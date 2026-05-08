@@ -1,0 +1,746 @@
+[
+  {
+    "case": "case1",
+    "intent": "实现 login 函数，验证密码后生成JWT并返回",
+    "generatedCode": "from auth import query_data, verify_password, generate_jwt, create_session\n\n\ndef main():\n    user_data = query_data(\"query_key\")\n    is_valid = verify_password(\"password\", \"stored_hash\")\n    token = generate_jwt(\"user_payload\")\n    session = create_session(\"user_payload\", token)\n    return session\n    return \"error: invalid credentials\"\n    if is_valid:\n        pass\n\nif __name__ == '__main__':\n    main()\n",
+    "actionSequence": [
+      {
+        "kind": "assign",
+        "target": "username",
+        "value": "input_username"
+      },
+      {
+        "kind": "assign",
+        "target": "password",
+        "value": "input_password"
+      },
+      {
+        "kind": "assign",
+        "target": "query_key",
+        "value": "user:username"
+      },
+      {
+        "kind": "call",
+        "function": "query_data",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "query_key"
+          }
+        ],
+        "assignTo": "user_data"
+      },
+      {
+        "kind": "assign",
+        "target": "stored_hash",
+        "value": "user_data.password_hash"
+      },
+      {
+        "kind": "call",
+        "function": "verify_password",
+        "args": [
+          {
+            "name": "plain",
+            "type": "str",
+            "value": "password"
+          },
+          {
+            "name": "hash",
+            "type": "PasswordHash",
+            "value": "stored_hash"
+          }
+        ],
+        "assignTo": "is_valid"
+      },
+      {
+        "kind": "assign",
+        "target": "user_payload",
+        "value": "user_data.payload"
+      },
+      {
+        "kind": "call",
+        "function": "generate_jwt",
+        "args": [
+          {
+            "name": "payload",
+            "type": "UserPayload",
+            "value": "user_payload"
+          }
+        ],
+        "assignTo": "token"
+      },
+      {
+        "kind": "call",
+        "function": "create_session",
+        "args": [
+          {
+            "name": "user",
+            "type": "UserPayload",
+            "value": "user_payload"
+          },
+          {
+            "name": "token",
+            "type": "Token",
+            "value": "token"
+          }
+        ],
+        "assignTo": "session"
+      },
+      {
+        "kind": "return",
+        "value": "session"
+      },
+      {
+        "kind": "return",
+        "value": "error: invalid credentials"
+      },
+      {
+        "kind": "if",
+        "condition": "is_valid",
+        "thenActions": [],
+        "elseActions": []
+      }
+    ],
+    "syntaxPass": true,
+    "semanticError": false,
+    "runtimePass": true
+  },
+  {
+    "case": "case2",
+    "intent": "实现用户注册，先加密密码，然后发送欢迎邮件",
+    "generatedCode": "from auth import verify_password, send_email\n\n\ndef main():\n    password_hash = verify_password(\"user_provided_password\", \"hash_value\")\n    email_sent = send_email(\"user_email\", \"Welcome\", \"Thank you for registering\")\n    return \"Registration completed\"\n\nif __name__ == '__main__':\n    main()\n",
+    "actionSequence": [
+      {
+        "kind": "assign",
+        "target": "user_provided_password",
+        "value": "plain_password"
+      },
+      {
+        "kind": "call",
+        "function": "verify_password",
+        "args": [
+          {
+            "name": "plain",
+            "type": "str",
+            "value": "user_provided_password"
+          },
+          {
+            "name": "hash",
+            "type": "PasswordHash",
+            "value": "hash_value"
+          }
+        ],
+        "assignTo": "password_hash"
+      },
+      {
+        "kind": "call",
+        "function": "send_email",
+        "args": [
+          {
+            "name": "recipient",
+            "type": "str",
+            "value": "user_email"
+          },
+          {
+            "name": "subject",
+            "type": "str",
+            "value": "Welcome"
+          },
+          {
+            "name": "body",
+            "type": "str",
+            "value": "Thank you for registering"
+          }
+        ],
+        "assignTo": "email_sent"
+      },
+      {
+        "kind": "return",
+        "value": "Registration completed"
+      }
+    ],
+    "syntaxPass": true,
+    "semanticError": false,
+    "runtimePass": true
+  },
+  {
+    "case": "case3",
+    "intent": "实现带缓存的查询：先查缓存，若无则查询并更新缓存",
+    "generatedCode": "from auth import cache_get, query_data, cache_set\n\n\ndef main():\n    cached_data = cache_get(\"query_key\")\n    return cached_data\n    fresh_data = query_data(\"query_key\")\n    _res = cache_set(\"query_key\", fresh_data)\n    return fresh_data\n    if cached_data:\n        pass\n\nif __name__ == '__main__':\n    main()\n",
+    "actionSequence": [
+      {
+        "kind": "assign",
+        "target": "query_key",
+        "value": "user:123"
+      },
+      {
+        "kind": "call",
+        "function": "cache_get",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "query_key"
+          }
+        ],
+        "assignTo": "cached_data"
+      },
+      {
+        "kind": "return",
+        "value": "cached_data"
+      },
+      {
+        "kind": "call",
+        "function": "query_data",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "query_key"
+          }
+        ],
+        "assignTo": "fresh_data"
+      },
+      {
+        "kind": "call",
+        "function": "cache_set",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "query_key"
+          },
+          {
+            "name": "value",
+            "type": "any",
+            "value": "fresh_data"
+          }
+        ]
+      },
+      {
+        "kind": "return",
+        "value": "fresh_data"
+      },
+      {
+        "kind": "if",
+        "condition": "cached_data",
+        "thenActions": [],
+        "elseActions": []
+      }
+    ],
+    "syntaxPass": true,
+    "semanticError": false,
+    "runtimePass": true
+  },
+  {
+    "case": "case4",
+    "intent": "实现批量发送邮件：遍历用户列表，对每个活跃用户发送通知",
+    "generatedCode": "",
+    "actionSequence": [],
+    "syntaxPass": false,
+    "semanticError": true,
+    "runtimePass": false
+  },
+  {
+    "case": "case5",
+    "intent": "实现角色检查：验证用户是否为管理员，是则执行操作",
+    "generatedCode": "\n\ndef main():\n    return \"执行管理员操作\"\n    return \"无权限\"\n    if user_role:\n        pass\n\nif __name__ == '__main__':\n    main()\n",
+    "actionSequence": [
+      {
+        "kind": "assign",
+        "target": "user_role",
+        "value": "admin"
+      },
+      {
+        "kind": "return",
+        "value": "执行管理员操作"
+      },
+      {
+        "kind": "return",
+        "value": "无权限"
+      },
+      {
+        "kind": "if",
+        "condition": "user_role",
+        "thenActions": [],
+        "elseActions": []
+      }
+    ],
+    "syntaxPass": true,
+    "semanticError": false,
+    "runtimePass": true
+  },
+  {
+    "case": "case6",
+    "intent": "实现会话创建：验证凭据后，生成JWT，创建会话并缓存",
+    "generatedCode": "",
+    "actionSequence": [],
+    "syntaxPass": false,
+    "semanticError": true,
+    "runtimePass": false
+  },
+  {
+    "case": "case7",
+    "intent": "实现数据导出：获取所有用户数据，转换格式并保存到文件",
+    "generatedCode": "from auth import query_data, cache_set\n\n\ndef main():\n    users_data = query_data(\"users_key\")\n    if temp:\n        pass\n    if i:\n        pass\n    if i:\n        pass\n    if user_count:\n        pass\n    if users_list:\n        pass\n    _res = cache_set(\"export_file\", \"csv_content\")\n    return \"csv_content\"\n\nif __name__ == '__main__':\n    main()\n",
+    "actionSequence": [
+      {
+        "kind": "assign",
+        "target": "users_key",
+        "value": "all_users"
+      },
+      {
+        "kind": "call",
+        "function": "query_data",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "users_key"
+          }
+        ],
+        "assignTo": "users_data"
+      },
+      {
+        "kind": "assign",
+        "target": "csv_header",
+        "value": "ID,Name,Email,Role"
+      },
+      {
+        "kind": "assign",
+        "target": "csv_body",
+        "value": ""
+      },
+      {
+        "kind": "assign",
+        "target": "index",
+        "value": 0
+      },
+      {
+        "kind": "assign",
+        "target": "users_list",
+        "value": "users_data"
+      },
+      {
+        "kind": "assign",
+        "target": "user_count",
+        "value": "users_list.length"
+      },
+      {
+        "kind": "assign",
+        "target": "i",
+        "value": 0
+      },
+      {
+        "kind": "assign",
+        "target": "user",
+        "value": "users_list[i]"
+      },
+      {
+        "kind": "assign",
+        "target": "row",
+        "value": "user.id + ',' + user.name + ',' + user.email + ',' + user.role"
+      },
+      {
+        "kind": "assign",
+        "target": "csv_body",
+        "value": "csv_body + '\n' + row"
+      },
+      {
+        "kind": "assign",
+        "target": "i",
+        "value": "i + 1"
+      },
+      {
+        "kind": "assign",
+        "target": "temp",
+        "value": "i < user_count"
+      },
+      {
+        "kind": "assign",
+        "target": "user",
+        "value": "users_list[i]"
+      },
+      {
+        "kind": "assign",
+        "target": "row",
+        "value": "user.id + ',' + user.name + ',' + user.email + ',' + user.role"
+      },
+      {
+        "kind": "assign",
+        "target": "csv_body",
+        "value": "csv_body + '\n' + row"
+      },
+      {
+        "kind": "assign",
+        "target": "i",
+        "value": "i + 1"
+      },
+      {
+        "kind": "if",
+        "condition": "temp",
+        "thenActions": [],
+        "elseActions": []
+      },
+      {
+        "kind": "if",
+        "condition": "i",
+        "thenActions": [],
+        "elseActions": []
+      },
+      {
+        "kind": "if",
+        "condition": "i",
+        "thenActions": [],
+        "elseActions": []
+      },
+      {
+        "kind": "if",
+        "condition": "user_count",
+        "thenActions": [],
+        "elseActions": []
+      },
+      {
+        "kind": "if",
+        "condition": "users_list",
+        "thenActions": [],
+        "elseActions": []
+      },
+      {
+        "kind": "assign",
+        "target": "csv_content",
+        "value": "csv_header + csv_body"
+      },
+      {
+        "kind": "call",
+        "function": "cache_set",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "export_file"
+          },
+          {
+            "name": "value",
+            "type": "any",
+            "value": "csv_content"
+          }
+        ]
+      },
+      {
+        "kind": "return",
+        "value": "csv_content"
+      }
+    ],
+    "syntaxPass": true,
+    "semanticError": true,
+    "runtimePass": false
+  },
+  {
+    "case": "case8",
+    "intent": "实现账户锁定：检查登录失败次数，超过阈值则锁定账户",
+    "generatedCode": "from auth import cache_get, cache_set\n\n\ndef main():\n    failed_attempts = cache_get(\"username\")\n    if failed_attempts:\n        pass\n    lockout_key = cache_get(\"username\")\n    return \"Account locked due to too many failed attempts\"\n    _res = cache_set(\"username\", \"new_attempts\")\n    _res = cache_set(\"username\", lockout_key)\n    return \"Account locked\"\n    return \"Login failed, attempts remaining: NaN\"\n    if threshold_reached:\n        pass\n    if new_attempts:\n        pass\n    if attempts_int:\n        pass\n    if lockout_key:\n        pass\n\nif __name__ == '__main__':\n    main()\n",
+    "actionSequence": [
+      {
+        "kind": "assign",
+        "target": "max_attempts",
+        "value": "5"
+      },
+      {
+        "kind": "assign",
+        "target": "lockout_duration",
+        "value": "900"
+      },
+      {
+        "kind": "assign",
+        "target": "username",
+        "value": "input_username"
+      },
+      {
+        "kind": "call",
+        "function": "cache_get",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "username"
+          }
+        ],
+        "assignTo": "failed_attempts"
+      },
+      {
+        "kind": "assign",
+        "target": "attempts_int",
+        "value": "failed_attempts"
+      },
+      {
+        "kind": "assign",
+        "target": "attempts_int",
+        "value": "0"
+      },
+      {
+        "kind": "if",
+        "condition": "failed_attempts",
+        "thenActions": [],
+        "elseActions": []
+      },
+      {
+        "kind": "call",
+        "function": "cache_get",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "username"
+          }
+        ],
+        "assignTo": "lockout_key"
+      },
+      {
+        "kind": "return",
+        "value": "Account locked due to too many failed attempts"
+      },
+      {
+        "kind": "assign",
+        "target": "new_attempts",
+        "value": "attempts_int + 1"
+      },
+      {
+        "kind": "call",
+        "function": "cache_set",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "username"
+          },
+          {
+            "name": "value",
+            "type": "any",
+            "value": "new_attempts"
+          }
+        ]
+      },
+      {
+        "kind": "assign",
+        "target": "threshold_reached",
+        "value": "new_attempts >= max_attempts"
+      },
+      {
+        "kind": "call",
+        "function": "cache_set",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "username"
+          },
+          {
+            "name": "value",
+            "type": "any",
+            "value": "lockout_key"
+          }
+        ]
+      },
+      {
+        "kind": "return",
+        "value": "Account locked"
+      },
+      {
+        "kind": "return",
+        "value": "Login failed, attempts remaining: NaN"
+      },
+      {
+        "kind": "if",
+        "condition": "threshold_reached",
+        "thenActions": [],
+        "elseActions": []
+      },
+      {
+        "kind": "if",
+        "condition": "new_attempts",
+        "thenActions": [],
+        "elseActions": []
+      },
+      {
+        "kind": "if",
+        "condition": "attempts_int",
+        "thenActions": [],
+        "elseActions": []
+      },
+      {
+        "kind": "if",
+        "condition": "lockout_key",
+        "thenActions": [],
+        "elseActions": []
+      }
+    ],
+    "syntaxPass": true,
+    "semanticError": false,
+    "runtimePass": true
+  },
+  {
+    "case": "case9",
+    "intent": "实现令牌刷新：验证旧令牌有效性，生成新令牌并更新会话",
+    "generatedCode": "from auth import cache_get, query_data, generate_jwt, create_session, cache_set\n\n\ndef main():\n    cached_session = cache_get(\"old_token_value\")\n    session_data = query_data(\"old_token_value\")\n    new_token = generate_jwt(\"user_payload\")\n    _res = create_session(\"user_payload\", new_token)\n    _res = cache_set(\"old_token_value\", new_token)\n    return new_token\n    return \"null\"\n    if cached_session:\n        pass\n\nif __name__ == '__main__':\n    main()\n",
+    "actionSequence": [
+      {
+        "kind": "assign",
+        "target": "old_token_value",
+        "value": "old_token"
+      },
+      {
+        "kind": "call",
+        "function": "cache_get",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "old_token_value"
+          }
+        ],
+        "assignTo": "cached_session"
+      },
+      {
+        "kind": "call",
+        "function": "query_data",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "old_token_value"
+          }
+        ],
+        "assignTo": "session_data"
+      },
+      {
+        "kind": "assign",
+        "target": "user_payload",
+        "value": "session_data"
+      },
+      {
+        "kind": "call",
+        "function": "generate_jwt",
+        "args": [
+          {
+            "name": "payload",
+            "type": "UserPayload",
+            "value": "user_payload"
+          }
+        ],
+        "assignTo": "new_token"
+      },
+      {
+        "kind": "call",
+        "function": "create_session",
+        "args": [
+          {
+            "name": "user",
+            "type": "UserPayload",
+            "value": "user_payload"
+          },
+          {
+            "name": "token",
+            "type": "Token",
+            "value": "new_token"
+          }
+        ]
+      },
+      {
+        "kind": "call",
+        "function": "cache_set",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "old_token_value"
+          },
+          {
+            "name": "value",
+            "type": "any",
+            "value": "new_token"
+          }
+        ]
+      },
+      {
+        "kind": "return",
+        "value": "new_token"
+      },
+      {
+        "kind": "return",
+        "value": "null"
+      },
+      {
+        "kind": "if",
+        "condition": "cached_session",
+        "thenActions": [],
+        "elseActions": []
+      }
+    ],
+    "syntaxPass": true,
+    "semanticError": false,
+    "runtimePass": true
+  },
+  {
+    "case": "case10",
+    "intent": "实现用户注销：销毁会话，清理缓存，记录审计日志",
+    "generatedCode": "from auth import cache_set\n\n\ndef main():\n    _res = cache_set(\"session:user_id\", None)\n    _res = cache_set(\"audit:logout:user_id\", \"User logged out at 2026-05-08T12:41:07.624Z\")\n    return \"注销成功\"\n\nif __name__ == '__main__':\n    main()\n",
+    "actionSequence": [
+      {
+        "kind": "assign",
+        "target": "user_id",
+        "value": "user:123"
+      },
+      {
+        "kind": "assign",
+        "target": "session_key",
+        "value": "session:user_id"
+      },
+      {
+        "kind": "call",
+        "function": "cache_set",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "session:user_id"
+          },
+          {
+            "name": "p1",
+            "type": "any",
+            "value": null
+          }
+        ]
+      },
+      {
+        "kind": "assign",
+        "target": "audit_log_key",
+        "value": "audit:logout:user_id"
+      },
+      {
+        "kind": "call",
+        "function": "cache_set",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "audit:logout:user_id"
+          },
+          {
+            "name": "value",
+            "type": "any",
+            "value": "User logged out at 2026-05-08T12:41:07.624Z"
+          }
+        ]
+      },
+      {
+        "kind": "return",
+        "value": "注销成功"
+      }
+    ],
+    "syntaxPass": true,
+    "semanticError": false,
+    "runtimePass": true
+  }
+]

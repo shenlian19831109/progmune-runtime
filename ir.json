@@ -1,0 +1,106 @@
+[
+  {
+    "name": "verify_password",
+    "params": [
+      {
+        "name": "plain",
+        "type": "str"
+      },
+      {
+        "name": "hash",
+        "type": "PasswordHash"
+      }
+    ],
+    "returnType": "bool",
+    "file": "auth.py",
+    "calls": []
+  },
+  {
+    "name": "generate_jwt",
+    "params": [
+      {
+        "name": "payload",
+        "type": "UserPayload"
+      }
+    ],
+    "returnType": "Token",
+    "file": "auth.py",
+    "calls": []
+  },
+  {
+    "name": "create_session",
+    "params": [
+      {
+        "name": "user",
+        "type": "UserPayload"
+      },
+      {
+        "name": "token",
+        "type": "Token"
+      }
+    ],
+    "returnType": "Dict",
+    "file": "auth.py",
+    "calls": []
+  },
+  {
+    "name": "cache_set",
+    "params": [
+      {
+        "name": "key",
+        "type": "str"
+      },
+      {
+        "name": "value",
+        "type": "any"
+      }
+    ],
+    "returnType": "None",
+    "file": "auth.py",
+    "calls": []
+  },
+  {
+    "name": "cache_get",
+    "params": [
+      {
+        "name": "key",
+        "type": "str"
+      }
+    ],
+    "returnType": "Optional[any]",
+    "file": "auth.py",
+    "calls": []
+  },
+  {
+    "name": "send_email",
+    "params": [
+      {
+        "name": "recipient",
+        "type": "str"
+      },
+      {
+        "name": "subject",
+        "type": "str"
+      },
+      {
+        "name": "body",
+        "type": "str"
+      }
+    ],
+    "returnType": "bool",
+    "file": "auth.py",
+    "calls": []
+  },
+  {
+    "name": "query_data",
+    "params": [
+      {
+        "name": "key",
+        "type": "str"
+      }
+    ],
+    "returnType": "Dict",
+    "file": "auth.py",
+    "calls": []
+  }
+]

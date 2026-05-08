@@ -1,0 +1,452 @@
+[
+  {
+    "intent": "实现 login 函数，验证密码，通过后生成 JWT",
+    "functionName": "verify_password",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T14:36:29.299Z"
+  },
+  {
+    "intent": "实现 login 函数，验证密码，通过后生成 JWT",
+    "functionName": "login",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T14:36:29.301Z"
+  },
+  {
+    "intent": "实现 login 函数，验证密码，通过后生成 JWT",
+    "functionName": "generate_jwt",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T14:36:29.302Z"
+  },
+  {
+    "intent": "实现 login 函数，使用 verify_password 检查密码，通过后调用 generate_jwt 返回令牌",
+    "functionName": "verify_password",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T14:48:09.351Z"
+  },
+  {
+    "intent": "实现 login 函数，使用 verify_password 检查密码，通过后调用 generate_jwt 返回令牌",
+    "functionName": "generate_jwt",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T14:48:09.354Z"
+  },
+  {
+    "intent": "实现 login 函数，使用 verify_password 检查密码，通过后调用 generate_jwt 返回令牌",
+    "functionName": "verify_password",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T14:49:34.634Z"
+  },
+  {
+    "intent": "实现 login 函数，使用 verify_password 检查密码，通过后调用 generate_jwt 返回令牌",
+    "functionName": "generate_jwt",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T14:49:34.636Z"
+  },
+  {
+    "intent": "实现 login 函数，使用 verify_password 检查密码，通过后调用 generate_jwt 返回令牌",
+    "functionName": "login",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T14:49:34.637Z"
+  },
+  {
+    "intent": "实现 login 函数，使用 verify_password 检查密码，通过后调用 generate_jwt 返回令牌",
+    "functionName": "verify_password",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T14:53:57.061Z"
+  },
+  {
+    "intent": "实现 login 函数，使用 verify_password 检查密码，通过后调用 generate_jwt 返回令牌",
+    "functionName": "generate_jwt",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T14:53:57.064Z"
+  },
+  {
+    "intent": "实现 login 函数，使用 verify_password 检查密码，通过后调用 generate_jwt 返回令牌",
+    "functionName": "login",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T14:53:57.064Z"
+  },
+  {
+    "intent": "实现 login 函数，使用 verify_password 检查密码，通过后调用 generate_jwt 返回令牌",
+    "functionName": "verify_password",
+    "success": true,
+    "timestamp": "2026-05-07T14:55:52.573Z"
+  },
+  {
+    "intent": "实现 login 函数，使用 verify_password 检查密码，通过后调用 generate_jwt 返回令牌",
+    "functionName": "generate_jwt",
+    "success": true,
+    "timestamp": "2026-05-07T14:55:52.574Z"
+  },
+  {
+    "intent": "实现 login 函数，验证密码，成功则生成JWT返回，否则返回错误信息",
+    "functionName": "verify_password",
+    "success": true,
+    "timestamp": "2026-05-07T15:07:40.805Z"
+  },
+  {
+    "intent": "实现 login 函数，验证密码，成功则生成JWT返回，否则返回错误信息",
+    "functionName": "verify_password",
+    "success": true,
+    "timestamp": "2026-05-07T15:10:50.838Z"
+  },
+  {
+    "intent": "实现 login 函数，验证密码，成功则生成JWT返回，否则返回错误信息",
+    "functionName": "generate_jwt",
+    "success": true,
+    "timestamp": "2026-05-07T15:10:50.841Z"
+  },
+  {
+    "intent": "实现 login 函数，验证密码，成功则生成JWT，否则返回错误",
+    "functionName": "authenticate",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T15:17:29.247Z"
+  },
+  {
+    "intent": "实现 login 函数，验证密码，成功则生成JWT，否则返回错误",
+    "functionName": "validate_email",
+    "success": true,
+    "timestamp": "2026-05-07T15:21:41.572Z"
+  },
+  {
+    "intent": "实现 login 函数，验证密码，成功则生成JWT，否则返回错误",
+    "functionName": "validate_user",
+    "success": true,
+    "timestamp": "2026-05-07T15:21:41.573Z"
+  },
+  {
+    "intent": "实现 login 函数，验证密码，成功则生成JWT，否则返回错误",
+    "functionName": "validate_user",
+    "success": true,
+    "timestamp": "2026-05-07T15:21:41.574Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，需要校验卡片并记录日志",
+    "functionName": "get_transactions",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T15:22:13.538Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，需要校验卡片并记录日志",
+    "functionName": "filter_active",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T15:22:13.541Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，需要校验卡片并记录日志",
+    "functionName": "chunk_list",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T15:22:13.543Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，需要校验卡片并记录日志",
+    "functionName": "log_info",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T15:22:13.545Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，需要校验卡片并记录日志",
+    "functionName": "process_batch",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T15:22:13.547Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，需要校验卡片并记录日志",
+    "functionName": "flatten",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T15:22:13.549Z"
+  },
+  {
+    "intent": "实现数据报表函数，分页获取活跃用户，按类别分组并排序",
+    "functionName": "filter_active",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T15:22:24.707Z"
+  },
+  {
+    "intent": "实现 login 函数，验证密码，成功则生成JWT，否则返回错误",
+    "functionName": "login_2fa",
+    "success": true,
+    "timestamp": "2026-05-07T15:27:56.460Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，需要校验卡片并记录日志",
+    "functionName": "get_transactions",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T15:28:12.216Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，需要校验卡片并记录日志",
+    "functionName": "filter_active",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T15:28:12.216Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，需要校验卡片并记录日志",
+    "functionName": "retry",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T15:28:12.218Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，需要校验卡片并记录日志",
+    "functionName": "check_permission",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T15:28:12.219Z"
+  },
+  {
+    "intent": "实现数据报表函数，分页获取活跃用户，按类别分组并排序",
+    "functionName": "current_timestamp",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T15:28:29.644Z"
+  },
+  {
+    "intent": "实现数据报表函数，分页获取活跃用户，按类别分组并排序",
+    "functionName": "get_cached",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T15:28:29.644Z"
+  },
+  {
+    "intent": "实现 login 函数，验证密码，成功则生成JWT，否则返回错误信息",
+    "functionName": "api_login",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T15:33:09.326Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，对每笔交易校验卡片并记录日志",
+    "functionName": "get_transactions",
+    "success": true,
+    "timestamp": "2026-05-07T15:33:19.744Z"
+  },
+  {
+    "intent": "实现数据报表函数，分页获取活跃用户，按类别分组并排序",
+    "functionName": "generate_report",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T15:33:28.139Z"
+  },
+  {
+    "intent": "实现数据报表函数，分页获取活跃用户，按类别分组并排序",
+    "functionName": "enqueue",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T15:33:28.140Z"
+  },
+  {
+    "intent": "实现数据报表函数，分页获取活跃用户，按类别分组并排序",
+    "functionName": "generate_report",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T15:33:28.141Z"
+  },
+  {
+    "intent": "实现数据报表函数，分页获取活跃用户，按类别分组并排序",
+    "functionName": "send_emails",
+    "success": false,
+    "errorType": "Traceback (most recent call last):",
+    "timestamp": "2026-05-07T15:33:28.143Z"
+  },
+  {
+    "intent": "实现 login 函数，验证密码，成功则生成JWT，否则返回错误信息",
+    "functionName": "api_login",
+    "success": true,
+    "timestamp": "2026-05-07T15:36:24.623Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，对每笔交易校验卡片并记录日志",
+    "functionName": "get_transactions",
+    "success": true,
+    "timestamp": "2026-05-07T15:36:37.545Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，对每笔交易校验卡片并记录日志",
+    "functionName": "filter_active",
+    "success": true,
+    "timestamp": "2026-05-07T15:36:37.547Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，对每笔交易校验卡片并记录日志",
+    "functionName": "transform_items",
+    "success": true,
+    "timestamp": "2026-05-07T15:36:37.548Z"
+  },
+  {
+    "intent": "实现数据报表函数，分页获取活跃用户，按类别分组并排序",
+    "functionName": "generate_report",
+    "success": true,
+    "timestamp": "2026-05-07T15:36:43.636Z"
+  },
+  {
+    "intent": "实现 login 函数，验证密码，成功则生成JWT，否则返回错误信息",
+    "functionName": "api_login",
+    "success": true,
+    "timestamp": "2026-05-07T15:39:15.229Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，对每笔交易校验卡片并记录日志",
+    "functionName": "get_transactions",
+    "success": true,
+    "timestamp": "2026-05-07T15:39:20.613Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，对每笔交易校验卡片并记录日志",
+    "functionName": "filter_active",
+    "success": true,
+    "timestamp": "2026-05-07T15:39:20.614Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，对每笔交易校验卡片并记录日志",
+    "functionName": "transform_items",
+    "success": true,
+    "timestamp": "2026-05-07T15:39:20.615Z"
+  },
+  {
+    "intent": "实现数据报表函数，分页获取活跃用户，按类别分组并排序",
+    "functionName": "generate_report",
+    "success": true,
+    "timestamp": "2026-05-07T15:39:27.351Z"
+  },
+  {
+    "intent": "实现 login 函数，验证密码，成功则生成JWT，否则返回错误信息",
+    "functionName": "api_login",
+    "success": true,
+    "timestamp": "2026-05-07T15:51:28.492Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，对每笔交易校验卡片并记录日志",
+    "functionName": "get_transactions",
+    "success": true,
+    "timestamp": "2026-05-07T15:51:33.313Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，对每笔交易校验卡片并记录日志",
+    "functionName": "filter_active",
+    "success": true,
+    "timestamp": "2026-05-07T15:51:33.315Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，对每笔交易校验卡片并记录日志",
+    "functionName": "transform_items",
+    "success": true,
+    "timestamp": "2026-05-07T15:51:33.316Z"
+  },
+  {
+    "intent": "实现数据报表函数，分页获取活跃用户，按类别分组并排序",
+    "functionName": "generate_report",
+    "success": true,
+    "timestamp": "2026-05-07T15:51:38.411Z"
+  },
+  {
+    "intent": "实现 login 函数，验证密码，成功则生成JWT，否则返回错误信息",
+    "functionName": "api_login",
+    "success": true,
+    "timestamp": "2026-05-07T15:54:07.986Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，对每笔交易校验卡片并记录日志",
+    "functionName": "get_transactions",
+    "success": true,
+    "timestamp": "2026-05-07T15:54:13.105Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，对每笔交易校验卡片并记录日志",
+    "functionName": "filter_active",
+    "success": true,
+    "timestamp": "2026-05-07T15:54:13.106Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，对每笔交易校验卡片并记录日志",
+    "functionName": "transform_items",
+    "success": true,
+    "timestamp": "2026-05-07T15:54:13.107Z"
+  },
+  {
+    "intent": "实现数据报表函数，分页获取活跃用户，按类别分组并排序",
+    "functionName": "generate_report",
+    "success": true,
+    "timestamp": "2026-05-07T15:54:18.740Z"
+  },
+  {
+    "intent": "实现 login 函数，验证密码，成功则生成JWT，否则返回错误信息",
+    "functionName": "api_login",
+    "success": true,
+    "timestamp": "2026-05-07T15:54:36.498Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，对每笔交易校验卡片并记录日志",
+    "functionName": "get_transactions",
+    "success": true,
+    "timestamp": "2026-05-07T15:54:41.467Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，对每笔交易校验卡片并记录日志",
+    "functionName": "filter_active",
+    "success": true,
+    "timestamp": "2026-05-07T15:54:41.467Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，对每笔交易校验卡片并记录日志",
+    "functionName": "transform_items",
+    "success": true,
+    "timestamp": "2026-05-07T15:54:41.469Z"
+  },
+  {
+    "intent": "实现数据报表函数，分页获取活跃用户，按类别分组并排序",
+    "functionName": "generate_report",
+    "success": true,
+    "timestamp": "2026-05-07T15:54:47.111Z"
+  },
+  {
+    "intent": "实现 login 函数，验证密码，成功则生成JWT，否则返回错误信息",
+    "functionName": "api_login",
+    "success": true,
+    "timestamp": "2026-05-08T08:03:52.962Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，对每笔交易校验卡片并记录日志",
+    "functionName": "get_transactions",
+    "success": true,
+    "timestamp": "2026-05-08T08:03:58.804Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，对每笔交易校验卡片并记录日志",
+    "functionName": "filter_active",
+    "success": true,
+    "timestamp": "2026-05-08T08:03:58.804Z"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，对每笔交易校验卡片并记录日志",
+    "functionName": "transform_items",
+    "success": true,
+    "timestamp": "2026-05-08T08:03:58.806Z"
+  },
+  {
+    "intent": "实现数据报表函数，分页获取活跃用户，按类别分组并排序",
+    "functionName": "generate_report",
+    "success": true,
+    "timestamp": "2026-05-08T08:04:10.985Z"
+  }
+]

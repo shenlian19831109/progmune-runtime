@@ -1,0 +1,47 @@
+[
+  {
+    "intent": "实现 login 函数，验证密码，成功则生成JWT，否则返回错误信息",
+    "planner": "llm",
+    "duration_ms": 16345,
+    "llm_calls": 3,
+    "success": true
+  },
+  {
+    "intent": "实现 login 函数，验证密码，成功则生成JWT，否则返回错误信息",
+    "planner": "search",
+    "duration_ms": 1470,
+    "llm_calls": 1,
+    "success": false,
+    "error": "校验失败或无动作"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，对每笔交易校验卡片并记录日志",
+    "planner": "llm",
+    "duration_ms": 4304,
+    "llm_calls": 1,
+    "success": true
+  },
+  {
+    "intent": "实现批量处理支付 transactions，对每笔交易校验卡片并记录日志",
+    "planner": "search",
+    "duration_ms": 1878,
+    "llm_calls": 1,
+    "success": false,
+    "error": "校验失败或无动作"
+  },
+  {
+    "intent": "实现数据报表函数，分页获取活跃用户，按类别分组并排序",
+    "planner": "llm",
+    "duration_ms": 10236,
+    "llm_calls": 2,
+    "success": true
+  },
+  {
+    "intent": "实现数据报表函数，分页获取活跃用户，按类别分组并排序",
+    "planner": "search",
+    "duration_ms": 2295,
+    "llm_calls": 1,
+    "success": false,
+    "error": "校验失败或无动作"
+  }
+]

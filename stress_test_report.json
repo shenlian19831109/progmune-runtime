@@ -1,0 +1,49 @@
+[
+  {
+    "intent": "实现 login 函数，验证密码，成功则生成JWT，否则返回错误",
+    "planner": "llm",
+    "duration_ms": 7192,
+    "llm_calls": 1,
+    "success": true
+  },
+  {
+    "intent": "实现 login 函数，验证密码，成功则生成JWT，否则返回错误",
+    "planner": "search",
+    "duration_ms": 1163,
+    "llm_calls": 1,
+    "success": false,
+    "error": "校验失败或无动作"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，需要校验卡片并记录日志",
+    "planner": "llm",
+    "duration_ms": 14425,
+    "llm_calls": 1,
+    "success": false,
+    "error": "Traceback (most recent call last):\n  File \"/Users/shenlian/brainycode-v2/test-large/__test.py\", line 28, in <module>\n    main()\n    ~~~~^^\n  File \"/Users/shenlian/brainycode-v2/test-large/__test.py\", line 10, in main\n    payment_result = retry(\"process_payment\", \"3\")\n  File \"/Users/shenlian/brainycode-v2/test-large/utils/helpers.py\", line 6, in retry\n    for i in range(max_tries):\n             ~~~~~^^^^^^^^^^^\nTypeError: 'str' object cannot be interpreted as an integer\n"
+  },
+  {
+    "intent": "实现批量处理支付 transactions，需要校验卡片并记录日志",
+    "planner": "search",
+    "duration_ms": 1055,
+    "llm_calls": 1,
+    "success": false,
+    "error": "校验失败或无动作"
+  },
+  {
+    "intent": "实现数据报表函数，分页获取活跃用户，按类别分组并排序",
+    "planner": "llm",
+    "duration_ms": 16280,
+    "llm_calls": 1,
+    "success": false,
+    "error": "Traceback (most recent call last):\n  File \"/Users/shenlian/brainycode-v2/test-large/__test.py\", line 23, in <module>\n    main()\n    ~~~~^^\n  File \"/Users/shenlian/brainycode-v2/test-large/__test.py\", line 11, in main\n    page1 = retry(\"fetch_active_users_page\", \"placeholder\")\n  File \"/Users/shenlian/brainycode-v2/test-large/utils/helpers.py\", line 6, in retry\n    for i in range(max_tries):\n             ~~~~~^^^^^^^^^^^\nTypeError: 'str' object cannot be interpreted as an integer\n"
+  },
+  {
+    "intent": "实现数据报表函数，分页获取活跃用户，按类别分组并排序",
+    "planner": "search",
+    "duration_ms": 1245,
+    "llm_calls": 1,
+    "success": false,
+    "error": "校验失败或无动作"
+  }
+]
