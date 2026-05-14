@@ -45,6 +45,20 @@ const { extractIRPython } = require('./extract-ir-python.js');
 const { emitPython } = require('./python-emitter.js');
 const { recordRun } = require('./feedback.js');
 
+// 从独立的协议文件中加载协议，并注入到 IR 中
+function mergeProtocols(irArray) {
+  const protocolsFile = path.resolve(__dirname, '../protocols.json');
+  if (!fs.existsSync(protocolsFile)) return irArray;
+  
+  const protocols = JSON.parse(fs.readFileSync(protocolsFile, 'utf-8'));
+  return irArray.map(fn => {
+    if (protocols[fn.name]) {
+      return { ...fn, protocol: protocols[fn.name] };
+    }
+    return fn;
+  });
+}
+
 async function main() {
   const server = new Server({
     name: "progmune",
@@ -79,7 +93,10 @@ async function main() {
       }
 
       const fns = extractIRPython(projectPath);
-      fs.writeFileSync("ir.json", JSON.stringify(fns, null, 2));
+      // 关键步骤：将协议信息合并到 IR 中
+      const irWithProtocols = mergeProtocols(fns);
+      fs.writeFileSync("ir.json", JSON.stringify(irWithProtocols, null, 2));
+      
       const actions = await plan(intent);
       if (!actions || actions.length === 0) {
         return { content: [{ type: "text", text: "无法生成满足约束的代码。" }] };

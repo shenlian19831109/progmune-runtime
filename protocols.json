@@ -1,0 +1,16 @@
+{
+  "verify_password": {
+    "pre_states": ["UNAUTHENTICATED"],
+    "post_states": ["AUTHENTICATED"]
+  },
+  "generate_jwt": {
+    "pre_states": ["AUTHENTICATED"],
+    "post_states": ["TOKEN_ISSUED"],
+    "invalidate": ["AUTHENTICATED"]
+  },
+  "create_session": {
+    "pre_states": ["TOKEN_ISSUED"],
+    "post_states": ["SESSION_ACTIVE"],
+    "invalidate": ["TOKEN_ISSUED"]
+  }
+}
