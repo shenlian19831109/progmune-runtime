@@ -1,0 +1,40 @@
+{
+  "intent": "生成一个JWT令牌",
+  "projectFunctions": [
+    "verify_password",
+    "generate_jwt",
+    "create_session",
+    "cache_set",
+    "cache_get",
+    "send_email",
+    "query_data"
+  ],
+  "violatedSVL": "SVL-4",
+  "constraintType": "protocol",
+  "actionSequence": [
+    {
+      "kind": "assign",
+      "target": "user_payload",
+      "value": "{\"username\": \"test\", \"role\": \"user\"}"
+    },
+    {
+      "kind": "call",
+      "function": "generate_jwt",
+      "args": [
+        {
+          "name": "payload",
+          "type": "UserPayload",
+          "value": "user_payload"
+        }
+      ],
+      "assignTo": "token"
+    },
+    {
+      "kind": "return",
+      "value": "token"
+    }
+  ],
+  "errorDetail": "非法调用：generate_jwt 要求前置状态 [AUTHENTICATED]，当前状态为 [UNAUTHENTICATED]",
+  "id": "fail_1778777100167",
+  "timestamp": "2026-05-14T16:45:00.167Z"
+}

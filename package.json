@@ -4,20 +4,13 @@
   "description": "Progmune Runtime — Program Immunology: Constraint-Guided Program Synthesis Runtime",
   "main": "dist/mcp-server.mjs",
   "bin": {
-    "progmune-runtime": "./dist/mcp-server.mjs"
+    "progmune-runtime": "dist/mcp-server.mjs"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node dist/mcp-server.mjs"
   },
-  "keywords": [
-    "program-synthesis",
-    "verification",
-    "mcp",
-    "compiler",
-    "runtime",
-    "immunology"
-  ],
+  "keywords": ["program-synthesis", "verification", "mcp", "compiler", "runtime", "immunology"],
   "author": "",
   "license": "MIT",
   "dependencies": {

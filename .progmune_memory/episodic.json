@@ -1,6 +1,103 @@
 [
   {
     "intent": "生成一个JWT令牌",
+    "actions": [],
+    "success": false,
+    "id": "ep_1778777101293",
+    "timestamp": "2026-05-14T16:45:01.293Z"
+  },
+  {
+    "intent": "生成一个JWT令牌",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "user_payload",
+        "value": "{\"user_id\": 123, \"role\": \"user\"}"
+      },
+      {
+        "kind": "call",
+        "function": "generate_jwt",
+        "args": [
+          {
+            "name": "payload",
+            "type": "UserPayload",
+            "value": "user_payload"
+          }
+        ],
+        "assignTo": "token"
+      },
+      {
+        "kind": "return",
+        "value": "token"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-4",
+    "id": "ep_1778777101292",
+    "timestamp": "2026-05-14T16:45:01.292Z"
+  },
+  {
+    "intent": "生成一个JWT令牌",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "user_payload",
+        "value": "{\"username\": \"test\", \"role\": \"user\"}"
+      },
+      {
+        "kind": "call",
+        "function": "generate_jwt",
+        "args": [
+          {
+            "name": "payload",
+            "type": "UserPayload",
+            "value": "user_payload"
+          }
+        ],
+        "assignTo": "token"
+      },
+      {
+        "kind": "return",
+        "value": "token"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-4",
+    "id": "ep_1778777100168",
+    "timestamp": "2026-05-14T16:45:00.168Z"
+  },
+  {
+    "intent": "生成一个JWT令牌",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "payload",
+        "value": "user:123"
+      },
+      {
+        "kind": "call",
+        "function": "generate_jwt",
+        "args": [
+          {
+            "name": "payload",
+            "type": "UserPayload",
+            "value": "payload"
+          }
+        ],
+        "assignTo": "token"
+      },
+      {
+        "kind": "return",
+        "value": "token"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-4",
+    "id": "ep_1778777098742",
+    "timestamp": "2026-05-14T16:44:58.742Z"
+  },
+  {
+    "intent": "生成一个JWT令牌",
     "actions": [
       {
         "kind": "assign",

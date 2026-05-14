@@ -13,7 +13,15 @@
     ],
     "returnType": "bool",
     "file": "auth.py",
-    "calls": []
+    "calls": [],
+    "protocol": {
+      "pre_states": [
+        "UNAUTHENTICATED"
+      ],
+      "post_states": [
+        "AUTHENTICATED"
+      ]
+    }
   },
   {
     "name": "generate_jwt",
@@ -25,7 +33,18 @@
     ],
     "returnType": "Token",
     "file": "auth.py",
-    "calls": []
+    "calls": [],
+    "protocol": {
+      "pre_states": [
+        "AUTHENTICATED"
+      ],
+      "post_states": [
+        "TOKEN_ISSUED"
+      ],
+      "invalidate": [
+        "AUTHENTICATED"
+      ]
+    }
   },
   {
     "name": "create_session",
@@ -41,7 +60,18 @@
     ],
     "returnType": "Dict",
     "file": "auth.py",
-    "calls": []
+    "calls": [],
+    "protocol": {
+      "pre_states": [
+        "TOKEN_ISSUED"
+      ],
+      "post_states": [
+        "SESSION_ACTIVE"
+      ],
+      "invalidate": [
+        "TOKEN_ISSUED"
+      ]
+    }
   },
   {
     "name": "cache_set",
