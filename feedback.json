@@ -478,5 +478,47 @@
     "functionName": "cache_set",
     "success": true,
     "timestamp": "2026-05-13T19:04:55.647Z"
+  },
+  {
+    "intent": "创建一个带令牌的会话",
+    "functionName": "query_data",
+    "success": true,
+    "timestamp": "2026-05-14T16:11:22.947Z"
+  },
+  {
+    "intent": "创建一个带令牌的会话",
+    "functionName": "verify_password",
+    "success": true,
+    "timestamp": "2026-05-14T16:11:22.952Z"
+  },
+  {
+    "intent": "创建一个带令牌的会话",
+    "functionName": "generate_jwt",
+    "success": true,
+    "timestamp": "2026-05-14T16:11:22.957Z"
+  },
+  {
+    "intent": "创建一个带令牌的会话",
+    "functionName": "create_session",
+    "success": true,
+    "timestamp": "2026-05-14T16:11:22.959Z"
+  },
+  {
+    "intent": "生成一个JWT令牌",
+    "functionName": "generate_jwt",
+    "success": true,
+    "timestamp": "2026-05-14T16:12:53.519Z"
+  },
+  {
+    "intent": "生成一个JWT令牌",
+    "functionName": "generate_jwt",
+    "success": true,
+    "timestamp": "2026-05-14T16:15:15.731Z"
+  },
+  {
+    "intent": "生成一个JWT令牌",
+    "functionName": "generate_jwt",
+    "success": true,
+    "timestamp": "2026-05-14T16:20:11.416Z"
   }
 ]

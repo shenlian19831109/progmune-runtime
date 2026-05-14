@@ -42,6 +42,7 @@ const feedback_1 = require("./feedback");
 const utils_1 = require("./utils");
 const failure_corpus_1 = require("./failure-corpus");
 const memory_layer_1 = require("./memory-layer");
+const ssg_validator_1 = require("./ssg-validator");
 const fs = __importStar(require("fs"));
 function enrichActions(actions, ir) {
     return actions.map(a => {
@@ -87,17 +88,36 @@ function determineConstraintType(svl) {
         case "SVL-4": return "protocol";
     }
 }
+/** 加载 IR 中所有带 protocol 的函数为协议规则 */
+function loadProtocols(ir) {
+    return ir
+        .filter((f) => f.protocol)
+        .map((f) => ({ function: f.name, protocol: f.protocol }));
+}
+/** 验证动作序列的协议合法性 */
+function validateProtocol(actions, protocols, initialState) {
+    const ssv = new ssg_validator_1.StateMachineValidator(protocols, initialState);
+    for (let i = 0; i < actions.length; i++) {
+        const a = actions[i];
+        if (a.kind === "call" && a.function) {
+            const result = ssv.apply(a.function);
+            if (!result.valid) {
+                return { valid: false, error: result.error, index: i };
+            }
+        }
+    }
+    return { valid: true };
+}
 async function plan(userIntent) {
     (0, llm_1.resetCallCount)();
     const ir = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
-    // ========== 语义模板快速通道 ==========
+    // 语义模板快速通道
     const cachedTemplate = (0, memory_layer_1.findSemanticTemplate)(userIntent);
     if (cachedTemplate && cachedTemplate.successRate >= 0.8 && cachedTemplate.useCount >= 2) {
         console.log("⚡ 命中语义模板，直接复用已验证序列");
         (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: cachedTemplate.actionSequence, success: true });
         return cachedTemplate.actionSequence;
     }
-    // ====================================
     const keywords = (0, utils_1.extractKeywords)(userIntent);
     const scored = ir.map((f) => {
         let score = 0;
@@ -159,6 +179,8 @@ ${userIntent}
 只输出代码。`;
     let finalActions = [];
     let currentPrompt = basePrompt;
+    // 加载协议规则，设定初始状态（例如未认证场景）
+    const protocols = loadProtocols(ir);
     for (let r = 0; r < 3; r++) {
         let text;
         try {
@@ -179,6 +201,7 @@ ${userIntent}
         }
         const enriched = enrichActions(rawActions, ir);
         const filtered = enriched.filter(a => !forbiddenFuncs.includes(a.function || ''));
+        // 1) 基础序列校验
         const seqResult = (0, validator_1.validateActionSequence)(filtered);
         if (!seqResult.valid) {
             const errorsFlat = seqResult.errors.flat();
@@ -196,6 +219,26 @@ ${userIntent}
             currentPrompt = basePrompt + `\n错误：${errorsFlat.join("；")}。请修正。`;
             continue;
         }
+        // 2) 协议状态机校验 (SSG)
+        if (protocols.length > 0) {
+            const protoResult = validateProtocol(filtered, protocols, "UNAUTHENTICATED");
+            if (!protoResult.valid) {
+                console.log("🛡️ SSG 协议违规:", protoResult.error);
+                (0, failure_corpus_1.recordFailure)({
+                    intent: userIntent,
+                    projectFunctions: ir.map((f) => f.name),
+                    violatedSVL: "SVL-4",
+                    constraintType: "protocol",
+                    actionSequence: filtered,
+                    errorDetail: protoResult.error,
+                });
+                (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: filtered, success: false, svlViolated: "SVL-4" });
+                currentPrompt = basePrompt + `\n协议错误：${protoResult.error}。请按照正确的业务顺序重新生成，确保先通过认证再签发令牌。`;
+                continue;
+                continue;
+            }
+        }
+        // 3) 语义合约校验
         const semResult = (0, semantic_validator_1.checkSemantic)(userIntent, filtered);
         if (!semResult.valid) {
             console.log("⚠️ 语义校验失败:", semResult.errors.join(", "));

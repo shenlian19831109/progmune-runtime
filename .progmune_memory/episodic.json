@@ -1,0 +1,186 @@
+[
+  {
+    "intent": "生成一个JWT令牌",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "payload",
+        "value": "user:123"
+      },
+      {
+        "kind": "call",
+        "function": "generate_jwt",
+        "args": [
+          {
+            "name": "payload",
+            "type": "UserPayload",
+            "value": "payload"
+          }
+        ],
+        "assignTo": "token"
+      },
+      {
+        "kind": "return",
+        "value": "token"
+      }
+    ],
+    "success": true,
+    "id": "ep_1778775611414",
+    "timestamp": "2026-05-14T16:20:11.414Z"
+  },
+  {
+    "intent": "生成一个JWT令牌",
+    "actions": [],
+    "success": false,
+    "id": "ep_1778775591074",
+    "timestamp": "2026-05-14T16:19:51.074Z"
+  },
+  {
+    "intent": "生成一个JWT令牌",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "payload",
+        "value": "user:123"
+      },
+      {
+        "kind": "call",
+        "function": "generate_jwt",
+        "args": [
+          {
+            "name": "payload",
+            "type": "UserPayload",
+            "value": "payload"
+          }
+        ],
+        "assignTo": "token"
+      },
+      {
+        "kind": "return",
+        "value": "token"
+      }
+    ],
+    "success": true,
+    "id": "ep_1778775315729",
+    "timestamp": "2026-05-14T16:15:15.729Z"
+  },
+  {
+    "intent": "生成一个JWT令牌",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "payload",
+        "value": "user:123"
+      },
+      {
+        "kind": "call",
+        "function": "generate_jwt",
+        "args": [
+          {
+            "name": "payload",
+            "type": "UserPayload",
+            "value": "payload"
+          }
+        ],
+        "assignTo": "token"
+      },
+      {
+        "kind": "return",
+        "value": "token"
+      }
+    ],
+    "success": true,
+    "id": "ep_1778775173516",
+    "timestamp": "2026-05-14T16:12:53.516Z"
+  },
+  {
+    "intent": "创建一个带令牌的会话",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "user_payload",
+        "value": "user:123"
+      },
+      {
+        "kind": "call",
+        "function": "query_data",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "user_payload"
+          }
+        ],
+        "assignTo": "user_data"
+      },
+      {
+        "kind": "assign",
+        "target": "plain_password",
+        "value": "password123"
+      },
+      {
+        "kind": "call",
+        "function": "verify_password",
+        "args": [
+          {
+            "name": "plain",
+            "type": "str",
+            "value": "plain_password"
+          },
+          {
+            "name": "hash",
+            "type": "PasswordHash",
+            "value": "user_data"
+          }
+        ],
+        "assignTo": "password_valid"
+      },
+      {
+        "kind": "call",
+        "function": "generate_jwt",
+        "args": [
+          {
+            "name": "payload",
+            "type": "UserPayload",
+            "value": "user_payload"
+          }
+        ],
+        "assignTo": "token"
+      },
+      {
+        "kind": "call",
+        "function": "create_session",
+        "args": [
+          {
+            "name": "user",
+            "type": "UserPayload",
+            "value": "user_payload"
+          },
+          {
+            "name": "token",
+            "type": "Token",
+            "value": "token"
+          }
+        ],
+        "assignTo": "session"
+      },
+      {
+        "kind": "return",
+        "value": "session"
+      },
+      {
+        "kind": "return",
+        "value": "error"
+      },
+      {
+        "kind": "if",
+        "condition": "password_valid",
+        "thenActions": [],
+        "elseActions": []
+      }
+    ],
+    "success": true,
+    "id": "ep_1778775082912",
+    "timestamp": "2026-05-14T16:11:22.919Z"
+  }
+]
