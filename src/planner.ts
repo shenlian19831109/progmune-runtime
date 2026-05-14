@@ -206,7 +206,7 @@ ${userIntent}
         });
         recordEpisode({ intent: userIntent, actions: filtered, success: false, svlViolated: "SVL-4" });
         currentPrompt = basePrompt + `\n协议错误：${protoResult.error}。请按照正确的业务顺序重新生成，确保先通过认证再签发令牌。`;
-        continue;
+      continue;        continue;
       }
     }
 
