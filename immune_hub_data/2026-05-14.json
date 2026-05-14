@@ -1,0 +1,50 @@
+[
+  {
+    "instance_id": "1009ae6be3d4526c",
+    "timestamp": "2026-05-13T18:53:16.840Z",
+    "violatedSVL": "SVL-4",
+    "constraintType": "protocol",
+    "functionSequence": [
+      "generate_jwt"
+    ],
+    "preState": [
+      "UNAUTHENTICATED"
+    ],
+    "count": 1
+  },
+  {
+    "instance_id": "1009ae6be3d4526c",
+    "timestamp": "2026-05-13T21:24:45.973Z",
+    "violatedSVL": "SVL-4",
+    "constraintType": "protocol",
+    "functionSequence": [
+      "generate_jwt",
+      "create_session"
+    ],
+    "count": 1
+  },
+  {
+    "instance_id": "1009ae6be3d4526c",
+    "timestamp": "2026-05-13T21:24:47.155Z",
+    "violatedSVL": "SVL-4",
+    "constraintType": "protocol",
+    "functionSequence": [
+      "query_data",
+      "generate_jwt",
+      "create_session"
+    ],
+    "count": 1
+  },
+  {
+    "instance_id": "1009ae6be3d4526c",
+    "timestamp": "2026-05-13T21:24:48.290Z",
+    "violatedSVL": "SVL-4",
+    "constraintType": "protocol",
+    "functionSequence": [
+      "query_data",
+      "generate_jwt",
+      "create_session"
+    ],
+    "count": 1
+  }
+]

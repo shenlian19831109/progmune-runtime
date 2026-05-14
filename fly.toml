@@ -1,0 +1,31 @@
+app = "progmune-runtime"
+primary_region = "sin"
+
+[build]
+  [build.args]
+    NODE_VERSION = "18"
+
+[env]
+  PORT = "3000"
+
+[processes]
+  web = "node server/hub.js"
+
+[[vm]]
+  memory = "256mb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[[services]]
+  processes = ["web"]
+  internal_port = 3000
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+  [[services.tcp_checks]]
+    interval = "10s"
+    timeout = "2s"
+
+[mounts]
+  source = "progmune_data"
+  destination = "/app/immune_hub_data"

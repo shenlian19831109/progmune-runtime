@@ -1,0 +1,14 @@
+node_modules/
+src/
+test-*/
+tools/
+scripts/
+*.sh
+.env
+.git
+failure_corpus/
+.brainycode_memory/
+immune_hub_data/
+feedback.json
+ir.json
+*.md
