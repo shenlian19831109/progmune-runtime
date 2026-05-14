@@ -1,24 +1,17 @@
 {
-  "type": "commonjs",
   "name": "progmune-runtime",
   "version": "2.0.0",
-  "description": "Constraint-Guided Program Synthesis Runtime - MCP Server",
+  "description": "Progmune Runtime — Program Immunology: Constraint-Guided Program Synthesis Runtime",
   "main": "dist/mcp-server.mjs",
   "bin": {
-    "brainycode-mcp": "./dist/mcp-server.mjs"
+    "progmune-runtime": "./dist/mcp-server.mjs"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.json",
     "start": "node dist/mcp-server.mjs"
   },
-  "keywords": [
-    "program-synthesis",
-    "verification",
-    "mcp",
-    "compiler",
-    "runtime"
-  ],
-  "author": "Your Name",
+  "keywords": ["program-synthesis", "verification", "mcp", "compiler", "runtime", "immunology"],
+  "author": "",
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
