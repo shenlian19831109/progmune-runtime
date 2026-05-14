@@ -1,0 +1,75 @@
+{
+  "intent": "创建一个带令牌的会话",
+  "projectFunctions": [
+    "verify_password",
+    "generate_jwt",
+    "create_session",
+    "cache_get",
+    "cache_set",
+    "send_email",
+    "query_data"
+  ],
+  "violatedSVL": "SVL-4",
+  "constraintType": "protocol",
+  "actionSequence": [
+    {
+      "kind": "assign",
+      "target": "user",
+      "value": "user:123"
+    },
+    {
+      "kind": "call",
+      "function": "query_data",
+      "args": [
+        {
+          "name": "key",
+          "type": "str",
+          "value": "user"
+        }
+      ],
+      "assignTo": "user_data"
+    },
+    {
+      "kind": "call",
+      "function": "generate_jwt",
+      "args": [
+        {
+          "name": "payload",
+          "type": "userpayload",
+          "value": "user_data"
+        }
+      ],
+      "assignTo": "token"
+    },
+    {
+      "kind": "call",
+      "function": "create_session",
+      "args": [
+        {
+          "name": "user",
+          "type": "userpayload",
+          "value": "user_data"
+        },
+        {
+          "name": "token",
+          "type": "token",
+          "value": "token"
+        }
+      ],
+      "assignTo": "session"
+    },
+    {
+      "kind": "return",
+      "value": "session"
+    },
+    {
+      "kind": "if",
+      "condition": "user_data",
+      "thenActions": [],
+      "elseActions": []
+    }
+  ],
+  "errorDetail": "非法调用：generate_jwt 要求前置状态 [AUTHENTICATED]，当前状态为 [UNAUTHENTICATED]",
+  "id": "fail_1778707488290",
+  "timestamp": "2026-05-13T21:24:48.290Z"
+}

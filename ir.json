@@ -1,106 +1,58 @@
 [
   {
     "name": "verify_password",
-    "params": [
-      {
-        "name": "plain",
-        "type": "str"
-      },
-      {
-        "name": "hash",
-        "type": "PasswordHash"
-      }
-    ],
+    "params": [{"name": "plain", "type": "str"}, {"name": "hash", "type": "passwordhash"}],
     "returnType": "bool",
     "file": "auth.py",
-    "calls": []
+    "protocol": {
+      "pre_states": ["UNAUTHENTICATED"],
+      "post_states": ["AUTHENTICATED"]
+    }
   },
   {
     "name": "generate_jwt",
-    "params": [
-      {
-        "name": "payload",
-        "type": "UserPayload"
-      }
-    ],
-    "returnType": "Token",
+    "params": [{"name": "payload", "type": "userpayload"}],
+    "returnType": "token",
     "file": "auth.py",
-    "calls": []
+    "protocol": {
+      "pre_states": ["AUTHENTICATED"],
+      "post_states": ["TOKEN_ISSUED"],
+      "invalidate": ["AUTHENTICATED"]
+    }
   },
   {
     "name": "create_session",
-    "params": [
-      {
-        "name": "user",
-        "type": "UserPayload"
-      },
-      {
-        "name": "token",
-        "type": "Token"
-      }
-    ],
-    "returnType": "Dict",
+    "params": [{"name": "user", "type": "userpayload"}, {"name": "token", "type": "token"}],
+    "returnType": "dict",
     "file": "auth.py",
-    "calls": []
-  },
-  {
-    "name": "cache_set",
-    "params": [
-      {
-        "name": "key",
-        "type": "str"
-      },
-      {
-        "name": "value",
-        "type": "any"
-      }
-    ],
-    "returnType": "None",
-    "file": "auth.py",
-    "calls": []
+    "protocol": {
+      "pre_states": ["TOKEN_ISSUED"],
+      "post_states": ["SESSION_ACTIVE"],
+      "invalidate": ["TOKEN_ISSUED"]
+    }
   },
   {
     "name": "cache_get",
-    "params": [
-      {
-        "name": "key",
-        "type": "str"
-      }
-    ],
-    "returnType": "Optional[any]",
-    "file": "auth.py",
-    "calls": []
+    "params": [{"name": "key", "type": "str"}],
+    "returnType": "optional[any]",
+    "file": "auth.py"
+  },
+  {
+    "name": "cache_set",
+    "params": [{"name": "key", "type": "str"}, {"name": "value", "type": "any"}],
+    "returnType": "none",
+    "file": "auth.py"
   },
   {
     "name": "send_email",
-    "params": [
-      {
-        "name": "recipient",
-        "type": "str"
-      },
-      {
-        "name": "subject",
-        "type": "str"
-      },
-      {
-        "name": "body",
-        "type": "str"
-      }
-    ],
+    "params": [{"name": "recipient", "type": "str"}, {"name": "subject", "type": "str"}, {"name": "body", "type": "str"}],
     "returnType": "bool",
-    "file": "auth.py",
-    "calls": []
+    "file": "auth.py"
   },
   {
     "name": "query_data",
-    "params": [
-      {
-        "name": "key",
-        "type": "str"
-      }
-    ],
-    "returnType": "Dict",
-    "file": "auth.py",
-    "calls": []
+    "params": [{"name": "key", "type": "str"}],
+    "returnType": "dict",
+    "file": "auth.py"
   }
 ]

@@ -2,8 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.executeActionCode = executeActionCode;
 class ActionBuilder {
-    actions = [];
-    vars = {};
+    constructor() {
+        this.actions = [];
+        this.vars = {};
+    }
     call(func, args, assignTo) {
         const normalizedArgs = args.map(a => {
             if (typeof a === 'object' && a !== null && !('name' in a && 'type' in a && 'value' in a)) {

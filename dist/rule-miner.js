@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const failure_corpus_1 = require("./failure-corpus");
+console.log("═══ 失败模式分析 ═══");
+const patterns = (0, failure_corpus_1.getTopFailurePatterns)(5);
+console.log("Top 5 失败模式:");
+patterns.forEach(p => console.log(`  ${p.pattern}: ${p.count} 次`));
+console.log("\n候选规则建议:");
+const rules = (0, failure_corpus_1.generateCandidateRules)();
+rules.forEach(r => console.log(`  - ${r}`));

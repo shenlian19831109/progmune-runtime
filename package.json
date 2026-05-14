@@ -1,8 +1,8 @@
 {
   "type": "commonjs",
-  "name": "brainycode-mcp",
+  "name": "progmune-runtime",
   "version": "2.0.0",
-  "description": "Constraint-Guided Program Synthesis Runtime — MCP Server",
+  "description": "Constraint-Guided Program Synthesis Runtime - MCP Server",
   "main": "dist/mcp-server.mjs",
   "bin": {
     "brainycode-mcp": "./dist/mcp-server.mjs"

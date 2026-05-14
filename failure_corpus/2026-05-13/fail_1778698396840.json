@@ -1,0 +1,19 @@
+{
+  "intent": "实现一个登录函数",
+  "projectFunctions": [
+    "verify_password",
+    "generate_jwt"
+  ],
+  "violatedSVL": "SVL-4",
+  "constraintType": "protocol",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "generate_jwt"
+    }
+  ],
+  "errorDetail": "非法调用：generate_jwt 要求前置状态 [AUTHENTICATED]，当前状态为 [UNAUTHENTICATED]",
+  "ssgState": "UNAUTHENTICATED",
+  "id": "fail_1778698396840",
+  "timestamp": "2026-05-13T18:53:16.840Z"
+}

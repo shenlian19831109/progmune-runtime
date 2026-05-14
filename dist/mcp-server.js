@@ -13,7 +13,7 @@ const { recordRun } = require('./feedback.js');
 
 async function main() {
   const server = new Server({
-    name: "brainycode",
+    name: "progmune",
     version: "2.0.0"
   }, { capabilities: { tools: {} } });
 

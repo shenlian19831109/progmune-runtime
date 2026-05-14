@@ -1,0 +1,864 @@
+[
+  {
+    "intent": "创建一个带令牌的会话",
+    "actions": [],
+    "success": false,
+    "id": "ep_1778707488292",
+    "timestamp": "2026-05-13T21:24:48.292Z"
+  },
+  {
+    "intent": "创建一个带令牌的会话",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "user",
+        "value": "user:123"
+      },
+      {
+        "kind": "call",
+        "function": "query_data",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "user"
+          }
+        ],
+        "assignTo": "user_data"
+      },
+      {
+        "kind": "call",
+        "function": "generate_jwt",
+        "args": [
+          {
+            "name": "payload",
+            "type": "userpayload",
+            "value": "user_data"
+          }
+        ],
+        "assignTo": "token"
+      },
+      {
+        "kind": "call",
+        "function": "create_session",
+        "args": [
+          {
+            "name": "user",
+            "type": "userpayload",
+            "value": "user_data"
+          },
+          {
+            "name": "token",
+            "type": "token",
+            "value": "token"
+          }
+        ],
+        "assignTo": "session"
+      },
+      {
+        "kind": "return",
+        "value": "session"
+      },
+      {
+        "kind": "if",
+        "condition": "user_data",
+        "thenActions": [],
+        "elseActions": []
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-4",
+    "id": "ep_1778707488291",
+    "timestamp": "2026-05-13T21:24:48.291Z"
+  },
+  {
+    "intent": "创建一个带令牌的会话",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "user",
+        "value": "user:456"
+      },
+      {
+        "kind": "call",
+        "function": "query_data",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "user"
+          }
+        ],
+        "assignTo": "user_data"
+      },
+      {
+        "kind": "call",
+        "function": "generate_jwt",
+        "args": [
+          {
+            "name": "payload",
+            "type": "userpayload",
+            "value": "user_data"
+          }
+        ],
+        "assignTo": "token"
+      },
+      {
+        "kind": "call",
+        "function": "create_session",
+        "args": [
+          {
+            "name": "user",
+            "type": "userpayload",
+            "value": "user_data"
+          },
+          {
+            "name": "token",
+            "type": "token",
+            "value": "token"
+          }
+        ],
+        "assignTo": "session"
+      },
+      {
+        "kind": "return",
+        "value": "session"
+      },
+      {
+        "kind": "if",
+        "condition": "user_data",
+        "thenActions": [],
+        "elseActions": []
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-4",
+    "id": "ep_1778707487157",
+    "timestamp": "2026-05-13T21:24:47.157Z"
+  },
+  {
+    "intent": "创建一个带令牌的会话",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "user_payload",
+        "value": "userpayload"
+      },
+      {
+        "kind": "call",
+        "function": "generate_jwt",
+        "args": [
+          {
+            "name": "payload",
+            "type": "userpayload",
+            "value": "user_payload"
+          }
+        ],
+        "assignTo": "token"
+      },
+      {
+        "kind": "call",
+        "function": "create_session",
+        "args": [
+          {
+            "name": "user",
+            "type": "userpayload",
+            "value": "user_payload"
+          },
+          {
+            "name": "token",
+            "type": "token",
+            "value": "token"
+          }
+        ],
+        "assignTo": "session"
+      },
+      {
+        "kind": "return",
+        "value": "session"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-4",
+    "id": "ep_1778707485974",
+    "timestamp": "2026-05-13T21:24:45.974Z"
+  },
+  {
+    "intent": "实现一个登录函数，验证密码后生成JWT并返回",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "username",
+        "value": "input_username"
+      },
+      {
+        "kind": "assign",
+        "target": "password",
+        "value": "input_password"
+      },
+      {
+        "kind": "call",
+        "function": "query_data",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "username"
+          }
+        ],
+        "assignTo": "user_data"
+      },
+      {
+        "kind": "assign",
+        "target": "password_hash",
+        "value": "user_data.password_hash"
+      },
+      {
+        "kind": "call",
+        "function": "verify_password",
+        "args": [
+          {
+            "name": "plain",
+            "type": "str",
+            "value": "password"
+          },
+          {
+            "name": "hash",
+            "type": "PasswordHash",
+            "value": "password_hash"
+          }
+        ],
+        "assignTo": "password_valid"
+      },
+      {
+        "kind": "assign",
+        "target": "user_payload",
+        "value": {
+          "id": "user_data.id",
+          "username": "user_data.username",
+          "role": "user_data.role"
+        }
+      },
+      {
+        "kind": "call",
+        "function": "generate_jwt",
+        "args": [
+          {
+            "name": "payload",
+            "type": "UserPayload",
+            "value": "user_payload"
+          }
+        ],
+        "assignTo": "token"
+      },
+      {
+        "kind": "call",
+        "function": "create_session",
+        "args": [
+          {
+            "name": "user",
+            "type": "UserPayload",
+            "value": "user_payload"
+          },
+          {
+            "name": "token",
+            "type": "Token",
+            "value": "token"
+          }
+        ],
+        "assignTo": "session"
+      },
+      {
+        "kind": "call",
+        "function": "cache_set",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "session:token"
+          },
+          {
+            "name": "value",
+            "type": "any",
+            "value": "session"
+          }
+        ]
+      },
+      {
+        "kind": "return",
+        "value": "token"
+      },
+      {
+        "kind": "return",
+        "value": "error: token generation failed"
+      },
+      {
+        "kind": "if",
+        "condition": "token",
+        "thenActions": [],
+        "elseActions": []
+      },
+      {
+        "kind": "return",
+        "value": "error: invalid password"
+      },
+      {
+        "kind": "if",
+        "condition": "password_valid",
+        "thenActions": [],
+        "elseActions": []
+      },
+      {
+        "kind": "return",
+        "value": "error: user not found"
+      },
+      {
+        "kind": "if",
+        "condition": "user_data",
+        "thenActions": [],
+        "elseActions": []
+      }
+    ],
+    "success": true,
+    "id": "ep_1778707484476",
+    "timestamp": "2026-05-13T21:24:44.476Z"
+  },
+  {
+    "intent": "实现一个登录函数，验证密码后生成JWT并返回",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "username",
+        "value": "input_username"
+      },
+      {
+        "kind": "assign",
+        "target": "password",
+        "value": "input_password"
+      },
+      {
+        "kind": "call",
+        "function": "query_data",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "username"
+          }
+        ],
+        "assignTo": "user_data"
+      },
+      {
+        "kind": "assign",
+        "target": "password_hash",
+        "value": "user_data.password_hash"
+      },
+      {
+        "kind": "call",
+        "function": "verify_password",
+        "args": [
+          {
+            "name": "plain",
+            "type": "str",
+            "value": "password"
+          },
+          {
+            "name": "hash",
+            "type": "PasswordHash",
+            "value": "password_hash"
+          }
+        ],
+        "assignTo": "password_valid"
+      },
+      {
+        "kind": "assign",
+        "target": "user_payload",
+        "value": {
+          "id": "user_data.id",
+          "username": "user_data.username",
+          "role": "user_data.role"
+        }
+      },
+      {
+        "kind": "call",
+        "function": "generate_jwt",
+        "args": [
+          {
+            "name": "payload",
+            "type": "UserPayload",
+            "value": "user_payload"
+          }
+        ],
+        "assignTo": "token"
+      },
+      {
+        "kind": "call",
+        "function": "create_session",
+        "args": [
+          {
+            "name": "user",
+            "type": "UserPayload",
+            "value": "user_payload"
+          },
+          {
+            "name": "token",
+            "type": "Token",
+            "value": "token"
+          }
+        ],
+        "assignTo": "session"
+      },
+      {
+        "kind": "call",
+        "function": "cache_set",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "session:token"
+          },
+          {
+            "name": "value",
+            "type": "any",
+            "value": "session"
+          }
+        ]
+      },
+      {
+        "kind": "return",
+        "value": "token"
+      },
+      {
+        "kind": "return",
+        "value": "error: token generation failed"
+      },
+      {
+        "kind": "if",
+        "condition": "token",
+        "thenActions": [],
+        "elseActions": []
+      },
+      {
+        "kind": "return",
+        "value": "error: invalid password"
+      },
+      {
+        "kind": "if",
+        "condition": "password_valid",
+        "thenActions": [],
+        "elseActions": []
+      },
+      {
+        "kind": "return",
+        "value": "error: user not found"
+      },
+      {
+        "kind": "if",
+        "condition": "user_data",
+        "thenActions": [],
+        "elseActions": []
+      }
+    ],
+    "success": true,
+    "id": "ep_1778707103494",
+    "timestamp": "2026-05-13T21:18:23.494Z"
+  },
+  {
+    "intent": "实现一个登录函数，验证密码后生成JWT并返回",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "username",
+        "value": "input_username"
+      },
+      {
+        "kind": "assign",
+        "target": "password",
+        "value": "input_password"
+      },
+      {
+        "kind": "call",
+        "function": "query_data",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "username"
+          }
+        ],
+        "assignTo": "user_data"
+      },
+      {
+        "kind": "assign",
+        "target": "password_hash",
+        "value": "user_data.password_hash"
+      },
+      {
+        "kind": "call",
+        "function": "verify_password",
+        "args": [
+          {
+            "name": "plain",
+            "type": "str",
+            "value": "password"
+          },
+          {
+            "name": "hash",
+            "type": "PasswordHash",
+            "value": "password_hash"
+          }
+        ],
+        "assignTo": "password_valid"
+      },
+      {
+        "kind": "assign",
+        "target": "user_payload",
+        "value": {
+          "id": "user_data.id",
+          "username": "user_data.username",
+          "role": "user_data.role"
+        }
+      },
+      {
+        "kind": "call",
+        "function": "generate_jwt",
+        "args": [
+          {
+            "name": "payload",
+            "type": "UserPayload",
+            "value": "user_payload"
+          }
+        ],
+        "assignTo": "token"
+      },
+      {
+        "kind": "call",
+        "function": "create_session",
+        "args": [
+          {
+            "name": "user",
+            "type": "UserPayload",
+            "value": "user_payload"
+          },
+          {
+            "name": "token",
+            "type": "Token",
+            "value": "token"
+          }
+        ],
+        "assignTo": "session"
+      },
+      {
+        "kind": "call",
+        "function": "cache_set",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "session:token"
+          },
+          {
+            "name": "value",
+            "type": "any",
+            "value": "session"
+          }
+        ]
+      },
+      {
+        "kind": "return",
+        "value": "token"
+      },
+      {
+        "kind": "return",
+        "value": "error: token generation failed"
+      },
+      {
+        "kind": "if",
+        "condition": "token",
+        "thenActions": [],
+        "elseActions": []
+      },
+      {
+        "kind": "return",
+        "value": "error: invalid password"
+      },
+      {
+        "kind": "if",
+        "condition": "password_valid",
+        "thenActions": [],
+        "elseActions": []
+      },
+      {
+        "kind": "return",
+        "value": "error: user not found"
+      },
+      {
+        "kind": "if",
+        "condition": "user_data",
+        "thenActions": [],
+        "elseActions": []
+      }
+    ],
+    "success": true,
+    "id": "ep_1778707096873",
+    "timestamp": "2026-05-13T21:18:16.873Z"
+  },
+  {
+    "intent": "实现一个登录函数，验证密码后生成JWT并返回",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "username",
+        "value": "input_username"
+      },
+      {
+        "kind": "assign",
+        "target": "password",
+        "value": "input_password"
+      },
+      {
+        "kind": "call",
+        "function": "query_data",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "username"
+          }
+        ],
+        "assignTo": "user_data"
+      },
+      {
+        "kind": "assign",
+        "target": "password_hash",
+        "value": "user_data.password_hash"
+      },
+      {
+        "kind": "call",
+        "function": "verify_password",
+        "args": [
+          {
+            "name": "plain",
+            "type": "str",
+            "value": "password"
+          },
+          {
+            "name": "hash",
+            "type": "PasswordHash",
+            "value": "password_hash"
+          }
+        ],
+        "assignTo": "password_valid"
+      },
+      {
+        "kind": "assign",
+        "target": "user_payload",
+        "value": {
+          "username": "username",
+          "role": "user_data.role"
+        }
+      },
+      {
+        "kind": "call",
+        "function": "generate_jwt",
+        "args": [
+          {
+            "name": "payload",
+            "type": "UserPayload",
+            "value": "user_payload"
+          }
+        ],
+        "assignTo": "token"
+      },
+      {
+        "kind": "call",
+        "function": "create_session",
+        "args": [
+          {
+            "name": "user",
+            "type": "UserPayload",
+            "value": "user_payload"
+          },
+          {
+            "name": "token",
+            "type": "Token",
+            "value": "token"
+          }
+        ],
+        "assignTo": "session"
+      },
+      {
+        "kind": "call",
+        "function": "cache_set",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "session:token"
+          },
+          {
+            "name": "value",
+            "type": "any",
+            "value": "session"
+          }
+        ]
+      },
+      {
+        "kind": "return",
+        "value": "token"
+      },
+      {
+        "kind": "return",
+        "value": "error: invalid password"
+      },
+      {
+        "kind": "if",
+        "condition": "password_valid",
+        "thenActions": [],
+        "elseActions": []
+      },
+      {
+        "kind": "return",
+        "value": "error: user not found"
+      },
+      {
+        "kind": "if",
+        "condition": "user_data",
+        "thenActions": [],
+        "elseActions": []
+      }
+    ],
+    "success": true,
+    "id": "ep_1778707030320",
+    "timestamp": "2026-05-13T21:17:10.320Z"
+  },
+  {
+    "intent": "实现一个登录函数，验证密码后生成JWT并返回",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "username",
+        "value": "input_username"
+      },
+      {
+        "kind": "assign",
+        "target": "password",
+        "value": "input_password"
+      },
+      {
+        "kind": "call",
+        "function": "query_data",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "username"
+          }
+        ],
+        "assignTo": "user_data"
+      },
+      {
+        "kind": "assign",
+        "target": "password_hash",
+        "value": "user_data.password_hash"
+      },
+      {
+        "kind": "call",
+        "function": "verify_password",
+        "args": [
+          {
+            "name": "plain",
+            "type": "str",
+            "value": "password"
+          },
+          {
+            "name": "hash",
+            "type": "PasswordHash",
+            "value": "password_hash"
+          }
+        ],
+        "assignTo": "password_valid"
+      },
+      {
+        "kind": "assign",
+        "target": "user_payload",
+        "value": {
+          "username": "username",
+          "role": "user_data.role"
+        }
+      },
+      {
+        "kind": "call",
+        "function": "generate_jwt",
+        "args": [
+          {
+            "name": "payload",
+            "type": "UserPayload",
+            "value": "user_payload"
+          }
+        ],
+        "assignTo": "token"
+      },
+      {
+        "kind": "call",
+        "function": "create_session",
+        "args": [
+          {
+            "name": "user",
+            "type": "UserPayload",
+            "value": "user_payload"
+          },
+          {
+            "name": "token",
+            "type": "Token",
+            "value": "token"
+          }
+        ],
+        "assignTo": "session"
+      },
+      {
+        "kind": "call",
+        "function": "cache_set",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "session:token"
+          },
+          {
+            "name": "value",
+            "type": "any",
+            "value": "session"
+          }
+        ]
+      },
+      {
+        "kind": "return",
+        "value": "token"
+      },
+      {
+        "kind": "return",
+        "value": "error: invalid password"
+      },
+      {
+        "kind": "if",
+        "condition": "password_valid",
+        "thenActions": [],
+        "elseActions": []
+      },
+      {
+        "kind": "return",
+        "value": "error: user not found"
+      },
+      {
+        "kind": "if",
+        "condition": "user_data",
+        "thenActions": [],
+        "elseActions": []
+      }
+    ],
+    "success": true,
+    "id": "ep_1778706354010",
+    "timestamp": "2026-05-13T21:05:54.010Z"
+  }
+]

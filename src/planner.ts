@@ -4,6 +4,9 @@ import { validateActionSequence } from "./validator";
 import { checkSemantic } from "./semantic-validator";
 import { getFunctionSuccessRate } from "./feedback";
 import { jaccardSimilarity, extractKeywords } from "./utils";
+import { recordFailure, SVL } from "./failure-corpus";
+import { recordEpisode, findSemanticTemplate } from "./memory-layer";
+import { StateMachineValidator } from "./ssg-validator";
 import * as fs from "fs";
 
 function enrichActions(actions: Action[], ir: any[]): Action[] {
@@ -30,11 +33,58 @@ function enrichActions(actions: Action[], ir: any[]): Action[] {
   });
 }
 
+function determineSVL(errors: string[]): SVL {
+  if (errors.some(e => e.includes("不存在"))) return "SVL-1";
+  if (errors.some(e => e.includes("类型不匹配") || e.includes("参数数量"))) return "SVL-2";
+  if (errors.some(e => e.includes("变量") && (e.includes("未定义") || e.includes("引用自身")))) return "SVL-3";
+  if (errors.some(e => e.includes("协议") || e.includes("状态"))) return "SVL-4";
+  return "SVL-1";
+}
+
+function determineConstraintType(svl: SVL): string {
+  switch (svl) {
+    case "SVL-1": return "symbol_existence";
+    case "SVL-2": return "type_mismatch";
+    case "SVL-3": return "dataflow";
+    case "SVL-4": return "protocol";
+  }
+}
+
+/** 加载 IR 中所有带 protocol 的函数为协议规则 */
+function loadProtocols(ir: any[]) {
+  return ir
+    .filter((f: any) => f.protocol)
+    .map((f: any) => ({ function: f.name, protocol: f.protocol }));
+}
+
+/** 验证动作序列的协议合法性 */
+function validateProtocol(actions: Action[], protocols: any[], initialState: string) {
+  const ssv = new StateMachineValidator(protocols, initialState);
+  for (let i = 0; i < actions.length; i++) {
+    const a = actions[i];
+    if (a.kind === "call" && a.function) {
+      const result = ssv.apply(a.function);
+      if (!result.valid) {
+        return { valid: false, error: result.error!, index: i };
+      }
+    }
+  }
+  return { valid: true };
+}
+
 export async function plan(userIntent: string): Promise<Action[]> {
   resetCallCount();
   const ir = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
-  const keywords = extractKeywords(userIntent);
 
+  // 语义模板快速通道
+  const cachedTemplate = findSemanticTemplate(userIntent);
+  if (cachedTemplate && cachedTemplate.successRate >= 0.8 && cachedTemplate.useCount >= 2) {
+    console.log("⚡ 命中语义模板，直接复用已验证序列");
+    recordEpisode({ intent: userIntent, actions: cachedTemplate.actionSequence, success: true });
+    return cachedTemplate.actionSequence;
+  }
+
+  const keywords = extractKeywords(userIntent);
   const scored = ir.map((f: any) => {
     let score = 0;
     for (const kw of keywords) {
@@ -62,7 +112,6 @@ export async function plan(userIntent: string): Promise<Action[]> {
     }
   }
 
-  // 示例中显式 assign 后立即使用 ifBlock
   const exampleCode = 
     `assign("query_key", "user:123")
 callAssign("cache_get", "cached_data", "query_key")
@@ -84,15 +133,15 @@ ${exampleCode}
 
 全局函数及用法规则：
 - 声明变量：assign("变量名", "值") 或 callAssign("函数", "变量名", ...)
-- 条件分支：ifElse("变量名", () => { ... }, () => { ... })  —— 只能在已声明的变量上使用
+- 条件分支：ifElse("变量名", () => { ... }, () => { ... })
 - 简单分支：ifBlock("变量名", () => { ... })
 - 调用：call("函数", "arg1", ...)
 - 返回：output("值或变量名")
 
-铁律（每违反一条就会重试）：
-1. 使用 if/else 前，必须先在同一作用域内用 assign 或 callAssign 声明条件里提到的变量。
-2. 参数数量必须与函数声明完全一致。
-3. 条件括号内只能是已声明的变量名，不能是表达式。
+铁律：
+1. 必须先 assign 或 callAssign 再使用变量。
+2. 参数数量必须与函数声明一致。
+3. 条件括号内只能是已声明的变量名。
 
 需求：
 ${userIntent}
@@ -101,6 +150,9 @@ ${userIntent}
 
   let finalActions: Action[] = [];
   let currentPrompt = basePrompt;
+
+  // 加载协议规则，设定初始状态（例如未认证场景）
+  const protocols = loadProtocols(ir);
 
   for (let r = 0; r < 3; r++) {
     let text: string;
@@ -120,22 +172,69 @@ ${userIntent}
     const enriched = enrichActions(rawActions, ir);
     const filtered = enriched.filter(a => !forbiddenFuncs.includes(a.function || ''));
 
+    // 1) 基础序列校验
     const seqResult = validateActionSequence(filtered);
     if (!seqResult.valid) {
-      console.log("⚠️ 序列校验失败:", seqResult.errors.flat().join(", "));
-      currentPrompt = basePrompt + `\n错误：${seqResult.errors.flat().join("；")}。请修正。`;
+      const errorsFlat = seqResult.errors.flat();
+      console.log("⚠️ 序列校验失败:", errorsFlat.join(", "));
+      const svl = determineSVL(errorsFlat);
+      recordFailure({
+        intent: userIntent,
+        projectFunctions: ir.map((f: any) => f.name),
+        violatedSVL: svl,
+        constraintType: determineConstraintType(svl),
+        actionSequence: filtered,
+        errorDetail: errorsFlat.join("; "),
+      });
+      recordEpisode({ intent: userIntent, actions: filtered, success: false, svlViolated: svl });
+      currentPrompt = basePrompt + `\n错误：${errorsFlat.join("；")}。请修正。`;
       continue;
     }
 
+    // 2) 协议状态机校验 (SSG)
+    if (protocols.length > 0) {
+      const protoResult = validateProtocol(filtered, protocols, "UNAUTHENTICATED");
+      if (!protoResult.valid) {
+        console.log("🛡️ SSG 协议违规:", protoResult.error);
+        recordFailure({
+          intent: userIntent,
+          projectFunctions: ir.map((f: any) => f.name),
+          violatedSVL: "SVL-4",
+          constraintType: "protocol",
+          actionSequence: filtered,
+          errorDetail: protoResult.error!,
+        });
+        recordEpisode({ intent: userIntent, actions: filtered, success: false, svlViolated: "SVL-4" });
+        currentPrompt = basePrompt + `\n协议错误：${protoResult.error}。请按照正确的业务顺序重新生成，确保先通过认证再签发令牌。`;
+        continue;
+      }
+    }
+
+    // 3) 语义合约校验
     const semResult = checkSemantic(userIntent, filtered);
     if (!semResult.valid) {
       console.log("⚠️ 语义校验失败:", semResult.errors.join(", "));
+      recordFailure({
+        intent: userIntent,
+        projectFunctions: ir.map((f: any) => f.name),
+        violatedSVL: "SVL-4",
+        constraintType: "protocol",
+        actionSequence: filtered,
+        errorDetail: semResult.errors.join("; "),
+      });
+      recordEpisode({ intent: userIntent, actions: filtered, success: false, svlViolated: "SVL-4" });
       currentPrompt = basePrompt + `\n错误：${semResult.errors.join("；")}。请修正。`;
       continue;
     }
 
     finalActions = filtered;
     break;
+  }
+
+  if (finalActions.length > 0) {
+    recordEpisode({ intent: userIntent, actions: finalActions, success: true });
+  } else {
+    recordEpisode({ intent: userIntent, actions: [], success: false });
   }
 
   return finalActions;
