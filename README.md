@@ -256,3 +256,17 @@ The core moat of Progmune lies in its continuously accumulating semantic failure
 MIT License.
 
 Progmune is redefining AI-assisted programming—not by "making models smarter," but by "letting program truth govern generation." Join our technical preview and build a future of verifiable AI coding together.
+
+## Action 对象字段说明
+
+当使用 Progmune 的 Action API 时，请遵循以下字段规范：
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `kind` | `"call" \| "if" \| "assign" \| "return"` | 是 | 动作类型 |
+| `function` | `string` | 当 `kind` 为 `"call"` 时 | 被调用的函数名。**注意不是 `fn` 或 `name`** |
+| `args` | `Arg[]` | 当 `kind` 为 `"call"` 时 | 参数列表，每个元素为 `{ name: string, type: string, value: any }` |
+| `assignTo` | `string` | 否 | 将返回值绑定到的变量名 |
+| `condition` | `string` | 当 `kind` 为 `"if"` 时 | 条件变量名，必须是已声明的变量 |
+
+**常见错误**：使用 `action.fn` 代替 `action.function` 会导致校验器报告“函数 'undefined' 不存在”。

@@ -1,8 +1,15 @@
 import * as fs from "fs";
 import * as path from "path";
 
-const MEMORY_DIR = path.resolve(__dirname, "../.progmune_memory");
+// 基于项目路径的隔离记忆目录，可通过环境变量 PROGMUNE_MEMORY_DIR 自定义
+const MEMORY_DIR = process.env.PROGMUNE_MEMORY_DIR
+  || path.resolve(process.cwd(), ".progmune_memory");
 
+function ensureDir(dir: string) {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+}
+
+// ========== 工作记忆 ==========
 export class WorkMemory {
   private bindings: Map<string, string> = new Map();
   private intent: string = "";
@@ -14,6 +21,7 @@ export class WorkMemory {
   clear() { this.bindings.clear(); this.intent = ""; }
 }
 
+// ========== 情景记忆 ==========
 export interface Episode {
   id: string;
   timestamp: string;
@@ -25,10 +33,6 @@ export interface Episode {
 
 const EPISODIC_FILE = path.join(MEMORY_DIR, "episodic.json");
 const MAX_EPISODES = 50;
-
-function ensureDir(dir: string) {
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-}
 
 function loadEpisodes(): Episode[] {
   ensureDir(MEMORY_DIR);
@@ -49,7 +53,9 @@ export function recordEpisode(episode: Omit<Episode, "id" | "timestamp">) {
     timestamp: new Date().toISOString(),
   };
   episodes.unshift(newEpisode);
-  if (episodes.length > MAX_EPISODES) episodes.length = MAX_EPISODES;
+  if (episodes.length > MAX_EPISODES) {
+    episodes.length = MAX_EPISODES;
+  }
   saveEpisodes(episodes);
 }
 
@@ -61,6 +67,7 @@ export function getSuccessfulEpisodes(limit: number = 10): Episode[] {
   return loadEpisodes().filter(e => e.success).slice(0, limit);
 }
 
+// ========== 语义记忆 ==========
 export interface SemanticTemplate {
   id: string;
   intentPattern: string;
