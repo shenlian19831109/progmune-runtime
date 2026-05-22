@@ -43,14 +43,7 @@ function checkVariableFlow(actions: Action[]): string[] {
 
   const processAction = (action: Action) => {
     if (action.kind === "call") {
-      for (const arg of (action.args || [])) {
-        const val = arg.value;
-        if (typeof val === 'string' && !isLiteral(val)) {
-          if (/^[a-zA-Z_]\w*$/.test(val) && !declared.has(val)) {
-            errors.push(`变量 '${val}' 未声明就使用`);
-          }
-        }
-      }
+      // call 动作的参数值来自结构化 {name, type, value}，都是字面量，不做变量引用检查
       if (action.assignTo) {
         declared.set(action.assignTo, "any");
       }

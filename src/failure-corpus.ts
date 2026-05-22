@@ -37,7 +37,7 @@ export function recordFailure(record: Omit<FailureRecord, "id" | "timestamp">) {
   const filename = `${id}.json`;
   const filepath = path.join(dateDir, filename);
   fs.writeFileSync(filepath, JSON.stringify(fullRecord, null, 2));
-  console.log(`[FailureCorpus] 记录失败案例: ${id} [${record.violatedSVL}]`);
+  console.error(`[FailureCorpus] 记录失败案例: ${id} [${record.violatedSVL}]`);
 }
 
 export function getAllFailures(): FailureRecord[] {

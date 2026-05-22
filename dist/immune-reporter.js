@@ -42,26 +42,44 @@ const https = __importStar(require("https"));
 const http = __importStar(require("http"));
 const crypto = __importStar(require("crypto"));
 const REPORT_ENDPOINT = process.env.PROGMUNE_HUB || "http://localhost:3000/report";
-const FINGERPRINT_FILE = path.resolve(__dirname, "../.progmune_memory/fingerprints.json");
+const CURSOR_FILE = path.resolve(__dirname, "../.progmune_memory/report_cursor.json");
 function getInstanceId() {
     const host = require("os").hostname();
     const cwd = process.cwd();
     return crypto.createHash("sha256").update(host + cwd).digest("hex").substring(0, 16);
 }
-function extractFingerprints() {
+function getReportCursor() {
+    try {
+        if (fs.existsSync(CURSOR_FILE))
+            return JSON.parse(fs.readFileSync(CURSOR_FILE, "utf-8"));
+    }
+    catch { }
+    return { lastTimestamp: null, reportedCount: 0 };
+}
+function saveReportCursor(timestamp, count) {
+    const dir = path.dirname(CURSOR_FILE);
+    if (!fs.existsSync(dir))
+        fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(CURSOR_FILE, JSON.stringify({ lastTimestamp: timestamp, reportedCount: count, updatedAt: new Date().toISOString() }, null, 2));
+}
+function extractFingerprints(cursor) {
     const corpusDir = path.resolve(__dirname, "../failure_corpus");
     if (!fs.existsSync(corpusDir))
         return [];
     const fingerprints = [];
     const instanceId = getInstanceId();
-    for (const dateDir of fs.readdirSync(corpusDir)) {
+    for (const dateDir of fs.readdirSync(corpusDir).sort()) {
         const datePath = path.join(corpusDir, dateDir);
         if (!fs.statSync(datePath).isDirectory())
             continue;
-        for (const file of fs.readdirSync(datePath)) {
+        for (const file of fs.readdirSync(datePath).sort()) {
             if (!file.endsWith(".json"))
                 continue;
-            const record = JSON.parse(fs.readFileSync(path.join(datePath, file), "utf-8"));
+            const filePath = path.join(datePath, file);
+            const record = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+            // 如果游标存在且该记录时间戳 <= 游标，跳过
+            if (cursor && cursor.lastTimestamp && record.timestamp <= cursor.lastTimestamp)
+                continue;
             const funcSeq = (record.actionSequence || [])
                 .filter((a) => a.kind === "call")
                 .map((a) => a.function);
@@ -80,19 +98,15 @@ function extractFingerprints() {
     return fingerprints;
 }
 async function reportFingerprints() {
-    const fingerprints = extractFingerprints();
+    const cursor = getReportCursor();
+    const fingerprints = extractFingerprints(cursor);
     if (fingerprints.length === 0) {
         return { success: true, message: "无新指纹需要上报" };
     }
-    let reported = [];
-    if (fs.existsSync(FINGERPRINT_FILE)) {
-        reported = JSON.parse(fs.readFileSync(FINGERPRINT_FILE, "utf-8"));
-    }
-    const newFingerprints = fingerprints.filter(f => !reported.includes(f.functionSequence.join(",")));
-    if (newFingerprints.length === 0) {
-        return { success: true, message: "所有指纹已上报，无新增" };
-    }
-    const payload = JSON.stringify({ fingerprints: newFingerprints });
+    // 按时间戳排序，取最新的作为游标
+    fingerprints.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+    const maxTimestamp = fingerprints[fingerprints.length - 1].timestamp;
+    const payload = JSON.stringify({ fingerprints });
     return new Promise((resolve) => {
         const url = new URL(REPORT_ENDPOINT);
         const transport = url.protocol === "https:" ? https : http;
@@ -104,12 +118,9 @@ async function reportFingerprints() {
             res.on("data", (chunk) => data += chunk);
             res.on("end", () => {
                 if (res.statusCode === 200) {
-                    const updated = [...reported, ...newFingerprints.map(f => f.functionSequence.join(","))];
-                    const dir = path.dirname(FINGERPRINT_FILE);
-                    if (!fs.existsSync(dir))
-                        fs.mkdirSync(dir, { recursive: true });
-                    fs.writeFileSync(FINGERPRINT_FILE, JSON.stringify(updated, null, 2));
-                    resolve({ success: true, message: `成功上报 ${newFingerprints.length} 条新指纹` });
+                    const total = (cursor.reportedCount || 0) + fingerprints.length;
+                    saveReportCursor(maxTimestamp, total);
+                    resolve({ success: true, message: `成功上报 ${fingerprints.length} 条新指纹（累计 ${total} 条）` });
                 }
                 else {
                     resolve({ success: false, message: `上报失败: ${res.statusCode} ${data}` });
@@ -122,5 +133,5 @@ async function reportFingerprints() {
     });
 }
 function previewFingerprints() {
-    return extractFingerprints();
+    return extractFingerprints({ lastTimestamp: null });
 }

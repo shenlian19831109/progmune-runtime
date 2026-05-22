@@ -27,9 +27,13 @@ export class StateMachineValidator {
 
     const hasValidPreState = rule.pre_states.some(s => this.currentStates.has(s));
     if (!hasValidPreState) {
+      const missingSteps = this.findMissingSteps([...this.currentStates], rule.pre_states);
+      const hint = missingSteps.length > 0
+        ? `\n  缺失步骤：${missingSteps.join(' → ')}`
+        : '';
       return {
         valid: false,
-        error: `非法调用：${functionName} 要求前置状态 [${rule.pre_states}]，当前状态为 [${[...this.currentStates]}]`
+        error: `[PROGMUNE] L4 协议违规：${functionName}\n  当前状态：${[...this.currentStates].join(', ')}\n  期望前置状态：${rule.pre_states.join(', ')}${hint}`
       };
     }
 
@@ -43,5 +47,27 @@ export class StateMachineValidator {
 
   getCurrentStates(): string[] {
     return [...this.currentStates];
+  }
+
+  /** 查找从当前状态到目标前置状态的缺失步骤 */
+  private findMissingSteps(current: string[], targetPreStates: string[]): string[] {
+    const steps: string[] = [];
+    for (const target of targetPreStates) {
+      if (current.includes(target)) continue;
+      // 查找哪个函数的 post_states 能达到目标状态
+      for (const [fn, rule] of this.rules) {
+        if (rule.post_states.includes(target) && !rule.pre_states.some(p => !current.includes(p))) {
+          steps.push(fn);
+          for (const s of rule.post_states) {
+            if (!current.includes(s)) {
+              steps.push(s);
+              current.push(s);
+            }
+          }
+          break;
+        }
+      }
+    }
+    return steps;
   }
 }

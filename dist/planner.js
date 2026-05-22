@@ -114,7 +114,7 @@ async function plan(userIntent) {
     // 语义模板快速通道
     const cachedTemplate = (0, memory_layer_1.findSemanticTemplate)(userIntent);
     if (cachedTemplate && cachedTemplate.successRate >= 0.8 && cachedTemplate.useCount >= 2) {
-        console.log("⚡ 命中语义模板，直接复用已验证序列");
+        console.error("⚡ 命中语义模板，直接复用已验证序列");
         (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: cachedTemplate.actionSequence, success: true });
         return cachedTemplate.actionSequence;
     }
@@ -181,6 +181,27 @@ ${userIntent}
     let currentPrompt = basePrompt;
     // 加载协议规则，设定初始状态（例如未认证场景）
     const protocols = loadProtocols(ir);
+    // 动作掩码：根据 SSG 状态生成当前可用的合法函数列表
+    function getMaskedFuncList(currentState) {
+        if (protocols.length === 0)
+            return funcList;
+        const ssv = new ssg_validator_1.StateMachineValidator(protocols, currentState);
+        const legalFuncs = topFuncs.filter((f) => {
+            const proto = protocols.find((p) => p.function === f.name);
+            if (!proto)
+                return true; // 无协议约束的函数始终可用
+            const result = ssv.apply(f.name);
+            return result.valid;
+        });
+        if (legalFuncs.length === topFuncs.length)
+            return funcList;
+        return legalFuncs.map((f) => {
+            const rate = (0, feedback_1.getFunctionSuccessRate)(f.name);
+            const star = rate > 0.8 ? "⭐" : rate > 0.5 ? "👍" : "⚠️";
+            const params = f.params.map((p) => `${p.name}: ${p.type}`).join(", ");
+            return `${star} ${f.name}(${params}) [${f.params.length}个参数] -> ${f.returnType} (成功率: ${(rate * 100).toFixed(0)}%)`;
+        }).join("\n");
+    }
     for (let r = 0; r < 3; r++) {
         let text;
         try {
@@ -192,10 +213,10 @@ ${userIntent}
         if (!text)
             continue;
         text = text.replace(/```javascript\s*/gi, '').replace(/```\s*/g, '').trim();
-        console.log("📝 LLM 生成的代码:\n", text);
+        console.error("📝 LLM 生成的代码:\n", text);
         const rawActions = (0, action_runtime_1.executeActionCode)(text);
         if (!rawActions || rawActions.length === 0) {
-            console.log("⚠️ 代码执行失败，重试...");
+            console.error("⚠️ 代码执行失败，重试...");
             currentPrompt = basePrompt + "\n上一次代码无效，请严格模仿示例。";
             continue;
         }
@@ -205,7 +226,7 @@ ${userIntent}
         const seqResult = (0, validator_1.validateActionSequence)(filtered);
         if (!seqResult.valid) {
             const errorsFlat = seqResult.errors.flat();
-            console.log("⚠️ 序列校验失败:", errorsFlat.join(", "));
+            console.error("⚠️ 序列校验失败:", errorsFlat.join(", "));
             const svl = determineSVL(errorsFlat);
             (0, failure_corpus_1.recordFailure)({
                 intent: userIntent,
@@ -223,7 +244,7 @@ ${userIntent}
         if (protocols.length > 0) {
             const protoResult = validateProtocol(filtered, protocols, "UNAUTHENTICATED");
             if (!protoResult.valid) {
-                console.log("🛡️ SSG 协议违规:", protoResult.error);
+                console.error("🛡️ SSG 协议违规:", protoResult.error);
                 (0, failure_corpus_1.recordFailure)({
                     intent: userIntent,
                     projectFunctions: ir.map((f) => f.name),
@@ -233,15 +254,19 @@ ${userIntent}
                     errorDetail: protoResult.error,
                 });
                 (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: filtered, success: false, svlViolated: "SVL-4" });
-                currentPrompt = basePrompt + `\n协议错误：${protoResult.error}。请按照正确的业务顺序重新生成，确保先通过认证再签发令牌。`;
-                continue;
+                // 动作掩码：根据当前 SSG 状态过滤可用函数列表
+                const maskedFuncList = getMaskedFuncList("UNAUTHENTICATED");
+                currentPrompt = `当前 SSG 状态要求只有以下函数可用（已按协议过滤）：
+${maskedFuncList}
+
+${basePrompt}`;
                 continue;
             }
         }
         // 3) 语义合约校验
         const semResult = (0, semantic_validator_1.checkSemantic)(userIntent, filtered);
         if (!semResult.valid) {
-            console.log("⚠️ 语义校验失败:", semResult.errors.join(", "));
+            console.error("⚠️ 语义校验失败:", semResult.errors.join(", "));
             (0, failure_corpus_1.recordFailure)({
                 intent: userIntent,
                 projectFunctions: ir.map((f) => f.name),
@@ -261,7 +286,47 @@ ${userIntent}
         (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: finalActions, success: true });
     }
     else {
+        // LLM 3 次重试失败，尝试本地规则回退
+        console.error("[降级] LLM 规划失败，尝试本地规则回退");
+        const fallback = generateFallbackPlan(userIntent, ir);
+        if (fallback.length > 0) {
+            console.error(`[降级] 本地规则生成了 ${fallback.length} 个动作`);
+            (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: fallback, success: true });
+            return fallback;
+        }
         (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: [], success: false });
     }
     return finalActions;
+}
+/** 本地规则回退：当 LLM 不可用时，根据意图关键词生成简单动作序列 */
+function generateFallbackPlan(intent, ir) {
+    const intentLower = intent.toLowerCase();
+    const actions = [];
+    const keywords = intentLower.split(/[\s,，、]+/).filter(k => k.length > 1);
+    const matchedFuncs = [];
+    for (const kw of keywords) {
+        for (const fn of ir) {
+            if (fn.name.toLowerCase().includes(kw) && !matchedFuncs.find((f) => f.name === fn.name)) {
+                matchedFuncs.push(fn);
+            }
+        }
+    }
+    if (matchedFuncs.length === 0)
+        return [];
+    for (const fn of matchedFuncs) {
+        const args = (fn.params || []).map((p, i) => ({
+            name: p.name || `p${i}`,
+            type: p.type || 'any',
+            value: `{{${p.name || `p${i}`}}}`
+        }));
+        const assignTo = fn.returnType && fn.returnType !== 'void' && fn.returnType !== 'undefined'
+            ? `${fn.name}_result` : undefined;
+        if (assignTo) {
+            actions.push({ kind: 'call', function: fn.name, args, assignTo });
+        }
+        else {
+            actions.push({ kind: 'call', function: fn.name, args });
+        }
+    }
+    return actions;
 }

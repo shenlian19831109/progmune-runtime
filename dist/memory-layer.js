@@ -63,6 +63,7 @@ class WorkMemory {
 exports.WorkMemory = WorkMemory;
 const EPISODIC_FILE = path.join(MEMORY_DIR, "episodic.json");
 const MAX_EPISODES = 50;
+const EPISODE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 天
 function loadEpisodes() {
     ensureDir(MEMORY_DIR);
     if (!fs.existsSync(EPISODIC_FILE))
@@ -71,7 +72,13 @@ function loadEpisodes() {
 }
 function saveEpisodes(episodes) {
     ensureDir(MEMORY_DIR);
-    fs.writeFileSync(EPISODIC_FILE, JSON.stringify(episodes.slice(0, MAX_EPISODES), null, 2));
+    // TTL 衰减：过滤掉超过 7 天的旧记录
+    const cutoff = Date.now() - EPISODE_TTL_MS;
+    const fresh = episodes.filter(e => new Date(e.timestamp).getTime() > cutoff);
+    if (fresh.length !== episodes.length) {
+        console.error(`[记忆衰减] 清理了 ${episodes.length - fresh.length} 条过期情景记忆`);
+    }
+    fs.writeFileSync(EPISODIC_FILE, JSON.stringify(fresh.slice(0, MAX_EPISODES), null, 2));
 }
 function recordEpisode(episode) {
     const episodes = loadEpisodes();
@@ -93,6 +100,7 @@ function getSuccessfulEpisodes(limit = 10) {
     return loadEpisodes().filter(e => e.success).slice(0, limit);
 }
 const SEMANTIC_FILE = path.join(MEMORY_DIR, "semantic.json");
+const SEMANTIC_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 天
 function loadSemantic() {
     ensureDir(MEMORY_DIR);
     if (!fs.existsSync(SEMANTIC_FILE))
@@ -101,7 +109,13 @@ function loadSemantic() {
 }
 function saveSemantic(templates) {
     ensureDir(MEMORY_DIR);
-    fs.writeFileSync(SEMANTIC_FILE, JSON.stringify(templates, null, 2));
+    // TTL 衰减：清理超过 30 天未使用的语义模板
+    const cutoff = Date.now() - SEMANTIC_TTL_MS;
+    const fresh = templates.filter(t => new Date(t.lastUsedAt).getTime() > cutoff);
+    if (fresh.length !== templates.length) {
+        console.error(`[记忆衰减] 清理了 ${templates.length - fresh.length} 个过期语义模板`);
+    }
+    fs.writeFileSync(SEMANTIC_FILE, JSON.stringify(fresh, null, 2));
 }
 function consolidateSemantic(minOccurrences = 3) {
     const episodes = getSuccessfulEpisodes(MAX_EPISODES);
@@ -136,7 +150,7 @@ function consolidateSemantic(minOccurrences = 3) {
         }
     }
     saveSemantic(templates);
-    console.log(`[语义记忆] 巩固完成，模板数量: ${templates.length}`);
+    console.error(`[语义记忆] 巩固完成，模板数量: ${templates.length}`);
 }
 function findSemanticTemplate(intent) {
     const templates = loadSemantic();

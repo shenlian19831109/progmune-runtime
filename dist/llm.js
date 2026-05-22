@@ -7,9 +7,25 @@ exports.callCount = void 0;
 exports.resetCallCount = resetCallCount;
 exports.generate = generate;
 const openai_1 = __importDefault(require("openai"));
+const provider = process.env.LLM_PROVIDER || "deepseek";
+const configs = {
+    deepseek: {
+        baseURL: "https://api.deepseek.com/v1",
+        model: "deepseek-chat",
+    },
+    openai: {
+        baseURL: "https://api.openai.com/v1",
+        model: "gpt-4",
+    },
+    ollama: {
+        baseURL: "http://localhost:11434/v1",
+        model: "llama3",
+    },
+};
+const selected = configs[provider] || configs.deepseek;
 const apiKey = process.env.LLM_API_KEY || "sk-xxxx";
-const baseURL = process.env.LLM_BASE_URL || "https://api.deepseek.com/v1";
-const model = process.env.LLM_MODEL || "deepseek-chat";
+const baseURL = process.env.LLM_BASE_URL || selected.baseURL;
+const model = process.env.LLM_MODEL || selected.model;
 const client = new openai_1.default({ apiKey, baseURL });
 exports.callCount = 0;
 function resetCallCount() { exports.callCount = 0; }
