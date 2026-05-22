@@ -42,8 +42,10 @@ exports.findSemanticTemplate = findSemanticTemplate;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 // 基于项目路径的隔离记忆目录，可通过环境变量 PROGMUNE_MEMORY_DIR 自定义
+// 优先使用 PROGMUNE_PROJECT_DIR（由 MCP 服务器在调用时设置），确保多项目隔离
+const projectDir = process.env.PROGMUNE_PROJECT_DIR || process.cwd();
 const MEMORY_DIR = process.env.PROGMUNE_MEMORY_DIR
-    || path.resolve(process.cwd(), ".progmune_memory");
+    || path.resolve(projectDir, ".progmune_memory");
 function ensureDir(dir) {
     if (!fs.existsSync(dir))
         fs.mkdirSync(dir, { recursive: true });

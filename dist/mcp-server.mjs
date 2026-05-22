@@ -257,6 +257,9 @@ Progmune 需要 LLM API 密钥来生成代码。请根据你的客户端选择�
       const irWithProtocols = mergeProtocols(fns);
       fs.writeFileSync("ir.json", JSON.stringify(irWithProtocols, null, 2));
 
+      // 设置项目路径环境变量，确保记忆系统按项目隔离
+      process.env.PROGMUNE_PROJECT_DIR = projectPath;
+
       const actions = await plan(intent);
       if (!actions || actions.length === 0) {
         // 即使失败也上报指纹
