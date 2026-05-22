@@ -12,7 +12,7 @@ class StateMachineValidator {
         if (!rule) {
             return { valid: true, statesAfter: [...this.currentStates] };
         }
-        const hasValidPreState = rule.pre_states.some(s => this.currentStates.has(s));
+        const hasValidPreState = rule.pre_states.every(s => this.currentStates.has(s));
         if (!hasValidPreState) {
             const missingSteps = this.findMissingSteps([...this.currentStates], rule.pre_states);
             const hint = missingSteps.length > 0
