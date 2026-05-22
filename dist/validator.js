@@ -69,64 +69,86 @@ function normalizeType(type) {
         return "any";
     return t;
 }
+// ========== 重写的变量流向分析：基于声明追踪的确定性检查 ==========
 function checkVariableFlow(actions) {
     const errors = [];
     const declared = new Map();
-    for (let i = 0; i < actions.length; i++) {
-        const action = actions[i];
+    const isLiteral = (val) => {
+        if (typeof val !== 'string')
+            return true;
+        if (/^["'`]/.test(val) || /["'`]$/.test(val))
+            return true;
+        if (/^\d+$/.test(val))
+            return true;
+        if (val === 'true' || val === 'false' || val === 'null' || val === 'undefined')
+            return true;
+        if (/\s/.test(val) || /[^\w]/.test(val))
+            return true;
+        return false;
+    };
+    const processAction = (action) => {
         if (action.kind === "call") {
             for (const arg of (action.args || [])) {
-                if (typeof arg.value === "string" && /^[a-zA-Z_]\w*$/.test(arg.value)) {
-                    if (declared.has(arg.value))
-                        continue;
-                    if (arg.value.length < 15 && arg.value[0] === arg.value[0].toLowerCase()) {
-                        continue;
+                const val = arg.value;
+                if (typeof val === 'string' && !isLiteral(val)) {
+                    if (/^[a-zA-Z_]\w*$/.test(val) && !declared.has(val)) {
+                        errors.push(`变量 '${val}' 未声明就使用`);
                     }
                 }
             }
             if (action.assignTo) {
-                if (action.args?.some(a => a.value === action.assignTo)) {
-                    errors.push(`变量 '${action.assignTo}' 在动作${i}中引用自身`);
-                }
                 declared.set(action.assignTo, "any");
             }
         }
         else if (action.kind === "assign") {
-            if (action.target) {
-                if (typeof action.value === "string" && /^[a-zA-Z_]\w*$/.test(action.value)) {
-                    if (!declared.has(action.value) && action.value.length < 15)
-                        continue;
-                    if (!declared.has(action.value))
-                        errors.push(`赋值时引用未定义变量 '${action.value}'`);
+            if (typeof action.value === "string") {
+                const val = action.value;
+                if (!isLiteral(val) && /^[a-zA-Z_]\w*$/.test(val)) {
+                    if (!declared.has(val)) {
+                        errors.push(`变量 '${val}' 在赋值前未声明`);
+                    }
                 }
+            }
+            if (action.target) {
                 declared.set(action.target, "any");
             }
         }
         else if (action.kind === "return") {
-            if (typeof action.value === "string" && /^[a-zA-Z_]\w*$/.test(action.value)) {
-                if (!declared.has(action.value) && !/^["']/.test(action.value) && action.value.length < 15)
-                    continue;
-                if (!declared.has(action.value))
-                    errors.push(`返回未定义变量 '${action.value}'`);
+            if (typeof action.value === "string") {
+                const val = action.value;
+                if (!isLiteral(val) && /^[a-zA-Z_]\w*$/.test(val)) {
+                    if (!declared.has(val)) {
+                        errors.push(`返回语句引用了未声明的变量 '${val}'`);
+                    }
+                }
             }
         }
         else if (action.kind === "if") {
-            if (typeof action.condition === "string" && declared.has(action.condition))
-                continue;
-            if (typeof action.condition === "string" && /^(true|false)$/.test(action.condition))
-                continue;
-            if (typeof action.condition === "string" && action.condition.length < 10) {
-                // 可能是表达式，放行
+            if (typeof action.condition === "string") {
+                const cond = action.condition;
+                if (!isLiteral(cond) && /^[a-zA-Z_]\w*$/.test(cond)) {
+                    if (!declared.has(cond) && cond !== 'true' && cond !== 'false') {
+                        errors.push(`条件中引用了未声明的变量 '${cond}'`);
+                    }
+                }
             }
-            else {
-                errors.push(`条件中引用了未定义的变量 '${action.condition}'`);
+            for (const a of (action.thenActions || [])) {
+                processAction(a);
             }
-            errors.push(...checkVariableFlow(action.thenActions || []));
-            errors.push(...checkVariableFlow(action.elseActions || []));
+            for (const a of (action.elseActions || [])) {
+                processAction(a);
+            }
         }
         else if (action.kind === "for") {
-            errors.push(...checkVariableFlow(action.bodyActions || []));
+            if (action.variable)
+                declared.set(action.variable, "any");
+            for (const a of (action.bodyActions || [])) {
+                processAction(a);
+            }
         }
+    };
+    for (const action of actions) {
+        processAction(action);
     }
     return errors;
 }

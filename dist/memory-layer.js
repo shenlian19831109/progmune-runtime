@@ -41,7 +41,14 @@ exports.consolidateSemantic = consolidateSemantic;
 exports.findSemanticTemplate = findSemanticTemplate;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
-const MEMORY_DIR = path.resolve(__dirname, "../.progmune_memory");
+// 基于项目路径的隔离记忆目录，可通过环境变量 PROGMUNE_MEMORY_DIR 自定义
+const MEMORY_DIR = process.env.PROGMUNE_MEMORY_DIR
+    || path.resolve(process.cwd(), ".progmune_memory");
+function ensureDir(dir) {
+    if (!fs.existsSync(dir))
+        fs.mkdirSync(dir, { recursive: true });
+}
+// ========== 工作记忆 ==========
 class WorkMemory {
     constructor() {
         this.bindings = new Map();
@@ -56,10 +63,6 @@ class WorkMemory {
 exports.WorkMemory = WorkMemory;
 const EPISODIC_FILE = path.join(MEMORY_DIR, "episodic.json");
 const MAX_EPISODES = 50;
-function ensureDir(dir) {
-    if (!fs.existsSync(dir))
-        fs.mkdirSync(dir, { recursive: true });
-}
 function loadEpisodes() {
     ensureDir(MEMORY_DIR);
     if (!fs.existsSync(EPISODIC_FILE))
@@ -78,8 +81,9 @@ function recordEpisode(episode) {
         timestamp: new Date().toISOString(),
     };
     episodes.unshift(newEpisode);
-    if (episodes.length > MAX_EPISODES)
+    if (episodes.length > MAX_EPISODES) {
         episodes.length = MAX_EPISODES;
+    }
     saveEpisodes(episodes);
 }
 function getRecentEpisodes(limit = 10) {
