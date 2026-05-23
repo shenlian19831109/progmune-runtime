@@ -41,6 +41,7 @@ exports.consolidateSemantic = consolidateSemantic;
 exports.findSemanticTemplate = findSemanticTemplate;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
+const file_lock_1 = require("./file-lock");
 // 基于项目路径的隔离记忆目录，可通过环境变量 PROGMUNE_MEMORY_DIR 自定义
 // 优先使用 PROGMUNE_PROJECT_DIR（由 MCP 服务器在调用时设置），确保多项目隔离
 const projectDir = process.env.PROGMUNE_PROJECT_DIR || process.cwd();
@@ -73,14 +74,16 @@ function loadEpisodes() {
     return JSON.parse(fs.readFileSync(EPISODIC_FILE, "utf-8"));
 }
 function saveEpisodes(episodes) {
-    ensureDir(MEMORY_DIR);
-    // TTL 衰减：过滤掉超过 7 天的旧记录
-    const cutoff = Date.now() - EPISODE_TTL_MS;
-    const fresh = episodes.filter(e => new Date(e.timestamp).getTime() > cutoff);
-    if (fresh.length !== episodes.length) {
-        console.error(`[记忆衰减] 清理了 ${episodes.length - fresh.length} 条过期情景记忆`);
-    }
-    fs.writeFileSync(EPISODIC_FILE, JSON.stringify(fresh.slice(0, MAX_EPISODES), null, 2));
+    (0, file_lock_1.withLock)("episodic.json", () => {
+        ensureDir(MEMORY_DIR);
+        // TTL 衰减：过滤掉超过 7 天的旧记录
+        const cutoff = Date.now() - EPISODE_TTL_MS;
+        const fresh = episodes.filter(e => new Date(e.timestamp).getTime() > cutoff);
+        if (fresh.length !== episodes.length) {
+            console.error(`[记忆衰减] 清理了 ${episodes.length - fresh.length} 条过期情景记忆`);
+        }
+        fs.writeFileSync(EPISODIC_FILE, JSON.stringify(fresh.slice(0, MAX_EPISODES), null, 2));
+    });
 }
 function recordEpisode(episode) {
     const episodes = loadEpisodes();
@@ -110,14 +113,16 @@ function loadSemantic() {
     return JSON.parse(fs.readFileSync(SEMANTIC_FILE, "utf-8"));
 }
 function saveSemantic(templates) {
-    ensureDir(MEMORY_DIR);
-    // TTL 衰减：清理超过 30 天未使用的语义模板
-    const cutoff = Date.now() - SEMANTIC_TTL_MS;
-    const fresh = templates.filter(t => new Date(t.lastUsedAt).getTime() > cutoff);
-    if (fresh.length !== templates.length) {
-        console.error(`[记忆衰减] 清理了 ${templates.length - fresh.length} 个过期语义模板`);
-    }
-    fs.writeFileSync(SEMANTIC_FILE, JSON.stringify(fresh, null, 2));
+    (0, file_lock_1.withLock)("semantic.json", () => {
+        ensureDir(MEMORY_DIR);
+        // TTL 衰减：清理超过 30 天未使用的语义模板
+        const cutoff = Date.now() - SEMANTIC_TTL_MS;
+        const fresh = templates.filter(t => new Date(t.lastUsedAt).getTime() > cutoff);
+        if (fresh.length !== templates.length) {
+            console.error(`[记忆衰减] 清理了 ${templates.length - fresh.length} 个过期语义模板`);
+        }
+        fs.writeFileSync(SEMANTIC_FILE, JSON.stringify(fresh, null, 2));
+    });
 }
 function consolidateSemantic(minOccurrences = 3) {
     const episodes = getSuccessfulEpisodes(MAX_EPISODES);

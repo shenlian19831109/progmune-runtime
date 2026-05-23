@@ -40,26 +40,39 @@ exports.getTopFailurePatterns = getTopFailurePatterns;
 exports.generateCandidateRules = generateCandidateRules;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
+const file_lock_1 = require("./file-lock");
 const CORPUS_DIR = path.resolve(__dirname, "../failure_corpus");
 function ensureDir(dir) {
     if (!fs.existsSync(dir))
         fs.mkdirSync(dir, { recursive: true });
 }
 function recordFailure(record) {
-    ensureDir(CORPUS_DIR);
-    const date = new Date().toISOString().slice(0, 10);
-    const dateDir = path.join(CORPUS_DIR, date);
-    ensureDir(dateDir);
-    const id = `fail_${Date.now()}`;
-    const fullRecord = {
-        ...record,
-        id,
-        timestamp: new Date().toISOString(),
-    };
-    const filename = `${id}.json`;
-    const filepath = path.join(dateDir, filename);
-    fs.writeFileSync(filepath, JSON.stringify(fullRecord, null, 2));
-    console.error(`[FailureCorpus] 记录失败案例: ${id} [${record.violatedSVL}]`);
+    // 使用锁 + 计数器防止同一毫秒内文件名冲突
+    (0, file_lock_1.withLock)("failure-corpus", () => {
+        ensureDir(CORPUS_DIR);
+        const date = new Date().toISOString().slice(0, 10);
+        const dateDir = path.join(CORPUS_DIR, date);
+        ensureDir(dateDir);
+        // 用计数器保证同一毫秒内不重复
+        const seqFile = path.join(CORPUS_DIR, ".seq");
+        let seq = 0;
+        try {
+            seq = parseInt(fs.readFileSync(seqFile, 'utf-8'), 10);
+        }
+        catch { }
+        seq++;
+        fs.writeFileSync(seqFile, String(seq));
+        const id = `fail_${Date.now()}_${seq}`;
+        const fullRecord = {
+            ...record,
+            id,
+            timestamp: new Date().toISOString(),
+        };
+        const filename = `${id}.json`;
+        const filepath = path.join(dateDir, filename);
+        fs.writeFileSync(filepath, JSON.stringify(fullRecord, null, 2));
+        console.error(`[FailureCorpus] 记录失败案例: ${id} [${record.violatedSVL}]`);
+    });
 }
 function getAllFailures() {
     const records = [];

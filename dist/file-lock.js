@@ -33,44 +33,50 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loadFeedback = loadFeedback;
-exports.saveFeedback = saveFeedback;
-exports.getFunctionSuccessRate = getFunctionSuccessRate;
-exports.recordRun = recordRun;
+exports.withLock = withLock;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
-const file_lock_1 = require("./file-lock");
-const FEEDBACK_PATH = path.resolve(__dirname, "../feedback.json");
-function loadFeedback() {
-    if (!fs.existsSync(FEEDBACK_PATH))
-        return [];
-    return JSON.parse(fs.readFileSync(FEEDBACK_PATH, "utf-8"));
+/**
+ * 基于目录原子性的轻量级文件锁
+ * mkdir 在系统层面是原子操作，用锁目录的存在与否表示锁定状态
+ */
+const LOCK_DIR = path.resolve(__dirname, "../.locks");
+function ensureLockDir() {
+    if (!fs.existsSync(LOCK_DIR))
+        fs.mkdirSync(LOCK_DIR, { recursive: true });
 }
-function saveFeedback(record) {
-    (0, file_lock_1.withLock)("feedback.json", () => {
-        const data = loadFeedback();
-        data.push(record);
-        fs.writeFileSync(FEEDBACK_PATH, JSON.stringify(data, null, 2));
-    });
+function lockPath(name) {
+    return path.join(LOCK_DIR, name.replace(/[^a-zA-Z0-9_\-\.]/g, "_"));
 }
-function getFunctionSuccessRate(funcName) {
-    const records = loadFeedback();
-    const funcRecords = records.filter(r => r.functionName === funcName);
-    if (funcRecords.length === 0)
-        return 0.5; // 中性值
-    const successCount = funcRecords.filter(r => r.success).length;
-    return successCount / funcRecords.length;
-}
-function recordRun(intent, actions, success, error) {
-    for (const action of actions) {
-        if (action.kind === "call") {
-            saveFeedback({
-                intent,
-                functionName: action.function,
-                success,
-                errorType: error ? error.split("\n")[0] : undefined,
-                timestamp: new Date().toISOString(),
-            });
+function withLock(name, fn) {
+    ensureLockDir();
+    const lock = lockPath(name);
+    const maxRetries = 100;
+    const retryDelay = 5; // ms
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+            fs.mkdirSync(lock);
+            // 获取锁成功
+            try {
+                return fn();
+            }
+            finally {
+                try {
+                    fs.rmdirSync(lock);
+                }
+                catch { }
+            }
+        }
+        catch (err) {
+            if (err.code !== 'EEXIST')
+                throw err;
+            // 锁被占用，等待重试
+            if (attempt < maxRetries - 1) {
+                // busy-wait，但每次最多 5ms × 100 = 500ms
+                const start = Date.now();
+                while (Date.now() - start < retryDelay) { }
+            }
         }
     }
+    throw new Error(`无法获取锁: ${name} (超过最大重试次数 ${maxRetries})`);
 }

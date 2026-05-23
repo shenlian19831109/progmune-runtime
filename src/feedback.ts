@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import { withLock } from "./file-lock";
 
 interface RunRecord {
   intent: string;
@@ -17,9 +18,11 @@ export function loadFeedback(): RunRecord[] {
 }
 
 export function saveFeedback(record: RunRecord) {
-  const data = loadFeedback();
-  data.push(record);
-  fs.writeFileSync(FEEDBACK_PATH, JSON.stringify(data, null, 2));
+  withLock("feedback.json", () => {
+    const data = loadFeedback();
+    data.push(record);
+    fs.writeFileSync(FEEDBACK_PATH, JSON.stringify(data, null, 2));
+  });
 }
 
 export function getFunctionSuccessRate(funcName: string): number {

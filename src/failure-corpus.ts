@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import { withLock } from "./file-lock";
 
 export type SVL = "SVL-1" | "SVL-2" | "SVL-3" | "SVL-4";
 
@@ -22,22 +23,32 @@ function ensureDir(dir: string) {
 }
 
 export function recordFailure(record: Omit<FailureRecord, "id" | "timestamp">) {
-  ensureDir(CORPUS_DIR);
-  const date = new Date().toISOString().slice(0, 10);
-  const dateDir = path.join(CORPUS_DIR, date);
-  ensureDir(dateDir);
+  // 使用锁 + 计数器防止同一毫秒内文件名冲突
+  withLock("failure-corpus", () => {
+    ensureDir(CORPUS_DIR);
+    const date = new Date().toISOString().slice(0, 10);
+    const dateDir = path.join(CORPUS_DIR, date);
+    ensureDir(dateDir);
 
-  const id = `fail_${Date.now()}`;
-  const fullRecord: FailureRecord = {
-    ...record,
-    id,
-    timestamp: new Date().toISOString(),
-  };
+    // 用计数器保证同一毫秒内不重复
+    const seqFile = path.join(CORPUS_DIR, ".seq");
+    let seq = 0;
+    try { seq = parseInt(fs.readFileSync(seqFile, 'utf-8'), 10); } catch {}
+    seq++;
+    fs.writeFileSync(seqFile, String(seq));
 
-  const filename = `${id}.json`;
-  const filepath = path.join(dateDir, filename);
-  fs.writeFileSync(filepath, JSON.stringify(fullRecord, null, 2));
-  console.error(`[FailureCorpus] 记录失败案例: ${id} [${record.violatedSVL}]`);
+    const id = `fail_${Date.now()}_${seq}`;
+    const fullRecord: FailureRecord = {
+      ...record,
+      id,
+      timestamp: new Date().toISOString(),
+    };
+
+    const filename = `${id}.json`;
+    const filepath = path.join(dateDir, filename);
+    fs.writeFileSync(filepath, JSON.stringify(fullRecord, null, 2));
+    console.error(`[FailureCorpus] 记录失败案例: ${id} [${record.violatedSVL}]`);
+  });
 }
 
 export function getAllFailures(): FailureRecord[] {
