@@ -92,13 +92,39 @@ async function decomposeGoals(intent, functions) {
     catch { }
     return [intent];
 }
-async function functionMatchesGoal(funcName, goal, staticScore) {
-    if (staticScore > STATIC_HIGH_THRESHOLD)
-        return staticScore;
-    const prompt = `函数 ${funcName} 对 "${goal}" 的贡献度（0-10整数），只返回数字:`;
-    const resp = await (0, llm_1.generate)(prompt);
-    const s = parseFloat(resp.trim());
-    return isNaN(s) ? 0.3 : Math.min(1, s / 10);
+/** 批量评分：将同一 goal 的所有候选函数打包为一次 LLM 调用 */
+async function batchScoreFuncs(funcs, goal) {
+    const result = new Map();
+    const needsLLM = [];
+    for (const f of funcs) {
+        if (f.staticScore > STATIC_HIGH_THRESHOLD) {
+            result.set(f.name, f.staticScore);
+        }
+        else {
+            needsLLM.push(f);
+        }
+    }
+    if (needsLLM.length === 0)
+        return result;
+    const funcNames = needsLLM.map(f => f.name).join(", ");
+    const prompt = `评估以下每个函数对目标"${goal}"的贡献度（0-10整数）。只返回JSON对象，格式：{"函数名":整数}\n函数：${funcNames}`;
+    try {
+        const text = await (0, llm_1.generate)(prompt);
+        const match = text.match(/\{[\s\S]*\}/);
+        if (match) {
+            const scores = JSON.parse(match[0]);
+            for (const [name, score] of Object.entries(scores)) {
+                const n = typeof score === 'number' ? score : parseFloat(String(score));
+                result.set(name, isNaN(n) ? 0.3 : Math.min(1, n / 10));
+            }
+        }
+    }
+    catch { }
+    for (const f of needsLLM) {
+        if (!result.has(f.name))
+            result.set(f.name, 0.3);
+    }
+    return result;
 }
 async function searchPlan(intent, beamWidth = 2, maxDepth = 6) {
     (0, llm_1.resetCallCount)();
@@ -127,11 +153,13 @@ async function searchPlan(intent, beamWidth = 2, maxDepth = 6) {
             })).filter((f) => f.staticScore > 0.05)
                 .sort((a, b) => b.staticScore - a.staticScore)
                 .slice(0, 5);
+            // 批量评分：一次 LLM 调用评估所有候选函数
+            const scoreMap = await batchScoreFuncs(scoredFuncs.map(f => ({ name: f.name, staticScore: f.staticScore })), currentGoal);
             for (const func of scoredFuncs) {
                 const alreadyUsed = cand.actions.some(a => a.kind === "call" && a.function === func.name && a._goalIndex === cand.currentGoalIndex);
                 if (alreadyUsed)
                     continue;
-                const relevance = await functionMatchesGoal(func.name, currentGoal, func.staticScore);
+                const relevance = scoreMap.get(func.name) ?? 0.3;
                 if (relevance < 0.2)
                     continue;
                 const args = func.params.map((p) => ({

@@ -71,16 +71,22 @@ function loadEpisodes() {
     ensureDir(MEMORY_DIR);
     if (!fs.existsSync(EPISODIC_FILE))
         return [];
-    return JSON.parse(fs.readFileSync(EPISODIC_FILE, "utf-8"));
+    const all = JSON.parse(fs.readFileSync(EPISODIC_FILE, "utf-8"));
+    const cutoff = Date.now() - EPISODE_TTL_MS;
+    const fresh = all.filter(e => new Date(e.timestamp).getTime() > cutoff);
+    if (fresh.length < all.length) {
+        console.error(`[记忆衰减-读取] 过滤了 ${all.length - fresh.length} 条过期情景记忆`);
+        fs.writeFileSync(EPISODIC_FILE, JSON.stringify(fresh, null, 2));
+    }
+    return fresh;
 }
 function saveEpisodes(episodes) {
     (0, file_lock_1.withLock)("episodic.json", () => {
         ensureDir(MEMORY_DIR);
-        // TTL 衰减：过滤掉超过 7 天的旧记录
         const cutoff = Date.now() - EPISODE_TTL_MS;
         const fresh = episodes.filter(e => new Date(e.timestamp).getTime() > cutoff);
         if (fresh.length !== episodes.length) {
-            console.error(`[记忆衰减] 清理了 ${episodes.length - fresh.length} 条过期情景记忆`);
+            console.error(`[记忆衰减-写入] 清理了 ${episodes.length - fresh.length} 条过期情景记忆`);
         }
         fs.writeFileSync(EPISODIC_FILE, JSON.stringify(fresh.slice(0, MAX_EPISODES), null, 2));
     });
@@ -110,7 +116,14 @@ function loadSemantic() {
     ensureDir(MEMORY_DIR);
     if (!fs.existsSync(SEMANTIC_FILE))
         return [];
-    return JSON.parse(fs.readFileSync(SEMANTIC_FILE, "utf-8"));
+    const all = JSON.parse(fs.readFileSync(SEMANTIC_FILE, "utf-8"));
+    const cutoff = Date.now() - SEMANTIC_TTL_MS;
+    const fresh = all.filter(t => new Date(t.lastUsedAt).getTime() > cutoff);
+    if (fresh.length < all.length) {
+        console.error(`[记忆衰减-读取] 清理了 ${all.length - fresh.length} 个过期语义模板`);
+        fs.writeFileSync(SEMANTIC_FILE, JSON.stringify(fresh, null, 2));
+    }
+    return fresh;
 }
 function saveSemantic(templates) {
     (0, file_lock_1.withLock)("semantic.json", () => {

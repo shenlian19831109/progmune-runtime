@@ -5,7 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.callCount = void 0;
 exports.resetCallCount = resetCallCount;
+exports.estimateTokens = estimateTokens;
 exports.generate = generate;
+exports.chat = chat;
 const openai_1 = __importDefault(require("openai"));
 const provider = process.env.LLM_PROVIDER || "deepseek";
 const configs = {
@@ -29,11 +31,30 @@ const model = process.env.LLM_MODEL || selected.model;
 const client = new openai_1.default({ apiKey, baseURL });
 exports.callCount = 0;
 function resetCallCount() { exports.callCount = 0; }
+/** 粗略 token 估算：CJK 字符 ~1.5 token/字，其余 ~0.4 token/字符 */
+function estimateTokens(text) {
+    const cjk = (text.match(/[一-鿿㐀-䶿]/g) || []).length;
+    const other = text.length - cjk;
+    return Math.ceil(cjk * 1.5 + other * 0.4);
+}
 async function generate(prompt) {
     exports.callCount++;
     const resp = await client.chat.completions.create({
         model,
         messages: [{ role: "user", content: prompt }],
+        temperature: 0.0,
+    });
+    return resp.choices[0]?.message?.content || "";
+}
+/** 带 system prompt 的调用：静态规则放 system，动态内容放 user，语义分离便于未来对接各平台缓存策略 */
+async function chat(systemPrompt, userPrompt) {
+    exports.callCount++;
+    const resp = await client.chat.completions.create({
+        model,
+        messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+        ],
         temperature: 0.0,
     });
     return resp.choices[0]?.message?.content || "";

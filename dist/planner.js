@@ -38,7 +38,6 @@ const llm_1 = require("./llm");
 const action_runtime_1 = require("./action-runtime");
 const validator_1 = require("./validator");
 const semantic_validator_1 = require("./semantic-validator");
-const feedback_1 = require("./feedback");
 const utils_1 = require("./utils");
 const failure_corpus_1 = require("./failure-corpus");
 const memory_layer_1 = require("./memory-layer");
@@ -88,6 +87,35 @@ function determineConstraintType(svl) {
         case "SVL-4": return "protocol";
     }
 }
+/** 构建紧凑函数列表（约节省 50% token） */
+function buildCompactFuncList(funcs) {
+    return funcs.map((f) => {
+        const params = f.params.map((p) => `${p.name}:${p.type}`).join(",");
+        return `${f.name}(${params})->${f.returnType}`;
+    }).join("\n");
+}
+const SYSTEM_PROMPT = `你是程序合成助手。只输出 IR 代码，不输出解释。
+
+示例（缓存查询——注意 assign 先于条件）：
+assign("query_key","user:123")
+callAssign("cache_get","cached_data","query_key")
+ifElse("cached_data",()=>{output("cached_data")},()=>{callAssign("query_data","fresh_data","query_key");call("cache_set","query_key","fresh_data");output("fresh_data")})
+
+全局函数：
+- assign("变量名","值")——声明变量
+- callAssign("函数","变量名",...args)——调用函数并绑定返回值
+- ifElse("变量名",()=>{...},()=>{...})——条件分支
+- ifBlock("变量名",()=>{...})——简单分支
+- call("函数",...args)——调用 void 函数
+- output("值或变量名")——返回结果
+
+铁律：
+1. 先 assign 或 callAssign 声明变量，再使用
+2. 参数数量与函数声明严格一致
+3. 条件括号内只能是已声明的变量名
+4. 禁止调用可用列表外的任何函数`;
+const RETRY_HINT = `输出规则：用 assign("var","val") / callAssign("fn","var",...) / ifElse("var",()=>{},()=>{}) / call("fn",...) / output("var") 格式，只输出代码`;
+/** 构建重试 prompt：精简但包含必要的 IR 语法提示 */
 /** 加载 IR 中所有带 protocol 的函数为协议规则 */
 function loadProtocols(ir) {
     return ir
@@ -130,82 +158,48 @@ async function plan(userIntent) {
     });
     scored.sort((a, b) => b.score - a.score);
     const topFuncs = scored.slice(0, 15);
-    const funcList = topFuncs.map((f) => {
-        const rate = (0, feedback_1.getFunctionSuccessRate)(f.name);
-        const star = rate > 0.8 ? "⭐" : rate > 0.5 ? "👍" : "⚠️";
-        const params = f.params.map((p) => `${p.name}: ${p.type}`).join(", ");
-        return `${star} ${f.name}(${params}) [${f.params.length}个参数] -> ${f.returnType} (成功率: ${(rate * 100).toFixed(0)}%)`;
-    }).join("\n");
-    const matchFunc = userIntent.match(/(?:实现|implement|编写|创建)\s*(\w+)\s*(?:函数|function)?/i);
+    const compactFuncList = buildCompactFuncList(topFuncs);
+    const userIntentPart = userIntent.match(/(?:实现|implement|编写|创建)\s*(\w+)\s*(?:函数|function)?/i);
     const forbiddenFuncs = [];
-    if (matchFunc) {
-        const targetName = matchFunc[1];
+    if (userIntentPart) {
+        const targetName = userIntentPart[1];
         if (ir.find((f) => f.name.toLowerCase() === targetName.toLowerCase())) {
             forbiddenFuncs.push(targetName);
         }
     }
-    const exampleCode = `assign("query_key", "user:123")
-callAssign("cache_get", "cached_data", "query_key")
-ifElse("cached_data", () => {
-  output("cached_data")
-}, () => {
-  callAssign("query_data", "fresh_data", "query_key")
-  call("cache_set", "query_key", "fresh_data")
-  output("fresh_data")
-})`;
-    const basePrompt = `你能使用的函数：
-${funcList}
+    const userPrompt = `可用函数：
+${compactFuncList}
 
-绝对禁止调用列表外函数。
-
-示例（缓存查询，注意 assign 先于条件）：
-${exampleCode}
-
-全局函数及用法规则：
-- 声明变量：assign("变量名", "值") 或 callAssign("函数", "变量名", ...)
-- 条件分支：ifElse("变量名", () => { ... }, () => { ... })
-- 简单分支：ifBlock("变量名", () => { ... })
-- 调用：call("函数", "arg1", ...)
-- 返回：output("值或变量名")
-
-铁律：
-1. 必须先 assign 或 callAssign 再使用变量。
-2. 参数数量必须与函数声明一致。
-3. 条件括号内只能是已声明的变量名。
-
-需求：
-${userIntent}
+需求：${userIntent}
 
 只输出代码。`;
+    const estimatedTokens = (0, llm_1.estimateTokens)(SYSTEM_PROMPT + userPrompt);
+    console.error(`💰 估算 prompt token: ${estimatedTokens}`);
     let finalActions = [];
-    let currentPrompt = basePrompt;
-    // 加载协议规则，设定初始状态（例如未认证场景）
+    let currentPrompt = userPrompt;
+    let useSystem = true;
     const protocols = loadProtocols(ir);
-    // 动作掩码：根据 SSG 状态生成当前可用的合法函数列表
     function getMaskedFuncList(currentState) {
         if (protocols.length === 0)
-            return funcList;
+            return compactFuncList;
         const ssv = new ssg_validator_1.StateMachineValidator(protocols, currentState);
         const legalFuncs = topFuncs.filter((f) => {
             const proto = protocols.find((p) => p.function === f.name);
             if (!proto)
-                return true; // 无协议约束的函数始终可用
+                return true;
             const result = ssv.apply(f.name);
             return result.valid;
         });
         if (legalFuncs.length === topFuncs.length)
-            return funcList;
-        return legalFuncs.map((f) => {
-            const rate = (0, feedback_1.getFunctionSuccessRate)(f.name);
-            const star = rate > 0.8 ? "⭐" : rate > 0.5 ? "👍" : "⚠️";
-            const params = f.params.map((p) => `${p.name}: ${p.type}`).join(", ");
-            return `${star} ${f.name}(${params}) [${f.params.length}个参数] -> ${f.returnType} (成功率: ${(rate * 100).toFixed(0)}%)`;
-        }).join("\n");
+            return compactFuncList;
+        return buildCompactFuncList(legalFuncs);
     }
     for (let r = 0; r < 3; r++) {
         let text;
         try {
-            text = await (0, llm_1.generate)(currentPrompt);
+            text = useSystem
+                ? await (0, llm_1.chat)(SYSTEM_PROMPT, currentPrompt)
+                : await (0, llm_1.generate)(`你是程序合成助手。\n\n${currentPrompt}`);
         }
         catch (e) {
             continue;
@@ -217,7 +211,8 @@ ${userIntent}
         const rawActions = (0, action_runtime_1.executeActionCode)(text);
         if (!rawActions || rawActions.length === 0) {
             console.error("⚠️ 代码执行失败，重试...");
-            currentPrompt = basePrompt + "\n上一次代码无效，请严格模仿示例。";
+            currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n上一次代码无效，请严格模仿示例。\n${RETRY_HINT}\n只输出代码。`;
+            useSystem = false;
             continue;
         }
         const enriched = enrichActions(rawActions, ir);
@@ -237,7 +232,8 @@ ${userIntent}
                 errorDetail: errorsFlat.join("; "),
             });
             (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: filtered, success: false, svlViolated: svl });
-            currentPrompt = basePrompt + `\n错误：${errorsFlat.join("；")}。请修正。`;
+            currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n错误：${errorsFlat.join("；")}。请修正。\n${RETRY_HINT}\n只输出代码。`;
+            useSystem = false;
             continue;
         }
         // 2) 协议状态机校验 (SSG)
@@ -254,12 +250,9 @@ ${userIntent}
                     errorDetail: protoResult.error,
                 });
                 (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: filtered, success: false, svlViolated: "SVL-4" });
-                // 动作掩码：根据当前 SSG 状态过滤可用函数列表
                 const maskedFuncList = getMaskedFuncList("UNAUTHENTICATED");
-                currentPrompt = `当前 SSG 状态要求只有以下函数可用（已按协议过滤）：
-${maskedFuncList}
-
-${basePrompt}`;
+                currentPrompt = `当前协议状态只允许以下函数：\n${maskedFuncList}\n\n需求：${userIntent}\n\n协议违规：${protoResult.error}。请修正。\n${RETRY_HINT}\n只输出代码。`;
+                useSystem = false;
                 continue;
             }
         }
@@ -276,7 +269,8 @@ ${basePrompt}`;
                 errorDetail: semResult.errors.join("; "),
             });
             (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: filtered, success: false, svlViolated: "SVL-4" });
-            currentPrompt = basePrompt + `\n错误：${semResult.errors.join("；")}。请修正。`;
+            currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n语义错误：${semResult.errors.join("；")}。请修正。\n${RETRY_HINT}\n只输出代码。`;
+            useSystem = false;
             continue;
         }
         finalActions = filtered;

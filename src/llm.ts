@@ -27,11 +27,32 @@ const client = new OpenAI({ apiKey, baseURL });
 export let callCount = 0;
 export function resetCallCount() { callCount = 0; }
 
+/** 粗略 token 估算：CJK 字符 ~1.5 token/字，其余 ~0.4 token/字符 */
+export function estimateTokens(text: string): number {
+  const cjk = (text.match(/[一-鿿㐀-䶿]/g) || []).length;
+  const other = text.length - cjk;
+  return Math.ceil(cjk * 1.5 + other * 0.4);
+}
+
 export async function generate(prompt: string): Promise<string> {
   callCount++;
   const resp = await client.chat.completions.create({
     model,
     messages: [{ role: "user", content: prompt }],
+    temperature: 0.0,
+  });
+  return resp.choices[0]?.message?.content || "";
+}
+
+/** 带 system prompt 的调用：静态规则放 system，动态内容放 user，语义分离便于未来对接各平台缓存策略 */
+export async function chat(systemPrompt: string, userPrompt: string): Promise<string> {
+  callCount++;
+  const resp = await client.chat.completions.create({
+    model,
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt },
+    ],
     temperature: 0.0,
   });
   return resp.choices[0]?.message?.content || "";
