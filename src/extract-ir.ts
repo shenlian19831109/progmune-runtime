@@ -1,4 +1,4 @@
-import { Project, Node, FunctionDeclaration, VariableStatement, ArrowFunction, Type } from "ts-morph";
+import { Project, Node, FunctionDeclaration, VariableStatement, ArrowFunction, Type, CallExpression } from "ts-morph";
 import * as path from "path";
 import * as fs from "fs";
 
@@ -15,6 +15,42 @@ interface FunctionInfo {
   returnTypeDetail?: string;
   file: string;
   calls: string[];
+  protocol?: {
+    pre_states: string[];
+    post_states: string[];
+    invalidate?: string[];
+  };
+}
+
+/** 从 JSDoc 注释中解析 @protocol 注解 */
+function parseProtocolFromJSDoc(node: any): FunctionInfo['protocol'] | undefined {
+  const jsdocs = node.getJsDocs?.();
+  if (!jsdocs || jsdocs.length === 0) return undefined;
+  for (const doc of jsdocs) {
+    const tags = doc.getTags?.();
+    if (!tags) continue;
+    for (const tag of tags) {
+      const tagName = tag.getTagName?.();
+      if (tagName !== 'protocol') continue;
+      const text = tag.getCommentText?.() || '';
+      // 解析格式: pre_states=["A","B"] post_states=["C"] invalidate=["A"]
+      try {
+        const preMatch = text.match(/pre_states\s*=\s*\[([^\]]*)\]/);
+        const postMatch = text.match(/post_states\s*=\s*\[([^\]]*)\]/);
+        const invMatch = text.match(/invalidate\s*=\s*\[([^\]]*)\]/);
+        if (!preMatch || !postMatch) return undefined;
+        const pre_states = preMatch[1].split(',').map((s: string) => s.trim().replace(/["']/g, '')).filter(Boolean);
+        const post_states = postMatch[1].split(',').map((s: string) => s.trim().replace(/["']/g, '')).filter(Boolean);
+        const invalidate = invMatch
+          ? invMatch[1].split(',').map((s: string) => s.trim().replace(/["']/g, '')).filter(Boolean)
+          : undefined;
+        return { pre_states, post_states, invalidate };
+      } catch {
+        return undefined;
+      }
+    }
+  }
+  return undefined;
 }
 
 // 获取类型节点的结构化描述
@@ -104,9 +140,54 @@ export function extractIR(projectRoot: string): FunctionInfo[] {
         returnTypeDetail: getReturnTypeDetail(f),
         file: relPath,
         calls: extractDirectCalls(f),
+        protocol: parseProtocolFromJSDoc(f),
       });
     }
-    // 箭头函数类似处理，略
+    // 提取箭头函数（const fn = () => {}, export const fn = () => {} 等）
+    for (const vd of sf.getVariableDeclarations()) {
+      const init = vd.getInitializer();
+      if (!init) continue;
+      // 直接箭头函数: const fn = () => {}
+      if (Node.isArrowFunction(init)) {
+        const name = vd.getName();
+        funcs.push({
+          name,
+          params: init.getParameters().map(p => ({
+            name: p.getName(),
+            type: getParamType(p),
+            typeDetail: getParamTypeDetail(p),
+          })),
+          returnType: getReturnType(init),
+          returnTypeDetail: getReturnTypeDetail(init),
+          file: relPath,
+          calls: extractDirectCalls(init),
+	        protocol: parseProtocolFromJSDoc(vd),
+        });
+        continue;
+      }
+      // 包装的箭头函数: const fn = debounce(() => {})
+      if (Node.isCallExpression(init)) {
+        for (const arg of init.getArguments()) {
+          if (Node.isArrowFunction(arg)) {
+            const name = vd.getName();
+            funcs.push({
+              name,
+              params: arg.getParameters().map(p => ({
+                name: p.getName(),
+                type: getParamType(p),
+                typeDetail: getParamTypeDetail(p),
+              })),
+              returnType: getReturnType(arg),
+              returnTypeDetail: getReturnTypeDetail(arg),
+              file: relPath,
+              calls: extractDirectCalls(arg),
+	            protocol: parseProtocolFromJSDoc(vd),
+            });
+            break; // 只取第一个箭头函数参数
+          }
+        }
+      }
+    }
   }
   return funcs;
 }

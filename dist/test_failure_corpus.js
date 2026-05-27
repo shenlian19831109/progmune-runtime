@@ -9,7 +9,9 @@ const failure_corpus_1 = require("./failure-corpus");
     constraintType: "protocol",
     actionSequence: [{ kind: "call", function: "generate_jwt" }],
     errorDetail: "非法调用：generate_jwt 要求前置状态 [AUTHENTICATED]，当前状态为 [UNAUTHENTICATED]",
-    ssgState: "UNAUTHENTICATED",
+    ssgState: ["UNAUTHENTICATED"],
+    plannerAttempt: 1,
+    plannerRetryTotal: 3,
 });
 // 打印当前统计
 console.log("当前失败案例总数:", (0, failure_corpus_1.getAllFailures)().length);

@@ -1,16 +1,42 @@
 {
-  "verify_password": {
-    "pre_states": ["UNAUTHENTICATED"],
-    "post_states": ["AUTHENTICATED"]
+  "$schema": "https://progmune.dev/schemas/protocols.json",
+  "$description": "Progmune 协议定义 —— 函数调用的合法状态转换规则。这是程序免疫系统的 SVL-4 规则库。",
+  "initialState": "UNAUTHENTICATED",
+  "states": {
+    "UNAUTHENTICATED": "初始状态：用户未认证",
+    "PASSWORD_VERIFIED": "密码已通过验证",
+    "TOKEN_ISSUED": "JWT 令牌已签发",
+    "SESSION_ACTIVE": "会话已激活"
   },
-  "generate_jwt": {
-    "pre_states": ["AUTHENTICATED"],
-    "post_states": ["TOKEN_ISSUED"],
-    "invalidate": ["AUTHENTICATED"]
-  },
-  "create_session": {
-    "pre_states": ["TOKEN_ISSUED"],
-    "post_states": ["SESSION_ACTIVE"],
-    "invalidate": ["TOKEN_ISSUED"]
+  "rules": {
+    "verify_password": {
+      "pre_states": ["UNAUTHENTICATED"],
+      "post_states": ["PASSWORD_VERIFIED"],
+      "description": "验证用户密码 → 进入已认证状态"
+    },
+    "generate_jwt": {
+      "pre_states": ["PASSWORD_VERIFIED"],
+      "post_states": ["TOKEN_ISSUED"],
+      "invalidate": ["PASSWORD_VERIFIED"],
+      "description": "签发 JWT 令牌 → 必须在密码验证之后，签发后密码验证状态失效"
+    },
+    "create_session": {
+      "pre_states": ["TOKEN_ISSUED"],
+      "post_states": ["SESSION_ACTIVE"],
+      "invalidate": ["TOKEN_ISSUED"],
+      "description": "创建会话 → 必须在令牌签发之后，创建后令牌状态失效"
+    },
+    "revoke_token": {
+      "pre_states": ["TOKEN_ISSUED"],
+      "post_states": ["UNAUTHENTICATED"],
+      "invalidate": ["TOKEN_ISSUED"],
+      "description": "撤销令牌 → 回到未认证状态"
+    },
+    "logout": {
+      "pre_states": ["SESSION_ACTIVE"],
+      "post_states": ["UNAUTHENTICATED"],
+      "invalidate": ["SESSION_ACTIVE"],
+      "description": "登出 → 清除会话，回到未认证状态"
+    }
   }
 }

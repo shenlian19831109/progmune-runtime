@@ -1,13 +1,1 @@
-[
-  {
-    "name": "cache_get",
-    "params": [
-      {
-        "name": "key",
-        "type": "str"
-      }
-    ],
-    "returnType": "any",
-    "file": "auth.py"
-  }
-]
+[{"name":"login","params":[{"name":"user","type":"str"},{"name":"pass","type":"str"}],"returnType":"bool"},{"name":"get_data","params":[{"name":"key","type":"str"}],"returnType":"any"}]

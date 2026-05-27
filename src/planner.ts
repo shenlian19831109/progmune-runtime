@@ -4,9 +4,9 @@ import { validateActionSequence } from "./validator";
 import { checkSemantic } from "./semantic-validator";
 import { getFunctionSuccessRate } from "./feedback";
 import { jaccardSimilarity, extractKeywords } from "./utils";
-import { recordFailure, SVL } from "./failure-corpus";
+import { recordFailure, recordSession, SVL } from "./failure-corpus";
 import { recordEpisode, findSemanticTemplate } from "./memory-layer";
-import { StateMachineValidator } from "./ssg-validator";
+import { StateMachineValidator, SSGRejection } from "./ssg-validator";
 import * as fs from "fs";
 
 function enrichActions(actions: Action[], ir: any[]): Action[] {
@@ -91,14 +91,14 @@ function loadProtocols(ir: any[]) {
 }
 
 /** 验证动作序列的协议合法性 */
-function validateProtocol(actions: Action[], protocols: any[], initialState: string) {
+function validateProtocol(actions: Action[], protocols: any[], initialState: string): { valid: boolean; rejection?: SSGRejection; index?: number } {
   const ssv = new StateMachineValidator(protocols, initialState);
   for (let i = 0; i < actions.length; i++) {
     const a = actions[i];
     if (a.kind === "call" && a.function) {
       const result = ssv.apply(a.function);
       if (!result.valid) {
-        return { valid: false, error: result.error!, index: i };
+        return { valid: false, rejection: result.rejection!, index: i };
       }
     }
   }
@@ -168,7 +168,10 @@ ${compactFuncList}
     return buildCompactFuncList(legalFuncs);
   }
 
-  for (let r = 0; r < 3; r++) {
+  const collectedFailures: any[] = [];
+  const maxRetries = 3;
+
+  for (let r = 0; r < maxRetries; r++) {
     let text: string;
     try {
       text = useSystem
@@ -204,6 +207,16 @@ ${compactFuncList}
         constraintType: determineConstraintType(svl),
         actionSequence: filtered,
         errorDetail: errorsFlat.join("; "),
+        plannerAttempt: r + 1,
+        plannerRetryTotal: maxRetries,
+      });
+      collectedFailures.push({
+        violatedSVL: svl,
+        constraintType: determineConstraintType(svl),
+        errorDetail: errorsFlat.join("; "),
+        actionSequence: filtered,
+        plannerAttempt: r + 1,
+        plannerRetryTotal: maxRetries,
       });
       recordEpisode({ intent: userIntent, actions: filtered, success: false, svlViolated: svl });
       currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n错误：${errorsFlat.join("；")}。请修正。\n${RETRY_HINT}\n只输出代码。`;
@@ -214,19 +227,36 @@ ${compactFuncList}
     // 2) 协议状态机校验 (SSG)
     if (protocols.length > 0) {
       const protoResult = validateProtocol(filtered, protocols, "UNAUTHENTICATED");
-      if (!protoResult.valid) {
-        console.error("🛡️ SSG 协议违规:", protoResult.error);
+      if (!protoResult.valid && protoResult.rejection) {
+        const rej = protoResult.rejection;
+        const explain = StateMachineValidator.explainRejection(rej);
+        console.error(explain);
         recordFailure({
           intent: userIntent,
           projectFunctions: ir.map((f: any) => f.name),
           violatedSVL: "SVL-4",
           constraintType: "protocol",
           actionSequence: filtered,
-          errorDetail: protoResult.error!,
+          errorDetail: JSON.stringify(StateMachineValidator.rejectionToJSON(rej)),
+          ssgState: rej.currentState,
+          ssgFixPath: rej.fixPath,
+          ssgMissingFunctions: rej.missingFunctions,
+          plannerAttempt: r + 1,
+          plannerRetryTotal: maxRetries,
+        });
+        collectedFailures.push({
+          violatedSVL: "SVL-4",
+          constraintType: "protocol",
+          errorDetail: JSON.stringify(StateMachineValidator.rejectionToJSON(rej)),
+          actionSequence: filtered,
+          ssgFixPath: rej.fixPath,
+          ssgMissingFunctions: rej.missingFunctions,
+          plannerAttempt: r + 1,
+          plannerRetryTotal: maxRetries,
         });
         recordEpisode({ intent: userIntent, actions: filtered, success: false, svlViolated: "SVL-4" });
         const maskedFuncList = getMaskedFuncList("UNAUTHENTICATED");
-        currentPrompt = `当前协议状态只允许以下函数：\n${maskedFuncList}\n\n需求：${userIntent}\n\n协议违规：${protoResult.error}。请修正。\n${RETRY_HINT}\n只输出代码。`;
+        currentPrompt = `当前协议状态只允许以下函数：\n${maskedFuncList}\n\n需求：${userIntent}\n\n协议违规：${explain.replace(/\n/g, '；')}。请修正。\n${RETRY_HINT}\n只输出代码。`;
         useSystem = false;
       continue;
       }
@@ -243,6 +273,16 @@ ${compactFuncList}
         constraintType: "protocol",
         actionSequence: filtered,
         errorDetail: semResult.errors.join("; "),
+        plannerAttempt: r + 1,
+        plannerRetryTotal: maxRetries,
+      });
+      collectedFailures.push({
+        violatedSVL: "SVL-4",
+        constraintType: "protocol",
+        errorDetail: semResult.errors.join("; "),
+        actionSequence: filtered,
+        plannerAttempt: r + 1,
+        plannerRetryTotal: maxRetries,
       });
       recordEpisode({ intent: userIntent, actions: filtered, success: false, svlViolated: "SVL-4" });
       currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n语义错误：${semResult.errors.join("；")}。请修正。\n${RETRY_HINT}\n只输出代码。`;
@@ -256,6 +296,14 @@ ${compactFuncList}
 
   if (finalActions.length > 0) {
     recordEpisode({ intent: userIntent, actions: finalActions, success: true });
+    recordSession({
+      intent: userIntent,
+      timestamp: new Date().toISOString(),
+      attempts: collectedFailures,
+      successfulAlternative: finalActions,
+      totalRetries: collectedFailures.length,
+      resolved: true,
+    });
   } else {
     // LLM 3 次重试失败，尝试本地规则回退
     console.error("[降级] LLM 规划失败，尝试本地规则回退");
@@ -263,9 +311,24 @@ ${compactFuncList}
     if (fallback.length > 0) {
       console.error(`[降级] 本地规则生成了 ${fallback.length} 个动作`);
       recordEpisode({ intent: userIntent, actions: fallback, success: true });
+      recordSession({
+        intent: userIntent,
+        timestamp: new Date().toISOString(),
+        attempts: collectedFailures,
+        successfulAlternative: fallback,
+        totalRetries: collectedFailures.length,
+        resolved: true,
+      });
       return fallback;
     }
     recordEpisode({ intent: userIntent, actions: [], success: false });
+    recordSession({
+      intent: userIntent,
+      timestamp: new Date().toISOString(),
+      attempts: collectedFailures,
+      totalRetries: collectedFailures.length,
+      resolved: false,
+    });
   }
 
   return finalActions;

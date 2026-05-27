@@ -15,6 +15,7 @@ Progmune（免序）不是一个 AI 编程助手，而是一个面向生成式�
 - [核心命题](#核心命题ai-生成的程序必须具备免疫系统)
 - [架构概览](#架构概览一个会学习会记忆会防御的运行时)
 - [语义有效性级别 (SVL)](#语义有效性级别-svl)
+- [Semantic Observatory](#semantic-observatory语义观测台)
 - [快速开始](#快速开始)
 - [CLI 命令](#cli-命令)
 - [MCP 工具](#mcp-工具)
@@ -42,14 +43,33 @@ Progmune 提出**程序免疫学（Program Immunology）**范式，为生成式�
 
 ## 架构概览：一个会学习、会记忆、会防御的运行时
 
-Progmune 的架构受生物免疫系统启发，分为六个核心层：
+Progmune 的架构受生物免疫系统启发，分为三层：
 
 | 生物免疫系统 | 程序免疫 (Progmune) | 核心职责 |
 |:-------------|:--------------------|:---------|
 | **天然免疫** | **约束引擎** (IR + SVL-1~SVL-3) | 快速、自动地拒绝调用不存在的函数、类型错误和数据流问题。 |
-| **获得性免疫** | **语义状态图 (SSG)** | 通过可编程的状态机，精确拦截非法业务逻辑跃迁（如"未认证即签发令牌"）。 |
-| **免疫记忆** | **三层记忆架构** | 工作记忆、情景记忆和语义记忆协同，让系统越用越聪明，相似意图可跳过 LLM 直接复用验证过的路径。 |
-| **抗原呈递** | **Failure Corpus** | 结构化的失败案例库，每一次拦截都转化为可分析的"错误指纹"，为系统进化提供数据基础。 |
+| **获得性免疫** | **语义状态图 (SSG)** | 通过可编程的状态机，精确拦截非法业务逻辑跃迁（如"未认证即签发令牌"），输出结构化修复路径。 |
+| **免疫记忆** | **三层记忆 + Failure Corpus** | 工作记忆、情景记忆和语义记忆协同；失败基因组记录每次语义异常、修复路径和适应轨迹。 |
+| **抗体生成** | **Antibody Registry** | 从失败中自动挖掘修复模式，按 ACL-1~4 置信度分级，生成候选免疫规则。 |
+| **免疫观测** | **Semantic Observatory** | 终端原生语义观测工具——时间线、认知回放、状态机追踪、基因组热力图。 |
+
+### SSG：语义状态图
+
+SSG 是 Progmune 的协议级验证引擎。通过 `@protocol` JSDoc 注解声明函数的前置/后置状态和失效规则：
+
+```typescript
+/**
+ * 签发 JWT 令牌
+ * @protocol pre_states=["PASSWORD_VERIFIED"] post_states=["TOKEN_ISSUED"] invalidate=["PASSWORD_VERIFIED"]
+ */
+export function generate_jwt(userId: string, expiresIn: number): string
+```
+
+当 AI 生成的代码违反协议时，SSG 输出结构化拒绝：被拦截的函数、当前状态、所需状态、缺失步骤和完整修复路径。
+
+### Failure Corpus：AI 失败基因组
+
+每次语义异常被记录为一条基因组记录，包含：违规 SVL 级别、约束类型、SSG 状态快照、修复路径、缺失函数、规划器重试次数。`IntentSession` 将同一意图的所有适应尝试链接为完整的"认知会话"——记录 AI 如何从失败中逐渐学会正确完成任务。
 
 ---
 
@@ -63,6 +83,44 @@ Progmune 定义了 AI 生成代码正确性的分层标准：
 | SVL-2 | 类型有效性 | 参数数量和类型严格匹配 |
 | SVL-3 | 数据流正确性 | 变量先声明后使用，无循环引用 |
 | SVL-4 | 协议合法性 | 业务步骤顺序必须遵守状态迁移规则 |
+
+---
+
+## Semantic Observatory（语义观测台）
+
+终端原生的 AI 推理可观测性工具。零依赖，纯 ANSI + Unicode box-drawing。
+
+```bash
+# 会话摘要表
+ts-node src/semantic-trace.ts
+
+# 单会话完整时间线
+ts-node src/semantic-trace.ts <sessionId>
+
+# 逐步认知回放（含适应差异对比）
+ts-node src/semantic-trace.ts replay <sessionId>
+
+# 状态机转换追踪（+/− 状态获取/失效标记）
+ts-node src/semantic-trace.ts --states <sessionId>
+
+# 失败基因组（SVL 分布条状图）
+ts-node src/semantic-trace.ts --genome
+
+# 抗体注册表（ACL-1~4 置信度）
+ts-node src/semantic-trace.ts --learned
+
+# 语义热力图（脆弱协议 / 免疫层活跃度 / 约束共现 / 高摩擦任务）
+ts-node src/semantic-trace.ts --heatmap
+```
+
+### 抗体置信度级别 (ACL)
+
+| 级别 | 标准 | 含义 |
+|:-----|:-----|:-----|
+| ACL-1 | 单案例观察 | 首次出现的修复模式，仅记录 |
+| ACL-2 | 重复观察（2+ 会话） | 同一模式在多个会话中重现，标记关注 |
+| ACL-3 | 跨任务验证（4+ 次或 3+ 独立意图） | 高置信候选，可考虑纳入默认规则 |
+| ACL-4 | 全局稳定（10+ 次 / 5+ 独立意图） | 已验证的免疫规则，可自动应用 |
 
 ---
 
@@ -295,6 +353,7 @@ Progmune is not an AI programming assistant, but an immune system for generative
 - [Core Proposition](#core-proposition-ai-generated-programs-must-have-an-immune-system)
 - [Architecture Overview](#architecture-overview-a-runtime-that-learns-remembers-and-defends)
 - [Semantic Validity Levels (SVL)](#semantic-validity-levels-svl)
+- [Semantic Observatory](#semantic-observatory)
 - [Quick Start](#quick-start)
 - [CLI Commands](#cli-commands)
 - [MCP Tools](#mcp-tools)
@@ -322,14 +381,33 @@ Progmune proposes the **Program Immunology** paradigm, establishing an identifia
 
 ## Architecture Overview: A Runtime That Learns, Remembers, and Defends
 
-Inspired by biological immune systems, Progmune's architecture consists of six core layers:
+Inspired by biological immune systems, Progmune's architecture consists of three layers:
 
 | Biological Immune System | Program Immunology (Progmune) | Core Responsibility |
 |:-------------------------|:------------------------------|:--------------------|
 | **Innate Immunity** | **Constraint Engine** (IR + SVL-1~SVL-3) | Rapidly and automatically rejects calls to non-existent functions, type errors, and dataflow issues. |
-| **Adaptive Immunity** | **Semantic State Graph (SSG)** | Precisely intercepts illegal business logic transitions (e.g., "issue token before authentication") via programmable state machines. |
-| **Immune Memory** | **Three-Layer Memory Architecture** | Working, episodic, and semantic memory collaborate to make the system smarter with use; similar intentions can reuse validated paths directly, bypassing the LLM. |
-| **Antigen Presentation** | **Failure Corpus** | A structured database of failure cases; each interception is transformed into an analyzable "error fingerprint," providing data for system evolution. |
+| **Adaptive Immunity** | **Semantic State Graph (SSG)** | Precisely intercepts illegal business logic transitions (e.g., "issue token before authentication") via programmable state machines, outputting structured repair paths. |
+| **Immune Memory** | **Three-Layer Memory + Failure Corpus** | Working, episodic, and semantic memory collaborate; the failure genome records every semantic anomaly, repair path, and adaptation trajectory. |
+| **Antibody Synthesis** | **Antibody Registry** | Automatically mines repair patterns from failures, graded by ACL-1~4 confidence, generating candidate immune rules. |
+| **Immune Observability** | **Semantic Observatory** | Terminal-native semantic observability tool — timeline, cognitive replay, state machine trace, genome heatmap. |
+
+### SSG: Semantic State Graph
+
+SSG is Progmune's protocol-level validation engine. Functions declare pre/post states and invalidation rules via `@protocol` JSDoc annotations:
+
+```typescript
+/**
+ * Issue JWT token
+ * @protocol pre_states=["PASSWORD_VERIFIED"] post_states=["TOKEN_ISSUED"] invalidate=["PASSWORD_VERIFIED"]
+ */
+export function generate_jwt(userId: string, expiresIn: number): string
+```
+
+When AI-generated code violates a protocol, SSG outputs a structured rejection: blocked function, current state, required state, missing steps, and a complete repair path.
+
+### Failure Corpus: AI Failure Genome
+
+Every semantic anomaly is recorded as a genome entry containing: violated SVL level, constraint type, SSG state snapshot, repair path, missing functions, and planner retry count. `IntentSession` links all adaptation attempts for a single intent into a complete "cognitive session" — recording how AI gradually learns to complete tasks correctly.
 
 ---
 
@@ -343,6 +421,44 @@ Progmune defines a layered standard for the correctness of AI-generated code:
 | SVL-2 | Type Validity | Parameter count and types strictly match |
 | SVL-3 | Dataflow Correctness | Variables are declared before use, no circular references |
 | SVL-4 | Protocol Legality | Business step order must adhere to state transition rules |
+
+---
+
+## Semantic Observatory
+
+Terminal-native AI reasoning observability tool. Zero dependencies, pure ANSI + Unicode box-drawing.
+
+```bash
+# Session summary table
+ts-node src/semantic-trace.ts
+
+# Full timeline for a single session
+ts-node src/semantic-trace.ts <sessionId>
+
+# Step-by-step cognitive replay (with adaptation diffs)
+ts-node src/semantic-trace.ts replay <sessionId>
+
+# State machine transition trace (+/− state gain/invalidation)
+ts-node src/semantic-trace.ts --states <sessionId>
+
+# Failure genome (SVL bar charts)
+ts-node src/semantic-trace.ts --genome
+
+# Antibody registry (ACL-1~4 confidence levels)
+ts-node src/semantic-trace.ts --learned
+
+# Semantic heatmap (fragile protocols / immune layer activity / constraint co-occurrence / high-friction intents)
+ts-node src/semantic-trace.ts --heatmap
+```
+
+### Antibody Confidence Levels (ACL)
+
+| Level | Criteria | Meaning |
+|:------|:---------|:--------|
+| ACL-1 | Single case observation | First occurrence — record only |
+| ACL-2 | Repeated observation (2+ sessions) | Pattern reproduced across sessions — flag for attention |
+| ACL-3 | Cross-task validated (4+ occurrences or 3+ distinct intents) | High-confidence candidate — consider as default rule |
+| ACL-4 | Globally stable (10+ occurrences / 5+ distinct intents) | Validated immune rule — safe for automatic application |
 
 ---
 
