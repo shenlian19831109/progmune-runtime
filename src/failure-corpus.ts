@@ -53,8 +53,11 @@ export interface IntentSession {
   resolved: boolean;
 }
 
-const CORPUS_DIR = path.resolve(__dirname, "../failure_corpus");
-const SESSIONS_DIR = path.resolve(__dirname, "../failure_corpus/sessions");
+// 优先使用 PROGMUNE_PROJECT_DIR（由 MCP 服务器在调用时设置），确保多项目隔离
+const projectDir = process.env.PROGMUNE_PROJECT_DIR || process.cwd();
+const CORPUS_DIR = process.env.PROGMUNE_CORPUS_DIR
+  || path.resolve(projectDir, ".progmune_corpus");
+const SESSIONS_DIR = path.join(CORPUS_DIR, "sessions");
 
 function ensureDir(dir: string) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
@@ -216,9 +219,15 @@ export interface LearnedPattern {
 }
 
 function computeACL(count: number, distinctIntents: number, resolvedRate: number): AntibodyLevel {
-  if (count >= 10 && distinctIntents >= 5) return "ACL-4";
-  if (count >= 4 || distinctIntents >= 3) return "ACL-3";
-  if (count >= 2) return "ACL-2";
+  const acl4Count = parseInt(process.env.PROGMUNE_ACL4_COUNT || "10", 10);
+  const acl4Intents = parseInt(process.env.PROGMUNE_ACL4_INTENTS || "5", 10);
+  const acl3Count = parseInt(process.env.PROGMUNE_ACL3_COUNT || "4", 10);
+  const acl3Intents = parseInt(process.env.PROGMUNE_ACL3_INTENTS || "3", 10);
+  const acl2Count = parseInt(process.env.PROGMUNE_ACL2_COUNT || "2", 10);
+
+  if (count >= acl4Count && distinctIntents >= acl4Intents) return "ACL-4";
+  if (count >= acl3Count || distinctIntents >= acl3Intents) return "ACL-3";
+  if (count >= acl2Count) return "ACL-2";
   return "ACL-1";
 }
 

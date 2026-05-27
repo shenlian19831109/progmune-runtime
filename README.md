@@ -122,6 +122,8 @@ ts-node src/semantic-trace.ts --heatmap
 | ACL-3 | 跨任务验证（4+ 次或 3+ 独立意图） | 高置信候选，可考虑纳入默认规则 |
 | ACL-4 | 全局稳定（10+ 次 / 5+ 独立意图） | 已验证的免疫规则，可自动应用 |
 
+> ACL 门槛可通过环境变量配置：`PROGMUNE_ACL4_COUNT`（默认 10）、`PROGMUNE_ACL4_INTENTS`（默认 5）、`PROGMUNE_ACL3_COUNT`（默认 4）、`PROGMUNE_ACL3_INTENTS`（默认 3）、`PROGMUNE_ACL2_COUNT`（默认 2）。设置较低值可加速抗体升级。
+
 ---
 
 ## 快速开始
@@ -459,6 +461,8 @@ ts-node src/semantic-trace.ts --heatmap
 | ACL-2 | Repeated observation (2+ sessions) | Pattern reproduced across sessions — flag for attention |
 | ACL-3 | Cross-task validated (4+ occurrences or 3+ distinct intents) | High-confidence candidate — consider as default rule |
 | ACL-4 | Globally stable (10+ occurrences / 5+ distinct intents) | Validated immune rule — safe for automatic application |
+
+> ACL thresholds are configurable via environment variables: `PROGMUNE_ACL4_COUNT` (default 10), `PROGMUNE_ACL4_INTENTS` (default 5), `PROGMUNE_ACL3_COUNT` (default 4), `PROGMUNE_ACL3_INTENTS` (default 3), `PROGMUNE_ACL2_COUNT` (default 2). Lower values accelerate antibody promotion.
 
 ---
 
