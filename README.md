@@ -67,9 +67,82 @@ export function generate_jwt(userId: string, expiresIn: number): string
 
 当 AI 生成的代码违反协议时，SSG 输出结构化拒绝：被拦截的函数、当前状态、所需状态、缺失步骤和完整修复路径。
 
+#### 资源中心 SSG（Resource-Centric SSG）
+
+SSG 支持命名空间隔离的状态机，不同资源域（认证、文件、数据库）各自维护独立的状态空间：
+
+```typescript
+// 文件资源生命周期（namespace=file）
+/** @protocol namespace=file pre_states=[] post_states=["FILE_OPEN"] */
+export function open_file(path: string): FileHandle
+
+/** @protocol namespace=file pre_states=["FILE_OPEN"] post_states=["FILE_READ"] */
+export function read_file(fh: FileHandle): string
+
+// 数据库资源生命周期（namespace=db）
+/** @protocol namespace=db pre_states=[] post_states=["DB_CONNECTED"] */
+export function connect_db(url: string): Connection
+
+/** @protocol namespace=db pre_states=["DB_CONNECTED"] post_states=["DB_QUERIED"] */
+export function query_db(conn: Connection, sql: string): Result[]
+```
+
+每个命名空间维护独立的状态集合，跨命名空间的函数调用互不干扰。命名空间初始状态可在 `protocols.json` 中通过 `namespaceInitialStates` 配置。
+
+### 确定性修复规划器（Deterministic Repair Planner）
+
+当 SSG 检测到协议违规时，规划器使用 **BFS 多跳修复路径搜索**自动补全缺失步骤：
+
+```
+违规：AI 尝试直接调用 generate_jwt()，但当前状态为 UNAUTHENTICATED
+BFS 搜索：UNAUTHENTICATED → verify_password() → PASSWORD_VERIFIED → generate_jwt() → TOKEN_ISSUED
+修复路径：[verify_password, generate_jwt]
+```
+
+BFS 搜索替代了原来的单跳线性扫描，可处理任意长度的协议缺口链。修复路径通过 SSG 校验后自动插入到 Action 序列中，无需 LLM 参与。
+
 ### Failure Corpus：AI 失败基因组
 
 每次语义异常被记录为一条基因组记录，包含：违规 SVL 级别、约束类型、SSG 状态快照、修复路径、缺失函数、规划器重试次数。`IntentSession` 将同一意图的所有适应尝试链接为完整的"认知会话"——记录 AI 如何从失败中逐渐学会正确完成任务。
+
+### 语义快照引擎（Semantic Snapshot Engine）
+
+每次规划会话自动捕获 IR 快照，记录当时的所有函数名和签名。快照支持三种操作：
+
+| 命令 | 用途 |
+|:-----|:-----|
+| `ts-node src/semantic-trace.ts --snapshots` | 列出所有 IR 快照 |
+| `ts-node src/semantic-trace.ts --diff <idA> <idB>` | 比较两个快照的 IR 差异（新增/删除/变更函数） |
+| `ts-node src/semantic-trace.ts --validate <sessionId>` | 确定性回放验证 |
+
+### 确定性回放（Deterministic Replay）
+
+`--validate` 命令将会话中的 Action 序列在快照 IR 和当前 IR 上分别校验，逐函数对比结果：
+
+```
+Action          │ Snapshot IR        │ Live IR            │ Status
+────────────────┼────────────────────┼────────────────────┼──────────
+verify_password │ ✔ exists (1 param) │ ✔ exists (1 param) │ STABLE
+generate_jwt    │ ✔ exists (2 param) │ ✔ exists (2 param) │ STABLE
+create_session  │ ✔ exists (1 param) │ ✖ NOT FOUND        │ REGRESSION
+```
+
+通过对比快照与当前 IR，可检测代码变更是否破坏了已有的正确修复路径。
+
+### 抗体推理集成（Antibody Inference Integration）
+
+抗体注册表中的修复模式已集成到规划器的推理层：
+
+| ACL 级别 | 推理行为 |
+|:---------|:---------|
+| ACL-3 | 将已验证的修复路径注入 LLM 提示，约束其按已知正确顺序生成 |
+| ACL-4 | 完全跳过 LLM——直接从 fixPath 构建 Action 序列，经 SSG 校验后返回（零 LLM 调用） |
+
+抗体匹配使用 Jaccard 相似度（阈值 20%）将新意图与已知修复模式关联，实现"一次修复，永久免疫"。
+
+### IR 外部函数提取
+
+IR 提取器不仅捕获项目内声明的函数，还自动识别外部依赖函数（如 `readFileSync`、`parse`、`resolve` 等），为它们注册已知的 Node.js/JavaScript API 签名。这使得约束引擎可以对外部 API 调用进行 SVL-1~SVL-2 校验。
 
 ---
 
@@ -111,6 +184,15 @@ ts-node src/semantic-trace.ts --learned
 
 # 语义热力图（脆弱协议 / 免疫层活跃度 / 约束共现 / 高摩擦任务）
 ts-node src/semantic-trace.ts --heatmap
+
+# 确定性回放（对比快照 IR vs 当前 IR，检测回归）
+ts-node src/semantic-trace.ts --validate <sessionId>
+
+# 列出所有 IR 快照
+ts-node src/semantic-trace.ts --snapshots
+
+# 比较两个快照的 IR 差异
+ts-node src/semantic-trace.ts --diff <idA> <idB>
 ```
 
 ### 抗体置信度级别 (ACL)
@@ -407,9 +489,82 @@ export function generate_jwt(userId: string, expiresIn: number): string
 
 When AI-generated code violates a protocol, SSG outputs a structured rejection: blocked function, current state, required state, missing steps, and a complete repair path.
 
+#### Resource-Centric SSG
+
+SSG supports namespace-isolated state machines, where different resource domains (auth, file, database) maintain independent state spaces:
+
+```typescript
+// File resource lifecycle (namespace=file)
+/** @protocol namespace=file pre_states=[] post_states=["FILE_OPEN"] */
+export function open_file(path: string): FileHandle
+
+/** @protocol namespace=file pre_states=["FILE_OPEN"] post_states=["FILE_READ"] */
+export function read_file(fh: FileHandle): string
+
+// Database resource lifecycle (namespace=db)
+/** @protocol namespace=db pre_states=[] post_states=["DB_CONNECTED"] */
+export function connect_db(url: string): Connection
+
+/** @protocol namespace=db pre_states=["DB_CONNECTED"] post_states=["DB_QUERIED"] */
+export function query_db(conn: Connection, sql: string): Result[]
+```
+
+Each namespace maintains an independent state set; cross-namespace function calls do not interfere. Namespace initial states are configurable via `namespaceInitialStates` in `protocols.json`.
+
+### Deterministic Repair Planner
+
+When SSG detects a protocol violation, the planner uses **BFS multi-hop fixPath search** to automatically fill missing steps:
+
+```
+Violation: AI tried to call generate_jwt() directly, but current state is UNAUTHENTICATED
+BFS search: UNAUTHENTICATED → verify_password() → PASSWORD_VERIFIED → generate_jwt() → TOKEN_ISSUED
+Repair path: [verify_password, generate_jwt]
+```
+
+BFS search replaces the original single-hop linear scan, handling protocol gap chains of arbitrary length. Repair paths are validated through SSG and auto-inserted into the Action sequence without LLM involvement.
+
 ### Failure Corpus: AI Failure Genome
 
 Every semantic anomaly is recorded as a genome entry containing: violated SVL level, constraint type, SSG state snapshot, repair path, missing functions, and planner retry count. `IntentSession` links all adaptation attempts for a single intent into a complete "cognitive session" — recording how AI gradually learns to complete tasks correctly.
+
+### Semantic Snapshot Engine
+
+Each planner session automatically captures an IR snapshot, recording all function names and signatures at that point in time. Snapshots support three operations:
+
+| Command | Purpose |
+|:--------|:-------|
+| `ts-node src/semantic-trace.ts --snapshots` | List all IR snapshots |
+| `ts-node src/semantic-trace.ts --diff <idA> <idB>` | Compare IR differences between two snapshots (added/removed/changed) |
+| `ts-node src/semantic-trace.ts --validate <sessionId>` | Deterministic replay validation |
+
+### Deterministic Replay
+
+The `--validate` command replays a session's Action sequence against both the snapshot IR and the live IR, comparing results per function:
+
+```
+Action          │ Snapshot IR        │ Live IR            │ Status
+────────────────┼────────────────────┼────────────────────┼──────────
+verify_password │ ✔ exists (1 param) │ ✔ exists (1 param) │ STABLE
+generate_jwt    │ ✔ exists (2 param) │ ✔ exists (2 param) │ STABLE
+create_session  │ ✔ exists (1 param) │ ✖ NOT FOUND        │ REGRESSION
+```
+
+By comparing snapshot vs. current IR, you can detect whether code changes have broken previously correct repair paths.
+
+### Antibody Inference Integration
+
+Repair patterns from the Antibody Registry are integrated into the planner's inference layer:
+
+| ACL Level | Inference Behavior |
+|:----------|:-------------------|
+| ACL-3 | Injects validated fix paths into the LLM prompt, constraining generation to known-correct sequences |
+| ACL-4 | Skips the LLM entirely — builds Action sequences directly from fixPath, validates via SSG, returns immediately (zero LLM calls) |
+
+Antibody matching uses Jaccard similarity (20% threshold) to associate new intents with known repair patterns, achieving "fix once, immune forever."
+
+### IR External Function Extraction
+
+The IR extractor now captures not only project-local functions but also external dependencies (e.g., `readFileSync`, `parse`, `resolve`), registering them with known Node.js/JavaScript API signatures. This enables the constraint engine to perform SVL-1~SVL-2 validation on external API calls.
 
 ---
 
@@ -451,6 +606,15 @@ ts-node src/semantic-trace.ts --learned
 
 # Semantic heatmap (fragile protocols / immune layer activity / constraint co-occurrence / high-friction intents)
 ts-node src/semantic-trace.ts --heatmap
+
+# Deterministic replay (compare snapshot IR vs live IR, detect regressions)
+ts-node src/semantic-trace.ts --validate <sessionId>
+
+# List all IR snapshots
+ts-node src/semantic-trace.ts --snapshots
+
+# Compare IR differences between two snapshots
+ts-node src/semantic-trace.ts --diff <idA> <idB>
 ```
 
 ### Antibody Confidence Levels (ACL)
