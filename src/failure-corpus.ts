@@ -48,9 +48,11 @@ export interface IntentSession {
   intent: string;
   timestamp: string;
   attempts: SessionAttempt[];
-  successfulAlternative?: any[];  // 最终成功的 action sequence
+  successfulAlternative?: any[];
   totalRetries: number;
   resolved: boolean;
+  /** IR 快照 ID，用于确定性回放 */
+  snapshotId?: string;
 }
 
 // 优先使用 PROGMUNE_PROJECT_DIR（由 MCP 服务器在调用时设置），确保多项目隔离

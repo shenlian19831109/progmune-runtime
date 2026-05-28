@@ -98,9 +98,13 @@ function formatSessionTimeline(session) {
     const title = `Intent: ${session.intent}`;
     const header = `┌─ ${B(title)} ${"─".repeat(Math.max(2, width - title.length - 5))}┐`;
     const resolvedIcon = session.resolved ? G("✔") : R("✖");
+    const snapTag = session.snapshotId ? `  │  ${D("Snapshot:")} ${D(session.snapshotId.slice(-16))}` : "";
     const info = `│ Session: ${D(session.sessionId)}  │  Retries: ${session.totalRetries}  │  Resolved: ${resolvedIcon} ${" ".repeat(Math.max(1, 15))}│`;
     const footer = `└${"─".repeat(width - 2)}┘`;
-    const lines = [header, info, footer, ""];
+    const lines = [header, info];
+    if (snapTag)
+        lines.push(snapTag);
+    lines.push(footer, "");
     // Render all failure attempts
     for (let i = 0; i < session.attempts.length; i++) {
         const a = session.attempts[i];
@@ -275,6 +279,7 @@ function formatLearnedPatterns() {
 // ── Semantic heatmap ──
 const failure_corpus_2 = require("./failure-corpus");
 const ssg_validator_1 = require("./ssg-validator");
+const semantic_snapshot_1 = require("./semantic-snapshot");
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 function formatHeatmap() {
@@ -651,6 +656,73 @@ async function replaySession(session) {
     console.log("");
 }
 // ── CLI entry ──
+// ── Semantic Snapshot formatting ──
+function formatSnapshotList() {
+    const snapshots = (0, semantic_snapshot_1.listSnapshots)();
+    if (snapshots.length === 0) {
+        return `${D("No IR snapshots recorded yet. Run the planner to capture the first snapshot.")}`;
+    }
+    const lines = [];
+    const C_ = (s) => `${C.cyan}${s}${C.reset}`;
+    lines.push(`${C_("IR Snapshots")} (${snapshots.length} total):\n`);
+    lines.push(`${B("┌──────────────────────┬──────────────────────┬──────────┬────────────────────────────────┐")}`);
+    lines.push(`${B("│")} ${B("Snapshot ID")}       ${B("│")} ${B("Timestamp")}           ${B("│")} ${B("Funcs")}   ${B("│")} ${B("Intent")}                        ${B("│")}`);
+    lines.push(`${B("├──────────────────────┼──────────────────────┼──────────┼────────────────────────────────┤")}`);
+    for (const snap of snapshots.slice(0, 20)) {
+        const id = snap.id.slice(-16);
+        const ts = snap.timestamp.slice(0, 19).replace("T", " ");
+        const count = String(snap.functions.length).padStart(4);
+        const intent = (snap.intent || "").slice(0, 30).padEnd(30);
+        lines.push(`${D("│")} ${D(id)} ${D("│")} ${ts} ${D("│")} ${count}   ${D("│")} ${intent} ${D("│")}`);
+    }
+    lines.push(`${B("└──────────────────────┴──────────────────────┴──────────┴────────────────────────────────┘")}`);
+    return lines.join("\n");
+}
+function formatSnapshotDiff(snapIdA, snapIdB) {
+    const a = (0, semantic_snapshot_1.loadSnapshot)(snapIdA);
+    const b = (0, semantic_snapshot_1.loadSnapshot)(snapIdB);
+    if (!a)
+        return `${R("Snapshot not found:")} ${snapIdA}`;
+    if (!b)
+        return `${R("Snapshot not found:")} ${snapIdB}`;
+    const diff = (0, semantic_snapshot_1.diffSnapshots)(a, b);
+    const lines = [];
+    const C_ = (s) => `${C.cyan}${s}${C.reset}`;
+    lines.push(`${C_("IR Snapshot Diff")}`);
+    lines.push(`${D(`${a.id}`)}  →  ${D(`${b.id}`)}`);
+    lines.push(`  ${a.timestamp.slice(0, 19)}  →  ${b.timestamp.slice(0, 19)}`);
+    lines.push("");
+    if (diff.added.length > 0) {
+        lines.push(`  ${G("+ Added")} (${diff.added.length}):`);
+        for (const f of diff.added) {
+            lines.push(`    ${G("+")} ${f.name}(${f.params.map(p => `${p.name}:${p.type}`).join(", ")}) → ${f.returnType}`);
+        }
+        lines.push("");
+    }
+    if (diff.removed.length > 0) {
+        lines.push(`  ${R("- Removed")} (${diff.removed.length}):`);
+        for (const f of diff.removed) {
+            lines.push(`    ${R("-")} ${f.name}(${f.params.map(p => `${p.name}:${p.type}`).join(", ")}) → ${f.returnType}`);
+        }
+        lines.push("");
+    }
+    if (diff.changed.length > 0) {
+        lines.push(`  ${Y("~ Changed")} (${diff.changed.length}):`);
+        for (const { before, after } of diff.changed) {
+            lines.push(`    ${Y("~")} ${before.name}:`);
+            lines.push(`      ${R("-")} ${before.returnType} (${before.params.map(p => `${p.name}:${p.type}`).join(", ")})`);
+            lines.push(`      ${G("+")} ${after.returnType} (${after.params.map(p => `${p.name}:${p.type}`).join(", ")})`);
+        }
+        lines.push("");
+    }
+    if (diff.unchanged > 0) {
+        lines.push(`  ${D(`${diff.unchanged} functions unchanged`)}`);
+    }
+    if (diff.added.length === 0 && diff.removed.length === 0 && diff.changed.length === 0) {
+        lines.push(`  ${D("No differences — snapshots are identical.")}`);
+    }
+    return lines.join("\n");
+}
 async function main() {
     const arg = process.argv[2];
     if (arg === "--genome") {
@@ -663,6 +735,21 @@ async function main() {
     }
     if (arg === "--heatmap") {
         console.log(formatHeatmap());
+        return;
+    }
+    if (arg === "--snapshots") {
+        console.log(formatSnapshotList());
+        return;
+    }
+    if (arg === "--diff") {
+        const snapA = process.argv[3];
+        const snapB = process.argv[4];
+        if (!snapA || !snapB) {
+            console.log(formatSnapshotList());
+            console.log(`\n${D("Usage:")} ts-node src/semantic-trace.ts --diff <snapshotIdA> <snapshotIdB>`);
+            return;
+        }
+        console.log(formatSnapshotDiff(snapA, snapB));
         return;
     }
     const sessions = (0, failure_corpus_1.getAllSessions)();

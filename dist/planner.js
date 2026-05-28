@@ -42,6 +42,7 @@ const utils_1 = require("./utils");
 const failure_corpus_1 = require("./failure-corpus");
 const memory_layer_1 = require("./memory-layer");
 const ssg_validator_1 = require("./ssg-validator");
+const semantic_snapshot_1 = require("./semantic-snapshot");
 const fs = __importStar(require("fs"));
 function enrichActions(actions, ir) {
     return actions.map(a => {
@@ -297,6 +298,9 @@ ${compactFuncList}
             return compactFuncList;
         return buildCompactFuncList(legalFuncs);
     }
+    // 创建 IR 语义快照，用于确定性回放
+    const snapshot = (0, semantic_snapshot_1.createSnapshot)(ir, userIntent);
+    const snapshotId = (0, semantic_snapshot_1.saveSnapshot)(snapshot);
     const maxRetries = 3;
     for (let r = startRetry; r < maxRetries; r++) {
         let text;
@@ -443,6 +447,7 @@ ${compactFuncList}
             successfulAlternative: finalActions,
             totalRetries: collectedFailures.length,
             resolved: true,
+            snapshotId,
         });
         (0, failure_corpus_1.clearCheckpoint)(userIntent);
     }
@@ -460,6 +465,7 @@ ${compactFuncList}
                 successfulAlternative: fallback,
                 totalRetries: collectedFailures.length,
                 resolved: true,
+                snapshotId,
             });
             (0, failure_corpus_1.clearCheckpoint)(userIntent);
             return fallback;
@@ -471,6 +477,7 @@ ${compactFuncList}
             attempts: collectedFailures,
             totalRetries: collectedFailures.length,
             resolved: false,
+            snapshotId,
         });
         (0, failure_corpus_1.clearCheckpoint)(userIntent);
     }

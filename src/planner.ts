@@ -7,6 +7,7 @@ import { jaccardSimilarity, extractKeywords } from "./utils";
 import { recordFailure, recordSession, saveCheckpoint, loadCheckpoint, clearCheckpoint, SVL } from "./failure-corpus";
 import { recordEpisode, findSemanticTemplate } from "./memory-layer";
 import { StateMachineValidator, SSGRejection, parseProtocolsFromJSON } from "./ssg-validator";
+import { createSnapshot, saveSnapshot } from "./semantic-snapshot";
 import * as fs from "fs";
 
 function enrichActions(actions: Action[], ir: any[]): Action[] {
@@ -298,6 +299,10 @@ ${compactFuncList}
     return buildCompactFuncList(legalFuncs);
   }
 
+  // 创建 IR 语义快照，用于确定性回放
+  const snapshot = createSnapshot(ir, userIntent);
+  const snapshotId = saveSnapshot(snapshot);
+
   const maxRetries = 3;
 
   for (let r = startRetry; r < maxRetries; r++) {
@@ -452,6 +457,7 @@ ${compactFuncList}
       successfulAlternative: finalActions,
       totalRetries: collectedFailures.length,
       resolved: true,
+      snapshotId,
     });
     clearCheckpoint(userIntent);
   } else {
@@ -468,6 +474,7 @@ ${compactFuncList}
         successfulAlternative: fallback,
         totalRetries: collectedFailures.length,
         resolved: true,
+        snapshotId,
       });
       clearCheckpoint(userIntent);
       return fallback;
@@ -479,6 +486,7 @@ ${compactFuncList}
       attempts: collectedFailures,
       totalRetries: collectedFailures.length,
       resolved: false,
+      snapshotId,
     });
     clearCheckpoint(userIntent);
   }
