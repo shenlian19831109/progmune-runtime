@@ -218,7 +218,7 @@ Progmune MCP 服务器暴露以下工具：
 
 ```json
 {
-  "version": "2.0.5",
+  "version": "2.1.0",
   "llm": { "model": "deepseek-chat", "callCount": 3, "apiKeySet": true },
   "immuneNetwork": { "optIn": true, "hubReachable": true, "totalFailures": 14 }
 }
@@ -556,7 +556,7 @@ After configuration, describe your programming needs directly in the conversatio
 
 ```json
 {
-  "version": "2.0.5",
+  "version": "2.1.0",
   "llm": { "model": "deepseek-chat", "callCount": 3, "apiKeySet": true },
   "immuneNetwork": { "optIn": true, "hubReachable": true, "totalFailures": 14 }
 }
