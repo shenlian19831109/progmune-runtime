@@ -1,45 +1,82 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.StateMachineValidator = void 0;
+exports.parseProtocolsFromJSON = parseProtocolsFromJSON;
+const DEFAULT_NAMESPACE = "_global";
 class StateMachineValidator {
     constructor(rules, initialState = 'INIT') {
         this.trace = [];
-        this.currentStates = new Set([initialState]);
+        this.namespaceStates = new Map();
+        // 默认命名空间初始化
+        this.namespaceStates.set(DEFAULT_NAMESPACE, new Set([initialState]));
         this.rules = new Map();
-        rules.forEach(r => this.rules.set(r.function, r.protocol));
+        rules.forEach(r => {
+            this.rules.set(r.function, r.protocol);
+            // 为每个引用的命名空间预初始化状态
+            const ns = r.protocol.namespace || DEFAULT_NAMESPACE;
+            if (!this.namespaceStates.has(ns)) {
+                this.namespaceStates.set(ns, new Set());
+            }
+        });
+    }
+    /** 为指定命名空间设置初始状态（用于协议定义中的 initialState） */
+    setNamespaceInitialState(namespace, state) {
+        const ns = namespace || DEFAULT_NAMESPACE;
+        if (!this.namespaceStates.has(ns)) {
+            this.namespaceStates.set(ns, new Set());
+        }
+        this.namespaceStates.get(ns).add(state);
     }
     apply(functionName) {
-        const statesBefore = [...this.currentStates];
+        const statesBefore = [...this.getEffectiveStates()];
         const rule = this.rules.get(functionName);
         if (!rule) {
-            // 无协议约束 → 直接放行
-            this.trace.push({ function: functionName, valid: true, statesBefore, statesAfter: [...this.currentStates] });
-            return { valid: true, statesAfter: [...this.currentStates] };
+            this.trace.push({ function: functionName, valid: true, statesBefore, statesAfter: [...this.getEffectiveStates()] });
+            return { valid: true, statesAfter: [...this.getEffectiveStates()] };
         }
-        const hasValidPreState = rule.pre_states.every(s => this.currentStates.has(s));
+        const ns = rule.namespace || DEFAULT_NAMESPACE;
+        const nsStates = this.namespaceStates.get(ns) || new Set();
+        const hasValidPreState = rule.pre_states.every(s => nsStates.has(s));
         if (!hasValidPreState) {
-            const fixPath = this.findFixPath([...this.currentStates], rule.pre_states);
-            const missingFunctions = this.findMissingFunctions([...this.currentStates], rule.pre_states);
+            const fixPath = this.findFixPath(ns, [...nsStates], rule.pre_states);
+            const missingFunctions = this.findMissingFunctions(ns, [...nsStates], rule.pre_states);
             const rejection = {
                 blocked: functionName,
-                currentState: [...this.currentStates],
+                currentState: [...nsStates],
                 requiredState: rule.pre_states,
                 missingFunctions,
                 fixPath,
+                namespace: ns,
             };
-            this.trace.push({ function: functionName, valid: false, statesBefore, statesAfter: [...this.currentStates], rejection });
-            return { valid: false, statesAfter: [...this.currentStates], rejection };
+            this.trace.push({ function: functionName, valid: false, statesBefore, statesAfter: [...this.getEffectiveStates()], rejection });
+            return { valid: false, statesAfter: [...this.getEffectiveStates()], rejection };
         }
         if (rule.invalidate) {
-            rule.invalidate.forEach(s => this.currentStates.delete(s));
+            rule.invalidate.forEach(s => nsStates.delete(s));
         }
-        rule.post_states.forEach(s => this.currentStates.add(s));
-        const statesAfter = [...this.currentStates];
+        rule.post_states.forEach(s => nsStates.add(s));
+        this.namespaceStates.set(ns, nsStates);
+        const statesAfter = [...this.getEffectiveStates()];
         this.trace.push({ function: functionName, valid: true, statesBefore, statesAfter });
         return { valid: true, statesAfter };
     }
     getCurrentStates() {
-        return [...this.currentStates];
+        return [...this.getEffectiveStates()];
+    }
+    /** 获取所有命名空间的合并状态视图 */
+    getEffectiveStates() {
+        const all = new Set();
+        for (const states of this.namespaceStates.values()) {
+            for (const s of states) {
+                all.add(s);
+            }
+        }
+        return all;
+    }
+    /** 获取指定命名空间的当前状态 */
+    getNamespaceStates(namespace) {
+        const ns = namespace || DEFAULT_NAMESPACE;
+        return [...(this.namespaceStates.get(ns) || new Set())];
     }
     /** 返回完整跟踪记录 */
     getTrace() {
@@ -47,8 +84,10 @@ class StateMachineValidator {
     }
     /** 生成人类可读的拦截解释 */
     static explainRejection(rejection) {
+        const nsLabel = rejection.namespace && rejection.namespace !== DEFAULT_NAMESPACE
+            ? ` [namespace: ${rejection.namespace}]` : '';
         const lines = [
-            `🚫 SSG 协议拦截: ${rejection.blocked}`,
+            `🚫 SSG 协议拦截: ${rejection.blocked}${nsLabel}`,
             ``,
             `  当前状态: ${rejection.currentState.join(', ') || '(无)'}`,
             `  所需状态: ${rejection.requiredState.join(', ')}`,
@@ -67,6 +106,7 @@ class StateMachineValidator {
         return {
             protocol_violation: {
                 blocked_function: rejection.blocked,
+                namespace: rejection.namespace,
                 current_state: rejection.currentState,
                 required_pre_states: rejection.requiredState,
             },
@@ -76,13 +116,16 @@ class StateMachineValidator {
             },
         };
     }
-    /** 查找从当前状态到目标前置状态的缺失函数名 */
-    findMissingFunctions(current, targetPreStates) {
+    /** 在指定命名空间中查找缺失函数 */
+    findMissingFunctions(namespace, current, targetPreStates) {
         const missing = [];
         for (const target of targetPreStates) {
             if (current.includes(target))
                 continue;
             for (const [fn, rule] of this.rules) {
+                const ns = rule.namespace || DEFAULT_NAMESPACE;
+                if (ns !== namespace)
+                    continue;
                 if (rule.post_states.includes(target)) {
                     missing.push(fn);
                     break;
@@ -91,20 +134,20 @@ class StateMachineValidator {
         }
         return missing;
     }
-    /** 查找修复路径：要调用哪些函数才能达到目标状态 */
-    findFixPath(current, targetPreStates) {
+    /** 在指定命名空间中查找修复路径 */
+    findFixPath(namespace, current, targetPreStates) {
         const path = [];
         const currentSet = new Set(current);
         for (const target of targetPreStates) {
             if (currentSet.has(target))
                 continue;
-            // 找到能产生目标状态的函数
             for (const [fn, rule] of this.rules) {
+                const ns = rule.namespace || DEFAULT_NAMESPACE;
+                if (ns !== namespace)
+                    continue;
                 if (rule.post_states.includes(target)) {
-                    // 检查该函数的前置条件是否满足
                     if (rule.pre_states.every(p => currentSet.has(p))) {
                         path.push(fn);
-                        // 模拟执行
                         if (rule.invalidate)
                             rule.invalidate.forEach(s => currentSet.delete(s));
                         rule.post_states.forEach(s => currentSet.add(s));
@@ -117,3 +160,19 @@ class StateMachineValidator {
     }
 }
 exports.StateMachineValidator = StateMachineValidator;
+/** 从 protocols.json 结构构建 FunctionProtocol 数组 */
+function parseProtocolsFromJSON(protocolDef) {
+    const protocols = [];
+    for (const [funcName, rule] of Object.entries(protocolDef.rules)) {
+        protocols.push({
+            function: funcName,
+            protocol: {
+                pre_states: rule.pre_states,
+                post_states: rule.post_states,
+                invalidate: rule.invalidate,
+                namespace: rule.namespace,
+            },
+        });
+    }
+    return protocols;
+}

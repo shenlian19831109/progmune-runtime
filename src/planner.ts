@@ -6,7 +6,7 @@ import { getFunctionSuccessRate } from "./feedback";
 import { jaccardSimilarity, extractKeywords } from "./utils";
 import { recordFailure, recordSession, saveCheckpoint, loadCheckpoint, clearCheckpoint, SVL } from "./failure-corpus";
 import { recordEpisode, findSemanticTemplate } from "./memory-layer";
-import { StateMachineValidator, SSGRejection } from "./ssg-validator";
+import { StateMachineValidator, SSGRejection, parseProtocolsFromJSON } from "./ssg-validator";
 import * as fs from "fs";
 
 function enrichActions(actions: Action[], ir: any[]): Action[] {
@@ -83,16 +83,67 @@ const RETRY_HINT = `输出规则：用 assign("var","val") / callAssign("fn","va
 
 /** 构建重试 prompt：精简但包含必要的 IR 语法提示 */
 
-/** 加载 IR 中所有带 protocol 的函数为协议规则 */
-function loadProtocols(ir: any[]) {
-  return ir
+/** 加载 IR 中所有带 protocol 的函数为协议规则，同时从 protocols.json 加载命名空间初始状态 */
+function loadProtocols(ir: any[]): { protocols: FunctionProtocol[]; namespaceInitialStates: Map<string, string> } {
+  const irProtocols = ir
     .filter((f: any) => f.protocol)
     .map((f: any) => ({ function: f.name, protocol: f.protocol }));
+
+  // 合并 protocols.json 中的规则（如果存在）
+  let jsonProtocols: FunctionProtocol[] = [];
+  const namespaceInitialStates = new Map<string, string>();
+  namespaceInitialStates.set("_global", "UNAUTHENTICATED");
+
+  try {
+    const protoDef = JSON.parse(fs.readFileSync("protocols.json", "utf-8"));
+    jsonProtocols = parseProtocolsFromJSON(protoDef);
+    // 从协议定义中加载每个命名空间的初始状态
+    if (protoDef.namespaceInitialStates) {
+      for (const [ns, initState] of Object.entries(protoDef.namespaceInitialStates)) {
+        namespaceInitialStates.set(ns, initState as string);
+      }
+    }
+  } catch {}
+
+  // IR @protocol 优先，但继承 JSON 中的 namespace（JSON 为权威命名空间定义）
+  const merged = new Map<string, FunctionProtocol>();
+  for (const p of jsonProtocols) merged.set(p.function, p);
+  for (const p of irProtocols) {
+    const existing = merged.get(p.function);
+    if (existing && existing.protocol.namespace && !p.protocol.namespace) {
+      p.protocol.namespace = existing.protocol.namespace;
+    }
+    merged.set(p.function, p);
+  }
+
+  return { protocols: [...merged.values()], namespaceInitialStates };
+}
+
+interface FunctionProtocol {
+  function: string;
+  protocol: {
+    pre_states: string[];
+    post_states: string[];
+    invalidate?: string[];
+    namespace?: string;
+  };
 }
 
 /** 验证动作序列的协议合法性，返回完整 SSG 跟踪 */
-function validateProtocol(actions: Action[], protocols: any[], initialState: string): { valid: boolean; rejection?: SSGRejection; index?: number; trace?: { function: string; statesBefore: string[]; statesAfter: string[] }[] } {
-  const ssv = new StateMachineValidator(protocols, initialState);
+function validateProtocol(
+  actions: Action[],
+  protocols: FunctionProtocol[],
+  namespaceInitialStates: Map<string, string>
+): { valid: boolean; rejection?: SSGRejection; index?: number; trace?: { function: string; statesBefore: string[]; statesAfter: string[] }[] } {
+  // 使用默认命名空间的初始状态，其他命名空间在 SSG 构造时预初始化
+  const defaultInit = namespaceInitialStates.get("_global") || "INIT";
+  const ssv = new StateMachineValidator(protocols, defaultInit);
+  // 为每个非默认命名空间设置初始状态
+  for (const [ns, initState] of namespaceInitialStates) {
+    if (ns !== "_global" && initState) {
+      ssv.setNamespaceInitialState(ns, initState);
+    }
+  }
   for (let i = 0; i < actions.length; i++) {
     const a = actions[i];
     if (a.kind === "call" && a.function) {
@@ -116,8 +167,8 @@ function attemptSSGRepair(
   actions: Action[],
   rejection: SSGRejection,
   ir: any[],
-  protocols: any[],
-  initialState: string
+  protocols: FunctionProtocol[],
+  namespaceInitialStates: Map<string, string>
 ): Action[] | null {
   if (!rejection.fixPath || rejection.fixPath.length === 0) return null;
 
@@ -129,12 +180,12 @@ function attemptSSGRepair(
   const repairActions: Action[] = [];
   for (const fnName of rejection.fixPath) {
     const def = ir.find((f: any) => f.name === fnName);
-    if (!def) return null; // 修复路径引用了不存在的函数，无法修复
+    if (!def) return null;
 
     const args = (def.params || []).map((p: any, i: number) => ({
       name: p.name || `p${i}`,
       type: p.type || 'any',
-      value: null, // 占位值，由后续 enrich 填充
+      value: null,
     }));
 
     const assignTo = def.returnType && def.returnType !== 'void' && def.returnType !== 'undefined'
@@ -153,7 +204,7 @@ function attemptSSGRepair(
   ];
 
   // 重新验证
-  const recheck = validateProtocol(repaired, protocols, initialState);
+  const recheck = validateProtocol(repaired, protocols, namespaceInitialStates);
   if (recheck.valid) {
     console.error(`🔧 SSG 确定性修复: 自动插入 ${rejection.fixPath.join(' → ')} 以解决协议违规`);
     return repaired;
@@ -161,7 +212,7 @@ function attemptSSGRepair(
 
   // 单步修复不够，尝试递归修复
   if (recheck.rejection && recheck.rejection.fixPath && recheck.rejection.fixPath.length > 0) {
-    const nested = attemptSSGRepair(repaired, recheck.rejection, ir, protocols, initialState);
+    const nested = attemptSSGRepair(repaired, recheck.rejection, ir, protocols, namespaceInitialStates);
     if (nested) return nested;
   }
 
@@ -229,10 +280,14 @@ ${compactFuncList}
     collectedFailures = cp.collectedFailures || [];
   }
 
-  const protocols = loadProtocols(ir);
-  function getMaskedFuncList(currentState: string): string {
+  const { protocols, namespaceInitialStates } = loadProtocols(ir);
+  function getMaskedFuncList(): string {
     if (protocols.length === 0) return compactFuncList;
-    const ssv = new StateMachineValidator(protocols, currentState);
+    const defaultInit = namespaceInitialStates.get("_global") || "INIT";
+    const ssv = new StateMachineValidator(protocols, defaultInit);
+    for (const [ns, initState] of namespaceInitialStates) {
+      if (ns !== "_global" && initState) ssv.setNamespaceInitialState(ns, initState);
+    }
     const legalFuncs = topFuncs.filter((f: any) => {
       const proto = protocols.find((p: any) => p.function === f.name);
       if (!proto) return true;
@@ -308,7 +363,7 @@ ${compactFuncList}
 
     // 2) 协议状态机校验 (SSG)
     if (protocols.length > 0) {
-      const protoResult = validateProtocol(filtered, protocols, "UNAUTHENTICATED");
+      const protoResult = validateProtocol(filtered, protocols, namespaceInitialStates);
       if (!protoResult.valid && protoResult.rejection) {
         const rej = protoResult.rejection;
         const explain = StateMachineValidator.explainRejection(rej);
@@ -340,14 +395,14 @@ ${compactFuncList}
         recordEpisode({ intent: userIntent, actions: filtered, success: false, svlViolated: "SVL-4" });
 
         // 尝试确定性修复：用 SSG 的 fixPath 自动插入缺失函数
-        const repaired = attemptSSGRepair(filtered, rej, ir, protocols, "UNAUTHENTICATED");
+        const repaired = attemptSSGRepair(filtered, rej, ir, protocols, namespaceInitialStates);
         if (repaired) {
           console.error("🔧 SSG 修复成功，跳过 LLM 重试");
           finalActions = repaired;
           break;
         }
 
-        const maskedFuncList = getMaskedFuncList("UNAUTHENTICATED");
+        const maskedFuncList = getMaskedFuncList();
         currentPrompt = `当前协议状态只允许以下函数：\n${maskedFuncList}\n\n需求：${userIntent}\n\n协议违规：${explain.replace(/\n/g, '；')}。请修正。\n${RETRY_HINT}\n只输出代码。`;
         useSystem = false;
         saveCheckpoint(userIntent, { attemptIndex: r + 1, collectedFailures, currentPrompt, useSystem });

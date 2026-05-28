@@ -338,7 +338,6 @@ function formatHeatmap() {
 function loadProtocols() {
     const protocolsJson = path.join(__dirname, "..", "protocols.json");
     const protocols = [];
-    // From protocols.json
     if (fs.existsSync(protocolsJson)) {
         const raw = JSON.parse(fs.readFileSync(protocolsJson, "utf-8"));
         for (const [funcName, rule] of Object.entries(raw.rules || {})) {
@@ -349,18 +348,53 @@ function loadProtocols() {
                     pre_states: r.pre_states || [],
                     post_states: r.post_states || [],
                     invalidate: r.invalidate,
+                    namespace: r.namespace,
                 },
             });
         }
     }
     return protocols;
 }
+function loadNamespaceInitialStates(protocols) {
+    const states = new Map();
+    states.set("_global", "UNAUTHENTICATED");
+    // 从 protocols.json 读取命名空间初始状态
+    const protocolsJson = path.join(__dirname, "..", "protocols.json");
+    if (fs.existsSync(protocolsJson)) {
+        try {
+            const raw = JSON.parse(fs.readFileSync(protocolsJson, "utf-8"));
+            if (raw.namespaceInitialStates) {
+                for (const [ns, initState] of Object.entries(raw.namespaceInitialStates)) {
+                    states.set(ns, initState);
+                }
+            }
+        }
+        catch { }
+    }
+    // 回退：协议中用到的命名空间如果未显式配置，默认 UNAUTHENTICATED
+    for (const p of protocols) {
+        const ns = p.protocol.namespace || "_global";
+        if (!states.has(ns))
+            states.set(ns, "UNAUTHENTICATED");
+    }
+    return states;
+}
+function createSSV(protocols) {
+    const nsStates = loadNamespaceInitialStates(protocols);
+    const defaultInit = nsStates.get("_global") || "INIT";
+    const ssv = new ssg_validator_1.StateMachineValidator(protocols, defaultInit);
+    for (const [ns, initState] of nsStates) {
+        if (ns !== "_global")
+            ssv.setNamespaceInitialState(ns, initState);
+    }
+    return ssv;
+}
 function formatStateTransitionPath(actions) {
     const protocols = loadProtocols();
     if (protocols.length === 0) {
         return `${D("No protocol rules loaded. Add @protocol annotations or protocols.json.")}`;
     }
-    const ssv = new ssg_validator_1.StateMachineValidator(protocols, "UNAUTHENTICATED");
+    const ssv = createSSV(protocols);
     // Apply all protocol-governed actions
     for (const a of actions) {
         if (a.kind !== "call" || !a.function)

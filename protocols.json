@@ -1,7 +1,11 @@
 {
   "$schema": "https://progmune.dev/schemas/protocols.json",
-  "$description": "Progmune 协议定义 —— 函数调用的合法状态转换规则。这是程序免疫系统的 SVL-4 规则库。",
+  "$description": "Progmune 协议定义 —— 函数调用的合法状态转换规则。支持命名空间（namespace）隔离不同资源的状态机。",
   "initialState": "UNAUTHENTICATED",
+  "namespaceInitialStates": {
+    "_global": "UNAUTHENTICATED",
+    "auth": "UNAUTHENTICATED"
+  },
   "states": {
     "UNAUTHENTICATED": "初始状态：用户未认证",
     "PASSWORD_VERIFIED": "密码已通过验证",
@@ -10,33 +14,82 @@
   },
   "rules": {
     "verify_password": {
+      "namespace": "auth",
       "pre_states": ["UNAUTHENTICATED"],
       "post_states": ["PASSWORD_VERIFIED"],
       "description": "验证用户密码 → 进入已认证状态"
     },
     "generate_jwt": {
+      "namespace": "auth",
       "pre_states": ["PASSWORD_VERIFIED"],
       "post_states": ["TOKEN_ISSUED"],
       "invalidate": ["PASSWORD_VERIFIED"],
       "description": "签发 JWT 令牌 → 必须在密码验证之后，签发后密码验证状态失效"
     },
     "create_session": {
+      "namespace": "auth",
       "pre_states": ["TOKEN_ISSUED"],
       "post_states": ["SESSION_ACTIVE"],
       "invalidate": ["TOKEN_ISSUED"],
       "description": "创建会话 → 必须在令牌签发之后，创建后令牌状态失效"
     },
     "revoke_token": {
+      "namespace": "auth",
       "pre_states": ["TOKEN_ISSUED"],
       "post_states": ["UNAUTHENTICATED"],
       "invalidate": ["TOKEN_ISSUED"],
       "description": "撤销令牌 → 回到未认证状态"
     },
     "logout": {
+      "namespace": "auth",
       "pre_states": ["SESSION_ACTIVE"],
       "post_states": ["UNAUTHENTICATED"],
       "invalidate": ["SESSION_ACTIVE"],
       "description": "登出 → 清除会话，回到未认证状态"
+    },
+    "open_file": {
+      "namespace": "file",
+      "pre_states": [],
+      "post_states": ["FILE_OPEN"],
+      "description": "打开文件 → 获得文件句柄"
+    },
+    "read_file": {
+      "namespace": "file",
+      "pre_states": ["FILE_OPEN"],
+      "post_states": [],
+      "description": "读取文件内容 → 需要文件已打开"
+    },
+    "write_file": {
+      "namespace": "file",
+      "pre_states": ["FILE_OPEN"],
+      "post_states": [],
+      "description": "写入文件内容 → 需要文件已打开"
+    },
+    "close_file": {
+      "namespace": "file",
+      "pre_states": ["FILE_OPEN"],
+      "post_states": [],
+      "invalidate": ["FILE_OPEN"],
+      "description": "关闭文件句柄 → 释放文件资源"
+    },
+    "connect_db": {
+      "namespace": "db",
+      "pre_states": [],
+      "post_states": ["DB_CONNECTED"],
+      "description": "建立数据库连接"
+    },
+    "query_db": {
+      "namespace": "db",
+      "pre_states": ["DB_CONNECTED"],
+      "post_states": [],
+      "description": "执行数据库查询 → 需要已连接"
+    },
+    "disconnect_db": {
+      "namespace": "db",
+      "pre_states": ["DB_CONNECTED"],
+      "post_states": [],
+      "invalidate": ["DB_CONNECTED"],
+      "description": "断开数据库连接"
     }
   }
 }

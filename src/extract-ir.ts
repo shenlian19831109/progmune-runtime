@@ -19,6 +19,7 @@ interface FunctionInfo {
     pre_states: string[];
     post_states: string[];
     invalidate?: string[];
+    namespace?: string;
   };
 }
 
@@ -33,18 +34,20 @@ function parseProtocolFromJSDoc(node: any): FunctionInfo['protocol'] | undefined
       const tagName = tag.getTagName?.();
       if (tagName !== 'protocol') continue;
       const text = tag.getCommentText?.() || '';
-      // 解析格式: pre_states=["A","B"] post_states=["C"] invalidate=["A"]
+      // 解析格式: namespace=file pre_states=["A","B"] post_states=["C"] invalidate=["A"]
       try {
+        const nsMatch = text.match(/namespace\s*=\s*(\w+)/);
         const preMatch = text.match(/pre_states\s*=\s*\[([^\]]*)\]/);
         const postMatch = text.match(/post_states\s*=\s*\[([^\]]*)\]/);
         const invMatch = text.match(/invalidate\s*=\s*\[([^\]]*)\]/);
         if (!preMatch || !postMatch) return undefined;
+        const namespace = nsMatch ? nsMatch[1] : undefined;
         const pre_states = preMatch[1].split(',').map((s: string) => s.trim().replace(/["']/g, '')).filter(Boolean);
         const post_states = postMatch[1].split(',').map((s: string) => s.trim().replace(/["']/g, '')).filter(Boolean);
         const invalidate = invMatch
           ? invMatch[1].split(',').map((s: string) => s.trim().replace(/["']/g, '')).filter(Boolean)
           : undefined;
-        return { pre_states, post_states, invalidate };
+        return { pre_states, post_states, invalidate, namespace };
       } catch {
         return undefined;
       }
