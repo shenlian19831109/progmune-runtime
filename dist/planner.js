@@ -142,6 +142,52 @@ function validateProtocol(actions, protocols, initialState) {
     }
     return { valid: true };
 }
+/** SSG 确定性修复：当协议违规有已知修复路径时，自动插入缺失函数 */
+function attemptSSGRepair(actions, rejection, ir, protocols, initialState) {
+    if (!rejection.fixPath || rejection.fixPath.length === 0)
+        return null;
+    // 找到被拦截函数在序列中的位置
+    const blockedIdx = actions.findIndex(a => a.function === rejection.blocked);
+    if (blockedIdx === -1)
+        return null;
+    // 为修复路径中的每个函数创建合成 Action
+    const repairActions = [];
+    for (const fnName of rejection.fixPath) {
+        const def = ir.find((f) => f.name === fnName);
+        if (!def)
+            return null; // 修复路径引用了不存在的函数，无法修复
+        const args = (def.params || []).map((p, i) => ({
+            name: p.name || `p${i}`,
+            type: p.type || 'any',
+            value: null, // 占位值，由后续 enrich 填充
+        }));
+        const assignTo = def.returnType && def.returnType !== 'void' && def.returnType !== 'undefined'
+            ? `${fnName}_result` : undefined;
+        const action = { kind: 'call', function: fnName, args };
+        if (assignTo)
+            action.assignTo = assignTo;
+        repairActions.push(action);
+    }
+    // 在被拦截函数前插入修复函数
+    const repaired = [
+        ...actions.slice(0, blockedIdx),
+        ...repairActions,
+        ...actions.slice(blockedIdx),
+    ];
+    // 重新验证
+    const recheck = validateProtocol(repaired, protocols, initialState);
+    if (recheck.valid) {
+        console.error(`🔧 SSG 确定性修复: 自动插入 ${rejection.fixPath.join(' → ')} 以解决协议违规`);
+        return repaired;
+    }
+    // 单步修复不够，尝试递归修复
+    if (recheck.rejection && recheck.rejection.fixPath && recheck.rejection.fixPath.length > 0) {
+        const nested = attemptSSGRepair(repaired, recheck.rejection, ir, protocols, initialState);
+        if (nested)
+            return nested;
+    }
+    return null;
+}
 async function plan(userIntent) {
     (0, llm_1.resetCallCount)();
     const ir = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
@@ -303,6 +349,13 @@ ${compactFuncList}
                     plannerRetryTotal: maxRetries,
                 });
                 (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: filtered, success: false, svlViolated: "SVL-4" });
+                // 尝试确定性修复：用 SSG 的 fixPath 自动插入缺失函数
+                const repaired = attemptSSGRepair(filtered, rej, ir, protocols, "UNAUTHENTICATED");
+                if (repaired) {
+                    console.error("🔧 SSG 修复成功，跳过 LLM 重试");
+                    finalActions = repaired;
+                    break;
+                }
                 const maskedFuncList = getMaskedFuncList("UNAUTHENTICATED");
                 currentPrompt = `当前协议状态只允许以下函数：\n${maskedFuncList}\n\n需求：${userIntent}\n\n协议违规：${explain.replace(/\n/g, '；')}。请修正。\n${RETRY_HINT}\n只输出代码。`;
                 useSystem = false;
