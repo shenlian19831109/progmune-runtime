@@ -116,43 +116,66 @@ class StateMachineValidator {
             },
         };
     }
-    /** 在指定命名空间中查找缺失函数 */
+    /** 在指定命名空间中查找缺失函数（复用 BFS 修复路径） */
     findMissingFunctions(namespace, current, targetPreStates) {
-        const missing = [];
-        for (const target of targetPreStates) {
-            if (current.includes(target))
-                continue;
-            for (const [fn, rule] of this.rules) {
-                const ns = rule.namespace || DEFAULT_NAMESPACE;
-                if (ns !== namespace)
-                    continue;
-                if (rule.post_states.includes(target)) {
-                    missing.push(fn);
-                    break;
-                }
+        // 复用 BFS fixPath，缺失函数 = 修复路径中尚未被调用的函数
+        return this.findFixPath(namespace, current, targetPreStates);
+    }
+    /** 在指定命名空间中查找修复路径（BFS 状态图搜索，支持多跳缺口） */
+    findFixPath(namespace, current, targetPreStates) {
+        // 构建命名空间内的函数列表
+        const nsFuncs = [];
+        for (const [fn, rule] of this.rules) {
+            if ((rule.namespace || DEFAULT_NAMESPACE) === namespace) {
+                nsFuncs.push({ name: fn, rule });
             }
         }
-        return missing;
-    }
-    /** 在指定命名空间中查找修复路径 */
-    findFixPath(namespace, current, targetPreStates) {
+        // BFS 状态图搜索
+        const startKey = [...new Set(current)].sort().join(",");
+        const visited = new Set();
+        const queue = [
+            { states: new Set(current), path: [] }
+        ];
+        visited.add(startKey);
+        while (queue.length > 0) {
+            const { states, path } = queue.shift();
+            // 检查目标：所有 targetPreStates 是否都满足
+            if (targetPreStates.every(s => states.has(s))) {
+                return path;
+            }
+            // 尝试每一步可用的函数
+            for (const { name, rule } of nsFuncs) {
+                // 检查前置条件是否满足
+                if (!rule.pre_states.every(p => states.has(p)))
+                    continue;
+                // 模拟执行
+                const nextStates = new Set(states);
+                if (rule.invalidate)
+                    rule.invalidate.forEach(s => nextStates.delete(s));
+                rule.post_states.forEach(s => nextStates.add(s));
+                const nextKey = [...nextStates].sort().join(",");
+                if (visited.has(nextKey))
+                    continue;
+                visited.add(nextKey);
+                // 防止无限扩展（状态爆炸保护）
+                if (visited.size > 1000)
+                    break;
+                queue.push({ states: nextStates, path: [...path, name] });
+            }
+        }
+        // BFS 未找到完整路径，回退到单跳直接查找
         const path = [];
         const currentSet = new Set(current);
         for (const target of targetPreStates) {
             if (currentSet.has(target))
                 continue;
-            for (const [fn, rule] of this.rules) {
-                const ns = rule.namespace || DEFAULT_NAMESPACE;
-                if (ns !== namespace)
-                    continue;
+            for (const { name, rule } of nsFuncs) {
                 if (rule.post_states.includes(target)) {
-                    if (rule.pre_states.every(p => currentSet.has(p))) {
-                        path.push(fn);
-                        if (rule.invalidate)
-                            rule.invalidate.forEach(s => currentSet.delete(s));
-                        rule.post_states.forEach(s => currentSet.add(s));
-                        break;
-                    }
+                    path.push(name);
+                    if (rule.invalidate)
+                        rule.invalidate.forEach(s => currentSet.delete(s));
+                    rule.post_states.forEach(s => currentSet.add(s));
+                    break;
                 }
             }
         }

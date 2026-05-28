@@ -118,7 +118,7 @@ function recordFailure(record) {
 /** 记录一个完整的意图会话（成功或失败的所有尝试） */
 function recordSession(session) {
     ensureDir(SESSIONS_DIR);
-    const sessionId = `sess_${Date.now()}`;
+    const sessionId = `sess_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     const fullSession = { ...session, sessionId };
     fs.writeFileSync(path.join(SESSIONS_DIR, `${sessionId}.json`), JSON.stringify(fullSession, null, 2));
     return sessionId;
