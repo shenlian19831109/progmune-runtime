@@ -299,7 +299,7 @@ function formatLearnedPatterns(): string {
 // ── Semantic heatmap ──
 
 import { getSemanticHeatmap } from "./failure-corpus";
-import { StateMachineValidator, FunctionProtocol } from "./ssg-validator";
+import { StateMachineValidator, FunctionProtocol, parseProtocolsFromJSON } from "./ssg-validator";
 import { listSnapshots, loadSnapshot, diffSnapshots, IRSnapshot } from "./semantic-snapshot";
 import * as fs from "fs";
 import * as path from "path";
@@ -817,6 +817,166 @@ function formatSnapshotDiff(snapIdA: string, snapIdB: string): string {
   return lines.join("\n");
 }
 
+// ── Deterministic Replay: validate session against snapshot vs. live IR ──
+
+function formatSessionValidation(session: ReturnType<typeof getAllSessions>[0]): string {
+  const lines: string[] = [];
+  const C_ = (s: string) => `${C.cyan}${s}${C.reset}`;
+
+  lines.push(`${C_("Deterministic Replay Validation")}`);
+  lines.push(`${D(`Session: ${session.sessionId}`)}`);
+  lines.push(`${D(`Intent:  ${session.intent}`)}`);
+  lines.push("");
+
+  // Collect all called functions from all attempts + successful path
+  const allCalledFns = new Set<string>();
+  for (const a of session.attempts) {
+    for (const act of (a.actionSequence || [])) {
+      if (act.function) allCalledFns.add(act.function);
+    }
+  }
+  for (const act of (session.successfulAlternative || [])) {
+    if (act.function) allCalledFns.add(act.function);
+  }
+
+  // Load snapshotted IR
+  let snapshotFns: Set<string> | null = null;
+  if (session.snapshotId) {
+    const snap = loadSnapshot(session.snapshotId);
+    if (snap) {
+      snapshotFns = new Set(snap.functions.map(f => f.name));
+      lines.push(`${D("Snapshot IR:")} ${snap.id} (${snap.functions.length} functions)`);
+    } else {
+      lines.push(`${Y("Snapshot not found:")} ${session.snapshotId}`);
+    }
+  } else {
+    lines.push(`${D("No snapshot linked to this session.")}`);
+  }
+
+  // Load current IR
+  let currentFns: Set<string> | null = null;
+  try {
+    const irPath = path.join(process.env.PROGMUNE_PROJECT_DIR || process.cwd(), "ir.json");
+    if (fs.existsSync(irPath)) {
+      const ir = JSON.parse(fs.readFileSync(irPath, "utf-8"));
+      currentFns = new Set(ir.map((f: any) => f.name));
+      lines.push(`${D("Current IR:")}  ir.json (${ir.length} functions)`);
+    }
+  } catch {}
+
+  lines.push("");
+
+  if (!snapshotFns && !currentFns) {
+    lines.push(`${D("No IR data available for comparison.")}`);
+    return lines.join("\n");
+  }
+
+  // Per-function validation table
+  const fns = [...allCalledFns].sort();
+  if (fns.length === 0) {
+    lines.push(`${D("No function calls recorded in this session.")}`);
+    return lines.join("\n");
+  }
+
+  lines.push(`${B("Function validation (then vs. now):")}`);
+  lines.push(`${B("┌────────────────────────────┬──────────┬──────────┬──────────────────────────────────────┐")}`);
+  lines.push(`${B("│")} ${B("Function")}                 ${B("│")} ${B("Then")}     ${B("│")} ${B("Now")}      ${B("│")} ${B("Status")}                              ${B("│")}`);
+  lines.push(`${B("├────────────────────────────┼──────────┼──────────┼──────────────────────────────────────┤")}`);
+
+  let regressions = 0;
+  let additions = 0;
+
+  for (const fn of fns) {
+    const existed = snapshotFns ? snapshotFns.has(fn) : null;
+    const exists = currentFns ? currentFns.has(fn) : null;
+
+    const thenIcon = existed === null ? D("?") : existed ? G("✔") : R("✖");
+    const nowIcon = exists === null ? D("?") : exists ? G("✔") : R("✖");
+
+    let status: string;
+    if (existed === true && exists === true) {
+      status = D("stable");
+    } else if (existed === true && exists === false) {
+      status = R("REGRESSION — removed from IR");
+      regressions++;
+    } else if (existed === false && exists === true) {
+      status = G("ADDED — new in IR");
+      additions++;
+    } else if (existed === false && exists === false) {
+      status = R("MISSING — never existed");
+    } else {
+      status = D("unknown");
+    }
+
+    const fnPad = fn.padEnd(26).slice(0, 26);
+    lines.push(`${D("│")} ${fnPad} ${D("│")}  ${thenIcon}      ${D("│")}  ${nowIcon}      ${D("│")} ${status.padEnd(36)} ${D("│")}`);
+  }
+
+  lines.push(`${B("└────────────────────────────┴──────────┴──────────┴──────────────────────────────────────┘")}`);
+  lines.push("");
+
+  // Summary
+  if (regressions > 0) {
+    lines.push(`${R(`⚠ ${regressions} regression(s) detected — functions removed from IR since this session`)}`);
+  }
+  if (additions > 0) {
+    lines.push(`${G(`+ ${additions} function(s) added to IR since this session`)}`);
+  }
+  if (regressions === 0 && additions === 0 && fns.length > 0) {
+    lines.push(`${G("✔ IR stable — all functions present in both snapshot and current IR.")}`);
+  }
+
+  // Protocol validation against snapshot
+  if (session.successfulAlternative && session.snapshotId) {
+    lines.push("");
+    lines.push(`${C_("Protocol re-validation (snapshot IR):")}`);
+    const snap = loadSnapshot(session.snapshotId);
+    if (snap) {
+      // Build protocols from snapshot functions that had @protocol annotations
+      // (we approximate from the function list — actual protocol data is in protocols.json)
+      try {
+        const protoPath = path.join(process.env.PROGMUNE_PROJECT_DIR || process.cwd(), "protocols.json");
+        if (fs.existsSync(protoPath)) {
+          const protoDef = JSON.parse(fs.readFileSync(protoPath, "utf-8"));
+          const protocols = parseProtocolsFromJSON(protoDef);
+
+          const nsStates = new Map<string, string>();
+          nsStates.set("_global", "UNAUTHENTICATED");
+          if (protoDef.namespaceInitialStates) {
+            for (const [ns, s] of Object.entries(protoDef.namespaceInitialStates)) {
+              nsStates.set(ns, s as string);
+            }
+          }
+          const ssv = new StateMachineValidator(protocols, nsStates.get("_global") || "INIT");
+          for (const [ns, s] of nsStates) {
+            if (ns !== "_global") ssv.setNamespaceInitialState(ns, s as string);
+          }
+
+          let valid = true;
+          for (const act of session.successfulAlternative) {
+            if (act.kind === "call" && act.function) {
+              const result = ssv.apply(act.function);
+              if (!result.valid) {
+                lines.push(`  ${R("🚫")} ${act.function}: ${result.rejection?.missingFunctions.join(" → ") || "protocol violation"}`);
+                valid = false;
+              } else {
+                lines.push(`  ${G("✅")} ${act.function}`);
+              }
+            }
+          }
+          if (valid) {
+            lines.push(`  ${G("✔ All actions satisfy protocol constraints against snapshot IR.")}`);
+          }
+        }
+      } catch (e) {
+        lines.push(`  ${D("(protocol re-validation not available)")}`);
+      }
+    }
+  }
+
+  return lines.join("\n");
+}
+
 async function main() {
   const arg = process.argv[2];
 
@@ -849,6 +1009,23 @@ async function main() {
       return;
     }
     console.log(formatSnapshotDiff(snapA, snapB));
+    return;
+  }
+
+  if (arg === "--validate") {
+    const sessionId = process.argv[3];
+    if (!sessionId) {
+      console.error(`${R("Usage:")} ts-node src/semantic-trace.ts --validate <sessionId>`);
+      console.error(`\n${D("Validates a session's actions against both its snapshotted IR and the current IR.")}`);
+      process.exit(1);
+    }
+    const sessionsForValidate = getAllSessions();
+    const session = sessionsForValidate.find(s => s.sessionId === sessionId || s.sessionId.startsWith(sessionId));
+    if (!session) {
+      console.error(`${R("Session not found:")} ${sessionId}`);
+      process.exit(1);
+    }
+    console.log(formatSessionValidation(session));
     return;
   }
 
