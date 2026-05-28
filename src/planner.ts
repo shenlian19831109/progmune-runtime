@@ -4,7 +4,7 @@ import { validateActionSequence } from "./validator";
 import { checkSemantic } from "./semantic-validator";
 import { getFunctionSuccessRate } from "./feedback";
 import { jaccardSimilarity, extractKeywords } from "./utils";
-import { recordFailure, recordSession, saveCheckpoint, loadCheckpoint, clearCheckpoint, SVL } from "./failure-corpus";
+import { recordFailure, recordSession, saveCheckpoint, loadCheckpoint, clearCheckpoint, SVL, queryAntibodies } from "./failure-corpus";
 import { recordEpisode, findSemanticTemplate } from "./memory-layer";
 import { StateMachineValidator, SSGRejection, parseProtocolsFromJSON } from "./ssg-validator";
 import { createSnapshot, saveSnapshot } from "./semantic-snapshot";
@@ -232,6 +232,53 @@ export async function plan(userIntent: string): Promise<Action[]> {
     return cachedTemplate.actionSequence;
   }
 
+  // 抗体免疫快速通道：查询高置信度抗体（ACL-3+），匹配则约束或跳过 LLM
+  const antibodies = queryAntibodies(userIntent, "ACL-3");
+  let antibodyHint = "";
+  if (antibodies.length > 0) {
+    const top = antibodies[0];
+    const aclLabel = top.antibodyLevel;
+    console.error(`🛡️  命中抗体: ${aclLabel} | 模式: ${top.signature} | 相似度: ${(top as any)._score.toFixed(2)}`);
+    console.error(`   修复路径: ${top.fixPath.join(" → ")}`);
+
+    // ACL-4: 全局稳定抗体 → 直接构建动作序列，跳过 LLM
+    if (aclLabel === "ACL-4" && top.fixPath.length > 0) {
+      const antibodyActions: Action[] = top.fixPath.map((fnName: string) => {
+        const def = ir.find((f: any) => f.name === fnName);
+        const args = (def?.params || []).map((p: any, i: number) => ({
+          name: p.name || `p${i}`,
+          type: p.type || 'any',
+          value: null,
+        }));
+        const action: Action = { kind: 'call', function: fnName, args };
+        if (def?.returnType && def.returnType !== 'void' && def.returnType !== 'undefined') {
+          action.assignTo = `${fnName}_result`;
+        }
+        return action;
+      });
+
+      // 验证抗体序列
+      const { protocols, namespaceInitialStates } = loadProtocols(ir);
+      if (protocols.length > 0) {
+        const validation = validateProtocol(antibodyActions, protocols, namespaceInitialStates);
+        if (validation.valid) {
+          console.error("⚡ ACL-4 抗体快速通道: 0 LLM 调用，直接返回免疫验证序列");
+          recordEpisode({ intent: userIntent, actions: antibodyActions, success: true });
+          return antibodyActions;
+        }
+      } else {
+        // 无协议规则，直接信任抗体
+        console.error("⚡ ACL-4 抗体快速通道: 0 LLM 调用（无协议约束）");
+        recordEpisode({ intent: userIntent, actions: antibodyActions, success: true });
+        return antibodyActions;
+      }
+    }
+
+    // ACL-3: 注入修复路径作为提示约束
+    antibodyHint = `\n已知正确调用顺序: ${top.fixPath.join(" → ")}。请遵循此顺序。`;
+    console.error(`💉 ACL-3 抗体注入提示: ${top.fixPath.join(" → ")}`);
+  }
+
   const keywords = extractKeywords(userIntent);
   const scored = ir.map((f: any) => {
     let score = 0;
@@ -258,7 +305,7 @@ export async function plan(userIntent: string): Promise<Action[]> {
   const userPrompt = `可用函数：
 ${compactFuncList}
 
-需求：${userIntent}
+需求：${userIntent}${antibodyHint}
 
 只输出代码。`;
 

@@ -331,6 +331,33 @@ export function getLearnedPatterns(): { failureToFix: LearnedPattern[] } {
   return { failureToFix: patterns };
 }
 
+/** 查询匹配当前意图的高置信度抗体（ACL-3+），用于推理层免疫加速 */
+export function queryAntibodies(intent: string, minACL: AntibodyLevel = "ACL-3"): LearnedPattern[] {
+  const { failureToFix } = getLearnedPatterns();
+  const aclRank: Record<AntibodyLevel, number> = { "ACL-1": 1, "ACL-2": 2, "ACL-3": 3, "ACL-4": 4 };
+  const minRank = aclRank[minACL];
+
+  const intentLower = intent.toLowerCase();
+  const intentWords = new Set(intentLower.split(/[\s,，、]+/).filter(w => w.length > 1));
+
+  return failureToFix
+    .filter(p => aclRank[p.antibodyLevel] >= minRank)
+    .filter(p => p.fixPath && p.fixPath.length > 0)
+    .map(p => {
+      // 计算意图相似度
+      let overlapScore = 0;
+      for (const di of p.distinctIntents) {
+        const diWords = new Set(di.toLowerCase().split(/[\s,，、]+/).filter(w => w.length > 1));
+        const intersection = [...intentWords].filter(w => diWords.has(w)).length;
+        const union = new Set([...intentWords, ...diWords]).size;
+        overlapScore = Math.max(overlapScore, union > 0 ? intersection / union : 0);
+      }
+      return { ...p, _score: overlapScore };
+    })
+    .filter(p => p._score > 0.2) // 至少 20% 的 Jaccard 相似度
+    .sort((a, b) => b._score - a._score);
+}
+
 /** 语义热力图：哪些协议/层最脆弱，约束如何聚类 */
 export function getSemanticHeatmap(): {
   fragileProtocols: { function: string; violationCount: number; svl: string }[];
