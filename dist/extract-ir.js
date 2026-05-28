@@ -211,6 +211,196 @@ function extractIR(projectRoot) {
             }
         }
     }
+    // 提取外部依赖函数：收集所有 calls 中引用但未声明的函数
+    const declaredNames = new Set(funcs.map(f => f.name));
+    const allCalls = new Set();
+    for (const f of funcs) {
+        for (const c of f.calls) {
+            allCalls.add(c);
+        }
+    }
+    // JS 内置方法和 TypeScript 语法节点，不作为外部函数暴露
+    const ignoredBuiltins = new Set([
+        "map", "filter", "reduce", "forEach", "find", "some", "every",
+        "push", "pop", "shift", "unshift", "slice", "splice", "concat",
+        "join", "split", "replace", "match", "search", "trim", "toLowerCase",
+        "toUpperCase", "includes", "indexOf", "startsWith", "endsWith",
+        "sort", "reverse", "keys", "values", "entries", "has", "get", "set",
+        "toString", "toISOString", "getTime", "getFullYear", "getMonth", "getDate",
+        "getHours", "getMinutes", "getSeconds", "floor", "ceil", "round",
+        "charAt", "charCodeAt", "substring", "substr", "padStart", "padEnd",
+        "getJsDocs", "getTags", "getTagName", "getCommentText", "getText",
+        "getName", "getType", "getExpression", "getArguments", "getParameters",
+        "getSourceFiles", "getFunctions", "getVariableDeclarations",
+        "getInitializer", "getReturnType", "isIdentifier", "isArrowFunction",
+        "isCallExpression", "isFunctionDeclaration", "isUnionTypeNode",
+        "isTypeReference", "isPropertyAccessExpression", "getTypeNodes",
+        "getTypeArguments", "getTypeName", "skip", "traversal",
+        "addSourceFilesAtPaths", "getFilePath",
+        "then", "catch", "resolve", "reject", // Promise
+    ]);
+    // 已知外部函数签名注册表
+    const knownExternals = {
+        // fs
+        "readFileSync": {
+            params: [{ name: "path", type: "string" }, { name: "encoding", type: "string" }],
+            returnType: "string", description: "同步读取文件内容",
+        },
+        "writeFileSync": {
+            params: [{ name: "path", type: "string" }, { name: "data", type: "string" }],
+            returnType: "void", description: "同步写入文件",
+        },
+        "existsSync": {
+            params: [{ name: "path", type: "string" }],
+            returnType: "boolean", description: "检查文件是否存在",
+        },
+        "readdirSync": {
+            params: [{ name: "path", type: "string" }],
+            returnType: "string[]", description: "读取目录内容",
+        },
+        "mkdirSync": {
+            params: [{ name: "path", type: "string" }, { name: "options", type: "object" }],
+            returnType: "void", description: "创建目录",
+        },
+        "unlinkSync": {
+            params: [{ name: "path", type: "string" }],
+            returnType: "void", description: "删除文件",
+        },
+        "statSync": {
+            params: [{ name: "path", type: "string" }],
+            returnType: "object", description: "获取文件状态",
+        },
+        // path
+        "resolve": {
+            params: [{ name: "segments", type: "string[]" }],
+            returnType: "string", description: "解析路径段为绝对路径",
+        },
+        "relative": {
+            params: [{ name: "from", type: "string" }, { name: "to", type: "string" }],
+            returnType: "string", description: "计算相对路径",
+        },
+        "dirname": {
+            params: [{ name: "path", type: "string" }],
+            returnType: "string", description: "获取目录名",
+        },
+        "basename": {
+            params: [{ name: "path", type: "string" }],
+            returnType: "string", description: "获取文件名",
+        },
+        "extname": {
+            params: [{ name: "path", type: "string" }],
+            returnType: "string", description: "获取文件扩展名",
+        },
+        // JSON
+        "parse": {
+            params: [{ name: "text", type: "string" }],
+            returnType: "any", description: "解析 JSON 字符串",
+        },
+        "stringify": {
+            params: [{ name: "value", type: "any" }, { name: "replacer", type: "any" }],
+            returnType: "string", description: "序列化为 JSON 字符串",
+        },
+        // console
+        "log": {
+            params: [{ name: "message", type: "any" }],
+            returnType: "void", description: "输出日志",
+        },
+        "error": {
+            params: [{ name: "message", type: "any" }],
+            returnType: "void", description: "输出错误日志",
+        },
+        "warn": {
+            params: [{ name: "message", type: "any" }],
+            returnType: "void", description: "输出警告日志",
+        },
+        // Buffer
+        "from": {
+            params: [{ name: "data", type: "string" }, { name: "encoding", type: "string" }],
+            returnType: "Buffer", description: "从字符串创建 Buffer",
+        },
+        // process
+        "exit": {
+            params: [{ name: "code", type: "number" }],
+            returnType: "void", description: "退出进程",
+        },
+        "cwd": {
+            params: [],
+            returnType: "string", description: "获取当前工作目录",
+        },
+        // child_process
+        "execSync": {
+            params: [{ name: "command", type: "string" }],
+            returnType: "Buffer", description: "同步执行命令",
+        },
+        // crypto
+        "createHash": {
+            params: [{ name: "algorithm", type: "string" }],
+            returnType: "Hash", description: "创建哈希对象",
+        },
+        "digest": {
+            params: [{ name: "encoding", type: "string" }],
+            returnType: "string", description: "输出哈希摘要",
+        },
+        "update": {
+            params: [{ name: "data", type: "string" }],
+            returnType: "Hash", description: "更新哈希数据",
+        },
+        // Date
+        "now": {
+            params: [],
+            returnType: "number", description: "当前时间戳（毫秒）",
+        },
+        // Object
+        "entries": {
+            params: [{ name: "obj", type: "object" }],
+            returnType: "Array<[string, any]>", description: "返回对象的键值对数组",
+        },
+        // setTimeout / setInterval
+        "setTimeout": {
+            params: [{ name: "callback", type: "function" }, { name: "ms", type: "number" }],
+            returnType: "number", description: "延迟执行回调",
+        },
+        // Math
+        "random": {
+            params: [],
+            returnType: "number", description: "生成 0-1 随机数",
+        },
+        "abs": {
+            params: [{ name: "x", type: "number" }],
+            returnType: "number", description: "绝对值",
+        },
+        "max": {
+            params: [{ name: "values", type: "number[]" }],
+            returnType: "number", description: "最大值",
+        },
+        "min": {
+            params: [{ name: "values", type: "number[]" }],
+            returnType: "number", description: "最小值",
+        },
+    };
+    let externalCount = 0;
+    for (const callName of allCalls) {
+        if (declaredNames.has(callName))
+            continue;
+        if (ignoredBuiltins.has(callName))
+            continue;
+        // 跳过 TypeScript 类型/语法节点
+        if (callName.startsWith("is") && callName[2] === callName[2]?.toUpperCase())
+            continue;
+        const known = knownExternals[callName];
+        funcs.push({
+            name: callName,
+            params: known ? known.params : [],
+            returnType: known ? known.returnType : "any",
+            returnTypeDetail: known ? known.returnType : "any",
+            file: "(external)",
+            calls: [],
+            external: true,
+            description: known?.description,
+        });
+        externalCount++;
+    }
+    console.error(`📦 外部函数: ${externalCount} (from ${allCalls.size} total calls)`);
     return funcs;
 }
 // 若直接运行
