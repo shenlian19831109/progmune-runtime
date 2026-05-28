@@ -4,7 +4,7 @@ import { validateActionSequence } from "./validator";
 import { checkSemantic } from "./semantic-validator";
 import { getFunctionSuccessRate } from "./feedback";
 import { jaccardSimilarity, extractKeywords } from "./utils";
-import { recordFailure, recordSession, SVL } from "./failure-corpus";
+import { recordFailure, recordSession, saveCheckpoint, loadCheckpoint, clearCheckpoint, SVL } from "./failure-corpus";
 import { recordEpisode, findSemanticTemplate } from "./memory-layer";
 import { StateMachineValidator, SSGRejection } from "./ssg-validator";
 import * as fs from "fs";
@@ -90,15 +90,21 @@ function loadProtocols(ir: any[]) {
     .map((f: any) => ({ function: f.name, protocol: f.protocol }));
 }
 
-/** 验证动作序列的协议合法性 */
-function validateProtocol(actions: Action[], protocols: any[], initialState: string): { valid: boolean; rejection?: SSGRejection; index?: number } {
+/** 验证动作序列的协议合法性，返回完整 SSG 跟踪 */
+function validateProtocol(actions: Action[], protocols: any[], initialState: string): { valid: boolean; rejection?: SSGRejection; index?: number; trace?: { function: string; statesBefore: string[]; statesAfter: string[] }[] } {
   const ssv = new StateMachineValidator(protocols, initialState);
   for (let i = 0; i < actions.length; i++) {
     const a = actions[i];
     if (a.kind === "call" && a.function) {
       const result = ssv.apply(a.function);
       if (!result.valid) {
-        return { valid: false, rejection: result.rejection!, index: i };
+        const fullTrace = ssv.getTrace();
+        const trace = fullTrace.map(t => ({
+          function: t.function,
+          statesBefore: t.statesBefore || [],
+          statesAfter: t.statesAfter || [],
+        }));
+        return { valid: false, rejection: result.rejection!, index: i, trace };
       }
     }
   }
@@ -150,9 +156,21 @@ ${compactFuncList}
   const estimatedTokens = estimateTokens(SYSTEM_PROMPT + userPrompt);
   console.error(`💰 估算 prompt token: ${estimatedTokens}`);
 
+  // ── 执行持久化：检查是否有未完成的 checkpoint ──
+  const cp = loadCheckpoint(userIntent);
+  let startRetry = 0;
   let finalActions: Action[] = [];
   let currentPrompt = userPrompt;
   let useSystem = true;
+  let collectedFailures: any[] = [];
+
+  if (cp) {
+    console.error(`📌 恢复 checkpoint: 已完成 ${cp.attemptIndex} 次尝试，从第 ${cp.attemptIndex + 1} 次继续`);
+    startRetry = cp.attemptIndex;
+    currentPrompt = cp.currentPrompt;
+    useSystem = cp.useSystem;
+    collectedFailures = cp.collectedFailures || [];
+  }
 
   const protocols = loadProtocols(ir);
   function getMaskedFuncList(currentState: string): string {
@@ -168,10 +186,9 @@ ${compactFuncList}
     return buildCompactFuncList(legalFuncs);
   }
 
-  const collectedFailures: any[] = [];
   const maxRetries = 3;
 
-  for (let r = 0; r < maxRetries; r++) {
+  for (let r = startRetry; r < maxRetries; r++) {
     let text: string;
     try {
       text = useSystem
@@ -200,6 +217,11 @@ ${compactFuncList}
       const errorsFlat = seqResult.errors.flat();
       console.error("⚠️ 序列校验失败:", errorsFlat.join(", "));
       const svl = determineSVL(errorsFlat);
+      // 从错误信息中提取结构化上下文
+      const missingFnMatch = errorsFlat.join(" ").match(/函数\s*['"]?(\w+)['"]?\s*不存在/);
+      const typeMatch = errorsFlat.join(" ").match(/(\w+)\s*(参数数量不匹配|类型不匹配|参数)/);
+      const varMatch = errorsFlat.join(" ").match(/变量\s*['"]?(\w+)['"]?\s*(未定义|在赋值前被引用)/);
+
       recordFailure({
         intent: userIntent,
         projectFunctions: ir.map((f: any) => f.name),
@@ -207,6 +229,7 @@ ${compactFuncList}
         constraintType: determineConstraintType(svl),
         actionSequence: filtered,
         errorDetail: errorsFlat.join("; "),
+        ssgMissingFunctions: missingFnMatch ? [missingFnMatch[1]] : (typeMatch ? [typeMatch[1]] : (varMatch ? [varMatch[1]] : undefined)),
         plannerAttempt: r + 1,
         plannerRetryTotal: maxRetries,
       });
@@ -215,12 +238,14 @@ ${compactFuncList}
         constraintType: determineConstraintType(svl),
         errorDetail: errorsFlat.join("; "),
         actionSequence: filtered,
+        ssgMissingFunctions: missingFnMatch ? [missingFnMatch[1]] : undefined,
         plannerAttempt: r + 1,
         plannerRetryTotal: maxRetries,
       });
       recordEpisode({ intent: userIntent, actions: filtered, success: false, svlViolated: svl });
       currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n错误：${errorsFlat.join("；")}。请修正。\n${RETRY_HINT}\n只输出代码。`;
       useSystem = false;
+      saveCheckpoint(userIntent, { attemptIndex: r + 1, collectedFailures, currentPrompt, useSystem });
       continue;
     }
 
@@ -239,6 +264,7 @@ ${compactFuncList}
           actionSequence: filtered,
           errorDetail: JSON.stringify(StateMachineValidator.rejectionToJSON(rej)),
           ssgState: rej.currentState,
+          ssgTrace: protoResult.trace,
           ssgFixPath: rej.fixPath,
           ssgMissingFunctions: rej.missingFunctions,
           plannerAttempt: r + 1,
@@ -258,6 +284,7 @@ ${compactFuncList}
         const maskedFuncList = getMaskedFuncList("UNAUTHENTICATED");
         currentPrompt = `当前协议状态只允许以下函数：\n${maskedFuncList}\n\n需求：${userIntent}\n\n协议违规：${explain.replace(/\n/g, '；')}。请修正。\n${RETRY_HINT}\n只输出代码。`;
         useSystem = false;
+        saveCheckpoint(userIntent, { attemptIndex: r + 1, collectedFailures, currentPrompt, useSystem });
       continue;
       }
     }
@@ -287,6 +314,7 @@ ${compactFuncList}
       recordEpisode({ intent: userIntent, actions: filtered, success: false, svlViolated: "SVL-4" });
       currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n语义错误：${semResult.errors.join("；")}。请修正。\n${RETRY_HINT}\n只输出代码。`;
       useSystem = false;
+      saveCheckpoint(userIntent, { attemptIndex: r + 1, collectedFailures, currentPrompt, useSystem });
       continue;
     }
 
@@ -304,6 +332,7 @@ ${compactFuncList}
       totalRetries: collectedFailures.length,
       resolved: true,
     });
+    clearCheckpoint(userIntent);
   } else {
     // LLM 3 次重试失败，尝试本地规则回退
     console.error("[降级] LLM 规划失败，尝试本地规则回退");
@@ -319,6 +348,7 @@ ${compactFuncList}
         totalRetries: collectedFailures.length,
         resolved: true,
       });
+      clearCheckpoint(userIntent);
       return fallback;
     }
     recordEpisode({ intent: userIntent, actions: [], success: false });
@@ -329,6 +359,7 @@ ${compactFuncList}
       totalRetries: collectedFailures.length,
       resolved: false,
     });
+    clearCheckpoint(userIntent);
   }
 
   return finalActions;

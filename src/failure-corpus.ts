@@ -58,9 +58,50 @@ const projectDir = process.env.PROGMUNE_PROJECT_DIR || process.cwd();
 const CORPUS_DIR = process.env.PROGMUNE_CORPUS_DIR
   || path.resolve(projectDir, ".progmune_corpus");
 const SESSIONS_DIR = path.join(CORPUS_DIR, "sessions");
+const CHECKPOINT_DIR = path.join(CORPUS_DIR, "checkpoints");
 
 function ensureDir(dir: string) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+}
+
+// ── Planner checkpoint: 执行持久化，支持中断恢复 ──
+
+export interface PlannerCheckpoint {
+  intent: string;
+  attemptIndex: number;       // 已完成的尝试次数（下次从 r = attemptIndex 继续）
+  collectedFailures: SessionAttempt[];
+  currentPrompt: string;
+  useSystem: boolean;
+  timestamp: string;
+}
+
+function checkpointPath(intent: string): string {
+  // 用 intent 的稳定 hash 作为文件名，避免特殊字符
+  const hash = Buffer.from(intent).toString("base64").replace(/[/+=]/g, "_").slice(0, 32);
+  return path.join(CHECKPOINT_DIR, `ckpt_${hash}.json`);
+}
+
+export function saveCheckpoint(intent: string, data: Omit<PlannerCheckpoint, "intent" | "timestamp">): void {
+  ensureDir(CHECKPOINT_DIR);
+  const cp: PlannerCheckpoint = {
+    ...data,
+    intent,
+    timestamp: new Date().toISOString(),
+  };
+  fs.writeFileSync(checkpointPath(intent), JSON.stringify(cp, null, 2));
+}
+
+export function loadCheckpoint(intent: string): PlannerCheckpoint | null {
+  try {
+    const raw = fs.readFileSync(checkpointPath(intent), "utf-8");
+    return JSON.parse(raw) as PlannerCheckpoint;
+  } catch {
+    return null;
+  }
+}
+
+export function clearCheckpoint(intent: string): void {
+  try { fs.unlinkSync(checkpointPath(intent)); } catch {}
 }
 
 export function recordFailure(

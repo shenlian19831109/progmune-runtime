@@ -33,6 +33,9 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.saveCheckpoint = saveCheckpoint;
+exports.loadCheckpoint = loadCheckpoint;
+exports.clearCheckpoint = clearCheckpoint;
 exports.recordFailure = recordFailure;
 exports.recordSession = recordSession;
 exports.getAllFailures = getAllFailures;
@@ -51,9 +54,39 @@ const projectDir = process.env.PROGMUNE_PROJECT_DIR || process.cwd();
 const CORPUS_DIR = process.env.PROGMUNE_CORPUS_DIR
     || path.resolve(projectDir, ".progmune_corpus");
 const SESSIONS_DIR = path.join(CORPUS_DIR, "sessions");
+const CHECKPOINT_DIR = path.join(CORPUS_DIR, "checkpoints");
 function ensureDir(dir) {
     if (!fs.existsSync(dir))
         fs.mkdirSync(dir, { recursive: true });
+}
+function checkpointPath(intent) {
+    // 用 intent 的稳定 hash 作为文件名，避免特殊字符
+    const hash = Buffer.from(intent).toString("base64").replace(/[/+=]/g, "_").slice(0, 32);
+    return path.join(CHECKPOINT_DIR, `ckpt_${hash}.json`);
+}
+function saveCheckpoint(intent, data) {
+    ensureDir(CHECKPOINT_DIR);
+    const cp = {
+        ...data,
+        intent,
+        timestamp: new Date().toISOString(),
+    };
+    fs.writeFileSync(checkpointPath(intent), JSON.stringify(cp, null, 2));
+}
+function loadCheckpoint(intent) {
+    try {
+        const raw = fs.readFileSync(checkpointPath(intent), "utf-8");
+        return JSON.parse(raw);
+    }
+    catch {
+        return null;
+    }
+}
+function clearCheckpoint(intent) {
+    try {
+        fs.unlinkSync(checkpointPath(intent));
+    }
+    catch { }
 }
 function recordFailure(record) {
     (0, file_lock_1.withLock)("failure-corpus", () => {

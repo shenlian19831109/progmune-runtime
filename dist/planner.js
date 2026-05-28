@@ -122,7 +122,7 @@ function loadProtocols(ir) {
         .filter((f) => f.protocol)
         .map((f) => ({ function: f.name, protocol: f.protocol }));
 }
-/** 验证动作序列的协议合法性 */
+/** 验证动作序列的协议合法性，返回完整 SSG 跟踪 */
 function validateProtocol(actions, protocols, initialState) {
     const ssv = new ssg_validator_1.StateMachineValidator(protocols, initialState);
     for (let i = 0; i < actions.length; i++) {
@@ -130,7 +130,13 @@ function validateProtocol(actions, protocols, initialState) {
         if (a.kind === "call" && a.function) {
             const result = ssv.apply(a.function);
             if (!result.valid) {
-                return { valid: false, rejection: result.rejection, index: i };
+                const fullTrace = ssv.getTrace();
+                const trace = fullTrace.map(t => ({
+                    function: t.function,
+                    statesBefore: t.statesBefore || [],
+                    statesAfter: t.statesAfter || [],
+                }));
+                return { valid: false, rejection: result.rejection, index: i, trace };
             }
         }
     }
@@ -175,9 +181,20 @@ ${compactFuncList}
 只输出代码。`;
     const estimatedTokens = (0, llm_1.estimateTokens)(SYSTEM_PROMPT + userPrompt);
     console.error(`💰 估算 prompt token: ${estimatedTokens}`);
+    // ── 执行持久化：检查是否有未完成的 checkpoint ──
+    const cp = (0, failure_corpus_1.loadCheckpoint)(userIntent);
+    let startRetry = 0;
     let finalActions = [];
     let currentPrompt = userPrompt;
     let useSystem = true;
+    let collectedFailures = [];
+    if (cp) {
+        console.error(`📌 恢复 checkpoint: 已完成 ${cp.attemptIndex} 次尝试，从第 ${cp.attemptIndex + 1} 次继续`);
+        startRetry = cp.attemptIndex;
+        currentPrompt = cp.currentPrompt;
+        useSystem = cp.useSystem;
+        collectedFailures = cp.collectedFailures || [];
+    }
     const protocols = loadProtocols(ir);
     function getMaskedFuncList(currentState) {
         if (protocols.length === 0)
@@ -194,9 +211,8 @@ ${compactFuncList}
             return compactFuncList;
         return buildCompactFuncList(legalFuncs);
     }
-    const collectedFailures = [];
     const maxRetries = 3;
-    for (let r = 0; r < maxRetries; r++) {
+    for (let r = startRetry; r < maxRetries; r++) {
         let text;
         try {
             text = useSystem
@@ -225,6 +241,10 @@ ${compactFuncList}
             const errorsFlat = seqResult.errors.flat();
             console.error("⚠️ 序列校验失败:", errorsFlat.join(", "));
             const svl = determineSVL(errorsFlat);
+            // 从错误信息中提取结构化上下文
+            const missingFnMatch = errorsFlat.join(" ").match(/函数\s*['"]?(\w+)['"]?\s*不存在/);
+            const typeMatch = errorsFlat.join(" ").match(/(\w+)\s*(参数数量不匹配|类型不匹配|参数)/);
+            const varMatch = errorsFlat.join(" ").match(/变量\s*['"]?(\w+)['"]?\s*(未定义|在赋值前被引用)/);
             (0, failure_corpus_1.recordFailure)({
                 intent: userIntent,
                 projectFunctions: ir.map((f) => f.name),
@@ -232,6 +252,7 @@ ${compactFuncList}
                 constraintType: determineConstraintType(svl),
                 actionSequence: filtered,
                 errorDetail: errorsFlat.join("; "),
+                ssgMissingFunctions: missingFnMatch ? [missingFnMatch[1]] : (typeMatch ? [typeMatch[1]] : (varMatch ? [varMatch[1]] : undefined)),
                 plannerAttempt: r + 1,
                 plannerRetryTotal: maxRetries,
             });
@@ -240,12 +261,14 @@ ${compactFuncList}
                 constraintType: determineConstraintType(svl),
                 errorDetail: errorsFlat.join("; "),
                 actionSequence: filtered,
+                ssgMissingFunctions: missingFnMatch ? [missingFnMatch[1]] : undefined,
                 plannerAttempt: r + 1,
                 plannerRetryTotal: maxRetries,
             });
             (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: filtered, success: false, svlViolated: svl });
             currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n错误：${errorsFlat.join("；")}。请修正。\n${RETRY_HINT}\n只输出代码。`;
             useSystem = false;
+            (0, failure_corpus_1.saveCheckpoint)(userIntent, { attemptIndex: r + 1, collectedFailures, currentPrompt, useSystem });
             continue;
         }
         // 2) 协议状态机校验 (SSG)
@@ -263,6 +286,7 @@ ${compactFuncList}
                     actionSequence: filtered,
                     errorDetail: JSON.stringify(ssg_validator_1.StateMachineValidator.rejectionToJSON(rej)),
                     ssgState: rej.currentState,
+                    ssgTrace: protoResult.trace,
                     ssgFixPath: rej.fixPath,
                     ssgMissingFunctions: rej.missingFunctions,
                     plannerAttempt: r + 1,
@@ -282,6 +306,7 @@ ${compactFuncList}
                 const maskedFuncList = getMaskedFuncList("UNAUTHENTICATED");
                 currentPrompt = `当前协议状态只允许以下函数：\n${maskedFuncList}\n\n需求：${userIntent}\n\n协议违规：${explain.replace(/\n/g, '；')}。请修正。\n${RETRY_HINT}\n只输出代码。`;
                 useSystem = false;
+                (0, failure_corpus_1.saveCheckpoint)(userIntent, { attemptIndex: r + 1, collectedFailures, currentPrompt, useSystem });
                 continue;
             }
         }
@@ -310,6 +335,7 @@ ${compactFuncList}
             (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: filtered, success: false, svlViolated: "SVL-4" });
             currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n语义错误：${semResult.errors.join("；")}。请修正。\n${RETRY_HINT}\n只输出代码。`;
             useSystem = false;
+            (0, failure_corpus_1.saveCheckpoint)(userIntent, { attemptIndex: r + 1, collectedFailures, currentPrompt, useSystem });
             continue;
         }
         finalActions = filtered;
@@ -325,6 +351,7 @@ ${compactFuncList}
             totalRetries: collectedFailures.length,
             resolved: true,
         });
+        (0, failure_corpus_1.clearCheckpoint)(userIntent);
     }
     else {
         // LLM 3 次重试失败，尝试本地规则回退
@@ -341,6 +368,7 @@ ${compactFuncList}
                 totalRetries: collectedFailures.length,
                 resolved: true,
             });
+            (0, failure_corpus_1.clearCheckpoint)(userIntent);
             return fallback;
         }
         (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: [], success: false });
@@ -351,6 +379,7 @@ ${compactFuncList}
             totalRetries: collectedFailures.length,
             resolved: false,
         });
+        (0, failure_corpus_1.clearCheckpoint)(userIntent);
     }
     return finalActions;
 }
