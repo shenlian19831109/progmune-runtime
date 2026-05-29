@@ -447,14 +447,24 @@ function formatStateTransitionPath(actions: { kind: string; function?: string }[
   for (const step of trace) {
     if (!step.valid) continue;
     const fnLabel = C_(step.function + "()");
-    const beforeStr = (step.statesBefore || []).join(", ");
-    const afterStr = (step.statesAfter || []).join(", ");
 
-    // State delta
-    const before = step.statesBefore || [];
-    const after = step.statesAfter || [];
-    const gained = after.filter((s: string) => !before.includes(s));
-    const lost = before.filter((s: string) => !after.includes(s));
+    // Merge per-namespace states for display
+    const mergeStates = (rec: Record<string, string[]>): Set<string> => {
+      const all = new Set<string>();
+      for (const states of Object.values(rec)) {
+        for (const s of states) all.add(s);
+      }
+      return all;
+    };
+    const beforeAll = mergeStates(step.statesBefore);
+    const afterAll = mergeStates(step.statesAfter);
+
+    const beforeStr = [...beforeAll].join(", ");
+    const afterStr = [...afterAll].join(", ");
+
+    // Use pre-computed per-namespace deltas
+    const gained = step.acquired || [];
+    const lost = step.invalidated || [];
 
     let delta = "";
     if (gained.length > 0) delta += ` ${G("+" + gained.join(",+"))}`;

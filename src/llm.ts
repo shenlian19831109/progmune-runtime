@@ -1,4 +1,5 @@
-import "dotenv/config";
+try { require("dotenv/config"); } catch {}
+
 import OpenAI from "openai";
 
 const provider = process.env.LLM_PROVIDER || "deepseek";

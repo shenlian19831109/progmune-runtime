@@ -27,27 +27,26 @@ export interface SSGRejection {
 /** 单次 apply 的结构化结果 */
 export interface SSGStepResult {
   valid: boolean;
-  statesAfter: string[];                        // merged (backward compat)
   rejection?: SSGRejection;
-  nsStatesBefore?: Record<string, string[]>;   // per-namespace snapshot before
-  nsStatesAfter?: Record<string, string[]>;    // per-namespace snapshot after
-  acquired?: string[];                         // states added in this step
-  invalidated?: string[];                      // states removed in this step
-  namespace?: string;                          // namespace affected
+  /** per-namespace state snapshot — canonical format, aligns with runtime-types.StateTransition */
+  statesBefore: Record<string, string[]>;
+  statesAfter: Record<string, string[]>;
+  acquired: string[];
+  invalidated: string[];
+  namespace: string;
 }
 
-/** 完整跟踪节点 */
+/** 完整跟踪节点 — 与 runtime-types.StateTransition 格式对齐 */
 export interface SSGTraceNode {
   function: string;
   valid: boolean;
-  statesBefore: string[];          // merged
-  statesAfter: string[];           // merged
   rejection?: SSGRejection;
-  nsStatesBefore?: Record<string, string[]>;
-  nsStatesAfter?: Record<string, string[]>;
-  acquired?: string[];
-  invalidated?: string[];
-  namespace?: string;
+  /** per-namespace state snapshot */
+  statesBefore: Record<string, string[]>;
+  statesAfter: Record<string, string[]>;
+  acquired: string[];
+  invalidated: string[];
+  namespace: string;
 }
 
 const DEFAULT_NAMESPACE = "_global";
@@ -95,13 +94,20 @@ export class StateMachineValidator {
 
   apply(functionName: string, actionIndex?: number): SSGStepResult {
     const nsSnapBefore = this.snapshotNamespaceStates();
-    const statesBefore = [...this.getEffectiveStates()];
     const rule = this.rules.get(functionName);
 
     if (!rule) {
-      const node: SSGTraceNode = { function: functionName, valid: true, statesBefore, statesAfter: [...this.getEffectiveStates()] };
+      const node: SSGTraceNode = {
+        function: functionName, valid: true,
+        statesBefore: nsSnapBefore, statesAfter: nsSnapBefore,
+        acquired: [], invalidated: [], namespace: DEFAULT_NAMESPACE,
+      };
       this.trace.push(node);
-      return { valid: true, statesAfter: [...this.getEffectiveStates()] };
+      return {
+        valid: true,
+        statesBefore: nsSnapBefore, statesAfter: nsSnapBefore,
+        acquired: [], invalidated: [], namespace: DEFAULT_NAMESPACE,
+      };
     }
 
     const ns = rule.namespace || DEFAULT_NAMESPACE;
@@ -122,16 +128,17 @@ export class StateMachineValidator {
         namespace: ns,
       };
 
+      const rejectionSnapAfter = this.snapshotNamespaceStates();
       const node: SSGTraceNode = {
-        function: functionName, valid: false, statesBefore, statesAfter: [...this.getEffectiveStates()],
-        nsStatesBefore: nsSnapBefore, nsStatesAfter: this.snapshotNamespaceStates(),
-        namespace: ns, rejection,
+        function: functionName, valid: false,
+        statesBefore: nsSnapBefore, statesAfter: rejectionSnapAfter,
+        acquired: [], invalidated: [], namespace: ns, rejection,
       };
       this.trace.push(node);
       return {
-        valid: false, statesAfter: [...this.getEffectiveStates()], rejection,
-        nsStatesBefore: nsSnapBefore, nsStatesAfter: this.snapshotNamespaceStates(),
-        namespace: ns,
+        valid: false,
+        statesBefore: nsSnapBefore, statesAfter: rejectionSnapAfter,
+        acquired: [], invalidated: [], namespace: ns, rejection,
       };
     }
 
@@ -148,16 +155,15 @@ export class StateMachineValidator {
     const acquired = afterNs.filter(s => !beforeNs.includes(s));
     const invalidated = beforeNs.filter(s => !afterNs.includes(s));
 
-    const statesAfter = [...this.getEffectiveStates()];
     const node: SSGTraceNode = {
-      function: functionName, valid: true, statesBefore, statesAfter,
-      nsStatesBefore: nsSnapBefore, nsStatesAfter: nsSnapAfter,
+      function: functionName, valid: true,
+      statesBefore: nsSnapBefore, statesAfter: nsSnapAfter,
       acquired, invalidated, namespace: ns,
     };
     this.trace.push(node);
     return {
-      valid: true, statesAfter,
-      nsStatesBefore: nsSnapBefore, nsStatesAfter: nsSnapAfter,
+      valid: true,
+      statesBefore: nsSnapBefore, statesAfter: nsSnapAfter,
       acquired, invalidated, namespace: ns,
     };
   }
@@ -172,8 +178,8 @@ export class StateMachineValidator {
       namespace: ns,
       acquired: result.acquired || [],
       invalidated: result.invalidated || [],
-      statesBefore: result.nsStatesBefore || {},
-      statesAfter: result.nsStatesAfter || {},
+      statesBefore: result.statesBefore,
+      statesAfter: result.statesAfter,
       valid: result.valid,
     };
     return { result, transition };

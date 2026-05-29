@@ -170,7 +170,7 @@ function validateProtocolWithTransitions(
   actions: Action[],
   protocols: FunctionProtocol[],
   namespaceInitialStates: Map<string, string>
-): { valid: boolean; rejection?: SSGRejection; index?: number; trace?: { function: string; statesBefore: string[]; statesAfter: string[] }[]; transitions: import("./runtime-types").StateTransition[] } {
+): { valid: boolean; rejection?: SSGRejection; index?: number; trace?: { function: string; statesBefore: Record<string, string[]>; statesAfter: Record<string, string[]> }[]; transitions: import("./runtime-types").StateTransition[] } {
   const defaultInit = namespaceInitialStates.get("_global") || "INIT";
   const ssv = new StateMachineValidator(protocols, defaultInit, namespaceInitialStates);
   const transitions: import("./runtime-types").StateTransition[] = [];
@@ -183,8 +183,8 @@ function validateProtocolWithTransitions(
         const fullTrace = ssv.getTrace();
         const trace = fullTrace.map(t => ({
           function: t.function,
-          statesBefore: t.statesBefore || [],
-          statesAfter: t.statesAfter || [],
+          statesBefore: t.statesBefore,
+          statesAfter: t.statesAfter,
         }));
         return { valid: false, rejection: result.rejection!, index: i, trace, transitions };
       }
@@ -438,18 +438,18 @@ ${RETRY_HINT}
     if (!seqResult.valid) {
       const errorsFlat = seqResult.errors.flat();
       console.error("⚠️ 序列校验失败:", errorsFlat.join(", "));
-      const svl = determineSVL(errorsFlat);
-      const missingFnMatch = errorsFlat.join(" ").match(/函数\s*['"]?(\w+)['"]?\s*不存在/);
-      const typeMatch = errorsFlat.join(" ").match(/(\w+)\s*(参数数量不匹配|类型不匹配|参数)/);
-      const varMatch = errorsFlat.join(" ").match(/变量\s*['"]?(\w+)['"]?\s*(未定义|在赋值前被引用)/);
 
-      const violation: ConstraintViolation = {
-        svl: parseInt(svl.split("-")[1]) as 1|2|3,
-        violatedConstraint: determineConstraintType(svl),
-        actionIndex: 0,
-        missingStates: missingFnMatch ? [missingFnMatch[1]] : (typeMatch ? [typeMatch[1]] : (varMatch ? [varMatch[1]] : undefined)),
-        description: errorsFlat.join("; "),
-      };
+      // Use structured violations directly from validator
+      const violations: ConstraintViolation[] = seqResult.violations.length > 0
+        ? seqResult.violations
+        : [{
+            svl: 1 as const,
+            violatedConstraint: "symbol_existence",
+            actionIndex: 0,
+            description: errorsFlat.join("; "),
+          }];
+
+      const primarySvl = `SVL-${violations[0].svl}` as SVL;
 
       const attempt: Attempt = {
         id: generateAttemptId(),
@@ -460,7 +460,7 @@ ${RETRY_HINT}
         constraintSnapshotId: snapshotId,
         generatedActions: filtered,
         transitions: [],
-        violations: [violation],
+        violations,
         outcome: "constraint_violation",
         timestamp: Date.now(),
         llmCallCount: 0,
@@ -471,15 +471,15 @@ ${RETRY_HINT}
       recordFailure({
         intent: userIntent,
         projectFunctions: ir.map((f: any) => f.name),
-        violatedSVL: svl,
-        constraintType: determineConstraintType(svl),
+        violatedSVL: primarySvl,
+        constraintType: violations[0].violatedConstraint,
         actionSequence: filtered,
         errorDetail: errorsFlat.join("; "),
-        ssgMissingFunctions: missingFnMatch ? [missingFnMatch[1]] : (typeMatch ? [typeMatch[1]] : (varMatch ? [varMatch[1]] : undefined)),
+        ssgMissingFunctions: violations[0].missingStates,
         plannerAttempt: r + 1,
         plannerRetryTotal: maxRetries,
       });
-      recordEpisode({ intent: userIntent, actions: filtered, success: false, svlViolated: svl });
+      recordEpisode({ intent: userIntent, actions: filtered, success: false, svlViolated: primarySvl });
       currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n错误：${errorsFlat.join("；")}。请修正。\n${RETRY_HINT}\n只输出 JSON。`;
       useSystem = false;
       saveCheckpoint(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });

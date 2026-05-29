@@ -22,7 +22,7 @@ export interface FailureRecord {
   ssgState?: string[];
 
   /** SSG 完整跟踪（从初始状态到违规点） */
-  ssgTrace?: { function: string; statesBefore: string[]; statesAfter: string[] }[];
+  ssgTrace?: { function: string; statesBefore: Record<string, string[]>; statesAfter: Record<string, string[]> }[];
 
   /** SSG 修复路径：要调用哪些函数才能达到目标状态 */
   ssgFixPath?: string[];

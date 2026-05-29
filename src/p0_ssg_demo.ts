@@ -97,7 +97,7 @@ function runDemo() {
       allPassed = false;
       break;
     } else {
-      console.log(`  ✅ ${fn} → [${result.statesAfter.join(', ')}]`);
+      console.log(`  ✅ ${fn} → [${Object.values(result.statesAfter).flat().join(', ')}]`);
     }
   }
   if (allPassed) console.log('  ✔ 合法序列全部通过\n');
@@ -116,7 +116,7 @@ function runDemo() {
       console.log('  ' + JSON.stringify(StateMachineValidator.rejectionToJSON(result.rejection!), null, 2).replace(/\n/g, '\n  '));
       break;
     }
-    console.log(`  ✅ ${fn} → [${result.statesAfter.join(', ')}]`);
+    console.log(`  ✅ ${fn} → [${Object.values(result.statesAfter).flat().join(', ')}]`);
   }
 
   // 5) 非法序列 — 调用后被撤销
@@ -140,7 +140,7 @@ function runDemo() {
   trace.forEach((node, i) => {
     const icon = node.valid ? '✅' : '🚫';
     console.log(`  ${icon} 步骤 ${i + 1}: ${node.function}`);
-    console.log(`     状态: [${node.statesBefore.join(', ')}] → [${node.statesAfter.join(', ')}]`);
+    console.log(`     状态: [${Object.values(node.statesBefore).flat().join(', ')}] → [${Object.values(node.statesAfter).flat().join(', ')}]`);
     if (node.rejection) {
       console.log(`     修复: ${node.rejection.fixPath.join(' → ')}`);
     }
