@@ -138,13 +138,7 @@ function validateProtocol(
 ): { valid: boolean; rejection?: SSGRejection; index?: number; trace?: { function: string; statesBefore: string[]; statesAfter: string[] }[] } {
   // 使用默认命名空间的初始状态，其他命名空间在 SSG 构造时预初始化
   const defaultInit = namespaceInitialStates.get("_global") || "INIT";
-  const ssv = new StateMachineValidator(protocols, defaultInit);
-  // 为每个非默认命名空间设置初始状态
-  for (const [ns, initState] of namespaceInitialStates) {
-    if (ns !== "_global" && initState) {
-      ssv.setNamespaceInitialState(ns, initState);
-    }
-  }
+  const ssv = new StateMachineValidator(protocols, defaultInit, namespaceInitialStates);
   for (let i = 0; i < actions.length; i++) {
     const a = actions[i];
     if (a.kind === "call" && a.function) {
@@ -332,10 +326,7 @@ ${compactFuncList}
   function getMaskedFuncList(): string {
     if (protocols.length === 0) return compactFuncList;
     const defaultInit = namespaceInitialStates.get("_global") || "INIT";
-    const ssv = new StateMachineValidator(protocols, defaultInit);
-    for (const [ns, initState] of namespaceInitialStates) {
-      if (ns !== "_global" && initState) ssv.setNamespaceInitialState(ns, initState);
-    }
+    const ssv = new StateMachineValidator(protocols, defaultInit, namespaceInitialStates);
     const legalFuncs = topFuncs.filter((f: any) => {
       const proto = protocols.find((p: any) => p.function === f.name);
       if (!proto) return true;

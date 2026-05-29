@@ -46,7 +46,7 @@ export class StateMachineValidator {
   private readonly rules: Map<string, StateAnnotation>;
   private trace: SSGTraceNode[] = [];
 
-  constructor(rules: FunctionProtocol[], initialState: string = 'INIT') {
+  constructor(rules: FunctionProtocol[], initialState: string = 'INIT', namespaceInitialStates?: Map<string, string>) {
     this.namespaceStates = new Map();
     // 默认命名空间初始化
     this.namespaceStates.set(DEFAULT_NAMESPACE, new Set<string>([initialState]));
@@ -59,6 +59,17 @@ export class StateMachineValidator {
         this.namespaceStates.set(ns, new Set<string>());
       }
     });
+    // 一次性设置所有命名空间初始状态，消除顺序依赖
+    if (namespaceInitialStates) {
+      for (const [ns, state] of namespaceInitialStates) {
+        if (ns !== DEFAULT_NAMESPACE && state) {
+          if (!this.namespaceStates.has(ns)) {
+            this.namespaceStates.set(ns, new Set<string>());
+          }
+          this.namespaceStates.get(ns)!.add(state);
+        }
+      }
+    }
   }
 
   /** 为指定命名空间设置初始状态（用于协议定义中的 initialState） */

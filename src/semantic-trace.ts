@@ -422,11 +422,7 @@ function loadNamespaceInitialStates(protocols: FunctionProtocol[]): Map<string, 
 function createSSV(protocols: FunctionProtocol[]): StateMachineValidator {
   const nsStates = loadNamespaceInitialStates(protocols);
   const defaultInit = nsStates.get("_global") || "INIT";
-  const ssv = new StateMachineValidator(protocols, defaultInit);
-  for (const [ns, initState] of nsStates) {
-    if (ns !== "_global") ssv.setNamespaceInitialState(ns, initState);
-  }
-  return ssv;
+  return new StateMachineValidator(protocols, defaultInit, nsStates);
 }
 
 function formatStateTransitionPath(actions: { kind: string; function?: string }[]): string {
@@ -947,10 +943,7 @@ function formatSessionValidation(session: ReturnType<typeof getAllSessions>[0]):
               nsStates.set(ns, s as string);
             }
           }
-          const ssv = new StateMachineValidator(protocols, nsStates.get("_global") || "INIT");
-          for (const [ns, s] of nsStates) {
-            if (ns !== "_global") ssv.setNamespaceInitialState(ns, s as string);
-          }
+          const ssv = new StateMachineValidator(protocols, nsStates.get("_global") || "INIT", nsStates);
 
           let valid = true;
           for (const act of session.successfulAlternative) {

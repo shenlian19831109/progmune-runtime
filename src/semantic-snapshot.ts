@@ -135,3 +135,9 @@ export function summarizeSnapshot(snapshot: IRSnapshot): string {
   if (snapshot.sessionId) lines.push(`Session: ${snapshot.sessionId}`);
   return lines.join("\n");
 }
+
+/** 按 sessionId 查找快照，返回最近的一个（或 undefined） */
+export function findSnapshotBySession(sessionId: string): IRSnapshot | undefined {
+  const snapshots = listSnapshots();
+  return snapshots.find(s => s.sessionId === sessionId);
+}

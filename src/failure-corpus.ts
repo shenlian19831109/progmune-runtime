@@ -338,7 +338,7 @@ export function queryAntibodies(intent: string, minACL: AntibodyLevel = "ACL-3")
   const minRank = aclRank[minACL];
 
   const intentLower = intent.toLowerCase();
-  const intentWords = new Set(intentLower.split(/[\s,，、]+/).filter(w => w.length > 1));
+  const intentWords = new Set(intentLower.split(/[\s,，、]+|(?<=[一-鿿])(?=[一-鿿])/).filter(w => w.length > 0));
 
   return failureToFix
     .filter(p => aclRank[p.antibodyLevel] >= minRank)
@@ -347,14 +347,14 @@ export function queryAntibodies(intent: string, minACL: AntibodyLevel = "ACL-3")
       // 计算意图相似度
       let overlapScore = 0;
       for (const di of p.distinctIntents) {
-        const diWords = new Set(di.toLowerCase().split(/[\s,，、]+/).filter(w => w.length > 1));
+        const diWords = new Set(di.toLowerCase().split(/[\s,，、]+|(?<=[一-鿿])(?=[一-鿿])/).filter(w => w.length > 0));
         const intersection = [...intentWords].filter(w => diWords.has(w)).length;
         const union = new Set([...intentWords, ...diWords]).size;
         overlapScore = Math.max(overlapScore, union > 0 ? intersection / union : 0);
       }
       return { ...p, _score: overlapScore };
     })
-    .filter(p => p._score > 0.2) // 至少 20% 的 Jaccard 相似度
+    .filter(p => p._score >= 0.2) // 至少 20% 的 Jaccard 相似度
     .sort((a, b) => b._score - a._score);
 }
 
