@@ -1,1 +1,3780 @@
-[{"name":"get","params":[{"name":"k","type":"str"}],"returnType":"any"}]
+[
+  {
+    "name": "executeActionCode",
+    "params": [
+      {
+        "name": "code",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "Action[] | null",
+    "returnTypeDetail": "Action[] | null",
+    "file": "src/action-runtime.ts",
+    "calls": [
+      "map",
+      "fn",
+      "error"
+    ]
+  },
+  {
+    "name": "getImportPath",
+    "params": [
+      {
+        "name": "file",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/emitter.ts",
+    "calls": [
+      "replace"
+    ]
+  },
+  {
+    "name": "emitCode",
+    "params": [
+      {
+        "name": "actions",
+        "type": "Action[]",
+        "typeDetail": "Action[]"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/emitter.ts",
+    "calls": [
+      "parse",
+      "readFileSync",
+      "set",
+      "collect",
+      "join",
+      "getImportPath",
+      "convert"
+    ],
+    "protocol": {
+      "pre_states": [
+        "SEQUENCE_VALIDATED"
+      ],
+      "post_states": [
+        "CODE_EMITTED"
+      ],
+      "invalidate": [
+        "SEQUENCE_VALIDATED"
+      ],
+      "namespace": "dev_pipeline"
+    }
+  },
+  {
+    "name": "extractIRPython",
+    "params": [
+      {
+        "name": "projectRoot",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any[]",
+    "returnTypeDetail": "any[]",
+    "file": "src/extract-ir-python.ts",
+    "calls": [
+      "resolve",
+      "execSync",
+      "error",
+      "toString",
+      "existsSync",
+      "parse",
+      "readFileSync"
+    ]
+  },
+  {
+    "name": "parseProtocolFromJSDoc",
+    "params": [
+      {
+        "name": "node",
+        "type": "any",
+        "typeDetail": "any"
+      }
+    ],
+    "returnType": "FunctionInfo['protocol'] | undefined",
+    "returnTypeDetail": "FunctionInfo['protocol'] | undefined",
+    "file": "src/extract-ir.ts",
+    "calls": [
+      "getJsDocs",
+      "getTags",
+      "getTagName",
+      "getCommentText",
+      "match",
+      "filter",
+      "map",
+      "split"
+    ]
+  },
+  {
+    "name": "getTypeDetail",
+    "params": [
+      {
+        "name": "typeNode",
+        "type": "any",
+        "typeDetail": "any"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/extract-ir.ts",
+    "calls": [
+      "getText",
+      "isUnionTypeNode",
+      "join",
+      "map",
+      "getTypeNodes",
+      "isTypeReference",
+      "getTypeName",
+      "getTypeArguments",
+      "isArrayTypeNode",
+      "getTypeDetail",
+      "getElementTypeNode"
+    ]
+  },
+  {
+    "name": "getParamType",
+    "params": [
+      {
+        "name": "param",
+        "type": "any",
+        "typeDetail": "any"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/extract-ir.ts",
+    "calls": [
+      "getTypeNode",
+      "getText"
+    ]
+  },
+  {
+    "name": "getParamTypeDetail",
+    "params": [
+      {
+        "name": "param",
+        "type": "any",
+        "typeDetail": "any"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/extract-ir.ts",
+    "calls": [
+      "getTypeNode",
+      "getTypeDetail"
+    ]
+  },
+  {
+    "name": "getReturnType",
+    "params": [
+      {
+        "name": "func",
+        "type": "FunctionDeclaration | ArrowFunction",
+        "typeDetail": "FunctionDeclaration | ArrowFunction"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/extract-ir.ts",
+    "calls": [
+      "getReturnTypeNode",
+      "getText"
+    ]
+  },
+  {
+    "name": "getReturnTypeDetail",
+    "params": [
+      {
+        "name": "func",
+        "type": "FunctionDeclaration | ArrowFunction",
+        "typeDetail": "FunctionDeclaration | ArrowFunction"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/extract-ir.ts",
+    "calls": [
+      "getReturnTypeNode",
+      "getTypeDetail"
+    ]
+  },
+  {
+    "name": "extractDirectCalls",
+    "params": [
+      {
+        "name": "func",
+        "type": "FunctionDeclaration | ArrowFunction",
+        "typeDetail": "FunctionDeclaration | ArrowFunction"
+      }
+    ],
+    "returnType": "string[]",
+    "returnTypeDetail": "string[]",
+    "file": "src/extract-ir.ts",
+    "calls": [
+      "getBody",
+      "forEachDescendant"
+    ]
+  },
+  {
+    "name": "extractIR",
+    "params": [
+      {
+        "name": "projectRoot",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "FunctionInfo[]",
+    "returnTypeDetail": "FunctionInfo[]",
+    "file": "src/extract-ir.ts",
+    "calls": [
+      "resolve",
+      "join",
+      "existsSync",
+      "addSourceFilesAtPaths",
+      "getSourceFiles",
+      "relative",
+      "getFilePath",
+      "getFunctions",
+      "getName",
+      "push",
+      "map",
+      "getParameters",
+      "getReturnType",
+      "getReturnTypeDetail",
+      "extractDirectCalls",
+      "parseProtocolFromJSDoc",
+      "getVariableDeclarations",
+      "getInitializer",
+      "isArrowFunction",
+      "isCallExpression",
+      "getArguments",
+      "add",
+      "has",
+      "startsWith",
+      "toUpperCase",
+      "error"
+    ],
+    "protocol": {
+      "pre_states": [],
+      "post_states": [
+        "IR_EXTRACTED"
+      ],
+      "invalidate": [
+        "IR_STALE"
+      ],
+      "namespace": "dev_pipeline"
+    }
+  },
+  {
+    "name": "ensureDir",
+    "params": [
+      {
+        "name": "dir",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/failure-corpus.ts",
+    "calls": [
+      "existsSync",
+      "mkdirSync"
+    ]
+  },
+  {
+    "name": "checkpointPath",
+    "params": [
+      {
+        "name": "intent",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/failure-corpus.ts",
+    "calls": [
+      "slice",
+      "replace",
+      "toString",
+      "from",
+      "join"
+    ]
+  },
+  {
+    "name": "saveCheckpoint",
+    "params": [
+      {
+        "name": "intent",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "data",
+        "type": "Omit<PlannerCheckpoint, \"intent\" | \"timestamp\">",
+        "typeDetail": "Omit<PlannerCheckpoint, \"intent\" | \"timestamp\">"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "src/failure-corpus.ts",
+    "calls": [
+      "ensureDir",
+      "toISOString",
+      "writeFileSync",
+      "checkpointPath",
+      "stringify"
+    ]
+  },
+  {
+    "name": "loadCheckpoint",
+    "params": [
+      {
+        "name": "intent",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "PlannerCheckpoint | null",
+    "returnTypeDetail": "PlannerCheckpoint | null",
+    "file": "src/failure-corpus.ts",
+    "calls": [
+      "readFileSync",
+      "checkpointPath",
+      "parse"
+    ]
+  },
+  {
+    "name": "clearCheckpoint",
+    "params": [
+      {
+        "name": "intent",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "src/failure-corpus.ts",
+    "calls": [
+      "unlinkSync",
+      "checkpointPath"
+    ]
+  },
+  {
+    "name": "recordFailure",
+    "params": [
+      {
+        "name": "record",
+        "type": "Omit<FailureRecord, \"id\" | \"timestamp\" | \"parentSessionId\"> & { sessionId?: string } & Partial<Pick<FailureRecord, \"plannerAttempt\" | \"plannerRetryTotal\">>",
+        "typeDetail": "Omit<FailureRecord, \"id\" | \"timestamp\" | \"parentSessionId\"> & { sessionId?: string } & Partial<Pick<FailureRecord, \"plannerAttempt\" | \"plannerRetryTotal\">>"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/failure-corpus.ts",
+    "calls": [
+      "withLock"
+    ]
+  },
+  {
+    "name": "recordSession",
+    "params": [
+      {
+        "name": "session",
+        "type": "ExecutionSession | Omit<IntentSession, \"sessionId\">",
+        "typeDetail": "ExecutionSession | Omit<IntentSession, \"sessionId\">"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/failure-corpus.ts",
+    "calls": [
+      "ensureDir",
+      "now",
+      "slice",
+      "toString",
+      "random",
+      "writeFileSync",
+      "join",
+      "stringify",
+      "recordFailure"
+    ],
+    "protocol": {
+      "pre_states": [
+        "CODE_EMITTED"
+      ],
+      "post_states": [
+        "SESSION_RECORDED"
+      ],
+      "invalidate": [
+        "CODE_EMITTED"
+      ],
+      "namespace": "dev_pipeline"
+    }
+  },
+  {
+    "name": "getAllFailures",
+    "params": [],
+    "returnType": "FailureRecord[]",
+    "returnTypeDetail": "FailureRecord[]",
+    "file": "src/failure-corpus.ts",
+    "calls": [
+      "existsSync",
+      "filter",
+      "readdirSync",
+      "join",
+      "isDirectory",
+      "statSync",
+      "endsWith",
+      "push",
+      "parse",
+      "readFileSync"
+    ]
+  },
+  {
+    "name": "getFailuresBySVL",
+    "params": [
+      {
+        "name": "level",
+        "type": "SVL",
+        "typeDetail": "SVL"
+      }
+    ],
+    "returnType": "FailureRecord[]",
+    "returnTypeDetail": "FailureRecord[]",
+    "file": "src/failure-corpus.ts",
+    "calls": [
+      "filter",
+      "getAllFailures"
+    ]
+  },
+  {
+    "name": "getTopFailurePatterns",
+    "params": [
+      {
+        "name": "limit",
+        "type": "number",
+        "typeDetail": "number"
+      }
+    ],
+    "returnType": "{ pattern: string; count: number; examples: string[] }[]",
+    "returnTypeDetail": "{ pattern: string; count: number; examples: string[] }[]",
+    "file": "src/failure-corpus.ts",
+    "calls": [
+      "getAllFailures",
+      "get",
+      "push",
+      "set",
+      "slice",
+      "sort",
+      "map",
+      "entries"
+    ]
+  },
+  {
+    "name": "getFailureGenome",
+    "params": [],
+    "returnType": "{\n  totalFailures: number;\n  bySVL: Record<SVL, number>;\n  byConstraintType: Record<string, number>;\n  topPatterns: { pattern: string; count: number; examples: string[] }[];\n  commonFixPaths: { violation: string; fixPath: string[]; count: number }[];\n  averageRetriesToSuccess: number;\n}",
+    "returnTypeDetail": "{\n  totalFailures: number;\n  bySVL: Record<SVL, number>;\n  byConstraintType: Record<string, number>;\n  topPatterns: { pattern: string; count: number; examples: string[] }[];\n  commonFixPaths: { violation: string; fixPath: string[]; count: number }[];\n  averageRetriesToSuccess: number;\n}",
+    "file": "src/failure-corpus.ts",
+    "calls": [
+      "getAllSessions",
+      "filter",
+      "get",
+      "push",
+      "set",
+      "join",
+      "slice",
+      "sort",
+      "map",
+      "entries",
+      "round"
+    ]
+  },
+  {
+    "name": "getAllSessions",
+    "params": [],
+    "returnType": "ExecutionSession[]",
+    "returnTypeDetail": "ExecutionSession[]",
+    "file": "src/failure-corpus.ts",
+    "calls": [
+      "existsSync",
+      "readdirSync",
+      "endsWith",
+      "parse",
+      "readFileSync",
+      "join",
+      "push",
+      "normalizeSession"
+    ]
+  },
+  {
+    "name": "normalizeSession",
+    "params": [
+      {
+        "name": "raw",
+        "type": "any",
+        "typeDetail": "any"
+      }
+    ],
+    "returnType": "ExecutionSession",
+    "returnTypeDetail": "ExecutionSession",
+    "file": "src/failure-corpus.ts",
+    "calls": [
+      "convertOldSession"
+    ]
+  },
+  {
+    "name": "convertOldSession",
+    "params": [
+      {
+        "name": "old",
+        "type": "IntentSession",
+        "typeDetail": "IntentSession"
+      }
+    ],
+    "returnType": "ExecutionSession",
+    "returnTypeDetail": "ExecutionSession",
+    "file": "src/failure-corpus.ts",
+    "calls": [
+      "map",
+      "getTime"
+    ]
+  },
+  {
+    "name": "computeACL",
+    "params": [
+      {
+        "name": "count",
+        "type": "number",
+        "typeDetail": "number"
+      },
+      {
+        "name": "distinctIntents",
+        "type": "number",
+        "typeDetail": "number"
+      },
+      {
+        "name": "resolvedRate",
+        "type": "number",
+        "typeDetail": "number"
+      }
+    ],
+    "returnType": "AntibodyLevel",
+    "returnTypeDetail": "AntibodyLevel",
+    "file": "src/failure-corpus.ts",
+    "calls": [
+      "parseInt"
+    ]
+  },
+  {
+    "name": "getLearnedPatterns",
+    "params": [],
+    "returnType": "{ failureToFix: LearnedPattern[] }",
+    "returnTypeDetail": "{ failureToFix: LearnedPattern[] }",
+    "file": "src/failure-corpus.ts",
+    "calls": [
+      "getAllSessions",
+      "join",
+      "get",
+      "toISOString",
+      "add",
+      "set",
+      "round",
+      "push",
+      "computeACL",
+      "sort"
+    ]
+  },
+  {
+    "name": "queryAntibodies",
+    "params": [
+      {
+        "name": "intent",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "minACL",
+        "type": "AntibodyLevel",
+        "typeDetail": "AntibodyLevel"
+      }
+    ],
+    "returnType": "LearnedPattern[]",
+    "returnTypeDetail": "LearnedPattern[]",
+    "file": "src/failure-corpus.ts",
+    "calls": [
+      "getLearnedPatterns",
+      "toLowerCase",
+      "filter",
+      "split",
+      "sort",
+      "map"
+    ]
+  },
+  {
+    "name": "getSemanticHeatmap",
+    "params": [],
+    "returnType": "{\n  fragileProtocols: { function: string; violationCount: number; svl: string }[];\n  svlHotspots: { svl: string; count: number; percentage: number }[];\n  constraintClusters: { constraints: string[]; count: number; intent: string }[];\n  highFrictionIntents: { intent: string; adaptationCount: number; anomalyTypes: string[] }[];\n}",
+    "returnTypeDetail": "{\n  fragileProtocols: { function: string; violationCount: number; svl: string }[];\n  svlHotspots: { svl: string; count: number; percentage: number }[];\n  constraintClusters: { constraints: string[]; count: number; intent: string }[];\n  highFrictionIntents: { intent: string; adaptationCount: number; anomalyTypes: string[] }[];\n}",
+    "file": "src/failure-corpus.ts",
+    "calls": [
+      "getAllSessions",
+      "match",
+      "find",
+      "get",
+      "set",
+      "slice",
+      "sort",
+      "map",
+      "entries",
+      "push",
+      "round",
+      "filter",
+      "flatMap"
+    ]
+  },
+  {
+    "name": "generateCandidateRules",
+    "params": [],
+    "returnType": "string[]",
+    "returnTypeDetail": "string[]",
+    "file": "src/failure-corpus.ts",
+    "calls": [
+      "getFailureGenome",
+      "filter",
+      "push",
+      "join"
+    ]
+  },
+  {
+    "name": "loadFeedback",
+    "params": [],
+    "returnType": "RunRecord[]",
+    "returnTypeDetail": "RunRecord[]",
+    "file": "src/feedback.ts",
+    "calls": [
+      "existsSync",
+      "parse",
+      "readFileSync"
+    ]
+  },
+  {
+    "name": "saveFeedback",
+    "params": [
+      {
+        "name": "record",
+        "type": "RunRecord",
+        "typeDetail": "RunRecord"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/feedback.ts",
+    "calls": [
+      "withLock"
+    ]
+  },
+  {
+    "name": "getFunctionSuccessRate",
+    "params": [
+      {
+        "name": "funcName",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "number",
+    "returnTypeDetail": "number",
+    "file": "src/feedback.ts",
+    "calls": [
+      "loadFeedback",
+      "filter"
+    ]
+  },
+  {
+    "name": "recordRun",
+    "params": [
+      {
+        "name": "intent",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "actions",
+        "type": "any[]",
+        "typeDetail": "any[]"
+      },
+      {
+        "name": "success",
+        "type": "boolean",
+        "typeDetail": "boolean"
+      },
+      {
+        "name": "error",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/feedback.ts",
+    "calls": [
+      "saveFeedback",
+      "split",
+      "toISOString"
+    ]
+  },
+  {
+    "name": "ensureLockDir",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/file-lock.ts",
+    "calls": [
+      "existsSync",
+      "mkdirSync"
+    ]
+  },
+  {
+    "name": "lockPath",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/file-lock.ts",
+    "calls": [
+      "join",
+      "replace"
+    ]
+  },
+  {
+    "name": "withLock",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "fn",
+        "type": "() => T",
+        "typeDetail": "() => T"
+      }
+    ],
+    "returnType": "T",
+    "returnTypeDetail": "T",
+    "file": "src/file-lock.ts",
+    "calls": [
+      "ensureLockDir",
+      "lockPath",
+      "mkdirSync",
+      "fn",
+      "rmdirSync",
+      "now"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/generate_500.ts",
+    "calls": [
+      "extractIRPython",
+      "writeFileSync",
+      "stringify",
+      "log",
+      "now",
+      "plan",
+      "searchPlan",
+      "push",
+      "String",
+      "every",
+      "map",
+      "emitPython",
+      "join",
+      "resolve",
+      "execSync",
+      "toString",
+      "existsSync",
+      "unlinkSync",
+      "recordRun",
+      "substring",
+      "table",
+      "reduce",
+      "filter",
+      "toFixed"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/generate.ts",
+    "calls": [
+      "extractIRPython",
+      "writeFileSync",
+      "stringify",
+      "log",
+      "now",
+      "plan",
+      "searchPlan",
+      "push",
+      "String",
+      "map",
+      "every",
+      "emitPython",
+      "join",
+      "resolve",
+      "execSync",
+      "toString",
+      "existsSync",
+      "unlinkSync",
+      "recordRun",
+      "substring",
+      "table",
+      "reduce",
+      "filter",
+      "toFixed"
+    ]
+  },
+  {
+    "name": "getInstanceId",
+    "params": [],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/immune-reporter.ts",
+    "calls": [
+      "hostname",
+      "require",
+      "cwd",
+      "substring",
+      "digest",
+      "update",
+      "createHash"
+    ]
+  },
+  {
+    "name": "getReportCursor",
+    "params": [],
+    "returnType": "{ lastTimestamp: string | null; reportedCount: number }",
+    "returnTypeDetail": "{ lastTimestamp: string | null; reportedCount: number }",
+    "file": "src/immune-reporter.ts",
+    "calls": [
+      "existsSync",
+      "parse",
+      "readFileSync"
+    ]
+  },
+  {
+    "name": "saveReportCursor",
+    "params": [
+      {
+        "name": "timestamp",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "count",
+        "type": "number",
+        "typeDetail": "number"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/immune-reporter.ts",
+    "calls": [
+      "dirname",
+      "existsSync",
+      "mkdirSync",
+      "writeFileSync",
+      "stringify",
+      "toISOString"
+    ]
+  },
+  {
+    "name": "extractFingerprints",
+    "params": [
+      {
+        "name": "cursor",
+        "type": "{ lastTimestamp: string | null }",
+        "typeDetail": "{ lastTimestamp: string | null }"
+      }
+    ],
+    "returnType": "ImmuneFingerprint[]",
+    "returnTypeDetail": "ImmuneFingerprint[]",
+    "file": "src/immune-reporter.ts",
+    "calls": [
+      "resolve",
+      "existsSync",
+      "getInstanceId",
+      "sort",
+      "readdirSync",
+      "join",
+      "isDirectory",
+      "statSync",
+      "endsWith",
+      "parse",
+      "readFileSync",
+      "map",
+      "filter",
+      "push"
+    ]
+  },
+  {
+    "name": "reportFingerprints",
+    "params": [],
+    "returnType": "Promise<{ success: boolean; message: string }>",
+    "returnTypeDetail": "Promise<{ success: boolean; message: string }>",
+    "file": "src/immune-reporter.ts",
+    "calls": [
+      "getReportCursor",
+      "extractFingerprints",
+      "sort",
+      "stringify"
+    ]
+  },
+  {
+    "name": "previewFingerprints",
+    "params": [],
+    "returnType": "ImmuneFingerprint[]",
+    "returnTypeDetail": "ImmuneFingerprint[]",
+    "file": "src/immune-reporter.ts",
+    "calls": [
+      "extractFingerprints"
+    ]
+  },
+  {
+    "name": "resetCallCount",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/llm.ts",
+    "calls": []
+  },
+  {
+    "name": "estimateTokens",
+    "params": [
+      {
+        "name": "text",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "number",
+    "returnTypeDetail": "number",
+    "file": "src/llm.ts",
+    "calls": [
+      "match",
+      "ceil"
+    ]
+  },
+  {
+    "name": "generate",
+    "params": [
+      {
+        "name": "prompt",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "Promise<string>",
+    "returnTypeDetail": "Promise<string>",
+    "file": "src/llm.ts",
+    "calls": [
+      "create"
+    ]
+  },
+  {
+    "name": "chat",
+    "params": [
+      {
+        "name": "systemPrompt",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "userPrompt",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "Promise<string>",
+    "returnTypeDetail": "Promise<string>",
+    "file": "src/llm.ts",
+    "calls": [
+      "create"
+    ]
+  },
+  {
+    "name": "runTest",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "actions",
+        "type": "any[]",
+        "typeDetail": "any[]"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/main.ts",
+    "calls": [
+      "log",
+      "map",
+      "every",
+      "forEach",
+      "emitCode",
+      "join",
+      "split",
+      "runAndCheck"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/main.ts",
+    "calls": [
+      "log",
+      "extractIR",
+      "writeFileSync",
+      "stringify",
+      "plan",
+      "runTest",
+      "modify"
+    ]
+  },
+  {
+    "name": "ensureDir",
+    "params": [
+      {
+        "name": "dir",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/memory-layer.ts",
+    "calls": [
+      "existsSync",
+      "mkdirSync"
+    ]
+  },
+  {
+    "name": "loadEpisodes",
+    "params": [],
+    "returnType": "Episode[]",
+    "returnTypeDetail": "Episode[]",
+    "file": "src/memory-layer.ts",
+    "calls": [
+      "ensureDir",
+      "existsSync",
+      "parse",
+      "readFileSync",
+      "now",
+      "filter",
+      "error",
+      "writeFileSync",
+      "stringify"
+    ]
+  },
+  {
+    "name": "saveEpisodes",
+    "params": [
+      {
+        "name": "episodes",
+        "type": "Episode[]",
+        "typeDetail": "Episode[]"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/memory-layer.ts",
+    "calls": [
+      "withLock"
+    ]
+  },
+  {
+    "name": "recordEpisode",
+    "params": [
+      {
+        "name": "episode",
+        "type": "Omit<Episode, \"id\" | \"timestamp\">",
+        "typeDetail": "Omit<Episode, \"id\" | \"timestamp\">"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/memory-layer.ts",
+    "calls": [
+      "loadEpisodes",
+      "now",
+      "toISOString",
+      "unshift",
+      "saveEpisodes"
+    ]
+  },
+  {
+    "name": "getRecentEpisodes",
+    "params": [
+      {
+        "name": "limit",
+        "type": "number",
+        "typeDetail": "number"
+      }
+    ],
+    "returnType": "Episode[]",
+    "returnTypeDetail": "Episode[]",
+    "file": "src/memory-layer.ts",
+    "calls": [
+      "slice",
+      "loadEpisodes"
+    ]
+  },
+  {
+    "name": "getSuccessfulEpisodes",
+    "params": [
+      {
+        "name": "limit",
+        "type": "number",
+        "typeDetail": "number"
+      }
+    ],
+    "returnType": "Episode[]",
+    "returnTypeDetail": "Episode[]",
+    "file": "src/memory-layer.ts",
+    "calls": [
+      "slice",
+      "filter",
+      "loadEpisodes"
+    ]
+  },
+  {
+    "name": "loadSemantic",
+    "params": [],
+    "returnType": "SemanticTemplate[]",
+    "returnTypeDetail": "SemanticTemplate[]",
+    "file": "src/memory-layer.ts",
+    "calls": [
+      "ensureDir",
+      "existsSync",
+      "parse",
+      "readFileSync",
+      "now",
+      "filter",
+      "error",
+      "writeFileSync",
+      "stringify"
+    ]
+  },
+  {
+    "name": "saveSemantic",
+    "params": [
+      {
+        "name": "templates",
+        "type": "SemanticTemplate[]",
+        "typeDetail": "SemanticTemplate[]"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/memory-layer.ts",
+    "calls": [
+      "withLock"
+    ]
+  },
+  {
+    "name": "consolidateSemantic",
+    "params": [
+      {
+        "name": "minOccurrences",
+        "type": "number",
+        "typeDetail": "number"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/memory-layer.ts",
+    "calls": [
+      "getSuccessfulEpisodes",
+      "substring",
+      "has",
+      "set",
+      "push",
+      "get",
+      "loadSemantic",
+      "find",
+      "toISOString",
+      "now",
+      "saveSemantic",
+      "error"
+    ]
+  },
+  {
+    "name": "findSemanticTemplate",
+    "params": [
+      {
+        "name": "intent",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "SemanticTemplate | undefined",
+    "returnTypeDetail": "SemanticTemplate | undefined",
+    "file": "src/memory-layer.ts",
+    "calls": [
+      "loadSemantic",
+      "toLowerCase",
+      "substring",
+      "find"
+    ]
+  },
+  {
+    "name": "loadProtocolsFromFile",
+    "params": [
+      {
+        "name": "filePath",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "{ protocols: FunctionProtocol[]; initialState: string; namespaceInitialStates: Record<string, string> }",
+    "returnTypeDetail": "{ protocols: FunctionProtocol[]; initialState: string; namespaceInitialStates: Record<string, string> }",
+    "file": "src/p0_ssg_demo.ts",
+    "calls": [
+      "parse",
+      "readFileSync",
+      "entries",
+      "push"
+    ]
+  },
+  {
+    "name": "loadProtocolsFromIR",
+    "params": [
+      {
+        "name": "ir",
+        "type": "any[]",
+        "typeDetail": "any[]"
+      }
+    ],
+    "returnType": "FunctionProtocol[]",
+    "returnTypeDetail": "FunctionProtocol[]",
+    "file": "src/p0_ssg_demo.ts",
+    "calls": [
+      "map",
+      "filter"
+    ]
+  },
+  {
+    "name": "runDemo",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/p0_ssg_demo.ts",
+    "calls": [
+      "log",
+      "join",
+      "existsSync",
+      "loadProtocolsFromFile",
+      "extractIR",
+      "loadProtocolsFromIR",
+      "forEach",
+      "values",
+      "createNamespacedSSV",
+      "apply",
+      "explainRejection",
+      "replace",
+      "stringify",
+      "rejectionToJSON",
+      "repeat",
+      "getTrace"
+    ]
+  },
+  {
+    "name": "enrichActions",
+    "params": [
+      {
+        "name": "actions",
+        "type": "Action[]",
+        "typeDetail": "Action[]"
+      },
+      {
+        "name": "ir",
+        "type": "any[]",
+        "typeDetail": "any[]"
+      }
+    ],
+    "returnType": "Action[]",
+    "returnTypeDetail": "Action[]",
+    "file": "src/planner.ts",
+    "calls": [
+      "map"
+    ]
+  },
+  {
+    "name": "determineSVL",
+    "params": [
+      {
+        "name": "errors",
+        "type": "string[]",
+        "typeDetail": "string[]"
+      }
+    ],
+    "returnType": "SVL",
+    "returnTypeDetail": "SVL",
+    "file": "src/planner.ts",
+    "calls": [
+      "some"
+    ]
+  },
+  {
+    "name": "determineConstraintType",
+    "params": [
+      {
+        "name": "svl",
+        "type": "SVL",
+        "typeDetail": "SVL"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/planner.ts",
+    "calls": []
+  },
+  {
+    "name": "buildCompactFuncList",
+    "params": [
+      {
+        "name": "funcs",
+        "type": "any[]",
+        "typeDetail": "any[]"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/planner.ts",
+    "calls": [
+      "join",
+      "map"
+    ]
+  },
+  {
+    "name": "loadProtocols",
+    "params": [
+      {
+        "name": "ir",
+        "type": "any[]",
+        "typeDetail": "any[]"
+      }
+    ],
+    "returnType": "{ protocols: FunctionProtocol[]; namespaceInitialStates: Map<string, string> }",
+    "returnTypeDetail": "{ protocols: FunctionProtocol[]; namespaceInitialStates: Map<string, string> }",
+    "file": "src/planner.ts",
+    "calls": [
+      "map",
+      "filter",
+      "set",
+      "parse",
+      "readFileSync",
+      "parseProtocolsFromJSON",
+      "entries",
+      "get",
+      "values"
+    ]
+  },
+  {
+    "name": "validateProtocolWithTransitions",
+    "params": [
+      {
+        "name": "actions",
+        "type": "Action[]",
+        "typeDetail": "Action[]"
+      },
+      {
+        "name": "protocols",
+        "type": "FunctionProtocol[]",
+        "typeDetail": "FunctionProtocol[]"
+      },
+      {
+        "name": "namespaceInitialStates",
+        "type": "Map<string, string>",
+        "typeDetail": "Map<string, string>"
+      }
+    ],
+    "returnType": "{ valid: boolean; rejection?: SSGRejection; index?: number; trace?: { function: string; statesBefore: string[]; statesAfter: string[] }[]; transitions: import(\"./runtime-types\").StateTransition[] }",
+    "returnTypeDetail": "{ valid: boolean; rejection?: SSGRejection; index?: number; trace?: { function: string; statesBefore: string[]; statesAfter: string[] }[]; transitions: import(\"./runtime-types\").StateTransition[] }",
+    "file": "src/planner.ts",
+    "calls": [
+      "get",
+      "applyWithTransition",
+      "push",
+      "getTrace",
+      "map"
+    ]
+  },
+  {
+    "name": "attemptSSGRepair",
+    "params": [
+      {
+        "name": "actions",
+        "type": "Action[]",
+        "typeDetail": "Action[]"
+      },
+      {
+        "name": "rejection",
+        "type": "SSGRejection",
+        "typeDetail": "SSGRejection"
+      },
+      {
+        "name": "ir",
+        "type": "any[]",
+        "typeDetail": "any[]"
+      },
+      {
+        "name": "protocols",
+        "type": "FunctionProtocol[]",
+        "typeDetail": "FunctionProtocol[]"
+      },
+      {
+        "name": "namespaceInitialStates",
+        "type": "Map<string, string>",
+        "typeDetail": "Map<string, string>"
+      }
+    ],
+    "returnType": "Action[] | null",
+    "returnTypeDetail": "Action[] | null",
+    "file": "src/planner.ts",
+    "calls": [
+      "findIndex",
+      "find",
+      "map",
+      "push",
+      "slice",
+      "validateProtocolWithTransitions",
+      "error",
+      "join",
+      "attemptSSGRepair"
+    ]
+  },
+  {
+    "name": "plan",
+    "params": [
+      {
+        "name": "userIntent",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "Promise<Action[]>",
+    "returnTypeDetail": "Promise<Action[]>",
+    "file": "src/planner.ts",
+    "calls": [
+      "resetCallCount",
+      "parse",
+      "readFileSync",
+      "findSemanticTemplate",
+      "error",
+      "recordEpisode",
+      "queryAntibodies",
+      "toFixed",
+      "join",
+      "map",
+      "loadProtocols",
+      "validateProtocolWithTransitions",
+      "extractKeywords",
+      "sort",
+      "slice",
+      "buildCompactFuncList",
+      "match",
+      "find",
+      "push",
+      "estimateTokens",
+      "loadCheckpoint",
+      "generateSessionId",
+      "now",
+      "createSnapshot",
+      "saveSnapshot",
+      "chat",
+      "generate",
+      "trim",
+      "replace",
+      "executeActionCode",
+      "enrichActions",
+      "filter",
+      "validateActionSequence",
+      "flat",
+      "determineSVL",
+      "parseInt",
+      "split",
+      "determineConstraintType",
+      "generateAttemptId",
+      "generatePlannerSeed",
+      "recordFailure",
+      "saveCheckpoint",
+      "explainRejection",
+      "stringify",
+      "rejectionToJSON",
+      "attemptSSGRepair",
+      "getMaskedFuncList",
+      "checkSemantic",
+      "recordSession",
+      "clearCheckpoint",
+      "generateFallbackPlan"
+    ]
+  },
+  {
+    "name": "generateFallbackPlan",
+    "params": [
+      {
+        "name": "intent",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "ir",
+        "type": "any[]",
+        "typeDetail": "any[]"
+      }
+    ],
+    "returnType": "Action[]",
+    "returnTypeDetail": "Action[]",
+    "file": "src/planner.ts",
+    "calls": [
+      "toLowerCase",
+      "filter",
+      "split",
+      "includes",
+      "find",
+      "push",
+      "map"
+    ]
+  },
+  {
+    "name": "toPythonModule",
+    "params": [
+      {
+        "name": "filePath",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/python-emitter.ts",
+    "calls": [
+      "replace"
+    ]
+  },
+  {
+    "name": "pythonValue",
+    "params": [
+      {
+        "name": "val",
+        "type": "any",
+        "typeDetail": "any"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/python-emitter.ts",
+    "calls": [
+      "stringify",
+      "String",
+      "map",
+      "entries",
+      "join"
+    ]
+  },
+  {
+    "name": "emitPython",
+    "params": [
+      {
+        "name": "actions",
+        "type": "Action[]",
+        "typeDetail": "Action[]"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/python-emitter.ts",
+    "calls": [
+      "parse",
+      "readFileSync",
+      "set",
+      "collectImports",
+      "join",
+      "from",
+      "push",
+      "convertLines"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/report.ts",
+    "calls": [
+      "log",
+      "previewFingerprints",
+      "forEach",
+      "reportFingerprints"
+    ]
+  },
+  {
+    "name": "generateAttemptId",
+    "params": [],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/runtime-types.ts",
+    "calls": [
+      "now",
+      "slice",
+      "toString",
+      "random"
+    ]
+  },
+  {
+    "name": "generateSessionId",
+    "params": [],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/runtime-types.ts",
+    "calls": [
+      "now",
+      "slice",
+      "toString",
+      "random"
+    ]
+  },
+  {
+    "name": "generatePlannerSeed",
+    "params": [
+      {
+        "name": "prompt",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "model",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/runtime-types.ts",
+    "calls": [
+      "slice",
+      "digest",
+      "update",
+      "createHash",
+      "now"
+    ]
+  },
+  {
+    "name": "runAndCheck",
+    "params": [
+      {
+        "name": "code",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "{ success: boolean; error?: string }",
+    "returnTypeDetail": "{ success: boolean; error?: string }",
+    "file": "src/runtime.ts",
+    "calls": [
+      "resolve",
+      "join",
+      "writeFileSync",
+      "execSync",
+      "unlinkSync",
+      "existsSync",
+      "toString"
+    ]
+  },
+  {
+    "name": "loadIR",
+    "params": [],
+    "returnType": "any[]",
+    "returnTypeDetail": "any[]",
+    "file": "src/search-planner.ts",
+    "calls": [
+      "parse",
+      "readFileSync"
+    ]
+  },
+  {
+    "name": "getStaticScore",
+    "params": [
+      {
+        "name": "funcName",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "goal",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "number",
+    "returnTypeDetail": "number",
+    "file": "src/search-planner.ts",
+    "calls": [
+      "has",
+      "get",
+      "toLowerCase",
+      "split",
+      "includes",
+      "jaccardSimilarity",
+      "min",
+      "set"
+    ]
+  },
+  {
+    "name": "decomposeGoals",
+    "params": [
+      {
+        "name": "intent",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "functions",
+        "type": "any[]",
+        "typeDetail": "any[]"
+      }
+    ],
+    "returnType": "Promise<string[]>",
+    "returnTypeDetail": "Promise<string[]>",
+    "file": "src/search-planner.ts",
+    "calls": [
+      "join",
+      "map",
+      "generate",
+      "replace",
+      "match",
+      "parse",
+      "isArray",
+      "includes",
+      "push",
+      "filter",
+      "split",
+      "slice"
+    ]
+  },
+  {
+    "name": "batchScoreFuncs",
+    "params": [
+      {
+        "name": "funcs",
+        "type": "{name: string; staticScore: number}[]",
+        "typeDetail": "{name: string; staticScore: number}[]"
+      },
+      {
+        "name": "goal",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "Promise<Map<string, number>>",
+    "returnTypeDetail": "Promise<Map<string, number>>",
+    "file": "src/search-planner.ts",
+    "calls": [
+      "set",
+      "push",
+      "join",
+      "map",
+      "generate",
+      "match",
+      "parse",
+      "entries",
+      "parseFloat",
+      "String",
+      "isNaN",
+      "min",
+      "has"
+    ]
+  },
+  {
+    "name": "searchPlan",
+    "params": [
+      {
+        "name": "intent",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "beamWidth",
+        "type": "any",
+        "typeDetail": ""
+      },
+      {
+        "name": "maxDepth",
+        "type": "any",
+        "typeDetail": ""
+      }
+    ],
+    "returnType": "Promise<Action[]>",
+    "returnTypeDetail": "Promise<Action[]>",
+    "file": "src/search-planner.ts",
+    "calls": [
+      "resetCallCount",
+      "clear",
+      "loadIR",
+      "decomposeGoals",
+      "log",
+      "push",
+      "slice",
+      "sort",
+      "filter",
+      "map",
+      "batchScoreFuncs",
+      "some",
+      "get",
+      "validateAction",
+      "set",
+      "getFunctionSuccessRate",
+      "find"
+    ]
+  },
+  {
+    "name": "findCompatibleVar",
+    "params": [
+      {
+        "name": "declaredVars",
+        "type": "Map<string, string>",
+        "typeDetail": "Map<string, string>"
+      },
+      {
+        "name": "neededType",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "string | null",
+    "returnTypeDetail": "string | null",
+    "file": "src/search-planner.ts",
+    "calls": []
+  },
+  {
+    "name": "runSemanticTest",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/semantic_guard_test.ts",
+    "calls": [
+      "entries",
+      "log",
+      "substring",
+      "plan",
+      "push",
+      "validateActionSequence",
+      "join",
+      "emitPython",
+      "map",
+      "slice",
+      "split",
+      "resolve",
+      "writeFileSync",
+      "execSync",
+      "existsSync",
+      "unlinkSync",
+      "filter",
+      "toFixed",
+      "stringify"
+    ]
+  },
+  {
+    "name": "ensureDir",
+    "params": [
+      {
+        "name": "dir",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/semantic-snapshot.ts",
+    "calls": [
+      "existsSync",
+      "mkdirSync"
+    ]
+  },
+  {
+    "name": "createSnapshot",
+    "params": [
+      {
+        "name": "ir",
+        "type": "any[]",
+        "typeDetail": "any[]"
+      },
+      {
+        "name": "intent",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "sessionId",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "IRSnapshot",
+    "returnTypeDetail": "IRSnapshot",
+    "file": "src/semantic-snapshot.ts",
+    "calls": [
+      "map",
+      "slice",
+      "digest",
+      "update",
+      "createHash",
+      "stringify",
+      "now",
+      "toISOString"
+    ]
+  },
+  {
+    "name": "saveSnapshot",
+    "params": [
+      {
+        "name": "snapshot",
+        "type": "IRSnapshot",
+        "typeDetail": "IRSnapshot"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-snapshot.ts",
+    "calls": [
+      "ensureDir",
+      "writeFileSync",
+      "join",
+      "stringify"
+    ]
+  },
+  {
+    "name": "loadSnapshot",
+    "params": [
+      {
+        "name": "snapshotId",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "IRSnapshot | null",
+    "returnTypeDetail": "IRSnapshot | null",
+    "file": "src/semantic-snapshot.ts",
+    "calls": [
+      "readFileSync",
+      "join",
+      "parse"
+    ]
+  },
+  {
+    "name": "listSnapshots",
+    "params": [],
+    "returnType": "IRSnapshot[]",
+    "returnTypeDetail": "IRSnapshot[]",
+    "file": "src/semantic-snapshot.ts",
+    "calls": [
+      "existsSync",
+      "readdirSync",
+      "endsWith",
+      "push",
+      "parse",
+      "readFileSync",
+      "join",
+      "sort"
+    ]
+  },
+  {
+    "name": "diffSnapshots",
+    "params": [
+      {
+        "name": "before",
+        "type": "IRSnapshot",
+        "typeDetail": "IRSnapshot"
+      },
+      {
+        "name": "after",
+        "type": "IRSnapshot",
+        "typeDetail": "IRSnapshot"
+      }
+    ],
+    "returnType": "IRDiff",
+    "returnTypeDetail": "IRDiff",
+    "file": "src/semantic-snapshot.ts",
+    "calls": [
+      "set",
+      "has",
+      "push",
+      "get",
+      "join",
+      "map"
+    ]
+  },
+  {
+    "name": "summarizeSnapshot",
+    "params": [
+      {
+        "name": "snapshot",
+        "type": "IRSnapshot",
+        "typeDetail": "IRSnapshot"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-snapshot.ts",
+    "calls": [
+      "push",
+      "join"
+    ]
+  },
+  {
+    "name": "findSnapshotBySession",
+    "params": [
+      {
+        "name": "sessionId",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "IRSnapshot | undefined",
+    "returnTypeDetail": "IRSnapshot | undefined",
+    "file": "src/semantic-snapshot.ts",
+    "calls": [
+      "listSnapshots",
+      "find"
+    ]
+  },
+  {
+    "name": "narrateRejection",
+    "params": [
+      {
+        "name": "v",
+        "type": "ConstraintViolation",
+        "typeDetail": "ConstraintViolation"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "join",
+      "match",
+      "D",
+      "R",
+      "C_"
+    ]
+  },
+  {
+    "name": "narrateSuccess",
+    "params": [
+      {
+        "name": "actions",
+        "type": "{ kind: string; function?: string }[]",
+        "typeDetail": "{ kind: string; function?: string }[]"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "join",
+      "map",
+      "filter",
+      "G"
+    ]
+  },
+  {
+    "name": "formatActionSequence",
+    "params": [
+      {
+        "name": "actions",
+        "type": "{ kind: string; function?: string }[]",
+        "typeDetail": "{ kind: string; function?: string }[]"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "join",
+      "map",
+      "filter",
+      "D"
+    ]
+  },
+  {
+    "name": "formatSessionTimeline",
+    "params": [
+      {
+        "name": "session",
+        "type": "ExecutionSession",
+        "typeDetail": "ExecutionSession"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "B",
+      "repeat",
+      "max",
+      "filter",
+      "G",
+      "R",
+      "D",
+      "slice",
+      "push",
+      "formatActionSequence",
+      "narrateRejection",
+      "split",
+      "join",
+      "C_",
+      "Y",
+      "narrateSuccess"
+    ]
+  },
+  {
+    "name": "pad",
+    "params": [
+      {
+        "name": "s",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "w",
+        "type": "number",
+        "typeDetail": "number"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "replace",
+      "repeat",
+      "max"
+    ]
+  },
+  {
+    "name": "formatSessionSummary",
+    "params": [
+      {
+        "name": "sessions",
+        "type": "ReturnType<typeof getAllSessions>",
+        "typeDetail": "ReturnType<typeof getAllSessions>"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "D",
+      "repeat",
+      "pad",
+      "slice",
+      "G",
+      "R",
+      "push",
+      "String",
+      "join"
+    ]
+  },
+  {
+    "name": "formatGenomeSummary",
+    "params": [],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "getFailureGenome",
+      "D",
+      "repeat",
+      "B",
+      "slice",
+      "R",
+      "String",
+      "Y",
+      "barChart",
+      "push",
+      "max",
+      "join",
+      "sort",
+      "entries"
+    ]
+  },
+  {
+    "name": "barChart",
+    "params": [
+      {
+        "name": "count",
+        "type": "number",
+        "typeDetail": "number"
+      },
+      {
+        "name": "total",
+        "type": "number",
+        "typeDetail": "number"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "D",
+      "repeat",
+      "round",
+      "Y"
+    ]
+  },
+  {
+    "name": "aclBadge",
+    "params": [
+      {
+        "name": "level",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "G",
+      "C_",
+      "Y",
+      "D"
+    ]
+  },
+  {
+    "name": "formatLearnedPatterns",
+    "params": [],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "getLearnedPatterns",
+      "D",
+      "B",
+      "repeat",
+      "join",
+      "slice",
+      "round",
+      "push",
+      "R",
+      "Y",
+      "aclBadge"
+    ]
+  },
+  {
+    "name": "formatHeatmap",
+    "params": [],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "getSemanticHeatmap",
+      "D",
+      "push",
+      "B",
+      "repeat",
+      "max",
+      "map",
+      "round",
+      "R",
+      "padStart",
+      "padEnd",
+      "String",
+      "slice",
+      "Y",
+      "C_",
+      "join"
+    ]
+  },
+  {
+    "name": "loadProtocols",
+    "params": [],
+    "returnType": "FunctionProtocol[]",
+    "returnTypeDetail": "FunctionProtocol[]",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "join",
+      "existsSync",
+      "parse",
+      "readFileSync",
+      "entries",
+      "push"
+    ]
+  },
+  {
+    "name": "loadNamespaceInitialStates",
+    "params": [
+      {
+        "name": "protocols",
+        "type": "FunctionProtocol[]",
+        "typeDetail": "FunctionProtocol[]"
+      }
+    ],
+    "returnType": "Map<string, string>",
+    "returnTypeDetail": "Map<string, string>",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "set",
+      "join",
+      "existsSync",
+      "parse",
+      "readFileSync",
+      "entries",
+      "has"
+    ]
+  },
+  {
+    "name": "createSSV",
+    "params": [
+      {
+        "name": "protocols",
+        "type": "FunctionProtocol[]",
+        "typeDetail": "FunctionProtocol[]"
+      }
+    ],
+    "returnType": "StateMachineValidator",
+    "returnTypeDetail": "StateMachineValidator",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "loadNamespaceInitialStates",
+      "get"
+    ]
+  },
+  {
+    "name": "formatStateTransitionPath",
+    "params": [
+      {
+        "name": "actions",
+        "type": "{ kind: string; function?: string }[]",
+        "typeDetail": "{ kind: string; function?: string }[]"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "loadProtocols",
+      "D",
+      "createSSV",
+      "find",
+      "apply",
+      "getTrace",
+      "push",
+      "C_",
+      "join",
+      "filter",
+      "G",
+      "R"
+    ]
+  },
+  {
+    "name": "formatStateTransitions",
+    "params": [
+      {
+        "name": "session",
+        "type": "ExecutionSession",
+        "typeDetail": "ExecutionSession"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "B",
+      "repeat",
+      "max",
+      "G",
+      "R",
+      "D",
+      "push",
+      "formatStateTransitionPath",
+      "join",
+      "map",
+      "filter",
+      "Y"
+    ]
+  },
+  {
+    "name": "sleep",
+    "params": [
+      {
+        "name": "ms",
+        "type": "number",
+        "typeDetail": "number"
+      }
+    ],
+    "returnType": "Promise<void>",
+    "returnTypeDetail": "Promise<void>",
+    "file": "src/semantic-trace.ts",
+    "calls": []
+  },
+  {
+    "name": "clearScreen",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "write"
+    ]
+  },
+  {
+    "name": "svlLabel",
+    "params": [
+      {
+        "name": "svl",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": []
+  },
+  {
+    "name": "describeSVLLayer",
+    "params": [
+      {
+        "name": "svl",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": []
+  },
+  {
+    "name": "formatReplayHeader",
+    "params": [
+      {
+        "name": "session",
+        "type": "ExecutionSession",
+        "typeDetail": "ExecutionSession"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "filter",
+      "push",
+      "B",
+      "D",
+      "repeat",
+      "C_",
+      "G",
+      "R",
+      "join"
+    ]
+  },
+  {
+    "name": "formatActionList",
+    "params": [
+      {
+        "name": "actions",
+        "type": "{ kind: string; function?: string }[]",
+        "typeDetail": "{ kind: string; function?: string }[]"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "D",
+      "join",
+      "map",
+      "filter"
+    ]
+  },
+  {
+    "name": "formatAdaptationDiff",
+    "params": [
+      {
+        "name": "prev",
+        "type": "Attempt",
+        "typeDetail": "Attempt"
+      },
+      {
+        "name": "current",
+        "type": "Attempt",
+        "typeDetail": "Attempt"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "map",
+      "filter",
+      "push",
+      "B",
+      "D",
+      "join",
+      "R",
+      "G"
+    ]
+  },
+  {
+    "name": "formatAnomalyReport",
+    "params": [
+      {
+        "name": "a",
+        "type": "Attempt",
+        "typeDetail": "Attempt"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "push",
+      "B",
+      "R",
+      "join",
+      "svlLabel",
+      "D",
+      "describeSVLLayer",
+      "match",
+      "find",
+      "C_",
+      "slice"
+    ]
+  },
+  {
+    "name": "formatImmuneResponse",
+    "params": [
+      {
+        "name": "a",
+        "type": "Attempt",
+        "typeDetail": "Attempt"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "join",
+      "push",
+      "B",
+      "Y",
+      "D"
+    ]
+  },
+  {
+    "name": "formatReplayProgress",
+    "params": [
+      {
+        "name": "current",
+        "type": "number",
+        "typeDetail": "number"
+      },
+      {
+        "name": "total",
+        "type": "number",
+        "typeDetail": "number"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "repeat",
+      "D"
+    ]
+  },
+  {
+    "name": "replaySession",
+    "params": [
+      {
+        "name": "session",
+        "type": "ExecutionSession",
+        "typeDetail": "ExecutionSession"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "clearScreen",
+      "log",
+      "formatReplayHeader",
+      "sleep",
+      "B",
+      "D",
+      "formatActionList",
+      "formatAnomalyReport",
+      "formatImmuneResponse",
+      "formatAdaptationDiff",
+      "formatReplayProgress",
+      "G",
+      "join",
+      "map",
+      "filter",
+      "loadProtocols",
+      "formatStateTransitionPath",
+      "R",
+      "repeat"
+    ]
+  },
+  {
+    "name": "formatSnapshotList",
+    "params": [],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "listSnapshots",
+      "D",
+      "push",
+      "C_",
+      "B",
+      "slice",
+      "replace",
+      "padStart",
+      "String",
+      "padEnd",
+      "join"
+    ]
+  },
+  {
+    "name": "formatSnapshotDiff",
+    "params": [
+      {
+        "name": "snapIdA",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "snapIdB",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "loadSnapshot",
+      "R",
+      "diffSnapshots",
+      "push",
+      "C_",
+      "D",
+      "slice",
+      "G",
+      "join",
+      "map",
+      "Y"
+    ]
+  },
+  {
+    "name": "formatSessionValidation",
+    "params": [
+      {
+        "name": "session",
+        "type": "ExecutionSession",
+        "typeDetail": "ExecutionSession"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "push",
+      "C_",
+      "D",
+      "add",
+      "loadSnapshot",
+      "map",
+      "Y",
+      "join",
+      "cwd",
+      "existsSync",
+      "parse",
+      "readFileSync",
+      "sort",
+      "B",
+      "has",
+      "G",
+      "R",
+      "slice",
+      "padEnd",
+      "parseProtocolsFromJSON",
+      "set",
+      "entries",
+      "get",
+      "apply"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "log",
+      "formatGenomeSummary",
+      "formatLearnedPatterns",
+      "formatHeatmap",
+      "formatSnapshotList",
+      "D",
+      "formatSnapshotDiff",
+      "error",
+      "R",
+      "exit",
+      "getAllSessions",
+      "find",
+      "formatSessionValidation",
+      "formatSessionSummary",
+      "formatStateTransitions",
+      "replaySession",
+      "startsWith",
+      "formatSessionTimeline"
+    ]
+  },
+  {
+    "name": "G",
+    "params": [
+      {
+        "name": "s",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/semantic-trace.ts",
+    "calls": []
+  },
+  {
+    "name": "R",
+    "params": [
+      {
+        "name": "s",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/semantic-trace.ts",
+    "calls": []
+  },
+  {
+    "name": "Y",
+    "params": [
+      {
+        "name": "s",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/semantic-trace.ts",
+    "calls": []
+  },
+  {
+    "name": "C_",
+    "params": [
+      {
+        "name": "s",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/semantic-trace.ts",
+    "calls": []
+  },
+  {
+    "name": "D",
+    "params": [
+      {
+        "name": "s",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/semantic-trace.ts",
+    "calls": []
+  },
+  {
+    "name": "B",
+    "params": [
+      {
+        "name": "s",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/semantic-trace.ts",
+    "calls": []
+  },
+  {
+    "name": "loadContracts",
+    "params": [],
+    "returnType": "IRFunction[]",
+    "returnTypeDetail": "IRFunction[]",
+    "file": "src/semantic-validator.ts",
+    "calls": [
+      "parse",
+      "readFileSync",
+      "require"
+    ]
+  },
+  {
+    "name": "matchIntent",
+    "params": [
+      {
+        "name": "intent",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "keywords",
+        "type": "string[]",
+        "typeDetail": "string[]"
+      }
+    ],
+    "returnType": "boolean",
+    "returnTypeDetail": "boolean",
+    "file": "src/semantic-validator.ts",
+    "calls": [
+      "some"
+    ]
+  },
+  {
+    "name": "checkSemantic",
+    "params": [
+      {
+        "name": "intent",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "actions",
+        "type": "Action[]",
+        "typeDetail": "Action[]"
+      }
+    ],
+    "returnType": "{ valid: boolean; errors: string[] }",
+    "returnTypeDetail": "{ valid: boolean; errors: string[] }",
+    "file": "src/semantic-validator.ts",
+    "calls": [
+      "loadContracts",
+      "filter",
+      "find",
+      "matchIntent",
+      "includes",
+      "trim",
+      "push",
+      "some",
+      "indexOf",
+      "findIndex"
+    ]
+  },
+  {
+    "name": "parseProtocolsFromJSON",
+    "params": [
+      {
+        "name": "protocolDef",
+        "type": "{\n    rules: Record<string, {\n      pre_states: string[];\n      post_states: string[];\n      invalidate?: string[];\n      namespace?: string;\n    }>;\n  }",
+        "typeDetail": "{\n    rules: Record<string, {\n      pre_states: string[];\n      post_states: string[];\n      invalidate?: string[];\n      namespace?: string;\n    }>;\n  }"
+      }
+    ],
+    "returnType": "FunctionProtocol[]",
+    "returnTypeDetail": "FunctionProtocol[]",
+    "file": "src/ssg-validator.ts",
+    "calls": [
+      "entries",
+      "push"
+    ]
+  },
+  {
+    "name": "jaccardSimilarity",
+    "params": [
+      {
+        "name": "a",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "b",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "number",
+    "returnTypeDetail": "number",
+    "file": "src/utils.ts",
+    "calls": [
+      "bigrams",
+      "filter"
+    ]
+  },
+  {
+    "name": "extractKeywords",
+    "params": [
+      {
+        "name": "intent",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "string[]",
+    "returnTypeDetail": "string[]",
+    "file": "src/utils.ts",
+    "calls": [
+      "map",
+      "filter",
+      "split"
+    ]
+  },
+  {
+    "name": "loadIR",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/validator.ts",
+    "calls": [
+      "resolve",
+      "existsSync",
+      "parse",
+      "readFileSync"
+    ]
+  },
+  {
+    "name": "normalizeType",
+    "params": [
+      {
+        "name": "type",
+        "type": "string | undefined",
+        "typeDetail": "string | undefined"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/validator.ts",
+    "calls": [
+      "trim",
+      "toLowerCase"
+    ]
+  },
+  {
+    "name": "checkVariableFlow",
+    "params": [
+      {
+        "name": "actions",
+        "type": "Action[]",
+        "typeDetail": "Action[]"
+      }
+    ],
+    "returnType": "string[]",
+    "returnTypeDetail": "string[]",
+    "file": "src/validator.ts",
+    "calls": [
+      "processAction"
+    ]
+  },
+  {
+    "name": "validateAction",
+    "params": [
+      {
+        "name": "action",
+        "type": "Action",
+        "typeDetail": "Action"
+      }
+    ],
+    "returnType": "{ valid: boolean; errors: string[] }",
+    "returnTypeDetail": "{ valid: boolean; errors: string[] }",
+    "file": "src/validator.ts",
+    "calls": [
+      "loadIR",
+      "includes",
+      "push",
+      "find",
+      "has",
+      "forEach",
+      "validateAction"
+    ],
+    "protocol": {
+      "pre_states": [
+        "IR_EXTRACTED"
+      ],
+      "post_states": [
+        "ACTION_VALIDATED"
+      ],
+      "namespace": "dev_pipeline"
+    }
+  },
+  {
+    "name": "validateActionSequence",
+    "params": [
+      {
+        "name": "actions",
+        "type": "Action[]",
+        "typeDetail": "Action[]"
+      }
+    ],
+    "returnType": "{ valid: boolean; errors: string[] }",
+    "returnTypeDetail": "{ valid: boolean; errors: string[] }",
+    "file": "src/validator.ts",
+    "calls": [
+      "validateAction",
+      "push",
+      "checkVariableFlow"
+    ],
+    "protocol": {
+      "pre_states": [
+        "ACTION_VALIDATED"
+      ],
+      "post_states": [
+        "SEQUENCE_VALIDATED"
+      ],
+      "invalidate": [
+        "ACTION_VALIDATED"
+      ],
+      "namespace": "dev_pipeline"
+    }
+  },
+  {
+    "name": "fn",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "error",
+    "params": [
+      {
+        "name": "message",
+        "type": "any"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "输出错误日志"
+  },
+  {
+    "name": "parse",
+    "params": [
+      {
+        "name": "text",
+        "type": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "解析 JSON 字符串"
+  },
+  {
+    "name": "readFileSync",
+    "params": [
+      {
+        "name": "path",
+        "type": "string"
+      },
+      {
+        "name": "encoding",
+        "type": "string"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "同步读取文件内容"
+  },
+  {
+    "name": "collect",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "convert",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "execSync",
+    "params": [
+      {
+        "name": "command",
+        "type": "string"
+      }
+    ],
+    "returnType": "Buffer",
+    "returnTypeDetail": "Buffer",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "同步执行命令"
+  },
+  {
+    "name": "existsSync",
+    "params": [
+      {
+        "name": "path",
+        "type": "string"
+      }
+    ],
+    "returnType": "boolean",
+    "returnTypeDetail": "boolean",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "检查文件是否存在"
+  },
+  {
+    "name": "getElementTypeNode",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "getTypeNode",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "getReturnTypeNode",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "getBody",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "forEachDescendant",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "relative",
+    "params": [
+      {
+        "name": "from",
+        "type": "string"
+      },
+      {
+        "name": "to",
+        "type": "string"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "计算相对路径"
+  },
+  {
+    "name": "add",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "mkdirSync",
+    "params": [
+      {
+        "name": "path",
+        "type": "string"
+      },
+      {
+        "name": "options",
+        "type": "object"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "创建目录"
+  },
+  {
+    "name": "from",
+    "params": [
+      {
+        "name": "data",
+        "type": "string"
+      },
+      {
+        "name": "encoding",
+        "type": "string"
+      }
+    ],
+    "returnType": "Buffer",
+    "returnTypeDetail": "Buffer",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "从字符串创建 Buffer"
+  },
+  {
+    "name": "writeFileSync",
+    "params": [
+      {
+        "name": "path",
+        "type": "string"
+      },
+      {
+        "name": "data",
+        "type": "string"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "同步写入文件"
+  },
+  {
+    "name": "stringify",
+    "params": [
+      {
+        "name": "value",
+        "type": "any"
+      },
+      {
+        "name": "replacer",
+        "type": "any"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "序列化为 JSON 字符串"
+  },
+  {
+    "name": "unlinkSync",
+    "params": [
+      {
+        "name": "path",
+        "type": "string"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "删除文件"
+  },
+  {
+    "name": "now",
+    "params": [],
+    "returnType": "number",
+    "returnTypeDetail": "number",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "当前时间戳（毫秒）"
+  },
+  {
+    "name": "random",
+    "params": [],
+    "returnType": "number",
+    "returnTypeDetail": "number",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "生成 0-1 随机数"
+  },
+  {
+    "name": "readdirSync",
+    "params": [
+      {
+        "name": "path",
+        "type": "string"
+      }
+    ],
+    "returnType": "string[]",
+    "returnTypeDetail": "string[]",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "读取目录内容"
+  },
+  {
+    "name": "statSync",
+    "params": [
+      {
+        "name": "path",
+        "type": "string"
+      }
+    ],
+    "returnType": "object",
+    "returnTypeDetail": "object",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "获取文件状态"
+  },
+  {
+    "name": "parseInt",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "flatMap",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "rmdirSync",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "log",
+    "params": [
+      {
+        "name": "message",
+        "type": "any"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "输出日志"
+  },
+  {
+    "name": "String",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "table",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "toFixed",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "hostname",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "require",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "cwd",
+    "params": [],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "获取当前工作目录"
+  },
+  {
+    "name": "digest",
+    "params": [
+      {
+        "name": "encoding",
+        "type": "string"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "输出哈希摘要"
+  },
+  {
+    "name": "update",
+    "params": [
+      {
+        "name": "data",
+        "type": "string"
+      }
+    ],
+    "returnType": "Hash",
+    "returnTypeDetail": "Hash",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "更新哈希数据"
+  },
+  {
+    "name": "createHash",
+    "params": [
+      {
+        "name": "algorithm",
+        "type": "string"
+      }
+    ],
+    "returnType": "Hash",
+    "returnTypeDetail": "Hash",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "创建哈希对象"
+  },
+  {
+    "name": "dirname",
+    "params": [
+      {
+        "name": "path",
+        "type": "string"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "获取目录名"
+  },
+  {
+    "name": "create",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "modify",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "createNamespacedSSV",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "apply",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "explainRejection",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "rejectionToJSON",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "repeat",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "getTrace",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "applyWithTransition",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "findIndex",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "flat",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "getMaskedFuncList",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "collectImports",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "convertLines",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "min",
+    "params": [
+      {
+        "name": "values",
+        "type": "number[]"
+      }
+    ],
+    "returnType": "number",
+    "returnTypeDetail": "number",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "最小值"
+  },
+  {
+    "name": "parseFloat",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "clear",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "max",
+    "params": [
+      {
+        "name": "values",
+        "type": "number[]"
+      }
+    ],
+    "returnType": "number",
+    "returnTypeDetail": "number",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "最大值"
+  },
+  {
+    "name": "write",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "exit",
+    "params": [
+      {
+        "name": "code",
+        "type": "number"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "退出进程"
+  },
+  {
+    "name": "bigrams",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "processAction",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  }
+]

@@ -4,13 +4,20 @@
   "initialState": "UNAUTHENTICATED",
   "namespaceInitialStates": {
     "_global": "UNAUTHENTICATED",
-    "auth": "UNAUTHENTICATED"
+    "auth": "UNAUTHENTICATED",
+    "dev_pipeline": "IR_STALE"
   },
   "states": {
     "UNAUTHENTICATED": "初始状态：用户未认证",
     "PASSWORD_VERIFIED": "密码已通过验证",
     "TOKEN_ISSUED": "JWT 令牌已签发",
-    "SESSION_ACTIVE": "会话已激活"
+    "SESSION_ACTIVE": "会话已激活",
+    "IR_STALE": "IR 已过期或未生成",
+    "IR_EXTRACTED": "IR 已从源码提取",
+    "ACTION_VALIDATED": "动作已通过 SVL 校验",
+    "SEQUENCE_VALIDATED": "动作序列 + 变量流向已通过校验",
+    "CODE_EMITTED": "目标代码已生成",
+    "SESSION_RECORDED": "执行会话已保存"
   },
   "rules": {
     "verify_password": {
@@ -90,6 +97,40 @@
       "post_states": [],
       "invalidate": ["DB_CONNECTED"],
       "description": "断开数据库连接"
+    },
+    "extractIR": {
+      "namespace": "dev_pipeline",
+      "pre_states": [],
+      "post_states": ["IR_EXTRACTED"],
+      "invalidate": ["IR_STALE"],
+      "description": "从源码提取 IR → 产出 IR_EXTRACTED 状态"
+    },
+    "validateAction": {
+      "namespace": "dev_pipeline",
+      "pre_states": ["IR_EXTRACTED"],
+      "post_states": ["ACTION_VALIDATED"],
+      "description": "校验单个动作合法性 → 需要 IR 已提取"
+    },
+    "validateActionSequence": {
+      "namespace": "dev_pipeline",
+      "pre_states": ["ACTION_VALIDATED"],
+      "post_states": ["SEQUENCE_VALIDATED"],
+      "invalidate": ["ACTION_VALIDATED"],
+      "description": "批量校验动作序列 → 需要动作已验证，校验后消耗"
+    },
+    "emitCode": {
+      "namespace": "dev_pipeline",
+      "pre_states": ["SEQUENCE_VALIDATED"],
+      "post_states": ["CODE_EMITTED"],
+      "invalidate": ["SEQUENCE_VALIDATED"],
+      "description": "编译动作序列为目标代码 → 需要序列已验证"
+    },
+    "recordSession": {
+      "namespace": "dev_pipeline",
+      "pre_states": ["CODE_EMITTED"],
+      "post_states": ["SESSION_RECORDED"],
+      "invalidate": ["CODE_EMITTED"],
+      "description": "保存执行会话到语料库 → 需要代码已生成"
     }
   }
 }

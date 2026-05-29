@@ -138,6 +138,10 @@ export function recordFailure(
 }
 
 /** 记录一个完整的意图会话（支持 ExecutionSession 和旧 IntentSession） */
+/**
+ * 保存执行会话（含所有尝试、违规、状态转移）。
+ * @protocol namespace=dev_pipeline pre_states=["CODE_EMITTED"] post_states=["SESSION_RECORDED"] invalidate=["CODE_EMITTED"]
+ */
 export function recordSession(session: ExecutionSession | Omit<IntentSession, "sessionId">): string {
   ensureDir(SESSIONS_DIR);
   const sessionId = (session as any).sessionId || `sess_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;

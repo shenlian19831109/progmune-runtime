@@ -8,7 +8,11 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/mcp-server.mjs"
+    "start": "node dist/mcp-server.mjs",
+    "test": "node dist/mcp-server.mjs test",
+    "ir": "npx ts-node src/extract-ir.ts .",
+    "guard": "node -e \"require('./dist/validator.js'); console.log('✅ 校验器已加载')\"",
+    "obs": "npx ts-node src/semantic-trace.ts"
   },
   "keywords": [
     "program-synthesis",
@@ -22,6 +26,7 @@
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
+    "dotenv": "^17.4.2",
     "openai": "^6.36.0",
     "ts-morph": "^28.0.0",
     "ts-node": "^10.9.2",

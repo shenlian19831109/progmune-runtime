@@ -134,6 +134,10 @@ function extractDirectCalls(func) {
     });
     return [...new Set(calls)];
 }
+/**
+ * 从 TypeScript 项目提取 IR（函数签名、参数、返回值、协议注解）。
+ * @protocol namespace=dev_pipeline pre_states=[] post_states=["IR_EXTRACTED"] invalidate=["IR_STALE"]
+ */
 function extractIR(projectRoot) {
     const absRoot = path.resolve(projectRoot);
     const project = new ts_morph_1.Project({

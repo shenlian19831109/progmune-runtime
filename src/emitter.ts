@@ -10,6 +10,10 @@ function getImportPath(file: string): string {
   return "./" + file.replace(/\.ts$|\.tsx$/, "");
 }
 
+/**
+ * 将动作序列编译为目标语言代码。
+ * @protocol namespace=dev_pipeline pre_states=["SEQUENCE_VALIDATED"] post_states=["CODE_EMITTED"] invalidate=["SEQUENCE_VALIDATED"]
+ */
 export function emitCode(actions: Action[]): string {
   const ir = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
   const fnIndex = new Map<string, string>();

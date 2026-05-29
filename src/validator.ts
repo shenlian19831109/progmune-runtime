@@ -97,6 +97,10 @@ function checkVariableFlow(actions: Action[]): string[] {
   return errors;
 }
 
+/**
+ * 校验单个动作的合法性（函数存在、类型匹配、参数数量）。
+ * @protocol namespace=dev_pipeline pre_states=["IR_EXTRACTED"] post_states=["ACTION_VALIDATED"]
+ */
 export function validateAction(action: Action): { valid: boolean; errors: string[] } {
   const functions = loadIR();
   const errors: string[] = [];
@@ -147,6 +151,10 @@ export function validateAction(action: Action): { valid: boolean; errors: string
   return { valid: errors.length === 0, errors };
 }
 
+/**
+ * 批量校验动作序列 + 变量流向分析。
+ * @protocol namespace=dev_pipeline pre_states=["ACTION_VALIDATED"] post_states=["SEQUENCE_VALIDATED"] invalidate=["ACTION_VALIDATED"]
+ */
 export function validateActionSequence(actions: Action[]): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
   for (const action of actions) {

@@ -61,28 +61,71 @@ function buildCompactFuncList(funcs: any[]): string {
   }).join("\n");
 }
 
-const SYSTEM_PROMPT = `你是程序合成助手。只输出 IR 代码，不输出解释。
+const SYSTEM_PROMPT = `你是程序合成助手。只输出 JSON 数组，不输出解释。
 
-示例（缓存查询——注意 assign 先于条件）：
-assign("query_key","user:123")
-callAssign("cache_get","cached_data","query_key")
-ifElse("cached_data",()=>{output("cached_data")},()=>{callAssign("query_data","fresh_data","query_key");call("cache_set","query_key","fresh_data");output("fresh_data")})
+格式（紧凑一行）：
+[{"f":"函数名","to":"变量名","a":[{"n":"参数名","t":"类型","v":值}]},{"r":"变量名"}]
 
-全局函数：
-- assign("变量名","值")——声明变量
-- callAssign("函数","变量名",...args)——调用函数并绑定返回值
-- ifElse("变量名",()=>{...},()=>{...})——条件分支
-- ifBlock("变量名",()=>{...})——简单分支
-- call("函数",...args)——调用 void 函数
-- output("值或变量名")——返回结果
+规则：
+- "f": 函数名，"to": 接收返回值的变量名（void 函数省略）
+- "a": 参数数组，每个参数 n=名称 t=类型 v=值
+- 字符串值直接写: "v":"hello"，数字: "v":42
+- 引用之前返回的变量: "v":"$变量名"（$前缀表示这是变量引用）
+- {"r":"变量名"} 表示返回该变量
 
-铁律：
-1. 先 assign 或 callAssign 声明变量，再使用
-2. 参数数量与函数声明严格一致
-3. 条件括号内只能是已声明的变量名
-4. 禁止调用可用列表外的任何函数`;
+示例 — 提取 IR 后校验：
+[{"f":"extractIR","to":"ir","a":[{"n":"root","t":"str","v":"."}]},{"f":"validateActionSequence","to":"ok","a":[{"n":"actions","t":"any","v":"$ir"}]},{"r":"ok"}]
 
-const RETRY_HINT = `输出规则：用 assign("var","val") / callAssign("fn","var",...) / ifElse("var",()=>{},()=>{}) / call("fn",...) / output("var") 格式，只输出代码`;
+铁律：只输出 JSON 数组，双引号，不输出解释`;
+
+const RETRY_HINT = `输出格式：紧凑 JSON 数组 [{"f":"函数名","to":"变量名","a":[...]}]`;
+
+/** 构建重试 prompt：精简但包含必要的 IR 语法提示 */
+
+/** 解析 LLM 输出的紧凑 JSON 为 Action[]。
+ *  格式: [{"f":"fn","to":"var","a":[{"n":"p","t":"str","v":"x"}]}, {"r":"var"}, ...]
+ *  f=function(→call), to=assignTo, a=args, r=return, if=condition
+ */
+function parseActionJSON(text: string): Action[] | null {
+  const clean = text.replace(/```(?:json|javascript)?\s*/gi, '').replace(/```\s*/g, '').trim();
+  try {
+    const arr = JSON.parse(clean);
+    if (!Array.isArray(arr)) return null;
+    const actions: Action[] = [];
+    for (const item of arr) {
+      if (!item || typeof item !== 'object') return null;
+      if (item.r !== undefined) {
+        actions.push({ kind: "return", value: item.r });
+      } else if (item.f) {
+        const a: Action = {
+          kind: "call",
+          function: item.f,
+          args: (item.a || []).map((p: any) => ({
+            name: p.n || "arg",
+            type: p.t || "any",
+            value: p.v ?? null,
+          })),
+        };
+        if (item.to) a.assignTo = item.to;
+        actions.push(a);
+      } else if (item.if) {
+        const a: Action = {
+          kind: "if",
+          condition: item.if,
+          thenActions: item.then ? parseActionJSON(JSON.stringify(item.then)) || [] : [],
+          elseActions: item.else ? parseActionJSON(JSON.stringify(item.else)) || [] : [],
+        };
+        actions.push(a);
+      } else if (item.kind) {
+        // 完整 Action 格式（后向兼容）
+        actions.push(item as Action);
+      } else {
+        return null;
+      }
+    }
+    return actions.length > 0 ? actions : null;
+  } catch { return null; }
+}
 
 /** 构建重试 prompt：精简但包含必要的 IR 语法提示 */
 
@@ -294,7 +337,8 @@ ${compactFuncList}
 
 需求：${userIntent}${antibodyHint}
 
-只输出代码。`;
+${RETRY_HINT}
+只输出 JSON。`;
 
   const estimatedTokens = estimateTokens(SYSTEM_PROMPT + userPrompt);
   console.error(`💰 估算 prompt token: ${estimatedTokens}`);
@@ -356,16 +400,34 @@ ${compactFuncList}
     } catch (e) { continue; }
     if (!text) continue;
 
-    text = text.replace(/```javascript\s*/gi, '').replace(/```\s*/g, '').trim();
-    console.error("📝 LLM 生成的代码:\n", text);
+    text = text.replace(/```(?:json|javascript)?\s*/gi, '').replace(/```\s*/g, '').trim();
+    console.error("📝 LLM 输出:\n", text);
 
-    const rawActions = executeActionCode(text);
+    // 优先尝试 JSON 解析，失败则回退到 DSL 执行
+    let rawActions = parseActionJSON(text);
+    if (!rawActions) {
+      console.error("⚠️ JSON 解析失败，尝试 DSL 回退...");
+      rawActions = executeActionCode(text);
+    }
     if (!rawActions || rawActions.length === 0) {
-      console.error("⚠️ 代码执行失败，重试...");
-      currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n上一次代码无效，请严格模仿示例。\n${RETRY_HINT}\n只输出代码。`;
+      console.error("⚠️ 解析失败，重试...");
+      currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n上一次输出无效。请严格输出 JSON 数组。\n${RETRY_HINT}\n只输出 JSON。`;
       useSystem = false;
       continue;
     }
+
+    // 解析 $变量名 引用为实际变量名
+    rawActions = rawActions.map(a => {
+      if (a.kind === "call" && a.args) {
+        a.args = a.args.map(arg => {
+          if (typeof arg.value === 'string' && arg.value.startsWith('$')) {
+            return { ...arg, value: arg.value.slice(1) };
+          }
+          return arg;
+        });
+      }
+      return a;
+    });
 
     const enriched = enrichActions(rawActions, ir);
     const filtered = enriched.filter(a => !forbiddenFuncs.includes(a.kind === "call" ? a.function : ''));
@@ -418,7 +480,7 @@ ${compactFuncList}
         plannerRetryTotal: maxRetries,
       });
       recordEpisode({ intent: userIntent, actions: filtered, success: false, svlViolated: svl });
-      currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n错误：${errorsFlat.join("；")}。请修正。\n${RETRY_HINT}\n只输出代码。`;
+      currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n错误：${errorsFlat.join("；")}。请修正。\n${RETRY_HINT}\n只输出 JSON。`;
       useSystem = false;
       saveCheckpoint(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });
       continue;
@@ -486,7 +548,7 @@ ${compactFuncList}
         }
 
         const maskedFuncList = getMaskedFuncList();
-        currentPrompt = `当前协议状态只允许以下函数：\n${maskedFuncList}\n\n需求：${userIntent}\n\n协议违规：${explain.replace(/\n/g, '；')}。请修正。\n${RETRY_HINT}\n只输出代码。`;
+        currentPrompt = `当前协议状态只允许以下函数：\n${maskedFuncList}\n\n需求：${userIntent}\n\n协议违规：${explain.replace(/\n/g, '；')}。请修正。\n${RETRY_HINT}\n只输出 JSON。`;
         useSystem = false;
         saveCheckpoint(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });
         continue;
@@ -536,7 +598,7 @@ ${compactFuncList}
         plannerRetryTotal: maxRetries,
       });
       recordEpisode({ intent: userIntent, actions: filtered, success: false, svlViolated: "SVL-4" });
-      currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n语义错误：${semResult.errors.join("；")}。请修正。\n${RETRY_HINT}\n只输出代码。`;
+      currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n语义错误：${semResult.errors.join("；")}。请修正。\n${RETRY_HINT}\n只输出 JSON。`;
       useSystem = false;
       saveCheckpoint(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });
       continue;
