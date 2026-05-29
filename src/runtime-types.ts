@@ -50,6 +50,16 @@ export interface StateTransition {
 
 // ── Attempt ──
 
+export interface AntibodyHit {
+  level: string;           // ACL-1 | ACL-2 | ACL-3 | ACL-4
+  signature: string;
+  fixPath: string[];
+  similarityScore: number;
+  action: "fast_path" | "injected_hint";  // ACL-4 = fast_path, ACL-3 = injected_hint
+  llmCallsSaved: number;
+  estimatedTokensSaved: number;
+}
+
 export interface Attempt {
   id: string;
   sessionId: string;
@@ -65,6 +75,7 @@ export interface Attempt {
   timestamp: number;
   llmCallCount: number;
   durationMs: number;
+  antibodyHit?: AntibodyHit;
 }
 
 // ── Execution Session ──

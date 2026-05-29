@@ -11,10 +11,11 @@
  *   ts-node src/semantic-trace.ts --states <sessionId> → state transition visualization
  *   ts-node src/semantic-trace.ts --genome             → failure genome summary
  *   ts-node src/semantic-trace.ts --learned            → antibody registry with ACL levels
+ *   ts-node src/semantic-trace.ts --antibodies         → antibody efficacy metrics
  *   ts-node src/semantic-trace.ts --heatmap            → semantic heatmap
  */
 
-import { getAllSessions, getFailureGenome, getLearnedPatterns } from "./failure-corpus";
+import { getAllSessions, getFailureGenome, getLearnedPatterns, getAntibodyStats } from "./failure-corpus";
 
 // ── ANSI colors ──
 const C = { reset: "\x1b[0m", green: "\x1b[32m", red: "\x1b[31m", yellow: "\x1b[33m", cyan: "\x1b[36m", gray: "\x1b[90m", bold: "\x1b[1m", dim: "\x1b[2m" };
@@ -177,7 +178,7 @@ function formatSessionSummary(sessions: ReturnType<typeof getAllSessions>): stri
 
   lines.push(`└${sep}┘`);
   lines.push("");
-  lines.push(`${D("Commands:")} timeline | replay | --states | --genome | --learned | --heatmap`);
+  lines.push(`${D("Commands:")} timeline | replay | --states | --genome | --learned | --antibodies | --heatmap`);
 
   return lines.join("\n");
 }
@@ -284,6 +285,64 @@ function formatLearnedPatterns(): string {
     lines.push(`  ${D("Confidence:")} ${aclBadge(p.antibodyLevel)}`);
     lines.push(`  ${D("Occurrences:")} ${p.occurrenceCount}x  │  ${D("Resolved:")} ${ratePct}%  │  ${D("Intents:")} ${intents}${moreIntents}`);
     lines.push("");
+  }
+
+  return lines.join("\n");
+}
+
+// ── Antibody efficacy stats ──
+
+function formatAntibodyStats(): string {
+  const stats = getAntibodyStats();
+
+  if (stats.totalHits === 0) {
+    return `${D("No antibody hits recorded yet.")}\nAntibodies are recorded when the immune system accelerates planning via learned fix paths.`;
+  }
+
+  const lines: string[] = [];
+  lines.push(`${B("Antibody Efficacy Report")}`);
+  lines.push("═".repeat(68));
+  lines.push("");
+
+  // Summary
+  lines.push(`  ${B("Immune Acceleration Summary")}`);
+  lines.push(`  ${D("─".repeat(44))}`);
+  lines.push(`  Total antibody hits:        ${C_(String(stats.totalHits))}`);
+  lines.push(`  ACL-4 fast-path (0 LLM):     ${G(String(stats.fastPathHits))}`);
+  lines.push(`  ACL-3 injected hints:        ${Y(String(stats.injectedHintHits))}`);
+  lines.push(`  LLM calls saved:             ${G(String(stats.totalLLMCallsSaved))}`);
+  lines.push(`  Est. tokens saved:           ${G(stats.totalTokensSaved.toLocaleString())}`);
+  lines.push("");
+
+  // By Level
+  if (Object.keys(stats.byLevel).length > 0) {
+    lines.push(`  ${B("By Antibody Level")}`);
+    lines.push(`  ${D("─".repeat(34))}`);
+    const levels = ["ACL-4", "ACL-3", "ACL-2", "ACL-1"];
+    for (const lvl of levels) {
+      const d = stats.byLevel[lvl];
+      if (!d) continue;
+      const icon = lvl === "ACL-4" ? G("◆") : lvl === "ACL-3" ? C_("◈") : lvl === "ACL-2" ? Y("◇") : D("◌");
+      lines.push(`  ${icon} ${lvl}: ${d.hits} hits, ${d.llmSaved} LLM saved, ${d.tokensSaved.toLocaleString()} tokens`);
+    }
+    lines.push("");
+  }
+
+  // Top signatures
+  if (stats.topSignatures.length > 0) {
+    lines.push(`  ${B("Top Antibody Signatures")}`);
+    lines.push(`  ${D("─".repeat(40))}`);
+    for (const s of stats.topSignatures.slice(0, 5)) {
+      const sig = s.signature.length > 42 ? s.signature.slice(0, 39) + "..." : s.signature;
+      lines.push(`  ${s.hits}x  ${sig.padEnd(44)} ~${s.avgSimilarity}`);
+    }
+    lines.push("");
+  }
+
+  // Efficiency note
+  if (stats.fastPathHits > 0) {
+    const pct = Math.round((stats.fastPathHits / stats.totalHits) * 100);
+    lines.push(`  ${G(`Immune efficiency: ${pct}% of hits bypassed LLM entirely`)}`);
   }
 
   return lines.join("\n");
@@ -992,6 +1051,11 @@ async function main() {
 
   if (arg === "--learned") {
     console.log(formatLearnedPatterns());
+    return;
+  }
+
+  if (arg === "--antibodies") {
+    console.log(formatAntibodyStats());
     return;
   }
 

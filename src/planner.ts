@@ -1,5 +1,5 @@
 import { generate, chat, resetCallCount, estimateTokens } from "./llm";
-import type { Action, ConstraintViolation, Attempt, ExecutionSession } from "./runtime-types";
+import type { Action, ConstraintViolation, Attempt, ExecutionSession, AntibodyHit } from "./runtime-types";
 import { generateAttemptId, generateSessionId, generatePlannerSeed } from "./runtime-types";
 import { executeActionCode } from "./action-runtime";
 import { validateActionSequence } from "./validator";
@@ -125,6 +125,114 @@ function parseActionJSON(text: string): Action[] | null {
     }
     return actions.length > 0 ? actions : null;
   } catch { return null; }
+}
+
+/** JSON schema pre-validation: structural checks before IR-aware validation.
+ *  Catches malformed actions that parseActionJSON() accepted but are semantically invalid. */
+function validateActionSchema(actions: Action[]): { valid: boolean; errors: string[] } {
+  const errors: string[] = [];
+  const assignedVars = new Set<string>();
+  const validVarName = /^[a-zA-Z_]\w*$/;
+
+  for (let i = 0; i < actions.length; i++) {
+    const a = actions[i];
+    const pos = `action[${i}]`;
+
+    if (!a.kind) {
+      errors.push(`${pos}: missing "kind" field`);
+      continue;
+    }
+
+    switch (a.kind) {
+      case "call": {
+        if (!a.function || typeof a.function !== "string") {
+          errors.push(`${pos}: call action requires "function" (string)`);
+        }
+        if (!Array.isArray(a.args)) {
+          errors.push(`${pos}: call action requires "args" (array)`);
+        } else {
+          for (let j = 0; j < a.args.length; j++) {
+            const arg = a.args[j];
+            if (!arg || typeof arg !== "object") {
+              errors.push(`${pos}: args[${j}] must be an object`);
+            } else if (arg.name === undefined && arg.type === undefined && arg.value === undefined) {
+              errors.push(`${pos}: args[${j}] missing name/type/value`);
+            }
+          }
+        }
+        if (a.assignTo !== undefined) {
+          if (typeof a.assignTo !== "string" || !validVarName.test(a.assignTo)) {
+            errors.push(`${pos}: assignTo "${a.assignTo}" is not a valid variable name`);
+          } else if (assignedVars.has(a.assignTo)) {
+            errors.push(`${pos}: duplicate assignTo "${a.assignTo}" (previously assigned at another action)`);
+          } else {
+            assignedVars.add(a.assignTo);
+          }
+        }
+        break;
+      }
+      case "return": {
+        if (a.value === undefined) {
+          errors.push(`${pos}: return action requires "value"`);
+        }
+        if (i < actions.length - 1) {
+          errors.push(`${pos}: return should be the last action (actions after return are unreachable)`);
+        }
+        break;
+      }
+      case "assign": {
+        if (!a.target || typeof a.target !== "string" || !validVarName.test(a.target)) {
+          errors.push(`${pos}: assign requires valid "target" variable name`);
+        } else if (assignedVars.has(a.target)) {
+          errors.push(`${pos}: duplicate assign target "${a.target}"`);
+        } else {
+          assignedVars.add(a.target);
+        }
+        if (a.value === undefined) {
+          errors.push(`${pos}: assign action requires "value"`);
+        }
+        break;
+      }
+      case "if": {
+        if (!a.condition || typeof a.condition !== "string") {
+          errors.push(`${pos}: if action requires "condition" (string)`);
+        }
+        if (!Array.isArray(a.thenActions)) {
+          errors.push(`${pos}: if action requires "thenActions" (array)`);
+        } else {
+          const thenCheck = validateActionSchema(a.thenActions);
+          errors.push(...thenCheck.errors.map(e => `${pos}.thenActions: ${e}`));
+        }
+        if (a.elseActions && !Array.isArray(a.elseActions)) {
+          errors.push(`${pos}: elseActions must be an array if present`);
+        } else if (a.elseActions) {
+          const elseCheck = validateActionSchema(a.elseActions);
+          errors.push(...elseCheck.errors.map(e => `${pos}.elseActions: ${e}`));
+        }
+        break;
+      }
+      case "for": {
+        if (!a.variable || typeof a.variable !== "string" || !validVarName.test(a.variable)) {
+          errors.push(`${pos}: for action requires valid "variable" name`);
+        }
+        if (!a.iterable || typeof a.iterable !== "string") {
+          errors.push(`${pos}: for action requires "iterable" (string)`);
+        }
+        if (!Array.isArray(a.bodyActions)) {
+          errors.push(`${pos}: for action requires "bodyActions" (array)`);
+        } else {
+          const bodyCheck = validateActionSchema(a.bodyActions);
+          errors.push(...bodyCheck.errors.map(e => `${pos}.bodyActions: ${e}`));
+        }
+        break;
+      }
+      default: {
+        errors.push(`${pos}: unknown action kind "${(a as any).kind}"`);
+      }
+    }
+  }
+
+  return { valid: errors.length === 0, errors };
 }
 
 /** 构建重试 prompt：精简但包含必要的 IR 语法提示 */
@@ -254,6 +362,18 @@ export async function plan(userIntent: string): Promise<Action[]> {
   resetCallCount();
   const ir = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
 
+  // 初始化执行会话和快照（需在抗体快速通道前创建，以便记录 antibody hits）
+  const sessionId = generateSessionId();
+  const session: ExecutionSession = {
+    sessionId,
+    intent: userIntent,
+    attempts: [],
+    resolved: false,
+    startedAt: Date.now(),
+  };
+  const snapshot = createSnapshot(ir, userIntent);
+  const snapshotId = saveSnapshot(snapshot);
+
   // 语义模板快速通道
   const cachedTemplate = findSemanticTemplate(userIntent);
   if (cachedTemplate && cachedTemplate.successRate >= 0.8 && cachedTemplate.useCount >= 2) {
@@ -287,18 +407,72 @@ export async function plan(userIntent: string): Promise<Action[]> {
         return action;
       });
 
+      const antibodyHit: AntibodyHit = {
+        level: aclLabel,
+        signature: top.signature,
+        fixPath: top.fixPath,
+        similarityScore: (top as any)._score,
+        action: "fast_path",
+        llmCallsSaved: 1,
+        estimatedTokensSaved: Math.ceil(estimateTokens(SYSTEM_PROMPT + userIntent) * 1.2),
+      };
+
       // 验证抗体序列
       const { protocols, namespaceInitialStates } = loadProtocols(ir);
       if (protocols.length > 0) {
         const validation = validateProtocolWithTransitions(antibodyActions, protocols, namespaceInitialStates);
         if (validation.valid) {
-          console.error("⚡ ACL-4 抗体快速通道: 0 LLM 调用，直接返回免疫验证序列");
+          console.error(`⚡ ACL-4 抗体快速通道: 0 LLM 调用，节省 ~${Math.ceil(estimateTokens(SYSTEM_PROMPT + userIntent) * 1.2)} tokens (est.)`);
+          const antibodyAttempt: Attempt = {
+            id: generateAttemptId(),
+            sessionId: session.sessionId,
+            attemptNumber: 1,
+            inputIntent: userIntent,
+            plannerSeed: generatePlannerSeed("antibody-acl4", "immune"),
+            constraintSnapshotId: snapshotId,
+            generatedActions: antibodyActions,
+            transitions: validation.transitions,
+            violations: [],
+            outcome: "success",
+            timestamp: Date.now(),
+            llmCallCount: 0,
+            durationMs: 0,
+            antibodyHit,
+          };
+          session.attempts.push(antibodyAttempt);
+          session.successfulAttempt = antibodyAttempt;
+          session.resolved = true;
+          session.snapshotId = snapshotId;
+          session.endedAt = Date.now();
+          recordSession(session);
           recordEpisode({ intent: userIntent, actions: antibodyActions, success: true });
           return antibodyActions;
         }
       } else {
         // 无协议规则，直接信任抗体
-        console.error("⚡ ACL-4 抗体快速通道: 0 LLM 调用（无协议约束）");
+        console.error(`⚡ ACL-4 抗体快速通道: 0 LLM 调用（无协议约束），节省 ~${Math.ceil(estimateTokens(SYSTEM_PROMPT + userIntent) * 1.2)} tokens (est.)`);
+        const antibodyAttempt: Attempt = {
+          id: generateAttemptId(),
+          sessionId: session.sessionId,
+          attemptNumber: 1,
+          inputIntent: userIntent,
+          plannerSeed: generatePlannerSeed("antibody-acl4", "immune"),
+          constraintSnapshotId: snapshotId,
+          generatedActions: antibodyActions,
+          transitions: [],
+          violations: [],
+          outcome: "success",
+          timestamp: Date.now(),
+          llmCallCount: 0,
+          durationMs: 0,
+          antibodyHit,
+        };
+        session.attempts.push(antibodyAttempt);
+        session.successfulAttempt = antibodyAttempt;
+        session.resolved = true;
+        session.snapshotId = snapshotId;
+        session.endedAt = Date.now();
+        recordSession(session);
         recordEpisode({ intent: userIntent, actions: antibodyActions, success: true });
         return antibodyActions;
       }
@@ -350,15 +524,6 @@ ${RETRY_HINT}
   let currentPrompt = userPrompt;
   let useSystem = true;
 
-  const sessionId = generateSessionId();
-  const session: ExecutionSession = {
-    sessionId,
-    intent: userIntent,
-    attempts: [],
-    resolved: false,
-    startedAt: Date.now(),
-  };
-
   if (cp) {
     console.error(`📌 恢复 checkpoint: 已完成 ${cp.attemptIndex} 次尝试，从第 ${cp.attemptIndex + 1} 次继续`);
     startRetry = cp.attemptIndex;
@@ -385,10 +550,6 @@ ${RETRY_HINT}
     return buildCompactFuncList(legalFuncs);
   }
 
-  // 创建 IR 语义快照，用于确定性回放
-  const snapshot = createSnapshot(ir, userIntent);
-  const snapshotId = saveSnapshot(snapshot);
-
   const maxRetries = 3;
 
   for (let r = startRetry; r < maxRetries; r++) {
@@ -413,6 +574,39 @@ ${RETRY_HINT}
       console.error("⚠️ 解析失败，重试...");
       currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n上一次输出无效。请严格输出 JSON 数组。\n${RETRY_HINT}\n只输出 JSON。`;
       useSystem = false;
+      continue;
+    }
+
+    // P2: JSON schema pre-validation — catch structural errors early
+    const schemaCheck = validateActionSchema(rawActions);
+    if (!schemaCheck.valid) {
+      console.error("⚠️ JSON schema 校验失败:", schemaCheck.errors.join("; "));
+      currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n输出格式错误：${schemaCheck.errors.join("；")}。请修正 JSON 结构。\n${RETRY_HINT}\n只输出 JSON。`;
+      useSystem = false;
+      const schemaViolation: ConstraintViolation = {
+        svl: 1,
+        violatedConstraint: "schema",
+        actionIndex: 0,
+        description: schemaCheck.errors.join("; "),
+      };
+      const schemaAttempt: Attempt = {
+        id: generateAttemptId(),
+        sessionId: session.sessionId,
+        attemptNumber: r + 1,
+        inputIntent: userIntent,
+        plannerSeed: generatePlannerSeed(currentPrompt, process.env.LLM_MODEL || "deepseek-chat"),
+        constraintSnapshotId: snapshotId,
+        generatedActions: rawActions,
+        transitions: [],
+        violations: [schemaViolation],
+        outcome: "constraint_violation",
+        timestamp: Date.now(),
+        llmCallCount: 0,
+        durationMs: 0,
+      };
+      session.attempts.push(schemaAttempt);
+      recordEpisode({ intent: userIntent, actions: rawActions, success: false, svlViolated: "SVL-1" });
+      saveCheckpoint(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });
       continue;
     }
 
@@ -605,6 +799,18 @@ ${RETRY_HINT}
     }
 
     // 校验通过：构建成功 Attempt
+    const successAntibodyHit: AntibodyHit | undefined = antibodyHint
+      ? {
+          level: antibodies[0]?.antibodyLevel || "ACL-3",
+          signature: antibodies[0]?.signature || "",
+          fixPath: antibodies[0]?.fixPath || [],
+          similarityScore: (antibodies[0] as any)?._score || 0,
+          action: "injected_hint",
+          llmCallsSaved: 0,
+          estimatedTokensSaved: 0,
+        }
+      : undefined;
+
     const successAttempt: Attempt = {
       id: generateAttemptId(),
       sessionId: session.sessionId,
@@ -619,6 +825,7 @@ ${RETRY_HINT}
       timestamp: Date.now(),
       llmCallCount: 1,
       durationMs: 0,
+      antibodyHit: successAntibodyHit,
     };
     session.attempts.push(successAttempt);
     session.successfulAttempt = successAttempt;
