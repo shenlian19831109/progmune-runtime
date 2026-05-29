@@ -35,6 +35,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.plan = plan;
 const llm_1 = require("./llm");
+const runtime_types_1 = require("./runtime-types");
 const action_runtime_1 = require("./action-runtime");
 const validator_1 = require("./validator");
 const semantic_validator_1 = require("./semantic-validator");
@@ -150,21 +151,16 @@ function loadProtocols(ir) {
     }
     return { protocols: [...merged.values()], namespaceInitialStates };
 }
-/** 验证动作序列的协议合法性，返回完整 SSG 跟踪 */
-function validateProtocol(actions, protocols, namespaceInitialStates) {
-    // 使用默认命名空间的初始状态，其他命名空间在 SSG 构造时预初始化
+/** 验证动作序列的协议合法性，返回完整 SSG 跟踪和状态转换 */
+function validateProtocolWithTransitions(actions, protocols, namespaceInitialStates) {
     const defaultInit = namespaceInitialStates.get("_global") || "INIT";
-    const ssv = new ssg_validator_1.StateMachineValidator(protocols, defaultInit);
-    // 为每个非默认命名空间设置初始状态
-    for (const [ns, initState] of namespaceInitialStates) {
-        if (ns !== "_global" && initState) {
-            ssv.setNamespaceInitialState(ns, initState);
-        }
-    }
+    const ssv = new ssg_validator_1.StateMachineValidator(protocols, defaultInit, namespaceInitialStates);
+    const transitions = [];
     for (let i = 0; i < actions.length; i++) {
         const a = actions[i];
         if (a.kind === "call" && a.function) {
-            const result = ssv.apply(a.function);
+            const { result, transition } = ssv.applyWithTransition(a.function, i);
+            transitions.push(transition);
             if (!result.valid) {
                 const fullTrace = ssv.getTrace();
                 const trace = fullTrace.map(t => ({
@@ -172,18 +168,18 @@ function validateProtocol(actions, protocols, namespaceInitialStates) {
                     statesBefore: t.statesBefore || [],
                     statesAfter: t.statesAfter || [],
                 }));
-                return { valid: false, rejection: result.rejection, index: i, trace };
+                return { valid: false, rejection: result.rejection, index: i, trace, transitions };
             }
         }
     }
-    return { valid: true };
+    return { valid: true, transitions };
 }
 /** SSG 确定性修复：当协议违规有已知修复路径时，自动插入缺失函数 */
 function attemptSSGRepair(actions, rejection, ir, protocols, namespaceInitialStates) {
     if (!rejection.fixPath || rejection.fixPath.length === 0)
         return null;
     // 找到被拦截函数在序列中的位置
-    const blockedIdx = actions.findIndex(a => a.function === rejection.blocked);
+    const blockedIdx = actions.findIndex(a => a.kind === "call" && a.function === rejection.blocked);
     if (blockedIdx === -1)
         return null;
     // 为修复路径中的每个函数创建合成 Action
@@ -211,7 +207,7 @@ function attemptSSGRepair(actions, rejection, ir, protocols, namespaceInitialSta
         ...actions.slice(blockedIdx),
     ];
     // 重新验证
-    const recheck = validateProtocol(repaired, protocols, namespaceInitialStates);
+    const recheck = validateProtocolWithTransitions(repaired, protocols, namespaceInitialStates);
     if (recheck.valid) {
         console.error(`🔧 SSG 确定性修复: 自动插入 ${rejection.fixPath.join(' → ')} 以解决协议违规`);
         return repaired;
@@ -260,7 +256,7 @@ async function plan(userIntent) {
             // 验证抗体序列
             const { protocols, namespaceInitialStates } = loadProtocols(ir);
             if (protocols.length > 0) {
-                const validation = validateProtocol(antibodyActions, protocols, namespaceInitialStates);
+                const validation = validateProtocolWithTransitions(antibodyActions, protocols, namespaceInitialStates);
                 if (validation.valid) {
                     console.error("⚡ ACL-4 抗体快速通道: 0 LLM 调用，直接返回免疫验证序列");
                     (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: antibodyActions, success: true });
@@ -313,24 +309,30 @@ ${compactFuncList}
     let finalActions = [];
     let currentPrompt = userPrompt;
     let useSystem = true;
-    let collectedFailures = [];
+    const sessionId = (0, runtime_types_1.generateSessionId)();
+    const session = {
+        sessionId,
+        intent: userIntent,
+        attempts: [],
+        resolved: false,
+        startedAt: Date.now(),
+    };
     if (cp) {
         console.error(`📌 恢复 checkpoint: 已完成 ${cp.attemptIndex} 次尝试，从第 ${cp.attemptIndex + 1} 次继续`);
         startRetry = cp.attemptIndex;
         currentPrompt = cp.currentPrompt;
         useSystem = cp.useSystem;
-        collectedFailures = cp.collectedFailures || [];
+        // 从 checkpoint 恢复已有的 session.attempts
+        if (cp.sessionAttempts) {
+            session.attempts = cp.sessionAttempts;
+        }
     }
     const { protocols, namespaceInitialStates } = loadProtocols(ir);
     function getMaskedFuncList() {
         if (protocols.length === 0)
             return compactFuncList;
         const defaultInit = namespaceInitialStates.get("_global") || "INIT";
-        const ssv = new ssg_validator_1.StateMachineValidator(protocols, defaultInit);
-        for (const [ns, initState] of namespaceInitialStates) {
-            if (ns !== "_global" && initState)
-                ssv.setNamespaceInitialState(ns, initState);
-        }
+        const ssv = new ssg_validator_1.StateMachineValidator(protocols, defaultInit, namespaceInitialStates);
         const legalFuncs = topFuncs.filter((f) => {
             const proto = protocols.find((p) => p.function === f.name);
             if (!proto)
@@ -368,17 +370,40 @@ ${compactFuncList}
             continue;
         }
         const enriched = enrichActions(rawActions, ir);
-        const filtered = enriched.filter(a => !forbiddenFuncs.includes(a.function || ''));
+        const filtered = enriched.filter(a => !forbiddenFuncs.includes(a.kind === "call" ? a.function : ''));
+        let ssgTransitions = [];
         // 1) 基础序列校验
         const seqResult = (0, validator_1.validateActionSequence)(filtered);
         if (!seqResult.valid) {
             const errorsFlat = seqResult.errors.flat();
             console.error("⚠️ 序列校验失败:", errorsFlat.join(", "));
             const svl = determineSVL(errorsFlat);
-            // 从错误信息中提取结构化上下文
             const missingFnMatch = errorsFlat.join(" ").match(/函数\s*['"]?(\w+)['"]?\s*不存在/);
             const typeMatch = errorsFlat.join(" ").match(/(\w+)\s*(参数数量不匹配|类型不匹配|参数)/);
             const varMatch = errorsFlat.join(" ").match(/变量\s*['"]?(\w+)['"]?\s*(未定义|在赋值前被引用)/);
+            const violation = {
+                svl: parseInt(svl.split("-")[1]),
+                violatedConstraint: determineConstraintType(svl),
+                actionIndex: 0,
+                missingStates: missingFnMatch ? [missingFnMatch[1]] : (typeMatch ? [typeMatch[1]] : (varMatch ? [varMatch[1]] : undefined)),
+                description: errorsFlat.join("; "),
+            };
+            const attempt = {
+                id: (0, runtime_types_1.generateAttemptId)(),
+                sessionId: session.sessionId,
+                attemptNumber: r + 1,
+                inputIntent: userIntent,
+                plannerSeed: (0, runtime_types_1.generatePlannerSeed)(currentPrompt, process.env.LLM_MODEL || "deepseek-chat"),
+                constraintSnapshotId: snapshotId,
+                generatedActions: filtered,
+                transitions: [],
+                violations: [violation],
+                outcome: "constraint_violation",
+                timestamp: Date.now(),
+                llmCallCount: 0,
+                durationMs: 0,
+            };
+            session.attempts.push(attempt);
             (0, failure_corpus_1.recordFailure)({
                 intent: userIntent,
                 projectFunctions: ir.map((f) => f.name),
@@ -390,28 +415,46 @@ ${compactFuncList}
                 plannerAttempt: r + 1,
                 plannerRetryTotal: maxRetries,
             });
-            collectedFailures.push({
-                violatedSVL: svl,
-                constraintType: determineConstraintType(svl),
-                errorDetail: errorsFlat.join("; "),
-                actionSequence: filtered,
-                ssgMissingFunctions: missingFnMatch ? [missingFnMatch[1]] : undefined,
-                plannerAttempt: r + 1,
-                plannerRetryTotal: maxRetries,
-            });
             (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: filtered, success: false, svlViolated: svl });
             currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n错误：${errorsFlat.join("；")}。请修正。\n${RETRY_HINT}\n只输出代码。`;
             useSystem = false;
-            (0, failure_corpus_1.saveCheckpoint)(userIntent, { attemptIndex: r + 1, collectedFailures, currentPrompt, useSystem });
+            (0, failure_corpus_1.saveCheckpoint)(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });
             continue;
         }
         // 2) 协议状态机校验 (SSG)
         if (protocols.length > 0) {
-            const protoResult = validateProtocol(filtered, protocols, namespaceInitialStates);
+            const protoResult = validateProtocolWithTransitions(filtered, protocols, namespaceInitialStates);
             if (!protoResult.valid && protoResult.rejection) {
                 const rej = protoResult.rejection;
                 const explain = ssg_validator_1.StateMachineValidator.explainRejection(rej);
                 console.error(explain);
+                const violation = {
+                    svl: 4,
+                    violatedConstraint: "protocol",
+                    actionIndex: protoResult.index || 0,
+                    currentStates: rej.currentState,
+                    requiredStates: rej.requiredState,
+                    missingStates: rej.missingFunctions,
+                    fixPath: rej.fixPath,
+                    namespace: rej.namespace,
+                    description: JSON.stringify(ssg_validator_1.StateMachineValidator.rejectionToJSON(rej)),
+                };
+                const attempt = {
+                    id: (0, runtime_types_1.generateAttemptId)(),
+                    sessionId: session.sessionId,
+                    attemptNumber: r + 1,
+                    inputIntent: userIntent,
+                    plannerSeed: (0, runtime_types_1.generatePlannerSeed)(currentPrompt, process.env.LLM_MODEL || "deepseek-chat"),
+                    constraintSnapshotId: snapshotId,
+                    generatedActions: filtered,
+                    transitions: protoResult.transitions,
+                    violations: [violation],
+                    outcome: "constraint_violation",
+                    timestamp: Date.now(),
+                    llmCallCount: 0,
+                    durationMs: 0,
+                };
+                session.attempts.push(attempt);
                 (0, failure_corpus_1.recordFailure)({
                     intent: userIntent,
                     projectFunctions: ir.map((f) => f.name),
@@ -421,16 +464,6 @@ ${compactFuncList}
                     errorDetail: JSON.stringify(ssg_validator_1.StateMachineValidator.rejectionToJSON(rej)),
                     ssgState: rej.currentState,
                     ssgTrace: protoResult.trace,
-                    ssgFixPath: rej.fixPath,
-                    ssgMissingFunctions: rej.missingFunctions,
-                    plannerAttempt: r + 1,
-                    plannerRetryTotal: maxRetries,
-                });
-                collectedFailures.push({
-                    violatedSVL: "SVL-4",
-                    constraintType: "protocol",
-                    errorDetail: JSON.stringify(ssg_validator_1.StateMachineValidator.rejectionToJSON(rej)),
-                    actionSequence: filtered,
                     ssgFixPath: rej.fixPath,
                     ssgMissingFunctions: rej.missingFunctions,
                     plannerAttempt: r + 1,
@@ -447,14 +480,38 @@ ${compactFuncList}
                 const maskedFuncList = getMaskedFuncList();
                 currentPrompt = `当前协议状态只允许以下函数：\n${maskedFuncList}\n\n需求：${userIntent}\n\n协议违规：${explain.replace(/\n/g, '；')}。请修正。\n${RETRY_HINT}\n只输出代码。`;
                 useSystem = false;
-                (0, failure_corpus_1.saveCheckpoint)(userIntent, { attemptIndex: r + 1, collectedFailures, currentPrompt, useSystem });
+                (0, failure_corpus_1.saveCheckpoint)(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });
                 continue;
             }
+            // SSG passed — capture transitions
+            ssgTransitions = protoResult.transitions;
         }
         // 3) 语义合约校验
         const semResult = (0, semantic_validator_1.checkSemantic)(userIntent, filtered);
         if (!semResult.valid) {
             console.error("⚠️ 语义校验失败:", semResult.errors.join(", "));
+            const violation = {
+                svl: 4,
+                violatedConstraint: "semantic_contract",
+                actionIndex: 0,
+                description: semResult.errors.join("; "),
+            };
+            const attempt = {
+                id: (0, runtime_types_1.generateAttemptId)(),
+                sessionId: session.sessionId,
+                attemptNumber: r + 1,
+                inputIntent: userIntent,
+                plannerSeed: (0, runtime_types_1.generatePlannerSeed)(currentPrompt, process.env.LLM_MODEL || "deepseek-chat"),
+                constraintSnapshotId: snapshotId,
+                generatedActions: filtered,
+                transitions: ssgTransitions,
+                violations: [violation],
+                outcome: "constraint_violation",
+                timestamp: Date.now(),
+                llmCallCount: 0,
+                durationMs: 0,
+            };
+            session.attempts.push(attempt);
             (0, failure_corpus_1.recordFailure)({
                 intent: userIntent,
                 projectFunctions: ir.map((f) => f.name),
@@ -465,34 +522,39 @@ ${compactFuncList}
                 plannerAttempt: r + 1,
                 plannerRetryTotal: maxRetries,
             });
-            collectedFailures.push({
-                violatedSVL: "SVL-4",
-                constraintType: "protocol",
-                errorDetail: semResult.errors.join("; "),
-                actionSequence: filtered,
-                plannerAttempt: r + 1,
-                plannerRetryTotal: maxRetries,
-            });
             (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: filtered, success: false, svlViolated: "SVL-4" });
             currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n语义错误：${semResult.errors.join("；")}。请修正。\n${RETRY_HINT}\n只输出代码。`;
             useSystem = false;
-            (0, failure_corpus_1.saveCheckpoint)(userIntent, { attemptIndex: r + 1, collectedFailures, currentPrompt, useSystem });
+            (0, failure_corpus_1.saveCheckpoint)(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });
             continue;
         }
+        // 校验通过：构建成功 Attempt
+        const successAttempt = {
+            id: (0, runtime_types_1.generateAttemptId)(),
+            sessionId: session.sessionId,
+            attemptNumber: r + 1,
+            inputIntent: userIntent,
+            plannerSeed: (0, runtime_types_1.generatePlannerSeed)(currentPrompt, process.env.LLM_MODEL || "deepseek-chat"),
+            constraintSnapshotId: snapshotId,
+            generatedActions: filtered,
+            transitions: ssgTransitions,
+            violations: [],
+            outcome: "success",
+            timestamp: Date.now(),
+            llmCallCount: 1,
+            durationMs: 0,
+        };
+        session.attempts.push(successAttempt);
+        session.successfulAttempt = successAttempt;
         finalActions = filtered;
         break;
     }
     if (finalActions.length > 0) {
         (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: finalActions, success: true });
-        (0, failure_corpus_1.recordSession)({
-            intent: userIntent,
-            timestamp: new Date().toISOString(),
-            attempts: collectedFailures,
-            successfulAlternative: finalActions,
-            totalRetries: collectedFailures.length,
-            resolved: true,
-            snapshotId,
-        });
+        session.resolved = true;
+        session.snapshotId = snapshotId;
+        session.endedAt = Date.now();
+        (0, failure_corpus_1.recordSession)(session); // Phase 5 will update recordSession to accept ExecutionSession
         (0, failure_corpus_1.clearCheckpoint)(userIntent);
     }
     else {
@@ -502,27 +564,35 @@ ${compactFuncList}
         if (fallback.length > 0) {
             console.error(`[降级] 本地规则生成了 ${fallback.length} 个动作`);
             (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: fallback, success: true });
-            (0, failure_corpus_1.recordSession)({
-                intent: userIntent,
-                timestamp: new Date().toISOString(),
-                attempts: collectedFailures,
-                successfulAlternative: fallback,
-                totalRetries: collectedFailures.length,
-                resolved: true,
-                snapshotId,
-            });
+            const fallbackAttempt = {
+                id: (0, runtime_types_1.generateAttemptId)(),
+                sessionId: session.sessionId,
+                attemptNumber: session.attempts.length + 1,
+                inputIntent: userIntent,
+                plannerSeed: (0, runtime_types_1.generatePlannerSeed)("fallback", "local-rule"),
+                constraintSnapshotId: snapshotId,
+                generatedActions: fallback,
+                transitions: [],
+                violations: [],
+                outcome: "success",
+                timestamp: Date.now(),
+                llmCallCount: 0,
+                durationMs: 0,
+            };
+            session.attempts.push(fallbackAttempt);
+            session.successfulAttempt = fallbackAttempt;
+            session.resolved = true;
+            session.snapshotId = snapshotId;
+            session.endedAt = Date.now();
+            (0, failure_corpus_1.recordSession)(session);
             (0, failure_corpus_1.clearCheckpoint)(userIntent);
             return fallback;
         }
         (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: [], success: false });
-        (0, failure_corpus_1.recordSession)({
-            intent: userIntent,
-            timestamp: new Date().toISOString(),
-            attempts: collectedFailures,
-            totalRetries: collectedFailures.length,
-            resolved: false,
-            snapshotId,
-        });
+        session.resolved = false;
+        session.snapshotId = snapshotId;
+        session.endedAt = Date.now();
+        (0, failure_corpus_1.recordSession)(session);
         (0, failure_corpus_1.clearCheckpoint)(userIntent);
     }
     return finalActions;

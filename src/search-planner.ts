@@ -1,4 +1,4 @@
-import { Action } from "./action-runtime";
+import type { Action } from "./runtime-types";
 import { validateAction } from "./validator";
 import { generate, resetCallCount, chat, estimateTokens } from "./llm";
 import { getFunctionSuccessRate } from "./feedback";

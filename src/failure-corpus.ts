@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import { withLock } from "./file-lock";
+import type { Attempt, ExecutionSession } from "./runtime-types";
 
 export type SVL = "SVL-1" | "SVL-2" | "SVL-3" | "SVL-4";
 
@@ -71,7 +72,7 @@ function ensureDir(dir: string) {
 export interface PlannerCheckpoint {
   intent: string;
   attemptIndex: number;       // 已完成的尝试次数（下次从 r = attemptIndex 继续）
-  collectedFailures: SessionAttempt[];
+  sessionAttempts: Attempt[]; // serialized Attempt objects from the session
   currentPrompt: string;
   useSystem: boolean;
   timestamp: string;
@@ -136,11 +137,47 @@ export function recordFailure(
   });
 }
 
-/** 记录一个完整的意图会话（成功或失败的所有尝试） */
-export function recordSession(session: Omit<IntentSession, "sessionId">): string {
+/** 记录一个完整的意图会话（支持 ExecutionSession 和旧 IntentSession） */
+export function recordSession(session: ExecutionSession | Omit<IntentSession, "sessionId">): string {
   ensureDir(SESSIONS_DIR);
-  const sessionId = `sess_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-  const fullSession: IntentSession = { ...session, sessionId };
+  const sessionId = (session as any).sessionId || `sess_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+
+  // 检测新格式：ExecutionSession has .attempts[0]?.violations
+  const isExecutionSession = (session as any).attempts?.length > 0 && (session as any).attempts[0].violations;
+
+  if (isExecutionSession) {
+    // 新格式：直接保存 ExecutionSession
+    const fullSession: ExecutionSession = { ...(session as ExecutionSession), sessionId };
+    fs.writeFileSync(
+      path.join(SESSIONS_DIR, `${sessionId}.json`),
+      JSON.stringify(fullSession, null, 2)
+    );
+
+    // 为每个违规的 attempt 记录到 failure corpus（向后兼容）
+    for (const attempt of fullSession.attempts) {
+      for (const violation of attempt.violations) {
+        const svlStr = `SVL-${violation.svl}` as SVL;
+        const blockingFn = attempt.generatedActions[violation.actionIndex];
+        recordFailure({
+          intent: fullSession.intent,
+          projectFunctions: [],
+          violatedSVL: svlStr,
+          constraintType: violation.violatedConstraint,
+          actionSequence: attempt.generatedActions,
+          errorDetail: violation.description,
+          ssgState: violation.currentStates,
+          ssgFixPath: violation.fixPath,
+          ssgMissingFunctions: violation.missingStates,
+          plannerAttempt: attempt.attemptNumber,
+          plannerRetryTotal: fullSession.attempts.length,
+        });
+      }
+    }
+    return sessionId;
+  }
+
+  // 旧格式：兼容保存
+  const fullSession: IntentSession = { ...(session as any), sessionId };
   fs.writeFileSync(
     path.join(SESSIONS_DIR, `${sessionId}.json`),
     JSON.stringify(fullSession, null, 2)
@@ -194,55 +231,143 @@ export function getFailureGenome(): {
   commonFixPaths: { violation: string; fixPath: string[]; count: number }[];
   averageRetriesToSuccess: number;
 } {
-  const all = getAllFailures();
+  const sessions = getAllSessions();
   const bySVL: Record<SVL, number> = { "SVL-1": 0, "SVL-2": 0, "SVL-3": 0, "SVL-4": 0 };
   const byConstraint: Record<string, number> = {};
-
-  // 修复路径统计
+  const patternCounts = new Map<string, { count: number; examples: string[] }>();
   const fixPathCounts = new Map<string, number>();
+  let totalViolations = 0;
   let totalRetries = 0;
+  let resolvedSessions = 0;
 
-  for (const r of all) {
-    bySVL[r.violatedSVL] = (bySVL[r.violatedSVL] || 0) + 1;
-    byConstraint[r.constraintType] = (byConstraint[r.constraintType] || 0) + 1;
-    totalRetries += r.plannerAttempt || 1;
+  for (const s of sessions) {
+    const sessionRetries = s.attempts.filter(a => a.outcome !== "success").length;
+    totalRetries += sessionRetries;
+    if (s.resolved) resolvedSessions++;
 
-    if (r.ssgFixPath && r.ssgFixPath.length > 0) {
-      const key = `${r.violatedSVL}:${r.ssgFixPath.join('→')}`;
-      fixPathCounts.set(key, (fixPathCounts.get(key) || 0) + 1);
+    for (const a of s.attempts) {
+      for (const v of a.violations) {
+        totalViolations++;
+        const svlKey = `SVL-${v.svl}` as SVL;
+        bySVL[svlKey] = (bySVL[svlKey] || 0) + 1;
+        const ct = v.violatedConstraint || "unknown";
+        byConstraint[ct] = (byConstraint[ct] || 0) + 1;
+
+        // Pattern grouping
+        const patternKey = `${svlKey}:${ct}`;
+        const entry = patternCounts.get(patternKey) || { count: 0, examples: [] };
+        entry.count++;
+        if (entry.examples.length < 3) entry.examples.push(s.intent);
+        patternCounts.set(patternKey, entry);
+
+        if (v.fixPath && v.fixPath.length > 0) {
+          const key = `${svlKey}:${v.fixPath.join("→")}`;
+          fixPathCounts.set(key, (fixPathCounts.get(key) || 0) + 1);
+        }
+      }
     }
   }
 
+  const topPatterns = [...patternCounts.entries()]
+    .map(([pattern, entry]) => ({ pattern, count: entry.count, examples: entry.examples }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+
   const commonFixPaths = [...fixPathCounts.entries()]
     .map(([key, count]) => {
-      const [violation, ...rest] = key.split(':');
-      return { violation, fixPath: rest.join(':').split('→'), count };
+      const [violation, ...rest] = key.split(":");
+      return { violation, fixPath: rest.join(":").split("→"), count };
     })
     .sort((a, b) => b.count - a.count)
     .slice(0, 10);
 
   return {
-    totalFailures: all.length,
+    totalFailures: totalViolations,
     bySVL,
     byConstraintType: byConstraint,
-    topPatterns: getTopFailurePatterns(5),
+    topPatterns,
     commonFixPaths,
-    averageRetriesToSuccess: all.length > 0 ? Math.round((totalRetries / all.length) * 10) / 10 : 0,
+    averageRetriesToSuccess: totalViolations > 0 ? Math.round((totalRetries / totalViolations) * 10) / 10 : 0,
   };
 }
 
-/** 获取所有意图会话 */
-export function getAllSessions(): IntentSession[] {
-  const sessions: IntentSession[] = [];
+/** 获取所有意图会话（归一化为 ExecutionSession[]） */
+export function getAllSessions(): ExecutionSession[] {
+  const sessions: ExecutionSession[] = [];
   if (!fs.existsSync(SESSIONS_DIR)) return sessions;
   for (const file of fs.readdirSync(SESSIONS_DIR)) {
     if (file.endsWith(".json")) {
       try {
-        sessions.push(JSON.parse(fs.readFileSync(path.join(SESSIONS_DIR, file), "utf-8")));
+        const raw = JSON.parse(fs.readFileSync(path.join(SESSIONS_DIR, file), "utf-8"));
+        sessions.push(normalizeSession(raw));
       } catch {}
     }
   }
   return sessions;
+}
+
+/** 检测并归一化新旧两种会话格式 */
+function normalizeSession(raw: any): ExecutionSession {
+  // 新格式：attempts[0] 有 violations 字段
+  if (raw.attempts?.length > 0 && raw.attempts[0].violations) {
+    return raw as ExecutionSession;
+  }
+  // 旧 IntentSession 格式 → 上转
+  return convertOldSession(raw);
+}
+
+/** 将旧 IntentSession 转换为 ExecutionSession */
+function convertOldSession(old: IntentSession): ExecutionSession {
+  const attempts: Attempt[] = (old.attempts || []).map((sa, i) => ({
+    id: `${old.sessionId}_att_${i + 1}`,
+    sessionId: old.sessionId,
+    attemptNumber: (sa as any).plannerAttempt || i + 1,
+    inputIntent: old.intent,
+    plannerSeed: old.sessionId,
+    constraintSnapshotId: old.snapshotId || "",
+    generatedActions: sa.actionSequence || [],
+    transitions: [],
+    violations: [{
+      svl: parseInt((sa.violatedSVL || "SVL-1").split("-")[1]) as 1|2|3|4,
+      violatedConstraint: sa.constraintType || "unknown",
+      actionIndex: 0,
+      currentStates: (sa as any).ssgState,
+      missingStates: sa.ssgMissingFunctions,
+      fixPath: sa.ssgFixPath,
+      description: sa.errorDetail || "",
+    }],
+    outcome: "constraint_violation" as const,
+    timestamp: new Date(old.timestamp).getTime(),
+    llmCallCount: 1,
+    durationMs: 0,
+  }));
+
+  return {
+    sessionId: old.sessionId,
+    intent: old.intent,
+    attempts,
+    successfulAttempt: old.resolved && old.successfulAlternative
+      ? {
+          id: `${old.sessionId}_success`,
+          sessionId: old.sessionId,
+          attemptNumber: old.totalRetries + 1,
+          inputIntent: old.intent,
+          plannerSeed: old.sessionId,
+          constraintSnapshotId: old.snapshotId || "",
+          generatedActions: old.successfulAlternative,
+          transitions: [],
+          violations: [],
+          outcome: "success",
+          timestamp: new Date(old.timestamp).getTime(),
+          llmCallCount: old.totalRetries,
+          durationMs: 0,
+        }
+      : undefined,
+    resolved: old.resolved,
+    snapshotId: old.snapshotId,
+    startedAt: new Date(old.timestamp).getTime(),
+    endedAt: new Date(old.timestamp).getTime(),
+  };
 }
 
 /** 查询学到的东西：哪些失效模式最常见，对应的修复路径是什么 */
@@ -288,24 +413,31 @@ export function getLearnedPatterns(): { failureToFix: LearnedPattern[] } {
 
   for (const s of sessions) {
     for (const a of s.attempts) {
-      if (!a.ssgFixPath || a.ssgFixPath.length === 0) continue;
-      const signature = `${a.violatedSVL}:${(a.ssgMissingFunctions || ["unknown"]).join(",")}`;
-      const existing = agg.get(signature);
-      if (existing) {
-        existing.count++;
-        existing.intents.add(s.intent);
-        if (s.resolved) existing.resolvedCount++;
-        if (s.timestamp > existing.lastSeen) existing.lastSeen = s.timestamp;
-      } else {
-        agg.set(signature, {
-          violation: `${a.violatedSVL}: ${(a.ssgMissingFunctions || ["unknown"]).join(", ")}`,
-          fixPath: a.ssgFixPath,
-          count: 1,
-          intents: new Set([s.intent]),
-          resolvedCount: s.resolved ? 1 : 0,
-          firstSeen: s.timestamp,
-          lastSeen: s.timestamp,
-        });
+      // Extract SSG violations from Attempt.violations
+      for (const v of a.violations) {
+        if (!v.fixPath || v.fixPath.length === 0) continue;
+        if (v.svl !== 4) continue; // only SVL-4 has fix paths
+        const violatedLabel = `SVL-${v.svl}`;
+        const missingKey = (v.missingStates || ["unknown"]).join(",");
+        const signature = `${violatedLabel}:${missingKey}`;
+        const existing = agg.get(signature);
+        const ts = new Date(s.startedAt).toISOString();
+        if (existing) {
+          existing.count++;
+          existing.intents.add(s.intent);
+          if (s.resolved) existing.resolvedCount++;
+          if (ts > existing.lastSeen) existing.lastSeen = ts;
+        } else {
+          agg.set(signature, {
+            violation: `${violatedLabel}: ${(v.missingStates || ["unknown"]).join(", ")}`,
+            fixPath: v.fixPath,
+            count: 1,
+            intents: new Set([s.intent]),
+            resolvedCount: s.resolved ? 1 : 0,
+            firstSeen: ts,
+            lastSeen: ts,
+          });
+        }
       }
     }
   }
@@ -366,21 +498,32 @@ export function getSemanticHeatmap(): {
   highFrictionIntents: { intent: string; adaptationCount: number; anomalyTypes: string[] }[];
 } {
   const sessions = getAllSessions();
-  const allFailures = getAllFailures();
-  const total = allFailures.length || 1;
 
-  // Fragile protocols: which functions are most frequently blocked
+  // Count total violations from sessions
+  let totalViolations = 0;
+  const svlCounts: Record<string, number> = {};
   const funcCounts = new Map<string, { count: number; svl: string }>();
-  for (const r of allFailures) {
-    const blockedMatch = r.errorDetail.match(/(\w+)\s*(要求|requires|blocked|不允许|不合法)/);
-    const fn = blockedMatch ? blockedMatch[1] : (r.actionSequence?.[0]?.function || "unknown");
-    const existing = funcCounts.get(fn);
-    if (existing) {
-      existing.count++;
-    } else {
-      funcCounts.set(fn, { count: 1, svl: r.violatedSVL });
+
+  for (const s of sessions) {
+    for (const a of s.attempts) {
+      for (const v of a.violations) {
+        totalViolations++;
+        const svlKey = `SVL-${v.svl}`;
+        svlCounts[svlKey] = (svlCounts[svlKey] || 0) + 1;
+
+        // Fragile protocols: extract blocked function from description
+        const blockedMatch = v.description.match(/(\w+)\s*(要求|requires|blocked|不允许|不合法)/);
+        const fn = blockedMatch ? blockedMatch[1] : (a.generatedActions.find(x => x.kind === "call")?.function || "unknown");
+        const existing = funcCounts.get(fn);
+        if (existing) {
+          existing.count++;
+        } else {
+          funcCounts.set(fn, { count: 1, svl: svlKey });
+        }
+      }
     }
   }
+  const total = totalViolations || 1;
 
   const fragileProtocols = [...funcCounts.entries()]
     .map(([fn, data]) => ({ function: fn, violationCount: data.count, svl: data.svl }))
@@ -389,10 +532,6 @@ export function getSemanticHeatmap(): {
 
   // SVL hotspots
   const svlHotspots: { svl: string; count: number; percentage: number }[] = [];
-  const svlCounts: Record<string, number> = {};
-  for (const r of allFailures) {
-    svlCounts[r.violatedSVL] = (svlCounts[r.violatedSVL] || 0) + 1;
-  }
   for (const [svl, count] of Object.entries(svlCounts)) {
     svlHotspots.push({ svl, count, percentage: Math.round((count / total) * 100) });
   }
@@ -402,7 +541,7 @@ export function getSemanticHeatmap(): {
   const constraintClusters: { constraints: string[]; count: number; intent: string }[] = [];
   for (const s of sessions) {
     if (s.attempts.length < 2) continue;
-    const types = [...new Set(s.attempts.map(a => a.constraintType))].sort();
+    const types = [...new Set(s.attempts.flatMap(a => a.violations.map(v => v.violatedConstraint)))].filter(Boolean).sort();
     if (types.length >= 2) {
       constraintClusters.push({ constraints: types, count: s.attempts.length, intent: s.intent });
     }
@@ -413,8 +552,8 @@ export function getSemanticHeatmap(): {
   const highFrictionIntents = sessions
     .map(s => ({
       intent: s.intent,
-      adaptationCount: s.totalRetries,
-      anomalyTypes: [...new Set(s.attempts.map(a => a.constraintType))],
+      adaptationCount: s.attempts.filter(a => a.outcome !== "success").length,
+      anomalyTypes: [...new Set(s.attempts.flatMap(a => a.violations.map(v => v.violatedConstraint)))].filter(Boolean),
     }))
     .sort((a, b) => b.adaptationCount - a.adaptationCount)
     .slice(0, 8);

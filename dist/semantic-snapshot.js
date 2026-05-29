@@ -39,6 +39,7 @@ exports.loadSnapshot = loadSnapshot;
 exports.listSnapshots = listSnapshots;
 exports.diffSnapshots = diffSnapshots;
 exports.summarizeSnapshot = summarizeSnapshot;
+exports.findSnapshotBySession = findSnapshotBySession;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const crypto = __importStar(require("crypto"));
@@ -146,4 +147,9 @@ function summarizeSnapshot(snapshot) {
     if (snapshot.sessionId)
         lines.push(`Session: ${snapshot.sessionId}`);
     return lines.join("\n");
+}
+/** 按 sessionId 查找快照，返回最近的一个（或 undefined） */
+function findSnapshotBySession(sessionId) {
+    const snapshots = listSnapshots();
+    return snapshots.find(s => s.sessionId === sessionId);
 }

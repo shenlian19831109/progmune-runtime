@@ -1,4 +1,4 @@
-import { Action } from "./action-runtime";
+import type { Action } from "./runtime-types";
 import * as fs from "fs";
 import * as path from "path";
 

@@ -57,26 +57,24 @@ const Y = (s) => `${C.yellow}${s}${C.reset}`;
 const C_ = (s) => `${C.cyan}${s}${C.reset}`;
 const D = (s) => `${C.gray}${s}${C.reset}`;
 const B = (s) => `${C.bold}${s}${C.reset}`;
-function narrateRejection(a) {
-    const svl = a.violatedSVL;
-    const missing = a.ssgMissingFunctions?.length ? a.ssgMissingFunctions.join(", ") : null;
-    // Try to extract the blocked function from the error
-    const blockedMatch = a.errorDetail.match(/(\w+)\s*(要求|requires|blocked|不允许|不合法)/);
-    const blocked = blockedMatch ? blockedMatch[1] : a.actionSequence[0]?.function || "unknown";
-    switch (svl) {
+function narrateRejection(v) {
+    const svlStr = `SVL-${v.svl}`;
+    const missing = v.missingStates?.length ? v.missingStates.join(", ") : null;
+    const blocked = v.description.match(/(\w+)\s*(要求|requires|blocked|不允许|不合法)/)?.[1] || "unknown";
+    switch (svlStr) {
         case "SVL-1":
-            return `Planner referenced a function that does not exist in the project.\n     ${D("→ " + a.errorDetail)}`;
+            return `Planner referenced a function that does not exist in the project.\n     ${D("→ " + v.description)}`;
         case "SVL-2":
-            return `Planner called a function with incorrect argument types.\n     ${D("→ " + a.errorDetail)}`;
+            return `Planner called a function with incorrect argument types.\n     ${D("→ " + v.description)}`;
         case "SVL-3":
-            return `Planner used a variable before it was defined or referenced it circularly.\n     ${D("→ " + a.errorDetail)}`;
+            return `Planner used a variable before it was defined or referenced it circularly.\n     ${D("→ " + v.description)}`;
         case "SVL-4":
             if (missing) {
                 return `Planner attempted to call ${R(blocked)} before ${C_(missing)} was established.`;
             }
-            return `Planner violated the protocol contract for ${R(blocked)}.\n     ${D("→ " + a.errorDetail)}`;
+            return `Planner violated the protocol contract for ${R(blocked)}.\n     ${D("→ " + v.description)}`;
         default:
-            return a.errorDetail;
+            return v.description;
     }
 }
 function narrateSuccess(actions) {
@@ -97,60 +95,66 @@ function formatSessionTimeline(session) {
     const width = 66;
     const title = `Intent: ${session.intent}`;
     const header = `┌─ ${B(title)} ${"─".repeat(Math.max(2, width - title.length - 5))}┐`;
+    const failedCount = session.attempts.filter(a => a.outcome !== "success").length;
     const resolvedIcon = session.resolved ? G("✔") : R("✖");
     const snapTag = session.snapshotId ? `  │  ${D("Snapshot:")} ${D(session.snapshotId.slice(-16))}` : "";
-    const info = `│ Session: ${D(session.sessionId)}  │  Retries: ${session.totalRetries}  │  Resolved: ${resolvedIcon} ${" ".repeat(Math.max(1, 15))}│`;
+    const info = `│ Session: ${D(session.sessionId)}  │  Retries: ${failedCount}  │  Resolved: ${resolvedIcon} ${" ".repeat(Math.max(1, 15))}│`;
     const footer = `└${"─".repeat(width - 2)}┘`;
     const lines = [header, info];
     if (snapTag)
         lines.push(snapTag);
     lines.push(footer, "");
     // Render all failure attempts
-    for (let i = 0; i < session.attempts.length; i++) {
-        const a = session.attempts[i];
-        const num = i + 1;
-        const actions = a.actionSequence || [];
+    const failedAttempts = session.attempts.filter(a => a.outcome !== "success");
+    for (let i = 0; i < failedAttempts.length; i++) {
+        const a = failedAttempts[i];
+        const num = a.attemptNumber;
+        const actions = a.generatedActions || [];
         const actionDisplay = formatActionSequence(actions);
         lines.push(`  Attempt ${num} ${"─".repeat(62)}`);
         lines.push(`  │  ${actionDisplay || D("(no actions)")}`);
         lines.push(`  │`);
-        const narration = narrateRejection(a);
-        const lines_narration = narration.split("\n");
-        lines.push(`  ${R("✖")}  ${lines_narration[0]}`);
-        for (let j = 1; j < lines_narration.length; j++) {
-            lines.push(`     ${lines_narration[j]}`);
-        }
-        // Show SSG context for protocol failures
-        if (a.violatedSVL === "SVL-4") {
-            if (a.ssgMissingFunctions?.length) {
-                const missingList = a.ssgMissingFunctions.join(", ");
-                lines.push(`     ${D("→")} Missing: ${C_(missingList)}`);
+        // Render each violation in the attempt
+        for (const v of a.violations) {
+            const narration = narrateRejection(v);
+            const lines_narration = narration.split("\n");
+            lines.push(`  ${R("✖")}  ${lines_narration[0]}`);
+            for (let j = 1; j < lines_narration.length; j++) {
+                lines.push(`     ${lines_narration[j]}`);
             }
-            if (a.ssgFixPath?.length) {
-                const fixList = a.ssgFixPath.join(" → ");
-                lines.push(`     ${D("→")} Repair:  ${Y(fixList)}`);
+            // Show SSG context for protocol failures
+            if (v.svl === 4) {
+                if (v.missingStates?.length) {
+                    const missingList = v.missingStates.join(", ");
+                    lines.push(`     ${D("→")} Missing: ${C_(missingList)}`);
+                }
+                if (v.fixPath?.length) {
+                    const fixList = v.fixPath.join(" → ");
+                    lines.push(`     ${D("→")} Repair:  ${Y(fixList)}`);
+                }
+                if (v.namespace && v.namespace !== "_global") {
+                    lines.push(`     ${D("→")} Namespace: ${D(v.namespace)}`);
+                }
             }
         }
-        if (a.plannerAttempt && a.plannerRetryTotal && a.plannerRetryTotal > 1) {
-            lines.push(`     ${D(`(retry ${a.plannerAttempt}/${a.plannerRetryTotal})`)}`);
-        }
+        lines.push(`     ${D(`(attempt ${num}/${session.attempts.length})`)}`);
         lines.push("");
     }
     // Final resolution
-    if (session.resolved && session.successfulAlternative) {
-        const actions = session.successfulAlternative || [];
+    if (session.resolved && session.successfulAttempt) {
+        const actions = session.successfulAttempt.generatedActions || [];
         const actionDisplay = formatActionSequence(actions);
         lines.push(`  ${G("✔")} Resolution ${"─".repeat(51)}`);
         lines.push(`  │  ${actionDisplay}`);
         lines.push(`  │`);
         const narration = narrateSuccess(actions);
         lines.push(`  ${G("✔")}  ${narration}`);
-        lines.push(`     ${D(`Resolved after ${session.totalRetries} retries.`)}`);
+        lines.push(`     ${D(`Resolved after ${failedCount} retries.`)}`);
         lines.push("");
     }
     else if (!session.resolved) {
         lines.push(`  ${R("✖")} ${B("Unresolved")} ${"─".repeat(50)}`);
-        lines.push(`     ${D(`Failed after ${session.totalRetries} retries with no successful path.`)}`);
+        lines.push(`     ${D(`Failed after ${failedCount} retries with no successful path.`)}`);
         lines.push("");
     }
     return lines.join("\n");
@@ -387,12 +391,7 @@ function loadNamespaceInitialStates(protocols) {
 function createSSV(protocols) {
     const nsStates = loadNamespaceInitialStates(protocols);
     const defaultInit = nsStates.get("_global") || "INIT";
-    const ssv = new ssg_validator_1.StateMachineValidator(protocols, defaultInit);
-    for (const [ns, initState] of nsStates) {
-        if (ns !== "_global")
-            ssv.setNamespaceInitialState(ns, initState);
-    }
-    return ssv;
+    return new ssg_validator_1.StateMachineValidator(protocols, defaultInit, nsStates);
 }
 function formatStateTransitionPath(actions) {
     const protocols = loadProtocols();
@@ -447,21 +446,21 @@ function formatStateTransitions(session) {
     const info = `│ Session: ${D(session.sessionId)}  │  Resolved: ${resolvedIcon} ${" ".repeat(Math.max(1, 15))}│`;
     const footer = `└${"─".repeat(width - 2)}┘`;
     const lines = [header, info, footer, ""];
-    // Show state transitions for the successful path
-    if (session.successfulAlternative) {
+    if (session.successfulAttempt) {
         lines.push(`  ${B("Successful Path State Machine:")}`);
         lines.push("");
-        lines.push(formatStateTransitionPath(session.successfulAlternative));
+        lines.push(formatStateTransitionPath(session.successfulAttempt.generatedActions));
         lines.push("");
     }
-    // Show each failed attempt's state
     for (const a of session.attempts) {
-        if (a.violatedSVL === "SVL-4" && a.ssgFixPath) {
-            lines.push(`  ${D("─".repeat(50))}`);
-            const actions = (a.actionSequence || []).filter((x) => x.function).map((x) => x.function).join(" → ");
-            lines.push(`  ${R("Blocked at:")} ${actions}`);
-            lines.push(`  ${D("Repair:")}     ${Y(a.ssgFixPath.join(" → "))}`);
-            lines.push("");
+        for (const v of a.violations) {
+            if (v.svl === 4 && v.fixPath?.length) {
+                lines.push(`  ${D("─".repeat(50))}`);
+                const actions = a.generatedActions.filter((x) => x.kind === "call" && x.function).map((x) => x.function).join(" → ");
+                lines.push(`  ${R("Blocked at:")} ${actions}`);
+                lines.push(`  ${D("Repair:")}     ${Y(v.fixPath.join(" → "))}`);
+                lines.push("");
+            }
         }
     }
     return lines.join("\n");
@@ -494,13 +493,14 @@ function describeSVLLayer(svl) {
 function formatReplayHeader(session) {
     const lines = [];
     const w = 62;
+    const totalRetries = session.attempts.filter(a => a.outcome !== "success").length;
     lines.push("");
     lines.push(`  ${B("Semantic Observatory — Cognitive Session Replay")}`);
     lines.push(`  ${D("─".repeat(w))}`);
     lines.push("");
     lines.push(`  ${D("Intent:")}     ${C_(session.intent)}`);
     lines.push(`  ${D("Session:")}    ${session.sessionId}`);
-    lines.push(`  ${D("Adaptations:")} ${session.totalRetries}`);
+    lines.push(`  ${D("Adaptations:")} ${totalRetries}`);
     lines.push(`  ${D("Outcome:")}     ${session.resolved ? G("cognitive adaptation successful") : R("cognitive adaptation incomplete")}`);
     lines.push("");
     lines.push(`  ${D("─".repeat(w))}`);
@@ -516,8 +516,8 @@ function formatActionList(actions) {
         .join("\n");
 }
 function formatAdaptationDiff(prev, current) {
-    const prevFns = (prev.actionSequence || []).filter(a => a.function).map(a => a.function);
-    const currFns = (current.actionSequence || []).filter(a => a.function).map(a => a.function);
+    const prevFns = (prev.generatedActions || []).filter(a => a.kind === "call").map(a => a.function);
+    const currFns = (current.generatedActions || []).filter(a => a.kind === "call").map(a => a.function);
     const added = currFns.filter(f => !prevFns.includes(f));
     const removed = prevFns.filter(f => !currFns.includes(f));
     const kept = currFns.filter(f => prevFns.includes(f));
@@ -536,38 +536,42 @@ function formatAdaptationDiff(prev, current) {
 }
 function formatAnomalyReport(a) {
     const lines = [];
-    const svl = a.violatedSVL;
+    const primary = a.violations[0];
+    if (!primary) {
+        lines.push(`  ${B("Semantic anomaly:")} ${R("unknown")}`);
+        return lines.join("\n");
+    }
+    const svl = `SVL-${primary.svl}`;
     lines.push(`  ${B("Semantic anomaly:")} ${R(svlLabel(svl))}`);
     lines.push(`  ${D("Layer:")}  ${describeSVLLayer(svl)}`);
-    // Diagnostic
-    if (svl === "SVL-4") {
-        const blockedMatch = a.errorDetail.match(/(\w+)\s*(要求|requires|blocked|不允许|不合法)/);
-        const blocked = blockedMatch ? blockedMatch[1] : a.actionSequence[0]?.function || "unknown";
+    if (primary.svl === 4) {
+        const blockedMatch = primary.description.match(/(\w+)\s*(要求|requires|blocked|不允许|不合法)/);
+        const blocked = blockedMatch ? blockedMatch[1] : a.generatedActions.find(x => x.kind === "call")?.function || "unknown";
         lines.push(`  ${D("Blocked:")}  ${R(blocked + "()")}`);
-        if (a.ssgMissingFunctions?.length) {
-            const missing = a.ssgMissingFunctions.join(", ");
+        if (primary.missingStates?.length) {
+            const missing = primary.missingStates.join(", ");
             lines.push(`  ${D("Missing:")}  ${C_(missing)}`);
         }
-        if (a.ssgFixPath?.length) {
-            const fixPath = a.ssgFixPath.join(" → ");
+        if (primary.fixPath?.length) {
+            const fixPath = primary.fixPath.join(" → ");
             lines.push(`  ${D("Required:")} ${C_(fixPath)}`);
         }
     }
     else {
-        // Extract key info from errorDetail
-        const detail = a.errorDetail.length > 80 ? a.errorDetail.slice(0, 77) + "..." : a.errorDetail;
+        const detail = primary.description.length > 80 ? primary.description.slice(0, 77) + "..." : primary.description;
         lines.push(`  ${D("Detail:")}  ${detail}`);
     }
     return lines.join("\n");
 }
 function formatImmuneResponse(a) {
     const lines = [];
-    if (a.ssgFixPath?.length) {
-        const path = a.ssgFixPath.join(" → ");
+    const primary = a.violations[0];
+    if (primary?.fixPath?.length) {
+        const path = primary.fixPath.join(" → ");
         lines.push(`  ${B("Immune response:")} ${Y("repair path activated")}`);
         lines.push(`  ${D("Repair:")}  ${Y(path)}`);
     }
-    else if (a.plannerRetryTotal && a.plannerRetryTotal > 1) {
+    else if (a.llmCallCount > 1) {
         lines.push(`  ${B("Immune response:")} ${Y("adaptation requested")}`);
     }
     else {
@@ -595,7 +599,7 @@ async function replaySession(session) {
         await sleep(300);
         // ── What the cognitive planner attempted ──
         console.log(`  ${D("Cognitive planner action:")}`);
-        console.log(formatActionList(a.actionSequence));
+        console.log(formatActionList(a.generatedActions));
         console.log("");
         await sleep(400);
         // ── Semantic anomaly ──
@@ -626,12 +630,12 @@ async function replaySession(session) {
     await sleep(600);
     console.log(`  ${B("━━━ Cognitive Adaptation Complete ━━━")}`);
     console.log("");
-    if (session.resolved && session.successfulAlternative) {
-        const actions = session.successfulAlternative || [];
+    if (session.resolved && session.successfulAttempt) {
+        const actions = session.successfulAttempt.generatedActions || [];
         console.log(`  ${G("✔")}  ${B("Successful cognitive path established:")}`);
         console.log(formatActionList(actions));
         console.log("");
-        const names = actions.filter(a => a.kind === "call" && a.function).map(a => a.function).join(" → ");
+        const names = actions.filter(a => a.kind === "call").map(a => a.function).join(" → ");
         console.log(`  ${G("✔")}  ${names}`);
         console.log("");
         // State machine trace
@@ -641,14 +645,16 @@ async function replaySession(session) {
             console.log(formatStateTransitionPath(actions));
             console.log("");
         }
-        console.log(`  ${D(`Total adaptations: ${session.totalRetries}`)}`);
+        const totalRetries = session.attempts.filter(a => a.outcome !== "success").length;
+        console.log(`  ${D(`Total adaptations: ${totalRetries}`)}`);
         console.log(`  ${D(`Session: ${session.sessionId}`)}`);
     }
     else {
         console.log(`  ${R("✖")}  ${B("Cognitive adaptation incomplete")}`);
         console.log("");
         console.log(`  ${D("The planner was unable to find a valid path within the constraint space.")}`);
-        console.log(`  ${D(`Total adaptations attempted: ${session.totalRetries}`)}`);
+        const totalRetries = session.attempts.length;
+        console.log(`  ${D(`Total adaptations attempted: ${totalRetries}`)}`);
     }
     console.log("");
     console.log(`  ${D("─".repeat(62))}`);
@@ -734,14 +740,16 @@ function formatSessionValidation(session) {
     // Collect all called functions from all attempts + successful path
     const allCalledFns = new Set();
     for (const a of session.attempts) {
-        for (const act of (a.actionSequence || [])) {
-            if (act.function)
+        for (const act of (a.generatedActions || [])) {
+            if (act.kind === "call" && act.function)
                 allCalledFns.add(act.function);
         }
     }
-    for (const act of (session.successfulAlternative || [])) {
-        if (act.function)
-            allCalledFns.add(act.function);
+    if (session.successfulAttempt) {
+        for (const act of session.successfulAttempt.generatedActions) {
+            if (act.kind === "call" && act.function)
+                allCalledFns.add(act.function);
+        }
     }
     // Load snapshotted IR
     let snapshotFns = null;
@@ -825,7 +833,7 @@ function formatSessionValidation(session) {
         lines.push(`${G("✔ IR stable — all functions present in both snapshot and current IR.")}`);
     }
     // Protocol validation against snapshot
-    if (session.successfulAlternative && session.snapshotId) {
+    if (session.successfulAttempt && session.snapshotId) {
         lines.push("");
         lines.push(`${C_("Protocol re-validation (snapshot IR):")}`);
         const snap = (0, semantic_snapshot_1.loadSnapshot)(session.snapshotId);
@@ -844,13 +852,9 @@ function formatSessionValidation(session) {
                             nsStates.set(ns, s);
                         }
                     }
-                    const ssv = new ssg_validator_1.StateMachineValidator(protocols, nsStates.get("_global") || "INIT");
-                    for (const [ns, s] of nsStates) {
-                        if (ns !== "_global")
-                            ssv.setNamespaceInitialState(ns, s);
-                    }
+                    const ssv = new ssg_validator_1.StateMachineValidator(protocols, nsStates.get("_global") || "INIT", nsStates);
                     let valid = true;
-                    for (const act of session.successfulAlternative) {
+                    for (const act of session.successfulAttempt.generatedActions) {
                         if (act.kind === "call" && act.function) {
                             const result = ssv.apply(act.function);
                             if (!result.valid) {

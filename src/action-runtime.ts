@@ -1,17 +1,4 @@
-export interface Action {
-  kind: "call" | "if" | "for" | "assign" | "return";
-  function?: string;
-  args?: any[];
-  assignTo?: string;
-  condition?: string;
-  thenActions?: Action[];
-  elseActions?: Action[];
-  variable?: string;
-  iterable?: string;
-  bodyActions?: Action[];
-  target?: string;
-  value?: any;
-}
+import type { Action, Arg } from "./runtime-types";
 
 class ActionBuilder {
   public actions: Action[] = [];

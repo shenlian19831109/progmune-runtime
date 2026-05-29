@@ -4,7 +4,7 @@ exports.StateMachineValidator = void 0;
 exports.parseProtocolsFromJSON = parseProtocolsFromJSON;
 const DEFAULT_NAMESPACE = "_global";
 class StateMachineValidator {
-    constructor(rules, initialState = 'INIT') {
+    constructor(rules, initialState = 'INIT', namespaceInitialStates) {
         this.trace = [];
         this.namespaceStates = new Map();
         // 默认命名空间初始化
@@ -18,6 +18,17 @@ class StateMachineValidator {
                 this.namespaceStates.set(ns, new Set());
             }
         });
+        // 一次性设置所有命名空间初始状态，消除顺序依赖
+        if (namespaceInitialStates) {
+            for (const [ns, state] of namespaceInitialStates) {
+                if (ns !== DEFAULT_NAMESPACE && state) {
+                    if (!this.namespaceStates.has(ns)) {
+                        this.namespaceStates.set(ns, new Set());
+                    }
+                    this.namespaceStates.get(ns).add(state);
+                }
+            }
+        }
     }
     /** 为指定命名空间设置初始状态（用于协议定义中的 initialState） */
     setNamespaceInitialState(namespace, state) {
@@ -27,11 +38,13 @@ class StateMachineValidator {
         }
         this.namespaceStates.get(ns).add(state);
     }
-    apply(functionName) {
+    apply(functionName, actionIndex) {
+        const nsSnapBefore = this.snapshotNamespaceStates();
         const statesBefore = [...this.getEffectiveStates()];
         const rule = this.rules.get(functionName);
         if (!rule) {
-            this.trace.push({ function: functionName, valid: true, statesBefore, statesAfter: [...this.getEffectiveStates()] });
+            const node = { function: functionName, valid: true, statesBefore, statesAfter: [...this.getEffectiveStates()] };
+            this.trace.push(node);
             return { valid: true, statesAfter: [...this.getEffectiveStates()] };
         }
         const ns = rule.namespace || DEFAULT_NAMESPACE;
@@ -48,17 +61,57 @@ class StateMachineValidator {
                 fixPath,
                 namespace: ns,
             };
-            this.trace.push({ function: functionName, valid: false, statesBefore, statesAfter: [...this.getEffectiveStates()], rejection });
-            return { valid: false, statesAfter: [...this.getEffectiveStates()], rejection };
+            const node = {
+                function: functionName, valid: false, statesBefore, statesAfter: [...this.getEffectiveStates()],
+                nsStatesBefore: nsSnapBefore, nsStatesAfter: this.snapshotNamespaceStates(),
+                namespace: ns, rejection,
+            };
+            this.trace.push(node);
+            return {
+                valid: false, statesAfter: [...this.getEffectiveStates()], rejection,
+                nsStatesBefore: nsSnapBefore, nsStatesAfter: this.snapshotNamespaceStates(),
+                namespace: ns,
+            };
         }
+        // 计算 acquire/invalidated delta
+        const beforeNs = nsSnapBefore[ns] || [];
         if (rule.invalidate) {
             rule.invalidate.forEach(s => nsStates.delete(s));
         }
         rule.post_states.forEach(s => nsStates.add(s));
         this.namespaceStates.set(ns, nsStates);
+        const nsSnapAfter = this.snapshotNamespaceStates();
+        const afterNs = nsSnapAfter[ns] || [];
+        const acquired = afterNs.filter(s => !beforeNs.includes(s));
+        const invalidated = beforeNs.filter(s => !afterNs.includes(s));
         const statesAfter = [...this.getEffectiveStates()];
-        this.trace.push({ function: functionName, valid: true, statesBefore, statesAfter });
-        return { valid: true, statesAfter };
+        const node = {
+            function: functionName, valid: true, statesBefore, statesAfter,
+            nsStatesBefore: nsSnapBefore, nsStatesAfter: nsSnapAfter,
+            acquired, invalidated, namespace: ns,
+        };
+        this.trace.push(node);
+        return {
+            valid: true, statesAfter,
+            nsStatesBefore: nsSnapBefore, nsStatesAfter: nsSnapAfter,
+            acquired, invalidated, namespace: ns,
+        };
+    }
+    /** 返回包含 StateTransition 的 apply 结果（供 planner 使用） */
+    applyWithTransition(functionName, actionIndex) {
+        const result = this.apply(functionName, actionIndex);
+        const ns = result.namespace || DEFAULT_NAMESPACE;
+        const transition = {
+            actionIndex,
+            function: functionName,
+            namespace: ns,
+            acquired: result.acquired || [],
+            invalidated: result.invalidated || [],
+            statesBefore: result.nsStatesBefore || {},
+            statesAfter: result.nsStatesAfter || {},
+            valid: result.valid,
+        };
+        return { result, transition };
     }
     getCurrentStates() {
         return [...this.getEffectiveStates()];
@@ -72,6 +125,14 @@ class StateMachineValidator {
             }
         }
         return all;
+    }
+    /** 获取每个命名空间的独立状态快照 */
+    snapshotNamespaceStates() {
+        const snap = {};
+        for (const [ns, states] of this.namespaceStates) {
+            snap[ns] = [...states].sort();
+        }
+        return snap;
     }
     /** 获取指定命名空间的当前状态 */
     getNamespaceStates(namespace) {
