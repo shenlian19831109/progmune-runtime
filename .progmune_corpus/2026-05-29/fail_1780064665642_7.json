@@ -1,0 +1,56 @@
+{
+  "intent": "extract IR then validate",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-4",
+  "constraintType": "protocol",
+  "actionSequence": [
+    {
+      "kind": "assign",
+      "target": "irResult",
+      "value": ""
+    },
+    {
+      "kind": "call",
+      "function": "extractIR",
+      "args": [
+        {
+          "name": "projectRoot",
+          "type": "string",
+          "value": "/path"
+        }
+      ],
+      "assignTo": "irResult"
+    },
+    {
+      "kind": "assign",
+      "target": "validationResult",
+      "value": ""
+    },
+    {
+      "kind": "call",
+      "function": "validateActionSequence",
+      "args": [
+        {
+          "name": "p0",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "validationResult"
+    }
+  ],
+  "errorDetail": "{\"protocol_violation\":{\"blocked_function\":\"validateActionSequence\",\"namespace\":\"dev_pipeline\",\"current_state\":[\"IR_EXTRACTED\"],\"required_pre_states\":[\"ACTION_VALIDATED\"]},\"diagnosis\":{\"missing_functions\":[\"validateAction\"],\"fix_path\":[\"validateAction\"]}}",
+  "ssgState": [
+    "IR_EXTRACTED"
+  ],
+  "ssgFixPath": [
+    "validateAction"
+  ],
+  "ssgMissingFunctions": [
+    "validateAction"
+  ],
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 1,
+  "id": "fail_1780064665642_7",
+  "timestamp": "2026-05-29T14:24:25.642Z"
+}

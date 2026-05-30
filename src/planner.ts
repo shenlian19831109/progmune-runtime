@@ -1,5 +1,5 @@
 import { generate, chat, resetCallCount, estimateTokens } from "./llm";
-import type { Action, ConstraintViolation, Attempt, ExecutionSession, AntibodyHit } from "./runtime-types";
+import type { Action, ConstraintViolation, Attempt, ExecutionSession, AntibodyHit, StateTransition } from "./runtime-types";
 import { generateAttemptId, generateSessionId, generatePlannerSeed } from "./runtime-types";
 import { executeActionCode } from "./action-runtime";
 import { validateActionSequence } from "./validator";
@@ -8,7 +8,7 @@ import { getFunctionSuccessRate } from "./feedback";
 import { jaccardSimilarity, extractKeywords } from "./utils";
 import { recordFailure, recordSession, saveCheckpoint, loadCheckpoint, clearCheckpoint, SVL, queryAntibodies } from "./failure-corpus";
 import { recordEpisode, findSemanticTemplate } from "./memory-layer";
-import { StateMachineValidator, SSGRejection, FunctionProtocol, parseProtocolsFromJSON } from "./ssg-validator";
+import { SSGRejection, FunctionProtocol, parseProtocolsFromJSON, ValidationContext, validateTransition, checkLedgerConsistency, rebuildState, hashRules, explainRejection, rejectionToJSON } from "./ssg-validator";
 import { createSnapshot, saveSnapshot } from "./semantic-snapshot";
 import * as fs from "fs";
 
@@ -273,32 +273,56 @@ function loadProtocols(ir: any[]): { protocols: FunctionProtocol[]; namespaceIni
   return { protocols: [...merged.values()], namespaceInitialStates };
 }
 
-/** 验证动作序列的协议合法性，返回完整 SSG 跟踪和状态转换 */
+/** 验证动作序列的协议合法性，使用 Semantic Ledger (Phase 3) 纯函数 */
 function validateProtocolWithTransitions(
   actions: Action[],
   protocols: FunctionProtocol[],
   namespaceInitialStates: Map<string, string>
-): { valid: boolean; rejection?: SSGRejection; index?: number; trace?: { function: string; statesBefore: Record<string, string[]>; statesAfter: Record<string, string[]> }[]; transitions: import("./runtime-types").StateTransition[] } {
-  const defaultInit = namespaceInitialStates.get("_global") || "INIT";
-  const ssv = new StateMachineValidator(protocols, defaultInit, namespaceInitialStates);
-  const transitions: import("./runtime-types").StateTransition[] = [];
+): { valid: boolean; rejection?: SSGRejection; index?: number; trace?: { function: string; statesBefore: Record<string, string[]>; statesAfter: Record<string, string[]> }[]; transitions: StateTransition[]; ledgerConsistent?: boolean; ruleHash: string } {
+  const rules = new Map<string, import("./ssg-validator").StateAnnotation>();
+  for (const p of protocols) rules.set(p.function, p.protocol);
+
+  const ruleHash = hashRules(rules);
+
+  const ctx: ValidationContext = {
+    ledger: [],
+    currentState: rebuildState([], namespaceInitialStates),
+  };
+  const transitions: StateTransition[] = [];
+
   for (let i = 0; i < actions.length; i++) {
     const a = actions[i];
     if (a.kind === "call" && a.function) {
-      const { result, transition } = ssv.applyWithTransition(a.function, i);
+      const { valid, transition, rejection } = validateTransition(
+        ctx, a.function, i, rules, namespaceInitialStates, ruleHash
+      );
       transitions.push(transition);
-      if (!result.valid) {
-        const fullTrace = ssv.getTrace();
-        const trace = fullTrace.map(t => ({
+
+      if (!valid) {
+        const trace = transitions.map(t => ({
           function: t.function,
           statesBefore: t.statesBefore,
           statesAfter: t.statesAfter,
         }));
-        return { valid: false, rejection: result.rejection!, index: i, trace, transitions };
+        return { valid: false, rejection: rejection!, index: i, trace, transitions, ruleHash };
       }
+
+      // Incremental update — O(1) per step
+      ctx.ledger = transitions;
+      ctx.currentState = transition.statesAfter;
     }
   }
-  return { valid: true, transitions };
+
+  // Invariant check on full ledger
+  const consistency = checkLedgerConsistency(transitions, namespaceInitialStates);
+  if (!consistency.consistent) {
+    console.error(`[Invariant] Ledger consistency violations: ${consistency.violations.length}`);
+    for (const v of consistency.violations) {
+      console.error(`  [${v.invariant}] index=${v.index}: ${v.detail}`);
+    }
+  }
+
+  return { valid: true, transitions, ledgerConsistent: consistency.consistent, ruleHash };
 }
 
 /** SSG 确定性修复：当协议违规有已知修复路径时，自动插入缺失函数 */
@@ -419,6 +443,11 @@ export async function plan(userIntent: string): Promise<Action[]> {
 
       // 验证抗体序列
       const { protocols, namespaceInitialStates } = loadProtocols(ir);
+      const antibodyRuleHash = (() => {
+        const rules = new Map<string, import("./ssg-validator").StateAnnotation>();
+        for (const p of protocols) rules.set(p.function, p.protocol);
+        return hashRules(rules);
+      })();
       if (protocols.length > 0) {
         const validation = validateProtocolWithTransitions(antibodyActions, protocols, namespaceInitialStates);
         if (validation.valid) {
@@ -438,9 +467,11 @@ export async function plan(userIntent: string): Promise<Action[]> {
             llmCallCount: 0,
             durationMs: 0,
             antibodyHit,
+            ruleHash: validation.ruleHash,
           };
           session.attempts.push(antibodyAttempt);
           session.successfulAttempt = antibodyAttempt;
+          session.ruleHash = validation.ruleHash;
           session.resolved = true;
           session.snapshotId = snapshotId;
           session.endedAt = Date.now();
@@ -466,9 +497,11 @@ export async function plan(userIntent: string): Promise<Action[]> {
           llmCallCount: 0,
           durationMs: 0,
           antibodyHit,
+          ruleHash: antibodyRuleHash,
         };
         session.attempts.push(antibodyAttempt);
         session.successfulAttempt = antibodyAttempt;
+        session.ruleHash = antibodyRuleHash;
         session.resolved = true;
         session.snapshotId = snapshotId;
         session.endedAt = Date.now();
@@ -536,15 +569,23 @@ ${RETRY_HINT}
   }
 
   const { protocols, namespaceInitialStates } = loadProtocols(ir);
+  const sessionRuleHash = (() => {
+    const rules = new Map<string, import("./ssg-validator").StateAnnotation>();
+    for (const p of protocols) rules.set(p.function, p.protocol);
+    return hashRules(rules);
+  })();
+  session.ruleHash = sessionRuleHash;
+
   function getMaskedFuncList(): string {
     if (protocols.length === 0) return compactFuncList;
-    const defaultInit = namespaceInitialStates.get("_global") || "INIT";
-    const ssv = new StateMachineValidator(protocols, defaultInit, namespaceInitialStates);
+    const rules = new Map<string, import("./ssg-validator").StateAnnotation>();
+    for (const p of protocols) rules.set(p.function, p.protocol);
+    const ctx: ValidationContext = { ledger: [], currentState: rebuildState([], namespaceInitialStates) };
     const legalFuncs = topFuncs.filter((f: any) => {
       const proto = protocols.find((p: any) => p.function === f.name);
       if (!proto) return true;
-      const result = ssv.apply(f.name);
-      return result.valid;
+      const { valid } = validateTransition(ctx, f.name, 0, rules, namespaceInitialStates);
+      return valid;
     });
     if (legalFuncs.length === topFuncs.length) return compactFuncList;
     return buildCompactFuncList(legalFuncs);
@@ -603,6 +644,7 @@ ${RETRY_HINT}
         timestamp: Date.now(),
         llmCallCount: 0,
         durationMs: 0,
+        ruleHash: sessionRuleHash,
       };
       session.attempts.push(schemaAttempt);
       recordEpisode({ intent: userIntent, actions: rawActions, success: false, svlViolated: "SVL-1" });
@@ -625,7 +667,7 @@ ${RETRY_HINT}
 
     const enriched = enrichActions(rawActions, ir);
     const filtered = enriched.filter(a => !forbiddenFuncs.includes(a.kind === "call" ? a.function : ''));
-    let ssgTransitions: import("./runtime-types").StateTransition[] = [];
+    let ssgTransitions: StateTransition[] = [];
 
     // 1) 基础序列校验
     const seqResult = validateActionSequence(filtered);
@@ -659,6 +701,7 @@ ${RETRY_HINT}
         timestamp: Date.now(),
         llmCallCount: 0,
         durationMs: 0,
+        ruleHash: sessionRuleHash,
       };
       session.attempts.push(attempt);
 
@@ -685,7 +728,7 @@ ${RETRY_HINT}
       const protoResult = validateProtocolWithTransitions(filtered, protocols, namespaceInitialStates);
       if (!protoResult.valid && protoResult.rejection) {
         const rej = protoResult.rejection;
-        const explain = StateMachineValidator.explainRejection(rej);
+        const explain = explainRejection(rej);
         console.error(explain);
 
         const violation: ConstraintViolation = {
@@ -697,7 +740,7 @@ ${RETRY_HINT}
           missingStates: rej.missingFunctions,
           fixPath: rej.fixPath,
           namespace: rej.namespace,
-          description: JSON.stringify(StateMachineValidator.rejectionToJSON(rej)),
+          description: JSON.stringify(rejectionToJSON(rej)),
         };
 
         const attempt: Attempt = {
@@ -714,6 +757,7 @@ ${RETRY_HINT}
           timestamp: Date.now(),
           llmCallCount: 0,
           durationMs: 0,
+          ruleHash: sessionRuleHash,
         };
         session.attempts.push(attempt);
 
@@ -723,7 +767,7 @@ ${RETRY_HINT}
           violatedSVL: "SVL-4",
           constraintType: "protocol",
           actionSequence: filtered,
-          errorDetail: JSON.stringify(StateMachineValidator.rejectionToJSON(rej)),
+          errorDetail: JSON.stringify(rejectionToJSON(rej)),
           ssgState: rej.currentState,
           ssgTrace: protoResult.trace,
           ssgFixPath: rej.fixPath,
@@ -778,6 +822,7 @@ ${RETRY_HINT}
         timestamp: Date.now(),
         llmCallCount: 0,
         durationMs: 0,
+        ruleHash: sessionRuleHash,
       };
       session.attempts.push(attempt);
 
@@ -826,6 +871,7 @@ ${RETRY_HINT}
       llmCallCount: 1,
       durationMs: 0,
       antibodyHit: successAntibodyHit,
+      ruleHash: sessionRuleHash,
     };
     session.attempts.push(successAttempt);
     session.successfulAttempt = successAttempt;
@@ -863,6 +909,7 @@ ${RETRY_HINT}
         timestamp: Date.now(),
         llmCallCount: 0,
         durationMs: 0,
+        ruleHash: sessionRuleHash,
       };
       session.attempts.push(fallbackAttempt);
       session.successfulAttempt = fallbackAttempt;

@@ -1,0 +1,17 @@
+{
+  "id": "snap_1780063202052_5315551a7ee7",
+  "timestamp": "2026-05-29T14:00:02.052Z",
+  "intent": "实现一个函数来提取 IR、校验动作、然后生成代码",
+  "functions": [
+    {
+      "name": "get",
+      "params": [
+        {
+          "name": "k",
+          "type": "str"
+        }
+      ],
+      "returnType": "any"
+    }
+  ]
+}

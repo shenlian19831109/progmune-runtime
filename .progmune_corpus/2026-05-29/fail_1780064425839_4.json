@@ -1,0 +1,41 @@
+{
+  "intent": "extract IR then validate",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "symbol_existence",
+  "actionSequence": [
+    {
+      "kind": "assign",
+      "target": "project_root",
+      "value": "/path/to/project"
+    },
+    {
+      "kind": "call",
+      "function": "ir_data",
+      "args": [
+        "project_root"
+      ],
+      "assignTo": "extractIR"
+    },
+    {
+      "kind": "call",
+      "function": "validation_result",
+      "args": [
+        "ir_data"
+      ],
+      "assignTo": "validateActionSequence"
+    },
+    {
+      "kind": "return",
+      "value": "validation_result"
+    }
+  ],
+  "errorDetail": "函数 'ir_data' 不存在; 函数 'validation_result' 不存在",
+  "ssgMissingFunctions": [
+    "ir_data"
+  ],
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 3,
+  "id": "fail_1780064425839_4",
+  "timestamp": "2026-05-29T14:20:25.839Z"
+}

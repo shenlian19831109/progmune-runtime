@@ -135,6 +135,20 @@ function formatSessionTimeline(session: ExecutionSession): string {
     const narration = narrateSuccess(actions);
     lines.push(`  ${G("✔")}  ${narration}`);
     lines.push(`     ${D(`Resolved after ${failedCount} retries.`)}`);
+
+    // Phase 3: Ledger consistency check
+    if (session.successfulAttempt.transitions.length > 0) {
+      const nsInit = new Map<string, string>([["_global", "INIT"]]);
+      const consistency = checkLedgerConsistency(session.successfulAttempt.transitions, nsInit);
+      if (consistency.consistent) {
+        lines.push(`     ${G("Ledger: consistent")}`);
+      } else {
+        lines.push(`     ${R(`Ledger: ${consistency.violations.length} violation(s)`)}`);
+        for (const v of consistency.violations) {
+          lines.push(`       ${D(`[${v.invariant}] index=${v.index}`)}`);
+        }
+      }
+    }
     lines.push("");
   } else if (!session.resolved) {
     lines.push(`  ${R("✖")} ${B("Unresolved")} ${"─".repeat(50)}`);
@@ -351,7 +365,7 @@ function formatAntibodyStats(): string {
 // ── Semantic heatmap ──
 
 import { getSemanticHeatmap } from "./failure-corpus";
-import { StateMachineValidator, FunctionProtocol, parseProtocolsFromJSON } from "./ssg-validator";
+import { FunctionProtocol, parseProtocolsFromJSON, checkLedgerConsistency, rebuildState, ValidationContext, validateTransition, hashRules, hashLedger, diffLedgers, findProducer, findConsumer, findViolations, findTransition, listAllStates } from "./ssg-validator";
 import { listSnapshots, loadSnapshot, diffSnapshots, IRSnapshot } from "./semantic-snapshot";
 import * as fs from "fs";
 import * as path from "path";
@@ -446,84 +460,37 @@ function loadProtocols(): FunctionProtocol[] {
   return protocols;
 }
 
-function loadNamespaceInitialStates(protocols: FunctionProtocol[]): Map<string, string> {
-  const states = new Map<string, string>();
-  states.set("_global", "UNAUTHENTICATED");
 
-  // 从 protocols.json 读取命名空间初始状态
-  const protocolsJson = path.join(__dirname, "..", "protocols.json");
-  if (fs.existsSync(protocolsJson)) {
-    try {
-      const raw = JSON.parse(fs.readFileSync(protocolsJson, "utf-8"));
-      if (raw.namespaceInitialStates) {
-        for (const [ns, initState] of Object.entries(raw.namespaceInitialStates)) {
-          states.set(ns, initState as string);
-        }
-      }
-    } catch {}
-  }
-
-  // 回退：协议中用到的命名空间如果未显式配置，默认 UNAUTHENTICATED
-  for (const p of protocols) {
-    const ns = p.protocol.namespace || "_global";
-    if (!states.has(ns)) states.set(ns, "UNAUTHENTICATED");
-  }
-  return states;
-}
-
-function createSSV(protocols: FunctionProtocol[]): StateMachineValidator {
-  const nsStates = loadNamespaceInitialStates(protocols);
-  const defaultInit = nsStates.get("_global") || "INIT";
-  return new StateMachineValidator(protocols, defaultInit, nsStates);
-}
-
-function formatStateTransitionPath(actions: { kind: string; function?: string }[]): string {
-  const protocols = loadProtocols();
-  if (protocols.length === 0) {
-    return `${D("No protocol rules loaded. Add @protocol annotations or protocols.json.")}`;
-  }
-
-  const ssv = createSSV(protocols);
-
-  // Apply all protocol-governed actions
-  for (const a of actions) {
-    if (a.kind !== "call" || !a.function) continue;
-    const proto = protocols.find(p => p.function === a.function);
-    if (!proto) continue;
-    ssv.apply(a.function);
-  }
-
-  const trace = ssv.getTrace();
-  if (trace.length === 0) {
-    return `${D("No protocol-governed functions in this sequence.")}`;
+function formatStateTransitionPathFromLedger(transitions: StateTransition[]): string {
+  if (transitions.length === 0) {
+    return `${D("No protocol-governed transitions in this sequence.")}`;
   }
 
   const lines: string[] = [];
 
-  // Initial state
-  lines.push(`  ${D("UNAUTHENTICATED")}`);
+  // Initial state from first transition
+  const initState = transitions[0].statesBefore;
+  const mergeStates = (rec: Record<string, string[]>): Set<string> => {
+    const all = new Set<string>();
+    for (const states of Object.values(rec)) {
+      for (const s of states) all.add(s);
+    }
+    return all;
+  };
+  lines.push(`  ${D([...mergeStates(initState)].join(", ") || "—")}`);
 
-  for (const step of trace) {
-    if (!step.valid) continue;
-    const fnLabel = C_(step.function + "()");
+  for (const t of transitions) {
+    if (!t.valid) continue;
+    const fnLabel = C_(t.function + "()");
 
-    // Merge per-namespace states for display
-    const mergeStates = (rec: Record<string, string[]>): Set<string> => {
-      const all = new Set<string>();
-      for (const states of Object.values(rec)) {
-        for (const s of states) all.add(s);
-      }
-      return all;
-    };
-    const beforeAll = mergeStates(step.statesBefore);
-    const afterAll = mergeStates(step.statesAfter);
+    const beforeAll = mergeStates(t.statesBefore);
+    const afterAll = mergeStates(t.statesAfter);
 
     const beforeStr = [...beforeAll].join(", ");
     const afterStr = [...afterAll].join(", ");
 
-    // Use pre-computed per-namespace deltas
-    const gained = step.acquired || [];
-    const lost = step.invalidated || [];
+    const gained = t.acquired || [];
+    const lost = t.invalidated || [];
 
     let delta = "";
     if (gained.length > 0) delta += ` ${G("+" + gained.join(",+"))}`;
@@ -551,7 +518,7 @@ function formatStateTransitions(session: ExecutionSession): string {
   if (session.successfulAttempt) {
     lines.push(`  ${B("Successful Path State Machine:")}`);
     lines.push("");
-    lines.push(formatStateTransitionPath(session.successfulAttempt.generatedActions));
+    lines.push(formatStateTransitionPathFromLedger(session.successfulAttempt.transitions));
     lines.push("");
   }
 
@@ -776,11 +743,11 @@ async function replaySession(session: ExecutionSession) {
     console.log(`  ${G("✔")}  ${names}`);
     console.log("");
 
-    // State machine trace
-    const protocols = loadProtocols();
-    if (protocols.length > 0) {
-      console.log(`  ${B("State machine trace:")}`);
-      console.log(formatStateTransitionPath(actions));
+    // State machine trace (from Semantic Ledger)
+    const transitions = session.successfulAttempt.transitions;
+    if (transitions.length > 0) {
+      console.log(`  ${B("State machine trace (from Ledger):")}`);
+      console.log(formatStateTransitionPathFromLedger(transitions));
       console.log("");
     }
 
@@ -799,6 +766,281 @@ async function replaySession(session: ExecutionSession) {
   console.log(`  ${D("─".repeat(62))}`);
   console.log(`  ${D("Semantic Observatory — replay complete")}`);
   console.log("");
+
+  // Ledger replay validation
+  console.log(formatLedgerReplayValidation(session));
+}
+
+// ── Ledger Replay Validation (P1-B) ──
+
+function formatLedgerReplayValidation(session: ExecutionSession): string {
+  const lines: string[] = [];
+  lines.push("");
+  lines.push(`${C_("Ledger Replay Validation")}`);
+  lines.push(`${D("═".repeat(62))}`);
+
+  if (!session.attempts || session.attempts.length === 0) {
+    lines.push(`  ${D("No attempts to replay.")}`);
+    return lines.join("\n");
+  }
+
+  // Load current protocols for ruleHash comparison
+  let currentRuleHash: string | null = null;
+  try {
+    const protoPath = path.join(process.env.PROGMUNE_PROJECT_DIR || process.cwd(), "protocols.json");
+    if (fs.existsSync(protoPath)) {
+      const protoDef = JSON.parse(fs.readFileSync(protoPath, "utf-8"));
+      const protocols = parseProtocolsFromJSON(protoDef);
+      const rules = new Map<string, import("./ssg-validator").StateAnnotation>();
+      for (const p of protocols) rules.set(p.function, p.protocol);
+      currentRuleHash = hashRules(rules);
+    }
+  } catch {}
+
+  const nsInit = new Map<string, string>();
+  nsInit.set("_global", "UNAUTHENTICATED");
+  try {
+    const protoPath = path.join(process.env.PROGMUNE_PROJECT_DIR || process.cwd(), "protocols.json");
+    if (fs.existsSync(protoPath)) {
+      const protoDef = JSON.parse(fs.readFileSync(protoPath, "utf-8"));
+      if (protoDef.namespaceInitialStates) {
+        for (const [ns, s] of Object.entries(protoDef.namespaceInitialStates)) {
+          nsInit.set(ns, s as string);
+        }
+      }
+    }
+  } catch {}
+
+  let totalLedgers = 0;
+  let consistentLedgers = 0;
+  let stateMatchLedgers = 0;
+
+  for (const attempt of session.attempts) {
+    const transitions = attempt.transitions || [];
+    if (transitions.length === 0) continue;
+    totalLedgers++;
+
+    const attemptLabel = `Attempt #${attempt.attemptNumber} (${attempt.outcome})`;
+
+    // 1. Invariant check
+    const consistency = checkLedgerConsistency(transitions, nsInit);
+    if (consistency.consistent) {
+      consistentLedgers++;
+      lines.push(`  ${G("✔")} ${attemptLabel}: Invariants clean`);
+    } else {
+      lines.push(`  ${R("✖")} ${attemptLabel}: ${consistency.violations.length} invariant violation(s)`);
+      for (const v of consistency.violations.slice(0, 2)) {
+        lines.push(`     ${D(`[${v.invariant}] index=${v.index}: ${v.detail || ""}`)}`);
+      }
+    }
+
+    // 2. rebuildState matches recorded statesAfter (normalized)
+    const rebuilt = rebuildState(transitions, nsInit);
+    const lastTransition = transitions[transitions.length - 1];
+    const recorded = lastTransition.statesAfter;
+    // Normalize: collect all namespace keys, fill empty arrays for missing ones
+    const allNs = new Set([...Object.keys(rebuilt), ...Object.keys(recorded)]);
+    const norm = (snap: Record<string, string[]>) => {
+      const out: Record<string, string[]> = {};
+      for (const ns of [...allNs].sort()) {
+        out[ns] = [...(snap[ns] || [])].sort();
+      }
+      return out;
+    };
+    const rebuiltNorm = JSON.stringify(norm(rebuilt));
+    const recordedNorm = JSON.stringify(norm(recorded));
+    if (rebuiltNorm === recordedNorm) {
+      stateMatchLedgers++;
+      lines.push(`     ${G("rebuildState === recorded")}`);
+    } else {
+      lines.push(`     ${R("rebuildState !== recorded")}`);
+      lines.push(`     ${D("  rebuilt:  " + rebuiltNorm)}`);
+      lines.push(`     ${D("  recorded: " + recordedNorm)}`);
+    }
+
+    // 3. ruleHash comparison
+    if (attempt.ruleHash && currentRuleHash) {
+      if (attempt.ruleHash === currentRuleHash) {
+        lines.push(`     ${G("ruleHash match")} ${D(attempt.ruleHash)}`);
+      } else {
+        lines.push(`     ${Y("ruleHash mismatch")} ${D("attempt: " + attempt.ruleHash + " | current: " + currentRuleHash)}`);
+      }
+    } else if (attempt.ruleHash && !currentRuleHash) {
+      lines.push(`     ${D("ruleHash: " + attempt.ruleHash + " (no current protocols to compare)")}`);
+    }
+  }
+
+  // Session-level ruleHash
+  if (session.ruleHash) {
+    lines.push("");
+    lines.push(`  ${D("Session ruleHash:")} ${session.ruleHash}`);
+    if (currentRuleHash) {
+      if (session.ruleHash === currentRuleHash) {
+        lines.push(`  ${G("Session ruleHash matches current protocols.")}`);
+      } else {
+        lines.push(`  ${Y("Session ruleHash differs from current protocols.")} ${D("Replay may yield different results.")}`);
+      }
+    }
+  }
+
+  // Ledger integrity hash
+  {
+    const allTransitions = session.attempts.flatMap(a => a.transitions || []);
+    if (allTransitions.length > 0) {
+      const ledgerHash = hashLedger(allTransitions);
+      lines.push(`  ${D("Ledger hash:")} ${ledgerHash} ${D("(tamper-evident integrity)")}`);
+    }
+  }
+
+  lines.push("");
+  if (totalLedgers === 0) {
+    lines.push(`  ${D("No ledger data in this session.")}`);
+  } else {
+    const allOk = consistentLedgers === totalLedgers && stateMatchLedgers === totalLedgers;
+    if (allOk) {
+      lines.push(`  ${G("✦")} ${B(`Ledger Replay: ${totalLedgers}/${totalLedgers} consistent, all states match`)}`);
+    } else {
+      lines.push(`  ${Y("◇")} ${B(`Ledger Replay: ${consistentLedgers}/${totalLedgers} consistent, ${stateMatchLedgers}/${totalLedgers} state-match`)}`);
+    }
+  }
+
+  return lines.join("\n");
+}
+
+// ── Corpus-wide Ledger Statistics (P1) ──
+
+function formatLedgerStats(): string {
+  const sessions = getAllSessions();
+  const lines: string[] = [];
+  lines.push(`${C_("Ledger Corpus Statistics")}`);
+  lines.push(`${D("═".repeat(62))}`);
+  lines.push("");
+
+  let totalSessions = 0;
+  let totalLedgers = 0;
+  let totalTransitions = 0;
+  let validTransitions = 0;
+  let invalidTransitions = 0;
+  let sessionsWithRuleHash = 0;
+  const stateProducers = new Map<string, number>();
+  const stateConsumers = new Map<string, number>();
+  const allRuleHashes = new Set<string>();
+
+  for (const session of sessions) {
+    const allTransitions = session.attempts.flatMap(a => a.transitions || []);
+    if (allTransitions.length === 0) continue;
+    totalSessions++;
+    totalLedgers += session.attempts.filter(a => (a.transitions || []).length > 0).length;
+    totalTransitions += allTransitions.length;
+
+    for (const t of allTransitions) {
+      if (t.valid) validTransitions++;
+      else invalidTransitions++;
+      for (const s of t.acquired) {
+        stateProducers.set(s, (stateProducers.get(s) || 0) + 1);
+      }
+      for (const states of Object.values(t.statesBefore)) {
+        for (const s of states) {
+          stateConsumers.set(s, (stateConsumers.get(s) || 0) + 1);
+        }
+      }
+    }
+
+    if (session.ruleHash) {
+      sessionsWithRuleHash++;
+      allRuleHashes.add(session.ruleHash);
+    }
+  }
+
+  if (totalSessions === 0) {
+    lines.push(`  ${D("No sessions with ledger data.")}`);
+    return lines.join("\n");
+  }
+
+  lines.push(`  ${B("Sessions:")}        ${totalSessions} (${D(`${sessions.length} total`)})`);
+  lines.push(`  ${B("Ledgers:")}         ${totalLedgers}`);
+  lines.push(`  ${B("Transitions:")}     ${totalTransitions} (${G(`${validTransitions} valid`)}, ${R(`${invalidTransitions} invalid`)})`);
+  const validPct = totalTransitions > 0 ? Math.round((validTransitions / totalTransitions) * 100) : 0;
+  lines.push(`  ${B("Validity rate:")}    ${validPct >= 90 ? G(`${validPct}%`) : Y(`${validPct}%`)}`);
+  lines.push(`  ${B("Rule hashes:")}      ${allRuleHashes.size} unique (${sessionsWithRuleHash}/${totalSessions} sessions have ruleHash)`);
+
+  // Top producers
+  const topProducers = [...stateProducers.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
+  if (topProducers.length > 0) {
+    lines.push("");
+    lines.push(`  ${B("Top produced states:")}`);
+    for (const [state, count] of topProducers) {
+      lines.push(`    ${G("+" + state)}: ${count}x`);
+    }
+  }
+
+  // Top consumers
+  const topConsumers = [...stateConsumers.entries()]
+    .filter(([s]) => !s.startsWith("_"))
+    .sort((a, b) => b[1] - a[1]).slice(0, 5);
+  if (topConsumers.length > 0) {
+    lines.push("");
+    lines.push(`  ${B("Top consumed states:")}`);
+    for (const [state, count] of topConsumers) {
+      lines.push(`    ${Y("←" + state)}: ${count}x`);
+    }
+  }
+
+  // Per-session detail
+  lines.push("");
+  lines.push(`  ${B("Per-session breakdown:")}`);
+  for (const session of sessions) {
+    const allTransitions = session.attempts.flatMap(a => a.transitions || []);
+    if (allTransitions.length === 0) continue;
+    const validCount = allTransitions.filter(t => t.valid).length;
+    const hashTag = session.ruleHash ? ` [${D(session.ruleHash.slice(0, 8))}]` : "";
+    const intentShort = session.intent.length > 40 ? session.intent.slice(0, 37) + "..." : session.intent;
+    lines.push(`  ${D(session.sessionId.slice(-8))} ${validCount}/${allTransitions.length} valid ${D("·")} ${intentShort}${hashTag}`);
+  }
+
+  return lines.join("\n");
+}
+
+// ── Cross-session Query ──
+
+function formatCrossSessionQuery(operation: string, state: string): string {
+  const sessions = getAllSessions();
+  const lines: string[] = [];
+  const label = operation === "producer" ? `Producers of "${state}"` : `Consumers of "${state}"`;
+  lines.push(`${C_(`Cross-session: ${label}`)}`);
+  lines.push(`${D("═".repeat(62))}`);
+  lines.push("");
+
+  let found = 0;
+  for (const session of sessions) {
+    const allTransitions = session.attempts.flatMap(a => a.transitions || []);
+    if (allTransitions.length === 0) continue;
+
+    let results;
+    if (operation === "producer") {
+      results = findProducer(state, allTransitions);
+    } else {
+      results = findConsumer(state, allTransitions);
+    }
+    if (results.length === 0) continue;
+
+    found++;
+    const intentShort = session.intent.length > 50 ? session.intent.slice(0, 47) + "..." : session.intent;
+    const funcs = [...new Set(results.map(r => r.transition.function))].join(", ");
+    const validCount = allTransitions.filter(t => t.valid).length;
+    const hashTag = session.ruleHash ? ` ${D(session.ruleHash.slice(0, 8))}` : "";
+    lines.push(`  ${D(session.sessionId.slice(-8))} ${G(`${results.length}x`)} via ${C_(funcs)} ${D(`(${validCount}/${allTransitions.length} valid)${hashTag}`)}`);
+    lines.push(`     ${D(intentShort)}`);
+  }
+
+  if (found === 0) {
+    lines.push(`  ${D(`No sessions found with ${operation} for "${state}".`)}`);
+  } else {
+    lines.push("");
+    lines.push(`  ${B(`Found in ${found} session(s).`)}`);
+  }
+
+  return lines.join("\n");
 }
 
 // ── CLI entry ──
@@ -1014,20 +1256,43 @@ function formatSessionValidation(session: ExecutionSession): string {
               nsStates.set(ns, s as string);
             }
           }
-          const ssv = new StateMachineValidator(protocols, nsStates.get("_global") || "INIT", nsStates);
+          // Pure function validation (no StateMachineValidator instance)
+          const rules = new Map<string, import("./ssg-validator").StateAnnotation>();
+          for (const p of protocols) rules.set(p.function, p.protocol);
+          const ruleHash = hashRules(rules);
+
+          const ctx: ValidationContext = {
+            ledger: [],
+            currentState: rebuildState([], nsStates),
+          };
+          const transitions: StateTransition[] = [];
 
           let valid = true;
-          for (const act of session.successfulAttempt.generatedActions) {
+          for (let i = 0; i < session.successfulAttempt.generatedActions.length; i++) {
+            const act = session.successfulAttempt.generatedActions[i];
             if (act.kind === "call" && act.function) {
-              const result = ssv.apply(act.function);
-              if (!result.valid) {
-                lines.push(`  ${R("🚫")} ${act.function}: ${result.rejection?.missingFunctions.join(" → ") || "protocol violation"}`);
+              const { valid: tValid, transition, rejection } = validateTransition(
+                ctx, act.function, i, rules, nsStates, ruleHash
+              );
+              transitions.push(transition);
+              ctx.ledger = transitions;
+              if (!tValid) {
+                lines.push(`  ${R("🚫")} ${act.function}: ${rejection?.missingFunctions.join(" → ") || "protocol violation"}`);
                 valid = false;
               } else {
+                ctx.currentState = transition.statesAfter;
                 lines.push(`  ${G("✅")} ${act.function}`);
               }
             }
           }
+
+          // Ledger consistency check
+          const consistency = checkLedgerConsistency(transitions, nsStates);
+          if (!consistency.consistent) {
+            lines.push(`  ${R("⚠")} Ledger consistency: ${consistency.violations.length} violation(s)`);
+            valid = false;
+          }
+
           if (valid) {
             lines.push(`  ${G("✔ All actions satisfy protocol constraints against snapshot IR.")}`);
           }
@@ -1064,6 +1329,65 @@ async function main() {
     return;
   }
 
+  if (arg === "--diff-ledgers") {
+    const idA = process.argv[3];
+    const idB = process.argv[4];
+    if (!idA || !idB) {
+      console.error(`${R("Usage:")} ts-node src/semantic-trace.ts --diff-ledgers <sessionIdA> <sessionIdB>`);
+      process.exit(1);
+    }
+    const sessions = getAllSessions();
+    const sessA = sessions.find(s => s.sessionId === idA || s.sessionId.startsWith(idA));
+    const sessB = sessions.find(s => s.sessionId === idB || s.sessionId.startsWith(idB));
+    if (!sessA) { console.error(`${R("Session A not found:")} ${idA}`); process.exit(1); }
+    if (!sessB) { console.error(`${R("Session B not found:")} ${idB}`); process.exit(1); }
+
+    const ledgerA = sessA.attempts.flatMap(a => a.transitions || []);
+    const ledgerB = sessB.attempts.flatMap(a => a.transitions || []);
+    const diff = diffLedgers(ledgerA, ledgerB);
+
+    console.log(`${C_("Ledger Diff")}`);
+    console.log(`${D("═".repeat(50))}`);
+    console.log(`  A: ${D(sessA.sessionId)} (${ledgerA.length} transitions)`);
+    console.log(`  B: ${D(sessB.sessionId)} (${ledgerB.length} transitions)`);
+    console.log("");
+    if (diff.identical) {
+      console.log(`  ${G("✔ Ledgers are identical.")}`);
+    } else {
+      console.log(`  ${G(`Unchanged: ${diff.unchanged}`)}  ${R(`Only in A: ${diff.onlyInA.length}`)}  ${Y(`Only in B: ${diff.onlyInB.length}`)}  ${Y(`Changed: ${diff.changed.length}`)}`);
+      for (const d of diff.onlyInA.slice(0, 3)) {
+        console.log(`    ${R("-")} @${d.index} ${d.function} ${D(d.hashA)}`);
+      }
+      for (const d of diff.onlyInB.slice(0, 3)) {
+        console.log(`    ${G("+")} @${d.index} ${d.function} ${D(d.hashB)}`);
+      }
+      for (const d of diff.changed.slice(0, 3)) {
+        console.log(`    ${Y("~")} @${d.index} ${d.function} ${D(d.hashA + " → " + d.hashB)}`);
+      }
+    }
+    return;
+  }
+
+  if (arg === "--query-all") {
+    const op = process.argv[3];
+    const st = process.argv[4];
+    if (!op || !st) {
+      console.error(`${R("Usage:")} ts-node src/semantic-trace.ts --query-all <producer|consumer> <state>`);
+      process.exit(1);
+    }
+    if (op !== "producer" && op !== "consumer") {
+      console.error(`${R("Operation must be 'producer' or 'consumer'.")}`);
+      process.exit(1);
+    }
+    console.log(formatCrossSessionQuery(op, st));
+    return;
+  }
+
+  if (arg === "--stats") {
+    console.log(formatLedgerStats());
+    return;
+  }
+
   if (arg === "--snapshots") {
     console.log(formatSnapshotList());
     return;
@@ -1085,7 +1409,7 @@ async function main() {
     const sessionId = process.argv[3];
     if (!sessionId) {
       console.error(`${R("Usage:")} ts-node src/semantic-trace.ts --validate <sessionId>`);
-      console.error(`\n${D("Validates a session's actions against both its snapshotted IR and the current IR.")}`);
+      console.error(`\n${D("Validates a session's IR snapshot and replays its Semantic Ledger.")}`);
       process.exit(1);
     }
     const sessionsForValidate = getAllSessions();
@@ -1095,6 +1419,24 @@ async function main() {
       process.exit(1);
     }
     console.log(formatSessionValidation(session));
+    console.log(formatLedgerReplayValidation(session));
+    return;
+  }
+
+  if (arg === "--ledger") {
+    const sessionId = process.argv[3];
+    if (!sessionId) {
+      console.error(`${R("Usage:")} ts-node src/semantic-trace.ts --ledger <sessionId>`);
+      console.error(`\n${D("Replays the Semantic Ledger: rebuildState, invariants, ruleHash comparison.")}`);
+      process.exit(1);
+    }
+    const sessionsForLedger = getAllSessions();
+    const session = sessionsForLedger.find(s => s.sessionId === sessionId || s.sessionId.startsWith(sessionId));
+    if (!session) {
+      console.error(`${R("Session not found:")} ${sessionId}`);
+      process.exit(1);
+    }
+    console.log(formatLedgerReplayValidation(session));
     return;
   }
 
@@ -1136,6 +1478,112 @@ async function main() {
       process.exit(1);
     }
     await replaySession(session);
+    return;
+  }
+
+  if (arg === "--query") {
+    const sessionId = process.argv[3];
+    const operation = process.argv[4];
+    const operand = process.argv[5];
+    if (!sessionId || !operation) {
+      console.error(`${R("Usage:")} ts-node src/semantic-trace.ts --query <sessionId> <operation> [state|index]`);
+      console.error(`\n${B("Operations:")}`);
+      console.error(`  ${D("producer <state>")}   — find transitions that produce a state`);
+      console.error(`  ${D("consumer <state>")}   — find transitions that consume a state`);
+      console.error(`  ${D("violations")}         — list all invalid transitions`);
+      console.error(`  ${D("transition <index>")} — find a transition by action index`);
+      console.error(`  ${D("all-states")}         — list all unique states in the ledger`);
+      process.exit(1);
+    }
+    const sessionsForQuery = getAllSessions();
+    const session = sessionsForQuery.find(s => s.sessionId === sessionId || s.sessionId.startsWith(sessionId));
+    if (!session) {
+      console.error(`${R("Session not found:")} ${sessionId}`);
+      process.exit(1);
+    }
+
+    // Collect all transitions from all attempts
+    const allTransitions = session.attempts.flatMap(a => a.transitions || []);
+    if (allTransitions.length === 0) {
+      console.log(`${D("No ledger data in this session.")}`);
+      return;
+    }
+
+    console.log(`${C_("Ledger Query")} — ${session.sessionId}`);
+    console.log(`${D("═".repeat(50))}`);
+    console.log(`${D(`Ledger size: ${allTransitions.length} transitions`)}`);
+    console.log("");
+
+    if (operation === "producer" || operation === "prod") {
+      if (!operand) { console.error(`${R("Missing state name.")}`); process.exit(1); }
+      const results = findProducer(operand, allTransitions);
+      if (results.length === 0) {
+        console.log(`  ${D(`No producer found for "${operand}"`)}`);
+      } else {
+        console.log(`  ${B(`Producers of "${operand}":`)}`);
+        for (const r of results) {
+          console.log(`    ${G("→")} ${r.transition.function}() @index=${r.index} [${D(r.namespace)}]`);
+        }
+      }
+    } else if (operation === "consumer" || operation === "cons") {
+      if (!operand) { console.error(`${R("Missing state name.")}`); process.exit(1); }
+      const results = findConsumer(operand, allTransitions);
+      if (results.length === 0) {
+        console.log(`  ${D(`No consumer found for "${operand}"`)}`);
+      } else {
+        console.log(`  ${B(`Consumers of "${operand}":`)}`);
+        for (const r of results) {
+          console.log(`    ${Y("←")} ${r.transition.function}() @index=${r.index} [${D(r.namespace)}]`);
+        }
+      }
+    } else if (operation === "violations" || operation === "viol") {
+      const results = findViolations(allTransitions);
+      if (results.length === 0) {
+        console.log(`  ${G("No violations — all transitions are valid.")}`);
+      } else {
+        console.log(`  ${R(`${results.length} violation(s):`)}`);
+        for (const r of results) {
+          console.log(`    ${R("✖")} ${r.transition.function}() @index=${r.index} [${D(r.namespace)}]`);
+        }
+      }
+    } else if (operation === "transition" || operation === "t") {
+      if (!operand) { console.error(`${R("Missing action index.")}`); process.exit(1); }
+      const idx = parseInt(operand, 10);
+      if (isNaN(idx)) { console.error(`${R("Invalid index.")}`); process.exit(1); }
+      const result = findTransition(idx, allTransitions);
+      if (!result) {
+        console.log(`  ${D(`No transition at index ${idx}`)}`);
+      } else {
+        const t = result.transition;
+        console.log(`  ${B(`Transition @${idx}:`)}`);
+        console.log(`    function:    ${C_(t.function)}`);
+        console.log(`    namespace:   ${D(t.namespace)}`);
+        console.log(`    valid:       ${t.valid ? G("yes") : R("no")}`);
+        console.log(`    acquired:    ${t.acquired.length ? G("+" + t.acquired.join(",+")) : D("(none)")}`);
+        console.log(`    invalidated: ${t.invalidated.length ? R("-" + t.invalidated.join(",-")) : D("(none)")}`);
+        if (t.ruleHash) console.log(`    ruleHash:    ${D(t.ruleHash)}`);
+      }
+    } else if (operation === "all-states" || operation === "states") {
+      const states = listAllStates(allTransitions);
+      if (states.length === 0) {
+        console.log(`  ${D("No states in ledger.")}`);
+      } else {
+        console.log(`  ${B(`All states (${states.length}):`)}`);
+        // Group by namespace
+        const byNs = new Map<string, string[]>();
+        for (const s of states) {
+          if (!byNs.has(s.namespace)) byNs.set(s.namespace, []);
+          byNs.get(s.namespace)!.push(s.state);
+        }
+        for (const [ns, ss] of [...byNs.entries()].sort()) {
+          console.log(`    ${C_(ns)}: ${ss.join(", ")}`);
+        }
+      }
+    } else {
+      console.error(`${R("Unknown operation:")} ${operation}`);
+      console.error(`${D("Valid: producer, consumer, violations, transition, all-states")}`);
+      process.exit(1);
+    }
     return;
   }
 

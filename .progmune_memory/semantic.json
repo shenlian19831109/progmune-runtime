@@ -1,0 +1,32 @@
+[
+  {
+    "id": "tmpl_1779545674933",
+    "intentPattern": "repeated pattern",
+    "actionSequence": [
+      {
+        "kind": "assign",
+        "target": "x",
+        "value": "1"
+      }
+    ],
+    "successRate": 1,
+    "useCount": 10,
+    "createdAt": "2026-05-23T14:14:34.933Z",
+    "lastUsedAt": "2026-05-23T14:15:07.638Z"
+  },
+  {
+    "id": "tmpl_1779545707638",
+    "intentPattern": "consolidate test pat",
+    "actionSequence": [
+      {
+        "kind": "assign",
+        "target": "data",
+        "value": "value"
+      }
+    ],
+    "successRate": 1,
+    "useCount": 5,
+    "createdAt": "2026-05-23T14:15:07.638Z",
+    "lastUsedAt": "2026-05-23T14:15:07.638Z"
+  }
+]

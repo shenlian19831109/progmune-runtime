@@ -18,6 +18,160 @@
     ]
   },
   {
+    "name": "step",
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "src/check.ts",
+    "calls": [
+      "log",
+      "B",
+      "repeat",
+      "max"
+    ]
+  },
+  {
+    "name": "pass",
+    "params": [
+      {
+        "name": "msg",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "src/check.ts",
+    "calls": [
+      "log",
+      "G"
+    ]
+  },
+  {
+    "name": "fail",
+    "params": [
+      {
+        "name": "msg",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "src/check.ts",
+    "calls": [
+      "log",
+      "R"
+    ]
+  },
+  {
+    "name": "warn",
+    "params": [
+      {
+        "name": "msg",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "src/check.ts",
+    "calls": [
+      "log",
+      "Y"
+    ]
+  },
+  {
+    "name": "G",
+    "params": [
+      {
+        "name": "s",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/check.ts",
+    "calls": []
+  },
+  {
+    "name": "R",
+    "params": [
+      {
+        "name": "s",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/check.ts",
+    "calls": []
+  },
+  {
+    "name": "Y",
+    "params": [
+      {
+        "name": "s",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/check.ts",
+    "calls": []
+  },
+  {
+    "name": "C_",
+    "params": [
+      {
+        "name": "s",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/check.ts",
+    "calls": []
+  },
+  {
+    "name": "D",
+    "params": [
+      {
+        "name": "s",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/check.ts",
+    "calls": []
+  },
+  {
+    "name": "B",
+    "params": [
+      {
+        "name": "s",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/check.ts",
+    "calls": []
+  },
+  {
     "name": "getImportPath",
     "params": [
       {
@@ -646,6 +800,23 @@
     ]
   },
   {
+    "name": "getAntibodyStats",
+    "params": [],
+    "returnType": "{\n  totalHits: number;\n  fastPathHits: number;\n  injectedHintHits: number;\n  totalLLMCallsSaved: number;\n  totalTokensSaved: number;\n  byLevel: Record<string, { hits: number; llmSaved: number; tokensSaved: number }>;\n  topSignatures: { signature: string; hits: number; avgSimilarity: number }[];\n}",
+    "returnTypeDetail": "{\n  totalHits: number;\n  fastPathHits: number;\n  injectedHintHits: number;\n  totalLLMCallsSaved: number;\n  totalTokensSaved: number;\n  byLevel: Record<string, { hits: number; llmSaved: number; tokensSaved: number }>;\n  topSignatures: { signature: string; hits: number; avgSimilarity: number }[];\n}",
+    "file": "src/failure-corpus.ts",
+    "calls": [
+      "getAllSessions",
+      "get",
+      "push",
+      "set",
+      "slice",
+      "sort",
+      "map",
+      "entries"
+    ]
+  },
+  {
     "name": "generateCandidateRules",
     "params": [],
     "returnType": "string[]",
@@ -1255,6 +1426,84 @@
     ]
   },
   {
+    "name": "jsonReply",
+    "params": [
+      {
+        "name": "res",
+        "type": "http.ServerResponse",
+        "typeDetail": "http.ServerResponse"
+      },
+      {
+        "name": "data",
+        "type": "any",
+        "typeDetail": "any"
+      },
+      {
+        "name": "code",
+        "type": "any",
+        "typeDetail": ""
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/obs-web.ts",
+    "calls": [
+      "writeHead",
+      "end",
+      "stringify"
+    ]
+  },
+  {
+    "name": "handleAPI",
+    "params": [
+      {
+        "name": "req",
+        "type": "http.IncomingMessage",
+        "typeDetail": "http.IncomingMessage"
+      },
+      {
+        "name": "res",
+        "type": "http.ServerResponse",
+        "typeDetail": "http.ServerResponse"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/obs-web.ts",
+    "calls": [
+      "startsWith",
+      "slice",
+      "getAllSessions",
+      "find",
+      "jsonReply",
+      "handler"
+    ]
+  },
+  {
+    "name": "server",
+    "params": [
+      {
+        "name": "req",
+        "type": "any",
+        "typeDetail": ""
+      },
+      {
+        "name": "res",
+        "type": "any",
+        "typeDetail": ""
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/obs-web.ts",
+    "calls": [
+      "startsWith",
+      "handleAPI",
+      "writeHead",
+      "end"
+    ]
+  },
+  {
     "name": "loadProtocolsFromFile",
     "params": [
       {
@@ -1305,14 +1554,31 @@
       "loadProtocolsFromIR",
       "forEach",
       "values",
-      "createNamespacedSSV",
+      "set",
+      "entries",
+      "has",
+      "hashRules",
+      "createPureContext",
       "apply",
       "explainRejection",
+      "flat",
       "replace",
       "stringify",
       "rejectionToJSON",
       "repeat",
-      "getTrace"
+      "getTrace",
+      "rebuildState",
+      "validateTransition",
+      "push",
+      "checkLedgerConsistency",
+      "filter",
+      "findProducer",
+      "map",
+      "findConsumer",
+      "findViolations",
+      "findTransition",
+      "listAllStates",
+      "hashLedger"
     ]
   },
   {
@@ -1384,6 +1650,51 @@
     ]
   },
   {
+    "name": "parseActionJSON",
+    "params": [
+      {
+        "name": "text",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "Action[] | null",
+    "returnTypeDetail": "Action[] | null",
+    "file": "src/planner.ts",
+    "calls": [
+      "trim",
+      "replace",
+      "parse",
+      "isArray",
+      "push",
+      "map",
+      "parseActionJSON",
+      "stringify"
+    ]
+  },
+  {
+    "name": "validateActionSchema",
+    "params": [
+      {
+        "name": "actions",
+        "type": "Action[]",
+        "typeDetail": "Action[]"
+      }
+    ],
+    "returnType": "{ valid: boolean; errors: string[] }",
+    "returnTypeDetail": "{ valid: boolean; errors: string[] }",
+    "file": "src/planner.ts",
+    "calls": [
+      "push",
+      "isArray",
+      "test",
+      "has",
+      "add",
+      "validateActionSchema",
+      "map"
+    ]
+  },
+  {
     "name": "loadProtocols",
     "params": [
       {
@@ -1426,15 +1737,18 @@
         "typeDetail": "Map<string, string>"
       }
     ],
-    "returnType": "{ valid: boolean; rejection?: SSGRejection; index?: number; trace?: { function: string; statesBefore: string[]; statesAfter: string[] }[]; transitions: import(\"./runtime-types\").StateTransition[] }",
-    "returnTypeDetail": "{ valid: boolean; rejection?: SSGRejection; index?: number; trace?: { function: string; statesBefore: string[]; statesAfter: string[] }[]; transitions: import(\"./runtime-types\").StateTransition[] }",
+    "returnType": "{ valid: boolean; rejection?: SSGRejection; index?: number; trace?: { function: string; statesBefore: Record<string, string[]>; statesAfter: Record<string, string[]> }[]; transitions: StateTransition[]; ledgerConsistent?: boolean; ruleHash: string }",
+    "returnTypeDetail": "{ valid: boolean; rejection?: SSGRejection; index?: number; trace?: { function: string; statesBefore: Record<string, string[]>; statesAfter: Record<string, string[]> }[]; transitions: StateTransition[]; ledgerConsistent?: boolean; ruleHash: string }",
     "file": "src/planner.ts",
     "calls": [
-      "get",
-      "applyWithTransition",
+      "set",
+      "hashRules",
+      "rebuildState",
+      "validateTransition",
       "push",
-      "getTrace",
-      "map"
+      "map",
+      "checkLedgerConsistency",
+      "error"
     ]
   },
   {
@@ -1497,6 +1811,10 @@
       "resetCallCount",
       "parse",
       "readFileSync",
+      "generateSessionId",
+      "now",
+      "createSnapshot",
+      "saveSnapshot",
       "findSemanticTemplate",
       "error",
       "recordEpisode",
@@ -1504,45 +1822,40 @@
       "toFixed",
       "join",
       "map",
+      "ceil",
+      "estimateTokens",
       "loadProtocols",
       "validateProtocolWithTransitions",
+      "generateAttemptId",
+      "generatePlannerSeed",
+      "push",
+      "recordSession",
       "extractKeywords",
       "sort",
       "slice",
       "buildCompactFuncList",
       "match",
       "find",
-      "push",
-      "estimateTokens",
       "loadCheckpoint",
-      "generateSessionId",
-      "now",
-      "createSnapshot",
-      "saveSnapshot",
       "chat",
       "generate",
       "trim",
       "replace",
+      "parseActionJSON",
       "executeActionCode",
+      "validateActionSchema",
+      "saveCheckpoint",
       "enrichActions",
       "filter",
       "validateActionSequence",
       "flat",
-      "determineSVL",
-      "parseInt",
-      "split",
-      "determineConstraintType",
-      "generateAttemptId",
-      "generatePlannerSeed",
       "recordFailure",
-      "saveCheckpoint",
       "explainRejection",
       "stringify",
       "rejectionToJSON",
       "attemptSSGRepair",
       "getMaskedFuncList",
       "checkSemantic",
-      "recordSession",
       "clearCheckpoint",
       "generateFallbackPlan"
     ]
@@ -2162,7 +2475,8 @@
       "join",
       "C_",
       "Y",
-      "narrateSuccess"
+      "narrateSuccess",
+      "checkLedgerConsistency"
     ]
   },
   {
@@ -2299,6 +2613,30 @@
     ]
   },
   {
+    "name": "formatAntibodyStats",
+    "params": [],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "getAntibodyStats",
+      "D",
+      "push",
+      "B",
+      "repeat",
+      "C_",
+      "String",
+      "G",
+      "Y",
+      "toLocaleString",
+      "keys",
+      "slice",
+      "padEnd",
+      "round",
+      "join"
+    ]
+  },
+  {
     "name": "formatHeatmap",
     "params": [],
     "returnType": "string",
@@ -2339,67 +2677,23 @@
     ]
   },
   {
-    "name": "loadNamespaceInitialStates",
+    "name": "formatStateTransitionPathFromLedger",
     "params": [
       {
-        "name": "protocols",
-        "type": "FunctionProtocol[]",
-        "typeDetail": "FunctionProtocol[]"
-      }
-    ],
-    "returnType": "Map<string, string>",
-    "returnTypeDetail": "Map<string, string>",
-    "file": "src/semantic-trace.ts",
-    "calls": [
-      "set",
-      "join",
-      "existsSync",
-      "parse",
-      "readFileSync",
-      "entries",
-      "has"
-    ]
-  },
-  {
-    "name": "createSSV",
-    "params": [
-      {
-        "name": "protocols",
-        "type": "FunctionProtocol[]",
-        "typeDetail": "FunctionProtocol[]"
-      }
-    ],
-    "returnType": "StateMachineValidator",
-    "returnTypeDetail": "StateMachineValidator",
-    "file": "src/semantic-trace.ts",
-    "calls": [
-      "loadNamespaceInitialStates",
-      "get"
-    ]
-  },
-  {
-    "name": "formatStateTransitionPath",
-    "params": [
-      {
-        "name": "actions",
-        "type": "{ kind: string; function?: string }[]",
-        "typeDetail": "{ kind: string; function?: string }[]"
+        "name": "transitions",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
       }
     ],
     "returnType": "string",
     "returnTypeDetail": "string",
     "file": "src/semantic-trace.ts",
     "calls": [
-      "loadProtocols",
       "D",
-      "createSSV",
-      "find",
-      "apply",
-      "getTrace",
       "push",
-      "C_",
       "join",
-      "filter",
+      "mergeStates",
+      "C_",
       "G",
       "R"
     ]
@@ -2424,7 +2718,7 @@
       "R",
       "D",
       "push",
-      "formatStateTransitionPath",
+      "formatStateTransitionPathFromLedger",
       "join",
       "map",
       "filter",
@@ -2650,10 +2944,113 @@
       "join",
       "map",
       "filter",
-      "loadProtocols",
-      "formatStateTransitionPath",
+      "formatStateTransitionPathFromLedger",
       "R",
-      "repeat"
+      "repeat",
+      "formatLedgerReplayValidation"
+    ]
+  },
+  {
+    "name": "formatLedgerReplayValidation",
+    "params": [
+      {
+        "name": "session",
+        "type": "ExecutionSession",
+        "typeDetail": "ExecutionSession"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "push",
+      "C_",
+      "D",
+      "repeat",
+      "join",
+      "cwd",
+      "existsSync",
+      "parse",
+      "readFileSync",
+      "parseProtocolsFromJSON",
+      "set",
+      "hashRules",
+      "entries",
+      "checkLedgerConsistency",
+      "G",
+      "R",
+      "slice",
+      "rebuildState",
+      "keys",
+      "stringify",
+      "norm",
+      "Y",
+      "flatMap",
+      "hashLedger",
+      "B"
+    ]
+  },
+  {
+    "name": "formatLedgerStats",
+    "params": [],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "getAllSessions",
+      "push",
+      "C_",
+      "D",
+      "repeat",
+      "flatMap",
+      "filter",
+      "set",
+      "get",
+      "values",
+      "add",
+      "join",
+      "B",
+      "G",
+      "R",
+      "round",
+      "Y",
+      "slice",
+      "sort",
+      "entries"
+    ]
+  },
+  {
+    "name": "formatCrossSessionQuery",
+    "params": [
+      {
+        "name": "operation",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "state",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/semantic-trace.ts",
+    "calls": [
+      "getAllSessions",
+      "push",
+      "C_",
+      "D",
+      "repeat",
+      "flatMap",
+      "findProducer",
+      "findConsumer",
+      "slice",
+      "join",
+      "map",
+      "filter",
+      "G",
+      "B"
     ]
   },
   {
@@ -2742,8 +3139,10 @@
       "parseProtocolsFromJSON",
       "set",
       "entries",
-      "get",
-      "apply"
+      "hashRules",
+      "rebuildState",
+      "validateTransition",
+      "checkLedgerConsistency"
     ]
   },
   {
@@ -2756,19 +3155,45 @@
       "log",
       "formatGenomeSummary",
       "formatLearnedPatterns",
+      "formatAntibodyStats",
       "formatHeatmap",
-      "formatSnapshotList",
-      "D",
-      "formatSnapshotDiff",
       "error",
       "R",
       "exit",
       "getAllSessions",
       "find",
+      "flatMap",
+      "diffLedgers",
+      "C_",
+      "D",
+      "repeat",
+      "G",
+      "Y",
+      "slice",
+      "formatCrossSessionQuery",
+      "formatLedgerStats",
+      "formatSnapshotList",
+      "formatSnapshotDiff",
       "formatSessionValidation",
+      "formatLedgerReplayValidation",
       "formatSessionSummary",
       "formatStateTransitions",
       "replaySession",
+      "B",
+      "findProducer",
+      "findConsumer",
+      "findViolations",
+      "parseInt",
+      "isNaN",
+      "findTransition",
+      "join",
+      "listAllStates",
+      "has",
+      "set",
+      "push",
+      "get",
+      "sort",
+      "entries",
       "startsWith",
       "formatSessionTimeline"
     ]
@@ -2921,6 +3346,462 @@
     ]
   },
   {
+    "name": "toSnapshot",
+    "params": [
+      {
+        "name": "stateMap",
+        "type": "Map<string, Set<string>>",
+        "typeDetail": "Map<string, Set<string>>"
+      }
+    ],
+    "returnType": "Record<string, string[]>",
+    "returnTypeDetail": "Record<string, string[]>",
+    "file": "src/ssg-validator.ts",
+    "calls": [
+      "sort"
+    ]
+  },
+  {
+    "name": "fromSnapshot",
+    "params": [
+      {
+        "name": "snap",
+        "type": "Record<string, string[]>",
+        "typeDetail": "Record<string, string[]>"
+      }
+    ],
+    "returnType": "Map<string, Set<string>>",
+    "returnTypeDetail": "Map<string, Set<string>>",
+    "file": "src/ssg-validator.ts",
+    "calls": [
+      "entries",
+      "set"
+    ]
+  },
+  {
+    "name": "deepEqualSnapshots",
+    "params": [
+      {
+        "name": "a",
+        "type": "Record<string, string[]>",
+        "typeDetail": "Record<string, string[]>"
+      },
+      {
+        "name": "b",
+        "type": "Record<string, string[]>",
+        "typeDetail": "Record<string, string[]>"
+      }
+    ],
+    "returnType": "boolean",
+    "returnTypeDetail": "boolean",
+    "file": "src/ssg-validator.ts",
+    "calls": [
+      "sort",
+      "keys"
+    ]
+  },
+  {
+    "name": "rebuildState",
+    "params": [
+      {
+        "name": "ledger",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
+      },
+      {
+        "name": "namespaceInitialStates",
+        "type": "Map<string, string>",
+        "typeDetail": "Map<string, string>"
+      }
+    ],
+    "returnType": "Record<string, string[]>",
+    "returnTypeDetail": "Record<string, string[]>",
+    "file": "src/ssg-validator.ts",
+    "calls": [
+      "fromSnapshot",
+      "set",
+      "has",
+      "applyTransitionDelta",
+      "toSnapshot"
+    ]
+  },
+  {
+    "name": "applyTransitionDelta",
+    "params": [
+      {
+        "name": "stateMap",
+        "type": "Map<string, Set<string>>",
+        "typeDetail": "Map<string, Set<string>>"
+      },
+      {
+        "name": "transition",
+        "type": "StateTransition",
+        "typeDetail": "StateTransition"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "src/ssg-validator.ts",
+    "calls": [
+      "get",
+      "delete",
+      "add",
+      "set"
+    ]
+  },
+  {
+    "name": "computeDelta",
+    "params": [
+      {
+        "name": "beforeSnap",
+        "type": "Record<string, string[]>",
+        "typeDetail": "Record<string, string[]>"
+      },
+      {
+        "name": "afterSnap",
+        "type": "Record<string, string[]>",
+        "typeDetail": "Record<string, string[]>"
+      },
+      {
+        "name": "namespace",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "{ acquired: string[]; invalidated: string[] }",
+    "returnTypeDetail": "{ acquired: string[]; invalidated: string[] }",
+    "file": "src/ssg-validator.ts",
+    "calls": [
+      "filter"
+    ]
+  },
+  {
+    "name": "findFixPathStatic",
+    "params": [
+      {
+        "name": "rules",
+        "type": "Map<string, StateAnnotation>",
+        "typeDetail": "Map<string, StateAnnotation>"
+      },
+      {
+        "name": "namespace",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "current",
+        "type": "string[]",
+        "typeDetail": "string[]"
+      },
+      {
+        "name": "targetPreStates",
+        "type": "string[]",
+        "typeDetail": "string[]"
+      }
+    ],
+    "returnType": "string[]",
+    "returnTypeDetail": "string[]",
+    "file": "src/ssg-validator.ts",
+    "calls": [
+      "push",
+      "join",
+      "sort",
+      "add",
+      "shift",
+      "every",
+      "forEach",
+      "has",
+      "includes"
+    ]
+  },
+  {
+    "name": "validateTransition",
+    "params": [
+      {
+        "name": "ctx",
+        "type": "ValidationContext",
+        "typeDetail": "ValidationContext"
+      },
+      {
+        "name": "candidateFunctionName",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "actionIndex",
+        "type": "number",
+        "typeDetail": "number"
+      },
+      {
+        "name": "rules",
+        "type": "Map<string, StateAnnotation>",
+        "typeDetail": "Map<string, StateAnnotation>"
+      },
+      {
+        "name": "namespaceInitialStates",
+        "type": "Map<string, string>",
+        "typeDetail": "Map<string, string>"
+      },
+      {
+        "name": "ruleHash",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "{ valid: boolean; transition: StateTransition; rejection?: SSGRejection }",
+    "returnTypeDetail": "{ valid: boolean; transition: StateTransition; rejection?: SSGRejection }",
+    "file": "src/ssg-validator.ts",
+    "calls": [
+      "get",
+      "every",
+      "findFixPathStatic",
+      "forEach",
+      "keys",
+      "sort",
+      "filter",
+      "fromSnapshot",
+      "applyTransitionDelta",
+      "toSnapshot",
+      "deepEqualSnapshots",
+      "error",
+      "join",
+      "stringify"
+    ]
+  },
+  {
+    "name": "checkLedgerConsistency",
+    "params": [
+      {
+        "name": "ledger",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
+      },
+      {
+        "name": "namespaceInitialStates",
+        "type": "Map<string, string>",
+        "typeDetail": "Map<string, string>"
+      }
+    ],
+    "returnType": "{ consistent: boolean; violations: LedgerConsistencyViolation[] }",
+    "returnTypeDetail": "{ consistent: boolean; violations: LedgerConsistencyViolation[] }",
+    "file": "src/ssg-validator.ts",
+    "calls": [
+      "fromSnapshot",
+      "keys",
+      "add",
+      "has",
+      "set",
+      "get",
+      "normalizeSnap",
+      "toSnapshot",
+      "deepEqualSnapshots",
+      "push",
+      "applyTransitionDelta"
+    ]
+  },
+  {
+    "name": "hashRules",
+    "params": [
+      {
+        "name": "rules",
+        "type": "Map<string, StateAnnotation>",
+        "typeDetail": "Map<string, StateAnnotation>"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/ssg-validator.ts",
+    "calls": [
+      "map",
+      "sort",
+      "entries",
+      "slice",
+      "digest",
+      "update",
+      "createHash",
+      "stringify"
+    ]
+  },
+  {
+    "name": "hashLedger",
+    "params": [
+      {
+        "name": "ledger",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/ssg-validator.ts",
+    "calls": [
+      "map",
+      "slice",
+      "digest",
+      "update",
+      "createHash",
+      "stringify"
+    ]
+  },
+  {
+    "name": "diffLedgers",
+    "params": [
+      {
+        "name": "ledgerA",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
+      },
+      {
+        "name": "ledgerB",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
+      }
+    ],
+    "returnType": "LedgerDiff",
+    "returnTypeDetail": "LedgerDiff",
+    "file": "src/ssg-validator.ts",
+    "calls": [
+      "set",
+      "hash",
+      "keys",
+      "sort",
+      "get",
+      "push"
+    ]
+  },
+  {
+    "name": "findProducer",
+    "params": [
+      {
+        "name": "state",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "ledger",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
+      }
+    ],
+    "returnType": "LedgerQueryResult[]",
+    "returnTypeDetail": "LedgerQueryResult[]",
+    "file": "src/ssg-validator.ts",
+    "calls": [
+      "filter",
+      "map"
+    ]
+  },
+  {
+    "name": "findConsumer",
+    "params": [
+      {
+        "name": "state",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "ledger",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
+      }
+    ],
+    "returnType": "LedgerQueryResult[]",
+    "returnTypeDetail": "LedgerQueryResult[]",
+    "file": "src/ssg-validator.ts",
+    "calls": [
+      "filter",
+      "map"
+    ]
+  },
+  {
+    "name": "findViolations",
+    "params": [
+      {
+        "name": "ledger",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
+      }
+    ],
+    "returnType": "LedgerQueryResult[]",
+    "returnTypeDetail": "LedgerQueryResult[]",
+    "file": "src/ssg-validator.ts",
+    "calls": [
+      "filter",
+      "map"
+    ]
+  },
+  {
+    "name": "findTransition",
+    "params": [
+      {
+        "name": "actionIndex",
+        "type": "number",
+        "typeDetail": "number"
+      },
+      {
+        "name": "ledger",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
+      }
+    ],
+    "returnType": "LedgerQueryResult | null",
+    "returnTypeDetail": "LedgerQueryResult | null",
+    "file": "src/ssg-validator.ts",
+    "calls": [
+      "findIndex"
+    ]
+  },
+  {
+    "name": "listAllStates",
+    "params": [
+      {
+        "name": "ledger",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
+      }
+    ],
+    "returnType": "{ namespace: string; state: string }[]",
+    "returnTypeDetail": "{ namespace: string; state: string }[]",
+    "file": "src/ssg-validator.ts",
+    "calls": [
+      "has",
+      "add",
+      "push",
+      "values"
+    ]
+  },
+  {
+    "name": "explainRejection",
+    "params": [
+      {
+        "name": "rejection",
+        "type": "SSGRejection",
+        "typeDetail": "SSGRejection"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/ssg-validator.ts",
+    "calls": [
+      "join",
+      "push"
+    ]
+  },
+  {
+    "name": "rejectionToJSON",
+    "params": [
+      {
+        "name": "rejection",
+        "type": "SSGRejection",
+        "typeDetail": "SSGRejection"
+      }
+    ],
+    "returnType": "object",
+    "returnTypeDetail": "object",
+    "file": "src/ssg-validator.ts",
+    "calls": []
+  },
+  {
     "name": "parseProtocolsFromJSON",
     "params": [
       {
@@ -3030,10 +3911,15 @@
         "name": "action",
         "type": "Action",
         "typeDetail": "Action"
+      },
+      {
+        "name": "actionIndex",
+        "type": "number",
+        "typeDetail": "number"
       }
     ],
-    "returnType": "{ valid: boolean; errors: string[] }",
-    "returnTypeDetail": "{ valid: boolean; errors: string[] }",
+    "returnType": "{ valid: boolean; errors: string[]; violations: ConstraintViolation[] }",
+    "returnTypeDetail": "{ valid: boolean; errors: string[]; violations: ConstraintViolation[] }",
     "file": "src/validator.ts",
     "calls": [
       "loadIR",
@@ -3063,8 +3949,8 @@
         "typeDetail": "Action[]"
       }
     ],
-    "returnType": "{ valid: boolean; errors: string[] }",
-    "returnTypeDetail": "{ valid: boolean; errors: string[] }",
+    "returnType": "{ valid: boolean; errors: string[]; violations: ConstraintViolation[] }",
+    "returnTypeDetail": "{ valid: boolean; errors: string[]; violations: ConstraintViolation[] }",
     "file": "src/validator.ts",
     "calls": [
       "validateAction",
@@ -3107,6 +3993,45 @@
     "calls": [],
     "external": true,
     "description": "输出错误日志"
+  },
+  {
+    "name": "log",
+    "params": [
+      {
+        "name": "message",
+        "type": "any"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "输出日志"
+  },
+  {
+    "name": "repeat",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "max",
+    "params": [
+      {
+        "name": "values",
+        "type": "number[]"
+      }
+    ],
+    "returnType": "number",
+    "returnTypeDetail": "number",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "最大值"
   },
   {
     "name": "parse",
@@ -3432,21 +4357,6 @@
     "external": true
   },
   {
-    "name": "log",
-    "params": [
-      {
-        "name": "message",
-        "type": "any"
-      }
-    ],
-    "returnType": "void",
-    "returnTypeDetail": "void",
-    "file": "(external)",
-    "calls": [],
-    "external": true,
-    "description": "输出日志"
-  },
-  {
     "name": "String",
     "params": [],
     "returnType": "any",
@@ -3580,7 +4490,34 @@
     "external": true
   },
   {
-    "name": "createNamespacedSSV",
+    "name": "writeHead",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "end",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "handler",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "createPureContext",
     "params": [],
     "returnType": "any",
     "returnTypeDetail": "any",
@@ -3598,25 +4535,7 @@
     "external": true
   },
   {
-    "name": "explainRejection",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "any",
-    "file": "(external)",
-    "calls": [],
-    "external": true
-  },
-  {
-    "name": "rejectionToJSON",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "any",
-    "file": "(external)",
-    "calls": [],
-    "external": true
-  },
-  {
-    "name": "repeat",
+    "name": "flat",
     "params": [],
     "returnType": "any",
     "returnTypeDetail": "any",
@@ -3634,7 +4553,7 @@
     "external": true
   },
   {
-    "name": "applyWithTransition",
+    "name": "test",
     "params": [],
     "returnType": "any",
     "returnTypeDetail": "any",
@@ -3644,15 +4563,6 @@
   },
   {
     "name": "findIndex",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "any",
-    "file": "(external)",
-    "calls": [],
-    "external": true
-  },
-  {
-    "name": "flat",
     "params": [],
     "returnType": "any",
     "returnTypeDetail": "any",
@@ -3721,22 +4631,31 @@
     "external": true
   },
   {
-    "name": "max",
-    "params": [
-      {
-        "name": "values",
-        "type": "number[]"
-      }
-    ],
-    "returnType": "number",
-    "returnTypeDetail": "number",
+    "name": "toLocaleString",
     "file": "(external)",
     "calls": [],
-    "external": true,
-    "description": "最大值"
+    "external": true
+  },
+  {
+    "name": "mergeStates",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
   },
   {
     "name": "write",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "norm",
     "params": [],
     "returnType": "any",
     "returnTypeDetail": "any",
@@ -3758,6 +4677,33 @@
     "calls": [],
     "external": true,
     "description": "退出进程"
+  },
+  {
+    "name": "delete",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "normalizeSnap",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "hash",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
   },
   {
     "name": "bigrams",

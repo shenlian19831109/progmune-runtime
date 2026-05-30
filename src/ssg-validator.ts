@@ -1,10 +1,10 @@
 import type { StateTransition } from "./runtime-types";
+import * as crypto from "crypto";
 
 export interface StateAnnotation {
   pre_states: string[];
   post_states: string[];
   invalidate?: string[];
-  /** 命名空间：auth, file, db, socket 等。未指定则为全局默认空间 "_global" */
   namespace?: string;
 }
 
@@ -13,22 +13,18 @@ export interface FunctionProtocol {
   protocol: StateAnnotation;
 }
 
-/** 结构化 SSG 拦截结果 */
 export interface SSGRejection {
   blocked: string;
   currentState: string[];
   requiredState: string[];
   missingFunctions: string[];
   fixPath: string[];
-  /** 违规所在的命名空间 */
   namespace: string;
 }
 
-/** 单次 apply 的结构化结果 */
 export interface SSGStepResult {
   valid: boolean;
   rejection?: SSGRejection;
-  /** per-namespace state snapshot — canonical format, aligns with runtime-types.StateTransition */
   statesBefore: Record<string, string[]>;
   statesAfter: Record<string, string[]>;
   acquired: string[];
@@ -36,12 +32,10 @@ export interface SSGStepResult {
   namespace: string;
 }
 
-/** 完整跟踪节点 — 与 runtime-types.StateTransition 格式对齐 */
 export interface SSGTraceNode {
   function: string;
   valid: boolean;
   rejection?: SSGRejection;
-  /** per-namespace state snapshot */
   statesBefore: Record<string, string[]>;
   statesAfter: Record<string, string[]>;
   acquired: string[];
@@ -49,285 +43,719 @@ export interface SSGTraceNode {
   namespace: string;
 }
 
+// ── Phase 3: Semantic Ledger types ──
+
+/** Incremental validation context — avoids O(n²) rebuildState() calls */
+export interface ValidationContext {
+  ledger: StateTransition[];
+  currentState: Record<string, string[]>;
+}
+
+export interface LedgerConsistencyViolation {
+  index: number;
+  invariant: "before-consistency" | "delta-consistency";
+  expected: Record<string, string[]>;
+  actual: Record<string, string[]>;
+  detail?: string;
+}
+
 const DEFAULT_NAMESPACE = "_global";
 
+// ═══════════════════════════════════════════════════════════════
+// Phase 3: Pure Functions — Semantic Ledger Kernel
+// ═══════════════════════════════════════════════════════════════
+
+// ── Internal helpers ──
+
+function toSnapshot(stateMap: Map<string, Set<string>>): Record<string, string[]> {
+  const snap: Record<string, string[]> = {};
+  for (const [ns, states] of stateMap) {
+    snap[ns] = [...states].sort();
+  }
+  return snap;
+}
+
+function fromSnapshot(snap: Record<string, string[]>): Map<string, Set<string>> {
+  const map = new Map<string, Set<string>>();
+  for (const [ns, states] of Object.entries(snap)) {
+    map.set(ns, new Set(states));
+  }
+  return map;
+}
+
+function deepEqualSnapshots(a: Record<string, string[]>, b: Record<string, string[]>): boolean {
+  const keysA = Object.keys(a).sort();
+  const keysB = Object.keys(b).sort();
+  if (keysA.length !== keysB.length) return false;
+  for (let i = 0; i < keysA.length; i++) {
+    if (keysA[i] !== keysB[i]) return false;
+    const statesA = a[keysA[i]];
+    const statesB = b[keysA[i]];
+    if (statesA.length !== statesB.length) return false;
+    for (let j = 0; j < statesA.length; j++) {
+      if (statesA[j] !== statesB[j]) return false;
+    }
+  }
+  return true;
+}
+
+// ── rebuildState: pure fold over ledger → per-namespace state snapshot ──
+
+export function rebuildState(
+  ledger: StateTransition[],
+  namespaceInitialStates: Map<string, string> = new Map([["_global", "INIT"]])
+): Record<string, string[]> {
+  const stateMap = fromSnapshot({});
+  for (const [ns, initState] of namespaceInitialStates) {
+    stateMap.set(ns, new Set<string>([initState]));
+  }
+  if (!stateMap.has("_global")) stateMap.set("_global", new Set<string>(["INIT"]));
+
+  for (const t of ledger) {
+    if (!t.valid) continue;
+    applyTransitionDelta(stateMap, t);
+  }
+  return toSnapshot(stateMap);
+}
+
+// ── applyTransitionDelta: incremental primitive for O(n) loops ──
+
+export function applyTransitionDelta(
+  stateMap: Map<string, Set<string>>,
+  transition: StateTransition
+): void {
+  const ns = transition.namespace || DEFAULT_NAMESPACE;
+  const nsStates = stateMap.get(ns) || new Set<string>();
+  for (const s of transition.invalidated) nsStates.delete(s);
+  for (const s of transition.acquired) nsStates.add(s);
+  stateMap.set(ns, nsStates);
+}
+
+// ── computeDelta: derive acquired/invalidated from before/after for one namespace ──
+
+function computeDelta(
+  beforeSnap: Record<string, string[]>,
+  afterSnap: Record<string, string[]>,
+  namespace: string
+): { acquired: string[]; invalidated: string[] } {
+  const before = beforeSnap[namespace] || [];
+  const after = afterSnap[namespace] || [];
+  const acquired = after.filter(s => !before.includes(s));
+  const invalidated = before.filter(s => !after.includes(s));
+  return { acquired, invalidated };
+}
+
+// ── findFixPathStatic: BFS state graph search (extracted from class) ──
+
+export function findFixPathStatic(
+  rules: Map<string, StateAnnotation>,
+  namespace: string,
+  current: string[],
+  targetPreStates: string[]
+): string[] {
+  const nsFuncs: { name: string; rule: StateAnnotation }[] = [];
+  for (const [fn, rule] of rules) {
+    if ((rule.namespace || DEFAULT_NAMESPACE) === namespace) {
+      nsFuncs.push({ name: fn, rule });
+    }
+  }
+
+  // BFS
+  const startKey = [...new Set(current)].sort().join(",");
+  const visited = new Set<string>();
+  const queue: { states: Set<string>; path: string[] }[] = [
+    { states: new Set(current), path: [] }
+  ];
+  visited.add(startKey);
+
+  while (queue.length > 0) {
+    const { states, path } = queue.shift()!;
+    if (targetPreStates.every(s => states.has(s))) return path;
+
+    for (const { name, rule } of nsFuncs) {
+      if (!rule.pre_states.every(p => states.has(p))) continue;
+      const nextStates = new Set(states);
+      if (rule.invalidate) rule.invalidate.forEach(s => nextStates.delete(s));
+      rule.post_states.forEach(s => nextStates.add(s));
+      const nextKey = [...nextStates].sort().join(",");
+      if (visited.has(nextKey)) continue;
+      visited.add(nextKey);
+      if (visited.size > 1000) break;
+      queue.push({ states: nextStates, path: [...path, name] });
+    }
+  }
+
+  // Fallback: single-hop greedy
+  const path: string[] = [];
+  const currentSet = new Set(current);
+  for (const target of targetPreStates) {
+    if (currentSet.has(target)) continue;
+    for (const { name, rule } of nsFuncs) {
+      if (rule.post_states.includes(target)) {
+        path.push(name);
+        if (rule.invalidate) rule.invalidate.forEach(s => currentSet.delete(s));
+        rule.post_states.forEach(s => currentSet.add(s));
+        break;
+      }
+    }
+  }
+  return path;
+}
+
+// ── validateTransition: pure function, stateless ──
+
+export function validateTransition(
+  ctx: ValidationContext,
+  candidateFunctionName: string,
+  actionIndex: number,
+  rules: Map<string, StateAnnotation>,
+  namespaceInitialStates: Map<string, string>,
+  ruleHash?: string
+): { valid: boolean; transition: StateTransition; rejection?: SSGRejection } {
+  const currentState = ctx.currentState;
+  const rule = rules.get(candidateFunctionName);
+
+  if (!rule) {
+    const transition: StateTransition = {
+      actionIndex,
+      function: candidateFunctionName,
+      namespace: DEFAULT_NAMESPACE,
+      acquired: [],
+      invalidated: [],
+      statesBefore: currentState,
+      statesAfter: currentState,
+      valid: true,
+      ruleHash,
+    };
+    // Invariant-1: delta consistency for no-rule transition (trivially satisfied)
+    return { valid: true, transition };
+  }
+
+  const ns = rule.namespace || DEFAULT_NAMESPACE;
+  const nsStates = new Set(currentState[ns] || []);
+
+  // Check pre-states
+  if (!rule.pre_states.every((s: string) => nsStates.has(s))) {
+    const fixPath = findFixPathStatic(rules, ns, [...nsStates], rule.pre_states);
+    const rejection: SSGRejection = {
+      blocked: candidateFunctionName,
+      currentState: [...nsStates],
+      requiredState: rule.pre_states,
+      missingFunctions: fixPath,
+      fixPath,
+      namespace: ns,
+    };
+
+    const transition: StateTransition = {
+      actionIndex,
+      function: candidateFunctionName,
+      namespace: ns,
+      acquired: [],
+      invalidated: [],
+      statesBefore: currentState,
+      statesAfter: currentState,  // no state change on rejection
+      valid: false,
+      ruleHash,
+    };
+    return { valid: false, transition, rejection };
+  }
+
+  // Valid — compute state change
+  const beforeNs = [...nsStates];
+  if (rule.invalidate) rule.invalidate.forEach((s: string) => nsStates.delete(s));
+  rule.post_states.forEach((s: string) => nsStates.add(s));
+
+  // Build statesAfter: copy currentState, replace this namespace
+  const statesAfter: Record<string, string[]> = {};
+  for (const nsKey of Object.keys(currentState)) {
+    statesAfter[nsKey] = nsKey === ns
+      ? [...nsStates].sort()
+      : [...(currentState[nsKey] || [])];
+  }
+  if (!statesAfter[ns]) {
+    statesAfter[ns] = [...nsStates].sort();
+  }
+
+  const afterNs = statesAfter[ns] || [];
+  const acquired = afterNs.filter((s: string) => !beforeNs.includes(s));
+  const invalidated = beforeNs.filter((s: string) => !afterNs.includes(s));
+
+  const transition: StateTransition = {
+    actionIndex,
+    function: candidateFunctionName,
+    namespace: ns,
+    acquired,
+    invalidated,
+    statesBefore: currentState,
+    statesAfter,
+    valid: true,
+    ruleHash,
+  };
+
+  // Invariant-1: delta consistency
+  const deltaMap = fromSnapshot(currentState);
+  applyTransitionDelta(deltaMap, transition);
+  const computedAfter = toSnapshot(deltaMap);
+  if (!deepEqualSnapshots(computedAfter, statesAfter)) {
+    console.error(
+      `[Invariant-1] Delta consistency violation in validateTransition for "${candidateFunctionName}":\n` +
+      `  acquired: [${acquired.join(", ")}]  invalidated: [${invalidated.join(", ")}]\n` +
+      `  expected after: ${JSON.stringify(computedAfter)}\n` +
+      `  actual after:   ${JSON.stringify(statesAfter)}`
+    );
+  }
+
+  return { valid: true, transition };
+}
+
+// ── checkLedgerConsistency: Invariant-0 + Invariant-1 over full ledger ──
+
+export function checkLedgerConsistency(
+  ledger: StateTransition[],
+  namespaceInitialStates: Map<string, string> = new Map([["_global", "INIT"]])
+): { consistent: boolean; violations: LedgerConsistencyViolation[] } {
+  const violations: LedgerConsistencyViolation[] = [];
+  const running = fromSnapshot({});
+
+  // Pre-scan: collect all namespaces referenced in any transition
+  const allNamespaces = new Set(namespaceInitialStates.keys());
+  for (const t of ledger) {
+    for (const ns of Object.keys(t.statesBefore)) allNamespaces.add(ns);
+    for (const ns of Object.keys(t.statesAfter)) allNamespaces.add(ns);
+    allNamespaces.add(t.namespace);
+  }
+
+  // Initialize running state: init from namespaceInitialStates, empty for others
+  for (const ns of allNamespaces) {
+    if (namespaceInitialStates.has(ns)) {
+      running.set(ns, new Set<string>([namespaceInitialStates.get(ns)!]));
+    } else {
+      running.set(ns, new Set<string>());
+    }
+  }
+
+  // Normalize a snapshot: ensure all known namespaces are present
+  function normalizeSnap(snap: Record<string, string[]>): Record<string, string[]> {
+    const out: Record<string, string[]> = {};
+    for (const ns of allNamespaces) {
+      out[ns] = [...(snap[ns] || [])].sort();
+    }
+    return out;
+  }
+
+  for (let i = 0; i < ledger.length; i++) {
+    const t = ledger[i];
+
+    // Invariant-0: statesBefore must equal rebuildState(ledger[0..i-1])
+    const expectedBefore = normalizeSnap(toSnapshot(running));
+    const actualBefore = normalizeSnap(t.statesBefore);
+    if (!deepEqualSnapshots(expectedBefore, actualBefore)) {
+      violations.push({
+        index: i,
+        invariant: "before-consistency",
+        expected: expectedBefore,
+        actual: actualBefore,
+        detail: `Transition[${i}] "${t.function}": statesBefore does not match rebuilt state from previous ledger`,
+      });
+    }
+
+    // Invariant-1: statesAfter must equal applyDelta(statesBefore, acquired, invalidated)
+    if (t.valid) {
+      const beforeMap = fromSnapshot(t.statesBefore);
+      applyTransitionDelta(beforeMap, t);
+      const expectedAfter = normalizeSnap(toSnapshot(beforeMap));
+      const actualAfter = normalizeSnap(t.statesAfter);
+      if (!deepEqualSnapshots(expectedAfter, actualAfter)) {
+        violations.push({
+          index: i,
+          invariant: "delta-consistency",
+          expected: expectedAfter,
+          actual: actualAfter,
+          detail: `Transition[${i}] "${t.function}": statesAfter does not match applyDelta(statesBefore, acquired, invalidated)`,
+        });
+      }
+    }
+
+    // Advance running state
+    if (t.valid) {
+      applyTransitionDelta(running, t);
+    }
+  }
+
+  return { consistent: violations.length === 0, violations };
+}
+
+// ── hashRules: stable hash of rule set for constraint snapshot (P1) ──
+
+export function hashRules(rules: Map<string, StateAnnotation>): string {
+  const sorted = [...rules.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([name, rule]) => ({
+      function: name,
+      pre_states: [...rule.pre_states].sort(),
+      post_states: [...rule.post_states].sort(),
+      invalidate: rule.invalidate ? [...rule.invalidate].sort() : undefined,
+      namespace: rule.namespace || DEFAULT_NAMESPACE,
+    }));
+  return crypto.createHash("sha256").update(JSON.stringify(sorted)).digest("hex").slice(0, 16);
+}
+
+/** Compute a deterministic SHA256 hash of an entire ledger (P1: Tamper-evident integrity). */
+export function hashLedger(ledger: StateTransition[]): string {
+  const canonical = ledger.map(t => ({
+    actionIndex: t.actionIndex,
+    function: t.function,
+    namespace: t.namespace,
+    acquired: [...t.acquired].sort(),
+    invalidated: [...t.invalidated].sort(),
+    statesBefore: Object.fromEntries(
+      Object.entries(t.statesBefore).map(([k, v]) => [k, [...v].sort()]).sort()
+    ),
+    statesAfter: Object.fromEntries(
+      Object.entries(t.statesAfter).map(([k, v]) => [k, [...v].sort()]).sort()
+    ),
+    valid: t.valid,
+    ruleHash: t.ruleHash || "",
+  }));
+  return crypto.createHash("sha256").update(JSON.stringify(canonical)).digest("hex").slice(0, 16);
+}
+
+/** Result of comparing two ledgers. */
+export interface LedgerDiff {
+  /** Number of transitions with same index and hash in both ledgers. */
+  unchanged: number;
+  /** Transitions present in ledgerA but not (identically) in ledgerB. */
+  onlyInA: { index: number; function: string; hashA: string }[];
+  /** Transitions present in ledgerB but not (identically) in ledgerB. */
+  onlyInB: { index: number; function: string; hashB: string }[];
+  /** Transitions with same index but different content. */
+  changed: { index: number; function: string; hashA: string; hashB: string }[];
+  /** Whether the two ledgers are identical. */
+  identical: boolean;
+}
+
+/** Compare two ledgers and identify structural differences. */
+export function diffLedgers(ledgerA: StateTransition[], ledgerB: StateTransition[]): LedgerDiff {
+  const hash = (t: StateTransition) =>
+    crypto.createHash("sha256").update(JSON.stringify({
+      i: t.actionIndex, f: t.function, n: t.namespace,
+      a: [...t.acquired].sort(), x: [...t.invalidated].sort(),
+      v: t.valid, r: t.ruleHash || "",
+    })).digest("hex").slice(0, 12);
+
+  const mapA = new Map<number, { t: StateTransition; h: string }>();
+  const mapB = new Map<number, { t: StateTransition; h: string }>();
+  for (const t of ledgerA) mapA.set(t.actionIndex, { t, h: hash(t) });
+  for (const t of ledgerB) mapB.set(t.actionIndex, { t, h: hash(t) });
+
+  const allIndices = new Set([...mapA.keys(), ...mapB.keys()]);
+  const unchanged: number[] = [];
+  const onlyInA: LedgerDiff["onlyInA"] = [];
+  const onlyInB: LedgerDiff["onlyInB"] = [];
+  const changed: LedgerDiff["changed"] = [];
+
+  for (const idx of [...allIndices].sort((a, b) => a - b)) {
+    const a = mapA.get(idx);
+    const b = mapB.get(idx);
+    if (a && b) {
+      if (a.h === b.h) {
+        unchanged.push(idx);
+      } else {
+        changed.push({ index: idx, function: a.t.function, hashA: a.h, hashB: b.h });
+      }
+    } else if (a && !b) {
+      onlyInA.push({ index: idx, function: a.t.function, hashA: a.h });
+    } else if (!a && b) {
+      onlyInB.push({ index: idx, function: b.t.function, hashB: b.h });
+    }
+  }
+
+  return {
+    unchanged: unchanged.length,
+    onlyInA,
+    onlyInB,
+    changed,
+    identical: onlyInA.length === 0 && onlyInB.length === 0 && changed.length === 0,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Ledger Query API (P1-C) — the Semantic Ledger as a queryable database
+// ═══════════════════════════════════════════════════════════════
+
+export interface LedgerQueryResult {
+  transition: StateTransition;
+  index: number;
+  namespace: string;
+}
+
+/** Find all transitions that acquire (produce) a given state in the ledger. */
+export function findProducer(state: string, ledger: StateTransition[]): LedgerQueryResult[] {
+  return ledger
+    .map((t, i) => ({ transition: t, index: i, namespace: t.namespace }))
+    .filter(r => r.transition.acquired.includes(state));
+}
+
+/** Find all transitions that have a given state in their pre_states (consume it). */
+export function findConsumer(state: string, ledger: StateTransition[]): LedgerQueryResult[] {
+  return ledger
+    .map((t, i) => ({ transition: t, index: i, namespace: t.namespace }))
+    .filter(r => (r.transition.statesBefore[r.namespace] || []).includes(state));
+}
+
+/** Find all invalid transitions in a ledger. */
+export function findViolations(ledger: StateTransition[]): LedgerQueryResult[] {
+  return ledger
+    .map((t, i) => ({ transition: t, index: i, namespace: t.namespace }))
+    .filter(r => !r.transition.valid);
+}
+
+/** Find a transition by its action index. */
+export function findTransition(actionIndex: number, ledger: StateTransition[]): LedgerQueryResult | null {
+  const idx = ledger.findIndex(t => t.actionIndex === actionIndex);
+  if (idx === -1) return null;
+  return { transition: ledger[idx], index: idx, namespace: ledger[idx].namespace };
+}
+
+/** List all unique states present across all namespaces in a ledger. */
+export function listAllStates(ledger: StateTransition[]): { namespace: string; state: string }[] {
+  const seen = new Set<string>();
+  const result: { namespace: string; state: string }[] = [];
+  for (const t of ledger) {
+    const ns = t.namespace;
+    for (const s of t.acquired) {
+      const key = `${ns}:${s}`;
+      if (!seen.has(key)) { seen.add(key); result.push({ namespace: ns, state: s }); }
+    }
+    for (const s of t.invalidated) {
+      const key = `${ns}:${s}`;
+      if (!seen.has(key)) { seen.add(key); result.push({ namespace: ns, state: s }); }
+    }
+    for (const states of Object.values(t.statesBefore)) {
+      for (const s of states) {
+        const key = `${ns}:${s}`;
+        if (!seen.has(key)) { seen.add(key); result.push({ namespace: ns, state: s }); }
+      }
+    }
+  }
+  return result;
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// StateMachineValidator — backward-compatible class wrapper
+// Delegates to pure functions internally (Strangler Pattern)
+// ═══════════════════════════════════════════════════════════════
+
 export class StateMachineValidator {
-  /** 每个命名空间独立的状态集合 */
-  private namespaceStates: Map<string, Set<string>>;
   private readonly rules: Map<string, StateAnnotation>;
-  private trace: SSGTraceNode[] = [];
+  private readonly nsInitialStates: Map<string, string>;
+
+  /** Internal ledger — the truth source. State is derived from this. */
+  private ledger: StateTransition[] = [];
+
+  /** Cached validation context for O(n) incremental validation */
+  private ctx: ValidationContext;
+
+  /** Pre-computed rule hash for constraint snapshot (P1) */
+  private readonly _ruleHash: string;
 
   constructor(rules: FunctionProtocol[], initialState: string = 'INIT', namespaceInitialStates?: Map<string, string>) {
-    this.namespaceStates = new Map();
-    // 默认命名空间初始化
-    this.namespaceStates.set(DEFAULT_NAMESPACE, new Set<string>([initialState]));
     this.rules = new Map();
     rules.forEach(r => {
       this.rules.set(r.function, r.protocol);
-      // 为每个引用的命名空间预初始化状态
-      const ns = r.protocol.namespace || DEFAULT_NAMESPACE;
-      if (!this.namespaceStates.has(ns)) {
-        this.namespaceStates.set(ns, new Set<string>());
-      }
     });
-    // 一次性设置所有命名空间初始状态，消除顺序依赖
-    if (namespaceInitialStates) {
-      for (const [ns, state] of namespaceInitialStates) {
-        if (ns !== DEFAULT_NAMESPACE && state) {
-          if (!this.namespaceStates.has(ns)) {
-            this.namespaceStates.set(ns, new Set<string>());
-          }
-          this.namespaceStates.get(ns)!.add(state);
-        }
-      }
+
+    this.nsInitialStates = new Map(namespaceInitialStates);
+    if (!this.nsInitialStates.has("_global")) {
+      this.nsInitialStates.set("_global", initialState);
     }
+
+    // Pre-compute rule hash for constraint snapshot determinism
+    this._ruleHash = hashRules(this.rules);
+
+    // Initialize ledger and context from namespace initial states
+    this.ctx = {
+      ledger: [],
+      currentState: rebuildState([], this.nsInitialStates),
+    };
   }
 
-  /** 为指定命名空间设置初始状态（用于协议定义中的 initialState） */
+  /** @deprecated Use validateTransition(ctx, ...) for stateless validation */
   setNamespaceInitialState(namespace: string, state: string): void {
     const ns = namespace || DEFAULT_NAMESPACE;
-    if (!this.namespaceStates.has(ns)) {
-      this.namespaceStates.set(ns, new Set<string>());
-    }
-    this.namespaceStates.get(ns)!.add(state);
+    this.nsInitialStates.set(ns, state);
+    // Rebuild context to reflect new initial state
+    this.ctx = {
+      ledger: this.ledger,
+      currentState: rebuildState(this.ledger, this.nsInitialStates),
+    };
   }
 
+  /**
+   * Validate a function call against current protocol state.
+   * Internally delegates to the pure validateTransition() function.
+   * @deprecated Prefer validateTransition() directly for stateless validation.
+   */
   apply(functionName: string, actionIndex?: number): SSGStepResult {
-    const nsSnapBefore = this.snapshotNamespaceStates();
-    const rule = this.rules.get(functionName);
+    const idx = actionIndex ?? this.ledger.length;
+    const { valid, transition, rejection } = validateTransition(
+      this.ctx, functionName, idx,
+      this.rules, this.nsInitialStates,
+      this._ruleHash
+    );
 
-    if (!rule) {
-      const node: SSGTraceNode = {
-        function: functionName, valid: true,
-        statesBefore: nsSnapBefore, statesAfter: nsSnapBefore,
-        acquired: [], invalidated: [], namespace: DEFAULT_NAMESPACE,
+    // Append to ledger (truth source)
+    this.ledger.push(transition);
+
+    // Update context incrementally (O(1) per step)
+    if (transition.valid) {
+      const stateMap = fromSnapshot(this.ctx.currentState);
+      applyTransitionDelta(stateMap, transition);
+      this.ctx = {
+        ledger: this.ledger,
+        currentState: toSnapshot(stateMap),
       };
-      this.trace.push(node);
-      return {
-        valid: true,
-        statesBefore: nsSnapBefore, statesAfter: nsSnapBefore,
-        acquired: [], invalidated: [], namespace: DEFAULT_NAMESPACE,
-      };
-    }
-
-    const ns = rule.namespace || DEFAULT_NAMESPACE;
-    const nsStates = this.namespaceStates.get(ns) || new Set<string>();
-
-    const hasValidPreState = rule.pre_states.every(s => nsStates.has(s));
-
-    if (!hasValidPreState) {
-      const fixPath = this.findFixPath(ns, [...nsStates], rule.pre_states);
-      const missingFunctions = this.findMissingFunctions(ns, [...nsStates], rule.pre_states);
-
-      const rejection: SSGRejection = {
-        blocked: functionName,
-        currentState: [...nsStates],
-        requiredState: rule.pre_states,
-        missingFunctions,
-        fixPath,
-        namespace: ns,
-      };
-
-      const rejectionSnapAfter = this.snapshotNamespaceStates();
-      const node: SSGTraceNode = {
-        function: functionName, valid: false,
-        statesBefore: nsSnapBefore, statesAfter: rejectionSnapAfter,
-        acquired: [], invalidated: [], namespace: ns, rejection,
-      };
-      this.trace.push(node);
-      return {
-        valid: false,
-        statesBefore: nsSnapBefore, statesAfter: rejectionSnapAfter,
-        acquired: [], invalidated: [], namespace: ns, rejection,
+    } else {
+      this.ctx = {
+        ledger: this.ledger,
+        currentState: this.ctx.currentState,  // unchanged on rejection
       };
     }
 
-    // 计算 acquire/invalidated delta
-    const beforeNs = nsSnapBefore[ns] || [];
-    if (rule.invalidate) {
-      rule.invalidate.forEach(s => nsStates.delete(s));
-    }
-    rule.post_states.forEach(s => nsStates.add(s));
-    this.namespaceStates.set(ns, nsStates);
-
-    const nsSnapAfter = this.snapshotNamespaceStates();
-    const afterNs = nsSnapAfter[ns] || [];
-    const acquired = afterNs.filter(s => !beforeNs.includes(s));
-    const invalidated = beforeNs.filter(s => !afterNs.includes(s));
-
-    const node: SSGTraceNode = {
-      function: functionName, valid: true,
-      statesBefore: nsSnapBefore, statesAfter: nsSnapAfter,
-      acquired, invalidated, namespace: ns,
-    };
-    this.trace.push(node);
     return {
-      valid: true,
-      statesBefore: nsSnapBefore, statesAfter: nsSnapAfter,
-      acquired, invalidated, namespace: ns,
+      valid,
+      statesBefore: transition.statesBefore,
+      statesAfter: transition.statesAfter,
+      acquired: transition.acquired,
+      invalidated: transition.invalidated,
+      namespace: transition.namespace,
+      rejection,
     };
   }
 
-  /** 返回包含 StateTransition 的 apply 结果（供 planner 使用） */
   applyWithTransition(functionName: string, actionIndex: number): { result: SSGStepResult; transition: StateTransition } {
     const result = this.apply(functionName, actionIndex);
-    const ns = result.namespace || DEFAULT_NAMESPACE;
-    const transition: StateTransition = {
-      actionIndex,
-      function: functionName,
-      namespace: ns,
-      acquired: result.acquired || [],
-      invalidated: result.invalidated || [],
-      statesBefore: result.statesBefore,
-      statesAfter: result.statesAfter,
-      valid: result.valid,
-    };
+    const transition = this.ledger[this.ledger.length - 1];
     return { result, transition };
   }
 
   getCurrentStates(): string[] {
-    return [...this.getEffectiveStates()];
-  }
-
-  /** 获取所有命名空间的合并状态视图 */
-  private getEffectiveStates(): Set<string> {
-    const all = new Set<string>();
-    for (const states of this.namespaceStates.values()) {
-      for (const s of states) {
-        all.add(s);
-      }
+    const effective = new Set<string>();
+    for (const states of Object.values(this.ctx.currentState)) {
+      for (const s of states) effective.add(s);
     }
-    return all;
+    return [...effective];
   }
 
-  /** 获取每个命名空间的独立状态快照 */
   snapshotNamespaceStates(): Record<string, string[]> {
-    const snap: Record<string, string[]> = {};
-    for (const [ns, states] of this.namespaceStates) {
-      snap[ns] = [...states].sort();
-    }
-    return snap;
+    return rebuildState(this.ledger, this.nsInitialStates);
   }
 
-  /** 获取指定命名空间的当前状态 */
   getNamespaceStates(namespace: string): string[] {
     const ns = namespace || DEFAULT_NAMESPACE;
-    return [...(this.namespaceStates.get(ns) || new Set<string>())];
+    return [...(this.ctx.currentState[ns] || [])];
   }
 
-  /** 返回完整跟踪记录 */
+  /** Returns trace reconstructed from the ledger (backward-compat) */
   getTrace(): SSGTraceNode[] {
-    return [...this.trace];
+    // Replay the ledger to build trace nodes
+    const trace: SSGTraceNode[] = [];
+    const runningState = fromSnapshot({});
+    for (const [ns, initState] of this.nsInitialStates) {
+      runningState.set(ns, new Set<string>([initState]));
+    }
+    if (!runningState.has("_global")) runningState.set("_global", new Set<string>(["INIT"]));
+
+    for (const t of this.ledger) {
+      const node: SSGTraceNode = {
+        function: t.function,
+        valid: t.valid,
+        statesBefore: t.statesBefore,
+        statesAfter: t.statesAfter,
+        acquired: t.acquired,
+        invalidated: t.invalidated,
+        namespace: t.namespace,
+      };
+      trace.push(node);
+      if (t.valid) {
+        applyTransitionDelta(runningState, t);
+      }
+    }
+    return trace;
   }
 
-  /** 生成人类可读的拦截解释 */
+  /** Returns the internal ledger (Phase 3 API) */
+  getLedger(): StateTransition[] {
+    return [...this.ledger];
+  }
+
+  /** Returns the current ValidationContext (Phase 3 API) */
+  getContext(): ValidationContext {
+    return { ...this.ctx, ledger: [...this.ctx.ledger] };
+  }
+
+  /** Returns the pre-computed rule hash (Phase 3 API) */
+  getRuleHash(): string {
+    return this._ruleHash;
+  }
+
+  // ── Static utilities (delegate to standalone functions) ──
+
   static explainRejection(rejection: SSGRejection): string {
-    const nsLabel = rejection.namespace && rejection.namespace !== DEFAULT_NAMESPACE
-      ? ` [namespace: ${rejection.namespace}]` : '';
-    const lines = [
-      `🚫 SSG 协议拦截: ${rejection.blocked}${nsLabel}`,
-      ``,
-      `  当前状态: ${rejection.currentState.join(', ') || '(无)'}`,
-      `  所需状态: ${rejection.requiredState.join(', ')}`,
-      ``,
-    ];
-    if (rejection.missingFunctions.length > 0) {
-      lines.push(`  缺失步骤: ${rejection.missingFunctions.join(' → ')}`);
-    }
-    if (rejection.fixPath.length > 0) {
-      lines.push(`  修复路径: ${rejection.fixPath.join(' → ')}`);
-    }
-    return lines.join('\n');
+    return explainRejection(rejection);
   }
 
-  /** 生成结构化 JSON 格式的错误报告 */
   static rejectionToJSON(rejection: SSGRejection): object {
-    return {
-      protocol_violation: {
-        blocked_function: rejection.blocked,
-        namespace: rejection.namespace,
-        current_state: rejection.currentState,
-        required_pre_states: rejection.requiredState,
-      },
-      diagnosis: {
-        missing_functions: rejection.missingFunctions,
-        fix_path: rejection.fixPath,
-      },
-    };
-  }
-
-  /** 在指定命名空间中查找缺失函数（复用 BFS 修复路径） */
-  private findMissingFunctions(namespace: string, current: string[], targetPreStates: string[]): string[] {
-    // 复用 BFS fixPath，缺失函数 = 修复路径中尚未被调用的函数
-    return this.findFixPath(namespace, current, targetPreStates);
-  }
-
-  /** 在指定命名空间中查找修复路径（BFS 状态图搜索，支持多跳缺口） */
-  private findFixPath(namespace: string, current: string[], targetPreStates: string[]): string[] {
-    // 构建命名空间内的函数列表
-    const nsFuncs: { name: string; rule: StateAnnotation }[] = [];
-    for (const [fn, rule] of this.rules) {
-      if ((rule.namespace || DEFAULT_NAMESPACE) === namespace) {
-        nsFuncs.push({ name: fn, rule });
-      }
-    }
-
-    // BFS 状态图搜索
-    const startKey = [...new Set(current)].sort().join(",");
-    const visited = new Set<string>();
-    const queue: { states: Set<string>; path: string[] }[] = [
-      { states: new Set(current), path: [] }
-    ];
-    visited.add(startKey);
-
-    while (queue.length > 0) {
-      const { states, path } = queue.shift()!;
-
-      // 检查目标：所有 targetPreStates 是否都满足
-      if (targetPreStates.every(s => states.has(s))) {
-        return path;
-      }
-
-      // 尝试每一步可用的函数
-      for (const { name, rule } of nsFuncs) {
-        // 检查前置条件是否满足
-        if (!rule.pre_states.every(p => states.has(p))) continue;
-
-        // 模拟执行
-        const nextStates = new Set(states);
-        if (rule.invalidate) rule.invalidate.forEach(s => nextStates.delete(s));
-        rule.post_states.forEach(s => nextStates.add(s));
-
-        const nextKey = [...nextStates].sort().join(",");
-        if (visited.has(nextKey)) continue;
-        visited.add(nextKey);
-
-        // 防止无限扩展（状态爆炸保护）
-        if (visited.size > 1000) break;
-
-        queue.push({ states: nextStates, path: [...path, name] });
-      }
-    }
-
-    // BFS 未找到完整路径，回退到单跳直接查找
-    const path: string[] = [];
-    const currentSet = new Set(current);
-    for (const target of targetPreStates) {
-      if (currentSet.has(target)) continue;
-      for (const { name, rule } of nsFuncs) {
-        if (rule.post_states.includes(target)) {
-          path.push(name);
-          if (rule.invalidate) rule.invalidate.forEach(s => currentSet.delete(s));
-          rule.post_states.forEach(s => currentSet.add(s));
-          break;
-        }
-      }
-    }
-    return path;
+    return rejectionToJSON(rejection);
   }
 }
 
-/** 从 protocols.json 结构构建 FunctionProtocol 数组 */
+// ═══════════════════════════════════════════════════════════════
+// Standalone presentation utilities (formerly static methods)
+// ═══════════════════════════════════════════════════════════════
+
+/** Format an SSG rejection as a human-readable multi-line string. */
+export function explainRejection(rejection: SSGRejection): string {
+  const nsLabel = rejection.namespace && rejection.namespace !== DEFAULT_NAMESPACE
+    ? ` [namespace: ${rejection.namespace}]` : '';
+  const lines = [
+    `🚫 SSG 协议拦截: ${rejection.blocked}${nsLabel}`,
+    ``,
+    `  当前状态: ${rejection.currentState.join(', ') || '(无)'}`,
+    `  所需状态: ${rejection.requiredState.join(', ')}`,
+    ``,
+  ];
+  if (rejection.missingFunctions.length > 0) {
+    lines.push(`  缺失步骤: ${rejection.missingFunctions.join(' → ')}`);
+  }
+  if (rejection.fixPath.length > 0) {
+    lines.push(`  修复路径: ${rejection.fixPath.join(' → ')}`);
+  }
+  return lines.join('\n');
+}
+
+/** Format an SSG rejection as a structured JSON object. */
+export function rejectionToJSON(rejection: SSGRejection): object {
+  return {
+    protocol_violation: {
+      blocked_function: rejection.blocked,
+      namespace: rejection.namespace,
+      current_state: rejection.currentState,
+      required_pre_states: rejection.requiredState,
+    },
+    diagnosis: {
+      missing_functions: rejection.missingFunctions,
+      fix_path: rejection.fixPath,
+    },
+  };
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// parseProtocolsFromJSON (unchanged)
+// ═══════════════════════════════════════════════════════════════
+
 export function parseProtocolsFromJSON(
   protocolDef: {
     rules: Record<string, {

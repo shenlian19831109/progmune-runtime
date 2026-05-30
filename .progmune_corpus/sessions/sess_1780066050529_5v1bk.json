@@ -1,0 +1,159 @@
+{
+  "sessionId": "sess_1780066050529_5v1bk",
+  "intent": "extract IR then validate and emit code",
+  "attempts": [
+    {
+      "id": "att_1780066052295_dn2lk",
+      "sessionId": "sess_1780066050529_5v1bk",
+      "attemptNumber": 1,
+      "inputIntent": "extract IR then validate and emit code",
+      "plannerSeed": "3d16be05",
+      "constraintSnapshotId": "snap_1780066050532_82709ff22603",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "extractIR",
+          "args": [
+            {
+              "name": "projectRoot",
+              "type": "string",
+              "value": "."
+            }
+          ],
+          "assignTo": "ir"
+        },
+        {
+          "kind": "call",
+          "function": "validateActionSequence",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": "ir"
+            }
+          ],
+          "assignTo": "ok"
+        },
+        {
+          "kind": "call",
+          "function": "emitCode",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": "ir"
+            }
+          ],
+          "assignTo": "code"
+        },
+        {
+          "kind": "return",
+          "value": "code"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "extractIR",
+          "namespace": "dev_pipeline",
+          "acquired": [
+            "IR_EXTRACTED"
+          ],
+          "invalidated": [
+            "IR_STALE"
+          ],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "file": [],
+            "db": [],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "file": [],
+            "db": [],
+            "dev_pipeline": [
+              "IR_EXTRACTED"
+            ]
+          },
+          "valid": true
+        },
+        {
+          "actionIndex": 1,
+          "function": "validateActionSequence",
+          "namespace": "dev_pipeline",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "file": [],
+            "db": [],
+            "dev_pipeline": [
+              "IR_EXTRACTED"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "file": [],
+            "db": [],
+            "dev_pipeline": [
+              "IR_EXTRACTED"
+            ]
+          },
+          "valid": false
+        }
+      ],
+      "violations": [
+        {
+          "svl": 4,
+          "violatedConstraint": "protocol",
+          "actionIndex": 1,
+          "currentStates": [
+            "IR_EXTRACTED"
+          ],
+          "requiredStates": [
+            "ACTION_VALIDATED"
+          ],
+          "missingStates": [
+            "validateAction"
+          ],
+          "fixPath": [
+            "validateAction"
+          ],
+          "namespace": "dev_pipeline",
+          "description": "{\"protocol_violation\":{\"blocked_function\":\"validateActionSequence\",\"namespace\":\"dev_pipeline\",\"current_state\":[\"IR_EXTRACTED\"],\"required_pre_states\":[\"ACTION_VALIDATED\"]},\"diagnosis\":{\"missing_functions\":[\"validateAction\"],\"fix_path\":[\"validateAction\"]}}"
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780066052295,
+      "llmCallCount": 0,
+      "durationMs": 0
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780066050529,
+  "snapshotId": "snap_1780066050532_82709ff22603",
+  "endedAt": 1780066052311
+}

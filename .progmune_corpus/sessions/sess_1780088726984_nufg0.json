@@ -1,0 +1,152 @@
+{
+  "sessionId": "sess_1780088726984_nufg0",
+  "intent": "提取 IR 并验证项目中的函数",
+  "attempts": [
+    {
+      "id": "att_1780088728944_qwr7t",
+      "sessionId": "sess_1780088726984_nufg0",
+      "attemptNumber": 1,
+      "inputIntent": "提取 IR 并验证项目中的函数",
+      "plannerSeed": "9558aab5",
+      "constraintSnapshotId": "snap_1780088726987_423fb71a5c25",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "extractIR",
+          "args": [
+            {
+              "name": "projectRoot",
+              "type": "string",
+              "value": "."
+            }
+          ],
+          "assignTo": "ir"
+        },
+        {
+          "kind": "return",
+          "value": "ir"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "extractIR",
+          "namespace": "dev_pipeline",
+          "acquired": [
+            "IR_EXTRACTED"
+          ],
+          "invalidated": [
+            "IR_STALE"
+          ],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "file": [],
+            "db": [],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "file": [],
+            "db": [],
+            "dev_pipeline": [
+              "IR_EXTRACTED"
+            ]
+          },
+          "valid": true
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780088728944,
+      "llmCallCount": 1,
+      "durationMs": 0
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780088726984,
+  "successfulAttempt": {
+    "id": "att_1780088728944_qwr7t",
+    "sessionId": "sess_1780088726984_nufg0",
+    "attemptNumber": 1,
+    "inputIntent": "提取 IR 并验证项目中的函数",
+    "plannerSeed": "9558aab5",
+    "constraintSnapshotId": "snap_1780088726987_423fb71a5c25",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "."
+          }
+        ],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "return",
+        "value": "ir"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "extractIR",
+        "namespace": "dev_pipeline",
+        "acquired": [
+          "IR_EXTRACTED"
+        ],
+        "invalidated": [
+          "IR_STALE"
+        ],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "file": [],
+          "db": [],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "file": [],
+          "db": [],
+          "dev_pipeline": [
+            "IR_EXTRACTED"
+          ]
+        },
+        "valid": true
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780088728944,
+    "llmCallCount": 1,
+    "durationMs": 0
+  },
+  "snapshotId": "snap_1780088726987_423fb71a5c25",
+  "endedAt": 1780088728952
+}

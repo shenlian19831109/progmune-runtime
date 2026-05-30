@@ -5,8 +5,10 @@ import * as crypto from "crypto";
 
 // ── 从权威来源重新导出 ──
 
-export type { StateAnnotation, FunctionProtocol, SSGRejection, SSGStepResult, SSGTraceNode } from "./ssg-validator";
+export type { StateAnnotation, FunctionProtocol, SSGRejection, SSGStepResult, SSGTraceNode, ValidationContext, LedgerConsistencyViolation, LedgerQueryResult, LedgerDiff } from "./ssg-validator";
 export { StateMachineValidator, parseProtocolsFromJSON } from "./ssg-validator";
+// Phase 3: Semantic Ledger pure functions (re-exported from ssg-validator)
+export { rebuildState, applyTransitionDelta, validateTransition, checkLedgerConsistency, findFixPathStatic, hashRules, hashLedger, diffLedgers, explainRejection, rejectionToJSON, findProducer, findConsumer, findViolations, findTransition, listAllStates } from "./ssg-validator";
 export type { SVL } from "./failure-corpus";
 
 // ── Action DSL ──
@@ -46,6 +48,8 @@ export interface StateTransition {
   statesBefore: Record<string, string[]>;  // per-namespace snapshot before
   statesAfter: Record<string, string[]>;   // per-namespace snapshot after
   valid: boolean;
+  /** SHA256 hash of the rule set used when this transition was created (P1: Constraint Snapshot) */
+  ruleHash?: string;
 }
 
 // ── Attempt ──
@@ -76,6 +80,8 @@ export interface Attempt {
   llmCallCount: number;
   durationMs: number;
   antibodyHit?: AntibodyHit;
+  /** SHA256 hash of the SSG rule set in effect during this attempt (P1-A: Constraint Snapshot) */
+  ruleHash?: string;
 }
 
 // ── Execution Session ──
@@ -89,6 +95,8 @@ export interface ExecutionSession {
   snapshotId?: string;
   startedAt: number;
   endedAt?: number;
+  /** SHA256 hash of the SSG rule set in effect during this session (P1-A: Constraint Snapshot) */
+  ruleHash?: string;
 }
 
 // ── ID生成工具 ──

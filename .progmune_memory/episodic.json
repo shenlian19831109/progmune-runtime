@@ -1,327 +1,1288 @@
 [
   {
-    "intent": "直接生成一个JWT令牌",
-    "actions": [],
-    "success": false,
-    "id": "ep_1779133496497",
-    "timestamp": "2026-05-18T19:44:56.497Z"
-  },
-  {
-    "intent": "直接生成一个JWT令牌",
+    "intent": "提取 IR 并验证项目中的函数",
     "actions": [
       {
-        "kind": "assign",
-        "target": "user_payload",
-        "value": "{\"username\": \"test\", \"role\": \"user\"}"
-      },
-      {
         "kind": "call",
-        "function": "generate_jwt",
+        "function": "extractIR",
         "args": [
           {
-            "name": "payload",
-            "type": "UserPayload",
-            "value": "user_payload"
+            "name": "projectRoot",
+            "type": "string",
+            "value": "."
           }
         ],
-        "assignTo": "token"
+        "assignTo": "ir"
       },
       {
         "kind": "return",
-        "value": "token"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-4",
-    "id": "ep_1779133496496",
-    "timestamp": "2026-05-18T19:44:56.496Z"
-  },
-  {
-    "intent": "直接生成一个JWT令牌",
-    "actions": [
-      {
-        "kind": "assign",
-        "target": "user_payload",
-        "value": "{\"username\": \"test_user\", \"role\": \"user\"}"
-      },
-      {
-        "kind": "call",
-        "function": "generate_jwt",
-        "args": [
-          {
-            "name": "payload",
-            "type": "UserPayload",
-            "value": "user_payload"
-          }
-        ],
-        "assignTo": "token"
-      },
-      {
-        "kind": "return",
-        "value": "token"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-4",
-    "id": "ep_1779133495467",
-    "timestamp": "2026-05-18T19:44:55.467Z"
-  },
-  {
-    "intent": "直接生成一个JWT令牌",
-    "actions": [
-      {
-        "kind": "assign",
-        "target": "user_payload",
-        "value": {
-          "user_id": 1,
-          "username": "test"
-        }
-      },
-      {
-        "kind": "call",
-        "function": "generate_jwt",
-        "args": [
-          {
-            "name": "payload",
-            "type": "UserPayload",
-            "value": "user_payload"
-          }
-        ],
-        "assignTo": "token"
-      },
-      {
-        "kind": "return",
-        "value": "token"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-4",
-    "id": "ep_1779133494462",
-    "timestamp": "2026-05-18T19:44:54.462Z"
-  },
-  {
-    "intent": "直接生成一个JWT令牌",
-    "actions": [],
-    "success": false,
-    "id": "ep_1779133471595",
-    "timestamp": "2026-05-18T19:44:31.595Z"
-  },
-  {
-    "intent": "生成一个JWT令牌",
-    "actions": [],
-    "success": false,
-    "id": "ep_1778777101293",
-    "timestamp": "2026-05-14T16:45:01.293Z"
-  },
-  {
-    "intent": "生成一个JWT令牌",
-    "actions": [
-      {
-        "kind": "assign",
-        "target": "user_payload",
-        "value": "{\"user_id\": 123, \"role\": \"user\"}"
-      },
-      {
-        "kind": "call",
-        "function": "generate_jwt",
-        "args": [
-          {
-            "name": "payload",
-            "type": "UserPayload",
-            "value": "user_payload"
-          }
-        ],
-        "assignTo": "token"
-      },
-      {
-        "kind": "return",
-        "value": "token"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-4",
-    "id": "ep_1778777101292",
-    "timestamp": "2026-05-14T16:45:01.292Z"
-  },
-  {
-    "intent": "生成一个JWT令牌",
-    "actions": [
-      {
-        "kind": "assign",
-        "target": "user_payload",
-        "value": "{\"username\": \"test\", \"role\": \"user\"}"
-      },
-      {
-        "kind": "call",
-        "function": "generate_jwt",
-        "args": [
-          {
-            "name": "payload",
-            "type": "UserPayload",
-            "value": "user_payload"
-          }
-        ],
-        "assignTo": "token"
-      },
-      {
-        "kind": "return",
-        "value": "token"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-4",
-    "id": "ep_1778777100168",
-    "timestamp": "2026-05-14T16:45:00.168Z"
-  },
-  {
-    "intent": "生成一个JWT令牌",
-    "actions": [
-      {
-        "kind": "assign",
-        "target": "payload",
-        "value": "user:123"
-      },
-      {
-        "kind": "call",
-        "function": "generate_jwt",
-        "args": [
-          {
-            "name": "payload",
-            "type": "UserPayload",
-            "value": "payload"
-          }
-        ],
-        "assignTo": "token"
-      },
-      {
-        "kind": "return",
-        "value": "token"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-4",
-    "id": "ep_1778777098742",
-    "timestamp": "2026-05-14T16:44:58.742Z"
-  },
-  {
-    "intent": "生成一个JWT令牌",
-    "actions": [
-      {
-        "kind": "assign",
-        "target": "payload",
-        "value": "user:123"
-      },
-      {
-        "kind": "call",
-        "function": "generate_jwt",
-        "args": [
-          {
-            "name": "payload",
-            "type": "UserPayload",
-            "value": "payload"
-          }
-        ],
-        "assignTo": "token"
-      },
-      {
-        "kind": "return",
-        "value": "token"
+        "value": "ir"
       }
     ],
     "success": true,
-    "id": "ep_1778775611414",
-    "timestamp": "2026-05-14T16:20:11.414Z"
+    "id": "ep_1780088728947",
+    "timestamp": "2026-05-29T21:05:28.947Z"
   },
   {
-    "intent": "生成一个JWT令牌",
+    "intent": "extract IR and validate actions",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "."
+          }
+        ],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "validateAction",
+        "args": [
+          {
+            "name": "action",
+            "type": "Action",
+            "value": null
+          }
+        ],
+        "assignTo": "validateAction_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateActionSequence",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "ir"
+          }
+        ],
+        "assignTo": "ok"
+      },
+      {
+        "kind": "return",
+        "value": "ok"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780066053402",
+    "timestamp": "2026-05-29T14:47:33.402Z"
+  },
+  {
+    "intent": "extract IR and validate actions",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "."
+          }
+        ],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "validateActionSequence",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "ir"
+          }
+        ],
+        "assignTo": "ok"
+      },
+      {
+        "kind": "return",
+        "value": "ok"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-4",
+    "id": "ep_1780066053398",
+    "timestamp": "2026-05-29T14:47:33.398Z"
+  },
+  {
+    "intent": "extract IR then validate and emit code",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "."
+          }
+        ],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "validateAction",
+        "args": [
+          {
+            "name": "action",
+            "type": "Action",
+            "value": null
+          }
+        ],
+        "assignTo": "validateAction_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateActionSequence",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "ir"
+          }
+        ],
+        "assignTo": "ok"
+      },
+      {
+        "kind": "call",
+        "function": "emitCode",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "ir"
+          }
+        ],
+        "assignTo": "code"
+      },
+      {
+        "kind": "return",
+        "value": "code"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780066052310",
+    "timestamp": "2026-05-29T14:47:32.310Z"
+  },
+  {
+    "intent": "extract IR then validate and emit code",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "."
+          }
+        ],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "validateActionSequence",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "ir"
+          }
+        ],
+        "assignTo": "ok"
+      },
+      {
+        "kind": "call",
+        "function": "emitCode",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "ir"
+          }
+        ],
+        "assignTo": "code"
+      },
+      {
+        "kind": "return",
+        "value": "code"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-4",
+    "id": "ep_1780066052302",
+    "timestamp": "2026-05-29T14:47:32.302Z"
+  },
+  {
+    "intent": "extract IR then validate",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "."
+          }
+        ],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "validateAction",
+        "args": [
+          {
+            "name": "action",
+            "type": "Action",
+            "value": null
+          }
+        ],
+        "assignTo": "validateAction_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateActionSequence",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "ir"
+          }
+        ],
+        "assignTo": "ok"
+      },
+      {
+        "kind": "return",
+        "value": "ok"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780065391329",
+    "timestamp": "2026-05-29T14:36:31.329Z"
+  },
+  {
+    "intent": "extract IR then validate",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "."
+          }
+        ],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "validateActionSequence",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "ir"
+          }
+        ],
+        "assignTo": "ok"
+      },
+      {
+        "kind": "return",
+        "value": "ok"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-4",
+    "id": "ep_1780065391325",
+    "timestamp": "2026-05-29T14:36:31.325Z"
+  },
+  {
+    "intent": "extract IR then validate and emit code",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIRPython",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "{{projectRoot}}"
+          }
+        ],
+        "assignTo": "extractIRPython_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractDirectCalls",
+        "args": [
+          {
+            "name": "func",
+            "type": "FunctionDeclaration | ArrowFunction",
+            "value": "{{func}}"
+          }
+        ],
+        "assignTo": "extractDirectCalls_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "{{projectRoot}}"
+          }
+        ],
+        "assignTo": "extractIR_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractFingerprints",
+        "args": [
+          {
+            "name": "cursor",
+            "type": "{ lastTimestamp: string | null }",
+            "value": "{{cursor}}"
+          }
+        ],
+        "assignTo": "extractFingerprints_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractKeywords",
+        "args": [
+          {
+            "name": "intent",
+            "type": "string",
+            "value": "{{intent}}"
+          }
+        ],
+        "assignTo": "extractKeywords_result"
+      },
+      {
+        "kind": "call",
+        "function": "ensureDir",
+        "args": [
+          {
+            "name": "dir",
+            "type": "string",
+            "value": "{{dir}}"
+          }
+        ],
+        "assignTo": "ensureDir_result"
+      },
+      {
+        "kind": "call",
+        "function": "ensureLockDir",
+        "args": [],
+        "assignTo": "ensureLockDir_result"
+      },
+      {
+        "kind": "call",
+        "function": "loadProtocolsFromIR",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "loadProtocolsFromIR_result"
+      },
+      {
+        "kind": "call",
+        "function": "attemptSSGRepair",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "{{actions}}"
+          },
+          {
+            "name": "rejection",
+            "type": "SSGRejection",
+            "value": "{{rejection}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "{{protocols}}"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "{{namespaceInitialStates}}"
+          }
+        ],
+        "assignTo": "attemptSSGRepair_result"
+      },
+      {
+        "kind": "call",
+        "function": "loadIR",
+        "args": [],
+        "assignTo": "loadIR_result"
+      },
+      {
+        "kind": "call",
+        "function": "mkdirSync",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "{{path}}"
+          },
+          {
+            "name": "options",
+            "type": "object",
+            "value": "{{options}}"
+          }
+        ]
+      },
+      {
+        "kind": "call",
+        "function": "readdirSync",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "{{path}}"
+          }
+        ],
+        "assignTo": "readdirSync_result"
+      },
+      {
+        "kind": "call",
+        "function": "rmdirSync",
+        "args": [],
+        "assignTo": "rmdirSync_result"
+      },
+      {
+        "kind": "call",
+        "function": "require",
+        "args": [],
+        "assignTo": "require_result"
+      },
+      {
+        "kind": "call",
+        "function": "dirname",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "{{path}}"
+          }
+        ],
+        "assignTo": "dirname_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateProtocolWithTransitions",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "{{actions}}"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "{{protocols}}"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "{{namespaceInitialStates}}"
+          }
+        ],
+        "assignTo": "validateProtocolWithTransitions_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateAction",
+        "args": [
+          {
+            "name": "action",
+            "type": "Action",
+            "value": "{{action}}"
+          }
+        ],
+        "assignTo": "validateAction_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateActionSequence",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "{{actions}}"
+          }
+        ],
+        "assignTo": "validateActionSequence_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateCandidateRules",
+        "args": [],
+        "assignTo": "generateCandidateRules_result"
+      },
+      {
+        "kind": "call",
+        "function": "runAndCheck",
+        "args": [
+          {
+            "name": "code",
+            "type": "string",
+            "value": "{{code}}"
+          }
+        ],
+        "assignTo": "runAndCheck_result"
+      },
+      {
+        "kind": "call",
+        "function": "random",
+        "args": [],
+        "assignTo": "random_result"
+      },
+      {
+        "kind": "call",
+        "function": "emitCode",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "{{actions}}"
+          }
+        ],
+        "assignTo": "emitCode_result"
+      },
+      {
+        "kind": "call",
+        "function": "emitPython",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "{{actions}}"
+          }
+        ],
+        "assignTo": "emitPython_result"
+      },
+      {
+        "kind": "call",
+        "function": "executeActionCode",
+        "args": [
+          {
+            "name": "code",
+            "type": "string",
+            "value": "{{code}}"
+          }
+        ],
+        "assignTo": "executeActionCode_result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780064797670",
+    "timestamp": "2026-05-29T14:26:37.670Z"
+  },
+  {
+    "intent": "extract IR then validate",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "irResult",
+        "value": ""
+      },
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "/path"
+          }
+        ],
+        "assignTo": "irResult"
+      },
+      {
+        "kind": "assign",
+        "target": "validationResult",
+        "value": ""
+      },
+      {
+        "kind": "call",
+        "function": "validateAction",
+        "args": [
+          {
+            "name": "action",
+            "type": "Action",
+            "value": null
+          }
+        ],
+        "assignTo": "validateAction_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateActionSequence",
+        "args": [
+          {
+            "name": "p0",
+            "type": "any",
+            "value": null
+          }
+        ],
+        "assignTo": "validationResult"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780064665638",
+    "timestamp": "2026-05-29T14:24:25.638Z"
+  },
+  {
+    "intent": "extract IR then validate",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "irResult",
+        "value": ""
+      },
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "/path"
+          }
+        ],
+        "assignTo": "irResult"
+      },
+      {
+        "kind": "assign",
+        "target": "validationResult",
+        "value": ""
+      },
+      {
+        "kind": "call",
+        "function": "validateActionSequence",
+        "args": [
+          {
+            "name": "p0",
+            "type": "any",
+            "value": null
+          }
+        ],
+        "assignTo": "validationResult"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-4",
+    "id": "ep_1780064665629",
+    "timestamp": "2026-05-29T14:24:25.629Z"
+  },
+  {
+    "intent": "extract IR then validate action",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "ir",
+        "value": ""
+      },
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "/path"
+          }
+        ],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "assign",
+        "target": "validationResult",
+        "value": ""
+      },
+      {
+        "kind": "call",
+        "function": "validateAction",
+        "args": [
+          {
+            "name": "p0",
+            "type": "any",
+            "value": null
+          }
+        ],
+        "assignTo": "validationResult"
+      },
+      {
+        "kind": "return",
+        "value": "validationResult"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780064611826",
+    "timestamp": "2026-05-29T14:23:31.826Z"
+  },
+  {
+    "intent": "extract IR then validate",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIRPython",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "{{projectRoot}}"
+          }
+        ],
+        "assignTo": "extractIRPython_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractDirectCalls",
+        "args": [
+          {
+            "name": "func",
+            "type": "FunctionDeclaration | ArrowFunction",
+            "value": "{{func}}"
+          }
+        ],
+        "assignTo": "extractDirectCalls_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "{{projectRoot}}"
+          }
+        ],
+        "assignTo": "extractIR_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractFingerprints",
+        "args": [
+          {
+            "name": "cursor",
+            "type": "{ lastTimestamp: string | null }",
+            "value": "{{cursor}}"
+          }
+        ],
+        "assignTo": "extractFingerprints_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractKeywords",
+        "args": [
+          {
+            "name": "intent",
+            "type": "string",
+            "value": "{{intent}}"
+          }
+        ],
+        "assignTo": "extractKeywords_result"
+      },
+      {
+        "kind": "call",
+        "function": "ensureDir",
+        "args": [
+          {
+            "name": "dir",
+            "type": "string",
+            "value": "{{dir}}"
+          }
+        ],
+        "assignTo": "ensureDir_result"
+      },
+      {
+        "kind": "call",
+        "function": "ensureLockDir",
+        "args": [],
+        "assignTo": "ensureLockDir_result"
+      },
+      {
+        "kind": "call",
+        "function": "loadProtocolsFromIR",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "loadProtocolsFromIR_result"
+      },
+      {
+        "kind": "call",
+        "function": "attemptSSGRepair",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "{{actions}}"
+          },
+          {
+            "name": "rejection",
+            "type": "SSGRejection",
+            "value": "{{rejection}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "{{protocols}}"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "{{namespaceInitialStates}}"
+          }
+        ],
+        "assignTo": "attemptSSGRepair_result"
+      },
+      {
+        "kind": "call",
+        "function": "loadIR",
+        "args": [],
+        "assignTo": "loadIR_result"
+      },
+      {
+        "kind": "call",
+        "function": "mkdirSync",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "{{path}}"
+          },
+          {
+            "name": "options",
+            "type": "object",
+            "value": "{{options}}"
+          }
+        ]
+      },
+      {
+        "kind": "call",
+        "function": "readdirSync",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "{{path}}"
+          }
+        ],
+        "assignTo": "readdirSync_result"
+      },
+      {
+        "kind": "call",
+        "function": "rmdirSync",
+        "args": [],
+        "assignTo": "rmdirSync_result"
+      },
+      {
+        "kind": "call",
+        "function": "require",
+        "args": [],
+        "assignTo": "require_result"
+      },
+      {
+        "kind": "call",
+        "function": "dirname",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "{{path}}"
+          }
+        ],
+        "assignTo": "dirname_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateProtocolWithTransitions",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "{{actions}}"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "{{protocols}}"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "{{namespaceInitialStates}}"
+          }
+        ],
+        "assignTo": "validateProtocolWithTransitions_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateAction",
+        "args": [
+          {
+            "name": "action",
+            "type": "Action",
+            "value": "{{action}}"
+          }
+        ],
+        "assignTo": "validateAction_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateActionSequence",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "{{actions}}"
+          }
+        ],
+        "assignTo": "validateActionSequence_result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780064425834",
+    "timestamp": "2026-05-29T14:20:25.834Z"
+  },
+  {
+    "intent": "extract IR then validate",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "loadIR",
+        "args": [
+          {
+            "name": "p0",
+            "type": "any",
+            "value": []
+          }
+        ]
+      },
+      {
+        "kind": "assign",
+        "target": "ir_data",
+        "value": "loadIR_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateActionSequence",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": [
+              "ir_data"
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "assign",
+        "target": "validation_result",
+        "value": "validateActionSequence_result"
+      },
+      {
+        "kind": "return",
+        "value": "validation_result"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-2",
+    "id": "ep_1780064420680",
+    "timestamp": "2026-05-29T14:20:20.680Z"
+  },
+  {
+    "intent": "extract IR then validate",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "project_root",
+        "value": "/path/to/project"
+      },
+      {
+        "kind": "call",
+        "function": "ir_data",
+        "args": [
+          "project_root"
+        ],
+        "assignTo": "extractIR"
+      },
+      {
+        "kind": "call",
+        "function": "validation_result",
+        "args": [
+          "ir_data"
+        ],
+        "assignTo": "validateActionSequence"
+      },
+      {
+        "kind": "return",
+        "value": "validation_result"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780064417147",
+    "timestamp": "2026-05-29T14:20:17.147Z"
+  },
+  {
+    "intent": "实现一个函数，先提取 IR，然后校验动作，最后生成代码并保存会话",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIRPython",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "{{projectRoot}}"
+          }
+        ],
+        "assignTo": "extractIRPython_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractDirectCalls",
+        "args": [
+          {
+            "name": "func",
+            "type": "FunctionDeclaration | ArrowFunction",
+            "value": "{{func}}"
+          }
+        ],
+        "assignTo": "extractDirectCalls_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "{{projectRoot}}"
+          }
+        ],
+        "assignTo": "extractIR_result"
+      },
+      {
+        "kind": "call",
+        "function": "ensureDir",
+        "args": [
+          {
+            "name": "dir",
+            "type": "string",
+            "value": "{{dir}}"
+          }
+        ],
+        "assignTo": "ensureDir_result"
+      },
+      {
+        "kind": "call",
+        "function": "ensureLockDir",
+        "args": [],
+        "assignTo": "ensureLockDir_result"
+      },
+      {
+        "kind": "call",
+        "function": "loadProtocolsFromIR",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "loadProtocolsFromIR_result"
+      },
+      {
+        "kind": "call",
+        "function": "attemptSSGRepair",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "{{actions}}"
+          },
+          {
+            "name": "rejection",
+            "type": "SSGRejection",
+            "value": "{{rejection}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "{{protocols}}"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "{{namespaceInitialStates}}"
+          }
+        ],
+        "assignTo": "attemptSSGRepair_result"
+      },
+      {
+        "kind": "call",
+        "function": "loadIR",
+        "args": [],
+        "assignTo": "loadIR_result"
+      },
+      {
+        "kind": "call",
+        "function": "mkdirSync",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "{{path}}"
+          },
+          {
+            "name": "options",
+            "type": "object",
+            "value": "{{options}}"
+          }
+        ]
+      },
+      {
+        "kind": "call",
+        "function": "readdirSync",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "{{path}}"
+          }
+        ],
+        "assignTo": "readdirSync_result"
+      },
+      {
+        "kind": "call",
+        "function": "rmdirSync",
+        "args": [],
+        "assignTo": "rmdirSync_result"
+      },
+      {
+        "kind": "call",
+        "function": "require",
+        "args": [],
+        "assignTo": "require_result"
+      },
+      {
+        "kind": "call",
+        "function": "dirname",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "{{path}}"
+          }
+        ],
+        "assignTo": "dirname_result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780064037497",
+    "timestamp": "2026-05-29T14:13:57.497Z"
+  },
+  {
+    "intent": "实现一个函数来提取 IR、校验动作、然后生成代码",
     "actions": [],
     "success": false,
-    "id": "ep_1778775591074",
-    "timestamp": "2026-05-14T16:19:51.074Z"
+    "id": "ep_1780063203480",
+    "timestamp": "2026-05-29T14:00:03.480Z"
   },
   {
-    "intent": "生成一个JWT令牌",
+    "intent": "test memory",
+    "actions": [],
+    "success": true,
+    "id": "ep_1780063182208",
+    "timestamp": "2026-05-29T13:59:42.208Z"
+  },
+  {
+    "intent": "implement login",
+    "actions": [],
+    "success": false,
+    "id": "ep_1780059576575",
+    "timestamp": "2026-05-29T12:59:36.575Z"
+  },
+  {
+    "intent": "test memory",
+    "actions": [],
+    "success": true,
+    "id": "ep_1779987805720",
+    "timestamp": "2026-05-28T17:03:25.720Z"
+  },
+  {
+    "intent": "读取 ir.json 文件并返回函数数量",
+    "actions": [],
+    "success": false,
+    "id": "ep_1779984028938",
+    "timestamp": "2026-05-28T16:00:28.938Z"
+  },
+  {
+    "intent": "test memory",
+    "actions": [],
+    "success": true,
+    "id": "ep_1779962540677",
+    "timestamp": "2026-05-28T10:02:20.677Z"
+  },
+  {
+    "intent": "ttl test fresh",
     "actions": [
       {
         "kind": "assign",
-        "target": "payload",
-        "value": "user:123"
-      },
-      {
-        "kind": "call",
-        "function": "generate_jwt",
-        "args": [
-          {
-            "name": "payload",
-            "type": "UserPayload",
-            "value": "payload"
-          }
-        ],
-        "assignTo": "token"
-      },
-      {
-        "kind": "return",
-        "value": "token"
+        "target": "x",
+        "value": "1"
       }
     ],
     "success": true,
-    "id": "ep_1778775315729",
-    "timestamp": "2026-05-14T16:15:15.729Z"
+    "id": "ep_1779828802111",
+    "timestamp": "2026-05-26T20:53:22.111Z"
   },
   {
-    "intent": "生成一个JWT令牌",
-    "actions": [
-      {
-        "kind": "assign",
-        "target": "payload",
-        "value": "user:123"
-      },
-      {
-        "kind": "call",
-        "function": "generate_jwt",
-        "args": [
-          {
-            "name": "payload",
-            "type": "UserPayload",
-            "value": "payload"
-          }
-        ],
-        "assignTo": "token"
-      },
-      {
-        "kind": "return",
-        "value": "token"
-      }
-    ],
-    "success": true,
-    "id": "ep_1778775173516",
-    "timestamp": "2026-05-14T16:12:53.516Z"
+    "intent": "实现 login 函数，验证密码后生成JWT并返回",
+    "actions": [],
+    "success": false,
+    "id": "ep_1779828721794",
+    "timestamp": "2026-05-26T20:52:01.794Z"
   },
   {
-    "intent": "创建一个带令牌的会话",
+    "intent": "实现 login 函数，验证密码后生成JWT并返回",
     "actions": [
-      {
-        "kind": "assign",
-        "target": "user_payload",
-        "value": "user:123"
-      },
-      {
-        "kind": "call",
-        "function": "query_data",
-        "args": [
-          {
-            "name": "key",
-            "type": "str",
-            "value": "user_payload"
-          }
-        ],
-        "assignTo": "user_data"
-      },
-      {
-        "kind": "assign",
-        "target": "plain_password",
-        "value": "password123"
-      },
       {
         "kind": "call",
         "function": "verify_password",
@@ -329,15 +1290,15 @@
           {
             "name": "plain",
             "type": "str",
-            "value": "plain_password"
+            "value": "plainPassword"
           },
           {
             "name": "hash",
             "type": "PasswordHash",
-            "value": "user_data"
+            "value": "storedHash"
           }
         ],
-        "assignTo": "password_valid"
+        "assignTo": "passwordValid"
       },
       {
         "kind": "call",
@@ -346,7 +1307,10 @@
           {
             "name": "payload",
             "type": "UserPayload",
-            "value": "user_payload"
+            "value": {
+              "userId": "userId",
+              "role": "role"
+            }
           }
         ],
         "assignTo": "token"
@@ -358,7 +1322,10 @@
           {
             "name": "user",
             "type": "UserPayload",
-            "value": "user_payload"
+            "value": {
+              "userId": "userId",
+              "role": "role"
+            }
           },
           {
             "name": "token",
@@ -369,22 +1336,484 @@
         "assignTo": "session"
       },
       {
-        "kind": "return",
-        "value": "session"
+        "kind": "call",
+        "function": "cache_set",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "session:token"
+          },
+          {
+            "name": "value",
+            "type": "any",
+            "value": "session"
+          }
+        ]
       },
       {
         "kind": "return",
-        "value": "error"
+        "value": "token"
+      },
+      {
+        "kind": "return",
+        "value": "None"
+      },
+      {
+        "kind": "if",
+        "condition": "passwordValid",
+        "thenActions": [],
+        "elseActions": []
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1779828721792",
+    "timestamp": "2026-05-26T20:52:01.792Z"
+  },
+  {
+    "intent": "实现 login 函数，验证密码后生成JWT并返回",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "email",
+        "value": "user@example.com"
+      },
+      {
+        "kind": "assign",
+        "target": "password",
+        "value": "plain_password"
+      },
+      {
+        "kind": "call",
+        "function": "user_data",
+        "args": [
+          "email"
+        ],
+        "assignTo": "query_data"
+      },
+      {
+        "kind": "assign",
+        "target": "password_hash",
+        "value": "user_data.password_hash"
+      },
+      {
+        "kind": "call",
+        "function": "password_valid",
+        "args": [
+          "password",
+          "password_hash"
+        ],
+        "assignTo": "verify_password"
+      },
+      {
+        "kind": "assign",
+        "target": "user_payload",
+        "value": {
+          "email": "user@example.com",
+          "role": "user"
+        }
+      },
+      {
+        "kind": "call",
+        "function": "token",
+        "args": [
+          "user_payload"
+        ],
+        "assignTo": "generate_jwt"
+      },
+      {
+        "kind": "call",
+        "function": "session",
+        "args": [
+          "user_payload",
+          "token"
+        ],
+        "assignTo": "create_session"
+      },
+      {
+        "kind": "call",
+        "function": "cache_set",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "session:token"
+          },
+          {
+            "name": "value",
+            "type": "any",
+            "value": {
+              "session": "session",
+              "token": "token"
+            }
+          }
+        ]
+      },
+      {
+        "kind": "return",
+        "value": "token"
+      },
+      {
+        "kind": "return",
+        "value": "Invalid password"
       },
       {
         "kind": "if",
         "condition": "password_valid",
         "thenActions": [],
         "elseActions": []
+      },
+      {
+        "kind": "return",
+        "value": "User not found"
+      },
+      {
+        "kind": "if",
+        "condition": "password_hash",
+        "thenActions": [],
+        "elseActions": []
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1779828719013",
+    "timestamp": "2026-05-26T20:51:59.013Z"
+  },
+  {
+    "intent": "实现 login 函数，验证密码后生成JWT并返回",
+    "actions": [],
+    "success": false,
+    "id": "ep_1779828549435",
+    "timestamp": "2026-05-26T20:49:09.435Z"
+  },
+  {
+    "intent": "实现 login 函数，验证密码后生成JWT并返回",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "email",
+        "value": "user@example.com"
+      },
+      {
+        "kind": "assign",
+        "target": "password",
+        "value": "plain_password"
+      },
+      {
+        "kind": "call",
+        "function": "user_data",
+        "args": [
+          "email"
+        ],
+        "assignTo": "query_data"
+      },
+      {
+        "kind": "assign",
+        "target": "password_hash",
+        "value": "user_data.password_hash"
+      },
+      {
+        "kind": "call",
+        "function": "password_valid",
+        "args": [
+          "password",
+          "password_hash"
+        ],
+        "assignTo": "verify_password"
+      },
+      {
+        "kind": "assign",
+        "target": "user_payload",
+        "value": {
+          "email": "user@example.com",
+          "role": "user"
+        }
+      },
+      {
+        "kind": "call",
+        "function": "token",
+        "args": [
+          "user_payload"
+        ],
+        "assignTo": "generate_jwt"
+      },
+      {
+        "kind": "call",
+        "function": "session",
+        "args": [
+          "user_payload",
+          "token"
+        ],
+        "assignTo": "create_session"
+      },
+      {
+        "kind": "call",
+        "function": "cache_set",
+        "args": [
+          {
+            "name": "key",
+            "type": "str",
+            "value": "session:token"
+          },
+          {
+            "name": "value",
+            "type": "any",
+            "value": "session"
+          }
+        ]
+      },
+      {
+        "kind": "return",
+        "value": "token"
+      },
+      {
+        "kind": "return",
+        "value": "Invalid credentials"
+      },
+      {
+        "kind": "if",
+        "condition": "password_valid",
+        "thenActions": [],
+        "elseActions": []
+      },
+      {
+        "kind": "return",
+        "value": "User not found"
+      },
+      {
+        "kind": "if",
+        "condition": "password_hash",
+        "thenActions": [],
+        "elseActions": []
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1779828545721",
+    "timestamp": "2026-05-26T20:49:05.721Z"
+  },
+  {
+    "intent": "ttl test fresh",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "x",
+        "value": "1"
       }
     ],
     "success": true,
-    "id": "ep_1778775082912",
-    "timestamp": "2026-05-14T16:11:22.919Z"
+    "id": "ep_1779828386508",
+    "timestamp": "2026-05-26T20:46:26.508Z"
+  },
+  {
+    "intent": "实现 greet 函数：调用 greet 生成问候语，然后调用 format_message 格式化输出",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "greet",
+        "args": [
+          {
+            "name": "name",
+            "type": "str",
+            "value": "{{name}}"
+          }
+        ],
+        "assignTo": "greet_result"
+      },
+      {
+        "kind": "call",
+        "function": "format_message",
+        "args": [
+          {
+            "name": "msg",
+            "type": "str",
+            "value": "{{msg}}"
+          }
+        ],
+        "assignTo": "format_message_result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1779545709123",
+    "timestamp": "2026-05-23T14:15:09.123Z"
+  },
+  {
+    "intent": "consolidate test pattern",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "data",
+        "value": "value"
+      }
+    ],
+    "success": true,
+    "id": "ep_1779545707635",
+    "timestamp": "2026-05-23T14:15:07.635Z"
+  },
+  {
+    "intent": "consolidate test pattern",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "data",
+        "value": "value"
+      }
+    ],
+    "success": true,
+    "id": "ep_1779545707634",
+    "timestamp": "2026-05-23T14:15:07.634Z"
+  },
+  {
+    "intent": "consolidate test pattern",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "data",
+        "value": "value"
+      }
+    ],
+    "success": true,
+    "id": "ep_1779545707631",
+    "timestamp": "2026-05-23T14:15:07.631Z"
+  },
+  {
+    "intent": "consolidate test pattern",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "data",
+        "value": "value"
+      }
+    ],
+    "success": true,
+    "id": "ep_1779545707627",
+    "timestamp": "2026-05-23T14:15:07.627Z"
+  },
+  {
+    "intent": "consolidate test pattern",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "data",
+        "value": "value"
+      }
+    ],
+    "success": true,
+    "id": "ep_1779545707625",
+    "timestamp": "2026-05-23T14:15:07.625Z"
+  },
+  {
+    "intent": "test memory system retry",
+    "actions": [],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1779545707623",
+    "timestamp": "2026-05-23T14:15:07.623Z"
+  },
+  {
+    "intent": "test memory system",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "x",
+        "value": "1"
+      }
+    ],
+    "success": true,
+    "id": "ep_1779545707621",
+    "timestamp": "2026-05-23T14:15:07.621Z"
+  },
+  {
+    "intent": "repeated pattern",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "x",
+        "value": "1"
+      }
+    ],
+    "success": true,
+    "id": "ep_1779545674932",
+    "timestamp": "2026-05-23T14:14:34.932Z"
+  },
+  {
+    "intent": "repeated pattern",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "x",
+        "value": "1"
+      }
+    ],
+    "success": true,
+    "id": "ep_1779545674930",
+    "timestamp": "2026-05-23T14:14:34.930Z"
+  },
+  {
+    "intent": "repeated pattern",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "x",
+        "value": "1"
+      }
+    ],
+    "success": true,
+    "id": "ep_1779545674929",
+    "timestamp": "2026-05-23T14:14:34.929Z"
+  },
+  {
+    "intent": "repeated pattern",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "x",
+        "value": "1"
+      }
+    ],
+    "success": true,
+    "id": "ep_1779545674927",
+    "timestamp": "2026-05-23T14:14:34.927Z"
+  },
+  {
+    "intent": "repeated pattern",
+    "actions": [
+      {
+        "kind": "assign",
+        "target": "x",
+        "value": "1"
+      }
+    ],
+    "success": true,
+    "id": "ep_1779545674925",
+    "timestamp": "2026-05-23T14:14:34.925Z"
+  },
+  {
+    "intent": "implement login",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "login",
+        "args": [
+          {
+            "name": "u",
+            "type": "str",
+            "value": "{{u}}"
+          }
+        ],
+        "assignTo": "login_result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1779545674919",
+    "timestamp": "2026-05-23T14:14:34.919Z"
+  },
+  {
+    "intent": "test",
+    "actions": [],
+    "success": false,
+    "id": "ep_1779545673975",
+    "timestamp": "2026-05-23T14:14:33.975Z"
   }
 ]

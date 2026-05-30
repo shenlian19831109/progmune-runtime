@@ -7,21 +7,27 @@
  *  1. IR 重新提取（确保与当前代码同步）
  *  2. TypeScript 编译（零类型错误）
  *  3. SSG dev_pipeline 协议验证
- *  4. 各命名空间状态快照
- *  5. 失败基因组概要
- *  6. 抗体效能统计
+ *  4. Ledger 不变量 + 回放验证 (Invariant-0, Invariant-1, Replay)
+ *  5. 各命名空间状态快照
+ *  6. 失败基因组概要
+ *  7. 抗体效能统计
  */
 
 import * as fs from "fs";
 import * as path from "path";
 import { execSync } from "child_process";
 import {
-  StateMachineValidator,
   FunctionProtocol,
   parseProtocolsFromJSON,
-  StateMachineValidator as SSV,
+  checkLedgerConsistency,
+  ValidationContext,
+  validateTransition,
+  rebuildState,
+  hashRules,
+  hashLedger,
 } from "./ssg-validator";
-import { getFailureGenome, getAntibodyStats } from "./failure-corpus";
+import type { StateTransition } from "./runtime-types";
+import { getFailureGenome, getAntibodyStats, getAllSessions } from "./failure-corpus";
 
 const C = {
   reset: "\x1b[0m",
@@ -42,6 +48,91 @@ const B = (s: string) => `${C.bold}${s}${C.reset}`;
 let failures = 0;
 let warnings = 0;
 
+// ── CLI: single-session ledger validation ──
+const cliArg = process.argv[2];
+if (cliArg === "--ledger") {
+  const sessionId = process.argv[3];
+  if (!sessionId) {
+    console.error(`${R("Usage:")} npx ts-node src/check.ts --ledger <sessionId>`);
+    process.exit(1);
+  }
+  const sessions = getAllSessions();
+  const session = sessions.find(s => s.sessionId === sessionId || s.sessionId.startsWith(sessionId));
+  if (!session) {
+    console.error(`${R("Session not found:")} ${sessionId}`);
+    process.exit(1);
+  }
+
+  const nsInit = new Map<string, string>();
+  nsInit.set("_global", "UNAUTHENTICATED");
+  try {
+    const protoPath = path.resolve(__dirname, "../protocols.json");
+    if (fs.existsSync(protoPath)) {
+      const protoDef = JSON.parse(fs.readFileSync(protoPath, "utf-8"));
+      if (protoDef.namespaceInitialStates) {
+        for (const [ns, s] of Object.entries(protoDef.namespaceInitialStates)) {
+          nsInit.set(ns, s as string);
+        }
+      }
+    }
+  } catch {}
+
+  const allTransitions = session.attempts.flatMap(a => a.transitions || []);
+  if (allTransitions.length === 0) {
+    console.log(`${D("No ledger data in this session.")}`);
+    process.exit(0);
+  }
+
+  console.log(`${C_("Ledger Validation")} — ${session.sessionId}`);
+  console.log(`${D("═".repeat(50))}`);
+  console.log(`  Intent: ${session.intent}`);
+  console.log(`  Ledger: ${allTransitions.length} transitions across ${session.attempts.filter(a => (a.transitions||[]).length > 0).length} attempt(s)`);
+
+  // Invariants
+  const consistency = checkLedgerConsistency(allTransitions, nsInit);
+  console.log(`  Invariants: ${consistency.consistent ? G("clean") : R(`${consistency.violations.length} violations`)}`);
+
+  // Replay
+  const rebuilt = rebuildState(allTransitions, nsInit);
+  const lastTransition = allTransitions[allTransitions.length - 1];
+  const recorded = lastTransition.statesAfter;
+  const allNs = new Set([...Object.keys(rebuilt), ...Object.keys(recorded)]);
+  const norm = (snap: Record<string, string[]>) => {
+    const out: Record<string, string[]> = {};
+    for (const ns of [...allNs].sort()) out[ns] = [...(snap[ns] || [])].sort();
+    return out;
+  };
+  const replayOk = JSON.stringify(norm(rebuilt)) === JSON.stringify(norm(recorded));
+  console.log(`  Replay: ${replayOk ? G("state matches") : R("state mismatch")}`);
+
+  // Integrity
+  const ledgerHash = hashLedger(allTransitions);
+  console.log(`  Fingerprint: ${D(ledgerHash)}`);
+
+  // Per-attempt detail
+  for (const attempt of session.attempts) {
+    const ts = attempt.transitions || [];
+    if (ts.length === 0) continue;
+    const validCount = ts.filter(t => t.valid).length;
+    const consAtt = checkLedgerConsistency(ts, nsInit);
+    console.log(`  ${D("─".repeat(40))}`);
+    console.log(`  Attempt #${attempt.attemptNumber} (${attempt.outcome}): ${validCount}/${ts.length} valid, invariants ${consAtt.consistent ? G("ok") : R("fail")}`);
+    for (const t of ts) {
+      const icon = t.valid ? G("✓") : R("✗");
+      const delta = [t.acquired.length ? G("+"+t.acquired.join(",")) : "", t.invalidated.length ? R("-"+t.invalidated.join(",")) : ""].filter(Boolean).join(" ");
+      console.log(`    ${icon} ${t.function.padEnd(22)} ${D(t.namespace.padEnd(14))} ${delta || D("(no delta)")}`);
+    }
+  }
+
+  if (consistency.consistent && replayOk) {
+    console.log(`\n  ${G("✔")} ${B("Ledger is valid and replayable.")}`);
+    process.exit(0);
+  } else {
+    console.log(`\n  ${R("✖")} ${B("Ledger has issues.")}`);
+    process.exit(1);
+  }
+}
+
 function step(label: string): void {
   console.log(`\n${B("━━━")} ${B(label)} ${"━".repeat(Math.max(2, 60 - label.length))}`);
 }
@@ -61,7 +152,7 @@ function warn(msg: string): void {
 }
 
 // ── 1. IR 提取 ──
-step("1/5 IR 提取");
+step("1/6 IR 提取");
 try {
   execSync("npx ts-node src/extract-ir.ts .", { stdio: "pipe", cwd: path.resolve(__dirname, "..") });
   const ir = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../ir.json"), "utf-8"));
@@ -72,7 +163,7 @@ try {
 }
 
 // ── 2. TypeScript 编译 ──
-step("2/5 TypeScript 类型检查");
+step("2/6 TypeScript 类型检查");
 try {
   execSync("npx tsc --noEmit", { stdio: "pipe", cwd: path.resolve(__dirname, "..") });
   pass("零类型错误");
@@ -89,7 +180,7 @@ try {
 }
 
 // ── 3. SSG 协议验证 ──
-step("3/5 SSG 协议验证");
+step("3/6 SSG 协议验证");
 const protoPath = path.resolve(__dirname, "../protocols.json");
 if (!fs.existsSync(protoPath)) {
   fail("protocols.json 不存在");
@@ -111,7 +202,16 @@ if (!fs.existsSync(protoPath)) {
     }
   }
 
-  const ssv = new StateMachineValidator(protocols, nsStates.get("_global") || "INIT", nsStates);
+  // dev_pipeline 验证 (pure functions, no StateMachineValidator instance)
+  const rules = new Map<string, import("./ssg-validator").StateAnnotation>();
+  for (const p of protocols) rules.set(p.function, p.protocol);
+  const ruleHash = hashRules(rules);
+
+  const ctx: ValidationContext = {
+    ledger: [],
+    currentState: rebuildState([], nsStates),
+  };
+  const transitions: StateTransition[] = [];
   const devSeq = [
     { fn: "extractIR", name: "IR 提取" },
     { fn: "validateAction", name: "动作校验" },
@@ -121,14 +221,20 @@ if (!fs.existsSync(protoPath)) {
   ];
 
   let pipelineOk = true;
-  for (const { fn, name } of devSeq) {
-    const result = ssv.apply(fn);
-    if (result.valid) {
-      const gained = result.acquired.length ? G("+" + result.acquired.join(",+")) : "";
-      const lost = result.invalidated.length ? R("-" + result.invalidated.join(",-")) : "";
+  for (let i = 0; i < devSeq.length; i++) {
+    const { fn, name } = devSeq[i];
+    const { valid, transition, rejection } = validateTransition(
+      ctx, fn, i, rules, nsStates, ruleHash
+    );
+    transitions.push(transition);
+    ctx.ledger = transitions;
+    if (valid) {
+      ctx.currentState = transition.statesAfter;
+      const gained = transition.acquired.length ? G("+" + transition.acquired.join(",+")) : "";
+      const lost = transition.invalidated.length ? R("-" + transition.invalidated.join(",-")) : "";
       console.log(`  ${G("✅")} ${fn.padEnd(25)} ${[gained, lost].filter(Boolean).join(" ") || D("(no delta)")}`);
     } else {
-      const missing = result.rejection?.missingFunctions.join(" → ") || "?";
+      const missing = rejection?.missingFunctions.join(" → ") || "?";
       console.log(`  ${R("🚫")} ${fn.padEnd(25)} ${R("需 " + missing)}`);
       pipelineOk = false;
     }
@@ -140,8 +246,8 @@ if (!fs.existsSync(protoPath)) {
     fail("dev_pipeline 协议存在违规");
   }
 
-  // Per-namespace 状态
-  const snap = ssv.snapshotNamespaceStates();
+  // Per-namespace 状态 (from ledger via rebuildState)
+  const snap = rebuildState(transitions, nsStates);
   console.log(`\n  ${B("命名空间状态快照:")}`);
   for (const [ns, states] of Object.entries(snap).sort()) {
     const statesStr = states.length > 0 ? states.map(s => C_(s)).join(", ") : D("(empty)");
@@ -149,8 +255,95 @@ if (!fs.existsSync(protoPath)) {
   }
 }
 
-// ── 4. 失败基因组 ──
-step("4/5 失败基因组");
+// ── 4. Ledger 不变量检查 (Phase 3) ──
+step("4/6 Ledger 不变量");
+{
+  // Load namespace initial states from protocols.json for correct replay
+  const nsInit = new Map<string, string>();
+  nsInit.set("_global", "UNAUTHENTICATED");
+  try {
+    const protoRaw = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../protocols.json"), "utf-8"));
+    if (protoRaw.namespaceInitialStates) {
+      for (const [ns, s] of Object.entries(protoRaw.namespaceInitialStates)) {
+        nsInit.set(ns, s as string);
+      }
+    }
+  } catch {}
+  let checked = 0;
+  let consistent = 0;
+  let stateMatch = 0;
+  const allLedgers: StateTransition[] = [];
+  const violationsDetail: string[] = [];
+  const replayMismatchDetail: string[] = [];
+  const sessionsDir = path.resolve(
+    process.env.PROGMUNE_PROJECT_DIR || process.cwd(),
+    ".progmune_corpus/sessions"
+  );
+  const norm = (snap: Record<string, string[]>, allNs: Set<string>) => {
+    const out: Record<string, string[]> = {};
+    for (const ns of [...allNs].sort()) {
+      out[ns] = [...(snap[ns] || [])].sort();
+    }
+    return out;
+  };
+  if (fs.existsSync(sessionsDir)) {
+    for (const file of fs.readdirSync(sessionsDir)) {
+      if (!file.endsWith(".json")) continue;
+      try {
+        const session = JSON.parse(fs.readFileSync(path.join(sessionsDir, file), "utf-8"));
+        for (const attempt of (session.attempts || [])) {
+          const transitions = attempt.transitions || [];
+          if (transitions.length === 0) continue;
+          allLedgers.push(...transitions);
+          // Invariant check
+          const result = checkLedgerConsistency(transitions, nsInit);
+          checked++;
+          if (result.consistent) {
+            consistent++;
+          } else {
+            for (const v of result.violations.slice(0, 2)) {
+              violationsDetail.push(`[${v.invariant}] session=${session.sessionId} idx=${v.index}`);
+            }
+          }
+          // Replay check: rebuildState === recorded statesAfter
+          const rebuilt = rebuildState(transitions, nsInit);
+          const recorded = transitions[transitions.length - 1].statesAfter;
+          const allNs = new Set([...Object.keys(rebuilt), ...Object.keys(recorded)]);
+          if (JSON.stringify(norm(rebuilt, allNs)) === JSON.stringify(norm(recorded, allNs))) {
+            stateMatch++;
+          } else {
+            replayMismatchDetail.push(`session=${session.sessionId} attempt=${attempt.attemptNumber}`);
+          }
+        }
+      } catch {}
+    }
+  }
+  if (checked === 0) {
+    pass("无可检查的 Ledger（需要更多规划会话）");
+  } else if (consistent === checked && stateMatch === checked) {
+    const combinedHash = hashLedger(allLedgers);
+    pass(`全部 ${checked} 个 Ledger 通过 (Invariant-0 + Invariant-1 + Replay) | 完整性指纹: ${combinedHash}`);
+  } else {
+    if (consistent < checked) {
+      fail(`${checked - consistent}/${checked} 个 Ledger 存在一致性问题`);
+      for (const d of violationsDetail.slice(0, 3)) {
+        console.log(`     ${D(d)}`);
+      }
+    }
+    if (stateMatch < checked) {
+      fail(`${checked - stateMatch}/${checked} 个 Ledger 回放状态不匹配`);
+      for (const d of replayMismatchDetail.slice(0, 3)) {
+        console.log(`     ${D(d)}`);
+      }
+    }
+    if (consistent === checked && stateMatch === checked) {
+      // This shouldn't happen due to outer condition, but keep it safe
+    }
+  }
+}
+
+// ── 5. 失败基因组 ──
+step("5/6 失败基因组");
 const genome = getFailureGenome();
 if (genome.totalFailures === 0) {
   pass("零失败记录");
@@ -165,8 +358,8 @@ if (genome.totalFailures === 0) {
   }
 }
 
-// ── 5. 抗体效能 ──
-step("5/5 抗体效能");
+// ── 6. 抗体效能 ──
+step("6/6 抗体效能");
 const abStats = getAntibodyStats();
 if (abStats.totalHits === 0) {
   pass("暂无抗体命中（需要更多会话积累）");
