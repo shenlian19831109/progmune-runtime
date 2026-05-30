@@ -1673,6 +1673,69 @@
     ]
   },
   {
+    "name": "correctFunctionNames",
+    "params": [
+      {
+        "name": "actions",
+        "type": "Action[]",
+        "typeDetail": "Action[]"
+      },
+      {
+        "name": "ir",
+        "type": "any[]",
+        "typeDetail": "any[]"
+      }
+    ],
+    "returnType": "{ actions: Action[]; corrections: string[] }",
+    "returnTypeDetail": "{ actions: Action[]; corrections: string[] }",
+    "file": "src/planner.ts",
+    "calls": [
+      "map"
+    ]
+  },
+  {
+    "name": "fixParameterCounts",
+    "params": [
+      {
+        "name": "actions",
+        "type": "Action[]",
+        "typeDetail": "Action[]"
+      },
+      {
+        "name": "ir",
+        "type": "any[]",
+        "typeDetail": "any[]"
+      }
+    ],
+    "returnType": "{ actions: Action[]; fixes: string[] }",
+    "returnTypeDetail": "{ actions: Action[]; fixes: string[] }",
+    "file": "src/planner.ts",
+    "calls": [
+      "map"
+    ]
+  },
+  {
+    "name": "buildProtocolChainHint",
+    "params": [
+      {
+        "name": "protocols",
+        "type": "FunctionProtocol[]",
+        "typeDetail": "FunctionProtocol[]"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/planner.ts",
+    "calls": [
+      "has",
+      "set",
+      "push",
+      "get",
+      "join",
+      "map"
+    ]
+  },
+  {
     "name": "validateActionSchema",
     "params": [
       {
@@ -1818,13 +1881,13 @@
       "findSemanticTemplate",
       "error",
       "recordEpisode",
+      "loadProtocols",
       "queryAntibodies",
       "toFixed",
       "join",
       "map",
       "ceil",
       "estimateTokens",
-      "loadProtocols",
       "validateProtocolWithTransitions",
       "generateAttemptId",
       "generatePlannerSeed",
@@ -1836,6 +1899,7 @@
       "buildCompactFuncList",
       "match",
       "find",
+      "buildProtocolChainHint",
       "loadCheckpoint",
       "chat",
       "generate",
@@ -1843,6 +1907,8 @@
       "replace",
       "parseActionJSON",
       "executeActionCode",
+      "correctFunctionNames",
+      "fixParameterCounts",
       "validateActionSchema",
       "saveCheckpoint",
       "enrichActions",

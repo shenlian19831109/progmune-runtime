@@ -168,6 +168,91 @@ function parseActionJSON(text) {
         return null;
     }
 }
+/** 模糊函数名纠正：当 LLM 生成不存在的函数名时，用 Jaccard 相似度找最接近的 IR 函数 */
+function correctFunctionNames(actions, ir) {
+    const corrections = [];
+    const corrected = actions.map((a, i) => {
+        if (a.kind !== "call" || !a.function)
+            return a;
+        // 跳过已知存在的函数和白名单
+        if (ir.some((f) => f.name === a.function))
+            return a;
+        if (["if", "for", "assign", "return"].includes(a.function))
+            return a;
+        // 用 Jaccard 相似度找最佳匹配
+        let bestMatch = "";
+        let bestScore = 0;
+        const target = a.function.toLowerCase();
+        for (const fn of ir) {
+            const score = (0, utils_1.jaccardSimilarity)(target, fn.name.toLowerCase());
+            if (score > bestScore) {
+                bestScore = score;
+                bestMatch = fn.name;
+            }
+        }
+        if (bestMatch && bestScore >= 0.3) {
+            corrections.push(`action[${i}]: "${a.function}" → "${bestMatch}" (相似度 ${bestScore.toFixed(2)})`);
+            return { ...a, function: bestMatch };
+        }
+        return a;
+    });
+    return { actions: corrected, corrections };
+}
+/** 参数签名预检：确保 call action 的参数数量与 IR 函数签名一致 */
+function fixParameterCounts(actions, ir) {
+    const fixes = [];
+    const corrected = actions.map((a, i) => {
+        if (a.kind !== "call" || !a.function)
+            return a;
+        const def = ir.find((f) => f.name === a.function);
+        if (!def || !def.params)
+            return a;
+        const expected = def.params.length;
+        const actual = a.args ? a.args.length : 0;
+        if (actual === expected)
+            return a;
+        if (actual < expected) {
+            // 参数太少：填充缺失参数
+            const padded = [...(a.args || [])];
+            for (let j = actual; j < expected; j++) {
+                padded.push({ name: def.params[j].name, type: def.params[j].type || "any", value: "" });
+            }
+            fixes.push(`action[${i}] ${a.function}: 参数 ${actual}→${expected} (填充 ${expected - actual} 个缺失参数)`);
+            return { ...a, args: padded };
+        }
+        else {
+            // 参数太多：截断多余参数
+            fixes.push(`action[${i}] ${a.function}: 参数 ${actual}→${expected} (截断 ${actual - expected} 个多余参数)`);
+            return { ...a, args: a.args.slice(0, expected) };
+        }
+    });
+    return { actions: corrected, fixes };
+}
+/** 构建协议链提示：为 LLM 显示协议状态机的合法调用顺序 */
+function buildProtocolChainHint(protocols) {
+    if (protocols.length === 0)
+        return "";
+    // 按命名空间分组
+    const byNs = new Map();
+    for (const p of protocols) {
+        const ns = p.protocol.namespace || "_global";
+        if (!byNs.has(ns))
+            byNs.set(ns, []);
+        byNs.get(ns).push(p);
+    }
+    const lines = ["\n⚠️ 协议约束（必须严格遵循调用顺序）:"];
+    for (const [ns, fns] of byNs) {
+        if (ns === "_global" || fns.length <= 1)
+            continue;
+        lines.push(`  [${ns}] 合法调用链: ${fns.map(p => p.function).join(" → ")}`);
+        for (const p of fns) {
+            const pre = p.protocol.pre_states?.join(",") || "(无)";
+            const post = p.protocol.post_states?.join(",") || "(无)";
+            lines.push(`    ${p.function}: 前置状态=[${pre}] → 后置状态=[${post}]`);
+        }
+    }
+    return lines.join("\n");
+}
 /** JSON schema pre-validation: structural checks before IR-aware validation.
  *  Catches malformed actions that parseActionJSON() accepted but are semantically invalid. */
 function validateActionSchema(actions) {
@@ -370,7 +455,7 @@ function attemptSSGRepair(actions, rejection, ir, protocols, namespaceInitialSta
         const args = (def.params || []).map((p, i) => ({
             name: p.name || `p${i}`,
             type: p.type || 'any',
-            value: null,
+            value: "",
         }));
         const assignTo = def.returnType && def.returnType !== 'void' && def.returnType !== 'undefined'
             ? `${fnName}_result` : undefined;
@@ -420,6 +505,8 @@ async function plan(userIntent) {
         (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: cachedTemplate.actionSequence, success: true });
         return cachedTemplate.actionSequence;
     }
+    // 提前加载协议（后续多处使用）
+    const { protocols, namespaceInitialStates } = loadProtocols(ir);
     // 抗体免疫快速通道：查询高置信度抗体（ACL-3+），匹配则约束或跳过 LLM
     const antibodies = (0, failure_corpus_1.queryAntibodies)(userIntent, "ACL-3");
     let antibodyHint = "";
@@ -435,7 +522,7 @@ async function plan(userIntent) {
                 const args = (def?.params || []).map((p, i) => ({
                     name: p.name || `p${i}`,
                     type: p.type || 'any',
-                    value: null,
+                    value: "",
                 }));
                 const action = { kind: 'call', function: fnName, args };
                 if (def?.returnType && def.returnType !== 'void' && def.returnType !== 'undefined') {
@@ -453,7 +540,6 @@ async function plan(userIntent) {
                 estimatedTokensSaved: Math.ceil((0, llm_1.estimateTokens)(SYSTEM_PROMPT + userIntent) * 1.2),
             };
             // 验证抗体序列
-            const { protocols, namespaceInitialStates } = loadProtocols(ir);
             const antibodyRuleHash = (() => {
                 const rules = new Map();
                 for (const p of protocols)
@@ -548,8 +634,9 @@ async function plan(userIntent) {
             forbiddenFuncs.push(targetName);
         }
     }
+    const protocolChainHint = buildProtocolChainHint(protocols);
     const userPrompt = `可用函数：
-${compactFuncList}
+${compactFuncList}${protocolChainHint}
 
 需求：${userIntent}${antibodyHint}
 
@@ -573,7 +660,6 @@ ${RETRY_HINT}
             session.attempts = cp.sessionAttempts;
         }
     }
-    const { protocols, namespaceInitialStates } = loadProtocols(ir);
     const sessionRuleHash = (() => {
         const rules = new Map();
         for (const p of protocols)
@@ -622,15 +708,31 @@ ${RETRY_HINT}
         }
         if (!rawActions || rawActions.length === 0) {
             console.error("⚠️ 解析失败，重试...");
-            currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n上一次输出无效。请严格输出 JSON 数组。\n${RETRY_HINT}\n只输出 JSON。`;
+            currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}\n\n上一次输出无效。请严格输出 JSON 数组。\n${RETRY_HINT}\n只输出 JSON。`;
             useSystem = false;
             continue;
+        }
+        // 🔧 SVL-1 修复: 模糊函数名纠正 — 把 LLM 编造的函数名映射到真实 IR 函数
+        const nameCorrection = correctFunctionNames(rawActions, ir);
+        if (nameCorrection.corrections.length > 0) {
+            console.error("🔧 [SVL-1 自动修复] 函数名纠正:");
+            for (const c of nameCorrection.corrections)
+                console.error(`   ${c}`);
+            rawActions = nameCorrection.actions;
+        }
+        // 🔧 SVL-2 修复: 参数签名预检 — 自动调整 args 数量匹配 IR 签名
+        const paramFix = fixParameterCounts(rawActions, ir);
+        if (paramFix.fixes.length > 0) {
+            console.error("🔧 [SVL-2 自动修复] 参数数量修正:");
+            for (const f of paramFix.fixes)
+                console.error(`   ${f}`);
+            rawActions = paramFix.actions;
         }
         // P2: JSON schema pre-validation — catch structural errors early
         const schemaCheck = validateActionSchema(rawActions);
         if (!schemaCheck.valid) {
             console.error("⚠️ JSON schema 校验失败:", schemaCheck.errors.join("; "));
-            currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n输出格式错误：${schemaCheck.errors.join("；")}。请修正 JSON 结构。\n${RETRY_HINT}\n只输出 JSON。`;
+            currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}\n\n输出格式错误：${schemaCheck.errors.join("；")}。请修正 JSON 结构。\n${RETRY_HINT}\n只输出 JSON。`;
             useSystem = false;
             const schemaViolation = {
                 svl: 1,
@@ -718,7 +820,7 @@ ${RETRY_HINT}
                 plannerRetryTotal: maxRetries,
             });
             (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: filtered, success: false, svlViolated: primarySvl });
-            currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n错误：${errorsFlat.join("；")}。请修正。\n${RETRY_HINT}\n只输出 JSON。`;
+            currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}\n\n错误：${errorsFlat.join("；")}。请修正。\n${RETRY_HINT}\n只输出 JSON。`;
             useSystem = false;
             (0, failure_corpus_1.saveCheckpoint)(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });
             continue;
@@ -781,7 +883,7 @@ ${RETRY_HINT}
                     break;
                 }
                 const maskedFuncList = getMaskedFuncList();
-                currentPrompt = `当前协议状态只允许以下函数：\n${maskedFuncList}\n\n需求：${userIntent}\n\n协议违规：${explain.replace(/\n/g, '；')}。请修正。\n${RETRY_HINT}\n只输出 JSON。`;
+                currentPrompt = `当前协议状态只允许以下函数：\n${maskedFuncList}${protocolChainHint}\n\n需求：${userIntent}\n\n协议违规：${explain.replace(/\n/g, '；')}。请修正。\n${RETRY_HINT}\n只输出 JSON。`;
                 useSystem = false;
                 (0, failure_corpus_1.saveCheckpoint)(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });
                 continue;
@@ -827,7 +929,7 @@ ${RETRY_HINT}
                 plannerRetryTotal: maxRetries,
             });
             (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: filtered, success: false, svlViolated: "SVL-4" });
-            currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n语义错误：${semResult.errors.join("；")}。请修正。\n${RETRY_HINT}\n只输出 JSON。`;
+            currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}\n\n语义错误：${semResult.errors.join("；")}。请修正。\n${RETRY_HINT}\n只输出 JSON。`;
             useSystem = false;
             (0, failure_corpus_1.saveCheckpoint)(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });
             continue;

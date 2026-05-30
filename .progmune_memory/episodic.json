@@ -1,5 +1,111 @@
 [
   {
+    "intent": "extract IR then validate and emit code",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "."
+          }
+        ],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "validateAction",
+        "args": [
+          {
+            "name": "action",
+            "type": "Action",
+            "value": "ir"
+          },
+          {
+            "name": "actionIndex",
+            "type": "number",
+            "value": 0
+          }
+        ],
+        "assignTo": "validated"
+      },
+      {
+        "kind": "call",
+        "function": "validateActionSequence",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "ir"
+          }
+        ],
+        "assignTo": "seqValid"
+      },
+      {
+        "kind": "call",
+        "function": "emitCode",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "ir"
+          }
+        ],
+        "assignTo": "code"
+      },
+      {
+        "kind": "return",
+        "value": "code"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780174029376",
+    "timestamp": "2026-05-30T20:47:09.376Z"
+  },
+  {
+    "intent": "extract IR then validate",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "."
+          }
+        ],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "validateAction",
+        "args": [
+          {
+            "name": "action",
+            "type": "Action",
+            "value": "ir"
+          },
+          {
+            "name": "actionIndex",
+            "type": "number",
+            "value": 0
+          }
+        ],
+        "assignTo": "validated"
+      },
+      {
+        "kind": "return",
+        "value": "validated"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780174027598",
+    "timestamp": "2026-05-30T20:47:07.598Z"
+  },
+  {
     "intent": "提取 IR 并验证项目中的函数",
     "actions": [
       {
@@ -1605,215 +1711,5 @@
     "success": true,
     "id": "ep_1779828386508",
     "timestamp": "2026-05-26T20:46:26.508Z"
-  },
-  {
-    "intent": "实现 greet 函数：调用 greet 生成问候语，然后调用 format_message 格式化输出",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "greet",
-        "args": [
-          {
-            "name": "name",
-            "type": "str",
-            "value": "{{name}}"
-          }
-        ],
-        "assignTo": "greet_result"
-      },
-      {
-        "kind": "call",
-        "function": "format_message",
-        "args": [
-          {
-            "name": "msg",
-            "type": "str",
-            "value": "{{msg}}"
-          }
-        ],
-        "assignTo": "format_message_result"
-      }
-    ],
-    "success": true,
-    "id": "ep_1779545709123",
-    "timestamp": "2026-05-23T14:15:09.123Z"
-  },
-  {
-    "intent": "consolidate test pattern",
-    "actions": [
-      {
-        "kind": "assign",
-        "target": "data",
-        "value": "value"
-      }
-    ],
-    "success": true,
-    "id": "ep_1779545707635",
-    "timestamp": "2026-05-23T14:15:07.635Z"
-  },
-  {
-    "intent": "consolidate test pattern",
-    "actions": [
-      {
-        "kind": "assign",
-        "target": "data",
-        "value": "value"
-      }
-    ],
-    "success": true,
-    "id": "ep_1779545707634",
-    "timestamp": "2026-05-23T14:15:07.634Z"
-  },
-  {
-    "intent": "consolidate test pattern",
-    "actions": [
-      {
-        "kind": "assign",
-        "target": "data",
-        "value": "value"
-      }
-    ],
-    "success": true,
-    "id": "ep_1779545707631",
-    "timestamp": "2026-05-23T14:15:07.631Z"
-  },
-  {
-    "intent": "consolidate test pattern",
-    "actions": [
-      {
-        "kind": "assign",
-        "target": "data",
-        "value": "value"
-      }
-    ],
-    "success": true,
-    "id": "ep_1779545707627",
-    "timestamp": "2026-05-23T14:15:07.627Z"
-  },
-  {
-    "intent": "consolidate test pattern",
-    "actions": [
-      {
-        "kind": "assign",
-        "target": "data",
-        "value": "value"
-      }
-    ],
-    "success": true,
-    "id": "ep_1779545707625",
-    "timestamp": "2026-05-23T14:15:07.625Z"
-  },
-  {
-    "intent": "test memory system retry",
-    "actions": [],
-    "success": false,
-    "svlViolated": "SVL-1",
-    "id": "ep_1779545707623",
-    "timestamp": "2026-05-23T14:15:07.623Z"
-  },
-  {
-    "intent": "test memory system",
-    "actions": [
-      {
-        "kind": "assign",
-        "target": "x",
-        "value": "1"
-      }
-    ],
-    "success": true,
-    "id": "ep_1779545707621",
-    "timestamp": "2026-05-23T14:15:07.621Z"
-  },
-  {
-    "intent": "repeated pattern",
-    "actions": [
-      {
-        "kind": "assign",
-        "target": "x",
-        "value": "1"
-      }
-    ],
-    "success": true,
-    "id": "ep_1779545674932",
-    "timestamp": "2026-05-23T14:14:34.932Z"
-  },
-  {
-    "intent": "repeated pattern",
-    "actions": [
-      {
-        "kind": "assign",
-        "target": "x",
-        "value": "1"
-      }
-    ],
-    "success": true,
-    "id": "ep_1779545674930",
-    "timestamp": "2026-05-23T14:14:34.930Z"
-  },
-  {
-    "intent": "repeated pattern",
-    "actions": [
-      {
-        "kind": "assign",
-        "target": "x",
-        "value": "1"
-      }
-    ],
-    "success": true,
-    "id": "ep_1779545674929",
-    "timestamp": "2026-05-23T14:14:34.929Z"
-  },
-  {
-    "intent": "repeated pattern",
-    "actions": [
-      {
-        "kind": "assign",
-        "target": "x",
-        "value": "1"
-      }
-    ],
-    "success": true,
-    "id": "ep_1779545674927",
-    "timestamp": "2026-05-23T14:14:34.927Z"
-  },
-  {
-    "intent": "repeated pattern",
-    "actions": [
-      {
-        "kind": "assign",
-        "target": "x",
-        "value": "1"
-      }
-    ],
-    "success": true,
-    "id": "ep_1779545674925",
-    "timestamp": "2026-05-23T14:14:34.925Z"
-  },
-  {
-    "intent": "implement login",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "login",
-        "args": [
-          {
-            "name": "u",
-            "type": "str",
-            "value": "{{u}}"
-          }
-        ],
-        "assignTo": "login_result"
-      }
-    ],
-    "success": true,
-    "id": "ep_1779545674919",
-    "timestamp": "2026-05-23T14:14:34.919Z"
-  },
-  {
-    "intent": "test",
-    "actions": [],
-    "success": false,
-    "id": "ep_1779545673975",
-    "timestamp": "2026-05-23T14:14:33.975Z"
   }
 ]
