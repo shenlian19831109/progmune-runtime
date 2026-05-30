@@ -28,6 +28,11 @@ import {
 } from "./ssg-validator";
 import type { StateTransition } from "./runtime-types";
 import { getFailureGenome, getAntibodyStats, getAllSessions } from "./failure-corpus";
+import {
+  assertLedgerConsistency,
+  assertLedgerInvariants,
+  InvariantViolationError,
+} from "./runtime-invariants";
 
 const C = {
   reset: "\x1b[0m",
@@ -329,6 +334,10 @@ step("4/6 Ledger 不变量");
       for (const d of violationsDetail.slice(0, 3)) {
         console.log(`     ${D(d)}`);
       }
+      // P0: Strict mode — invariant violations are now hard failures
+      if (process.env.PROGMUNE_STRICT !== "false") {
+        console.log(`     ${R("PROGMUNE_STRICT=true — 不变量违规视为硬错误")}`);
+      }
     }
     if (stateMatch < checked) {
       fail(`${checked - stateMatch}/${checked} 个 Ledger 回放状态不匹配`);
@@ -338,6 +347,33 @@ step("4/6 Ledger 不变量");
     }
     if (consistent === checked && stateMatch === checked) {
       // This shouldn't happen due to outer condition, but keep it safe
+    }
+  }
+
+  // P0: Strict invariant assertion — catch any violation that escaped per-session checks
+  // Per-ledger check (not combined, since different sessions have independent index sequences)
+  if (process.env.PROGMUNE_STRICT !== "false" && checked > 0) {
+    let invariantFailed = false;
+    for (const file of fs.readdirSync(sessionsDir)) {
+      if (!file.endsWith(".json")) continue;
+      try {
+        const session = JSON.parse(fs.readFileSync(path.join(sessionsDir, file), "utf-8"));
+        for (const attempt of (session.attempts || [])) {
+          const transitions = attempt.transitions || [];
+          if (transitions.length === 0) continue;
+          try {
+            assertLedgerInvariants(transitions, nsInit);
+          } catch (e) {
+            if (e instanceof InvariantViolationError) {
+              invariantFailed = true;
+              console.log(`     ${R(`[${e.detail.invariant}] session=${session.sessionId} attempt=${attempt.attemptNumber}: ${e.message.slice(0, 80)}`)}`);
+            }
+          }
+        }
+      } catch {}
+    }
+    if (invariantFailed) {
+      fail("PROGMUNE_STRICT=true — 严格不变量断言发现违规");
     }
   }
 }

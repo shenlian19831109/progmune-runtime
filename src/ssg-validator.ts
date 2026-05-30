@@ -61,6 +61,27 @@ export interface LedgerConsistencyViolation {
 
 const DEFAULT_NAMESPACE = "_global";
 
+// ── Phase 4: Invariant Violation Error ──
+
+export interface InvariantViolationDetail {
+  invariant: "before-consistency" | "delta-consistency" | "rule-hash-mismatch" | "transition-order";
+  index?: number;
+  namespace?: string;
+  function?: string;
+  expected?: Record<string, string[]>;
+  actual?: Record<string, string[]>;
+}
+
+export class InvariantViolationError extends Error {
+  public readonly detail: InvariantViolationDetail;
+
+  constructor(message: string, detail: InvariantViolationDetail) {
+    super(message);
+    this.name = "InvariantViolationError";
+    this.detail = detail;
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════
 // Phase 3: Pure Functions — Semantic Ledger Kernel
 // ═══════════════════════════════════════════════════════════════
@@ -297,12 +318,21 @@ export function validateTransition(
   applyTransitionDelta(deltaMap, transition);
   const computedAfter = toSnapshot(deltaMap);
   if (!deepEqualSnapshots(computedAfter, statesAfter)) {
-    console.error(
-      `[Invariant-1] Delta consistency violation in validateTransition for "${candidateFunctionName}":\n` +
+    const detail = `[Invariant-1] Delta consistency violation in validateTransition for "${candidateFunctionName}":\n` +
       `  acquired: [${acquired.join(", ")}]  invalidated: [${invalidated.join(", ")}]\n` +
       `  expected after: ${JSON.stringify(computedAfter)}\n` +
-      `  actual after:   ${JSON.stringify(statesAfter)}`
-    );
+      `  actual after:   ${JSON.stringify(statesAfter)}`;
+    // P0 Strict Mode: fail fast on kernel corruption
+    if (process.env.PROGMUNE_STRICT !== "false") {
+      throw new InvariantViolationError(detail, {
+        invariant: "delta-consistency",
+        namespace: ns,
+        function: candidateFunctionName,
+        expected: computedAfter,
+        actual: statesAfter,
+      });
+    }
+    console.error(detail);
   }
 
   return { valid: true, transition };

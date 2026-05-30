@@ -9,6 +9,9 @@ export type { StateAnnotation, FunctionProtocol, SSGRejection, SSGStepResult, SS
 export { StateMachineValidator, parseProtocolsFromJSON } from "./ssg-validator";
 // Phase 3: Semantic Ledger pure functions (re-exported from ssg-validator)
 export { rebuildState, applyTransitionDelta, validateTransition, checkLedgerConsistency, findFixPathStatic, hashRules, hashLedger, diffLedgers, explainRejection, rejectionToJSON, findProducer, findConsumer, findViolations, findTransition, listAllStates } from "./ssg-validator";
+// Phase 4: Invariant assertion layer
+export { InvariantViolationError, assertLedgerConsistency, assertDeltaConsistency, assertRuleHashMatch, assertTransitionOrder, assertLedgerInvariants } from "./runtime-invariants";
+export type { InvariantViolationDetail } from "./ssg-validator";
 export type { SVL } from "./failure-corpus";
 
 // ── Action DSL ──

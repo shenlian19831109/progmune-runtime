@@ -35,7 +35,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.listAllStates = exports.findTransition = exports.findViolations = exports.findConsumer = exports.findProducer = exports.rejectionToJSON = exports.explainRejection = exports.diffLedgers = exports.hashLedger = exports.hashRules = exports.findFixPathStatic = exports.checkLedgerConsistency = exports.validateTransition = exports.applyTransitionDelta = exports.rebuildState = exports.parseProtocolsFromJSON = exports.StateMachineValidator = void 0;
+exports.assertLedgerInvariants = exports.assertTransitionOrder = exports.assertRuleHashMatch = exports.assertDeltaConsistency = exports.assertLedgerConsistency = exports.InvariantViolationError = exports.listAllStates = exports.findTransition = exports.findViolations = exports.findConsumer = exports.findProducer = exports.rejectionToJSON = exports.explainRejection = exports.diffLedgers = exports.hashLedger = exports.hashRules = exports.findFixPathStatic = exports.checkLedgerConsistency = exports.validateTransition = exports.applyTransitionDelta = exports.rebuildState = exports.parseProtocolsFromJSON = exports.StateMachineValidator = void 0;
 exports.generateAttemptId = generateAttemptId;
 exports.generateSessionId = generateSessionId;
 exports.generatePlannerSeed = generatePlannerSeed;
@@ -60,6 +60,14 @@ Object.defineProperty(exports, "findConsumer", { enumerable: true, get: function
 Object.defineProperty(exports, "findViolations", { enumerable: true, get: function () { return ssg_validator_2.findViolations; } });
 Object.defineProperty(exports, "findTransition", { enumerable: true, get: function () { return ssg_validator_2.findTransition; } });
 Object.defineProperty(exports, "listAllStates", { enumerable: true, get: function () { return ssg_validator_2.listAllStates; } });
+// Phase 4: Invariant assertion layer
+var runtime_invariants_1 = require("./runtime-invariants");
+Object.defineProperty(exports, "InvariantViolationError", { enumerable: true, get: function () { return runtime_invariants_1.InvariantViolationError; } });
+Object.defineProperty(exports, "assertLedgerConsistency", { enumerable: true, get: function () { return runtime_invariants_1.assertLedgerConsistency; } });
+Object.defineProperty(exports, "assertDeltaConsistency", { enumerable: true, get: function () { return runtime_invariants_1.assertDeltaConsistency; } });
+Object.defineProperty(exports, "assertRuleHashMatch", { enumerable: true, get: function () { return runtime_invariants_1.assertRuleHashMatch; } });
+Object.defineProperty(exports, "assertTransitionOrder", { enumerable: true, get: function () { return runtime_invariants_1.assertTransitionOrder; } });
+Object.defineProperty(exports, "assertLedgerInvariants", { enumerable: true, get: function () { return runtime_invariants_1.assertLedgerInvariants; } });
 // ── ID生成工具 ──
 function generateAttemptId() {
     return `att_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;

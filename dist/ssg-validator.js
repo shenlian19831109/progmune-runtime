@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.StateMachineValidator = void 0;
+exports.StateMachineValidator = exports.InvariantViolationError = void 0;
 exports.rebuildState = rebuildState;
 exports.applyTransitionDelta = applyTransitionDelta;
 exports.findFixPathStatic = findFixPathStatic;
@@ -52,6 +52,14 @@ exports.rejectionToJSON = rejectionToJSON;
 exports.parseProtocolsFromJSON = parseProtocolsFromJSON;
 const crypto = __importStar(require("crypto"));
 const DEFAULT_NAMESPACE = "_global";
+class InvariantViolationError extends Error {
+    constructor(message, detail) {
+        super(message);
+        this.name = "InvariantViolationError";
+        this.detail = detail;
+    }
+}
+exports.InvariantViolationError = InvariantViolationError;
 // ═══════════════════════════════════════════════════════════════
 // Phase 3: Pure Functions — Semantic Ledger Kernel
 // ═══════════════════════════════════════════════════════════════
@@ -254,10 +262,21 @@ function validateTransition(ctx, candidateFunctionName, actionIndex, rules, name
     applyTransitionDelta(deltaMap, transition);
     const computedAfter = toSnapshot(deltaMap);
     if (!deepEqualSnapshots(computedAfter, statesAfter)) {
-        console.error(`[Invariant-1] Delta consistency violation in validateTransition for "${candidateFunctionName}":\n` +
+        const detail = `[Invariant-1] Delta consistency violation in validateTransition for "${candidateFunctionName}":\n` +
             `  acquired: [${acquired.join(", ")}]  invalidated: [${invalidated.join(", ")}]\n` +
             `  expected after: ${JSON.stringify(computedAfter)}\n` +
-            `  actual after:   ${JSON.stringify(statesAfter)}`);
+            `  actual after:   ${JSON.stringify(statesAfter)}`;
+        // P0 Strict Mode: fail fast on kernel corruption
+        if (process.env.PROGMUNE_STRICT !== "false") {
+            throw new InvariantViolationError(detail, {
+                invariant: "delta-consistency",
+                namespace: ns,
+                function: candidateFunctionName,
+                expected: computedAfter,
+                actual: statesAfter,
+            });
+        }
+        console.error(detail);
     }
     return { valid: true, transition };
 }

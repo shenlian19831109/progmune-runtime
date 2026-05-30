@@ -2026,6 +2026,137 @@
     ]
   },
   {
+    "name": "assertLedgerConsistency",
+    "params": [
+      {
+        "name": "ledger",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
+      },
+      {
+        "name": "namespaceInitialStates",
+        "type": "Map<string, string>",
+        "typeDetail": "Map<string, string>"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "src/runtime-invariants.ts",
+    "calls": [
+      "checkLedgerConsistency",
+      "isStrict",
+      "error"
+    ]
+  },
+  {
+    "name": "assertDeltaConsistency",
+    "params": [
+      {
+        "name": "transition",
+        "type": "StateTransition",
+        "typeDetail": "StateTransition"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "src/runtime-invariants.ts",
+    "calls": [
+      "fromSnapshot",
+      "has",
+      "set",
+      "add",
+      "get",
+      "delete",
+      "toSnapshot",
+      "deepEqual",
+      "isStrict",
+      "error"
+    ]
+  },
+  {
+    "name": "assertRuleHashMatch",
+    "params": [
+      {
+        "name": "expected",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "actual",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "context",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "src/runtime-invariants.ts",
+    "calls": [
+      "slice",
+      "isStrict",
+      "error"
+    ]
+  },
+  {
+    "name": "assertTransitionOrder",
+    "params": [
+      {
+        "name": "ledger",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "src/runtime-invariants.ts",
+    "calls": [
+      "isStrict",
+      "error"
+    ]
+  },
+  {
+    "name": "assertLedgerInvariants",
+    "params": [
+      {
+        "name": "ledger",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
+      },
+      {
+        "name": "namespaceInitialStates",
+        "type": "Map<string, string>",
+        "typeDetail": "Map<string, string>"
+      },
+      {
+        "name": "expectedRuleHash",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "src/runtime-invariants.ts",
+    "calls": [
+      "assertTransitionOrder",
+      "assertLedgerConsistency",
+      "assertDeltaConsistency",
+      "hashRules",
+      "assertRuleHashMatch"
+    ]
+  },
+  {
+    "name": "isStrict",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/runtime-invariants.ts",
+    "calls": []
+  },
+  {
     "name": "generateAttemptId",
     "params": [],
     "returnType": "string",
@@ -3629,9 +3760,9 @@
       "applyTransitionDelta",
       "toSnapshot",
       "deepEqualSnapshots",
-      "error",
       "join",
-      "stringify"
+      "stringify",
+      "error"
     ]
   },
   {
@@ -4664,6 +4795,24 @@
     "external": true
   },
   {
+    "name": "delete",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "deepEqual",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
     "name": "min",
     "params": [
       {
@@ -4743,15 +4892,6 @@
     "calls": [],
     "external": true,
     "description": "退出进程"
-  },
-  {
-    "name": "delete",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "any",
-    "file": "(external)",
-    "calls": [],
-    "external": true
   },
   {
     "name": "normalizeSnap",
