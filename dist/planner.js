@@ -168,6 +168,118 @@ function parseActionJSON(text) {
         return null;
     }
 }
+/** JSON schema pre-validation: structural checks before IR-aware validation.
+ *  Catches malformed actions that parseActionJSON() accepted but are semantically invalid. */
+function validateActionSchema(actions) {
+    const errors = [];
+    const assignedVars = new Set();
+    const validVarName = /^[a-zA-Z_]\w*$/;
+    for (let i = 0; i < actions.length; i++) {
+        const a = actions[i];
+        const pos = `action[${i}]`;
+        if (!a.kind) {
+            errors.push(`${pos}: missing "kind" field`);
+            continue;
+        }
+        switch (a.kind) {
+            case "call": {
+                if (!a.function || typeof a.function !== "string") {
+                    errors.push(`${pos}: call action requires "function" (string)`);
+                }
+                if (!Array.isArray(a.args)) {
+                    errors.push(`${pos}: call action requires "args" (array)`);
+                }
+                else {
+                    for (let j = 0; j < a.args.length; j++) {
+                        const arg = a.args[j];
+                        if (!arg || typeof arg !== "object") {
+                            errors.push(`${pos}: args[${j}] must be an object`);
+                        }
+                        else if (arg.name === undefined && arg.type === undefined && arg.value === undefined) {
+                            errors.push(`${pos}: args[${j}] missing name/type/value`);
+                        }
+                    }
+                }
+                if (a.assignTo !== undefined) {
+                    if (typeof a.assignTo !== "string" || !validVarName.test(a.assignTo)) {
+                        errors.push(`${pos}: assignTo "${a.assignTo}" is not a valid variable name`);
+                    }
+                    else if (assignedVars.has(a.assignTo)) {
+                        errors.push(`${pos}: duplicate assignTo "${a.assignTo}" (previously assigned at another action)`);
+                    }
+                    else {
+                        assignedVars.add(a.assignTo);
+                    }
+                }
+                break;
+            }
+            case "return": {
+                if (a.value === undefined) {
+                    errors.push(`${pos}: return action requires "value"`);
+                }
+                if (i < actions.length - 1) {
+                    errors.push(`${pos}: return should be the last action (actions after return are unreachable)`);
+                }
+                break;
+            }
+            case "assign": {
+                if (!a.target || typeof a.target !== "string" || !validVarName.test(a.target)) {
+                    errors.push(`${pos}: assign requires valid "target" variable name`);
+                }
+                else if (assignedVars.has(a.target)) {
+                    errors.push(`${pos}: duplicate assign target "${a.target}"`);
+                }
+                else {
+                    assignedVars.add(a.target);
+                }
+                if (a.value === undefined) {
+                    errors.push(`${pos}: assign action requires "value"`);
+                }
+                break;
+            }
+            case "if": {
+                if (!a.condition || typeof a.condition !== "string") {
+                    errors.push(`${pos}: if action requires "condition" (string)`);
+                }
+                if (!Array.isArray(a.thenActions)) {
+                    errors.push(`${pos}: if action requires "thenActions" (array)`);
+                }
+                else {
+                    const thenCheck = validateActionSchema(a.thenActions);
+                    errors.push(...thenCheck.errors.map(e => `${pos}.thenActions: ${e}`));
+                }
+                if (a.elseActions && !Array.isArray(a.elseActions)) {
+                    errors.push(`${pos}: elseActions must be an array if present`);
+                }
+                else if (a.elseActions) {
+                    const elseCheck = validateActionSchema(a.elseActions);
+                    errors.push(...elseCheck.errors.map(e => `${pos}.elseActions: ${e}`));
+                }
+                break;
+            }
+            case "for": {
+                if (!a.variable || typeof a.variable !== "string" || !validVarName.test(a.variable)) {
+                    errors.push(`${pos}: for action requires valid "variable" name`);
+                }
+                if (!a.iterable || typeof a.iterable !== "string") {
+                    errors.push(`${pos}: for action requires "iterable" (string)`);
+                }
+                if (!Array.isArray(a.bodyActions)) {
+                    errors.push(`${pos}: for action requires "bodyActions" (array)`);
+                }
+                else {
+                    const bodyCheck = validateActionSchema(a.bodyActions);
+                    errors.push(...bodyCheck.errors.map(e => `${pos}.bodyActions: ${e}`));
+                }
+                break;
+            }
+            default: {
+                errors.push(`${pos}: unknown action kind "${a.kind}"`);
+            }
+        }
+    }
+    return { valid: errors.length === 0, errors };
+}
 /** 构建重试 prompt：精简但包含必要的 IR 语法提示 */
 /** 加载 IR 中所有带 protocol 的函数为协议规则，同时从 protocols.json 加载命名空间初始状态 */
 function loadProtocols(ir) {
@@ -202,28 +314,44 @@ function loadProtocols(ir) {
     }
     return { protocols: [...merged.values()], namespaceInitialStates };
 }
-/** 验证动作序列的协议合法性，返回完整 SSG 跟踪和状态转换 */
+/** 验证动作序列的协议合法性，使用 Semantic Ledger (Phase 3) 纯函数 */
 function validateProtocolWithTransitions(actions, protocols, namespaceInitialStates) {
-    const defaultInit = namespaceInitialStates.get("_global") || "INIT";
-    const ssv = new ssg_validator_1.StateMachineValidator(protocols, defaultInit, namespaceInitialStates);
+    const rules = new Map();
+    for (const p of protocols)
+        rules.set(p.function, p.protocol);
+    const ruleHash = (0, ssg_validator_1.hashRules)(rules);
+    const ctx = {
+        ledger: [],
+        currentState: (0, ssg_validator_1.rebuildState)([], namespaceInitialStates),
+    };
     const transitions = [];
     for (let i = 0; i < actions.length; i++) {
         const a = actions[i];
         if (a.kind === "call" && a.function) {
-            const { result, transition } = ssv.applyWithTransition(a.function, i);
+            const { valid, transition, rejection } = (0, ssg_validator_1.validateTransition)(ctx, a.function, i, rules, namespaceInitialStates, ruleHash);
             transitions.push(transition);
-            if (!result.valid) {
-                const fullTrace = ssv.getTrace();
-                const trace = fullTrace.map(t => ({
+            if (!valid) {
+                const trace = transitions.map(t => ({
                     function: t.function,
-                    statesBefore: t.statesBefore || [],
-                    statesAfter: t.statesAfter || [],
+                    statesBefore: t.statesBefore,
+                    statesAfter: t.statesAfter,
                 }));
-                return { valid: false, rejection: result.rejection, index: i, trace, transitions };
+                return { valid: false, rejection: rejection, index: i, trace, transitions, ruleHash };
             }
+            // Incremental update — O(1) per step
+            ctx.ledger = transitions;
+            ctx.currentState = transition.statesAfter;
         }
     }
-    return { valid: true, transitions };
+    // Invariant check on full ledger
+    const consistency = (0, ssg_validator_1.checkLedgerConsistency)(transitions, namespaceInitialStates);
+    if (!consistency.consistent) {
+        console.error(`[Invariant] Ledger consistency violations: ${consistency.violations.length}`);
+        for (const v of consistency.violations) {
+            console.error(`  [${v.invariant}] index=${v.index}: ${v.detail}`);
+        }
+    }
+    return { valid: true, transitions, ledgerConsistent: consistency.consistent, ruleHash };
 }
 /** SSG 确定性修复：当协议违规有已知修复路径时，自动插入缺失函数 */
 function attemptSSGRepair(actions, rejection, ir, protocols, namespaceInitialStates) {
@@ -274,6 +402,17 @@ function attemptSSGRepair(actions, rejection, ir, protocols, namespaceInitialSta
 async function plan(userIntent) {
     (0, llm_1.resetCallCount)();
     const ir = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
+    // 初始化执行会话和快照（需在抗体快速通道前创建，以便记录 antibody hits）
+    const sessionId = (0, runtime_types_1.generateSessionId)();
+    const session = {
+        sessionId,
+        intent: userIntent,
+        attempts: [],
+        resolved: false,
+        startedAt: Date.now(),
+    };
+    const snapshot = (0, semantic_snapshot_1.createSnapshot)(ir, userIntent);
+    const snapshotId = (0, semantic_snapshot_1.saveSnapshot)(snapshot);
     // 语义模板快速通道
     const cachedTemplate = (0, memory_layer_1.findSemanticTemplate)(userIntent);
     if (cachedTemplate && cachedTemplate.successRate >= 0.8 && cachedTemplate.useCount >= 2) {
@@ -304,19 +443,82 @@ async function plan(userIntent) {
                 }
                 return action;
             });
+            const antibodyHit = {
+                level: aclLabel,
+                signature: top.signature,
+                fixPath: top.fixPath,
+                similarityScore: top._score,
+                action: "fast_path",
+                llmCallsSaved: 1,
+                estimatedTokensSaved: Math.ceil((0, llm_1.estimateTokens)(SYSTEM_PROMPT + userIntent) * 1.2),
+            };
             // 验证抗体序列
             const { protocols, namespaceInitialStates } = loadProtocols(ir);
+            const antibodyRuleHash = (() => {
+                const rules = new Map();
+                for (const p of protocols)
+                    rules.set(p.function, p.protocol);
+                return (0, ssg_validator_1.hashRules)(rules);
+            })();
             if (protocols.length > 0) {
                 const validation = validateProtocolWithTransitions(antibodyActions, protocols, namespaceInitialStates);
                 if (validation.valid) {
-                    console.error("⚡ ACL-4 抗体快速通道: 0 LLM 调用，直接返回免疫验证序列");
+                    console.error(`⚡ ACL-4 抗体快速通道: 0 LLM 调用，节省 ~${Math.ceil((0, llm_1.estimateTokens)(SYSTEM_PROMPT + userIntent) * 1.2)} tokens (est.)`);
+                    const antibodyAttempt = {
+                        id: (0, runtime_types_1.generateAttemptId)(),
+                        sessionId: session.sessionId,
+                        attemptNumber: 1,
+                        inputIntent: userIntent,
+                        plannerSeed: (0, runtime_types_1.generatePlannerSeed)("antibody-acl4", "immune"),
+                        constraintSnapshotId: snapshotId,
+                        generatedActions: antibodyActions,
+                        transitions: validation.transitions,
+                        violations: [],
+                        outcome: "success",
+                        timestamp: Date.now(),
+                        llmCallCount: 0,
+                        durationMs: 0,
+                        antibodyHit,
+                        ruleHash: validation.ruleHash,
+                    };
+                    session.attempts.push(antibodyAttempt);
+                    session.successfulAttempt = antibodyAttempt;
+                    session.ruleHash = validation.ruleHash;
+                    session.resolved = true;
+                    session.snapshotId = snapshotId;
+                    session.endedAt = Date.now();
+                    (0, failure_corpus_1.recordSession)(session);
                     (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: antibodyActions, success: true });
                     return antibodyActions;
                 }
             }
             else {
                 // 无协议规则，直接信任抗体
-                console.error("⚡ ACL-4 抗体快速通道: 0 LLM 调用（无协议约束）");
+                console.error(`⚡ ACL-4 抗体快速通道: 0 LLM 调用（无协议约束），节省 ~${Math.ceil((0, llm_1.estimateTokens)(SYSTEM_PROMPT + userIntent) * 1.2)} tokens (est.)`);
+                const antibodyAttempt = {
+                    id: (0, runtime_types_1.generateAttemptId)(),
+                    sessionId: session.sessionId,
+                    attemptNumber: 1,
+                    inputIntent: userIntent,
+                    plannerSeed: (0, runtime_types_1.generatePlannerSeed)("antibody-acl4", "immune"),
+                    constraintSnapshotId: snapshotId,
+                    generatedActions: antibodyActions,
+                    transitions: [],
+                    violations: [],
+                    outcome: "success",
+                    timestamp: Date.now(),
+                    llmCallCount: 0,
+                    durationMs: 0,
+                    antibodyHit,
+                    ruleHash: antibodyRuleHash,
+                };
+                session.attempts.push(antibodyAttempt);
+                session.successfulAttempt = antibodyAttempt;
+                session.ruleHash = antibodyRuleHash;
+                session.resolved = true;
+                session.snapshotId = snapshotId;
+                session.endedAt = Date.now();
+                (0, failure_corpus_1.recordSession)(session);
                 (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: antibodyActions, success: true });
                 return antibodyActions;
             }
@@ -361,14 +563,6 @@ ${RETRY_HINT}
     let finalActions = [];
     let currentPrompt = userPrompt;
     let useSystem = true;
-    const sessionId = (0, runtime_types_1.generateSessionId)();
-    const session = {
-        sessionId,
-        intent: userIntent,
-        attempts: [],
-        resolved: false,
-        startedAt: Date.now(),
-    };
     if (cp) {
         console.error(`📌 恢复 checkpoint: 已完成 ${cp.attemptIndex} 次尝试，从第 ${cp.attemptIndex + 1} 次继续`);
         startRetry = cp.attemptIndex;
@@ -380,25 +574,31 @@ ${RETRY_HINT}
         }
     }
     const { protocols, namespaceInitialStates } = loadProtocols(ir);
+    const sessionRuleHash = (() => {
+        const rules = new Map();
+        for (const p of protocols)
+            rules.set(p.function, p.protocol);
+        return (0, ssg_validator_1.hashRules)(rules);
+    })();
+    session.ruleHash = sessionRuleHash;
     function getMaskedFuncList() {
         if (protocols.length === 0)
             return compactFuncList;
-        const defaultInit = namespaceInitialStates.get("_global") || "INIT";
-        const ssv = new ssg_validator_1.StateMachineValidator(protocols, defaultInit, namespaceInitialStates);
+        const rules = new Map();
+        for (const p of protocols)
+            rules.set(p.function, p.protocol);
+        const ctx = { ledger: [], currentState: (0, ssg_validator_1.rebuildState)([], namespaceInitialStates) };
         const legalFuncs = topFuncs.filter((f) => {
             const proto = protocols.find((p) => p.function === f.name);
             if (!proto)
                 return true;
-            const result = ssv.apply(f.name);
-            return result.valid;
+            const { valid } = (0, ssg_validator_1.validateTransition)(ctx, f.name, 0, rules, namespaceInitialStates);
+            return valid;
         });
         if (legalFuncs.length === topFuncs.length)
             return compactFuncList;
         return buildCompactFuncList(legalFuncs);
     }
-    // 创建 IR 语义快照，用于确定性回放
-    const snapshot = (0, semantic_snapshot_1.createSnapshot)(ir, userIntent);
-    const snapshotId = (0, semantic_snapshot_1.saveSnapshot)(snapshot);
     const maxRetries = 3;
     for (let r = startRetry; r < maxRetries; r++) {
         let text;
@@ -426,6 +626,39 @@ ${RETRY_HINT}
             useSystem = false;
             continue;
         }
+        // P2: JSON schema pre-validation — catch structural errors early
+        const schemaCheck = validateActionSchema(rawActions);
+        if (!schemaCheck.valid) {
+            console.error("⚠️ JSON schema 校验失败:", schemaCheck.errors.join("; "));
+            currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n输出格式错误：${schemaCheck.errors.join("；")}。请修正 JSON 结构。\n${RETRY_HINT}\n只输出 JSON。`;
+            useSystem = false;
+            const schemaViolation = {
+                svl: 1,
+                violatedConstraint: "schema",
+                actionIndex: 0,
+                description: schemaCheck.errors.join("; "),
+            };
+            const schemaAttempt = {
+                id: (0, runtime_types_1.generateAttemptId)(),
+                sessionId: session.sessionId,
+                attemptNumber: r + 1,
+                inputIntent: userIntent,
+                plannerSeed: (0, runtime_types_1.generatePlannerSeed)(currentPrompt, process.env.LLM_MODEL || "deepseek-chat"),
+                constraintSnapshotId: snapshotId,
+                generatedActions: rawActions,
+                transitions: [],
+                violations: [schemaViolation],
+                outcome: "constraint_violation",
+                timestamp: Date.now(),
+                llmCallCount: 0,
+                durationMs: 0,
+                ruleHash: sessionRuleHash,
+            };
+            session.attempts.push(schemaAttempt);
+            (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: rawActions, success: false, svlViolated: "SVL-1" });
+            (0, failure_corpus_1.saveCheckpoint)(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });
+            continue;
+        }
         // 解析 $变量名 引用为实际变量名
         rawActions = rawActions.map(a => {
             if (a.kind === "call" && a.args) {
@@ -446,17 +679,16 @@ ${RETRY_HINT}
         if (!seqResult.valid) {
             const errorsFlat = seqResult.errors.flat();
             console.error("⚠️ 序列校验失败:", errorsFlat.join(", "));
-            const svl = determineSVL(errorsFlat);
-            const missingFnMatch = errorsFlat.join(" ").match(/函数\s*['"]?(\w+)['"]?\s*不存在/);
-            const typeMatch = errorsFlat.join(" ").match(/(\w+)\s*(参数数量不匹配|类型不匹配|参数)/);
-            const varMatch = errorsFlat.join(" ").match(/变量\s*['"]?(\w+)['"]?\s*(未定义|在赋值前被引用)/);
-            const violation = {
-                svl: parseInt(svl.split("-")[1]),
-                violatedConstraint: determineConstraintType(svl),
-                actionIndex: 0,
-                missingStates: missingFnMatch ? [missingFnMatch[1]] : (typeMatch ? [typeMatch[1]] : (varMatch ? [varMatch[1]] : undefined)),
-                description: errorsFlat.join("; "),
-            };
+            // Use structured violations directly from validator
+            const violations = seqResult.violations.length > 0
+                ? seqResult.violations
+                : [{
+                        svl: 1,
+                        violatedConstraint: "symbol_existence",
+                        actionIndex: 0,
+                        description: errorsFlat.join("; "),
+                    }];
+            const primarySvl = `SVL-${violations[0].svl}`;
             const attempt = {
                 id: (0, runtime_types_1.generateAttemptId)(),
                 sessionId: session.sessionId,
@@ -466,25 +698,26 @@ ${RETRY_HINT}
                 constraintSnapshotId: snapshotId,
                 generatedActions: filtered,
                 transitions: [],
-                violations: [violation],
+                violations,
                 outcome: "constraint_violation",
                 timestamp: Date.now(),
                 llmCallCount: 0,
                 durationMs: 0,
+                ruleHash: sessionRuleHash,
             };
             session.attempts.push(attempt);
             (0, failure_corpus_1.recordFailure)({
                 intent: userIntent,
                 projectFunctions: ir.map((f) => f.name),
-                violatedSVL: svl,
-                constraintType: determineConstraintType(svl),
+                violatedSVL: primarySvl,
+                constraintType: violations[0].violatedConstraint,
                 actionSequence: filtered,
                 errorDetail: errorsFlat.join("; "),
-                ssgMissingFunctions: missingFnMatch ? [missingFnMatch[1]] : (typeMatch ? [typeMatch[1]] : (varMatch ? [varMatch[1]] : undefined)),
+                ssgMissingFunctions: violations[0].missingStates,
                 plannerAttempt: r + 1,
                 plannerRetryTotal: maxRetries,
             });
-            (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: filtered, success: false, svlViolated: svl });
+            (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: filtered, success: false, svlViolated: primarySvl });
             currentPrompt = `可用函数：\n${compactFuncList}\n\n需求：${userIntent}\n\n错误：${errorsFlat.join("；")}。请修正。\n${RETRY_HINT}\n只输出 JSON。`;
             useSystem = false;
             (0, failure_corpus_1.saveCheckpoint)(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });
@@ -495,7 +728,7 @@ ${RETRY_HINT}
             const protoResult = validateProtocolWithTransitions(filtered, protocols, namespaceInitialStates);
             if (!protoResult.valid && protoResult.rejection) {
                 const rej = protoResult.rejection;
-                const explain = ssg_validator_1.StateMachineValidator.explainRejection(rej);
+                const explain = (0, ssg_validator_1.explainRejection)(rej);
                 console.error(explain);
                 const violation = {
                     svl: 4,
@@ -506,7 +739,7 @@ ${RETRY_HINT}
                     missingStates: rej.missingFunctions,
                     fixPath: rej.fixPath,
                     namespace: rej.namespace,
-                    description: JSON.stringify(ssg_validator_1.StateMachineValidator.rejectionToJSON(rej)),
+                    description: JSON.stringify((0, ssg_validator_1.rejectionToJSON)(rej)),
                 };
                 const attempt = {
                     id: (0, runtime_types_1.generateAttemptId)(),
@@ -522,6 +755,7 @@ ${RETRY_HINT}
                     timestamp: Date.now(),
                     llmCallCount: 0,
                     durationMs: 0,
+                    ruleHash: sessionRuleHash,
                 };
                 session.attempts.push(attempt);
                 (0, failure_corpus_1.recordFailure)({
@@ -530,7 +764,7 @@ ${RETRY_HINT}
                     violatedSVL: "SVL-4",
                     constraintType: "protocol",
                     actionSequence: filtered,
-                    errorDetail: JSON.stringify(ssg_validator_1.StateMachineValidator.rejectionToJSON(rej)),
+                    errorDetail: JSON.stringify((0, ssg_validator_1.rejectionToJSON)(rej)),
                     ssgState: rej.currentState,
                     ssgTrace: protoResult.trace,
                     ssgFixPath: rej.fixPath,
@@ -579,6 +813,7 @@ ${RETRY_HINT}
                 timestamp: Date.now(),
                 llmCallCount: 0,
                 durationMs: 0,
+                ruleHash: sessionRuleHash,
             };
             session.attempts.push(attempt);
             (0, failure_corpus_1.recordFailure)({
@@ -598,6 +833,17 @@ ${RETRY_HINT}
             continue;
         }
         // 校验通过：构建成功 Attempt
+        const successAntibodyHit = antibodyHint
+            ? {
+                level: antibodies[0]?.antibodyLevel || "ACL-3",
+                signature: antibodies[0]?.signature || "",
+                fixPath: antibodies[0]?.fixPath || [],
+                similarityScore: antibodies[0]?._score || 0,
+                action: "injected_hint",
+                llmCallsSaved: 0,
+                estimatedTokensSaved: 0,
+            }
+            : undefined;
         const successAttempt = {
             id: (0, runtime_types_1.generateAttemptId)(),
             sessionId: session.sessionId,
@@ -612,6 +858,8 @@ ${RETRY_HINT}
             timestamp: Date.now(),
             llmCallCount: 1,
             durationMs: 0,
+            antibodyHit: successAntibodyHit,
+            ruleHash: sessionRuleHash,
         };
         session.attempts.push(successAttempt);
         session.successfulAttempt = successAttempt;
@@ -647,6 +895,7 @@ ${RETRY_HINT}
                 timestamp: Date.now(),
                 llmCallCount: 0,
                 durationMs: 0,
+                ruleHash: sessionRuleHash,
             };
             session.attempts.push(fallbackAttempt);
             session.successfulAttempt = fallbackAttempt;

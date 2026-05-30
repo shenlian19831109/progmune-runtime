@@ -10,11 +10,24 @@ import * as path from 'path';
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// ── Load .env ──
+const ENV_FILE = path.resolve(__dirname, "..", ".env");
+if (fs.existsSync(ENV_FILE)) {
+  const envContent = fs.readFileSync(ENV_FILE, "utf-8");
+  for (const line of envContent.split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const eqIdx = trimmed.indexOf("=");
+    if (eqIdx === -1) continue;
+    const key = trimmed.slice(0, eqIdx).trim();
+    const value = trimmed.slice(eqIdx + 1).trim();
+    if (!process.env[key]) process.env[key] = value;
+  }
+}
+
 // 处理命令行子命令
 const args = process.argv.slice(2);
 const OPT_IN_FILE = path.resolve(__dirname, '../.progmune_memory/opt_in.json');
-const ENV_FILE = path.resolve(__dirname, '../.env');
-
 if (args[0] === 'test') {
   console.log('🧪 Progmune Runtime 自测试\n');
   const { validateActionSequence } = require('./validator.js');
@@ -135,8 +148,8 @@ PROGMUNE_HUB=${process.env.PROGMUNE_HUB || 'http://localhost:8080/report'}
 }
 
 const { plan } = require('./planner.js');
-const { extractIRPython } = require('./extract-ir-python.js');
-const { emitPython } = require('./python-emitter.js');
+const { extractIR } = require('./extract-ir.js');
+const { emitCode } = require('./emitter.js');
 const { recordRun } = require('./feedback.js');
 const { reportFingerprints } = require('./immune-reporter.js');
 
@@ -148,47 +161,54 @@ const log = {
   success: (msg) => console.error(`[Progmune] ✅ ${msg}`),
 };
 
-// 从独立的协议文件中加载协议，并注入到 IR 中
-function mergeProtocols(irArray) {
-  const protocolsFile = path.resolve(__dirname, '../protocols.json');
-  if (!fs.existsSync(protocolsFile)) return irArray;
-  
-  const protocols = JSON.parse(fs.readFileSync(protocolsFile, 'utf-8'));
-  return irArray.map(fn => {
-    if (protocols[fn.name]) {
-      return { ...fn, protocol: protocols[fn.name] };
-    }
-    return fn;
-  });
-}
-
 async function main() {
-  const server = new Server({
-    name: "progmune",
-    version: "2.0.0"
-  }, { capabilities: { tools: {} } });
+  const server = new Server(
+    { name: "progmune", version: "2.2.0" },
+    { capabilities: { tools: {} } }
+  );
 
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
-    tools: [{
-      name: "progmune_generate",
-      description: "生成类型安全的Python代码，仅使用项目中真实存在的函数。",
-      inputSchema: {
-        type: "object",
-        properties: {
-          intent: { type: "string", description: "编程意图" },
-          projectPath: { type: "string", description: "项目根目录绝对路径" }
+    tools: [
+      {
+        name: "progmune_generate",
+        description:
+          "Generate type-safe TypeScript code using only functions that actually exist in the project. Multi-layer validation: symbol existence, type arity, variable flow, SSG protocol constraints.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            intent: {
+              type: "string",
+              description: "Natural-language programming intent, e.g. 'authenticate a user and issue a JWT token'",
+            },
+            projectPath: {
+              type: "string",
+              description: "Absolute path to the project root (must contain TypeScript source files)",
+            },
+          },
+          required: ["intent", "projectPath"],
         },
-        required: ["intent", "projectPath"]
-      }
-    }, {
-      name: "progmune_status",
-      description: "查看 Progmune Runtime 的运行状态、统计信息和健康检查。",
-      inputSchema: {
-        type: "object",
-        properties: {},
-        required: []
-      }
-    }]
+      },
+      {
+        name: "progmune_status",
+        description: "View Progmune Runtime health: LLM config, immune network stats, failure patterns, memory state.",
+        inputSchema: { type: "object", properties: {}, required: [] },
+      },
+      {
+        name: "progmune_check",
+        description:
+          "Run the immune audit pipeline: IR extraction, SSG protocol validation, ledger invariants (Invariant-0 + Invariant-1 + Replay), failure genome, antibody efficacy.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            projectPath: {
+              type: "string",
+              description: "Absolute path to the project root",
+            },
+          },
+          required: ["projectPath"],
+        },
+      },
+    ],
   }));
 
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
@@ -196,96 +216,160 @@ async function main() {
       const { intent, projectPath } = request.params.arguments;
 
       if (!process.env.LLM_API_KEY) {
-        return { content: [{ type: "text", text: `❌ 未设置 LLM_API_KEY。
+        return {
+          content: [
+            {
+              type: "text",
+              text: `❌ LLM_API_KEY not set.
 
-Progmune 需要 LLM API 密钥来生成代码。请根据你的客户端选择一种方式配置：
+Progmune needs an LLM API key. Configure via:
 
-【Claude Code】编辑 ~/.claude/settings.json，在 mcpServers.progmune 中添加：
-  "env": {
-    "LLM_API_KEY": "你的DeepSeek或OpenAI密钥",
-    "LLM_BASE_URL": "https://api.deepseek.com/v1"
-  }
+  .env file (loaded automatically):
+    LLM_API_KEY=your-key
+    LLM_BASE_URL=https://api.deepseek.com/v1
+    LLM_MODEL=deepseek-chat
 
-【命令行运行】
-  export LLM_API_KEY='你的密钥'
-  npx progmune-runtime
+Or export: export LLM_API_KEY='your-key'
 
-【快速配置】
-  npx progmune-runtime setup 你的密钥
-
-支持 DeepSeek 和 OpenAI 兼容接口。
-获取密钥: https://platform.deepseek.com/api_keys` }] };
+Supports DeepSeek and OpenAI-compatible APIs.
+Get a key: https://platform.deepseek.com/api_keys`,
+            },
+          ],
+        };
       }
 
       if (!fs.existsSync(OPT_IN_FILE)) {
-        return { content: [{ type: "text", text: "⚠️ 请先完成免疫网络配置。\n\n运行以下命令开启（推荐）：\n  npx progmune-runtime opt-in enable\n\n或运行以下命令以离线模式使用：\n  npx progmune-runtime opt-in disable\n\n配置完成后重启客户端即可使用。" }] };
+        return {
+          content: [
+            {
+              type: "text",
+              text: "⚠️ Immune network not configured.\n\nEnable (recommended):\n  npx progmune-runtime opt-in enable\n\nOr disable for offline mode:\n  npx progmune-runtime opt-in disable\n\nThen restart Claude Code.",
+            },
+          ],
+        };
       }
 
-      // 校验 projectPath
-      if (!projectPath || typeof projectPath !== 'string') {
-        return { content: [{ type: "text", text: "❌ projectPath 参数必须是一个非空字符串（项目根目录的绝对路径）。" }] };
+      // Validate projectPath
+      if (!projectPath || typeof projectPath !== "string") {
+        return {
+          content: [
+            { type: "text", text: "❌ projectPath must be a non-empty string (absolute path to the project root)." },
+          ],
+        };
       }
       if (!fs.existsSync(projectPath)) {
-        return { content: [{ type: "text", text: `❌ projectPath 指定的路径不存在: ${projectPath}\n请确认路径正确后重试。` }] };
+        return {
+          content: [{ type: "text", text: `❌ Path not found: ${projectPath}` }],
+        };
       }
       if (!fs.statSync(projectPath).isDirectory()) {
-        return { content: [{ type: "text", text: `❌ projectPath 不是目录: ${projectPath}\n请提供项目根目录的绝对路径。` }] };
-      }
-      // 检查是否为 Python 项目（有 .py 文件）
-      const hasPyFiles = fs.readdirSync(projectPath).some(f => f.endsWith('.py'));
-      if (!hasPyFiles) {
-        log.warn(`项目目录 ${projectPath} 中未找到 .py 文件，IR 可能为空`);
+        return {
+          content: [{ type: "text", text: `❌ Not a directory: ${projectPath}` }],
+        };
       }
 
-      const fns = extractIRPython(projectPath);
-      if (fns.length === 0) {
-        log.warn(`项目 ${projectPath} 中未提取到任何函数定义`);
-      }
-
-      // 交叉校验 protocols.json 与 IR
-      const protocolsFile = path.resolve(__dirname, '../protocols.json');
-      if (fs.existsSync(protocolsFile)) {
-        const protocols = JSON.parse(fs.readFileSync(protocolsFile, 'utf-8'));
-        for (const funcName of Object.keys(protocols)) {
-          if (!fns.find(f => f.name === funcName)) {
-            log.warn(`protocols.json 中定义了函数 "${funcName}" 的协议，但 IR 中未找到该函数，协议将被忽略`);
-          }
+      // Check for TypeScript source files
+      const hasTsFiles = (() => {
+        try {
+          return fs.readdirSync(projectPath).some(
+            (f) => f.endsWith(".ts") || f.endsWith(".tsx")
+          );
+        } catch {
+          return false;
         }
+      })();
+      if (!hasTsFiles) {
+        log.warn(`No .ts/.tsx files found in project root, IR may be empty`);
       }
 
-      // 关键步骤：将协议信息合并到 IR 中
-      const irWithProtocols = mergeProtocols(fns);
-      fs.writeFileSync("ir.json", JSON.stringify(irWithProtocols, null, 2));
+      // IR extraction (TypeScript via ts-morph)
+      let ir;
+      try {
+        ir = extractIR(projectPath);
+      } catch (e) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `❌ IR extraction failed: ${e.message}\n\nEnsure the project has a tsconfig.json or .ts source files.`,
+            },
+          ],
+        };
+      }
 
-      // 设置项目路径环境变量，确保记忆系统按项目隔离
+      if (ir.length === 0) {
+        log.warn(`No functions extracted from ${projectPath}`);
+      }
+
+      // Cross-validate protocols.json with IR
+      const protocolsFile = path.resolve(__dirname, "..", "protocols.json");
+      if (fs.existsSync(protocolsFile)) {
+        try {
+          const protocols = JSON.parse(fs.readFileSync(protocolsFile, "utf-8"));
+          const rules = protocols.rules || {};
+          for (const funcName of Object.keys(rules)) {
+            if (!ir.find((f) => f.name === funcName)) {
+              log.warn(
+                `protocols.json defines "${funcName}" but IR has no such function — protocol ignored`
+              );
+            }
+          }
+        } catch {}
+      }
+
+      // Write ir.json for planner
+      fs.writeFileSync("ir.json", JSON.stringify(ir, null, 2));
+
+      // Set project path for memory isolation
       process.env.PROGMUNE_PROJECT_DIR = projectPath;
 
-      const actions = await plan(intent);
-      if (!actions || actions.length === 0) {
-        // 即使失败也上报指纹
+      // Plan
+      let actions;
+      try {
+        actions = await plan(intent);
+      } catch (e) {
+        log.error(`Planning failed: ${e.message}`);
         reportFingerprints().catch(() => {});
-        return { content: [{ type: "text", text: "无法生成满足约束的代码。" }] };
+        return {
+          content: [{ type: "text", text: `❌ Planning failed: ${e.message}` }],
+        };
       }
-      const code = emitPython(actions);
+
+      if (!actions || actions.length === 0) {
+        reportFingerprints().catch(() => {});
+        return {
+          content: [
+            {
+              type: "text",
+              text: "Could not generate constraint-satisfying TypeScript code.",
+            },
+          ],
+        };
+      }
+
+      // Emit TypeScript code
+      const code = emitCode(actions);
       recordRun(intent, actions, true);
-      // 异步上报指纹，不阻塞响应
       reportFingerprints().catch(() => {});
+
       return { content: [{ type: "text", text: code }] };
-    } else if (request.params.name === "progmune_status") {
-      const { getAllFailures, getTopFailurePatterns } = require('./failure-corpus.js');
-      const { getRecentEpisodes } = require('./memory-layer.js');
-      const { callCount } = require('./llm.js');
+    }
+
+    if (request.params.name === "progmune_status") {
+      const { getAllFailures, getTopFailurePatterns } = require("./failure-corpus.js");
+      const { getRecentEpisodes } = require("./memory-layer.js");
+      const { callCount } = require("./llm.js");
       const failures = getAllFailures();
       const patterns = getTopFailurePatterns(5);
       const episodes = getRecentEpisodes(5);
-      const hubEndpoint = process.env.PROGMUNE_HUB || '未配置';
+      const hubEndpoint = process.env.PROGMUNE_HUB || "not configured";
       const hubReachable = await checkHubReachable(hubEndpoint);
 
       const status = {
-        version: "2.0.5",
+        version: "2.2.0",
         llm: {
-          model: process.env.LLM_MODEL || 'deepseek-chat',
-          baseUrl: process.env.LLM_BASE_URL || 'https://api.deepseek.com/v1',
+          model: process.env.LLM_MODEL || "deepseek-chat",
+          baseUrl: process.env.LLM_BASE_URL || "https://api.deepseek.com/v1",
           callCount: callCount || 0,
           apiKeySet: !!process.env.LLM_API_KEY,
         },
@@ -300,29 +384,134 @@ Progmune 需要 LLM API 密钥来生成代码。请根据你的客户端选择�
           recentEpisodes: episodes.length,
         },
       };
-      return { content: [{ type: "text", text: JSON.stringify(status, null, 2) }] };
+      return {
+        content: [{ type: "text", text: JSON.stringify(status, null, 2) }],
+      };
     }
-    throw new Error("未知工具");
+
+    if (request.params.name === "progmune_check") {
+      const { projectPath } = request.params.arguments;
+
+      if (!projectPath || !fs.existsSync(projectPath)) {
+        return {
+          content: [{ type: "text", text: `❌ Invalid projectPath: ${projectPath}` }],
+        };
+      }
+
+      process.env.PROGMUNE_PROJECT_DIR = projectPath;
+
+      const lines = [];
+      const G = (s) => `✔ ${s}`;
+      const B = (s) => `✖ ${s}`;
+
+      // 1. IR extraction
+      try {
+        const ir = extractIR(projectPath);
+        lines.push(G(`IR: ${ir.length} functions extracted`));
+      } catch (e) {
+        lines.push(B(`IR: ${e.message}`));
+      }
+
+      // 2. SSG protocols
+      const protoPath = path.resolve(projectPath, "protocols.json");
+      if (fs.existsSync(protoPath)) {
+        try {
+          const protoDef = JSON.parse(fs.readFileSync(protoPath, "utf-8"));
+          const { parseProtocolsFromJSON } = require("./ssg-validator.js");
+          const protocols = parseProtocolsFromJSON(protoDef);
+          lines.push(G(`SSG: ${protocols.length} protocol rules loaded`));
+        } catch (e) {
+          lines.push(B(`SSG: ${e.message}`));
+        }
+      } else {
+        lines.push(`! SSG: no protocols.json`);
+      }
+
+      // 3. Failure genome + antibodies
+      try {
+        const { getFailureGenome, getAntibodyStats } = require("./failure-corpus.js");
+        const genome = getFailureGenome();
+        const ab = getAntibodyStats();
+        lines.push(
+          `  Failures: ${genome.totalFailures} | SVL-1:${genome.bySVL["SVL-1"]} SVL-2:${genome.bySVL["SVL-2"]} SVL-3:${genome.bySVL["SVL-3"]} SVL-4:${genome.bySVL["SVL-4"]}`
+        );
+        lines.push(
+          `  Antibodies: ${ab.totalHits} hits | ${ab.fastPathHits} fast-path | ${ab.totalLLMCallsSaved} LLM saved | ${ab.totalTokensSaved} tokens saved`
+        );
+      } catch (e) {
+        lines.push(B(`Failure corpus: ${e.message}`));
+      }
+
+      // 4. Ledger invariants
+      try {
+        const { checkLedgerConsistency } = require("./ssg-validator.js");
+        const sessionsDir = path.join(projectPath, ".progmune_corpus", "sessions");
+        if (fs.existsSync(sessionsDir)) {
+          let checked = 0,
+            consistent = 0;
+          const nsInit = new Map();
+          nsInit.set("_global", "UNAUTHENTICATED");
+          for (const file of fs.readdirSync(sessionsDir)) {
+            if (!file.endsWith(".json")) continue;
+            try {
+              const session = JSON.parse(
+                fs.readFileSync(path.join(sessionsDir, file), "utf-8")
+              );
+              for (const attempt of session.attempts || []) {
+                const ts = attempt.transitions || [];
+                if (ts.length === 0) continue;
+                const result = checkLedgerConsistency(ts, nsInit);
+                checked++;
+                if (result.consistent) consistent++;
+              }
+            } catch {}
+          }
+          if (checked > 0) {
+            const ok = consistent === checked ? "all clean" : `${checked - consistent} violations`;
+            lines.push(`  Ledger: ${checked} ledgers checked, ${ok}`);
+          } else {
+            lines.push(`  Ledger: no ledgers found`);
+          }
+        } else {
+          lines.push(`  Ledger: no session data`);
+        }
+      } catch (e) {
+        lines.push(B(`Ledger: ${e.message}`));
+      }
+
+      return { content: [{ type: "text", text: lines.join("\n") }] };
+    }
+
+    throw new Error(`Unknown tool: ${request.params.name}`);
   });
 
   async function checkHubReachable(hubUrl) {
-    if (!hubUrl || hubUrl === '未配置') return false;
+    if (!hubUrl || hubUrl === "not configured") return false;
     try {
-      const http = require('http');
-      const https = require('https');
-      const transport = hubUrl.startsWith('https') ? https : http;
+      const http = require("http");
+      const https = require("https");
+      const transport = hubUrl.startsWith("https") ? https : http;
       return new Promise((resolve) => {
         const req = transport.get(hubUrl, (res) => {
           resolve(res.statusCode === 200);
         });
-        req.on('error', () => resolve(false));
-        req.setTimeout(3000, () => { req.destroy(); resolve(false); });
+        req.on("error", () => resolve(false));
+        req.setTimeout(3000, () => {
+          req.destroy();
+          resolve(false);
+        });
       });
-    } catch { return false; }
+    } catch {
+      return false;
+    }
   }
 
   const transport = new StdioServerTransport();
   await server.connect(transport);
+  log.success("Progmune MCP server ready (TypeScript)");
 }
 
-main().catch(console.error);
+main().catch((e) => {
+  console.error("[Progmune] Fatal:", e);
+  process.exit(1);
+});

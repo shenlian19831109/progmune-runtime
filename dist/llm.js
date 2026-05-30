@@ -8,7 +8,10 @@ exports.resetCallCount = resetCallCount;
 exports.estimateTokens = estimateTokens;
 exports.generate = generate;
 exports.chat = chat;
-require("dotenv/config");
+try {
+    require("dotenv/config");
+}
+catch { }
 const openai_1 = __importDefault(require("openai"));
 const provider = process.env.LLM_PROVIDER || "deepseek";
 const configs = {

@@ -46,6 +46,7 @@ exports.getAllSessions = getAllSessions;
 exports.getLearnedPatterns = getLearnedPatterns;
 exports.queryAntibodies = queryAntibodies;
 exports.getSemanticHeatmap = getSemanticHeatmap;
+exports.getAntibodyStats = getAntibodyStats;
 exports.generateCandidateRules = generateCandidateRules;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
@@ -481,6 +482,51 @@ function getSemanticHeatmap() {
         .sort((a, b) => b.adaptationCount - a.adaptationCount)
         .slice(0, 8);
     return { fragileProtocols, svlHotspots, constraintClusters, highFrictionIntents };
+}
+/** 抗体效能统计：量化免疫加速节省的 LLM 调用和 token */
+function getAntibodyStats() {
+    const sessions = getAllSessions();
+    let totalHits = 0;
+    let fastPathHits = 0;
+    let injectedHintHits = 0;
+    let totalLLMCallsSaved = 0;
+    let totalTokensSaved = 0;
+    const byLevel = {};
+    const sigMap = new Map();
+    for (const s of sessions) {
+        for (const a of s.attempts) {
+            const hit = a.antibodyHit;
+            if (!hit)
+                continue;
+            totalHits++;
+            if (hit.action === "fast_path")
+                fastPathHits++;
+            else if (hit.action === "injected_hint")
+                injectedHintHits++;
+            totalLLMCallsSaved += hit.llmCallsSaved || 0;
+            totalTokensSaved += hit.estimatedTokensSaved || 0;
+            const level = hit.level || "ACL-1";
+            const lb = byLevel[level] || { hits: 0, llmSaved: 0, tokensSaved: 0 };
+            lb.hits++;
+            lb.llmSaved += hit.llmCallsSaved || 0;
+            lb.tokensSaved += hit.estimatedTokensSaved || 0;
+            byLevel[level] = lb;
+            const sig = hit.signature || "unknown";
+            const se = sigMap.get(sig) || { hits: 0, similarities: [] };
+            se.hits++;
+            se.similarities.push(hit.similarityScore || 0);
+            sigMap.set(sig, se);
+        }
+    }
+    const topSignatures = [...sigMap.entries()]
+        .map(([signature, d]) => ({
+        signature,
+        hits: d.hits,
+        avgSimilarity: Math.round((d.similarities.reduce((a, b) => a + b, 0) / d.similarities.length) * 100) / 100,
+    }))
+        .sort((a, b) => b.hits - a.hits)
+        .slice(0, 10);
+    return { totalHits, fastPathHits, injectedHintHits, totalLLMCallsSaved, totalTokensSaved, byLevel, topSignatures };
 }
 function generateCandidateRules() {
     const genome = getFailureGenome();

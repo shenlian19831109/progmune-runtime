@@ -149,57 +149,80 @@ function checkVariableFlow(actions) {
  * 校验单个动作的合法性（函数存在、类型匹配、参数数量）。
  * @protocol namespace=dev_pipeline pre_states=["IR_EXTRACTED"] post_states=["ACTION_VALIDATED"]
  */
-function validateAction(action) {
+function validateAction(action, actionIndex) {
     const functions = loadIR();
     const errors = [];
+    const violations = [];
+    const idx = actionIndex ?? 0;
     if (!action || !["call", "if", "for", "assign", "return"].includes(action.kind)) {
-        errors.push(`无效动作类型: '${action?.kind}'`);
-        return { valid: false, errors };
+        const msg = `无效动作类型: '${action?.kind}'`;
+        errors.push(msg);
+        violations.push({ svl: 1, violatedConstraint: "symbol_existence", actionIndex: idx, description: msg });
+        return { valid: false, errors, violations };
     }
     if (action.kind === "call") {
         const fn = functions.find((f) => f.name === action.function);
         if (!fn) {
             if (action.function && BUILTIN_WHITELIST.has(action.function))
-                return { valid: true, errors: [] };
-            errors.push(`函数 '${action.function}' 不存在`);
-            return { valid: false, errors };
+                return { valid: true, errors: [], violations: [] };
+            const msg = `函数 '${action.function}' 不存在`;
+            errors.push(msg);
+            violations.push({ svl: 1, violatedConstraint: "symbol_existence", actionIndex: idx, missingStates: [action.function], description: msg });
+            return { valid: false, errors, violations };
         }
         if (!action.args) {
-            errors.push(`函数 '${action.function}' 缺少参数列表`);
-            return { valid: false, errors };
+            const msg = `函数 '${action.function}' 缺少参数列表`;
+            errors.push(msg);
+            violations.push({ svl: 2, violatedConstraint: "type_mismatch", actionIndex: idx, description: msg });
+            return { valid: false, errors, violations };
         }
         if (action.args.length !== fn.params.length) {
-            errors.push(`参数数量不匹配: 期望 ${fn.params.length}, 实际 ${action.args.length}`);
+            const msg = `参数数量不匹配: 期望 ${fn.params.length}, 实际 ${action.args.length}`;
+            errors.push(msg);
+            violations.push({ svl: 2, violatedConstraint: "type_mismatch", actionIndex: idx, description: msg });
         }
         action.args.forEach((arg, i) => {
             if (!arg) {
-                errors.push(`函数 '${action.function}' 的第${i}个参数为空`);
+                const msg = `函数 '${action.function}' 的第${i}个参数为空`;
+                errors.push(msg);
+                violations.push({ svl: 2, violatedConstraint: "type_mismatch", actionIndex: idx, description: msg });
                 return;
             }
             const expected = normalizeType(fn.params[i]?.type);
             const actual = normalizeType(arg.type);
             if (actual !== "any" && expected !== "any" && actual !== expected) {
-                errors.push(`类型不匹配: 参数 '${fn.params[i].name}' 期望 ${expected}, 实际 ${actual}`);
+                const msg = `类型不匹配: 参数 '${fn.params[i].name}' 期望 ${expected}, 实际 ${actual}`;
+                errors.push(msg);
+                violations.push({ svl: 2, violatedConstraint: "type_mismatch", actionIndex: idx, description: msg });
             }
         });
     }
     else if (action.kind === "if") {
         if (action.thenActions) {
-            for (const a of action.thenActions)
-                errors.push(...validateAction(a).errors);
+            for (const a of action.thenActions) {
+                const r = validateAction(a, idx);
+                errors.push(...r.errors);
+                violations.push(...r.violations);
+            }
         }
         if (action.elseActions) {
-            for (const a of action.elseActions)
-                errors.push(...validateAction(a).errors);
+            for (const a of action.elseActions) {
+                const r = validateAction(a, idx);
+                errors.push(...r.errors);
+                violations.push(...r.violations);
+            }
         }
     }
     else if (action.kind === "for") {
         if (action.bodyActions) {
-            for (const a of action.bodyActions)
-                errors.push(...validateAction(a).errors);
+            for (const a of action.bodyActions) {
+                const r = validateAction(a, idx);
+                errors.push(...r.errors);
+                violations.push(...r.violations);
+            }
         }
     }
-    return { valid: errors.length === 0, errors };
+    return { valid: errors.length === 0, errors, violations };
 }
 /**
  * 批量校验动作序列 + 变量流向分析。
@@ -207,13 +230,22 @@ function validateAction(action) {
  */
 function validateActionSequence(actions) {
     const errors = [];
-    for (const action of actions) {
-        const result = validateAction(action);
-        if (!result.valid)
+    const violations = [];
+    for (let i = 0; i < actions.length; i++) {
+        const result = validateAction(actions[i], i);
+        if (!result.valid) {
             errors.push(...result.errors);
+            violations.push(...result.violations);
+        }
     }
     if (errors.length === 0) {
-        errors.push(...checkVariableFlow(actions));
+        const flowErrors = checkVariableFlow(actions);
+        if (flowErrors.length > 0) {
+            errors.push(...flowErrors);
+            for (const msg of flowErrors) {
+                violations.push({ svl: 3, violatedConstraint: "dataflow", actionIndex: 0, description: msg });
+            }
+        }
     }
-    return { valid: errors.length === 0, errors };
+    return { valid: errors.length === 0, errors, violations };
 }
