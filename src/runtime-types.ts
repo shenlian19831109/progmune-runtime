@@ -18,6 +18,9 @@ export type { LedgerFingerprint, FingerprintVerifyResult, RegistrySummary } from
 // Phase 4: Branch Ledger
 export { createRootBranch, createBranch, forkBranch, mergeBranches, flattenBranch, getBranchPath, replayBranch, buildBranchMap, findRootBranch, wrapAsBranch, unwrapBranchTree, describeBranchTree } from "./branch-ledger";
 export type { Branch, BranchReason, BranchReplayResult } from "./branch-ledger";
+// Phase 4: Repair Proposal Engine
+export { suggestRepairs, suggestProtocolRepair, suggestInvariantRepair, applyProposalAsBranch, validateProposal, generateRepairSummary } from "./repair-proposal";
+export type { RepairProposal, RepairStrategy, RepairSummary } from "./repair-proposal";
 export type { SVL } from "./failure-corpus";
 
 // ── Action DSL ──
