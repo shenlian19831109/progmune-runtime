@@ -1,0 +1,237 @@
+{
+  "sessionId": "sess_1780238693023_j3nxt",
+  "intent": "read a JSON file and validate it against a schema",
+  "attempts": [
+    {
+      "id": "att_1780238695907_rn80l",
+      "sessionId": "sess_1780238693023_j3nxt",
+      "attemptNumber": 1,
+      "inputIntent": "read a JSON file and validate it against a schema",
+      "plannerSeed": "bb6efc11",
+      "constraintSnapshotId": "snap_1780238693073_2d50dbee3cd5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "readFileSync",
+          "args": [
+            {
+              "name": "path",
+              "type": "string",
+              "value": "schema.json"
+            },
+            {
+              "name": "encoding",
+              "type": "string",
+              "value": "utf8"
+            }
+          ],
+          "assignTo": "fileContent"
+        },
+        {
+          "kind": "call",
+          "function": "validateActionSchema",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": "fileContent"
+            }
+          ],
+          "assignTo": "validationResult"
+        },
+        {
+          "kind": "return",
+          "value": "validationResult"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "readFileSync",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "validateActionSchema",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780238695907,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780238693023,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780238695907_rn80l",
+    "sessionId": "sess_1780238693023_j3nxt",
+    "attemptNumber": 1,
+    "inputIntent": "read a JSON file and validate it against a schema",
+    "plannerSeed": "bb6efc11",
+    "constraintSnapshotId": "snap_1780238693073_2d50dbee3cd5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "readFileSync",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "schema.json"
+          },
+          {
+            "name": "encoding",
+            "type": "string",
+            "value": "utf8"
+          }
+        ],
+        "assignTo": "fileContent"
+      },
+      {
+        "kind": "call",
+        "function": "validateActionSchema",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "fileContent"
+          }
+        ],
+        "assignTo": "validationResult"
+      },
+      {
+        "kind": "return",
+        "value": "validationResult"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "readFileSync",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "validateActionSchema",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780238695907,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780238693073_2d50dbee3cd5",
+  "endedAt": 1780238695956
+}

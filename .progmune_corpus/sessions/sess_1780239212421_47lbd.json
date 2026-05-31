@@ -1,0 +1,181 @@
+{
+  "sessionId": "sess_1780239212421_47lbd",
+  "intent": "validate an action sequence immediately",
+  "attempts": [
+    {
+      "id": "att_1780239215987_5v5u0",
+      "sessionId": "sess_1780239212421_47lbd",
+      "attemptNumber": 1,
+      "inputIntent": "validate an action sequence immediately",
+      "plannerSeed": "f7033731",
+      "constraintSnapshotId": "snap_1780239212422_2d50dbee3cd5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "validateActionSequence",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": "actions"
+            }
+          ],
+          "assignTo": "result"
+        },
+        {
+          "kind": "return",
+          "value": "result"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "validateActionSequence",
+          "namespace": "dev_pipeline",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": false,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [
+        {
+          "svl": 4,
+          "violatedConstraint": "protocol",
+          "actionIndex": 0,
+          "currentStates": [
+            "IR_STALE"
+          ],
+          "requiredStates": [
+            "ACTION_VALIDATED"
+          ],
+          "missingStates": [
+            "extractIR",
+            "validateAction"
+          ],
+          "fixPath": [
+            "extractIR",
+            "validateAction"
+          ],
+          "namespace": "dev_pipeline",
+          "description": "{\"protocol_violation\":{\"blocked_function\":\"validateActionSequence\",\"namespace\":\"dev_pipeline\",\"current_state\":[\"IR_STALE\"],\"required_pre_states\":[\"ACTION_VALIDATED\"]},\"diagnosis\":{\"missing_functions\":[\"extractIR\",\"validateAction\"],\"fix_path\":[\"extractIR\",\"validateAction\"]}}"
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780239215987,
+      "llmCallCount": 0,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780239212421,
+  "ruleHash": "9dec68bc2995e92a",
+  "branchTree": [
+    {
+      "id": "br_1780239215995_z4afh",
+      "rootId": "br_1780239215995_z4afh",
+      "transitions": [
+        {
+          "kind": "call",
+          "function": "validateActionSequence",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": "actions"
+            }
+          ],
+          "assignTo": "result"
+        },
+        {
+          "kind": "return",
+          "value": "result"
+        }
+      ],
+      "reason": "root",
+      "createdAt": 1780239215995,
+      "outcome": "violation"
+    },
+    {
+      "id": "br_1780239215995_utqt5",
+      "parentId": "br_1780239215995_z4afh",
+      "rootId": "br_1780239215995_z4afh",
+      "transitions": [
+        {
+          "kind": "call",
+          "function": "extractIR",
+          "args": [
+            {
+              "name": "projectRoot",
+              "type": "string",
+              "value": ""
+            }
+          ],
+          "assignTo": "extractIR_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateAction",
+          "args": [
+            {
+              "name": "action",
+              "type": "Action",
+              "value": ""
+            },
+            {
+              "name": "actionIndex",
+              "type": "number",
+              "value": ""
+            }
+          ],
+          "assignTo": "validateAction_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateActionSequence",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": "actions"
+            }
+          ],
+          "assignTo": "result"
+        },
+        {
+          "kind": "return",
+          "value": "result"
+        }
+      ],
+      "reason": "repair_attempt",
+      "createdAt": 1780239215995,
+      "outcome": "success"
+    }
+  ],
+  "rootBranchId": "br_1780239215995_z4afh",
+  "snapshotId": "snap_1780239212422_2d50dbee3cd5",
+  "endedAt": 1780239215998
+}

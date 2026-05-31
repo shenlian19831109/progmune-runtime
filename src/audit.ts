@@ -148,12 +148,38 @@ export function formatAuditResult(result: AuditResult): string {
       if (m.lastGeneration) {
         lines.push(`  Last: ${m.lastGeneration}`);
       }
-      // Trend: last 5 generations
       if (m.history.length >= 2) {
         const recent = m.history.slice(-5);
         lines.push(`  Recent: ${recent.map((r: any) => r.repaired ? '🔧' : '✅').join(' ')}`);
       }
       lines.push("");
+    }
+  } catch {}
+
+  // Phase 7: Violation Analytics
+  try {
+    const repairDir = ".progmune_corpus/repairs";
+    if (fs.existsSync(repairDir)) {
+      const repairs = fs.readdirSync(repairDir).filter((f: string) => f.endsWith(".json"));
+      if (repairs.length > 0) {
+        const bySvl: Record<string, number> = {};
+        const byConstraint: Record<string, number> = {};
+        for (const f of repairs) {
+          try {
+            const r = JSON.parse(fs.readFileSync(`${repairDir}/${f}`, "utf-8"));
+            bySvl[r.violation] = (bySvl[r.violation] || 0) + 1;
+            byConstraint[r.constraint] = (byConstraint[r.constraint] || 0) + 1;
+          } catch {}
+        }
+        lines.push(`  Repairs recorded: ${repairs.length}`);
+        const svlSummary = Object.entries(bySvl).map(([k, v]) => `${k}: ${v}`).join(" | ");
+        lines.push(`  By SVL: ${svlSummary}`);
+        if (Object.keys(byConstraint).length > 1) {
+          const cSummary = Object.entries(byConstraint).map(([k, v]) => `${k}: ${v}`).join(" | ");
+          lines.push(`  By constraint: ${cSummary}`);
+        }
+        lines.push("");
+      }
     }
   } catch {}
 

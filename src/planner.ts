@@ -911,6 +911,30 @@ ${RETRY_HINT}
             branchIds: [rootBranch.id, repairBranch.id],
           };
 
+          // Phase 7: Record repair event for analytics
+          try {
+            const repairDir = ".progmune_corpus/repairs";
+            if (!fs.existsSync(repairDir)) fs.mkdirSync(repairDir, { recursive: true });
+            const repairRecord = {
+              sessionId: session.sessionId,
+              timestamp: Date.now(),
+              violation: "SVL-4",
+              constraint: "protocol",
+              blockedFunction: rej.blocked,
+              namespace: rej.namespace,
+              missingStates: rej.missingFunctions,
+              fixPath: rej.fixPath,
+              originalPlan: filtered.map((a: any) => a.kind === "call" ? a.function : a.kind),
+              repairPlan: (repaired as Action[]).map((a: any) => a.kind === "call" ? a.function : a.kind),
+              success: true,
+            };
+            fs.writeFileSync(
+              `${repairDir}/repair_${session.sessionId}.json`,
+              JSON.stringify(repairRecord, null, 2),
+              "utf-8"
+            );
+          } catch {}
+
           finalActions = repaired;
           break;
         }
