@@ -197,9 +197,18 @@
       "toFixed",
       "push",
       "repeat",
-      "map",
+      "require",
+      "getExecutionMetrics",
       "slice",
-      "join"
+      "join",
+      "map",
+      "existsSync",
+      "filter",
+      "readdirSync",
+      "parse",
+      "readFileSync",
+      "entries",
+      "keys"
     ]
   },
   {
@@ -469,6 +478,33 @@
       "slice",
       "findChildBranches",
       "describeBranchTree"
+    ]
+  },
+  {
+    "name": "evaluateBranches",
+    "params": [
+      {
+        "name": "branches",
+        "type": "Branch[]",
+        "typeDetail": "Branch[]"
+      },
+      {
+        "name": "namespaceInitialStates",
+        "type": "Map<string, string>",
+        "typeDetail": "Map<string, string>"
+      }
+    ],
+    "returnType": "{ scores: BranchScore[]; winner: BranchScore | null }",
+    "returnTypeDetail": "{ scores: BranchScore[]; winner: BranchScore | null }",
+    "file": "src/branch-ledger.ts",
+    "calls": [
+      "buildBranchMap",
+      "flattenBranch",
+      "filter",
+      "replayBranch",
+      "push",
+      "sort",
+      "find"
     ]
   },
   {
@@ -888,6 +924,66 @@
     }
   },
   {
+    "name": "loadMetrics",
+    "params": [],
+    "returnType": "ExecutionMetrics",
+    "returnTypeDetail": "ExecutionMetrics",
+    "file": "src/execute.ts",
+    "calls": [
+      "existsSync",
+      "parse",
+      "readFileSync"
+    ]
+  },
+  {
+    "name": "saveMetrics",
+    "params": [
+      {
+        "name": "m",
+        "type": "ExecutionMetrics",
+        "typeDetail": "ExecutionMetrics"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "src/execute.ts",
+    "calls": [
+      "existsSync",
+      "mkdirSync",
+      "writeFileSync",
+      "stringify"
+    ]
+  },
+  {
+    "name": "recordGeneration",
+    "params": [
+      {
+        "name": "record",
+        "type": "GenerationRecord",
+        "typeDetail": "GenerationRecord"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "src/execute.ts",
+    "calls": [
+      "loadMetrics",
+      "push",
+      "slice",
+      "saveMetrics"
+    ]
+  },
+  {
+    "name": "getExecutionMetrics",
+    "params": [],
+    "returnType": "ExecutionMetrics",
+    "returnTypeDetail": "ExecutionMetrics",
+    "file": "src/execute.ts",
+    "calls": [
+      "loadMetrics"
+    ]
+  },
+  {
     "name": "execute",
     "params": [
       {
@@ -926,7 +1022,9 @@
       "slice",
       "digest",
       "update",
-      "createHash"
+      "createHash",
+      "recordGeneration",
+      "now"
     ]
   },
   {
@@ -3466,6 +3564,9 @@
       "require",
       "createRootBranch",
       "createBranch",
+      "existsSync",
+      "mkdirSync",
+      "writeFileSync",
       "getMaskedFuncList",
       "checkSemantic",
       "clearCheckpoint",
@@ -6301,6 +6402,30 @@
     "external": true
   },
   {
+    "name": "require",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "parse",
+    "params": [
+      {
+        "name": "text",
+        "type": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "解析 JSON 字符串"
+  },
+  {
     "name": "now",
     "params": [],
     "returnType": "number",
@@ -6379,21 +6504,6 @@
     "description": "获取当前工作目录"
   },
   {
-    "name": "parse",
-    "params": [
-      {
-        "name": "text",
-        "type": "string"
-      }
-    ],
-    "returnType": "any",
-    "returnTypeDetail": "any",
-    "file": "(external)",
-    "calls": [],
-    "external": true,
-    "description": "解析 JSON 字符串"
-  },
-  {
     "name": "stringify",
     "params": [
       {
@@ -6429,21 +6539,6 @@
     "file": "(external)",
     "calls": [],
     "external": true
-  },
-  {
-    "name": "dirname",
-    "params": [
-      {
-        "name": "path",
-        "type": "string"
-      }
-    ],
-    "returnType": "string",
-    "returnTypeDetail": "string",
-    "file": "(external)",
-    "calls": [],
-    "external": true,
-    "description": "获取目录名"
   },
   {
     "name": "mkdirSync",
@@ -6484,13 +6579,19 @@
     "description": "同步写入文件"
   },
   {
-    "name": "require",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "any",
+    "name": "dirname",
+    "params": [
+      {
+        "name": "path",
+        "type": "string"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
     "file": "(external)",
     "calls": [],
-    "external": true
+    "external": true,
+    "description": "获取目录名"
   },
   {
     "name": "digest",
