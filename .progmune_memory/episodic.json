@@ -1,5 +1,285 @@
 [
   {
+    "intent": "read execution metrics from disk and format a one-line status summary",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "loadMetrics",
+        "args": [],
+        "assignTo": "metrics"
+      },
+      {
+        "kind": "call",
+        "function": "getExecutionMetrics",
+        "args": [],
+        "assignTo": "current"
+      },
+      {
+        "kind": "call",
+        "function": "formatGenomeSummary",
+        "args": [],
+        "assignTo": "summary"
+      },
+      {
+        "kind": "return",
+        "value": "summary"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780255195232",
+    "timestamp": "2026-05-31T19:19:55.232Z"
+  },
+  {
+    "intent": "validate an action sequence immediately",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "extractIR_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateAction",
+        "args": [
+          {
+            "name": "action",
+            "type": "Action",
+            "value": ""
+          },
+          {
+            "name": "actionIndex",
+            "type": "number",
+            "value": ""
+          }
+        ],
+        "assignTo": "validateAction_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateActionSequence",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "actions"
+          }
+        ],
+        "assignTo": "result"
+      },
+      {
+        "kind": "return",
+        "value": "result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780254855622",
+    "timestamp": "2026-05-31T19:14:15.622Z"
+  },
+  {
+    "intent": "validate an action sequence immediately",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "validateActionSequence",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "actions"
+          }
+        ],
+        "assignTo": "result"
+      },
+      {
+        "kind": "return",
+        "value": "result"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-4",
+    "id": "ep_1780254855601",
+    "timestamp": "2026-05-31T19:14:15.601Z"
+  },
+  {
+    "intent": "validate an action sequence immediately",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "extractIR_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateAction",
+        "args": [
+          {
+            "name": "action",
+            "type": "Action",
+            "value": ""
+          },
+          {
+            "name": "actionIndex",
+            "type": "number",
+            "value": ""
+          }
+        ],
+        "assignTo": "validateAction_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateActionSequence",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "actions"
+          }
+        ],
+        "assignTo": "result"
+      },
+      {
+        "kind": "return",
+        "value": "result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780239215996",
+    "timestamp": "2026-05-31T14:53:35.996Z"
+  },
+  {
+    "intent": "validate an action sequence immediately",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "validateActionSequence",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "actions"
+          }
+        ],
+        "assignTo": "result"
+      },
+      {
+        "kind": "return",
+        "value": "result"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-4",
+    "id": "ep_1780239215991",
+    "timestamp": "2026-05-31T14:53:35.991Z"
+  },
+  {
+    "intent": "extract IR and validate the sequence",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "."
+          }
+        ],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "validateAction",
+        "args": [
+          {
+            "name": "action",
+            "type": "Action",
+            "value": "ir"
+          },
+          {
+            "name": "actionIndex",
+            "type": "number",
+            "value": 0
+          }
+        ],
+        "assignTo": "validated"
+      },
+      {
+        "kind": "call",
+        "function": "validateActionSequence",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "ir"
+          }
+        ],
+        "assignTo": "ok"
+      },
+      {
+        "kind": "return",
+        "value": "ok"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780239123925",
+    "timestamp": "2026-05-31T14:52:03.925Z"
+  },
+  {
+    "intent": "read a JSON file and validate it against a schema",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "readFileSync",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "schema.json"
+          },
+          {
+            "name": "encoding",
+            "type": "string",
+            "value": "utf8"
+          }
+        ],
+        "assignTo": "fileContent"
+      },
+      {
+        "kind": "call",
+        "function": "validateActionSchema",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "fileContent"
+          }
+        ],
+        "assignTo": "validationResult"
+      },
+      {
+        "kind": "return",
+        "value": "validationResult"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780238695933",
+    "timestamp": "2026-05-31T14:44:55.933Z"
+  },
+  {
     "intent": "validate a branch ledger by extracting IR first, then checking all transitions pass ledger consistency, and return a summary with the branch tree description",
     "actions": [
       {
