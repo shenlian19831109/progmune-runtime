@@ -2941,6 +2941,7 @@
       "find",
       "getSessionTransitions",
       "checkLedgerConsistency",
+      "getNsInit",
       "hashLedger"
     ]
   },
@@ -2967,7 +2968,8 @@
       "getAllSessions",
       "find",
       "checkLedgerConsistency",
-      "getSessionTransitions"
+      "getSessionTransitions",
+      "getNsInit"
     ]
   },
   {
@@ -3312,11 +3314,11 @@
     "calls": [
       "map",
       "filter",
-      "set",
+      "getNsInit",
       "parse",
       "readFileSync",
       "parseProtocolsFromJSON",
-      "entries",
+      "set",
       "get",
       "values"
     ]
@@ -3495,6 +3497,52 @@
       "find",
       "push",
       "map"
+    ]
+  },
+  {
+    "name": "invalidateProtocolCache",
+    "params": [],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "src/protocol-registry.ts",
+    "calls": []
+  },
+  {
+    "name": "getProtocolConfig",
+    "params": [],
+    "returnType": "ProtocolConfig",
+    "returnTypeDetail": "ProtocolConfig",
+    "file": "src/protocol-registry.ts",
+    "calls": [
+      "resolve",
+      "cwd",
+      "existsSync",
+      "parse",
+      "readFileSync",
+      "set",
+      "entries",
+      "parseProtocolsFromJSON",
+      "hashRules"
+    ]
+  },
+  {
+    "name": "getNsInit",
+    "params": [],
+    "returnType": "Map<string, string>",
+    "returnTypeDetail": "Map<string, string>",
+    "file": "src/protocol-registry.ts",
+    "calls": [
+      "getProtocolConfig"
+    ]
+  },
+  {
+    "name": "getRuleHash",
+    "params": [],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/protocol-registry.ts",
+    "calls": [
+      "getProtocolConfig"
     ]
   },
   {
