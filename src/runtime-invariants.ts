@@ -16,6 +16,7 @@ import type {
   LedgerConsistencyViolation,
   StateTransition,
 } from "./runtime-types";
+import { getNsInit } from "./protocol-registry";
 
 // Re-export for convenient import
 export { InvariantViolationError } from "./ssg-validator";
@@ -32,7 +33,7 @@ const isStrict = () => STRICT;
  *  Throws InvariantViolationError with the first violation's details. */
 export function assertLedgerConsistency(
   ledger: StateTransition[],
-  namespaceInitialStates: Map<string, string> = new Map([["_global", "INIT"]])
+  namespaceInitialStates: Map<string, string> = getNsInit()
 ): void {
   if (ledger.length === 0) return;
   const result = checkLedgerConsistency(ledger, namespaceInitialStates);
@@ -155,7 +156,7 @@ export function assertTransitionOrder(ledger: StateTransition[]): void {
 /** Convenience: run all invariant checks on a ledger. Does not throw if all pass. */
 export function assertLedgerInvariants(
   ledger: StateTransition[],
-  namespaceInitialStates: Map<string, string> = new Map([["_global", "INIT"]]),
+  namespaceInitialStates: Map<string, string> = getNsInit(),
   expectedRuleHash?: string
 ): void {
   assertTransitionOrder(ledger);

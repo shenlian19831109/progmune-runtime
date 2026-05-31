@@ -15,6 +15,7 @@ exports.assertRuleHashMatch = assertRuleHashMatch;
 exports.assertTransitionOrder = assertTransitionOrder;
 exports.assertLedgerInvariants = assertLedgerInvariants;
 const ssg_validator_1 = require("./ssg-validator");
+const protocol_registry_1 = require("./protocol-registry");
 // Re-export for convenient import
 var ssg_validator_2 = require("./ssg-validator");
 Object.defineProperty(exports, "InvariantViolationError", { enumerable: true, get: function () { return ssg_validator_2.InvariantViolationError; } });
@@ -24,7 +25,7 @@ const isStrict = () => STRICT;
 // ── Assertions ──
 /** Assert full ledger passes Invariant-0 + Invariant-1.
  *  Throws InvariantViolationError with the first violation's details. */
-function assertLedgerConsistency(ledger, namespaceInitialStates = new Map([["_global", "INIT"]])) {
+function assertLedgerConsistency(ledger, namespaceInitialStates = (0, protocol_registry_1.getNsInit)()) {
     if (ledger.length === 0)
         return;
     const result = (0, ssg_validator_1.checkLedgerConsistency)(ledger, namespaceInitialStates);
@@ -143,7 +144,7 @@ function assertTransitionOrder(ledger) {
     }
 }
 /** Convenience: run all invariant checks on a ledger. Does not throw if all pass. */
-function assertLedgerInvariants(ledger, namespaceInitialStates = new Map([["_global", "INIT"]]), expectedRuleHash) {
+function assertLedgerInvariants(ledger, namespaceInitialStates = (0, protocol_registry_1.getNsInit)(), expectedRuleHash) {
     assertTransitionOrder(ledger);
     assertLedgerConsistency(ledger, namespaceInitialStates);
     for (const t of ledger) {

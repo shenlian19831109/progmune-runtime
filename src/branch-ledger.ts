@@ -14,6 +14,7 @@
 import type { StateTransition } from "./runtime-types";
 import { rebuildState } from "./ssg-validator";
 import { assertDeltaConsistency } from "./runtime-invariants";
+import { getNsInit } from "./protocol-registry";
 
 // ── Types ──
 
@@ -248,7 +249,7 @@ export function getBranchPath(
 export function replayBranch(
   branch: Branch,
   allBranches: Map<string, Branch>,
-  namespaceInitialStates: Map<string, string> = new Map([["_global", "INIT"]])
+  namespaceInitialStates: Map<string, string> = getNsInit()
 ): BranchReplayResult {
   const path = getBranchPath(branch, allBranches);
   const pathIds = path.map(b => b.id);

@@ -23,6 +23,7 @@ exports.generateRepairSummary = generateRepairSummary;
 exports.getMinimalFixSet = getMinimalFixSet;
 const ssg_validator_1 = require("./ssg-validator");
 const runtime_invariants_1 = require("./runtime-invariants");
+const protocol_registry_1 = require("./protocol-registry");
 const branch_ledger_1 = require("./branch-ledger");
 // ── Proposal Generation ──
 /** Generate repair proposals for all detected violations in a ledger. */
@@ -93,7 +94,7 @@ function suggestProtocolRepair(rejection, ir) {
     return proposals;
 }
 /** Invariant violation repair: use rebuildState to compute correct transition data. */
-function suggestInvariantRepair(violation, ledger, namespaceInitialStates = new Map([["_global", "INIT"]])) {
+function suggestInvariantRepair(violation, ledger, namespaceInitialStates = (0, protocol_registry_1.getNsInit)()) {
     const proposals = [];
     if (violation.invariant === "before-consistency") {
         // statesBefore is wrong — can be recomputed from rebuildState
@@ -274,7 +275,7 @@ function applyProposalAsBranch(proposal, parentBranch, currentLedger, ir) {
 // ── Validation ──
 /** Validate a repair proposal: does applying it fix the violation?
  *  Returns true if a re-check passes after applying the proposal. */
-function validateProposal(proposal, currentLedger, namespaceInitialStates = new Map([["_global", "INIT"]])) {
+function validateProposal(proposal, currentLedger, namespaceInitialStates = (0, protocol_registry_1.getNsInit)()) {
     let proposedLedger;
     switch (proposal.strategy) {
         case "replace":
@@ -297,7 +298,7 @@ function validateProposal(proposal, currentLedger, namespaceInitialStates = new 
 }
 // ── Summary ──
 /** Generate a comprehensive repair summary from a ledger and IR context. */
-function generateRepairSummary(ledger, ir, protocols, namespaceInitialStates = new Map([["_global", "INIT"]])) {
+function generateRepairSummary(ledger, ir, protocols, namespaceInitialStates = (0, protocol_registry_1.getNsInit)()) {
     const consistency = (0, ssg_validator_1.checkLedgerConsistency)(ledger, namespaceInitialStates);
     const allProposals = [];
     // Generate invariant repair proposals

@@ -31,6 +31,7 @@ import {
   hashRules,
 } from "./ssg-validator";
 import { assertDeltaConsistency } from "./runtime-invariants";
+import { getNsInit } from "./protocol-registry";
 import type { Branch } from "./branch-ledger";
 import { createBranch, generateBranchId } from "./branch-ledger";
 
@@ -149,7 +150,7 @@ export function suggestProtocolRepair(
 export function suggestInvariantRepair(
   violation: LedgerConsistencyViolation,
   ledger: StateTransition[],
-  namespaceInitialStates: Map<string, string> = new Map([["_global", "INIT"]])
+  namespaceInitialStates: Map<string, string> = getNsInit()
 ): RepairProposal[] {
   const proposals: RepairProposal[] = [];
 
@@ -356,7 +357,7 @@ export function applyProposalAsBranch(
 export function validateProposal(
   proposal: RepairProposal,
   currentLedger: StateTransition[],
-  namespaceInitialStates: Map<string, string> = new Map([["_global", "INIT"]])
+  namespaceInitialStates: Map<string, string> = getNsInit()
 ): { valid: boolean; remainingViolations: LedgerConsistencyViolation[] } {
   let proposedLedger: StateTransition[];
 
@@ -390,7 +391,7 @@ export function generateRepairSummary(
   ledger: StateTransition[],
   ir: any[],
   protocols: FunctionProtocol[],
-  namespaceInitialStates: Map<string, string> = new Map([["_global", "INIT"]])
+  namespaceInitialStates: Map<string, string> = getNsInit()
 ): RepairSummary {
   const consistency = checkLedgerConsistency(ledger, namespaceInitialStates);
   const allProposals: RepairProposal[] = [];

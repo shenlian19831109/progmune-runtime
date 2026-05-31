@@ -39,6 +39,7 @@ import {
   verifyAllFingerprints,
 } from "./ledger-registry";
 import { replaySession } from "./deterministic-replay";
+import { getNsInit, getProtocolConfig } from "./protocol-registry";
 
 const C = {
   reset: "\x1b[0m",
@@ -295,16 +296,7 @@ if (!fs.existsSync(protoPath)) {
 step("4/6 Ledger 不变量");
 {
   // Load namespace initial states from protocols.json for correct replay
-  const nsInit = new Map<string, string>();
-  nsInit.set("_global", "UNAUTHENTICATED");
-  try {
-    const protoRaw = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../protocols.json"), "utf-8"));
-    if (protoRaw.namespaceInitialStates) {
-      for (const [ns, s] of Object.entries(protoRaw.namespaceInitialStates)) {
-        nsInit.set(ns, s as string);
-      }
-    }
-  } catch {}
+  const nsInit = getNsInit();
   let checked = 0;
   let consistent = 0;
   let stateMatch = 0;

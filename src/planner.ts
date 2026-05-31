@@ -9,6 +9,7 @@ import { jaccardSimilarity, extractKeywords } from "./utils";
 import { recordFailure, recordSession, saveCheckpoint, loadCheckpoint, clearCheckpoint, SVL, queryAntibodies } from "./failure-corpus";
 import { recordEpisode, findSemanticTemplate } from "./memory-layer";
 import { SSGRejection, FunctionProtocol, parseProtocolsFromJSON, ValidationContext, validateTransition, checkLedgerConsistency, rebuildState, hashRules, explainRejection, rejectionToJSON } from "./ssg-validator";
+import { getNsInit } from "./protocol-registry";
 import { createSnapshot, saveSnapshot } from "./semantic-snapshot";
 import * as fs from "fs";
 
@@ -321,23 +322,17 @@ function loadProtocols(ir: any[]): { protocols: FunctionProtocol[]; namespaceIni
     .filter((f: any) => f.protocol)
     .map((f: any) => ({ function: f.name, protocol: f.protocol }));
 
-  // 合并 protocols.json 中的规则（如果存在）
-  let jsonProtocols: FunctionProtocol[] = [];
-  const namespaceInitialStates = new Map<string, string>();
-  namespaceInitialStates.set("_global", "UNAUTHENTICATED");
+  // Phase 6C: use ProtocolRegistry for nsInit (single source of truth)
+  const namespaceInitialStates = getNsInit();
 
+  // Parse protocol rules from JSON (rules themselves still need the JSON for definitions)
+  let jsonProtocols: FunctionProtocol[] = [];
   try {
     const protoDef = JSON.parse(fs.readFileSync("protocols.json", "utf-8"));
     jsonProtocols = parseProtocolsFromJSON(protoDef);
-    // 从协议定义中加载每个命名空间的初始状态
-    if (protoDef.namespaceInitialStates) {
-      for (const [ns, initState] of Object.entries(protoDef.namespaceInitialStates)) {
-        namespaceInitialStates.set(ns, initState as string);
-      }
-    }
   } catch {}
 
-  // IR @protocol 优先，但继承 JSON 中的 namespace（JSON 为权威命名空间定义）
+  // Merge: IR @protocol takes priority, but inherits JSON namespace
   const merged = new Map<string, FunctionProtocol>();
   for (const p of jsonProtocols) merged.set(p.function, p);
   for (const p of irProtocols) {

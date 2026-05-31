@@ -43,6 +43,7 @@ const utils_1 = require("./utils");
 const failure_corpus_1 = require("./failure-corpus");
 const memory_layer_1 = require("./memory-layer");
 const ssg_validator_1 = require("./ssg-validator");
+const protocol_registry_1 = require("./protocol-registry");
 const semantic_snapshot_1 = require("./semantic-snapshot");
 const fs = __importStar(require("fs"));
 function enrichActions(actions, ir) {
@@ -371,22 +372,16 @@ function loadProtocols(ir) {
     const irProtocols = ir
         .filter((f) => f.protocol)
         .map((f) => ({ function: f.name, protocol: f.protocol }));
-    // 合并 protocols.json 中的规则（如果存在）
+    // Phase 6C: use ProtocolRegistry for nsInit (single source of truth)
+    const namespaceInitialStates = (0, protocol_registry_1.getNsInit)();
+    // Parse protocol rules from JSON (rules themselves still need the JSON for definitions)
     let jsonProtocols = [];
-    const namespaceInitialStates = new Map();
-    namespaceInitialStates.set("_global", "UNAUTHENTICATED");
     try {
         const protoDef = JSON.parse(fs.readFileSync("protocols.json", "utf-8"));
         jsonProtocols = (0, ssg_validator_1.parseProtocolsFromJSON)(protoDef);
-        // 从协议定义中加载每个命名空间的初始状态
-        if (protoDef.namespaceInitialStates) {
-            for (const [ns, initState] of Object.entries(protoDef.namespaceInitialStates)) {
-                namespaceInitialStates.set(ns, initState);
-            }
-        }
     }
     catch { }
-    // IR @protocol 优先，但继承 JSON 中的 namespace（JSON 为权威命名空间定义）
+    // Merge: IR @protocol takes priority, but inherits JSON namespace
     const merged = new Map();
     for (const p of jsonProtocols)
         merged.set(p.function, p);

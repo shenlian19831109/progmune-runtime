@@ -21,6 +21,7 @@ import { checkLedgerConsistency, hashLedger, diffLedgers } from "./ssg-validator
 import { getFingerprintRegistry } from "./ledger-registry";
 import { replaySession } from "./deterministic-replay";
 import { flattenBranch, buildBranchMap, findRootBranch, wrapAsBranch } from "./branch-ledger";
+import { getNsInit } from "./protocol-registry";
 
 const PORT = parseInt(process.env.PROGMUNE_OBS_PORT || process.argv[3] || "3100", 10);
 
@@ -98,7 +99,7 @@ function handleLedgerAPI(res: http.ServerResponse, url: URL) {
   const s = sessions.find(x => x.sessionId === sid || x.sessionId.startsWith(sid));
   if (!s) return jsonReply(res, { error: "session not found" }, 404);
   const tx = getSessionTransitions(s);
-  const consistency = checkLedgerConsistency(tx as any, new Map([["_global", "UNAUTHENTICATED"]]));
+  const consistency = checkLedgerConsistency(tx as any, getNsInit());
   return jsonReply(res, {
     sessionId: s.sessionId, intent: s.intent,
     transitionCount: tx.length, hash: hashLedger(tx as any),
@@ -113,7 +114,7 @@ function handleConsistencyAPI(res: http.ServerResponse, url: URL) {
   const sessions = getAllSessions();
   const s = sessions.find(x => x.sessionId === sid || x.sessionId.startsWith(sid));
   if (!s) return jsonReply(res, { error: "session not found" }, 404);
-  return jsonReply(res, checkLedgerConsistency(getSessionTransitions(s) as any, new Map([["_global", "UNAUTHENTICATED"]])));
+  return jsonReply(res, checkLedgerConsistency(getSessionTransitions(s) as any, getNsInit()));
 }
 
 function handleDiffAPI(res: http.ServerResponse, url: URL) {

@@ -55,6 +55,7 @@ const failure_corpus_1 = require("./failure-corpus");
 const runtime_invariants_1 = require("./runtime-invariants");
 const ledger_registry_1 = require("./ledger-registry");
 const deterministic_replay_1 = require("./deterministic-replay");
+const protocol_registry_1 = require("./protocol-registry");
 const C = {
     reset: "\x1b[0m",
     green: "\x1b[32m",
@@ -295,17 +296,7 @@ else {
 step("4/6 Ledger 不变量");
 {
     // Load namespace initial states from protocols.json for correct replay
-    const nsInit = new Map();
-    nsInit.set("_global", "UNAUTHENTICATED");
-    try {
-        const protoRaw = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../protocols.json"), "utf-8"));
-        if (protoRaw.namespaceInitialStates) {
-            for (const [ns, s] of Object.entries(protoRaw.namespaceInitialStates)) {
-                nsInit.set(ns, s);
-            }
-        }
-    }
-    catch { }
+    const nsInit = (0, protocol_registry_1.getNsInit)();
     let checked = 0;
     let consistent = 0;
     let stateMatch = 0;

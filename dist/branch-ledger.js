@@ -28,6 +28,7 @@ exports.wrapAsBranch = wrapAsBranch;
 exports.unwrapBranchTree = unwrapBranchTree;
 const ssg_validator_1 = require("./ssg-validator");
 const runtime_invariants_1 = require("./runtime-invariants");
+const protocol_registry_1 = require("./protocol-registry");
 // ── Pure Functions ──
 /** Generate a unique branch ID. */
 function generateBranchId() {
@@ -201,7 +202,7 @@ function getBranchPath(branch, allBranches) {
 }
 /** Replay a branch tree: rebuild state across all ancestor branches
  *  and verify every transition is valid. */
-function replayBranch(branch, allBranches, namespaceInitialStates = new Map([["_global", "INIT"]])) {
+function replayBranch(branch, allBranches, namespaceInitialStates = (0, protocol_registry_1.getNsInit)()) {
     const path = getBranchPath(branch, allBranches);
     const pathIds = path.map(b => b.id);
     // Collect all transitions in tree order

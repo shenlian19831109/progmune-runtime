@@ -634,7 +634,7 @@ This project uses [Progmune](https://github.com/shenlian19831109/progmune-runtim
           allTransitions = allTransitions.concat(a.transitions || []);
         }
 
-        const nsInit = new Map([["_global", "UNAUTHENTICATED"]]);
+        const nsInit = require("./protocol-registry").getNsInit();
         const consistency = checkLedgerConsistency(allTransitions, nsInit);
 
         if (consistency.consistent) {
@@ -699,7 +699,7 @@ This project uses [Progmune](https://github.com/shenlian19831109/progmune-runtim
           allTransitions = allTransitions.concat(a.transitions || []);
         }
 
-        const nsInit = new Map([["_global", "UNAUTHENTICATED"]]);
+        const nsInit = require("./protocol-registry").getNsInit();
         const ir = JSON.parse(require("fs").readFileSync("ir.json", "utf-8"));
         const summary = generateRepairSummary(allTransitions, ir, [], nsInit);
         const proposal = summary.proposals.find((p: any) => p.id === proposalId);

@@ -47,6 +47,7 @@ const ssg_validator_1 = require("./ssg-validator");
 const ledger_registry_1 = require("./ledger-registry");
 const deterministic_replay_1 = require("./deterministic-replay");
 const branch_ledger_1 = require("./branch-ledger");
+const protocol_registry_1 = require("./protocol-registry");
 const PORT = parseInt(process.env.PROGMUNE_OBS_PORT || process.argv[3] || "3100", 10);
 // ── JSON API handlers ──
 function jsonReply(res, data, code = 200) {
@@ -122,7 +123,7 @@ function handleLedgerAPI(res, url) {
     if (!s)
         return jsonReply(res, { error: "session not found" }, 404);
     const tx = getSessionTransitions(s);
-    const consistency = (0, ssg_validator_1.checkLedgerConsistency)(tx, new Map([["_global", "UNAUTHENTICATED"]]));
+    const consistency = (0, ssg_validator_1.checkLedgerConsistency)(tx, (0, protocol_registry_1.getNsInit)());
     return jsonReply(res, {
         sessionId: s.sessionId, intent: s.intent,
         transitionCount: tx.length, hash: (0, ssg_validator_1.hashLedger)(tx),
@@ -138,7 +139,7 @@ function handleConsistencyAPI(res, url) {
     const s = sessions.find(x => x.sessionId === sid || x.sessionId.startsWith(sid));
     if (!s)
         return jsonReply(res, { error: "session not found" }, 404);
-    return jsonReply(res, (0, ssg_validator_1.checkLedgerConsistency)(getSessionTransitions(s), new Map([["_global", "UNAUTHENTICATED"]])));
+    return jsonReply(res, (0, ssg_validator_1.checkLedgerConsistency)(getSessionTransitions(s), (0, protocol_registry_1.getNsInit)()));
 }
 function handleDiffAPI(res, url) {
     const aId = url.searchParams.get("sessionA"), bId = url.searchParams.get("sessionB");
