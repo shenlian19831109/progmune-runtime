@@ -43,6 +43,10 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const http = __importStar(require("http"));
 const failure_corpus_1 = require("./failure-corpus");
+const ssg_validator_1 = require("./ssg-validator");
+const ledger_registry_1 = require("./ledger-registry");
+const deterministic_replay_1 = require("./deterministic-replay");
+const branch_ledger_1 = require("./branch-ledger");
 const PORT = parseInt(process.env.PROGMUNE_OBS_PORT || process.argv[3] || "3100", 10);
 // ── JSON API handlers ──
 function jsonReply(res, data, code = 200) {
@@ -73,6 +77,17 @@ function handleAPI(req, res) {
             return jsonReply(res, { error: "not found" }, 404);
         }
     }
+    // Phase 4 Ledger APIs
+    if (pathname === "/api/ledger")
+        return handleLedgerAPI(res, url);
+    if (pathname === "/api/consistency")
+        return handleConsistencyAPI(res, url);
+    if (pathname === "/api/diff")
+        return handleDiffAPI(res, url);
+    if (pathname === "/api/replay")
+        return handleReplayAPI(res, url);
+    if (pathname === "/api/fingerprints")
+        return jsonReply(res, (0, ledger_registry_1.getFingerprintRegistry)());
     const handler = apiRoutes[pathname];
     if (handler) {
         try {
@@ -83,6 +98,65 @@ function handleAPI(req, res) {
         }
     }
     return jsonReply(res, { error: "not found" }, 404);
+}
+// ── Phase 4 Ledger API handlers ──
+function getSessionTransitions(session) {
+    if (session.branchTree && session.branchTree.length > 0) {
+        const map = (0, branch_ledger_1.buildBranchMap)(session.branchTree);
+        const root = (0, branch_ledger_1.findRootBranch)(session.branchTree);
+        if (root)
+            return (0, branch_ledger_1.flattenBranch)(root, map);
+    }
+    let tx = [];
+    for (const a of (session.attempts || [])) {
+        tx = tx.concat(a.transitions || []);
+    }
+    return tx;
+}
+function handleLedgerAPI(res, url) {
+    const sid = url.searchParams.get("sessionId");
+    if (!sid)
+        return jsonReply(res, { error: "missing sessionId" }, 400);
+    const sessions = (0, failure_corpus_1.getAllSessions)();
+    const s = sessions.find(x => x.sessionId === sid || x.sessionId.startsWith(sid));
+    if (!s)
+        return jsonReply(res, { error: "session not found" }, 404);
+    const tx = getSessionTransitions(s);
+    const consistency = (0, ssg_validator_1.checkLedgerConsistency)(tx, new Map([["_global", "UNAUTHENTICATED"]]));
+    return jsonReply(res, {
+        sessionId: s.sessionId, intent: s.intent,
+        transitionCount: tx.length, hash: (0, ssg_validator_1.hashLedger)(tx),
+        consistency: { consistent: consistency.consistent, violationCount: consistency.violations.length },
+        transitions: tx,
+    });
+}
+function handleConsistencyAPI(res, url) {
+    const sid = url.searchParams.get("sessionId");
+    if (!sid)
+        return jsonReply(res, { error: "missing sessionId" }, 400);
+    const sessions = (0, failure_corpus_1.getAllSessions)();
+    const s = sessions.find(x => x.sessionId === sid || x.sessionId.startsWith(sid));
+    if (!s)
+        return jsonReply(res, { error: "session not found" }, 404);
+    return jsonReply(res, (0, ssg_validator_1.checkLedgerConsistency)(getSessionTransitions(s), new Map([["_global", "UNAUTHENTICATED"]])));
+}
+function handleDiffAPI(res, url) {
+    const aId = url.searchParams.get("sessionA"), bId = url.searchParams.get("sessionB");
+    if (!aId || !bId)
+        return jsonReply(res, { error: "missing sessionA or sessionB" }, 400);
+    const sessions = (0, failure_corpus_1.getAllSessions)();
+    const sA = sessions.find(x => x.sessionId === aId || x.sessionId.startsWith(aId));
+    const sB = sessions.find(x => x.sessionId === bId || x.sessionId.startsWith(bId));
+    if (!sA || !sB)
+        return jsonReply(res, { error: "session not found" }, 404);
+    const diff = (0, ssg_validator_1.diffLedgers)(getSessionTransitions(sA), getSessionTransitions(sB));
+    return jsonReply(res, { sessionA: { id: sA.sessionId, intent: sA.intent }, sessionB: { id: sB.sessionId, intent: sB.intent }, diff });
+}
+function handleReplayAPI(res, url) {
+    const sid = url.searchParams.get("sessionId");
+    if (!sid)
+        return jsonReply(res, { error: "missing sessionId" }, 400);
+    return jsonReply(res, (0, deterministic_replay_1.replaySession)(sid));
 }
 // ── Dashboard HTML ──
 const DASHBOARD_HTML = `<!DOCTYPE html>
@@ -138,6 +212,7 @@ const DASHBOARD_HTML = `<!DOCTYPE html>
   <button class="tab" data-panel="genome">Genome</button>
   <button class="tab" data-panel="heatmap">Heatmap</button>
   <button class="tab" data-panel="antibodies">Antibodies</button>
+  <button class="tab" data-panel="ledger">Ledger</button>
 </div>
 
 <div id="overview" class="panel active"><div class="loading">Loading...</div></div>
@@ -145,6 +220,7 @@ const DASHBOARD_HTML = `<!DOCTYPE html>
 <div id="genome" class="panel"><div class="loading">Loading...</div></div>
 <div id="heatmap" class="panel"><div class="loading">Loading...</div></div>
 <div id="antibodies" class="panel"><div class="loading">Loading...</div></div>
+<div id="ledger" class="panel"><div class="loading">Loading...</div></div>
 
 <script>
 async function fetchJSON(u) {
@@ -332,6 +408,105 @@ async function loadAntibodies() {
   document.getElementById('antibodies').innerHTML = html || '<div class="card">No antibody activity yet.</div>';
 }
 
+async function loadLedger() {
+  const sessions = await fetchJSON('/api/sessions');
+  // Session selector
+  let html = '<div class="card"><h2>Ledger Timeline</h2>';
+  html += '<select id="ledgerSession" style="background:var(--bg);color:var(--text);padding:6px;border:1px solid var(--border);border-radius:4px;margin-bottom:12px;width:100%">';
+  html += '<option value="">-- Select session --</option>';
+  for (const s of sessions.reverse()) {
+    html += '<option value="' + s.sessionId + '">' + s.sessionId.slice(0,13) + '... — ' + esc(s.intent.slice(0,60)) + '</option>';
+  }
+  html += '</select>';
+  html += '<div id="ledgerDetail"></div></div>';
+
+  // Session Diff
+  html += '<div class="card" style="margin-top:12px"><h2>Session Diff</h2>';
+  html += '<div style="display:flex;gap:8px">';
+  html += '<select id="diffSessionA" style="flex:1;background:var(--bg);color:var(--text);padding:6px;border:1px solid var(--border);border-radius:4px"><option value="">-- Session A --</option>';
+  for (const s of sessions) {
+    html += '<option value="' + s.sessionId + '">' + s.sessionId.slice(0,13) + '...</option>';
+  }
+  html += '</select>';
+  html += '<select id="diffSessionB" style="flex:1;background:var(--bg);color:var(--text);padding:6px;border:1px solid var(--border);border-radius:4px"><option value="">-- Session B --</option>';
+  for (const s of sessions) {
+    html += '<option value="' + s.sessionId + '">' + s.sessionId.slice(0,13) + '...</option>';
+  }
+  html += '</select>';
+  html += '<button onclick="showDiff()" style="background:var(--cyan);color:#000;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-weight:600">Diff</button>';
+  html += '</div>';
+  html += '<div id="diffResult" style="margin-top:8px"></div></div>';
+
+  document.getElementById('ledger').innerHTML = html;
+
+  // Bind selector
+  document.getElementById('ledgerSession').addEventListener('change', function() {
+    if (this.value) showTimeline(this.value);
+  });
+}
+
+async function showTimeline(sessionId) {
+  const data = await fetchJSON('/api/ledger?sessionId=' + sessionId);
+  const detail = document.getElementById('ledgerDetail');
+
+  let html = '<div style="color:var(--dim);margin-bottom:8px">' +
+    'Transitions: <strong style="color:var(--text)">' + data.transitionCount + '</strong> | ' +
+    'Hash: <code style="color:var(--cyan)">' + data.hash + '</code> | ' +
+    (data.consistency.consistent
+      ? '<span class="badge badge-green">Consistent</span>'
+      : '<span class="badge badge-red">' + data.consistency.violationCount + ' violations</span>') +
+    '</div>';
+
+  // Timeline table
+  html += '<table><tr><th>#</th><th>Function</th><th>Namespace</th><th>Valid</th><th>Acquired</th><th>Invalidated</th></tr>';
+  for (const t of data.transitions) {
+    const validBadge = t.valid
+      ? '<span class="badge badge-green">✓</span>'
+      : '<span class="badge badge-red">✗</span>';
+    const acquired = (t.acquired||[]).map(s => '<span style="color:var(--green)">+' + esc(s) + '</span>').join(' ') || '—';
+    const invalidated = (t.invalidated||[]).map(s => '<span style="color:var(--red)">-' + esc(s) + '</span>').join(' ') || '—';
+    html += '<tr>' +
+      '<td style="color:var(--dim)">' + t.actionIndex + '</td>' +
+      '<td><span class="fn">' + esc(t.function) + '()</span></td>' +
+      '<td style="color:var(--dim)">' + esc(t.namespace) + '</td>' +
+      '<td>' + validBadge + '</td>' +
+      '<td style="font-size:12px">' + acquired + '</td>' +
+      '<td style="font-size:12px">' + invalidated + '</td>' +
+      '</tr>';
+  }
+  html += '</table>';
+
+  // States before/after summary for last transition
+  if (data.transitions.length > 0) {
+    const last = data.transitions[data.transitions.length - 1];
+    html += '<div style="margin-top:12px;font-size:12px;color:var(--dim)">';
+    html += '<strong>Final State:</strong> ';
+    for (const [ns, states] of Object.entries(last.statesAfter || {})) {
+      html += '<span style="color:var(--cyan)">' + esc(ns) + '</span>=[<span style="color:var(--text)">' + (states as string[]).join(', ') + '</span>] ';
+    }
+    html += '</div>';
+  }
+
+  detail.innerHTML = html;
+}
+
+async function showDiff() {
+  const a = document.getElementById('diffSessionA').value;
+  const b = document.getElementById('diffSessionB').value;
+  if (!a || !b) return;
+
+  const data = await fetchJSON('/api/diff?sessionA=' + a + '&sessionB=' + b);
+  const d = data.diff;
+  let html = '<div style="margin-top:8px">';
+  html += '<span style="color:var(--dim)">Unchanged: </span><strong>' + d.unchanged + '</strong> | ';
+  html += '<span style="color:var(--yellow)">Only A: </span><strong>' + d.onlyInA + '</strong> | ';
+  html += '<span style="color:var(--cyan)">Only B: </span><strong>' + d.onlyInB + '</strong> | ';
+  html += '<span style="color:var(--red)">Changed: </span><strong>' + d.changed + '</strong>';
+  if (d.identical) html += ' <span class="badge badge-green">Identical</span>';
+  html += '</div>';
+  document.getElementById('diffResult').innerHTML = html;
+}
+
 function esc(s) {
   if (!s) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -353,6 +528,7 @@ loadSessions();
 loadGenome();
 loadHeatmap();
 loadAntibodies();
+loadLedger();
 </script>
 </body>
 </html>`;
@@ -375,4 +551,10 @@ server.listen(PORT, () => {
     console.error(`  GET /api/heatmap`);
     console.error(`  GET /api/antibodies`);
     console.error(`  GET /api/learned`);
+    console.error(`Phase 4 Ledger APIs:`);
+    console.error(`  GET /api/ledger?sessionId=`);
+    console.error(`  GET /api/consistency?sessionId=`);
+    console.error(`  GET /api/diff?sessionA=&sessionB=`);
+    console.error(`  GET /api/replay?sessionId=`);
+    console.error(`  GET /api/fingerprints`);
 });
