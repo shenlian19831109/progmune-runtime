@@ -1,5 +1,140 @@
 [
   {
+    "intent": "list all files in a directory that match a given file extension",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "readFileSync",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "."
+          },
+          {
+            "name": "encoding",
+            "type": "string",
+            "value": "utf-8"
+          }
+        ],
+        "assignTo": "dirContent"
+      },
+      {
+        "kind": "return",
+        "value": "dirContent"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780255359361",
+    "timestamp": "2026-05-31T19:22:39.361Z"
+  },
+  {
+    "intent": "count how many TypeScript source files exist in the src directory",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "readFileSync",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "src"
+          },
+          {
+            "name": "encoding",
+            "type": "string",
+            "value": "utf-8"
+          }
+        ],
+        "assignTo": "content"
+      },
+      {
+        "kind": "call",
+        "function": "findIndex",
+        "args": [],
+        "assignTo": "count"
+      },
+      {
+        "kind": "return",
+        "value": "count"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780255354186",
+    "timestamp": "2026-05-31T19:22:34.186Z"
+  },
+  {
+    "intent": "read a JSON file from disk, parse it, and return the parsed object",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "readFileSync",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "file.json"
+          },
+          {
+            "name": "encoding",
+            "type": "string",
+            "value": "utf-8"
+          }
+        ],
+        "assignTo": "data"
+      },
+      {
+        "kind": "call",
+        "function": "parse",
+        "args": [
+          {
+            "name": "text",
+            "type": "string",
+            "value": "data"
+          }
+        ],
+        "assignTo": "obj"
+      },
+      {
+        "kind": "return",
+        "value": "obj"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780255345558",
+    "timestamp": "2026-05-31T19:22:25.558Z"
+  },
+  {
+    "intent": "load session files from the corpus directory and count total sessions, resolved sessions, and unresolved sessions",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "formatSessionSummary",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "ReturnType<typeof getAllSessions>",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "summary"
+      },
+      {
+        "kind": "return",
+        "value": "summary"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780255302494",
+    "timestamp": "2026-05-31T19:21:42.494Z"
+  },
+  {
     "intent": "read execution metrics from disk and format a one-line status summary",
     "actions": [
       {

@@ -1,7 +1,7 @@
 {
-  "generated": 5,
+  "generated": 9,
   "repaired": 2,
-  "lastGeneration": "src/metrics-status.ts",
+  "lastGeneration": "src/list-files.ts",
   "history": [
     {
       "sessionId": "sess_1780238693023_j3nxt",
@@ -39,6 +39,38 @@
       "sessionId": "sess_1780255193704_rws69",
       "timestamp": 1780255195238,
       "filePath": "src/metrics-status.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 381
+    },
+    {
+      "sessionId": "sess_1780255300733_uwl27",
+      "timestamp": 1780255302503,
+      "filePath": "src/session-count.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 381
+    },
+    {
+      "sessionId": "sess_1780255343517_uifn3",
+      "timestamp": 1780255345564,
+      "filePath": "src/json-read.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 381
+    },
+    {
+      "sessionId": "sess_1780255352817_3agzg",
+      "timestamp": 1780255354191,
+      "filePath": "src/count-ts.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 381
+    },
+    {
+      "sessionId": "sess_1780255358108_l80ua",
+      "timestamp": 1780255359367,
+      "filePath": "src/list-files.ts",
       "repaired": false,
       "repairCount": 0,
       "irFunctionCount": 381
