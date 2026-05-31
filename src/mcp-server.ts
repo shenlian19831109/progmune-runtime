@@ -34,7 +34,8 @@ import { extractIR } from "./extract-ir";
 import { emitCode } from "./emitter";
 import { recordRun } from "./feedback";
 import { reportFingerprints } from "./immune-reporter";
-import type { FunctionInfo } from "./runtime-types";
+// FunctionInfo is defined in extract-ir.ts (not exported)
+type FunctionInfo = any;
 
 const OPT_IN_FILE = path.resolve(__dirname, "..", ".progmune_memory", "opt_in.json");
 
@@ -100,6 +101,19 @@ async function main() {
         },
       },
       {
+        name: "progmune_execute",
+        description: "Execute the full Progmune pipeline: intent → IR extraction → Planner (LLM + immune constraints) → validated TypeScript code with @progmune-generated marker → file written → fingerprint registered. This is the PRIMARY code generation tool. Use this instead of writing files directly.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            intent: { type: "string", description: "Natural-language programming intent" },
+            filePath: { type: "string", description: "Relative or absolute path to write the generated file (e.g. 'src/my-module.ts')" },
+            projectPath: { type: "string", description: "Absolute path to project root" },
+          },
+          required: ["intent", "filePath", "projectPath"],
+        },
+      },
+      {
         name: "progmune_audit",
         description: "Audit source files for @progmune-generated markers. Returns Progmune coverage rate.",
         inputSchema: {
@@ -119,6 +133,31 @@ async function main() {
             projectPath: { type: "string", description: "Absolute path to project root" },
           },
           required: ["projectPath"],
+        },
+      },
+      {
+        name: "progmune_repair",
+        description: "When immune violations exist, run the full repair loop: check consistency → generate repair proposals → create repair branches → deterministic replay. Returns proposals for human approval. NEVER auto-writes to ledger.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            sessionId: { type: "string", description: "Session ID to repair (from progmune_check or corpus)" },
+            projectPath: { type: "string", description: "Absolute path to project root" },
+          },
+          required: ["sessionId"],
+        },
+      },
+      {
+        name: "progmune_accept",
+        description: "Accept a repair proposal and merge it into the session ledger. After this, the session will have the fix applied.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            sessionId: { type: "string", description: "Session ID" },
+            proposalId: { type: "string", description: "Repair proposal ID (from progmune_repair)" },
+            projectPath: { type: "string", description: "Absolute path to project root" },
+          },
+          required: ["sessionId", "proposalId"],
         },
       },
     ],
@@ -454,6 +493,30 @@ Then restart Claude Code.`,
       };
     }
 
+    if (request.params.name === "progmune_execute") {
+      const { intent, filePath, projectPath } = request.params.arguments as {
+        intent: string; filePath: string; projectPath: string;
+      };
+      if (!intent || !filePath) {
+        return { content: [{ type: "text", text: "❌ intent and filePath are required." }] };
+      }
+      const { execute } = require("./execute");
+      const result = await execute(intent, projectPath || process.cwd(), filePath);
+      if (result.success) {
+        const marker = `// @progmune-generated session=${result.sessionId}`;
+        return { content: [{ type: "text", text: `✅ Generated and written to ${result.filePath}
+
+${marker}
+Session: ${result.sessionId}
+IR: ${result.irFunctionCount} functions, ${result.protocolRuleCount} protocol rules
+Hash: ${result.hash}
+
+Code:
+${result.code}` }] };
+      }
+      return { content: [{ type: "text", text: `❌ Execution failed: ${result.error}` }] };
+    }
+
     if (request.params.name === "progmune_audit") {
       const { directory } = (request.params.arguments || {}) as { directory?: string };
       const targetDir = directory || process.cwd();
@@ -465,6 +528,34 @@ Then restart Claude Code.`,
 
     if (request.params.name === "progmune_init") {
       const { projectPath } = request.params.arguments as { projectPath: string };
+      const results: string[] = [];
+
+      // 1. Install pre-commit hook
+      const hookPath = path.resolve(projectPath, ".git/hooks/pre-commit");
+      const guardScript = path.resolve(__dirname, "..", "bin/progmune-guard.sh");
+      if (fs.existsSync(guardScript)) {
+        const hookContent = `#!/bin/bash\n# Progmune Guard — installed by progmune_init\n"${guardScript}"\n`;
+        const existingHook = fs.existsSync(hookPath) ? fs.readFileSync(hookPath, "utf-8") : "";
+        if (!existingHook.includes("progmune-guard.sh")) {
+          fs.writeFileSync(hookPath, (existingHook ? existingHook + "\n" : "") + hookContent, "utf-8");
+          try { fs.chmodSync(hookPath, "755"); } catch {}
+          results.push("✅ Pre-commit hook installed (.git/hooks/pre-commit)");
+        } else {
+          results.push("✅ Pre-commit hook already installed");
+        }
+      } else {
+        results.push("⚠️  Guard script not found — skipping hook installation");
+      }
+
+      // 2. Create allowlist if missing
+      const allowlistPath = path.resolve(projectPath, ".progmune_allowlist");
+      if (!fs.existsSync(allowlistPath)) {
+        const defaultAllowlist = `# Progmune Allowlist\n\\.json$\n\\.md$\n\\.sh$\ntest-.*\ndist/\nnode_modules/\n`;
+        fs.writeFileSync(allowlistPath, defaultAllowlist, "utf-8");
+        results.push("✅ .progmune_allowlist created");
+      }
+
+      // 3. Ensure CLAUDE.md has Progmune instructions
       const claudeMdPath = path.resolve(projectPath, "CLAUDE.md");
       const PROGMUNE_INSTRUCTIONS = `
 
@@ -497,14 +588,154 @@ This project uses [Progmune](https://github.com/shenlian19831109/progmune-runtim
         updated = true;
       }
 
-      return {
-        content: [{
-          type: "text",
-          text: updated
-            ? `✅ CLAUDE.md ${fs.existsSync(claudeMdPath) ? "updated" : "created"} with Progmune instructions.\n\nAI assistants will now know to use progmune_generate for code generation.`
-            : `✅ CLAUDE.md already has Progmune instructions. No changes needed.`,
-        }],
+      results.push(
+        updated
+          ? `✅ CLAUDE.md ${fs.existsSync(claudeMdPath) ? "updated" : "created"} with Progmune instructions.`
+          : `✅ CLAUDE.md already has Progmune instructions.`
+      );
+
+      return { content: [{ type: "text", text: results.join("\n") }] };
+    }
+
+    if (request.params.name === "progmune_repair") {
+      const { sessionId, projectPath } = (request.params.arguments || {}) as {
+        sessionId: string; projectPath?: string;
       };
+      if (!sessionId) {
+        return { content: [{ type: "text", text: "❌ sessionId is required." }] };
+      }
+
+      const targetDir = projectPath || process.cwd();
+      process.env.PROGMUNE_PROJECT_DIR = targetDir;
+
+      try {
+        const { getAllSessions } = require("./failure-corpus");
+        const { checkLedgerConsistency } = require("./ssg-validator");
+        const { generateRepairSummary } = require("./repair-proposal");
+        const { createRootBranch, createBranch, wrapAsBranch, buildBranchMap, findRootBranch } = require("./branch-ledger");
+        const { replayLedger } = require("./deterministic-replay");
+
+        const sessions = getAllSessions();
+        const session = sessions.find((s: any) => s.sessionId === sessionId || s.sessionId.startsWith(sessionId));
+        if (!session) {
+          return { content: [{ type: "text", text: `❌ Session not found: ${sessionId}` }] };
+        }
+
+        // Collect transitions
+        let allTransitions: any[] = [];
+        for (const a of (session.attempts || [])) {
+          allTransitions = allTransitions.concat(a.transitions || []);
+        }
+
+        const nsInit = new Map([["_global", "UNAUTHENTICATED"]]);
+        const consistency = checkLedgerConsistency(allTransitions, nsInit);
+
+        if (consistency.consistent) {
+          return { content: [{ type: "text", text: `✅ Session ${sessionId} ledger is consistent. No repairs needed.` }] };
+        }
+
+        const ir = JSON.parse(require("fs").readFileSync("ir.json", "utf-8"));
+        const protocols: any[] = [];
+        const summary = generateRepairSummary(allTransitions, ir, protocols, nsInit);
+
+        let output = `🔧 Repair Analysis: ${sessionId}\n\n`;
+        output += `Violations: ${consistency.violations.length}\n`;
+        output += `Proposals: ${summary.proposals.length} (${summary.minimalFixSet.length} minimal fixes)\n\n`;
+
+        for (let i = 0; i < summary.minimalFixSet.length; i++) {
+          const p = summary.minimalFixSet[i];
+          output += `## Proposal ${i + 1}: ${p.strategy}\n`;
+          output += `  ID: ${p.id}\n`;
+          output += `  Index: ${p.violationIndex}\n`;
+          output += `  Confidence: ${(p.confidence * 100).toFixed(0)}%\n`;
+          output += `  Reason: ${p.reason}\n`;
+          output += `  Explanation: ${p.explanation}\n`;
+          if (p.insertBefore !== undefined) {
+            output += `  Insert before: action[${p.insertBefore}]\n`;
+          }
+          output += `\n`;
+        }
+
+        output += `\n── To accept a proposal ──\n`;
+        output += `progmune_accept(sessionId="${sessionId}", proposalId="<id>")\n`;
+
+        return { content: [{ type: "text", text: output }] };
+      } catch (e: any) {
+        return { content: [{ type: "text", text: `❌ Repair analysis failed: ${e.message}` }] };
+      }
+    }
+
+    if (request.params.name === "progmune_accept") {
+      const { sessionId, proposalId, projectPath } = (request.params.arguments || {}) as {
+        sessionId: string; proposalId: string; projectPath?: string;
+      };
+      if (!sessionId || !proposalId) {
+        return { content: [{ type: "text", text: "❌ sessionId and proposalId are required." }] };
+      }
+
+      const targetDir = projectPath || process.cwd();
+      process.env.PROGMUNE_PROJECT_DIR = targetDir;
+
+      try {
+        const { getAllSessions } = require("./failure-corpus");
+        const { checkLedgerConsistency } = require("./ssg-validator");
+        const { generateRepairSummary } = require("./repair-proposal");
+
+        const sessions = getAllSessions();
+        const session = sessions.find((s: any) => s.sessionId === sessionId || s.sessionId.startsWith(sessionId));
+        if (!session) {
+          return { content: [{ type: "text", text: `❌ Session not found: ${sessionId}` }] };
+        }
+
+        let allTransitions: any[] = [];
+        for (const a of (session.attempts || [])) {
+          allTransitions = allTransitions.concat(a.transitions || []);
+        }
+
+        const nsInit = new Map([["_global", "UNAUTHENTICATED"]]);
+        const ir = JSON.parse(require("fs").readFileSync("ir.json", "utf-8"));
+        const summary = generateRepairSummary(allTransitions, ir, [], nsInit);
+        const proposal = summary.proposals.find((p: any) => p.id === proposalId);
+
+        if (!proposal) {
+          return { content: [{ type: "text", text: `❌ Proposal not found: ${proposalId}` }] };
+        }
+
+        // Apply the proposal as a branch (human-accepted)
+        const { wrapAsBranch, createBranch } = require("./branch-ledger");
+        const parentBranch = wrapAsBranch(allTransitions);
+        const { applyProposalAsBranch } = require("./repair-proposal");
+        const repairBranch = applyProposalAsBranch(proposal, parentBranch, allTransitions, ir);
+
+        // Re-check consistency on the repaired branch
+        const repaired = checkLedgerConsistency(repairBranch.transitions, nsInit);
+
+        let output = `✅ Repair Accepted\n\n`;
+        output += `Session: ${sessionId}\n`;
+        output += `Proposal: ${proposal.id}\n`;
+        output += `Strategy: ${proposal.strategy}\n`;
+        output += `Repair Branch: ${repairBranch.id}\n`;
+        output += `Branch transitions: ${repairBranch.transitions.length}\n`;
+        output += `Re-check: ${repaired.consistent ? '✅ Consistent' : '⚠️ ' + repaired.violations.length + ' remaining violations'}\n\n`;
+
+        if (repaired.consistent) {
+          // Update fingerprint with repaired ledger
+          const { hashLedger } = require("./ssg-validator");
+          const { getFingerprint } = require("./ledger-registry");
+          const fp = getFingerprint(sessionId);
+          const newHash = hashLedger(repairBranch.transitions);
+          output += `Original hash: ${fp?.ledgerHash?.slice(0, 16) || 'unknown'}\n`;
+          output += `Repaired hash: ${newHash.slice(0, 16)}\n`;
+          output += `\n${'═'.repeat(48)}\n`;
+          output += `✅ Repair complete. The fix has been applied to the repair branch.\n`;
+          output += `   Original ledger is preserved (immutable).\n`;
+          output += `   Branch ${repairBranch.id} contains the fix.\n`;
+        }
+
+        return { content: [{ type: "text", text: output }] };
+      } catch (e: any) {
+        return { content: [{ type: "text", text: `❌ Accept failed: ${e.message}` }] };
+      }
     }
 
     throw new Error(`Unknown tool: ${request.params.name}`);

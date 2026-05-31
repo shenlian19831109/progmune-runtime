@@ -1,0 +1,50 @@
+# Progmune Allowlist — files exempt from @progmune-generated requirement
+# Add patterns (one per line) for files that don't need the marker.
+# Lines starting with # are comments.
+
+# Configuration files
+\\.json$
+\\.md$
+\\.sh$
+\\.css$
+\\.html$
+
+# Test files
+test-.*
+.*\\.test\\.ts$
+.*\\.spec\\.ts$
+test_.*\\.ts$
+test_.*\\.mjs$
+test_.*\\.js$
+
+# Build artifacts
+dist/
+node_modules/
+
+# Progmune's own infrastructure (core files that predate Phase 4.5)
+src/runtime-types\\.ts$
+src/runtime-invariants\\.ts$
+src/ssg-validator\\.ts$
+src/failure-corpus\\.ts$
+src/memory-layer\\.ts$
+src/planner\\.ts$
+src/emitter\\.ts$
+src/extract-ir.*\\.ts$
+src/validator\\.ts$
+src/semantic-validator\\.ts$
+src/action-runtime\\.ts$
+src/actions\\.ts$
+src/llm\\.ts$
+src/utils\\.ts$
+src/feedback\\.ts$
+src/immune-reporter\\.ts$
+src/report\\.ts$
+src/file-lock\\.ts$
+src/consolidate\\.ts$
+src/mcp-server\\.ts$
+src/check\\.ts$
+src/semantic-trace\\.ts$
+src/semantic-snapshot\\.ts$
+src/obs-web\\.ts$
+src/p0_ssg_demo\\.ts$
+src/main\\.ts$
