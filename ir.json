@@ -18,6 +18,411 @@
     ]
   },
   {
+    "name": "auditDirectory",
+    "params": [
+      {
+        "name": "dir",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "AuditResult",
+    "returnTypeDetail": "AuditResult",
+    "file": "src/audit.ts",
+    "calls": [
+      "existsSync",
+      "statSync",
+      "isDirectory",
+      "scanDir",
+      "sort"
+    ]
+  },
+  {
+    "name": "scanDir",
+    "params": [
+      {
+        "name": "rootDir",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "currentDir",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "result",
+        "type": "AuditResult",
+        "typeDetail": "AuditResult"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "src/audit.ts",
+    "calls": [
+      "readdirSync",
+      "join",
+      "isDirectory",
+      "has",
+      "startsWith",
+      "scanDir",
+      "endsWith",
+      "readFileSync",
+      "slice",
+      "split",
+      "match",
+      "push",
+      "relative"
+    ]
+  },
+  {
+    "name": "formatAuditResult",
+    "params": [
+      {
+        "name": "result",
+        "type": "AuditResult",
+        "typeDetail": "AuditResult"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/audit.ts",
+    "calls": [
+      "toFixed",
+      "push",
+      "repeat",
+      "map",
+      "slice",
+      "join"
+    ]
+  },
+  {
+    "name": "generateBranchId",
+    "params": [],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/branch-ledger.ts",
+    "calls": [
+      "now",
+      "slice",
+      "toString",
+      "random"
+    ]
+  },
+  {
+    "name": "createRootBranch",
+    "params": [
+      {
+        "name": "transitions",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
+      }
+    ],
+    "returnType": "Branch",
+    "returnTypeDetail": "Branch",
+    "file": "src/branch-ledger.ts",
+    "calls": [
+      "generateBranchId",
+      "now"
+    ]
+  },
+  {
+    "name": "createBranch",
+    "params": [
+      {
+        "name": "parent",
+        "type": "Branch",
+        "typeDetail": "Branch"
+      },
+      {
+        "name": "reason",
+        "type": "BranchReason",
+        "typeDetail": "BranchReason"
+      },
+      {
+        "name": "initialTransitions",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
+      }
+    ],
+    "returnType": "Branch",
+    "returnTypeDetail": "Branch",
+    "file": "src/branch-ledger.ts",
+    "calls": [
+      "generateBranchId",
+      "now"
+    ]
+  },
+  {
+    "name": "forkBranch",
+    "params": [
+      {
+        "name": "branch",
+        "type": "Branch",
+        "typeDetail": "Branch"
+      },
+      {
+        "name": "splitIndex",
+        "type": "number",
+        "typeDetail": "number"
+      },
+      {
+        "name": "reason",
+        "type": "BranchReason",
+        "typeDetail": "BranchReason"
+      }
+    ],
+    "returnType": "{ original: Branch; forked: Branch }",
+    "returnTypeDetail": "{ original: Branch; forked: Branch }",
+    "file": "src/branch-ledger.ts",
+    "calls": [
+      "slice",
+      "generateBranchId",
+      "now"
+    ]
+  },
+  {
+    "name": "mergeBranches",
+    "params": [
+      {
+        "name": "branches",
+        "type": "Branch[]",
+        "typeDetail": "Branch[]"
+      }
+    ],
+    "returnType": "Branch | null",
+    "returnTypeDetail": "Branch | null",
+    "file": "src/branch-ledger.ts",
+    "calls": [
+      "filter",
+      "sort",
+      "generateBranchId",
+      "now",
+      "has",
+      "add",
+      "push"
+    ]
+  },
+  {
+    "name": "flattenBranch",
+    "params": [
+      {
+        "name": "branch",
+        "type": "Branch",
+        "typeDetail": "Branch"
+      },
+      {
+        "name": "allBranches",
+        "type": "Map<string, Branch>",
+        "typeDetail": "Map<string, Branch>"
+      }
+    ],
+    "returnType": "StateTransition[]",
+    "returnTypeDetail": "StateTransition[]",
+    "file": "src/branch-ledger.ts",
+    "calls": [
+      "getBranchPath",
+      "has",
+      "findIndex",
+      "add",
+      "push",
+      "sort"
+    ]
+  },
+  {
+    "name": "getBranchPath",
+    "params": [
+      {
+        "name": "branch",
+        "type": "Branch",
+        "typeDetail": "Branch"
+      },
+      {
+        "name": "allBranches",
+        "type": "Map<string, Branch>",
+        "typeDetail": "Map<string, Branch>"
+      }
+    ],
+    "returnType": "Branch[]",
+    "returnTypeDetail": "Branch[]",
+    "file": "src/branch-ledger.ts",
+    "calls": [
+      "unshift",
+      "get"
+    ]
+  },
+  {
+    "name": "replayBranch",
+    "params": [
+      {
+        "name": "branch",
+        "type": "Branch",
+        "typeDetail": "Branch"
+      },
+      {
+        "name": "allBranches",
+        "type": "Map<string, Branch>",
+        "typeDetail": "Map<string, Branch>"
+      },
+      {
+        "name": "namespaceInitialStates",
+        "type": "Map<string, string>",
+        "typeDetail": "Map<string, string>"
+      }
+    ],
+    "returnType": "BranchReplayResult",
+    "returnTypeDetail": "BranchReplayResult",
+    "file": "src/branch-ledger.ts",
+    "calls": [
+      "getBranchPath",
+      "map",
+      "flattenBranch",
+      "some",
+      "rebuildState"
+    ]
+  },
+  {
+    "name": "buildBranchMap",
+    "params": [
+      {
+        "name": "branches",
+        "type": "Branch[]",
+        "typeDetail": "Branch[]"
+      }
+    ],
+    "returnType": "Map<string, Branch>",
+    "returnTypeDetail": "Map<string, Branch>",
+    "file": "src/branch-ledger.ts",
+    "calls": [
+      "set"
+    ]
+  },
+  {
+    "name": "findRootBranch",
+    "params": [
+      {
+        "name": "branches",
+        "type": "Branch[]",
+        "typeDetail": "Branch[]"
+      }
+    ],
+    "returnType": "Branch | undefined",
+    "returnTypeDetail": "Branch | undefined",
+    "file": "src/branch-ledger.ts",
+    "calls": [
+      "find"
+    ]
+  },
+  {
+    "name": "findChildBranches",
+    "params": [
+      {
+        "name": "parent",
+        "type": "Branch",
+        "typeDetail": "Branch"
+      },
+      {
+        "name": "allBranches",
+        "type": "Map<string, Branch>",
+        "typeDetail": "Map<string, Branch>"
+      }
+    ],
+    "returnType": "Branch[]",
+    "returnTypeDetail": "Branch[]",
+    "file": "src/branch-ledger.ts",
+    "calls": [
+      "values",
+      "push"
+    ]
+  },
+  {
+    "name": "describeBranchTree",
+    "params": [
+      {
+        "name": "root",
+        "type": "Branch",
+        "typeDetail": "Branch"
+      },
+      {
+        "name": "allBranches",
+        "type": "Map<string, Branch>",
+        "typeDetail": "Map<string, Branch>"
+      },
+      {
+        "name": "indent",
+        "type": "any",
+        "typeDetail": ""
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/branch-ledger.ts",
+    "calls": [
+      "repeat",
+      "slice",
+      "findChildBranches",
+      "describeBranchTree"
+    ]
+  },
+  {
+    "name": "wrapAsBranch",
+    "params": [
+      {
+        "name": "transitions",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
+      }
+    ],
+    "returnType": "Branch",
+    "returnTypeDetail": "Branch",
+    "file": "src/branch-ledger.ts",
+    "calls": [
+      "createRootBranch",
+      "every"
+    ]
+  },
+  {
+    "name": "unwrapBranchTree",
+    "params": [
+      {
+        "name": "branches",
+        "type": "Branch[]",
+        "typeDetail": "Branch[]"
+      }
+    ],
+    "returnType": "StateTransition[]",
+    "returnTypeDetail": "StateTransition[]",
+    "file": "src/branch-ledger.ts",
+    "calls": [
+      "buildBranchMap",
+      "findRootBranch",
+      "findSuccessfulLeaf",
+      "flattenBranch"
+    ]
+  },
+  {
+    "name": "findSuccessfulLeaf",
+    "params": [
+      {
+        "name": "branch",
+        "type": "Branch",
+        "typeDetail": "Branch"
+      },
+      {
+        "name": "allBranches",
+        "type": "Map<string, Branch>",
+        "typeDetail": "Map<string, Branch>"
+      }
+    ],
+    "returnType": "Branch | undefined",
+    "returnTypeDetail": "Branch | undefined",
+    "file": "src/branch-ledger.ts",
+    "calls": [
+      "findChildBranches",
+      "findSuccessfulLeaf"
+    ]
+  },
+  {
     "name": "step",
     "params": [
       {
@@ -172,6 +577,152 @@
     "calls": []
   },
   {
+    "name": "replaySession",
+    "params": [
+      {
+        "name": "sessionId",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "currentRules",
+        "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>",
+        "typeDetail": "Map<string, import(\"./ssg-validator\").StateAnnotation>"
+      },
+      {
+        "name": "namespaceInitialStates",
+        "type": "Map<string, string>",
+        "typeDetail": "Map<string, string>"
+      }
+    ],
+    "returnType": "ReplayResult",
+    "returnTypeDetail": "ReplayResult",
+    "file": "src/deterministic-replay.ts",
+    "calls": [
+      "resolve",
+      "cwd",
+      "join",
+      "existsSync",
+      "parse",
+      "readFileSync",
+      "buildBranchMap",
+      "findRootBranch",
+      "flattenBranch",
+      "concat",
+      "getFingerprint",
+      "hashRules",
+      "replayLedger"
+    ]
+  },
+  {
+    "name": "replayLedger",
+    "params": [
+      {
+        "name": "sessionId",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "transitions",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
+      },
+      {
+        "name": "storedRuleHash",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "storedLedgerHash",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "currentRuleHash",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "currentRules",
+        "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>",
+        "typeDetail": "Map<string, import(\"./ssg-validator\").StateAnnotation>"
+      },
+      {
+        "name": "namespaceInitialStates",
+        "type": "Map<string, string>",
+        "typeDetail": "Map<string, string>"
+      }
+    ],
+    "returnType": "ReplayResult",
+    "returnTypeDetail": "ReplayResult",
+    "file": "src/deterministic-replay.ts",
+    "calls": [
+      "hashLedger",
+      "rebuildState",
+      "validateTransition",
+      "deepEqualSnapshots",
+      "stringify",
+      "push",
+      "checkLedgerConsistency",
+      "filter"
+    ]
+  },
+  {
+    "name": "replayWithDetail",
+    "params": [
+      {
+        "name": "transitions",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
+      },
+      {
+        "name": "currentRules",
+        "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>",
+        "typeDetail": "Map<string, import(\"./ssg-validator\").StateAnnotation>"
+      },
+      {
+        "name": "namespaceInitialStates",
+        "type": "Map<string, string>",
+        "typeDetail": "Map<string, string>"
+      }
+    ],
+    "returnType": "ReplayTransition[]",
+    "returnTypeDetail": "ReplayTransition[]",
+    "file": "src/deterministic-replay.ts",
+    "calls": [
+      "map",
+      "rebuildState",
+      "hashRules",
+      "push",
+      "validateTransition",
+      "deepEqualSnapshots",
+      "slice"
+    ]
+  },
+  {
+    "name": "deepEqualSnapshots",
+    "params": [
+      {
+        "name": "a",
+        "type": "Record<string, string[]>",
+        "typeDetail": "Record<string, string[]>"
+      },
+      {
+        "name": "b",
+        "type": "Record<string, string[]>",
+        "typeDetail": "Record<string, string[]>"
+      }
+    ],
+    "returnType": "boolean",
+    "returnTypeDetail": "boolean",
+    "file": "src/deterministic-replay.ts",
+    "calls": [
+      "sort",
+      "keys",
+      "join"
+    ]
+  },
+  {
     "name": "getImportPath",
     "params": [
       {
@@ -194,6 +745,11 @@
         "name": "actions",
         "type": "Action[]",
         "typeDetail": "Action[]"
+      },
+      {
+        "name": "meta",
+        "type": "{ sessionId?: string; ruleHash?: string; irFunctionCount?: number; protocolRuleCount?: number }",
+        "typeDetail": "{ sessionId?: string; ruleHash?: string; irFunctionCount?: number; protocolRuleCount?: number }"
       }
     ],
     "returnType": "string",
@@ -204,6 +760,7 @@
       "readFileSync",
       "set",
       "collect",
+      "toISOString",
       "join",
       "getImportPath",
       "convert"
@@ -1134,6 +1691,176 @@
     ]
   },
   {
+    "name": "fingerprintsDir",
+    "params": [],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/ledger-registry.ts",
+    "calls": [
+      "cwd",
+      "resolve"
+    ]
+  },
+  {
+    "name": "fingerprintPath",
+    "params": [
+      {
+        "name": "sessionId",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/ledger-registry.ts",
+    "calls": [
+      "join",
+      "fingerprintsDir"
+    ]
+  },
+  {
+    "name": "registerFingerprint",
+    "params": [
+      {
+        "name": "sessionId",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "transitions",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
+      },
+      {
+        "name": "ruleHash",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "LedgerFingerprint",
+    "returnTypeDetail": "LedgerFingerprint",
+    "file": "src/ledger-registry.ts",
+    "calls": [
+      "fingerprintsDir",
+      "existsSync",
+      "mkdirSync",
+      "hashLedger",
+      "now",
+      "writeFileSync",
+      "fingerprintPath",
+      "stringify"
+    ]
+  },
+  {
+    "name": "getFingerprint",
+    "params": [
+      {
+        "name": "sessionId",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "LedgerFingerprint | null",
+    "returnTypeDetail": "LedgerFingerprint | null",
+    "file": "src/ledger-registry.ts",
+    "calls": [
+      "fingerprintPath",
+      "existsSync",
+      "parse",
+      "readFileSync"
+    ]
+  },
+  {
+    "name": "getFingerprintRegistry",
+    "params": [],
+    "returnType": "LedgerFingerprint[]",
+    "returnTypeDetail": "LedgerFingerprint[]",
+    "file": "src/ledger-registry.ts",
+    "calls": [
+      "fingerprintsDir",
+      "existsSync",
+      "readdirSync",
+      "endsWith",
+      "parse",
+      "readFileSync",
+      "join",
+      "push",
+      "sort"
+    ]
+  },
+  {
+    "name": "verifyFingerprint",
+    "params": [
+      {
+        "name": "sessionId",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "transitions",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
+      },
+      {
+        "name": "currentRuleHash",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "FingerprintVerifyResult",
+    "returnTypeDetail": "FingerprintVerifyResult",
+    "file": "src/ledger-registry.ts",
+    "calls": [
+      "getFingerprint",
+      "hashLedger"
+    ]
+  },
+  {
+    "name": "verifyAllFingerprints",
+    "params": [
+      {
+        "name": "currentRuleHash",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "RegistrySummary",
+    "returnTypeDetail": "RegistrySummary",
+    "file": "src/ledger-registry.ts",
+    "calls": [
+      "getFingerprintRegistry",
+      "resolve",
+      "cwd",
+      "join",
+      "existsSync",
+      "push",
+      "parse",
+      "readFileSync",
+      "concat",
+      "verifyFingerprint"
+    ]
+  },
+  {
+    "name": "registerAllMissingFingerprints",
+    "params": [],
+    "returnType": "number",
+    "returnTypeDetail": "number",
+    "file": "src/ledger-registry.ts",
+    "calls": [
+      "resolve",
+      "cwd",
+      "existsSync",
+      "readdirSync",
+      "endsWith",
+      "parse",
+      "readFileSync",
+      "join",
+      "getFingerprint",
+      "concat",
+      "registerFingerprint"
+    ]
+  },
+  {
     "name": "resetCallCount",
     "params": [],
     "returnType": "any",
@@ -1476,7 +2203,133 @@
       "getAllSessions",
       "find",
       "jsonReply",
+      "handleLedgerAPI",
+      "handleConsistencyAPI",
+      "handleDiffAPI",
+      "handleReplayAPI",
+      "getFingerprintRegistry",
       "handler"
+    ]
+  },
+  {
+    "name": "getSessionTransitions",
+    "params": [
+      {
+        "name": "session",
+        "type": "any",
+        "typeDetail": "any"
+      }
+    ],
+    "returnType": "any[]",
+    "returnTypeDetail": "any[]",
+    "file": "src/obs-web.ts",
+    "calls": [
+      "buildBranchMap",
+      "findRootBranch",
+      "flattenBranch",
+      "concat"
+    ]
+  },
+  {
+    "name": "handleLedgerAPI",
+    "params": [
+      {
+        "name": "res",
+        "type": "http.ServerResponse",
+        "typeDetail": "http.ServerResponse"
+      },
+      {
+        "name": "url",
+        "type": "URL",
+        "typeDetail": "URL"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/obs-web.ts",
+    "calls": [
+      "get",
+      "jsonReply",
+      "getAllSessions",
+      "find",
+      "getSessionTransitions",
+      "checkLedgerConsistency",
+      "hashLedger"
+    ]
+  },
+  {
+    "name": "handleConsistencyAPI",
+    "params": [
+      {
+        "name": "res",
+        "type": "http.ServerResponse",
+        "typeDetail": "http.ServerResponse"
+      },
+      {
+        "name": "url",
+        "type": "URL",
+        "typeDetail": "URL"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/obs-web.ts",
+    "calls": [
+      "get",
+      "jsonReply",
+      "getAllSessions",
+      "find",
+      "checkLedgerConsistency",
+      "getSessionTransitions"
+    ]
+  },
+  {
+    "name": "handleDiffAPI",
+    "params": [
+      {
+        "name": "res",
+        "type": "http.ServerResponse",
+        "typeDetail": "http.ServerResponse"
+      },
+      {
+        "name": "url",
+        "type": "URL",
+        "typeDetail": "URL"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/obs-web.ts",
+    "calls": [
+      "get",
+      "jsonReply",
+      "getAllSessions",
+      "find",
+      "diffLedgers",
+      "getSessionTransitions"
+    ]
+  },
+  {
+    "name": "handleReplayAPI",
+    "params": [
+      {
+        "name": "res",
+        "type": "http.ServerResponse",
+        "typeDetail": "http.ServerResponse"
+      },
+      {
+        "name": "url",
+        "type": "URL",
+        "typeDetail": "URL"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/obs-web.ts",
+    "calls": [
+      "get",
+      "jsonReply",
+      "replaySession"
     ]
   },
   {
@@ -1867,8 +2720,8 @@
         "typeDetail": "string"
       }
     ],
-    "returnType": "Promise<Action[]>",
-    "returnTypeDetail": "Promise<Action[]>",
+    "returnType": "Promise<PlanResult>",
+    "returnTypeDetail": "Promise<PlanResult>",
     "file": "src/planner.ts",
     "calls": [
       "resetCallCount",
@@ -1881,6 +2734,7 @@
       "findSemanticTemplate",
       "error",
       "recordEpisode",
+      "wrapResult",
       "loadProtocols",
       "queryAntibodies",
       "toFixed",
@@ -2010,6 +2864,258 @@
       "from",
       "push",
       "convertLines"
+    ]
+  },
+  {
+    "name": "suggestRepairs",
+    "params": [
+      {
+        "name": "violations",
+        "type": "ConstraintViolation[]",
+        "typeDetail": "ConstraintViolation[]"
+      },
+      {
+        "name": "ir",
+        "type": "any[]",
+        "typeDetail": "any[]"
+      },
+      {
+        "name": "protocols",
+        "type": "FunctionProtocol[]",
+        "typeDetail": "FunctionProtocol[]"
+      }
+    ],
+    "returnType": "RepairProposal[]",
+    "returnTypeDetail": "RepairProposal[]",
+    "file": "src/repair-proposal.ts",
+    "calls": [
+      "tryParseRejection",
+      "push",
+      "suggestProtocolRepair",
+      "suggestGenericRepair"
+    ]
+  },
+  {
+    "name": "suggestProtocolRepair",
+    "params": [
+      {
+        "name": "rejection",
+        "type": "SSGRejection",
+        "typeDetail": "SSGRejection"
+      },
+      {
+        "name": "ir",
+        "type": "any[]",
+        "typeDetail": "any[]"
+      }
+    ],
+    "returnType": "RepairProposal[]",
+    "returnTypeDetail": "RepairProposal[]",
+    "file": "src/repair-proposal.ts",
+    "calls": [
+      "find",
+      "map",
+      "push",
+      "now",
+      "slice",
+      "toString",
+      "random",
+      "join"
+    ]
+  },
+  {
+    "name": "suggestInvariantRepair",
+    "params": [
+      {
+        "name": "violation",
+        "type": "LedgerConsistencyViolation",
+        "typeDetail": "LedgerConsistencyViolation"
+      },
+      {
+        "name": "ledger",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
+      },
+      {
+        "name": "namespaceInitialStates",
+        "type": "Map<string, string>",
+        "typeDetail": "Map<string, string>"
+      }
+    ],
+    "returnType": "RepairProposal[]",
+    "returnTypeDetail": "RepairProposal[]",
+    "file": "src/repair-proposal.ts",
+    "calls": [
+      "push",
+      "now",
+      "slice",
+      "toString",
+      "random",
+      "stringify"
+    ]
+  },
+  {
+    "name": "suggestGenericRepair",
+    "params": [
+      {
+        "name": "violation",
+        "type": "ConstraintViolation",
+        "typeDetail": "ConstraintViolation"
+      },
+      {
+        "name": "ir",
+        "type": "any[]",
+        "typeDetail": "any[]"
+      }
+    ],
+    "returnType": "RepairProposal",
+    "returnTypeDetail": "RepairProposal",
+    "file": "src/repair-proposal.ts",
+    "calls": [
+      "now",
+      "slice",
+      "toString",
+      "random",
+      "jaccardSimilarity",
+      "toLowerCase",
+      "find",
+      "map",
+      "toFixed"
+    ]
+  },
+  {
+    "name": "applyProposalAsBranch",
+    "params": [
+      {
+        "name": "proposal",
+        "type": "RepairProposal",
+        "typeDetail": "RepairProposal"
+      },
+      {
+        "name": "parentBranch",
+        "type": "Branch",
+        "typeDetail": "Branch"
+      },
+      {
+        "name": "currentLedger",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
+      },
+      {
+        "name": "ir",
+        "type": "any[]",
+        "typeDetail": "any[]"
+      }
+    ],
+    "returnType": "Branch",
+    "returnTypeDetail": "Branch",
+    "file": "src/repair-proposal.ts",
+    "calls": [
+      "createBranch",
+      "slice",
+      "map"
+    ]
+  },
+  {
+    "name": "validateProposal",
+    "params": [
+      {
+        "name": "proposal",
+        "type": "RepairProposal",
+        "typeDetail": "RepairProposal"
+      },
+      {
+        "name": "currentLedger",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
+      },
+      {
+        "name": "namespaceInitialStates",
+        "type": "Map<string, string>",
+        "typeDetail": "Map<string, string>"
+      }
+    ],
+    "returnType": "{ valid: boolean; remainingViolations: LedgerConsistencyViolation[] }",
+    "returnTypeDetail": "{ valid: boolean; remainingViolations: LedgerConsistencyViolation[] }",
+    "file": "src/repair-proposal.ts",
+    "calls": [
+      "map",
+      "checkLedgerConsistency"
+    ]
+  },
+  {
+    "name": "generateRepairSummary",
+    "params": [
+      {
+        "name": "ledger",
+        "type": "StateTransition[]",
+        "typeDetail": "StateTransition[]"
+      },
+      {
+        "name": "ir",
+        "type": "any[]",
+        "typeDetail": "any[]"
+      },
+      {
+        "name": "protocols",
+        "type": "FunctionProtocol[]",
+        "typeDetail": "FunctionProtocol[]"
+      },
+      {
+        "name": "namespaceInitialStates",
+        "type": "Map<string, string>",
+        "typeDetail": "Map<string, string>"
+      }
+    ],
+    "returnType": "RepairSummary",
+    "returnTypeDetail": "RepairSummary",
+    "file": "src/repair-proposal.ts",
+    "calls": [
+      "checkLedgerConsistency",
+      "push",
+      "suggestInvariantRepair",
+      "get",
+      "set",
+      "sort",
+      "values"
+    ]
+  },
+  {
+    "name": "tryParseRejection",
+    "params": [
+      {
+        "name": "v",
+        "type": "ConstraintViolation",
+        "typeDetail": "ConstraintViolation"
+      }
+    ],
+    "returnType": "SSGRejection | null",
+    "returnTypeDetail": "SSGRejection | null",
+    "file": "src/repair-proposal.ts",
+    "calls": [
+      "parse"
+    ]
+  },
+  {
+    "name": "jaccardSimilarity",
+    "params": [
+      {
+        "name": "a",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "b",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "number",
+    "returnTypeDetail": "number",
+    "file": "src/repair-proposal.ts",
+    "calls": [
+      "split",
+      "filter"
     ]
   },
   {
@@ -4192,58 +5298,49 @@
     "description": "输出错误日志"
   },
   {
-    "name": "log",
+    "name": "existsSync",
     "params": [
       {
-        "name": "message",
-        "type": "any"
-      }
-    ],
-    "returnType": "void",
-    "returnTypeDetail": "void",
-    "file": "(external)",
-    "calls": [],
-    "external": true,
-    "description": "输出日志"
-  },
-  {
-    "name": "repeat",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "any",
-    "file": "(external)",
-    "calls": [],
-    "external": true
-  },
-  {
-    "name": "max",
-    "params": [
-      {
-        "name": "values",
-        "type": "number[]"
-      }
-    ],
-    "returnType": "number",
-    "returnTypeDetail": "number",
-    "file": "(external)",
-    "calls": [],
-    "external": true,
-    "description": "最大值"
-  },
-  {
-    "name": "parse",
-    "params": [
-      {
-        "name": "text",
+        "name": "path",
         "type": "string"
       }
     ],
-    "returnType": "any",
-    "returnTypeDetail": "any",
+    "returnType": "boolean",
+    "returnTypeDetail": "boolean",
     "file": "(external)",
     "calls": [],
     "external": true,
-    "description": "解析 JSON 字符串"
+    "description": "检查文件是否存在"
+  },
+  {
+    "name": "statSync",
+    "params": [
+      {
+        "name": "path",
+        "type": "string"
+      }
+    ],
+    "returnType": "object",
+    "returnTypeDetail": "object",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "获取文件状态"
+  },
+  {
+    "name": "readdirSync",
+    "params": [
+      {
+        "name": "path",
+        "type": "string"
+      }
+    ],
+    "returnType": "string[]",
+    "returnTypeDetail": "string[]",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "读取目录内容"
   },
   {
     "name": "readFileSync",
@@ -4263,6 +5360,155 @@
     "calls": [],
     "external": true,
     "description": "同步读取文件内容"
+  },
+  {
+    "name": "relative",
+    "params": [
+      {
+        "name": "from",
+        "type": "string"
+      },
+      {
+        "name": "to",
+        "type": "string"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "计算相对路径"
+  },
+  {
+    "name": "toFixed",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "repeat",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "now",
+    "params": [],
+    "returnType": "number",
+    "returnTypeDetail": "number",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "当前时间戳（毫秒）"
+  },
+  {
+    "name": "random",
+    "params": [],
+    "returnType": "number",
+    "returnTypeDetail": "number",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "生成 0-1 随机数"
+  },
+  {
+    "name": "add",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "findIndex",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "log",
+    "params": [
+      {
+        "name": "message",
+        "type": "any"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "输出日志"
+  },
+  {
+    "name": "max",
+    "params": [
+      {
+        "name": "values",
+        "type": "number[]"
+      }
+    ],
+    "returnType": "number",
+    "returnTypeDetail": "number",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "最大值"
+  },
+  {
+    "name": "cwd",
+    "params": [],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "获取当前工作目录"
+  },
+  {
+    "name": "parse",
+    "params": [
+      {
+        "name": "text",
+        "type": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "解析 JSON 字符串"
+  },
+  {
+    "name": "stringify",
+    "params": [
+      {
+        "name": "value",
+        "type": "any"
+      },
+      {
+        "name": "replacer",
+        "type": "any"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "序列化为 JSON 字符串"
   },
   {
     "name": "collect",
@@ -4296,21 +5542,6 @@
     "calls": [],
     "external": true,
     "description": "同步执行命令"
-  },
-  {
-    "name": "existsSync",
-    "params": [
-      {
-        "name": "path",
-        "type": "string"
-      }
-    ],
-    "returnType": "boolean",
-    "returnTypeDetail": "boolean",
-    "file": "(external)",
-    "calls": [],
-    "external": true,
-    "description": "检查文件是否存在"
   },
   {
     "name": "getElementTypeNode",
@@ -4350,34 +5581,6 @@
   },
   {
     "name": "forEachDescendant",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "any",
-    "file": "(external)",
-    "calls": [],
-    "external": true
-  },
-  {
-    "name": "relative",
-    "params": [
-      {
-        "name": "from",
-        "type": "string"
-      },
-      {
-        "name": "to",
-        "type": "string"
-      }
-    ],
-    "returnType": "string",
-    "returnTypeDetail": "string",
-    "file": "(external)",
-    "calls": [],
-    "external": true,
-    "description": "计算相对路径"
-  },
-  {
-    "name": "add",
     "params": [],
     "returnType": "any",
     "returnTypeDetail": "any",
@@ -4443,25 +5646,6 @@
     "description": "同步写入文件"
   },
   {
-    "name": "stringify",
-    "params": [
-      {
-        "name": "value",
-        "type": "any"
-      },
-      {
-        "name": "replacer",
-        "type": "any"
-      }
-    ],
-    "returnType": "string",
-    "returnTypeDetail": "string",
-    "file": "(external)",
-    "calls": [],
-    "external": true,
-    "description": "序列化为 JSON 字符串"
-  },
-  {
     "name": "unlinkSync",
     "params": [
       {
@@ -4475,56 +5659,6 @@
     "calls": [],
     "external": true,
     "description": "删除文件"
-  },
-  {
-    "name": "now",
-    "params": [],
-    "returnType": "number",
-    "returnTypeDetail": "number",
-    "file": "(external)",
-    "calls": [],
-    "external": true,
-    "description": "当前时间戳（毫秒）"
-  },
-  {
-    "name": "random",
-    "params": [],
-    "returnType": "number",
-    "returnTypeDetail": "number",
-    "file": "(external)",
-    "calls": [],
-    "external": true,
-    "description": "生成 0-1 随机数"
-  },
-  {
-    "name": "readdirSync",
-    "params": [
-      {
-        "name": "path",
-        "type": "string"
-      }
-    ],
-    "returnType": "string[]",
-    "returnTypeDetail": "string[]",
-    "file": "(external)",
-    "calls": [],
-    "external": true,
-    "description": "读取目录内容"
-  },
-  {
-    "name": "statSync",
-    "params": [
-      {
-        "name": "path",
-        "type": "string"
-      }
-    ],
-    "returnType": "object",
-    "returnTypeDetail": "object",
-    "file": "(external)",
-    "calls": [],
-    "external": true,
-    "description": "获取文件状态"
   },
   {
     "name": "parseInt",
@@ -4572,15 +5706,6 @@
     "external": true
   },
   {
-    "name": "toFixed",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "any",
-    "file": "(external)",
-    "calls": [],
-    "external": true
-  },
-  {
     "name": "hostname",
     "params": [],
     "returnType": "any",
@@ -4597,16 +5722,6 @@
     "file": "(external)",
     "calls": [],
     "external": true
-  },
-  {
-    "name": "cwd",
-    "params": [],
-    "returnType": "string",
-    "returnTypeDetail": "string",
-    "file": "(external)",
-    "calls": [],
-    "external": true,
-    "description": "获取当前工作目录"
   },
   {
     "name": "digest",
@@ -4759,7 +5874,7 @@
     "external": true
   },
   {
-    "name": "findIndex",
+    "name": "wrapResult",
     "params": [],
     "returnType": "any",
     "returnTypeDetail": "any",

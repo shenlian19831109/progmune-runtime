@@ -1,5 +1,60 @@
 [
   {
+    "intent": "format an immune status report for the failure genome",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getFailureGenome",
+        "args": [],
+        "assignTo": "genome"
+      },
+      {
+        "kind": "call",
+        "function": "formatImmuneResponse",
+        "args": [
+          {
+            "name": "a",
+            "type": "Attempt",
+            "value": "genome"
+          }
+        ]
+      }
+    ],
+    "success": true,
+    "id": "ep_1780204738490",
+    "timestamp": "2026-05-31T05:18:58.490Z"
+  },
+  {
+    "intent": "format an immune status report for the failure genome",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getFailureGenome",
+        "args": [],
+        "assignTo": "genome"
+      },
+      {
+        "kind": "call",
+        "function": "formatImmuneResponse",
+        "args": [
+          {
+            "name": "a",
+            "type": "Attempt",
+            "value": "genome"
+          }
+        ],
+        "assignTo": "report"
+      },
+      {
+        "kind": "return",
+        "value": "report"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780204710949",
+    "timestamp": "2026-05-31T05:18:30.949Z"
+  },
+  {
     "intent": "extract IR then validate and emit code",
     "actions": [
       {
