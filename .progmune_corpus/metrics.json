@@ -1,7 +1,7 @@
 {
-  "generated": 1,
-  "repaired": 0,
-  "lastGeneration": "src/validate-config.ts",
+  "generated": 4,
+  "repaired": 2,
+  "lastGeneration": "src/eval-test.ts",
   "history": [
     {
       "sessionId": "sess_1780238693023_j3nxt",
@@ -10,6 +10,30 @@
       "repaired": false,
       "repairCount": 0,
       "irFunctionCount": 380
+    },
+    {
+      "sessionId": "sess_1780239121990_jc4bk",
+      "timestamp": 1780239123933,
+      "filePath": "src/pipeline-test.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 380
+    },
+    {
+      "sessionId": "sess_1780239212421_47lbd",
+      "timestamp": 1780239216005,
+      "filePath": "src/force-repair.ts",
+      "repaired": true,
+      "repairCount": 2,
+      "irFunctionCount": 380
+    },
+    {
+      "sessionId": "sess_1780254854227_nb00t",
+      "timestamp": 1780254855642,
+      "filePath": "src/eval-test.ts",
+      "repaired": true,
+      "repairCount": 2,
+      "irFunctionCount": 381
     }
   ]
 }

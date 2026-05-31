@@ -97,7 +97,7 @@ async function execute(intent, projectPath, filePath) {
         ir = (0, extract_ir_1.extractIR)(projectPath);
     }
     catch (e) {
-        return { success: false, code: "", sessionId: "", hash: "", ruleHash: "", irFunctionCount: 0, protocolRuleCount: 0, violations: 0, repairApplied: false, repairCount: 0, repairBranchIds: [], error: `IR extraction failed: ${e.message}` };
+        return { success: false, code: "", sessionId: "", hash: "", ruleHash: "", irFunctionCount: 0, protocolRuleCount: 0, violations: 0, repairApplied: false, repairCount: 0, repairBranchIds: [], branchWinner: undefined, error: `IR extraction failed: ${e.message}` };
     }
     // 2. Protocol rule count
     let protocolRuleCount = 0;
@@ -114,10 +114,10 @@ async function execute(intent, projectPath, filePath) {
         planResult = await (0, planner_1.plan)(intent);
     }
     catch (e) {
-        return { success: false, code: "", sessionId: "", hash: "", ruleHash: "", irFunctionCount: ir.length, protocolRuleCount, violations: 0, repairApplied: false, repairCount: 0, repairBranchIds: [], error: `Planning failed: ${e.message}` };
+        return { success: false, code: "", sessionId: "", hash: "", ruleHash: "", irFunctionCount: ir.length, protocolRuleCount, violations: 0, repairApplied: false, repairCount: 0, repairBranchIds: [], branchWinner: undefined, error: `Planning failed: ${e.message}` };
     }
     if (!planResult.actions || planResult.actions.length === 0) {
-        return { success: false, code: "", sessionId: planResult.sessionId, hash: "", ruleHash: planResult.ruleHash || "", irFunctionCount: ir.length, protocolRuleCount, violations: 0, repairApplied: false, repairCount: 0, repairBranchIds: [], error: "Planner returned empty action sequence" };
+        return { success: false, code: "", sessionId: planResult.sessionId, hash: "", ruleHash: planResult.ruleHash || "", irFunctionCount: ir.length, protocolRuleCount, violations: 0, repairApplied: false, repairCount: 0, repairBranchIds: [], branchWinner: undefined, error: "Planner returned empty action sequence" };
     }
     // 4. Emit code with generation marker
     const code = (0, emitter_1.emitCode)(planResult.actions, {
@@ -168,6 +168,31 @@ async function execute(intent, projectPath, filePath) {
         repairApplied: planResult.repairApplied,
         repairCount: planResult.repairCount,
         repairBranchIds: planResult.repairBranchIds,
+        branchWinner: planResult.repairApplied && planResult.repairBranchIds.length >= 2
+            ? (() => {
+                try {
+                    // Load branches from the session file to evaluate
+                    const sessionFile = `.progmune_corpus/sessions/${planResult.sessionId}.json`;
+                    if (fs.existsSync(sessionFile)) {
+                        const session = JSON.parse(fs.readFileSync(sessionFile, "utf-8"));
+                        if (session.branchTree && session.branchTree.length > 0) {
+                            const { evaluateBranches } = require("./branch-ledger");
+                            const { getNsInit } = require("./protocol-registry");
+                            const evalResult = evaluateBranches(session.branchTree, getNsInit());
+                            if (evalResult.winner) {
+                                return {
+                                    id: evalResult.winner.branchId.slice(0, 12),
+                                    score: evalResult.winner.score,
+                                    recommendation: evalResult.winner.recommendation,
+                                };
+                            }
+                        }
+                    }
+                }
+                catch { }
+                return undefined;
+            })()
+            : undefined,
     };
 }
 /** Quick audit: check whether a file has the @progmune-generated marker. */

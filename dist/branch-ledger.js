@@ -24,6 +24,7 @@ exports.buildBranchMap = buildBranchMap;
 exports.findRootBranch = findRootBranch;
 exports.findChildBranches = findChildBranches;
 exports.describeBranchTree = describeBranchTree;
+exports.evaluateBranches = evaluateBranches;
 exports.wrapAsBranch = wrapAsBranch;
 exports.unwrapBranchTree = unwrapBranchTree;
 const ssg_validator_1 = require("./ssg-validator");
@@ -269,6 +270,60 @@ function describeBranchTree(root, allBranches, indent = 0) {
         result += describeBranchTree(child, allBranches, indent + 1);
     }
     return result;
+}
+/** Evaluate all branches in a tree, score them, and return the recommended winner.
+ *  Scoring: replay +50, zero violations +30, success outcome +20.
+ *  Highest score wins. Ties go to the smaller branch (fewer transitions). */
+function evaluateBranches(branches, namespaceInitialStates = new Map([["_global", "UNAUTHENTICATED"]])) {
+    if (branches.length === 0)
+        return { scores: [], winner: null };
+    const map = buildBranchMap(branches);
+    const scores = [];
+    for (const branch of branches) {
+        const tx = flattenBranch(branch, map);
+        const validCount = tx.filter(t => t.valid).length;
+        const invalidCount = tx.filter(t => !t.valid).length;
+        let replayPassed = false;
+        try {
+            const replay = replayBranch(branch, map, namespaceInitialStates);
+            replayPassed = replay.valid;
+        }
+        catch {
+            replayPassed = false;
+        }
+        let score = 0;
+        if (replayPassed)
+            score += 50;
+        if (invalidCount === 0)
+            score += 30;
+        if (branch.outcome === "success")
+            score += 20;
+        let recommendation = "";
+        if (score >= 90)
+            recommendation = "Recommended — clean execution";
+        else if (score >= 70)
+            recommendation = "Acceptable — minor issues";
+        else if (score >= 50)
+            recommendation = "Needs review — violations present";
+        else
+            recommendation = "Rejected — replay failed or significant violations";
+        scores.push({
+            branchId: branch.id,
+            reason: branch.reason,
+            outcome: branch.outcome || "open",
+            transitionCount: tx.length,
+            validCount,
+            violationCount: invalidCount,
+            replayPassed,
+            score,
+            recommendation,
+        });
+    }
+    // Sort: highest score first, ties broken by fewer transitions
+    scores.sort((a, b) => b.score - a.score || a.transitionCount - b.transitionCount);
+    // Winner is the first one that passed replay
+    const winner = scores.find(s => s.replayPassed) || scores[0] || null;
+    return { scores, winner };
 }
 /** Wrap a linear transition array as a single root branch (backward compat). */
 function wrapAsBranch(transitions) {

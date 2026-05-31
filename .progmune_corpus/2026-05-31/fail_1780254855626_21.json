@@ -1,0 +1,40 @@
+{
+  "intent": "validate an action sequence immediately",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-4",
+  "constraintType": "protocol",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "validateActionSequence",
+      "args": [
+        {
+          "name": "actions",
+          "type": "Action[]",
+          "value": "actions"
+        }
+      ],
+      "assignTo": "result"
+    },
+    {
+      "kind": "return",
+      "value": "result"
+    }
+  ],
+  "errorDetail": "{\"protocol_violation\":{\"blocked_function\":\"validateActionSequence\",\"namespace\":\"dev_pipeline\",\"current_state\":[\"IR_STALE\"],\"required_pre_states\":[\"ACTION_VALIDATED\"]},\"diagnosis\":{\"missing_functions\":[\"extractIR\",\"validateAction\"],\"fix_path\":[\"extractIR\",\"validateAction\"]}}",
+  "ssgState": [
+    "IR_STALE"
+  ],
+  "ssgFixPath": [
+    "extractIR",
+    "validateAction"
+  ],
+  "ssgMissingFunctions": [
+    "extractIR",
+    "validateAction"
+  ],
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 1,
+  "id": "fail_1780254855626_21",
+  "timestamp": "2026-05-31T19:14:15.626Z"
+}
