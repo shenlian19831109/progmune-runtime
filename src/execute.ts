@@ -23,6 +23,12 @@ export interface ExecuteResult {
   irFunctionCount: number;
   protocolRuleCount: number;
   violations: number;
+  /** Phase 6: Repair metrics — true if SSG deterministic repair was applied */
+  repairApplied: boolean;
+  /** Phase 6: Number of repair actions inserted */
+  repairCount: number;
+  /** Phase 6: Branch IDs created by repair */
+  repairBranchIds: string[];
   error?: string;
 }
 
@@ -43,7 +49,7 @@ export async function execute(
   try {
     ir = extractIR(projectPath);
   } catch (e: any) {
-    return { success: false, code: "", sessionId: "", hash: "", ruleHash: "", irFunctionCount: 0, protocolRuleCount: 0, violations: 0, error: `IR extraction failed: ${e.message}` };
+    return { success: false, code: "", sessionId: "", hash: "", ruleHash: "", irFunctionCount: 0, protocolRuleCount: 0, violations: 0, repairApplied: false, repairCount: 0, repairBranchIds: [], error: `IR extraction failed: ${e.message}` };
   }
 
   // 2. Protocol rule count
@@ -60,11 +66,11 @@ export async function execute(
   try {
     planResult = await plan(intent);
   } catch (e: any) {
-    return { success: false, code: "", sessionId: "", hash: "", ruleHash: "", irFunctionCount: ir.length, protocolRuleCount, violations: 0, error: `Planning failed: ${e.message}` };
+    return { success: false, code: "", sessionId: "", hash: "", ruleHash: "", irFunctionCount: ir.length, protocolRuleCount, violations: 0, repairApplied: false, repairCount: 0, repairBranchIds: [], error: `Planning failed: ${e.message}` };
   }
 
   if (!planResult.actions || planResult.actions.length === 0) {
-    return { success: false, code: "", sessionId: planResult.sessionId, hash: "", ruleHash: planResult.ruleHash || "", irFunctionCount: ir.length, protocolRuleCount, violations: 0, error: "Planner returned empty action sequence" };
+    return { success: false, code: "", sessionId: planResult.sessionId, hash: "", ruleHash: planResult.ruleHash || "", irFunctionCount: ir.length, protocolRuleCount, violations: 0, repairApplied: false, repairCount: 0, repairBranchIds: [], error: "Planner returned empty action sequence" };
   }
 
   // 4. Emit code with generation marker
@@ -106,6 +112,9 @@ export async function execute(
     irFunctionCount: ir.length,
     protocolRuleCount,
     violations: 0,
+    repairApplied: planResult.repairApplied,
+    repairCount: planResult.repairCount,
+    repairBranchIds: planResult.repairBranchIds,
   };
 }
 

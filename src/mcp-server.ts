@@ -504,7 +504,11 @@ Then restart Claude Code.`,
       const result = await execute(intent, projectPath || process.cwd(), filePath);
       if (result.success) {
         const marker = `// @progmune-generated session=${result.sessionId}`;
-        return { content: [{ type: "text", text: `✅ Generated and written to ${result.filePath}
+        let extra = "";
+        if (result.repairApplied) {
+          extra = `\n🔧 SSG Repair: ${result.repairCount} fix(es) applied, branches: ${result.repairBranchIds.map((id: string) => id.slice(0, 12)).join(", ")}`;
+        }
+        return { content: [{ type: "text", text: `✅ Generated and written to ${result.filePath}${extra}
 
 ${marker}
 Session: ${result.sessionId}

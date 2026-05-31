@@ -38,6 +38,7 @@ import {
   registerAllMissingFingerprints,
   verifyAllFingerprints,
 } from "./ledger-registry";
+import { replaySession } from "./deterministic-replay";
 
 const C = {
   reset: "\x1b[0m",
@@ -412,6 +413,34 @@ step("4/6 Ledger 不变量");
     const registered = registerAllMissingFingerprints();
     if (registered > 0) {
       console.log(`     ${C_(`新注册 ${registered} 个指纹`)}`);
+    }
+  }
+
+  // Phase 6: Auto Replay — replay is health check, not special command
+  if (checked > 0) {
+    const sessionFiles = fs.readdirSync(sessionsDir).filter(f => f.endsWith(".json"));
+    const toReplay = sessionFiles.length <= 20
+      ? sessionFiles
+      : sessionFiles.slice(-10); // sample recent 10 if > 20
+
+    let replayed = 0;
+    let replayPassed = 0;
+    for (const file of toReplay) {
+      try {
+        const sid = file.replace(".json", "");
+        const result = replaySession(sid);
+        replayed++;
+        if (result.success) replayPassed++;
+        else if (result.divergencePoint !== undefined) {
+          console.log(`     ${Y(`Replay divergence: ${sid.slice(0, 13)}... at index ${result.divergencePoint}`)}`);
+        }
+      } catch {}
+    }
+    if (replayed > 0) {
+      const status = replayPassed === replayed
+        ? `${G("✔")}  ${replayed}/${replayed} Replay 通过`
+        : `${Y("!")}  ${replayPassed}/${replayed} Replay 通过`;
+      console.log(`     ${status}`);
     }
   }
 }

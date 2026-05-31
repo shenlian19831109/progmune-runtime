@@ -464,6 +464,10 @@ export interface PlanResult {
   actions: Action[];
   sessionId: string;
   ruleHash?: string;
+  /** Phase 6: Repair metrics */
+  repairApplied: boolean;
+  repairCount: number;
+  repairBranchIds: string[];
 }
 
 export async function plan(userIntent: string): Promise<PlanResult> {
@@ -471,10 +475,15 @@ export async function plan(userIntent: string): Promise<PlanResult> {
   const ir = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
 
   // Helper: wrap actions into PlanResult
-  const wrapResult = (actions: Action[]): PlanResult => ({
+  let repairMetrics = { applied: false, count: 0, branchIds: [] as string[] };
+
+  const wrapResult = (actions: Action[], repair?: { applied: boolean; count: number; branchIds: string[] }): PlanResult => ({
     actions,
     sessionId: session?.sessionId || "",
     ruleHash: session?.ruleHash,
+    repairApplied: repair?.applied ?? repairMetrics.applied,
+    repairCount: repair?.count ?? repairMetrics.count,
+    repairBranchIds: repair?.branchIds ?? repairMetrics.branchIds,
   });
 
   // 初始化执行会话和快照（需在抗体快速通道前创建，以便记录 antibody hits）
@@ -891,6 +900,22 @@ ${RETRY_HINT}
         const repaired = attemptSSGRepair(filtered, rej, ir, protocols, namespaceInitialStates);
         if (repaired) {
           console.error("🔧 SSG 修复成功，跳过 LLM 重试");
+
+          // Phase 6: Repair → Branch — 保留原始序列作为证据
+          const { createRootBranch, createBranch } = require("./branch-ledger");
+          const rootBranch = createRootBranch(filtered);
+          rootBranch.outcome = "violation";
+          const repairBranch = createBranch(rootBranch, "repair_attempt", repaired as any);
+          repairBranch.outcome = "success";
+          session.branchTree = [rootBranch, repairBranch];
+          session.rootBranchId = rootBranch.id;
+
+          repairMetrics = {
+            applied: true,
+            count: rej.fixPath?.length || 0,
+            branchIds: [rootBranch.id, repairBranch.id],
+          };
+
           finalActions = repaired;
           break;
         }
