@@ -32,6 +32,58 @@ export interface ExecuteResult {
   error?: string;
 }
 
+// ── Phase 7: Execution Metrics ──
+
+export interface GenerationRecord {
+  sessionId: string;
+  timestamp: number;
+  filePath: string;
+  repaired: boolean;
+  repairCount: number;
+  irFunctionCount: number;
+}
+
+export interface ExecutionMetrics {
+  generated: number;
+  repaired: number;
+  lastGeneration: string | null;
+  history: GenerationRecord[];
+}
+
+const METRICS_FILE = ".progmune_corpus/metrics.json";
+
+function loadMetrics(): ExecutionMetrics {
+  try {
+    if (fs.existsSync(METRICS_FILE)) {
+      return JSON.parse(fs.readFileSync(METRICS_FILE, "utf-8"));
+    }
+  } catch {}
+  return { generated: 0, repaired: 0, lastGeneration: null, history: [] };
+}
+
+function saveMetrics(m: ExecutionMetrics): void {
+  const dir = ".progmune_corpus";
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(METRICS_FILE, JSON.stringify(m, null, 2), "utf-8");
+}
+
+/** Record a generation event. Called automatically by execute(). */
+export function recordGeneration(record: GenerationRecord): void {
+  const m = loadMetrics();
+  m.generated++;
+  if (record.repaired) m.repaired++;
+  m.lastGeneration = record.filePath;
+  m.history.push(record);
+  // Keep last 100 entries
+  if (m.history.length > 100) m.history = m.history.slice(-100);
+  saveMetrics(m);
+}
+
+/** Get current execution metrics. */
+export function getExecutionMetrics(): ExecutionMetrics {
+  return loadMetrics();
+}
+
 /**
  * Execute the full Progmune pipeline: intent → validated code → file.
  *
@@ -95,6 +147,18 @@ export async function execute(
   const crypto = require("crypto");
   const hash = crypto.createHash("sha256").update(code).digest("hex").slice(0, 16);
   const ruleHash = planResult.ruleHash || "";
+
+  // Phase 7: Record execution metrics
+  if (filePath) {
+    recordGeneration({
+      sessionId: planResult.sessionId,
+      timestamp: Date.now(),
+      filePath: filePath,
+      repaired: planResult.repairApplied,
+      repairCount: planResult.repairCount,
+      irFunctionCount: ir.length,
+    });
+  }
 
   // Fingerprint registration is NOT done here.
   // plan() internally calls recordSession() which writes real transitions to

@@ -140,6 +140,25 @@ function formatAuditResult(result) {
     }
     lines.push(`  Not covered:          ${result.nonProgmuneFiles.length}`);
     lines.push("");
+    // Phase 7: Execution metrics
+    try {
+        const { getExecutionMetrics } = require("./execute");
+        const m = getExecutionMetrics();
+        if (m.generated > 0) {
+            const repairRate = m.repaired > 0 ? ` | Repaired: ${m.repaired}` : "";
+            lines.push(`  Executions: ${m.generated} total${repairRate}`);
+            if (m.lastGeneration) {
+                lines.push(`  Last: ${m.lastGeneration}`);
+            }
+            // Trend: last 5 generations
+            if (m.history.length >= 2) {
+                const recent = m.history.slice(-5);
+                lines.push(`  Recent: ${recent.map((r) => r.repaired ? '🔧' : '✅').join(' ')}`);
+            }
+            lines.push("");
+        }
+    }
+    catch { }
     if (result.sessions.length > 0) {
         lines.push(`  Last generation: ${result.lastGeneration || "unknown"}`);
         lines.push(`  Unique sessions:  ${new Set(result.sessions.map(s => s.sessionId)).size}`);

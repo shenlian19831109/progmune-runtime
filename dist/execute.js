@@ -41,6 +41,8 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.recordGeneration = recordGeneration;
+exports.getExecutionMetrics = getExecutionMetrics;
 exports.execute = execute;
 exports.verifyFileMarker = verifyFileMarker;
 const fs = __importStar(require("fs"));
@@ -48,6 +50,39 @@ const path = __importStar(require("path"));
 const planner_1 = require("./planner");
 const extract_ir_1 = require("./extract-ir");
 const emitter_1 = require("./emitter");
+const METRICS_FILE = ".progmune_corpus/metrics.json";
+function loadMetrics() {
+    try {
+        if (fs.existsSync(METRICS_FILE)) {
+            return JSON.parse(fs.readFileSync(METRICS_FILE, "utf-8"));
+        }
+    }
+    catch { }
+    return { generated: 0, repaired: 0, lastGeneration: null, history: [] };
+}
+function saveMetrics(m) {
+    const dir = ".progmune_corpus";
+    if (!fs.existsSync(dir))
+        fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(METRICS_FILE, JSON.stringify(m, null, 2), "utf-8");
+}
+/** Record a generation event. Called automatically by execute(). */
+function recordGeneration(record) {
+    const m = loadMetrics();
+    m.generated++;
+    if (record.repaired)
+        m.repaired++;
+    m.lastGeneration = record.filePath;
+    m.history.push(record);
+    // Keep last 100 entries
+    if (m.history.length > 100)
+        m.history = m.history.slice(-100);
+    saveMetrics(m);
+}
+/** Get current execution metrics. */
+function getExecutionMetrics() {
+    return loadMetrics();
+}
 /**
  * Execute the full Progmune pipeline: intent → validated code → file.
  *
@@ -104,6 +139,17 @@ async function execute(intent, projectPath, filePath) {
     const crypto = require("crypto");
     const hash = crypto.createHash("sha256").update(code).digest("hex").slice(0, 16);
     const ruleHash = planResult.ruleHash || "";
+    // Phase 7: Record execution metrics
+    if (filePath) {
+        recordGeneration({
+            sessionId: planResult.sessionId,
+            timestamp: Date.now(),
+            filePath: filePath,
+            repaired: planResult.repairApplied,
+            repairCount: planResult.repairCount,
+            irFunctionCount: ir.length,
+        });
+    }
     // Fingerprint registration is NOT done here.
     // plan() internally calls recordSession() which writes real transitions to
     // .progmune_corpus/sessions/. The fingerprint is registered later by
