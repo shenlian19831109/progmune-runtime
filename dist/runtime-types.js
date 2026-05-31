@@ -35,7 +35,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateRepairSummary = exports.validateProposal = exports.applyProposalAsBranch = exports.suggestInvariantRepair = exports.suggestProtocolRepair = exports.suggestRepairs = exports.describeBranchTree = exports.unwrapBranchTree = exports.wrapAsBranch = exports.findRootBranch = exports.buildBranchMap = exports.replayBranch = exports.getBranchPath = exports.flattenBranch = exports.mergeBranches = exports.forkBranch = exports.createBranch = exports.createRootBranch = exports.registerAllMissingFingerprints = exports.verifyAllFingerprints = exports.verifyFingerprint = exports.getFingerprintRegistry = exports.getFingerprint = exports.registerFingerprint = exports.assertLedgerInvariants = exports.assertTransitionOrder = exports.assertRuleHashMatch = exports.assertDeltaConsistency = exports.assertLedgerConsistency = exports.InvariantViolationError = exports.listAllStates = exports.findTransition = exports.findViolations = exports.findConsumer = exports.findProducer = exports.rejectionToJSON = exports.explainRejection = exports.diffLedgers = exports.hashLedger = exports.hashRules = exports.findFixPathStatic = exports.checkLedgerConsistency = exports.validateTransition = exports.applyTransitionDelta = exports.rebuildState = exports.parseProtocolsFromJSON = exports.StateMachineValidator = void 0;
+exports.replayWithDetail = exports.replayLedger = exports.replaySession = exports.generateRepairSummary = exports.validateProposal = exports.applyProposalAsBranch = exports.suggestInvariantRepair = exports.suggestProtocolRepair = exports.suggestRepairs = exports.describeBranchTree = exports.unwrapBranchTree = exports.wrapAsBranch = exports.findRootBranch = exports.buildBranchMap = exports.replayBranch = exports.getBranchPath = exports.flattenBranch = exports.mergeBranches = exports.forkBranch = exports.createBranch = exports.createRootBranch = exports.registerAllMissingFingerprints = exports.verifyAllFingerprints = exports.verifyFingerprint = exports.getFingerprintRegistry = exports.getFingerprint = exports.registerFingerprint = exports.assertLedgerInvariants = exports.assertTransitionOrder = exports.assertRuleHashMatch = exports.assertDeltaConsistency = exports.assertLedgerConsistency = exports.InvariantViolationError = exports.listAllStates = exports.findTransition = exports.findViolations = exports.findConsumer = exports.findProducer = exports.rejectionToJSON = exports.explainRejection = exports.diffLedgers = exports.hashLedger = exports.hashRules = exports.findFixPathStatic = exports.checkLedgerConsistency = exports.validateTransition = exports.applyTransitionDelta = exports.rebuildState = exports.parseProtocolsFromJSON = exports.StateMachineValidator = void 0;
 exports.generateAttemptId = generateAttemptId;
 exports.generateSessionId = generateSessionId;
 exports.generatePlannerSeed = generatePlannerSeed;
@@ -98,6 +98,11 @@ Object.defineProperty(exports, "suggestInvariantRepair", { enumerable: true, get
 Object.defineProperty(exports, "applyProposalAsBranch", { enumerable: true, get: function () { return repair_proposal_1.applyProposalAsBranch; } });
 Object.defineProperty(exports, "validateProposal", { enumerable: true, get: function () { return repair_proposal_1.validateProposal; } });
 Object.defineProperty(exports, "generateRepairSummary", { enumerable: true, get: function () { return repair_proposal_1.generateRepairSummary; } });
+// Phase 4: Deterministic Replay
+var deterministic_replay_1 = require("./deterministic-replay");
+Object.defineProperty(exports, "replaySession", { enumerable: true, get: function () { return deterministic_replay_1.replaySession; } });
+Object.defineProperty(exports, "replayLedger", { enumerable: true, get: function () { return deterministic_replay_1.replayLedger; } });
+Object.defineProperty(exports, "replayWithDetail", { enumerable: true, get: function () { return deterministic_replay_1.replayWithDetail; } });
 // ── ID生成工具 ──
 function generateAttemptId() {
     return `att_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
