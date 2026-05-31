@@ -37,7 +37,7 @@ async function runSemanticTest() {
 
   for (const [caseName, intent] of Object.entries(intents)) {
     console.log(`\n🧪 ${caseName}: ${intent.substring(0,50)}...`);
-    const actions = await plan(intent);
+    const result = await plan(intent); const actions = result.actions;
     
     if (!actions || actions.length === 0) {
       results.push({ case: caseName, intent, generatedCode: "", actionSequence: [], syntaxPass: false, semanticError: true, runtimePass: false });

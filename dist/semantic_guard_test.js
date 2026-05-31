@@ -58,7 +58,8 @@ async function runSemanticTest() {
     const results = [];
     for (const [caseName, intent] of Object.entries(intents)) {
         console.log(`\n🧪 ${caseName}: ${intent.substring(0, 50)}...`);
-        const actions = await (0, planner_1.plan)(intent);
+        const result = await (0, planner_1.plan)(intent);
+        const actions = result.actions;
         if (!actions || actions.length === 0) {
             results.push({ case: caseName, intent, generatedCode: "", actionSequence: [], syntaxPass: false, semanticError: true, runtimePass: false });
             console.log("  ❌ 规划失败（无输出）");

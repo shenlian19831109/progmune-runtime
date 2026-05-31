@@ -14,7 +14,8 @@
     "guard": "node -e \"require('./dist/validator.js'); console.log('✅ 校验器已加载')\"",
     "obs": "npx ts-node src/semantic-trace.ts",
     "obs-web": "npx ts-node src/obs-web.ts",
-    "check": "npx ts-node src/check.ts"
+    "check": "npx ts-node src/check.ts",
+    "audit": "npx ts-node src/audit.ts"
   },
   "keywords": [
     "program-synthesis",

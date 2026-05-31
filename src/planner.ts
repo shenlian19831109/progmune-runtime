@@ -460,9 +460,22 @@ function attemptSSGRepair(
   return null;
 }
 
-export async function plan(userIntent: string): Promise<Action[]> {
+export interface PlanResult {
+  actions: Action[];
+  sessionId: string;
+  ruleHash?: string;
+}
+
+export async function plan(userIntent: string): Promise<PlanResult> {
   resetCallCount();
   const ir = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
+
+  // Helper: wrap actions into PlanResult
+  const wrapResult = (actions: Action[]): PlanResult => ({
+    actions,
+    sessionId: session?.sessionId || "",
+    ruleHash: session?.ruleHash,
+  });
 
   // 初始化执行会话和快照（需在抗体快速通道前创建，以便记录 antibody hits）
   const sessionId = generateSessionId();
@@ -481,7 +494,7 @@ export async function plan(userIntent: string): Promise<Action[]> {
   if (cachedTemplate && cachedTemplate.successRate >= 0.8 && cachedTemplate.useCount >= 2) {
     console.error("⚡ 命中语义模板，直接复用已验证序列");
     recordEpisode({ intent: userIntent, actions: cachedTemplate.actionSequence, success: true });
-    return cachedTemplate.actionSequence;
+    return wrapResult(cachedTemplate.actionSequence);
   }
 
   // 提前加载协议（后续多处使用）
@@ -557,7 +570,7 @@ export async function plan(userIntent: string): Promise<Action[]> {
           session.endedAt = Date.now();
           recordSession(session);
           recordEpisode({ intent: userIntent, actions: antibodyActions, success: true });
-          return antibodyActions;
+          return wrapResult(antibodyActions);
         }
       } else {
         // 无协议规则，直接信任抗体
@@ -587,7 +600,7 @@ export async function plan(userIntent: string): Promise<Action[]> {
         session.endedAt = Date.now();
         recordSession(session);
         recordEpisode({ intent: userIntent, actions: antibodyActions, success: true });
-        return antibodyActions;
+        return wrapResult(antibodyActions);
       }
     }
 
@@ -1015,7 +1028,7 @@ ${RETRY_HINT}
       session.endedAt = Date.now();
       recordSession(session);
       clearCheckpoint(userIntent);
-      return fallback;
+      return wrapResult(fallback);
     }
     recordEpisode({ intent: userIntent, actions: [], success: false });
     session.resolved = false;
@@ -1025,7 +1038,7 @@ ${RETRY_HINT}
     clearCheckpoint(userIntent);
   }
 
-  return finalActions;
+  return wrapResult(finalActions);
 }
 
 /** 本地规则回退：当 LLM 不可用时，根据意图关键词生成简单动作序列 */

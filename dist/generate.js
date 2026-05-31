@@ -62,7 +62,8 @@ async function main() {
             let actions = [];
             try {
                 if (planner === "llm") {
-                    actions = await (0, planner_1.plan)(intent);
+                    const result = await (0, planner_1.plan)(intent);
+                    actions = result.actions;
                 }
                 else {
                     actions = await (0, search_planner_1.searchPlan)(intent, 2, 4);

@@ -42,7 +42,7 @@ async function main() {
       let actions: any[] = [];
       try {
         if (planner === "llm") {
-          actions = await plan(intent);
+          const result = await plan(intent); actions = result.actions;
         } else {
           actions = await searchPlan(intent, 2, 4);
         }

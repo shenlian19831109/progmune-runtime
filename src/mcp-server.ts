@@ -99,6 +99,28 @@ async function main() {
           required: ["projectPath"],
         },
       },
+      {
+        name: "progmune_audit",
+        description: "Audit source files for @progmune-generated markers. Returns Progmune coverage rate.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            directory: { type: "string", description: "Directory to audit (e.g. 'src/')" },
+          },
+          required: [],
+        },
+      },
+      {
+        name: "progmune_init",
+        description: "Ensure CLAUDE.md includes Progmune usage instructions so AI assistants prefer progmune_generate.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            projectPath: { type: "string", description: "Absolute path to project root" },
+          },
+          required: ["projectPath"],
+        },
+      },
     ],
   }));
 
@@ -237,9 +259,9 @@ Then restart Claude Code.`,
       process.env.PROGMUNE_PROJECT_DIR = projectPath;
 
       // Plan
-      let actions;
+      let planResult;
       try {
-        actions = await plan(intent);
+        planResult = await plan(intent);
       } catch (e: any) {
         log.error(`Planning failed: ${e.message}`);
         reportFingerprints().catch(() => {});
@@ -253,7 +275,8 @@ Then restart Claude Code.`,
         };
       }
 
-      if (!actions || actions.length === 0) {
+      const actions = planResult?.actions || [];
+      if (actions.length === 0) {
         reportFingerprints().catch(() => {});
         return {
           content: [
@@ -265,8 +288,18 @@ Then restart Claude Code.`,
         };
       }
 
-      // Emit TypeScript code
-      const code = emitCode(actions);
+      // Emit TypeScript code with generation marker
+      const protocolsFile = path.resolve(__dirname, "..", "protocols.json");
+      let protocolRuleCount = 0;
+      if (fs.existsSync(protocolsFile)) {
+        try { protocolRuleCount = Object.keys(JSON.parse(fs.readFileSync(protocolsFile, "utf-8")).rules || {}).length; } catch {}
+      }
+      const code = emitCode(actions, {
+        sessionId: planResult.sessionId,
+        ruleHash: planResult.ruleHash,
+        irFunctionCount: ir.length,
+        protocolRuleCount,
+      });
       recordRun(intent, actions, true);
 
       // Report fingerprints async (don't block response)
@@ -418,6 +451,59 @@ Then restart Claude Code.`,
 
       return {
         content: [{ type: "text", text: results.join("\n") }],
+      };
+    }
+
+    if (request.params.name === "progmune_audit") {
+      const { directory } = (request.params.arguments || {}) as { directory?: string };
+      const targetDir = directory || process.cwd();
+      const { auditDirectory, formatAuditResult } = require("./audit");
+      const result = auditDirectory(targetDir);
+      const text = formatAuditResult(result);
+      return { content: [{ type: "text", text }] };
+    }
+
+    if (request.params.name === "progmune_init") {
+      const { projectPath } = request.params.arguments as { projectPath: string };
+      const claudeMdPath = path.resolve(projectPath, "CLAUDE.md");
+      const PROGMUNE_INSTRUCTIONS = `
+
+## Progmune — Program Immune System
+
+This project uses [Progmune](https://github.com/shenlian19831109/progmune-runtime) for constraint-guided code generation. When writing new TypeScript code, prefer the \`progmune_generate\` MCP tool over direct file writes.
+
+### Available MCP Tools
+- \`progmune_generate\` — generate TypeScript code constrained by the project's IR and protocol rules
+- \`progmune_check\` — run the full 7-step immune audit pipeline
+- \`progmune_audit\` — scan files for @progmune-generated markers and report coverage
+- \`progmune_status\` — view LLM config, immune network state, failure patterns
+- \`progmune_init\` — ensure CLAUDE.md has Progmune instructions
+
+### How to verify Progmune is working
+- Generated files have \`// @progmune-generated session=...\` header
+- Run \`npm run check\` to audit immune status
+- Run \`progmune_audit\` to see coverage rate
+`;
+
+      let updated = false;
+      if (fs.existsSync(claudeMdPath)) {
+        const existing = fs.readFileSync(claudeMdPath, "utf-8");
+        if (!existing.includes("progmune_generate")) {
+          fs.writeFileSync(claudeMdPath, existing + PROGMUNE_INSTRUCTIONS, "utf-8");
+          updated = true;
+        }
+      } else {
+        fs.writeFileSync(claudeMdPath, `# ${path.basename(projectPath)}\n${PROGMUNE_INSTRUCTIONS}`, "utf-8");
+        updated = true;
+      }
+
+      return {
+        content: [{
+          type: "text",
+          text: updated
+            ? `✅ CLAUDE.md ${fs.existsSync(claudeMdPath) ? "updated" : "created"} with Progmune instructions.\n\nAI assistants will now know to use progmune_generate for code generation.`
+            : `✅ CLAUDE.md already has Progmune instructions. No changes needed.`,
+        }],
       };
     }
 

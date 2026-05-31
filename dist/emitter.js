@@ -46,7 +46,7 @@ function getImportPath(file) {
  * 将动作序列编译为目标语言代码。
  * @protocol namespace=dev_pipeline pre_states=["SEQUENCE_VALIDATED"] post_states=["CODE_EMITTED"] invalidate=["SEQUENCE_VALIDATED"]
  */
-function emitCode(actions) {
+function emitCode(actions, meta) {
     const ir = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
     const fnIndex = new Map();
     const fnMeta = new Map();
@@ -85,7 +85,21 @@ function emitCode(actions) {
     };
     for (const a of actions)
         collect(a);
+    // ── Generation marker (provable usage) ──
     let code = "";
+    if (meta?.sessionId) {
+        const ts = new Date().toISOString();
+        code += `// @progmune-generated session=${meta.sessionId} timestamp=${ts}`;
+        if (meta.ruleHash)
+            code += ` ruleHash=${meta.ruleHash}`;
+        code += `\n`;
+        const funcs = meta.irFunctionCount ?? ir.length;
+        const rules = meta.protocolRuleCount ?? 0;
+        code += `// Generated with IR constraint: ${funcs} functions`;
+        if (rules > 0)
+            code += `, ${rules} protocol rules`;
+        code += `\n`;
+    }
     for (const [file, funcSet] of imports)
         code += `import { ${[...funcSet].join(", ")} } from "${getImportPath(file)}";\n`;
     for (const [file, typeSet] of typeImports)

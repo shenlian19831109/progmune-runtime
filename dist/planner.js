@@ -487,6 +487,12 @@ function attemptSSGRepair(actions, rejection, ir, protocols, namespaceInitialSta
 async function plan(userIntent) {
     (0, llm_1.resetCallCount)();
     const ir = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
+    // Helper: wrap actions into PlanResult
+    const wrapResult = (actions) => ({
+        actions,
+        sessionId: session?.sessionId || "",
+        ruleHash: session?.ruleHash,
+    });
     // 初始化执行会话和快照（需在抗体快速通道前创建，以便记录 antibody hits）
     const sessionId = (0, runtime_types_1.generateSessionId)();
     const session = {
@@ -503,7 +509,7 @@ async function plan(userIntent) {
     if (cachedTemplate && cachedTemplate.successRate >= 0.8 && cachedTemplate.useCount >= 2) {
         console.error("⚡ 命中语义模板，直接复用已验证序列");
         (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: cachedTemplate.actionSequence, success: true });
-        return cachedTemplate.actionSequence;
+        return wrapResult(cachedTemplate.actionSequence);
     }
     // 提前加载协议（后续多处使用）
     const { protocols, namespaceInitialStates } = loadProtocols(ir);
@@ -575,7 +581,7 @@ async function plan(userIntent) {
                     session.endedAt = Date.now();
                     (0, failure_corpus_1.recordSession)(session);
                     (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: antibodyActions, success: true });
-                    return antibodyActions;
+                    return wrapResult(antibodyActions);
                 }
             }
             else {
@@ -606,7 +612,7 @@ async function plan(userIntent) {
                 session.endedAt = Date.now();
                 (0, failure_corpus_1.recordSession)(session);
                 (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: antibodyActions, success: true });
-                return antibodyActions;
+                return wrapResult(antibodyActions);
             }
         }
         // ACL-3: 注入修复路径作为提示约束
@@ -1006,7 +1012,7 @@ ${RETRY_HINT}
             session.endedAt = Date.now();
             (0, failure_corpus_1.recordSession)(session);
             (0, failure_corpus_1.clearCheckpoint)(userIntent);
-            return fallback;
+            return wrapResult(fallback);
         }
         (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: [], success: false });
         session.resolved = false;
@@ -1015,7 +1021,7 @@ ${RETRY_HINT}
         (0, failure_corpus_1.recordSession)(session);
         (0, failure_corpus_1.clearCheckpoint)(userIntent);
     }
-    return finalActions;
+    return wrapResult(finalActions);
 }
 /** 本地规则回退：当 LLM 不可用时，根据意图关键词生成简单动作序列 */
 function generateFallbackPlan(intent, ir) {

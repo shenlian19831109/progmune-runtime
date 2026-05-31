@@ -60,8 +60,10 @@ async function main() {
             const start = Date.now();
             let actions = [];
             try {
-                if (planner === "llm")
-                    actions = await (0, planner_1.plan)(intent);
+                if (planner === "llm") {
+                    const result = await (0, planner_1.plan)(intent);
+                    actions = result.actions;
+                }
                 else
                     actions = await (0, search_planner_1.searchPlan)(intent, 2, 4);
             }

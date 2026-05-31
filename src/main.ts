@@ -48,7 +48,7 @@ async function main() {
   // 2. 获取正常动作序列
   const intent = "实现登录接口，验证密码后返回 JWT，并记录日志";
   console.log("\n🧠 正常规划...");
-  const normalActions = await plan(intent);
+  const result = await plan(intent); const normalActions = result.actions;
   console.log("🎯 正常动作:");
   console.log(JSON.stringify(normalActions, null, 2));
 

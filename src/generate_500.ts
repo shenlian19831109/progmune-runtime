@@ -32,7 +32,7 @@ async function main() {
       const start = Date.now();
       let actions: any[] = [];
       try {
-        if (planner === "llm") actions = await plan(intent);
+        if (planner === "llm") { const result = await plan(intent); actions = result.actions; }
         else actions = await searchPlan(intent, 2, 4);
       } catch (e) {
         results.push({ intent, planner, duration_ms: Date.now()-start, llm_calls: callCount, success: false, error: String(e) });
