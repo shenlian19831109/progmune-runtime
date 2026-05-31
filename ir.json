@@ -735,7 +735,9 @@
     "returnTypeDetail": "string",
     "file": "src/emitter.ts",
     "calls": [
-      "replace"
+      "replace",
+      "startsWith",
+      "slice"
     ]
   },
   {
@@ -777,6 +779,69 @@
       ],
       "namespace": "dev_pipeline"
     }
+  },
+  {
+    "name": "execute",
+    "params": [
+      {
+        "name": "intent",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "projectPath",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "filePath",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "Promise<ExecuteResult>",
+    "returnTypeDetail": "Promise<ExecuteResult>",
+    "file": "src/execute.ts",
+    "calls": [
+      "extractIR",
+      "resolve",
+      "existsSync",
+      "keys",
+      "parse",
+      "readFileSync",
+      "plan",
+      "emitCode",
+      "isAbsolute",
+      "dirname",
+      "mkdirSync",
+      "writeFileSync",
+      "require",
+      "slice",
+      "digest",
+      "update",
+      "createHash",
+      "registerFingerprint"
+    ]
+  },
+  {
+    "name": "verifyFileMarker",
+    "params": [
+      {
+        "name": "filePath",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "{ marked: boolean; sessionId?: string; timestamp?: string }",
+    "returnTypeDetail": "{ marked: boolean; sessionId?: string; timestamp?: string }",
+    "file": "src/execute.ts",
+    "calls": [
+      "readFileSync",
+      "join",
+      "slice",
+      "split",
+      "match"
+    ]
   },
   {
     "name": "extractIRPython",
@@ -968,10 +1033,24 @@
       "isArrowFunction",
       "isCallExpression",
       "getArguments",
-      "add",
+      "includes",
+      "getImportDeclarations",
+      "getModuleSpecifierValue",
+      "getNamedImports",
       "has",
+      "getModuleSpecifierSourceFile",
+      "extractSignatureFromFile",
+      "set",
+      "resolveModuleName",
+      "extractSignatureFromDts",
+      "getNamespaceImport",
+      "getText",
+      "addSourceFileAtPathIfExists",
+      "add",
       "startsWith",
       "toUpperCase",
+      "tryResolveFromNamespace",
+      "get",
       "error"
     ],
     "protocol": {
@@ -984,6 +1063,64 @@
       ],
       "namespace": "dev_pipeline"
     }
+  },
+  {
+    "name": "extractSignatureFromFile",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "sf",
+        "type": "SourceFile",
+        "typeDetail": "SourceFile"
+      }
+    ],
+    "returnType": "{ params: ParamInfo[]; returnType: string; description: string } | null",
+    "returnTypeDetail": "{ params: ParamInfo[]; returnType: string; description: string } | null",
+    "file": "src/extract-ir.ts",
+    "calls": [
+      "entries",
+      "getExportedDeclarations",
+      "isFunctionDeclaration",
+      "map",
+      "getParameters",
+      "getText",
+      "getReturnTypeNode",
+      "getFilePath",
+      "isVariableDeclaration",
+      "getInitializer",
+      "isArrowFunction"
+    ]
+  },
+  {
+    "name": "extractSignatureFromDts",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "dtsPath",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "project",
+        "type": "Project",
+        "typeDetail": "Project"
+      }
+    ],
+    "returnType": "{ params: ParamInfo[]; returnType: string; description: string } | null",
+    "returnTypeDetail": "{ params: ParamInfo[]; returnType: string; description: string } | null",
+    "file": "src/extract-ir.ts",
+    "calls": [
+      "addSourceFileAtPathIfExists",
+      "extractSignatureFromFile"
+    ]
   },
   {
     "name": "ensureDir",
@@ -5529,6 +5666,113 @@
     "external": true
   },
   {
+    "name": "dirname",
+    "params": [
+      {
+        "name": "path",
+        "type": "string"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "获取目录名"
+  },
+  {
+    "name": "mkdirSync",
+    "params": [
+      {
+        "name": "path",
+        "type": "string"
+      },
+      {
+        "name": "options",
+        "type": "object"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "创建目录"
+  },
+  {
+    "name": "writeFileSync",
+    "params": [
+      {
+        "name": "path",
+        "type": "string"
+      },
+      {
+        "name": "data",
+        "type": "string"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "同步写入文件"
+  },
+  {
+    "name": "require",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "digest",
+    "params": [
+      {
+        "name": "encoding",
+        "type": "string"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "输出哈希摘要"
+  },
+  {
+    "name": "update",
+    "params": [
+      {
+        "name": "data",
+        "type": "string"
+      }
+    ],
+    "returnType": "Hash",
+    "returnTypeDetail": "Hash",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "更新哈希数据"
+  },
+  {
+    "name": "createHash",
+    "params": [
+      {
+        "name": "algorithm",
+        "type": "string"
+      }
+    ],
+    "returnType": "Hash",
+    "returnTypeDetail": "Hash",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "创建哈希对象"
+  },
+  {
     "name": "execSync",
     "params": [
       {
@@ -5589,23 +5833,115 @@
     "external": true
   },
   {
-    "name": "mkdirSync",
+    "name": "getImportDeclarations",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "getModuleSpecifierValue",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "getNamedImports",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "getModuleSpecifierSourceFile",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "resolveModuleName",
     "params": [
       {
-        "name": "path",
+        "name": "moduleName",
         "type": "string"
       },
       {
-        "name": "options",
-        "type": "object"
+        "name": "containingFile",
+        "type": "string"
+      },
+      {
+        "name": "compilerOptions",
+        "type": "CompilerOptions"
+      },
+      {
+        "name": "host",
+        "type": "ModuleResolutionHost"
+      },
+      {
+        "name": "cache",
+        "type": "ModuleResolutionCache"
+      },
+      {
+        "name": "redirectedReference",
+        "type": "ResolvedProjectReference"
+      },
+      {
+        "name": "resolutionMode",
+        "type": "ResolutionMode"
       }
     ],
-    "returnType": "void",
-    "returnTypeDetail": "void",
+    "returnType": "ResolvedModuleWithFailedLookupLocations",
+    "returnTypeDetail": "ResolvedModuleWithFailedLookupLocations",
     "file": "(external)",
     "calls": [],
     "external": true,
-    "description": "创建目录"
+    "description": "auto-resolved from /Users/shenlian/progmune-runtime/node_modules/typescript/lib/typescript.d.ts"
+  },
+  {
+    "name": "getNamespaceImport",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "addSourceFileAtPathIfExists",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "tryResolveFromNamespace",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "getExportedDeclarations",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
   },
   {
     "name": "from",
@@ -5625,25 +5961,6 @@
     "calls": [],
     "external": true,
     "description": "从字符串创建 Buffer"
-  },
-  {
-    "name": "writeFileSync",
-    "params": [
-      {
-        "name": "path",
-        "type": "string"
-      },
-      {
-        "name": "data",
-        "type": "string"
-      }
-    ],
-    "returnType": "void",
-    "returnTypeDetail": "void",
-    "file": "(external)",
-    "calls": [],
-    "external": true,
-    "description": "同步写入文件"
   },
   {
     "name": "unlinkSync",
@@ -5713,75 +6030,6 @@
     "file": "(external)",
     "calls": [],
     "external": true
-  },
-  {
-    "name": "require",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "any",
-    "file": "(external)",
-    "calls": [],
-    "external": true
-  },
-  {
-    "name": "digest",
-    "params": [
-      {
-        "name": "encoding",
-        "type": "string"
-      }
-    ],
-    "returnType": "string",
-    "returnTypeDetail": "string",
-    "file": "(external)",
-    "calls": [],
-    "external": true,
-    "description": "输出哈希摘要"
-  },
-  {
-    "name": "update",
-    "params": [
-      {
-        "name": "data",
-        "type": "string"
-      }
-    ],
-    "returnType": "Hash",
-    "returnTypeDetail": "Hash",
-    "file": "(external)",
-    "calls": [],
-    "external": true,
-    "description": "更新哈希数据"
-  },
-  {
-    "name": "createHash",
-    "params": [
-      {
-        "name": "algorithm",
-        "type": "string"
-      }
-    ],
-    "returnType": "Hash",
-    "returnTypeDetail": "Hash",
-    "file": "(external)",
-    "calls": [],
-    "external": true,
-    "description": "创建哈希对象"
-  },
-  {
-    "name": "dirname",
-    "params": [
-      {
-        "name": "path",
-        "type": "string"
-      }
-    ],
-    "returnType": "string",
-    "returnTypeDetail": "string",
-    "file": "(external)",
-    "calls": [],
-    "external": true,
-    "description": "获取目录名"
   },
   {
     "name": "create",

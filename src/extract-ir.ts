@@ -1,6 +1,7 @@
-import { Project, Node, FunctionDeclaration, VariableStatement, ArrowFunction, Type, CallExpression } from "ts-morph";
+import { Project, Node, FunctionDeclaration, VariableStatement, ArrowFunction, Type, CallExpression, SourceFile } from "ts-morph";
 import * as path from "path";
 import * as fs from "fs";
+import * as ts from "typescript";
 
 interface ParamInfo {
   name: string;
@@ -200,8 +201,85 @@ export function extractIR(projectRoot: string): FunctionInfo[] {
       }
     }
   }
-  // 提取外部依赖函数：收集所有 calls 中引用但未声明的函数
+  // ═══════════════════════════════════════════════════════════════
+  // Phase 5: Dynamic external function resolution
+  // Replaces hardcoded knownExternals with ts-morph + ts.resolveModuleName
+  // ═══════════════════════════════════════════════════════════════
+
   const declaredNames = new Set(funcs.map(f => f.name));
+
+  // Collect imports for dynamic resolution
+  const externalFuncs = new Map<string, { params: ParamInfo[]; returnType: string; description: string }>();
+  // Also track namespace imports: import * as X from 'module' → X.method
+  const namespaceImports = new Map<string, SourceFile>(); // X → resolved source file
+
+  for (const sf of project.getSourceFiles()) {
+    if (sf.getFilePath().includes('node_modules')) continue;
+    for (const imp of sf.getImportDeclarations()) {
+      const mod = imp.getModuleSpecifierValue();
+
+      // Named imports: import { X } from 'mod'
+      for (const ni of imp.getNamedImports()) {
+        const name = ni.getName();
+        if (declaredNames.has(name)) continue;
+        if (externalFuncs.has(name)) continue;
+
+        try {
+          const resolved = imp.getModuleSpecifierSourceFile();
+          if (resolved) {
+            const sig = extractSignatureFromFile(name, resolved);
+            if (sig) { externalFuncs.set(name, sig); continue; }
+          }
+
+          const tsResult = ts.resolveModuleName(mod, sf.getFilePath(), {}, ts.sys);
+          const resolvedPath = tsResult.resolvedModule?.resolvedFileName;
+          if (resolvedPath && fs.existsSync(resolvedPath)) {
+            const sig = extractSignatureFromDts(name, resolvedPath, project);
+            if (sig) { externalFuncs.set(name, sig); continue; }
+          }
+        } catch {}
+      }
+
+      // Namespace imports: import * as X from 'mod'
+      const nsImport = imp.getNamespaceImport();
+      if (nsImport) {
+        try {
+          const resolved = imp.getModuleSpecifierSourceFile();
+          if (resolved) {
+            namespaceImports.set(nsImport.getText(), resolved);
+          } else {
+            const tsResult = ts.resolveModuleName(mod, sf.getFilePath(), {}, ts.sys);
+            const resolvedPath = tsResult.resolvedModule?.resolvedFileName;
+            if (resolvedPath && fs.existsSync(resolvedPath)) {
+              const dtsFile = project.addSourceFileAtPathIfExists(resolvedPath);
+              if (dtsFile) namespaceImports.set(nsImport.getText(), dtsFile);
+            } else {
+              // Node.js built-in: try @types/node
+              const nodeTypesPath = path.join(absRoot, "node_modules/@types/node", mod + ".d.ts");
+              if (fs.existsSync(nodeTypesPath)) {
+                const nodeDts = project.addSourceFileAtPathIfExists(nodeTypesPath);
+                if (nodeDts) namespaceImports.set(nsImport.getText(), nodeDts);
+              }
+            }
+          }
+        } catch {}
+      }
+    }
+  }
+
+  // Resolve namespace calls: fs.readFileSync → look up 'readFileSync' in 'fs' source file
+  function tryResolveFromNamespace(callName: string, prefix: string): boolean {
+    const sourceFile = namespaceImports.get(prefix);
+    if (!sourceFile) return false;
+    const sig = extractSignatureFromFile(callName, sourceFile);
+    if (sig) {
+      externalFuncs.set(callName, sig);
+      return true;
+    }
+    return false;
+  }
+
+  // Collect undeclared calls (functions used but not declared and not resolved above)
   const allCalls = new Set<string>();
   for (const f of funcs) {
     for (const c of f.calls) {
@@ -230,7 +308,7 @@ export function extractIR(projectRoot: string): FunctionInfo[] {
     "then", "catch", "resolve", "reject", // Promise
   ]);
 
-  // 已知外部函数签名注册表
+  // Minimal fallback registry (Node.js built-ins that ts-morph can't resolve)
   const knownExternals: Record<string, { params: ParamInfo[]; returnType: string; description: string }> = {
     // fs
     "readFileSync": {
@@ -371,29 +449,126 @@ export function extractIR(projectRoot: string): FunctionInfo[] {
   };
 
   let externalCount = 0;
+  let dynamicCount = 0;
+  let fallbackCount = 0;
+
   for (const callName of allCalls) {
     if (declaredNames.has(callName)) continue;
     if (ignoredBuiltins.has(callName)) continue;
-
-    // 跳过 TypeScript 类型/语法节点
     if (callName.startsWith("is") && callName[2] === callName[2]?.toUpperCase()) continue;
 
-    const known = knownExternals[callName];
-    funcs.push({
-      name: callName,
-      params: known ? known.params : [],
-      returnType: known ? known.returnType : "any",
-      returnTypeDetail: known ? known.returnType : "any",
-      file: "(external)",
-      calls: [],
-      external: true,
-      description: known?.description,
-    });
-    externalCount++;
+    // Try namespace resolution for unresolved calls
+    if (!externalFuncs.has(callName) && !knownExternals[callName]) {
+      // Check if this function is called as X.method (property access)
+      // The callName is already the method name from extractDirectCalls
+      // Try each known namespace to find the function
+      for (const [nsPrefix] of namespaceImports) {
+        if (tryResolveFromNamespace(callName, nsPrefix)) break;
+      }
+    }
+
+    // Priority: dynamic resolution > knownExternals fallback > any
+    const dynamic = externalFuncs.get(callName);
+    const fallback = knownExternals[callName];
+
+    if (dynamic) {
+      funcs.push({
+        name: callName,
+        params: dynamic.params,
+        returnType: dynamic.returnType,
+        returnTypeDetail: dynamic.returnType,
+        file: "(external)",
+        calls: [],
+        external: true,
+        description: dynamic.description,
+      });
+      dynamicCount++;
+    } else if (fallback) {
+      funcs.push({
+        name: callName,
+        params: fallback.params,
+        returnType: fallback.returnType,
+        returnTypeDetail: fallback.returnType,
+        file: "(external)",
+        calls: [],
+        external: true,
+        description: fallback.description,
+      });
+      fallbackCount++;
+    } else {
+      funcs.push({
+        name: callName,
+        params: [],
+        returnType: "any",
+        returnTypeDetail: "any",
+        file: "(external)",
+        calls: [],
+        external: true,
+      });
+      externalCount++;
+    }
   }
 
-  console.error(`📦 外部函数: ${externalCount} (from ${allCalls.size} total calls)`);
+  const totalExternal = dynamicCount + fallbackCount + externalCount;
+  console.error(`📦 外部函数: ${totalExternal} (动态=${dynamicCount} 回退=${fallbackCount} 未签名=${externalCount}, from ${allCalls.size} total calls)`);
   return funcs;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Dynamic external signature extraction helpers
+// ═══════════════════════════════════════════════════════════════
+
+/** Extract function signature from a resolved ts-morph source file. */
+function extractSignatureFromFile(
+  name: string,
+  sf: SourceFile
+): { params: ParamInfo[]; returnType: string; description: string } | null {
+  for (const exp of sf.getExportedDeclarations().entries()) {
+    if (exp[0] !== name) continue;
+    for (const decl of exp[1]) {
+      if (Node.isFunctionDeclaration(decl)) {
+        const params = decl.getParameters().map(p => ({
+          name: p.getName(),
+          type: p.getTypeNode()?.getText() || "any",
+        }));
+        return {
+          params,
+          returnType: decl.getReturnTypeNode()?.getText() || "any",
+          description: `auto-resolved from ${sf.getFilePath()}`,
+        };
+      }
+      if (Node.isVariableDeclaration(decl)) {
+        const init = decl.getInitializer();
+        if (init && Node.isArrowFunction(init)) {
+          const params = init.getParameters().map(p => ({
+            name: p.getName(),
+            type: p.getTypeNode()?.getText() || "any",
+          }));
+          return {
+            params,
+            returnType: init.getReturnTypeNode()?.getText() || "any",
+            description: `auto-resolved arrow from ${sf.getFilePath()}`,
+          };
+        }
+      }
+    }
+  }
+  return null;
+}
+
+/** Extract function signature from a .d.ts file using ts-morph. */
+function extractSignatureFromDts(
+  name: string,
+  dtsPath: string,
+  project: Project
+): { params: ParamInfo[]; returnType: string; description: string } | null {
+  try {
+    const sf = project.addSourceFileAtPathIfExists(dtsPath);
+    if (!sf) return null;
+    return extractSignatureFromFile(name, sf);
+  } catch {
+    return null;
+  }
 }
 
 // 若直接运行
