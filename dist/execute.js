@@ -48,7 +48,6 @@ const path = __importStar(require("path"));
 const planner_1 = require("./planner");
 const extract_ir_1 = require("./extract-ir");
 const emitter_1 = require("./emitter");
-const ledger_registry_1 = require("./ledger-registry");
 /**
  * Execute the full Progmune pipeline: intent → validated code → file.
  *
@@ -101,16 +100,15 @@ async function execute(intent, projectPath, filePath) {
         }
         fs.writeFileSync(resolvedPath, code, "utf-8");
     }
-    // 6. Compute hash (from code content, since actions are not transitions)
+    // 6. Compute hash (from code content)
     const crypto = require("crypto");
     const hash = crypto.createHash("sha256").update(code).digest("hex").slice(0, 16);
     const ruleHash = planResult.ruleHash || "";
-    // 7. Register fingerprint only if we have real transitions
-    // (execute produces actions, transitions come from the session in corpus)
-    try {
-        (0, ledger_registry_1.registerFingerprint)(planResult.sessionId, [], ruleHash);
-    }
-    catch { }
+    // Fingerprint registration is NOT done here.
+    // plan() internally calls recordSession() which writes real transitions to
+    // .progmune_corpus/sessions/. The fingerprint is registered later by
+    // `npm run check` → registerAllMissingFingerprints() which reads the
+    // actual session file with real StateTransition[].
     return {
         success: true,
         code,
