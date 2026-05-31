@@ -13,6 +13,25 @@ import * as path from "path";
 import type { StateTransition } from "./runtime-types";
 import type { LedgerFingerprint } from "./ledger-registry";
 import { getFingerprint } from "./ledger-registry";
+
+/** Load namespace initial states from protocols.json (authoritative source).
+ *  Falls back to _global=UNAUTHENTICATED if no file found. */
+function loadNsInit(): Map<string, string> {
+  const nsInit = new Map<string, string>();
+  nsInit.set("_global", "UNAUTHENTICATED");
+  try {
+    const protoPath = path.resolve(process.env.PROGMUNE_PROJECT_DIR || process.cwd(), "protocols.json");
+    if (fs.existsSync(protoPath)) {
+      const proto = JSON.parse(fs.readFileSync(protoPath, "utf-8"));
+      if (proto.namespaceInitialStates) {
+        for (const [ns, state] of Object.entries(proto.namespaceInitialStates)) {
+          nsInit.set(ns, state as string);
+        }
+      }
+    }
+  } catch {}
+  return nsInit;
+}
 import {
   rebuildState,
   validateTransition,
@@ -57,7 +76,7 @@ export interface ReplayTransition {
 export function replaySession(
   sessionId: string,
   currentRules?: Map<string, import("./ssg-validator").StateAnnotation>,
-  namespaceInitialStates: Map<string, string> = new Map([["_global", "INIT"]])
+  namespaceInitialStates: Map<string, string> = loadNsInit()
 ): ReplayResult {
   // Load session
   const sessionsDir = path.resolve(
@@ -141,7 +160,7 @@ export function replayLedger(
   storedLedgerHash: string,
   currentRuleHash?: string,
   currentRules?: Map<string, import("./ssg-validator").StateAnnotation>,
-  namespaceInitialStates: Map<string, string> = new Map([["_global", "INIT"]])
+  namespaceInitialStates: Map<string, string> = loadNsInit()
 ): ReplayResult {
   const replayedHash = transitions.length > 0 ? hashLedger(transitions) : "";
   const ruleHashMatch = !currentRuleHash || !storedRuleHash
@@ -245,7 +264,7 @@ export function replayLedger(
 export function replayWithDetail(
   transitions: StateTransition[],
   currentRules?: Map<string, import("./ssg-validator").StateAnnotation>,
-  namespaceInitialStates: Map<string, string> = new Map([["_global", "INIT"]])
+  namespaceInitialStates: Map<string, string> = loadNsInit()
 ): ReplayTransition[] {
   if (!currentRules || currentRules.size === 0) {
     return transitions.map(t => ({

@@ -48,11 +48,30 @@ exports.replayWithDetail = replayWithDetail;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const ledger_registry_1 = require("./ledger-registry");
+/** Load namespace initial states from protocols.json (authoritative source).
+ *  Falls back to _global=UNAUTHENTICATED if no file found. */
+function loadNsInit() {
+    const nsInit = new Map();
+    nsInit.set("_global", "UNAUTHENTICATED");
+    try {
+        const protoPath = path.resolve(process.env.PROGMUNE_PROJECT_DIR || process.cwd(), "protocols.json");
+        if (fs.existsSync(protoPath)) {
+            const proto = JSON.parse(fs.readFileSync(protoPath, "utf-8"));
+            if (proto.namespaceInitialStates) {
+                for (const [ns, state] of Object.entries(proto.namespaceInitialStates)) {
+                    nsInit.set(ns, state);
+                }
+            }
+        }
+    }
+    catch { }
+    return nsInit;
+}
 const ssg_validator_1 = require("./ssg-validator");
 const branch_ledger_1 = require("./branch-ledger");
 // ── Core Replay ──
 /** Replay a session from disk, comparing against its stored fingerprint. */
-function replaySession(sessionId, currentRules, namespaceInitialStates = new Map([["_global", "INIT"]])) {
+function replaySession(sessionId, currentRules, namespaceInitialStates = loadNsInit()) {
     // Load session
     const sessionsDir = path.resolve(process.env.PROGMUNE_PROJECT_DIR || process.cwd(), ".progmune_corpus/sessions");
     const sessionFile = path.join(sessionsDir, `${sessionId}.json`);
@@ -111,7 +130,7 @@ function replaySession(sessionId, currentRules, namespaceInitialStates = new Map
     return replayLedger(sessionId, transitions, sessionRuleHash, storedHash, currentRuleHash, currentRules, namespaceInitialStates);
 }
 /** Core replay logic: replay transitions against (optional) current rules. */
-function replayLedger(sessionId, transitions, storedRuleHash, storedLedgerHash, currentRuleHash, currentRules, namespaceInitialStates = new Map([["_global", "INIT"]])) {
+function replayLedger(sessionId, transitions, storedRuleHash, storedLedgerHash, currentRuleHash, currentRules, namespaceInitialStates = loadNsInit()) {
     const replayedHash = transitions.length > 0 ? (0, ssg_validator_1.hashLedger)(transitions) : "";
     const ruleHashMatch = !currentRuleHash || !storedRuleHash
         ? true // can't compare if either is missing
@@ -199,7 +218,7 @@ function replayLedger(sessionId, transitions, storedRuleHash, storedLedgerHash, 
     };
 }
 /** Replay with per-transition detail — for debugging and UI. */
-function replayWithDetail(transitions, currentRules, namespaceInitialStates = new Map([["_global", "INIT"]])) {
+function replayWithDetail(transitions, currentRules, namespaceInitialStates = loadNsInit()) {
     if (!currentRules || currentRules.size === 0) {
         return transitions.map(t => ({
             index: t.actionIndex,
