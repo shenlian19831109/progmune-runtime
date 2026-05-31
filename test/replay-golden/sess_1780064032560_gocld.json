@@ -1,0 +1,354 @@
+{
+  "sessionId": "sess_1780064032560_gocld",
+  "intent": "实现一个函数，先提取 IR，然后校验动作，最后生成代码并保存会话",
+  "attempts": [
+    {
+      "id": "att_1780064037502_vmsfo",
+      "sessionId": "sess_1780064032560_gocld",
+      "attemptNumber": 1,
+      "inputIntent": "实现一个函数，先提取 IR，然后校验动作，最后生成代码并保存会话",
+      "plannerSeed": "a525918c",
+      "constraintSnapshotId": "snap_1780064032562_82709ff22603",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "extractIRPython",
+          "args": [
+            {
+              "name": "projectRoot",
+              "type": "string",
+              "value": "{{projectRoot}}"
+            }
+          ],
+          "assignTo": "extractIRPython_result"
+        },
+        {
+          "kind": "call",
+          "function": "extractDirectCalls",
+          "args": [
+            {
+              "name": "func",
+              "type": "FunctionDeclaration | ArrowFunction",
+              "value": "{{func}}"
+            }
+          ],
+          "assignTo": "extractDirectCalls_result"
+        },
+        {
+          "kind": "call",
+          "function": "extractIR",
+          "args": [
+            {
+              "name": "projectRoot",
+              "type": "string",
+              "value": "{{projectRoot}}"
+            }
+          ],
+          "assignTo": "extractIR_result"
+        },
+        {
+          "kind": "call",
+          "function": "ensureDir",
+          "args": [
+            {
+              "name": "dir",
+              "type": "string",
+              "value": "{{dir}}"
+            }
+          ],
+          "assignTo": "ensureDir_result"
+        },
+        {
+          "kind": "call",
+          "function": "ensureLockDir",
+          "args": [],
+          "assignTo": "ensureLockDir_result"
+        },
+        {
+          "kind": "call",
+          "function": "loadProtocolsFromIR",
+          "args": [
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": "{{ir}}"
+            }
+          ],
+          "assignTo": "loadProtocolsFromIR_result"
+        },
+        {
+          "kind": "call",
+          "function": "attemptSSGRepair",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": "{{actions}}"
+            },
+            {
+              "name": "rejection",
+              "type": "SSGRejection",
+              "value": "{{rejection}}"
+            },
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": "{{ir}}"
+            },
+            {
+              "name": "protocols",
+              "type": "FunctionProtocol[]",
+              "value": "{{protocols}}"
+            },
+            {
+              "name": "namespaceInitialStates",
+              "type": "Map<string, string>",
+              "value": "{{namespaceInitialStates}}"
+            }
+          ],
+          "assignTo": "attemptSSGRepair_result"
+        },
+        {
+          "kind": "call",
+          "function": "loadIR",
+          "args": [],
+          "assignTo": "loadIR_result"
+        },
+        {
+          "kind": "call",
+          "function": "mkdirSync",
+          "args": [
+            {
+              "name": "path",
+              "type": "string",
+              "value": "{{path}}"
+            },
+            {
+              "name": "options",
+              "type": "object",
+              "value": "{{options}}"
+            }
+          ]
+        },
+        {
+          "kind": "call",
+          "function": "readdirSync",
+          "args": [
+            {
+              "name": "path",
+              "type": "string",
+              "value": "{{path}}"
+            }
+          ],
+          "assignTo": "readdirSync_result"
+        },
+        {
+          "kind": "call",
+          "function": "rmdirSync",
+          "args": [],
+          "assignTo": "rmdirSync_result"
+        },
+        {
+          "kind": "call",
+          "function": "require",
+          "args": [],
+          "assignTo": "require_result"
+        },
+        {
+          "kind": "call",
+          "function": "dirname",
+          "args": [
+            {
+              "name": "path",
+              "type": "string",
+              "value": "{{path}}"
+            }
+          ],
+          "assignTo": "dirname_result"
+        }
+      ],
+      "transitions": [],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780064037502,
+      "llmCallCount": 0,
+      "durationMs": 0
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780064032560,
+  "successfulAttempt": {
+    "id": "att_1780064037502_vmsfo",
+    "sessionId": "sess_1780064032560_gocld",
+    "attemptNumber": 1,
+    "inputIntent": "实现一个函数，先提取 IR，然后校验动作，最后生成代码并保存会话",
+    "plannerSeed": "a525918c",
+    "constraintSnapshotId": "snap_1780064032562_82709ff22603",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "extractIRPython",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "{{projectRoot}}"
+          }
+        ],
+        "assignTo": "extractIRPython_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractDirectCalls",
+        "args": [
+          {
+            "name": "func",
+            "type": "FunctionDeclaration | ArrowFunction",
+            "value": "{{func}}"
+          }
+        ],
+        "assignTo": "extractDirectCalls_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "{{projectRoot}}"
+          }
+        ],
+        "assignTo": "extractIR_result"
+      },
+      {
+        "kind": "call",
+        "function": "ensureDir",
+        "args": [
+          {
+            "name": "dir",
+            "type": "string",
+            "value": "{{dir}}"
+          }
+        ],
+        "assignTo": "ensureDir_result"
+      },
+      {
+        "kind": "call",
+        "function": "ensureLockDir",
+        "args": [],
+        "assignTo": "ensureLockDir_result"
+      },
+      {
+        "kind": "call",
+        "function": "loadProtocolsFromIR",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "loadProtocolsFromIR_result"
+      },
+      {
+        "kind": "call",
+        "function": "attemptSSGRepair",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "{{actions}}"
+          },
+          {
+            "name": "rejection",
+            "type": "SSGRejection",
+            "value": "{{rejection}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "{{protocols}}"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "{{namespaceInitialStates}}"
+          }
+        ],
+        "assignTo": "attemptSSGRepair_result"
+      },
+      {
+        "kind": "call",
+        "function": "loadIR",
+        "args": [],
+        "assignTo": "loadIR_result"
+      },
+      {
+        "kind": "call",
+        "function": "mkdirSync",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "{{path}}"
+          },
+          {
+            "name": "options",
+            "type": "object",
+            "value": "{{options}}"
+          }
+        ]
+      },
+      {
+        "kind": "call",
+        "function": "readdirSync",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "{{path}}"
+          }
+        ],
+        "assignTo": "readdirSync_result"
+      },
+      {
+        "kind": "call",
+        "function": "rmdirSync",
+        "args": [],
+        "assignTo": "rmdirSync_result"
+      },
+      {
+        "kind": "call",
+        "function": "require",
+        "args": [],
+        "assignTo": "require_result"
+      },
+      {
+        "kind": "call",
+        "function": "dirname",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "{{path}}"
+          }
+        ],
+        "assignTo": "dirname_result"
+      }
+    ],
+    "transitions": [],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780064037502,
+    "llmCallCount": 0,
+    "durationMs": 0
+  },
+  "snapshotId": "snap_1780064032562_82709ff22603",
+  "endedAt": 1780064037502
+}

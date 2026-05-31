@@ -15,7 +15,8 @@
     "obs": "npx ts-node src/semantic-trace.ts",
     "obs-web": "npx ts-node src/obs-web.ts",
     "check": "npx ts-node src/check.ts",
-    "audit": "npx ts-node src/audit.ts"
+    "audit": "npx ts-node src/audit.ts",
+    "replay-golden": "npx ts-node --transpile-only test/replay-golden.ts"
   },
   "keywords": [
     "program-synthesis",
