@@ -53,6 +53,7 @@ const child_process_1 = require("child_process");
 const ssg_validator_1 = require("./ssg-validator");
 const failure_corpus_1 = require("./failure-corpus");
 const runtime_invariants_1 = require("./runtime-invariants");
+const ledger_registry_1 = require("./ledger-registry");
 const C = {
     reset: "\x1b[0m",
     green: "\x1b[32m",
@@ -163,6 +164,31 @@ function fail(msg) {
 function warn(msg) {
     console.log(`  ${Y("!")}  ${msg}`);
     warnings++;
+}
+// CLI: --verify — fingerprint integrity check
+if (cliArg === "--verify") {
+    console.log(`${B("━━━")} ${B("Fingerprint Verification")} ${"━".repeat(40)}`);
+    const summary = (0, ledger_registry_1.verifyAllFingerprints)();
+    console.log(`  Total fingerprints: ${summary.total}`);
+    console.log(`  ${G("✔")} Valid: ${summary.valid}`);
+    if (summary.tampered > 0) {
+        console.log(`  ${R("✖")} Tampered: ${summary.tampered}`);
+        for (const r of summary.verified.filter(r => r.tampered)) {
+            console.log(`     ${R(r.sessionId)}: stored=${r.stored.ledgerHash.slice(0, 16)} current=${(r.currentHash || "?").slice(0, 16)}`);
+        }
+    }
+    if (summary.notFound > 0) {
+        console.log(`  ${Y("!")} Sessions missing: ${summary.notFound} (fingerprint exists but session file gone)`);
+    }
+    console.log();
+    if (summary.tampered > 0) {
+        console.log(`${R("✖")} Integrity check failed.`);
+        process.exit(1);
+    }
+    else {
+        console.log(`${G("✔")} All execution certificates intact.`);
+        process.exit(0);
+    }
 }
 // ── 1. IR 提取 ──
 step("1/6 IR 提取");
@@ -386,6 +412,13 @@ step("4/6 Ledger 不变量");
         }
         if (invariantFailed) {
             fail("PROGMUNE_STRICT=true — 严格不变量断言发现违规");
+        }
+    }
+    // P0: Fingerprint registration — ensure every session has an execution certificate
+    {
+        const registered = (0, ledger_registry_1.registerAllMissingFingerprints)();
+        if (registered > 0) {
+            console.log(`     ${C_(`新注册 ${registered} 个指纹`)}`);
         }
     }
 }

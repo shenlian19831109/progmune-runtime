@@ -12,6 +12,12 @@ export { rebuildState, applyTransitionDelta, validateTransition, checkLedgerCons
 // Phase 4: Invariant assertion layer
 export { InvariantViolationError, assertLedgerConsistency, assertDeltaConsistency, assertRuleHashMatch, assertTransitionOrder, assertLedgerInvariants } from "./runtime-invariants";
 export type { InvariantViolationDetail } from "./ssg-validator";
+// Phase 4: Fingerprint Registry
+export { registerFingerprint, getFingerprint, getFingerprintRegistry, verifyFingerprint, verifyAllFingerprints, registerAllMissingFingerprints } from "./ledger-registry";
+export type { LedgerFingerprint, FingerprintVerifyResult, RegistrySummary } from "./ledger-registry";
+// Phase 4: Branch Ledger
+export { createRootBranch, createBranch, forkBranch, mergeBranches, flattenBranch, getBranchPath, replayBranch, buildBranchMap, findRootBranch, wrapAsBranch, unwrapBranchTree, describeBranchTree } from "./branch-ledger";
+export type { Branch, BranchReason, BranchReplayResult } from "./branch-ledger";
 export type { SVL } from "./failure-corpus";
 
 // ── Action DSL ──
@@ -100,6 +106,9 @@ export interface ExecutionSession {
   endedAt?: number;
   /** SHA256 hash of the SSG rule set in effect during this session (P1-A: Constraint Snapshot) */
   ruleHash?: string;
+  /** Phase 4: Branch tree — replaces/extends flat attempts for multi-path execution */
+  branchTree?: import("./branch-ledger").Branch[];
+  rootBranchId?: string;
 }
 
 // ── ID生成工具 ──
