@@ -7,7 +7,10 @@ const BASIC_TYPES = new Set([
 ]);
 
 function getImportPath(file: string): string {
-  return "./" + file.replace(/\.ts$|\.tsx$/, "");
+  // Normalize: strip common src/ prefix since generated code lives in src/
+  let clean = file.replace(/\.ts$|\.tsx$/, "");
+  if (clean.startsWith("src/")) clean = clean.slice(4);
+  return "./" + clean;
 }
 
 /**

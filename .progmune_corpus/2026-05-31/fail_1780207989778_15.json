@@ -1,0 +1,55 @@
+{
+  "intent": "validate a sequence of actions against IR and return a boolean result",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-4",
+  "constraintType": "protocol",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "validateAction",
+      "args": [
+        {
+          "name": "action",
+          "type": "Action",
+          "value": "ir"
+        },
+        {
+          "name": "actionIndex",
+          "type": "number",
+          "value": 0
+        }
+      ],
+      "assignTo": "v1"
+    },
+    {
+      "kind": "call",
+      "function": "validateActionSequence",
+      "args": [
+        {
+          "name": "actions",
+          "type": "Action[]",
+          "value": "ir"
+        }
+      ],
+      "assignTo": "ok"
+    },
+    {
+      "kind": "return",
+      "value": "ok"
+    }
+  ],
+  "errorDetail": "{\"protocol_violation\":{\"blocked_function\":\"validateAction\",\"namespace\":\"dev_pipeline\",\"current_state\":[\"IR_STALE\"],\"required_pre_states\":[\"IR_EXTRACTED\"]},\"diagnosis\":{\"missing_functions\":[\"extractIR\"],\"fix_path\":[\"extractIR\"]}}",
+  "ssgState": [
+    "IR_STALE"
+  ],
+  "ssgFixPath": [
+    "extractIR"
+  ],
+  "ssgMissingFunctions": [
+    "extractIR"
+  ],
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 1,
+  "id": "fail_1780207989778_15",
+  "timestamp": "2026-05-31T06:13:09.778Z"
+}

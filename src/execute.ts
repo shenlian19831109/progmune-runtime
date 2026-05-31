@@ -87,15 +87,16 @@ export async function execute(
     fs.writeFileSync(resolvedPath, code, "utf-8");
   }
 
-  // 6. Register fingerprint
+  // 6. Compute hash (from code content, since actions are not transitions)
+  const crypto = require("crypto");
+  const hash = crypto.createHash("sha256").update(code).digest("hex").slice(0, 16);
   const ruleHash = planResult.ruleHash || "";
-  try {
-    registerFingerprint(planResult.sessionId, planResult.actions as any, ruleHash);
-  } catch {}
 
-  // 7. Compute hash
-  const { hashLedger } = require("./ssg-validator");
-  const hash = hashLedger(planResult.actions as any);
+  // 7. Register fingerprint only if we have real transitions
+  // (execute produces actions, transitions come from the session in corpus)
+  try {
+    registerFingerprint(planResult.sessionId, [] as any, ruleHash);
+  } catch {}
 
   return {
     success: true,

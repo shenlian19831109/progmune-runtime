@@ -40,7 +40,11 @@ const BASIC_TYPES = new Set([
     "str", "int", "float", "bool", "list", "dict", "tuple", "bytes",
 ]);
 function getImportPath(file) {
-    return "./" + file.replace(/\.ts$|\.tsx$/, "");
+    // Normalize: strip common src/ prefix since generated code lives in src/
+    let clean = file.replace(/\.ts$|\.tsx$/, "");
+    if (clean.startsWith("src/"))
+        clean = clean.slice(4);
+    return "./" + clean;
 }
 /**
  * 将动作序列编译为目标语言代码。

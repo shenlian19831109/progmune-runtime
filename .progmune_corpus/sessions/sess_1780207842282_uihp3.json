@@ -1,0 +1,141 @@
+{
+  "sessionId": "sess_1780207842282_uihp3",
+  "intent": "generate a helper that takes an immune status response and formats it as a colored terminal summary with sections for IR extraction, type checking, SSG protocols, ledger invariants, and failure genome",
+  "attempts": [
+    {
+      "id": "att_1780207844339_qvime",
+      "sessionId": "sess_1780207842282_uihp3",
+      "attemptNumber": 1,
+      "inputIntent": "generate a helper that takes an immune status response and formats it as a colored terminal summary with sections for IR extraction, type checking, SSG protocols, ledger invariants, and failure genome",
+      "plannerSeed": "d01b42ce",
+      "constraintSnapshotId": "snap_1780207842283_d64f2aa78769",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "formatImmuneResponse",
+          "args": [
+            {
+              "name": "a",
+              "type": "Attempt",
+              "value": "response"
+            }
+          ],
+          "assignTo": "summary"
+        },
+        {
+          "kind": "return",
+          "value": "summary"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "formatImmuneResponse",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780207844339,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780207842282,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780207844339_qvime",
+    "sessionId": "sess_1780207842282_uihp3",
+    "attemptNumber": 1,
+    "inputIntent": "generate a helper that takes an immune status response and formats it as a colored terminal summary with sections for IR extraction, type checking, SSG protocols, ledger invariants, and failure genome",
+    "plannerSeed": "d01b42ce",
+    "constraintSnapshotId": "snap_1780207842283_d64f2aa78769",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "formatImmuneResponse",
+        "args": [
+          {
+            "name": "a",
+            "type": "Attempt",
+            "value": "response"
+          }
+        ],
+        "assignTo": "summary"
+      },
+      {
+        "kind": "return",
+        "value": "summary"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "formatImmuneResponse",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780207844339,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780207842283_d64f2aa78769",
+  "endedAt": 1780207844346
+}
