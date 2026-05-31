@@ -27,6 +27,7 @@ exports.describeBranchTree = describeBranchTree;
 exports.wrapAsBranch = wrapAsBranch;
 exports.unwrapBranchTree = unwrapBranchTree;
 const ssg_validator_1 = require("./ssg-validator");
+const runtime_invariants_1 = require("./runtime-invariants");
 // ── Pure Functions ──
 /** Generate a unique branch ID. */
 function generateBranchId() {
@@ -43,8 +44,24 @@ function createRootBranch(transitions = []) {
         createdAt: Date.now(),
     };
 }
-/** Create a child branch from a parent.
- *  The child starts with the parent's effective state at the fork point. */
+/**
+ * Create a CHILD branch (parent → child relationship).
+ *
+ * Tree structure:
+ *   root
+ *   └── child (parentId = root.id)
+ *
+ * The child starts with an independent transition sequence. It does NOT
+ * inherit any transitions from the parent — it begins empty or with
+ * the given initialTransitions. The parent's state at creation time is
+ * the child's implicit starting state; use forkBranch() if you need to
+ * share a prefix of transitions.
+ *
+ * Use createBranch when:
+ * - Creating an alternative implementation from scratch
+ * - The child has no shared history with the parent beyond the parent's
+ *   final state
+ */
 function createBranch(parent, reason = "alternative", initialTransitions = []) {
     const id = generateBranchId();
     return {
@@ -56,9 +73,34 @@ function createBranch(parent, reason = "alternative", initialTransitions = []) {
         createdAt: Date.now(),
     };
 }
-/** Fork a branch at a specific transition index.
- *  The new branch inherits all transitions up to (and including) splitIndex,
- *  then continues independently from that point. */
+/**
+ * Fork a branch at a specific transition index, creating a SIBLING branch.
+ *
+ * Sibling semantics (NOT child):
+ *   parent
+ *   ├── original (branch, truncated at splitIndex, marked "abandoned")
+ *   └── forked  (NEW sibling — same parentId as original, NOT a child of original)
+ *
+ * Tree structure BEFORE fork:
+ *   ... → parent → branch
+ *
+ * Tree structure AFTER fork:
+ *   ... → parent
+ *         ├── original (abandoned — only transitions[0..splitIndex])
+ *         └── forked  (repair_attempt — transitions[splitIndex+1..end])
+ *
+ * Both share the same parent. The forked branch inherits the COMMON PREFIX
+ * (transitions 0..splitIndex) implicitly through the tree path — flattenBranch()
+ * will walk parent → forked and include parent's + forked's transitions.
+ *
+ * Use forkBranch when:
+ * - A violation is detected at splitIndex and you want to try a fix
+ * - The prefix up to splitIndex is valid and should be preserved
+ * - You want to keep the original as evidence (abandoned, not deleted)
+ *
+ * Use createBranch when:
+ * - Starting a completely fresh alternative from the parent's final state
+ */
 function forkBranch(branch, splitIndex, reason = "repair_attempt") {
     const sharedTransitions = branch.transitions.slice(0, splitIndex + 1);
     const remainingTransitions = branch.transitions.slice(splitIndex + 1);
@@ -75,6 +117,14 @@ function forkBranch(branch, splitIndex, reason = "repair_attempt") {
         reason,
         createdAt: Date.now(),
     };
+    // Ontology: verify all split transitions are internally consistent
+    for (const t of [...sharedTransitions, ...remainingTransitions]) {
+        if (t.valid)
+            try {
+                (0, runtime_invariants_1.assertDeltaConsistency)(t);
+            }
+            catch { }
+    }
     return { original, forked };
 }
 /** Merge multiple branches into one.

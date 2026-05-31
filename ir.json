@@ -24,6 +24,11 @@
         "name": "dir",
         "type": "string",
         "typeDetail": "string"
+      },
+      {
+        "name": "threshold",
+        "type": "any",
+        "typeDetail": ""
       }
     ],
     "returnType": "AuditResult",
@@ -34,6 +39,7 @@
       "statSync",
       "isDirectory",
       "scanDir",
+      "toFixed",
       "sort"
     ]
   },
@@ -178,7 +184,8 @@
     "calls": [
       "slice",
       "generateBranchId",
-      "now"
+      "now",
+      "assertDeltaConsistency"
     ]
   },
   {
@@ -819,8 +826,7 @@
       "slice",
       "digest",
       "update",
-      "createHash",
-      "registerFingerprint"
+      "createHash"
     ]
   },
   {
@@ -3083,6 +3089,7 @@
     "returnTypeDetail": "RepairProposal[]",
     "file": "src/repair-proposal.ts",
     "calls": [
+      "assertDeltaConsistency",
       "push",
       "now",
       "slice",
@@ -3211,6 +3218,22 @@
       "checkLedgerConsistency",
       "push",
       "suggestInvariantRepair",
+      "getMinimalFixSet"
+    ]
+  },
+  {
+    "name": "getMinimalFixSet",
+    "params": [
+      {
+        "name": "proposals",
+        "type": "RepairProposal[]",
+        "typeDetail": "RepairProposal[]"
+      }
+    ],
+    "returnType": "RepairProposal[]",
+    "returnTypeDetail": "RepairProposal[]",
+    "file": "src/repair-proposal.ts",
+    "calls": [
       "get",
       "set",
       "sort",
@@ -5465,6 +5488,15 @@
     "description": "获取文件状态"
   },
   {
+    "name": "toFixed",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
     "name": "readdirSync",
     "params": [
       {
@@ -5516,15 +5548,6 @@
     "calls": [],
     "external": true,
     "description": "计算相对路径"
-  },
-  {
-    "name": "toFixed",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "any",
-    "file": "(external)",
-    "calls": [],
-    "external": true
   },
   {
     "name": "repeat",

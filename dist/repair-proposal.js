@@ -20,7 +20,9 @@ exports.suggestInvariantRepair = suggestInvariantRepair;
 exports.applyProposalAsBranch = applyProposalAsBranch;
 exports.validateProposal = validateProposal;
 exports.generateRepairSummary = generateRepairSummary;
+exports.getMinimalFixSet = getMinimalFixSet;
 const ssg_validator_1 = require("./ssg-validator");
+const runtime_invariants_1 = require("./runtime-invariants");
 const branch_ledger_1 = require("./branch-ledger");
 // ── Proposal Generation ──
 /** Generate repair proposals for all detected violations in a ledger. */
@@ -103,6 +105,11 @@ function suggestInvariantRepair(violation, ledger, namespaceInitialStates = new 
             ...t,
             statesBefore: correctStatesBefore,
         };
+        // Ontology: verify corrected transition passes delta consistency
+        try {
+            (0, runtime_invariants_1.assertDeltaConsistency)(correctedTransition);
+        }
+        catch { }
         proposals.push({
             id: `rp_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
             violationIndex: violation.index,
@@ -124,6 +131,10 @@ function suggestInvariantRepair(violation, ledger, namespaceInitialStates = new 
             ...t,
             statesAfter: correctStatesAfter,
         };
+        try {
+            (0, runtime_invariants_1.assertDeltaConsistency)(correctedTransition);
+        }
+        catch { }
         proposals.push({
             id: `rp_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
             violationIndex: violation.index,
@@ -293,20 +304,29 @@ function generateRepairSummary(ledger, ir, protocols, namespaceInitialStates = n
     for (const v of consistency.violations) {
         allProposals.push(...suggestInvariantRepair(v, ledger, namespaceInitialStates));
     }
-    // Deduplicate: pick highest-confidence proposal per violation index
-    const seen = new Map();
-    for (const p of allProposals) {
-        const existing = seen.get(p.violationIndex);
-        if (!existing || p.confidence > existing.confidence) {
-            seen.set(p.violationIndex, p);
-        }
-    }
-    const minimalFixSet = [...seen.values()].sort((a, b) => a.violationIndex - b.violationIndex);
+    const minimalFixSet = getMinimalFixSet(allProposals);
     return {
         totalViolations: consistency.violations.length,
         proposals: allProposals,
         minimalFixSet,
     };
+}
+/**
+ * Deduplicate repair proposals: pick the highest-confidence proposal per violation index.
+ * Returns proposals sorted by violationIndex (ascending).
+ *
+ * This is the authoritative "minimal fix set" — applying these proposals in order
+ * should resolve all detected violations without redundant fixes.
+ */
+function getMinimalFixSet(proposals) {
+    const seen = new Map();
+    for (const p of proposals) {
+        const existing = seen.get(p.violationIndex);
+        if (!existing || p.confidence > existing.confidence) {
+            seen.set(p.violationIndex, p);
+        }
+    }
+    return [...seen.values()].sort((a, b) => a.violationIndex - b.violationIndex);
 }
 // ── Helpers ──
 function tryParseRejection(v) {

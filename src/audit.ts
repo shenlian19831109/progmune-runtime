@@ -14,6 +14,8 @@ export interface AuditResult {
   totalFiles: number;
   progmuneFiles: number;
   coverage: number;                   // 0.0 – 1.0
+  threshold: number;                  // warning threshold (default 0.8)
+  warning: string | null;             // non-null when coverage < threshold
   nonProgmuneFiles: string[];         // files without marker
   sessions: {                         // sessions found in markers
     sessionId: string;
@@ -25,12 +27,16 @@ export interface AuditResult {
 }
 
 /** Scan a directory recursively for TypeScript files and check for @progmune-generated markers. */
-export function auditDirectory(dir: string): AuditResult {
+const DEFAULT_THRESHOLD = 0.8;
+
+export function auditDirectory(dir: string, threshold = DEFAULT_THRESHOLD): AuditResult {
   const result: AuditResult = {
     directory: dir,
     totalFiles: 0,
     progmuneFiles: 0,
     coverage: 0,
+    threshold,
+    warning: null,
     nonProgmuneFiles: [],
     sessions: [],
   };
@@ -49,6 +55,12 @@ export function auditDirectory(dir: string): AuditResult {
   result.coverage = result.totalFiles > 0
     ? result.progmuneFiles / result.totalFiles
     : 0;
+
+  if (result.coverage < result.threshold && result.totalFiles > 0) {
+    const pct = (result.coverage * 100).toFixed(0);
+    const target = (result.threshold * 100).toFixed(0);
+    result.warning = `Coverage ${pct}% below ${target}% threshold. ${result.nonProgmuneFiles.length} file(s) are not @progmune-generated.`;
+  }
 
   // Sort sessions by timestamp (most recent first)
   result.sessions.sort((a, b) => (b.timestamp || "").localeCompare(a.timestamp || ""));
@@ -119,6 +131,10 @@ export function formatAuditResult(result: AuditResult): string {
   lines.push("═".repeat(56));
   lines.push(`  Total source files:   ${result.totalFiles}`);
   lines.push(`  @progmune-generated:  ${result.progmuneFiles}  (${pct}%)`);
+  lines.push(`  Threshold:            ${(result.threshold * 100).toFixed(0)}%`);
+  if (result.warning) {
+    lines.push(`  ⚠️  ${result.warning}`);
+  }
   lines.push(`  Not covered:          ${result.nonProgmuneFiles.length}`);
   lines.push("");
 

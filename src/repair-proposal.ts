@@ -30,6 +30,7 @@ import {
   validateTransition,
   hashRules,
 } from "./ssg-validator";
+import { assertDeltaConsistency } from "./runtime-invariants";
 import type { Branch } from "./branch-ledger";
 import { createBranch, generateBranchId } from "./branch-ledger";
 
@@ -163,6 +164,9 @@ export function suggestInvariantRepair(
       statesBefore: correctStatesBefore,
     };
 
+    // Ontology: verify corrected transition passes delta consistency
+    try { assertDeltaConsistency(correctedTransition); } catch {}
+
     proposals.push({
       id: `rp_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
       violationIndex: violation.index,
@@ -185,6 +189,8 @@ export function suggestInvariantRepair(
       ...t,
       statesAfter: correctStatesAfter,
     };
+
+    try { assertDeltaConsistency(correctedTransition); } catch {}
 
     proposals.push({
       id: `rp_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
@@ -394,21 +400,31 @@ export function generateRepairSummary(
     allProposals.push(...suggestInvariantRepair(v, ledger, namespaceInitialStates));
   }
 
-  // Deduplicate: pick highest-confidence proposal per violation index
-  const seen = new Map<number, RepairProposal>();
-  for (const p of allProposals) {
-    const existing = seen.get(p.violationIndex);
-    if (!existing || p.confidence > existing.confidence) {
-      seen.set(p.violationIndex, p);
-    }
-  }
-  const minimalFixSet = [...seen.values()].sort((a, b) => a.violationIndex - b.violationIndex);
+  const minimalFixSet = getMinimalFixSet(allProposals);
 
   return {
     totalViolations: consistency.violations.length,
     proposals: allProposals,
     minimalFixSet,
   };
+}
+
+/**
+ * Deduplicate repair proposals: pick the highest-confidence proposal per violation index.
+ * Returns proposals sorted by violationIndex (ascending).
+ *
+ * This is the authoritative "minimal fix set" — applying these proposals in order
+ * should resolve all detected violations without redundant fixes.
+ */
+export function getMinimalFixSet(proposals: RepairProposal[]): RepairProposal[] {
+  const seen = new Map<number, RepairProposal>();
+  for (const p of proposals) {
+    const existing = seen.get(p.violationIndex);
+    if (!existing || p.confidence > existing.confidence) {
+      seen.set(p.violationIndex, p);
+    }
+  }
+  return [...seen.values()].sort((a, b) => a.violationIndex - b.violationIndex);
 }
 
 // ── Helpers ──

@@ -13,6 +13,7 @@
 
 import type { StateTransition } from "./runtime-types";
 import { rebuildState } from "./ssg-validator";
+import { assertDeltaConsistency } from "./runtime-invariants";
 
 // ── Types ──
 
@@ -60,8 +61,24 @@ export function createRootBranch(transitions: StateTransition[] = []): Branch {
   };
 }
 
-/** Create a child branch from a parent.
- *  The child starts with the parent's effective state at the fork point. */
+/**
+ * Create a CHILD branch (parent → child relationship).
+ *
+ * Tree structure:
+ *   root
+ *   └── child (parentId = root.id)
+ *
+ * The child starts with an independent transition sequence. It does NOT
+ * inherit any transitions from the parent — it begins empty or with
+ * the given initialTransitions. The parent's state at creation time is
+ * the child's implicit starting state; use forkBranch() if you need to
+ * share a prefix of transitions.
+ *
+ * Use createBranch when:
+ * - Creating an alternative implementation from scratch
+ * - The child has no shared history with the parent beyond the parent's
+ *   final state
+ */
 export function createBranch(
   parent: Branch,
   reason: BranchReason = "alternative",
@@ -78,9 +95,34 @@ export function createBranch(
   };
 }
 
-/** Fork a branch at a specific transition index.
- *  The new branch inherits all transitions up to (and including) splitIndex,
- *  then continues independently from that point. */
+/**
+ * Fork a branch at a specific transition index, creating a SIBLING branch.
+ *
+ * Sibling semantics (NOT child):
+ *   parent
+ *   ├── original (branch, truncated at splitIndex, marked "abandoned")
+ *   └── forked  (NEW sibling — same parentId as original, NOT a child of original)
+ *
+ * Tree structure BEFORE fork:
+ *   ... → parent → branch
+ *
+ * Tree structure AFTER fork:
+ *   ... → parent
+ *         ├── original (abandoned — only transitions[0..splitIndex])
+ *         └── forked  (repair_attempt — transitions[splitIndex+1..end])
+ *
+ * Both share the same parent. The forked branch inherits the COMMON PREFIX
+ * (transitions 0..splitIndex) implicitly through the tree path — flattenBranch()
+ * will walk parent → forked and include parent's + forked's transitions.
+ *
+ * Use forkBranch when:
+ * - A violation is detected at splitIndex and you want to try a fix
+ * - The prefix up to splitIndex is valid and should be preserved
+ * - You want to keep the original as evidence (abandoned, not deleted)
+ *
+ * Use createBranch when:
+ * - Starting a completely fresh alternative from the parent's final state
+ */
 export function forkBranch(
   branch: Branch,
   splitIndex: number,
@@ -103,6 +145,11 @@ export function forkBranch(
     reason,
     createdAt: Date.now(),
   };
+
+  // Ontology: verify all split transitions are internally consistent
+  for (const t of [...sharedTransitions, ...remainingTransitions]) {
+    if (t.valid) try { assertDeltaConsistency(t); } catch {}
+  }
 
   return { original, forked };
 }

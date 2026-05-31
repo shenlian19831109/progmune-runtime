@@ -523,6 +523,9 @@ ${result.code}` }] };
       const { auditDirectory, formatAuditResult } = require("./audit");
       const result = auditDirectory(targetDir);
       const text = formatAuditResult(result);
+      if (result.warning) {
+        return { content: [{ type: "text", text: `⚠️  ${result.warning}\n\n${text}` }] };
+      }
       return { content: [{ type: "text", text }] };
     }
 
