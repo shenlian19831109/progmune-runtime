@@ -214,11 +214,33 @@ function extractIR(projectRoot) {
                     }
                 }
             }
+            // Extract class methods: ts-morph getFunctions() excludes class members
+            for (const cls of sf.getClasses()) {
+                const cn = cls.getName();
+                if (!cn)
+                    continue;
+                for (const m of cls.getMethods()) {
+                    const mn = m.getName();
+                    if (!mn)
+                        continue;
+                    funcs.push({
+                        name: `${cn}.${mn}`,
+                        params: m.getParameters().map((p) => ({ name: p.getName(), type: getParamType(p), typeDetail: getParamTypeDetail(p) })),
+                        returnType: m.getReturnTypeNode?.()?.getText?.() || "any",
+                        returnTypeDetail: m.getReturnTypeNode?.()?.getText?.() || "any",
+                        file: relPath, calls: [],
+                        protocol: parseProtocolFromJSDoc(m),
+                    });
+                }
+            }
         }
     }
     // ═══════════════════════════════════════════════════════════════
     // Phase 5: Dynamic external function resolution
-    // Replaces hardcoded knownExternals with ts-morph + ts.resolveModuleName
+    // Replaces hardcoded knownExternals
+    //   includes: npm packages (.d.ts via ts.resolveModuleName), Node.js built-ins (@types/node)
+    //   fallback: knownExternals registry for unresolved functions
+    //   final fallback: any type with empty params with ts-morph + ts.resolveModuleName
     // ═══════════════════════════════════════════════════════════════
     const declaredNames = new Set(funcs.map(f => f.name));
     // Collect imports for dynamic resolution

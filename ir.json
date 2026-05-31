@@ -18,6 +18,106 @@
     ]
   },
   {
+    "name": "ActionBuilder.call",
+    "params": [
+      {
+        "name": "func",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "args",
+        "type": "any[]",
+        "typeDetail": "any[]"
+      },
+      {
+        "name": "assignTo",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/action-runtime.ts",
+    "calls": []
+  },
+  {
+    "name": "ActionBuilder.ifBlock",
+    "params": [
+      {
+        "name": "condition",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "thenFn",
+        "type": "() => void",
+        "typeDetail": "() => void"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/action-runtime.ts",
+    "calls": []
+  },
+  {
+    "name": "ActionBuilder.ifElse",
+    "params": [
+      {
+        "name": "condition",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "thenFn",
+        "type": "() => void",
+        "typeDetail": "() => void"
+      },
+      {
+        "name": "elseFn",
+        "type": "() => void",
+        "typeDetail": "() => void"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/action-runtime.ts",
+    "calls": []
+  },
+  {
+    "name": "ActionBuilder.assign",
+    "params": [
+      {
+        "name": "target",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "value",
+        "type": "any",
+        "typeDetail": "any"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/action-runtime.ts",
+    "calls": []
+  },
+  {
+    "name": "ActionBuilder.output",
+    "params": [
+      {
+        "name": "value",
+        "type": "any",
+        "typeDetail": "any"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/action-runtime.ts",
+    "calls": []
+  },
+  {
     "name": "auditDirectory",
     "params": [
       {
@@ -1039,6 +1139,10 @@
       "isArrowFunction",
       "isCallExpression",
       "getArguments",
+      "getClasses",
+      "getMethods",
+      "getText",
+      "getReturnTypeNode",
       "includes",
       "getImportDeclarations",
       "getModuleSpecifierValue",
@@ -1050,7 +1154,6 @@
       "resolveModuleName",
       "extractSignatureFromDts",
       "getNamespaceImport",
-      "getText",
       "addSourceFileAtPathIfExists",
       "add",
       "startsWith",
@@ -2294,6 +2397,447 @@
       "substring",
       "find"
     ]
+  },
+  {
+    "name": "WorkMemory.setIntent",
+    "params": [
+      {
+        "name": "intent",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.getIntent",
+    "params": [],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.bind",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "type",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.get",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "string | undefined",
+    "returnTypeDetail": "string | undefined",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.clear",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.setIntent",
+    "params": [
+      {
+        "name": "intent",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.getIntent",
+    "params": [],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.bind",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "type",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.get",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "string | undefined",
+    "returnTypeDetail": "string | undefined",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.clear",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.setIntent",
+    "params": [
+      {
+        "name": "intent",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.getIntent",
+    "params": [],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.bind",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "type",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.get",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "string | undefined",
+    "returnTypeDetail": "string | undefined",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.clear",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.setIntent",
+    "params": [
+      {
+        "name": "intent",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.getIntent",
+    "params": [],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.bind",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "type",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.get",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "string | undefined",
+    "returnTypeDetail": "string | undefined",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.clear",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.setIntent",
+    "params": [
+      {
+        "name": "intent",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.getIntent",
+    "params": [],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.bind",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "type",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.get",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "string | undefined",
+    "returnTypeDetail": "string | undefined",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.clear",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.setIntent",
+    "params": [
+      {
+        "name": "intent",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.getIntent",
+    "params": [],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.bind",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "type",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.get",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "string | undefined",
+    "returnTypeDetail": "string | undefined",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.clear",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.setIntent",
+    "params": [
+      {
+        "name": "intent",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.getIntent",
+    "params": [],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.bind",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "type",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.get",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "string | undefined",
+    "returnTypeDetail": "string | undefined",
+    "file": "src/memory-layer.ts",
+    "calls": []
+  },
+  {
+    "name": "WorkMemory.clear",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "src/memory-layer.ts",
+    "calls": []
   },
   {
     "name": "jsonReply",
@@ -5282,6 +5826,153 @@
     ]
   },
   {
+    "name": "StateMachineValidator.setNamespaceInitialState",
+    "params": [
+      {
+        "name": "namespace",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "state",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "src/ssg-validator.ts",
+    "calls": []
+  },
+  {
+    "name": "StateMachineValidator.apply",
+    "params": [
+      {
+        "name": "functionName",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "actionIndex",
+        "type": "number",
+        "typeDetail": "number"
+      }
+    ],
+    "returnType": "SSGStepResult",
+    "returnTypeDetail": "SSGStepResult",
+    "file": "src/ssg-validator.ts",
+    "calls": []
+  },
+  {
+    "name": "StateMachineValidator.applyWithTransition",
+    "params": [
+      {
+        "name": "functionName",
+        "type": "string",
+        "typeDetail": "string"
+      },
+      {
+        "name": "actionIndex",
+        "type": "number",
+        "typeDetail": "number"
+      }
+    ],
+    "returnType": "{ result: SSGStepResult; transition: StateTransition }",
+    "returnTypeDetail": "{ result: SSGStepResult; transition: StateTransition }",
+    "file": "src/ssg-validator.ts",
+    "calls": []
+  },
+  {
+    "name": "StateMachineValidator.getCurrentStates",
+    "params": [],
+    "returnType": "string[]",
+    "returnTypeDetail": "string[]",
+    "file": "src/ssg-validator.ts",
+    "calls": []
+  },
+  {
+    "name": "StateMachineValidator.snapshotNamespaceStates",
+    "params": [],
+    "returnType": "Record<string, string[]>",
+    "returnTypeDetail": "Record<string, string[]>",
+    "file": "src/ssg-validator.ts",
+    "calls": []
+  },
+  {
+    "name": "StateMachineValidator.getNamespaceStates",
+    "params": [
+      {
+        "name": "namespace",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "string[]",
+    "returnTypeDetail": "string[]",
+    "file": "src/ssg-validator.ts",
+    "calls": []
+  },
+  {
+    "name": "StateMachineValidator.getTrace",
+    "params": [],
+    "returnType": "SSGTraceNode[]",
+    "returnTypeDetail": "SSGTraceNode[]",
+    "file": "src/ssg-validator.ts",
+    "calls": []
+  },
+  {
+    "name": "StateMachineValidator.getLedger",
+    "params": [],
+    "returnType": "StateTransition[]",
+    "returnTypeDetail": "StateTransition[]",
+    "file": "src/ssg-validator.ts",
+    "calls": []
+  },
+  {
+    "name": "StateMachineValidator.getContext",
+    "params": [],
+    "returnType": "ValidationContext",
+    "returnTypeDetail": "ValidationContext",
+    "file": "src/ssg-validator.ts",
+    "calls": []
+  },
+  {
+    "name": "StateMachineValidator.getRuleHash",
+    "params": [],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/ssg-validator.ts",
+    "calls": []
+  },
+  {
+    "name": "StateMachineValidator.explainRejection",
+    "params": [
+      {
+        "name": "rejection",
+        "type": "SSGRejection",
+        "typeDetail": "SSGRejection"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/ssg-validator.ts",
+    "calls": []
+  },
+  {
+    "name": "StateMachineValidator.rejectionToJSON",
+    "params": [
+      {
+        "name": "rejection",
+        "type": "SSGRejection",
+        "typeDetail": "SSGRejection"
+      }
+    ],
+    "returnType": "object",
+    "returnTypeDetail": "object",
+    "file": "src/ssg-validator.ts",
+    "calls": []
+  },
+  {
     "name": "jaccardSimilarity",
     "params": [
       {
@@ -5848,6 +6539,24 @@
   },
   {
     "name": "forEachDescendant",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "getClasses",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "getMethods",
     "params": [],
     "returnType": "any",
     "returnTypeDetail": "any",
