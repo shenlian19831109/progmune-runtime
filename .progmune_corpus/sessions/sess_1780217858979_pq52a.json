@@ -1,0 +1,182 @@
+{
+  "sessionId": "sess_1780217858979_pq52a",
+  "intent": "validate a branch ledger by extracting IR first, then checking all transitions pass ledger consistency, and return a summary with the branch tree description",
+  "attempts": [
+    {
+      "id": "att_1780217861139_2l06r",
+      "sessionId": "sess_1780217858979_pq52a",
+      "attemptNumber": 1,
+      "inputIntent": "validate a branch ledger by extracting IR first, then checking all transitions pass ledger consistency, and return a summary with the branch tree description",
+      "plannerSeed": "6d7dcf55",
+      "constraintSnapshotId": "snap_1780217858980_eeda8c7a52e0",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "extractIR",
+          "args": [
+            {
+              "name": "projectRoot",
+              "type": "string",
+              "value": "."
+            }
+          ],
+          "assignTo": "ir"
+        },
+        {
+          "kind": "call",
+          "function": "validateActionSequence",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": "ir"
+            }
+          ],
+          "assignTo": "ok"
+        },
+        {
+          "kind": "call",
+          "function": "checkLedgerConsistency",
+          "args": [
+            {
+              "name": "ledger",
+              "type": "StateTransition[]",
+              "value": "ir"
+            },
+            {
+              "name": "namespaceInitialStates",
+              "type": "Map<string, string>",
+              "value": {}
+            }
+          ],
+          "assignTo": "ledgerResult"
+        },
+        {
+          "kind": "call",
+          "function": "describeBranchTree",
+          "args": [
+            {
+              "name": "root",
+              "type": "Branch",
+              "value": "ir"
+            },
+            {
+              "name": "allBranches",
+              "type": "Map<string, Branch>",
+              "value": {}
+            },
+            {
+              "name": "indent",
+              "type": "any",
+              "value": ""
+            }
+          ],
+          "assignTo": "treeDesc"
+        },
+        {
+          "kind": "return",
+          "value": "ledgerResult"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "extractIR",
+          "namespace": "dev_pipeline",
+          "acquired": [
+            "IR_EXTRACTED"
+          ],
+          "invalidated": [
+            "IR_STALE"
+          ],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_EXTRACTED"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "validateActionSequence",
+          "namespace": "dev_pipeline",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_EXTRACTED"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_EXTRACTED"
+            ]
+          },
+          "valid": false,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [
+        {
+          "svl": 4,
+          "violatedConstraint": "protocol",
+          "actionIndex": 1,
+          "currentStates": [
+            "IR_EXTRACTED"
+          ],
+          "requiredStates": [
+            "ACTION_VALIDATED"
+          ],
+          "missingStates": [
+            "validateAction"
+          ],
+          "fixPath": [
+            "validateAction"
+          ],
+          "namespace": "dev_pipeline",
+          "description": "{\"protocol_violation\":{\"blocked_function\":\"validateActionSequence\",\"namespace\":\"dev_pipeline\",\"current_state\":[\"IR_EXTRACTED\"],\"required_pre_states\":[\"ACTION_VALIDATED\"]},\"diagnosis\":{\"missing_functions\":[\"validateAction\"],\"fix_path\":[\"validateAction\"]}}"
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780217861139,
+      "llmCallCount": 0,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780217858979,
+  "ruleHash": "9dec68bc2995e92a",
+  "snapshotId": "snap_1780217858980_eeda8c7a52e0",
+  "endedAt": 1780217861153
+}
