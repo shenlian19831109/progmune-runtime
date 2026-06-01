@@ -1,0 +1,225 @@
+{
+  "sessionId": "sess_1780346991895_9qxxj",
+  "intent": "get execution metrics and show the generation count",
+  "attempts": [
+    {
+      "id": "att_1780346993712_gsz6a",
+      "sessionId": "sess_1780346991895_9qxxj",
+      "attemptNumber": 1,
+      "inputIntent": "get execution metrics and show the generation count",
+      "plannerSeed": "de921112",
+      "constraintSnapshotId": "snap_1780346991897_ff8fd39a5e00",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getExecutionMetrics",
+          "args": [],
+          "assignTo": "metrics"
+        },
+        {
+          "kind": "call",
+          "function": "getStaticScore",
+          "args": [
+            {
+              "name": "funcName",
+              "type": "string",
+              "value": "getExecutionMetrics"
+            },
+            {
+              "name": "goal",
+              "type": "string",
+              "value": "show generation count"
+            }
+          ],
+          "assignTo": "score"
+        },
+        {
+          "kind": "return",
+          "value": "metrics"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getExecutionMetrics",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "getStaticScore",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780346993715,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780346991895,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780346993712_gsz6a",
+    "sessionId": "sess_1780346991895_9qxxj",
+    "attemptNumber": 1,
+    "inputIntent": "get execution metrics and show the generation count",
+    "plannerSeed": "de921112",
+    "constraintSnapshotId": "snap_1780346991897_ff8fd39a5e00",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getExecutionMetrics",
+        "args": [],
+        "assignTo": "metrics"
+      },
+      {
+        "kind": "call",
+        "function": "getStaticScore",
+        "args": [
+          {
+            "name": "funcName",
+            "type": "string",
+            "value": "getExecutionMetrics"
+          },
+          {
+            "name": "goal",
+            "type": "string",
+            "value": "show generation count"
+          }
+        ],
+        "assignTo": "score"
+      },
+      {
+        "kind": "return",
+        "value": "metrics"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getExecutionMetrics",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "getStaticScore",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780346993715,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780346991897_ff8fd39a5e00",
+  "endedAt": 1780346993721
+}

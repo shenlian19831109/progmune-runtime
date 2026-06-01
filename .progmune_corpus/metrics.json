@@ -1,56 +1,8 @@
 {
-  "generated": 154,
+  "generated": 160,
   "repaired": 3,
-  "lastGeneration": "src/compare-hashes.ts",
+  "lastGeneration": "src/state-total.ts",
   "history": [
-    {
-      "sessionId": "sess_1780295055187_wi0yi",
-      "timestamp": 1780295056696,
-      "filePath": "src/tokens-saved.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 400
-    },
-    {
-      "sessionId": "sess_1780295072433_6rten",
-      "timestamp": 1780295074107,
-      "filePath": "src/fragile-protocol.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 401
-    },
-    {
-      "sessionId": "sess_1780295093317_9ccza",
-      "timestamp": 1780295094795,
-      "filePath": "src/void-funcs.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 402
-    },
-    {
-      "sessionId": "sess_1780295433138_flbms",
-      "timestamp": 1780295435046,
-      "filePath": "src/session-stats.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 403
-    },
-    {
-      "sessionId": "sess_1780295455287_7qmtq",
-      "timestamp": 1780295456975,
-      "filePath": "src/svl4-total.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 404
-    },
-    {
-      "sessionId": "sess_1780295480881_4b2mc",
-      "timestamp": 1780295482879,
-      "filePath": "src/recent-gens.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 405
-    },
     {
       "sessionId": "sess_1780295506230_pzg9t",
       "timestamp": 1780295508246,
@@ -802,6 +754,54 @@
       "repaired": false,
       "repairCount": 0,
       "irFunctionCount": 393
+    },
+    {
+      "sessionId": "sess_1780346871759_o27rs",
+      "timestamp": 1780346873356,
+      "filePath": "src/total-failures.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 393
+    },
+    {
+      "sessionId": "sess_1780346895088_0sakw",
+      "timestamp": 1780346896380,
+      "filePath": "src/corpus-count.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 394
+    },
+    {
+      "sessionId": "sess_1780346921997_9kfrx",
+      "timestamp": 1780346922993,
+      "filePath": "src/antibody-hits.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 394
+    },
+    {
+      "sessionId": "sess_1780346947480_xh8bd",
+      "timestamp": 1780346950165,
+      "filePath": "src/all-valid.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 395
+    },
+    {
+      "sessionId": "sess_1780346991895_9qxxj",
+      "timestamp": 1780346993726,
+      "filePath": "src/gen-count.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 396
+    },
+    {
+      "sessionId": "sess_1780347031177_iwzm9",
+      "timestamp": 1780347032675,
+      "filePath": "src/state-total.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 396
     }
   ]
 }

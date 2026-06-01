@@ -1,0 +1,218 @@
+{
+  "sessionId": "sess_1780346947480_xh8bd",
+  "intent": "verify all ledger fingerprints and return the valid count",
+  "attempts": [
+    {
+      "id": "att_1780346948929_shcpz",
+      "sessionId": "sess_1780346947480_xh8bd",
+      "attemptNumber": 1,
+      "inputIntent": "verify all ledger fingerprints and return the valid count",
+      "plannerSeed": "f0788ed2",
+      "constraintSnapshotId": "snap_1780346947480_ff8fd39a5e00",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "validateAction",
+          "args": [
+            {
+              "name": "action",
+              "type": "any",
+              "value": ""
+            },
+            {
+              "name": "actionIndex",
+              "type": "number",
+              "value": ""
+            }
+          ],
+          "assignTo": "_"
+        },
+        {
+          "kind": "call",
+          "function": "verifyAllFingerprints",
+          "args": [
+            {
+              "name": "currentRuleHash",
+              "type": "str",
+              "value": ""
+            }
+          ],
+          "assignTo": "summary"
+        },
+        {
+          "kind": "call",
+          "function": "resetCallCount",
+          "args": [],
+          "assignTo": "_"
+        },
+        {
+          "kind": "return",
+          "value": "summary"
+        }
+      ],
+      "transitions": [],
+      "violations": [
+        {
+          "svl": 1,
+          "violatedConstraint": "schema",
+          "actionIndex": 0,
+          "description": "action[2]: duplicate assignTo \"_\" (previously assigned at another action)"
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780346948929,
+      "llmCallCount": 0,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    },
+    {
+      "id": "att_1780346950146_jkrp1",
+      "sessionId": "sess_1780346947480_xh8bd",
+      "attemptNumber": 2,
+      "inputIntent": "verify all ledger fingerprints and return the valid count",
+      "plannerSeed": "833d4ae7",
+      "constraintSnapshotId": "snap_1780346947480_ff8fd39a5e00",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "verifyAllFingerprints",
+          "args": [
+            {
+              "name": "currentRuleHash",
+              "type": "string",
+              "value": null
+            }
+          ],
+          "assignTo": "_"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "verifyAllFingerprints",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780346950146,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "antibodyHit": {
+        "level": "ACL-3",
+        "signature": "SVL-4:validateAction",
+        "fixPath": [
+          "validateAction"
+        ],
+        "similarityScore": 0.2,
+        "action": "injected_hint",
+        "llmCallsSaved": 0,
+        "estimatedTokensSaved": 0
+      },
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780346947480,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780346950146_jkrp1",
+    "sessionId": "sess_1780346947480_xh8bd",
+    "attemptNumber": 2,
+    "inputIntent": "verify all ledger fingerprints and return the valid count",
+    "plannerSeed": "833d4ae7",
+    "constraintSnapshotId": "snap_1780346947480_ff8fd39a5e00",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "verifyAllFingerprints",
+        "args": [
+          {
+            "name": "currentRuleHash",
+            "type": "string",
+            "value": null
+          }
+        ],
+        "assignTo": "_"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "verifyAllFingerprints",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780346950146,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "antibodyHit": {
+      "level": "ACL-3",
+      "signature": "SVL-4:validateAction",
+      "fixPath": [
+        "validateAction"
+      ],
+      "similarityScore": 0.2,
+      "action": "injected_hint",
+      "llmCallsSaved": 0,
+      "estimatedTokensSaved": 0
+    },
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780346947480_ff8fd39a5e00",
+  "endedAt": 1780346950147
+}
