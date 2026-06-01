@@ -1,4 +1,6 @@
-/** Load benchmark tasks from bench/tasks.json */
+/** Load benchmark tasks from bench/tasks.json
+ * @protocol pre_states=[] post_states=["BENCHMARKS_LOADED"]
+ */
 import * as fs from "fs";
 import * as path from "path";
 

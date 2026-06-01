@@ -1,24 +1,8 @@
 {
-  "generated": 222,
-  "repaired": 3,
-  "lastGeneration": "src/benchmark-count.ts",
+  "generated": 224,
+  "repaired": 4,
+  "lastGeneration": "src/total-benchmarks.ts",
   "history": [
-    {
-      "sessionId": "sess_1780343627181_k5xw4",
-      "timestamp": 1780343628657,
-      "filePath": "src/branch-tree-count.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 389
-    },
-    {
-      "sessionId": "sess_1780343649325_e8j9k",
-      "timestamp": 1780343650497,
-      "filePath": "src/token-savings.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 390
-    },
     {
       "sessionId": "sess_1780343673382_7ucqe",
       "timestamp": 1780343674916,
@@ -802,6 +786,22 @@
       "repaired": false,
       "repairCount": 0,
       "irFunctionCount": 397
+    },
+    {
+      "sessionId": "sess_1780350415752_0mzv7",
+      "timestamp": 1780350417640,
+      "filePath": "src/benchmark-pass-rate.ts",
+      "repaired": true,
+      "repairCount": 1,
+      "irFunctionCount": 398
+    },
+    {
+      "sessionId": "sess_1780350688789_3p8vn",
+      "timestamp": 1780350690693,
+      "filePath": "src/total-benchmarks.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 399
     }
   ]
 }

@@ -1,0 +1,238 @@
+{
+  "sessionId": "sess_1780350415752_0mzv7",
+  "intent": "calculate the percentage of benchmark tasks that passed compilation",
+  "attempts": [
+    {
+      "id": "att_1780350417625_msdv8",
+      "sessionId": "sess_1780350415752_0mzv7",
+      "attemptNumber": 1,
+      "inputIntent": "calculate the percentage of benchmark tasks that passed compilation",
+      "plannerSeed": "dcd48d75",
+      "constraintSnapshotId": "snap_1780350415753_ff8fd39a5e00",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "extractIR",
+          "args": [
+            {
+              "name": "projectRoot",
+              "type": "string",
+              "value": "."
+            }
+          ],
+          "assignTo": "ir"
+        },
+        {
+          "kind": "call",
+          "function": "validateActionSequence",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": "ir"
+            }
+          ],
+          "assignTo": "ok"
+        },
+        {
+          "kind": "return",
+          "value": "ok"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "extractIR",
+          "namespace": "dev_pipeline",
+          "acquired": [
+            "IR_EXTRACTED"
+          ],
+          "invalidated": [
+            "IR_STALE"
+          ],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_EXTRACTED"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "validateActionSequence",
+          "namespace": "dev_pipeline",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_EXTRACTED"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_EXTRACTED"
+            ]
+          },
+          "valid": false,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [
+        {
+          "svl": 4,
+          "violatedConstraint": "protocol",
+          "actionIndex": 1,
+          "currentStates": [
+            "IR_EXTRACTED"
+          ],
+          "requiredStates": [
+            "ACTION_VALIDATED"
+          ],
+          "missingStates": [
+            "validateAction"
+          ],
+          "fixPath": [
+            "validateAction"
+          ],
+          "namespace": "dev_pipeline",
+          "description": "{\"protocol_violation\":{\"blocked_function\":\"validateActionSequence\",\"namespace\":\"dev_pipeline\",\"current_state\":[\"IR_EXTRACTED\"],\"required_pre_states\":[\"ACTION_VALIDATED\"]},\"diagnosis\":{\"missing_functions\":[\"validateAction\"],\"fix_path\":[\"validateAction\"]}}"
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780350417625,
+      "llmCallCount": 0,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780350415752,
+  "ruleHash": "9dec68bc2995e92a",
+  "branchTree": [
+    {
+      "id": "br_1780350417631_40wr2",
+      "rootId": "br_1780350417631_40wr2",
+      "transitions": [
+        {
+          "kind": "call",
+          "function": "extractIR",
+          "args": [
+            {
+              "name": "projectRoot",
+              "type": "string",
+              "value": "."
+            }
+          ],
+          "assignTo": "ir"
+        },
+        {
+          "kind": "call",
+          "function": "validateActionSequence",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": "ir"
+            }
+          ],
+          "assignTo": "ok"
+        },
+        {
+          "kind": "return",
+          "value": "ok"
+        }
+      ],
+      "reason": "root",
+      "createdAt": 1780350417631,
+      "outcome": "violation"
+    },
+    {
+      "id": "br_1780350417631_d6gux",
+      "parentId": "br_1780350417631_40wr2",
+      "rootId": "br_1780350417631_40wr2",
+      "transitions": [
+        {
+          "kind": "call",
+          "function": "extractIR",
+          "args": [
+            {
+              "name": "projectRoot",
+              "type": "string",
+              "value": "."
+            }
+          ],
+          "assignTo": "ir"
+        },
+        {
+          "kind": "call",
+          "function": "validateAction",
+          "args": [
+            {
+              "name": "action",
+              "type": "Action",
+              "value": ""
+            },
+            {
+              "name": "actionIndex",
+              "type": "number",
+              "value": ""
+            }
+          ],
+          "assignTo": "validateAction_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateActionSequence",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": "ir"
+            }
+          ],
+          "assignTo": "ok"
+        },
+        {
+          "kind": "return",
+          "value": "ok"
+        }
+      ],
+      "reason": "repair_attempt",
+      "createdAt": 1780350417631,
+      "outcome": "success"
+    }
+  ],
+  "rootBranchId": "br_1780350417631_40wr2",
+  "snapshotId": "snap_1780350415753_ff8fd39a5e00",
+  "endedAt": 1780350417633
+}
