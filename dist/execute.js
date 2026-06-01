@@ -50,6 +50,7 @@ const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const planner_1 = require("./planner");
 const extract_ir_1 = require("./extract-ir");
+const failure_collector_1 = require("./failure-collector");
 const emitter_1 = require("./emitter");
 const METRICS_FILE = ".progmune_corpus/metrics.json";
 function loadMetrics() {
@@ -115,13 +116,22 @@ async function execute(intent, projectPath, filePath) {
         planResult = await (0, planner_1.plan)(intent);
     }
     catch (e) {
+        (0, failure_collector_1.recordFailure)({
+            intent,
+            stage: "plan",
+            plan: [],
+            compileErrors: [e.message],
+            rootCause: (0, failure_collector_1.classifyPlanError)(e.message),
+            sessionId: undefined,
+        });
         return { success: false, code: "", sessionId: "", hash: "", ruleHash: "", irFunctionCount: ir.length, protocolRuleCount, violations: 0, repairApplied: false, repairCount: 0, repairBranchIds: [], branchWinner: undefined, error: `Planning failed: ${e.message}` };
     }
-    if (!planResult.actions || planResult.actions.length === 0) {
+    const actions = planResult.actions || [];
+    if (actions.length === 0) {
         return { success: false, code: "", sessionId: planResult.sessionId, hash: "", ruleHash: planResult.ruleHash || "", irFunctionCount: ir.length, protocolRuleCount, violations: 0, repairApplied: false, repairCount: 0, repairBranchIds: [], branchWinner: undefined, error: "Planner returned empty action sequence" };
     }
     // 4. Emit code with generation marker
-    const code = (0, emitter_1.emitCode)(planResult.actions, {
+    const code = (0, emitter_1.emitCode)(actions, {
         sessionId: planResult.sessionId,
         ruleHash: planResult.ruleHash,
         irFunctionCount: ir.length,

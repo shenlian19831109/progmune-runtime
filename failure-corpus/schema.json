@@ -1,0 +1,14 @@
+{
+  "rootCauses": {
+    "F01": "unexported_function — function in IR but not exported from module",
+    "F02": "wrong_import_path — import path doesn't resolve",
+    "F03": "type_name_error — type import has wrong name or module",
+    "F04": "wrong_arg_count — parameter count mismatch",
+    "F05": "wrong_arg_type — parameter type doesn't match signature",
+    "F06": "undefined_variable — variable used but never declared",
+    "F07": "planning_failure — LLM output couldn't be parsed into actions",
+    "F08": "return_type_error — wrong return type annotation",
+    "F09": "protocol_violation — SSG state machine blocked the call",
+    "F10": "other"
+  }
+}

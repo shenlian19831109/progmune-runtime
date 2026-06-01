@@ -12,6 +12,7 @@ import * as path from "path";
 import { plan } from "./planner";
 import type { PlanResult } from "./planner";
 import { extractIR } from "./extract-ir";
+import { recordFailure, classifyError, classifyPlanError } from "./failure-collector";
 import { emitCode } from "./emitter";
 export interface ExecuteResult {
   success: boolean;
@@ -120,17 +121,26 @@ export async function execute(
   try {
     planResult = await plan(intent);
   } catch (e: any) {
+    recordFailure({
+      intent,
+      stage: "plan",
+      plan: [],
+      compileErrors: [e.message],
+      rootCause: classifyPlanError(e.message),
+      sessionId: undefined,
+    });
     return { success: false, code: "", sessionId: "", hash: "", ruleHash: "", irFunctionCount: ir.length, protocolRuleCount, violations: 0, repairApplied: false, repairCount: 0, repairBranchIds: [], branchWinner: undefined, error: `Planning failed: ${e.message}` };
   }
 
-  if (!planResult.actions || planResult.actions.length === 0) {
-    return { success: false, code: "", sessionId: planResult.sessionId, hash: "", ruleHash: planResult.ruleHash || "", irFunctionCount: ir.length, protocolRuleCount, violations: 0, repairApplied: false, repairCount: 0, repairBranchIds: [], branchWinner: undefined, error: "Planner returned empty action sequence" };
+  const actions = planResult!.actions || [];
+  if (actions.length === 0) {
+    return { success: false, code: "", sessionId: planResult!.sessionId, hash: "", ruleHash: planResult!.ruleHash || "", irFunctionCount: ir.length, protocolRuleCount, violations: 0, repairApplied: false, repairCount: 0, repairBranchIds: [], branchWinner: undefined, error: "Planner returned empty action sequence" };
   }
 
   // 4. Emit code with generation marker
-  const code = emitCode(planResult.actions, {
-    sessionId: planResult.sessionId,
-    ruleHash: planResult.ruleHash,
+  const code = emitCode(actions, {
+    sessionId: planResult!.sessionId,
+    ruleHash: planResult!.ruleHash,
     irFunctionCount: ir.length,
     protocolRuleCount,
   });
@@ -148,16 +158,16 @@ export async function execute(
   // 6. Compute hash (from code content)
   const crypto = require("crypto");
   const hash = crypto.createHash("sha256").update(code).digest("hex").slice(0, 16);
-  const ruleHash = planResult.ruleHash || "";
+  const ruleHash = planResult!.ruleHash || "";
 
   // Phase 7: Record execution metrics
   if (filePath) {
     recordGeneration({
-      sessionId: planResult.sessionId,
+      sessionId: planResult!.sessionId,
       timestamp: Date.now(),
       filePath: filePath,
-      repaired: planResult.repairApplied,
-      repairCount: planResult.repairCount,
+      repaired: planResult!.repairApplied,
+      repairCount: planResult!.repairCount,
       irFunctionCount: ir.length,
     });
   }
@@ -171,21 +181,21 @@ export async function execute(
   return {
     success: true,
     code,
-    sessionId: planResult.sessionId,
+    sessionId: planResult!.sessionId,
     filePath: filePath || undefined,
     hash,
     ruleHash,
     irFunctionCount: ir.length,
     protocolRuleCount,
     violations: 0,
-    repairApplied: planResult.repairApplied,
-    repairCount: planResult.repairCount,
-    repairBranchIds: planResult.repairBranchIds,
-    branchWinner: planResult.repairApplied && planResult.repairBranchIds.length >= 2
+    repairApplied: planResult!.repairApplied,
+    repairCount: planResult!.repairCount,
+    repairBranchIds: planResult!.repairBranchIds,
+    branchWinner: planResult!.repairApplied && planResult!.repairBranchIds.length >= 2
       ? (() => {
           try {
             // Load branches from the session file to evaluate
-            const sessionFile = `.progmune_corpus/sessions/${planResult.sessionId}.json`;
+            const sessionFile = `.progmune_corpus/sessions/${planResult!.sessionId}.json`;
             if (fs.existsSync(sessionFile)) {
               const session = JSON.parse(fs.readFileSync(sessionFile, "utf-8"));
               if (session.branchTree && session.branchTree.length > 0) {
