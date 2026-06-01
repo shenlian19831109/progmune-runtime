@@ -1751,6 +1751,16 @@
     ]
   },
   {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/failure-report.ts",
+    "calls": [
+      "getFailureGenome"
+    ]
+  },
+  {
     "name": "loadFeedback",
     "params": [],
     "returnType": "RunRecord[]",
