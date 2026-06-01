@@ -1,0 +1,227 @@
+{
+  "sessionId": "sess_1780351549023_j3jz4",
+  "intent": "load protocol rules and count total rules defined",
+  "attempts": [
+    {
+      "id": "att_1780351550515_mi7sf",
+      "sessionId": "sess_1780351549023_j3jz4",
+      "attemptNumber": 1,
+      "inputIntent": "load protocol rules and count total rules defined",
+      "plannerSeed": "2751d54e",
+      "constraintSnapshotId": "snap_1780351549029_f7c8ff5db3d3",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "loadProtocols",
+          "args": [
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": ""
+            }
+          ],
+          "assignTo": "protocols"
+        },
+        {
+          "kind": "call",
+          "function": "hashRules",
+          "args": [
+            {
+              "name": "rules",
+              "type": "Map<string, StateAnnotation>",
+              "value": "protocols"
+            }
+          ],
+          "assignTo": "hash"
+        },
+        {
+          "kind": "return",
+          "value": "hash"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "loadProtocols",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "hashRules",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780351550515,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780351549023,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780351550515_mi7sf",
+    "sessionId": "sess_1780351549023_j3jz4",
+    "attemptNumber": 1,
+    "inputIntent": "load protocol rules and count total rules defined",
+    "plannerSeed": "2751d54e",
+    "constraintSnapshotId": "snap_1780351549029_f7c8ff5db3d3",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "loadProtocols",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": ""
+          }
+        ],
+        "assignTo": "protocols"
+      },
+      {
+        "kind": "call",
+        "function": "hashRules",
+        "args": [
+          {
+            "name": "rules",
+            "type": "Map<string, StateAnnotation>",
+            "value": "protocols"
+          }
+        ],
+        "assignTo": "hash"
+      },
+      {
+        "kind": "return",
+        "value": "hash"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "loadProtocols",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "hashRules",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780351550515,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780351549029_f7c8ff5db3d3",
+  "endedAt": 1780351550522
+}

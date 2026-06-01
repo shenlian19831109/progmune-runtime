@@ -1,32 +1,8 @@
 {
-  "generated": 226,
+  "generated": 229,
   "repaired": 4,
-  "lastGeneration": "src/benchmark-full.ts",
+  "lastGeneration": "src/compare-hashes.ts",
   "history": [
-    {
-      "sessionId": "sess_1780343799715_z6pcw",
-      "timestamp": 1780343801677,
-      "filePath": "src/unresolved-count.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 393
-    },
-    {
-      "sessionId": "sess_1780343822181_r90g9",
-      "timestamp": 1780343823490,
-      "filePath": "src/svl-distribution.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 394
-    },
-    {
-      "sessionId": "sess_1780343852770_0srir",
-      "timestamp": 1780343854250,
-      "filePath": "src/fast-path-hits.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 395
-    },
     {
       "sessionId": "sess_1780343878763_2tpv3",
       "timestamp": 1780343880795,
@@ -802,6 +778,30 @@
       "repaired": false,
       "repairCount": 0,
       "irFunctionCount": 404
+    },
+    {
+      "sessionId": "sess_1780351549023_j3jz4",
+      "timestamp": 1780351550529,
+      "filePath": "src/rule-count.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 405
+    },
+    {
+      "sessionId": "sess_1780351571548_g5k95",
+      "timestamp": 1780351572791,
+      "filePath": "src/check-violations.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 405
+    },
+    {
+      "sessionId": "sess_1780351608724_tnij0",
+      "timestamp": 1780351611673,
+      "filePath": "src/compare-hashes.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 405
     }
   ]
 }

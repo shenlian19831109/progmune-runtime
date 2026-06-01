@@ -187,28 +187,6 @@
       "calls": []
     },
     {
-      "name": "main",
-      "params": [],
-      "returnType": "any",
-      "returnTypeDetail": "",
-      "file": "src/all-valid.ts",
-      "calls": [
-        "verifyAllFingerprints"
-      ],
-      "exported": true
-    },
-    {
-      "name": "main",
-      "params": [],
-      "returnType": "any",
-      "returnTypeDetail": "",
-      "file": "src/antibody-hits.ts",
-      "calls": [
-        "getAntibodyStats"
-      ],
-      "exported": true
-    },
-    {
       "name": "auditDirectory",
       "params": [
         {
@@ -6791,29 +6769,6 @@
       "file": "src/ssg-validator.ts",
       "exported": false,
       "calls": []
-    },
-    {
-      "name": "main",
-      "params": [],
-      "returnType": "any",
-      "returnTypeDetail": "",
-      "file": "src/total-benchmarks.ts",
-      "calls": [
-        "loadBenchmarks",
-        "benchmarkCount"
-      ],
-      "exported": true
-    },
-    {
-      "name": "main",
-      "params": [],
-      "returnType": "any",
-      "returnTypeDetail": "",
-      "file": "src/total-failures.ts",
-      "calls": [
-        "getFailureGenome"
-      ],
-      "exported": true
     },
     {
       "name": "jaccardSimilarity",
