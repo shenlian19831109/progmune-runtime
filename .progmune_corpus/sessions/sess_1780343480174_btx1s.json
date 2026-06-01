@@ -1,0 +1,129 @@
+{
+  "sessionId": "sess_1780343480174_btx1s",
+  "intent": "get the semantic heatmap data",
+  "attempts": [
+    {
+      "id": "att_1780343481665_857bq",
+      "sessionId": "sess_1780343480174_btx1s",
+      "attemptNumber": 1,
+      "inputIntent": "get the semantic heatmap data",
+      "plannerSeed": "185b69f7",
+      "constraintSnapshotId": "snap_1780343480174_da5a8993dd84",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getSemanticHeatmap",
+          "args": [],
+          "assignTo": "heatmap"
+        },
+        {
+          "kind": "return",
+          "value": "heatmap"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getSemanticHeatmap",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780343481665,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780343480174,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780343481665_857bq",
+    "sessionId": "sess_1780343480174_btx1s",
+    "attemptNumber": 1,
+    "inputIntent": "get the semantic heatmap data",
+    "plannerSeed": "185b69f7",
+    "constraintSnapshotId": "snap_1780343480174_da5a8993dd84",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getSemanticHeatmap",
+        "args": [],
+        "assignTo": "heatmap"
+      },
+      {
+        "kind": "return",
+        "value": "heatmap"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getSemanticHeatmap",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780343481665,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780343480174_da5a8993dd84",
+  "endedAt": 1780343481671
+}
