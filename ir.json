@@ -233,6 +233,16 @@
     ]
   },
   {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/avg-retries.ts",
+    "calls": [
+      "getFailureGenome"
+    ]
+  },
+  {
     "name": "generateBranchId",
     "params": [],
     "returnType": "string",
@@ -1931,6 +1941,29 @@
     "params": [],
     "returnType": "any",
     "returnTypeDetail": "",
+    "file": "src/find-violations.ts",
+    "calls": [
+      "getAllSessions",
+      "loadProtocols",
+      "findViolations"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/fragile-protocol.ts",
+    "calls": [
+      "getFailureGenome",
+      "getTopFailurePatterns"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
     "file": "src/gen-history.ts",
     "calls": [
       "getExecutionMetrics",
@@ -3027,6 +3060,17 @@
     "params": [],
     "returnType": "any",
     "returnTypeDetail": "",
+    "file": "src/most-attempts.ts",
+    "calls": [
+      "getAllSessions",
+      "formatSessionSummary"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
     "file": "src/namespace-stats.ts",
     "calls": [
       "loadProtocols",
@@ -3823,6 +3867,16 @@
       "from",
       "push",
       "convertLines"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/repair-pct.ts",
+    "calls": [
+      "getExecutionMetrics"
     ]
   },
   {
@@ -6282,6 +6336,17 @@
     "params": [],
     "returnType": "any",
     "returnTypeDetail": "",
+    "file": "src/tokens-saved.ts",
+    "calls": [
+      "getAntibodyStats",
+      "estimateTokens"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
     "file": "src/top-violation.ts",
     "calls": [
       "getFailureGenome",
@@ -6451,6 +6516,18 @@
       "getAllSessions",
       "getFingerprint",
       "verifyFingerprint"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/void-funcs.ts",
+    "calls": [
+      "extractIR",
+      "validateAction",
+      "getReturnType"
     ]
   },
   {
