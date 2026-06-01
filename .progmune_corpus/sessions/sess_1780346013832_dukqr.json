@@ -1,0 +1,227 @@
+{
+  "sessionId": "sess_1780346013832_dukqr",
+  "intent": "check if a session ID has any recorded violations by loading it from the corpus",
+  "attempts": [
+    {
+      "id": "att_1780346015261_4t1x6",
+      "sessionId": "sess_1780346013832_dukqr",
+      "attemptNumber": 1,
+      "inputIntent": "check if a session ID has any recorded violations by loading it from the corpus",
+      "plannerSeed": "df8e82f8",
+      "constraintSnapshotId": "snap_1780346013833_ff8fd39a5e00",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "findSnapshotBySession",
+          "args": [
+            {
+              "name": "sessionId",
+              "type": "string",
+              "value": "sessionId"
+            }
+          ],
+          "assignTo": "snapshot"
+        },
+        {
+          "kind": "call",
+          "function": "findViolations",
+          "args": [
+            {
+              "name": "ledger",
+              "type": "StateTransition[]",
+              "value": "snapshot.ledger"
+            }
+          ],
+          "assignTo": "violations"
+        },
+        {
+          "kind": "return",
+          "value": "violations"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "findSnapshotBySession",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "findViolations",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780346015261,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780346013832,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780346015261_4t1x6",
+    "sessionId": "sess_1780346013832_dukqr",
+    "attemptNumber": 1,
+    "inputIntent": "check if a session ID has any recorded violations by loading it from the corpus",
+    "plannerSeed": "df8e82f8",
+    "constraintSnapshotId": "snap_1780346013833_ff8fd39a5e00",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "findSnapshotBySession",
+        "args": [
+          {
+            "name": "sessionId",
+            "type": "string",
+            "value": "sessionId"
+          }
+        ],
+        "assignTo": "snapshot"
+      },
+      {
+        "kind": "call",
+        "function": "findViolations",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "snapshot.ledger"
+          }
+        ],
+        "assignTo": "violations"
+      },
+      {
+        "kind": "return",
+        "value": "violations"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "findSnapshotBySession",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "findViolations",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780346015261,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780346013833_ff8fd39a5e00",
+  "endedAt": 1780346015263
+}

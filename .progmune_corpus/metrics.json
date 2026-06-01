@@ -1,56 +1,8 @@
 {
-  "generated": 145,
+  "generated": 151,
   "repaired": 3,
-  "lastGeneration": "src/heatmap.ts",
+  "lastGeneration": "src/compare-hashes.ts",
   "history": [
-    {
-      "sessionId": "sess_1780294700533_6mjx3",
-      "timestamp": 1780294702150,
-      "filePath": "src/external-funcs.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 391
-    },
-    {
-      "sessionId": "sess_1780294718388_awbi7",
-      "timestamp": 1780294721334,
-      "filePath": "src/gen-history.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 392
-    },
-    {
-      "sessionId": "sess_1780294739110_bpmef",
-      "timestamp": 1780294740602,
-      "filePath": "src/check-fingerprints.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 393
-    },
-    {
-      "sessionId": "sess_1780294758264_q5da1",
-      "timestamp": 1780294759558,
-      "filePath": "src/precondition-funcs.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 394
-    },
-    {
-      "sessionId": "sess_1780294777098_qub4s",
-      "timestamp": 1780294778393,
-      "filePath": "src/top-violation.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 395
-    },
-    {
-      "sessionId": "sess_1780294920456_07ny4",
-      "timestamp": 1780294921707,
-      "filePath": "src/avg-retries.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 396
-    },
     {
       "sessionId": "sess_1780294937806_g72xd",
       "timestamp": 1780294939488,
@@ -802,6 +754,54 @@
       "repaired": false,
       "repairCount": 0,
       "irFunctionCount": 389
+    },
+    {
+      "sessionId": "sess_1780345916092_sn5tt",
+      "timestamp": 1780345917614,
+      "filePath": "src/failures.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 390
+    },
+    {
+      "sessionId": "sess_1780345941461_pofm6",
+      "timestamp": 1780345943161,
+      "filePath": "src/learned.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 391
+    },
+    {
+      "sessionId": "sess_1780345966249_zvzsq",
+      "timestamp": 1780345967620,
+      "filePath": "src/rule-count.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 392
+    },
+    {
+      "sessionId": "sess_1780345989368_kvfa0",
+      "timestamp": 1780345990800,
+      "filePath": "src/ir-total.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 392
+    },
+    {
+      "sessionId": "sess_1780346013832_dukqr",
+      "timestamp": 1780346015266,
+      "filePath": "src/check-violations.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 392
+    },
+    {
+      "sessionId": "sess_1780346039661_0cqcp",
+      "timestamp": 1780346041674,
+      "filePath": "src/compare-hashes.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 392
     }
   ]
 }
