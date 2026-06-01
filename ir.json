@@ -118,6 +118,28 @@
     "calls": []
   },
   {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/antibody-levels.ts",
+    "calls": [
+      "getAntibodyStats",
+      "formatAntibodyStats"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/antibody-sessions.ts",
+    "calls": [
+      "getAllSessions",
+      "getAntibodyStats"
+    ]
+  },
+  {
     "name": "auditDirectory",
     "params": [
       {
@@ -718,6 +740,17 @@
     "returnTypeDetail": "",
     "file": "src/check.ts",
     "calls": []
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/constraint-count.ts",
+    "calls": [
+      "getFailureGenome",
+      "determineConstraintType"
+    ]
   },
   {
     "name": "replaySession",
@@ -1950,6 +1983,16 @@
     ]
   },
   {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/immune-heatmap.ts",
+    "calls": [
+      "getSemanticHeatmap"
+    ]
+  },
+  {
     "name": "getInstanceId",
     "params": [],
     "returnType": "string",
@@ -2053,6 +2096,17 @@
     "file": "src/immune-reporter.ts",
     "calls": [
       "extractFingerprints"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/ir-count.ts",
+    "calls": [
+      "extractIR",
+      "validateAction"
     ]
   },
   {
@@ -5537,6 +5591,16 @@
     ]
   },
   {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/session-list.ts",
+    "calls": [
+      "getAllSessions"
+    ]
+  },
+  {
     "name": "toSnapshot",
     "params": [
       {
@@ -6168,6 +6232,16 @@
     ]
   },
   {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/svl4-count.ts",
+    "calls": [
+      "getFailureGenome"
+    ]
+  },
+  {
     "name": "jaccardSimilarity",
     "params": [
       {
@@ -6318,6 +6392,16 @@
       ],
       "namespace": "dev_pipeline"
     }
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/verify-all.ts",
+    "calls": [
+      "verifyAllFingerprints"
+    ]
   },
   {
     "name": "fn",
