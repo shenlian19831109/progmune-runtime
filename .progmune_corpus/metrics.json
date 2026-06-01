@@ -1,7 +1,7 @@
 {
-  "generated": 53,
+  "generated": 57,
   "repaired": 2,
-  "lastGeneration": "src/repair-pct.ts",
+  "lastGeneration": "src/void-funcs.ts",
   "history": [
     {
       "sessionId": "sess_1780238693023_j3nxt",
@@ -426,6 +426,38 @@
       "repaired": false,
       "repairCount": 0,
       "irFunctionCount": 398
+    },
+    {
+      "sessionId": "sess_1780295036730_lj1bt",
+      "timestamp": 1780295038537,
+      "filePath": "src/find-violations.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 399
+    },
+    {
+      "sessionId": "sess_1780295055187_wi0yi",
+      "timestamp": 1780295056696,
+      "filePath": "src/tokens-saved.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 400
+    },
+    {
+      "sessionId": "sess_1780295072433_6rten",
+      "timestamp": 1780295074107,
+      "filePath": "src/fragile-protocol.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 401
+    },
+    {
+      "sessionId": "sess_1780295093317_9ccza",
+      "timestamp": 1780295094795,
+      "filePath": "src/void-funcs.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 402
     }
   ]
 }
