@@ -1,24 +1,8 @@
 {
-  "generated": 111,
-  "repaired": 2,
-  "lastGeneration": "src/smallest-namespace.ts",
+  "generated": 113,
+  "repaired": 3,
+  "lastGeneration": "src/ci-check.ts",
   "history": [
-    {
-      "sessionId": "sess_1780289432252_0lz6c",
-      "timestamp": 1780289433960,
-      "filePath": "src/is-positive.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 381
-    },
-    {
-      "sessionId": "sess_1780289484542_b2c0n",
-      "timestamp": 1780289486223,
-      "filePath": "src/pipeline-stats.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 381
-    },
     {
       "sessionId": "sess_1780289492362_fhaid",
       "timestamp": 1780289493637,
@@ -802,6 +786,22 @@
       "repaired": false,
       "repairCount": 0,
       "irFunctionCount": 461
+    },
+    {
+      "sessionId": "sess_1780326160345_lc49a",
+      "timestamp": 1780326162849,
+      "filePath": "src/hook-status.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 382
+    },
+    {
+      "sessionId": "sess_1780326214318_j6bvz",
+      "timestamp": 1780326216392,
+      "filePath": "src/ci-check.ts",
+      "repaired": true,
+      "repairCount": 1,
+      "irFunctionCount": 382
     }
   ]
 }

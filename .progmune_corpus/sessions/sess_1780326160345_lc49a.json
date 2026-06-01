@@ -1,0 +1,141 @@
+{
+  "sessionId": "sess_1780326160345_lc49a",
+  "intent": "check if the project pre-commit hook is installed and print its status",
+  "attempts": [
+    {
+      "id": "att_1780326162829_3d8xv",
+      "sessionId": "sess_1780326160345_lc49a",
+      "attemptNumber": 1,
+      "inputIntent": "check if the project pre-commit hook is installed and print its status",
+      "plannerSeed": "8b98b13e",
+      "constraintSnapshotId": "snap_1780326160346_80052da888d7",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "runAndCheck",
+          "args": [
+            {
+              "name": "code",
+              "type": "string",
+              "value": "ls -la .git/hooks/pre-commit 2>/dev/null && echo 'INSTALLED' || echo 'NOT_INSTALLED'"
+            }
+          ],
+          "assignTo": "result"
+        },
+        {
+          "kind": "return",
+          "value": "result"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "runAndCheck",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780326162829,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780326160345,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780326162829_3d8xv",
+    "sessionId": "sess_1780326160345_lc49a",
+    "attemptNumber": 1,
+    "inputIntent": "check if the project pre-commit hook is installed and print its status",
+    "plannerSeed": "8b98b13e",
+    "constraintSnapshotId": "snap_1780326160346_80052da888d7",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "runAndCheck",
+        "args": [
+          {
+            "name": "code",
+            "type": "string",
+            "value": "ls -la .git/hooks/pre-commit 2>/dev/null && echo 'INSTALLED' || echo 'NOT_INSTALLED'"
+          }
+        ],
+        "assignTo": "result"
+      },
+      {
+        "kind": "return",
+        "value": "result"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "runAndCheck",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780326162829,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780326160346_80052da888d7",
+  "endedAt": 1780326162842
+}
