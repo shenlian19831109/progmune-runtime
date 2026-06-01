@@ -1,48 +1,8 @@
 {
-  "generated": 121,
+  "generated": 126,
   "repaired": 3,
-  "lastGeneration": "src/heatmap-data.ts",
+  "lastGeneration": "src/gen-history-log.ts",
   "history": [
-    {
-      "sessionId": "sess_1780289929743_rkuz2",
-      "timestamp": 1780289930979,
-      "filePath": "src/immune-heatmap.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 386
-    },
-    {
-      "sessionId": "sess_1780289947169_7eu0a",
-      "timestamp": 1780289948905,
-      "filePath": "src/verify-all.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 387
-    },
-    {
-      "sessionId": "sess_1780290010213_hkcg9",
-      "timestamp": 1780290012227,
-      "filePath": "src/resolved-filter.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 388
-    },
-    {
-      "sessionId": "sess_1780290019973_616zx",
-      "timestamp": 1780290021190,
-      "filePath": "src/constraint-count.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 388
-    },
-    {
-      "sessionId": "sess_1780290037551_31a8b",
-      "timestamp": 1780290039003,
-      "filePath": "src/antibody-levels.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 389
-    },
     {
       "sessionId": "sess_1780290055265_xb6nl",
       "timestamp": 1780290056517,
@@ -802,6 +762,46 @@
       "repaired": false,
       "repairCount": 0,
       "irFunctionCount": 387
+    },
+    {
+      "sessionId": "sess_1780343606682_645o6",
+      "timestamp": 1780343608292,
+      "filePath": "src/constraint-types.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 388
+    },
+    {
+      "sessionId": "sess_1780343627181_k5xw4",
+      "timestamp": 1780343628657,
+      "filePath": "src/branch-tree-count.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 389
+    },
+    {
+      "sessionId": "sess_1780343649325_e8j9k",
+      "timestamp": 1780343650497,
+      "filePath": "src/token-savings.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 390
+    },
+    {
+      "sessionId": "sess_1780343673382_7ucqe",
+      "timestamp": 1780343674916,
+      "filePath": "src/fingerprint-list.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 391
+    },
+    {
+      "sessionId": "sess_1780343705506_4rpek",
+      "timestamp": 1780343707333,
+      "filePath": "src/gen-history-log.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 392
     }
   ]
 }
