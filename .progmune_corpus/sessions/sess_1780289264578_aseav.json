@@ -1,0 +1,255 @@
+{
+  "sessionId": "sess_1780289264578_aseav",
+  "intent": "check if a value exists in an array",
+  "attempts": [
+    {
+      "id": "att_1780289266413_z3cp3",
+      "sessionId": "sess_1780289264578_aseav",
+      "attemptNumber": 1,
+      "inputIntent": "check if a value exists in an array",
+      "plannerSeed": "558f741f",
+      "constraintSnapshotId": "snap_1780289264579_b1eb582d377d",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "stringify",
+          "args": [
+            {
+              "name": "value",
+              "type": "any",
+              "value": [
+                "a",
+                "b",
+                "c"
+              ]
+            },
+            {
+              "name": "replacer",
+              "type": "any",
+              "value": null
+            }
+          ],
+          "assignTo": "arrStr"
+        },
+        {
+          "kind": "call",
+          "function": "stringify",
+          "args": [
+            {
+              "name": "value",
+              "type": "any",
+              "value": "b"
+            },
+            {
+              "name": "replacer",
+              "type": "any",
+              "value": null
+            }
+          ],
+          "assignTo": "valStr"
+        },
+        {
+          "kind": "return",
+          "value": "arrStr"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "stringify",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "stringify",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780289266413,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780289264578,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780289266413_z3cp3",
+    "sessionId": "sess_1780289264578_aseav",
+    "attemptNumber": 1,
+    "inputIntent": "check if a value exists in an array",
+    "plannerSeed": "558f741f",
+    "constraintSnapshotId": "snap_1780289264579_b1eb582d377d",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "stringify",
+        "args": [
+          {
+            "name": "value",
+            "type": "any",
+            "value": [
+              "a",
+              "b",
+              "c"
+            ]
+          },
+          {
+            "name": "replacer",
+            "type": "any",
+            "value": null
+          }
+        ],
+        "assignTo": "arrStr"
+      },
+      {
+        "kind": "call",
+        "function": "stringify",
+        "args": [
+          {
+            "name": "value",
+            "type": "any",
+            "value": "b"
+          },
+          {
+            "name": "replacer",
+            "type": "any",
+            "value": null
+          }
+        ],
+        "assignTo": "valStr"
+      },
+      {
+        "kind": "return",
+        "value": "arrStr"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "stringify",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "stringify",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780289266413,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780289264579_b1eb582d377d",
+  "endedAt": 1780289266415
+}

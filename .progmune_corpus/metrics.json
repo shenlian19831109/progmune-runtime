@@ -1,7 +1,7 @@
 {
-  "generated": 9,
+  "generated": 16,
   "repaired": 2,
-  "lastGeneration": "src/list-files.ts",
+  "lastGeneration": "src/svl-breakdown.ts",
   "history": [
     {
       "sessionId": "sess_1780238693023_j3nxt",
@@ -74,6 +74,62 @@
       "repaired": false,
       "repairCount": 0,
       "irFunctionCount": 381
+    },
+    {
+      "sessionId": "sess_1780289258099_72qkc",
+      "timestamp": 1780289259623,
+      "filePath": "src/join-strings.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 381
+    },
+    {
+      "sessionId": "sess_1780289264578_aseav",
+      "timestamp": 1780289266419,
+      "filePath": "src/includes-value.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 381
+    },
+    {
+      "sessionId": "sess_1780289432252_0lz6c",
+      "timestamp": 1780289433960,
+      "filePath": "src/is-positive.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 381
+    },
+    {
+      "sessionId": "sess_1780289484542_b2c0n",
+      "timestamp": 1780289486223,
+      "filePath": "src/pipeline-stats.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 381
+    },
+    {
+      "sessionId": "sess_1780289492362_fhaid",
+      "timestamp": 1780289493637,
+      "filePath": "src/resolved-count.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 381
+    },
+    {
+      "sessionId": "sess_1780289524436_6mq0y",
+      "timestamp": 1780289526343,
+      "filePath": "src/genome-stats.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 381
+    },
+    {
+      "sessionId": "sess_1780289587404_08qke",
+      "timestamp": 1780289588999,
+      "filePath": "src/svl-breakdown.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 382
     }
   ]
 }
