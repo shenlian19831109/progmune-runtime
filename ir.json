@@ -928,6 +928,11 @@
       "toISOString",
       "join",
       "getImportPath",
+      "add",
+      "test",
+      "filter",
+      "includes",
+      "map",
       "convert"
     ],
     "protocol": {
@@ -1751,16 +1756,6 @@
     ]
   },
   {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/failure-report.ts",
-    "calls": [
-      "getFailureGenome"
-    ]
-  },
-  {
     "name": "loadFeedback",
     "params": [],
     "returnType": "RunRecord[]",
@@ -1890,6 +1885,22 @@
       "fn",
       "rmdirSync",
       "now"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [
+      {
+        "name": "sessionId",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/find-session.ts",
+    "calls": [
+      "findSnapshotBySession"
     ]
   },
   {

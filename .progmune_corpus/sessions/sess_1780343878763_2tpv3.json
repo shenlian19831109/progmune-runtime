@@ -1,0 +1,231 @@
+{
+  "sessionId": "sess_1780343878763_2tpv3",
+  "intent": "verify fingerprints and return which ones are valid",
+  "attempts": [
+    {
+      "id": "att_1780343880269_747sg",
+      "sessionId": "sess_1780343878763_2tpv3",
+      "attemptNumber": 1,
+      "inputIntent": "verify fingerprints and return which ones are valid",
+      "plannerSeed": "3cb91da9",
+      "constraintSnapshotId": "snap_1780343878765_da5a8993dd84",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "extractFingerprints",
+          "args": [
+            {
+              "name": "cursor",
+              "type": "{ lastTimestamp: string | null }",
+              "value": {
+                "lastTimestamp": null
+              }
+            }
+          ],
+          "assignTo": "fps"
+        },
+        {
+          "kind": "call",
+          "function": "verifyAllFingerprints",
+          "args": [
+            {
+              "name": "currentRuleHash",
+              "type": "string",
+              "value": ""
+            }
+          ],
+          "assignTo": "summary"
+        },
+        {
+          "kind": "return",
+          "value": "summary"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "extractFingerprints",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "verifyAllFingerprints",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780343880269,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780343878763,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780343880269_747sg",
+    "sessionId": "sess_1780343878763_2tpv3",
+    "attemptNumber": 1,
+    "inputIntent": "verify fingerprints and return which ones are valid",
+    "plannerSeed": "3cb91da9",
+    "constraintSnapshotId": "snap_1780343878765_da5a8993dd84",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "extractFingerprints",
+        "args": [
+          {
+            "name": "cursor",
+            "type": "{ lastTimestamp: string | null }",
+            "value": {
+              "lastTimestamp": null
+            }
+          }
+        ],
+        "assignTo": "fps"
+      },
+      {
+        "kind": "call",
+        "function": "verifyAllFingerprints",
+        "args": [
+          {
+            "name": "currentRuleHash",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "summary"
+      },
+      {
+        "kind": "return",
+        "value": "summary"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "extractFingerprints",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "verifyAllFingerprints",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780343880269,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780343878765_da5a8993dd84",
+  "endedAt": 1780343880781
+}

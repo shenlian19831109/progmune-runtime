@@ -1,112 +1,8 @@
 {
-  "generated": 126,
+  "generated": 139,
   "repaired": 3,
-  "lastGeneration": "src/gen-history-log.ts",
+  "lastGeneration": "src/find-session.ts",
   "history": [
-    {
-      "sessionId": "sess_1780290055265_xb6nl",
-      "timestamp": 1780290056517,
-      "filePath": "src/ir-count.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 390
-    },
-    {
-      "sessionId": "sess_1780290073159_ol5a3",
-      "timestamp": 1780290075152,
-      "filePath": "src/status-check.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 391
-    },
-    {
-      "sessionId": "sess_1780290089058_wt5ay",
-      "timestamp": 1780290090506,
-      "filePath": "src/session-list.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 391
-    },
-    {
-      "sessionId": "sess_1780290147188_174a4",
-      "timestamp": 1780290148788,
-      "filePath": "src/svl4-count.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 392
-    },
-    {
-      "sessionId": "sess_1780290165192_szvj9",
-      "timestamp": 1780290166417,
-      "filePath": "src/state-producers.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 393
-    },
-    {
-      "sessionId": "sess_1780290177225_lopmo",
-      "timestamp": 1780290178883,
-      "filePath": "src/diff-sessions.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 393
-    },
-    {
-      "sessionId": "sess_1780292659166_exw58",
-      "timestamp": 1780292660744,
-      "filePath": "src/top-repair.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 393
-    },
-    {
-      "sessionId": "sess_1780292682061_81g0o",
-      "timestamp": 1780292683603,
-      "filePath": "src/namespace-count.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 394
-    },
-    {
-      "sessionId": "sess_1780292712254_h15ay",
-      "timestamp": 1780292713849,
-      "filePath": "src/fingerprint-valid.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 395
-    },
-    {
-      "sessionId": "sess_1780292738461_3rcew",
-      "timestamp": 1780292740107,
-      "filePath": "src/ledger-pass.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 396
-    },
-    {
-      "sessionId": "sess_1780294422473_5n54n",
-      "timestamp": 1780294424360,
-      "filePath": "src/genome-summary.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 382
-    },
-    {
-      "sessionId": "sess_1780294440939_s2rg6",
-      "timestamp": 1780294442428,
-      "filePath": "src/session-summary.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 383
-    },
-    {
-      "sessionId": "sess_1780294460034_9t76u",
-      "timestamp": 1780294461157,
-      "filePath": "src/antibody-summary.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 384
-    },
     {
       "sessionId": "sess_1780294480866_bh717",
       "timestamp": 1780294482588,
@@ -802,6 +698,110 @@
       "repaired": false,
       "repairCount": 0,
       "irFunctionCount": 392
+    },
+    {
+      "sessionId": "sess_1780343799715_z6pcw",
+      "timestamp": 1780343801677,
+      "filePath": "src/unresolved-count.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 393
+    },
+    {
+      "sessionId": "sess_1780343822181_r90g9",
+      "timestamp": 1780343823490,
+      "filePath": "src/svl-distribution.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 394
+    },
+    {
+      "sessionId": "sess_1780343852770_0srir",
+      "timestamp": 1780343854250,
+      "filePath": "src/fast-path-hits.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 395
+    },
+    {
+      "sessionId": "sess_1780343878763_2tpv3",
+      "timestamp": 1780343880795,
+      "filePath": "src/valid-fingerprints.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 396
+    },
+    {
+      "sessionId": "sess_1780343904555_v2jom",
+      "timestamp": 1780343906165,
+      "filePath": "src/total-repairs.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 397
+    },
+    {
+      "sessionId": "sess_1780343925827_zga2j",
+      "timestamp": 1780343927099,
+      "filePath": "src/recent-session.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 398
+    },
+    {
+      "sessionId": "sess_1780343958169_8r1tt",
+      "timestamp": 1780343960199,
+      "filePath": "src/common-fixpath.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 399
+    },
+    {
+      "sessionId": "sess_1780343994721_xgc40",
+      "timestamp": 1780343999186,
+      "filePath": "src/acl-breakdown.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 400
+    },
+    {
+      "sessionId": "sess_1780344395701_me9s5",
+      "timestamp": 1780344397108,
+      "filePath": "src/find-session.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 401
+    },
+    {
+      "sessionId": "sess_1780344650114_88ali",
+      "timestamp": 1780344651908,
+      "filePath": "src/find-session.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 382
+    },
+    {
+      "sessionId": "sess_1780344909019_ax5ks",
+      "timestamp": 1780344910457,
+      "filePath": "src/find-session.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 382
+    },
+    {
+      "sessionId": "sess_1780345041610_v9i9a",
+      "timestamp": 1780345043037,
+      "filePath": "src/find-session.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 382
+    },
+    {
+      "sessionId": "sess_1780345171834_s7714",
+      "timestamp": 1780345173215,
+      "filePath": "src/find-session.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 382
     }
   ]
 }

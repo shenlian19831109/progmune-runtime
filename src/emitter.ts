@@ -97,10 +97,47 @@ export function emitCode(
     code += `import { ${[...funcSet].join(", ")} } from "${getImportPath(file)}";\n`;
   for (const [file, typeSet] of typeImports)
     code += `import type { ${[...typeSet].join(", ")} } from "${getImportPath(file)}";\n`;
-  code += "\nexport function main() {\n";
 
+  // Pre-scan: find input variables (referenced but never assigned via call/assign)
   const declared = new Set<string>();
+  const referenced = new Set<string>();
   let counter = 0;
+
+  // First pass: collect declared and referenced variables
+  for (const action of actions) {
+    if (action.kind === "call" && action.assignTo) {
+      declared.add(action.assignTo);
+    } else if (action.kind === "assign" && action.target) {
+      declared.add(action.target);
+    }
+    // Collect arg value references
+    if (action.kind === "call" && action.args) {
+      for (const arg of action.args) {
+        const v = typeof arg === "object" ? arg?.value : arg;
+        if (typeof v === "string" && /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(v) && v !== "") {
+          referenced.add(v);
+        }
+      }
+    }
+  }
+
+  // Inputs = referenced but not declared — add as typed parameters
+  const inputs = [...referenced].filter(v => !declared.has(v) && v !== "");
+  const inputTypes = new Map<string, string>();
+  for (const action of actions) {
+    if (action.kind === "call" && action.args) {
+      for (const arg of action.args) {
+        const v = typeof arg === "object" ? arg?.value : arg;
+        const t = typeof arg === "object" ? arg?.type : "string";
+        if (typeof v === "string" && inputs.includes(v) && t && t !== "any") {
+          inputTypes.set(v, t);
+        }
+      }
+    }
+  }
+  const paramList = inputs.map(v => `${v}: ${inputTypes.get(v) || "string"}`).join(", ");
+
+  code += `\nexport function main(${paramList}) {\n`;
 
   const convert = (action: Action, indent: string = "  "): string => {
     if (!action || !action.kind) return "";
@@ -113,12 +150,17 @@ export function emitCode(
         }
         const val = a?.value;
         if (typeof val === "string" && declared.has(val)) return val;
+        // If value looks like a variable name (valid JS identifier), pass it through
+        if (typeof val === "string" && /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(val) && val !== "") {
+          declared.add(val);
+          return val;
+        }
         const paramType = meta?.params?.[i]?.type || "any";
         if (BASIC_TYPES.has(paramType)) {
-          if (paramType === "string" || paramType === "str") return `"defaultStr"`;
+          if (paramType === "string" || paramType === "str") return `""`;
           if (paramType === "number" || paramType === "int" || paramType === "float") return "0";
           if (paramType === "boolean" || paramType === "bool") return "false";
-          return `"default"`;
+          return `""`;
         }
         if (paramType === "UserPayload") return `{ id: 1, role: "user" } as UserPayload`;
         if (paramType === "PasswordHash") return `"defaultHash"`;
@@ -157,6 +199,13 @@ export function emitCode(
   };
 
   for (const a of actions) code += convert(a) + "\n";
-  code += "}\nmain();\n";
+  code += "}\n";
+  // Call main with params if it has inputs, otherwise no-arg call
+  if (inputs.length > 0) {
+    // Don't call — the user provides the arguments
+    // Just export the function for external use
+  } else {
+    code += "main();\n";
+  }
   return code;
 }
