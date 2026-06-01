@@ -1,0 +1,141 @@
+{
+  "sessionId": "sess_1780304872643_s2lzp",
+  "intent": "verify all fingerprints and compute the percentage that are valid",
+  "attempts": [
+    {
+      "id": "att_1780304874316_aoqxx",
+      "sessionId": "sess_1780304872643_s2lzp",
+      "attemptNumber": 1,
+      "inputIntent": "verify all fingerprints and compute the percentage that are valid",
+      "plannerSeed": "ca91ea3e",
+      "constraintSnapshotId": "snap_1780304872643_4b33a78d698e",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "verifyAllFingerprints",
+          "args": [
+            {
+              "name": "currentRuleHash",
+              "type": "string",
+              "value": ""
+            }
+          ],
+          "assignTo": "summary"
+        },
+        {
+          "kind": "return",
+          "value": "summary"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "verifyAllFingerprints",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780304874316,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780304872643,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780304874316_aoqxx",
+    "sessionId": "sess_1780304872643_s2lzp",
+    "attemptNumber": 1,
+    "inputIntent": "verify all fingerprints and compute the percentage that are valid",
+    "plannerSeed": "ca91ea3e",
+    "constraintSnapshotId": "snap_1780304872643_4b33a78d698e",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "verifyAllFingerprints",
+        "args": [
+          {
+            "name": "currentRuleHash",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "summary"
+      },
+      {
+        "kind": "return",
+        "value": "summary"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "verifyAllFingerprints",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780304874316,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780304872643_4b33a78d698e",
+  "endedAt": 1780304874318
+}
