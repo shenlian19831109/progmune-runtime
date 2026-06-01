@@ -1,0 +1,277 @@
+{
+  "sessionId": "sess_1780350835297_stf8a",
+  "intent": "load benchmark tasks, count them, and format a report showing the results",
+  "attempts": [
+    {
+      "id": "att_1780350837119_1qmqv",
+      "sessionId": "sess_1780350835297_stf8a",
+      "attemptNumber": 1,
+      "inputIntent": "load benchmark tasks, count them, and format a report showing the results",
+      "plannerSeed": "b9f05919",
+      "constraintSnapshotId": "snap_1780350835298_3138f0c14d42",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "loadBenchmarks",
+          "args": [],
+          "assignTo": "tasks"
+        },
+        {
+          "kind": "call",
+          "function": "benchmarkCount",
+          "args": [],
+          "assignTo": "count"
+        },
+        {
+          "kind": "call",
+          "function": "benchmarkReport",
+          "args": [],
+          "assignTo": "report"
+        },
+        {
+          "kind": "return",
+          "value": "report"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "loadBenchmarks",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "benchmarkCount",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 2,
+          "function": "benchmarkReport",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780350837119,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780350835297,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780350837119_1qmqv",
+    "sessionId": "sess_1780350835297_stf8a",
+    "attemptNumber": 1,
+    "inputIntent": "load benchmark tasks, count them, and format a report showing the results",
+    "plannerSeed": "b9f05919",
+    "constraintSnapshotId": "snap_1780350835298_3138f0c14d42",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "loadBenchmarks",
+        "args": [],
+        "assignTo": "tasks"
+      },
+      {
+        "kind": "call",
+        "function": "benchmarkCount",
+        "args": [],
+        "assignTo": "count"
+      },
+      {
+        "kind": "call",
+        "function": "benchmarkReport",
+        "args": [],
+        "assignTo": "report"
+      },
+      {
+        "kind": "return",
+        "value": "report"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "loadBenchmarks",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "benchmarkCount",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 2,
+        "function": "benchmarkReport",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780350837119,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780350835298_3138f0c14d42",
+  "endedAt": 1780350837123
+}

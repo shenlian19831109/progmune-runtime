@@ -1,16 +1,8 @@
 {
-  "generated": 224,
+  "generated": 225,
   "repaired": 4,
-  "lastGeneration": "src/total-benchmarks.ts",
+  "lastGeneration": "src/benchmark-status.ts",
   "history": [
-    {
-      "sessionId": "sess_1780343673382_7ucqe",
-      "timestamp": 1780343674916,
-      "filePath": "src/fingerprint-list.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 391
-    },
     {
       "sessionId": "sess_1780343705506_4rpek",
       "timestamp": 1780343707333,
@@ -802,6 +794,14 @@
       "repaired": false,
       "repairCount": 0,
       "irFunctionCount": 399
+    },
+    {
+      "sessionId": "sess_1780350835297_stf8a",
+      "timestamp": 1780350837128,
+      "filePath": "src/benchmark-status.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 401
     }
   ]
 }

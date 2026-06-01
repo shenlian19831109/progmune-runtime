@@ -285,6 +285,29 @@
     "exported": true
   },
   {
+    "name": "benchmarkReport",
+    "params": [],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/benchmark-report.ts",
+    "calls": [
+      "resolve",
+      "cwd",
+      "existsSync",
+      "reverse",
+      "sort",
+      "filter",
+      "readdirSync",
+      "parse",
+      "readFileSync",
+      "join",
+      "toFixed",
+      "push",
+      "slice"
+    ],
+    "exported": true
+  },
+  {
     "name": "generateBranchId",
     "params": [],
     "returnType": "string",
@@ -6638,6 +6661,18 @@
     "file": "src/ssg-validator.ts",
     "exported": false,
     "calls": []
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/total-benchmarks.ts",
+    "calls": [
+      "loadBenchmarks",
+      "benchmarkCount"
+    ],
+    "exported": true
   },
   {
     "name": "main",
