@@ -34,6 +34,7 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.extractIR = extractIR;
+exports.extractIRWithTypes = extractIRWithTypes;
 const ts_morph_1 = require("ts-morph");
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
@@ -140,6 +141,10 @@ function extractDirectCalls(func) {
  * @protocol namespace=dev_pipeline pre_states=[] post_states=["IR_EXTRACTED"] invalidate=["IR_STALE"]
  */
 function extractIR(projectRoot) {
+    return extractIRWithTypes(projectRoot).functions;
+}
+/** Extract both functions and type→file mapping. */
+function extractIRWithTypes(projectRoot) {
     const absRoot = path.resolve(projectRoot);
     const project = new ts_morph_1.Project({
         tsConfigFilePath: path.join(absRoot, "tsconfig.json"),
@@ -557,7 +562,24 @@ function extractIR(projectRoot) {
     }
     const totalExternal = dynamicCount + fallbackCount + externalCount;
     console.error(`📦 外部函数: ${totalExternal} (动态=${dynamicCount} 回退=${fallbackCount} 未签名=${externalCount}, from ${allCalls.size} total calls)`);
-    return funcs;
+    // Build type→module map for emitter
+    const _typeMap = {};
+    for (const _sf of project.getSourceFiles()) {
+        if (_sf.getFilePath().includes("node_modules"))
+            continue;
+        const _rp = path.relative(absRoot, _sf.getFilePath());
+        for (const _iface of _sf.getInterfaces()) {
+            const _n = _iface.getName();
+            if (_n && _iface.isExported())
+                _typeMap[_n] = _rp;
+        }
+        for (const _ta of _sf.getTypeAliases()) {
+            const _n = _ta.getName();
+            if (_n && _ta.isExported())
+                _typeMap[_n] = _rp;
+        }
+    }
+    return { functions: funcs, typeMap: _typeMap };
 }
 // ═══════════════════════════════════════════════════════════════
 // Dynamic external signature extraction helpers
@@ -616,7 +638,8 @@ if (require.main === module) {
         console.error("用法: ts-node extract-ir.ts <项目根>");
         process.exit(1);
     }
-    const fns = extractIR(root);
-    fs.writeFileSync("ir.json", JSON.stringify(fns, null, 2));
-    console.log(`✅ IR 提取完成: ${fns.length} 个函数 -> ir.json`);
+    const result = extractIRWithTypes(root);
+    const data = { typeMap: result.typeMap, functions: result.functions };
+    fs.writeFileSync("ir.json", JSON.stringify(data, null, 2));
+    console.log(`✅ IR 提取完成: ${result.functions.length} 个函数, ${Object.keys(result.typeMap).length} 个类型 -> ir.json`);
 }

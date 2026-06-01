@@ -73,7 +73,10 @@ function getImportPath(file) {
  * @protocol namespace=dev_pipeline pre_states=["SEQUENCE_VALIDATED"] post_states=["CODE_EMITTED"] invalidate=["SEQUENCE_VALIDATED"]
  */
 function emitCode(actions, meta) {
-    const ir = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
+    const irRaw = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
+    // Support both old format (array) and new format ({typeMap, functions})
+    const typeMap = irRaw.typeMap || {};
+    const ir = irRaw.functions || irRaw;
     const fnIndex = new Map();
     const fnMeta = new Map();
     for (const f of ir) {
@@ -96,9 +99,11 @@ function emitCode(actions, meta) {
                     for (const p of meta.params) {
                         const normalized = normalizeTypeName(p.type);
                         if (normalized && !BASIC_TYPES.has(normalized)) {
-                            if (!typeImports.has(file))
-                                typeImports.set(file, new Set());
-                            typeImports.get(file).add(normalized);
+                            // Use typeMap to find the correct module for this type
+                            const typeFile = typeMap[normalized] || file;
+                            if (!typeImports.has(typeFile))
+                                typeImports.set(typeFile, new Set());
+                            typeImports.get(typeFile).add(normalized);
                         }
                     }
                 }
