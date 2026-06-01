@@ -1,0 +1,387 @@
+{
+  "sessionId": "sess_1780294646712_60mn5",
+  "intent": "get the failure genome and count violations for each SVL level",
+  "attempts": [
+    {
+      "id": "att_1780294648470_vmzsk",
+      "sessionId": "sess_1780294646712_60mn5",
+      "attemptNumber": 1,
+      "inputIntent": "get the failure genome and count violations for each SVL level",
+      "plannerSeed": "8fb2d791",
+      "constraintSnapshotId": "snap_1780294646713_461239a5ad81",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getFailureGenome",
+          "args": [],
+          "assignTo": "genome"
+        },
+        {
+          "kind": "call",
+          "function": "getFailuresBySVL",
+          "args": [
+            {
+              "name": "level",
+              "type": "SVL",
+              "value": "SVL1"
+            }
+          ],
+          "assignTo": "svl1"
+        },
+        {
+          "kind": "call",
+          "function": "getFailuresBySVL",
+          "args": [
+            {
+              "name": "level",
+              "type": "SVL",
+              "value": "SVL2"
+            }
+          ],
+          "assignTo": "svl2"
+        },
+        {
+          "kind": "call",
+          "function": "getFailuresBySVL",
+          "args": [
+            {
+              "name": "level",
+              "type": "SVL",
+              "value": "SVL3"
+            }
+          ],
+          "assignTo": "svl3"
+        },
+        {
+          "kind": "return",
+          "value": "genome"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getFailureGenome",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "getFailuresBySVL",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 2,
+          "function": "getFailuresBySVL",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 3,
+          "function": "getFailuresBySVL",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780294648470,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780294646712,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780294648470_vmzsk",
+    "sessionId": "sess_1780294646712_60mn5",
+    "attemptNumber": 1,
+    "inputIntent": "get the failure genome and count violations for each SVL level",
+    "plannerSeed": "8fb2d791",
+    "constraintSnapshotId": "snap_1780294646713_461239a5ad81",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getFailureGenome",
+        "args": [],
+        "assignTo": "genome"
+      },
+      {
+        "kind": "call",
+        "function": "getFailuresBySVL",
+        "args": [
+          {
+            "name": "level",
+            "type": "SVL",
+            "value": "SVL1"
+          }
+        ],
+        "assignTo": "svl1"
+      },
+      {
+        "kind": "call",
+        "function": "getFailuresBySVL",
+        "args": [
+          {
+            "name": "level",
+            "type": "SVL",
+            "value": "SVL2"
+          }
+        ],
+        "assignTo": "svl2"
+      },
+      {
+        "kind": "call",
+        "function": "getFailuresBySVL",
+        "args": [
+          {
+            "name": "level",
+            "type": "SVL",
+            "value": "SVL3"
+          }
+        ],
+        "assignTo": "svl3"
+      },
+      {
+        "kind": "return",
+        "value": "genome"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getFailureGenome",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "getFailuresBySVL",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 2,
+        "function": "getFailuresBySVL",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 3,
+        "function": "getFailuresBySVL",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780294648470,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780294646713_461239a5ad81",
+  "endedAt": 1780294648474
+}

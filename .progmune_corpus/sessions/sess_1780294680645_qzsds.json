@@ -1,0 +1,203 @@
+{
+  "sessionId": "sess_1780294680645_qzsds",
+  "intent": "get antibody statistics and count hints injected vs fast path",
+  "attempts": [
+    {
+      "id": "att_1780294682240_4vl2c",
+      "sessionId": "sess_1780294680645_qzsds",
+      "attemptNumber": 1,
+      "inputIntent": "get antibody statistics and count hints injected vs fast path",
+      "plannerSeed": "4fbb83cb",
+      "constraintSnapshotId": "snap_1780294680645_461239a5ad81",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getAntibodyStats",
+          "args": [],
+          "assignTo": "stats"
+        },
+        {
+          "kind": "call",
+          "function": "getSemanticHeatmap",
+          "args": [],
+          "assignTo": "heatmap"
+        },
+        {
+          "kind": "return",
+          "value": "stats"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getAntibodyStats",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "getSemanticHeatmap",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780294682240,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780294680645,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780294682240_4vl2c",
+    "sessionId": "sess_1780294680645_qzsds",
+    "attemptNumber": 1,
+    "inputIntent": "get antibody statistics and count hints injected vs fast path",
+    "plannerSeed": "4fbb83cb",
+    "constraintSnapshotId": "snap_1780294680645_461239a5ad81",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getAntibodyStats",
+        "args": [],
+        "assignTo": "stats"
+      },
+      {
+        "kind": "call",
+        "function": "getSemanticHeatmap",
+        "args": [],
+        "assignTo": "heatmap"
+      },
+      {
+        "kind": "return",
+        "value": "stats"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getAntibodyStats",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "getSemanticHeatmap",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780294682240,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780294680645_461239a5ad81",
+  "endedAt": 1780294682242
+}

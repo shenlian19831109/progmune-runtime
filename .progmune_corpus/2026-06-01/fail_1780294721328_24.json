@@ -1,0 +1,33 @@
+{
+  "intent": "get execution metrics and show the generation history",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "schema",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "getExecutionMetrics",
+      "args": [],
+      "assignTo": "metrics"
+    },
+    {
+      "kind": "call",
+      "function": "getTrace",
+      "args": [],
+      "assignTo": "trace"
+    },
+    {
+      "kind": "return",
+      "value": "metrics"
+    },
+    {
+      "kind": "return",
+      "value": "trace"
+    }
+  ],
+  "errorDetail": "action[2]: return should be the last action (actions after return are unreachable)",
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 2,
+  "id": "fail_1780294721328_24",
+  "timestamp": "2026-06-01T06:18:41.328Z"
+}

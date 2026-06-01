@@ -1,0 +1,225 @@
+{
+  "sessionId": "sess_1780294739110_bpmef",
+  "intent": "check if all ledger fingerprints are valid and return pass count",
+  "attempts": [
+    {
+      "id": "att_1780294740595_q4s76",
+      "sessionId": "sess_1780294739110_bpmef",
+      "attemptNumber": 1,
+      "inputIntent": "check if all ledger fingerprints are valid and return pass count",
+      "plannerSeed": "baba0f5f",
+      "constraintSnapshotId": "snap_1780294739115_461239a5ad81",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "verifyAllFingerprints",
+          "args": [
+            {
+              "name": "currentRuleHash",
+              "type": "string",
+              "value": "latest"
+            }
+          ],
+          "assignTo": "summary"
+        },
+        {
+          "kind": "call",
+          "function": "pass",
+          "args": [
+            {
+              "name": "msg",
+              "type": "string",
+              "value": "All fingerprints verified"
+            }
+          ]
+        },
+        {
+          "kind": "return",
+          "value": "summary"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "verifyAllFingerprints",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "pass",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780294740595,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780294739110,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780294740595_q4s76",
+    "sessionId": "sess_1780294739110_bpmef",
+    "attemptNumber": 1,
+    "inputIntent": "check if all ledger fingerprints are valid and return pass count",
+    "plannerSeed": "baba0f5f",
+    "constraintSnapshotId": "snap_1780294739115_461239a5ad81",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "verifyAllFingerprints",
+        "args": [
+          {
+            "name": "currentRuleHash",
+            "type": "string",
+            "value": "latest"
+          }
+        ],
+        "assignTo": "summary"
+      },
+      {
+        "kind": "call",
+        "function": "pass",
+        "args": [
+          {
+            "name": "msg",
+            "type": "string",
+            "value": "All fingerprints verified"
+          }
+        ]
+      },
+      {
+        "kind": "return",
+        "value": "summary"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "verifyAllFingerprints",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "pass",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780294740595,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780294739115_461239a5ad81",
+  "endedAt": 1780294740599
+}
