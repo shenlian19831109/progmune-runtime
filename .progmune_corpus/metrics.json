@@ -1,7 +1,7 @@
 {
-  "generated": 19,
+  "generated": 23,
   "repaired": 2,
-  "lastGeneration": "src/protocol-count.ts",
+  "lastGeneration": "src/verify-all.ts",
   "history": [
     {
       "sessionId": "sess_1780238693023_j3nxt",
@@ -154,6 +154,38 @@
       "repaired": false,
       "repairCount": 0,
       "irFunctionCount": 385
+    },
+    {
+      "sessionId": "sess_1780289900984_pzm4g",
+      "timestamp": 1780289902666,
+      "filePath": "src/antibody-sessions.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 385
+    },
+    {
+      "sessionId": "sess_1780289918246_vpl9y",
+      "timestamp": 1780289919928,
+      "filePath": "src/protocol-funcs.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 386
+    },
+    {
+      "sessionId": "sess_1780289929743_rkuz2",
+      "timestamp": 1780289930979,
+      "filePath": "src/immune-heatmap.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 386
+    },
+    {
+      "sessionId": "sess_1780289947169_7eu0a",
+      "timestamp": 1780289948905,
+      "filePath": "src/verify-all.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 387
     }
   ]
 }

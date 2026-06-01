@@ -1731,6 +1731,16 @@
     ]
   },
   {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/failure-total.ts",
+    "calls": [
+      "getFailureGenome"
+    ]
+  },
+  {
     "name": "loadFeedback",
     "params": [],
     "returnType": "RunRecord[]",
@@ -3996,6 +4006,17 @@
       "previewFingerprints",
       "forEach",
       "reportFingerprints"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/resolved-sessions.ts",
+    "calls": [
+      "getAllSessions",
+      "from"
     ]
   },
   {

@@ -1,0 +1,203 @@
+{
+  "sessionId": "sess_1780289900984_pzm4g",
+  "intent": "get all sessions and count how many have antibody hits",
+  "attempts": [
+    {
+      "id": "att_1780289902657_pbxtt",
+      "sessionId": "sess_1780289900984_pzm4g",
+      "attemptNumber": 1,
+      "inputIntent": "get all sessions and count how many have antibody hits",
+      "plannerSeed": "a1889975",
+      "constraintSnapshotId": "snap_1780289900985_a162736871dc",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getAllSessions",
+          "args": [],
+          "assignTo": "sessions"
+        },
+        {
+          "kind": "call",
+          "function": "getAntibodyStats",
+          "args": [],
+          "assignTo": "stats"
+        },
+        {
+          "kind": "return",
+          "value": "stats"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getAllSessions",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "getAntibodyStats",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780289902657,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780289900984,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780289902657_pbxtt",
+    "sessionId": "sess_1780289900984_pzm4g",
+    "attemptNumber": 1,
+    "inputIntent": "get all sessions and count how many have antibody hits",
+    "plannerSeed": "a1889975",
+    "constraintSnapshotId": "snap_1780289900985_a162736871dc",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "getAntibodyStats",
+        "args": [],
+        "assignTo": "stats"
+      },
+      {
+        "kind": "return",
+        "value": "stats"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getAllSessions",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "getAntibodyStats",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780289902657,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780289900985_a162736871dc",
+  "endedAt": 1780289902659
+}
