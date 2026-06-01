@@ -1,7 +1,7 @@
 {
-  "generated": 77,
+  "generated": 85,
   "repaired": 2,
-  "lastGeneration": "src/last-repair.ts",
+  "lastGeneration": "src/most-preconditions.ts",
   "history": [
     {
       "sessionId": "sess_1780238693023_j3nxt",
@@ -618,6 +618,70 @@
       "repaired": false,
       "repairCount": 0,
       "irFunctionCount": 428
+    },
+    {
+      "sessionId": "sess_1780303053128_ja8p8",
+      "timestamp": 1780303054930,
+      "filePath": "src/dev-violations.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 429
+    },
+    {
+      "sessionId": "sess_1780303065591_ghoyr",
+      "timestamp": 1780303069005,
+      "filePath": "src/most-transitions.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 429
+    },
+    {
+      "sessionId": "sess_1780303076541_l2oug",
+      "timestamp": 1780303077805,
+      "filePath": "src/repaired-sessions.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 430
+    },
+    {
+      "sessionId": "sess_1780303087044_rv7m5",
+      "timestamp": 1780303088391,
+      "filePath": "src/bool-funcs.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 431
+    },
+    {
+      "sessionId": "sess_1780303097832_u0ggf",
+      "timestamp": 1780303099496,
+      "filePath": "src/top-fixpath.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 432
+    },
+    {
+      "sessionId": "sess_1780303111646_1ww78",
+      "timestamp": 1780303113892,
+      "filePath": "src/tampered-list.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 433
+    },
+    {
+      "sessionId": "sess_1780303129124_oy2ad",
+      "timestamp": 1780303130278,
+      "filePath": "src/resolved-groups.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 434
+    },
+    {
+      "sessionId": "sess_1780303140235_k616w",
+      "timestamp": 1780303144289,
+      "filePath": "src/most-preconditions.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 435
     }
   ]
 }

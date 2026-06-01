@@ -1,0 +1,355 @@
+{
+  "sessionId": "sess_1780303087044_rv7m5",
+  "intent": "extract IR and count how many functions have a return type of boolean",
+  "attempts": [
+    {
+      "id": "att_1780303088385_85ku1",
+      "sessionId": "sess_1780303087044_rv7m5",
+      "attemptNumber": 1,
+      "inputIntent": "extract IR and count how many functions have a return type of boolean",
+      "plannerSeed": "c18220c8",
+      "constraintSnapshotId": "snap_1780303087045_f1d1d745a84f",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "extractIR",
+          "args": [
+            {
+              "name": "projectRoot",
+              "type": "string",
+              "value": "."
+            }
+          ],
+          "assignTo": "ir"
+        },
+        {
+          "kind": "call",
+          "function": "validateAction",
+          "args": [
+            {
+              "name": "action",
+              "type": "Action",
+              "value": "ir"
+            },
+            {
+              "name": "actionIndex",
+              "type": "number",
+              "value": ""
+            }
+          ],
+          "assignTo": "validated"
+        },
+        {
+          "kind": "call",
+          "function": "getReturnType",
+          "args": [
+            {
+              "name": "func",
+              "type": "FunctionDeclaration | ArrowFunction",
+              "value": "ir"
+            }
+          ],
+          "assignTo": "retType"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "extractIR",
+          "namespace": "dev_pipeline",
+          "acquired": [
+            "IR_EXTRACTED"
+          ],
+          "invalidated": [
+            "IR_STALE"
+          ],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_EXTRACTED"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "validateAction",
+          "namespace": "dev_pipeline",
+          "acquired": [
+            "ACTION_VALIDATED"
+          ],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_EXTRACTED"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "ACTION_VALIDATED",
+              "IR_EXTRACTED"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 2,
+          "function": "getReturnType",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "ACTION_VALIDATED",
+              "IR_EXTRACTED"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "ACTION_VALIDATED",
+              "IR_EXTRACTED"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780303088385,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "antibodyHit": {
+        "level": "ACL-3",
+        "signature": "SVL-4:validateAction",
+        "fixPath": [
+          "validateAction"
+        ],
+        "similarityScore": 0.2,
+        "action": "injected_hint",
+        "llmCallsSaved": 0,
+        "estimatedTokensSaved": 0
+      },
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780303087044,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780303088385_85ku1",
+    "sessionId": "sess_1780303087044_rv7m5",
+    "attemptNumber": 1,
+    "inputIntent": "extract IR and count how many functions have a return type of boolean",
+    "plannerSeed": "c18220c8",
+    "constraintSnapshotId": "snap_1780303087045_f1d1d745a84f",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "."
+          }
+        ],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "validateAction",
+        "args": [
+          {
+            "name": "action",
+            "type": "Action",
+            "value": "ir"
+          },
+          {
+            "name": "actionIndex",
+            "type": "number",
+            "value": ""
+          }
+        ],
+        "assignTo": "validated"
+      },
+      {
+        "kind": "call",
+        "function": "getReturnType",
+        "args": [
+          {
+            "name": "func",
+            "type": "FunctionDeclaration | ArrowFunction",
+            "value": "ir"
+          }
+        ],
+        "assignTo": "retType"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "extractIR",
+        "namespace": "dev_pipeline",
+        "acquired": [
+          "IR_EXTRACTED"
+        ],
+        "invalidated": [
+          "IR_STALE"
+        ],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_EXTRACTED"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "validateAction",
+        "namespace": "dev_pipeline",
+        "acquired": [
+          "ACTION_VALIDATED"
+        ],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_EXTRACTED"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "ACTION_VALIDATED",
+            "IR_EXTRACTED"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 2,
+        "function": "getReturnType",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "ACTION_VALIDATED",
+            "IR_EXTRACTED"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "ACTION_VALIDATED",
+            "IR_EXTRACTED"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780303088385,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "antibodyHit": {
+      "level": "ACL-3",
+      "signature": "SVL-4:validateAction",
+      "fixPath": [
+        "validateAction"
+      ],
+      "similarityScore": 0.2,
+      "action": "injected_hint",
+      "llmCallsSaved": 0,
+      "estimatedTokensSaved": 0
+    },
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780303087045_f1d1d745a84f",
+  "endedAt": 1780303088387
+}
