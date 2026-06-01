@@ -1,7 +1,7 @@
 {
-  "generated": 50,
+  "generated": 53,
   "repaired": 2,
-  "lastGeneration": "src/top-violation.ts",
+  "lastGeneration": "src/repair-pct.ts",
   "history": [
     {
       "sessionId": "sess_1780238693023_j3nxt",
@@ -402,6 +402,30 @@
       "repaired": false,
       "repairCount": 0,
       "irFunctionCount": 395
+    },
+    {
+      "sessionId": "sess_1780294920456_07ny4",
+      "timestamp": 1780294921707,
+      "filePath": "src/avg-retries.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 396
+    },
+    {
+      "sessionId": "sess_1780294937806_g72xd",
+      "timestamp": 1780294939488,
+      "filePath": "src/most-attempts.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 397
+    },
+    {
+      "sessionId": "sess_1780294953811_r61gt",
+      "timestamp": 1780294955500,
+      "filePath": "src/repair-pct.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 398
     }
   ]
 }

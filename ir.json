@@ -128,6 +128,17 @@
     ]
   },
   {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/antibody-types.ts",
+    "calls": [
+      "getAntibodyStats",
+      "getSemanticHeatmap"
+    ]
+  },
+  {
     "name": "auditDirectory",
     "params": [
       {
@@ -573,6 +584,17 @@
     "calls": [
       "findChildBranches",
       "findSuccessfulLeaf"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/check-fingerprints.ts",
+    "calls": [
+      "verifyAllFingerprints",
+      "pass"
     ]
   },
   {
@@ -1075,6 +1097,18 @@
       "slice",
       "split",
       "match"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/external-funcs.ts",
+    "calls": [
+      "extractIR",
+      "validateAction",
+      "extractDirectCalls"
     ]
   },
   {
@@ -1890,6 +1924,17 @@
       "fn",
       "rmdirSync",
       "now"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/gen-history.ts",
+    "calls": [
+      "getExecutionMetrics",
+      "recordGeneration"
     ]
   },
   {
@@ -3650,6 +3695,17 @@
       "find",
       "push",
       "map"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/precondition-funcs.ts",
+    "calls": [
+      "loadProtocols",
+      "listAllStates"
     ]
   },
   {
@@ -6198,6 +6254,40 @@
     "returnTypeDetail": "object",
     "file": "src/ssg-validator.ts",
     "calls": []
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/success-sessions.ts",
+    "calls": [
+      "getAllSessions",
+      "getSuccessfulEpisodes"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/svl-counts.ts",
+    "calls": [
+      "getFailureGenome",
+      "getFailuresBySVL"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/top-violation.ts",
+    "calls": [
+      "getFailureGenome",
+      "getAllFailures",
+      "findViolations"
+    ]
   },
   {
     "name": "jaccardSimilarity",
