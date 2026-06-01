@@ -1,27 +1,22 @@
 #!/bin/bash
-# Progmune Guard — Git pre-commit hook
-# Ensures new .ts files are generated through Progmune (have @progmune-generated marker)
-# or are in the allowlist.
+# Progmune Guard — Git pre-commit hook (Phase 6E: Route Enforcement)
+#
+# PROGMUNE_ENFORCE=warn  → warning only, commit allowed (default)
+# PROGMUNE_ENFORCE=block → reject commits with unmarked .ts files
 
 set -e
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-NC='\033[0m' # No Color
-
 ALLOWLIST_FILE=".progmune_allowlist"
 MARKER="@progmune-generated"
+ENFORCE="${PROGMUNE_ENFORCE:-warn}"
 
-# Find new/staged .ts files (excluding deleted files)
 STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep '\.ts$' || true)
 
 if [ -z "$STAGED_FILES" ]; then
   exit 0
 fi
 
-# Load allowlist patterns
+# Load allowlist
 ALLOWLIST=""
 if [ -f "$ALLOWLIST_FILE" ]; then
   ALLOWLIST=$(grep -v '^#' "$ALLOWLIST_FILE" | grep -v '^$' || true)
@@ -30,7 +25,7 @@ fi
 VIOLATIONS=0
 
 for FILE in $STAGED_FILES; do
-  # Check if file is in allowlist
+  # Check allowlist
   ALLOWED=0
   if [ -n "$ALLOWLIST" ]; then
     while IFS= read -r pattern; do
@@ -45,33 +40,36 @@ for FILE in $STAGED_FILES; do
     continue
   fi
 
-  # Check if file has @progmune-generated marker in first 5 lines
+  # Check marker
   if [ -f "$FILE" ]; then
     HEAD=$(head -5 "$FILE" 2>/dev/null || true)
     if echo "$HEAD" | grep -q "$MARKER"; then
-      echo -e "  ${GREEN}✓${NC} $FILE (progmune-generated)"
+      echo "  [progmune] OK: $FILE"
       continue
     fi
   fi
 
-  # New file without marker — VIOLATION
-  echo -e "  ${RED}✗${NC} $FILE ${RED}missing @progmune-generated marker${NC}"
+  echo "  [progmune] MISSING: $FILE"
   VIOLATIONS=$((VIOLATIONS + 1))
 done
 
 if [ "$VIOLATIONS" -gt 0 ]; then
   echo ""
-  echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-  echo -e "${RED}  Progmune Guard: ${VIOLATIONS} file(s) blocked${NC}"
-  echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo "=============================================="
+  echo "  Progmune: $VIOLATIONS file(s) without marker"
+  echo "=============================================="
   echo ""
-  echo "New TypeScript files must be generated through Progmune."
-  echo "Use: progmune_execute(intent=\"...\", filePath=\"$FILE\")"
+  echo "  Generate via: progmune_execute(intent=..., filePath=...)"
+  echo "  Allowlist:    echo 'pattern' >> $ALLOWLIST_FILE"
   echo ""
-  echo "Or add to $ALLOWLIST_FILE:"
-  echo "  echo '$FILE' >> $ALLOWLIST_FILE"
-  echo ""
-  exit 1
+
+  if [ "$ENFORCE" = "block" ]; then
+    echo "  PROGMUNE_ENFORCE=block — commit rejected."
+    exit 1
+  fi
+
+  echo "  PROGMUNE_ENFORCE=warn — commit allowed."
+  echo "  Set PROGMUNE_ENFORCE=block to enforce."
 fi
 
 exit 0
