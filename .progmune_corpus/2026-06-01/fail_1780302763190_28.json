@@ -1,0 +1,39 @@
+{
+  "intent": "get all sessions and sort them by the number of attempts",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "symbol_existence",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "getAllSessions",
+      "args": [],
+      "assignTo": "sessions"
+    },
+    {
+      "kind": "call",
+      "function": "sort",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "sortedSessions"
+    }
+  ],
+  "errorDetail": "函数 'sort' 不存在",
+  "ssgMissingFunctions": [
+    "sort"
+  ],
+  "plannerAttempt": 3,
+  "plannerRetryTotal": 3,
+  "id": "fail_1780302763190_28",
+  "timestamp": "2026-06-01T08:32:43.190Z"
+}
