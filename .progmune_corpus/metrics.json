@@ -1,7 +1,7 @@
 {
-  "generated": 23,
+  "generated": 29,
   "repaired": 2,
-  "lastGeneration": "src/verify-all.ts",
+  "lastGeneration": "src/session-list.ts",
   "history": [
     {
       "sessionId": "sess_1780238693023_j3nxt",
@@ -186,6 +186,54 @@
       "repaired": false,
       "repairCount": 0,
       "irFunctionCount": 387
+    },
+    {
+      "sessionId": "sess_1780290010213_hkcg9",
+      "timestamp": 1780290012227,
+      "filePath": "src/resolved-filter.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 388
+    },
+    {
+      "sessionId": "sess_1780290019973_616zx",
+      "timestamp": 1780290021190,
+      "filePath": "src/constraint-count.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 388
+    },
+    {
+      "sessionId": "sess_1780290037551_31a8b",
+      "timestamp": 1780290039003,
+      "filePath": "src/antibody-levels.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 389
+    },
+    {
+      "sessionId": "sess_1780290055265_xb6nl",
+      "timestamp": 1780290056517,
+      "filePath": "src/ir-count.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 390
+    },
+    {
+      "sessionId": "sess_1780290073159_ol5a3",
+      "timestamp": 1780290075152,
+      "filePath": "src/status-check.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 391
+    },
+    {
+      "sessionId": "sess_1780290089058_wt5ay",
+      "timestamp": 1780290090506,
+      "filePath": "src/session-list.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 391
     }
   ]
 }
