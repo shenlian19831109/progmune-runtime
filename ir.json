@@ -308,6 +308,63 @@
     "exported": true
   },
   {
+    "name": "benchmarkSave",
+    "params": [
+      {
+        "name": "data",
+        "type": "any",
+        "typeDetail": "any"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "src/benchmark-save.ts",
+    "calls": [
+      "resolve",
+      "cwd",
+      "existsSync",
+      "mkdirSync",
+      "now",
+      "join",
+      "writeFileSync",
+      "stringify"
+    ],
+    "exported": true
+  },
+  {
+    "name": "benchmarkLoadLatest",
+    "params": [],
+    "returnType": "any | null",
+    "returnTypeDetail": "any | null",
+    "file": "src/benchmark-save.ts",
+    "calls": [
+      "resolve",
+      "cwd",
+      "existsSync",
+      "reverse",
+      "sort",
+      "filter",
+      "readdirSync",
+      "parse",
+      "readFileSync",
+      "join"
+    ],
+    "exported": true
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/benchmark-status.ts",
+    "calls": [
+      "loadBenchmarks",
+      "benchmarkCount",
+      "benchmarkReport"
+    ],
+    "exported": true
+  },
+  {
     "name": "generateBranchId",
     "params": [],
     "returnType": "string",
@@ -7015,6 +7072,25 @@
     "description": "获取当前工作目录"
   },
   {
+    "name": "mkdirSync",
+    "params": [
+      {
+        "name": "path",
+        "type": "string"
+      },
+      {
+        "name": "options",
+        "type": "object"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "创建目录"
+  },
+  {
     "name": "now",
     "params": [],
     "returnType": "number",
@@ -7023,6 +7099,44 @@
     "calls": [],
     "external": true,
     "description": "当前时间戳（毫秒）"
+  },
+  {
+    "name": "writeFileSync",
+    "params": [
+      {
+        "name": "path",
+        "type": "string"
+      },
+      {
+        "name": "data",
+        "type": "string"
+      }
+    ],
+    "returnType": "void",
+    "returnTypeDetail": "void",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "同步写入文件"
+  },
+  {
+    "name": "stringify",
+    "params": [
+      {
+        "name": "value",
+        "type": "any"
+      },
+      {
+        "name": "replacer",
+        "type": "any"
+      }
+    ],
+    "returnType": "string",
+    "returnTypeDetail": "string",
+    "file": "(external)",
+    "calls": [],
+    "external": true,
+    "description": "序列化为 JSON 字符串"
   },
   {
     "name": "random",
@@ -7083,25 +7197,6 @@
     "description": "最大值"
   },
   {
-    "name": "stringify",
-    "params": [
-      {
-        "name": "value",
-        "type": "any"
-      },
-      {
-        "name": "replacer",
-        "type": "any"
-      }
-    ],
-    "returnType": "string",
-    "returnTypeDetail": "string",
-    "file": "(external)",
-    "calls": [],
-    "external": true,
-    "description": "序列化为 JSON 字符串"
-  },
-  {
     "name": "test",
     "params": [],
     "returnType": "any",
@@ -7127,44 +7222,6 @@
     "file": "(external)",
     "calls": [],
     "external": true
-  },
-  {
-    "name": "mkdirSync",
-    "params": [
-      {
-        "name": "path",
-        "type": "string"
-      },
-      {
-        "name": "options",
-        "type": "object"
-      }
-    ],
-    "returnType": "void",
-    "returnTypeDetail": "void",
-    "file": "(external)",
-    "calls": [],
-    "external": true,
-    "description": "创建目录"
-  },
-  {
-    "name": "writeFileSync",
-    "params": [
-      {
-        "name": "path",
-        "type": "string"
-      },
-      {
-        "name": "data",
-        "type": "string"
-      }
-    ],
-    "returnType": "void",
-    "returnTypeDetail": "void",
-    "file": "(external)",
-    "calls": [],
-    "external": true,
-    "description": "同步写入文件"
   },
   {
     "name": "dirname",
