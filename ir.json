@@ -1929,6 +1929,17 @@
     ]
   },
   {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/genome-stats.ts",
+    "calls": [
+      "extractIR",
+      "getFailureGenome"
+    ]
+  },
+  {
     "name": "getInstanceId",
     "params": [],
     "returnType": "string",
@@ -6123,6 +6134,17 @@
     "returnTypeDetail": "object",
     "file": "src/ssg-validator.ts",
     "calls": []
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/svl-breakdown.ts",
+    "calls": [
+      "getAllSessions",
+      "getFailureGenome"
+    ]
   },
   {
     "name": "jaccardSimilarity",
