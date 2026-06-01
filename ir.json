@@ -122,20 +122,8 @@
     "params": [],
     "returnType": "any",
     "returnTypeDetail": "",
-    "file": "src/antibody-levels.ts",
+    "file": "src/antibody-summary.ts",
     "calls": [
-      "getAntibodyStats",
-      "formatAntibodyStats"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/antibody-sessions.ts",
-    "calls": [
-      "getAllSessions",
       "getAntibodyStats"
     ]
   },
@@ -742,17 +730,6 @@
     "calls": []
   },
   {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/constraint-count.ts",
-    "calls": [
-      "getFailureGenome",
-      "determineConstraintType"
-    ]
-  },
-  {
     "name": "replaySession",
     "params": [
       {
@@ -896,6 +873,26 @@
       "sort",
       "keys",
       "join"
+    ]
+  },
+  {
+    "name": "normalizeTypeName",
+    "params": [
+      {
+        "name": "raw",
+        "type": "string",
+        "typeDetail": "string"
+      }
+    ],
+    "returnType": "string | null",
+    "returnTypeDetail": "string | null",
+    "file": "src/emitter.ts",
+    "calls": [
+      "trim",
+      "includes",
+      "replace",
+      "split",
+      "test"
     ]
   },
   {
@@ -1764,16 +1761,6 @@
     ]
   },
   {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/failure-total.ts",
-    "calls": [
-      "getFailureGenome"
-    ]
-  },
-  {
     "name": "loadFeedback",
     "params": [],
     "returnType": "RunRecord[]",
@@ -1976,20 +1963,9 @@
     "params": [],
     "returnType": "any",
     "returnTypeDetail": "",
-    "file": "src/genome-stats.ts",
+    "file": "src/genome-summary.ts",
     "calls": [
-      "extractIR",
       "getFailureGenome"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/immune-heatmap.ts",
-    "calls": [
-      "getSemanticHeatmap"
     ]
   },
   {
@@ -2096,17 +2072,6 @@
     "file": "src/immune-reporter.ts",
     "calls": [
       "extractFingerprints"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/ir-count.ts",
-    "calls": [
-      "extractIR",
-      "validateAction"
     ]
   },
   {
@@ -3013,6 +2978,18 @@
     "calls": []
   },
   {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/namespace-stats.ts",
+    "calls": [
+      "loadProtocols",
+      "parseProtocolsFromJSON",
+      "buildProtocolChainHint"
+    ]
+  },
+  {
     "name": "jsonReply",
     "params": [
       {
@@ -3676,6 +3653,18 @@
     ]
   },
   {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/protocol-annotated.ts",
+    "calls": [
+      "extractIR",
+      "loadProtocolsFromIR",
+      "random"
+    ]
+  },
+  {
     "name": "invalidateProtocolCache",
     "params": [],
     "returnType": "void",
@@ -4060,17 +4049,6 @@
       "previewFingerprints",
       "forEach",
       "reportFingerprints"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/resolved-sessions.ts",
-    "calls": [
-      "getAllSessions",
-      "from"
     ]
   },
   {
@@ -5595,9 +5573,10 @@
     "params": [],
     "returnType": "any",
     "returnTypeDetail": "",
-    "file": "src/session-list.ts",
+    "file": "src/session-summary.ts",
     "calls": [
-      "getAllSessions"
+      "getAllSessions",
+      "formatSessionSummary"
     ]
   },
   {
@@ -6221,27 +6200,6 @@
     "calls": []
   },
   {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/svl-breakdown.ts",
-    "calls": [
-      "getAllSessions",
-      "getFailureGenome"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/svl4-count.ts",
-    "calls": [
-      "getFailureGenome"
-    ]
-  },
-  {
     "name": "jaccardSimilarity",
     "params": [
       {
@@ -6398,9 +6356,11 @@
     "params": [],
     "returnType": "any",
     "returnTypeDetail": "",
-    "file": "src/verify-all.ts",
+    "file": "src/verify-fingerprints.ts",
     "calls": [
-      "verifyAllFingerprints"
+      "getAllSessions",
+      "getFingerprint",
+      "verifyFingerprint"
     ]
   },
   {
@@ -6648,6 +6608,15 @@
     "calls": [],
     "external": true,
     "description": "序列化为 JSON 字符串"
+  },
+  {
+    "name": "test",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
   },
   {
     "name": "collect",
@@ -7116,15 +7085,6 @@
   },
   {
     "name": "getTrace",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "any",
-    "file": "(external)",
-    "calls": [],
-    "external": true
-  },
-  {
-    "name": "test",
     "params": [],
     "returnType": "any",
     "returnTypeDetail": "any",

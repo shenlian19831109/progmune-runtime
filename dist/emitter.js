@@ -39,6 +39,28 @@ const BASIC_TYPES = new Set([
     "string", "number", "boolean", "any", "void", "undefined", "null",
     "str", "int", "float", "bool", "list", "dict", "tuple", "bytes",
 ]);
+/** Normalize a type string to an importable type name.
+ *  Strips [], <...>, unions, and typeof expressions.
+ *  e.g. "StateTransition[]" → "StateTransition"
+ *       "Map<string, string>" → "Map"
+ *       "Action | null" → "Action"
+ *       "ReturnType<typeof fn>" → null (complex, skip) */
+function normalizeTypeName(raw) {
+    let t = raw.trim();
+    // Skip function types and complex expressions
+    if (t.includes("=>") || t.includes("typeof"))
+        return null;
+    // Strip array brackets
+    t = t.replace(/\[\]/g, "");
+    // Strip generic parameters
+    t = t.replace(/<[^>]*>/g, "");
+    // Take first part of union/intersection
+    t = t.split("|")[0].split("&")[0].trim();
+    // Must be a simple identifier
+    if (/^[A-Z][a-zA-Z0-9_]*$/.test(t))
+        return t;
+    return null;
+}
 function getImportPath(file) {
     // Normalize: strip common src/ prefix since generated code lives in src/
     let clean = file.replace(/\.ts$|\.tsx$/, "");
@@ -64,16 +86,18 @@ function emitCode(actions, meta) {
         if (action.kind === "call" && action.function) {
             const file = fnIndex.get(action.function);
             const meta = fnMeta.get(action.function);
-            if (file) {
+            // Skip external functions — they are global/standard library (fs, path, etc.)
+            if (file && file !== "(external)") {
                 if (!imports.has(file))
                     imports.set(file, new Set());
                 imports.get(file).add(action.function);
                 if (meta?.params) {
                     for (const p of meta.params) {
-                        if (!BASIC_TYPES.has(p.type)) {
+                        const normalized = normalizeTypeName(p.type);
+                        if (normalized && !BASIC_TYPES.has(normalized)) {
                             if (!typeImports.has(file))
                                 typeImports.set(file, new Set());
-                            typeImports.get(file).add(p.type);
+                            typeImports.get(file).add(normalized);
                         }
                     }
                 }

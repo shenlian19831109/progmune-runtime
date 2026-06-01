@@ -1,7 +1,7 @@
 {
-  "generated": 36,
+  "generated": 42,
   "repaired": 2,
-  "lastGeneration": "src/ledger-pass.ts",
+  "lastGeneration": "src/namespace-stats.ts",
   "history": [
     {
       "sessionId": "sess_1780238693023_j3nxt",
@@ -290,6 +290,54 @@
       "repaired": false,
       "repairCount": 0,
       "irFunctionCount": 396
+    },
+    {
+      "sessionId": "sess_1780294422473_5n54n",
+      "timestamp": 1780294424360,
+      "filePath": "src/genome-summary.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 382
+    },
+    {
+      "sessionId": "sess_1780294440939_s2rg6",
+      "timestamp": 1780294442428,
+      "filePath": "src/session-summary.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 383
+    },
+    {
+      "sessionId": "sess_1780294460034_9t76u",
+      "timestamp": 1780294461157,
+      "filePath": "src/antibody-summary.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 384
+    },
+    {
+      "sessionId": "sess_1780294480866_bh717",
+      "timestamp": 1780294482588,
+      "filePath": "src/protocol-annotated.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 385
+    },
+    {
+      "sessionId": "sess_1780294499826_ib446",
+      "timestamp": 1780294501493,
+      "filePath": "src/verify-fingerprints.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 386
+    },
+    {
+      "sessionId": "sess_1780294518049_6plzh",
+      "timestamp": 1780294520014,
+      "filePath": "src/namespace-stats.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 387
     }
   ]
 }
