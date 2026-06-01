@@ -269,6 +269,17 @@
     "params": [],
     "returnType": "any",
     "returnTypeDetail": "",
+    "file": "src/avg-similarity.ts",
+    "calls": [
+      "getAntibodyStats",
+      "getStaticScore"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
     "file": "src/best-antibody.ts",
     "calls": [
       "getAntibodyStats",
@@ -977,6 +988,17 @@
     ]
   },
   {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/distinct-fixes.ts",
+    "calls": [
+      "getFailureGenome",
+      "loadIR"
+    ]
+  },
+  {
     "name": "normalizeTypeName",
     "params": [
       {
@@ -1184,6 +1206,18 @@
     "returnType": "any",
     "returnTypeDetail": "",
     "file": "src/external-funcs.ts",
+    "calls": [
+      "extractIR",
+      "validateAction",
+      "extractDirectCalls"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/external-list.ts",
     "calls": [
       "extractIR",
       "validateAction",
@@ -2045,6 +2079,17 @@
     "params": [],
     "returnType": "any",
     "returnTypeDetail": "",
+    "file": "src/first-attempt.ts",
+    "calls": [
+      "getAllSessions",
+      "findViolations"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
     "file": "src/fragile-protocol.ts",
     "calls": [
       "getFailureGenome",
@@ -2136,6 +2181,17 @@
     "file": "src/genome-summary.ts",
     "calls": [
       "getFailureGenome"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/get-hash.ts",
+    "calls": [
+      "getFingerprint",
+      "hash"
     ]
   },
   {
@@ -2260,11 +2316,34 @@
     "params": [],
     "returnType": "any",
     "returnTypeDetail": "",
+    "file": "src/invalidate-rules.ts",
+    "calls": [
+      "loadProtocols",
+      "generateCandidateRules",
+      "hashRules"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
     "file": "src/ir-by-file.ts",
     "calls": [
       "extractIR",
       "validateAction",
       "correctFunctionNames"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/large-sessions.ts",
+    "calls": [
+      "getAllSessions",
+      "getSessionTransitions"
     ]
   },
   {
@@ -3190,6 +3269,18 @@
     "calls": [
       "getAllSessions",
       "formatSessionSummary"
+    ]
+  },
+  {
+    "name": "main",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "",
+    "file": "src/most-branches.ts",
+    "calls": [
+      "getExecutionMetrics",
+      "getAllSessions",
+      "findChildBranches"
     ]
   },
   {
@@ -7541,6 +7632,15 @@
     "external": true
   },
   {
+    "name": "hash",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
     "name": "hostname",
     "params": [],
     "returnType": "any",
@@ -7821,15 +7921,6 @@
   },
   {
     "name": "normalizeSnap",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "any",
-    "file": "(external)",
-    "calls": [],
-    "external": true
-  },
-  {
-    "name": "hash",
     "params": [],
     "returnType": "any",
     "returnTypeDetail": "any",

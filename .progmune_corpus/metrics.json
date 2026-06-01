@@ -1,32 +1,8 @@
 {
-  "generated": 93,
+  "generated": 103,
   "repaired": 2,
-  "lastGeneration": "src/invalidate-rules.ts",
+  "lastGeneration": "src/ab-sessions.ts",
   "history": [
-    {
-      "sessionId": "sess_1780238693023_j3nxt",
-      "timestamp": 1780238695962,
-      "filePath": "src/validate-config.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 380
-    },
-    {
-      "sessionId": "sess_1780239121990_jc4bk",
-      "timestamp": 1780239123933,
-      "filePath": "src/pipeline-test.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 380
-    },
-    {
-      "sessionId": "sess_1780239212421_47lbd",
-      "timestamp": 1780239216005,
-      "filePath": "src/force-repair.ts",
-      "repaired": true,
-      "repairCount": 2,
-      "irFunctionCount": 380
-    },
     {
       "sessionId": "sess_1780254854227_nb00t",
       "timestamp": 1780254855642,
@@ -746,6 +722,86 @@
       "repaired": false,
       "repairCount": 0,
       "irFunctionCount": 443
+    },
+    {
+      "sessionId": "sess_1780304640736_nx7eo",
+      "timestamp": 1780304643944,
+      "filePath": "src/total-transitions.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 444
+    },
+    {
+      "sessionId": "sess_1780304650974_mt91f",
+      "timestamp": 1780304652519,
+      "filePath": "src/ns-violations.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 445
+    },
+    {
+      "sessionId": "sess_1780304660211_kfahn",
+      "timestamp": 1780304662303,
+      "filePath": "src/recent-five.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 446
+    },
+    {
+      "sessionId": "sess_1780304669698_6xltd",
+      "timestamp": 1780304671395,
+      "filePath": "src/corpus-funcs.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 447
+    },
+    {
+      "sessionId": "sess_1780304678202_kxlcs",
+      "timestamp": 1780304679929,
+      "filePath": "src/fastpath-count.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 448
+    },
+    {
+      "sessionId": "sess_1780304689251_ca5lk",
+      "timestamp": 1780304690993,
+      "filePath": "src/total-fingerprints.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 449
+    },
+    {
+      "sessionId": "sess_1780304698066_5ln4i",
+      "timestamp": 1780304700142,
+      "filePath": "src/recent-sessions.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 450
+    },
+    {
+      "sessionId": "sess_1780304707951_0fip1",
+      "timestamp": 1780304709697,
+      "filePath": "src/state-count.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 451
+    },
+    {
+      "sessionId": "sess_1780304717192_j2wfa",
+      "timestamp": 1780304719091,
+      "filePath": "src/svl4-ratio.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 452
+    },
+    {
+      "sessionId": "sess_1780304728089_wjcf8",
+      "timestamp": 1780304729924,
+      "filePath": "src/ab-sessions.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 453
     }
   ]
 }
