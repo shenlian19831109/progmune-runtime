@@ -1,0 +1,22 @@
+[
+  {"id":"T001","intent":"get all sessions from the corpus","category":"corpus-read"},
+  {"id":"T002","intent":"get the failure genome statistics","category":"corpus-read"},
+  {"id":"T003","intent":"get the antibody statistics","category":"corpus-read"},
+  {"id":"T004","intent":"get the execution metrics","category":"corpus-read"},
+  {"id":"T005","intent":"verify all ledger fingerprints","category":"fingerprint"},
+  {"id":"T006","intent":"get the semantic heatmap data","category":"corpus-read"},
+  {"id":"T007","intent":"extract IR from the project","category":"ir"},
+  {"id":"T008","intent":"take a session ID and look it up in the corpus","category":"corpus-read","hasInput":true},
+  {"id":"T009","intent":"load protocol rules and list all defined namespaces","category":"protocol"},
+  {"id":"T010","intent":"count how many sessions are resolved in the corpus","category":"corpus-read"},
+  {"id":"T011","intent":"find the most common failure pattern in the genome","category":"corpus-read"},
+  {"id":"T012","intent":"check if all ledgers pass invariant validation","category":"ledger"},
+  {"id":"T013","intent":"get the fingerprint hash for a specific session","category":"fingerprint","hasInput":true},
+  {"id":"T014","intent":"compare two session ledgers and show the differences","category":"ledger","hasInput":true},
+  {"id":"T015","intent":"format the immune status as a colored terminal output","category":"format"},
+  {"id":"T016","intent":"list all files in the corpus directory","category":"fs"},
+  {"id":"T017","intent":"read the protocols configuration and count total rules","category":"protocol"},
+  {"id":"T018","intent":"find all sessions that have antibody hits","category":"corpus-read"},
+  {"id":"T019","intent":"count how many unique namespaces exist in the protocol rules","category":"protocol"},
+  {"id":"T020","intent":"get the total number of transitions across all session ledgers","category":"ledger"}
+]
