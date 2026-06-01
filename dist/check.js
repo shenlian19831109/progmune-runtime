@@ -468,6 +468,28 @@ else {
     pass(`${abStats.totalHits} 次命中 | ${abStats.fastPathHits} 快速通道 | ${abStats.totalLLMCallsSaved} 次 LLM 节省 | ${abStats.totalTokensSaved} tokens 节省`);
     console.log(`     ${D("免疫效率:")} ${G(pct + "%")} ${D("绕过 LLM")}`);
 }
+// ── 7. Progmune Coverage ──
+step("7/7 覆盖率");
+{
+    const { auditDirectory } = require("./audit");
+    const srcDir = path.resolve(process.env.PROGMUNE_PROJECT_DIR || process.cwd(), "src");
+    const auditResult = auditDirectory(srcDir);
+    const pct = Math.round(auditResult.coverage * 100);
+    if (pct >= 50) {
+        pass(`@progmune-generated 覆盖率 ${pct}% (${auditResult.progmuneFiles}/${auditResult.totalFiles})`);
+    }
+    else if (pct >= 20) {
+        warn(`覆盖率 ${pct}% — 低于 50% 目标 (${auditResult.progmuneFiles}/${auditResult.totalFiles})`);
+    }
+    else {
+        fail(`覆盖率 ${pct}% — 严重低于 20% (${auditResult.progmuneFiles}/${auditResult.totalFiles})`);
+    }
+    const { getExecutionMetrics } = require("./execute");
+    const m = getExecutionMetrics();
+    if (m.generated > 0) {
+        console.log(`     ${D(`执行次数: ${m.generated} | 修复: ${m.repaired} | 最近: ${m.lastGeneration || '无'}`)}`);
+    }
+}
 // ── 总结 ──
 console.log(`\n${"═".repeat(66)}`);
 if (failures === 0 && warnings === 0) {

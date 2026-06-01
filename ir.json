@@ -1,16 +1,5 @@
 [
   {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/acl-hits.ts",
-    "calls": [
-      "getAntibodyStats",
-      "getSemanticHeatmap"
-    ]
-  },
-  {
     "name": "executeActionCode",
     "params": [
       {
@@ -129,27 +118,6 @@
     "calls": []
   },
   {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/antibody-summary.ts",
-    "calls": [
-      "getAntibodyStats"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/antibody-types.ts",
-    "calls": [
-      "getAntibodyStats",
-      "getSemanticHeatmap"
-    ]
-  },
-  {
     "name": "auditDirectory",
     "params": [
       {
@@ -241,73 +209,6 @@
       "readFileSync",
       "entries",
       "keys"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/auth-funcs.ts",
-    "calls": [
-      "loadProtocols",
-      "findIndex"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/avg-retries.ts",
-    "calls": [
-      "getFailureGenome"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/avg-similarity.ts",
-    "calls": [
-      "getAntibodyStats",
-      "getStaticScore"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/best-antibody.ts",
-    "calls": [
-      "getAntibodyStats",
-      "formatAntibodyStats"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/bool-funcs.ts",
-    "calls": [
-      "extractIR",
-      "validateAction",
-      "getReturnType"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/branch-count.ts",
-    "calls": [
-      "getAllSessions",
-      "findRootBranch",
-      "describeBranchTree"
     ]
   },
   {
@@ -665,29 +566,6 @@
     ]
   },
   {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/by-constraint.ts",
-    "calls": [
-      "getFailureGenome",
-      "getAllFailures",
-      "findViolations"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/check-fingerprints.ts",
-    "calls": [
-      "verifyAllFingerprints",
-      "pass"
-    ]
-  },
-  {
     "name": "step",
     "params": [
       {
@@ -988,17 +866,6 @@
     ]
   },
   {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/distinct-fixes.ts",
-    "calls": [
-      "getFailureGenome",
-      "loadIR"
-    ]
-  },
-  {
     "name": "normalizeTypeName",
     "params": [
       {
@@ -1198,30 +1065,6 @@
       "slice",
       "split",
       "match"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/external-funcs.ts",
-    "calls": [
-      "extractIR",
-      "validateAction",
-      "extractDirectCalls"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/external-list.ts",
-    "calls": [
-      "extractIR",
-      "validateAction",
-      "extractDirectCalls"
     ]
   },
   {
@@ -2044,74 +1887,6 @@
     "params": [],
     "returnType": "any",
     "returnTypeDetail": "",
-    "file": "src/file-protocols.ts",
-    "calls": [
-      "extractIR",
-      "validateAction",
-      "extractDirectCalls"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/find-violations.ts",
-    "calls": [
-      "getAllSessions",
-      "loadProtocols",
-      "findViolations"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/fingerprint-pass.ts",
-    "calls": [
-      "verifyAllFingerprints",
-      "pass"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/first-attempt.ts",
-    "calls": [
-      "getAllSessions",
-      "findViolations"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/fragile-protocol.ts",
-    "calls": [
-      "getFailureGenome",
-      "getTopFailurePatterns"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/gen-history.ts",
-    "calls": [
-      "getExecutionMetrics",
-      "recordGeneration"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
     "file": "src/generate_500.ts",
     "calls": [
       "extractIRPython",
@@ -2171,38 +1946,6 @@
       "reduce",
       "filter",
       "toFixed"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/genome-summary.ts",
-    "calls": [
-      "getFailureGenome"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/get-hash.ts",
-    "calls": [
-      "getFingerprint",
-      "hash"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/immune-efficiency.ts",
-    "calls": [
-      "getAntibodyStats",
-      "computeDelta"
     ]
   },
   {
@@ -2309,52 +2052,6 @@
     "file": "src/immune-reporter.ts",
     "calls": [
       "extractFingerprints"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/invalidate-rules.ts",
-    "calls": [
-      "loadProtocols",
-      "generateCandidateRules",
-      "hashRules"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/ir-by-file.ts",
-    "calls": [
-      "extractIR",
-      "validateAction",
-      "correctFunctionNames"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/large-sessions.ts",
-    "calls": [
-      "getAllSessions",
-      "getSessionTransitions"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/last-repair.ts",
-    "calls": [
-      "getExecutionMetrics",
-      "getRecentEpisodes"
     ]
   },
   {
@@ -3261,64 +2958,6 @@
     "calls": []
   },
   {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/most-attempts.ts",
-    "calls": [
-      "getAllSessions",
-      "formatSessionSummary"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/most-branches.ts",
-    "calls": [
-      "getExecutionMetrics",
-      "getAllSessions",
-      "findChildBranches"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/most-preconditions.ts",
-    "calls": [
-      "loadProtocols",
-      "getProtocolConfig",
-      "findIndex"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/most-transitions.ts",
-    "calls": [
-      "getAllSessions",
-      "getSessionTransitions"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/namespace-stats.ts",
-    "calls": [
-      "loadProtocols",
-      "parseProtocolsFromJSON",
-      "buildProtocolChainHint"
-    ]
-  },
-  {
     "name": "jsonReply",
     "params": [
       {
@@ -3600,17 +3239,6 @@
       "findTransition",
       "listAllStates",
       "hashLedger"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/param-funcs.ts",
-    "calls": [
-      "extractIR",
-      "listAllStates"
     ]
   },
   {
@@ -3993,29 +3621,6 @@
     ]
   },
   {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/precondition-funcs.ts",
-    "calls": [
-      "loadProtocols",
-      "listAllStates"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/protocol-annotated.ts",
-    "calls": [
-      "extractIR",
-      "loadProtocolsFromIR",
-      "random"
-    ]
-  },
-  {
     "name": "invalidateProtocolCache",
     "params": [],
     "returnType": "void",
@@ -4118,40 +3723,6 @@
       "from",
       "push",
       "convertLines"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/recent-gens.ts",
-    "calls": [
-      "getExecutionMetrics",
-      "getRecentEpisodes"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/repair-branches.ts",
-    "calls": [
-      "getAllSessions",
-      "getAllFailures",
-      "findRootBranch",
-      "findChildBranches"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/repair-pct.ts",
-    "calls": [
-      "getExecutionMetrics"
     ]
   },
   {
@@ -4428,44 +3999,12 @@
     "params": [],
     "returnType": "any",
     "returnTypeDetail": "",
-    "file": "src/repair-ratio.ts",
-    "calls": [
-      "getExecutionMetrics",
-      "toFixed"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/repaired-sessions.ts",
-    "calls": [
-      "getExecutionMetrics",
-      "getAllSessions"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
     "file": "src/report.ts",
     "calls": [
       "log",
       "previewFingerprints",
       "forEach",
       "reportFingerprints"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/resolved-groups.ts",
-    "calls": [
-      "getAllSessions"
     ]
   },
   {
@@ -5986,108 +5525,6 @@
     ]
   },
   {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/session-stats.ts",
-    "calls": [
-      "getAllSessions",
-      "getSessionTransitions"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/session-summary.ts",
-    "calls": [
-      "getAllSessions",
-      "formatSessionSummary"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/sort-attempts.ts",
-    "calls": [
-      "getBranchPath",
-      "getImportPath",
-      "getExecutionMetrics",
-      "getTypeDetail",
-      "getParamType",
-      "getParamTypeDetail",
-      "getReturnType",
-      "getReturnTypeDetail",
-      "getAllFailures",
-      "getFailuresBySVL",
-      "getTopFailurePatterns",
-      "getFailureGenome",
-      "getAllSessions",
-      "getLearnedPatterns",
-      "getSemanticHeatmap",
-      "getAntibodyStats",
-      "getFunctionSuccessRate",
-      "getInstanceId",
-      "getReportCursor",
-      "getFingerprint",
-      "getFingerprintRegistry",
-      "getRecentEpisodes",
-      "getSuccessfulEpisodes",
-      "getIntent",
-      "get",
-      "getSessionTransitions",
-      "getProtocolConfig",
-      "getNsInit",
-      "getRuleHash",
-      "getMinimalFixSet",
-      "getStaticScore",
-      "getCurrentStates",
-      "getNamespaceStates",
-      "getTrace",
-      "getLedger",
-      "getContext",
-      "getElementTypeNode",
-      "getTypeNode",
-      "getReturnTypeNode",
-      "getBody",
-      "getClasses",
-      "getMethods",
-      "getImportDeclarations",
-      "getModuleSpecifierValue",
-      "getNamedImports",
-      "getModuleSpecifierSourceFile",
-      "getNamespaceImport",
-      "getExportedDeclarations",
-      "getMaskedFuncList",
-      "call",
-      "extractDirectCalls",
-      "verifyAllFingerprints",
-      "registerAllMissingFingerprints",
-      "resetCallCount",
-      "generateFallbackPlan",
-      "listAllStates",
-      "formatSessionSummary",
-      "scanDir",
-      "generateCandidateRules",
-      "handleAPI",
-      "handleLedgerAPI",
-      "handleConsistencyAPI",
-      "handleDiffAPI",
-      "handleReplayAPI",
-      "runAndCheck",
-      "random",
-      "handler",
-      "findSnapshotBySession",
-      "formatHeatmap",
-      "toFixed",
-      "attemptSSGRepair"
-    ]
-  },
-  {
     "name": "toSnapshot",
     "params": [
       {
@@ -6708,105 +6145,6 @@
     "calls": []
   },
   {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/success-sessions.ts",
-    "calls": [
-      "getAllSessions",
-      "getSuccessfulEpisodes"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/svl-counts.ts",
-    "calls": [
-      "getFailureGenome",
-      "getFailuresBySVL"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/svl4-total.ts",
-    "calls": [
-      "getFailureGenome",
-      "getFailuresBySVL"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/tampered-list.ts",
-    "calls": [
-      "verifyAllFingerprints"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/today-gens.ts",
-    "calls": [
-      "getExecutionMetrics",
-      "getMethods"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/tokens-saved.ts",
-    "calls": [
-      "getAntibodyStats",
-      "estimateTokens"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/top-fixpath.ts",
-    "calls": [
-      "getAntibodyStats",
-      "getStaticScore"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/top-pattern.ts",
-    "calls": [
-      "getFailureGenome",
-      "getTopFailurePatterns"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/top-violation.ts",
-    "calls": [
-      "getFailureGenome",
-      "getAllFailures",
-      "findViolations"
-    ]
-  },
-  {
     "name": "jaccardSimilarity",
     "params": [
       {
@@ -6959,40 +6297,6 @@
     }
   },
   {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/verify-fingerprints.ts",
-    "calls": [
-      "getAllSessions",
-      "getFingerprint",
-      "verifyFingerprint"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/verify-one.ts",
-    "calls": [
-      "verifyFingerprint"
-    ]
-  },
-  {
-    "name": "main",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "",
-    "file": "src/void-funcs.ts",
-    "calls": [
-      "extractIR",
-      "validateAction",
-      "getReturnType"
-    ]
-  },
-  {
     "name": "fn",
     "params": [],
     "returnType": "any",
@@ -7142,15 +6446,6 @@
     "description": "解析 JSON 字符串"
   },
   {
-    "name": "findIndex",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "any",
-    "file": "(external)",
-    "calls": [],
-    "external": true
-  },
-  {
     "name": "now",
     "params": [],
     "returnType": "number",
@@ -7172,6 +6467,15 @@
   },
   {
     "name": "add",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "findIndex",
     "params": [],
     "returnType": "any",
     "returnTypeDetail": "any",
@@ -7632,15 +6936,6 @@
     "external": true
   },
   {
-    "name": "hash",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "any",
-    "file": "(external)",
-    "calls": [],
-    "external": true
-  },
-  {
     "name": "hostname",
     "params": [],
     "returnType": "any",
@@ -7866,61 +7161,16 @@
     "description": "退出进程"
   },
   {
-    "name": "getIntent",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "any",
-    "file": "(external)",
-    "calls": [],
-    "external": true
-  },
-  {
-    "name": "getCurrentStates",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "any",
-    "file": "(external)",
-    "calls": [],
-    "external": true
-  },
-  {
-    "name": "getNamespaceStates",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "any",
-    "file": "(external)",
-    "calls": [],
-    "external": true
-  },
-  {
-    "name": "getLedger",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "any",
-    "file": "(external)",
-    "calls": [],
-    "external": true
-  },
-  {
-    "name": "getContext",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "any",
-    "file": "(external)",
-    "calls": [],
-    "external": true
-  },
-  {
-    "name": "call",
-    "params": [],
-    "returnType": "any",
-    "returnTypeDetail": "any",
-    "file": "(external)",
-    "calls": [],
-    "external": true
-  },
-  {
     "name": "normalizeSnap",
+    "params": [],
+    "returnType": "any",
+    "returnTypeDetail": "any",
+    "file": "(external)",
+    "calls": [],
+    "external": true
+  },
+  {
+    "name": "hash",
     "params": [],
     "returnType": "any",
     "returnTypeDetail": "any",
