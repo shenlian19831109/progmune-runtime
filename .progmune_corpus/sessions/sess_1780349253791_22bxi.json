@@ -1,0 +1,235 @@
+{
+  "sessionId": "sess_1780349253791_22bxi",
+  "intent": "get the antibody statistics and compute the immune efficiency",
+  "attempts": [
+    {
+      "id": "att_1780349255286_5jb2m",
+      "sessionId": "sess_1780349253791_22bxi",
+      "attemptNumber": 1,
+      "inputIntent": "get the antibody statistics and compute the immune efficiency",
+      "plannerSeed": "23288d45",
+      "constraintSnapshotId": "snap_1780349253796_ff8fd39a5e00",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getAntibodyStats",
+          "args": [],
+          "assignTo": "stats"
+        },
+        {
+          "kind": "call",
+          "function": "computeACL",
+          "args": [
+            {
+              "name": "count",
+              "type": "number",
+              "value": "stats.totalHits"
+            },
+            {
+              "name": "distinctIntents",
+              "type": "number",
+              "value": "stats.totalLLMCallsSaved"
+            },
+            {
+              "name": "resolvedRate",
+              "type": "number",
+              "value": "stats.totalTokensSaved"
+            }
+          ],
+          "assignTo": "efficiency"
+        },
+        {
+          "kind": "return",
+          "value": "efficiency"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getAntibodyStats",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "computeACL",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780349255286,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780349253792,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780349255286_5jb2m",
+    "sessionId": "sess_1780349253791_22bxi",
+    "attemptNumber": 1,
+    "inputIntent": "get the antibody statistics and compute the immune efficiency",
+    "plannerSeed": "23288d45",
+    "constraintSnapshotId": "snap_1780349253796_ff8fd39a5e00",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getAntibodyStats",
+        "args": [],
+        "assignTo": "stats"
+      },
+      {
+        "kind": "call",
+        "function": "computeACL",
+        "args": [
+          {
+            "name": "count",
+            "type": "number",
+            "value": "stats.totalHits"
+          },
+          {
+            "name": "distinctIntents",
+            "type": "number",
+            "value": "stats.totalLLMCallsSaved"
+          },
+          {
+            "name": "resolvedRate",
+            "type": "number",
+            "value": "stats.totalTokensSaved"
+          }
+        ],
+        "assignTo": "efficiency"
+      },
+      {
+        "kind": "return",
+        "value": "efficiency"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getAntibodyStats",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "computeACL",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780349255286,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780349253796_ff8fd39a5e00",
+  "endedAt": 1780349255289
+}
