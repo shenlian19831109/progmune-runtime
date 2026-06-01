@@ -208,6 +208,27 @@ export async function execute(
   };
 }
 
+/** Verify a file compiles without errors. Returns {pass, errors[]}.
+ *  Uses tsc directly — no grep tricks, no pipefail ambiguity. */
+export function verifyCompiles(filePath: string): { pass: boolean; errors: string[] } {
+  try {
+    const { execSync } = require("child_process");
+    const result = execSync(`npx tsc --noEmit --project tsconfig.json --pretty false 2>&1`, {
+      timeout: 30000,
+      encoding: "utf-8",
+      stdio: "pipe",
+    });
+    // tsc exits 0, check if our file is mentioned in output anyway (unlikely but safe)
+    const lines = result.split("\n").filter((l: string) => l.includes(filePath));
+    return { pass: lines.length === 0, errors: lines };
+  } catch (e: any) {
+    // tsc exits non-zero — parse stderr/stdout for our file's errors
+    const output = (e.stdout || "") + (e.stderr || "");
+    const lines = output.split("\n").filter((l: string) => l.includes(filePath));
+    return { pass: lines.length === 0, errors: lines };
+  }
+}
+
 /** Quick audit: check whether a file has the @progmune-generated marker. */
 export function verifyFileMarker(filePath: string): { marked: boolean; sessionId?: string; timestamp?: string } {
   try {

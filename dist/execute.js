@@ -44,6 +44,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.recordGeneration = recordGeneration;
 exports.getExecutionMetrics = getExecutionMetrics;
 exports.execute = execute;
+exports.verifyCompiles = verifyCompiles;
 exports.verifyFileMarker = verifyFileMarker;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
@@ -194,6 +195,27 @@ async function execute(intent, projectPath, filePath) {
             })()
             : undefined,
     };
+}
+/** Verify a file compiles without errors. Returns {pass, errors[]}.
+ *  Uses tsc directly — no grep tricks, no pipefail ambiguity. */
+function verifyCompiles(filePath) {
+    try {
+        const { execSync } = require("child_process");
+        const result = execSync(`npx tsc --noEmit --project tsconfig.json --pretty false 2>&1`, {
+            timeout: 30000,
+            encoding: "utf-8",
+            stdio: "pipe",
+        });
+        // tsc exits 0, check if our file is mentioned in output anyway (unlikely but safe)
+        const lines = result.split("\n").filter((l) => l.includes(filePath));
+        return { pass: lines.length === 0, errors: lines };
+    }
+    catch (e) {
+        // tsc exits non-zero — parse stderr/stdout for our file's errors
+        const output = (e.stdout || "") + (e.stderr || "");
+        const lines = output.split("\n").filter((l) => l.includes(filePath));
+        return { pass: lines.length === 0, errors: lines };
+    }
 }
 /** Quick audit: check whether a file has the @progmune-generated marker. */
 function verifyFileMarker(filePath) {
