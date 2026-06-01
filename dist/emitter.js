@@ -87,7 +87,8 @@ function emitCode(actions, meta) {
             const file = fnIndex.get(action.function);
             const meta = fnMeta.get(action.function);
             // Skip external functions — they are global/standard library (fs, path, etc.)
-            if (file && file !== "(external)") {
+            // Skip non-exported functions — can't import what isn't exported
+            if (file && file !== "(external)" && meta?.exported !== false) {
                 if (!imports.has(file))
                     imports.set(file, new Set());
                 imports.get(file).add(action.function);

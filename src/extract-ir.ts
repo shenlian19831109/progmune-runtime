@@ -16,6 +16,8 @@ interface FunctionInfo {
   returnTypeDetail?: string;
   file: string;
   calls: string[];
+  /** 是否为导出函数（只有导出的才能被 import） */
+  exported?: boolean;
   /** 外部导入函数（非本项目声明） */
   external?: boolean;
   /** 外部函数的描述 */
@@ -152,6 +154,7 @@ export function extractIR(projectRoot: string): FunctionInfo[] {
         returnTypeDetail: getReturnTypeDetail(f),
         file: relPath,
         calls: extractDirectCalls(f),
+        exported: f.isExported(),
         protocol: parseProtocolFromJSDoc(f),
       });
     }
@@ -172,6 +175,7 @@ export function extractIR(projectRoot: string): FunctionInfo[] {
           returnType: getReturnType(init),
           returnTypeDetail: getReturnTypeDetail(init),
           file: relPath,
+          exported: vd.isExported(),
           calls: extractDirectCalls(init),
 	        protocol: parseProtocolFromJSDoc(vd),
         });
@@ -192,6 +196,7 @@ export function extractIR(projectRoot: string): FunctionInfo[] {
               returnType: getReturnType(arg),
               returnTypeDetail: getReturnTypeDetail(arg),
               file: relPath,
+          exported: vd.isExported(),
               calls: extractDirectCalls(arg),
 	            protocol: parseProtocolFromJSDoc(vd),
             });
@@ -212,7 +217,8 @@ export function extractIR(projectRoot: string): FunctionInfo[] {
             params: m.getParameters().map((p: any) => ({ name: p.getName(), type: getParamType(p), typeDetail: getParamTypeDetail(p) })),
             returnType: (m as any).getReturnTypeNode?.()?.getText?.() || "any",
             returnTypeDetail: (m as any).getReturnTypeNode?.()?.getText?.() || "any",
-            file: relPath, calls: [],
+            file: relPath,
+          exported: vd.isExported(), calls: [],
             protocol: parseProtocolFromJSDoc(m),
           });
         }

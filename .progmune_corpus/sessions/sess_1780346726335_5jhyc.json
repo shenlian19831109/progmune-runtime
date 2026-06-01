@@ -1,0 +1,405 @@
+{
+  "sessionId": "sess_1780346726335_5jhyc",
+  "intent": "compare two fingerprint hashes and return whether they match",
+  "attempts": [
+    {
+      "id": "att_1780346728076_mndnx",
+      "sessionId": "sess_1780346726335_5jhyc",
+      "attemptNumber": 1,
+      "inputIntent": "compare two fingerprint hashes and return whether they match",
+      "plannerSeed": "95e50fc3",
+      "constraintSnapshotId": "snap_1780346726336_ff8fd39a5e00",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getFingerprintRegistry",
+          "args": [],
+          "assignTo": "registry"
+        },
+        {
+          "kind": "call",
+          "function": "getReturnType",
+          "args": [
+            {
+              "name": "func",
+              "type": "FunctionDeclaration | ArrowFunction",
+              "value": "registry"
+            }
+          ],
+          "assignTo": "type1"
+        },
+        {
+          "kind": "call",
+          "function": "getReturnType",
+          "args": [
+            {
+              "name": "func",
+              "type": "FunctionDeclaration | ArrowFunction",
+              "value": "registry"
+            }
+          ],
+          "assignTo": "type2"
+        },
+        {
+          "kind": "call",
+          "function": "matchIntent",
+          "args": [
+            {
+              "name": "intent",
+              "type": "string",
+              "value": "compare fingerprints"
+            },
+            {
+              "name": "keywords",
+              "type": "string[]",
+              "value": [
+                "fingerprint",
+                "compare",
+                "match"
+              ]
+            }
+          ],
+          "assignTo": "match"
+        },
+        {
+          "kind": "return",
+          "value": "match"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getFingerprintRegistry",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "getReturnType",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 2,
+          "function": "getReturnType",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 3,
+          "function": "matchIntent",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780346728076,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780346726335,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780346728076_mndnx",
+    "sessionId": "sess_1780346726335_5jhyc",
+    "attemptNumber": 1,
+    "inputIntent": "compare two fingerprint hashes and return whether they match",
+    "plannerSeed": "95e50fc3",
+    "constraintSnapshotId": "snap_1780346726336_ff8fd39a5e00",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getFingerprintRegistry",
+        "args": [],
+        "assignTo": "registry"
+      },
+      {
+        "kind": "call",
+        "function": "getReturnType",
+        "args": [
+          {
+            "name": "func",
+            "type": "FunctionDeclaration | ArrowFunction",
+            "value": "registry"
+          }
+        ],
+        "assignTo": "type1"
+      },
+      {
+        "kind": "call",
+        "function": "getReturnType",
+        "args": [
+          {
+            "name": "func",
+            "type": "FunctionDeclaration | ArrowFunction",
+            "value": "registry"
+          }
+        ],
+        "assignTo": "type2"
+      },
+      {
+        "kind": "call",
+        "function": "matchIntent",
+        "args": [
+          {
+            "name": "intent",
+            "type": "string",
+            "value": "compare fingerprints"
+          },
+          {
+            "name": "keywords",
+            "type": "string[]",
+            "value": [
+              "fingerprint",
+              "compare",
+              "match"
+            ]
+          }
+        ],
+        "assignTo": "match"
+      },
+      {
+        "kind": "return",
+        "value": "match"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getFingerprintRegistry",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "getReturnType",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 2,
+        "function": "getReturnType",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 3,
+        "function": "matchIntent",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780346728076,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780346726336_ff8fd39a5e00",
+  "endedAt": 1780346728084
+}

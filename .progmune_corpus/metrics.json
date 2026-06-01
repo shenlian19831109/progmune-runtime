@@ -1,32 +1,8 @@
 {
-  "generated": 151,
+  "generated": 154,
   "repaired": 3,
   "lastGeneration": "src/compare-hashes.ts",
   "history": [
-    {
-      "sessionId": "sess_1780294937806_g72xd",
-      "timestamp": 1780294939488,
-      "filePath": "src/most-attempts.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 397
-    },
-    {
-      "sessionId": "sess_1780294953811_r61gt",
-      "timestamp": 1780294955500,
-      "filePath": "src/repair-pct.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 398
-    },
-    {
-      "sessionId": "sess_1780295036730_lj1bt",
-      "timestamp": 1780295038537,
-      "filePath": "src/find-violations.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 399
-    },
     {
       "sessionId": "sess_1780295055187_wi0yi",
       "timestamp": 1780295056696,
@@ -802,6 +778,30 @@
       "repaired": false,
       "repairCount": 0,
       "irFunctionCount": 392
+    },
+    {
+      "sessionId": "sess_1780346660817_bcum7",
+      "timestamp": 1780346662831,
+      "filePath": "src/ir-total.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 392
+    },
+    {
+      "sessionId": "sess_1780346699127_0zd19",
+      "timestamp": 1780346700507,
+      "filePath": "src/check-violations.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 393
+    },
+    {
+      "sessionId": "sess_1780346726335_5jhyc",
+      "timestamp": 1780346728089,
+      "filePath": "src/compare-hashes.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 393
     }
   ]
 }

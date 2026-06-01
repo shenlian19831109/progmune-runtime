@@ -166,6 +166,7 @@ function extractIR(projectRoot) {
                 returnTypeDetail: getReturnTypeDetail(f),
                 file: relPath,
                 calls: extractDirectCalls(f),
+                exported: f.isExported(),
                 protocol: parseProtocolFromJSDoc(f),
             });
         }
@@ -187,6 +188,7 @@ function extractIR(projectRoot) {
                     returnType: getReturnType(init),
                     returnTypeDetail: getReturnTypeDetail(init),
                     file: relPath,
+                    exported: vd.isExported(),
                     calls: extractDirectCalls(init),
                     protocol: parseProtocolFromJSDoc(vd),
                 });
@@ -207,6 +209,7 @@ function extractIR(projectRoot) {
                             returnType: getReturnType(arg),
                             returnTypeDetail: getReturnTypeDetail(arg),
                             file: relPath,
+                            exported: vd.isExported(),
                             calls: extractDirectCalls(arg),
                             protocol: parseProtocolFromJSDoc(vd),
                         });
@@ -228,7 +231,8 @@ function extractIR(projectRoot) {
                         params: m.getParameters().map((p) => ({ name: p.getName(), type: getParamType(p), typeDetail: getParamTypeDetail(p) })),
                         returnType: m.getReturnTypeNode?.()?.getText?.() || "any",
                         returnTypeDetail: m.getReturnTypeNode?.()?.getText?.() || "any",
-                        file: relPath, calls: [],
+                        file: relPath,
+                        exported: vd.isExported(), calls: [],
                         protocol: parseProtocolFromJSDoc(m),
                     });
                 }
