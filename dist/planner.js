@@ -621,12 +621,35 @@ async function plan(userIntent) {
         console.error(`💉 ACL-3 抗体注入提示: ${top.fixPath.join(" → ")}`);
     }
     const keywords = (0, utils_1.extractKeywords)(userIntent);
+    const intentLower = userIntent.toLowerCase();
     const scored = ir.map((f) => {
         let score = 0;
+        // Name match (existing)
         for (const kw of keywords) {
             score += (0, utils_1.jaccardSimilarity)(f.name.toLowerCase(), kw);
             if (f.name.toLowerCase().includes(kw))
                 score += 0.5;
+        }
+        // Capability Graph: purpose match
+        if (f.purpose) {
+            const purposeLower = f.purpose.toLowerCase();
+            for (const kw of keywords) {
+                if (purposeLower.includes(kw))
+                    score += 1.0; // strong signal
+            }
+            // Full intent overlap with purpose
+            const intentWords = intentLower.split(/[\s,，]+/);
+            for (const w of intentWords) {
+                if (w.length > 2 && purposeLower.includes(w))
+                    score += 0.3;
+            }
+        }
+        // Capability Graph: tag match
+        if (f.tags) {
+            for (const tag of f.tags) {
+                if (intentLower.includes(tag.toLowerCase()))
+                    score += 0.8;
+            }
         }
         return { ...f, score };
     });

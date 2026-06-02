@@ -80,7 +80,7 @@ function parseCapabilityFromJSDoc(node) {
 /** Auto-derive tags from function's source file name */
 function deriveTagsFromFile(filePath) {
     const name = filePath.replace(/\.ts$/, "").replace(/^src\//, "");
-    const tags = name.split(/[\/\-]/).filter(t => t.length > 1 && t !== "src");
+    const tags = name.split(/[\/\-]/).filter(t => t.length > 2 && t !== "src");
     return [...new Set(tags)];
 }
 /** 从 JSDoc 注释中解析 @protocol 注解 */
