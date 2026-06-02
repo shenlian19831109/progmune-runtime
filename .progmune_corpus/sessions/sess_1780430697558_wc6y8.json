@@ -1,0 +1,1318 @@
+{
+  "sessionId": "sess_1780430697558_wc6y8",
+  "intent": "connect to a database and execute a SQL query",
+  "attempts": [
+    {
+      "id": "att_1780430699395_hrw2t",
+      "sessionId": "sess_1780430697558_wc6y8",
+      "attemptNumber": 1,
+      "inputIntent": "connect to a database and execute a SQL query",
+      "plannerSeed": "d973bdc4",
+      "constraintSnapshotId": "snap_1780430697559_db5b608fb193",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "connect_db",
+          "args": [
+            {
+              "name": "host",
+              "type": "str",
+              "value": "localhost"
+            },
+            {
+              "name": "port",
+              "type": "int",
+              "value": 5432
+            }
+          ],
+          "assignTo": "dbConn"
+        },
+        {
+          "kind": "call",
+          "function": "query_db",
+          "args": [
+            {
+              "name": "connection",
+              "type": "any",
+              "value": "dbConn"
+            },
+            {
+              "name": "sql",
+              "type": "str",
+              "value": "SELECT * FROM users"
+            }
+          ]
+        }
+      ],
+      "transitions": [],
+      "violations": [
+        {
+          "svl": 1,
+          "violatedConstraint": "symbol_existence",
+          "actionIndex": 0,
+          "missingStates": [
+            "connect_db"
+          ],
+          "description": "函数 'connect_db' 不存在"
+        },
+        {
+          "svl": 1,
+          "violatedConstraint": "symbol_existence",
+          "actionIndex": 1,
+          "missingStates": [
+            "query_db"
+          ],
+          "description": "函数 'query_db' 不存在"
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780430699396,
+      "llmCallCount": 0,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    },
+    {
+      "id": "att_1780430700536_iab99",
+      "sessionId": "sess_1780430697558_wc6y8",
+      "attemptNumber": 2,
+      "inputIntent": "connect to a database and execute a SQL query",
+      "plannerSeed": "9be15b70",
+      "constraintSnapshotId": "snap_1780430697559_db5b608fb193",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "connect_db",
+          "args": [],
+          "assignTo": "dbConn"
+        },
+        {
+          "kind": "call",
+          "function": "query_db",
+          "args": [
+            {
+              "name": "arg",
+              "type": "any",
+              "value": null
+            }
+          ],
+          "assignTo": "result"
+        }
+      ],
+      "transitions": [],
+      "violations": [
+        {
+          "svl": 1,
+          "violatedConstraint": "symbol_existence",
+          "actionIndex": 0,
+          "missingStates": [
+            "connect_db"
+          ],
+          "description": "函数 'connect_db' 不存在"
+        },
+        {
+          "svl": 1,
+          "violatedConstraint": "symbol_existence",
+          "actionIndex": 1,
+          "missingStates": [
+            "query_db"
+          ],
+          "description": "函数 'query_db' 不存在"
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780430700536,
+      "llmCallCount": 0,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    },
+    {
+      "id": "att_1780430701529_5ttsv",
+      "sessionId": "sess_1780430697558_wc6y8",
+      "attemptNumber": 3,
+      "inputIntent": "connect to a database and execute a SQL query",
+      "plannerSeed": "fcc55eee",
+      "constraintSnapshotId": "snap_1780430697559_db5b608fb193",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "connect_db",
+          "args": [],
+          "assignTo": "dbConn"
+        },
+        {
+          "kind": "call",
+          "function": "query_db",
+          "args": [
+            {
+              "name": "arg",
+              "type": "any",
+              "value": null
+            }
+          ],
+          "assignTo": "result"
+        }
+      ],
+      "transitions": [],
+      "violations": [
+        {
+          "svl": 1,
+          "violatedConstraint": "symbol_existence",
+          "actionIndex": 0,
+          "missingStates": [
+            "connect_db"
+          ],
+          "description": "函数 'connect_db' 不存在"
+        },
+        {
+          "svl": 1,
+          "violatedConstraint": "symbol_existence",
+          "actionIndex": 1,
+          "missingStates": [
+            "query_db"
+          ],
+          "description": "函数 'query_db' 不存在"
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780430701535,
+      "llmCallCount": 0,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    },
+    {
+      "id": "att_1780430701542_kuim7",
+      "sessionId": "sess_1780430697558_wc6y8",
+      "attemptNumber": 4,
+      "inputIntent": "connect to a database and execute a SQL query",
+      "plannerSeed": "450e37fd",
+      "constraintSnapshotId": "snap_1780430697559_db5b608fb193",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "auditDirectory",
+          "args": [
+            {
+              "name": "dir",
+              "type": "string",
+              "value": "{{dir}}"
+            },
+            {
+              "name": "threshold",
+              "type": "any",
+              "value": "{{threshold}}"
+            }
+          ],
+          "assignTo": "auditDirectory_result"
+        },
+        {
+          "kind": "call",
+          "function": "parseProtocolFromJSDoc",
+          "args": [
+            {
+              "name": "node",
+              "type": "any",
+              "value": "{{node}}"
+            }
+          ],
+          "assignTo": "parseProtocolFromJSDoc_result"
+        },
+        {
+          "kind": "call",
+          "function": "getTopFailurePatterns",
+          "args": [
+            {
+              "name": "limit",
+              "type": "number",
+              "value": "{{limit}}"
+            }
+          ],
+          "assignTo": "getTopFailurePatterns_result"
+        },
+        {
+          "kind": "call",
+          "function": "convertOldSession",
+          "args": [
+            {
+              "name": "old",
+              "type": "IntentSession",
+              "value": "{{old}}"
+            }
+          ],
+          "assignTo": "convertOldSession_result"
+        },
+        {
+          "kind": "call",
+          "function": "estimateTokens",
+          "args": [
+            {
+              "name": "text",
+              "type": "string",
+              "value": "{{text}}"
+            }
+          ],
+          "assignTo": "estimateTokens_result"
+        },
+        {
+          "kind": "call",
+          "function": "loadProtocolsFromFile",
+          "args": [
+            {
+              "name": "filePath",
+              "type": "string",
+              "value": "{{filePath}}"
+            }
+          ],
+          "assignTo": "loadProtocolsFromFile_result"
+        },
+        {
+          "kind": "call",
+          "function": "loadProtocolsFromIR",
+          "args": [
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": "{{ir}}"
+            }
+          ],
+          "assignTo": "loadProtocolsFromIR_result"
+        },
+        {
+          "kind": "call",
+          "function": "buildProtocolChainHint",
+          "args": [
+            {
+              "name": "protocols",
+              "type": "FunctionProtocol[]",
+              "value": "{{protocols}}"
+            }
+          ],
+          "assignTo": "buildProtocolChainHint_result"
+        },
+        {
+          "kind": "call",
+          "function": "loadProtocols",
+          "args": [
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": "{{ir}}"
+            }
+          ],
+          "assignTo": "loadProtocols_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateProtocolWithTransitions",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": "{{actions}}"
+            },
+            {
+              "name": "protocols",
+              "type": "FunctionProtocol[]",
+              "value": "{{protocols}}"
+            },
+            {
+              "name": "namespaceInitialStates",
+              "type": "Map<string, string>",
+              "value": "{{namespaceInitialStates}}"
+            }
+          ],
+          "assignTo": "validateProtocolWithTransitions_result"
+        },
+        {
+          "kind": "call",
+          "function": "invalidateProtocolCache",
+          "args": []
+        },
+        {
+          "kind": "call",
+          "function": "getProtocolConfig",
+          "args": [],
+          "assignTo": "getProtocolConfig_result"
+        },
+        {
+          "kind": "call",
+          "function": "toPythonModule",
+          "args": [
+            {
+              "name": "filePath",
+              "type": "string",
+              "value": "{{filePath}}"
+            }
+          ],
+          "assignTo": "toPythonModule_result"
+        },
+        {
+          "kind": "call",
+          "function": "suggestProtocolRepair",
+          "args": [
+            {
+              "name": "rejection",
+              "type": "SSGRejection",
+              "value": "{{rejection}}"
+            },
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": "{{ir}}"
+            }
+          ],
+          "assignTo": "suggestProtocolRepair_result"
+        },
+        {
+          "kind": "call",
+          "function": "toSnapshot",
+          "args": [
+            {
+              "name": "stateMap",
+              "type": "Map<string, Set<string>>",
+              "value": "{{stateMap}}"
+            }
+          ],
+          "assignTo": "toSnapshot_result"
+        },
+        {
+          "kind": "call",
+          "function": "rejectionToJSON",
+          "args": [
+            {
+              "name": "rejection",
+              "type": "SSGRejection",
+              "value": "{{rejection}}"
+            }
+          ],
+          "assignTo": "rejectionToJSON_result"
+        },
+        {
+          "kind": "call",
+          "function": "parseProtocolsFromJSON",
+          "args": [
+            {
+              "name": "protocolDef",
+              "type": "{\n    rules: Record<string, {\n      pre_states: string[];\n      post_states: string[];\n      invalidate?: string[];\n      namespace?: string;\n    }>;\n  }",
+              "value": "{{protocolDef}}"
+            }
+          ],
+          "assignTo": "parseProtocolsFromJSON_result"
+        },
+        {
+          "kind": "call",
+          "function": "StateMachineValidator.setNamespaceInitialState",
+          "args": [
+            {
+              "name": "namespace",
+              "type": "string",
+              "value": "{{namespace}}"
+            },
+            {
+              "name": "state",
+              "type": "string",
+              "value": "{{state}}"
+            }
+          ]
+        },
+        {
+          "kind": "call",
+          "function": "StateMachineValidator.apply",
+          "args": [
+            {
+              "name": "functionName",
+              "type": "string",
+              "value": "{{functionName}}"
+            },
+            {
+              "name": "actionIndex",
+              "type": "number",
+              "value": "{{actionIndex}}"
+            }
+          ],
+          "assignTo": "StateMachineValidator.apply_result"
+        },
+        {
+          "kind": "call",
+          "function": "StateMachineValidator.applyWithTransition",
+          "args": [
+            {
+              "name": "functionName",
+              "type": "string",
+              "value": "{{functionName}}"
+            },
+            {
+              "name": "actionIndex",
+              "type": "number",
+              "value": "{{actionIndex}}"
+            }
+          ],
+          "assignTo": "StateMachineValidator.applyWithTransition_result"
+        },
+        {
+          "kind": "call",
+          "function": "StateMachineValidator.getCurrentStates",
+          "args": [],
+          "assignTo": "StateMachineValidator.getCurrentStates_result"
+        },
+        {
+          "kind": "call",
+          "function": "StateMachineValidator.snapshotNamespaceStates",
+          "args": [],
+          "assignTo": "StateMachineValidator.snapshotNamespaceStates_result"
+        },
+        {
+          "kind": "call",
+          "function": "StateMachineValidator.getNamespaceStates",
+          "args": [
+            {
+              "name": "namespace",
+              "type": "string",
+              "value": "{{namespace}}"
+            }
+          ],
+          "assignTo": "StateMachineValidator.getNamespaceStates_result"
+        },
+        {
+          "kind": "call",
+          "function": "StateMachineValidator.getTrace",
+          "args": [],
+          "assignTo": "StateMachineValidator.getTrace_result"
+        },
+        {
+          "kind": "call",
+          "function": "StateMachineValidator.getLedger",
+          "args": [],
+          "assignTo": "StateMachineValidator.getLedger_result"
+        },
+        {
+          "kind": "call",
+          "function": "StateMachineValidator.getContext",
+          "args": [],
+          "assignTo": "StateMachineValidator.getContext_result"
+        },
+        {
+          "kind": "call",
+          "function": "StateMachineValidator.getRuleHash",
+          "args": [],
+          "assignTo": "StateMachineValidator.getRuleHash_result"
+        },
+        {
+          "kind": "call",
+          "function": "StateMachineValidator.explainRejection",
+          "args": [
+            {
+              "name": "rejection",
+              "type": "SSGRejection",
+              "value": "{{rejection}}"
+            }
+          ],
+          "assignTo": "StateMachineValidator.explainRejection_result"
+        },
+        {
+          "kind": "call",
+          "function": "StateMachineValidator.rejectionToJSON",
+          "args": [
+            {
+              "name": "rejection",
+              "type": "SSGRejection",
+              "value": "{{rejection}}"
+            }
+          ],
+          "assignTo": "StateMachineValidator.rejectionToJSON_result"
+        },
+        {
+          "kind": "call",
+          "function": "toFixed",
+          "args": [],
+          "assignTo": "toFixed_result"
+        },
+        {
+          "kind": "call",
+          "function": "toLocaleString",
+          "args": []
+        },
+        {
+          "kind": "call",
+          "function": "scanDir",
+          "args": [
+            {
+              "name": "rootDir",
+              "type": "string",
+              "value": "{{rootDir}}"
+            },
+            {
+              "name": "currentDir",
+              "type": "string",
+              "value": "{{currentDir}}"
+            },
+            {
+              "name": "result",
+              "type": "AuditResult",
+              "value": "{{result}}"
+            }
+          ]
+        },
+        {
+          "kind": "call",
+          "function": "generateCandidateRules",
+          "args": [],
+          "assignTo": "generateCandidateRules_result"
+        },
+        {
+          "kind": "call",
+          "function": "handleAPI",
+          "args": [
+            {
+              "name": "req",
+              "type": "http.IncomingMessage",
+              "value": "{{req}}"
+            },
+            {
+              "name": "res",
+              "type": "http.ServerResponse",
+              "value": "{{res}}"
+            }
+          ],
+          "assignTo": "handleAPI_result"
+        },
+        {
+          "kind": "call",
+          "function": "handleLedgerAPI",
+          "args": [
+            {
+              "name": "res",
+              "type": "http.ServerResponse",
+              "value": "{{res}}"
+            },
+            {
+              "name": "url",
+              "type": "URL",
+              "value": "{{url}}"
+            }
+          ],
+          "assignTo": "handleLedgerAPI_result"
+        },
+        {
+          "kind": "call",
+          "function": "handleConsistencyAPI",
+          "args": [
+            {
+              "name": "res",
+              "type": "http.ServerResponse",
+              "value": "{{res}}"
+            },
+            {
+              "name": "url",
+              "type": "URL",
+              "value": "{{url}}"
+            }
+          ],
+          "assignTo": "handleConsistencyAPI_result"
+        },
+        {
+          "kind": "call",
+          "function": "handleDiffAPI",
+          "args": [
+            {
+              "name": "res",
+              "type": "http.ServerResponse",
+              "value": "{{res}}"
+            },
+            {
+              "name": "url",
+              "type": "URL",
+              "value": "{{url}}"
+            }
+          ],
+          "assignTo": "handleDiffAPI_result"
+        },
+        {
+          "kind": "call",
+          "function": "handleReplayAPI",
+          "args": [
+            {
+              "name": "res",
+              "type": "http.ServerResponse",
+              "value": "{{res}}"
+            },
+            {
+              "name": "url",
+              "type": "URL",
+              "value": "{{url}}"
+            }
+          ],
+          "assignTo": "handleReplayAPI_result"
+        },
+        {
+          "kind": "call",
+          "function": "runAndCheck",
+          "args": [
+            {
+              "name": "code",
+              "type": "string",
+              "value": "{{code}}"
+            }
+          ],
+          "assignTo": "runAndCheck_result"
+        },
+        {
+          "kind": "call",
+          "function": "random",
+          "args": [],
+          "assignTo": "random_result"
+        },
+        {
+          "kind": "call",
+          "function": "handler",
+          "args": [],
+          "assignTo": "handler_result"
+        },
+        {
+          "kind": "call",
+          "function": "executeActionCode",
+          "args": [
+            {
+              "name": "code",
+              "type": "string",
+              "value": "{{code}}"
+            }
+          ],
+          "assignTo": "executeActionCode_result"
+        },
+        {
+          "kind": "call",
+          "function": "execute",
+          "args": [
+            {
+              "name": "intent",
+              "type": "string",
+              "value": "{{intent}}"
+            },
+            {
+              "name": "projectPath",
+              "type": "string",
+              "value": "{{projectPath}}"
+            },
+            {
+              "name": "filePath",
+              "type": "string",
+              "value": "{{filePath}}"
+            }
+          ],
+          "assignTo": "execute_result"
+        },
+        {
+          "kind": "call",
+          "function": "queryAntibodies",
+          "args": [
+            {
+              "name": "intent",
+              "type": "string",
+              "value": "{{intent}}"
+            },
+            {
+              "name": "minACL",
+              "type": "AntibodyLevel",
+              "value": "{{minACL}}"
+            }
+          ],
+          "assignTo": "queryAntibodies_result"
+        },
+        {
+          "kind": "call",
+          "function": "formatCrossSessionQuery",
+          "args": [
+            {
+              "name": "operation",
+              "type": "string",
+              "value": "{{operation}}"
+            },
+            {
+              "name": "state",
+              "type": "string",
+              "value": "{{state}}"
+            }
+          ],
+          "assignTo": "formatCrossSessionQuery_result"
+        }
+      ],
+      "transitions": [],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780430701542,
+      "llmCallCount": 0,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780430697558,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780430701542_kuim7",
+    "sessionId": "sess_1780430697558_wc6y8",
+    "attemptNumber": 4,
+    "inputIntent": "connect to a database and execute a SQL query",
+    "plannerSeed": "450e37fd",
+    "constraintSnapshotId": "snap_1780430697559_db5b608fb193",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "auditDirectory",
+        "args": [
+          {
+            "name": "dir",
+            "type": "string",
+            "value": "{{dir}}"
+          },
+          {
+            "name": "threshold",
+            "type": "any",
+            "value": "{{threshold}}"
+          }
+        ],
+        "assignTo": "auditDirectory_result"
+      },
+      {
+        "kind": "call",
+        "function": "parseProtocolFromJSDoc",
+        "args": [
+          {
+            "name": "node",
+            "type": "any",
+            "value": "{{node}}"
+          }
+        ],
+        "assignTo": "parseProtocolFromJSDoc_result"
+      },
+      {
+        "kind": "call",
+        "function": "getTopFailurePatterns",
+        "args": [
+          {
+            "name": "limit",
+            "type": "number",
+            "value": "{{limit}}"
+          }
+        ],
+        "assignTo": "getTopFailurePatterns_result"
+      },
+      {
+        "kind": "call",
+        "function": "convertOldSession",
+        "args": [
+          {
+            "name": "old",
+            "type": "IntentSession",
+            "value": "{{old}}"
+          }
+        ],
+        "assignTo": "convertOldSession_result"
+      },
+      {
+        "kind": "call",
+        "function": "estimateTokens",
+        "args": [
+          {
+            "name": "text",
+            "type": "string",
+            "value": "{{text}}"
+          }
+        ],
+        "assignTo": "estimateTokens_result"
+      },
+      {
+        "kind": "call",
+        "function": "loadProtocolsFromFile",
+        "args": [
+          {
+            "name": "filePath",
+            "type": "string",
+            "value": "{{filePath}}"
+          }
+        ],
+        "assignTo": "loadProtocolsFromFile_result"
+      },
+      {
+        "kind": "call",
+        "function": "loadProtocolsFromIR",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "loadProtocolsFromIR_result"
+      },
+      {
+        "kind": "call",
+        "function": "buildProtocolChainHint",
+        "args": [
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "{{protocols}}"
+          }
+        ],
+        "assignTo": "buildProtocolChainHint_result"
+      },
+      {
+        "kind": "call",
+        "function": "loadProtocols",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "loadProtocols_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateProtocolWithTransitions",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "{{actions}}"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "{{protocols}}"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "{{namespaceInitialStates}}"
+          }
+        ],
+        "assignTo": "validateProtocolWithTransitions_result"
+      },
+      {
+        "kind": "call",
+        "function": "invalidateProtocolCache",
+        "args": []
+      },
+      {
+        "kind": "call",
+        "function": "getProtocolConfig",
+        "args": [],
+        "assignTo": "getProtocolConfig_result"
+      },
+      {
+        "kind": "call",
+        "function": "toPythonModule",
+        "args": [
+          {
+            "name": "filePath",
+            "type": "string",
+            "value": "{{filePath}}"
+          }
+        ],
+        "assignTo": "toPythonModule_result"
+      },
+      {
+        "kind": "call",
+        "function": "suggestProtocolRepair",
+        "args": [
+          {
+            "name": "rejection",
+            "type": "SSGRejection",
+            "value": "{{rejection}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "suggestProtocolRepair_result"
+      },
+      {
+        "kind": "call",
+        "function": "toSnapshot",
+        "args": [
+          {
+            "name": "stateMap",
+            "type": "Map<string, Set<string>>",
+            "value": "{{stateMap}}"
+          }
+        ],
+        "assignTo": "toSnapshot_result"
+      },
+      {
+        "kind": "call",
+        "function": "rejectionToJSON",
+        "args": [
+          {
+            "name": "rejection",
+            "type": "SSGRejection",
+            "value": "{{rejection}}"
+          }
+        ],
+        "assignTo": "rejectionToJSON_result"
+      },
+      {
+        "kind": "call",
+        "function": "parseProtocolsFromJSON",
+        "args": [
+          {
+            "name": "protocolDef",
+            "type": "{\n    rules: Record<string, {\n      pre_states: string[];\n      post_states: string[];\n      invalidate?: string[];\n      namespace?: string;\n    }>;\n  }",
+            "value": "{{protocolDef}}"
+          }
+        ],
+        "assignTo": "parseProtocolsFromJSON_result"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.setNamespaceInitialState",
+        "args": [
+          {
+            "name": "namespace",
+            "type": "string",
+            "value": "{{namespace}}"
+          },
+          {
+            "name": "state",
+            "type": "string",
+            "value": "{{state}}"
+          }
+        ]
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.apply",
+        "args": [
+          {
+            "name": "functionName",
+            "type": "string",
+            "value": "{{functionName}}"
+          },
+          {
+            "name": "actionIndex",
+            "type": "number",
+            "value": "{{actionIndex}}"
+          }
+        ],
+        "assignTo": "StateMachineValidator.apply_result"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.applyWithTransition",
+        "args": [
+          {
+            "name": "functionName",
+            "type": "string",
+            "value": "{{functionName}}"
+          },
+          {
+            "name": "actionIndex",
+            "type": "number",
+            "value": "{{actionIndex}}"
+          }
+        ],
+        "assignTo": "StateMachineValidator.applyWithTransition_result"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.getCurrentStates",
+        "args": [],
+        "assignTo": "StateMachineValidator.getCurrentStates_result"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.snapshotNamespaceStates",
+        "args": [],
+        "assignTo": "StateMachineValidator.snapshotNamespaceStates_result"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.getNamespaceStates",
+        "args": [
+          {
+            "name": "namespace",
+            "type": "string",
+            "value": "{{namespace}}"
+          }
+        ],
+        "assignTo": "StateMachineValidator.getNamespaceStates_result"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.getTrace",
+        "args": [],
+        "assignTo": "StateMachineValidator.getTrace_result"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.getLedger",
+        "args": [],
+        "assignTo": "StateMachineValidator.getLedger_result"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.getContext",
+        "args": [],
+        "assignTo": "StateMachineValidator.getContext_result"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.getRuleHash",
+        "args": [],
+        "assignTo": "StateMachineValidator.getRuleHash_result"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.explainRejection",
+        "args": [
+          {
+            "name": "rejection",
+            "type": "SSGRejection",
+            "value": "{{rejection}}"
+          }
+        ],
+        "assignTo": "StateMachineValidator.explainRejection_result"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.rejectionToJSON",
+        "args": [
+          {
+            "name": "rejection",
+            "type": "SSGRejection",
+            "value": "{{rejection}}"
+          }
+        ],
+        "assignTo": "StateMachineValidator.rejectionToJSON_result"
+      },
+      {
+        "kind": "call",
+        "function": "toFixed",
+        "args": [],
+        "assignTo": "toFixed_result"
+      },
+      {
+        "kind": "call",
+        "function": "toLocaleString",
+        "args": []
+      },
+      {
+        "kind": "call",
+        "function": "scanDir",
+        "args": [
+          {
+            "name": "rootDir",
+            "type": "string",
+            "value": "{{rootDir}}"
+          },
+          {
+            "name": "currentDir",
+            "type": "string",
+            "value": "{{currentDir}}"
+          },
+          {
+            "name": "result",
+            "type": "AuditResult",
+            "value": "{{result}}"
+          }
+        ]
+      },
+      {
+        "kind": "call",
+        "function": "generateCandidateRules",
+        "args": [],
+        "assignTo": "generateCandidateRules_result"
+      },
+      {
+        "kind": "call",
+        "function": "handleAPI",
+        "args": [
+          {
+            "name": "req",
+            "type": "http.IncomingMessage",
+            "value": "{{req}}"
+          },
+          {
+            "name": "res",
+            "type": "http.ServerResponse",
+            "value": "{{res}}"
+          }
+        ],
+        "assignTo": "handleAPI_result"
+      },
+      {
+        "kind": "call",
+        "function": "handleLedgerAPI",
+        "args": [
+          {
+            "name": "res",
+            "type": "http.ServerResponse",
+            "value": "{{res}}"
+          },
+          {
+            "name": "url",
+            "type": "URL",
+            "value": "{{url}}"
+          }
+        ],
+        "assignTo": "handleLedgerAPI_result"
+      },
+      {
+        "kind": "call",
+        "function": "handleConsistencyAPI",
+        "args": [
+          {
+            "name": "res",
+            "type": "http.ServerResponse",
+            "value": "{{res}}"
+          },
+          {
+            "name": "url",
+            "type": "URL",
+            "value": "{{url}}"
+          }
+        ],
+        "assignTo": "handleConsistencyAPI_result"
+      },
+      {
+        "kind": "call",
+        "function": "handleDiffAPI",
+        "args": [
+          {
+            "name": "res",
+            "type": "http.ServerResponse",
+            "value": "{{res}}"
+          },
+          {
+            "name": "url",
+            "type": "URL",
+            "value": "{{url}}"
+          }
+        ],
+        "assignTo": "handleDiffAPI_result"
+      },
+      {
+        "kind": "call",
+        "function": "handleReplayAPI",
+        "args": [
+          {
+            "name": "res",
+            "type": "http.ServerResponse",
+            "value": "{{res}}"
+          },
+          {
+            "name": "url",
+            "type": "URL",
+            "value": "{{url}}"
+          }
+        ],
+        "assignTo": "handleReplayAPI_result"
+      },
+      {
+        "kind": "call",
+        "function": "runAndCheck",
+        "args": [
+          {
+            "name": "code",
+            "type": "string",
+            "value": "{{code}}"
+          }
+        ],
+        "assignTo": "runAndCheck_result"
+      },
+      {
+        "kind": "call",
+        "function": "random",
+        "args": [],
+        "assignTo": "random_result"
+      },
+      {
+        "kind": "call",
+        "function": "handler",
+        "args": [],
+        "assignTo": "handler_result"
+      },
+      {
+        "kind": "call",
+        "function": "executeActionCode",
+        "args": [
+          {
+            "name": "code",
+            "type": "string",
+            "value": "{{code}}"
+          }
+        ],
+        "assignTo": "executeActionCode_result"
+      },
+      {
+        "kind": "call",
+        "function": "execute",
+        "args": [
+          {
+            "name": "intent",
+            "type": "string",
+            "value": "{{intent}}"
+          },
+          {
+            "name": "projectPath",
+            "type": "string",
+            "value": "{{projectPath}}"
+          },
+          {
+            "name": "filePath",
+            "type": "string",
+            "value": "{{filePath}}"
+          }
+        ],
+        "assignTo": "execute_result"
+      },
+      {
+        "kind": "call",
+        "function": "queryAntibodies",
+        "args": [
+          {
+            "name": "intent",
+            "type": "string",
+            "value": "{{intent}}"
+          },
+          {
+            "name": "minACL",
+            "type": "AntibodyLevel",
+            "value": "{{minACL}}"
+          }
+        ],
+        "assignTo": "queryAntibodies_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatCrossSessionQuery",
+        "args": [
+          {
+            "name": "operation",
+            "type": "string",
+            "value": "{{operation}}"
+          },
+          {
+            "name": "state",
+            "type": "string",
+            "value": "{{state}}"
+          }
+        ],
+        "assignTo": "formatCrossSessionQuery_result"
+      }
+    ],
+    "transitions": [],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780430701542,
+    "llmCallCount": 0,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780430697559_db5b608fb193",
+  "endedAt": 1780430701542
+}

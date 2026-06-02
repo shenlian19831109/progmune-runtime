@@ -1,0 +1,555 @@
+{
+  "sessionId": "sess_1780430772558_ayxsd",
+  "intent": "download a file from a URL and save it to disk",
+  "attempts": [
+    {
+      "id": "att_1780430774579_rdodw",
+      "sessionId": "sess_1780430772558_ayxsd",
+      "attemptNumber": 1,
+      "inputIntent": "download a file from a URL and save it to disk",
+      "plannerSeed": "44e4e499",
+      "constraintSnapshotId": "snap_1780430772560_db5b608fb193",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "extractIR",
+          "args": [
+            {
+              "name": "projectRoot",
+              "type": "string",
+              "value": "."
+            }
+          ],
+          "assignTo": "ir"
+        },
+        {
+          "kind": "call",
+          "function": "validateAction",
+          "args": [
+            {
+              "name": "action",
+              "type": "Action",
+              "value": "download"
+            },
+            {
+              "name": "actionIndex",
+              "type": "number",
+              "value": ""
+            }
+          ],
+          "assignTo": "valid"
+        },
+        {
+          "kind": "call",
+          "function": "validateActionSequence",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": "ir"
+            }
+          ],
+          "assignTo": "seqValid"
+        },
+        {
+          "kind": "call",
+          "function": "emitCode",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": "ir"
+            },
+            {
+              "name": "meta",
+              "type": "{ sessionId?: string; ruleHash?: string; irFunctionCount?: number; protocolRuleCount?: number }",
+              "value": ""
+            }
+          ],
+          "assignTo": "code"
+        },
+        {
+          "kind": "call",
+          "function": "recordSession",
+          "args": [
+            {
+              "name": "session",
+              "type": "ExecutionSession | Omit<IntentSession, \"sessionId\">",
+              "value": "code"
+            }
+          ],
+          "assignTo": "session"
+        },
+        {
+          "kind": "return",
+          "value": "session"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "extractIR",
+          "namespace": "dev_pipeline",
+          "acquired": [
+            "IR_EXTRACTED"
+          ],
+          "invalidated": [
+            "IR_STALE"
+          ],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_EXTRACTED"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "validateAction",
+          "namespace": "dev_pipeline",
+          "acquired": [
+            "ACTION_VALIDATED"
+          ],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_EXTRACTED"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "ACTION_VALIDATED",
+              "IR_EXTRACTED"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 2,
+          "function": "validateActionSequence",
+          "namespace": "dev_pipeline",
+          "acquired": [
+            "SEQUENCE_VALIDATED"
+          ],
+          "invalidated": [
+            "ACTION_VALIDATED"
+          ],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "ACTION_VALIDATED",
+              "IR_EXTRACTED"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_EXTRACTED",
+              "SEQUENCE_VALIDATED"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 3,
+          "function": "emitCode",
+          "namespace": "dev_pipeline",
+          "acquired": [
+            "CODE_EMITTED"
+          ],
+          "invalidated": [
+            "SEQUENCE_VALIDATED"
+          ],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_EXTRACTED",
+              "SEQUENCE_VALIDATED"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "CODE_EMITTED",
+              "IR_EXTRACTED"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 4,
+          "function": "recordSession",
+          "namespace": "dev_pipeline",
+          "acquired": [
+            "SESSION_RECORDED"
+          ],
+          "invalidated": [
+            "CODE_EMITTED"
+          ],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "CODE_EMITTED",
+              "IR_EXTRACTED"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_EXTRACTED",
+              "SESSION_RECORDED"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780430774579,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780430772558,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780430774579_rdodw",
+    "sessionId": "sess_1780430772558_ayxsd",
+    "attemptNumber": 1,
+    "inputIntent": "download a file from a URL and save it to disk",
+    "plannerSeed": "44e4e499",
+    "constraintSnapshotId": "snap_1780430772560_db5b608fb193",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "."
+          }
+        ],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "validateAction",
+        "args": [
+          {
+            "name": "action",
+            "type": "Action",
+            "value": "download"
+          },
+          {
+            "name": "actionIndex",
+            "type": "number",
+            "value": ""
+          }
+        ],
+        "assignTo": "valid"
+      },
+      {
+        "kind": "call",
+        "function": "validateActionSequence",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "ir"
+          }
+        ],
+        "assignTo": "seqValid"
+      },
+      {
+        "kind": "call",
+        "function": "emitCode",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "ir"
+          },
+          {
+            "name": "meta",
+            "type": "{ sessionId?: string; ruleHash?: string; irFunctionCount?: number; protocolRuleCount?: number }",
+            "value": ""
+          }
+        ],
+        "assignTo": "code"
+      },
+      {
+        "kind": "call",
+        "function": "recordSession",
+        "args": [
+          {
+            "name": "session",
+            "type": "ExecutionSession | Omit<IntentSession, \"sessionId\">",
+            "value": "code"
+          }
+        ],
+        "assignTo": "session"
+      },
+      {
+        "kind": "return",
+        "value": "session"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "extractIR",
+        "namespace": "dev_pipeline",
+        "acquired": [
+          "IR_EXTRACTED"
+        ],
+        "invalidated": [
+          "IR_STALE"
+        ],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_EXTRACTED"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "validateAction",
+        "namespace": "dev_pipeline",
+        "acquired": [
+          "ACTION_VALIDATED"
+        ],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_EXTRACTED"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "ACTION_VALIDATED",
+            "IR_EXTRACTED"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 2,
+        "function": "validateActionSequence",
+        "namespace": "dev_pipeline",
+        "acquired": [
+          "SEQUENCE_VALIDATED"
+        ],
+        "invalidated": [
+          "ACTION_VALIDATED"
+        ],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "ACTION_VALIDATED",
+            "IR_EXTRACTED"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_EXTRACTED",
+            "SEQUENCE_VALIDATED"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 3,
+        "function": "emitCode",
+        "namespace": "dev_pipeline",
+        "acquired": [
+          "CODE_EMITTED"
+        ],
+        "invalidated": [
+          "SEQUENCE_VALIDATED"
+        ],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_EXTRACTED",
+            "SEQUENCE_VALIDATED"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "CODE_EMITTED",
+            "IR_EXTRACTED"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 4,
+        "function": "recordSession",
+        "namespace": "dev_pipeline",
+        "acquired": [
+          "SESSION_RECORDED"
+        ],
+        "invalidated": [
+          "CODE_EMITTED"
+        ],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "CODE_EMITTED",
+            "IR_EXTRACTED"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_EXTRACTED",
+            "SESSION_RECORDED"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780430774579,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780430772560_db5b608fb193",
+  "endedAt": 1780430774584
+}

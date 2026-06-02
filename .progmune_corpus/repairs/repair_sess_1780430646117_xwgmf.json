@@ -1,0 +1,29 @@
+{
+  "sessionId": "sess_1780430646117_xwgmf",
+  "timestamp": 1780430647844,
+  "violation": "SVL-4",
+  "constraint": "protocol",
+  "blockedFunction": "validateActionSequence",
+  "namespace": "dev_pipeline",
+  "missingStates": [
+    "extractIR",
+    "validateAction"
+  ],
+  "fixPath": [
+    "extractIR",
+    "validateAction"
+  ],
+  "originalPlan": [
+    "extractIRWithTypes",
+    "validateActionSequence",
+    "return"
+  ],
+  "repairPlan": [
+    "extractIRWithTypes",
+    "extractIR",
+    "validateAction",
+    "validateActionSequence",
+    "return"
+  ],
+  "success": true
+}
