@@ -39,6 +39,27 @@ const ts_morph_1 = require("ts-morph");
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
 const ts = __importStar(require("typescript"));
+/** 从 JSDoc 注释中解析 capability 注解 (@purpose, @tags) */
+function parseCapabilityFromJSDoc(node) {
+    const jsdocs = node.getJsDocs?.();
+    if (!jsdocs || jsdocs.length === 0)
+        return {};
+    const result = {};
+    for (const doc of jsdocs) {
+        const text = doc.getComment?.() || doc.getText?.() || "";
+        // Extract @purpose from JSDoc description (first line before any @tag)
+        const firstLine = text.split("\n")[0].replace(/^\s*\*\s*/, "").trim();
+        if (firstLine && !firstLine.startsWith("@")) {
+            result.purpose = firstLine;
+        }
+        // Extract @tags
+        const tagsMatch = text.match(/@tags?\s+(.+)/);
+        if (tagsMatch) {
+            result.tags = tagsMatch[1].split(/[,\s]+/).map((s) => s.trim()).filter(Boolean);
+        }
+    }
+    return result;
+}
 /** 从 JSDoc 注释中解析 @protocol 注解 */
 function parseProtocolFromJSDoc(node) {
     const jsdocs = node.getJsDocs?.();
@@ -173,6 +194,7 @@ function extractIRWithTypes(projectRoot) {
                 calls: extractDirectCalls(f),
                 exported: f.isExported(),
                 protocol: parseProtocolFromJSDoc(f),
+                ...parseCapabilityFromJSDoc(f),
             });
         }
         // 提取箭头函数（const fn = () => {}, export const fn = () => {} 等）
@@ -196,6 +218,7 @@ function extractIRWithTypes(projectRoot) {
                     exported: vd.isExported(),
                     calls: extractDirectCalls(init),
                     protocol: parseProtocolFromJSDoc(vd),
+                    ...parseCapabilityFromJSDoc(vd),
                 });
                 continue;
             }
@@ -238,6 +261,7 @@ function extractIRWithTypes(projectRoot) {
                         returnTypeDetail: m.getReturnTypeNode?.()?.getText?.() || "any",
                         file: relPath,
                         exported: vd.isExported(), calls: [],
+                        ...parseCapabilityFromJSDoc(m),
                         protocol: parseProtocolFromJSDoc(m),
                     });
                 }

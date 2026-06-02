@@ -12,6 +12,7 @@
     "GenerationRecord": "src/execute.ts",
     "ExecutionMetrics": "src/execute.ts",
     "FailureRecord": "src/failure-corpus.ts",
+    "RootCause": "src/failure-collector.ts",
     "IntentSession": "src/failure-corpus.ts",
     "PlannerCheckpoint": "src/failure-corpus.ts",
     "LearnedPattern": "src/failure-corpus.ts",
@@ -281,7 +282,8 @@
         "entries",
         "keys"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Format audit result as human-readable text."
     },
     {
       "name": "benchmarkCount",
@@ -420,7 +422,8 @@
         "toString",
         "random"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Generate a unique branch ID."
     },
     {
       "name": "createRootBranch",
@@ -438,7 +441,8 @@
         "generateBranchId",
         "now"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Create the root branch of a new execution tree."
     },
     {
       "name": "createBranch",
@@ -466,7 +470,8 @@
         "generateBranchId",
         "now"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Create a CHILD branch (parent → child relationship)."
     },
     {
       "name": "forkBranch",
@@ -496,7 +501,8 @@
         "now",
         "assertDeltaConsistency"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Fork a branch at a specific transition index, creating a SIBLING branch."
     },
     {
       "name": "mergeBranches",
@@ -519,7 +525,8 @@
         "add",
         "push"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Merge multiple branches into one."
     },
     {
       "name": "flattenBranch",
@@ -546,7 +553,8 @@
         "push",
         "sort"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Flatten a branch and all its ancestors into a single linear transition sequence."
     },
     {
       "name": "getBranchPath",
@@ -569,7 +577,8 @@
         "unshift",
         "get"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Get the path from root to a given branch (inclusive)."
     },
     {
       "name": "replayBranch",
@@ -600,7 +609,8 @@
         "some",
         "rebuildState"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Replay a branch tree: rebuild state across all ancestor branches"
     },
     {
       "name": "buildBranchMap",
@@ -617,7 +627,8 @@
       "calls": [
         "set"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Build a branch lookup map from an array of branches."
     },
     {
       "name": "findRootBranch",
@@ -634,7 +645,8 @@
       "calls": [
         "find"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Find the root branch of a tree."
     },
     {
       "name": "findChildBranches",
@@ -657,7 +669,8 @@
         "values",
         "push"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Find all child branches of a given parent."
     },
     {
       "name": "describeBranchTree",
@@ -687,7 +700,8 @@
         "findChildBranches",
         "describeBranchTree"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Get the full branch tree as a human-readable structure."
     },
     {
       "name": "evaluateBranches",
@@ -715,7 +729,8 @@
         "sort",
         "find"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Evaluate all branches in a tree, score them, and return the recommended winner."
     },
     {
       "name": "wrapAsBranch",
@@ -733,7 +748,8 @@
         "createRootBranch",
         "every"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Wrap a linear transition array as a single root branch (backward compat)."
     },
     {
       "name": "unwrapBranchTree",
@@ -753,7 +769,8 @@
         "findSuccessfulLeaf",
         "flattenBranch"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Unwrap a branch tree to the linear transition list."
     },
     {
       "name": "findSuccessfulLeaf",
@@ -979,7 +996,8 @@
         "hashRules",
         "replayLedger"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Replay a session from disk, comparing against its stored fingerprint."
     },
     {
       "name": "replayLedger",
@@ -1033,7 +1051,8 @@
         "checkLedgerConsistency",
         "filter"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Core replay logic: replay transitions against (optional) current rules."
     },
     {
       "name": "replayWithDetail",
@@ -1066,7 +1085,8 @@
         "deepEqualSnapshots",
         "slice"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Replay with per-transition detail — for debugging and UI."
     },
     {
       "name": "deepEqualSnapshots",
@@ -1111,7 +1131,8 @@
         "split",
         "test"
       ],
-      "exported": false
+      "exported": false,
+      "purpose": "Normalize a type string to an importable type name."
     },
     {
       "name": "getImportPath",
@@ -1176,7 +1197,8 @@
           "SEQUENCE_VALIDATED"
         ],
         "namespace": "dev_pipeline"
-      }
+      },
+      "purpose": "将动作序列编译为目标语言代码。"
     },
     {
       "name": "loadMetrics",
@@ -1229,7 +1251,8 @@
         "slice",
         "saveMetrics"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Record a generation event. Called automatically by execute()."
     },
     {
       "name": "getExecutionMetrics",
@@ -1240,7 +1263,8 @@
       "calls": [
         "loadMetrics"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Get current execution metrics."
     },
     {
       "name": "execute",
@@ -1272,6 +1296,8 @@
         "parse",
         "readFileSync",
         "plan",
+        "recordFailure",
+        "classifyPlanError",
         "emitCode",
         "isAbsolute",
         "dirname",
@@ -1285,7 +1311,8 @@
         "recordGeneration",
         "now"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Execute the full Progmune pipeline: intent → validated code → file."
     },
     {
       "name": "verifyCompiles",
@@ -1305,7 +1332,8 @@
         "filter",
         "split"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Verify a file compiles without errors. Returns {pass, errors[]}."
     },
     {
       "name": "verifyFileMarker",
@@ -1326,7 +1354,8 @@
         "split",
         "match"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Quick audit: check whether a file has the"
     },
     {
       "name": "extractIRPython",
@@ -1352,6 +1381,33 @@
       "exported": true
     },
     {
+      "name": "parseCapabilityFromJSDoc",
+      "params": [
+        {
+          "name": "node",
+          "type": "any",
+          "typeDetail": "any"
+        }
+      ],
+      "returnType": "{ purpose?: string; tags?: string[] }",
+      "returnTypeDetail": "{ purpose?: string; tags?: string[] }",
+      "file": "src/extract-ir.ts",
+      "calls": [
+        "getJsDocs",
+        "getComment",
+        "getText",
+        "trim",
+        "replace",
+        "split",
+        "startsWith",
+        "match",
+        "filter",
+        "map"
+      ],
+      "exported": false,
+      "purpose": "从 JSDoc 注释中解析 capability 注解 (@purpose,"
+    },
+    {
       "name": "parseProtocolFromJSDoc",
       "params": [
         {
@@ -1373,7 +1429,8 @@
         "map",
         "split"
       ],
-      "exported": false
+      "exported": false,
+      "purpose": "从 JSDoc 注释中解析"
     },
     {
       "name": "getTypeDetail",
@@ -1517,7 +1574,8 @@
           "IR_STALE"
         ],
         "namespace": "dev_pipeline"
-      }
+      },
+      "purpose": "从 TypeScript 项目提取 IR（函数签名、参数、返回值、协议注解）。"
     },
     {
       "name": "extractIRWithTypes",
@@ -1549,6 +1607,7 @@
         "extractDirectCalls",
         "isExported",
         "parseProtocolFromJSDoc",
+        "parseCapabilityFromJSDoc",
         "getVariableDeclarations",
         "getInitializer",
         "isArrowFunction",
@@ -1579,7 +1638,8 @@
         "getInterfaces",
         "getTypeAliases"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Extract both functions and type→file mapping."
     },
     {
       "name": "extractSignatureFromFile",
@@ -1611,7 +1671,8 @@
         "getInitializer",
         "isArrowFunction"
       ],
-      "exported": false
+      "exported": false,
+      "purpose": "Extract function signature from a resolved ts-morph source file."
     },
     {
       "name": "extractSignatureFromDts",
@@ -1639,7 +1700,120 @@
         "addSourceFileAtPathIfExists",
         "extractSignatureFromFile"
       ],
-      "exported": false
+      "exported": false,
+      "purpose": "Extract function signature from a .d.ts file using ts-morph."
+    },
+    {
+      "name": "classifyError",
+      "params": [
+        {
+          "name": "error",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "RootCause",
+      "returnTypeDetail": "RootCause",
+      "file": "src/failure-collector.ts",
+      "calls": [
+        "includes"
+      ],
+      "exported": true,
+      "purpose": "Classify a compile error string into a root cause."
+    },
+    {
+      "name": "classifyPlanError",
+      "params": [
+        {
+          "name": "error",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "RootCause",
+      "returnTypeDetail": "RootCause",
+      "file": "src/failure-collector.ts",
+      "calls": [
+        "includes"
+      ],
+      "exported": true,
+      "purpose": "Classify a planning failure."
+    },
+    {
+      "name": "recordFailure",
+      "params": [
+        {
+          "name": "record",
+          "type": "Omit<FailureRecord, \"id\" | \"timestamp\">",
+          "typeDetail": "Omit<FailureRecord, \"id\" | \"timestamp\">"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/failure-collector.ts",
+      "calls": [
+        "now",
+        "slice",
+        "toString",
+        "random",
+        "existsSync",
+        "mkdirSync",
+        "writeFileSync",
+        "stringify"
+      ],
+      "exported": true,
+      "purpose": "Record a failure and save to disk."
+    },
+    {
+      "name": "loadFailures",
+      "params": [],
+      "returnType": "FailureRecord[]",
+      "returnTypeDetail": "FailureRecord[]",
+      "file": "src/failure-collector.ts",
+      "calls": [
+        "existsSync",
+        "readdirSync",
+        "endsWith",
+        "push",
+        "parse",
+        "readFileSync",
+        "sort"
+      ],
+      "exported": true,
+      "purpose": "Load all recorded failures."
+    },
+    {
+      "name": "failureStats",
+      "params": [],
+      "returnType": "{ total: number; byRootCause: Record<string, number>; topCause: string }",
+      "returnTypeDetail": "{ total: number; byRootCause: Record<string, number>; topCause: string }",
+      "file": "src/failure-collector.ts",
+      "calls": [
+        "loadFailures",
+        "sort",
+        "entries"
+      ],
+      "exported": true,
+      "purpose": "Get failure statistics grouped by root cause."
+    },
+    {
+      "name": "formatFailureStats",
+      "params": [],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/failure-collector.ts",
+      "calls": [
+        "failureStats",
+        "sort",
+        "entries",
+        "repeat",
+        "round",
+        "toFixed",
+        "push",
+        "join"
+      ],
+      "exported": true,
+      "purpose": "Format failure stats as readable text."
     },
     {
       "name": "ensureDir",
@@ -1795,7 +1969,8 @@
           "CODE_EMITTED"
         ],
         "namespace": "dev_pipeline"
-      }
+      },
+      "purpose": "保存执行会话（含所有尝试、违规、状态转移）。"
     },
     {
       "name": "getAllFailures",
@@ -1878,7 +2053,8 @@
         "entries",
         "round"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Get failure genome statistics: total failures, SVL distribution, constraint types, top patterns."
     },
     {
       "name": "getAllSessions",
@@ -1896,7 +2072,8 @@
         "push",
         "normalizeSession"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Load all execution sessions from the corpus directory."
     },
     {
       "name": "normalizeSession",
@@ -1913,7 +2090,8 @@
       "calls": [
         "convertOldSession"
       ],
-      "exported": false
+      "exported": false,
+      "purpose": "检测并归一化新旧两种会话格式"
     },
     {
       "name": "convertOldSession",
@@ -1931,7 +2109,8 @@
         "map",
         "getTime"
       ],
-      "exported": false
+      "exported": false,
+      "purpose": "将旧 IntentSession 转换为 ExecutionSession"
     },
     {
       "name": "computeACL",
@@ -2005,7 +2184,8 @@
         "sort",
         "map"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "查询匹配当前意图的高置信度抗体（ACL-3+），用于推理层免疫加速"
     },
     {
       "name": "getSemanticHeatmap",
@@ -2028,7 +2208,8 @@
         "filter",
         "flatMap"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "语义热力图：哪些协议/层最脆弱，约束如何聚类"
     },
     {
       "name": "getAntibodyStats",
@@ -2046,7 +2227,8 @@
         "map",
         "entries"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Get antibody efficacy statistics: hits by level, tokens saved, top signatures."
     },
     {
       "name": "generateCandidateRules",
@@ -2504,7 +2686,8 @@
         "fingerprintPath",
         "stringify"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Register a ledger fingerprint (execution certificate)."
     },
     {
       "name": "getFingerprint",
@@ -2524,7 +2707,8 @@
         "parse",
         "readFileSync"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Get a single stored fingerprint by sessionId. Returns null if not registered."
     },
     {
       "name": "getFingerprintRegistry",
@@ -2543,7 +2727,8 @@
         "push",
         "sort"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "List all registered fingerprints, sorted by timestamp (oldest first)."
     },
     {
       "name": "verifyFingerprint",
@@ -2571,7 +2756,8 @@
         "getFingerprint",
         "hashLedger"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Verify a single session's fingerprint."
     },
     {
       "name": "verifyAllFingerprints",
@@ -2597,7 +2783,8 @@
         "concat",
         "verifyFingerprint"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Verify all registered fingerprints."
     },
     {
       "name": "registerAllMissingFingerprints",
@@ -2618,7 +2805,8 @@
         "concat",
         "registerFingerprint"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Register fingerprints for all sessions that don't yet have one."
     },
     {
       "name": "resetCallCount",
@@ -2645,7 +2833,8 @@
         "match",
         "ceil"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "粗略 token 估算：CJK 字符 ~1.5 token/字，其余 ~0.4 token/字符"
     },
     {
       "name": "generate",
@@ -2684,7 +2873,8 @@
       "calls": [
         "create"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "带 system prompt 的调用：静态规则放 system，动态内容放 user，语义分离便于未来对接各平台缓存策略"
     },
     {
       "name": "loadBenchmarks",
@@ -3795,7 +3985,8 @@
         "join",
         "map"
       ],
-      "exported": false
+      "exported": false,
+      "purpose": "构建紧凑函数列表（约节省 50% token）"
     },
     {
       "name": "parseActionJSON",
@@ -3819,7 +4010,8 @@
         "parseActionJSON",
         "stringify"
       ],
-      "exported": false
+      "exported": false,
+      "purpose": "解析 LLM 输出的紧凑 JSON 为 Action[]。"
     },
     {
       "name": "correctFunctionNames",
@@ -3841,7 +4033,8 @@
       "calls": [
         "map"
       ],
-      "exported": false
+      "exported": false,
+      "purpose": "模糊函数名纠正：当 LLM 生成不存在的函数名时，用 Jaccard 相似度找最接近的 IR 函数"
     },
     {
       "name": "fixParameterCounts",
@@ -3863,7 +4056,8 @@
       "calls": [
         "map"
       ],
-      "exported": false
+      "exported": false,
+      "purpose": "参数签名预检：确保 call action 的参数数量与 IR 函数签名一致"
     },
     {
       "name": "buildProtocolChainHint",
@@ -3885,7 +4079,8 @@
         "join",
         "map"
       ],
-      "exported": false
+      "exported": false,
+      "purpose": "构建协议链提示：为 LLM 显示协议状态机的合法调用顺序"
     },
     {
       "name": "validateActionSchema",
@@ -3908,7 +4103,8 @@
         "validateActionSchema",
         "map"
       ],
-      "exported": false
+      "exported": false,
+      "purpose": "JSON schema pre-validation: structural checks before IR-aware validation."
     },
     {
       "name": "loadProtocols",
@@ -3933,7 +4129,8 @@
         "get",
         "values"
       ],
-      "exported": false
+      "exported": false,
+      "purpose": "加载 IR 中所有带 protocol 的函数为协议规则，同时从 protocols.json 加载命名空间初始状态"
     },
     {
       "name": "validateProtocolWithTransitions",
@@ -3967,7 +4164,8 @@
         "checkLedgerConsistency",
         "error"
       ],
-      "exported": false
+      "exported": false,
+      "purpose": "验证动作序列的协议合法性，使用 Semantic Ledger (Phase 3) 纯函数"
     },
     {
       "name": "attemptSSGRepair",
@@ -4012,7 +4210,8 @@
         "join",
         "attemptSSGRepair"
       ],
-      "exported": false
+      "exported": false,
+      "purpose": "SSG 确定性修复：当协议违规有已知修复路径时，自动插入缺失函数"
     },
     {
       "name": "plan",
@@ -4030,6 +4229,7 @@
         "resetCallCount",
         "parse",
         "readFileSync",
+        "isArray",
         "generateSessionId",
         "now",
         "createSnapshot",
@@ -4116,7 +4316,8 @@
         "push",
         "map"
       ],
-      "exported": false
+      "exported": false,
+      "purpose": "本地规则回退：当 LLM 不可用时，根据意图关键词生成简单动作序列"
     },
     {
       "name": "invalidateProtocolCache",
@@ -4125,7 +4326,8 @@
       "returnTypeDetail": "void",
       "file": "src/protocol-registry.ts",
       "calls": [],
-      "exported": true
+      "exported": true,
+      "purpose": "Invalidate the cache (call after protocols.json changes)."
     },
     {
       "name": "getProtocolConfig",
@@ -4144,7 +4346,8 @@
         "parseProtocolsFromJSON",
         "hashRules"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Get the authoritative protocol configuration."
     },
     {
       "name": "getNsInit",
@@ -4155,7 +4358,8 @@
       "calls": [
         "getProtocolConfig"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Get namespace initial states only (most common need)."
     },
     {
       "name": "getRuleHash",
@@ -4166,7 +4370,8 @@
       "calls": [
         "getProtocolConfig"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Get current rule hash without loading full config."
     },
     {
       "name": "toPythonModule",
@@ -4258,7 +4463,8 @@
         "suggestProtocolRepair",
         "suggestGenericRepair"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Generate repair proposals for all detected violations in a ledger."
     },
     {
       "name": "suggestProtocolRepair",
@@ -4287,7 +4493,8 @@
         "random",
         "join"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Protocol violation repair: use SSG fixPath to suggest insertions."
     },
     {
       "name": "suggestInvariantRepair",
@@ -4320,7 +4527,8 @@
         "random",
         "stringify"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Invariant violation repair: use rebuildState to compute correct transition data."
     },
     {
       "name": "suggestGenericRepair",
@@ -4350,7 +4558,8 @@
         "map",
         "toFixed"
       ],
-      "exported": false
+      "exported": false,
+      "purpose": "Generic repair for SVL-1/SVL-2/SVL-3 violations."
     },
     {
       "name": "applyProposalAsBranch",
@@ -4384,7 +4593,8 @@
         "slice",
         "map"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Convert an accepted repair proposal into a new Branch."
     },
     {
       "name": "validateProposal",
@@ -4412,7 +4622,8 @@
         "map",
         "checkLedgerConsistency"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Validate a repair proposal: does applying it fix the violation?"
     },
     {
       "name": "generateRepairSummary",
@@ -4447,7 +4658,8 @@
         "suggestInvariantRepair",
         "getMinimalFixSet"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Generate a comprehensive repair summary from a ledger and IR context."
     },
     {
       "name": "getMinimalFixSet",
@@ -4467,7 +4679,8 @@
         "sort",
         "values"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Deduplicate repair proposals: pick the highest-confidence proposal per violation index."
     },
     {
       "name": "tryParseRejection",
@@ -4545,7 +4758,8 @@
         "isStrict",
         "error"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Assert full ledger passes Invariant-0 + Invariant-1."
     },
     {
       "name": "assertDeltaConsistency",
@@ -4571,7 +4785,8 @@
         "isStrict",
         "error"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Assert a single transition's delta consistency."
     },
     {
       "name": "assertRuleHashMatch",
@@ -4600,7 +4815,8 @@
         "isStrict",
         "error"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Assert rule hashes match — detects when validation rules changed under a ledger."
     },
     {
       "name": "assertTransitionOrder",
@@ -4618,7 +4834,8 @@
         "isStrict",
         "error"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Assert transition indices are strictly monotonic (no duplicates, non-decreasing)."
     },
     {
       "name": "assertLedgerInvariants",
@@ -4649,7 +4866,8 @@
         "hashRules",
         "assertRuleHashMatch"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Convenience: run all invariant checks on a ledger. Does not throw if all pass."
     },
     {
       "name": "isStrict",
@@ -4745,7 +4963,8 @@
       "file": "src/search-planner.ts",
       "calls": [
         "parse",
-        "readFileSync"
+        "readFileSync",
+        "isArray"
       ],
       "exported": false
     },
@@ -4843,7 +5062,8 @@
         "min",
         "has"
       ],
-      "exported": false
+      "exported": false,
+      "purpose": "批量评分：将同一 goal 的所有候选函数打包为一次 LLM 调用"
     },
     {
       "name": "searchPlan",
@@ -4987,7 +5207,8 @@
         "now",
         "toISOString"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "从 IR 数据创建快照"
     },
     {
       "name": "saveSnapshot",
@@ -5007,7 +5228,8 @@
         "join",
         "stringify"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "持久化快照"
     },
     {
       "name": "loadSnapshot",
@@ -5026,7 +5248,8 @@
         "join",
         "parse"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "加载快照"
     },
     {
       "name": "listSnapshots",
@@ -5044,7 +5267,8 @@
         "join",
         "sort"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "列出所有快照"
     },
     {
       "name": "diffSnapshots",
@@ -5071,7 +5295,8 @@
         "join",
         "map"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "计算两个快照之间的差异"
     },
     {
       "name": "summarizeSnapshot",
@@ -5089,7 +5314,8 @@
         "push",
         "join"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "生成快照摘要"
     },
     {
       "name": "findSnapshotBySession",
@@ -5107,7 +5333,8 @@
         "listSnapshots",
         "find"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "按 sessionId 查找快照，返回最近的一个（或 undefined）"
     },
     {
       "name": "narrateRejection",
@@ -6050,7 +6277,8 @@
       "calls": [
         "parse",
         "readFileSync",
-        "require"
+        "require",
+        "isArray"
       ],
       "exported": false
     },
@@ -6425,7 +6653,8 @@
         "createHash",
         "stringify"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Compute a deterministic SHA256 hash of an entire ledger (P1: Tamper-evident integrity)."
     },
     {
       "name": "diffLedgers",
@@ -6452,7 +6681,8 @@
         "get",
         "push"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Compare two ledgers and identify structural differences."
     },
     {
       "name": "findProducer",
@@ -6475,7 +6705,8 @@
         "filter",
         "map"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Find all transitions that acquire (produce) a given state in the ledger."
     },
     {
       "name": "findConsumer",
@@ -6498,7 +6729,8 @@
         "filter",
         "map"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Find all transitions that have a given state in their pre_states (consume it)."
     },
     {
       "name": "findViolations",
@@ -6516,7 +6748,8 @@
         "filter",
         "map"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Find all invalid transitions in a ledger."
     },
     {
       "name": "findTransition",
@@ -6538,7 +6771,8 @@
       "calls": [
         "findIndex"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Find a transition by its action index."
     },
     {
       "name": "listAllStates",
@@ -6558,7 +6792,8 @@
         "push",
         "values"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "List all unique states present across all namespaces in a ledger."
     },
     {
       "name": "explainRejection",
@@ -6576,7 +6811,8 @@
         "join",
         "push"
       ],
-      "exported": true
+      "exported": true,
+      "purpose": "Format an SSG rejection as a human-readable multi-line string."
     },
     {
       "name": "rejectionToJSON",
@@ -6591,7 +6827,8 @@
       "returnTypeDetail": "object",
       "file": "src/ssg-validator.ts",
       "calls": [],
-      "exported": true
+      "exported": true,
+      "purpose": "Format an SSG rejection as a structured JSON object."
     },
     {
       "name": "parseProtocolsFromJSON",
@@ -6629,7 +6866,8 @@
       "returnTypeDetail": "void",
       "file": "src/ssg-validator.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "purpose": "/** @deprecated Use validateTransition(ctx, ...) for stateless validation */"
     },
     {
       "name": "StateMachineValidator.apply",
@@ -6649,7 +6887,8 @@
       "returnTypeDetail": "SSGStepResult",
       "file": "src/ssg-validator.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "purpose": "Validate a function call against current protocol state."
     },
     {
       "name": "StateMachineValidator.applyWithTransition",
@@ -6711,7 +6950,8 @@
       "returnTypeDetail": "SSGTraceNode[]",
       "file": "src/ssg-validator.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "purpose": "Returns trace reconstructed from the ledger (backward-compat)"
     },
     {
       "name": "StateMachineValidator.getLedger",
@@ -6720,7 +6960,8 @@
       "returnTypeDetail": "StateTransition[]",
       "file": "src/ssg-validator.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "purpose": "Returns the internal ledger (Phase 3 API)"
     },
     {
       "name": "StateMachineValidator.getContext",
@@ -6729,7 +6970,8 @@
       "returnTypeDetail": "ValidationContext",
       "file": "src/ssg-validator.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "purpose": "Returns the current ValidationContext (Phase 3 API)"
     },
     {
       "name": "StateMachineValidator.getRuleHash",
@@ -6738,7 +6980,8 @@
       "returnTypeDetail": "string",
       "file": "src/ssg-validator.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "purpose": "Returns the pre-computed rule hash (Phase 3 API)"
     },
     {
       "name": "StateMachineValidator.explainRejection",
@@ -6815,14 +7058,15 @@
     {
       "name": "loadIR",
       "params": [],
-      "returnType": "any",
-      "returnTypeDetail": "",
+      "returnType": "any[]",
+      "returnTypeDetail": "any[]",
       "file": "src/validator.ts",
       "calls": [
         "resolve",
         "existsSync",
         "parse",
-        "readFileSync"
+        "readFileSync",
+        "isArray"
       ],
       "exported": false
     },
@@ -6896,7 +7140,8 @@
           "ACTION_VALIDATED"
         ],
         "namespace": "dev_pipeline"
-      }
+      },
+      "purpose": "校验单个动作的合法性（函数存在、类型匹配、参数数量）。"
     },
     {
       "name": "validateActionSequence",
@@ -6927,7 +7172,8 @@
           "ACTION_VALIDATED"
         ],
         "namespace": "dev_pipeline"
-      }
+      },
+      "purpose": "批量校验动作序列 + 变量流向分析。"
     },
     {
       "name": "main",
@@ -7325,6 +7571,15 @@
       "calls": [],
       "external": true,
       "description": "同步执行命令"
+    },
+    {
+      "name": "getComment",
+      "params": [],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "(external)",
+      "calls": [],
+      "external": true
     },
     {
       "name": "getElementTypeNode",

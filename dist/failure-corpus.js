@@ -197,6 +197,9 @@ function getTopFailurePatterns(limit = 5) {
         .slice(0, limit);
 }
 /** 构建 AI 失败基因组 —— 按失效模式分组的完整画像 */
+/** Get failure genome statistics: total failures, SVL distribution, constraint types, top patterns.
+ * @tags failure, statistics, genome, audit
+ */
 function getFailureGenome() {
     const sessions = getAllSessions();
     const bySVL = { "SVL-1": 0, "SVL-2": 0, "SVL-3": 0, "SVL-4": 0 };
@@ -253,6 +256,9 @@ function getFailureGenome() {
     };
 }
 /** 获取所有意图会话（归一化为 ExecutionSession[]） */
+/** Load all execution sessions from the corpus directory.
+ * @tags session, corpus, audit, history
+ */
 function getAllSessions() {
     const sessions = [];
     if (!fs.existsSync(SESSIONS_DIR))
@@ -484,6 +490,9 @@ function getSemanticHeatmap() {
     return { fragileProtocols, svlHotspots, constraintClusters, highFrictionIntents };
 }
 /** 抗体效能统计：量化免疫加速节省的 LLM 调用和 token */
+/** Get antibody efficacy statistics: hits by level, tokens saved, top signatures.
+ * @tags antibody, immune, statistics, efficiency
+ */
 function getAntibodyStats() {
     const sessions = getAllSessions();
     let totalHits = 0;

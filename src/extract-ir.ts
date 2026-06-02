@@ -22,12 +22,36 @@ interface FunctionInfo {
   external?: boolean;
   /** 外部函数的描述 */
   description?: string;
+  /** Phase 7: Capability Graph */
+  purpose?: string;           // @purpose JSDoc tag
+  tags?: string[];            // @tags JSDoc tag (comma-separated)
   protocol?: {
     pre_states: string[];
     post_states: string[];
     invalidate?: string[];
     namespace?: string;
   };
+}
+
+/** 从 JSDoc 注释中解析 capability 注解 (@purpose, @tags) */
+function parseCapabilityFromJSDoc(node: any): { purpose?: string; tags?: string[] } {
+  const jsdocs = node.getJsDocs?.();
+  if (!jsdocs || jsdocs.length === 0) return {};
+  const result: { purpose?: string; tags?: string[] } = {};
+  for (const doc of jsdocs) {
+    const text = doc.getComment?.() || doc.getText?.() || "";
+    // Extract @purpose from JSDoc description (first line before any @tag)
+    const firstLine = text.split("\n")[0].replace(/^\s*\*\s*/, "").trim();
+    if (firstLine && !firstLine.startsWith("@")) {
+      result.purpose = firstLine;
+    }
+    // Extract @tags
+    const tagsMatch = text.match(/@tags?\s+(.+)/);
+    if (tagsMatch) {
+      result.tags = tagsMatch[1].split(/[,\s]+/).map((s: string) => s.trim()).filter(Boolean);
+    }
+  }
+  return result;
 }
 
 /** 从 JSDoc 注释中解析 @protocol 注解 */
@@ -164,6 +188,7 @@ export function extractIRWithTypes(projectRoot: string): {
         calls: extractDirectCalls(f),
         exported: f.isExported(),
         protocol: parseProtocolFromJSDoc(f),
+        ...parseCapabilityFromJSDoc(f),
       });
     }
     // 提取箭头函数（const fn = () => {}, export const fn = () => {} 等）
@@ -186,6 +211,7 @@ export function extractIRWithTypes(projectRoot: string): {
           exported: vd.isExported(),
           calls: extractDirectCalls(init),
 	        protocol: parseProtocolFromJSDoc(vd),
+          ...parseCapabilityFromJSDoc(vd),
         });
         continue;
       }
@@ -227,6 +253,7 @@ export function extractIRWithTypes(projectRoot: string): {
             returnTypeDetail: (m as any).getReturnTypeNode?.()?.getText?.() || "any",
             file: relPath,
           exported: vd.isExported(), calls: [],
+            ...parseCapabilityFromJSDoc(m),
             protocol: parseProtocolFromJSDoc(m),
           });
         }

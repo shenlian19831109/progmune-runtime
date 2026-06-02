@@ -227,6 +227,9 @@ export function getTopFailurePatterns(limit: number = 5): { pattern: string; cou
 }
 
 /** 构建 AI 失败基因组 —— 按失效模式分组的完整画像 */
+/** Get failure genome statistics: total failures, SVL distribution, constraint types, top patterns.
+ * @tags failure, statistics, genome, audit
+ */
 export function getFailureGenome(): {
   totalFailures: number;
   bySVL: Record<SVL, number>;
@@ -296,6 +299,9 @@ export function getFailureGenome(): {
 }
 
 /** 获取所有意图会话（归一化为 ExecutionSession[]） */
+/** Load all execution sessions from the corpus directory.
+ * @tags session, corpus, audit, history
+ */
 export function getAllSessions(): ExecutionSession[] {
   const sessions: ExecutionSession[] = [];
   if (!fs.existsSync(SESSIONS_DIR)) return sessions;
@@ -566,6 +572,9 @@ export function getSemanticHeatmap(): {
 }
 
 /** 抗体效能统计：量化免疫加速节省的 LLM 调用和 token */
+/** Get antibody efficacy statistics: hits by level, tokens saved, top signatures.
+ * @tags antibody, immune, statistics, efficiency
+ */
 export function getAntibodyStats(): {
   totalHits: number;
   fastPathHits: number;
