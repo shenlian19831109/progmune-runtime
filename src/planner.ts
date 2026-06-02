@@ -57,8 +57,8 @@ function determineConstraintType(svl: SVL): string {
 /** 构建紧凑函数列表（约节省 50% token） */
 function buildCompactFuncList(funcs: any[]): string {
   return funcs.map((f: any) => {
-    const params = f.params.map((p: any) => `${p.name}:${p.type}`).join(",");
-    return `${f.name}(${params})->${f.returnType}`;
+    const params = (f.params || []).map((p: any) => `${p.name}:${p.type}`).join(",");
+    return `${f.name}(${params})->${f.returnType || "any"}`;
   }).join("\n");
 }
 
@@ -707,11 +707,11 @@ ${RETRY_HINT}
 
     // 优先尝试 JSON 解析，失败则回退到 DSL 执行
     let rawActions = parseActionJSON(text);
-    if (!rawActions) {
+    if (!rawActions || !Array.isArray(rawActions)) {
       console.error("⚠️ JSON 解析失败，尝试 DSL 回退...");
       rawActions = executeActionCode(text);
     }
-    if (!rawActions || rawActions.length === 0) {
+    if (!rawActions || !Array.isArray(rawActions) || rawActions.length === 0) {
       console.error("⚠️ 解析失败，重试...");
       currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}\n\n上一次输出无效。请严格输出 JSON 数组。\n${RETRY_HINT}\n只输出 JSON。`;
       useSystem = false;
