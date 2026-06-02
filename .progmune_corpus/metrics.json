@@ -1,16 +1,8 @@
 {
-  "generated": 564,
+  "generated": 565,
   "repaired": 9,
-  "lastGeneration": "/tmp/t3.ts",
+  "lastGeneration": "/tmp/test-case1.ts",
   "history": [
-    {
-      "sessionId": "sess_1780425961246_ms79b",
-      "timestamp": 1780425962860,
-      "filePath": "bench/tmp/T026.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 415
-    },
     {
       "sessionId": "sess_1780425988638_nr51t",
       "timestamp": 1780425990458,
@@ -802,6 +794,14 @@
       "repaired": false,
       "repairCount": 0,
       "irFunctionCount": 416
+    },
+    {
+      "sessionId": "sess_1780437580729_lhfjm",
+      "timestamp": 1780437582744,
+      "filePath": "/tmp/test-case1.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 418
     }
   ]
 }

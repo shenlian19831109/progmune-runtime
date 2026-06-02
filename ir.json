@@ -9272,6 +9272,72 @@
       ]
     },
     {
+      "name": "countResolved",
+      "params": [
+        {
+          "name": "sessions",
+          "type": "any[]",
+          "typeDetail": "any[]"
+        }
+      ],
+      "returnType": "{ resolved: number; unresolved: number; total: number }",
+      "returnTypeDetail": "{ resolved: number; unresolved: number; total: number }",
+      "file": "src/session-utils.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "{ resolved: number; unresolved: number; total: number }"
+      ],
+      "purpose": "Count resolved vs unresolved sessions in a session list.",
+      "requires": [
+        "SESSION_LIST"
+      ],
+      "produces": [
+        "RESOLVED_COUNT"
+      ],
+      "tags": [
+        "session",
+        "count",
+        "statistics"
+      ]
+    },
+    {
+      "name": "formatSessionCounts",
+      "params": [
+        {
+          "name": "counts",
+          "type": "{ resolved: number; unresolved: number; total: number }",
+          "typeDetail": "{ resolved: number; unresolved: number; total: number }"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/session-utils.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "{ resolved: number; unresolved: number; total: number }"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Get a summary of session counts as a formatted string.",
+      "requires": [
+        "RESOLVED_COUNT"
+      ],
+      "produces": [
+        "FORMATTED_COUNT"
+      ],
+      "tags": [
+        "session",
+        "format",
+        "report"
+      ]
+    },
+    {
       "name": "main",
       "params": [],
       "returnType": "any",
