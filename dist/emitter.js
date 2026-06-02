@@ -263,6 +263,17 @@ function emitCode(actions, meta) {
     };
     for (const a of actions)
         code += convert(a) + "\n";
+    // Ensure last action is a return — inject one if LLM forgot
+    const lastAction = actions[actions.length - 1];
+    if (lastAction && lastAction.kind !== "return") {
+        const lastCall = [...actions].reverse().find(a => a.kind === "call" && a.assignTo);
+        if (lastCall && lastCall.assignTo) {
+            code += `  return ${lastCall.assignTo};\n`;
+        }
+        else if (lastAction.kind === "call" && lastAction.assignTo) {
+            code += `  return ${lastAction.assignTo};\n`;
+        }
+    }
     code += "}\n";
     // Call main with params if it has inputs, otherwise no-arg call
     if (inputs.length > 0) {
