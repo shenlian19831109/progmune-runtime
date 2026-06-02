@@ -132,6 +132,7 @@ function computeDelta(beforeSnap, afterSnap, namespace) {
     return { acquired, invalidated };
 }
 // ── findFixPathStatic: BFS state graph search (extracted from class) ──
+/** @requires CURRENT_STATES @produces FIX_PATH */
 function findFixPathStatic(rules, namespace, current, targetPreStates) {
     const nsFuncs = [];
     for (const [fn, rule] of rules) {
@@ -623,6 +624,7 @@ exports.StateMachineValidator = StateMachineValidator;
 // Standalone presentation utilities (formerly static methods)
 // ═══════════════════════════════════════════════════════════════
 /** Format an SSG rejection as a human-readable multi-line string. */
+/** @requires SSG_REJECTION @produces EXPLANATION */
 function explainRejection(rejection) {
     const nsLabel = rejection.namespace && rejection.namespace !== DEFAULT_NAMESPACE
         ? ` [namespace: ${rejection.namespace}]` : '';

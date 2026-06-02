@@ -209,10 +209,12 @@ function extractDirectCalls(func) {
  * @protocol namespace=dev_pipeline pre_states=[] post_states=["IR_EXTRACTED"] invalidate=["IR_STALE"]
  */
 /** @requires PROJECT_PATH @produces IR_FUNCTIONS */
+/** @requires PROJECT_PATH @produces IR_FUNCTIONS */
 function extractIR(projectRoot) {
     return extractIRWithTypes(projectRoot).functions;
 }
 /** Extract both functions and type→file mapping. */
+/** @requires PROJECT_PATH @produces IR_WITH_TYPES */
 /** @requires PROJECT_PATH @produces IR_WITH_TYPES */
 function extractIRWithTypes(projectRoot) {
     const absRoot = path.resolve(projectRoot);

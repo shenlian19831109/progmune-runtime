@@ -169,6 +169,7 @@ function computeDelta(
 
 // ── findFixPathStatic: BFS state graph search (extracted from class) ──
 
+/** @requires CURRENT_STATES @produces FIX_PATH */
 export function findFixPathStatic(
   rules: Map<string, StateAnnotation>,
   namespace: string,
@@ -752,6 +753,7 @@ export class StateMachineValidator {
 // ═══════════════════════════════════════════════════════════════
 
 /** Format an SSG rejection as a human-readable multi-line string. */
+/** @requires SSG_REJECTION @produces EXPLANATION */
 export function explainRejection(rejection: SSGRejection): string {
   const nsLabel = rejection.namespace && rejection.namespace !== DEFAULT_NAMESPACE
     ? ` [namespace: ${rejection.namespace}]` : '';

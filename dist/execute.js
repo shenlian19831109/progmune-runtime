@@ -94,6 +94,7 @@ function getExecutionMetrics() {
  * @param projectPath - Absolute path to project root
  * @param filePath - Optional: write generated code to this file
  */
+/** @requires INTENT @produces CODE */
 async function execute(intent, projectPath, filePath) {
     // 1. IR extraction
     let ir;
@@ -210,6 +211,7 @@ async function execute(intent, projectPath, filePath) {
 }
 /** Verify a file compiles without errors. Returns {pass, errors[]}.
  *  Uses tsc directly — no grep tricks, no pipefail ambiguity. */
+/** @requires FILE_PATH @produces COMPILE_RESULT */
 /** @requires FILE_PATH @produces COMPILE_RESULT */
 function verifyCompiles(filePath) {
     try {

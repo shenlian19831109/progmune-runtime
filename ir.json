@@ -1555,6 +1555,12 @@
         "ReplayTransition"
       ],
       "purpose": "Replay transitions with per-step detail for debugging. */",
+      "requires": [
+        "TRANSITIONS"
+      ],
+      "produces": [
+        "DETAIL_RESULT"
+      ],
       "tags": [
         "deterministic",
         "replay"
@@ -1708,9 +1714,11 @@
       },
       "purpose": "将动作序列编译为目标语言代码。",
       "requires": [
+        "ACTIONS",
         "ACTIONS"
       ],
       "produces": [
+        "TYPESCRIPT_CODE",
         "TYPESCRIPT_CODE"
       ],
       "tags": [
@@ -1878,6 +1886,12 @@
         "Promise"
       ],
       "purpose": "Execute the full Progmune pipeline: intent → validated code → file. *",
+      "requires": [
+        "INTENT"
+      ],
+      "produces": [
+        "CODE"
+      ],
       "tags": [
         "execute"
       ]
@@ -1909,9 +1923,11 @@
       ],
       "purpose": "Verify a file compiles without errors. Returns {pass, errors[]}. Uses tsc directly — no grep tricks, no pipefail ambiguity. */",
       "requires": [
+        "FILE_PATH",
         "FILE_PATH"
       ],
       "produces": [
+        "COMPILE_RESULT",
         "COMPILE_RESULT"
       ],
       "tags": [
@@ -2343,9 +2359,11 @@
       },
       "purpose": "从 TypeScript 项目提取 IR（函数签名、参数、返回值、协议注解）。",
       "requires": [
+        "PROJECT_PATH",
         "PROJECT_PATH"
       ],
       "produces": [
+        "IR_FUNCTIONS",
         "IR_FUNCTIONS"
       ],
       "tags": [
@@ -2425,9 +2443,11 @@
       ],
       "purpose": "Extract both functions and type→file mapping. */",
       "requires": [
+        "PROJECT_PATH",
         "PROJECT_PATH"
       ],
       "produces": [
+        "IR_WITH_TYPES",
         "IR_WITH_TYPES"
       ],
       "tags": [
@@ -2615,6 +2635,12 @@
         "string"
       ],
       "purpose": "Record a generation failure to the failure corpus. */",
+      "requires": [
+        "FAILURE_EVENT"
+      ],
+      "produces": [
+        "FAILURE_ID"
+      ],
       "tags": [
         "failure",
         "collector"
@@ -5767,6 +5793,11 @@
           "name": "funcs",
           "type": "any[]",
           "typeDetail": "any[]"
+        },
+        {
+          "name": "allFuncs",
+          "type": "any[]",
+          "typeDetail": "any[]"
         }
       ],
       "returnType": "string",
@@ -5781,7 +5812,35 @@
       "outputs": [
         "string"
       ],
-      "purpose": "构建紧凑函数列表（约节省 50% token） */",
+      "purpose": "构建紧凑函数列表 — 包含能力元数据帮助 LLM 理解函数语义 */",
+      "tags": [
+        "planner"
+      ]
+    },
+    {
+      "name": "buildChainHints",
+      "params": [
+        {
+          "name": "funcs",
+          "type": "any[]",
+          "typeDetail": "any[]"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/planner.ts",
+      "calls": [
+        "filter",
+        "push",
+        "join",
+        "map"
+      ],
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Build capability chain hints from IR: producer→consumer relationships. e.g. \"failureStats → formatFailureStats (FAILURE_STATS)\" */",
       "tags": [
         "planner"
       ]
@@ -6128,6 +6187,7 @@
         "sort",
         "slice",
         "buildCompactFuncList",
+        "buildChainHints",
         "match",
         "find",
         "buildProtocolChainHint",
@@ -9340,6 +9400,12 @@
       "outputs": [
         "string"
       ],
+      "requires": [
+        "CURRENT_STATES"
+      ],
+      "produces": [
+        "FIX_PATH"
+      ],
       "tags": [
         "ssg",
         "validator"
@@ -9782,6 +9848,12 @@
         "string"
       ],
       "purpose": "Format an SSG rejection as a human-readable multi-line string. */",
+      "requires": [
+        "SSG_REJECTION"
+      ],
+      "produces": [
+        "EXPLANATION"
+      ],
       "tags": [
         "ssg",
         "validator"
@@ -10231,6 +10303,12 @@
         "namespace": "dev_pipeline"
       },
       "purpose": "校验单个动作的合法性（函数存在、类型匹配、参数数量）。",
+      "requires": [
+        "ACTION"
+      ],
+      "produces": [
+        "VALIDATION_RESULT"
+      ],
       "tags": [
         "validator"
       ]

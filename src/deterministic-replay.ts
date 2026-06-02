@@ -248,6 +248,7 @@ export function replayLedger(
 
 /** Replay with per-transition detail — for debugging and UI. */
 /** Replay transitions with per-step detail for debugging. */
+/** @requires TRANSITIONS @produces DETAIL_RESULT */
 export function replayWithDetail(
   transitions: StateTransition[],
   currentRules?: Map<string, import("./ssg-validator").StateAnnotation>,

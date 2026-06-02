@@ -102,6 +102,7 @@ function checkVariableFlow(actions: Action[]): string[] {
  * 校验单个动作的合法性（函数存在、类型匹配、参数数量）。
  * @protocol namespace=dev_pipeline pre_states=["IR_EXTRACTED"] post_states=["ACTION_VALIDATED"]
  */
+/** @requires ACTION @produces VALIDATION_RESULT */
 export function validateAction(action: Action, actionIndex?: number): { valid: boolean; errors: string[]; violations: ConstraintViolation[] } {
   const functions = loadIR();
   const errors: string[] = [];

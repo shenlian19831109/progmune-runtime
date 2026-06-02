@@ -83,6 +83,7 @@ function classifyPlanError(error) {
 }
 /** Record a failure and save to disk. */
 /** Record a generation failure to the failure corpus. */
+/** @requires FAILURE_EVENT @produces FAILURE_ID */
 function recordFailure(record) {
     const id = `F-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     const entry = {

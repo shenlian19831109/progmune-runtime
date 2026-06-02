@@ -205,6 +205,7 @@ function replayLedger(sessionId, transitions, storedRuleHash, storedLedgerHash, 
 }
 /** Replay with per-transition detail — for debugging and UI. */
 /** Replay transitions with per-step detail for debugging. */
+/** @requires TRANSITIONS @produces DETAIL_RESULT */
 function replayWithDetail(transitions, currentRules, namespaceInitialStates = (0, protocol_registry_1.getNsInit)()) {
     if (!currentRules || currentRules.size === 0) {
         return transitions.map(t => ({
