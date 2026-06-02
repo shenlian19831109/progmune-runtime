@@ -15,27 +15,25 @@ Progmune（免序）不是一个 AI 编程助手，而是一个面向生成式�
 - [核心命题](#核心命题ai-生成的程序必须具备免疫系统)
 - [架构概览](#架构概览一个会学习会记忆会防御的运行时)
 - [语义有效性级别 (SVL)](#语义有效性级别-svl)
+- [v2.1.0 新特性：抗体与快照](#v210-新特性抗体与快照)
 - [Semantic Observatory](#semantic-observatory语义观测台)
 - [快速开始](#快速开始)
 - [CLI 命令](#cli-命令)
 - [MCP 工具](#mcp-工具)
-- [LLM 后端配置](#llm-后端配置)
 - [全球免疫网络](#全球免疫网络-global-immune-network)
-- [常见问题](#常见问题)
-- [Action 对象字段说明](#action-对象字段说明)
 - [许可证](#许可证)
 
 ---
 
 ## 核心命题：AI 生成的程序必须具备免疫系统
 
-LLM 在生成代码时会产生"幻觉"——调用不存在的函数、违反类型约束、跳过关键的业务步骤。传统的提示工程和事后校验无法根除这些问题，因为它们将 LLM 置于系统的中心，缺乏第一性原理的约束。
+LLM 在生成代码时会产生“幻觉”——调用不存在的函数、违反类型约束、跳过关键的业务步骤。传统的提示工程和事后校验无法根除这些问题，因为它们将 LLM 置于系统的中心，缺乏第一性原理的约束。
 
 Progmune 提出**程序免疫学（Program Immunology）**范式，为生成式程序建立一套可识别、可记忆、可进化的防御体系：
 
-1. **天然免疫**：快速识别并拒绝违反符号存在性、类型兼容性和数据流规则的代码。
-2. **获得性免疫**：从过去的失败案例中学习，生成特异性的防御规则，主动预防未来同类错误。
-3. **免疫记忆**：将成功和失败的模式沉淀为结构化的知识，使系统随着使用持续进化，越用越可靠。
+1.  **天然免疫**：快速识别并拒绝违反符号存在性、类型兼容性和数据流规则的代码。
+2.  **获得性免疫**：从过去的失败案例中学习，生成特异性的防御规则，主动预防未来同类错误。
+3.  **免疫记忆**：将成功和失败的模式沉淀为结构化的知识，使系统随着使用持续进化，越用越可靠。
 
 **详细理论框架请参阅《[Program Immunology 白皮书](./WHITEPAPER.md)》。**
 
@@ -43,106 +41,25 @@ Progmune 提出**程序免疫学（Program Immunology）**范式，为生成式�
 
 ## 架构概览：一个会学习、会记忆、会防御的运行时
 
-Progmune 的架构受生物免疫系统启发，分为三层：
+Progmune 的架构受生物免疫系统启发，分为核心防御层：
 
 | 生物免疫系统 | 程序免疫 (Progmune) | 核心职责 |
 |:-------------|:--------------------|:---------|
 | **天然免疫** | **约束引擎** (IR + SVL-1~SVL-3) | 快速、自动地拒绝调用不存在的函数、类型错误和数据流问题。 |
-| **获得性免疫** | **语义状态图 (SSG)** | 通过可编程的状态机，精确拦截非法业务逻辑跃迁（如"未认证即签发令牌"），输出结构化修复路径。 |
+| **获得性免疫** | **语义状态图 (SSG)** | 通过可编程的状态机，精确拦截非法业务逻辑跃迁（如“未认证即签发令牌”）。 |
 | **免疫记忆** | **三层记忆 + Failure Corpus** | 工作记忆、情景记忆和语义记忆协同；失败基因组记录每次语义异常、修复路径和适应轨迹。 |
-| **抗体生成** | **Antibody Registry** | 从失败中自动挖掘修复模式，按 ACL-1~4 置信度分级，生成候选免疫规则。 |
+| **抗体生成** | **Antibody Registry** | **v2.1.0 新增**：从失败中自动挖掘修复模式，生成 ACL-1~4 置信度分级的免疫规则。 |
 | **免疫观测** | **Semantic Observatory** | 终端原生语义观测工具——时间线、认知回放、状态机追踪、基因组热力图。 |
 
-### SSG：语义状态图
+---
 
-SSG 是 Progmune 的协议级验证引擎。通过 `@protocol` JSDoc 注解声明函数的前置/后置状态和失效规则：
+## v2.1.0 新特性：抗体与快照
 
-```typescript
-/**
- * 签发 JWT 令牌
- * @protocol pre_states=["PASSWORD_VERIFIED"] post_states=["TOKEN_ISSUED"] invalidate=["PASSWORD_VERIFIED"]
- */
-export function generate_jwt(userId: string, expiresIn: number): string
-```
+在 v2.1.0 版本中，Progmune 实现了从“被动拦截”到“主动防御”的跨越：
 
-当 AI 生成的代码违反协议时，SSG 输出结构化拒绝：被拦截的函数、当前状态、所需状态、缺失步骤和完整修复路径。
-
-#### 资源中心 SSG（Resource-Centric SSG）
-
-SSG 支持命名空间隔离的状态机，不同资源域（认证、文件、数据库）各自维护独立的状态空间：
-
-```typescript
-// 文件资源生命周期（namespace=file）
-/** @protocol namespace=file pre_states=[] post_states=["FILE_OPEN"] */
-export function open_file(path: string): FileHandle
-
-/** @protocol namespace=file pre_states=["FILE_OPEN"] post_states=["FILE_READ"] */
-export function read_file(fh: FileHandle): string
-
-// 数据库资源生命周期（namespace=db）
-/** @protocol namespace=db pre_states=[] post_states=["DB_CONNECTED"] */
-export function connect_db(url: string): Connection
-
-/** @protocol namespace=db pre_states=["DB_CONNECTED"] post_states=["DB_QUERIED"] */
-export function query_db(conn: Connection, sql: string): Result[]
-```
-
-每个命名空间维护独立的状态集合，跨命名空间的函数调用互不干扰。命名空间初始状态可在 `protocols.json` 中通过 `namespaceInitialStates` 配置。
-
-### 确定性修复规划器（Deterministic Repair Planner）
-
-当 SSG 检测到协议违规时，规划器使用 **BFS 多跳修复路径搜索**自动补全缺失步骤：
-
-```
-违规：AI 尝试直接调用 generate_jwt()，但当前状态为 UNAUTHENTICATED
-BFS 搜索：UNAUTHENTICATED → verify_password() → PASSWORD_VERIFIED → generate_jwt() → TOKEN_ISSUED
-修复路径：[verify_password, generate_jwt]
-```
-
-BFS 搜索替代了原来的单跳线性扫描，可处理任意长度的协议缺口链。修复路径通过 SSG 校验后自动插入到 Action 序列中，无需 LLM 参与。
-
-### Failure Corpus：AI 失败基因组
-
-每次语义异常被记录为一条基因组记录，包含：违规 SVL 级别、约束类型、SSG 状态快照、修复路径、缺失函数、规划器重试次数。`IntentSession` 将同一意图的所有适应尝试链接为完整的"认知会话"——记录 AI 如何从失败中逐渐学会正确完成任务。
-
-### 语义快照引擎（Semantic Snapshot Engine）
-
-每次规划会话自动捕获 IR 快照，记录当时的所有函数名和签名。快照支持三种操作：
-
-| 命令 | 用途 |
-|:-----|:-----|
-| `ts-node src/semantic-trace.ts --snapshots` | 列出所有 IR 快照 |
-| `ts-node src/semantic-trace.ts --diff <idA> <idB>` | 比较两个快照的 IR 差异（新增/删除/变更函数） |
-| `ts-node src/semantic-trace.ts --validate <sessionId>` | 确定性回放验证 |
-
-### 确定性回放（Deterministic Replay）
-
-`--validate` 命令将会话中的 Action 序列在快照 IR 和当前 IR 上分别校验，逐函数对比结果：
-
-```
-Action          │ Snapshot IR        │ Live IR            │ Status
-────────────────┼────────────────────┼────────────────────┼──────────
-verify_password │ ✔ exists (1 param) │ ✔ exists (1 param) │ STABLE
-generate_jwt    │ ✔ exists (2 param) │ ✔ exists (2 param) │ STABLE
-create_session  │ ✔ exists (1 param) │ ✖ NOT FOUND        │ REGRESSION
-```
-
-通过对比快照与当前 IR，可检测代码变更是否破坏了已有的正确修复路径。
-
-### 抗体推理集成（Antibody Inference Integration）
-
-抗体注册表中的修复模式已集成到规划器的推理层：
-
-| ACL 级别 | 推理行为 |
-|:---------|:---------|
-| ACL-3 | 将已验证的修复路径注入 LLM 提示，约束其按已知正确顺序生成 |
-| ACL-4 | 完全跳过 LLM——直接从 fixPath 构建 Action 序列，经 SSG 校验后返回（零 LLM 调用） |
-
-抗体匹配使用 Jaccard 相似度（阈值 20%）将新意图与已知修复模式关联，实现"一次修复，永久免疫"。
-
-### IR 外部函数提取
-
-IR 提取器不仅捕获项目内声明的函数，还自动识别外部依赖函数（如 `readFileSync`、`parse`、`resolve` 等），为它们注册已知的 Node.js/JavaScript API 签名。这使得约束引擎可以对外部 API 调用进行 SVL-1~SVL-2 校验。
+*   **抗体注册表 (Antibody Registry)**：系统自动从 `Failure Corpus` 中提取修复模式。高置信度（ACL-4）的抗体可触发“免疫快跑”，绕过 LLM 直接应用验证过的修复路径。
+*   **语义快照引擎 (Snapshot Engine)**：在规划时自动捕获 IR 状态。支持通过 `diff` 命令对比不同时间点的 IR 差异，解决因环境漂移导致的生成失败。
+*   **BFS 协议修复**：SSG 验证器现在使用广度优先搜索寻找多步修复路径，能够自动补全复杂的协议缺失（如 `INIT` -> `EMAIL_OK` -> `PWD_HASHED`）。
 
 ---
 
@@ -159,61 +76,12 @@ Progmune 定义了 AI 生成代码正确性的分层标准：
 
 ---
 
-## Semantic Observatory（语义观测台）
-
-终端原生的 AI 推理可观测性工具。零依赖，纯 ANSI + Unicode box-drawing。
-
-```bash
-# 会话摘要表
-ts-node src/semantic-trace.ts
-
-# 单会话完整时间线
-ts-node src/semantic-trace.ts <sessionId>
-
-# 逐步认知回放（含适应差异对比）
-ts-node src/semantic-trace.ts replay <sessionId>
-
-# 状态机转换追踪（+/− 状态获取/失效标记）
-ts-node src/semantic-trace.ts --states <sessionId>
-
-# 失败基因组（SVL 分布条状图）
-ts-node src/semantic-trace.ts --genome
-
-# 抗体注册表（ACL-1~4 置信度）
-ts-node src/semantic-trace.ts --learned
-
-# 语义热力图（脆弱协议 / 免疫层活跃度 / 约束共现 / 高摩擦任务）
-ts-node src/semantic-trace.ts --heatmap
-
-# 确定性回放（对比快照 IR vs 当前 IR，检测回归）
-ts-node src/semantic-trace.ts --validate <sessionId>
-
-# 列出所有 IR 快照
-ts-node src/semantic-trace.ts --snapshots
-
-# 比较两个快照的 IR 差异
-ts-node src/semantic-trace.ts --diff <idA> <idB>
-```
-
-### 抗体置信度级别 (ACL)
-
-| 级别 | 标准 | 含义 |
-|:-----|:-----|:-----|
-| ACL-1 | 单案例观察 | 首次出现的修复模式，仅记录 |
-| ACL-2 | 重复观察（2+ 会话） | 同一模式在多个会话中重现，标记关注 |
-| ACL-3 | 跨任务验证（4+ 次或 3+ 独立意图） | 高置信候选，可考虑纳入默认规则 |
-| ACL-4 | 全局稳定（10+ 次 / 5+ 独立意图） | 已验证的免疫规则，可自动应用 |
-
-> ACL 门槛可通过环境变量配置：`PROGMUNE_ACL4_COUNT`（默认 10）、`PROGMUNE_ACL4_INTENTS`（默认 5）、`PROGMUNE_ACL3_COUNT`（默认 4）、`PROGMUNE_ACL3_INTENTS`（默认 3）、`PROGMUNE_ACL2_COUNT`（默认 2）。设置较低值可加速抗体升级。
-
----
-
 ## 快速开始
 
 ### 前置条件
 
-- [Node.js](https://nodejs.org/) >= 18
-- 一个有效的 LLM API 密钥（DeepSeek 或 OpenAI 兼容接口）
+*   [Node.js](https://nodejs.org/) >= 18
+*   一个有效的 LLM API 密钥（DeepSeek 或 OpenAI 兼容接口）
 
 ### 1. 安装
 
@@ -221,194 +89,17 @@ ts-node src/semantic-trace.ts --diff <idA> <idB>
 npm install -g progmune-runtime
 ```
 
-### 2. 配置 LLM API 密钥
+### 2. 配置
 
 ```bash
-# 方式一：快速配置（推荐）
-npx progmune-runtime setup "你的DeepSeek或OpenAI密钥"
-
-# 方式二：环境变量
-export LLM_API_KEY="你的DeepSeek或OpenAI密钥"
+npx progmune-runtime setup "你的API密钥"
 ```
 
-支持多模型后端，详见 [LLM 后端配置](#llm-后端配置)。
-
-### 3. 在 MCP 客户端中配置
-
-**Claude Code** — 编辑 `~/.claude/settings.json`：
-
-```json
-{
-  "mcpServers": {
-    "progmune": {
-      "command": "npx",
-      "args": ["progmune-runtime"],
-      "env": {
-        "LLM_API_KEY": "你的DeepSeek或OpenAI密钥",
-        "LLM_BASE_URL": "https://api.deepseek.com/v1"
-      }
-    }
-  }
-}
-```
-
-> `env` 字段是必需的。仅设置终端环境变量可能不会被 MCP 子进程继承。
-
-**Manus / 其他客户端**：Command: `npx`, Args: `progmune-runtime`，并在客户端环境变量中配置 `LLM_API_KEY`。
-
-### 4. 验证安装
+### 3. 验证
 
 ```bash
 npx progmune-runtime test
 ```
-
-输出示例：
-```
-🧪 Progmune Runtime 自测试
-  ✅ SVL-1: 存在函数通过
-  ✅ SVL-1: 不存在函数拦截
-  ✅ SVL-2: 参数数量匹配通过
-  ✅ SVL-4: 非法跃迁拦截（无 auth）
-📊 结果: 11/11 通过 (100%)
-```
-
-配置完成后，在对话中直接描述编程需求，AI 代理会自动调用 Progmune 生成安全代码。
-
----
-
-## CLI 命令
-
-| 命令 | 用途 |
-|:-----|:------|
-| `progmune-runtime setup <key>` | 配置向导，引导完成 LLM 密钥和 MCP 设置 |
-| `progmune-runtime test` | 运行内置自测试（11 项），验证部署是否正常 |
-| `progmune-runtime opt-in [enable\|disable\|status]` | 管理免疫网络上报 |
-| `progmune-runtime` | 以 MCP 服务器模式运行（供 MCP 客户端调用） |
-
----
-
-## MCP 工具
-
-Progmune MCP 服务器暴露以下工具：
-
-| 工具 | 描述 |
-|:-----|:------|
-| `progmune_generate` | 生成类型安全的 Python 代码（需传入 `intent` 和 `projectPath`） |
-| `progmune_status` | 查看运行时状态、LLM 调用统计、免疫网络状况 |
-
-**progmune_status 输出示例**：
-
-```json
-{
-  "version": "2.1.0",
-  "llm": { "model": "deepseek-chat", "callCount": 3, "apiKeySet": true },
-  "immuneNetwork": { "optIn": true, "hubReachable": true, "totalFailures": 14 }
-}
-```
-
----
-
-## LLM 后端配置
-
-通过 `LLM_PROVIDER` 环境变量切换后端：
-
-### DeepSeek（默认）
-
-```bash
-export LLM_PROVIDER=deepseek
-export LLM_API_KEY="你的密钥"
-```
-
-### OpenAI
-
-```bash
-export LLM_PROVIDER=openai
-export LLM_API_KEY="你的密钥"
-export LLM_BASE_URL=https://api.openai.com/v1
-export LLM_MODEL=gpt-4
-```
-
-### Ollama（本地模型，无需联网）
-
-```bash
-export LLM_PROVIDER=ollama
-# 默认使用 http://localhost:11434/v1，模型 llama3
-# 可通过 LLM_BASE_URL 和 LLM_MODEL 覆盖
-```
-
-Ollama 模式不需要 `LLM_API_KEY`，适合完全离线使用。
-
----
-
-## 全球免疫网络 (Global Immune Network)
-
-Progmune 支持将本地脱敏后的错误指纹上报至中央免疫服务器，实现"群体免疫"。开启上报后，每次 `progmune_generate` 调用会自动上报。
-
-### 开启上报
-
-```bash
-npx progmune-runtime opt-in enable
-```
-
-### 启动本地 Hub 服务器
-
-```bash
-# 启动（默认端口 8080）
-node server/hub.js
-
-# 访问仪表板
-open http://localhost:8080/
-```
-
-仪表板包含实时统计、高频错误模式、SVL 分布和最近免疫事件时间线。
-
-### 配置中央服务器地址
-
-```bash
-export PROGMUNE_HUB="http://localhost:8080/report"
-```
-
-### 预览和手动上报
-
-```bash
-# 预览待上报的脱敏数据
-npx ts-node src/report.ts preview
-
-# 手动执行安全上报
-npx ts-node src/report.ts report
-```
-
-### 隐私保护
-
-只上传函数名序列、SVL 级别、状态迁移，**绝不包含**任何代码片段、变量值或用户数据。
-
----
-
-## 常见问题
-
-遇到问题？请查阅 [FAQ.md](./FAQ.md)，涵盖：
-
-- 如何获取 API 密钥
-- MCP 配置失败的排查步骤
-- 免疫网络上报说明
-- 数据隐私保障
-- 错误调试指南
-
----
-
-## Action 对象字段说明
-
-当使用 Progmune 的 Action API 时，请遵循以下字段规范：
-
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `kind` | `"call" \| "if" \| "assign" \| "return"` | 是 | 动作类型 |
-| `function` | `string` | 当 `kind` 为 `"call"` 时 | 被调用的函数名。**注意不是 `fn` 或 `name`** |
-| `args` | `Arg[]` | 当 `kind` 为 `"call"` 时 | 参数列表，每个元素为 `{ name: string, type: string, value: any }` |
-| `assignTo` | `string` | 否 | 将返回值绑定到的变量名 |
-| `condition` | `string` | 当 `kind` 为 `"if"` 时 | 条件变量名，必须是已声明的变量 |
-
-**常见错误**：使用 `action.fn` 代替 `action.function` 会导致校验器报告"函数 'undefined' 不存在"。
 
 ---
 
@@ -416,7 +107,7 @@ npx ts-node src/report.ts report
 
 MIT License。
 
-Progmune 正在重新定义 AI 辅助编程——不是"让模型更聪明"，而是"让程序真相主导生成"。加入我们的技术预览，一起构建可验证的 AI 编码未来。
+Progmune 正在重新定义 AI 辅助编程——不是“让模型更聪明”，而是“让程序真相主导生成”。
 
 ---
 
@@ -428,397 +119,49 @@ Progmune 正在重新定义 AI 辅助编程——不是"让模型更聪明"，�
 [![MCP](https://img.shields.io/badge/MCP-Compatible-blue)](https://modelcontextprotocol.io)
 [![Stage: Technical Preview](https://img.shields.io/badge/Stage-Technical_Preview-orange)]()
 
-Progmune is not an AI programming assistant, but an immune system for generative programs. It demotes Large Language Models (LLMs) from open-world code generators to heuristic searchers strictly constrained by the Program Truth Layer (IR), ensuring that generated code is not only symbolically and type-correct but also behaviorally legal.
+Progmune is not an AI programming assistant, but an immune system for generative programs. It demotes LLMs from open-world code generators to heuristic searchers strictly constrained by the Program Truth Layer (IR).
 
 ---
 
-## Table of Contents
+## v2.1.0 New Features: Antibodies & Snapshots
 
-- [Core Proposition](#core-proposition-ai-generated-programs-must-have-an-immune-system)
-- [Architecture Overview](#architecture-overview-a-runtime-that-learns-remembers-and-defends)
-- [Semantic Validity Levels (SVL)](#semantic-validity-levels-svl)
-- [Semantic Observatory](#semantic-observatory)
-- [Quick Start](#quick-start)
-- [CLI Commands](#cli-commands)
-- [MCP Tools](#mcp-tools)
-- [LLM Backend Configuration](#llm-backend-configuration)
-- [Global Immune Network](#global-immune-network)
-- [FAQ](#faq)
-- [Action Object Fields](#action-object-fields)
-- [License](#license-1)
+v2.1.0 marks a major leap from "passive interception" to "active defense":
+
+*   **Antibody Registry**: Automatically extracts repair patterns from the `Failure Corpus`. High-confidence (ACL-4) antibodies trigger "Immune Fast-Path," bypassing the LLM to apply validated fixes directly.
+*   **Semantic Snapshot Engine**: Captures the exact IR state during planning. Supports `diff` commands to track IR evolution and debug environment drift.
+*   **BFS Protocol Repair**: The SSG validator now uses Breadth-First Search to find multi-hop repair paths, automatically filling complex protocol gaps.
 
 ---
 
-## Core Proposition: AI-Generated Programs Must Have an Immune System
-
-LLMs often hallucinate when generating code—calling non-existent functions, violating type constraints, or skipping critical business steps. Traditional prompt engineering and post-hoc validation cannot eradicate these issues because they place the LLM at the center of the system, lacking first-principle constraints.
-
-Progmune proposes the **Program Immunology** paradigm, establishing an identifiable, memorable, and evolvable defense system for generative programs:
-
-1. **Innate Immunity**: Rapidly identify and reject code that violates symbolic existence, type compatibility, and dataflow rules.
-2. **Adaptive Immunity**: Learn from past failure cases to generate specific defense rules, actively preventing similar future errors.
-3. **Immune Memory**: Consolidate successful and failed patterns into structured knowledge, allowing the system to continuously evolve and become more reliable with use.
-
-**For a detailed theoretical framework, please refer to the [Program Immunology Whitepaper](./WHITEPAPER.md).**
-
----
-
-## Architecture Overview: A Runtime That Learns, Remembers, and Defends
-
-Inspired by biological immune systems, Progmune's architecture consists of three layers:
+## Architecture Overview
 
 | Biological Immune System | Program Immunology (Progmune) | Core Responsibility |
 |:-------------------------|:------------------------------|:--------------------|
-| **Innate Immunity** | **Constraint Engine** (IR + SVL-1~SVL-3) | Rapidly and automatically rejects calls to non-existent functions, type errors, and dataflow issues. |
-| **Adaptive Immunity** | **Semantic State Graph (SSG)** | Precisely intercepts illegal business logic transitions (e.g., "issue token before authentication") via programmable state machines, outputting structured repair paths. |
-| **Immune Memory** | **Three-Layer Memory + Failure Corpus** | Working, episodic, and semantic memory collaborate; the failure genome records every semantic anomaly, repair path, and adaptation trajectory. |
-| **Antibody Synthesis** | **Antibody Registry** | Automatically mines repair patterns from failures, graded by ACL-1~4 confidence, generating candidate immune rules. |
-| **Immune Observability** | **Semantic Observatory** | Terminal-native semantic observability tool — timeline, cognitive replay, state machine trace, genome heatmap. |
-
-### SSG: Semantic State Graph
-
-SSG is Progmune's protocol-level validation engine. Functions declare pre/post states and invalidation rules via `@protocol` JSDoc annotations:
-
-```typescript
-/**
- * Issue JWT token
- * @protocol pre_states=["PASSWORD_VERIFIED"] post_states=["TOKEN_ISSUED"] invalidate=["PASSWORD_VERIFIED"]
- */
-export function generate_jwt(userId: string, expiresIn: number): string
-```
-
-When AI-generated code violates a protocol, SSG outputs a structured rejection: blocked function, current state, required state, missing steps, and a complete repair path.
-
-#### Resource-Centric SSG
-
-SSG supports namespace-isolated state machines, where different resource domains (auth, file, database) maintain independent state spaces:
-
-```typescript
-// File resource lifecycle (namespace=file)
-/** @protocol namespace=file pre_states=[] post_states=["FILE_OPEN"] */
-export function open_file(path: string): FileHandle
-
-/** @protocol namespace=file pre_states=["FILE_OPEN"] post_states=["FILE_READ"] */
-export function read_file(fh: FileHandle): string
-
-// Database resource lifecycle (namespace=db)
-/** @protocol namespace=db pre_states=[] post_states=["DB_CONNECTED"] */
-export function connect_db(url: string): Connection
-
-/** @protocol namespace=db pre_states=["DB_CONNECTED"] post_states=["DB_QUERIED"] */
-export function query_db(conn: Connection, sql: string): Result[]
-```
-
-Each namespace maintains an independent state set; cross-namespace function calls do not interfere. Namespace initial states are configurable via `namespaceInitialStates` in `protocols.json`.
-
-### Deterministic Repair Planner
-
-When SSG detects a protocol violation, the planner uses **BFS multi-hop fixPath search** to automatically fill missing steps:
-
-```
-Violation: AI tried to call generate_jwt() directly, but current state is UNAUTHENTICATED
-BFS search: UNAUTHENTICATED → verify_password() → PASSWORD_VERIFIED → generate_jwt() → TOKEN_ISSUED
-Repair path: [verify_password, generate_jwt]
-```
-
-BFS search replaces the original single-hop linear scan, handling protocol gap chains of arbitrary length. Repair paths are validated through SSG and auto-inserted into the Action sequence without LLM involvement.
-
-### Failure Corpus: AI Failure Genome
-
-Every semantic anomaly is recorded as a genome entry containing: violated SVL level, constraint type, SSG state snapshot, repair path, missing functions, and planner retry count. `IntentSession` links all adaptation attempts for a single intent into a complete "cognitive session" — recording how AI gradually learns to complete tasks correctly.
-
-### Semantic Snapshot Engine
-
-Each planner session automatically captures an IR snapshot, recording all function names and signatures at that point in time. Snapshots support three operations:
-
-| Command | Purpose |
-|:--------|:-------|
-| `ts-node src/semantic-trace.ts --snapshots` | List all IR snapshots |
-| `ts-node src/semantic-trace.ts --diff <idA> <idB>` | Compare IR differences between two snapshots (added/removed/changed) |
-| `ts-node src/semantic-trace.ts --validate <sessionId>` | Deterministic replay validation |
-
-### Deterministic Replay
-
-The `--validate` command replays a session's Action sequence against both the snapshot IR and the live IR, comparing results per function:
-
-```
-Action          │ Snapshot IR        │ Live IR            │ Status
-────────────────┼────────────────────┼────────────────────┼──────────
-verify_password │ ✔ exists (1 param) │ ✔ exists (1 param) │ STABLE
-generate_jwt    │ ✔ exists (2 param) │ ✔ exists (2 param) │ STABLE
-create_session  │ ✔ exists (1 param) │ ✖ NOT FOUND        │ REGRESSION
-```
-
-By comparing snapshot vs. current IR, you can detect whether code changes have broken previously correct repair paths.
-
-### Antibody Inference Integration
-
-Repair patterns from the Antibody Registry are integrated into the planner's inference layer:
-
-| ACL Level | Inference Behavior |
-|:----------|:-------------------|
-| ACL-3 | Injects validated fix paths into the LLM prompt, constraining generation to known-correct sequences |
-| ACL-4 | Skips the LLM entirely — builds Action sequences directly from fixPath, validates via SSG, returns immediately (zero LLM calls) |
-
-Antibody matching uses Jaccard similarity (20% threshold) to associate new intents with known repair patterns, achieving "fix once, immune forever."
-
-### IR External Function Extraction
-
-The IR extractor now captures not only project-local functions but also external dependencies (e.g., `readFileSync`, `parse`, `resolve`), registering them with known Node.js/JavaScript API signatures. This enables the constraint engine to perform SVL-1~SVL-2 validation on external API calls.
+| **Innate Immunity**      | **Constraint Engine** (IR + SVL-1~3) | Rejects non-existent functions, type errors, and dataflow issues. |
+| **Adaptive Immunity**    | **Semantic State Graph (SSG)** | Intercepts illegal business logic transitions (e.g., "issue token before auth"). |
+| **Immune Memory**        | **Three-Layer Memory**        | Working, episodic, and semantic memory collaborate to make the system smarter with use. |
+| **Antibody Generation**  | **Antibody Registry**         | **New in v2.1.0**: Mines repair patterns and generates ACL-1~4 graded immune rules. |
 
 ---
 
 ## Semantic Validity Levels (SVL)
 
-Progmune defines a layered standard for the correctness of AI-generated code:
-
-| Level | Name | Guarantee |
-|:------|:-----|:----------|
-| SVL-1 | Symbolic Existence | Never calls functions that do not exist in the project |
-| SVL-2 | Type Validity | Parameter count and types strictly match |
+| Level | Name                 | Guarantee                                      |
+|:------|:---------------------|:-----------------------------------------------|
+| SVL-1 | Symbolic Existence   | Never calls functions that do not exist in the project |
+| SVL-2 | Type Validity        | Parameter count and types strictly match       |
 | SVL-3 | Dataflow Correctness | Variables are declared before use, no circular references |
-| SVL-4 | Protocol Legality | Business step order must adhere to state transition rules |
-
----
-
-## Semantic Observatory
-
-Terminal-native AI reasoning observability tool. Zero dependencies, pure ANSI + Unicode box-drawing.
-
-```bash
-# Session summary table
-ts-node src/semantic-trace.ts
-
-# Full timeline for a single session
-ts-node src/semantic-trace.ts <sessionId>
-
-# Step-by-step cognitive replay (with adaptation diffs)
-ts-node src/semantic-trace.ts replay <sessionId>
-
-# State machine transition trace (+/− state gain/invalidation)
-ts-node src/semantic-trace.ts --states <sessionId>
-
-# Failure genome (SVL bar charts)
-ts-node src/semantic-trace.ts --genome
-
-# Antibody registry (ACL-1~4 confidence levels)
-ts-node src/semantic-trace.ts --learned
-
-# Semantic heatmap (fragile protocols / immune layer activity / constraint co-occurrence / high-friction intents)
-ts-node src/semantic-trace.ts --heatmap
-
-# Deterministic replay (compare snapshot IR vs live IR, detect regressions)
-ts-node src/semantic-trace.ts --validate <sessionId>
-
-# List all IR snapshots
-ts-node src/semantic-trace.ts --snapshots
-
-# Compare IR differences between two snapshots
-ts-node src/semantic-trace.ts --diff <idA> <idB>
-```
-
-### Antibody Confidence Levels (ACL)
-
-| Level | Criteria | Meaning |
-|:------|:---------|:--------|
-| ACL-1 | Single case observation | First occurrence — record only |
-| ACL-2 | Repeated observation (2+ sessions) | Pattern reproduced across sessions — flag for attention |
-| ACL-3 | Cross-task validated (4+ occurrences or 3+ distinct intents) | High-confidence candidate — consider as default rule |
-| ACL-4 | Globally stable (10+ occurrences / 5+ distinct intents) | Validated immune rule — safe for automatic application |
-
-> ACL thresholds are configurable via environment variables: `PROGMUNE_ACL4_COUNT` (default 10), `PROGMUNE_ACL4_INTENTS` (default 5), `PROGMUNE_ACL3_COUNT` (default 4), `PROGMUNE_ACL3_INTENTS` (default 3), `PROGMUNE_ACL2_COUNT` (default 2). Lower values accelerate antibody promotion.
+| SVL-4 | Protocol Legality    | Business step order must adhere to state transition rules |
 
 ---
 
 ## Quick Start
 
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) >= 18
-- A valid LLM API key (DeepSeek or OpenAI compatible)
-
-### 1. Installation
-
 ```bash
 npm install -g progmune-runtime
-```
-
-### 2. Configure LLM API Key
-
-```bash
-# Option 1: Setup wizard (recommended)
 npx progmune-runtime setup "YOUR_API_KEY"
-
-# Option 2: Environment variable
-export LLM_API_KEY="YOUR_DEEPSEEK_OR_OPENAI_KEY"
-```
-
-See [LLM Backend Configuration](#llm-backend-configuration) for multi-model support.
-
-### 3. Configure in MCP Client
-
-**Claude Code** — Edit `~/.claude/settings.json`:
-
-```json
-{
-  "mcpServers": {
-    "progmune": {
-      "command": "npx",
-      "args": ["progmune-runtime"],
-      "env": {
-        "LLM_API_KEY": "YOUR_DEEPSEEK_OR_OPENAI_KEY",
-        "LLM_BASE_URL": "https://api.deepseek.com/v1"
-      }
-    }
-  }
-}
-```
-
-> The `env` field is required. Terminal-level environment variables may not be inherited by MCP subprocesses.
-
-**Manus / Other Clients**: Command: `npx`, Args: `progmune-runtime`, configure `LLM_API_KEY` in the client's environment variables.
-
-### 4. Verify Installation
-
-```bash
 npx progmune-runtime test
 ```
-
-Expected output:
-```
-🧪 Progmune Runtime 自测试
-  ✅ SVL-1: 存在函数通过
-  ✅ SVL-1: 不存在函数拦截
-  ✅ SVL-2: 参数数量匹配通过
-  ✅ SVL-4: 非法跃迁拦截（无 auth）
-📊 结果: 11/11 通过 (100%)
-```
-
-After configuration, describe your programming needs directly in the conversation, and the AI agent will automatically invoke Progmune to generate secure code.
-
----
-
-## CLI Commands
-
-| Command | Description |
-|:--------|:------------|
-| `progmune-runtime setup <key>` | Setup wizard for LLM API key and MCP configuration |
-| `progmune-runtime test` | Run 11 built-in self-tests to verify the installation |
-| `progmune-runtime opt-in [enable\|disable\|status]` | Manage immune network reporting |
-| `progmune-runtime` | Run as MCP server (for MCP clients) |
-
----
-
-## MCP Tools
-
-| Tool | Description |
-|:-----|:------------|
-| `progmune_generate` | Generate type-safe Python code (requires `intent` and `projectPath`) |
-| `progmune_status` | View runtime status, LLM stats, and immune network health |
-
-**progmune_status example**:
-
-```json
-{
-  "version": "2.1.0",
-  "llm": { "model": "deepseek-chat", "callCount": 3, "apiKeySet": true },
-  "immuneNetwork": { "optIn": true, "hubReachable": true, "totalFailures": 14 }
-}
-```
-
----
-
-## LLM Backend Configuration
-
-Set `LLM_PROVIDER` environment variable to switch backends:
-
-### DeepSeek (default)
-
-```bash
-export LLM_PROVIDER=deepseek
-export LLM_API_KEY="your-key"
-```
-
-### OpenAI
-
-```bash
-export LLM_PROVIDER=openai
-export LLM_API_KEY="your-key"
-export LLM_BASE_URL=https://api.openai.com/v1
-export LLM_MODEL=gpt-4
-```
-
-### Ollama (local, no internet required)
-
-```bash
-export LLM_PROVIDER=ollama
-# Defaults to http://localhost:11434/v1, model llama3
-```
-
-Ollama mode does not require `LLM_API_KEY`.
-
----
-
-## Global Immune Network
-
-Progmune supports securely reporting anonymized error fingerprints to a central immune server to achieve "herd immunity." When opt-in is enabled, each `progmune_generate` call automatically uploads fingerprints.
-
-### Enable Reporting
-
-```bash
-npx progmune-runtime opt-in enable
-```
-
-### Start Local Hub Server
-
-```bash
-node server/hub.js
-# Dashboard: http://localhost:8080/
-```
-
-The dashboard provides real-time stats, top error patterns, SVL distribution, and event timeline.
-
-### Set Central Server Address
-
-```bash
-export PROGMUNE_HUB="http://localhost:8080/report"
-```
-
-### Preview and Manual Report
-
-```bash
-# Preview anonymized data
-npx ts-node src/report.ts preview
-
-# Manual report
-npx ts-node src/report.ts report
-```
-
-### Privacy Protection
-
-Only function name sequences, SVL levels, and state transitions are uploaded; **no** code snippets, variable values, or user data are ever included.
-
----
-
-## FAQ
-
-See [FAQ.md](./FAQ.md) for troubleshooting and common issues including API key setup, MCP configuration debugging, and immune network setup.
-
----
-
-## Action Object Fields
-
-When using Progmune's Action API, follow these field conventions:
-
-| Field | Type | Required | Description |
-|:------|:-----|:---------|:------------|
-| `kind` | `"call" \| "if" \| "assign" \| "return"` | Yes | Action type |
-| `function` | `string` | When `kind` is `"call"` | Function name to call. **Not `fn` or `name`** |
-| `args` | `Arg[]` | When `kind` is `"call"` | Arguments, each `{ name: string, type: string, value: any }` |
-| `assignTo` | `string` | No | Variable to bind the return value to |
-| `condition` | `string` | When `kind` is `"if"` | Condition variable name, must be declared |
-
-**Common mistake**: Using `action.fn` instead of `action.function` causes the validator to report "function 'undefined' does not exist."
 
 ---
 
@@ -826,4 +169,4 @@ When using Progmune's Action API, follow these field conventions:
 
 MIT License.
 
-Progmune is redefining AI-assisted programming—not by "making models smarter," but by "letting program truth govern generation." Join our technical preview and build a future of verifiable AI coding together.
+Progmune is redefining AI-assisted programming—not by "making models smarter," but by "letting program truth govern generation."
