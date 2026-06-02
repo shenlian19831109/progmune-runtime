@@ -30,12 +30,14 @@ export let callCount = 0;
 export function resetCallCount() { callCount = 0; }
 
 /** 粗略 token 估算：CJK 字符 ~1.5 token/字，其余 ~0.4 token/字符 */
+/** @requires TEXT @produces TOKEN_COUNT */
 export function estimateTokens(text: string): number {
   const cjk = (text.match(/[一-鿿㐀-䶿]/g) || []).length;
   const other = text.length - cjk;
   return Math.ceil(cjk * 1.5 + other * 0.4);
 }
 
+/** @requires PROMPT @produces LLM_RESPONSE */
 export async function generate(prompt: string): Promise<string> {
   callCount++;
   const resp = await client.chat.completions.create({
@@ -47,6 +49,7 @@ export async function generate(prompt: string): Promise<string> {
 }
 
 /** 带 system prompt 的调用：静态规则放 system，动态内容放 user，语义分离便于未来对接各平台缓存策略 */
+/** @requires SYSTEM_PROMPT @produces LLM_RESPONSE */
 export async function chat(systemPrompt: string, userPrompt: string): Promise<string> {
   callCount++;
   const resp = await client.chat.completions.create({

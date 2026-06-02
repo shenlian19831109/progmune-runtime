@@ -97,6 +97,7 @@ function extractFingerprints(cursor) {
     }
     return fingerprints;
 }
+/** @requires CORPUS @produces FINGERPRINT_REPORT */
 async function reportFingerprints() {
     const cursor = getReportCursor();
     const fingerprints = extractFingerprints(cursor);

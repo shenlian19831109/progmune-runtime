@@ -36,11 +36,13 @@ const client = new openai_1.default({ apiKey, baseURL });
 exports.callCount = 0;
 function resetCallCount() { exports.callCount = 0; }
 /** 粗略 token 估算：CJK 字符 ~1.5 token/字，其余 ~0.4 token/字符 */
+/** @requires TEXT @produces TOKEN_COUNT */
 function estimateTokens(text) {
     const cjk = (text.match(/[一-鿿㐀-䶿]/g) || []).length;
     const other = text.length - cjk;
     return Math.ceil(cjk * 1.5 + other * 0.4);
 }
+/** @requires PROMPT @produces LLM_RESPONSE */
 async function generate(prompt) {
     exports.callCount++;
     const resp = await client.chat.completions.create({
@@ -51,6 +53,7 @@ async function generate(prompt) {
     return resp.choices[0]?.message?.content || "";
 }
 /** 带 system prompt 的调用：静态规则放 system，动态内容放 user，语义分离便于未来对接各平台缓存策略 */
+/** @requires SYSTEM_PROMPT @produces LLM_RESPONSE */
 async function chat(systemPrompt, userPrompt) {
     exports.callCount++;
     const resp = await client.chat.completions.create({

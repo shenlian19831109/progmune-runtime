@@ -55,6 +55,7 @@ class ActionBuilder {
 
 let currentVars: Record<string, any> = {};
 
+/** @requires ACTION_CODE @produces ACTION_RESULT */
 export function executeActionCode(code: string): Action[] | null {
   const root = new ActionBuilder();
   currentVars = {};

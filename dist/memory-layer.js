@@ -91,6 +91,7 @@ function saveEpisodes(episodes) {
         fs.writeFileSync(EPISODIC_FILE, JSON.stringify(fresh.slice(0, MAX_EPISODES), null, 2));
     });
 }
+/** @requires EXECUTION_DATA @produces MEMORY_ID */
 function recordEpisode(episode) {
     const episodes = loadEpisodes();
     const newEpisode = {
@@ -104,6 +105,7 @@ function recordEpisode(episode) {
     }
     saveEpisodes(episodes);
 }
+/** @requires LIMIT @produces EPISODE_LIST */
 function getRecentEpisodes(limit = 10) {
     return loadEpisodes().slice(0, limit);
 }
@@ -172,6 +174,7 @@ function consolidateSemantic(minOccurrences = 3) {
     saveSemantic(templates);
     console.error(`[语义记忆] 巩固完成，模板数量: ${templates.length}`);
 }
+/** @requires INTENT @produces TEMPLATE */
 function findSemanticTemplate(intent) {
     const templates = loadSemantic();
     if (templates.length === 0)

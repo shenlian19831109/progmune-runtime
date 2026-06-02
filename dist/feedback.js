@@ -41,11 +41,13 @@ const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const file_lock_1 = require("./file-lock");
 const FEEDBACK_PATH = path.resolve(__dirname, "../feedback.json");
+/** @requires CORPUS @produces FEEDBACK_DATA */
 function loadFeedback() {
     if (!fs.existsSync(FEEDBACK_PATH))
         return [];
     return JSON.parse(fs.readFileSync(FEEDBACK_PATH, "utf-8"));
 }
+/** @requires FEEDBACK_EVENT @produces FEEDBACK_ID */
 function saveFeedback(record) {
     (0, file_lock_1.withLock)("feedback.json", () => {
         const data = loadFeedback();
@@ -53,6 +55,7 @@ function saveFeedback(record) {
         fs.writeFileSync(FEEDBACK_PATH, JSON.stringify(data, null, 2));
     });
 }
+/** @requires FUNCTION_NAME @produces SUCCESS_RATE */
 function getFunctionSuccessRate(funcName) {
     const records = loadFeedback();
     const funcRecords = records.filter(r => r.functionName === funcName);
@@ -61,6 +64,7 @@ function getFunctionSuccessRate(funcName) {
     const successCount = funcRecords.filter(r => r.success).length;
     return successCount / funcRecords.length;
 }
+/** @requires EXECUTION_DATA @produces RUN_ID */
 function recordRun(intent, actions, success, error) {
     for (const action of actions) {
         if (action.kind === "call") {

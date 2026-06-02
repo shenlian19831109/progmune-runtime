@@ -79,6 +79,7 @@ export function extractFingerprints(cursor?: { lastTimestamp: string | null }): 
   return fingerprints;
 }
 
+/** @requires CORPUS @produces FINGERPRINT_REPORT */
 export async function reportFingerprints(): Promise<{ success: boolean; message: string }> {
   const cursor = getReportCursor();
   const fingerprints = extractFingerprints(cursor);

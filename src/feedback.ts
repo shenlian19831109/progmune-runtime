@@ -12,11 +12,13 @@ interface RunRecord {
 
 const FEEDBACK_PATH = path.resolve(__dirname, "../feedback.json");
 
+/** @requires CORPUS @produces FEEDBACK_DATA */
 export function loadFeedback(): RunRecord[] {
   if (!fs.existsSync(FEEDBACK_PATH)) return [];
   return JSON.parse(fs.readFileSync(FEEDBACK_PATH, "utf-8"));
 }
 
+/** @requires FEEDBACK_EVENT @produces FEEDBACK_ID */
 export function saveFeedback(record: RunRecord) {
   withLock("feedback.json", () => {
     const data = loadFeedback();
@@ -25,6 +27,7 @@ export function saveFeedback(record: RunRecord) {
   });
 }
 
+/** @requires FUNCTION_NAME @produces SUCCESS_RATE */
 export function getFunctionSuccessRate(funcName: string): number {
   const records = loadFeedback();
   const funcRecords = records.filter(r => r.functionName === funcName);
@@ -33,6 +36,7 @@ export function getFunctionSuccessRate(funcName: string): number {
   return successCount / funcRecords.length;
 }
 
+/** @requires EXECUTION_DATA @produces RUN_ID */
 export function recordRun(intent: string, actions: any[], success: boolean, error?: string) {
   for (const action of actions) {
     if (action.kind === "call") {

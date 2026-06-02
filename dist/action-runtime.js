@@ -51,6 +51,7 @@ class ActionBuilder {
     }
 }
 let currentVars = {};
+/** @requires ACTION_CODE @produces ACTION_RESULT */
 function executeActionCode(code) {
     const root = new ActionBuilder();
     currentVars = {};

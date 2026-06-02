@@ -92,6 +92,12 @@
       "outputs": [
         "Action[]"
       ],
+      "requires": [
+        "ACTION_CODE"
+      ],
+      "produces": [
+        "ACTION_RESULT"
+      ],
       "tags": [
         "action",
         "runtime"
@@ -3454,6 +3460,12 @@
       "outputs": [
         "RunRecord"
       ],
+      "requires": [
+        "CORPUS"
+      ],
+      "produces": [
+        "FEEDBACK_DATA"
+      ],
       "tags": [
         "feedback"
       ]
@@ -3478,6 +3490,12 @@
         "RunRecord"
       ],
       "outputs": [],
+      "requires": [
+        "FEEDBACK_EVENT"
+      ],
+      "produces": [
+        "FEEDBACK_ID"
+      ],
       "tags": [
         "feedback"
       ]
@@ -3504,6 +3522,12 @@
       ],
       "outputs": [
         "number"
+      ],
+      "requires": [
+        "FUNCTION_NAME"
+      ],
+      "produces": [
+        "SUCCESS_RATE"
       ],
       "tags": [
         "feedback"
@@ -3548,6 +3572,12 @@
         "string"
       ],
       "outputs": [],
+      "requires": [
+        "EXECUTION_DATA"
+      ],
+      "produces": [
+        "RUN_ID"
+      ],
       "tags": [
         "feedback"
       ]
@@ -3910,6 +3940,12 @@
       "outputs": [
         "Promise"
       ],
+      "requires": [
+        "CORPUS"
+      ],
+      "produces": [
+        "FINGERPRINT_REPORT"
+      ],
       "tags": [
         "immune",
         "reporter"
@@ -4268,6 +4304,12 @@
         "number"
       ],
       "purpose": "粗略 token 估算：CJK 字符 ~1.5 token/字，其余 ~0.4 token/字符 */",
+      "requires": [
+        "TEXT"
+      ],
+      "produces": [
+        "TOKEN_COUNT"
+      ],
       "tags": [
         "llm"
       ]
@@ -4293,6 +4335,12 @@
       ],
       "outputs": [
         "Promise"
+      ],
+      "requires": [
+        "PROMPT"
+      ],
+      "produces": [
+        "LLM_RESPONSE"
       ],
       "tags": [
         "llm"
@@ -4327,6 +4375,12 @@
         "Promise"
       ],
       "purpose": "带 system prompt 的调用：静态规则放 system，动态内容放 user，语义分离便于未来对接各平台缓存策略 */",
+      "requires": [
+        "SYSTEM_PROMPT"
+      ],
+      "produces": [
+        "LLM_RESPONSE"
+      ],
       "tags": [
         "llm"
       ]
@@ -4514,6 +4568,12 @@
         "Omit"
       ],
       "outputs": [],
+      "requires": [
+        "EXECUTION_DATA"
+      ],
+      "produces": [
+        "MEMORY_ID"
+      ],
       "tags": [
         "memory",
         "layer"
@@ -4541,6 +4601,12 @@
       ],
       "outputs": [
         "Episode"
+      ],
+      "requires": [
+        "LIMIT"
+      ],
+      "produces": [
+        "EPISODE_LIST"
       ],
       "tags": [
         "memory",
@@ -4688,6 +4754,12 @@
       ],
       "outputs": [
         "SemanticTemplate"
+      ],
+      "requires": [
+        "INTENT"
+      ],
+      "produces": [
+        "TEMPLATE"
       ],
       "tags": [
         "memory",
@@ -6188,6 +6260,8 @@
         "slice",
         "buildCompactFuncList",
         "buildChainHints",
+        "keys",
+        "entries",
         "match",
         "find",
         "buildProtocolChainHint",
@@ -10154,6 +10228,12 @@
       "outputs": [
         "number"
       ],
+      "requires": [
+        "STRING_A"
+      ],
+      "produces": [
+        "SIMILARITY_SCORE"
+      ],
       "tags": [
         "utils"
       ]
@@ -10181,6 +10261,12 @@
       ],
       "outputs": [
         "string"
+      ],
+      "requires": [
+        "TEXT"
+      ],
+      "produces": [
+        "KEYWORDS"
       ],
       "tags": [
         "utils"

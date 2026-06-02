@@ -63,6 +63,7 @@ function saveEpisodes(episodes: Episode[]) {
   });
 }
 
+/** @requires EXECUTION_DATA @produces MEMORY_ID */
 export function recordEpisode(episode: Omit<Episode, "id" | "timestamp">) {
   const episodes = loadEpisodes();
   const newEpisode: Episode = {
@@ -77,6 +78,7 @@ export function recordEpisode(episode: Omit<Episode, "id" | "timestamp">) {
   saveEpisodes(episodes);
 }
 
+/** @requires LIMIT @produces EPISODE_LIST */
 export function getRecentEpisodes(limit: number = 10): Episode[] {
   return loadEpisodes().slice(0, limit);
 }
@@ -160,6 +162,7 @@ export function consolidateSemantic(minOccurrences: number = 3) {
   console.error(`[语义记忆] 巩固完成，模板数量: ${templates.length}`);
 }
 
+/** @requires INTENT @produces TEMPLATE */
 export function findSemanticTemplate(intent: string): SemanticTemplate | undefined {
   const templates = loadSemantic();
   if (templates.length === 0) return undefined;

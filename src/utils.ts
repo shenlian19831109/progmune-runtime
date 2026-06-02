@@ -1,4 +1,5 @@
 // 计算两个字符串的简单 Jaccard 相似度（基于字符二元组）
+/** @requires STRING_A @produces SIMILARITY_SCORE */
 export function jaccardSimilarity(a: string, b: string): number {
   const bigrams = (s: string) => {
     const bgs = new Set<string>();
@@ -13,6 +14,7 @@ export function jaccardSimilarity(a: string, b: string): number {
 }
 
 // 从意图中提取关键词
+/** @requires TEXT @produces KEYWORDS */
 export function extractKeywords(intent: string): string[] {
   return intent.split(/[\s，。！？,]+/).filter(w => w.length > 1).map(w => w.toLowerCase());
 }
