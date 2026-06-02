@@ -542,6 +542,12 @@
         "string"
       ],
       "purpose": "Generate a unique branch ID. */",
+      "requires": [
+        "BRANCH_TREE"
+      ],
+      "produces": [
+        "BRANCH_ID"
+      ],
       "tags": [
         "branch",
         "ledger"
@@ -571,6 +577,12 @@
         "Branch"
       ],
       "purpose": "Create the root branch of an execution tree. */",
+      "requires": [
+        "TRANSITIONS"
+      ],
+      "produces": [
+        "ROOT_BRANCH"
+      ],
       "tags": [
         "branch",
         "ledger"
@@ -612,6 +624,12 @@
         "Branch"
       ],
       "purpose": "Create a child branch from a parent branch. */",
+      "requires": [
+        "PARENT_BRANCH"
+      ],
+      "produces": [
+        "CHILD_BRANCH"
+      ],
       "tags": [
         "branch",
         "ledger"
@@ -695,6 +713,12 @@
         "Branch"
       ],
       "purpose": "Merge multiple branches into one unified branch. */",
+      "requires": [
+        "BRANCH_LIST"
+      ],
+      "produces": [
+        "MERGED_BRANCH"
+      ],
       "tags": [
         "branch",
         "ledger"
@@ -734,6 +758,12 @@
         "StateTransition"
       ],
       "purpose": "Flatten a branch tree into a linear transition sequence. */",
+      "requires": [
+        "BRANCH_TREE"
+      ],
+      "produces": [
+        "TRANSITIONS"
+      ],
       "tags": [
         "branch",
         "ledger"
@@ -769,6 +799,12 @@
         "Branch"
       ],
       "purpose": "Get the path from root to a target branch. */",
+      "requires": [
+        "BRANCH"
+      ],
+      "produces": [
+        "BRANCH_PATH"
+      ],
       "tags": [
         "branch",
         "ledger"
@@ -847,6 +883,12 @@
         "Map"
       ],
       "purpose": "Build a lookup map from a branch array. */",
+      "requires": [
+        "BRANCH_LIST"
+      ],
+      "produces": [
+        "BRANCH_MAP"
+      ],
       "tags": [
         "branch",
         "ledger"
@@ -875,6 +917,12 @@
         "Branch"
       ],
       "purpose": "Find the root branch of a tree. */",
+      "requires": [
+        "BRANCH_LIST"
+      ],
+      "produces": [
+        "ROOT_BRANCH"
+      ],
       "tags": [
         "branch",
         "ledger"
@@ -910,6 +958,12 @@
         "Branch"
       ],
       "purpose": "Find all child branches of a given parent. */",
+      "requires": [
+        "PARENT_BRANCH"
+      ],
+      "produces": [
+        "CHILD_BRANCHES"
+      ],
       "tags": [
         "branch",
         "ledger"
@@ -952,6 +1006,12 @@
         "string"
       ],
       "purpose": "Format a branch tree as human-readable text. */",
+      "requires": [
+        "BRANCH_TREE"
+      ],
+      "produces": [
+        "DESCRIPTION"
+      ],
       "tags": [
         "branch",
         "ledger"
@@ -1027,6 +1087,12 @@
         "Branch"
       ],
       "purpose": "Wrap linear transitions as a single root branch. */",
+      "requires": [
+        "TRANSITIONS"
+      ],
+      "produces": [
+        "ROOT_BRANCH"
+      ],
       "tags": [
         "branch",
         "ledger"
@@ -1058,6 +1124,12 @@
         "StateTransition"
       ],
       "purpose": "Unwrap a branch tree to a flat transition list. */",
+      "requires": [
+        "BRANCH_LIST"
+      ],
+      "produces": [
+        "TRANSITIONS"
+      ],
       "tags": [
         "branch",
         "ledger"
@@ -2270,6 +2342,12 @@
         "namespace": "dev_pipeline"
       },
       "purpose": "从 TypeScript 项目提取 IR（函数签名、参数、返回值、协议注解）。",
+      "requires": [
+        "PROJECT_PATH"
+      ],
+      "produces": [
+        "IR_FUNCTIONS"
+      ],
       "tags": [
         "extract"
       ]
@@ -2346,6 +2424,12 @@
         "{\n  functions: FunctionInfo[];\n  typeMap: Record;\n}"
       ],
       "purpose": "Extract both functions and type→file mapping. */",
+      "requires": [
+        "PROJECT_PATH"
+      ],
+      "produces": [
+        "IR_WITH_TYPES"
+      ],
       "tags": [
         "extract"
       ]
@@ -2848,6 +2932,12 @@
         "namespace": "dev_pipeline"
       },
       "purpose": "保存执行会话（含所有尝试、违规、状态转移）。",
+      "requires": [
+        "EXECUTION_DATA"
+      ],
+      "produces": [
+        "SESSION_ID"
+      ],
       "tags": [
         "failure",
         "corpus"
@@ -2876,6 +2966,12 @@
       "outputs": [
         "FailureRecord"
       ],
+      "requires": [
+        "FAILURE_CORPUS"
+      ],
+      "produces": [
+        "FAILURE_LIST"
+      ],
       "tags": [
         "failure",
         "corpus"
@@ -2903,6 +2999,12 @@
       ],
       "outputs": [
         "FailureRecord"
+      ],
+      "requires": [
+        "FAILURE_LIST"
+      ],
+      "produces": [
+        "FILTERED_FAILURES"
       ],
       "tags": [
         "failure",
@@ -2937,6 +3039,12 @@
       ],
       "outputs": [
         "{ pattern: string; count: number; examples: string[] }"
+      ],
+      "requires": [
+        "FAILURE_LIST"
+      ],
+      "produces": [
+        "FAILURE_PATTERNS"
       ],
       "tags": [
         "failure",
@@ -3010,9 +3118,11 @@
         "history"
       ],
       "requires": [
-        "SESSION_DATA"
+        "SESSION_DATA",
+        "SESSION_CORPUS"
       ],
       "produces": [
+        "SESSION_LIST",
         "SESSION_LIST"
       ]
     },
@@ -6059,6 +6169,12 @@
       "outputs": [
         "Promise"
       ],
+      "requires": [
+        "INTENT"
+      ],
+      "produces": [
+        "ACTION_PLAN"
+      ],
       "tags": [
         "planner"
       ]
@@ -7388,6 +7504,12 @@
         "IRSnapshot"
       ],
       "purpose": "从 IR 数据创建快照 */",
+      "requires": [
+        "IR_DATA"
+      ],
+      "produces": [
+        "SNAPSHOT"
+      ],
       "tags": [
         "semantic",
         "snapshot"
@@ -7419,6 +7541,12 @@
         "string"
       ],
       "purpose": "持久化快照 */",
+      "requires": [
+        "SNAPSHOT"
+      ],
+      "produces": [
+        "SNAPSHOT_ID"
+      ],
       "tags": [
         "semantic",
         "snapshot"

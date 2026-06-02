@@ -204,11 +204,13 @@ function extractDirectCalls(func: FunctionDeclaration | ArrowFunction): string[]
  * 从 TypeScript 项目提取 IR（函数签名、参数、返回值、协议注解）。
  * @protocol namespace=dev_pipeline pre_states=[] post_states=["IR_EXTRACTED"] invalidate=["IR_STALE"]
  */
+/** @requires PROJECT_PATH @produces IR_FUNCTIONS */
 export function extractIR(projectRoot: string): FunctionInfo[] {
   return extractIRWithTypes(projectRoot).functions;
 }
 
 /** Extract both functions and type→file mapping. */
+/** @requires PROJECT_PATH @produces IR_WITH_TYPES */
 export function extractIRWithTypes(projectRoot: string): {
   functions: FunctionInfo[];
   typeMap: Record<string, string>;

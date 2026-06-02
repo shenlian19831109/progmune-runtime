@@ -50,6 +50,7 @@ function ensureDir(dir) {
         fs.mkdirSync(dir, { recursive: true });
 }
 /** 从 IR 数据创建快照 */
+/** @requires IR_DATA @produces SNAPSHOT */
 function createSnapshot(ir, intent, sessionId) {
     const functions = ir.map((f) => ({
         name: f.name,
@@ -69,6 +70,7 @@ function createSnapshot(ir, intent, sessionId) {
     };
 }
 /** 持久化快照 */
+/** @requires SNAPSHOT @produces SNAPSHOT_ID */
 function saveSnapshot(snapshot) {
     ensureDir(SNAPSHOT_DIR);
     fs.writeFileSync(path.join(SNAPSHOT_DIR, `${snapshot.id}.json`), JSON.stringify(snapshot, null, 2));

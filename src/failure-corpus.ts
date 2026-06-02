@@ -146,6 +146,7 @@ export function recordFailure(
  * 保存执行会话（含所有尝试、违规、状态转移）。
  * @protocol namespace=dev_pipeline pre_states=["CODE_EMITTED"] post_states=["SESSION_RECORDED"] invalidate=["CODE_EMITTED"]
  */
+/** @requires EXECUTION_DATA @produces SESSION_ID */
 export function recordSession(session: ExecutionSession | Omit<IntentSession, "sessionId">): string {
   ensureDir(SESSIONS_DIR);
   const sessionId = (session as any).sessionId || `sess_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
@@ -193,6 +194,7 @@ export function recordSession(session: ExecutionSession | Omit<IntentSession, "s
   return sessionId;
 }
 
+/** @requires FAILURE_CORPUS @produces FAILURE_LIST */
 export function getAllFailures(): FailureRecord[] {
   const records: FailureRecord[] = [];
   if (!fs.existsSync(CORPUS_DIR)) return records;
@@ -211,10 +213,12 @@ export function getAllFailures(): FailureRecord[] {
   return records;
 }
 
+/** @requires FAILURE_LIST @produces FILTERED_FAILURES */
 export function getFailuresBySVL(level: SVL): FailureRecord[] {
   return getAllFailures().filter(r => r.violatedSVL === level);
 }
 
+/** @requires FAILURE_LIST @produces FAILURE_PATTERNS */
 export function getTopFailurePatterns(limit: number = 5): { pattern: string; count: number; examples: string[] }[] {
   const groups = new Map<string, { count: number; examples: string[] }>();
   for (const r of getAllFailures()) {
@@ -309,6 +313,7 @@ export function getFailureGenome(): {
  * @tags session, corpus, audit, history
  */
 /** @requires SESSION_DATA @produces SESSION_LIST */
+/** @requires SESSION_CORPUS @produces SESSION_LIST */
 export function getAllSessions(): ExecutionSession[] {
   const sessions: ExecutionSession[] = [];
   if (!fs.existsSync(SESSIONS_DIR)) return sessions;

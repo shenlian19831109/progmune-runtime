@@ -31,6 +31,7 @@ function ensureDir(dir: string) {
 }
 
 /** 从 IR 数据创建快照 */
+/** @requires IR_DATA @produces SNAPSHOT */
 export function createSnapshot(ir: any[], intent?: string, sessionId?: string): IRSnapshot {
   const functions: IRFunctionSnapshot[] = ir.map((f: any) => ({
     name: f.name,
@@ -53,6 +54,7 @@ export function createSnapshot(ir: any[], intent?: string, sessionId?: string): 
 }
 
 /** 持久化快照 */
+/** @requires SNAPSHOT @produces SNAPSHOT_ID */
 export function saveSnapshot(snapshot: IRSnapshot): string {
   ensureDir(SNAPSHOT_DIR);
   fs.writeFileSync(

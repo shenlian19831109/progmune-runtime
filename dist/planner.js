@@ -479,6 +479,7 @@ function attemptSSGRepair(actions, rejection, ir, protocols, namespaceInitialSta
     }
     return null;
 }
+/** @requires INTENT @produces ACTION_PLAN */
 async function plan(userIntent) {
     (0, llm_1.resetCallCount)();
     const irRaw = JSON.parse(fs.readFileSync("ir.json", "utf-8"));

@@ -32,11 +32,13 @@ const runtime_invariants_1 = require("./runtime-invariants");
 const protocol_registry_1 = require("./protocol-registry");
 // ── Pure Functions ──
 /** Generate a unique branch ID. */
+/** @requires BRANCH_TREE @produces BRANCH_ID */
 function generateBranchId() {
     return `br_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 }
 /** Create the root branch of a new execution tree. */
 /** Create the root branch of an execution tree. */
+/** @requires TRANSITIONS @produces ROOT_BRANCH */
 function createRootBranch(transitions = []) {
     const id = generateBranchId();
     return {
@@ -66,6 +68,7 @@ function createRootBranch(transitions = []) {
  *   final state
  */
 /** Create a child branch from a parent branch. */
+/** @requires PARENT_BRANCH @produces CHILD_BRANCH */
 function createBranch(parent, reason = "alternative", initialTransitions = []) {
     const id = generateBranchId();
     return {
@@ -138,6 +141,7 @@ function forkBranch(branch, splitIndex, reason = "repair_attempt") {
  *  in the order they appear in the tree path.
  *  Returns null if no branches have transitions. */
 /** Merge multiple branches into one unified branch. */
+/** @requires BRANCH_LIST @produces MERGED_BRANCH */
 function mergeBranches(branches) {
     const validBranches = branches.filter(b => b.transitions.length > 0);
     if (validBranches.length === 0)
@@ -170,6 +174,7 @@ function mergeBranches(branches) {
  *  This is the bridge between the tree model and existing linear-only consumers
  *  (checkLedgerConsistency, hashLedger, etc.). */
 /** Flatten a branch tree into a linear transition sequence. */
+/** @requires BRANCH_TREE @produces TRANSITIONS */
 function flattenBranch(branch, allBranches) {
     const path = getBranchPath(branch, allBranches);
     const allTransitions = [];
@@ -194,6 +199,7 @@ function flattenBranch(branch, allBranches) {
 }
 /** Get the path from root to a given branch (inclusive). */
 /** Get the path from root to a target branch. */
+/** @requires BRANCH @produces BRANCH_PATH */
 function getBranchPath(branch, allBranches) {
     const path = [];
     let current = branch;
@@ -250,6 +256,7 @@ function replayBranch(branch, allBranches, namespaceInitialStates = (0, protocol
 }
 /** Build a branch lookup map from an array of branches. */
 /** Build a lookup map from a branch array. */
+/** @requires BRANCH_LIST @produces BRANCH_MAP */
 function buildBranchMap(branches) {
     const map = new Map();
     for (const b of branches) {
@@ -259,10 +266,12 @@ function buildBranchMap(branches) {
 }
 /** Find the root branch of a tree. */
 /** Find the root branch of a tree. */
+/** @requires BRANCH_LIST @produces ROOT_BRANCH */
 function findRootBranch(branches) {
     return branches.find(b => !b.parentId);
 }
 /** Find all child branches of a given parent. */
+/** @requires PARENT_BRANCH @produces CHILD_BRANCHES */
 function findChildBranches(parent, allBranches) {
     const children = [];
     for (const b of allBranches.values()) {
@@ -274,6 +283,7 @@ function findChildBranches(parent, allBranches) {
 }
 /** Get the full branch tree as a human-readable structure. */
 /** Format a branch tree as human-readable text. */
+/** @requires BRANCH_TREE @produces DESCRIPTION */
 function describeBranchTree(root, allBranches, indent = 0) {
     const prefix = "  ".repeat(indent);
     let result = `${prefix}${root.id.slice(0, 12)} [${root.reason}] (${root.transitions.length} tx, outcome: ${root.outcome || "open"})\n`;
@@ -341,6 +351,7 @@ function evaluateBranches(branches, namespaceInitialStates = new Map([["_global"
 }
 /** Wrap a linear transition array as a single root branch (backward compat). */
 /** Wrap linear transitions as a single root branch. */
+/** @requires TRANSITIONS @produces ROOT_BRANCH */
 function wrapAsBranch(transitions) {
     const b = createRootBranch(transitions);
     b.outcome = transitions.length > 0
@@ -351,6 +362,7 @@ function wrapAsBranch(transitions) {
 /** Unwrap a branch tree to the linear transition list.
  *  For backward compatibility: flattens the "winning" path (first successful leaf). */
 /** Unwrap a branch tree to a flat transition list. */
+/** @requires BRANCH_LIST @produces TRANSITIONS */
 function unwrapBranchTree(branches) {
     if (branches.length === 0)
         return [];

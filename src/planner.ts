@@ -465,6 +465,7 @@ export interface PlanResult {
   repairBranchIds: string[];
 }
 
+/** @requires INTENT @produces ACTION_PLAN */
 export async function plan(userIntent: string): Promise<PlanResult> {
   resetCallCount();
   const irRaw = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
