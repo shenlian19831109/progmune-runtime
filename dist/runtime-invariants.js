@@ -26,6 +26,7 @@ const isStrict = () => STRICT;
 /** Assert full ledger passes Invariant-0 + Invariant-1.
  *  Throws InvariantViolationError with the first violation's details. */
 /** Assert a ledger passes all invariant checks. */
+/** @requires LEDGER_DATA @produces CONSISTENCY_CHECK */
 function assertLedgerConsistency(ledger, namespaceInitialStates = (0, protocol_registry_1.getNsInit)()) {
     if (ledger.length === 0)
         return;
@@ -53,6 +54,7 @@ function assertLedgerConsistency(ledger, namespaceInitialStates = (0, protocol_r
 /** Assert a single transition's delta consistency.
  *  Checks that applying acquire/invalidate to statesBefore produces statesAfter. */
 /** Assert a single transition has consistent state deltas. */
+/** @requires TRANSITION @produces DELTA_CHECK */
 function assertDeltaConsistency(transition) {
     if (!transition.valid)
         return;
@@ -114,6 +116,7 @@ function assertDeltaConsistency(transition) {
 }
 /** Assert rule hashes match — detects when validation rules changed under a ledger. */
 /** Assert rule hashes match to detect rule changes. */
+/** @requires EXPECTED_HASH @produces HASH_MATCH_RESULT */
 function assertRuleHashMatch(expected, actual, context) {
     if (expected === actual)
         return;
@@ -149,6 +152,7 @@ function assertTransitionOrder(ledger) {
 }
 /** Convenience: run all invariant checks on a ledger. Does not throw if all pass. */
 /** Run all invariant checks on a ledger. */
+/** @requires LEDGER_DATA @produces INVARIANT_RESULT */
 function assertLedgerInvariants(ledger, namespaceInitialStates = (0, protocol_registry_1.getNsInit)(), expectedRuleHash) {
     assertTransitionOrder(ledger);
     assertLedgerConsistency(ledger, namespaceInitialStates);

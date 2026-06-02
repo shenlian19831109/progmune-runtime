@@ -38,6 +38,7 @@ function getImportPath(file: string): string {
  * 将动作序列编译为目标语言代码。
  * @protocol namespace=dev_pipeline pre_states=["SEQUENCE_VALIDATED"] post_states=["CODE_EMITTED"] invalidate=["SEQUENCE_VALIDATED"]
  */
+/** @requires ACTIONS @produces TYPESCRIPT_CODE */
 export function emitCode(
   actions: Action[],
   meta?: { sessionId?: string; ruleHash?: string; irFunctionCount?: number; protocolRuleCount?: number }

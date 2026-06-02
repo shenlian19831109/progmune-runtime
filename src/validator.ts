@@ -182,6 +182,7 @@ export function validateAction(action: Action, actionIndex?: number): { valid: b
  * 批量校验动作序列 + 变量流向分析。
  * @protocol namespace=dev_pipeline pre_states=["ACTION_VALIDATED"] post_states=["SEQUENCE_VALIDATED"] invalidate=["ACTION_VALIDATED"]
  */
+/** @requires ACTIONS @produces VALIDATION_RESULT */
 export function validateActionSequence(actions: Action[]): { valid: boolean; errors: string[]; violations: ConstraintViolation[] } {
   const errors: string[] = [];
   const violations: ConstraintViolation[] = [];

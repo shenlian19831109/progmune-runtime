@@ -27,6 +27,7 @@ const CORPUS_DIR = "failure-corpus";
 
 /** Classify a compile error string into a root cause. */
 /** Classify a compile error into a root cause category. */
+/** @requires ERROR_STRING @produces ROOT_CAUSE */
 export function classifyError(error: string): RootCause {
   if (!error) return "F10";
   if (error.includes("declares") && error.includes("locally")) return "F01";
@@ -41,6 +42,7 @@ export function classifyError(error: string): RootCause {
 
 /** Classify a planning failure. */
 /** Classify a planning failure into a root cause category. */
+/** @requires ERROR_STRING @produces ROOT_CAUSE */
 export function classifyPlanError(error: string): RootCause {
   if (!error) return "F10";
   if (error.includes("protocol") || error.includes("SSG")) return "F09";
@@ -72,6 +74,7 @@ export function recordFailure(record: Omit<FailureRecord, "id" | "timestamp">): 
 
 /** Load all recorded failures. */
 /** Load all recorded failures from the failure corpus. */
+/** @requires FAILURE_CORPUS @produces FAILURE_LIST */
 export function loadFailures(): FailureRecord[] {
   if (!fs.existsSync(CORPUS_DIR)) return [];
   const failures: FailureRecord[] = [];
@@ -86,6 +89,7 @@ export function loadFailures(): FailureRecord[] {
 
 /** Get failure statistics grouped by root cause. */
 /** Get failure statistics grouped by root cause. */
+/** @requires FAILURE_LIST @produces FAILURE_STATS */
 export function failureStats(): { total: number; byRootCause: Record<string, number>; topCause: string } {
   const failures = loadFailures();
   const byRootCause: Record<string, number> = {};
@@ -102,6 +106,7 @@ export function failureStats(): { total: number; byRootCause: Record<string, num
 
 /** Format failure stats as readable text. */
 /** Format failure statistics as a human-readable report. */
+/** @requires FAILURE_STATS @produces FORMATTED_REPORT */
 export function formatFailureStats(): string {
   const stats = failureStats();
   if (stats.total === 0) return "No failures recorded yet.";

@@ -32,6 +32,7 @@ const isStrict = () => STRICT;
 /** Assert full ledger passes Invariant-0 + Invariant-1.
  *  Throws InvariantViolationError with the first violation's details. */
 /** Assert a ledger passes all invariant checks. */
+/** @requires LEDGER_DATA @produces CONSISTENCY_CHECK */
 export function assertLedgerConsistency(
   ledger: StateTransition[],
   namespaceInitialStates: Map<string, string> = getNsInit()
@@ -64,6 +65,7 @@ export function assertLedgerConsistency(
 /** Assert a single transition's delta consistency.
  *  Checks that applying acquire/invalidate to statesBefore produces statesAfter. */
 /** Assert a single transition has consistent state deltas. */
+/** @requires TRANSITION @produces DELTA_CHECK */
 export function assertDeltaConsistency(transition: StateTransition): void {
   if (!transition.valid) return;
   // Replay: apply the delta to statesBefore, compare with statesAfter
@@ -124,6 +126,7 @@ export function assertDeltaConsistency(transition: StateTransition): void {
 
 /** Assert rule hashes match — detects when validation rules changed under a ledger. */
 /** Assert rule hashes match to detect rule changes. */
+/** @requires EXPECTED_HASH @produces HASH_MATCH_RESULT */
 export function assertRuleHashMatch(expected: string, actual: string, context?: string): void {
   if (expected === actual) return;
   const msg = context
@@ -159,6 +162,7 @@ export function assertTransitionOrder(ledger: StateTransition[]): void {
 
 /** Convenience: run all invariant checks on a ledger. Does not throw if all pass. */
 /** Run all invariant checks on a ledger. */
+/** @requires LEDGER_DATA @produces INVARIANT_RESULT */
 export function assertLedgerInvariants(
   ledger: StateTransition[],
   namespaceInitialStates: Map<string, string> = getNsInit(),

@@ -38,6 +38,7 @@ export function invalidateProtocolCache(): void {
 /** Get the authoritative protocol configuration.
  *  Cached after first call; call invalidateProtocolCache() to force reload. */
 /** Get the authoritative protocol configuration from the single source of truth. */
+/** @requires PROJECT_CONFIG @produces PROTOCOL_CONFIG */
 export function getProtocolConfig(): ProtocolConfig {
   if (cached) return cached;
 
@@ -86,12 +87,14 @@ export function getProtocolConfig(): ProtocolConfig {
 
 /** Get namespace initial states only (most common need). */
 /** Get namespace initial states from protocol configuration. */
+/** @requires PROJECT_CONFIG @produces NAMESPACE_STATES */
 export function getNsInit(): Map<string, string> {
   return new Map(getProtocolConfig().nsInit);
 }
 
 /** Get current rule hash without loading full config. */
 /** Get the current rule set hash. */
+/** @requires PROTOCOL_CONFIG @produces RULE_HASH */
 export function getRuleHash(): string {
   return getProtocolConfig().ruleHash;
 }

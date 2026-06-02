@@ -122,6 +122,7 @@ function deepEqualSnapshots(a: Record<string, string[]>, b: Record<string, strin
 
 // ── rebuildState: pure fold over ledger → per-namespace state snapshot ──
 
+/** @requires LEDGER_DATA @produces STATE_SNAPSHOT */
 export function rebuildState(
   ledger: StateTransition[],
   namespaceInitialStates: Map<string, string> = new Map([["_global", "INIT"]])
@@ -225,6 +226,7 @@ export function findFixPathStatic(
 
 // ── validateTransition: pure function, stateless ──
 
+/** @requires TRANSITION_CONTEXT @produces VALIDATION_RESULT */
 export function validateTransition(
   ctx: ValidationContext,
   candidateFunctionName: string,
@@ -340,6 +342,7 @@ export function validateTransition(
 
 // ── checkLedgerConsistency: Invariant-0 + Invariant-1 over full ledger ──
 
+/** @requires LEDGER_DATA @produces CONSISTENCY_RESULT */
 export function checkLedgerConsistency(
   ledger: StateTransition[],
   namespaceInitialStates: Map<string, string> = new Map([["_global", "INIT"]])
@@ -417,6 +420,7 @@ export function checkLedgerConsistency(
 
 // ── hashRules: stable hash of rule set for constraint snapshot (P1) ──
 
+/** @requires RULES @produces RULE_HASH */
 export function hashRules(rules: Map<string, StateAnnotation>): string {
   const sorted = [...rules.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
@@ -431,6 +435,7 @@ export function hashRules(rules: Map<string, StateAnnotation>): string {
 }
 
 /** Compute a deterministic SHA256 hash of an entire ledger (P1: Tamper-evident integrity). */
+/** @requires LEDGER_DATA @produces LEDGER_HASH */
 export function hashLedger(ledger: StateTransition[]): string {
   const canonical = ledger.map(t => ({
     actionIndex: t.actionIndex,
@@ -465,6 +470,7 @@ export interface LedgerDiff {
 }
 
 /** Compare two ledgers and identify structural differences. */
+/** @requires TWO_LEDGERS @produces LEDGER_DIFF */
 export function diffLedgers(ledgerA: StateTransition[], ledgerB: StateTransition[]): LedgerDiff {
   const hash = (t: StateTransition) =>
     crypto.createHash("sha256").update(JSON.stringify({

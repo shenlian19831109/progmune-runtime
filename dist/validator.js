@@ -229,6 +229,7 @@ function validateAction(action, actionIndex) {
  * 批量校验动作序列 + 变量流向分析。
  * @protocol namespace=dev_pipeline pre_states=["ACTION_VALIDATED"] post_states=["SEQUENCE_VALIDATED"] invalidate=["ACTION_VALIDATED"]
  */
+/** @requires ACTIONS @produces VALIDATION_RESULT */
 function validateActionSequence(actions) {
     const errors = [];
     const violations = [];

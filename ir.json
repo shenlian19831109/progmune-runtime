@@ -1635,6 +1635,12 @@
         "namespace": "dev_pipeline"
       },
       "purpose": "将动作序列编译为目标语言代码。",
+      "requires": [
+        "ACTIONS"
+      ],
+      "produces": [
+        "TYPESCRIPT_CODE"
+      ],
       "tags": [
         "emitter"
       ]
@@ -1710,6 +1716,12 @@
       ],
       "outputs": [],
       "purpose": "Record a generation event. Called automatically by execute(). */",
+      "requires": [
+        "GENERATION_EVENT"
+      ],
+      "produces": [
+        "METRICS_DATA"
+      ],
       "tags": [
         "execute"
       ]
@@ -1729,6 +1741,12 @@
         "ExecutionMetrics"
       ],
       "purpose": "Get current execution metrics. */",
+      "requires": [
+        "METRICS_DATA"
+      ],
+      "produces": [
+        "EXECUTION_METRICS"
+      ],
       "tags": [
         "execute"
       ]
@@ -1818,6 +1836,12 @@
         "{ pass: boolean; errors: string[] }"
       ],
       "purpose": "Verify a file compiles without errors. Returns {pass, errors[]}. Uses tsc directly — no grep tricks, no pipefail ambiguity. */",
+      "requires": [
+        "FILE_PATH"
+      ],
+      "produces": [
+        "COMPILE_RESULT"
+      ],
       "tags": [
         "execute"
       ]
@@ -1849,6 +1873,12 @@
         "{ marked: boolean; sessionId?: string; timestamp?: string }"
       ],
       "purpose": "Quick audit: check whether a file has the",
+      "requires": [
+        "FILE_PATH"
+      ],
+      "produces": [
+        "MARKER_STATUS"
+      ],
       "tags": [
         "execute"
       ]
@@ -2426,6 +2456,12 @@
         "RootCause"
       ],
       "purpose": "Classify a compile error into a root cause category. */",
+      "requires": [
+        "ERROR_STRING"
+      ],
+      "produces": [
+        "ROOT_CAUSE"
+      ],
       "tags": [
         "failure",
         "collector"
@@ -2454,6 +2490,12 @@
         "RootCause"
       ],
       "purpose": "Classify a planning failure into a root cause category. */",
+      "requires": [
+        "ERROR_STRING"
+      ],
+      "produces": [
+        "ROOT_CAUSE"
+      ],
       "tags": [
         "failure",
         "collector"
@@ -2515,6 +2557,12 @@
         "FailureRecord"
       ],
       "purpose": "Load all recorded failures from the failure corpus. */",
+      "requires": [
+        "FAILURE_CORPUS"
+      ],
+      "produces": [
+        "FAILURE_LIST"
+      ],
       "tags": [
         "failure",
         "collector"
@@ -2537,6 +2585,12 @@
         "{ total: number; byRootCause: Record; topCause: string }"
       ],
       "purpose": "Get failure statistics grouped by root cause. */",
+      "requires": [
+        "FAILURE_LIST"
+      ],
+      "produces": [
+        "FAILURE_STATS"
+      ],
       "tags": [
         "failure",
         "collector"
@@ -2564,6 +2618,12 @@
         "string"
       ],
       "purpose": "Format failure statistics as a human-readable report. */",
+      "requires": [
+        "FAILURE_STATS"
+      ],
+      "produces": [
+        "FORMATTED_REPORT"
+      ],
       "tags": [
         "failure",
         "collector"
@@ -6080,6 +6140,12 @@
         "ProtocolConfig"
       ],
       "purpose": "Get the authoritative protocol configuration from the single source of truth. */",
+      "requires": [
+        "PROJECT_CONFIG"
+      ],
+      "produces": [
+        "PROTOCOL_CONFIG"
+      ],
       "tags": [
         "protocol",
         "registry"
@@ -6100,6 +6166,12 @@
         "Map"
       ],
       "purpose": "Get namespace initial states from protocol configuration. */",
+      "requires": [
+        "PROJECT_CONFIG"
+      ],
+      "produces": [
+        "NAMESPACE_STATES"
+      ],
       "tags": [
         "protocol",
         "registry"
@@ -6120,6 +6192,12 @@
         "string"
       ],
       "purpose": "Get the current rule set hash. */",
+      "requires": [
+        "PROTOCOL_CONFIG"
+      ],
+      "produces": [
+        "RULE_HASH"
+      ],
       "tags": [
         "protocol",
         "registry"
@@ -6678,6 +6756,12 @@
       ],
       "outputs": [],
       "purpose": "Assert a ledger passes all invariant checks. */",
+      "requires": [
+        "LEDGER_DATA"
+      ],
+      "produces": [
+        "CONSISTENCY_CHECK"
+      ],
       "tags": [
         "runtime",
         "invariants"
@@ -6713,6 +6797,12 @@
       ],
       "outputs": [],
       "purpose": "Assert a single transition has consistent state deltas. */",
+      "requires": [
+        "TRANSITION"
+      ],
+      "produces": [
+        "DELTA_CHECK"
+      ],
       "tags": [
         "runtime",
         "invariants"
@@ -6753,6 +6843,12 @@
       ],
       "outputs": [],
       "purpose": "Assert rule hashes match to detect rule changes. */",
+      "requires": [
+        "EXPECTED_HASH"
+      ],
+      "produces": [
+        "HASH_MATCH_RESULT"
+      ],
       "tags": [
         "runtime",
         "invariants"
@@ -6822,6 +6918,12 @@
       ],
       "outputs": [],
       "purpose": "Run all invariant checks on a ledger. */",
+      "requires": [
+        "LEDGER_DATA"
+      ],
+      "produces": [
+        "INVARIANT_RESULT"
+      ],
       "tags": [
         "runtime",
         "invariants"
@@ -8978,6 +9080,12 @@
       "outputs": [
         "Record"
       ],
+      "requires": [
+        "LEDGER_DATA"
+      ],
+      "produces": [
+        "STATE_SNAPSHOT"
+      ],
       "tags": [
         "ssg",
         "validator"
@@ -9174,6 +9282,12 @@
       "outputs": [
         "{ valid: boolean; transition: StateTransition; rejection?: SSGRejection }"
       ],
+      "requires": [
+        "TRANSITION_CONTEXT"
+      ],
+      "produces": [
+        "VALIDATION_RESULT"
+      ],
       "tags": [
         "ssg",
         "validator"
@@ -9217,6 +9331,12 @@
       "outputs": [
         "{ consistent: boolean; violations: LedgerConsistencyViolation[] }"
       ],
+      "requires": [
+        "LEDGER_DATA"
+      ],
+      "produces": [
+        "CONSISTENCY_RESULT"
+      ],
       "tags": [
         "ssg",
         "validator"
@@ -9251,6 +9371,12 @@
       "outputs": [
         "string"
       ],
+      "requires": [
+        "RULES"
+      ],
+      "produces": [
+        "RULE_HASH"
+      ],
       "tags": [
         "ssg",
         "validator"
@@ -9284,6 +9410,12 @@
         "string"
       ],
       "purpose": "Compute a deterministic SHA256 hash of an entire ledger (P1: Tamper-evident integrity). */",
+      "requires": [
+        "LEDGER_DATA"
+      ],
+      "produces": [
+        "LEDGER_HASH"
+      ],
       "tags": [
         "ssg",
         "validator"
@@ -9323,6 +9455,12 @@
         "LedgerDiff"
       ],
       "purpose": "Compare two ledgers and identify structural differences. */",
+      "requires": [
+        "TWO_LEDGERS"
+      ],
+      "produces": [
+        "LEDGER_DIFF"
+      ],
       "tags": [
         "ssg",
         "validator"
@@ -10006,6 +10144,12 @@
         "namespace": "dev_pipeline"
       },
       "purpose": "批量校验动作序列 + 变量流向分析。",
+      "requires": [
+        "ACTIONS"
+      ],
+      "produces": [
+        "VALIDATION_RESULT"
+      ],
       "tags": [
         "validator"
       ]

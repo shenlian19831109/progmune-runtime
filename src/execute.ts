@@ -71,6 +71,7 @@ function saveMetrics(m: ExecutionMetrics): void {
 }
 
 /** Record a generation event. Called automatically by execute(). */
+/** @requires GENERATION_EVENT @produces METRICS_DATA */
 export function recordGeneration(record: GenerationRecord): void {
   const m = loadMetrics();
   m.generated++;
@@ -83,6 +84,7 @@ export function recordGeneration(record: GenerationRecord): void {
 }
 
 /** Get current execution metrics. */
+/** @requires METRICS_DATA @produces EXECUTION_METRICS */
 export function getExecutionMetrics(): ExecutionMetrics {
   return loadMetrics();
 }
@@ -220,6 +222,7 @@ export async function execute(
 
 /** Verify a file compiles without errors. Returns {pass, errors[]}.
  *  Uses tsc directly — no grep tricks, no pipefail ambiguity. */
+/** @requires FILE_PATH @produces COMPILE_RESULT */
 export function verifyCompiles(filePath: string): { pass: boolean; errors: string[] } {
   try {
     const { execSync } = require("child_process");
@@ -240,6 +243,7 @@ export function verifyCompiles(filePath: string): { pass: boolean; errors: strin
 }
 
 /** Quick audit: check whether a file has the @progmune-generated marker. */
+/** @requires FILE_PATH @produces MARKER_STATUS */
 export function verifyFileMarker(filePath: string): { marked: boolean; sessionId?: string; timestamp?: string } {
   try {
     const content = fs.readFileSync(filePath, "utf-8");

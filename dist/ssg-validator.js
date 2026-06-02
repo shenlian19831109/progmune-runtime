@@ -98,6 +98,7 @@ function deepEqualSnapshots(a, b) {
     return true;
 }
 // ── rebuildState: pure fold over ledger → per-namespace state snapshot ──
+/** @requires LEDGER_DATA @produces STATE_SNAPSHOT */
 function rebuildState(ledger, namespaceInitialStates = new Map([["_global", "INIT"]])) {
     const stateMap = fromSnapshot({});
     for (const [ns, initState] of namespaceInitialStates) {
@@ -184,6 +185,7 @@ function findFixPathStatic(rules, namespace, current, targetPreStates) {
     return path;
 }
 // ── validateTransition: pure function, stateless ──
+/** @requires TRANSITION_CONTEXT @produces VALIDATION_RESULT */
 function validateTransition(ctx, candidateFunctionName, actionIndex, rules, namespaceInitialStates, ruleHash) {
     const currentState = ctx.currentState;
     const rule = rules.get(candidateFunctionName);
@@ -281,6 +283,7 @@ function validateTransition(ctx, candidateFunctionName, actionIndex, rules, name
     return { valid: true, transition };
 }
 // ── checkLedgerConsistency: Invariant-0 + Invariant-1 over full ledger ──
+/** @requires LEDGER_DATA @produces CONSISTENCY_RESULT */
 function checkLedgerConsistency(ledger, namespaceInitialStates = new Map([["_global", "INIT"]])) {
     const violations = [];
     const running = fromSnapshot({});
@@ -348,6 +351,7 @@ function checkLedgerConsistency(ledger, namespaceInitialStates = new Map([["_glo
     return { consistent: violations.length === 0, violations };
 }
 // ── hashRules: stable hash of rule set for constraint snapshot (P1) ──
+/** @requires RULES @produces RULE_HASH */
 function hashRules(rules) {
     const sorted = [...rules.entries()]
         .sort(([a], [b]) => a.localeCompare(b))
@@ -361,6 +365,7 @@ function hashRules(rules) {
     return crypto.createHash("sha256").update(JSON.stringify(sorted)).digest("hex").slice(0, 16);
 }
 /** Compute a deterministic SHA256 hash of an entire ledger (P1: Tamper-evident integrity). */
+/** @requires LEDGER_DATA @produces LEDGER_HASH */
 function hashLedger(ledger) {
     const canonical = ledger.map(t => ({
         actionIndex: t.actionIndex,
@@ -376,6 +381,7 @@ function hashLedger(ledger) {
     return crypto.createHash("sha256").update(JSON.stringify(canonical)).digest("hex").slice(0, 16);
 }
 /** Compare two ledgers and identify structural differences. */
+/** @requires TWO_LEDGERS @produces LEDGER_DIFF */
 function diffLedgers(ledgerA, ledgerB) {
     const hash = (t) => crypto.createHash("sha256").update(JSON.stringify({
         i: t.actionIndex, f: t.function, n: t.namespace,

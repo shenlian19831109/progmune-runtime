@@ -49,6 +49,7 @@ const fs = __importStar(require("fs"));
 const CORPUS_DIR = "failure-corpus";
 /** Classify a compile error string into a root cause. */
 /** Classify a compile error into a root cause category. */
+/** @requires ERROR_STRING @produces ROOT_CAUSE */
 function classifyError(error) {
     if (!error)
         return "F10";
@@ -70,6 +71,7 @@ function classifyError(error) {
 }
 /** Classify a planning failure. */
 /** Classify a planning failure into a root cause category. */
+/** @requires ERROR_STRING @produces ROOT_CAUSE */
 function classifyPlanError(error) {
     if (!error)
         return "F10";
@@ -98,6 +100,7 @@ function recordFailure(record) {
 }
 /** Load all recorded failures. */
 /** Load all recorded failures from the failure corpus. */
+/** @requires FAILURE_CORPUS @produces FAILURE_LIST */
 function loadFailures() {
     if (!fs.existsSync(CORPUS_DIR))
         return [];
@@ -114,6 +117,7 @@ function loadFailures() {
 }
 /** Get failure statistics grouped by root cause. */
 /** Get failure statistics grouped by root cause. */
+/** @requires FAILURE_LIST @produces FAILURE_STATS */
 function failureStats() {
     const failures = loadFailures();
     const byRootCause = {};
@@ -129,6 +133,7 @@ function failureStats() {
 }
 /** Format failure stats as readable text. */
 /** Format failure statistics as a human-readable report. */
+/** @requires FAILURE_STATS @produces FORMATTED_REPORT */
 function formatFailureStats() {
     const stats = failureStats();
     if (stats.total === 0)

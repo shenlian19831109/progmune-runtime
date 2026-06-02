@@ -72,6 +72,7 @@ function getImportPath(file) {
  * 将动作序列编译为目标语言代码。
  * @protocol namespace=dev_pipeline pre_states=["SEQUENCE_VALIDATED"] post_states=["CODE_EMITTED"] invalidate=["SEQUENCE_VALIDATED"]
  */
+/** @requires ACTIONS @produces TYPESCRIPT_CODE */
 function emitCode(actions, meta) {
     const irRaw = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
     // Support both old format (array) and new format ({typeMap, functions})
