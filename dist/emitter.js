@@ -207,6 +207,14 @@ function emitCode(actions, meta) {
                         return "false";
                     return `""`;
                 }
+                // String enum defaults — match param type to sensible value
+                const STRING_ENUMS = {
+                    "SVL": '"SVL-4"', "RootCause": '"F01"', "BranchReason": '"repair_attempt"',
+                    "RepairStrategy": '"insert"', "ConstraintType": '"protocol"',
+                    "SVLString": '"SVL-4"', "BranchOutcome": '"success"',
+                };
+                if (STRING_ENUMS[paramType])
+                    return STRING_ENUMS[paramType];
                 if (paramType === "UserPayload")
                     return `{ id: 1, role: "user" } as UserPayload`;
                 if (paramType === "PasswordHash")
