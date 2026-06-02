@@ -91,12 +91,17 @@ const SYSTEM_PROMPT = `你是程序合成助手。只输出 JSON 数组，不输
 
 规则：
 - 函数名从可用列表中选择，优先选注释中 purpose 匹配需求的函数
-- 0参数函数直接省略 "a": []：{"f":"getAllSessions","to":"s","a":[]}
-- 参数值：已知变量用 "$变量名" 引用，字符串用 ""，对象用 {} as Type
-- 调用链：上一个函数的返回值通过 $变量名 传给下一个
-- {"r":"变量名"} 返回最终结果
+- 0参数函数直接用 "a":[]：{"f":"getAllSessions","to":"s","a":[]}
+- 参数值规则（重要！）：
+  - 字符串: "v":""（空串）或 "v":"SVL-4"（已知枚举值）
+  - 数字: "v":0 或 "v":1
+  - 布尔: "v":false
+  - 对象/数组: "v":{} as Type
+  - 上一个函数返回值: "v":"$变量名"（$前缀引用）
+- 返回值: {"r":"变量名"} — 必须返回，不能只调用不返回
+- 链式调用：看到推荐调用链时，用 $变量名 把生产者输出传给消费者
 
-铁律：只输出 JSON，不输出解释`;
+铁律：只输出 JSON，最后一个 action 必须是 return`;
 
 const RETRY_HINT = `输出格式：紧凑 JSON 数组 [{"f":"函数名","to":"变量名","a":[...]}]`;
 
@@ -681,6 +686,20 @@ export async function plan(userIntent: string): Promise<PlanResult> {
   const compactFuncList = buildCompactFuncList(topFuncs, ir);
   const chainHints = buildChainHints(topFuncs);
 
+  // Collect string-enum types so LLM knows to pass strings, not {} as Type
+  const stringTypes = new Set<string>();
+  for (const f of topFuncs) {
+    for (const p of (f.params || [])) {
+      const t = (p.type || "").replace(/\[\]$/, "");
+      if (/^[A-Z][A-Z_]+$/.test(t) && t.length <= 10) {
+        stringTypes.add(t);
+      }
+    }
+  }
+  const typeHints = stringTypes.size > 0
+    ? `\n注意：以下类型是字符串枚举，不是对象：${[...stringTypes].join("、")}。传字符串值而非 {} as Type。`
+    : "";
+
   const userIntentPart = userIntent.match(/(?:实现|implement|编写|创建)\s*(\w+)\s*(?:函数|function)?/i);
   const forbiddenFuncs: string[] = [];
   if (userIntentPart) {
@@ -693,7 +712,7 @@ export async function plan(userIntent: string): Promise<PlanResult> {
   const protocolChainHint = buildProtocolChainHint(protocols);
 
   const userPrompt = `可用函数：
-${compactFuncList}${protocolChainHint}${chainHints}
+${compactFuncList}${protocolChainHint}${chainHints}${typeHints}
 
 需求：${userIntent}${antibodyHint}
 
