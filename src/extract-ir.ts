@@ -25,6 +25,8 @@ interface FunctionInfo {
   /** Phase 7: Capability Graph */
   purpose?: string;           // @purpose JSDoc tag
   tags?: string[];            // @tags JSDoc tag (comma-separated)
+  inputs?: string[];          // auto-derived from param types
+  outputs?: string[];         // auto-derived from return type
   protocol?: {
     pre_states: string[];
     post_states: string[];
@@ -54,7 +56,6 @@ function parseCapabilityFromJSDoc(node: any): { purpose?: string; tags?: string[
           result.tags = val.split(/[,\s]+/).map((s: string) => s.trim()).filter(Boolean);
         }
       }
-    }
     }
   }
   return result;
@@ -139,6 +140,20 @@ function getReturnTypeDetail(func: FunctionDeclaration | ArrowFunction): string 
   return typeNode ? getTypeDetail(typeNode) : "";
 }
 
+/** Derive input types from params (auto-capability graph). */
+function deriveInputs(params: any[]): string[] {
+  return params.map(p => {
+    const t = (p.type || "any").replace(/\[\]$/, "").replace(/<[^>]*>/g, "");
+    return t.split("|")[0].trim();
+  }).filter(t => t !== "any" && t !== "void");
+}
+
+/** Derive output types from return type (auto-capability graph). */
+function deriveOutputs(returnType: string): string[] {
+  const t = returnType.replace(/\[\]$/, "").replace(/<[^>]*>/g, "").split("|")[0].trim();
+  return (t === "void" || t === "any") ? [] : [t];
+}
+
 function extractDirectCalls(func: FunctionDeclaration | ArrowFunction): string[] {
   const body = func.getBody();
   if (!body) return [];
@@ -193,6 +208,8 @@ export function extractIRWithTypes(projectRoot: string): {
         file: relPath,
         calls: extractDirectCalls(f),
         exported: f.isExported(),
+        inputs: deriveInputs(f.getParameters().map(p => ({name: p.getName(), type: p.getTypeNode()?.getText() || "any"}))),
+        outputs: deriveOutputs(f.getReturnTypeNode()?.getText() || "any"),
         protocol: parseProtocolFromJSDoc(f),
         ...parseCapabilityFromJSDoc(f),
       });

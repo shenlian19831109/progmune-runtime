@@ -46,16 +46,21 @@ function parseCapabilityFromJSDoc(node) {
         return {};
     const result = {};
     for (const doc of jsdocs) {
-        const text = doc.getComment?.() || doc.getText?.() || "";
-        // Extract @purpose from JSDoc description (first line before any @tag)
-        const firstLine = text.split("\n")[0].replace(/^\s*\*\s*/, "").trim();
-        if (firstLine && !firstLine.startsWith("@")) {
-            result.purpose = firstLine;
+        // @purpose from the description text
+        const comment = doc.getComment?.() || "";
+        if (comment && !comment.startsWith("@")) {
+            result.purpose = comment.split("\n")[0].trim();
         }
-        // Extract @tags
-        const tagsMatch = text.match(/@tags?\s+(.+)/);
-        if (tagsMatch) {
-            result.tags = tagsMatch[1].split(/[,\s]+/).map((s) => s.trim()).filter(Boolean);
+        // @tags from ts-morph tag system (getTags returns @tag annotations)
+        const tsTags = doc.getTags?.();
+        if (tsTags) {
+            for (const t of tsTags) {
+                const tn = t.getTagName?.();
+                if (tn === "tags" || tn === "tag") {
+                    const val = t.getCommentText?.() || "";
+                    result.tags = val.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean);
+                }
+            }
         }
     }
     return result;
@@ -139,6 +144,18 @@ function getReturnTypeDetail(func) {
     const typeNode = func.getReturnTypeNode?.();
     return typeNode ? getTypeDetail(typeNode) : "";
 }
+/** Derive input types from params (auto-capability graph). */
+function deriveInputs(params) {
+    return params.map(p => {
+        const t = (p.type || "any").replace(/\[\]$/, "").replace(/<[^>]*>/g, "");
+        return t.split("|")[0].trim();
+    }).filter(t => t !== "any" && t !== "void");
+}
+/** Derive output types from return type (auto-capability graph). */
+function deriveOutputs(returnType) {
+    const t = returnType.replace(/\[\]$/, "").replace(/<[^>]*>/g, "").split("|")[0].trim();
+    return (t === "void" || t === "any") ? [] : [t];
+}
 function extractDirectCalls(func) {
     const body = func.getBody();
     if (!body)
@@ -193,6 +210,8 @@ function extractIRWithTypes(projectRoot) {
                 file: relPath,
                 calls: extractDirectCalls(f),
                 exported: f.isExported(),
+                inputs: deriveInputs(f.getParameters().map(p => ({ name: p.getName(), type: p.getTypeNode()?.getText() || "any" }))),
+                outputs: deriveOutputs(f.getReturnTypeNode()?.getText() || "any"),
                 protocol: parseProtocolFromJSDoc(f),
                 ...parseCapabilityFromJSDoc(f),
             });
