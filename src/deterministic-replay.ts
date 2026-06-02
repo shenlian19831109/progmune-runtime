@@ -55,6 +55,7 @@ export interface ReplayTransition {
 // ── Core Replay ──
 
 /** Replay a session from disk, comparing against its stored fingerprint. */
+/** Deterministically replay a session ledger and verify against stored fingerprint. */
 export function replaySession(
   sessionId: string,
   currentRules?: Map<string, import("./ssg-validator").StateAnnotation>,
@@ -135,6 +136,7 @@ export function replaySession(
 }
 
 /** Core replay logic: replay transitions against (optional) current rules. */
+/** Replay a ledger of transitions against current rules and verify consistency. */
 export function replayLedger(
   sessionId: string,
   transitions: StateTransition[],
@@ -243,6 +245,7 @@ export function replayLedger(
 }
 
 /** Replay with per-transition detail — for debugging and UI. */
+/** Replay transitions with per-step detail for debugging. */
 export function replayWithDetail(
   transitions: StateTransition[],
   currentRules?: Map<string, import("./ssg-validator").StateAnnotation>,

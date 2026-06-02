@@ -55,6 +55,7 @@ function fingerprintPath(sessionId: string): string {
 
 /** Register a ledger fingerprint (execution certificate).
  *  Called after a session is recorded — creates an immutable proof of the ledger state. */
+/** Register a ledger fingerprint as an execution certificate. */
 export function registerFingerprint(
   sessionId: string,
   transitions: StateTransition[],
@@ -78,6 +79,7 @@ export function registerFingerprint(
 }
 
 /** Get a single stored fingerprint by sessionId. Returns null if not registered. */
+/** Get a stored ledger fingerprint by session ID. */
 export function getFingerprint(sessionId: string): LedgerFingerprint | null {
   const fpPath = fingerprintPath(sessionId);
   if (!fs.existsSync(fpPath)) return null;
@@ -89,6 +91,7 @@ export function getFingerprint(sessionId: string): LedgerFingerprint | null {
 }
 
 /** List all registered fingerprints, sorted by timestamp (oldest first). */
+/** List all registered ledger fingerprints. */
 export function getFingerprintRegistry(): LedgerFingerprint[] {
   const dir = fingerprintsDir();
   if (!fs.existsSync(dir)) return [];
@@ -109,6 +112,7 @@ export function getFingerprintRegistry(): LedgerFingerprint[] {
 
 /** Verify a single session's fingerprint.
  *  Requires the session's transitions to re-hash and compare. */
+/** Verify a single ledger fingerprint against current data. */
 export function verifyFingerprint(
   sessionId: string,
   transitions?: StateTransition[],
@@ -150,6 +154,7 @@ export function verifyFingerprint(
 
 /** Verify all registered fingerprints.
  *  Loads each session to re-hash and compare against the stored fingerprint. */
+/** Verify all registered ledger fingerprints and return tampered status. */
 export function verifyAllFingerprints(currentRuleHash?: string): RegistrySummary {
   const fingerprints = getFingerprintRegistry();
   const results: FingerprintVerifyResult[] = [];
@@ -212,6 +217,7 @@ export function verifyAllFingerprints(currentRuleHash?: string): RegistrySummary
 
 /** Register fingerprints for all sessions that don't yet have one.
  *  Called during `npm run check` to ensure all sessions are fingerprinted. */
+/** Register fingerprints for all sessions that lack them. */
 export function registerAllMissingFingerprints(): number {
   const sessionsDir = path.resolve(
     process.env.PROGMUNE_PROJECT_DIR || process.cwd(),

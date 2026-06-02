@@ -53,11 +53,13 @@ const ssg_validator_1 = require("./ssg-validator");
 // ── Singleton cache ──
 let cached = null;
 /** Invalidate the cache (call after protocols.json changes). */
+/** Invalidate cached protocol configuration for reload. */
 function invalidateProtocolCache() {
     cached = null;
 }
 /** Get the authoritative protocol configuration.
  *  Cached after first call; call invalidateProtocolCache() to force reload. */
+/** Get the authoritative protocol configuration from the single source of truth. */
 function getProtocolConfig() {
     if (cached)
         return cached;
@@ -96,10 +98,12 @@ function getProtocolConfig() {
 }
 // ── Convenience re-exports ──
 /** Get namespace initial states only (most common need). */
+/** Get namespace initial states from protocol configuration. */
 function getNsInit() {
     return new Map(getProtocolConfig().nsInit);
 }
 /** Get current rule hash without loading full config. */
+/** Get the current rule set hash. */
 function getRuleHash() {
     return getProtocolConfig().ruleHash;
 }

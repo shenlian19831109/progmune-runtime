@@ -64,6 +64,7 @@ export interface RepairSummary {
 // ── Proposal Generation ──
 
 /** Generate repair proposals for all detected violations in a ledger. */
+/** Generate repair proposals for all detected violations. */
 export function suggestRepairs(
   violations: ConstraintViolation[],
   ir: any[],
@@ -87,6 +88,7 @@ export function suggestRepairs(
 }
 
 /** Protocol violation repair: use SSG fixPath to suggest insertions. */
+/** Generate repair proposals for SSG protocol violations. */
 export function suggestProtocolRepair(
   rejection: SSGRejection,
   ir: any[]
@@ -147,6 +149,7 @@ export function suggestProtocolRepair(
 }
 
 /** Invariant violation repair: use rebuildState to compute correct transition data. */
+/** Generate repair proposals for invariant consistency violations. */
 export function suggestInvariantRepair(
   violation: LedgerConsistencyViolation,
   ledger: StateTransition[],
@@ -291,6 +294,7 @@ function suggestGenericRepair(
 /** Convert an accepted repair proposal into a new Branch.
  *  Creates a child branch with the proposed fix applied.
  *  The original ledger is never modified. */
+/** Convert an accepted repair proposal into a new branch. */
 export function applyProposalAsBranch(
   proposal: RepairProposal,
   parentBranch: Branch,
@@ -354,6 +358,7 @@ export function applyProposalAsBranch(
 
 /** Validate a repair proposal: does applying it fix the violation?
  *  Returns true if a re-check passes after applying the proposal. */
+/** Validate whether a repair proposal fixes the violation. */
 export function validateProposal(
   proposal: RepairProposal,
   currentLedger: StateTransition[],
@@ -387,6 +392,7 @@ export function validateProposal(
 // ── Summary ──
 
 /** Generate a comprehensive repair summary from a ledger and IR context. */
+/** Generate a comprehensive repair summary with minimal fix set. */
 export function generateRepairSummary(
   ledger: StateTransition[],
   ir: any[],
@@ -417,6 +423,7 @@ export function generateRepairSummary(
  * This is the authoritative "minimal fix set" — applying these proposals in order
  * should resolve all detected violations without redundant fixes.
  */
+/** Get the minimal set of repair proposals by deduplication. */
 export function getMinimalFixSet(proposals: RepairProposal[]): RepairProposal[] {
   const seen = new Map<number, RepairProposal>();
   for (const p of proposals) {

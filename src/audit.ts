@@ -29,6 +29,7 @@ export interface AuditResult {
 /** Scan a directory recursively for TypeScript files and check for @progmune-generated markers. */
 const DEFAULT_THRESHOLD = 0.8;
 
+/** Audit a directory for @progmune-generated markers and report coverage. */
 export function auditDirectory(dir: string, threshold = DEFAULT_THRESHOLD): AuditResult {
   const result: AuditResult = {
     directory: dir,
@@ -123,6 +124,7 @@ function scanDir(rootDir: string, currentDir: string, result: AuditResult): void
 }
 
 /** Format audit result as human-readable text. */
+/** Format audit result as human-readable text with coverage statistics. */
 export function formatAuditResult(result: AuditResult): string {
   const pct = (result.coverage * 100).toFixed(1);
   const lines: string[] = [];

@@ -48,6 +48,7 @@ exports.formatFailureStats = formatFailureStats;
 const fs = __importStar(require("fs"));
 const CORPUS_DIR = "failure-corpus";
 /** Classify a compile error string into a root cause. */
+/** Classify a compile error into a root cause category. */
 function classifyError(error) {
     if (!error)
         return "F10";
@@ -68,6 +69,7 @@ function classifyError(error) {
     return "F10";
 }
 /** Classify a planning failure. */
+/** Classify a planning failure into a root cause category. */
 function classifyPlanError(error) {
     if (!error)
         return "F10";
@@ -78,6 +80,7 @@ function classifyPlanError(error) {
     return "F07"; // most plan failures are parsing issues
 }
 /** Record a failure and save to disk. */
+/** Record a generation failure to the failure corpus. */
 function recordFailure(record) {
     const id = `F-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     const entry = {
@@ -94,6 +97,7 @@ function recordFailure(record) {
     return id;
 }
 /** Load all recorded failures. */
+/** Load all recorded failures from the failure corpus. */
 function loadFailures() {
     if (!fs.existsSync(CORPUS_DIR))
         return [];
@@ -109,6 +113,7 @@ function loadFailures() {
     return failures.sort((a, b) => b.timestamp - a.timestamp);
 }
 /** Get failure statistics grouped by root cause. */
+/** Get failure statistics grouped by root cause. */
 function failureStats() {
     const failures = loadFailures();
     const byRootCause = {};
@@ -123,6 +128,7 @@ function failureStats() {
     };
 }
 /** Format failure stats as readable text. */
+/** Format failure statistics as a human-readable report. */
 function formatFailureStats() {
     const stats = failureStats();
     if (stats.total === 0)

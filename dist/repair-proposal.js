@@ -27,6 +27,7 @@ const protocol_registry_1 = require("./protocol-registry");
 const branch_ledger_1 = require("./branch-ledger");
 // ── Proposal Generation ──
 /** Generate repair proposals for all detected violations in a ledger. */
+/** Generate repair proposals for all detected violations. */
 function suggestRepairs(violations, ir, protocols) {
     const proposals = [];
     for (const v of violations) {
@@ -43,6 +44,7 @@ function suggestRepairs(violations, ir, protocols) {
     return proposals;
 }
 /** Protocol violation repair: use SSG fixPath to suggest insertions. */
+/** Generate repair proposals for SSG protocol violations. */
 function suggestProtocolRepair(rejection, ir) {
     const proposals = [];
     if (rejection.fixPath && rejection.fixPath.length > 0) {
@@ -94,6 +96,7 @@ function suggestProtocolRepair(rejection, ir) {
     return proposals;
 }
 /** Invariant violation repair: use rebuildState to compute correct transition data. */
+/** Generate repair proposals for invariant consistency violations. */
 function suggestInvariantRepair(violation, ledger, namespaceInitialStates = (0, protocol_registry_1.getNsInit)()) {
     const proposals = [];
     if (violation.invariant === "before-consistency") {
@@ -223,6 +226,7 @@ function suggestGenericRepair(violation, ir) {
 /** Convert an accepted repair proposal into a new Branch.
  *  Creates a child branch with the proposed fix applied.
  *  The original ledger is never modified. */
+/** Convert an accepted repair proposal into a new branch. */
 function applyProposalAsBranch(proposal, parentBranch, currentLedger, ir) {
     const branch = (0, branch_ledger_1.createBranch)(parentBranch, "repair_attempt");
     switch (proposal.strategy) {
@@ -275,6 +279,7 @@ function applyProposalAsBranch(proposal, parentBranch, currentLedger, ir) {
 // ── Validation ──
 /** Validate a repair proposal: does applying it fix the violation?
  *  Returns true if a re-check passes after applying the proposal. */
+/** Validate whether a repair proposal fixes the violation. */
 function validateProposal(proposal, currentLedger, namespaceInitialStates = (0, protocol_registry_1.getNsInit)()) {
     let proposedLedger;
     switch (proposal.strategy) {
@@ -298,6 +303,7 @@ function validateProposal(proposal, currentLedger, namespaceInitialStates = (0, 
 }
 // ── Summary ──
 /** Generate a comprehensive repair summary from a ledger and IR context. */
+/** Generate a comprehensive repair summary with minimal fix set. */
 function generateRepairSummary(ledger, ir, protocols, namespaceInitialStates = (0, protocol_registry_1.getNsInit)()) {
     const consistency = (0, ssg_validator_1.checkLedgerConsistency)(ledger, namespaceInitialStates);
     const allProposals = [];
@@ -319,6 +325,7 @@ function generateRepairSummary(ledger, ir, protocols, namespaceInitialStates = (
  * This is the authoritative "minimal fix set" — applying these proposals in order
  * should resolve all detected violations without redundant fixes.
  */
+/** Get the minimal set of repair proposals by deduplication. */
 function getMinimalFixSet(proposals) {
     const seen = new Map();
     for (const p of proposals) {

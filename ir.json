@@ -254,6 +254,7 @@
       "outputs": [
         "AuditResult"
       ],
+      "purpose": "Audit a directory for",
       "tags": [
         "audit"
       ]
@@ -342,7 +343,7 @@
       "outputs": [
         "string"
       ],
-      "purpose": "Format audit result as human-readable text. */",
+      "purpose": "Format audit result as human-readable text with coverage statistics. */",
       "tags": [
         "audit"
       ]
@@ -569,7 +570,7 @@
       "outputs": [
         "Branch"
       ],
-      "purpose": "Create the root branch of a new execution tree. */",
+      "purpose": "Create the root branch of an execution tree. */",
       "tags": [
         "branch",
         "ledger"
@@ -610,7 +611,7 @@
       "outputs": [
         "Branch"
       ],
-      "purpose": "Create a CHILD branch (parent → child relationship). * Tree structure: root └── child (parentId = root.id) * The child starts with an independent transition sequence. It does NOT inherit any transitions from the parent — it begins empty or with the given initialTransitions. The parent's state at creation time is the child's implicit starting state; use forkBranch() if you need to share a prefix of transitions. * Use createBranch when: - Creating an alternative implementation from scratch - The child has no shared history with the parent beyond the parent's final state /",
+      "purpose": "Create a child branch from a parent branch. */",
       "tags": [
         "branch",
         "ledger"
@@ -653,7 +654,7 @@
       "outputs": [
         "{ original: Branch; forked: Branch }"
       ],
-      "purpose": "Fork a branch at a specific transition index, creating a SIBLING branch. * Sibling semantics (NOT child): parent ├── original (branch, truncated at splitIndex, marked \"abandoned\") └── forked  (NEW sibling — same parentId as original, NOT a child of original) * Tree structure BEFORE fork: ... → parent → branch * Tree structure AFTER fork: ... → parent ├── original (abandoned — only transitions[0..splitIndex]) └── forked  (repair_attempt — transitions[splitIndex+1..end]) * Both share the same parent. The forked branch inherits the COMMON PREFIX (transitions 0..splitIndex) implicitly through the tree path — flattenBranch() will walk parent → forked and include parent's + forked's transitions. * Use forkBranch when: - A violation is detected at splitIndex and you want to try a fix - The prefix up to splitIndex is valid and should be preserved - You want to keep the original as evidence (abandoned, not deleted) * Use createBranch when: - Starting a completely fresh alternative from the parent's final state /",
+      "purpose": "Fork a branch at a split index creating a sibling repair branch. */",
       "tags": [
         "branch",
         "ledger"
@@ -687,7 +688,7 @@
       "outputs": [
         "Branch"
       ],
-      "purpose": "Merge multiple branches into one. Takes the successful path: concatenates transitions from each branch in the order they appear in the tree path. Returns null if no branches have transitions. */",
+      "purpose": "Merge multiple branches into one unified branch. */",
       "tags": [
         "branch",
         "ledger"
@@ -726,7 +727,7 @@
       "outputs": [
         "StateTransition"
       ],
-      "purpose": "Flatten a branch and all its ancestors into a single linear transition sequence. This is the bridge between the tree model and existing linear-only consumers (checkLedgerConsistency, hashLedger, etc.). */",
+      "purpose": "Flatten a branch tree into a linear transition sequence. */",
       "tags": [
         "branch",
         "ledger"
@@ -761,7 +762,7 @@
       "outputs": [
         "Branch"
       ],
-      "purpose": "Get the path from root to a given branch (inclusive). */",
+      "purpose": "Get the path from root to a target branch. */",
       "tags": [
         "branch",
         "ledger"
@@ -805,7 +806,7 @@
       "outputs": [
         "BranchReplayResult"
       ],
-      "purpose": "Replay a branch tree: rebuild state across all ancestor branches and verify every transition is valid. */",
+      "purpose": "Replay a branch tree verifying all transitions. */",
       "tags": [
         "branch",
         "ledger"
@@ -833,7 +834,7 @@
       "outputs": [
         "Map"
       ],
-      "purpose": "Build a branch lookup map from an array of branches. */",
+      "purpose": "Build a lookup map from a branch array. */",
       "tags": [
         "branch",
         "ledger"
@@ -938,7 +939,7 @@
       "outputs": [
         "string"
       ],
-      "purpose": "Get the full branch tree as a human-readable structure. */",
+      "purpose": "Format a branch tree as human-readable text. */",
       "tags": [
         "branch",
         "ledger"
@@ -978,7 +979,7 @@
       "outputs": [
         "{ scores: BranchScore[]; winner: BranchScore"
       ],
-      "purpose": "Evaluate all branches in a tree, score them, and return the recommended winner. Scoring: replay +50, zero violations +30, success outcome +20. Highest score wins. Ties go to the smaller branch (fewer transitions). */",
+      "purpose": "Score all branches in a tree and return the recommended winner. */",
       "tags": [
         "branch",
         "ledger"
@@ -1007,7 +1008,7 @@
       "outputs": [
         "Branch"
       ],
-      "purpose": "Wrap a linear transition array as a single root branch (backward compat). */",
+      "purpose": "Wrap linear transitions as a single root branch. */",
       "tags": [
         "branch",
         "ledger"
@@ -1038,7 +1039,7 @@
       "outputs": [
         "StateTransition"
       ],
-      "purpose": "Unwrap a branch tree to the linear transition list. For backward compatibility: flattens the \"winning\" path (first successful leaf). */",
+      "purpose": "Unwrap a branch tree to a flat transition list. */",
       "tags": [
         "branch",
         "ledger"
@@ -1334,7 +1335,7 @@
       "outputs": [
         "ReplayResult"
       ],
-      "purpose": "Replay a session from disk, comparing against its stored fingerprint. */",
+      "purpose": "Deterministically replay a session ledger and verify against stored fingerprint. */",
       "tags": [
         "deterministic",
         "replay"
@@ -1405,7 +1406,7 @@
       "outputs": [
         "ReplayResult"
       ],
-      "purpose": "Core replay logic: replay transitions against (optional) current rules. */",
+      "purpose": "Replay a ledger of transitions against current rules and verify consistency. */",
       "tags": [
         "deterministic",
         "replay"
@@ -1451,7 +1452,7 @@
       "outputs": [
         "ReplayTransition"
       ],
-      "purpose": "Replay with per-transition detail — for debugging and UI. */",
+      "purpose": "Replay transitions with per-step detail for debugging. */",
       "tags": [
         "deterministic",
         "replay"
@@ -2389,7 +2390,7 @@
       "outputs": [
         "RootCause"
       ],
-      "purpose": "Classify a compile error string into a root cause. */",
+      "purpose": "Classify a compile error into a root cause category. */",
       "tags": [
         "failure",
         "collector"
@@ -2417,7 +2418,7 @@
       "outputs": [
         "RootCause"
       ],
-      "purpose": "Classify a planning failure. */",
+      "purpose": "Classify a planning failure into a root cause category. */",
       "tags": [
         "failure",
         "collector"
@@ -2452,7 +2453,7 @@
       "outputs": [
         "string"
       ],
-      "purpose": "Record a failure and save to disk. */",
+      "purpose": "Record a generation failure to the failure corpus. */",
       "tags": [
         "failure",
         "collector"
@@ -2478,7 +2479,7 @@
       "outputs": [
         "FailureRecord"
       ],
-      "purpose": "Load all recorded failures. */",
+      "purpose": "Load all recorded failures from the failure corpus. */",
       "tags": [
         "failure",
         "collector"
@@ -2527,7 +2528,7 @@
       "outputs": [
         "string"
       ],
-      "purpose": "Format failure stats as readable text. */",
+      "purpose": "Format failure statistics as a human-readable report. */",
       "tags": [
         "failure",
         "collector"
@@ -2620,6 +2621,7 @@
         "Omit"
       ],
       "outputs": [],
+      "purpose": "Save planner checkpoint for crash recovery. */",
       "tags": [
         "failure",
         "corpus"
@@ -2649,6 +2651,7 @@
       "outputs": [
         "PlannerCheckpoint"
       ],
+      "purpose": "Load a previously saved planner checkpoint. */",
       "tags": [
         "failure",
         "corpus"
@@ -2675,6 +2678,7 @@
         "string"
       ],
       "outputs": [],
+      "purpose": "Clear a saved planner checkpoint. */",
       "tags": [
         "failure",
         "corpus"
@@ -2700,6 +2704,7 @@
         "Omit & { sessionId?: string } & Partial>"
       ],
       "outputs": [],
+      "purpose": "Record a constraint violation to the failure corpus. */",
       "tags": [
         "failure",
         "corpus"
@@ -2867,7 +2872,7 @@
       "outputs": [
         "{\n  totalFailures: number;\n  bySVL: Record;\n  byConstraintType: Record;\n  topPatterns: { pattern: string; count: number; examples: string[] }[];\n  commonFixPaths: { violation: string; fixPath: string[]; count: number }[];\n  averageRetriesToSuccess: number;\n}"
       ],
-      "purpose": "Get failure genome statistics: total failures, SVL distribution, constraint types, top patterns.",
+      "purpose": "Get failure genome statistics: total failures by SVL, constraint type, and fix path. */",
       "tags": [
         "failure",
         "statistics",
@@ -3021,6 +3026,7 @@
       "outputs": [
         "{ failureToFix: LearnedPattern[] }"
       ],
+      "purpose": "Get antibody patterns learned from failure history. */",
       "tags": [
         "failure",
         "corpus"
@@ -3059,7 +3065,7 @@
       "outputs": [
         "LearnedPattern"
       ],
-      "purpose": "查询匹配当前意图的高置信度抗体（ACL-3+），用于推理层免疫加速 */",
+      "purpose": "Query antibody registry for matching repair patterns. */",
       "tags": [
         "failure",
         "corpus"
@@ -3091,7 +3097,7 @@
       "outputs": [
         "{\n  fragileProtocols: { function: string; violationCount: number; svl: string }[];\n  svlHotspots: { svl: string; count: number; percentage: number }[];\n  constraintClusters: { constraints: string[]; count: number; intent: string }[];\n  highFrictionIntents: { intent: string; adaptationCount: number; anomalyTypes: string[] }[];\n}"
       ],
-      "purpose": "语义热力图：哪些协议/层最脆弱，约束如何聚类 */",
+      "purpose": "Get semantic heatmap showing fragile protocols and SVL hotspots. */",
       "tags": [
         "failure",
         "corpus"
@@ -3143,6 +3149,7 @@
       "outputs": [
         "string"
       ],
+      "purpose": "Generate candidate immune rules from failure patterns. */",
       "tags": [
         "failure",
         "corpus"
@@ -3765,7 +3772,7 @@
       "outputs": [
         "LedgerFingerprint"
       ],
-      "purpose": "Register a ledger fingerprint (execution certificate). Called after a session is recorded — creates an immutable proof of the ledger state. */",
+      "purpose": "Register a ledger fingerprint as an execution certificate. */",
       "tags": [
         "ledger",
         "registry"
@@ -3796,7 +3803,7 @@
       "outputs": [
         "LedgerFingerprint"
       ],
-      "purpose": "Get a single stored fingerprint by sessionId. Returns null if not registered. */",
+      "purpose": "Get a stored ledger fingerprint by session ID. */",
       "tags": [
         "ledger",
         "registry"
@@ -3824,7 +3831,7 @@
       "outputs": [
         "LedgerFingerprint"
       ],
-      "purpose": "List all registered fingerprints, sorted by timestamp (oldest first). */",
+      "purpose": "List all registered ledger fingerprints. */",
       "tags": [
         "ledger",
         "registry"
@@ -3865,7 +3872,7 @@
       "outputs": [
         "FingerprintVerifyResult"
       ],
-      "purpose": "Verify a single session's fingerprint. Requires the session's transitions to re-hash and compare. */",
+      "purpose": "Verify a single ledger fingerprint against current data. */",
       "tags": [
         "ledger",
         "registry"
@@ -3902,7 +3909,7 @@
       "outputs": [
         "RegistrySummary"
       ],
-      "purpose": "Verify all registered fingerprints. Loads each session to re-hash and compare against the stored fingerprint. */",
+      "purpose": "Verify all registered ledger fingerprints and return tampered status. */",
       "tags": [
         "ledger",
         "registry"
@@ -3932,7 +3939,7 @@
       "outputs": [
         "number"
       ],
-      "purpose": "Register fingerprints for all sessions that don't yet have one. Called during `npm run check` to ensure all sessions are fingerprinted. */",
+      "purpose": "Register fingerprints for all sessions that lack them. */",
       "tags": [
         "ledger",
         "registry"
@@ -5858,6 +5865,7 @@
         "push",
         "recordSession",
         "extractKeywords",
+        "toLowerCase",
         "sort",
         "slice",
         "buildCompactFuncList",
@@ -5954,7 +5962,7 @@
       "exported": true,
       "inputs": [],
       "outputs": [],
-      "purpose": "Invalidate the cache (call after protocols.json changes). */",
+      "purpose": "Invalidate cached protocol configuration for reload. */",
       "tags": [
         "protocol",
         "registry"
@@ -5982,7 +5990,7 @@
       "outputs": [
         "ProtocolConfig"
       ],
-      "purpose": "Get the authoritative protocol configuration. Cached after first call; call invalidateProtocolCache() to force reload. */",
+      "purpose": "Get the authoritative protocol configuration from the single source of truth. */",
       "tags": [
         "protocol",
         "registry"
@@ -6002,7 +6010,7 @@
       "outputs": [
         "Map"
       ],
-      "purpose": "Get namespace initial states only (most common need). */",
+      "purpose": "Get namespace initial states from protocol configuration. */",
       "tags": [
         "protocol",
         "registry"
@@ -6022,7 +6030,7 @@
       "outputs": [
         "string"
       ],
-      "purpose": "Get current rule hash without loading full config. */",
+      "purpose": "Get the current rule set hash. */",
       "tags": [
         "protocol",
         "registry"
@@ -6154,7 +6162,7 @@
       "outputs": [
         "RepairProposal"
       ],
-      "purpose": "Generate repair proposals for all detected violations in a ledger. */",
+      "purpose": "Generate repair proposals for all detected violations. */",
       "tags": [
         "repair",
         "proposal"
@@ -6194,7 +6202,7 @@
       "outputs": [
         "RepairProposal"
       ],
-      "purpose": "Protocol violation repair: use SSG fixPath to suggest insertions. */",
+      "purpose": "Generate repair proposals for SSG protocol violations. */",
       "tags": [
         "repair",
         "proposal"
@@ -6240,7 +6248,7 @@
       "outputs": [
         "RepairProposal"
       ],
-      "purpose": "Invariant violation repair: use rebuildState to compute correct transition data. */",
+      "purpose": "Generate repair proposals for invariant consistency violations. */",
       "tags": [
         "repair",
         "proposal"
@@ -6328,7 +6336,7 @@
       "outputs": [
         "Branch"
       ],
-      "purpose": "Convert an accepted repair proposal into a new Branch. Creates a child branch with the proposed fix applied. The original ledger is never modified. */",
+      "purpose": "Convert an accepted repair proposal into a new branch. */",
       "tags": [
         "repair",
         "proposal"
@@ -6369,7 +6377,7 @@
       "outputs": [
         "{ valid: boolean; remainingViolations: LedgerConsistencyViolation[] }"
       ],
-      "purpose": "Validate a repair proposal: does applying it fix the violation? Returns true if a re-check passes after applying the proposal. */",
+      "purpose": "Validate whether a repair proposal fixes the violation. */",
       "tags": [
         "repair",
         "proposal"
@@ -6417,7 +6425,7 @@
       "outputs": [
         "RepairSummary"
       ],
-      "purpose": "Generate a comprehensive repair summary from a ledger and IR context. */",
+      "purpose": "Generate a comprehensive repair summary with minimal fix set. */",
       "tags": [
         "repair",
         "proposal"
@@ -6448,7 +6456,7 @@
       "outputs": [
         "RepairProposal"
       ],
-      "purpose": "Deduplicate repair proposals: pick the highest-confidence proposal per violation index. Returns proposals sorted by violationIndex (ascending). * This is the authoritative \"minimal fix set\" — applying these proposals in order should resolve all detected violations without redundant fixes. /",
+      "purpose": "Get the minimal set of repair proposals by deduplication. */",
       "tags": [
         "repair",
         "proposal"
@@ -6562,7 +6570,7 @@
         "Map"
       ],
       "outputs": [],
-      "purpose": "Assert full ledger passes Invariant-0 + Invariant-1. Throws InvariantViolationError with the first violation's details. */",
+      "purpose": "Assert a ledger passes all invariant checks. */",
       "tags": [
         "runtime",
         "invariants"
@@ -6597,7 +6605,7 @@
         "StateTransition"
       ],
       "outputs": [],
-      "purpose": "Assert a single transition's delta consistency. Checks that applying acquire/invalidate to statesBefore produces statesAfter. */",
+      "purpose": "Assert a single transition has consistent state deltas. */",
       "tags": [
         "runtime",
         "invariants"
@@ -6637,7 +6645,7 @@
         "string"
       ],
       "outputs": [],
-      "purpose": "Assert rule hashes match — detects when validation rules changed under a ledger. */",
+      "purpose": "Assert rule hashes match to detect rule changes. */",
       "tags": [
         "runtime",
         "invariants"
@@ -6664,7 +6672,7 @@
         "StateTransition"
       ],
       "outputs": [],
-      "purpose": "Assert transition indices are strictly monotonic (no duplicates, non-decreasing). */",
+      "purpose": "Assert transition indices are strictly monotonic. */",
       "tags": [
         "runtime",
         "invariants"
@@ -6706,7 +6714,7 @@
         "string"
       ],
       "outputs": [],
-      "purpose": "Convenience: run all invariant checks on a ledger. Does not throw if all pass. */",
+      "purpose": "Run all invariant checks on a ledger. */",
       "tags": [
         "runtime",
         "invariants"

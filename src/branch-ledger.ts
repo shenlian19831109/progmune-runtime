@@ -51,6 +51,7 @@ export function generateBranchId(): string {
 }
 
 /** Create the root branch of a new execution tree. */
+/** Create the root branch of an execution tree. */
 export function createRootBranch(transitions: StateTransition[] = []): Branch {
   const id = generateBranchId();
   return {
@@ -80,6 +81,7 @@ export function createRootBranch(transitions: StateTransition[] = []): Branch {
  * - The child has no shared history with the parent beyond the parent's
  *   final state
  */
+/** Create a child branch from a parent branch. */
 export function createBranch(
   parent: Branch,
   reason: BranchReason = "alternative",
@@ -124,6 +126,7 @@ export function createBranch(
  * Use createBranch when:
  * - Starting a completely fresh alternative from the parent's final state
  */
+/** Fork a branch at a split index creating a sibling repair branch. */
 export function forkBranch(
   branch: Branch,
   splitIndex: number,
@@ -159,6 +162,7 @@ export function forkBranch(
  *  Takes the successful path: concatenates transitions from each branch
  *  in the order they appear in the tree path.
  *  Returns null if no branches have transitions. */
+/** Merge multiple branches into one unified branch. */
 export function mergeBranches(branches: Branch[]): Branch | null {
   const validBranches = branches.filter(b => b.transitions.length > 0);
   if (validBranches.length === 0) return null;
@@ -195,6 +199,7 @@ export function mergeBranches(branches: Branch[]): Branch | null {
 /** Flatten a branch and all its ancestors into a single linear transition sequence.
  *  This is the bridge between the tree model and existing linear-only consumers
  *  (checkLedgerConsistency, hashLedger, etc.). */
+/** Flatten a branch tree into a linear transition sequence. */
 export function flattenBranch(
   branch: Branch,
   allBranches: Map<string, Branch>
@@ -225,6 +230,7 @@ export function flattenBranch(
 }
 
 /** Get the path from root to a given branch (inclusive). */
+/** Get the path from root to a target branch. */
 export function getBranchPath(
   branch: Branch,
   allBranches: Map<string, Branch>
@@ -246,6 +252,7 @@ export function getBranchPath(
 
 /** Replay a branch tree: rebuild state across all ancestor branches
  *  and verify every transition is valid. */
+/** Replay a branch tree verifying all transitions. */
 export function replayBranch(
   branch: Branch,
   allBranches: Map<string, Branch>,
@@ -293,6 +300,7 @@ export function replayBranch(
 }
 
 /** Build a branch lookup map from an array of branches. */
+/** Build a lookup map from a branch array. */
 export function buildBranchMap(branches: Branch[]): Map<string, Branch> {
   const map = new Map<string, Branch>();
   for (const b of branches) {
@@ -301,6 +309,7 @@ export function buildBranchMap(branches: Branch[]): Map<string, Branch> {
   return map;
 }
 
+/** Find the root branch of a tree. */
 /** Find the root branch of a tree. */
 export function findRootBranch(branches: Branch[]): Branch | undefined {
   return branches.find(b => !b.parentId);
@@ -321,6 +330,7 @@ export function findChildBranches(
 }
 
 /** Get the full branch tree as a human-readable structure. */
+/** Format a branch tree as human-readable text. */
 export function describeBranchTree(
   root: Branch,
   allBranches: Map<string, Branch>,
@@ -354,6 +364,7 @@ export interface BranchScore {
 /** Evaluate all branches in a tree, score them, and return the recommended winner.
  *  Scoring: replay +50, zero violations +30, success outcome +20.
  *  Highest score wins. Ties go to the smaller branch (fewer transitions). */
+/** Score all branches in a tree and return the recommended winner. */
 export function evaluateBranches(
   branches: Branch[],
   namespaceInitialStates: Map<string, string> = new Map([["_global", "UNAUTHENTICATED"]])
@@ -410,6 +421,7 @@ export function evaluateBranches(
 }
 
 /** Wrap a linear transition array as a single root branch (backward compat). */
+/** Wrap linear transitions as a single root branch. */
 export function wrapAsBranch(transitions: StateTransition[]): Branch {
   const b = createRootBranch(transitions);
   b.outcome = transitions.length > 0
@@ -420,6 +432,7 @@ export function wrapAsBranch(transitions: StateTransition[]): Branch {
 
 /** Unwrap a branch tree to the linear transition list.
  *  For backward compatibility: flattens the "winning" path (first successful leaf). */
+/** Unwrap a branch tree to a flat transition list. */
 export function unwrapBranchTree(
   branches: Branch[]
 ): StateTransition[] {

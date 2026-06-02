@@ -30,12 +30,14 @@ export interface ProtocolConfig {
 let cached: ProtocolConfig | null = null;
 
 /** Invalidate the cache (call after protocols.json changes). */
+/** Invalidate cached protocol configuration for reload. */
 export function invalidateProtocolCache(): void {
   cached = null;
 }
 
 /** Get the authoritative protocol configuration.
  *  Cached after first call; call invalidateProtocolCache() to force reload. */
+/** Get the authoritative protocol configuration from the single source of truth. */
 export function getProtocolConfig(): ProtocolConfig {
   if (cached) return cached;
 
@@ -83,11 +85,13 @@ export function getProtocolConfig(): ProtocolConfig {
 // ── Convenience re-exports ──
 
 /** Get namespace initial states only (most common need). */
+/** Get namespace initial states from protocol configuration. */
 export function getNsInit(): Map<string, string> {
   return new Map(getProtocolConfig().nsInit);
 }
 
 /** Get current rule hash without loading full config. */
+/** Get the current rule set hash. */
 export function getRuleHash(): string {
   return getProtocolConfig().ruleHash;
 }

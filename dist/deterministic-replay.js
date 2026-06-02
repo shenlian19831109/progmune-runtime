@@ -53,6 +53,7 @@ const ssg_validator_1 = require("./ssg-validator");
 const branch_ledger_1 = require("./branch-ledger");
 // ── Core Replay ──
 /** Replay a session from disk, comparing against its stored fingerprint. */
+/** Deterministically replay a session ledger and verify against stored fingerprint. */
 function replaySession(sessionId, currentRules, namespaceInitialStates = (0, protocol_registry_1.getNsInit)()) {
     // Load session
     const sessionsDir = path.resolve(process.env.PROGMUNE_PROJECT_DIR || process.cwd(), ".progmune_corpus/sessions");
@@ -112,6 +113,7 @@ function replaySession(sessionId, currentRules, namespaceInitialStates = (0, pro
     return replayLedger(sessionId, transitions, sessionRuleHash, storedHash, currentRuleHash, currentRules, namespaceInitialStates);
 }
 /** Core replay logic: replay transitions against (optional) current rules. */
+/** Replay a ledger of transitions against current rules and verify consistency. */
 function replayLedger(sessionId, transitions, storedRuleHash, storedLedgerHash, currentRuleHash, currentRules, namespaceInitialStates = (0, protocol_registry_1.getNsInit)()) {
     const replayedHash = transitions.length > 0 ? (0, ssg_validator_1.hashLedger)(transitions) : "";
     const ruleHashMatch = !currentRuleHash || !storedRuleHash
@@ -200,6 +202,7 @@ function replayLedger(sessionId, transitions, storedRuleHash, storedLedgerHash, 
     };
 }
 /** Replay with per-transition detail — for debugging and UI. */
+/** Replay transitions with per-step detail for debugging. */
 function replayWithDetail(transitions, currentRules, namespaceInitialStates = (0, protocol_registry_1.getNsInit)()) {
     if (!currentRules || currentRules.size === 0) {
         return transitions.map(t => ({

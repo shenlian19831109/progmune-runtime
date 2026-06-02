@@ -62,6 +62,7 @@ function fingerprintPath(sessionId) {
 // ── Core API ──
 /** Register a ledger fingerprint (execution certificate).
  *  Called after a session is recorded — creates an immutable proof of the ledger state. */
+/** Register a ledger fingerprint as an execution certificate. */
 function registerFingerprint(sessionId, transitions, ruleHash) {
     const dir = fingerprintsDir();
     if (!fs.existsSync(dir)) {
@@ -78,6 +79,7 @@ function registerFingerprint(sessionId, transitions, ruleHash) {
     return fingerprint;
 }
 /** Get a single stored fingerprint by sessionId. Returns null if not registered. */
+/** Get a stored ledger fingerprint by session ID. */
 function getFingerprint(sessionId) {
     const fpPath = fingerprintPath(sessionId);
     if (!fs.existsSync(fpPath))
@@ -90,6 +92,7 @@ function getFingerprint(sessionId) {
     }
 }
 /** List all registered fingerprints, sorted by timestamp (oldest first). */
+/** List all registered ledger fingerprints. */
 function getFingerprintRegistry() {
     const dir = fingerprintsDir();
     if (!fs.existsSync(dir))
@@ -112,6 +115,7 @@ function getFingerprintRegistry() {
 }
 /** Verify a single session's fingerprint.
  *  Requires the session's transitions to re-hash and compare. */
+/** Verify a single ledger fingerprint against current data. */
 function verifyFingerprint(sessionId, transitions, currentRuleHash) {
     const stored = getFingerprint(sessionId);
     if (!stored) {
@@ -144,6 +148,7 @@ function verifyFingerprint(sessionId, transitions, currentRuleHash) {
 }
 /** Verify all registered fingerprints.
  *  Loads each session to re-hash and compare against the stored fingerprint. */
+/** Verify all registered ledger fingerprints and return tampered status. */
 function verifyAllFingerprints(currentRuleHash) {
     const fingerprints = getFingerprintRegistry();
     const results = [];
@@ -199,6 +204,7 @@ function verifyAllFingerprints(currentRuleHash) {
 }
 /** Register fingerprints for all sessions that don't yet have one.
  *  Called during `npm run check` to ensure all sessions are fingerprinted. */
+/** Register fingerprints for all sessions that lack them. */
 function registerAllMissingFingerprints() {
     const sessionsDir = path.resolve(process.env.PROGMUNE_PROJECT_DIR || process.cwd(), ".progmune_corpus/sessions");
     if (!fs.existsSync(sessionsDir))

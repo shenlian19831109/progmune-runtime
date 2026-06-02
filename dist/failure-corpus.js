@@ -66,6 +66,7 @@ function checkpointPath(intent) {
     const hash = Buffer.from(intent).toString("base64").replace(/[/+=]/g, "_").slice(0, 32);
     return path.join(CHECKPOINT_DIR, `ckpt_${hash}.json`);
 }
+/** Save planner checkpoint for crash recovery. */
 function saveCheckpoint(intent, data) {
     ensureDir(CHECKPOINT_DIR);
     const cp = {
@@ -75,6 +76,7 @@ function saveCheckpoint(intent, data) {
     };
     fs.writeFileSync(checkpointPath(intent), JSON.stringify(cp, null, 2));
 }
+/** Load a previously saved planner checkpoint. */
 function loadCheckpoint(intent) {
     try {
         const raw = fs.readFileSync(checkpointPath(intent), "utf-8");
@@ -84,12 +86,14 @@ function loadCheckpoint(intent) {
         return null;
     }
 }
+/** Clear a saved planner checkpoint. */
 function clearCheckpoint(intent) {
     try {
         fs.unlinkSync(checkpointPath(intent));
     }
     catch { }
 }
+/** Record a constraint violation to the failure corpus. */
 function recordFailure(record) {
     (0, file_lock_1.withLock)("failure-corpus", () => {
         ensureDir(CORPUS_DIR);
@@ -200,6 +204,7 @@ function getTopFailurePatterns(limit = 5) {
 /** Get failure genome statistics: total failures, SVL distribution, constraint types, top patterns.
  * @tags failure, statistics, genome, audit
  */
+/** Get failure genome statistics: total failures by SVL, constraint type, and fix path. */
 function getFailureGenome() {
     const sessions = getAllSessions();
     const bySVL = { "SVL-1": 0, "SVL-2": 0, "SVL-3": 0, "SVL-4": 0 };
@@ -349,6 +354,7 @@ function computeACL(count, distinctIntents, resolvedRate) {
         return "ACL-2";
     return "ACL-1";
 }
+/** Get antibody patterns learned from failure history. */
 function getLearnedPatterns() {
     const sessions = getAllSessions();
     const agg = new Map();
@@ -407,6 +413,7 @@ function getLearnedPatterns() {
     return { failureToFix: patterns };
 }
 /** 查询匹配当前意图的高置信度抗体（ACL-3+），用于推理层免疫加速 */
+/** Query antibody registry for matching repair patterns. */
 function queryAntibodies(intent, minACL = "ACL-3") {
     const { failureToFix } = getLearnedPatterns();
     const aclRank = { "ACL-1": 1, "ACL-2": 2, "ACL-3": 3, "ACL-4": 4 };
@@ -431,6 +438,7 @@ function queryAntibodies(intent, minACL = "ACL-3") {
         .sort((a, b) => b._score - a._score);
 }
 /** 语义热力图：哪些协议/层最脆弱，约束如何聚类 */
+/** Get semantic heatmap showing fragile protocols and SVL hotspots. */
 function getSemanticHeatmap() {
     const sessions = getAllSessions();
     // Count total violations from sessions
@@ -537,6 +545,7 @@ function getAntibodyStats() {
         .slice(0, 10);
     return { totalHits, fastPathHits, injectedHintHits, totalLLMCallsSaved, totalTokensSaved, byLevel, topSignatures };
 }
+/** Generate candidate immune rules from failure patterns. */
 function generateCandidateRules() {
     const genome = getFailureGenome();
     const rules = [];

@@ -36,6 +36,7 @@ function generateBranchId() {
     return `br_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 }
 /** Create the root branch of a new execution tree. */
+/** Create the root branch of an execution tree. */
 function createRootBranch(transitions = []) {
     const id = generateBranchId();
     return {
@@ -64,6 +65,7 @@ function createRootBranch(transitions = []) {
  * - The child has no shared history with the parent beyond the parent's
  *   final state
  */
+/** Create a child branch from a parent branch. */
 function createBranch(parent, reason = "alternative", initialTransitions = []) {
     const id = generateBranchId();
     return {
@@ -103,6 +105,7 @@ function createBranch(parent, reason = "alternative", initialTransitions = []) {
  * Use createBranch when:
  * - Starting a completely fresh alternative from the parent's final state
  */
+/** Fork a branch at a split index creating a sibling repair branch. */
 function forkBranch(branch, splitIndex, reason = "repair_attempt") {
     const sharedTransitions = branch.transitions.slice(0, splitIndex + 1);
     const remainingTransitions = branch.transitions.slice(splitIndex + 1);
@@ -133,6 +136,7 @@ function forkBranch(branch, splitIndex, reason = "repair_attempt") {
  *  Takes the successful path: concatenates transitions from each branch
  *  in the order they appear in the tree path.
  *  Returns null if no branches have transitions. */
+/** Merge multiple branches into one unified branch. */
 function mergeBranches(branches) {
     const validBranches = branches.filter(b => b.transitions.length > 0);
     if (validBranches.length === 0)
@@ -164,6 +168,7 @@ function mergeBranches(branches) {
 /** Flatten a branch and all its ancestors into a single linear transition sequence.
  *  This is the bridge between the tree model and existing linear-only consumers
  *  (checkLedgerConsistency, hashLedger, etc.). */
+/** Flatten a branch tree into a linear transition sequence. */
 function flattenBranch(branch, allBranches) {
     const path = getBranchPath(branch, allBranches);
     const allTransitions = [];
@@ -187,6 +192,7 @@ function flattenBranch(branch, allBranches) {
     return allTransitions.sort((a, b) => a.actionIndex - b.actionIndex);
 }
 /** Get the path from root to a given branch (inclusive). */
+/** Get the path from root to a target branch. */
 function getBranchPath(branch, allBranches) {
     const path = [];
     let current = branch;
@@ -203,6 +209,7 @@ function getBranchPath(branch, allBranches) {
 }
 /** Replay a branch tree: rebuild state across all ancestor branches
  *  and verify every transition is valid. */
+/** Replay a branch tree verifying all transitions. */
 function replayBranch(branch, allBranches, namespaceInitialStates = (0, protocol_registry_1.getNsInit)()) {
     const path = getBranchPath(branch, allBranches);
     const pathIds = path.map(b => b.id);
@@ -240,6 +247,7 @@ function replayBranch(branch, allBranches, namespaceInitialStates = (0, protocol
     };
 }
 /** Build a branch lookup map from an array of branches. */
+/** Build a lookup map from a branch array. */
 function buildBranchMap(branches) {
     const map = new Map();
     for (const b of branches) {
@@ -247,6 +255,7 @@ function buildBranchMap(branches) {
     }
     return map;
 }
+/** Find the root branch of a tree. */
 /** Find the root branch of a tree. */
 function findRootBranch(branches) {
     return branches.find(b => !b.parentId);
@@ -262,6 +271,7 @@ function findChildBranches(parent, allBranches) {
     return children;
 }
 /** Get the full branch tree as a human-readable structure. */
+/** Format a branch tree as human-readable text. */
 function describeBranchTree(root, allBranches, indent = 0) {
     const prefix = "  ".repeat(indent);
     let result = `${prefix}${root.id.slice(0, 12)} [${root.reason}] (${root.transitions.length} tx, outcome: ${root.outcome || "open"})\n`;
@@ -274,6 +284,7 @@ function describeBranchTree(root, allBranches, indent = 0) {
 /** Evaluate all branches in a tree, score them, and return the recommended winner.
  *  Scoring: replay +50, zero violations +30, success outcome +20.
  *  Highest score wins. Ties go to the smaller branch (fewer transitions). */
+/** Score all branches in a tree and return the recommended winner. */
 function evaluateBranches(branches, namespaceInitialStates = new Map([["_global", "UNAUTHENTICATED"]])) {
     if (branches.length === 0)
         return { scores: [], winner: null };
@@ -326,6 +337,7 @@ function evaluateBranches(branches, namespaceInitialStates = new Map([["_global"
     return { scores, winner };
 }
 /** Wrap a linear transition array as a single root branch (backward compat). */
+/** Wrap linear transitions as a single root branch. */
 function wrapAsBranch(transitions) {
     const b = createRootBranch(transitions);
     b.outcome = transitions.length > 0
@@ -335,6 +347,7 @@ function wrapAsBranch(transitions) {
 }
 /** Unwrap a branch tree to the linear transition list.
  *  For backward compatibility: flattens the "winning" path (first successful leaf). */
+/** Unwrap a branch tree to a flat transition list. */
 function unwrapBranchTree(branches) {
     if (branches.length === 0)
         return [];

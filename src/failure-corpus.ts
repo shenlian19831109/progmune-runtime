@@ -84,6 +84,7 @@ function checkpointPath(intent: string): string {
   return path.join(CHECKPOINT_DIR, `ckpt_${hash}.json`);
 }
 
+/** Save planner checkpoint for crash recovery. */
 export function saveCheckpoint(intent: string, data: Omit<PlannerCheckpoint, "intent" | "timestamp">): void {
   ensureDir(CHECKPOINT_DIR);
   const cp: PlannerCheckpoint = {
@@ -94,6 +95,7 @@ export function saveCheckpoint(intent: string, data: Omit<PlannerCheckpoint, "in
   fs.writeFileSync(checkpointPath(intent), JSON.stringify(cp, null, 2));
 }
 
+/** Load a previously saved planner checkpoint. */
 export function loadCheckpoint(intent: string): PlannerCheckpoint | null {
   try {
     const raw = fs.readFileSync(checkpointPath(intent), "utf-8");
@@ -103,10 +105,12 @@ export function loadCheckpoint(intent: string): PlannerCheckpoint | null {
   }
 }
 
+/** Clear a saved planner checkpoint. */
 export function clearCheckpoint(intent: string): void {
   try { fs.unlinkSync(checkpointPath(intent)); } catch {}
 }
 
+/** Record a constraint violation to the failure corpus. */
 export function recordFailure(
   record: Omit<FailureRecord, "id" | "timestamp" | "parentSessionId"> & { sessionId?: string } & Partial<Pick<FailureRecord, "plannerAttempt" | "plannerRetryTotal">>
 ) {
@@ -230,6 +234,7 @@ export function getTopFailurePatterns(limit: number = 5): { pattern: string; cou
 /** Get failure genome statistics: total failures, SVL distribution, constraint types, top patterns.
  * @tags failure, statistics, genome, audit
  */
+/** Get failure genome statistics: total failures by SVL, constraint type, and fix path. */
 export function getFailureGenome(): {
   totalFailures: number;
   bySVL: Record<SVL, number>;
@@ -409,6 +414,7 @@ function computeACL(count: number, distinctIntents: number, resolvedRate: number
   return "ACL-1";
 }
 
+/** Get antibody patterns learned from failure history. */
 export function getLearnedPatterns(): { failureToFix: LearnedPattern[] } {
   const sessions = getAllSessions();
   const agg = new Map<string, {
@@ -474,6 +480,7 @@ export function getLearnedPatterns(): { failureToFix: LearnedPattern[] } {
 }
 
 /** 查询匹配当前意图的高置信度抗体（ACL-3+），用于推理层免疫加速 */
+/** Query antibody registry for matching repair patterns. */
 export function queryAntibodies(intent: string, minACL: AntibodyLevel = "ACL-3"): LearnedPattern[] {
   const { failureToFix } = getLearnedPatterns();
   const aclRank: Record<AntibodyLevel, number> = { "ACL-1": 1, "ACL-2": 2, "ACL-3": 3, "ACL-4": 4 };
@@ -501,6 +508,7 @@ export function queryAntibodies(intent: string, minACL: AntibodyLevel = "ACL-3")
 }
 
 /** 语义热力图：哪些协议/层最脆弱，约束如何聚类 */
+/** Get semantic heatmap showing fragile protocols and SVL hotspots. */
 export function getSemanticHeatmap(): {
   fragileProtocols: { function: string; violationCount: number; svl: string }[];
   svlHotspots: { svl: string; count: number; percentage: number }[];
@@ -630,6 +638,7 @@ export function getAntibodyStats(): {
   return { totalHits, fastPathHits, injectedHintHits, totalLLMCallsSaved, totalTokensSaved, byLevel, topSignatures };
 }
 
+/** Generate candidate immune rules from failure patterns. */
 export function generateCandidateRules(): string[] {
   const genome = getFailureGenome();
   const rules: string[] = [];

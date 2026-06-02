@@ -46,6 +46,7 @@ const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 /** Scan a directory recursively for TypeScript files and check for @progmune-generated markers. */
 const DEFAULT_THRESHOLD = 0.8;
+/** Audit a directory for @progmune-generated markers and report coverage. */
 function auditDirectory(dir, threshold = DEFAULT_THRESHOLD) {
     const result = {
         directory: dir,
@@ -127,6 +128,7 @@ function scanDir(rootDir, currentDir, result) {
     }
 }
 /** Format audit result as human-readable text. */
+/** Format audit result as human-readable text with coverage statistics. */
 function formatAuditResult(result) {
     const pct = (result.coverage * 100).toFixed(1);
     const lines = [];
