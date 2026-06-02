@@ -1,0 +1,49 @@
+{
+  "intent": "get the failure genome, get the learned patterns, and compare which patterns match the top failures",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "schema",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "getFailureGenome",
+      "args": [],
+      "assignTo": "genome"
+    },
+    {
+      "kind": "call",
+      "function": "getLearnedPatterns",
+      "args": [],
+      "assignTo": "patterns"
+    },
+    {
+      "kind": "call",
+      "function": "getTopFailurePatterns",
+      "args": [
+        {
+          "name": "limit",
+          "type": "number",
+          "value": 5
+        }
+      ],
+      "assignTo": "topFailures"
+    },
+    {
+      "kind": "return",
+      "value": "genome"
+    },
+    {
+      "kind": "return",
+      "value": "patterns"
+    },
+    {
+      "kind": "return",
+      "value": "topFailures"
+    }
+  ],
+  "errorDetail": "action[3]: return should be the last action (actions after return are unreachable); action[4]: return should be the last action (actions after return are unreachable)",
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 2,
+  "id": "fail_1780427410385_59",
+  "timestamp": "2026-06-02T19:10:10.385Z"
+}

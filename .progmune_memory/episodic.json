@@ -1,31 +1,133 @@
 [
   {
-    "intent": "get execution metrics and calculate the repair rate as a percentage",
+    "intent": "take a session ID and a repair proposal, create a repair branch, replay it, and return the evaluation score",
     "actions": [
       {
         "kind": "call",
-        "function": "getExecutionMetrics",
-        "args": [],
-        "assignTo": "metrics"
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "."
+          }
+        ],
+        "assignTo": "ir"
       },
       {
         "kind": "call",
-        "function": "getExecutionMetrics",
-        "args": [],
-        "assignTo": "metrics2"
+        "function": "replaySession",
+        "args": [
+          {
+            "name": "sessionId",
+            "type": "string",
+            "value": "sessionId"
+          },
+          {
+            "name": "currentRules",
+            "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>",
+            "value": {}
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": {}
+          }
+        ],
+        "assignTo": "replay"
+      },
+      {
+        "kind": "call",
+        "function": "applyProposalAsBranch",
+        "args": [
+          {
+            "name": "proposal",
+            "type": "RepairProposal",
+            "value": "proposal"
+          },
+          {
+            "name": "parentBranch",
+            "type": "Branch",
+            "value": "replay.branch"
+          },
+          {
+            "name": "currentLedger",
+            "type": "StateTransition[]",
+            "value": "replay.ledger"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "ir"
+          }
+        ],
+        "assignTo": "branch"
+      },
+      {
+        "kind": "call",
+        "function": "replayBranch",
+        "args": [
+          {
+            "name": "branch",
+            "type": "Branch",
+            "value": "branch"
+          },
+          {
+            "name": "allBranches",
+            "type": "Map<string, Branch>",
+            "value": {}
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": {}
+          }
+        ],
+        "assignTo": "branchReplay"
+      },
+      {
+        "kind": "call",
+        "function": "evaluateBranches",
+        "args": [
+          {
+            "name": "branches",
+            "type": "Branch[]",
+            "value": [
+              "$branch"
+            ]
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": {}
+          }
+        ],
+        "assignTo": "eval"
       },
       {
         "kind": "return",
-        "value": "metrics"
+        "value": "eval"
       }
     ],
     "success": true,
-    "id": "ep_1780426448160",
-    "timestamp": "2026-06-02T18:54:08.160Z"
+    "id": "ep_1780427830740",
+    "timestamp": "2026-06-02T19:17:10.740Z"
   },
   {
-    "intent": "load protocol rules and count how many distinct states are defined",
+    "intent": "take a protocol namespace name and return all rules belonging to that namespace with their state transitions",
     "actions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "."
+          }
+        ],
+        "assignTo": "ir"
+      },
       {
         "kind": "call",
         "function": "loadProtocols",
@@ -37,95 +139,14 @@
           }
         ],
         "assignTo": "protocols"
-      },
-      {
-        "kind": "call",
-        "function": "listAllStates",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "protocols"
-          }
-        ],
-        "assignTo": "states"
-      },
-      {
-        "kind": "call",
-        "function": "benchmarkCount",
-        "args": [],
-        "assignTo": "count"
-      },
-      {
-        "kind": "return",
-        "value": "count"
       }
     ],
     "success": true,
-    "id": "ep_1780426425383",
-    "timestamp": "2026-06-02T18:53:45.383Z"
+    "id": "ep_1780427803353",
+    "timestamp": "2026-06-02T19:16:43.353Z"
   },
   {
-    "intent": "get the failure genome and list the top three constraint violation types",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getFailureGenome",
-        "args": [],
-        "assignTo": "genome"
-      },
-      {
-        "kind": "call",
-        "function": "failureStats",
-        "args": [],
-        "assignTo": "stats"
-      },
-      {
-        "kind": "return",
-        "value": "genome"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780426392743",
-    "timestamp": "2026-06-02T18:53:12.743Z"
-  },
-  {
-    "intent": "get all sessions and find the one with the longest intent string",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "findProducer",
-        "args": [
-          {
-            "name": "state",
-            "type": "string",
-            "value": ""
-          },
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "sessions"
-          }
-        ],
-        "assignTo": "result"
-      },
-      {
-        "kind": "return",
-        "value": "result"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780426362296",
-    "timestamp": "2026-06-02T18:52:42.296Z"
-  },
-  {
-    "intent": "verify fingerprint for a single session by its ID and return tampered status",
+    "intent": "take a session ID, load its ledger, check invariants, replay it, and return a full audit result",
     "actions": [
       {
         "kind": "call",
@@ -141,7 +162,34 @@
       },
       {
         "kind": "call",
-        "function": "verifyFingerprint",
+        "function": "StateMachineValidator.getLedger",
+        "args": [],
+        "assignTo": "ledger"
+      },
+      {
+        "kind": "call",
+        "function": "assertLedgerInvariants",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "ledger"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": {}
+          },
+          {
+            "name": "expectedRuleHash",
+            "type": "string",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "kind": "call",
+        "function": "replayLedger",
         "args": [
           {
             "name": "sessionId",
@@ -151,27 +199,710 @@
           {
             "name": "transitions",
             "type": "StateTransition[]",
-            "value": "transitions"
+            "value": "ledger"
+          },
+          {
+            "name": "storedRuleHash",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "storedLedgerHash",
+            "type": "string",
+            "value": ""
           },
           {
             "name": "currentRuleHash",
             "type": "string",
-            "value": "currentRuleHash"
+            "value": ""
+          },
+          {
+            "name": "currentRules",
+            "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>",
+            "value": {}
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": {}
           }
         ],
-        "assignTo": "result"
+        "assignTo": "replayResult"
+      },
+      {
+        "kind": "call",
+        "function": "formatAuditResult",
+        "args": [
+          {
+            "name": "result",
+            "type": "AuditResult",
+            "value": "replayResult"
+          }
+        ],
+        "assignTo": "auditStr"
       },
       {
         "kind": "return",
-        "value": "result"
+        "value": "auditStr"
       }
     ],
     "success": true,
-    "id": "ep_1780426336429",
-    "timestamp": "2026-06-02T18:52:16.429Z"
+    "id": "ep_1780427775510",
+    "timestamp": "2026-06-02T19:16:15.510Z"
   },
   {
-    "intent": "extract IR and group functions by their source file",
+    "intent": "extract IR, get protocol rules, validate the dev pipeline sequence, and return the state snapshot",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "."
+          }
+        ],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "getRuleHash",
+        "args": [],
+        "assignTo": "ruleHash"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.apply",
+        "args": [
+          {
+            "name": "functionName",
+            "type": "string",
+            "value": "validateAction"
+          },
+          {
+            "name": "actionIndex",
+            "type": "number",
+            "value": 0
+          }
+        ],
+        "assignTo": "step1"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.apply",
+        "args": [
+          {
+            "name": "functionName",
+            "type": "string",
+            "value": "validateActionSequence"
+          },
+          {
+            "name": "actionIndex",
+            "type": "number",
+            "value": 1
+          }
+        ],
+        "assignTo": "step2"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.getTrace",
+        "args": [],
+        "assignTo": "trace"
+      },
+      {
+        "kind": "return",
+        "value": "trace"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780427752370",
+    "timestamp": "2026-06-02T19:15:52.370Z"
+  },
+  {
+    "intent": "get all sessions, evaluate their branch trees, and return the branch with the highest replay score",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "findRootBranch",
+        "args": [
+          {
+            "name": "branches",
+            "type": "Branch[]",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "root"
+      },
+      {
+        "kind": "call",
+        "function": "evaluateBranches",
+        "args": [
+          {
+            "name": "branches",
+            "type": "Branch[]",
+            "value": "sessions"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": {}
+          }
+        ],
+        "assignTo": "evalResult"
+      },
+      {
+        "kind": "call",
+        "function": "getBranchPath",
+        "args": [
+          {
+            "name": "branch",
+            "type": "Branch",
+            "value": "evalResult.winner"
+          },
+          {
+            "name": "allBranches",
+            "type": "Map<string, Branch>",
+            "value": {}
+          }
+        ],
+        "assignTo": "winnerPath"
+      },
+      {
+        "kind": "return",
+        "value": "$evalResult.winner"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780427729532",
+    "timestamp": "2026-06-02T19:15:29.532Z"
+  },
+  {
+    "intent": "verify all fingerprints, replay each ledger, and report sessions where fingerprint and replay diverge",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "getFingerprintRegistry",
+        "args": [],
+        "assignTo": "registry"
+      },
+      {
+        "kind": "call",
+        "function": "verifyAllFingerprints",
+        "args": [
+          {
+            "name": "currentRuleHash",
+            "type": "string",
+            "value": "latest"
+          }
+        ],
+        "assignTo": "summary"
+      },
+      {
+        "kind": "call",
+        "function": "generateCandidateRules",
+        "args": [],
+        "assignTo": "candidateRules"
+      },
+      {
+        "kind": "call",
+        "function": "replaySession",
+        "args": [
+          {
+            "name": "sessionId",
+            "type": "string",
+            "value": "sessions[0].id"
+          },
+          {
+            "name": "currentRules",
+            "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>",
+            "value": {}
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": {}
+          }
+        ],
+        "assignTo": "replayResult"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780427706278",
+    "timestamp": "2026-06-02T19:15:06.278Z"
+  },
+  {
+    "intent": "load protocol rules, check ledger consistency across all sessions, and report namespace states",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "getNsInit",
+        "args": [],
+        "assignTo": "nsInit"
+      },
+      {
+        "kind": "call",
+        "function": "listAllStates",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "states"
+      },
+      {
+        "kind": "call",
+        "function": "assertLedgerConsistency",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "sessions"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "nsInit"
+          }
+        ]
+      },
+      {
+        "kind": "return",
+        "value": "states"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780427682698",
+    "timestamp": "2026-06-02T19:14:42.698Z"
+  },
+  {
+    "intent": "get the failure genome, find violations, generate repair proposals, and return the minimal fix set",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getFailureGenome",
+        "args": [],
+        "assignTo": "genome"
+      },
+      {
+        "kind": "call",
+        "function": "suggestRepairs",
+        "args": [
+          {
+            "name": "violations",
+            "type": "ConstraintViolation[]",
+            "value": "genome.byConstraintType"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "genome.topPatterns"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "genome.commonFixPaths"
+          }
+        ],
+        "assignTo": "proposals"
+      },
+      {
+        "kind": "call",
+        "function": "getMinimalFixSet",
+        "args": [
+          {
+            "name": "proposals",
+            "type": "RepairProposal[]",
+            "value": "proposals"
+          }
+        ],
+        "assignTo": "fixSet"
+      },
+      {
+        "kind": "return",
+        "value": "fixSet"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780427658825",
+    "timestamp": "2026-06-02T19:14:18.825Z"
+  },
+  {
+    "intent": "extract IR, find functions with protocol annotations, and check if they pass SSG validation",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "."
+          }
+        ],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "loadProtocols",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "ir"
+          }
+        ],
+        "assignTo": "protocols"
+      },
+      {
+        "kind": "call",
+        "function": "validateAction",
+        "args": [
+          {
+            "name": "action",
+            "type": "Action",
+            "value": "ir"
+          },
+          {
+            "name": "actionIndex",
+            "type": "number",
+            "value": ""
+          }
+        ],
+        "assignTo": "validated"
+      },
+      {
+        "kind": "return",
+        "value": "validated"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780427636874",
+    "timestamp": "2026-06-02T19:13:56.874Z"
+  },
+  {
+    "intent": "get all sessions, replay each one, and return which sessions fail replay",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "replaySession",
+        "args": [
+          {
+            "name": "sessionId",
+            "type": "string",
+            "value": null
+          },
+          {
+            "name": "currentRules",
+            "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>",
+            "value": null
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": null
+          }
+        ],
+        "assignTo": "result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780427611662",
+    "timestamp": "2026-06-02T19:13:31.662Z"
+  },
+  {
+    "intent": "get all sessions, replay each one, and return which sessions fail replay",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "replaySession",
+        "args": [
+          {
+            "name": "sessionId",
+            "type": "str",
+            "value": "$sessions[0].id"
+          },
+          {
+            "name": "currentRules",
+            "type": "Map",
+            "value": {}
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map",
+            "value": {}
+          }
+        ],
+        "assignTo": "result0"
+      },
+      {
+        "kind": "call",
+        "function": "replaySession",
+        "args": [
+          {
+            "name": "sessionId",
+            "type": "str",
+            "value": "$sessions[1].id"
+          },
+          {
+            "name": "currentRules",
+            "type": "Map",
+            "value": {}
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map",
+            "value": {}
+          }
+        ],
+        "assignTo": "result1"
+      },
+      {
+        "kind": "call",
+        "function": "replaySession",
+        "args": [
+          {
+            "name": "sessionId",
+            "type": "str",
+            "value": "$sessions[2].id"
+          },
+          {
+            "name": "currentRules",
+            "type": "Map",
+            "value": {}
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map",
+            "value": {}
+          }
+        ],
+        "assignTo": "result2"
+      },
+      {
+        "kind": "call",
+        "function": "replaySession",
+        "args": [
+          {
+            "name": "sessionId",
+            "type": "str",
+            "value": "$sessions[3].id"
+          },
+          {
+            "name": "currentRules",
+            "type": "Map",
+            "value": {}
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map",
+            "value": {}
+          }
+        ],
+        "assignTo": "result3"
+      },
+      {
+        "kind": "call",
+        "function": "replaySession",
+        "args": [
+          {
+            "name": "sessionId",
+            "type": "str",
+            "value": "$sessions[4].id"
+          },
+          {
+            "name": "currentRules",
+            "type": "Map",
+            "value": {}
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map",
+            "value": {}
+          }
+        ],
+        "assignTo": "result4"
+      },
+      {
+        "kind": "return",
+        "value": "result0"
+      },
+      {
+        "kind": "return",
+        "value": "result1"
+      },
+      {
+        "kind": "return",
+        "value": "result2"
+      },
+      {
+        "kind": "return",
+        "value": "result3"
+      },
+      {
+        "kind": "return",
+        "value": "result4"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780427573800",
+    "timestamp": "2026-06-02T19:12:53.800Z"
+  },
+  {
+    "intent": "compare two session ledgers, find the differences, and check if both pass invariants",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "diffLedgers",
+        "args": [
+          {
+            "name": "ledgerA",
+            "type": "StateTransition[]",
+            "value": "sessions[0].ledger"
+          },
+          {
+            "name": "ledgerB",
+            "type": "StateTransition[]",
+            "value": "sessions[1].ledger"
+          }
+        ],
+        "assignTo": "diff"
+      },
+      {
+        "kind": "call",
+        "function": "assertLedgerConsistency",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "sessions[0].ledger"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": {}
+          }
+        ]
+      },
+      {
+        "kind": "call",
+        "function": "assertLedgerConsistency",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "sessions[1].ledger"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": {}
+          }
+        ]
+      },
+      {
+        "kind": "return",
+        "value": "diff"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780427549968",
+    "timestamp": "2026-06-02T19:12:29.968Z"
+  },
+  {
+    "intent": "check ledger consistency for a session, get its fingerprint, and verify both match",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "getFingerprint",
+        "args": [
+          {
+            "name": "sessionId",
+            "type": "string",
+            "value": "sessions[0].id"
+          }
+        ],
+        "assignTo": "fp"
+      },
+      {
+        "kind": "call",
+        "function": "getFingerprintRegistry",
+        "args": [],
+        "assignTo": "registry"
+      },
+      {
+        "kind": "call",
+        "function": "assertLedgerConsistency",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "sessions[0].transitions"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": {}
+          }
+        ]
+      },
+      {
+        "kind": "return",
+        "value": "fp"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780427527192",
+    "timestamp": "2026-06-02T19:12:07.192Z"
+  },
+  {
+    "intent": "extract IR, validate the action sequence against IR, and return the validation result",
     "actions": [
       {
         "kind": "call",
@@ -192,7 +923,7 @@
           {
             "name": "action",
             "type": "Action",
-            "value": "ir"
+            "value": ""
           },
           {
             "name": "actionIndex",
@@ -200,189 +931,75 @@
             "value": ""
           }
         ],
-        "assignTo": "validated"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780426312944",
-    "timestamp": "2026-06-02T18:51:52.944Z"
-  },
-  {
-    "intent": "get antibody statistics and count fast path hits vs injected hints",
-    "actions": [
+        "assignTo": "validateAction_result"
+      },
       {
         "kind": "call",
-        "function": "getAntibodyStats",
-        "args": [],
-        "assignTo": "stats"
+        "function": "validateActionSequence",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "ir"
+          }
+        ],
+        "assignTo": "ok"
       },
       {
         "kind": "return",
-        "value": "stats"
+        "value": "ok"
       }
     ],
     "success": true,
-    "id": "ep_1780426278254",
-    "timestamp": "2026-06-02T18:51:18.254Z"
+    "id": "ep_1780427503308",
+    "timestamp": "2026-06-02T19:11:43.308Z"
   },
   {
-    "intent": "get the failure genome and antibody statistics, compute the overall immune health score as a percentage, and return a formatted health summary",
+    "intent": "extract IR, validate the action sequence against IR, and return the validation result",
     "actions": [
       {
         "kind": "call",
-        "function": "getFailureGenome",
-        "args": [],
-        "assignTo": "fg"
-      },
-      {
-        "kind": "call",
-        "function": "getAntibodyStats",
-        "args": [],
-        "assignTo": "ab"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.getContext",
-        "args": [],
-        "assignTo": "ctx"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.getLedger",
-        "args": [],
-        "assignTo": "ledger"
-      },
-      {
-        "kind": "call",
-        "function": "getMinimalFixSet",
+        "function": "extractIR",
         "args": [
           {
-            "name": "proposals",
-            "type": "RepairProposal[]",
-            "value": null
-          }
-        ],
-        "assignTo": "fixSet"
-      },
-      {
-        "kind": "call",
-        "function": "generateRepairSummary",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": null
-          },
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": null
-          },
-          {
-            "name": "protocols",
-            "type": "FunctionProtocol[]",
-            "value": null
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": null
-          }
-        ],
-        "assignTo": "summary"
-      },
-      {
-        "kind": "call",
-        "function": "failureStats",
-        "args": [],
-        "assignTo": "fs"
-      },
-      {
-        "kind": "call",
-        "function": "verifyAllFingerprints",
-        "args": [
-          {
-            "name": "currentRuleHash",
+            "name": "projectRoot",
             "type": "string",
-            "value": null
+            "value": "."
           }
         ],
-        "assignTo": "registry"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780426271214",
-    "timestamp": "2026-06-02T18:51:11.214Z"
-  },
-  {
-    "intent": "get the failure genome and antibody statistics, compute the overall immune health score as a percentage, and return a formatted health summary",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getFailureGenome",
-        "args": [],
-        "assignTo": "fg"
+        "assignTo": "ir"
       },
       {
         "kind": "call",
-        "function": "getAntibodyStats",
-        "args": [],
-        "assignTo": "ab"
-      },
-      {
-        "kind": "call",
-        "function": "computeOverallImmuneHealthScore",
+        "function": "validateActionSequence",
         "args": [
           {
-            "name": "fg",
-            "type": "any",
-            "value": "fg"
-          },
-          {
-            "name": "ab",
-            "type": "any",
-            "value": "ab"
+            "name": "actions",
+            "type": "Action[]",
+            "value": "ir"
           }
         ],
-        "assignTo": "score"
-      },
-      {
-        "kind": "call",
-        "function": "formatHeatmap",
-        "args": [],
-        "assignTo": "summary"
+        "assignTo": "ok"
       },
       {
         "kind": "return",
-        "value": "summary"
+        "value": "ok"
       }
     ],
     "success": false,
-    "svlViolated": "SVL-1",
-    "id": "ep_1780426269347",
-    "timestamp": "2026-06-02T18:51:09.347Z"
+    "svlViolated": "SVL-4",
+    "id": "ep_1780427503305",
+    "timestamp": "2026-06-02T19:11:43.305Z"
   },
   {
-    "intent": "find all sessions that have been resolved on the first attempt",
+    "intent": "get execution metrics, get the failure genome, and compute the failure rate per execution",
     "actions": [
       {
         "kind": "call",
-        "function": "getAllSessions",
+        "function": "getExecutionMetrics",
         "args": [],
-        "assignTo": "sessions"
+        "assignTo": "metrics"
       },
-      {
-        "kind": "return",
-        "value": "sessions"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780426239544",
-    "timestamp": "2026-06-02T18:50:39.544Z"
-  },
-  {
-    "intent": "get the failure genome and count violations by constraint type",
-    "actions": [
       {
         "kind": "call",
         "function": "getFailureGenome",
@@ -394,94 +1011,217 @@
         "function": "failureStats",
         "args": [],
         "assignTo": "stats"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780427479270",
+    "timestamp": "2026-06-02T19:11:19.270Z"
+  },
+  {
+    "intent": "get all sessions, get antibody stats, and find sessions with antibody hits",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "getAntibodyStats",
+        "args": [],
+        "assignTo": "stats"
+      },
+      {
+        "kind": "call",
+        "function": "getFingerprint",
+        "args": [
+          {
+            "name": "sessionId",
+            "type": "string",
+            "value": null
+          }
+        ],
+        "assignTo": "fp"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780427452937",
+    "timestamp": "2026-06-02T19:10:52.937Z"
+  },
+  {
+    "intent": "get all sessions, get antibody stats, and find sessions with antibody hits",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "getAntibodyStats",
+        "args": [],
+        "assignTo": "stats"
+      },
+      {
+        "kind": "return",
+        "value": "sessions"
+      },
+      {
+        "kind": "return",
+        "value": "stats"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780427451226",
+    "timestamp": "2026-06-02T19:10:51.226Z"
+  },
+  {
+    "intent": "extract IR, get protocol rules, and count how many IR functions have protocol annotations",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "."
+          }
+        ],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "loadProtocols",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "ir"
+          }
+        ],
+        "assignTo": "protocols"
+      },
+      {
+        "kind": "call",
+        "function": "validateAction",
+        "args": [
+          {
+            "name": "action",
+            "type": "Action",
+            "value": "countProtocolAnnotations"
+          },
+          {
+            "name": "actionIndex",
+            "type": "number",
+            "value": ""
+          }
+        ],
+        "assignTo": "valid"
+      },
+      {
+        "kind": "return",
+        "value": "ir"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780427429396",
+    "timestamp": "2026-06-02T19:10:29.396Z"
+  },
+  {
+    "intent": "get the failure genome, get the learned patterns, and compare which patterns match the top failures",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getFailureGenome",
+        "args": [],
+        "assignTo": "fg"
+      },
+      {
+        "kind": "call",
+        "function": "getLearnedPatterns",
+        "args": [],
+        "assignTo": "lp"
+      },
+      {
+        "kind": "call",
+        "function": "getTopFailurePatterns",
+        "args": [
+          {
+            "name": "limit",
+            "type": "number",
+            "value": null
+          }
+        ],
+        "assignTo": "top"
+      },
+      {
+        "kind": "call",
+        "function": "getFailureGenome",
+        "args": [],
+        "assignTo": "fg2"
+      },
+      {
+        "kind": "call",
+        "function": "getLearnedPatterns",
+        "args": [],
+        "assignTo": "lp2"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780427410382",
+    "timestamp": "2026-06-02T19:10:10.382Z"
+  },
+  {
+    "intent": "get the failure genome, get the learned patterns, and compare which patterns match the top failures",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getFailureGenome",
+        "args": [],
+        "assignTo": "genome"
+      },
+      {
+        "kind": "call",
+        "function": "getLearnedPatterns",
+        "args": [],
+        "assignTo": "patterns"
+      },
+      {
+        "kind": "call",
+        "function": "getTopFailurePatterns",
+        "args": [
+          {
+            "name": "limit",
+            "type": "number",
+            "value": 5
+          }
+        ],
+        "assignTo": "topFailures"
       },
       {
         "kind": "return",
         "value": "genome"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780426214011",
-    "timestamp": "2026-06-02T18:50:14.011Z"
-  },
-  {
-    "intent": "load protocol rules and find the namespace with the most rules",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getProtocolConfig",
-        "args": [],
-        "assignTo": "config"
-      },
-      {
-        "kind": "call",
-        "function": "findProducer",
-        "args": [
-          {
-            "name": "state",
-            "type": "string",
-            "value": ""
-          },
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": []
-          }
-        ],
-        "assignTo": "producers"
-      },
-      {
-        "kind": "call",
-        "function": "findConsumer",
-        "args": [
-          {
-            "name": "state",
-            "type": "string",
-            "value": ""
-          },
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": []
-          }
-        ],
-        "assignTo": "consumers"
       },
       {
         "kind": "return",
-        "value": "config"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780426186955",
-    "timestamp": "2026-06-02T18:49:46.955Z"
-  },
-  {
-    "intent": "get execution metrics and count how many repairs occurred",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getExecutionMetrics",
-        "args": [],
-        "assignTo": "metrics"
-      },
-      {
-        "kind": "call",
-        "function": "benchmarkCount",
-        "args": [],
-        "assignTo": "count"
+        "value": "patterns"
       },
       {
         "kind": "return",
-        "value": "count"
+        "value": "topFailures"
       }
     ],
-    "success": true,
-    "id": "ep_1780426159112",
-    "timestamp": "2026-06-02T18:49:19.112Z"
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780427408953",
+    "timestamp": "2026-06-02T19:10:08.953Z"
   },
   {
-    "intent": "verify all fingerprints and list any tampered sessions",
+    "intent": "verify fingerprints, get all sessions, and cross-reference which sessions have missing fingerprints",
     "actions": [
       {
         "kind": "call",
@@ -493,7 +1233,7 @@
             "value": "latest"
           }
         ],
-        "assignTo": "summary"
+        "assignTo": "registrySummary"
       },
       {
         "kind": "call",
@@ -509,19 +1249,315 @@
       },
       {
         "kind": "return",
+        "value": "registrySummary"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780427390696",
+    "timestamp": "2026-06-02T19:09:50.696Z"
+  },
+  {
+    "intent": "get all sessions, get the heatmap, and find which sessions have the most fragile protocols",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "getSemanticHeatmap",
+        "args": [],
+        "assignTo": "heatmap"
+      },
+      {
+        "kind": "return",
+        "value": "heatmap"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780427366579",
+    "timestamp": "2026-06-02T19:09:26.579Z"
+  },
+  {
+    "intent": "load protocol rules, get the failure genome, and count violations by namespace",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "loadProtocols",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "ir"
+          }
+        ],
+        "assignTo": "protocols"
+      },
+      {
+        "kind": "call",
+        "function": "getFailureGenome",
+        "args": [],
+        "assignTo": "genome"
+      },
+      {
+        "kind": "call",
+        "function": "getNsInit",
+        "args": [],
+        "assignTo": "nsInit"
+      },
+      {
+        "kind": "return",
+        "value": "genome"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780427328800",
+    "timestamp": "2026-06-02T19:08:48.800Z"
+  },
+  {
+    "intent": "get execution metrics, get antibody stats, and compute the ratio of repairs to total executions",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getExecutionMetrics",
+        "args": [],
+        "assignTo": "metrics"
+      },
+      {
+        "kind": "call",
+        "function": "getAntibodyStats",
+        "args": [],
+        "assignTo": "stats"
+      },
+      {
+        "kind": "call",
+        "function": "getFailureGenome",
+        "args": [],
+        "assignTo": "genome"
+      },
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "getExecutionMetrics",
+        "args": [],
+        "assignTo": "metrics2"
+      },
+      {
+        "kind": "call",
+        "function": "getAntibodyStats",
+        "args": [],
+        "assignTo": "stats2"
+      },
+      {
+        "kind": "call",
+        "function": "getFailureGenome",
+        "args": [],
+        "assignTo": "genome2"
+      },
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions2"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780427293067",
+    "timestamp": "2026-06-02T19:08:13.067Z"
+  },
+  {
+    "intent": "get execution metrics, get antibody stats, and compute the ratio of repairs to total executions",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getExecutionMetrics",
+        "args": [],
+        "assignTo": "metrics"
+      },
+      {
+        "kind": "call",
+        "function": "getAntibodyStats",
+        "args": [],
+        "assignTo": "stats"
+      },
+      {
+        "kind": "return",
+        "value": "metrics"
+      },
+      {
+        "kind": "return",
+        "value": "stats"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780427291516",
+    "timestamp": "2026-06-02T19:08:11.516Z"
+  },
+  {
+    "intent": "get the failure genome, count SVL-4 violations, and get antibody stats for protocol violations",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getFailureGenome",
+        "args": [],
+        "assignTo": "fg"
+      },
+      {
+        "kind": "call",
+        "function": "getAntibodyStats",
+        "args": [],
+        "assignTo": "ab"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780427268290",
+    "timestamp": "2026-06-02T19:07:48.290Z"
+  },
+  {
+    "intent": "verify fingerprints, get the tampered count, and check if any are invalid",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "verifyAllFingerprints",
+        "args": [
+          {
+            "name": "currentRuleHash",
+            "type": "string",
+            "value": "latest"
+          }
+        ],
+        "assignTo": "summary"
+      },
+      {
+        "kind": "call",
+        "function": "registerAllMissingFingerprints",
+        "args": [],
+        "assignTo": "missingCount"
+      },
+      {
+        "kind": "return",
         "value": "summary"
       }
     ],
     "success": true,
-    "id": "ep_1780426140310",
-    "timestamp": "2026-06-02T18:49:00.310Z"
+    "id": "ep_1780427249221",
+    "timestamp": "2026-06-02T19:07:29.221Z"
   },
   {
-    "intent": "extract IR and count functions that have return type void",
+    "intent": "get all sessions, filter to resolved ones, and get the failure genome for those sessions",
     "actions": [
       {
         "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
         "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "."
+          }
+        ],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "getFailureGenome",
+        "args": [],
+        "assignTo": "genome"
+      },
+      {
+        "kind": "return",
+        "value": "genome"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780427229342",
+    "timestamp": "2026-06-02T19:07:09.342Z"
+  },
+  {
+    "intent": "extract IR from the project, then get the heatmap, and return fragile protocols",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIRWithTypes",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "."
+          }
+        ],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "extractIR_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateAction",
+        "args": [
+          {
+            "name": "action",
+            "type": "Action",
+            "value": "ir"
+          },
+          {
+            "name": "actionIndex",
+            "type": "number",
+            "value": ""
+          }
+        ],
+        "assignTo": "valid"
+      },
+      {
+        "kind": "call",
+        "function": "getMinimalFixSet",
+        "args": [
+          {
+            "name": "proposals",
+            "type": "RepairProposal[]",
+            "value": "ir"
+          }
+        ],
+        "assignTo": "fragile"
+      },
+      {
+        "kind": "return",
+        "value": "fragile"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780427211553",
+    "timestamp": "2026-06-02T19:06:51.553Z"
+  },
+  {
+    "intent": "extract IR from the project, then get the heatmap, and return fragile protocols",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIRWithTypes",
         "args": [
           {
             "name": "projectRoot",
@@ -550,63 +1586,67 @@
       },
       {
         "kind": "call",
-        "function": "validateActionSequence",
+        "function": "getMinimalFixSet",
         "args": [
           {
-            "name": "actions",
-            "type": "Action[]",
+            "name": "proposals",
+            "type": "RepairProposal[]",
             "value": "ir"
           }
         ],
-        "assignTo": "ok"
-      },
-      {
-        "kind": "call",
-        "function": "emitCode",
-        "args": [
-          {
-            "name": "actions",
-            "type": "Action[]",
-            "value": "ir"
-          },
-          {
-            "name": "meta",
-            "type": "{ sessionId?: string; ruleHash?: string; irFunctionCount?: number; protocolRuleCount?: number }",
-            "value": ""
-          }
-        ],
-        "assignTo": "code"
-      },
-      {
-        "kind": "call",
-        "function": "recordSession",
-        "args": [
-          {
-            "name": "session",
-            "type": "ExecutionSession | Omit<IntentSession, \"sessionId\">",
-            "value": "code"
-          }
-        ],
-        "assignTo": "session"
+        "assignTo": "fragile"
       },
       {
         "kind": "return",
-        "value": "$ir"
+        "value": "fragile"
       }
     ],
-    "success": true,
-    "id": "ep_1780426117580",
-    "timestamp": "2026-06-02T18:48:37.580Z"
+    "success": false,
+    "svlViolated": "SVL-4",
+    "id": "ep_1780427211547",
+    "timestamp": "2026-06-02T19:06:51.547Z"
   },
   {
-    "intent": "get the antibody statistics and compute the immune efficiency",
+    "intent": "get the failure genome, find the most common fix path, and get antibody stats for that path",
     "actions": [
+      {
+        "kind": "call",
+        "function": "getFailureGenome",
+        "args": [],
+        "assignTo": "fg"
+      },
       {
         "kind": "call",
         "function": "getAntibodyStats",
         "args": [],
-        "assignTo": "stats"
+        "assignTo": "ab"
       },
+      {
+        "kind": "call",
+        "function": "failureStats",
+        "args": [],
+        "assignTo": "fs"
+      },
+      {
+        "kind": "call",
+        "function": "getFailureGenome",
+        "args": [],
+        "assignTo": "fg2"
+      },
+      {
+        "kind": "call",
+        "function": "getAntibodyStats",
+        "args": [],
+        "assignTo": "ab2"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780427191553",
+    "timestamp": "2026-06-02T19:06:31.553Z"
+  },
+  {
+    "intent": "get the failure genome, find the most common fix path, and get antibody stats for that path",
+    "actions": [
       {
         "kind": "call",
         "function": "getFailureGenome",
@@ -614,256 +1654,28 @@
         "assignTo": "genome"
       },
       {
+        "kind": "call",
+        "function": "getAntibodyStats",
+        "args": [],
+        "assignTo": "stats"
+      },
+      {
         "kind": "return",
-        "value": "stats"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780426097610",
-    "timestamp": "2026-06-02T18:48:17.610Z"
-  },
-  {
-    "intent": "get all sessions sorted by the number of attempts",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "getMinimalFixSet",
-        "args": [
-          {
-            "name": "proposals",
-            "type": "RepairProposal[]",
-            "value": null
-          }
-        ],
-        "assignTo": "sortedSessions"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780426073552",
-    "timestamp": "2026-06-02T18:47:53.552Z"
-  },
-  {
-    "intent": "get all sessions sorted by the number of attempts",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "sort",
-        "args": [
-          {
-            "name": "arr",
-            "type": "any",
-            "value": "sessions"
-          },
-          {
-            "name": "key",
-            "type": "str",
-            "value": "attempts"
-          }
-        ],
-        "assignTo": "sorted"
+        "value": "genome"
       },
       {
         "kind": "return",
-        "value": "sorted"
+        "value": "stats"
       }
     ],
     "success": false,
     "svlViolated": "SVL-1",
-    "id": "ep_1780426072528",
-    "timestamp": "2026-06-02T18:47:52.528Z"
+    "id": "ep_1780427190274",
+    "timestamp": "2026-06-02T19:06:30.274Z"
   },
   {
-    "intent": "check ledger consistency for a specific session",
+    "intent": "verify all fingerprints, then get the execution metrics, and return both results",
     "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "replaySession",
-        "args": [
-          {
-            "name": "sessionId",
-            "type": "string",
-            "value": "sessions[0].id"
-          },
-          {
-            "name": "currentRules",
-            "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>",
-            "value": {}
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": {}
-          }
-        ],
-        "assignTo": "replay"
-      },
-      {
-        "kind": "call",
-        "function": "checkLedgerConsistency",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "replay.ledger"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": {}
-          }
-        ],
-        "assignTo": "consistency"
-      },
-      {
-        "kind": "return",
-        "value": "consistency"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780426044672",
-    "timestamp": "2026-06-02T18:47:24.672Z"
-  },
-  {
-    "intent": "get the failure genome and return the most common fix path",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getFailureGenome",
-        "args": [],
-        "assignTo": "genome"
-      },
-      {
-        "kind": "call",
-        "function": "getMinimalFixSet",
-        "args": [
-          {
-            "name": "proposals",
-            "type": "RepairProposal[]",
-            "value": "genome.commonFixPaths"
-          }
-        ],
-        "assignTo": "fixSet"
-      },
-      {
-        "kind": "return",
-        "value": "fixSet"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780426016736",
-    "timestamp": "2026-06-02T18:46:56.736Z"
-  },
-  {
-    "intent": "load all protocol rules and count how many have invalidate clauses",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "loadProtocols",
-        "args": [
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "ir"
-          }
-        ],
-        "assignTo": "protocolsResult"
-      },
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "loadFailures",
-        "args": [],
-        "assignTo": "failures"
-      },
-      {
-        "kind": "return",
-        "value": "protocolsResult"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780425990448",
-    "timestamp": "2026-06-02T18:46:30.448Z"
-  },
-  {
-    "intent": "get execution metrics and show the last five generations",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getExecutionMetrics",
-        "args": [],
-        "assignTo": "metrics"
-      },
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "return",
-        "value": "metrics"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780425962854",
-    "timestamp": "2026-06-02T18:46:02.854Z"
-  },
-  {
-    "intent": "get all sessions and count how many have branch trees",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "benchmarkCount",
-        "args": [],
-        "assignTo": "count"
-      },
-      {
-        "kind": "return",
-        "value": "count"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780425937179",
-    "timestamp": "2026-06-02T18:45:37.179Z"
-  },
-  {
-    "intent": "verify fingerprints for all sessions and return the valid percentage",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
       {
         "kind": "call",
         "function": "verifyAllFingerprints",
@@ -871,515 +1683,80 @@
           {
             "name": "currentRuleHash",
             "type": "string",
-            "value": "default"
+            "value": null
           }
         ],
-        "assignTo": "summary"
+        "assignTo": "registrySummary"
       },
       {
-        "kind": "return",
-        "value": "summary"
+        "kind": "call",
+        "function": "getExecutionMetrics",
+        "args": [],
+        "assignTo": "executionMetrics"
       }
     ],
     "success": true,
-    "id": "ep_1780425909326",
-    "timestamp": "2026-06-02T18:45:09.326Z"
+    "id": "ep_1780427161888",
+    "timestamp": "2026-06-02T19:06:01.888Z"
   },
   {
-    "intent": "extract IR and return all functions with protocol annotations",
+    "intent": "verify all fingerprints, then get the execution metrics, and return both results",
     "actions": [
       {
         "kind": "call",
-        "function": "extractIR",
+        "function": "verifyAllFingerprints",
         "args": [
           {
-            "name": "projectRoot",
+            "name": "currentRuleHash",
             "type": "string",
-            "value": "."
+            "value": null
           }
         ],
-        "assignTo": "ir"
+        "assignTo": "registrySummary"
       },
       {
-        "kind": "return",
-        "value": "ir"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780425881547",
-    "timestamp": "2026-06-02T18:44:41.547Z"
-  },
-  {
-    "intent": "get antibody statistics and count hits by each ACL level",
-    "actions": [
-      {
         "kind": "call",
-        "function": "getAntibodyStats",
+        "function": "getExecutionMetrics",
         "args": [],
-        "assignTo": "stats"
+        "assignTo": "executionMetrics"
       },
       {
         "kind": "call",
-        "function": "benchmarkCount",
-        "args": [],
-        "assignTo": "count"
-      },
-      {
-        "kind": "return",
-        "value": "stats"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780425855201",
-    "timestamp": "2026-06-02T18:44:15.201Z"
-  },
-  {
-    "intent": "get the failure genome and return the SVL-1 violation count",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getFailureGenome",
-        "args": [],
-        "assignTo": "genome"
-      },
-      {
-        "kind": "return",
-        "value": "genome.bySVL[\"SVL-1\"]"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780425827316",
-    "timestamp": "2026-06-02T18:43:47.316Z"
-  },
-  {
-    "intent": "get the total number of transitions across all session ledgers",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "getProtocolConfig",
-        "args": [],
-        "assignTo": "config"
-      },
-      {
-        "kind": "return",
-        "value": "sessions"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780425789408",
-    "timestamp": "2026-06-02T18:43:09.408Z"
-  },
-  {
-    "intent": "count how many unique namespaces exist in the protocol rules",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getProtocolConfig",
-        "args": [],
-        "assignTo": "config"
-      },
-      {
-        "kind": "call",
-        "function": "listAllStates",
+        "function": "return",
         "args": [
           {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "config"
-          }
-        ],
-        "assignTo": "states"
-      },
-      {
-        "kind": "return",
-        "value": "states"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780425758821",
-    "timestamp": "2026-06-02T18:42:38.821Z"
-  },
-  {
-    "intent": "find all sessions that have antibody hits",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "getAntibodyStats",
-        "args": [],
-        "assignTo": "stats"
-      },
-      {
-        "kind": "return",
-        "value": "stats"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780425726525",
-    "timestamp": "2026-06-02T18:42:06.525Z"
-  },
-  {
-    "intent": "read the protocols configuration and count total rules",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getProtocolConfig",
-        "args": [],
-        "assignTo": "config"
-      },
-      {
-        "kind": "call",
-        "function": "benchmarkCount",
-        "args": [],
-        "assignTo": "count"
-      },
-      {
-        "kind": "return",
-        "value": "count"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780425688241",
-    "timestamp": "2026-06-02T18:41:28.241Z"
-  },
-  {
-    "intent": "list all files in the corpus directory",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "listAllStates",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "sessions"
-          }
-        ],
-        "assignTo": "states"
-      },
-      {
-        "kind": "return",
-        "value": "states"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780425638520",
-    "timestamp": "2026-06-02T18:40:38.520Z"
-  },
-  {
-    "intent": "format the immune status as a colored terminal output",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "formatAuditResult",
-        "args": [
-          {
-            "name": "result",
-            "type": "AuditResult",
-            "value": "ir"
-          }
-        ],
-        "assignTo": "output"
-      },
-      {
-        "kind": "return",
-        "value": "output"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780425585406",
-    "timestamp": "2026-06-02T18:39:45.406Z"
-  },
-  {
-    "intent": "compare two session ledgers and show the differences",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "diffLedgers",
-        "args": [
-          {
-            "name": "ledgerA",
-            "type": "StateTransition[]",
-            "value": "sessions[0].ledger"
+            "name": "arg",
+            "type": "any",
+            "value": null
           },
           {
-            "name": "ledgerB",
-            "type": "StateTransition[]",
-            "value": "sessions[1].ledger"
-          }
-        ],
-        "assignTo": "diff"
-      },
-      {
-        "kind": "return",
-        "value": "diff"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780425539961",
-    "timestamp": "2026-06-02T18:38:59.961Z"
-  },
-  {
-    "intent": "get the fingerprint hash for a specific session",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getFingerprint",
-        "args": [
-          {
-            "name": "sessionId",
-            "type": "string",
-            "value": "specific_session_id"
-          }
-        ],
-        "assignTo": "fp"
-      },
-      {
-        "kind": "return",
-        "value": "fp"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780425496964",
-    "timestamp": "2026-06-02T18:38:16.964Z"
-  },
-  {
-    "intent": "check if all ledgers pass invariant validation",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "assertLedgerInvariants",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "ledger"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "namespaceInitialStates"
-          },
-          {
-            "name": "expectedRuleHash",
-            "type": "string",
-            "value": "expectedRuleHash"
+            "name": "arg",
+            "type": "any",
+            "value": null
           }
         ]
       }
     ],
-    "success": true,
-    "id": "ep_1780425455722",
-    "timestamp": "2026-06-02T18:37:35.722Z"
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780427160868",
+    "timestamp": "2026-06-02T19:06:00.868Z"
   },
   {
-    "intent": "find the most common failure pattern in the genome",
+    "intent": "verify all fingerprints, then get the execution metrics, and return both results",
     "actions": [
-      {
-        "kind": "call",
-        "function": "getFailureGenome",
-        "args": [],
-        "assignTo": "genome"
-      },
-      {
-        "kind": "call",
-        "function": "getMinimalFixSet",
-        "args": [
-          {
-            "name": "proposals",
-            "type": "RepairProposal[]",
-            "value": "genome.topPatterns"
-          }
-        ],
-        "assignTo": "fixSet"
-      },
-      {
-        "kind": "return",
-        "value": "fixSet"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780425414840",
-    "timestamp": "2026-06-02T18:36:54.840Z"
-  },
-  {
-    "intent": "count how many sessions are resolved in the corpus",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "benchmarkCount",
-        "args": [],
-        "assignTo": "count"
-      },
-      {
-        "kind": "return",
-        "value": "count"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780425377266",
-    "timestamp": "2026-06-02T18:36:17.266Z"
-  },
-  {
-    "intent": "load protocol rules and list all defined namespaces",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "loadProtocols",
-        "args": [
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": []
-          }
-        ],
-        "assignTo": "ir"
-      },
-      {
-        "kind": "call",
-        "function": "listAllStates",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "ir"
-          }
-        ],
-        "assignTo": "states"
-      },
-      {
-        "kind": "return",
-        "value": "states"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780425336808",
-    "timestamp": "2026-06-02T18:35:36.808Z"
-  },
-  {
-    "intent": "take a session ID and look it up in the corpus",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "findSnapshotBySession",
-        "args": [
-          {
-            "name": "sessionId",
-            "type": "string",
-            "value": "sessionId"
-          }
-        ],
-        "assignTo": "snapshot"
-      },
-      {
-        "kind": "return",
-        "value": "snapshot"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780425297803",
-    "timestamp": "2026-06-02T18:34:57.803Z"
-  },
-  {
-    "intent": "extract IR from the project",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "extractIR",
-        "args": [
-          {
-            "name": "projectRoot",
-            "type": "string",
-            "value": "."
-          }
-        ],
-        "assignTo": "ir"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780425257447",
-    "timestamp": "2026-06-02T18:34:17.447Z"
-  },
-  {
-    "intent": "get the semantic heatmap data",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getSemanticHeatmap",
-        "args": [],
-        "assignTo": "heatmap"
-      },
-      {
-        "kind": "return",
-        "value": "heatmap"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780425215274",
-    "timestamp": "2026-06-02T18:33:35.274Z"
-  },
-  {
-    "intent": "verify all ledger fingerprints",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getFingerprintRegistry",
-        "args": [],
-        "assignTo": "registry"
-      },
       {
         "kind": "call",
         "function": "verifyAllFingerprints",
         "args": [
           {
             "name": "currentRuleHash",
-            "type": "string",
-            "value": "registry"
+            "type": "str",
+            "value": "."
           }
         ],
-        "assignTo": "summary"
+        "assignTo": "registrySummary"
       },
-      {
-        "kind": "return",
-        "value": "summary"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780425175127",
-    "timestamp": "2026-06-02T18:32:55.127Z"
-  },
-  {
-    "intent": "get the execution metrics",
-    "actions": [
       {
         "kind": "call",
         "function": "getExecutionMetrics",
@@ -1388,34 +1765,27 @@
       },
       {
         "kind": "return",
-        "value": "metrics"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780425135032",
-    "timestamp": "2026-06-02T18:32:15.032Z"
-  },
-  {
-    "intent": "get the antibody statistics",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAntibodyStats",
-        "args": [],
-        "assignTo": "stats"
+        "value": "registrySummary"
       },
       {
         "kind": "return",
-        "value": "stats"
+        "value": "metrics"
       }
     ],
-    "success": true,
-    "id": "ep_1780425087276",
-    "timestamp": "2026-06-02T18:31:27.276Z"
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780427159639",
+    "timestamp": "2026-06-02T19:05:59.639Z"
   },
   {
-    "intent": "get the failure genome statistics",
+    "intent": "get all sessions, then get the failure genome, and count how many sessions have violations",
     "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
       {
         "kind": "call",
         "function": "getFailureGenome",
@@ -1428,11 +1798,11 @@
       }
     ],
     "success": true,
-    "id": "ep_1780425018773",
-    "timestamp": "2026-06-02T18:30:18.773Z"
+    "id": "ep_1780427136901",
+    "timestamp": "2026-06-02T19:05:36.901Z"
   },
   {
-    "intent": "get all sessions from the corpus",
+    "intent": "count how many sessions are resolved vs unresolved",
     "actions": [
       {
         "kind": "call",
@@ -1441,104 +1811,82 @@
         "assignTo": "sessions"
       },
       {
-        "kind": "return",
-        "value": "sessions"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780424966279",
-    "timestamp": "2026-06-02T18:29:26.279Z"
-  },
-  {
-    "intent": "get all sessions from the corpus",
-    "actions": [
-      {
         "kind": "call",
-        "function": "getAllSessions",
+        "function": "benchmarkCount",
         "args": [],
-        "assignTo": "sessions"
+        "assignTo": "count"
       },
       {
         "kind": "return",
-        "value": "sessions"
+        "value": "count"
       }
     ],
     "success": true,
-    "id": "ep_1780424878618",
-    "timestamp": "2026-06-02T18:27:58.618Z"
+    "id": "ep_1780427114017",
+    "timestamp": "2026-06-02T19:05:14.017Z"
   },
   {
-    "intent": "extract IR, validate the full pipeline, check invariants, replay all sessions, and return a complete immune audit report",
+    "intent": "get the heatmap and show fragile protocols",
     "actions": [
       {
         "kind": "call",
-        "function": "extractIR",
+        "function": "getAntibodyStats",
+        "args": [],
+        "assignTo": "stats"
+      },
+      {
+        "kind": "return",
+        "value": "stats"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780427084439",
+    "timestamp": "2026-06-02T19:04:44.439Z"
+  },
+  {
+    "intent": "count how many protocol rules have invalidate clauses",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "loadProtocols",
         "args": [
           {
-            "name": "projectRoot",
+            "name": "ir",
+            "type": "any[]",
+            "value": []
+          }
+        ],
+        "assignTo": "protocols"
+      },
+      {
+        "kind": "call",
+        "function": "benchmarkCount",
+        "args": [],
+        "assignTo": "count"
+      },
+      {
+        "kind": "return",
+        "value": "count"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780427056598",
+    "timestamp": "2026-06-02T19:04:16.598Z"
+  },
+  {
+    "intent": "verify fingerprints and list tampered sessions",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "verifyAllFingerprints",
+        "args": [
+          {
+            "name": "currentRuleHash",
             "type": "string",
-            "value": "."
+            "value": "latest"
           }
         ],
-        "assignTo": "ir"
-      },
-      {
-        "kind": "call",
-        "function": "validateAction",
-        "args": [
-          {
-            "name": "action",
-            "type": "Action",
-            "value": "ir"
-          },
-          {
-            "name": "actionIndex",
-            "type": "number",
-            "value": 0
-          }
-        ],
-        "assignTo": "va"
-      },
-      {
-        "kind": "call",
-        "function": "validateActionSequence",
-        "args": [
-          {
-            "name": "actions",
-            "type": "Action[]",
-            "value": "ir"
-          }
-        ],
-        "assignTo": "vas"
-      },
-      {
-        "kind": "call",
-        "function": "emitCode",
-        "args": [
-          {
-            "name": "actions",
-            "type": "Action[]",
-            "value": "ir"
-          },
-          {
-            "name": "meta",
-            "type": "{ sessionId?: string; ruleHash?: string; irFunctionCount?: number; protocolRuleCount?: number }",
-            "value": ""
-          }
-        ],
-        "assignTo": "code"
-      },
-      {
-        "kind": "call",
-        "function": "recordSession",
-        "args": [
-          {
-            "name": "session",
-            "type": "ExecutionSession | Omit<IntentSession, \"sessionId\">",
-            "value": "code"
-          }
-        ],
-        "assignTo": "session"
+        "assignTo": "registrySummary"
       },
       {
         "kind": "call",
@@ -1548,160 +1896,221 @@
       },
       {
         "kind": "call",
-        "function": "replaySession",
-        "args": [
-          {
-            "name": "sessionId",
-            "type": "string",
-            "value": "sessions"
-          },
-          {
-            "name": "currentRules",
-            "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>",
-            "value": ""
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": ""
-          }
-        ],
-        "assignTo": "replay"
-      },
-      {
-        "kind": "return",
-        "value": "replay"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780421746414",
-    "timestamp": "2026-06-02T17:35:46.414Z"
-  },
-  {
-    "intent": "take a ledger with violations, generate repair proposals, create branches for each, evaluate them, and return the winner",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "generateRepairSummary",
+        "function": "listAllStates",
         "args": [
           {
             "name": "ledger",
             "type": "StateTransition[]",
-            "value": "ledger"
-          },
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "ir"
-          },
-          {
-            "name": "protocols",
-            "type": "FunctionProtocol[]",
-            "value": "protocols"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "namespaceInitialStates"
+            "value": "registrySummary"
           }
         ],
-        "assignTo": "repairSummary"
-      },
-      {
-        "kind": "call",
-        "function": "generateCandidateRules",
-        "args": [],
-        "assignTo": "candidateRules"
-      },
-      {
-        "kind": "call",
-        "function": "createRootBranch",
-        "args": [
-          {
-            "name": "transitions",
-            "type": "StateTransition[]",
-            "value": "ledger"
-          }
-        ],
-        "assignTo": "rootBranch"
-      },
-      {
-        "kind": "call",
-        "function": "createBranch",
-        "args": [
-          {
-            "name": "parent",
-            "type": "Branch",
-            "value": "rootBranch"
-          },
-          {
-            "name": "reason",
-            "type": "BranchReason",
-            "value": "repair"
-          },
-          {
-            "name": "initialTransitions",
-            "type": "StateTransition[]",
-            "value": "ledger"
-          }
-        ],
-        "assignTo": "branch1"
-      },
-      {
-        "kind": "call",
-        "function": "createBranch",
-        "args": [
-          {
-            "name": "parent",
-            "type": "Branch",
-            "value": "rootBranch"
-          },
-          {
-            "name": "reason",
-            "type": "BranchReason",
-            "value": "repair"
-          },
-          {
-            "name": "initialTransitions",
-            "type": "StateTransition[]",
-            "value": "ledger"
-          }
-        ],
-        "assignTo": "branch2"
-      },
-      {
-        "kind": "call",
-        "function": "evaluateBranches",
-        "args": [
-          {
-            "name": "branches",
-            "type": "Branch[]",
-            "value": [
-              "$branch1",
-              "$branch2"
-            ]
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "namespaceInitialStates"
-          }
-        ],
-        "assignTo": "evaluation"
-      },
-      {
-        "kind": "call",
-        "function": "formatHeatmap",
-        "args": [],
-        "assignTo": "heatmap"
+        "assignTo": "states"
       },
       {
         "kind": "return",
-        "value": "$evaluation.winner"
+        "value": "sessions"
       }
     ],
     "success": true,
-    "id": "ep_1780421725817",
-    "timestamp": "2026-06-02T17:35:25.817Z"
+    "id": "ep_1780427032650",
+    "timestamp": "2026-06-02T19:03:52.650Z"
+  },
+  {
+    "intent": "get antibody stats and compute immune efficiency",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAntibodyStats",
+        "args": [],
+        "assignTo": "stats"
+      },
+      {
+        "kind": "call",
+        "function": "getExecutionMetrics",
+        "args": [],
+        "assignTo": "metrics"
+      },
+      {
+        "kind": "return",
+        "value": "stats"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780427011671",
+    "timestamp": "2026-06-02T19:03:31.671Z"
+  },
+  {
+    "intent": "get the failure genome and find the most common fix path",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getFailureGenome",
+        "args": [],
+        "assignTo": "genome"
+      },
+      {
+        "kind": "call",
+        "function": "failureStats",
+        "args": [],
+        "assignTo": "stats"
+      },
+      {
+        "kind": "return",
+        "value": "genome"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780426988231",
+    "timestamp": "2026-06-02T19:03:08.231Z"
+  },
+  {
+    "intent": "get all sessions sorted by their timestamp",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "getExecutionMetrics",
+        "args": [],
+        "assignTo": "metrics"
+      },
+      {
+        "kind": "return",
+        "value": "sessions"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780426965565",
+    "timestamp": "2026-06-02T19:02:45.565Z"
+  },
+  {
+    "intent": "count protocol rules defined in the configuration",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getProtocolConfig",
+        "args": [],
+        "assignTo": "config"
+      },
+      {
+        "kind": "return",
+        "value": "config"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780426945507",
+    "timestamp": "2026-06-02T19:02:25.507Z"
+  },
+  {
+    "intent": "get execution metrics and show generation count",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getExecutionMetrics",
+        "args": [],
+        "assignTo": "metrics"
+      },
+      {
+        "kind": "call",
+        "function": "benchmarkCount",
+        "args": [],
+        "assignTo": "count"
+      },
+      {
+        "kind": "return",
+        "value": "count"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780426923326",
+    "timestamp": "2026-06-02T19:02:03.326Z"
+  },
+  {
+    "intent": "verify all fingerprints and return valid count",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "verifyAllFingerprints",
+        "args": [
+          {
+            "name": "currentRuleHash",
+            "type": "string",
+            "value": "latest"
+          }
+        ],
+        "assignTo": "summary"
+      },
+      {
+        "kind": "return",
+        "value": "summary"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780426903188",
+    "timestamp": "2026-06-02T19:01:43.188Z"
+  },
+  {
+    "intent": "get antibody stats and count fast path hits",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAntibodyStats",
+        "args": [],
+        "assignTo": "stats"
+      },
+      {
+        "kind": "call",
+        "function": "benchmarkCount",
+        "args": [],
+        "assignTo": "count"
+      },
+      {
+        "kind": "return",
+        "value": "stats"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780426880600",
+    "timestamp": "2026-06-02T19:01:20.600Z"
+  },
+  {
+    "intent": "get the failure genome and return total failures",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getFailureGenome",
+        "args": [],
+        "assignTo": "genome"
+      },
+      {
+        "kind": "return",
+        "value": "genome.totalFailures"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780426857130",
+    "timestamp": "2026-06-02T19:00:57.130Z"
+  },
+  {
+    "intent": "get all learned patterns from the immune memory",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAntibodyStats",
+        "args": [],
+        "assignTo": "stats"
+      },
+      {
+        "kind": "return",
+        "value": "stats"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780426838252",
+    "timestamp": "2026-06-02T19:00:38.252Z"
   }
 ]

@@ -1,0 +1,50 @@
+{
+  "intent": "verify all fingerprints, then get the execution metrics, and return both results",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "symbol_existence",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "verifyAllFingerprints",
+      "args": [
+        {
+          "name": "currentRuleHash",
+          "type": "string",
+          "value": null
+        }
+      ],
+      "assignTo": "registrySummary"
+    },
+    {
+      "kind": "call",
+      "function": "getExecutionMetrics",
+      "args": [],
+      "assignTo": "executionMetrics"
+    },
+    {
+      "kind": "call",
+      "function": "return",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ]
+    }
+  ],
+  "errorDetail": "函数 'return' 不存在",
+  "ssgMissingFunctions": [
+    "return"
+  ],
+  "plannerAttempt": 2,
+  "plannerRetryTotal": 3,
+  "id": "fail_1780427161896_54",
+  "timestamp": "2026-06-02T19:06:01.896Z"
+}

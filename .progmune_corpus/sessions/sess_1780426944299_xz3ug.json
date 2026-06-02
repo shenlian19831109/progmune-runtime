@@ -1,0 +1,129 @@
+{
+  "sessionId": "sess_1780426944299_xz3ug",
+  "intent": "count protocol rules defined in the configuration",
+  "attempts": [
+    {
+      "id": "att_1780426945506_npq4w",
+      "sessionId": "sess_1780426944299_xz3ug",
+      "attemptNumber": 1,
+      "inputIntent": "count protocol rules defined in the configuration",
+      "plannerSeed": "1f807b99",
+      "constraintSnapshotId": "snap_1780426944300_cb94d605e698",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getProtocolConfig",
+          "args": [],
+          "assignTo": "config"
+        },
+        {
+          "kind": "return",
+          "value": "config"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getProtocolConfig",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780426945506,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780426944299,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780426945506_npq4w",
+    "sessionId": "sess_1780426944299_xz3ug",
+    "attemptNumber": 1,
+    "inputIntent": "count protocol rules defined in the configuration",
+    "plannerSeed": "1f807b99",
+    "constraintSnapshotId": "snap_1780426944300_cb94d605e698",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getProtocolConfig",
+        "args": [],
+        "assignTo": "config"
+      },
+      {
+        "kind": "return",
+        "value": "config"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getProtocolConfig",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780426945506,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780426944300_cb94d605e698",
+  "endedAt": 1780426945508
+}
