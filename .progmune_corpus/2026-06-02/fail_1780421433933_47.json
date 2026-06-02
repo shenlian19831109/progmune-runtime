@@ -1,0 +1,66 @@
+{
+  "intent": "get all sessions, evaluate their branch trees, and return the branch with the highest replay score",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-4",
+  "constraintType": "protocol",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "getAllSessions",
+      "args": [],
+      "assignTo": "sessions"
+    },
+    {
+      "kind": "call",
+      "function": "evaluateBranches",
+      "args": [
+        {
+          "name": "branches",
+          "type": "Branch[]",
+          "value": "sessions"
+        },
+        {
+          "name": "namespaceInitialStates",
+          "type": "Map<string, string>",
+          "value": {}
+        }
+      ],
+      "assignTo": "evalResult"
+    },
+    {
+      "kind": "call",
+      "function": "validateAction",
+      "args": [
+        {
+          "name": "action",
+          "type": "Action",
+          "value": "evalResult.winner"
+        },
+        {
+          "name": "actionIndex",
+          "type": "number",
+          "value": ""
+        }
+      ],
+      "assignTo": "validated"
+    },
+    {
+      "kind": "return",
+      "value": "$evalResult.winner"
+    }
+  ],
+  "errorDetail": "{\"protocol_violation\":{\"blocked_function\":\"validateAction\",\"namespace\":\"dev_pipeline\",\"current_state\":[\"IR_STALE\"],\"required_pre_states\":[\"IR_EXTRACTED\"]},\"diagnosis\":{\"missing_functions\":[\"extractIR\"],\"fix_path\":[\"extractIR\"]}}",
+  "ssgState": [
+    "IR_STALE"
+  ],
+  "ssgFixPath": [
+    "extractIR"
+  ],
+  "ssgMissingFunctions": [
+    "extractIR"
+  ],
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 1,
+  "id": "fail_1780421433933_47",
+  "timestamp": "2026-06-02T17:30:33.933Z"
+}

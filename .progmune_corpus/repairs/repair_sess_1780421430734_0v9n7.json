@@ -1,0 +1,28 @@
+{
+  "sessionId": "sess_1780421430734_0v9n7",
+  "timestamp": 1780421433914,
+  "violation": "SVL-4",
+  "constraint": "protocol",
+  "blockedFunction": "validateAction",
+  "namespace": "dev_pipeline",
+  "missingStates": [
+    "extractIR"
+  ],
+  "fixPath": [
+    "extractIR"
+  ],
+  "originalPlan": [
+    "getAllSessions",
+    "evaluateBranches",
+    "validateAction",
+    "return"
+  ],
+  "repairPlan": [
+    "getAllSessions",
+    "evaluateBranches",
+    "extractIR",
+    "validateAction",
+    "return"
+  ],
+  "success": true
+}

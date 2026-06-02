@@ -1,0 +1,331 @@
+{
+  "sessionId": "sess_1780426041793_a3pvr",
+  "intent": "check ledger consistency for a specific session",
+  "attempts": [
+    {
+      "id": "att_1780426044667_4h029",
+      "sessionId": "sess_1780426041793_a3pvr",
+      "attemptNumber": 1,
+      "inputIntent": "check ledger consistency for a specific session",
+      "plannerSeed": "4daf07aa",
+      "constraintSnapshotId": "snap_1780426041796_cb94d605e698",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getAllSessions",
+          "args": [],
+          "assignTo": "sessions"
+        },
+        {
+          "kind": "call",
+          "function": "replaySession",
+          "args": [
+            {
+              "name": "sessionId",
+              "type": "string",
+              "value": "sessions[0].id"
+            },
+            {
+              "name": "currentRules",
+              "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>",
+              "value": {}
+            },
+            {
+              "name": "namespaceInitialStates",
+              "type": "Map<string, string>",
+              "value": {}
+            }
+          ],
+          "assignTo": "replay"
+        },
+        {
+          "kind": "call",
+          "function": "checkLedgerConsistency",
+          "args": [
+            {
+              "name": "ledger",
+              "type": "StateTransition[]",
+              "value": "replay.ledger"
+            },
+            {
+              "name": "namespaceInitialStates",
+              "type": "Map<string, string>",
+              "value": {}
+            }
+          ],
+          "assignTo": "consistency"
+        },
+        {
+          "kind": "return",
+          "value": "consistency"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getAllSessions",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "replaySession",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 2,
+          "function": "checkLedgerConsistency",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780426044667,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780426041793,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780426044667_4h029",
+    "sessionId": "sess_1780426041793_a3pvr",
+    "attemptNumber": 1,
+    "inputIntent": "check ledger consistency for a specific session",
+    "plannerSeed": "4daf07aa",
+    "constraintSnapshotId": "snap_1780426041796_cb94d605e698",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "replaySession",
+        "args": [
+          {
+            "name": "sessionId",
+            "type": "string",
+            "value": "sessions[0].id"
+          },
+          {
+            "name": "currentRules",
+            "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>",
+            "value": {}
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": {}
+          }
+        ],
+        "assignTo": "replay"
+      },
+      {
+        "kind": "call",
+        "function": "checkLedgerConsistency",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "replay.ledger"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": {}
+          }
+        ],
+        "assignTo": "consistency"
+      },
+      {
+        "kind": "return",
+        "value": "consistency"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getAllSessions",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "replaySession",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 2,
+        "function": "checkLedgerConsistency",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780426044667,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780426041796_cb94d605e698",
+  "endedAt": 1780426044675
+}

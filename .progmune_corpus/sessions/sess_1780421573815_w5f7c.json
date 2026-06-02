@@ -1,0 +1,447 @@
+{
+  "sessionId": "sess_1780421573815_w5f7c",
+  "intent": "take a session ID and a repair proposal, create a repair branch, replay it, and return the evaluation score",
+  "attempts": [
+    {
+      "id": "att_1780421576328_c4jlt",
+      "sessionId": "sess_1780421573815_w5f7c",
+      "attemptNumber": 1,
+      "inputIntent": "take a session ID and a repair proposal, create a repair branch, replay it, and return the evaluation score",
+      "plannerSeed": "58a544d0",
+      "constraintSnapshotId": "snap_1780421573816_391d859ab6eb",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "replaySession",
+          "args": [
+            {
+              "name": "sessionId",
+              "type": "string",
+              "value": "sessionId"
+            },
+            {
+              "name": "currentRules",
+              "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>",
+              "value": {}
+            },
+            {
+              "name": "namespaceInitialStates",
+              "type": "Map<string, string>",
+              "value": {}
+            }
+          ],
+          "assignTo": "session"
+        },
+        {
+          "kind": "call",
+          "function": "createBranch",
+          "args": [
+            {
+              "name": "parent",
+              "type": "Branch",
+              "value": "session"
+            },
+            {
+              "name": "reason",
+              "type": "BranchReason",
+              "value": "repair"
+            },
+            {
+              "name": "initialTransitions",
+              "type": "StateTransition[]",
+              "value": []
+            }
+          ],
+          "assignTo": "branch"
+        },
+        {
+          "kind": "call",
+          "function": "replayBranch",
+          "args": [
+            {
+              "name": "branch",
+              "type": "Branch",
+              "value": "branch"
+            },
+            {
+              "name": "allBranches",
+              "type": "Map<string, Branch>",
+              "value": {}
+            },
+            {
+              "name": "namespaceInitialStates",
+              "type": "Map<string, string>",
+              "value": {}
+            }
+          ],
+          "assignTo": "result"
+        },
+        {
+          "kind": "call",
+          "function": "random",
+          "args": [],
+          "assignTo": "score"
+        },
+        {
+          "kind": "return",
+          "value": "score"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "replaySession",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "createBranch",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 2,
+          "function": "replayBranch",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 3,
+          "function": "random",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780421576328,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780421573815,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780421576328_c4jlt",
+    "sessionId": "sess_1780421573815_w5f7c",
+    "attemptNumber": 1,
+    "inputIntent": "take a session ID and a repair proposal, create a repair branch, replay it, and return the evaluation score",
+    "plannerSeed": "58a544d0",
+    "constraintSnapshotId": "snap_1780421573816_391d859ab6eb",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "replaySession",
+        "args": [
+          {
+            "name": "sessionId",
+            "type": "string",
+            "value": "sessionId"
+          },
+          {
+            "name": "currentRules",
+            "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>",
+            "value": {}
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": {}
+          }
+        ],
+        "assignTo": "session"
+      },
+      {
+        "kind": "call",
+        "function": "createBranch",
+        "args": [
+          {
+            "name": "parent",
+            "type": "Branch",
+            "value": "session"
+          },
+          {
+            "name": "reason",
+            "type": "BranchReason",
+            "value": "repair"
+          },
+          {
+            "name": "initialTransitions",
+            "type": "StateTransition[]",
+            "value": []
+          }
+        ],
+        "assignTo": "branch"
+      },
+      {
+        "kind": "call",
+        "function": "replayBranch",
+        "args": [
+          {
+            "name": "branch",
+            "type": "Branch",
+            "value": "branch"
+          },
+          {
+            "name": "allBranches",
+            "type": "Map<string, Branch>",
+            "value": {}
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": {}
+          }
+        ],
+        "assignTo": "result"
+      },
+      {
+        "kind": "call",
+        "function": "random",
+        "args": [],
+        "assignTo": "score"
+      },
+      {
+        "kind": "return",
+        "value": "score"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "replaySession",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "createBranch",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 2,
+        "function": "replayBranch",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 3,
+        "function": "random",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780421576328,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780421573816_391d859ab6eb",
+  "endedAt": 1780421576334
+}

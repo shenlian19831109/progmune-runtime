@@ -1,464 +1,8 @@
 {
-  "generated": 427,
-  "repaired": 5,
-  "lastGeneration": "bench/tmp/L3-058.ts",
+  "generated": 484,
+  "repaired": 6,
+  "lastGeneration": "bench/tmp/T044.ts",
   "history": [
-    {
-      "sessionId": "sess_1780386386447_hxi7h",
-      "timestamp": 1780386388606,
-      "filePath": "bench/tmp/T044.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 409
-    },
-    {
-      "sessionId": "sess_1780386408166_pgkoi",
-      "timestamp": 1780386409584,
-      "filePath": "bench/tmp/T045.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 409
-    },
-    {
-      "sessionId": "sess_1780386429382_xpr52",
-      "timestamp": 1780386430572,
-      "filePath": "bench/tmp/T046.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 409
-    },
-    {
-      "sessionId": "sess_1780386448482_f4g6d",
-      "timestamp": 1780386450047,
-      "filePath": "bench/tmp/T047.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 409
-    },
-    {
-      "sessionId": "sess_1780386467253_j4ei4",
-      "timestamp": 1780386468461,
-      "filePath": "bench/tmp/T048.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 409
-    },
-    {
-      "sessionId": "sess_1780386488338_h097j",
-      "timestamp": 1780386489762,
-      "filePath": "bench/tmp/T049.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 409
-    },
-    {
-      "sessionId": "sess_1780386507076_azqgy",
-      "timestamp": 1780386509422,
-      "filePath": "bench/tmp/T050.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 409
-    },
-    {
-      "sessionId": "sess_1780420141103_nl40v",
-      "timestamp": 1780420143294,
-      "filePath": "bench/tmp/T001.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420155368_3fqzn",
-      "timestamp": 1780420156775,
-      "filePath": "bench/tmp/T002.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420167524_3p6wr",
-      "timestamp": 1780420168754,
-      "filePath": "bench/tmp/T003.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420179250_eamp5",
-      "timestamp": 1780420180605,
-      "filePath": "bench/tmp/T004.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420191420_jnagi",
-      "timestamp": 1780420192772,
-      "filePath": "bench/tmp/T005.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420201174_3hoqk",
-      "timestamp": 1780420202525,
-      "filePath": "bench/tmp/T006.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420209957_2l8tr",
-      "timestamp": 1780420211416,
-      "filePath": "bench/tmp/T007.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420218554_vtv8g",
-      "timestamp": 1780420219945,
-      "filePath": "bench/tmp/T008.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420226749_oll5a",
-      "timestamp": 1780420228209,
-      "filePath": "bench/tmp/T009.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420236878_i77il",
-      "timestamp": 1780420238511,
-      "filePath": "bench/tmp/T010.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420245594_p4pe3",
-      "timestamp": 1780420247354,
-      "filePath": "bench/tmp/T011.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420255502_xrg65",
-      "timestamp": 1780420257673,
-      "filePath": "bench/tmp/T012.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420267859_3irmz",
-      "timestamp": 1780420269645,
-      "filePath": "bench/tmp/T013.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420278517_sljbl",
-      "timestamp": 1780420279960,
-      "filePath": "bench/tmp/T014.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420287349_a6dqn",
-      "timestamp": 1780420288668,
-      "filePath": "bench/tmp/T015.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420297407_p2rti",
-      "timestamp": 1780420299214,
-      "filePath": "bench/tmp/T016.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420307010_q8ntj",
-      "timestamp": 1780420308472,
-      "filePath": "bench/tmp/T017.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420315281_4x4do",
-      "timestamp": 1780420316822,
-      "filePath": "bench/tmp/T018.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420326463_j74ke",
-      "timestamp": 1780420327883,
-      "filePath": "bench/tmp/T019.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420336079_conx4",
-      "timestamp": 1780420338855,
-      "filePath": "bench/tmp/T020.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420345498_p8p7o",
-      "timestamp": 1780420346966,
-      "filePath": "bench/tmp/T021.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420357113_ps6gq",
-      "timestamp": 1780420358532,
-      "filePath": "bench/tmp/T022.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420365921_1juoj",
-      "timestamp": 1780420367304,
-      "filePath": "bench/tmp/T023.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420375382_8xx84",
-      "timestamp": 1780420376726,
-      "filePath": "bench/tmp/T024.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420385021_zlxqy",
-      "timestamp": 1780420386359,
-      "filePath": "bench/tmp/T025.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420395095_km1eu",
-      "timestamp": 1780420396288,
-      "filePath": "bench/tmp/T026.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420403571_hhv2s",
-      "timestamp": 1780420405026,
-      "filePath": "bench/tmp/T027.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420414369_91s4o",
-      "timestamp": 1780420416045,
-      "filePath": "bench/tmp/T028.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420423207_hfw5n",
-      "timestamp": 1780420424759,
-      "filePath": "bench/tmp/T029.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420433125_puynu",
-      "timestamp": 1780420434337,
-      "filePath": "bench/tmp/T030.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420442948_9g3ic",
-      "timestamp": 1780420445071,
-      "filePath": "bench/tmp/T031.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420453056_d9ag3",
-      "timestamp": 1780420454794,
-      "filePath": "bench/tmp/T032.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420461951_2z269",
-      "timestamp": 1780420463650,
-      "filePath": "bench/tmp/T033.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420472531_369va",
-      "timestamp": 1780420474106,
-      "filePath": "bench/tmp/T034.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420481380_ee54j",
-      "timestamp": 1780420482852,
-      "filePath": "bench/tmp/T035.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420491136_c6as3",
-      "timestamp": 1780420492157,
-      "filePath": "bench/tmp/T036.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420499676_dpn9g",
-      "timestamp": 1780420501246,
-      "filePath": "bench/tmp/T037.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420509519_ymq5p",
-      "timestamp": 1780420510694,
-      "filePath": "bench/tmp/T038.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420517801_26jz4",
-      "timestamp": 1780420519167,
-      "filePath": "bench/tmp/T039.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420527436_c9c40",
-      "timestamp": 1780420528992,
-      "filePath": "bench/tmp/T040.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420536865_g1hxn",
-      "timestamp": 1780420538818,
-      "filePath": "bench/tmp/T041.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420545957_7s3lq",
-      "timestamp": 1780420547522,
-      "filePath": "bench/tmp/T042.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420555899_6icfo",
-      "timestamp": 1780420557360,
-      "filePath": "bench/tmp/T043.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420566439_clcrs",
-      "timestamp": 1780420567675,
-      "filePath": "bench/tmp/T044.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420574735_f3ct3",
-      "timestamp": 1780420576128,
-      "filePath": "bench/tmp/T045.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420584361_52fxv",
-      "timestamp": 1780420586145,
-      "filePath": "bench/tmp/T046.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420597719_wgzq4",
-      "timestamp": 1780420599360,
-      "filePath": "bench/tmp/T047.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420609712_ml3vr",
-      "timestamp": 1780420611422,
-      "filePath": "bench/tmp/T048.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420619803_0eani",
-      "timestamp": 1780420621560,
-      "filePath": "bench/tmp/T049.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
-    {
-      "sessionId": "sess_1780420628273_czwqe",
-      "timestamp": 1780420630678,
-      "filePath": "bench/tmp/T050.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 411
-    },
     {
       "sessionId": "sess_1780420638750_7mmzq",
       "timestamp": 1780420639965,
@@ -802,6 +346,462 @@
       "repaired": false,
       "repairCount": 0,
       "irFunctionCount": 413
+    },
+    {
+      "sessionId": "sess_1780421430734_0v9n7",
+      "timestamp": 1780421433941,
+      "filePath": "bench/tmp/L3-059.ts",
+      "repaired": true,
+      "repairCount": 1,
+      "irFunctionCount": 413
+    },
+    {
+      "sessionId": "sess_1780421473836_fl2g7",
+      "timestamp": 1780421481867,
+      "filePath": "bench/tmp/L3-060.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 413
+    },
+    {
+      "sessionId": "sess_1780421515760_tr9i5",
+      "timestamp": 1780421519276,
+      "filePath": "bench/tmp/L4-051.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 413
+    },
+    {
+      "sessionId": "sess_1780421548817_7o9ix",
+      "timestamp": 1780421551298,
+      "filePath": "bench/tmp/L4-052.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 413
+    },
+    {
+      "sessionId": "sess_1780421573815_w5f7c",
+      "timestamp": 1780421576337,
+      "filePath": "bench/tmp/L4-053.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 413
+    },
+    {
+      "sessionId": "sess_1780421599489_yu8r2",
+      "timestamp": 1780421601328,
+      "filePath": "bench/tmp/L4-054.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 413
+    },
+    {
+      "sessionId": "sess_1780421623841_8ziu0",
+      "timestamp": 1780421625195,
+      "filePath": "bench/tmp/L4-055.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 413
+    },
+    {
+      "sessionId": "sess_1780421648714_kke80",
+      "timestamp": 1780421650840,
+      "filePath": "bench/tmp/L5-051.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 413
+    },
+    {
+      "sessionId": "sess_1780421674799_isspg",
+      "timestamp": 1780421677474,
+      "filePath": "bench/tmp/L5-052.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 413
+    },
+    {
+      "sessionId": "sess_1780421700556_u4jry",
+      "timestamp": 1780421702176,
+      "filePath": "bench/tmp/L5-053.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 413
+    },
+    {
+      "sessionId": "sess_1780421722932_jpd46",
+      "timestamp": 1780421725822,
+      "filePath": "bench/tmp/L5-054.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 413
+    },
+    {
+      "sessionId": "sess_1780421744381_ajanf",
+      "timestamp": 1780421746419,
+      "filePath": "bench/tmp/L5-055.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 413
+    },
+    {
+      "sessionId": "sess_1780424964189_7ttyz",
+      "timestamp": 1780424966292,
+      "filePath": "bench/tmp/T001.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425016007_7eto9",
+      "timestamp": 1780425018783,
+      "filePath": "bench/tmp/T002.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425069633_vqtr7",
+      "timestamp": 1780425087284,
+      "filePath": "bench/tmp/T003.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425133477_3abyk",
+      "timestamp": 1780425135064,
+      "filePath": "bench/tmp/T004.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425173868_fblag",
+      "timestamp": 1780425175133,
+      "filePath": "bench/tmp/T005.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425213719_c8y6g",
+      "timestamp": 1780425215280,
+      "filePath": "bench/tmp/T006.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425256091_pjz4r",
+      "timestamp": 1780425257457,
+      "filePath": "bench/tmp/T007.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425295375_c4djx",
+      "timestamp": 1780425297813,
+      "filePath": "bench/tmp/T008.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425335191_ava99",
+      "timestamp": 1780425336814,
+      "filePath": "bench/tmp/T009.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425375539_i6jap",
+      "timestamp": 1780425377272,
+      "filePath": "bench/tmp/T010.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425413335_av81h",
+      "timestamp": 1780425414848,
+      "filePath": "bench/tmp/T011.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425452311_biv9v",
+      "timestamp": 1780425455731,
+      "filePath": "bench/tmp/T012.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425495328_djmgu",
+      "timestamp": 1780425496976,
+      "filePath": "bench/tmp/T013.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425538050_ebpi7",
+      "timestamp": 1780425539967,
+      "filePath": "bench/tmp/T014.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425582434_zk14f",
+      "timestamp": 1780425585415,
+      "filePath": "bench/tmp/T015.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425635779_zo0fg",
+      "timestamp": 1780425638527,
+      "filePath": "bench/tmp/T016.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425686075_j6ed4",
+      "timestamp": 1780425688248,
+      "filePath": "bench/tmp/T017.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425724984_2yh3g",
+      "timestamp": 1780425726532,
+      "filePath": "bench/tmp/T018.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425757126_83hjl",
+      "timestamp": 1780425758827,
+      "filePath": "bench/tmp/T019.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425787187_856ke",
+      "timestamp": 1780425789416,
+      "filePath": "bench/tmp/T020.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425826268_p2ns0",
+      "timestamp": 1780425827324,
+      "filePath": "bench/tmp/T021.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425853936_06u1r",
+      "timestamp": 1780425855207,
+      "filePath": "bench/tmp/T022.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425879926_oo131",
+      "timestamp": 1780425881554,
+      "filePath": "bench/tmp/T023.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425907807_gpkty",
+      "timestamp": 1780425909333,
+      "filePath": "bench/tmp/T024.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425935711_ga7c4",
+      "timestamp": 1780425937186,
+      "filePath": "bench/tmp/T025.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425961246_ms79b",
+      "timestamp": 1780425962860,
+      "filePath": "bench/tmp/T026.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780425988638_nr51t",
+      "timestamp": 1780425990458,
+      "filePath": "bench/tmp/T027.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780426015114_3k7et",
+      "timestamp": 1780426016745,
+      "filePath": "bench/tmp/T028.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780426041793_a3pvr",
+      "timestamp": 1780426044679,
+      "filePath": "bench/tmp/T029.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780426070842_by0t4",
+      "timestamp": 1780426073560,
+      "filePath": "bench/tmp/T030.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780426096204_fkj88",
+      "timestamp": 1780426097615,
+      "filePath": "bench/tmp/T031.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780426115796_7ocsk",
+      "timestamp": 1780426117586,
+      "filePath": "bench/tmp/T032.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780426138944_exooa",
+      "timestamp": 1780426140315,
+      "filePath": "bench/tmp/T033.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780426157575_l2bfm",
+      "timestamp": 1780426159117,
+      "filePath": "bench/tmp/T034.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780426185574_kr2ru",
+      "timestamp": 1780426186960,
+      "filePath": "bench/tmp/T035.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780426209997_2en4z",
+      "timestamp": 1780426214041,
+      "filePath": "bench/tmp/T036.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780426238300_ytnqc",
+      "timestamp": 1780426239557,
+      "filePath": "bench/tmp/T037.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780426267147_2segx",
+      "timestamp": 1780426271229,
+      "filePath": "src/health-summary.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780426276996_a0u0p",
+      "timestamp": 1780426278260,
+      "filePath": "bench/tmp/T038.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780426310331_1a4p9",
+      "timestamp": 1780426312950,
+      "filePath": "bench/tmp/T039.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 418
+    },
+    {
+      "sessionId": "sess_1780426334602_j4rhp",
+      "timestamp": 1780426336441,
+      "filePath": "bench/tmp/T040.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 418
+    },
+    {
+      "sessionId": "sess_1780426360009_470dh",
+      "timestamp": 1780426362302,
+      "filePath": "bench/tmp/T041.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780426384198_m6g9f",
+      "timestamp": 1780426392753,
+      "filePath": "bench/tmp/T042.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780426423998_oicci",
+      "timestamp": 1780426425394,
+      "filePath": "bench/tmp/T043.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780426446769_eewnf",
+      "timestamp": 1780426448166,
+      "filePath": "bench/tmp/T044.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
     }
   ]
 }

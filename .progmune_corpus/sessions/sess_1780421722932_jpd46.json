@@ -1,0 +1,719 @@
+{
+  "sessionId": "sess_1780421722932_jpd46",
+  "intent": "take a ledger with violations, generate repair proposals, create branches for each, evaluate them, and return the winner",
+  "attempts": [
+    {
+      "id": "att_1780421725817_j05bl",
+      "sessionId": "sess_1780421722932_jpd46",
+      "attemptNumber": 1,
+      "inputIntent": "take a ledger with violations, generate repair proposals, create branches for each, evaluate them, and return the winner",
+      "plannerSeed": "3ea74c55",
+      "constraintSnapshotId": "snap_1780421722933_391d859ab6eb",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "generateRepairSummary",
+          "args": [
+            {
+              "name": "ledger",
+              "type": "StateTransition[]",
+              "value": "ledger"
+            },
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": "ir"
+            },
+            {
+              "name": "protocols",
+              "type": "FunctionProtocol[]",
+              "value": "protocols"
+            },
+            {
+              "name": "namespaceInitialStates",
+              "type": "Map<string, string>",
+              "value": "namespaceInitialStates"
+            }
+          ],
+          "assignTo": "repairSummary"
+        },
+        {
+          "kind": "call",
+          "function": "generateCandidateRules",
+          "args": [],
+          "assignTo": "candidateRules"
+        },
+        {
+          "kind": "call",
+          "function": "createRootBranch",
+          "args": [
+            {
+              "name": "transitions",
+              "type": "StateTransition[]",
+              "value": "ledger"
+            }
+          ],
+          "assignTo": "rootBranch"
+        },
+        {
+          "kind": "call",
+          "function": "createBranch",
+          "args": [
+            {
+              "name": "parent",
+              "type": "Branch",
+              "value": "rootBranch"
+            },
+            {
+              "name": "reason",
+              "type": "BranchReason",
+              "value": "repair"
+            },
+            {
+              "name": "initialTransitions",
+              "type": "StateTransition[]",
+              "value": "ledger"
+            }
+          ],
+          "assignTo": "branch1"
+        },
+        {
+          "kind": "call",
+          "function": "createBranch",
+          "args": [
+            {
+              "name": "parent",
+              "type": "Branch",
+              "value": "rootBranch"
+            },
+            {
+              "name": "reason",
+              "type": "BranchReason",
+              "value": "repair"
+            },
+            {
+              "name": "initialTransitions",
+              "type": "StateTransition[]",
+              "value": "ledger"
+            }
+          ],
+          "assignTo": "branch2"
+        },
+        {
+          "kind": "call",
+          "function": "evaluateBranches",
+          "args": [
+            {
+              "name": "branches",
+              "type": "Branch[]",
+              "value": [
+                "$branch1",
+                "$branch2"
+              ]
+            },
+            {
+              "name": "namespaceInitialStates",
+              "type": "Map<string, string>",
+              "value": "namespaceInitialStates"
+            }
+          ],
+          "assignTo": "evaluation"
+        },
+        {
+          "kind": "call",
+          "function": "formatHeatmap",
+          "args": [],
+          "assignTo": "heatmap"
+        },
+        {
+          "kind": "return",
+          "value": "$evaluation.winner"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "generateRepairSummary",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "generateCandidateRules",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 2,
+          "function": "createRootBranch",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 3,
+          "function": "createBranch",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 4,
+          "function": "createBranch",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 5,
+          "function": "evaluateBranches",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 6,
+          "function": "formatHeatmap",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780421725817,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780421722932,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780421725817_j05bl",
+    "sessionId": "sess_1780421722932_jpd46",
+    "attemptNumber": 1,
+    "inputIntent": "take a ledger with violations, generate repair proposals, create branches for each, evaluate them, and return the winner",
+    "plannerSeed": "3ea74c55",
+    "constraintSnapshotId": "snap_1780421722933_391d859ab6eb",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "generateRepairSummary",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "ledger"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "ir"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "protocols"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "namespaceInitialStates"
+          }
+        ],
+        "assignTo": "repairSummary"
+      },
+      {
+        "kind": "call",
+        "function": "generateCandidateRules",
+        "args": [],
+        "assignTo": "candidateRules"
+      },
+      {
+        "kind": "call",
+        "function": "createRootBranch",
+        "args": [
+          {
+            "name": "transitions",
+            "type": "StateTransition[]",
+            "value": "ledger"
+          }
+        ],
+        "assignTo": "rootBranch"
+      },
+      {
+        "kind": "call",
+        "function": "createBranch",
+        "args": [
+          {
+            "name": "parent",
+            "type": "Branch",
+            "value": "rootBranch"
+          },
+          {
+            "name": "reason",
+            "type": "BranchReason",
+            "value": "repair"
+          },
+          {
+            "name": "initialTransitions",
+            "type": "StateTransition[]",
+            "value": "ledger"
+          }
+        ],
+        "assignTo": "branch1"
+      },
+      {
+        "kind": "call",
+        "function": "createBranch",
+        "args": [
+          {
+            "name": "parent",
+            "type": "Branch",
+            "value": "rootBranch"
+          },
+          {
+            "name": "reason",
+            "type": "BranchReason",
+            "value": "repair"
+          },
+          {
+            "name": "initialTransitions",
+            "type": "StateTransition[]",
+            "value": "ledger"
+          }
+        ],
+        "assignTo": "branch2"
+      },
+      {
+        "kind": "call",
+        "function": "evaluateBranches",
+        "args": [
+          {
+            "name": "branches",
+            "type": "Branch[]",
+            "value": [
+              "$branch1",
+              "$branch2"
+            ]
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "namespaceInitialStates"
+          }
+        ],
+        "assignTo": "evaluation"
+      },
+      {
+        "kind": "call",
+        "function": "formatHeatmap",
+        "args": [],
+        "assignTo": "heatmap"
+      },
+      {
+        "kind": "return",
+        "value": "$evaluation.winner"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "generateRepairSummary",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "generateCandidateRules",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 2,
+        "function": "createRootBranch",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 3,
+        "function": "createBranch",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 4,
+        "function": "createBranch",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 5,
+        "function": "evaluateBranches",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 6,
+        "function": "formatHeatmap",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780421725817,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780421722933_391d859ab6eb",
+  "endedAt": 1780421725818
+}
