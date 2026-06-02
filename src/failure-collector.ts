@@ -79,6 +79,7 @@ export function recordFailure(record: Omit<FailureRecord, "id" | "timestamp">): 
 /** Load all recorded failures from the failure corpus. */
 /** @requires FAILURE_CORPUS @produces FAILURE_LIST */
 /** @requires FAILURE_CORPUS @produces FAILURE_LIST */
+/** @requires FAILURE_CORPUS @produces FAILURE_LIST */
 export function loadFailures(): FailureRecord[] {
   if (!fs.existsSync(CORPUS_DIR)) return [];
   const failures: FailureRecord[] = [];
@@ -93,6 +94,7 @@ export function loadFailures(): FailureRecord[] {
 
 /** Get failure statistics grouped by root cause. */
 /** Get failure statistics grouped by root cause. */
+/** @requires FAILURE_LIST @produces FAILURE_STATS */
 /** @requires FAILURE_LIST @produces FAILURE_STATS */
 /** @requires FAILURE_LIST @produces FAILURE_STATS */
 export function failureStats(): { total: number; byRootCause: Record<string, number>; topCause: string } {
@@ -111,6 +113,7 @@ export function failureStats(): { total: number; byRootCause: Record<string, num
 
 /** Format failure stats as readable text. */
 /** Format failure statistics as a human-readable report. */
+/** @requires FAILURE_STATS @produces FORMATTED_REPORT */
 /** @requires FAILURE_STATS @produces FORMATTED_REPORT */
 /** @requires FAILURE_STATS @produces FORMATTED_REPORT */
 export function formatFailureStats(): string {

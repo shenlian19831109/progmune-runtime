@@ -105,6 +105,7 @@ function recordFailure(record) {
 /** Load all recorded failures from the failure corpus. */
 /** @requires FAILURE_CORPUS @produces FAILURE_LIST */
 /** @requires FAILURE_CORPUS @produces FAILURE_LIST */
+/** @requires FAILURE_CORPUS @produces FAILURE_LIST */
 function loadFailures() {
     if (!fs.existsSync(CORPUS_DIR))
         return [];
@@ -123,6 +124,7 @@ function loadFailures() {
 /** Get failure statistics grouped by root cause. */
 /** @requires FAILURE_LIST @produces FAILURE_STATS */
 /** @requires FAILURE_LIST @produces FAILURE_STATS */
+/** @requires FAILURE_LIST @produces FAILURE_STATS */
 function failureStats() {
     const failures = loadFailures();
     const byRootCause = {};
@@ -138,6 +140,7 @@ function failureStats() {
 }
 /** Format failure stats as readable text. */
 /** Format failure statistics as a human-readable report. */
+/** @requires FAILURE_STATS @produces FORMATTED_REPORT */
 /** @requires FAILURE_STATS @produces FORMATTED_REPORT */
 /** @requires FAILURE_STATS @produces FORMATTED_REPORT */
 function formatFailureStats() {

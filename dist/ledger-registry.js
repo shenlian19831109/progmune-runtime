@@ -152,6 +152,7 @@ function verifyFingerprint(sessionId, transitions, currentRuleHash) {
  *  Loads each session to re-hash and compare against the stored fingerprint. */
 /** Verify all registered ledger fingerprints and return tampered status. */
 /** @requires FINGERPRINT_DATA @produces VERIFICATION_RESULT */
+/** @requires FINGERPRINT_DATA @produces VERIFICATION_RESULT */
 function verifyAllFingerprints(currentRuleHash) {
     const fingerprints = getFingerprintRegistry();
     const results = [];
@@ -208,6 +209,7 @@ function verifyAllFingerprints(currentRuleHash) {
 /** Register fingerprints for all sessions that don't yet have one.
  *  Called during `npm run check` to ensure all sessions are fingerprinted. */
 /** Register fingerprints for all sessions that lack them. */
+/** @requires SESSION_DATA @produces FINGERPRINT_DATA */
 function registerAllMissingFingerprints() {
     const sessionsDir = path.resolve(process.env.PROGMUNE_PROJECT_DIR || process.cwd(), ".progmune_corpus/sessions");
     if (!fs.existsSync(sessionsDir))

@@ -241,6 +241,7 @@ export function getTopFailurePatterns(limit: number = 5): { pattern: string; cou
  */
 /** Get failure genome statistics: total failures by SVL, constraint type, and fix path. */
 /** @requires FAILURE_DATA @produces FAILURE_GENOME */
+/** @requires FAILURE_DATA @produces FAILURE_GENOME */
 export function getFailureGenome(): {
   totalFailures: number;
   bySVL: Record<SVL, number>;
@@ -314,6 +315,7 @@ export function getFailureGenome(): {
  * @tags session, corpus, audit, history
  */
 /** @requires SESSION_DATA @produces SESSION_LIST */
+/** @requires SESSION_CORPUS @produces SESSION_LIST */
 /** @requires SESSION_CORPUS @produces SESSION_LIST */
 /** @requires SESSION_CORPUS @produces SESSION_LIST */
 export function getAllSessions(): ExecutionSession[] {
@@ -521,6 +523,7 @@ export function queryAntibodies(intent: string, minACL: AntibodyLevel = "ACL-3")
 /** 语义热力图：哪些协议/层最脆弱，约束如何聚类 */
 /** Get semantic heatmap showing fragile protocols and SVL hotspots. */
 /** @requires FAILURE_DATA @produces HEATMAP */
+/** @requires FAILURE_HEATMAP @produces HEATMAP_DATA */
 export function getSemanticHeatmap(): {
   fragileProtocols: { function: string; violationCount: number; svl: string }[];
   svlHotspots: { svl: string; count: number; percentage: number }[];
@@ -595,6 +598,7 @@ export function getSemanticHeatmap(): {
 /** Get antibody efficacy statistics: hits by level, tokens saved, top signatures.
  * @tags antibody, immune, statistics, efficiency
  */
+/** @requires ANTIBODY_DATA @produces ANTIBODY_STATS */
 /** @requires ANTIBODY_DATA @produces ANTIBODY_STATS */
 export function getAntibodyStats(): {
   totalHits: number;

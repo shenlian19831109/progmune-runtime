@@ -2697,9 +2697,11 @@
       "purpose": "Load all recorded failures from the failure corpus. */",
       "requires": [
         "FAILURE_CORPUS",
+        "FAILURE_CORPUS",
         "FAILURE_CORPUS"
       ],
       "produces": [
+        "FAILURE_LIST",
         "FAILURE_LIST",
         "FAILURE_LIST"
       ],
@@ -2727,9 +2729,11 @@
       "purpose": "Get failure statistics grouped by root cause. */",
       "requires": [
         "FAILURE_LIST",
+        "FAILURE_LIST",
         "FAILURE_LIST"
       ],
       "produces": [
+        "FAILURE_STATS",
         "FAILURE_STATS",
         "FAILURE_STATS"
       ],
@@ -2762,9 +2766,11 @@
       "purpose": "Format failure statistics as a human-readable report. */",
       "requires": [
         "FAILURE_STATS",
+        "FAILURE_STATS",
         "FAILURE_STATS"
       ],
       "produces": [
+        "FORMATTED_REPORT",
         "FORMATTED_REPORT",
         "FORMATTED_REPORT"
       ],
@@ -3145,9 +3151,11 @@
         "audit"
       ],
       "requires": [
+        "FAILURE_DATA",
         "FAILURE_DATA"
       ],
       "produces": [
+        "FAILURE_GENOME",
         "FAILURE_GENOME"
       ]
     },
@@ -3182,9 +3190,11 @@
       "requires": [
         "SESSION_DATA",
         "SESSION_CORPUS",
+        "SESSION_CORPUS",
         "SESSION_CORPUS"
       ],
       "produces": [
+        "SESSION_LIST",
         "SESSION_LIST",
         "SESSION_LIST",
         "SESSION_LIST"
@@ -3392,10 +3402,12 @@
       ],
       "purpose": "Get semantic heatmap showing fragile protocols and SVL hotspots. */",
       "requires": [
-        "FAILURE_DATA"
+        "FAILURE_DATA",
+        "FAILURE_HEATMAP"
       ],
       "produces": [
-        "HEATMAP"
+        "HEATMAP",
+        "HEATMAP_DATA"
       ],
       "tags": [
         "failure",
@@ -3431,9 +3443,11 @@
         "efficiency"
       ],
       "requires": [
+        "ANTIBODY_DATA",
         "ANTIBODY_DATA"
       ],
       "produces": [
+        "ANTIBODY_STATS",
         "ANTIBODY_STATS"
       ]
     },
@@ -4258,9 +4272,11 @@
       ],
       "purpose": "Verify all registered ledger fingerprints and return tampered status. */",
       "requires": [
+        "FINGERPRINT_DATA",
         "FINGERPRINT_DATA"
       ],
       "produces": [
+        "VERIFICATION_RESULT",
         "VERIFICATION_RESULT"
       ],
       "tags": [
@@ -4293,6 +4309,12 @@
         "number"
       ],
       "purpose": "Register fingerprints for all sessions that lack them. */",
+      "requires": [
+        "SESSION_DATA"
+      ],
+      "produces": [
+        "FINGERPRINT_DATA"
+      ],
       "tags": [
         "ledger",
         "registry"

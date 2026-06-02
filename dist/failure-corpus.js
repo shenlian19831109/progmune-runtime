@@ -211,6 +211,7 @@ function getTopFailurePatterns(limit = 5) {
  */
 /** Get failure genome statistics: total failures by SVL, constraint type, and fix path. */
 /** @requires FAILURE_DATA @produces FAILURE_GENOME */
+/** @requires FAILURE_DATA @produces FAILURE_GENOME */
 function getFailureGenome() {
     const sessions = getAllSessions();
     const bySVL = { "SVL-1": 0, "SVL-2": 0, "SVL-3": 0, "SVL-4": 0 };
@@ -271,6 +272,7 @@ function getFailureGenome() {
  * @tags session, corpus, audit, history
  */
 /** @requires SESSION_DATA @produces SESSION_LIST */
+/** @requires SESSION_CORPUS @produces SESSION_LIST */
 /** @requires SESSION_CORPUS @produces SESSION_LIST */
 /** @requires SESSION_CORPUS @produces SESSION_LIST */
 function getAllSessions() {
@@ -451,6 +453,7 @@ function queryAntibodies(intent, minACL = "ACL-3") {
 /** 语义热力图：哪些协议/层最脆弱，约束如何聚类 */
 /** Get semantic heatmap showing fragile protocols and SVL hotspots. */
 /** @requires FAILURE_DATA @produces HEATMAP */
+/** @requires FAILURE_HEATMAP @produces HEATMAP_DATA */
 function getSemanticHeatmap() {
     const sessions = getAllSessions();
     // Count total violations from sessions
@@ -513,6 +516,7 @@ function getSemanticHeatmap() {
 /** Get antibody efficacy statistics: hits by level, tokens saved, top signatures.
  * @tags antibody, immune, statistics, efficiency
  */
+/** @requires ANTIBODY_DATA @produces ANTIBODY_STATS */
 /** @requires ANTIBODY_DATA @produces ANTIBODY_STATS */
 function getAntibodyStats() {
     const sessions = getAllSessions();
