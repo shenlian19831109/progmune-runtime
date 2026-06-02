@@ -1,52 +1,587 @@
 [
-  {"id":"T001","intent":"get all sessions from the corpus","category":"corpus-read"},
-  {"id":"T002","intent":"get the failure genome statistics","category":"corpus-read"},
-  {"id":"T003","intent":"get the antibody statistics","category":"corpus-read"},
-  {"id":"T004","intent":"get the execution metrics","category":"corpus-read"},
-  {"id":"T005","intent":"verify all ledger fingerprints","category":"fingerprint"},
-  {"id":"T006","intent":"get the semantic heatmap data","category":"corpus-read"},
-  {"id":"T007","intent":"extract IR from the project","category":"ir"},
-  {"id":"T008","intent":"take a session ID and look it up in the corpus","category":"corpus-read","hasInput":true},
-  {"id":"T009","intent":"load protocol rules and list all defined namespaces","category":"protocol"},
-  {"id":"T010","intent":"count how many sessions are resolved in the corpus","category":"corpus-read"},
-  {"id":"T011","intent":"find the most common failure pattern in the genome","category":"corpus-read"},
-  {"id":"T012","intent":"check if all ledgers pass invariant validation","category":"ledger"},
-  {"id":"T013","intent":"get the fingerprint hash for a specific session","category":"fingerprint","hasInput":true},
-  {"id":"T014","intent":"compare two session ledgers and show the differences","category":"ledger","hasInput":true},
-  {"id":"T015","intent":"format the immune status as a colored terminal output","category":"format"},
-  {"id":"T016","intent":"list all files in the corpus directory","category":"fs"},
-  {"id":"T017","intent":"read the protocols configuration and count total rules","category":"protocol"},
-  {"id":"T018","intent":"find all sessions that have antibody hits","category":"corpus-read"},
-  {"id":"T019","intent":"count how many unique namespaces exist in the protocol rules","category":"protocol"},
-  {"id":"T020","intent":"get the total number of transitions across all session ledgers","category":"ledger"},
-  {"id":"T021","intent":"get the failure genome and return the SVL-1 violation count","category":"corpus-read"},
-  {"id":"T022","intent":"get antibody statistics and count hits by each ACL level","category":"corpus-read"},
-  {"id":"T023","intent":"extract IR and return all functions with protocol annotations","category":"ir"},
-  {"id":"T024","intent":"verify fingerprints for all sessions and return the valid percentage","category":"fingerprint"},
-  {"id":"T025","intent":"get all sessions and count how many have branch trees","category":"corpus-read"},
-  {"id":"T026","intent":"get execution metrics and show the last five generations","category":"corpus-read"},
-  {"id":"T027","intent":"load all protocol rules and count how many have invalidate clauses","category":"protocol"},
-  {"id":"T028","intent":"get the failure genome and return the most common fix path","category":"corpus-read"},
-  {"id":"T029","intent":"check ledger consistency for a specific session","category":"ledger","hasInput":true},
-  {"id":"T030","intent":"get all sessions sorted by the number of attempts","category":"corpus-read"},
-  {"id":"T031","intent":"get the antibody statistics and compute the immune efficiency","category":"corpus-read"},
-  {"id":"T032","intent":"extract IR and count functions that have return type void","category":"ir"},
-  {"id":"T033","intent":"verify all fingerprints and list any tampered sessions","category":"fingerprint"},
-  {"id":"T034","intent":"get execution metrics and count how many repairs occurred","category":"corpus-read"},
-  {"id":"T035","intent":"load protocol rules and find the namespace with the most rules","category":"protocol"},
-  {"id":"T036","intent":"get the failure genome and count violations by constraint type","category":"corpus-read"},
-  {"id":"T037","intent":"find all sessions that have been resolved on the first attempt","category":"corpus-read"},
-  {"id":"T038","intent":"get antibody statistics and count fast path hits vs injected hints","category":"corpus-read"},
-  {"id":"T039","intent":"extract IR and group functions by their source file","category":"ir"},
-  {"id":"T040","intent":"verify fingerprint for a single session by its ID and return tampered status","category":"fingerprint","hasInput":true},
-  {"id":"T041","intent":"get all sessions and find the one with the longest intent string","category":"corpus-read"},
-  {"id":"T042","intent":"get the failure genome and list the top three constraint violation types","category":"corpus-read"},
-  {"id":"T043","intent":"load protocol rules and count how many distinct states are defined","category":"protocol"},
-  {"id":"T044","intent":"get execution metrics and calculate the repair rate as a percentage","category":"corpus-read"},
-  {"id":"T045","intent":"get all sessions and find sessions that have at least one protocol violation","category":"corpus-read"},
-  {"id":"T046","intent":"get antibody statistics and return the top antibody signature by hit count","category":"corpus-read"},
-  {"id":"T047","intent":"extract IR and count how many functions take zero parameters","category":"ir"},
-  {"id":"T048","intent":"verify all fingerprints and return the total number registered","category":"fingerprint"},
-  {"id":"T049","intent":"get the failure genome and count violations in the dev pipeline namespace","category":"corpus-read"},
-  {"id":"T050","intent":"load protocol rules and count rules that belong to the auth namespace","category":"protocol"}
+  {
+    "id": "T001",
+    "intent": "get all sessions from the corpus",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T002",
+    "intent": "get the failure genome statistics",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T003",
+    "intent": "get the antibody statistics",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T004",
+    "intent": "get the execution metrics",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T005",
+    "intent": "verify all ledger fingerprints",
+    "category": "fingerprint"
+  },
+  {
+    "id": "T006",
+    "intent": "get the semantic heatmap data",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T007",
+    "intent": "extract IR from the project",
+    "category": "ir"
+  },
+  {
+    "id": "T008",
+    "intent": "take a session ID and look it up in the corpus",
+    "category": "corpus-read",
+    "hasInput": true
+  },
+  {
+    "id": "T009",
+    "intent": "load protocol rules and list all defined namespaces",
+    "category": "protocol"
+  },
+  {
+    "id": "T010",
+    "intent": "count how many sessions are resolved in the corpus",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T011",
+    "intent": "find the most common failure pattern in the genome",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T012",
+    "intent": "check if all ledgers pass invariant validation",
+    "category": "ledger"
+  },
+  {
+    "id": "T013",
+    "intent": "get the fingerprint hash for a specific session",
+    "category": "fingerprint",
+    "hasInput": true
+  },
+  {
+    "id": "T014",
+    "intent": "compare two session ledgers and show the differences",
+    "category": "ledger",
+    "hasInput": true
+  },
+  {
+    "id": "T015",
+    "intent": "format the immune status as a colored terminal output",
+    "category": "format"
+  },
+  {
+    "id": "T016",
+    "intent": "list all files in the corpus directory",
+    "category": "fs"
+  },
+  {
+    "id": "T017",
+    "intent": "read the protocols configuration and count total rules",
+    "category": "protocol"
+  },
+  {
+    "id": "T018",
+    "intent": "find all sessions that have antibody hits",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T019",
+    "intent": "count how many unique namespaces exist in the protocol rules",
+    "category": "protocol"
+  },
+  {
+    "id": "T020",
+    "intent": "get the total number of transitions across all session ledgers",
+    "category": "ledger"
+  },
+  {
+    "id": "T021",
+    "intent": "get the failure genome and return the SVL-1 violation count",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T022",
+    "intent": "get antibody statistics and count hits by each ACL level",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T023",
+    "intent": "extract IR and return all functions with protocol annotations",
+    "category": "ir"
+  },
+  {
+    "id": "T024",
+    "intent": "verify fingerprints for all sessions and return the valid percentage",
+    "category": "fingerprint"
+  },
+  {
+    "id": "T025",
+    "intent": "get all sessions and count how many have branch trees",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T026",
+    "intent": "get execution metrics and show the last five generations",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T027",
+    "intent": "load all protocol rules and count how many have invalidate clauses",
+    "category": "protocol"
+  },
+  {
+    "id": "T028",
+    "intent": "get the failure genome and return the most common fix path",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T029",
+    "intent": "check ledger consistency for a specific session",
+    "category": "ledger",
+    "hasInput": true
+  },
+  {
+    "id": "T030",
+    "intent": "get all sessions sorted by the number of attempts",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T031",
+    "intent": "get the antibody statistics and compute the immune efficiency",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T032",
+    "intent": "extract IR and count functions that have return type void",
+    "category": "ir"
+  },
+  {
+    "id": "T033",
+    "intent": "verify all fingerprints and list any tampered sessions",
+    "category": "fingerprint"
+  },
+  {
+    "id": "T034",
+    "intent": "get execution metrics and count how many repairs occurred",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T035",
+    "intent": "load protocol rules and find the namespace with the most rules",
+    "category": "protocol"
+  },
+  {
+    "id": "T036",
+    "intent": "get the failure genome and count violations by constraint type",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T037",
+    "intent": "find all sessions that have been resolved on the first attempt",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T038",
+    "intent": "get antibody statistics and count fast path hits vs injected hints",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T039",
+    "intent": "extract IR and group functions by their source file",
+    "category": "ir"
+  },
+  {
+    "id": "T040",
+    "intent": "verify fingerprint for a single session by its ID and return tampered status",
+    "category": "fingerprint",
+    "hasInput": true
+  },
+  {
+    "id": "T041",
+    "intent": "get all sessions and find the one with the longest intent string",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T042",
+    "intent": "get the failure genome and list the top three constraint violation types",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T043",
+    "intent": "load protocol rules and count how many distinct states are defined",
+    "category": "protocol"
+  },
+  {
+    "id": "T044",
+    "intent": "get execution metrics and calculate the repair rate as a percentage",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T045",
+    "intent": "get all sessions and find sessions that have at least one protocol violation",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T046",
+    "intent": "get antibody statistics and return the top antibody signature by hit count",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T047",
+    "intent": "extract IR and count how many functions take zero parameters",
+    "category": "ir"
+  },
+  {
+    "id": "T048",
+    "intent": "verify all fingerprints and return the total number registered",
+    "category": "fingerprint"
+  },
+  {
+    "id": "T049",
+    "intent": "get the failure genome and count violations in the dev pipeline namespace",
+    "category": "corpus-read"
+  },
+  {
+    "id": "T050",
+    "intent": "load protocol rules and count rules that belong to the auth namespace",
+    "category": "protocol"
+  },
+  {
+    "id": "L1-051",
+    "intent": "get all sessions from the corpus",
+    "category": "corpus-read",
+    "level": 1
+  },
+  {
+    "id": "L1-052",
+    "intent": "get the failure genome statistics",
+    "category": "corpus-read",
+    "level": 1
+  },
+  {
+    "id": "L1-053",
+    "intent": "get the antibody statistics",
+    "category": "corpus-read",
+    "level": 1
+  },
+  {
+    "id": "L1-054",
+    "intent": "get the execution metrics",
+    "category": "corpus-read",
+    "level": 1
+  },
+  {
+    "id": "L1-055",
+    "intent": "verify all ledger fingerprints",
+    "category": "fingerprint",
+    "level": 1
+  },
+  {
+    "id": "L1-056",
+    "intent": "get the semantic heatmap data",
+    "category": "corpus-read",
+    "level": 1
+  },
+  {
+    "id": "L1-057",
+    "intent": "extract IR from the project",
+    "category": "ir",
+    "level": 1
+  },
+  {
+    "id": "L1-058",
+    "intent": "get all learned patterns from the immune memory",
+    "category": "corpus-read",
+    "level": 1
+  },
+  {
+    "id": "L1-059",
+    "intent": "get the failure genome and return total failures",
+    "category": "corpus-read",
+    "level": 1
+  },
+  {
+    "id": "L1-060",
+    "intent": "get antibody stats and count fast path hits",
+    "category": "corpus-read",
+    "level": 1
+  },
+  {
+    "id": "L1-061",
+    "intent": "verify all fingerprints and return valid count",
+    "category": "fingerprint",
+    "level": 1
+  },
+  {
+    "id": "L1-062",
+    "intent": "get execution metrics and show generation count",
+    "category": "corpus-read",
+    "level": 1
+  },
+  {
+    "id": "L1-063",
+    "intent": "count protocol rules defined in the configuration",
+    "category": "protocol",
+    "level": 1
+  },
+  {
+    "id": "L1-064",
+    "intent": "get all sessions sorted by their timestamp",
+    "category": "corpus-read",
+    "level": 1
+  },
+  {
+    "id": "L1-065",
+    "intent": "get the failure genome and find the most common fix path",
+    "category": "corpus-read",
+    "level": 1
+  },
+  {
+    "id": "L1-066",
+    "intent": "get antibody stats and compute immune efficiency",
+    "category": "corpus-read",
+    "level": 1
+  },
+  {
+    "id": "L1-067",
+    "intent": "verify fingerprints and list tampered sessions",
+    "category": "fingerprint",
+    "level": 1
+  },
+  {
+    "id": "L1-068",
+    "intent": "count how many protocol rules have invalidate clauses",
+    "category": "protocol",
+    "level": 1
+  },
+  {
+    "id": "L1-069",
+    "intent": "get the heatmap and show fragile protocols",
+    "category": "corpus-read",
+    "level": 1
+  },
+  {
+    "id": "L1-070",
+    "intent": "count how many sessions are resolved vs unresolved",
+    "category": "corpus-read",
+    "level": 1
+  },
+  {
+    "id": "L2-051",
+    "intent": "get all sessions, then get the failure genome, and count how many sessions have violations",
+    "category": "corpus-read",
+    "level": 2
+  },
+  {
+    "id": "L2-052",
+    "intent": "verify all fingerprints, then get the execution metrics, and return both results",
+    "category": "corpus-read",
+    "level": 2
+  },
+  {
+    "id": "L2-053",
+    "intent": "get the failure genome, find the most common fix path, and get antibody stats for that path",
+    "category": "corpus-read",
+    "level": 2
+  },
+  {
+    "id": "L2-054",
+    "intent": "extract IR from the project, then get the heatmap, and return fragile protocols",
+    "category": "ir",
+    "level": 2
+  },
+  {
+    "id": "L2-055",
+    "intent": "get all sessions, filter to resolved ones, and get the failure genome for those sessions",
+    "category": "corpus-read",
+    "level": 2
+  },
+  {
+    "id": "L2-056",
+    "intent": "verify fingerprints, get the tampered count, and check if any are invalid",
+    "category": "fingerprint",
+    "level": 2
+  },
+  {
+    "id": "L2-057",
+    "intent": "get the failure genome, count SVL-4 violations, and get antibody stats for protocol violations",
+    "category": "corpus-read",
+    "level": 2
+  },
+  {
+    "id": "L2-058",
+    "intent": "get execution metrics, get antibody stats, and compute the ratio of repairs to total executions",
+    "category": "corpus-read",
+    "level": 2
+  },
+  {
+    "id": "L2-059",
+    "intent": "load protocol rules, get the failure genome, and count violations by namespace",
+    "category": "protocol",
+    "level": 2
+  },
+  {
+    "id": "L2-060",
+    "intent": "get all sessions, get the heatmap, and find which sessions have the most fragile protocols",
+    "category": "corpus-read",
+    "level": 2
+  },
+  {
+    "id": "L2-061",
+    "intent": "verify fingerprints, get all sessions, and cross-reference which sessions have missing fingerprints",
+    "category": "fingerprint",
+    "level": 2
+  },
+  {
+    "id": "L2-062",
+    "intent": "get the failure genome, get the learned patterns, and compare which patterns match the top failures",
+    "category": "corpus-read",
+    "level": 2
+  },
+  {
+    "id": "L2-063",
+    "intent": "extract IR, get protocol rules, and count how many IR functions have protocol annotations",
+    "category": "ir",
+    "level": 2
+  },
+  {
+    "id": "L2-064",
+    "intent": "get all sessions, get antibody stats, and find sessions with antibody hits",
+    "category": "corpus-read",
+    "level": 2
+  },
+  {
+    "id": "L2-065",
+    "intent": "get execution metrics, get the failure genome, and compute the failure rate per execution",
+    "category": "corpus-read",
+    "level": 2
+  },
+  {
+    "id": "L3-051",
+    "intent": "extract IR, validate the action sequence against IR, and return the validation result",
+    "category": "ir",
+    "level": 3
+  },
+  {
+    "id": "L3-052",
+    "intent": "check ledger consistency for a session, get its fingerprint, and verify both match",
+    "category": "ledger",
+    "level": 3
+  },
+  {
+    "id": "L3-053",
+    "intent": "compare two session ledgers, find the differences, and check if both pass invariants",
+    "category": "ledger",
+    "level": 3
+  },
+  {
+    "id": "L3-054",
+    "intent": "get all sessions, replay each one, and return which sessions fail replay",
+    "category": "ledger",
+    "level": 3
+  },
+  {
+    "id": "L3-055",
+    "intent": "extract IR, find functions with protocol annotations, and check if they pass SSG validation",
+    "category": "ir",
+    "level": 3
+  },
+  {
+    "id": "L3-056",
+    "intent": "get the failure genome, find violations, generate repair proposals, and return the minimal fix set",
+    "category": "corpus-read",
+    "level": 3
+  },
+  {
+    "id": "L3-057",
+    "intent": "load protocol rules, check ledger consistency across all sessions, and report namespace states",
+    "category": "protocol",
+    "level": 3
+  },
+  {
+    "id": "L3-058",
+    "intent": "verify all fingerprints, replay each ledger, and report sessions where fingerprint and replay diverge",
+    "category": "fingerprint",
+    "level": 3
+  },
+  {
+    "id": "L3-059",
+    "intent": "get all sessions, evaluate their branch trees, and return the branch with the highest replay score",
+    "category": "ledger",
+    "level": 3
+  },
+  {
+    "id": "L3-060",
+    "intent": "extract IR, get protocol rules, validate the dev pipeline sequence, and return the state snapshot",
+    "category": "ir",
+    "level": 3
+  },
+  {
+    "id": "L4-051",
+    "intent": "take a session ID, load its ledger, check invariants, replay it, and return a full audit result",
+    "category": "ledger",
+    "level": 4
+  },
+  {
+    "id": "L4-052",
+    "intent": "take a protocol namespace name and return all rules belonging to that namespace with their state transitions",
+    "category": "protocol",
+    "level": 4
+  },
+  {
+    "id": "L4-053",
+    "intent": "take a session ID and a repair proposal, create a repair branch, replay it, and return the evaluation score",
+    "category": "ledger",
+    "level": 4
+  },
+  {
+    "id": "L4-054",
+    "intent": "take two session IDs, load both, diff their ledgers, and return which transitions are unique to each",
+    "category": "ledger",
+    "level": 4
+  },
+  {
+    "id": "L4-055",
+    "intent": "take a failure pattern string, search the failure genome for matching violations, and return repair statistics",
+    "category": "corpus-read",
+    "level": 4
+  },
+  {
+    "id": "L5-051",
+    "intent": "validate the complete dev pipeline sequence from IR extraction through session recording",
+    "category": "protocol",
+    "level": 5
+  },
+  {
+    "id": "L5-052",
+    "intent": "take an intent string and determine which SVL level violations it would trigger based on the failure genome",
+    "category": "corpus-read",
+    "level": 5
+  },
+  {
+    "id": "L5-053",
+    "intent": "load all protocol rules, run the auth namespace sequence, and verify all state transitions are valid",
+    "category": "protocol",
+    "level": 5
+  },
+  {
+    "id": "L5-054",
+    "intent": "take a ledger with violations, generate repair proposals, create branches for each, evaluate them, and return the winner",
+    "category": "ledger",
+    "level": 5
+  },
+  {
+    "id": "L5-055",
+    "intent": "extract IR, validate the full pipeline, check invariants, replay all sessions, and return a complete immune audit report",
+    "category": "ir",
+    "level": 5
+  }
 ]
