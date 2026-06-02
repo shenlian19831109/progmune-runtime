@@ -1,0 +1,215 @@
+{
+  "sessionId": "sess_1780385802192_556tk",
+  "intent": "count how many unique namespaces exist in the protocol rules",
+  "attempts": [
+    {
+      "id": "att_1780385803455_qvhe3",
+      "sessionId": "sess_1780385802192_556tk",
+      "attemptNumber": 1,
+      "inputIntent": "count how many unique namespaces exist in the protocol rules",
+      "plannerSeed": "e4e43831",
+      "constraintSnapshotId": "snap_1780385802192_2b3389fa44bd",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "StateMachineValidator.snapshotNamespaceStates",
+          "args": [],
+          "assignTo": "states"
+        },
+        {
+          "kind": "call",
+          "function": "hashRules",
+          "args": [
+            {
+              "name": "rules",
+              "type": "Map<string, StateAnnotation>",
+              "value": "states"
+            }
+          ],
+          "assignTo": "hash"
+        },
+        {
+          "kind": "return",
+          "value": "hash"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "StateMachineValidator.snapshotNamespaceStates",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "hashRules",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780385803455,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780385802192,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780385803455_qvhe3",
+    "sessionId": "sess_1780385802192_556tk",
+    "attemptNumber": 1,
+    "inputIntent": "count how many unique namespaces exist in the protocol rules",
+    "plannerSeed": "e4e43831",
+    "constraintSnapshotId": "snap_1780385802192_2b3389fa44bd",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.snapshotNamespaceStates",
+        "args": [],
+        "assignTo": "states"
+      },
+      {
+        "kind": "call",
+        "function": "hashRules",
+        "args": [
+          {
+            "name": "rules",
+            "type": "Map<string, StateAnnotation>",
+            "value": "states"
+          }
+        ],
+        "assignTo": "hash"
+      },
+      {
+        "kind": "return",
+        "value": "hash"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "StateMachineValidator.snapshotNamespaceStates",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "hashRules",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780385803455,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780385802192_2b3389fa44bd",
+  "endedAt": 1780385803460
+}

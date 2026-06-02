@@ -1,0 +1,215 @@
+{
+  "sessionId": "sess_1780385654447_imk1e",
+  "intent": "get the fingerprint hash for a specific session",
+  "attempts": [
+    {
+      "id": "att_1780385655669_pi1fu",
+      "sessionId": "sess_1780385654447_imk1e",
+      "attemptNumber": 1,
+      "inputIntent": "get the fingerprint hash for a specific session",
+      "plannerSeed": "45687b5a",
+      "constraintSnapshotId": "snap_1780385654448_2b3389fa44bd",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getFingerprint",
+          "args": [
+            {
+              "name": "sessionId",
+              "type": "string",
+              "value": "specific_session_id"
+            }
+          ],
+          "assignTo": "fp"
+        },
+        {
+          "kind": "call",
+          "function": "hash",
+          "args": [],
+          "assignTo": "hashVal"
+        },
+        {
+          "kind": "return",
+          "value": "hashVal"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getFingerprint",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "hash",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780385655670,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780385654447,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780385655669_pi1fu",
+    "sessionId": "sess_1780385654447_imk1e",
+    "attemptNumber": 1,
+    "inputIntent": "get the fingerprint hash for a specific session",
+    "plannerSeed": "45687b5a",
+    "constraintSnapshotId": "snap_1780385654448_2b3389fa44bd",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getFingerprint",
+        "args": [
+          {
+            "name": "sessionId",
+            "type": "string",
+            "value": "specific_session_id"
+          }
+        ],
+        "assignTo": "fp"
+      },
+      {
+        "kind": "call",
+        "function": "hash",
+        "args": [],
+        "assignTo": "hashVal"
+      },
+      {
+        "kind": "return",
+        "value": "hashVal"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getFingerprint",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "hash",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780385655670,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780385654448_2b3389fa44bd",
+  "endedAt": 1780385655671
+}

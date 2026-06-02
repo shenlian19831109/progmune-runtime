@@ -1,0 +1,3975 @@
+{
+  "id": "snap_1780385630990_2b3389fa44bd",
+  "timestamp": "2026-06-02T07:33:50.990Z",
+  "intent": "check if all ledgers pass invariant validation",
+  "functions": [
+    {
+      "name": "main",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "executeActionCode",
+      "params": [
+        {
+          "name": "code",
+          "type": "string"
+        }
+      ],
+      "returnType": "Action[] | null"
+    },
+    {
+      "name": "ActionBuilder.call",
+      "params": [
+        {
+          "name": "func",
+          "type": "string"
+        },
+        {
+          "name": "args",
+          "type": "any[]"
+        },
+        {
+          "name": "assignTo",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "ActionBuilder.ifBlock",
+      "params": [
+        {
+          "name": "condition",
+          "type": "string"
+        },
+        {
+          "name": "thenFn",
+          "type": "() => void"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "ActionBuilder.ifElse",
+      "params": [
+        {
+          "name": "condition",
+          "type": "string"
+        },
+        {
+          "name": "thenFn",
+          "type": "() => void"
+        },
+        {
+          "name": "elseFn",
+          "type": "() => void"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "ActionBuilder.assign",
+      "params": [
+        {
+          "name": "target",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "type": "any"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "ActionBuilder.output",
+      "params": [
+        {
+          "name": "value",
+          "type": "any"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "auditDirectory",
+      "params": [
+        {
+          "name": "dir",
+          "type": "string"
+        },
+        {
+          "name": "threshold",
+          "type": "any"
+        }
+      ],
+      "returnType": "AuditResult"
+    },
+    {
+      "name": "scanDir",
+      "params": [
+        {
+          "name": "rootDir",
+          "type": "string"
+        },
+        {
+          "name": "currentDir",
+          "type": "string"
+        },
+        {
+          "name": "result",
+          "type": "AuditResult"
+        }
+      ],
+      "returnType": "void"
+    },
+    {
+      "name": "formatAuditResult",
+      "params": [
+        {
+          "name": "result",
+          "type": "AuditResult"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "benchmarkCount",
+      "params": [],
+      "returnType": "number"
+    },
+    {
+      "name": "main",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "benchmarkPassRate",
+      "params": [],
+      "returnType": "{ total: number; passed: number; rate: number }"
+    },
+    {
+      "name": "benchmarkReport",
+      "params": [],
+      "returnType": "string"
+    },
+    {
+      "name": "benchmarkSave",
+      "params": [
+        {
+          "name": "data",
+          "type": "any"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "benchmarkLoadLatest",
+      "params": [],
+      "returnType": "any | null"
+    },
+    {
+      "name": "main",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "generateBranchId",
+      "params": [],
+      "returnType": "string"
+    },
+    {
+      "name": "createRootBranch",
+      "params": [
+        {
+          "name": "transitions",
+          "type": "StateTransition[]"
+        }
+      ],
+      "returnType": "Branch"
+    },
+    {
+      "name": "createBranch",
+      "params": [
+        {
+          "name": "parent",
+          "type": "Branch"
+        },
+        {
+          "name": "reason",
+          "type": "BranchReason"
+        },
+        {
+          "name": "initialTransitions",
+          "type": "StateTransition[]"
+        }
+      ],
+      "returnType": "Branch"
+    },
+    {
+      "name": "forkBranch",
+      "params": [
+        {
+          "name": "branch",
+          "type": "Branch"
+        },
+        {
+          "name": "splitIndex",
+          "type": "number"
+        },
+        {
+          "name": "reason",
+          "type": "BranchReason"
+        }
+      ],
+      "returnType": "{ original: Branch; forked: Branch }"
+    },
+    {
+      "name": "mergeBranches",
+      "params": [
+        {
+          "name": "branches",
+          "type": "Branch[]"
+        }
+      ],
+      "returnType": "Branch | null"
+    },
+    {
+      "name": "flattenBranch",
+      "params": [
+        {
+          "name": "branch",
+          "type": "Branch"
+        },
+        {
+          "name": "allBranches",
+          "type": "Map<string, Branch>"
+        }
+      ],
+      "returnType": "StateTransition[]"
+    },
+    {
+      "name": "getBranchPath",
+      "params": [
+        {
+          "name": "branch",
+          "type": "Branch"
+        },
+        {
+          "name": "allBranches",
+          "type": "Map<string, Branch>"
+        }
+      ],
+      "returnType": "Branch[]"
+    },
+    {
+      "name": "replayBranch",
+      "params": [
+        {
+          "name": "branch",
+          "type": "Branch"
+        },
+        {
+          "name": "allBranches",
+          "type": "Map<string, Branch>"
+        },
+        {
+          "name": "namespaceInitialStates",
+          "type": "Map<string, string>"
+        }
+      ],
+      "returnType": "BranchReplayResult"
+    },
+    {
+      "name": "buildBranchMap",
+      "params": [
+        {
+          "name": "branches",
+          "type": "Branch[]"
+        }
+      ],
+      "returnType": "Map<string, Branch>"
+    },
+    {
+      "name": "findRootBranch",
+      "params": [
+        {
+          "name": "branches",
+          "type": "Branch[]"
+        }
+      ],
+      "returnType": "Branch | undefined"
+    },
+    {
+      "name": "findChildBranches",
+      "params": [
+        {
+          "name": "parent",
+          "type": "Branch"
+        },
+        {
+          "name": "allBranches",
+          "type": "Map<string, Branch>"
+        }
+      ],
+      "returnType": "Branch[]"
+    },
+    {
+      "name": "describeBranchTree",
+      "params": [
+        {
+          "name": "root",
+          "type": "Branch"
+        },
+        {
+          "name": "allBranches",
+          "type": "Map<string, Branch>"
+        },
+        {
+          "name": "indent",
+          "type": "any"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "evaluateBranches",
+      "params": [
+        {
+          "name": "branches",
+          "type": "Branch[]"
+        },
+        {
+          "name": "namespaceInitialStates",
+          "type": "Map<string, string>"
+        }
+      ],
+      "returnType": "{ scores: BranchScore[]; winner: BranchScore | null }"
+    },
+    {
+      "name": "wrapAsBranch",
+      "params": [
+        {
+          "name": "transitions",
+          "type": "StateTransition[]"
+        }
+      ],
+      "returnType": "Branch"
+    },
+    {
+      "name": "unwrapBranchTree",
+      "params": [
+        {
+          "name": "branches",
+          "type": "Branch[]"
+        }
+      ],
+      "returnType": "StateTransition[]"
+    },
+    {
+      "name": "findSuccessfulLeaf",
+      "params": [
+        {
+          "name": "branch",
+          "type": "Branch"
+        },
+        {
+          "name": "allBranches",
+          "type": "Map<string, Branch>"
+        }
+      ],
+      "returnType": "Branch | undefined"
+    },
+    {
+      "name": "step",
+      "params": [
+        {
+          "name": "label",
+          "type": "string"
+        }
+      ],
+      "returnType": "void"
+    },
+    {
+      "name": "pass",
+      "params": [
+        {
+          "name": "msg",
+          "type": "string"
+        }
+      ],
+      "returnType": "void"
+    },
+    {
+      "name": "fail",
+      "params": [
+        {
+          "name": "msg",
+          "type": "string"
+        }
+      ],
+      "returnType": "void"
+    },
+    {
+      "name": "warn",
+      "params": [
+        {
+          "name": "msg",
+          "type": "string"
+        }
+      ],
+      "returnType": "void"
+    },
+    {
+      "name": "G",
+      "params": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "R",
+      "params": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "Y",
+      "params": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "C_",
+      "params": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "D",
+      "params": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "B",
+      "params": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "replaySession",
+      "params": [
+        {
+          "name": "sessionId",
+          "type": "string"
+        },
+        {
+          "name": "currentRules",
+          "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>"
+        },
+        {
+          "name": "namespaceInitialStates",
+          "type": "Map<string, string>"
+        }
+      ],
+      "returnType": "ReplayResult"
+    },
+    {
+      "name": "replayLedger",
+      "params": [
+        {
+          "name": "sessionId",
+          "type": "string"
+        },
+        {
+          "name": "transitions",
+          "type": "StateTransition[]"
+        },
+        {
+          "name": "storedRuleHash",
+          "type": "string"
+        },
+        {
+          "name": "storedLedgerHash",
+          "type": "string"
+        },
+        {
+          "name": "currentRuleHash",
+          "type": "string"
+        },
+        {
+          "name": "currentRules",
+          "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>"
+        },
+        {
+          "name": "namespaceInitialStates",
+          "type": "Map<string, string>"
+        }
+      ],
+      "returnType": "ReplayResult"
+    },
+    {
+      "name": "replayWithDetail",
+      "params": [
+        {
+          "name": "transitions",
+          "type": "StateTransition[]"
+        },
+        {
+          "name": "currentRules",
+          "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>"
+        },
+        {
+          "name": "namespaceInitialStates",
+          "type": "Map<string, string>"
+        }
+      ],
+      "returnType": "ReplayTransition[]"
+    },
+    {
+      "name": "deepEqualSnapshots",
+      "params": [
+        {
+          "name": "a",
+          "type": "Record<string, string[]>"
+        },
+        {
+          "name": "b",
+          "type": "Record<string, string[]>"
+        }
+      ],
+      "returnType": "boolean"
+    },
+    {
+      "name": "normalizeTypeName",
+      "params": [
+        {
+          "name": "raw",
+          "type": "string"
+        }
+      ],
+      "returnType": "string | null"
+    },
+    {
+      "name": "getImportPath",
+      "params": [
+        {
+          "name": "file",
+          "type": "string"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "emitCode",
+      "params": [
+        {
+          "name": "actions",
+          "type": "Action[]"
+        },
+        {
+          "name": "meta",
+          "type": "{ sessionId?: string; ruleHash?: string; irFunctionCount?: number; protocolRuleCount?: number }"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "loadMetrics",
+      "params": [],
+      "returnType": "ExecutionMetrics"
+    },
+    {
+      "name": "saveMetrics",
+      "params": [
+        {
+          "name": "m",
+          "type": "ExecutionMetrics"
+        }
+      ],
+      "returnType": "void"
+    },
+    {
+      "name": "recordGeneration",
+      "params": [
+        {
+          "name": "record",
+          "type": "GenerationRecord"
+        }
+      ],
+      "returnType": "void"
+    },
+    {
+      "name": "getExecutionMetrics",
+      "params": [],
+      "returnType": "ExecutionMetrics"
+    },
+    {
+      "name": "execute",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string"
+        },
+        {
+          "name": "projectPath",
+          "type": "string"
+        },
+        {
+          "name": "filePath",
+          "type": "string"
+        }
+      ],
+      "returnType": "Promise<ExecuteResult>"
+    },
+    {
+      "name": "verifyCompiles",
+      "params": [
+        {
+          "name": "filePath",
+          "type": "string"
+        }
+      ],
+      "returnType": "{ pass: boolean; errors: string[] }"
+    },
+    {
+      "name": "verifyFileMarker",
+      "params": [
+        {
+          "name": "filePath",
+          "type": "string"
+        }
+      ],
+      "returnType": "{ marked: boolean; sessionId?: string; timestamp?: string }"
+    },
+    {
+      "name": "extractIRPython",
+      "params": [
+        {
+          "name": "projectRoot",
+          "type": "string"
+        }
+      ],
+      "returnType": "any[]"
+    },
+    {
+      "name": "parseProtocolFromJSDoc",
+      "params": [
+        {
+          "name": "node",
+          "type": "any"
+        }
+      ],
+      "returnType": "FunctionInfo['protocol'] | undefined"
+    },
+    {
+      "name": "getTypeDetail",
+      "params": [
+        {
+          "name": "typeNode",
+          "type": "any"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "getParamType",
+      "params": [
+        {
+          "name": "param",
+          "type": "any"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "getParamTypeDetail",
+      "params": [
+        {
+          "name": "param",
+          "type": "any"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "getReturnType",
+      "params": [
+        {
+          "name": "func",
+          "type": "FunctionDeclaration | ArrowFunction"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "getReturnTypeDetail",
+      "params": [
+        {
+          "name": "func",
+          "type": "FunctionDeclaration | ArrowFunction"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "extractDirectCalls",
+      "params": [
+        {
+          "name": "func",
+          "type": "FunctionDeclaration | ArrowFunction"
+        }
+      ],
+      "returnType": "string[]"
+    },
+    {
+      "name": "extractIR",
+      "params": [
+        {
+          "name": "projectRoot",
+          "type": "string"
+        }
+      ],
+      "returnType": "FunctionInfo[]"
+    },
+    {
+      "name": "extractIRWithTypes",
+      "params": [
+        {
+          "name": "projectRoot",
+          "type": "string"
+        }
+      ],
+      "returnType": "{\n  functions: FunctionInfo[];\n  typeMap: Record<string, string>;\n}"
+    },
+    {
+      "name": "extractSignatureFromFile",
+      "params": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "sf",
+          "type": "SourceFile"
+        }
+      ],
+      "returnType": "{ params: ParamInfo[]; returnType: string; description: string } | null"
+    },
+    {
+      "name": "extractSignatureFromDts",
+      "params": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "dtsPath",
+          "type": "string"
+        },
+        {
+          "name": "project",
+          "type": "Project"
+        }
+      ],
+      "returnType": "{ params: ParamInfo[]; returnType: string; description: string } | null"
+    },
+    {
+      "name": "classifyError",
+      "params": [
+        {
+          "name": "error",
+          "type": "string"
+        }
+      ],
+      "returnType": "RootCause"
+    },
+    {
+      "name": "classifyPlanError",
+      "params": [
+        {
+          "name": "error",
+          "type": "string"
+        }
+      ],
+      "returnType": "RootCause"
+    },
+    {
+      "name": "recordFailure",
+      "params": [
+        {
+          "name": "record",
+          "type": "Omit<FailureRecord, \"id\" | \"timestamp\">"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "loadFailures",
+      "params": [],
+      "returnType": "FailureRecord[]"
+    },
+    {
+      "name": "failureStats",
+      "params": [],
+      "returnType": "{ total: number; byRootCause: Record<string, number>; topCause: string }"
+    },
+    {
+      "name": "formatFailureStats",
+      "params": [],
+      "returnType": "string"
+    },
+    {
+      "name": "ensureDir",
+      "params": [
+        {
+          "name": "dir",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "checkpointPath",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "saveCheckpoint",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string"
+        },
+        {
+          "name": "data",
+          "type": "Omit<PlannerCheckpoint, \"intent\" | \"timestamp\">"
+        }
+      ],
+      "returnType": "void"
+    },
+    {
+      "name": "loadCheckpoint",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string"
+        }
+      ],
+      "returnType": "PlannerCheckpoint | null"
+    },
+    {
+      "name": "clearCheckpoint",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string"
+        }
+      ],
+      "returnType": "void"
+    },
+    {
+      "name": "recordFailure",
+      "params": [
+        {
+          "name": "record",
+          "type": "Omit<FailureRecord, \"id\" | \"timestamp\" | \"parentSessionId\"> & { sessionId?: string } & Partial<Pick<FailureRecord, \"plannerAttempt\" | \"plannerRetryTotal\">>"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "recordSession",
+      "params": [
+        {
+          "name": "session",
+          "type": "ExecutionSession | Omit<IntentSession, \"sessionId\">"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "getAllFailures",
+      "params": [],
+      "returnType": "FailureRecord[]"
+    },
+    {
+      "name": "getFailuresBySVL",
+      "params": [
+        {
+          "name": "level",
+          "type": "SVL"
+        }
+      ],
+      "returnType": "FailureRecord[]"
+    },
+    {
+      "name": "getTopFailurePatterns",
+      "params": [
+        {
+          "name": "limit",
+          "type": "number"
+        }
+      ],
+      "returnType": "{ pattern: string; count: number; examples: string[] }[]"
+    },
+    {
+      "name": "getFailureGenome",
+      "params": [],
+      "returnType": "{\n  totalFailures: number;\n  bySVL: Record<SVL, number>;\n  byConstraintType: Record<string, number>;\n  topPatterns: { pattern: string; count: number; examples: string[] }[];\n  commonFixPaths: { violation: string; fixPath: string[]; count: number }[];\n  averageRetriesToSuccess: number;\n}"
+    },
+    {
+      "name": "getAllSessions",
+      "params": [],
+      "returnType": "ExecutionSession[]"
+    },
+    {
+      "name": "normalizeSession",
+      "params": [
+        {
+          "name": "raw",
+          "type": "any"
+        }
+      ],
+      "returnType": "ExecutionSession"
+    },
+    {
+      "name": "convertOldSession",
+      "params": [
+        {
+          "name": "old",
+          "type": "IntentSession"
+        }
+      ],
+      "returnType": "ExecutionSession"
+    },
+    {
+      "name": "computeACL",
+      "params": [
+        {
+          "name": "count",
+          "type": "number"
+        },
+        {
+          "name": "distinctIntents",
+          "type": "number"
+        },
+        {
+          "name": "resolvedRate",
+          "type": "number"
+        }
+      ],
+      "returnType": "AntibodyLevel"
+    },
+    {
+      "name": "getLearnedPatterns",
+      "params": [],
+      "returnType": "{ failureToFix: LearnedPattern[] }"
+    },
+    {
+      "name": "queryAntibodies",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string"
+        },
+        {
+          "name": "minACL",
+          "type": "AntibodyLevel"
+        }
+      ],
+      "returnType": "LearnedPattern[]"
+    },
+    {
+      "name": "getSemanticHeatmap",
+      "params": [],
+      "returnType": "{\n  fragileProtocols: { function: string; violationCount: number; svl: string }[];\n  svlHotspots: { svl: string; count: number; percentage: number }[];\n  constraintClusters: { constraints: string[]; count: number; intent: string }[];\n  highFrictionIntents: { intent: string; adaptationCount: number; anomalyTypes: string[] }[];\n}"
+    },
+    {
+      "name": "getAntibodyStats",
+      "params": [],
+      "returnType": "{\n  totalHits: number;\n  fastPathHits: number;\n  injectedHintHits: number;\n  totalLLMCallsSaved: number;\n  totalTokensSaved: number;\n  byLevel: Record<string, { hits: number; llmSaved: number; tokensSaved: number }>;\n  topSignatures: { signature: string; hits: number; avgSimilarity: number }[];\n}"
+    },
+    {
+      "name": "generateCandidateRules",
+      "params": [],
+      "returnType": "string[]"
+    },
+    {
+      "name": "main",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "loadFeedback",
+      "params": [],
+      "returnType": "RunRecord[]"
+    },
+    {
+      "name": "saveFeedback",
+      "params": [
+        {
+          "name": "record",
+          "type": "RunRecord"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "getFunctionSuccessRate",
+      "params": [
+        {
+          "name": "funcName",
+          "type": "string"
+        }
+      ],
+      "returnType": "number"
+    },
+    {
+      "name": "recordRun",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string"
+        },
+        {
+          "name": "actions",
+          "type": "any[]"
+        },
+        {
+          "name": "success",
+          "type": "boolean"
+        },
+        {
+          "name": "error",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "ensureLockDir",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "lockPath",
+      "params": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "withLock",
+      "params": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "fn",
+          "type": "() => T"
+        }
+      ],
+      "returnType": "T"
+    },
+    {
+      "name": "main",
+      "params": [
+        {
+          "name": "sessionId",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "main",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "main",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "main",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "main",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "getInstanceId",
+      "params": [],
+      "returnType": "string"
+    },
+    {
+      "name": "getReportCursor",
+      "params": [],
+      "returnType": "{ lastTimestamp: string | null; reportedCount: number }"
+    },
+    {
+      "name": "saveReportCursor",
+      "params": [
+        {
+          "name": "timestamp",
+          "type": "string"
+        },
+        {
+          "name": "count",
+          "type": "number"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "extractFingerprints",
+      "params": [
+        {
+          "name": "cursor",
+          "type": "{ lastTimestamp: string | null }"
+        }
+      ],
+      "returnType": "ImmuneFingerprint[]"
+    },
+    {
+      "name": "reportFingerprints",
+      "params": [],
+      "returnType": "Promise<{ success: boolean; message: string }>"
+    },
+    {
+      "name": "previewFingerprints",
+      "params": [],
+      "returnType": "ImmuneFingerprint[]"
+    },
+    {
+      "name": "main",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "fingerprintsDir",
+      "params": [],
+      "returnType": "string"
+    },
+    {
+      "name": "fingerprintPath",
+      "params": [
+        {
+          "name": "sessionId",
+          "type": "string"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "registerFingerprint",
+      "params": [
+        {
+          "name": "sessionId",
+          "type": "string"
+        },
+        {
+          "name": "transitions",
+          "type": "StateTransition[]"
+        },
+        {
+          "name": "ruleHash",
+          "type": "string"
+        }
+      ],
+      "returnType": "LedgerFingerprint"
+    },
+    {
+      "name": "getFingerprint",
+      "params": [
+        {
+          "name": "sessionId",
+          "type": "string"
+        }
+      ],
+      "returnType": "LedgerFingerprint | null"
+    },
+    {
+      "name": "getFingerprintRegistry",
+      "params": [],
+      "returnType": "LedgerFingerprint[]"
+    },
+    {
+      "name": "verifyFingerprint",
+      "params": [
+        {
+          "name": "sessionId",
+          "type": "string"
+        },
+        {
+          "name": "transitions",
+          "type": "StateTransition[]"
+        },
+        {
+          "name": "currentRuleHash",
+          "type": "string"
+        }
+      ],
+      "returnType": "FingerprintVerifyResult"
+    },
+    {
+      "name": "verifyAllFingerprints",
+      "params": [
+        {
+          "name": "currentRuleHash",
+          "type": "string"
+        }
+      ],
+      "returnType": "RegistrySummary"
+    },
+    {
+      "name": "registerAllMissingFingerprints",
+      "params": [],
+      "returnType": "number"
+    },
+    {
+      "name": "resetCallCount",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "estimateTokens",
+      "params": [
+        {
+          "name": "text",
+          "type": "string"
+        }
+      ],
+      "returnType": "number"
+    },
+    {
+      "name": "generate",
+      "params": [
+        {
+          "name": "prompt",
+          "type": "string"
+        }
+      ],
+      "returnType": "Promise<string>"
+    },
+    {
+      "name": "chat",
+      "params": [
+        {
+          "name": "systemPrompt",
+          "type": "string"
+        },
+        {
+          "name": "userPrompt",
+          "type": "string"
+        }
+      ],
+      "returnType": "Promise<string>"
+    },
+    {
+      "name": "loadBenchmarks",
+      "params": [],
+      "returnType": "BenchTask[]"
+    },
+    {
+      "name": "runTest",
+      "params": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "actions",
+          "type": "any[]"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "main",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "ensureDir",
+      "params": [
+        {
+          "name": "dir",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "loadEpisodes",
+      "params": [],
+      "returnType": "Episode[]"
+    },
+    {
+      "name": "saveEpisodes",
+      "params": [
+        {
+          "name": "episodes",
+          "type": "Episode[]"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "recordEpisode",
+      "params": [
+        {
+          "name": "episode",
+          "type": "Omit<Episode, \"id\" | \"timestamp\">"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "getRecentEpisodes",
+      "params": [
+        {
+          "name": "limit",
+          "type": "number"
+        }
+      ],
+      "returnType": "Episode[]"
+    },
+    {
+      "name": "getSuccessfulEpisodes",
+      "params": [
+        {
+          "name": "limit",
+          "type": "number"
+        }
+      ],
+      "returnType": "Episode[]"
+    },
+    {
+      "name": "loadSemantic",
+      "params": [],
+      "returnType": "SemanticTemplate[]"
+    },
+    {
+      "name": "saveSemantic",
+      "params": [
+        {
+          "name": "templates",
+          "type": "SemanticTemplate[]"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "consolidateSemantic",
+      "params": [
+        {
+          "name": "minOccurrences",
+          "type": "number"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "findSemanticTemplate",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string"
+        }
+      ],
+      "returnType": "SemanticTemplate | undefined"
+    },
+    {
+      "name": "WorkMemory.setIntent",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "WorkMemory.getIntent",
+      "params": [],
+      "returnType": "string"
+    },
+    {
+      "name": "WorkMemory.bind",
+      "params": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "type",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "WorkMemory.get",
+      "params": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "returnType": "string | undefined"
+    },
+    {
+      "name": "WorkMemory.clear",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "WorkMemory.setIntent",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "WorkMemory.getIntent",
+      "params": [],
+      "returnType": "string"
+    },
+    {
+      "name": "WorkMemory.bind",
+      "params": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "type",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "WorkMemory.get",
+      "params": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "returnType": "string | undefined"
+    },
+    {
+      "name": "WorkMemory.clear",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "WorkMemory.setIntent",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "WorkMemory.getIntent",
+      "params": [],
+      "returnType": "string"
+    },
+    {
+      "name": "WorkMemory.bind",
+      "params": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "type",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "WorkMemory.get",
+      "params": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "returnType": "string | undefined"
+    },
+    {
+      "name": "WorkMemory.clear",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "WorkMemory.setIntent",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "WorkMemory.getIntent",
+      "params": [],
+      "returnType": "string"
+    },
+    {
+      "name": "WorkMemory.bind",
+      "params": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "type",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "WorkMemory.get",
+      "params": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "returnType": "string | undefined"
+    },
+    {
+      "name": "WorkMemory.clear",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "WorkMemory.setIntent",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "WorkMemory.getIntent",
+      "params": [],
+      "returnType": "string"
+    },
+    {
+      "name": "WorkMemory.bind",
+      "params": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "type",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "WorkMemory.get",
+      "params": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "returnType": "string | undefined"
+    },
+    {
+      "name": "WorkMemory.clear",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "WorkMemory.setIntent",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "WorkMemory.getIntent",
+      "params": [],
+      "returnType": "string"
+    },
+    {
+      "name": "WorkMemory.bind",
+      "params": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "type",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "WorkMemory.get",
+      "params": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "returnType": "string | undefined"
+    },
+    {
+      "name": "WorkMemory.clear",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "WorkMemory.setIntent",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "WorkMemory.getIntent",
+      "params": [],
+      "returnType": "string"
+    },
+    {
+      "name": "WorkMemory.bind",
+      "params": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "type",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "WorkMemory.get",
+      "params": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "returnType": "string | undefined"
+    },
+    {
+      "name": "WorkMemory.clear",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "main",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "jsonReply",
+      "params": [
+        {
+          "name": "res",
+          "type": "http.ServerResponse"
+        },
+        {
+          "name": "data",
+          "type": "any"
+        },
+        {
+          "name": "code",
+          "type": "any"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "handleAPI",
+      "params": [
+        {
+          "name": "req",
+          "type": "http.IncomingMessage"
+        },
+        {
+          "name": "res",
+          "type": "http.ServerResponse"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "getSessionTransitions",
+      "params": [
+        {
+          "name": "session",
+          "type": "any"
+        }
+      ],
+      "returnType": "any[]"
+    },
+    {
+      "name": "handleLedgerAPI",
+      "params": [
+        {
+          "name": "res",
+          "type": "http.ServerResponse"
+        },
+        {
+          "name": "url",
+          "type": "URL"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "handleConsistencyAPI",
+      "params": [
+        {
+          "name": "res",
+          "type": "http.ServerResponse"
+        },
+        {
+          "name": "url",
+          "type": "URL"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "handleDiffAPI",
+      "params": [
+        {
+          "name": "res",
+          "type": "http.ServerResponse"
+        },
+        {
+          "name": "url",
+          "type": "URL"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "handleReplayAPI",
+      "params": [
+        {
+          "name": "res",
+          "type": "http.ServerResponse"
+        },
+        {
+          "name": "url",
+          "type": "URL"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "server",
+      "params": [
+        {
+          "name": "req",
+          "type": "any"
+        },
+        {
+          "name": "res",
+          "type": "any"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "loadProtocolsFromFile",
+      "params": [
+        {
+          "name": "filePath",
+          "type": "string"
+        }
+      ],
+      "returnType": "{ protocols: FunctionProtocol[]; initialState: string; namespaceInitialStates: Record<string, string> }"
+    },
+    {
+      "name": "loadProtocolsFromIR",
+      "params": [
+        {
+          "name": "ir",
+          "type": "any[]"
+        }
+      ],
+      "returnType": "FunctionProtocol[]"
+    },
+    {
+      "name": "runDemo",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "enrichActions",
+      "params": [
+        {
+          "name": "actions",
+          "type": "Action[]"
+        },
+        {
+          "name": "ir",
+          "type": "any[]"
+        }
+      ],
+      "returnType": "Action[]"
+    },
+    {
+      "name": "determineSVL",
+      "params": [
+        {
+          "name": "errors",
+          "type": "string[]"
+        }
+      ],
+      "returnType": "SVL"
+    },
+    {
+      "name": "determineConstraintType",
+      "params": [
+        {
+          "name": "svl",
+          "type": "SVL"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "buildCompactFuncList",
+      "params": [
+        {
+          "name": "funcs",
+          "type": "any[]"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "parseActionJSON",
+      "params": [
+        {
+          "name": "text",
+          "type": "string"
+        }
+      ],
+      "returnType": "Action[] | null"
+    },
+    {
+      "name": "correctFunctionNames",
+      "params": [
+        {
+          "name": "actions",
+          "type": "Action[]"
+        },
+        {
+          "name": "ir",
+          "type": "any[]"
+        }
+      ],
+      "returnType": "{ actions: Action[]; corrections: string[] }"
+    },
+    {
+      "name": "fixParameterCounts",
+      "params": [
+        {
+          "name": "actions",
+          "type": "Action[]"
+        },
+        {
+          "name": "ir",
+          "type": "any[]"
+        }
+      ],
+      "returnType": "{ actions: Action[]; fixes: string[] }"
+    },
+    {
+      "name": "buildProtocolChainHint",
+      "params": [
+        {
+          "name": "protocols",
+          "type": "FunctionProtocol[]"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "validateActionSchema",
+      "params": [
+        {
+          "name": "actions",
+          "type": "Action[]"
+        }
+      ],
+      "returnType": "{ valid: boolean; errors: string[] }"
+    },
+    {
+      "name": "loadProtocols",
+      "params": [
+        {
+          "name": "ir",
+          "type": "any[]"
+        }
+      ],
+      "returnType": "{ protocols: FunctionProtocol[]; namespaceInitialStates: Map<string, string> }"
+    },
+    {
+      "name": "validateProtocolWithTransitions",
+      "params": [
+        {
+          "name": "actions",
+          "type": "Action[]"
+        },
+        {
+          "name": "protocols",
+          "type": "FunctionProtocol[]"
+        },
+        {
+          "name": "namespaceInitialStates",
+          "type": "Map<string, string>"
+        }
+      ],
+      "returnType": "{ valid: boolean; rejection?: SSGRejection; index?: number; trace?: { function: string; statesBefore: Record<string, string[]>; statesAfter: Record<string, string[]> }[]; transitions: StateTransition[]; ledgerConsistent?: boolean; ruleHash: string }"
+    },
+    {
+      "name": "attemptSSGRepair",
+      "params": [
+        {
+          "name": "actions",
+          "type": "Action[]"
+        },
+        {
+          "name": "rejection",
+          "type": "SSGRejection"
+        },
+        {
+          "name": "ir",
+          "type": "any[]"
+        },
+        {
+          "name": "protocols",
+          "type": "FunctionProtocol[]"
+        },
+        {
+          "name": "namespaceInitialStates",
+          "type": "Map<string, string>"
+        }
+      ],
+      "returnType": "Action[] | null"
+    },
+    {
+      "name": "plan",
+      "params": [
+        {
+          "name": "userIntent",
+          "type": "string"
+        }
+      ],
+      "returnType": "Promise<PlanResult>"
+    },
+    {
+      "name": "generateFallbackPlan",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string"
+        },
+        {
+          "name": "ir",
+          "type": "any[]"
+        }
+      ],
+      "returnType": "Action[]"
+    },
+    {
+      "name": "invalidateProtocolCache",
+      "params": [],
+      "returnType": "void"
+    },
+    {
+      "name": "getProtocolConfig",
+      "params": [],
+      "returnType": "ProtocolConfig"
+    },
+    {
+      "name": "getNsInit",
+      "params": [],
+      "returnType": "Map<string, string>"
+    },
+    {
+      "name": "getRuleHash",
+      "params": [],
+      "returnType": "string"
+    },
+    {
+      "name": "toPythonModule",
+      "params": [
+        {
+          "name": "filePath",
+          "type": "string"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "pythonValue",
+      "params": [
+        {
+          "name": "val",
+          "type": "any"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "emitPython",
+      "params": [
+        {
+          "name": "actions",
+          "type": "Action[]"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "suggestRepairs",
+      "params": [
+        {
+          "name": "violations",
+          "type": "ConstraintViolation[]"
+        },
+        {
+          "name": "ir",
+          "type": "any[]"
+        },
+        {
+          "name": "protocols",
+          "type": "FunctionProtocol[]"
+        }
+      ],
+      "returnType": "RepairProposal[]"
+    },
+    {
+      "name": "suggestProtocolRepair",
+      "params": [
+        {
+          "name": "rejection",
+          "type": "SSGRejection"
+        },
+        {
+          "name": "ir",
+          "type": "any[]"
+        }
+      ],
+      "returnType": "RepairProposal[]"
+    },
+    {
+      "name": "suggestInvariantRepair",
+      "params": [
+        {
+          "name": "violation",
+          "type": "LedgerConsistencyViolation"
+        },
+        {
+          "name": "ledger",
+          "type": "StateTransition[]"
+        },
+        {
+          "name": "namespaceInitialStates",
+          "type": "Map<string, string>"
+        }
+      ],
+      "returnType": "RepairProposal[]"
+    },
+    {
+      "name": "suggestGenericRepair",
+      "params": [
+        {
+          "name": "violation",
+          "type": "ConstraintViolation"
+        },
+        {
+          "name": "ir",
+          "type": "any[]"
+        }
+      ],
+      "returnType": "RepairProposal"
+    },
+    {
+      "name": "applyProposalAsBranch",
+      "params": [
+        {
+          "name": "proposal",
+          "type": "RepairProposal"
+        },
+        {
+          "name": "parentBranch",
+          "type": "Branch"
+        },
+        {
+          "name": "currentLedger",
+          "type": "StateTransition[]"
+        },
+        {
+          "name": "ir",
+          "type": "any[]"
+        }
+      ],
+      "returnType": "Branch"
+    },
+    {
+      "name": "validateProposal",
+      "params": [
+        {
+          "name": "proposal",
+          "type": "RepairProposal"
+        },
+        {
+          "name": "currentLedger",
+          "type": "StateTransition[]"
+        },
+        {
+          "name": "namespaceInitialStates",
+          "type": "Map<string, string>"
+        }
+      ],
+      "returnType": "{ valid: boolean; remainingViolations: LedgerConsistencyViolation[] }"
+    },
+    {
+      "name": "generateRepairSummary",
+      "params": [
+        {
+          "name": "ledger",
+          "type": "StateTransition[]"
+        },
+        {
+          "name": "ir",
+          "type": "any[]"
+        },
+        {
+          "name": "protocols",
+          "type": "FunctionProtocol[]"
+        },
+        {
+          "name": "namespaceInitialStates",
+          "type": "Map<string, string>"
+        }
+      ],
+      "returnType": "RepairSummary"
+    },
+    {
+      "name": "getMinimalFixSet",
+      "params": [
+        {
+          "name": "proposals",
+          "type": "RepairProposal[]"
+        }
+      ],
+      "returnType": "RepairProposal[]"
+    },
+    {
+      "name": "tryParseRejection",
+      "params": [
+        {
+          "name": "v",
+          "type": "ConstraintViolation"
+        }
+      ],
+      "returnType": "SSGRejection | null"
+    },
+    {
+      "name": "jaccardSimilarity",
+      "params": [
+        {
+          "name": "a",
+          "type": "string"
+        },
+        {
+          "name": "b",
+          "type": "string"
+        }
+      ],
+      "returnType": "number"
+    },
+    {
+      "name": "main",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "assertLedgerConsistency",
+      "params": [
+        {
+          "name": "ledger",
+          "type": "StateTransition[]"
+        },
+        {
+          "name": "namespaceInitialStates",
+          "type": "Map<string, string>"
+        }
+      ],
+      "returnType": "void"
+    },
+    {
+      "name": "assertDeltaConsistency",
+      "params": [
+        {
+          "name": "transition",
+          "type": "StateTransition"
+        }
+      ],
+      "returnType": "void"
+    },
+    {
+      "name": "assertRuleHashMatch",
+      "params": [
+        {
+          "name": "expected",
+          "type": "string"
+        },
+        {
+          "name": "actual",
+          "type": "string"
+        },
+        {
+          "name": "context",
+          "type": "string"
+        }
+      ],
+      "returnType": "void"
+    },
+    {
+      "name": "assertTransitionOrder",
+      "params": [
+        {
+          "name": "ledger",
+          "type": "StateTransition[]"
+        }
+      ],
+      "returnType": "void"
+    },
+    {
+      "name": "assertLedgerInvariants",
+      "params": [
+        {
+          "name": "ledger",
+          "type": "StateTransition[]"
+        },
+        {
+          "name": "namespaceInitialStates",
+          "type": "Map<string, string>"
+        },
+        {
+          "name": "expectedRuleHash",
+          "type": "string"
+        }
+      ],
+      "returnType": "void"
+    },
+    {
+      "name": "isStrict",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "generateAttemptId",
+      "params": [],
+      "returnType": "string"
+    },
+    {
+      "name": "generateSessionId",
+      "params": [],
+      "returnType": "string"
+    },
+    {
+      "name": "generatePlannerSeed",
+      "params": [
+        {
+          "name": "prompt",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "type": "string"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "runAndCheck",
+      "params": [
+        {
+          "name": "code",
+          "type": "string"
+        }
+      ],
+      "returnType": "{ success: boolean; error?: string }"
+    },
+    {
+      "name": "loadIR",
+      "params": [],
+      "returnType": "any[]"
+    },
+    {
+      "name": "getStaticScore",
+      "params": [
+        {
+          "name": "funcName",
+          "type": "string"
+        },
+        {
+          "name": "goal",
+          "type": "string"
+        }
+      ],
+      "returnType": "number"
+    },
+    {
+      "name": "decomposeGoals",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string"
+        },
+        {
+          "name": "functions",
+          "type": "any[]"
+        }
+      ],
+      "returnType": "Promise<string[]>"
+    },
+    {
+      "name": "batchScoreFuncs",
+      "params": [
+        {
+          "name": "funcs",
+          "type": "{name: string; staticScore: number}[]"
+        },
+        {
+          "name": "goal",
+          "type": "string"
+        }
+      ],
+      "returnType": "Promise<Map<string, number>>"
+    },
+    {
+      "name": "searchPlan",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string"
+        },
+        {
+          "name": "beamWidth",
+          "type": "any"
+        },
+        {
+          "name": "maxDepth",
+          "type": "any"
+        }
+      ],
+      "returnType": "Promise<Action[]>"
+    },
+    {
+      "name": "findCompatibleVar",
+      "params": [
+        {
+          "name": "declaredVars",
+          "type": "Map<string, string>"
+        },
+        {
+          "name": "neededType",
+          "type": "string"
+        }
+      ],
+      "returnType": "string | null"
+    },
+    {
+      "name": "runSemanticTest",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "ensureDir",
+      "params": [
+        {
+          "name": "dir",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "createSnapshot",
+      "params": [
+        {
+          "name": "ir",
+          "type": "any[]"
+        },
+        {
+          "name": "intent",
+          "type": "string"
+        },
+        {
+          "name": "sessionId",
+          "type": "string"
+        }
+      ],
+      "returnType": "IRSnapshot"
+    },
+    {
+      "name": "saveSnapshot",
+      "params": [
+        {
+          "name": "snapshot",
+          "type": "IRSnapshot"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "loadSnapshot",
+      "params": [
+        {
+          "name": "snapshotId",
+          "type": "string"
+        }
+      ],
+      "returnType": "IRSnapshot | null"
+    },
+    {
+      "name": "listSnapshots",
+      "params": [],
+      "returnType": "IRSnapshot[]"
+    },
+    {
+      "name": "diffSnapshots",
+      "params": [
+        {
+          "name": "before",
+          "type": "IRSnapshot"
+        },
+        {
+          "name": "after",
+          "type": "IRSnapshot"
+        }
+      ],
+      "returnType": "IRDiff"
+    },
+    {
+      "name": "summarizeSnapshot",
+      "params": [
+        {
+          "name": "snapshot",
+          "type": "IRSnapshot"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "findSnapshotBySession",
+      "params": [
+        {
+          "name": "sessionId",
+          "type": "string"
+        }
+      ],
+      "returnType": "IRSnapshot | undefined"
+    },
+    {
+      "name": "narrateRejection",
+      "params": [
+        {
+          "name": "v",
+          "type": "ConstraintViolation"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "narrateSuccess",
+      "params": [
+        {
+          "name": "actions",
+          "type": "{ kind: string; function?: string }[]"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "formatActionSequence",
+      "params": [
+        {
+          "name": "actions",
+          "type": "{ kind: string; function?: string }[]"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "formatSessionTimeline",
+      "params": [
+        {
+          "name": "session",
+          "type": "ExecutionSession"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "pad",
+      "params": [
+        {
+          "name": "s",
+          "type": "string"
+        },
+        {
+          "name": "w",
+          "type": "number"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "formatSessionSummary",
+      "params": [
+        {
+          "name": "sessions",
+          "type": "ReturnType<typeof getAllSessions>"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "formatGenomeSummary",
+      "params": [],
+      "returnType": "string"
+    },
+    {
+      "name": "barChart",
+      "params": [
+        {
+          "name": "count",
+          "type": "number"
+        },
+        {
+          "name": "total",
+          "type": "number"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "aclBadge",
+      "params": [
+        {
+          "name": "level",
+          "type": "string"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "formatLearnedPatterns",
+      "params": [],
+      "returnType": "string"
+    },
+    {
+      "name": "formatAntibodyStats",
+      "params": [],
+      "returnType": "string"
+    },
+    {
+      "name": "formatHeatmap",
+      "params": [],
+      "returnType": "string"
+    },
+    {
+      "name": "loadProtocols",
+      "params": [],
+      "returnType": "FunctionProtocol[]"
+    },
+    {
+      "name": "formatStateTransitionPathFromLedger",
+      "params": [
+        {
+          "name": "transitions",
+          "type": "StateTransition[]"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "formatStateTransitions",
+      "params": [
+        {
+          "name": "session",
+          "type": "ExecutionSession"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "sleep",
+      "params": [
+        {
+          "name": "ms",
+          "type": "number"
+        }
+      ],
+      "returnType": "Promise<void>"
+    },
+    {
+      "name": "clearScreen",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "svlLabel",
+      "params": [
+        {
+          "name": "svl",
+          "type": "string"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "describeSVLLayer",
+      "params": [
+        {
+          "name": "svl",
+          "type": "string"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "formatReplayHeader",
+      "params": [
+        {
+          "name": "session",
+          "type": "ExecutionSession"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "formatActionList",
+      "params": [
+        {
+          "name": "actions",
+          "type": "{ kind: string; function?: string }[]"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "formatAdaptationDiff",
+      "params": [
+        {
+          "name": "prev",
+          "type": "Attempt"
+        },
+        {
+          "name": "current",
+          "type": "Attempt"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "formatAnomalyReport",
+      "params": [
+        {
+          "name": "a",
+          "type": "Attempt"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "formatImmuneResponse",
+      "params": [
+        {
+          "name": "a",
+          "type": "Attempt"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "formatReplayProgress",
+      "params": [
+        {
+          "name": "current",
+          "type": "number"
+        },
+        {
+          "name": "total",
+          "type": "number"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "replaySession",
+      "params": [
+        {
+          "name": "session",
+          "type": "ExecutionSession"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "formatLedgerReplayValidation",
+      "params": [
+        {
+          "name": "session",
+          "type": "ExecutionSession"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "formatLedgerStats",
+      "params": [],
+      "returnType": "string"
+    },
+    {
+      "name": "formatCrossSessionQuery",
+      "params": [
+        {
+          "name": "operation",
+          "type": "string"
+        },
+        {
+          "name": "state",
+          "type": "string"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "formatSnapshotList",
+      "params": [],
+      "returnType": "string"
+    },
+    {
+      "name": "formatSnapshotDiff",
+      "params": [
+        {
+          "name": "snapIdA",
+          "type": "string"
+        },
+        {
+          "name": "snapIdB",
+          "type": "string"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "formatSessionValidation",
+      "params": [
+        {
+          "name": "session",
+          "type": "ExecutionSession"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "main",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "G",
+      "params": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "R",
+      "params": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "Y",
+      "params": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "C_",
+      "params": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "D",
+      "params": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "B",
+      "params": [
+        {
+          "name": "s",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "loadContracts",
+      "params": [],
+      "returnType": "IRFunction[]"
+    },
+    {
+      "name": "matchIntent",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string"
+        },
+        {
+          "name": "keywords",
+          "type": "string[]"
+        }
+      ],
+      "returnType": "boolean"
+    },
+    {
+      "name": "checkSemantic",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string"
+        },
+        {
+          "name": "actions",
+          "type": "Action[]"
+        }
+      ],
+      "returnType": "{ valid: boolean; errors: string[] }"
+    },
+    {
+      "name": "main",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "toSnapshot",
+      "params": [
+        {
+          "name": "stateMap",
+          "type": "Map<string, Set<string>>"
+        }
+      ],
+      "returnType": "Record<string, string[]>"
+    },
+    {
+      "name": "fromSnapshot",
+      "params": [
+        {
+          "name": "snap",
+          "type": "Record<string, string[]>"
+        }
+      ],
+      "returnType": "Map<string, Set<string>>"
+    },
+    {
+      "name": "deepEqualSnapshots",
+      "params": [
+        {
+          "name": "a",
+          "type": "Record<string, string[]>"
+        },
+        {
+          "name": "b",
+          "type": "Record<string, string[]>"
+        }
+      ],
+      "returnType": "boolean"
+    },
+    {
+      "name": "rebuildState",
+      "params": [
+        {
+          "name": "ledger",
+          "type": "StateTransition[]"
+        },
+        {
+          "name": "namespaceInitialStates",
+          "type": "Map<string, string>"
+        }
+      ],
+      "returnType": "Record<string, string[]>"
+    },
+    {
+      "name": "applyTransitionDelta",
+      "params": [
+        {
+          "name": "stateMap",
+          "type": "Map<string, Set<string>>"
+        },
+        {
+          "name": "transition",
+          "type": "StateTransition"
+        }
+      ],
+      "returnType": "void"
+    },
+    {
+      "name": "computeDelta",
+      "params": [
+        {
+          "name": "beforeSnap",
+          "type": "Record<string, string[]>"
+        },
+        {
+          "name": "afterSnap",
+          "type": "Record<string, string[]>"
+        },
+        {
+          "name": "namespace",
+          "type": "string"
+        }
+      ],
+      "returnType": "{ acquired: string[]; invalidated: string[] }"
+    },
+    {
+      "name": "findFixPathStatic",
+      "params": [
+        {
+          "name": "rules",
+          "type": "Map<string, StateAnnotation>"
+        },
+        {
+          "name": "namespace",
+          "type": "string"
+        },
+        {
+          "name": "current",
+          "type": "string[]"
+        },
+        {
+          "name": "targetPreStates",
+          "type": "string[]"
+        }
+      ],
+      "returnType": "string[]"
+    },
+    {
+      "name": "validateTransition",
+      "params": [
+        {
+          "name": "ctx",
+          "type": "ValidationContext"
+        },
+        {
+          "name": "candidateFunctionName",
+          "type": "string"
+        },
+        {
+          "name": "actionIndex",
+          "type": "number"
+        },
+        {
+          "name": "rules",
+          "type": "Map<string, StateAnnotation>"
+        },
+        {
+          "name": "namespaceInitialStates",
+          "type": "Map<string, string>"
+        },
+        {
+          "name": "ruleHash",
+          "type": "string"
+        }
+      ],
+      "returnType": "{ valid: boolean; transition: StateTransition; rejection?: SSGRejection }"
+    },
+    {
+      "name": "checkLedgerConsistency",
+      "params": [
+        {
+          "name": "ledger",
+          "type": "StateTransition[]"
+        },
+        {
+          "name": "namespaceInitialStates",
+          "type": "Map<string, string>"
+        }
+      ],
+      "returnType": "{ consistent: boolean; violations: LedgerConsistencyViolation[] }"
+    },
+    {
+      "name": "hashRules",
+      "params": [
+        {
+          "name": "rules",
+          "type": "Map<string, StateAnnotation>"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "hashLedger",
+      "params": [
+        {
+          "name": "ledger",
+          "type": "StateTransition[]"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "diffLedgers",
+      "params": [
+        {
+          "name": "ledgerA",
+          "type": "StateTransition[]"
+        },
+        {
+          "name": "ledgerB",
+          "type": "StateTransition[]"
+        }
+      ],
+      "returnType": "LedgerDiff"
+    },
+    {
+      "name": "findProducer",
+      "params": [
+        {
+          "name": "state",
+          "type": "string"
+        },
+        {
+          "name": "ledger",
+          "type": "StateTransition[]"
+        }
+      ],
+      "returnType": "LedgerQueryResult[]"
+    },
+    {
+      "name": "findConsumer",
+      "params": [
+        {
+          "name": "state",
+          "type": "string"
+        },
+        {
+          "name": "ledger",
+          "type": "StateTransition[]"
+        }
+      ],
+      "returnType": "LedgerQueryResult[]"
+    },
+    {
+      "name": "findViolations",
+      "params": [
+        {
+          "name": "ledger",
+          "type": "StateTransition[]"
+        }
+      ],
+      "returnType": "LedgerQueryResult[]"
+    },
+    {
+      "name": "findTransition",
+      "params": [
+        {
+          "name": "actionIndex",
+          "type": "number"
+        },
+        {
+          "name": "ledger",
+          "type": "StateTransition[]"
+        }
+      ],
+      "returnType": "LedgerQueryResult | null"
+    },
+    {
+      "name": "listAllStates",
+      "params": [
+        {
+          "name": "ledger",
+          "type": "StateTransition[]"
+        }
+      ],
+      "returnType": "{ namespace: string; state: string }[]"
+    },
+    {
+      "name": "explainRejection",
+      "params": [
+        {
+          "name": "rejection",
+          "type": "SSGRejection"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "rejectionToJSON",
+      "params": [
+        {
+          "name": "rejection",
+          "type": "SSGRejection"
+        }
+      ],
+      "returnType": "object"
+    },
+    {
+      "name": "parseProtocolsFromJSON",
+      "params": [
+        {
+          "name": "protocolDef",
+          "type": "{\n    rules: Record<string, {\n      pre_states: string[];\n      post_states: string[];\n      invalidate?: string[];\n      namespace?: string;\n    }>;\n  }"
+        }
+      ],
+      "returnType": "FunctionProtocol[]"
+    },
+    {
+      "name": "StateMachineValidator.setNamespaceInitialState",
+      "params": [
+        {
+          "name": "namespace",
+          "type": "string"
+        },
+        {
+          "name": "state",
+          "type": "string"
+        }
+      ],
+      "returnType": "void"
+    },
+    {
+      "name": "StateMachineValidator.apply",
+      "params": [
+        {
+          "name": "functionName",
+          "type": "string"
+        },
+        {
+          "name": "actionIndex",
+          "type": "number"
+        }
+      ],
+      "returnType": "SSGStepResult"
+    },
+    {
+      "name": "StateMachineValidator.applyWithTransition",
+      "params": [
+        {
+          "name": "functionName",
+          "type": "string"
+        },
+        {
+          "name": "actionIndex",
+          "type": "number"
+        }
+      ],
+      "returnType": "{ result: SSGStepResult; transition: StateTransition }"
+    },
+    {
+      "name": "StateMachineValidator.getCurrentStates",
+      "params": [],
+      "returnType": "string[]"
+    },
+    {
+      "name": "StateMachineValidator.snapshotNamespaceStates",
+      "params": [],
+      "returnType": "Record<string, string[]>"
+    },
+    {
+      "name": "StateMachineValidator.getNamespaceStates",
+      "params": [
+        {
+          "name": "namespace",
+          "type": "string"
+        }
+      ],
+      "returnType": "string[]"
+    },
+    {
+      "name": "StateMachineValidator.getTrace",
+      "params": [],
+      "returnType": "SSGTraceNode[]"
+    },
+    {
+      "name": "StateMachineValidator.getLedger",
+      "params": [],
+      "returnType": "StateTransition[]"
+    },
+    {
+      "name": "StateMachineValidator.getContext",
+      "params": [],
+      "returnType": "ValidationContext"
+    },
+    {
+      "name": "StateMachineValidator.getRuleHash",
+      "params": [],
+      "returnType": "string"
+    },
+    {
+      "name": "StateMachineValidator.explainRejection",
+      "params": [
+        {
+          "name": "rejection",
+          "type": "SSGRejection"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "StateMachineValidator.rejectionToJSON",
+      "params": [
+        {
+          "name": "rejection",
+          "type": "SSGRejection"
+        }
+      ],
+      "returnType": "object"
+    },
+    {
+      "name": "jaccardSimilarity",
+      "params": [
+        {
+          "name": "a",
+          "type": "string"
+        },
+        {
+          "name": "b",
+          "type": "string"
+        }
+      ],
+      "returnType": "number"
+    },
+    {
+      "name": "extractKeywords",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string"
+        }
+      ],
+      "returnType": "string[]"
+    },
+    {
+      "name": "loadIR",
+      "params": [],
+      "returnType": "any[]"
+    },
+    {
+      "name": "normalizeType",
+      "params": [
+        {
+          "name": "type",
+          "type": "string | undefined"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "checkVariableFlow",
+      "params": [
+        {
+          "name": "actions",
+          "type": "Action[]"
+        }
+      ],
+      "returnType": "string[]"
+    },
+    {
+      "name": "validateAction",
+      "params": [
+        {
+          "name": "action",
+          "type": "Action"
+        },
+        {
+          "name": "actionIndex",
+          "type": "number"
+        }
+      ],
+      "returnType": "{ valid: boolean; errors: string[]; violations: ConstraintViolation[] }"
+    },
+    {
+      "name": "validateActionSequence",
+      "params": [
+        {
+          "name": "actions",
+          "type": "Action[]"
+        }
+      ],
+      "returnType": "{ valid: boolean; errors: string[]; violations: ConstraintViolation[] }"
+    },
+    {
+      "name": "main",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "fn",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "error",
+      "params": [
+        {
+          "name": "message",
+          "type": "any"
+        }
+      ],
+      "returnType": "void"
+    },
+    {
+      "name": "existsSync",
+      "params": [
+        {
+          "name": "path",
+          "type": "string"
+        }
+      ],
+      "returnType": "boolean"
+    },
+    {
+      "name": "statSync",
+      "params": [
+        {
+          "name": "path",
+          "type": "string"
+        }
+      ],
+      "returnType": "object"
+    },
+    {
+      "name": "toFixed",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "readdirSync",
+      "params": [
+        {
+          "name": "path",
+          "type": "string"
+        }
+      ],
+      "returnType": "string[]"
+    },
+    {
+      "name": "readFileSync",
+      "params": [
+        {
+          "name": "path",
+          "type": "string"
+        },
+        {
+          "name": "encoding",
+          "type": "string"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "relative",
+      "params": [
+        {
+          "name": "from",
+          "type": "string"
+        },
+        {
+          "name": "to",
+          "type": "string"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "repeat",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "require",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "parse",
+      "params": [
+        {
+          "name": "text",
+          "type": "string"
+        }
+      ],
+      "returnType": "any"
+    },
+    {
+      "name": "cwd",
+      "params": [],
+      "returnType": "string"
+    },
+    {
+      "name": "mkdirSync",
+      "params": [
+        {
+          "name": "path",
+          "type": "string"
+        },
+        {
+          "name": "options",
+          "type": "object"
+        }
+      ],
+      "returnType": "void"
+    },
+    {
+      "name": "now",
+      "params": [],
+      "returnType": "number"
+    },
+    {
+      "name": "writeFileSync",
+      "params": [
+        {
+          "name": "path",
+          "type": "string"
+        },
+        {
+          "name": "data",
+          "type": "string"
+        }
+      ],
+      "returnType": "void"
+    },
+    {
+      "name": "stringify",
+      "params": [
+        {
+          "name": "value",
+          "type": "any"
+        },
+        {
+          "name": "replacer",
+          "type": "any"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "random",
+      "params": [],
+      "returnType": "number"
+    },
+    {
+      "name": "add",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "findIndex",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "log",
+      "params": [
+        {
+          "name": "message",
+          "type": "any"
+        }
+      ],
+      "returnType": "void"
+    },
+    {
+      "name": "max",
+      "params": [
+        {
+          "name": "values",
+          "type": "number[]"
+        }
+      ],
+      "returnType": "number"
+    },
+    {
+      "name": "test",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "collect",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "convert",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "dirname",
+      "params": [
+        {
+          "name": "path",
+          "type": "string"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "digest",
+      "params": [
+        {
+          "name": "encoding",
+          "type": "string"
+        }
+      ],
+      "returnType": "string"
+    },
+    {
+      "name": "update",
+      "params": [
+        {
+          "name": "data",
+          "type": "string"
+        }
+      ],
+      "returnType": "Hash"
+    },
+    {
+      "name": "createHash",
+      "params": [
+        {
+          "name": "algorithm",
+          "type": "string"
+        }
+      ],
+      "returnType": "Hash"
+    },
+    {
+      "name": "execSync",
+      "params": [
+        {
+          "name": "command",
+          "type": "string"
+        }
+      ],
+      "returnType": "Buffer"
+    },
+    {
+      "name": "getElementTypeNode",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "getTypeNode",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "getReturnTypeNode",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "getBody",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "forEachDescendant",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "getClasses",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "getMethods",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "getImportDeclarations",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "getModuleSpecifierValue",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "getNamedImports",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "getModuleSpecifierSourceFile",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "resolveModuleName",
+      "params": [
+        {
+          "name": "moduleName",
+          "type": "string"
+        },
+        {
+          "name": "containingFile",
+          "type": "string"
+        },
+        {
+          "name": "compilerOptions",
+          "type": "CompilerOptions"
+        },
+        {
+          "name": "host",
+          "type": "ModuleResolutionHost"
+        },
+        {
+          "name": "cache",
+          "type": "ModuleResolutionCache"
+        },
+        {
+          "name": "redirectedReference",
+          "type": "ResolvedProjectReference"
+        },
+        {
+          "name": "resolutionMode",
+          "type": "ResolutionMode"
+        }
+      ],
+      "returnType": "ResolvedModuleWithFailedLookupLocations"
+    },
+    {
+      "name": "getNamespaceImport",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "addSourceFileAtPathIfExists",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "tryResolveFromNamespace",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "getInterfaces",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "getTypeAliases",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "getExportedDeclarations",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "from",
+      "params": [
+        {
+          "name": "data",
+          "type": "string"
+        },
+        {
+          "name": "encoding",
+          "type": "string"
+        }
+      ],
+      "returnType": "Buffer"
+    },
+    {
+      "name": "unlinkSync",
+      "params": [
+        {
+          "name": "path",
+          "type": "string"
+        }
+      ],
+      "returnType": "void"
+    },
+    {
+      "name": "parseInt",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "flatMap",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "rmdirSync",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "String",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "table",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "hostname",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "create",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "modify",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "writeHead",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "end",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "handler",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "createPureContext",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "apply",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "flat",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "getTrace",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "wrapResult",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "getMaskedFuncList",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "collectImports",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "convertLines",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "delete",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "deepEqual",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "min",
+      "params": [
+        {
+          "name": "values",
+          "type": "number[]"
+        }
+      ],
+      "returnType": "number"
+    },
+    {
+      "name": "parseFloat",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "clear",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "toLocaleString",
+      "params": [],
+      "returnType": "void"
+    },
+    {
+      "name": "mergeStates",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "write",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "norm",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "exit",
+      "params": [
+        {
+          "name": "code",
+          "type": "number"
+        }
+      ],
+      "returnType": "void"
+    },
+    {
+      "name": "normalizeSnap",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "hash",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "bigrams",
+      "params": [],
+      "returnType": "any"
+    },
+    {
+      "name": "processAction",
+      "params": [],
+      "returnType": "any"
+    }
+  ]
+}

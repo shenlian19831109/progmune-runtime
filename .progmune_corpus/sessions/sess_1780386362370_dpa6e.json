@@ -1,0 +1,227 @@
+{
+  "sessionId": "sess_1780386362370_dpa6e",
+  "intent": "load protocol rules and count how many distinct states are defined",
+  "attempts": [
+    {
+      "id": "att_1780386363609_7fh9x",
+      "sessionId": "sess_1780386362370_dpa6e",
+      "attemptNumber": 1,
+      "inputIntent": "load protocol rules and count how many distinct states are defined",
+      "plannerSeed": "3955026b",
+      "constraintSnapshotId": "snap_1780386362371_2b3389fa44bd",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "loadProtocols",
+          "args": [
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": "ir"
+            }
+          ],
+          "assignTo": "protocols"
+        },
+        {
+          "kind": "call",
+          "function": "listAllStates",
+          "args": [
+            {
+              "name": "ledger",
+              "type": "StateTransition[]",
+              "value": "protocols"
+            }
+          ],
+          "assignTo": "states"
+        },
+        {
+          "kind": "return",
+          "value": "states"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "loadProtocols",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "listAllStates",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780386363609,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780386362370,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780386363609_7fh9x",
+    "sessionId": "sess_1780386362370_dpa6e",
+    "attemptNumber": 1,
+    "inputIntent": "load protocol rules and count how many distinct states are defined",
+    "plannerSeed": "3955026b",
+    "constraintSnapshotId": "snap_1780386362371_2b3389fa44bd",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "loadProtocols",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "ir"
+          }
+        ],
+        "assignTo": "protocols"
+      },
+      {
+        "kind": "call",
+        "function": "listAllStates",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "protocols"
+          }
+        ],
+        "assignTo": "states"
+      },
+      {
+        "kind": "return",
+        "value": "states"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "loadProtocols",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "listAllStates",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780386363609,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780386362371_2b3389fa44bd",
+  "endedAt": 1780386363611
+}
