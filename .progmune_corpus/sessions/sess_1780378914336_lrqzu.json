@@ -1,0 +1,151 @@
+{
+  "sessionId": "sess_1780378914336_lrqzu",
+  "intent": "compare two ledgers",
+  "attempts": [
+    {
+      "id": "att_1780378916108_jefi3",
+      "sessionId": "sess_1780378914336_lrqzu",
+      "attemptNumber": 1,
+      "inputIntent": "compare two ledgers",
+      "plannerSeed": "0e5aa334",
+      "constraintSnapshotId": "snap_1780378914336_2b3389fa44bd",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "diffLedgers",
+          "args": [
+            {
+              "name": "ledgerA",
+              "type": "StateTransition[]",
+              "value": "ledgerA"
+            },
+            {
+              "name": "ledgerB",
+              "type": "StateTransition[]",
+              "value": "ledgerB"
+            }
+          ],
+          "assignTo": "diff"
+        },
+        {
+          "kind": "return",
+          "value": "diff"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "diffLedgers",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780378916108,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780378914336,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780378916108_jefi3",
+    "sessionId": "sess_1780378914336_lrqzu",
+    "attemptNumber": 1,
+    "inputIntent": "compare two ledgers",
+    "plannerSeed": "0e5aa334",
+    "constraintSnapshotId": "snap_1780378914336_2b3389fa44bd",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "diffLedgers",
+        "args": [
+          {
+            "name": "ledgerA",
+            "type": "StateTransition[]",
+            "value": "ledgerA"
+          },
+          {
+            "name": "ledgerB",
+            "type": "StateTransition[]",
+            "value": "ledgerB"
+          }
+        ],
+        "assignTo": "diff"
+      },
+      {
+        "kind": "return",
+        "value": "diff"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "diffLedgers",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780378916108,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780378914336_2b3389fa44bd",
+  "endedAt": 1780378916120
+}
