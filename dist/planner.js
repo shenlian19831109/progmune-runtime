@@ -91,7 +91,7 @@ function determineConstraintType(svl) {
     }
 }
 /** 构建紧凑函数列表 — 包含能力元数据帮助 LLM 理解函数语义 */
-function buildCompactFuncList(funcs) {
+function buildCompactFuncList(funcs, allFuncs) {
     return funcs.map((f) => {
         const params = (f.params || []).map((p) => `${p.name}:${p.type}`).join(",");
         let line = `${f.name}(${params})->${f.returnType || "any"}`;
@@ -105,6 +105,24 @@ function buildCompactFuncList(funcs) {
             line += `  // ${meta.join(" | ")}`;
         return line;
     }).join("\n");
+}
+/** Build capability chain hints from IR: producer→consumer relationships.
+ *  e.g. "failureStats → formatFailureStats (FAILURE_STATS)" */
+function buildChainHints(funcs) {
+    const chains = [];
+    for (const f of funcs) {
+        if (!f.produces)
+            continue;
+        for (const p of f.produces) {
+            const consumers = funcs.filter((x) => x.requires?.includes(p) && x.name !== f.name);
+            for (const c of consumers) {
+                chains.push(`${f.name}()→${c.name}()  // ${p}`);
+            }
+        }
+    }
+    if (chains.length === 0)
+        return "";
+    return "\n推荐调用链（先调生产者，用 $变量名 传给消费者）:\n" + chains.map(c => `  ${c}`).join("\n");
 }
 const SYSTEM_PROMPT = `你是程序合成助手。只输出 JSON 数组，不输出解释。
 
@@ -674,7 +692,8 @@ async function plan(userIntent) {
     });
     scored.sort((a, b) => b.score - a.score);
     const topFuncs = scored.slice(0, 15);
-    const compactFuncList = buildCompactFuncList(topFuncs);
+    const compactFuncList = buildCompactFuncList(topFuncs, ir);
+    const chainHints = buildChainHints(topFuncs);
     const userIntentPart = userIntent.match(/(?:实现|implement|编写|创建)\s*(\w+)\s*(?:函数|function)?/i);
     const forbiddenFuncs = [];
     if (userIntentPart) {
@@ -685,7 +704,7 @@ async function plan(userIntent) {
     }
     const protocolChainHint = buildProtocolChainHint(protocols);
     const userPrompt = `可用函数：
-${compactFuncList}${protocolChainHint}
+${compactFuncList}${protocolChainHint}${chainHints}
 
 需求：${userIntent}${antibodyHint}
 
@@ -732,7 +751,7 @@ ${RETRY_HINT}
         });
         if (legalFuncs.length === topFuncs.length)
             return compactFuncList;
-        return buildCompactFuncList(legalFuncs);
+        return buildCompactFuncList(legalFuncs, ir);
     }
     const maxRetries = 3;
     for (let r = startRetry; r < maxRetries; r++) {
