@@ -1,10 +1,16 @@
 # 记忆文件（用户本地）
 .brainycode_memory/
 failure_corpus/
+failure-corpus/
 feedback.json
 ir.json
 semantic_block_results.json
 stress_*.json
+
+# 运行时数据（用户本地）
+.progmune_corpus/
+.progmune_memory/
+bench/
 
 # 测试项目和临时项目
 test-login/
@@ -35,6 +41,13 @@ upgrade_*
 
 # 源代码（用户只需 dist）
 src/
+
+# 敏感文件
+.env
+.env.example
+immune_hub_data/
+docs/Progmune_Runtime_*
+backup/
 
 # 其他
 node_modules/
