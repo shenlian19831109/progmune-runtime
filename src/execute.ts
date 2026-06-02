@@ -85,6 +85,7 @@ export function recordGeneration(record: GenerationRecord): void {
 
 /** Get current execution metrics. */
 /** @requires METRICS_DATA @produces EXECUTION_METRICS */
+/** @requires METRICS_DATA @produces EXECUTION_METRICS */
 export function getExecutionMetrics(): ExecutionMetrics {
   return loadMetrics();
 }
@@ -96,6 +97,7 @@ export function getExecutionMetrics(): ExecutionMetrics {
  * @param projectPath - Absolute path to project root
  * @param filePath - Optional: write generated code to this file
  */
+/** @requires INTENT @produces CODE */
 /** @requires INTENT @produces CODE */
 export async function execute(
   intent: string,
@@ -223,6 +225,7 @@ export async function execute(
 
 /** Verify a file compiles without errors. Returns {pass, errors[]}.
  *  Uses tsc directly — no grep tricks, no pipefail ambiguity. */
+/** @requires FILE_PATH @produces COMPILE_RESULT */
 /** @requires FILE_PATH @produces COMPILE_RESULT */
 /** @requires FILE_PATH @produces COMPILE_RESULT */
 export function verifyCompiles(filePath: string): { pass: boolean; errors: string[] } {

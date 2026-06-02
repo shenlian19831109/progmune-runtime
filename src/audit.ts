@@ -30,6 +30,7 @@ export interface AuditResult {
 const DEFAULT_THRESHOLD = 0.8;
 
 /** Audit a directory for @progmune-generated markers and report coverage. */
+/** @requires DIRECTORY @produces AUDIT_RESULT */
 export function auditDirectory(dir: string, threshold = DEFAULT_THRESHOLD): AuditResult {
   const result: AuditResult = {
     directory: dir,
@@ -125,6 +126,7 @@ function scanDir(rootDir: string, currentDir: string, result: AuditResult): void
 
 /** Format audit result as human-readable text. */
 /** Format audit result as human-readable text with coverage statistics. */
+/** @requires AUDIT_RESULT @produces FORMATTED_REPORT */
 export function formatAuditResult(result: AuditResult): string {
   const pct = (result.coverage * 100).toFixed(1);
   const lines: string[] = [];

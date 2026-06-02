@@ -261,6 +261,12 @@
         "AuditResult"
       ],
       "purpose": "Audit a directory for",
+      "requires": [
+        "DIRECTORY"
+      ],
+      "produces": [
+        "AUDIT_RESULT"
+      ],
       "tags": [
         "audit"
       ]
@@ -350,6 +356,12 @@
         "string"
       ],
       "purpose": "Format audit result as human-readable text with coverage statistics. */",
+      "requires": [
+        "AUDIT_RESULT"
+      ],
+      "produces": [
+        "FORMATTED_REPORT"
+      ],
       "tags": [
         "audit"
       ]
@@ -1828,9 +1840,11 @@
       ],
       "purpose": "Get current execution metrics. */",
       "requires": [
+        "METRICS_DATA",
         "METRICS_DATA"
       ],
       "produces": [
+        "EXECUTION_METRICS",
         "EXECUTION_METRICS"
       ],
       "tags": [
@@ -1893,9 +1907,11 @@
       ],
       "purpose": "Execute the full Progmune pipeline: intent → validated code → file. *",
       "requires": [
+        "INTENT",
         "INTENT"
       ],
       "produces": [
+        "CODE",
         "CODE"
       ],
       "tags": [
@@ -1930,9 +1946,11 @@
       "purpose": "Verify a file compiles without errors. Returns {pass, errors[]}. Uses tsc directly — no grep tricks, no pipefail ambiguity. */",
       "requires": [
         "FILE_PATH",
+        "FILE_PATH",
         "FILE_PATH"
       ],
       "produces": [
+        "COMPILE_RESULT",
         "COMPILE_RESULT",
         "COMPILE_RESULT"
       ],
@@ -2567,9 +2585,11 @@
       ],
       "purpose": "Classify a compile error into a root cause category. */",
       "requires": [
+        "ERROR_STRING",
         "ERROR_STRING"
       ],
       "produces": [
+        "ROOT_CAUSE",
         "ROOT_CAUSE"
       ],
       "tags": [
@@ -2601,9 +2621,11 @@
       ],
       "purpose": "Classify a planning failure into a root cause category. */",
       "requires": [
+        "ERROR_STRING",
         "ERROR_STRING"
       ],
       "produces": [
+        "ROOT_CAUSE",
         "ROOT_CAUSE"
       ],
       "tags": [
@@ -2674,9 +2696,11 @@
       ],
       "purpose": "Load all recorded failures from the failure corpus. */",
       "requires": [
+        "FAILURE_CORPUS",
         "FAILURE_CORPUS"
       ],
       "produces": [
+        "FAILURE_LIST",
         "FAILURE_LIST"
       ],
       "tags": [
@@ -2702,9 +2726,11 @@
       ],
       "purpose": "Get failure statistics grouped by root cause. */",
       "requires": [
+        "FAILURE_LIST",
         "FAILURE_LIST"
       ],
       "produces": [
+        "FAILURE_STATS",
         "FAILURE_STATS"
       ],
       "tags": [
@@ -2735,9 +2761,11 @@
       ],
       "purpose": "Format failure statistics as a human-readable report. */",
       "requires": [
+        "FAILURE_STATS",
         "FAILURE_STATS"
       ],
       "produces": [
+        "FORMATTED_REPORT",
         "FORMATTED_REPORT"
       ],
       "tags": [
@@ -2965,9 +2993,11 @@
       },
       "purpose": "保存执行会话（含所有尝试、违规、状态转移）。",
       "requires": [
+        "EXECUTION_DATA",
         "EXECUTION_DATA"
       ],
       "produces": [
+        "SESSION_ID",
         "SESSION_ID"
       ],
       "tags": [
@@ -3151,9 +3181,11 @@
       ],
       "requires": [
         "SESSION_DATA",
+        "SESSION_CORPUS",
         "SESSION_CORPUS"
       ],
       "produces": [
+        "SESSION_LIST",
         "SESSION_LIST",
         "SESSION_LIST"
       ]

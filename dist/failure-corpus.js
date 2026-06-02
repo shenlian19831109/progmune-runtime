@@ -127,6 +127,7 @@ function recordFailure(record) {
  * @protocol namespace=dev_pipeline pre_states=["CODE_EMITTED"] post_states=["SESSION_RECORDED"] invalidate=["CODE_EMITTED"]
  */
 /** @requires EXECUTION_DATA @produces SESSION_ID */
+/** @requires EXECUTION_DATA @produces SESSION_ID */
 function recordSession(session) {
     ensureDir(SESSIONS_DIR);
     const sessionId = session.sessionId || `sess_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
@@ -270,6 +271,7 @@ function getFailureGenome() {
  * @tags session, corpus, audit, history
  */
 /** @requires SESSION_DATA @produces SESSION_LIST */
+/** @requires SESSION_CORPUS @produces SESSION_LIST */
 /** @requires SESSION_CORPUS @produces SESSION_LIST */
 function getAllSessions() {
     const sessions = [];
