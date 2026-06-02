@@ -1,0 +1,129 @@
+{
+  "sessionId": "sess_1780431094228_oer3o",
+  "intent": "get failure statistics",
+  "attempts": [
+    {
+      "id": "att_1780431095697_jfv7p",
+      "sessionId": "sess_1780431094228_oer3o",
+      "attemptNumber": 1,
+      "inputIntent": "get failure statistics",
+      "plannerSeed": "b3b18432",
+      "constraintSnapshotId": "snap_1780431094233_db5b608fb193",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "failureStats",
+          "args": [],
+          "assignTo": "stats"
+        },
+        {
+          "kind": "return",
+          "value": "stats"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "failureStats",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780431095697,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780431094228,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780431095697_jfv7p",
+    "sessionId": "sess_1780431094228_oer3o",
+    "attemptNumber": 1,
+    "inputIntent": "get failure statistics",
+    "plannerSeed": "b3b18432",
+    "constraintSnapshotId": "snap_1780431094233_db5b608fb193",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "failureStats",
+        "args": [],
+        "assignTo": "stats"
+      },
+      {
+        "kind": "return",
+        "value": "stats"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "failureStats",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780431095697,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780431094233_db5b608fb193",
+  "endedAt": 1780431095704
+}

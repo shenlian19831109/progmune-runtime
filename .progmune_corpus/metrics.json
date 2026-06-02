@@ -1,16 +1,8 @@
 {
-  "generated": 546,
+  "generated": 547,
   "repaired": 9,
-  "lastGeneration": "bench/tmp/t.ts",
+  "lastGeneration": "src/health-report.ts",
   "history": [
-    {
-      "sessionId": "sess_1780425295375_c4djx",
-      "timestamp": 1780425297813,
-      "filePath": "bench/tmp/T008.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 415
-    },
     {
       "sessionId": "sess_1780425335191_ava99",
       "timestamp": 1780425336814,
@@ -799,6 +791,14 @@
       "sessionId": "sess_1780430797648_ntspl",
       "timestamp": 1780430799563,
       "filePath": "bench/tmp/t.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 415
+    },
+    {
+      "sessionId": "sess_1780431335338_br87j",
+      "timestamp": 1780431338195,
+      "filePath": "src/health-report.ts",
       "repaired": false,
       "repairCount": 0,
       "irFunctionCount": 415
