@@ -92,8 +92,17 @@ function determineConstraintType(svl) {
 }
 /** 构建紧凑函数列表 — 包含能力元数据帮助 LLM 理解函数语义 */
 function buildCompactFuncList(funcs, allFuncs) {
+    // Known string enums with example values
+    const ENUM_DEFAULTS = {
+        "SVL": '"SVL-4"', "RootCause": '"F01"', "BranchReason": '"repair_attempt"',
+        "RepairStrategy": '"insert"', "ConstraintType": '"protocol"',
+    };
     return funcs.map((f) => {
-        const params = (f.params || []).map((p) => `${p.name}:${p.type}`).join(",");
+        const params = (f.params || []).map((p) => {
+            const t = (p.type || "any").replace(/\[\]$/, "");
+            const def = ENUM_DEFAULTS[t];
+            return def ? `${p.name}: ${def}` : `${p.name}: ${p.type}`;
+        }).join(",");
         let line = `${f.name}(${params})->${f.returnType || "any"}`;
         // Add capability metadata
         const meta = [];
@@ -140,7 +149,11 @@ const SYSTEM_PROMPT = `你是程序合成助手。只输出 JSON 数组，不输
 - 返回值: {"r":"变量名"} — 必须返回，不能只调用不返回
 - 链式调用：看到推荐调用链时，用 $变量名 把生产者输出传给消费者
 
-铁律：只输出 JSON，最后一个 action 必须是 return`;
+铁律：
+- 函数签名中带引号的参数（如 "SVL-4"）是字符串值，直接写在 v 中
+- 禁止写 {} as SVL、{} as RootCause 等。字符串枚举用引号值
+- 最后一个 action 必须是 return
+- 只输出 JSON`;
 const RETRY_HINT = `输出格式：紧凑 JSON 数组 [{"f":"函数名","to":"变量名","a":[...]}]`;
 /** 构建重试 prompt：精简但包含必要的 IR 语法提示 */
 /** 解析 LLM 输出的紧凑 JSON 为 Action[]。
@@ -699,18 +712,15 @@ async function plan(userIntent) {
     const topFuncs = scored.slice(0, 15);
     const compactFuncList = buildCompactFuncList(topFuncs, ir);
     const chainHints = buildChainHints(topFuncs);
-    // Collect string-enum types so LLM knows to pass strings, not {} as Type
-    const stringTypes = new Set();
-    for (const f of topFuncs) {
-        for (const p of (f.params || [])) {
-            const t = (p.type || "").replace(/\[\]$/, "");
-            if (/^[A-Z][A-Z_]+$/.test(t) && t.length <= 10) {
-                stringTypes.add(t);
-            }
-        }
-    }
-    const typeHints = stringTypes.size > 0
-        ? `\n注意：以下类型是字符串枚举，不是对象：${[...stringTypes].join("、")}。传字符串值而非 {} as Type。`
+    // Known string-enum types: tell LLM these are strings, not objects
+    const STRING_ENUMS = {
+        "SVL": '"SVL-1"|"SVL-2"|"SVL-3"|"SVL-4"',
+        "RootCause": '"F01"|"F02"|...|"F10"',
+        "BranchReason": '"root"|"repair_attempt"|"alternative"',
+        "RepairStrategy": '"insert"|"replace"|"reorder"',
+    };
+    const typeHints = Object.keys(STRING_ENUMS).length > 0
+        ? `\n类型速查：${Object.entries(STRING_ENUMS).map(([k, v]) => `${k}=${v}`).join("，")}。这些类型传字符串值。`
         : "";
     const userIntentPart = userIntent.match(/(?:实现|implement|编写|创建)\s*(\w+)\s*(?:函数|function)?/i);
     const forbiddenFuncs = [];
