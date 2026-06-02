@@ -1,0 +1,45 @@
+{
+  "intent": "compare two fingerprints",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "schema",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "getFingerprint",
+      "args": [
+        {
+          "name": "sessionId",
+          "type": "string",
+          "value": "session1"
+        }
+      ],
+      "assignTo": "fp1"
+    },
+    {
+      "kind": "call",
+      "function": "getFingerprint",
+      "args": [
+        {
+          "name": "sessionId",
+          "type": "string",
+          "value": "session2"
+        }
+      ],
+      "assignTo": "fp2"
+    },
+    {
+      "kind": "return",
+      "value": "fp1"
+    },
+    {
+      "kind": "return",
+      "value": "fp2"
+    }
+  ],
+  "errorDetail": "action[2]: return should be the last action (actions after return are unreachable)",
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 2,
+  "id": "fail_1780377356545_37",
+  "timestamp": "2026-06-02T05:15:56.545Z"
+}
