@@ -37,6 +37,7 @@ exports.runAndCheck = runAndCheck;
 const child_process_1 = require("child_process");
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
+/** @requires COMMAND @produces EXECUTION_RESULT */
 function runAndCheck(code) {
     // 把临时文件写入 test-login 目录，使用它的 tsconfig 编译
     const tmpDir = path.resolve("test-login");

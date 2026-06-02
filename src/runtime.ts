@@ -2,6 +2,7 @@ import { execSync } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 
+/** @requires COMMAND @produces EXECUTION_RESULT */
 export function runAndCheck(code: string): { success: boolean; error?: string } {
   // 把临时文件写入 test-login 目录，使用它的 tsconfig 编译
   const tmpDir = path.resolve("test-login");

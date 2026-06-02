@@ -127,6 +127,7 @@ async function batchScoreFuncs(funcs, goal) {
     }
     return result;
 }
+/** @requires INTENT @produces ACTION_PLAN */
 async function searchPlan(intent, beamWidth = 2, maxDepth = 6) {
     (0, llm_1.resetCallCount)();
     staticScoreCache.clear();

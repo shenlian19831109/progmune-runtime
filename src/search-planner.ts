@@ -100,6 +100,7 @@ async function batchScoreFuncs(
   return result;
 }
 
+/** @requires INTENT @produces ACTION_PLAN */
 export async function searchPlan(intent: string, beamWidth = 2, maxDepth = 6): Promise<Action[]> {
   resetCallCount();
   staticScoreCache.clear();

@@ -7333,6 +7333,12 @@
       "outputs": [
         "{ success: boolean; error?: string }"
       ],
+      "requires": [
+        "COMMAND"
+      ],
+      "produces": [
+        "EXECUTION_RESULT"
+      ],
       "tags": [
         "runtime"
       ]
@@ -7532,6 +7538,12 @@
       ],
       "outputs": [
         "Promise"
+      ],
+      "requires": [
+        "INTENT"
+      ],
+      "produces": [
+        "ACTION_PLAN"
       ],
       "tags": [
         "search",
