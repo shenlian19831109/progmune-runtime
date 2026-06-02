@@ -90,11 +90,20 @@ function determineConstraintType(svl) {
         case "SVL-4": return "protocol";
     }
 }
-/** 构建紧凑函数列表（约节省 50% token） */
+/** 构建紧凑函数列表 — 包含能力元数据帮助 LLM 理解函数语义 */
 function buildCompactFuncList(funcs) {
     return funcs.map((f) => {
         const params = (f.params || []).map((p) => `${p.name}:${p.type}`).join(",");
-        return `${f.name}(${params})->${f.returnType || "any"}`;
+        let line = `${f.name}(${params})->${f.returnType || "any"}`;
+        // Add capability metadata
+        const meta = [];
+        if (f.purpose)
+            meta.push(f.purpose.slice(0, 60));
+        if (f.produces && f.produces.length > 0)
+            meta.push(`→${f.produces.join(",")}`);
+        if (meta.length > 0)
+            line += `  // ${meta.join(" | ")}`;
+        return line;
     }).join("\n");
 }
 const SYSTEM_PROMPT = `你是程序合成助手。只输出 JSON 数组，不输出解释。

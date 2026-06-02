@@ -54,11 +54,17 @@ function determineConstraintType(svl: SVL): string {
   }
 }
 
-/** 构建紧凑函数列表（约节省 50% token） */
+/** 构建紧凑函数列表 — 包含能力元数据帮助 LLM 理解函数语义 */
 function buildCompactFuncList(funcs: any[]): string {
   return funcs.map((f: any) => {
     const params = (f.params || []).map((p: any) => `${p.name}:${p.type}`).join(",");
-    return `${f.name}(${params})->${f.returnType || "any"}`;
+    let line = `${f.name}(${params})->${f.returnType || "any"}`;
+    // Add capability metadata
+    const meta: string[] = [];
+    if (f.purpose) meta.push(f.purpose.slice(0, 60));
+    if (f.produces && f.produces.length > 0) meta.push(`→${f.produces.join(",")}`);
+    if (meta.length > 0) line += `  // ${meta.join(" | ")}`;
+    return line;
   }).join("\n");
 }
 
