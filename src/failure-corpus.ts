@@ -235,6 +235,7 @@ export function getTopFailurePatterns(limit: number = 5): { pattern: string; cou
  * @tags failure, statistics, genome, audit
  */
 /** Get failure genome statistics: total failures by SVL, constraint type, and fix path. */
+/** @requires FAILURE_DATA @produces FAILURE_GENOME */
 export function getFailureGenome(): {
   totalFailures: number;
   bySVL: Record<SVL, number>;
@@ -307,6 +308,7 @@ export function getFailureGenome(): {
 /** Load all execution sessions from the corpus directory.
  * @tags session, corpus, audit, history
  */
+/** @requires SESSION_DATA @produces SESSION_LIST */
 export function getAllSessions(): ExecutionSession[] {
   const sessions: ExecutionSession[] = [];
   if (!fs.existsSync(SESSIONS_DIR)) return sessions;
@@ -415,6 +417,7 @@ function computeACL(count: number, distinctIntents: number, resolvedRate: number
 }
 
 /** Get antibody patterns learned from failure history. */
+/** @requires FAILURE_HISTORY @produces LEARNED_PATTERNS */
 export function getLearnedPatterns(): { failureToFix: LearnedPattern[] } {
   const sessions = getAllSessions();
   const agg = new Map<string, {
@@ -481,6 +484,7 @@ export function getLearnedPatterns(): { failureToFix: LearnedPattern[] } {
 
 /** 查询匹配当前意图的高置信度抗体（ACL-3+），用于推理层免疫加速 */
 /** Query antibody registry for matching repair patterns. */
+/** @requires FAILURE_SIGNATURE @produces ANTIBODY_MATCH */
 export function queryAntibodies(intent: string, minACL: AntibodyLevel = "ACL-3"): LearnedPattern[] {
   const { failureToFix } = getLearnedPatterns();
   const aclRank: Record<AntibodyLevel, number> = { "ACL-1": 1, "ACL-2": 2, "ACL-3": 3, "ACL-4": 4 };
@@ -509,6 +513,7 @@ export function queryAntibodies(intent: string, minACL: AntibodyLevel = "ACL-3")
 
 /** 语义热力图：哪些协议/层最脆弱，约束如何聚类 */
 /** Get semantic heatmap showing fragile protocols and SVL hotspots. */
+/** @requires FAILURE_DATA @produces HEATMAP */
 export function getSemanticHeatmap(): {
   fragileProtocols: { function: string; violationCount: number; svl: string }[];
   svlHotspots: { svl: string; count: number; percentage: number }[];
@@ -583,6 +588,7 @@ export function getSemanticHeatmap(): {
 /** Get antibody efficacy statistics: hits by level, tokens saved, top signatures.
  * @tags antibody, immune, statistics, efficiency
  */
+/** @requires ANTIBODY_DATA @produces ANTIBODY_STATS */
 export function getAntibodyStats(): {
   totalHits: number;
   fastPathHits: number;

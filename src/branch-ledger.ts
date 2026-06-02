@@ -127,6 +127,7 @@ export function createBranch(
  * - Starting a completely fresh alternative from the parent's final state
  */
 /** Fork a branch at a split index creating a sibling repair branch. */
+/** @requires BRANCH @produces FORKED_BRANCHES */
 export function forkBranch(
   branch: Branch,
   splitIndex: number,
@@ -253,6 +254,7 @@ export function getBranchPath(
 /** Replay a branch tree: rebuild state across all ancestor branches
  *  and verify every transition is valid. */
 /** Replay a branch tree verifying all transitions. */
+/** @requires BRANCH_TREE @produces REPLAY_RESULT */
 export function replayBranch(
   branch: Branch,
   allBranches: Map<string, Branch>,
@@ -365,6 +367,7 @@ export interface BranchScore {
  *  Scoring: replay +50, zero violations +30, success outcome +20.
  *  Highest score wins. Ties go to the smaller branch (fewer transitions). */
 /** Score all branches in a tree and return the recommended winner. */
+/** @requires BRANCH_TREE @produces BRANCH_SCORES */
 export function evaluateBranches(
   branches: Branch[],
   namespaceInitialStates: Map<string, string> = new Map([["_global", "UNAUTHENTICATED"]])

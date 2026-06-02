@@ -644,6 +644,19 @@ async function plan(userIntent) {
                     score += 0.3;
             }
         }
+        // Capability Graph: requires/produces capability matching
+        if (f.produces) {
+            for (const p of f.produces) {
+                if (intentLower.includes(p.toLowerCase().replace(/_/g, " ")))
+                    score += 1.5;
+            }
+        }
+        if (f.requires) {
+            for (const r of f.requires) {
+                if (intentLower.includes(r.toLowerCase().replace(/_/g, " ")))
+                    score += 0.5;
+            }
+        }
         // Capability Graph: tag match
         if (f.tags) {
             for (const tag of f.tags) {

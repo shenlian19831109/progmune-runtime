@@ -27,6 +27,8 @@ interface FunctionInfo {
   tags?: string[];            // @tags JSDoc tag (comma-separated)
   inputs?: string[];          // auto-derived from param types
   outputs?: string[];         // auto-derived from return type
+  requires?: string[];        // @requires JSDoc tag — capability prerequisites
+  produces?: string[];        // @produces JSDoc tag — capability outcomes
   protocol?: {
     pre_states: string[];
     post_states: string[];
@@ -35,11 +37,11 @@ interface FunctionInfo {
   };
 }
 
-/** 从 JSDoc 注释中解析 capability 注解 (@purpose, @tags) */
-function parseCapabilityFromJSDoc(node: any): { purpose?: string; tags?: string[] } {
+/** 从 JSDoc 注释中解析 capability 注解 (@purpose, @tags, @requires, @produces) */
+function parseCapabilityFromJSDoc(node: any): { purpose?: string; tags?: string[]; requires?: string[]; produces?: string[] } {
   const jsdocs = node.getJsDocs?.();
   if (!jsdocs || jsdocs.length === 0) return {};
-  const result: { purpose?: string; tags?: string[] } = {};
+  const result: { purpose?: string; tags?: string[]; requires?: string[]; produces?: string[] } = {};
   for (const doc of jsdocs) {
     // @purpose: full description text (all lines before any @tag)
     const fullText = doc.getFullText?.() || "";
@@ -66,6 +68,16 @@ function parseCapabilityFromJSDoc(node: any): { purpose?: string; tags?: string[
         if (tn === "tags" || tn === "tag") {
           const val = t.getCommentText?.() || "";
           result.tags = val.split(/[,\s]+/).map((s: string) => s.trim()).filter(Boolean);
+        }
+        if (tn === "requires") {
+          const val = t.getCommentText?.() || "";
+          if (!result.requires) result.requires = [];
+          result.requires.push(...val.split(/[,\s]+/).map((s: string) => s.trim()).filter(Boolean));
+        }
+        if (tn === "produces") {
+          const val = t.getCommentText?.() || "";
+          if (!result.produces) result.produces = [];
+          result.produces.push(...val.split(/[,\s]+/).map((s: string) => s.trim()).filter(Boolean));
         }
       }
     }

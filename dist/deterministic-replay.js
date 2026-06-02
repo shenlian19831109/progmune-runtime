@@ -54,6 +54,7 @@ const branch_ledger_1 = require("./branch-ledger");
 // ── Core Replay ──
 /** Replay a session from disk, comparing against its stored fingerprint. */
 /** Deterministically replay a session ledger and verify against stored fingerprint. */
+/** @requires SESSION_DATA @produces REPLAY_RESULT */
 function replaySession(sessionId, currentRules, namespaceInitialStates = (0, protocol_registry_1.getNsInit)()) {
     // Load session
     const sessionsDir = path.resolve(process.env.PROGMUNE_PROJECT_DIR || process.cwd(), ".progmune_corpus/sessions");
@@ -114,6 +115,7 @@ function replaySession(sessionId, currentRules, namespaceInitialStates = (0, pro
 }
 /** Core replay logic: replay transitions against (optional) current rules. */
 /** Replay a ledger of transitions against current rules and verify consistency. */
+/** @requires LEDGER_DATA @produces REPLAY_RESULT */
 function replayLedger(sessionId, transitions, storedRuleHash, storedLedgerHash, currentRuleHash, currentRules, namespaceInitialStates = (0, protocol_registry_1.getNsInit)()) {
     const replayedHash = transitions.length > 0 ? (0, ssg_validator_1.hashLedger)(transitions) : "";
     const ruleHashMatch = !currentRuleHash || !storedRuleHash

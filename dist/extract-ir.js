@@ -39,7 +39,7 @@ const ts_morph_1 = require("ts-morph");
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
 const ts = __importStar(require("typescript"));
-/** 从 JSDoc 注释中解析 capability 注解 (@purpose, @tags) */
+/** 从 JSDoc 注释中解析 capability 注解 (@purpose, @tags, @requires, @produces) */
 function parseCapabilityFromJSDoc(node) {
     const jsdocs = node.getJsDocs?.();
     if (!jsdocs || jsdocs.length === 0)
@@ -71,6 +71,18 @@ function parseCapabilityFromJSDoc(node) {
                 if (tn === "tags" || tn === "tag") {
                     const val = t.getCommentText?.() || "";
                     result.tags = val.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean);
+                }
+                if (tn === "requires") {
+                    const val = t.getCommentText?.() || "";
+                    if (!result.requires)
+                        result.requires = [];
+                    result.requires.push(...val.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean));
+                }
+                if (tn === "produces") {
+                    const val = t.getCommentText?.() || "";
+                    if (!result.produces)
+                        result.produces = [];
+                    result.produces.push(...val.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean));
                 }
             }
         }

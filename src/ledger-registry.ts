@@ -56,6 +56,7 @@ function fingerprintPath(sessionId: string): string {
 /** Register a ledger fingerprint (execution certificate).
  *  Called after a session is recorded — creates an immutable proof of the ledger state. */
 /** Register a ledger fingerprint as an execution certificate. */
+/** @requires LEDGER_DATA @produces FINGERPRINT */
 export function registerFingerprint(
   sessionId: string,
   transitions: StateTransition[],
@@ -80,6 +81,7 @@ export function registerFingerprint(
 
 /** Get a single stored fingerprint by sessionId. Returns null if not registered. */
 /** Get a stored ledger fingerprint by session ID. */
+/** @requires SESSION_ID @produces FINGERPRINT */
 export function getFingerprint(sessionId: string): LedgerFingerprint | null {
   const fpPath = fingerprintPath(sessionId);
   if (!fs.existsSync(fpPath)) return null;
@@ -155,6 +157,7 @@ export function verifyFingerprint(
 /** Verify all registered fingerprints.
  *  Loads each session to re-hash and compare against the stored fingerprint. */
 /** Verify all registered ledger fingerprints and return tampered status. */
+/** @requires FINGERPRINT_DATA @produces VERIFICATION_RESULT */
 export function verifyAllFingerprints(currentRuleHash?: string): RegistrySummary {
   const fingerprints = getFingerprintRegistry();
   const results: FingerprintVerifyResult[] = [];

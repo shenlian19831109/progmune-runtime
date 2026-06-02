@@ -65,6 +65,7 @@ export interface RepairSummary {
 
 /** Generate repair proposals for all detected violations in a ledger. */
 /** Generate repair proposals for all detected violations. */
+/** @requires VIOLATIONS @produces REPAIR_PROPOSALS */
 export function suggestRepairs(
   violations: ConstraintViolation[],
   ir: any[],
@@ -393,6 +394,7 @@ export function validateProposal(
 
 /** Generate a comprehensive repair summary from a ledger and IR context. */
 /** Generate a comprehensive repair summary with minimal fix set. */
+/** @requires LEDGER_DATA @produces REPAIR_SUMMARY */
 export function generateRepairSummary(
   ledger: StateTransition[],
   ir: any[],
@@ -424,6 +426,7 @@ export function generateRepairSummary(
  * should resolve all detected violations without redundant fixes.
  */
 /** Get the minimal set of repair proposals by deduplication. */
+/** @requires REPAIR_PROPOSALS @produces MINIMAL_FIX_SET */
 export function getMinimalFixSet(proposals: RepairProposal[]): RepairProposal[] {
   const seen = new Map<number, RepairProposal>();
   for (const p of proposals) {

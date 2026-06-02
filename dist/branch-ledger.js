@@ -106,6 +106,7 @@ function createBranch(parent, reason = "alternative", initialTransitions = []) {
  * - Starting a completely fresh alternative from the parent's final state
  */
 /** Fork a branch at a split index creating a sibling repair branch. */
+/** @requires BRANCH @produces FORKED_BRANCHES */
 function forkBranch(branch, splitIndex, reason = "repair_attempt") {
     const sharedTransitions = branch.transitions.slice(0, splitIndex + 1);
     const remainingTransitions = branch.transitions.slice(splitIndex + 1);
@@ -210,6 +211,7 @@ function getBranchPath(branch, allBranches) {
 /** Replay a branch tree: rebuild state across all ancestor branches
  *  and verify every transition is valid. */
 /** Replay a branch tree verifying all transitions. */
+/** @requires BRANCH_TREE @produces REPLAY_RESULT */
 function replayBranch(branch, allBranches, namespaceInitialStates = (0, protocol_registry_1.getNsInit)()) {
     const path = getBranchPath(branch, allBranches);
     const pathIds = path.map(b => b.id);
@@ -285,6 +287,7 @@ function describeBranchTree(root, allBranches, indent = 0) {
  *  Scoring: replay +50, zero violations +30, success outcome +20.
  *  Highest score wins. Ties go to the smaller branch (fewer transitions). */
 /** Score all branches in a tree and return the recommended winner. */
+/** @requires BRANCH_TREE @produces BRANCH_SCORES */
 function evaluateBranches(branches, namespaceInitialStates = new Map([["_global", "UNAUTHENTICATED"]])) {
     if (branches.length === 0)
         return { scores: [], winner: null };

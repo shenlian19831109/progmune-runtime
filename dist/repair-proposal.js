@@ -28,6 +28,7 @@ const branch_ledger_1 = require("./branch-ledger");
 // ── Proposal Generation ──
 /** Generate repair proposals for all detected violations in a ledger. */
 /** Generate repair proposals for all detected violations. */
+/** @requires VIOLATIONS @produces REPAIR_PROPOSALS */
 function suggestRepairs(violations, ir, protocols) {
     const proposals = [];
     for (const v of violations) {
@@ -304,6 +305,7 @@ function validateProposal(proposal, currentLedger, namespaceInitialStates = (0, 
 // ── Summary ──
 /** Generate a comprehensive repair summary from a ledger and IR context. */
 /** Generate a comprehensive repair summary with minimal fix set. */
+/** @requires LEDGER_DATA @produces REPAIR_SUMMARY */
 function generateRepairSummary(ledger, ir, protocols, namespaceInitialStates = (0, protocol_registry_1.getNsInit)()) {
     const consistency = (0, ssg_validator_1.checkLedgerConsistency)(ledger, namespaceInitialStates);
     const allProposals = [];
@@ -326,6 +328,7 @@ function generateRepairSummary(ledger, ir, protocols, namespaceInitialStates = (
  * should resolve all detected violations without redundant fixes.
  */
 /** Get the minimal set of repair proposals by deduplication. */
+/** @requires REPAIR_PROPOSALS @produces MINIMAL_FIX_SET */
 function getMinimalFixSet(proposals) {
     const seen = new Map();
     for (const p of proposals) {

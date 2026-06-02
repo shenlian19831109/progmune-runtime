@@ -655,6 +655,12 @@
         "{ original: Branch; forked: Branch }"
       ],
       "purpose": "Fork a branch at a split index creating a sibling repair branch. */",
+      "requires": [
+        "BRANCH"
+      ],
+      "produces": [
+        "FORKED_BRANCHES"
+      ],
       "tags": [
         "branch",
         "ledger"
@@ -807,6 +813,12 @@
         "BranchReplayResult"
       ],
       "purpose": "Replay a branch tree verifying all transitions. */",
+      "requires": [
+        "BRANCH_TREE"
+      ],
+      "produces": [
+        "REPLAY_RESULT"
+      ],
       "tags": [
         "branch",
         "ledger"
@@ -980,6 +992,12 @@
         "{ scores: BranchScore[]; winner: BranchScore"
       ],
       "purpose": "Score all branches in a tree and return the recommended winner. */",
+      "requires": [
+        "BRANCH_TREE"
+      ],
+      "produces": [
+        "BRANCH_SCORES"
+      ],
       "tags": [
         "branch",
         "ledger"
@@ -1336,6 +1354,12 @@
         "ReplayResult"
       ],
       "purpose": "Deterministically replay a session ledger and verify against stored fingerprint. */",
+      "requires": [
+        "SESSION_DATA"
+      ],
+      "produces": [
+        "REPLAY_RESULT"
+      ],
       "tags": [
         "deterministic",
         "replay"
@@ -1407,6 +1431,12 @@
         "ReplayResult"
       ],
       "purpose": "Replay a ledger of transitions against current rules and verify consistency. */",
+      "requires": [
+        "LEDGER_DATA"
+      ],
+      "produces": [
+        "REPLAY_RESULT"
+      ],
       "tags": [
         "deterministic",
         "replay"
@@ -1863,8 +1893,8 @@
           "typeDetail": "any"
         }
       ],
-      "returnType": "{ purpose?: string; tags?: string[] }",
-      "returnTypeDetail": "{ purpose?: string; tags?: string[] }",
+      "returnType": "{ purpose?: string; tags?: string[]; requires?: string[]; produces?: string[] }",
+      "returnTypeDetail": "{ purpose?: string; tags?: string[]; requires?: string[]; produces?: string[] }",
       "file": "src/extract-ir.ts",
       "calls": [
         "getJsDocs",
@@ -1879,15 +1909,20 @@
         "getTagName",
         "getCommentText",
         "filter",
-        "map"
+        "map",
+        "push"
       ],
       "exported": false,
       "inputs": [],
       "outputs": [
-        "{ purpose?: string; tags?: string[] }"
+        "{ purpose?: string; tags?: string[]; requires?: string[]; produces?: string[] }"
       ],
       "purpose": "从 JSDoc 注释中解析 capability 注解 (",
       "tags": [
+        "extract"
+      ],
+      "requires": [],
+      "produces": [
         ")"
       ]
     },
@@ -2878,6 +2913,12 @@
         "statistics",
         "genome",
         "audit"
+      ],
+      "requires": [
+        "FAILURE_DATA"
+      ],
+      "produces": [
+        "FAILURE_GENOME"
       ]
     },
     {
@@ -2907,6 +2948,12 @@
         "corpus",
         "audit",
         "history"
+      ],
+      "requires": [
+        "SESSION_DATA"
+      ],
+      "produces": [
+        "SESSION_LIST"
       ]
     },
     {
@@ -3027,6 +3074,12 @@
         "{ failureToFix: LearnedPattern[] }"
       ],
       "purpose": "Get antibody patterns learned from failure history. */",
+      "requires": [
+        "FAILURE_HISTORY"
+      ],
+      "produces": [
+        "LEARNED_PATTERNS"
+      ],
       "tags": [
         "failure",
         "corpus"
@@ -3066,6 +3119,12 @@
         "LearnedPattern"
       ],
       "purpose": "Query antibody registry for matching repair patterns. */",
+      "requires": [
+        "FAILURE_SIGNATURE"
+      ],
+      "produces": [
+        "ANTIBODY_MATCH"
+      ],
       "tags": [
         "failure",
         "corpus"
@@ -3098,6 +3157,12 @@
         "{\n  fragileProtocols: { function: string; violationCount: number; svl: string }[];\n  svlHotspots: { svl: string; count: number; percentage: number }[];\n  constraintClusters: { constraints: string[]; count: number; intent: string }[];\n  highFrictionIntents: { intent: string; adaptationCount: number; anomalyTypes: string[] }[];\n}"
       ],
       "purpose": "Get semantic heatmap showing fragile protocols and SVL hotspots. */",
+      "requires": [
+        "FAILURE_DATA"
+      ],
+      "produces": [
+        "HEATMAP"
+      ],
       "tags": [
         "failure",
         "corpus"
@@ -3130,6 +3195,12 @@
         "immune",
         "statistics",
         "efficiency"
+      ],
+      "requires": [
+        "ANTIBODY_DATA"
+      ],
+      "produces": [
+        "ANTIBODY_STATS"
       ]
     },
     {
@@ -3773,6 +3844,12 @@
         "LedgerFingerprint"
       ],
       "purpose": "Register a ledger fingerprint as an execution certificate. */",
+      "requires": [
+        "LEDGER_DATA"
+      ],
+      "produces": [
+        "FINGERPRINT"
+      ],
       "tags": [
         "ledger",
         "registry"
@@ -3804,6 +3881,12 @@
         "LedgerFingerprint"
       ],
       "purpose": "Get a stored ledger fingerprint by session ID. */",
+      "requires": [
+        "SESSION_ID"
+      ],
+      "produces": [
+        "FINGERPRINT"
+      ],
       "tags": [
         "ledger",
         "registry"
@@ -3910,6 +3993,12 @@
         "RegistrySummary"
       ],
       "purpose": "Verify all registered ledger fingerprints and return tampered status. */",
+      "requires": [
+        "FINGERPRINT_DATA"
+      ],
+      "produces": [
+        "VERIFICATION_RESULT"
+      ],
       "tags": [
         "ledger",
         "registry"
@@ -6163,6 +6252,12 @@
         "RepairProposal"
       ],
       "purpose": "Generate repair proposals for all detected violations. */",
+      "requires": [
+        "VIOLATIONS"
+      ],
+      "produces": [
+        "REPAIR_PROPOSALS"
+      ],
       "tags": [
         "repair",
         "proposal"
@@ -6426,6 +6521,12 @@
         "RepairSummary"
       ],
       "purpose": "Generate a comprehensive repair summary with minimal fix set. */",
+      "requires": [
+        "LEDGER_DATA"
+      ],
+      "produces": [
+        "REPAIR_SUMMARY"
+      ],
       "tags": [
         "repair",
         "proposal"
@@ -6457,6 +6558,12 @@
         "RepairProposal"
       ],
       "purpose": "Get the minimal set of repair proposals by deduplication. */",
+      "requires": [
+        "REPAIR_PROPOSALS"
+      ],
+      "produces": [
+        "MINIMAL_FIX_SET"
+      ],
       "tags": [
         "repair",
         "proposal"

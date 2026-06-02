@@ -205,6 +205,7 @@ function getTopFailurePatterns(limit = 5) {
  * @tags failure, statistics, genome, audit
  */
 /** Get failure genome statistics: total failures by SVL, constraint type, and fix path. */
+/** @requires FAILURE_DATA @produces FAILURE_GENOME */
 function getFailureGenome() {
     const sessions = getAllSessions();
     const bySVL = { "SVL-1": 0, "SVL-2": 0, "SVL-3": 0, "SVL-4": 0 };
@@ -264,6 +265,7 @@ function getFailureGenome() {
 /** Load all execution sessions from the corpus directory.
  * @tags session, corpus, audit, history
  */
+/** @requires SESSION_DATA @produces SESSION_LIST */
 function getAllSessions() {
     const sessions = [];
     if (!fs.existsSync(SESSIONS_DIR))
@@ -355,6 +357,7 @@ function computeACL(count, distinctIntents, resolvedRate) {
     return "ACL-1";
 }
 /** Get antibody patterns learned from failure history. */
+/** @requires FAILURE_HISTORY @produces LEARNED_PATTERNS */
 function getLearnedPatterns() {
     const sessions = getAllSessions();
     const agg = new Map();
@@ -414,6 +417,7 @@ function getLearnedPatterns() {
 }
 /** 查询匹配当前意图的高置信度抗体（ACL-3+），用于推理层免疫加速 */
 /** Query antibody registry for matching repair patterns. */
+/** @requires FAILURE_SIGNATURE @produces ANTIBODY_MATCH */
 function queryAntibodies(intent, minACL = "ACL-3") {
     const { failureToFix } = getLearnedPatterns();
     const aclRank = { "ACL-1": 1, "ACL-2": 2, "ACL-3": 3, "ACL-4": 4 };
@@ -439,6 +443,7 @@ function queryAntibodies(intent, minACL = "ACL-3") {
 }
 /** 语义热力图：哪些协议/层最脆弱，约束如何聚类 */
 /** Get semantic heatmap showing fragile protocols and SVL hotspots. */
+/** @requires FAILURE_DATA @produces HEATMAP */
 function getSemanticHeatmap() {
     const sessions = getAllSessions();
     // Count total violations from sessions
@@ -501,6 +506,7 @@ function getSemanticHeatmap() {
 /** Get antibody efficacy statistics: hits by level, tokens saved, top signatures.
  * @tags antibody, immune, statistics, efficiency
  */
+/** @requires ANTIBODY_DATA @produces ANTIBODY_STATS */
 function getAntibodyStats() {
     const sessions = getAllSessions();
     let totalHits = 0;
