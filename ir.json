@@ -61,7 +61,13 @@
       "calls": [
         "getAntibodyStats"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "ab",
+        "stats"
+      ]
     },
     {
       "name": "executeActionCode",
@@ -80,7 +86,17 @@
         "fn",
         "error"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "Action[]"
+      ],
+      "tags": [
+        "action",
+        "runtime"
+      ]
     },
     {
       "name": "ActionBuilder.call",
@@ -105,7 +121,11 @@
       "returnTypeDetail": "any",
       "file": "src/action-runtime.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "action",
+        "runtime"
+      ]
     },
     {
       "name": "ActionBuilder.ifBlock",
@@ -125,7 +145,11 @@
       "returnTypeDetail": "any",
       "file": "src/action-runtime.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "action",
+        "runtime"
+      ]
     },
     {
       "name": "ActionBuilder.ifElse",
@@ -150,7 +174,11 @@
       "returnTypeDetail": "any",
       "file": "src/action-runtime.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "action",
+        "runtime"
+      ]
     },
     {
       "name": "ActionBuilder.assign",
@@ -170,7 +198,11 @@
       "returnTypeDetail": "any",
       "file": "src/action-runtime.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "action",
+        "runtime"
+      ]
     },
     {
       "name": "ActionBuilder.output",
@@ -185,7 +217,11 @@
       "returnTypeDetail": "any",
       "file": "src/action-runtime.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "action",
+        "runtime"
+      ]
     },
     {
       "name": "auditDirectory",
@@ -212,7 +248,16 @@
         "toFixed",
         "sort"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "AuditResult"
+      ],
+      "tags": [
+        "audit"
+      ]
     },
     {
       "name": "scanDir",
@@ -251,7 +296,16 @@
         "push",
         "relative"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string",
+        "string",
+        "AuditResult"
+      ],
+      "outputs": [],
+      "tags": [
+        "audit"
+      ]
     },
     {
       "name": "formatAuditResult",
@@ -283,7 +337,16 @@
         "keys"
       ],
       "exported": true,
-      "purpose": "Format audit result as human-readable text."
+      "inputs": [
+        "AuditResult"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Format audit result as human-readable text. */",
+      "tags": [
+        "audit"
+      ]
     },
     {
       "name": "benchmarkCount",
@@ -294,7 +357,15 @@
       "calls": [
         "loadBenchmarks"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "number"
+      ],
+      "tags": [
+        "benchmark",
+        "count"
+      ]
     },
     {
       "name": "main",
@@ -308,7 +379,13 @@
         "benchmarkReport",
         "benchmarkSave"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "benchmark",
+        "full"
+      ]
     },
     {
       "name": "benchmarkPassRate",
@@ -328,7 +405,16 @@
         "readFileSync",
         "join"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "{ total: number; passed: number; rate: number }"
+      ],
+      "tags": [
+        "benchmark",
+        "pass",
+        "rate"
+      ]
     },
     {
       "name": "benchmarkReport",
@@ -351,7 +437,15 @@
         "push",
         "slice"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "benchmark",
+        "report"
+      ]
     },
     {
       "name": "benchmarkSave",
@@ -375,7 +469,15 @@
         "writeFileSync",
         "stringify"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "benchmark",
+        "save"
+      ]
     },
     {
       "name": "benchmarkLoadLatest",
@@ -395,7 +497,13 @@
         "readFileSync",
         "join"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "benchmark",
+        "save"
+      ]
     },
     {
       "name": "main",
@@ -408,7 +516,13 @@
         "benchmarkCount",
         "benchmarkReport"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "benchmark",
+        "status"
+      ]
     },
     {
       "name": "generateBranchId",
@@ -423,7 +537,15 @@
         "random"
       ],
       "exported": true,
-      "purpose": "Generate a unique branch ID."
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Generate a unique branch ID. */",
+      "tags": [
+        "branch",
+        "ledger"
+      ]
     },
     {
       "name": "createRootBranch",
@@ -442,7 +564,17 @@
         "now"
       ],
       "exported": true,
-      "purpose": "Create the root branch of a new execution tree."
+      "inputs": [
+        "StateTransition"
+      ],
+      "outputs": [
+        "Branch"
+      ],
+      "purpose": "Create the root branch of a new execution tree. */",
+      "tags": [
+        "branch",
+        "ledger"
+      ]
     },
     {
       "name": "createBranch",
@@ -471,7 +603,19 @@
         "now"
       ],
       "exported": true,
-      "purpose": "Create a CHILD branch (parent → child relationship)."
+      "inputs": [
+        "Branch",
+        "BranchReason",
+        "StateTransition"
+      ],
+      "outputs": [
+        "Branch"
+      ],
+      "purpose": "Create a CHILD branch (parent → child relationship). * Tree structure: root └── child (parentId = root.id) * The child starts with an independent transition sequence. It does NOT inherit any transitions from the parent — it begins empty or with the given initialTransitions. The parent's state at creation time is the child's implicit starting state; use forkBranch() if you need to share a prefix of transitions. * Use createBranch when: - Creating an alternative implementation from scratch - The child has no shared history with the parent beyond the parent's final state /",
+      "tags": [
+        "branch",
+        "ledger"
+      ]
     },
     {
       "name": "forkBranch",
@@ -502,7 +646,19 @@
         "assertDeltaConsistency"
       ],
       "exported": true,
-      "purpose": "Fork a branch at a specific transition index, creating a SIBLING branch."
+      "inputs": [
+        "Branch",
+        "number",
+        "BranchReason"
+      ],
+      "outputs": [
+        "{ original: Branch; forked: Branch }"
+      ],
+      "purpose": "Fork a branch at a specific transition index, creating a SIBLING branch. * Sibling semantics (NOT child): parent ├── original (branch, truncated at splitIndex, marked \"abandoned\") └── forked  (NEW sibling — same parentId as original, NOT a child of original) * Tree structure BEFORE fork: ... → parent → branch * Tree structure AFTER fork: ... → parent ├── original (abandoned — only transitions[0..splitIndex]) └── forked  (repair_attempt — transitions[splitIndex+1..end]) * Both share the same parent. The forked branch inherits the COMMON PREFIX (transitions 0..splitIndex) implicitly through the tree path — flattenBranch() will walk parent → forked and include parent's + forked's transitions. * Use forkBranch when: - A violation is detected at splitIndex and you want to try a fix - The prefix up to splitIndex is valid and should be preserved - You want to keep the original as evidence (abandoned, not deleted) * Use createBranch when: - Starting a completely fresh alternative from the parent's final state /",
+      "tags": [
+        "branch",
+        "ledger"
+      ]
     },
     {
       "name": "mergeBranches",
@@ -526,7 +682,17 @@
         "push"
       ],
       "exported": true,
-      "purpose": "Merge multiple branches into one."
+      "inputs": [
+        "Branch"
+      ],
+      "outputs": [
+        "Branch"
+      ],
+      "purpose": "Merge multiple branches into one. Takes the successful path: concatenates transitions from each branch in the order they appear in the tree path. Returns null if no branches have transitions. */",
+      "tags": [
+        "branch",
+        "ledger"
+      ]
     },
     {
       "name": "flattenBranch",
@@ -554,7 +720,18 @@
         "sort"
       ],
       "exported": true,
-      "purpose": "Flatten a branch and all its ancestors into a single linear transition sequence."
+      "inputs": [
+        "Branch",
+        "Map"
+      ],
+      "outputs": [
+        "StateTransition"
+      ],
+      "purpose": "Flatten a branch and all its ancestors into a single linear transition sequence. This is the bridge between the tree model and existing linear-only consumers (checkLedgerConsistency, hashLedger, etc.). */",
+      "tags": [
+        "branch",
+        "ledger"
+      ]
     },
     {
       "name": "getBranchPath",
@@ -578,7 +755,18 @@
         "get"
       ],
       "exported": true,
-      "purpose": "Get the path from root to a given branch (inclusive)."
+      "inputs": [
+        "Branch",
+        "Map"
+      ],
+      "outputs": [
+        "Branch"
+      ],
+      "purpose": "Get the path from root to a given branch (inclusive). */",
+      "tags": [
+        "branch",
+        "ledger"
+      ]
     },
     {
       "name": "replayBranch",
@@ -610,7 +798,19 @@
         "rebuildState"
       ],
       "exported": true,
-      "purpose": "Replay a branch tree: rebuild state across all ancestor branches"
+      "inputs": [
+        "Branch",
+        "Map",
+        "Map"
+      ],
+      "outputs": [
+        "BranchReplayResult"
+      ],
+      "purpose": "Replay a branch tree: rebuild state across all ancestor branches and verify every transition is valid. */",
+      "tags": [
+        "branch",
+        "ledger"
+      ]
     },
     {
       "name": "buildBranchMap",
@@ -628,7 +828,17 @@
         "set"
       ],
       "exported": true,
-      "purpose": "Build a branch lookup map from an array of branches."
+      "inputs": [
+        "Branch"
+      ],
+      "outputs": [
+        "Map"
+      ],
+      "purpose": "Build a branch lookup map from an array of branches. */",
+      "tags": [
+        "branch",
+        "ledger"
+      ]
     },
     {
       "name": "findRootBranch",
@@ -646,7 +856,17 @@
         "find"
       ],
       "exported": true,
-      "purpose": "Find the root branch of a tree."
+      "inputs": [
+        "Branch"
+      ],
+      "outputs": [
+        "Branch"
+      ],
+      "purpose": "Find the root branch of a tree. */",
+      "tags": [
+        "branch",
+        "ledger"
+      ]
     },
     {
       "name": "findChildBranches",
@@ -670,7 +890,18 @@
         "push"
       ],
       "exported": true,
-      "purpose": "Find all child branches of a given parent."
+      "inputs": [
+        "Branch",
+        "Map"
+      ],
+      "outputs": [
+        "Branch"
+      ],
+      "purpose": "Find all child branches of a given parent. */",
+      "tags": [
+        "branch",
+        "ledger"
+      ]
     },
     {
       "name": "describeBranchTree",
@@ -701,7 +932,18 @@
         "describeBranchTree"
       ],
       "exported": true,
-      "purpose": "Get the full branch tree as a human-readable structure."
+      "inputs": [
+        "Branch",
+        "Map"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Get the full branch tree as a human-readable structure. */",
+      "tags": [
+        "branch",
+        "ledger"
+      ]
     },
     {
       "name": "evaluateBranches",
@@ -730,7 +972,18 @@
         "find"
       ],
       "exported": true,
-      "purpose": "Evaluate all branches in a tree, score them, and return the recommended winner."
+      "inputs": [
+        "Branch",
+        "Map"
+      ],
+      "outputs": [
+        "{ scores: BranchScore[]; winner: BranchScore"
+      ],
+      "purpose": "Evaluate all branches in a tree, score them, and return the recommended winner. Scoring: replay +50, zero violations +30, success outcome +20. Highest score wins. Ties go to the smaller branch (fewer transitions). */",
+      "tags": [
+        "branch",
+        "ledger"
+      ]
     },
     {
       "name": "wrapAsBranch",
@@ -749,7 +1002,17 @@
         "every"
       ],
       "exported": true,
-      "purpose": "Wrap a linear transition array as a single root branch (backward compat)."
+      "inputs": [
+        "StateTransition"
+      ],
+      "outputs": [
+        "Branch"
+      ],
+      "purpose": "Wrap a linear transition array as a single root branch (backward compat). */",
+      "tags": [
+        "branch",
+        "ledger"
+      ]
     },
     {
       "name": "unwrapBranchTree",
@@ -770,7 +1033,17 @@
         "flattenBranch"
       ],
       "exported": true,
-      "purpose": "Unwrap a branch tree to the linear transition list."
+      "inputs": [
+        "Branch"
+      ],
+      "outputs": [
+        "StateTransition"
+      ],
+      "purpose": "Unwrap a branch tree to the linear transition list. For backward compatibility: flattens the \"winning\" path (first successful leaf). */",
+      "tags": [
+        "branch",
+        "ledger"
+      ]
     },
     {
       "name": "findSuccessfulLeaf",
@@ -793,7 +1066,18 @@
         "findChildBranches",
         "findSuccessfulLeaf"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "Branch",
+        "Map"
+      ],
+      "outputs": [
+        "Branch"
+      ],
+      "tags": [
+        "branch",
+        "ledger"
+      ]
     },
     {
       "name": "step",
@@ -813,7 +1097,14 @@
         "repeat",
         "max"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [],
+      "tags": [
+        "check"
+      ]
     },
     {
       "name": "pass",
@@ -831,7 +1122,14 @@
         "log",
         "G"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [],
+      "tags": [
+        "check"
+      ]
     },
     {
       "name": "fail",
@@ -849,7 +1147,14 @@
         "log",
         "R"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [],
+      "tags": [
+        "check"
+      ]
     },
     {
       "name": "warn",
@@ -867,7 +1172,14 @@
         "log",
         "Y"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [],
+      "tags": [
+        "check"
+      ]
     },
     {
       "name": "G",
@@ -882,7 +1194,10 @@
       "returnTypeDetail": "",
       "file": "src/check.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "check"
+      ]
     },
     {
       "name": "R",
@@ -897,7 +1212,10 @@
       "returnTypeDetail": "",
       "file": "src/check.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "check"
+      ]
     },
     {
       "name": "Y",
@@ -912,7 +1230,10 @@
       "returnTypeDetail": "",
       "file": "src/check.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "check"
+      ]
     },
     {
       "name": "C_",
@@ -927,7 +1248,10 @@
       "returnTypeDetail": "",
       "file": "src/check.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "check"
+      ]
     },
     {
       "name": "D",
@@ -942,7 +1266,10 @@
       "returnTypeDetail": "",
       "file": "src/check.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "check"
+      ]
     },
     {
       "name": "B",
@@ -957,7 +1284,10 @@
       "returnTypeDetail": "",
       "file": "src/check.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "check"
+      ]
     },
     {
       "name": "replaySession",
@@ -997,7 +1327,19 @@
         "replayLedger"
       ],
       "exported": true,
-      "purpose": "Replay a session from disk, comparing against its stored fingerprint."
+      "inputs": [
+        "string",
+        "Map",
+        "Map"
+      ],
+      "outputs": [
+        "ReplayResult"
+      ],
+      "purpose": "Replay a session from disk, comparing against its stored fingerprint. */",
+      "tags": [
+        "deterministic",
+        "replay"
+      ]
     },
     {
       "name": "replayLedger",
@@ -1052,7 +1394,23 @@
         "filter"
       ],
       "exported": true,
-      "purpose": "Core replay logic: replay transitions against (optional) current rules."
+      "inputs": [
+        "string",
+        "StateTransition",
+        "string",
+        "string",
+        "string",
+        "Map",
+        "Map"
+      ],
+      "outputs": [
+        "ReplayResult"
+      ],
+      "purpose": "Core replay logic: replay transitions against (optional) current rules. */",
+      "tags": [
+        "deterministic",
+        "replay"
+      ]
     },
     {
       "name": "replayWithDetail",
@@ -1086,7 +1444,19 @@
         "slice"
       ],
       "exported": true,
-      "purpose": "Replay with per-transition detail — for debugging and UI."
+      "inputs": [
+        "StateTransition",
+        "Map",
+        "Map"
+      ],
+      "outputs": [
+        "ReplayTransition"
+      ],
+      "purpose": "Replay with per-transition detail — for debugging and UI. */",
+      "tags": [
+        "deterministic",
+        "replay"
+      ]
     },
     {
       "name": "deepEqualSnapshots",
@@ -1110,7 +1480,18 @@
         "keys",
         "join"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "Record",
+        "Record"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "deterministic",
+        "replay"
+      ]
     },
     {
       "name": "normalizeTypeName",
@@ -1132,7 +1513,16 @@
         "test"
       ],
       "exported": false,
-      "purpose": "Normalize a type string to an importable type name."
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Normalize a type string to an importable type name. Strips [], <...>, unions, and typeof expressions. e.g. \"StateTransition[]\" → \"StateTransition\" \"Map<string, string>\" → \"Map\" \"Action | null\" → \"Action\" \"ReturnType<typeof fn>\" → null (complex, skip) */",
+      "tags": [
+        "emitter"
+      ]
     },
     {
       "name": "getImportPath",
@@ -1151,7 +1541,16 @@
         "startsWith",
         "slice"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "emitter"
+      ]
     },
     {
       "name": "emitCode",
@@ -1186,6 +1585,13 @@
         "convert"
       ],
       "exported": true,
+      "inputs": [
+        "Action",
+        "{ sessionId?: string; ruleHash?: string; irFunctionCount?: number; protocolRuleCount?: number }"
+      ],
+      "outputs": [
+        "string"
+      ],
       "protocol": {
         "pre_states": [
           "SEQUENCE_VALIDATED"
@@ -1198,7 +1604,10 @@
         ],
         "namespace": "dev_pipeline"
       },
-      "purpose": "将动作序列编译为目标语言代码。"
+      "purpose": "将动作序列编译为目标语言代码。",
+      "tags": [
+        "emitter"
+      ]
     },
     {
       "name": "loadMetrics",
@@ -1211,7 +1620,14 @@
         "parse",
         "readFileSync"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "ExecutionMetrics"
+      ],
+      "tags": [
+        "execute"
+      ]
     },
     {
       "name": "saveMetrics",
@@ -1231,7 +1647,14 @@
         "writeFileSync",
         "stringify"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "ExecutionMetrics"
+      ],
+      "outputs": [],
+      "tags": [
+        "execute"
+      ]
     },
     {
       "name": "recordGeneration",
@@ -1252,7 +1675,14 @@
         "saveMetrics"
       ],
       "exported": true,
-      "purpose": "Record a generation event. Called automatically by execute()."
+      "inputs": [
+        "GenerationRecord"
+      ],
+      "outputs": [],
+      "purpose": "Record a generation event. Called automatically by execute(). */",
+      "tags": [
+        "execute"
+      ]
     },
     {
       "name": "getExecutionMetrics",
@@ -1264,7 +1694,14 @@
         "loadMetrics"
       ],
       "exported": true,
-      "purpose": "Get current execution metrics."
+      "inputs": [],
+      "outputs": [
+        "ExecutionMetrics"
+      ],
+      "purpose": "Get current execution metrics. */",
+      "tags": [
+        "execute"
+      ]
     },
     {
       "name": "execute",
@@ -1312,7 +1749,18 @@
         "now"
       ],
       "exported": true,
-      "purpose": "Execute the full Progmune pipeline: intent → validated code → file."
+      "inputs": [
+        "string",
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "Promise"
+      ],
+      "purpose": "Execute the full Progmune pipeline: intent → validated code → file. *",
+      "tags": [
+        "execute"
+      ]
     },
     {
       "name": "verifyCompiles",
@@ -1333,7 +1781,16 @@
         "split"
       ],
       "exported": true,
-      "purpose": "Verify a file compiles without errors. Returns {pass, errors[]}."
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "{ pass: boolean; errors: string[] }"
+      ],
+      "purpose": "Verify a file compiles without errors. Returns {pass, errors[]}. Uses tsc directly — no grep tricks, no pipefail ambiguity. */",
+      "tags": [
+        "execute"
+      ]
     },
     {
       "name": "verifyFileMarker",
@@ -1355,7 +1812,16 @@
         "match"
       ],
       "exported": true,
-      "purpose": "Quick audit: check whether a file has the"
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "{ marked: boolean; sessionId?: string; timestamp?: string }"
+      ],
+      "purpose": "Quick audit: check whether a file has the",
+      "tags": [
+        "execute"
+      ]
     },
     {
       "name": "extractIRPython",
@@ -1378,7 +1844,16 @@
         "parse",
         "readFileSync"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [],
+      "tags": [
+        "extract",
+        "ir",
+        "python"
+      ]
     },
     {
       "name": "parseCapabilityFromJSDoc",
@@ -1394,18 +1869,58 @@
       "file": "src/extract-ir.ts",
       "calls": [
         "getJsDocs",
-        "getComment",
-        "getText",
+        "getFullText",
+        "match",
         "trim",
         "replace",
-        "split",
         "startsWith",
-        "match",
+        "getComment",
+        "split",
+        "getTags",
+        "getTagName",
+        "getCommentText",
         "filter",
         "map"
       ],
       "exported": false,
-      "purpose": "从 JSDoc 注释中解析 capability 注解 (@purpose,"
+      "inputs": [],
+      "outputs": [
+        "{ purpose?: string; tags?: string[] }"
+      ],
+      "purpose": "从 JSDoc 注释中解析 capability 注解 (",
+      "tags": [
+        ")"
+      ]
+    },
+    {
+      "name": "deriveTagsFromFile",
+      "params": [
+        {
+          "name": "filePath",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string[]",
+      "returnTypeDetail": "string[]",
+      "file": "src/extract-ir.ts",
+      "calls": [
+        "replace",
+        "filter",
+        "split"
+      ],
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Auto-derive tags from function's source file name */",
+      "tags": [
+        "extract",
+        "ir"
+      ]
     },
     {
       "name": "parseProtocolFromJSDoc",
@@ -1430,7 +1945,15 @@
         "split"
       ],
       "exported": false,
-      "purpose": "从 JSDoc 注释中解析"
+      "inputs": [],
+      "outputs": [
+        "FunctionInfo['protocol']"
+      ],
+      "purpose": "从 JSDoc 注释中解析",
+      "tags": [
+        "extract",
+        "ir"
+      ]
     },
     {
       "name": "getTypeDetail",
@@ -1457,7 +1980,15 @@
         "getTypeDetail",
         "getElementTypeNode"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "extract",
+        "ir"
+      ]
     },
     {
       "name": "getParamType",
@@ -1475,7 +2006,15 @@
         "getTypeNode",
         "getText"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "extract",
+        "ir"
+      ]
     },
     {
       "name": "getParamTypeDetail",
@@ -1493,7 +2032,15 @@
         "getTypeNode",
         "getTypeDetail"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "extract",
+        "ir"
+      ]
     },
     {
       "name": "getReturnType",
@@ -1511,7 +2058,17 @@
         "getReturnTypeNode",
         "getText"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "FunctionDeclaration"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "extract",
+        "ir"
+      ]
     },
     {
       "name": "getReturnTypeDetail",
@@ -1529,7 +2086,74 @@
         "getReturnTypeNode",
         "getTypeDetail"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "FunctionDeclaration"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "extract",
+        "ir"
+      ]
+    },
+    {
+      "name": "deriveInputs",
+      "params": [
+        {
+          "name": "params",
+          "type": "any[]",
+          "typeDetail": "any[]"
+        }
+      ],
+      "returnType": "string[]",
+      "returnTypeDetail": "string[]",
+      "file": "src/extract-ir.ts",
+      "calls": [
+        "filter",
+        "map"
+      ],
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Derive input types from params (auto-capability graph). */",
+      "tags": [
+        "extract",
+        "ir"
+      ]
+    },
+    {
+      "name": "deriveOutputs",
+      "params": [
+        {
+          "name": "returnType",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string[]",
+      "returnTypeDetail": "string[]",
+      "file": "src/extract-ir.ts",
+      "calls": [
+        "trim",
+        "split",
+        "replace"
+      ],
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Derive output types from return type (auto-capability graph). */",
+      "tags": [
+        "extract",
+        "ir"
+      ]
     },
     {
       "name": "extractDirectCalls",
@@ -1547,7 +2171,17 @@
         "getBody",
         "forEachDescendant"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "FunctionDeclaration"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "extract",
+        "ir"
+      ]
     },
     {
       "name": "extractIR",
@@ -1565,6 +2199,12 @@
         "extractIRWithTypes"
       ],
       "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "FunctionInfo"
+      ],
       "protocol": {
         "pre_states": [],
         "post_states": [
@@ -1575,7 +2215,11 @@
         ],
         "namespace": "dev_pipeline"
       },
-      "purpose": "从 TypeScript 项目提取 IR（函数签名、参数、返回值、协议注解）。"
+      "purpose": "从 TypeScript 项目提取 IR（函数签名、参数、返回值、协议注解）。",
+      "tags": [
+        "extract",
+        "ir"
+      ]
     },
     {
       "name": "extractIRWithTypes",
@@ -1606,6 +2250,10 @@
         "getReturnTypeDetail",
         "extractDirectCalls",
         "isExported",
+        "deriveInputs",
+        "deriveOutputs",
+        "getText",
+        "getReturnTypeNode",
         "parseProtocolFromJSDoc",
         "parseCapabilityFromJSDoc",
         "getVariableDeclarations",
@@ -1615,8 +2263,6 @@
         "getArguments",
         "getClasses",
         "getMethods",
-        "getText",
-        "getReturnTypeNode",
         "includes",
         "getImportDeclarations",
         "getModuleSpecifierValue",
@@ -1635,11 +2281,22 @@
         "tryResolveFromNamespace",
         "get",
         "error",
+        "deriveTagsFromFile",
         "getInterfaces",
         "getTypeAliases"
       ],
       "exported": true,
-      "purpose": "Extract both functions and type→file mapping."
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "{\n  functions: FunctionInfo[];\n  typeMap: Record;\n}"
+      ],
+      "purpose": "Extract both functions and type→file mapping. */",
+      "tags": [
+        "extract",
+        "ir"
+      ]
     },
     {
       "name": "extractSignatureFromFile",
@@ -1672,7 +2329,18 @@
         "isArrowFunction"
       ],
       "exported": false,
-      "purpose": "Extract function signature from a resolved ts-morph source file."
+      "inputs": [
+        "string",
+        "SourceFile"
+      ],
+      "outputs": [
+        "{ params: ParamInfo[]; returnType: string; description: string }"
+      ],
+      "purpose": "Extract function signature from a resolved ts-morph source file. */",
+      "tags": [
+        "extract",
+        "ir"
+      ]
     },
     {
       "name": "extractSignatureFromDts",
@@ -1701,7 +2369,19 @@
         "extractSignatureFromFile"
       ],
       "exported": false,
-      "purpose": "Extract function signature from a .d.ts file using ts-morph."
+      "inputs": [
+        "string",
+        "string",
+        "Project"
+      ],
+      "outputs": [
+        "{ params: ParamInfo[]; returnType: string; description: string }"
+      ],
+      "purpose": "Extract function signature from a .d.ts file using ts-morph. */",
+      "tags": [
+        "extract",
+        "ir"
+      ]
     },
     {
       "name": "classifyError",
@@ -1719,7 +2399,17 @@
         "includes"
       ],
       "exported": true,
-      "purpose": "Classify a compile error string into a root cause."
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "RootCause"
+      ],
+      "purpose": "Classify a compile error string into a root cause. */",
+      "tags": [
+        "failure",
+        "collector"
+      ]
     },
     {
       "name": "classifyPlanError",
@@ -1737,7 +2427,17 @@
         "includes"
       ],
       "exported": true,
-      "purpose": "Classify a planning failure."
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "RootCause"
+      ],
+      "purpose": "Classify a planning failure. */",
+      "tags": [
+        "failure",
+        "collector"
+      ]
     },
     {
       "name": "recordFailure",
@@ -1762,7 +2462,17 @@
         "stringify"
       ],
       "exported": true,
-      "purpose": "Record a failure and save to disk."
+      "inputs": [
+        "Omit"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Record a failure and save to disk. */",
+      "tags": [
+        "failure",
+        "collector"
+      ]
     },
     {
       "name": "loadFailures",
@@ -1780,7 +2490,15 @@
         "sort"
       ],
       "exported": true,
-      "purpose": "Load all recorded failures."
+      "inputs": [],
+      "outputs": [
+        "FailureRecord"
+      ],
+      "purpose": "Load all recorded failures. */",
+      "tags": [
+        "failure",
+        "collector"
+      ]
     },
     {
       "name": "failureStats",
@@ -1794,7 +2512,15 @@
         "entries"
       ],
       "exported": true,
-      "purpose": "Get failure statistics grouped by root cause."
+      "inputs": [],
+      "outputs": [
+        "{ total: number; byRootCause: Record; topCause: string }"
+      ],
+      "purpose": "Get failure statistics grouped by root cause. */",
+      "tags": [
+        "failure",
+        "collector"
+      ]
     },
     {
       "name": "formatFailureStats",
@@ -1813,7 +2539,15 @@
         "join"
       ],
       "exported": true,
-      "purpose": "Format failure stats as readable text."
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Format failure stats as readable text. */",
+      "tags": [
+        "failure",
+        "collector"
+      ]
     },
     {
       "name": "ensureDir",
@@ -1831,7 +2565,15 @@
         "existsSync",
         "mkdirSync"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [],
+      "tags": [
+        "failure",
+        "corpus"
+      ]
     },
     {
       "name": "checkpointPath",
@@ -1852,7 +2594,17 @@
         "from",
         "join"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "failure",
+        "corpus"
+      ]
     },
     {
       "name": "saveCheckpoint",
@@ -1878,7 +2630,16 @@
         "checkpointPath",
         "stringify"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "string",
+        "Omit"
+      ],
+      "outputs": [],
+      "tags": [
+        "failure",
+        "corpus"
+      ]
     },
     {
       "name": "loadCheckpoint",
@@ -1897,7 +2658,17 @@
         "checkpointPath",
         "parse"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "PlannerCheckpoint"
+      ],
+      "tags": [
+        "failure",
+        "corpus"
+      ]
     },
     {
       "name": "clearCheckpoint",
@@ -1915,7 +2686,15 @@
         "unlinkSync",
         "checkpointPath"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [],
+      "tags": [
+        "failure",
+        "corpus"
+      ]
     },
     {
       "name": "recordFailure",
@@ -1932,7 +2711,15 @@
       "calls": [
         "withLock"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "Omit & { sessionId?: string } & Partial>"
+      ],
+      "outputs": [],
+      "tags": [
+        "failure",
+        "corpus"
+      ]
     },
     {
       "name": "recordSession",
@@ -1958,6 +2745,12 @@
         "recordFailure"
       ],
       "exported": true,
+      "inputs": [
+        "ExecutionSession"
+      ],
+      "outputs": [
+        "string"
+      ],
       "protocol": {
         "pre_states": [
           "CODE_EMITTED"
@@ -1970,7 +2763,11 @@
         ],
         "namespace": "dev_pipeline"
       },
-      "purpose": "保存执行会话（含所有尝试、违规、状态转移）。"
+      "purpose": "保存执行会话（含所有尝试、违规、状态转移）。",
+      "tags": [
+        "failure",
+        "corpus"
+      ]
     },
     {
       "name": "getAllFailures",
@@ -1990,7 +2787,15 @@
         "parse",
         "readFileSync"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "FailureRecord"
+      ],
+      "tags": [
+        "failure",
+        "corpus"
+      ]
     },
     {
       "name": "getFailuresBySVL",
@@ -2008,7 +2813,17 @@
         "filter",
         "getAllFailures"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "SVL"
+      ],
+      "outputs": [
+        "FailureRecord"
+      ],
+      "tags": [
+        "failure",
+        "corpus"
+      ]
     },
     {
       "name": "getTopFailurePatterns",
@@ -2032,7 +2847,17 @@
         "map",
         "entries"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "number"
+      ],
+      "outputs": [
+        "{ pattern: string; count: number; examples: string[] }"
+      ],
+      "tags": [
+        "failure",
+        "corpus"
+      ]
     },
     {
       "name": "getFailureGenome",
@@ -2054,7 +2879,17 @@
         "round"
       ],
       "exported": true,
-      "purpose": "Get failure genome statistics: total failures, SVL distribution, constraint types, top patterns."
+      "inputs": [],
+      "outputs": [
+        "{\n  totalFailures: number;\n  bySVL: Record;\n  byConstraintType: Record;\n  topPatterns: { pattern: string; count: number; examples: string[] }[];\n  commonFixPaths: { violation: string; fixPath: string[]; count: number }[];\n  averageRetriesToSuccess: number;\n}"
+      ],
+      "purpose": "Get failure genome statistics: total failures, SVL distribution, constraint types, top patterns.",
+      "tags": [
+        "failure",
+        "statistics",
+        "genome",
+        "audit"
+      ]
     },
     {
       "name": "getAllSessions",
@@ -2073,7 +2908,17 @@
         "normalizeSession"
       ],
       "exported": true,
-      "purpose": "Load all execution sessions from the corpus directory."
+      "inputs": [],
+      "outputs": [
+        "ExecutionSession"
+      ],
+      "purpose": "Load all execution sessions from the corpus directory.",
+      "tags": [
+        "session",
+        "corpus",
+        "audit",
+        "history"
+      ]
     },
     {
       "name": "normalizeSession",
@@ -2091,7 +2936,15 @@
         "convertOldSession"
       ],
       "exported": false,
-      "purpose": "检测并归一化新旧两种会话格式"
+      "inputs": [],
+      "outputs": [
+        "ExecutionSession"
+      ],
+      "purpose": "检测并归一化新旧两种会话格式 */",
+      "tags": [
+        "failure",
+        "corpus"
+      ]
     },
     {
       "name": "convertOldSession",
@@ -2110,7 +2963,17 @@
         "getTime"
       ],
       "exported": false,
-      "purpose": "将旧 IntentSession 转换为 ExecutionSession"
+      "inputs": [
+        "IntentSession"
+      ],
+      "outputs": [
+        "ExecutionSession"
+      ],
+      "purpose": "将旧 IntentSession 转换为 ExecutionSession */",
+      "tags": [
+        "failure",
+        "corpus"
+      ]
     },
     {
       "name": "computeACL",
@@ -2137,7 +3000,19 @@
       "calls": [
         "parseInt"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "number",
+        "number",
+        "number"
+      ],
+      "outputs": [
+        "AntibodyLevel"
+      ],
+      "tags": [
+        "failure",
+        "corpus"
+      ]
     },
     {
       "name": "getLearnedPatterns",
@@ -2157,7 +3032,15 @@
         "computeACL",
         "sort"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "{ failureToFix: LearnedPattern[] }"
+      ],
+      "tags": [
+        "failure",
+        "corpus"
+      ]
     },
     {
       "name": "queryAntibodies",
@@ -2185,7 +3068,18 @@
         "map"
       ],
       "exported": true,
-      "purpose": "查询匹配当前意图的高置信度抗体（ACL-3+），用于推理层免疫加速"
+      "inputs": [
+        "string",
+        "AntibodyLevel"
+      ],
+      "outputs": [
+        "LearnedPattern"
+      ],
+      "purpose": "查询匹配当前意图的高置信度抗体（ACL-3+），用于推理层免疫加速 */",
+      "tags": [
+        "failure",
+        "corpus"
+      ]
     },
     {
       "name": "getSemanticHeatmap",
@@ -2209,7 +3103,15 @@
         "flatMap"
       ],
       "exported": true,
-      "purpose": "语义热力图：哪些协议/层最脆弱，约束如何聚类"
+      "inputs": [],
+      "outputs": [
+        "{\n  fragileProtocols: { function: string; violationCount: number; svl: string }[];\n  svlHotspots: { svl: string; count: number; percentage: number }[];\n  constraintClusters: { constraints: string[]; count: number; intent: string }[];\n  highFrictionIntents: { intent: string; adaptationCount: number; anomalyTypes: string[] }[];\n}"
+      ],
+      "purpose": "语义热力图：哪些协议/层最脆弱，约束如何聚类 */",
+      "tags": [
+        "failure",
+        "corpus"
+      ]
     },
     {
       "name": "getAntibodyStats",
@@ -2228,7 +3130,17 @@
         "entries"
       ],
       "exported": true,
-      "purpose": "Get antibody efficacy statistics: hits by level, tokens saved, top signatures."
+      "inputs": [],
+      "outputs": [
+        "{\n  totalHits: number;\n  fastPathHits: number;\n  injectedHintHits: number;\n  totalLLMCallsSaved: number;\n  totalTokensSaved: number;\n  byLevel: Record;\n  topSignatures: { signature: string; hits: number; avgSimilarity: number }[];\n}"
+      ],
+      "purpose": "Get antibody efficacy statistics: hits by level, tokens saved, top signatures.",
+      "tags": [
+        "antibody",
+        "immune",
+        "statistics",
+        "efficiency"
+      ]
     },
     {
       "name": "generateCandidateRules",
@@ -2242,7 +3154,15 @@
         "push",
         "join"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "failure",
+        "corpus"
+      ]
     },
     {
       "name": "main",
@@ -2253,7 +3173,12 @@
       "calls": [
         "getAllFailures"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "failures"
+      ]
     },
     {
       "name": "loadFeedback",
@@ -2266,7 +3191,14 @@
         "parse",
         "readFileSync"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "RunRecord"
+      ],
+      "tags": [
+        "feedback"
+      ]
     },
     {
       "name": "saveFeedback",
@@ -2283,7 +3215,14 @@
       "calls": [
         "withLock"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "RunRecord"
+      ],
+      "outputs": [],
+      "tags": [
+        "feedback"
+      ]
     },
     {
       "name": "getFunctionSuccessRate",
@@ -2301,7 +3240,16 @@
         "loadFeedback",
         "filter"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "tags": [
+        "feedback"
+      ]
     },
     {
       "name": "recordRun",
@@ -2335,7 +3283,16 @@
         "split",
         "toISOString"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "string",
+        "boolean",
+        "string"
+      ],
+      "outputs": [],
+      "tags": [
+        "feedback"
+      ]
     },
     {
       "name": "ensureLockDir",
@@ -2347,7 +3304,13 @@
         "existsSync",
         "mkdirSync"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "file",
+        "lock"
+      ]
     },
     {
       "name": "lockPath",
@@ -2365,7 +3328,17 @@
         "join",
         "replace"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "file",
+        "lock"
+      ]
     },
     {
       "name": "withLock",
@@ -2392,7 +3365,18 @@
         "rmdirSync",
         "now"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "string",
+        "() => T"
+      ],
+      "outputs": [
+        "T"
+      ],
+      "tags": [
+        "file",
+        "lock"
+      ]
     },
     {
       "name": "main",
@@ -2409,7 +3393,15 @@
       "calls": [
         "findSnapshotBySession"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [],
+      "tags": [
+        "find",
+        "session"
+      ]
     },
     {
       "name": "main",
@@ -2443,7 +3435,12 @@
         "filter",
         "toFixed"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "generate_500"
+      ]
     },
     {
       "name": "main",
@@ -2477,7 +3474,12 @@
         "filter",
         "toFixed"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "generate"
+      ]
     },
     {
       "name": "main",
@@ -2488,7 +3490,12 @@
       "calls": [
         "getFailureGenome"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "genome"
+      ]
     },
     {
       "name": "main",
@@ -2499,7 +3506,12 @@
       "calls": [
         "getSemanticHeatmap"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "heatmap"
+      ]
     },
     {
       "name": "getInstanceId",
@@ -2516,7 +3528,15 @@
         "update",
         "createHash"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "immune",
+        "reporter"
+      ]
     },
     {
       "name": "getReportCursor",
@@ -2529,7 +3549,15 @@
         "parse",
         "readFileSync"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "{ lastTimestamp: string"
+      ],
+      "tags": [
+        "immune",
+        "reporter"
+      ]
     },
     {
       "name": "saveReportCursor",
@@ -2556,7 +3584,16 @@
         "stringify",
         "toISOString"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string",
+        "number"
+      ],
+      "outputs": [],
+      "tags": [
+        "immune",
+        "reporter"
+      ]
     },
     {
       "name": "extractFingerprints",
@@ -2586,7 +3623,17 @@
         "filter",
         "push"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "{ lastTimestamp: string"
+      ],
+      "outputs": [
+        "ImmuneFingerprint"
+      ],
+      "tags": [
+        "immune",
+        "reporter"
+      ]
     },
     {
       "name": "reportFingerprints",
@@ -2600,7 +3647,15 @@
         "sort",
         "stringify"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "Promise"
+      ],
+      "tags": [
+        "immune",
+        "reporter"
+      ]
     },
     {
       "name": "previewFingerprints",
@@ -2611,7 +3666,15 @@
       "calls": [
         "extractFingerprints"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "ImmuneFingerprint"
+      ],
+      "tags": [
+        "immune",
+        "reporter"
+      ]
     },
     {
       "name": "main",
@@ -2622,7 +3685,12 @@
       "calls": [
         "getLearnedPatterns"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "learned"
+      ]
     },
     {
       "name": "fingerprintsDir",
@@ -2634,7 +3702,15 @@
         "cwd",
         "resolve"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "ledger",
+        "registry"
+      ]
     },
     {
       "name": "fingerprintPath",
@@ -2652,7 +3728,17 @@
         "join",
         "fingerprintsDir"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "ledger",
+        "registry"
+      ]
     },
     {
       "name": "registerFingerprint",
@@ -2687,7 +3773,19 @@
         "stringify"
       ],
       "exported": true,
-      "purpose": "Register a ledger fingerprint (execution certificate)."
+      "inputs": [
+        "string",
+        "StateTransition",
+        "string"
+      ],
+      "outputs": [
+        "LedgerFingerprint"
+      ],
+      "purpose": "Register a ledger fingerprint (execution certificate). Called after a session is recorded — creates an immutable proof of the ledger state. */",
+      "tags": [
+        "ledger",
+        "registry"
+      ]
     },
     {
       "name": "getFingerprint",
@@ -2708,7 +3806,17 @@
         "readFileSync"
       ],
       "exported": true,
-      "purpose": "Get a single stored fingerprint by sessionId. Returns null if not registered."
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "LedgerFingerprint"
+      ],
+      "purpose": "Get a single stored fingerprint by sessionId. Returns null if not registered. */",
+      "tags": [
+        "ledger",
+        "registry"
+      ]
     },
     {
       "name": "getFingerprintRegistry",
@@ -2728,7 +3836,15 @@
         "sort"
       ],
       "exported": true,
-      "purpose": "List all registered fingerprints, sorted by timestamp (oldest first)."
+      "inputs": [],
+      "outputs": [
+        "LedgerFingerprint"
+      ],
+      "purpose": "List all registered fingerprints, sorted by timestamp (oldest first). */",
+      "tags": [
+        "ledger",
+        "registry"
+      ]
     },
     {
       "name": "verifyFingerprint",
@@ -2757,7 +3873,19 @@
         "hashLedger"
       ],
       "exported": true,
-      "purpose": "Verify a single session's fingerprint."
+      "inputs": [
+        "string",
+        "StateTransition",
+        "string"
+      ],
+      "outputs": [
+        "FingerprintVerifyResult"
+      ],
+      "purpose": "Verify a single session's fingerprint. Requires the session's transitions to re-hash and compare. */",
+      "tags": [
+        "ledger",
+        "registry"
+      ]
     },
     {
       "name": "verifyAllFingerprints",
@@ -2784,7 +3912,17 @@
         "verifyFingerprint"
       ],
       "exported": true,
-      "purpose": "Verify all registered fingerprints."
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "RegistrySummary"
+      ],
+      "purpose": "Verify all registered fingerprints. Loads each session to re-hash and compare against the stored fingerprint. */",
+      "tags": [
+        "ledger",
+        "registry"
+      ]
     },
     {
       "name": "registerAllMissingFingerprints",
@@ -2806,7 +3944,15 @@
         "registerFingerprint"
       ],
       "exported": true,
-      "purpose": "Register fingerprints for all sessions that don't yet have one."
+      "inputs": [],
+      "outputs": [
+        "number"
+      ],
+      "purpose": "Register fingerprints for all sessions that don't yet have one. Called during `npm run check` to ensure all sessions are fingerprinted. */",
+      "tags": [
+        "ledger",
+        "registry"
+      ]
     },
     {
       "name": "resetCallCount",
@@ -2815,7 +3961,12 @@
       "returnTypeDetail": "",
       "file": "src/llm.ts",
       "calls": [],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "llm"
+      ]
     },
     {
       "name": "estimateTokens",
@@ -2834,7 +3985,16 @@
         "ceil"
       ],
       "exported": true,
-      "purpose": "粗略 token 估算：CJK 字符 ~1.5 token/字，其余 ~0.4 token/字符"
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "purpose": "粗略 token 估算：CJK 字符 ~1.5 token/字，其余 ~0.4 token/字符 */",
+      "tags": [
+        "llm"
+      ]
     },
     {
       "name": "generate",
@@ -2851,7 +4011,16 @@
       "calls": [
         "create"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "Promise"
+      ],
+      "tags": [
+        "llm"
+      ]
     },
     {
       "name": "chat",
@@ -2874,7 +4043,17 @@
         "create"
       ],
       "exported": true,
-      "purpose": "带 system prompt 的调用：静态规则放 system，动态内容放 user，语义分离便于未来对接各平台缓存策略"
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "Promise"
+      ],
+      "purpose": "带 system prompt 的调用：静态规则放 system，动态内容放 user，语义分离便于未来对接各平台缓存策略 */",
+      "tags": [
+        "llm"
+      ]
     },
     {
       "name": "loadBenchmarks",
@@ -2889,7 +4068,15 @@
         "parse",
         "readFileSync"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "BenchTask"
+      ],
+      "tags": [
+        "load",
+        "benchmarks"
+      ]
     },
     {
       "name": "runTest",
@@ -2918,7 +4105,14 @@
         "split",
         "runAndCheck"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [],
+      "tags": [
+        "main"
+      ]
     },
     {
       "name": "main",
@@ -2935,7 +4129,12 @@
         "runTest",
         "modify"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "main"
+      ]
     },
     {
       "name": "ensureDir",
@@ -2953,7 +4152,15 @@
         "existsSync",
         "mkdirSync"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "loadEpisodes",
@@ -2972,7 +4179,15 @@
         "writeFileSync",
         "stringify"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "Episode"
+      ],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "saveEpisodes",
@@ -2989,7 +4204,15 @@
       "calls": [
         "withLock"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "Episode"
+      ],
+      "outputs": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "recordEpisode",
@@ -3010,7 +4233,15 @@
         "unshift",
         "saveEpisodes"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "Omit"
+      ],
+      "outputs": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "getRecentEpisodes",
@@ -3028,7 +4259,17 @@
         "slice",
         "loadEpisodes"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "number"
+      ],
+      "outputs": [
+        "Episode"
+      ],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "getSuccessfulEpisodes",
@@ -3047,7 +4288,17 @@
         "filter",
         "loadEpisodes"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "number"
+      ],
+      "outputs": [
+        "Episode"
+      ],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "loadSemantic",
@@ -3066,7 +4317,15 @@
         "writeFileSync",
         "stringify"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "SemanticTemplate"
+      ],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "saveSemantic",
@@ -3083,7 +4342,15 @@
       "calls": [
         "withLock"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "SemanticTemplate"
+      ],
+      "outputs": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "consolidateSemantic",
@@ -3111,7 +4378,15 @@
         "saveSemantic",
         "error"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "number"
+      ],
+      "outputs": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "findSemanticTemplate",
@@ -3131,7 +4406,17 @@
         "substring",
         "find"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "SemanticTemplate"
+      ],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.setIntent",
@@ -3146,7 +4431,11 @@
       "returnTypeDetail": "any",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.getIntent",
@@ -3155,7 +4444,11 @@
       "returnTypeDetail": "string",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.bind",
@@ -3175,7 +4468,11 @@
       "returnTypeDetail": "any",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.get",
@@ -3190,7 +4487,11 @@
       "returnTypeDetail": "string | undefined",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.clear",
@@ -3199,7 +4500,11 @@
       "returnTypeDetail": "any",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.setIntent",
@@ -3214,7 +4519,11 @@
       "returnTypeDetail": "any",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.getIntent",
@@ -3223,7 +4532,11 @@
       "returnTypeDetail": "string",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.bind",
@@ -3243,7 +4556,11 @@
       "returnTypeDetail": "any",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.get",
@@ -3258,7 +4575,11 @@
       "returnTypeDetail": "string | undefined",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.clear",
@@ -3267,7 +4588,11 @@
       "returnTypeDetail": "any",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.setIntent",
@@ -3282,7 +4607,11 @@
       "returnTypeDetail": "any",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.getIntent",
@@ -3291,7 +4620,11 @@
       "returnTypeDetail": "string",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.bind",
@@ -3311,7 +4644,11 @@
       "returnTypeDetail": "any",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.get",
@@ -3326,7 +4663,11 @@
       "returnTypeDetail": "string | undefined",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.clear",
@@ -3335,7 +4676,11 @@
       "returnTypeDetail": "any",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.setIntent",
@@ -3350,7 +4695,11 @@
       "returnTypeDetail": "any",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.getIntent",
@@ -3359,7 +4708,11 @@
       "returnTypeDetail": "string",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.bind",
@@ -3379,7 +4732,11 @@
       "returnTypeDetail": "any",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.get",
@@ -3394,7 +4751,11 @@
       "returnTypeDetail": "string | undefined",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.clear",
@@ -3403,7 +4764,11 @@
       "returnTypeDetail": "any",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.setIntent",
@@ -3418,7 +4783,11 @@
       "returnTypeDetail": "any",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.getIntent",
@@ -3427,7 +4796,11 @@
       "returnTypeDetail": "string",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.bind",
@@ -3447,7 +4820,11 @@
       "returnTypeDetail": "any",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.get",
@@ -3462,7 +4839,11 @@
       "returnTypeDetail": "string | undefined",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.clear",
@@ -3471,7 +4852,11 @@
       "returnTypeDetail": "any",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.setIntent",
@@ -3486,7 +4871,11 @@
       "returnTypeDetail": "any",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.getIntent",
@@ -3495,7 +4884,11 @@
       "returnTypeDetail": "string",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.bind",
@@ -3515,7 +4908,11 @@
       "returnTypeDetail": "any",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.get",
@@ -3530,7 +4927,11 @@
       "returnTypeDetail": "string | undefined",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.clear",
@@ -3539,7 +4940,11 @@
       "returnTypeDetail": "any",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.setIntent",
@@ -3554,7 +4959,11 @@
       "returnTypeDetail": "any",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.getIntent",
@@ -3563,7 +4972,11 @@
       "returnTypeDetail": "string",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.bind",
@@ -3583,7 +4996,11 @@
       "returnTypeDetail": "any",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.get",
@@ -3598,7 +5015,11 @@
       "returnTypeDetail": "string | undefined",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "WorkMemory.clear",
@@ -3607,7 +5028,11 @@
       "returnTypeDetail": "any",
       "file": "src/memory-layer.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
     },
     {
       "name": "main",
@@ -3618,7 +5043,12 @@
       "calls": [
         "getExecutionMetrics"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "metrics"
+      ]
     },
     {
       "name": "jsonReply",
@@ -3647,7 +5077,15 @@
         "end",
         "stringify"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "http.ServerResponse"
+      ],
+      "outputs": [],
+      "tags": [
+        "obs",
+        "web"
+      ]
     },
     {
       "name": "handleAPI",
@@ -3679,7 +5117,16 @@
         "getFingerprintRegistry",
         "handler"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "http.IncomingMessage",
+        "http.ServerResponse"
+      ],
+      "outputs": [],
+      "tags": [
+        "obs",
+        "web"
+      ]
     },
     {
       "name": "getSessionTransitions",
@@ -3699,7 +5146,13 @@
         "flattenBranch",
         "concat"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "obs",
+        "web"
+      ]
     },
     {
       "name": "handleLedgerAPI",
@@ -3728,7 +5181,16 @@
         "getNsInit",
         "hashLedger"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "http.ServerResponse",
+        "URL"
+      ],
+      "outputs": [],
+      "tags": [
+        "obs",
+        "web"
+      ]
     },
     {
       "name": "handleConsistencyAPI",
@@ -3756,7 +5218,16 @@
         "getSessionTransitions",
         "getNsInit"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "http.ServerResponse",
+        "URL"
+      ],
+      "outputs": [],
+      "tags": [
+        "obs",
+        "web"
+      ]
     },
     {
       "name": "handleDiffAPI",
@@ -3783,7 +5254,16 @@
         "diffLedgers",
         "getSessionTransitions"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "http.ServerResponse",
+        "URL"
+      ],
+      "outputs": [],
+      "tags": [
+        "obs",
+        "web"
+      ]
     },
     {
       "name": "handleReplayAPI",
@@ -3807,7 +5287,16 @@
         "jsonReply",
         "replaySession"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "http.ServerResponse",
+        "URL"
+      ],
+      "outputs": [],
+      "tags": [
+        "obs",
+        "web"
+      ]
     },
     {
       "name": "server",
@@ -3832,6 +5321,10 @@
         "handleAPI",
         "writeHead",
         "end"
+      ],
+      "tags": [
+        "obs",
+        "web"
       ]
     },
     {
@@ -3852,7 +5345,16 @@
         "entries",
         "push"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "{ protocols: FunctionProtocol[]; initialState: string; namespaceInitialStates: Record }"
+      ],
+      "tags": [
+        "p0_ssg_demo"
+      ]
     },
     {
       "name": "loadProtocolsFromIR",
@@ -3870,7 +5372,14 @@
         "map",
         "filter"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "FunctionProtocol"
+      ],
+      "tags": [
+        "p0_ssg_demo"
+      ]
     },
     {
       "name": "runDemo",
@@ -3913,7 +5422,12 @@
         "listAllStates",
         "hashLedger"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "p0_ssg_demo"
+      ]
     },
     {
       "name": "enrichActions",
@@ -3935,7 +5449,16 @@
       "calls": [
         "map"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "Action"
+      ],
+      "outputs": [
+        "Action"
+      ],
+      "tags": [
+        "planner"
+      ]
     },
     {
       "name": "determineSVL",
@@ -3952,7 +5475,16 @@
       "calls": [
         "some"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "SVL"
+      ],
+      "tags": [
+        "planner"
+      ]
     },
     {
       "name": "determineConstraintType",
@@ -3967,7 +5499,16 @@
       "returnTypeDetail": "string",
       "file": "src/planner.ts",
       "calls": [],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "SVL"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "planner"
+      ]
     },
     {
       "name": "buildCompactFuncList",
@@ -3986,7 +5527,14 @@
         "map"
       ],
       "exported": false,
-      "purpose": "构建紧凑函数列表（约节省 50% token）"
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "构建紧凑函数列表（约节省 50% token） */",
+      "tags": [
+        "planner"
+      ]
     },
     {
       "name": "parseActionJSON",
@@ -4011,7 +5559,16 @@
         "stringify"
       ],
       "exported": false,
-      "purpose": "解析 LLM 输出的紧凑 JSON 为 Action[]。"
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "Action[]"
+      ],
+      "purpose": "解析 LLM 输出的紧凑 JSON 为 Action[]。 格式: [{\"f\":\"fn\",\"to\":\"var\",\"a\":[{\"n\":\"p\",\"t\":\"str\",\"v\":\"x\"}]}, {\"r\":\"var\"}, ...] f=function(→call), to=assignTo, a=args, r=return, if=condition /",
+      "tags": [
+        "planner"
+      ]
     },
     {
       "name": "correctFunctionNames",
@@ -4034,7 +5591,16 @@
         "map"
       ],
       "exported": false,
-      "purpose": "模糊函数名纠正：当 LLM 生成不存在的函数名时，用 Jaccard 相似度找最接近的 IR 函数"
+      "inputs": [
+        "Action"
+      ],
+      "outputs": [
+        "{ actions: Action[]; corrections: string[] }"
+      ],
+      "purpose": "模糊函数名纠正：当 LLM 生成不存在的函数名时，用 Jaccard 相似度找最接近的 IR 函数 */",
+      "tags": [
+        "planner"
+      ]
     },
     {
       "name": "fixParameterCounts",
@@ -4057,7 +5623,16 @@
         "map"
       ],
       "exported": false,
-      "purpose": "参数签名预检：确保 call action 的参数数量与 IR 函数签名一致"
+      "inputs": [
+        "Action"
+      ],
+      "outputs": [
+        "{ actions: Action[]; fixes: string[] }"
+      ],
+      "purpose": "参数签名预检：确保 call action 的参数数量与 IR 函数签名一致 */",
+      "tags": [
+        "planner"
+      ]
     },
     {
       "name": "buildProtocolChainHint",
@@ -4080,7 +5655,16 @@
         "map"
       ],
       "exported": false,
-      "purpose": "构建协议链提示：为 LLM 显示协议状态机的合法调用顺序"
+      "inputs": [
+        "FunctionProtocol"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "构建协议链提示：为 LLM 显示协议状态机的合法调用顺序 */",
+      "tags": [
+        "planner"
+      ]
     },
     {
       "name": "validateActionSchema",
@@ -4104,7 +5688,16 @@
         "map"
       ],
       "exported": false,
-      "purpose": "JSON schema pre-validation: structural checks before IR-aware validation."
+      "inputs": [
+        "Action"
+      ],
+      "outputs": [
+        "{ valid: boolean; errors: string[] }"
+      ],
+      "purpose": "JSON schema pre-validation: structural checks before IR-aware validation. Catches malformed actions that parseActionJSON() accepted but are semantically invalid. */",
+      "tags": [
+        "planner"
+      ]
     },
     {
       "name": "loadProtocols",
@@ -4130,7 +5723,14 @@
         "values"
       ],
       "exported": false,
-      "purpose": "加载 IR 中所有带 protocol 的函数为协议规则，同时从 protocols.json 加载命名空间初始状态"
+      "inputs": [],
+      "outputs": [
+        "{ protocols: FunctionProtocol[]; namespaceInitialStates: Map }"
+      ],
+      "purpose": "加载 IR 中所有带 protocol 的函数为协议规则，同时从 protocols.json 加载命名空间初始状态 */",
+      "tags": [
+        "planner"
+      ]
     },
     {
       "name": "validateProtocolWithTransitions",
@@ -4165,7 +5765,18 @@
         "error"
       ],
       "exported": false,
-      "purpose": "验证动作序列的协议合法性，使用 Semantic Ledger (Phase 3) 纯函数"
+      "inputs": [
+        "Action",
+        "FunctionProtocol",
+        "Map"
+      ],
+      "outputs": [
+        "{ valid: boolean; rejection?: SSGRejection; index?: number; trace?: { function: string; statesBefore: Record; statesAfter: Record }[]; transitions: StateTransition[]; ledgerConsistent?: boolean; ruleHash: string }"
+      ],
+      "purpose": "验证动作序列的协议合法性，使用 Semantic Ledger (Phase 3) 纯函数 */",
+      "tags": [
+        "planner"
+      ]
     },
     {
       "name": "attemptSSGRepair",
@@ -4211,7 +5822,19 @@
         "attemptSSGRepair"
       ],
       "exported": false,
-      "purpose": "SSG 确定性修复：当协议违规有已知修复路径时，自动插入缺失函数"
+      "inputs": [
+        "Action",
+        "SSGRejection",
+        "FunctionProtocol",
+        "Map"
+      ],
+      "outputs": [
+        "Action[]"
+      ],
+      "purpose": "SSG 确定性修复：当协议违规有已知修复路径时，自动插入缺失函数 */",
+      "tags": [
+        "planner"
+      ]
     },
     {
       "name": "plan",
@@ -4288,7 +5911,16 @@
         "clearCheckpoint",
         "generateFallbackPlan"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "Promise"
+      ],
+      "tags": [
+        "planner"
+      ]
     },
     {
       "name": "generateFallbackPlan",
@@ -4317,7 +5949,16 @@
         "map"
       ],
       "exported": false,
-      "purpose": "本地规则回退：当 LLM 不可用时，根据意图关键词生成简单动作序列"
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "Action"
+      ],
+      "purpose": "本地规则回退：当 LLM 不可用时，根据意图关键词生成简单动作序列 */",
+      "tags": [
+        "planner"
+      ]
     },
     {
       "name": "invalidateProtocolCache",
@@ -4327,7 +5968,13 @@
       "file": "src/protocol-registry.ts",
       "calls": [],
       "exported": true,
-      "purpose": "Invalidate the cache (call after protocols.json changes)."
+      "inputs": [],
+      "outputs": [],
+      "purpose": "Invalidate the cache (call after protocols.json changes). */",
+      "tags": [
+        "protocol",
+        "registry"
+      ]
     },
     {
       "name": "getProtocolConfig",
@@ -4347,7 +5994,15 @@
         "hashRules"
       ],
       "exported": true,
-      "purpose": "Get the authoritative protocol configuration."
+      "inputs": [],
+      "outputs": [
+        "ProtocolConfig"
+      ],
+      "purpose": "Get the authoritative protocol configuration. Cached after first call; call invalidateProtocolCache() to force reload. */",
+      "tags": [
+        "protocol",
+        "registry"
+      ]
     },
     {
       "name": "getNsInit",
@@ -4359,7 +6014,15 @@
         "getProtocolConfig"
       ],
       "exported": true,
-      "purpose": "Get namespace initial states only (most common need)."
+      "inputs": [],
+      "outputs": [
+        "Map"
+      ],
+      "purpose": "Get namespace initial states only (most common need). */",
+      "tags": [
+        "protocol",
+        "registry"
+      ]
     },
     {
       "name": "getRuleHash",
@@ -4371,7 +6034,15 @@
         "getProtocolConfig"
       ],
       "exported": true,
-      "purpose": "Get current rule hash without loading full config."
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Get current rule hash without loading full config. */",
+      "tags": [
+        "protocol",
+        "registry"
+      ]
     },
     {
       "name": "toPythonModule",
@@ -4388,7 +6059,17 @@
       "calls": [
         "replace"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "python",
+        "emitter"
+      ]
     },
     {
       "name": "pythonValue",
@@ -4409,7 +6090,15 @@
         "entries",
         "join"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "python",
+        "emitter"
+      ]
     },
     {
       "name": "emitPython",
@@ -4433,7 +6122,17 @@
         "push",
         "convertLines"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "Action"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "python",
+        "emitter"
+      ]
     },
     {
       "name": "suggestRepairs",
@@ -4464,7 +6163,18 @@
         "suggestGenericRepair"
       ],
       "exported": true,
-      "purpose": "Generate repair proposals for all detected violations in a ledger."
+      "inputs": [
+        "ConstraintViolation",
+        "FunctionProtocol"
+      ],
+      "outputs": [
+        "RepairProposal"
+      ],
+      "purpose": "Generate repair proposals for all detected violations in a ledger. */",
+      "tags": [
+        "repair",
+        "proposal"
+      ]
     },
     {
       "name": "suggestProtocolRepair",
@@ -4494,7 +6204,17 @@
         "join"
       ],
       "exported": true,
-      "purpose": "Protocol violation repair: use SSG fixPath to suggest insertions."
+      "inputs": [
+        "SSGRejection"
+      ],
+      "outputs": [
+        "RepairProposal"
+      ],
+      "purpose": "Protocol violation repair: use SSG fixPath to suggest insertions. */",
+      "tags": [
+        "repair",
+        "proposal"
+      ]
     },
     {
       "name": "suggestInvariantRepair",
@@ -4528,7 +6248,19 @@
         "stringify"
       ],
       "exported": true,
-      "purpose": "Invariant violation repair: use rebuildState to compute correct transition data."
+      "inputs": [
+        "LedgerConsistencyViolation",
+        "StateTransition",
+        "Map"
+      ],
+      "outputs": [
+        "RepairProposal"
+      ],
+      "purpose": "Invariant violation repair: use rebuildState to compute correct transition data. */",
+      "tags": [
+        "repair",
+        "proposal"
+      ]
     },
     {
       "name": "suggestGenericRepair",
@@ -4559,7 +6291,17 @@
         "toFixed"
       ],
       "exported": false,
-      "purpose": "Generic repair for SVL-1/SVL-2/SVL-3 violations."
+      "inputs": [
+        "ConstraintViolation"
+      ],
+      "outputs": [
+        "RepairProposal"
+      ],
+      "purpose": "Generic repair for SVL-1/SVL-2/SVL-3 violations. */",
+      "tags": [
+        "repair",
+        "proposal"
+      ]
     },
     {
       "name": "applyProposalAsBranch",
@@ -4594,7 +6336,19 @@
         "map"
       ],
       "exported": true,
-      "purpose": "Convert an accepted repair proposal into a new Branch."
+      "inputs": [
+        "RepairProposal",
+        "Branch",
+        "StateTransition"
+      ],
+      "outputs": [
+        "Branch"
+      ],
+      "purpose": "Convert an accepted repair proposal into a new Branch. Creates a child branch with the proposed fix applied. The original ledger is never modified. */",
+      "tags": [
+        "repair",
+        "proposal"
+      ]
     },
     {
       "name": "validateProposal",
@@ -4623,7 +6377,19 @@
         "checkLedgerConsistency"
       ],
       "exported": true,
-      "purpose": "Validate a repair proposal: does applying it fix the violation?"
+      "inputs": [
+        "RepairProposal",
+        "StateTransition",
+        "Map"
+      ],
+      "outputs": [
+        "{ valid: boolean; remainingViolations: LedgerConsistencyViolation[] }"
+      ],
+      "purpose": "Validate a repair proposal: does applying it fix the violation? Returns true if a re-check passes after applying the proposal. */",
+      "tags": [
+        "repair",
+        "proposal"
+      ]
     },
     {
       "name": "generateRepairSummary",
@@ -4659,7 +6425,19 @@
         "getMinimalFixSet"
       ],
       "exported": true,
-      "purpose": "Generate a comprehensive repair summary from a ledger and IR context."
+      "inputs": [
+        "StateTransition",
+        "FunctionProtocol",
+        "Map"
+      ],
+      "outputs": [
+        "RepairSummary"
+      ],
+      "purpose": "Generate a comprehensive repair summary from a ledger and IR context. */",
+      "tags": [
+        "repair",
+        "proposal"
+      ]
     },
     {
       "name": "getMinimalFixSet",
@@ -4680,7 +6458,17 @@
         "values"
       ],
       "exported": true,
-      "purpose": "Deduplicate repair proposals: pick the highest-confidence proposal per violation index."
+      "inputs": [
+        "RepairProposal"
+      ],
+      "outputs": [
+        "RepairProposal"
+      ],
+      "purpose": "Deduplicate repair proposals: pick the highest-confidence proposal per violation index. Returns proposals sorted by violationIndex (ascending). * This is the authoritative \"minimal fix set\" — applying these proposals in order should resolve all detected violations without redundant fixes. /",
+      "tags": [
+        "repair",
+        "proposal"
+      ]
     },
     {
       "name": "tryParseRejection",
@@ -4697,7 +6485,17 @@
       "calls": [
         "parse"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "ConstraintViolation"
+      ],
+      "outputs": [
+        "SSGRejection"
+      ],
+      "tags": [
+        "repair",
+        "proposal"
+      ]
     },
     {
       "name": "jaccardSimilarity",
@@ -4720,7 +6518,18 @@
         "split",
         "filter"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "tags": [
+        "repair",
+        "proposal"
+      ]
     },
     {
       "name": "main",
@@ -4734,7 +6543,12 @@
         "forEach",
         "reportFingerprints"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "report"
+      ]
     },
     {
       "name": "assertLedgerConsistency",
@@ -4759,7 +6573,16 @@
         "error"
       ],
       "exported": true,
-      "purpose": "Assert full ledger passes Invariant-0 + Invariant-1."
+      "inputs": [
+        "StateTransition",
+        "Map"
+      ],
+      "outputs": [],
+      "purpose": "Assert full ledger passes Invariant-0 + Invariant-1. Throws InvariantViolationError with the first violation's details. */",
+      "tags": [
+        "runtime",
+        "invariants"
+      ]
     },
     {
       "name": "assertDeltaConsistency",
@@ -4786,7 +6609,15 @@
         "error"
       ],
       "exported": true,
-      "purpose": "Assert a single transition's delta consistency."
+      "inputs": [
+        "StateTransition"
+      ],
+      "outputs": [],
+      "purpose": "Assert a single transition's delta consistency. Checks that applying acquire/invalidate to statesBefore produces statesAfter. */",
+      "tags": [
+        "runtime",
+        "invariants"
+      ]
     },
     {
       "name": "assertRuleHashMatch",
@@ -4816,7 +6647,17 @@
         "error"
       ],
       "exported": true,
-      "purpose": "Assert rule hashes match — detects when validation rules changed under a ledger."
+      "inputs": [
+        "string",
+        "string",
+        "string"
+      ],
+      "outputs": [],
+      "purpose": "Assert rule hashes match — detects when validation rules changed under a ledger. */",
+      "tags": [
+        "runtime",
+        "invariants"
+      ]
     },
     {
       "name": "assertTransitionOrder",
@@ -4835,7 +6676,15 @@
         "error"
       ],
       "exported": true,
-      "purpose": "Assert transition indices are strictly monotonic (no duplicates, non-decreasing)."
+      "inputs": [
+        "StateTransition"
+      ],
+      "outputs": [],
+      "purpose": "Assert transition indices are strictly monotonic (no duplicates, non-decreasing). */",
+      "tags": [
+        "runtime",
+        "invariants"
+      ]
     },
     {
       "name": "assertLedgerInvariants",
@@ -4867,7 +6716,17 @@
         "assertRuleHashMatch"
       ],
       "exported": true,
-      "purpose": "Convenience: run all invariant checks on a ledger. Does not throw if all pass."
+      "inputs": [
+        "StateTransition",
+        "Map",
+        "string"
+      ],
+      "outputs": [],
+      "purpose": "Convenience: run all invariant checks on a ledger. Does not throw if all pass. */",
+      "tags": [
+        "runtime",
+        "invariants"
+      ]
     },
     {
       "name": "isStrict",
@@ -4876,7 +6735,11 @@
       "returnTypeDetail": "",
       "file": "src/runtime-invariants.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "runtime",
+        "invariants"
+      ]
     },
     {
       "name": "generateAttemptId",
@@ -4890,7 +6753,15 @@
         "toString",
         "random"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "runtime",
+        "types"
+      ]
     },
     {
       "name": "generateSessionId",
@@ -4904,7 +6775,15 @@
         "toString",
         "random"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "runtime",
+        "types"
+      ]
     },
     {
       "name": "generatePlannerSeed",
@@ -4930,7 +6809,18 @@
         "createHash",
         "now"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "runtime",
+        "types"
+      ]
     },
     {
       "name": "runAndCheck",
@@ -4953,7 +6843,16 @@
         "existsSync",
         "toString"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "{ success: boolean; error?: string }"
+      ],
+      "tags": [
+        "runtime"
+      ]
     },
     {
       "name": "loadIR",
@@ -4966,7 +6865,13 @@
         "readFileSync",
         "isArray"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "search",
+        "planner"
+      ]
     },
     {
       "name": "getStaticScore",
@@ -4995,7 +6900,18 @@
         "min",
         "set"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "tags": [
+        "search",
+        "planner"
+      ]
     },
     {
       "name": "decomposeGoals",
@@ -5028,7 +6944,17 @@
         "split",
         "slice"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "Promise"
+      ],
+      "tags": [
+        "search",
+        "planner"
+      ]
     },
     {
       "name": "batchScoreFuncs",
@@ -5063,7 +6989,18 @@
         "has"
       ],
       "exported": false,
-      "purpose": "批量评分：将同一 goal 的所有候选函数打包为一次 LLM 调用"
+      "inputs": [
+        "{name: string; staticScore: number}",
+        "string"
+      ],
+      "outputs": [
+        "Promise>"
+      ],
+      "purpose": "批量评分：将同一 goal 的所有候选函数打包为一次 LLM 调用 */",
+      "tags": [
+        "search",
+        "planner"
+      ]
     },
     {
       "name": "searchPlan",
@@ -5106,7 +7043,17 @@
         "getFunctionSuccessRate",
         "find"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "Promise"
+      ],
+      "tags": [
+        "search",
+        "planner"
+      ]
     },
     {
       "name": "findCompatibleVar",
@@ -5126,7 +7073,18 @@
       "returnTypeDetail": "string | null",
       "file": "src/search-planner.ts",
       "calls": [],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "Map",
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "search",
+        "planner"
+      ]
     },
     {
       "name": "runSemanticTest",
@@ -5155,7 +7113,12 @@
         "toFixed",
         "stringify"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "semantic_guard_test"
+      ]
     },
     {
       "name": "ensureDir",
@@ -5173,7 +7136,15 @@
         "existsSync",
         "mkdirSync"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [],
+      "tags": [
+        "semantic",
+        "snapshot"
+      ]
     },
     {
       "name": "createSnapshot",
@@ -5208,7 +7179,18 @@
         "toISOString"
       ],
       "exported": true,
-      "purpose": "从 IR 数据创建快照"
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "IRSnapshot"
+      ],
+      "purpose": "从 IR 数据创建快照 */",
+      "tags": [
+        "semantic",
+        "snapshot"
+      ]
     },
     {
       "name": "saveSnapshot",
@@ -5229,7 +7211,17 @@
         "stringify"
       ],
       "exported": true,
-      "purpose": "持久化快照"
+      "inputs": [
+        "IRSnapshot"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "持久化快照 */",
+      "tags": [
+        "semantic",
+        "snapshot"
+      ]
     },
     {
       "name": "loadSnapshot",
@@ -5249,7 +7241,17 @@
         "parse"
       ],
       "exported": true,
-      "purpose": "加载快照"
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "IRSnapshot"
+      ],
+      "purpose": "加载快照 */",
+      "tags": [
+        "semantic",
+        "snapshot"
+      ]
     },
     {
       "name": "listSnapshots",
@@ -5268,7 +7270,15 @@
         "sort"
       ],
       "exported": true,
-      "purpose": "列出所有快照"
+      "inputs": [],
+      "outputs": [
+        "IRSnapshot"
+      ],
+      "purpose": "列出所有快照 */",
+      "tags": [
+        "semantic",
+        "snapshot"
+      ]
     },
     {
       "name": "diffSnapshots",
@@ -5296,7 +7306,18 @@
         "map"
       ],
       "exported": true,
-      "purpose": "计算两个快照之间的差异"
+      "inputs": [
+        "IRSnapshot",
+        "IRSnapshot"
+      ],
+      "outputs": [
+        "IRDiff"
+      ],
+      "purpose": "计算两个快照之间的差异 */",
+      "tags": [
+        "semantic",
+        "snapshot"
+      ]
     },
     {
       "name": "summarizeSnapshot",
@@ -5315,7 +7336,17 @@
         "join"
       ],
       "exported": true,
-      "purpose": "生成快照摘要"
+      "inputs": [
+        "IRSnapshot"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "生成快照摘要 */",
+      "tags": [
+        "semantic",
+        "snapshot"
+      ]
     },
     {
       "name": "findSnapshotBySession",
@@ -5334,7 +7365,17 @@
         "find"
       ],
       "exported": true,
-      "purpose": "按 sessionId 查找快照，返回最近的一个（或 undefined）"
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "IRSnapshot"
+      ],
+      "purpose": "按 sessionId 查找快照，返回最近的一个（或 undefined） */",
+      "tags": [
+        "semantic",
+        "snapshot"
+      ]
     },
     {
       "name": "narrateRejection",
@@ -5355,7 +7396,17 @@
         "R",
         "C_"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "ConstraintViolation"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "narrateSuccess",
@@ -5375,7 +7426,17 @@
         "filter",
         "G"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "{ kind: string; function?: string }"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "formatActionSequence",
@@ -5395,7 +7456,17 @@
         "filter",
         "D"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "{ kind: string; function?: string }"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "formatSessionTimeline",
@@ -5428,7 +7499,17 @@
         "narrateSuccess",
         "checkLedgerConsistency"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "ExecutionSession"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "pad",
@@ -5452,7 +7533,18 @@
         "repeat",
         "max"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string",
+        "number"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "formatSessionSummary",
@@ -5477,7 +7569,17 @@
         "String",
         "join"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "ReturnType"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "formatGenomeSummary",
@@ -5501,7 +7603,15 @@
         "sort",
         "entries"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "barChart",
@@ -5526,7 +7636,18 @@
         "round",
         "Y"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "number",
+        "number"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "aclBadge",
@@ -5546,7 +7667,17 @@
         "Y",
         "D"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "formatLearnedPatterns",
@@ -5567,7 +7698,15 @@
         "Y",
         "aclBadge"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "formatAntibodyStats",
@@ -5592,7 +7731,15 @@
         "round",
         "join"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "formatHeatmap",
@@ -5618,7 +7765,15 @@
         "C_",
         "join"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "loadProtocols",
@@ -5634,7 +7789,15 @@
         "entries",
         "push"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "FunctionProtocol"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "formatStateTransitionPathFromLedger",
@@ -5657,7 +7820,17 @@
         "G",
         "R"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "StateTransition"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "formatStateTransitions",
@@ -5685,7 +7858,17 @@
         "filter",
         "Y"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "ExecutionSession"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "sleep",
@@ -5700,7 +7883,17 @@
       "returnTypeDetail": "Promise<void>",
       "file": "src/semantic-trace.ts",
       "calls": [],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "number"
+      ],
+      "outputs": [
+        "Promise"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "clearScreen",
@@ -5711,7 +7904,13 @@
       "calls": [
         "write"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "svlLabel",
@@ -5726,7 +7925,17 @@
       "returnTypeDetail": "string",
       "file": "src/semantic-trace.ts",
       "calls": [],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "describeSVLLayer",
@@ -5741,7 +7950,17 @@
       "returnTypeDetail": "string",
       "file": "src/semantic-trace.ts",
       "calls": [],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "formatReplayHeader",
@@ -5766,7 +7985,17 @@
         "R",
         "join"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "ExecutionSession"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "formatActionList",
@@ -5786,7 +8015,17 @@
         "map",
         "filter"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "{ kind: string; function?: string }"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "formatAdaptationDiff",
@@ -5815,7 +8054,18 @@
         "R",
         "G"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "Attempt",
+        "Attempt"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "formatAnomalyReport",
@@ -5842,7 +8092,17 @@
         "C_",
         "slice"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "Attempt"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "formatImmuneResponse",
@@ -5863,7 +8123,17 @@
         "Y",
         "D"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "Attempt"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "formatReplayProgress",
@@ -5886,7 +8156,18 @@
         "repeat",
         "D"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "number",
+        "number"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "replaySession",
@@ -5921,7 +8202,15 @@
         "repeat",
         "formatLedgerReplayValidation"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "ExecutionSession"
+      ],
+      "outputs": [],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "formatLedgerReplayValidation",
@@ -5962,7 +8251,17 @@
         "hashLedger",
         "B"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "ExecutionSession"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "formatLedgerStats",
@@ -5992,7 +8291,15 @@
         "sort",
         "entries"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "formatCrossSessionQuery",
@@ -6027,7 +8334,18 @@
         "G",
         "B"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "formatSnapshotList",
@@ -6048,7 +8366,15 @@
         "padEnd",
         "join"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "formatSnapshotDiff",
@@ -6080,7 +8406,18 @@
         "map",
         "Y"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "formatSessionValidation",
@@ -6122,7 +8459,17 @@
         "validateTransition",
         "checkLedgerConsistency"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "ExecutionSession"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "main",
@@ -6176,7 +8523,13 @@
         "startsWith",
         "formatSessionTimeline"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "G",
@@ -6191,7 +8544,11 @@
       "returnTypeDetail": "",
       "file": "src/semantic-trace.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "R",
@@ -6206,7 +8563,11 @@
       "returnTypeDetail": "",
       "file": "src/semantic-trace.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "Y",
@@ -6221,7 +8582,11 @@
       "returnTypeDetail": "",
       "file": "src/semantic-trace.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "C_",
@@ -6236,7 +8601,11 @@
       "returnTypeDetail": "",
       "file": "src/semantic-trace.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "D",
@@ -6251,7 +8620,11 @@
       "returnTypeDetail": "",
       "file": "src/semantic-trace.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "B",
@@ -6266,7 +8639,11 @@
       "returnTypeDetail": "",
       "file": "src/semantic-trace.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "semantic",
+        "trace"
+      ]
     },
     {
       "name": "loadContracts",
@@ -6280,7 +8657,15 @@
         "require",
         "isArray"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "IRFunction"
+      ],
+      "tags": [
+        "semantic",
+        "validator"
+      ]
     },
     {
       "name": "matchIntent",
@@ -6302,7 +8687,18 @@
       "calls": [
         "some"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "semantic",
+        "validator"
+      ]
     },
     {
       "name": "checkSemantic",
@@ -6333,7 +8729,18 @@
         "indexOf",
         "findIndex"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "string",
+        "Action"
+      ],
+      "outputs": [
+        "{ valid: boolean; errors: string[] }"
+      ],
+      "tags": [
+        "semantic",
+        "validator"
+      ]
     },
     {
       "name": "main",
@@ -6344,7 +8751,12 @@
       "calls": [
         "getAllSessions"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "sessions"
+      ]
     },
     {
       "name": "toSnapshot",
@@ -6361,7 +8773,17 @@
       "calls": [
         "sort"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "Map>"
+      ],
+      "outputs": [
+        "Record"
+      ],
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "fromSnapshot",
@@ -6379,7 +8801,17 @@
         "entries",
         "set"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "Record"
+      ],
+      "outputs": [
+        "Map>"
+      ],
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "deepEqualSnapshots",
@@ -6402,7 +8834,18 @@
         "sort",
         "keys"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "Record",
+        "Record"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "rebuildState",
@@ -6428,7 +8871,18 @@
         "applyTransitionDelta",
         "toSnapshot"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "StateTransition",
+        "Map"
+      ],
+      "outputs": [
+        "Record"
+      ],
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "applyTransitionDelta",
@@ -6453,7 +8907,16 @@
         "add",
         "set"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "Map>",
+        "StateTransition"
+      ],
+      "outputs": [],
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "computeDelta",
@@ -6480,7 +8943,19 @@
       "calls": [
         "filter"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "Record",
+        "Record",
+        "string"
+      ],
+      "outputs": [
+        "{ acquired: string[]; invalidated: string[] }"
+      ],
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "findFixPathStatic",
@@ -6520,7 +8995,20 @@
         "has",
         "includes"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "Map",
+        "string",
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "validateTransition",
@@ -6575,7 +9063,22 @@
         "stringify",
         "error"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "ValidationContext",
+        "string",
+        "number",
+        "Map",
+        "Map",
+        "string"
+      ],
+      "outputs": [
+        "{ valid: boolean; transition: StateTransition; rejection?: SSGRejection }"
+      ],
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "checkLedgerConsistency",
@@ -6607,7 +9110,18 @@
         "push",
         "applyTransitionDelta"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "StateTransition",
+        "Map"
+      ],
+      "outputs": [
+        "{ consistent: boolean; violations: LedgerConsistencyViolation[] }"
+      ],
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "hashRules",
@@ -6631,7 +9145,17 @@
         "createHash",
         "stringify"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "Map"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "hashLedger",
@@ -6654,7 +9178,17 @@
         "stringify"
       ],
       "exported": true,
-      "purpose": "Compute a deterministic SHA256 hash of an entire ledger (P1: Tamper-evident integrity)."
+      "inputs": [
+        "StateTransition"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Compute a deterministic SHA256 hash of an entire ledger (P1: Tamper-evident integrity). */",
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "diffLedgers",
@@ -6682,7 +9216,18 @@
         "push"
       ],
       "exported": true,
-      "purpose": "Compare two ledgers and identify structural differences."
+      "inputs": [
+        "StateTransition",
+        "StateTransition"
+      ],
+      "outputs": [
+        "LedgerDiff"
+      ],
+      "purpose": "Compare two ledgers and identify structural differences. */",
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "findProducer",
@@ -6706,7 +9251,18 @@
         "map"
       ],
       "exported": true,
-      "purpose": "Find all transitions that acquire (produce) a given state in the ledger."
+      "inputs": [
+        "string",
+        "StateTransition"
+      ],
+      "outputs": [
+        "LedgerQueryResult"
+      ],
+      "purpose": "Find all transitions that acquire (produce) a given state in the ledger. */",
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "findConsumer",
@@ -6730,7 +9286,18 @@
         "map"
       ],
       "exported": true,
-      "purpose": "Find all transitions that have a given state in their pre_states (consume it)."
+      "inputs": [
+        "string",
+        "StateTransition"
+      ],
+      "outputs": [
+        "LedgerQueryResult"
+      ],
+      "purpose": "Find all transitions that have a given state in their pre_states (consume it). */",
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "findViolations",
@@ -6749,7 +9316,17 @@
         "map"
       ],
       "exported": true,
-      "purpose": "Find all invalid transitions in a ledger."
+      "inputs": [
+        "StateTransition"
+      ],
+      "outputs": [
+        "LedgerQueryResult"
+      ],
+      "purpose": "Find all invalid transitions in a ledger. */",
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "findTransition",
@@ -6772,7 +9349,18 @@
         "findIndex"
       ],
       "exported": true,
-      "purpose": "Find a transition by its action index."
+      "inputs": [
+        "number",
+        "StateTransition"
+      ],
+      "outputs": [
+        "LedgerQueryResult"
+      ],
+      "purpose": "Find a transition by its action index. */",
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "listAllStates",
@@ -6793,7 +9381,17 @@
         "values"
       ],
       "exported": true,
-      "purpose": "List all unique states present across all namespaces in a ledger."
+      "inputs": [
+        "StateTransition"
+      ],
+      "outputs": [
+        "{ namespace: string; state: string }"
+      ],
+      "purpose": "List all unique states present across all namespaces in a ledger. */",
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "explainRejection",
@@ -6812,7 +9410,17 @@
         "push"
       ],
       "exported": true,
-      "purpose": "Format an SSG rejection as a human-readable multi-line string."
+      "inputs": [
+        "SSGRejection"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Format an SSG rejection as a human-readable multi-line string. */",
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "rejectionToJSON",
@@ -6828,7 +9436,17 @@
       "file": "src/ssg-validator.ts",
       "calls": [],
       "exported": true,
-      "purpose": "Format an SSG rejection as a structured JSON object."
+      "inputs": [
+        "SSGRejection"
+      ],
+      "outputs": [
+        "object"
+      ],
+      "purpose": "Format an SSG rejection as a structured JSON object. */",
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "parseProtocolsFromJSON",
@@ -6846,7 +9464,17 @@
         "entries",
         "push"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "{\n    rules: Record;\n  }"
+      ],
+      "outputs": [
+        "FunctionProtocol"
+      ],
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "StateMachineValidator.setNamespaceInitialState",
@@ -6867,7 +9495,10 @@
       "file": "src/ssg-validator.ts",
       "exported": false,
       "calls": [],
-      "purpose": "/** @deprecated Use validateTransition(ctx, ...) for stateless validation */"
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "StateMachineValidator.apply",
@@ -6888,7 +9519,11 @@
       "file": "src/ssg-validator.ts",
       "exported": false,
       "calls": [],
-      "purpose": "Validate a function call against current protocol state."
+      "purpose": "Validate a function call against current protocol state. Internally delegates to the pure validateTransition() function.",
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "StateMachineValidator.applyWithTransition",
@@ -6908,7 +9543,11 @@
       "returnTypeDetail": "{ result: SSGStepResult; transition: StateTransition }",
       "file": "src/ssg-validator.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "StateMachineValidator.getCurrentStates",
@@ -6917,7 +9556,11 @@
       "returnTypeDetail": "string[]",
       "file": "src/ssg-validator.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "StateMachineValidator.snapshotNamespaceStates",
@@ -6926,7 +9569,11 @@
       "returnTypeDetail": "Record<string, string[]>",
       "file": "src/ssg-validator.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "StateMachineValidator.getNamespaceStates",
@@ -6941,7 +9588,11 @@
       "returnTypeDetail": "string[]",
       "file": "src/ssg-validator.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "StateMachineValidator.getTrace",
@@ -6951,7 +9602,11 @@
       "file": "src/ssg-validator.ts",
       "exported": false,
       "calls": [],
-      "purpose": "Returns trace reconstructed from the ledger (backward-compat)"
+      "purpose": "Returns trace reconstructed from the ledger (backward-compat) */",
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "StateMachineValidator.getLedger",
@@ -6961,7 +9616,11 @@
       "file": "src/ssg-validator.ts",
       "exported": false,
       "calls": [],
-      "purpose": "Returns the internal ledger (Phase 3 API)"
+      "purpose": "Returns the internal ledger (Phase 3 API) */",
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "StateMachineValidator.getContext",
@@ -6971,7 +9630,11 @@
       "file": "src/ssg-validator.ts",
       "exported": false,
       "calls": [],
-      "purpose": "Returns the current ValidationContext (Phase 3 API)"
+      "purpose": "Returns the current ValidationContext (Phase 3 API) */",
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "StateMachineValidator.getRuleHash",
@@ -6981,7 +9644,11 @@
       "file": "src/ssg-validator.ts",
       "exported": false,
       "calls": [],
-      "purpose": "Returns the pre-computed rule hash (Phase 3 API)"
+      "purpose": "Returns the pre-computed rule hash (Phase 3 API) */",
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "StateMachineValidator.explainRejection",
@@ -6996,7 +9663,11 @@
       "returnTypeDetail": "string",
       "file": "src/ssg-validator.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "StateMachineValidator.rejectionToJSON",
@@ -7011,7 +9682,11 @@
       "returnTypeDetail": "object",
       "file": "src/ssg-validator.ts",
       "exported": false,
-      "calls": []
+      "calls": [],
+      "tags": [
+        "ssg",
+        "validator"
+      ]
     },
     {
       "name": "jaccardSimilarity",
@@ -7034,7 +9709,17 @@
         "bigrams",
         "filter"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "tags": [
+        "utils"
+      ]
     },
     {
       "name": "extractKeywords",
@@ -7053,7 +9738,16 @@
         "filter",
         "split"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "utils"
+      ]
     },
     {
       "name": "loadIR",
@@ -7068,7 +9762,12 @@
         "readFileSync",
         "isArray"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "validator"
+      ]
     },
     {
       "name": "normalizeType",
@@ -7086,7 +9785,16 @@
         "trim",
         "toLowerCase"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "validator"
+      ]
     },
     {
       "name": "checkVariableFlow",
@@ -7103,7 +9811,16 @@
       "calls": [
         "processAction"
       ],
-      "exported": false
+      "exported": false,
+      "inputs": [
+        "Action"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "validator"
+      ]
     },
     {
       "name": "validateAction",
@@ -7132,6 +9849,13 @@
         "validateAction"
       ],
       "exported": true,
+      "inputs": [
+        "Action",
+        "number"
+      ],
+      "outputs": [
+        "{ valid: boolean; errors: string[]; violations: ConstraintViolation[] }"
+      ],
       "protocol": {
         "pre_states": [
           "IR_EXTRACTED"
@@ -7141,7 +9865,10 @@
         ],
         "namespace": "dev_pipeline"
       },
-      "purpose": "校验单个动作的合法性（函数存在、类型匹配、参数数量）。"
+      "purpose": "校验单个动作的合法性（函数存在、类型匹配、参数数量）。",
+      "tags": [
+        "validator"
+      ]
     },
     {
       "name": "validateActionSequence",
@@ -7161,6 +9888,12 @@
         "checkVariableFlow"
       ],
       "exported": true,
+      "inputs": [
+        "Action"
+      ],
+      "outputs": [
+        "{ valid: boolean; errors: string[]; violations: ConstraintViolation[] }"
+      ],
       "protocol": {
         "pre_states": [
           "ACTION_VALIDATED"
@@ -7173,7 +9906,10 @@
         ],
         "namespace": "dev_pipeline"
       },
-      "purpose": "批量校验动作序列 + 变量流向分析。"
+      "purpose": "批量校验动作序列 + 变量流向分析。",
+      "tags": [
+        "validator"
+      ]
     },
     {
       "name": "main",
@@ -7184,7 +9920,13 @@
       "calls": [
         "verifyAllFingerprints"
       ],
-      "exported": true
+      "exported": true,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "verify",
+        "fps"
+      ]
     },
     {
       "name": "fn",
@@ -7193,7 +9935,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "error",
@@ -7208,7 +9953,10 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "输出错误日志"
+      "description": "输出错误日志",
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "existsSync",
@@ -7223,7 +9971,10 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "检查文件是否存在"
+      "description": "检查文件是否存在",
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "statSync",
@@ -7238,7 +9989,10 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "获取文件状态"
+      "description": "获取文件状态",
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "toFixed",
@@ -7247,7 +10001,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "readdirSync",
@@ -7262,7 +10019,10 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "读取目录内容"
+      "description": "读取目录内容",
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "readFileSync",
@@ -7281,7 +10041,10 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "同步读取文件内容"
+      "description": "同步读取文件内容",
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "relative",
@@ -7300,7 +10063,10 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "计算相对路径"
+      "description": "计算相对路径",
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "repeat",
@@ -7309,7 +10075,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "require",
@@ -7318,7 +10087,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "parse",
@@ -7333,7 +10105,10 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "解析 JSON 字符串"
+      "description": "解析 JSON 字符串",
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "cwd",
@@ -7343,7 +10118,10 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "获取当前工作目录"
+      "description": "获取当前工作目录",
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "mkdirSync",
@@ -7362,7 +10140,10 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "创建目录"
+      "description": "创建目录",
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "now",
@@ -7372,7 +10153,10 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "当前时间戳（毫秒）"
+      "description": "当前时间戳（毫秒）",
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "writeFileSync",
@@ -7391,7 +10175,10 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "同步写入文件"
+      "description": "同步写入文件",
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "stringify",
@@ -7410,7 +10197,10 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "序列化为 JSON 字符串"
+      "description": "序列化为 JSON 字符串",
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "random",
@@ -7420,7 +10210,10 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "生成 0-1 随机数"
+      "description": "生成 0-1 随机数",
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "add",
@@ -7429,7 +10222,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "findIndex",
@@ -7438,7 +10234,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "log",
@@ -7453,7 +10252,10 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "输出日志"
+      "description": "输出日志",
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "max",
@@ -7468,7 +10270,10 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "最大值"
+      "description": "最大值",
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "test",
@@ -7477,7 +10282,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "collect",
@@ -7486,7 +10294,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "convert",
@@ -7495,7 +10306,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "dirname",
@@ -7510,7 +10324,10 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "获取目录名"
+      "description": "获取目录名",
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "digest",
@@ -7525,7 +10342,10 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "输出哈希摘要"
+      "description": "输出哈希摘要",
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "update",
@@ -7540,7 +10360,10 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "更新哈希数据"
+      "description": "更新哈希数据",
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "createHash",
@@ -7555,7 +10378,10 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "创建哈希对象"
+      "description": "创建哈希对象",
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "execSync",
@@ -7570,7 +10396,22 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "同步执行命令"
+      "description": "同步执行命令",
+      "tags": [
+        "(external)"
+      ]
+    },
+    {
+      "name": "getFullText",
+      "params": [],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "getComment",
@@ -7579,7 +10420,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "getElementTypeNode",
@@ -7588,7 +10432,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "getTypeNode",
@@ -7597,7 +10444,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "getReturnTypeNode",
@@ -7606,7 +10456,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "getBody",
@@ -7615,7 +10468,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "forEachDescendant",
@@ -7624,7 +10480,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "getClasses",
@@ -7633,7 +10492,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "getMethods",
@@ -7642,7 +10504,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "getImportDeclarations",
@@ -7651,7 +10516,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "getModuleSpecifierValue",
@@ -7660,7 +10528,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "getNamedImports",
@@ -7669,7 +10540,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "getModuleSpecifierSourceFile",
@@ -7678,7 +10552,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "resolveModuleName",
@@ -7717,7 +10594,10 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "auto-resolved from /Users/shenlian/progmune-runtime/node_modules/typescript/lib/typescript.d.ts"
+      "description": "auto-resolved from /Users/shenlian/progmune-runtime/node_modules/typescript/lib/typescript.d.ts",
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "getNamespaceImport",
@@ -7726,7 +10606,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "addSourceFileAtPathIfExists",
@@ -7735,7 +10618,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "tryResolveFromNamespace",
@@ -7744,7 +10630,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "getInterfaces",
@@ -7753,7 +10642,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "getTypeAliases",
@@ -7762,7 +10654,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "getExportedDeclarations",
@@ -7771,7 +10666,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "from",
@@ -7790,7 +10688,10 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "从字符串创建 Buffer"
+      "description": "从字符串创建 Buffer",
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "unlinkSync",
@@ -7805,7 +10706,10 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "删除文件"
+      "description": "删除文件",
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "parseInt",
@@ -7814,7 +10718,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "flatMap",
@@ -7823,7 +10730,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "rmdirSync",
@@ -7832,7 +10742,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "String",
@@ -7841,7 +10754,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "table",
@@ -7850,7 +10766,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "hostname",
@@ -7859,7 +10778,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "create",
@@ -7868,7 +10790,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "modify",
@@ -7877,7 +10802,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "writeHead",
@@ -7886,7 +10814,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "end",
@@ -7895,7 +10826,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "handler",
@@ -7904,7 +10838,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "createPureContext",
@@ -7913,7 +10850,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "apply",
@@ -7922,7 +10862,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "flat",
@@ -7931,7 +10874,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "getTrace",
@@ -7940,7 +10886,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "wrapResult",
@@ -7949,7 +10898,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "getMaskedFuncList",
@@ -7958,7 +10910,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "collectImports",
@@ -7967,7 +10922,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "convertLines",
@@ -7976,7 +10934,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "delete",
@@ -7985,7 +10946,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "deepEqual",
@@ -7994,7 +10958,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "min",
@@ -8009,7 +10976,10 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "最小值"
+      "description": "最小值",
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "parseFloat",
@@ -8018,7 +10988,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "clear",
@@ -8027,13 +11000,19 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "toLocaleString",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "mergeStates",
@@ -8042,7 +11021,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "write",
@@ -8051,7 +11033,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "norm",
@@ -8060,7 +11045,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "exit",
@@ -8075,7 +11063,10 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "description": "退出进程"
+      "description": "退出进程",
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "normalizeSnap",
@@ -8084,7 +11075,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "hash",
@@ -8093,7 +11087,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "bigrams",
@@ -8102,7 +11099,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     },
     {
       "name": "processAction",
@@ -8111,7 +11111,10 @@
       "returnTypeDetail": "any",
       "file": "(external)",
       "calls": [],
-      "external": true
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
     }
   ]
 }

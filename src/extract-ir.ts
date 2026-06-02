@@ -41,12 +41,24 @@ function parseCapabilityFromJSDoc(node: any): { purpose?: string; tags?: string[
   if (!jsdocs || jsdocs.length === 0) return {};
   const result: { purpose?: string; tags?: string[] } = {};
   for (const doc of jsdocs) {
-    // @purpose from the description text
-    const comment = doc.getComment?.() || "";
-    if (comment && !comment.startsWith("@")) {
-      result.purpose = comment.split("\n")[0].trim();
+    // @purpose: full description text (all lines before any @tag)
+    const fullText = doc.getFullText?.() || "";
+    // Extract description: everything between "/**" and the first "@tag"
+    const descMatch = fullText.match(/\/\*\*\s*\n?\s*\*?\s*([^@]*)/);
+    if (descMatch) {
+      const desc = descMatch[1].replace(/\n\s*\*\s*/g, " ").trim();
+      if (desc && !desc.startsWith("@")) {
+        result.purpose = desc;
+      }
     }
-    // @tags from ts-morph tag system (getTags returns @tag annotations)
+    // Fallback: use getComment()
+    if (!result.purpose) {
+      const comment = doc.getComment?.() || "";
+      if (comment && !comment.startsWith("@")) {
+        result.purpose = comment.split("\n")[0].trim();
+      }
+    }
+    // @tags from ts-morph tag system
     const tsTags = doc.getTags?.();
     if (tsTags) {
       for (const t of tsTags) {
@@ -59,6 +71,13 @@ function parseCapabilityFromJSDoc(node: any): { purpose?: string; tags?: string[
     }
   }
   return result;
+}
+
+/** Auto-derive tags from function's source file name */
+function deriveTagsFromFile(filePath: string): string[] {
+  const name = filePath.replace(/\.ts$/, "").replace(/^src\//, "");
+  const tags = name.split(/[\/\-]/).filter(t => t.length > 2 && t !== "src");
+  return [...new Set(tags)];
 }
 
 /** 从 JSDoc 注释中解析 @protocol 注解 */
@@ -596,6 +615,14 @@ export function extractIRWithTypes(projectRoot: string): {
 
   const totalExternal = dynamicCount + fallbackCount + externalCount;
   console.error(`📦 外部函数: ${totalExternal} (动态=${dynamicCount} 回退=${fallbackCount} 未签名=${externalCount}, from ${allCalls.size} total calls)`);
+
+  // Post-process: auto-derive tags from file names
+  for (const f of funcs) {
+    if (!f.tags || f.tags.length === 0) {
+      const derived = deriveTagsFromFile(f.file);
+      if (derived.length > 0) f.tags = derived;
+    }
+  }
 
   // Build type→module map for emitter
   const _typeMap: Record<string, string> = {};
