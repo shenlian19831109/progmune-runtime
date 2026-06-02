@@ -1,0 +1,397 @@
+{
+  "sessionId": "sess_1780420628273_czwqe",
+  "intent": "load protocol rules and count rules that belong to the auth namespace",
+  "attempts": [
+    {
+      "id": "att_1780420630672_41vtg",
+      "sessionId": "sess_1780420628273_czwqe",
+      "attemptNumber": 1,
+      "inputIntent": "load protocol rules and count rules that belong to the auth namespace",
+      "plannerSeed": "31485c0d",
+      "constraintSnapshotId": "snap_1780420628273_391d859ab6eb",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "loadProtocols",
+          "args": [
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": []
+            }
+          ],
+          "assignTo": "protocols"
+        },
+        {
+          "kind": "call",
+          "function": "getProtocolConfig",
+          "args": [],
+          "assignTo": "config"
+        },
+        {
+          "kind": "call",
+          "function": "parseProtocolsFromJSON",
+          "args": [
+            {
+              "name": "protocolDef",
+              "type": "{\n    rules: Record<string, {\n      pre_states: string[];\n      post_states: string[];\n      invalidate?: string[];\n      namespace?: string;\n    }>;\n  }",
+              "value": {
+                "rules": {
+                  "verify_password": {
+                    "pre_states": [
+                      "UNAUTHENTICATED"
+                    ],
+                    "post_states": [
+                      "PASSWORD_VERIFIED"
+                    ],
+                    "namespace": "auth"
+                  },
+                  "generate_jwt": {
+                    "pre_states": [
+                      "PASSWORD_VERIFIED"
+                    ],
+                    "post_states": [
+                      "TOKEN_ISSUED"
+                    ],
+                    "namespace": "auth"
+                  },
+                  "create_session": {
+                    "pre_states": [
+                      "TOKEN_ISSUED"
+                    ],
+                    "post_states": [
+                      "SESSION_ACTIVE"
+                    ],
+                    "namespace": "auth"
+                  },
+                  "revoke_token": {
+                    "pre_states": [
+                      "TOKEN_ISSUED"
+                    ],
+                    "post_states": [
+                      "UNAUTHENTICATED"
+                    ],
+                    "namespace": "auth"
+                  },
+                  "logout": {
+                    "pre_states": [
+                      "SESSION_ACTIVE"
+                    ],
+                    "post_states": [
+                      "UNAUTHENTICATED"
+                    ],
+                    "namespace": "auth"
+                  }
+                }
+              }
+            }
+          ],
+          "assignTo": "authProtocols"
+        },
+        {
+          "kind": "return",
+          "value": "authProtocols"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "loadProtocols",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "getProtocolConfig",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 2,
+          "function": "parseProtocolsFromJSON",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780420630672,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780420628273,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780420630672_41vtg",
+    "sessionId": "sess_1780420628273_czwqe",
+    "attemptNumber": 1,
+    "inputIntent": "load protocol rules and count rules that belong to the auth namespace",
+    "plannerSeed": "31485c0d",
+    "constraintSnapshotId": "snap_1780420628273_391d859ab6eb",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "loadProtocols",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": []
+          }
+        ],
+        "assignTo": "protocols"
+      },
+      {
+        "kind": "call",
+        "function": "getProtocolConfig",
+        "args": [],
+        "assignTo": "config"
+      },
+      {
+        "kind": "call",
+        "function": "parseProtocolsFromJSON",
+        "args": [
+          {
+            "name": "protocolDef",
+            "type": "{\n    rules: Record<string, {\n      pre_states: string[];\n      post_states: string[];\n      invalidate?: string[];\n      namespace?: string;\n    }>;\n  }",
+            "value": {
+              "rules": {
+                "verify_password": {
+                  "pre_states": [
+                    "UNAUTHENTICATED"
+                  ],
+                  "post_states": [
+                    "PASSWORD_VERIFIED"
+                  ],
+                  "namespace": "auth"
+                },
+                "generate_jwt": {
+                  "pre_states": [
+                    "PASSWORD_VERIFIED"
+                  ],
+                  "post_states": [
+                    "TOKEN_ISSUED"
+                  ],
+                  "namespace": "auth"
+                },
+                "create_session": {
+                  "pre_states": [
+                    "TOKEN_ISSUED"
+                  ],
+                  "post_states": [
+                    "SESSION_ACTIVE"
+                  ],
+                  "namespace": "auth"
+                },
+                "revoke_token": {
+                  "pre_states": [
+                    "TOKEN_ISSUED"
+                  ],
+                  "post_states": [
+                    "UNAUTHENTICATED"
+                  ],
+                  "namespace": "auth"
+                },
+                "logout": {
+                  "pre_states": [
+                    "SESSION_ACTIVE"
+                  ],
+                  "post_states": [
+                    "UNAUTHENTICATED"
+                  ],
+                  "namespace": "auth"
+                }
+              }
+            }
+          }
+        ],
+        "assignTo": "authProtocols"
+      },
+      {
+        "kind": "return",
+        "value": "authProtocols"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "loadProtocols",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "getProtocolConfig",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 2,
+        "function": "parseProtocolsFromJSON",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780420630672,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780420628273_391d859ab6eb",
+  "endedAt": 1780420630674
+}

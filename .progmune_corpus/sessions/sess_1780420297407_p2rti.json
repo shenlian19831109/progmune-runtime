@@ -1,0 +1,151 @@
+{
+  "sessionId": "sess_1780420297407_p2rti",
+  "intent": "list all files in the corpus directory",
+  "attempts": [
+    {
+      "id": "att_1780420299209_9dt3a",
+      "sessionId": "sess_1780420297407_p2rti",
+      "attemptNumber": 1,
+      "inputIntent": "list all files in the corpus directory",
+      "plannerSeed": "db889800",
+      "constraintSnapshotId": "snap_1780420297407_391d859ab6eb",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "readFileSync",
+          "args": [
+            {
+              "name": "path",
+              "type": "string",
+              "value": "./corpus"
+            },
+            {
+              "name": "encoding",
+              "type": "string",
+              "value": "utf-8"
+            }
+          ],
+          "assignTo": "files"
+        },
+        {
+          "kind": "return",
+          "value": "files"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "readFileSync",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780420299209,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780420297407,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780420299209_9dt3a",
+    "sessionId": "sess_1780420297407_p2rti",
+    "attemptNumber": 1,
+    "inputIntent": "list all files in the corpus directory",
+    "plannerSeed": "db889800",
+    "constraintSnapshotId": "snap_1780420297407_391d859ab6eb",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "readFileSync",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "./corpus"
+          },
+          {
+            "name": "encoding",
+            "type": "string",
+            "value": "utf-8"
+          }
+        ],
+        "assignTo": "files"
+      },
+      {
+        "kind": "return",
+        "value": "files"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "readFileSync",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780420299209,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780420297407_391d859ab6eb",
+  "endedAt": 1780420299211
+}

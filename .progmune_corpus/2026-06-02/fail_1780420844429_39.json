@@ -1,0 +1,39 @@
+{
+  "intent": "verify all fingerprints, then get the execution metrics, and return both results",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "schema",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "verifyAllFingerprints",
+      "args": [
+        {
+          "name": "currentRuleHash",
+          "type": "str",
+          "value": "."
+        }
+      ],
+      "assignTo": "summary"
+    },
+    {
+      "kind": "call",
+      "function": "getExecutionMetrics",
+      "args": [],
+      "assignTo": "metrics"
+    },
+    {
+      "kind": "return",
+      "value": "summary"
+    },
+    {
+      "kind": "return",
+      "value": "metrics"
+    }
+  ],
+  "errorDetail": "action[2]: return should be the last action (actions after return are unreachable)",
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 3,
+  "id": "fail_1780420844429_39",
+  "timestamp": "2026-06-02T17:20:44.429Z"
+}

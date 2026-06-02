@@ -1,0 +1,141 @@
+{
+  "sessionId": "sess_1780420287349_a6dqn",
+  "intent": "format the immune status as a colored terminal output",
+  "attempts": [
+    {
+      "id": "att_1780420288661_zwqqq",
+      "sessionId": "sess_1780420287349_a6dqn",
+      "attemptNumber": 1,
+      "inputIntent": "format the immune status as a colored terminal output",
+      "plannerSeed": "283f857b",
+      "constraintSnapshotId": "snap_1780420287353_391d859ab6eb",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "formatImmuneResponse",
+          "args": [
+            {
+              "name": "a",
+              "type": "Attempt",
+              "value": null
+            }
+          ],
+          "assignTo": "output"
+        },
+        {
+          "kind": "return",
+          "value": "output"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "formatImmuneResponse",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780420288661,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780420287349,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780420288661_zwqqq",
+    "sessionId": "sess_1780420287349_a6dqn",
+    "attemptNumber": 1,
+    "inputIntent": "format the immune status as a colored terminal output",
+    "plannerSeed": "283f857b",
+    "constraintSnapshotId": "snap_1780420287353_391d859ab6eb",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "formatImmuneResponse",
+        "args": [
+          {
+            "name": "a",
+            "type": "Attempt",
+            "value": null
+          }
+        ],
+        "assignTo": "output"
+      },
+      {
+        "kind": "return",
+        "value": "output"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "formatImmuneResponse",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780420288661,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780420287353_391d859ab6eb",
+  "endedAt": 1780420288663
+}

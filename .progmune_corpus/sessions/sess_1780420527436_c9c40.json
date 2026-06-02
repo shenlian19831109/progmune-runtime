@@ -1,0 +1,161 @@
+{
+  "sessionId": "sess_1780420527436_c9c40",
+  "intent": "verify fingerprint for a single session by its ID and return tampered status",
+  "attempts": [
+    {
+      "id": "att_1780420528985_pyzdf",
+      "sessionId": "sess_1780420527436_c9c40",
+      "attemptNumber": 1,
+      "inputIntent": "verify fingerprint for a single session by its ID and return tampered status",
+      "plannerSeed": "d1930f0d",
+      "constraintSnapshotId": "snap_1780420527437_391d859ab6eb",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "verifyFingerprint",
+          "args": [
+            {
+              "name": "sessionId",
+              "type": "string",
+              "value": "sessionId"
+            },
+            {
+              "name": "transitions",
+              "type": "StateTransition[]",
+              "value": "transitions"
+            },
+            {
+              "name": "currentRuleHash",
+              "type": "string",
+              "value": "currentRuleHash"
+            }
+          ],
+          "assignTo": "result"
+        },
+        {
+          "kind": "return",
+          "value": "result"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "verifyFingerprint",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780420528986,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780420527436,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780420528985_pyzdf",
+    "sessionId": "sess_1780420527436_c9c40",
+    "attemptNumber": 1,
+    "inputIntent": "verify fingerprint for a single session by its ID and return tampered status",
+    "plannerSeed": "d1930f0d",
+    "constraintSnapshotId": "snap_1780420527437_391d859ab6eb",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "verifyFingerprint",
+        "args": [
+          {
+            "name": "sessionId",
+            "type": "string",
+            "value": "sessionId"
+          },
+          {
+            "name": "transitions",
+            "type": "StateTransition[]",
+            "value": "transitions"
+          },
+          {
+            "name": "currentRuleHash",
+            "type": "string",
+            "value": "currentRuleHash"
+          }
+        ],
+        "assignTo": "result"
+      },
+      {
+        "kind": "return",
+        "value": "result"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "verifyFingerprint",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780420528986,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780420527437_391d859ab6eb",
+  "endedAt": 1780420528988
+}
