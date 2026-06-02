@@ -196,7 +196,8 @@ if (cliArg === "--verify") {
 step("1/6 IR 提取");
 try {
     (0, child_process_1.execSync)("npx ts-node src/extract-ir.ts .", { stdio: "pipe", cwd: path.resolve(__dirname, "..") });
-    const ir = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../ir.json"), "utf-8"));
+    const irRaw = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../ir.json"), "utf-8"));
+    const ir = Array.isArray(irRaw) ? irRaw : (irRaw.functions || []);
     const externalCount = ir.filter((f) => f.external).length;
     pass(`IR 提取完成: ${ir.length} 个函数 (${externalCount} 外部)`);
 }

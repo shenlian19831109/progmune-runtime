@@ -641,7 +641,8 @@ This project uses [Progmune](https://github.com/shenlian19831109/progmune-runtim
           return { content: [{ type: "text", text: `✅ Session ${sessionId} ledger is consistent. No repairs needed.` }] };
         }
 
-        const ir = JSON.parse(require("fs").readFileSync("ir.json", "utf-8"));
+        const irRaw = JSON.parse(require("fs").readFileSync("ir.json", "utf-8"));
+        const ir = Array.isArray(irRaw) ? irRaw : (irRaw.functions || []);
         const protocols: any[] = [];
         const summary = generateRepairSummary(allTransitions, ir, protocols, nsInit);
 
@@ -700,7 +701,8 @@ This project uses [Progmune](https://github.com/shenlian19831109/progmune-runtim
         }
 
         const nsInit = require("./protocol-registry").getNsInit();
-        const ir = JSON.parse(require("fs").readFileSync("ir.json", "utf-8"));
+        const irRaw = JSON.parse(require("fs").readFileSync("ir.json", "utf-8"));
+        const ir = Array.isArray(irRaw) ? irRaw : (irRaw.functions || []);
         const summary = generateRepairSummary(allTransitions, ir, [], nsInit);
         const proposal = summary.proposals.find((p: any) => p.id === proposalId);
 

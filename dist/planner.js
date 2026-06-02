@@ -481,7 +481,9 @@ function attemptSSGRepair(actions, rejection, ir, protocols, namespaceInitialSta
 }
 async function plan(userIntent) {
     (0, llm_1.resetCallCount)();
-    const ir = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
+    const irRaw = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
+    // Support both old (array) and new ({typeMap, functions}) formats
+    const ir = Array.isArray(irRaw) ? irRaw : (irRaw.functions || []);
     // Helper: wrap actions into PlanResult
     let repairMetrics = { applied: false, count: 0, branchIds: [] };
     const wrapResult = (actions, repair) => ({

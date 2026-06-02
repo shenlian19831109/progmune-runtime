@@ -2,10 +2,11 @@ import type { Action, ConstraintViolation } from "./runtime-types";
 import * as fs from "fs";
 import * as path from "path";
 
-function loadIR() {
+function loadIR(): any[] {
   const irPath = path.resolve(__dirname, "../ir.json");
   if (!fs.existsSync(irPath)) return [];
-  return JSON.parse(fs.readFileSync(irPath, "utf-8"));
+  const raw = JSON.parse(fs.readFileSync(irPath, "utf-8"));
+  return Array.isArray(raw) ? raw : (raw.functions || []);
 }
 
 const BUILTIN_WHITELIST = new Set([

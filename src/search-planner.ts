@@ -20,7 +20,8 @@ interface Candidate {
 }
 
 function loadIR(): any[] {
-  return JSON.parse(fs.readFileSync("ir.json", "utf-8"));
+  const raw = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
+  return Array.isArray(raw) ? raw : (raw.functions || []);
 }
 
 const staticScoreCache = new Map<string, number>();

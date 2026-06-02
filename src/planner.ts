@@ -467,7 +467,9 @@ export interface PlanResult {
 
 export async function plan(userIntent: string): Promise<PlanResult> {
   resetCallCount();
-  const ir = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
+  const irRaw = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
+  // Support both old (array) and new ({typeMap, functions}) formats
+  const ir = Array.isArray(irRaw) ? irRaw : (irRaw.functions || []);
 
   // Helper: wrap actions into PlanResult
   let repairMetrics = { applied: false, count: 0, branchIds: [] as string[] };

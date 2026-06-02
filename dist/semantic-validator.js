@@ -6,8 +6,9 @@ function loadContracts() {
     if (irCache)
         return irCache;
     const raw = JSON.parse(require("fs").readFileSync("ir.json", "utf-8"));
-    irCache = raw;
-    return raw;
+    const functions = Array.isArray(raw) ? raw : (raw.functions || []);
+    irCache = functions;
+    return functions;
 }
 function matchIntent(intent, keywords) {
     return keywords.some(kw => intent.includes(kw));

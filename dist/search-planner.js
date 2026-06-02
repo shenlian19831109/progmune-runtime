@@ -46,7 +46,8 @@ const WEIGHT_HISTORY = 0.4; // 反馈系统成功率的权重
 const WEIGHT_GOAL_COMPLETION = 0.5; // 目标完成奖励
 const STATIC_HIGH_THRESHOLD = 0.6; // 静态评分超过此值时，跳过LLM调用
 function loadIR() {
-    return JSON.parse(fs.readFileSync("ir.json", "utf-8"));
+    const raw = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
+    return Array.isArray(raw) ? raw : (raw.functions || []);
 }
 const staticScoreCache = new Map();
 function getStaticScore(funcName, goal) {

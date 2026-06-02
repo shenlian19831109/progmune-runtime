@@ -19,8 +19,9 @@ let irCache: IRFunction[] | null = null;
 function loadContracts(): IRFunction[] {
   if (irCache) return irCache;
   const raw = JSON.parse(require("fs").readFileSync("ir.json", "utf-8"));
-  irCache = raw;
-  return raw;
+  const functions = Array.isArray(raw) ? raw : (raw.functions || []);
+  irCache = functions;
+  return functions;
 }
 
 function matchIntent(intent: string, keywords: string[]): boolean {
