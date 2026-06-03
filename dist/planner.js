@@ -47,6 +47,7 @@ const ssg_validator_1 = require("./ssg-validator");
 const protocol_registry_1 = require("./protocol-registry");
 const semantic_snapshot_1 = require("./semantic-snapshot");
 const strategy_planner_1 = require("./strategy-planner");
+const semantic_topology_1 = require("./semantic-topology");
 const fs = __importStar(require("fs"));
 function enrichActions(actions, ir) {
     return actions.map(a => {
@@ -120,17 +121,20 @@ function buildCompactFuncList(funcs, allFuncs) {
     }).join("\n");
 }
 /** Semantic matching: check if two capability labels are related.
- *  Uses exact match, substring, and Jaccard similarity. */
+ *  Uses SemanticTopology (structural graph) instead of string matching. */
 function semanticMatch(a, b) {
+    try {
+        const topo = (0, semantic_topology_1.getTopology)();
+        if (topo.size > 0)
+            return topo.capabilityMatch(a, b);
+    }
+    catch { }
+    // Fallback: exact + substring
     if (a === b)
         return true;
     if (a.includes(b) || b.includes(a))
         return true;
-    // Fuzzy: shared word prefix (e.g. FAILURE_LIST ↔ FAILURE_DATA)
-    const aWords = a.split("_");
-    const bWords = b.split("_");
-    const shared = aWords.filter(w => bWords.some(bw => bw.includes(w) || w.includes(bw)));
-    return shared.length >= 1 && aWords.length <= 3 && bWords.length <= 3;
+    return false;
 }
 /** Build capability chain hints from IR: producer→consumer relationships.
  *  Uses semantic matching for fuzzy capability linking. */
@@ -552,6 +556,11 @@ async function plan(userIntent) {
     const irRaw = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
     // Support both old (array) and new ({typeMap, functions}) formats
     const ir = Array.isArray(irRaw) ? irRaw : (irRaw.functions || []);
+    // P1: Build Semantic Topology (once per plan call, cached)
+    try {
+        (0, semantic_topology_1.rebuildTopology)(ir);
+    }
+    catch { }
     // Helper: wrap actions into PlanResult
     let repairMetrics = { applied: false, count: 0, branchIds: [] };
     const wrapResult = (actions, repair) => ({

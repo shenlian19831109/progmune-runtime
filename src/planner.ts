@@ -12,6 +12,7 @@ import { SSGRejection, FunctionProtocol, parseProtocolsFromJSON, ValidationConte
 import { getNsInit } from "./protocol-registry";
 import { createSnapshot, saveSnapshot } from "./semantic-snapshot";
 import { selectCapabilityChains, formatChainHint } from "./strategy-planner";
+import { getTopology, rebuildTopology } from "./semantic-topology";
 import * as fs from "fs";
 
 function enrichActions(actions: Action[], ir: any[]): Action[] {
@@ -80,15 +81,16 @@ function buildCompactFuncList(funcs: any[], allFuncs: any[]): string {
 }
 
 /** Semantic matching: check if two capability labels are related.
- *  Uses exact match, substring, and Jaccard similarity. */
+ *  Uses SemanticTopology (structural graph) instead of string matching. */
 function semanticMatch(a: string, b: string): boolean {
+  try {
+    const topo = getTopology();
+    if (topo.size > 0) return topo.capabilityMatch(a, b);
+  } catch {}
+  // Fallback: exact + substring
   if (a === b) return true;
   if (a.includes(b) || b.includes(a)) return true;
-  // Fuzzy: shared word prefix (e.g. FAILURE_LIST ↔ FAILURE_DATA)
-  const aWords = a.split("_");
-  const bWords = b.split("_");
-  const shared = aWords.filter(w => bWords.some(bw => bw.includes(w) || w.includes(bw)));
-  return shared.length >= 1 && aWords.length <= 3 && bWords.length <= 3;
+  return false;
 }
 
 /** Build capability chain hints from IR: producer→consumer relationships.
@@ -532,6 +534,9 @@ export async function plan(userIntent: string): Promise<PlanResult> {
   const irRaw = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
   // Support both old (array) and new ({typeMap, functions}) formats
   const ir = Array.isArray(irRaw) ? irRaw : (irRaw.functions || []);
+
+  // P1: Build Semantic Topology (once per plan call, cached)
+  try { rebuildTopology(ir); } catch {}
 
   // Helper: wrap actions into PlanResult
   let repairMetrics = { applied: false, count: 0, branchIds: [] as string[] };
