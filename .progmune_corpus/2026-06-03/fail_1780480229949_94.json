@@ -1,0 +1,55 @@
+{
+  "intent": "read a JSON config file, validate its structure, and return the parsed config",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-4",
+  "constraintType": "protocol",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "parseActionJSON",
+      "args": [
+        {
+          "name": "text",
+          "type": "string",
+          "value": ""
+        }
+      ],
+      "assignTo": "parsedConfig"
+    },
+    {
+      "kind": "call",
+      "function": "validateAction",
+      "args": [
+        {
+          "name": "action",
+          "type": "Action",
+          "value": ""
+        },
+        {
+          "name": "actionIndex",
+          "type": "number",
+          "value": 0
+        }
+      ],
+      "assignTo": "validationResult"
+    },
+    {
+      "kind": "return",
+      "value": "validationResult"
+    }
+  ],
+  "errorDetail": "{\"protocol_violation\":{\"blocked_function\":\"validateAction\",\"namespace\":\"dev_pipeline\",\"current_state\":[\"IR_STALE\"],\"required_pre_states\":[\"IR_EXTRACTED\"]},\"diagnosis\":{\"missing_functions\":[\"extractIR\"],\"fix_path\":[\"extractIR\"]}}",
+  "ssgState": [
+    "IR_STALE"
+  ],
+  "ssgFixPath": [
+    "extractIR"
+  ],
+  "ssgMissingFunctions": [
+    "extractIR"
+  ],
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 1,
+  "id": "fail_1780480229949_94",
+  "timestamp": "2026-06-03T09:50:29.949Z"
+}

@@ -1,0 +1,141 @@
+{
+  "sessionId": "sess_1780479265626_np0rp",
+  "intent": "remove duplicate values from an array",
+  "attempts": [
+    {
+      "id": "att_1780479267212_6kph6",
+      "sessionId": "sess_1780479265626_np0rp",
+      "attemptNumber": 1,
+      "inputIntent": "remove duplicate values from an array",
+      "plannerSeed": "3535d1d1",
+      "constraintSnapshotId": "snap_1780479265628_60f57f132781",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "unique",
+          "args": [
+            {
+              "name": "arr",
+              "type": "T[]",
+              "value": []
+            }
+          ],
+          "assignTo": "uniqueResult"
+        },
+        {
+          "kind": "return",
+          "value": "uniqueResult"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "unique",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780479267212,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780479265626,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780479267212_6kph6",
+    "sessionId": "sess_1780479265626_np0rp",
+    "attemptNumber": 1,
+    "inputIntent": "remove duplicate values from an array",
+    "plannerSeed": "3535d1d1",
+    "constraintSnapshotId": "snap_1780479265628_60f57f132781",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "unique",
+        "args": [
+          {
+            "name": "arr",
+            "type": "T[]",
+            "value": []
+          }
+        ],
+        "assignTo": "uniqueResult"
+      },
+      {
+        "kind": "return",
+        "value": "uniqueResult"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "unique",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780479267212,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780479265628_60f57f132781",
+  "endedAt": 1780479267215
+}

@@ -1,0 +1,141 @@
+{
+  "sessionId": "sess_1780479841510_vr8l4",
+  "intent": "get the file size in a human-readable format like KB or MB",
+  "attempts": [
+    {
+      "id": "att_1780479842786_9yevs",
+      "sessionId": "sess_1780479841510_vr8l4",
+      "attemptNumber": 1,
+      "inputIntent": "get the file size in a human-readable format like KB or MB",
+      "plannerSeed": "99450fce",
+      "constraintSnapshotId": "snap_1780479841510_60f57f132781",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "formatFileSize",
+          "args": [
+            {
+              "name": "bytes",
+              "type": "number",
+              "value": 0
+            }
+          ],
+          "assignTo": "formattedSize"
+        },
+        {
+          "kind": "return",
+          "value": "formattedSize"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "formatFileSize",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780479842786,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780479841510,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780479842786_9yevs",
+    "sessionId": "sess_1780479841510_vr8l4",
+    "attemptNumber": 1,
+    "inputIntent": "get the file size in a human-readable format like KB or MB",
+    "plannerSeed": "99450fce",
+    "constraintSnapshotId": "snap_1780479841510_60f57f132781",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "formatFileSize",
+        "args": [
+          {
+            "name": "bytes",
+            "type": "number",
+            "value": 0
+          }
+        ],
+        "assignTo": "formattedSize"
+      },
+      {
+        "kind": "return",
+        "value": "formattedSize"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "formatFileSize",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780479842786,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780479841510_60f57f132781",
+  "endedAt": 1780479842788
+}

@@ -1,0 +1,141 @@
+{
+  "sessionId": "sess_1780480446057_eej2c",
+  "intent": "extract all function names from a TypeScript source file",
+  "attempts": [
+    {
+      "id": "att_1780480448074_mu7wi",
+      "sessionId": "sess_1780480446057_eej2c",
+      "attemptNumber": 1,
+      "inputIntent": "extract all function names from a TypeScript source file",
+      "plannerSeed": "973fd21b",
+      "constraintSnapshotId": "snap_1780480446063_60f57f132781",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "extractDirectCalls",
+          "args": [
+            {
+              "name": "func",
+              "type": "FunctionDeclaration | ArrowFunction",
+              "value": {}
+            }
+          ],
+          "assignTo": "calls"
+        },
+        {
+          "kind": "return",
+          "value": "calls"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "extractDirectCalls",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780480448074,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780480446057,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780480448074_mu7wi",
+    "sessionId": "sess_1780480446057_eej2c",
+    "attemptNumber": 1,
+    "inputIntent": "extract all function names from a TypeScript source file",
+    "plannerSeed": "973fd21b",
+    "constraintSnapshotId": "snap_1780480446063_60f57f132781",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "extractDirectCalls",
+        "args": [
+          {
+            "name": "func",
+            "type": "FunctionDeclaration | ArrowFunction",
+            "value": {}
+          }
+        ],
+        "assignTo": "calls"
+      },
+      {
+        "kind": "return",
+        "value": "calls"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "extractDirectCalls",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780480448074,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780480446063_60f57f132781",
+  "endedAt": 1780480448090
+}

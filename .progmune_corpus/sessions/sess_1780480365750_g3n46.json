@@ -1,0 +1,141 @@
+{
+  "sessionId": "sess_1780480365750_g3n46",
+  "intent": "create a simple task queue that processes tasks one at a time in order",
+  "attempts": [
+    {
+      "id": "att_1780480366987_6doj4",
+      "sessionId": "sess_1780480365750_g3n46",
+      "attemptNumber": 1,
+      "inputIntent": "create a simple task queue that processes tasks one at a time in order",
+      "plannerSeed": "9ade58e2",
+      "constraintSnapshotId": "snap_1780480365751_60f57f132781",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "createRootBranch",
+          "args": [
+            {
+              "name": "transitions",
+              "type": "StateTransition[]",
+              "value": []
+            }
+          ],
+          "assignTo": "branch"
+        },
+        {
+          "kind": "return",
+          "value": "branch"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "createRootBranch",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780480366987,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780480365750,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780480366987_6doj4",
+    "sessionId": "sess_1780480365750_g3n46",
+    "attemptNumber": 1,
+    "inputIntent": "create a simple task queue that processes tasks one at a time in order",
+    "plannerSeed": "9ade58e2",
+    "constraintSnapshotId": "snap_1780480365751_60f57f132781",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "createRootBranch",
+        "args": [
+          {
+            "name": "transitions",
+            "type": "StateTransition[]",
+            "value": []
+          }
+        ],
+        "assignTo": "branch"
+      },
+      {
+        "kind": "return",
+        "value": "branch"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "createRootBranch",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780480366987,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780480365751_60f57f132781",
+  "endedAt": 1780480366997
+}

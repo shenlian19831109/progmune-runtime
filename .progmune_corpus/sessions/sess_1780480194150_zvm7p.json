@@ -1,0 +1,141 @@
+{
+  "sessionId": "sess_1780480194150_zvm7p",
+  "intent": "encode an object as a URL query string",
+  "attempts": [
+    {
+      "id": "att_1780480195644_ev79t",
+      "sessionId": "sess_1780480194150_zvm7p",
+      "attemptNumber": 1,
+      "inputIntent": "encode an object as a URL query string",
+      "plannerSeed": "256ba5b4",
+      "constraintSnapshotId": "snap_1780480194154_60f57f132781",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "toQueryString",
+          "args": [
+            {
+              "name": "obj",
+              "type": "Record<string, any>",
+              "value": {}
+            }
+          ],
+          "assignTo": "qs"
+        },
+        {
+          "kind": "return",
+          "value": "qs"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "toQueryString",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780480195644,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780480194150,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780480195644_ev79t",
+    "sessionId": "sess_1780480194150_zvm7p",
+    "attemptNumber": 1,
+    "inputIntent": "encode an object as a URL query string",
+    "plannerSeed": "256ba5b4",
+    "constraintSnapshotId": "snap_1780480194154_60f57f132781",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "toQueryString",
+        "args": [
+          {
+            "name": "obj",
+            "type": "Record<string, any>",
+            "value": {}
+          }
+        ],
+        "assignTo": "qs"
+      },
+      {
+        "kind": "return",
+        "value": "qs"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "toQueryString",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780480195644,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780480194154_60f57f132781",
+  "endedAt": 1780480195646
+}

@@ -1,0 +1,151 @@
+{
+  "sessionId": "sess_1780480335004_ur71r",
+  "intent": "generate a basic HTTP server that serves static files from a directory",
+  "attempts": [
+    {
+      "id": "att_1780480336745_eu6cs",
+      "sessionId": "sess_1780480335004_ur71r",
+      "attemptNumber": 1,
+      "inputIntent": "generate a basic HTTP server that serves static files from a directory",
+      "plannerSeed": "73fcb568",
+      "constraintSnapshotId": "snap_1780480335005_60f57f132781",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "server",
+          "args": [
+            {
+              "name": "req",
+              "type": "any",
+              "value": {}
+            },
+            {
+              "name": "res",
+              "type": "any",
+              "value": {}
+            }
+          ],
+          "assignTo": "s"
+        },
+        {
+          "kind": "return",
+          "value": "s"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "server",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780480336745,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780480335004,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780480336745_eu6cs",
+    "sessionId": "sess_1780480335004_ur71r",
+    "attemptNumber": 1,
+    "inputIntent": "generate a basic HTTP server that serves static files from a directory",
+    "plannerSeed": "73fcb568",
+    "constraintSnapshotId": "snap_1780480335005_60f57f132781",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "server",
+        "args": [
+          {
+            "name": "req",
+            "type": "any",
+            "value": {}
+          },
+          {
+            "name": "res",
+            "type": "any",
+            "value": {}
+          }
+        ],
+        "assignTo": "s"
+      },
+      {
+        "kind": "return",
+        "value": "s"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "server",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780480336745,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780480335005_60f57f132781",
+  "endedAt": 1780480336747
+}

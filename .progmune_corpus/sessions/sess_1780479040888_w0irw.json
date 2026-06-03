@@ -1,0 +1,141 @@
+{
+  "sessionId": "sess_1780479040888_w0irw",
+  "intent": "capitalize the first letter of every word in a string",
+  "attempts": [
+    {
+      "id": "att_1780479042146_pd8np",
+      "sessionId": "sess_1780479040888_w0irw",
+      "attemptNumber": 1,
+      "inputIntent": "capitalize the first letter of every word in a string",
+      "plannerSeed": "c6a4fc0c",
+      "constraintSnapshotId": "snap_1780479040892_60f57f132781",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "capitalizeWords",
+          "args": [
+            {
+              "name": "str",
+              "type": "string",
+              "value": ""
+            }
+          ],
+          "assignTo": "result"
+        },
+        {
+          "kind": "return",
+          "value": "result"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "capitalizeWords",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780479042146,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780479040889,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780479042146_pd8np",
+    "sessionId": "sess_1780479040888_w0irw",
+    "attemptNumber": 1,
+    "inputIntent": "capitalize the first letter of every word in a string",
+    "plannerSeed": "c6a4fc0c",
+    "constraintSnapshotId": "snap_1780479040892_60f57f132781",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "capitalizeWords",
+        "args": [
+          {
+            "name": "str",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "result"
+      },
+      {
+        "kind": "return",
+        "value": "result"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "capitalizeWords",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780479042146,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780479040892_60f57f132781",
+  "endedAt": 1780479042147
+}

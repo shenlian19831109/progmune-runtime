@@ -1,0 +1,151 @@
+{
+  "sessionId": "sess_1780479812268_1cf8x",
+  "intent": "list all files in a directory that match a pattern",
+  "attempts": [
+    {
+      "id": "att_1780479814336_t7fz9",
+      "sessionId": "sess_1780479812268_1cf8x",
+      "attemptNumber": 1,
+      "inputIntent": "list all files in a directory that match a pattern",
+      "plannerSeed": "6d5c25f8",
+      "constraintSnapshotId": "snap_1780479812269_60f57f132781",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "auditDirectory",
+          "args": [
+            {
+              "name": "dir",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "name": "threshold",
+              "type": "any",
+              "value": {}
+            }
+          ],
+          "assignTo": "auditResult"
+        },
+        {
+          "kind": "return",
+          "value": "auditResult"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "auditDirectory",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780479814336,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780479812268,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780479814336_t7fz9",
+    "sessionId": "sess_1780479812268_1cf8x",
+    "attemptNumber": 1,
+    "inputIntent": "list all files in a directory that match a pattern",
+    "plannerSeed": "6d5c25f8",
+    "constraintSnapshotId": "snap_1780479812269_60f57f132781",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "auditDirectory",
+        "args": [
+          {
+            "name": "dir",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "threshold",
+            "type": "any",
+            "value": {}
+          }
+        ],
+        "assignTo": "auditResult"
+      },
+      {
+        "kind": "return",
+        "value": "auditResult"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "auditDirectory",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780479814336,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780479812269_60f57f132781",
+  "endedAt": 1780479814351
+}

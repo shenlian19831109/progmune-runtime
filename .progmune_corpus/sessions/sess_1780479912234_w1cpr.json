@@ -1,0 +1,141 @@
+{
+  "sessionId": "sess_1780479912234_w1cpr",
+  "intent": "validate that all required fields are present in an object",
+  "attempts": [
+    {
+      "id": "att_1780479915444_t69gp",
+      "sessionId": "sess_1780479912234_w1cpr",
+      "attemptNumber": 1,
+      "inputIntent": "validate that all required fields are present in an object",
+      "plannerSeed": "3eb96314",
+      "constraintSnapshotId": "snap_1780479912235_60f57f132781",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "validateActionSchema",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": []
+            }
+          ],
+          "assignTo": "validationResult"
+        },
+        {
+          "kind": "return",
+          "value": "validationResult"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "validateActionSchema",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780479915444,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780479912234,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780479915444_t69gp",
+    "sessionId": "sess_1780479912234_w1cpr",
+    "attemptNumber": 1,
+    "inputIntent": "validate that all required fields are present in an object",
+    "plannerSeed": "3eb96314",
+    "constraintSnapshotId": "snap_1780479912235_60f57f132781",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "validateActionSchema",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": []
+          }
+        ],
+        "assignTo": "validationResult"
+      },
+      {
+        "kind": "return",
+        "value": "validationResult"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "validateActionSchema",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780479915444,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780479912235_60f57f132781",
+  "endedAt": 1780479915471
+}

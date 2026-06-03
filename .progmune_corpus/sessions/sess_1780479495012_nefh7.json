@@ -1,0 +1,163 @@
+{
+  "sessionId": "sess_1780479495012_nefh7",
+  "intent": "calculate the median value from an array of numbers",
+  "attempts": [
+    {
+      "id": "att_1780479499165_wg9t1",
+      "sessionId": "sess_1780479495012_nefh7",
+      "attemptNumber": 1,
+      "inputIntent": "calculate the median value from an array of numbers",
+      "plannerSeed": "1c978d38",
+      "constraintSnapshotId": "snap_1780479495018_60f57f132781",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "median",
+          "args": [
+            {
+              "name": "nums",
+              "type": "number[]",
+              "value": []
+            }
+          ],
+          "assignTo": "m"
+        },
+        {
+          "kind": "return",
+          "value": "m"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "median",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780479499165,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "antibodyHit": {
+        "level": "ACL-3",
+        "signature": "SVL-4:validateAction",
+        "fixPath": [
+          "validateAction"
+        ],
+        "similarityScore": 0.2,
+        "action": "injected_hint",
+        "llmCallsSaved": 0,
+        "estimatedTokensSaved": 0
+      },
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780479495012,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780479499165_wg9t1",
+    "sessionId": "sess_1780479495012_nefh7",
+    "attemptNumber": 1,
+    "inputIntent": "calculate the median value from an array of numbers",
+    "plannerSeed": "1c978d38",
+    "constraintSnapshotId": "snap_1780479495018_60f57f132781",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "median",
+        "args": [
+          {
+            "name": "nums",
+            "type": "number[]",
+            "value": []
+          }
+        ],
+        "assignTo": "m"
+      },
+      {
+        "kind": "return",
+        "value": "m"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "median",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780479499165,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "antibodyHit": {
+      "level": "ACL-3",
+      "signature": "SVL-4:validateAction",
+      "fixPath": [
+        "validateAction"
+      ],
+      "similarityScore": 0.2,
+      "action": "injected_hint",
+      "llmCallsSaved": 0,
+      "estimatedTokensSaved": 0
+    },
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780479495018_60f57f132781",
+  "endedAt": 1780479499166
+}

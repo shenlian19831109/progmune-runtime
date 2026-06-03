@@ -1,0 +1,129 @@
+{
+  "sessionId": "sess_1780479977027_t6vwp",
+  "intent": "create a basic CRUD repository for a given entity type",
+  "attempts": [
+    {
+      "id": "att_1780479978979_za2ze",
+      "sessionId": "sess_1780479977027_t6vwp",
+      "attemptNumber": 1,
+      "inputIntent": "create a basic CRUD repository for a given entity type",
+      "plannerSeed": "f52f3741",
+      "constraintSnapshotId": "snap_1780479977028_60f57f132781",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "create",
+          "args": [],
+          "assignTo": "repo"
+        },
+        {
+          "kind": "return",
+          "value": "repo"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "create",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780479978979,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780479977027,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780479978979_za2ze",
+    "sessionId": "sess_1780479977027_t6vwp",
+    "attemptNumber": 1,
+    "inputIntent": "create a basic CRUD repository for a given entity type",
+    "plannerSeed": "f52f3741",
+    "constraintSnapshotId": "snap_1780479977028_60f57f132781",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "create",
+        "args": [],
+        "assignTo": "repo"
+      },
+      {
+        "kind": "return",
+        "value": "repo"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "create",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780479978979,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780479977028_60f57f132781",
+  "endedAt": 1780479978983
+}

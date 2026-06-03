@@ -1,0 +1,151 @@
+{
+  "sessionId": "sess_1780479348096_ucts1",
+  "intent": "find the difference between two arrays, elements in A not in B",
+  "attempts": [
+    {
+      "id": "att_1780479350304_19oq6",
+      "sessionId": "sess_1780479348096_ucts1",
+      "attemptNumber": 1,
+      "inputIntent": "find the difference between two arrays, elements in A not in B",
+      "plannerSeed": "0cf6a2cf",
+      "constraintSnapshotId": "snap_1780479348104_60f57f132781",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "arrayDiff",
+          "args": [
+            {
+              "name": "a",
+              "type": "T[]",
+              "value": []
+            },
+            {
+              "name": "b",
+              "type": "T[]",
+              "value": []
+            }
+          ],
+          "assignTo": "diff"
+        },
+        {
+          "kind": "return",
+          "value": "diff"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "arrayDiff",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780479350304,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780479348096,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780479350304_19oq6",
+    "sessionId": "sess_1780479348096_ucts1",
+    "attemptNumber": 1,
+    "inputIntent": "find the difference between two arrays, elements in A not in B",
+    "plannerSeed": "0cf6a2cf",
+    "constraintSnapshotId": "snap_1780479348104_60f57f132781",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "arrayDiff",
+        "args": [
+          {
+            "name": "a",
+            "type": "T[]",
+            "value": []
+          },
+          {
+            "name": "b",
+            "type": "T[]",
+            "value": []
+          }
+        ],
+        "assignTo": "diff"
+      },
+      {
+        "kind": "return",
+        "value": "diff"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "arrayDiff",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780479350304,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780479348104_60f57f132781",
+  "endedAt": 1780479350310
+}

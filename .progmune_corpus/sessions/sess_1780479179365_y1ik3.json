@@ -1,0 +1,141 @@
+{
+  "sessionId": "sess_1780479179365_y1ik3",
+  "intent": "convert a camelCase string to snake_case",
+  "attempts": [
+    {
+      "id": "att_1780479180634_g5h7u",
+      "sessionId": "sess_1780479179365_y1ik3",
+      "attemptNumber": 1,
+      "inputIntent": "convert a camelCase string to snake_case",
+      "plannerSeed": "be9ffd64",
+      "constraintSnapshotId": "snap_1780479179366_60f57f132781",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "camelToSnake",
+          "args": [
+            {
+              "name": "str",
+              "type": "string",
+              "value": ""
+            }
+          ],
+          "assignTo": "result"
+        },
+        {
+          "kind": "return",
+          "value": "result"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "camelToSnake",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780479180634,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780479179365,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780479180634_g5h7u",
+    "sessionId": "sess_1780479179365_y1ik3",
+    "attemptNumber": 1,
+    "inputIntent": "convert a camelCase string to snake_case",
+    "plannerSeed": "be9ffd64",
+    "constraintSnapshotId": "snap_1780479179366_60f57f132781",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "camelToSnake",
+        "args": [
+          {
+            "name": "str",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "result"
+      },
+      {
+        "kind": "return",
+        "value": "result"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "camelToSnake",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780479180634,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780479179366_60f57f132781",
+  "endedAt": 1780479180635
+}

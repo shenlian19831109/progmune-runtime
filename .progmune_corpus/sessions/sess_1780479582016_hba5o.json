@@ -1,0 +1,133 @@
+{
+  "sessionId": "sess_1780479582016_hba5o",
+  "intent": "flatten a nested object into a single level with dot-notation keys",
+  "attempts": [
+    {
+      "id": "att_1780479584842_g76k4",
+      "sessionId": "sess_1780479582016_hba5o",
+      "attemptNumber": 2,
+      "inputIntent": "flatten a nested object into a single level with dot-notation keys",
+      "plannerSeed": "8f57e80f",
+      "constraintSnapshotId": "snap_1780479582018_60f57f132781",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "deepClone",
+          "args": [
+            {
+              "name": "obj",
+              "type": "T",
+              "value": null
+            }
+          ],
+          "assignTo": "clonedObj"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "deepClone",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780479584842,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780479582017,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780479584842_g76k4",
+    "sessionId": "sess_1780479582016_hba5o",
+    "attemptNumber": 2,
+    "inputIntent": "flatten a nested object into a single level with dot-notation keys",
+    "plannerSeed": "8f57e80f",
+    "constraintSnapshotId": "snap_1780479582018_60f57f132781",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "deepClone",
+        "args": [
+          {
+            "name": "obj",
+            "type": "T",
+            "value": null
+          }
+        ],
+        "assignTo": "clonedObj"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "deepClone",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780479584842,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780479582018_60f57f132781",
+  "endedAt": 1780479584844
+}

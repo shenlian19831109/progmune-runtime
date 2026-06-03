@@ -1,0 +1,151 @@
+{
+  "sessionId": "sess_1780479412796_d5wy1",
+  "intent": "round a number to a specified number of decimal places",
+  "attempts": [
+    {
+      "id": "att_1780479414383_23qu4",
+      "sessionId": "sess_1780479412796_d5wy1",
+      "attemptNumber": 1,
+      "inputIntent": "round a number to a specified number of decimal places",
+      "plannerSeed": "960bf531",
+      "constraintSnapshotId": "snap_1780479412799_60f57f132781",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "roundTo",
+          "args": [
+            {
+              "name": "num",
+              "type": "number",
+              "value": 0
+            },
+            {
+              "name": "decimals",
+              "type": "number",
+              "value": 0
+            }
+          ],
+          "assignTo": "rounded"
+        },
+        {
+          "kind": "return",
+          "value": "rounded"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "roundTo",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780479414383,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780479412796,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780479414383_23qu4",
+    "sessionId": "sess_1780479412796_d5wy1",
+    "attemptNumber": 1,
+    "inputIntent": "round a number to a specified number of decimal places",
+    "plannerSeed": "960bf531",
+    "constraintSnapshotId": "snap_1780479412799_60f57f132781",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "roundTo",
+        "args": [
+          {
+            "name": "num",
+            "type": "number",
+            "value": 0
+          },
+          {
+            "name": "decimals",
+            "type": "number",
+            "value": 0
+          }
+        ],
+        "assignTo": "rounded"
+      },
+      {
+        "kind": "return",
+        "value": "rounded"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "roundTo",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780479414383,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780479412799_60f57f132781",
+  "endedAt": 1780479414386
+}

@@ -1,0 +1,151 @@
+{
+  "sessionId": "sess_1780479096769_8kkk4",
+  "intent": "count how many times a substring appears in a larger string",
+  "attempts": [
+    {
+      "id": "att_1780479098160_xotic",
+      "sessionId": "sess_1780479096769_8kkk4",
+      "attemptNumber": 1,
+      "inputIntent": "count how many times a substring appears in a larger string",
+      "plannerSeed": "2209cec0",
+      "constraintSnapshotId": "snap_1780479096770_60f57f132781",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "countSubstring",
+          "args": [
+            {
+              "name": "str",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "name": "sub",
+              "type": "string",
+              "value": ""
+            }
+          ],
+          "assignTo": "result"
+        },
+        {
+          "kind": "return",
+          "value": "result"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "countSubstring",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780479098160,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780479096769,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780479098160_xotic",
+    "sessionId": "sess_1780479096769_8kkk4",
+    "attemptNumber": 1,
+    "inputIntent": "count how many times a substring appears in a larger string",
+    "plannerSeed": "2209cec0",
+    "constraintSnapshotId": "snap_1780479096770_60f57f132781",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "countSubstring",
+        "args": [
+          {
+            "name": "str",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "sub",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "result"
+      },
+      {
+        "kind": "return",
+        "value": "result"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "countSubstring",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780479098160,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780479096770_60f57f132781",
+  "endedAt": 1780479098162
+}

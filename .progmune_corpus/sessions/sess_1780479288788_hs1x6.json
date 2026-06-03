@@ -1,0 +1,151 @@
+{
+  "sessionId": "sess_1780479288788_hs1x6",
+  "intent": "split an array into chunks of a specified size",
+  "attempts": [
+    {
+      "id": "att_1780479290316_2n9yj",
+      "sessionId": "sess_1780479288788_hs1x6",
+      "attemptNumber": 1,
+      "inputIntent": "split an array into chunks of a specified size",
+      "plannerSeed": "73614e32",
+      "constraintSnapshotId": "snap_1780479288788_60f57f132781",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "chunk",
+          "args": [
+            {
+              "name": "arr",
+              "type": "T[]",
+              "value": []
+            },
+            {
+              "name": "size",
+              "type": "number",
+              "value": 0
+            }
+          ],
+          "assignTo": "chunks"
+        },
+        {
+          "kind": "return",
+          "value": "chunks"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "chunk",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780479290316,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780479288788,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780479290316_2n9yj",
+    "sessionId": "sess_1780479288788_hs1x6",
+    "attemptNumber": 1,
+    "inputIntent": "split an array into chunks of a specified size",
+    "plannerSeed": "73614e32",
+    "constraintSnapshotId": "snap_1780479288788_60f57f132781",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "chunk",
+        "args": [
+          {
+            "name": "arr",
+            "type": "T[]",
+            "value": []
+          },
+          {
+            "name": "size",
+            "type": "number",
+            "value": 0
+          }
+        ],
+        "assignTo": "chunks"
+      },
+      {
+        "kind": "return",
+        "value": "chunks"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "chunk",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780479290316,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780479288788_60f57f132781",
+  "endedAt": 1780479290317
+}

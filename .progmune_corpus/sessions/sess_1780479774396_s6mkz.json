@@ -1,0 +1,129 @@
+{
+  "sessionId": "sess_1780479774396_s6mkz",
+  "intent": "create a directory path including all parent directories if they do not exist",
+  "attempts": [
+    {
+      "id": "att_1780479775980_dso5s",
+      "sessionId": "sess_1780479774396_s6mkz",
+      "attemptNumber": 1,
+      "inputIntent": "create a directory path including all parent directories if they do not exist",
+      "plannerSeed": "b9e26fbf",
+      "constraintSnapshotId": "snap_1780479774398_60f57f132781",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "addSourceFileAtPathIfExists",
+          "args": [],
+          "assignTo": "result"
+        },
+        {
+          "kind": "return",
+          "value": "result"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "addSourceFileAtPathIfExists",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780479775980,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780479774396,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780479775980_dso5s",
+    "sessionId": "sess_1780479774396_s6mkz",
+    "attemptNumber": 1,
+    "inputIntent": "create a directory path including all parent directories if they do not exist",
+    "plannerSeed": "b9e26fbf",
+    "constraintSnapshotId": "snap_1780479774398_60f57f132781",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "addSourceFileAtPathIfExists",
+        "args": [],
+        "assignTo": "result"
+      },
+      {
+        "kind": "return",
+        "value": "result"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "addSourceFileAtPathIfExists",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780479775980,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780479774398_60f57f132781",
+  "endedAt": 1780479776005
+}

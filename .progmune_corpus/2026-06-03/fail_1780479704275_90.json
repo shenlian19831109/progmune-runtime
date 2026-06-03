@@ -1,0 +1,57 @@
+{
+  "intent": "read a file and return its contents as a string, with error handling",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "symbol_existence",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "open_file",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "fileHandle"
+    },
+    {
+      "kind": "call",
+      "function": "readFileSync",
+      "args": [
+        {
+          "name": "path",
+          "type": "string",
+          "value": null
+        },
+        {
+          "name": "encoding",
+          "type": "string",
+          "value": ""
+        }
+      ],
+      "assignTo": "content"
+    },
+    {
+      "kind": "call",
+      "function": "close_file",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "_"
+    }
+  ],
+  "errorDetail": "函数 'close_file' 不存在",
+  "ssgMissingFunctions": [
+    "close_file"
+  ],
+  "plannerAttempt": 2,
+  "plannerRetryTotal": 4,
+  "id": "fail_1780479704275_90",
+  "timestamp": "2026-06-03T09:41:44.275Z"
+}

@@ -1,0 +1,141 @@
+{
+  "sessionId": "sess_1780479654702_qztmn",
+  "intent": "merge multiple objects together, with later objects overwriting earlier ones",
+  "attempts": [
+    {
+      "id": "att_1780479656990_81vh8",
+      "sessionId": "sess_1780479654702_qztmn",
+      "attemptNumber": 1,
+      "inputIntent": "merge multiple objects together, with later objects overwriting earlier ones",
+      "plannerSeed": "519a3de9",
+      "constraintSnapshotId": "snap_1780479654703_60f57f132781",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "deepMerge",
+          "args": [
+            {
+              "name": "objects",
+              "type": "any[]",
+              "value": []
+            }
+          ],
+          "assignTo": "merged"
+        },
+        {
+          "kind": "return",
+          "value": "merged"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "deepMerge",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780479656990,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780479654702,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780479656990_81vh8",
+    "sessionId": "sess_1780479654702_qztmn",
+    "attemptNumber": 1,
+    "inputIntent": "merge multiple objects together, with later objects overwriting earlier ones",
+    "plannerSeed": "519a3de9",
+    "constraintSnapshotId": "snap_1780479654703_60f57f132781",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "deepMerge",
+        "args": [
+          {
+            "name": "objects",
+            "type": "any[]",
+            "value": []
+          }
+        ],
+        "assignTo": "merged"
+      },
+      {
+        "kind": "return",
+        "value": "merged"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "deepMerge",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780479656990,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780479654703_60f57f132781",
+  "endedAt": 1780479656994
+}
