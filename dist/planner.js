@@ -45,6 +45,7 @@ const memory_layer_1 = require("./memory-layer");
 const ssg_validator_1 = require("./ssg-validator");
 const protocol_registry_1 = require("./protocol-registry");
 const semantic_snapshot_1 = require("./semantic-snapshot");
+const strategy_planner_1 = require("./strategy-planner");
 const fs = __importStar(require("fs"));
 function enrichActions(actions, ir) {
     return actions.map(a => {
@@ -750,7 +751,23 @@ async function plan(userIntent) {
     });
     scored.sort((a, b) => b.score - a.score);
     const topFuncs = scored.slice(0, 15);
-    const compactFuncList = buildCompactFuncList(topFuncs, ir);
+    // Strategy Layer: select capability chain (local, 0 LLM calls)
+    const chains = (0, strategy_planner_1.selectCapabilityChains)(userIntent, ir, 3);
+    const strategyHint = (0, strategy_planner_1.formatChainHint)(chains);
+    // Action Layer: filter functions to those in selected chains
+    let chainFuncs = topFuncs;
+    if (chains.length > 0) {
+        const chainNames = new Set();
+        for (const c of chains.slice(0, 2)) {
+            for (const n of c.nodes)
+                chainNames.add(n.name);
+        }
+        // Prioritize chain functions: keep them first, add others as fallback
+        const inChain = topFuncs.filter((f) => chainNames.has(f.name));
+        const outChain = topFuncs.filter((f) => !chainNames.has(f.name));
+        chainFuncs = [...inChain, ...outChain].slice(0, 15);
+    }
+    const compactFuncList = buildCompactFuncList(chainFuncs, ir);
     const chainHints = buildChainHints(topFuncs);
     // Known string-enum types: tell LLM these are strings, not objects
     const STRING_ENUMS = {
@@ -772,7 +789,7 @@ async function plan(userIntent) {
     }
     const protocolChainHint = buildProtocolChainHint(protocols);
     const userPrompt = `可用函数：
-${compactFuncList}${protocolChainHint}${chainHints}${typeHints}
+${compactFuncList}${protocolChainHint}${chainHints}${typeHints}${strategyHint}
 
 需求：${userIntent}${antibodyHint}
 

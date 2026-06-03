@@ -11,6 +11,7 @@ import { recordEpisode, findSemanticTemplate } from "./memory-layer";
 import { SSGRejection, FunctionProtocol, parseProtocolsFromJSON, ValidationContext, validateTransition, checkLedgerConsistency, rebuildState, hashRules, explainRejection, rejectionToJSON } from "./ssg-validator";
 import { getNsInit } from "./protocol-registry";
 import { createSnapshot, saveSnapshot } from "./semantic-snapshot";
+import { selectCapabilityChains, formatChainHint } from "./strategy-planner";
 import * as fs from "fs";
 
 function enrichActions(actions: Action[], ir: any[]): Action[] {
@@ -729,7 +730,24 @@ export async function plan(userIntent: string): Promise<PlanResult> {
   scored.sort((a: any, b: any) => b.score - a.score);
   const topFuncs = scored.slice(0, 15);
 
-  const compactFuncList = buildCompactFuncList(topFuncs, ir);
+  // Strategy Layer: select capability chain (local, 0 LLM calls)
+  const chains = selectCapabilityChains(userIntent, ir, 3);
+  const strategyHint = formatChainHint(chains);
+
+  // Action Layer: filter functions to those in selected chains
+  let chainFuncs = topFuncs;
+  if (chains.length > 0) {
+    const chainNames = new Set<string>();
+    for (const c of chains.slice(0, 2)) {
+      for (const n of c.nodes) chainNames.add(n.name);
+    }
+    // Prioritize chain functions: keep them first, add others as fallback
+    const inChain = topFuncs.filter((f: any) => chainNames.has(f.name));
+    const outChain = topFuncs.filter((f: any) => !chainNames.has(f.name));
+    chainFuncs = [...inChain, ...outChain].slice(0, 15);
+  }
+
+  const compactFuncList = buildCompactFuncList(chainFuncs, ir);
   const chainHints = buildChainHints(topFuncs);
 
   // Known string-enum types: tell LLM these are strings, not objects
@@ -755,7 +773,7 @@ export async function plan(userIntent: string): Promise<PlanResult> {
   const protocolChainHint = buildProtocolChainHint(protocols);
 
   const userPrompt = `可用函数：
-${compactFuncList}${protocolChainHint}${chainHints}${typeHints}
+${compactFuncList}${protocolChainHint}${chainHints}${typeHints}${strategyHint}
 
 需求：${userIntent}${antibodyHint}
 
