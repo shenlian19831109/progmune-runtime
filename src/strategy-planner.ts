@@ -9,6 +9,7 @@
  */
 
 import { jaccardSimilarity, extractKeywords } from "./utils";
+import { getFunctionSuccessRate } from "./feedback";
 
 interface CapabilityNode {
   name: string;           // function name
@@ -64,7 +65,10 @@ function scoreNode(node: CapabilityNode, intentLower: string, keywords: string[]
   for (const w of intentWords) {
     if (w.length > 2 && purposeLower.includes(w)) score += 0.5;
   }
-  return score;
+  // Dynamic Credit: multiply by actual success rate
+  const successRate = getFunctionSuccessRate(node.name);
+  const creditFactor = 0.3 + successRate * 0.7;
+  return score * creditFactor;
 }
 
 /** Find all capability nodes that produce a given capability label. */

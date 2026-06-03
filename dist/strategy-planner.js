@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.selectCapabilityChains = selectCapabilityChains;
 exports.formatChainHint = formatChainHint;
 const utils_1 = require("./utils");
+const feedback_1 = require("./feedback");
 /** Build a capability graph from IR functions. */
 function buildCapabilityGraph(ir) {
     const graph = new Map();
@@ -55,7 +56,10 @@ function scoreNode(node, intentLower, keywords) {
         if (w.length > 2 && purposeLower.includes(w))
             score += 0.5;
     }
-    return score;
+    // Dynamic Credit: multiply by actual success rate
+    const successRate = (0, feedback_1.getFunctionSuccessRate)(node.name);
+    const creditFactor = 0.3 + successRate * 0.7;
+    return score * creditFactor;
 }
 /** Find all capability nodes that produce a given capability label. */
 function findProducers(graph, capability) {

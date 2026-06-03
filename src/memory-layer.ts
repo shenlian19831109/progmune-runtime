@@ -162,16 +162,31 @@ export function consolidateSemantic(minOccurrences: number = 3) {
   console.error(`[语义记忆] 巩固完成，模板数量: ${templates.length}`);
 }
 
-/** @requires INTENT @produces TEMPLATE */
+/** @requires INTENT @produces TEMPLATE
+ *  Uses keyword overlap (replaces prefix matching) for semantic recall. */
 export function findSemanticTemplate(intent: string): SemanticTemplate | undefined {
   const templates = loadSemantic();
   if (templates.length === 0) return undefined;
-  const prefix = intent.substring(0, 20).toLowerCase();
-  const exactMatch = templates.find(t => t.intentPattern.toLowerCase() === prefix);
-  if (exactMatch && exactMatch.successRate >= 0.7) return exactMatch;
-  const fuzzyMatch = templates.find(t => {
-    const pattern = t.intentPattern.toLowerCase();
-    return (prefix.includes(pattern) || pattern.includes(prefix)) && t.successRate >= 0.8;
-  });
-  return fuzzyMatch;
+
+  // Extract keywords from intent
+  const words = new Set(
+    intent.toLowerCase().split(/[\s,，]+/).filter(w => w.length > 2)
+  );
+  if (words.size === 0) return undefined;
+
+  // Score templates by keyword overlap
+  let best: SemanticTemplate | undefined;
+  let bestScore = 0;
+  for (const t of templates) {
+    const tWords = t.intentPattern.toLowerCase().split(/[\s,，]+/);
+    const shared = tWords.filter(w => words.has(w)).length;
+    const total = new Set([...words, ...new Set(tWords)]).size;
+    const score = shared / (total || 1); // Jaccard-like
+
+    if (score > 0.5 && t.successRate >= 0.7 && score > bestScore) {
+      bestScore = score;
+      best = t;
+    }
+  }
+  return best;
 }
