@@ -750,6 +750,17 @@ async function plan(userIntent) {
                     score += matchCount * 0.2;
             }
         }
+        // Semantic Capability: useWhen scenario matching
+        if (f.useWhen) {
+            for (const scenario of f.useWhen) {
+                const scenarioWords = scenario.toLowerCase().split(/[\s,]+/);
+                const matchCount = scenarioWords.filter((w) => w.length > 3 && intentLower.includes(w)).length;
+                if (matchCount >= 2)
+                    score += 3.0; // strong signal: intent matches use case
+                else if (matchCount === 1)
+                    score += 1.0;
+            }
+        }
         // Capability Graph: tag match
         if (f.tags) {
             for (const tag of f.tags) {

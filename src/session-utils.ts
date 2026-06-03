@@ -2,6 +2,7 @@
  * @requires SESSION_LIST @produces RESOLVED_COUNT
  * @tags session, count, statistics
  */
+/** @useWhen checking how many sessions succeeded; computing success rate */
 export function countResolved(sessions: any[]): { resolved: number; unresolved: number; total: number } {
   const resolved = sessions.filter((s: any) => s.resolved).length;
   return { resolved, unresolved: sessions.length - resolved, total: sessions.length };

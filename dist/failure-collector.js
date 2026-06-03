@@ -125,6 +125,7 @@ function loadFailures() {
 /** @requires FAILURE_LIST @produces FAILURE_STATS */
 /** @requires FAILURE_LIST @produces FAILURE_STATS */
 /** @requires FAILURE_LIST @produces FAILURE_STATS */
+/** @useWhen dashboard; health report; monitoring system status */
 function failureStats() {
     const failures = loadFailures();
     const byRootCause = {};
@@ -143,6 +144,7 @@ function failureStats() {
 /** @requires FAILURE_STATS @produces FORMATTED_REPORT */
 /** @requires FAILURE_STATS @produces FORMATTED_REPORT */
 /** @requires FAILURE_STATS @produces FORMATTED_REPORT */
+/** @useWhen generating readable reports; CLI output; CI summary */
 function formatFailureStats() {
     const stats = failureStats();
     if (stats.total === 0)

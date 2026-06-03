@@ -6,11 +6,13 @@
 // ── String ──
 
 /** @requires STRING @produces VALIDATION_RESULT @tags string, email, validation */
+/** @useWhen validating user input; form validation; email checking */
 export function isValidEmail(str: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str);
 }
 
 /** @requires STRING @produces TRUNCATED_STRING @tags string, format */
+/** @useWhen displaying preview text; limiting UI output; shortening strings */
 export function truncate(str: string, maxLen: number, ellipsis = "..."): string {
   return str.length <= maxLen ? str : str.slice(0, maxLen - ellipsis.length) + ellipsis;
 }
@@ -67,6 +69,7 @@ export function arrayDiff<T>(a: T[], b: T[]): T[] {
 // ── Math ──
 
 /** @requires NUMBERS @produces AVERAGE @tags math, statistics */
+/** @useWhen computing statistics; data analysis; metrics calculation */
 export function average(nums: number[]): number {
   return nums.length === 0 ? 0 : nums.reduce((a, b) => a + b, 0) / nums.length;
 }

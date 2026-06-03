@@ -97,6 +97,7 @@ export function loadFailures(): FailureRecord[] {
 /** @requires FAILURE_LIST @produces FAILURE_STATS */
 /** @requires FAILURE_LIST @produces FAILURE_STATS */
 /** @requires FAILURE_LIST @produces FAILURE_STATS */
+/** @useWhen dashboard; health report; monitoring system status */
 export function failureStats(): { total: number; byRootCause: Record<string, number>; topCause: string } {
   const failures = loadFailures();
   const byRootCause: Record<string, number> = {};
@@ -116,6 +117,7 @@ export function failureStats(): { total: number; byRootCause: Record<string, num
 /** @requires FAILURE_STATS @produces FORMATTED_REPORT */
 /** @requires FAILURE_STATS @produces FORMATTED_REPORT */
 /** @requires FAILURE_STATS @produces FORMATTED_REPORT */
+/** @useWhen generating readable reports; CLI output; CI summary */
 export function formatFailureStats(): string {
   const stats = failureStats();
   if (stats.total === 0) return "No failures recorded yet.";

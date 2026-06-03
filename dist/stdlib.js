@@ -32,10 +32,12 @@ exports.retry = retry;
 exports.debounce = debounce;
 // ── String ──
 /** @requires STRING @produces VALIDATION_RESULT @tags string, email, validation */
+/** @useWhen validating user input; form validation; email checking */
 function isValidEmail(str) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str);
 }
 /** @requires STRING @produces TRUNCATED_STRING @tags string, format */
+/** @useWhen displaying preview text; limiting UI output; shortening strings */
 function truncate(str, maxLen, ellipsis = "...") {
     return str.length <= maxLen ? str : str.slice(0, maxLen - ellipsis.length) + ellipsis;
 }
@@ -88,6 +90,7 @@ function arrayDiff(a, b) {
 }
 // ── Math ──
 /** @requires NUMBERS @produces AVERAGE @tags math, statistics */
+/** @useWhen computing statistics; data analysis; metrics calculation */
 function average(nums) {
     return nums.length === 0 ? 0 : nums.reduce((a, b) => a + b, 0) / nums.length;
 }

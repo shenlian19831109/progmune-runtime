@@ -1703,11 +1703,17 @@
         "toISOString",
         "join",
         "getImportPath",
-        "add",
-        "test",
+        "scanAction",
         "filter",
-        "includes",
         "map",
+        "entries",
+        "includes",
+        "get",
+        "toLowerCase",
+        "replace",
+        "push",
+        "isEmptyV",
+        "has",
         "convert"
       ],
       "exported": true,
@@ -2035,8 +2041,8 @@
           "typeDetail": "any"
         }
       ],
-      "returnType": "{ purpose?: string; tags?: string[]; requires?: string[]; produces?: string[] }",
-      "returnTypeDetail": "{ purpose?: string; tags?: string[]; requires?: string[]; produces?: string[] }",
+      "returnType": "{ purpose?: string; tags?: string[]; requires?: string[]; produces?: string[]; useWhen?: string[] }",
+      "returnTypeDetail": "{ purpose?: string; tags?: string[]; requires?: string[]; produces?: string[]; useWhen?: string[] }",
       "file": "src/extract-ir.ts",
       "calls": [
         "getJsDocs",
@@ -2057,7 +2063,7 @@
       "exported": false,
       "inputs": [],
       "outputs": [
-        "{ purpose?: string; tags?: string[]; requires?: string[]; produces?: string[] }"
+        "{ purpose?: string; tags?: string[]; requires?: string[]; produces?: string[]; useWhen?: string[] }"
       ],
       "purpose": "从 JSDoc 注释中解析 capability 注解 (",
       "tags": [
@@ -2737,6 +2743,11 @@
         "FAILURE_STATS",
         "FAILURE_STATS"
       ],
+      "useWhen": [
+        "dashboard",
+        "health report",
+        "monitoring system status"
+      ],
       "tags": [
         "failure",
         "collector"
@@ -2773,6 +2784,11 @@
         "FORMATTED_REPORT",
         "FORMATTED_REPORT",
         "FORMATTED_REPORT"
+      ],
+      "useWhen": [
+        "generating readable reports",
+        "CLI output",
+        "CI summary"
       ],
       "tags": [
         "failure",
@@ -3157,6 +3173,11 @@
       "produces": [
         "FAILURE_GENOME",
         "FAILURE_GENOME"
+      ],
+      "useWhen": [
+        "user asks why generation failed",
+        "benchmark compile rate drops",
+        "analyzing error patterns"
       ]
     },
     {
@@ -3198,6 +3219,11 @@
         "SESSION_LIST",
         "SESSION_LIST",
         "SESSION_LIST"
+      ],
+      "useWhen": [
+        "listing all past executions",
+        "auditing session history",
+        "checking coverage"
       ]
     },
     {
@@ -3324,6 +3350,10 @@
       "produces": [
         "LEARNED_PATTERNS"
       ],
+      "useWhen": [
+        "finding what fixes worked before",
+        "reusing successful repairs"
+      ],
       "tags": [
         "failure",
         "corpus"
@@ -3449,6 +3479,10 @@
       "produces": [
         "ANTIBODY_STATS",
         "ANTIBODY_STATS"
+      ],
+      "useWhen": [
+        "checking immune system effectiveness",
+        "measuring token savings"
       ]
     },
     {
@@ -3573,7 +3607,114 @@
         "FUNCTION_NAME"
       ],
       "produces": [
-        "SUCCESS_RATE"
+        "SUCCESS_RATE",
+        "Flat",
+        "success",
+        "rate",
+        "(all",
+        "records",
+        "equal",
+        "weight)."
+      ],
+      "tags": [
+        "feedback"
+      ]
+    },
+    {
+      "name": "getWeightedSuccessRate",
+      "params": [
+        {
+          "name": "funcName",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/feedback.ts",
+      "calls": [
+        "loadFeedback",
+        "map",
+        "filter",
+        "pow",
+        "max"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "requires": [
+        "FUNCTION_NAME"
+      ],
+      "produces": [
+        "WEIGHTED_SUCCESS_RATE",
+        "Time-weighted",
+        "success",
+        "rate:",
+        "recent",
+        "results",
+        "matter",
+        "more.",
+        "Decay:",
+        "weight",
+        "=",
+        "0.5^(age_days)."
+      ],
+      "tags": [
+        "feedback"
+      ]
+    },
+    {
+      "name": "getFailureAdjustedCredit",
+      "params": [
+        {
+          "name": "funcName",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/feedback.ts",
+      "calls": [
+        "loadFeedback",
+        "map",
+        "filter",
+        "pow",
+        "max"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "requires": [
+        "FUNCTION_NAME"
+      ],
+      "produces": [
+        "FAILURE_ADJUSTED_CREDIT",
+        "Credit",
+        "score",
+        "adjusted",
+        "by",
+        "failure",
+        "severity.",
+        "SVL-4",
+        "(protocol)",
+        "violations",
+        "penalize",
+        "2x",
+        "more",
+        "than",
+        "SVL-1.",
+        "Time-weighted",
+        "+",
+        "severity-weighted."
       ],
       "tags": [
         "feedback"
@@ -3868,6 +4009,11 @@
         "health",
         "score",
         "immune"
+      ],
+      "useWhen": [
+        "generating immune health metrics",
+        "dashboard",
+        "monitoring"
       ]
     },
     {
@@ -4451,6 +4597,10 @@
         "VERIFICATION_RESULT",
         "VERIFICATION_RESULT"
       ],
+      "useWhen": [
+        "checking execution integrity",
+        "audit after tampering suspicion"
+      ],
       "tags": [
         "ledger",
         "registry"
@@ -4486,6 +4636,10 @@
       ],
       "produces": [
         "FINGERPRINT_DATA"
+      ],
+      "useWhen": [
+        "first-time setup",
+        "after adding new sessions"
       ],
       "tags": [
         "ledger",
@@ -4915,7 +5069,8 @@
         "now",
         "toISOString",
         "unshift",
-        "saveEpisodes"
+        "saveEpisodes",
+        "pruneEpisodicMemory"
       ],
       "exported": true,
       "inputs": [
@@ -4991,6 +5146,32 @@
       "outputs": [
         "Episode"
       ],
+      "tags": [
+        "memory",
+        "layer"
+      ]
+    },
+    {
+      "name": "pruneEpisodicMemory",
+      "params": [],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/memory-layer.ts",
+      "calls": [
+        "loadEpisodes",
+        "now",
+        "map",
+        "sort",
+        "slice",
+        "saveEpisodes",
+        "error"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "number"
+      ],
+      "purpose": "Prune episodic memory: keep high-value, recent, diverse episodes. Removes: old failures (>30 days), low-value duplicates, excess beyond max. Called periodically after recording new episodes. */",
       "tags": [
         "memory",
         "layer"
@@ -5098,9 +5279,9 @@
       "file": "src/memory-layer.ts",
       "calls": [
         "loadSemantic",
-        "toLowerCase",
-        "substring",
-        "find"
+        "filter",
+        "split",
+        "toLowerCase"
       ],
       "exported": true,
       "inputs": [
@@ -5113,8 +5294,193 @@
         "INTENT"
       ],
       "produces": [
-        "TEMPLATE"
+        "TEMPLATE",
+        "Uses",
+        "keyword",
+        "overlap",
+        "(replaces",
+        "prefix",
+        "matching)",
+        "for",
+        "semantic",
+        "recall."
       ],
+      "tags": [
+        "memory",
+        "layer"
+      ]
+    },
+    {
+      "name": "WorkMemory.setIntent",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "src/memory-layer.ts",
+      "exported": false,
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
+    },
+    {
+      "name": "WorkMemory.getIntent",
+      "params": [],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/memory-layer.ts",
+      "exported": false,
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
+    },
+    {
+      "name": "WorkMemory.bind",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "src/memory-layer.ts",
+      "exported": false,
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
+    },
+    {
+      "name": "WorkMemory.get",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string | undefined",
+      "returnTypeDetail": "string | undefined",
+      "file": "src/memory-layer.ts",
+      "exported": false,
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
+    },
+    {
+      "name": "WorkMemory.clear",
+      "params": [],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "src/memory-layer.ts",
+      "exported": false,
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
+    },
+    {
+      "name": "WorkMemory.setIntent",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "src/memory-layer.ts",
+      "exported": false,
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
+    },
+    {
+      "name": "WorkMemory.getIntent",
+      "params": [],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/memory-layer.ts",
+      "exported": false,
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
+    },
+    {
+      "name": "WorkMemory.bind",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "src/memory-layer.ts",
+      "exported": false,
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
+    },
+    {
+      "name": "WorkMemory.get",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string | undefined",
+      "returnTypeDetail": "string | undefined",
+      "file": "src/memory-layer.ts",
+      "exported": false,
+      "calls": [],
+      "tags": [
+        "memory",
+        "layer"
+      ]
+    },
+    {
+      "name": "WorkMemory.clear",
+      "params": [],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "src/memory-layer.ts",
+      "exported": false,
+      "calls": [],
       "tags": [
         "memory",
         "layer"
@@ -6244,6 +6610,41 @@
       ]
     },
     {
+      "name": "semanticMatch",
+      "params": [
+        {
+          "name": "a",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "b",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/planner.ts",
+      "calls": [
+        "getTopology",
+        "capabilityMatch",
+        "includes"
+      ],
+      "exported": false,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "purpose": "Semantic matching: check if two capability labels are related. Uses SemanticTopology (structural graph) instead of string matching. */",
+      "tags": [
+        "planner"
+      ]
+    },
+    {
       "name": "buildChainHints",
       "params": [
         {
@@ -6257,6 +6658,9 @@
       "file": "src/planner.ts",
       "calls": [
         "filter",
+        "has",
+        "add",
+        "find",
         "push",
         "join",
         "map"
@@ -6266,7 +6670,7 @@
       "outputs": [
         "string"
       ],
-      "purpose": "Build capability chain hints from IR: producer→consumer relationships. e.g. \"failureStats → formatFailureStats (FAILURE_STATS)\" */",
+      "purpose": "Build capability chain hints from IR: producer→consumer relationships. Uses semantic matching for fuzzy capability linking. */",
       "tags": [
         "planner"
       ]
@@ -6588,6 +6992,7 @@
         "parse",
         "readFileSync",
         "isArray",
+        "rebuildTopology",
         "generateSessionId",
         "now",
         "createSnapshot",
@@ -6612,6 +7017,10 @@
         "toLowerCase",
         "sort",
         "slice",
+        "selectCapabilityChains",
+        "formatChainHint",
+        "add",
+        "filter",
         "buildCompactFuncList",
         "buildChainHints",
         "keys",
@@ -6631,7 +7040,9 @@
         "validateActionSchema",
         "saveCheckpoint",
         "enrichActions",
-        "filter",
+        "set",
+        "rebuildState",
+        "validateTransition",
         "validateActionSequence",
         "flat",
         "recordFailure",
@@ -6647,6 +7058,10 @@
         "writeFileSync",
         "getMaskedFuncList",
         "checkSemantic",
+        "isEmpty",
+        "get",
+        "values",
+        "max",
         "clearCheckpoint",
         "generateFallbackPlan"
       ],
@@ -8207,6 +8622,185 @@
       ]
     },
     {
+      "name": "getTopology",
+      "params": [
+        {
+          "name": "ir",
+          "type": "any[]",
+          "typeDetail": "any[]"
+        }
+      ],
+      "returnType": "SemanticTopology",
+      "returnTypeDetail": "SemanticTopology",
+      "file": "src/semantic-topology.ts",
+      "calls": [
+        "build"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "SemanticTopology"
+      ],
+      "tags": [
+        "semantic",
+        "topology"
+      ]
+    },
+    {
+      "name": "rebuildTopology",
+      "params": [
+        {
+          "name": "ir",
+          "type": "any[]",
+          "typeDetail": "any[]"
+        }
+      ],
+      "returnType": "SemanticTopology",
+      "returnTypeDetail": "SemanticTopology",
+      "file": "src/semantic-topology.ts",
+      "calls": [
+        "build"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "SemanticTopology"
+      ],
+      "tags": [
+        "semantic",
+        "topology"
+      ]
+    },
+    {
+      "name": "SemanticTopology.build",
+      "params": [
+        {
+          "name": "ir",
+          "type": "any[]",
+          "typeDetail": "any[]"
+        }
+      ],
+      "returnType": "void",
+      "returnTypeDetail": "void",
+      "file": "src/semantic-topology.ts",
+      "exported": false,
+      "calls": [],
+      "purpose": "Build topology from IR data */",
+      "tags": [
+        "semantic",
+        "topology"
+      ]
+    },
+    {
+      "name": "SemanticTopology.addEdge",
+      "params": [
+        {
+          "name": "a",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "b",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "weight",
+          "type": "number",
+          "typeDetail": "number"
+        },
+        {
+          "name": "reason",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "void",
+      "returnTypeDetail": "void",
+      "file": "src/semantic-topology.ts",
+      "exported": false,
+      "calls": [],
+      "tags": [
+        "semantic",
+        "topology"
+      ]
+    },
+    {
+      "name": "SemanticTopology.similarity",
+      "params": [
+        {
+          "name": "funcA",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "funcB",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/semantic-topology.ts",
+      "exported": false,
+      "calls": [],
+      "purpose": "Get similarity between two functions (0-1). */",
+      "tags": [
+        "semantic",
+        "topology"
+      ]
+    },
+    {
+      "name": "SemanticTopology.findSimilar",
+      "params": [
+        {
+          "name": "funcName",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "topN",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "{ name: string; similarity: number }[]",
+      "returnTypeDetail": "{ name: string; similarity: number }[]",
+      "file": "src/semantic-topology.ts",
+      "exported": false,
+      "calls": [],
+      "purpose": "Find top N most similar functions to a given function. */",
+      "tags": [
+        "semantic",
+        "topology"
+      ]
+    },
+    {
+      "name": "SemanticTopology.capabilityMatch",
+      "params": [
+        {
+          "name": "produce",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "require",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/semantic-topology.ts",
+      "exported": false,
+      "calls": [],
+      "purpose": "Semantic match: two capability labels are related via topology. */",
+      "tags": [
+        "semantic",
+        "topology"
+      ]
+    },
+    {
       "name": "narrateRejection",
       "params": [
         {
@@ -9602,6 +10196,10 @@
         "session",
         "count",
         "statistics"
+      ],
+      "useWhen": [
+        "checking how many sessions succeeded",
+        "computing success rate"
       ]
     },
     {
@@ -10669,6 +11267,11 @@
         "string",
         "email",
         "validation"
+      ],
+      "useWhen": [
+        "validating user input",
+        "form validation",
+        "email checking"
       ]
     },
     {
@@ -10713,6 +11316,11 @@
       "tags": [
         "string",
         "format"
+      ],
+      "useWhen": [
+        "displaying preview text",
+        "limiting UI output",
+        "shortening strings"
       ]
     },
     {
@@ -11032,6 +11640,11 @@
       "tags": [
         "math",
         "statistics"
+      ],
+      "useWhen": [
+        "computing statistics",
+        "data analysis",
+        "metrics calculation"
       ]
     },
     {
@@ -11560,6 +12173,233 @@
       "tags": [
         "async",
         "debounce"
+      ]
+    },
+    {
+      "name": "buildCapabilityGraph",
+      "params": [
+        {
+          "name": "ir",
+          "type": "any[]",
+          "typeDetail": "any[]"
+        }
+      ],
+      "returnType": "Map<string, CapabilityNode>",
+      "returnTypeDetail": "Map<string, CapabilityNode>",
+      "file": "src/strategy-planner.ts",
+      "calls": [
+        "set"
+      ],
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "Map"
+      ],
+      "purpose": "Build a capability graph from IR functions. */",
+      "tags": [
+        "strategy",
+        "planner"
+      ]
+    },
+    {
+      "name": "scoreNode",
+      "params": [
+        {
+          "name": "node",
+          "type": "CapabilityNode",
+          "typeDetail": "CapabilityNode"
+        },
+        {
+          "name": "intentLower",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "keywords",
+          "type": "string[]",
+          "typeDetail": "string[]"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/strategy-planner.ts",
+      "calls": [
+        "includes",
+        "toLowerCase",
+        "jaccardSimilarity",
+        "split",
+        "getFailureAdjustedCredit"
+      ],
+      "exported": false,
+      "inputs": [
+        "CapabilityNode",
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "purpose": "Score a capability node against an intent. */",
+      "tags": [
+        "strategy",
+        "planner"
+      ]
+    },
+    {
+      "name": "findProducers",
+      "params": [
+        {
+          "name": "graph",
+          "type": "Map<string, CapabilityNode>",
+          "typeDetail": "Map<string, CapabilityNode>"
+        },
+        {
+          "name": "capability",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "CapabilityNode[]",
+      "returnTypeDetail": "CapabilityNode[]",
+      "file": "src/strategy-planner.ts",
+      "calls": [
+        "values",
+        "some",
+        "push"
+      ],
+      "exported": false,
+      "inputs": [
+        "Map",
+        "string"
+      ],
+      "outputs": [
+        "CapabilityNode"
+      ],
+      "purpose": "Find all capability nodes that produce a given capability label. */",
+      "tags": [
+        "strategy",
+        "planner"
+      ]
+    },
+    {
+      "name": "findConsumers",
+      "params": [
+        {
+          "name": "graph",
+          "type": "Map<string, CapabilityNode>",
+          "typeDetail": "Map<string, CapabilityNode>"
+        },
+        {
+          "name": "capability",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "CapabilityNode[]",
+      "returnTypeDetail": "CapabilityNode[]",
+      "file": "src/strategy-planner.ts",
+      "calls": [
+        "values",
+        "some",
+        "push"
+      ],
+      "exported": false,
+      "inputs": [
+        "Map",
+        "string"
+      ],
+      "outputs": [
+        "CapabilityNode"
+      ],
+      "purpose": "Find all capability nodes that require a given capability label. */",
+      "tags": [
+        "strategy",
+        "planner"
+      ]
+    },
+    {
+      "name": "selectCapabilityChains",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "ir",
+          "type": "any[]",
+          "typeDetail": "any[]"
+        },
+        {
+          "name": "maxChains",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "CapabilityChain[]",
+      "returnTypeDetail": "CapabilityChain[]",
+      "file": "src/strategy-planner.ts",
+      "calls": [
+        "toLowerCase",
+        "extractKeywords",
+        "buildCapabilityGraph",
+        "values",
+        "scoreNode",
+        "slice",
+        "sort",
+        "filter",
+        "findConsumers",
+        "push",
+        "add",
+        "findProducers",
+        "unshift",
+        "join",
+        "map",
+        "has"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "number"
+      ],
+      "outputs": [
+        "CapabilityChain"
+      ],
+      "purpose": "Select the best capability chain for an intent. * Algorithm: 1. Score all nodes against intent 2. Find top producers (nodes whose produces matches intent keywords) 3. For each producer, trace forward: producer → consumer → consumer... 4. Score each chain and return top N /",
+      "tags": [
+        "strategy",
+        "planner"
+      ]
+    },
+    {
+      "name": "formatChainHint",
+      "params": [
+        {
+          "name": "chains",
+          "type": "CapabilityChain[]",
+          "typeDetail": "CapabilityChain[]"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/strategy-planner.ts",
+      "calls": [
+        "min",
+        "push",
+        "toFixed",
+        "join"
+      ],
+      "exported": true,
+      "inputs": [
+        "CapabilityChain"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Format chains as a hint for the LLM prompt. */",
+      "tags": [
+        "strategy",
+        "planner"
       ]
     },
     {
@@ -12198,6 +13038,18 @@
       ]
     },
     {
+      "name": "scanAction",
+      "params": [],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
+    },
+    {
       "name": "convert",
       "params": [],
       "returnType": "any",
@@ -12634,6 +13486,18 @@
       ]
     },
     {
+      "name": "pow",
+      "params": [],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
+    },
+    {
       "name": "rmdirSync",
       "params": [],
       "returnType": "any",
@@ -12808,6 +13672,18 @@
       ]
     },
     {
+      "name": "capabilityMatch",
+      "params": [],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
+    },
+    {
       "name": "wrapResult",
       "params": [],
       "returnType": "any",
@@ -12904,6 +13780,18 @@
       ]
     },
     {
+      "name": "build",
+      "params": [],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
+    },
+    {
       "name": "toLocaleString",
       "file": "(external)",
       "calls": [],
@@ -12980,18 +13868,6 @@
     },
     {
       "name": "hash",
-      "params": [],
-      "returnType": "any",
-      "returnTypeDetail": "any",
-      "file": "(external)",
-      "calls": [],
-      "external": true,
-      "tags": [
-        "(external)"
-      ]
-    },
-    {
-      "name": "pow",
       "params": [],
       "returnType": "any",
       "returnTypeDetail": "any",

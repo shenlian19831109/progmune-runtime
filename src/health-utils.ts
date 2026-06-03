@@ -2,6 +2,7 @@
  * @requires FAILURE_GENOME @produces HEALTH_SCORE
  * @tags health, score, immune
  */
+/** @useWhen generating immune health metrics; dashboard; monitoring */
 export function computeHealthScore(failureGenome: any, antibodyStats: any): number {
   const totalFailures = failureGenome?.totalFailures || 0;
   const totalHits = antibodyStats?.totalHits || 0;

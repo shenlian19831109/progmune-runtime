@@ -7,6 +7,7 @@ exports.countSessionLedgers = countSessionLedgers;
  * @requires FAILURE_GENOME @produces HEALTH_SCORE
  * @tags health, score, immune
  */
+/** @useWhen generating immune health metrics; dashboard; monitoring */
 function computeHealthScore(failureGenome, antibodyStats) {
     const totalFailures = failureGenome?.totalFailures || 0;
     const totalHits = antibodyStats?.totalHits || 0;

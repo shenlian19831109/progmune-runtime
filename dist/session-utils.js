@@ -6,6 +6,7 @@ exports.formatSessionCounts = formatSessionCounts;
  * @requires SESSION_LIST @produces RESOLVED_COUNT
  * @tags session, count, statistics
  */
+/** @useWhen checking how many sessions succeeded; computing success rate */
 function countResolved(sessions) {
     const resolved = sessions.filter((s) => s.resolved).length;
     return { resolved, unresolved: sessions.length - resolved, total: sessions.length };

@@ -159,6 +159,7 @@ export function verifyFingerprint(
 /** Verify all registered ledger fingerprints and return tampered status. */
 /** @requires FINGERPRINT_DATA @produces VERIFICATION_RESULT */
 /** @requires FINGERPRINT_DATA @produces VERIFICATION_RESULT */
+/** @useWhen checking execution integrity; audit after tampering suspicion */
 export function verifyAllFingerprints(currentRuleHash?: string): RegistrySummary {
   const fingerprints = getFingerprintRegistry();
   const results: FingerprintVerifyResult[] = [];
@@ -223,6 +224,7 @@ export function verifyAllFingerprints(currentRuleHash?: string): RegistrySummary
  *  Called during `npm run check` to ensure all sessions are fingerprinted. */
 /** Register fingerprints for all sessions that lack them. */
 /** @requires SESSION_DATA @produces FINGERPRINT_DATA */
+/** @useWhen first-time setup; after adding new sessions */
 export function registerAllMissingFingerprints(): number {
   const sessionsDir = path.resolve(
     process.env.PROGMUNE_PROJECT_DIR || process.cwd(),

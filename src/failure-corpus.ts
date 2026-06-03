@@ -242,6 +242,7 @@ export function getTopFailurePatterns(limit: number = 5): { pattern: string; cou
 /** Get failure genome statistics: total failures by SVL, constraint type, and fix path. */
 /** @requires FAILURE_DATA @produces FAILURE_GENOME */
 /** @requires FAILURE_DATA @produces FAILURE_GENOME */
+/** @useWhen user asks why generation failed; benchmark compile rate drops; analyzing error patterns */
 export function getFailureGenome(): {
   totalFailures: number;
   bySVL: Record<SVL, number>;
@@ -318,6 +319,7 @@ export function getFailureGenome(): {
 /** @requires SESSION_CORPUS @produces SESSION_LIST */
 /** @requires SESSION_CORPUS @produces SESSION_LIST */
 /** @requires SESSION_CORPUS @produces SESSION_LIST */
+/** @useWhen listing all past executions; auditing session history; checking coverage */
 export function getAllSessions(): ExecutionSession[] {
   const sessions: ExecutionSession[] = [];
   if (!fs.existsSync(SESSIONS_DIR)) return sessions;
@@ -427,6 +429,7 @@ function computeACL(count: number, distinctIntents: number, resolvedRate: number
 
 /** Get antibody patterns learned from failure history. */
 /** @requires FAILURE_HISTORY @produces LEARNED_PATTERNS */
+/** @useWhen finding what fixes worked before; reusing successful repairs */
 export function getLearnedPatterns(): { failureToFix: LearnedPattern[] } {
   const sessions = getAllSessions();
   const agg = new Map<string, {
@@ -600,6 +603,7 @@ export function getSemanticHeatmap(): {
  */
 /** @requires ANTIBODY_DATA @produces ANTIBODY_STATS */
 /** @requires ANTIBODY_DATA @produces ANTIBODY_STATS */
+/** @useWhen checking immune system effectiveness; measuring token savings */
 export function getAntibodyStats(): {
   totalHits: number;
   fastPathHits: number;

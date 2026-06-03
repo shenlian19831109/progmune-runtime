@@ -29,6 +29,7 @@ interface FunctionInfo {
   outputs?: string[];         // auto-derived from return type
   requires?: string[];        // @requires JSDoc tag — capability prerequisites
   produces?: string[];        // @produces JSDoc tag — capability outcomes
+  useWhen?: string[];         // @useWhen JSDoc tag — scenarios when to use this function
   protocol?: {
     pre_states: string[];
     post_states: string[];
@@ -38,10 +39,10 @@ interface FunctionInfo {
 }
 
 /** 从 JSDoc 注释中解析 capability 注解 (@purpose, @tags, @requires, @produces) */
-function parseCapabilityFromJSDoc(node: any): { purpose?: string; tags?: string[]; requires?: string[]; produces?: string[] } {
+function parseCapabilityFromJSDoc(node: any): { purpose?: string; tags?: string[]; requires?: string[]; produces?: string[]; useWhen?: string[] } {
   const jsdocs = node.getJsDocs?.();
   if (!jsdocs || jsdocs.length === 0) return {};
-  const result: { purpose?: string; tags?: string[]; requires?: string[]; produces?: string[] } = {};
+  const result: { purpose?: string; tags?: string[]; requires?: string[]; produces?: string[]; useWhen?: string[] } = {};
   for (const doc of jsdocs) {
     // @purpose: full description text (all lines before any @tag)
     const fullText = doc.getFullText?.() || "";
@@ -78,6 +79,11 @@ function parseCapabilityFromJSDoc(node: any): { purpose?: string; tags?: string[
           const val = t.getCommentText?.() || "";
           if (!result.produces) result.produces = [];
           result.produces.push(...val.split(/[,\s]+/).map((s: string) => s.trim()).filter(Boolean));
+        }
+        if (tn === "useWhen") {
+          const val = t.getCommentText?.() || "";
+          if (!result.useWhen) result.useWhen = [];
+          result.useWhen.push(...val.split(/[;；]/).map((s: string) => s.trim()).filter(Boolean));
         }
       }
     }

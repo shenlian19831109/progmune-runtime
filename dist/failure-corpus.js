@@ -212,6 +212,7 @@ function getTopFailurePatterns(limit = 5) {
 /** Get failure genome statistics: total failures by SVL, constraint type, and fix path. */
 /** @requires FAILURE_DATA @produces FAILURE_GENOME */
 /** @requires FAILURE_DATA @produces FAILURE_GENOME */
+/** @useWhen user asks why generation failed; benchmark compile rate drops; analyzing error patterns */
 function getFailureGenome() {
     const sessions = getAllSessions();
     const bySVL = { "SVL-1": 0, "SVL-2": 0, "SVL-3": 0, "SVL-4": 0 };
@@ -275,6 +276,7 @@ function getFailureGenome() {
 /** @requires SESSION_CORPUS @produces SESSION_LIST */
 /** @requires SESSION_CORPUS @produces SESSION_LIST */
 /** @requires SESSION_CORPUS @produces SESSION_LIST */
+/** @useWhen listing all past executions; auditing session history; checking coverage */
 function getAllSessions() {
     const sessions = [];
     if (!fs.existsSync(SESSIONS_DIR))
@@ -367,6 +369,7 @@ function computeACL(count, distinctIntents, resolvedRate) {
 }
 /** Get antibody patterns learned from failure history. */
 /** @requires FAILURE_HISTORY @produces LEARNED_PATTERNS */
+/** @useWhen finding what fixes worked before; reusing successful repairs */
 function getLearnedPatterns() {
     const sessions = getAllSessions();
     const agg = new Map();
@@ -518,6 +521,7 @@ function getSemanticHeatmap() {
  */
 /** @requires ANTIBODY_DATA @produces ANTIBODY_STATS */
 /** @requires ANTIBODY_DATA @produces ANTIBODY_STATS */
+/** @useWhen checking immune system effectiveness; measuring token savings */
 function getAntibodyStats() {
     const sessions = getAllSessions();
     let totalHits = 0;

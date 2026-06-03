@@ -84,6 +84,12 @@ function parseCapabilityFromJSDoc(node) {
                         result.produces = [];
                     result.produces.push(...val.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean));
                 }
+                if (tn === "useWhen") {
+                    const val = t.getCommentText?.() || "";
+                    if (!result.useWhen)
+                        result.useWhen = [];
+                    result.useWhen.push(...val.split(/[;；]/).map((s) => s.trim()).filter(Boolean));
+                }
             }
         }
     }
