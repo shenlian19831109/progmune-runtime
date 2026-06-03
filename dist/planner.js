@@ -758,7 +758,7 @@ async function plan(userIntent) {
             }
         }
         // Dynamic Credit: multiply by actual success rate (0.1-1.0)
-        const successRate = (0, feedback_1.getWeightedSuccessRate)(f.name);
+        const successRate = (0, feedback_1.getFailureAdjustedCredit)(f.name);
         const creditFactor = 0.3 + successRate * 0.7; // range: 0.3 (always fail) to 1.0 (always succeed)
         if (f.exported && !f.external)
             score *= creditFactor;

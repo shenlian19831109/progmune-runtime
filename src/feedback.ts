@@ -7,6 +7,8 @@ interface RunRecord {
   functionName: string;
   success: boolean;
   errorType?: string;
+  /** SVL level if this was a constraint violation */
+  svlLevel?: string;
   timestamp: string;
 }
 
@@ -51,6 +53,39 @@ export function getWeightedSuccessRate(funcName: string): number {
     const w = Math.pow(0.5, Math.max(0, r.age)); // half-life = 1 day
     totalWeight += w;
     if (r.success) weightedSuccess += w;
+  }
+  return totalWeight > 0 ? weightedSuccess / totalWeight : 0.5;
+}
+
+/** @requires FUNCTION_NAME @produces FAILURE_ADJUSTED_CREDIT
+ *  Credit score adjusted by failure severity.
+ *  SVL-4 (protocol) violations penalize 2x more than SVL-1.
+ *  Time-weighted + severity-weighted. */
+export function getFailureAdjustedCredit(funcName: string): number {
+  const records = loadFeedback();
+  const funcRecords = records
+    .filter(r => r.functionName === funcName)
+    .map(r => ({ ...r, age: (Date.now() - new Date(r.timestamp).getTime()) / 86400000 }));
+  if (funcRecords.length === 0) return 0.5;
+
+  const SVL_PENALTY: Record<string, number> = {
+    "SVL-1": 1.0,   // missing function — minor
+    "SVL-2": 1.5,   // type mismatch — moderate
+    "SVL-3": 2.0,   // dataflow — significant
+    "SVL-4": 3.0,   // protocol — severe
+  };
+
+  let totalWeight = 0, weightedSuccess = 0;
+  for (const r of funcRecords) {
+    const timeW = Math.pow(0.5, Math.max(0, r.age));
+    if (r.success) {
+      totalWeight += timeW;
+      weightedSuccess += timeW;
+    } else {
+      const penalty = SVL_PENALTY[r.svlLevel || ""] || 1.0;
+      totalWeight += timeW * penalty;
+      // weightedSuccess stays 0 for failures
+    }
   }
   return totalWeight > 0 ? weightedSuccess / totalWeight : 0.5;
 }

@@ -4,7 +4,7 @@ import { generateAttemptId, generateSessionId, generatePlannerSeed } from "./run
 import { executeActionCode } from "./action-runtime";
 import { validateActionSequence } from "./validator";
 import { checkSemantic } from "./semantic-validator";
-import { getFunctionSuccessRate, getWeightedSuccessRate, recordRun } from "./feedback";
+import { getFunctionSuccessRate, getWeightedSuccessRate, getFailureAdjustedCredit, recordRun } from "./feedback";
 import { jaccardSimilarity, extractKeywords } from "./utils";
 import { recordFailure, recordSession, saveCheckpoint, loadCheckpoint, clearCheckpoint, SVL, queryAntibodies } from "./failure-corpus";
 import { recordEpisode, findSemanticTemplate } from "./memory-layer";
@@ -731,7 +731,7 @@ export async function plan(userIntent: string): Promise<PlanResult> {
       }
     }
     // Dynamic Credit: multiply by actual success rate (0.1-1.0)
-    const successRate = getWeightedSuccessRate(f.name);
+    const successRate = getFailureAdjustedCredit(f.name);
     const creditFactor = 0.3 + successRate * 0.7; // range: 0.3 (always fail) to 1.0 (always succeed)
     if (f.exported && !f.external) score *= creditFactor;
     return { ...f, score };

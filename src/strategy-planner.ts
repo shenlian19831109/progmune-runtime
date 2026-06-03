@@ -9,7 +9,7 @@
  */
 
 import { jaccardSimilarity, extractKeywords } from "./utils";
-import { getWeightedSuccessRate } from "./feedback";
+import { getFailureAdjustedCredit } from "./feedback";
 
 interface CapabilityNode {
   name: string;           // function name
@@ -66,7 +66,7 @@ function scoreNode(node: CapabilityNode, intentLower: string, keywords: string[]
     if (w.length > 2 && purposeLower.includes(w)) score += 0.5;
   }
   // Dynamic Credit: multiply by actual success rate
-  const successRate = getWeightedSuccessRate(node.name);
+  const successRate = getFailureAdjustedCredit(node.name);
   const creditFactor = 0.3 + successRate * 0.7;
   return score * creditFactor;
 }

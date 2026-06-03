@@ -57,7 +57,7 @@ function scoreNode(node, intentLower, keywords) {
             score += 0.5;
     }
     // Dynamic Credit: multiply by actual success rate
-    const successRate = (0, feedback_1.getWeightedSuccessRate)(node.name);
+    const successRate = (0, feedback_1.getFailureAdjustedCredit)(node.name);
     const creditFactor = 0.3 + successRate * 0.7;
     return score * creditFactor;
 }
