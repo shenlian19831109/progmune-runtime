@@ -1,0 +1,252 @@
+[
+  {
+    "id": "R001",
+    "intent": "check if a string is a valid email address",
+    "category": "string"
+  },
+  {
+    "id": "R002",
+    "intent": "validate that a phone number matches a given pattern",
+    "category": "validation"
+  },
+  {
+    "id": "R003",
+    "intent": "convert a date string from one format to another format",
+    "category": "datetime"
+  },
+  {
+    "id": "R004",
+    "intent": "capitalize the first letter of every word in a string",
+    "category": "string"
+  },
+  {
+    "id": "R005",
+    "intent": "truncate a long string to a maximum length and add ellipsis",
+    "category": "string"
+  },
+  {
+    "id": "R006",
+    "intent": "count how many times a substring appears in a larger string",
+    "category": "string"
+  },
+  {
+    "id": "R007",
+    "intent": "generate a random string of a specified length using letters and numbers",
+    "category": "random"
+  },
+  {
+    "id": "R008",
+    "intent": "remove all whitespace from a string",
+    "category": "string"
+  },
+  {
+    "id": "R009",
+    "intent": "convert a camelCase string to snake_case",
+    "category": "string"
+  },
+  {
+    "id": "R010",
+    "intent": "parse a JSON string safely, returning a default if it fails",
+    "category": "json"
+  },
+  {
+    "id": "R011",
+    "intent": "find the most frequently occurring element in an array",
+    "category": "array"
+  },
+  {
+    "id": "R012",
+    "intent": "remove duplicate values from an array",
+    "category": "array"
+  },
+  {
+    "id": "R013",
+    "intent": "split an array into chunks of a specified size",
+    "category": "array"
+  },
+  {
+    "id": "R014",
+    "intent": "merge two sorted arrays into one sorted array",
+    "category": "array"
+  },
+  {
+    "id": "R015",
+    "intent": "find the difference between two arrays, elements in A not in B",
+    "category": "array"
+  },
+  {
+    "id": "R016",
+    "intent": "calculate the average of an array of numbers",
+    "category": "math"
+  },
+  {
+    "id": "R017",
+    "intent": "round a number to a specified number of decimal places",
+    "category": "math"
+  },
+  {
+    "id": "R018",
+    "intent": "check if a number is a prime number",
+    "category": "math"
+  },
+  {
+    "id": "R019",
+    "intent": "generate a random integer between a minimum and maximum value",
+    "category": "random"
+  },
+  {
+    "id": "R020",
+    "intent": "calculate the median value from an array of numbers",
+    "category": "math"
+  },
+  {
+    "id": "R021",
+    "intent": "deep clone a JavaScript object",
+    "category": "object"
+  },
+  {
+    "id": "R022",
+    "intent": "pick specific keys from an object and return a new object with only those keys",
+    "category": "object"
+  },
+  {
+    "id": "R023",
+    "intent": "flatten a nested object into a single level with dot-notation keys",
+    "category": "object"
+  },
+  {
+    "id": "R024",
+    "intent": "check if two objects have the same keys and values",
+    "category": "object"
+  },
+  {
+    "id": "R025",
+    "intent": "merge multiple objects together, with later objects overwriting earlier ones",
+    "category": "object"
+  },
+  {
+    "id": "R026",
+    "intent": "read a file and return its contents as a string, with error handling",
+    "category": "file"
+  },
+  {
+    "id": "R027",
+    "intent": "check if a file path has a specific file extension",
+    "category": "file"
+  },
+  {
+    "id": "R028",
+    "intent": "create a directory path including all parent directories if they do not exist",
+    "category": "file"
+  },
+  {
+    "id": "R029",
+    "intent": "list all files in a directory that match a pattern",
+    "category": "file"
+  },
+  {
+    "id": "R030",
+    "intent": "get the file size in a human-readable format like KB or MB",
+    "category": "file"
+  },
+  {
+    "id": "R031",
+    "intent": "check if a value is a plain object and not an array or null",
+    "category": "validation"
+  },
+  {
+    "id": "R032",
+    "intent": "validate that all required fields are present in an object",
+    "category": "validation"
+  },
+  {
+    "id": "R033",
+    "intent": "generate a TypeScript interface definition from a sample JSON object",
+    "category": "codegen"
+  },
+  {
+    "id": "R034",
+    "intent": "create a basic CRUD repository for a given entity type",
+    "category": "codegen"
+  },
+  {
+    "id": "R035",
+    "intent": "generate a simple HTTP route handler that validates input and returns JSON",
+    "category": "codegen"
+  },
+  {
+    "id": "R036",
+    "intent": "create a retry wrapper that retries a function call up to N times on failure",
+    "category": "async"
+  },
+  {
+    "id": "R037",
+    "intent": "create a debounced version of a function that delays execution",
+    "category": "async"
+  },
+  {
+    "id": "R038",
+    "intent": "create a simple cache with a maximum size that evicts the oldest entries",
+    "category": "data"
+  },
+  {
+    "id": "R039",
+    "intent": "format a number of milliseconds into a human-readable duration string",
+    "category": "datetime"
+  },
+  {
+    "id": "R040",
+    "intent": "encode an object as a URL query string",
+    "category": "web"
+  },
+  {
+    "id": "R041",
+    "intent": "read a JSON config file, validate its structure, and return the parsed config",
+    "category": "composition"
+  },
+  {
+    "id": "R042",
+    "intent": "fetch data from a URL, parse the JSON response, and handle errors",
+    "category": "composition"
+  },
+  {
+    "id": "R043",
+    "intent": "create a simple event emitter with on, off, and emit methods",
+    "category": "codegen"
+  },
+  {
+    "id": "R044",
+    "intent": "generate a basic HTTP server that serves static files from a directory",
+    "category": "codegen"
+  },
+  {
+    "id": "R045",
+    "intent": "create a simple task queue that processes tasks one at a time in order",
+    "category": "data"
+  },
+  {
+    "id": "R046",
+    "intent": "count how many TypeScript files exist in a directory recursively",
+    "category": "file"
+  },
+  {
+    "id": "R047",
+    "intent": "read a JSON file, merge it with a second JSON file, and write the result",
+    "category": "composition"
+  },
+  {
+    "id": "R048",
+    "intent": "extract all function names from a TypeScript source file",
+    "category": "codegen"
+  },
+  {
+    "id": "R049",
+    "intent": "create a simple logger that writes timestamped messages to a file",
+    "category": "composition"
+  },
+  {
+    "id": "R050",
+    "intent": "validate a semantic version string and return its major, minor, and patch components",
+    "category": "validation"
+  }
+]

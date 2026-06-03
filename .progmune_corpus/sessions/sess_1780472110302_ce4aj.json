@@ -1,0 +1,141 @@
+{
+  "sessionId": "sess_1780472110302_ce4aj",
+  "intent": "remove all whitespace from a string",
+  "attempts": [
+    {
+      "id": "att_1780472111490_latn1",
+      "sessionId": "sess_1780472110302_ce4aj",
+      "attemptNumber": 1,
+      "inputIntent": "remove all whitespace from a string",
+      "plannerSeed": "8afb1ee8",
+      "constraintSnapshotId": "snap_1780472110303_b0218fa10b62",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "deriveTagsFromFile",
+          "args": [
+            {
+              "name": "filePath",
+              "type": "string",
+              "value": ""
+            }
+          ],
+          "assignTo": "tags"
+        },
+        {
+          "kind": "return",
+          "value": "tags"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "deriveTagsFromFile",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780472111490,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780472110302,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780472111490_latn1",
+    "sessionId": "sess_1780472110302_ce4aj",
+    "attemptNumber": 1,
+    "inputIntent": "remove all whitespace from a string",
+    "plannerSeed": "8afb1ee8",
+    "constraintSnapshotId": "snap_1780472110303_b0218fa10b62",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "deriveTagsFromFile",
+        "args": [
+          {
+            "name": "filePath",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "tags"
+      },
+      {
+        "kind": "return",
+        "value": "tags"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "deriveTagsFromFile",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780472111490,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780472110303_b0218fa10b62",
+  "endedAt": 1780472111492
+}

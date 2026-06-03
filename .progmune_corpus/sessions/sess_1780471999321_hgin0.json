@@ -1,0 +1,141 @@
+{
+  "sessionId": "sess_1780471999321_hgin0",
+  "intent": "convert a date string from one format to another format",
+  "attempts": [
+    {
+      "id": "att_1780472000787_6aa7b",
+      "sessionId": "sess_1780471999321_hgin0",
+      "attemptNumber": 1,
+      "inputIntent": "convert a date string from one format to another format",
+      "plannerSeed": "e1e82870",
+      "constraintSnapshotId": "snap_1780471999321_b0218fa10b62",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "normalizeTypeName",
+          "args": [
+            {
+              "name": "raw",
+              "type": "string",
+              "value": ""
+            }
+          ],
+          "assignTo": "normalized"
+        },
+        {
+          "kind": "return",
+          "value": "normalized"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "normalizeTypeName",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780472000787,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780471999321,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780472000787_6aa7b",
+    "sessionId": "sess_1780471999321_hgin0",
+    "attemptNumber": 1,
+    "inputIntent": "convert a date string from one format to another format",
+    "plannerSeed": "e1e82870",
+    "constraintSnapshotId": "snap_1780471999321_b0218fa10b62",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "normalizeTypeName",
+        "args": [
+          {
+            "name": "raw",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "normalized"
+      },
+      {
+        "kind": "return",
+        "value": "normalized"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "normalizeTypeName",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780472000787,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780471999321_b0218fa10b62",
+  "endedAt": 1780472000790
+}
