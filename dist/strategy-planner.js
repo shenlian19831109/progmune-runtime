@@ -16,10 +16,13 @@ const feedback_1 = require("./feedback");
 const semantic_topology_1 = require("./semantic-topology");
 /** Build a capability graph from IR functions. */
 function buildCapabilityGraph(ir) {
+    const SKIP_FILES = new Set(["src/strategy-planner.ts", "src/planner.ts"]);
     const graph = new Map();
     for (const f of ir) {
         if (!f.exported)
             continue;
+        if (SKIP_FILES.has(f.file))
+            continue; // skip planner internals
         graph.set(f.name, {
             name: f.name,
             purpose: f.purpose || "",
