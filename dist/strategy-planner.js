@@ -168,11 +168,19 @@ function selectCapabilityChains(intent, ir, maxChains = 5) {
     for (const node of graph.values()) {
         node.score = scoreNode(node, intentLower, keywords);
     }
-    // Find seed nodes: highest-scoring nodes (prefer producers, allow pure consumers)
-    const seeds = [...graph.values()]
-        .filter(n => n.score > 1.0 && (n.produces.length > 0 || n.score > 3))
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 15);
+    // Dynamic threshold: tighten for large IR to prevent score dilution
+    let dynamicThreshold = graph.size > 500 ? 2.0 : graph.size > 200 ? 1.5 : 1.0;
+    // Fallback: if no seeds found, halve threshold
+    let seeds = [...graph.values()]
+        .filter(n => n.score > dynamicThreshold && (n.produces.length > 0 || n.score > dynamicThreshold + 2))
+        .sort((a, b) => b.score - a.score);
+    if (seeds.length === 0 && dynamicThreshold > 0.5) {
+        dynamicThreshold *= 0.5;
+        seeds = [...graph.values()]
+            .filter(n => n.score > dynamicThreshold && (n.produces.length > 0 || n.score > dynamicThreshold + 1))
+            .sort((a, b) => b.score - a.score);
+    }
+    seeds = seeds.slice(0, graph.size > 500 ? 30 : 15);
     const allNodes = [...graph.values()];
     const chains = [];
     for (const seed of seeds) {
@@ -180,23 +188,45 @@ function selectCapabilityChains(intent, ir, maxChains = 5) {
         const chain = [seed];
         const visited = new Set([seed.name]);
         let totalScore = seed.score;
-        // Forward trace: for each produce of the last node, find consumers
+        // Forward trace: data flow → semantic leap
         let current = seed;
         let extended = true;
+        let leapDecay = 1.0; // weight decay for semantic leaps
         while (extended && chain.length < 8) {
             extended = false;
+            // Strategy 1: direct data flow (produces → requires)
             for (const p of current.produces) {
                 const consumers = findConsumers(graph, p, allNodes).filter(c => !visited.has(c.name));
                 if (consumers.length > 0) {
-                    // Pick best-scoring consumer
                     const bestConsumer = consumers.sort((a, b) => b.score - a.score)[0];
                     chain.push(bestConsumer);
                     visited.add(bestConsumer.name);
                     totalScore += bestConsumer.score;
                     current = bestConsumer;
                     extended = true;
+                    leapDecay = 1.0; // reset decay on direct match
                     break;
                 }
+            }
+            // Strategy 2: semantic leap — use topology similarity
+            if (!extended) {
+                try {
+                    const topo = (0, semantic_topology_1.getTopology)();
+                    const similar = topo.findSimilar(current.name, 10)
+                        .filter(s => !visited.has(s.name) && s.similarity > 0.2);
+                    if (similar.length > 0) {
+                        const bestMatch = graph.get(similar[0].name);
+                        if (bestMatch && bestMatch.score > 0) {
+                            chain.push(bestMatch);
+                            visited.add(bestMatch.name);
+                            totalScore += bestMatch.score * leapDecay; // decayed score
+                            current = bestMatch;
+                            extended = true;
+                            leapDecay *= 0.7; // each semantic leap loses 30% weight
+                        }
+                    }
+                }
+                catch { }
             }
         }
         // Backward trace: does seed need something? Find producers.
