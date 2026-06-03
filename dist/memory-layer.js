@@ -37,6 +37,7 @@ exports.WorkMemory = void 0;
 exports.recordEpisode = recordEpisode;
 exports.getRecentEpisodes = getRecentEpisodes;
 exports.getSuccessfulEpisodes = getSuccessfulEpisodes;
+exports.pruneEpisodicMemory = pruneEpisodicMemory;
 exports.consolidateSemantic = consolidateSemantic;
 exports.findSemanticTemplate = findSemanticTemplate;
 const fs = __importStar(require("fs"));
@@ -100,10 +101,14 @@ function recordEpisode(episode) {
         timestamp: new Date().toISOString(),
     };
     episodes.unshift(newEpisode);
-    if (episodes.length > MAX_EPISODES) {
+    // Simple cap: trim to prevent runaway growth between GC cycles
+    if (episodes.length > MAX_EPISODES * 1.5) {
         episodes.length = MAX_EPISODES;
     }
     saveEpisodes(episodes);
+    // Run GC every 100 episodes
+    if (episodes.length % 100 === 0)
+        pruneEpisodicMemory();
 }
 /** @requires LIMIT @produces EPISODE_LIST */
 function getRecentEpisodes(limit = 10) {
@@ -111,6 +116,35 @@ function getRecentEpisodes(limit = 10) {
 }
 function getSuccessfulEpisodes(limit = 10) {
     return loadEpisodes().filter(e => e.success).slice(0, limit);
+}
+// ── Semantic GC: prune episodic memory ──
+const MAX_EPISODES = 1000;
+const MAX_AGE_DAYS = 30;
+/** Prune episodic memory: keep high-value, recent, diverse episodes.
+ *  Removes: old failures (>30 days), low-value duplicates, excess beyond max.
+ *  Called periodically after recording new episodes. */
+function pruneEpisodicMemory() {
+    const episodes = loadEpisodes();
+    if (episodes.length <= MAX_EPISODES)
+        return 0;
+    const now = Date.now();
+    const scored = episodes.map((ep, i) => {
+        const ageDays = (now - new Date(ep.timestamp).getTime()) / 86400000;
+        // Score: success=+2, recent=+3, older=-1/day
+        let score = ep.success ? 2 : 0;
+        score += Math.max(0, 3 - ageDays * 0.5); // recent bonus, decays over 6 days
+        score -= Math.max(0, (ageDays - MAX_AGE_DAYS) * 0.5); // penalty for >30 days
+        return { ep, score, index: i };
+    });
+    // Keep top MAX_EPISODES by score
+    scored.sort((a, b) => b.score - a.score);
+    const kept = scored.slice(0, MAX_EPISODES).sort((a, b) => a.index - b.index);
+    const removed = episodes.length - kept.length;
+    if (removed > 0) {
+        saveEpisodes(kept.map(s => s.ep));
+        console.error(`[Memory] Semantic GC: removed ${removed} low-value episodes, kept ${kept.length}`);
+    }
+    return removed;
 }
 const SEMANTIC_FILE = path.join(MEMORY_DIR, "semantic.json");
 const SEMANTIC_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 天

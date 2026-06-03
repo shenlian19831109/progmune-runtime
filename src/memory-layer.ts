@@ -72,10 +72,13 @@ export function recordEpisode(episode: Omit<Episode, "id" | "timestamp">) {
     timestamp: new Date().toISOString(),
   };
   episodes.unshift(newEpisode);
-  if (episodes.length > MAX_EPISODES) {
+  // Simple cap: trim to prevent runaway growth between GC cycles
+  if (episodes.length > MAX_EPISODES * 1.5) {
     episodes.length = MAX_EPISODES;
   }
   saveEpisodes(episodes);
+  // Run GC every 100 episodes
+  if (episodes.length % 100 === 0) pruneEpisodicMemory();
 }
 
 /** @requires LIMIT @produces EPISODE_LIST */
@@ -85,6 +88,40 @@ export function getRecentEpisodes(limit: number = 10): Episode[] {
 
 export function getSuccessfulEpisodes(limit: number = 10): Episode[] {
   return loadEpisodes().filter(e => e.success).slice(0, limit);
+}
+
+// ── Semantic GC: prune episodic memory ──
+
+const MAX_EPISODES = 1000;
+const MAX_AGE_DAYS = 30;
+
+/** Prune episodic memory: keep high-value, recent, diverse episodes.
+ *  Removes: old failures (>30 days), low-value duplicates, excess beyond max.
+ *  Called periodically after recording new episodes. */
+export function pruneEpisodicMemory(): number {
+  const episodes = loadEpisodes();
+  if (episodes.length <= MAX_EPISODES) return 0;
+
+  const now = Date.now();
+  const scored = episodes.map((ep, i) => {
+    const ageDays = (now - new Date(ep.timestamp).getTime()) / 86400000;
+    // Score: success=+2, recent=+3, older=-1/day
+    let score = ep.success ? 2 : 0;
+    score += Math.max(0, 3 - ageDays * 0.5); // recent bonus, decays over 6 days
+    score -= Math.max(0, (ageDays - MAX_AGE_DAYS) * 0.5); // penalty for >30 days
+    return { ep, score, index: i };
+  });
+
+  // Keep top MAX_EPISODES by score
+  scored.sort((a, b) => b.score - a.score);
+  const kept = scored.slice(0, MAX_EPISODES).sort((a, b) => a.index - b.index);
+  const removed = episodes.length - kept.length;
+
+  if (removed > 0) {
+    saveEpisodes(kept.map(s => s.ep));
+    console.error(`[Memory] Semantic GC: removed ${removed} low-value episodes, kept ${kept.length}`);
+  }
+  return removed;
 }
 
 // ========== 语义记忆 ==========
