@@ -143,33 +143,73 @@ function emitCode(actions, meta) {
     // Pre-scan: find input variables (referenced but never assigned via call/assign)
     const declared = new Set();
     const referenced = new Set();
+    // Track param name → type for conflict detection
+    const paramTypes = new Map();
     let counter = 0;
-    // First pass: collect declared and referenced variables
-    for (const action of actions) {
+    // Recursive scan: collect variables from actions including nested if/for
+    const scanAction = (action) => {
         if (action.kind === "call" && action.assignTo) {
             declared.add(action.assignTo);
         }
         else if (action.kind === "assign" && action.target) {
             declared.add(action.target);
         }
-        // Collect arg value references AND empty-default params
         if (action.kind === "call" && action.args) {
             for (const arg of action.args) {
                 const v = typeof arg === "object" ? arg?.value : arg;
+                const n = typeof arg === "object" ? arg?.name : undefined;
+                const t = typeof arg === "object" ? arg?.type : "string";
                 if (typeof v === "string" && /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(v) && v !== "") {
                     referenced.add(v);
                 }
-                // Also detect empty defaults: these should become function params
-                const isDefault = v === "" || v === 0 || v === false || v === null
-                    || (Array.isArray(v) && v.length === 0);
-                if (isDefault && typeof arg === "object" && arg.name) {
-                    referenced.add(arg.name);
+                const isEmptyV = (val) => val === "" || val === 0 || val === false || val === null || (Array.isArray(val) && val.length === 0);
+                const isDefault = isEmptyV(v);
+                if (isDefault && n) {
+                    // Track type for conflict detection
+                    if (!paramTypes.has(n))
+                        paramTypes.set(n, []);
+                    if (!paramTypes.get(n).includes(t))
+                        paramTypes.get(n).push(t);
+                    referenced.add(n);
                 }
             }
         }
-    }
+        // Recursive: scan nested actions in if/for
+        if (action.kind === "if") {
+            (action.thenActions || []).forEach(scanAction);
+            (action.elseActions || []).forEach(scanAction);
+        }
+        else if (action.kind === "for") {
+            if (action.variable)
+                declared.add(action.variable);
+            (action.bodyActions || []).forEach(scanAction);
+        }
+    };
+    for (const action of actions)
+        scanAction(action);
     // Inputs = referenced but not declared — add as typed parameters
-    const inputs = [...referenced].filter(v => !declared.has(v) && v !== "");
+    const rawInputs = [...referenced].filter(v => !declared.has(v) && v !== "");
+    // Resolve type conflicts: rename duplicate params with different types
+    const conflictNames = [...paramTypes.entries()]
+        .filter(([_, types]) => new Set(types).size > 1)
+        .map(([name]) => name);
+    const _resolved = [];
+    const renamed = new Map(); // oldName → newName
+    for (const name of rawInputs) {
+        if (conflictNames.includes(name) && paramTypes.get(name).length > 1) {
+            const types = [...new Set(paramTypes.get(name))]; // unique types
+            for (const t of types) {
+                const suffix = t.replace(/\[\]$/, "").toLowerCase();
+                const newName = `${name}_${suffix}`;
+                _resolved.push(newName);
+                renamed.set(name + ":" + t, newName);
+            }
+        }
+        else {
+            _resolved.push(name);
+        }
+    }
+    const uniqueInputs = [...new Set(_resolved)];
     const inputTypes = new Map();
     for (const action of actions) {
         if (action.kind === "call" && action.args) {
@@ -177,20 +217,33 @@ function emitCode(actions, meta) {
                 const v = typeof arg === "object" ? arg?.value : arg;
                 const n = typeof arg === "object" ? arg?.name : undefined;
                 const t = typeof arg === "object" ? arg?.type : "string";
-                // Variable reference: value matches input name
-                if (typeof v === "string" && inputs.includes(v) && t && t !== "any") {
+                // Check for renamed param (type conflict resolution)
+                const renameKey = n + ":" + t;
+                const resolvedName = renamed.get(renameKey) || n || "";
+                // Variable reference
+                if (typeof v === "string" && uniqueInputs.includes(v) && t && t !== "any") {
                     inputTypes.set(v, t);
                 }
-                // Empty default: param name matches input name
-                const isDefault = v === "" || v === 0 || v === false || v === null
-                    || (Array.isArray(v) && v.length === 0);
-                if (isDefault && n && inputs.includes(n)) {
+                // Empty default: use resolved name for type-conflicted params
+                const isEmptyV = (val) => val === "" || val === 0 || val === false || val === null || (Array.isArray(val) && val.length === 0);
+                const isDefault = isEmptyV(v);
+                if (isDefault && n) {
                     const cleanType = (t || "string").replace(/\[\]$/, "");
-                    if (!inputTypes.has(n))
+                    const targetName = (resolvedName !== n) ? resolvedName : n;
+                    if (uniqueInputs.includes(targetName) && !inputTypes.has(targetName)) {
+                        inputTypes.set(targetName, cleanType);
+                    }
+                    else if (uniqueInputs.includes(n) && !inputTypes.has(n)) {
                         inputTypes.set(n, cleanType);
+                    }
                 }
             }
         }
+    }
+    // Parameter bloat threshold: refuse if too many params
+    const MAX_PARAMS = 10;
+    if (uniqueInputs.length > MAX_PARAMS) {
+        return `// REFINEMENT_NEEDED: ${uniqueInputs.length} params detected (max ${MAX_PARAMS}). Split into smaller functions or use an options object.`;
     }
     // Refinement: collect empty defaults for Planner feedback
     const emptyDefaults = [];
@@ -199,8 +252,8 @@ function emitCode(actions, meta) {
         if (action.kind === "call" && action.args) {
             for (const arg of action.args) {
                 const v = typeof arg === "object" ? arg?.value : arg;
-                const isDefault = v === "" || v === 0 || v === false || v === null
-                    || (Array.isArray(v) && v.length === 0);
+                const isEmptyV = (val) => val === "" || val === 0 || val === false || val === null || (Array.isArray(val) && val.length === 0);
+                const isDefault = isEmptyV(v);
                 if (isDefault && typeof arg === "object" && arg.name) {
                     emptyDefaults.push({
                         actionIndex: i,
@@ -216,7 +269,7 @@ function emitCode(actions, meta) {
     if (emptyDefaults.length > 0) {
         globalThis.__progmune_empty_defaults = emptyDefaults;
     }
-    const paramList = inputs.map(v => `${v}: ${inputTypes.get(v) || "string"}`).join(", ");
+    const paramList = uniqueInputs.map(v => `${v}: ${inputTypes.get(v) || "string"}`).join(", ");
     code += `\nexport function main(${paramList}) {\n`;
     const convert = (action, indent = "  ") => {
         if (!action || !action.kind)
@@ -237,11 +290,21 @@ function emitCode(actions, meta) {
                     return val;
                 }
                 // Empty default value → use function's parameter name (input parameter)
-                const isDefault = val === "" || val === 0 || val === false || val === null
-                    || (Array.isArray(val) && val.length === 0);
-                if (isDefault && a?.name && inputs.includes(a.name)) {
-                    declared.add(a.name);
-                    return a.name;
+                const isEmptyVal = (v) => v === "" || v === 0 || v === false || v === null || (Array.isArray(v) && v.length === 0);
+                const isDefault = isEmptyVal(val);
+                if (isDefault && a?.name) {
+                    // Check for renamed param (type conflict resolution)
+                    const paramType = meta?.params?.[i]?.type || "string";
+                    const renameKey = a.name + ":" + paramType;
+                    const resolvedName = renamed.get(renameKey) || a.name;
+                    if (uniqueInputs.includes(resolvedName)) {
+                        declared.add(resolvedName);
+                        return resolvedName;
+                    }
+                    else if (uniqueInputs.includes(a.name)) {
+                        declared.add(a.name);
+                        return a.name;
+                    }
                 }
                 const paramType = meta?.params?.[i]?.type || "any";
                 if (BASIC_TYPES.has(paramType)) {
@@ -332,7 +395,7 @@ function emitCode(actions, meta) {
     }
     code += "}\n";
     // Call main with params if it has inputs, otherwise no-arg call
-    if (inputs.length > 0) {
+    if (uniqueInputs.length > 0) {
         // Don't call — the user provides the arguments
         // Just export the function for external use
     }
