@@ -177,6 +177,11 @@ export function emitCode(
           "SVLString": '"SVL-4"', "BranchOutcome": '"success"',
         };
         if (STRING_ENUMS[paramType]) return STRING_ENUMS[paramType];
+        // Array types: use empty array
+        if (paramType.endsWith("[]")) return "[]";
+        // Generic Map/Set types: use empty constructor
+        if (paramType.startsWith("Map<")) return `new Map()`;
+        if (paramType.startsWith("Set<")) return `new Set()`;
         if (paramType === "UserPayload") return `{ id: 1, role: "user" } as UserPayload`;
         if (paramType === "PasswordHash") return `"defaultHash"`;
         if (paramType === "Token") return `"defaultToken"`;
@@ -217,11 +222,13 @@ export function emitCode(
   // Ensure last action is a return — inject one if LLM forgot
   const lastAction = actions[actions.length - 1];
   if (lastAction && lastAction.kind !== "return") {
-    const lastCall = [...actions].reverse().find(a => a.kind === "call" && a.assignTo);
-    if (lastCall && lastCall.assignTo) {
-      code += `  return ${lastCall.assignTo};\n`;
-    } else if (lastAction.kind === "call" && lastAction.assignTo) {
-      code += `  return ${lastAction.assignTo};\n`;
+    const allCalls = actions.filter(a => a.kind === "call" && a.assignTo);
+    if (allCalls.length === 1) {
+      code += `  return ${allCalls[0].assignTo};\n`;
+    } else if (allCalls.length > 1) {
+      // Multiple calls: return all results as an object
+      const vars = allCalls.map(c => (c as any).assignTo).join(", ");
+      code += `  return { ${vars} };\n`;
     }
   }
   code += "}\n";
