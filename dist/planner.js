@@ -1123,11 +1123,12 @@ ${RETRY_HINT}
         let scoreViolations = 0;
         for (const fn of chosenFuncs) {
             const actualScore = scoredFuncs.get(fn) || 0;
-            const maxScore = Math.max(...[...scoredFuncs.values()]);
+            const allScores = [...scoredFuncs.values()].filter((s) => typeof s === "number" && s > 0);
+            const maxScore = allScores.length > 0 ? Math.max(...allScores) : 0;
             if (maxScore > 0 && actualScore < maxScore * 0.3 && maxScore > 1) {
                 scoreViolations++;
                 const better = [...scoredFuncs.entries()]
-                    .filter(([_, s]) => s > actualScore * 2)
+                    .filter(([_, s]) => typeof s === "number" && s > actualScore * 2)
                     .sort((a, b) => b[1] - a[1])
                     .slice(0, 3).map(([n, s]) => `${n}(${s.toFixed(1)})`).join(", ");
                 console.error(`⚠️ 评分偏低: ${fn}(${actualScore.toFixed(1)}) 被选中, 但更高分函数可用: ${better}`);
