@@ -1708,7 +1708,9 @@
         "filter",
         "includes",
         "map",
-        "convert"
+        "convert",
+        "find",
+        "reverse"
       ],
       "exported": true,
       "inputs": [
@@ -4014,6 +4016,74 @@
       "tags": [
         "immune",
         "reporter"
+      ]
+    },
+    {
+      "name": "countExported",
+      "params": [
+        {
+          "name": "ir",
+          "type": "any[]",
+          "typeDetail": "any[]"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/ir-utils.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "number"
+      ],
+      "purpose": "Count exported functions in an IR function list.",
+      "requires": [
+        "IR_FUNCTIONS"
+      ],
+      "produces": [
+        "EXPORT_COUNT"
+      ],
+      "tags": [
+        "ir",
+        "count",
+        "export"
+      ]
+    },
+    {
+      "name": "mergeResults",
+      "params": [
+        {
+          "name": "a",
+          "type": "any",
+          "typeDetail": "any"
+        },
+        {
+          "name": "b",
+          "type": "any",
+          "typeDetail": "any"
+        }
+      ],
+      "returnType": "{ first: any; second: any }",
+      "returnTypeDetail": "{ first: any; second: any }",
+      "file": "src/ir-utils.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "{ first: any; second: any }"
+      ],
+      "purpose": "Merge two results into a combined object.",
+      "requires": [
+        "RESULT_A"
+      ],
+      "produces": [
+        "MERGED_RESULT"
+      ],
+      "tags": [
+        "merge",
+        "combine"
       ]
     },
     {
