@@ -142,9 +142,18 @@ export function emitCode(
     if (action.kind === "call" && action.args) {
       for (const arg of action.args) {
         const v = typeof arg === "object" ? arg?.value : arg;
+        const n = typeof arg === "object" ? arg?.name : undefined;
         const t = typeof arg === "object" ? arg?.type : "string";
+        // Variable reference: value matches input name
         if (typeof v === "string" && inputs.includes(v) && t && t !== "any") {
           inputTypes.set(v, t);
+        }
+        // Empty default: param name matches input name
+        const isDefault = v === "" || v === 0 || v === false || v === null
+          || (Array.isArray(v) && v.length === 0);
+        if (isDefault && n && inputs.includes(n)) {
+          const cleanType = (t || "string").replace(/\[\]$/, "");
+          if (!inputTypes.has(n)) inputTypes.set(n, cleanType);
         }
       }
     }
