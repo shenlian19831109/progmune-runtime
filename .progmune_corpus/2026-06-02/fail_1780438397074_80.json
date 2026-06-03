@@ -1,0 +1,44 @@
+{
+  "intent": "get failure genome and antibody statistics, return both",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "symbol_existence",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "getFailureGenome",
+      "args": [],
+      "assignTo": "failureGenome"
+    },
+    {
+      "kind": "call",
+      "function": "getAntibodyStats",
+      "args": [],
+      "assignTo": "antibodyStats"
+    },
+    {
+      "kind": "call",
+      "function": "return",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ]
+    }
+  ],
+  "errorDetail": "函数 'return' 不存在",
+  "ssgMissingFunctions": [
+    "return"
+  ],
+  "plannerAttempt": 2,
+  "plannerRetryTotal": 3,
+  "id": "fail_1780438397074_80",
+  "timestamp": "2026-06-02T22:13:17.074Z"
+}
