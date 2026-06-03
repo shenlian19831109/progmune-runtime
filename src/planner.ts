@@ -464,7 +464,7 @@ export async function plan(userIntent: string): Promise<PlanResult> {
   // 提前加载协议（后续多处使用）
   const { protocols, namespaceInitialStates } = loadProtocols(ir);
 
-  // 抗体免疫快速通道：查询高置信度抗体（ACL-3+），匹配则约束或跳过 LLM
+  // ── 抗体免疫系统：查询历史失败模式，注入知识回流 ──
   const antibodies = queryAntibodies(userIntent, "ACL-3");
   let antibodyHint = "";
   if (antibodies.length > 0) {
@@ -473,7 +473,7 @@ export async function plan(userIntent: string): Promise<PlanResult> {
     console.error(`🛡️  命中抗体: ${aclLabel} | 模式: ${top.signature} | 相似度: ${(top as any)._score.toFixed(2)}`);
     console.error(`   修复路径: ${top.fixPath.join(" → ")}`);
 
-    // ACL-4: 全局稳定抗体 → 直接构建动作序列，跳过 LLM
+    // L2: ACL-4 全局稳定抗体 → 快速通道，绕过 LLM
     if (aclLabel === "ACL-4" && top.fixPath.length > 0) {
       const antibodyActions: Action[] = top.fixPath.map((fnName: string) => {
         const def = ir.find((f: any) => f.name === fnName);
@@ -568,9 +568,24 @@ export async function plan(userIntent: string): Promise<PlanResult> {
       }
     }
 
-    // ACL-3: 注入修复路径作为提示约束
-    antibodyHint = `\n已知正确调用顺序: ${top.fixPath.join(" → ")}。请遵循此顺序。`;
-    console.error(`💉 ACL-3 抗体注入提示: ${top.fixPath.join(" → ")}`);
+    // L1: ACL-3 抗体注入提示 — 知识回流到 Planner
+    const hints: string[] = [];
+    for (let i = 0; i < Math.min(antibodies.length, 3); i++) {
+      const ab = antibodies[i];
+      const level = ab.antibodyLevel;
+      const sig = ab.signature;
+      const count = ab.occurrenceCount;
+      const fix = ab.fixPath.join(" → ");
+      // 为每种违规类型生成具体的避错指南
+      const avoidance = sig.includes("F07") ? "确保在调用 .map/.filter 前检查对象是否为数组，使用 (obj || [])"
+        : sig.includes("SVL-1") ? "只使用可用函数列表中的函数名，禁止编造"
+        : sig.includes("SVL-2") ? `检查函数参数类型是否与 IR 签名一致`
+        : sig.includes("SVL-4") ? `严格遵循 SSG 协议状态顺序：${fix}`
+        : `避免此模式：${sig}`;
+      hints.push(`${i + 1}. [${level}] ${sig}（累计 ${count} 次）→ ${avoidance}`);
+    }
+    antibodyHint = `\n\n⚠️ 免疫系统警告（来自 ${antibodies.length} 条历史抗体记录）：\n${hints.join("\n")}\n请避免上述已知错误模式。`;
+    console.error(`💉 L1 抗体注入: ${antibodies.length} 条抗体 → ${hints.length} 条注入提示`);
   }
 
   const keywords = extractKeywords(userIntent);
@@ -754,7 +769,7 @@ ${RETRY_HINT}
     }
     if (!rawActions || !Array.isArray(rawActions) || rawActions.length === 0) {
       console.error("⚠️ 解析失败，重试...");
-      currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}\n\n上一次输出无效。请严格输出 JSON 数组。\n${RETRY_HINT}\n只输出 JSON。`;
+      currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}${antibodyHint}\n\n上一次输出无效。请严格输出 JSON 数组。\n${RETRY_HINT}\n只输出 JSON。`;
       useSystem = false;
       continue;
     }
@@ -779,7 +794,7 @@ ${RETRY_HINT}
     const schemaCheck = validateActionSchema(rawActions);
     if (!schemaCheck.valid) {
       console.error("⚠️ JSON schema 校验失败:", schemaCheck.errors.join("; "));
-      currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}\n\n输出格式错误：${schemaCheck.errors.join("；")}。请修正 JSON 结构。\n${RETRY_HINT}\n只输出 JSON。`;
+      currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}${antibodyHint}\n\n输出格式错误：${schemaCheck.errors.join("；")}。请修正 JSON 结构。\n${RETRY_HINT}\n只输出 JSON。`;
       useSystem = false;
       const schemaViolation: ConstraintViolation = {
         svl: 1,
@@ -914,7 +929,7 @@ ${RETRY_HINT}
       const specificErrors = preCheckErrors.length > 0
         ? `精确错误:\n${preCheckErrors.map(e => `  - ${e}`).join("\n")}`
         : `错误：${errorsFlat.join("；")}`;
-      currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}\n\n${specificErrors}\n请修正上述问题。\n${RETRY_HINT}\n只输出 JSON。`;
+      currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}${antibodyHint}\n\n${specificErrors}\n请修正上述问题。\n${RETRY_HINT}\n只输出 JSON。`;
       useSystem = false;
       saveCheckpoint(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });
       continue;
@@ -1023,7 +1038,7 @@ ${RETRY_HINT}
         }
 
         const maskedFuncList = getMaskedFuncList();
-        currentPrompt = `当前协议状态只允许以下函数：\n${maskedFuncList}${protocolChainHint}\n\n需求：${userIntent}\n\n协议违规：${explain.replace(/\n/g, '；')}。请修正。\n${RETRY_HINT}\n只输出 JSON。`;
+        currentPrompt = `当前协议状态只允许以下函数：\n${maskedFuncList}${protocolChainHint}\n\n需求：${userIntent}${antibodyHint}\n\n协议违规：${explain.replace(/\n/g, '；')}。请修正。\n${RETRY_HINT}\n只输出 JSON。`;
         useSystem = false;
         saveCheckpoint(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });
         continue;
@@ -1074,7 +1089,7 @@ ${RETRY_HINT}
         plannerRetryTotal: maxRetries,
       });
       recordEpisode({ intent: userIntent, actions: filtered, success: false, svlViolated: "SVL-4" });
-      currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}\n\n语义错误：${semResult.errors.join("；")}。请修正。\n${RETRY_HINT}\n只输出 JSON。`;
+      currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}${antibodyHint}\n\n语义错误：${semResult.errors.join("；")}。请修正。\n${RETRY_HINT}\n只输出 JSON。`;
       useSystem = false;
       saveCheckpoint(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });
       continue;
@@ -1097,7 +1112,7 @@ ${RETRY_HINT}
     if (emptyArgs.length > 0 && r < maxRetries - 1) {
       const argDetails = emptyArgs.map(e => `  ${e.fn}() 参数 "${e.param}" (${e.type}) 是空值`).join("\n");
       console.error(`🔍 检测到 ${emptyArgs.length} 个空参数，启动精炼...`);
-      currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}\n\n上一次生成的 JSON 中以下参数为空值：\n${argDetails}\n\n请为这些参数填入有意义的示例值（字符串用描述性值，数字用合理数值，对象用 {} as Type）。\n${RETRY_HINT}\n只输出 JSON。`;
+      currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}${antibodyHint}\n\n上一次生成的 JSON 中以下参数为空值：\n${argDetails}\n\n请为这些参数填入有意义的示例值（字符串用描述性值，数字用合理数值，对象用 {} as Type）。\n${RETRY_HINT}\n只输出 JSON。`;
       useSystem = false;
       continue;
     }
