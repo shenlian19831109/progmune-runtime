@@ -4493,6 +4493,134 @@
       ]
     },
     {
+      "name": "countTotalTransitions",
+      "params": [
+        {
+          "name": "sessions",
+          "type": "any[]",
+          "typeDetail": "any[]"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/ledger-utils.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "number"
+      ],
+      "purpose": "Count total transitions across all session ledgers.",
+      "requires": [
+        "SESSION_LIST"
+      ],
+      "produces": [
+        "TRANSITION_COUNT"
+      ],
+      "tags": [
+        "ledger",
+        "count",
+        "statistics"
+      ]
+    },
+    {
+      "name": "formatTransitionCount",
+      "params": [
+        {
+          "name": "count",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/ledger-utils.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "number"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Format a transition count as a summary string.",
+      "requires": [
+        "TRANSITION_COUNT"
+      ],
+      "produces": [
+        "FORMATTED_COUNT"
+      ],
+      "tags": [
+        "ledger",
+        "format"
+      ]
+    },
+    {
+      "name": "hasViolations",
+      "params": [
+        {
+          "name": "session",
+          "type": "any",
+          "typeDetail": "any"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/ledger-utils.ts",
+      "calls": [
+        "some"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "boolean"
+      ],
+      "purpose": "Check if a session has any protocol violations in its attempts.",
+      "requires": [
+        "SESSION_DATA"
+      ],
+      "produces": [
+        "VIOLATION_CHECK"
+      ],
+      "tags": [
+        "ledger",
+        "validation"
+      ]
+    },
+    {
+      "name": "countSessionsWithViolations",
+      "params": [
+        {
+          "name": "sessions",
+          "type": "any[]",
+          "typeDetail": "any[]"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/ledger-utils.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "number"
+      ],
+      "purpose": "Count sessions that have violations.",
+      "requires": [
+        "SESSION_LIST"
+      ],
+      "produces": [
+        "VIOLATION_COUNT"
+      ],
+      "tags": [
+        "ledger",
+        "validation",
+        "statistics"
+      ]
+    },
+    {
       "name": "resetCallCount",
       "params": [],
       "returnType": "any",

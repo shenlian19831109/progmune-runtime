@@ -1,0 +1,51 @@
+{
+  "intent": "get all sessions, count transitions, count violations, return both counts",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "schema",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "getAllSessions",
+      "args": [],
+      "assignTo": "sessions"
+    },
+    {
+      "kind": "call",
+      "function": "countTotalTransitions",
+      "args": [
+        {
+          "name": "sessions",
+          "type": "any[]",
+          "value": "$sessions"
+        }
+      ],
+      "assignTo": "transitions"
+    },
+    {
+      "kind": "call",
+      "function": "countSessionsWithViolations",
+      "args": [
+        {
+          "name": "sessions",
+          "type": "any[]",
+          "value": "$sessions"
+        }
+      ],
+      "assignTo": "violations"
+    },
+    {
+      "kind": "return",
+      "value": "transitions"
+    },
+    {
+      "kind": "return",
+      "value": "violations"
+    }
+  ],
+  "errorDetail": "action[3]: return should be the last action (actions after return are unreachable)",
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 2,
+  "id": "fail_1780470626942_83",
+  "timestamp": "2026-06-03T07:10:26.942Z"
+}
