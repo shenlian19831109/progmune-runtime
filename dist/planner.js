@@ -117,17 +117,37 @@ function buildCompactFuncList(funcs, allFuncs) {
         return line;
     }).join("\n");
 }
+/** Semantic matching: check if two capability labels are related.
+ *  Uses exact match, substring, and Jaccard similarity. */
+function semanticMatch(a, b) {
+    if (a === b)
+        return true;
+    if (a.includes(b) || b.includes(a))
+        return true;
+    // Fuzzy: shared word prefix (e.g. FAILURE_LIST ↔ FAILURE_DATA)
+    const aWords = a.split("_");
+    const bWords = b.split("_");
+    const shared = aWords.filter(w => bWords.some(bw => bw.includes(w) || w.includes(bw)));
+    return shared.length >= 1 && aWords.length <= 3 && bWords.length <= 3;
+}
 /** Build capability chain hints from IR: producer→consumer relationships.
- *  e.g. "failureStats → formatFailureStats (FAILURE_STATS)" */
+ *  Uses semantic matching for fuzzy capability linking. */
 function buildChainHints(funcs) {
     const chains = [];
+    const seen = new Set();
     for (const f of funcs) {
         if (!f.produces)
             continue;
         for (const p of f.produces) {
-            const consumers = funcs.filter((x) => x.requires?.includes(p) && x.name !== f.name);
+            const consumers = funcs.filter((x) => x.name !== f.name &&
+                (x.requires || []).some((r) => semanticMatch(p, r)));
             for (const c of consumers) {
-                chains.push(`${f.name}()→${c.name}()  // ${p}`);
+                const key = `${f.name}→${c.name}`;
+                if (seen.has(key))
+                    continue;
+                seen.add(key);
+                const matchedReq = (c.requires || []).find((r) => semanticMatch(p, r));
+                chains.push(`${f.name}()→${c.name}()  // ${p} ≈ ${matchedReq || "?"}`);
             }
         }
     }
@@ -690,17 +710,33 @@ async function plan(userIntent) {
                     score += 0.3;
             }
         }
-        // Capability Graph: requires/produces capability matching
+        // Capability Graph: semantic requires/produces matching
         if (f.produces) {
             for (const p of f.produces) {
-                if (intentLower.includes(p.toLowerCase().replace(/_/g, " ")))
+                const pText = p.toLowerCase().replace(/_/g, " ");
+                // Exact match
+                if (intentLower.includes(pText)) {
                     score += 1.5;
+                    continue;
+                }
+                // Semantic: word overlap
+                const pWords = pText.split(/\s+/);
+                const matchCount = pWords.filter(w => intentLower.includes(w)).length;
+                if (matchCount > 0)
+                    score += matchCount * 0.5;
             }
         }
         if (f.requires) {
             for (const r of f.requires) {
-                if (intentLower.includes(r.toLowerCase().replace(/_/g, " ")))
+                const rText = r.toLowerCase().replace(/_/g, " ");
+                if (intentLower.includes(rText)) {
                     score += 0.5;
+                    continue;
+                }
+                const rWords = rText.split(/\s+/);
+                const matchCount = rWords.filter(w => intentLower.includes(w)).length;
+                if (matchCount > 0)
+                    score += matchCount * 0.2;
             }
         }
         // Capability Graph: tag match
