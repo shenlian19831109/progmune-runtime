@@ -176,11 +176,22 @@ export function selectCapabilityChains(
   let seeds = [...graph.values()]
     .filter(n => n.score > dynamicThreshold && (n.produces.length > 0 || n.score > dynamicThreshold + 2))
     .sort((a, b) => b.score - a.score);
-  if (seeds.length === 0 && dynamicThreshold > 0.5) {
+  if (seeds.length === 0 && dynamicThreshold > 0.3) {
     dynamicThreshold *= 0.5;
     seeds = [...graph.values()]
       .filter(n => n.score > dynamicThreshold && (n.produces.length > 0 || n.score > dynamicThreshold + 1))
       .sort((a, b) => b.score - a.score);
+  }
+  // Best-effort fallback: when no keyword matches at all, try nodes with capability edges
+  if (seeds.length === 0) {
+    seeds = [...graph.values()]
+      .filter(n => n.produces.length > 0 || n.requires.length > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5);
+  }
+  // Ultimate fallback: just take any exported nodes
+  if (seeds.length === 0) {
+    seeds = [...graph.values()].slice(0, 3);
   }
   seeds = seeds.slice(0, graph.size > 500 ? 30 : 15);
 
