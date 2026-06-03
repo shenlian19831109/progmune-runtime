@@ -1,589 +1,98 @@
 [
   {
-    "intent": "get all failures filtered by SVL-4",
+    "intent": "validate a semantic version string and return its major, minor, and patch components",
     "actions": [
       {
         "kind": "call",
-        "function": "getAllFailures",
-        "args": [],
-        "assignTo": "allFailures"
-      },
-      {
-        "kind": "call",
-        "function": "getFailuresBySVL",
+        "function": "extractIRWithTypes",
         "args": [
           {
-            "name": "level",
-            "type": "SVL",
-            "value": "SVL-4"
-          }
-        ],
-        "assignTo": "filtered"
-      },
-      {
-        "kind": "return",
-        "value": "filtered"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780434396429",
-    "timestamp": "2026-06-02T21:06:36.429Z"
-  },
-  {
-    "intent": "get all failures filtered by SVL-4",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllFailures",
-        "args": [],
-        "assignTo": "failures"
-      },
-      {
-        "kind": "call",
-        "function": "getFailuresBySVL",
-        "args": [
-          {
-            "name": "level",
-            "type": "SVL",
-            "value": "SVL-4"
-          }
-        ],
-        "assignTo": "filtered"
-      },
-      {
-        "kind": "return",
-        "value": "filtered"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780434260916",
-    "timestamp": "2026-06-02T21:04:20.916Z"
-  },
-  {
-    "intent": "get all failures filtered by SVL-4",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllFailures",
-        "args": [],
-        "assignTo": "failures"
-      },
-      {
-        "kind": "call",
-        "function": "getFailuresBySVL",
-        "args": [
-          {
-            "name": "level",
-            "type": "SVL",
-            "value": "SVL-4"
-          }
-        ],
-        "assignTo": "filtered"
-      },
-      {
-        "kind": "return",
-        "value": "filtered"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780434206016",
-    "timestamp": "2026-06-02T21:03:26.016Z"
-  },
-  {
-    "intent": "get all failures filtered by SVL-4",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllFailures",
-        "args": [],
-        "assignTo": "allFailures"
-      },
-      {
-        "kind": "call",
-        "function": "getFailuresBySVL",
-        "args": [
-          {
-            "name": "level",
-            "type": "SVL",
-            "value": "SVL-4"
-          }
-        ],
-        "assignTo": "filtered"
-      },
-      {
-        "kind": "return",
-        "value": "filtered"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780433850077",
-    "timestamp": "2026-06-02T20:57:30.077Z"
-  },
-  {
-    "intent": "get all failures filtered by SVL-4",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllFailures",
-        "args": [],
-        "assignTo": "failures"
-      },
-      {
-        "kind": "call",
-        "function": "getFailuresBySVL",
-        "args": [
-          {
-            "name": "level",
-            "type": "SVL",
-            "value": "SVL-4"
-          }
-        ],
-        "assignTo": "filtered"
-      },
-      {
-        "kind": "return",
-        "value": "filtered"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780433533091",
-    "timestamp": "2026-06-02T20:52:13.091Z"
-  },
-  {
-    "intent": "get all failures filtered by SVL-4",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllFailures",
-        "args": [],
-        "assignTo": "failures"
-      },
-      {
-        "kind": "call",
-        "function": "getFailuresBySVL",
-        "args": [
-          {
-            "name": "level",
-            "type": "SVL",
-            "value": "SVL-4"
-          }
-        ],
-        "assignTo": "filtered"
-      },
-      {
-        "kind": "return",
-        "value": "filtered"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780433413274",
-    "timestamp": "2026-06-02T20:50:13.274Z"
-  },
-  {
-    "intent": "get all failures filtered by SVL-4",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllFailures",
-        "args": [],
-        "assignTo": "failures"
-      },
-      {
-        "kind": "call",
-        "function": "getFailuresBySVL",
-        "args": [
-          {
-            "name": "level",
-            "type": "SVL",
-            "value": "SVL-4"
-          }
-        ],
-        "assignTo": "filtered"
-      },
-      {
-        "kind": "return",
-        "value": "filtered"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780433245922",
-    "timestamp": "2026-06-02T20:47:25.922Z"
-  },
-  {
-    "intent": "get all failures and filter by SVL-4",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllFailures",
-        "args": [],
-        "assignTo": "allFailures"
-      },
-      {
-        "kind": "call",
-        "function": "getFailuresBySVL",
-        "args": [
-          {
-            "name": "level",
-            "type": "SVL",
-            "value": "SVL-4"
-          }
-        ],
-        "assignTo": "filteredFailures"
-      },
-      {
-        "kind": "return",
-        "value": "filteredFailures"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780433031113",
-    "timestamp": "2026-06-02T20:43:51.113Z"
-  },
-  {
-    "intent": "get all failures and filter by SVL-4 violations",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllFailures",
-        "args": [],
-        "assignTo": "failures"
-      },
-      {
-        "kind": "call",
-        "function": "getFailuresBySVL",
-        "args": [
-          {
-            "name": "level",
-            "type": "SVL",
-            "value": "SVL-4"
-          }
-        ],
-        "assignTo": "filtered"
-      },
-      {
-        "kind": "return",
-        "value": "filtered"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780432757402",
-    "timestamp": "2026-06-02T20:39:17.403Z"
-  },
-  {
-    "intent": "get all failures and filter by SVL level",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllFailures",
-        "args": [],
-        "assignTo": "failures"
-      },
-      {
-        "kind": "call",
-        "function": "getFailuresBySVL",
-        "args": [
-          {
-            "name": "level",
-            "type": "SVL",
-            "value": "failures"
-          }
-        ],
-        "assignTo": "filtered"
-      },
-      {
-        "kind": "return",
-        "value": "filtered"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780432223680",
-    "timestamp": "2026-06-02T20:30:23.680Z"
-  },
-  {
-    "intent": "suggest repairs for violations and get the minimal fix set",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "suggestRepairs",
-        "args": [
-          {
-            "name": "violations",
-            "type": "ConstraintViolation[]",
-            "value": "violations"
-          },
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "ir"
-          },
-          {
-            "name": "protocols",
-            "type": "FunctionProtocol[]",
-            "value": "protocols"
-          }
-        ],
-        "assignTo": "proposals"
-      },
-      {
-        "kind": "call",
-        "function": "getMinimalFixSet",
-        "args": [
-          {
-            "name": "proposals",
-            "type": "RepairProposal[]",
-            "value": "proposals"
-          }
-        ],
-        "assignTo": "minimalFixSet"
-      },
-      {
-        "kind": "return",
-        "value": "minimalFixSet"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780431788047",
-    "timestamp": "2026-06-02T20:23:08.047Z"
-  },
-  {
-    "intent": "get the protocol config and check the rule hash",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getProtocolConfig",
-        "args": [],
-        "assignTo": "config"
-      },
-      {
-        "kind": "call",
-        "function": "getRuleHash",
-        "args": [],
-        "assignTo": "hash"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780431763974",
-    "timestamp": "2026-06-02T20:22:43.974Z"
-  },
-  {
-    "intent": "replay a session and return the result",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "replaySession",
-        "args": [
-          {
-            "name": "sessionId",
+            "name": "projectRoot",
             "type": "string",
-            "value": null
-          },
-          {
-            "name": "currentRules",
-            "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>",
-            "value": null
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": null
+            "value": ""
           }
         ],
-        "assignTo": "result"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780431740828",
-    "timestamp": "2026-06-02T20:22:20.828Z"
-  },
-  {
-    "intent": "load all failures and format the failure statistics",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "loadFailures",
-        "args": [],
-        "assignTo": "failures"
-      },
-      {
-        "kind": "call",
-        "function": "failureStats",
-        "args": [],
-        "assignTo": "stats"
-      },
-      {
-        "kind": "call",
-        "function": "formatFailureStats",
-        "args": [],
-        "assignTo": "report"
+        "assignTo": "ir"
       },
       {
         "kind": "return",
-        "value": "report"
+        "value": "ir"
       }
     ],
     "success": true,
-    "id": "ep_1780431715103",
-    "timestamp": "2026-06-02T20:21:55.103Z"
+    "id": "ep_1780480501112",
+    "timestamp": "2026-06-03T09:55:01.112Z"
   },
   {
-    "intent": "get failure statistics and format a report",
+    "intent": "create a simple logger that writes timestamped messages to a file",
     "actions": [
       {
         "kind": "call",
-        "function": "failureStats",
-        "args": [],
-        "assignTo": "stats"
-      },
-      {
-        "kind": "call",
-        "function": "formatFailureStats",
-        "args": [],
-        "assignTo": "report"
+        "function": "createRootBranch",
+        "args": [
+          {
+            "name": "transitions",
+            "type": "StateTransition[]",
+            "value": []
+          }
+        ],
+        "assignTo": "branch"
       },
       {
         "kind": "return",
-        "value": "report"
+        "value": "branch"
       }
     ],
     "success": true,
-    "id": "ep_1780431629920",
-    "timestamp": "2026-06-02T20:20:29.920Z"
+    "id": "ep_1780480472828",
+    "timestamp": "2026-06-03T09:54:32.828Z"
   },
   {
-    "intent": "get all sessions, get the failure genome, and return a combined health report",
+    "intent": "extract all function names from a TypeScript source file",
     "actions": [
       {
         "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "getFailureGenome",
-        "args": [],
-        "assignTo": "failureGenome"
-      },
-      {
-        "kind": "call",
-        "function": "getSemanticHeatmap",
-        "args": [],
-        "assignTo": "heatmap"
-      },
-      {
-        "kind": "call",
-        "function": "getLearnedPatterns",
-        "args": [],
-        "assignTo": "patterns"
-      },
-      {
-        "kind": "call",
-        "function": "failureStats",
-        "args": [],
-        "assignTo": "stats"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780431338185",
-    "timestamp": "2026-06-02T20:15:38.185Z"
-  },
-  {
-    "intent": "get all sessions, get the failure genome, and return a combined health report",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "getFailureGenome",
-        "args": [],
-        "assignTo": "genome"
+        "function": "extractDirectCalls",
+        "args": [
+          {
+            "name": "func",
+            "type": "FunctionDeclaration | ArrowFunction",
+            "value": {}
+          }
+        ],
+        "assignTo": "calls"
       },
       {
         "kind": "return",
-        "value": "combinedHealthReport"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-3",
-    "id": "ep_1780431336985",
-    "timestamp": "2026-06-02T20:15:36.985Z"
-  },
-  {
-    "intent": "get antibody stats",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAntibodyStats",
-        "args": [],
-        "assignTo": "stats"
-      },
-      {
-        "kind": "return",
-        "value": "stats"
+        "value": "calls"
       }
     ],
     "success": true,
-    "id": "ep_1780431283534",
-    "timestamp": "2026-06-02T20:14:43.534Z"
+    "id": "ep_1780480448075",
+    "timestamp": "2026-06-03T09:54:08.075Z"
   },
   {
-    "intent": "get failure statistics",
+    "intent": "read a JSON file, merge it with a second JSON file, and write the result",
     "actions": [
       {
         "kind": "call",
-        "function": "failureStats",
-        "args": [],
-        "assignTo": "stats"
+        "function": "extractIRWithTypes",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "ir"
       }
     ],
     "success": true,
-    "id": "ep_1780431282220",
-    "timestamp": "2026-06-02T20:14:42.220Z"
+    "id": "ep_1780480414287",
+    "timestamp": "2026-06-03T09:53:34.287Z"
   },
   {
-    "intent": "get all sessions",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780431280822",
-    "timestamp": "2026-06-02T20:14:40.822Z"
-  },
-  {
-    "intent": "get failure statistics",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "failureStats",
-        "args": [],
-        "assignTo": "stats"
-      },
-      {
-        "kind": "return",
-        "value": "stats"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780431095701",
-    "timestamp": "2026-06-02T20:11:35.701Z"
-  },
-  {
-    "intent": "watch a directory for changes and log new files",
+    "intent": "count how many TypeScript files exist in a directory recursively",
     "actions": [
       {
         "kind": "call",
@@ -592,39 +101,80 @@
           {
             "name": "dir",
             "type": "string",
-            "value": "."
+            "value": ""
           },
           {
             "name": "threshold",
             "type": "any",
-            "value": 0
+            "value": {}
           }
         ],
         "assignTo": "auditResult"
       },
       {
-        "kind": "call",
-        "function": "formatAuditResult",
-        "args": [
-          {
-            "name": "result",
-            "type": "AuditResult",
-            "value": "auditResult"
-          }
-        ],
-        "assignTo": "formatted"
-      },
-      {
         "kind": "return",
-        "value": "formatted"
+        "value": "auditResult"
       }
     ],
     "success": true,
-    "id": "ep_1780430799555",
-    "timestamp": "2026-06-02T20:06:39.555Z"
+    "id": "ep_1780480392040",
+    "timestamp": "2026-06-03T09:53:12.040Z"
   },
   {
-    "intent": "download a file from a URL and save it to disk",
+    "intent": "create a simple task queue that processes tasks one at a time in order",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "createRootBranch",
+        "args": [
+          {
+            "name": "transitions",
+            "type": "StateTransition[]",
+            "value": []
+          }
+        ],
+        "assignTo": "branch"
+      },
+      {
+        "kind": "return",
+        "value": "branch"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780480366994",
+    "timestamp": "2026-06-03T09:52:46.994Z"
+  },
+  {
+    "intent": "generate a basic HTTP server that serves static files from a directory",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "server",
+        "args": [
+          {
+            "name": "req",
+            "type": "any",
+            "value": {}
+          },
+          {
+            "name": "res",
+            "type": "any",
+            "value": {}
+          }
+        ],
+        "assignTo": "s"
+      },
+      {
+        "kind": "return",
+        "value": "s"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780480336746",
+    "timestamp": "2026-06-03T09:52:16.746Z"
+  },
+  {
+    "intent": "create a simple event emitter with on, off, and emit methods",
     "actions": [
       {
         "kind": "call",
@@ -633,7 +183,7 @@
           {
             "name": "projectRoot",
             "type": "string",
-            "value": "."
+            "value": ""
           }
         ],
         "assignTo": "ir"
@@ -645,7 +195,7 @@
           {
             "name": "action",
             "type": "Action",
-            "value": "download"
+            "value": "ir"
           },
           {
             "name": "actionIndex",
@@ -653,7 +203,7 @@
             "value": ""
           }
         ],
-        "assignTo": "valid"
+        "assignTo": "validated"
       },
       {
         "kind": "call",
@@ -662,10 +212,10 @@
           {
             "name": "actions",
             "type": "Action[]",
-            "value": "ir"
+            "value": "validated"
           }
         ],
-        "assignTo": "seqValid"
+        "assignTo": "sequenceValidated"
       },
       {
         "kind": "call",
@@ -674,12 +224,17 @@
           {
             "name": "actions",
             "type": "Action[]",
-            "value": "ir"
+            "value": "sequenceValidated"
           },
           {
             "name": "meta",
             "type": "{ sessionId?: string; ruleHash?: string; irFunctionCount?: number; protocolRuleCount?: number }",
-            "value": ""
+            "value": {
+              "sessionId": "",
+              "ruleHash": "",
+              "irFunctionCount": 0,
+              "protocolRuleCount": 0
+            }
           }
         ],
         "assignTo": "code"
@@ -691,7 +246,7 @@
           {
             "name": "session",
             "type": "ExecutionSession | Omit<IntentSession, \"sessionId\">",
-            "value": "code"
+            "value": ""
           }
         ],
         "assignTo": "session"
@@ -702,11 +257,11 @@
       }
     ],
     "success": true,
-    "id": "ep_1780430774582",
-    "timestamp": "2026-06-02T20:06:14.582Z"
+    "id": "ep_1780480302339",
+    "timestamp": "2026-06-03T09:51:42.339Z"
   },
   {
-    "intent": "schedule a task to run every 5 minutes",
+    "intent": "fetch data from a URL, parse the JSON response, and handle errors",
     "actions": [
       {
         "kind": "call",
@@ -715,10 +270,46 @@
           {
             "name": "projectRoot",
             "type": "string",
-            "value": "."
+            "value": ""
           }
         ],
         "assignTo": "ir"
+      },
+      {
+        "kind": "return",
+        "value": "ir"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780480259030",
+    "timestamp": "2026-06-03T09:50:59.030Z"
+  },
+  {
+    "intent": "read a JSON config file, validate its structure, and return the parsed config",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "parseActionJSON",
+        "args": [
+          {
+            "name": "text",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "parsedConfig"
+      },
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "extractIR_result"
       },
       {
         "kind": "call",
@@ -727,92 +318,327 @@
           {
             "name": "action",
             "type": "Action",
-            "value": "schedule_task"
+            "value": ""
           },
           {
             "name": "actionIndex",
             "type": "number",
-            "value": ""
+            "value": 0
           }
         ],
-        "assignTo": "va"
-      },
-      {
-        "kind": "call",
-        "function": "validateActionSequence",
-        "args": [
-          {
-            "name": "actions",
-            "type": "Action[]",
-            "value": "ir"
-          }
-        ],
-        "assignTo": "ok"
-      },
-      {
-        "kind": "call",
-        "function": "emitCode",
-        "args": [
-          {
-            "name": "actions",
-            "type": "Action[]",
-            "value": "ir"
-          },
-          {
-            "name": "meta",
-            "type": "{ sessionId?: string; ruleHash?: string; irFunctionCount?: number; protocolRuleCount?: number }",
-            "value": ""
-          }
-        ],
-        "assignTo": "code"
-      },
-      {
-        "kind": "call",
-        "function": "recordSession",
-        "args": [
-          {
-            "name": "session",
-            "type": "ExecutionSession | Omit<IntentSession, \"sessionId\">",
-            "value": "code"
-          }
-        ],
-        "assignTo": "session"
+        "assignTo": "validationResult"
       },
       {
         "kind": "return",
-        "value": "session"
+        "value": "validationResult"
       }
     ],
     "success": true,
-    "id": "ep_1780430749119",
-    "timestamp": "2026-06-02T20:05:49.119Z"
+    "id": "ep_1780480229947",
+    "timestamp": "2026-06-03T09:50:29.947Z"
   },
   {
-    "intent": "encrypt a string using SHA256 and return the hex digest",
+    "intent": "read a JSON config file, validate its structure, and return the parsed config",
     "actions": [
       {
         "kind": "call",
-        "function": "digest",
+        "function": "parseActionJSON",
         "args": [
           {
-            "name": "encoding",
+            "name": "text",
             "type": "string",
-            "value": "hex"
+            "value": ""
           }
         ],
-        "assignTo": "hex"
+        "assignTo": "parsedConfig"
+      },
+      {
+        "kind": "call",
+        "function": "validateAction",
+        "args": [
+          {
+            "name": "action",
+            "type": "Action",
+            "value": ""
+          },
+          {
+            "name": "actionIndex",
+            "type": "number",
+            "value": 0
+          }
+        ],
+        "assignTo": "validationResult"
       },
       {
         "kind": "return",
-        "value": "hex"
+        "value": "validationResult"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-4",
+    "id": "ep_1780480229936",
+    "timestamp": "2026-06-03T09:50:29.936Z"
+  },
+  {
+    "intent": "encode an object as a URL query string",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "toQueryString",
+        "args": [
+          {
+            "name": "obj",
+            "type": "Record<string, any>",
+            "value": {}
+          }
+        ],
+        "assignTo": "qs"
+      },
+      {
+        "kind": "return",
+        "value": "qs"
       }
     ],
     "success": true,
-    "id": "ep_1780430725272",
-    "timestamp": "2026-06-02T20:05:25.272Z"
+    "id": "ep_1780480195645",
+    "timestamp": "2026-06-03T09:49:55.645Z"
   },
   {
-    "intent": "connect to a database and execute a SQL query",
+    "intent": "format a number of milliseconds into a human-readable duration string",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "formatDuration",
+        "args": [
+          {
+            "name": "ms",
+            "type": "number",
+            "value": 0
+          }
+        ],
+        "assignTo": "result"
+      },
+      {
+        "kind": "return",
+        "value": "result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780480167997",
+    "timestamp": "2026-06-03T09:49:27.997Z"
+  },
+  {
+    "intent": "create a simple cache with a maximum size that evicts the oldest entries",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "create",
+        "args": [],
+        "assignTo": "cache"
+      },
+      {
+        "kind": "return",
+        "value": "cache"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780480130122",
+    "timestamp": "2026-06-03T09:48:50.122Z"
+  },
+  {
+    "intent": "create a debounced version of a function that delays execution",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "debounce",
+        "args": [
+          {
+            "name": "fn",
+            "type": "T",
+            "value": null
+          },
+          {
+            "name": "delay",
+            "type": "number",
+            "value": 0
+          }
+        ],
+        "assignTo": "debouncedFn"
+      },
+      {
+        "kind": "return",
+        "value": "debouncedFn"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780480082219",
+    "timestamp": "2026-06-03T09:48:02.219Z"
+  },
+  {
+    "intent": "create a retry wrapper that retries a function call up to N times on failure",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "retry",
+        "args": [
+          {
+            "name": "fn",
+            "type": "() => Promise<T>",
+            "value": null
+          },
+          {
+            "name": "maxRetries",
+            "type": "number",
+            "value": null
+          }
+        ],
+        "assignTo": "retryResult"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780480035875",
+    "timestamp": "2026-06-03T09:47:15.875Z"
+  },
+  {
+    "intent": "generate a simple HTTP route handler that validates input and returns JSON",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "handler",
+        "args": [],
+        "assignTo": "result"
+      },
+      {
+        "kind": "return",
+        "value": "result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780480004241",
+    "timestamp": "2026-06-03T09:46:44.241Z"
+  },
+  {
+    "intent": "create a basic CRUD repository for a given entity type",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "create",
+        "args": [],
+        "assignTo": "repo"
+      },
+      {
+        "kind": "return",
+        "value": "repo"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780479978980",
+    "timestamp": "2026-06-03T09:46:18.980Z"
+  },
+  {
+    "intent": "generate a TypeScript interface definition from a sample JSON object",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "generateSessionId",
+        "args": [],
+        "assignTo": "sessionId"
+      },
+      {
+        "kind": "call",
+        "function": "generate",
+        "args": [
+          {
+            "name": "prompt",
+            "type": "string",
+            "value": "Generate a TypeScript interface definition from this sample JSON object: {\"name\":\"John\",\"age\":30,\"email\":\"john@example.com\"}"
+          }
+        ],
+        "assignTo": "llmResponse"
+      },
+      {
+        "kind": "return",
+        "value": "llmResponse"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780479954642",
+    "timestamp": "2026-06-03T09:45:54.642Z"
+  },
+  {
+    "intent": "validate that all required fields are present in an object",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "validateActionSchema",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": []
+          }
+        ],
+        "assignTo": "validationResult"
+      },
+      {
+        "kind": "return",
+        "value": "validationResult"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780479915465",
+    "timestamp": "2026-06-03T09:45:15.465Z"
+  },
+  {
+    "intent": "check if a value is a plain object and not an array or null",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "isValidEmail",
+        "args": [
+          {
+            "name": "str",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "result"
+      },
+      {
+        "kind": "return",
+        "value": "result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780479871749",
+    "timestamp": "2026-06-03T09:44:31.749Z"
+  },
+  {
+    "intent": "get the file size in a human-readable format like KB or MB",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "formatFileSize",
+        "args": [
+          {
+            "name": "bytes",
+            "type": "number",
+            "value": 0
+          }
+        ],
+        "assignTo": "formattedSize"
+      },
+      {
+        "kind": "return",
+        "value": "formattedSize"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780479842787",
+    "timestamp": "2026-06-03T09:44:02.787Z"
+  },
+  {
+    "intent": "list all files in a directory that match a pattern",
     "actions": [
       {
         "kind": "call",
@@ -821,63 +647,139 @@
           {
             "name": "dir",
             "type": "string",
-            "value": "{{dir}}"
+            "value": ""
           },
           {
             "name": "threshold",
             "type": "any",
-            "value": "{{threshold}}"
+            "value": {}
           }
         ],
-        "assignTo": "auditDirectory_result"
+        "assignTo": "auditResult"
       },
       {
-        "kind": "call",
-        "function": "parseProtocolFromJSDoc",
-        "args": [
-          {
-            "name": "node",
-            "type": "any",
-            "value": "{{node}}"
-          }
-        ],
-        "assignTo": "parseProtocolFromJSDoc_result"
-      },
+        "kind": "return",
+        "value": "auditResult"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780479814347",
+    "timestamp": "2026-06-03T09:43:34.347Z"
+  },
+  {
+    "intent": "create a directory path including all parent directories if they do not exist",
+    "actions": [
       {
         "kind": "call",
-        "function": "getTopFailurePatterns",
-        "args": [
-          {
-            "name": "limit",
-            "type": "number",
-            "value": "{{limit}}"
-          }
-        ],
-        "assignTo": "getTopFailurePatterns_result"
+        "function": "addSourceFileAtPathIfExists",
+        "args": [],
+        "assignTo": "result"
       },
       {
-        "kind": "call",
-        "function": "convertOldSession",
-        "args": [
-          {
-            "name": "old",
-            "type": "IntentSession",
-            "value": "{{old}}"
-          }
-        ],
-        "assignTo": "convertOldSession_result"
-      },
+        "kind": "return",
+        "value": "result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780479775999",
+    "timestamp": "2026-06-03T09:42:55.999Z"
+  },
+  {
+    "intent": "check if a file path has a specific file extension",
+    "actions": [
       {
         "kind": "call",
-        "function": "estimateTokens",
+        "function": "verifyFileMarker",
         "args": [
           {
-            "name": "text",
+            "name": "filePath",
             "type": "string",
-            "value": "{{text}}"
+            "value": ""
           }
         ],
-        "assignTo": "estimateTokens_result"
+        "assignTo": "markerResult"
+      },
+      {
+        "kind": "return",
+        "value": "markerResult"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780479743467",
+    "timestamp": "2026-06-03T09:42:23.467Z"
+  },
+  {
+    "intent": "read a file and return its contents as a string, with error handling",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "readdirSync",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "{{path}}"
+          }
+        ],
+        "assignTo": "readdirSync_result"
+      },
+      {
+        "kind": "call",
+        "function": "readFileSync",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "{{path}}"
+          },
+          {
+            "name": "encoding",
+            "type": "string",
+            "value": "{{encoding}}"
+          }
+        ],
+        "assignTo": "readFileSync_result"
+      },
+      {
+        "kind": "call",
+        "function": "verifyFileMarker",
+        "args": [
+          {
+            "name": "filePath",
+            "type": "string",
+            "value": "{{filePath}}"
+          }
+        ],
+        "assignTo": "verifyFileMarker_result"
+      },
+      {
+        "kind": "call",
+        "function": "deriveTagsFromFile",
+        "args": [
+          {
+            "name": "filePath",
+            "type": "string",
+            "value": "{{filePath}}"
+          }
+        ],
+        "assignTo": "deriveTagsFromFile_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractSignatureFromFile",
+        "args": [
+          {
+            "name": "name",
+            "type": "string",
+            "value": "{{name}}"
+          },
+          {
+            "name": "sf",
+            "type": "SourceFile",
+            "value": "{{sf}}"
+          }
+        ],
+        "assignTo": "extractSignatureFromFile_result"
       },
       {
         "kind": "call",
@@ -893,270 +795,43 @@
       },
       {
         "kind": "call",
-        "function": "loadProtocolsFromIR",
+        "function": "formatFileSize",
         "args": [
           {
-            "name": "ir",
-            "type": "any[]",
-            "value": "{{ir}}"
+            "name": "bytes",
+            "type": "number",
+            "value": "{{bytes}}"
           }
         ],
-        "assignTo": "loadProtocolsFromIR_result"
+        "assignTo": "formatFileSize_result"
       },
       {
         "kind": "call",
-        "function": "buildProtocolChainHint",
+        "function": "writeFileSync",
         "args": [
           {
-            "name": "protocols",
-            "type": "FunctionProtocol[]",
-            "value": "{{protocols}}"
-          }
-        ],
-        "assignTo": "buildProtocolChainHint_result"
-      },
-      {
-        "kind": "call",
-        "function": "loadProtocols",
-        "args": [
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "{{ir}}"
-          }
-        ],
-        "assignTo": "loadProtocols_result"
-      },
-      {
-        "kind": "call",
-        "function": "validateProtocolWithTransitions",
-        "args": [
-          {
-            "name": "actions",
-            "type": "Action[]",
-            "value": "{{actions}}"
-          },
-          {
-            "name": "protocols",
-            "type": "FunctionProtocol[]",
-            "value": "{{protocols}}"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "{{namespaceInitialStates}}"
-          }
-        ],
-        "assignTo": "validateProtocolWithTransitions_result"
-      },
-      {
-        "kind": "call",
-        "function": "invalidateProtocolCache",
-        "args": []
-      },
-      {
-        "kind": "call",
-        "function": "getProtocolConfig",
-        "args": [],
-        "assignTo": "getProtocolConfig_result"
-      },
-      {
-        "kind": "call",
-        "function": "toPythonModule",
-        "args": [
-          {
-            "name": "filePath",
+            "name": "path",
             "type": "string",
-            "value": "{{filePath}}"
-          }
-        ],
-        "assignTo": "toPythonModule_result"
-      },
-      {
-        "kind": "call",
-        "function": "suggestProtocolRepair",
-        "args": [
-          {
-            "name": "rejection",
-            "type": "SSGRejection",
-            "value": "{{rejection}}"
+            "value": "{{path}}"
           },
           {
-            "name": "ir",
-            "type": "any[]",
-            "value": "{{ir}}"
-          }
-        ],
-        "assignTo": "suggestProtocolRepair_result"
-      },
-      {
-        "kind": "call",
-        "function": "toSnapshot",
-        "args": [
-          {
-            "name": "stateMap",
-            "type": "Map<string, Set<string>>",
-            "value": "{{stateMap}}"
-          }
-        ],
-        "assignTo": "toSnapshot_result"
-      },
-      {
-        "kind": "call",
-        "function": "rejectionToJSON",
-        "args": [
-          {
-            "name": "rejection",
-            "type": "SSGRejection",
-            "value": "{{rejection}}"
-          }
-        ],
-        "assignTo": "rejectionToJSON_result"
-      },
-      {
-        "kind": "call",
-        "function": "parseProtocolsFromJSON",
-        "args": [
-          {
-            "name": "protocolDef",
-            "type": "{\n    rules: Record<string, {\n      pre_states: string[];\n      post_states: string[];\n      invalidate?: string[];\n      namespace?: string;\n    }>;\n  }",
-            "value": "{{protocolDef}}"
-          }
-        ],
-        "assignTo": "parseProtocolsFromJSON_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.setNamespaceInitialState",
-        "args": [
-          {
-            "name": "namespace",
+            "name": "data",
             "type": "string",
-            "value": "{{namespace}}"
-          },
-          {
-            "name": "state",
-            "type": "string",
-            "value": "{{state}}"
+            "value": "{{data}}"
           }
         ]
       },
       {
         "kind": "call",
-        "function": "StateMachineValidator.apply",
-        "args": [
-          {
-            "name": "functionName",
-            "type": "string",
-            "value": "{{functionName}}"
-          },
-          {
-            "name": "actionIndex",
-            "type": "number",
-            "value": "{{actionIndex}}"
-          }
-        ],
-        "assignTo": "StateMachineValidator.apply_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.applyWithTransition",
-        "args": [
-          {
-            "name": "functionName",
-            "type": "string",
-            "value": "{{functionName}}"
-          },
-          {
-            "name": "actionIndex",
-            "type": "number",
-            "value": "{{actionIndex}}"
-          }
-        ],
-        "assignTo": "StateMachineValidator.applyWithTransition_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.getCurrentStates",
+        "function": "getModuleSpecifierSourceFile",
         "args": [],
-        "assignTo": "StateMachineValidator.getCurrentStates_result"
+        "assignTo": "getModuleSpecifierSourceFile_result"
       },
       {
         "kind": "call",
-        "function": "StateMachineValidator.snapshotNamespaceStates",
+        "function": "addSourceFileAtPathIfExists",
         "args": [],
-        "assignTo": "StateMachineValidator.snapshotNamespaceStates_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.getNamespaceStates",
-        "args": [
-          {
-            "name": "namespace",
-            "type": "string",
-            "value": "{{namespace}}"
-          }
-        ],
-        "assignTo": "StateMachineValidator.getNamespaceStates_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.getTrace",
-        "args": [],
-        "assignTo": "StateMachineValidator.getTrace_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.getLedger",
-        "args": [],
-        "assignTo": "StateMachineValidator.getLedger_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.getContext",
-        "args": [],
-        "assignTo": "StateMachineValidator.getContext_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.getRuleHash",
-        "args": [],
-        "assignTo": "StateMachineValidator.getRuleHash_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.explainRejection",
-        "args": [
-          {
-            "name": "rejection",
-            "type": "SSGRejection",
-            "value": "{{rejection}}"
-          }
-        ],
-        "assignTo": "StateMachineValidator.explainRejection_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.rejectionToJSON",
-        "args": [
-          {
-            "name": "rejection",
-            "type": "SSGRejection",
-            "value": "{{rejection}}"
-          }
-        ],
-        "assignTo": "StateMachineValidator.rejectionToJSON_result"
-      },
-      {
-        "kind": "call",
-        "function": "toFixed",
-        "args": [],
-        "assignTo": "toFixed_result"
-      },
-      {
-        "kind": "call",
-        "function": "toLocaleString",
-        "args": []
+        "assignTo": "addSourceFileAtPathIfExists_result"
       },
       {
         "kind": "call",
@@ -1284,6 +959,23 @@
       },
       {
         "kind": "call",
+        "function": "randomInt",
+        "args": [
+          {
+            "name": "min",
+            "type": "number",
+            "value": "{{min}}"
+          },
+          {
+            "name": "max",
+            "type": "number",
+            "value": "{{max}}"
+          }
+        ],
+        "assignTo": "randomInt_result"
+      },
+      {
+        "kind": "call",
         "function": "random",
         "args": [],
         "assignTo": "random_result"
@@ -1296,176 +988,391 @@
       },
       {
         "kind": "call",
-        "function": "executeActionCode",
+        "function": "getReturnType",
         "args": [
           {
-            "name": "code",
-            "type": "string",
-            "value": "{{code}}"
+            "name": "func",
+            "type": "FunctionDeclaration | ArrowFunction",
+            "value": "{{func}}"
           }
         ],
-        "assignTo": "executeActionCode_result"
+        "assignTo": "getReturnType_result"
       },
       {
         "kind": "call",
-        "function": "execute",
+        "function": "getReturnTypeDetail",
         "args": [
           {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          },
-          {
-            "name": "projectPath",
-            "type": "string",
-            "value": "{{projectPath}}"
-          },
-          {
-            "name": "filePath",
-            "type": "string",
-            "value": "{{filePath}}"
+            "name": "func",
+            "type": "FunctionDeclaration | ArrowFunction",
+            "value": "{{func}}"
           }
         ],
-        "assignTo": "execute_result"
+        "assignTo": "getReturnTypeDetail_result"
       },
       {
         "kind": "call",
-        "function": "queryAntibodies",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          },
-          {
-            "name": "minACL",
-            "type": "AntibodyLevel",
-            "value": "{{minACL}}"
-          }
-        ],
-        "assignTo": "queryAntibodies_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatCrossSessionQuery",
-        "args": [
-          {
-            "name": "operation",
-            "type": "string",
-            "value": "{{operation}}"
-          },
-          {
-            "name": "state",
-            "type": "string",
-            "value": "{{state}}"
-          }
-        ],
-        "assignTo": "formatCrossSessionQuery_result"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780430701541",
-    "timestamp": "2026-06-02T20:05:01.541Z"
-  },
-  {
-    "intent": "connect to a database and execute a SQL query",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "connect_db",
+        "function": "getReturnTypeNode",
         "args": [],
-        "assignTo": "dbConn"
+        "assignTo": "getReturnTypeNode_result"
       },
       {
         "kind": "call",
-        "function": "query_db",
+        "function": "ActionBuilder.assign",
         "args": [
           {
-            "name": "arg",
+            "name": "target",
+            "type": "string",
+            "value": "{{target}}"
+          },
+          {
+            "name": "value",
             "type": "any",
-            "value": null
+            "value": "{{value}}"
           }
         ],
-        "assignTo": "result"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-1",
-    "id": "ep_1780430701537",
-    "timestamp": "2026-06-02T20:05:01.537Z"
-  },
-  {
-    "intent": "connect to a database and execute a SQL query",
-    "actions": [
+        "assignTo": "ActionBuilder.assign_result"
+      },
       {
         "kind": "call",
-        "function": "connect_db",
+        "function": "benchmarkPassRate",
         "args": [],
-        "assignTo": "dbConn"
+        "assignTo": "benchmarkPassRate_result"
       },
       {
         "kind": "call",
-        "function": "query_db",
+        "function": "wrapAsBranch",
         "args": [
           {
-            "name": "arg",
-            "type": "any",
-            "value": null
+            "name": "transitions",
+            "type": "StateTransition[]",
+            "value": "{{transitions}}"
           }
         ],
-        "assignTo": "result"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-1",
-    "id": "ep_1780430700538",
-    "timestamp": "2026-06-02T20:05:00.538Z"
-  },
-  {
-    "intent": "connect to a database and execute a SQL query",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "connect_db",
-        "args": [
-          {
-            "name": "host",
-            "type": "str",
-            "value": "localhost"
-          },
-          {
-            "name": "port",
-            "type": "int",
-            "value": 5432
-          }
-        ],
-        "assignTo": "dbConn"
+        "assignTo": "wrapAsBranch_result"
       },
       {
         "kind": "call",
-        "function": "query_db",
+        "function": "pass",
         "args": [
           {
-            "name": "connection",
-            "type": "any",
-            "value": "dbConn"
-          },
-          {
-            "name": "sql",
-            "type": "str",
-            "value": "SELECT * FROM users"
+            "name": "msg",
+            "type": "string",
+            "value": "{{msg}}"
           }
         ]
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-1",
-    "id": "ep_1780430699399",
-    "timestamp": "2026-06-02T20:04:59.399Z"
-  },
-  {
-    "intent": "start an HTTP server on port 3000 and respond with JSON",
-    "actions": [
+      },
+      {
+        "kind": "call",
+        "function": "classifyError",
+        "args": [
+          {
+            "name": "error",
+            "type": "string",
+            "value": "{{error}}"
+          }
+        ],
+        "assignTo": "classifyError_result"
+      },
+      {
+        "kind": "call",
+        "function": "classifyPlanError",
+        "args": [
+          {
+            "name": "error",
+            "type": "string",
+            "value": "{{error}}"
+          }
+        ],
+        "assignTo": "classifyPlanError_result"
+      },
+      {
+        "kind": "call",
+        "function": "hasViolations",
+        "args": [
+          {
+            "name": "session",
+            "type": "any",
+            "value": "{{session}}"
+          }
+        ],
+        "assignTo": "hasViolations_result"
+      },
+      {
+        "kind": "call",
+        "function": "getRuleHash",
+        "args": [],
+        "assignTo": "getRuleHash_result"
+      },
+      {
+        "kind": "call",
+        "function": "applyProposalAsBranch",
+        "args": [
+          {
+            "name": "proposal",
+            "type": "RepairProposal",
+            "value": "{{proposal}}"
+          },
+          {
+            "name": "parentBranch",
+            "type": "Branch",
+            "value": "{{parentBranch}}"
+          },
+          {
+            "name": "currentLedger",
+            "type": "StateTransition[]",
+            "value": "{{currentLedger}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "applyProposalAsBranch_result"
+      },
+      {
+        "kind": "call",
+        "function": "assertLedgerConsistency",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "{{ledger}}"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "{{namespaceInitialStates}}"
+          }
+        ]
+      },
+      {
+        "kind": "call",
+        "function": "assertDeltaConsistency",
+        "args": [
+          {
+            "name": "transition",
+            "type": "StateTransition",
+            "value": "{{transition}}"
+          }
+        ]
+      },
+      {
+        "kind": "call",
+        "function": "assertRuleHashMatch",
+        "args": [
+          {
+            "name": "expected",
+            "type": "string",
+            "value": "{{expected}}"
+          },
+          {
+            "name": "actual",
+            "type": "string",
+            "value": "{{actual}}"
+          },
+          {
+            "name": "context",
+            "type": "string",
+            "value": "{{context}}"
+          }
+        ]
+      },
+      {
+        "kind": "call",
+        "function": "assertTransitionOrder",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "{{ledger}}"
+          }
+        ]
+      },
+      {
+        "kind": "call",
+        "function": "assertLedgerInvariants",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "{{ledger}}"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "{{namespaceInitialStates}}"
+          },
+          {
+            "name": "expectedRuleHash",
+            "type": "string",
+            "value": "{{expectedRuleHash}}"
+          }
+        ]
+      },
+      {
+        "kind": "call",
+        "function": "hashRules",
+        "args": [
+          {
+            "name": "rules",
+            "type": "Map<string, StateAnnotation>",
+            "value": "{{rules}}"
+          }
+        ],
+        "assignTo": "hashRules_result"
+      },
+      {
+        "kind": "call",
+        "function": "hashLedger",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "{{ledger}}"
+          }
+        ],
+        "assignTo": "hashLedger_result"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.getRuleHash",
+        "args": [],
+        "assignTo": "StateMachineValidator.getRuleHash_result"
+      },
+      {
+        "kind": "call",
+        "function": "hasRequiredFields",
+        "args": [
+          {
+            "name": "obj",
+            "type": "any",
+            "value": "{{obj}}"
+          },
+          {
+            "name": "fields",
+            "type": "string[]",
+            "value": "{{fields}}"
+          }
+        ],
+        "assignTo": "hasRequiredFields_result"
+      },
+      {
+        "kind": "call",
+        "function": "createHash",
+        "args": [
+          {
+            "name": "algorithm",
+            "type": "string",
+            "value": "{{algorithm}}"
+          }
+        ],
+        "assignTo": "createHash_result"
+      },
+      {
+        "kind": "call",
+        "function": "getClasses",
+        "args": [],
+        "assignTo": "getClasses_result"
+      },
+      {
+        "kind": "call",
+        "function": "getTypeAliases",
+        "args": [],
+        "assignTo": "getTypeAliases_result"
+      },
+      {
+        "kind": "call",
+        "function": "getMaskedFuncList",
+        "args": [],
+        "assignTo": "getMaskedFuncList_result"
+      },
+      {
+        "kind": "call",
+        "function": "hash",
+        "args": [],
+        "assignTo": "hash_result"
+      },
+      {
+        "kind": "call",
+        "function": "countSubstring",
+        "args": [
+          {
+            "name": "str",
+            "type": "string",
+            "value": "{{str}}"
+          },
+          {
+            "name": "sub",
+            "type": "string",
+            "value": "{{sub}}"
+          }
+        ],
+        "assignTo": "countSubstring_result"
+      },
+      {
+        "kind": "call",
+        "function": "toQueryString",
+        "args": [
+          {
+            "name": "obj",
+            "type": "Record<string, any>",
+            "value": "{{obj}}"
+          }
+        ],
+        "assignTo": "toQueryString_result"
+      },
+      {
+        "kind": "call",
+        "function": "stringify",
+        "args": [
+          {
+            "name": "value",
+            "type": "any",
+            "value": "{{value}}"
+          },
+          {
+            "name": "replacer",
+            "type": "any",
+            "value": "{{replacer}}"
+          }
+        ],
+        "assignTo": "stringify_result"
+      },
+      {
+        "kind": "call",
+        "function": "String",
+        "args": [],
+        "assignTo": "String_result"
+      },
+      {
+        "kind": "call",
+        "function": "toLocaleString",
+        "args": []
+      },
+      {
+        "kind": "call",
+        "function": "replayWithDetail",
+        "args": [
+          {
+            "name": "transitions",
+            "type": "StateTransition[]",
+            "value": "{{transitions}}"
+          },
+          {
+            "name": "currentRules",
+            "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>",
+            "value": "{{currentRules}}"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "{{namespaceInitialStates}}"
+          }
+        ],
+        "assignTo": "replayWithDetail_result"
+      },
       {
         "kind": "call",
         "function": "extractIRWithTypes",
@@ -1473,161 +1380,411 @@
           {
             "name": "projectRoot",
             "type": "string",
-            "value": "."
+            "value": "{{projectRoot}}"
           }
         ],
-        "assignTo": "ir"
+        "assignTo": "extractIRWithTypes_result"
       },
       {
         "kind": "call",
-        "function": "validateActionSchema",
+        "function": "withLock",
+        "args": [
+          {
+            "name": "name",
+            "type": "string",
+            "value": "{{name}}"
+          },
+          {
+            "name": "fn",
+            "type": "() => T",
+            "value": "{{fn}}"
+          }
+        ],
+        "assignTo": "withLock_result"
+      },
+      {
+        "kind": "call",
+        "function": "countSessionsWithViolations",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": "{{sessions}}"
+          }
+        ],
+        "assignTo": "countSessionsWithViolations_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateProtocolWithTransitions",
         "args": [
           {
             "name": "actions",
             "type": "Action[]",
-            "value": "ir"
+            "value": "{{actions}}"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "{{protocols}}"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "{{namespaceInitialStates}}"
           }
         ],
-        "assignTo": "schema"
+        "assignTo": "validateProtocolWithTransitions_result"
       },
       {
         "kind": "call",
-        "function": "generateCandidateRules",
-        "args": [],
-        "assignTo": "rules"
-      },
-      {
-        "kind": "return",
-        "value": "schema"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780430674647",
-    "timestamp": "2026-06-02T20:04:34.647Z"
-  },
-  {
-    "intent": "parse a CSV file and count the number of rows",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "extractIRWithTypes",
+        "function": "StateMachineValidator.applyWithTransition",
         "args": [
           {
-            "name": "projectRoot",
+            "name": "functionName",
             "type": "string",
-            "value": "."
-          }
-        ],
-        "assignTo": "ir"
-      },
-      {
-        "kind": "call",
-        "function": "extractIR",
-        "args": [
-          {
-            "name": "projectRoot",
-            "type": "string",
-            "value": ""
-          }
-        ],
-        "assignTo": "extractIR_result"
-      },
-      {
-        "kind": "call",
-        "function": "validateAction",
-        "args": [
-          {
-            "name": "action",
-            "type": "Action",
-            "value": ""
+            "value": "{{functionName}}"
           },
           {
             "name": "actionIndex",
             "type": "number",
-            "value": ""
+            "value": "{{actionIndex}}"
           }
         ],
-        "assignTo": "validateAction_result"
+        "assignTo": "StateMachineValidator.applyWithTransition_result"
       },
       {
         "kind": "call",
-        "function": "validateActionSequence",
+        "function": "error",
         "args": [
           {
-            "name": "actions",
-            "type": "Action[]",
-            "value": "ir"
+            "name": "message",
+            "type": "any",
+            "value": "{{message}}"
           }
-        ],
-        "assignTo": "ok"
-      },
-      {
-        "kind": "return",
-        "value": "ok"
+        ]
       }
     ],
     "success": true,
-    "id": "ep_1780430647846",
-    "timestamp": "2026-06-02T20:04:07.846Z"
+    "id": "ep_1780479704267",
+    "timestamp": "2026-06-03T09:41:44.267Z"
   },
   {
-    "intent": "parse a CSV file and count the number of rows",
+    "intent": "read a file and return its contents as a string, with error handling",
     "actions": [
       {
         "kind": "call",
-        "function": "extractIRWithTypes",
+        "function": "open_file",
         "args": [
           {
-            "name": "projectRoot",
-            "type": "string",
-            "value": "."
+            "name": "arg",
+            "type": "any",
+            "value": null
           }
         ],
-        "assignTo": "ir"
+        "assignTo": "fileHandle"
       },
       {
         "kind": "call",
-        "function": "validateActionSequence",
+        "function": "readFileSync",
         "args": [
           {
-            "name": "actions",
-            "type": "Action[]",
-            "value": "ir"
+            "name": "path",
+            "type": "string",
+            "value": null
+          },
+          {
+            "name": "encoding",
+            "type": "string",
+            "value": ""
           }
         ],
-        "assignTo": "ok"
+        "assignTo": "content"
       },
       {
-        "kind": "return",
-        "value": "ok"
+        "kind": "call",
+        "function": "close_file",
+        "args": [
+          {
+            "name": "arg",
+            "type": "any",
+            "value": null
+          }
+        ],
+        "assignTo": "_"
       }
     ],
     "success": false,
-    "svlViolated": "SVL-4",
-    "id": "ep_1780430647839",
-    "timestamp": "2026-06-02T20:04:07.839Z"
+    "svlViolated": "SVL-1",
+    "id": "ep_1780479704261",
+    "timestamp": "2026-06-03T09:41:44.261Z"
   },
   {
-    "intent": "create a new file in the corpus directory with the current timestamp as content",
+    "intent": "read a file and return its contents as a string, with error handling",
     "actions": [
       {
         "kind": "call",
-        "function": "execute",
+        "function": "open_file",
         "args": [
           {
-            "name": "intent",
+            "name": "arg",
+            "type": "any",
+            "value": null
+          }
+        ],
+        "assignTo": "fileHandle"
+      },
+      {
+        "kind": "call",
+        "function": "readFileSync",
+        "args": [
+          {
+            "name": "path",
             "type": "string",
-            "value": "create a new file in the corpus directory with the current timestamp as content"
+            "value": null
           },
           {
-            "name": "projectPath",
+            "name": "encoding",
             "type": "string",
-            "value": "."
+            "value": ""
+          }
+        ],
+        "assignTo": "content"
+      },
+      {
+        "kind": "call",
+        "function": "close_file",
+        "args": [
+          {
+            "name": "arg",
+            "type": "any",
+            "value": null
+          }
+        ],
+        "assignTo": "_"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780479702646",
+    "timestamp": "2026-06-03T09:41:42.646Z"
+  },
+  {
+    "intent": "read a file and return its contents as a string, with error handling",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "open_file",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "file"
+      },
+      {
+        "kind": "call",
+        "function": "readFileSync",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "file"
           },
           {
-            "name": "filePath",
+            "name": "encoding",
             "type": "string",
-            "value": "corpus/new_file.txt"
+            "value": ""
+          }
+        ],
+        "assignTo": "content"
+      },
+      {
+        "kind": "call",
+        "function": "close_file",
+        "args": [
+          {
+            "name": "file",
+            "type": "any",
+            "value": "file"
+          }
+        ],
+        "assignTo": "closed"
+      },
+      {
+        "kind": "return",
+        "value": "content"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780479701118",
+    "timestamp": "2026-06-03T09:41:41.118Z"
+  },
+  {
+    "intent": "merge multiple objects together, with later objects overwriting earlier ones",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "deepMerge",
+        "args": [
+          {
+            "name": "objects",
+            "type": "any[]",
+            "value": []
+          }
+        ],
+        "assignTo": "merged"
+      },
+      {
+        "kind": "return",
+        "value": "merged"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780479656993",
+    "timestamp": "2026-06-03T09:40:56.993Z"
+  },
+  {
+    "intent": "check if two objects have the same keys and values",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "diffLedgers",
+        "args": [
+          {
+            "name": "ledgerA",
+            "type": "StateTransition[]",
+            "value": []
+          },
+          {
+            "name": "ledgerB",
+            "type": "StateTransition[]",
+            "value": []
+          }
+        ],
+        "assignTo": "diff"
+      },
+      {
+        "kind": "return",
+        "value": "diff"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780479614024",
+    "timestamp": "2026-06-03T09:40:14.024Z"
+  },
+  {
+    "intent": "flatten a nested object into a single level with dot-notation keys",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "deepClone",
+        "args": [
+          {
+            "name": "obj",
+            "type": "T",
+            "value": null
+          }
+        ],
+        "assignTo": "clonedObj"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780479584842",
+    "timestamp": "2026-06-03T09:39:44.842Z"
+  },
+  {
+    "intent": "pick specific keys from an object and return a new object with only those keys",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "pick",
+        "args": [
+          {
+            "name": "obj",
+            "type": "T",
+            "value": null
+          },
+          {
+            "name": "keys",
+            "type": "string[]",
+            "value": null
+          }
+        ],
+        "assignTo": "picked"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780479558629",
+    "timestamp": "2026-06-03T09:39:18.629Z"
+  },
+  {
+    "intent": "deep clone a JavaScript object",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "deepClone",
+        "args": [
+          {
+            "name": "obj",
+            "type": "T",
+            "value": {}
+          }
+        ],
+        "assignTo": "clonedObj"
+      },
+      {
+        "kind": "return",
+        "value": "clonedObj"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780479529757",
+    "timestamp": "2026-06-03T09:38:49.757Z"
+  },
+  {
+    "intent": "calculate the median value from an array of numbers",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "median",
+        "args": [
+          {
+            "name": "nums",
+            "type": "number[]",
+            "value": []
+          }
+        ],
+        "assignTo": "m"
+      },
+      {
+        "kind": "return",
+        "value": "m"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780479499165",
+    "timestamp": "2026-06-03T09:38:19.165Z"
+  },
+  {
+    "intent": "generate a random integer between a minimum and maximum value",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "randomInt",
+        "args": [
+          {
+            "name": "min",
+            "type": "number",
+            "value": 0
+          },
+          {
+            "name": "max",
+            "type": "number",
+            "value": 100
           }
         ],
         "assignTo": "result"
@@ -1638,849 +1795,105 @@
       }
     ],
     "success": true,
-    "id": "ep_1780430621178",
-    "timestamp": "2026-06-02T20:03:41.178Z"
+    "id": "ep_1780479466888",
+    "timestamp": "2026-06-03T09:37:46.888Z"
   },
   {
-    "intent": "take a session ID and a repair proposal, create a repair branch, replay it, and return the evaluation score",
+    "intent": "check if a number is a prime number",
     "actions": [
       {
         "kind": "call",
-        "function": "extractIR",
+        "function": "isPrime",
         "args": [
           {
-            "name": "projectRoot",
-            "type": "string",
-            "value": "."
-          }
-        ],
-        "assignTo": "ir"
-      },
-      {
-        "kind": "call",
-        "function": "replaySession",
-        "args": [
-          {
-            "name": "sessionId",
-            "type": "string",
-            "value": "sessionId"
-          },
-          {
-            "name": "currentRules",
-            "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>",
-            "value": {}
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": {}
-          }
-        ],
-        "assignTo": "replay"
-      },
-      {
-        "kind": "call",
-        "function": "applyProposalAsBranch",
-        "args": [
-          {
-            "name": "proposal",
-            "type": "RepairProposal",
-            "value": "proposal"
-          },
-          {
-            "name": "parentBranch",
-            "type": "Branch",
-            "value": "replay.branch"
-          },
-          {
-            "name": "currentLedger",
-            "type": "StateTransition[]",
-            "value": "replay.ledger"
-          },
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "ir"
-          }
-        ],
-        "assignTo": "branch"
-      },
-      {
-        "kind": "call",
-        "function": "replayBranch",
-        "args": [
-          {
-            "name": "branch",
-            "type": "Branch",
-            "value": "branch"
-          },
-          {
-            "name": "allBranches",
-            "type": "Map<string, Branch>",
-            "value": {}
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": {}
-          }
-        ],
-        "assignTo": "branchReplay"
-      },
-      {
-        "kind": "call",
-        "function": "evaluateBranches",
-        "args": [
-          {
-            "name": "branches",
-            "type": "Branch[]",
-            "value": [
-              "$branch"
-            ]
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": {}
-          }
-        ],
-        "assignTo": "eval"
-      },
-      {
-        "kind": "return",
-        "value": "eval"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780427830740",
-    "timestamp": "2026-06-02T19:17:10.740Z"
-  },
-  {
-    "intent": "take a protocol namespace name and return all rules belonging to that namespace with their state transitions",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "extractIR",
-        "args": [
-          {
-            "name": "projectRoot",
-            "type": "string",
-            "value": "."
-          }
-        ],
-        "assignTo": "ir"
-      },
-      {
-        "kind": "call",
-        "function": "loadProtocols",
-        "args": [
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "ir"
-          }
-        ],
-        "assignTo": "protocols"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780427803353",
-    "timestamp": "2026-06-02T19:16:43.353Z"
-  },
-  {
-    "intent": "take a session ID, load its ledger, check invariants, replay it, and return a full audit result",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getFingerprint",
-        "args": [
-          {
-            "name": "sessionId",
-            "type": "string",
-            "value": "sessionId"
-          }
-        ],
-        "assignTo": "fp"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.getLedger",
-        "args": [],
-        "assignTo": "ledger"
-      },
-      {
-        "kind": "call",
-        "function": "assertLedgerInvariants",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "ledger"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": {}
-          },
-          {
-            "name": "expectedRuleHash",
-            "type": "string",
-            "value": ""
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "replayLedger",
-        "args": [
-          {
-            "name": "sessionId",
-            "type": "string",
-            "value": "sessionId"
-          },
-          {
-            "name": "transitions",
-            "type": "StateTransition[]",
-            "value": "ledger"
-          },
-          {
-            "name": "storedRuleHash",
-            "type": "string",
-            "value": ""
-          },
-          {
-            "name": "storedLedgerHash",
-            "type": "string",
-            "value": ""
-          },
-          {
-            "name": "currentRuleHash",
-            "type": "string",
-            "value": ""
-          },
-          {
-            "name": "currentRules",
-            "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>",
-            "value": {}
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": {}
-          }
-        ],
-        "assignTo": "replayResult"
-      },
-      {
-        "kind": "call",
-        "function": "formatAuditResult",
-        "args": [
-          {
-            "name": "result",
-            "type": "AuditResult",
-            "value": "replayResult"
-          }
-        ],
-        "assignTo": "auditStr"
-      },
-      {
-        "kind": "return",
-        "value": "auditStr"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780427775510",
-    "timestamp": "2026-06-02T19:16:15.510Z"
-  },
-  {
-    "intent": "extract IR, get protocol rules, validate the dev pipeline sequence, and return the state snapshot",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "extractIR",
-        "args": [
-          {
-            "name": "projectRoot",
-            "type": "string",
-            "value": "."
-          }
-        ],
-        "assignTo": "ir"
-      },
-      {
-        "kind": "call",
-        "function": "getRuleHash",
-        "args": [],
-        "assignTo": "ruleHash"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.apply",
-        "args": [
-          {
-            "name": "functionName",
-            "type": "string",
-            "value": "validateAction"
-          },
-          {
-            "name": "actionIndex",
+            "name": "n",
             "type": "number",
             "value": 0
           }
         ],
-        "assignTo": "step1"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.apply",
-        "args": [
-          {
-            "name": "functionName",
-            "type": "string",
-            "value": "validateActionSequence"
-          },
-          {
-            "name": "actionIndex",
-            "type": "number",
-            "value": 1
-          }
-        ],
-        "assignTo": "step2"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.getTrace",
-        "args": [],
-        "assignTo": "trace"
-      },
-      {
-        "kind": "return",
-        "value": "trace"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780427752370",
-    "timestamp": "2026-06-02T19:15:52.370Z"
-  },
-  {
-    "intent": "get all sessions, evaluate their branch trees, and return the branch with the highest replay score",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "findRootBranch",
-        "args": [
-          {
-            "name": "branches",
-            "type": "Branch[]",
-            "value": "sessions"
-          }
-        ],
-        "assignTo": "root"
-      },
-      {
-        "kind": "call",
-        "function": "evaluateBranches",
-        "args": [
-          {
-            "name": "branches",
-            "type": "Branch[]",
-            "value": "sessions"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": {}
-          }
-        ],
-        "assignTo": "evalResult"
-      },
-      {
-        "kind": "call",
-        "function": "getBranchPath",
-        "args": [
-          {
-            "name": "branch",
-            "type": "Branch",
-            "value": "evalResult.winner"
-          },
-          {
-            "name": "allBranches",
-            "type": "Map<string, Branch>",
-            "value": {}
-          }
-        ],
-        "assignTo": "winnerPath"
-      },
-      {
-        "kind": "return",
-        "value": "$evalResult.winner"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780427729532",
-    "timestamp": "2026-06-02T19:15:29.532Z"
-  },
-  {
-    "intent": "verify all fingerprints, replay each ledger, and report sessions where fingerprint and replay diverge",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "getFingerprintRegistry",
-        "args": [],
-        "assignTo": "registry"
-      },
-      {
-        "kind": "call",
-        "function": "verifyAllFingerprints",
-        "args": [
-          {
-            "name": "currentRuleHash",
-            "type": "string",
-            "value": "latest"
-          }
-        ],
-        "assignTo": "summary"
-      },
-      {
-        "kind": "call",
-        "function": "generateCandidateRules",
-        "args": [],
-        "assignTo": "candidateRules"
-      },
-      {
-        "kind": "call",
-        "function": "replaySession",
-        "args": [
-          {
-            "name": "sessionId",
-            "type": "string",
-            "value": "sessions[0].id"
-          },
-          {
-            "name": "currentRules",
-            "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>",
-            "value": {}
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": {}
-          }
-        ],
-        "assignTo": "replayResult"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780427706278",
-    "timestamp": "2026-06-02T19:15:06.278Z"
-  },
-  {
-    "intent": "load protocol rules, check ledger consistency across all sessions, and report namespace states",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "getNsInit",
-        "args": [],
-        "assignTo": "nsInit"
-      },
-      {
-        "kind": "call",
-        "function": "listAllStates",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "sessions"
-          }
-        ],
-        "assignTo": "states"
-      },
-      {
-        "kind": "call",
-        "function": "assertLedgerConsistency",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "sessions"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "nsInit"
-          }
-        ]
-      },
-      {
-        "kind": "return",
-        "value": "states"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780427682698",
-    "timestamp": "2026-06-02T19:14:42.698Z"
-  },
-  {
-    "intent": "get the failure genome, find violations, generate repair proposals, and return the minimal fix set",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getFailureGenome",
-        "args": [],
-        "assignTo": "genome"
-      },
-      {
-        "kind": "call",
-        "function": "suggestRepairs",
-        "args": [
-          {
-            "name": "violations",
-            "type": "ConstraintViolation[]",
-            "value": "genome.byConstraintType"
-          },
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "genome.topPatterns"
-          },
-          {
-            "name": "protocols",
-            "type": "FunctionProtocol[]",
-            "value": "genome.commonFixPaths"
-          }
-        ],
-        "assignTo": "proposals"
-      },
-      {
-        "kind": "call",
-        "function": "getMinimalFixSet",
-        "args": [
-          {
-            "name": "proposals",
-            "type": "RepairProposal[]",
-            "value": "proposals"
-          }
-        ],
-        "assignTo": "fixSet"
-      },
-      {
-        "kind": "return",
-        "value": "fixSet"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780427658825",
-    "timestamp": "2026-06-02T19:14:18.825Z"
-  },
-  {
-    "intent": "extract IR, find functions with protocol annotations, and check if they pass SSG validation",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "extractIR",
-        "args": [
-          {
-            "name": "projectRoot",
-            "type": "string",
-            "value": "."
-          }
-        ],
-        "assignTo": "ir"
-      },
-      {
-        "kind": "call",
-        "function": "loadProtocols",
-        "args": [
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "ir"
-          }
-        ],
-        "assignTo": "protocols"
-      },
-      {
-        "kind": "call",
-        "function": "validateAction",
-        "args": [
-          {
-            "name": "action",
-            "type": "Action",
-            "value": "ir"
-          },
-          {
-            "name": "actionIndex",
-            "type": "number",
-            "value": ""
-          }
-        ],
-        "assignTo": "validated"
-      },
-      {
-        "kind": "return",
-        "value": "validated"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780427636874",
-    "timestamp": "2026-06-02T19:13:56.874Z"
-  },
-  {
-    "intent": "get all sessions, replay each one, and return which sessions fail replay",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "replaySession",
-        "args": [
-          {
-            "name": "sessionId",
-            "type": "string",
-            "value": null
-          },
-          {
-            "name": "currentRules",
-            "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>",
-            "value": null
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": null
-          }
-        ],
         "assignTo": "result"
+      },
+      {
+        "kind": "return",
+        "value": "result"
       }
     ],
     "success": true,
-    "id": "ep_1780427611662",
-    "timestamp": "2026-06-02T19:13:31.662Z"
+    "id": "ep_1780479439659",
+    "timestamp": "2026-06-03T09:37:19.659Z"
   },
   {
-    "intent": "get all sessions, replay each one, and return which sessions fail replay",
+    "intent": "round a number to a specified number of decimal places",
     "actions": [
       {
         "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "replaySession",
+        "function": "roundTo",
         "args": [
           {
-            "name": "sessionId",
-            "type": "str",
-            "value": "$sessions[0].id"
+            "name": "num",
+            "type": "number",
+            "value": 0
           },
           {
-            "name": "currentRules",
-            "type": "Map",
-            "value": {}
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map",
-            "value": {}
+            "name": "decimals",
+            "type": "number",
+            "value": 0
           }
         ],
-        "assignTo": "result0"
-      },
-      {
-        "kind": "call",
-        "function": "replaySession",
-        "args": [
-          {
-            "name": "sessionId",
-            "type": "str",
-            "value": "$sessions[1].id"
-          },
-          {
-            "name": "currentRules",
-            "type": "Map",
-            "value": {}
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map",
-            "value": {}
-          }
-        ],
-        "assignTo": "result1"
-      },
-      {
-        "kind": "call",
-        "function": "replaySession",
-        "args": [
-          {
-            "name": "sessionId",
-            "type": "str",
-            "value": "$sessions[2].id"
-          },
-          {
-            "name": "currentRules",
-            "type": "Map",
-            "value": {}
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map",
-            "value": {}
-          }
-        ],
-        "assignTo": "result2"
-      },
-      {
-        "kind": "call",
-        "function": "replaySession",
-        "args": [
-          {
-            "name": "sessionId",
-            "type": "str",
-            "value": "$sessions[3].id"
-          },
-          {
-            "name": "currentRules",
-            "type": "Map",
-            "value": {}
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map",
-            "value": {}
-          }
-        ],
-        "assignTo": "result3"
-      },
-      {
-        "kind": "call",
-        "function": "replaySession",
-        "args": [
-          {
-            "name": "sessionId",
-            "type": "str",
-            "value": "$sessions[4].id"
-          },
-          {
-            "name": "currentRules",
-            "type": "Map",
-            "value": {}
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map",
-            "value": {}
-          }
-        ],
-        "assignTo": "result4"
+        "assignTo": "rounded"
       },
       {
         "kind": "return",
-        "value": "result0"
-      },
-      {
-        "kind": "return",
-        "value": "result1"
-      },
-      {
-        "kind": "return",
-        "value": "result2"
-      },
-      {
-        "kind": "return",
-        "value": "result3"
-      },
-      {
-        "kind": "return",
-        "value": "result4"
+        "value": "rounded"
       }
     ],
-    "success": false,
-    "svlViolated": "SVL-1",
-    "id": "ep_1780427573800",
-    "timestamp": "2026-06-02T19:12:53.800Z"
+    "success": true,
+    "id": "ep_1780479414384",
+    "timestamp": "2026-06-03T09:36:54.384Z"
   },
   {
-    "intent": "compare two session ledgers, find the differences, and check if both pass invariants",
+    "intent": "calculate the average of an array of numbers",
     "actions": [
       {
         "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "diffLedgers",
+        "function": "average",
         "args": [
           {
-            "name": "ledgerA",
-            "type": "StateTransition[]",
-            "value": "sessions[0].ledger"
+            "name": "nums",
+            "type": "number[]",
+            "value": []
+          }
+        ],
+        "assignTo": "avg"
+      },
+      {
+        "kind": "return",
+        "value": "avg"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780479385379",
+    "timestamp": "2026-06-03T09:36:25.379Z"
+  },
+  {
+    "intent": "find the difference between two arrays, elements in A not in B",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "arrayDiff",
+        "args": [
+          {
+            "name": "a",
+            "type": "T[]",
+            "value": []
           },
           {
-            "name": "ledgerB",
-            "type": "StateTransition[]",
-            "value": "sessions[1].ledger"
+            "name": "b",
+            "type": "T[]",
+            "value": []
           }
         ],
         "assignTo": "diff"
-      },
-      {
-        "kind": "call",
-        "function": "assertLedgerConsistency",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "sessions[0].ledger"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": {}
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "assertLedgerConsistency",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "sessions[1].ledger"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": {}
-          }
-        ]
       },
       {
         "kind": "return",
@@ -2488,207 +1901,329 @@
       }
     ],
     "success": true,
-    "id": "ep_1780427549968",
-    "timestamp": "2026-06-02T19:12:29.968Z"
+    "id": "ep_1780479350309",
+    "timestamp": "2026-06-03T09:35:50.309Z"
   },
   {
-    "intent": "check ledger consistency for a session, get its fingerprint, and verify both match",
+    "intent": "merge two sorted arrays into one sorted array",
     "actions": [
       {
         "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "getFingerprint",
+        "function": "arrayDiff",
         "args": [
           {
-            "name": "sessionId",
-            "type": "string",
-            "value": "sessions[0].id"
-          }
-        ],
-        "assignTo": "fp"
-      },
-      {
-        "kind": "call",
-        "function": "getFingerprintRegistry",
-        "args": [],
-        "assignTo": "registry"
-      },
-      {
-        "kind": "call",
-        "function": "assertLedgerConsistency",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "sessions[0].transitions"
+            "name": "a",
+            "type": "T[]",
+            "value": []
           },
           {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": {}
+            "name": "b",
+            "type": "T[]",
+            "value": []
           }
-        ]
+        ],
+        "assignTo": "diff"
+      },
+      {
+        "kind": "call",
+        "function": "unique",
+        "args": [
+          {
+            "name": "arr",
+            "type": "T[]",
+            "value": "diff"
+          }
+        ],
+        "assignTo": "uniqueDiff"
       },
       {
         "kind": "return",
-        "value": "fp"
+        "value": "uniqueDiff"
       }
     ],
     "success": true,
-    "id": "ep_1780427527192",
-    "timestamp": "2026-06-02T19:12:07.192Z"
+    "id": "ep_1780479314645",
+    "timestamp": "2026-06-03T09:35:14.645Z"
   },
   {
-    "intent": "extract IR, validate the action sequence against IR, and return the validation result",
+    "intent": "split an array into chunks of a specified size",
     "actions": [
       {
         "kind": "call",
-        "function": "extractIR",
+        "function": "chunk",
         "args": [
           {
-            "name": "projectRoot",
-            "type": "string",
-            "value": "."
-          }
-        ],
-        "assignTo": "ir"
-      },
-      {
-        "kind": "call",
-        "function": "validateAction",
-        "args": [
-          {
-            "name": "action",
-            "type": "Action",
-            "value": ""
+            "name": "arr",
+            "type": "T[]",
+            "value": []
           },
           {
-            "name": "actionIndex",
+            "name": "size",
             "type": "number",
+            "value": 0
+          }
+        ],
+        "assignTo": "chunks"
+      },
+      {
+        "kind": "return",
+        "value": "chunks"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780479290316",
+    "timestamp": "2026-06-03T09:34:50.316Z"
+  },
+  {
+    "intent": "remove duplicate values from an array",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "unique",
+        "args": [
+          {
+            "name": "arr",
+            "type": "T[]",
+            "value": []
+          }
+        ],
+        "assignTo": "uniqueResult"
+      },
+      {
+        "kind": "return",
+        "value": "uniqueResult"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780479267213",
+    "timestamp": "2026-06-03T09:34:27.213Z"
+  },
+  {
+    "intent": "find the most frequently occurring element in an array",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "arrayDiff",
+        "args": [
+          {
+            "name": "a",
+            "type": "T[]",
+            "value": []
+          },
+          {
+            "name": "b",
+            "type": "T[]",
+            "value": []
+          }
+        ],
+        "assignTo": "diff"
+      },
+      {
+        "kind": "call",
+        "function": "mostFrequent",
+        "args": [
+          {
+            "name": "arr",
+            "type": "T[]",
+            "value": "diff"
+          }
+        ],
+        "assignTo": "result"
+      },
+      {
+        "kind": "return",
+        "value": "result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780479242939",
+    "timestamp": "2026-06-03T09:34:02.939Z"
+  },
+  {
+    "intent": "parse a JSON string safely, returning a default if it fails",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "parseActionJSON",
+        "args": [
+          {
+            "name": "text",
+            "type": "string",
             "value": ""
           }
         ],
-        "assignTo": "validateAction_result"
-      },
-      {
-        "kind": "call",
-        "function": "validateActionSequence",
-        "args": [
-          {
-            "name": "actions",
-            "type": "Action[]",
-            "value": "ir"
-          }
-        ],
-        "assignTo": "ok"
+        "assignTo": "parsed"
       },
       {
         "kind": "return",
-        "value": "ok"
+        "value": "parsed"
       }
     ],
     "success": true,
-    "id": "ep_1780427503308",
-    "timestamp": "2026-06-02T19:11:43.308Z"
+    "id": "ep_1780479216328",
+    "timestamp": "2026-06-03T09:33:36.328Z"
   },
   {
-    "intent": "extract IR, validate the action sequence against IR, and return the validation result",
+    "intent": "convert a camelCase string to snake_case",
     "actions": [
       {
         "kind": "call",
-        "function": "extractIR",
+        "function": "camelToSnake",
         "args": [
           {
-            "name": "projectRoot",
+            "name": "str",
             "type": "string",
-            "value": "."
+            "value": ""
           }
         ],
-        "assignTo": "ir"
-      },
-      {
-        "kind": "call",
-        "function": "validateActionSequence",
-        "args": [
-          {
-            "name": "actions",
-            "type": "Action[]",
-            "value": "ir"
-          }
-        ],
-        "assignTo": "ok"
+        "assignTo": "result"
       },
       {
         "kind": "return",
-        "value": "ok"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-4",
-    "id": "ep_1780427503305",
-    "timestamp": "2026-06-02T19:11:43.305Z"
-  },
-  {
-    "intent": "get execution metrics, get the failure genome, and compute the failure rate per execution",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getExecutionMetrics",
-        "args": [],
-        "assignTo": "metrics"
-      },
-      {
-        "kind": "call",
-        "function": "getFailureGenome",
-        "args": [],
-        "assignTo": "genome"
-      },
-      {
-        "kind": "call",
-        "function": "failureStats",
-        "args": [],
-        "assignTo": "stats"
+        "value": "result"
       }
     ],
     "success": true,
-    "id": "ep_1780427479270",
-    "timestamp": "2026-06-02T19:11:19.270Z"
+    "id": "ep_1780479180634",
+    "timestamp": "2026-06-03T09:33:00.634Z"
   },
   {
-    "intent": "get all sessions, get antibody stats, and find sessions with antibody hits",
+    "intent": "remove all whitespace from a string",
     "actions": [
       {
         "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "getAntibodyStats",
-        "args": [],
-        "assignTo": "stats"
-      },
-      {
-        "kind": "call",
-        "function": "getFingerprint",
+        "function": "removeWhitespace",
         "args": [
           {
-            "name": "sessionId",
+            "name": "str",
             "type": "string",
-            "value": null
+            "value": ""
           }
         ],
-        "assignTo": "fp"
+        "assignTo": "cleaned"
+      },
+      {
+        "kind": "return",
+        "value": "cleaned"
       }
     ],
     "success": true,
-    "id": "ep_1780427452937",
-    "timestamp": "2026-06-02T19:10:52.937Z"
+    "id": "ep_1780479154476",
+    "timestamp": "2026-06-03T09:32:34.476Z"
+  },
+  {
+    "intent": "generate a random string of a specified length using letters and numbers",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "randomInt",
+        "args": [
+          {
+            "name": "min",
+            "type": "number",
+            "value": 8
+          },
+          {
+            "name": "max",
+            "type": "number",
+            "value": 16
+          }
+        ],
+        "assignTo": "len"
+      },
+      {
+        "kind": "call",
+        "function": "String",
+        "args": [],
+        "assignTo": "chars"
+      },
+      {
+        "kind": "call",
+        "function": "randomInt",
+        "args": [
+          {
+            "name": "min",
+            "type": "number",
+            "value": 0
+          },
+          {
+            "name": "max",
+            "type": "number",
+            "value": 35
+          }
+        ],
+        "assignTo": "idx"
+      },
+      {
+        "kind": "return",
+        "value": "chars"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780479123710",
+    "timestamp": "2026-06-03T09:32:03.710Z"
+  },
+  {
+    "intent": "count how many times a substring appears in a larger string",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "countSubstring",
+        "args": [
+          {
+            "name": "str",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "sub",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "result"
+      },
+      {
+        "kind": "return",
+        "value": "result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780479098161",
+    "timestamp": "2026-06-03T09:31:38.161Z"
+  },
+  {
+    "intent": "truncate a long string to a maximum length and add ellipsis",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "truncate",
+        "args": [
+          {
+            "name": "str",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "maxLen",
+            "type": "number",
+            "value": 0
+          },
+          {
+            "name": "ellipsis",
+            "type": "any",
+            "value": ""
+          }
+        ],
+        "assignTo": "truncated"
+      },
+      {
+        "kind": "return",
+        "value": "truncated"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780479070033",
+    "timestamp": "2026-06-03T09:31:10.033Z"
   }
 ]
