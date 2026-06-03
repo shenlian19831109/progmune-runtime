@@ -90,52 +90,42 @@ function scoreNode(node: CapabilityNode, intentLower: string, keywords: string[]
   return score * creditFactor;
 }
 
-/** Find all capability nodes that produce a given capability label.
- *  Falls back to topology similarity if no direct data-flow match. */
-function findProducers(graph: Map<string, CapabilityNode>, capability: string, allNodes: CapabilityNode[]): CapabilityNode[] {
-  const producers: CapabilityNode[] = [];
-  for (const node of graph.values()) {
-    if (node.produces.some(p => p === capability || capability.includes(p) || p.includes(capability))) {
-      producers.push(node);
-    }
-  }
-  // Topology fallback: find semantically related producers
-  if (producers.length === 0) {
-    try {
-      const topo = getTopology();
-      for (const node of allNodes) {
-        if (node.produces.length > 0) {
-          for (const p of node.produces) {
-            if (topo.capabilityMatch(p, capability) && !producers.includes(node)) {
-              producers.push(node);
-              break;
-            }
-          }
-        }
-      }
-    } catch {}
-  }
-  return producers;
+/** Pick the highest-scoring node from a list. */
+function topByScore(nodes: CapabilityNode[]): CapabilityNode | undefined {
+  return nodes.sort((a, b) => b.score - a.score)[0];
 }
 
-/** Find all capability nodes that require a given capability label.
- *  Falls back to topology similarity if no direct data-flow match. */
-function findConsumers(graph: Map<string, CapabilityNode>, capability: string, allNodes: CapabilityNode[]): CapabilityNode[] {
-  const consumers: CapabilityNode[] = [];
+/** Shared logic for finding nodes that produce or consume a capability label.
+ *  Falls back to topology similarity if no direct data-flow match.
+ *
+ *  @param field - which side of the data-flow edge to match on
+ *  @param isProducer - when true the field value acts as the "produce" side
+ *    of capabilityMatch; when false it acts as the "require" side. */
+function findRelated(
+  graph: Map<string, CapabilityNode>,
+  capability: string,
+  allNodes: CapabilityNode[],
+  field: "produces" | "requires",
+  isProducer: boolean,
+): CapabilityNode[] {
+  const results: CapabilityNode[] = [];
   for (const node of graph.values()) {
-    if (node.requires.some(r => r === capability || capability.includes(r) || r.includes(capability))) {
-      consumers.push(node);
+    if (node[field].some(v => v === capability || capability.includes(v) || v.includes(capability))) {
+      results.push(node);
     }
   }
-  // Topology fallback
-  if (consumers.length === 0) {
+  // Topology fallback: find semantically related nodes via capabilityMatch
+  if (results.length === 0) {
     try {
       const topo = getTopology();
       for (const node of allNodes) {
-        if (node.requires.length > 0) {
-          for (const r of node.requires) {
-            if (topo.capabilityMatch(capability, r) && !consumers.includes(node)) {
-              consumers.push(node);
+        if (node[field].length > 0) {
+          for (const v of node[field]) {
+            const matched = isProducer
+              ? topo.capabilityMatch(v, capability)
+              : topo.capabilityMatch(capability, v);
+            if (matched && !results.includes(node)) {
+              results.push(node);
               break;
             }
           }
@@ -143,7 +133,17 @@ function findConsumers(graph: Map<string, CapabilityNode>, capability: string, a
       }
     } catch {}
   }
-  return consumers;
+  return results;
+}
+
+/** Find all capability nodes that produce a given capability label. */
+function findProducers(graph: Map<string, CapabilityNode>, capability: string, allNodes: CapabilityNode[]): CapabilityNode[] {
+  return findRelated(graph, capability, allNodes, "produces", true);
+}
+
+/** Find all capability nodes that require a given capability label. */
+function findConsumers(graph: Map<string, CapabilityNode>, capability: string, allNodes: CapabilityNode[]): CapabilityNode[] {
+  return findRelated(graph, capability, allNodes, "requires", false);
 }
 
 /**
@@ -160,6 +160,9 @@ export function selectCapabilityChains(
   ir: any[],
   maxChains: number = 5
 ): CapabilityChain[] {
+  // Ensure semantic topology is built before any capability matching
+  getTopology(ir);
+
   const intentLower = intent.toLowerCase();
   const keywords = extractKeywords(intent);
   const graph = buildCapabilityGraph(ir);
@@ -214,7 +217,7 @@ export function selectCapabilityChains(
       for (const p of current.produces) {
         const consumers = findConsumers(graph, p, allNodes).filter(c => !visited.has(c.name));
         if (consumers.length > 0) {
-          const bestConsumer = consumers.sort((a, b) => b.score - a.score)[0];
+          const bestConsumer = topByScore(consumers)!;
           chain.push(bestConsumer);
           visited.add(bestConsumer.name);
           totalScore += bestConsumer.score;
@@ -250,7 +253,7 @@ export function selectCapabilityChains(
       const producers = findProducers(graph, seed.requires[0], allNodes)
         .filter(p => !visited.has(p.name));
       if (producers.length > 0) {
-        const bestProducer = producers.sort((a, b) => b.score - a.score)[0];
+        const bestProducer = topByScore(producers)!;
         chain.unshift(bestProducer);
         totalScore += bestProducer.score;
       }

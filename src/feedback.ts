@@ -66,7 +66,7 @@ export function getFailureAdjustedCredit(funcName: string): number {
   const funcRecords = records
     .filter(r => r.functionName === funcName)
     .map(r => ({ ...r, age: (Date.now() - new Date(r.timestamp).getTime()) / 86400000 }));
-  if (funcRecords.length === 0) return 0.5;
+  if (funcRecords.length === 0) return 1.0; // cold start: no penalty without evidence
 
   const SVL_PENALTY: Record<string, number> = {
     "SVL-1": 1.0,   // missing function — minor
@@ -87,7 +87,7 @@ export function getFailureAdjustedCredit(funcName: string): number {
       // weightedSuccess stays 0 for failures
     }
   }
-  return totalWeight > 0 ? weightedSuccess / totalWeight : 0.5;
+  return totalWeight > 0 ? weightedSuccess / totalWeight : 1.0;
 }
 
 /** @requires EXECUTION_DATA @produces RUN_ID */
