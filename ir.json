@@ -12188,6 +12188,7 @@
       "returnTypeDetail": "Map<string, CapabilityNode>",
       "file": "src/strategy-planner.ts",
       "calls": [
+        "has",
         "set"
       ],
       "exported": false,
@@ -12228,6 +12229,7 @@
         "toLowerCase",
         "jaccardSimilarity",
         "split",
+        "filter",
         "getFailureAdjustedCredit"
       ],
       "exported": false,
@@ -12239,7 +12241,7 @@
       "outputs": [
         "number"
       ],
-      "purpose": "Score a capability node against an intent. */",
+      "purpose": "Score a capability node against an intent. Returns 0 for irrelevant nodes (no keyword match at all). */",
       "tags": [
         "strategy",
         "planner"
@@ -12257,6 +12259,11 @@
           "name": "capability",
           "type": "string",
           "typeDetail": "string"
+        },
+        {
+          "name": "allNodes",
+          "type": "CapabilityNode[]",
+          "typeDetail": "CapabilityNode[]"
         }
       ],
       "returnType": "CapabilityNode[]",
@@ -12265,17 +12272,21 @@
       "calls": [
         "values",
         "some",
-        "push"
+        "push",
+        "getTopology",
+        "capabilityMatch",
+        "includes"
       ],
       "exported": false,
       "inputs": [
         "Map",
-        "string"
+        "string",
+        "CapabilityNode"
       ],
       "outputs": [
         "CapabilityNode"
       ],
-      "purpose": "Find all capability nodes that produce a given capability label. */",
+      "purpose": "Find all capability nodes that produce a given capability label. Falls back to topology similarity if no direct data-flow match. */",
       "tags": [
         "strategy",
         "planner"
@@ -12293,6 +12304,11 @@
           "name": "capability",
           "type": "string",
           "typeDetail": "string"
+        },
+        {
+          "name": "allNodes",
+          "type": "CapabilityNode[]",
+          "typeDetail": "CapabilityNode[]"
         }
       ],
       "returnType": "CapabilityNode[]",
@@ -12301,17 +12317,21 @@
       "calls": [
         "values",
         "some",
-        "push"
+        "push",
+        "getTopology",
+        "capabilityMatch",
+        "includes"
       ],
       "exported": false,
       "inputs": [
         "Map",
-        "string"
+        "string",
+        "CapabilityNode"
       ],
       "outputs": [
         "CapabilityNode"
       ],
-      "purpose": "Find all capability nodes that require a given capability label. */",
+      "purpose": "Find all capability nodes that require a given capability label. Falls back to topology similarity if no direct data-flow match. */",
       "tags": [
         "strategy",
         "planner"
@@ -12345,12 +12365,15 @@
         "buildCapabilityGraph",
         "values",
         "scoreNode",
-        "slice",
         "sort",
         "filter",
+        "slice",
         "findConsumers",
         "push",
         "add",
+        "getTopology",
+        "findSimilar",
+        "get",
         "findProducers",
         "unshift",
         "join",
@@ -13880,6 +13903,18 @@
     },
     {
       "name": "sqrt",
+      "params": [],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
+    },
+    {
+      "name": "findSimilar",
       "params": [],
       "returnType": "any",
       "returnTypeDetail": "any",
