@@ -52,7 +52,7 @@ graph TD
     F --> H(Immune Memory)
     H --> I(Antibody Registry & Credit Loops)
     I --> B
-    subgraph Program Truth (IR)
+    subgraph "Program Truth (IR)"
         J[Symbol Table]
         K[Type Graph]
         L[Call Graph]
@@ -235,7 +235,7 @@ graph TD
     F --> H(Immune Memory)
     H --> I(Antibody Registry & Credit Loops)
     I --> B
-    subgraph Program Truth (IR)
+    subgraph "Program Truth (IR)"
         J[Symbol Table]
         K[Type Graph]
         L[Call Graph]
@@ -418,7 +418,7 @@ graph TD
     F --> H(Immune Memory)
     H --> I(Antibody Registry & Credit Loops)
     I --> B
-    subgraph Program Truth (IR)
+    subgraph "Program Truth (IR)"
         J[Symbol Table]
         K[Type Graph]
         L[Call Graph]
