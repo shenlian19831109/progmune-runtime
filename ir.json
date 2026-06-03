@@ -1708,9 +1708,7 @@
         "filter",
         "includes",
         "map",
-        "convert",
-        "find",
-        "reverse"
+        "convert"
       ],
       "exported": true,
       "inputs": [
@@ -3831,6 +3829,110 @@
       "outputs": [],
       "tags": [
         "genome"
+      ]
+    },
+    {
+      "name": "computeHealthScore",
+      "params": [
+        {
+          "name": "failureGenome",
+          "type": "any",
+          "typeDetail": "any"
+        },
+        {
+          "name": "antibodyStats",
+          "type": "any",
+          "typeDetail": "any"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/health-utils.ts",
+      "calls": [
+        "min",
+        "max"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "number"
+      ],
+      "purpose": "Compute overall immune health score from failure and antibody data.",
+      "requires": [
+        "FAILURE_GENOME"
+      ],
+      "produces": [
+        "HEALTH_SCORE"
+      ],
+      "tags": [
+        "health",
+        "score",
+        "immune"
+      ]
+    },
+    {
+      "name": "formatHealthLevel",
+      "params": [
+        {
+          "name": "score",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/health-utils.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "number"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Format a health score as a status level.",
+      "requires": [
+        "HEALTH_SCORE"
+      ],
+      "produces": [
+        "HEALTH_STATUS"
+      ],
+      "tags": [
+        "health",
+        "format"
+      ]
+    },
+    {
+      "name": "countSessionLedgers",
+      "params": [
+        {
+          "name": "sessions",
+          "type": "any[]",
+          "typeDetail": "any[]"
+        }
+      ],
+      "returnType": "{ total: number; withLedger: number }",
+      "returnTypeDetail": "{ total: number; withLedger: number }",
+      "file": "src/health-utils.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "{ total: number; withLedger: number }"
+      ],
+      "purpose": "Validate a ledger and return pass/fail counts.",
+      "requires": [
+        "SESSION_LIST"
+      ],
+      "produces": [
+        "VALIDATION_COUNTS"
+      ],
+      "tags": [
+        "ledger",
+        "validation",
+        "audit"
       ]
     },
     {
@@ -11509,6 +11611,24 @@
       ]
     },
     {
+      "name": "min",
+      "params": [
+        {
+          "name": "values",
+          "type": "number[]"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "description": "最小值",
+      "tags": [
+        "(external)"
+      ]
+    },
+    {
       "name": "hostname",
       "params": [],
       "returnType": "any",
@@ -11696,24 +11816,6 @@
       "file": "(external)",
       "calls": [],
       "external": true,
-      "tags": [
-        "(external)"
-      ]
-    },
-    {
-      "name": "min",
-      "params": [
-        {
-          "name": "values",
-          "type": "number[]"
-        }
-      ],
-      "returnType": "number",
-      "returnTypeDetail": "number",
-      "file": "(external)",
-      "calls": [],
-      "external": true,
-      "description": "最小值",
       "tags": [
         "(external)"
       ]
