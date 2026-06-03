@@ -104,10 +104,12 @@ function buildCompactFuncList(funcs, allFuncs) {
             return def ? `${p.name}: ${def}` : `${p.name}: ${p.type}`;
         }).join(",");
         let line = `${f.name}(${params})->${f.returnType || "any"}`;
-        // Add capability metadata
+        // Add capability metadata + score
         const meta = [];
+        if (f.score && f.score > 0)
+            meta.push(`★${f.score.toFixed(1)}`);
         if (f.purpose)
-            meta.push(f.purpose.slice(0, 60));
+            meta.push(f.purpose.slice(0, 50));
         if (f.produces && f.produces.length > 0)
             meta.push(`→${f.produces.join(",")}`);
         if (meta.length > 0)
@@ -1114,6 +1116,25 @@ ${RETRY_HINT}
             currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}\n\n上一次生成的 JSON 中以下参数为空值：\n${argDetails}\n\n请为这些参数填入有意义的示例值（字符串用描述性值，数字用合理数值，对象用 {} as Type）。\n${RETRY_HINT}\n只输出 JSON。`;
             useSystem = false;
             continue;
+        }
+        // 4D Scoring Self-Verification: compare LLM choices against scores
+        const chosenFuncs = filtered.filter(a => a.kind === "call").map(a => a.function);
+        const scoredFuncs = new Map(topFuncs.map((f) => [f.name, f.score || 0]));
+        let scoreViolations = 0;
+        for (const fn of chosenFuncs) {
+            const actualScore = scoredFuncs.get(fn) || 0;
+            const maxScore = Math.max(...[...scoredFuncs.values()]);
+            if (maxScore > 0 && actualScore < maxScore * 0.3 && maxScore > 1) {
+                scoreViolations++;
+                const better = [...scoredFuncs.entries()]
+                    .filter(([_, s]) => s > actualScore * 2)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 3).map(([n, s]) => `${n}(${s.toFixed(1)})`).join(", ");
+                console.error(`⚠️ 评分偏低: ${fn}(${actualScore.toFixed(1)}) 被选中, 但更高分函数可用: ${better}`);
+            }
+        }
+        if (scoreViolations > 0) {
+            console.error(`📊 评分自省: ${scoreViolations}/${chosenFuncs.length} 个函数评分偏低 (阈值: 最高分30%)`);
         }
         // 校验通过：构建成功 Attempt
         const successAntibodyHit = antibodyHint
