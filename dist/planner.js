@@ -39,6 +39,7 @@ const runtime_types_1 = require("./runtime-types");
 const action_runtime_1 = require("./action-runtime");
 const validator_1 = require("./validator");
 const semantic_validator_1 = require("./semantic-validator");
+const feedback_1 = require("./feedback");
 const utils_1 = require("./utils");
 const failure_corpus_1 = require("./failure-corpus");
 const memory_layer_1 = require("./memory-layer");
@@ -747,6 +748,11 @@ async function plan(userIntent) {
                     score += 0.8;
             }
         }
+        // Dynamic Credit: multiply by actual success rate (0.1-1.0)
+        const successRate = (0, feedback_1.getFunctionSuccessRate)(f.name);
+        const creditFactor = 0.3 + successRate * 0.7; // range: 0.3 (always fail) to 1.0 (always succeed)
+        if (f.exported && !f.external)
+            score *= creditFactor;
         return { ...f, score };
     });
     scored.sort((a, b) => b.score - a.score);
@@ -954,6 +960,17 @@ ${RETRY_HINT}
                 if (!valid && rejection) {
                     preCheckErrors.push(`${a.function}: 协议违规 — 需要先调用 ${rejection.fixPath?.join(" → ") || "?"}`);
                 }
+            }
+        }
+        // P0: Strategy Enforcement — LLM must follow recommended chain
+        if (chains.length > 0 && chains[0].nodes.length >= 2) {
+            const topChain = chains[0];
+            const requiredFuncs = topChain.nodes.map(n => n.name);
+            const chosenFuncs = filtered.filter(a => a.kind === "call").map(a => a.function);
+            const missing = requiredFuncs.filter(fn => !chosenFuncs.includes(fn));
+            if (missing.length >= requiredFuncs.length * 0.5) {
+                // More than 50% of the chain is missing — LLM ignored the strategy
+                preCheckErrors.push(`策略违规: 推荐链 ${topChain.explanation}，但缺少 ${missing.join(", ")}`);
             }
         }
         // 1) 基础序列校验

@@ -4,7 +4,7 @@ import { generateAttemptId, generateSessionId, generatePlannerSeed } from "./run
 import { executeActionCode } from "./action-runtime";
 import { validateActionSequence } from "./validator";
 import { checkSemantic } from "./semantic-validator";
-import { getFunctionSuccessRate } from "./feedback";
+import { getFunctionSuccessRate, recordRun } from "./feedback";
 import { jaccardSimilarity, extractKeywords } from "./utils";
 import { recordFailure, recordSession, saveCheckpoint, loadCheckpoint, clearCheckpoint, SVL, queryAntibodies } from "./failure-corpus";
 import { recordEpisode, findSemanticTemplate } from "./memory-layer";
@@ -725,6 +725,10 @@ export async function plan(userIntent: string): Promise<PlanResult> {
         if (intentLower.includes(tag.toLowerCase())) score += 0.8;
       }
     }
+    // Dynamic Credit: multiply by actual success rate (0.1-1.0)
+    const successRate = getFunctionSuccessRate(f.name);
+    const creditFactor = 0.3 + successRate * 0.7; // range: 0.3 (always fail) to 1.0 (always succeed)
+    if (f.exported && !f.external) score *= creditFactor;
     return { ...f, score };
   });
   scored.sort((a: any, b: any) => b.score - a.score);
@@ -941,6 +945,18 @@ ${RETRY_HINT}
         if (!valid && rejection) {
           preCheckErrors.push(`${a.function}: 协议违规 — 需要先调用 ${rejection.fixPath?.join(" → ") || "?"}`);
         }
+      }
+    }
+
+    // P0: Strategy Enforcement — LLM must follow recommended chain
+    if (chains.length > 0 && chains[0].nodes.length >= 2) {
+      const topChain = chains[0];
+      const requiredFuncs = topChain.nodes.map(n => n.name);
+      const chosenFuncs = filtered.filter(a => a.kind === "call").map(a => (a as any).function);
+      const missing = requiredFuncs.filter(fn => !chosenFuncs.includes(fn));
+      if (missing.length >= requiredFuncs.length * 0.5) {
+        // More than 50% of the chain is missing — LLM ignored the strategy
+        preCheckErrors.push(`策略违规: 推荐链 ${topChain.explanation}，但缺少 ${missing.join(", ")}`);
       }
     }
 
