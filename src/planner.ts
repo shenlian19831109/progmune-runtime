@@ -1138,7 +1138,7 @@ ${RETRY_HINT}
     const scoredFuncs = new Map(topFuncs.map((f: any) => [f.name, f.score || 0]));
     let scoreViolations = 0;
     for (const fn of chosenFuncs) {
-      const actualScore = scoredFuncs.get(fn) || 0;
+      const actualScore: number = (scoredFuncs.get(fn) as number) || 0;
       const allScores = [...scoredFuncs.values()].filter((s): s is number => typeof s === "number" && s > 0);
     const maxScore = allScores.length > 0 ? Math.max(...allScores) : 0;
     if (maxScore > 0 && actualScore < maxScore * 0.3 && maxScore > 1) {
