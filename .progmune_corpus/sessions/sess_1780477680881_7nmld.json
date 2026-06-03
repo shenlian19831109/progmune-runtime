@@ -1,0 +1,161 @@
+{
+  "sessionId": "sess_1780477680881_7nmld",
+  "intent": "truncate a long string to a maximum length and add ellipsis",
+  "attempts": [
+    {
+      "id": "att_1780477682974_e9thr",
+      "sessionId": "sess_1780477680881_7nmld",
+      "attemptNumber": 1,
+      "inputIntent": "truncate a long string to a maximum length and add ellipsis",
+      "plannerSeed": "9375083e",
+      "constraintSnapshotId": "snap_1780477680882_60f57f132781",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "truncate",
+          "args": [
+            {
+              "name": "str",
+              "type": "string",
+              "value": "This is a very long string that needs to be truncated"
+            },
+            {
+              "name": "maxLen",
+              "type": "number",
+              "value": 20
+            },
+            {
+              "name": "ellipsis",
+              "type": "any",
+              "value": "..."
+            }
+          ],
+          "assignTo": "truncated"
+        },
+        {
+          "kind": "return",
+          "value": "truncated"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "truncate",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780477682975,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780477680881,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780477682974_e9thr",
+    "sessionId": "sess_1780477680881_7nmld",
+    "attemptNumber": 1,
+    "inputIntent": "truncate a long string to a maximum length and add ellipsis",
+    "plannerSeed": "9375083e",
+    "constraintSnapshotId": "snap_1780477680882_60f57f132781",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "truncate",
+        "args": [
+          {
+            "name": "str",
+            "type": "string",
+            "value": "This is a very long string that needs to be truncated"
+          },
+          {
+            "name": "maxLen",
+            "type": "number",
+            "value": 20
+          },
+          {
+            "name": "ellipsis",
+            "type": "any",
+            "value": "..."
+          }
+        ],
+        "assignTo": "truncated"
+      },
+      {
+        "kind": "return",
+        "value": "truncated"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "truncate",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780477682975,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780477680882_60f57f132781",
+  "endedAt": 1780477682979
+}

@@ -152,12 +152,18 @@ function emitCode(actions, meta) {
         else if (action.kind === "assign" && action.target) {
             declared.add(action.target);
         }
-        // Collect arg value references
+        // Collect arg value references AND empty-default params
         if (action.kind === "call" && action.args) {
             for (const arg of action.args) {
                 const v = typeof arg === "object" ? arg?.value : arg;
                 if (typeof v === "string" && /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(v) && v !== "") {
                     referenced.add(v);
+                }
+                // Also detect empty defaults: these should become function params
+                const isDefault = v === "" || v === 0 || v === false || v === null
+                    || (Array.isArray(v) && v.length === 0);
+                if (isDefault && typeof arg === "object" && arg.name) {
+                    referenced.add(arg.name);
                 }
             }
         }
@@ -172,6 +178,26 @@ function emitCode(actions, meta) {
                 const t = typeof arg === "object" ? arg?.type : "string";
                 if (typeof v === "string" && inputs.includes(v) && t && t !== "any") {
                     inputTypes.set(v, t);
+                }
+            }
+        }
+    }
+    // If no inputs detected but functions have params with empty defaults,
+    // create parameters from function signatures
+    if (inputs.length === 0) {
+        for (const action of actions) {
+            if (action.kind === "call" && action.args && action.args.length > 0) {
+                for (const arg of action.args) {
+                    const name = typeof arg === "object" ? arg.name : "param";
+                    const type = typeof arg === "object" ? (arg.type || "string") : "string";
+                    const val = typeof arg === "object" ? arg.value : arg;
+                    // Only add if value is empty default (not a real value)
+                    if (val === "" || val === 0 || val === false || val === null || (Array.isArray(val) && val.length === 0)) {
+                        if (!inputTypes.has(name)) {
+                            inputs.push(name);
+                            inputTypes.set(name, type.replace(/\[\]$/, ""));
+                        }
+                    }
                 }
             }
         }
@@ -192,10 +218,16 @@ function emitCode(actions, meta) {
                 const val = a?.value;
                 if (typeof val === "string" && declared.has(val))
                     return val;
-                // If value looks like a variable name (valid JS identifier), pass it through
                 if (typeof val === "string" && /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(val) && val !== "") {
                     declared.add(val);
                     return val;
+                }
+                // Empty default value → use function's parameter name (input parameter)
+                const isDefault = val === "" || val === 0 || val === false || val === null
+                    || (Array.isArray(val) && val.length === 0);
+                if (isDefault && a?.name && inputs.includes(a.name)) {
+                    declared.add(a.name);
+                    return a.name;
                 }
                 const paramType = meta?.params?.[i]?.type || "any";
                 if (BASIC_TYPES.has(paramType)) {
