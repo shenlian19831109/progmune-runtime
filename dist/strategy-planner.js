@@ -13,6 +13,7 @@ exports.selectCapabilityChains = selectCapabilityChains;
 exports.formatChainHint = formatChainHint;
 const utils_1 = require("./utils");
 const feedback_1 = require("./feedback");
+const semantic_topology_1 = require("./semantic-topology");
 /** Build a capability graph from IR functions. */
 function buildCapabilityGraph(ir) {
     const graph = new Map();
@@ -25,59 +26,128 @@ function buildCapabilityGraph(ir) {
             tags: f.tags || [],
             requires: f.requires || [],
             produces: f.produces || [],
+            useWhen: f.useWhen || [],
             score: 0,
         });
     }
     return graph;
 }
-/** Score a capability node against an intent. */
+/** Score a capability node against an intent.
+ *  Returns 0 for irrelevant nodes (no keyword match at all). */
 function scoreNode(node, intentLower, keywords) {
     let score = 0;
+    let hasMatch = false;
     // Name match
     for (const kw of keywords) {
-        if (node.name.toLowerCase().includes(kw))
+        if (node.name.toLowerCase().includes(kw)) {
             score += 1;
-        score += (0, utils_1.jaccardSimilarity)(node.name.toLowerCase(), kw);
+            hasMatch = true;
+        }
+        const js = (0, utils_1.jaccardSimilarity)(node.name.toLowerCase(), kw);
+        if (js > 0.2) {
+            score += js;
+            hasMatch = true;
+        }
     }
     // Purpose match
     const purposeLower = node.purpose.toLowerCase();
     for (const kw of keywords) {
-        if (purposeLower.includes(kw))
+        if (purposeLower.includes(kw)) {
             score += 2;
+            hasMatch = true;
+        }
     }
     // Tag match
     for (const tag of node.tags) {
-        if (intentLower.includes(tag.toLowerCase()))
+        if (intentLower.includes(tag.toLowerCase())) {
             score += 1.5;
+            hasMatch = true;
+        }
     }
     // Semantic word overlap in purpose
     const intentWords = intentLower.split(/[\s,，]+/);
     for (const w of intentWords) {
-        if (w.length > 2 && purposeLower.includes(w))
+        if (w.length > 2 && purposeLower.includes(w)) {
             score += 0.5;
+            hasMatch = true;
+        }
     }
+    // useWhen scenario match
+    if (node.useWhen) {
+        for (const scenario of node.useWhen) {
+            const scenarioWords = scenario.toLowerCase().split(/[\s,]+/);
+            const matchCount = scenarioWords.filter((w) => w.length > 3 && intentLower.includes(w)).length;
+            if (matchCount >= 2) {
+                score += 3.0;
+                hasMatch = true;
+            }
+            else if (matchCount === 1) {
+                score += 1.0;
+                hasMatch = true;
+            }
+        }
+    }
+    // Require at least one match to be relevant
+    if (!hasMatch)
+        return 0;
     // Dynamic Credit: multiply by actual success rate
     const successRate = (0, feedback_1.getFailureAdjustedCredit)(node.name);
     const creditFactor = 0.3 + successRate * 0.7;
     return score * creditFactor;
 }
-/** Find all capability nodes that produce a given capability label. */
-function findProducers(graph, capability) {
+/** Find all capability nodes that produce a given capability label.
+ *  Falls back to topology similarity if no direct data-flow match. */
+function findProducers(graph, capability, allNodes) {
     const producers = [];
     for (const node of graph.values()) {
         if (node.produces.some(p => p === capability || capability.includes(p) || p.includes(capability))) {
             producers.push(node);
         }
     }
+    // Topology fallback: find semantically related producers
+    if (producers.length === 0) {
+        try {
+            const topo = (0, semantic_topology_1.getTopology)();
+            for (const node of allNodes) {
+                if (node.produces.length > 0) {
+                    for (const p of node.produces) {
+                        if (topo.capabilityMatch(p, capability) && !producers.includes(node)) {
+                            producers.push(node);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        catch { }
+    }
     return producers;
 }
-/** Find all capability nodes that require a given capability label. */
-function findConsumers(graph, capability) {
+/** Find all capability nodes that require a given capability label.
+ *  Falls back to topology similarity if no direct data-flow match. */
+function findConsumers(graph, capability, allNodes) {
     const consumers = [];
     for (const node of graph.values()) {
         if (node.requires.some(r => r === capability || capability.includes(r) || r.includes(capability))) {
             consumers.push(node);
         }
+    }
+    // Topology fallback
+    if (consumers.length === 0) {
+        try {
+            const topo = (0, semantic_topology_1.getTopology)();
+            for (const node of allNodes) {
+                if (node.requires.length > 0) {
+                    for (const r of node.requires) {
+                        if (topo.capabilityMatch(capability, r) && !consumers.includes(node)) {
+                            consumers.push(node);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        catch { }
     }
     return consumers;
 }
@@ -98,11 +168,12 @@ function selectCapabilityChains(intent, ir, maxChains = 5) {
     for (const node of graph.values()) {
         node.score = scoreNode(node, intentLower, keywords);
     }
-    // Find seed nodes: highest-scoring nodes that produce something
+    // Find seed nodes: highest-scoring nodes (prefer producers, allow pure consumers)
     const seeds = [...graph.values()]
-        .filter(n => n.produces.length > 0 && n.score > 0)
+        .filter(n => n.score > 1.0 && (n.produces.length > 0 || n.score > 3))
         .sort((a, b) => b.score - a.score)
-        .slice(0, 10);
+        .slice(0, 15);
+    const allNodes = [...graph.values()];
     const chains = [];
     for (const seed of seeds) {
         // Build chain: seed → consumer → consumer...
@@ -115,7 +186,7 @@ function selectCapabilityChains(intent, ir, maxChains = 5) {
         while (extended && chain.length < 8) {
             extended = false;
             for (const p of current.produces) {
-                const consumers = findConsumers(graph, p).filter(c => !visited.has(c.name));
+                const consumers = findConsumers(graph, p, allNodes).filter(c => !visited.has(c.name));
                 if (consumers.length > 0) {
                     // Pick best-scoring consumer
                     const bestConsumer = consumers.sort((a, b) => b.score - a.score)[0];
@@ -130,7 +201,7 @@ function selectCapabilityChains(intent, ir, maxChains = 5) {
         }
         // Backward trace: does seed need something? Find producers.
         if (seed.requires.length > 0) {
-            const producers = findProducers(graph, seed.requires[0])
+            const producers = findProducers(graph, seed.requires[0], allNodes)
                 .filter(p => !visited.has(p.name));
             if (producers.length > 0) {
                 const bestProducer = producers.sort((a, b) => b.score - a.score)[0];
