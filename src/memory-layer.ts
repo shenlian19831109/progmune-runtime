@@ -92,7 +92,7 @@ export function getSuccessfulEpisodes(limit: number = 10): Episode[] {
 
 // ── Semantic GC: prune episodic memory ──
 
-const MAX_EPISODES = 1000;
+const MAX_EPISODE_COUNT = 1000;
 const MAX_AGE_DAYS = 30;
 
 /** Prune episodic memory: keep high-value, recent, diverse episodes.
@@ -100,7 +100,7 @@ const MAX_AGE_DAYS = 30;
  *  Called periodically after recording new episodes. */
 export function pruneEpisodicMemory(): number {
   const episodes = loadEpisodes();
-  if (episodes.length <= MAX_EPISODES) return 0;
+  if (episodes.length <= MAX_EPISODE_COUNT) return 0;
 
   const now = Date.now();
   const scored = episodes.map((ep, i) => {
@@ -114,7 +114,7 @@ export function pruneEpisodicMemory(): number {
 
   // Keep top MAX_EPISODES by score
   scored.sort((a, b) => b.score - a.score);
-  const kept = scored.slice(0, MAX_EPISODES).sort((a, b) => a.index - b.index);
+  const kept = scored.slice(0, MAX_EPISODE_COUNT).sort((a, b) => a.index - b.index);
   const removed = episodes.length - kept.length;
 
   if (removed > 0) {
