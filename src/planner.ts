@@ -870,6 +870,9 @@ ${RETRY_HINT}
 
     // 0) Hard Constraint Pre-check: local scan before full validation
     //    Saves LLM tokens by detecting obvious violations first
+    const preCheckRules = new Map<string, import("./ssg-validator").StateAnnotation>();
+    for (const p of protocols) preCheckRules.set(p.function, p.protocol);
+
     const preCheckErrors: string[] = [];
     for (let ai = 0; ai < filtered.length; ai++) {
       const a = filtered[ai];
@@ -883,9 +886,9 @@ ${RETRY_HINT}
         preCheckErrors.push(`${a.function}: 参数数量错误 (期望${def.params.length}, 实际${a.args.length})`);
       }
       // Protocol pre-check: verify function is callable in current namespace state
-      if (def.protocol && protocols.length > 0) {
+      if (def.protocol && preCheckRules.size > 0) {
         const ctx: ValidationContext = { ledger: [], currentState: rebuildState([], namespaceInitialStates) };
-        const { valid, rejection } = validateTransition(ctx, a.function, ai, rules, namespaceInitialStates);
+        const { valid, rejection } = validateTransition(ctx, a.function, ai, preCheckRules, namespaceInitialStates);
         if (!valid && rejection) {
           preCheckErrors.push(`${a.function}: 协议违规 — 需要先调用 ${rejection.fixPath?.join(" → ") || "?"}`);
         }
