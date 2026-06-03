@@ -42,4 +42,8 @@ jobs:
           cache: "npm"
       - run: npm ci
       - run: npm run build
-      - run: test -f dist/mcp-server.mjs || (echo "MISSING: dist/mcp-server.mjs" && exit 1)
+      - run: |
+          if [ ! -f dist/mcp-server.mjs ]; then
+            echo "MISSING: dist/mcp-server.mjs"
+            exit 1
+          fi
