@@ -45,7 +45,7 @@ graph TD
     A --> B(Semantic Topology & Strategy Planner)
     B --> C(Action Runtime)
     C --> D{Constraint Engine}
-    D --> |SVL-1, SVL-2, SVL-3 Valid| E{Semantic State Graph (SSG)}
+    D --> |SVL-1, SVL-2, SVL-3 Valid| E{"Semantic State Graph (SSG)"}
     D --> |Invalid| F(Failure Corpus)
     E --> |SVL-4 Valid| G(Code Emitter)
     E --> |Invalid| F
@@ -228,7 +228,7 @@ graph TD
     A --> B(Semantic Topology & Strategy Planner)
     B --> C(Action Runtime)
     C --> D{Constraint Engine}
-    D --> |SVL-1, SVL-2, SVL-3 Valid| E{Semantic State Graph (SSG)}
+    D --> |SVL-1, SVL-2, SVL-3 Valid| E{"Semantic State Graph (SSG)"}
     D --> |Invalid| F(Failure Corpus)
     E --> |SVL-4 Valid| G(Code Emitter)
     E --> |Invalid| F
@@ -411,7 +411,7 @@ graph TD
     A --> B(Semantic Topology & Strategy Planner)
     B --> C(Action Runtime)
     C --> D{Constraint Engine}
-    D --> |SVL-1, SVL-2, SVL-3 Valid| E{Semantic State Graph (SSG)}
+    D --> |SVL-1, SVL-2, SVL-3 Valid| E{"Semantic State Graph (SSG)"}
     D --> |Invalid| F(Failure Corpus)
     E --> |SVL-4 Valid| G(Code Emitter)
     E --> |Invalid| F
