@@ -1,0 +1,19 @@
+{
+  "intent": "get all sessions",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "symbol_existence",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "getAllSessions",
+      "args": [],
+      "assignTo": "sessions"
+    }
+  ],
+  "errorDetail": "策略违规: 推荐链 getFailureGenome → registerAllMissingFingerprints → verifyAllFingerprints → getAllSessions → countResolved → formatSessionCounts → countSessionsWithViolations → replaySession → getBranchPath，但缺少 getFailureGenome, registerAllMissingFingerprints, verifyAllFingerprints, countResolved, formatSessionCounts, countSessionsWithViolations, replaySession, getBranchPath",
+  "plannerAttempt": 2,
+  "plannerRetryTotal": 4,
+  "id": "fail_1780509990690_105",
+  "timestamp": "2026-06-03T18:06:30.690Z"
+}

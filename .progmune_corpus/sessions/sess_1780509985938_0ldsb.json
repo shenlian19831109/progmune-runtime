@@ -1,0 +1,143 @@
+{
+  "sessionId": "sess_1780509985938_0ldsb",
+  "intent": "",
+  "attempts": [
+    {
+      "id": "att_1780509991084_vudnf",
+      "sessionId": "sess_1780509985938_0ldsb",
+      "attemptNumber": 3,
+      "inputIntent": "",
+      "plannerSeed": "00da06ae",
+      "constraintSnapshotId": "snap_1780509985939_90a89eda056f",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "auditDirectory",
+          "args": [
+            {
+              "name": "dir",
+              "type": "string",
+              "value": null
+            },
+            {
+              "name": "threshold",
+              "type": "any",
+              "value": null
+            }
+          ],
+          "assignTo": "result"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "auditDirectory",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780509991084,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780509985939,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780509991084_vudnf",
+    "sessionId": "sess_1780509985938_0ldsb",
+    "attemptNumber": 3,
+    "inputIntent": "",
+    "plannerSeed": "00da06ae",
+    "constraintSnapshotId": "snap_1780509985939_90a89eda056f",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "auditDirectory",
+        "args": [
+          {
+            "name": "dir",
+            "type": "string",
+            "value": null
+          },
+          {
+            "name": "threshold",
+            "type": "any",
+            "value": null
+          }
+        ],
+        "assignTo": "result"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "auditDirectory",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780509991084,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780509985939_90a89eda056f",
+  "endedAt": 1780509991087
+}
