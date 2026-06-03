@@ -159,25 +159,29 @@ export function emitCode(
     }
   }
 
-  // If no inputs detected but functions have params with empty defaults,
-  // create parameters from function signatures
-  if (inputs.length === 0) {
-    for (const action of actions) {
-      if (action.kind === "call" && action.args && action.args.length > 0) {
-        for (const arg of action.args) {
-          const name = typeof arg === "object" ? arg.name : "param";
-          const type = typeof arg === "object" ? (arg.type || "string") : "string";
-          const val = typeof arg === "object" ? arg.value : arg;
-          // Only add if value is empty default (not a real value)
-          if (val === "" || val === 0 || val === false || val === null || (Array.isArray(val) && val.length === 0)) {
-            if (!inputTypes.has(name)) {
-              inputs.push(name);
-              inputTypes.set(name, type.replace(/\[\]$/, ""));
-            }
-          }
+  // Refinement: collect empty defaults for Planner feedback
+  const emptyDefaults: { actionIndex: number; function: string; param: string; type: string }[] = [];
+  for (let i = 0; i < actions.length; i++) {
+    const action = actions[i];
+    if (action.kind === "call" && action.args) {
+      for (const arg of action.args) {
+        const v = typeof arg === "object" ? arg?.value : arg;
+        const isDefault = v === "" || v === 0 || v === false || v === null
+          || (Array.isArray(v) && v.length === 0);
+        if (isDefault && typeof arg === "object" && arg.name) {
+          emptyDefaults.push({
+            actionIndex: i,
+            function: action.function || "unknown",
+            param: arg.name,
+            type: (typeof arg === "object" ? arg.type : "string") || "string",
+          });
         }
       }
     }
+  }
+  // Store for Planner feedback (accessible via global)
+  if (emptyDefaults.length > 0) {
+    (globalThis as any).__progmune_empty_defaults = emptyDefaults;
   }
 
   const paramList = inputs.map(v => `${v}: ${inputTypes.get(v) || "string"}`).join(", ");

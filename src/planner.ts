@@ -1082,6 +1082,28 @@ ${RETRY_HINT}
       continue;
     }
 
+    // Phase 8: Refinement — detect empty args, ask LLM to fill meaningful values
+    const emptyArgs: { idx: number; fn: string; param: string; type: string }[] = [];
+    for (let ai = 0; ai < filtered.length; ai++) {
+      const a = filtered[ai];
+      if (a.kind === "call" && a.args) {
+        for (const arg of a.args) {
+          const v = typeof arg === "object" ? arg.value : arg;
+          const isEmpty = (val: any) => val === "" || val === 0 || val === false || val === null || (Array.isArray(val) && val.length === 0);
+          if (isEmpty(v)) {
+            emptyArgs.push({ idx: ai, fn: a.function || "?", param: arg.name || "?", type: arg.type || "?" });
+          }
+        }
+      }
+    }
+    if (emptyArgs.length > 0 && r < maxRetries - 1) {
+      const argDetails = emptyArgs.map(e => `  ${e.fn}() 参数 "${e.param}" (${e.type}) 是空值`).join("\n");
+      console.error(`🔍 检测到 ${emptyArgs.length} 个空参数，启动精炼...`);
+      currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}\n\n上一次生成的 JSON 中以下参数为空值：\n${argDetails}\n\n请为这些参数填入有意义的示例值（字符串用描述性值，数字用合理数值，对象用 {} as Type）。\n${RETRY_HINT}\n只输出 JSON。`;
+      useSystem = false;
+      continue;
+    }
+
     // 校验通过：构建成功 Attempt
     const successAntibodyHit: AntibodyHit | undefined = antibodyHint
       ? {
