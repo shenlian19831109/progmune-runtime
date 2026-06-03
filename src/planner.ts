@@ -705,7 +705,7 @@ export async function plan(userIntent: string): Promise<PlanResult> {
         if (intentLower.includes(pText)) { score += 1.5; continue; }
         // Semantic: word overlap
         const pWords = pText.split(/\s+/);
-        const matchCount = pWords.filter(w => intentLower.includes(w)).length;
+        const matchCount = pWords.filter((w: string) => intentLower.includes(w)).length;
         if (matchCount > 0) score += matchCount * 0.5;
       }
     }
@@ -714,7 +714,7 @@ export async function plan(userIntent: string): Promise<PlanResult> {
         const rText = r.toLowerCase().replace(/_/g, " ");
         if (intentLower.includes(rText)) { score += 0.5; continue; }
         const rWords = rText.split(/\s+/);
-        const matchCount = rWords.filter(w => intentLower.includes(w)).length;
+        const matchCount = rWords.filter((w: string) => intentLower.includes(w)).length;
         if (matchCount > 0) score += matchCount * 0.2;
       }
     }

@@ -721,7 +721,7 @@ async function plan(userIntent) {
                 }
                 // Semantic: word overlap
                 const pWords = pText.split(/\s+/);
-                const matchCount = pWords.filter(w => intentLower.includes(w)).length;
+                const matchCount = pWords.filter((w) => intentLower.includes(w)).length;
                 if (matchCount > 0)
                     score += matchCount * 0.5;
             }
@@ -734,7 +734,7 @@ async function plan(userIntent) {
                     continue;
                 }
                 const rWords = rText.split(/\s+/);
-                const matchCount = rWords.filter(w => intentLower.includes(w)).length;
+                const matchCount = rWords.filter((w) => intentLower.includes(w)).length;
                 if (matchCount > 0)
                     score += matchCount * 0.2;
             }
