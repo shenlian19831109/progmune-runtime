@@ -53,9 +53,9 @@ export interface ValidationContext {
 
 export interface LedgerConsistencyViolation {
   index: number;
-  invariant: "before-consistency" | "delta-consistency";
-  expected: Record<string, string[]>;
-  actual: Record<string, string[]>;
+  invariant: "before-consistency" | "delta-consistency" | "delta-legality";
+  expected?: Record<string, string[]>;
+  actual?: Record<string, string[]>;
   detail?: string;
 }
 
@@ -64,7 +64,7 @@ const DEFAULT_NAMESPACE = "_global";
 // ── Phase 4: Invariant Violation Error ──
 
 export interface InvariantViolationDetail {
-  invariant: "before-consistency" | "delta-consistency" | "rule-hash-mismatch" | "transition-order";
+  invariant: "before-consistency" | "delta-consistency" | "rule-hash-mismatch" | "transition-order" | "delta-legality";
   index?: number;
   namespace?: string;
   function?: string;
@@ -346,7 +346,8 @@ export function validateTransition(
 /** @requires LEDGER_DATA @produces CONSISTENCY_RESULT */
 export function checkLedgerConsistency(
   ledger: StateTransition[],
-  namespaceInitialStates: Map<string, string> = new Map([["_global", "INIT"]])
+  namespaceInitialStates: Map<string, string> = new Map([["_global", "INIT"]]),
+  protocolRules?: Map<string, StateAnnotation>,
 ): { consistent: boolean; violations: LedgerConsistencyViolation[] } {
   const violations: LedgerConsistencyViolation[] = [];
   const running = fromSnapshot({});
@@ -407,6 +408,54 @@ export function checkLedgerConsistency(
           actual: actualAfter,
           detail: `Transition[${i}] "${t.function}": statesAfter does not match applyDelta(statesBefore, acquired, invalidated)`,
         });
+      }
+    }
+
+    // Invariant-2: delta legality — acquired/invalidated must match protocol rules
+    if (t.valid && protocolRules && protocolRules.size > 0) {
+      const rule = protocolRules.get(t.function);
+      if (rule) {
+        // Check acquired states are in the function's post_states
+        const beforeStates = t.statesBefore[t.namespace] || [];
+        for (const a of (t.acquired || [])) {
+          if (!rule.post_states.includes(a)) {
+            violations.push({
+              index: i,
+              invariant: "delta-legality",
+              detail: `Transition[${i}] "${t.function}": acquired state "${a}" is not in protocol post_states [${rule.post_states.join(", ")}]`,
+            });
+          }
+          // Reject acquiring a state that already exists in statesBefore
+          if (beforeStates.includes(a)) {
+            violations.push({
+              index: i,
+              invariant: "delta-legality",
+              detail: `Transition[${i}] "${t.function}": acquired state "${a}" already exists in statesBefore [${beforeStates.join(", ")}]`,
+            });
+          }
+        }
+        // Check invalidated states are in the function's invalidate list
+        for (const inv of (t.invalidated || [])) {
+          if (!(rule.invalidate || []).includes(inv)) {
+            violations.push({
+              index: i,
+              invariant: "delta-legality",
+              detail: `Transition[${i}] "${t.function}": invalidated state "${inv}" is not in protocol invalidate [${(rule.invalidate || []).join(", ")}]`,
+            });
+          }
+        }
+        // Check no missing expected invalidations (unless the function has no invalidate rule)
+        if (rule.invalidate && rule.invalidate.length > 0) {
+          for (const expectedInv of rule.invalidate) {
+            if (!(t.invalidated || []).includes(expectedInv)) {
+              violations.push({
+                index: i,
+                invariant: "delta-legality",
+                detail: `Transition[${i}] "${t.function}": expected invalidation of "${expectedInv}" per protocol, but not present in transition`,
+              });
+            }
+          }
+        }
       }
     }
 

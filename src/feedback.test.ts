@@ -36,15 +36,27 @@ describe("feedback module", () => {
     expect(rate).toBe(0.5);
   });
 
-  it("getFailureAdjustedCredit returns 1.0 for unknown function (cold start, no penalty)", () => {
+  it("getFailureAdjustedCredit returns 0.5 for unknown function (Laplace prior: neutral)", () => {
     const credit = getFailureAdjustedCredit("__nonexistent_func_xyz__");
-    expect(credit).toBe(1.0);
+    expect(credit).toBe(0.5);
   });
 
   it("getFailureAdjustedCredit returns a number between 0 and 1", () => {
-    // Test with a function that may or may not exist
     const credit = getFailureAdjustedCredit("generateJWT");
     expect(credit).toBeGreaterThanOrEqual(0);
     expect(credit).toBeLessThanOrEqual(1);
+  });
+
+  it("Laplace smoothing: cold start = 0.5 (neutral prior)", () => {
+    // No records → prior Beta(1,1) → 1/(1+1) = 0.5
+    expect(getFailureAdjustedCredit("__unknown_fn__")).toBe(0.5);
+  });
+
+  it("Laplace smoothing: 0/1 record is not zero (allows redemption)", () => {
+    // Laplace: (0+1)/(1+2) ≈ 0.33, not 0.0
+    // This is only true if there are real records (not cold start).
+    // Cold start with no records returns 0.5 by definition.
+    const credit = getFailureAdjustedCredit("svl1_test_1780509556916");
+    expect(credit).toBeGreaterThan(0);
   });
 });

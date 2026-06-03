@@ -112,6 +112,24 @@ describe("selectCapabilityChains", () => {
   });
 });
 
+describe("selectCapabilityChains — edge cases", () => {
+  it("returns empty array for null intent", () => {
+    expect(selectCapabilityChains(null as any, mockIR)).toEqual([]);
+  });
+
+  it("returns empty array for undefined intent", () => {
+    expect(selectCapabilityChains(undefined as any, mockIR)).toEqual([]);
+  });
+
+  it("returns empty array for empty string intent", () => {
+    expect(selectCapabilityChains("", mockIR)).toEqual([]);
+  });
+
+  it("returns empty array for whitespace-only intent", () => {
+    expect(selectCapabilityChains("   ", mockIR)).toEqual([]);
+  });
+});
+
 describe("formatChainHint", () => {
   it("returns empty string for empty chains", () => {
     expect(formatChainHint([])).toBe("");

@@ -58,15 +58,27 @@ export function getWeightedSuccessRate(funcName: string): number {
 }
 
 /** @requires FUNCTION_NAME @produces FAILURE_ADJUSTED_CREDIT
- *  Credit score adjusted by failure severity.
- *  SVL-4 (protocol) violations penalize 2x more than SVL-1.
- *  Time-weighted + severity-weighted. */
+ *  Credit score adjusted by failure severity with Laplace smoothing.
+ *
+ *  Laplace (add-1) smoothing eliminates small-sample bias:
+ *    - 1/1 success → ~0.67 (not 1.0 — still uncertain)
+ *    - 99/100 success → ~0.98 (approaches empirical rate)
+ *    - 0/1 failure → ~0.33 (not 0.0 — allows redemption)
+ *    - Cold start → 0.5 (neutral prior)
+ *
+ *  SVL-4 protocol violations are penalized 3× more than SVL-1.
+ *  Time-weighted via exponential decay (half-life = 1 day). */
 export function getFailureAdjustedCredit(funcName: string): number {
   const records = loadFeedback();
   const funcRecords = records
     .filter(r => r.functionName === funcName)
     .map(r => ({ ...r, age: (Date.now() - new Date(r.timestamp).getTime()) / 86400000 }));
-  if (funcRecords.length === 0) return 1.0; // cold start: no penalty without evidence
+
+  // Laplace prior: Beta(1,1) → pseudocount of 1 success + 1 failure
+  const LAPLACE_PRIOR_SUCCESS = 1;
+  const LAPLACE_PRIOR_TOTAL = 2;
+
+  if (funcRecords.length === 0) return LAPLACE_PRIOR_SUCCESS / LAPLACE_PRIOR_TOTAL; // 0.5
 
   const SVL_PENALTY: Record<string, number> = {
     "SVL-1": 1.0,   // missing function — minor
@@ -87,7 +99,8 @@ export function getFailureAdjustedCredit(funcName: string): number {
       // weightedSuccess stays 0 for failures
     }
   }
-  return totalWeight > 0 ? weightedSuccess / totalWeight : 1.0;
+  // Laplace smoothing: (success + 1) / (total + 2)
+  return (weightedSuccess + LAPLACE_PRIOR_SUCCESS) / (totalWeight + LAPLACE_PRIOR_TOTAL);
 }
 
 /** @requires EXECUTION_DATA @produces RUN_ID */
