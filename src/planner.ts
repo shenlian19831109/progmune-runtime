@@ -868,21 +868,42 @@ ${RETRY_HINT}
     const filtered = enriched.filter(a => !forbiddenFuncs.includes(a.kind === "call" ? a.function : ''));
     let ssgTransitions: StateTransition[] = [];
 
+    // 0) Hard Constraint Pre-check: local scan before full validation
+    //    Saves LLM tokens by detecting obvious violations first
+    const preCheckErrors: string[] = [];
+    for (let ai = 0; ai < filtered.length; ai++) {
+      const a = filtered[ai];
+      if (a.kind !== "call" || !a.function) continue;
+      const def = ir.find((f: any) => f.name === a.function);
+      if (!def) {
+        preCheckErrors.push(`${a.function}: 函数不存在于 IR`);
+        continue;
+      }
+      if (def.params && a.args && a.args.length !== def.params.length) {
+        preCheckErrors.push(`${a.function}: 参数数量错误 (期望${def.params.length}, 实际${a.args.length})`);
+      }
+      // Protocol pre-check: verify function is callable in current namespace state
+      if (def.protocol && protocols.length > 0) {
+        const ctx: ValidationContext = { ledger: [], currentState: rebuildState([], namespaceInitialStates) };
+        const { valid, rejection } = validateTransition(ctx, a.function, ai, rules, namespaceInitialStates);
+        if (!valid && rejection) {
+          preCheckErrors.push(`${a.function}: 协议违规 — 需要先调用 ${rejection.fixPath?.join(" → ") || "?"}`);
+        }
+      }
+    }
+
     // 1) 基础序列校验
     const seqResult = validateActionSequence(filtered);
-    if (!seqResult.valid) {
-      const errorsFlat = seqResult.errors.flat();
+    if (!seqResult.valid || preCheckErrors.length > 0) {
+      const errorsFlat = [...preCheckErrors, ...seqResult.errors.flat()];
       console.error("⚠️ 序列校验失败:", errorsFlat.join(", "));
 
       // Use structured violations directly from validator
       const violations: ConstraintViolation[] = seqResult.violations.length > 0
         ? seqResult.violations
-        : [{
-            svl: 1 as const,
-            violatedConstraint: "symbol_existence",
-            actionIndex: 0,
-            description: errorsFlat.join("; "),
-          }];
+        : preCheckErrors.length > 0
+        ? [{ svl: 1 as const, violatedConstraint: "symbol_existence", actionIndex: 0, description: preCheckErrors.join("; ") }]
+        : [{ svl: 1 as const, violatedConstraint: "symbol_existence", actionIndex: 0, description: errorsFlat.join("; ") }];
 
       const primarySvl = `SVL-${violations[0].svl}` as SVL;
 
@@ -916,7 +937,11 @@ ${RETRY_HINT}
         plannerRetryTotal: maxRetries,
       });
       recordEpisode({ intent: userIntent, actions: filtered, success: false, svlViolated: primarySvl });
-      currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}\n\n错误：${errorsFlat.join("；")}。请修正。\n${RETRY_HINT}\n只输出 JSON。`;
+      // Build targeted retry prompt based on pre-check results
+      const specificErrors = preCheckErrors.length > 0
+        ? `精确错误:\n${preCheckErrors.map(e => `  - ${e}`).join("\n")}`
+        : `错误：${errorsFlat.join("；")}`;
+      currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}\n\n${specificErrors}\n请修正上述问题。\n${RETRY_HINT}\n只输出 JSON。`;
       useSystem = false;
       saveCheckpoint(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });
       continue;
