@@ -1,13 +1,8 @@
 import type { Action, ConstraintViolation } from "./runtime-types";
-import * as fs from "fs";
-import * as path from "path";
-
-function loadIR(): any[] {
-  const irPath = path.resolve(__dirname, "../ir.json");
-  if (!fs.existsSync(irPath)) return [];
-  const raw = JSON.parse(fs.readFileSync(irPath, "utf-8"));
-  return Array.isArray(raw) ? raw : (raw.functions || []);
-}
+import type { FunctionInfo } from "./extract-ir";
+import { loadIR } from "./ir-utils";
+import { ok, err } from "./runtime-types";
+import type { Result, ValidationError } from "./runtime-types";
 
 const BUILTIN_WHITELIST = new Set([
   "console.log", "setTimeout", "setInterval", "clearTimeout",
@@ -117,7 +112,7 @@ export function validateAction(action: Action, actionIndex?: number): { valid: b
   }
 
   if (action.kind === "call") {
-    const fn = functions.find((f: any) => f.name === action.function);
+    const fn = functions.find((f: FunctionInfo) => f.name === action.function);
     if (!fn) {
       if (action.function && BUILTIN_WHITELIST.has(action.function)) return { valid: true, errors: [], violations: [] };
       const msg = `函数 '${action.function}' 不存在`;
@@ -204,4 +199,24 @@ export function validateActionSequence(actions: Action[]): { valid: boolean; err
     }
   }
   return { valid: errors.length === 0, errors, violations };
+}
+
+/**
+ * Result-typed variant of validateActionSequence.
+ * Returns Ok<Action[]> on success, Err<ValidationError[]> on failure.
+ * Use this for new code; the legacy {valid, errors} API remains for backward compat.
+ */
+export function validateActionResult(actions: Action[]): Result<Action[], ValidationError[]> {
+  const legacy = validateActionSequence(actions);
+  if (legacy.valid) return ok(actions);
+
+  const mapped: ValidationError[] = legacy.errors.map((msg, i) => {
+    const v = legacy.violations[i];
+    return {
+      message: msg,
+      code: v?.violatedConstraint || "unknown",
+      index: v?.actionIndex,
+    };
+  });
+  return err(mapped);
 }

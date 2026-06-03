@@ -1,4 +1,3 @@
-"use strict";
 /**
  * Phase 8: Multi-Level Planning — Strategy Layer
  *
@@ -8,12 +7,9 @@
  * The Action Layer (planner.ts) then uses this chain to constrain
  * the LLM's function selection space.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.selectCapabilityChains = selectCapabilityChains;
-exports.formatChainHint = formatChainHint;
-const utils_1 = require("./utils");
-const feedback_1 = require("./feedback");
-const semantic_topology_1 = require("./semantic-topology");
+import { jaccardSimilarity, extractKeywords } from "./utils";
+import { getFailureAdjustedCredit } from "./feedback";
+import { getTopology } from "./semantic-topology";
 /** Build a capability graph from IR functions. */
 function buildCapabilityGraph(ir) {
     const SKIP_FILES = new Set(["src/strategy-planner.ts", "src/planner.ts"]);
@@ -46,7 +42,7 @@ function scoreNode(node, intentLower, keywords) {
             score += 1;
             hasMatch = true;
         }
-        const js = (0, utils_1.jaccardSimilarity)(node.name.toLowerCase(), kw);
+        const js = jaccardSimilarity(node.name.toLowerCase(), kw);
         if (js > 0.2) {
             score += js;
             hasMatch = true;
@@ -94,65 +90,56 @@ function scoreNode(node, intentLower, keywords) {
     if (!hasMatch)
         return 0;
     // Dynamic Credit: multiply by actual success rate
-    const successRate = (0, feedback_1.getFailureAdjustedCredit)(node.name);
+    const successRate = getFailureAdjustedCredit(node.name);
     const creditFactor = 0.3 + successRate * 0.7;
     return score * creditFactor;
 }
-/** Find all capability nodes that produce a given capability label.
- *  Falls back to topology similarity if no direct data-flow match. */
-function findProducers(graph, capability, allNodes) {
-    const producers = [];
-    for (const node of graph.values()) {
-        if (node.produces.some(p => p === capability || capability.includes(p) || p.includes(capability))) {
-            producers.push(node);
-        }
-    }
-    // Topology fallback: find semantically related producers
-    if (producers.length === 0) {
-        try {
-            const topo = (0, semantic_topology_1.getTopology)();
-            for (const node of allNodes) {
-                if (node.produces.length > 0) {
-                    for (const p of node.produces) {
-                        if (topo.capabilityMatch(p, capability) && !producers.includes(node)) {
-                            producers.push(node);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        catch { }
-    }
-    return producers;
+/** Pick the highest-scoring node from a list. */
+function topByScore(nodes) {
+    return nodes.sort((a, b) => b.score - a.score)[0];
 }
-/** Find all capability nodes that require a given capability label.
- *  Falls back to topology similarity if no direct data-flow match. */
-function findConsumers(graph, capability, allNodes) {
-    const consumers = [];
+/** Shared logic for finding nodes that produce or consume a capability label.
+ *  Falls back to topology similarity if no direct data-flow match.
+ *
+ *  @param field - which side of the data-flow edge to match on
+ *  @param isProducer - when true the field value acts as the "produce" side
+ *    of capabilityMatch; when false it acts as the "require" side. */
+function findRelated(graph, capability, allNodes, field, isProducer) {
+    const results = [];
     for (const node of graph.values()) {
-        if (node.requires.some(r => r === capability || capability.includes(r) || r.includes(capability))) {
-            consumers.push(node);
+        if (node[field].some(v => v === capability || capability.includes(v) || v.includes(capability))) {
+            results.push(node);
         }
     }
-    // Topology fallback
-    if (consumers.length === 0) {
+    // Topology fallback: find semantically related nodes via capabilityMatch
+    if (results.length === 0) {
         try {
-            const topo = (0, semantic_topology_1.getTopology)();
+            const topo = getTopology();
             for (const node of allNodes) {
-                if (node.requires.length > 0) {
-                    for (const r of node.requires) {
-                        if (topo.capabilityMatch(capability, r) && !consumers.includes(node)) {
-                            consumers.push(node);
+                if (node[field].length > 0) {
+                    for (const v of node[field]) {
+                        const matched = isProducer
+                            ? topo.capabilityMatch(v, capability)
+                            : topo.capabilityMatch(capability, v);
+                        if (matched && !results.includes(node)) {
+                            results.push(node);
                             break;
                         }
                     }
                 }
             }
         }
-        catch { }
+        catch { /* topology fallback unavailable — non-critical */ }
     }
-    return consumers;
+    return results;
+}
+/** Find all capability nodes that produce a given capability label. */
+function findProducers(graph, capability, allNodes) {
+    return findRelated(graph, capability, allNodes, "produces", true);
+}
+/** Find all capability nodes that require a given capability label. */
+function findConsumers(graph, capability, allNodes) {
+    return findRelated(graph, capability, allNodes, "requires", false);
 }
 /**
  * Select the best capability chain for an intent.
@@ -163,9 +150,11 @@ function findConsumers(graph, capability, allNodes) {
  * 3. For each producer, trace forward: producer → consumer → consumer...
  * 4. Score each chain and return top N
  */
-function selectCapabilityChains(intent, ir, maxChains = 5) {
+export function selectCapabilityChains(intent, ir, maxChains = 5) {
+    // Ensure semantic topology is built before any capability matching
+    getTopology(ir);
     const intentLower = intent.toLowerCase();
-    const keywords = (0, utils_1.extractKeywords)(intent);
+    const keywords = extractKeywords(intent);
     const graph = buildCapabilityGraph(ir);
     // Score all nodes
     for (const node of graph.values()) {
@@ -177,11 +166,22 @@ function selectCapabilityChains(intent, ir, maxChains = 5) {
     let seeds = [...graph.values()]
         .filter(n => n.score > dynamicThreshold && (n.produces.length > 0 || n.score > dynamicThreshold + 2))
         .sort((a, b) => b.score - a.score);
-    if (seeds.length === 0 && dynamicThreshold > 0.5) {
+    if (seeds.length === 0 && dynamicThreshold > 0.3) {
         dynamicThreshold *= 0.5;
         seeds = [...graph.values()]
             .filter(n => n.score > dynamicThreshold && (n.produces.length > 0 || n.score > dynamicThreshold + 1))
             .sort((a, b) => b.score - a.score);
+    }
+    // Best-effort fallback: when no keyword matches at all, try nodes with capability edges
+    if (seeds.length === 0) {
+        seeds = [...graph.values()]
+            .filter(n => n.produces.length > 0 || n.requires.length > 0)
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 5);
+    }
+    // Ultimate fallback: just take any exported nodes
+    if (seeds.length === 0) {
+        seeds = [...graph.values()].slice(0, 3);
     }
     seeds = seeds.slice(0, graph.size > 500 ? 30 : 15);
     const allNodes = [...graph.values()];
@@ -201,7 +201,7 @@ function selectCapabilityChains(intent, ir, maxChains = 5) {
             for (const p of current.produces) {
                 const consumers = findConsumers(graph, p, allNodes).filter(c => !visited.has(c.name));
                 if (consumers.length > 0) {
-                    const bestConsumer = consumers.sort((a, b) => b.score - a.score)[0];
+                    const bestConsumer = topByScore(consumers);
                     chain.push(bestConsumer);
                     visited.add(bestConsumer.name);
                     totalScore += bestConsumer.score;
@@ -214,7 +214,7 @@ function selectCapabilityChains(intent, ir, maxChains = 5) {
             // Strategy 2: semantic leap — use topology similarity
             if (!extended) {
                 try {
-                    const topo = (0, semantic_topology_1.getTopology)();
+                    const topo = getTopology();
                     const similar = topo.findSimilar(current.name, 10)
                         .filter(s => !visited.has(s.name) && s.similarity > 0.2);
                     if (similar.length > 0) {
@@ -229,7 +229,7 @@ function selectCapabilityChains(intent, ir, maxChains = 5) {
                         }
                     }
                 }
-                catch { }
+                catch { /* semantic leap unavailable — non-critical */ }
             }
         }
         // Backward trace: does seed need something? Find producers.
@@ -237,7 +237,7 @@ function selectCapabilityChains(intent, ir, maxChains = 5) {
             const producers = findProducers(graph, seed.requires[0], allNodes)
                 .filter(p => !visited.has(p.name));
             if (producers.length > 0) {
-                const bestProducer = producers.sort((a, b) => b.score - a.score)[0];
+                const bestProducer = topByScore(producers);
                 chain.unshift(bestProducer);
                 totalScore += bestProducer.score;
             }
@@ -264,7 +264,7 @@ function selectCapabilityChains(intent, ir, maxChains = 5) {
     return unique.slice(0, maxChains);
 }
 /** Format chains as a hint for the LLM prompt. */
-function formatChainHint(chains) {
+export function formatChainHint(chains) {
     if (chains.length === 0)
         return "";
     const lines = ["\n推荐能力链 (Strategy Layer):"];

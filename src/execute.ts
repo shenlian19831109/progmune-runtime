@@ -60,7 +60,7 @@ function loadMetrics(): ExecutionMetrics {
     if (fs.existsSync(METRICS_FILE)) {
       return JSON.parse(fs.readFileSync(METRICS_FILE, "utf-8"));
     }
-  } catch {}
+  } catch { /* sandbox action — non-critical */ }
   return { generated: 0, repaired: 0, lastGeneration: null, history: [] };
 }
 
@@ -119,7 +119,7 @@ export async function execute(
     if (fs.existsSync(protoPath)) {
       protocolRuleCount = Object.keys(JSON.parse(fs.readFileSync(protoPath, "utf-8")).rules || {}).length;
     }
-  } catch {}
+  } catch { /* sandbox action — non-critical */ }
 
   // 3. Plan (LLM + immune constraints)
   let planResult: PlanResult;
@@ -216,7 +216,7 @@ export async function execute(
                 }
               }
             }
-          } catch {}
+          } catch { /* sandbox action — non-critical */ }
           return undefined;
         })()
       : undefined,
@@ -257,6 +257,6 @@ export function verifyFileMarker(filePath: string): { marked: boolean; sessionId
     if (match) {
       return { marked: true, sessionId: match[1], timestamp: match[2] };
     }
-  } catch {}
+  } catch { /* sandbox action — non-critical */ }
   return { marked: false };
 }

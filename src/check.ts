@@ -87,7 +87,7 @@ if (cliArg === "--ledger") {
         }
       }
     }
-  } catch {}
+  } catch { /* check step — best-effort */ }
 
   const allTransitions = session.attempts.flatMap(a => a.transitions || []);
   if (allTransitions.length === 0) {
@@ -344,7 +344,7 @@ step("4/6 Ledger 不变量");
             replayMismatchDetail.push(`session=${session.sessionId} attempt=${attempt.attemptNumber}`);
           }
         }
-      } catch {}
+      } catch { /* check step — best-effort */ }
     }
   }
   if (checked === 0) {
@@ -394,7 +394,7 @@ step("4/6 Ledger 不变量");
             }
           }
         }
-      } catch {}
+      } catch { /* check step — best-effort */ }
     }
     if (invariantFailed) {
       fail("PROGMUNE_STRICT=true — 严格不变量断言发现违规");
@@ -427,7 +427,7 @@ step("4/6 Ledger 不变量");
         else if (result.divergencePoint !== undefined) {
           console.log(`     ${Y(`Replay divergence: ${sid.slice(0, 13)}... at index ${result.divergencePoint}`)}`);
         }
-      } catch {}
+      } catch { /* check step — best-effort */ }
     }
     if (replayed > 0) {
       const status = replayPassed === replayed

@@ -98,7 +98,7 @@ function recordFailure(record) {
             fs.mkdirSync(CORPUS_DIR, { recursive: true });
         fs.writeFileSync(`${CORPUS_DIR}/${id}.json`, JSON.stringify(entry, null, 2), "utf-8");
     }
-    catch { }
+    catch { /* collect best-effort */ }
     return id;
 }
 /** Load all recorded failures. */
@@ -116,7 +116,7 @@ function loadFailures() {
         try {
             failures.push(JSON.parse(fs.readFileSync(`${CORPUS_DIR}/${f}`, "utf-8")));
         }
-        catch { }
+        catch { /* collect best-effort */ }
     }
     return failures.sort((a, b) => b.timestamp - a.timestamp);
 }

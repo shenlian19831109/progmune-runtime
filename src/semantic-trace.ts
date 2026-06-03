@@ -15,20 +15,15 @@
  *   ts-node src/semantic-trace.ts --heatmap            → semantic heatmap
  */
 
-import { getAllSessions, getFailureGenome, getLearnedPatterns, getAntibodyStats } from "./failure-corpus";
-
-// ── ANSI colors ──
-const C = { reset: "\x1b[0m", green: "\x1b[32m", red: "\x1b[31m", yellow: "\x1b[33m", cyan: "\x1b[36m", gray: "\x1b[90m", bold: "\x1b[1m", dim: "\x1b[2m" };
-const G = (s: string) => `${C.green}${s}${C.reset}`;
-const R = (s: string) => `${C.red}${s}${C.reset}`;
-const Y = (s: string) => `${C.yellow}${s}${C.reset}`;
-const C_ = (s: string) => `${C.cyan}${s}${C.reset}`;
-const D = (s: string) => `${C.gray}${s}${C.reset}`;
-const B = (s: string) => `${C.bold}${s}${C.reset}`;
+import { getAllSessions, getFailureGenome, getLearnedPatterns, getAntibodyStats, getSemanticHeatmap } from "./failure-corpus";
+import { G, R, Y, C_, D, B, COLORS as C } from "./terminal-format";
+import type { ConstraintViolation, StateTransition, ExecutionSession, Attempt } from "./runtime-types";
+import { FunctionProtocol, parseProtocolsFromJSON, checkLedgerConsistency, rebuildState, ValidationContext, validateTransition, hashRules, hashLedger, diffLedgers, findProducer, findConsumer, findViolations, findTransition, listAllStates } from "./ssg-validator";
+import { listSnapshots, loadSnapshot, diffSnapshots, IRSnapshot } from "./semantic-snapshot";
+import * as fs from "fs";
+import * as path from "path";
 
 // ── Narrative translation ──
-
-import type { ConstraintViolation, StateTransition, ExecutionSession, Attempt } from "./runtime-types";
 
 function narrateRejection(v: ConstraintViolation): string {
   const svlStr = `SVL-${v.svl}`;
@@ -363,12 +358,6 @@ function formatAntibodyStats(): string {
 }
 
 // ── Semantic heatmap ──
-
-import { getSemanticHeatmap } from "./failure-corpus";
-import { FunctionProtocol, parseProtocolsFromJSON, checkLedgerConsistency, rebuildState, ValidationContext, validateTransition, hashRules, hashLedger, diffLedgers, findProducer, findConsumer, findViolations, findTransition, listAllStates } from "./ssg-validator";
-import { listSnapshots, loadSnapshot, diffSnapshots, IRSnapshot } from "./semantic-snapshot";
-import * as fs from "fs";
-import * as path from "path";
 
 function formatHeatmap(): string {
   const h = getSemanticHeatmap();
@@ -795,7 +784,7 @@ function formatLedgerReplayValidation(session: ExecutionSession): string {
       for (const p of protocols) rules.set(p.function, p.protocol);
       currentRuleHash = hashRules(rules);
     }
-  } catch {}
+  } catch { /* trace step — best-effort */ }
 
   const nsInit = new Map<string, string>();
   nsInit.set("_global", "UNAUTHENTICATED");
@@ -809,7 +798,7 @@ function formatLedgerReplayValidation(session: ExecutionSession): string {
         }
       }
     }
-  } catch {}
+  } catch { /* trace step — best-effort */ }
 
   let totalLedgers = 0;
   let consistentLedgers = 0;
@@ -1171,7 +1160,7 @@ function formatSessionValidation(session: ExecutionSession): string {
       currentFns = new Set(ir.map((f: any) => f.name));
       lines.push(`${D("Current IR:")}  ir.json (${ir.length} functions)`);
     }
-  } catch {}
+  } catch { /* trace step — best-effort */ }
 
   lines.push("");
 

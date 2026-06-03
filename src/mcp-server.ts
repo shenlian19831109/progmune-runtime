@@ -13,6 +13,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import * as fs from "fs";
 import * as path from "path";
+import { createLogger } from "./logger";
 
 // ── Load .env (in compiled ESM output, use import.meta.url; here we use __dirname) ──
 const envPath = path.resolve(__dirname, "..", ".env");
@@ -34,18 +35,12 @@ import { extractIR } from "./extract-ir";
 import { emitCode } from "./emitter";
 import { recordRun } from "./feedback";
 import { reportFingerprints } from "./immune-reporter";
-// FunctionInfo is defined in extract-ir.ts (not exported)
-type FunctionInfo = any;
+import type { FunctionInfo } from "./extract-ir";
 
 const OPT_IN_FILE = path.resolve(__dirname, "..", ".progmune_memory", "opt_in.json");
 
 // ── Structured logging (stderr, not stdout JSON-RPC) ──
-const log = {
-  info: (msg: string) => console.error(`[Progmune] ${msg}`),
-  warn: (msg: string) => console.error(`[Progmune] ⚠️ ${msg}`),
-  error: (msg: string) => console.error(`[Progmune] ❌ ${msg}`),
-  success: (msg: string) => console.error(`[Progmune] ✅ ${msg}`),
-};
+const log = createLogger("progmune");
 
 async function main() {
   const server = new Server(
@@ -328,10 +323,9 @@ Then restart Claude Code.`,
       }
 
       // Emit TypeScript code with generation marker
-      const protocolsFile = path.resolve(__dirname, "..", "protocols.json");
       let protocolRuleCount = 0;
       if (fs.existsSync(protocolsFile)) {
-        try { protocolRuleCount = Object.keys(JSON.parse(fs.readFileSync(protocolsFile, "utf-8")).rules || {}).length; } catch {}
+        try { protocolRuleCount = Object.keys(JSON.parse(fs.readFileSync(protocolsFile, "utf-8")).rules || {}).length; } catch { /* protocol parse — non-critical */ }
       }
       const code = emitCode(actions, {
         sessionId: planResult.sessionId,
@@ -545,7 +539,7 @@ ${result.code}` }] };
         const existingHook = fs.existsSync(hookPath) ? fs.readFileSync(hookPath, "utf-8") : "";
         if (!existingHook.includes("progmune-guard.sh")) {
           fs.writeFileSync(hookPath, (existingHook ? existingHook + "\n" : "") + hookContent, "utf-8");
-          try { fs.chmodSync(hookPath, "755"); } catch {}
+          try { fs.chmodSync(hookPath, "755"); } catch { /* chmod best-effort */ }
           results.push("✅ Pre-commit hook installed (.git/hooks/pre-commit)");
         } else {
           results.push("✅ Pre-commit hook already installed");
@@ -752,7 +746,7 @@ This project uses [Progmune](https://github.com/shenlian19831109/progmune-runtim
 
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  log.success("Progmune MCP server started (TypeScript)");
+  log.info("✅ Progmune MCP server ready (TypeScript)");
 }
 
 main().catch((e) => {

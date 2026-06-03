@@ -82,7 +82,7 @@ export function listSnapshots(): IRSnapshot[] {
     if (file.endsWith(".json")) {
       try {
         snapshots.push(JSON.parse(fs.readFileSync(path.join(SNAPSHOT_DIR, file), "utf-8")));
-      } catch {}
+      } catch { /* snapshot may be unavailable */ }
     }
   }
   snapshots.sort((a, b) => b.timestamp.localeCompare(a.timestamp));

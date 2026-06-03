@@ -28,7 +28,7 @@ export function withLock<T>(name: string, fn: () => T): T {
       try {
         return fn();
       } finally {
-        try { fs.rmdirSync(lock); } catch {}
+        try { fs.rmdirSync(lock); } catch { /* best-effort cleanup */ }
       }
     } catch (err: any) {
       if (err.code !== 'EEXIST') throw err;

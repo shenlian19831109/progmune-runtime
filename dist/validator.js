@@ -1,49 +1,5 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateAction = validateAction;
-exports.validateActionSequence = validateActionSequence;
-const fs = __importStar(require("fs"));
-const path = __importStar(require("path"));
-function loadIR() {
-    const irPath = path.resolve(__dirname, "../ir.json");
-    if (!fs.existsSync(irPath))
-        return [];
-    const raw = JSON.parse(fs.readFileSync(irPath, "utf-8"));
-    return Array.isArray(raw) ? raw : (raw.functions || []);
-}
+import { loadIR } from "./ir-utils";
+import { ok, err } from "./runtime-types";
 const BUILTIN_WHITELIST = new Set([
     "console.log", "setTimeout", "setInterval", "clearTimeout",
     "JSON.stringify", "JSON.parse", "fetch"
@@ -151,7 +107,7 @@ function checkVariableFlow(actions) {
  * @protocol namespace=dev_pipeline pre_states=["IR_EXTRACTED"] post_states=["ACTION_VALIDATED"]
  */
 /** @requires ACTION @produces VALIDATION_RESULT */
-function validateAction(action, actionIndex) {
+export function validateAction(action, actionIndex) {
     const functions = loadIR();
     const errors = [];
     const violations = [];
@@ -231,7 +187,7 @@ function validateAction(action, actionIndex) {
  * @protocol namespace=dev_pipeline pre_states=["ACTION_VALIDATED"] post_states=["SEQUENCE_VALIDATED"] invalidate=["ACTION_VALIDATED"]
  */
 /** @requires ACTIONS @produces VALIDATION_RESULT */
-function validateActionSequence(actions) {
+export function validateActionSequence(actions) {
     const errors = [];
     const violations = [];
     for (let i = 0; i < actions.length; i++) {
@@ -251,4 +207,23 @@ function validateActionSequence(actions) {
         }
     }
     return { valid: errors.length === 0, errors, violations };
+}
+/**
+ * Result-typed variant of validateActionSequence.
+ * Returns Ok<Action[]> on success, Err<ValidationError[]> on failure.
+ * Use this for new code; the legacy {valid, errors} API remains for backward compat.
+ */
+export function validateActionResult(actions) {
+    const legacy = validateActionSequence(actions);
+    if (legacy.valid)
+        return ok(actions);
+    const mapped = legacy.errors.map((msg, i) => {
+        const v = legacy.violations[i];
+        return {
+            message: msg,
+            code: v?.violatedConstraint || "unknown",
+            index: v?.actionIndex,
+        };
+    });
+    return err(mapped);
 }

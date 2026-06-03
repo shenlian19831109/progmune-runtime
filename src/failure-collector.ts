@@ -70,7 +70,7 @@ export function recordFailure(record: Omit<FailureRecord, "id" | "timestamp">): 
       JSON.stringify(entry, null, 2),
       "utf-8"
     );
-  } catch {}
+  } catch { /* collect best-effort */ }
 
   return id;
 }
@@ -87,7 +87,7 @@ export function loadFailures(): FailureRecord[] {
     if (!f.endsWith(".json") || f === "schema.json") continue;
     try {
       failures.push(JSON.parse(fs.readFileSync(`${CORPUS_DIR}/${f}`, "utf-8")));
-    } catch {}
+    } catch { /* collect best-effort */ }
   }
   return failures.sort((a, b) => b.timestamp - a.timestamp);
 }

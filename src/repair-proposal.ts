@@ -170,7 +170,7 @@ export function suggestInvariantRepair(
     };
 
     // Ontology: verify corrected transition passes delta consistency
-    try { assertDeltaConsistency(correctedTransition); } catch {}
+    try { assertDeltaConsistency(correctedTransition); } catch { /* consistency assertion — best-effort */ }
 
     proposals.push({
       id: `rp_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
@@ -195,7 +195,7 @@ export function suggestInvariantRepair(
       statesAfter: correctStatesAfter,
     };
 
-    try { assertDeltaConsistency(correctedTransition); } catch {}
+    try { assertDeltaConsistency(correctedTransition); } catch { /* consistency assertion — best-effort */ }
 
     proposals.push({
       id: `rp_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,

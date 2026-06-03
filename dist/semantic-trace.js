@@ -50,30 +50,28 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const failure_corpus_1 = require("./failure-corpus");
-// ── ANSI colors ──
-const C = { reset: "\x1b[0m", green: "\x1b[32m", red: "\x1b[31m", yellow: "\x1b[33m", cyan: "\x1b[36m", gray: "\x1b[90m", bold: "\x1b[1m", dim: "\x1b[2m" };
-const G = (s) => `${C.green}${s}${C.reset}`;
-const R = (s) => `${C.red}${s}${C.reset}`;
-const Y = (s) => `${C.yellow}${s}${C.reset}`;
-const C_ = (s) => `${C.cyan}${s}${C.reset}`;
-const D = (s) => `${C.gray}${s}${C.reset}`;
-const B = (s) => `${C.bold}${s}${C.reset}`;
+const terminal_format_1 = require("./terminal-format");
+const ssg_validator_1 = require("./ssg-validator");
+const semantic_snapshot_1 = require("./semantic-snapshot");
+const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
+// ── Narrative translation ──
 function narrateRejection(v) {
     const svlStr = `SVL-${v.svl}`;
     const missing = v.missingStates?.length ? v.missingStates.join(", ") : null;
     const blocked = v.description.match(/(\w+)\s*(要求|requires|blocked|不允许|不合法)/)?.[1] || "unknown";
     switch (svlStr) {
         case "SVL-1":
-            return `Planner referenced a function that does not exist in the project.\n     ${D("→ " + v.description)}`;
+            return `Planner referenced a function that does not exist in the project.\n     ${(0, terminal_format_1.D)("→ " + v.description)}`;
         case "SVL-2":
-            return `Planner called a function with incorrect argument types.\n     ${D("→ " + v.description)}`;
+            return `Planner called a function with incorrect argument types.\n     ${(0, terminal_format_1.D)("→ " + v.description)}`;
         case "SVL-3":
-            return `Planner used a variable before it was defined or referenced it circularly.\n     ${D("→ " + v.description)}`;
+            return `Planner used a variable before it was defined or referenced it circularly.\n     ${(0, terminal_format_1.D)("→ " + v.description)}`;
         case "SVL-4":
             if (missing) {
-                return `Planner attempted to call ${R(blocked)} before ${C_(missing)} was established.`;
+                return `Planner attempted to call ${(0, terminal_format_1.R)(blocked)} before ${(0, terminal_format_1.C_)(missing)} was established.`;
             }
-            return `Planner violated the protocol contract for ${R(blocked)}.\n     ${D("→ " + v.description)}`;
+            return `Planner violated the protocol contract for ${(0, terminal_format_1.R)(blocked)}.\n     ${(0, terminal_format_1.D)("→ " + v.description)}`;
         default:
             return v.description;
     }
@@ -83,23 +81,23 @@ function narrateSuccess(actions) {
         .filter(a => a.kind === "call" && a.function)
         .map(a => a.function)
         .join(" → ");
-    return `Successfully completed: ${G(names)}.`;
+    return `Successfully completed: ${(0, terminal_format_1.G)(names)}.`;
 }
 // ── Timeline rendering ──
 function formatActionSequence(actions) {
     return actions
         .filter(a => a.kind === "call" && a.function)
-        .map(a => C_(a.function + "()"))
-        .join(`  ${D("→")}  `);
+        .map(a => (0, terminal_format_1.C_)(a.function + "()"))
+        .join(`  ${(0, terminal_format_1.D)("→")}  `);
 }
 function formatSessionTimeline(session) {
     const width = 66;
     const title = `Intent: ${session.intent}`;
-    const header = `┌─ ${B(title)} ${"─".repeat(Math.max(2, width - title.length - 5))}┐`;
+    const header = `┌─ ${(0, terminal_format_1.B)(title)} ${"─".repeat(Math.max(2, width - title.length - 5))}┐`;
     const failedCount = session.attempts.filter(a => a.outcome !== "success").length;
-    const resolvedIcon = session.resolved ? G("✔") : R("✖");
-    const snapTag = session.snapshotId ? `  │  ${D("Snapshot:")} ${D(session.snapshotId.slice(-16))}` : "";
-    const info = `│ Session: ${D(session.sessionId)}  │  Retries: ${failedCount}  │  Resolved: ${resolvedIcon} ${" ".repeat(Math.max(1, 15))}│`;
+    const resolvedIcon = session.resolved ? (0, terminal_format_1.G)("✔") : (0, terminal_format_1.R)("✖");
+    const snapTag = session.snapshotId ? `  │  ${(0, terminal_format_1.D)("Snapshot:")} ${(0, terminal_format_1.D)(session.snapshotId.slice(-16))}` : "";
+    const info = `│ Session: ${(0, terminal_format_1.D)(session.sessionId)}  │  Retries: ${failedCount}  │  Resolved: ${resolvedIcon} ${" ".repeat(Math.max(1, 15))}│`;
     const footer = `└${"─".repeat(width - 2)}┘`;
     const lines = [header, info];
     if (snapTag)
@@ -113,13 +111,13 @@ function formatSessionTimeline(session) {
         const actions = a.generatedActions || [];
         const actionDisplay = formatActionSequence(actions);
         lines.push(`  Attempt ${num} ${"─".repeat(62)}`);
-        lines.push(`  │  ${actionDisplay || D("(no actions)")}`);
+        lines.push(`  │  ${actionDisplay || (0, terminal_format_1.D)("(no actions)")}`);
         lines.push(`  │`);
         // Render each violation in the attempt
         for (const v of a.violations) {
             const narration = narrateRejection(v);
             const lines_narration = narration.split("\n");
-            lines.push(`  ${R("✖")}  ${lines_narration[0]}`);
+            lines.push(`  ${(0, terminal_format_1.R)("✖")}  ${lines_narration[0]}`);
             for (let j = 1; j < lines_narration.length; j++) {
                 lines.push(`     ${lines_narration[j]}`);
             }
@@ -127,49 +125,49 @@ function formatSessionTimeline(session) {
             if (v.svl === 4) {
                 if (v.missingStates?.length) {
                     const missingList = v.missingStates.join(", ");
-                    lines.push(`     ${D("→")} Missing: ${C_(missingList)}`);
+                    lines.push(`     ${(0, terminal_format_1.D)("→")} Missing: ${(0, terminal_format_1.C_)(missingList)}`);
                 }
                 if (v.fixPath?.length) {
                     const fixList = v.fixPath.join(" → ");
-                    lines.push(`     ${D("→")} Repair:  ${Y(fixList)}`);
+                    lines.push(`     ${(0, terminal_format_1.D)("→")} Repair:  ${(0, terminal_format_1.Y)(fixList)}`);
                 }
                 if (v.namespace && v.namespace !== "_global") {
-                    lines.push(`     ${D("→")} Namespace: ${D(v.namespace)}`);
+                    lines.push(`     ${(0, terminal_format_1.D)("→")} Namespace: ${(0, terminal_format_1.D)(v.namespace)}`);
                 }
             }
         }
-        lines.push(`     ${D(`(attempt ${num}/${session.attempts.length})`)}`);
+        lines.push(`     ${(0, terminal_format_1.D)(`(attempt ${num}/${session.attempts.length})`)}`);
         lines.push("");
     }
     // Final resolution
     if (session.resolved && session.successfulAttempt) {
         const actions = session.successfulAttempt.generatedActions || [];
         const actionDisplay = formatActionSequence(actions);
-        lines.push(`  ${G("✔")} Resolution ${"─".repeat(51)}`);
+        lines.push(`  ${(0, terminal_format_1.G)("✔")} Resolution ${"─".repeat(51)}`);
         lines.push(`  │  ${actionDisplay}`);
         lines.push(`  │`);
         const narration = narrateSuccess(actions);
-        lines.push(`  ${G("✔")}  ${narration}`);
-        lines.push(`     ${D(`Resolved after ${failedCount} retries.`)}`);
+        lines.push(`  ${(0, terminal_format_1.G)("✔")}  ${narration}`);
+        lines.push(`     ${(0, terminal_format_1.D)(`Resolved after ${failedCount} retries.`)}`);
         // Phase 3: Ledger consistency check
         if (session.successfulAttempt.transitions.length > 0) {
             const nsInit = new Map([["_global", "INIT"]]);
             const consistency = (0, ssg_validator_1.checkLedgerConsistency)(session.successfulAttempt.transitions, nsInit);
             if (consistency.consistent) {
-                lines.push(`     ${G("Ledger: consistent")}`);
+                lines.push(`     ${(0, terminal_format_1.G)("Ledger: consistent")}`);
             }
             else {
-                lines.push(`     ${R(`Ledger: ${consistency.violations.length} violation(s)`)}`);
+                lines.push(`     ${(0, terminal_format_1.R)(`Ledger: ${consistency.violations.length} violation(s)`)}`);
                 for (const v of consistency.violations) {
-                    lines.push(`       ${D(`[${v.invariant}] index=${v.index}`)}`);
+                    lines.push(`       ${(0, terminal_format_1.D)(`[${v.invariant}] index=${v.index}`)}`);
                 }
             }
         }
         lines.push("");
     }
     else if (!session.resolved) {
-        lines.push(`  ${R("✖")} ${B("Unresolved")} ${"─".repeat(50)}`);
-        lines.push(`     ${D(`Failed after ${failedCount} retries with no successful path.`)}`);
+        lines.push(`  ${(0, terminal_format_1.R)("✖")} ${(0, terminal_format_1.B)("Unresolved")} ${"─".repeat(50)}`);
+        lines.push(`     ${(0, terminal_format_1.D)(`Failed after ${failedCount} retries with no successful path.`)}`);
         lines.push("");
     }
     return lines.join("\n");
@@ -181,7 +179,7 @@ function pad(s, w) {
 }
 function formatSessionSummary(sessions) {
     if (sessions.length === 0) {
-        return `${D("No sessions recorded yet.")}\nRun the planner to generate semantic traces.`;
+        return `${(0, terminal_format_1.D)("No sessions recorded yet.")}\nRun the planner to generate semantic traces.`;
     }
     const header = `Sessions in failure corpus (${sessions.length} total):\n`;
     const colW = { session: 16, intent: 28, attempts: 10, resolved: 10 };
@@ -195,27 +193,27 @@ function formatSessionSummary(sessions) {
     for (const s of sessions) {
         const shortId = s.sessionId.length > 14 ? s.sessionId.slice(0, 13) + "…" : s.sessionId;
         const shortIntent = s.intent.length > 26 ? s.intent.slice(0, 25) + "…" : s.intent;
-        const resolved = s.resolved ? G("✔ resolved") : R("✖ unresolved");
-        lines.push(`│ ${pad(D(shortId), colW.session)}│ ${pad(shortIntent, colW.intent)}│ ${pad(String(s.attempts.length), colW.attempts)}│ ${pad(resolved, colW.resolved)}│`);
+        const resolved = s.resolved ? (0, terminal_format_1.G)("✔ resolved") : (0, terminal_format_1.R)("✖ unresolved");
+        lines.push(`│ ${pad((0, terminal_format_1.D)(shortId), colW.session)}│ ${pad(shortIntent, colW.intent)}│ ${pad(String(s.attempts.length), colW.attempts)}│ ${pad(resolved, colW.resolved)}│`);
     }
     lines.push(`└${sep}┘`);
     lines.push("");
-    lines.push(`${D("Commands:")} timeline | replay | --states | --genome | --learned | --antibodies | --heatmap`);
+    lines.push(`${(0, terminal_format_1.D)("Commands:")} timeline | replay | --states | --genome | --learned | --antibodies | --heatmap`);
     return lines.join("\n");
 }
 // ── Genome summary ──
 function formatGenomeSummary() {
     const g = (0, failure_corpus_1.getFailureGenome)();
     if (g.totalFailures === 0) {
-        return `${D("No failures recorded yet.")}`;
+        return `${(0, terminal_format_1.D)("No failures recorded yet.")}`;
     }
     const bar = "─".repeat(56);
     const lines = [
-        `┌─ ${B("Failure Genome")} ${bar.slice(0, 40)}┐`,
-        `│ Total failures: ${R(String(g.totalFailures))}${" ".repeat(39)}│`,
-        `│ Average retries: ${Y(String(g.averageRetriesToSuccess))}${" ".repeat(38)}│`,
+        `┌─ ${(0, terminal_format_1.B)("Failure Genome")} ${bar.slice(0, 40)}┐`,
+        `│ Total failures: ${(0, terminal_format_1.R)(String(g.totalFailures))}${" ".repeat(39)}│`,
+        `│ Average retries: ${(0, terminal_format_1.Y)(String(g.averageRetriesToSuccess))}${" ".repeat(38)}│`,
         `├${bar}┤`,
-        `│ ${B("By SVL Level")}${" ".repeat(44)}│`,
+        `│ ${(0, terminal_format_1.B)("By SVL Level")}${" ".repeat(44)}│`,
         `│   SVL-1 (Symbol):     ${barChart(g.bySVL["SVL-1"], g.totalFailures)} ${g.bySVL["SVL-1"]} │`,
         `│   SVL-2 (Type):       ${barChart(g.bySVL["SVL-2"], g.totalFailures)} ${g.bySVL["SVL-2"]} │`,
         `│   SVL-3 (Dataflow):   ${barChart(g.bySVL["SVL-3"], g.totalFailures)} ${g.bySVL["SVL-3"]} │`,
@@ -223,7 +221,7 @@ function formatGenomeSummary() {
         `├${bar}┤`,
     ];
     if (g.topPatterns.length > 0) {
-        lines.push(`│ ${B("Top Failure Patterns")}${" ".repeat(37)}│`);
+        lines.push(`│ ${(0, terminal_format_1.B)("Top Failure Patterns")}${" ".repeat(37)}│`);
         for (const p of g.topPatterns) {
             const label = `${p.pattern}: ${p.count}x`;
             lines.push(`│   ${label}${" ".repeat(Math.max(1, 52 - label.length))}│`);
@@ -231,7 +229,7 @@ function formatGenomeSummary() {
         lines.push(`├${bar}┤`);
     }
     if (g.commonFixPaths.length > 0) {
-        lines.push(`│ ${B("Common Repair Paths")}${" ".repeat(36)}│`);
+        lines.push(`│ ${(0, terminal_format_1.B)("Common Repair Paths")}${" ".repeat(36)}│`);
         for (const fp of g.commonFixPaths.slice(0, 4)) {
             const path = fp.fixPath.join(" → ");
             const label = `  ${path} (${fp.count}x)`;
@@ -243,7 +241,7 @@ function formatGenomeSummary() {
     // By constraint type
     const constraints = Object.entries(g.byConstraintType).sort((a, b) => b[1] - a[1]);
     if (constraints.length > 0) {
-        lines.push(`│ ${B("By Constraint Type")}${" ".repeat(37)}│`);
+        lines.push(`│ ${(0, terminal_format_1.B)("By Constraint Type")}${" ".repeat(37)}│`);
         for (const [k, v] of constraints) {
             lines.push(`│   ${k}: ${v}${" ".repeat(Math.max(1, 51 - k.length - String(v).length))}│`);
         }
@@ -253,33 +251,33 @@ function formatGenomeSummary() {
 }
 function barChart(count, total) {
     if (total === 0)
-        return D("▏".repeat(0));
+        return (0, terminal_format_1.D)("▏".repeat(0));
     const maxBars = 20;
     const n = Math.round((count / total) * maxBars);
     if (n === 0 && count > 0)
-        return Y("▏");
+        return (0, terminal_format_1.Y)("▏");
     if (n === 0)
-        return D("▏".repeat(0));
-    return Y("█".repeat(n)) + D("░".repeat(maxBars - n));
+        return (0, terminal_format_1.D)("▏".repeat(0));
+    return (0, terminal_format_1.Y)("█".repeat(n)) + (0, terminal_format_1.D)("░".repeat(maxBars - n));
 }
 // ── Learned patterns ──
 function aclBadge(level) {
     switch (level) {
-        case "ACL-4": return G(`◆ ${level} (globally stable)`);
-        case "ACL-3": return C_(`◈ ${level} (cross-task validated)`);
-        case "ACL-2": return Y(`◇ ${level} (repeated observation)`);
-        case "ACL-1": return D(`◌ ${level} (single case)`);
-        default: return D(level);
+        case "ACL-4": return (0, terminal_format_1.G)(`◆ ${level} (globally stable)`);
+        case "ACL-3": return (0, terminal_format_1.C_)(`◈ ${level} (cross-task validated)`);
+        case "ACL-2": return (0, terminal_format_1.Y)(`◇ ${level} (repeated observation)`);
+        case "ACL-1": return (0, terminal_format_1.D)(`◌ ${level} (single case)`);
+        default: return (0, terminal_format_1.D)(level);
     }
 }
 function formatLearnedPatterns() {
     const learned = (0, failure_corpus_1.getLearnedPatterns)();
     const patterns = learned.failureToFix;
     if (patterns.length === 0) {
-        return `${D("No learned patterns yet.")}\nPatterns emerge when sessions capture failures with repair paths.`;
+        return `${(0, terminal_format_1.D)("No learned patterns yet.")}\nPatterns emerge when sessions capture failures with repair paths.`;
     }
     const lines = [
-        `${B("Antibody Registry")} (${patterns.length} patterns)`,
+        `${(0, terminal_format_1.B)("Antibody Registry")} (${patterns.length} patterns)`,
         "─".repeat(72),
     ];
     for (const p of patterns) {
@@ -287,10 +285,10 @@ function formatLearnedPatterns() {
         const intents = p.distinctIntents.slice(0, 3).join(", ");
         const moreIntents = p.distinctIntents.length > 3 ? ` +${p.distinctIntents.length - 3} more` : "";
         const ratePct = Math.round(p.resolvedRate * 100);
-        lines.push(`  ${B("Signature:")}  ${R(p.violation)}`);
-        lines.push(`  ${D("Repair:")}     ${Y(path)}`);
-        lines.push(`  ${D("Confidence:")} ${aclBadge(p.antibodyLevel)}`);
-        lines.push(`  ${D("Occurrences:")} ${p.occurrenceCount}x  │  ${D("Resolved:")} ${ratePct}%  │  ${D("Intents:")} ${intents}${moreIntents}`);
+        lines.push(`  ${(0, terminal_format_1.B)("Signature:")}  ${(0, terminal_format_1.R)(p.violation)}`);
+        lines.push(`  ${(0, terminal_format_1.D)("Repair:")}     ${(0, terminal_format_1.Y)(path)}`);
+        lines.push(`  ${(0, terminal_format_1.D)("Confidence:")} ${aclBadge(p.antibodyLevel)}`);
+        lines.push(`  ${(0, terminal_format_1.D)("Occurrences:")} ${p.occurrenceCount}x  │  ${(0, terminal_format_1.D)("Resolved:")} ${ratePct}%  │  ${(0, terminal_format_1.D)("Intents:")} ${intents}${moreIntents}`);
         lines.push("");
     }
     return lines.join("\n");
@@ -299,39 +297,39 @@ function formatLearnedPatterns() {
 function formatAntibodyStats() {
     const stats = (0, failure_corpus_1.getAntibodyStats)();
     if (stats.totalHits === 0) {
-        return `${D("No antibody hits recorded yet.")}\nAntibodies are recorded when the immune system accelerates planning via learned fix paths.`;
+        return `${(0, terminal_format_1.D)("No antibody hits recorded yet.")}\nAntibodies are recorded when the immune system accelerates planning via learned fix paths.`;
     }
     const lines = [];
-    lines.push(`${B("Antibody Efficacy Report")}`);
+    lines.push(`${(0, terminal_format_1.B)("Antibody Efficacy Report")}`);
     lines.push("═".repeat(68));
     lines.push("");
     // Summary
-    lines.push(`  ${B("Immune Acceleration Summary")}`);
-    lines.push(`  ${D("─".repeat(44))}`);
-    lines.push(`  Total antibody hits:        ${C_(String(stats.totalHits))}`);
-    lines.push(`  ACL-4 fast-path (0 LLM):     ${G(String(stats.fastPathHits))}`);
-    lines.push(`  ACL-3 injected hints:        ${Y(String(stats.injectedHintHits))}`);
-    lines.push(`  LLM calls saved:             ${G(String(stats.totalLLMCallsSaved))}`);
-    lines.push(`  Est. tokens saved:           ${G(stats.totalTokensSaved.toLocaleString())}`);
+    lines.push(`  ${(0, terminal_format_1.B)("Immune Acceleration Summary")}`);
+    lines.push(`  ${(0, terminal_format_1.D)("─".repeat(44))}`);
+    lines.push(`  Total antibody hits:        ${(0, terminal_format_1.C_)(String(stats.totalHits))}`);
+    lines.push(`  ACL-4 fast-path (0 LLM):     ${(0, terminal_format_1.G)(String(stats.fastPathHits))}`);
+    lines.push(`  ACL-3 injected hints:        ${(0, terminal_format_1.Y)(String(stats.injectedHintHits))}`);
+    lines.push(`  LLM calls saved:             ${(0, terminal_format_1.G)(String(stats.totalLLMCallsSaved))}`);
+    lines.push(`  Est. tokens saved:           ${(0, terminal_format_1.G)(stats.totalTokensSaved.toLocaleString())}`);
     lines.push("");
     // By Level
     if (Object.keys(stats.byLevel).length > 0) {
-        lines.push(`  ${B("By Antibody Level")}`);
-        lines.push(`  ${D("─".repeat(34))}`);
+        lines.push(`  ${(0, terminal_format_1.B)("By Antibody Level")}`);
+        lines.push(`  ${(0, terminal_format_1.D)("─".repeat(34))}`);
         const levels = ["ACL-4", "ACL-3", "ACL-2", "ACL-1"];
         for (const lvl of levels) {
             const d = stats.byLevel[lvl];
             if (!d)
                 continue;
-            const icon = lvl === "ACL-4" ? G("◆") : lvl === "ACL-3" ? C_("◈") : lvl === "ACL-2" ? Y("◇") : D("◌");
+            const icon = lvl === "ACL-4" ? (0, terminal_format_1.G)("◆") : lvl === "ACL-3" ? (0, terminal_format_1.C_)("◈") : lvl === "ACL-2" ? (0, terminal_format_1.Y)("◇") : (0, terminal_format_1.D)("◌");
             lines.push(`  ${icon} ${lvl}: ${d.hits} hits, ${d.llmSaved} LLM saved, ${d.tokensSaved.toLocaleString()} tokens`);
         }
         lines.push("");
     }
     // Top signatures
     if (stats.topSignatures.length > 0) {
-        lines.push(`  ${B("Top Antibody Signatures")}`);
-        lines.push(`  ${D("─".repeat(40))}`);
+        lines.push(`  ${(0, terminal_format_1.B)("Top Antibody Signatures")}`);
+        lines.push(`  ${(0, terminal_format_1.D)("─".repeat(40))}`);
         for (const s of stats.topSignatures.slice(0, 5)) {
             const sig = s.signature.length > 42 ? s.signature.slice(0, 39) + "..." : s.signature;
             lines.push(`  ${s.hits}x  ${sig.padEnd(44)} ~${s.avgSimilarity}`);
@@ -341,34 +339,29 @@ function formatAntibodyStats() {
     // Efficiency note
     if (stats.fastPathHits > 0) {
         const pct = Math.round((stats.fastPathHits / stats.totalHits) * 100);
-        lines.push(`  ${G(`Immune efficiency: ${pct}% of hits bypassed LLM entirely`)}`);
+        lines.push(`  ${(0, terminal_format_1.G)(`Immune efficiency: ${pct}% of hits bypassed LLM entirely`)}`);
     }
     return lines.join("\n");
 }
 // ── Semantic heatmap ──
-const failure_corpus_2 = require("./failure-corpus");
-const ssg_validator_1 = require("./ssg-validator");
-const semantic_snapshot_1 = require("./semantic-snapshot");
-const fs = __importStar(require("fs"));
-const path = __importStar(require("path"));
 function formatHeatmap() {
-    const h = (0, failure_corpus_2.getSemanticHeatmap)();
+    const h = (0, failure_corpus_1.getSemanticHeatmap)();
     if (h.fragileProtocols.length === 0 && h.svlHotspots.length === 0) {
-        return `${D("No heatmap data yet.")}`;
+        return `${(0, terminal_format_1.D)("No heatmap data yet.")}`;
     }
     const lines = [];
-    lines.push(`${B("Semantic Heatmap")}`);
+    lines.push(`${(0, terminal_format_1.B)("Semantic Heatmap")}`);
     lines.push("═".repeat(72));
     lines.push("");
     // SVL hotspots as horizontal bars
     if (h.svlHotspots.length > 0) {
-        lines.push(`  ${B("Immune Layer Activity")}`);
-        lines.push(`  ${D("─".repeat(44))}`);
+        lines.push(`  ${(0, terminal_format_1.B)("Immune Layer Activity")}`);
+        lines.push(`  ${(0, terminal_format_1.D)("─".repeat(44))}`);
         const maxCount = Math.max(...h.svlHotspots.map(s => s.count), 1);
         const maxBar = 30;
         for (const s of h.svlHotspots) {
             const n = Math.round((s.count / maxCount) * maxBar) || (s.count > 0 ? 1 : 0);
-            const bar = R("█".repeat(n)) + D("░".repeat(maxBar - n));
+            const bar = (0, terminal_format_1.R)("█".repeat(n)) + (0, terminal_format_1.D)("░".repeat(maxBar - n));
             const pct = `${s.percentage}%`.padStart(4);
             lines.push(`  ${s.svl.padEnd(8)} ${bar} ${String(s.count).padStart(2)} (${pct})`);
         }
@@ -376,33 +369,33 @@ function formatHeatmap() {
     }
     // Fragile protocols
     if (h.fragileProtocols.length > 0) {
-        lines.push(`  ${B("Fragile Protocols (most blocked functions)")}`);
-        lines.push(`  ${D("─".repeat(52))}`);
+        lines.push(`  ${(0, terminal_format_1.B)("Fragile Protocols (most blocked functions)")}`);
+        lines.push(`  ${(0, terminal_format_1.D)("─".repeat(52))}`);
         for (const fp of h.fragileProtocols.slice(0, 6)) {
-            const heat = fp.violationCount >= 5 ? R("●●●") : fp.violationCount >= 3 ? Y("●●") : Y("●");
-            lines.push(`  ${heat} ${C_(fp.function + "()")} ${D(`— ${fp.violationCount}x, ${fp.svl}`)}`);
+            const heat = fp.violationCount >= 5 ? (0, terminal_format_1.R)("●●●") : fp.violationCount >= 3 ? (0, terminal_format_1.Y)("●●") : (0, terminal_format_1.Y)("●");
+            lines.push(`  ${heat} ${(0, terminal_format_1.C_)(fp.function + "()")} ${(0, terminal_format_1.D)(`— ${fp.violationCount}x, ${fp.svl}`)}`);
         }
         lines.push("");
     }
     // Constraint clusters
     if (h.constraintClusters.length > 0) {
-        lines.push(`  ${B("Constraint Co-occurrence")}`);
-        lines.push(`  ${D("─".repeat(40))}`);
+        lines.push(`  ${(0, terminal_format_1.B)("Constraint Co-occurrence")}`);
+        lines.push(`  ${(0, terminal_format_1.D)("─".repeat(40))}`);
         for (const cc of h.constraintClusters.slice(0, 4)) {
-            const cluster = cc.constraints.map(c => Y(c)).join(" + ");
+            const cluster = cc.constraints.map(c => (0, terminal_format_1.Y)(c)).join(" + ");
             lines.push(`  ${cluster}`);
-            lines.push(`  ${D(`  ↳ ${cc.count} anomalies in "${cc.intent.slice(0, 40)}"`)}`);
+            lines.push(`  ${(0, terminal_format_1.D)(`  ↳ ${cc.count} anomalies in "${cc.intent.slice(0, 40)}"`)}`);
         }
         lines.push("");
     }
     // High friction intents
     if (h.highFrictionIntents.length > 0) {
-        lines.push(`  ${B("High Friction Intents (most adaptations required)")}`);
-        lines.push(`  ${D("─".repeat(52))}`);
+        lines.push(`  ${(0, terminal_format_1.B)("High Friction Intents (most adaptations required)")}`);
+        lines.push(`  ${(0, terminal_format_1.D)("─".repeat(52))}`);
         for (const fi of h.highFrictionIntents.slice(0, 5)) {
-            const friction = fi.adaptationCount >= 4 ? R("■■■") : fi.adaptationCount >= 2 ? Y("■■") : Y("■");
+            const friction = fi.adaptationCount >= 4 ? (0, terminal_format_1.R)("■■■") : fi.adaptationCount >= 2 ? (0, terminal_format_1.Y)("■■") : (0, terminal_format_1.Y)("■");
             const types = fi.anomalyTypes.join(", ");
-            lines.push(`  ${friction} ${fi.intent.slice(0, 40).padEnd(42)} ${D(`${fi.adaptationCount} adapts, ${types}`)}`);
+            lines.push(`  ${friction} ${fi.intent.slice(0, 40).padEnd(42)} ${(0, terminal_format_1.D)(`${fi.adaptationCount} adapts, ${types}`)}`);
         }
         lines.push("");
     }
@@ -431,7 +424,7 @@ function loadProtocols() {
 }
 function formatStateTransitionPathFromLedger(transitions) {
     if (transitions.length === 0) {
-        return `${D("No protocol-governed transitions in this sequence.")}`;
+        return `${(0, terminal_format_1.D)("No protocol-governed transitions in this sequence.")}`;
     }
     const lines = [];
     // Initial state from first transition
@@ -444,11 +437,11 @@ function formatStateTransitionPathFromLedger(transitions) {
         }
         return all;
     };
-    lines.push(`  ${D([...mergeStates(initState)].join(", ") || "—")}`);
+    lines.push(`  ${(0, terminal_format_1.D)([...mergeStates(initState)].join(", ") || "—")}`);
     for (const t of transitions) {
         if (!t.valid)
             continue;
-        const fnLabel = C_(t.function + "()");
+        const fnLabel = (0, terminal_format_1.C_)(t.function + "()");
         const beforeAll = mergeStates(t.statesBefore);
         const afterAll = mergeStates(t.statesAfter);
         const beforeStr = [...beforeAll].join(", ");
@@ -457,12 +450,12 @@ function formatStateTransitionPathFromLedger(transitions) {
         const lost = t.invalidated || [];
         let delta = "";
         if (gained.length > 0)
-            delta += ` ${G("+" + gained.join(",+"))}`;
+            delta += ` ${(0, terminal_format_1.G)("+" + gained.join(",+"))}`;
         if (lost.length > 0)
-            delta += ` ${R("-" + lost.join(",-"))}`;
+            delta += ` ${(0, terminal_format_1.R)("-" + lost.join(",-"))}`;
         lines.push(`  │`);
         lines.push(`  ├─ ${fnLabel}`);
-        lines.push(`  │  ${D(beforeStr || "—")} ${D("──▶")} ${afterStr || "—"}${delta}`);
+        lines.push(`  │  ${(0, terminal_format_1.D)(beforeStr || "—")} ${(0, terminal_format_1.D)("──▶")} ${afterStr || "—"}${delta}`);
         lines.push(`  │`);
     }
     return lines.join("\n");
@@ -470,13 +463,13 @@ function formatStateTransitionPathFromLedger(transitions) {
 function formatStateTransitions(session) {
     const width = 66;
     const title = `State Transitions: ${session.intent}`;
-    const header = `┌─ ${B(title)} ${"─".repeat(Math.max(2, width - title.length - 5))}┐`;
-    const resolvedIcon = session.resolved ? G("✔") : R("✖");
-    const info = `│ Session: ${D(session.sessionId)}  │  Resolved: ${resolvedIcon} ${" ".repeat(Math.max(1, 15))}│`;
+    const header = `┌─ ${(0, terminal_format_1.B)(title)} ${"─".repeat(Math.max(2, width - title.length - 5))}┐`;
+    const resolvedIcon = session.resolved ? (0, terminal_format_1.G)("✔") : (0, terminal_format_1.R)("✖");
+    const info = `│ Session: ${(0, terminal_format_1.D)(session.sessionId)}  │  Resolved: ${resolvedIcon} ${" ".repeat(Math.max(1, 15))}│`;
     const footer = `└${"─".repeat(width - 2)}┘`;
     const lines = [header, info, footer, ""];
     if (session.successfulAttempt) {
-        lines.push(`  ${B("Successful Path State Machine:")}`);
+        lines.push(`  ${(0, terminal_format_1.B)("Successful Path State Machine:")}`);
         lines.push("");
         lines.push(formatStateTransitionPathFromLedger(session.successfulAttempt.transitions));
         lines.push("");
@@ -484,10 +477,10 @@ function formatStateTransitions(session) {
     for (const a of session.attempts) {
         for (const v of a.violations) {
             if (v.svl === 4 && v.fixPath?.length) {
-                lines.push(`  ${D("─".repeat(50))}`);
+                lines.push(`  ${(0, terminal_format_1.D)("─".repeat(50))}`);
                 const actions = a.generatedActions.filter((x) => x.kind === "call" && x.function).map((x) => x.function).join(" → ");
-                lines.push(`  ${R("Blocked at:")} ${actions}`);
-                lines.push(`  ${D("Repair:")}     ${Y(v.fixPath.join(" → "))}`);
+                lines.push(`  ${(0, terminal_format_1.R)("Blocked at:")} ${actions}`);
+                lines.push(`  ${(0, terminal_format_1.D)("Repair:")}     ${(0, terminal_format_1.Y)(v.fixPath.join(" → "))}`);
                 lines.push("");
             }
         }
@@ -524,24 +517,24 @@ function formatReplayHeader(session) {
     const w = 62;
     const totalRetries = session.attempts.filter(a => a.outcome !== "success").length;
     lines.push("");
-    lines.push(`  ${B("Semantic Observatory — Cognitive Session Replay")}`);
-    lines.push(`  ${D("─".repeat(w))}`);
+    lines.push(`  ${(0, terminal_format_1.B)("Semantic Observatory — Cognitive Session Replay")}`);
+    lines.push(`  ${(0, terminal_format_1.D)("─".repeat(w))}`);
     lines.push("");
-    lines.push(`  ${D("Intent:")}     ${C_(session.intent)}`);
-    lines.push(`  ${D("Session:")}    ${session.sessionId}`);
-    lines.push(`  ${D("Adaptations:")} ${totalRetries}`);
-    lines.push(`  ${D("Outcome:")}     ${session.resolved ? G("cognitive adaptation successful") : R("cognitive adaptation incomplete")}`);
+    lines.push(`  ${(0, terminal_format_1.D)("Intent:")}     ${(0, terminal_format_1.C_)(session.intent)}`);
+    lines.push(`  ${(0, terminal_format_1.D)("Session:")}    ${session.sessionId}`);
+    lines.push(`  ${(0, terminal_format_1.D)("Adaptations:")} ${totalRetries}`);
+    lines.push(`  ${(0, terminal_format_1.D)("Outcome:")}     ${session.resolved ? (0, terminal_format_1.G)("cognitive adaptation successful") : (0, terminal_format_1.R)("cognitive adaptation incomplete")}`);
     lines.push("");
-    lines.push(`  ${D("─".repeat(w))}`);
+    lines.push(`  ${(0, terminal_format_1.D)("─".repeat(w))}`);
     lines.push("");
     return lines.join("\n");
 }
 function formatActionList(actions) {
     if (!actions || actions.length === 0)
-        return D("(empty sequence)");
+        return (0, terminal_format_1.D)("(empty sequence)");
     return actions
         .filter(a => a.kind === "call" && a.function)
-        .map(a => `  ${C_(a.function + "()")}`)
+        .map(a => `  ${(0, terminal_format_1.C_)(a.function + "()")}`)
         .join("\n");
 }
 function formatAdaptationDiff(prev, current) {
@@ -551,15 +544,15 @@ function formatAdaptationDiff(prev, current) {
     const removed = prevFns.filter(f => !currFns.includes(f));
     const kept = currFns.filter(f => prevFns.includes(f));
     const lines = [];
-    lines.push(`  ${B("Adaptation shift:")}`);
+    lines.push(`  ${(0, terminal_format_1.B)("Adaptation shift:")}`);
     if (kept.length > 0) {
-        lines.push(`    ${D("persisted")}  ${kept.map(f => C_(f + "()")).join(" → ")}`);
+        lines.push(`    ${(0, terminal_format_1.D)("persisted")}  ${kept.map(f => (0, terminal_format_1.C_)(f + "()")).join(" → ")}`);
     }
     if (removed.length > 0) {
-        lines.push(`    ${R("dropped")}    ${removed.map(f => R(f + "()")).join(" → ")}`);
+        lines.push(`    ${(0, terminal_format_1.R)("dropped")}    ${removed.map(f => (0, terminal_format_1.R)(f + "()")).join(" → ")}`);
     }
     if (added.length > 0) {
-        lines.push(`    ${G("acquired")}   ${added.map(f => G(f + "()")).join(" → ")}`);
+        lines.push(`    ${(0, terminal_format_1.G)("acquired")}   ${added.map(f => (0, terminal_format_1.G)(f + "()")).join(" → ")}`);
     }
     return lines.join("\n");
 }
@@ -567,28 +560,28 @@ function formatAnomalyReport(a) {
     const lines = [];
     const primary = a.violations[0];
     if (!primary) {
-        lines.push(`  ${B("Semantic anomaly:")} ${R("unknown")}`);
+        lines.push(`  ${(0, terminal_format_1.B)("Semantic anomaly:")} ${(0, terminal_format_1.R)("unknown")}`);
         return lines.join("\n");
     }
     const svl = `SVL-${primary.svl}`;
-    lines.push(`  ${B("Semantic anomaly:")} ${R(svlLabel(svl))}`);
-    lines.push(`  ${D("Layer:")}  ${describeSVLLayer(svl)}`);
+    lines.push(`  ${(0, terminal_format_1.B)("Semantic anomaly:")} ${(0, terminal_format_1.R)(svlLabel(svl))}`);
+    lines.push(`  ${(0, terminal_format_1.D)("Layer:")}  ${describeSVLLayer(svl)}`);
     if (primary.svl === 4) {
         const blockedMatch = primary.description.match(/(\w+)\s*(要求|requires|blocked|不允许|不合法)/);
         const blocked = blockedMatch ? blockedMatch[1] : a.generatedActions.find(x => x.kind === "call")?.function || "unknown";
-        lines.push(`  ${D("Blocked:")}  ${R(blocked + "()")}`);
+        lines.push(`  ${(0, terminal_format_1.D)("Blocked:")}  ${(0, terminal_format_1.R)(blocked + "()")}`);
         if (primary.missingStates?.length) {
             const missing = primary.missingStates.join(", ");
-            lines.push(`  ${D("Missing:")}  ${C_(missing)}`);
+            lines.push(`  ${(0, terminal_format_1.D)("Missing:")}  ${(0, terminal_format_1.C_)(missing)}`);
         }
         if (primary.fixPath?.length) {
             const fixPath = primary.fixPath.join(" → ");
-            lines.push(`  ${D("Required:")} ${C_(fixPath)}`);
+            lines.push(`  ${(0, terminal_format_1.D)("Required:")} ${(0, terminal_format_1.C_)(fixPath)}`);
         }
     }
     else {
         const detail = primary.description.length > 80 ? primary.description.slice(0, 77) + "..." : primary.description;
-        lines.push(`  ${D("Detail:")}  ${detail}`);
+        lines.push(`  ${(0, terminal_format_1.D)("Detail:")}  ${detail}`);
     }
     return lines.join("\n");
 }
@@ -597,21 +590,21 @@ function formatImmuneResponse(a) {
     const primary = a.violations[0];
     if (primary?.fixPath?.length) {
         const path = primary.fixPath.join(" → ");
-        lines.push(`  ${B("Immune response:")} ${Y("repair path activated")}`);
-        lines.push(`  ${D("Repair:")}  ${Y(path)}`);
+        lines.push(`  ${(0, terminal_format_1.B)("Immune response:")} ${(0, terminal_format_1.Y)("repair path activated")}`);
+        lines.push(`  ${(0, terminal_format_1.D)("Repair:")}  ${(0, terminal_format_1.Y)(path)}`);
     }
     else if (a.llmCallCount > 1) {
-        lines.push(`  ${B("Immune response:")} ${Y("adaptation requested")}`);
+        lines.push(`  ${(0, terminal_format_1.B)("Immune response:")} ${(0, terminal_format_1.Y)("adaptation requested")}`);
     }
     else {
-        lines.push(`  ${B("Immune response:")} ${Y("constraint violation recorded")}`);
+        lines.push(`  ${(0, terminal_format_1.B)("Immune response:")} ${(0, terminal_format_1.Y)("constraint violation recorded")}`);
     }
     return lines.join("\n");
 }
 function formatReplayProgress(current, total) {
     const filled = "█".repeat(current);
     const empty = "░".repeat(total - current);
-    return `  ${D("[" + filled + empty + "]")} ${current}/${total}`;
+    return `  ${(0, terminal_format_1.D)("[" + filled + empty + "]")} ${current}/${total}`;
 }
 async function replaySession(session) {
     clearScreen();
@@ -623,11 +616,11 @@ async function replaySession(session) {
         const a = attempts[i];
         const prev = i > 0 ? attempts[i - 1] : null;
         // ── Step header ──
-        console.log(`  ${B("━━━ Adaptation " + (i + 1) + " of " + totalAdaptations + " ━━━")}`);
+        console.log(`  ${(0, terminal_format_1.B)("━━━ Adaptation " + (i + 1) + " of " + totalAdaptations + " ━━━")}`);
         console.log("");
         await sleep(300);
         // ── What the cognitive planner attempted ──
-        console.log(`  ${D("Cognitive planner action:")}`);
+        console.log(`  ${(0, terminal_format_1.D)("Cognitive planner action:")}`);
         console.log(formatActionList(a.generatedActions));
         console.log("");
         await sleep(400);
@@ -650,44 +643,44 @@ async function replaySession(session) {
         console.log("");
         // ── Inter-adaptation pause ──
         if (i < attempts.length - 1) {
-            console.log(`  ${D("⏳  Cognitive planner re-evaluating...")}`);
+            console.log(`  ${(0, terminal_format_1.D)("⏳  Cognitive planner re-evaluating...")}`);
             console.log("");
             await sleep(1200);
         }
     }
     // ── Resolution ──
     await sleep(600);
-    console.log(`  ${B("━━━ Cognitive Adaptation Complete ━━━")}`);
+    console.log(`  ${(0, terminal_format_1.B)("━━━ Cognitive Adaptation Complete ━━━")}`);
     console.log("");
     if (session.resolved && session.successfulAttempt) {
         const actions = session.successfulAttempt.generatedActions || [];
-        console.log(`  ${G("✔")}  ${B("Successful cognitive path established:")}`);
+        console.log(`  ${(0, terminal_format_1.G)("✔")}  ${(0, terminal_format_1.B)("Successful cognitive path established:")}`);
         console.log(formatActionList(actions));
         console.log("");
         const names = actions.filter(a => a.kind === "call").map(a => a.function).join(" → ");
-        console.log(`  ${G("✔")}  ${names}`);
+        console.log(`  ${(0, terminal_format_1.G)("✔")}  ${names}`);
         console.log("");
         // State machine trace (from Semantic Ledger)
         const transitions = session.successfulAttempt.transitions;
         if (transitions.length > 0) {
-            console.log(`  ${B("State machine trace (from Ledger):")}`);
+            console.log(`  ${(0, terminal_format_1.B)("State machine trace (from Ledger):")}`);
             console.log(formatStateTransitionPathFromLedger(transitions));
             console.log("");
         }
         const totalRetries = session.attempts.filter(a => a.outcome !== "success").length;
-        console.log(`  ${D(`Total adaptations: ${totalRetries}`)}`);
-        console.log(`  ${D(`Session: ${session.sessionId}`)}`);
+        console.log(`  ${(0, terminal_format_1.D)(`Total adaptations: ${totalRetries}`)}`);
+        console.log(`  ${(0, terminal_format_1.D)(`Session: ${session.sessionId}`)}`);
     }
     else {
-        console.log(`  ${R("✖")}  ${B("Cognitive adaptation incomplete")}`);
+        console.log(`  ${(0, terminal_format_1.R)("✖")}  ${(0, terminal_format_1.B)("Cognitive adaptation incomplete")}`);
         console.log("");
-        console.log(`  ${D("The planner was unable to find a valid path within the constraint space.")}`);
+        console.log(`  ${(0, terminal_format_1.D)("The planner was unable to find a valid path within the constraint space.")}`);
         const totalRetries = session.attempts.length;
-        console.log(`  ${D(`Total adaptations attempted: ${totalRetries}`)}`);
+        console.log(`  ${(0, terminal_format_1.D)(`Total adaptations attempted: ${totalRetries}`)}`);
     }
     console.log("");
-    console.log(`  ${D("─".repeat(62))}`);
-    console.log(`  ${D("Semantic Observatory — replay complete")}`);
+    console.log(`  ${(0, terminal_format_1.D)("─".repeat(62))}`);
+    console.log(`  ${(0, terminal_format_1.D)("Semantic Observatory — replay complete")}`);
     console.log("");
     // Ledger replay validation
     console.log(formatLedgerReplayValidation(session));
@@ -696,10 +689,10 @@ async function replaySession(session) {
 function formatLedgerReplayValidation(session) {
     const lines = [];
     lines.push("");
-    lines.push(`${C_("Ledger Replay Validation")}`);
-    lines.push(`${D("═".repeat(62))}`);
+    lines.push(`${(0, terminal_format_1.C_)("Ledger Replay Validation")}`);
+    lines.push(`${(0, terminal_format_1.D)("═".repeat(62))}`);
     if (!session.attempts || session.attempts.length === 0) {
-        lines.push(`  ${D("No attempts to replay.")}`);
+        lines.push(`  ${(0, terminal_format_1.D)("No attempts to replay.")}`);
         return lines.join("\n");
     }
     // Load current protocols for ruleHash comparison
@@ -715,7 +708,7 @@ function formatLedgerReplayValidation(session) {
             currentRuleHash = (0, ssg_validator_1.hashRules)(rules);
         }
     }
-    catch { }
+    catch { /* trace step — best-effort */ }
     const nsInit = new Map();
     nsInit.set("_global", "UNAUTHENTICATED");
     try {
@@ -729,7 +722,7 @@ function formatLedgerReplayValidation(session) {
             }
         }
     }
-    catch { }
+    catch { /* trace step — best-effort */ }
     let totalLedgers = 0;
     let consistentLedgers = 0;
     let stateMatchLedgers = 0;
@@ -743,12 +736,12 @@ function formatLedgerReplayValidation(session) {
         const consistency = (0, ssg_validator_1.checkLedgerConsistency)(transitions, nsInit);
         if (consistency.consistent) {
             consistentLedgers++;
-            lines.push(`  ${G("✔")} ${attemptLabel}: Invariants clean`);
+            lines.push(`  ${(0, terminal_format_1.G)("✔")} ${attemptLabel}: Invariants clean`);
         }
         else {
-            lines.push(`  ${R("✖")} ${attemptLabel}: ${consistency.violations.length} invariant violation(s)`);
+            lines.push(`  ${(0, terminal_format_1.R)("✖")} ${attemptLabel}: ${consistency.violations.length} invariant violation(s)`);
             for (const v of consistency.violations.slice(0, 2)) {
-                lines.push(`     ${D(`[${v.invariant}] index=${v.index}: ${v.detail || ""}`)}`);
+                lines.push(`     ${(0, terminal_format_1.D)(`[${v.invariant}] index=${v.index}: ${v.detail || ""}`)}`);
             }
         }
         // 2. rebuildState matches recorded statesAfter (normalized)
@@ -768,36 +761,36 @@ function formatLedgerReplayValidation(session) {
         const recordedNorm = JSON.stringify(norm(recorded));
         if (rebuiltNorm === recordedNorm) {
             stateMatchLedgers++;
-            lines.push(`     ${G("rebuildState === recorded")}`);
+            lines.push(`     ${(0, terminal_format_1.G)("rebuildState === recorded")}`);
         }
         else {
-            lines.push(`     ${R("rebuildState !== recorded")}`);
-            lines.push(`     ${D("  rebuilt:  " + rebuiltNorm)}`);
-            lines.push(`     ${D("  recorded: " + recordedNorm)}`);
+            lines.push(`     ${(0, terminal_format_1.R)("rebuildState !== recorded")}`);
+            lines.push(`     ${(0, terminal_format_1.D)("  rebuilt:  " + rebuiltNorm)}`);
+            lines.push(`     ${(0, terminal_format_1.D)("  recorded: " + recordedNorm)}`);
         }
         // 3. ruleHash comparison
         if (attempt.ruleHash && currentRuleHash) {
             if (attempt.ruleHash === currentRuleHash) {
-                lines.push(`     ${G("ruleHash match")} ${D(attempt.ruleHash)}`);
+                lines.push(`     ${(0, terminal_format_1.G)("ruleHash match")} ${(0, terminal_format_1.D)(attempt.ruleHash)}`);
             }
             else {
-                lines.push(`     ${Y("ruleHash mismatch")} ${D("attempt: " + attempt.ruleHash + " | current: " + currentRuleHash)}`);
+                lines.push(`     ${(0, terminal_format_1.Y)("ruleHash mismatch")} ${(0, terminal_format_1.D)("attempt: " + attempt.ruleHash + " | current: " + currentRuleHash)}`);
             }
         }
         else if (attempt.ruleHash && !currentRuleHash) {
-            lines.push(`     ${D("ruleHash: " + attempt.ruleHash + " (no current protocols to compare)")}`);
+            lines.push(`     ${(0, terminal_format_1.D)("ruleHash: " + attempt.ruleHash + " (no current protocols to compare)")}`);
         }
     }
     // Session-level ruleHash
     if (session.ruleHash) {
         lines.push("");
-        lines.push(`  ${D("Session ruleHash:")} ${session.ruleHash}`);
+        lines.push(`  ${(0, terminal_format_1.D)("Session ruleHash:")} ${session.ruleHash}`);
         if (currentRuleHash) {
             if (session.ruleHash === currentRuleHash) {
-                lines.push(`  ${G("Session ruleHash matches current protocols.")}`);
+                lines.push(`  ${(0, terminal_format_1.G)("Session ruleHash matches current protocols.")}`);
             }
             else {
-                lines.push(`  ${Y("Session ruleHash differs from current protocols.")} ${D("Replay may yield different results.")}`);
+                lines.push(`  ${(0, terminal_format_1.Y)("Session ruleHash differs from current protocols.")} ${(0, terminal_format_1.D)("Replay may yield different results.")}`);
             }
         }
     }
@@ -806,20 +799,20 @@ function formatLedgerReplayValidation(session) {
         const allTransitions = session.attempts.flatMap(a => a.transitions || []);
         if (allTransitions.length > 0) {
             const ledgerHash = (0, ssg_validator_1.hashLedger)(allTransitions);
-            lines.push(`  ${D("Ledger hash:")} ${ledgerHash} ${D("(tamper-evident integrity)")}`);
+            lines.push(`  ${(0, terminal_format_1.D)("Ledger hash:")} ${ledgerHash} ${(0, terminal_format_1.D)("(tamper-evident integrity)")}`);
         }
     }
     lines.push("");
     if (totalLedgers === 0) {
-        lines.push(`  ${D("No ledger data in this session.")}`);
+        lines.push(`  ${(0, terminal_format_1.D)("No ledger data in this session.")}`);
     }
     else {
         const allOk = consistentLedgers === totalLedgers && stateMatchLedgers === totalLedgers;
         if (allOk) {
-            lines.push(`  ${G("✦")} ${B(`Ledger Replay: ${totalLedgers}/${totalLedgers} consistent, all states match`)}`);
+            lines.push(`  ${(0, terminal_format_1.G)("✦")} ${(0, terminal_format_1.B)(`Ledger Replay: ${totalLedgers}/${totalLedgers} consistent, all states match`)}`);
         }
         else {
-            lines.push(`  ${Y("◇")} ${B(`Ledger Replay: ${consistentLedgers}/${totalLedgers} consistent, ${stateMatchLedgers}/${totalLedgers} state-match`)}`);
+            lines.push(`  ${(0, terminal_format_1.Y)("◇")} ${(0, terminal_format_1.B)(`Ledger Replay: ${consistentLedgers}/${totalLedgers} consistent, ${stateMatchLedgers}/${totalLedgers} state-match`)}`);
         }
     }
     return lines.join("\n");
@@ -828,8 +821,8 @@ function formatLedgerReplayValidation(session) {
 function formatLedgerStats() {
     const sessions = (0, failure_corpus_1.getAllSessions)();
     const lines = [];
-    lines.push(`${C_("Ledger Corpus Statistics")}`);
-    lines.push(`${D("═".repeat(62))}`);
+    lines.push(`${(0, terminal_format_1.C_)("Ledger Corpus Statistics")}`);
+    lines.push(`${(0, terminal_format_1.D)("═".repeat(62))}`);
     lines.push("");
     let totalSessions = 0;
     let totalLedgers = 0;
@@ -867,22 +860,22 @@ function formatLedgerStats() {
         }
     }
     if (totalSessions === 0) {
-        lines.push(`  ${D("No sessions with ledger data.")}`);
+        lines.push(`  ${(0, terminal_format_1.D)("No sessions with ledger data.")}`);
         return lines.join("\n");
     }
-    lines.push(`  ${B("Sessions:")}        ${totalSessions} (${D(`${sessions.length} total`)})`);
-    lines.push(`  ${B("Ledgers:")}         ${totalLedgers}`);
-    lines.push(`  ${B("Transitions:")}     ${totalTransitions} (${G(`${validTransitions} valid`)}, ${R(`${invalidTransitions} invalid`)})`);
+    lines.push(`  ${(0, terminal_format_1.B)("Sessions:")}        ${totalSessions} (${(0, terminal_format_1.D)(`${sessions.length} total`)})`);
+    lines.push(`  ${(0, terminal_format_1.B)("Ledgers:")}         ${totalLedgers}`);
+    lines.push(`  ${(0, terminal_format_1.B)("Transitions:")}     ${totalTransitions} (${(0, terminal_format_1.G)(`${validTransitions} valid`)}, ${(0, terminal_format_1.R)(`${invalidTransitions} invalid`)})`);
     const validPct = totalTransitions > 0 ? Math.round((validTransitions / totalTransitions) * 100) : 0;
-    lines.push(`  ${B("Validity rate:")}    ${validPct >= 90 ? G(`${validPct}%`) : Y(`${validPct}%`)}`);
-    lines.push(`  ${B("Rule hashes:")}      ${allRuleHashes.size} unique (${sessionsWithRuleHash}/${totalSessions} sessions have ruleHash)`);
+    lines.push(`  ${(0, terminal_format_1.B)("Validity rate:")}    ${validPct >= 90 ? (0, terminal_format_1.G)(`${validPct}%`) : (0, terminal_format_1.Y)(`${validPct}%`)}`);
+    lines.push(`  ${(0, terminal_format_1.B)("Rule hashes:")}      ${allRuleHashes.size} unique (${sessionsWithRuleHash}/${totalSessions} sessions have ruleHash)`);
     // Top producers
     const topProducers = [...stateProducers.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
     if (topProducers.length > 0) {
         lines.push("");
-        lines.push(`  ${B("Top produced states:")}`);
+        lines.push(`  ${(0, terminal_format_1.B)("Top produced states:")}`);
         for (const [state, count] of topProducers) {
-            lines.push(`    ${G("+" + state)}: ${count}x`);
+            lines.push(`    ${(0, terminal_format_1.G)("+" + state)}: ${count}x`);
         }
     }
     // Top consumers
@@ -891,22 +884,22 @@ function formatLedgerStats() {
         .sort((a, b) => b[1] - a[1]).slice(0, 5);
     if (topConsumers.length > 0) {
         lines.push("");
-        lines.push(`  ${B("Top consumed states:")}`);
+        lines.push(`  ${(0, terminal_format_1.B)("Top consumed states:")}`);
         for (const [state, count] of topConsumers) {
-            lines.push(`    ${Y("←" + state)}: ${count}x`);
+            lines.push(`    ${(0, terminal_format_1.Y)("←" + state)}: ${count}x`);
         }
     }
     // Per-session detail
     lines.push("");
-    lines.push(`  ${B("Per-session breakdown:")}`);
+    lines.push(`  ${(0, terminal_format_1.B)("Per-session breakdown:")}`);
     for (const session of sessions) {
         const allTransitions = session.attempts.flatMap(a => a.transitions || []);
         if (allTransitions.length === 0)
             continue;
         const validCount = allTransitions.filter(t => t.valid).length;
-        const hashTag = session.ruleHash ? ` [${D(session.ruleHash.slice(0, 8))}]` : "";
+        const hashTag = session.ruleHash ? ` [${(0, terminal_format_1.D)(session.ruleHash.slice(0, 8))}]` : "";
         const intentShort = session.intent.length > 40 ? session.intent.slice(0, 37) + "..." : session.intent;
-        lines.push(`  ${D(session.sessionId.slice(-8))} ${validCount}/${allTransitions.length} valid ${D("·")} ${intentShort}${hashTag}`);
+        lines.push(`  ${(0, terminal_format_1.D)(session.sessionId.slice(-8))} ${validCount}/${allTransitions.length} valid ${(0, terminal_format_1.D)("·")} ${intentShort}${hashTag}`);
     }
     return lines.join("\n");
 }
@@ -915,8 +908,8 @@ function formatCrossSessionQuery(operation, state) {
     const sessions = (0, failure_corpus_1.getAllSessions)();
     const lines = [];
     const label = operation === "producer" ? `Producers of "${state}"` : `Consumers of "${state}"`;
-    lines.push(`${C_(`Cross-session: ${label}`)}`);
-    lines.push(`${D("═".repeat(62))}`);
+    lines.push(`${(0, terminal_format_1.C_)(`Cross-session: ${label}`)}`);
+    lines.push(`${(0, terminal_format_1.D)("═".repeat(62))}`);
     lines.push("");
     let found = 0;
     for (const session of sessions) {
@@ -936,16 +929,16 @@ function formatCrossSessionQuery(operation, state) {
         const intentShort = session.intent.length > 50 ? session.intent.slice(0, 47) + "..." : session.intent;
         const funcs = [...new Set(results.map(r => r.transition.function))].join(", ");
         const validCount = allTransitions.filter(t => t.valid).length;
-        const hashTag = session.ruleHash ? ` ${D(session.ruleHash.slice(0, 8))}` : "";
-        lines.push(`  ${D(session.sessionId.slice(-8))} ${G(`${results.length}x`)} via ${C_(funcs)} ${D(`(${validCount}/${allTransitions.length} valid)${hashTag}`)}`);
-        lines.push(`     ${D(intentShort)}`);
+        const hashTag = session.ruleHash ? ` ${(0, terminal_format_1.D)(session.ruleHash.slice(0, 8))}` : "";
+        lines.push(`  ${(0, terminal_format_1.D)(session.sessionId.slice(-8))} ${(0, terminal_format_1.G)(`${results.length}x`)} via ${(0, terminal_format_1.C_)(funcs)} ${(0, terminal_format_1.D)(`(${validCount}/${allTransitions.length} valid)${hashTag}`)}`);
+        lines.push(`     ${(0, terminal_format_1.D)(intentShort)}`);
     }
     if (found === 0) {
-        lines.push(`  ${D(`No sessions found with ${operation} for "${state}".`)}`);
+        lines.push(`  ${(0, terminal_format_1.D)(`No sessions found with ${operation} for "${state}".`)}`);
     }
     else {
         lines.push("");
-        lines.push(`  ${B(`Found in ${found} session(s).`)}`);
+        lines.push(`  ${(0, terminal_format_1.B)(`Found in ${found} session(s).`)}`);
     }
     return lines.join("\n");
 }
@@ -954,76 +947,76 @@ function formatCrossSessionQuery(operation, state) {
 function formatSnapshotList() {
     const snapshots = (0, semantic_snapshot_1.listSnapshots)();
     if (snapshots.length === 0) {
-        return `${D("No IR snapshots recorded yet. Run the planner to capture the first snapshot.")}`;
+        return `${(0, terminal_format_1.D)("No IR snapshots recorded yet. Run the planner to capture the first snapshot.")}`;
     }
     const lines = [];
-    const C_ = (s) => `${C.cyan}${s}${C.reset}`;
+    const C_ = (s) => `${terminal_format_1.COLORS.cyan}${s}${terminal_format_1.COLORS.reset}`;
     lines.push(`${C_("IR Snapshots")} (${snapshots.length} total):\n`);
-    lines.push(`${B("┌──────────────────────┬──────────────────────┬──────────┬────────────────────────────────┐")}`);
-    lines.push(`${B("│")} ${B("Snapshot ID")}       ${B("│")} ${B("Timestamp")}           ${B("│")} ${B("Funcs")}   ${B("│")} ${B("Intent")}                        ${B("│")}`);
-    lines.push(`${B("├──────────────────────┼──────────────────────┼──────────┼────────────────────────────────┤")}`);
+    lines.push(`${(0, terminal_format_1.B)("┌──────────────────────┬──────────────────────┬──────────┬────────────────────────────────┐")}`);
+    lines.push(`${(0, terminal_format_1.B)("│")} ${(0, terminal_format_1.B)("Snapshot ID")}       ${(0, terminal_format_1.B)("│")} ${(0, terminal_format_1.B)("Timestamp")}           ${(0, terminal_format_1.B)("│")} ${(0, terminal_format_1.B)("Funcs")}   ${(0, terminal_format_1.B)("│")} ${(0, terminal_format_1.B)("Intent")}                        ${(0, terminal_format_1.B)("│")}`);
+    lines.push(`${(0, terminal_format_1.B)("├──────────────────────┼──────────────────────┼──────────┼────────────────────────────────┤")}`);
     for (const snap of snapshots.slice(0, 20)) {
         const id = snap.id.slice(-16);
         const ts = snap.timestamp.slice(0, 19).replace("T", " ");
         const count = String(snap.functions.length).padStart(4);
         const intent = (snap.intent || "").slice(0, 30).padEnd(30);
-        lines.push(`${D("│")} ${D(id)} ${D("│")} ${ts} ${D("│")} ${count}   ${D("│")} ${intent} ${D("│")}`);
+        lines.push(`${(0, terminal_format_1.D)("│")} ${(0, terminal_format_1.D)(id)} ${(0, terminal_format_1.D)("│")} ${ts} ${(0, terminal_format_1.D)("│")} ${count}   ${(0, terminal_format_1.D)("│")} ${intent} ${(0, terminal_format_1.D)("│")}`);
     }
-    lines.push(`${B("└──────────────────────┴──────────────────────┴──────────┴────────────────────────────────┘")}`);
+    lines.push(`${(0, terminal_format_1.B)("└──────────────────────┴──────────────────────┴──────────┴────────────────────────────────┘")}`);
     return lines.join("\n");
 }
 function formatSnapshotDiff(snapIdA, snapIdB) {
     const a = (0, semantic_snapshot_1.loadSnapshot)(snapIdA);
     const b = (0, semantic_snapshot_1.loadSnapshot)(snapIdB);
     if (!a)
-        return `${R("Snapshot not found:")} ${snapIdA}`;
+        return `${(0, terminal_format_1.R)("Snapshot not found:")} ${snapIdA}`;
     if (!b)
-        return `${R("Snapshot not found:")} ${snapIdB}`;
+        return `${(0, terminal_format_1.R)("Snapshot not found:")} ${snapIdB}`;
     const diff = (0, semantic_snapshot_1.diffSnapshots)(a, b);
     const lines = [];
-    const C_ = (s) => `${C.cyan}${s}${C.reset}`;
+    const C_ = (s) => `${terminal_format_1.COLORS.cyan}${s}${terminal_format_1.COLORS.reset}`;
     lines.push(`${C_("IR Snapshot Diff")}`);
-    lines.push(`${D(`${a.id}`)}  →  ${D(`${b.id}`)}`);
+    lines.push(`${(0, terminal_format_1.D)(`${a.id}`)}  →  ${(0, terminal_format_1.D)(`${b.id}`)}`);
     lines.push(`  ${a.timestamp.slice(0, 19)}  →  ${b.timestamp.slice(0, 19)}`);
     lines.push("");
     if (diff.added.length > 0) {
-        lines.push(`  ${G("+ Added")} (${diff.added.length}):`);
+        lines.push(`  ${(0, terminal_format_1.G)("+ Added")} (${diff.added.length}):`);
         for (const f of diff.added) {
-            lines.push(`    ${G("+")} ${f.name}(${f.params.map(p => `${p.name}:${p.type}`).join(", ")}) → ${f.returnType}`);
+            lines.push(`    ${(0, terminal_format_1.G)("+")} ${f.name}(${f.params.map(p => `${p.name}:${p.type}`).join(", ")}) → ${f.returnType}`);
         }
         lines.push("");
     }
     if (diff.removed.length > 0) {
-        lines.push(`  ${R("- Removed")} (${diff.removed.length}):`);
+        lines.push(`  ${(0, terminal_format_1.R)("- Removed")} (${diff.removed.length}):`);
         for (const f of diff.removed) {
-            lines.push(`    ${R("-")} ${f.name}(${f.params.map(p => `${p.name}:${p.type}`).join(", ")}) → ${f.returnType}`);
+            lines.push(`    ${(0, terminal_format_1.R)("-")} ${f.name}(${f.params.map(p => `${p.name}:${p.type}`).join(", ")}) → ${f.returnType}`);
         }
         lines.push("");
     }
     if (diff.changed.length > 0) {
-        lines.push(`  ${Y("~ Changed")} (${diff.changed.length}):`);
+        lines.push(`  ${(0, terminal_format_1.Y)("~ Changed")} (${diff.changed.length}):`);
         for (const { before, after } of diff.changed) {
-            lines.push(`    ${Y("~")} ${before.name}:`);
-            lines.push(`      ${R("-")} ${before.returnType} (${before.params.map(p => `${p.name}:${p.type}`).join(", ")})`);
-            lines.push(`      ${G("+")} ${after.returnType} (${after.params.map(p => `${p.name}:${p.type}`).join(", ")})`);
+            lines.push(`    ${(0, terminal_format_1.Y)("~")} ${before.name}:`);
+            lines.push(`      ${(0, terminal_format_1.R)("-")} ${before.returnType} (${before.params.map(p => `${p.name}:${p.type}`).join(", ")})`);
+            lines.push(`      ${(0, terminal_format_1.G)("+")} ${after.returnType} (${after.params.map(p => `${p.name}:${p.type}`).join(", ")})`);
         }
         lines.push("");
     }
     if (diff.unchanged > 0) {
-        lines.push(`  ${D(`${diff.unchanged} functions unchanged`)}`);
+        lines.push(`  ${(0, terminal_format_1.D)(`${diff.unchanged} functions unchanged`)}`);
     }
     if (diff.added.length === 0 && diff.removed.length === 0 && diff.changed.length === 0) {
-        lines.push(`  ${D("No differences — snapshots are identical.")}`);
+        lines.push(`  ${(0, terminal_format_1.D)("No differences — snapshots are identical.")}`);
     }
     return lines.join("\n");
 }
 // ── Deterministic Replay: validate session against snapshot vs. live IR ──
 function formatSessionValidation(session) {
     const lines = [];
-    const C_ = (s) => `${C.cyan}${s}${C.reset}`;
+    const C_ = (s) => `${terminal_format_1.COLORS.cyan}${s}${terminal_format_1.COLORS.reset}`;
     lines.push(`${C_("Deterministic Replay Validation")}`);
-    lines.push(`${D(`Session: ${session.sessionId}`)}`);
-    lines.push(`${D(`Intent:  ${session.intent}`)}`);
+    lines.push(`${(0, terminal_format_1.D)(`Session: ${session.sessionId}`)}`);
+    lines.push(`${(0, terminal_format_1.D)(`Intent:  ${session.intent}`)}`);
     lines.push("");
     // Collect all called functions from all attempts + successful path
     const allCalledFns = new Set();
@@ -1045,14 +1038,14 @@ function formatSessionValidation(session) {
         const snap = (0, semantic_snapshot_1.loadSnapshot)(session.snapshotId);
         if (snap) {
             snapshotFns = new Set(snap.functions.map(f => f.name));
-            lines.push(`${D("Snapshot IR:")} ${snap.id} (${snap.functions.length} functions)`);
+            lines.push(`${(0, terminal_format_1.D)("Snapshot IR:")} ${snap.id} (${snap.functions.length} functions)`);
         }
         else {
-            lines.push(`${Y("Snapshot not found:")} ${session.snapshotId}`);
+            lines.push(`${(0, terminal_format_1.Y)("Snapshot not found:")} ${session.snapshotId}`);
         }
     }
     else {
-        lines.push(`${D("No snapshot linked to this session.")}`);
+        lines.push(`${(0, terminal_format_1.D)("No snapshot linked to this session.")}`);
     }
     // Load current IR
     let currentFns = null;
@@ -1061,64 +1054,64 @@ function formatSessionValidation(session) {
         if (fs.existsSync(irPath)) {
             const ir = JSON.parse(fs.readFileSync(irPath, "utf-8"));
             currentFns = new Set(ir.map((f) => f.name));
-            lines.push(`${D("Current IR:")}  ir.json (${ir.length} functions)`);
+            lines.push(`${(0, terminal_format_1.D)("Current IR:")}  ir.json (${ir.length} functions)`);
         }
     }
-    catch { }
+    catch { /* trace step — best-effort */ }
     lines.push("");
     if (!snapshotFns && !currentFns) {
-        lines.push(`${D("No IR data available for comparison.")}`);
+        lines.push(`${(0, terminal_format_1.D)("No IR data available for comparison.")}`);
         return lines.join("\n");
     }
     // Per-function validation table
     const fns = [...allCalledFns].sort();
     if (fns.length === 0) {
-        lines.push(`${D("No function calls recorded in this session.")}`);
+        lines.push(`${(0, terminal_format_1.D)("No function calls recorded in this session.")}`);
         return lines.join("\n");
     }
-    lines.push(`${B("Function validation (then vs. now):")}`);
-    lines.push(`${B("┌────────────────────────────┬──────────┬──────────┬──────────────────────────────────────┐")}`);
-    lines.push(`${B("│")} ${B("Function")}                 ${B("│")} ${B("Then")}     ${B("│")} ${B("Now")}      ${B("│")} ${B("Status")}                              ${B("│")}`);
-    lines.push(`${B("├────────────────────────────┼──────────┼──────────┼──────────────────────────────────────┤")}`);
+    lines.push(`${(0, terminal_format_1.B)("Function validation (then vs. now):")}`);
+    lines.push(`${(0, terminal_format_1.B)("┌────────────────────────────┬──────────┬──────────┬──────────────────────────────────────┐")}`);
+    lines.push(`${(0, terminal_format_1.B)("│")} ${(0, terminal_format_1.B)("Function")}                 ${(0, terminal_format_1.B)("│")} ${(0, terminal_format_1.B)("Then")}     ${(0, terminal_format_1.B)("│")} ${(0, terminal_format_1.B)("Now")}      ${(0, terminal_format_1.B)("│")} ${(0, terminal_format_1.B)("Status")}                              ${(0, terminal_format_1.B)("│")}`);
+    lines.push(`${(0, terminal_format_1.B)("├────────────────────────────┼──────────┼──────────┼──────────────────────────────────────┤")}`);
     let regressions = 0;
     let additions = 0;
     for (const fn of fns) {
         const existed = snapshotFns ? snapshotFns.has(fn) : null;
         const exists = currentFns ? currentFns.has(fn) : null;
-        const thenIcon = existed === null ? D("?") : existed ? G("✔") : R("✖");
-        const nowIcon = exists === null ? D("?") : exists ? G("✔") : R("✖");
+        const thenIcon = existed === null ? (0, terminal_format_1.D)("?") : existed ? (0, terminal_format_1.G)("✔") : (0, terminal_format_1.R)("✖");
+        const nowIcon = exists === null ? (0, terminal_format_1.D)("?") : exists ? (0, terminal_format_1.G)("✔") : (0, terminal_format_1.R)("✖");
         let status;
         if (existed === true && exists === true) {
-            status = D("stable");
+            status = (0, terminal_format_1.D)("stable");
         }
         else if (existed === true && exists === false) {
-            status = R("REGRESSION — removed from IR");
+            status = (0, terminal_format_1.R)("REGRESSION — removed from IR");
             regressions++;
         }
         else if (existed === false && exists === true) {
-            status = G("ADDED — new in IR");
+            status = (0, terminal_format_1.G)("ADDED — new in IR");
             additions++;
         }
         else if (existed === false && exists === false) {
-            status = R("MISSING — never existed");
+            status = (0, terminal_format_1.R)("MISSING — never existed");
         }
         else {
-            status = D("unknown");
+            status = (0, terminal_format_1.D)("unknown");
         }
         const fnPad = fn.padEnd(26).slice(0, 26);
-        lines.push(`${D("│")} ${fnPad} ${D("│")}  ${thenIcon}      ${D("│")}  ${nowIcon}      ${D("│")} ${status.padEnd(36)} ${D("│")}`);
+        lines.push(`${(0, terminal_format_1.D)("│")} ${fnPad} ${(0, terminal_format_1.D)("│")}  ${thenIcon}      ${(0, terminal_format_1.D)("│")}  ${nowIcon}      ${(0, terminal_format_1.D)("│")} ${status.padEnd(36)} ${(0, terminal_format_1.D)("│")}`);
     }
-    lines.push(`${B("└────────────────────────────┴──────────┴──────────┴──────────────────────────────────────┘")}`);
+    lines.push(`${(0, terminal_format_1.B)("└────────────────────────────┴──────────┴──────────┴──────────────────────────────────────┘")}`);
     lines.push("");
     // Summary
     if (regressions > 0) {
-        lines.push(`${R(`⚠ ${regressions} regression(s) detected — functions removed from IR since this session`)}`);
+        lines.push(`${(0, terminal_format_1.R)(`⚠ ${regressions} regression(s) detected — functions removed from IR since this session`)}`);
     }
     if (additions > 0) {
-        lines.push(`${G(`+ ${additions} function(s) added to IR since this session`)}`);
+        lines.push(`${(0, terminal_format_1.G)(`+ ${additions} function(s) added to IR since this session`)}`);
     }
     if (regressions === 0 && additions === 0 && fns.length > 0) {
-        lines.push(`${G("✔ IR stable — all functions present in both snapshot and current IR.")}`);
+        lines.push(`${(0, terminal_format_1.G)("✔ IR stable — all functions present in both snapshot and current IR.")}`);
     }
     // Protocol validation against snapshot
     if (session.successfulAttempt && session.snapshotId) {
@@ -1158,28 +1151,28 @@ function formatSessionValidation(session) {
                             transitions.push(transition);
                             ctx.ledger = transitions;
                             if (!tValid) {
-                                lines.push(`  ${R("🚫")} ${act.function}: ${rejection?.missingFunctions.join(" → ") || "protocol violation"}`);
+                                lines.push(`  ${(0, terminal_format_1.R)("🚫")} ${act.function}: ${rejection?.missingFunctions.join(" → ") || "protocol violation"}`);
                                 valid = false;
                             }
                             else {
                                 ctx.currentState = transition.statesAfter;
-                                lines.push(`  ${G("✅")} ${act.function}`);
+                                lines.push(`  ${(0, terminal_format_1.G)("✅")} ${act.function}`);
                             }
                         }
                     }
                     // Ledger consistency check
                     const consistency = (0, ssg_validator_1.checkLedgerConsistency)(transitions, nsStates);
                     if (!consistency.consistent) {
-                        lines.push(`  ${R("⚠")} Ledger consistency: ${consistency.violations.length} violation(s)`);
+                        lines.push(`  ${(0, terminal_format_1.R)("⚠")} Ledger consistency: ${consistency.violations.length} violation(s)`);
                         valid = false;
                     }
                     if (valid) {
-                        lines.push(`  ${G("✔ All actions satisfy protocol constraints against snapshot IR.")}`);
+                        lines.push(`  ${(0, terminal_format_1.G)("✔ All actions satisfy protocol constraints against snapshot IR.")}`);
                     }
                 }
             }
             catch (e) {
-                lines.push(`  ${D("(protocol re-validation not available)")}`);
+                lines.push(`  ${(0, terminal_format_1.D)("(protocol re-validation not available)")}`);
             }
         }
     }
@@ -1207,41 +1200,41 @@ async function main() {
         const idA = process.argv[3];
         const idB = process.argv[4];
         if (!idA || !idB) {
-            console.error(`${R("Usage:")} ts-node src/semantic-trace.ts --diff-ledgers <sessionIdA> <sessionIdB>`);
+            console.error(`${(0, terminal_format_1.R)("Usage:")} ts-node src/semantic-trace.ts --diff-ledgers <sessionIdA> <sessionIdB>`);
             process.exit(1);
         }
         const sessions = (0, failure_corpus_1.getAllSessions)();
         const sessA = sessions.find(s => s.sessionId === idA || s.sessionId.startsWith(idA));
         const sessB = sessions.find(s => s.sessionId === idB || s.sessionId.startsWith(idB));
         if (!sessA) {
-            console.error(`${R("Session A not found:")} ${idA}`);
+            console.error(`${(0, terminal_format_1.R)("Session A not found:")} ${idA}`);
             process.exit(1);
         }
         if (!sessB) {
-            console.error(`${R("Session B not found:")} ${idB}`);
+            console.error(`${(0, terminal_format_1.R)("Session B not found:")} ${idB}`);
             process.exit(1);
         }
         const ledgerA = sessA.attempts.flatMap(a => a.transitions || []);
         const ledgerB = sessB.attempts.flatMap(a => a.transitions || []);
         const diff = (0, ssg_validator_1.diffLedgers)(ledgerA, ledgerB);
-        console.log(`${C_("Ledger Diff")}`);
-        console.log(`${D("═".repeat(50))}`);
-        console.log(`  A: ${D(sessA.sessionId)} (${ledgerA.length} transitions)`);
-        console.log(`  B: ${D(sessB.sessionId)} (${ledgerB.length} transitions)`);
+        console.log(`${(0, terminal_format_1.C_)("Ledger Diff")}`);
+        console.log(`${(0, terminal_format_1.D)("═".repeat(50))}`);
+        console.log(`  A: ${(0, terminal_format_1.D)(sessA.sessionId)} (${ledgerA.length} transitions)`);
+        console.log(`  B: ${(0, terminal_format_1.D)(sessB.sessionId)} (${ledgerB.length} transitions)`);
         console.log("");
         if (diff.identical) {
-            console.log(`  ${G("✔ Ledgers are identical.")}`);
+            console.log(`  ${(0, terminal_format_1.G)("✔ Ledgers are identical.")}`);
         }
         else {
-            console.log(`  ${G(`Unchanged: ${diff.unchanged}`)}  ${R(`Only in A: ${diff.onlyInA.length}`)}  ${Y(`Only in B: ${diff.onlyInB.length}`)}  ${Y(`Changed: ${diff.changed.length}`)}`);
+            console.log(`  ${(0, terminal_format_1.G)(`Unchanged: ${diff.unchanged}`)}  ${(0, terminal_format_1.R)(`Only in A: ${diff.onlyInA.length}`)}  ${(0, terminal_format_1.Y)(`Only in B: ${diff.onlyInB.length}`)}  ${(0, terminal_format_1.Y)(`Changed: ${diff.changed.length}`)}`);
             for (const d of diff.onlyInA.slice(0, 3)) {
-                console.log(`    ${R("-")} @${d.index} ${d.function} ${D(d.hashA)}`);
+                console.log(`    ${(0, terminal_format_1.R)("-")} @${d.index} ${d.function} ${(0, terminal_format_1.D)(d.hashA)}`);
             }
             for (const d of diff.onlyInB.slice(0, 3)) {
-                console.log(`    ${G("+")} @${d.index} ${d.function} ${D(d.hashB)}`);
+                console.log(`    ${(0, terminal_format_1.G)("+")} @${d.index} ${d.function} ${(0, terminal_format_1.D)(d.hashB)}`);
             }
             for (const d of diff.changed.slice(0, 3)) {
-                console.log(`    ${Y("~")} @${d.index} ${d.function} ${D(d.hashA + " → " + d.hashB)}`);
+                console.log(`    ${(0, terminal_format_1.Y)("~")} @${d.index} ${d.function} ${(0, terminal_format_1.D)(d.hashA + " → " + d.hashB)}`);
             }
         }
         return;
@@ -1250,11 +1243,11 @@ async function main() {
         const op = process.argv[3];
         const st = process.argv[4];
         if (!op || !st) {
-            console.error(`${R("Usage:")} ts-node src/semantic-trace.ts --query-all <producer|consumer> <state>`);
+            console.error(`${(0, terminal_format_1.R)("Usage:")} ts-node src/semantic-trace.ts --query-all <producer|consumer> <state>`);
             process.exit(1);
         }
         if (op !== "producer" && op !== "consumer") {
-            console.error(`${R("Operation must be 'producer' or 'consumer'.")}`);
+            console.error(`${(0, terminal_format_1.R)("Operation must be 'producer' or 'consumer'.")}`);
             process.exit(1);
         }
         console.log(formatCrossSessionQuery(op, st));
@@ -1273,7 +1266,7 @@ async function main() {
         const snapB = process.argv[4];
         if (!snapA || !snapB) {
             console.log(formatSnapshotList());
-            console.log(`\n${D("Usage:")} ts-node src/semantic-trace.ts --diff <snapshotIdA> <snapshotIdB>`);
+            console.log(`\n${(0, terminal_format_1.D)("Usage:")} ts-node src/semantic-trace.ts --diff <snapshotIdA> <snapshotIdB>`);
             return;
         }
         console.log(formatSnapshotDiff(snapA, snapB));
@@ -1282,14 +1275,14 @@ async function main() {
     if (arg === "--validate") {
         const sessionId = process.argv[3];
         if (!sessionId) {
-            console.error(`${R("Usage:")} ts-node src/semantic-trace.ts --validate <sessionId>`);
-            console.error(`\n${D("Validates a session's IR snapshot and replays its Semantic Ledger.")}`);
+            console.error(`${(0, terminal_format_1.R)("Usage:")} ts-node src/semantic-trace.ts --validate <sessionId>`);
+            console.error(`\n${(0, terminal_format_1.D)("Validates a session's IR snapshot and replays its Semantic Ledger.")}`);
             process.exit(1);
         }
         const sessionsForValidate = (0, failure_corpus_1.getAllSessions)();
         const session = sessionsForValidate.find(s => s.sessionId === sessionId || s.sessionId.startsWith(sessionId));
         if (!session) {
-            console.error(`${R("Session not found:")} ${sessionId}`);
+            console.error(`${(0, terminal_format_1.R)("Session not found:")} ${sessionId}`);
             process.exit(1);
         }
         console.log(formatSessionValidation(session));
@@ -1299,14 +1292,14 @@ async function main() {
     if (arg === "--ledger") {
         const sessionId = process.argv[3];
         if (!sessionId) {
-            console.error(`${R("Usage:")} ts-node src/semantic-trace.ts --ledger <sessionId>`);
-            console.error(`\n${D("Replays the Semantic Ledger: rebuildState, invariants, ruleHash comparison.")}`);
+            console.error(`${(0, terminal_format_1.R)("Usage:")} ts-node src/semantic-trace.ts --ledger <sessionId>`);
+            console.error(`\n${(0, terminal_format_1.D)("Replays the Semantic Ledger: rebuildState, invariants, ruleHash comparison.")}`);
             process.exit(1);
         }
         const sessionsForLedger = (0, failure_corpus_1.getAllSessions)();
         const session = sessionsForLedger.find(s => s.sessionId === sessionId || s.sessionId.startsWith(sessionId));
         if (!session) {
-            console.error(`${R("Session not found:")} ${sessionId}`);
+            console.error(`${(0, terminal_format_1.R)("Session not found:")} ${sessionId}`);
             process.exit(1);
         }
         console.log(formatLedgerReplayValidation(session));
@@ -1317,12 +1310,12 @@ async function main() {
         const sessionId = process.argv[3];
         if (!sessionId) {
             console.log(formatSessionSummary(sessions));
-            console.log(`\n${D("Usage:")} ts-node src/semantic-trace.ts --states <sessionId>`);
+            console.log(`\n${(0, terminal_format_1.D)("Usage:")} ts-node src/semantic-trace.ts --states <sessionId>`);
             return;
         }
         const session = sessions.find(s => s.sessionId === sessionId || s.sessionId.startsWith(sessionId));
         if (!session) {
-            console.error(`${R("Session not found:")} ${sessionId}`);
+            console.error(`${(0, terminal_format_1.R)("Session not found:")} ${sessionId}`);
             process.exit(1);
         }
         console.log(formatStateTransitions(session));
@@ -1331,19 +1324,19 @@ async function main() {
     if (arg === "replay") {
         const sessionId = process.argv[3];
         if (!sessionId) {
-            console.error(`${R("Usage:")} ts-node src/semantic-trace.ts replay <sessionId>`);
-            console.error(`\n${D("Available sessions:")}`);
+            console.error(`${(0, terminal_format_1.R)("Usage:")} ts-node src/semantic-trace.ts replay <sessionId>`);
+            console.error(`\n${(0, terminal_format_1.D)("Available sessions:")}`);
             for (const s of sessions) {
-                console.error(`  ${D(s.sessionId)} — ${s.intent}`);
+                console.error(`  ${(0, terminal_format_1.D)(s.sessionId)} — ${s.intent}`);
             }
             process.exit(1);
         }
         const session = sessions.find(s => s.sessionId === sessionId || s.sessionId.startsWith(sessionId));
         if (!session) {
-            console.error(`${R("Session not found:")} ${sessionId}`);
-            console.error(`\n${D("Available sessions:")}`);
+            console.error(`${(0, terminal_format_1.R)("Session not found:")} ${sessionId}`);
+            console.error(`\n${(0, terminal_format_1.D)("Available sessions:")}`);
             for (const s of sessions) {
-                console.error(`  ${D(s.sessionId)} — ${s.intent}`);
+                console.error(`  ${(0, terminal_format_1.D)(s.sessionId)} — ${s.intent}`);
             }
             process.exit(1);
         }
@@ -1355,108 +1348,108 @@ async function main() {
         const operation = process.argv[4];
         const operand = process.argv[5];
         if (!sessionId || !operation) {
-            console.error(`${R("Usage:")} ts-node src/semantic-trace.ts --query <sessionId> <operation> [state|index]`);
-            console.error(`\n${B("Operations:")}`);
-            console.error(`  ${D("producer <state>")}   — find transitions that produce a state`);
-            console.error(`  ${D("consumer <state>")}   — find transitions that consume a state`);
-            console.error(`  ${D("violations")}         — list all invalid transitions`);
-            console.error(`  ${D("transition <index>")} — find a transition by action index`);
-            console.error(`  ${D("all-states")}         — list all unique states in the ledger`);
+            console.error(`${(0, terminal_format_1.R)("Usage:")} ts-node src/semantic-trace.ts --query <sessionId> <operation> [state|index]`);
+            console.error(`\n${(0, terminal_format_1.B)("Operations:")}`);
+            console.error(`  ${(0, terminal_format_1.D)("producer <state>")}   — find transitions that produce a state`);
+            console.error(`  ${(0, terminal_format_1.D)("consumer <state>")}   — find transitions that consume a state`);
+            console.error(`  ${(0, terminal_format_1.D)("violations")}         — list all invalid transitions`);
+            console.error(`  ${(0, terminal_format_1.D)("transition <index>")} — find a transition by action index`);
+            console.error(`  ${(0, terminal_format_1.D)("all-states")}         — list all unique states in the ledger`);
             process.exit(1);
         }
         const sessionsForQuery = (0, failure_corpus_1.getAllSessions)();
         const session = sessionsForQuery.find(s => s.sessionId === sessionId || s.sessionId.startsWith(sessionId));
         if (!session) {
-            console.error(`${R("Session not found:")} ${sessionId}`);
+            console.error(`${(0, terminal_format_1.R)("Session not found:")} ${sessionId}`);
             process.exit(1);
         }
         // Collect all transitions from all attempts
         const allTransitions = session.attempts.flatMap(a => a.transitions || []);
         if (allTransitions.length === 0) {
-            console.log(`${D("No ledger data in this session.")}`);
+            console.log(`${(0, terminal_format_1.D)("No ledger data in this session.")}`);
             return;
         }
-        console.log(`${C_("Ledger Query")} — ${session.sessionId}`);
-        console.log(`${D("═".repeat(50))}`);
-        console.log(`${D(`Ledger size: ${allTransitions.length} transitions`)}`);
+        console.log(`${(0, terminal_format_1.C_)("Ledger Query")} — ${session.sessionId}`);
+        console.log(`${(0, terminal_format_1.D)("═".repeat(50))}`);
+        console.log(`${(0, terminal_format_1.D)(`Ledger size: ${allTransitions.length} transitions`)}`);
         console.log("");
         if (operation === "producer" || operation === "prod") {
             if (!operand) {
-                console.error(`${R("Missing state name.")}`);
+                console.error(`${(0, terminal_format_1.R)("Missing state name.")}`);
                 process.exit(1);
             }
             const results = (0, ssg_validator_1.findProducer)(operand, allTransitions);
             if (results.length === 0) {
-                console.log(`  ${D(`No producer found for "${operand}"`)}`);
+                console.log(`  ${(0, terminal_format_1.D)(`No producer found for "${operand}"`)}`);
             }
             else {
-                console.log(`  ${B(`Producers of "${operand}":`)}`);
+                console.log(`  ${(0, terminal_format_1.B)(`Producers of "${operand}":`)}`);
                 for (const r of results) {
-                    console.log(`    ${G("→")} ${r.transition.function}() @index=${r.index} [${D(r.namespace)}]`);
+                    console.log(`    ${(0, terminal_format_1.G)("→")} ${r.transition.function}() @index=${r.index} [${(0, terminal_format_1.D)(r.namespace)}]`);
                 }
             }
         }
         else if (operation === "consumer" || operation === "cons") {
             if (!operand) {
-                console.error(`${R("Missing state name.")}`);
+                console.error(`${(0, terminal_format_1.R)("Missing state name.")}`);
                 process.exit(1);
             }
             const results = (0, ssg_validator_1.findConsumer)(operand, allTransitions);
             if (results.length === 0) {
-                console.log(`  ${D(`No consumer found for "${operand}"`)}`);
+                console.log(`  ${(0, terminal_format_1.D)(`No consumer found for "${operand}"`)}`);
             }
             else {
-                console.log(`  ${B(`Consumers of "${operand}":`)}`);
+                console.log(`  ${(0, terminal_format_1.B)(`Consumers of "${operand}":`)}`);
                 for (const r of results) {
-                    console.log(`    ${Y("←")} ${r.transition.function}() @index=${r.index} [${D(r.namespace)}]`);
+                    console.log(`    ${(0, terminal_format_1.Y)("←")} ${r.transition.function}() @index=${r.index} [${(0, terminal_format_1.D)(r.namespace)}]`);
                 }
             }
         }
         else if (operation === "violations" || operation === "viol") {
             const results = (0, ssg_validator_1.findViolations)(allTransitions);
             if (results.length === 0) {
-                console.log(`  ${G("No violations — all transitions are valid.")}`);
+                console.log(`  ${(0, terminal_format_1.G)("No violations — all transitions are valid.")}`);
             }
             else {
-                console.log(`  ${R(`${results.length} violation(s):`)}`);
+                console.log(`  ${(0, terminal_format_1.R)(`${results.length} violation(s):`)}`);
                 for (const r of results) {
-                    console.log(`    ${R("✖")} ${r.transition.function}() @index=${r.index} [${D(r.namespace)}]`);
+                    console.log(`    ${(0, terminal_format_1.R)("✖")} ${r.transition.function}() @index=${r.index} [${(0, terminal_format_1.D)(r.namespace)}]`);
                 }
             }
         }
         else if (operation === "transition" || operation === "t") {
             if (!operand) {
-                console.error(`${R("Missing action index.")}`);
+                console.error(`${(0, terminal_format_1.R)("Missing action index.")}`);
                 process.exit(1);
             }
             const idx = parseInt(operand, 10);
             if (isNaN(idx)) {
-                console.error(`${R("Invalid index.")}`);
+                console.error(`${(0, terminal_format_1.R)("Invalid index.")}`);
                 process.exit(1);
             }
             const result = (0, ssg_validator_1.findTransition)(idx, allTransitions);
             if (!result) {
-                console.log(`  ${D(`No transition at index ${idx}`)}`);
+                console.log(`  ${(0, terminal_format_1.D)(`No transition at index ${idx}`)}`);
             }
             else {
                 const t = result.transition;
-                console.log(`  ${B(`Transition @${idx}:`)}`);
-                console.log(`    function:    ${C_(t.function)}`);
-                console.log(`    namespace:   ${D(t.namespace)}`);
-                console.log(`    valid:       ${t.valid ? G("yes") : R("no")}`);
-                console.log(`    acquired:    ${t.acquired.length ? G("+" + t.acquired.join(",+")) : D("(none)")}`);
-                console.log(`    invalidated: ${t.invalidated.length ? R("-" + t.invalidated.join(",-")) : D("(none)")}`);
+                console.log(`  ${(0, terminal_format_1.B)(`Transition @${idx}:`)}`);
+                console.log(`    function:    ${(0, terminal_format_1.C_)(t.function)}`);
+                console.log(`    namespace:   ${(0, terminal_format_1.D)(t.namespace)}`);
+                console.log(`    valid:       ${t.valid ? (0, terminal_format_1.G)("yes") : (0, terminal_format_1.R)("no")}`);
+                console.log(`    acquired:    ${t.acquired.length ? (0, terminal_format_1.G)("+" + t.acquired.join(",+")) : (0, terminal_format_1.D)("(none)")}`);
+                console.log(`    invalidated: ${t.invalidated.length ? (0, terminal_format_1.R)("-" + t.invalidated.join(",-")) : (0, terminal_format_1.D)("(none)")}`);
                 if (t.ruleHash)
-                    console.log(`    ruleHash:    ${D(t.ruleHash)}`);
+                    console.log(`    ruleHash:    ${(0, terminal_format_1.D)(t.ruleHash)}`);
             }
         }
         else if (operation === "all-states" || operation === "states") {
             const states = (0, ssg_validator_1.listAllStates)(allTransitions);
             if (states.length === 0) {
-                console.log(`  ${D("No states in ledger.")}`);
+                console.log(`  ${(0, terminal_format_1.D)("No states in ledger.")}`);
             }
             else {
-                console.log(`  ${B(`All states (${states.length}):`)}`);
+                console.log(`  ${(0, terminal_format_1.B)(`All states (${states.length}):`)}`);
                 // Group by namespace
                 const byNs = new Map();
                 for (const s of states) {
@@ -1465,13 +1458,13 @@ async function main() {
                     byNs.get(s.namespace).push(s.state);
                 }
                 for (const [ns, ss] of [...byNs.entries()].sort()) {
-                    console.log(`    ${C_(ns)}: ${ss.join(", ")}`);
+                    console.log(`    ${(0, terminal_format_1.C_)(ns)}: ${ss.join(", ")}`);
                 }
             }
         }
         else {
-            console.error(`${R("Unknown operation:")} ${operation}`);
-            console.error(`${D("Valid: producer, consumer, violations, transition, all-states")}`);
+            console.error(`${(0, terminal_format_1.R)("Unknown operation:")} ${operation}`);
+            console.error(`${(0, terminal_format_1.D)("Valid: producer, consumer, violations, transition, all-states")}`);
             process.exit(1);
         }
         return;
@@ -1480,10 +1473,10 @@ async function main() {
         // View a specific session
         const session = sessions.find(s => s.sessionId === arg || s.sessionId.startsWith(arg));
         if (!session) {
-            console.error(`${R("Session not found:")} ${arg}`);
-            console.error(`\n${D("Available sessions:")}`);
+            console.error(`${(0, terminal_format_1.R)("Session not found:")} ${arg}`);
+            console.error(`\n${(0, terminal_format_1.D)("Available sessions:")}`);
             for (const s of sessions) {
-                console.error(`  ${D(s.sessionId)} — ${s.intent}`);
+                console.error(`  ${(0, terminal_format_1.D)(s.sessionId)} — ${s.intent}`);
             }
             process.exit(1);
         }

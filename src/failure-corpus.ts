@@ -107,7 +107,7 @@ export function loadCheckpoint(intent: string): PlannerCheckpoint | null {
 
 /** Clear a saved planner checkpoint. */
 export function clearCheckpoint(intent: string): void {
-  try { fs.unlinkSync(checkpointPath(intent)); } catch {}
+  try { fs.unlinkSync(checkpointPath(intent)); } catch { /* checkpoint file may not exist */ }
 }
 
 /** Record a constraint violation to the failure corpus. */
@@ -122,7 +122,7 @@ export function recordFailure(
 
     const seqFile = path.join(CORPUS_DIR, ".seq");
     let seq = 0;
-    try { seq = parseInt(fs.readFileSync(seqFile, 'utf-8'), 10); } catch {}
+    try { seq = parseInt(fs.readFileSync(seqFile, 'utf-8'), 10); } catch { /* checkpoint file may not exist */ }
     seq++;
     fs.writeFileSync(seqFile, String(seq));
 
@@ -207,7 +207,7 @@ export function getAllFailures(): FailureRecord[] {
       if (file.endsWith(".json")) {
         try {
           records.push(JSON.parse(fs.readFileSync(path.join(dirPath, file), "utf-8")));
-        } catch {}
+        } catch { /* checkpoint file may not exist */ }
       }
     }
   }
@@ -328,7 +328,7 @@ export function getAllSessions(): ExecutionSession[] {
       try {
         const raw = JSON.parse(fs.readFileSync(path.join(SESSIONS_DIR, file), "utf-8"));
         sessions.push(normalizeSession(raw));
-      } catch {}
+      } catch { /* checkpoint file may not exist */ }
     }
   }
   return sessions;

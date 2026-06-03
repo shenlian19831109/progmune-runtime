@@ -3,7 +3,7 @@ import { validateAction } from "./validator";
 import { generate, resetCallCount, chat, estimateTokens } from "./llm";
 import { getFunctionSuccessRate } from "./feedback";
 import { jaccardSimilarity } from "./utils";
-import * as fs from "fs";
+import { loadIR } from "./ir-utils";
 
 // ⚖️ 可调权重（修改这些值后重新运行压力测试即可）
 const WEIGHT_STATIC_SCORE = 0.3;      // 静态文本相似度的权重
@@ -17,11 +17,6 @@ interface Candidate {
   declaredVars: Map<string, string>;
   currentGoalIndex: number;
   score: number;
-}
-
-function loadIR(): any[] {
-  const raw = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
-  return Array.isArray(raw) ? raw : (raw.functions || []);
 }
 
 const staticScoreCache = new Map<string, number>();
@@ -61,7 +56,7 @@ async function decomposeGoals(intent: string, functions: any[]): Promise<string[
       }
       return result.slice(0, 3);
     }
-  } catch {}
+  } catch { /* LLM score fallback */ }
   return [intent];
 }
 
@@ -93,7 +88,7 @@ async function batchScoreFuncs(
         result.set(name, isNaN(n) ? 0.3 : Math.min(1, n / 10));
       }
     }
-  } catch {}
+  } catch { /* LLM score fallback */ }
   for (const f of needsLLM) {
     if (!result.has(f.name)) result.set(f.name, 0.3);
   }

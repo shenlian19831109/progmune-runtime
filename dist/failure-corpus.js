@@ -1,56 +1,6 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.saveCheckpoint = saveCheckpoint;
-exports.loadCheckpoint = loadCheckpoint;
-exports.clearCheckpoint = clearCheckpoint;
-exports.recordFailure = recordFailure;
-exports.recordSession = recordSession;
-exports.getAllFailures = getAllFailures;
-exports.getFailuresBySVL = getFailuresBySVL;
-exports.getTopFailurePatterns = getTopFailurePatterns;
-exports.getFailureGenome = getFailureGenome;
-exports.getAllSessions = getAllSessions;
-exports.getLearnedPatterns = getLearnedPatterns;
-exports.queryAntibodies = queryAntibodies;
-exports.getSemanticHeatmap = getSemanticHeatmap;
-exports.getAntibodyStats = getAntibodyStats;
-exports.generateCandidateRules = generateCandidateRules;
-const fs = __importStar(require("fs"));
-const path = __importStar(require("path"));
-const file_lock_1 = require("./file-lock");
+import * as fs from "fs";
+import * as path from "path";
+import { withLock } from "./file-lock";
 // 优先使用 PROGMUNE_PROJECT_DIR（由 MCP 服务器在调用时设置），确保多项目隔离
 const projectDir = process.env.PROGMUNE_PROJECT_DIR || process.cwd();
 const CORPUS_DIR = process.env.PROGMUNE_CORPUS_DIR
@@ -67,7 +17,7 @@ function checkpointPath(intent) {
     return path.join(CHECKPOINT_DIR, `ckpt_${hash}.json`);
 }
 /** Save planner checkpoint for crash recovery. */
-function saveCheckpoint(intent, data) {
+export function saveCheckpoint(intent, data) {
     ensureDir(CHECKPOINT_DIR);
     const cp = {
         ...data,
@@ -77,7 +27,7 @@ function saveCheckpoint(intent, data) {
     fs.writeFileSync(checkpointPath(intent), JSON.stringify(cp, null, 2));
 }
 /** Load a previously saved planner checkpoint. */
-function loadCheckpoint(intent) {
+export function loadCheckpoint(intent) {
     try {
         const raw = fs.readFileSync(checkpointPath(intent), "utf-8");
         return JSON.parse(raw);
@@ -87,15 +37,15 @@ function loadCheckpoint(intent) {
     }
 }
 /** Clear a saved planner checkpoint. */
-function clearCheckpoint(intent) {
+export function clearCheckpoint(intent) {
     try {
         fs.unlinkSync(checkpointPath(intent));
     }
-    catch { }
+    catch { /* checkpoint file may not exist */ }
 }
 /** Record a constraint violation to the failure corpus. */
-function recordFailure(record) {
-    (0, file_lock_1.withLock)("failure-corpus", () => {
+export function recordFailure(record) {
+    withLock("failure-corpus", () => {
         ensureDir(CORPUS_DIR);
         const date = new Date().toISOString().slice(0, 10);
         const dateDir = path.join(CORPUS_DIR, date);
@@ -105,7 +55,7 @@ function recordFailure(record) {
         try {
             seq = parseInt(fs.readFileSync(seqFile, 'utf-8'), 10);
         }
-        catch { }
+        catch { /* checkpoint file may not exist */ }
         seq++;
         fs.writeFileSync(seqFile, String(seq));
         const id = `fail_${Date.now()}_${seq}`;
@@ -128,7 +78,7 @@ function recordFailure(record) {
  */
 /** @requires EXECUTION_DATA @produces SESSION_ID */
 /** @requires EXECUTION_DATA @produces SESSION_ID */
-function recordSession(session) {
+export function recordSession(session) {
     ensureDir(SESSIONS_DIR);
     const sessionId = session.sessionId || `sess_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     // 检测新格式：ExecutionSession has .attempts[0]?.violations
@@ -165,7 +115,7 @@ function recordSession(session) {
     return sessionId;
 }
 /** @requires FAILURE_CORPUS @produces FAILURE_LIST */
-function getAllFailures() {
+export function getAllFailures() {
     const records = [];
     if (!fs.existsSync(CORPUS_DIR))
         return records;
@@ -179,18 +129,18 @@ function getAllFailures() {
                 try {
                     records.push(JSON.parse(fs.readFileSync(path.join(dirPath, file), "utf-8")));
                 }
-                catch { }
+                catch { /* checkpoint file may not exist */ }
             }
         }
     }
     return records;
 }
 /** @requires FAILURE_LIST @produces FILTERED_FAILURES */
-function getFailuresBySVL(level) {
+export function getFailuresBySVL(level) {
     return getAllFailures().filter(r => r.violatedSVL === level);
 }
 /** @requires FAILURE_LIST @produces FAILURE_PATTERNS */
-function getTopFailurePatterns(limit = 5) {
+export function getTopFailurePatterns(limit = 5) {
     const groups = new Map();
     for (const r of getAllFailures()) {
         const key = `${r.violatedSVL}:${r.constraintType}`;
@@ -213,7 +163,7 @@ function getTopFailurePatterns(limit = 5) {
 /** @requires FAILURE_DATA @produces FAILURE_GENOME */
 /** @requires FAILURE_DATA @produces FAILURE_GENOME */
 /** @useWhen user asks why generation failed; benchmark compile rate drops; analyzing error patterns */
-function getFailureGenome() {
+export function getFailureGenome() {
     const sessions = getAllSessions();
     const bySVL = { "SVL-1": 0, "SVL-2": 0, "SVL-3": 0, "SVL-4": 0 };
     const byConstraint = {};
@@ -277,7 +227,7 @@ function getFailureGenome() {
 /** @requires SESSION_CORPUS @produces SESSION_LIST */
 /** @requires SESSION_CORPUS @produces SESSION_LIST */
 /** @useWhen listing all past executions; auditing session history; checking coverage */
-function getAllSessions() {
+export function getAllSessions() {
     const sessions = [];
     if (!fs.existsSync(SESSIONS_DIR))
         return sessions;
@@ -287,7 +237,7 @@ function getAllSessions() {
                 const raw = JSON.parse(fs.readFileSync(path.join(SESSIONS_DIR, file), "utf-8"));
                 sessions.push(normalizeSession(raw));
             }
-            catch { }
+            catch { /* checkpoint file may not exist */ }
         }
     }
     return sessions;
@@ -370,7 +320,7 @@ function computeACL(count, distinctIntents, resolvedRate) {
 /** Get antibody patterns learned from failure history. */
 /** @requires FAILURE_HISTORY @produces LEARNED_PATTERNS */
 /** @useWhen finding what fixes worked before; reusing successful repairs */
-function getLearnedPatterns() {
+export function getLearnedPatterns() {
     const sessions = getAllSessions();
     const agg = new Map();
     for (const s of sessions) {
@@ -430,7 +380,7 @@ function getLearnedPatterns() {
 /** 查询匹配当前意图的高置信度抗体（ACL-3+），用于推理层免疫加速 */
 /** Query antibody registry for matching repair patterns. */
 /** @requires FAILURE_SIGNATURE @produces ANTIBODY_MATCH */
-function queryAntibodies(intent, minACL = "ACL-3") {
+export function queryAntibodies(intent, minACL = "ACL-3") {
     const { failureToFix } = getLearnedPatterns();
     const aclRank = { "ACL-1": 1, "ACL-2": 2, "ACL-3": 3, "ACL-4": 4 };
     const minRank = aclRank[minACL];
@@ -457,7 +407,7 @@ function queryAntibodies(intent, minACL = "ACL-3") {
 /** Get semantic heatmap showing fragile protocols and SVL hotspots. */
 /** @requires FAILURE_DATA @produces HEATMAP */
 /** @requires FAILURE_HEATMAP @produces HEATMAP_DATA */
-function getSemanticHeatmap() {
+export function getSemanticHeatmap() {
     const sessions = getAllSessions();
     // Count total violations from sessions
     let totalViolations = 0;
@@ -522,7 +472,7 @@ function getSemanticHeatmap() {
 /** @requires ANTIBODY_DATA @produces ANTIBODY_STATS */
 /** @requires ANTIBODY_DATA @produces ANTIBODY_STATS */
 /** @useWhen checking immune system effectiveness; measuring token savings */
-function getAntibodyStats() {
+export function getAntibodyStats() {
     const sessions = getAllSessions();
     let totalHits = 0;
     let fastPathHits = 0;
@@ -567,7 +517,7 @@ function getAntibodyStats() {
     return { totalHits, fastPathHits, injectedHintHits, totalLLMCallsSaved, totalTokensSaved, byLevel, topSignatures };
 }
 /** Generate candidate immune rules from failure patterns. */
-function generateCandidateRules() {
+export function generateCandidateRules() {
     const genome = getFailureGenome();
     const rules = [];
     // SVL-4 修复路径

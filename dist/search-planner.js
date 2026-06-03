@@ -1,54 +1,17 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.searchPlan = searchPlan;
 const validator_1 = require("./validator");
 const llm_1 = require("./llm");
 const feedback_1 = require("./feedback");
 const utils_1 = require("./utils");
-const fs = __importStar(require("fs"));
+const ir_utils_1 = require("./ir-utils");
 // ⚖️ 可调权重（修改这些值后重新运行压力测试即可）
 const WEIGHT_STATIC_SCORE = 0.3; // 静态文本相似度的权重
 const WEIGHT_LLM_SCORE = 0.7; // LLM 评分的权重
 const WEIGHT_HISTORY = 0.4; // 反馈系统成功率的权重
 const WEIGHT_GOAL_COMPLETION = 0.5; // 目标完成奖励
 const STATIC_HIGH_THRESHOLD = 0.6; // 静态评分超过此值时，跳过LLM调用
-function loadIR() {
-    const raw = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
-    return Array.isArray(raw) ? raw : (raw.functions || []);
-}
 const staticScoreCache = new Map();
 function getStaticScore(funcName, goal) {
     const key = `${funcName}|${goal}`;
@@ -90,7 +53,7 @@ async function decomposeGoals(intent, functions) {
             return result.slice(0, 3);
         }
     }
-    catch { }
+    catch { /* LLM score fallback */ }
     return [intent];
 }
 /** 批量评分：将同一 goal 的所有候选函数打包为一次 LLM 调用 */
@@ -120,7 +83,7 @@ async function batchScoreFuncs(funcs, goal) {
             }
         }
     }
-    catch { }
+    catch { /* LLM score fallback */ }
     for (const f of needsLLM) {
         if (!result.has(f.name))
             result.set(f.name, 0.3);
@@ -131,7 +94,7 @@ async function batchScoreFuncs(funcs, goal) {
 async function searchPlan(intent, beamWidth = 2, maxDepth = 6) {
     (0, llm_1.resetCallCount)();
     staticScoreCache.clear();
-    const ir = loadIR();
+    const ir = (0, ir_utils_1.loadIR)();
     const goals = await decomposeGoals(intent, ir);
     console.log("🎯 目标栈:", goals);
     let beam = [{

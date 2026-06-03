@@ -1,6 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkSemantic = checkSemantic;
 let irCache = null;
 function loadContracts() {
     if (irCache)
@@ -13,7 +10,7 @@ function loadContracts() {
 function matchIntent(intent, keywords) {
     return keywords.some(kw => intent.includes(kw));
 }
-function checkSemantic(intent, actions) {
+export function checkSemantic(intent, actions) {
     const ir = loadContracts();
     const errors = [];
     const callActions = actions.filter((a) => a.kind === "call");

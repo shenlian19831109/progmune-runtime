@@ -1,4 +1,4 @@
-try { require("dotenv/config"); } catch {}
+try { require("dotenv/config"); } catch { /* ignore — dotenv is optional */ }
 
 import OpenAI from "openai";
 
@@ -29,6 +29,27 @@ const client = new OpenAI({ apiKey, baseURL });
 export let callCount = 0;
 export function resetCallCount() { callCount = 0; }
 
+const MAX_LLM_CALLS = parseInt(process.env.PROGMUNE_MAX_LLM_CALLS || "50", 10);
+const RATE_LIMIT_MS = parseInt(process.env.PROGMUNE_RATE_LIMIT_MS || "0", 10);
+let lastCallTime = 0;
+
+function assertCallLimit(): void {
+  if (callCount >= MAX_LLM_CALLS) {
+    throw new Error(
+      `LLM call limit reached (${callCount}/${MAX_LLM_CALLS}). ` +
+      `Increase via PROGMUNE_MAX_LLM_CALLS env var or call resetCallCount().`
+    );
+  }
+}
+
+async function applyRateLimit(): Promise<void> {
+  if (RATE_LIMIT_MS <= 0) return;
+  const elapsed = Date.now() - lastCallTime;
+  if (elapsed < RATE_LIMIT_MS) {
+    await new Promise(r => setTimeout(r, RATE_LIMIT_MS - elapsed));
+  }
+}
+
 /** 粗略 token 估算：CJK 字符 ~1.5 token/字，其余 ~0.4 token/字符 */
 /** @requires TEXT @produces TOKEN_COUNT */
 export function estimateTokens(text: string): number {
@@ -39,7 +60,10 @@ export function estimateTokens(text: string): number {
 
 /** @requires PROMPT @produces LLM_RESPONSE */
 export async function generate(prompt: string): Promise<string> {
+  assertCallLimit();
+  await applyRateLimit();
   callCount++;
+  lastCallTime = Date.now();
   const resp = await client.chat.completions.create({
     model,
     messages: [{ role: "user", content: prompt }],
@@ -51,7 +75,10 @@ export async function generate(prompt: string): Promise<string> {
 /** 带 system prompt 的调用：静态规则放 system，动态内容放 user，语义分离便于未来对接各平台缓存策略 */
 /** @requires SYSTEM_PROMPT @produces LLM_RESPONSE */
 export async function chat(systemPrompt: string, userPrompt: string): Promise<string> {
+  assertCallLimit();
+  await applyRateLimit();
   callCount++;
+  lastCallTime = Date.now();
   const resp = await client.chat.completions.create({
     model,
     messages: [

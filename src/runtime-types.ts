@@ -26,6 +26,36 @@ export { replaySession, replayLedger, replayWithDetail } from "./deterministic-r
 export type { ReplayResult, ReplayTransition } from "./deterministic-replay";
 export type { SVL } from "./failure-corpus";
 
+// ── Result type — replaces { success: boolean; error?: string } ──
+
+/** Ok variant: operation succeeded. */
+export type Ok<T> = { ok: true; value: T };
+
+/** Err variant: operation failed with a typed error. */
+export type Err<E> = { ok: false; error: E };
+
+/** Discriminated result: either success with T or failure with E. */
+export type Result<T, E = string> = Ok<T> | Err<E>;
+
+/** Create an Ok result. */
+export function ok<T>(value: T): Ok<T> {
+  return { ok: true, value };
+}
+
+/** Create an Err result. */
+export function err<E>(error: E): Err<E> {
+  return { ok: false, error };
+}
+
+// ── Simple validation error (for gradual migration) ──
+
+export interface ValidationError {
+  message: string;
+  code: string;
+  index?: number;
+  details?: string[];
+}
+
 // ── Action DSL ──
 
 export type Action =

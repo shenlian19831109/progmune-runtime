@@ -1,4 +1,3 @@
-"use strict";
 /**
  * Phase 4: Ledger Fingerprint Registry (P0)
  *
@@ -8,49 +7,9 @@
  * Does NOT do: previousHash chains, blockchain-style verification, multi-node sync.
  * Those are for Phase 5+ when distributed execution is needed.
  */
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.registerFingerprint = registerFingerprint;
-exports.getFingerprint = getFingerprint;
-exports.getFingerprintRegistry = getFingerprintRegistry;
-exports.verifyFingerprint = verifyFingerprint;
-exports.verifyAllFingerprints = verifyAllFingerprints;
-exports.registerAllMissingFingerprints = registerAllMissingFingerprints;
-const fs = __importStar(require("fs"));
-const path = __importStar(require("path"));
-const ssg_validator_1 = require("./ssg-validator");
+import * as fs from "fs";
+import * as path from "path";
+import { hashLedger } from "./ssg-validator";
 // ── Storage ──
 function fingerprintsDir() {
     const projectDir = process.env.PROGMUNE_PROJECT_DIR || process.cwd();
@@ -64,14 +23,14 @@ function fingerprintPath(sessionId) {
  *  Called after a session is recorded — creates an immutable proof of the ledger state. */
 /** Register a ledger fingerprint as an execution certificate. */
 /** @requires LEDGER_DATA @produces FINGERPRINT */
-function registerFingerprint(sessionId, transitions, ruleHash) {
+export function registerFingerprint(sessionId, transitions, ruleHash) {
     const dir = fingerprintsDir();
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
     }
     const fingerprint = {
         sessionId,
-        ledgerHash: (0, ssg_validator_1.hashLedger)(transitions),
+        ledgerHash: hashLedger(transitions),
         ruleHash,
         transitionCount: transitions.length,
         timestamp: Date.now(),
@@ -82,7 +41,7 @@ function registerFingerprint(sessionId, transitions, ruleHash) {
 /** Get a single stored fingerprint by sessionId. Returns null if not registered. */
 /** Get a stored ledger fingerprint by session ID. */
 /** @requires SESSION_ID @produces FINGERPRINT */
-function getFingerprint(sessionId) {
+export function getFingerprint(sessionId) {
     const fpPath = fingerprintPath(sessionId);
     if (!fs.existsSync(fpPath))
         return null;
@@ -95,7 +54,7 @@ function getFingerprint(sessionId) {
 }
 /** List all registered fingerprints, sorted by timestamp (oldest first). */
 /** List all registered ledger fingerprints. */
-function getFingerprintRegistry() {
+export function getFingerprintRegistry() {
     const dir = fingerprintsDir();
     if (!fs.existsSync(dir))
         return [];
@@ -118,7 +77,7 @@ function getFingerprintRegistry() {
 /** Verify a single session's fingerprint.
  *  Requires the session's transitions to re-hash and compare. */
 /** Verify a single ledger fingerprint against current data. */
-function verifyFingerprint(sessionId, transitions, currentRuleHash) {
+export function verifyFingerprint(sessionId, transitions, currentRuleHash) {
     const stored = getFingerprint(sessionId);
     if (!stored) {
         return {
@@ -135,7 +94,7 @@ function verifyFingerprint(sessionId, transitions, currentRuleHash) {
         tampered: false,
     };
     if (transitions && transitions.length > 0) {
-        result.currentHash = (0, ssg_validator_1.hashLedger)(transitions);
+        result.currentHash = hashLedger(transitions);
         if (result.currentHash !== stored.ledgerHash) {
             result.valid = false;
             result.tampered = true;
@@ -154,7 +113,7 @@ function verifyFingerprint(sessionId, transitions, currentRuleHash) {
 /** @requires FINGERPRINT_DATA @produces VERIFICATION_RESULT */
 /** @requires FINGERPRINT_DATA @produces VERIFICATION_RESULT */
 /** @useWhen checking execution integrity; audit after tampering suspicion */
-function verifyAllFingerprints(currentRuleHash) {
+export function verifyAllFingerprints(currentRuleHash) {
     const fingerprints = getFingerprintRegistry();
     const results = [];
     let valid = 0;
@@ -212,7 +171,7 @@ function verifyAllFingerprints(currentRuleHash) {
 /** Register fingerprints for all sessions that lack them. */
 /** @requires SESSION_DATA @produces FINGERPRINT_DATA */
 /** @useWhen first-time setup; after adding new sessions */
-function registerAllMissingFingerprints() {
+export function registerAllMissingFingerprints() {
     const sessionsDir = path.resolve(process.env.PROGMUNE_PROJECT_DIR || process.cwd(), ".progmune_corpus/sessions");
     if (!fs.existsSync(sessionsDir))
         return 0;

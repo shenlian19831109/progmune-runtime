@@ -158,7 +158,7 @@ export function formatAuditResult(result: AuditResult): string {
       }
       lines.push("");
     }
-  } catch {}
+  } catch { /* audit step — best-effort */ }
 
   // Phase 7: Violation Analytics
   try {
@@ -173,7 +173,7 @@ export function formatAuditResult(result: AuditResult): string {
             const r = JSON.parse(fs.readFileSync(`${repairDir}/${f}`, "utf-8"));
             bySvl[r.violation] = (bySvl[r.violation] || 0) + 1;
             byConstraint[r.constraint] = (byConstraint[r.constraint] || 0) + 1;
-          } catch {}
+          } catch { /* audit step — best-effort */ }
         }
         lines.push(`  Repairs recorded: ${repairs.length}`);
         const svlSummary = Object.entries(bySvl).map(([k, v]) => `${k}: ${v}`).join(" | ");
@@ -185,7 +185,7 @@ export function formatAuditResult(result: AuditResult): string {
         lines.push("");
       }
     }
-  } catch {}
+  } catch { /* audit step — best-effort */ }
 
   if (result.sessions.length > 0) {
     lines.push(`  Last generation: ${result.lastGeneration || "unknown"}`);

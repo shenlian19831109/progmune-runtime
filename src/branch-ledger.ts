@@ -156,7 +156,7 @@ export function forkBranch(
 
   // Ontology: verify all split transitions are internally consistent
   for (const t of [...sharedTransitions, ...remainingTransitions]) {
-    if (t.valid) try { assertDeltaConsistency(t); } catch {}
+    if (t.valid) try { assertDeltaConsistency(t); } catch { /* consistency assertion — best-effort */ }
   }
 
   return { original, forked };

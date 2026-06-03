@@ -59,7 +59,7 @@ function loadMetrics() {
             return JSON.parse(fs.readFileSync(METRICS_FILE, "utf-8"));
         }
     }
-    catch { }
+    catch { /* sandbox action — non-critical */ }
     return { generated: 0, repaired: 0, lastGeneration: null, history: [] };
 }
 function saveMetrics(m) {
@@ -114,7 +114,7 @@ async function execute(intent, projectPath, filePath) {
             protocolRuleCount = Object.keys(JSON.parse(fs.readFileSync(protoPath, "utf-8")).rules || {}).length;
         }
     }
-    catch { }
+    catch { /* sandbox action — non-critical */ }
     // 3. Plan (LLM + immune constraints)
     let planResult;
     try {
@@ -205,7 +205,7 @@ async function execute(intent, projectPath, filePath) {
                         }
                     }
                 }
-                catch { }
+                catch { /* sandbox action — non-critical */ }
                 return undefined;
             })()
             : undefined,
@@ -246,6 +246,6 @@ function verifyFileMarker(filePath) {
             return { marked: true, sessionId: match[1], timestamp: match[2] };
         }
     }
-    catch { }
+    catch { /* sandbox action — non-critical */ }
     return { marked: false };
 }

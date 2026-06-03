@@ -1,46 +1,8 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.extractFingerprints = extractFingerprints;
-exports.reportFingerprints = reportFingerprints;
-exports.previewFingerprints = previewFingerprints;
-const fs = __importStar(require("fs"));
-const path = __importStar(require("path"));
-const https = __importStar(require("https"));
-const http = __importStar(require("http"));
-const crypto = __importStar(require("crypto"));
+import * as fs from "fs";
+import * as path from "path";
+import * as https from "https";
+import * as http from "http";
+import * as crypto from "crypto";
 const REPORT_ENDPOINT = process.env.PROGMUNE_HUB || "http://localhost:3000/report";
 const CURSOR_FILE = path.resolve(__dirname, "../.progmune_memory/report_cursor.json");
 function getInstanceId() {
@@ -53,7 +15,7 @@ function getReportCursor() {
         if (fs.existsSync(CURSOR_FILE))
             return JSON.parse(fs.readFileSync(CURSOR_FILE, "utf-8"));
     }
-    catch { }
+    catch { /* report may be unavailable */ }
     return { lastTimestamp: null, reportedCount: 0 };
 }
 function saveReportCursor(timestamp, count) {
@@ -62,7 +24,7 @@ function saveReportCursor(timestamp, count) {
         fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(CURSOR_FILE, JSON.stringify({ lastTimestamp: timestamp, reportedCount: count, updatedAt: new Date().toISOString() }, null, 2));
 }
-function extractFingerprints(cursor) {
+export function extractFingerprints(cursor) {
     const corpusDir = path.resolve(__dirname, "../failure_corpus");
     if (!fs.existsSync(corpusDir))
         return [];
@@ -98,7 +60,7 @@ function extractFingerprints(cursor) {
     return fingerprints;
 }
 /** @requires CORPUS @produces FINGERPRINT_REPORT */
-async function reportFingerprints() {
+export async function reportFingerprints() {
     const cursor = getReportCursor();
     const fingerprints = extractFingerprints(cursor);
     if (fingerprints.length === 0) {
@@ -133,6 +95,6 @@ async function reportFingerprints() {
         req.end();
     });
 }
-function previewFingerprints() {
+export function previewFingerprints() {
     return extractFingerprints({ lastTimestamp: null });
 }

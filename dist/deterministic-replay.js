@@ -1,4 +1,3 @@
-"use strict";
 /**
  * Phase 4: Deterministic Replay (P1)
  *
@@ -8,54 +7,17 @@
  * Answers: "Would this execution produce the same result today?"
  * Not just "read the log" — actively re-validates every transition.
  */
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.replaySession = replaySession;
-exports.replayLedger = replayLedger;
-exports.replayWithDetail = replayWithDetail;
-const fs = __importStar(require("fs"));
-const path = __importStar(require("path"));
-const ledger_registry_1 = require("./ledger-registry");
-const protocol_registry_1 = require("./protocol-registry");
-const ssg_validator_1 = require("./ssg-validator");
-const branch_ledger_1 = require("./branch-ledger");
+import * as fs from "fs";
+import * as path from "path";
+import { getFingerprint } from "./ledger-registry";
+import { getNsInit } from "./protocol-registry";
+import { rebuildState, validateTransition, checkLedgerConsistency, hashLedger, hashRules, } from "./ssg-validator";
+import { flattenBranch, buildBranchMap, findRootBranch } from "./branch-ledger";
 // ── Core Replay ──
 /** Replay a session from disk, comparing against its stored fingerprint. */
 /** Deterministically replay a session ledger and verify against stored fingerprint. */
 /** @requires SESSION_DATA @produces REPLAY_RESULT */
-function replaySession(sessionId, currentRules, namespaceInitialStates = (0, protocol_registry_1.getNsInit)()) {
+export function replaySession(sessionId, currentRules, namespaceInitialStates = getNsInit()) {
     // Load session
     const sessionsDir = path.resolve(process.env.PROGMUNE_PROJECT_DIR || process.cwd(), ".progmune_corpus/sessions");
     const sessionFile = path.join(sessionsDir, `${sessionId}.json`);
@@ -82,10 +44,10 @@ function replaySession(sessionId, currentRules, namespaceInitialStates = (0, pro
     // Handle branch tree if present (Phase 4)
     if (session.branchTree && session.branchTree.length > 0) {
         const branches = session.branchTree;
-        const map = (0, branch_ledger_1.buildBranchMap)(branches);
-        const root = (0, branch_ledger_1.findRootBranch)(branches);
+        const map = buildBranchMap(branches);
+        const root = findRootBranch(branches);
         if (root) {
-            transitions = (0, branch_ledger_1.flattenBranch)(root, map);
+            transitions = flattenBranch(root, map);
         }
         // Use first attempt's ruleHash as session hash
         if (!sessionRuleHash && branches[0]?.transitions[0]?.ruleHash) {
@@ -104,20 +66,20 @@ function replaySession(sessionId, currentRules, namespaceInitialStates = (0, pro
         }
     }
     // Load fingerprint
-    const fingerprint = (0, ledger_registry_1.getFingerprint)(sessionId);
+    const fingerprint = getFingerprint(sessionId);
     const storedHash = fingerprint?.ledgerHash || "";
     // Compute current rule hash
     let currentRuleHash = "";
     if (currentRules && currentRules.size > 0) {
-        currentRuleHash = (0, ssg_validator_1.hashRules)(currentRules);
+        currentRuleHash = hashRules(currentRules);
     }
     return replayLedger(sessionId, transitions, sessionRuleHash, storedHash, currentRuleHash, currentRules, namespaceInitialStates);
 }
 /** Core replay logic: replay transitions against (optional) current rules. */
 /** Replay a ledger of transitions against current rules and verify consistency. */
 /** @requires LEDGER_DATA @produces REPLAY_RESULT */
-function replayLedger(sessionId, transitions, storedRuleHash, storedLedgerHash, currentRuleHash, currentRules, namespaceInitialStates = (0, protocol_registry_1.getNsInit)()) {
-    const replayedHash = transitions.length > 0 ? (0, ssg_validator_1.hashLedger)(transitions) : "";
+export function replayLedger(sessionId, transitions, storedRuleHash, storedLedgerHash, currentRuleHash, currentRules, namespaceInitialStates = getNsInit()) {
+    const replayedHash = transitions.length > 0 ? hashLedger(transitions) : "";
     const ruleHashMatch = !currentRuleHash || !storedRuleHash
         ? true // can't compare if either is missing
         : currentRuleHash === storedRuleHash;
@@ -132,7 +94,7 @@ function replayLedger(sessionId, transitions, storedRuleHash, storedLedgerHash, 
     if (currentRules && currentRules.size > 0) {
         const ctx = {
             ledger: [],
-            currentState: (0, ssg_validator_1.rebuildState)([], namespaceInitialStates),
+            currentState: rebuildState([], namespaceInitialStates),
         };
         for (let i = 0; i < transitions.length; i++) {
             const t = transitions[i];
@@ -142,7 +104,7 @@ function replayLedger(sessionId, transitions, storedRuleHash, storedLedgerHash, 
             }
             try {
                 // Re-validate against current rules
-                const { valid, transition } = (0, ssg_validator_1.validateTransition)(ctx, t.function, i, currentRules, namespaceInitialStates, currentRuleHash || "");
+                const { valid, transition } = validateTransition(ctx, t.function, i, currentRules, namespaceInitialStates, currentRuleHash || "");
                 if (!valid && divergencePoint === undefined) {
                     divergencePoint = i;
                     divergenceDetail = `Transition[${i}] "${t.function}" is no longer valid under current rules.`;
@@ -175,7 +137,7 @@ function replayLedger(sessionId, transitions, storedRuleHash, storedLedgerHash, 
     }
     else {
         // No current rules: just verify structural consistency
-        const consistency = (0, ssg_validator_1.checkLedgerConsistency)(transitions, namespaceInitialStates);
+        const consistency = checkLedgerConsistency(transitions, namespaceInitialStates);
         if (!consistency.consistent) {
             divergencePoint = consistency.violations[0]?.index;
             divergenceDetail = `Structural inconsistency: ${consistency.violations.length} violation(s). First: [${consistency.violations[0]?.invariant}] at index ${consistency.violations[0]?.index}`;
@@ -185,7 +147,7 @@ function replayLedger(sessionId, transitions, storedRuleHash, storedLedgerHash, 
     }
     // Compute final state
     const finalState = transitions.length > 0
-        ? (0, ssg_validator_1.rebuildState)(transitions.filter(t => t.valid), namespaceInitialStates)
+        ? rebuildState(transitions.filter(t => t.valid), namespaceInitialStates)
         : {};
     const success = ruleHashMatch && ledgerHashMatch && divergencePoint === undefined;
     return {
@@ -206,7 +168,7 @@ function replayLedger(sessionId, transitions, storedRuleHash, storedLedgerHash, 
 /** Replay with per-transition detail — for debugging and UI. */
 /** Replay transitions with per-step detail for debugging. */
 /** @requires TRANSITIONS @produces DETAIL_RESULT */
-function replayWithDetail(transitions, currentRules, namespaceInitialStates = (0, protocol_registry_1.getNsInit)()) {
+export function replayWithDetail(transitions, currentRules, namespaceInitialStates = getNsInit()) {
     if (!currentRules || currentRules.size === 0) {
         return transitions.map(t => ({
             index: t.actionIndex,
@@ -220,9 +182,9 @@ function replayWithDetail(transitions, currentRules, namespaceInitialStates = (0
     }
     const ctx = {
         ledger: [],
-        currentState: (0, ssg_validator_1.rebuildState)([], namespaceInitialStates),
+        currentState: rebuildState([], namespaceInitialStates),
     };
-    const currentRuleHash = (0, ssg_validator_1.hashRules)(currentRules);
+    const currentRuleHash = hashRules(currentRules);
     const results = [];
     for (let i = 0; i < transitions.length; i++) {
         const t = transitions[i];
@@ -241,7 +203,7 @@ function replayWithDetail(transitions, currentRules, namespaceInitialStates = (0
             continue;
         }
         try {
-            const { valid, transition } = (0, ssg_validator_1.validateTransition)(ctx, t.function, i, currentRules, namespaceInitialStates, currentRuleHash);
+            const { valid, transition } = validateTransition(ctx, t.function, i, currentRules, namespaceInitialStates, currentRuleHash);
             result.replayValid = valid;
             result.statesBeforeMatch = deepEqualSnapshots(ctx.currentState, t.statesBefore);
             result.statesAfterMatch = valid

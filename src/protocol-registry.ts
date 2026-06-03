@@ -66,7 +66,7 @@ export function getProtocolConfig(): ProtocolConfig {
 
       // Parse rules
       rules = parseProtocolsFromJSON(proto);
-    } catch {}
+    } catch { /* protocol load — optional */ }
   } else {
     // Fallback: minimal defaults (no protocols.json found)
     nsInit.set("_global", "UNAUTHENTICATED");

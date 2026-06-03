@@ -1,10 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.jaccardSimilarity = jaccardSimilarity;
-exports.extractKeywords = extractKeywords;
 // 计算两个字符串的简单 Jaccard 相似度（基于字符二元组）
 /** @requires STRING_A @produces SIMILARITY_SCORE */
-function jaccardSimilarity(a, b) {
+export function jaccardSimilarity(a, b) {
     const bigrams = (s) => {
         const bgs = new Set();
         for (let i = 0; i < s.length - 1; i++)
@@ -19,6 +15,6 @@ function jaccardSimilarity(a, b) {
 }
 // 从意图中提取关键词
 /** @requires TEXT @produces KEYWORDS */
-function extractKeywords(intent) {
+export function extractKeywords(intent) {
     return intent.split(/[\s，。！？,]+/).filter(w => w.length > 1).map(w => w.toLowerCase());
 }

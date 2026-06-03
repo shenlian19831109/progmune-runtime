@@ -3,19 +3,19 @@ import * as path from "path";
 import * as fs from "fs";
 import * as ts from "typescript";
 
-interface ParamInfo {
+export interface ParamInfo {
   name: string;
   type: string;          // 保留字符串形式
   typeDetail?: string;   // 结构化类型表示（如 "string | null", "Promise<User>"）
 }
 
-interface FunctionInfo {
+export interface FunctionInfo {
   name: string;
   params: ParamInfo[];
   returnType: string;
   returnTypeDetail?: string;
   file: string;
-  calls: string[];
+  calls?: string[];
   /** 是否为导出函数（只有导出的才能被 import） */
   exported?: boolean;
   /** 外部导入函数（非本项目声明） */
@@ -363,7 +363,7 @@ export function extractIRWithTypes(projectRoot: string): {
             const sig = extractSignatureFromDts(name, resolvedPath, project);
             if (sig) { externalFuncs.set(name, sig); continue; }
           }
-        } catch {}
+        } catch { /* IR parse fallback */ }
       }
 
       // Namespace imports: import * as X from 'mod'
@@ -388,7 +388,7 @@ export function extractIRWithTypes(projectRoot: string): {
               }
             }
           }
-        } catch {}
+        } catch { /* IR parse fallback */ }
       }
     }
   }
@@ -408,7 +408,7 @@ export function extractIRWithTypes(projectRoot: string): {
   // Collect undeclared calls (functions used but not declared and not resolved above)
   const allCalls = new Set<string>();
   for (const f of funcs) {
-    for (const c of f.calls) {
+    for (const c of (f.calls || [])) {
       allCalls.add(c);
     }
   }

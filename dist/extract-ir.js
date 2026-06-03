@@ -1,44 +1,7 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.extractIR = extractIR;
-exports.extractIRWithTypes = extractIRWithTypes;
-const ts_morph_1 = require("ts-morph");
-const path = __importStar(require("path"));
-const fs = __importStar(require("fs"));
-const ts = __importStar(require("typescript"));
+import { Project, Node } from "ts-morph";
+import * as path from "path";
+import * as fs from "fs";
+import * as ts from "typescript";
 /** 从 JSDoc 注释中解析 capability 注解 (@purpose, @tags, @requires, @produces) */
 function parseCapabilityFromJSDoc(node) {
     const jsdocs = node.getJsDocs?.();
@@ -144,11 +107,11 @@ function getTypeDetail(typeNode) {
         return "";
     const text = typeNode.getText();
     // 简单处理联合类型
-    if (ts_morph_1.Node.isUnionTypeNode(typeNode)) {
+    if (Node.isUnionTypeNode(typeNode)) {
         return typeNode.getTypeNodes().map((t) => getTypeDetail(t)).join(" | ");
     }
     // 处理泛型
-    if (ts_morph_1.Node.isTypeReference(typeNode)) {
+    if (Node.isTypeReference(typeNode)) {
         const typeName = typeNode.getTypeName().getText();
         const typeArgs = typeNode.getTypeArguments();
         if (typeArgs.length > 0) {
@@ -158,7 +121,7 @@ function getTypeDetail(typeNode) {
         return typeName;
     }
     // 处理数组/元组
-    if (ts_morph_1.Node.isArrayTypeNode(typeNode)) {
+    if (Node.isArrayTypeNode(typeNode)) {
         return getTypeDetail(typeNode.getElementTypeNode()) + "[]";
     }
     // 其他类型直接返回文本
@@ -198,14 +161,14 @@ function extractDirectCalls(func) {
         return [];
     const calls = [];
     body.forEachDescendant((node, traversal) => {
-        if (ts_morph_1.Node.isCallExpression(node)) {
+        if (Node.isCallExpression(node)) {
             const expr = node.getExpression();
-            if (ts_morph_1.Node.isIdentifier(expr))
+            if (Node.isIdentifier(expr))
                 calls.push(expr.getText());
-            else if (ts_morph_1.Node.isPropertyAccessExpression(expr))
+            else if (Node.isPropertyAccessExpression(expr))
                 calls.push(expr.getName());
         }
-        if (ts_morph_1.Node.isFunctionDeclaration(node) || ts_morph_1.Node.isArrowFunction(node))
+        if (Node.isFunctionDeclaration(node) || Node.isArrowFunction(node))
             traversal.skip();
     });
     return [...new Set(calls)];
@@ -216,15 +179,15 @@ function extractDirectCalls(func) {
  */
 /** @requires PROJECT_PATH @produces IR_FUNCTIONS */
 /** @requires PROJECT_PATH @produces IR_FUNCTIONS */
-function extractIR(projectRoot) {
+export function extractIR(projectRoot) {
     return extractIRWithTypes(projectRoot).functions;
 }
 /** Extract both functions and type→file mapping. */
 /** @requires PROJECT_PATH @produces IR_WITH_TYPES */
 /** @requires PROJECT_PATH @produces IR_WITH_TYPES */
-function extractIRWithTypes(projectRoot) {
+export function extractIRWithTypes(projectRoot) {
     const absRoot = path.resolve(projectRoot);
-    const project = new ts_morph_1.Project({
+    const project = new Project({
         tsConfigFilePath: path.join(absRoot, "tsconfig.json"),
         skipAddingFilesFromTsConfig: false,
     });
@@ -262,7 +225,7 @@ function extractIRWithTypes(projectRoot) {
             if (!init)
                 continue;
             // 直接箭头函数: const fn = () => {}
-            if (ts_morph_1.Node.isArrowFunction(init)) {
+            if (Node.isArrowFunction(init)) {
                 const name = vd.getName();
                 funcs.push({
                     name,
@@ -282,9 +245,9 @@ function extractIRWithTypes(projectRoot) {
                 continue;
             }
             // 包装的箭头函数: const fn = debounce(() => {})
-            if (ts_morph_1.Node.isCallExpression(init)) {
+            if (Node.isCallExpression(init)) {
                 for (const arg of init.getArguments()) {
-                    if (ts_morph_1.Node.isArrowFunction(arg)) {
+                    if (Node.isArrowFunction(arg)) {
                         const name = vd.getName();
                         funcs.push({
                             name,
@@ -370,7 +333,7 @@ function extractIRWithTypes(projectRoot) {
                         }
                     }
                 }
-                catch { }
+                catch { /* IR parse fallback */ }
             }
             // Namespace imports: import * as X from 'mod'
             const nsImport = imp.getNamespaceImport();
@@ -399,7 +362,7 @@ function extractIRWithTypes(projectRoot) {
                         }
                     }
                 }
-                catch { }
+                catch { /* IR parse fallback */ }
             }
         }
     }
@@ -418,7 +381,7 @@ function extractIRWithTypes(projectRoot) {
     // Collect undeclared calls (functions used but not declared and not resolved above)
     const allCalls = new Set();
     for (const f of funcs) {
-        for (const c of f.calls) {
+        for (const c of (f.calls || [])) {
             allCalls.add(c);
         }
     }
@@ -681,7 +644,7 @@ function extractSignatureFromFile(name, sf) {
         if (exp[0] !== name)
             continue;
         for (const decl of exp[1]) {
-            if (ts_morph_1.Node.isFunctionDeclaration(decl)) {
+            if (Node.isFunctionDeclaration(decl)) {
                 const params = decl.getParameters().map(p => ({
                     name: p.getName(),
                     type: p.getTypeNode()?.getText() || "any",
@@ -692,9 +655,9 @@ function extractSignatureFromFile(name, sf) {
                     description: `auto-resolved from ${sf.getFilePath()}`,
                 };
             }
-            if (ts_morph_1.Node.isVariableDeclaration(decl)) {
+            if (Node.isVariableDeclaration(decl)) {
                 const init = decl.getInitializer();
-                if (init && ts_morph_1.Node.isArrowFunction(init)) {
+                if (init && Node.isArrowFunction(init)) {
                     const params = init.getParameters().map(p => ({
                         name: p.getName(),
                         type: p.getTypeNode()?.getText() || "any",

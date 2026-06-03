@@ -11,6 +11,7 @@
 import { jaccardSimilarity, extractKeywords } from "./utils";
 import { getFailureAdjustedCredit } from "./feedback";
 import { getTopology } from "./semantic-topology";
+import type { FunctionInfo } from "./extract-ir";
 
 interface CapabilityNode {
   name: string;           // function name
@@ -29,7 +30,7 @@ interface CapabilityChain {
 }
 
 /** Build a capability graph from IR functions. */
-function buildCapabilityGraph(ir: any[]): Map<string, CapabilityNode> {
+function buildCapabilityGraph(ir: FunctionInfo[]): Map<string, CapabilityNode> {
   const SKIP_FILES = new Set(["src/strategy-planner.ts", "src/planner.ts"]);
   const graph = new Map<string, CapabilityNode>();
   for (const f of ir) {
@@ -131,7 +132,7 @@ function findRelated(
           }
         }
       }
-    } catch {}
+    } catch { /* topology fallback unavailable — non-critical */ }
   }
   return results;
 }
@@ -157,7 +158,7 @@ function findConsumers(graph: Map<string, CapabilityNode>, capability: string, a
  */
 export function selectCapabilityChains(
   intent: string,
-  ir: any[],
+  ir: FunctionInfo[],
   maxChains: number = 5
 ): CapabilityChain[] {
   // Ensure semantic topology is built before any capability matching
@@ -244,7 +245,7 @@ export function selectCapabilityChains(
               leapDecay *= 0.7; // each semantic leap loses 30% weight
             }
           }
-        } catch {}
+        } catch { /* semantic leap unavailable — non-critical */ }
       }
     }
 

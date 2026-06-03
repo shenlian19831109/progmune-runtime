@@ -7,9 +7,12 @@
     "progmune-runtime": "dist/mcp-server.mjs"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && tsc -p tsconfig.mcp.json && mv dist/mcp-server.js dist/mcp-server.mjs",
     "start": "node dist/mcp-server.mjs",
     "test": "node dist/mcp-server.mjs test",
+    "test:unit": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "ir": "npx ts-node src/extract-ir.ts .",
     "guard": "node -e \"require('./dist/validator.js'); console.log('✅ 校验器已加载')\"",
     "obs": "npx ts-node src/semantic-trace.ts",
@@ -37,6 +40,8 @@
   },
   "devDependencies": {
     "@types/node": "^25.6.0",
-    "dotenv": "^17.4.2"
+    "@vitest/coverage-v8": "^3.2.6",
+    "dotenv": "^17.4.2",
+    "vitest": "^3.2.6"
   }
 }

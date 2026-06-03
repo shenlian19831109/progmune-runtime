@@ -161,7 +161,7 @@ function formatAuditResult(result) {
             lines.push("");
         }
     }
-    catch { }
+    catch { /* audit step — best-effort */ }
     // Phase 7: Violation Analytics
     try {
         const repairDir = ".progmune_corpus/repairs";
@@ -176,7 +176,7 @@ function formatAuditResult(result) {
                         bySvl[r.violation] = (bySvl[r.violation] || 0) + 1;
                         byConstraint[r.constraint] = (byConstraint[r.constraint] || 0) + 1;
                     }
-                    catch { }
+                    catch { /* audit step — best-effort */ }
                 }
                 lines.push(`  Repairs recorded: ${repairs.length}`);
                 const svlSummary = Object.entries(bySvl).map(([k, v]) => `${k}: ${v}`).join(" | ");
@@ -189,7 +189,7 @@ function formatAuditResult(result) {
             }
         }
     }
-    catch { }
+    catch { /* audit step — best-effort */ }
     if (result.sessions.length > 0) {
         lines.push(`  Last generation: ${result.lastGeneration || "unknown"}`);
         lines.push(`  Unique sessions:  ${new Set(result.sessions.map(s => s.sessionId)).size}`);

@@ -28,7 +28,7 @@ function getReportCursor(): { lastTimestamp: string | null; reportedCount: numbe
   try {
     if (fs.existsSync(CURSOR_FILE))
       return JSON.parse(fs.readFileSync(CURSOR_FILE, "utf-8"));
-  } catch {}
+  } catch { /* report may be unavailable */ }
   return { lastTimestamp: null, reportedCount: 0 };
 }
 

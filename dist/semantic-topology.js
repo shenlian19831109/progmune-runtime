@@ -1,4 +1,3 @@
-"use strict";
 /**
  * Phase 8: Semantic Topology (P1)
  *
@@ -10,11 +9,7 @@
  *
  * Replaces simple string matching in capability search.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.SemanticTopology = void 0;
-exports.getTopology = getTopology;
-exports.rebuildTopology = rebuildTopology;
-class SemanticTopology {
+export class SemanticTopology {
     constructor() {
         this.nodes = new Map();
         this.edges = new Map();
@@ -143,17 +138,16 @@ class SemanticTopology {
     /** Get node count */
     get size() { return this.nodes.size; }
 }
-exports.SemanticTopology = SemanticTopology;
 // Singleton
 let _topology = null;
-function getTopology(ir) {
+export function getTopology(ir) {
     if (!_topology && ir) {
         _topology = new SemanticTopology();
         _topology.build(ir);
     }
     return _topology || new SemanticTopology();
 }
-function rebuildTopology(ir) {
+export function rebuildTopology(ir) {
     _topology = new SemanticTopology();
     _topology.build(ir);
     return _topology;
