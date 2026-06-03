@@ -1,0 +1,141 @@
+{
+  "sessionId": "sess_1780477046692_mf991",
+  "intent": "parse a JSON string safely, returning a default if it fails",
+  "attempts": [
+    {
+      "id": "att_1780477048198_9wmvr",
+      "sessionId": "sess_1780477046692_mf991",
+      "attemptNumber": 1,
+      "inputIntent": "parse a JSON string safely, returning a default if it fails",
+      "plannerSeed": "26ef7c33",
+      "constraintSnapshotId": "snap_1780477046694_60f57f132781",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "parseActionJSON",
+          "args": [
+            {
+              "name": "text",
+              "type": "string",
+              "value": ""
+            }
+          ],
+          "assignTo": "parsed"
+        },
+        {
+          "kind": "return",
+          "value": "parsed"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "parseActionJSON",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780477048198,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780477046692,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780477048198_9wmvr",
+    "sessionId": "sess_1780477046692_mf991",
+    "attemptNumber": 1,
+    "inputIntent": "parse a JSON string safely, returning a default if it fails",
+    "plannerSeed": "26ef7c33",
+    "constraintSnapshotId": "snap_1780477046694_60f57f132781",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "parseActionJSON",
+        "args": [
+          {
+            "name": "text",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "parsed"
+      },
+      {
+        "kind": "return",
+        "value": "parsed"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "parseActionJSON",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780477048198,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780477046694_60f57f132781",
+  "endedAt": 1780477048200
+}

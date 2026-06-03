@@ -10632,6 +10632,937 @@
       ]
     },
     {
+      "name": "isValidEmail",
+      "params": [
+        {
+          "name": "str",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/stdlib.ts",
+      "calls": [
+        "test"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "purpose": "Progmune Standard Library — general-purpose utilities for external tasks. Each function has",
+      "requires": [
+        "/@produces",
+        "for",
+        "Capability",
+        "Graph",
+        "integration.",
+        "STRING"
+      ],
+      "produces": [
+        "VALIDATION_RESULT"
+      ],
+      "tags": [
+        "string",
+        "email",
+        "validation"
+      ]
+    },
+    {
+      "name": "truncate",
+      "params": [
+        {
+          "name": "str",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "maxLen",
+          "type": "number",
+          "typeDetail": "number"
+        },
+        {
+          "name": "ellipsis",
+          "type": "any",
+          "typeDetail": ""
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/stdlib.ts",
+      "calls": [
+        "slice"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "number"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "requires": [
+        "STRING"
+      ],
+      "produces": [
+        "TRUNCATED_STRING"
+      ],
+      "tags": [
+        "string",
+        "format"
+      ]
+    },
+    {
+      "name": "camelToSnake",
+      "params": [
+        {
+          "name": "str",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/stdlib.ts",
+      "calls": [
+        "replace"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "requires": [
+        "STRING"
+      ],
+      "produces": [
+        "FORMATTED_STRING"
+      ],
+      "tags": [
+        "string",
+        "case",
+        "format"
+      ]
+    },
+    {
+      "name": "capitalizeWords",
+      "params": [
+        {
+          "name": "str",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/stdlib.ts",
+      "calls": [
+        "replace"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "requires": [
+        "STRING"
+      ],
+      "produces": [
+        "FORMATTED_STRING"
+      ],
+      "tags": [
+        "string",
+        "case",
+        "format"
+      ]
+    },
+    {
+      "name": "countSubstring",
+      "params": [
+        {
+          "name": "str",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "sub",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/stdlib.ts",
+      "calls": [
+        "indexOf"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "requires": [
+        "STRING"
+      ],
+      "produces": [
+        "COUNT"
+      ],
+      "tags": [
+        "string",
+        "count"
+      ]
+    },
+    {
+      "name": "removeWhitespace",
+      "params": [
+        {
+          "name": "str",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/stdlib.ts",
+      "calls": [
+        "replace"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "requires": [
+        "STRING"
+      ],
+      "produces": [
+        "CLEANED_STRING"
+      ],
+      "tags": [
+        "string",
+        "format"
+      ]
+    },
+    {
+      "name": "mostFrequent",
+      "params": [
+        {
+          "name": "arr",
+          "type": "T[]",
+          "typeDetail": "T[]"
+        }
+      ],
+      "returnType": "T | null",
+      "returnTypeDetail": "T | null",
+      "file": "src/stdlib.ts",
+      "calls": [
+        "set",
+        "get",
+        "sort",
+        "entries"
+      ],
+      "exported": true,
+      "inputs": [
+        "T"
+      ],
+      "outputs": [
+        "T"
+      ],
+      "requires": [
+        "ARRAY"
+      ],
+      "produces": [
+        "ELEMENT"
+      ],
+      "tags": [
+        "array",
+        "statistics"
+      ]
+    },
+    {
+      "name": "unique",
+      "params": [
+        {
+          "name": "arr",
+          "type": "T[]",
+          "typeDetail": "T[]"
+        }
+      ],
+      "returnType": "T[]",
+      "returnTypeDetail": "T[]",
+      "file": "src/stdlib.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "T"
+      ],
+      "outputs": [
+        "T"
+      ],
+      "requires": [
+        "ARRAY"
+      ],
+      "produces": [
+        "ARRAY"
+      ],
+      "tags": [
+        "array",
+        "dedupe"
+      ]
+    },
+    {
+      "name": "chunk",
+      "params": [
+        {
+          "name": "arr",
+          "type": "T[]",
+          "typeDetail": "T[]"
+        },
+        {
+          "name": "size",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "T[][]",
+      "returnTypeDetail": "T[][]",
+      "file": "src/stdlib.ts",
+      "calls": [
+        "push",
+        "slice"
+      ],
+      "exported": true,
+      "inputs": [
+        "T",
+        "number"
+      ],
+      "outputs": [
+        "T[]"
+      ],
+      "requires": [
+        "ARRAY"
+      ],
+      "produces": [
+        "ARRAY"
+      ],
+      "tags": [
+        "array",
+        "chunk"
+      ]
+    },
+    {
+      "name": "arrayDiff",
+      "params": [
+        {
+          "name": "a",
+          "type": "T[]",
+          "typeDetail": "T[]"
+        },
+        {
+          "name": "b",
+          "type": "T[]",
+          "typeDetail": "T[]"
+        }
+      ],
+      "returnType": "T[]",
+      "returnTypeDetail": "T[]",
+      "file": "src/stdlib.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [
+        "T",
+        "T"
+      ],
+      "outputs": [
+        "T"
+      ],
+      "requires": [
+        "ARRAY"
+      ],
+      "produces": [
+        "ARRAY"
+      ],
+      "tags": [
+        "array",
+        "difference"
+      ]
+    },
+    {
+      "name": "average",
+      "params": [
+        {
+          "name": "nums",
+          "type": "number[]",
+          "typeDetail": "number[]"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/stdlib.ts",
+      "calls": [
+        "reduce"
+      ],
+      "exported": true,
+      "inputs": [
+        "number"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "requires": [
+        "NUMBERS"
+      ],
+      "produces": [
+        "AVERAGE"
+      ],
+      "tags": [
+        "math",
+        "statistics"
+      ]
+    },
+    {
+      "name": "median",
+      "params": [
+        {
+          "name": "nums",
+          "type": "number[]",
+          "typeDetail": "number[]"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/stdlib.ts",
+      "calls": [
+        "sort",
+        "floor"
+      ],
+      "exported": true,
+      "inputs": [
+        "number"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "requires": [
+        "NUMBERS"
+      ],
+      "produces": [
+        "MEDIAN"
+      ],
+      "tags": [
+        "math",
+        "statistics"
+      ]
+    },
+    {
+      "name": "roundTo",
+      "params": [
+        {
+          "name": "num",
+          "type": "number",
+          "typeDetail": "number"
+        },
+        {
+          "name": "decimals",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/stdlib.ts",
+      "calls": [
+        "pow",
+        "round"
+      ],
+      "exported": true,
+      "inputs": [
+        "number",
+        "number"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "requires": [
+        "NUMBER"
+      ],
+      "produces": [
+        "ROUNDED_NUMBER"
+      ],
+      "tags": [
+        "math",
+        "format"
+      ]
+    },
+    {
+      "name": "isPrime",
+      "params": [
+        {
+          "name": "n",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/stdlib.ts",
+      "calls": [
+        "sqrt"
+      ],
+      "exported": true,
+      "inputs": [
+        "number"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "requires": [
+        "NUMBER"
+      ],
+      "produces": [
+        "PRIME_CHECK"
+      ],
+      "tags": [
+        "math",
+        "validation"
+      ]
+    },
+    {
+      "name": "randomInt",
+      "params": [
+        {
+          "name": "min",
+          "type": "number",
+          "typeDetail": "number"
+        },
+        {
+          "name": "max",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/stdlib.ts",
+      "calls": [
+        "floor",
+        "random"
+      ],
+      "exported": true,
+      "inputs": [
+        "number",
+        "number"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "requires": [
+        "NUMBERS"
+      ],
+      "produces": [
+        "RANDOM_INT"
+      ],
+      "tags": [
+        "math",
+        "random"
+      ]
+    },
+    {
+      "name": "deepClone",
+      "params": [
+        {
+          "name": "obj",
+          "type": "T",
+          "typeDetail": "T"
+        }
+      ],
+      "returnType": "T",
+      "returnTypeDetail": "T",
+      "file": "src/stdlib.ts",
+      "calls": [
+        "parse",
+        "stringify"
+      ],
+      "exported": true,
+      "inputs": [
+        "T"
+      ],
+      "outputs": [
+        "T"
+      ],
+      "requires": [
+        "OBJECT"
+      ],
+      "produces": [
+        "CLONED_OBJECT"
+      ],
+      "tags": [
+        "object",
+        "clone"
+      ]
+    },
+    {
+      "name": "pick",
+      "params": [
+        {
+          "name": "obj",
+          "type": "T",
+          "typeDetail": "T"
+        },
+        {
+          "name": "keys",
+          "type": "string[]",
+          "typeDetail": "string[]"
+        }
+      ],
+      "returnType": "Partial<T>",
+      "returnTypeDetail": "Partial<T>",
+      "file": "src/stdlib.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "T",
+        "string"
+      ],
+      "outputs": [
+        "Partial"
+      ],
+      "requires": [
+        "OBJECT"
+      ],
+      "produces": [
+        "PICKED_OBJECT"
+      ],
+      "tags": [
+        "object",
+        "filter"
+      ]
+    },
+    {
+      "name": "deepMerge",
+      "params": [
+        {
+          "name": "objects",
+          "type": "any[]",
+          "typeDetail": "any[]"
+        }
+      ],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "src/stdlib.ts",
+      "calls": [
+        "reduce"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [],
+      "requires": [
+        "OBJECTS"
+      ],
+      "produces": [
+        "MERGED_OBJECT"
+      ],
+      "tags": [
+        "object",
+        "merge"
+      ]
+    },
+    {
+      "name": "hasRequiredFields",
+      "params": [
+        {
+          "name": "obj",
+          "type": "any",
+          "typeDetail": "any"
+        },
+        {
+          "name": "fields",
+          "type": "string[]",
+          "typeDetail": "string[]"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/stdlib.ts",
+      "calls": [
+        "every"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "requires": [
+        "OBJECT"
+      ],
+      "produces": [
+        "VALIDATION_RESULT"
+      ],
+      "tags": [
+        "validation",
+        "schema"
+      ]
+    },
+    {
+      "name": "isPlainObject",
+      "params": [
+        {
+          "name": "val",
+          "type": "any",
+          "typeDetail": "any"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/stdlib.ts",
+      "calls": [
+        "isArray"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "boolean"
+      ],
+      "requires": [
+        "ANY"
+      ],
+      "produces": [
+        "VALIDATION_RESULT"
+      ],
+      "tags": [
+        "validation",
+        "type"
+      ]
+    },
+    {
+      "name": "parseSemver",
+      "params": [
+        {
+          "name": "version",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "{ major: number; minor: number; patch: number } | null",
+      "returnTypeDetail": "{ major: number; minor: number; patch: number } | null",
+      "file": "src/stdlib.ts",
+      "calls": [
+        "match"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "{ major: number; minor: number; patch: number }"
+      ],
+      "requires": [
+        "STRING"
+      ],
+      "produces": [
+        "PARSED_VERSION"
+      ],
+      "tags": [
+        "validation",
+        "semver"
+      ]
+    },
+    {
+      "name": "formatDuration",
+      "params": [
+        {
+          "name": "ms",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/stdlib.ts",
+      "calls": [
+        "toFixed",
+        "floor",
+        "round"
+      ],
+      "exported": true,
+      "inputs": [
+        "number"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "requires": [
+        "NUMBER"
+      ],
+      "produces": [
+        "FORMATTED_STRING"
+      ],
+      "tags": [
+        "format",
+        "duration"
+      ]
+    },
+    {
+      "name": "formatFileSize",
+      "params": [
+        {
+          "name": "bytes",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/stdlib.ts",
+      "calls": [
+        "toFixed"
+      ],
+      "exported": true,
+      "inputs": [
+        "number"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "requires": [
+        "NUMBER"
+      ],
+      "produces": [
+        "FORMATTED_STRING"
+      ],
+      "tags": [
+        "format",
+        "file"
+      ]
+    },
+    {
+      "name": "toQueryString",
+      "params": [
+        {
+          "name": "obj",
+          "type": "Record<string, any>",
+          "typeDetail": "Record<string, any>"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/stdlib.ts",
+      "calls": [
+        "join",
+        "map",
+        "entries"
+      ],
+      "exported": true,
+      "inputs": [
+        "Record"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "requires": [
+        "OBJECT"
+      ],
+      "produces": [
+        "QUERY_STRING"
+      ],
+      "tags": [
+        "web",
+        "format"
+      ]
+    },
+    {
+      "name": "retry",
+      "params": [
+        {
+          "name": "fn",
+          "type": "() => Promise<T>",
+          "typeDetail": "() => Promise<T>"
+        },
+        {
+          "name": "maxRetries",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "Promise<T>",
+      "returnTypeDetail": "Promise<T>",
+      "file": "src/stdlib.ts",
+      "calls": [
+        "fn"
+      ],
+      "exported": true,
+      "inputs": [
+        "() => Promise",
+        "number"
+      ],
+      "outputs": [
+        "Promise"
+      ],
+      "requires": [
+        "FUNCTION"
+      ],
+      "produces": [
+        "RETRY_RESULT"
+      ],
+      "tags": [
+        "async",
+        "retry"
+      ]
+    },
+    {
+      "name": "debounce",
+      "params": [
+        {
+          "name": "fn",
+          "type": "T",
+          "typeDetail": "T"
+        },
+        {
+          "name": "delay",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "T",
+      "returnTypeDetail": "T",
+      "file": "src/stdlib.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "T",
+        "number"
+      ],
+      "outputs": [
+        "T"
+      ],
+      "requires": [
+        "FUNCTION"
+      ],
+      "produces": [
+        "DEBOUNCED_FUNCTION"
+      ],
+      "tags": [
+        "async",
+        "debounce"
+      ]
+    },
+    {
       "name": "jaccardSimilarity",
       "params": [
         {
@@ -12049,6 +12980,30 @@
     },
     {
       "name": "hash",
+      "params": [],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
+    },
+    {
+      "name": "pow",
+      "params": [],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "tags": [
+        "(external)"
+      ]
+    },
+    {
+      "name": "sqrt",
       "params": [],
       "returnType": "any",
       "returnTypeDetail": "any",
