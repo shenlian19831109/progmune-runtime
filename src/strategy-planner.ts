@@ -203,12 +203,14 @@ export function selectCapabilityChains(
   if (seeds.length === 0) {
     seeds = [...graph.values()].slice(0, 3);
   }
-  seeds = seeds.slice(0, graph.size > 500 ? 30 : 15);
+  seeds = seeds.slice(0, graph.size > 1000 ? 10 : graph.size > 500 ? 20 : 15);
 
   const allNodes = [...graph.values()];
   const chains: CapabilityChain[] = [];
   const BEAM_WIDTH = graph.size > 500 ? 3 : 5;
   const MAX_CHAIN_LEN = parseInt(process.env.PROGMUNE_MAX_CHAIN_LEN || "5", 10);
+  // Heuristic pruning: drop nodes below this score to avoid noise accumulation
+  const SCORE_FLOOR = graph.size > 1000 ? 0.2 : 0;
 
   for (const seed of seeds) {
     // ── Priority-queue (beam) search: forward trace ──
@@ -247,7 +249,7 @@ export function selectCapabilityChains(
         // Strategy 1: direct data flow (produces → requires)
         for (const p of current.produces) {
           const consumers = findConsumers(graph, p, allNodes)
-            .filter(c => !entry.visited.has(c.name));
+            .filter(c => !entry.visited.has(c.name) && c.score >= SCORE_FLOOR);
           for (const consumer of consumers) {
             const newVisited = new Set(entry.visited);
             newVisited.add(consumer.name);
@@ -267,10 +269,10 @@ export function selectCapabilityChains(
           try {
             const topo = getTopology();
             const similar = topo.findSimilar(current.name, 10)
-              .filter(s => !entry.visited.has(s.name) && s.similarity > 0.2);
-            for (const s of similar) {
+              .filter(s => !entry.visited.has(s.name) && s.similarity > 0.25);
+            for (const s of similar.slice(0, 3)) {
               const bestMatch = graph.get(s.name);
-              if (bestMatch && bestMatch.score > 0) {
+              if (bestMatch && bestMatch.score >= SCORE_FLOOR) {
                 const newVisited = new Set(entry.visited);
                 newVisited.add(bestMatch.name);
                 nextBeam.push({
