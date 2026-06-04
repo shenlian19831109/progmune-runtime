@@ -165,8 +165,17 @@ const CACHE_DIR = path.resolve(__dirname, "..", ".progmune");
 const TOPO_CACHE = path.join(CACHE_DIR, "topology.json");
 
 function irHash(ir: any[]): string {
+  // Include protocol + capability metadata in hash — if annotations change,
+  // the cached topology must be invalidated even if function names stay same.
   return crypto.createHash("md5")
-    .update(JSON.stringify(ir.map((f: any) => f.name + f.file)))
+    .update(JSON.stringify(ir.map((f: any) => ({
+      name: f.name,
+      file: f.file,
+      protocol: f.protocol,
+      purpose: f.purpose,
+      requires: f.requires,
+      produces: f.produces,
+    }))))
     .digest("hex");
 }
 
