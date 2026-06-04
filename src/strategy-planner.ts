@@ -36,10 +36,12 @@ interface CapabilityChain {
 /** Build a capability graph from IR functions. */
 function buildCapabilityGraph(ir: FunctionInfo[]): Map<string, CapabilityNode> {
   const SKIP_FILES = new Set(["src/strategy-planner.ts", "src/planner.ts"]);
+  const SKIP_TAGS = new Set(["python"]); // language-specific functions excluded from graph
   const graph = new Map<string, CapabilityNode>();
   for (const f of ir) {
     if (!f.exported) continue;
-    if (SKIP_FILES.has(f.file)) continue; // skip planner internals
+    if (SKIP_FILES.has(f.file)) continue;
+    if ((f.tags || []).some(t => SKIP_TAGS.has(t))) continue; // skip language-specific
     graph.set(f.name, {
       name: f.name,
       purpose: f.purpose || "",
