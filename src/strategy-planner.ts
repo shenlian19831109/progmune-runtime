@@ -60,17 +60,27 @@ function buildCapabilityGraph(ir: FunctionInfo[]): Map<string, CapabilityNode> {
 function scoreNode(node: CapabilityNode, intentLower: string, keywords: string[]): number {
   let score = 0;
   let hasMatch = false;
-  // Name match
+
+  // ── Primary verb detection: first keyword is the main action ──
+  const primaryVerb = keywords.length > 0 ? keywords[0] : "";
   const nameWords = node.name.replace(/([A-Z])/g, " $1").toLowerCase().split(/[\s_]+/).filter(w => w.length > 1);
+  const nameLower = node.name.toLowerCase();
+
+  // Name match
   for (const kw of keywords) {
     // Substring match
-    if (node.name.toLowerCase().includes(kw)) {
+    if (nameLower.includes(kw)) {
       score += 1;
       hasMatch = true;
-      // Exact word match: e.g., "extract" in "extractIR" → +100% bonus
-      if (nameWords.includes(kw)) score += 2;
+      // Exact word match
+      if (nameWords.includes(kw)) {
+        // Primary verb (first keyword) that STARTS the function name → decisive bonus
+        // e.g., "extract" matches "extractIR" → +5, beats generic "validate" matches
+        if (kw === primaryVerb && nameLower.startsWith(kw)) score += 5;
+        else score += 2;
+      }
     }
-    const js = jaccardSimilarity(node.name.toLowerCase(), kw);
+    const js = jaccardSimilarity(nameLower, kw);
     if (js > 0.2) { score += js; hasMatch = true; }
   }
   // Purpose match
