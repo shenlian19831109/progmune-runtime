@@ -24,6 +24,13 @@ const PROJECT_ROOT = '/Users/shenlian/progmune-runtime';
 const TEST_DIR = path.join(PROJECT_ROOT, '.test_report');
 const REPORT_FILE = path.join(TEST_DIR, 'test_report.md');
 
+// 环境变量检查
+if (!process.env.LLM_API_KEY) {
+  console.error('❌ LLM_API_KEY 未设置。请在环境中设置后重试：');
+  console.error('   export LLM_API_KEY="your-api-key"');
+  process.exit(1);
+}
+
 // ============================================================
 // 测试基础设施
 // ============================================================
@@ -88,9 +95,8 @@ class MCPClient {
         cwd: PROJECT_ROOT,
         env: {
           ...process.env,
-          LLM_API_KEY: '***REDACTED***',
-          LLM_BASE_URL: 'https://api.deepseek.com/v1',
-          LLM_MODEL: 'deepseek-chat',
+          LLM_BASE_URL: process.env.LLM_BASE_URL || 'https://api.deepseek.com/v1',
+          LLM_MODEL: process.env.LLM_MODEL || 'deepseek-chat',
           PATH: '/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin:/opt/homebrew/sbin'
         },
         stdio: ['pipe', 'pipe', 'pipe']

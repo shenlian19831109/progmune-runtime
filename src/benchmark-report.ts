@@ -1,6 +1,3 @@
-/** Format benchmark results as a readable report
- * @protocol pre_states=["BENCHMARKS_LOADED"] post_states=["REPORT_FORMATTED"]
- */
 import * as fs from "fs";
 import * as path from "path";
 
@@ -11,6 +8,14 @@ export interface BenchReportItem {
   repaired: boolean;
 }
 
+/**
+ * Format benchmark results as a readable report.
+ * @requires PASS_RATE_DATA @produces BENCHMARK_REPORT
+ * @purpose Generate human-readable benchmark summary with pass/fail breakdown
+ * @tags benchmark, report, formatting
+ * @useWhen generating benchmark reports
+ * @protocol pre_states=["BENCHMARKS_LOADED"] post_states=["REPORT_FORMATTED"]
+ */
 export function benchmarkReport(): string {
   const resultsDir = path.resolve(process.cwd(), "bench");
   if (!fs.existsSync(resultsDir)) return "No benchmark results.";

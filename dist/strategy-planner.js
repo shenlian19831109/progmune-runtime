@@ -151,6 +151,9 @@ function findConsumers(graph, capability, allNodes) {
  * 4. Score each chain and return top N
  */
 export function selectCapabilityChains(intent, ir, maxChains = 5) {
+    // Guard: null/undefined/empty intent
+    if (!intent || typeof intent !== "string" || !intent.trim())
+        return [];
     // Ensure semantic topology is built before any capability matching
     getTopology(ir);
     const intentLower = intent.toLowerCase();
@@ -186,52 +189,92 @@ export function selectCapabilityChains(intent, ir, maxChains = 5) {
     seeds = seeds.slice(0, graph.size > 500 ? 30 : 15);
     const allNodes = [...graph.values()];
     const chains = [];
+    const BEAM_WIDTH = graph.size > 500 ? 3 : 5; // narrower beam for large IR
+    const MAX_CHAIN_LEN = 8;
     for (const seed of seeds) {
-        // Build chain: seed → consumer → consumer...
-        const chain = [seed];
-        const visited = new Set([seed.name]);
-        let totalScore = seed.score;
-        // Forward trace: data flow → semantic leap
-        let current = seed;
-        let extended = true;
-        let leapDecay = 1.0; // weight decay for semantic leaps
-        while (extended && chain.length < 8) {
-            extended = false;
-            // Strategy 1: direct data flow (produces → requires)
-            for (const p of current.produces) {
-                const consumers = findConsumers(graph, p, allNodes).filter(c => !visited.has(c.name));
-                if (consumers.length > 0) {
-                    const bestConsumer = topByScore(consumers);
-                    chain.push(bestConsumer);
-                    visited.add(bestConsumer.name);
-                    totalScore += bestConsumer.score;
-                    current = bestConsumer;
-                    extended = true;
-                    leapDecay = 1.0; // reset decay on direct match
-                    break;
+        let beam = [{
+                chain: [seed],
+                visited: new Set([seed.name]),
+                totalScore: seed.score,
+                leapDecay: 1.0,
+                deadEnd: false,
+            }];
+        let bestEntry = null;
+        for (let depth = 0; depth < MAX_CHAIN_LEN && beam.length > 0; depth++) {
+            const nextBeam = [];
+            for (const entry of beam) {
+                if (entry.deadEnd || entry.chain.length >= MAX_CHAIN_LEN) {
+                    // Dead-end or max length: finalize this branch
+                    if (!bestEntry || (entry.totalScore / entry.chain.length) > (bestEntry.totalScore / bestEntry.chain.length)) {
+                        bestEntry = entry;
+                    }
+                    continue;
                 }
-            }
-            // Strategy 2: semantic leap — use topology similarity
-            if (!extended) {
-                try {
-                    const topo = getTopology();
-                    const similar = topo.findSimilar(current.name, 10)
-                        .filter(s => !visited.has(s.name) && s.similarity > 0.2);
-                    if (similar.length > 0) {
-                        const bestMatch = graph.get(similar[0].name);
-                        if (bestMatch && bestMatch.score > 0) {
-                            chain.push(bestMatch);
-                            visited.add(bestMatch.name);
-                            totalScore += bestMatch.score * leapDecay; // decayed score
-                            current = bestMatch;
-                            extended = true;
-                            leapDecay *= 0.7; // each semantic leap loses 30% weight
-                        }
+                const current = entry.chain[entry.chain.length - 1];
+                let expanded = false;
+                // Strategy 1: direct data flow (produces → requires)
+                for (const p of current.produces) {
+                    const consumers = findConsumers(graph, p, allNodes)
+                        .filter(c => !entry.visited.has(c.name));
+                    for (const consumer of consumers) {
+                        const newVisited = new Set(entry.visited);
+                        newVisited.add(consumer.name);
+                        nextBeam.push({
+                            chain: [...entry.chain, consumer],
+                            visited: newVisited,
+                            totalScore: entry.totalScore + consumer.score,
+                            leapDecay: 1.0, // reset decay on direct match
+                            deadEnd: consumer.score === 0 && consumer.produces.length === 0,
+                        });
+                        expanded = true;
                     }
                 }
-                catch { /* semantic leap unavailable — non-critical */ }
+                // Strategy 2: semantic leap — topology similarity
+                if (!expanded) {
+                    try {
+                        const topo = getTopology();
+                        const similar = topo.findSimilar(current.name, 10)
+                            .filter(s => !entry.visited.has(s.name) && s.similarity > 0.2);
+                        for (const s of similar) {
+                            const bestMatch = graph.get(s.name);
+                            if (bestMatch && bestMatch.score > 0) {
+                                const newVisited = new Set(entry.visited);
+                                newVisited.add(bestMatch.name);
+                                nextBeam.push({
+                                    chain: [...entry.chain, bestMatch],
+                                    visited: newVisited,
+                                    totalScore: entry.totalScore + bestMatch.score * entry.leapDecay,
+                                    leapDecay: entry.leapDecay * 0.7, // decay 30% per leap
+                                    deadEnd: false,
+                                });
+                                expanded = true;
+                            }
+                        }
+                    }
+                    catch { /* semantic leap unavailable — non-critical */ }
+                }
+                // Dead-end: no consumers found → finalize this branch
+                if (!expanded) {
+                    if (!bestEntry || (entry.totalScore / entry.chain.length) > (bestEntry.totalScore / bestEntry.chain.length)) {
+                        bestEntry = entry;
+                    }
+                }
+            }
+            // Beam pruning: keep top BEAM_WIDTH by average score
+            nextBeam.sort((a, b) => (b.totalScore / b.chain.length) - (a.totalScore / a.chain.length));
+            beam = nextBeam.slice(0, BEAM_WIDTH);
+        }
+        // Any remaining beam entries compete for best
+        for (const entry of beam) {
+            if (!bestEntry || (entry.totalScore / entry.chain.length) > (bestEntry.totalScore / bestEntry.chain.length)) {
+                bestEntry = entry;
             }
         }
+        if (!bestEntry || bestEntry.chain.length < 1)
+            continue;
+        const chain = bestEntry.chain;
+        let totalScore = bestEntry.totalScore;
+        const visited = bestEntry.visited;
         // Backward trace: does seed need something? Find producers.
         if (seed.requires.length > 0) {
             const producers = findProducers(graph, seed.requires[0], allNodes)

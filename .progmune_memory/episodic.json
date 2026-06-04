@@ -1,5 +1,1451 @@
 [
   {
+    "intent": "",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "auditDirectory",
+        "args": [
+          {
+            "name": "dir",
+            "type": "string",
+            "value": null
+          },
+          {
+            "name": "threshold",
+            "type": "any",
+            "value": null
+          }
+        ],
+        "assignTo": "result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780509991084",
+    "timestamp": "2026-06-03T18:06:31.084Z"
+  },
+  {
+    "intent": "get all sessions",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getBranchPath",
+        "args": [
+          {
+            "name": "branch",
+            "type": "Branch",
+            "value": "{{branch}}"
+          },
+          {
+            "name": "allBranches",
+            "type": "Map<string, Branch>",
+            "value": "{{allBranches}}"
+          }
+        ],
+        "assignTo": "getBranchPath_result"
+      },
+      {
+        "kind": "call",
+        "function": "getImportPath",
+        "args": [
+          {
+            "name": "file",
+            "type": "string",
+            "value": "{{file}}"
+          }
+        ],
+        "assignTo": "getImportPath_result"
+      },
+      {
+        "kind": "call",
+        "function": "getExecutionMetrics",
+        "args": [],
+        "assignTo": "getExecutionMetrics_result"
+      },
+      {
+        "kind": "call",
+        "function": "getTypeDetail",
+        "args": [
+          {
+            "name": "typeNode",
+            "type": "any",
+            "value": "{{typeNode}}"
+          }
+        ],
+        "assignTo": "getTypeDetail_result"
+      },
+      {
+        "kind": "call",
+        "function": "getParamType",
+        "args": [
+          {
+            "name": "param",
+            "type": "any",
+            "value": "{{param}}"
+          }
+        ],
+        "assignTo": "getParamType_result"
+      },
+      {
+        "kind": "call",
+        "function": "getParamTypeDetail",
+        "args": [
+          {
+            "name": "param",
+            "type": "any",
+            "value": "{{param}}"
+          }
+        ],
+        "assignTo": "getParamTypeDetail_result"
+      },
+      {
+        "kind": "call",
+        "function": "getReturnType",
+        "args": [
+          {
+            "name": "func",
+            "type": "FunctionDeclaration | ArrowFunction",
+            "value": "{{func}}"
+          }
+        ],
+        "assignTo": "getReturnType_result"
+      },
+      {
+        "kind": "call",
+        "function": "getReturnTypeDetail",
+        "args": [
+          {
+            "name": "func",
+            "type": "FunctionDeclaration | ArrowFunction",
+            "value": "{{func}}"
+          }
+        ],
+        "assignTo": "getReturnTypeDetail_result"
+      },
+      {
+        "kind": "call",
+        "function": "getAllFailures",
+        "args": [],
+        "assignTo": "getAllFailures_result"
+      },
+      {
+        "kind": "call",
+        "function": "getFailuresBySVL",
+        "args": [
+          {
+            "name": "level",
+            "type": "SVL",
+            "value": "{{level}}"
+          }
+        ],
+        "assignTo": "getFailuresBySVL_result"
+      },
+      {
+        "kind": "call",
+        "function": "getTopFailurePatterns",
+        "args": [
+          {
+            "name": "limit",
+            "type": "number",
+            "value": "{{limit}}"
+          }
+        ],
+        "assignTo": "getTopFailurePatterns_result"
+      },
+      {
+        "kind": "call",
+        "function": "getFailureGenome",
+        "args": [],
+        "assignTo": "getFailureGenome_result"
+      },
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "getAllSessions_result"
+      },
+      {
+        "kind": "call",
+        "function": "getLearnedPatterns",
+        "args": [],
+        "assignTo": "getLearnedPatterns_result"
+      },
+      {
+        "kind": "call",
+        "function": "getSemanticHeatmap",
+        "args": [],
+        "assignTo": "getSemanticHeatmap_result"
+      },
+      {
+        "kind": "call",
+        "function": "getAntibodyStats",
+        "args": [],
+        "assignTo": "getAntibodyStats_result"
+      },
+      {
+        "kind": "call",
+        "function": "getFunctionSuccessRate",
+        "args": [
+          {
+            "name": "funcName",
+            "type": "string",
+            "value": "{{funcName}}"
+          }
+        ],
+        "assignTo": "getFunctionSuccessRate_result"
+      },
+      {
+        "kind": "call",
+        "function": "getWeightedSuccessRate",
+        "args": [
+          {
+            "name": "funcName",
+            "type": "string",
+            "value": "{{funcName}}"
+          }
+        ],
+        "assignTo": "getWeightedSuccessRate_result"
+      },
+      {
+        "kind": "call",
+        "function": "getFailureAdjustedCredit",
+        "args": [
+          {
+            "name": "funcName",
+            "type": "string",
+            "value": "{{funcName}}"
+          }
+        ],
+        "assignTo": "getFailureAdjustedCredit_result"
+      },
+      {
+        "kind": "call",
+        "function": "getInstanceId",
+        "args": [],
+        "assignTo": "getInstanceId_result"
+      },
+      {
+        "kind": "call",
+        "function": "getReportCursor",
+        "args": [],
+        "assignTo": "getReportCursor_result"
+      },
+      {
+        "kind": "call",
+        "function": "getFingerprint",
+        "args": [
+          {
+            "name": "sessionId",
+            "type": "string",
+            "value": "{{sessionId}}"
+          }
+        ],
+        "assignTo": "getFingerprint_result"
+      },
+      {
+        "kind": "call",
+        "function": "getFingerprintRegistry",
+        "args": [],
+        "assignTo": "getFingerprintRegistry_result"
+      },
+      {
+        "kind": "call",
+        "function": "getRecentEpisodes",
+        "args": [
+          {
+            "name": "limit",
+            "type": "number",
+            "value": "{{limit}}"
+          }
+        ],
+        "assignTo": "getRecentEpisodes_result"
+      },
+      {
+        "kind": "call",
+        "function": "getSuccessfulEpisodes",
+        "args": [
+          {
+            "name": "limit",
+            "type": "number",
+            "value": "{{limit}}"
+          }
+        ],
+        "assignTo": "getSuccessfulEpisodes_result"
+      },
+      {
+        "kind": "call",
+        "function": "WorkMemory.getIntent",
+        "args": [],
+        "assignTo": "WorkMemory.getIntent_result"
+      },
+      {
+        "kind": "call",
+        "function": "WorkMemory.get",
+        "args": [
+          {
+            "name": "name",
+            "type": "string",
+            "value": "{{name}}"
+          }
+        ],
+        "assignTo": "WorkMemory.get_result"
+      },
+      {
+        "kind": "call",
+        "function": "getSessionTransitions",
+        "args": [
+          {
+            "name": "session",
+            "type": "any",
+            "value": "{{session}}"
+          }
+        ],
+        "assignTo": "getSessionTransitions_result"
+      },
+      {
+        "kind": "call",
+        "function": "getProtocolConfig",
+        "args": [],
+        "assignTo": "getProtocolConfig_result"
+      },
+      {
+        "kind": "call",
+        "function": "getNsInit",
+        "args": [],
+        "assignTo": "getNsInit_result"
+      },
+      {
+        "kind": "call",
+        "function": "getRuleHash",
+        "args": [],
+        "assignTo": "getRuleHash_result"
+      },
+      {
+        "kind": "call",
+        "function": "getMinimalFixSet",
+        "args": [
+          {
+            "name": "proposals",
+            "type": "RepairProposal[]",
+            "value": "{{proposals}}"
+          }
+        ],
+        "assignTo": "getMinimalFixSet_result"
+      },
+      {
+        "kind": "call",
+        "function": "getStaticScore",
+        "args": [
+          {
+            "name": "funcName",
+            "type": "string",
+            "value": "{{funcName}}"
+          },
+          {
+            "name": "goal",
+            "type": "string",
+            "value": "{{goal}}"
+          }
+        ],
+        "assignTo": "getStaticScore_result"
+      },
+      {
+        "kind": "call",
+        "function": "getTopology",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "getTopology_result"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.getCurrentStates",
+        "args": [],
+        "assignTo": "StateMachineValidator.getCurrentStates_result"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.getNamespaceStates",
+        "args": [
+          {
+            "name": "namespace",
+            "type": "string",
+            "value": "{{namespace}}"
+          }
+        ],
+        "assignTo": "StateMachineValidator.getNamespaceStates_result"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.getTrace",
+        "args": [],
+        "assignTo": "StateMachineValidator.getTrace_result"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.getLedger",
+        "args": [],
+        "assignTo": "StateMachineValidator.getLedger_result"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.getContext",
+        "args": [],
+        "assignTo": "StateMachineValidator.getContext_result"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.getRuleHash",
+        "args": [],
+        "assignTo": "StateMachineValidator.getRuleHash_result"
+      },
+      {
+        "kind": "call",
+        "function": "getFullText",
+        "args": [],
+        "assignTo": "getFullText_result"
+      },
+      {
+        "kind": "call",
+        "function": "getComment",
+        "args": [],
+        "assignTo": "getComment_result"
+      },
+      {
+        "kind": "call",
+        "function": "getElementTypeNode",
+        "args": [],
+        "assignTo": "getElementTypeNode_result"
+      },
+      {
+        "kind": "call",
+        "function": "getTypeNode",
+        "args": [],
+        "assignTo": "getTypeNode_result"
+      },
+      {
+        "kind": "call",
+        "function": "getReturnTypeNode",
+        "args": [],
+        "assignTo": "getReturnTypeNode_result"
+      },
+      {
+        "kind": "call",
+        "function": "getBody",
+        "args": [],
+        "assignTo": "getBody_result"
+      },
+      {
+        "kind": "call",
+        "function": "getClasses",
+        "args": [],
+        "assignTo": "getClasses_result"
+      },
+      {
+        "kind": "call",
+        "function": "getMethods",
+        "args": [],
+        "assignTo": "getMethods_result"
+      },
+      {
+        "kind": "call",
+        "function": "getImportDeclarations",
+        "args": [],
+        "assignTo": "getImportDeclarations_result"
+      },
+      {
+        "kind": "call",
+        "function": "getModuleSpecifierValue",
+        "args": [],
+        "assignTo": "getModuleSpecifierValue_result"
+      },
+      {
+        "kind": "call",
+        "function": "getNamedImports",
+        "args": [],
+        "assignTo": "getNamedImports_result"
+      },
+      {
+        "kind": "call",
+        "function": "getModuleSpecifierSourceFile",
+        "args": [],
+        "assignTo": "getModuleSpecifierSourceFile_result"
+      },
+      {
+        "kind": "call",
+        "function": "getNamespaceImport",
+        "args": [],
+        "assignTo": "getNamespaceImport_result"
+      },
+      {
+        "kind": "call",
+        "function": "getInterfaces",
+        "args": [],
+        "assignTo": "getInterfaces_result"
+      },
+      {
+        "kind": "call",
+        "function": "getTypeAliases",
+        "args": [],
+        "assignTo": "getTypeAliases_result"
+      },
+      {
+        "kind": "call",
+        "function": "getExportedDeclarations",
+        "args": [],
+        "assignTo": "getExportedDeclarations_result"
+      },
+      {
+        "kind": "call",
+        "function": "getTrace",
+        "args": [],
+        "assignTo": "getTrace_result"
+      },
+      {
+        "kind": "call",
+        "function": "getMaskedFuncList",
+        "args": [],
+        "assignTo": "getMaskedFuncList_result"
+      },
+      {
+        "kind": "call",
+        "function": "ActionBuilder.call",
+        "args": [
+          {
+            "name": "func",
+            "type": "string",
+            "value": "{{func}}"
+          },
+          {
+            "name": "args",
+            "type": "any[]",
+            "value": "{{args}}"
+          },
+          {
+            "name": "assignTo",
+            "type": "string",
+            "value": "{{assignTo}}"
+          }
+        ],
+        "assignTo": "ActionBuilder.call_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractDirectCalls",
+        "args": [
+          {
+            "name": "func",
+            "type": "FunctionDeclaration | ArrowFunction",
+            "value": "{{func}}"
+          }
+        ],
+        "assignTo": "extractDirectCalls_result"
+      },
+      {
+        "kind": "call",
+        "function": "verifyAllFingerprints",
+        "args": [
+          {
+            "name": "currentRuleHash",
+            "type": "string",
+            "value": "{{currentRuleHash}}"
+          }
+        ],
+        "assignTo": "verifyAllFingerprints_result"
+      },
+      {
+        "kind": "call",
+        "function": "registerAllMissingFingerprints",
+        "args": [],
+        "assignTo": "registerAllMissingFingerprints_result"
+      },
+      {
+        "kind": "call",
+        "function": "resetCallCount",
+        "args": [],
+        "assignTo": "resetCallCount_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateFallbackPlan",
+        "args": [
+          {
+            "name": "intent",
+            "type": "string",
+            "value": "{{intent}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "generateFallbackPlan_result"
+      },
+      {
+        "kind": "call",
+        "function": "listAllStates",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "{{ledger}}"
+          }
+        ],
+        "assignTo": "listAllStates_result"
+      },
+      {
+        "kind": "call",
+        "function": "countSessionsWithViolations",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": "{{sessions}}"
+          }
+        ],
+        "assignTo": "countSessionsWithViolations_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatSessionSummary",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "ReturnType<typeof getAllSessions>",
+            "value": "{{sessions}}"
+          }
+        ],
+        "assignTo": "formatSessionSummary_result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780509990682",
+    "timestamp": "2026-06-03T18:06:30.682Z"
+  },
+  {
+    "intent": "get all sessions",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780509990676",
+    "timestamp": "2026-06-03T18:06:30.676Z"
+  },
+  {
+    "intent": "get all sessions",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780509989764",
+    "timestamp": "2026-06-03T18:06:29.764Z"
+  },
+  {
+    "intent": "analyze the failure genome statistics and format a comprehensive report with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown ",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getFailureGenome",
+        "args": [],
+        "assignTo": "genome"
+      },
+      {
+        "kind": "call",
+        "function": "failureStats",
+        "args": [],
+        "assignTo": "stats"
+      },
+      {
+        "kind": "call",
+        "function": "formatAuditResult",
+        "args": [
+          {
+            "name": "result",
+            "type": "AuditResult",
+            "value": "genome"
+          }
+        ],
+        "assignTo": "report"
+      },
+      {
+        "kind": "return",
+        "value": "report"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780509989062",
+    "timestamp": "2026-06-03T18:06:29.062Z"
+  },
+  {
+    "intent": "get all sessions",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "return",
+        "value": "sessions"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780509988742",
+    "timestamp": "2026-06-03T18:06:28.742Z"
+  },
+  {
+    "intent": "",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "auditDirectory",
+        "args": [
+          {
+            "name": "dir",
+            "type": "string",
+            "value": null
+          },
+          {
+            "name": "threshold",
+            "type": "any",
+            "value": null
+          }
+        ],
+        "assignTo": "result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780509970308",
+    "timestamp": "2026-06-03T18:06:10.308Z"
+  },
+  {
+    "intent": "get all sessions",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getBranchPath",
+        "args": [
+          {
+            "name": "branch",
+            "type": "Branch",
+            "value": "{{branch}}"
+          },
+          {
+            "name": "allBranches",
+            "type": "Map<string, Branch>",
+            "value": "{{allBranches}}"
+          }
+        ],
+        "assignTo": "getBranchPath_result"
+      },
+      {
+        "kind": "call",
+        "function": "getImportPath",
+        "args": [
+          {
+            "name": "file",
+            "type": "string",
+            "value": "{{file}}"
+          }
+        ],
+        "assignTo": "getImportPath_result"
+      },
+      {
+        "kind": "call",
+        "function": "getExecutionMetrics",
+        "args": [],
+        "assignTo": "getExecutionMetrics_result"
+      },
+      {
+        "kind": "call",
+        "function": "getTypeDetail",
+        "args": [
+          {
+            "name": "typeNode",
+            "type": "any",
+            "value": "{{typeNode}}"
+          }
+        ],
+        "assignTo": "getTypeDetail_result"
+      },
+      {
+        "kind": "call",
+        "function": "getParamType",
+        "args": [
+          {
+            "name": "param",
+            "type": "any",
+            "value": "{{param}}"
+          }
+        ],
+        "assignTo": "getParamType_result"
+      },
+      {
+        "kind": "call",
+        "function": "getParamTypeDetail",
+        "args": [
+          {
+            "name": "param",
+            "type": "any",
+            "value": "{{param}}"
+          }
+        ],
+        "assignTo": "getParamTypeDetail_result"
+      },
+      {
+        "kind": "call",
+        "function": "getReturnType",
+        "args": [
+          {
+            "name": "func",
+            "type": "FunctionDeclaration | ArrowFunction",
+            "value": "{{func}}"
+          }
+        ],
+        "assignTo": "getReturnType_result"
+      },
+      {
+        "kind": "call",
+        "function": "getReturnTypeDetail",
+        "args": [
+          {
+            "name": "func",
+            "type": "FunctionDeclaration | ArrowFunction",
+            "value": "{{func}}"
+          }
+        ],
+        "assignTo": "getReturnTypeDetail_result"
+      },
+      {
+        "kind": "call",
+        "function": "getAllFailures",
+        "args": [],
+        "assignTo": "getAllFailures_result"
+      },
+      {
+        "kind": "call",
+        "function": "getFailuresBySVL",
+        "args": [
+          {
+            "name": "level",
+            "type": "SVL",
+            "value": "{{level}}"
+          }
+        ],
+        "assignTo": "getFailuresBySVL_result"
+      },
+      {
+        "kind": "call",
+        "function": "getTopFailurePatterns",
+        "args": [
+          {
+            "name": "limit",
+            "type": "number",
+            "value": "{{limit}}"
+          }
+        ],
+        "assignTo": "getTopFailurePatterns_result"
+      },
+      {
+        "kind": "call",
+        "function": "getFailureGenome",
+        "args": [],
+        "assignTo": "getFailureGenome_result"
+      },
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "getAllSessions_result"
+      },
+      {
+        "kind": "call",
+        "function": "getLearnedPatterns",
+        "args": [],
+        "assignTo": "getLearnedPatterns_result"
+      },
+      {
+        "kind": "call",
+        "function": "getSemanticHeatmap",
+        "args": [],
+        "assignTo": "getSemanticHeatmap_result"
+      },
+      {
+        "kind": "call",
+        "function": "getAntibodyStats",
+        "args": [],
+        "assignTo": "getAntibodyStats_result"
+      },
+      {
+        "kind": "call",
+        "function": "getFunctionSuccessRate",
+        "args": [
+          {
+            "name": "funcName",
+            "type": "string",
+            "value": "{{funcName}}"
+          }
+        ],
+        "assignTo": "getFunctionSuccessRate_result"
+      },
+      {
+        "kind": "call",
+        "function": "getWeightedSuccessRate",
+        "args": [
+          {
+            "name": "funcName",
+            "type": "string",
+            "value": "{{funcName}}"
+          }
+        ],
+        "assignTo": "getWeightedSuccessRate_result"
+      },
+      {
+        "kind": "call",
+        "function": "getFailureAdjustedCredit",
+        "args": [
+          {
+            "name": "funcName",
+            "type": "string",
+            "value": "{{funcName}}"
+          }
+        ],
+        "assignTo": "getFailureAdjustedCredit_result"
+      },
+      {
+        "kind": "call",
+        "function": "getInstanceId",
+        "args": [],
+        "assignTo": "getInstanceId_result"
+      },
+      {
+        "kind": "call",
+        "function": "getReportCursor",
+        "args": [],
+        "assignTo": "getReportCursor_result"
+      },
+      {
+        "kind": "call",
+        "function": "getFingerprint",
+        "args": [
+          {
+            "name": "sessionId",
+            "type": "string",
+            "value": "{{sessionId}}"
+          }
+        ],
+        "assignTo": "getFingerprint_result"
+      },
+      {
+        "kind": "call",
+        "function": "getFingerprintRegistry",
+        "args": [],
+        "assignTo": "getFingerprintRegistry_result"
+      },
+      {
+        "kind": "call",
+        "function": "getRecentEpisodes",
+        "args": [
+          {
+            "name": "limit",
+            "type": "number",
+            "value": "{{limit}}"
+          }
+        ],
+        "assignTo": "getRecentEpisodes_result"
+      },
+      {
+        "kind": "call",
+        "function": "getSuccessfulEpisodes",
+        "args": [
+          {
+            "name": "limit",
+            "type": "number",
+            "value": "{{limit}}"
+          }
+        ],
+        "assignTo": "getSuccessfulEpisodes_result"
+      },
+      {
+        "kind": "call",
+        "function": "WorkMemory.getIntent",
+        "args": [],
+        "assignTo": "WorkMemory.getIntent_result"
+      },
+      {
+        "kind": "call",
+        "function": "WorkMemory.get",
+        "args": [
+          {
+            "name": "name",
+            "type": "string",
+            "value": "{{name}}"
+          }
+        ],
+        "assignTo": "WorkMemory.get_result"
+      },
+      {
+        "kind": "call",
+        "function": "getSessionTransitions",
+        "args": [
+          {
+            "name": "session",
+            "type": "any",
+            "value": "{{session}}"
+          }
+        ],
+        "assignTo": "getSessionTransitions_result"
+      },
+      {
+        "kind": "call",
+        "function": "getProtocolConfig",
+        "args": [],
+        "assignTo": "getProtocolConfig_result"
+      },
+      {
+        "kind": "call",
+        "function": "getNsInit",
+        "args": [],
+        "assignTo": "getNsInit_result"
+      },
+      {
+        "kind": "call",
+        "function": "getRuleHash",
+        "args": [],
+        "assignTo": "getRuleHash_result"
+      },
+      {
+        "kind": "call",
+        "function": "getMinimalFixSet",
+        "args": [
+          {
+            "name": "proposals",
+            "type": "RepairProposal[]",
+            "value": "{{proposals}}"
+          }
+        ],
+        "assignTo": "getMinimalFixSet_result"
+      },
+      {
+        "kind": "call",
+        "function": "getStaticScore",
+        "args": [
+          {
+            "name": "funcName",
+            "type": "string",
+            "value": "{{funcName}}"
+          },
+          {
+            "name": "goal",
+            "type": "string",
+            "value": "{{goal}}"
+          }
+        ],
+        "assignTo": "getStaticScore_result"
+      },
+      {
+        "kind": "call",
+        "function": "getTopology",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "getTopology_result"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.getCurrentStates",
+        "args": [],
+        "assignTo": "StateMachineValidator.getCurrentStates_result"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.getNamespaceStates",
+        "args": [
+          {
+            "name": "namespace",
+            "type": "string",
+            "value": "{{namespace}}"
+          }
+        ],
+        "assignTo": "StateMachineValidator.getNamespaceStates_result"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.getTrace",
+        "args": [],
+        "assignTo": "StateMachineValidator.getTrace_result"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.getLedger",
+        "args": [],
+        "assignTo": "StateMachineValidator.getLedger_result"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.getContext",
+        "args": [],
+        "assignTo": "StateMachineValidator.getContext_result"
+      },
+      {
+        "kind": "call",
+        "function": "StateMachineValidator.getRuleHash",
+        "args": [],
+        "assignTo": "StateMachineValidator.getRuleHash_result"
+      },
+      {
+        "kind": "call",
+        "function": "getFullText",
+        "args": [],
+        "assignTo": "getFullText_result"
+      },
+      {
+        "kind": "call",
+        "function": "getComment",
+        "args": [],
+        "assignTo": "getComment_result"
+      },
+      {
+        "kind": "call",
+        "function": "getElementTypeNode",
+        "args": [],
+        "assignTo": "getElementTypeNode_result"
+      },
+      {
+        "kind": "call",
+        "function": "getTypeNode",
+        "args": [],
+        "assignTo": "getTypeNode_result"
+      },
+      {
+        "kind": "call",
+        "function": "getReturnTypeNode",
+        "args": [],
+        "assignTo": "getReturnTypeNode_result"
+      },
+      {
+        "kind": "call",
+        "function": "getBody",
+        "args": [],
+        "assignTo": "getBody_result"
+      },
+      {
+        "kind": "call",
+        "function": "getClasses",
+        "args": [],
+        "assignTo": "getClasses_result"
+      },
+      {
+        "kind": "call",
+        "function": "getMethods",
+        "args": [],
+        "assignTo": "getMethods_result"
+      },
+      {
+        "kind": "call",
+        "function": "getImportDeclarations",
+        "args": [],
+        "assignTo": "getImportDeclarations_result"
+      },
+      {
+        "kind": "call",
+        "function": "getModuleSpecifierValue",
+        "args": [],
+        "assignTo": "getModuleSpecifierValue_result"
+      },
+      {
+        "kind": "call",
+        "function": "getNamedImports",
+        "args": [],
+        "assignTo": "getNamedImports_result"
+      },
+      {
+        "kind": "call",
+        "function": "getModuleSpecifierSourceFile",
+        "args": [],
+        "assignTo": "getModuleSpecifierSourceFile_result"
+      },
+      {
+        "kind": "call",
+        "function": "getNamespaceImport",
+        "args": [],
+        "assignTo": "getNamespaceImport_result"
+      },
+      {
+        "kind": "call",
+        "function": "getInterfaces",
+        "args": [],
+        "assignTo": "getInterfaces_result"
+      },
+      {
+        "kind": "call",
+        "function": "getTypeAliases",
+        "args": [],
+        "assignTo": "getTypeAliases_result"
+      },
+      {
+        "kind": "call",
+        "function": "getExportedDeclarations",
+        "args": [],
+        "assignTo": "getExportedDeclarations_result"
+      },
+      {
+        "kind": "call",
+        "function": "getTrace",
+        "args": [],
+        "assignTo": "getTrace_result"
+      },
+      {
+        "kind": "call",
+        "function": "getMaskedFuncList",
+        "args": [],
+        "assignTo": "getMaskedFuncList_result"
+      },
+      {
+        "kind": "call",
+        "function": "ActionBuilder.call",
+        "args": [
+          {
+            "name": "func",
+            "type": "string",
+            "value": "{{func}}"
+          },
+          {
+            "name": "args",
+            "type": "any[]",
+            "value": "{{args}}"
+          },
+          {
+            "name": "assignTo",
+            "type": "string",
+            "value": "{{assignTo}}"
+          }
+        ],
+        "assignTo": "ActionBuilder.call_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractDirectCalls",
+        "args": [
+          {
+            "name": "func",
+            "type": "FunctionDeclaration | ArrowFunction",
+            "value": "{{func}}"
+          }
+        ],
+        "assignTo": "extractDirectCalls_result"
+      },
+      {
+        "kind": "call",
+        "function": "verifyAllFingerprints",
+        "args": [
+          {
+            "name": "currentRuleHash",
+            "type": "string",
+            "value": "{{currentRuleHash}}"
+          }
+        ],
+        "assignTo": "verifyAllFingerprints_result"
+      },
+      {
+        "kind": "call",
+        "function": "registerAllMissingFingerprints",
+        "args": [],
+        "assignTo": "registerAllMissingFingerprints_result"
+      },
+      {
+        "kind": "call",
+        "function": "resetCallCount",
+        "args": [],
+        "assignTo": "resetCallCount_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateFallbackPlan",
+        "args": [
+          {
+            "name": "intent",
+            "type": "string",
+            "value": "{{intent}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "generateFallbackPlan_result"
+      },
+      {
+        "kind": "call",
+        "function": "listAllStates",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "{{ledger}}"
+          }
+        ],
+        "assignTo": "listAllStates_result"
+      },
+      {
+        "kind": "call",
+        "function": "countSessionsWithViolations",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": "{{sessions}}"
+          }
+        ],
+        "assignTo": "countSessionsWithViolations_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatSessionSummary",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "ReturnType<typeof getAllSessions>",
+            "value": "{{sessions}}"
+          }
+        ],
+        "assignTo": "formatSessionSummary_result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780509969658",
+    "timestamp": "2026-06-03T18:06:09.658Z"
+  },
+  {
+    "intent": "get all sessions",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780509969653",
+    "timestamp": "2026-06-03T18:06:09.653Z"
+  },
+  {
+    "intent": "get all sessions",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780509968439",
+    "timestamp": "2026-06-03T18:06:08.439Z"
+  },
+  {
+    "intent": "analyze the failure genome statistics and format a comprehensive report with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown ",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getFailureGenome",
+        "args": [],
+        "assignTo": "genome"
+      },
+      {
+        "kind": "call",
+        "function": "failureStats",
+        "args": [],
+        "assignTo": "stats"
+      },
+      {
+        "kind": "call",
+        "function": "formatAuditResult",
+        "args": [
+          {
+            "name": "result",
+            "type": "AuditResult",
+            "value": "genome"
+          }
+        ],
+        "assignTo": "report"
+      },
+      {
+        "kind": "return",
+        "value": "report"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780509968113",
+    "timestamp": "2026-06-03T18:06:08.113Z"
+  },
+  {
+    "intent": "get all sessions",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "return",
+        "value": "sessions"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780509967507",
+    "timestamp": "2026-06-03T18:06:07.507Z"
+  },
+  {
+    "intent": "check if a string is a valid email address",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "isValidEmail",
+        "args": [
+          {
+            "name": "str",
+            "type": "string",
+            "value": null
+          }
+        ],
+        "assignTo": "str"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780481523434",
+    "timestamp": "2026-06-03T10:12:03.434Z"
+  },
+  {
     "intent": "validate a semantic version string and return its major, minor, and patch components",
     "actions": [
       {
@@ -1821,409 +3267,5 @@
     "success": true,
     "id": "ep_1780479439659",
     "timestamp": "2026-06-03T09:37:19.659Z"
-  },
-  {
-    "intent": "round a number to a specified number of decimal places",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "roundTo",
-        "args": [
-          {
-            "name": "num",
-            "type": "number",
-            "value": 0
-          },
-          {
-            "name": "decimals",
-            "type": "number",
-            "value": 0
-          }
-        ],
-        "assignTo": "rounded"
-      },
-      {
-        "kind": "return",
-        "value": "rounded"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780479414384",
-    "timestamp": "2026-06-03T09:36:54.384Z"
-  },
-  {
-    "intent": "calculate the average of an array of numbers",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "average",
-        "args": [
-          {
-            "name": "nums",
-            "type": "number[]",
-            "value": []
-          }
-        ],
-        "assignTo": "avg"
-      },
-      {
-        "kind": "return",
-        "value": "avg"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780479385379",
-    "timestamp": "2026-06-03T09:36:25.379Z"
-  },
-  {
-    "intent": "find the difference between two arrays, elements in A not in B",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "arrayDiff",
-        "args": [
-          {
-            "name": "a",
-            "type": "T[]",
-            "value": []
-          },
-          {
-            "name": "b",
-            "type": "T[]",
-            "value": []
-          }
-        ],
-        "assignTo": "diff"
-      },
-      {
-        "kind": "return",
-        "value": "diff"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780479350309",
-    "timestamp": "2026-06-03T09:35:50.309Z"
-  },
-  {
-    "intent": "merge two sorted arrays into one sorted array",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "arrayDiff",
-        "args": [
-          {
-            "name": "a",
-            "type": "T[]",
-            "value": []
-          },
-          {
-            "name": "b",
-            "type": "T[]",
-            "value": []
-          }
-        ],
-        "assignTo": "diff"
-      },
-      {
-        "kind": "call",
-        "function": "unique",
-        "args": [
-          {
-            "name": "arr",
-            "type": "T[]",
-            "value": "diff"
-          }
-        ],
-        "assignTo": "uniqueDiff"
-      },
-      {
-        "kind": "return",
-        "value": "uniqueDiff"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780479314645",
-    "timestamp": "2026-06-03T09:35:14.645Z"
-  },
-  {
-    "intent": "split an array into chunks of a specified size",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "chunk",
-        "args": [
-          {
-            "name": "arr",
-            "type": "T[]",
-            "value": []
-          },
-          {
-            "name": "size",
-            "type": "number",
-            "value": 0
-          }
-        ],
-        "assignTo": "chunks"
-      },
-      {
-        "kind": "return",
-        "value": "chunks"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780479290316",
-    "timestamp": "2026-06-03T09:34:50.316Z"
-  },
-  {
-    "intent": "remove duplicate values from an array",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "unique",
-        "args": [
-          {
-            "name": "arr",
-            "type": "T[]",
-            "value": []
-          }
-        ],
-        "assignTo": "uniqueResult"
-      },
-      {
-        "kind": "return",
-        "value": "uniqueResult"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780479267213",
-    "timestamp": "2026-06-03T09:34:27.213Z"
-  },
-  {
-    "intent": "find the most frequently occurring element in an array",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "arrayDiff",
-        "args": [
-          {
-            "name": "a",
-            "type": "T[]",
-            "value": []
-          },
-          {
-            "name": "b",
-            "type": "T[]",
-            "value": []
-          }
-        ],
-        "assignTo": "diff"
-      },
-      {
-        "kind": "call",
-        "function": "mostFrequent",
-        "args": [
-          {
-            "name": "arr",
-            "type": "T[]",
-            "value": "diff"
-          }
-        ],
-        "assignTo": "result"
-      },
-      {
-        "kind": "return",
-        "value": "result"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780479242939",
-    "timestamp": "2026-06-03T09:34:02.939Z"
-  },
-  {
-    "intent": "parse a JSON string safely, returning a default if it fails",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "parseActionJSON",
-        "args": [
-          {
-            "name": "text",
-            "type": "string",
-            "value": ""
-          }
-        ],
-        "assignTo": "parsed"
-      },
-      {
-        "kind": "return",
-        "value": "parsed"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780479216328",
-    "timestamp": "2026-06-03T09:33:36.328Z"
-  },
-  {
-    "intent": "convert a camelCase string to snake_case",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "camelToSnake",
-        "args": [
-          {
-            "name": "str",
-            "type": "string",
-            "value": ""
-          }
-        ],
-        "assignTo": "result"
-      },
-      {
-        "kind": "return",
-        "value": "result"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780479180634",
-    "timestamp": "2026-06-03T09:33:00.634Z"
-  },
-  {
-    "intent": "remove all whitespace from a string",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "removeWhitespace",
-        "args": [
-          {
-            "name": "str",
-            "type": "string",
-            "value": ""
-          }
-        ],
-        "assignTo": "cleaned"
-      },
-      {
-        "kind": "return",
-        "value": "cleaned"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780479154476",
-    "timestamp": "2026-06-03T09:32:34.476Z"
-  },
-  {
-    "intent": "generate a random string of a specified length using letters and numbers",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "randomInt",
-        "args": [
-          {
-            "name": "min",
-            "type": "number",
-            "value": 8
-          },
-          {
-            "name": "max",
-            "type": "number",
-            "value": 16
-          }
-        ],
-        "assignTo": "len"
-      },
-      {
-        "kind": "call",
-        "function": "String",
-        "args": [],
-        "assignTo": "chars"
-      },
-      {
-        "kind": "call",
-        "function": "randomInt",
-        "args": [
-          {
-            "name": "min",
-            "type": "number",
-            "value": 0
-          },
-          {
-            "name": "max",
-            "type": "number",
-            "value": 35
-          }
-        ],
-        "assignTo": "idx"
-      },
-      {
-        "kind": "return",
-        "value": "chars"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780479123710",
-    "timestamp": "2026-06-03T09:32:03.710Z"
-  },
-  {
-    "intent": "count how many times a substring appears in a larger string",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "countSubstring",
-        "args": [
-          {
-            "name": "str",
-            "type": "string",
-            "value": ""
-          },
-          {
-            "name": "sub",
-            "type": "string",
-            "value": ""
-          }
-        ],
-        "assignTo": "result"
-      },
-      {
-        "kind": "return",
-        "value": "result"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780479098161",
-    "timestamp": "2026-06-03T09:31:38.161Z"
-  },
-  {
-    "intent": "truncate a long string to a maximum length and add ellipsis",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "truncate",
-        "args": [
-          {
-            "name": "str",
-            "type": "string",
-            "value": ""
-          },
-          {
-            "name": "maxLen",
-            "type": "number",
-            "value": 0
-          },
-          {
-            "name": "ellipsis",
-            "type": "any",
-            "value": ""
-          }
-        ],
-        "assignTo": "truncated"
-      },
-      {
-        "kind": "return",
-        "value": "truncated"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780479070033",
-    "timestamp": "2026-06-03T09:31:10.033Z"
   }
 ]

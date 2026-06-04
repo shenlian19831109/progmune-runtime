@@ -36,6 +36,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.benchmarkPassRate = benchmarkPassRate;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
+/**
+ * Calculate pass rate from the latest benchmark results file.
+ * @requires BENCHMARK_TASKS @produces PASS_RATE_DATA
+ * @purpose Compute pass/fail statistics from benchmark results
+ * @tags benchmark, statistics, analysis
+ * @useWhen evaluating benchmark quality
+ */
 function benchmarkPassRate() {
     const resultsDir = path.resolve(process.cwd(), "bench");
     if (!fs.existsSync(resultsDir))

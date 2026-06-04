@@ -34,11 +34,16 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadBenchmarks = loadBenchmarks;
-/** Load benchmark tasks from bench/tasks.json
- * @protocol pre_states=[] post_states=["BENCHMARKS_LOADED"]
- */
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
+/**
+ * Load benchmark tasks from bench/tasks.json.
+ * @requires BENCH_DIR @produces BENCHMARK_TASKS
+ * @purpose Load benchmark task definitions for execution
+ * @tags benchmark, load, data
+ * @useWhen running benchmarks, generating benchmark reports
+ * @protocol pre_states=[] post_states=["BENCHMARKS_LOADED"]
+ */
 function loadBenchmarks() {
     const tasksPath = path.resolve(process.cwd(), "bench/tasks.json");
     if (!fs.existsSync(tasksPath))

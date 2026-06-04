@@ -132,15 +132,52 @@ function saveSemantic(templates) {
 }
 export function consolidateSemantic(minOccurrences = 3) {
     const episodes = getSuccessfulEpisodes(MAX_EPISODES);
+    // Extract the first 3 meaningful keywords as the grouping key
+    // (replaces fragile 20-char prefix — two intents with the same first
+    //  3 keywords are far more likely to be semantically similar)
+    function keywordKey(intent) {
+        const words = intent
+            .toLowerCase()
+            .split(/[\s,，、。！？：；]+/)
+            .filter(w => w.length > 2 && !["the", "and", "for", "with", "from", "that", "this"].includes(w));
+        return words.slice(0, 3).join("|");
+    }
+    // Group episodes by keyword key
     const grouped = new Map();
     for (const ep of episodes) {
-        const pattern = ep.intent.substring(0, 20);
-        if (!grouped.has(pattern))
-            grouped.set(pattern, []);
-        grouped.get(pattern).push(ep);
+        const key = keywordKey(ep.intent);
+        if (!key)
+            continue; // skip intents too short to produce keywords
+        if (!grouped.has(key))
+            grouped.set(key, []);
+        grouped.get(key).push(ep);
+    }
+    // Merge small groups into larger ones by Jaccard overlap
+    const keys = [...grouped.keys()];
+    const merged = new Map();
+    const processed = new Set();
+    for (const k of keys) {
+        if (processed.has(k))
+            continue;
+        const cluster = [...grouped.get(k)];
+        processed.add(k);
+        // Find nearby groups with high keyword overlap
+        for (const other of keys) {
+            if (processed.has(other))
+                continue;
+            const kWords = new Set(k.split("|").filter(w => w.length > 0));
+            const oWords = new Set(other.split("|").filter(w => w.length > 0));
+            const intersection = [...kWords].filter(w => oWords.has(w)).length;
+            const union = new Set([...kWords, ...oWords]).size;
+            if (union > 0 && intersection / union >= 0.5) {
+                cluster.push(...grouped.get(other));
+                processed.add(other);
+            }
+        }
+        merged.set(k, cluster);
     }
     const templates = loadSemantic();
-    for (const [pattern, eps] of grouped) {
+    for (const [pattern, eps] of merged) {
         if (eps.length >= minOccurrences) {
             const existing = templates.find(t => t.intentPattern === pattern);
             if (existing) {

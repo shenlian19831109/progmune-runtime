@@ -11,6 +11,8 @@
     "ExecuteResult": "src/execute.ts",
     "GenerationRecord": "src/execute.ts",
     "ExecutionMetrics": "src/execute.ts",
+    "ParamInfo": "src/extract-ir.ts",
+    "FunctionInfo": "src/extract-ir.ts",
     "FailureRecord": "src/failure-corpus.ts",
     "RootCause": "src/failure-collector.ts",
     "IntentSession": "src/failure-corpus.ts",
@@ -23,6 +25,7 @@
     "FingerprintVerifyResult": "src/ledger-registry.ts",
     "RegistrySummary": "src/ledger-registry.ts",
     "BenchTask": "src/load-benchmarks.ts",
+    "Logger": "src/logger.ts",
     "Episode": "src/memory-layer.ts",
     "SemanticTemplate": "src/memory-layer.ts",
     "PlanResult": "src/planner.ts",
@@ -30,11 +33,15 @@
     "RepairProposal": "src/repair-proposal.ts",
     "RepairSummary": "src/repair-proposal.ts",
     "RepairStrategy": "src/repair-proposal.ts",
+    "ValidationError": "src/runtime-types.ts",
     "ConstraintViolation": "src/runtime-types.ts",
     "StateTransition": "src/runtime-types.ts",
     "AntibodyHit": "src/runtime-types.ts",
     "Attempt": "src/runtime-types.ts",
     "ExecutionSession": "src/runtime-types.ts",
+    "Ok": "src/runtime-types.ts",
+    "Err": "src/runtime-types.ts",
+    "Result": "src/runtime-types.ts",
     "Action": "src/runtime-types.ts",
     "Arg": "src/runtime-types.ts",
     "IRFunctionSnapshot": "src/semantic-snapshot.ts",
@@ -66,6 +73,13 @@
       "outputs": [],
       "tags": [
         "stats"
+      ],
+      "purpose": "main",
+      "requires": [
+        "ANTIBODY_DATA"
+      ],
+      "produces": [
+        "ANTIBODY_STATS"
       ]
     },
     {
@@ -101,7 +115,8 @@
       "tags": [
         "action",
         "runtime"
-      ]
+      ],
+      "purpose": "execute action code"
     },
     {
       "name": "ActionBuilder.call",
@@ -130,7 +145,8 @@
       "tags": [
         "action",
         "runtime"
-      ]
+      ],
+      "purpose": "action builder.call"
     },
     {
       "name": "ActionBuilder.ifBlock",
@@ -154,7 +170,8 @@
       "tags": [
         "action",
         "runtime"
-      ]
+      ],
+      "purpose": "action builder.if block"
     },
     {
       "name": "ActionBuilder.ifElse",
@@ -183,7 +200,8 @@
       "tags": [
         "action",
         "runtime"
-      ]
+      ],
+      "purpose": "action builder.if else"
     },
     {
       "name": "ActionBuilder.assign",
@@ -207,7 +225,8 @@
       "tags": [
         "action",
         "runtime"
-      ]
+      ],
+      "purpose": "action builder.assign"
     },
     {
       "name": "ActionBuilder.output",
@@ -226,7 +245,8 @@
       "tags": [
         "action",
         "runtime"
-      ]
+      ],
+      "purpose": "action builder.output"
     },
     {
       "name": "auditDirectory",
@@ -317,6 +337,10 @@
       "outputs": [],
       "tags": [
         "audit"
+      ],
+      "purpose": "scan dir",
+      "produces": [
+        "EXTRACTED"
       ]
     },
     {
@@ -380,10 +404,18 @@
       "outputs": [
         "number"
       ],
+      "requires": [
+        "BENCHMARK_TASKS"
+      ],
+      "produces": [
+        "TASK_COUNT"
+      ],
       "tags": [
         "benchmark",
-        "count"
-      ]
+        "count",
+        "statistics"
+      ],
+      "purpose": "benchmark count"
     },
     {
       "name": "main",
@@ -403,6 +435,13 @@
       "tags": [
         "benchmark",
         "full"
+      ],
+      "purpose": "main",
+      "requires": [
+        "BENCH_DIR"
+      ],
+      "produces": [
+        "BENCHMARK_TASKS"
       ]
     },
     {
@@ -428,10 +467,20 @@
       "outputs": [
         "{ total: number; passed: number; rate: number }"
       ],
+      "purpose": "Calculate pass rate from the latest benchmark results file.",
+      "requires": [
+        "BENCHMARK_TASKS"
+      ],
+      "produces": [
+        "PASS_RATE_DATA"
+      ],
       "tags": [
         "benchmark",
-        "pass",
-        "rate"
+        "statistics",
+        "analysis"
+      ],
+      "useWhen": [
+        "evaluating benchmark quality"
       ]
     },
     {
@@ -460,9 +509,28 @@
       "outputs": [
         "string"
       ],
+      "protocol": {
+        "pre_states": [
+          "BENCHMARKS_LOADED"
+        ],
+        "post_states": [
+          "REPORT_FORMATTED"
+        ]
+      },
+      "purpose": "Format benchmark results as a readable report.",
+      "requires": [
+        "PASS_RATE_DATA"
+      ],
+      "produces": [
+        "BENCHMARK_REPORT"
+      ],
       "tags": [
         "benchmark",
-        "report"
+        "report",
+        "formatting"
+      ],
+      "useWhen": [
+        "generating benchmark reports"
       ]
     },
     {
@@ -492,10 +560,17 @@
       "outputs": [
         "string"
       ],
+      "requires": [
+        "BENCHMARK_RESULT"
+      ],
+      "produces": [
+        "SAVED_FILE_PATH"
+      ],
       "tags": [
         "benchmark",
         "save"
-      ]
+      ],
+      "purpose": "benchmark save"
     },
     {
       "name": "benchmarkLoadLatest",
@@ -518,10 +593,18 @@
       "exported": true,
       "inputs": [],
       "outputs": [],
+      "requires": [
+        "BENCH_DIR"
+      ],
+      "produces": [
+        "BENCHMARK_RESULT"
+      ],
       "tags": [
         "benchmark",
-        "save"
-      ]
+        "load",
+        "data"
+      ],
+      "purpose": "benchmark load latest"
     },
     {
       "name": "main",
@@ -540,6 +623,13 @@
       "tags": [
         "benchmark",
         "status"
+      ],
+      "purpose": "main",
+      "requires": [
+        "BENCH_DIR"
+      ],
+      "produces": [
+        "BENCHMARK_TASKS"
       ]
     },
     {
@@ -1185,6 +1275,13 @@
       "tags": [
         "branch",
         "ledger"
+      ],
+      "purpose": "find successful leaf",
+      "produces": [
+        "DATA"
+      ],
+      "requires": [
+        "PARENT_BRANCH"
       ]
     },
     {
@@ -1212,7 +1309,8 @@
       "outputs": [],
       "tags": [
         "check"
-      ]
+      ],
+      "purpose": "step"
     },
     {
       "name": "pass",
@@ -1237,7 +1335,8 @@
       "outputs": [],
       "tags": [
         "check"
-      ]
+      ],
+      "purpose": "pass"
     },
     {
       "name": "fail",
@@ -1262,7 +1361,8 @@
       "outputs": [],
       "tags": [
         "check"
-      ]
+      ],
+      "purpose": "fail"
     },
     {
       "name": "warn",
@@ -1287,7 +1387,8 @@
       "outputs": [],
       "tags": [
         "check"
-      ]
+      ],
+      "purpose": "warn"
     },
     {
       "name": "G",
@@ -1305,7 +1406,8 @@
       "calls": [],
       "tags": [
         "check"
-      ]
+      ],
+      "purpose": "g"
     },
     {
       "name": "R",
@@ -1323,7 +1425,8 @@
       "calls": [],
       "tags": [
         "check"
-      ]
+      ],
+      "purpose": "r"
     },
     {
       "name": "Y",
@@ -1341,7 +1444,8 @@
       "calls": [],
       "tags": [
         "check"
-      ]
+      ],
+      "purpose": "y"
     },
     {
       "name": "C_",
@@ -1359,7 +1463,8 @@
       "calls": [],
       "tags": [
         "check"
-      ]
+      ],
+      "purpose": "c"
     },
     {
       "name": "D",
@@ -1377,7 +1482,8 @@
       "calls": [],
       "tags": [
         "check"
-      ]
+      ],
+      "purpose": "d"
     },
     {
       "name": "B",
@@ -1395,6 +1501,226 @@
       "calls": [],
       "tags": [
         "check"
+      ],
+      "purpose": "b"
+    },
+    {
+      "name": "humanize",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/derive-metadata.ts",
+      "calls": [
+        "toLowerCase",
+        "trim",
+        "replace"
+      ],
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Humanize a camelCase/PascalCase function name into a readable purpose. /",
+      "tags": [
+        "derive",
+        "metadata"
+      ]
+    },
+    {
+      "name": "inferTags",
+      "params": [
+        {
+          "name": "filePath",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string[]",
+      "returnTypeDetail": "string[]",
+      "file": "src/derive-metadata.ts",
+      "calls": [
+        "replace",
+        "dirname",
+        "filter",
+        "split"
+      ],
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Infer tags from file path. /",
+      "tags": [
+        "derive",
+        "metadata"
+      ]
+    },
+    {
+      "name": "parseProtocolAnnotation",
+      "params": [
+        {
+          "name": "source",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "{ pre: string[]; post: string[] } | null",
+      "returnTypeDetail": "{ pre: string[]; post: string[] } | null",
+      "file": "src/derive-metadata.ts",
+      "calls": [
+        "match",
+        "filter",
+        "map",
+        "split"
+      ],
+      "exported": false,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "{ pre: string[]; post: string[] }"
+      ],
+      "purpose": "Parse",
+      "tags": [
+        "derive",
+        "metadata"
+      ],
+      "produces": [
+        "EXTRACTED"
+      ]
+    },
+    {
+      "name": "deriveMetadata",
+      "params": [
+        {
+          "name": "srcDir",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "DerivedMeta[]",
+      "returnTypeDetail": "DerivedMeta[]",
+      "file": "src/derive-metadata.ts",
+      "calls": [
+        "walk"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "DerivedMeta"
+      ],
+      "purpose": "Scan source files and auto-derive capability metadata for functions that lack it. /",
+      "tags": [
+        "derive",
+        "metadata"
+      ]
+    },
+    {
+      "name": "processFile",
+      "params": [
+        {
+          "name": "filePath",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "source",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "results",
+          "type": "DerivedMeta[]",
+          "typeDetail": "DerivedMeta[]"
+        }
+      ],
+      "returnType": "any",
+      "returnTypeDetail": "",
+      "file": "src/derive-metadata.ts",
+      "calls": [
+        "exec",
+        "slice",
+        "match",
+        "filter",
+        "map",
+        "split",
+        "find",
+        "push",
+        "humanize",
+        "inferTags",
+        "trim",
+        "replace",
+        "includes"
+      ],
+      "exported": false,
+      "inputs": [
+        "string",
+        "string",
+        "DerivedMeta"
+      ],
+      "outputs": [],
+      "tags": [
+        "derive",
+        "metadata"
+      ],
+      "purpose": "process file"
+    },
+    {
+      "name": "applyDerivedMetadata",
+      "params": [
+        {
+          "name": "dryRun",
+          "type": "boolean",
+          "typeDetail": "boolean"
+        }
+      ],
+      "returnType": "{ updated: number; skipped: number }",
+      "returnTypeDetail": "{ updated: number; skipped: number }",
+      "file": "src/derive-metadata.ts",
+      "calls": [
+        "deriveMetadata",
+        "existsSync",
+        "readFileSync",
+        "exec",
+        "includes",
+        "replace",
+        "join",
+        "writeFileSync"
+      ],
+      "exported": true,
+      "inputs": [
+        "boolean"
+      ],
+      "outputs": [
+        "{ updated: number; skipped: number }"
+      ],
+      "purpose": "Apply derived metadata back to source files. Inserts",
+      "requires": [
+        "/@produces/@purpose/@tags",
+        "tags",
+        "into",
+        "existing",
+        "JSDoc",
+        "comments."
+      ],
+      "tags": [
+        "derive",
+        "metadata"
+      ],
+      "produces": [
+        "EXECUTED"
       ]
     },
     {
@@ -1617,7 +1943,8 @@
       "tags": [
         "deterministic",
         "replay"
-      ]
+      ],
+      "purpose": "deep equal snapshots"
     },
     {
       "name": "normalizeTypeName",
@@ -1676,6 +2003,10 @@
       ],
       "tags": [
         "emitter"
+      ],
+      "purpose": "get import path",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -1767,6 +2098,10 @@
       ],
       "tags": [
         "execute"
+      ],
+      "purpose": "load metrics",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -1794,6 +2129,13 @@
       "outputs": [],
       "tags": [
         "execute"
+      ],
+      "purpose": "save metrics",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "SAVED"
       ]
     },
     {
@@ -2030,6 +2372,10 @@
       "tags": [
         "extract",
         "python"
+      ],
+      "purpose": "extract i r python",
+      "produces": [
+        "EXTRACTED"
       ]
     },
     {
@@ -2133,6 +2479,9 @@
       "purpose": "从 JSDoc 注释中解析",
       "tags": [
         "extract"
+      ],
+      "produces": [
+        "EXTRACTED"
       ]
     },
     {
@@ -2167,6 +2516,10 @@
       ],
       "tags": [
         "extract"
+      ],
+      "purpose": "get type detail",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -2192,6 +2545,10 @@
       ],
       "tags": [
         "extract"
+      ],
+      "purpose": "get param type",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -2217,6 +2574,10 @@
       ],
       "tags": [
         "extract"
+      ],
+      "purpose": "get param type detail",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -2244,6 +2605,10 @@
       ],
       "tags": [
         "extract"
+      ],
+      "purpose": "get return type",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -2271,6 +2636,10 @@
       ],
       "tags": [
         "extract"
+      ],
+      "purpose": "get return type detail",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -2353,6 +2722,10 @@
       ],
       "tags": [
         "extract"
+      ],
+      "purpose": "extract direct calls",
+      "produces": [
+        "EXTRACTED"
       ]
     },
     {
@@ -2462,7 +2835,13 @@
         "error",
         "deriveTagsFromFile",
         "getInterfaces",
-        "getTypeAliases"
+        "getTypeAliases",
+        "toLowerCase",
+        "trim",
+        "replace",
+        "split",
+        "filter",
+        "test"
       ],
       "exported": true,
       "inputs": [
@@ -2525,6 +2904,9 @@
       "purpose": "Extract function signature from a resolved ts-morph source file. */",
       "tags": [
         "extract"
+      ],
+      "produces": [
+        "EXTRACTED"
       ]
     },
     {
@@ -2565,6 +2947,9 @@
       "purpose": "Extract function signature from a .d.ts file using ts-morph. */",
       "tags": [
         "extract"
+      ],
+      "produces": [
+        "EXTRACTED"
       ]
     },
     {
@@ -2819,7 +3204,8 @@
       "tags": [
         "failure",
         "corpus"
-      ]
+      ],
+      "purpose": "ensure dir"
     },
     {
       "name": "checkpointPath",
@@ -2850,6 +3236,13 @@
       "tags": [
         "failure",
         "corpus"
+      ],
+      "purpose": "checkpoint path",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "VALIDATION_RESULT"
       ]
     },
     {
@@ -2886,6 +3279,12 @@
       "tags": [
         "failure",
         "corpus"
+      ],
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "SAVED"
       ]
     },
     {
@@ -2916,6 +3315,12 @@
       "tags": [
         "failure",
         "corpus"
+      ],
+      "produces": [
+        "DATA"
+      ],
+      "requires": [
+        "DATA"
       ]
     },
     {
@@ -2943,6 +3348,12 @@
       "tags": [
         "failure",
         "corpus"
+      ],
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "DELETED"
       ]
     },
     {
@@ -3059,7 +3470,8 @@
       "tags": [
         "failure",
         "corpus"
-      ]
+      ],
+      "purpose": "get all failures"
     },
     {
       "name": "getFailuresBySVL",
@@ -3093,7 +3505,8 @@
       "tags": [
         "failure",
         "corpus"
-      ]
+      ],
+      "purpose": "get failures by s v l"
     },
     {
       "name": "getTopFailurePatterns",
@@ -3133,7 +3546,8 @@
       "tags": [
         "failure",
         "corpus"
-      ]
+      ],
+      "purpose": "get top failure patterns"
     },
     {
       "name": "getFailureGenome",
@@ -3318,6 +3732,10 @@
       "tags": [
         "failure",
         "corpus"
+      ],
+      "purpose": "compute a c l",
+      "produces": [
+        "RESULT"
       ]
     },
     {
@@ -3506,6 +3924,12 @@
       "tags": [
         "failure",
         "corpus"
+      ],
+      "produces": [
+        "CREATED"
+      ],
+      "requires": [
+        "FAILURE_DATA"
       ]
     },
     {
@@ -3522,6 +3946,13 @@
       "outputs": [],
       "tags": [
         "failures"
+      ],
+      "purpose": "main",
+      "requires": [
+        "FAILURE_CORPUS"
+      ],
+      "produces": [
+        "FAILURE_LIST"
       ]
     },
     {
@@ -3548,7 +3979,8 @@
       ],
       "tags": [
         "feedback"
-      ]
+      ],
+      "purpose": "load feedback"
     },
     {
       "name": "saveFeedback",
@@ -3578,7 +4010,8 @@
       ],
       "tags": [
         "feedback"
-      ]
+      ],
+      "purpose": "save feedback"
     },
     {
       "name": "getFunctionSuccessRate",
@@ -3618,7 +4051,8 @@
       ],
       "tags": [
         "feedback"
-      ]
+      ],
+      "purpose": "get function success rate"
     },
     {
       "name": "getWeightedSuccessRate",
@@ -3665,7 +4099,8 @@
       ],
       "tags": [
         "feedback"
-      ]
+      ],
+      "purpose": "get weighted success rate"
     },
     {
       "name": "getFailureAdjustedCredit",
@@ -3703,22 +4138,73 @@
         "adjusted",
         "by",
         "failure",
-        "severity.",
+        "severity",
+        "with",
+        "Laplace",
+        "smoothing.",
+        "Laplace",
+        "(add-1)",
+        "smoothing",
+        "eliminates",
+        "small-sample",
+        "bias:",
+        "-",
+        "1/1",
+        "success",
+        "→",
+        "~0.67",
+        "(not",
+        "1.0",
+        "—",
+        "still",
+        "uncertain)",
+        "-",
+        "99/100",
+        "success",
+        "→",
+        "~0.98",
+        "(approaches",
+        "empirical",
+        "rate)",
+        "-",
+        "0/1",
+        "failure",
+        "→",
+        "~0.33",
+        "(not",
+        "0.0",
+        "—",
+        "allows",
+        "redemption)",
+        "-",
+        "Cold",
+        "start",
+        "→",
+        "0.5",
+        "(neutral",
+        "prior)",
         "SVL-4",
-        "(protocol)",
+        "protocol",
         "violations",
-        "penalize",
-        "2x",
+        "are",
+        "penalized",
+        "3×",
         "more",
         "than",
         "SVL-1.",
         "Time-weighted",
-        "+",
-        "severity-weighted."
+        "via",
+        "exponential",
+        "decay",
+        "(half-life",
+        "=",
+        "1",
+        "day)."
       ],
       "tags": [
         "feedback"
-      ]
+      ],
+      "purpose": "get failure adjusted credit"
     },
     {
       "name": "recordRun",
@@ -3767,7 +4253,8 @@
       ],
       "tags": [
         "feedback"
-      ]
+      ],
+      "purpose": "record run"
     },
     {
       "name": "ensureLockDir",
@@ -3785,7 +4272,8 @@
       "tags": [
         "file",
         "lock"
-      ]
+      ],
+      "purpose": "ensure lock dir"
     },
     {
       "name": "lockPath",
@@ -3813,7 +4301,8 @@
       "tags": [
         "file",
         "lock"
-      ]
+      ],
+      "purpose": "lock path"
     },
     {
       "name": "withLock",
@@ -3851,7 +4340,8 @@
       "tags": [
         "file",
         "lock"
-      ]
+      ],
+      "purpose": "with lock"
     },
     {
       "name": "main",
@@ -3876,6 +4366,10 @@
       "tags": [
         "find",
         "session"
+      ],
+      "purpose": "main",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -3915,6 +4409,13 @@
       "outputs": [],
       "tags": [
         "generate_500"
+      ],
+      "purpose": "main",
+      "produces": [
+        "EXTRACTED"
+      ],
+      "requires": [
+        "DATA"
       ]
     },
     {
@@ -3954,6 +4455,13 @@
       "outputs": [],
       "tags": [
         "generate"
+      ],
+      "purpose": "main",
+      "produces": [
+        "EXTRACTED"
+      ],
+      "requires": [
+        "DATA"
       ]
     },
     {
@@ -3970,6 +4478,13 @@
       "outputs": [],
       "tags": [
         "genome"
+      ],
+      "purpose": "main",
+      "requires": [
+        "FAILURE_DATA"
+      ],
+      "produces": [
+        "FAILURE_GENOME"
       ]
     },
     {
@@ -4095,6 +4610,228 @@
       "outputs": [],
       "tags": [
         "heatmap"
+      ],
+      "purpose": "main",
+      "requires": [
+        "FAILURE_DATA",
+        "FAILURE_HEATMAP"
+      ],
+      "produces": [
+        "HEATMAP",
+        "HEATMAP_DATA"
+      ]
+    },
+    {
+      "name": "hashFingerprint",
+      "params": [
+        {
+          "name": "fp",
+          "type": "ImmuneFingerprint",
+          "typeDetail": "ImmuneFingerprint"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/immune-receiver.ts",
+      "calls": [
+        "join",
+        "slice",
+        "digest",
+        "update",
+        "createHash"
+      ],
+      "exported": false,
+      "inputs": [
+        "ImmuneFingerprint"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Hash a fingerprint for deduplication. */",
+      "tags": [
+        "immune",
+        "receiver"
+      ],
+      "requires": [
+        "INPUT"
+      ],
+      "produces": [
+        "CREATED"
+      ]
+    },
+    {
+      "name": "getReceivedHashes",
+      "params": [],
+      "returnType": "Set<string>",
+      "returnTypeDetail": "Set<string>",
+      "file": "src/immune-receiver.ts",
+      "calls": [
+        "existsSync",
+        "parse",
+        "readFileSync"
+      ],
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "Set"
+      ],
+      "purpose": "Load the set of previously received fingerprint hashes. */",
+      "tags": [
+        "immune",
+        "receiver"
+      ],
+      "produces": [
+        "DATA"
+      ]
+    },
+    {
+      "name": "saveReceivedHashes",
+      "params": [
+        {
+          "name": "hashes",
+          "type": "Set<string>",
+          "typeDetail": "Set<string>"
+        }
+      ],
+      "returnType": "void",
+      "returnTypeDetail": "void",
+      "file": "src/immune-receiver.ts",
+      "calls": [
+        "dirname",
+        "existsSync",
+        "mkdirSync",
+        "writeFileSync",
+        "stringify",
+        "toISOString"
+      ],
+      "exported": false,
+      "inputs": [
+        "Set"
+      ],
+      "outputs": [],
+      "purpose": "Save received fingerprint hashes. */",
+      "tags": [
+        "immune",
+        "receiver"
+      ],
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "SAVED"
+      ]
+    },
+    {
+      "name": "importFingerprints",
+      "params": [
+        {
+          "name": "fingerprints",
+          "type": "ImmuneFingerprint[]",
+          "typeDetail": "ImmuneFingerprint[]"
+        }
+      ],
+      "returnType": "{ imported: number; skipped: number; total: number }",
+      "returnTypeDetail": "{ imported: number; skipped: number; total: number }",
+      "file": "src/immune-receiver.ts",
+      "calls": [
+        "getReceivedHashes",
+        "hashFingerprint",
+        "has",
+        "slice",
+        "toISOString",
+        "join",
+        "existsSync",
+        "mkdirSync",
+        "parseInt",
+        "readFileSync",
+        "now",
+        "writeFileSync",
+        "stringify",
+        "String",
+        "add",
+        "saveReceivedHashes"
+      ],
+      "exported": true,
+      "inputs": [
+        "ImmuneFingerprint"
+      ],
+      "outputs": [
+        "{ imported: number; skipped: number; total: number }"
+      ],
+      "purpose": "Import external fingerprints into the local failure corpus. Deduplicates: each fingerprint is only imported once. *",
+      "tags": [
+        "immune",
+        "receiver"
+      ],
+      "produces": [
+        "DATA"
+      ],
+      "requires": [
+        "INPUT"
+      ]
+    },
+    {
+      "name": "importFromFile",
+      "params": [
+        {
+          "name": "filePath",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "{ imported: number; skipped: number; total: number }",
+      "returnTypeDetail": "{ imported: number; skipped: number; total: number }",
+      "file": "src/immune-receiver.ts",
+      "calls": [
+        "existsSync",
+        "parse",
+        "readFileSync",
+        "isArray",
+        "importFingerprints"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "{ imported: number; skipped: number; total: number }"
+      ],
+      "purpose": "Import fingerprints from a JSON file (e.g., downloaded from the Hub). /",
+      "tags": [
+        "immune",
+        "receiver"
+      ],
+      "produces": [
+        "EXTRACTED"
+      ],
+      "requires": [
+        "INPUT"
+      ]
+    },
+    {
+      "name": "getReceiverStats",
+      "params": [],
+      "returnType": "{ totalReceived: number; lastUpdated: string | null }",
+      "returnTypeDetail": "{ totalReceived: number; lastUpdated: string | null }",
+      "file": "src/immune-receiver.ts",
+      "calls": [
+        "getReceivedHashes",
+        "existsSync",
+        "parse",
+        "readFileSync"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "{ totalReceived: number; lastUpdated: string"
+      ],
+      "purpose": "Get import statistics: how many external fingerprints have been received. /",
+      "tags": [
+        "immune",
+        "receiver"
+      ],
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -4120,6 +4857,10 @@
       "tags": [
         "immune",
         "reporter"
+      ],
+      "purpose": "get instance id",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -4141,6 +4882,10 @@
       "tags": [
         "immune",
         "reporter"
+      ],
+      "purpose": "get report cursor",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -4177,6 +4922,13 @@
       "tags": [
         "immune",
         "reporter"
+      ],
+      "purpose": "save report cursor",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "SAVED"
       ]
     },
     {
@@ -4217,6 +4969,10 @@
       "tags": [
         "immune",
         "reporter"
+      ],
+      "purpose": "extract fingerprints",
+      "produces": [
+        "EXTRACTED"
       ]
     },
     {
@@ -4245,7 +5001,8 @@
       "tags": [
         "immune",
         "reporter"
-      ]
+      ],
+      "purpose": "report fingerprints"
     },
     {
       "name": "previewFingerprints",
@@ -4264,6 +5021,42 @@
       "tags": [
         "immune",
         "reporter"
+      ],
+      "purpose": "preview fingerprints",
+      "produces": [
+        "EXTRACTED"
+      ]
+    },
+    {
+      "name": "loadIR",
+      "params": [
+        {
+          "name": "filePath",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "any[]",
+      "returnTypeDetail": "any[]",
+      "file": "src/ir-utils.ts",
+      "calls": [
+        "resolve",
+        "existsSync",
+        "parse",
+        "readFileSync",
+        "isArray"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [],
+      "purpose": "Load IR (Intermediate Representation) from disk. Centralised loader — used by validator, planner, and search modules. Returns the flat function array regardless of whether the on-disk format is a bare array or an object with a `functions` key. /",
+      "tags": [
+        "utils"
+      ],
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -4348,6 +5141,13 @@
       "outputs": [],
       "tags": [
         "learned"
+      ],
+      "purpose": "main",
+      "requires": [
+        "FAILURE_HISTORY"
+      ],
+      "produces": [
+        "LEARNED_PATTERNS"
       ]
     },
     {
@@ -4368,7 +5168,8 @@
       "tags": [
         "ledger",
         "registry"
-      ]
+      ],
+      "purpose": "fingerprints dir"
     },
     {
       "name": "fingerprintPath",
@@ -4396,7 +5197,8 @@
       "tags": [
         "ledger",
         "registry"
-      ]
+      ],
+      "purpose": "fingerprint path"
     },
     {
       "name": "registerFingerprint",
@@ -4514,6 +5316,9 @@
       "tags": [
         "ledger",
         "registry"
+      ],
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -4555,6 +5360,12 @@
       "tags": [
         "ledger",
         "registry"
+      ],
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "VALIDATION_RESULT"
       ]
     },
     {
@@ -4786,6 +5597,53 @@
       "outputs": [],
       "tags": [
         "llm"
+      ],
+      "purpose": "reset call count"
+    },
+    {
+      "name": "assertCallLimit",
+      "params": [],
+      "returnType": "void",
+      "returnTypeDetail": "void",
+      "file": "src/llm.ts",
+      "calls": [],
+      "exported": false,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "llm"
+      ],
+      "purpose": "assert call limit",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "VALIDATION_RESULT"
+      ]
+    },
+    {
+      "name": "applyRateLimit",
+      "params": [],
+      "returnType": "Promise<void>",
+      "returnTypeDetail": "Promise<void>",
+      "file": "src/llm.ts",
+      "calls": [
+        "now"
+      ],
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "Promise"
+      ],
+      "tags": [
+        "llm"
+      ],
+      "purpose": "apply rate limit",
+      "requires": [
+        "CONFIG"
+      ],
+      "produces": [
+        "EXECUTED"
       ]
     },
     {
@@ -4835,6 +5693,9 @@
       "returnTypeDetail": "Promise<string>",
       "file": "src/llm.ts",
       "calls": [
+        "assertCallLimit",
+        "applyRateLimit",
+        "now",
         "create"
       ],
       "exported": true,
@@ -4852,7 +5713,8 @@
       ],
       "tags": [
         "llm"
-      ]
+      ],
+      "purpose": "generate"
     },
     {
       "name": "chat",
@@ -4872,6 +5734,9 @@
       "returnTypeDetail": "Promise<string>",
       "file": "src/llm.ts",
       "calls": [
+        "assertCallLimit",
+        "applyRateLimit",
+        "now",
         "create"
       ],
       "exported": true,
@@ -4911,9 +5776,138 @@
       "outputs": [
         "BenchTask"
       ],
+      "protocol": {
+        "pre_states": [],
+        "post_states": [
+          "BENCHMARKS_LOADED"
+        ]
+      },
+      "purpose": "Load benchmark tasks from bench/tasks.json.",
+      "requires": [
+        "BENCH_DIR"
+      ],
+      "produces": [
+        "BENCHMARK_TASKS"
+      ],
       "tags": [
+        "benchmark",
         "load",
-        "benchmarks"
+        "data"
+      ],
+      "useWhen": [
+        "running benchmarks, generating benchmark reports"
+      ]
+    },
+    {
+      "name": "shouldLog",
+      "params": [
+        {
+          "name": "level",
+          "type": "Level",
+          "typeDetail": "Level"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/logger.ts",
+      "calls": [],
+      "exported": false,
+      "inputs": [
+        "Level"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "logger"
+      ],
+      "purpose": "should log"
+    },
+    {
+      "name": "formatLine",
+      "params": [
+        {
+          "name": "level",
+          "type": "Level",
+          "typeDetail": "Level"
+        },
+        {
+          "name": "module",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "message",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "data",
+          "type": "unknown",
+          "typeDetail": "unknown"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/logger.ts",
+      "calls": [
+        "toISOString",
+        "stringify"
+      ],
+      "exported": false,
+      "inputs": [
+        "Level",
+        "string",
+        "string",
+        "unknown"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "logger"
+      ],
+      "purpose": "format line",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "FORMATTED"
+      ]
+    },
+    {
+      "name": "createLogger",
+      "params": [
+        {
+          "name": "module",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "Logger",
+      "returnTypeDetail": "Logger",
+      "file": "src/logger.ts",
+      "calls": [
+        "shouldLog",
+        "error",
+        "formatLine"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "Logger"
+      ],
+      "tags": [
+        "logger"
+      ],
+      "purpose": "create logger",
+      "produces": [
+        "CREATED"
+      ],
+      "requires": [
+        "DATA"
       ]
     },
     {
@@ -4950,6 +5944,13 @@
       "outputs": [],
       "tags": [
         "main"
+      ],
+      "purpose": "run test",
+      "requires": [
+        "CONFIG"
+      ],
+      "produces": [
+        "EXECUTED"
       ]
     },
     {
@@ -4972,6 +5973,13 @@
       "outputs": [],
       "tags": [
         "main"
+      ],
+      "purpose": "main",
+      "requires": [
+        "PROJECT_PATH"
+      ],
+      "produces": [
+        "IR_FUNCTIONS"
       ]
     },
     {
@@ -4998,7 +6006,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "ensure dir"
     },
     {
       "name": "loadEpisodes",
@@ -5025,6 +6034,13 @@
       "tags": [
         "memory",
         "layer"
+      ],
+      "purpose": "load episodes",
+      "produces": [
+        "DATA"
+      ],
+      "requires": [
+        "DATA"
       ]
     },
     {
@@ -5050,6 +6066,13 @@
       "tags": [
         "memory",
         "layer"
+      ],
+      "purpose": "save episodes",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "SAVED"
       ]
     },
     {
@@ -5086,7 +6109,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "record episode"
     },
     {
       "name": "getRecentEpisodes",
@@ -5120,7 +6144,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "get recent episodes"
     },
     {
       "name": "getSuccessfulEpisodes",
@@ -5149,6 +6174,13 @@
       "tags": [
         "memory",
         "layer"
+      ],
+      "purpose": "get successful episodes",
+      "produces": [
+        "DATA"
+      ],
+      "requires": [
+        "DATA"
       ]
     },
     {
@@ -5175,6 +6207,12 @@
       "tags": [
         "memory",
         "layer"
+      ],
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -5202,6 +6240,13 @@
       "tags": [
         "memory",
         "layer"
+      ],
+      "purpose": "load semantic",
+      "produces": [
+        "DATA"
+      ],
+      "requires": [
+        "DATA"
       ]
     },
     {
@@ -5227,6 +6272,13 @@
       "tags": [
         "memory",
         "layer"
+      ],
+      "purpose": "save semantic",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "SAVED"
       ]
     },
     {
@@ -5243,11 +6295,15 @@
       "file": "src/memory-layer.ts",
       "calls": [
         "getSuccessfulEpisodes",
-        "substring",
+        "keywordKey",
         "has",
         "set",
         "push",
         "get",
+        "keys",
+        "add",
+        "filter",
+        "split",
         "loadSemantic",
         "find",
         "toISOString",
@@ -5263,6 +6319,13 @@
       "tags": [
         "memory",
         "layer"
+      ],
+      "purpose": "consolidate semantic",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -5308,7 +6371,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "find semantic template"
     },
     {
       "name": "WorkMemory.setIntent",
@@ -5327,7 +6391,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.set intent"
     },
     {
       "name": "WorkMemory.getIntent",
@@ -5340,7 +6405,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.get intent"
     },
     {
       "name": "WorkMemory.bind",
@@ -5364,7 +6430,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.bind"
     },
     {
       "name": "WorkMemory.get",
@@ -5383,7 +6450,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.get"
     },
     {
       "name": "WorkMemory.clear",
@@ -5396,7 +6464,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.clear"
     },
     {
       "name": "WorkMemory.setIntent",
@@ -5415,7 +6484,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.set intent"
     },
     {
       "name": "WorkMemory.getIntent",
@@ -5428,7 +6498,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.get intent"
     },
     {
       "name": "WorkMemory.bind",
@@ -5452,7 +6523,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.bind"
     },
     {
       "name": "WorkMemory.get",
@@ -5471,7 +6543,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.get"
     },
     {
       "name": "WorkMemory.clear",
@@ -5484,7 +6557,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.clear"
     },
     {
       "name": "WorkMemory.setIntent",
@@ -5503,7 +6577,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.set intent"
     },
     {
       "name": "WorkMemory.getIntent",
@@ -5516,7 +6591,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.get intent"
     },
     {
       "name": "WorkMemory.bind",
@@ -5540,7 +6616,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.bind"
     },
     {
       "name": "WorkMemory.get",
@@ -5559,7 +6636,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.get"
     },
     {
       "name": "WorkMemory.clear",
@@ -5572,7 +6650,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.clear"
     },
     {
       "name": "WorkMemory.setIntent",
@@ -5591,7 +6670,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.set intent"
     },
     {
       "name": "WorkMemory.getIntent",
@@ -5604,7 +6684,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.get intent"
     },
     {
       "name": "WorkMemory.bind",
@@ -5628,7 +6709,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.bind"
     },
     {
       "name": "WorkMemory.get",
@@ -5647,7 +6729,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.get"
     },
     {
       "name": "WorkMemory.clear",
@@ -5660,7 +6743,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.clear"
     },
     {
       "name": "WorkMemory.setIntent",
@@ -5679,7 +6763,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.set intent"
     },
     {
       "name": "WorkMemory.getIntent",
@@ -5692,7 +6777,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.get intent"
     },
     {
       "name": "WorkMemory.bind",
@@ -5716,7 +6802,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.bind"
     },
     {
       "name": "WorkMemory.get",
@@ -5735,7 +6822,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.get"
     },
     {
       "name": "WorkMemory.clear",
@@ -5748,7 +6836,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.clear"
     },
     {
       "name": "WorkMemory.setIntent",
@@ -5767,7 +6856,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.set intent"
     },
     {
       "name": "WorkMemory.getIntent",
@@ -5780,7 +6870,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.get intent"
     },
     {
       "name": "WorkMemory.bind",
@@ -5804,7 +6895,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.bind"
     },
     {
       "name": "WorkMemory.get",
@@ -5823,7 +6915,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.get"
     },
     {
       "name": "WorkMemory.clear",
@@ -5836,7 +6929,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.clear"
     },
     {
       "name": "WorkMemory.setIntent",
@@ -5855,7 +6949,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.set intent"
     },
     {
       "name": "WorkMemory.getIntent",
@@ -5868,7 +6963,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.get intent"
     },
     {
       "name": "WorkMemory.bind",
@@ -5892,7 +6988,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.bind"
     },
     {
       "name": "WorkMemory.get",
@@ -5911,7 +7008,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.get"
     },
     {
       "name": "WorkMemory.clear",
@@ -5924,7 +7022,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.clear"
     },
     {
       "name": "WorkMemory.setIntent",
@@ -5943,7 +7042,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.set intent"
     },
     {
       "name": "WorkMemory.getIntent",
@@ -5956,7 +7056,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.get intent"
     },
     {
       "name": "WorkMemory.bind",
@@ -5980,7 +7081,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.bind"
     },
     {
       "name": "WorkMemory.get",
@@ -5999,7 +7101,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.get"
     },
     {
       "name": "WorkMemory.clear",
@@ -6012,7 +7115,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.clear"
     },
     {
       "name": "WorkMemory.setIntent",
@@ -6031,7 +7135,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.set intent"
     },
     {
       "name": "WorkMemory.getIntent",
@@ -6044,7 +7149,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.get intent"
     },
     {
       "name": "WorkMemory.bind",
@@ -6068,7 +7174,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.bind"
     },
     {
       "name": "WorkMemory.get",
@@ -6087,7 +7194,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.get"
     },
     {
       "name": "WorkMemory.clear",
@@ -6100,7 +7208,8 @@
       "tags": [
         "memory",
         "layer"
-      ]
+      ],
+      "purpose": "work memory.clear"
     },
     {
       "name": "main",
@@ -6116,6 +7225,13 @@
       "outputs": [],
       "tags": [
         "metrics"
+      ],
+      "purpose": "main",
+      "requires": [
+        "METRICS_DATA"
+      ],
+      "produces": [
+        "EXECUTION_METRICS"
       ]
     },
     {
@@ -6153,6 +7269,13 @@
       "tags": [
         "obs",
         "web"
+      ],
+      "purpose": "json reply",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "SAVED"
       ]
     },
     {
@@ -6194,6 +7317,14 @@
       "tags": [
         "obs",
         "web"
+      ],
+      "purpose": "handle a p i",
+      "requires": [
+        "SESSION_DATA",
+        "SESSION_CORPUS"
+      ],
+      "produces": [
+        "SESSION_LIST"
       ]
     },
     {
@@ -6220,6 +7351,13 @@
       "tags": [
         "obs",
         "web"
+      ],
+      "purpose": "get session transitions",
+      "produces": [
+        "DATA"
+      ],
+      "requires": [
+        "BRANCH_LIST"
       ]
     },
     {
@@ -6258,6 +7396,13 @@
       "tags": [
         "obs",
         "web"
+      ],
+      "purpose": "handle ledger a p i",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "SAVED"
       ]
     },
     {
@@ -6295,6 +7440,13 @@
       "tags": [
         "obs",
         "web"
+      ],
+      "purpose": "handle consistency a p i",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "SAVED"
       ]
     },
     {
@@ -6331,6 +7483,13 @@
       "tags": [
         "obs",
         "web"
+      ],
+      "purpose": "handle diff a p i",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "SAVED"
       ]
     },
     {
@@ -6364,6 +7523,13 @@
       "tags": [
         "obs",
         "web"
+      ],
+      "purpose": "handle replay a p i",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "SAVED"
       ]
     },
     {
@@ -6393,6 +7559,14 @@
       "tags": [
         "obs",
         "web"
+      ],
+      "purpose": "server",
+      "requires": [
+        "SESSION_DATA",
+        "SESSION_CORPUS"
+      ],
+      "produces": [
+        "SESSION_LIST"
       ]
     },
     {
@@ -6422,6 +7596,10 @@
       ],
       "tags": [
         "p0_ssg_demo"
+      ],
+      "purpose": "load protocols from file",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -6447,6 +7625,10 @@
       ],
       "tags": [
         "p0_ssg_demo"
+      ],
+      "purpose": "load protocols from i r",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -6495,6 +7677,158 @@
       "outputs": [],
       "tags": [
         "p0_ssg_demo"
+      ],
+      "purpose": "run demo",
+      "requires": [
+        "CONFIG"
+      ],
+      "produces": [
+        "EXECUTED"
+      ]
+    },
+    {
+      "name": "buildCompactFuncList",
+      "params": [
+        {
+          "name": "funcs",
+          "type": "any[]",
+          "typeDetail": "any[]"
+        },
+        {
+          "name": "allFuncs",
+          "type": "any[]",
+          "typeDetail": "any[]"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/planner-prompts.ts",
+      "calls": [
+        "join",
+        "map"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Build a compact function list with capability metadata to help LLM understand function semantics. */",
+      "tags": [
+        "planner",
+        "prompts"
+      ],
+      "produces": [
+        "CREATED"
+      ]
+    },
+    {
+      "name": "semanticMatch",
+      "params": [
+        {
+          "name": "a",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "b",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/planner-prompts.ts",
+      "calls": [
+        "getTopology",
+        "capabilityMatch",
+        "includes"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "purpose": "Semantic matching: check if two capability labels are related via SemanticTopology. */",
+      "tags": [
+        "planner",
+        "prompts"
+      ],
+      "produces": [
+        "DATA"
+      ]
+    },
+    {
+      "name": "buildChainHints",
+      "params": [
+        {
+          "name": "funcs",
+          "type": "any[]",
+          "typeDetail": "any[]"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/planner-prompts.ts",
+      "calls": [
+        "filter",
+        "has",
+        "add",
+        "find",
+        "push",
+        "join",
+        "map"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Build capability chain hints: producer→consumer relationships using semantic matching. */",
+      "tags": [
+        "planner",
+        "prompts"
+      ],
+      "produces": [
+        "CREATED"
+      ]
+    },
+    {
+      "name": "buildProtocolChainHint",
+      "params": [
+        {
+          "name": "protocols",
+          "type": "FunctionProtocol[]",
+          "typeDetail": "FunctionProtocol[]"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/planner-prompts.ts",
+      "calls": [
+        "has",
+        "set",
+        "push",
+        "get",
+        "join",
+        "map"
+      ],
+      "exported": true,
+      "inputs": [
+        "FunctionProtocol"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Build protocol constraint hints for the LLM prompt. */",
+      "tags": [
+        "planner",
+        "prompts"
+      ],
+      "produces": [
+        "CREATED"
       ]
     },
     {
@@ -6526,7 +7860,8 @@
       ],
       "tags": [
         "planner"
-      ]
+      ],
+      "purpose": "enrich actions"
     },
     {
       "name": "determineSVL",
@@ -6552,7 +7887,8 @@
       ],
       "tags": [
         "planner"
-      ]
+      ],
+      "purpose": "determine s v l"
     },
     {
       "name": "determineConstraintType",
@@ -6576,104 +7912,8 @@
       ],
       "tags": [
         "planner"
-      ]
-    },
-    {
-      "name": "buildCompactFuncList",
-      "params": [
-        {
-          "name": "funcs",
-          "type": "any[]",
-          "typeDetail": "any[]"
-        },
-        {
-          "name": "allFuncs",
-          "type": "any[]",
-          "typeDetail": "any[]"
-        }
       ],
-      "returnType": "string",
-      "returnTypeDetail": "string",
-      "file": "src/planner.ts",
-      "calls": [
-        "join",
-        "map"
-      ],
-      "exported": false,
-      "inputs": [],
-      "outputs": [
-        "string"
-      ],
-      "purpose": "构建紧凑函数列表 — 包含能力元数据帮助 LLM 理解函数语义 */",
-      "tags": [
-        "planner"
-      ]
-    },
-    {
-      "name": "semanticMatch",
-      "params": [
-        {
-          "name": "a",
-          "type": "string",
-          "typeDetail": "string"
-        },
-        {
-          "name": "b",
-          "type": "string",
-          "typeDetail": "string"
-        }
-      ],
-      "returnType": "boolean",
-      "returnTypeDetail": "boolean",
-      "file": "src/planner.ts",
-      "calls": [
-        "getTopology",
-        "capabilityMatch",
-        "includes"
-      ],
-      "exported": false,
-      "inputs": [
-        "string",
-        "string"
-      ],
-      "outputs": [
-        "boolean"
-      ],
-      "purpose": "Semantic matching: check if two capability labels are related. Uses SemanticTopology (structural graph) instead of string matching. */",
-      "tags": [
-        "planner"
-      ]
-    },
-    {
-      "name": "buildChainHints",
-      "params": [
-        {
-          "name": "funcs",
-          "type": "any[]",
-          "typeDetail": "any[]"
-        }
-      ],
-      "returnType": "string",
-      "returnTypeDetail": "string",
-      "file": "src/planner.ts",
-      "calls": [
-        "filter",
-        "has",
-        "add",
-        "find",
-        "push",
-        "join",
-        "map"
-      ],
-      "exported": false,
-      "inputs": [],
-      "outputs": [
-        "string"
-      ],
-      "purpose": "Build capability chain hints from IR: producer→consumer relationships. Uses semantic matching for fuzzy capability linking. */",
-      "tags": [
-        "planner"
-      ]
+      "purpose": "determine constraint type"
     },
     {
       "name": "parseActionJSON",
@@ -6707,6 +7947,9 @@
       "purpose": "解析 LLM 输出的紧凑 JSON 为 Action[]。 格式: [{\"f\":\"fn\",\"to\":\"var\",\"a\":[{\"n\":\"p\",\"t\":\"str\",\"v\":\"x\"}]}, {\"r\":\"var\"}, ...] f=function(→call), to=assignTo, a=args, r=return, if=condition /",
       "tags": [
         "planner"
+      ],
+      "produces": [
+        "EXTRACTED"
       ]
     },
     {
@@ -6774,38 +8017,6 @@
       ]
     },
     {
-      "name": "buildProtocolChainHint",
-      "params": [
-        {
-          "name": "protocols",
-          "type": "FunctionProtocol[]",
-          "typeDetail": "FunctionProtocol[]"
-        }
-      ],
-      "returnType": "string",
-      "returnTypeDetail": "string",
-      "file": "src/planner.ts",
-      "calls": [
-        "has",
-        "set",
-        "push",
-        "get",
-        "join",
-        "map"
-      ],
-      "exported": false,
-      "inputs": [
-        "FunctionProtocol"
-      ],
-      "outputs": [
-        "string"
-      ],
-      "purpose": "构建协议链提示：为 LLM 显示协议状态机的合法调用顺序 */",
-      "tags": [
-        "planner"
-      ]
-    },
-    {
       "name": "validateActionSchema",
       "params": [
         {
@@ -6836,6 +8047,12 @@
       "purpose": "JSON schema pre-validation: structural checks before IR-aware validation. Catches malformed actions that parseActionJSON() accepted but are semantically invalid. */",
       "tags": [
         "planner"
+      ],
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "VALIDATION_RESULT"
       ]
     },
     {
@@ -6869,6 +8086,12 @@
       "purpose": "加载 IR 中所有带 protocol 的函数为协议规则，同时从 protocols.json 加载命名空间初始状态 */",
       "tags": [
         "planner"
+      ],
+      "produces": [
+        "DATA"
+      ],
+      "requires": [
+        "PROJECT_CONFIG"
       ]
     },
     {
@@ -6915,6 +8138,12 @@
       "purpose": "验证动作序列的协议合法性，使用 Semantic Ledger (Phase 3) 纯函数 */",
       "tags": [
         "planner"
+      ],
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "VALIDATION_RESULT"
       ]
     },
     {
@@ -6973,6 +8202,12 @@
       "purpose": "SSG 确定性修复：当协议违规有已知修复路径时，自动插入缺失函数 */",
       "tags": [
         "planner"
+      ],
+      "produces": [
+        "DATA"
+      ],
+      "requires": [
+        "DATA"
       ]
     },
     {
@@ -7013,6 +8248,8 @@
         "generatePlannerSeed",
         "push",
         "recordSession",
+        "min",
+        "includes",
         "extractKeywords",
         "toLowerCase",
         "sort",
@@ -7080,7 +8317,8 @@
       ],
       "tags": [
         "planner"
-      ]
+      ],
+      "purpose": "plan"
     },
     {
       "name": "generateFallbackPlan",
@@ -7118,6 +8356,9 @@
       "purpose": "本地规则回退：当 LLM 不可用时，根据意图关键词生成简单动作序列 */",
       "tags": [
         "planner"
+      ],
+      "produces": [
+        "CREATED"
       ]
     },
     {
@@ -7247,7 +8488,8 @@
       "tags": [
         "python",
         "emitter"
-      ]
+      ],
+      "purpose": "to python module"
     },
     {
       "name": "pythonValue",
@@ -7276,6 +8518,10 @@
       "tags": [
         "python",
         "emitter"
+      ],
+      "purpose": "python value",
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -7285,6 +8531,11 @@
           "name": "actions",
           "type": "Action[]",
           "typeDetail": "Action[]"
+        },
+        {
+          "name": "meta",
+          "type": "{ sessionId?: string; ruleHash?: string; irFunctionCount?: number; protocolRuleCount?: number }",
+          "typeDetail": "{ sessionId?: string; ruleHash?: string; irFunctionCount?: number; protocolRuleCount?: number }"
         }
       ],
       "returnType": "string",
@@ -7295,14 +8546,20 @@
         "readFileSync",
         "set",
         "collectImports",
+        "scanAction",
+        "filter",
+        "includes",
+        "toISOString",
         "join",
         "from",
+        "map",
         "push",
         "convertLines"
       ],
       "exported": true,
       "inputs": [
-        "Action"
+        "Action",
+        "{ sessionId?: string; ruleHash?: string; irFunctionCount?: number; protocolRuleCount?: number }"
       ],
       "outputs": [
         "string"
@@ -7310,6 +8567,13 @@
       "tags": [
         "python",
         "emitter"
+      ],
+      "purpose": "emit python",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -7444,6 +8708,12 @@
       "tags": [
         "repair",
         "proposal"
+      ],
+      "requires": [
+        "TRANSITION"
+      ],
+      "produces": [
+        "DELTA_CHECK"
       ]
     },
     {
@@ -7485,6 +8755,12 @@
       "tags": [
         "repair",
         "proposal"
+      ],
+      "requires": [
+        "STRING_A"
+      ],
+      "produces": [
+        "SIMILARITY_SCORE"
       ]
     },
     {
@@ -7532,6 +8808,12 @@
       "tags": [
         "repair",
         "proposal"
+      ],
+      "requires": [
+        "CONFIG"
+      ],
+      "produces": [
+        "EXECUTED"
       ]
     },
     {
@@ -7573,6 +8855,12 @@
       "tags": [
         "repair",
         "proposal"
+      ],
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "VALIDATION_RESULT"
       ]
     },
     {
@@ -7691,6 +8979,10 @@
       "tags": [
         "repair",
         "proposal"
+      ],
+      "purpose": "try parse rejection",
+      "produces": [
+        "EXTRACTED"
       ]
     },
     {
@@ -7725,7 +9017,8 @@
       "tags": [
         "repair",
         "proposal"
-      ]
+      ],
+      "purpose": "jaccard similarity"
     },
     {
       "name": "main",
@@ -7744,6 +9037,120 @@
       "outputs": [],
       "tags": [
         "report"
+      ],
+      "purpose": "main",
+      "produces": [
+        "EXTRACTED"
+      ],
+      "requires": [
+        "CORPUS"
+      ]
+    },
+    {
+      "name": "mineRules",
+      "params": [],
+      "returnType": "MinedRule[]",
+      "returnTypeDetail": "MinedRule[]",
+      "file": "src/rule-miner.ts",
+      "calls": [
+        "getFailureGenome",
+        "getTopFailurePatterns",
+        "filter",
+        "push",
+        "toUpperCase",
+        "join",
+        "match",
+        "has",
+        "get",
+        "set",
+        "sort",
+        "values"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "MinedRule"
+      ],
+      "purpose": "Mine protocol rules from failure patterns. * Analyses SVL-4 protocol violations to infer state transitions that should be encoded as permanent protocol rules. /",
+      "tags": [
+        "rule",
+        "miner"
+      ],
+      "requires": [
+        "FAILURE_DATA"
+      ],
+      "produces": [
+        "FAILURE_GENOME"
+      ]
+    },
+    {
+      "name": "toProtocolEntries",
+      "params": [
+        {
+          "name": "rules",
+          "type": "MinedRule[]",
+          "typeDetail": "MinedRule[]"
+        }
+      ],
+      "returnType": "Record<string, any>",
+      "returnTypeDetail": "Record<string, any>",
+      "file": "src/rule-miner.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "MinedRule"
+      ],
+      "outputs": [
+        "Record"
+      ],
+      "purpose": "Convert mined rules to FunctionProtocol format compatible with protocols.json. /",
+      "tags": [
+        "rule",
+        "miner"
+      ]
+    },
+    {
+      "name": "applyMinedRules",
+      "params": [
+        {
+          "name": "apply",
+          "type": "boolean",
+          "typeDetail": "boolean"
+        }
+      ],
+      "returnType": "{\n  rules: MinedRule[];\n  merged: number;\n  skipped: number;\n  dryRun: boolean;\n}",
+      "returnTypeDetail": "{\n  rules: MinedRule[];\n  merged: number;\n  skipped: number;\n  dryRun: boolean;\n}",
+      "file": "src/rule-miner.ts",
+      "calls": [
+        "mineRules",
+        "resolve",
+        "existsSync",
+        "parse",
+        "readFileSync",
+        "toProtocolEntries",
+        "entries",
+        "copyFileSync",
+        "writeFileSync",
+        "stringify",
+        "error"
+      ],
+      "exported": true,
+      "inputs": [
+        "boolean"
+      ],
+      "outputs": [
+        "{\n  rules: MinedRule[];\n  merged: number;\n  skipped: number;\n  dryRun: boolean;\n}"
+      ],
+      "purpose": "Merge mined rules into protocols.json. Dry-run by default — set apply=true to write. /",
+      "tags": [
+        "rule",
+        "miner"
+      ],
+      "requires": [
+        "CONFIG"
+      ],
+      "produces": [
+        "EXECUTED"
       ]
     },
     {
@@ -7898,6 +9305,12 @@
       "tags": [
         "runtime",
         "invariants"
+      ],
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "VALIDATION_RESULT"
       ]
     },
     {
@@ -7959,6 +9372,59 @@
       "tags": [
         "runtime",
         "invariants"
+      ],
+      "purpose": "is strict"
+    },
+    {
+      "name": "ok",
+      "params": [
+        {
+          "name": "value",
+          "type": "T",
+          "typeDetail": "T"
+        }
+      ],
+      "returnType": "Ok<T>",
+      "returnTypeDetail": "Ok<T>",
+      "file": "src/runtime-types.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "T"
+      ],
+      "outputs": [
+        "Ok"
+      ],
+      "purpose": "Create an Ok result. */",
+      "tags": [
+        "runtime",
+        "types"
+      ]
+    },
+    {
+      "name": "err",
+      "params": [
+        {
+          "name": "error",
+          "type": "E",
+          "typeDetail": "E"
+        }
+      ],
+      "returnType": "Err<E>",
+      "returnTypeDetail": "Err<E>",
+      "file": "src/runtime-types.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "E"
+      ],
+      "outputs": [
+        "Err"
+      ],
+      "purpose": "Create an Err result. */",
+      "tags": [
+        "runtime",
+        "types"
       ]
     },
     {
@@ -7981,6 +9447,10 @@
       "tags": [
         "runtime",
         "types"
+      ],
+      "purpose": "generate attempt id",
+      "produces": [
+        "CREATED"
       ]
     },
     {
@@ -8003,6 +9473,10 @@
       "tags": [
         "runtime",
         "types"
+      ],
+      "purpose": "generate session id",
+      "produces": [
+        "CREATED"
       ]
     },
     {
@@ -8040,6 +9514,10 @@
       "tags": [
         "runtime",
         "types"
+      ],
+      "purpose": "generate planner seed",
+      "produces": [
+        "CREATED"
       ]
     },
     {
@@ -8078,26 +9556,8 @@
       ],
       "tags": [
         "runtime"
-      ]
-    },
-    {
-      "name": "loadIR",
-      "params": [],
-      "returnType": "any[]",
-      "returnTypeDetail": "any[]",
-      "file": "src/search-planner.ts",
-      "calls": [
-        "parse",
-        "readFileSync",
-        "isArray"
       ],
-      "exported": false,
-      "inputs": [],
-      "outputs": [],
-      "tags": [
-        "search",
-        "planner"
-      ]
+      "purpose": "run and check"
     },
     {
       "name": "getStaticScore",
@@ -8137,6 +9597,13 @@
       "tags": [
         "search",
         "planner"
+      ],
+      "purpose": "get static score",
+      "produces": [
+        "DATA"
+      ],
+      "requires": [
+        "STRING_A"
       ]
     },
     {
@@ -8180,6 +9647,13 @@
       "tags": [
         "search",
         "planner"
+      ],
+      "purpose": "decompose goals",
+      "requires": [
+        "PROMPT"
+      ],
+      "produces": [
+        "LLM_RESPONSE"
       ]
     },
     {
@@ -8226,6 +9700,12 @@
       "tags": [
         "search",
         "planner"
+      ],
+      "requires": [
+        "PROMPT"
+      ],
+      "produces": [
+        "LLM_RESPONSE"
       ]
     },
     {
@@ -8285,7 +9765,8 @@
       "tags": [
         "search",
         "planner"
-      ]
+      ],
+      "purpose": "search plan"
     },
     {
       "name": "findCompatibleVar",
@@ -8316,6 +9797,10 @@
       "tags": [
         "search",
         "planner"
+      ],
+      "purpose": "find compatible var",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -8350,6 +9835,13 @@
       "outputs": [],
       "tags": [
         "semantic_guard_test"
+      ],
+      "purpose": "run semantic test",
+      "requires": [
+        "CONFIG"
+      ],
+      "produces": [
+        "EXECUTED"
       ]
     },
     {
@@ -8376,7 +9868,8 @@
       "tags": [
         "semantic",
         "snapshot"
-      ]
+      ],
+      "purpose": "ensure dir"
     },
     {
       "name": "createSnapshot",
@@ -8495,6 +9988,9 @@
       "tags": [
         "semantic",
         "snapshot"
+      ],
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -8522,6 +10018,9 @@
       "tags": [
         "semantic",
         "snapshot"
+      ],
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -8561,6 +10060,9 @@
       "tags": [
         "semantic",
         "snapshot"
+      ],
+      "requires": [
+        "DATA"
       ]
     },
     {
@@ -8619,6 +10121,9 @@
       "tags": [
         "semantic",
         "snapshot"
+      ],
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -8644,6 +10149,10 @@
       "tags": [
         "semantic",
         "topology"
+      ],
+      "purpose": "get topology",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -8669,6 +10178,10 @@
       "tags": [
         "semantic",
         "topology"
+      ],
+      "purpose": "rebuild topology",
+      "produces": [
+        "CREATED"
       ]
     },
     {
@@ -8723,7 +10236,8 @@
       "tags": [
         "semantic",
         "topology"
-      ]
+      ],
+      "purpose": "semantic topology.add edge"
     },
     {
       "name": "SemanticTopology.similarity",
@@ -8829,7 +10343,8 @@
       "tags": [
         "semantic",
         "trace"
-      ]
+      ],
+      "purpose": "narrate rejection"
     },
     {
       "name": "narrateSuccess",
@@ -8859,7 +10374,8 @@
       "tags": [
         "semantic",
         "trace"
-      ]
+      ],
+      "purpose": "narrate success"
     },
     {
       "name": "formatActionSequence",
@@ -8889,6 +10405,13 @@
       "tags": [
         "semantic",
         "trace"
+      ],
+      "purpose": "format action sequence",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -8932,6 +10455,13 @@
       "tags": [
         "semantic",
         "trace"
+      ],
+      "purpose": "format session timeline",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -8967,7 +10497,8 @@
       "tags": [
         "semantic",
         "trace"
-      ]
+      ],
+      "purpose": "pad"
     },
     {
       "name": "formatSessionSummary",
@@ -9002,6 +10533,13 @@
       "tags": [
         "semantic",
         "trace"
+      ],
+      "purpose": "format session summary",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -9034,6 +10572,13 @@
       "tags": [
         "semantic",
         "trace"
+      ],
+      "purpose": "format genome summary",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -9070,7 +10615,8 @@
       "tags": [
         "semantic",
         "trace"
-      ]
+      ],
+      "purpose": "bar chart"
     },
     {
       "name": "aclBadge",
@@ -9100,7 +10646,8 @@
       "tags": [
         "semantic",
         "trace"
-      ]
+      ],
+      "purpose": "acl badge"
     },
     {
       "name": "formatLearnedPatterns",
@@ -9129,6 +10676,13 @@
       "tags": [
         "semantic",
         "trace"
+      ],
+      "purpose": "format learned patterns",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -9162,6 +10716,13 @@
       "tags": [
         "semantic",
         "trace"
+      ],
+      "purpose": "format antibody stats",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -9196,6 +10757,13 @@
       "tags": [
         "semantic",
         "trace"
+      ],
+      "purpose": "format heatmap",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -9220,6 +10788,10 @@
       "tags": [
         "semantic",
         "trace"
+      ],
+      "purpose": "load protocols",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -9253,6 +10825,13 @@
       "tags": [
         "semantic",
         "trace"
+      ],
+      "purpose": "format state transition path from ledger",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -9291,6 +10870,13 @@
       "tags": [
         "semantic",
         "trace"
+      ],
+      "purpose": "format state transitions",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -9316,7 +10902,8 @@
       "tags": [
         "semantic",
         "trace"
-      ]
+      ],
+      "purpose": "sleep"
     },
     {
       "name": "clearScreen",
@@ -9333,6 +10920,13 @@
       "tags": [
         "semantic",
         "trace"
+      ],
+      "purpose": "clear screen",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "DELETED"
       ]
     },
     {
@@ -9358,7 +10952,8 @@
       "tags": [
         "semantic",
         "trace"
-      ]
+      ],
+      "purpose": "svl label"
     },
     {
       "name": "describeSVLLayer",
@@ -9383,7 +10978,8 @@
       "tags": [
         "semantic",
         "trace"
-      ]
+      ],
+      "purpose": "describe s v l layer"
     },
     {
       "name": "formatReplayHeader",
@@ -9418,6 +11014,13 @@
       "tags": [
         "semantic",
         "trace"
+      ],
+      "purpose": "format replay header",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -9448,6 +11051,13 @@
       "tags": [
         "semantic",
         "trace"
+      ],
+      "purpose": "format action list",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -9488,6 +11098,13 @@
       "tags": [
         "semantic",
         "trace"
+      ],
+      "purpose": "format adaptation diff",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -9525,6 +11142,13 @@
       "tags": [
         "semantic",
         "trace"
+      ],
+      "purpose": "format anomaly report",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -9556,6 +11180,13 @@
       "tags": [
         "semantic",
         "trace"
+      ],
+      "purpose": "format immune response",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -9590,6 +11221,13 @@
       "tags": [
         "semantic",
         "trace"
+      ],
+      "purpose": "format replay progress",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -9633,6 +11271,13 @@
       "tags": [
         "semantic",
         "trace"
+      ],
+      "purpose": "replay session",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "DELETED"
       ]
     },
     {
@@ -9684,6 +11329,13 @@
       "tags": [
         "semantic",
         "trace"
+      ],
+      "purpose": "format ledger replay validation",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -9722,6 +11374,13 @@
       "tags": [
         "semantic",
         "trace"
+      ],
+      "purpose": "format ledger stats",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -9768,6 +11427,13 @@
       "tags": [
         "semantic",
         "trace"
+      ],
+      "purpose": "format cross session query",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -9797,6 +11463,13 @@
       "tags": [
         "semantic",
         "trace"
+      ],
+      "purpose": "format snapshot list",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -9840,6 +11513,13 @@
       "tags": [
         "semantic",
         "trace"
+      ],
+      "purpose": "format snapshot diff",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -9892,6 +11572,13 @@
       "tags": [
         "semantic",
         "trace"
+      ],
+      "purpose": "format session validation",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -9952,120 +11639,13 @@
       "tags": [
         "semantic",
         "trace"
-      ]
-    },
-    {
-      "name": "G",
-      "params": [
-        {
-          "name": "s",
-          "type": "string",
-          "typeDetail": "string"
-        }
       ],
-      "returnType": "any",
-      "returnTypeDetail": "",
-      "file": "src/semantic-trace.ts",
-      "exported": false,
-      "calls": [],
-      "tags": [
-        "semantic",
-        "trace"
-      ]
-    },
-    {
-      "name": "R",
-      "params": [
-        {
-          "name": "s",
-          "type": "string",
-          "typeDetail": "string"
-        }
+      "purpose": "main",
+      "requires": [
+        "DATA"
       ],
-      "returnType": "any",
-      "returnTypeDetail": "",
-      "file": "src/semantic-trace.ts",
-      "exported": false,
-      "calls": [],
-      "tags": [
-        "semantic",
-        "trace"
-      ]
-    },
-    {
-      "name": "Y",
-      "params": [
-        {
-          "name": "s",
-          "type": "string",
-          "typeDetail": "string"
-        }
-      ],
-      "returnType": "any",
-      "returnTypeDetail": "",
-      "file": "src/semantic-trace.ts",
-      "exported": false,
-      "calls": [],
-      "tags": [
-        "semantic",
-        "trace"
-      ]
-    },
-    {
-      "name": "C_",
-      "params": [
-        {
-          "name": "s",
-          "type": "string",
-          "typeDetail": "string"
-        }
-      ],
-      "returnType": "any",
-      "returnTypeDetail": "",
-      "file": "src/semantic-trace.ts",
-      "exported": false,
-      "calls": [],
-      "tags": [
-        "semantic",
-        "trace"
-      ]
-    },
-    {
-      "name": "D",
-      "params": [
-        {
-          "name": "s",
-          "type": "string",
-          "typeDetail": "string"
-        }
-      ],
-      "returnType": "any",
-      "returnTypeDetail": "",
-      "file": "src/semantic-trace.ts",
-      "exported": false,
-      "calls": [],
-      "tags": [
-        "semantic",
-        "trace"
-      ]
-    },
-    {
-      "name": "B",
-      "params": [
-        {
-          "name": "s",
-          "type": "string",
-          "typeDetail": "string"
-        }
-      ],
-      "returnType": "any",
-      "returnTypeDetail": "",
-      "file": "src/semantic-trace.ts",
-      "exported": false,
-      "calls": [],
-      "tags": [
-        "semantic",
-        "trace"
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -10088,6 +11668,10 @@
       "tags": [
         "semantic",
         "validator"
+      ],
+      "purpose": "load contracts",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -10121,6 +11705,10 @@
       "tags": [
         "semantic",
         "validator"
+      ],
+      "purpose": "match intent",
+      "requires": [
+        "DATA"
       ]
     },
     {
@@ -10163,6 +11751,13 @@
       "tags": [
         "semantic",
         "validator"
+      ],
+      "purpose": "check semantic",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "VALIDATION_RESULT"
       ]
     },
     {
@@ -10249,6 +11844,14 @@
       "outputs": [],
       "tags": [
         "sessions"
+      ],
+      "purpose": "main",
+      "requires": [
+        "SESSION_DATA",
+        "SESSION_CORPUS"
+      ],
+      "produces": [
+        "SESSION_LIST"
       ]
     },
     {
@@ -10276,7 +11879,8 @@
       "tags": [
         "ssg",
         "validator"
-      ]
+      ],
+      "purpose": "to snapshot"
     },
     {
       "name": "fromSnapshot",
@@ -10304,7 +11908,8 @@
       "tags": [
         "ssg",
         "validator"
-      ]
+      ],
+      "purpose": "from snapshot"
     },
     {
       "name": "deepEqualSnapshots",
@@ -10338,7 +11943,8 @@
       "tags": [
         "ssg",
         "validator"
-      ]
+      ],
+      "purpose": "deep equal snapshots"
     },
     {
       "name": "rebuildState",
@@ -10381,7 +11987,8 @@
       "tags": [
         "ssg",
         "validator"
-      ]
+      ],
+      "purpose": "rebuild state"
     },
     {
       "name": "applyTransitionDelta",
@@ -10415,6 +12022,13 @@
       "tags": [
         "ssg",
         "validator"
+      ],
+      "purpose": "apply transition delta",
+      "requires": [
+        "CONFIG"
+      ],
+      "produces": [
+        "EXECUTED"
       ]
     },
     {
@@ -10454,6 +12068,10 @@
       "tags": [
         "ssg",
         "validator"
+      ],
+      "purpose": "compute delta",
+      "produces": [
+        "RESULT"
       ]
     },
     {
@@ -10513,7 +12131,8 @@
       "tags": [
         "ssg",
         "validator"
-      ]
+      ],
+      "purpose": "find fix path static"
     },
     {
       "name": "validateTransition",
@@ -10589,7 +12208,8 @@
       "tags": [
         "ssg",
         "validator"
-      ]
+      ],
+      "purpose": "validate transition"
     },
     {
       "name": "checkLedgerConsistency",
@@ -10603,6 +12223,11 @@
           "name": "namespaceInitialStates",
           "type": "Map<string, string>",
           "typeDetail": "Map<string, string>"
+        },
+        {
+          "name": "protocolRules",
+          "type": "Map<string, StateAnnotation>",
+          "typeDetail": "Map<string, StateAnnotation>"
         }
       ],
       "returnType": "{ consistent: boolean; violations: LedgerConsistencyViolation[] }",
@@ -10619,11 +12244,14 @@
         "toSnapshot",
         "deepEqualSnapshots",
         "push",
-        "applyTransitionDelta"
+        "applyTransitionDelta",
+        "includes",
+        "join"
       ],
       "exported": true,
       "inputs": [
         "StateTransition",
+        "Map",
         "Map"
       ],
       "outputs": [
@@ -10638,7 +12266,8 @@
       "tags": [
         "ssg",
         "validator"
-      ]
+      ],
+      "purpose": "check ledger consistency"
     },
     {
       "name": "hashRules",
@@ -10678,7 +12307,8 @@
       "tags": [
         "ssg",
         "validator"
-      ]
+      ],
+      "purpose": "hash rules"
     },
     {
       "name": "hashLedger",
@@ -10797,6 +12427,9 @@
       "tags": [
         "ssg",
         "validator"
+      ],
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -10832,6 +12465,9 @@
       "tags": [
         "ssg",
         "validator"
+      ],
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -10861,6 +12497,9 @@
       "tags": [
         "ssg",
         "validator"
+      ],
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -10895,6 +12534,9 @@
       "tags": [
         "ssg",
         "validator"
+      ],
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -10926,6 +12568,9 @@
       "tags": [
         "ssg",
         "validator"
+      ],
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -11015,6 +12660,10 @@
       "tags": [
         "ssg",
         "validator"
+      ],
+      "purpose": "parse protocols from j s o n",
+      "produces": [
+        "EXTRACTED"
       ]
     },
     {
@@ -11039,7 +12688,8 @@
       "tags": [
         "ssg",
         "validator"
-      ]
+      ],
+      "purpose": "state machine validator.set namespace initial state"
     },
     {
       "name": "StateMachineValidator.apply",
@@ -11088,7 +12738,8 @@
       "tags": [
         "ssg",
         "validator"
-      ]
+      ],
+      "purpose": "state machine validator.apply with transition"
     },
     {
       "name": "StateMachineValidator.getCurrentStates",
@@ -11101,7 +12752,8 @@
       "tags": [
         "ssg",
         "validator"
-      ]
+      ],
+      "purpose": "state machine validator.get current states"
     },
     {
       "name": "StateMachineValidator.snapshotNamespaceStates",
@@ -11114,7 +12766,8 @@
       "tags": [
         "ssg",
         "validator"
-      ]
+      ],
+      "purpose": "state machine validator.snapshot namespace states"
     },
     {
       "name": "StateMachineValidator.getNamespaceStates",
@@ -11133,7 +12786,8 @@
       "tags": [
         "ssg",
         "validator"
-      ]
+      ],
+      "purpose": "state machine validator.get namespace states"
     },
     {
       "name": "StateMachineValidator.getTrace",
@@ -11208,7 +12862,8 @@
       "tags": [
         "ssg",
         "validator"
-      ]
+      ],
+      "purpose": "state machine validator.explain rejection"
     },
     {
       "name": "StateMachineValidator.rejectionToJSON",
@@ -11227,7 +12882,8 @@
       "tags": [
         "ssg",
         "validator"
-      ]
+      ],
+      "purpose": "state machine validator.rejection to j s o n"
     },
     {
       "name": "isValidEmail",
@@ -11321,7 +12977,8 @@
         "displaying preview text",
         "limiting UI output",
         "shortening strings"
-      ]
+      ],
+      "purpose": "truncate"
     },
     {
       "name": "camelToSnake",
@@ -11355,7 +13012,8 @@
         "string",
         "case",
         "format"
-      ]
+      ],
+      "purpose": "camel to snake"
     },
     {
       "name": "capitalizeWords",
@@ -11389,7 +13047,8 @@
         "string",
         "case",
         "format"
-      ]
+      ],
+      "purpose": "capitalize words"
     },
     {
       "name": "countSubstring",
@@ -11428,7 +13087,8 @@
       "tags": [
         "string",
         "count"
-      ]
+      ],
+      "purpose": "count substring"
     },
     {
       "name": "removeWhitespace",
@@ -11461,7 +13121,8 @@
       "tags": [
         "string",
         "format"
-      ]
+      ],
+      "purpose": "remove whitespace"
     },
     {
       "name": "mostFrequent",
@@ -11497,7 +13158,8 @@
       "tags": [
         "array",
         "statistics"
-      ]
+      ],
+      "purpose": "most frequent"
     },
     {
       "name": "unique",
@@ -11528,7 +13190,8 @@
       "tags": [
         "array",
         "dedupe"
-      ]
+      ],
+      "purpose": "unique"
     },
     {
       "name": "chunk",
@@ -11568,7 +13231,8 @@
       "tags": [
         "array",
         "chunk"
-      ]
+      ],
+      "purpose": "chunk"
     },
     {
       "name": "arrayDiff",
@@ -11607,7 +13271,8 @@
       "tags": [
         "array",
         "difference"
-      ]
+      ],
+      "purpose": "array diff"
     },
     {
       "name": "average",
@@ -11645,7 +13310,8 @@
         "computing statistics",
         "data analysis",
         "metrics calculation"
-      ]
+      ],
+      "purpose": "average"
     },
     {
       "name": "median",
@@ -11679,7 +13345,8 @@
       "tags": [
         "math",
         "statistics"
-      ]
+      ],
+      "purpose": "median"
     },
     {
       "name": "roundTo",
@@ -11719,7 +13386,8 @@
       "tags": [
         "math",
         "format"
-      ]
+      ],
+      "purpose": "round to"
     },
     {
       "name": "isPrime",
@@ -11752,7 +13420,8 @@
       "tags": [
         "math",
         "validation"
-      ]
+      ],
+      "purpose": "is prime"
     },
     {
       "name": "randomInt",
@@ -11792,7 +13461,8 @@
       "tags": [
         "math",
         "random"
-      ]
+      ],
+      "purpose": "random int"
     },
     {
       "name": "deepClone",
@@ -11826,7 +13496,8 @@
       "tags": [
         "object",
         "clone"
-      ]
+      ],
+      "purpose": "deep clone"
     },
     {
       "name": "pick",
@@ -11863,7 +13534,8 @@
       "tags": [
         "object",
         "filter"
-      ]
+      ],
+      "purpose": "pick"
     },
     {
       "name": "deepMerge",
@@ -11892,7 +13564,8 @@
       "tags": [
         "object",
         "merge"
-      ]
+      ],
+      "purpose": "deep merge"
     },
     {
       "name": "hasRequiredFields",
@@ -11930,7 +13603,8 @@
       "tags": [
         "validation",
         "schema"
-      ]
+      ],
+      "purpose": "has required fields"
     },
     {
       "name": "isPlainObject",
@@ -11961,7 +13635,8 @@
       "tags": [
         "validation",
         "type"
-      ]
+      ],
+      "purpose": "is plain object"
     },
     {
       "name": "parseSemver",
@@ -11994,7 +13669,8 @@
       "tags": [
         "validation",
         "semver"
-      ]
+      ],
+      "purpose": "parse semver"
     },
     {
       "name": "formatDuration",
@@ -12029,7 +13705,8 @@
       "tags": [
         "format",
         "duration"
-      ]
+      ],
+      "purpose": "format duration"
     },
     {
       "name": "formatFileSize",
@@ -12062,7 +13739,8 @@
       "tags": [
         "format",
         "file"
-      ]
+      ],
+      "purpose": "format file size"
     },
     {
       "name": "toQueryString",
@@ -12097,7 +13775,8 @@
       "tags": [
         "web",
         "format"
-      ]
+      ],
+      "purpose": "to query string"
     },
     {
       "name": "retry",
@@ -12136,7 +13815,8 @@
       "tags": [
         "async",
         "retry"
-      ]
+      ],
+      "purpose": "retry"
     },
     {
       "name": "debounce",
@@ -12173,15 +13853,16 @@
       "tags": [
         "async",
         "debounce"
-      ]
+      ],
+      "purpose": "debounce"
     },
     {
       "name": "buildCapabilityGraph",
       "params": [
         {
           "name": "ir",
-          "type": "any[]",
-          "typeDetail": "any[]"
+          "type": "FunctionInfo[]",
+          "typeDetail": "FunctionInfo[]"
         }
       ],
       "returnType": "Map<string, CapabilityNode>",
@@ -12192,7 +13873,9 @@
         "set"
       ],
       "exported": false,
-      "inputs": [],
+      "inputs": [
+        "FunctionInfo"
+      ],
       "outputs": [
         "Map"
       ],
@@ -12200,6 +13883,9 @@
       "tags": [
         "strategy",
         "planner"
+      ],
+      "produces": [
+        "CREATED"
       ]
     },
     {
@@ -12245,6 +13931,100 @@
       "tags": [
         "strategy",
         "planner"
+      ],
+      "requires": [
+        "STRING_A"
+      ],
+      "produces": [
+        "SIMILARITY_SCORE"
+      ]
+    },
+    {
+      "name": "topByScore",
+      "params": [
+        {
+          "name": "nodes",
+          "type": "CapabilityNode[]",
+          "typeDetail": "CapabilityNode[]"
+        }
+      ],
+      "returnType": "CapabilityNode | undefined",
+      "returnTypeDetail": "CapabilityNode | undefined",
+      "file": "src/strategy-planner.ts",
+      "calls": [
+        "sort"
+      ],
+      "exported": false,
+      "inputs": [
+        "CapabilityNode"
+      ],
+      "outputs": [
+        "CapabilityNode"
+      ],
+      "purpose": "Pick the highest-scoring node from a list. */",
+      "tags": [
+        "strategy",
+        "planner"
+      ]
+    },
+    {
+      "name": "findRelated",
+      "params": [
+        {
+          "name": "graph",
+          "type": "Map<string, CapabilityNode>",
+          "typeDetail": "Map<string, CapabilityNode>"
+        },
+        {
+          "name": "capability",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "allNodes",
+          "type": "CapabilityNode[]",
+          "typeDetail": "CapabilityNode[]"
+        },
+        {
+          "name": "field",
+          "type": "\"produces\" | \"requires\"",
+          "typeDetail": "\"produces\" | \"requires\""
+        },
+        {
+          "name": "isProducer",
+          "type": "boolean",
+          "typeDetail": "boolean"
+        }
+      ],
+      "returnType": "CapabilityNode[]",
+      "returnTypeDetail": "CapabilityNode[]",
+      "file": "src/strategy-planner.ts",
+      "calls": [
+        "values",
+        "some",
+        "push",
+        "getTopology",
+        "capabilityMatch",
+        "includes"
+      ],
+      "exported": false,
+      "inputs": [
+        "Map",
+        "string",
+        "CapabilityNode",
+        "\"produces\"",
+        "boolean"
+      ],
+      "outputs": [
+        "CapabilityNode"
+      ],
+      "purpose": "Shared logic for finding nodes that produce or consume a capability label. Falls back to topology similarity if no direct data-flow match. *",
+      "tags": [
+        "strategy",
+        "planner"
+      ],
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -12270,12 +14050,7 @@
       "returnTypeDetail": "CapabilityNode[]",
       "file": "src/strategy-planner.ts",
       "calls": [
-        "values",
-        "some",
-        "push",
-        "getTopology",
-        "capabilityMatch",
-        "includes"
+        "findRelated"
       ],
       "exported": false,
       "inputs": [
@@ -12286,10 +14061,13 @@
       "outputs": [
         "CapabilityNode"
       ],
-      "purpose": "Find all capability nodes that produce a given capability label. Falls back to topology similarity if no direct data-flow match. */",
+      "purpose": "Find all capability nodes that produce a given capability label. */",
       "tags": [
         "strategy",
         "planner"
+      ],
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -12315,12 +14093,7 @@
       "returnTypeDetail": "CapabilityNode[]",
       "file": "src/strategy-planner.ts",
       "calls": [
-        "values",
-        "some",
-        "push",
-        "getTopology",
-        "capabilityMatch",
-        "includes"
+        "findRelated"
       ],
       "exported": false,
       "inputs": [
@@ -12331,10 +14104,13 @@
       "outputs": [
         "CapabilityNode"
       ],
-      "purpose": "Find all capability nodes that require a given capability label. Falls back to topology similarity if no direct data-flow match. */",
+      "purpose": "Find all capability nodes that require a given capability label. */",
       "tags": [
         "strategy",
         "planner"
+      ],
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -12347,8 +14123,8 @@
         },
         {
           "name": "ir",
-          "type": "any[]",
-          "typeDetail": "any[]"
+          "type": "FunctionInfo[]",
+          "typeDetail": "FunctionInfo[]"
         },
         {
           "name": "maxChains",
@@ -12360,6 +14136,8 @@
       "returnTypeDetail": "CapabilityChain[]",
       "file": "src/strategy-planner.ts",
       "calls": [
+        "trim",
+        "getTopology",
         "toLowerCase",
         "extractKeywords",
         "buildCapabilityGraph",
@@ -12369,12 +14147,12 @@
         "filter",
         "slice",
         "findConsumers",
-        "push",
         "add",
-        "getTopology",
+        "push",
         "findSimilar",
         "get",
         "findProducers",
+        "topByScore",
         "unshift",
         "join",
         "map",
@@ -12383,6 +14161,7 @@
       "exported": true,
       "inputs": [
         "string",
+        "FunctionInfo",
         "number"
       ],
       "outputs": [
@@ -12392,6 +14171,12 @@
       "tags": [
         "strategy",
         "planner"
+      ],
+      "produces": [
+        "DATA"
+      ],
+      "requires": [
+        "TEXT"
       ]
     },
     {
@@ -12423,7 +14208,292 @@
       "tags": [
         "strategy",
         "planner"
+      ],
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "FORMATTED"
       ]
+    },
+    {
+      "name": "pad",
+      "params": [
+        {
+          "name": "s",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "w",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/terminal-format.ts",
+      "calls": [
+        "test",
+        "charCodeAt",
+        "repeat",
+        "max"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "number"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "terminal",
+        "format"
+      ],
+      "purpose": "pad"
+    },
+    {
+      "name": "barChart",
+      "params": [
+        {
+          "name": "count",
+          "type": "number",
+          "typeDetail": "number"
+        },
+        {
+          "name": "total",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/terminal-format.ts",
+      "calls": [
+        "round",
+        "max",
+        "repeat"
+      ],
+      "exported": true,
+      "inputs": [
+        "number",
+        "number"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "terminal",
+        "format"
+      ],
+      "purpose": "bar chart"
+    },
+    {
+      "name": "aclBadge",
+      "params": [
+        {
+          "name": "level",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/terminal-format.ts",
+      "calls": [
+        "G",
+        "C_",
+        "Y",
+        "D"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "terminal",
+        "format"
+      ],
+      "purpose": "acl badge"
+    },
+    {
+      "name": "svlLabel",
+      "params": [
+        {
+          "name": "svl",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/terminal-format.ts",
+      "calls": [
+        "Y",
+        "R"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "terminal",
+        "format"
+      ],
+      "purpose": "svl label"
+    },
+    {
+      "name": "describeSVLLayer",
+      "params": [
+        {
+          "name": "svl",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/terminal-format.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "terminal",
+        "format"
+      ],
+      "purpose": "describe s v l layer"
+    },
+    {
+      "name": "G",
+      "params": [
+        {
+          "name": "s",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "any",
+      "returnTypeDetail": "",
+      "file": "src/terminal-format.ts",
+      "exported": true,
+      "calls": [],
+      "tags": [
+        "terminal",
+        "format"
+      ],
+      "purpose": "g"
+    },
+    {
+      "name": "R",
+      "params": [
+        {
+          "name": "s",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "any",
+      "returnTypeDetail": "",
+      "file": "src/terminal-format.ts",
+      "exported": true,
+      "calls": [],
+      "tags": [
+        "terminal",
+        "format"
+      ],
+      "purpose": "r"
+    },
+    {
+      "name": "Y",
+      "params": [
+        {
+          "name": "s",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "any",
+      "returnTypeDetail": "",
+      "file": "src/terminal-format.ts",
+      "exported": true,
+      "calls": [],
+      "tags": [
+        "terminal",
+        "format"
+      ],
+      "purpose": "y"
+    },
+    {
+      "name": "C_",
+      "params": [
+        {
+          "name": "s",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "any",
+      "returnTypeDetail": "",
+      "file": "src/terminal-format.ts",
+      "exported": true,
+      "calls": [],
+      "tags": [
+        "terminal",
+        "format"
+      ],
+      "purpose": "c"
+    },
+    {
+      "name": "D",
+      "params": [
+        {
+          "name": "s",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "any",
+      "returnTypeDetail": "",
+      "file": "src/terminal-format.ts",
+      "exported": true,
+      "calls": [],
+      "tags": [
+        "terminal",
+        "format"
+      ],
+      "purpose": "d"
+    },
+    {
+      "name": "B",
+      "params": [
+        {
+          "name": "s",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "any",
+      "returnTypeDetail": "",
+      "file": "src/terminal-format.ts",
+      "exported": true,
+      "calls": [],
+      "tags": [
+        "terminal",
+        "format"
+      ],
+      "purpose": "b"
     },
     {
       "name": "jaccardSimilarity",
@@ -12462,7 +14532,8 @@
       ],
       "tags": [
         "utils"
-      ]
+      ],
+      "purpose": "jaccard similarity"
     },
     {
       "name": "extractKeywords",
@@ -12496,27 +14567,8 @@
       ],
       "tags": [
         "utils"
-      ]
-    },
-    {
-      "name": "loadIR",
-      "params": [],
-      "returnType": "any[]",
-      "returnTypeDetail": "any[]",
-      "file": "src/validator.ts",
-      "calls": [
-        "resolve",
-        "existsSync",
-        "parse",
-        "readFileSync",
-        "isArray"
       ],
-      "exported": false,
-      "inputs": [],
-      "outputs": [],
-      "tags": [
-        "validator"
-      ]
+      "purpose": "extract keywords"
     },
     {
       "name": "normalizeType",
@@ -12543,7 +14595,8 @@
       ],
       "tags": [
         "validator"
-      ]
+      ],
+      "purpose": "normalize type"
     },
     {
       "name": "checkVariableFlow",
@@ -12569,6 +14622,13 @@
       ],
       "tags": [
         "validator"
+      ],
+      "purpose": "check variable flow",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "VALIDATION_RESULT"
       ]
     },
     {
@@ -12673,6 +14733,42 @@
       ]
     },
     {
+      "name": "validateActionResult",
+      "params": [
+        {
+          "name": "actions",
+          "type": "Action[]",
+          "typeDetail": "Action[]"
+        }
+      ],
+      "returnType": "Result<Action[], ValidationError[]>",
+      "returnTypeDetail": "Result<Action[], ValidationError[]>",
+      "file": "src/validator.ts",
+      "calls": [
+        "validateActionSequence",
+        "ok",
+        "map",
+        "err"
+      ],
+      "exported": true,
+      "inputs": [
+        "Action"
+      ],
+      "outputs": [
+        "Result"
+      ],
+      "purpose": "Result-typed variant of validateActionSequence. Returns Ok<Action[]> on success, Err<ValidationError[]> on failure. Use this for new code; the legacy {valid, errors} API remains for backward compat. /",
+      "tags": [
+        "validator"
+      ],
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "VALIDATION_RESULT"
+      ]
+    },
+    {
       "name": "main",
       "params": [],
       "returnType": "any",
@@ -12687,6 +14783,13 @@
       "tags": [
         "verify",
         "fps"
+      ],
+      "purpose": "main",
+      "requires": [
+        "FINGERPRINT_DATA"
+      ],
+      "produces": [
+        "VERIFICATION_RESULT"
       ]
     },
     {
@@ -12699,7 +14802,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "fn"
     },
     {
       "name": "error",
@@ -12717,7 +14821,8 @@
       "description": "输出错误日志",
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "error"
     },
     {
       "name": "existsSync",
@@ -12735,7 +14840,8 @@
       "description": "检查文件是否存在",
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "exists sync"
     },
     {
       "name": "statSync",
@@ -12753,7 +14859,8 @@
       "description": "获取文件状态",
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "stat sync"
     },
     {
       "name": "toFixed",
@@ -12765,7 +14872,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "to fixed"
     },
     {
       "name": "readdirSync",
@@ -12783,6 +14891,10 @@
       "description": "读取目录内容",
       "tags": [
         "(external)"
+      ],
+      "purpose": "readdir sync",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -12805,6 +14917,10 @@
       "description": "同步读取文件内容",
       "tags": [
         "(external)"
+      ],
+      "purpose": "read file sync",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -12827,7 +14943,8 @@
       "description": "计算相对路径",
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "relative"
     },
     {
       "name": "repeat",
@@ -12839,7 +14956,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "repeat"
     },
     {
       "name": "require",
@@ -12851,7 +14969,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "require"
     },
     {
       "name": "parse",
@@ -12869,6 +14988,10 @@
       "description": "解析 JSON 字符串",
       "tags": [
         "(external)"
+      ],
+      "purpose": "parse",
+      "produces": [
+        "EXTRACTED"
       ]
     },
     {
@@ -12882,7 +15005,8 @@
       "description": "获取当前工作目录",
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "cwd"
     },
     {
       "name": "mkdirSync",
@@ -12904,7 +15028,8 @@
       "description": "创建目录",
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "mkdir sync"
     },
     {
       "name": "now",
@@ -12917,7 +15042,8 @@
       "description": "当前时间戳（毫秒）",
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "now"
     },
     {
       "name": "writeFileSync",
@@ -12939,6 +15065,13 @@
       "description": "同步写入文件",
       "tags": [
         "(external)"
+      ],
+      "purpose": "write file sync",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "SAVED"
       ]
     },
     {
@@ -12961,6 +15094,10 @@
       "description": "序列化为 JSON 字符串",
       "tags": [
         "(external)"
+      ],
+      "purpose": "stringify",
+      "produces": [
+        "FORMATTED"
       ]
     },
     {
@@ -12974,7 +15111,8 @@
       "description": "生成 0-1 随机数",
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "random"
     },
     {
       "name": "add",
@@ -12986,7 +15124,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "add"
     },
     {
       "name": "findIndex",
@@ -12998,6 +15137,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "find index",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -13016,7 +15159,8 @@
       "description": "输出日志",
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "log"
     },
     {
       "name": "max",
@@ -13034,55 +15178,8 @@
       "description": "最大值",
       "tags": [
         "(external)"
-      ]
-    },
-    {
-      "name": "test",
-      "params": [],
-      "returnType": "any",
-      "returnTypeDetail": "any",
-      "file": "(external)",
-      "calls": [],
-      "external": true,
-      "tags": [
-        "(external)"
-      ]
-    },
-    {
-      "name": "collect",
-      "params": [],
-      "returnType": "any",
-      "returnTypeDetail": "any",
-      "file": "(external)",
-      "calls": [],
-      "external": true,
-      "tags": [
-        "(external)"
-      ]
-    },
-    {
-      "name": "scanAction",
-      "params": [],
-      "returnType": "any",
-      "returnTypeDetail": "any",
-      "file": "(external)",
-      "calls": [],
-      "external": true,
-      "tags": [
-        "(external)"
-      ]
-    },
-    {
-      "name": "convert",
-      "params": [],
-      "returnType": "any",
-      "returnTypeDetail": "any",
-      "file": "(external)",
-      "calls": [],
-      "external": true,
-      "tags": [
-        "(external)"
-      ]
+      ],
+      "purpose": "max"
     },
     {
       "name": "dirname",
@@ -13100,7 +15197,89 @@
       "description": "获取目录名",
       "tags": [
         "(external)"
+      ],
+      "purpose": "dirname"
+    },
+    {
+      "name": "walk",
+      "params": [],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "tags": [
+        "(external)"
+      ],
+      "purpose": "walk"
+    },
+    {
+      "name": "exec",
+      "params": [],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "tags": [
+        "(external)"
+      ],
+      "purpose": "exec"
+    },
+    {
+      "name": "test",
+      "params": [],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "tags": [
+        "(external)"
+      ],
+      "purpose": "test"
+    },
+    {
+      "name": "collect",
+      "params": [],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "tags": [
+        "(external)"
+      ],
+      "purpose": "collect"
+    },
+    {
+      "name": "scanAction",
+      "params": [],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "tags": [
+        "(external)"
+      ],
+      "purpose": "scan action",
+      "produces": [
+        "EXTRACTED"
       ]
+    },
+    {
+      "name": "convert",
+      "params": [],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "tags": [
+        "(external)"
+      ],
+      "purpose": "convert"
     },
     {
       "name": "digest",
@@ -13118,7 +15297,8 @@
       "description": "输出哈希摘要",
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "digest"
     },
     {
       "name": "update",
@@ -13136,7 +15316,8 @@
       "description": "更新哈希数据",
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "update"
     },
     {
       "name": "createHash",
@@ -13154,6 +15335,10 @@
       "description": "创建哈希对象",
       "tags": [
         "(external)"
+      ],
+      "purpose": "create hash",
+      "produces": [
+        "CREATED"
       ]
     },
     {
@@ -13172,7 +15357,8 @@
       "description": "同步执行命令",
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "exec sync"
     },
     {
       "name": "getFullText",
@@ -13184,6 +15370,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "get full text",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -13196,6 +15386,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "get comment",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -13208,6 +15402,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "get element type node",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -13220,6 +15418,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "get type node",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -13232,6 +15434,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "get return type node",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -13244,6 +15450,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "get body",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -13256,7 +15466,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "for each descendant"
     },
     {
       "name": "getClasses",
@@ -13268,6 +15479,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "get classes",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -13280,6 +15495,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "get methods",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -13292,6 +15511,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "get import declarations",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -13304,6 +15527,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "get module specifier value",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -13316,6 +15543,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "get named imports",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -13328,6 +15559,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "get module specifier source file",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -13370,7 +15605,8 @@
       "description": "auto-resolved from /Users/shenlian/progmune-runtime/node_modules/typescript/lib/typescript.d.ts",
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "resolve module name"
     },
     {
       "name": "getNamespaceImport",
@@ -13382,6 +15618,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "get namespace import",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -13394,7 +15634,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "add source file at path if exists"
     },
     {
       "name": "tryResolveFromNamespace",
@@ -13406,7 +15647,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "try resolve from namespace"
     },
     {
       "name": "getInterfaces",
@@ -13418,6 +15660,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "get interfaces",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -13430,6 +15676,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "get type aliases",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -13442,6 +15692,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "get exported declarations",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -13464,7 +15718,8 @@
       "description": "从字符串创建 Buffer",
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "from"
     },
     {
       "name": "unlinkSync",
@@ -13482,7 +15737,8 @@
       "description": "删除文件",
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "unlink sync"
     },
     {
       "name": "parseInt",
@@ -13494,6 +15750,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "parse int",
+      "produces": [
+        "EXTRACTED"
       ]
     },
     {
@@ -13506,7 +15766,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "flat map"
     },
     {
       "name": "pow",
@@ -13518,7 +15779,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "pow"
     },
     {
       "name": "rmdirSync",
@@ -13530,7 +15792,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "rmdir sync"
     },
     {
       "name": "String",
@@ -13542,7 +15805,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "string"
     },
     {
       "name": "table",
@@ -13554,7 +15818,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "table"
     },
     {
       "name": "min",
@@ -13572,7 +15837,8 @@
       "description": "最小值",
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "min"
     },
     {
       "name": "hostname",
@@ -13584,7 +15850,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "hostname"
     },
     {
       "name": "create",
@@ -13596,6 +15863,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "create",
+      "produces": [
+        "CREATED"
       ]
     },
     {
@@ -13608,7 +15879,21 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "modify"
+    },
+    {
+      "name": "keywordKey",
+      "params": [],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "tags": [
+        "(external)"
+      ],
+      "purpose": "keyword key"
     },
     {
       "name": "writeHead",
@@ -13620,6 +15905,13 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "write head",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "SAVED"
       ]
     },
     {
@@ -13632,7 +15924,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "end"
     },
     {
       "name": "handler",
@@ -13644,7 +15937,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "handler"
     },
     {
       "name": "createPureContext",
@@ -13656,6 +15950,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "create pure context",
+      "produces": [
+        "CREATED"
       ]
     },
     {
@@ -13668,6 +15966,13 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "apply",
+      "requires": [
+        "CONFIG"
+      ],
+      "produces": [
+        "EXECUTED"
       ]
     },
     {
@@ -13680,7 +15985,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "flat"
     },
     {
       "name": "getTrace",
@@ -13692,6 +15998,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "get trace",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -13704,7 +16014,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "capability match"
     },
     {
       "name": "wrapResult",
@@ -13716,7 +16027,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "wrap result"
     },
     {
       "name": "getMaskedFuncList",
@@ -13728,6 +16040,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "get masked func list",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -13740,7 +16056,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "collect imports"
     },
     {
       "name": "convertLines",
@@ -13752,7 +16069,21 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "convert lines"
+    },
+    {
+      "name": "copyFileSync",
+      "params": [],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "tags": [
+        "(external)"
+      ],
+      "purpose": "copy file sync"
     },
     {
       "name": "delete",
@@ -13764,6 +16095,13 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "delete",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "DELETED"
       ]
     },
     {
@@ -13776,7 +16114,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "deep equal"
     },
     {
       "name": "parseFloat",
@@ -13788,6 +16127,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "parse float",
+      "produces": [
+        "EXTRACTED"
       ]
     },
     {
@@ -13800,6 +16143,13 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "clear",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "DELETED"
       ]
     },
     {
@@ -13812,6 +16162,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "build",
+      "produces": [
+        "CREATED"
       ]
     },
     {
@@ -13821,7 +16175,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "to locale string"
     },
     {
       "name": "mergeStates",
@@ -13833,6 +16188,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "merge states",
+      "requires": [
+        "DATA"
       ]
     },
     {
@@ -13845,6 +16204,13 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "write",
+      "requires": [
+        "DATA"
+      ],
+      "produces": [
+        "SAVED"
       ]
     },
     {
@@ -13857,7 +16223,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "norm"
     },
     {
       "name": "exit",
@@ -13875,7 +16242,8 @@
       "description": "退出进程",
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "exit"
     },
     {
       "name": "normalizeSnap",
@@ -13887,7 +16255,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "normalize snap"
     },
     {
       "name": "hash",
@@ -13899,6 +16268,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "hash",
+      "requires": [
+        "INPUT"
       ]
     },
     {
@@ -13911,7 +16284,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "sqrt"
     },
     {
       "name": "findSimilar",
@@ -13923,6 +16297,10 @@
       "external": true,
       "tags": [
         "(external)"
+      ],
+      "purpose": "find similar",
+      "produces": [
+        "DATA"
       ]
     },
     {
@@ -13935,7 +16313,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "bigrams"
     },
     {
       "name": "processAction",
@@ -13947,7 +16326,8 @@
       "external": true,
       "tags": [
         "(external)"
-      ]
+      ],
+      "purpose": "process action"
     }
   ]
 }

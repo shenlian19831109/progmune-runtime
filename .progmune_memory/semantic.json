@@ -28,5 +28,53 @@
     "useCount": 5,
     "createdAt": "2026-05-23T14:15:07.638Z",
     "lastUsedAt": "2026-05-23T14:15:07.638Z"
+  },
+  {
+    "id": "tmpl_1780550367044",
+    "intentPattern": "create|simple|logger",
+    "actionSequence": [
+      {
+        "kind": "call",
+        "function": "createRootBranch",
+        "args": [
+          {
+            "name": "transitions",
+            "type": "StateTransition[]",
+            "value": []
+          }
+        ],
+        "assignTo": "branch"
+      },
+      {
+        "kind": "return",
+        "value": "branch"
+      }
+    ],
+    "successRate": 1,
+    "useCount": 12,
+    "createdAt": "2026-06-04T05:19:27.044Z",
+    "lastUsedAt": "2026-06-04T05:21:37.151Z"
+  },
+  {
+    "id": "tmpl_1780550367044",
+    "intentPattern": "read|json|file",
+    "actionSequence": [
+      {
+        "kind": "call",
+        "function": "extractIRWithTypes",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "ir"
+      }
+    ],
+    "successRate": 1,
+    "useCount": 9,
+    "createdAt": "2026-06-04T05:19:27.044Z",
+    "lastUsedAt": "2026-06-04T05:21:37.151Z"
   }
 ]

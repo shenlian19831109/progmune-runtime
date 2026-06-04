@@ -35,11 +35,19 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.benchmarkSave = benchmarkSave;
 exports.benchmarkLoadLatest = benchmarkLoadLatest;
-/** Save benchmark results to a timestamped file
+/** Save benchmark results to a timestamped file.
+ * @requires BENCHMARK_RESULT @produces SAVED_FILE_PATH
+ * @purpose Persist benchmark execution results to disk
+ * @tags benchmark, save, persistence
+ * @useWhen saving benchmark run outputs
  * @protocol pre_states=["BENCHMARKS_LOADED"] post_states=["RESULTS_SAVED"]
  */
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
+/**
+ * @requires BENCHMARK_RESULT @produces SAVED_FILE_PATH
+ * @purpose Write benchmark data to a timestamped JSON file
+ */
 function benchmarkSave(data) {
     const dir = path.resolve(process.cwd(), "bench");
     if (!fs.existsSync(dir))
@@ -49,6 +57,11 @@ function benchmarkSave(data) {
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
     return filePath;
 }
+/**
+ * @requires BENCH_DIR @produces BENCHMARK_RESULT
+ * @purpose Load the most recent benchmark results from disk
+ * @tags benchmark, load, data
+ */
 function benchmarkLoadLatest() {
     const dir = path.resolve(process.cwd(), "bench");
     if (!fs.existsSync(dir))

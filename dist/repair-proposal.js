@@ -93,7 +93,7 @@ export function suggestInvariantRepair(violation, ledger, namespaceInitialStates
     const proposals = [];
     if (violation.invariant === "before-consistency") {
         // statesBefore is wrong — can be recomputed from rebuildState
-        const correctStatesBefore = violation.expected;
+        const correctStatesBefore = violation.expected || {};
         const t = ledger[violation.index];
         if (!t)
             return [];
@@ -119,7 +119,7 @@ export function suggestInvariantRepair(violation, ledger, namespaceInitialStates
     }
     if (violation.invariant === "delta-consistency") {
         // statesAfter doesn't match applyDelta(statesBefore, acquired, invalidated)
-        const correctStatesAfter = violation.expected;
+        const correctStatesAfter = violation.expected || {};
         const t = ledger[violation.index];
         if (!t)
             return [];

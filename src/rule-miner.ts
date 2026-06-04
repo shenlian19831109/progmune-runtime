@@ -66,18 +66,40 @@ export function mineRules(): MinedRule[] {
     }
   }
 
-  // Strategy 2: Extract ordering constraints from top SVL-4 patterns
+  // Strategy 2: Pattern-based rules from top violations
+  const PATTERN_RULES: Record<string, { pre: string[]; post: string[]; desc: string }> = {
+    symbol_existence: { pre: [], post: ["IR_VALIDATED"], desc: "只使用 IR 中已导出的函数，禁止编造函数名" },
+    type_mismatch: { pre: [], post: ["TYPE_CHECKED"], desc: "检查参数类型与 IR 签名一致后再调用" },
+    dataflow: { pre: [], post: ["DATAFLOW_VALID"], desc: "变量必须先声明再使用，避免循环引用" },
+    protocol: { pre: ["INIT"], post: ["PROTOCOL_COMPLIANT"], desc: "严格遵循 SSG 协议状态顺序调用函数" },
+    missing_import: { pre: [], post: ["IMPORT_RESOLVED"], desc: "只从已导出的模块导入符号" },
+    params_undefined: { pre: [], post: ["PARAMS_SAFE"], desc: "调用 .map/.filter 前检查对象是否为数组，使用 (obj || [])" },
+  };
+
   for (const p of patterns) {
-    if (!p.pattern.includes("SVL-4")) continue;
-    // Pattern format: "SVL-4:protocolViolation" → extract function sequence from context
-    const funcMatch = p.pattern.match(/function=([^,\s]+)/);
-    if (funcMatch) {
+    // Extract constraint type from pattern (e.g. "SVL-1:symbol_existence" → "symbol_existence")
+    const constraintMatch = p.pattern.match(/SVL-\d:(.+)/);
+    if (!constraintMatch) continue;
+    const constraintType = constraintMatch[1];
+
+    const rule = PATTERN_RULES[constraintType];
+    if (rule) {
       mined.push({
-        function: funcMatch[1],
+        function: constraintType,
+        pre_states: rule.pre,
+        post_states: rule.post,
+        namespace: "mined",
+        reason: `Pattern "${constraintType}" occurred ${p.count} times → ${rule.desc}`,
+        confidence: p.count,
+      });
+    } else {
+      // Generic fallback for unknown patterns
+      mined.push({
+        function: constraintType,
         pre_states: ["INIT"],
         post_states: ["VALIDATED"],
         namespace: "mined",
-        reason: `Pattern "${p.pattern}" occurred ${p.count} times`,
+        reason: `Unknown pattern "${constraintType}" occurred ${p.count} times`,
         confidence: p.count,
       });
     }

@@ -661,6 +661,98 @@ export function extractIRWithTypes(projectRoot: string): {
     }
   }
 
+  // ── Post-process: auto-derive missing capability metadata ──
+
+  // Name-based data-flow inference patterns
+  const PRODUCER_PREFIXES: [RegExp, string][] = [
+    [/^(load|get|fetch|read|find|list|query|select)/i, "DATA"],
+    [/^(create|build|generate|make|new)/i, "CREATED"],
+    [/^(validate|verify|check|assert)/i, "VALIDATION_RESULT"],
+    [/^(format|render|emit|stringify)/i, "FORMATTED"],
+    [/^(save|write|persist|store|put)/i, "SAVED"],
+    [/^(count|compute|calculate|measure)/i, "RESULT"],
+    [/^(extract|parse|scan)/i, "EXTRACTED"],
+    [/^(execute|run|invoke|apply)/i, "EXECUTED"],
+    [/^(delete|remove|clear|destroy)/i, "DELETED"],
+  ];
+  const CONSUMER_PREFIXES: [RegExp, string][] = [
+    [/^(save|write|persist|store)/i, "DATA"],
+    [/^(validate|verify|check|assert)/i, "DATA"],
+    [/^(format|render|emit|display)/i, "DATA"],
+    [/^(delete|remove|clear)/i, "DATA"],
+    [/^(execute|run|apply)/i, "CONFIG"],
+    [/^(search|query|filter|sort)/i, "DATA"],
+    [/^(merge|combine|concat)/i, "DATA"],
+    [/^(compare|diff|match)/i, "DATA"],
+    [/^(hash|encode|encrypt|sign)/i, "INPUT"],
+  ];
+
+  for (const f of funcs) {
+    // Strategy 1: @protocol pre_states → @requires, post_states → @produces
+    if (f.protocol) {
+      if ((!f.requires || f.requires.length === 0) && f.protocol.pre_states?.length > 0) {
+        f.requires = f.protocol.pre_states;
+      }
+      if ((!f.produces || f.produces.length === 0) && f.protocol.post_states?.length > 0) {
+        f.produces = f.protocol.post_states;
+      }
+    }
+
+    // Strategy 2: Derive purpose from function name if missing
+    if (!f.purpose && f.name) {
+      f.purpose = f.name
+        .replace(/([A-Z])/g, " $1")
+        .replace(/_/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+    }
+
+    // Strategy 3: Derive tags from file path if missing
+    if (!f.tags || f.tags.length === 0) {
+      const parts = (f.file || "").replace(/\.ts$/, "").replace(/^src\//, "").split("/");
+      f.tags = parts.filter(t => t.length > 2 && t !== "src");
+    }
+
+    // Strategy 4: Infer requires/produces from function name prefix
+    if (!f.requires || f.requires.length === 0) {
+      for (const [re, label] of CONSUMER_PREFIXES) {
+        if (re.test(f.name)) {
+          f.requires = [label];
+          break;
+        }
+      }
+    }
+    if (!f.produces || f.produces.length === 0) {
+      for (const [re, label] of PRODUCER_PREFIXES) {
+        if (re.test(f.name)) {
+          f.produces = [label];
+          break;
+        }
+      }
+    }
+  }
+
+  // Strategy 5: Cross-function data-flow inference — if A calls B, inherit B's requires/produces
+  const nameToFunc = new Map<string, (typeof funcs)[0]>();
+  for (const f of funcs) nameToFunc.set(f.name, f);
+
+  for (const f of funcs) {
+    if (!f.calls || f.calls.length === 0) continue;
+    for (const calleeName of f.calls) {
+      const callee = nameToFunc.get(calleeName);
+      if (!callee) continue;
+      // If caller lacks requires but callee has them, inherit
+      if ((!f.requires || f.requires.length === 0) && callee.requires && callee.requires.length > 0) {
+        f.requires = [...new Set([...(f.requires || []), ...callee.requires])];
+      }
+      // If caller lacks produces but callee produces something, inherit
+      if ((!f.produces || f.produces.length === 0) && callee.produces && callee.produces.length > 0) {
+        f.produces = [...new Set([...(f.produces || []), ...callee.produces])];
+      }
+    }
+  }
+
   return { functions: funcs, typeMap: _typeMap };
 }
 

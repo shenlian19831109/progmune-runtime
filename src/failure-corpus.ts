@@ -447,10 +447,11 @@ export function getLearnedPatterns(): { failureToFix: LearnedPattern[] } {
       // Extract SSG violations from Attempt.violations
       for (const v of a.violations) {
         if (!v.fixPath || v.fixPath.length === 0) continue;
-        if (v.svl !== 4) continue; // only SVL-4 has fix paths
         const violatedLabel = `SVL-${v.svl}`;
-        const missingKey = (v.missingStates || ["unknown"]).join(",");
-        const signature = `${violatedLabel}:${missingKey}`;
+        // Use violatedConstraint if available, otherwise fall back to missingStates
+        const constraintKey = v.violatedConstraint
+          || (v.missingStates || ["unknown"]).join(",");
+        const signature = `${violatedLabel}:${constraintKey}`;
         const existing = agg.get(signature);
         const ts = new Date(s.startedAt).toISOString();
         if (existing) {
@@ -460,7 +461,7 @@ export function getLearnedPatterns(): { failureToFix: LearnedPattern[] } {
           if (ts > existing.lastSeen) existing.lastSeen = ts;
         } else {
           agg.set(signature, {
-            violation: `${violatedLabel}: ${(v.missingStates || ["unknown"]).join(", ")}`,
+            violation: `${violatedLabel}: ${constraintKey}`,
             fixPath: v.fixPath,
             count: 1,
             intents: new Set([s.intent]),

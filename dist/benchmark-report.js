@@ -34,11 +34,16 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.benchmarkReport = benchmarkReport;
-/** Format benchmark results as a readable report
- * @protocol pre_states=["BENCHMARKS_LOADED"] post_states=["REPORT_FORMATTED"]
- */
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
+/**
+ * Format benchmark results as a readable report.
+ * @requires PASS_RATE_DATA @produces BENCHMARK_REPORT
+ * @purpose Generate human-readable benchmark summary with pass/fail breakdown
+ * @tags benchmark, report, formatting
+ * @useWhen generating benchmark reports
+ * @protocol pre_states=["BENCHMARKS_LOADED"] post_states=["REPORT_FORMATTED"]
+ */
 function benchmarkReport() {
     const resultsDir = path.resolve(process.cwd(), "bench");
     if (!fs.existsSync(resultsDir))
