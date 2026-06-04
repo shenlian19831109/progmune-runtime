@@ -189,8 +189,8 @@ export function selectCapabilityChains(intent, ir, maxChains = 5) {
     seeds = seeds.slice(0, graph.size > 500 ? 30 : 15);
     const allNodes = [...graph.values()];
     const chains = [];
-    const BEAM_WIDTH = graph.size > 500 ? 3 : 5; // narrower beam for large IR
-    const MAX_CHAIN_LEN = 8;
+    const BEAM_WIDTH = graph.size > 500 ? 3 : 5;
+    const MAX_CHAIN_LEN = 5; // keep chains focused — prevent noise accumulation
     for (const seed of seeds) {
         let beam = [{
                 chain: [seed],

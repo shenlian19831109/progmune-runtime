@@ -715,10 +715,13 @@ export function extractIRWithTypes(projectRoot: string): {
     }
 
     // Strategy 4: Infer requires/produces from function name prefix
+    // Mark as derived so Strategy 5 can skip these (name-derived labels are
+    // too generic for cross-function data-flow inheritance).
     if (!f.requires || f.requires.length === 0) {
       for (const [re, label] of CONSUMER_PREFIXES) {
         if (re.test(f.name)) {
           f.requires = [label];
+          (f as any)._requiresDerived = true;
           break;
         }
       }
@@ -727,13 +730,17 @@ export function extractIRWithTypes(projectRoot: string): {
       for (const [re, label] of PRODUCER_PREFIXES) {
         if (re.test(f.name)) {
           f.produces = [label];
+          (f as any)._producesDerived = true;
           break;
         }
       }
     }
   }
 
-  // Strategy 5: Cross-function data-flow inference — if A calls B, inherit B's requires/produces
+  // Strategy 5: Cross-function data-flow inference — if A calls B, inherit
+  // B's requires/produces ONLY if B has EXPLICIT annotations (JSDoc or @protocol).
+  // Skip name-derived labels — they're too generic (e.g., "DATA", "CREATED")
+  // and produce noisy chains.
   const nameToFunc = new Map<string, (typeof funcs)[0]>();
   for (const f of funcs) nameToFunc.set(f.name, f);
 
@@ -742,13 +749,14 @@ export function extractIRWithTypes(projectRoot: string): {
     for (const calleeName of f.calls) {
       const callee = nameToFunc.get(calleeName);
       if (!callee) continue;
-      // If caller lacks requires but callee has them, inherit
-      if ((!f.requires || f.requires.length === 0) && callee.requires && callee.requires.length > 0) {
-        f.requires = [...new Set([...(f.requires || []), ...callee.requires])];
+      // Only inherit from callees with explicit (non-derived) annotations
+      const hasExplicitR = callee.requires && callee.requires.length > 0 && !(callee as any)._requiresDerived;
+      const hasExplicitP = callee.produces && callee.produces.length > 0 && !(callee as any)._producesDerived;
+      if ((!f.requires || f.requires.length === 0) && hasExplicitR) {
+        f.requires = [...new Set([...(f.requires || []), ...callee.requires!])];
       }
-      // If caller lacks produces but callee produces something, inherit
-      if ((!f.produces || f.produces.length === 0) && callee.produces && callee.produces.length > 0) {
-        f.produces = [...new Set([...(f.produces || []), ...callee.produces])];
+      if ((!f.produces || f.produces.length === 0) && hasExplicitP) {
+        f.produces = [...new Set([...(f.produces || []), ...callee.produces!])];
       }
     }
   }

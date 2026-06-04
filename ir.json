@@ -341,7 +341,8 @@
       "purpose": "scan dir",
       "produces": [
         "EXTRACTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "formatAuditResult",
@@ -1280,6 +1281,7 @@
       "produces": [
         "DATA"
       ],
+      "_producesDerived": true,
       "requires": [
         "PARENT_BRANCH"
       ]
@@ -1597,7 +1599,8 @@
       ],
       "produces": [
         "EXTRACTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "deriveMetadata",
@@ -1721,7 +1724,8 @@
       ],
       "produces": [
         "EXECUTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "replaySession",
@@ -2007,7 +2011,8 @@
       "purpose": "get import path",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "emitCode",
@@ -2102,7 +2107,8 @@
       "purpose": "load metrics",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "saveMetrics",
@@ -2134,9 +2140,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "SAVED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "recordGeneration",
@@ -2376,7 +2384,8 @@
       "purpose": "extract i r python",
       "produces": [
         "EXTRACTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "parseCapabilityFromJSDoc",
@@ -2482,7 +2491,8 @@
       ],
       "produces": [
         "EXTRACTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "getTypeDetail",
@@ -2520,7 +2530,8 @@
       "purpose": "get type detail",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "getParamType",
@@ -2549,7 +2560,8 @@
       "purpose": "get param type",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "getParamTypeDetail",
@@ -2578,7 +2590,8 @@
       "purpose": "get param type detail",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "getReturnType",
@@ -2609,7 +2622,8 @@
       "purpose": "get return type",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "getReturnTypeDetail",
@@ -2640,7 +2654,8 @@
       "purpose": "get return type detail",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "deriveInputs",
@@ -2726,7 +2741,8 @@
       "purpose": "extract direct calls",
       "produces": [
         "EXTRACTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "extractIR",
@@ -2907,7 +2923,8 @@
       ],
       "produces": [
         "EXTRACTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "extractSignatureFromDts",
@@ -2950,7 +2967,8 @@
       ],
       "produces": [
         "EXTRACTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "classifyError",
@@ -3241,9 +3259,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "VALIDATION_RESULT"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "saveCheckpoint",
@@ -3283,9 +3303,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "SAVED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "loadCheckpoint",
@@ -3319,9 +3341,7 @@
       "produces": [
         "DATA"
       ],
-      "requires": [
-        "DATA"
-      ]
+      "_producesDerived": true
     },
     {
       "name": "clearCheckpoint",
@@ -3352,9 +3372,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "DELETED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "recordFailure",
@@ -3736,7 +3758,8 @@
       "purpose": "compute a c l",
       "produces": [
         "RESULT"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "getLearnedPatterns",
@@ -3928,6 +3951,7 @@
       "produces": [
         "CREATED"
       ],
+      "_producesDerived": true,
       "requires": [
         "FAILURE_DATA"
       ]
@@ -4367,10 +4391,7 @@
         "find",
         "session"
       ],
-      "purpose": "main",
-      "produces": [
-        "DATA"
-      ]
+      "purpose": "main"
     },
     {
       "name": "main",
@@ -4411,11 +4432,11 @@
         "generate_500"
       ],
       "purpose": "main",
-      "produces": [
-        "EXTRACTED"
-      ],
       "requires": [
-        "DATA"
+        "INTENT"
+      ],
+      "produces": [
+        "ACTION_PLAN"
       ]
     },
     {
@@ -4457,11 +4478,11 @@
         "generate"
       ],
       "purpose": "main",
-      "produces": [
-        "EXTRACTED"
-      ],
       "requires": [
-        "DATA"
+        "INTENT"
+      ],
+      "produces": [
+        "ACTION_PLAN"
       ]
     },
     {
@@ -4655,9 +4676,7 @@
       "requires": [
         "INPUT"
       ],
-      "produces": [
-        "CREATED"
-      ]
+      "_requiresDerived": true
     },
     {
       "name": "getReceivedHashes",
@@ -4682,7 +4701,8 @@
       ],
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "saveReceivedHashes",
@@ -4717,9 +4737,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "SAVED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "importFingerprints",
@@ -4762,12 +4784,6 @@
       "tags": [
         "immune",
         "receiver"
-      ],
-      "produces": [
-        "DATA"
-      ],
-      "requires": [
-        "INPUT"
       ]
     },
     {
@@ -4800,12 +4816,6 @@
       "tags": [
         "immune",
         "receiver"
-      ],
-      "produces": [
-        "EXTRACTED"
-      ],
-      "requires": [
-        "INPUT"
       ]
     },
     {
@@ -4832,7 +4842,8 @@
       ],
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "getInstanceId",
@@ -4861,7 +4872,8 @@
       "purpose": "get instance id",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "getReportCursor",
@@ -4886,7 +4898,8 @@
       "purpose": "get report cursor",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "saveReportCursor",
@@ -4927,9 +4940,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "SAVED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "extractFingerprints",
@@ -4973,7 +4988,8 @@
       "purpose": "extract fingerprints",
       "produces": [
         "EXTRACTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "reportFingerprints",
@@ -5022,10 +5038,7 @@
         "immune",
         "reporter"
       ],
-      "purpose": "preview fingerprints",
-      "produces": [
-        "EXTRACTED"
-      ]
+      "purpose": "preview fingerprints"
     },
     {
       "name": "loadIR",
@@ -5057,7 +5070,8 @@
       ],
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "countExported",
@@ -5319,7 +5333,8 @@
       ],
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "verifyFingerprint",
@@ -5364,9 +5379,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "VALIDATION_RESULT"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "verifyAllFingerprints",
@@ -5617,9 +5634,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "VALIDATION_RESULT"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "applyRateLimit",
@@ -5642,9 +5661,11 @@
       "requires": [
         "CONFIG"
       ],
+      "_requiresDerived": true,
       "produces": [
         "EXECUTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "estimateTokens",
@@ -5871,9 +5892,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "createLogger",
@@ -5906,9 +5929,7 @@
       "produces": [
         "CREATED"
       ],
-      "requires": [
-        "DATA"
-      ]
+      "_producesDerived": true
     },
     {
       "name": "runTest",
@@ -5949,9 +5970,11 @@
       "requires": [
         "CONFIG"
       ],
+      "_requiresDerived": true,
       "produces": [
         "EXECUTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "main",
@@ -6039,9 +6062,7 @@
       "produces": [
         "DATA"
       ],
-      "requires": [
-        "DATA"
-      ]
+      "_producesDerived": true
     },
     {
       "name": "saveEpisodes",
@@ -6071,9 +6092,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "SAVED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "recordEpisode",
@@ -6179,9 +6202,7 @@
       "produces": [
         "DATA"
       ],
-      "requires": [
-        "DATA"
-      ]
+      "_producesDerived": true
     },
     {
       "name": "pruneEpisodicMemory",
@@ -6207,12 +6228,6 @@
       "tags": [
         "memory",
         "layer"
-      ],
-      "requires": [
-        "DATA"
-      ],
-      "produces": [
-        "DATA"
       ]
     },
     {
@@ -6245,9 +6260,7 @@
       "produces": [
         "DATA"
       ],
-      "requires": [
-        "DATA"
-      ]
+      "_producesDerived": true
     },
     {
       "name": "saveSemantic",
@@ -6277,9 +6290,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "SAVED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "consolidateSemantic",
@@ -6320,13 +6335,7 @@
         "memory",
         "layer"
       ],
-      "purpose": "consolidate semantic",
-      "requires": [
-        "DATA"
-      ],
-      "produces": [
-        "DATA"
-      ]
+      "purpose": "consolidate semantic"
     },
     {
       "name": "findSemanticTemplate",
@@ -7270,13 +7279,7 @@
         "obs",
         "web"
       ],
-      "purpose": "json reply",
-      "requires": [
-        "DATA"
-      ],
-      "produces": [
-        "SAVED"
-      ]
+      "purpose": "json reply"
     },
     {
       "name": "handleAPI",
@@ -7356,6 +7359,7 @@
       "produces": [
         "DATA"
       ],
+      "_producesDerived": true,
       "requires": [
         "BRANCH_LIST"
       ]
@@ -7399,10 +7403,11 @@
       ],
       "purpose": "handle ledger a p i",
       "requires": [
-        "DATA"
+        "SESSION_DATA",
+        "SESSION_CORPUS"
       ],
       "produces": [
-        "SAVED"
+        "SESSION_LIST"
       ]
     },
     {
@@ -7443,10 +7448,11 @@
       ],
       "purpose": "handle consistency a p i",
       "requires": [
-        "DATA"
+        "SESSION_DATA",
+        "SESSION_CORPUS"
       ],
       "produces": [
-        "SAVED"
+        "SESSION_LIST"
       ]
     },
     {
@@ -7486,10 +7492,11 @@
       ],
       "purpose": "handle diff a p i",
       "requires": [
-        "DATA"
+        "SESSION_DATA",
+        "SESSION_CORPUS"
       ],
       "produces": [
-        "SAVED"
+        "SESSION_LIST"
       ]
     },
     {
@@ -7524,13 +7531,7 @@
         "obs",
         "web"
       ],
-      "purpose": "handle replay a p i",
-      "requires": [
-        "DATA"
-      ],
-      "produces": [
-        "SAVED"
-      ]
+      "purpose": "handle replay a p i"
     },
     {
       "name": "server",
@@ -7600,7 +7601,8 @@
       "purpose": "load protocols from file",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "loadProtocolsFromIR",
@@ -7629,7 +7631,8 @@
       "purpose": "load protocols from i r",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "runDemo",
@@ -7682,9 +7685,11 @@
       "requires": [
         "CONFIG"
       ],
+      "_requiresDerived": true,
       "produces": [
         "EXECUTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "buildCompactFuncList",
@@ -7719,7 +7724,8 @@
       ],
       "produces": [
         "CREATED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "semanticMatch",
@@ -7755,9 +7761,6 @@
       "tags": [
         "planner",
         "prompts"
-      ],
-      "produces": [
-        "DATA"
       ]
     },
     {
@@ -7793,7 +7796,8 @@
       ],
       "produces": [
         "CREATED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "buildProtocolChainHint",
@@ -7829,7 +7833,8 @@
       ],
       "produces": [
         "CREATED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "enrichActions",
@@ -7950,7 +7955,8 @@
       ],
       "produces": [
         "EXTRACTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "correctFunctionNames",
@@ -8051,9 +8057,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "VALIDATION_RESULT"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "loadProtocols",
@@ -8090,6 +8098,7 @@
       "produces": [
         "DATA"
       ],
+      "_producesDerived": true,
       "requires": [
         "PROJECT_CONFIG"
       ]
@@ -8142,9 +8151,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "VALIDATION_RESULT"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "attemptSSGRepair",
@@ -8202,12 +8213,6 @@
       "purpose": "SSG 确定性修复：当协议违规有已知修复路径时，自动插入缺失函数 */",
       "tags": [
         "planner"
-      ],
-      "produces": [
-        "DATA"
-      ],
-      "requires": [
-        "DATA"
       ]
     },
     {
@@ -8359,7 +8364,8 @@
       ],
       "produces": [
         "CREATED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "invalidateProtocolCache",
@@ -8519,10 +8525,7 @@
         "python",
         "emitter"
       ],
-      "purpose": "python value",
-      "produces": [
-        "FORMATTED"
-      ]
+      "purpose": "python value"
     },
     {
       "name": "emitPython",
@@ -8572,9 +8575,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "suggestRepairs",
@@ -8812,9 +8817,11 @@
       "requires": [
         "CONFIG"
       ],
+      "_requiresDerived": true,
       "produces": [
         "EXECUTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "validateProposal",
@@ -8859,9 +8866,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "VALIDATION_RESULT"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "generateRepairSummary",
@@ -8980,10 +8989,7 @@
         "repair",
         "proposal"
       ],
-      "purpose": "try parse rejection",
-      "produces": [
-        "EXTRACTED"
-      ]
+      "purpose": "try parse rejection"
     },
     {
       "name": "jaccardSimilarity",
@@ -9039,11 +9045,11 @@
         "report"
       ],
       "purpose": "main",
-      "produces": [
-        "EXTRACTED"
-      ],
       "requires": [
         "CORPUS"
+      ],
+      "produces": [
+        "FINGERPRINT_REPORT"
       ]
     },
     {
@@ -9149,9 +9155,11 @@
       "requires": [
         "CONFIG"
       ],
+      "_requiresDerived": true,
       "produces": [
         "EXECUTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "assertLedgerConsistency",
@@ -9309,9 +9317,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "VALIDATION_RESULT"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "assertLedgerInvariants",
@@ -9451,7 +9461,8 @@
       "purpose": "generate attempt id",
       "produces": [
         "CREATED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "generateSessionId",
@@ -9477,7 +9488,8 @@
       "purpose": "generate session id",
       "produces": [
         "CREATED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "generatePlannerSeed",
@@ -9518,7 +9530,8 @@
       "purpose": "generate planner seed",
       "produces": [
         "CREATED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "runAndCheck",
@@ -9602,6 +9615,7 @@
       "produces": [
         "DATA"
       ],
+      "_producesDerived": true,
       "requires": [
         "STRING_A"
       ]
@@ -9801,7 +9815,8 @@
       "purpose": "find compatible var",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "runSemanticTest",
@@ -9840,9 +9855,11 @@
       "requires": [
         "CONFIG"
       ],
+      "_requiresDerived": true,
       "produces": [
         "EXECUTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "ensureDir",
@@ -9991,7 +10008,8 @@
       ],
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "listSnapshots",
@@ -10021,7 +10039,8 @@
       ],
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "diffSnapshots",
@@ -10063,7 +10082,8 @@
       ],
       "requires": [
         "DATA"
-      ]
+      ],
+      "_requiresDerived": true
     },
     {
       "name": "summarizeSnapshot",
@@ -10124,7 +10144,8 @@
       ],
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "getTopology",
@@ -10153,7 +10174,8 @@
       "purpose": "get topology",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "rebuildTopology",
@@ -10179,10 +10201,7 @@
         "semantic",
         "topology"
       ],
-      "purpose": "rebuild topology",
-      "produces": [
-        "CREATED"
-      ]
+      "purpose": "rebuild topology"
     },
     {
       "name": "SemanticTopology.build",
@@ -10410,9 +10429,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "formatSessionTimeline",
@@ -10460,9 +10481,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "pad",
@@ -10538,9 +10561,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "formatGenomeSummary",
@@ -10577,9 +10602,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "barChart",
@@ -10681,9 +10708,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "formatAntibodyStats",
@@ -10721,9 +10750,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "formatHeatmap",
@@ -10762,9 +10793,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "loadProtocols",
@@ -10792,7 +10825,8 @@
       "purpose": "load protocols",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "formatStateTransitionPathFromLedger",
@@ -10830,9 +10864,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "formatStateTransitions",
@@ -10875,9 +10911,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "sleep",
@@ -10925,9 +10963,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "DELETED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "svlLabel",
@@ -11019,9 +11059,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "formatActionList",
@@ -11056,9 +11098,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "formatAdaptationDiff",
@@ -11103,9 +11147,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "formatAnomalyReport",
@@ -11147,9 +11193,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "formatImmuneResponse",
@@ -11185,9 +11233,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "formatReplayProgress",
@@ -11226,9 +11276,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "replaySession",
@@ -11272,13 +11324,7 @@
         "semantic",
         "trace"
       ],
-      "purpose": "replay session",
-      "requires": [
-        "DATA"
-      ],
-      "produces": [
-        "DELETED"
-      ]
+      "purpose": "replay session"
     },
     {
       "name": "formatLedgerReplayValidation",
@@ -11334,9 +11380,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "formatLedgerStats",
@@ -11379,9 +11427,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "formatCrossSessionQuery",
@@ -11432,9 +11482,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "formatSnapshotList",
@@ -11468,9 +11520,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "formatSnapshotDiff",
@@ -11518,9 +11572,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "formatSessionValidation",
@@ -11577,9 +11633,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "main",
@@ -11642,10 +11700,11 @@
       ],
       "purpose": "main",
       "requires": [
-        "DATA"
+        "SESSION_DATA",
+        "SESSION_CORPUS"
       ],
       "produces": [
-        "FORMATTED"
+        "SESSION_LIST"
       ]
     },
     {
@@ -11672,7 +11731,8 @@
       "purpose": "load contracts",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "matchIntent",
@@ -11709,7 +11769,8 @@
       "purpose": "match intent",
       "requires": [
         "DATA"
-      ]
+      ],
+      "_requiresDerived": true
     },
     {
       "name": "checkSemantic",
@@ -11756,9 +11817,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "VALIDATION_RESULT"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "countResolved",
@@ -12027,9 +12090,11 @@
       "requires": [
         "CONFIG"
       ],
+      "_requiresDerived": true,
       "produces": [
         "EXECUTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "computeDelta",
@@ -12072,7 +12137,8 @@
       "purpose": "compute delta",
       "produces": [
         "RESULT"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "findFixPathStatic",
@@ -12430,7 +12496,8 @@
       ],
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "findConsumer",
@@ -12468,7 +12535,8 @@
       ],
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "findViolations",
@@ -12500,7 +12568,8 @@
       ],
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "findTransition",
@@ -12537,7 +12606,8 @@
       ],
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "listAllStates",
@@ -12571,7 +12641,8 @@
       ],
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "explainRejection",
@@ -12664,7 +12735,8 @@
       "purpose": "parse protocols from j s o n",
       "produces": [
         "EXTRACTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "StateMachineValidator.setNamespaceInitialState",
@@ -13886,7 +13958,8 @@
       ],
       "produces": [
         "CREATED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "scoreNode",
@@ -14025,7 +14098,8 @@
       ],
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "findProducers",
@@ -14068,7 +14142,8 @@
       ],
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "findConsumers",
@@ -14111,7 +14186,8 @@
       ],
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "selectCapabilityChains",
@@ -14175,6 +14251,7 @@
       "produces": [
         "DATA"
       ],
+      "_producesDerived": true,
       "requires": [
         "TEXT"
       ]
@@ -14212,9 +14289,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "pad",
@@ -14627,9 +14706,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "VALIDATION_RESULT"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "validateAction",
@@ -14764,9 +14845,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "VALIDATION_RESULT"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "main",
@@ -14895,7 +14978,8 @@
       "purpose": "readdir sync",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "readFileSync",
@@ -14921,7 +15005,8 @@
       "purpose": "read file sync",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "relative",
@@ -14992,7 +15077,8 @@
       "purpose": "parse",
       "produces": [
         "EXTRACTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "cwd",
@@ -15070,9 +15156,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "SAVED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "stringify",
@@ -15098,7 +15186,8 @@
       "purpose": "stringify",
       "produces": [
         "FORMATTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "random",
@@ -15141,7 +15230,8 @@
       "purpose": "find index",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "log",
@@ -15266,7 +15356,8 @@
       "purpose": "scan action",
       "produces": [
         "EXTRACTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "convert",
@@ -15339,7 +15430,8 @@
       "purpose": "create hash",
       "produces": [
         "CREATED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "execSync",
@@ -15374,7 +15466,8 @@
       "purpose": "get full text",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "getComment",
@@ -15390,7 +15483,8 @@
       "purpose": "get comment",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "getElementTypeNode",
@@ -15406,7 +15500,8 @@
       "purpose": "get element type node",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "getTypeNode",
@@ -15422,7 +15517,8 @@
       "purpose": "get type node",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "getReturnTypeNode",
@@ -15438,7 +15534,8 @@
       "purpose": "get return type node",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "getBody",
@@ -15454,7 +15551,8 @@
       "purpose": "get body",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "forEachDescendant",
@@ -15483,7 +15581,8 @@
       "purpose": "get classes",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "getMethods",
@@ -15499,7 +15598,8 @@
       "purpose": "get methods",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "getImportDeclarations",
@@ -15515,7 +15615,8 @@
       "purpose": "get import declarations",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "getModuleSpecifierValue",
@@ -15531,7 +15632,8 @@
       "purpose": "get module specifier value",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "getNamedImports",
@@ -15547,7 +15649,8 @@
       "purpose": "get named imports",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "getModuleSpecifierSourceFile",
@@ -15563,7 +15666,8 @@
       "purpose": "get module specifier source file",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "resolveModuleName",
@@ -15622,7 +15726,8 @@
       "purpose": "get namespace import",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "addSourceFileAtPathIfExists",
@@ -15664,7 +15769,8 @@
       "purpose": "get interfaces",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "getTypeAliases",
@@ -15680,7 +15786,8 @@
       "purpose": "get type aliases",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "getExportedDeclarations",
@@ -15696,7 +15803,8 @@
       "purpose": "get exported declarations",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "from",
@@ -15754,7 +15862,8 @@
       "purpose": "parse int",
       "produces": [
         "EXTRACTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "flatMap",
@@ -15867,7 +15976,8 @@
       "purpose": "create",
       "produces": [
         "CREATED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "modify",
@@ -15910,9 +16020,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "SAVED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "end",
@@ -15954,7 +16066,8 @@
       "purpose": "create pure context",
       "produces": [
         "CREATED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "apply",
@@ -15971,9 +16084,11 @@
       "requires": [
         "CONFIG"
       ],
+      "_requiresDerived": true,
       "produces": [
         "EXECUTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "flat",
@@ -16002,7 +16117,8 @@
       "purpose": "get trace",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "capabilityMatch",
@@ -16044,7 +16160,8 @@
       "purpose": "get masked func list",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "collectImports",
@@ -16100,9 +16217,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "DELETED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "deepEqual",
@@ -16131,7 +16250,8 @@
       "purpose": "parse float",
       "produces": [
         "EXTRACTED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "clear",
@@ -16148,9 +16268,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "DELETED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "build",
@@ -16166,7 +16288,8 @@
       "purpose": "build",
       "produces": [
         "CREATED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "toLocaleString",
@@ -16192,7 +16315,8 @@
       "purpose": "merge states",
       "requires": [
         "DATA"
-      ]
+      ],
+      "_requiresDerived": true
     },
     {
       "name": "write",
@@ -16209,9 +16333,11 @@
       "requires": [
         "DATA"
       ],
+      "_requiresDerived": true,
       "produces": [
         "SAVED"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "norm",
@@ -16272,7 +16398,8 @@
       "purpose": "hash",
       "requires": [
         "INPUT"
-      ]
+      ],
+      "_requiresDerived": true
     },
     {
       "name": "sqrt",
@@ -16301,7 +16428,8 @@
       "purpose": "find similar",
       "produces": [
         "DATA"
-      ]
+      ],
+      "_producesDerived": true
     },
     {
       "name": "bigrams",

@@ -204,8 +204,8 @@ export function selectCapabilityChains(
 
   const allNodes = [...graph.values()];
   const chains: CapabilityChain[] = [];
-  const BEAM_WIDTH = graph.size > 500 ? 3 : 5; // narrower beam for large IR
-  const MAX_CHAIN_LEN = 8;
+  const BEAM_WIDTH = graph.size > 500 ? 3 : 5;
+  const MAX_CHAIN_LEN = 5; // keep chains focused — prevent noise accumulation
 
   for (const seed of seeds) {
     // ── Priority-queue (beam) search: forward trace ──
