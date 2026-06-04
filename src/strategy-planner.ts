@@ -11,6 +11,7 @@
 import { jaccardSimilarity, extractKeywords } from "./utils";
 import { getFailureAdjustedCredit } from "./feedback";
 import { getTopology } from "./semantic-topology";
+import { getConstraints, applyConstraints } from "./planner-constraints";
 import type { FunctionInfo } from "./extract-ir";
 
 interface CapabilityNode {
@@ -85,10 +86,14 @@ function scoreNode(node: CapabilityNode, intentLower: string, keywords: string[]
   }
   // Require at least one match to be relevant
   if (!hasMatch) return 0;
-  // Dynamic Credit: multiply by actual success rate
+  // L3: Dynamic Credit — multiply by actual success rate
   const successRate = getFailureAdjustedCredit(node.name);
   const creditFactor = 0.3 + successRate * 0.7;
-  return score * creditFactor;
+  score *= creditFactor;
+  // Rule → Planner: apply mined rule constraints
+  const constraints = getConstraints();
+  const { multiplier } = applyConstraints(node.name, node.purpose, constraints);
+  return score * multiplier;
 }
 
 /** Pick the highest-scoring node from a list. */
