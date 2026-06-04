@@ -440,8 +440,10 @@ export async function plan(userIntent) {
     }
     // 提前加载协议（后续多处使用）
     const { protocols, namespaceInitialStates } = loadProtocols(ir);
+    // Graph ON/OFF switch for ROI experiments
+    const graphMode = process.env.PROGMUNE_GRAPH_MODE || "on";
     // ── 抗体免疫系统：查询历史失败模式，注入知识回流 ──
-    const antibodies = queryAntibodies(userIntent, "ACL-3");
+    const antibodies = graphMode !== "off" ? queryAntibodies(userIntent, "ACL-3") : [];
     let antibodyHint = "";
     if (antibodies.length > 0) {
         const top = antibodies[0];
@@ -642,8 +644,8 @@ export async function plan(userIntent) {
     scored.sort((a, b) => b.score - a.score);
     const topFuncs = scored.slice(0, 15);
     // Strategy Layer: select capability chain (local, 0 LLM calls)
-    const chains = selectCapabilityChains(userIntent, ir, 3);
-    const strategyHint = formatChainHint(chains);
+    const chains = graphMode !== "off" ? selectCapabilityChains(userIntent, ir, 3) : [];
+    const strategyHint = graphMode !== "off" ? formatChainHint(chains) : "";
     // Action Layer: filter functions to those in selected chains
     let chainFuncs = topFuncs;
     if (chains.length > 0) {
@@ -824,6 +826,8 @@ ${RETRY_HINT}
         const preCheckRules = new Map();
         for (const p of protocols)
             preCheckRules.set(p.function, p.protocol);
+        // Protocol pre-check: state must accumulate across the sequence
+        const preCheckCtx = { ledger: [], currentState: rebuildState([], namespaceInitialStates) };
         const preCheckErrors = [];
         for (let ai = 0; ai < filtered.length; ai++) {
             const a = filtered[ai];
@@ -837,24 +841,27 @@ ${RETRY_HINT}
             if (def.params && a.args && a.args.length !== def.params.length) {
                 preCheckErrors.push(`${a.function}: 参数数量错误 (期望${def.params.length}, 实际${a.args.length})`);
             }
-            // Protocol pre-check: verify function is callable in current namespace state
+            // Protocol pre-check: verify function is callable in ACCUMULATED namespace state
             if (def.protocol && preCheckRules.size > 0) {
-                const ctx = { ledger: [], currentState: rebuildState([], namespaceInitialStates) };
-                const { valid, rejection } = validateTransition(ctx, a.function, ai, preCheckRules, namespaceInitialStates);
+                const { valid, transition, rejection } = validateTransition(preCheckCtx, a.function, ai, preCheckRules, namespaceInitialStates);
                 if (!valid && rejection) {
                     preCheckErrors.push(`${a.function}: 协议违规 — 需要先调用 ${rejection.fixPath?.join(" → ") || "?"}`);
                 }
+                // Update accumulated state: validateTransition computes statesAfter but doesn't mutate ctx
+                if (transition.valid) {
+                    preCheckCtx.currentState = transition.statesAfter;
+                }
             }
         }
-        // P0: Strategy Enforcement — LLM must follow recommended chain
+        // Strategy hint: warn if LLM missed all recommended nodes (soft guidance, not hard fail)
         if (chains.length > 0 && chains[0].nodes.length >= 2) {
             const topChain = chains[0];
-            const requiredFuncs = topChain.nodes.map(n => n.name);
+            const recommendedFuncs = topChain.nodes.map(n => n.name);
             const chosenFuncs = filtered.filter(a => a.kind === "call").map(a => a.function);
-            const missing = requiredFuncs.filter(fn => !chosenFuncs.includes(fn));
-            if (missing.length >= requiredFuncs.length * 0.5) {
-                // More than 50% of the chain is missing — LLM ignored the strategy
-                preCheckErrors.push(`策略违规: 推荐链 ${topChain.explanation}，但缺少 ${missing.join(", ")}`);
+            const hasAny = recommendedFuncs.some(fn => chosenFuncs.includes(fn));
+            if (!hasAny && recommendedFuncs.length >= 3) {
+                // Only warn if LLM ignored the ENTIRE chain (none of the recommended functions used)
+                console.error(`⚠️ 策略提示: LLM 未使用推荐链中的任何函数 (推荐: ${topChain.explanation})`);
             }
         }
         // 1) 基础序列校验

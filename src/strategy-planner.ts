@@ -15,13 +15,15 @@ import { getConstraints, applyConstraints } from "./planner-constraints";
 import type { FunctionInfo } from "./extract-ir";
 
 interface CapabilityNode {
-  name: string;           // function name
-  purpose: string;        // what it does
-  tags: string[];         // domain tags
-  requires: string[];     // capability preconditions
-  produces: string[];     // capability outcomes
-  useWhen: string[];      // scenarios when to use
-  score: number;          // relevance to intent (computed)
+  name: string;
+  purpose: string;
+  tags: string[];
+  requires: string[];
+  produces: string[];
+  useWhen: string[];
+  score: number;
+  /** Whether requires/produces come from explicit annotations (JSDoc/@protocol) */
+  hasExplicitMeta: boolean;
 }
 
 interface CapabilityChain {
@@ -45,6 +47,8 @@ function buildCapabilityGraph(ir: FunctionInfo[]): Map<string, CapabilityNode> {
       produces: f.produces || [],
       useWhen: f.useWhen || [],
       score: 0,
+      hasExplicitMeta: !(f as any)._requiresDerived && !(f as any)._producesDerived
+        && (f.requires || []).length > 0 && (f.produces || []).length > 0,
     });
   }
   return graph;
@@ -86,6 +90,8 @@ function scoreNode(node: CapabilityNode, intentLower: string, keywords: string[]
   }
   // Require at least one match to be relevant
   if (!hasMatch) return 0;
+  // Bonus: explicit annotations are more reliable than derived ones
+  if (node.hasExplicitMeta) score *= 1.3;
   // L3: Dynamic Credit — multiply by actual success rate
   const successRate = getFailureAdjustedCredit(node.name);
   const creditFactor = 0.3 + successRate * 0.7;

@@ -703,28 +703,36 @@ export function extractIRWithTypes(projectRoot) {
             }
         }
     }
-    // Strategy 5: Cross-function data-flow inference — if A calls B, inherit
-    // B's requires/produces ONLY if B has EXPLICIT annotations (JSDoc or @protocol).
-    // Skip name-derived labels — they're too generic (e.g., "DATA", "CREATED")
-    // and produce noisy chains.
+    // Strategy 5: Cross-function data-flow — only inherit from callees
+    // with BOTH explicit requires AND produces (true pipeline functions).
+    // Single-hop only. Prevents noise: generateAttemptId→CREATED won't propagate.
     const nameToFunc = new Map();
     for (const f of funcs)
         nameToFunc.set(f.name, f);
     for (const f of funcs) {
+        if ((f.requires || []).length > 0 && (f.produces || []).length > 0)
+            continue; // already annotated
         if (!f.calls || f.calls.length === 0)
             continue;
+        let inherited = 0;
+        const MAX_INHERIT = 2; // cap edges per function
         for (const calleeName of f.calls) {
+            if (inherited >= MAX_INHERIT)
+                break;
             const callee = nameToFunc.get(calleeName);
             if (!callee)
                 continue;
-            // Only inherit from callees with explicit (non-derived) annotations
+            // Require BOTH explicit requires AND produces — true pipeline node
             const hasExplicitR = callee.requires && callee.requires.length > 0 && !callee._requiresDerived;
             const hasExplicitP = callee.produces && callee.produces.length > 0 && !callee._producesDerived;
-            if ((!f.requires || f.requires.length === 0) && hasExplicitR) {
-                f.requires = [...new Set([...(f.requires || []), ...callee.requires])];
+            if (!hasExplicitR || !hasExplicitP)
+                continue;
+            if (!f.requires || f.requires.length === 0) {
+                f.requires = [...new Set(callee.requires)];
+                inherited++;
             }
-            if ((!f.produces || f.produces.length === 0) && hasExplicitP) {
-                f.produces = [...new Set([...(f.produces || []), ...callee.produces])];
+            if (!f.produces || f.produces.length === 0) {
+                f.produces = [...new Set(callee.produces)];
             }
         }
     }

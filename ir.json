@@ -21,6 +21,7 @@
     "SVL": "src/failure-corpus.ts",
     "SessionAttempt": "src/failure-corpus.ts",
     "AntibodyLevel": "src/failure-corpus.ts",
+    "ImmuneMetrics": "src/immune-metrics.ts",
     "LedgerFingerprint": "src/ledger-registry.ts",
     "FingerprintVerifyResult": "src/ledger-registry.ts",
     "RegistrySummary": "src/ledger-registry.ts",
@@ -4509,6 +4510,178 @@
       ]
     },
     {
+      "name": "generateMermaid",
+      "params": [
+        {
+          "name": "ir",
+          "type": "any[]",
+          "typeDetail": "any[]"
+        },
+        {
+          "name": "opts",
+          "type": "VizOptions",
+          "typeDetail": "VizOptions"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/graph-viz.ts",
+      "calls": [
+        "slice",
+        "filter",
+        "join",
+        "replace",
+        "push",
+        "map",
+        "includes"
+      ],
+      "exported": true,
+      "inputs": [
+        "VizOptions"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Generate a Mermaid flowchart of the capability graph. /",
+      "tags": [
+        "graph",
+        "viz"
+      ],
+      "produces": [
+        "CREATED"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "generateDOT",
+      "params": [
+        {
+          "name": "ir",
+          "type": "any[]",
+          "typeDetail": "any[]"
+        },
+        {
+          "name": "opts",
+          "type": "VizOptions",
+          "typeDetail": "VizOptions"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/graph-viz.ts",
+      "calls": [
+        "slice",
+        "filter",
+        "push",
+        "includes",
+        "join"
+      ],
+      "exported": true,
+      "inputs": [
+        "VizOptions"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Generate a DOT graph for use with Graphviz. /",
+      "tags": [
+        "graph",
+        "viz"
+      ],
+      "produces": [
+        "CREATED"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "generateChainViz",
+      "params": [
+        {
+          "name": "intent",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "ir",
+          "type": "any[]",
+          "typeDetail": "any[]"
+        },
+        {
+          "name": "maxChains",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/graph-viz.ts",
+      "calls": [
+        "selectCapabilityChains",
+        "toFixed",
+        "replace",
+        "join",
+        "slice",
+        "push",
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "number"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Generate a focused visualization of a single intent's chain. /",
+      "tags": [
+        "graph",
+        "viz"
+      ],
+      "produces": [
+        "CREATED"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "generateGraphReport",
+      "params": [
+        {
+          "name": "ir",
+          "type": "any[]",
+          "typeDetail": "any[]"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/graph-viz.ts",
+      "calls": [
+        "filter",
+        "includes",
+        "set",
+        "get",
+        "slice",
+        "sort",
+        "entries",
+        "round",
+        "map",
+        "join"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Generate a summary report of the capability graph. /",
+      "tags": [
+        "graph",
+        "viz"
+      ],
+      "produces": [
+        "CREATED"
+      ],
+      "_producesDerived": true
+    },
+    {
       "name": "computeHealthScore",
       "params": [
         {
@@ -4640,6 +4813,97 @@
       "produces": [
         "HEATMAP",
         "HEATMAP_DATA"
+      ]
+    },
+    {
+      "name": "computeImmuneMetrics",
+      "params": [],
+      "returnType": "ImmuneMetrics",
+      "returnTypeDetail": "ImmuneMetrics",
+      "file": "src/immune-metrics.ts",
+      "calls": [
+        "getAntibodyStats",
+        "getFailureGenome",
+        "getLearnedPatterns",
+        "getFailureAdjustedCredit",
+        "round"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "ImmuneMetrics"
+      ],
+      "purpose": "Compute live immune metrics from the current corpus. /",
+      "tags": [
+        "immune",
+        "metrics"
+      ],
+      "produces": [
+        "RESULT"
+      ],
+      "_producesDerived": true,
+      "requires": [
+        "ANTIBODY_DATA"
+      ]
+    },
+    {
+      "name": "formatImmuneMetrics",
+      "params": [
+        {
+          "name": "m",
+          "type": "ImmuneMetrics",
+          "typeDetail": "ImmuneMetrics"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/immune-metrics.ts",
+      "calls": [
+        "toLocaleString",
+        "toFixed",
+        "join"
+      ],
+      "exported": true,
+      "inputs": [
+        "ImmuneMetrics"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Format immune metrics as a human-readable report. /",
+      "tags": [
+        "immune",
+        "metrics"
+      ],
+      "requires": [
+        "DATA"
+      ],
+      "_requiresDerived": true,
+      "produces": [
+        "FORMATTED"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "reportImmuneMetrics",
+      "params": [],
+      "returnType": "ImmuneMetrics",
+      "returnTypeDetail": "ImmuneMetrics",
+      "file": "src/immune-metrics.ts",
+      "calls": [
+        "computeImmuneMetrics",
+        "error",
+        "formatImmuneMetrics"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "ImmuneMetrics"
+      ],
+      "purpose": "Print current immune metrics to stderr. */",
+      "tags": [
+        "immune",
+        "metrics"
       ]
     },
     {
@@ -7692,6 +7956,167 @@
       "_producesDerived": true
     },
     {
+      "name": "deriveConstraints",
+      "params": [],
+      "returnType": "PlannerConstraint[]",
+      "returnTypeDetail": "PlannerConstraint[]",
+      "file": "src/planner-constraints.ts",
+      "calls": [
+        "mineRules",
+        "min",
+        "push",
+        "max"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "PlannerConstraint"
+      ],
+      "purpose": "Derive planner constraints from mined rules. Each mined rule becomes a scoring constraint that modifies how functions are weighted during capability graph construction. /",
+      "tags": [
+        "planner",
+        "constraints"
+      ]
+    },
+    {
+      "name": "applyConstraints",
+      "params": [
+        {
+          "name": "funcName",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "funcPurpose",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "constraints",
+          "type": "PlannerConstraint[]",
+          "typeDetail": "PlannerConstraint[]"
+        }
+      ],
+      "returnType": "{ multiplier: number; matchedRules: string[] }",
+      "returnTypeDetail": "{ multiplier: number; matchedRules: string[] }",
+      "file": "src/planner-constraints.ts",
+      "calls": [
+        "toLowerCase",
+        "includes",
+        "push",
+        "max"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string",
+        "PlannerConstraint"
+      ],
+      "outputs": [
+        "{ multiplier: number; matchedRules: string[] }"
+      ],
+      "purpose": "Apply constraints to adjust a function's score. Returns a multiplier in [0, 1] — multiply the raw score by this. /",
+      "tags": [
+        "planner",
+        "constraints"
+      ],
+      "requires": [
+        "CONFIG"
+      ],
+      "_requiresDerived": true,
+      "produces": [
+        "EXECUTED"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "formatConstraints",
+      "params": [
+        {
+          "name": "constraints",
+          "type": "PlannerConstraint[]",
+          "typeDetail": "PlannerConstraint[]"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/planner-constraints.ts",
+      "calls": [
+        "slice",
+        "push",
+        "toFixed",
+        "join"
+      ],
+      "exported": true,
+      "inputs": [
+        "PlannerConstraint"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Get a human-readable summary of active constraints. /",
+      "tags": [
+        "planner",
+        "constraints"
+      ],
+      "requires": [
+        "DATA"
+      ],
+      "_requiresDerived": true,
+      "produces": [
+        "FORMATTED"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "getConstraints",
+      "params": [],
+      "returnType": "PlannerConstraint[]",
+      "returnTypeDetail": "PlannerConstraint[]",
+      "file": "src/planner-constraints.ts",
+      "calls": [
+        "deriveConstraints"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "PlannerConstraint"
+      ],
+      "tags": [
+        "planner",
+        "constraints"
+      ],
+      "purpose": "get constraints",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "clearConstraintsCache",
+      "params": [],
+      "returnType": "void",
+      "returnTypeDetail": "void",
+      "file": "src/planner-constraints.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [],
+      "outputs": [],
+      "tags": [
+        "planner",
+        "constraints"
+      ],
+      "purpose": "clear constraints cache",
+      "requires": [
+        "DATA"
+      ],
+      "_requiresDerived": true,
+      "produces": [
+        "DELETED"
+      ],
+      "_producesDerived": true
+    },
+    {
       "name": "buildCompactFuncList",
       "params": [
         {
@@ -8285,6 +8710,7 @@
         "set",
         "rebuildState",
         "validateTransition",
+        "some",
         "validateActionSequence",
         "flat",
         "recordFailure",
@@ -10148,6 +10574,98 @@
       "_producesDerived": true
     },
     {
+      "name": "irHash",
+      "params": [
+        {
+          "name": "ir",
+          "type": "any[]",
+          "typeDetail": "any[]"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/semantic-topology.ts",
+      "calls": [
+        "digest",
+        "update",
+        "createHash",
+        "stringify",
+        "map"
+      ],
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "semantic",
+        "topology"
+      ],
+      "purpose": "ir hash"
+    },
+    {
+      "name": "serializeTopology",
+      "params": [
+        {
+          "name": "topo",
+          "type": "SemanticTopology",
+          "typeDetail": "SemanticTopology"
+        },
+        {
+          "name": "hash",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "void",
+      "returnTypeDetail": "void",
+      "file": "src/semantic-topology.ts",
+      "calls": [
+        "existsSync",
+        "mkdirSync",
+        "map",
+        "entries",
+        "writeFileSync",
+        "stringify"
+      ],
+      "exported": false,
+      "inputs": [
+        "SemanticTopology",
+        "string"
+      ],
+      "outputs": [],
+      "tags": [
+        "semantic",
+        "topology"
+      ],
+      "purpose": "serialize topology"
+    },
+    {
+      "name": "deserializeTopology",
+      "params": [],
+      "returnType": "SemanticTopology | null",
+      "returnTypeDetail": "SemanticTopology | null",
+      "file": "src/semantic-topology.ts",
+      "calls": [
+        "existsSync",
+        "parse",
+        "readFileSync",
+        "set",
+        "max",
+        "get"
+      ],
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "SemanticTopology"
+      ],
+      "tags": [
+        "semantic",
+        "topology"
+      ],
+      "purpose": "deserialize topology"
+    },
+    {
       "name": "getTopology",
       "params": [
         {
@@ -10160,7 +10678,15 @@
       "returnTypeDetail": "SemanticTopology",
       "file": "src/semantic-topology.ts",
       "calls": [
-        "build"
+        "irHash",
+        "existsSync",
+        "parse",
+        "readFileSync",
+        "deserializeTopology",
+        "error",
+        "now",
+        "build",
+        "serializeTopology"
       ],
       "exported": true,
       "inputs": [],
@@ -10190,7 +10716,9 @@
       "returnTypeDetail": "SemanticTopology",
       "file": "src/semantic-topology.ts",
       "calls": [
-        "build"
+        "build",
+        "irHash",
+        "serializeTopology"
       ],
       "exported": true,
       "inputs": [],
@@ -10202,6 +10730,396 @@
         "topology"
       ],
       "purpose": "rebuild topology"
+    },
+    {
+      "name": "SemanticTopology.build",
+      "params": [
+        {
+          "name": "ir",
+          "type": "any[]",
+          "typeDetail": "any[]"
+        }
+      ],
+      "returnType": "void",
+      "returnTypeDetail": "void",
+      "file": "src/semantic-topology.ts",
+      "exported": false,
+      "calls": [],
+      "purpose": "Build topology from IR data */",
+      "tags": [
+        "semantic",
+        "topology"
+      ]
+    },
+    {
+      "name": "SemanticTopology.addEdge",
+      "params": [
+        {
+          "name": "a",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "b",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "weight",
+          "type": "number",
+          "typeDetail": "number"
+        },
+        {
+          "name": "reason",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "void",
+      "returnTypeDetail": "void",
+      "file": "src/semantic-topology.ts",
+      "exported": false,
+      "calls": [],
+      "tags": [
+        "semantic",
+        "topology"
+      ],
+      "purpose": "semantic topology.add edge"
+    },
+    {
+      "name": "SemanticTopology.similarity",
+      "params": [
+        {
+          "name": "funcA",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "funcB",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/semantic-topology.ts",
+      "exported": false,
+      "calls": [],
+      "purpose": "Get similarity between two functions (0-1). */",
+      "tags": [
+        "semantic",
+        "topology"
+      ]
+    },
+    {
+      "name": "SemanticTopology.findSimilar",
+      "params": [
+        {
+          "name": "funcName",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "topN",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "{ name: string; similarity: number }[]",
+      "returnTypeDetail": "{ name: string; similarity: number }[]",
+      "file": "src/semantic-topology.ts",
+      "exported": false,
+      "calls": [],
+      "purpose": "Find top N most similar functions to a given function. */",
+      "tags": [
+        "semantic",
+        "topology"
+      ]
+    },
+    {
+      "name": "SemanticTopology.capabilityMatch",
+      "params": [
+        {
+          "name": "produce",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "require",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/semantic-topology.ts",
+      "exported": false,
+      "calls": [],
+      "purpose": "Semantic match: two capability labels are related via topology. */",
+      "tags": [
+        "semantic",
+        "topology"
+      ]
+    },
+    {
+      "name": "SemanticTopology.build",
+      "params": [
+        {
+          "name": "ir",
+          "type": "any[]",
+          "typeDetail": "any[]"
+        }
+      ],
+      "returnType": "void",
+      "returnTypeDetail": "void",
+      "file": "src/semantic-topology.ts",
+      "exported": false,
+      "calls": [],
+      "purpose": "Build topology from IR data */",
+      "tags": [
+        "semantic",
+        "topology"
+      ]
+    },
+    {
+      "name": "SemanticTopology.addEdge",
+      "params": [
+        {
+          "name": "a",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "b",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "weight",
+          "type": "number",
+          "typeDetail": "number"
+        },
+        {
+          "name": "reason",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "void",
+      "returnTypeDetail": "void",
+      "file": "src/semantic-topology.ts",
+      "exported": false,
+      "calls": [],
+      "tags": [
+        "semantic",
+        "topology"
+      ],
+      "purpose": "semantic topology.add edge"
+    },
+    {
+      "name": "SemanticTopology.similarity",
+      "params": [
+        {
+          "name": "funcA",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "funcB",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/semantic-topology.ts",
+      "exported": false,
+      "calls": [],
+      "purpose": "Get similarity between two functions (0-1). */",
+      "tags": [
+        "semantic",
+        "topology"
+      ]
+    },
+    {
+      "name": "SemanticTopology.findSimilar",
+      "params": [
+        {
+          "name": "funcName",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "topN",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "{ name: string; similarity: number }[]",
+      "returnTypeDetail": "{ name: string; similarity: number }[]",
+      "file": "src/semantic-topology.ts",
+      "exported": false,
+      "calls": [],
+      "purpose": "Find top N most similar functions to a given function. */",
+      "tags": [
+        "semantic",
+        "topology"
+      ]
+    },
+    {
+      "name": "SemanticTopology.capabilityMatch",
+      "params": [
+        {
+          "name": "produce",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "require",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/semantic-topology.ts",
+      "exported": false,
+      "calls": [],
+      "purpose": "Semantic match: two capability labels are related via topology. */",
+      "tags": [
+        "semantic",
+        "topology"
+      ]
+    },
+    {
+      "name": "SemanticTopology.build",
+      "params": [
+        {
+          "name": "ir",
+          "type": "any[]",
+          "typeDetail": "any[]"
+        }
+      ],
+      "returnType": "void",
+      "returnTypeDetail": "void",
+      "file": "src/semantic-topology.ts",
+      "exported": false,
+      "calls": [],
+      "purpose": "Build topology from IR data */",
+      "tags": [
+        "semantic",
+        "topology"
+      ]
+    },
+    {
+      "name": "SemanticTopology.addEdge",
+      "params": [
+        {
+          "name": "a",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "b",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "weight",
+          "type": "number",
+          "typeDetail": "number"
+        },
+        {
+          "name": "reason",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "void",
+      "returnTypeDetail": "void",
+      "file": "src/semantic-topology.ts",
+      "exported": false,
+      "calls": [],
+      "tags": [
+        "semantic",
+        "topology"
+      ],
+      "purpose": "semantic topology.add edge"
+    },
+    {
+      "name": "SemanticTopology.similarity",
+      "params": [
+        {
+          "name": "funcA",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "funcB",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/semantic-topology.ts",
+      "exported": false,
+      "calls": [],
+      "purpose": "Get similarity between two functions (0-1). */",
+      "tags": [
+        "semantic",
+        "topology"
+      ]
+    },
+    {
+      "name": "SemanticTopology.findSimilar",
+      "params": [
+        {
+          "name": "funcName",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "topN",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "{ name: string; similarity: number }[]",
+      "returnTypeDetail": "{ name: string; similarity: number }[]",
+      "file": "src/semantic-topology.ts",
+      "exported": false,
+      "calls": [],
+      "purpose": "Find top N most similar functions to a given function. */",
+      "tags": [
+        "semantic",
+        "topology"
+      ]
+    },
+    {
+      "name": "SemanticTopology.capabilityMatch",
+      "params": [
+        {
+          "name": "produce",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "require",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/semantic-topology.ts",
+      "exported": false,
+      "calls": [],
+      "purpose": "Semantic match: two capability labels are related via topology. */",
+      "tags": [
+        "semantic",
+        "topology"
+      ]
     },
     {
       "name": "SemanticTopology.build",
@@ -13989,7 +14907,9 @@
         "jaccardSimilarity",
         "split",
         "filter",
-        "getFailureAdjustedCredit"
+        "getFailureAdjustedCredit",
+        "getConstraints",
+        "applyConstraints"
       ],
       "exported": false,
       "inputs": [
@@ -14213,6 +15133,7 @@
       "file": "src/strategy-planner.ts",
       "calls": [
         "trim",
+        "now",
         "getTopology",
         "toLowerCase",
         "extractKeywords",
@@ -14222,6 +15143,7 @@
         "sort",
         "filter",
         "slice",
+        "parseInt",
         "findConsumers",
         "add",
         "push",
@@ -14232,7 +15154,8 @@
         "unshift",
         "join",
         "map",
-        "has"
+        "has",
+        "error"
       ],
       "exported": true,
       "inputs": [
@@ -15950,6 +16873,16 @@
       "purpose": "min"
     },
     {
+      "name": "toLocaleString",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "tags": [
+        "(external)"
+      ],
+      "purpose": "to locale string"
+    },
+    {
       "name": "hostname",
       "params": [],
       "returnType": "any",
@@ -16290,16 +17223,6 @@
         "CREATED"
       ],
       "_producesDerived": true
-    },
-    {
-      "name": "toLocaleString",
-      "file": "(external)",
-      "calls": [],
-      "external": true,
-      "tags": [
-        "(external)"
-      ],
-      "purpose": "to locale string"
     },
     {
       "name": "mergeStates",

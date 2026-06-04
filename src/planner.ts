@@ -464,8 +464,11 @@ export async function plan(userIntent: string): Promise<PlanResult> {
   // 提前加载协议（后续多处使用）
   const { protocols, namespaceInitialStates } = loadProtocols(ir);
 
+  // Graph ON/OFF switch for ROI experiments
+  const graphMode = process.env.PROGMUNE_GRAPH_MODE || "on";
+
   // ── 抗体免疫系统：查询历史失败模式，注入知识回流 ──
-  const antibodies = queryAntibodies(userIntent, "ACL-3");
+  const antibodies = graphMode !== "off" ? queryAntibodies(userIntent, "ACL-3") : [];
   let antibodyHint = "";
   if (antibodies.length > 0) {
     const top = antibodies[0];
@@ -655,8 +658,8 @@ export async function plan(userIntent: string): Promise<PlanResult> {
   const topFuncs = scored.slice(0, 15);
 
   // Strategy Layer: select capability chain (local, 0 LLM calls)
-  const chains = selectCapabilityChains(userIntent, ir, 3);
-  const strategyHint = formatChainHint(chains);
+  const chains = graphMode !== "off" ? selectCapabilityChains(userIntent, ir, 3) : [];
+  const strategyHint = graphMode !== "off" ? formatChainHint(chains) : "";
 
   // Action Layer: filter functions to those in selected chains
   let chainFuncs = topFuncs;

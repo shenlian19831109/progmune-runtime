@@ -10,6 +10,7 @@
 import { jaccardSimilarity, extractKeywords } from "./utils";
 import { getFailureAdjustedCredit } from "./feedback";
 import { getTopology } from "./semantic-topology";
+import { getConstraints, applyConstraints } from "./planner-constraints";
 /** Build a capability graph from IR functions. */
 function buildCapabilityGraph(ir) {
     const SKIP_FILES = new Set(["src/strategy-planner.ts", "src/planner.ts"]);
@@ -27,6 +28,8 @@ function buildCapabilityGraph(ir) {
             produces: f.produces || [],
             useWhen: f.useWhen || [],
             score: 0,
+            hasExplicitMeta: !f._requiresDerived && !f._producesDerived
+                && (f.requires || []).length > 0 && (f.produces || []).length > 0,
         });
     }
     return graph;
@@ -89,10 +92,17 @@ function scoreNode(node, intentLower, keywords) {
     // Require at least one match to be relevant
     if (!hasMatch)
         return 0;
-    // Dynamic Credit: multiply by actual success rate
+    // Bonus: explicit annotations are more reliable than derived ones
+    if (node.hasExplicitMeta)
+        score *= 1.3;
+    // L3: Dynamic Credit — multiply by actual success rate
     const successRate = getFailureAdjustedCredit(node.name);
     const creditFactor = 0.3 + successRate * 0.7;
-    return score * creditFactor;
+    score *= creditFactor;
+    // Rule → Planner: apply mined rule constraints
+    const constraints = getConstraints();
+    const { multiplier } = applyConstraints(node.name, node.purpose, constraints);
+    return score * multiplier;
 }
 /** Pick the highest-scoring node from a list. */
 function topByScore(nodes) {
