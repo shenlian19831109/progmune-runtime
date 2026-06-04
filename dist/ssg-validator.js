@@ -207,27 +207,29 @@ export function validateTransition(ctx, candidateFunctionName, actionIndex, rule
         valid: true,
         ruleHash,
     };
-    // Invariant-1: delta consistency
-    const deltaMap = fromSnapshot(currentState);
-    applyTransitionDelta(deltaMap, transition);
-    const computedAfter = toSnapshot(deltaMap);
-    if (!deepEqualSnapshots(computedAfter, statesAfter)) {
-        const detail = `[Invariant-1] Delta consistency violation in validateTransition for "${candidateFunctionName}":\n` +
-            `  acquired: [${acquired.join(", ")}]  invalidated: [${invalidated.join(", ")}]\n` +
-            `  expected after: ${JSON.stringify(computedAfter)}\n` +
-            `  actual after:   ${JSON.stringify(statesAfter)}`;
-        // P0 Strict Mode: fail fast on kernel corruption
-        if (process.env.PROGMUNE_STRICT !== "false") {
-            throw new InvariantViolationError(detail, {
-                invariant: "delta-consistency",
-                namespace: ns,
-                function: candidateFunctionName,
-                expected: computedAfter,
-                actual: statesAfter,
-            });
+    // Invariant-1: delta consistency (skip in fast mode for performance)
+    if (process.env.PROGMUNE_FAST_VALIDATE !== "true") {
+        const deltaMap = fromSnapshot(currentState);
+        applyTransitionDelta(deltaMap, transition);
+        const computedAfter = toSnapshot(deltaMap);
+        if (!deepEqualSnapshots(computedAfter, statesAfter)) {
+            const detail = `[Invariant-1] Delta consistency violation in validateTransition for "${candidateFunctionName}":\n` +
+                `  acquired: [${acquired.join(", ")}]  invalidated: [${invalidated.join(", ")}]\n` +
+                `  expected after: ${JSON.stringify(computedAfter)}\n` +
+                `  actual after:   ${JSON.stringify(statesAfter)}`;
+            // P0 Strict Mode: fail fast on kernel corruption
+            if (process.env.PROGMUNE_STRICT !== "false") {
+                throw new InvariantViolationError(detail, {
+                    invariant: "delta-consistency",
+                    namespace: ns,
+                    function: candidateFunctionName,
+                    expected: computedAfter,
+                    actual: statesAfter,
+                });
+            }
+            console.error(detail);
         }
-        console.error(detail);
-    }
+    } // PROGMUNE_FAST_VALIDATE guard
     return { valid: true, transition };
 }
 // ── checkLedgerConsistency: Invariant-0 + Invariant-1 over full ledger ──

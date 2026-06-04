@@ -154,12 +154,15 @@ export function selectCapabilityChains(intent, ir, maxChains = 5) {
     // Guard: null/undefined/empty intent
     if (!intent || typeof intent !== "string" || !intent.trim())
         return [];
-    // Ensure semantic topology is built before any capability matching
+    // Ensure semantic topology is built (cached after first build)
+    const startTopo = Date.now();
     getTopology(ir);
+    const topoMs = Date.now() - startTopo;
     const intentLower = intent.toLowerCase();
     const keywords = extractKeywords(intent);
     const graph = buildCapabilityGraph(ir);
     // Score all nodes
+    const startScore = Date.now();
     for (const node of graph.values()) {
         node.score = scoreNode(node, intentLower, keywords);
     }
@@ -186,11 +189,13 @@ export function selectCapabilityChains(intent, ir, maxChains = 5) {
     if (seeds.length === 0) {
         seeds = [...graph.values()].slice(0, 3);
     }
-    seeds = seeds.slice(0, graph.size > 500 ? 30 : 15);
+    seeds = seeds.slice(0, graph.size > 1000 ? 10 : graph.size > 500 ? 20 : 15);
     const allNodes = [...graph.values()];
     const chains = [];
     const BEAM_WIDTH = graph.size > 500 ? 3 : 5;
-    const MAX_CHAIN_LEN = 5; // keep chains focused — prevent noise accumulation
+    const MAX_CHAIN_LEN = parseInt(process.env.PROGMUNE_MAX_CHAIN_LEN || "5", 10);
+    // Heuristic pruning: drop nodes below this score to avoid noise accumulation
+    const SCORE_FLOOR = graph.size > 1000 ? 0.2 : 0;
     for (const seed of seeds) {
         let beam = [{
                 chain: [seed],
@@ -215,7 +220,7 @@ export function selectCapabilityChains(intent, ir, maxChains = 5) {
                 // Strategy 1: direct data flow (produces → requires)
                 for (const p of current.produces) {
                     const consumers = findConsumers(graph, p, allNodes)
-                        .filter(c => !entry.visited.has(c.name));
+                        .filter(c => !entry.visited.has(c.name) && c.score >= SCORE_FLOOR);
                     for (const consumer of consumers) {
                         const newVisited = new Set(entry.visited);
                         newVisited.add(consumer.name);
@@ -234,10 +239,10 @@ export function selectCapabilityChains(intent, ir, maxChains = 5) {
                     try {
                         const topo = getTopology();
                         const similar = topo.findSimilar(current.name, 10)
-                            .filter(s => !entry.visited.has(s.name) && s.similarity > 0.2);
-                        for (const s of similar) {
+                            .filter(s => !entry.visited.has(s.name) && s.similarity > 0.25);
+                        for (const s of similar.slice(0, 3)) {
                             const bestMatch = graph.get(s.name);
-                            if (bestMatch && bestMatch.score > 0) {
+                            if (bestMatch && bestMatch.score >= SCORE_FLOOR) {
                                 const newVisited = new Set(entry.visited);
                                 newVisited.add(bestMatch.name);
                                 nextBeam.push({
@@ -303,6 +308,10 @@ export function selectCapabilityChains(intent, ir, maxChains = 5) {
             seen.add(key);
             unique.push(c);
         }
+    }
+    const scoreMs = Date.now() - startScore;
+    if (graph.size > 200) {
+        console.error(`[Strategy] ${graph.size} nodes | topo=${topoMs}ms score=${scoreMs}ms | ${unique.length} chains`);
     }
     return unique.slice(0, maxChains);
 }
