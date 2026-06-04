@@ -660,6 +660,29 @@ export function getAntibodyStats(): {
   return { totalHits, fastPathHits, injectedHintHits, totalLLMCallsSaved, totalTokensSaved, byLevel, topSignatures };
 }
 
+// ── Edge rejection tracking ──
+const MEMORY_DIR = path.join(CORPUS_DIR, "..", ".progmune_memory");
+const REJECTION_FILE = path.join(MEMORY_DIR, "edge_rejections.json");
+
+/** Record that the LLM rejected a recommended edge (picked a different function). */
+export function recordEdgeRejection(producer: string, consumer: string): void {
+  withLock("edge_rejections", () => {
+    let data: Record<string, number> = {};
+    try { if (fs.existsSync(REJECTION_FILE)) data = JSON.parse(fs.readFileSync(REJECTION_FILE, "utf-8")); } catch {}
+    const key = `${producer}→${consumer}`;
+    data[key] = (data[key] || 0) + 1;
+    fs.writeFileSync(REJECTION_FILE, JSON.stringify(data, null, 2));
+  });
+}
+
+function getEdgeRejections(): Map<string, number> {
+  try {
+    if (!fs.existsSync(REJECTION_FILE)) return new Map();
+    const data = JSON.parse(fs.readFileSync(REJECTION_FILE, "utf-8"));
+    return new Map(Object.entries(data));
+  } catch { return new Map(); }
+}
+
 /** Edge confidence from session history.
  *  For each producer→consumer edge, returns how often it appeared
  *  in successful vs failed chains. Used by Capability Ranking. */
@@ -696,20 +719,25 @@ export function getEdgeConfidence(producer?: string, consumer?: string): EdgeCon
     }
   }
 
+  const rejections = getEdgeRejections();
+
   const results: EdgeConfidence[] = [];
   for (const [key, stats] of edgeStats) {
     const [prod, cons] = key.split("→");
     if (producer && prod !== producer) continue;
     if (consumer && cons !== consumer) continue;
-    const total = stats.success + stats.failure;
+    // Factor in explicit LLM rejections as negative signal
+    const rejectionCount = rejections.get(key) || 0;
+    const effectiveSuccess = Math.max(0, stats.success - rejectionCount);
+    const effectiveTotal = stats.success + stats.failure + rejectionCount;
     // Laplace smoothing: Beta(1,1) prior
-    const confidence = (stats.success + 1) / (total + 2);
+    const confidence = (effectiveSuccess + 1) / (effectiveTotal + 2);
     results.push({
       producer: prod,
       consumer: cons,
       successCount: stats.success,
       failureCount: stats.failure,
-      totalCount: total,
+      totalCount: effectiveTotal,
       confidence: Math.round(confidence * 100) / 100,
     });
   }

@@ -61,8 +61,15 @@ function scoreNode(node: CapabilityNode, intentLower: string, keywords: string[]
   let score = 0;
   let hasMatch = false;
   // Name match
+  const nameWords = node.name.replace(/([A-Z])/g, " $1").toLowerCase().split(/[\s_]+/).filter(w => w.length > 1);
   for (const kw of keywords) {
-    if (node.name.toLowerCase().includes(kw)) { score += 1; hasMatch = true; }
+    // Substring match
+    if (node.name.toLowerCase().includes(kw)) {
+      score += 1;
+      hasMatch = true;
+      // Exact word match: e.g., "extract" in "extractIR" → +100% bonus
+      if (nameWords.includes(kw)) score += 2;
+    }
     const js = jaccardSimilarity(node.name.toLowerCase(), kw);
     if (js > 0.2) { score += js; hasMatch = true; }
   }
