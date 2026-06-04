@@ -373,13 +373,25 @@ export function selectCapabilityChains(
   return unique.slice(0, maxChains);
 }
 
-/** Format chains as a hint for the LLM prompt. */
+/** Format chains as a routing hint (not full path).
+ *  Only shows top 2 high-confidence next steps per entry,
+ *  so the LLM gets guidance without being forced into long chains. */
 export function formatChainHint(chains: CapabilityChain[]): string {
   if (chains.length === 0) return "";
-  const lines = ["\n推荐能力链 (Strategy Layer):"];
-  for (let i = 0; i < Math.min(chains.length, 3); i++) {
-    const c = chains[i];
-    lines.push(`  ${i + 1}. ${c.explanation} (★${c.score.toFixed(1)})`);
+  const lines = ["\n建议的下一步调用 (已从历史成功链中验证):"];
+  const shown = new Set<string>();
+  for (const c of chains.slice(0, 3)) {
+    const pairs: string[] = [];
+    for (let i = 0; i < c.nodes.length - 1 && pairs.length < 2; i++) {
+      const key = `${c.nodes[i].name}→${c.nodes[i + 1].name}`;
+      if (!shown.has(key)) {
+        shown.add(key);
+        pairs.push(`${c.nodes[i].name} → ${c.nodes[i + 1].name}`);
+      }
+    }
+    if (pairs.length > 0) {
+      lines.push(`  ${pairs.join("  |  ")} (★${c.score.toFixed(1)})`);
+    }
   }
   return lines.join("\n");
 }
