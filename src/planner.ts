@@ -862,9 +862,13 @@ ${RETRY_HINT}
       }
       // Protocol pre-check: verify function is callable in ACCUMULATED namespace state
       if (def.protocol && preCheckRules.size > 0) {
-        const { valid, rejection } = validateTransition(preCheckCtx, a.function, ai, preCheckRules, namespaceInitialStates);
+        const { valid, transition, rejection } = validateTransition(preCheckCtx, a.function, ai, preCheckRules, namespaceInitialStates);
         if (!valid && rejection) {
           preCheckErrors.push(`${a.function}: 协议违规 — 需要先调用 ${rejection.fixPath?.join(" → ") || "?"}`);
+        }
+        // Update accumulated state: validateTransition computes statesAfter but doesn't mutate ctx
+        if (transition.valid) {
+          preCheckCtx.currentState = transition.statesAfter;
         }
       }
     }
