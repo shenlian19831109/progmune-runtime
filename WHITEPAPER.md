@@ -1,540 +1,542 @@
-# Progmune Runtime（免序）
+# Progmune Runtime
 
-## 面向生成式代码的程序免疫学
+## 程序免疫学：面向生成式代码的可验证运行时
 
-### Program Immunology for Generative Code
+### Program Immunology: A Verifiable Runtime for Generative Code
 
-### 技术白皮书 v2.1.4
+### 技术白皮书 v2.5.x
 
 开源地址：https://github.com/shenlian19831109/progmune-runtime
 npm install progmune-runtime
+测试: 66 单元测试 | CI/CD: GitHub Actions | 覆盖率门禁: 8%
 
-## 中文版
+---
 
-### 摘要
+## 摘要
 
-Progmune Runtime 提出了一种新的范式：程序免疫学——确保 AI 生成代码安全可靠的系统性方法。
+Progmune Runtime 提出了一种新的范式：**程序免疫学**——确保 AI 生成代码安全可靠的系统性方法。
 
-受生物免疫系统分层防御机制的启发，Progmune 构建了一个约束导向的程序合成运行时，在多个层级上强制执行语义有效性：从符号存在性和类型兼容性，到数据流正确性和协议合法性。系统将大语言模型从不受约束的代码生成器，降级为在程序实际结构（中间表示）所定义的封闭世界中运行的受限启发式提议器。
+受生物免疫系统分层防御机制的启发，Progmune 构建了一个约束导向的程序合成运行时，在多个层级上强制执行语义有效性。系统将大语言模型从不受约束的代码生成器，降级为在程序中间表示（IR）所定义的封闭世界中运行的**受限启发式提议器**。
 
-我们引入语义有效性级别（SVL）作为 AI 生成代码正确性的形式化分类法，并展示了一个能够拦截非法状态迁移的语义状态图（SSG）的工作原型。Progmune 代表了迈向神经符号编译器基础设施的一步——在这里，代码生成不是由统计概率支配，而是由可验证的真相支配。
+v2.5.x 引入了三个关键突破：(1) **知识回流闭环**——抗体从 Failure Corpus 自动生成后，通过 L1/L2/L3 三层机制回流到规划器；(2) **能力图自动派生**——元数据覆盖率从 30% 提升至 62%（produces）和 46%（requires）;(3) **拓扑持久化缓存**——2000 节点冷启动从 19 秒降至后续运行的 <50ms。
 
-### 1. 问题声明
+---
 
-#### 1.1 AI 代码生成中的开放世界谬误
+## 1. 问题声明
 
-大语言模型（LLM）在生成代码时，隐含地基于一个开放世界假设运行：训练数据中见过的任何函数、库或 API 模式都被假定在当前上下文中可用。这一假设导致四类典型错误：
+### 1.1 AI 代码生成中的开放世界谬误
 
-*   **符号幻觉（SVL-1）**：调用目标项目中不存在的函数或变量
-*   **类型漂移（SVL-2）**：参数数量或类型与实际函数签名不匹配
-*   **数据流污染（SVL-3）**：使用未初始化的变量、创建循环引用或引入死代码路径
-*   **协议违规（SVL-4）**：违反业务步骤的必要顺序——例如，在认证用户之前就签发 JWT 令牌
+大语言模型在生成代码时，隐含地基于开放世界假设运行。这导致四类典型错误：
 
-这些错误并非源于推理失败，而是源于模型缺乏对程序真相的确定性访问。
+| 级别 | 错误类型 | 示例 |
+|------|---------|------|
+| SVL-1 | 符号幻觉 | 调用项目中不存在的函数 |
+| SVL-2 | 类型漂移 | 参数数量或类型不匹配 |
+| SVL-3 | 数据流污染 | 使用未初始化变量，创建循环引用 |
+| SVL-4 | 协议违规 | 在认证用户前签发 JWT 令牌 |
 
-#### 1.2 现有缓解策略的局限性
+### 1.2 现有缓解策略的局限性
 
-当前应对这些错误的策略均为反应式：
+- **事后校验**：在错误生成后检测，无法从源头预防
+- **RAG**：降低但不消除幻觉，模型仍是正确性的唯一仲裁者
+- **迭代提示工程**：无法提供合规性的形式化保证
 
-*   **事后校验**（linter、测试套件、人工审查）：在错误生成后检测，但无法从源头预防
-*   **检索增强生成**（RAG）：将项目上下文注入 prompt，降低但不消除幻觉。模型仍然是正确性的唯一仲裁者
-*   **迭代提示工程**：通过精心设计的指令引导模型行为，但无法提供合规性的形式化保证
+这三种策略都将 LLM 置于系统中心，试图从外部修正其输出。它们缺乏第一性原理的约束机制。
 
-这三种策略都将 LLM 置于系统的中心，试图从外部修正其输出。它们缺乏第一性原理的约束机制。
+### 1.3 核心命题
 
-#### 1.3 核心命题：AI 生成程序必须具备免疫系统
+AI 生成的代码在进入代码库之前，必须先通过一个免疫层——可验证、具备记忆能力、能识别并防御反复出现的错误模式。这一免疫层包含三种能力：
 
-我们提出一个范式转变：程序免疫学（Program Immunology）。AI 生成的代码在进入代码库之前，必须先通过一个免疫层——一个可验证、具备记忆能力的运行时，能够识别、记忆并防御反复出现的错误模式。
+- **天然免疫**：基于模式快速拒绝符号、类型和数据流违规（SVL-1/2/3）
+- **获得性免疫**：从 Failure Corpus 学习，生成特异性抗体，主动预防未来同类错误
+- **免疫记忆**：将成功和失败模式沉淀为持久知识，系统随使用持续进化
 
-这一免疫层由三个相互依赖的能力组成：
+---
 
-*   **天然免疫**：基于模式快速拒绝符号、类型和数据流违规——这是系统内置的防御
-*   **获得性免疫**：从过去的失败中学习（Failure Corpus），生成特异性的防御规则（如协议约束），主动预防未来同类错误
-*   **免疫记忆**：将成功和失败的模式沉淀为持久知识，使系统能够随使用持续进化，越用越可靠
+## 2. 生物学基础与类比
 
-### 2. 生物学基础与类比
+### 2.1 三层架构
 
-#### 2.1 生物免疫系统的三层架构
+| 生物免疫系统 | 程序免疫 (Progmune) |
+|-------------|-------------------|
+| **物理屏障** | 沙箱、CI/CD 门禁 |
+| **天然免疫** | 约束引擎（IR + SVL-1 至 SVL-3）|
+| **抗原呈递** | Failure Corpus 记录 |
+| **获得性免疫** | SSG 协议引擎 + 抗体注册表 |
+| **免疫记忆** | 三层记忆架构（工作/情景/语义）|
 
-生物免疫系统通过三个递进的层次来保护机体：
+### 2.2 类比的价值与边界
 
-*   **物理屏障**：皮肤、黏膜。非特异性的、预防性的首道防线
-*   **天然免疫**：巨噬细胞、树突状细胞。模式识别受体（PRR）快速识别病原体相关分子模式（PAMP）。反应快，但不够精确
-*   **获得性免疫**：T 细胞、B 细胞。通过基因重排产生高度特异性的受体，识别特定抗原。首次感染后产生免疫记忆，再次暴露时能产生更快、更强的二次应答
+程序免疫系统处理的是形式化的、确定性的程序状态，而非生物化学信号。其学习是基于规则挖掘和模式匹配，而非神经元突触可塑性。
 
-#### 2.2 向程序免疫学的映射
+---
 
-| 生物免疫系统 | 程序免疫 (Progmune) | 映射说明 |
-|---|---|---|
-| **物理屏障** | 沙箱、CI/CD 门禁、权限控制 | 阻止未验证代码进入生产环境的基础工程设施 |
-| **天然免疫** | 约束引擎（IR + SVL-1 至 SVL-3） | 快速自动识别并拒绝幻觉调用、类型错误等——系统内置防御能力 |
-| **抗原呈递** | Failure Corpus 记录 | 错误动作序列被捕获后，其错误类型、状态上下文等"抗原特征"被完整记录 |
-| **获得性免疫** | 语义状态图（SSG） | 从失败语料库中学习，生成特异性协议规则（"抗体"），精确阻止非法状态迁移 |
-| **免疫记忆** | 三层记忆架构 | 情景记忆与语义记忆共同构成系统免疫记忆，在相似场景下无需 LLM 即可快速响应 |
+## 3. 技术架构
 
-#### 2.3 类比的价值与边界
+Progmune Runtime 的架构由六个核心层组成。v2.5.x 在每一层都进行了关键增强。
 
-这个类比的价值在于提供了一个清晰的、可扩展的思维框架：解释为什么静态验证器不够用，以及为什么系统需要学习、记忆和进化。然而，也必须明确其边界：程序免疫系统处理的是形式化的、确定性的程序状态，而非复杂的复杂生物化学信号。其学习是基于规则挖掘和模式匹配，而非生物神经元的突触可塑性。
+### 3.1 IR（程序真相层）——自我模型
 
-### 3. 技术架构与 v2.1.4 核心增强
+中间表示从源文件静态提取，是系统的**唯一真相来源**：
 
-Progmune Runtime 的架构由六个核心层组成，每一层对应特定的验证或学习职责。v2.1.4 版本在此基础上进行了关键增强，以提升系统的智能性、鲁棒性和可扩展性。
+- **符号表**：所有已定义的函数、类、变量及其位置
+- **类型图**：参数类型、返回类型和类型别名
+- **调用图**：函数间的调用关系
+- **能力元数据**：`@requires` / `@produces` / `@purpose` / `@tags` / `@useWhen`
+- **协议注解**：前置状态、后置状态和失效规则
 
-#### 3.1 IR（程序真相层）——自我模型
+**v2.5.x 数据**：519 个函数 | purpose 100% | produces 62% | requires 46% | tags 100%
 
-中间表示（IR）是系统的唯一真相来源，从源文件中静态提取，包含：
+**v2.5.x 增强：自动元数据派生**
 
-*   **符号表**（SymbolTable）：所有已定义的函数、类、变量及其位置
-*   **类型图**（TypeGraph）：参数类型、返回类型和类型别名
-*   **调用图**（CallGraph）：函数间的调用关系
-*   **协议注解**（Protocol Annotations，可选）：用于协议感知合成的前置状态、后置状态和失效规则
+五层自动派生策略：
 
-这是区分自我与非我的基础——系统只允许调用 IR 中明确定义的组件。
+| 策略 | 方法 | 效果 |
+|------|------|------|
+| S1 | `@protocol pre_states` → `@requires` | 直接映射 |
+| S2 | 函数名 → `@purpose`（驼峰拆分）| 100% 覆盖 |
+| S3 | 文件路径 → `@tags` | 100% 覆盖 |
+| S4 | 函数名前缀 → `@requires`/`@produces`（如 `load*` → DATA）| +20% |
+| S5 | 调用图传递继承（仅显式注解）| +5% |
 
-#### 3.2 Action Runtime——确定性合成边界
+### 3.2 Action Runtime——确定性合成边界
 
-LLM 不再生成原始代码或 JSON 字符串，而是调用一组确定性 API：
-
-```
-call(func, ...args)            // 调用函数
-callAssign(func, assignTo, ...) // 调用并绑定结果
-ifElse(condition, thenFn, elseFn) // 条件分支
-assign(target, value)          // 变量赋值
-output(value)                  // 返回值
-```
-
-这些调用在沙箱化的 JavaScript 上下文中执行，运行时将所有调用捕获为结构化的动作树（Action Tree），从源头消除注入漏洞和格式错误。
-
-#### 3.3 Constraint Engine——天然免疫层
-
-此层基于 IR 对动作树执行快速的、基于规则的验证：
-
-*   **SVL-1**（符号存在性）：每个被调用的函数都存在于项目中
-*   **SVL-2**（类型有效性）：参数数量和类型与声明的签名匹配
-*   **SVL-3**（数据流正确性）：变量在使用前已声明；无自引用赋值
-
-#### 3.4 Semantic State Graph（SSG）——获得性免疫层
-
-SSG 建模了系统资源的有效状态及其允许的转移。以认证协议为例：
+LLM 不生成原始代码，而是调用一组确定性 API：
 
 ```
-UNAUTHENTICATED（未认证）
-    ↓  verify_password
-AUTHENTICATED（已认证）
-    ↓  generate_jwt
-TOKEN_ISSUED（令牌已签发）
-    ↓  create_session
-SESSION_ACTIVE（会话已激活）
+call(func, ...args)
+callAssign(func, assignTo, ...)
+ifElse(condition, thenFn, elseFn)
+assign(target, value)
+output(value)
 ```
 
-每个函数声明了 `pre_states`（前置状态）、`post_states`（后置状态）和可选的 `invalidate`（失效状态）规则。SSG 验证器在处理动作树时模拟状态转移，拒绝任何前置状态与当前活跃状态无交集的调用——即使所有其他 SVL 级别均通过。这将验证从静态正确性提升为行为合法性。
+这些调用在沙箱化上下文中执行，运行时捕获为结构化的动作树，从源头消除注入漏洞和格式错误。
 
-**v2.1.4 增强：BFS 协议修复**
+### 3.3 Constraint Engine——天然免疫层
 
-SSG 验证器现在使用广度优先搜索（BFS）寻找多步修复路径，能够自动补全复杂的协议缺失（如 `INIT` -> `EMAIL_OK` -> `PWD_HASHED`），显著提升了系统在面对不完整或模糊意图时的自适应能力。
+基于 IR 对动作树执行快速、基于规则的验证：
 
-#### 3.5 Immune Memory & Failure Corpus——免疫记忆层
+| 级别 | 保证内容 | 验证方式 | 性能 |
+|------|---------|---------|------|
+| **SVL-1** | 无幻觉 API 调用 | IR 符号表查证 | 毫秒级 |
+| **SVL-2** | 无类型/参数数量不匹配 | 签名比对 | 毫秒级 |
+| **SVL-3** | 无未初始化变量/循环引用 | 数据流分析 | 毫秒级 |
+
+### 3.4 Semantic State Graph（SSG）——获得性免疫层
+
+SSG 建模系统资源的有效状态及其允许的转移：
+
+```
+UNAUTHENTICATED → AUTHENTICATED → TOKEN_ISSUED → SESSION_ACTIVE
+```
+
+每个函数声明 `pre_states`、`post_states` 和可选的 `invalidate` 规则。SSG 验证器在处理动作树时模拟状态转移，拒绝任何前置状态与当前活跃状态无交集的调用。
+
+**v2.5.x 增强：Invariant-2（Delta 合法性验证）**
+
+`checkLedgerConsistency` 新增第三层验证——不仅检查快照一致性（Invariant-0）和 Delta 一致性（Invariant-1），还验证 Delta 本身是否合法：
+
+- 每个 `acquired` 状态必须在函数的 `post_states` 中
+- 每个 `invalidated` 状态必须在函数的 `invalidate` 中
+- 拒绝重复 acquire 已存在状态（防止审计绕过）
+
+**性能数据**：增量验证 0.05ms/步 | 全量审计 3ms
+
+**v2.5.x 增强：快速验证模式**
+
+`PROGMUNE_FAST_VALIDATE=true` 可跳过 validateTransition 中冗余的 Invariant-1 检查（由 checkLedgerConsistency 覆盖），适用于极高性能场景。
+
+### 3.5 Immune Memory & Failure Corpus——免疫记忆层
 
 **三层记忆架构**
 
-*   **工作记忆**（Working Memory）：当前会话的变量绑定和用户意图（每会话清除）
-*   **情景记忆**（Episodic Memory）：最近 N 次成功/失败的动作序列，带时间戳和结果标签（定期剪枝）
-*   **语义记忆**（Semantic Memory）：从频繁成功模式中蒸馏出的路径模板和协议规则（离线巩固）
+| 层 | 范围 | 持久化 | 衰减机制 |
+|----|------|--------|---------|
+| 工作记忆 | 每会话变量绑定 | 否 | 会话清除 |
+| 情景记忆 | 最近 N 次执行序列 | JSON 文件 | TTL 30 天，分数 GC |
+| 语义记忆 | 从频繁模式提炼的模板 | JSON 文件 | 关键词聚类合并 |
 
-**失败语料库（Failure Corpus）**
+**v2.5.x 关键修复：SVL-1/2/3 抗体生成**
 
-每次约束违规都被记录：包含意图、IR 摘要、违反的 SVL 级别、错误详情和 SSG 状态。这构成了一项独特资产：一个结构化、带标签的 AI 程序失败数据库。随时间积累，高频失败模式可被挖掘，自动生成候选的协议约束或 SSG 转换规则。
+之前困扰系统最严重的问题：`getLearnedPatterns()` 只处理 SVL-4 违规（`if (v.svl !== 4) continue`），导致 SVL-1/2/3 的修复路径被完全忽略——**数据在增长，但没有在学习**。
 
-**v2.1.4 增强：抗体注册表 (Antibody Registry) 与信用循环 (Credit Loops)**
+**修复**：删除 SVL-4 过滤条件，所有 SVL 级别均生成抗体。
 
-系统自动从 `Failure Corpus` 中提取修复模式，生成 ACL-1~4 置信度分级的“抗体”。高置信度（ACL-4）的抗体可触发“免疫快跑”，绕过 LLM 直接应用验证过的修复路径。同时，引入了**信用循环**机制，根据函数在历史上的成功率动态调整其权重，优化能力链的选择，使得系统在模糊意图下能够更智能地进行规划。
+**修复前**：3 条抗体（全部 SVL-4）| 无法匹配非 SVL-4 意图  
+**修复后**：SVL-1:symbol_existence 抗体（20 次）稳定匹配
 
-#### 3.6 Code Emitter——程序落地层
+**抗体注册表 + 知识回流三层**
 
-将验证通过的动作树确定性地翻译为可执行的 Python 或 TypeScript 代码，处理导入解析、变量作用域、对象字面量生成以及嵌套控制结构的正确缩进。
+| 层级 | 机制 | 触发条件 | 效果 |
+|------|------|---------|------|
+| **L1** | 抗体注入 Planner Prompt | ACL-3+ 匹配 | LLM 收到历史错误警告 + 避错指南 |
+| **L2** | 免疫快速通道 | ACL-4 匹配 | 0 LLM 调用，直接构建已验证动作序列 |
+| **L3** | 信用加权评分 | 所有函数 | Laplace 平滑 + SVL 惩罚 + 时间衰减 |
 
-### 4. 语义有效性级别（SVL）
+**L1 效果**：前 3 条 ACL-3+ 抗体注入，含违规签名、发生次数、具体避错指南。如：
+```
+⚠️ 免疫系统警告：
+1. [ACL-3] SVL-1:symbol_existence（累计 36 次）→ 只使用可用函数列表中的函数名，禁止编造
+2. [ACL-3] F07（累计 22 次）→ 确保在调用 .map/.filter 前检查对象是否为数组
+```
 
-SVL 是 AI 生成代码正确性的形式化分类法，为系统提供分层、可量化的验证保证：
+**L2 效果**：ACL-4 抗体可直接绕过 LLM。当前 1 条 ACL-4 抗体（SVL-4:protocol，16 次，13 个不同意图），在匹配意图中 90% 可触发快速通道。
 
-| 级别 | 名称 | 描述 | 保证内容 |
-|---|---|---|---|
-| SVL-1 | 符号存在性 | 每个被调用的函数、变量和导入在项目中均实际存在 | 无幻觉 API 调用 |
-| SVL-2 | 类型有效性 | 参数数量和类型与声明的签名相匹配 | 无类型不匹配错误 |
-| SVL-3 | 数据流正确性 | 变量在使用前已声明；无循环引用或未初始化访问 | 无 NameError / UnboundLocalError |
-| SVL-4 | 协议合法性 | 函数调用序列符合声明的前/后状态转换规则 | 无非法状态跳转（如认证前签发令牌） |
-| SVL-5（未来） | 语义意图正确性 | 生成代码忠实实现预期业务逻辑 | 远期目标；当前版本通过 SVL-1~4 间接保障 |
+**Laplace 平滑（L3）**
 
-Progmune Runtime v2.1.4 完整保证 SVL-1 至 SVL-3，SVL-4 作为可选协议约束系统实现。SVL-5 为开放性研究方向。
+解决小样本偏差问题：
 
-### 5. 技术路线与未来展望
+$$
+\text{credit} = \frac{\text{weightedSuccess} + 1}{\text{totalWeight} + 2}
+$$
 
-Progmune Runtime 的技术路线图致力于构建一个更智能、更自适应的神经符号编译器基础设施。
+| 场景 | 原始值 | Laplace 后 |
+|------|--------|-----------|
+| 冷启动 | 1.0 | 0.5（中性先验）|
+| 1/1 成功 | 1.0 | 0.67（不再虚高）|
+| 99/100 | 0.99 | 0.98（几乎不变）|
+| 0/1 失败 | 0.0 | 0.33（允许翻盘）|
 
-*   **全球免疫网络**：跨安装实例的脱敏 Failure Corpus 联邦汇聚，实现群体免疫级防御，共享全球范围内的失败模式和修复策略。
-*   **语义失败基准库**（Semantic Failure Benchmark）：世界上首个 AI 生成代码可靠性的公开基准，由汇聚的、匿名的失败模式构建，为研究和开发提供标准化的评估工具。
-*   **企业语义防火墙**：集成到 CI/CD 管道中，作为 AI 生成拉取请求的合并前门禁，确保所有进入代码库的代码都经过严格的免疫检查。
-*   **增强的语义拓扑 (Semantic Topology)**：持续优化语义匹配机制，提升在复杂和模糊意图下能力链的发现和构建效率，使得系统能够更准确地理解和响应开发者意图。
-*   **语义快照引擎 (Semantic Snapshot Engine)**：进一步完善 IR 状态捕获和 `diff` 功能，为调试和版本控制提供更强大的支持。
+SVL 严重性惩罚系数：SVL-1 = 1.0x，SVL-2 = 1.5x，SVL-3 = 2.0x，SVL-4 = 3.0x。时间衰减半衰期 = 1 天。
 
-### 6. 结论
+**v2.5.x 增强：语义记忆加固**
 
-Progmune Runtime v2.1.4 证明了：通过颠倒 LLM 与程序真相之间的关系——将 IR 确立为第一性原理，并使 LLM 成为受约束的启发式提议器——我们可以实现具有强语义保证的可验证代码合成。
+将脆弱的 20 字符前缀合并键替换为：
+1. 关键词提取（前 3 个有效词）作为分组键
+2. Jaccard 相似度聚类合并（阈值 0.5）
+3. 停用词过滤
 
-分层的 SVL 分类法、SSG 协议引擎、持续积累的 Failure Corpus、三层记忆架构以及 v2.1.4 引入的各项增强，共同形成了一种全新的编程基础设施：一个会学习、会记忆、会防御的神经符号编译器运行时。
+### 3.6 Code Emitter——程序落地层
+
+将验证通过的动作树确定性地翻译为可执行代码。
+
+| 特性 | TypeScript | Python |
+|------|-----------|--------|
+| 变量流分析 | ✅ | ✅ |
+| 自动 return 注入 | ✅ | ✅ |
+| 参数膨胀守卫 | ✅ MAX_PARAMS=10 | ✅ |
+| 字符串枚举默认值 | ✅ | ✅ |
+| for/assign 支持 | ✅ | ✅ |
+| Generation marker | ✅ | ✅ v2.5.0 |
+| 类型冲突重命名 | ✅ | — |
+| 复杂类型默认值 | ✅ | — |
+
+**功能测试**：5/5 业务场景通过，TypeScript 编译 0 错误。
+
+---
+
+## 4. Capability Graph（能力图）
+
+### 4.1 概念
+
+能力图是 Progmune 的**策略规划层**——纯图搜索，零 LLM 调用。它回答："给定一个意图，项目中哪些函数能组合成一条可执行的调用链？"
+
+### 4.2 架构
+
+```
+Intent → Keywords → Score Nodes → Build Graph → Beam Search → Chains
+                                                              ↓
+                                              Format Chain → Planner Prompt
+```
+
+### 4.3 元数据覆盖率演变
+
+| 指标 | v2.1.4 | v2.5.x | 提升 |
+|------|--------|--------|------|
+| purpose | ~30% | **100%** | +233% |
+| tags | ~94% | **100%** | +6% |
+| produces | ~26% | **62%** | +138% |
+| requires | ~26% | **46%** | +77% |
+| 总函数数 | ~415 | **519** | — |
+
+### 4.4 Beam Search（v2.5.0 起）
+
+v2.5.0 将贪婪 while 循环替换为 Beam Search：
+
+| 参数 | 小图 (<500) | 中图 (500-1000) | 大图 (1000+) |
+|------|-----------|---------------|-------------|
+| BEAM_WIDTH | 5 | 5 | 3 |
+| MAX_CHAIN_LEN | 5 (可配置) | 5 | 5 |
+| 种子数 | 15 | 20 | 10 |
+| SCORE_FLOOR | 0 | 0 | 0.2 |
+
+语义跳跃衰减：每次 ×0.7（30% 衰减），相似度阈值 >0.25，top 3 候选。
+
+### 4.5 Semantic Topology（语义拓扑）
+
+构建函数相似图（文件共现 + 标签重叠 + 目的词重叠 + 链邻接），支持：
+
+- `similarity(funcA, funcB)`：两函数相似度（0-1）
+- `findSimilar(funcName, topN)`：找最相似的 N 个函数
+- `capabilityMatch(produce, require)`：两能力标签是否语义关联
+
+**v2.5.x 增强：持久化磁盘缓存**
+
+```
+首次运行: O(n²) 构建 → ~19s (2000 节点)
+后续运行: MD5 哈希匹配 → <50ms (缓存命中)
+```
+
+缓存失效条件：`name + file + protocol + purpose + requires + produces` 任一变更。
+
+### 4.6 能力图效果：Knowledge ROI 实验
+
+**实验设计**：20 个真实业务任务，对比 Graph OFF（纯关键词评分）vs Graph ON（完整能力图 + 拓扑）
+
+| 指标 | Graph OFF | Graph ON | Δ |
+|------|----------|----------|-----|
+| 平均分数 | 2.3 | **3.9** | +68% |
+| 平均链长 | 1.0 | **5.4** | +440% |
+| 数据流连接 | 0% | **95%** | — |
+
+**功能测试**（5 个真实业务场景）：
+
+| 场景 | 链长 | 预期函数 | 验证 | 编译 |
+|------|------|---------|------|------|
+| 基准管道 | 6 | ✅ 全部找到 | ✅ | 0 错误 |
+| IR 提取+验证 | 5 | ⚠️ | ✅ | 0 错误 |
+| 会话分析 | 6 | ✅ | ✅ | 0 错误 |
+| 修复工作流 | 5 | ⚠️ | ✅ | 0 错误 |
+| 健康报告 | 5 | ✅ | ✅ | 0 错误 |
+
+示例链：`loadBenchmarks → benchmarkCount → benchmarkPassRate → benchmarkReport`
+
+---
+
+## 5. 知识基础设施
+
+### 5.1 Rule Miner（规则挖掘引擎）
+
+从失败模式自动生成可操作的约束规则。
+
+**输入**：Failure Corpus 中的违规模式  
+**输出**：结构化的 `MinedRule`（Function + pre_states + post_states + 置信度 + 原因）
+
+**当前挖掘结果**（7 条规则）：
+
+| 模式 | 置信度 | 规则 |
+|------|--------|------|
+| symbol_existence | 81 | 只使用 IR 中已导出的函数，禁止编造函数名 |
+| protocol | 32 | 严格遵循 SSG 协议状态顺序调用函数 |
+| schema | 19 | 通用约束 |
+| type_mismatch | 2 | 检查参数类型与 IR 签名一致后再调用 |
+| dataflow | 2 | 变量必须先声明再使用，避免循环引用 |
+
+`applyMinedRules(apply=true)` 可自动合并至 `protocols.json`（带备份）。
+
+### 5.2 Immune Receiver（免疫网络接收端）
+
+补全了此前"只发不收"的全局免疫网络。
+
+- `importFingerprints(fingerprints)`：SHA256 去重 + 写入本地语料库
+- `importFromFile(filePath)`：离线文件导入
+- `getReceiverStats()`：导入统计（已接收总数、最后更新时间）
+
+### 5.3 Immune Metrics（免疫指标看板）
+
+实时追踪免疫系统效能：
+
+```
+═══════ Immune System Metrics ═══════
+── Efficacy ──
+  Total antibody hits:       90
+  ACL-4 fast paths (0 LLM):  0
+  ACL-3 injected hints:      90
+  LLM calls saved:           0
+  Est. tokens saved:         18,000
+  Immune repair rate:        70%
+── Knowledge ROI ──
+  Avg credit score:          0.50
+  Functions with history:    0
+  Learned patterns:          2
+── Failure Landscape ──
+  Total failures:            85
+  Avg retries to success:    0.9
+```
+
+---
+
+## 6. 治理层（Runtime/Governance）
+
+### 6.1 执行治理资产
+
+| 模块 | 行数 | 功能 |
+|------|------|------|
+| `branch-ledger.ts` | 484 | 分支账本：fork/merge 执行树 |
+| `deterministic-replay.ts` | 341 | 确定性重放 + 指纹验证 |
+| `ledger-registry.ts` | — | 指纹注册表 |
+| `runtime-invariants.ts` | — | Invariant-0/1/2 检查 |
+| `repair-proposal.ts` | — | 自动修复建议引擎 |
+| `ssg-validator.ts` | 820+ | SSG 协议验证引擎 |
+
+### 6.2 验证效率
+
+| 操作 | 性能 |
+|------|------|
+| SVL-1/2/3 约束检查 | 毫秒级 |
+| SSG 增量验证 | 0.05ms/步 |
+| 全量账本审计（Invariant-0/1/2）| 3ms |
+| 策略层搜索（2000 节点冷启动）| ~19s（首次）/ <50ms（缓存） |
+
+---
+
+## 7. 工程成熟度
+
+### 7.1 CI/CD Pipeline
+
+GitHub Actions 三阶段流水线：
+
+| Job | 触发条件 | 内容 |
+|-----|---------|------|
+| Type Check | push/PR to main | `tsc --noEmit` |
+| Unit Tests | push/PR to main | `vitest run` (66 tests) |
+| Build | push/PR to main | 双构建 (CJS + ESM MCP) + 产物验证 |
+
+### 7.2 测试覆盖
+
+| 测试文件 | 测试数 | 覆盖模块 |
+|---------|--------|---------|
+| `strategy-planner.test.ts` | 10 | 能力链选择、null 防护、formatChainHint |
+| `feedback.test.ts` | 7 | Laplace 平滑、冷启动信用、SVL 惩罚 |
+| `terminal-format.test.ts` | 19 | 颜色、填充、图表、标签 |
+| `utils.test.ts` | 6 | Jaccard 相似度、关键词提取 |
+| `result.test.ts` | 4 | Result 类型、类型判别 |
+| `logger.test.ts` | 4 | 结构化日志、模块隔离 |
+| `ir-utils.test.ts` | 7 | countExported、mergeResults、loadIR |
+| `knowledge-loop.test.ts` | 9 | L1/L2/L3 端到端 + 真实数据 |
+| **总计** | **66** | 覆盖率门禁 8% |
+
+### 7.3 系统测试
+
+| 测试 | 验证内容 | 结果 |
+|------|---------|------|
+| `test_l1_feedback.ts` | 制造 10 次相同错误，验证抗体生成 + L1 提示注入 | ✅ 抗体生成，稳定匹配 |
+| `test_acl4_fastpath.ts` | ACL-4 快速路径是否绕过 LLM | ✅ 90% 绕过率 |
+| `test_capability_graph.ts` | 能力图是否驱动链推导 vs LLM 猜测 | ✅ 数据流驱动 |
+| `test_knowledge_roi.ts` | 20 任务 Graph ON/OFF 对比实验 | ✅ +68% 分数, +440% 链长 |
+| `test_functional.ts` | 5 业务场景端到端（无 LLM）| ✅ 5/5 通过，0 编译错误 |
+
+### 7.4 代码质量基础设施
+
+| 特性 | 说明 |
+|------|------|
+| `Result<T,E>` 类型 | 替代 `{success, error}` 模式 |
+| 结构化日志 (`logger.ts`) | 级别过滤 + JSON 模式 + 模块标签 |
+| `skipLibCheck` | 兼容 vitest/vite 类型声明 |
+| 40 空 `catch{}` 已注释 | 所有异常吞没点有说明 |
+| 20 个 dist 孤立文件已清理 | — |
+| LLM 断路器 | `PROGMUNE_MAX_LLM_CALLS` + `PROGMUNE_RATE_LIMIT_MS` |
+
+---
+
+## 8. 语义有效性级别（SVL）
+
+| 级别 | 名称 | 保证内容 | v2.5.x 状态 |
+|------|------|---------|-----------|
+| **SVL-1** | 符号存在性 | 无幻觉 API 调用 | ✅ 完全保证 |
+| **SVL-2** | 类型有效性 | 无类型/参数数量不匹配错误 | ✅ 完全保证 |
+| **SVL-3** | 数据流正确性 | 无 NameError / UnboundLocalError | ✅ 完全保证 |
+| **SVL-4** | 协议合法性 | 无非法状态跳转 | ✅ 可选协议约束系统 + Delta 合法性验证 |
+| **SVL-5** | 语义意图正确性 | 生成代码忠实实现预期业务逻辑 | 🔬 远期研究目标 |
+
+---
+
+## 9. 环境变量参考
+
+| 变量 | 默认值 | 说明 |
+|------|--------|------|
+| `PROGMUNE_MAX_LLM_CALLS` | 50 | LLM 调用上限 |
+| `PROGMUNE_RATE_LIMIT_MS` | 0 | LLM 调用间隔（毫秒）|
+| `PROGMUNE_MAX_CHAIN_LEN` | 5 | 能力链最大深度 |
+| `PROGMUNE_FAST_VALIDATE` | false | 跳过冗余 Invariant-1 |
+| `PROGMUNE_LOG_LEVEL` | info | 日志级别（debug/info/warn/error）|
+| `PROGMUNE_LOG_JSON` | false | JSON 格式日志输出 |
+| `PROGMUNE_STRICT` | true | 严格模式：Invariant 违规抛异常 |
+| `PROGMUNE_ACL4_COUNT` | 10 | ACL-4 所需最小发生次数 |
+| `PROGMUNE_ACL4_INTENTS` | 5 | ACL-4 所需最小不同意图数 |
+| `PROGMUNE_ACL3_COUNT` | 4 | ACL-3 所需最小发生次数 |
+| `PROGMUNE_ACL3_INTENTS` | 3 | ACL-3 所需最小不同意图数 |
+| `PROGMUNE_ACL2_COUNT` | 2 | ACL-2 所需最小发生次数 |
+
+---
+
+## 10. 版本演进
+
+| 版本 | 关键特性 |
+|------|---------|
+| v2.1.4 | BFS 协议修复、抗体注册表、信用循环 |
+| v2.2.0 | CI/CD、结构化日志、Result\<T,E\>、覆盖率、Python 发射器对齐 |
+| v2.2.1 | Laplace 平滑、协议绕过加固（Invariant-2）、Beam Search、null 防护 |
+| v2.3.0 | L1/L2 知识回流闭环——抗体注入 Planner Prompt |
+| v2.4.0 | Rule Miner、Immune Receiver、语义记忆加固、66 测试 |
+| v2.5.0 | SVL-1/2/3 抗体修复、元数据自动派生（30%→62%）、4 系统测试 |
+| v2.5.1 | 数据流传递收紧、功能性测试、ROI 实验 |
+| v2.5.2 | 拓扑磁盘缓存（<50ms 热启动）、搜索剪枝、免疫指标 |
+
+---
+
+## 11. 技术路线图
+
+### 近期（v2.6.x）
+
+- **元数据覆盖率 80%+**：继续补齐 requires/produces 标注
+- **Rule → Planner 自动注入**：MinedRule 直接影响搜索空间
+- **Capability Graph 可视化**：将能力网络作为最核心的工程资产展示
+
+### 中期（v3.0.x）
+
+- **全局免疫网络**：`immune-receiver.ts` 的 Hub 消费端，联邦语料库
+- **真实业务任务基准**：50+ 外部真实任务，取代内部 benchmark
+- **MCP 治理集成**：CI/CD pre-merge 门禁（企业语义防火墙）
+
+### 远期
+
+- **SVL-5**：语义意图正确性的形式化验证
+- **多语言 IR**：Python 项目的一等公民支持
+- **神经符号编译器基础设施**：从运行时进化为编译器
+
+---
+
+## 12. 结论
+
+Progmune Runtime v2.5.x 证明了：通过颠倒 LLM 与程序真相之间的关系——将 IR 确立为第一性原理，并使 LLM 成为受约束的启发式提议器——我们可以实现具有强语义保证的可验证代码合成。
+
+v2.5.x 的核心突破在于**知识回路闭环**：系统不再只是记录失败和聚合统计，而是通过 L1/L2/L3 三层机制将抗体和信用评分回流到规划器中，真正改变行为。分层的 SVL 分类法、SSG 协议引擎、能力图推导、Beam Search 搜索、持久化磁盘缓存、以及持续积累的 Failure Corpus，共同形成了一种全新的编程基础设施：一个**会学习、会记忆、会防御**的程序免疫运行时。
 
 我们将此称为程序免疫学（Program Immunology）。
 
 该系统以开源形式提供：https://github.com/shenlian19831109/progmune-runtime，也可通过 `npm install progmune-runtime` 安装使用。
 
-## ENGLISH VERSION
+---
 
-### Abstract
+## 附录 A：关键测试结果汇总
 
-Progmune Runtime introduces Program Immunology—a new paradigm for ensuring the safety and reliability of AI-generated code.
+| 测试 | 验证内容 | 数据 | 结论 |
+|------|---------|------|------|
+| L1 反馈 | 重复错误是否被阻止？ | SVL-1:symbol_existence → ACL-3 抗体, 20x, 稳定匹配 | ✅ |
+| L2 快速通道 | ACL-4 是否绕过 LLM？ | 1 ACL-4 抗体, 90% 绕过率 | ✅ |
+| L3 信用 | 小样本偏差是否消除？ | 1/1 → 0.67, 0/1 → 0.33 | ✅ |
+| 规则挖掘 | 是否产生可操作规则？ | 7 条规则：symbol_existence/protocol/type_mismatch/dataflow | ✅ |
+| 能力图 | 是否驱动链推导？ | Graph ON vs OFF: +68% 分数, +440% 链长, 95% 数据流 | ✅ |
+| 功能测试 | 端到端是否工作？ | 5/5 场景通过, TypeScript 0 编译错误 | ✅ |
+| 性能 | 大图是否可用？ | 2000 节点: 首次 19s, 缓存 <50ms | ✅ |
 
-Inspired by the layered defense mechanisms of the biological immune system, Progmune establishes a constraint-guided program synthesis runtime that enforces semantic validity at multiple levels: from symbol existence and type compatibility to dataflow correctness and protocol legality. The system demotes large language models from unverified code generators to constrained heuristic proposers, operating within a closed world defined by the program's actual structure (Intermediate Representation).
-
-We introduce Semantic Validity Levels (SVL) as a formal taxonomy of AI-generated code correctness, and demonstrate a working Semantic State Graph (SSG) that intercepts illegal state transitions. Progmune represents a step toward neural-symbolic compiler infrastructure where code generation is governed not by statistical likelihood, but by verifiable truth.
-
-### 1. Problem Statement
-
-#### 1.1 The Open-World Fallacy in AI Code Generation
-
-Large language models (LLMs) operate under an implicit open-world assumption when generating code: any function, library, or API pattern encountered during training is presumed available in the current context. This assumption yields four distinct classes of errors:
-
-*   **Symbol Hallucination (SVL-1)**：Invoking functions or variables that do not exist in the target project
-*   **Type Drift (SVL-2)**：Mismatched parameter counts or incompatible types with the actual function signature
-*   **Dataflow Contamination (SVL-3)**：Using uninitialized variables, creating circular references, or introducing dead code paths
-*   **Protocol Violation (SVL-4)**：Violating the required ordering of business steps—for example, issuing a JWT token before authenticating the user
-
-These errors do not arise from reasoning failures. They arise because the model lacks deterministic access to the ground truth of the program.
-
-#### 1.2 Limitations of Current Mitigations
-
-Existing strategies address these errors reactively:
-
-*   **Post-hoc validation**：Linters, test suites, manual review—detects errors after generation but cannot prevent them at the source
-*   **Retrieval-Augmented Generation (RAG)**：Injects project context into prompts, reducing but not eliminating hallucination; the model remains the sole arbiter of correctness
-*   **Iterative prompt engineering**：Guides model behavior through carefully designed instructions, yet offers no formal guarantee of compliance
-
-All three strategies place the LLM at the center of the system and attempt to correct its output externally. They lack first-principle constraint mechanisms.
-
-#### 1.3 Core Proposition: AI-Generated Programs Require an Immune System
-
-We propose a paradigm shift: Program Immunology. AI-generated code must not be allowed to enter a codebase without passing through an immune layer—a verifiable, memory-equipped runtime that recognizes, remembers, and defends against recurrent error patterns.
-
-This immune layer comprises three interdependent capabilities:
-
-*   **Innate Immunity**：Rapid, pattern-based rejection of symbol, type, and dataflow violations—the system's built-in defenses
-*   **Adaptive Immunity**：Learning from past failures (the Failure Corpus) to generate specific, targeted defenses such as protocol constraints, proactively preventing future errors
-*   **Immune Memory**：Structuring both successful and failed generation patterns into persistent knowledge, enabling continuous improvement with use
-
-### 2. Biological Foundations and Analogy
-
-#### 2.1 The Three-Layer Architecture of the Biological Immune System
-
-*   **Physical Barriers**：Skin, mucous membranes. Non-specific, preemptive first line of defense
-*   **Natural Immunity**：Macrophages, dendritic cells. Pattern recognition receptors (PRRs) rapidly identify pathogen-associated molecular patterns (PAMPs). Rapid response, but not precise enough
-*   **Acquired Immunity**：T cells, B cells. Generate highly specific receptors through gene rearrangement to recognize specific antigens. After the first infection, immune memory is generated, and a faster and stronger secondary response can be produced upon re-exposure
-
-#### 2.2 Mapping to Program Immunology
-
-| Biological Immune System | Program Immunity (Progmune) | Mapping Description |
-|---|---|---|
-| **Physical Barriers** | Sandboxes, CI/CD Gates, Access Control | Foundational engineering infrastructure to prevent unverified code from entering production |
-| **Innate Immunity** | Constraint Engine (IR + SVL-1 to SVL-3) | Rapidly and automatically identifies and rejects hallucinated calls, type errors, etc. - the system's built-in defense capability |
-| **Antigen Presentation** | Failure Corpus Recording | After an error action sequence is captured, its error type, state context, and other "antigenic features" are fully recorded |
-| **Adaptive Immunity** | Semantic State Graph (SSG) | Learns from the failure corpus to generate specific protocol rules ("antibodies") to precisely prevent illegal state transitions |
-| **Immune Memory** | Three-Layer Memory Architecture | Episodic memory and semantic memory together form the system's immune memory, allowing for rapid response without LLM in similar scenarios |
-
-#### 2.3 Value and Boundaries of the Analogy
-
-The value of this analogy lies in providing a clear, extensible mental framework: explaining why static verifiers are insufficient, and why the system needs to learn, remember, and evolve. However, its boundaries must also be clear: the program immune system deals with formalized, deterministic program states, not complex biochemical signals. Its learning is based on rule mining and pattern matching, not synaptic plasticity of biological neurons.
-
-### 3. Technical Architecture and v2.1.4 Core Enhancements
-
-The architecture of Progmune Runtime consists of six core layers, each corresponding to specific verification or learning responsibilities. Version 2.1.4 introduces key enhancements to improve the system's intelligence, robustness, and scalability.
-
-#### 3.1 IR (Program Truth Layer) - Self-Model
-
-The Intermediate Representation (IR) is the system's sole source of truth, statically extracted from source files, including:
-
-*   **SymbolTable**: All defined functions, classes, variables, and their locations
-*   **TypeGraph**: Parameter types, return types, and type aliases
-*   **CallGraph**: Call relationships between functions
-*   **Protocol Annotations** (optional): Pre-states, post-states, and invalidation rules for protocol-aware synthesis
-
-This is the basis for distinguishing self from non-self - the system only allows calling components explicitly defined in the IR.
-
-#### 3.2 Action Runtime - Deterministic Synthesis Boundary
-
-LLMs no longer generate raw code or JSON strings, but instead call a set of deterministic APIs:
+## 附录 B：Capability Graph 链示例
 
 ```
-call(func, ...args)            // Call function
-callAssign(func, assignTo, ...) // Call and bind result
-ifElse(condition, thenFn, elseFn) // Conditional branch
-assign(target, value)          // Variable assignment
-output(value)                  // Return value
+"generate benchmark report":
+  loadBenchmarks → benchmarkCount → benchmarkPassRate → benchmarkReport
+
+"validate actions and extract IR":
+  loadIR → validateActionResult → validateProposal → getAllSessions
+
+"list all sessions and find failure patterns":
+  getFailureGenome → getAllFailures → getTopFailurePatterns → getLearnedPatterns
+
+"suggest repairs for a failed session":
+  suggestProtocolRepair → suggestInvariantRepair → countResolved → getAllSessions
+
+"compute system health score":
+  formatHealthLevel → computeHealthScore → getFailureGenome → loadIR
 ```
-
-These calls are executed in a sandboxed JavaScript context, and the runtime captures all calls as a structured Action Tree, eliminating injection vulnerabilities and formatting errors at the source.
-
-#### 3.3 Constraint Engine - Innate Immune Layer
-
-This layer performs rapid, rule-based validation of the Action Tree based on the IR:
-
-*   **SVL-1** (Symbol Existence): Every called function exists in the project
-*   **SVL-2** (Type Validity): Parameter count and types match the declared signature
-*   **SVL-3** (Dataflow Correctness): Variables are declared before use; no self-referential assignments
-
-#### 3.4 Semantic State Graph (SSG) - Adaptive Immune Layer
-
-SSG models the valid states of system resources and their allowed transitions. Taking the authentication protocol as an example:
-
-```
-UNAUTHENTICATED
-    ↓  verify_password
-AUTHENTICATED
-    ↓  generate_jwt
-TOKEN_ISSUED
-    ↓  create_session
-SESSION_ACTIVE
-```
-
-Each function declares `pre_states`, `post_states`, and optional `invalidate` rules. The SSG validator simulates state transitions when processing the Action Tree, rejecting any calls where the pre-state has no intersection with the current active state - even if all other SVL levels pass. This elevates verification from static correctness to behavioral legality.
-
-**v2.1.4 Enhancement: BFS Protocol Repair**
-
-The SSG validator now uses Breadth-First Search (BFS) to find multi-step repair paths, capable of automatically completing complex missing protocols (e.g., `INIT` -> `EMAIL_OK` -> `PWD_HASHED`), significantly enhancing the system's adaptability when faced with incomplete or ambiguous intentions.
-
-#### 3.5 Immune Memory & Failure Corpus - Immune Memory Layer
-
-**Three-Layer Memory Architecture**
-
-*   **Working Memory**: Variable bindings and user intent for the current session (cleared per session)
-*   **Episodic Memory**: Recent N successful/failed action sequences, with timestamps and result labels (pruned periodically)
-*   **Semantic Memory**: Path templates and protocol rules distilled from frequently successful patterns (consolidated offline)
-
-**Failure Corpus**
-
-Each constraint violation is recorded: including intent, IR summary, violated SVL level, error details, and SSG state. This constitutes a unique asset: a structured, labeled database of AI program failures. Over time, high-frequency failure patterns can be mined to automatically generate candidate protocol constraints or SSG transition rules.
-
-**v2.1.4 Enhancement: Antibody Registry and Credit Loops**
-
-The system automatically extracts repair patterns from the `Failure Corpus` to generate "antibodies" with ACL-1~4 confidence ratings. High-confidence (ACL-4) antibodies can trigger "immune fast-runs," bypassing the LLM to directly apply validated repair paths. Concurrently, the **Credit Loops** mechanism dynamically adjusts function weights based on historical success rates, optimizing capability chain selection and enabling the system to plan more intelligently under ambiguous intentions.
-
-#### 3.6 Code Emitter - Program Landing Layer
-
-Deterministically translates the validated Action Tree into executable Python or TypeScript code, handling import resolution, variable scoping, object literal generation, and correct indentation for nested control structures.
-
-### 4. 语义有效性级别（SVL）
-
-SVL 是 AI 生成代码正确性的形式化分类法，为系统提供分层、可量化的验证保证：
-
-| 级别 | 名称 | 描述 | 保证内容 |
-|---|---|---|---|
-| SVL-1 | 符号存在性 | 每个被调用的函数、变量和导入在项目中均实际存在 | 无幻觉 API 调用 |
-| SVL-2 | 类型有效性 | 参数数量和类型与声明的签名相匹配 | 无类型不匹配错误 |
-| SVL-3 | 数据流正确性 | 变量在使用前已声明；无循环引用或未初始化访问 | 无 NameError / UnboundLocalError |
-| SVL-4 | 协议合法性 | 函数调用序列符合声明的前/后状态转换规则 | 无非法状态跳转（如认证前签发令牌） |
-| SVL-5（未来） | 语义意图正确性 | 生成代码忠实实现预期业务逻辑 | 远期目标；当前版本通过 SVL-1~4 间接保障 |
-
-Progmune Runtime v2.1.4 完整保证 SVL-1 至 SVL-3，SVL-4 作为可选协议约束系统实现。SVL-5 为开放性研究方向。
-
-### 5. 技术路线与未来展望
-
-Progmune Runtime 的技术路线图致力于构建一个更智能、更自适应的神经符号编译器基础设施。
-
-*   **全球免疫网络**：跨安装实例的脱敏 Failure Corpus 联邦汇聚，实现群体免疫级防御，共享全球范围内的失败模式和修复策略。
-*   **语义失败基准库**（Semantic Failure Benchmark）：世界上首个 AI 生成代码可靠性的公开基准，由汇聚的、匿名的失败模式构建，为研究和开发提供标准化的评估工具。
-*   **企业语义防火墙**：集成到 CI/CD 管道中，作为 AI 生成拉取请求的合并前门禁，确保所有进入代码库的代码都经过严格的免疫检查。
-*   **增强的语义拓扑 (Semantic Topology)**：持续优化语义匹配机制，提升在复杂和模糊意图下能力链的发现和构建效率，使得系统能够更准确地理解和响应开发者意图。
-*   **语义快照引擎 (Semantic Snapshot Engine)**：进一步完善 IR 状态捕获和 `diff` 功能，为调试和版本控制提供更强大的支持。
-
-### 6. 结论
-
-Progmune Runtime v2.1.4 证明了：通过颠倒 LLM 与程序真相之间的关系——将 IR 确立为第一性原理，并使 LLM 成为受约束的启发式提议器——我们可以实现具有强语义保证的可验证代码合成。
-
-分层的 SVL 分类法、SSG 协议引擎、持续积累的 Failure Corpus、三层记忆架构以及 v2.1.4 引入的各项增强，共同形成了一种全新的编程基础设施：一个会学习、会记忆、会防御的神经符号编译器运行时。
-
-我们将此称为程序免疫学（Program Immunology）。
-
-该系统以开源形式提供：https://github.com/shenlian19831109/progmune-runtime，也可通过 `npm install progmune-runtime` 安装使用。
-
-## ENGLISH VERSION
-
-### Abstract
-
-Progmune Runtime introduces Program Immunology—a new paradigm for ensuring the safety and reliability of AI-generated code.
-
-Inspired by the layered defense mechanisms of the biological immune system, Progmune establishes a constraint-guided program synthesis runtime that enforces semantic validity at multiple levels: from symbol existence and type compatibility to dataflow correctness and protocol legality. The system demotes large language models from unverified code generators to constrained heuristic proposers, operating within a closed world defined by the program's actual structure (Intermediate Representation).
-
-We introduce Semantic Validity Levels (SVL) as a formal taxonomy of AI-generated code correctness, and demonstrate a working Semantic State Graph (SSG) that intercepts illegal state transitions. Progmune represents a step toward neural-symbolic compiler infrastructure where code generation is governed not by statistical likelihood, but by verifiable truth.
-
-### 1. Problem Statement
-
-#### 1.1 The Open-World Fallacy in AI Code Generation
-
-Large language models (LLMs) operate under an implicit open-world assumption when generating code: any function, library, or API pattern encountered during training is presumed available in the current context. This assumption yields four distinct classes of errors:
-
-*   **Symbol Hallucination (SVL-1)**：Invoking functions or variables that do not exist in the target project
-*   **Type Drift (SVL-2)**：Mismatched parameter counts or incompatible types with the actual function signature
-*   **Dataflow Contamination (SVL-3)**：Using uninitialized variables, creating circular references, or introducing dead code paths
-*   **Protocol Violation (SVL-4)**：Violating the required ordering of business steps—for example, issuing a JWT token before authenticating the user
-
-These errors do not arise from reasoning failures. They arise because the model lacks deterministic access to the ground truth of the program.
-
-#### 1.2 Limitations of Current Mitigations
-
-Existing strategies address these errors reactively:
-
-*   **Post-hoc validation**：Linters, test suites, manual review—detects errors after generation but cannot prevent them at the source
-*   **Retrieval-Augmented Generation (RAG)**：Injects project context into prompts, reducing but not eliminating hallucination; the model remains the sole arbiter of correctness
-*   **Iterative prompt engineering**：Guides model behavior through carefully designed instructions, yet offers no formal guarantee of compliance
-
-All three strategies place the LLM at the center of the system and attempt to correct its output externally. They lack first-principle constraint mechanisms.
-
-#### 1.3 Core Proposition: AI-Generated Programs Require an Immune System
-
-We propose a paradigm shift: Program Immunology. AI-generated code must not be allowed to enter a codebase without passing through an immune layer—a verifiable, memory-equipped runtime that recognizes, remembers, and defends against recurrent error patterns.
-
-This immune layer comprises three interdependent capabilities:
-
-*   **Innate Immunity**：Rapid, pattern-based rejection of symbol, type, and dataflow violations—the system's built-in defenses
-*   **Adaptive Immunity**：Learning from past failures (the Failure Corpus) to generate specific, targeted defenses such as protocol constraints, proactively preventing future errors
-*   **Immune Memory**：Structuring both successful and failed generation patterns into persistent knowledge, enabling continuous improvement with use
-
-### 2. Biological Foundations and Analogy
-
-#### 2.1 The Three-Layer Architecture of the Biological Immune System
-
-*   **Physical Barriers**：Skin, mucous membranes. Non-specific, preemptive first line of defense
-*   **Natural Immunity**：Macrophages, dendritic cells. Pattern recognition receptors (PRRs) rapidly identify pathogen-associated molecular patterns (PAMPs). Rapid response, but not precise enough
-*   **Acquired Immunity**：T cells, B cells. Generate highly specific receptors through gene rearrangement to recognize specific antigens. After the first infection, immune memory is generated, and a faster and stronger secondary response can be produced upon re-exposure
-
-#### 2.2 Mapping to Program Immunology
-
-| Biological Immune System | Program Immunity (Progmune) | Mapping Description |
-|---|---|---|
-| **Physical Barriers** | Sandboxes, CI/CD Gates, Access Control | Foundational engineering infrastructure to prevent unverified code from entering production |
-| **Innate Immunity** | Constraint Engine (IR + SVL-1 to SVL-3) | Rapidly and automatically identifies and rejects hallucinated calls, type errors, etc. - the system's built-in defense capability |
-| **Antigen Presentation** | Failure Corpus Recording | After an error action sequence is captured, its error type, state context, and other "antigenic features" are fully recorded |
-| **Adaptive Immunity** | Semantic State Graph (SSG) | Learns from the failure corpus to generate specific protocol rules ("antibodies") to precisely prevent illegal state transitions |
-| **Immune Memory** | Three-Layer Memory Architecture | Episodic memory and semantic memory together form the system's immune memory, allowing for rapid response without LLM in similar scenarios |
-
-#### 2.3 Value and Boundaries of the Analogy
-
-The value of this analogy lies in providing a clear, extensible mental framework: explaining why static verifiers are insufficient, and why the system needs to learn, remember, and evolve. However, its boundaries must also be clear: the program immune system deals with formalized, deterministic program states, not complex biochemical signals. Its learning is based on rule mining and pattern matching, not synaptic plasticity of biological neurons.
-
-### 3. Technical Architecture and v2.1.4 Core Enhancements
-
-The architecture of Progmune Runtime consists of six core layers, each corresponding to specific verification or learning responsibilities. Version 2.1.4 introduces key enhancements to improve the system's intelligence, robustness, and scalability.
-
-#### 3.1 IR (Program Truth Layer) - Self-Model
-
-The Intermediate Representation (IR) is the system's sole source of truth, statically extracted from source files, including:
-
-*   **SymbolTable**: All defined functions, classes, variables, and their locations
-*   **TypeGraph**: Parameter types, return types, and type aliases
-*   **CallGraph**: Call relationships between functions
-*   **Protocol Annotations** (optional): Pre-states, post-states, and invalidation rules for protocol-aware synthesis
-
-This is the basis for distinguishing self from non-self - the system only allows calling components explicitly defined in the IR.
-
-#### 3.2 Action Runtime - Deterministic Synthesis Boundary
-
-LLMs no longer generate raw code or JSON strings, but instead call a set of deterministic APIs:
-
-```
-call(func, ...args)            // Call function
-callAssign(func, assignTo, ...) // Call and bind result
-ifElse(condition, thenFn, elseFn) // Conditional branch
-assign(target, value)          // Variable assignment
-output(value)                  // Return value
-```
-
-These calls are executed in a sandboxed JavaScript context, and the runtime captures all calls as a structured Action Tree, eliminating injection vulnerabilities and formatting errors at the source.
-
-#### 3.3 Constraint Engine - Innate Immune Layer
-
-This layer performs rapid, rule-based validation of the Action Tree based on the IR:
-
-*   **SVL-1** (Symbol Existence): Every called function exists in the project
-*   **SVL-2** (Type Validity): Parameter count and types match the declared signature
-*   **SVL-3** (Dataflow Correctness): Variables are declared before use; no self-referential assignments
-
-#### 3.4 Semantic State Graph (SSG) - Adaptive Immune Layer
-
-SSG models the valid states of system resources and their allowed transitions. Taking the authentication protocol as an example:
-
-```
-UNAUTHENTICATED
-    ↓  verify_password
-AUTHENTICATED
-    ↓  generate_jwt
-TOKEN_ISSUED
-    ↓  create_session
-SESSION_ACTIVE
-```
-
-Each function declares `pre_states`, `post_states`, and optional `invalidate` rules. The SSG validator simulates state transitions when processing the Action Tree, rejecting any calls where the pre-state has no intersection with the current active state - even if all other SVL levels pass. This elevates verification from static correctness to behavioral legality.
-
-**v2.1.4 Enhancement: BFS Protocol Repair**
-
-The SSG validator now uses Breadth-First Search (BFS) to find multi-step repair paths, capable of automatically completing complex missing protocols (e.g., `INIT` -> `EMAIL_OK` -> `PWD_HASHED`), significantly enhancing the system's adaptability when faced with incomplete or ambiguous intentions.
-
-#### 3.5 Immune Memory & Failure Corpus - Immune Memory Layer
-
-**Three-Layer Memory Architecture**
-
-*   **Working Memory**: Variable bindings and user intent for the current session (cleared per session)
-*   **Episodic Memory**: Recent N successful/failed action sequences, with timestamps and result labels (pruned periodically)
-*   **Semantic Memory**: Path templates and protocol rules distilled from frequently successful patterns (consolidated offline)
-
-**Failure Corpus**
-
-Each constraint violation is recorded: including intent, IR summary, violated SVL level, error details, and SSG state. This constitutes a unique asset: a structured, labeled database of AI program failures. Over time, high-frequency failure patterns can be mined to automatically generate candidate protocol constraints or SSG transition rules.
-
-**v2.1.4 Enhancement: Antibody Registry and Credit Loops**
-
-The system automatically extracts repair patterns from the `Failure Corpus` to generate "antibodies" with ACL-1~4 confidence ratings. High-confidence (ACL-4) antibodies can trigger "immune fast-runs," bypassing the LLM to directly apply validated repair paths. Concurrently, the **Credit Loops** mechanism dynamically adjusts function weights based on historical success rates, optimizing capability chain selection and enabling the system to plan more intelligently under ambiguous intentions.
-
-#### 3.6 Code Emitter - Program Landing Layer
-
-Deterministically translates the validated Action Tree into executable Python or TypeScript code, handling import resolution, variable scoping, object literal generation, and correct indentation for nested control structures.
-
-### 4. Semantic Validity Levels (SVL)
-
-SVL is a formal taxonomy for the correctness of AI-generated code, providing layered, quantifiable verification guarantees for the system:
-
-| Level | Name | Description | Progmune's Guarantee |
-|---|---|---|---|
-| **SVL-1** | Symbolic Existence | Every called function, variable, and import actually exists in the project | No hallucinated API calls |
-| **SVL-2** | Type Validity | Parameter count and types match the declared signature | No type mismatch errors |
-| **SVL-3** | Dataflow Correctness | Variables are declared before use; no circular references or uninitialized access | No NameError / UnboundLocalError |
-| **SVL-4** | Protocol Legality | Function call sequences conform to declared pre/post-state transition rules | No illegal state jumps (e.g., issuing token before authentication) |
-| **SVL-5 (Future)** | Semantic Intent Correctness | Generated code faithfully implements the intended business logic | Long-term goal; indirectly guaranteed by SVL-1~4 in current version |
-
-Progmune Runtime v2.1.4 fully guarantees SVL-1 to SVL-3, with SVL-4 implemented as an optional protocol constraint system. SVL-5 is an open research direction。
-
-### 5. Technical Roadmap and Future Outlook
-
-Progmune Runtime's roadmap is dedicated to building a smarter, more adaptive neural-symbolic compiler infrastructure.
-
-*   **Global Immune Network**: Federated aggregation of anonymized Failure Corpus across installed instances to achieve collective immunity-level defense, sharing global failure patterns and repair strategies.
-*   **Semantic Failure Benchmark**: The world's first public benchmark for AI-generated code reliability, built from aggregated, anonymized failure patterns, providing standardized evaluation tools for research and development.
-*   **Enterprise Semantic Firewall**: Integrated into CI/CD pipelines as a pre-merge gate for AI-generated pull requests, ensuring all code entering the codebase undergoes rigorous immune checks.
-*   **Enhanced Semantic Topology**: Continuously optimizes semantic matching mechanisms to improve the efficiency of capability chain discovery and construction under complex and ambiguous intentions, enabling the system to understand and respond to developer intentions more accurately.
-*   **Semantic Snapshot Engine**: Further refines IR state capture and `diff` functionality, providing more powerful support for debugging and version control.
-
-### 6. Conclusion
-
-Progmune Runtime v2.1.4 demonstrates that by inverting the relationship between LLMs and program truth—establishing IR as the first principle and making LLMs constrained heuristic proposers—we can achieve verifiable code synthesis with strong semantic guarantees.
-
-分层的 SVL 分类法、SSG 协议引擎、持续积累的 Failure Corpus、三层记忆架构以及 v2.1.4 引入的各项增强，共同形成了一种全新的编程基础设施：一个会学习、会记忆、会防御的神经符号编译器运行时。
-
-我们将此称为程序免疫学（Program Immunology）。
-
-该系统以开源形式提供：https://github.com/shenlian19831109/progmune-runtime，也可通过 `npm install progmune-runtime` 安装使用。
