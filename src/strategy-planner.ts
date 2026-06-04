@@ -205,7 +205,7 @@ export function selectCapabilityChains(
   const allNodes = [...graph.values()];
   const chains: CapabilityChain[] = [];
   const BEAM_WIDTH = graph.size > 500 ? 3 : 5;
-  const MAX_CHAIN_LEN = 5; // keep chains focused — prevent noise accumulation
+  const MAX_CHAIN_LEN = parseInt(process.env.PROGMUNE_MAX_CHAIN_LEN || "5", 10);
 
   for (const seed of seeds) {
     // ── Priority-queue (beam) search: forward trace ──

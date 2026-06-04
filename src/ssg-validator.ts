@@ -316,7 +316,8 @@ export function validateTransition(
     ruleHash,
   };
 
-  // Invariant-1: delta consistency
+  // Invariant-1: delta consistency (skip in fast mode for performance)
+  if (process.env.PROGMUNE_FAST_VALIDATE !== "true") {
   const deltaMap = fromSnapshot(currentState);
   applyTransitionDelta(deltaMap, transition);
   const computedAfter = toSnapshot(deltaMap);
@@ -337,6 +338,7 @@ export function validateTransition(
     }
     console.error(detail);
   }
+  } // PROGMUNE_FAST_VALIDATE guard
 
   return { valid: true, transition };
 }
