@@ -164,14 +164,17 @@ export function selectCapabilityChains(
   // Guard: null/undefined/empty intent
   if (!intent || typeof intent !== "string" || !intent.trim()) return [];
 
-  // Ensure semantic topology is built before any capability matching
+  // Ensure semantic topology is built (cached after first build)
+  const startTopo = Date.now();
   getTopology(ir);
+  const topoMs = Date.now() - startTopo;
 
   const intentLower = intent.toLowerCase();
   const keywords = extractKeywords(intent);
   const graph = buildCapabilityGraph(ir);
 
   // Score all nodes
+  const startScore = Date.now();
   for (const node of graph.values()) {
     node.score = scoreNode(node, intentLower, keywords);
   }
@@ -339,6 +342,10 @@ export function selectCapabilityChains(
       seen.add(key);
       unique.push(c);
     }
+  }
+  const scoreMs = Date.now() - startScore;
+  if (graph.size > 200) {
+    console.error(`[Strategy] ${graph.size} nodes | topo=${topoMs}ms score=${scoreMs}ms | ${unique.length} chains`);
   }
   return unique.slice(0, maxChains);
 }

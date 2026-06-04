@@ -156,13 +156,89 @@ export class SemanticTopology {
   get size(): number { return this.nodes.size; }
 }
 
+// ── Persistence cache: avoid O(n²) rebuild on every run ──
+import * as crypto from "crypto";
+import * as fs from "fs";
+import * as path from "path";
+
+const CACHE_DIR = path.resolve(__dirname, "..", ".progmune");
+const TOPO_CACHE = path.join(CACHE_DIR, "topology.json");
+
+function irHash(ir: any[]): string {
+  return crypto.createHash("md5")
+    .update(JSON.stringify(ir.map((f: any) => f.name + f.file)))
+    .digest("hex");
+}
+
+function serializeTopology(topo: SemanticTopology, hash: string): void {
+  try {
+    if (!fs.existsSync(CACHE_DIR)) fs.mkdirSync(CACHE_DIR, { recursive: true });
+    const data = {
+      hash,
+      nodes: [...topo["nodes"].entries()].map(([name, n]: [string, any]) => ({
+        name, file: n.file, tags: [...n.tags], purposeWords: [...n.purposeWords],
+        produces: [...n.produces], requires: [...n.requires],
+      })),
+      edges: [...topo["edges"].entries()].map(([name, edges]: [string, any]) => ({
+        name, edges: edges.map((e: any) => ({ source: e.source, target: e.target, weight: e.weight, reason: e.reason })),
+      })),
+    };
+    fs.writeFileSync(TOPO_CACHE, JSON.stringify(data));
+  } catch { /* best-effort cache write */ }
+}
+
+function deserializeTopology(): SemanticTopology | null {
+  try {
+    if (!fs.existsSync(TOPO_CACHE)) return null;
+    const data = JSON.parse(fs.readFileSync(TOPO_CACHE, "utf-8"));
+    const topo = new SemanticTopology();
+    for (const n of data.nodes) {
+      topo["nodes"].set(n.name, {
+        name: n.name, file: n.file,
+        tags: new Set(n.tags), purposeWords: new Set(n.purposeWords),
+        produces: new Set(n.produces), requires: new Set(n.requires),
+      });
+    }
+    for (const e of data.edges) {
+      topo["edges"].set(e.name, e.edges);
+      for (const edge of e.edges) {
+        const key = edge.source < edge.target ? `${edge.source}::${edge.target}` : `${edge.target}::${edge.source}`;
+        topo["similarityCache"].set(key, Math.max(topo["similarityCache"].get(key) || 0, edge.weight));
+      }
+    }
+    return topo;
+  } catch { return null; }
+}
+
 // Singleton
 let _topology: SemanticTopology | null = null;
+let _topoHash: string | null = null;
 
 export function getTopology(ir?: any[]): SemanticTopology {
   if (!_topology && ir) {
+    const hash = irHash(ir);
+    // Try disk cache first
+    try {
+      if (fs.existsSync(TOPO_CACHE)) {
+        const cached = JSON.parse(fs.readFileSync(TOPO_CACHE, "utf-8"));
+        if (cached.hash === hash) {
+          _topology = deserializeTopology();
+          if (_topology) {
+            _topoHash = hash;
+            console.error("[Topology] 从缓存加载 (%d 节点)", _topology.size);
+            return _topology;
+          }
+        }
+      }
+    } catch { /* fall through to build */ }
+
+    // Build from scratch
+    const start = Date.now();
     _topology = new SemanticTopology();
     _topology.build(ir);
+    _topoHash = hash;
+    console.error("[Topology] 构建完成 (%d 节点, %dms)", _topology.size, Date.now() - start);
+    serializeTopology(_topology, hash);
   }
   return _topology || new SemanticTopology();
 }
@@ -170,5 +246,7 @@ export function getTopology(ir?: any[]): SemanticTopology {
 export function rebuildTopology(ir: any[]): SemanticTopology {
   _topology = new SemanticTopology();
   _topology.build(ir);
+  _topoHash = irHash(ir);
+  serializeTopology(_topology, _topoHash);
   return _topology;
 }
