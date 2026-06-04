@@ -12,6 +12,7 @@ import { jaccardSimilarity, extractKeywords } from "./utils";
 import { getFailureAdjustedCredit } from "./feedback";
 import { getTopology } from "./semantic-topology";
 import { getConstraints, applyConstraints } from "./planner-constraints";
+import { getEdgeConfidence } from "./failure-corpus";
 import type { FunctionInfo } from "./extract-ir";
 
 interface CapabilityNode {
@@ -220,8 +221,13 @@ export function selectCapabilityChains(
   const chains: CapabilityChain[] = [];
   const BEAM_WIDTH = graph.size > 500 ? 3 : 5;
   const MAX_CHAIN_LEN = parseInt(process.env.PROGMUNE_MAX_CHAIN_LEN || "5", 10);
-  // Heuristic pruning: drop nodes below this score to avoid noise accumulation
   const SCORE_FLOOR = graph.size > 1000 ? 0.2 : 0;
+
+  // ── Capability Ranking: preload edge confidence from session history ──
+  const edgeConfMap = new Map<string, number>();
+  for (const ec of getEdgeConfidence()) {
+    edgeConfMap.set(`${ec.producer}→${ec.consumer}`, ec.confidence);
+  }
 
   for (const seed of seeds) {
     // ── Priority-queue (beam) search: forward trace ──
@@ -264,11 +270,15 @@ export function selectCapabilityChains(
           for (const consumer of consumers) {
             const newVisited = new Set(entry.visited);
             newVisited.add(consumer.name);
+            // Capability Ranking: edge confidence × consumer score
+            const edgeKey = `${current.name}→${consumer.name}`;
+            const edgeConf = edgeConfMap.get(edgeKey) ?? 0.5; // Laplace prior for unseen edges
+            const rankedScore = consumer.score * (0.5 + edgeConf * 0.5);
             nextBeam.push({
               chain: [...entry.chain, consumer],
               visited: newVisited,
-              totalScore: entry.totalScore + consumer.score,
-              leapDecay: 1.0, // reset decay on direct match
+              totalScore: entry.totalScore + rankedScore,
+              leapDecay: 1.0,
               deadEnd: consumer.score === 0 && consumer.produces.length === 0,
             });
             expanded = true;

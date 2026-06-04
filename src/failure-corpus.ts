@@ -660,6 +660,64 @@ export function getAntibodyStats(): {
   return { totalHits, fastPathHits, injectedHintHits, totalLLMCallsSaved, totalTokensSaved, byLevel, topSignatures };
 }
 
+/** Edge confidence from session history.
+ *  For each producer→consumer edge, returns how often it appeared
+ *  in successful vs failed chains. Used by Capability Ranking. */
+export interface EdgeConfidence {
+  producer: string;
+  consumer: string;
+  successCount: number;
+  failureCount: number;
+  totalCount: number;
+  /** Confidence score: 0-1, Laplace smoothed */
+  confidence: number;
+}
+
+export function getEdgeConfidence(producer?: string, consumer?: string): EdgeConfidence[] {
+  const sessions = getAllSessions();
+  const edgeStats = new Map<string, { success: number; failure: number }>();
+
+  for (const s of sessions) {
+    for (const a of s.attempts) {
+      const calls = a.transitions
+        .filter(t => t.function)
+        .sort((x, y) => x.actionIndex - y.actionIndex);
+      const isSuccess = a.outcome === "success";
+
+      for (let i = 0; i < calls.length - 1; i++) {
+        const edgeKey = `${calls[i].function}→${calls[i + 1].function}`;
+        if (!edgeStats.has(edgeKey)) {
+          edgeStats.set(edgeKey, { success: 0, failure: 0 });
+        }
+        const stats = edgeStats.get(edgeKey)!;
+        if (isSuccess) stats.success++;
+        else stats.failure++;
+      }
+    }
+  }
+
+  const results: EdgeConfidence[] = [];
+  for (const [key, stats] of edgeStats) {
+    const [prod, cons] = key.split("→");
+    if (producer && prod !== producer) continue;
+    if (consumer && cons !== consumer) continue;
+    const total = stats.success + stats.failure;
+    // Laplace smoothing: Beta(1,1) prior
+    const confidence = (stats.success + 1) / (total + 2);
+    results.push({
+      producer: prod,
+      consumer: cons,
+      successCount: stats.success,
+      failureCount: stats.failure,
+      totalCount: total,
+      confidence: Math.round(confidence * 100) / 100,
+    });
+  }
+
+  results.sort((a, b) => b.confidence * b.totalCount - a.confidence * a.totalCount);
+  return results;
+}
+
 /** Generate candidate immune rules from failure patterns. */
 export function generateCandidateRules(): string[] {
   const genome = getFailureGenome();
