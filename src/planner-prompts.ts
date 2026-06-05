@@ -44,7 +44,7 @@ export function buildCompactFuncList(funcs: any[], allFuncs: any[]): string {
   function exampleValue(type: string, paramName: string): string {
     const t = (type || "any").replace(/\[\]$/, "").toLowerCase();
     if (t === "string" || t === "str") return `"${paramName}"`;
-    if (t === "number" || t === "int" || t === "float") return "0";
+    if (t === "number" || t === "int" || t === "float") return paramName === "limit" ? "10" : "1";
     if (t === "boolean" || t === "bool") return "false";
     if (t === "any" || t === "object") return "{}";
     if (t === "void" || t === "undefined" || t === "null") return "null";
@@ -62,7 +62,8 @@ export function buildCompactFuncList(funcs: any[], allFuncs: any[]): string {
 
   return funcs.map((f: any) => {
     const params = (f.params || []).map((p: any) => {
-      return `${p.name}=${exampleValue(p.type || "any", p.name || "arg")}`;
+      const ex = exampleValue(p.type || "any", p.name || "arg");
+      return `${p.name}=${ex}`;
     }).join(", ");
     let line = `${f.name}(${params}) → ${f.returnType || "any"}`;
     const meta: string[] = [];

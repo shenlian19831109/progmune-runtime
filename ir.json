@@ -18,6 +18,7 @@
     "IntentSession": "src/failure-corpus.ts",
     "PlannerCheckpoint": "src/failure-corpus.ts",
     "LearnedPattern": "src/failure-corpus.ts",
+    "EdgeConfidence": "src/failure-corpus.ts",
     "SVL": "src/failure-corpus.ts",
     "SessionAttempt": "src/failure-corpus.ts",
     "AntibodyLevel": "src/failure-corpus.ts",
@@ -2087,6 +2088,58 @@
       ]
     },
     {
+      "name": "autoRepair",
+      "params": [
+        {
+          "name": "code",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "maxRetries",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "{ code: string; repaired: boolean; errors: string[]; attempts: number }",
+      "returnTypeDetail": "{ code: string; repaired: boolean; errors: string[]; attempts: number }",
+      "file": "src/emitter.ts",
+      "calls": [
+        "join",
+        "cwd",
+        "existsSync",
+        "mkdirSync",
+        "now",
+        "writeFileSync",
+        "execSync",
+        "match",
+        "unlinkSync",
+        "filter",
+        "split",
+        "push",
+        "trim",
+        "includes",
+        "map",
+        "matchAll",
+        "parse",
+        "readFileSync",
+        "find",
+        "replace"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "number"
+      ],
+      "outputs": [
+        "{ code: string; repaired: boolean; errors: string[]; attempts: number }"
+      ],
+      "purpose": "Auto-repair: compile emitted code, fix common errors, retry. Returns { code, repaired, errors }. /",
+      "tags": [
+        "emitter"
+      ]
+    },
+    {
       "name": "loadMetrics",
       "params": [],
       "returnType": "ExecutionMetrics",
@@ -2925,7 +2978,10 @@
       "produces": [
         "EXTRACTED"
       ],
-      "_producesDerived": true
+      "_producesDerived": true,
+      "requires": [
+        "IR_FUNCTIONS"
+      ]
     },
     {
       "name": "extractSignatureFromDts",
@@ -3925,6 +3981,117 @@
       "useWhen": [
         "checking immune system effectiveness",
         "measuring token savings"
+      ]
+    },
+    {
+      "name": "recordEdgeRejection",
+      "params": [
+        {
+          "name": "producer",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "consumer",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "void",
+      "returnTypeDetail": "void",
+      "file": "src/failure-corpus.ts",
+      "calls": [
+        "withLock"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [],
+      "purpose": "Record that the LLM rejected a recommended edge (picked a different function). */",
+      "tags": [
+        "failure",
+        "corpus"
+      ]
+    },
+    {
+      "name": "getEdgeRejections",
+      "params": [],
+      "returnType": "Map<string, number>",
+      "returnTypeDetail": "Map<string, number>",
+      "file": "src/failure-corpus.ts",
+      "calls": [
+        "existsSync",
+        "parse",
+        "readFileSync",
+        "entries"
+      ],
+      "exported": false,
+      "inputs": [],
+      "outputs": [
+        "Map"
+      ],
+      "tags": [
+        "failure",
+        "corpus"
+      ],
+      "purpose": "get edge rejections",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "getEdgeConfidence",
+      "params": [
+        {
+          "name": "producer",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "consumer",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "EdgeConfidence[]",
+      "returnTypeDetail": "EdgeConfidence[]",
+      "file": "src/failure-corpus.ts",
+      "calls": [
+        "getAllSessions",
+        "sort",
+        "filter",
+        "has",
+        "set",
+        "get",
+        "getEdgeRejections",
+        "split",
+        "max",
+        "push",
+        "round"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "EdgeConfidence"
+      ],
+      "tags": [
+        "failure",
+        "corpus"
+      ],
+      "purpose": "get edge confidence",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true,
+      "requires": [
+        "SESSION_DATA",
+        "SESSION_CORPUS"
       ]
     },
     {
@@ -5403,6 +5570,36 @@
       "tags": [
         "merge",
         "combine"
+      ]
+    },
+    {
+      "name": "getExportedDeclarations",
+      "params": [],
+      "returnType": "any[]",
+      "returnTypeDetail": "any[]",
+      "file": "src/ir-utils.ts",
+      "calls": [
+        "loadIR",
+        "map",
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [],
+      "purpose": "Get all exported function declarations with capability metadata.",
+      "requires": [
+        "IR_FUNCTIONS"
+      ],
+      "produces": [
+        "EXPORTED_DECLARATIONS"
+      ],
+      "tags": [
+        "ir",
+        "export",
+        "catalog"
+      ],
+      "useWhen": [
+        "building capability catalogs, listing available functions"
       ]
     },
     {
@@ -8142,7 +8339,7 @@
       "outputs": [
         "string"
       ],
-      "purpose": "Build a compact function list with capability metadata to help LLM understand function semantics. */",
+      "purpose": "Build a compact function list with parameter examples for LLM precision. */",
       "tags": [
         "planner",
         "prompts"
@@ -8711,6 +8908,7 @@
         "rebuildState",
         "validateTransition",
         "some",
+        "recordEdgeRejection",
         "validateActionSequence",
         "flat",
         "recordFailure",
@@ -14860,6 +15058,7 @@
       "file": "src/strategy-planner.ts",
       "calls": [
         "has",
+        "some",
         "set"
       ],
       "exported": false,
@@ -14902,11 +15101,13 @@
       "returnTypeDetail": "number",
       "file": "src/strategy-planner.ts",
       "calls": [
-        "includes",
-        "toLowerCase",
-        "jaccardSimilarity",
-        "split",
         "filter",
+        "split",
+        "toLowerCase",
+        "replace",
+        "includes",
+        "startsWith",
+        "jaccardSimilarity",
         "getFailureAdjustedCredit",
         "getConstraints",
         "applyConstraints"
@@ -15144,11 +15345,13 @@
         "filter",
         "slice",
         "parseInt",
+        "getEdgeConfidence",
+        "set",
         "findConsumers",
         "add",
+        "get",
         "push",
         "findSimilar",
-        "get",
         "findProducers",
         "topByScore",
         "unshift",
@@ -15192,10 +15395,12 @@
       "returnTypeDetail": "string",
       "file": "src/strategy-planner.ts",
       "calls": [
-        "min",
+        "slice",
+        "has",
+        "add",
         "push",
-        "toFixed",
-        "join"
+        "join",
+        "toFixed"
       ],
       "exported": true,
       "inputs": [
@@ -15204,7 +15409,7 @@
       "outputs": [
         "string"
       ],
-      "purpose": "Format chains as a hint for the LLM prompt. */",
+      "purpose": "Format chains as a routing hint (not full path). Only shows top 2 high-confidence next steps per entry, so the LLM gets guidance without being forced into long chains. */",
       "tags": [
         "strategy",
         "planner"
@@ -16296,6 +16501,61 @@
       "purpose": "convert"
     },
     {
+      "name": "execSync",
+      "params": [
+        {
+          "name": "command",
+          "type": "string"
+        }
+      ],
+      "returnType": "Buffer",
+      "returnTypeDetail": "Buffer",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "description": "同步执行命令",
+      "tags": [
+        "(external)"
+      ],
+      "purpose": "exec sync"
+    },
+    {
+      "name": "unlinkSync",
+      "params": [
+        {
+          "name": "path",
+          "type": "string"
+        }
+      ],
+      "returnType": "void",
+      "returnTypeDetail": "void",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "description": "删除文件",
+      "tags": [
+        "(external)"
+      ],
+      "purpose": "unlink sync"
+    },
+    {
+      "name": "matchAll",
+      "params": [],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "tags": [
+        "(external)"
+      ],
+      "purpose": "match all",
+      "requires": [
+        "DATA"
+      ],
+      "_requiresDerived": true
+    },
+    {
       "name": "digest",
       "params": [
         {
@@ -16355,25 +16615,6 @@
         "CREATED"
       ],
       "_producesDerived": true
-    },
-    {
-      "name": "execSync",
-      "params": [
-        {
-          "name": "command",
-          "type": "string"
-        }
-      ],
-      "returnType": "Buffer",
-      "returnTypeDetail": "Buffer",
-      "file": "(external)",
-      "calls": [],
-      "external": true,
-      "description": "同步执行命令",
-      "tags": [
-        "(external)"
-      ],
-      "purpose": "exec sync"
     },
     {
       "name": "getFullText",
@@ -16713,23 +16954,6 @@
       "_producesDerived": true
     },
     {
-      "name": "getExportedDeclarations",
-      "params": [],
-      "returnType": "any",
-      "returnTypeDetail": "any",
-      "file": "(external)",
-      "calls": [],
-      "external": true,
-      "tags": [
-        "(external)"
-      ],
-      "purpose": "get exported declarations",
-      "produces": [
-        "DATA"
-      ],
-      "_producesDerived": true
-    },
-    {
       "name": "from",
       "params": [
         {
@@ -16751,25 +16975,6 @@
         "(external)"
       ],
       "purpose": "from"
-    },
-    {
-      "name": "unlinkSync",
-      "params": [
-        {
-          "name": "path",
-          "type": "string"
-        }
-      ],
-      "returnType": "void",
-      "returnTypeDetail": "void",
-      "file": "(external)",
-      "calls": [],
-      "external": true,
-      "description": "删除文件",
-      "tags": [
-        "(external)"
-      ],
-      "purpose": "unlink sync"
     },
     {
       "name": "parseInt",

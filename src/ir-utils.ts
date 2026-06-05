@@ -29,3 +29,24 @@ export function countExported(ir: any[]): number {
 export function mergeResults(a: any, b: any): { first: any; second: any } {
   return { first: a, second: b };
 }
+
+/**
+ * Get all exported function declarations with capability metadata.
+ * @requires IR_FUNCTIONS @produces EXPORTED_DECLARATIONS
+ * @purpose Return exported functions with their purpose, requires, and produces
+ * @tags ir, export, catalog
+ * @useWhen building capability catalogs, listing available functions
+ */
+export function getExportedDeclarations(): any[] {
+  const allFuncs = loadIR();
+  return allFuncs
+    .filter((f: any) => f.exported)
+    .map((f: any) => ({
+      name: f.name,
+      purpose: f.purpose || "",
+      requires: f.requires || [],
+      produces: f.produces || [],
+      tags: f.tags || [],
+      file: f.file,
+    }));
+}
