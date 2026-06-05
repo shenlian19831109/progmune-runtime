@@ -516,6 +516,82 @@ export function getAntibodyStats() {
         .slice(0, 10);
     return { totalHits, fastPathHits, injectedHintHits, totalLLMCallsSaved, totalTokensSaved, byLevel, topSignatures };
 }
+// ── Edge rejection tracking ──
+const MEMORY_DIR = path.join(CORPUS_DIR, "..", ".progmune_memory");
+const REJECTION_FILE = path.join(MEMORY_DIR, "edge_rejections.json");
+/** Record that the LLM rejected a recommended edge (picked a different function). */
+export function recordEdgeRejection(producer, consumer) {
+    withLock("edge_rejections", () => {
+        let data = {};
+        try {
+            if (fs.existsSync(REJECTION_FILE))
+                data = JSON.parse(fs.readFileSync(REJECTION_FILE, "utf-8"));
+        }
+        catch { }
+        const key = `${producer}→${consumer}`;
+        data[key] = (data[key] || 0) + 1;
+        fs.writeFileSync(REJECTION_FILE, JSON.stringify(data, null, 2));
+    });
+}
+function getEdgeRejections() {
+    try {
+        if (!fs.existsSync(REJECTION_FILE))
+            return new Map();
+        const data = JSON.parse(fs.readFileSync(REJECTION_FILE, "utf-8"));
+        return new Map(Object.entries(data));
+    }
+    catch {
+        return new Map();
+    }
+}
+export function getEdgeConfidence(producer, consumer) {
+    const sessions = getAllSessions();
+    const edgeStats = new Map();
+    for (const s of sessions) {
+        for (const a of s.attempts) {
+            const calls = a.transitions
+                .filter(t => t.function)
+                .sort((x, y) => x.actionIndex - y.actionIndex);
+            const isSuccess = a.outcome === "success";
+            for (let i = 0; i < calls.length - 1; i++) {
+                const edgeKey = `${calls[i].function}→${calls[i + 1].function}`;
+                if (!edgeStats.has(edgeKey)) {
+                    edgeStats.set(edgeKey, { success: 0, failure: 0 });
+                }
+                const stats = edgeStats.get(edgeKey);
+                if (isSuccess)
+                    stats.success++;
+                else
+                    stats.failure++;
+            }
+        }
+    }
+    const rejections = getEdgeRejections();
+    const results = [];
+    for (const [key, stats] of edgeStats) {
+        const [prod, cons] = key.split("→");
+        if (producer && prod !== producer)
+            continue;
+        if (consumer && cons !== consumer)
+            continue;
+        // Factor in explicit LLM rejections as negative signal
+        const rejectionCount = rejections.get(key) || 0;
+        const effectiveSuccess = Math.max(0, stats.success - rejectionCount);
+        const effectiveTotal = stats.success + stats.failure + rejectionCount;
+        // Laplace smoothing: Beta(1,1) prior
+        const confidence = (effectiveSuccess + 1) / (effectiveTotal + 2);
+        results.push({
+            producer: prod,
+            consumer: cons,
+            successCount: stats.success,
+            failureCount: stats.failure,
+            totalCount: effectiveTotal,
+            confidence: Math.round(confidence * 100) / 100,
+        });
+    }
+    results.sort((a, b) => b.confidence * b.totalCount - a.confidence * a.totalCount);
+    return results;
+}
 /** Generate candidate immune rules from failure patterns. */
 export function generateCandidateRules() {
     const genome = getFailureGenome();

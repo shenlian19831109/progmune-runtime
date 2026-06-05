@@ -5,7 +5,7 @@ import { validateActionSequence } from "./validator";
 import { checkSemantic } from "./semantic-validator";
 import { getFailureAdjustedCredit } from "./feedback";
 import { jaccardSimilarity, extractKeywords } from "./utils";
-import { recordFailure, recordSession, saveCheckpoint, loadCheckpoint, clearCheckpoint, queryAntibodies } from "./failure-corpus";
+import { recordFailure, recordSession, saveCheckpoint, loadCheckpoint, clearCheckpoint, queryAntibodies, recordEdgeRejection } from "./failure-corpus";
 import { recordEpisode, findSemanticTemplate } from "./memory-layer";
 import { parseProtocolsFromJSON, validateTransition, checkLedgerConsistency, rebuildState, hashRules, explainRejection, rejectionToJSON } from "./ssg-validator";
 import { getNsInit } from "./protocol-registry";
@@ -853,15 +853,18 @@ ${RETRY_HINT}
                 }
             }
         }
-        // Strategy hint: warn if LLM missed all recommended nodes (soft guidance, not hard fail)
+        // Strategy hint: warn if LLM missed all recommended nodes, record negative feedback
         if (chains.length > 0 && chains[0].nodes.length >= 2) {
             const topChain = chains[0];
             const recommendedFuncs = topChain.nodes.map(n => n.name);
             const chosenFuncs = filtered.filter(a => a.kind === "call").map(a => a.function);
             const hasAny = recommendedFuncs.some(fn => chosenFuncs.includes(fn));
             if (!hasAny && recommendedFuncs.length >= 3) {
-                // Only warn if LLM ignored the ENTIRE chain (none of the recommended functions used)
                 console.error(`⚠️ 策略提示: LLM 未使用推荐链中的任何函数 (推荐: ${topChain.explanation})`);
+                // Record negative feedback on recommended edges
+                for (let i = 0; i < topChain.nodes.length - 1; i++) {
+                    recordEdgeRejection(topChain.nodes[i].name, topChain.nodes[i + 1].name);
+                }
             }
         }
         // 1) 基础序列校验

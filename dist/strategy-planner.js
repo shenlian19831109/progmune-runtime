@@ -11,15 +11,19 @@ import { jaccardSimilarity, extractKeywords } from "./utils";
 import { getFailureAdjustedCredit } from "./feedback";
 import { getTopology } from "./semantic-topology";
 import { getConstraints, applyConstraints } from "./planner-constraints";
+import { getEdgeConfidence } from "./failure-corpus";
 /** Build a capability graph from IR functions. */
 function buildCapabilityGraph(ir) {
     const SKIP_FILES = new Set(["src/strategy-planner.ts", "src/planner.ts"]);
+    const SKIP_TAGS = new Set(["python"]); // language-specific functions excluded from graph
     const graph = new Map();
     for (const f of ir) {
         if (!f.exported)
             continue;
         if (SKIP_FILES.has(f.file))
-            continue; // skip planner internals
+            continue;
+        if ((f.tags || []).some(t => SKIP_TAGS.has(t)))
+            continue; // skip language-specific
         graph.set(f.name, {
             name: f.name,
             purpose: f.purpose || "",
@@ -39,13 +43,27 @@ function buildCapabilityGraph(ir) {
 function scoreNode(node, intentLower, keywords) {
     let score = 0;
     let hasMatch = false;
+    // ── Primary verb detection: first keyword is the main action ──
+    const primaryVerb = keywords.length > 0 ? keywords[0] : "";
+    const nameWords = node.name.replace(/([A-Z])/g, " $1").toLowerCase().split(/[\s_]+/).filter(w => w.length > 1);
+    const nameLower = node.name.toLowerCase();
     // Name match
     for (const kw of keywords) {
-        if (node.name.toLowerCase().includes(kw)) {
+        // Substring match
+        if (nameLower.includes(kw)) {
             score += 1;
             hasMatch = true;
+            // Exact word match
+            if (nameWords.includes(kw)) {
+                // Primary verb (first keyword) that STARTS the function name → decisive bonus
+                // e.g., "extract" matches "extractIR" → +5, beats generic "validate" matches
+                if (kw === primaryVerb && nameLower.startsWith(kw))
+                    score += 5;
+                else
+                    score += 2;
+            }
         }
-        const js = jaccardSimilarity(node.name.toLowerCase(), kw);
+        const js = jaccardSimilarity(nameLower, kw);
         if (js > 0.2) {
             score += js;
             hasMatch = true;
@@ -204,8 +222,12 @@ export function selectCapabilityChains(intent, ir, maxChains = 5) {
     const chains = [];
     const BEAM_WIDTH = graph.size > 500 ? 3 : 5;
     const MAX_CHAIN_LEN = parseInt(process.env.PROGMUNE_MAX_CHAIN_LEN || "5", 10);
-    // Heuristic pruning: drop nodes below this score to avoid noise accumulation
     const SCORE_FLOOR = graph.size > 1000 ? 0.2 : 0;
+    // ── Capability Ranking: preload edge confidence from session history ──
+    const edgeConfMap = new Map();
+    for (const ec of getEdgeConfidence()) {
+        edgeConfMap.set(`${ec.producer}→${ec.consumer}`, ec.confidence);
+    }
     for (const seed of seeds) {
         let beam = [{
                 chain: [seed],
@@ -234,11 +256,15 @@ export function selectCapabilityChains(intent, ir, maxChains = 5) {
                     for (const consumer of consumers) {
                         const newVisited = new Set(entry.visited);
                         newVisited.add(consumer.name);
+                        // Capability Ranking: edge confidence × consumer score
+                        const edgeKey = `${current.name}→${consumer.name}`;
+                        const edgeConf = edgeConfMap.get(edgeKey) ?? 0.5; // Laplace prior for unseen edges
+                        const rankedScore = consumer.score * (0.5 + edgeConf * 0.5);
                         nextBeam.push({
                             chain: [...entry.chain, consumer],
                             visited: newVisited,
-                            totalScore: entry.totalScore + consumer.score,
-                            leapDecay: 1.0, // reset decay on direct match
+                            totalScore: entry.totalScore + rankedScore,
+                            leapDecay: 1.0,
                             deadEnd: consumer.score === 0 && consumer.produces.length === 0,
                         });
                         expanded = true;
@@ -325,14 +351,26 @@ export function selectCapabilityChains(intent, ir, maxChains = 5) {
     }
     return unique.slice(0, maxChains);
 }
-/** Format chains as a hint for the LLM prompt. */
+/** Format chains as a routing hint (not full path).
+ *  Only shows top 2 high-confidence next steps per entry,
+ *  so the LLM gets guidance without being forced into long chains. */
 export function formatChainHint(chains) {
     if (chains.length === 0)
         return "";
-    const lines = ["\n推荐能力链 (Strategy Layer):"];
-    for (let i = 0; i < Math.min(chains.length, 3); i++) {
-        const c = chains[i];
-        lines.push(`  ${i + 1}. ${c.explanation} (★${c.score.toFixed(1)})`);
+    const lines = ["\n建议的下一步调用 (已从历史成功链中验证):"];
+    const shown = new Set();
+    for (const c of chains.slice(0, 3)) {
+        const pairs = [];
+        for (let i = 0; i < c.nodes.length - 1 && pairs.length < 2; i++) {
+            const key = `${c.nodes[i].name}→${c.nodes[i + 1].name}`;
+            if (!shown.has(key)) {
+                shown.add(key);
+                pairs.push(`${c.nodes[i].name} → ${c.nodes[i + 1].name}`);
+            }
+        }
+        if (pairs.length > 0) {
+            lines.push(`  ${pairs.join("  |  ")} (★${c.score.toFixed(1)})`);
+        }
     }
     return lines.join("\n");
 }
