@@ -19,43 +19,55 @@ export const SYSTEM_PROMPT = `你是程序合成助手。只输出 JSON 数组�
 规则：
 - 函数名从可用列表中选择，优先选注释中 purpose 匹配需求的函数
 - 0参数函数直接用 "a":[]：{"f":"getAllSessions","to":"s","a":[]}
-- 参数值规则（重要！）：
-  - 字符串: "v":""（空串）或 "v":"SVL-4"（已知枚举值）
-  - 数字: "v":0 或 "v":1
-  - 布尔: "v":false
-  - 对象/数组: "v":{} as Type
-  - 上一个函数返回值: "v":"$变量名"（$前缀引用）
-- 返回值: {"r":"变量名"} — 必须返回，不能只调用不返回
-- 链式调用：看到推荐调用链时，用 $变量名 把生产者输出传给消费者
+- 参数值规则（最重要！）：
+  - 链式调用：前面的 call 产生了 to="genome"，后面的 call 用 "v":"$genome" 引用
+  - 示例：{"f":"getFailureGenome","to":"g","a":[]} → {"f":"computeHealthScore","to":"s","a":[{"n":"failureGenome","t":"any","v":"$g"},{"n":"antibodyStats","t":"any","v":"$stats"}]}
+  - 第一个调用的参数用有意义的示例值：文件路径用 "/path/to/file"，ID用 "example-id"
+  - 禁止空串 "" 作为参数值！
+- 返回值: {"r":"变量名"} — 必须返回最后一个 call 的赋值变量
+- 链式调用：看到推荐链时，用 $变量名 把上一步输出传给下一步
 
 铁律：
-- 函数签名中带引号的参数（如 "SVL-4"）是字符串值，直接 v 中
-- 字符串枚举（SVL等）用带引号的值，禁止 {} as Type
-- 每个call的返回值用"to"命名变量，下一个call通过"$变量名"引用
-- 最后一个action必须是{"r":"变量名"}，不能以call结尾
-- 如果你调了函数，必须return它的结果
-- 只输出JSON`;
+- 禁止空串参数！每个参数根据函数签名中的 =默认值 填入实际值
+- 字符串用具体描述值（不用 ""），数字用合理数值，布尔用 false
+- 每个call用"to"命名变量，下一个call通过"$变量名"引用
+- 最后一个action必须是{"r":"变量名"}
+- 只输出JSON，不输出解释`;
 
 export const RETRY_HINT = `输出格式：紧凑 JSON 数组 [{"f":"函数名","to":"变量名","a":[...]}]`;
 
 // ── Formatters ──
 
-/** Build a compact function list with capability metadata to help LLM understand function semantics. */
+/** Build a compact function list with parameter examples for LLM precision. */
 export function buildCompactFuncList(funcs: any[], allFuncs: any[]): string {
-  const ENUM_DEFAULTS: Record<string, string> = {
-    SVL: '"SVL-4"', RootCause: '"F01"', BranchReason: '"repair_attempt"',
-    RepairStrategy: '"insert"', ConstraintType: '"protocol"',
-  };
+  // Example values for each type — helps LLM fill meaningful args
+  function exampleValue(type: string, paramName: string): string {
+    const t = (type || "any").replace(/\[\]$/, "").toLowerCase();
+    if (t === "string" || t === "str") return `"${paramName}"`;
+    if (t === "number" || t === "int" || t === "float") return "0";
+    if (t === "boolean" || t === "bool") return "false";
+    if (t === "any" || t === "object") return "{}";
+    if (t === "void" || t === "undefined" || t === "null") return "null";
+    // Known enum types
+    if (t === "svl") return '"SVL-4"';
+    if (t === "rootcause") return '"F01"';
+    if (t === "branchreason") return '"repair_attempt"';
+    if (t === "repairstrategy") return '"insert"';
+    if (t === "constrainttype") return '"protocol"';
+    if (t.endsWith("[]")) return "[]";
+    if (t.startsWith("map<")) return "new Map()";
+    if (t.startsWith("set<")) return "new Set()";
+    return `{} as ${type}`;
+  }
+
   return funcs.map((f: any) => {
     const params = (f.params || []).map((p: any) => {
-      const t = (p.type || "any").replace(/\[\]$/, "");
-      const def = ENUM_DEFAULTS[t];
-      return def ? `${p.name}: ${def}` : `${p.name}: ${p.type}`;
-    }).join(",");
-    let line = `${f.name}(${params})->${f.returnType || "any"}`;
+      return `${p.name}=${exampleValue(p.type || "any", p.name || "arg")}`;
+    }).join(", ");
+    let line = `${f.name}(${params}) → ${f.returnType || "any"}`;
     const meta: string[] = [];
     if (f.score && f.score > 0) meta.push(`★${f.score.toFixed(1)}`);
-    if (f.purpose) meta.push(f.purpose.slice(0, 50));
+    if (f.purpose) meta.push(f.purpose.slice(0, 60));
     if (f.produces && f.produces.length > 0) meta.push(`→${f.produces.join(",")}`);
     if (meta.length > 0) line += `  // ${meta.join(" | ")}`;
     return line;
