@@ -200,7 +200,9 @@ function findConsumers(graph: Map<string, CapabilityNode>, capability: string, a
 export function selectCapabilityChains(
   intent: string,
   ir: FunctionInfo[],
-  maxChains: number = 5
+  maxChains: number = 5,
+  llmSeeds?: string[], // LLM-picked function names for semantic bridge
+
 ): CapabilityChain[] {
   // Guard: null/undefined/empty intent
   if (!intent || typeof intent !== "string" || !intent.trim()) return [];
@@ -245,6 +247,20 @@ export function selectCapabilityChains(
     seeds = [...graph.values()].filter(n => n.score > 0).slice(0, 3);
   }
   seeds = seeds.slice(0, graph.size > 1000 ? 10 : graph.size > 500 ? 20 : 15);
+
+  // ── LLM seed injection: bridge the semantic gap ──
+  if (llmSeeds && llmSeeds.length > 0) {
+    const seedNames = new Set(seeds.map(n => n.name));
+    const maxScore = seeds.length > 0 ? Math.max(...seeds.map(n => n.score)) : 1;
+    for (const fnName of llmSeeds) {
+      if (seedNames.has(fnName)) continue; // already a seed
+      const node = graph.get(fnName);
+      if (node) {
+        node.score = Math.max(node.score, maxScore); // give it top seed priority
+        seeds.unshift(node);
+      }
+    }
+  }
 
   const allNodes = [...graph.values()];
   const chains: CapabilityChain[] = [];
