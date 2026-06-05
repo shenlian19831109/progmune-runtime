@@ -5,7 +5,7 @@
  */
 
 import { plan } from "./src/planner";
-import { emitCode } from "./src/emitter";
+import { emitCode, autoRepair } from "./src/emitter";
 import * as fs from "fs";
 
 const TASKS = [
@@ -39,7 +39,7 @@ const TASKS = [
 async function main() {
   console.log("═══ v3.0 Self-Hosting Benchmark ═══\n");
 
-  const results: { name: string; desc: string; success: boolean; actions: number; lines: number; retries: number }[] = [];
+  const results: { name: string; desc: string; success: boolean; actions: number; lines: number; retries: number; repaired: boolean; repairAttempts: number }[] = [];
 
   for (const task of TASKS) {
     console.log(`── ${task.name}: ${task.desc} ──`);
@@ -51,19 +51,30 @@ async function main() {
       const retries = (result.attempts?.length || 1) - 1;
 
       if (actions.length > 0 && actions.length < 50) {
-        const code = emitCode(actions, {
+        let code = emitCode(actions, {
           sessionId: result.sessionId,
           irFunctionCount: 549,
           protocolRuleCount: 7,
         });
+        // Auto-repair: compile → fix → retry
+        const repair = autoRepair(code, 3);
+        let lines = code.split("\n").length;
+        let repaired = false;
+        let repairAttempts = 0;
+        if (repair.repaired) {
+          code = repair.code;
+          lines = code.split("\n").length;
+          repaired = true;
+          repairAttempts = repair.attempts;
+        }
         const file = `progmune-self/${task.name}.ts`;
         fs.writeFileSync(file, code);
-        const lines = code.split("\n").length;
-        console.log(`  ✅ ${actions.length} actions | ${lines} lines | ${elapsed}ms | ${retries} retries`);
-        results.push({ name: task.name, desc: task.desc, success: true, actions: actions.length, lines, retries });
+        const status = repaired ? "🔧" : "✅";
+        console.log(`  ${status} ${actions.length} actions | ${lines} lines | ${elapsed}ms | ${retries} retries${repaired ? " | repaired" : ""}`);
+        results.push({ name: task.name, desc: task.desc, success: true, actions: actions.length, lines, retries, repaired, repairAttempts });
       } else {
         console.log(`  ❌ Invalid output (${actions.length} actions)`);
-        results.push({ name: task.name, desc: task.desc, success: false, actions: actions.length, lines: 0, retries });
+        results.push({ name: task.name, desc: task.desc, success: false, actions: actions.length, lines: 0, retries, repaired: false, repairAttempts: 0 });
       }
     } catch (e: any) {
       console.log(`  💥 ${e.message?.slice(0, 50)}`);
@@ -82,12 +93,14 @@ async function main() {
   // Write benchmark report
   let report = "# Progmune Self-Hosting Benchmark\n\n";
   report += `Generated: ${new Date().toISOString()}\n\n`;
-  report += "| Task | Description | Success | Actions | Lines | Retries |\n";
-  report += "|------|------------|---------|---------|-------|--------|\n";
+  report += "| Task | Description | Success | Actions | Lines | Retries | Repaired |\n";
+  report += "|------|------------|---------|---------|-------|---------|----------|\n";
   for (const r of results) {
-    report += `| ${r.name} | ${r.desc} | ${r.success ? "✅" : "❌"} | ${r.actions} | ${r.lines} | ${r.retries} |\n`;
+    report += `| ${r.name} | ${r.desc} | ${r.success ? "✅" : "❌"} | ${r.actions} | ${r.lines} | ${r.retries} | ${r.repaired ? "🔧" : "—"} |\n`;
   }
+  const repaired = results.filter(r => r.repaired);
   report += `\n**Success Rate: ${success.length}/${TASKS.length}**\n`;
+  if (repaired.length > 0) report += `**Auto-Repaired: ${repaired.length}**\n`;
   fs.writeFileSync("progmune-self/BENCHMARK.md", report);
   console.log(`\n  Report: progmune-self/BENCHMARK.md`);
 }

@@ -1,4 +1,4 @@
-// @progmune-generated session=sess_1780681607966_djhw7 timestamp=2026-06-05T17:46:51.895Z
+// @progmune-generated session=sess_1780683101018_zfwou timestamp=2026-06-05T18:11:44.205Z
 // Generated with IR constraint: 549 functions, 7 protocol rules
 import { getAntibodyStats } from "./failure-corpus";
 import { computeImmuneMetrics } from "./immune-metrics";
