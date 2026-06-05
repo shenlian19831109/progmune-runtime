@@ -138,7 +138,7 @@ describe("formatChainHint", () => {
   it("formats a single chain", () => {
     const chains = selectCapabilityChains("authenticate user", mockIR, 1);
     const hint = formatChainHint(chains);
-    expect(hint).toContain("推荐能力链");
+    expect(hint).toContain("建议的下一步调用");
     expect(hint).toContain("★");
   });
 });
