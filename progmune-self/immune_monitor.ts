@@ -1,15 +1,14 @@
-// @progmune-generated session=sess_1780672485088_60xff timestamp=2026-06-05T15:14:48.690Z
+// @progmune-generated session=sess_1780681607966_djhw7 timestamp=2026-06-05T17:46:51.895Z
 // Generated with IR constraint: 549 functions, 7 protocol rules
-import { getAntibodyStats, getFailureGenome } from "../src/failure-corpus";
-import { computeImmuneMetrics } from "../src/immune-metrics";
-import { computeHealthScore, formatHealthLevel } from "../src/health-utils";
+import { getAntibodyStats } from "./failure-corpus";
+import { computeImmuneMetrics } from "./immune-metrics";
+import { computeHealthScore, formatHealthLevel } from "./health-utils";
 
 export function main() {
-  const genome = getFailureGenome();
-  const antibodyStats = getAntibodyStats();
+  const stats = getAntibodyStats();
   const metrics = computeImmuneMetrics();
-  const score = computeHealthScore(genome, antibodyStats);
+  const score = computeHealthScore(metrics, stats);
   const status = formatHealthLevel(score);
-  return { metrics, score, status };
+  return status;
 }
 main();
