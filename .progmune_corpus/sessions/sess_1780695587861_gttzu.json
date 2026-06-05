@@ -1,0 +1,263 @@
+{
+  "sessionId": "sess_1780695587861_gttzu",
+  "intent": "patch the fingerprint verification error in ledger",
+  "attempts": [
+    {
+      "id": "att_1780695589698_uemgh",
+      "sessionId": "sess_1780695587861_gttzu",
+      "attemptNumber": 1,
+      "inputIntent": "patch the fingerprint verification error in ledger",
+      "plannerSeed": "c3f34e2b",
+      "constraintSnapshotId": "snap_1780695587862_e07521d2be9c",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "findUserByEmail",
+          "args": [
+            {
+              "name": "email",
+              "type": "string",
+              "value": "ledger-admin@example.com"
+            }
+          ],
+          "assignTo": "user"
+        },
+        {
+          "kind": "call",
+          "function": "sendNotification",
+          "args": [
+            {
+              "name": "userId",
+              "type": "string",
+              "value": "user"
+            },
+            {
+              "name": "message",
+              "type": "string",
+              "value": "Fingerprint verification error in ledger"
+            }
+          ],
+          "assignTo": "notification"
+        },
+        {
+          "kind": "return",
+          "value": "notification"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "findUserByEmail",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "sendNotification",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780695589698,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "antibodyHit": {
+        "level": "ACL-3",
+        "signature": "SVL-3:null_reference",
+        "fixPath": [
+          "addNullCheck",
+          "provideDefault",
+          "earlyReturn"
+        ],
+        "similarityScore": 0.3,
+        "action": "injected_hint",
+        "llmCallsSaved": 0,
+        "estimatedTokensSaved": 0
+      },
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780695587861,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780695589698_uemgh",
+    "sessionId": "sess_1780695587861_gttzu",
+    "attemptNumber": 1,
+    "inputIntent": "patch the fingerprint verification error in ledger",
+    "plannerSeed": "c3f34e2b",
+    "constraintSnapshotId": "snap_1780695587862_e07521d2be9c",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "findUserByEmail",
+        "args": [
+          {
+            "name": "email",
+            "type": "string",
+            "value": "ledger-admin@example.com"
+          }
+        ],
+        "assignTo": "user"
+      },
+      {
+        "kind": "call",
+        "function": "sendNotification",
+        "args": [
+          {
+            "name": "userId",
+            "type": "string",
+            "value": "user"
+          },
+          {
+            "name": "message",
+            "type": "string",
+            "value": "Fingerprint verification error in ledger"
+          }
+        ],
+        "assignTo": "notification"
+      },
+      {
+        "kind": "return",
+        "value": "notification"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "findUserByEmail",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "sendNotification",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780695589698,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "antibodyHit": {
+      "level": "ACL-3",
+      "signature": "SVL-3:null_reference",
+      "fixPath": [
+        "addNullCheck",
+        "provideDefault",
+        "earlyReturn"
+      ],
+      "similarityScore": 0.3,
+      "action": "injected_hint",
+      "llmCallsSaved": 0,
+      "estimatedTokensSaved": 0
+    },
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780695587862_e07521d2be9c",
+  "endedAt": 1780695589713
+}

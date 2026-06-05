@@ -1,0 +1,23 @@
+{
+  "intent": "shadow outer variable with inner declaration in emitter",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-3",
+  "constraintType": "dataflow",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "main",
+      "args": []
+    }
+  ],
+  "errorDetail": "Dataflow error: variable used before declaration or circular reference detected",
+  "ssgFixPath": [
+    "declareVariable",
+    "verifyScope",
+    "checkDataflow"
+  ],
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 1,
+  "id": "fail_1780671144289_224",
+  "timestamp": "2026-06-05T14:52:24.289Z"
+}

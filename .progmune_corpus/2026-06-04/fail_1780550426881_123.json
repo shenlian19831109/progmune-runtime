@@ -1,0 +1,23 @@
+{
+  "intent": "generate report from benchmark data",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "symbol_existence",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "formatReportAsMarkdown",
+      "args": []
+    }
+  ],
+  "errorDetail": "LLM hallucinated function: formatReportAsMarkdown does not exist in IR",
+  "ssgFixPath": [
+    "loadBenchmarks",
+    "benchmarkPassRate",
+    "benchmarkReport"
+  ],
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 1,
+  "id": "fail_1780550426881_123",
+  "timestamp": "2026-06-04T05:20:26.881Z"
+}

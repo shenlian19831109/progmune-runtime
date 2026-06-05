@@ -1,0 +1,49 @@
+{
+  "intent": "add a cache layer for frequently accessed IR functions",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "schema",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "loadIR",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "irCache"
+    },
+    {
+      "kind": "call",
+      "function": "extractIR",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "irCache"
+    },
+    {
+      "kind": "call",
+      "function": "countExported",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "exportCount"
+    }
+  ],
+  "errorDetail": "action[1]: duplicate assignTo \"irCache\" (previously assigned at another action)",
+  "plannerAttempt": 3,
+  "plannerRetryTotal": 3,
+  "id": "fail_1780594564370_188",
+  "timestamp": "2026-06-04T17:36:04.370Z"
+}

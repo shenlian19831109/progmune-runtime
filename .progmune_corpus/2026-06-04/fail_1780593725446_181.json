@@ -1,0 +1,210 @@
+{
+  "intent": "add a cache layer for frequently accessed IR functions",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "schema",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "loadIR",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "irCache"
+    },
+    {
+      "kind": "call",
+      "function": "extractIR",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "irCache"
+    },
+    {
+      "kind": "call",
+      "function": "readdirSync",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "fileList"
+    },
+    {
+      "kind": "call",
+      "function": "countExported",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "exportCount"
+    },
+    {
+      "kind": "call",
+      "function": "buildCapabilityGraph",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "capGraph"
+    },
+    {
+      "kind": "call",
+      "function": "scoreNode",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "score"
+    },
+    {
+      "kind": "call",
+      "function": "findRelated",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "relatedNodes"
+    },
+    {
+      "kind": "call",
+      "function": "validateActionSchema",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "validationResult"
+    },
+    {
+      "kind": "call",
+      "function": "formatActionSequence",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "formattedSeq"
+    },
+    {
+      "kind": "call",
+      "function": "formatActionList",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "formattedList"
+    },
+    {
+      "kind": "call",
+      "function": "formatImmuneResponse",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "formattedResponse"
+    },
+    {
+      "kind": "call",
+      "function": "suggestGenericRepair",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "repairProposal"
+    },
+    {
+      "kind": "call",
+      "function": "ensureDir",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "dirResult"
+    },
+    {
+      "kind": "call",
+      "function": "add",
+      "args": [],
+      "assignTo": "sum"
+    }
+  ],
+  "errorDetail": "action[1]: duplicate assignTo \"irCache\" (previously assigned at another action)",
+  "plannerAttempt": 3,
+  "plannerRetryTotal": 2,
+  "id": "fail_1780593725446_181",
+  "timestamp": "2026-06-04T17:22:05.446Z"
+}

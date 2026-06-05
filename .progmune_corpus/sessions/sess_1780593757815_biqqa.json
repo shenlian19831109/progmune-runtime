@@ -1,0 +1,687 @@
+{
+  "sessionId": "sess_1780593757815_biqqa",
+  "intent": "unify error reporting across all immune system modules",
+  "attempts": [
+    {
+      "id": "att_1780593777195_efc0p",
+      "sessionId": "sess_1780593757815_biqqa",
+      "attemptNumber": 3,
+      "inputIntent": "unify error reporting across all immune system modules",
+      "plannerSeed": "c5e83cb4",
+      "constraintSnapshotId": "snap_1780593757817_b00d96aecc16",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getAntibodyStats",
+          "args": [],
+          "assignTo": "antibodyStats"
+        },
+        {
+          "kind": "call",
+          "function": "listAllStates",
+          "args": [
+            {
+              "name": "arg",
+              "type": "any",
+              "value": null
+            }
+          ],
+          "assignTo": "ledger"
+        },
+        {
+          "kind": "call",
+          "function": "formatImmuneMetrics",
+          "args": [
+            {
+              "name": "arg",
+              "type": "any",
+              "value": null
+            }
+          ],
+          "assignTo": "m"
+        },
+        {
+          "kind": "call",
+          "function": "countTotalTransitions",
+          "args": [
+            {
+              "name": "arg",
+              "type": "any",
+              "value": null
+            }
+          ],
+          "assignTo": "sessions"
+        },
+        {
+          "kind": "call",
+          "function": "computeHealthScore",
+          "args": [
+            {
+              "name": "arg",
+              "type": "any",
+              "value": null
+            },
+            {
+              "name": "antibodyStats",
+              "type": "any",
+              "value": ""
+            }
+          ],
+          "assignTo": "failureGenome"
+        },
+        {
+          "kind": "call",
+          "function": "computeHealthScore",
+          "args": [
+            {
+              "name": "arg",
+              "type": "any",
+              "value": null
+            },
+            {
+              "name": "antibodyStats",
+              "type": "any",
+              "value": ""
+            }
+          ],
+          "assignTo": "antibodyStats"
+        },
+        {
+          "kind": "call",
+          "function": "formatImmuneResponse",
+          "args": [
+            {
+              "name": "arg",
+              "type": "any",
+              "value": null
+            }
+          ],
+          "assignTo": "a"
+        },
+        {
+          "kind": "call",
+          "function": "extractDirectCalls",
+          "args": [
+            {
+              "name": "arg",
+              "type": "any",
+              "value": null
+            }
+          ],
+          "assignTo": "func"
+        },
+        {
+          "kind": "call",
+          "function": "classifyError",
+          "args": [
+            {
+              "name": "arg",
+              "type": "any",
+              "value": null
+            }
+          ],
+          "assignTo": "error"
+        },
+        {
+          "kind": "call",
+          "function": "scoreNode",
+          "args": [
+            {
+              "name": "arg",
+              "type": "any",
+              "value": null
+            },
+            {
+              "name": "intentLower",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "name": "keywords",
+              "type": "string[]",
+              "value": ""
+            }
+          ],
+          "assignTo": "node"
+        },
+        {
+          "kind": "call",
+          "function": "scoreNode",
+          "args": [
+            {
+              "name": "arg",
+              "type": "any",
+              "value": null
+            },
+            {
+              "name": "intentLower",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "name": "keywords",
+              "type": "string[]",
+              "value": ""
+            }
+          ],
+          "assignTo": "intentLower"
+        },
+        {
+          "kind": "call",
+          "function": "scoreNode",
+          "args": [
+            {
+              "name": "arg",
+              "type": "any",
+              "value": null
+            },
+            {
+              "name": "intentLower",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "name": "keywords",
+              "type": "string[]",
+              "value": ""
+            }
+          ],
+          "assignTo": "keywords"
+        },
+        {
+          "kind": "call",
+          "function": "findProducers",
+          "args": [
+            {
+              "name": "arg",
+              "type": "any",
+              "value": null
+            },
+            {
+              "name": "capability",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "name": "allNodes",
+              "type": "CapabilityNode[]",
+              "value": ""
+            }
+          ],
+          "assignTo": "graph"
+        },
+        {
+          "kind": "call",
+          "function": "findProducers",
+          "args": [
+            {
+              "name": "arg",
+              "type": "any",
+              "value": null
+            },
+            {
+              "name": "capability",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "name": "allNodes",
+              "type": "CapabilityNode[]",
+              "value": ""
+            }
+          ],
+          "assignTo": "capability"
+        },
+        {
+          "kind": "call",
+          "function": "findProducers",
+          "args": [
+            {
+              "name": "arg",
+              "type": "any",
+              "value": null
+            },
+            {
+              "name": "capability",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "name": "allNodes",
+              "type": "CapabilityNode[]",
+              "value": ""
+            }
+          ],
+          "assignTo": "allNodes"
+        }
+      ],
+      "transitions": [],
+      "violations": [
+        {
+          "svl": 1,
+          "violatedConstraint": "schema",
+          "actionIndex": 0,
+          "description": "action[5]: duplicate assignTo \"antibodyStats\" (previously assigned at another action)"
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780593777195,
+      "llmCallCount": 0,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    },
+    {
+      "id": "att_1780593777214_kktrz",
+      "sessionId": "sess_1780593757815_biqqa",
+      "attemptNumber": 2,
+      "inputIntent": "unify error reporting across all immune system modules",
+      "plannerSeed": "cbe1115a",
+      "constraintSnapshotId": "snap_1780593757817_b00d96aecc16",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "classifyError",
+          "args": [
+            {
+              "name": "error",
+              "type": "string",
+              "value": "{{error}}"
+            }
+          ],
+          "assignTo": "classifyError_result"
+        },
+        {
+          "kind": "call",
+          "function": "classifyPlanError",
+          "args": [
+            {
+              "name": "error",
+              "type": "string",
+              "value": "{{error}}"
+            }
+          ],
+          "assignTo": "classifyPlanError_result"
+        },
+        {
+          "kind": "call",
+          "function": "error",
+          "args": [
+            {
+              "name": "message",
+              "type": "any",
+              "value": "{{message}}"
+            }
+          ]
+        },
+        {
+          "kind": "call",
+          "function": "ActionBuilder.call",
+          "args": [
+            {
+              "name": "func",
+              "type": "string",
+              "value": "{{func}}"
+            },
+            {
+              "name": "args",
+              "type": "any[]",
+              "value": "{{args}}"
+            },
+            {
+              "name": "assignTo",
+              "type": "string",
+              "value": "{{assignTo}}"
+            }
+          ],
+          "assignTo": "ActionBuilder.call_result"
+        },
+        {
+          "kind": "call",
+          "function": "extractDirectCalls",
+          "args": [
+            {
+              "name": "func",
+              "type": "FunctionDeclaration | ArrowFunction",
+              "value": "{{func}}"
+            }
+          ],
+          "assignTo": "extractDirectCalls_result"
+        },
+        {
+          "kind": "call",
+          "function": "getAllFailures",
+          "args": [],
+          "assignTo": "getAllFailures_result"
+        },
+        {
+          "kind": "call",
+          "function": "getAllSessions",
+          "args": [],
+          "assignTo": "getAllSessions_result"
+        },
+        {
+          "kind": "call",
+          "function": "verifyAllFingerprints",
+          "args": [
+            {
+              "name": "currentRuleHash",
+              "type": "string",
+              "value": "{{currentRuleHash}}"
+            }
+          ],
+          "assignTo": "verifyAllFingerprints_result"
+        },
+        {
+          "kind": "call",
+          "function": "registerAllMissingFingerprints",
+          "args": [],
+          "assignTo": "registerAllMissingFingerprints_result"
+        },
+        {
+          "kind": "call",
+          "function": "resetCallCount",
+          "args": [],
+          "assignTo": "resetCallCount_result"
+        },
+        {
+          "kind": "call",
+          "function": "assertCallLimit",
+          "args": []
+        },
+        {
+          "kind": "call",
+          "function": "generateFallbackPlan",
+          "args": [
+            {
+              "name": "intent",
+              "type": "string",
+              "value": "{{intent}}"
+            },
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": "{{ir}}"
+            }
+          ],
+          "assignTo": "generateFallbackPlan_result"
+        },
+        {
+          "kind": "call",
+          "function": "listAllStates",
+          "args": [
+            {
+              "name": "ledger",
+              "type": "StateTransition[]",
+              "value": "{{ledger}}"
+            }
+          ],
+          "assignTo": "listAllStates_result"
+        },
+        {
+          "kind": "call",
+          "function": "computeImmuneMetrics",
+          "args": [],
+          "assignTo": "computeImmuneMetrics_result"
+        },
+        {
+          "kind": "call",
+          "function": "formatImmuneMetrics",
+          "args": [
+            {
+              "name": "m",
+              "type": "ImmuneMetrics",
+              "value": "{{m}}"
+            }
+          ],
+          "assignTo": "formatImmuneMetrics_result"
+        },
+        {
+          "kind": "call",
+          "function": "reportImmuneMetrics",
+          "args": [],
+          "assignTo": "reportImmuneMetrics_result"
+        },
+        {
+          "kind": "call",
+          "function": "formatImmuneResponse",
+          "args": [
+            {
+              "name": "a",
+              "type": "Attempt",
+              "value": "{{a}}"
+            }
+          ],
+          "assignTo": "formatImmuneResponse_result"
+        },
+        {
+          "kind": "call",
+          "function": "getModuleSpecifierValue",
+          "args": [],
+          "assignTo": "getModuleSpecifierValue_result"
+        },
+        {
+          "kind": "call",
+          "function": "getModuleSpecifierSourceFile",
+          "args": [],
+          "assignTo": "getModuleSpecifierSourceFile_result"
+        }
+      ],
+      "transitions": [],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780593777215,
+      "llmCallCount": 0,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780593757815,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780593777214_kktrz",
+    "sessionId": "sess_1780593757815_biqqa",
+    "attemptNumber": 2,
+    "inputIntent": "unify error reporting across all immune system modules",
+    "plannerSeed": "cbe1115a",
+    "constraintSnapshotId": "snap_1780593757817_b00d96aecc16",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "classifyError",
+        "args": [
+          {
+            "name": "error",
+            "type": "string",
+            "value": "{{error}}"
+          }
+        ],
+        "assignTo": "classifyError_result"
+      },
+      {
+        "kind": "call",
+        "function": "classifyPlanError",
+        "args": [
+          {
+            "name": "error",
+            "type": "string",
+            "value": "{{error}}"
+          }
+        ],
+        "assignTo": "classifyPlanError_result"
+      },
+      {
+        "kind": "call",
+        "function": "error",
+        "args": [
+          {
+            "name": "message",
+            "type": "any",
+            "value": "{{message}}"
+          }
+        ]
+      },
+      {
+        "kind": "call",
+        "function": "ActionBuilder.call",
+        "args": [
+          {
+            "name": "func",
+            "type": "string",
+            "value": "{{func}}"
+          },
+          {
+            "name": "args",
+            "type": "any[]",
+            "value": "{{args}}"
+          },
+          {
+            "name": "assignTo",
+            "type": "string",
+            "value": "{{assignTo}}"
+          }
+        ],
+        "assignTo": "ActionBuilder.call_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractDirectCalls",
+        "args": [
+          {
+            "name": "func",
+            "type": "FunctionDeclaration | ArrowFunction",
+            "value": "{{func}}"
+          }
+        ],
+        "assignTo": "extractDirectCalls_result"
+      },
+      {
+        "kind": "call",
+        "function": "getAllFailures",
+        "args": [],
+        "assignTo": "getAllFailures_result"
+      },
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "getAllSessions_result"
+      },
+      {
+        "kind": "call",
+        "function": "verifyAllFingerprints",
+        "args": [
+          {
+            "name": "currentRuleHash",
+            "type": "string",
+            "value": "{{currentRuleHash}}"
+          }
+        ],
+        "assignTo": "verifyAllFingerprints_result"
+      },
+      {
+        "kind": "call",
+        "function": "registerAllMissingFingerprints",
+        "args": [],
+        "assignTo": "registerAllMissingFingerprints_result"
+      },
+      {
+        "kind": "call",
+        "function": "resetCallCount",
+        "args": [],
+        "assignTo": "resetCallCount_result"
+      },
+      {
+        "kind": "call",
+        "function": "assertCallLimit",
+        "args": []
+      },
+      {
+        "kind": "call",
+        "function": "generateFallbackPlan",
+        "args": [
+          {
+            "name": "intent",
+            "type": "string",
+            "value": "{{intent}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "generateFallbackPlan_result"
+      },
+      {
+        "kind": "call",
+        "function": "listAllStates",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "{{ledger}}"
+          }
+        ],
+        "assignTo": "listAllStates_result"
+      },
+      {
+        "kind": "call",
+        "function": "computeImmuneMetrics",
+        "args": [],
+        "assignTo": "computeImmuneMetrics_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatImmuneMetrics",
+        "args": [
+          {
+            "name": "m",
+            "type": "ImmuneMetrics",
+            "value": "{{m}}"
+          }
+        ],
+        "assignTo": "formatImmuneMetrics_result"
+      },
+      {
+        "kind": "call",
+        "function": "reportImmuneMetrics",
+        "args": [],
+        "assignTo": "reportImmuneMetrics_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatImmuneResponse",
+        "args": [
+          {
+            "name": "a",
+            "type": "Attempt",
+            "value": "{{a}}"
+          }
+        ],
+        "assignTo": "formatImmuneResponse_result"
+      },
+      {
+        "kind": "call",
+        "function": "getModuleSpecifierValue",
+        "args": [],
+        "assignTo": "getModuleSpecifierValue_result"
+      },
+      {
+        "kind": "call",
+        "function": "getModuleSpecifierSourceFile",
+        "args": [],
+        "assignTo": "getModuleSpecifierSourceFile_result"
+      }
+    ],
+    "transitions": [],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780593777215,
+    "llmCallCount": 0,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780593757817_b00d96aecc16",
+  "endedAt": 1780593777215
+}

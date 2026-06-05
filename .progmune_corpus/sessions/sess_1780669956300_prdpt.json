@@ -1,0 +1,133 @@
+{
+  "sessionId": "sess_1780669956300_prdpt",
+  "intent": "consolidate duplicate validation code in planner and validator",
+  "attempts": [
+    {
+      "id": "att_1780669965855_4rvsb",
+      "sessionId": "sess_1780669956300_prdpt",
+      "attemptNumber": 3,
+      "inputIntent": "consolidate duplicate validation code in planner and validator",
+      "plannerSeed": "c9c8fe36",
+      "constraintSnapshotId": "snap_1780669956311_86492662408e",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "loadIR",
+          "args": [
+            {
+              "name": "filePath",
+              "type": "string",
+              "value": null
+            }
+          ],
+          "assignTo": "irData"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "loadIR",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780669965855,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780669956300,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780669965855_4rvsb",
+    "sessionId": "sess_1780669956300_prdpt",
+    "attemptNumber": 3,
+    "inputIntent": "consolidate duplicate validation code in planner and validator",
+    "plannerSeed": "c9c8fe36",
+    "constraintSnapshotId": "snap_1780669956311_86492662408e",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "loadIR",
+        "args": [
+          {
+            "name": "filePath",
+            "type": "string",
+            "value": null
+          }
+        ],
+        "assignTo": "irData"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "loadIR",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780669965855,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780669956311_86492662408e",
+  "endedAt": 1780669965866
+}

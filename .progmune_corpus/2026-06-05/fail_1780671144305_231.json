@@ -1,0 +1,23 @@
+{
+  "intent": "generate report without loading benchmark tasks",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-4",
+  "constraintType": "protocol",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "main",
+      "args": []
+    }
+  ],
+  "errorDetail": "Protocol violation: function called before required prerequisite",
+  "ssgFixPath": [
+    "loadBenchmarks",
+    "benchmarkPassRate",
+    "benchmarkReport"
+  ],
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 1,
+  "id": "fail_1780671144305_231",
+  "timestamp": "2026-06-05T14:52:24.305Z"
+}

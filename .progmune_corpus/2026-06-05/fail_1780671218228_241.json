@@ -1,0 +1,23 @@
+{
+  "intent": "handle undefined session in formatSessionValidation",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-3",
+  "constraintType": "null_reference",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "main",
+      "args": []
+    }
+  ],
+  "errorDetail": "Null/undefined reference: accessed property on null or undefined",
+  "ssgFixPath": [
+    "addNullCheck",
+    "provideDefault",
+    "earlyReturn"
+  ],
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 1,
+  "id": "fail_1780671218228_241",
+  "timestamp": "2026-06-05T14:53:38.228Z"
+}

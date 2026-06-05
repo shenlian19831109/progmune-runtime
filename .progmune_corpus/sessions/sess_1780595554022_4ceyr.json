@@ -1,0 +1,213 @@
+{
+  "sessionId": "sess_1780595554022_4ceyr",
+  "intent": "fix missing import when loading benchmark data",
+  "attempts": [
+    {
+      "id": "att_1780595556191_0kq1q",
+      "sessionId": "sess_1780595554022_4ceyr",
+      "attemptNumber": 1,
+      "inputIntent": "fix missing import when loading benchmark data",
+      "plannerSeed": "49d620f9",
+      "constraintSnapshotId": "snap_1780595554023_b00d96aecc16",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "loadBenchmarks",
+          "args": [],
+          "assignTo": "tasks"
+        },
+        {
+          "kind": "call",
+          "function": "collectImports",
+          "args": [],
+          "assignTo": "imports"
+        },
+        {
+          "kind": "return",
+          "value": "tasks"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "loadBenchmarks",
+          "namespace": "_global",
+          "acquired": [
+            "BENCHMARKS_LOADED"
+          ],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "BENCHMARKS_LOADED",
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "collectImports",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "BENCHMARKS_LOADED",
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "BENCHMARKS_LOADED",
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780595556191,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780595554022,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780595556191_0kq1q",
+    "sessionId": "sess_1780595554022_4ceyr",
+    "attemptNumber": 1,
+    "inputIntent": "fix missing import when loading benchmark data",
+    "plannerSeed": "49d620f9",
+    "constraintSnapshotId": "snap_1780595554023_b00d96aecc16",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "loadBenchmarks",
+        "args": [],
+        "assignTo": "tasks"
+      },
+      {
+        "kind": "call",
+        "function": "collectImports",
+        "args": [],
+        "assignTo": "imports"
+      },
+      {
+        "kind": "return",
+        "value": "tasks"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "loadBenchmarks",
+        "namespace": "_global",
+        "acquired": [
+          "BENCHMARKS_LOADED"
+        ],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "BENCHMARKS_LOADED",
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "collectImports",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "BENCHMARKS_LOADED",
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "BENCHMARKS_LOADED",
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780595556191,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780595554023_b00d96aecc16",
+  "endedAt": 1780595556205
+}

@@ -1,0 +1,4673 @@
+{
+  "sessionId": "sess_1780669845605_pdpef",
+  "intent": "extract IR from project and validate the actions",
+  "attempts": [
+    {
+      "id": "att_1780669862493_ixseb",
+      "sessionId": "sess_1780669845605_pdpef",
+      "attemptNumber": 1,
+      "inputIntent": "extract IR from project and validate the actions",
+      "plannerSeed": "2e3d7f50",
+      "constraintSnapshotId": "snap_1780669845617_86492662408e",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "extractIRPython",
+          "args": [
+            {
+              "name": "projectRoot",
+              "type": "string",
+              "value": "{{projectRoot}}"
+            }
+          ],
+          "assignTo": "extractIRPython_result"
+        },
+        {
+          "kind": "call",
+          "function": "extractDirectCalls",
+          "args": [
+            {
+              "name": "func",
+              "type": "FunctionDeclaration | ArrowFunction",
+              "value": "{{func}}"
+            }
+          ],
+          "assignTo": "extractDirectCalls_result"
+        },
+        {
+          "kind": "call",
+          "function": "extractIR",
+          "args": [
+            {
+              "name": "projectRoot",
+              "type": "string",
+              "value": "{{projectRoot}}"
+            }
+          ],
+          "assignTo": "extractIR_result"
+        },
+        {
+          "kind": "call",
+          "function": "extractIRWithTypes",
+          "args": [
+            {
+              "name": "projectRoot",
+              "type": "string",
+              "value": "{{projectRoot}}"
+            }
+          ],
+          "assignTo": "extractIRWithTypes_result"
+        },
+        {
+          "kind": "call",
+          "function": "extractSignatureFromFile",
+          "args": [
+            {
+              "name": "name",
+              "type": "string",
+              "value": "{{name}}"
+            },
+            {
+              "name": "sf",
+              "type": "SourceFile",
+              "value": "{{sf}}"
+            }
+          ],
+          "assignTo": "extractSignatureFromFile_result"
+        },
+        {
+          "kind": "call",
+          "function": "extractSignatureFromDts",
+          "args": [
+            {
+              "name": "name",
+              "type": "string",
+              "value": "{{name}}"
+            },
+            {
+              "name": "dtsPath",
+              "type": "string",
+              "value": "{{dtsPath}}"
+            },
+            {
+              "name": "project",
+              "type": "Project",
+              "value": "{{project}}"
+            }
+          ],
+          "assignTo": "extractSignatureFromDts_result"
+        },
+        {
+          "kind": "call",
+          "function": "extractFingerprints",
+          "args": [
+            {
+              "name": "cursor",
+              "type": "{ lastTimestamp: string | null }",
+              "value": "{{cursor}}"
+            }
+          ],
+          "assignTo": "extractFingerprints_result"
+        },
+        {
+          "kind": "call",
+          "function": "extractKeywords",
+          "args": [
+            {
+              "name": "intent",
+              "type": "string",
+              "value": "{{intent}}"
+            }
+          ],
+          "assignTo": "extractKeywords_result"
+        },
+        {
+          "kind": "call",
+          "function": "auditDirectory",
+          "args": [
+            {
+              "name": "dir",
+              "type": "string",
+              "value": "{{dir}}"
+            },
+            {
+              "name": "threshold",
+              "type": "any",
+              "value": "{{threshold}}"
+            }
+          ],
+          "assignTo": "auditDirectory_result"
+        },
+        {
+          "kind": "call",
+          "function": "scanDir",
+          "args": [
+            {
+              "name": "rootDir",
+              "type": "string",
+              "value": "{{rootDir}}"
+            },
+            {
+              "name": "currentDir",
+              "type": "string",
+              "value": "{{currentDir}}"
+            },
+            {
+              "name": "result",
+              "type": "AuditResult",
+              "value": "{{result}}"
+            }
+          ]
+        },
+        {
+          "kind": "call",
+          "function": "ensureDir",
+          "args": [
+            {
+              "name": "dir",
+              "type": "string",
+              "value": "{{dir}}"
+            }
+          ],
+          "assignTo": "ensureDir_result"
+        },
+        {
+          "kind": "call",
+          "function": "ensureLockDir",
+          "args": [],
+          "assignTo": "ensureLockDir_result"
+        },
+        {
+          "kind": "call",
+          "function": "loadIR",
+          "args": [
+            {
+              "name": "filePath",
+              "type": "string",
+              "value": "{{filePath}}"
+            }
+          ],
+          "assignTo": "loadIR_result"
+        },
+        {
+          "kind": "call",
+          "function": "fingerprintsDir",
+          "args": [],
+          "assignTo": "fingerprintsDir_result"
+        },
+        {
+          "kind": "call",
+          "function": "loadProtocolsFromIR",
+          "args": [
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": "{{ir}}"
+            }
+          ],
+          "assignTo": "loadProtocolsFromIR_result"
+        },
+        {
+          "kind": "call",
+          "function": "attemptSSGRepair",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": "{{actions}}"
+            },
+            {
+              "name": "rejection",
+              "type": "SSGRejection",
+              "value": "{{rejection}}"
+            },
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": "{{ir}}"
+            },
+            {
+              "name": "protocols",
+              "type": "FunctionProtocol[]",
+              "value": "{{protocols}}"
+            },
+            {
+              "name": "namespaceInitialStates",
+              "type": "Map<string, string>",
+              "value": "{{namespaceInitialStates}}"
+            }
+          ],
+          "assignTo": "attemptSSGRepair_result"
+        },
+        {
+          "kind": "call",
+          "function": "suggestRepairs",
+          "args": [
+            {
+              "name": "violations",
+              "type": "ConstraintViolation[]",
+              "value": "{{violations}}"
+            },
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": "{{ir}}"
+            },
+            {
+              "name": "protocols",
+              "type": "FunctionProtocol[]",
+              "value": "{{protocols}}"
+            }
+          ],
+          "assignTo": "suggestRepairs_result"
+        },
+        {
+          "kind": "call",
+          "function": "suggestProtocolRepair",
+          "args": [
+            {
+              "name": "rejection",
+              "type": "SSGRejection",
+              "value": "{{rejection}}"
+            },
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": "{{ir}}"
+            }
+          ],
+          "assignTo": "suggestProtocolRepair_result"
+        },
+        {
+          "kind": "call",
+          "function": "suggestInvariantRepair",
+          "args": [
+            {
+              "name": "violation",
+              "type": "LedgerConsistencyViolation",
+              "value": "{{violation}}"
+            },
+            {
+              "name": "ledger",
+              "type": "StateTransition[]",
+              "value": "{{ledger}}"
+            },
+            {
+              "name": "namespaceInitialStates",
+              "type": "Map<string, string>",
+              "value": "{{namespaceInitialStates}}"
+            }
+          ],
+          "assignTo": "suggestInvariantRepair_result"
+        },
+        {
+          "kind": "call",
+          "function": "suggestGenericRepair",
+          "args": [
+            {
+              "name": "violation",
+              "type": "ConstraintViolation",
+              "value": "{{violation}}"
+            },
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": "{{ir}}"
+            }
+          ],
+          "assignTo": "suggestGenericRepair_result"
+        },
+        {
+          "kind": "call",
+          "function": "generateRepairSummary",
+          "args": [
+            {
+              "name": "ledger",
+              "type": "StateTransition[]",
+              "value": "{{ledger}}"
+            },
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": "{{ir}}"
+            },
+            {
+              "name": "protocols",
+              "type": "FunctionProtocol[]",
+              "value": "{{protocols}}"
+            },
+            {
+              "name": "namespaceInitialStates",
+              "type": "Map<string, string>",
+              "value": "{{namespaceInitialStates}}"
+            }
+          ],
+          "assignTo": "generateRepairSummary_result"
+        },
+        {
+          "kind": "call",
+          "function": "irHash",
+          "args": [
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": "{{ir}}"
+            }
+          ],
+          "assignTo": "irHash_result"
+        },
+        {
+          "kind": "call",
+          "function": "hasRequiredFields",
+          "args": [
+            {
+              "name": "obj",
+              "type": "any",
+              "value": "{{obj}}"
+            },
+            {
+              "name": "fields",
+              "type": "string[]",
+              "value": "{{fields}}"
+            }
+          ],
+          "assignTo": "hasRequiredFields_result"
+        },
+        {
+          "kind": "call",
+          "function": "readdirSync",
+          "args": [
+            {
+              "name": "path",
+              "type": "string",
+              "value": "{{path}}"
+            }
+          ],
+          "assignTo": "readdirSync_result"
+        },
+        {
+          "kind": "call",
+          "function": "require",
+          "args": [],
+          "assignTo": "require_result"
+        },
+        {
+          "kind": "call",
+          "function": "mkdirSync",
+          "args": [
+            {
+              "name": "path",
+              "type": "string",
+              "value": "{{path}}"
+            },
+            {
+              "name": "options",
+              "type": "object",
+              "value": "{{options}}"
+            }
+          ]
+        },
+        {
+          "kind": "call",
+          "function": "dirname",
+          "args": [
+            {
+              "name": "path",
+              "type": "string",
+              "value": "{{path}}"
+            }
+          ],
+          "assignTo": "dirname_result"
+        },
+        {
+          "kind": "call",
+          "function": "rmdirSync",
+          "args": [],
+          "assignTo": "rmdirSync_result"
+        },
+        {
+          "kind": "call",
+          "function": "watchDirData39",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "watchDirData39_result"
+        },
+        {
+          "kind": "call",
+          "function": "ensureDirData40",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "ensureDirData40_result"
+        },
+        {
+          "kind": "call",
+          "function": "watchDirResult80",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "watchDirResult80_result"
+        },
+        {
+          "kind": "call",
+          "function": "ensureDirResult81",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "ensureDirResult81_result"
+        },
+        {
+          "kind": "call",
+          "function": "watchDirRecord121",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "watchDirRecord121_result"
+        },
+        {
+          "kind": "call",
+          "function": "ensureDirRecord122",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "ensureDirRecord122_result"
+        },
+        {
+          "kind": "call",
+          "function": "watchDirEntry162",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "watchDirEntry162_result"
+        },
+        {
+          "kind": "call",
+          "function": "ensureDirEntry163",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "ensureDirEntry163_result"
+        },
+        {
+          "kind": "call",
+          "function": "watchDirItem203",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "watchDirItem203_result"
+        },
+        {
+          "kind": "call",
+          "function": "ensureDirItem204",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "ensureDirItem204_result"
+        },
+        {
+          "kind": "call",
+          "function": "watchDirConfig244",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "watchDirConfig244_result"
+        },
+        {
+          "kind": "call",
+          "function": "ensureDirConfig245",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "ensureDirConfig245_result"
+        },
+        {
+          "kind": "call",
+          "function": "watchDirOptions285",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "watchDirOptions285_result"
+        },
+        {
+          "kind": "call",
+          "function": "ensureDirOptions286",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "ensureDirOptions286_result"
+        },
+        {
+          "kind": "call",
+          "function": "watchDirRequest326",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "watchDirRequest326_result"
+        },
+        {
+          "kind": "call",
+          "function": "ensureDirRequest327",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "ensureDirRequest327_result"
+        },
+        {
+          "kind": "call",
+          "function": "watchDirResponse367",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "watchDirResponse367_result"
+        },
+        {
+          "kind": "call",
+          "function": "ensureDirResponse368",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "ensureDirResponse368_result"
+        },
+        {
+          "kind": "call",
+          "function": "watchDirEvent408",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "watchDirEvent408_result"
+        },
+        {
+          "kind": "call",
+          "function": "ensureDirEvent409",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "ensureDirEvent409_result"
+        },
+        {
+          "kind": "call",
+          "function": "watchDirMessage449",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "watchDirMessage449_result"
+        },
+        {
+          "kind": "call",
+          "function": "ensureDirMessage450",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "ensureDirMessage450_result"
+        },
+        {
+          "kind": "call",
+          "function": "watchDirTask490",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "watchDirTask490_result"
+        },
+        {
+          "kind": "call",
+          "function": "ensureDirTask491",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "ensureDirTask491_result"
+        },
+        {
+          "kind": "call",
+          "function": "watchDirJob531",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "watchDirJob531_result"
+        },
+        {
+          "kind": "call",
+          "function": "ensureDirJob532",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "ensureDirJob532_result"
+        },
+        {
+          "kind": "call",
+          "function": "watchDirWorker572",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "watchDirWorker572_result"
+        },
+        {
+          "kind": "call",
+          "function": "ensureDirWorker573",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "ensureDirWorker573_result"
+        },
+        {
+          "kind": "call",
+          "function": "watchDirHandler613",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "watchDirHandler613_result"
+        },
+        {
+          "kind": "call",
+          "function": "ensureDirHandler614",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "ensureDirHandler614_result"
+        },
+        {
+          "kind": "call",
+          "function": "parseCapabilityFromJSDoc",
+          "args": [
+            {
+              "name": "node",
+              "type": "any",
+              "value": "{{node}}"
+            }
+          ],
+          "assignTo": "parseCapabilityFromJSDoc_result"
+        },
+        {
+          "kind": "call",
+          "function": "deriveTagsFromFile",
+          "args": [
+            {
+              "name": "filePath",
+              "type": "string",
+              "value": "{{filePath}}"
+            }
+          ],
+          "assignTo": "deriveTagsFromFile_result"
+        },
+        {
+          "kind": "call",
+          "function": "parseProtocolFromJSDoc",
+          "args": [
+            {
+              "name": "node",
+              "type": "any",
+              "value": "{{node}}"
+            }
+          ],
+          "assignTo": "parseProtocolFromJSDoc_result"
+        },
+        {
+          "kind": "call",
+          "function": "importFromFile",
+          "args": [
+            {
+              "name": "filePath",
+              "type": "string",
+              "value": "{{filePath}}"
+            }
+          ],
+          "assignTo": "importFromFile_result"
+        },
+        {
+          "kind": "call",
+          "function": "loadProtocolsFromFile",
+          "args": [
+            {
+              "name": "filePath",
+              "type": "string",
+              "value": "{{filePath}}"
+            }
+          ],
+          "assignTo": "loadProtocolsFromFile_result"
+        },
+        {
+          "kind": "call",
+          "function": "formatStateTransitionPathFromLedger",
+          "args": [
+            {
+              "name": "transitions",
+              "type": "StateTransition[]",
+              "value": "{{transitions}}"
+            }
+          ],
+          "assignTo": "formatStateTransitionPathFromLedger_result"
+        },
+        {
+          "kind": "call",
+          "function": "fromSnapshot",
+          "args": [
+            {
+              "name": "snap",
+              "type": "Record<string, string[]>",
+              "value": "{{snap}}"
+            }
+          ],
+          "assignTo": "fromSnapshot_result"
+        },
+        {
+          "kind": "call",
+          "function": "parseProtocolsFromJSON",
+          "args": [
+            {
+              "name": "protocolDef",
+              "type": "{\n    rules: Record<string, {\n      pre_states: string[];\n      post_states: string[];\n      invalidate?: string[];\n      namespace?: string;\n    }>;\n  }",
+              "value": "{{protocolDef}}"
+            }
+          ],
+          "assignTo": "parseProtocolsFromJSON_result"
+        },
+        {
+          "kind": "call",
+          "function": "tryResolveFromNamespace",
+          "args": [],
+          "assignTo": "tryResolveFromNamespace_result"
+        },
+        {
+          "kind": "call",
+          "function": "from",
+          "args": [
+            {
+              "name": "data",
+              "type": "string",
+              "value": "{{data}}"
+            },
+            {
+              "name": "encoding",
+              "type": "string",
+              "value": "{{encoding}}"
+            }
+          ],
+          "assignTo": "from_result"
+        },
+        {
+          "kind": "call",
+          "function": "generateCandidateRules",
+          "args": [],
+          "assignTo": "generateCandidateRules_result"
+        },
+        {
+          "kind": "call",
+          "function": "handleAPI",
+          "args": [
+            {
+              "name": "req",
+              "type": "http.IncomingMessage",
+              "value": "{{req}}"
+            },
+            {
+              "name": "res",
+              "type": "http.ServerResponse",
+              "value": "{{res}}"
+            }
+          ],
+          "assignTo": "handleAPI_result"
+        },
+        {
+          "kind": "call",
+          "function": "handleLedgerAPI",
+          "args": [
+            {
+              "name": "res",
+              "type": "http.ServerResponse",
+              "value": "{{res}}"
+            },
+            {
+              "name": "url",
+              "type": "URL",
+              "value": "{{url}}"
+            }
+          ],
+          "assignTo": "handleLedgerAPI_result"
+        },
+        {
+          "kind": "call",
+          "function": "handleConsistencyAPI",
+          "args": [
+            {
+              "name": "res",
+              "type": "http.ServerResponse",
+              "value": "{{res}}"
+            },
+            {
+              "name": "url",
+              "type": "URL",
+              "value": "{{url}}"
+            }
+          ],
+          "assignTo": "handleConsistencyAPI_result"
+        },
+        {
+          "kind": "call",
+          "function": "handleDiffAPI",
+          "args": [
+            {
+              "name": "res",
+              "type": "http.ServerResponse",
+              "value": "{{res}}"
+            },
+            {
+              "name": "url",
+              "type": "URL",
+              "value": "{{url}}"
+            }
+          ],
+          "assignTo": "handleDiffAPI_result"
+        },
+        {
+          "kind": "call",
+          "function": "handleReplayAPI",
+          "args": [
+            {
+              "name": "res",
+              "type": "http.ServerResponse",
+              "value": "{{res}}"
+            },
+            {
+              "name": "url",
+              "type": "URL",
+              "value": "{{url}}"
+            }
+          ],
+          "assignTo": "handleReplayAPI_result"
+        },
+        {
+          "kind": "call",
+          "function": "runAndCheck",
+          "args": [
+            {
+              "name": "code",
+              "type": "string",
+              "value": "{{code}}"
+            }
+          ],
+          "assignTo": "runAndCheck_result"
+        },
+        {
+          "kind": "call",
+          "function": "randomInt",
+          "args": [
+            {
+              "name": "min",
+              "type": "number",
+              "value": "{{min}}"
+            },
+            {
+              "name": "max",
+              "type": "number",
+              "value": "{{max}}"
+            }
+          ],
+          "assignTo": "randomInt_result"
+        },
+        {
+          "kind": "call",
+          "function": "random",
+          "args": [],
+          "assignTo": "random_result"
+        },
+        {
+          "kind": "call",
+          "function": "handler",
+          "args": [],
+          "assignTo": "handler_result"
+        },
+        {
+          "kind": "call",
+          "function": "getHandler574",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "getHandler574_result"
+        },
+        {
+          "kind": "call",
+          "function": "setHandler575",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "setHandler575_result"
+        },
+        {
+          "kind": "call",
+          "function": "updateHandler576",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "updateHandler576_result"
+        },
+        {
+          "kind": "call",
+          "function": "deleteHandler577",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "deleteHandler577_result"
+        },
+        {
+          "kind": "call",
+          "function": "createHandler578",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "createHandler578_result"
+        },
+        {
+          "kind": "call",
+          "function": "loadHandler579",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "loadHandler579_result"
+        },
+        {
+          "kind": "call",
+          "function": "saveHandler580",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "saveHandler580_result"
+        },
+        {
+          "kind": "call",
+          "function": "fetchHandler581",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "fetchHandler581_result"
+        },
+        {
+          "kind": "call",
+          "function": "computeHandler582",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "computeHandler582_result"
+        },
+        {
+          "kind": "call",
+          "function": "formatHandler583",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "formatHandler583_result"
+        },
+        {
+          "kind": "call",
+          "function": "parseHandler584",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "parseHandler584_result"
+        },
+        {
+          "kind": "call",
+          "function": "serializeHandler585",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "serializeHandler585_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateHandler586",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "validateHandler586_result"
+        },
+        {
+          "kind": "call",
+          "function": "checkHandler587",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "checkHandler587_result"
+        },
+        {
+          "kind": "call",
+          "function": "verifyHandler588",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "verifyHandler588_result"
+        },
+        {
+          "kind": "call",
+          "function": "initHandler589",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "initHandler589_result"
+        },
+        {
+          "kind": "call",
+          "function": "cleanupHandler590",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "cleanupHandler590_result"
+        },
+        {
+          "kind": "call",
+          "function": "migrateHandler591",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "migrateHandler591_result"
+        },
+        {
+          "kind": "call",
+          "function": "exportHandler592",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "exportHandler592_result"
+        },
+        {
+          "kind": "call",
+          "function": "importHandler593",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "importHandler593_result"
+        },
+        {
+          "kind": "call",
+          "function": "syncHandler594",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "syncHandler594_result"
+        },
+        {
+          "kind": "call",
+          "function": "mergeHandler595",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "mergeHandler595_result"
+        },
+        {
+          "kind": "call",
+          "function": "splitHandler596",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "splitHandler596_result"
+        },
+        {
+          "kind": "call",
+          "function": "encryptHandler597",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "encryptHandler597_result"
+        },
+        {
+          "kind": "call",
+          "function": "decryptHandler598",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "decryptHandler598_result"
+        },
+        {
+          "kind": "call",
+          "function": "hashHandler599",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "hashHandler599_result"
+        },
+        {
+          "kind": "call",
+          "function": "signHandler600",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "signHandler600_result"
+        },
+        {
+          "kind": "call",
+          "function": "verifyHandler601",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "verifyHandler601_result"
+        },
+        {
+          "kind": "call",
+          "function": "encodeHandler602",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "encodeHandler602_result"
+        },
+        {
+          "kind": "call",
+          "function": "decodeHandler603",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "decodeHandler603_result"
+        },
+        {
+          "kind": "call",
+          "function": "connectHandler604",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "connectHandler604_result"
+        },
+        {
+          "kind": "call",
+          "function": "disconnectHandler605",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "disconnectHandler605_result"
+        },
+        {
+          "kind": "call",
+          "function": "sendHandler606",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "sendHandler606_result"
+        },
+        {
+          "kind": "call",
+          "function": "receiveHandler607",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "receiveHandler607_result"
+        },
+        {
+          "kind": "call",
+          "function": "pingHandler608",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "pingHandler608_result"
+        },
+        {
+          "kind": "call",
+          "function": "healthHandler609",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "healthHandler609_result"
+        },
+        {
+          "kind": "call",
+          "function": "readConfigHandler610",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "readConfigHandler610_result"
+        },
+        {
+          "kind": "call",
+          "function": "writeConfigHandler611",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "writeConfigHandler611_result"
+        },
+        {
+          "kind": "call",
+          "function": "listFilesHandler612",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "listFilesHandler612_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateActionSchema",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": "{{actions}}"
+            }
+          ],
+          "assignTo": "validateActionSchema_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateProtocolWithTransitions",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": "{{actions}}"
+            },
+            {
+              "name": "protocols",
+              "type": "FunctionProtocol[]",
+              "value": "{{protocols}}"
+            },
+            {
+              "name": "namespaceInitialStates",
+              "type": "Map<string, string>",
+              "value": "{{namespaceInitialStates}}"
+            }
+          ],
+          "assignTo": "validateProtocolWithTransitions_result"
+        },
+        {
+          "kind": "call",
+          "function": "invalidateProtocolCache",
+          "args": []
+        },
+        {
+          "kind": "call",
+          "function": "validateProposal",
+          "args": [
+            {
+              "name": "proposal",
+              "type": "RepairProposal",
+              "value": "{{proposal}}"
+            },
+            {
+              "name": "currentLedger",
+              "type": "StateTransition[]",
+              "value": "{{currentLedger}}"
+            },
+            {
+              "name": "namespaceInitialStates",
+              "type": "Map<string, string>",
+              "value": "{{namespaceInitialStates}}"
+            }
+          ],
+          "assignTo": "validateProposal_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateTransition",
+          "args": [
+            {
+              "name": "ctx",
+              "type": "ValidationContext",
+              "value": "{{ctx}}"
+            },
+            {
+              "name": "candidateFunctionName",
+              "type": "string",
+              "value": "{{candidateFunctionName}}"
+            },
+            {
+              "name": "actionIndex",
+              "type": "number",
+              "value": "{{actionIndex}}"
+            },
+            {
+              "name": "rules",
+              "type": "Map<string, StateAnnotation>",
+              "value": "{{rules}}"
+            },
+            {
+              "name": "namespaceInitialStates",
+              "type": "Map<string, string>",
+              "value": "{{namespaceInitialStates}}"
+            },
+            {
+              "name": "ruleHash",
+              "type": "string",
+              "value": "{{ruleHash}}"
+            }
+          ],
+          "assignTo": "validateTransition_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateAction",
+          "args": [
+            {
+              "name": "action",
+              "type": "Action",
+              "value": "{{action}}"
+            },
+            {
+              "name": "actionIndex",
+              "type": "number",
+              "value": "{{actionIndex}}"
+            }
+          ],
+          "assignTo": "validateAction_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateActionSequence",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": "{{actions}}"
+            }
+          ],
+          "assignTo": "validateActionSequence_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateActionResult",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": "{{actions}}"
+            }
+          ],
+          "assignTo": "validateActionResult_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateData12",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "validateData12_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateResult53",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "validateResult53_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateRecord94",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "validateRecord94_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateEntry135",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "validateEntry135_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateItem176",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "validateItem176_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateConfig217",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "validateConfig217_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateOptions258",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "validateOptions258_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateRequest299",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "validateRequest299_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateResponse340",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "validateResponse340_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateEvent381",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "validateEvent381_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateMessage422",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "validateMessage422_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateTask463",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "validateTask463_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateJob504",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "validateJob504_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateWorker545",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "validateWorker545_result"
+        },
+        {
+          "kind": "call",
+          "function": "validateProcessor627",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "validateProcessor627_result"
+        },
+        {
+          "kind": "call",
+          "function": "formatHealthLevel",
+          "args": [
+            {
+              "name": "score",
+              "type": "number",
+              "value": "{{score}}"
+            }
+          ],
+          "assignTo": "formatHealthLevel_result"
+        },
+        {
+          "kind": "call",
+          "function": "formatHeatmap",
+          "args": [],
+          "assignTo": "formatHeatmap_result"
+        },
+        {
+          "kind": "call",
+          "function": "healthEntry158",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "healthEntry158_result"
+        },
+        {
+          "kind": "call",
+          "function": "healthEvent404",
+          "args": [
+            {
+              "name": "input",
+              "type": "any",
+              "value": "{{input}}"
+            },
+            {
+              "name": "options",
+              "type": "any",
+              "value": "{{options}}"
+            }
+          ],
+          "assignTo": "healthEvent404_result"
+        },
+        {
+          "kind": "call",
+          "function": "enrichActions",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": "{{actions}}"
+            },
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": "{{ir}}"
+            }
+          ],
+          "assignTo": "enrichActions_result"
+        },
+        {
+          "kind": "call",
+          "function": "formatActionSequence",
+          "args": [
+            {
+              "name": "actions",
+              "type": "{ kind: string; function?: string }[]",
+              "value": "{{actions}}"
+            }
+          ],
+          "assignTo": "formatActionSequence_result"
+        }
+      ],
+      "transitions": [],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780669862493,
+      "llmCallCount": 0,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780669845605,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780669862493_ixseb",
+    "sessionId": "sess_1780669845605_pdpef",
+    "attemptNumber": 1,
+    "inputIntent": "extract IR from project and validate the actions",
+    "plannerSeed": "2e3d7f50",
+    "constraintSnapshotId": "snap_1780669845617_86492662408e",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "extractIRPython",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "{{projectRoot}}"
+          }
+        ],
+        "assignTo": "extractIRPython_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractDirectCalls",
+        "args": [
+          {
+            "name": "func",
+            "type": "FunctionDeclaration | ArrowFunction",
+            "value": "{{func}}"
+          }
+        ],
+        "assignTo": "extractDirectCalls_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "{{projectRoot}}"
+          }
+        ],
+        "assignTo": "extractIR_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractIRWithTypes",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "{{projectRoot}}"
+          }
+        ],
+        "assignTo": "extractIRWithTypes_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractSignatureFromFile",
+        "args": [
+          {
+            "name": "name",
+            "type": "string",
+            "value": "{{name}}"
+          },
+          {
+            "name": "sf",
+            "type": "SourceFile",
+            "value": "{{sf}}"
+          }
+        ],
+        "assignTo": "extractSignatureFromFile_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractSignatureFromDts",
+        "args": [
+          {
+            "name": "name",
+            "type": "string",
+            "value": "{{name}}"
+          },
+          {
+            "name": "dtsPath",
+            "type": "string",
+            "value": "{{dtsPath}}"
+          },
+          {
+            "name": "project",
+            "type": "Project",
+            "value": "{{project}}"
+          }
+        ],
+        "assignTo": "extractSignatureFromDts_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractFingerprints",
+        "args": [
+          {
+            "name": "cursor",
+            "type": "{ lastTimestamp: string | null }",
+            "value": "{{cursor}}"
+          }
+        ],
+        "assignTo": "extractFingerprints_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractKeywords",
+        "args": [
+          {
+            "name": "intent",
+            "type": "string",
+            "value": "{{intent}}"
+          }
+        ],
+        "assignTo": "extractKeywords_result"
+      },
+      {
+        "kind": "call",
+        "function": "auditDirectory",
+        "args": [
+          {
+            "name": "dir",
+            "type": "string",
+            "value": "{{dir}}"
+          },
+          {
+            "name": "threshold",
+            "type": "any",
+            "value": "{{threshold}}"
+          }
+        ],
+        "assignTo": "auditDirectory_result"
+      },
+      {
+        "kind": "call",
+        "function": "scanDir",
+        "args": [
+          {
+            "name": "rootDir",
+            "type": "string",
+            "value": "{{rootDir}}"
+          },
+          {
+            "name": "currentDir",
+            "type": "string",
+            "value": "{{currentDir}}"
+          },
+          {
+            "name": "result",
+            "type": "AuditResult",
+            "value": "{{result}}"
+          }
+        ]
+      },
+      {
+        "kind": "call",
+        "function": "ensureDir",
+        "args": [
+          {
+            "name": "dir",
+            "type": "string",
+            "value": "{{dir}}"
+          }
+        ],
+        "assignTo": "ensureDir_result"
+      },
+      {
+        "kind": "call",
+        "function": "ensureLockDir",
+        "args": [],
+        "assignTo": "ensureLockDir_result"
+      },
+      {
+        "kind": "call",
+        "function": "loadIR",
+        "args": [
+          {
+            "name": "filePath",
+            "type": "string",
+            "value": "{{filePath}}"
+          }
+        ],
+        "assignTo": "loadIR_result"
+      },
+      {
+        "kind": "call",
+        "function": "fingerprintsDir",
+        "args": [],
+        "assignTo": "fingerprintsDir_result"
+      },
+      {
+        "kind": "call",
+        "function": "loadProtocolsFromIR",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "loadProtocolsFromIR_result"
+      },
+      {
+        "kind": "call",
+        "function": "attemptSSGRepair",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "{{actions}}"
+          },
+          {
+            "name": "rejection",
+            "type": "SSGRejection",
+            "value": "{{rejection}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "{{protocols}}"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "{{namespaceInitialStates}}"
+          }
+        ],
+        "assignTo": "attemptSSGRepair_result"
+      },
+      {
+        "kind": "call",
+        "function": "suggestRepairs",
+        "args": [
+          {
+            "name": "violations",
+            "type": "ConstraintViolation[]",
+            "value": "{{violations}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "{{protocols}}"
+          }
+        ],
+        "assignTo": "suggestRepairs_result"
+      },
+      {
+        "kind": "call",
+        "function": "suggestProtocolRepair",
+        "args": [
+          {
+            "name": "rejection",
+            "type": "SSGRejection",
+            "value": "{{rejection}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "suggestProtocolRepair_result"
+      },
+      {
+        "kind": "call",
+        "function": "suggestInvariantRepair",
+        "args": [
+          {
+            "name": "violation",
+            "type": "LedgerConsistencyViolation",
+            "value": "{{violation}}"
+          },
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "{{ledger}}"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "{{namespaceInitialStates}}"
+          }
+        ],
+        "assignTo": "suggestInvariantRepair_result"
+      },
+      {
+        "kind": "call",
+        "function": "suggestGenericRepair",
+        "args": [
+          {
+            "name": "violation",
+            "type": "ConstraintViolation",
+            "value": "{{violation}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "suggestGenericRepair_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateRepairSummary",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "{{ledger}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "{{protocols}}"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "{{namespaceInitialStates}}"
+          }
+        ],
+        "assignTo": "generateRepairSummary_result"
+      },
+      {
+        "kind": "call",
+        "function": "irHash",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "irHash_result"
+      },
+      {
+        "kind": "call",
+        "function": "hasRequiredFields",
+        "args": [
+          {
+            "name": "obj",
+            "type": "any",
+            "value": "{{obj}}"
+          },
+          {
+            "name": "fields",
+            "type": "string[]",
+            "value": "{{fields}}"
+          }
+        ],
+        "assignTo": "hasRequiredFields_result"
+      },
+      {
+        "kind": "call",
+        "function": "readdirSync",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "{{path}}"
+          }
+        ],
+        "assignTo": "readdirSync_result"
+      },
+      {
+        "kind": "call",
+        "function": "require",
+        "args": [],
+        "assignTo": "require_result"
+      },
+      {
+        "kind": "call",
+        "function": "mkdirSync",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "{{path}}"
+          },
+          {
+            "name": "options",
+            "type": "object",
+            "value": "{{options}}"
+          }
+        ]
+      },
+      {
+        "kind": "call",
+        "function": "dirname",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "{{path}}"
+          }
+        ],
+        "assignTo": "dirname_result"
+      },
+      {
+        "kind": "call",
+        "function": "rmdirSync",
+        "args": [],
+        "assignTo": "rmdirSync_result"
+      },
+      {
+        "kind": "call",
+        "function": "watchDirData39",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "watchDirData39_result"
+      },
+      {
+        "kind": "call",
+        "function": "ensureDirData40",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "ensureDirData40_result"
+      },
+      {
+        "kind": "call",
+        "function": "watchDirResult80",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "watchDirResult80_result"
+      },
+      {
+        "kind": "call",
+        "function": "ensureDirResult81",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "ensureDirResult81_result"
+      },
+      {
+        "kind": "call",
+        "function": "watchDirRecord121",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "watchDirRecord121_result"
+      },
+      {
+        "kind": "call",
+        "function": "ensureDirRecord122",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "ensureDirRecord122_result"
+      },
+      {
+        "kind": "call",
+        "function": "watchDirEntry162",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "watchDirEntry162_result"
+      },
+      {
+        "kind": "call",
+        "function": "ensureDirEntry163",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "ensureDirEntry163_result"
+      },
+      {
+        "kind": "call",
+        "function": "watchDirItem203",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "watchDirItem203_result"
+      },
+      {
+        "kind": "call",
+        "function": "ensureDirItem204",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "ensureDirItem204_result"
+      },
+      {
+        "kind": "call",
+        "function": "watchDirConfig244",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "watchDirConfig244_result"
+      },
+      {
+        "kind": "call",
+        "function": "ensureDirConfig245",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "ensureDirConfig245_result"
+      },
+      {
+        "kind": "call",
+        "function": "watchDirOptions285",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "watchDirOptions285_result"
+      },
+      {
+        "kind": "call",
+        "function": "ensureDirOptions286",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "ensureDirOptions286_result"
+      },
+      {
+        "kind": "call",
+        "function": "watchDirRequest326",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "watchDirRequest326_result"
+      },
+      {
+        "kind": "call",
+        "function": "ensureDirRequest327",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "ensureDirRequest327_result"
+      },
+      {
+        "kind": "call",
+        "function": "watchDirResponse367",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "watchDirResponse367_result"
+      },
+      {
+        "kind": "call",
+        "function": "ensureDirResponse368",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "ensureDirResponse368_result"
+      },
+      {
+        "kind": "call",
+        "function": "watchDirEvent408",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "watchDirEvent408_result"
+      },
+      {
+        "kind": "call",
+        "function": "ensureDirEvent409",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "ensureDirEvent409_result"
+      },
+      {
+        "kind": "call",
+        "function": "watchDirMessage449",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "watchDirMessage449_result"
+      },
+      {
+        "kind": "call",
+        "function": "ensureDirMessage450",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "ensureDirMessage450_result"
+      },
+      {
+        "kind": "call",
+        "function": "watchDirTask490",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "watchDirTask490_result"
+      },
+      {
+        "kind": "call",
+        "function": "ensureDirTask491",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "ensureDirTask491_result"
+      },
+      {
+        "kind": "call",
+        "function": "watchDirJob531",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "watchDirJob531_result"
+      },
+      {
+        "kind": "call",
+        "function": "ensureDirJob532",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "ensureDirJob532_result"
+      },
+      {
+        "kind": "call",
+        "function": "watchDirWorker572",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "watchDirWorker572_result"
+      },
+      {
+        "kind": "call",
+        "function": "ensureDirWorker573",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "ensureDirWorker573_result"
+      },
+      {
+        "kind": "call",
+        "function": "watchDirHandler613",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "watchDirHandler613_result"
+      },
+      {
+        "kind": "call",
+        "function": "ensureDirHandler614",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "ensureDirHandler614_result"
+      },
+      {
+        "kind": "call",
+        "function": "parseCapabilityFromJSDoc",
+        "args": [
+          {
+            "name": "node",
+            "type": "any",
+            "value": "{{node}}"
+          }
+        ],
+        "assignTo": "parseCapabilityFromJSDoc_result"
+      },
+      {
+        "kind": "call",
+        "function": "deriveTagsFromFile",
+        "args": [
+          {
+            "name": "filePath",
+            "type": "string",
+            "value": "{{filePath}}"
+          }
+        ],
+        "assignTo": "deriveTagsFromFile_result"
+      },
+      {
+        "kind": "call",
+        "function": "parseProtocolFromJSDoc",
+        "args": [
+          {
+            "name": "node",
+            "type": "any",
+            "value": "{{node}}"
+          }
+        ],
+        "assignTo": "parseProtocolFromJSDoc_result"
+      },
+      {
+        "kind": "call",
+        "function": "importFromFile",
+        "args": [
+          {
+            "name": "filePath",
+            "type": "string",
+            "value": "{{filePath}}"
+          }
+        ],
+        "assignTo": "importFromFile_result"
+      },
+      {
+        "kind": "call",
+        "function": "loadProtocolsFromFile",
+        "args": [
+          {
+            "name": "filePath",
+            "type": "string",
+            "value": "{{filePath}}"
+          }
+        ],
+        "assignTo": "loadProtocolsFromFile_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatStateTransitionPathFromLedger",
+        "args": [
+          {
+            "name": "transitions",
+            "type": "StateTransition[]",
+            "value": "{{transitions}}"
+          }
+        ],
+        "assignTo": "formatStateTransitionPathFromLedger_result"
+      },
+      {
+        "kind": "call",
+        "function": "fromSnapshot",
+        "args": [
+          {
+            "name": "snap",
+            "type": "Record<string, string[]>",
+            "value": "{{snap}}"
+          }
+        ],
+        "assignTo": "fromSnapshot_result"
+      },
+      {
+        "kind": "call",
+        "function": "parseProtocolsFromJSON",
+        "args": [
+          {
+            "name": "protocolDef",
+            "type": "{\n    rules: Record<string, {\n      pre_states: string[];\n      post_states: string[];\n      invalidate?: string[];\n      namespace?: string;\n    }>;\n  }",
+            "value": "{{protocolDef}}"
+          }
+        ],
+        "assignTo": "parseProtocolsFromJSON_result"
+      },
+      {
+        "kind": "call",
+        "function": "tryResolveFromNamespace",
+        "args": [],
+        "assignTo": "tryResolveFromNamespace_result"
+      },
+      {
+        "kind": "call",
+        "function": "from",
+        "args": [
+          {
+            "name": "data",
+            "type": "string",
+            "value": "{{data}}"
+          },
+          {
+            "name": "encoding",
+            "type": "string",
+            "value": "{{encoding}}"
+          }
+        ],
+        "assignTo": "from_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateCandidateRules",
+        "args": [],
+        "assignTo": "generateCandidateRules_result"
+      },
+      {
+        "kind": "call",
+        "function": "handleAPI",
+        "args": [
+          {
+            "name": "req",
+            "type": "http.IncomingMessage",
+            "value": "{{req}}"
+          },
+          {
+            "name": "res",
+            "type": "http.ServerResponse",
+            "value": "{{res}}"
+          }
+        ],
+        "assignTo": "handleAPI_result"
+      },
+      {
+        "kind": "call",
+        "function": "handleLedgerAPI",
+        "args": [
+          {
+            "name": "res",
+            "type": "http.ServerResponse",
+            "value": "{{res}}"
+          },
+          {
+            "name": "url",
+            "type": "URL",
+            "value": "{{url}}"
+          }
+        ],
+        "assignTo": "handleLedgerAPI_result"
+      },
+      {
+        "kind": "call",
+        "function": "handleConsistencyAPI",
+        "args": [
+          {
+            "name": "res",
+            "type": "http.ServerResponse",
+            "value": "{{res}}"
+          },
+          {
+            "name": "url",
+            "type": "URL",
+            "value": "{{url}}"
+          }
+        ],
+        "assignTo": "handleConsistencyAPI_result"
+      },
+      {
+        "kind": "call",
+        "function": "handleDiffAPI",
+        "args": [
+          {
+            "name": "res",
+            "type": "http.ServerResponse",
+            "value": "{{res}}"
+          },
+          {
+            "name": "url",
+            "type": "URL",
+            "value": "{{url}}"
+          }
+        ],
+        "assignTo": "handleDiffAPI_result"
+      },
+      {
+        "kind": "call",
+        "function": "handleReplayAPI",
+        "args": [
+          {
+            "name": "res",
+            "type": "http.ServerResponse",
+            "value": "{{res}}"
+          },
+          {
+            "name": "url",
+            "type": "URL",
+            "value": "{{url}}"
+          }
+        ],
+        "assignTo": "handleReplayAPI_result"
+      },
+      {
+        "kind": "call",
+        "function": "runAndCheck",
+        "args": [
+          {
+            "name": "code",
+            "type": "string",
+            "value": "{{code}}"
+          }
+        ],
+        "assignTo": "runAndCheck_result"
+      },
+      {
+        "kind": "call",
+        "function": "randomInt",
+        "args": [
+          {
+            "name": "min",
+            "type": "number",
+            "value": "{{min}}"
+          },
+          {
+            "name": "max",
+            "type": "number",
+            "value": "{{max}}"
+          }
+        ],
+        "assignTo": "randomInt_result"
+      },
+      {
+        "kind": "call",
+        "function": "random",
+        "args": [],
+        "assignTo": "random_result"
+      },
+      {
+        "kind": "call",
+        "function": "handler",
+        "args": [],
+        "assignTo": "handler_result"
+      },
+      {
+        "kind": "call",
+        "function": "getHandler574",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "getHandler574_result"
+      },
+      {
+        "kind": "call",
+        "function": "setHandler575",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "setHandler575_result"
+      },
+      {
+        "kind": "call",
+        "function": "updateHandler576",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "updateHandler576_result"
+      },
+      {
+        "kind": "call",
+        "function": "deleteHandler577",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "deleteHandler577_result"
+      },
+      {
+        "kind": "call",
+        "function": "createHandler578",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "createHandler578_result"
+      },
+      {
+        "kind": "call",
+        "function": "loadHandler579",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "loadHandler579_result"
+      },
+      {
+        "kind": "call",
+        "function": "saveHandler580",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "saveHandler580_result"
+      },
+      {
+        "kind": "call",
+        "function": "fetchHandler581",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "fetchHandler581_result"
+      },
+      {
+        "kind": "call",
+        "function": "computeHandler582",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "computeHandler582_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatHandler583",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "formatHandler583_result"
+      },
+      {
+        "kind": "call",
+        "function": "parseHandler584",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "parseHandler584_result"
+      },
+      {
+        "kind": "call",
+        "function": "serializeHandler585",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "serializeHandler585_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateHandler586",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "validateHandler586_result"
+      },
+      {
+        "kind": "call",
+        "function": "checkHandler587",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "checkHandler587_result"
+      },
+      {
+        "kind": "call",
+        "function": "verifyHandler588",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "verifyHandler588_result"
+      },
+      {
+        "kind": "call",
+        "function": "initHandler589",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "initHandler589_result"
+      },
+      {
+        "kind": "call",
+        "function": "cleanupHandler590",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "cleanupHandler590_result"
+      },
+      {
+        "kind": "call",
+        "function": "migrateHandler591",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "migrateHandler591_result"
+      },
+      {
+        "kind": "call",
+        "function": "exportHandler592",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "exportHandler592_result"
+      },
+      {
+        "kind": "call",
+        "function": "importHandler593",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "importHandler593_result"
+      },
+      {
+        "kind": "call",
+        "function": "syncHandler594",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "syncHandler594_result"
+      },
+      {
+        "kind": "call",
+        "function": "mergeHandler595",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "mergeHandler595_result"
+      },
+      {
+        "kind": "call",
+        "function": "splitHandler596",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "splitHandler596_result"
+      },
+      {
+        "kind": "call",
+        "function": "encryptHandler597",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "encryptHandler597_result"
+      },
+      {
+        "kind": "call",
+        "function": "decryptHandler598",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "decryptHandler598_result"
+      },
+      {
+        "kind": "call",
+        "function": "hashHandler599",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "hashHandler599_result"
+      },
+      {
+        "kind": "call",
+        "function": "signHandler600",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "signHandler600_result"
+      },
+      {
+        "kind": "call",
+        "function": "verifyHandler601",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "verifyHandler601_result"
+      },
+      {
+        "kind": "call",
+        "function": "encodeHandler602",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "encodeHandler602_result"
+      },
+      {
+        "kind": "call",
+        "function": "decodeHandler603",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "decodeHandler603_result"
+      },
+      {
+        "kind": "call",
+        "function": "connectHandler604",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "connectHandler604_result"
+      },
+      {
+        "kind": "call",
+        "function": "disconnectHandler605",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "disconnectHandler605_result"
+      },
+      {
+        "kind": "call",
+        "function": "sendHandler606",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "sendHandler606_result"
+      },
+      {
+        "kind": "call",
+        "function": "receiveHandler607",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "receiveHandler607_result"
+      },
+      {
+        "kind": "call",
+        "function": "pingHandler608",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "pingHandler608_result"
+      },
+      {
+        "kind": "call",
+        "function": "healthHandler609",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "healthHandler609_result"
+      },
+      {
+        "kind": "call",
+        "function": "readConfigHandler610",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "readConfigHandler610_result"
+      },
+      {
+        "kind": "call",
+        "function": "writeConfigHandler611",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "writeConfigHandler611_result"
+      },
+      {
+        "kind": "call",
+        "function": "listFilesHandler612",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "listFilesHandler612_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateActionSchema",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "{{actions}}"
+          }
+        ],
+        "assignTo": "validateActionSchema_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateProtocolWithTransitions",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "{{actions}}"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "{{protocols}}"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "{{namespaceInitialStates}}"
+          }
+        ],
+        "assignTo": "validateProtocolWithTransitions_result"
+      },
+      {
+        "kind": "call",
+        "function": "invalidateProtocolCache",
+        "args": []
+      },
+      {
+        "kind": "call",
+        "function": "validateProposal",
+        "args": [
+          {
+            "name": "proposal",
+            "type": "RepairProposal",
+            "value": "{{proposal}}"
+          },
+          {
+            "name": "currentLedger",
+            "type": "StateTransition[]",
+            "value": "{{currentLedger}}"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "{{namespaceInitialStates}}"
+          }
+        ],
+        "assignTo": "validateProposal_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateTransition",
+        "args": [
+          {
+            "name": "ctx",
+            "type": "ValidationContext",
+            "value": "{{ctx}}"
+          },
+          {
+            "name": "candidateFunctionName",
+            "type": "string",
+            "value": "{{candidateFunctionName}}"
+          },
+          {
+            "name": "actionIndex",
+            "type": "number",
+            "value": "{{actionIndex}}"
+          },
+          {
+            "name": "rules",
+            "type": "Map<string, StateAnnotation>",
+            "value": "{{rules}}"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "{{namespaceInitialStates}}"
+          },
+          {
+            "name": "ruleHash",
+            "type": "string",
+            "value": "{{ruleHash}}"
+          }
+        ],
+        "assignTo": "validateTransition_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateAction",
+        "args": [
+          {
+            "name": "action",
+            "type": "Action",
+            "value": "{{action}}"
+          },
+          {
+            "name": "actionIndex",
+            "type": "number",
+            "value": "{{actionIndex}}"
+          }
+        ],
+        "assignTo": "validateAction_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateActionSequence",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "{{actions}}"
+          }
+        ],
+        "assignTo": "validateActionSequence_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateActionResult",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "{{actions}}"
+          }
+        ],
+        "assignTo": "validateActionResult_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateData12",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "validateData12_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateResult53",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "validateResult53_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateRecord94",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "validateRecord94_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateEntry135",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "validateEntry135_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateItem176",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "validateItem176_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateConfig217",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "validateConfig217_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateOptions258",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "validateOptions258_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateRequest299",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "validateRequest299_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateResponse340",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "validateResponse340_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateEvent381",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "validateEvent381_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateMessage422",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "validateMessage422_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateTask463",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "validateTask463_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateJob504",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "validateJob504_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateWorker545",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "validateWorker545_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateProcessor627",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "validateProcessor627_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatHealthLevel",
+        "args": [
+          {
+            "name": "score",
+            "type": "number",
+            "value": "{{score}}"
+          }
+        ],
+        "assignTo": "formatHealthLevel_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatHeatmap",
+        "args": [],
+        "assignTo": "formatHeatmap_result"
+      },
+      {
+        "kind": "call",
+        "function": "healthEntry158",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "healthEntry158_result"
+      },
+      {
+        "kind": "call",
+        "function": "healthEvent404",
+        "args": [
+          {
+            "name": "input",
+            "type": "any",
+            "value": "{{input}}"
+          },
+          {
+            "name": "options",
+            "type": "any",
+            "value": "{{options}}"
+          }
+        ],
+        "assignTo": "healthEvent404_result"
+      },
+      {
+        "kind": "call",
+        "function": "enrichActions",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "{{actions}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "enrichActions_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatActionSequence",
+        "args": [
+          {
+            "name": "actions",
+            "type": "{ kind: string; function?: string }[]",
+            "value": "{{actions}}"
+          }
+        ],
+        "assignTo": "formatActionSequence_result"
+      }
+    ],
+    "transitions": [],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780669862493,
+    "llmCallCount": 0,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780669845617_86492662408e",
+  "endedAt": 1780669862493
+}

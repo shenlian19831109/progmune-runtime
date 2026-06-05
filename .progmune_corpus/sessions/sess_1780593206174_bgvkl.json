@@ -1,0 +1,141 @@
+{
+  "sessionId": "sess_1780593206174_bgvkl",
+  "intent": "extract common IR loading logic into a shared utility",
+  "attempts": [
+    {
+      "id": "att_1780593210843_j6cbl",
+      "sessionId": "sess_1780593206174_bgvkl",
+      "attemptNumber": 3,
+      "inputIntent": "extract common IR loading logic into a shared utility",
+      "plannerSeed": "02c40806",
+      "constraintSnapshotId": "snap_1780593206175_04e5abcd9884",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "extractIR",
+          "args": [
+            {
+              "name": "projectRoot",
+              "type": "string",
+              "value": null
+            }
+          ],
+          "assignTo": "irFunctions"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "extractIR",
+          "namespace": "dev_pipeline",
+          "acquired": [
+            "IR_EXTRACTED"
+          ],
+          "invalidated": [
+            "IR_STALE"
+          ],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_EXTRACTED"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780593210843,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780593206174,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780593210843_j6cbl",
+    "sessionId": "sess_1780593206174_bgvkl",
+    "attemptNumber": 3,
+    "inputIntent": "extract common IR loading logic into a shared utility",
+    "plannerSeed": "02c40806",
+    "constraintSnapshotId": "snap_1780593206175_04e5abcd9884",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": null
+          }
+        ],
+        "assignTo": "irFunctions"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "extractIR",
+        "namespace": "dev_pipeline",
+        "acquired": [
+          "IR_EXTRACTED"
+        ],
+        "invalidated": [
+          "IR_STALE"
+        ],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_EXTRACTED"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780593210843,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780593206175_04e5abcd9884",
+  "endedAt": 1780593210847
+}

@@ -1,0 +1,69 @@
+{
+  "intent": "patch the fingerprint verification error in ledger",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "schema",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "getFingerprint",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "sessionId"
+    },
+    {
+      "kind": "call",
+      "function": "verifyFingerprint",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "transitions",
+          "type": "StateTransition[]",
+          "value": ""
+        },
+        {
+          "name": "currentRuleHash",
+          "type": "string",
+          "value": ""
+        }
+      ],
+      "assignTo": "sessionId"
+    },
+    {
+      "kind": "call",
+      "function": "verifyFingerprint",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "transitions",
+          "type": "StateTransition[]",
+          "value": ""
+        },
+        {
+          "name": "currentRuleHash",
+          "type": "string",
+          "value": ""
+        }
+      ],
+      "assignTo": "currentRuleHash"
+    }
+  ],
+  "errorDetail": "action[1]: duplicate assignTo \"sessionId\" (previously assigned at another action)",
+  "plannerAttempt": 2,
+  "plannerRetryTotal": 2,
+  "id": "fail_1780593630343_176",
+  "timestamp": "2026-06-04T17:20:30.343Z"
+}

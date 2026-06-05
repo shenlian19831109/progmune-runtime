@@ -1,0 +1,355 @@
+{
+  "sessionId": "sess_1780592084005_pshlf",
+  "intent": "generate benchmark report from results",
+  "attempts": [
+    {
+      "id": "att_1780592094516_tm8kr",
+      "sessionId": "sess_1780592084005_pshlf",
+      "attemptNumber": 1,
+      "inputIntent": "generate benchmark report from results",
+      "plannerSeed": "2721d394",
+      "constraintSnapshotId": "snap_1780592084006_04e5abcd9884",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "benchmarkLoadLatest",
+          "args": [],
+          "assignTo": "result"
+        },
+        {
+          "kind": "call",
+          "function": "benchmarkReport",
+          "args": [],
+          "assignTo": "report"
+        },
+        {
+          "kind": "return",
+          "value": "report"
+        }
+      ],
+      "transitions": [],
+      "violations": [
+        {
+          "svl": 1,
+          "violatedConstraint": "symbol_existence",
+          "actionIndex": 0,
+          "description": "benchmarkReport: 协议违规 — 需要先调用 loadBenchmarks"
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780592094517,
+      "llmCallCount": 0,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    },
+    {
+      "id": "att_1780592096028_dwqeu",
+      "sessionId": "sess_1780592084005_pshlf",
+      "attemptNumber": 2,
+      "inputIntent": "generate benchmark report from results",
+      "plannerSeed": "0afa6778",
+      "constraintSnapshotId": "snap_1780592084006_04e5abcd9884",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "loadBenchmarks",
+          "args": [],
+          "assignTo": "BENCHMARK_TASKS"
+        },
+        {
+          "kind": "call",
+          "function": "benchmarkLoadLatest",
+          "args": [],
+          "assignTo": "BENCHMARK_RESULT"
+        },
+        {
+          "kind": "call",
+          "function": "benchmarkReport",
+          "args": [],
+          "assignTo": "BENCHMARK_REPORT"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "loadBenchmarks",
+          "namespace": "_global",
+          "acquired": [
+            "BENCHMARKS_LOADED"
+          ],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "BENCHMARKS_LOADED",
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "benchmarkLoadLatest",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "BENCHMARKS_LOADED",
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "BENCHMARKS_LOADED",
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 2,
+          "function": "benchmarkReport",
+          "namespace": "_global",
+          "acquired": [
+            "REPORT_FORMATTED"
+          ],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "BENCHMARKS_LOADED",
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "BENCHMARKS_LOADED",
+              "REPORT_FORMATTED",
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780592096028,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "antibodyHit": {
+        "level": "ACL-3",
+        "signature": "SVL-1:symbol_existence",
+        "fixPath": [
+          "loadBenchmarks",
+          "benchmarkPassRate",
+          "benchmarkReport"
+        ],
+        "similarityScore": 0.6666666666666666,
+        "action": "injected_hint",
+        "llmCallsSaved": 0,
+        "estimatedTokensSaved": 0
+      },
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780592084005,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780592096028_dwqeu",
+    "sessionId": "sess_1780592084005_pshlf",
+    "attemptNumber": 2,
+    "inputIntent": "generate benchmark report from results",
+    "plannerSeed": "0afa6778",
+    "constraintSnapshotId": "snap_1780592084006_04e5abcd9884",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "loadBenchmarks",
+        "args": [],
+        "assignTo": "BENCHMARK_TASKS"
+      },
+      {
+        "kind": "call",
+        "function": "benchmarkLoadLatest",
+        "args": [],
+        "assignTo": "BENCHMARK_RESULT"
+      },
+      {
+        "kind": "call",
+        "function": "benchmarkReport",
+        "args": [],
+        "assignTo": "BENCHMARK_REPORT"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "loadBenchmarks",
+        "namespace": "_global",
+        "acquired": [
+          "BENCHMARKS_LOADED"
+        ],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "BENCHMARKS_LOADED",
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "benchmarkLoadLatest",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "BENCHMARKS_LOADED",
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "BENCHMARKS_LOADED",
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 2,
+        "function": "benchmarkReport",
+        "namespace": "_global",
+        "acquired": [
+          "REPORT_FORMATTED"
+        ],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "BENCHMARKS_LOADED",
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "BENCHMARKS_LOADED",
+            "REPORT_FORMATTED",
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780592096028,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "antibodyHit": {
+      "level": "ACL-3",
+      "signature": "SVL-1:symbol_existence",
+      "fixPath": [
+        "loadBenchmarks",
+        "benchmarkPassRate",
+        "benchmarkReport"
+      ],
+      "similarityScore": 0.6666666666666666,
+      "action": "injected_hint",
+      "llmCallsSaved": 0,
+      "estimatedTokensSaved": 0
+    },
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780592084006_04e5abcd9884",
+  "endedAt": 1780592096030
+}

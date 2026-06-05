@@ -1,0 +1,60 @@
+{
+  "sessionId": "sess_1780671144250_8rs5a",
+  "intent": "null passed to function expecting non-null StateTransition",
+  "attempts": [
+    {
+      "id": "att_1780671144250_x5leu",
+      "sessionId": "",
+      "attemptNumber": 1,
+      "inputIntent": "null passed to function expecting non-null StateTransition",
+      "plannerSeed": "f0e499ef",
+      "constraintSnapshotId": "snap_1780671144250",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "main",
+          "args": []
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "main",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "INIT"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "INIT"
+            ]
+          },
+          "valid": false
+        }
+      ],
+      "violations": [
+        {
+          "svl": 2,
+          "violatedConstraint": "type_mismatch",
+          "actionIndex": 0,
+          "description": "Type mismatch in function call: expected different parameter type or count",
+          "fixPath": [
+            "checkParams",
+            "verifyTypeSignature",
+            "correctArgs"
+          ]
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780671144250,
+      "llmCallCount": 1,
+      "durationMs": 100
+    }
+  ],
+  "resolved": false,
+  "startedAt": 1780671144250
+}

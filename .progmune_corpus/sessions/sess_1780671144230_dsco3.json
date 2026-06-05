@@ -1,0 +1,60 @@
+{
+  "sessionId": "sess_1780671144230_dsco3",
+  "intent": "pass string to function expecting number in benchmarkPassRate",
+  "attempts": [
+    {
+      "id": "att_1780671144230_a1bcw",
+      "sessionId": "",
+      "attemptNumber": 1,
+      "inputIntent": "pass string to function expecting number in benchmarkPassRate",
+      "plannerSeed": "9bcd6e50",
+      "constraintSnapshotId": "snap_1780671144231",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "main",
+          "args": []
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "main",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "INIT"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "INIT"
+            ]
+          },
+          "valid": false
+        }
+      ],
+      "violations": [
+        {
+          "svl": 2,
+          "violatedConstraint": "type_mismatch",
+          "actionIndex": 0,
+          "description": "Type mismatch in function call: expected different parameter type or count",
+          "fixPath": [
+            "checkParams",
+            "verifyTypeSignature",
+            "correctArgs"
+          ]
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780671144231,
+      "llmCallCount": 1,
+      "durationMs": 100
+    }
+  ],
+  "resolved": false,
+  "startedAt": 1780671144231
+}

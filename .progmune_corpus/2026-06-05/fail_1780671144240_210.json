@@ -1,0 +1,23 @@
+{
+  "intent": "wrong argument type for extractIR projectRoot parameter",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-2",
+  "constraintType": "type_mismatch",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "main",
+      "args": []
+    }
+  ],
+  "errorDetail": "Type mismatch in function call: expected different parameter type or count",
+  "ssgFixPath": [
+    "checkParams",
+    "verifyTypeSignature",
+    "correctArgs"
+  ],
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 1,
+  "id": "fail_1780671144240_210",
+  "timestamp": "2026-06-05T14:52:24.240Z"
+}

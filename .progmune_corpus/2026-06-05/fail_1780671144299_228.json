@@ -1,0 +1,23 @@
+{
+  "intent": "record session before validation passes",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-4",
+  "constraintType": "protocol",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "main",
+      "args": []
+    }
+  ],
+  "errorDetail": "Protocol violation: function called before required prerequisite",
+  "ssgFixPath": [
+    "loadBenchmarks",
+    "benchmarkPassRate",
+    "benchmarkReport"
+  ],
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 1,
+  "id": "fail_1780671144299_228",
+  "timestamp": "2026-06-05T14:52:24.299Z"
+}

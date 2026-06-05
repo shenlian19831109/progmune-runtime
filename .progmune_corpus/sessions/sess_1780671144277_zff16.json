@@ -1,0 +1,60 @@
+{
+  "sessionId": "sess_1780671144277_zff16",
+  "intent": "reference out-of-scope variable from nested if block",
+  "attempts": [
+    {
+      "id": "att_1780671144277_kzdle",
+      "sessionId": "",
+      "attemptNumber": 1,
+      "inputIntent": "reference out-of-scope variable from nested if block",
+      "plannerSeed": "b1a50452",
+      "constraintSnapshotId": "snap_1780671144277",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "main",
+          "args": []
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "main",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "INIT"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "INIT"
+            ]
+          },
+          "valid": false
+        }
+      ],
+      "violations": [
+        {
+          "svl": 3,
+          "violatedConstraint": "dataflow",
+          "actionIndex": 0,
+          "description": "Dataflow error: variable used before declaration or circular reference detected",
+          "fixPath": [
+            "declareVariable",
+            "verifyScope",
+            "checkDataflow"
+          ]
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780671144277,
+      "llmCallCount": 1,
+      "durationMs": 100
+    }
+  ],
+  "resolved": false,
+  "startedAt": 1780671144277
+}

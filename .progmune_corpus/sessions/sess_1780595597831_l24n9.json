@@ -1,0 +1,215 @@
+{
+  "sessionId": "sess_1780595597831_l24n9",
+  "intent": "refactor the protocol validator to use a single entry point",
+  "attempts": [
+    {
+      "id": "att_1780595599424_4dttn",
+      "sessionId": "sess_1780595597831_l24n9",
+      "attemptNumber": 1,
+      "inputIntent": "refactor the protocol validator to use a single entry point",
+      "plannerSeed": "ea0e9d1c",
+      "constraintSnapshotId": "snap_1780595597842_b00d96aecc16",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getProtocolConfig",
+          "args": [],
+          "assignTo": "config"
+        },
+        {
+          "kind": "call",
+          "function": "loadProtocols",
+          "args": [
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": "config"
+            }
+          ],
+          "assignTo": "protocols"
+        },
+        {
+          "kind": "return",
+          "value": "protocols"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getProtocolConfig",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "loadProtocols",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780595599424,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780595597831,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780595599424_4dttn",
+    "sessionId": "sess_1780595597831_l24n9",
+    "attemptNumber": 1,
+    "inputIntent": "refactor the protocol validator to use a single entry point",
+    "plannerSeed": "ea0e9d1c",
+    "constraintSnapshotId": "snap_1780595597842_b00d96aecc16",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getProtocolConfig",
+        "args": [],
+        "assignTo": "config"
+      },
+      {
+        "kind": "call",
+        "function": "loadProtocols",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "config"
+          }
+        ],
+        "assignTo": "protocols"
+      },
+      {
+        "kind": "return",
+        "value": "protocols"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getProtocolConfig",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "loadProtocols",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780595599424,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780595597842_b00d96aecc16",
+  "endedAt": 1780595599427
+}

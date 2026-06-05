@@ -1,0 +1,23 @@
+{
+  "intent": "restore corrupted session state from replay checkpoint",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-4",
+  "constraintType": "state_corruption",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "main",
+      "args": []
+    }
+  ],
+  "errorDetail": "State corruption: namespace state inconsistent after invalid operation",
+  "ssgFixPath": [
+    "rebuildState",
+    "validateLedger",
+    "restoreFromSnapshot"
+  ],
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 1,
+  "id": "fail_1780671218246_250",
+  "timestamp": "2026-06-05T14:53:38.246Z"
+}

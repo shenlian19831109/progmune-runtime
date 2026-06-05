@@ -1,0 +1,152 @@
+{
+  "intent": "add logging to all repair proposal functions",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "schema",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "suggestRepairs",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "proposal"
+    },
+    {
+      "kind": "call",
+      "function": "suggestProtocolRepair",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "proposal"
+    },
+    {
+      "kind": "call",
+      "function": "applyProposalAsBranch",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "branch"
+    },
+    {
+      "kind": "call",
+      "function": "validateProposal",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "validationResult"
+    },
+    {
+      "kind": "call",
+      "function": "suggestInvariantRepair",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "repairProposal"
+    },
+    {
+      "kind": "call",
+      "function": "getMinimalFixSet",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "minimalFixSet"
+    },
+    {
+      "kind": "call",
+      "function": "suggestGenericRepair",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "repairProposal"
+    }
+  ],
+  "errorDetail": "action[1]: duplicate assignTo \"proposal\" (previously assigned at another action); action[6]: duplicate assignTo \"repairProposal\" (previously assigned at another action)",
+  "plannerAttempt": 3,
+  "plannerRetryTotal": 3,
+  "id": "fail_1780594557651_186",
+  "timestamp": "2026-06-04T17:35:57.651Z"
+}

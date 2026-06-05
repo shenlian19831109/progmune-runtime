@@ -1,0 +1,37 @@
+{
+  "intent": "save benchmark results to disk",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "symbol_existence",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "loadBenchmarks",
+      "args": [],
+      "assignTo": "tasks"
+    },
+    {
+      "kind": "call",
+      "function": "benchmarkReport",
+      "args": [],
+      "assignTo": "report"
+    },
+    {
+      "kind": "call",
+      "function": "benchmarkSave",
+      "args": [
+        {
+          "name": "data",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "saved"
+    }
+  ],
+  "errorDetail": "benchmarkReport: 协议违规 — 需要先调用 loadBenchmarks; 策略违规: 推荐链 loadBenchmarks → benchmarkPassRate → benchmarkReport → benchmarkCount → benchmarkLoadLatest → benchmarkSave，但缺少 benchmarkPassRate, benchmarkCount, benchmarkLoadLatest",
+  "plannerAttempt": 3,
+  "plannerRetryTotal": 4,
+  "id": "fail_1780590750362_154",
+  "timestamp": "2026-06-04T16:32:30.362Z"
+}

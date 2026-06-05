@@ -69,12 +69,26 @@ function scoreNode(node, intentLower, keywords) {
             hasMatch = true;
         }
     }
-    // Purpose match
+    // Purpose match — semantic bridge when function names differ from intent
     const purposeLower = node.purpose.toLowerCase();
+    const intentWords = intentLower.split(/[\s,，]+/).filter(w => w.length > 2);
     for (const kw of keywords) {
         if (purposeLower.includes(kw)) {
             score += 2;
             hasMatch = true;
+        }
+    }
+    // Jaccard purpose similarity: "send receipt" ↔ "dispatch a message to recipient"
+    if (purposeLower.length > 0) {
+        const purposeWords = purposeLower.split(/[\s,，]+/).filter(w => w.length > 2);
+        if (purposeWords.length > 0 && intentWords.length > 0) {
+            const shared = intentWords.filter(w => purposeWords.includes(w)).length;
+            const union = new Set([...intentWords, ...purposeWords]).size;
+            const purposeJaccard = shared / union;
+            if (purposeJaccard > 0.1) {
+                score += purposeJaccard * 5;
+                hasMatch = true;
+            }
         }
     }
     // Tag match
@@ -85,7 +99,6 @@ function scoreNode(node, intentLower, keywords) {
         }
     }
     // Semantic word overlap in purpose
-    const intentWords = intentLower.split(/[\s,，]+/);
     for (const w of intentWords) {
         if (w.length > 2 && purposeLower.includes(w)) {
             score += 0.5;
@@ -178,7 +191,7 @@ function findConsumers(graph, capability, allNodes) {
  * 3. For each producer, trace forward: producer → consumer → consumer...
  * 4. Score each chain and return top N
  */
-export function selectCapabilityChains(intent, ir, maxChains = 5) {
+export function selectCapabilityChains(intent, ir, maxChains = 5, llmSeeds) {
     // Guard: null/undefined/empty intent
     if (!intent || typeof intent !== "string" || !intent.trim())
         return [];
@@ -206,23 +219,37 @@ export function selectCapabilityChains(intent, ir, maxChains = 5) {
             .filter(n => n.score > dynamicThreshold && (n.produces.length > 0 || n.score > dynamicThreshold + 1))
             .sort((a, b) => b.score - a.score);
     }
-    // Best-effort fallback: when no keyword matches at all, try nodes with capability edges
+    // Best-effort fallback: prefer nodes with edges AND some score
     if (seeds.length === 0) {
         seeds = [...graph.values()]
-            .filter(n => n.produces.length > 0 || n.requires.length > 0)
+            .filter(n => n.score > 0 && (n.produces.length > 0 || n.requires.length > 0))
             .sort((a, b) => b.score - a.score)
             .slice(0, 5);
     }
-    // Ultimate fallback: just take any exported nodes
+    // Ultimate fallback: just take any exported nodes with score > 0
     if (seeds.length === 0) {
-        seeds = [...graph.values()].slice(0, 3);
+        seeds = [...graph.values()].filter(n => n.score > 0).slice(0, 3);
     }
     seeds = seeds.slice(0, graph.size > 1000 ? 10 : graph.size > 500 ? 20 : 15);
+    // ── LLM seed injection: bridge the semantic gap ──
+    if (llmSeeds && llmSeeds.length > 0) {
+        const seedNames = new Set(seeds.map(n => n.name));
+        const maxScore = seeds.length > 0 ? Math.max(...seeds.map(n => n.score)) : 1;
+        for (const fnName of llmSeeds) {
+            if (seedNames.has(fnName))
+                continue; // already a seed
+            const node = graph.get(fnName);
+            if (node) {
+                node.score = Math.max(node.score, maxScore); // give it top seed priority
+                seeds.unshift(node);
+            }
+        }
+    }
     const allNodes = [...graph.values()];
     const chains = [];
     const BEAM_WIDTH = graph.size > 500 ? 3 : 5;
     const MAX_CHAIN_LEN = parseInt(process.env.PROGMUNE_MAX_CHAIN_LEN || "5", 10);
-    const SCORE_FLOOR = graph.size > 1000 ? 0.2 : 0;
+    const SCORE_FLOOR = graph.size > 1000 ? 0.2 : 0.1; // always filter noise
     // ── Capability Ranking: preload edge confidence from session history ──
     const edgeConfMap = new Map();
     for (const ec of getEdgeConfidence()) {
@@ -326,10 +353,20 @@ export function selectCapabilityChains(intent, ir, maxChains = 5) {
                 totalScore += bestProducer.score;
             }
         }
+        // Hybrid: supplement graph chain with high-score keyword matches the graph missed
+        const missed = allNodes
+            .filter(n => !visited.has(n.name) && n.score >= SCORE_FLOOR)
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 2); // at most 2 supplements
+        for (const m of missed) {
+            chain.push(m);
+            visited.add(m.name);
+            totalScore += m.score * 0.5; // half weight — graph-discovered nodes are preferred
+        }
         if (chain.length >= 1) {
             chains.push({
                 nodes: chain,
-                score: totalScore / chain.length, // average score
+                score: totalScore / chain.length,
                 explanation: chain.map(n => n.name).join(" → "),
             });
         }

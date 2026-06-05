@@ -1,0 +1,55 @@
+{
+  "intent": "save benchmark results to disk",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "symbol_existence",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "loadBenchmarks",
+      "args": [],
+      "assignTo": "tasks"
+    },
+    {
+      "kind": "call",
+      "function": "benchmarkPassRate",
+      "args": [],
+      "assignTo": "passRate"
+    },
+    {
+      "kind": "call",
+      "function": "benchmarkReport",
+      "args": [],
+      "assignTo": "report"
+    },
+    {
+      "kind": "call",
+      "function": "benchmarkCount",
+      "args": [],
+      "assignTo": "count"
+    },
+    {
+      "kind": "call",
+      "function": "benchmarkLoadLatest",
+      "args": [],
+      "assignTo": "latest"
+    },
+    {
+      "kind": "call",
+      "function": "benchmarkSave",
+      "args": [
+        {
+          "name": "data",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "savedPath"
+    }
+  ],
+  "errorDetail": "benchmarkReport: 协议违规 — 需要先调用 loadBenchmarks",
+  "plannerAttempt": 2,
+  "plannerRetryTotal": 4,
+  "id": "fail_1780590750361_153",
+  "timestamp": "2026-06-04T16:32:30.361Z"
+}

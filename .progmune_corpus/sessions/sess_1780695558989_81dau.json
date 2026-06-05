@@ -1,0 +1,114 @@
+{
+  "sessionId": "sess_1780695558989_81dau",
+  "intent": "extract common IR loading logic into a shared utility",
+  "attempts": [
+    {
+      "id": "att_1780695560200_g58ua",
+      "sessionId": "sess_1780695558989_81dau",
+      "attemptNumber": 1,
+      "inputIntent": "extract common IR loading logic into a shared utility",
+      "plannerSeed": "03fb1c6c",
+      "constraintSnapshotId": "snap_1780695558990_e07521d2be9c",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "extractIR",
+          "args": [],
+          "assignTo": "ir"
+        },
+        {
+          "kind": "return",
+          "value": "ir"
+        }
+      ],
+      "transitions": [],
+      "violations": [
+        {
+          "svl": 1,
+          "violatedConstraint": "symbol_existence",
+          "actionIndex": 0,
+          "missingStates": [
+            "extractIR"
+          ],
+          "description": "函数 'extractIR' 不存在"
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780695560200,
+      "llmCallCount": 0,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    },
+    {
+      "id": "att_1780695561257_ngtqc",
+      "sessionId": "sess_1780695558989_81dau",
+      "attemptNumber": 2,
+      "inputIntent": "extract common IR loading logic into a shared utility",
+      "plannerSeed": "75322035",
+      "constraintSnapshotId": "snap_1780695558990_e07521d2be9c",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "extractIR",
+          "args": [],
+          "assignTo": "ir"
+        }
+      ],
+      "transitions": [],
+      "violations": [
+        {
+          "svl": 1,
+          "violatedConstraint": "symbol_existence",
+          "actionIndex": 0,
+          "missingStates": [
+            "extractIR"
+          ],
+          "description": "函数 'extractIR' 不存在"
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780695561257,
+      "llmCallCount": 0,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    },
+    {
+      "id": "att_1780695562151_2qos7",
+      "sessionId": "sess_1780695558989_81dau",
+      "attemptNumber": 3,
+      "inputIntent": "extract common IR loading logic into a shared utility",
+      "plannerSeed": "a964856d",
+      "constraintSnapshotId": "snap_1780695558990_e07521d2be9c",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "extractIR",
+          "args": [],
+          "assignTo": "ir"
+        }
+      ],
+      "transitions": [],
+      "violations": [
+        {
+          "svl": 1,
+          "violatedConstraint": "symbol_existence",
+          "actionIndex": 0,
+          "missingStates": [
+            "extractIR"
+          ],
+          "description": "函数 'extractIR' 不存在"
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780695562151,
+      "llmCallCount": 0,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": false,
+  "startedAt": 1780695558989,
+  "ruleHash": "9dec68bc2995e92a",
+  "snapshotId": "snap_1780695558990_e07521d2be9c",
+  "endedAt": 1780695562156
+}

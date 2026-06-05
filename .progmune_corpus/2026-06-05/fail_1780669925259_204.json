@@ -1,0 +1,152 @@
+{
+  "intent": "add logging to all repair proposal functions",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "schema",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "suggestRepairs",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "protocols",
+          "type": "FunctionProtocol[]",
+          "value": ""
+        }
+      ],
+      "assignTo": "violations"
+    },
+    {
+      "kind": "call",
+      "function": "suggestProtocolRepair",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "ir",
+          "type": "any[]",
+          "value": ""
+        }
+      ],
+      "assignTo": "rejection"
+    },
+    {
+      "kind": "call",
+      "function": "applyProposalAsBranch",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "ir",
+          "type": "any[]",
+          "value": ""
+        }
+      ],
+      "assignTo": "proposal"
+    },
+    {
+      "kind": "call",
+      "function": "validateProposal",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "namespaceInitialStates",
+          "type": "Map<string, string>",
+          "value": ""
+        }
+      ],
+      "assignTo": "proposal"
+    },
+    {
+      "kind": "call",
+      "function": "suggestInvariantRepair",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "namespaceInitialStates",
+          "type": "Map<string, string>",
+          "value": ""
+        }
+      ],
+      "assignTo": "violation"
+    },
+    {
+      "kind": "call",
+      "function": "getMinimalFixSet",
+      "args": [
+        {
+          "name": "proposals",
+          "type": "RepairProposal[]",
+          "value": ""
+        }
+      ],
+      "assignTo": "proposals"
+    },
+    {
+      "kind": "call",
+      "function": "suggestGenericRepair",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "ir",
+          "type": "any[]",
+          "value": ""
+        }
+      ],
+      "assignTo": "violation"
+    }
+  ],
+  "errorDetail": "action[3]: duplicate assignTo \"proposal\" (previously assigned at another action); action[6]: duplicate assignTo \"violation\" (previously assigned at another action)",
+  "plannerAttempt": 2,
+  "plannerRetryTotal": 3,
+  "id": "fail_1780669925259_204",
+  "timestamp": "2026-06-05T14:32:05.259Z"
+}

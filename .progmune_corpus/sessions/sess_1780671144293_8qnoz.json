@@ -1,0 +1,60 @@
+{
+  "sessionId": "sess_1780671144293_8qnoz",
+  "intent": "call benchmarkReport without loadBenchmarks first",
+  "attempts": [
+    {
+      "id": "att_1780671144293_7m23f",
+      "sessionId": "",
+      "attemptNumber": 1,
+      "inputIntent": "call benchmarkReport without loadBenchmarks first",
+      "plannerSeed": "7aba8d64",
+      "constraintSnapshotId": "snap_1780671144293",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "main",
+          "args": []
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "main",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "INIT"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "INIT"
+            ]
+          },
+          "valid": false
+        }
+      ],
+      "violations": [
+        {
+          "svl": 4,
+          "violatedConstraint": "protocol",
+          "actionIndex": 0,
+          "description": "Protocol violation: function called before required prerequisite",
+          "fixPath": [
+            "loadBenchmarks",
+            "benchmarkPassRate",
+            "benchmarkReport"
+          ]
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780671144293,
+      "llmCallCount": 1,
+      "durationMs": 100
+    }
+  ],
+  "resolved": false,
+  "startedAt": 1780671144293
+}

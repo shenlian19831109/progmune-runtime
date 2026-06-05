@@ -1,0 +1,323 @@
+{
+  "sessionId": "sess_1780595608741_y210v",
+  "intent": "fix missing import when loading benchmark data",
+  "attempts": [
+    {
+      "id": "att_1780595625053_41js5",
+      "sessionId": "sess_1780595608741_y210v",
+      "attemptNumber": 1,
+      "inputIntent": "fix missing import when loading benchmark data",
+      "plannerSeed": "3fbbb6a3",
+      "constraintSnapshotId": "snap_1780595608742_b00d96aecc16",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "loadBenchmarks",
+          "args": [],
+          "assignTo": "tasks"
+        },
+        {
+          "kind": "call",
+          "function": "benchmarkPassRate",
+          "args": [],
+          "assignTo": "rate"
+        },
+        {
+          "kind": "call",
+          "function": "benchmarkReport",
+          "args": [],
+          "assignTo": "report"
+        },
+        {
+          "kind": "return",
+          "value": "report"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "loadBenchmarks",
+          "namespace": "_global",
+          "acquired": [
+            "BENCHMARKS_LOADED"
+          ],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "BENCHMARKS_LOADED",
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "benchmarkPassRate",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "BENCHMARKS_LOADED",
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "BENCHMARKS_LOADED",
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 2,
+          "function": "benchmarkReport",
+          "namespace": "_global",
+          "acquired": [
+            "REPORT_FORMATTED"
+          ],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "BENCHMARKS_LOADED",
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "BENCHMARKS_LOADED",
+              "REPORT_FORMATTED",
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780595625053,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "antibodyHit": {
+        "level": "ACL-3",
+        "signature": "SVL-1:symbol_existence",
+        "fixPath": [
+          "loadBenchmarks",
+          "benchmarkPassRate",
+          "benchmarkReport"
+        ],
+        "similarityScore": 0.2,
+        "action": "injected_hint",
+        "llmCallsSaved": 0,
+        "estimatedTokensSaved": 0
+      },
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780595608741,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780595625053_41js5",
+    "sessionId": "sess_1780595608741_y210v",
+    "attemptNumber": 1,
+    "inputIntent": "fix missing import when loading benchmark data",
+    "plannerSeed": "3fbbb6a3",
+    "constraintSnapshotId": "snap_1780595608742_b00d96aecc16",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "loadBenchmarks",
+        "args": [],
+        "assignTo": "tasks"
+      },
+      {
+        "kind": "call",
+        "function": "benchmarkPassRate",
+        "args": [],
+        "assignTo": "rate"
+      },
+      {
+        "kind": "call",
+        "function": "benchmarkReport",
+        "args": [],
+        "assignTo": "report"
+      },
+      {
+        "kind": "return",
+        "value": "report"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "loadBenchmarks",
+        "namespace": "_global",
+        "acquired": [
+          "BENCHMARKS_LOADED"
+        ],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "BENCHMARKS_LOADED",
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "benchmarkPassRate",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "BENCHMARKS_LOADED",
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "BENCHMARKS_LOADED",
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 2,
+        "function": "benchmarkReport",
+        "namespace": "_global",
+        "acquired": [
+          "REPORT_FORMATTED"
+        ],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "BENCHMARKS_LOADED",
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "BENCHMARKS_LOADED",
+            "REPORT_FORMATTED",
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780595625053,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "antibodyHit": {
+      "level": "ACL-3",
+      "signature": "SVL-1:symbol_existence",
+      "fixPath": [
+        "loadBenchmarks",
+        "benchmarkPassRate",
+        "benchmarkReport"
+      ],
+      "similarityScore": 0.2,
+      "action": "injected_hint",
+      "llmCallsSaved": 0,
+      "estimatedTokensSaved": 0
+    },
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780595608742_b00d96aecc16",
+  "endedAt": 1780595625063
+}

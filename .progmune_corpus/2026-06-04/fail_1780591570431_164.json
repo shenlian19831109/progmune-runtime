@@ -1,0 +1,29 @@
+{
+  "intent": "generate benchmark report from results",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "symbol_existence",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "benchmarkLoadLatest",
+      "args": [],
+      "assignTo": "result"
+    },
+    {
+      "kind": "call",
+      "function": "benchmarkReport",
+      "args": [],
+      "assignTo": "report"
+    },
+    {
+      "kind": "return",
+      "value": "report"
+    }
+  ],
+  "errorDetail": "benchmarkReport: 协议违规 — 需要先调用 loadBenchmarks",
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 4,
+  "id": "fail_1780591570431_164",
+  "timestamp": "2026-06-04T16:46:10.431Z"
+}

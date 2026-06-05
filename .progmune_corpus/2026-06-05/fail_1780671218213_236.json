@@ -1,0 +1,23 @@
+{
+  "intent": "import missing module in benchmark loader",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "import_error",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "main",
+      "args": []
+    }
+  ],
+  "errorDetail": "Import resolution failed: module not found or circular dependency",
+  "ssgFixPath": [
+    "checkModulePath",
+    "verifyExports",
+    "resolveImport"
+  ],
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 1,
+  "id": "fail_1780671218213_236",
+  "timestamp": "2026-06-05T14:53:38.213Z"
+}

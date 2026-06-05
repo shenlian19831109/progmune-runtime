@@ -1,0 +1,141 @@
+{
+  "sessionId": "sess_1780591574172_pzbca",
+  "intent": "save benchmark results to disk",
+  "attempts": [
+    {
+      "id": "att_1780591578072_kaosa",
+      "sessionId": "sess_1780591574172_pzbca",
+      "attemptNumber": 1,
+      "inputIntent": "save benchmark results to disk",
+      "plannerSeed": "cdd8a989",
+      "constraintSnapshotId": "snap_1780591574175_04e5abcd9884",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "benchmarkSave",
+          "args": [
+            {
+              "name": "data",
+              "type": "any",
+              "value": {}
+            }
+          ],
+          "assignTo": "saved"
+        },
+        {
+          "kind": "return",
+          "value": "saved"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "benchmarkSave",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780591578072,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780591574173,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780591578072_kaosa",
+    "sessionId": "sess_1780591574172_pzbca",
+    "attemptNumber": 1,
+    "inputIntent": "save benchmark results to disk",
+    "plannerSeed": "cdd8a989",
+    "constraintSnapshotId": "snap_1780591574175_04e5abcd9884",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "benchmarkSave",
+        "args": [
+          {
+            "name": "data",
+            "type": "any",
+            "value": {}
+          }
+        ],
+        "assignTo": "saved"
+      },
+      {
+        "kind": "return",
+        "value": "saved"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "benchmarkSave",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780591578072,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780591574175_04e5abcd9884",
+  "endedAt": 1780591578076
+}

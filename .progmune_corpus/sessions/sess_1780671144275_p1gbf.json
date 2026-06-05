@@ -1,0 +1,60 @@
+{
+  "sessionId": "sess_1780671144275_p1gbf",
+  "intent": "reassign const variable in protocol validator loop",
+  "attempts": [
+    {
+      "id": "att_1780671144275_5q0kc",
+      "sessionId": "",
+      "attemptNumber": 1,
+      "inputIntent": "reassign const variable in protocol validator loop",
+      "plannerSeed": "f84baac7",
+      "constraintSnapshotId": "snap_1780671144275",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "main",
+          "args": []
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "main",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "INIT"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "INIT"
+            ]
+          },
+          "valid": false
+        }
+      ],
+      "violations": [
+        {
+          "svl": 3,
+          "violatedConstraint": "dataflow",
+          "actionIndex": 0,
+          "description": "Dataflow error: variable used before declaration or circular reference detected",
+          "fixPath": [
+            "declareVariable",
+            "verifyScope",
+            "checkDataflow"
+          ]
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780671144275,
+      "llmCallCount": 1,
+      "durationMs": 100
+    }
+  ],
+  "resolved": false,
+  "startedAt": 1780671144275
+}

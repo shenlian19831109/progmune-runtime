@@ -1,148 +1,111 @@
 [
   {
-    "intent": "",
+    "intent": "unify error reporting across all immune system modules",
     "actions": [
       {
         "kind": "call",
-        "function": "auditDirectory",
+        "function": "generateFullReport",
+        "args": [],
+        "assignTo": "report"
+      },
+      {
+        "kind": "call",
+        "function": "formatReportAsJSON",
         "args": [
           {
-            "name": "dir",
+            "name": "report",
             "type": "string",
-            "value": null
-          },
-          {
-            "name": "threshold",
-            "type": "any",
-            "value": null
+            "value": "report"
           }
         ],
-        "assignTo": "result"
+        "assignTo": "formatted"
+      },
+      {
+        "kind": "return",
+        "value": "formatted"
       }
     ],
     "success": true,
-    "id": "ep_1780509991084",
-    "timestamp": "2026-06-03T18:06:31.084Z"
+    "id": "ep_1780695621538",
+    "timestamp": "2026-06-05T21:40:21.538Z"
   },
   {
-    "intent": "get all sessions",
+    "intent": "split the large session manager into focused modules",
     "actions": [
       {
         "kind": "call",
-        "function": "getBranchPath",
+        "function": "getActiveSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "revokeAllSessions",
         "args": [
           {
-            "name": "branch",
-            "type": "Branch",
-            "value": "{{branch}}"
+            "name": "userId",
+            "type": "string",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "revokedCount"
+      },
+      {
+        "kind": "return",
+        "value": "revokedCount"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780695619590",
+    "timestamp": "2026-06-05T21:40:19.590Z"
+  },
+  {
+    "intent": "consolidate duplicate validation code in planner and validator",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "findUserByEmail",
+        "args": [
+          {
+            "name": "email",
+            "type": "string",
+            "value": "admin@example.com"
+          }
+        ],
+        "assignTo": "user"
+      },
+      {
+        "kind": "call",
+        "function": "validateUserRole",
+        "args": [
+          {
+            "name": "userId",
+            "type": "string",
+            "value": "user"
           },
           {
-            "name": "allBranches",
-            "type": "Map<string, Branch>",
-            "value": "{{allBranches}}"
-          }
-        ],
-        "assignTo": "getBranchPath_result"
-      },
-      {
-        "kind": "call",
-        "function": "getImportPath",
-        "args": [
-          {
-            "name": "file",
+            "name": "requiredRole",
             "type": "string",
-            "value": "{{file}}"
+            "value": "admin"
           }
         ],
-        "assignTo": "getImportPath_result"
+        "assignTo": "roleResult"
       },
       {
-        "kind": "call",
-        "function": "getExecutionMetrics",
-        "args": [],
-        "assignTo": "getExecutionMetrics_result"
-      },
+        "kind": "return",
+        "value": "roleResult"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780695617328",
+    "timestamp": "2026-06-05T21:40:17.328Z"
+  },
+  {
+    "intent": "refactor the protocol validator to use a single entry point",
+    "actions": [
       {
         "kind": "call",
-        "function": "getTypeDetail",
-        "args": [
-          {
-            "name": "typeNode",
-            "type": "any",
-            "value": "{{typeNode}}"
-          }
-        ],
-        "assignTo": "getTypeDetail_result"
-      },
-      {
-        "kind": "call",
-        "function": "getParamType",
-        "args": [
-          {
-            "name": "param",
-            "type": "any",
-            "value": "{{param}}"
-          }
-        ],
-        "assignTo": "getParamType_result"
-      },
-      {
-        "kind": "call",
-        "function": "getParamTypeDetail",
-        "args": [
-          {
-            "name": "param",
-            "type": "any",
-            "value": "{{param}}"
-          }
-        ],
-        "assignTo": "getParamTypeDetail_result"
-      },
-      {
-        "kind": "call",
-        "function": "getReturnType",
-        "args": [
-          {
-            "name": "func",
-            "type": "FunctionDeclaration | ArrowFunction",
-            "value": "{{func}}"
-          }
-        ],
-        "assignTo": "getReturnType_result"
-      },
-      {
-        "kind": "call",
-        "function": "getReturnTypeDetail",
-        "args": [
-          {
-            "name": "func",
-            "type": "FunctionDeclaration | ArrowFunction",
-            "value": "{{func}}"
-          }
-        ],
-        "assignTo": "getReturnTypeDetail_result"
-      },
-      {
-        "kind": "call",
-        "function": "getAllFailures",
-        "args": [],
-        "assignTo": "getAllFailures_result"
-      },
-      {
-        "kind": "call",
-        "function": "getFailuresBySVL",
-        "args": [
-          {
-            "name": "level",
-            "type": "SVL",
-            "value": "{{level}}"
-          }
-        ],
-        "assignTo": "getFailuresBySVL_result"
-      },
-      {
-        "kind": "call",
-        "function": "getTopFailurePatterns",
+        "function": "getTopEvents",
         "args": [
           {
             "name": "limit",
@@ -150,1462 +113,652 @@
             "value": "{{limit}}"
           }
         ],
-        "assignTo": "getTopFailurePatterns_result"
+        "assignTo": "getTopEvents_result"
       },
       {
         "kind": "call",
-        "function": "getFailureGenome",
-        "args": [],
-        "assignTo": "getFailureGenome_result"
-      },
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "getAllSessions_result"
-      },
-      {
-        "kind": "call",
-        "function": "getLearnedPatterns",
-        "args": [],
-        "assignTo": "getLearnedPatterns_result"
-      },
-      {
-        "kind": "call",
-        "function": "getSemanticHeatmap",
-        "args": [],
-        "assignTo": "getSemanticHeatmap_result"
-      },
-      {
-        "kind": "call",
-        "function": "getAntibodyStats",
-        "args": [],
-        "assignTo": "getAntibodyStats_result"
-      },
-      {
-        "kind": "call",
-        "function": "getFunctionSuccessRate",
+        "function": "validateToken",
         "args": [
           {
-            "name": "funcName",
+            "name": "token",
             "type": "string",
-            "value": "{{funcName}}"
+            "value": "{{token}}"
           }
         ],
-        "assignTo": "getFunctionSuccessRate_result"
+        "assignTo": "validateToken_result"
       },
       {
         "kind": "call",
-        "function": "getWeightedSuccessRate",
+        "function": "refreshToken",
         "args": [
           {
-            "name": "funcName",
+            "name": "oldToken",
             "type": "string",
-            "value": "{{funcName}}"
+            "value": "{{oldToken}}"
           }
         ],
-        "assignTo": "getWeightedSuccessRate_result"
+        "assignTo": "refreshToken_result"
       },
       {
         "kind": "call",
-        "function": "getFailureAdjustedCredit",
+        "function": "updateStock",
         "args": [
           {
-            "name": "funcName",
+            "name": "id",
             "type": "string",
-            "value": "{{funcName}}"
-          }
-        ],
-        "assignTo": "getFailureAdjustedCredit_result"
-      },
-      {
-        "kind": "call",
-        "function": "getInstanceId",
-        "args": [],
-        "assignTo": "getInstanceId_result"
-      },
-      {
-        "kind": "call",
-        "function": "getReportCursor",
-        "args": [],
-        "assignTo": "getReportCursor_result"
-      },
-      {
-        "kind": "call",
-        "function": "getFingerprint",
-        "args": [
+            "value": "{{id}}"
+          },
           {
-            "name": "sessionId",
-            "type": "string",
-            "value": "{{sessionId}}"
-          }
-        ],
-        "assignTo": "getFingerprint_result"
-      },
-      {
-        "kind": "call",
-        "function": "getFingerprintRegistry",
-        "args": [],
-        "assignTo": "getFingerprintRegistry_result"
-      },
-      {
-        "kind": "call",
-        "function": "getRecentEpisodes",
-        "args": [
-          {
-            "name": "limit",
+            "name": "delta",
             "type": "number",
-            "value": "{{limit}}"
+            "value": "{{delta}}"
           }
         ],
-        "assignTo": "getRecentEpisodes_result"
+        "assignTo": "updateStock_result"
       },
       {
         "kind": "call",
-        "function": "getSuccessfulEpisodes",
+        "function": "listLowStock",
         "args": [
           {
-            "name": "limit",
+            "name": "threshold",
             "type": "number",
-            "value": "{{limit}}"
+            "value": "{{threshold}}"
           }
         ],
-        "assignTo": "getSuccessfulEpisodes_result"
+        "assignTo": "listLowStock_result"
       },
       {
         "kind": "call",
-        "function": "WorkMemory.getIntent",
+        "function": "getInventoryValue",
         "args": [],
-        "assignTo": "WorkMemory.getIntent_result"
+        "assignTo": "getInventoryValue_result"
       },
       {
         "kind": "call",
-        "function": "WorkMemory.get",
+        "function": "getStockSummary",
+        "args": [],
+        "assignTo": "getStockSummary_result"
+      },
+      {
+        "kind": "call",
+        "function": "getOrdersByUser",
+        "args": [
+          {
+            "name": "userId",
+            "type": "string",
+            "value": "{{userId}}"
+          }
+        ],
+        "assignTo": "getOrdersByUser_result"
+      },
+      {
+        "kind": "call",
+        "function": "getOrderPayments",
+        "args": [
+          {
+            "name": "orderId",
+            "type": "string",
+            "value": "{{orderId}}"
+          }
+        ],
+        "assignTo": "getOrderPayments_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateInventoryReport",
+        "args": [],
+        "assignTo": "generateInventoryReport_result"
+      },
+      {
+        "kind": "call",
+        "function": "getEventsByUser",
+        "args": [
+          {
+            "name": "userId",
+            "type": "string",
+            "value": "{{userId}}"
+          }
+        ],
+        "assignTo": "getEventsByUser_result"
+      },
+      {
+        "kind": "call",
+        "function": "getDailyActiveUsers",
+        "args": [],
+        "assignTo": "getDailyActiveUsers_result"
+      },
+      {
+        "kind": "call",
+        "function": "findUserByEmail",
+        "args": [
+          {
+            "name": "email",
+            "type": "string",
+            "value": "{{email}}"
+          }
+        ],
+        "assignTo": "findUserByEmail_result"
+      },
+      {
+        "kind": "call",
+        "function": "createUser",
         "args": [
           {
             "name": "name",
             "type": "string",
             "value": "{{name}}"
-          }
-        ],
-        "assignTo": "WorkMemory.get_result"
-      },
-      {
-        "kind": "call",
-        "function": "getSessionTransitions",
-        "args": [
-          {
-            "name": "session",
-            "type": "any",
-            "value": "{{session}}"
-          }
-        ],
-        "assignTo": "getSessionTransitions_result"
-      },
-      {
-        "kind": "call",
-        "function": "getProtocolConfig",
-        "args": [],
-        "assignTo": "getProtocolConfig_result"
-      },
-      {
-        "kind": "call",
-        "function": "getNsInit",
-        "args": [],
-        "assignTo": "getNsInit_result"
-      },
-      {
-        "kind": "call",
-        "function": "getRuleHash",
-        "args": [],
-        "assignTo": "getRuleHash_result"
-      },
-      {
-        "kind": "call",
-        "function": "getMinimalFixSet",
-        "args": [
-          {
-            "name": "proposals",
-            "type": "RepairProposal[]",
-            "value": "{{proposals}}"
-          }
-        ],
-        "assignTo": "getMinimalFixSet_result"
-      },
-      {
-        "kind": "call",
-        "function": "getStaticScore",
-        "args": [
-          {
-            "name": "funcName",
-            "type": "string",
-            "value": "{{funcName}}"
           },
           {
-            "name": "goal",
+            "name": "email",
             "type": "string",
-            "value": "{{goal}}"
-          }
-        ],
-        "assignTo": "getStaticScore_result"
-      },
-      {
-        "kind": "call",
-        "function": "getTopology",
-        "args": [
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "{{ir}}"
-          }
-        ],
-        "assignTo": "getTopology_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.getCurrentStates",
-        "args": [],
-        "assignTo": "StateMachineValidator.getCurrentStates_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.getNamespaceStates",
-        "args": [
-          {
-            "name": "namespace",
-            "type": "string",
-            "value": "{{namespace}}"
-          }
-        ],
-        "assignTo": "StateMachineValidator.getNamespaceStates_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.getTrace",
-        "args": [],
-        "assignTo": "StateMachineValidator.getTrace_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.getLedger",
-        "args": [],
-        "assignTo": "StateMachineValidator.getLedger_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.getContext",
-        "args": [],
-        "assignTo": "StateMachineValidator.getContext_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.getRuleHash",
-        "args": [],
-        "assignTo": "StateMachineValidator.getRuleHash_result"
-      },
-      {
-        "kind": "call",
-        "function": "getFullText",
-        "args": [],
-        "assignTo": "getFullText_result"
-      },
-      {
-        "kind": "call",
-        "function": "getComment",
-        "args": [],
-        "assignTo": "getComment_result"
-      },
-      {
-        "kind": "call",
-        "function": "getElementTypeNode",
-        "args": [],
-        "assignTo": "getElementTypeNode_result"
-      },
-      {
-        "kind": "call",
-        "function": "getTypeNode",
-        "args": [],
-        "assignTo": "getTypeNode_result"
-      },
-      {
-        "kind": "call",
-        "function": "getReturnTypeNode",
-        "args": [],
-        "assignTo": "getReturnTypeNode_result"
-      },
-      {
-        "kind": "call",
-        "function": "getBody",
-        "args": [],
-        "assignTo": "getBody_result"
-      },
-      {
-        "kind": "call",
-        "function": "getClasses",
-        "args": [],
-        "assignTo": "getClasses_result"
-      },
-      {
-        "kind": "call",
-        "function": "getMethods",
-        "args": [],
-        "assignTo": "getMethods_result"
-      },
-      {
-        "kind": "call",
-        "function": "getImportDeclarations",
-        "args": [],
-        "assignTo": "getImportDeclarations_result"
-      },
-      {
-        "kind": "call",
-        "function": "getModuleSpecifierValue",
-        "args": [],
-        "assignTo": "getModuleSpecifierValue_result"
-      },
-      {
-        "kind": "call",
-        "function": "getNamedImports",
-        "args": [],
-        "assignTo": "getNamedImports_result"
-      },
-      {
-        "kind": "call",
-        "function": "getModuleSpecifierSourceFile",
-        "args": [],
-        "assignTo": "getModuleSpecifierSourceFile_result"
-      },
-      {
-        "kind": "call",
-        "function": "getNamespaceImport",
-        "args": [],
-        "assignTo": "getNamespaceImport_result"
-      },
-      {
-        "kind": "call",
-        "function": "getInterfaces",
-        "args": [],
-        "assignTo": "getInterfaces_result"
-      },
-      {
-        "kind": "call",
-        "function": "getTypeAliases",
-        "args": [],
-        "assignTo": "getTypeAliases_result"
-      },
-      {
-        "kind": "call",
-        "function": "getExportedDeclarations",
-        "args": [],
-        "assignTo": "getExportedDeclarations_result"
-      },
-      {
-        "kind": "call",
-        "function": "getTrace",
-        "args": [],
-        "assignTo": "getTrace_result"
-      },
-      {
-        "kind": "call",
-        "function": "getMaskedFuncList",
-        "args": [],
-        "assignTo": "getMaskedFuncList_result"
-      },
-      {
-        "kind": "call",
-        "function": "ActionBuilder.call",
-        "args": [
-          {
-            "name": "func",
-            "type": "string",
-            "value": "{{func}}"
+            "value": "{{email}}"
           },
           {
-            "name": "args",
-            "type": "any[]",
-            "value": "{{args}}"
+            "name": "role",
+            "type": "string",
+            "value": "{{role}}"
+          }
+        ],
+        "assignTo": "createUser_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateUserRole",
+        "args": [
+          {
+            "name": "userId",
+            "type": "string",
+            "value": "{{userId}}"
           },
           {
-            "name": "assignTo",
+            "name": "requiredRole",
             "type": "string",
-            "value": "{{assignTo}}"
+            "value": "{{requiredRole}}"
           }
         ],
-        "assignTo": "ActionBuilder.call_result"
+        "assignTo": "validateUserRole_result"
       },
       {
         "kind": "call",
-        "function": "extractDirectCalls",
+        "function": "listUsersByRole",
         "args": [
           {
-            "name": "func",
-            "type": "FunctionDeclaration | ArrowFunction",
-            "value": "{{func}}"
-          }
-        ],
-        "assignTo": "extractDirectCalls_result"
-      },
-      {
-        "kind": "call",
-        "function": "verifyAllFingerprints",
-        "args": [
-          {
-            "name": "currentRuleHash",
+            "name": "role",
             "type": "string",
-            "value": "{{currentRuleHash}}"
+            "value": "{{role}}"
           }
         ],
-        "assignTo": "verifyAllFingerprints_result"
-      },
-      {
-        "kind": "call",
-        "function": "registerAllMissingFingerprints",
-        "args": [],
-        "assignTo": "registerAllMissingFingerprints_result"
-      },
-      {
-        "kind": "call",
-        "function": "resetCallCount",
-        "args": [],
-        "assignTo": "resetCallCount_result"
-      },
-      {
-        "kind": "call",
-        "function": "generateFallbackPlan",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          },
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "{{ir}}"
-          }
-        ],
-        "assignTo": "generateFallbackPlan_result"
-      },
-      {
-        "kind": "call",
-        "function": "listAllStates",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{{ledger}}"
-          }
-        ],
-        "assignTo": "listAllStates_result"
-      },
-      {
-        "kind": "call",
-        "function": "countSessionsWithViolations",
-        "args": [
-          {
-            "name": "sessions",
-            "type": "any[]",
-            "value": "{{sessions}}"
-          }
-        ],
-        "assignTo": "countSessionsWithViolations_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatSessionSummary",
-        "args": [
-          {
-            "name": "sessions",
-            "type": "ReturnType<typeof getAllSessions>",
-            "value": "{{sessions}}"
-          }
-        ],
-        "assignTo": "formatSessionSummary_result"
+        "assignTo": "listUsersByRole_result"
       }
     ],
     "success": true,
-    "id": "ep_1780509990682",
-    "timestamp": "2026-06-03T18:06:30.682Z"
+    "id": "ep_1780695614733",
+    "timestamp": "2026-06-05T21:40:14.733Z"
   },
   {
-    "intent": "get all sessions",
+    "intent": "refactor the protocol validator to use a single entry point",
     "actions": [
       {
         "kind": "call",
-        "function": "getAllSessions",
+        "function": "extractIR",
         "args": [],
-        "assignTo": "sessions"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-1",
-    "id": "ep_1780509990676",
-    "timestamp": "2026-06-03T18:06:30.676Z"
-  },
-  {
-    "intent": "get all sessions",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-1",
-    "id": "ep_1780509989764",
-    "timestamp": "2026-06-03T18:06:29.764Z"
-  },
-  {
-    "intent": "analyze the failure genome statistics and format a comprehensive report with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown ",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getFailureGenome",
-        "args": [],
-        "assignTo": "genome"
+        "assignTo": "ir"
       },
       {
         "kind": "call",
-        "function": "failureStats",
-        "args": [],
-        "assignTo": "stats"
-      },
-      {
-        "kind": "call",
-        "function": "formatAuditResult",
+        "function": "validateAddress",
         "args": [
           {
-            "name": "result",
-            "type": "AuditResult",
-            "value": "genome"
+            "name": "address",
+            "type": "string",
+            "value": ""
           }
         ],
-        "assignTo": "report"
+        "assignTo": "action"
+      },
+      {
+        "kind": "call",
+        "function": "validateToken",
+        "args": [
+          {
+            "name": "token",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "sequence"
+      },
+      {
+        "kind": "call",
+        "function": "emitCode",
+        "args": [],
+        "assignTo": "code"
+      },
+      {
+        "kind": "call",
+        "function": "revokeAllSessions",
+        "args": [
+          {
+            "name": "userId",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "session"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780695614728",
+    "timestamp": "2026-06-05T21:40:14.728Z"
+  },
+  {
+    "intent": "refactor the protocol validator to use a single entry point",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "validateAddress",
+        "args": [
+          {
+            "name": "address",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "action"
+      },
+      {
+        "kind": "call",
+        "function": "validateToken",
+        "args": [
+          {
+            "name": "token",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "sequence"
+      },
+      {
+        "kind": "call",
+        "function": "emitCode",
+        "args": [],
+        "assignTo": "code"
+      },
+      {
+        "kind": "call",
+        "function": "revokeAllSessions",
+        "args": [
+          {
+            "name": "userId",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "session"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780695613506",
+    "timestamp": "2026-06-05T21:40:13.506Z"
+  },
+  {
+    "intent": "refactor the protocol validator to use a single entry point",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [
+          {
+            "name": "code",
+            "type": "string",
+            "value": "protocol validator code"
+          }
+        ],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "validateAddress",
+        "args": [
+          {
+            "name": "address",
+            "type": "string",
+            "value": "ir"
+          }
+        ],
+        "assignTo": "action"
+      },
+      {
+        "kind": "call",
+        "function": "validateToken",
+        "args": [
+          {
+            "name": "token",
+            "type": "string",
+            "value": "action"
+          }
+        ],
+        "assignTo": "sequence"
+      },
+      {
+        "kind": "call",
+        "function": "emitCode",
+        "args": [
+          {
+            "name": "sequence",
+            "type": "any",
+            "value": "sequence"
+          }
+        ],
+        "assignTo": "code"
+      },
+      {
+        "kind": "call",
+        "function": "revokeAllSessions",
+        "args": [
+          {
+            "name": "userId",
+            "type": "string",
+            "value": "code"
+          }
+        ],
+        "assignTo": "session"
       },
       {
         "kind": "return",
-        "value": "report"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780509989062",
-    "timestamp": "2026-06-03T18:06:29.062Z"
-  },
-  {
-    "intent": "get all sessions",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "return",
-        "value": "sessions"
+        "value": "session"
       }
     ],
     "success": false,
     "svlViolated": "SVL-1",
-    "id": "ep_1780509988742",
-    "timestamp": "2026-06-03T18:06:28.742Z"
+    "id": "ep_1780695611951",
+    "timestamp": "2026-06-05T21:40:11.951Z"
   },
   {
-    "intent": "",
+    "intent": "extract common IR loading logic into a shared utility",
+    "actions": [],
+    "success": false,
+    "id": "ep_1780695609822",
+    "timestamp": "2026-06-05T21:40:09.822Z"
+  },
+  {
+    "intent": "extract common IR loading logic into a shared utility",
     "actions": [
       {
         "kind": "call",
-        "function": "auditDirectory",
+        "function": "extractIR",
+        "args": [],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "validateAddress",
         "args": [
           {
-            "name": "dir",
+            "name": "address",
             "type": "string",
-            "value": null
-          },
-          {
-            "name": "threshold",
-            "type": "any",
-            "value": null
+            "value": ""
           }
         ],
-        "assignTo": "result"
+        "assignTo": "action"
+      },
+      {
+        "kind": "call",
+        "function": "validateToken",
+        "args": [
+          {
+            "name": "token",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "sequence"
+      },
+      {
+        "kind": "call",
+        "function": "emitCode",
+        "args": [],
+        "assignTo": "code"
+      },
+      {
+        "kind": "call",
+        "function": "revokeAllSessions",
+        "args": [
+          {
+            "name": "userId",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "session"
       }
     ],
-    "success": true,
-    "id": "ep_1780509970308",
-    "timestamp": "2026-06-03T18:06:10.308Z"
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780695609816",
+    "timestamp": "2026-06-05T21:40:09.816Z"
   },
   {
-    "intent": "get all sessions",
+    "intent": "extract common IR loading logic into a shared utility",
     "actions": [
       {
         "kind": "call",
-        "function": "getBranchPath",
-        "args": [
-          {
-            "name": "branch",
-            "type": "Branch",
-            "value": "{{branch}}"
-          },
-          {
-            "name": "allBranches",
-            "type": "Map<string, Branch>",
-            "value": "{{allBranches}}"
-          }
-        ],
-        "assignTo": "getBranchPath_result"
-      },
-      {
-        "kind": "call",
-        "function": "getImportPath",
-        "args": [
-          {
-            "name": "file",
-            "type": "string",
-            "value": "{{file}}"
-          }
-        ],
-        "assignTo": "getImportPath_result"
-      },
-      {
-        "kind": "call",
-        "function": "getExecutionMetrics",
+        "function": "extractIR",
         "args": [],
-        "assignTo": "getExecutionMetrics_result"
+        "assignTo": "ir"
       },
       {
         "kind": "call",
-        "function": "getTypeDetail",
+        "function": "validateAddress",
         "args": [
           {
-            "name": "typeNode",
+            "name": "address",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "action"
+      },
+      {
+        "kind": "call",
+        "function": "validateToken",
+        "args": [
+          {
+            "name": "token",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "sequence"
+      },
+      {
+        "kind": "call",
+        "function": "emitCode",
+        "args": [],
+        "assignTo": "code"
+      },
+      {
+        "kind": "call",
+        "function": "revokeAllSessions",
+        "args": [
+          {
+            "name": "userId",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "session"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780695608554",
+    "timestamp": "2026-06-05T21:40:08.554Z"
+  },
+  {
+    "intent": "extract common IR loading logic into a shared utility",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "validateAddress",
+        "args": [
+          {
+            "name": "address",
+            "type": "string",
+            "value": "ir"
+          }
+        ],
+        "assignTo": "validated"
+      },
+      {
+        "kind": "call",
+        "function": "validateToken",
+        "args": [
+          {
+            "name": "token",
+            "type": "string",
+            "value": "validated"
+          }
+        ],
+        "assignTo": "sequence"
+      },
+      {
+        "kind": "call",
+        "function": "emitCode",
+        "args": [
+          {
+            "name": "ir",
             "type": "any",
-            "value": "{{typeNode}}"
+            "value": "sequence"
           }
         ],
-        "assignTo": "getTypeDetail_result"
+        "assignTo": "code"
       },
       {
         "kind": "call",
-        "function": "getParamType",
+        "function": "revokeAllSessions",
         "args": [
           {
-            "name": "param",
-            "type": "any",
-            "value": "{{param}}"
-          }
-        ],
-        "assignTo": "getParamType_result"
-      },
-      {
-        "kind": "call",
-        "function": "getParamTypeDetail",
-        "args": [
-          {
-            "name": "param",
-            "type": "any",
-            "value": "{{param}}"
-          }
-        ],
-        "assignTo": "getParamTypeDetail_result"
-      },
-      {
-        "kind": "call",
-        "function": "getReturnType",
-        "args": [
-          {
-            "name": "func",
-            "type": "FunctionDeclaration | ArrowFunction",
-            "value": "{{func}}"
-          }
-        ],
-        "assignTo": "getReturnType_result"
-      },
-      {
-        "kind": "call",
-        "function": "getReturnTypeDetail",
-        "args": [
-          {
-            "name": "func",
-            "type": "FunctionDeclaration | ArrowFunction",
-            "value": "{{func}}"
-          }
-        ],
-        "assignTo": "getReturnTypeDetail_result"
-      },
-      {
-        "kind": "call",
-        "function": "getAllFailures",
-        "args": [],
-        "assignTo": "getAllFailures_result"
-      },
-      {
-        "kind": "call",
-        "function": "getFailuresBySVL",
-        "args": [
-          {
-            "name": "level",
-            "type": "SVL",
-            "value": "{{level}}"
-          }
-        ],
-        "assignTo": "getFailuresBySVL_result"
-      },
-      {
-        "kind": "call",
-        "function": "getTopFailurePatterns",
-        "args": [
-          {
-            "name": "limit",
-            "type": "number",
-            "value": "{{limit}}"
-          }
-        ],
-        "assignTo": "getTopFailurePatterns_result"
-      },
-      {
-        "kind": "call",
-        "function": "getFailureGenome",
-        "args": [],
-        "assignTo": "getFailureGenome_result"
-      },
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "getAllSessions_result"
-      },
-      {
-        "kind": "call",
-        "function": "getLearnedPatterns",
-        "args": [],
-        "assignTo": "getLearnedPatterns_result"
-      },
-      {
-        "kind": "call",
-        "function": "getSemanticHeatmap",
-        "args": [],
-        "assignTo": "getSemanticHeatmap_result"
-      },
-      {
-        "kind": "call",
-        "function": "getAntibodyStats",
-        "args": [],
-        "assignTo": "getAntibodyStats_result"
-      },
-      {
-        "kind": "call",
-        "function": "getFunctionSuccessRate",
-        "args": [
-          {
-            "name": "funcName",
+            "name": "userId",
             "type": "string",
-            "value": "{{funcName}}"
+            "value": "code"
           }
         ],
-        "assignTo": "getFunctionSuccessRate_result"
+        "assignTo": "session"
       },
       {
-        "kind": "call",
-        "function": "getWeightedSuccessRate",
-        "args": [
-          {
-            "name": "funcName",
-            "type": "string",
-            "value": "{{funcName}}"
-          }
-        ],
-        "assignTo": "getWeightedSuccessRate_result"
-      },
+        "kind": "return",
+        "value": "session"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780695607226",
+    "timestamp": "2026-06-05T21:40:07.226Z"
+  },
+  {
+    "intent": "add a health check endpoint that reports immune metrics",
+    "actions": [
       {
         "kind": "call",
-        "function": "getFailureAdjustedCredit",
-        "args": [
-          {
-            "name": "funcName",
-            "type": "string",
-            "value": "{{funcName}}"
-          }
-        ],
-        "assignTo": "getFailureAdjustedCredit_result"
-      },
-      {
-        "kind": "call",
-        "function": "getInstanceId",
-        "args": [],
-        "assignTo": "getInstanceId_result"
-      },
-      {
-        "kind": "call",
-        "function": "getReportCursor",
-        "args": [],
-        "assignTo": "getReportCursor_result"
-      },
-      {
-        "kind": "call",
-        "function": "getFingerprint",
-        "args": [
-          {
-            "name": "sessionId",
-            "type": "string",
-            "value": "{{sessionId}}"
-          }
-        ],
-        "assignTo": "getFingerprint_result"
-      },
-      {
-        "kind": "call",
-        "function": "getFingerprintRegistry",
-        "args": [],
-        "assignTo": "getFingerprintRegistry_result"
-      },
-      {
-        "kind": "call",
-        "function": "getRecentEpisodes",
-        "args": [
-          {
-            "name": "limit",
-            "type": "number",
-            "value": "{{limit}}"
-          }
-        ],
-        "assignTo": "getRecentEpisodes_result"
-      },
-      {
-        "kind": "call",
-        "function": "getSuccessfulEpisodes",
-        "args": [
-          {
-            "name": "limit",
-            "type": "number",
-            "value": "{{limit}}"
-          }
-        ],
-        "assignTo": "getSuccessfulEpisodes_result"
-      },
-      {
-        "kind": "call",
-        "function": "WorkMemory.getIntent",
-        "args": [],
-        "assignTo": "WorkMemory.getIntent_result"
-      },
-      {
-        "kind": "call",
-        "function": "WorkMemory.get",
+        "function": "addProduct",
         "args": [
           {
             "name": "name",
             "type": "string",
-            "value": "{{name}}"
-          }
-        ],
-        "assignTo": "WorkMemory.get_result"
-      },
-      {
-        "kind": "call",
-        "function": "getSessionTransitions",
-        "args": [
-          {
-            "name": "session",
-            "type": "any",
-            "value": "{{session}}"
-          }
-        ],
-        "assignTo": "getSessionTransitions_result"
-      },
-      {
-        "kind": "call",
-        "function": "getProtocolConfig",
-        "args": [],
-        "assignTo": "getProtocolConfig_result"
-      },
-      {
-        "kind": "call",
-        "function": "getNsInit",
-        "args": [],
-        "assignTo": "getNsInit_result"
-      },
-      {
-        "kind": "call",
-        "function": "getRuleHash",
-        "args": [],
-        "assignTo": "getRuleHash_result"
-      },
-      {
-        "kind": "call",
-        "function": "getMinimalFixSet",
-        "args": [
-          {
-            "name": "proposals",
-            "type": "RepairProposal[]",
-            "value": "{{proposals}}"
-          }
-        ],
-        "assignTo": "getMinimalFixSet_result"
-      },
-      {
-        "kind": "call",
-        "function": "getStaticScore",
-        "args": [
-          {
-            "name": "funcName",
-            "type": "string",
-            "value": "{{funcName}}"
+            "value": null
           },
           {
-            "name": "goal",
-            "type": "string",
-            "value": "{{goal}}"
-          }
-        ],
-        "assignTo": "getStaticScore_result"
-      },
-      {
-        "kind": "call",
-        "function": "getTopology",
-        "args": [
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "{{ir}}"
-          }
-        ],
-        "assignTo": "getTopology_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.getCurrentStates",
-        "args": [],
-        "assignTo": "StateMachineValidator.getCurrentStates_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.getNamespaceStates",
-        "args": [
-          {
-            "name": "namespace",
-            "type": "string",
-            "value": "{{namespace}}"
-          }
-        ],
-        "assignTo": "StateMachineValidator.getNamespaceStates_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.getTrace",
-        "args": [],
-        "assignTo": "StateMachineValidator.getTrace_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.getLedger",
-        "args": [],
-        "assignTo": "StateMachineValidator.getLedger_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.getContext",
-        "args": [],
-        "assignTo": "StateMachineValidator.getContext_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.getRuleHash",
-        "args": [],
-        "assignTo": "StateMachineValidator.getRuleHash_result"
-      },
-      {
-        "kind": "call",
-        "function": "getFullText",
-        "args": [],
-        "assignTo": "getFullText_result"
-      },
-      {
-        "kind": "call",
-        "function": "getComment",
-        "args": [],
-        "assignTo": "getComment_result"
-      },
-      {
-        "kind": "call",
-        "function": "getElementTypeNode",
-        "args": [],
-        "assignTo": "getElementTypeNode_result"
-      },
-      {
-        "kind": "call",
-        "function": "getTypeNode",
-        "args": [],
-        "assignTo": "getTypeNode_result"
-      },
-      {
-        "kind": "call",
-        "function": "getReturnTypeNode",
-        "args": [],
-        "assignTo": "getReturnTypeNode_result"
-      },
-      {
-        "kind": "call",
-        "function": "getBody",
-        "args": [],
-        "assignTo": "getBody_result"
-      },
-      {
-        "kind": "call",
-        "function": "getClasses",
-        "args": [],
-        "assignTo": "getClasses_result"
-      },
-      {
-        "kind": "call",
-        "function": "getMethods",
-        "args": [],
-        "assignTo": "getMethods_result"
-      },
-      {
-        "kind": "call",
-        "function": "getImportDeclarations",
-        "args": [],
-        "assignTo": "getImportDeclarations_result"
-      },
-      {
-        "kind": "call",
-        "function": "getModuleSpecifierValue",
-        "args": [],
-        "assignTo": "getModuleSpecifierValue_result"
-      },
-      {
-        "kind": "call",
-        "function": "getNamedImports",
-        "args": [],
-        "assignTo": "getNamedImports_result"
-      },
-      {
-        "kind": "call",
-        "function": "getModuleSpecifierSourceFile",
-        "args": [],
-        "assignTo": "getModuleSpecifierSourceFile_result"
-      },
-      {
-        "kind": "call",
-        "function": "getNamespaceImport",
-        "args": [],
-        "assignTo": "getNamespaceImport_result"
-      },
-      {
-        "kind": "call",
-        "function": "getInterfaces",
-        "args": [],
-        "assignTo": "getInterfaces_result"
-      },
-      {
-        "kind": "call",
-        "function": "getTypeAliases",
-        "args": [],
-        "assignTo": "getTypeAliases_result"
-      },
-      {
-        "kind": "call",
-        "function": "getExportedDeclarations",
-        "args": [],
-        "assignTo": "getExportedDeclarations_result"
-      },
-      {
-        "kind": "call",
-        "function": "getTrace",
-        "args": [],
-        "assignTo": "getTrace_result"
-      },
-      {
-        "kind": "call",
-        "function": "getMaskedFuncList",
-        "args": [],
-        "assignTo": "getMaskedFuncList_result"
-      },
-      {
-        "kind": "call",
-        "function": "ActionBuilder.call",
-        "args": [
-          {
-            "name": "func",
-            "type": "string",
-            "value": "{{func}}"
+            "name": "stock",
+            "type": "number",
+            "value": null
           },
           {
-            "name": "args",
-            "type": "any[]",
-            "value": "{{args}}"
-          },
-          {
-            "name": "assignTo",
-            "type": "string",
-            "value": "{{assignTo}}"
-          }
-        ],
-        "assignTo": "ActionBuilder.call_result"
-      },
-      {
-        "kind": "call",
-        "function": "extractDirectCalls",
-        "args": [
-          {
-            "name": "func",
-            "type": "FunctionDeclaration | ArrowFunction",
-            "value": "{{func}}"
-          }
-        ],
-        "assignTo": "extractDirectCalls_result"
-      },
-      {
-        "kind": "call",
-        "function": "verifyAllFingerprints",
-        "args": [
-          {
-            "name": "currentRuleHash",
-            "type": "string",
-            "value": "{{currentRuleHash}}"
-          }
-        ],
-        "assignTo": "verifyAllFingerprints_result"
-      },
-      {
-        "kind": "call",
-        "function": "registerAllMissingFingerprints",
-        "args": [],
-        "assignTo": "registerAllMissingFingerprints_result"
-      },
-      {
-        "kind": "call",
-        "function": "resetCallCount",
-        "args": [],
-        "assignTo": "resetCallCount_result"
-      },
-      {
-        "kind": "call",
-        "function": "generateFallbackPlan",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          },
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "{{ir}}"
-          }
-        ],
-        "assignTo": "generateFallbackPlan_result"
-      },
-      {
-        "kind": "call",
-        "function": "listAllStates",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{{ledger}}"
-          }
-        ],
-        "assignTo": "listAllStates_result"
-      },
-      {
-        "kind": "call",
-        "function": "countSessionsWithViolations",
-        "args": [
-          {
-            "name": "sessions",
-            "type": "any[]",
-            "value": "{{sessions}}"
-          }
-        ],
-        "assignTo": "countSessionsWithViolations_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatSessionSummary",
-        "args": [
-          {
-            "name": "sessions",
-            "type": "ReturnType<typeof getAllSessions>",
-            "value": "{{sessions}}"
-          }
-        ],
-        "assignTo": "formatSessionSummary_result"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780509969658",
-    "timestamp": "2026-06-03T18:06:09.658Z"
-  },
-  {
-    "intent": "get all sessions",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-1",
-    "id": "ep_1780509969653",
-    "timestamp": "2026-06-03T18:06:09.653Z"
-  },
-  {
-    "intent": "get all sessions",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-1",
-    "id": "ep_1780509968439",
-    "timestamp": "2026-06-03T18:06:08.439Z"
-  },
-  {
-    "intent": "analyze the failure genome statistics and format a comprehensive report with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown with detailed breakdown ",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getFailureGenome",
-        "args": [],
-        "assignTo": "genome"
-      },
-      {
-        "kind": "call",
-        "function": "failureStats",
-        "args": [],
-        "assignTo": "stats"
-      },
-      {
-        "kind": "call",
-        "function": "formatAuditResult",
-        "args": [
-          {
-            "name": "result",
-            "type": "AuditResult",
-            "value": "genome"
-          }
-        ],
-        "assignTo": "report"
-      },
-      {
-        "kind": "return",
-        "value": "report"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780509968113",
-    "timestamp": "2026-06-03T18:06:08.113Z"
-  },
-  {
-    "intent": "get all sessions",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "return",
-        "value": "sessions"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-1",
-    "id": "ep_1780509967507",
-    "timestamp": "2026-06-03T18:06:07.507Z"
-  },
-  {
-    "intent": "check if a string is a valid email address",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "isValidEmail",
-        "args": [
-          {
-            "name": "str",
-            "type": "string",
+            "name": "price",
+            "type": "number",
             "value": null
           }
         ],
-        "assignTo": "str"
+        "assignTo": "product1"
       }
     ],
     "success": true,
-    "id": "ep_1780481523434",
-    "timestamp": "2026-06-03T10:12:03.434Z"
+    "id": "ep_1780695604855",
+    "timestamp": "2026-06-05T21:40:04.855Z"
   },
   {
-    "intent": "validate a semantic version string and return its major, minor, and patch components",
+    "intent": "add retry logic to session loading when disk is busy",
     "actions": [
       {
         "kind": "call",
-        "function": "extractIRWithTypes",
+        "function": "getActiveSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "validateToken",
         "args": [
           {
-            "name": "projectRoot",
+            "name": "token",
             "type": "string",
-            "value": ""
+            "value": "session-token"
           }
         ],
-        "assignTo": "ir"
+        "assignTo": "valid"
       },
       {
         "kind": "return",
-        "value": "ir"
+        "value": "valid"
       }
     ],
     "success": true,
-    "id": "ep_1780480501112",
-    "timestamp": "2026-06-03T09:55:01.112Z"
+    "id": "ep_1780695599761",
+    "timestamp": "2026-06-05T21:39:59.761Z"
   },
   {
-    "intent": "create a simple logger that writes timestamped messages to a file",
+    "intent": "add input validation before saving benchmark results",
     "actions": [
       {
         "kind": "call",
-        "function": "createRootBranch",
+        "function": "validateAddress",
         "args": [
           {
-            "name": "transitions",
-            "type": "StateTransition[]",
-            "value": []
+            "name": "address",
+            "type": "string",
+            "value": "benchmark-server-01"
           }
         ],
-        "assignTo": "branch"
+        "assignTo": "v"
       },
       {
-        "kind": "return",
-        "value": "branch"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780480472828",
-    "timestamp": "2026-06-03T09:54:32.828Z"
-  },
-  {
-    "intent": "extract all function names from a TypeScript source file",
-    "actions": [
-      {
         "kind": "call",
-        "function": "extractDirectCalls",
+        "function": "saveReport",
         "args": [
           {
-            "name": "func",
-            "type": "FunctionDeclaration | ArrowFunction",
-            "value": {}
-          }
-        ],
-        "assignTo": "calls"
-      },
-      {
-        "kind": "return",
-        "value": "calls"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780480448075",
-    "timestamp": "2026-06-03T09:54:08.075Z"
-  },
-  {
-    "intent": "read a JSON file, merge it with a second JSON file, and write the result",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "extractIRWithTypes",
-        "args": [
-          {
-            "name": "projectRoot",
+            "name": "report",
             "type": "string",
-            "value": ""
-          }
-        ],
-        "assignTo": "ir"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780480414287",
-    "timestamp": "2026-06-03T09:53:34.287Z"
-  },
-  {
-    "intent": "count how many TypeScript files exist in a directory recursively",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "auditDirectory",
-        "args": [
-          {
-            "name": "dir",
-            "type": "string",
-            "value": ""
+            "value": "benchmark_results_2024"
           },
           {
-            "name": "threshold",
-            "type": "any",
-            "value": {}
-          }
-        ],
-        "assignTo": "auditResult"
-      },
-      {
-        "kind": "return",
-        "value": "auditResult"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780480392040",
-    "timestamp": "2026-06-03T09:53:12.040Z"
-  },
-  {
-    "intent": "create a simple task queue that processes tasks one at a time in order",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "createRootBranch",
-        "args": [
-          {
-            "name": "transitions",
-            "type": "StateTransition[]",
-            "value": []
-          }
-        ],
-        "assignTo": "branch"
-      },
-      {
-        "kind": "return",
-        "value": "branch"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780480366994",
-    "timestamp": "2026-06-03T09:52:46.994Z"
-  },
-  {
-    "intent": "generate a basic HTTP server that serves static files from a directory",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "server",
-        "args": [
-          {
-            "name": "req",
-            "type": "any",
-            "value": {}
-          },
-          {
-            "name": "res",
-            "type": "any",
-            "value": {}
+            "name": "filename",
+            "type": "string",
+            "value": "/reports/benchmark.txt"
           }
         ],
         "assignTo": "s"
@@ -1616,83 +769,784 @@
       }
     ],
     "success": true,
-    "id": "ep_1780480336746",
-    "timestamp": "2026-06-03T09:52:16.746Z"
+    "id": "ep_1780695597537",
+    "timestamp": "2026-06-05T21:39:57.537Z"
   },
   {
-    "intent": "create a simple event emitter with on, off, and emit methods",
+    "intent": "add a cache layer for frequently accessed IR functions",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getActiveSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "formatReportAsHTML",
+        "args": [
+          {
+            "name": "report",
+            "type": "string",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "report"
+      },
+      {
+        "kind": "return",
+        "value": "report"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780695595457",
+    "timestamp": "2026-06-05T21:39:55.457Z"
+  },
+  {
+    "intent": "add logging to all repair proposal functions",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "addProduct",
+        "args": [
+          {
+            "name": "name",
+            "type": "string",
+            "value": "repair-part"
+          },
+          {
+            "name": "stock",
+            "type": "number",
+            "value": 10
+          },
+          {
+            "name": "price",
+            "type": "number",
+            "value": 25.99
+          }
+        ],
+        "assignTo": "product"
+      },
+      {
+        "kind": "call",
+        "function": "listLowStock",
+        "args": [
+          {
+            "name": "threshold",
+            "type": "number",
+            "value": 5
+          }
+        ],
+        "assignTo": "lowStock"
+      },
+      {
+        "kind": "call",
+        "function": "validateToken",
+        "args": [
+          {
+            "name": "token",
+            "type": "string",
+            "value": "repair-token-123"
+          }
+        ],
+        "assignTo": "valid"
+      },
+      {
+        "kind": "return",
+        "value": "valid"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780695592849",
+    "timestamp": "2026-06-05T21:39:52.849Z"
+  },
+  {
+    "intent": "patch the fingerprint verification error in ledger",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "findUserByEmail",
+        "args": [
+          {
+            "name": "email",
+            "type": "string",
+            "value": "ledger-admin@example.com"
+          }
+        ],
+        "assignTo": "user"
+      },
+      {
+        "kind": "call",
+        "function": "sendNotification",
+        "args": [
+          {
+            "name": "userId",
+            "type": "string",
+            "value": "user"
+          },
+          {
+            "name": "message",
+            "type": "string",
+            "value": "Fingerprint verification error in ledger"
+          }
+        ],
+        "assignTo": "notification"
+      },
+      {
+        "kind": "return",
+        "value": "notification"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780695589701",
+    "timestamp": "2026-06-05T21:39:49.702Z"
+  },
+  {
+    "intent": "fix protocol validation failure when state is empty",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "listLowStock",
+        "args": [
+          {
+            "name": "threshold",
+            "type": "number",
+            "value": 1
+          }
+        ],
+        "assignTo": "lowStock"
+      },
+      {
+        "kind": "call",
+        "function": "validateToken",
+        "args": [
+          {
+            "name": "token",
+            "type": "string",
+            "value": "example-token"
+          }
+        ],
+        "assignTo": "tokenValid"
+      },
+      {
+        "kind": "return",
+        "value": "tokenValid"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780695587839",
+    "timestamp": "2026-06-05T21:39:47.839Z"
+  },
+  {
+    "intent": "handle null pointer when corpus directory is empty",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "listLowStock",
+        "args": [
+          {
+            "name": "threshold",
+            "type": "number",
+            "value": 1
+          }
+        ],
+        "assignTo": "lowStock"
+      },
+      {
+        "kind": "call",
+        "function": "hasPermission",
+        "args": [
+          {
+            "name": "userId",
+            "type": "string",
+            "value": "admin"
+          },
+          {
+            "name": "permission",
+            "type": "string",
+            "value": "view_inventory"
+          }
+        ],
+        "assignTo": "perm"
+      },
+      {
+        "kind": "call",
+        "function": "validateUserRole",
+        "args": [
+          {
+            "name": "userId",
+            "type": "string",
+            "value": "admin"
+          },
+          {
+            "name": "requiredRole",
+            "type": "string",
+            "value": "inventory_manager"
+          }
+        ],
+        "assignTo": "roleValid"
+      },
+      {
+        "kind": "return",
+        "value": "lowStock"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780695586071",
+    "timestamp": "2026-06-05T21:39:46.071Z"
+  },
+  {
+    "intent": "fix the bug where session count returns wrong number",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getActiveSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "revokeAllSessions",
+        "args": [
+          {
+            "name": "userId",
+            "type": "string",
+            "value": "user-123"
+          }
+        ],
+        "assignTo": "result"
+      },
+      {
+        "kind": "return",
+        "value": "result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780695582932",
+    "timestamp": "2026-06-05T21:39:42.932Z"
+  },
+  {
+    "intent": "fix missing import when loading benchmark data",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getEventsByType",
+        "args": [
+          {
+            "name": "type",
+            "type": "string",
+            "value": "import_error"
+          }
+        ],
+        "assignTo": "events"
+      },
+      {
+        "kind": "call",
+        "function": "formatReportAsHTML",
+        "args": [
+          {
+            "name": "report",
+            "type": "string",
+            "value": "events"
+          }
+        ],
+        "assignTo": "report"
+      },
+      {
+        "kind": "return",
+        "value": "report"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780695581223",
+    "timestamp": "2026-06-05T21:39:41.223Z"
+  },
+  {
+    "intent": "unify error reporting across all immune system modules",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "generateFullReport",
+        "args": [],
+        "assignTo": "report"
+      },
+      {
+        "kind": "call",
+        "function": "formatReportAsJSON",
+        "args": [
+          {
+            "name": "report",
+            "type": "string",
+            "value": "report"
+          }
+        ],
+        "assignTo": "formatted"
+      },
+      {
+        "kind": "call",
+        "function": "saveReport",
+        "args": [
+          {
+            "name": "report",
+            "type": "string",
+            "value": "formatted"
+          },
+          {
+            "name": "filename",
+            "type": "string",
+            "value": "error_report.json"
+          }
+        ],
+        "assignTo": "saved"
+      },
+      {
+        "kind": "return",
+        "value": "saved"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780695572203",
+    "timestamp": "2026-06-05T21:39:32.203Z"
+  },
+  {
+    "intent": "split the large session manager into focused modules",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getActiveSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "createUser",
+        "args": [
+          {
+            "name": "name",
+            "type": "string",
+            "value": "SessionManager"
+          },
+          {
+            "name": "email",
+            "type": "string",
+            "value": "session.manager@example.com"
+          },
+          {
+            "name": "role",
+            "type": "string",
+            "value": "admin"
+          }
+        ],
+        "assignTo": "newUser"
+      },
+      {
+        "kind": "return",
+        "value": "newUser"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780695569657",
+    "timestamp": "2026-06-05T21:39:29.657Z"
+  },
+  {
+    "intent": "consolidate duplicate validation code in planner and validator",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "findIndex",
+        "args": [],
+        "assignTo": "index"
+      },
+      {
+        "kind": "call",
+        "function": "validateToken",
+        "args": [
+          {
+            "name": "token",
+            "type": "string",
+            "value": "index"
+          }
+        ],
+        "assignTo": "validation"
+      },
+      {
+        "kind": "return",
+        "value": "validation"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780695568353",
+    "timestamp": "2026-06-05T21:39:28.354Z"
+  },
+  {
+    "intent": "refactor the protocol validator to use a single entry point",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getTopEvents",
+        "args": [
+          {
+            "name": "limit",
+            "type": "number",
+            "value": "{{limit}}"
+          }
+        ],
+        "assignTo": "getTopEvents_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateToken",
+        "args": [
+          {
+            "name": "token",
+            "type": "string",
+            "value": "{{token}}"
+          }
+        ],
+        "assignTo": "validateToken_result"
+      },
+      {
+        "kind": "call",
+        "function": "refreshToken",
+        "args": [
+          {
+            "name": "oldToken",
+            "type": "string",
+            "value": "{{oldToken}}"
+          }
+        ],
+        "assignTo": "refreshToken_result"
+      },
+      {
+        "kind": "call",
+        "function": "updateStock",
+        "args": [
+          {
+            "name": "id",
+            "type": "string",
+            "value": "{{id}}"
+          },
+          {
+            "name": "delta",
+            "type": "number",
+            "value": "{{delta}}"
+          }
+        ],
+        "assignTo": "updateStock_result"
+      },
+      {
+        "kind": "call",
+        "function": "listLowStock",
+        "args": [
+          {
+            "name": "threshold",
+            "type": "number",
+            "value": "{{threshold}}"
+          }
+        ],
+        "assignTo": "listLowStock_result"
+      },
+      {
+        "kind": "call",
+        "function": "getInventoryValue",
+        "args": [],
+        "assignTo": "getInventoryValue_result"
+      },
+      {
+        "kind": "call",
+        "function": "getStockSummary",
+        "args": [],
+        "assignTo": "getStockSummary_result"
+      },
+      {
+        "kind": "call",
+        "function": "getOrdersByUser",
+        "args": [
+          {
+            "name": "userId",
+            "type": "string",
+            "value": "{{userId}}"
+          }
+        ],
+        "assignTo": "getOrdersByUser_result"
+      },
+      {
+        "kind": "call",
+        "function": "getOrderPayments",
+        "args": [
+          {
+            "name": "orderId",
+            "type": "string",
+            "value": "{{orderId}}"
+          }
+        ],
+        "assignTo": "getOrderPayments_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateInventoryReport",
+        "args": [],
+        "assignTo": "generateInventoryReport_result"
+      },
+      {
+        "kind": "call",
+        "function": "getEventsByUser",
+        "args": [
+          {
+            "name": "userId",
+            "type": "string",
+            "value": "{{userId}}"
+          }
+        ],
+        "assignTo": "getEventsByUser_result"
+      },
+      {
+        "kind": "call",
+        "function": "getDailyActiveUsers",
+        "args": [],
+        "assignTo": "getDailyActiveUsers_result"
+      },
+      {
+        "kind": "call",
+        "function": "findUserByEmail",
+        "args": [
+          {
+            "name": "email",
+            "type": "string",
+            "value": "{{email}}"
+          }
+        ],
+        "assignTo": "findUserByEmail_result"
+      },
+      {
+        "kind": "call",
+        "function": "createUser",
+        "args": [
+          {
+            "name": "name",
+            "type": "string",
+            "value": "{{name}}"
+          },
+          {
+            "name": "email",
+            "type": "string",
+            "value": "{{email}}"
+          },
+          {
+            "name": "role",
+            "type": "string",
+            "value": "{{role}}"
+          }
+        ],
+        "assignTo": "createUser_result"
+      },
+      {
+        "kind": "call",
+        "function": "validateUserRole",
+        "args": [
+          {
+            "name": "userId",
+            "type": "string",
+            "value": "{{userId}}"
+          },
+          {
+            "name": "requiredRole",
+            "type": "string",
+            "value": "{{requiredRole}}"
+          }
+        ],
+        "assignTo": "validateUserRole_result"
+      },
+      {
+        "kind": "call",
+        "function": "listUsersByRole",
+        "args": [
+          {
+            "name": "role",
+            "type": "string",
+            "value": "{{role}}"
+          }
+        ],
+        "assignTo": "listUsersByRole_result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780695566505",
+    "timestamp": "2026-06-05T21:39:26.505Z"
+  },
+  {
+    "intent": "refactor the protocol validator to use a single entry point",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "validateAddress",
+        "args": [
+          {
+            "name": "address",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "action"
+      },
+      {
+        "kind": "call",
+        "function": "validateToken",
+        "args": [
+          {
+            "name": "token",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "sequence"
+      },
+      {
+        "kind": "call",
+        "function": "emitCode",
+        "args": [],
+        "assignTo": "code"
+      },
+      {
+        "kind": "call",
+        "function": "revokeAllSessions",
+        "args": [
+          {
+            "name": "userId",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "session"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780695566503",
+    "timestamp": "2026-06-05T21:39:26.503Z"
+  },
+  {
+    "intent": "refactor the protocol validator to use a single entry point",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "validateAddress",
+        "args": [
+          {
+            "name": "address",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "action"
+      },
+      {
+        "kind": "call",
+        "function": "validateToken",
+        "args": [
+          {
+            "name": "token",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "sequence"
+      },
+      {
+        "kind": "call",
+        "function": "emitCode",
+        "args": [],
+        "assignTo": "code"
+      },
+      {
+        "kind": "call",
+        "function": "revokeAllSessions",
+        "args": [
+          {
+            "name": "userId",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "assignTo": "session"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780695565076",
+    "timestamp": "2026-06-05T21:39:25.076Z"
+  },
+  {
+    "intent": "refactor the protocol validator to use a single entry point",
     "actions": [
       {
         "kind": "call",
         "function": "extractIR",
         "args": [
           {
-            "name": "projectRoot",
+            "name": "code",
             "type": "string",
-            "value": ""
+            "value": "protocol_validator_code"
           }
         ],
         "assignTo": "ir"
       },
       {
         "kind": "call",
-        "function": "validateAction",
+        "function": "validateAddress",
         "args": [
           {
-            "name": "action",
-            "type": "Action",
+            "name": "address",
+            "type": "string",
             "value": "ir"
-          },
-          {
-            "name": "actionIndex",
-            "type": "number",
-            "value": ""
           }
         ],
-        "assignTo": "validated"
+        "assignTo": "action"
       },
       {
         "kind": "call",
-        "function": "validateActionSequence",
+        "function": "validateToken",
         "args": [
           {
-            "name": "actions",
-            "type": "Action[]",
-            "value": "validated"
+            "name": "token",
+            "type": "string",
+            "value": "action"
           }
         ],
-        "assignTo": "sequenceValidated"
+        "assignTo": "sequence"
       },
       {
         "kind": "call",
         "function": "emitCode",
         "args": [
           {
-            "name": "actions",
-            "type": "Action[]",
-            "value": "sequenceValidated"
-          },
-          {
-            "name": "meta",
-            "type": "{ sessionId?: string; ruleHash?: string; irFunctionCount?: number; protocolRuleCount?: number }",
-            "value": {
-              "sessionId": "",
-              "ruleHash": "",
-              "irFunctionCount": 0,
-              "protocolRuleCount": 0
-            }
+            "name": "sequence",
+            "type": "any",
+            "value": "sequence"
           }
         ],
         "assignTo": "code"
       },
       {
         "kind": "call",
-        "function": "recordSession",
+        "function": "revokeAllSessions",
         "args": [
           {
-            "name": "session",
-            "type": "ExecutionSession | Omit<IntentSession, \"sessionId\">",
-            "value": ""
+            "name": "userId",
+            "type": "string",
+            "value": "code"
           }
         ],
         "assignTo": "session"
@@ -1702,23 +1556,55 @@
         "value": "session"
       }
     ],
-    "success": true,
-    "id": "ep_1780480302339",
-    "timestamp": "2026-06-03T09:51:42.339Z"
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780695563895",
+    "timestamp": "2026-06-05T21:39:23.895Z"
   },
   {
-    "intent": "fetch data from a URL, parse the JSON response, and handle errors",
+    "intent": "extract common IR loading logic into a shared utility",
+    "actions": [],
+    "success": false,
+    "id": "ep_1780695562156",
+    "timestamp": "2026-06-05T21:39:22.156Z"
+  },
+  {
+    "intent": "extract common IR loading logic into a shared utility",
     "actions": [
       {
         "kind": "call",
         "function": "extractIR",
-        "args": [
-          {
-            "name": "projectRoot",
-            "type": "string",
-            "value": ""
-          }
-        ],
+        "args": [],
+        "assignTo": "ir"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780695562153",
+    "timestamp": "2026-06-05T21:39:22.153Z"
+  },
+  {
+    "intent": "extract common IR loading logic into a shared utility",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [],
+        "assignTo": "ir"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780695561259",
+    "timestamp": "2026-06-05T21:39:21.259Z"
+  },
+  {
+    "intent": "extract common IR loading logic into a shared utility",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "extractIR",
+        "args": [],
         "assignTo": "ir"
       },
       {
@@ -1726,328 +1612,145 @@
         "value": "ir"
       }
     ],
-    "success": true,
-    "id": "ep_1780480259030",
-    "timestamp": "2026-06-03T09:50:59.030Z"
-  },
-  {
-    "intent": "read a JSON config file, validate its structure, and return the parsed config",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "parseActionJSON",
-        "args": [
-          {
-            "name": "text",
-            "type": "string",
-            "value": ""
-          }
-        ],
-        "assignTo": "parsedConfig"
-      },
-      {
-        "kind": "call",
-        "function": "extractIR",
-        "args": [
-          {
-            "name": "projectRoot",
-            "type": "string",
-            "value": ""
-          }
-        ],
-        "assignTo": "extractIR_result"
-      },
-      {
-        "kind": "call",
-        "function": "validateAction",
-        "args": [
-          {
-            "name": "action",
-            "type": "Action",
-            "value": ""
-          },
-          {
-            "name": "actionIndex",
-            "type": "number",
-            "value": 0
-          }
-        ],
-        "assignTo": "validationResult"
-      },
-      {
-        "kind": "return",
-        "value": "validationResult"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780480229947",
-    "timestamp": "2026-06-03T09:50:29.947Z"
-  },
-  {
-    "intent": "read a JSON config file, validate its structure, and return the parsed config",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "parseActionJSON",
-        "args": [
-          {
-            "name": "text",
-            "type": "string",
-            "value": ""
-          }
-        ],
-        "assignTo": "parsedConfig"
-      },
-      {
-        "kind": "call",
-        "function": "validateAction",
-        "args": [
-          {
-            "name": "action",
-            "type": "Action",
-            "value": ""
-          },
-          {
-            "name": "actionIndex",
-            "type": "number",
-            "value": 0
-          }
-        ],
-        "assignTo": "validationResult"
-      },
-      {
-        "kind": "return",
-        "value": "validationResult"
-      }
-    ],
     "success": false,
-    "svlViolated": "SVL-4",
-    "id": "ep_1780480229936",
-    "timestamp": "2026-06-03T09:50:29.936Z"
+    "svlViolated": "SVL-1",
+    "id": "ep_1780695560234",
+    "timestamp": "2026-06-05T21:39:20.234Z"
   },
   {
-    "intent": "encode an object as a URL query string",
+    "intent": "add a health check endpoint that reports immune metrics",
     "actions": [
       {
         "kind": "call",
-        "function": "toQueryString",
-        "args": [
-          {
-            "name": "obj",
-            "type": "Record<string, any>",
-            "value": {}
-          }
-        ],
-        "assignTo": "qs"
-      },
-      {
-        "kind": "return",
-        "value": "qs"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780480195645",
-    "timestamp": "2026-06-03T09:49:55.645Z"
-  },
-  {
-    "intent": "format a number of milliseconds into a human-readable duration string",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "formatDuration",
-        "args": [
-          {
-            "name": "ms",
-            "type": "number",
-            "value": 0
-          }
-        ],
-        "assignTo": "result"
-      },
-      {
-        "kind": "return",
-        "value": "result"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780480167997",
-    "timestamp": "2026-06-03T09:49:27.997Z"
-  },
-  {
-    "intent": "create a simple cache with a maximum size that evicts the oldest entries",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "create",
+        "function": "generateFullReport",
         "args": [],
-        "assignTo": "cache"
+        "assignTo": "report"
       },
       {
-        "kind": "return",
-        "value": "cache"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780480130122",
-    "timestamp": "2026-06-03T09:48:50.122Z"
-  },
-  {
-    "intent": "create a debounced version of a function that delays execution",
-    "actions": [
-      {
         "kind": "call",
-        "function": "debounce",
+        "function": "formatReportAsJSON",
         "args": [
           {
-            "name": "fn",
-            "type": "T",
-            "value": null
-          },
-          {
-            "name": "delay",
-            "type": "number",
-            "value": 0
-          }
-        ],
-        "assignTo": "debouncedFn"
-      },
-      {
-        "kind": "return",
-        "value": "debouncedFn"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780480082219",
-    "timestamp": "2026-06-03T09:48:02.219Z"
-  },
-  {
-    "intent": "create a retry wrapper that retries a function call up to N times on failure",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "retry",
-        "args": [
-          {
-            "name": "fn",
-            "type": "() => Promise<T>",
-            "value": null
-          },
-          {
-            "name": "maxRetries",
-            "type": "number",
-            "value": null
-          }
-        ],
-        "assignTo": "retryResult"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780480035875",
-    "timestamp": "2026-06-03T09:47:15.875Z"
-  },
-  {
-    "intent": "generate a simple HTTP route handler that validates input and returns JSON",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "handler",
-        "args": [],
-        "assignTo": "result"
-      },
-      {
-        "kind": "return",
-        "value": "result"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780480004241",
-    "timestamp": "2026-06-03T09:46:44.241Z"
-  },
-  {
-    "intent": "create a basic CRUD repository for a given entity type",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "create",
-        "args": [],
-        "assignTo": "repo"
-      },
-      {
-        "kind": "return",
-        "value": "repo"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780479978980",
-    "timestamp": "2026-06-03T09:46:18.980Z"
-  },
-  {
-    "intent": "generate a TypeScript interface definition from a sample JSON object",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "generateSessionId",
-        "args": [],
-        "assignTo": "sessionId"
-      },
-      {
-        "kind": "call",
-        "function": "generate",
-        "args": [
-          {
-            "name": "prompt",
+            "name": "report",
             "type": "string",
-            "value": "Generate a TypeScript interface definition from this sample JSON object: {\"name\":\"John\",\"age\":30,\"email\":\"john@example.com\"}"
+            "value": "report"
           }
         ],
-        "assignTo": "llmResponse"
+        "assignTo": "formatted"
       },
       {
         "kind": "return",
-        "value": "llmResponse"
+        "value": "formatted"
       }
     ],
     "success": true,
-    "id": "ep_1780479954642",
-    "timestamp": "2026-06-03T09:45:54.642Z"
+    "id": "ep_1780695558970",
+    "timestamp": "2026-06-05T21:39:18.970Z"
   },
   {
-    "intent": "validate that all required fields are present in an object",
+    "intent": "add retry logic to session loading when disk is busy",
     "actions": [
       {
         "kind": "call",
-        "function": "validateActionSchema",
+        "function": "getActiveSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "validateToken",
         "args": [
           {
-            "name": "actions",
-            "type": "Action[]",
-            "value": []
+            "name": "token",
+            "type": "string",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "valid"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780695557763",
+    "timestamp": "2026-06-05T21:39:17.763Z"
+  },
+  {
+    "intent": "add input validation before saving benchmark results",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "validateAddress",
+        "args": [
+          {
+            "name": "address",
+            "type": "string",
+            "value": "benchmark-server-01"
           }
         ],
         "assignTo": "validationResult"
       },
       {
+        "kind": "call",
+        "function": "saveReport",
+        "args": [
+          {
+            "name": "report",
+            "type": "string",
+            "value": "benchmark_results_report"
+          },
+          {
+            "name": "filename",
+            "type": "string",
+            "value": "benchmark_results_2024.csv"
+          }
+        ],
+        "assignTo": "saved"
+      },
+      {
         "kind": "return",
-        "value": "validationResult"
+        "value": "saved"
       }
     ],
     "success": true,
-    "id": "ep_1780479915465",
-    "timestamp": "2026-06-03T09:45:15.465Z"
+    "id": "ep_1780695556651",
+    "timestamp": "2026-06-05T21:39:16.651Z"
   },
   {
-    "intent": "check if a value is a plain object and not an array or null",
+    "intent": "add a cache layer for frequently accessed IR functions",
     "actions": [
       {
         "kind": "call",
-        "function": "isValidEmail",
+        "function": "getActiveSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "formatReportAsJSON",
         "args": [
           {
-            "name": "str",
+            "name": "report",
             "type": "string",
-            "value": ""
+            "value": "sessions"
           }
         ],
+        "assignTo": "report"
+      },
+      {
+        "kind": "return",
+        "value": "report"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780695554601",
+    "timestamp": "2026-06-05T21:39:14.601Z"
+  },
+  {
+    "intent": "add logging to all repair proposal functions",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "add",
+        "args": [],
         "assignTo": "result"
       },
       {
@@ -2056,1059 +1759,311 @@
       }
     ],
     "success": true,
-    "id": "ep_1780479871749",
-    "timestamp": "2026-06-03T09:44:31.749Z"
+    "id": "ep_1780695553142",
+    "timestamp": "2026-06-05T21:39:13.142Z"
   },
   {
-    "intent": "get the file size in a human-readable format like KB or MB",
+    "intent": "patch the fingerprint verification error in ledger",
     "actions": [
       {
         "kind": "call",
-        "function": "formatFileSize",
+        "function": "findUserByEmail",
         "args": [
           {
-            "name": "bytes",
-            "type": "number",
-            "value": 0
+            "name": "email",
+            "type": "string",
+            "value": "admin@example.com"
           }
         ],
-        "assignTo": "formattedSize"
+        "assignTo": "user"
+      },
+      {
+        "kind": "call",
+        "function": "validateUserRole",
+        "args": [
+          {
+            "name": "userId",
+            "type": "string",
+            "value": "user"
+          },
+          {
+            "name": "requiredRole",
+            "type": "string",
+            "value": "admin"
+          }
+        ],
+        "assignTo": "perm"
       },
       {
         "kind": "return",
-        "value": "formattedSize"
+        "value": "perm"
       }
     ],
     "success": true,
-    "id": "ep_1780479842787",
-    "timestamp": "2026-06-03T09:44:02.787Z"
+    "id": "ep_1780695552119",
+    "timestamp": "2026-06-05T21:39:12.119Z"
   },
   {
-    "intent": "list all files in a directory that match a pattern",
+    "intent": "fix protocol validation failure when state is empty",
     "actions": [
       {
         "kind": "call",
-        "function": "auditDirectory",
+        "function": "validateToken",
         "args": [
           {
-            "name": "dir",
+            "name": "token",
             "type": "string",
-            "value": ""
-          },
+            "value": "example-token"
+          }
+        ],
+        "assignTo": "tokenResult"
+      },
+      {
+        "kind": "call",
+        "function": "validateAddress",
+        "args": [
+          {
+            "name": "address",
+            "type": "string",
+            "value": "123 Main St"
+          }
+        ],
+        "assignTo": "addressResult"
+      },
+      {
+        "kind": "return",
+        "value": "addressResult"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780695550713",
+    "timestamp": "2026-06-05T21:39:10.713Z"
+  },
+  {
+    "intent": "handle null pointer when corpus directory is empty",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "listLowStock",
+        "args": [
           {
             "name": "threshold",
-            "type": "any",
-            "value": {}
-          }
-        ],
-        "assignTo": "auditResult"
-      },
-      {
-        "kind": "return",
-        "value": "auditResult"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780479814347",
-    "timestamp": "2026-06-03T09:43:34.347Z"
-  },
-  {
-    "intent": "create a directory path including all parent directories if they do not exist",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "addSourceFileAtPathIfExists",
-        "args": [],
-        "assignTo": "result"
-      },
-      {
-        "kind": "return",
-        "value": "result"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780479775999",
-    "timestamp": "2026-06-03T09:42:55.999Z"
-  },
-  {
-    "intent": "check if a file path has a specific file extension",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "verifyFileMarker",
-        "args": [
-          {
-            "name": "filePath",
-            "type": "string",
-            "value": ""
-          }
-        ],
-        "assignTo": "markerResult"
-      },
-      {
-        "kind": "return",
-        "value": "markerResult"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780479743467",
-    "timestamp": "2026-06-03T09:42:23.467Z"
-  },
-  {
-    "intent": "read a file and return its contents as a string, with error handling",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "readdirSync",
-        "args": [
-          {
-            "name": "path",
-            "type": "string",
-            "value": "{{path}}"
-          }
-        ],
-        "assignTo": "readdirSync_result"
-      },
-      {
-        "kind": "call",
-        "function": "readFileSync",
-        "args": [
-          {
-            "name": "path",
-            "type": "string",
-            "value": "{{path}}"
-          },
-          {
-            "name": "encoding",
-            "type": "string",
-            "value": "{{encoding}}"
-          }
-        ],
-        "assignTo": "readFileSync_result"
-      },
-      {
-        "kind": "call",
-        "function": "verifyFileMarker",
-        "args": [
-          {
-            "name": "filePath",
-            "type": "string",
-            "value": "{{filePath}}"
-          }
-        ],
-        "assignTo": "verifyFileMarker_result"
-      },
-      {
-        "kind": "call",
-        "function": "deriveTagsFromFile",
-        "args": [
-          {
-            "name": "filePath",
-            "type": "string",
-            "value": "{{filePath}}"
-          }
-        ],
-        "assignTo": "deriveTagsFromFile_result"
-      },
-      {
-        "kind": "call",
-        "function": "extractSignatureFromFile",
-        "args": [
-          {
-            "name": "name",
-            "type": "string",
-            "value": "{{name}}"
-          },
-          {
-            "name": "sf",
-            "type": "SourceFile",
-            "value": "{{sf}}"
-          }
-        ],
-        "assignTo": "extractSignatureFromFile_result"
-      },
-      {
-        "kind": "call",
-        "function": "loadProtocolsFromFile",
-        "args": [
-          {
-            "name": "filePath",
-            "type": "string",
-            "value": "{{filePath}}"
-          }
-        ],
-        "assignTo": "loadProtocolsFromFile_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatFileSize",
-        "args": [
-          {
-            "name": "bytes",
             "type": "number",
-            "value": "{{bytes}}"
+            "value": 1
           }
         ],
-        "assignTo": "formatFileSize_result"
+        "assignTo": "lowStockProducts"
       },
       {
         "kind": "call",
-        "function": "writeFileSync",
+        "function": "generateInventoryReport",
+        "args": [],
+        "assignTo": "report"
+      },
+      {
+        "kind": "call",
+        "function": "saveReport",
         "args": [
           {
-            "name": "path",
+            "name": "report",
             "type": "string",
-            "value": "{{path}}"
+            "value": "report"
           },
           {
-            "name": "data",
+            "name": "filename",
             "type": "string",
-            "value": "{{data}}"
+            "value": "inventory_report.txt"
           }
-        ]
+        ],
+        "assignTo": "saved"
       },
       {
+        "kind": "return",
+        "value": "saved"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780695549446",
+    "timestamp": "2026-06-05T21:39:09.446Z"
+  },
+  {
+    "intent": "fix the bug where session count returns wrong number",
+    "actions": [
+      {
         "kind": "call",
-        "function": "getModuleSpecifierSourceFile",
+        "function": "getActiveSessions",
         "args": [],
-        "assignTo": "getModuleSpecifierSourceFile_result"
+        "assignTo": "sessions"
       },
       {
         "kind": "call",
-        "function": "addSourceFileAtPathIfExists",
-        "args": [],
-        "assignTo": "addSourceFileAtPathIfExists_result"
-      },
-      {
-        "kind": "call",
-        "function": "scanDir",
+        "function": "revokeAllSessions",
         "args": [
           {
-            "name": "rootDir",
+            "name": "userId",
             "type": "string",
-            "value": "{{rootDir}}"
+            "value": "user-123"
+          }
+        ],
+        "assignTo": "revokedCount"
+      },
+      {
+        "kind": "return",
+        "value": "revokedCount"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780695548022",
+    "timestamp": "2026-06-05T21:39:08.022Z"
+  },
+  {
+    "intent": "fix missing import when loading benchmark data",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getProduct",
+        "args": [
+          {
+            "name": "id",
+            "type": "string",
+            "value": "benchmark-product-id"
+          }
+        ],
+        "assignTo": "product"
+      },
+      {
+        "kind": "call",
+        "function": "formatReportAsHTML",
+        "args": [
+          {
+            "name": "report",
+            "type": "string",
+            "value": "product"
+          }
+        ],
+        "assignTo": "report"
+      },
+      {
+        "kind": "return",
+        "value": "report"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780695546494",
+    "timestamp": "2026-06-05T21:39:06.494Z"
+  },
+  {
+    "intent": "load the semantic topology and find similar functions for a given function name, returning top matches",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "SemanticTopology.findSimilar",
+        "args": [
+          {
+            "name": "funcName",
+            "type": "string",
+            "value": "exampleFunction"
           },
           {
-            "name": "currentDir",
-            "type": "string",
-            "value": "{{currentDir}}"
-          },
+            "name": "topN",
+            "type": "number",
+            "value": 5
+          }
+        ],
+        "assignTo": "similarFunctions"
+      },
+      {
+        "kind": "return",
+        "value": "similarFunctions"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780689133837",
+    "timestamp": "2026-06-05T19:52:13.837Z"
+  },
+  {
+    "intent": "audit all source files for generated markers, then format a coverage report with statistics",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "formatAuditResult",
+        "args": [
           {
             "name": "result",
             "type": "AuditResult",
-            "value": "{{result}}"
+            "value": {
+              "files": [
+                "/path/to/source1.ts",
+                "/path/to/source2.ts"
+              ],
+              "markers": [
+                "generated"
+              ],
+              "coverage": 0.85
+            }
           }
-        ]
+        ],
+        "assignTo": "report"
       },
       {
         "kind": "call",
-        "function": "generateCandidateRules",
+        "function": "formatFailureStats",
         "args": [],
-        "assignTo": "generateCandidateRules_result"
+        "assignTo": "stats"
       },
       {
-        "kind": "call",
-        "function": "handleAPI",
-        "args": [
-          {
-            "name": "req",
-            "type": "http.IncomingMessage",
-            "value": "{{req}}"
-          },
-          {
-            "name": "res",
-            "type": "http.ServerResponse",
-            "value": "{{res}}"
-          }
-        ],
-        "assignTo": "handleAPI_result"
-      },
+        "kind": "return",
+        "value": "stats"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780689118831",
+    "timestamp": "2026-06-05T19:51:58.831Z"
+  },
+  {
+    "intent": "create a session snapshot and compare it with a previous snapshot, listing the differences",
+    "actions": [
       {
         "kind": "call",
-        "function": "handleLedgerAPI",
-        "args": [
-          {
-            "name": "res",
-            "type": "http.ServerResponse",
-            "value": "{{res}}"
-          },
-          {
-            "name": "url",
-            "type": "URL",
-            "value": "{{url}}"
-          }
-        ],
-        "assignTo": "handleLedgerAPI_result"
-      },
-      {
-        "kind": "call",
-        "function": "handleConsistencyAPI",
-        "args": [
-          {
-            "name": "res",
-            "type": "http.ServerResponse",
-            "value": "{{res}}"
-          },
-          {
-            "name": "url",
-            "type": "URL",
-            "value": "{{url}}"
-          }
-        ],
-        "assignTo": "handleConsistencyAPI_result"
-      },
-      {
-        "kind": "call",
-        "function": "handleDiffAPI",
-        "args": [
-          {
-            "name": "res",
-            "type": "http.ServerResponse",
-            "value": "{{res}}"
-          },
-          {
-            "name": "url",
-            "type": "URL",
-            "value": "{{url}}"
-          }
-        ],
-        "assignTo": "handleDiffAPI_result"
-      },
-      {
-        "kind": "call",
-        "function": "handleReplayAPI",
-        "args": [
-          {
-            "name": "res",
-            "type": "http.ServerResponse",
-            "value": "{{res}}"
-          },
-          {
-            "name": "url",
-            "type": "URL",
-            "value": "{{url}}"
-          }
-        ],
-        "assignTo": "handleReplayAPI_result"
-      },
-      {
-        "kind": "call",
-        "function": "runAndCheck",
-        "args": [
-          {
-            "name": "code",
-            "type": "string",
-            "value": "{{code}}"
-          }
-        ],
-        "assignTo": "runAndCheck_result"
-      },
-      {
-        "kind": "call",
-        "function": "randomInt",
-        "args": [
-          {
-            "name": "min",
-            "type": "number",
-            "value": "{{min}}"
-          },
-          {
-            "name": "max",
-            "type": "number",
-            "value": "{{max}}"
-          }
-        ],
-        "assignTo": "randomInt_result"
-      },
-      {
-        "kind": "call",
-        "function": "random",
+        "function": "getAllSessions",
         "args": [],
-        "assignTo": "random_result"
+        "assignTo": "sessions"
       },
       {
         "kind": "call",
-        "function": "handler",
-        "args": [],
-        "assignTo": "handler_result"
-      },
-      {
-        "kind": "call",
-        "function": "getReturnType",
+        "function": "createSnapshot",
         "args": [
-          {
-            "name": "func",
-            "type": "FunctionDeclaration | ArrowFunction",
-            "value": "{{func}}"
-          }
-        ],
-        "assignTo": "getReturnType_result"
-      },
-      {
-        "kind": "call",
-        "function": "getReturnTypeDetail",
-        "args": [
-          {
-            "name": "func",
-            "type": "FunctionDeclaration | ArrowFunction",
-            "value": "{{func}}"
-          }
-        ],
-        "assignTo": "getReturnTypeDetail_result"
-      },
-      {
-        "kind": "call",
-        "function": "getReturnTypeNode",
-        "args": [],
-        "assignTo": "getReturnTypeNode_result"
-      },
-      {
-        "kind": "call",
-        "function": "ActionBuilder.assign",
-        "args": [
-          {
-            "name": "target",
-            "type": "string",
-            "value": "{{target}}"
-          },
-          {
-            "name": "value",
-            "type": "any",
-            "value": "{{value}}"
-          }
-        ],
-        "assignTo": "ActionBuilder.assign_result"
-      },
-      {
-        "kind": "call",
-        "function": "benchmarkPassRate",
-        "args": [],
-        "assignTo": "benchmarkPassRate_result"
-      },
-      {
-        "kind": "call",
-        "function": "wrapAsBranch",
-        "args": [
-          {
-            "name": "transitions",
-            "type": "StateTransition[]",
-            "value": "{{transitions}}"
-          }
-        ],
-        "assignTo": "wrapAsBranch_result"
-      },
-      {
-        "kind": "call",
-        "function": "pass",
-        "args": [
-          {
-            "name": "msg",
-            "type": "string",
-            "value": "{{msg}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "classifyError",
-        "args": [
-          {
-            "name": "error",
-            "type": "string",
-            "value": "{{error}}"
-          }
-        ],
-        "assignTo": "classifyError_result"
-      },
-      {
-        "kind": "call",
-        "function": "classifyPlanError",
-        "args": [
-          {
-            "name": "error",
-            "type": "string",
-            "value": "{{error}}"
-          }
-        ],
-        "assignTo": "classifyPlanError_result"
-      },
-      {
-        "kind": "call",
-        "function": "hasViolations",
-        "args": [
-          {
-            "name": "session",
-            "type": "any",
-            "value": "{{session}}"
-          }
-        ],
-        "assignTo": "hasViolations_result"
-      },
-      {
-        "kind": "call",
-        "function": "getRuleHash",
-        "args": [],
-        "assignTo": "getRuleHash_result"
-      },
-      {
-        "kind": "call",
-        "function": "applyProposalAsBranch",
-        "args": [
-          {
-            "name": "proposal",
-            "type": "RepairProposal",
-            "value": "{{proposal}}"
-          },
-          {
-            "name": "parentBranch",
-            "type": "Branch",
-            "value": "{{parentBranch}}"
-          },
-          {
-            "name": "currentLedger",
-            "type": "StateTransition[]",
-            "value": "{{currentLedger}}"
-          },
           {
             "name": "ir",
             "type": "any[]",
-            "value": "{{ir}}"
-          }
-        ],
-        "assignTo": "applyProposalAsBranch_result"
-      },
-      {
-        "kind": "call",
-        "function": "assertLedgerConsistency",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{{ledger}}"
+            "value": "sessions"
           },
           {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "{{namespaceInitialStates}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "assertDeltaConsistency",
-        "args": [
-          {
-            "name": "transition",
-            "type": "StateTransition",
-            "value": "{{transition}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "assertRuleHashMatch",
-        "args": [
-          {
-            "name": "expected",
+            "name": "intent",
             "type": "string",
-            "value": "{{expected}}"
+            "value": "compare-snapshots"
           },
           {
-            "name": "actual",
+            "name": "sessionId",
             "type": "string",
-            "value": "{{actual}}"
-          },
+            "value": "session-001"
+          }
+        ],
+        "assignTo": "snap1"
+      },
+      {
+        "kind": "call",
+        "function": "formatSnapshotDiff",
+        "args": [
           {
-            "name": "context",
+            "name": "snapIdA",
             "type": "string",
-            "value": "{{context}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "assertTransitionOrder",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{{ledger}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "assertLedgerInvariants",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{{ledger}}"
+            "value": "snap-001"
           },
           {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "{{namespaceInitialStates}}"
-          },
-          {
-            "name": "expectedRuleHash",
+            "name": "snapIdB",
             "type": "string",
-            "value": "{{expectedRuleHash}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "hashRules",
-        "args": [
-          {
-            "name": "rules",
-            "type": "Map<string, StateAnnotation>",
-            "value": "{{rules}}"
-          }
-        ],
-        "assignTo": "hashRules_result"
-      },
-      {
-        "kind": "call",
-        "function": "hashLedger",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{{ledger}}"
-          }
-        ],
-        "assignTo": "hashLedger_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.getRuleHash",
-        "args": [],
-        "assignTo": "StateMachineValidator.getRuleHash_result"
-      },
-      {
-        "kind": "call",
-        "function": "hasRequiredFields",
-        "args": [
-          {
-            "name": "obj",
-            "type": "any",
-            "value": "{{obj}}"
-          },
-          {
-            "name": "fields",
-            "type": "string[]",
-            "value": "{{fields}}"
-          }
-        ],
-        "assignTo": "hasRequiredFields_result"
-      },
-      {
-        "kind": "call",
-        "function": "createHash",
-        "args": [
-          {
-            "name": "algorithm",
-            "type": "string",
-            "value": "{{algorithm}}"
-          }
-        ],
-        "assignTo": "createHash_result"
-      },
-      {
-        "kind": "call",
-        "function": "getClasses",
-        "args": [],
-        "assignTo": "getClasses_result"
-      },
-      {
-        "kind": "call",
-        "function": "getTypeAliases",
-        "args": [],
-        "assignTo": "getTypeAliases_result"
-      },
-      {
-        "kind": "call",
-        "function": "getMaskedFuncList",
-        "args": [],
-        "assignTo": "getMaskedFuncList_result"
-      },
-      {
-        "kind": "call",
-        "function": "hash",
-        "args": [],
-        "assignTo": "hash_result"
-      },
-      {
-        "kind": "call",
-        "function": "countSubstring",
-        "args": [
-          {
-            "name": "str",
-            "type": "string",
-            "value": "{{str}}"
-          },
-          {
-            "name": "sub",
-            "type": "string",
-            "value": "{{sub}}"
-          }
-        ],
-        "assignTo": "countSubstring_result"
-      },
-      {
-        "kind": "call",
-        "function": "toQueryString",
-        "args": [
-          {
-            "name": "obj",
-            "type": "Record<string, any>",
-            "value": "{{obj}}"
-          }
-        ],
-        "assignTo": "toQueryString_result"
-      },
-      {
-        "kind": "call",
-        "function": "stringify",
-        "args": [
-          {
-            "name": "value",
-            "type": "any",
-            "value": "{{value}}"
-          },
-          {
-            "name": "replacer",
-            "type": "any",
-            "value": "{{replacer}}"
-          }
-        ],
-        "assignTo": "stringify_result"
-      },
-      {
-        "kind": "call",
-        "function": "String",
-        "args": [],
-        "assignTo": "String_result"
-      },
-      {
-        "kind": "call",
-        "function": "toLocaleString",
-        "args": []
-      },
-      {
-        "kind": "call",
-        "function": "replayWithDetail",
-        "args": [
-          {
-            "name": "transitions",
-            "type": "StateTransition[]",
-            "value": "{{transitions}}"
-          },
-          {
-            "name": "currentRules",
-            "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>",
-            "value": "{{currentRules}}"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "{{namespaceInitialStates}}"
-          }
-        ],
-        "assignTo": "replayWithDetail_result"
-      },
-      {
-        "kind": "call",
-        "function": "extractIRWithTypes",
-        "args": [
-          {
-            "name": "projectRoot",
-            "type": "string",
-            "value": "{{projectRoot}}"
-          }
-        ],
-        "assignTo": "extractIRWithTypes_result"
-      },
-      {
-        "kind": "call",
-        "function": "withLock",
-        "args": [
-          {
-            "name": "name",
-            "type": "string",
-            "value": "{{name}}"
-          },
-          {
-            "name": "fn",
-            "type": "() => T",
-            "value": "{{fn}}"
-          }
-        ],
-        "assignTo": "withLock_result"
-      },
-      {
-        "kind": "call",
-        "function": "countSessionsWithViolations",
-        "args": [
-          {
-            "name": "sessions",
-            "type": "any[]",
-            "value": "{{sessions}}"
-          }
-        ],
-        "assignTo": "countSessionsWithViolations_result"
-      },
-      {
-        "kind": "call",
-        "function": "validateProtocolWithTransitions",
-        "args": [
-          {
-            "name": "actions",
-            "type": "Action[]",
-            "value": "{{actions}}"
-          },
-          {
-            "name": "protocols",
-            "type": "FunctionProtocol[]",
-            "value": "{{protocols}}"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "{{namespaceInitialStates}}"
-          }
-        ],
-        "assignTo": "validateProtocolWithTransitions_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.applyWithTransition",
-        "args": [
-          {
-            "name": "functionName",
-            "type": "string",
-            "value": "{{functionName}}"
-          },
-          {
-            "name": "actionIndex",
-            "type": "number",
-            "value": "{{actionIndex}}"
-          }
-        ],
-        "assignTo": "StateMachineValidator.applyWithTransition_result"
-      },
-      {
-        "kind": "call",
-        "function": "error",
-        "args": [
-          {
-            "name": "message",
-            "type": "any",
-            "value": "{{message}}"
-          }
-        ]
-      }
-    ],
-    "success": true,
-    "id": "ep_1780479704267",
-    "timestamp": "2026-06-03T09:41:44.267Z"
-  },
-  {
-    "intent": "read a file and return its contents as a string, with error handling",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "open_file",
-        "args": [
-          {
-            "name": "arg",
-            "type": "any",
-            "value": null
-          }
-        ],
-        "assignTo": "fileHandle"
-      },
-      {
-        "kind": "call",
-        "function": "readFileSync",
-        "args": [
-          {
-            "name": "path",
-            "type": "string",
-            "value": null
-          },
-          {
-            "name": "encoding",
-            "type": "string",
-            "value": ""
-          }
-        ],
-        "assignTo": "content"
-      },
-      {
-        "kind": "call",
-        "function": "close_file",
-        "args": [
-          {
-            "name": "arg",
-            "type": "any",
-            "value": null
-          }
-        ],
-        "assignTo": "_"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-1",
-    "id": "ep_1780479704261",
-    "timestamp": "2026-06-03T09:41:44.261Z"
-  },
-  {
-    "intent": "read a file and return its contents as a string, with error handling",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "open_file",
-        "args": [
-          {
-            "name": "arg",
-            "type": "any",
-            "value": null
-          }
-        ],
-        "assignTo": "fileHandle"
-      },
-      {
-        "kind": "call",
-        "function": "readFileSync",
-        "args": [
-          {
-            "name": "path",
-            "type": "string",
-            "value": null
-          },
-          {
-            "name": "encoding",
-            "type": "string",
-            "value": ""
-          }
-        ],
-        "assignTo": "content"
-      },
-      {
-        "kind": "call",
-        "function": "close_file",
-        "args": [
-          {
-            "name": "arg",
-            "type": "any",
-            "value": null
-          }
-        ],
-        "assignTo": "_"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-1",
-    "id": "ep_1780479702646",
-    "timestamp": "2026-06-03T09:41:42.646Z"
-  },
-  {
-    "intent": "read a file and return its contents as a string, with error handling",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "open_file",
-        "args": [
-          {
-            "name": "path",
-            "type": "string",
-            "value": ""
-          }
-        ],
-        "assignTo": "file"
-      },
-      {
-        "kind": "call",
-        "function": "readFileSync",
-        "args": [
-          {
-            "name": "path",
-            "type": "string",
-            "value": "file"
-          },
-          {
-            "name": "encoding",
-            "type": "string",
-            "value": ""
-          }
-        ],
-        "assignTo": "content"
-      },
-      {
-        "kind": "call",
-        "function": "close_file",
-        "args": [
-          {
-            "name": "file",
-            "type": "any",
-            "value": "file"
-          }
-        ],
-        "assignTo": "closed"
-      },
-      {
-        "kind": "return",
-        "value": "content"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-1",
-    "id": "ep_1780479701118",
-    "timestamp": "2026-06-03T09:41:41.118Z"
-  },
-  {
-    "intent": "merge multiple objects together, with later objects overwriting earlier ones",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "deepMerge",
-        "args": [
-          {
-            "name": "objects",
-            "type": "any[]",
-            "value": []
-          }
-        ],
-        "assignTo": "merged"
-      },
-      {
-        "kind": "return",
-        "value": "merged"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780479656993",
-    "timestamp": "2026-06-03T09:40:56.993Z"
-  },
-  {
-    "intent": "check if two objects have the same keys and values",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "diffLedgers",
-        "args": [
-          {
-            "name": "ledgerA",
-            "type": "StateTransition[]",
-            "value": []
-          },
-          {
-            "name": "ledgerB",
-            "type": "StateTransition[]",
-            "value": []
+            "value": "snap1"
           }
         ],
         "assignTo": "diff"
@@ -3119,153 +2074,341 @@
       }
     ],
     "success": true,
-    "id": "ep_1780479614024",
-    "timestamp": "2026-06-03T09:40:14.024Z"
+    "id": "ep_1780689101990",
+    "timestamp": "2026-06-05T19:51:41.990Z"
   },
   {
-    "intent": "flatten a nested object into a single level with dot-notation keys",
+    "intent": "suggest repairs for ledger violations using the minimal fix set, then generate a repair summary",
     "actions": [
       {
         "kind": "call",
-        "function": "deepClone",
+        "function": "suggestRepairs",
         "args": [
           {
-            "name": "obj",
-            "type": "T",
-            "value": null
-          }
-        ],
-        "assignTo": "clonedObj"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780479584842",
-    "timestamp": "2026-06-03T09:39:44.842Z"
-  },
-  {
-    "intent": "pick specific keys from an object and return a new object with only those keys",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "pick",
-        "args": [
-          {
-            "name": "obj",
-            "type": "T",
+            "name": "violations",
+            "type": "ConstraintViolation[]",
             "value": null
           },
           {
-            "name": "keys",
-            "type": "string[]",
+            "name": "ir",
+            "type": "any[]",
+            "value": ""
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": ""
+          }
+        ],
+        "assignTo": "repairProposals"
+      },
+      {
+        "kind": "call",
+        "function": "getMinimalFixSet",
+        "args": [
+          {
+            "name": "proposals",
+            "type": "RepairProposal[]",
             "value": null
           }
         ],
-        "assignTo": "picked"
+        "assignTo": "minimalProposals"
+      },
+      {
+        "kind": "call",
+        "function": "generateRepairSummary",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": null
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": ""
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": ""
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": ""
+          }
+        ],
+        "assignTo": "summary"
       }
     ],
     "success": true,
-    "id": "ep_1780479558629",
-    "timestamp": "2026-06-03T09:39:18.629Z"
+    "id": "ep_1780689083510",
+    "timestamp": "2026-06-05T19:51:23.510Z"
   },
   {
-    "intent": "deep clone a JavaScript object",
+    "intent": "suggest repairs for ledger violations using the minimal fix set, then generate a repair summary",
     "actions": [
       {
         "kind": "call",
-        "function": "deepClone",
+        "function": "suggestRepairs",
         "args": [
           {
-            "name": "obj",
-            "type": "T",
+            "name": "arg",
+            "type": "any",
+            "value": null
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": ""
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": ""
+          }
+        ],
+        "assignTo": "protocols"
+      },
+      {
+        "kind": "call",
+        "function": "generateRepairSummary",
+        "args": [
+          {
+            "name": "arg",
+            "type": "any",
+            "value": null
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": ""
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": ""
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": ""
+          }
+        ],
+        "assignTo": "ledger"
+      },
+      {
+        "kind": "call",
+        "function": "generateRepairSummary",
+        "args": [
+          {
+            "name": "arg",
+            "type": "any",
+            "value": null
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": ""
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": ""
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": ""
+          }
+        ],
+        "assignTo": "protocols"
+      }
+    ],
+    "success": false,
+    "svlViolated": "SVL-1",
+    "id": "ep_1780689081453",
+    "timestamp": "2026-06-05T19:51:21.453Z"
+  },
+  {
+    "intent": "validate protocol transitions and check ledger consistency, then format violations as a report",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "validateProtocolWithTransitions",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": [
+              {
+                "type": "open_file",
+                "path": "/tmp/test.txt"
+              }
+            ]
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": [
+              {
+                "name": "file",
+                "transitions": [
+                  {
+                    "from": "",
+                    "to": "FILE_OPEN"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
             "value": {}
           }
         ],
-        "assignTo": "clonedObj"
+        "assignTo": "validation"
       },
       {
-        "kind": "return",
-        "value": "clonedObj"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780479529757",
-    "timestamp": "2026-06-03T09:38:49.757Z"
-  },
-  {
-    "intent": "calculate the median value from an array of numbers",
-    "actions": [
-      {
         "kind": "call",
-        "function": "median",
+        "function": "checkLedgerConsistency",
         "args": [
           {
-            "name": "nums",
-            "type": "number[]",
-            "value": []
-          }
-        ],
-        "assignTo": "m"
-      },
-      {
-        "kind": "return",
-        "value": "m"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780479499165",
-    "timestamp": "2026-06-03T09:38:19.165Z"
-  },
-  {
-    "intent": "generate a random integer between a minimum and maximum value",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "randomInt",
-        "args": [
-          {
-            "name": "min",
-            "type": "number",
-            "value": 0
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "validation.transitions"
           },
           {
-            "name": "max",
-            "type": "number",
-            "value": 100
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": {}
+          },
+          {
+            "name": "protocolRules",
+            "type": "Map<string, StateAnnotation>",
+            "value": {}
           }
         ],
-        "assignTo": "result"
+        "assignTo": "consistency"
+      },
+      {
+        "kind": "call",
+        "function": "formatAnomalyReport",
+        "args": [
+          {
+            "name": "a",
+            "type": "Attempt",
+            "value": {
+              "violations": "$consistency.violations"
+            }
+          }
+        ],
+        "assignTo": "report"
       },
       {
         "kind": "return",
-        "value": "result"
+        "value": "report"
       }
     ],
     "success": true,
-    "id": "ep_1780479466888",
-    "timestamp": "2026-06-03T09:37:46.888Z"
+    "id": "ep_1780689063607",
+    "timestamp": "2026-06-05T19:51:03.607Z"
   },
   {
-    "intent": "check if a number is a prime number",
+    "intent": "export all exported functions with their purpose requires and produces, formatted as a capability catalog",
     "actions": [
       {
         "kind": "call",
-        "function": "isPrime",
+        "function": "getExportedDeclarations",
+        "args": [],
+        "assignTo": "declarations"
+      },
+      {
+        "kind": "call",
+        "function": "buildCapabilityGraph",
         "args": [
           {
-            "name": "n",
-            "type": "number",
-            "value": 0
+            "name": "ir",
+            "type": "FunctionInfo[]",
+            "value": "declarations"
           }
         ],
-        "assignTo": "result"
+        "assignTo": "graph"
+      },
+      {
+        "kind": "call",
+        "function": "formatChainHint",
+        "args": [
+          {
+            "name": "chains",
+            "type": "CapabilityChain[]",
+            "value": "graph"
+          }
+        ],
+        "assignTo": "catalog"
       },
       {
         "kind": "return",
-        "value": "result"
+        "value": "catalog"
       }
     ],
     "success": true,
-    "id": "ep_1780479439659",
-    "timestamp": "2026-06-03T09:37:19.659Z"
+    "id": "ep_1780689050293",
+    "timestamp": "2026-06-05T19:50:50.293Z"
+  },
+  {
+    "intent": "compute immune metrics including antibody hits and token savings, then format as health status",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAntibodyStats",
+        "args": [],
+        "assignTo": "stats"
+      },
+      {
+        "kind": "call",
+        "function": "computeImmuneMetrics",
+        "args": [],
+        "assignTo": "metrics"
+      },
+      {
+        "kind": "call",
+        "function": "computeHealthScore",
+        "args": [
+          {
+            "name": "failureGenome",
+            "type": "any",
+            "value": "metrics"
+          },
+          {
+            "name": "antibodyStats",
+            "type": "any",
+            "value": "stats"
+          }
+        ],
+        "assignTo": "score"
+      },
+      {
+        "kind": "call",
+        "function": "formatHealthLevel",
+        "args": [
+          {
+            "name": "score",
+            "type": "number",
+            "value": "score"
+          }
+        ],
+        "assignTo": "status"
+      },
+      {
+        "kind": "return",
+        "value": "status"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780689037097",
+    "timestamp": "2026-06-05T19:50:37.097Z"
   }
 ]

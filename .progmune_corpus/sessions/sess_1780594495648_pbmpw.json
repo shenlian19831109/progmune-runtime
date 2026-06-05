@@ -1,0 +1,133 @@
+{
+  "sessionId": "sess_1780594495648_pbmpw",
+  "intent": "add input validation before saving benchmark results",
+  "attempts": [
+    {
+      "id": "att_1780594500259_p4rux",
+      "sessionId": "sess_1780594495648_pbmpw",
+      "attemptNumber": 3,
+      "inputIntent": "add input validation before saving benchmark results",
+      "plannerSeed": "38201699",
+      "constraintSnapshotId": "snap_1780594495649_b00d96aecc16",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "validateActionSchema",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": null
+            }
+          ],
+          "assignTo": "actions"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "validateActionSchema",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780594500259,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780594495648,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780594500259_p4rux",
+    "sessionId": "sess_1780594495648_pbmpw",
+    "attemptNumber": 3,
+    "inputIntent": "add input validation before saving benchmark results",
+    "plannerSeed": "38201699",
+    "constraintSnapshotId": "snap_1780594495649_b00d96aecc16",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "validateActionSchema",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": null
+          }
+        ],
+        "assignTo": "actions"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "validateActionSchema",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780594500259,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780594495649_b00d96aecc16",
+  "endedAt": 1780594500265
+}

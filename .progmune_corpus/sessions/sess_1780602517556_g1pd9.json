@@ -1,0 +1,319 @@
+{
+  "sessionId": "sess_1780602517556_g1pd9",
+  "intent": "patch the fingerprint verification error in ledger",
+  "attempts": [
+    {
+      "id": "att_1780602521215_ajxc9",
+      "sessionId": "sess_1780602517556_g1pd9",
+      "attemptNumber": 2,
+      "inputIntent": "patch the fingerprint verification error in ledger",
+      "plannerSeed": "57ac8eea",
+      "constraintSnapshotId": "snap_1780602517558_b00d96aecc16",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getFingerprint",
+          "args": [
+            {
+              "name": "arg",
+              "type": "any",
+              "value": null
+            }
+          ],
+          "assignTo": "sessionId"
+        },
+        {
+          "kind": "call",
+          "function": "verifyFingerprint",
+          "args": [
+            {
+              "name": "arg",
+              "type": "any",
+              "value": null
+            },
+            {
+              "name": "transitions",
+              "type": "StateTransition[]",
+              "value": ""
+            },
+            {
+              "name": "currentRuleHash",
+              "type": "string",
+              "value": ""
+            }
+          ],
+          "assignTo": "sessionId"
+        },
+        {
+          "kind": "call",
+          "function": "verifyFingerprint",
+          "args": [
+            {
+              "name": "arg",
+              "type": "any",
+              "value": null
+            },
+            {
+              "name": "transitions",
+              "type": "StateTransition[]",
+              "value": ""
+            },
+            {
+              "name": "currentRuleHash",
+              "type": "string",
+              "value": ""
+            }
+          ],
+          "assignTo": "currentRuleHash"
+        }
+      ],
+      "transitions": [],
+      "violations": [
+        {
+          "svl": 1,
+          "violatedConstraint": "schema",
+          "actionIndex": 0,
+          "description": "action[1]: duplicate assignTo \"sessionId\" (previously assigned at another action)"
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780602521215,
+      "llmCallCount": 0,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    },
+    {
+      "id": "att_1780602522773_gnq83",
+      "sessionId": "sess_1780602517556_g1pd9",
+      "attemptNumber": 3,
+      "inputIntent": "patch the fingerprint verification error in ledger",
+      "plannerSeed": "840c3124",
+      "constraintSnapshotId": "snap_1780602517558_b00d96aecc16",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getFingerprint",
+          "args": [
+            {
+              "name": "sessionId",
+              "type": "string",
+              "value": null
+            }
+          ],
+          "assignTo": "fp"
+        },
+        {
+          "kind": "call",
+          "function": "verifyFingerprint",
+          "args": [
+            {
+              "name": "sessionId",
+              "type": "string",
+              "value": null
+            },
+            {
+              "name": "transitions",
+              "type": "StateTransition[]",
+              "value": null
+            },
+            {
+              "name": "currentRuleHash",
+              "type": "string",
+              "value": null
+            }
+          ],
+          "assignTo": "result"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getFingerprint",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "verifyFingerprint",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780602522773,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780602517556,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780602522773_gnq83",
+    "sessionId": "sess_1780602517556_g1pd9",
+    "attemptNumber": 3,
+    "inputIntent": "patch the fingerprint verification error in ledger",
+    "plannerSeed": "840c3124",
+    "constraintSnapshotId": "snap_1780602517558_b00d96aecc16",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getFingerprint",
+        "args": [
+          {
+            "name": "sessionId",
+            "type": "string",
+            "value": null
+          }
+        ],
+        "assignTo": "fp"
+      },
+      {
+        "kind": "call",
+        "function": "verifyFingerprint",
+        "args": [
+          {
+            "name": "sessionId",
+            "type": "string",
+            "value": null
+          },
+          {
+            "name": "transitions",
+            "type": "StateTransition[]",
+            "value": null
+          },
+          {
+            "name": "currentRuleHash",
+            "type": "string",
+            "value": null
+          }
+        ],
+        "assignTo": "result"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getFingerprint",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "verifyFingerprint",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780602522773,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780602517558_b00d96aecc16",
+  "endedAt": 1780602522775
+}

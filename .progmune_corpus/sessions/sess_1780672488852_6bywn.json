@@ -1,0 +1,225 @@
+{
+  "sessionId": "sess_1780672488852_6bywn",
+  "intent": "export all exported functions with their purpose requires and produces, formatted as a capability catalog",
+  "attempts": [
+    {
+      "id": "att_1780672493468_do3ee",
+      "sessionId": "sess_1780672488852_6bywn",
+      "attemptNumber": 1,
+      "inputIntent": "export all exported functions with their purpose requires and produces, formatted as a capability catalog",
+      "plannerSeed": "5fe06ec8",
+      "constraintSnapshotId": "snap_1780672488853_b00d96aecc16",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getExportedDeclarations",
+          "args": [],
+          "assignTo": "declarations"
+        },
+        {
+          "kind": "call",
+          "function": "buildCompactFuncList",
+          "args": [
+            {
+              "name": "funcs",
+              "type": "any[]",
+              "value": "declarations"
+            },
+            {
+              "name": "allFuncs",
+              "type": "any[]",
+              "value": "declarations"
+            }
+          ],
+          "assignTo": "catalog"
+        },
+        {
+          "kind": "return",
+          "value": "catalog"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getExportedDeclarations",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "buildCompactFuncList",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780672493468,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780672488852,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780672493468_do3ee",
+    "sessionId": "sess_1780672488852_6bywn",
+    "attemptNumber": 1,
+    "inputIntent": "export all exported functions with their purpose requires and produces, formatted as a capability catalog",
+    "plannerSeed": "5fe06ec8",
+    "constraintSnapshotId": "snap_1780672488853_b00d96aecc16",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getExportedDeclarations",
+        "args": [],
+        "assignTo": "declarations"
+      },
+      {
+        "kind": "call",
+        "function": "buildCompactFuncList",
+        "args": [
+          {
+            "name": "funcs",
+            "type": "any[]",
+            "value": "declarations"
+          },
+          {
+            "name": "allFuncs",
+            "type": "any[]",
+            "value": "declarations"
+          }
+        ],
+        "assignTo": "catalog"
+      },
+      {
+        "kind": "return",
+        "value": "catalog"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getExportedDeclarations",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "buildCompactFuncList",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780672493468,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780672488853_b00d96aecc16",
+  "endedAt": 1780672493477
+}

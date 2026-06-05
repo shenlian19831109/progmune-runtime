@@ -1,0 +1,22 @@
+{
+  "intent": "extract common IR loading logic into a shared utility",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "symbol_existence",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "extractIR",
+      "args": [],
+      "assignTo": "ir"
+    }
+  ],
+  "errorDetail": "函数 'extractIR' 不存在",
+  "ssgMissingFunctions": [
+    "extractIR"
+  ],
+  "plannerAttempt": 2,
+  "plannerRetryTotal": 3,
+  "id": "fail_1780695562165_265",
+  "timestamp": "2026-06-05T21:39:22.165Z"
+}

@@ -1,0 +1,273 @@
+{
+  "sessionId": "sess_1780695604894_cv9u4",
+  "intent": "extract common IR loading logic into a shared utility",
+  "attempts": [
+    {
+      "id": "att_1780695607222_8msoq",
+      "sessionId": "sess_1780695604894_cv9u4",
+      "attemptNumber": 1,
+      "inputIntent": "extract common IR loading logic into a shared utility",
+      "plannerSeed": "ab0baa48",
+      "constraintSnapshotId": "snap_1780695604894_e07521d2be9c",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "extractIR",
+          "args": [],
+          "assignTo": "ir"
+        },
+        {
+          "kind": "call",
+          "function": "validateAddress",
+          "args": [
+            {
+              "name": "address",
+              "type": "string",
+              "value": "ir"
+            }
+          ],
+          "assignTo": "validated"
+        },
+        {
+          "kind": "call",
+          "function": "validateToken",
+          "args": [
+            {
+              "name": "token",
+              "type": "string",
+              "value": "validated"
+            }
+          ],
+          "assignTo": "sequence"
+        },
+        {
+          "kind": "call",
+          "function": "emitCode",
+          "args": [
+            {
+              "name": "ir",
+              "type": "any",
+              "value": "sequence"
+            }
+          ],
+          "assignTo": "code"
+        },
+        {
+          "kind": "call",
+          "function": "revokeAllSessions",
+          "args": [
+            {
+              "name": "userId",
+              "type": "string",
+              "value": "code"
+            }
+          ],
+          "assignTo": "session"
+        },
+        {
+          "kind": "return",
+          "value": "session"
+        }
+      ],
+      "transitions": [],
+      "violations": [
+        {
+          "svl": 1,
+          "violatedConstraint": "symbol_existence",
+          "actionIndex": 0,
+          "missingStates": [
+            "extractIR"
+          ],
+          "description": "函数 'extractIR' 不存在"
+        },
+        {
+          "svl": 1,
+          "violatedConstraint": "symbol_existence",
+          "actionIndex": 3,
+          "missingStates": [
+            "emitCode"
+          ],
+          "description": "函数 'emitCode' 不存在"
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780695607223,
+      "llmCallCount": 0,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    },
+    {
+      "id": "att_1780695608552_2y3kb",
+      "sessionId": "sess_1780695604894_cv9u4",
+      "attemptNumber": 2,
+      "inputIntent": "extract common IR loading logic into a shared utility",
+      "plannerSeed": "907254a8",
+      "constraintSnapshotId": "snap_1780695604894_e07521d2be9c",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "extractIR",
+          "args": [],
+          "assignTo": "ir"
+        },
+        {
+          "kind": "call",
+          "function": "validateAddress",
+          "args": [
+            {
+              "name": "address",
+              "type": "string",
+              "value": ""
+            }
+          ],
+          "assignTo": "action"
+        },
+        {
+          "kind": "call",
+          "function": "validateToken",
+          "args": [
+            {
+              "name": "token",
+              "type": "string",
+              "value": ""
+            }
+          ],
+          "assignTo": "sequence"
+        },
+        {
+          "kind": "call",
+          "function": "emitCode",
+          "args": [],
+          "assignTo": "code"
+        },
+        {
+          "kind": "call",
+          "function": "revokeAllSessions",
+          "args": [
+            {
+              "name": "userId",
+              "type": "string",
+              "value": ""
+            }
+          ],
+          "assignTo": "session"
+        }
+      ],
+      "transitions": [],
+      "violations": [
+        {
+          "svl": 1,
+          "violatedConstraint": "symbol_existence",
+          "actionIndex": 0,
+          "missingStates": [
+            "extractIR"
+          ],
+          "description": "函数 'extractIR' 不存在"
+        },
+        {
+          "svl": 1,
+          "violatedConstraint": "symbol_existence",
+          "actionIndex": 3,
+          "missingStates": [
+            "emitCode"
+          ],
+          "description": "函数 'emitCode' 不存在"
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780695608552,
+      "llmCallCount": 0,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    },
+    {
+      "id": "att_1780695609814_8a6p4",
+      "sessionId": "sess_1780695604894_cv9u4",
+      "attemptNumber": 3,
+      "inputIntent": "extract common IR loading logic into a shared utility",
+      "plannerSeed": "c4ee6e8a",
+      "constraintSnapshotId": "snap_1780695604894_e07521d2be9c",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "extractIR",
+          "args": [],
+          "assignTo": "ir"
+        },
+        {
+          "kind": "call",
+          "function": "validateAddress",
+          "args": [
+            {
+              "name": "address",
+              "type": "string",
+              "value": ""
+            }
+          ],
+          "assignTo": "action"
+        },
+        {
+          "kind": "call",
+          "function": "validateToken",
+          "args": [
+            {
+              "name": "token",
+              "type": "string",
+              "value": ""
+            }
+          ],
+          "assignTo": "sequence"
+        },
+        {
+          "kind": "call",
+          "function": "emitCode",
+          "args": [],
+          "assignTo": "code"
+        },
+        {
+          "kind": "call",
+          "function": "revokeAllSessions",
+          "args": [
+            {
+              "name": "userId",
+              "type": "string",
+              "value": ""
+            }
+          ],
+          "assignTo": "session"
+        }
+      ],
+      "transitions": [],
+      "violations": [
+        {
+          "svl": 1,
+          "violatedConstraint": "symbol_existence",
+          "actionIndex": 0,
+          "missingStates": [
+            "extractIR"
+          ],
+          "description": "函数 'extractIR' 不存在"
+        },
+        {
+          "svl": 1,
+          "violatedConstraint": "symbol_existence",
+          "actionIndex": 3,
+          "missingStates": [
+            "emitCode"
+          ],
+          "description": "函数 'emitCode' 不存在"
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780695609814,
+      "llmCallCount": 0,
+      "durationMs": 0,
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": false,
+  "startedAt": 1780695604894,
+  "ruleHash": "9dec68bc2995e92a",
+  "snapshotId": "snap_1780695604894_e07521d2be9c",
+  "endedAt": 1780695609823
+}

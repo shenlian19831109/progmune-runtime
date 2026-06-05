@@ -1,0 +1,399 @@
+{
+  "intent": "add logging to all repair proposal functions",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "schema",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "suggestRepairs",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "violations"
+    },
+    {
+      "kind": "call",
+      "function": "suggestRepairs",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "ir"
+    },
+    {
+      "kind": "call",
+      "function": "suggestRepairs",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "protocols"
+    },
+    {
+      "kind": "call",
+      "function": "suggestProtocolRepair",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "rejection"
+    },
+    {
+      "kind": "call",
+      "function": "suggestProtocolRepair",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "ir"
+    },
+    {
+      "kind": "call",
+      "function": "applyProposalAsBranch",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "proposal"
+    },
+    {
+      "kind": "call",
+      "function": "applyProposalAsBranch",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "parentBranch"
+    },
+    {
+      "kind": "call",
+      "function": "applyProposalAsBranch",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "currentLedger"
+    },
+    {
+      "kind": "call",
+      "function": "applyProposalAsBranch",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "ir"
+    },
+    {
+      "kind": "call",
+      "function": "validateProposal",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "proposal"
+    },
+    {
+      "kind": "call",
+      "function": "validateProposal",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "currentLedger"
+    },
+    {
+      "kind": "call",
+      "function": "validateProposal",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "namespaceInitialStates"
+    },
+    {
+      "kind": "call",
+      "function": "suggestInvariantRepair",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "violation"
+    },
+    {
+      "kind": "call",
+      "function": "suggestInvariantRepair",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "ledger"
+    },
+    {
+      "kind": "call",
+      "function": "suggestInvariantRepair",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "namespaceInitialStates"
+    },
+    {
+      "kind": "call",
+      "function": "getMinimalFixSet",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "proposals"
+    },
+    {
+      "kind": "call",
+      "function": "suggestGenericRepair",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "violation"
+    },
+    {
+      "kind": "call",
+      "function": "suggestGenericRepair",
+      "args": [
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        },
+        {
+          "name": "arg",
+          "type": "any",
+          "value": null
+        }
+      ],
+      "assignTo": "ir"
+    }
+  ],
+  "errorDetail": "action[4]: duplicate assignTo \"ir\" (previously assigned at another action); action[8]: duplicate assignTo \"ir\" (previously assigned at another action); action[9]: duplicate assignTo \"proposal\" (previously assigned at another action); action[10]: duplicate assignTo \"currentLedger\" (previously assigned at another action); action[14]: duplicate assignTo \"namespaceInitialStates\" (previously assigned at another action); action[16]: duplicate assignTo \"violation\" (previously assigned at another action); action[17]: duplicate assignTo \"ir\" (previously assigned at another action)",
+  "plannerAttempt": 3,
+  "plannerRetryTotal": 3,
+  "id": "fail_1780593714550_180",
+  "timestamp": "2026-06-04T17:21:54.550Z"
+}

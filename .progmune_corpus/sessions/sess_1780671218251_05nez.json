@@ -1,0 +1,60 @@
+{
+  "sessionId": "sess_1780671218251_05nez",
+  "intent": "handle file lock timeout in parallel benchmark execution",
+  "attempts": [
+    {
+      "id": "att_1780671218251_sp56d",
+      "sessionId": "",
+      "attemptNumber": 1,
+      "inputIntent": "handle file lock timeout in parallel benchmark execution",
+      "plannerSeed": "ac4eb6af",
+      "constraintSnapshotId": "snap_1780671218251",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "main",
+          "args": []
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "main",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "INIT"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "INIT"
+            ]
+          },
+          "valid": false
+        }
+      ],
+      "violations": [
+        {
+          "svl": 4,
+          "violatedConstraint": "concurrency_error",
+          "actionIndex": 0,
+          "description": "Concurrency error: race condition or deadlock in state transition",
+          "fixPath": [
+            "acquireLock",
+            "checkConsistency",
+            "retryWithBackoff"
+          ]
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780671218251,
+      "llmCallCount": 1,
+      "durationMs": 100
+    }
+  ],
+  "resolved": false,
+  "startedAt": 1780671218251
+}

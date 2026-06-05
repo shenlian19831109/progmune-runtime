@@ -1,0 +1,60 @@
+{
+  "sessionId": "sess_1780671144309_8wq13",
+  "intent": "save checkpoint without acquiring write lock",
+  "attempts": [
+    {
+      "id": "att_1780671144309_4sj7e",
+      "sessionId": "",
+      "attemptNumber": 1,
+      "inputIntent": "save checkpoint without acquiring write lock",
+      "plannerSeed": "d770acbe",
+      "constraintSnapshotId": "snap_1780671144309",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "main",
+          "args": []
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "main",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "INIT"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "INIT"
+            ]
+          },
+          "valid": false
+        }
+      ],
+      "violations": [
+        {
+          "svl": 4,
+          "violatedConstraint": "protocol",
+          "actionIndex": 0,
+          "description": "Protocol violation: function called before required prerequisite",
+          "fixPath": [
+            "loadBenchmarks",
+            "benchmarkPassRate",
+            "benchmarkReport"
+          ]
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780671144309,
+      "llmCallCount": 1,
+      "durationMs": 100
+    }
+  ],
+  "resolved": false,
+  "startedAt": 1780671144309
+}

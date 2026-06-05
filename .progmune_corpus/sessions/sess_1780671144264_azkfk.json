@@ -1,0 +1,60 @@
+{
+  "sessionId": "sess_1780671144264_azkfk",
+  "intent": "use variable before it is declared in benchmark pipeline",
+  "attempts": [
+    {
+      "id": "att_1780671144264_v5883",
+      "sessionId": "",
+      "attemptNumber": 1,
+      "inputIntent": "use variable before it is declared in benchmark pipeline",
+      "plannerSeed": "a01db567",
+      "constraintSnapshotId": "snap_1780671144264",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "main",
+          "args": []
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "main",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "INIT"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "INIT"
+            ]
+          },
+          "valid": false
+        }
+      ],
+      "violations": [
+        {
+          "svl": 3,
+          "violatedConstraint": "dataflow",
+          "actionIndex": 0,
+          "description": "Dataflow error: variable used before declaration or circular reference detected",
+          "fixPath": [
+            "declareVariable",
+            "verifyScope",
+            "checkDataflow"
+          ]
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780671144264,
+      "llmCallCount": 1,
+      "durationMs": 100
+    }
+  ],
+  "resolved": false,
+  "startedAt": 1780671144264
+}

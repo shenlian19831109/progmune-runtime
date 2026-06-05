@@ -1,0 +1,23 @@
+{
+  "intent": "fix race condition when two sessions write to same corpus",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-4",
+  "constraintType": "concurrency_error",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "main",
+      "args": []
+    }
+  ],
+  "errorDetail": "Concurrency error: race condition or deadlock in state transition",
+  "ssgFixPath": [
+    "acquireLock",
+    "checkConsistency",
+    "retryWithBackoff"
+  ],
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 1,
+  "id": "fail_1780671218248_251",
+  "timestamp": "2026-06-05T14:53:38.248Z"
+}

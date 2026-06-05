@@ -1,0 +1,60 @@
+{
+  "sessionId": "sess_1780671144298_2j4bd",
+  "intent": "record session before validation passes",
+  "attempts": [
+    {
+      "id": "att_1780671144298_ag4nh",
+      "sessionId": "",
+      "attemptNumber": 1,
+      "inputIntent": "record session before validation passes",
+      "plannerSeed": "eb929978",
+      "constraintSnapshotId": "snap_1780671144298",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "main",
+          "args": []
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "main",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "INIT"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "INIT"
+            ]
+          },
+          "valid": false
+        }
+      ],
+      "violations": [
+        {
+          "svl": 4,
+          "violatedConstraint": "protocol",
+          "actionIndex": 0,
+          "description": "Protocol violation: function called before required prerequisite",
+          "fixPath": [
+            "loadBenchmarks",
+            "benchmarkPassRate",
+            "benchmarkReport"
+          ]
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780671144298,
+      "llmCallCount": 1,
+      "durationMs": 100
+    }
+  ],
+  "resolved": false,
+  "startedAt": 1780671144298
+}

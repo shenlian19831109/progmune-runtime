@@ -1,0 +1,60 @@
+{
+  "sessionId": "sess_1780550497104_o5okf",
+  "intent": "generate report from benchmark data",
+  "attempts": [
+    {
+      "id": "att_1780550497104_qr7gh",
+      "sessionId": "sess_1780550497104_o5okf",
+      "attemptNumber": 1,
+      "inputIntent": "generate report from benchmark data",
+      "plannerSeed": "b3c15a18",
+      "constraintSnapshotId": "snap_1",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "formatReportAsMarkdown",
+          "args": []
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "formatReportAsMarkdown",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "INIT"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "INIT"
+            ]
+          },
+          "valid": false
+        }
+      ],
+      "violations": [
+        {
+          "svl": 1,
+          "violatedConstraint": "symbol_existence",
+          "actionIndex": 0,
+          "description": "LLM hallucinated function: formatReportAsMarkdown does not exist in IR",
+          "fixPath": [
+            "loadBenchmarks",
+            "benchmarkPassRate",
+            "benchmarkReport"
+          ]
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780549957104,
+      "llmCallCount": 1,
+      "durationMs": 100
+    }
+  ],
+  "resolved": false,
+  "startedAt": 1780549957104
+}

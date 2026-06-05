@@ -129,7 +129,7 @@ const mockIR = [
     (0, vitest_1.it)("formats a single chain", () => {
         const chains = (0, strategy_planner_1.selectCapabilityChains)("authenticate user", mockIR, 1);
         const hint = (0, strategy_planner_1.formatChainHint)(chains);
-        (0, vitest_1.expect)(hint).toContain("推荐能力链");
+        (0, vitest_1.expect)(hint).toContain("建议的下一步调用");
         (0, vitest_1.expect)(hint).toContain("★");
     });
 });

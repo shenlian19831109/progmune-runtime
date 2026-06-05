@@ -1,0 +1,60 @@
+{
+  "sessionId": "sess_1780671144267_wr9l2",
+  "intent": "circular reference in repair proposal dependency chain",
+  "attempts": [
+    {
+      "id": "att_1780671144267_di0p3",
+      "sessionId": "",
+      "attemptNumber": 1,
+      "inputIntent": "circular reference in repair proposal dependency chain",
+      "plannerSeed": "ce36b124",
+      "constraintSnapshotId": "snap_1780671144267",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "main",
+          "args": []
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "main",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "INIT"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "INIT"
+            ]
+          },
+          "valid": false
+        }
+      ],
+      "violations": [
+        {
+          "svl": 3,
+          "violatedConstraint": "dataflow",
+          "actionIndex": 0,
+          "description": "Dataflow error: variable used before declaration or circular reference detected",
+          "fixPath": [
+            "declareVariable",
+            "verifyScope",
+            "checkDataflow"
+          ]
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780671144267,
+      "llmCallCount": 1,
+      "durationMs": 100
+    }
+  ],
+  "resolved": false,
+  "startedAt": 1780671144267
+}

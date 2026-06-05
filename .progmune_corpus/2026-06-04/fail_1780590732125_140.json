@@ -1,0 +1,29 @@
+{
+  "intent": "generate benchmark report from results",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "symbol_existence",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "benchmarkLoadLatest",
+      "args": [],
+      "assignTo": "result"
+    },
+    {
+      "kind": "call",
+      "function": "benchmarkReport",
+      "args": [],
+      "assignTo": "report"
+    },
+    {
+      "kind": "return",
+      "value": "report"
+    }
+  ],
+  "errorDetail": "benchmarkReport: 协议违规 — 需要先调用 loadBenchmarks; 策略违规: 推荐链 benchmarkPassRate → benchmarkReport → benchmarkCount → loadBenchmarks → benchmarkLoadLatest，但缺少 benchmarkPassRate, benchmarkCount, loadBenchmarks",
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 4,
+  "id": "fail_1780590732125_140",
+  "timestamp": "2026-06-04T16:32:12.125Z"
+}

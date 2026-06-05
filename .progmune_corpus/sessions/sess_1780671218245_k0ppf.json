@@ -1,0 +1,60 @@
+{
+  "sessionId": "sess_1780671218245_k0ppf",
+  "intent": "restore corrupted session state from replay checkpoint",
+  "attempts": [
+    {
+      "id": "att_1780671218245_akn2z",
+      "sessionId": "",
+      "attemptNumber": 1,
+      "inputIntent": "restore corrupted session state from replay checkpoint",
+      "plannerSeed": "9058c495",
+      "constraintSnapshotId": "snap_1780671218245",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "main",
+          "args": []
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "main",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "INIT"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "INIT"
+            ]
+          },
+          "valid": false
+        }
+      ],
+      "violations": [
+        {
+          "svl": 4,
+          "violatedConstraint": "state_corruption",
+          "actionIndex": 0,
+          "description": "State corruption: namespace state inconsistent after invalid operation",
+          "fixPath": [
+            "rebuildState",
+            "validateLedger",
+            "restoreFromSnapshot"
+          ]
+        }
+      ],
+      "outcome": "constraint_violation",
+      "timestamp": 1780671218245,
+      "llmCallCount": 1,
+      "durationMs": 100
+    }
+  ],
+  "resolved": false,
+  "startedAt": 1780671218245
+}

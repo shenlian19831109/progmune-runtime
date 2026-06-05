@@ -1,0 +1,29 @@
+{
+  "intent": "load benchmarks and count them",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "symbol_existence",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "loadBenchmarks",
+      "args": [],
+      "assignTo": "benchmarks"
+    },
+    {
+      "kind": "call",
+      "function": "benchmarkCount",
+      "args": [],
+      "assignTo": "count"
+    },
+    {
+      "kind": "return",
+      "value": "count"
+    }
+  ],
+  "errorDetail": "策略违规: 推荐链 benchmarkLoadLatest → loadBenchmarks → benchmarkCount → countSessionLedgers → countResolved → formatSessionCounts，但缺少 benchmarkLoadLatest, countSessionLedgers, countResolved, formatSessionCounts",
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 4,
+  "id": "fail_1780590741459_146",
+  "timestamp": "2026-06-04T16:32:21.459Z"
+}

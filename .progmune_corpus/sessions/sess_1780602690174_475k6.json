@@ -1,0 +1,133 @@
+{
+  "sessionId": "sess_1780602690174_475k6",
+  "intent": "unify error reporting across all immune system modules",
+  "attempts": [
+    {
+      "id": "att_1780602700286_70hlv",
+      "sessionId": "sess_1780602690174_475k6",
+      "attemptNumber": 3,
+      "inputIntent": "unify error reporting across all immune system modules",
+      "plannerSeed": "21d80389",
+      "constraintSnapshotId": "snap_1780602690175_b00d96aecc16",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "listAllStates",
+          "args": [
+            {
+              "name": "ledger",
+              "type": "StateTransition[]",
+              "value": null
+            }
+          ],
+          "assignTo": "states"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "listAllStates",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780602700286,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780602690174,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780602700286_70hlv",
+    "sessionId": "sess_1780602690174_475k6",
+    "attemptNumber": 3,
+    "inputIntent": "unify error reporting across all immune system modules",
+    "plannerSeed": "21d80389",
+    "constraintSnapshotId": "snap_1780602690175_b00d96aecc16",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "listAllStates",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": null
+          }
+        ],
+        "assignTo": "states"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "listAllStates",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780602700286,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780602690175_b00d96aecc16",
+  "endedAt": 1780602700288
+}
