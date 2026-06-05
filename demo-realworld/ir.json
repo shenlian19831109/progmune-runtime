@@ -1,0 +1,514 @@
+{
+  "typeMap": {},
+  "functions": [
+    {
+      "name": "sendNotification",
+      "params": [
+        {
+          "name": "userId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "message",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/notifications.ts",
+      "calls": [
+        "push"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Send a notification to a user.",
+      "requires": [
+        "USER_ID_MESSAGE"
+      ],
+      "produces": [
+        "NOTIFICATION_ID"
+      ],
+      "tags": [
+        "notifications"
+      ]
+    },
+    {
+      "name": "getUnreadNotifications",
+      "params": [
+        {
+          "name": "userId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "Notification[]",
+      "returnTypeDetail": "Notification[]",
+      "file": "src/notifications.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "Notification"
+      ],
+      "purpose": "Get unread notifications for a user.",
+      "requires": [
+        "USER_ID"
+      ],
+      "produces": [
+        "NOTIFICATION_LIST"
+      ],
+      "tags": [
+        "notifications"
+      ]
+    },
+    {
+      "name": "markAsRead",
+      "params": [
+        {
+          "name": "notificationId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/notifications.ts",
+      "calls": [
+        "find"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "purpose": "Mark a notification as read.",
+      "requires": [
+        "NOTIFICATION_ID"
+      ],
+      "produces": [
+        "READ_STATUS"
+      ],
+      "tags": [
+        "notifications"
+      ]
+    },
+    {
+      "name": "createOrder",
+      "params": [
+        {
+          "name": "userId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "items",
+          "type": "string[]",
+          "typeDetail": "string[]"
+        },
+        {
+          "name": "total",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/orders.ts",
+      "calls": [
+        "push"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string",
+        "number"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Create a new order.",
+      "requires": [
+        "CART_DATA"
+      ],
+      "produces": [
+        "ORDER_ID"
+      ],
+      "tags": [
+        "orders"
+      ]
+    },
+    {
+      "name": "getOrdersByUser",
+      "params": [
+        {
+          "name": "userId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "Order[]",
+      "returnTypeDetail": "Order[]",
+      "file": "src/orders.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "Order"
+      ],
+      "purpose": "Get all orders for a user.",
+      "requires": [
+        "USER_ID"
+      ],
+      "produces": [
+        "ORDER_LIST"
+      ],
+      "tags": [
+        "orders"
+      ]
+    },
+    {
+      "name": "updateOrderStatus",
+      "params": [
+        {
+          "name": "orderId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "Order | undefined",
+      "returnTypeDetail": "Order | undefined",
+      "file": "src/orders.ts",
+      "calls": [
+        "find"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "Order"
+      ],
+      "purpose": "Update order status.",
+      "requires": [
+        "ORDER_ID_STATUS"
+      ],
+      "produces": [
+        "UPDATED_ORDER"
+      ],
+      "tags": [
+        "orders"
+      ]
+    },
+    {
+      "name": "calculateRevenue",
+      "params": [],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/orders.ts",
+      "calls": [
+        "reduce",
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "number"
+      ],
+      "purpose": "Calculate total revenue from completed orders.",
+      "requires": [
+        "ORDER_LIST"
+      ],
+      "produces": [
+        "REVENUE"
+      ],
+      "tags": [
+        "orders"
+      ]
+    },
+    {
+      "name": "processPayment",
+      "params": [
+        {
+          "name": "orderId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "amount",
+          "type": "number",
+          "typeDetail": "number"
+        },
+        {
+          "name": "method",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/payments.ts",
+      "calls": [
+        "push"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "number",
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Process a payment for an order.",
+      "requires": [
+        "ORDER_DATA"
+      ],
+      "produces": [
+        "PAYMENT_ID"
+      ],
+      "tags": [
+        "payments"
+      ]
+    },
+    {
+      "name": "refundPayment",
+      "params": [
+        {
+          "name": "paymentId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/payments.ts",
+      "calls": [
+        "find"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "purpose": "Refund a payment.",
+      "requires": [
+        "PAYMENT_ID"
+      ],
+      "produces": [
+        "REFUND_STATUS"
+      ],
+      "tags": [
+        "payments"
+      ]
+    },
+    {
+      "name": "getOrderPayments",
+      "params": [
+        {
+          "name": "orderId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "Payment[]",
+      "returnTypeDetail": "Payment[]",
+      "file": "src/payments.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "Payment"
+      ],
+      "purpose": "Get total payments for an order.",
+      "requires": [
+        "ORDER_ID"
+      ],
+      "produces": [
+        "PAYMENT_TOTAL"
+      ],
+      "tags": [
+        "payments"
+      ]
+    },
+    {
+      "name": "findUserByEmail",
+      "params": [
+        {
+          "name": "email",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "User | undefined",
+      "returnTypeDetail": "User | undefined",
+      "file": "src/users.ts",
+      "calls": [
+        "find"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "User"
+      ],
+      "purpose": "Find a user by email.",
+      "requires": [
+        "EMAIL"
+      ],
+      "produces": [
+        "USER"
+      ],
+      "tags": [
+        "users"
+      ]
+    },
+    {
+      "name": "createUser",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/users.ts",
+      "calls": [
+        "push"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "purpose": "Create a new user.",
+      "requires": [
+        "USER_DATA"
+      ],
+      "produces": [
+        "USER_ID"
+      ],
+      "tags": [
+        "users"
+      ]
+    },
+    {
+      "name": "validateUserRole",
+      "params": [
+        {
+          "name": "userId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "requiredRole",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/users.ts",
+      "calls": [
+        "find"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "purpose": "Validate user role has required permissions.",
+      "requires": [
+        "USER_ROLE"
+      ],
+      "produces": [
+        "PERMISSION_RESULT"
+      ],
+      "tags": [
+        "users"
+      ]
+    },
+    {
+      "name": "listUsersByRole",
+      "params": [
+        {
+          "name": "role",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "User[]",
+      "returnTypeDetail": "User[]",
+      "file": "src/users.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "User"
+      ],
+      "purpose": "Get all users with a given role.",
+      "requires": [
+        "ROLE"
+      ],
+      "produces": [
+        "USER_LIST"
+      ],
+      "tags": [
+        "users"
+      ]
+    }
+  ]
+}
