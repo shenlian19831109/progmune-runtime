@@ -2,6 +2,692 @@
   "typeMap": {},
   "functions": [
     {
+      "name": "trackEvent",
+      "params": [
+        {
+          "name": "type",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "userId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "data",
+          "type": "any",
+          "typeDetail": "any"
+        }
+      ],
+      "returnType": "void",
+      "returnTypeDetail": "void",
+      "file": "src/analytics.ts",
+      "calls": [
+        "push",
+        "now"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [],
+      "tags": [
+        "analytics"
+      ],
+      "purpose": "track event"
+    },
+    {
+      "name": "getEventsByType",
+      "params": [
+        {
+          "name": "type",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "Event[]",
+      "returnTypeDetail": "Event[]",
+      "file": "src/analytics.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "Event"
+      ],
+      "tags": [
+        "analytics"
+      ],
+      "purpose": "get events by type",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "getEventsByUser",
+      "params": [
+        {
+          "name": "userId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "Event[]",
+      "returnTypeDetail": "Event[]",
+      "file": "src/analytics.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "Event"
+      ],
+      "tags": [
+        "analytics"
+      ],
+      "purpose": "get events by user",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "getEventCount",
+      "params": [
+        {
+          "name": "type",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "since",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/analytics.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "number"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "tags": [
+        "analytics"
+      ],
+      "purpose": "get event count",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "getDailyActiveUsers",
+      "params": [],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/analytics.ts",
+      "calls": [
+        "now",
+        "map",
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "number"
+      ],
+      "tags": [
+        "analytics"
+      ],
+      "purpose": "get daily active users",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "getConversionRate",
+      "params": [
+        {
+          "name": "funnel",
+          "type": "string[]",
+          "typeDetail": "string[]"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/analytics.ts",
+      "calls": [
+        "add",
+        "some"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "tags": [
+        "analytics"
+      ],
+      "purpose": "get conversion rate",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "getTopEvents",
+      "params": [
+        {
+          "name": "limit",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "{type:string;count:number}[]",
+      "returnTypeDetail": "{type:string;count:number}[]",
+      "file": "src/analytics.ts",
+      "calls": [
+        "set",
+        "get",
+        "map",
+        "slice",
+        "sort",
+        "entries"
+      ],
+      "exported": true,
+      "inputs": [
+        "number"
+      ],
+      "outputs": [
+        "{type:string;count:number}"
+      ],
+      "tags": [
+        "analytics"
+      ],
+      "purpose": "get top events",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "login",
+      "params": [
+        {
+          "name": "email",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "password",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string|undefined",
+      "returnTypeDetail": "string | undefined",
+      "file": "src/auth.ts",
+      "calls": [
+        "now",
+        "push"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "auth"
+      ],
+      "purpose": "login"
+    },
+    {
+      "name": "validateToken",
+      "params": [
+        {
+          "name": "token",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/auth.ts",
+      "calls": [
+        "find",
+        "now"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "auth"
+      ],
+      "purpose": "validate token",
+      "requires": [
+        "DATA"
+      ],
+      "_requiresDerived": true,
+      "produces": [
+        "VALIDATION_RESULT"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "logout",
+      "params": [
+        {
+          "name": "token",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/auth.ts",
+      "calls": [
+        "findIndex",
+        "splice"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "auth"
+      ],
+      "purpose": "logout"
+    },
+    {
+      "name": "refreshToken",
+      "params": [
+        {
+          "name": "oldToken",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string|undefined",
+      "returnTypeDetail": "string | undefined",
+      "file": "src/auth.ts",
+      "calls": [
+        "find",
+        "now"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "auth"
+      ],
+      "purpose": "refresh token"
+    },
+    {
+      "name": "hasPermission",
+      "params": [
+        {
+          "name": "userId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "permission",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/auth.ts",
+      "calls": [
+        "includes"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "auth"
+      ],
+      "purpose": "has permission"
+    },
+    {
+      "name": "getActiveSessions",
+      "params": [],
+      "returnType": "Session[]",
+      "returnTypeDetail": "Session[]",
+      "file": "src/auth.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "Session"
+      ],
+      "tags": [
+        "auth"
+      ],
+      "purpose": "get active sessions",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "revokeAllSessions",
+      "params": [
+        {
+          "name": "userId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/auth.ts",
+      "calls": [
+        "splice"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "tags": [
+        "auth"
+      ],
+      "purpose": "revoke all sessions"
+    },
+    {
+      "name": "addProduct",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "stock",
+          "type": "number",
+          "typeDetail": "number"
+        },
+        {
+          "name": "price",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/inventory.ts",
+      "calls": [
+        "push"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "number",
+        "number"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "inventory"
+      ],
+      "purpose": "add product"
+    },
+    {
+      "name": "getProduct",
+      "params": [
+        {
+          "name": "id",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "Product|undefined",
+      "returnTypeDetail": "Product | undefined",
+      "file": "src/inventory.ts",
+      "calls": [
+        "find"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "Product"
+      ],
+      "tags": [
+        "inventory"
+      ],
+      "purpose": "get product",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "updateStock",
+      "params": [
+        {
+          "name": "id",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "delta",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/inventory.ts",
+      "calls": [
+        "find"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "number"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "inventory"
+      ],
+      "purpose": "update stock"
+    },
+    {
+      "name": "listLowStock",
+      "params": [
+        {
+          "name": "threshold",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "Product[]",
+      "returnTypeDetail": "Product[]",
+      "file": "src/inventory.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [
+        "number"
+      ],
+      "outputs": [
+        "Product"
+      ],
+      "tags": [
+        "inventory"
+      ],
+      "purpose": "list low stock",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "getInventoryValue",
+      "params": [],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/inventory.ts",
+      "calls": [
+        "reduce"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "number"
+      ],
+      "tags": [
+        "inventory"
+      ],
+      "purpose": "get inventory value",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "searchProducts",
+      "params": [
+        {
+          "name": "query",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "Product[]",
+      "returnTypeDetail": "Product[]",
+      "file": "src/inventory.ts",
+      "calls": [
+        "toLowerCase",
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "Product"
+      ],
+      "tags": [
+        "inventory"
+      ],
+      "purpose": "search products",
+      "requires": [
+        "DATA"
+      ],
+      "_requiresDerived": true
+    },
+    {
+      "name": "removeProduct",
+      "params": [
+        {
+          "name": "id",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/inventory.ts",
+      "calls": [
+        "findIndex",
+        "splice"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "inventory"
+      ],
+      "purpose": "remove product",
+      "requires": [
+        "DATA"
+      ],
+      "_requiresDerived": true,
+      "produces": [
+        "DELETED"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "getStockSummary",
+      "params": [],
+      "returnType": "{total:number; low:number; outOfStock:number}",
+      "returnTypeDetail": "{total:number; low:number; outOfStock:number}",
+      "file": "src/inventory.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "{total:number; low:number; outOfStock:number}"
+      ],
+      "tags": [
+        "inventory"
+      ],
+      "purpose": "get stock summary",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
       "name": "sendNotification",
       "params": [
         {
@@ -361,6 +1047,496 @@
       ]
     },
     {
+      "name": "generateInventoryReport",
+      "params": [],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/reporting.ts",
+      "calls": [
+        "getInventoryValue",
+        "getStockSummary"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "reporting"
+      ],
+      "purpose": "generate inventory report",
+      "produces": [
+        "CREATED"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "generateRevenueReport",
+      "params": [],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/reporting.ts",
+      "calls": [
+        "calculateRevenue"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "reporting"
+      ],
+      "purpose": "generate revenue report",
+      "produces": [
+        "CREATED"
+      ],
+      "_producesDerived": true,
+      "requires": [
+        "ORDER_LIST"
+      ]
+    },
+    {
+      "name": "generateActivityReport",
+      "params": [],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/reporting.ts",
+      "calls": [
+        "getDailyActiveUsers",
+        "getTopEvents",
+        "join",
+        "map"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "reporting"
+      ],
+      "purpose": "generate activity report",
+      "produces": [
+        "CREATED"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "generateShippingReport",
+      "params": [],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/reporting.ts",
+      "calls": [
+        "getPendingShipments"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "reporting"
+      ],
+      "purpose": "generate shipping report",
+      "produces": [
+        "CREATED"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "generateFullReport",
+      "params": [],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/reporting.ts",
+      "calls": [
+        "join",
+        "generateInventoryReport",
+        "generateRevenueReport",
+        "generateActivityReport",
+        "generateShippingReport"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "reporting"
+      ],
+      "purpose": "generate full report",
+      "produces": [
+        "CREATED"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "formatReportAsHTML",
+      "params": [
+        {
+          "name": "report",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/reporting.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "reporting"
+      ],
+      "purpose": "format report as h t m l",
+      "requires": [
+        "DATA"
+      ],
+      "_requiresDerived": true,
+      "produces": [
+        "FORMATTED"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "formatReportAsJSON",
+      "params": [
+        {
+          "name": "report",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/reporting.ts",
+      "calls": [
+        "stringify",
+        "toISOString"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "reporting"
+      ],
+      "purpose": "format report as j s o n",
+      "requires": [
+        "DATA"
+      ],
+      "_requiresDerived": true,
+      "produces": [
+        "FORMATTED"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "saveReport",
+      "params": [
+        {
+          "name": "report",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "filename",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/reporting.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "reporting"
+      ],
+      "purpose": "save report",
+      "requires": [
+        "DATA"
+      ],
+      "_requiresDerived": true,
+      "produces": [
+        "SAVED"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "createShipment",
+      "params": [
+        {
+          "name": "orderId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "address",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/shipping.ts",
+      "calls": [
+        "push"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "shipping"
+      ],
+      "purpose": "create shipment",
+      "produces": [
+        "CREATED"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "assignTracking",
+      "params": [
+        {
+          "name": "shipmentId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "tracking",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/shipping.ts",
+      "calls": [
+        "find"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "shipping"
+      ],
+      "purpose": "assign tracking"
+    },
+    {
+      "name": "updateShipmentStatus",
+      "params": [
+        {
+          "name": "id",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/shipping.ts",
+      "calls": [
+        "find"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "shipping"
+      ],
+      "purpose": "update shipment status"
+    },
+    {
+      "name": "getShipmentsByOrder",
+      "params": [
+        {
+          "name": "orderId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "Shipment[]",
+      "returnTypeDetail": "Shipment[]",
+      "file": "src/shipping.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "Shipment"
+      ],
+      "tags": [
+        "shipping"
+      ],
+      "purpose": "get shipments by order",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "getPendingShipments",
+      "params": [],
+      "returnType": "Shipment[]",
+      "returnTypeDetail": "Shipment[]",
+      "file": "src/shipping.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "Shipment"
+      ],
+      "tags": [
+        "shipping"
+      ],
+      "purpose": "get pending shipments",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "calculateShippingCost",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "weight",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/shipping.ts",
+      "calls": [
+        "includes"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "number"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "tags": [
+        "shipping"
+      ],
+      "purpose": "calculate shipping cost",
+      "produces": [
+        "RESULT"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "validateAddress",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/shipping.ts",
+      "calls": [
+        "includes"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "shipping"
+      ],
+      "purpose": "validate address",
+      "requires": [
+        "DATA"
+      ],
+      "_requiresDerived": true,
+      "produces": [
+        "VALIDATION_RESULT"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "estimateDelivery",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/shipping.ts",
+      "calls": [
+        "includes"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "tags": [
+        "shipping"
+      ],
+      "purpose": "estimate delivery"
+    },
+    {
       "name": "findUserByEmail",
       "params": [
         {
@@ -509,6 +1685,77 @@
       "tags": [
         "users"
       ]
+    },
+    {
+      "name": "now",
+      "params": [],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "description": "当前时间戳（毫秒）",
+      "tags": [
+        "(external)"
+      ],
+      "purpose": "now"
+    },
+    {
+      "name": "add",
+      "params": [],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "tags": [
+        "(external)"
+      ],
+      "purpose": "add"
+    },
+    {
+      "name": "findIndex",
+      "params": [],
+      "returnType": "any",
+      "returnTypeDetail": "any",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "tags": [
+        "(external)"
+      ],
+      "purpose": "find index",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "stringify",
+      "params": [
+        {
+          "name": "value",
+          "type": "any"
+        },
+        {
+          "name": "replacer",
+          "type": "any"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "description": "序列化为 JSON 字符串",
+      "tags": [
+        "(external)"
+      ],
+      "purpose": "stringify",
+      "produces": [
+        "FORMATTED"
+      ],
+      "_producesDerived": true
     }
   ]
 }
