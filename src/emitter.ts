@@ -1,5 +1,7 @@
 import type { Action } from "./runtime-types";
 import * as fs from "fs";
+import * as path from "path";
+import { execSync } from "child_process";
 
 const BASIC_TYPES = new Set([
   "string", "number", "boolean", "any", "void", "undefined", "null",
@@ -344,4 +346,79 @@ export function emitCode(
     code += "main();\n";
   }
   return code;
+}
+
+/**
+ * Auto-repair: compile emitted code, fix common errors, retry.
+ * Returns { code, repaired, errors }.
+ */
+export function autoRepair(
+  code: string,
+  maxRetries: number = 3
+): { code: string; repaired: boolean; errors: string[]; attempts: number } {
+  const tmpDir = path.join(process.cwd(), ".progmune_repair_tmp");
+  if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+
+  let currentCode = code;
+  let repaired = false;
+  const errors: string[] = [];
+  let attempts = 0;
+
+  for (let i = 0; i < maxRetries; i++) {
+    attempts++;
+    const tmpFile = path.join(tmpDir, `repair_${Date.now()}.ts`);
+    fs.writeFileSync(tmpFile, currentCode);
+
+    try {
+      const out = execSync(`npx tsc --noEmit --strict --skipLibCheck --ignoreConfig ${tmpFile} 2>&1 || true`, {
+        cwd: process.cwd(), timeout: 15000, encoding: "utf-8",
+      });
+      const errCount = (out.match(/error TS/g) || []).length;
+      if (errCount === 0) {
+        try { fs.unlinkSync(tmpFile); } catch {}
+        return { code: currentCode, repaired, errors, attempts };
+      }
+
+      // Parse and fix errors
+      const tsErrors = out.split("\n").filter(l => l.includes("error TS"));
+      for (const e of tsErrors) errors.push(e.trim());
+
+      // Fix 1: missing names — find in IR and add import
+      if (out.includes("Cannot find name") || out.includes("TS2304")) {
+        const missingNames = [...out.matchAll(/Cannot find name '(\w+)'/g)].map(m => m[1]);
+        for (const name of [...new Set(missingNames)]) {
+          // Try to find the function in IR and add import
+          const irRaw = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
+          const fn = (irRaw.functions || irRaw).find((f: any) => f.name === name);
+          if (fn && fn.file) {
+            const importPath = "./" + fn.file.replace(/\.ts$/, "").replace(/^src\//, "");
+            const importLine = `import { ${name} } from "${importPath}";\n`;
+            if (!currentCode.includes(`import { ${name} }`)) {
+              currentCode = importLine + currentCode;
+              repaired = true;
+            }
+          }
+        }
+      }
+
+      // Fix 2: type errors — add missing type annotations
+      if (out.includes("is not assignable") || out.includes("has no call signatures")) {
+        // Generic fix: add explicit type annotations
+        if (!currentCode.includes(": any")) {
+          currentCode = currentCode.replace(
+            /const (\w+) = (\w+)\(/g,
+            "const $1: any = $2("
+          );
+          repaired = true;
+        }
+      }
+
+      try { fs.unlinkSync(tmpFile); } catch {}
+    } catch {
+      try { fs.unlinkSync(tmpFile); } catch {}
+      errors.push("Compilation check failed");
+    }
+  }
+
+  return { code: currentCode, repaired, errors, attempts };
 }
