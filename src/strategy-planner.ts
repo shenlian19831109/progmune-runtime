@@ -85,17 +85,27 @@ function scoreNode(node: CapabilityNode, intentLower: string, keywords: string[]
     const js = jaccardSimilarity(nameLower, kw);
     if (js > 0.2) { score += js; hasMatch = true; }
   }
-  // Purpose match
+  // Purpose match — semantic bridge when function names differ from intent
   const purposeLower = node.purpose.toLowerCase();
+  const intentWords = intentLower.split(/[\s,，]+/).filter(w => w.length > 2);
   for (const kw of keywords) {
     if (purposeLower.includes(kw)) { score += 2; hasMatch = true; }
+  }
+  // Jaccard purpose similarity: "send receipt" ↔ "dispatch a message to recipient"
+  if (purposeLower.length > 0) {
+    const purposeWords = purposeLower.split(/[\s,，]+/).filter(w => w.length > 2);
+    if (purposeWords.length > 0 && intentWords.length > 0) {
+      const shared = intentWords.filter(w => purposeWords.includes(w)).length;
+      const union = new Set([...intentWords, ...purposeWords]).size;
+      const purposeJaccard = shared / union;
+      if (purposeJaccard > 0.1) { score += purposeJaccard * 5; hasMatch = true; }
+    }
   }
   // Tag match
   for (const tag of node.tags) {
     if (intentLower.includes(tag.toLowerCase())) { score += 1.5; hasMatch = true; }
   }
   // Semantic word overlap in purpose
-  const intentWords = intentLower.split(/[\s,，]+/);
   for (const w of intentWords) {
     if (w.length > 2 && purposeLower.includes(w)) { score += 0.5; hasMatch = true; }
   }
