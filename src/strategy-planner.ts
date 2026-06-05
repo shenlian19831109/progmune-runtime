@@ -223,16 +223,16 @@ export function selectCapabilityChains(
       .filter(n => n.score > dynamicThreshold && (n.produces.length > 0 || n.score > dynamicThreshold + 1))
       .sort((a, b) => b.score - a.score);
   }
-  // Best-effort fallback: when no keyword matches at all, try nodes with capability edges
+  // Best-effort fallback: prefer nodes with edges AND some score
   if (seeds.length === 0) {
     seeds = [...graph.values()]
-      .filter(n => n.produces.length > 0 || n.requires.length > 0)
+      .filter(n => n.score > 0 && (n.produces.length > 0 || n.requires.length > 0))
       .sort((a, b) => b.score - a.score)
       .slice(0, 5);
   }
-  // Ultimate fallback: just take any exported nodes
+  // Ultimate fallback: just take any exported nodes with score > 0
   if (seeds.length === 0) {
-    seeds = [...graph.values()].slice(0, 3);
+    seeds = [...graph.values()].filter(n => n.score > 0).slice(0, 3);
   }
   seeds = seeds.slice(0, graph.size > 1000 ? 10 : graph.size > 500 ? 20 : 15);
 
@@ -240,7 +240,7 @@ export function selectCapabilityChains(
   const chains: CapabilityChain[] = [];
   const BEAM_WIDTH = graph.size > 500 ? 3 : 5;
   const MAX_CHAIN_LEN = parseInt(process.env.PROGMUNE_MAX_CHAIN_LEN || "5", 10);
-  const SCORE_FLOOR = graph.size > 1000 ? 0.2 : 0;
+  const SCORE_FLOOR = graph.size > 1000 ? 0.2 : 0.1; // always filter noise
 
   // ── Capability Ranking: preload edge confidence from session history ──
   const edgeConfMap = new Map<string, number>();
@@ -365,10 +365,21 @@ export function selectCapabilityChains(
       }
     }
 
+    // Hybrid: supplement graph chain with high-score keyword matches the graph missed
+    const missed = allNodes
+      .filter(n => !visited.has(n.name) && n.score >= SCORE_FLOOR)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 2); // at most 2 supplements
+    for (const m of missed) {
+      chain.push(m);
+      visited.add(m.name);
+      totalScore += m.score * 0.5; // half weight — graph-discovered nodes are preferred
+    }
+
     if (chain.length >= 1) {
       chains.push({
         nodes: chain,
-        score: totalScore / chain.length, // average score
+        score: totalScore / chain.length,
         explanation: chain.map(n => n.name).join(" → "),
       });
     }
