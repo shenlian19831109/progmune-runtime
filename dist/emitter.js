@@ -258,8 +258,13 @@ export function emitCode(actions, meta) {
                 // Empty default value → use function's parameter name (input parameter)
                 const isEmptyVal = (v) => v === "" || v === 0 || v === false || v === null || (Array.isArray(v) && v.length === 0);
                 const isDefault = isEmptyVal(val);
+                // If the LLM provided a real (non-default) value, use it directly
+                if (!isDefault && val !== undefined && val !== null) {
+                    if (typeof val === "string")
+                        return JSON.stringify(val);
+                    return String(val);
+                }
                 if (isDefault && a?.name) {
-                    // Check for renamed param (type conflict resolution)
                     const paramType = meta?.params?.[i]?.type || "string";
                     const renameKey = a.name + ":" + paramType;
                     const resolvedName = renamed.get(renameKey) || a.name;
