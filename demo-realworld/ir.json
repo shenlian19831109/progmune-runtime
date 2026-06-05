@@ -440,6 +440,978 @@
       "purpose": "revoke all sessions"
     },
     {
+      "name": "issueBill",
+      "params": [
+        {
+          "name": "userId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "amount",
+          "type": "number",
+          "typeDetail": "number"
+        },
+        {
+          "name": "dueDate",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/billing.ts",
+      "calls": [
+        "push"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "number",
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "billing"
+      ],
+      "purpose": "issue bill"
+    },
+    {
+      "name": "markSettled",
+      "params": [
+        {
+          "name": "invoiceId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/billing.ts",
+      "calls": [
+        "find"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "billing"
+      ],
+      "purpose": "mark settled"
+    },
+    {
+      "name": "getOutstanding",
+      "params": [
+        {
+          "name": "userId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "Invoice[]",
+      "returnTypeDetail": "Invoice[]",
+      "file": "src/billing.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "Invoice"
+      ],
+      "tags": [
+        "billing"
+      ],
+      "purpose": "get outstanding",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "computeBalance",
+      "params": [
+        {
+          "name": "userId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/billing.ts",
+      "calls": [
+        "reduce",
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "tags": [
+        "billing"
+      ],
+      "purpose": "compute balance",
+      "produces": [
+        "RESULT"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "applyCredit",
+      "params": [
+        {
+          "name": "userId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "credit",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/billing.ts",
+      "calls": [
+        "computeBalance",
+        "max"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "number"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "tags": [
+        "billing"
+      ],
+      "purpose": "apply credit",
+      "requires": [
+        "CONFIG"
+      ],
+      "_requiresDerived": true,
+      "produces": [
+        "EXECUTED"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "generateStatement",
+      "params": [
+        {
+          "name": "userId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "month",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/billing.ts",
+      "calls": [
+        "filter",
+        "reduce"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "billing"
+      ],
+      "purpose": "generate statement",
+      "produces": [
+        "CREATED"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "scheduleAutoPay",
+      "params": [
+        {
+          "name": "userId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "method",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/billing.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "billing"
+      ],
+      "purpose": "schedule auto pay"
+    },
+    {
+      "name": "cancelAutoPay",
+      "params": [
+        {
+          "name": "userId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/billing.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "billing"
+      ],
+      "purpose": "cancel auto pay"
+    },
+    {
+      "name": "processRefund",
+      "params": [
+        {
+          "name": "invoiceId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "reason",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/billing.ts",
+      "calls": [
+        "find"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "billing"
+      ],
+      "purpose": "process refund"
+    },
+    {
+      "name": "checkOverdue",
+      "params": [],
+      "returnType": "Invoice[]",
+      "returnTypeDetail": "Invoice[]",
+      "file": "src/billing.ts",
+      "calls": [
+        "slice",
+        "toISOString",
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "Invoice"
+      ],
+      "tags": [
+        "billing"
+      ],
+      "purpose": "check overdue",
+      "requires": [
+        "DATA"
+      ],
+      "_requiresDerived": true,
+      "produces": [
+        "VALIDATION_RESULT"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "sendReminder",
+      "params": [
+        {
+          "name": "invoiceId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/billing.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "billing"
+      ],
+      "purpose": "send reminder"
+    },
+    {
+      "name": "applyLateFee",
+      "params": [
+        {
+          "name": "invoiceId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "fee",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/billing.ts",
+      "calls": [
+        "find"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "number"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "billing"
+      ],
+      "purpose": "apply late fee",
+      "requires": [
+        "CONFIG"
+      ],
+      "_requiresDerived": true,
+      "produces": [
+        "EXECUTED"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "getPaymentHistory",
+      "params": [
+        {
+          "name": "userId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string[]",
+      "returnTypeDetail": "string[]",
+      "file": "src/billing.ts",
+      "calls": [
+        "map",
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "billing"
+      ],
+      "purpose": "get payment history",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "validatePaymentMethod",
+      "params": [
+        {
+          "name": "method",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/billing.ts",
+      "calls": [
+        "includes"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "billing"
+      ],
+      "purpose": "validate payment method",
+      "requires": [
+        "DATA"
+      ],
+      "_requiresDerived": true,
+      "produces": [
+        "VALIDATION_RESULT"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "estimateMonthlyBill",
+      "params": [
+        {
+          "name": "userId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/billing.ts",
+      "calls": [
+        "computeBalance"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "tags": [
+        "billing"
+      ],
+      "purpose": "estimate monthly bill"
+    },
+    {
+      "name": "ingest",
+      "params": [
+        {
+          "name": "source",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "format",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/data.ts",
+      "calls": [
+        "push"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "data"
+      ],
+      "purpose": "ingest"
+    },
+    {
+      "name": "cleanse",
+      "params": [
+        {
+          "name": "datasetId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/data.ts",
+      "calls": [
+        "find"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "data"
+      ],
+      "purpose": "cleanse"
+    },
+    {
+      "name": "enrich",
+      "params": [
+        {
+          "name": "datasetId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "mapping",
+          "type": "Record<string,string>",
+          "typeDetail": "Record<string, string>"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/data.ts",
+      "calls": [
+        "find"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "Record"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "data"
+      ],
+      "purpose": "enrich"
+    },
+    {
+      "name": "validateSchema",
+      "params": [
+        {
+          "name": "datasetId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "schema",
+          "type": "string[]",
+          "typeDetail": "string[]"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/data.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "data"
+      ],
+      "purpose": "validate schema",
+      "requires": [
+        "DATA"
+      ],
+      "_requiresDerived": true,
+      "produces": [
+        "VALIDATION_RESULT"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "deduplicate",
+      "params": [
+        {
+          "name": "datasetId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "key",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/data.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "tags": [
+        "data"
+      ],
+      "purpose": "deduplicate"
+    },
+    {
+      "name": "aggregate",
+      "params": [
+        {
+          "name": "datasetId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "groupBy",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "metric",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "any[]",
+      "returnTypeDetail": "any[]",
+      "file": "src/data.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string",
+        "string"
+      ],
+      "outputs": [],
+      "tags": [
+        "data"
+      ],
+      "purpose": "aggregate"
+    },
+    {
+      "name": "exportDataset",
+      "params": [
+        {
+          "name": "datasetId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "format",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/data.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "data"
+      ],
+      "purpose": "export dataset"
+    },
+    {
+      "name": "transformLayout",
+      "params": [
+        {
+          "name": "datasetId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "layout",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/data.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "data"
+      ],
+      "purpose": "transform layout"
+    },
+    {
+      "name": "mergeDatasets",
+      "params": [
+        {
+          "name": "source",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "target",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/data.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "data"
+      ],
+      "purpose": "merge datasets",
+      "requires": [
+        "DATA"
+      ],
+      "_requiresDerived": true
+    },
+    {
+      "name": "getRowCount",
+      "params": [
+        {
+          "name": "datasetId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/data.ts",
+      "calls": [
+        "find"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "tags": [
+        "data"
+      ],
+      "purpose": "get row count",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "getPipelineStatus",
+      "params": [
+        {
+          "name": "datasetId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/data.ts",
+      "calls": [
+        "find"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "data"
+      ],
+      "purpose": "get pipeline status",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "scheduleIngest",
+      "params": [
+        {
+          "name": "source",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "format",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "cron",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/data.ts",
+      "calls": [
+        "ingest"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "data"
+      ],
+      "purpose": "schedule ingest"
+    },
+    {
+      "name": "archiveDataset",
+      "params": [
+        {
+          "name": "datasetId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/data.ts",
+      "calls": [
+        "find"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "data"
+      ],
+      "purpose": "archive dataset"
+    },
+    {
+      "name": "restoreDataset",
+      "params": [
+        {
+          "name": "datasetId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/data.ts",
+      "calls": [
+        "find"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "data"
+      ],
+      "purpose": "restore dataset"
+    },
+    {
+      "name": "compareDatasets",
+      "params": [
+        {
+          "name": "a",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "b",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string[]",
+      "returnTypeDetail": "string[]",
+      "file": "src/data.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "data"
+      ],
+      "purpose": "compare datasets",
+      "requires": [
+        "DATA"
+      ],
+      "_requiresDerived": true
+    },
+    {
       "name": "addProduct",
       "params": [
         {
@@ -686,6 +1658,522 @@
         "DATA"
       ],
       "_producesDerived": true
+    },
+    {
+      "name": "dispatch",
+      "params": [
+        {
+          "name": "to",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "subject",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "channel",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/messaging.ts",
+      "calls": [
+        "push"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string",
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "messaging"
+      ],
+      "purpose": "dispatch"
+    },
+    {
+      "name": "composeDraft",
+      "params": [
+        {
+          "name": "to",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "subject",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/messaging.ts",
+      "calls": [
+        "push"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "messaging"
+      ],
+      "purpose": "compose draft"
+    },
+    {
+      "name": "deliverDraft",
+      "params": [
+        {
+          "name": "draftId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/messaging.ts",
+      "calls": [
+        "find"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "messaging"
+      ],
+      "purpose": "deliver draft"
+    },
+    {
+      "name": "getInbox",
+      "params": [
+        {
+          "name": "user",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "Message[]",
+      "returnTypeDetail": "Message[]",
+      "file": "src/messaging.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "Message"
+      ],
+      "tags": [
+        "messaging"
+      ],
+      "purpose": "get inbox",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "countUnread",
+      "params": [
+        {
+          "name": "user",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/messaging.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "tags": [
+        "messaging"
+      ],
+      "purpose": "count unread",
+      "produces": [
+        "RESULT"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "archiveMessage",
+      "params": [
+        {
+          "name": "msgId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/messaging.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "messaging"
+      ],
+      "purpose": "archive message"
+    },
+    {
+      "name": "searchMessages",
+      "params": [
+        {
+          "name": "query",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "Message[]",
+      "returnTypeDetail": "Message[]",
+      "file": "src/messaging.ts",
+      "calls": [
+        "toLowerCase",
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "Message"
+      ],
+      "tags": [
+        "messaging"
+      ],
+      "purpose": "search messages",
+      "requires": [
+        "DATA"
+      ],
+      "_requiresDerived": true
+    },
+    {
+      "name": "setTemplate",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/messaging.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "messaging"
+      ],
+      "purpose": "set template"
+    },
+    {
+      "name": "renderTemplate",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "vars",
+          "type": "Record<string,string>",
+          "typeDetail": "Record<string, string>"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/messaging.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string",
+        "Record"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "messaging"
+      ],
+      "purpose": "render template",
+      "requires": [
+        "DATA"
+      ],
+      "_requiresDerived": true,
+      "produces": [
+        "FORMATTED"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "scheduleDispatch",
+      "params": [
+        {
+          "name": "to",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "subject",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "channel",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "at",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/messaging.ts",
+      "calls": [
+        "dispatch"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string",
+        "string",
+        "string",
+        "number"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "messaging"
+      ],
+      "purpose": "schedule dispatch"
+    },
+    {
+      "name": "bulkSend",
+      "params": [
+        {
+          "name": "recipients",
+          "type": "string[]",
+          "typeDetail": "string[]"
+        },
+        {
+          "name": "subject",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "channel",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/messaging.ts",
+      "calls": [
+        "dispatch"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string",
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "tags": [
+        "messaging"
+      ],
+      "purpose": "bulk send"
+    },
+    {
+      "name": "getDeliveryStatus",
+      "params": [
+        {
+          "name": "msgId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/messaging.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "messaging"
+      ],
+      "purpose": "get delivery status",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "retryFailed",
+      "params": [
+        {
+          "name": "msgId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/messaging.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "messaging"
+      ],
+      "purpose": "retry failed"
+    },
+    {
+      "name": "validateChannel",
+      "params": [
+        {
+          "name": "channel",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/messaging.ts",
+      "calls": [
+        "includes"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "messaging"
+      ],
+      "purpose": "validate channel",
+      "requires": [
+        "DATA"
+      ],
+      "_requiresDerived": true,
+      "produces": [
+        "VALIDATION_RESULT"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "optOut",
+      "params": [
+        {
+          "name": "user",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "channel",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/messaging.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "messaging"
+      ],
+      "purpose": "opt out"
     },
     {
       "name": "sendNotification",
@@ -1281,6 +2769,484 @@
       "_producesDerived": true
     },
     {
+      "name": "recordAccess",
+      "params": [
+        {
+          "name": "user",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "resource",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "void",
+      "returnTypeDetail": "void",
+      "file": "src/security.ts",
+      "calls": [
+        "push",
+        "now"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string",
+        "string"
+      ],
+      "outputs": [],
+      "tags": [
+        "security"
+      ],
+      "purpose": "record access"
+    },
+    {
+      "name": "queryLog",
+      "params": [
+        {
+          "name": "user",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "since",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "AuditEntry[]",
+      "returnTypeDetail": "AuditEntry[]",
+      "file": "src/security.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "number"
+      ],
+      "outputs": [
+        "AuditEntry"
+      ],
+      "tags": [
+        "security"
+      ],
+      "purpose": "query log",
+      "requires": [
+        "DATA"
+      ],
+      "_requiresDerived": true,
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "detectAnomaly",
+      "params": [
+        {
+          "name": "user",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/security.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "security"
+      ],
+      "purpose": "detect anomaly"
+    },
+    {
+      "name": "revokeAccess",
+      "params": [
+        {
+          "name": "user",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "resource",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/security.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "security"
+      ],
+      "purpose": "revoke access"
+    },
+    {
+      "name": "grantAccess",
+      "params": [
+        {
+          "name": "user",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "resource",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/security.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "security"
+      ],
+      "purpose": "grant access"
+    },
+    {
+      "name": "checkPermission",
+      "params": [
+        {
+          "name": "user",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "resource",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/security.ts",
+      "calls": [
+        "includes"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "security"
+      ],
+      "purpose": "check permission",
+      "requires": [
+        "DATA"
+      ],
+      "_requiresDerived": true,
+      "produces": [
+        "VALIDATION_RESULT"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "encryptPayload",
+      "params": [
+        {
+          "name": "data",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "key",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/security.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "security"
+      ],
+      "purpose": "encrypt payload",
+      "requires": [
+        "INPUT"
+      ],
+      "_requiresDerived": true
+    },
+    {
+      "name": "decryptPayload",
+      "params": [
+        {
+          "name": "encrypted",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "key",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/security.ts",
+      "calls": [
+        "replace"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "security"
+      ],
+      "purpose": "decrypt payload"
+    },
+    {
+      "name": "rotateKeys",
+      "params": [
+        {
+          "name": "oldKey",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/security.ts",
+      "calls": [
+        "now"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "security"
+      ],
+      "purpose": "rotate keys"
+    },
+    {
+      "name": "getAccessLog",
+      "params": [
+        {
+          "name": "resource",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "AuditEntry[]",
+      "returnTypeDetail": "AuditEntry[]",
+      "file": "src/security.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "AuditEntry"
+      ],
+      "tags": [
+        "security"
+      ],
+      "purpose": "get access log",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "flagSuspicious",
+      "params": [
+        {
+          "name": "user",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/security.ts",
+      "calls": [
+        "detectAnomaly"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "security"
+      ],
+      "purpose": "flag suspicious"
+    },
+    {
+      "name": "lockAccount",
+      "params": [
+        {
+          "name": "user",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/security.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "security"
+      ],
+      "purpose": "lock account"
+    },
+    {
+      "name": "unlockAccount",
+      "params": [
+        {
+          "name": "user",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/security.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "security"
+      ],
+      "purpose": "unlock account"
+    },
+    {
+      "name": "getSecurityReport",
+      "params": [],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/security.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "security"
+      ],
+      "purpose": "get security report",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "validateCompliance",
+      "params": [
+        {
+          "name": "standard",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/security.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "security"
+      ],
+      "purpose": "validate compliance",
+      "requires": [
+        "DATA"
+      ],
+      "_requiresDerived": true,
+      "produces": [
+        "VALIDATION_RESULT"
+      ],
+      "_producesDerived": true
+    },
+    {
       "name": "createShipment",
       "params": [
         {
@@ -1687,6 +3653,454 @@
       ]
     },
     {
+      "name": "initiateFlow",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "assignee",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/workflow.ts",
+      "calls": [
+        "push"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "workflow"
+      ],
+      "purpose": "initiate flow"
+    },
+    {
+      "name": "advanceStep",
+      "params": [
+        {
+          "name": "stepId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/workflow.ts",
+      "calls": [
+        "find"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "workflow"
+      ],
+      "purpose": "advance step"
+    },
+    {
+      "name": "completeStep",
+      "params": [
+        {
+          "name": "stepId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/workflow.ts",
+      "calls": [
+        "find"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "workflow"
+      ],
+      "purpose": "complete step"
+    },
+    {
+      "name": "rejectStep",
+      "params": [
+        {
+          "name": "stepId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "reason",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/workflow.ts",
+      "calls": [
+        "find"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "workflow"
+      ],
+      "purpose": "reject step"
+    },
+    {
+      "name": "getNextPending",
+      "params": [],
+      "returnType": "Step|undefined",
+      "returnTypeDetail": "Step | undefined",
+      "file": "src/workflow.ts",
+      "calls": [
+        "find"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "Step"
+      ],
+      "tags": [
+        "workflow"
+      ],
+      "purpose": "get next pending",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "reassignStep",
+      "params": [
+        {
+          "name": "stepId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "newAssignee",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/workflow.ts",
+      "calls": [
+        "find"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "workflow"
+      ],
+      "purpose": "reassign step"
+    },
+    {
+      "name": "getAssigneeWorkload",
+      "params": [
+        {
+          "name": "assignee",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "src/workflow.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "number"
+      ],
+      "tags": [
+        "workflow"
+      ],
+      "purpose": "get assignee workload",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "escalateOverdue",
+      "params": [
+        {
+          "name": "hours",
+          "type": "number",
+          "typeDetail": "number"
+        }
+      ],
+      "returnType": "Step[]",
+      "returnTypeDetail": "Step[]",
+      "file": "src/workflow.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [
+        "number"
+      ],
+      "outputs": [
+        "Step"
+      ],
+      "tags": [
+        "workflow"
+      ],
+      "purpose": "escalate overdue"
+    },
+    {
+      "name": "addCheckpoint",
+      "params": [
+        {
+          "name": "stepId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "checkpoint",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/workflow.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "workflow"
+      ],
+      "purpose": "add checkpoint"
+    },
+    {
+      "name": "verifyCheckpoints",
+      "params": [
+        {
+          "name": "stepId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/workflow.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "workflow"
+      ],
+      "purpose": "verify checkpoints",
+      "requires": [
+        "DATA"
+      ],
+      "_requiresDerived": true,
+      "produces": [
+        "VALIDATION_RESULT"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "getFlowHistory",
+      "params": [
+        {
+          "name": "flowId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string[]",
+      "returnTypeDetail": "string[]",
+      "file": "src/workflow.ts",
+      "calls": [
+        "map",
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "workflow"
+      ],
+      "purpose": "get flow history",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
+      "name": "cancelFlow",
+      "params": [
+        {
+          "name": "flowId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/workflow.ts",
+      "calls": [
+        "startsWith"
+      ],
+      "exported": true,
+      "inputs": [
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "workflow"
+      ],
+      "purpose": "cancel flow"
+    },
+    {
+      "name": "cloneFlow",
+      "params": [
+        {
+          "name": "sourceId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "newName",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "string",
+      "returnTypeDetail": "string",
+      "file": "src/workflow.ts",
+      "calls": [
+        "initiateFlow"
+      ],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "string"
+      ],
+      "tags": [
+        "workflow"
+      ],
+      "purpose": "clone flow"
+    },
+    {
+      "name": "mergeFlows",
+      "params": [
+        {
+          "name": "sourceId",
+          "type": "string",
+          "typeDetail": "string"
+        },
+        {
+          "name": "targetId",
+          "type": "string",
+          "typeDetail": "string"
+        }
+      ],
+      "returnType": "boolean",
+      "returnTypeDetail": "boolean",
+      "file": "src/workflow.ts",
+      "calls": [],
+      "exported": true,
+      "inputs": [
+        "string",
+        "string"
+      ],
+      "outputs": [
+        "boolean"
+      ],
+      "tags": [
+        "workflow"
+      ],
+      "purpose": "merge flows",
+      "requires": [
+        "DATA"
+      ],
+      "_requiresDerived": true
+    },
+    {
+      "name": "getFlowMetrics",
+      "params": [],
+      "returnType": "{total:number;completed:number;rejected:number;pending:number}",
+      "returnTypeDetail": "{total:number;completed:number;rejected:number;pending:number}",
+      "file": "src/workflow.ts",
+      "calls": [
+        "filter"
+      ],
+      "exported": true,
+      "inputs": [],
+      "outputs": [
+        "{total:number;completed:number;rejected:number;pending:number}"
+      ],
+      "tags": [
+        "workflow"
+      ],
+      "purpose": "get flow metrics",
+      "produces": [
+        "DATA"
+      ],
+      "_producesDerived": true
+    },
+    {
       "name": "now",
       "params": [],
       "returnType": "number",
@@ -1729,6 +4143,25 @@
         "DATA"
       ],
       "_producesDerived": true
+    },
+    {
+      "name": "max",
+      "params": [
+        {
+          "name": "values",
+          "type": "number[]"
+        }
+      ],
+      "returnType": "number",
+      "returnTypeDetail": "number",
+      "file": "(external)",
+      "calls": [],
+      "external": true,
+      "description": "最大值",
+      "tags": [
+        "(external)"
+      ],
+      "purpose": "max"
     },
     {
       "name": "stringify",
