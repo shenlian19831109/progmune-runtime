@@ -34,6 +34,32 @@ const TASKS = [
     intent: "export all exported functions with their purpose requires and produces, formatted as a capability catalog",
     desc: "Capability graph viewer",
   },
+  // ── v3.2: 5 additional tasks ──
+  {
+    name: "protocol_validator",
+    intent: "validate protocol transitions and check ledger consistency, then format violations as a report",
+    desc: "Protocol + ledger validation report",
+  },
+  {
+    name: "repair_advisor",
+    intent: "suggest repairs for ledger violations using the minimal fix set, then generate a repair summary",
+    desc: "Repair suggestion advisor",
+  },
+  {
+    name: "snapshot_diff",
+    intent: "create a session snapshot and compare it with a previous snapshot, listing the differences",
+    desc: "Semantic snapshot diff tool",
+  },
+  {
+    name: "audit_report",
+    intent: "audit all source files for generated markers, then format a coverage report with statistics",
+    desc: "Progmune coverage audit report",
+  },
+  {
+    name: "topology_explorer",
+    intent: "load the semantic topology and find similar functions for a given function name, returning top matches",
+    desc: "Topology similarity explorer",
+  },
 ];
 
 async function main() {
