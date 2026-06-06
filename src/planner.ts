@@ -1121,7 +1121,8 @@ ${RETRY_HINT}
         }
       }
     }
-    if (emptyArgs.length > 0 && r < maxRetries - 1) {
+    // Only refine empty args if validation also failed — don't break good chains
+    if (emptyArgs.length > 0 && r < maxRetries - 1 && (!seqResult.valid || preCheckErrors.length > 0)) {
       const argDetails = emptyArgs.map(e => `  ${e.fn}() 参数 "${e.param}" (${e.type}) 是空值`).join("\n");
       console.error(`🔍 检测到 ${emptyArgs.length} 个空参数，启动精炼...`);
       currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}${antibodyHint}\n\n上一次生成的 JSON 中以下参数为空值：\n${argDetails}\n\n请为这些参数填入有意义的示例值（字符串用描述性值，数字用合理数值，对象用 {} as Type）。\n${RETRY_HINT}\n只输出 JSON。`;
