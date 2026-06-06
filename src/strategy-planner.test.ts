@@ -114,19 +114,19 @@ describe("selectCapabilityChains", () => {
 
 describe("selectCapabilityChains — edge cases", () => {
   it("returns empty array for null intent", () => {
-    expect(selectCapabilityChains(null as any, mockIR)).toEqual([]);
+    expect(selectCapabilityChains(null as any, mockIR)).toEqual({ chains: [], needsLLM: false });
   });
 
   it("returns empty array for undefined intent", () => {
-    expect(selectCapabilityChains(undefined as any, mockIR)).toEqual([]);
+    expect(selectCapabilityChains(undefined as any, mockIR)).toEqual({ chains: [], needsLLM: false });
   });
 
   it("returns empty array for empty string intent", () => {
-    expect(selectCapabilityChains("", mockIR)).toEqual([]);
+    expect(selectCapabilityChains("", mockIR)).toEqual({ chains: [], needsLLM: false });
   });
 
   it("returns empty array for whitespace-only intent", () => {
-    expect(selectCapabilityChains("   ", mockIR)).toEqual([]);
+    expect(selectCapabilityChains("   ", mockIR)).toEqual({ chains: [], needsLLM: false });
   });
 });
 
