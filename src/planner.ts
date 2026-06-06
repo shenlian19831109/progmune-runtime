@@ -135,6 +135,14 @@ function correctFunctionNames(actions: Action[], ir: any[]): { actions: Action[]
 /** 参数签名预检：确保 call action 的参数数量与 IR 函数签名一致 */
 function fixParameterCounts(actions: Action[], ir: any[]): { actions: Action[]; fixes: string[] } {
   const fixes: string[] = [];
+  // Find the most recent preceding call with assignTo for chain defaults
+  function findPrevVar(idx: number): string | undefined {
+    for (let k = idx - 1; k >= 0; k--) {
+      const prev = actions[k];
+      if (prev.kind === "call" && prev.assignTo) return prev.assignTo;
+    }
+    return undefined;
+  }
   const corrected = actions.map((a, i) => {
     if (a.kind !== "call" || !a.function) return a;
     const def = ir.find((f: any) => f.name === a.function);
@@ -143,15 +151,16 @@ function fixParameterCounts(actions: Action[], ir: any[]): { actions: Action[]; 
     const actual = a.args ? a.args.length : 0;
     if (actual === expected) return a;
     if (actual < expected) {
-      // 参数太少：填充缺失参数
       const padded = [...(a.args || [])];
+      const prevVar = findPrevVar(i);
       for (let j = actual; j < expected; j++) {
-        padded.push({ name: def.params[j].name, type: def.params[j].type || "any", value: "" });
+        // Smart default: chain from previous call if available
+        const defaultValue = prevVar ? `$${prevVar}` : "";
+        padded.push({ name: def.params[j].name, type: def.params[j].type || "any", value: defaultValue });
       }
-      fixes.push(`action[${i}] ${a.function}: 参数 ${actual}→${expected} (填充 ${expected - actual} 个缺失参数)`);
+      fixes.push(`action[${i}] ${a.function}: 参数 ${actual}→${expected} (填充 ${expected - actual} 个缺失参数${prevVar ? ", 链自 $" + prevVar : ""})`);
       return { ...a, args: padded };
     } else {
-      // 参数太多：截断多余参数
       fixes.push(`action[${i}] ${a.function}: 参数 ${actual}→${expected} (截断 ${actual - expected} 个多余参数)`);
       return { ...a, args: a.args.slice(0, expected) };
     }
