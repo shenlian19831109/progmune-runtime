@@ -254,6 +254,12 @@ export function selectCapabilityChains(
   }
   seeds = seeds.slice(0, graph.size > 1000 ? 10 : graph.size > 500 ? 20 : 15);
 
+  // ── Capability Ranking: preload edge confidence from session history ──
+  const edgeConfMap = new Map<string, number>();
+  for (const ec of getEdgeConfidence()) {
+    edgeConfMap.set(`${ec.producer}→${ec.consumer}`, ec.confidence);
+  }
+
   // ── LLM seed injection: bridge the semantic gap ──
   if (llmSeeds && llmSeeds.length > 0) {
     const seedNames = new Set(seeds.map(n => n.name));
@@ -262,10 +268,11 @@ export function selectCapabilityChains(
       if (seedNames.has(fnName)) continue; // already a seed
       const node = graph.get(fnName);
       if (node) {
-        node.score = Math.max(node.score, maxScore); // give it top seed priority
+        node.score = Math.max(node.score, maxScore);
         seeds.unshift(node);
       }
     }
+
   }
 
   const allNodes = [...graph.values()];
@@ -273,12 +280,6 @@ export function selectCapabilityChains(
   const BEAM_WIDTH = graph.size > 500 ? 3 : 5;
   const MAX_CHAIN_LEN = parseInt(process.env.PROGMUNE_MAX_CHAIN_LEN || "5", 10);
   const SCORE_FLOOR = graph.size > 1000 ? 0.2 : 0.1; // always filter noise
-
-  // ── Capability Ranking: preload edge confidence from session history ──
-  const edgeConfMap = new Map<string, number>();
-  for (const ec of getEdgeConfidence()) {
-    edgeConfMap.set(`${ec.producer}→${ec.consumer}`, ec.confidence);
-  }
 
   for (const seed of seeds) {
     // ── Priority-queue (beam) search: forward trace ──
