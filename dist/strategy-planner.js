@@ -194,7 +194,7 @@ function findConsumers(graph, capability, allNodes) {
 export function selectCapabilityChains(intent, ir, maxChains = 5, llmSeeds) {
     // Guard: null/undefined/empty intent
     if (!intent || typeof intent !== "string" || !intent.trim())
-        return [];
+        return { chains: [], needsLLM: false };
     // Ensure semantic topology is built (cached after first build)
     const startTopo = Date.now();
     getTopology(ir);
@@ -383,10 +383,12 @@ export function selectCapabilityChains(intent, ir, maxChains = 5, llmSeeds) {
         }
     }
     const scoreMs = Date.now() - startScore;
+    // Detect semantic gap: very few seeds passed threshold → LLM could help
+    const needsLLM = seeds.length === 0 || (seeds.length <= 2 && graph.size > 50);
     if (graph.size > 200) {
-        console.error(`[Strategy] ${graph.size} nodes | topo=${topoMs}ms score=${scoreMs}ms | ${unique.length} chains`);
+        console.error(`[Strategy] ${graph.size} nodes | topo=${topoMs}ms score=${scoreMs}ms | ${unique.length} chains | needsLLM=${needsLLM}`);
     }
-    return unique.slice(0, maxChains);
+    return { chains: unique.slice(0, maxChains), needsLLM };
 }
 /** Format chains as a routing hint (not full path).
  *  Only shows top 2 high-confidence next steps per entry,

@@ -133,7 +133,7 @@ function generateDOT(ir, opts = {}) {
  * Generate a focused visualization of a single intent's chain.
  */
 function generateChainViz(intent, ir, maxChains = 1) {
-    const chains = (0, strategy_planner_1.selectCapabilityChains)(intent, ir, maxChains);
+    const { chains } = (0, strategy_planner_1.selectCapabilityChains)(intent, ir, maxChains);
     if (chains.length === 0)
         return `// No chains found for "${intent}"`;
     const chain = chains[0];

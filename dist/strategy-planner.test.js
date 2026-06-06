@@ -74,20 +74,20 @@ const mockIR = [
 ];
 (0, vitest_1.describe)("selectCapabilityChains", () => {
     (0, vitest_1.it)("returns chains for an auth intent", () => {
-        const chains = (0, strategy_planner_1.selectCapabilityChains)("authenticate user", mockIR, 3);
+        const { chains } = (0, strategy_planner_1.selectCapabilityChains)("authenticate user", mockIR, 3);
         (0, vitest_1.expect)(chains.length).toBeGreaterThan(0);
         // Should find at least validatePassword or generateJWT
         const names = chains.flatMap(c => c.nodes.map(n => n.name));
         (0, vitest_1.expect)(names.some(n => n.includes("validate") || n.includes("JWT"))).toBe(true);
     });
     (0, vitest_1.it)("returns chains for a data intent", () => {
-        const chains = (0, strategy_planner_1.selectCapabilityChains)("fetch user data", mockIR, 3);
+        const { chains } = (0, strategy_planner_1.selectCapabilityChains)("fetch user data", mockIR, 3);
         (0, vitest_1.expect)(chains.length).toBeGreaterThan(0);
         const names = chains.flatMap(c => c.nodes.map(n => n.name));
         (0, vitest_1.expect)(names.some(n => n.includes("fetchUser"))).toBe(true);
     });
     (0, vitest_1.it)("respects maxChains limit", () => {
-        const chains = (0, strategy_planner_1.selectCapabilityChains)("data", mockIR, 1);
+        const { chains } = (0, strategy_planner_1.selectCapabilityChains)("data", mockIR, 1);
         (0, vitest_1.expect)(chains.length).toBeLessThanOrEqual(1);
     });
     (0, vitest_1.it)("skips planner internals (self-referential guard)", () => {
@@ -102,7 +102,7 @@ const mockIR = [
                 params: [],
                 returnType: "any",
             }];
-        const chains = (0, strategy_planner_1.selectCapabilityChains)("planning", selfIR, 3);
+        const { chains } = (0, strategy_planner_1.selectCapabilityChains)("planning", selfIR, 3);
         // strategy-planner.ts and planner.ts should be filtered out
         const names = chains.flatMap(c => c.nodes.map(n => n.name));
         (0, vitest_1.expect)(names).not.toContain("selectCapabilityChains");
@@ -110,16 +110,16 @@ const mockIR = [
 });
 (0, vitest_1.describe)("selectCapabilityChains — edge cases", () => {
     (0, vitest_1.it)("returns empty array for null intent", () => {
-        (0, vitest_1.expect)((0, strategy_planner_1.selectCapabilityChains)(null, mockIR)).toEqual([]);
+        (0, vitest_1.expect)((0, strategy_planner_1.selectCapabilityChains)(null, mockIR)).toEqual({ chains: [], needsLLM: false });
     });
     (0, vitest_1.it)("returns empty array for undefined intent", () => {
-        (0, vitest_1.expect)((0, strategy_planner_1.selectCapabilityChains)(undefined, mockIR)).toEqual([]);
+        (0, vitest_1.expect)((0, strategy_planner_1.selectCapabilityChains)(undefined, mockIR)).toEqual({ chains: [], needsLLM: false });
     });
     (0, vitest_1.it)("returns empty array for empty string intent", () => {
-        (0, vitest_1.expect)((0, strategy_planner_1.selectCapabilityChains)("", mockIR)).toEqual([]);
+        (0, vitest_1.expect)((0, strategy_planner_1.selectCapabilityChains)("", mockIR)).toEqual({ chains: [], needsLLM: false });
     });
     (0, vitest_1.it)("returns empty array for whitespace-only intent", () => {
-        (0, vitest_1.expect)((0, strategy_planner_1.selectCapabilityChains)("   ", mockIR)).toEqual([]);
+        (0, vitest_1.expect)((0, strategy_planner_1.selectCapabilityChains)("   ", mockIR)).toEqual({ chains: [], needsLLM: false });
     });
 });
 (0, vitest_1.describe)("formatChainHint", () => {
@@ -127,7 +127,7 @@ const mockIR = [
         (0, vitest_1.expect)((0, strategy_planner_1.formatChainHint)([])).toBe("");
     });
     (0, vitest_1.it)("formats a single chain", () => {
-        const chains = (0, strategy_planner_1.selectCapabilityChains)("authenticate user", mockIR, 1);
+        const { chains } = (0, strategy_planner_1.selectCapabilityChains)("authenticate user", mockIR, 1);
         const hint = (0, strategy_planner_1.formatChainHint)(chains);
         (0, vitest_1.expect)(hint).toContain("建议的下一步调用");
         (0, vitest_1.expect)(hint).toContain("★");
