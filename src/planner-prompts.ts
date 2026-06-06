@@ -19,6 +19,7 @@ export const SYSTEM_PROMPT = `你是程序合成助手。只输出 JSON 数组�
 规则：
 - 函数名从可用列表中选择，优先选注释中 purpose 匹配需求的函数
 - 0参数函数直接用 "a":[]：{"f":"getAllSessions","to":"s","a":[]}
+- 每个参数的"t"字段必须使用函数签名中的精确类型（如 "t":"ConstraintViolation[]" 而不是 "t":"any"）
 - 参数值规则（最重要！）：
   - 链式调用：前面的 call 产生了 to="genome"，后面的 call 用 "v":"$genome" 引用
   - 示例：{"f":"getFailureGenome","to":"g","a":[]} → {"f":"computeHealthScore","to":"s","a":[{"n":"failureGenome","t":"any","v":"$g"},{"n":"antibodyStats","t":"any","v":"$stats"}]}
@@ -62,8 +63,9 @@ export function buildCompactFuncList(funcs: any[], allFuncs: any[]): string {
 
   return funcs.map((f: any) => {
     const params = (f.params || []).map((p: any) => {
-      const ex = exampleValue(p.type || "any", p.name || "arg");
-      return `${p.name}=${ex}`;
+      const t = p.type || "any";
+      const ex = exampleValue(t, p.name || "arg");
+      return `${p.name}: ${t} = ${ex}`;
     }).join(", ");
     let line = `${f.name}(${params}) → ${f.returnType || "any"}`;
     const meta: string[] = [];
