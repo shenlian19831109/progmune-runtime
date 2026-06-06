@@ -92,7 +92,9 @@ export function executeActionCode(code: string): Action[] | null {
       }
     });
 
-    const wrappedCode = `with(vars) { ${code} }`;
+    // Strip TypeScript 'as Type' annotations — JS sandbox, not TS
+    const jsCode = code.replace(/\{\}\s+as\s+\w+(\[\])?/g, '{}');
+    const wrappedCode = `with(vars) { ${jsCode} }`;
     const fn = new Function('vars', ...apiNames, wrappedCode);
     fn(proxyVars, ...apiValues);
     return root.actions;

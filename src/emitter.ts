@@ -387,6 +387,8 @@ export function autoRepair(
       const tsErrors = out.split("\n").filter(l => l.includes("error TS"));
       for (const e of tsErrors) errors.push(e.trim());
 
+      // Fix 0: remove hallucinated type imports (Map, Set, etc. — built-in types)
+      currentCode = currentCode.replace(/import type \{ [^}]*Map[^}]* \} from "[^"]+";\n/g, '');
       // Fix 1: missing names — find in IR and add import
       if (out.includes("Cannot find name") || out.includes("TS2304")) {
         const missingNames = [...out.matchAll(/Cannot find name '(\w+)'/g)].map(m => m[1]);
