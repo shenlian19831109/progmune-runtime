@@ -12,23 +12,23 @@ export const SYSTEM_PROMPT = `你是程序合成助手。只输出 JSON 数组�
 
 格式：[{"f":"函数名","to":"变量名","a":[{"n":"参数名","t":"类型","v":值}]},{"r":"变量名"}]
 
-规则：
-- 函数名从可用列表中选择，优先选注释中 purpose 匹配需求的函数
-- 0参数函数直接用 "a":[]：{"f":"getAllSessions","to":"s","a":[]}
-- 参数值规则（最重要！）：
-  - 链式调用：前面的 call 产生了 to="genome"，后面的 call 用 "v":"$genome" 引用
-  - 示例：{"f":"getFailureGenome","to":"g","a":[]} → {"f":"computeHealthScore","to":"s","a":[{"n":"failureGenome","t":"any","v":"$g"},{"n":"antibodyStats","t":"any","v":"$stats"}]}
-  - 第一个调用的参数用有意义的示例值：文件路径用 "/path/to/file"，ID用 "example-id"
-  - 禁止空串 "" 作为参数值！
-- 返回值: {"r":"变量名"} — 必须返回最后一个 call 的赋值变量
-- 链式调用：看到推荐链时，用 $变量名 把上一步输出传给下一步
+链式调用（最重要！读完再写）：
+  前面的 call 产生了 to="sessions"，后面的 call 用 "v":"$sessions" 引用，形成链条。
+
+  示例——3步链：
+    {"f":"getAllSessions","to":"sessions","a":[]}
+    {"f":"countSessionsWithViolations","to":"v","a":[{"n":"sessions","t":"any[]","v":"$sessions"}]}
+    {"f":"suggestRepairs","to":"r","a":[{"n":"violations","t":"ConstraintViolation[]","v":"$v"}]}
+    {"r":"r"}
+  注意：countSessionsWithViolations 用 $sessions 引用上一步的结果；suggestRepairs 用 $v 引用再上一步。
 
 铁律：
-- 禁止空串参数！每个参数根据函数签名中的 =默认值 填入实际值
-- 字符串用具体描述值（不用 ""），数字用合理数值，布尔用 false
-- 每个call用"to"命名变量，下一个call通过"$变量名"引用
-- 最后一个action必须是{"r":"变量名"}
-- 只输出JSON，不输出解释`;
+  - 必须用 $变量名 把前一步的输出传给下一步！禁止写 "" 或 [] 作为参数值！
+  - 每个 "t" 字段必须原样使用函数签名中的类型——如果有 [] 就必须保留（如 "t":"ConstraintViolation[]"）
+  - 每个 call 用 "to" 命名变量，下一个 call 通过 "$变量名" 引用
+  - 0 参数函数用 "a":[]，非 0 参数函数绝对不能 "a":[]
+  - 最后一个 action 必须是 {"r":"变量名"}
+  - 只输出 JSON，不输出解释`;
 export const RETRY_HINT = `输出格式：紧凑 JSON 数组 [{"f":"函数名","to":"变量名","a":[...]}]`;
 // ── Formatters ──
 /** Build a compact function list with parameter examples for LLM precision. */
@@ -67,8 +67,9 @@ export function buildCompactFuncList(funcs, allFuncs) {
     }
     return funcs.map((f) => {
         const params = (f.params || []).map((p) => {
-            const ex = exampleValue(p.type || "any", p.name || "arg");
-            return `${p.name}=${ex}`;
+            const t = p.type || "any";
+            const ex = exampleValue(t, p.name || "arg");
+            return `${p.name}: ${t} = ${ex}`;
         }).join(", ");
         let line = `${f.name}(${params}) → ${f.returnType || "any"}`;
         const meta = [];

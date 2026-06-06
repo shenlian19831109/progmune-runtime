@@ -1,5 +1,3080 @@
 [
   {
+    "intent": "load the semantic topology and find similar functions for a given function name, returning top matches",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "SemanticTopology.findSimilar",
+        "args": [
+          {
+            "name": "funcName",
+            "type": "string",
+            "value": "funcName"
+          },
+          {
+            "name": "topN",
+            "type": "number",
+            "value": 1
+          }
+        ],
+        "assignTo": "similarFunctions"
+      },
+      {
+        "kind": "return",
+        "value": "similarFunctions"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780732095091",
+    "timestamp": "2026-06-06T07:48:15.091Z"
+  },
+  {
+    "intent": "audit all source files for generated markers, then format a coverage report with statistics",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "formatAuditResult",
+        "args": [
+          {
+            "name": "result",
+            "type": "AuditResult",
+            "value": ""
+          }
+        ],
+        "assignTo": "report"
+      },
+      {
+        "kind": "call",
+        "function": "formatFailureStats",
+        "args": [],
+        "assignTo": "stats"
+      },
+      {
+        "kind": "return",
+        "value": "stats"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780732079886",
+    "timestamp": "2026-06-06T07:47:59.886Z"
+  },
+  {
+    "intent": "create a session snapshot and compare it with a previous snapshot, listing the differences",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "createSnapshot",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "sessions"
+          },
+          {
+            "name": "intent",
+            "type": "string",
+            "value": "intent"
+          },
+          {
+            "name": "sessionId",
+            "type": "string",
+            "value": "sessionId"
+          }
+        ],
+        "assignTo": "snap1"
+      },
+      {
+        "kind": "call",
+        "function": "createSnapshot",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "sessions"
+          },
+          {
+            "name": "intent",
+            "type": "string",
+            "value": "intent"
+          },
+          {
+            "name": "sessionId",
+            "type": "string",
+            "value": "sessionId"
+          }
+        ],
+        "assignTo": "snap2"
+      },
+      {
+        "kind": "call",
+        "function": "formatSnapshotDiff",
+        "args": [
+          {
+            "name": "snapIdA",
+            "type": "string",
+            "value": "snap1"
+          },
+          {
+            "name": "snapIdB",
+            "type": "string",
+            "value": "snap2"
+          }
+        ],
+        "assignTo": "diff"
+      },
+      {
+        "kind": "return",
+        "value": "diff"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780732068271",
+    "timestamp": "2026-06-06T07:47:48.271Z"
+  },
+  {
+    "intent": "suggest repairs for ledger violations using the minimal fix set, then generate a repair summary",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "suggestRepairs",
+        "args": [
+          {
+            "name": "violations",
+            "type": "ConstraintViolation[]",
+            "value": "violations"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "ir"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "protocols"
+          }
+        ],
+        "assignTo": "proposals"
+      },
+      {
+        "kind": "call",
+        "function": "getMinimalFixSet",
+        "args": [
+          {
+            "name": "proposals",
+            "type": "RepairProposal[]",
+            "value": "proposals"
+          }
+        ],
+        "assignTo": "minimal"
+      },
+      {
+        "kind": "call",
+        "function": "generateRepairSummary",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "ledger"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "ir"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "protocols"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "namespaceInitialStates"
+          }
+        ],
+        "assignTo": "summary"
+      },
+      {
+        "kind": "return",
+        "value": "summary"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780732055877",
+    "timestamp": "2026-06-06T07:47:35.877Z"
+  },
+  {
+    "intent": "validate protocol transitions and check ledger consistency, then format violations as a report",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "validateProtocolWithTransitions",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": ""
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": ""
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": ""
+          }
+        ],
+        "assignTo": "validationResult"
+      },
+      {
+        "kind": "call",
+        "function": "checkLedgerConsistency",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "validationResult.transitions"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "validationResult"
+          },
+          {
+            "name": "protocolRules",
+            "type": "Map<string, StateAnnotation>",
+            "value": "validationResult"
+          }
+        ],
+        "assignTo": "consistencyResult"
+      },
+      {
+        "kind": "call",
+        "function": "formatAnomalyReport",
+        "args": [
+          {
+            "name": "a",
+            "type": "Attempt",
+            "value": "validationResult"
+          }
+        ],
+        "assignTo": "report"
+      },
+      {
+        "kind": "return",
+        "value": "report"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780732041930",
+    "timestamp": "2026-06-06T07:47:21.930Z"
+  },
+  {
+    "intent": "export all exported functions with their purpose requires and produces, formatted as a capability catalog",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getExportedDeclarations",
+        "args": [],
+        "assignTo": "declarations"
+      },
+      {
+        "kind": "call",
+        "function": "extractIRWithTypes",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "declarations"
+          }
+        ],
+        "assignTo": "irWithTypes"
+      },
+      {
+        "kind": "return",
+        "value": "irWithTypes"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780732028320",
+    "timestamp": "2026-06-06T07:47:08.320Z"
+  },
+  {
+    "intent": "compute immune metrics including antibody hits and token savings, then format as health status",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAntibodyStats",
+        "args": [],
+        "assignTo": "stats"
+      },
+      {
+        "kind": "call",
+        "function": "computeImmuneMetrics",
+        "args": [],
+        "assignTo": "metrics"
+      },
+      {
+        "kind": "call",
+        "function": "formatHealthLevel",
+        "args": [
+          {
+            "name": "score",
+            "type": "number",
+            "value": "metrics"
+          }
+        ],
+        "assignTo": "status"
+      },
+      {
+        "kind": "return",
+        "value": "status"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780732017154",
+    "timestamp": "2026-06-06T07:46:57.154Z"
+  },
+  {
+    "intent": "list all sessions and count their ledgers, checking ledger consistency for each and reporting violations",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "countSessionLedgers",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "ledgerCounts"
+      },
+      {
+        "kind": "call",
+        "function": "countSessionsWithViolations",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "violations"
+      },
+      {
+        "kind": "return",
+        "value": "violations"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780732004501",
+    "timestamp": "2026-06-06T07:46:44.501Z"
+  },
+  {
+    "intent": "get failure genome and top failure patterns, then format as a trend report showing SVL distribution",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getFailureGenome",
+        "args": [],
+        "assignTo": "genome"
+      },
+      {
+        "kind": "call",
+        "function": "getTopFailurePatterns",
+        "args": [
+          {
+            "name": "limit",
+            "type": "number",
+            "value": 10
+          }
+        ],
+        "assignTo": "patterns"
+      },
+      {
+        "kind": "call",
+        "function": "formatAnomalyReport",
+        "args": [
+          {
+            "name": "a",
+            "type": "Attempt",
+            "value": "genome"
+          }
+        ],
+        "assignTo": "report"
+      },
+      {
+        "kind": "return",
+        "value": "report"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780731993106",
+    "timestamp": "2026-06-06T07:46:33.106Z"
+  },
+  {
+    "intent": "load benchmarks and compute pass rate, then format a readable report with pass/fail counts",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "loadBenchmarks",
+        "args": [],
+        "assignTo": "benchmarks"
+      },
+      {
+        "kind": "call",
+        "function": "benchmarkPassRate",
+        "args": [],
+        "assignTo": "passRate"
+      },
+      {
+        "kind": "call",
+        "function": "benchmarkReport",
+        "args": [],
+        "assignTo": "report"
+      },
+      {
+        "kind": "return",
+        "value": "report"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780731980528",
+    "timestamp": "2026-06-06T07:46:20.528Z"
+  },
+  {
+    "intent": "scan all sessions for unresolved violations, generate prioritized repair queue by severity",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "countResolved",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "resolved"
+      },
+      {
+        "kind": "call",
+        "function": "suggestRepairs",
+        "args": [
+          {
+            "name": "violations",
+            "type": "ConstraintViolation[]",
+            "value": "resolved"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "resolved"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "resolved"
+          }
+        ],
+        "assignTo": "repairs"
+      },
+      {
+        "kind": "return",
+        "value": "repairs"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780731047433",
+    "timestamp": "2026-06-06T07:30:47.433Z"
+  },
+  {
+    "intent": "scan all sessions for unresolved violations, generate prioritized repair queue by severity",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "countResolved",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "resolved"
+      },
+      {
+        "kind": "call",
+        "function": "countSessionsWithViolations",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "violationCount"
+      },
+      {
+        "kind": "call",
+        "function": "suggestRepairs",
+        "args": [
+          {
+            "name": "violations",
+            "type": "ConstraintViolation[]",
+            "value": "violationCount"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "violationCount"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "violationCount"
+          }
+        ],
+        "assignTo": "repairs"
+      },
+      {
+        "kind": "return",
+        "value": "repairs"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780730998234",
+    "timestamp": "2026-06-06T07:29:58.234Z"
+  },
+  {
+    "intent": "scan all sessions for unresolved violations, generate prioritized repair queue by severity",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "countResolved",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "resolved"
+      },
+      {
+        "kind": "call",
+        "function": "countSessionsWithViolations",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "violationCount"
+      },
+      {
+        "kind": "call",
+        "function": "suggestRepairs",
+        "args": [
+          {
+            "name": "violations",
+            "type": "ConstraintViolation[]",
+            "value": "violationCount"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "violationCount"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "violationCount"
+          }
+        ],
+        "assignTo": "repairs"
+      },
+      {
+        "kind": "return",
+        "value": "repairs"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780730966122",
+    "timestamp": "2026-06-06T07:29:26.122Z"
+  },
+  {
+    "intent": "scan all sessions for unresolved violations, generate prioritized repair queue by severity",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "countResolved",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "resolved"
+      },
+      {
+        "kind": "call",
+        "function": "countSessionsWithViolations",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "violationCount"
+      },
+      {
+        "kind": "call",
+        "function": "suggestRepairs",
+        "args": [
+          {
+            "name": "violations",
+            "type": "ConstraintViolation[]",
+            "value": "violationCount"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "violationCount"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "violationCount"
+          }
+        ],
+        "assignTo": "repairs"
+      },
+      {
+        "kind": "return",
+        "value": "repairs"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780730916240",
+    "timestamp": "2026-06-06T07:28:36.240Z"
+  },
+  {
+    "intent": "scan all sessions for unresolved violations, generate prioritized repair queue by severity",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "countResolved",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "resolved"
+      },
+      {
+        "kind": "call",
+        "function": "countSessionsWithViolations",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "violationCount"
+      },
+      {
+        "kind": "call",
+        "function": "suggestRepairs",
+        "args": [
+          {
+            "name": "violations",
+            "type": "ConstraintViolation[]",
+            "value": "violationCount"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "violationCount"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "violationCount"
+          }
+        ],
+        "assignTo": "repairs"
+      },
+      {
+        "kind": "return",
+        "value": "repairs"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780730860454",
+    "timestamp": "2026-06-06T07:27:40.454Z"
+  },
+  {
+    "intent": "scan all sessions for unresolved violations, generate prioritized repair queue by severity",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "countResolved",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "resolved"
+      },
+      {
+        "kind": "call",
+        "function": "countSessionsWithViolations",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "violationCount"
+      },
+      {
+        "kind": "call",
+        "function": "suggestRepairs",
+        "args": [
+          {
+            "name": "violations",
+            "type": "ConstraintViolation[]",
+            "value": "violationCount"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": ""
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": ""
+          }
+        ],
+        "assignTo": "repairs"
+      },
+      {
+        "kind": "return",
+        "value": "repairs"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780730089285",
+    "timestamp": "2026-06-06T07:14:49.285Z"
+  },
+  {
+    "intent": "scan all sessions for unresolved violations, generate prioritized repair queue by severity",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "countResolved",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "resolved"
+      },
+      {
+        "kind": "call",
+        "function": "countSessionsWithViolations",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "violationCount"
+      },
+      {
+        "kind": "call",
+        "function": "suggestRepairs",
+        "args": [
+          {
+            "name": "violations",
+            "type": "ConstraintViolation[]",
+            "value": "violationCount"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": ""
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": ""
+          }
+        ],
+        "assignTo": "repairs"
+      },
+      {
+        "kind": "return",
+        "value": "repairs"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780730055538",
+    "timestamp": "2026-06-06T07:14:15.538Z"
+  },
+  {
+    "intent": "scan all sessions for unresolved violations, generate prioritized repair queue by severity",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "countResolved",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "resolved"
+      },
+      {
+        "kind": "call",
+        "function": "countSessionsWithViolations",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "violationCount"
+      },
+      {
+        "kind": "call",
+        "function": "suggestRepairs",
+        "args": [
+          {
+            "name": "violations",
+            "type": "ConstraintViolation[]",
+            "value": "violationCount"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": ""
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": ""
+          }
+        ],
+        "assignTo": "repairs"
+      },
+      {
+        "kind": "return",
+        "value": "repairs"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780730017469",
+    "timestamp": "2026-06-06T07:13:37.469Z"
+  },
+  {
+    "intent": "scan all sessions for unresolved violations, generate prioritized repair queue by severity",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "scanDir",
+        "args": [
+          {
+            "name": "rootDir",
+            "type": "string",
+            "value": "{{rootDir}}"
+          },
+          {
+            "name": "currentDir",
+            "type": "string",
+            "value": "{{currentDir}}"
+          },
+          {
+            "name": "result",
+            "type": "AuditResult",
+            "value": "{{result}}"
+          }
+        ]
+      },
+      {
+        "kind": "call",
+        "function": "scanAction",
+        "args": [],
+        "assignTo": "scanAction_result"
+      },
+      {
+        "kind": "call",
+        "function": "ActionBuilder.call",
+        "args": [
+          {
+            "name": "func",
+            "type": "string",
+            "value": "{{func}}"
+          },
+          {
+            "name": "args",
+            "type": "any[]",
+            "value": "{{args}}"
+          },
+          {
+            "name": "assignTo",
+            "type": "string",
+            "value": "{{assignTo}}"
+          }
+        ],
+        "assignTo": "ActionBuilder.call_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractDirectCalls",
+        "args": [
+          {
+            "name": "func",
+            "type": "FunctionDeclaration | ArrowFunction",
+            "value": "{{func}}"
+          }
+        ],
+        "assignTo": "extractDirectCalls_result"
+      },
+      {
+        "kind": "call",
+        "function": "getAllFailures",
+        "args": [],
+        "assignTo": "getAllFailures_result"
+      },
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "getAllSessions_result"
+      },
+      {
+        "kind": "call",
+        "function": "verifyAllFingerprints",
+        "args": [
+          {
+            "name": "currentRuleHash",
+            "type": "string",
+            "value": "{{currentRuleHash}}"
+          }
+        ],
+        "assignTo": "verifyAllFingerprints_result"
+      },
+      {
+        "kind": "call",
+        "function": "registerAllMissingFingerprints",
+        "args": [],
+        "assignTo": "registerAllMissingFingerprints_result"
+      },
+      {
+        "kind": "call",
+        "function": "resetCallCount",
+        "args": [],
+        "assignTo": "resetCallCount_result"
+      },
+      {
+        "kind": "call",
+        "function": "assertCallLimit",
+        "args": []
+      },
+      {
+        "kind": "call",
+        "function": "generateFallbackPlan",
+        "args": [
+          {
+            "name": "intent",
+            "type": "string",
+            "value": "{{intent}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "generateFallbackPlan_result"
+      },
+      {
+        "kind": "call",
+        "function": "listAllStates",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "{{ledger}}"
+          }
+        ],
+        "assignTo": "listAllStates_result"
+      },
+      {
+        "kind": "call",
+        "function": "matchAll",
+        "args": [],
+        "assignTo": "matchAll_result"
+      },
+      {
+        "kind": "call",
+        "function": "countSessionsWithViolations",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": "{{sessions}}"
+          }
+        ],
+        "assignTo": "countSessionsWithViolations_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatSessionSummary",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "ReturnType<typeof getAllSessions>",
+            "value": "{{sessions}}"
+          }
+        ],
+        "assignTo": "formatSessionSummary_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatAuditResult",
+        "args": [
+          {
+            "name": "result",
+            "type": "AuditResult",
+            "value": "{{result}}"
+          }
+        ],
+        "assignTo": "formatAuditResult_result"
+      },
+      {
+        "kind": "call",
+        "function": "forkBranch",
+        "args": [
+          {
+            "name": "branch",
+            "type": "Branch",
+            "value": "{{branch}}"
+          },
+          {
+            "name": "splitIndex",
+            "type": "number",
+            "value": "{{splitIndex}}"
+          },
+          {
+            "name": "reason",
+            "type": "BranchReason",
+            "value": "{{reason}}"
+          }
+        ],
+        "assignTo": "forkBranch_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatFailureStats",
+        "args": [],
+        "assignTo": "formatFailureStats_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatHealthLevel",
+        "args": [
+          {
+            "name": "score",
+            "type": "number",
+            "value": "{{score}}"
+          }
+        ],
+        "assignTo": "formatHealthLevel_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatImmuneMetrics",
+        "args": [
+          {
+            "name": "m",
+            "type": "ImmuneMetrics",
+            "value": "{{m}}"
+          }
+        ],
+        "assignTo": "formatImmuneMetrics_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatTransitionCount",
+        "args": [
+          {
+            "name": "count",
+            "type": "number",
+            "value": "{{count}}"
+          }
+        ],
+        "assignTo": "formatTransitionCount_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatLine",
+        "args": [
+          {
+            "name": "level",
+            "type": "Level",
+            "value": "{{level}}"
+          },
+          {
+            "name": "module",
+            "type": "string",
+            "value": "{{module}}"
+          },
+          {
+            "name": "message",
+            "type": "string",
+            "value": "{{message}}"
+          },
+          {
+            "name": "data",
+            "type": "unknown",
+            "value": "{{data}}"
+          }
+        ],
+        "assignTo": "formatLine_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatConstraints",
+        "args": [
+          {
+            "name": "constraints",
+            "type": "PlannerConstraint[]",
+            "value": "{{constraints}}"
+          }
+        ],
+        "assignTo": "formatConstraints_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatActionSequence",
+        "args": [
+          {
+            "name": "actions",
+            "type": "{ kind: string; function?: string }[]",
+            "value": "{{actions}}"
+          }
+        ],
+        "assignTo": "formatActionSequence_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatSessionTimeline",
+        "args": [
+          {
+            "name": "session",
+            "type": "ExecutionSession",
+            "value": "{{session}}"
+          }
+        ],
+        "assignTo": "formatSessionTimeline_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatGenomeSummary",
+        "args": [],
+        "assignTo": "formatGenomeSummary_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatLearnedPatterns",
+        "args": [],
+        "assignTo": "formatLearnedPatterns_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatAntibodyStats",
+        "args": [],
+        "assignTo": "formatAntibodyStats_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatHeatmap",
+        "args": [],
+        "assignTo": "formatHeatmap_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatStateTransitionPathFromLedger",
+        "args": [
+          {
+            "name": "transitions",
+            "type": "StateTransition[]",
+            "value": "{{transitions}}"
+          }
+        ],
+        "assignTo": "formatStateTransitionPathFromLedger_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatStateTransitions",
+        "args": [
+          {
+            "name": "session",
+            "type": "ExecutionSession",
+            "value": "{{session}}"
+          }
+        ],
+        "assignTo": "formatStateTransitions_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatReplayHeader",
+        "args": [
+          {
+            "name": "session",
+            "type": "ExecutionSession",
+            "value": "{{session}}"
+          }
+        ],
+        "assignTo": "formatReplayHeader_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatActionList",
+        "args": [
+          {
+            "name": "actions",
+            "type": "{ kind: string; function?: string }[]",
+            "value": "{{actions}}"
+          }
+        ],
+        "assignTo": "formatActionList_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatAdaptationDiff",
+        "args": [
+          {
+            "name": "prev",
+            "type": "Attempt",
+            "value": "{{prev}}"
+          },
+          {
+            "name": "current",
+            "type": "Attempt",
+            "value": "{{current}}"
+          }
+        ],
+        "assignTo": "formatAdaptationDiff_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatAnomalyReport",
+        "args": [
+          {
+            "name": "a",
+            "type": "Attempt",
+            "value": "{{a}}"
+          }
+        ],
+        "assignTo": "formatAnomalyReport_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatImmuneResponse",
+        "args": [
+          {
+            "name": "a",
+            "type": "Attempt",
+            "value": "{{a}}"
+          }
+        ],
+        "assignTo": "formatImmuneResponse_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatReplayProgress",
+        "args": [
+          {
+            "name": "current",
+            "type": "number",
+            "value": "{{current}}"
+          },
+          {
+            "name": "total",
+            "type": "number",
+            "value": "{{total}}"
+          }
+        ],
+        "assignTo": "formatReplayProgress_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatLedgerReplayValidation",
+        "args": [
+          {
+            "name": "session",
+            "type": "ExecutionSession",
+            "value": "{{session}}"
+          }
+        ],
+        "assignTo": "formatLedgerReplayValidation_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatLedgerStats",
+        "args": [],
+        "assignTo": "formatLedgerStats_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatCrossSessionQuery",
+        "args": [
+          {
+            "name": "operation",
+            "type": "string",
+            "value": "{{operation}}"
+          },
+          {
+            "name": "state",
+            "type": "string",
+            "value": "{{state}}"
+          }
+        ],
+        "assignTo": "formatCrossSessionQuery_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatSnapshotList",
+        "args": [],
+        "assignTo": "formatSnapshotList_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatSnapshotDiff",
+        "args": [
+          {
+            "name": "snapIdA",
+            "type": "string",
+            "value": "{{snapIdA}}"
+          },
+          {
+            "name": "snapIdB",
+            "type": "string",
+            "value": "{{snapIdB}}"
+          }
+        ],
+        "assignTo": "formatSnapshotDiff_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatSessionValidation",
+        "args": [
+          {
+            "name": "session",
+            "type": "ExecutionSession",
+            "value": "{{session}}"
+          }
+        ],
+        "assignTo": "formatSessionValidation_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatSessionCounts",
+        "args": [
+          {
+            "name": "counts",
+            "type": "{ resolved: number; unresolved: number; total: number }",
+            "value": "{{counts}}"
+          }
+        ],
+        "assignTo": "formatSessionCounts_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatDuration",
+        "args": [
+          {
+            "name": "ms",
+            "type": "number",
+            "value": "{{ms}}"
+          }
+        ],
+        "assignTo": "formatDuration_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatFileSize",
+        "args": [
+          {
+            "name": "bytes",
+            "type": "number",
+            "value": "{{bytes}}"
+          }
+        ],
+        "assignTo": "formatFileSize_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatChainHint",
+        "args": [
+          {
+            "name": "chains",
+            "type": "CapabilityChain[]",
+            "value": "{{chains}}"
+          }
+        ],
+        "assignTo": "formatChainHint_result"
+      },
+      {
+        "kind": "call",
+        "function": "forEachDescendant",
+        "args": [],
+        "assignTo": "forEachDescendant_result"
+      },
+      {
+        "kind": "call",
+        "function": "hasViolations",
+        "args": [
+          {
+            "name": "session",
+            "type": "any",
+            "value": "{{session}}"
+          }
+        ],
+        "assignTo": "hasViolations_result"
+      },
+      {
+        "kind": "call",
+        "function": "findViolations",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "{{ledger}}"
+          }
+        ],
+        "assignTo": "findViolations_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateBranchId",
+        "args": [],
+        "assignTo": "generateBranchId_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateCandidateRules",
+        "args": [],
+        "assignTo": "generateCandidateRules_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateMermaid",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          },
+          {
+            "name": "opts",
+            "type": "VizOptions",
+            "value": "{{opts}}"
+          }
+        ],
+        "assignTo": "generateMermaid_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateDOT",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          },
+          {
+            "name": "opts",
+            "type": "VizOptions",
+            "value": "{{opts}}"
+          }
+        ],
+        "assignTo": "generateDOT_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateChainViz",
+        "args": [
+          {
+            "name": "intent",
+            "type": "string",
+            "value": "{{intent}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          },
+          {
+            "name": "maxChains",
+            "type": "number",
+            "value": "{{maxChains}}"
+          }
+        ],
+        "assignTo": "generateChainViz_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateGraphReport",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "generateGraphReport_result"
+      },
+      {
+        "kind": "call",
+        "function": "generate",
+        "args": [
+          {
+            "name": "prompt",
+            "type": "string",
+            "value": "{{prompt}}"
+          }
+        ],
+        "assignTo": "generate_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateRepairSummary",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "{{ledger}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "{{protocols}}"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "{{namespaceInitialStates}}"
+          }
+        ],
+        "assignTo": "generateRepairSummary_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateAttemptId",
+        "args": [],
+        "assignTo": "generateAttemptId_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateSessionId",
+        "args": [],
+        "assignTo": "generateSessionId_result"
+      },
+      {
+        "kind": "call",
+        "function": "generatePlannerSeed",
+        "args": [
+          {
+            "name": "prompt",
+            "type": "string",
+            "value": "{{prompt}}"
+          },
+          {
+            "name": "model",
+            "type": "string",
+            "value": "{{model}}"
+          }
+        ],
+        "assignTo": "generatePlannerSeed_result"
+      },
+      {
+        "kind": "call",
+        "function": "autoRepair",
+        "args": [
+          {
+            "name": "code",
+            "type": "string",
+            "value": "{{code}}"
+          },
+          {
+            "name": "maxRetries",
+            "type": "number",
+            "value": "{{maxRetries}}"
+          }
+        ],
+        "assignTo": "autoRepair_result"
+      },
+      {
+        "kind": "call",
+        "function": "attemptSSGRepair",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "{{actions}}"
+          },
+          {
+            "name": "rejection",
+            "type": "SSGRejection",
+            "value": "{{rejection}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "{{protocols}}"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "{{namespaceInitialStates}}"
+          }
+        ],
+        "assignTo": "attemptSSGRepair_result"
+      },
+      {
+        "kind": "call",
+        "function": "suggestRepairs",
+        "args": [
+          {
+            "name": "violations",
+            "type": "ConstraintViolation[]",
+            "value": "{{violations}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "{{protocols}}"
+          }
+        ],
+        "assignTo": "suggestRepairs_result"
+      },
+      {
+        "kind": "call",
+        "function": "suggestProtocolRepair",
+        "args": [
+          {
+            "name": "rejection",
+            "type": "SSGRejection",
+            "value": "{{rejection}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "suggestProtocolRepair_result"
+      },
+      {
+        "kind": "call",
+        "function": "suggestInvariantRepair",
+        "args": [
+          {
+            "name": "violation",
+            "type": "LedgerConsistencyViolation",
+            "value": "{{violation}}"
+          },
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "{{ledger}}"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "{{namespaceInitialStates}}"
+          }
+        ],
+        "assignTo": "suggestInvariantRepair_result"
+      },
+      {
+        "kind": "call",
+        "function": "suggestGenericRepair",
+        "args": [
+          {
+            "name": "violation",
+            "type": "ConstraintViolation",
+            "value": "{{violation}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "suggestGenericRepair_result"
+      },
+      {
+        "kind": "call",
+        "function": "getFailuresBySVL",
+        "args": [
+          {
+            "name": "level",
+            "type": "SVL",
+            "value": "{{level}}"
+          }
+        ],
+        "assignTo": "getFailuresBySVL_result"
+      },
+      {
+        "kind": "call",
+        "function": "findSnapshotBySession",
+        "args": [
+          {
+            "name": "sessionId",
+            "type": "string",
+            "value": "{{sessionId}}"
+          }
+        ],
+        "assignTo": "findSnapshotBySession_result"
+      },
+      {
+        "kind": "call",
+        "function": "topByScore",
+        "args": [
+          {
+            "name": "nodes",
+            "type": "CapabilityNode[]",
+            "value": "{{nodes}}"
+          }
+        ],
+        "assignTo": "topByScore_result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780729694864",
+    "timestamp": "2026-06-06T07:08:14.864Z"
+  },
+  {
+    "intent": "scan all sessions for unresolved violations that could be auto-repaired, then generate a prioritized repair queue sorted by severity",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "countSessionsWithViolations",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": null
+          }
+        ],
+        "assignTo": "violationCount"
+      },
+      {
+        "kind": "call",
+        "function": "countResolved",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": null
+          }
+        ],
+        "assignTo": "resolutionCount"
+      },
+      {
+        "kind": "call",
+        "function": "suggestRepairs",
+        "args": [
+          {
+            "name": "violations",
+            "type": "ConstraintViolation[]",
+            "value": null
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": null
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": null
+          }
+        ],
+        "assignTo": "repairProposals"
+      },
+      {
+        "kind": "call",
+        "function": "generateRepairSummary",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": null
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": null
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": null
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": null
+          }
+        ],
+        "assignTo": "repairSummary"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780728274481",
+    "timestamp": "2026-06-06T06:44:34.481Z"
+  },
+  {
+    "intent": "scan all sessions for unresolved violations that could be auto-repaired, then generate a prioritized repair queue sorted by severity",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "scanDir",
+        "args": [
+          {
+            "name": "rootDir",
+            "type": "string",
+            "value": "{{rootDir}}"
+          },
+          {
+            "name": "currentDir",
+            "type": "string",
+            "value": "{{currentDir}}"
+          },
+          {
+            "name": "result",
+            "type": "AuditResult",
+            "value": "{{result}}"
+          }
+        ]
+      },
+      {
+        "kind": "call",
+        "function": "scanAction",
+        "args": [],
+        "assignTo": "scanAction_result"
+      },
+      {
+        "kind": "call",
+        "function": "ActionBuilder.call",
+        "args": [
+          {
+            "name": "func",
+            "type": "string",
+            "value": "{{func}}"
+          },
+          {
+            "name": "args",
+            "type": "any[]",
+            "value": "{{args}}"
+          },
+          {
+            "name": "assignTo",
+            "type": "string",
+            "value": "{{assignTo}}"
+          }
+        ],
+        "assignTo": "ActionBuilder.call_result"
+      },
+      {
+        "kind": "call",
+        "function": "extractDirectCalls",
+        "args": [
+          {
+            "name": "func",
+            "type": "FunctionDeclaration | ArrowFunction",
+            "value": "{{func}}"
+          }
+        ],
+        "assignTo": "extractDirectCalls_result"
+      },
+      {
+        "kind": "call",
+        "function": "getAllFailures",
+        "args": [],
+        "assignTo": "getAllFailures_result"
+      },
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "getAllSessions_result"
+      },
+      {
+        "kind": "call",
+        "function": "verifyAllFingerprints",
+        "args": [
+          {
+            "name": "currentRuleHash",
+            "type": "string",
+            "value": "{{currentRuleHash}}"
+          }
+        ],
+        "assignTo": "verifyAllFingerprints_result"
+      },
+      {
+        "kind": "call",
+        "function": "registerAllMissingFingerprints",
+        "args": [],
+        "assignTo": "registerAllMissingFingerprints_result"
+      },
+      {
+        "kind": "call",
+        "function": "resetCallCount",
+        "args": [],
+        "assignTo": "resetCallCount_result"
+      },
+      {
+        "kind": "call",
+        "function": "assertCallLimit",
+        "args": []
+      },
+      {
+        "kind": "call",
+        "function": "generateFallbackPlan",
+        "args": [
+          {
+            "name": "intent",
+            "type": "string",
+            "value": "{{intent}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "generateFallbackPlan_result"
+      },
+      {
+        "kind": "call",
+        "function": "listAllStates",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "{{ledger}}"
+          }
+        ],
+        "assignTo": "listAllStates_result"
+      },
+      {
+        "kind": "call",
+        "function": "matchAll",
+        "args": [],
+        "assignTo": "matchAll_result"
+      },
+      {
+        "kind": "call",
+        "function": "countSessionsWithViolations",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": "{{sessions}}"
+          }
+        ],
+        "assignTo": "countSessionsWithViolations_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatSessionSummary",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "ReturnType<typeof getAllSessions>",
+            "value": "{{sessions}}"
+          }
+        ],
+        "assignTo": "formatSessionSummary_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatAuditResult",
+        "args": [
+          {
+            "name": "result",
+            "type": "AuditResult",
+            "value": "{{result}}"
+          }
+        ],
+        "assignTo": "formatAuditResult_result"
+      },
+      {
+        "kind": "call",
+        "function": "forkBranch",
+        "args": [
+          {
+            "name": "branch",
+            "type": "Branch",
+            "value": "{{branch}}"
+          },
+          {
+            "name": "splitIndex",
+            "type": "number",
+            "value": "{{splitIndex}}"
+          },
+          {
+            "name": "reason",
+            "type": "BranchReason",
+            "value": "{{reason}}"
+          }
+        ],
+        "assignTo": "forkBranch_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatFailureStats",
+        "args": [],
+        "assignTo": "formatFailureStats_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatHealthLevel",
+        "args": [
+          {
+            "name": "score",
+            "type": "number",
+            "value": "{{score}}"
+          }
+        ],
+        "assignTo": "formatHealthLevel_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatImmuneMetrics",
+        "args": [
+          {
+            "name": "m",
+            "type": "ImmuneMetrics",
+            "value": "{{m}}"
+          }
+        ],
+        "assignTo": "formatImmuneMetrics_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatTransitionCount",
+        "args": [
+          {
+            "name": "count",
+            "type": "number",
+            "value": "{{count}}"
+          }
+        ],
+        "assignTo": "formatTransitionCount_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatLine",
+        "args": [
+          {
+            "name": "level",
+            "type": "Level",
+            "value": "{{level}}"
+          },
+          {
+            "name": "module",
+            "type": "string",
+            "value": "{{module}}"
+          },
+          {
+            "name": "message",
+            "type": "string",
+            "value": "{{message}}"
+          },
+          {
+            "name": "data",
+            "type": "unknown",
+            "value": "{{data}}"
+          }
+        ],
+        "assignTo": "formatLine_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatConstraints",
+        "args": [
+          {
+            "name": "constraints",
+            "type": "PlannerConstraint[]",
+            "value": "{{constraints}}"
+          }
+        ],
+        "assignTo": "formatConstraints_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatActionSequence",
+        "args": [
+          {
+            "name": "actions",
+            "type": "{ kind: string; function?: string }[]",
+            "value": "{{actions}}"
+          }
+        ],
+        "assignTo": "formatActionSequence_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatSessionTimeline",
+        "args": [
+          {
+            "name": "session",
+            "type": "ExecutionSession",
+            "value": "{{session}}"
+          }
+        ],
+        "assignTo": "formatSessionTimeline_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatGenomeSummary",
+        "args": [],
+        "assignTo": "formatGenomeSummary_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatLearnedPatterns",
+        "args": [],
+        "assignTo": "formatLearnedPatterns_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatAntibodyStats",
+        "args": [],
+        "assignTo": "formatAntibodyStats_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatHeatmap",
+        "args": [],
+        "assignTo": "formatHeatmap_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatStateTransitionPathFromLedger",
+        "args": [
+          {
+            "name": "transitions",
+            "type": "StateTransition[]",
+            "value": "{{transitions}}"
+          }
+        ],
+        "assignTo": "formatStateTransitionPathFromLedger_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatStateTransitions",
+        "args": [
+          {
+            "name": "session",
+            "type": "ExecutionSession",
+            "value": "{{session}}"
+          }
+        ],
+        "assignTo": "formatStateTransitions_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatReplayHeader",
+        "args": [
+          {
+            "name": "session",
+            "type": "ExecutionSession",
+            "value": "{{session}}"
+          }
+        ],
+        "assignTo": "formatReplayHeader_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatActionList",
+        "args": [
+          {
+            "name": "actions",
+            "type": "{ kind: string; function?: string }[]",
+            "value": "{{actions}}"
+          }
+        ],
+        "assignTo": "formatActionList_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatAdaptationDiff",
+        "args": [
+          {
+            "name": "prev",
+            "type": "Attempt",
+            "value": "{{prev}}"
+          },
+          {
+            "name": "current",
+            "type": "Attempt",
+            "value": "{{current}}"
+          }
+        ],
+        "assignTo": "formatAdaptationDiff_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatAnomalyReport",
+        "args": [
+          {
+            "name": "a",
+            "type": "Attempt",
+            "value": "{{a}}"
+          }
+        ],
+        "assignTo": "formatAnomalyReport_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatImmuneResponse",
+        "args": [
+          {
+            "name": "a",
+            "type": "Attempt",
+            "value": "{{a}}"
+          }
+        ],
+        "assignTo": "formatImmuneResponse_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatReplayProgress",
+        "args": [
+          {
+            "name": "current",
+            "type": "number",
+            "value": "{{current}}"
+          },
+          {
+            "name": "total",
+            "type": "number",
+            "value": "{{total}}"
+          }
+        ],
+        "assignTo": "formatReplayProgress_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatLedgerReplayValidation",
+        "args": [
+          {
+            "name": "session",
+            "type": "ExecutionSession",
+            "value": "{{session}}"
+          }
+        ],
+        "assignTo": "formatLedgerReplayValidation_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatLedgerStats",
+        "args": [],
+        "assignTo": "formatLedgerStats_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatCrossSessionQuery",
+        "args": [
+          {
+            "name": "operation",
+            "type": "string",
+            "value": "{{operation}}"
+          },
+          {
+            "name": "state",
+            "type": "string",
+            "value": "{{state}}"
+          }
+        ],
+        "assignTo": "formatCrossSessionQuery_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatSnapshotList",
+        "args": [],
+        "assignTo": "formatSnapshotList_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatSnapshotDiff",
+        "args": [
+          {
+            "name": "snapIdA",
+            "type": "string",
+            "value": "{{snapIdA}}"
+          },
+          {
+            "name": "snapIdB",
+            "type": "string",
+            "value": "{{snapIdB}}"
+          }
+        ],
+        "assignTo": "formatSnapshotDiff_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatSessionValidation",
+        "args": [
+          {
+            "name": "session",
+            "type": "ExecutionSession",
+            "value": "{{session}}"
+          }
+        ],
+        "assignTo": "formatSessionValidation_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatSessionCounts",
+        "args": [
+          {
+            "name": "counts",
+            "type": "{ resolved: number; unresolved: number; total: number }",
+            "value": "{{counts}}"
+          }
+        ],
+        "assignTo": "formatSessionCounts_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatDuration",
+        "args": [
+          {
+            "name": "ms",
+            "type": "number",
+            "value": "{{ms}}"
+          }
+        ],
+        "assignTo": "formatDuration_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatFileSize",
+        "args": [
+          {
+            "name": "bytes",
+            "type": "number",
+            "value": "{{bytes}}"
+          }
+        ],
+        "assignTo": "formatFileSize_result"
+      },
+      {
+        "kind": "call",
+        "function": "formatChainHint",
+        "args": [
+          {
+            "name": "chains",
+            "type": "CapabilityChain[]",
+            "value": "{{chains}}"
+          }
+        ],
+        "assignTo": "formatChainHint_result"
+      },
+      {
+        "kind": "call",
+        "function": "forEachDescendant",
+        "args": [],
+        "assignTo": "forEachDescendant_result"
+      },
+      {
+        "kind": "call",
+        "function": "hasViolations",
+        "args": [
+          {
+            "name": "session",
+            "type": "any",
+            "value": "{{session}}"
+          }
+        ],
+        "assignTo": "hasViolations_result"
+      },
+      {
+        "kind": "call",
+        "function": "findViolations",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "{{ledger}}"
+          }
+        ],
+        "assignTo": "findViolations_result"
+      },
+      {
+        "kind": "call",
+        "function": "benchmarkCount",
+        "args": [],
+        "assignTo": "benchmarkCount_result"
+      },
+      {
+        "kind": "call",
+        "function": "benchmarkPassRate",
+        "args": [],
+        "assignTo": "benchmarkPassRate_result"
+      },
+      {
+        "kind": "call",
+        "function": "benchmarkReport",
+        "args": [],
+        "assignTo": "benchmarkReport_result"
+      },
+      {
+        "kind": "call",
+        "function": "benchmarkSave",
+        "args": [
+          {
+            "name": "data",
+            "type": "any",
+            "value": "{{data}}"
+          }
+        ],
+        "assignTo": "benchmarkSave_result"
+      },
+      {
+        "kind": "call",
+        "function": "benchmarkLoadLatest",
+        "args": [],
+        "assignTo": "benchmarkLoadLatest_result"
+      },
+      {
+        "kind": "call",
+        "function": "describeBranchTree",
+        "args": [
+          {
+            "name": "root",
+            "type": "Branch",
+            "value": "{{root}}"
+          },
+          {
+            "name": "allBranches",
+            "type": "Map<string, Branch>",
+            "value": "{{allBranches}}"
+          },
+          {
+            "name": "indent",
+            "type": "any",
+            "value": "{{indent}}"
+          }
+        ],
+        "assignTo": "describeBranchTree_result"
+      },
+      {
+        "kind": "call",
+        "function": "loadBenchmarks",
+        "args": [],
+        "assignTo": "loadBenchmarks_result"
+      },
+      {
+        "kind": "call",
+        "function": "svlLabel",
+        "args": [
+          {
+            "name": "svl",
+            "type": "string",
+            "value": "{{svl}}"
+          }
+        ],
+        "assignTo": "svlLabel_result"
+      },
+      {
+        "kind": "call",
+        "function": "describeSVLLayer",
+        "args": [
+          {
+            "name": "svl",
+            "type": "string",
+            "value": "{{svl}}"
+          }
+        ],
+        "assignTo": "describeSVLLayer_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateBranchId",
+        "args": [],
+        "assignTo": "generateBranchId_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateCandidateRules",
+        "args": [],
+        "assignTo": "generateCandidateRules_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateMermaid",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          },
+          {
+            "name": "opts",
+            "type": "VizOptions",
+            "value": "{{opts}}"
+          }
+        ],
+        "assignTo": "generateMermaid_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateDOT",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          },
+          {
+            "name": "opts",
+            "type": "VizOptions",
+            "value": "{{opts}}"
+          }
+        ],
+        "assignTo": "generateDOT_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateChainViz",
+        "args": [
+          {
+            "name": "intent",
+            "type": "string",
+            "value": "{{intent}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          },
+          {
+            "name": "maxChains",
+            "type": "number",
+            "value": "{{maxChains}}"
+          }
+        ],
+        "assignTo": "generateChainViz_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateGraphReport",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "generateGraphReport_result"
+      },
+      {
+        "kind": "call",
+        "function": "generate",
+        "args": [
+          {
+            "name": "prompt",
+            "type": "string",
+            "value": "{{prompt}}"
+          }
+        ],
+        "assignTo": "generate_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateRepairSummary",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "{{ledger}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "{{protocols}}"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "{{namespaceInitialStates}}"
+          }
+        ],
+        "assignTo": "generateRepairSummary_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateAttemptId",
+        "args": [],
+        "assignTo": "generateAttemptId_result"
+      },
+      {
+        "kind": "call",
+        "function": "generateSessionId",
+        "args": [],
+        "assignTo": "generateSessionId_result"
+      },
+      {
+        "kind": "call",
+        "function": "generatePlannerSeed",
+        "args": [
+          {
+            "name": "prompt",
+            "type": "string",
+            "value": "{{prompt}}"
+          },
+          {
+            "name": "model",
+            "type": "string",
+            "value": "{{model}}"
+          }
+        ],
+        "assignTo": "generatePlannerSeed_result"
+      },
+      {
+        "kind": "call",
+        "function": "autoRepair",
+        "args": [
+          {
+            "name": "code",
+            "type": "string",
+            "value": "{{code}}"
+          },
+          {
+            "name": "maxRetries",
+            "type": "number",
+            "value": "{{maxRetries}}"
+          }
+        ],
+        "assignTo": "autoRepair_result"
+      },
+      {
+        "kind": "call",
+        "function": "attemptSSGRepair",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "{{actions}}"
+          },
+          {
+            "name": "rejection",
+            "type": "SSGRejection",
+            "value": "{{rejection}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "{{protocols}}"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "{{namespaceInitialStates}}"
+          }
+        ],
+        "assignTo": "attemptSSGRepair_result"
+      },
+      {
+        "kind": "call",
+        "function": "suggestRepairs",
+        "args": [
+          {
+            "name": "violations",
+            "type": "ConstraintViolation[]",
+            "value": "{{violations}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": "{{protocols}}"
+          }
+        ],
+        "assignTo": "suggestRepairs_result"
+      },
+      {
+        "kind": "call",
+        "function": "suggestProtocolRepair",
+        "args": [
+          {
+            "name": "rejection",
+            "type": "SSGRejection",
+            "value": "{{rejection}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "suggestProtocolRepair_result"
+      },
+      {
+        "kind": "call",
+        "function": "suggestInvariantRepair",
+        "args": [
+          {
+            "name": "violation",
+            "type": "LedgerConsistencyViolation",
+            "value": "{{violation}}"
+          },
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "{{ledger}}"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "{{namespaceInitialStates}}"
+          }
+        ],
+        "assignTo": "suggestInvariantRepair_result"
+      },
+      {
+        "kind": "call",
+        "function": "suggestGenericRepair",
+        "args": [
+          {
+            "name": "violation",
+            "type": "ConstraintViolation",
+            "value": "{{violation}}"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "{{ir}}"
+          }
+        ],
+        "assignTo": "suggestGenericRepair_result"
+      },
+      {
+        "kind": "call",
+        "function": "getFailuresBySVL",
+        "args": [
+          {
+            "name": "level",
+            "type": "SVL",
+            "value": "{{level}}"
+          }
+        ],
+        "assignTo": "getFailuresBySVL_result"
+      },
+      {
+        "kind": "call",
+        "function": "findSnapshotBySession",
+        "args": [
+          {
+            "name": "sessionId",
+            "type": "string",
+            "value": "{{sessionId}}"
+          }
+        ],
+        "assignTo": "findSnapshotBySession_result"
+      },
+      {
+        "kind": "call",
+        "function": "topByScore",
+        "args": [
+          {
+            "name": "nodes",
+            "type": "CapabilityNode[]",
+            "value": "{{nodes}}"
+          }
+        ],
+        "assignTo": "topByScore_result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780728105390",
+    "timestamp": "2026-06-06T06:41:45.390Z"
+  },
+  {
+    "intent": "scan all sessions for unresolved violations that could be auto-repaired, then generate a prioritized repair queue sorted by severity",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "countSessionsWithViolations",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": null
+          }
+        ],
+        "assignTo": "violationCount"
+      },
+      {
+        "kind": "call",
+        "function": "countResolved",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": null
+          }
+        ],
+        "assignTo": "resolutionCount"
+      },
+      {
+        "kind": "call",
+        "function": "suggestRepairs",
+        "args": [
+          {
+            "name": "violations",
+            "type": "ConstraintViolation[]",
+            "value": null
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": ""
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": ""
+          }
+        ],
+        "assignTo": "repairProposals"
+      },
+      {
+        "kind": "call",
+        "function": "generateRepairSummary",
+        "args": [
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": null
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": ""
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": ""
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": ""
+          }
+        ],
+        "assignTo": "repairSummary"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780726410611",
+    "timestamp": "2026-06-06T06:13:30.611Z"
+  },
+  {
+    "intent": "scan all sessions for unresolved violations that could be auto-repaired, then generate a prioritized repair queue sorted by severity",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getActiveSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "getEventsByUser",
+        "args": [
+          {
+            "name": "userId",
+            "type": "string",
+            "value": "user-001"
+          }
+        ],
+        "assignTo": "events"
+      },
+      {
+        "kind": "call",
+        "function": "getUnreadNotifications",
+        "args": [
+          {
+            "name": "userId",
+            "type": "string",
+            "value": "user-001"
+          }
+        ],
+        "assignTo": "notifications"
+      },
+      {
+        "kind": "call",
+        "function": "generateFullReport",
+        "args": [],
+        "assignTo": "report"
+      },
+      {
+        "kind": "call",
+        "function": "formatReportAsJSON",
+        "args": [
+          {
+            "name": "report",
+            "type": "string",
+            "value": "report"
+          }
+        ],
+        "assignTo": "formattedReport"
+      },
+      {
+        "kind": "return",
+        "value": "formattedReport"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780726027235",
+    "timestamp": "2026-06-06T06:07:07.235Z"
+  },
+  {
     "intent": "unify error reporting across all immune system modules",
     "actions": [
       {
@@ -26,8 +3101,8 @@
       }
     ],
     "success": true,
-    "id": "ep_1780695621538",
-    "timestamp": "2026-06-05T21:40:21.538Z"
+    "id": "ep_1780724853916",
+    "timestamp": "2026-06-06T05:47:33.916Z"
   },
   {
     "intent": "split the large session manager into focused modules",
@@ -39,25 +3114,13 @@
         "assignTo": "sessions"
       },
       {
-        "kind": "call",
-        "function": "revokeAllSessions",
-        "args": [
-          {
-            "name": "userId",
-            "type": "string",
-            "value": "sessions"
-          }
-        ],
-        "assignTo": "revokedCount"
-      },
-      {
         "kind": "return",
-        "value": "revokedCount"
+        "value": "sessions"
       }
     ],
     "success": true,
-    "id": "ep_1780695619590",
-    "timestamp": "2026-06-05T21:40:19.590Z"
+    "id": "ep_1780724852291",
+    "timestamp": "2026-06-06T05:47:32.291Z"
   },
   {
     "intent": "consolidate duplicate validation code in planner and validator",
@@ -97,137 +3160,12 @@
       }
     ],
     "success": true,
-    "id": "ep_1780695617328",
-    "timestamp": "2026-06-05T21:40:17.328Z"
+    "id": "ep_1780724850844",
+    "timestamp": "2026-06-06T05:47:30.844Z"
   },
   {
     "intent": "refactor the protocol validator to use a single entry point",
     "actions": [
-      {
-        "kind": "call",
-        "function": "getTopEvents",
-        "args": [
-          {
-            "name": "limit",
-            "type": "number",
-            "value": "{{limit}}"
-          }
-        ],
-        "assignTo": "getTopEvents_result"
-      },
-      {
-        "kind": "call",
-        "function": "validateToken",
-        "args": [
-          {
-            "name": "token",
-            "type": "string",
-            "value": "{{token}}"
-          }
-        ],
-        "assignTo": "validateToken_result"
-      },
-      {
-        "kind": "call",
-        "function": "refreshToken",
-        "args": [
-          {
-            "name": "oldToken",
-            "type": "string",
-            "value": "{{oldToken}}"
-          }
-        ],
-        "assignTo": "refreshToken_result"
-      },
-      {
-        "kind": "call",
-        "function": "updateStock",
-        "args": [
-          {
-            "name": "id",
-            "type": "string",
-            "value": "{{id}}"
-          },
-          {
-            "name": "delta",
-            "type": "number",
-            "value": "{{delta}}"
-          }
-        ],
-        "assignTo": "updateStock_result"
-      },
-      {
-        "kind": "call",
-        "function": "listLowStock",
-        "args": [
-          {
-            "name": "threshold",
-            "type": "number",
-            "value": "{{threshold}}"
-          }
-        ],
-        "assignTo": "listLowStock_result"
-      },
-      {
-        "kind": "call",
-        "function": "getInventoryValue",
-        "args": [],
-        "assignTo": "getInventoryValue_result"
-      },
-      {
-        "kind": "call",
-        "function": "getStockSummary",
-        "args": [],
-        "assignTo": "getStockSummary_result"
-      },
-      {
-        "kind": "call",
-        "function": "getOrdersByUser",
-        "args": [
-          {
-            "name": "userId",
-            "type": "string",
-            "value": "{{userId}}"
-          }
-        ],
-        "assignTo": "getOrdersByUser_result"
-      },
-      {
-        "kind": "call",
-        "function": "getOrderPayments",
-        "args": [
-          {
-            "name": "orderId",
-            "type": "string",
-            "value": "{{orderId}}"
-          }
-        ],
-        "assignTo": "getOrderPayments_result"
-      },
-      {
-        "kind": "call",
-        "function": "generateInventoryReport",
-        "args": [],
-        "assignTo": "generateInventoryReport_result"
-      },
-      {
-        "kind": "call",
-        "function": "getEventsByUser",
-        "args": [
-          {
-            "name": "userId",
-            "type": "string",
-            "value": "{{userId}}"
-          }
-        ],
-        "assignTo": "getEventsByUser_result"
-      },
-      {
-        "kind": "call",
-        "function": "getDailyActiveUsers",
-        "args": [],
-        "assignTo": "getDailyActiveUsers_result"
-      },
       {
         "kind": "call",
         "function": "findUserByEmail",
@@ -235,32 +3173,10 @@
           {
             "name": "email",
             "type": "string",
-            "value": "{{email}}"
+            "value": "admin@example.com"
           }
         ],
-        "assignTo": "findUserByEmail_result"
-      },
-      {
-        "kind": "call",
-        "function": "createUser",
-        "args": [
-          {
-            "name": "name",
-            "type": "string",
-            "value": "{{name}}"
-          },
-          {
-            "name": "email",
-            "type": "string",
-            "value": "{{email}}"
-          },
-          {
-            "name": "role",
-            "type": "string",
-            "value": "{{role}}"
-          }
-        ],
-        "assignTo": "createUser_result"
+        "assignTo": "user"
       },
       {
         "kind": "call",
@@ -269,35 +3185,56 @@
           {
             "name": "userId",
             "type": "string",
-            "value": "{{userId}}"
+            "value": "user"
           },
           {
             "name": "requiredRole",
             "type": "string",
-            "value": "{{requiredRole}}"
+            "value": "admin"
           }
         ],
-        "assignTo": "validateUserRole_result"
+        "assignTo": "permission"
       },
       {
         "kind": "call",
-        "function": "listUsersByRole",
+        "function": "createUser",
         "args": [
+          {
+            "name": "name",
+            "type": "string",
+            "value": "new_admin"
+          },
+          {
+            "name": "email",
+            "type": "string",
+            "value": "new_admin@example.com"
+          },
           {
             "name": "role",
             "type": "string",
-            "value": "{{role}}"
+            "value": "admin"
           }
         ],
-        "assignTo": "listUsersByRole_result"
+        "assignTo": "newUser"
+      },
+      {
+        "kind": "return",
+        "value": "newUser"
       }
     ],
     "success": true,
-    "id": "ep_1780695614733",
-    "timestamp": "2026-06-05T21:40:14.733Z"
+    "id": "ep_1780724848877",
+    "timestamp": "2026-06-06T05:47:28.877Z"
   },
   {
-    "intent": "refactor the protocol validator to use a single entry point",
+    "intent": "extract common IR loading logic into a shared utility",
+    "actions": [],
+    "success": false,
+    "id": "ep_1780724846672",
+    "timestamp": "2026-06-06T05:47:26.672Z"
+  },
+  {
+    "intent": "extract common IR loading logic into a shared utility",
     "actions": [
       {
         "kind": "call",
@@ -350,11 +3287,11 @@
     ],
     "success": false,
     "svlViolated": "SVL-1",
-    "id": "ep_1780695614728",
-    "timestamp": "2026-06-05T21:40:14.728Z"
+    "id": "ep_1780724846668",
+    "timestamp": "2026-06-06T05:47:26.668Z"
   },
   {
-    "intent": "refactor the protocol validator to use a single entry point",
+    "intent": "extract common IR loading logic into a shared utility",
     "actions": [
       {
         "kind": "call",
@@ -407,22 +3344,16 @@
     ],
     "success": false,
     "svlViolated": "SVL-1",
-    "id": "ep_1780695613506",
-    "timestamp": "2026-06-05T21:40:13.506Z"
+    "id": "ep_1780724845314",
+    "timestamp": "2026-06-06T05:47:25.314Z"
   },
   {
-    "intent": "refactor the protocol validator to use a single entry point",
+    "intent": "extract common IR loading logic into a shared utility",
     "actions": [
       {
         "kind": "call",
         "function": "extractIR",
-        "args": [
-          {
-            "name": "code",
-            "type": "string",
-            "value": "protocol validator code"
-          }
-        ],
+        "args": [],
         "assignTo": "ir"
       },
       {
@@ -480,196 +3411,8 @@
     ],
     "success": false,
     "svlViolated": "SVL-1",
-    "id": "ep_1780695611951",
-    "timestamp": "2026-06-05T21:40:11.951Z"
-  },
-  {
-    "intent": "extract common IR loading logic into a shared utility",
-    "actions": [],
-    "success": false,
-    "id": "ep_1780695609822",
-    "timestamp": "2026-06-05T21:40:09.822Z"
-  },
-  {
-    "intent": "extract common IR loading logic into a shared utility",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "extractIR",
-        "args": [],
-        "assignTo": "ir"
-      },
-      {
-        "kind": "call",
-        "function": "validateAddress",
-        "args": [
-          {
-            "name": "address",
-            "type": "string",
-            "value": ""
-          }
-        ],
-        "assignTo": "action"
-      },
-      {
-        "kind": "call",
-        "function": "validateToken",
-        "args": [
-          {
-            "name": "token",
-            "type": "string",
-            "value": ""
-          }
-        ],
-        "assignTo": "sequence"
-      },
-      {
-        "kind": "call",
-        "function": "emitCode",
-        "args": [],
-        "assignTo": "code"
-      },
-      {
-        "kind": "call",
-        "function": "revokeAllSessions",
-        "args": [
-          {
-            "name": "userId",
-            "type": "string",
-            "value": ""
-          }
-        ],
-        "assignTo": "session"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-1",
-    "id": "ep_1780695609816",
-    "timestamp": "2026-06-05T21:40:09.816Z"
-  },
-  {
-    "intent": "extract common IR loading logic into a shared utility",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "extractIR",
-        "args": [],
-        "assignTo": "ir"
-      },
-      {
-        "kind": "call",
-        "function": "validateAddress",
-        "args": [
-          {
-            "name": "address",
-            "type": "string",
-            "value": ""
-          }
-        ],
-        "assignTo": "action"
-      },
-      {
-        "kind": "call",
-        "function": "validateToken",
-        "args": [
-          {
-            "name": "token",
-            "type": "string",
-            "value": ""
-          }
-        ],
-        "assignTo": "sequence"
-      },
-      {
-        "kind": "call",
-        "function": "emitCode",
-        "args": [],
-        "assignTo": "code"
-      },
-      {
-        "kind": "call",
-        "function": "revokeAllSessions",
-        "args": [
-          {
-            "name": "userId",
-            "type": "string",
-            "value": ""
-          }
-        ],
-        "assignTo": "session"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-1",
-    "id": "ep_1780695608554",
-    "timestamp": "2026-06-05T21:40:08.554Z"
-  },
-  {
-    "intent": "extract common IR loading logic into a shared utility",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "extractIR",
-        "args": [],
-        "assignTo": "ir"
-      },
-      {
-        "kind": "call",
-        "function": "validateAddress",
-        "args": [
-          {
-            "name": "address",
-            "type": "string",
-            "value": "ir"
-          }
-        ],
-        "assignTo": "validated"
-      },
-      {
-        "kind": "call",
-        "function": "validateToken",
-        "args": [
-          {
-            "name": "token",
-            "type": "string",
-            "value": "validated"
-          }
-        ],
-        "assignTo": "sequence"
-      },
-      {
-        "kind": "call",
-        "function": "emitCode",
-        "args": [
-          {
-            "name": "ir",
-            "type": "any",
-            "value": "sequence"
-          }
-        ],
-        "assignTo": "code"
-      },
-      {
-        "kind": "call",
-        "function": "revokeAllSessions",
-        "args": [
-          {
-            "name": "userId",
-            "type": "string",
-            "value": "code"
-          }
-        ],
-        "assignTo": "session"
-      },
-      {
-        "kind": "return",
-        "value": "session"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-1",
-    "id": "ep_1780695607226",
-    "timestamp": "2026-06-05T21:40:07.226Z"
+    "id": "ep_1780724843597",
+    "timestamp": "2026-06-06T05:47:23.597Z"
   },
   {
     "intent": "add a health check endpoint that reports immune metrics",
@@ -698,8 +3441,8 @@
       }
     ],
     "success": true,
-    "id": "ep_1780695604855",
-    "timestamp": "2026-06-05T21:40:04.855Z"
+    "id": "ep_1780724840412",
+    "timestamp": "2026-06-06T05:47:20.412Z"
   },
   {
     "intent": "add retry logic to session loading when disk is busy",
@@ -721,15 +3464,11 @@
           }
         ],
         "assignTo": "valid"
-      },
-      {
-        "kind": "return",
-        "value": "valid"
       }
     ],
     "success": true,
-    "id": "ep_1780695599761",
-    "timestamp": "2026-06-05T21:39:59.761Z"
+    "id": "ep_1780724834151",
+    "timestamp": "2026-06-06T05:47:14.151Z"
   },
   {
     "intent": "add input validation before saving benchmark results",
@@ -758,7 +3497,7 @@
           {
             "name": "filename",
             "type": "string",
-            "value": "/reports/benchmark.txt"
+            "value": "/reports/benchmark.csv"
           }
         ],
         "assignTo": "s"
@@ -769,8 +3508,8 @@
       }
     ],
     "success": true,
-    "id": "ep_1780695597537",
-    "timestamp": "2026-06-05T21:39:57.537Z"
+    "id": "ep_1780724831527",
+    "timestamp": "2026-06-06T05:47:11.527Z"
   },
   {
     "intent": "add a cache layer for frequently accessed IR functions",
@@ -794,13 +3533,25 @@
         "assignTo": "report"
       },
       {
+        "kind": "call",
+        "function": "formatReportAsJSON",
+        "args": [
+          {
+            "name": "report",
+            "type": "string",
+            "value": "report"
+          }
+        ],
+        "assignTo": "jsonReport"
+      },
+      {
         "kind": "return",
-        "value": "report"
+        "value": "jsonReport"
       }
     ],
     "success": true,
-    "id": "ep_1780695595457",
-    "timestamp": "2026-06-05T21:39:55.457Z"
+    "id": "ep_1780724827616",
+    "timestamp": "2026-06-06T05:47:07.616Z"
   },
   {
     "intent": "add logging to all repair proposal functions",
@@ -812,53 +3563,25 @@
           {
             "name": "name",
             "type": "string",
-            "value": "repair-part"
+            "value": null
           },
           {
             "name": "stock",
             "type": "number",
-            "value": 10
+            "value": null
           },
           {
             "name": "price",
             "type": "number",
-            "value": 25.99
+            "value": null
           }
         ],
-        "assignTo": "product"
-      },
-      {
-        "kind": "call",
-        "function": "listLowStock",
-        "args": [
-          {
-            "name": "threshold",
-            "type": "number",
-            "value": 5
-          }
-        ],
-        "assignTo": "lowStock"
-      },
-      {
-        "kind": "call",
-        "function": "validateToken",
-        "args": [
-          {
-            "name": "token",
-            "type": "string",
-            "value": "repair-token-123"
-          }
-        ],
-        "assignTo": "valid"
-      },
-      {
-        "kind": "return",
-        "value": "valid"
+        "assignTo": "addProduct"
       }
     ],
     "success": true,
-    "id": "ep_1780695592849",
-    "timestamp": "2026-06-05T21:39:52.849Z"
+    "id": "ep_1780724825570",
+    "timestamp": "2026-06-06T05:47:05.570Z"
   },
   {
     "intent": "patch the fingerprint verification error in ledger",
@@ -898,8 +3621,8 @@
       }
     ],
     "success": true,
-    "id": "ep_1780695589701",
-    "timestamp": "2026-06-05T21:39:49.702Z"
+    "id": "ep_1780724820358",
+    "timestamp": "2026-06-06T05:47:00.358Z"
   },
   {
     "intent": "fix protocol validation failure when state is empty",
@@ -934,8 +3657,8 @@
       }
     ],
     "success": true,
-    "id": "ep_1780695587839",
-    "timestamp": "2026-06-05T21:39:47.839Z"
+    "id": "ep_1780724818146",
+    "timestamp": "2026-06-06T05:46:58.146Z"
   },
   {
     "intent": "handle null pointer when corpus directory is empty",
@@ -987,13 +3710,36 @@
         "assignTo": "roleValid"
       },
       {
+        "kind": "call",
+        "function": "generateInventoryReport",
+        "args": [],
+        "assignTo": "report"
+      },
+      {
+        "kind": "call",
+        "function": "saveReport",
+        "args": [
+          {
+            "name": "report",
+            "type": "string",
+            "value": "report"
+          },
+          {
+            "name": "filename",
+            "type": "string",
+            "value": "inventory_report.txt"
+          }
+        ],
+        "assignTo": "saved"
+      },
+      {
         "kind": "return",
-        "value": "lowStock"
+        "value": "saved"
       }
     ],
     "success": true,
-    "id": "ep_1780695586071",
-    "timestamp": "2026-06-05T21:39:46.071Z"
+    "id": "ep_1780724815967",
+    "timestamp": "2026-06-06T05:46:55.967Z"
   },
   {
     "intent": "fix the bug where session count returns wrong number",
@@ -1014,16 +3760,16 @@
             "value": "user-123"
           }
         ],
-        "assignTo": "result"
+        "assignTo": "revoked"
       },
       {
         "kind": "return",
-        "value": "result"
+        "value": "revoked"
       }
     ],
     "success": true,
-    "id": "ep_1780695582932",
-    "timestamp": "2026-06-05T21:39:42.932Z"
+    "id": "ep_1780724813505",
+    "timestamp": "2026-06-06T05:46:53.505Z"
   },
   {
     "intent": "fix missing import when loading benchmark data",
@@ -1058,8 +3804,8 @@
       }
     ],
     "success": true,
-    "id": "ep_1780695581223",
-    "timestamp": "2026-06-05T21:39:41.223Z"
+    "id": "ep_1780724811222",
+    "timestamp": "2026-06-06T05:46:51.222Z"
   },
   {
     "intent": "unify error reporting across all immune system modules",
@@ -1083,30 +3829,13 @@
         "assignTo": "formatted"
       },
       {
-        "kind": "call",
-        "function": "saveReport",
-        "args": [
-          {
-            "name": "report",
-            "type": "string",
-            "value": "formatted"
-          },
-          {
-            "name": "filename",
-            "type": "string",
-            "value": "error_report.json"
-          }
-        ],
-        "assignTo": "saved"
-      },
-      {
         "kind": "return",
-        "value": "saved"
+        "value": "formatted"
       }
     ],
     "success": true,
-    "id": "ep_1780695572203",
-    "timestamp": "2026-06-05T21:39:32.203Z"
+    "id": "ep_1780724798907",
+    "timestamp": "2026-06-06T05:46:38.907Z"
   },
   {
     "intent": "split the large session manager into focused modules",
@@ -1124,12 +3853,12 @@
           {
             "name": "name",
             "type": "string",
-            "value": "SessionManager"
+            "value": "Alice"
           },
           {
             "name": "email",
             "type": "string",
-            "value": "session.manager@example.com"
+            "value": "alice@example.com"
           },
           {
             "name": "role",
@@ -1145,8 +3874,8 @@
       }
     ],
     "success": true,
-    "id": "ep_1780695569657",
-    "timestamp": "2026-06-05T21:39:29.657Z"
+    "id": "ep_1780724797389",
+    "timestamp": "2026-06-06T05:46:37.389Z"
   },
   {
     "intent": "consolidate duplicate validation code in planner and validator",
@@ -1175,8 +3904,8 @@
       }
     ],
     "success": true,
-    "id": "ep_1780695568353",
-    "timestamp": "2026-06-05T21:39:28.354Z"
+    "id": "ep_1780724796028",
+    "timestamp": "2026-06-06T05:46:36.028Z"
   },
   {
     "intent": "refactor the protocol validator to use a single entry point",
@@ -1371,8 +4100,8 @@
       }
     ],
     "success": true,
-    "id": "ep_1780695566505",
-    "timestamp": "2026-06-05T21:39:26.505Z"
+    "id": "ep_1780724794655",
+    "timestamp": "2026-06-06T05:46:34.655Z"
   },
   {
     "intent": "refactor the protocol validator to use a single entry point",
@@ -1428,8 +4157,8 @@
     ],
     "success": false,
     "svlViolated": "SVL-1",
-    "id": "ep_1780695566503",
-    "timestamp": "2026-06-05T21:39:26.503Z"
+    "id": "ep_1780724794652",
+    "timestamp": "2026-06-06T05:46:34.652Z"
   },
   {
     "intent": "refactor the protocol validator to use a single entry point",
@@ -1485,8 +4214,8 @@
     ],
     "success": false,
     "svlViolated": "SVL-1",
-    "id": "ep_1780695565076",
-    "timestamp": "2026-06-05T21:39:25.076Z"
+    "id": "ep_1780724793339",
+    "timestamp": "2026-06-06T05:46:33.339Z"
   },
   {
     "intent": "refactor the protocol validator to use a single entry point",
@@ -1494,13 +4223,7 @@
       {
         "kind": "call",
         "function": "extractIR",
-        "args": [
-          {
-            "name": "code",
-            "type": "string",
-            "value": "protocol_validator_code"
-          }
-        ],
+        "args": [],
         "assignTo": "ir"
       },
       {
@@ -1513,7 +4236,7 @@
             "value": "ir"
           }
         ],
-        "assignTo": "action"
+        "assignTo": "actionValid"
       },
       {
         "kind": "call",
@@ -1522,19 +4245,19 @@
           {
             "name": "token",
             "type": "string",
-            "value": "action"
+            "value": "actionValid"
           }
         ],
-        "assignTo": "sequence"
+        "assignTo": "seqValid"
       },
       {
         "kind": "call",
         "function": "emitCode",
         "args": [
           {
-            "name": "sequence",
+            "name": "validatedSequence",
             "type": "any",
-            "value": "sequence"
+            "value": "seqValid"
           }
         ],
         "assignTo": "code"
@@ -1558,15 +4281,15 @@
     ],
     "success": false,
     "svlViolated": "SVL-1",
-    "id": "ep_1780695563895",
-    "timestamp": "2026-06-05T21:39:23.895Z"
+    "id": "ep_1780724791625",
+    "timestamp": "2026-06-06T05:46:31.625Z"
   },
   {
     "intent": "extract common IR loading logic into a shared utility",
     "actions": [],
     "success": false,
-    "id": "ep_1780695562156",
-    "timestamp": "2026-06-05T21:39:22.156Z"
+    "id": "ep_1780724789884",
+    "timestamp": "2026-06-06T05:46:29.884Z"
   },
   {
     "intent": "extract common IR loading logic into a shared utility",
@@ -1580,835 +4303,7 @@
     ],
     "success": false,
     "svlViolated": "SVL-1",
-    "id": "ep_1780695562153",
-    "timestamp": "2026-06-05T21:39:22.153Z"
-  },
-  {
-    "intent": "extract common IR loading logic into a shared utility",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "extractIR",
-        "args": [],
-        "assignTo": "ir"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-1",
-    "id": "ep_1780695561259",
-    "timestamp": "2026-06-05T21:39:21.259Z"
-  },
-  {
-    "intent": "extract common IR loading logic into a shared utility",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "extractIR",
-        "args": [],
-        "assignTo": "ir"
-      },
-      {
-        "kind": "return",
-        "value": "ir"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-1",
-    "id": "ep_1780695560234",
-    "timestamp": "2026-06-05T21:39:20.234Z"
-  },
-  {
-    "intent": "add a health check endpoint that reports immune metrics",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "generateFullReport",
-        "args": [],
-        "assignTo": "report"
-      },
-      {
-        "kind": "call",
-        "function": "formatReportAsJSON",
-        "args": [
-          {
-            "name": "report",
-            "type": "string",
-            "value": "report"
-          }
-        ],
-        "assignTo": "formatted"
-      },
-      {
-        "kind": "return",
-        "value": "formatted"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780695558970",
-    "timestamp": "2026-06-05T21:39:18.970Z"
-  },
-  {
-    "intent": "add retry logic to session loading when disk is busy",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getActiveSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "validateToken",
-        "args": [
-          {
-            "name": "token",
-            "type": "string",
-            "value": "sessions"
-          }
-        ],
-        "assignTo": "valid"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780695557763",
-    "timestamp": "2026-06-05T21:39:17.763Z"
-  },
-  {
-    "intent": "add input validation before saving benchmark results",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "validateAddress",
-        "args": [
-          {
-            "name": "address",
-            "type": "string",
-            "value": "benchmark-server-01"
-          }
-        ],
-        "assignTo": "validationResult"
-      },
-      {
-        "kind": "call",
-        "function": "saveReport",
-        "args": [
-          {
-            "name": "report",
-            "type": "string",
-            "value": "benchmark_results_report"
-          },
-          {
-            "name": "filename",
-            "type": "string",
-            "value": "benchmark_results_2024.csv"
-          }
-        ],
-        "assignTo": "saved"
-      },
-      {
-        "kind": "return",
-        "value": "saved"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780695556651",
-    "timestamp": "2026-06-05T21:39:16.651Z"
-  },
-  {
-    "intent": "add a cache layer for frequently accessed IR functions",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getActiveSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "formatReportAsJSON",
-        "args": [
-          {
-            "name": "report",
-            "type": "string",
-            "value": "sessions"
-          }
-        ],
-        "assignTo": "report"
-      },
-      {
-        "kind": "return",
-        "value": "report"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780695554601",
-    "timestamp": "2026-06-05T21:39:14.601Z"
-  },
-  {
-    "intent": "add logging to all repair proposal functions",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "add",
-        "args": [],
-        "assignTo": "result"
-      },
-      {
-        "kind": "return",
-        "value": "result"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780695553142",
-    "timestamp": "2026-06-05T21:39:13.142Z"
-  },
-  {
-    "intent": "patch the fingerprint verification error in ledger",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "findUserByEmail",
-        "args": [
-          {
-            "name": "email",
-            "type": "string",
-            "value": "admin@example.com"
-          }
-        ],
-        "assignTo": "user"
-      },
-      {
-        "kind": "call",
-        "function": "validateUserRole",
-        "args": [
-          {
-            "name": "userId",
-            "type": "string",
-            "value": "user"
-          },
-          {
-            "name": "requiredRole",
-            "type": "string",
-            "value": "admin"
-          }
-        ],
-        "assignTo": "perm"
-      },
-      {
-        "kind": "return",
-        "value": "perm"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780695552119",
-    "timestamp": "2026-06-05T21:39:12.119Z"
-  },
-  {
-    "intent": "fix protocol validation failure when state is empty",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "validateToken",
-        "args": [
-          {
-            "name": "token",
-            "type": "string",
-            "value": "example-token"
-          }
-        ],
-        "assignTo": "tokenResult"
-      },
-      {
-        "kind": "call",
-        "function": "validateAddress",
-        "args": [
-          {
-            "name": "address",
-            "type": "string",
-            "value": "123 Main St"
-          }
-        ],
-        "assignTo": "addressResult"
-      },
-      {
-        "kind": "return",
-        "value": "addressResult"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780695550713",
-    "timestamp": "2026-06-05T21:39:10.713Z"
-  },
-  {
-    "intent": "handle null pointer when corpus directory is empty",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "listLowStock",
-        "args": [
-          {
-            "name": "threshold",
-            "type": "number",
-            "value": 1
-          }
-        ],
-        "assignTo": "lowStockProducts"
-      },
-      {
-        "kind": "call",
-        "function": "generateInventoryReport",
-        "args": [],
-        "assignTo": "report"
-      },
-      {
-        "kind": "call",
-        "function": "saveReport",
-        "args": [
-          {
-            "name": "report",
-            "type": "string",
-            "value": "report"
-          },
-          {
-            "name": "filename",
-            "type": "string",
-            "value": "inventory_report.txt"
-          }
-        ],
-        "assignTo": "saved"
-      },
-      {
-        "kind": "return",
-        "value": "saved"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780695549446",
-    "timestamp": "2026-06-05T21:39:09.446Z"
-  },
-  {
-    "intent": "fix the bug where session count returns wrong number",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getActiveSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "revokeAllSessions",
-        "args": [
-          {
-            "name": "userId",
-            "type": "string",
-            "value": "user-123"
-          }
-        ],
-        "assignTo": "revokedCount"
-      },
-      {
-        "kind": "return",
-        "value": "revokedCount"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780695548022",
-    "timestamp": "2026-06-05T21:39:08.022Z"
-  },
-  {
-    "intent": "fix missing import when loading benchmark data",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getProduct",
-        "args": [
-          {
-            "name": "id",
-            "type": "string",
-            "value": "benchmark-product-id"
-          }
-        ],
-        "assignTo": "product"
-      },
-      {
-        "kind": "call",
-        "function": "formatReportAsHTML",
-        "args": [
-          {
-            "name": "report",
-            "type": "string",
-            "value": "product"
-          }
-        ],
-        "assignTo": "report"
-      },
-      {
-        "kind": "return",
-        "value": "report"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780695546494",
-    "timestamp": "2026-06-05T21:39:06.494Z"
-  },
-  {
-    "intent": "load the semantic topology and find similar functions for a given function name, returning top matches",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "SemanticTopology.findSimilar",
-        "args": [
-          {
-            "name": "funcName",
-            "type": "string",
-            "value": "exampleFunction"
-          },
-          {
-            "name": "topN",
-            "type": "number",
-            "value": 5
-          }
-        ],
-        "assignTo": "similarFunctions"
-      },
-      {
-        "kind": "return",
-        "value": "similarFunctions"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780689133837",
-    "timestamp": "2026-06-05T19:52:13.837Z"
-  },
-  {
-    "intent": "audit all source files for generated markers, then format a coverage report with statistics",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "formatAuditResult",
-        "args": [
-          {
-            "name": "result",
-            "type": "AuditResult",
-            "value": {
-              "files": [
-                "/path/to/source1.ts",
-                "/path/to/source2.ts"
-              ],
-              "markers": [
-                "generated"
-              ],
-              "coverage": 0.85
-            }
-          }
-        ],
-        "assignTo": "report"
-      },
-      {
-        "kind": "call",
-        "function": "formatFailureStats",
-        "args": [],
-        "assignTo": "stats"
-      },
-      {
-        "kind": "return",
-        "value": "stats"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780689118831",
-    "timestamp": "2026-06-05T19:51:58.831Z"
-  },
-  {
-    "intent": "create a session snapshot and compare it with a previous snapshot, listing the differences",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "createSnapshot",
-        "args": [
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "sessions"
-          },
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "compare-snapshots"
-          },
-          {
-            "name": "sessionId",
-            "type": "string",
-            "value": "session-001"
-          }
-        ],
-        "assignTo": "snap1"
-      },
-      {
-        "kind": "call",
-        "function": "formatSnapshotDiff",
-        "args": [
-          {
-            "name": "snapIdA",
-            "type": "string",
-            "value": "snap-001"
-          },
-          {
-            "name": "snapIdB",
-            "type": "string",
-            "value": "snap1"
-          }
-        ],
-        "assignTo": "diff"
-      },
-      {
-        "kind": "return",
-        "value": "diff"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780689101990",
-    "timestamp": "2026-06-05T19:51:41.990Z"
-  },
-  {
-    "intent": "suggest repairs for ledger violations using the minimal fix set, then generate a repair summary",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "suggestRepairs",
-        "args": [
-          {
-            "name": "violations",
-            "type": "ConstraintViolation[]",
-            "value": null
-          },
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": ""
-          },
-          {
-            "name": "protocols",
-            "type": "FunctionProtocol[]",
-            "value": ""
-          }
-        ],
-        "assignTo": "repairProposals"
-      },
-      {
-        "kind": "call",
-        "function": "getMinimalFixSet",
-        "args": [
-          {
-            "name": "proposals",
-            "type": "RepairProposal[]",
-            "value": null
-          }
-        ],
-        "assignTo": "minimalProposals"
-      },
-      {
-        "kind": "call",
-        "function": "generateRepairSummary",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": null
-          },
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": ""
-          },
-          {
-            "name": "protocols",
-            "type": "FunctionProtocol[]",
-            "value": ""
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": ""
-          }
-        ],
-        "assignTo": "summary"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780689083510",
-    "timestamp": "2026-06-05T19:51:23.510Z"
-  },
-  {
-    "intent": "suggest repairs for ledger violations using the minimal fix set, then generate a repair summary",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "suggestRepairs",
-        "args": [
-          {
-            "name": "arg",
-            "type": "any",
-            "value": null
-          },
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": ""
-          },
-          {
-            "name": "protocols",
-            "type": "FunctionProtocol[]",
-            "value": ""
-          }
-        ],
-        "assignTo": "protocols"
-      },
-      {
-        "kind": "call",
-        "function": "generateRepairSummary",
-        "args": [
-          {
-            "name": "arg",
-            "type": "any",
-            "value": null
-          },
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": ""
-          },
-          {
-            "name": "protocols",
-            "type": "FunctionProtocol[]",
-            "value": ""
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": ""
-          }
-        ],
-        "assignTo": "ledger"
-      },
-      {
-        "kind": "call",
-        "function": "generateRepairSummary",
-        "args": [
-          {
-            "name": "arg",
-            "type": "any",
-            "value": null
-          },
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": ""
-          },
-          {
-            "name": "protocols",
-            "type": "FunctionProtocol[]",
-            "value": ""
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": ""
-          }
-        ],
-        "assignTo": "protocols"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-1",
-    "id": "ep_1780689081453",
-    "timestamp": "2026-06-05T19:51:21.453Z"
-  },
-  {
-    "intent": "validate protocol transitions and check ledger consistency, then format violations as a report",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "validateProtocolWithTransitions",
-        "args": [
-          {
-            "name": "actions",
-            "type": "Action[]",
-            "value": [
-              {
-                "type": "open_file",
-                "path": "/tmp/test.txt"
-              }
-            ]
-          },
-          {
-            "name": "protocols",
-            "type": "FunctionProtocol[]",
-            "value": [
-              {
-                "name": "file",
-                "transitions": [
-                  {
-                    "from": "",
-                    "to": "FILE_OPEN"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": {}
-          }
-        ],
-        "assignTo": "validation"
-      },
-      {
-        "kind": "call",
-        "function": "checkLedgerConsistency",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "validation.transitions"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": {}
-          },
-          {
-            "name": "protocolRules",
-            "type": "Map<string, StateAnnotation>",
-            "value": {}
-          }
-        ],
-        "assignTo": "consistency"
-      },
-      {
-        "kind": "call",
-        "function": "formatAnomalyReport",
-        "args": [
-          {
-            "name": "a",
-            "type": "Attempt",
-            "value": {
-              "violations": "$consistency.violations"
-            }
-          }
-        ],
-        "assignTo": "report"
-      },
-      {
-        "kind": "return",
-        "value": "report"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780689063607",
-    "timestamp": "2026-06-05T19:51:03.607Z"
-  },
-  {
-    "intent": "export all exported functions with their purpose requires and produces, formatted as a capability catalog",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getExportedDeclarations",
-        "args": [],
-        "assignTo": "declarations"
-      },
-      {
-        "kind": "call",
-        "function": "buildCapabilityGraph",
-        "args": [
-          {
-            "name": "ir",
-            "type": "FunctionInfo[]",
-            "value": "declarations"
-          }
-        ],
-        "assignTo": "graph"
-      },
-      {
-        "kind": "call",
-        "function": "formatChainHint",
-        "args": [
-          {
-            "name": "chains",
-            "type": "CapabilityChain[]",
-            "value": "graph"
-          }
-        ],
-        "assignTo": "catalog"
-      },
-      {
-        "kind": "return",
-        "value": "catalog"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780689050293",
-    "timestamp": "2026-06-05T19:50:50.293Z"
-  },
-  {
-    "intent": "compute immune metrics including antibody hits and token savings, then format as health status",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAntibodyStats",
-        "args": [],
-        "assignTo": "stats"
-      },
-      {
-        "kind": "call",
-        "function": "computeImmuneMetrics",
-        "args": [],
-        "assignTo": "metrics"
-      },
-      {
-        "kind": "call",
-        "function": "computeHealthScore",
-        "args": [
-          {
-            "name": "failureGenome",
-            "type": "any",
-            "value": "metrics"
-          },
-          {
-            "name": "antibodyStats",
-            "type": "any",
-            "value": "stats"
-          }
-        ],
-        "assignTo": "score"
-      },
-      {
-        "kind": "call",
-        "function": "formatHealthLevel",
-        "args": [
-          {
-            "name": "score",
-            "type": "number",
-            "value": "score"
-          }
-        ],
-        "assignTo": "status"
-      },
-      {
-        "kind": "return",
-        "value": "status"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780689037097",
-    "timestamp": "2026-06-05T19:50:37.097Z"
+    "id": "ep_1780724789882",
+    "timestamp": "2026-06-06T05:46:29.882Z"
   }
 ]

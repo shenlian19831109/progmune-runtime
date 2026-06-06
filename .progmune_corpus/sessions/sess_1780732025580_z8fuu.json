@@ -1,0 +1,215 @@
+{
+  "sessionId": "sess_1780732025580_z8fuu",
+  "intent": "export all exported functions with their purpose requires and produces, formatted as a capability catalog",
+  "attempts": [
+    {
+      "id": "att_1780732028319_p2g4g",
+      "sessionId": "sess_1780732025580_z8fuu",
+      "attemptNumber": 1,
+      "inputIntent": "export all exported functions with their purpose requires and produces, formatted as a capability catalog",
+      "plannerSeed": "a7d0ebb4",
+      "constraintSnapshotId": "snap_1780732025582_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getExportedDeclarations",
+          "args": [],
+          "assignTo": "declarations"
+        },
+        {
+          "kind": "call",
+          "function": "extractIRWithTypes",
+          "args": [
+            {
+              "name": "projectRoot",
+              "type": "string",
+              "value": "declarations"
+            }
+          ],
+          "assignTo": "irWithTypes"
+        },
+        {
+          "kind": "return",
+          "value": "irWithTypes"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getExportedDeclarations",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "extractIRWithTypes",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780732028319,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780732025580,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780732028319_p2g4g",
+    "sessionId": "sess_1780732025580_z8fuu",
+    "attemptNumber": 1,
+    "inputIntent": "export all exported functions with their purpose requires and produces, formatted as a capability catalog",
+    "plannerSeed": "a7d0ebb4",
+    "constraintSnapshotId": "snap_1780732025582_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getExportedDeclarations",
+        "args": [],
+        "assignTo": "declarations"
+      },
+      {
+        "kind": "call",
+        "function": "extractIRWithTypes",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "declarations"
+          }
+        ],
+        "assignTo": "irWithTypes"
+      },
+      {
+        "kind": "return",
+        "value": "irWithTypes"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getExportedDeclarations",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "extractIRWithTypes",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780732028319,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780732025582_d85b13b3d2c5",
+  "endedAt": 1780732028321
+}

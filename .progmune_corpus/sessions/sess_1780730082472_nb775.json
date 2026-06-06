@@ -1,0 +1,407 @@
+{
+  "sessionId": "sess_1780730082472_nb775",
+  "intent": "scan all sessions for unresolved violations, generate prioritized repair queue by severity",
+  "attempts": [
+    {
+      "id": "att_1780730089280_8mrta",
+      "sessionId": "sess_1780730082472_nb775",
+      "attemptNumber": 1,
+      "inputIntent": "scan all sessions for unresolved violations, generate prioritized repair queue by severity",
+      "plannerSeed": "fda5adb8",
+      "constraintSnapshotId": "snap_1780730082473_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getAllSessions",
+          "args": [],
+          "assignTo": "sessions"
+        },
+        {
+          "kind": "call",
+          "function": "countResolved",
+          "args": [
+            {
+              "name": "sessions",
+              "type": "any[]",
+              "value": "sessions"
+            }
+          ],
+          "assignTo": "resolved"
+        },
+        {
+          "kind": "call",
+          "function": "countSessionsWithViolations",
+          "args": [
+            {
+              "name": "sessions",
+              "type": "any[]",
+              "value": "sessions"
+            }
+          ],
+          "assignTo": "violationCount"
+        },
+        {
+          "kind": "call",
+          "function": "suggestRepairs",
+          "args": [
+            {
+              "name": "violations",
+              "type": "ConstraintViolation[]",
+              "value": "violationCount"
+            },
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": ""
+            },
+            {
+              "name": "protocols",
+              "type": "FunctionProtocol[]",
+              "value": ""
+            }
+          ],
+          "assignTo": "repairs"
+        },
+        {
+          "kind": "return",
+          "value": "repairs"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getAllSessions",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "countResolved",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 2,
+          "function": "countSessionsWithViolations",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 3,
+          "function": "suggestRepairs",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780730089281,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780730082472,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780730089280_8mrta",
+    "sessionId": "sess_1780730082472_nb775",
+    "attemptNumber": 1,
+    "inputIntent": "scan all sessions for unresolved violations, generate prioritized repair queue by severity",
+    "plannerSeed": "fda5adb8",
+    "constraintSnapshotId": "snap_1780730082473_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "countResolved",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "resolved"
+      },
+      {
+        "kind": "call",
+        "function": "countSessionsWithViolations",
+        "args": [
+          {
+            "name": "sessions",
+            "type": "any[]",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "violationCount"
+      },
+      {
+        "kind": "call",
+        "function": "suggestRepairs",
+        "args": [
+          {
+            "name": "violations",
+            "type": "ConstraintViolation[]",
+            "value": "violationCount"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": ""
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": ""
+          }
+        ],
+        "assignTo": "repairs"
+      },
+      {
+        "kind": "return",
+        "value": "repairs"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getAllSessions",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "countResolved",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 2,
+        "function": "countSessionsWithViolations",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 3,
+        "function": "suggestRepairs",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780730089281,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780730082473_d85b13b3d2c5",
+  "endedAt": 1780730089288
+}

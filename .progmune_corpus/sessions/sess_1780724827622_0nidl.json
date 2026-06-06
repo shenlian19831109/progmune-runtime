@@ -1,0 +1,259 @@
+{
+  "sessionId": "sess_1780724827622_0nidl",
+  "intent": "add input validation before saving benchmark results",
+  "attempts": [
+    {
+      "id": "att_1780724831526_e5pkr",
+      "sessionId": "sess_1780724827622_0nidl",
+      "attemptNumber": 1,
+      "inputIntent": "add input validation before saving benchmark results",
+      "plannerSeed": "840d1d7f",
+      "constraintSnapshotId": "snap_1780724827622_e07521d2be9c",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "validateAddress",
+          "args": [
+            {
+              "name": "address",
+              "type": "string",
+              "value": "benchmark-server-01"
+            }
+          ],
+          "assignTo": "v"
+        },
+        {
+          "kind": "call",
+          "function": "saveReport",
+          "args": [
+            {
+              "name": "report",
+              "type": "string",
+              "value": "benchmark_results_2024"
+            },
+            {
+              "name": "filename",
+              "type": "string",
+              "value": "/reports/benchmark.csv"
+            }
+          ],
+          "assignTo": "s"
+        },
+        {
+          "kind": "return",
+          "value": "s"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "validateAddress",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "saveReport",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780724831526,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "antibodyHit": {
+        "level": "ACL-4",
+        "signature": "SVL-4:protocol",
+        "fixPath": [
+          "validateAction"
+        ],
+        "similarityScore": 0.2,
+        "action": "injected_hint",
+        "llmCallsSaved": 0,
+        "estimatedTokensSaved": 0
+      },
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780724827622,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780724831526_e5pkr",
+    "sessionId": "sess_1780724827622_0nidl",
+    "attemptNumber": 1,
+    "inputIntent": "add input validation before saving benchmark results",
+    "plannerSeed": "840d1d7f",
+    "constraintSnapshotId": "snap_1780724827622_e07521d2be9c",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "validateAddress",
+        "args": [
+          {
+            "name": "address",
+            "type": "string",
+            "value": "benchmark-server-01"
+          }
+        ],
+        "assignTo": "v"
+      },
+      {
+        "kind": "call",
+        "function": "saveReport",
+        "args": [
+          {
+            "name": "report",
+            "type": "string",
+            "value": "benchmark_results_2024"
+          },
+          {
+            "name": "filename",
+            "type": "string",
+            "value": "/reports/benchmark.csv"
+          }
+        ],
+        "assignTo": "s"
+      },
+      {
+        "kind": "return",
+        "value": "s"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "validateAddress",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "saveReport",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780724831526,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "antibodyHit": {
+      "level": "ACL-4",
+      "signature": "SVL-4:protocol",
+      "fixPath": [
+        "validateAction"
+      ],
+      "similarityScore": 0.2,
+      "action": "injected_hint",
+      "llmCallsSaved": 0,
+      "estimatedTokensSaved": 0
+    },
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780724827622_e07521d2be9c",
+  "endedAt": 1780724831528
+}

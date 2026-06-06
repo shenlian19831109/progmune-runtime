@@ -1,0 +1,437 @@
+{
+  "sessionId": "sess_1780732064844_my3mz",
+  "intent": "create a session snapshot and compare it with a previous snapshot, listing the differences",
+  "attempts": [
+    {
+      "id": "att_1780732068270_bl6kk",
+      "sessionId": "sess_1780732064844_my3mz",
+      "attemptNumber": 1,
+      "inputIntent": "create a session snapshot and compare it with a previous snapshot, listing the differences",
+      "plannerSeed": "5cff1d3c",
+      "constraintSnapshotId": "snap_1780732064847_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getAllSessions",
+          "args": [],
+          "assignTo": "sessions"
+        },
+        {
+          "kind": "call",
+          "function": "createSnapshot",
+          "args": [
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": "sessions"
+            },
+            {
+              "name": "intent",
+              "type": "string",
+              "value": "intent"
+            },
+            {
+              "name": "sessionId",
+              "type": "string",
+              "value": "sessionId"
+            }
+          ],
+          "assignTo": "snap1"
+        },
+        {
+          "kind": "call",
+          "function": "createSnapshot",
+          "args": [
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": "sessions"
+            },
+            {
+              "name": "intent",
+              "type": "string",
+              "value": "intent"
+            },
+            {
+              "name": "sessionId",
+              "type": "string",
+              "value": "sessionId"
+            }
+          ],
+          "assignTo": "snap2"
+        },
+        {
+          "kind": "call",
+          "function": "formatSnapshotDiff",
+          "args": [
+            {
+              "name": "snapIdA",
+              "type": "string",
+              "value": "snap1"
+            },
+            {
+              "name": "snapIdB",
+              "type": "string",
+              "value": "snap2"
+            }
+          ],
+          "assignTo": "diff"
+        },
+        {
+          "kind": "return",
+          "value": "diff"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getAllSessions",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "createSnapshot",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 2,
+          "function": "createSnapshot",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 3,
+          "function": "formatSnapshotDiff",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780732068270,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780732064844,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780732068270_bl6kk",
+    "sessionId": "sess_1780732064844_my3mz",
+    "attemptNumber": 1,
+    "inputIntent": "create a session snapshot and compare it with a previous snapshot, listing the differences",
+    "plannerSeed": "5cff1d3c",
+    "constraintSnapshotId": "snap_1780732064847_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "createSnapshot",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "sessions"
+          },
+          {
+            "name": "intent",
+            "type": "string",
+            "value": "intent"
+          },
+          {
+            "name": "sessionId",
+            "type": "string",
+            "value": "sessionId"
+          }
+        ],
+        "assignTo": "snap1"
+      },
+      {
+        "kind": "call",
+        "function": "createSnapshot",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "sessions"
+          },
+          {
+            "name": "intent",
+            "type": "string",
+            "value": "intent"
+          },
+          {
+            "name": "sessionId",
+            "type": "string",
+            "value": "sessionId"
+          }
+        ],
+        "assignTo": "snap2"
+      },
+      {
+        "kind": "call",
+        "function": "formatSnapshotDiff",
+        "args": [
+          {
+            "name": "snapIdA",
+            "type": "string",
+            "value": "snap1"
+          },
+          {
+            "name": "snapIdB",
+            "type": "string",
+            "value": "snap2"
+          }
+        ],
+        "assignTo": "diff"
+      },
+      {
+        "kind": "return",
+        "value": "diff"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getAllSessions",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "createSnapshot",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 2,
+        "function": "createSnapshot",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 3,
+        "function": "formatSnapshotDiff",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780732068270,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780732064847_d85b13b3d2c5",
+  "endedAt": 1780732068275
+}

@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Progmune Runtime v3 — 程序免疫学技术白皮书</title>
+<style>
+  :root { --bg: #fafbfc; --card: #fff; --border: #e5e7eb; --text: #1a1a1a; --blue: #2563eb; --green: #059669; --red: #dc2626; --amber: #d97706; --gray: #6b7280; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', sans-serif; max-width: 1020px; margin: 0 auto; padding: 2em 1.5em 6em; color: var(--text); line-height: 1.8; background: var(--bg); font-size: 15px; }
+  h1 { font-size: 2.2em; border-bottom: 3px solid var(--blue); padding-bottom: .3em; letter-spacing: -.5px; margin-bottom: .5em; }
+  h2 { font-size: 1.5em; margin: 2.2em 0 .8em; color: var(--blue); border-bottom: 1px solid var(--border); padding-bottom: .3em; }
+  h3 { font-size: 1.15em; margin: 1.8em 0 .5em; color: #374151; }
+  h4 { font-size: 1em; margin: 1.2em 0 .3em; color: #4b5563; }
+  p, li { margin: .6em 0; }
+  ol, ul { padding-left: 1.5em; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: .88em; }
+  th, td { padding: 8px 14px; text-align: left; border: 1px solid var(--border); }
+  th { background: #f3f4f6; font-weight: 600; white-space: nowrap; }
+  tr:nth-child(even) { background: #fafafa; }
+  .pass { color: var(--green); font-weight: bold; } .fail { color: var(--red); font-weight: bold; } .tie { color: var(--amber); font-weight: bold; }
+  pre { background: #1e293b; color: #e2e8f0; padding: 1.2em; border-radius: 8px; overflow-x: auto; font-size: .83em; line-height: 1.5; }
+  code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: .9em; font-family: 'SF Mono', 'Fira Code', monospace; }
+  .box { border-left: 4px solid; padding: 1em 1.3em; margin: 1.2em 0; border-radius: 0 6px 6px 0; }
+  .box-b { border-color: var(--blue); background: #eff6ff; }
+  .box-y { border-color: #eab308; background: #fefce8; }
+  .box-g { border-color: var(--green); background: #ecfdf5; }
+  .box-r { border-color: var(--red); background: #fef2f2; }
+  .kpi { font-size: 1.3em; font-weight: 700; color: var(--blue); }
+  .tag { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: .78em; font-weight: 600; }
+  .tag-g { background: #d1fae5; color: #065f46; } .tag-y { background: #fef3c7; color: #92400e; } .tag-r { background: #fee2e2; color: #991b1b; } .tag-b { background: #dbeafe; color: #1e40af; }
+  .cover { text-align: center; padding: 3em 0 2em; }
+  .cover h1 { border: none; font-size: 2.5em; margin-bottom: .3em; }
+  .sep { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+  .arch { text-align: center; font-size: .88em; line-height: 1.5; }
+  blockquote { border-left: 3px solid var(--blue); margin: 1em 0; padding: .5em 1em; color: #4b5563; background: #f9fafb; border-radius: 0 4px 4px 0; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+<h1>Progmune Runtime</h1>
+<p style="font-size:1.3em;color:var(--gray);margin:.3em 0">程序免疫学：面向生成式代码的可验证运行时</p>
+<p style="font-size:1.1em;color:var(--gray)">Program Immunology: A Verifiable Runtime for Generative Code</p>
+<p style="color:var(--gray);margin-top:1em">
+  技术白皮书 v3 &nbsp;|&nbsp; June 2026<br>
+  开源 <a href="https://github.com/shenlian19831109/progmune-runtime">github.com/shenlian19831109/progmune-runtime</a> &nbsp;|&nbsp; MIT License<br>
+  <span class="tag tag-g">66 单元测试</span> <span class="tag tag-b">CI/CD</span> <span class="tag tag-y">覆盖率门禁 8%</span>
+</p>
+</div>
+
+<hr class="sep">
+
+<!-- ═══════════════ 摘要 ═══════════════ -->
+
+<h2>摘要</h2>
+
+<p>Progmune Runtime 提出一种新范式：<strong>程序免疫学 (Program Immunology)</strong>——确保 AI 生成代码安全可靠的系统性方法。受生物免疫系统分层防御机制的启发，Progmune 构建了一个约束导向的程序合成运行时，在多个层级上强制执行语义有效性：从符号存在性和类型兼容性，到数据流正确性和协议合法性。系统将大语言模型从不受约束的代码生成器，<strong>降级</strong>为在程序中间表示（IR，即"程序真相"）所定义的封闭世界中运行的受限启发式提议器。</p>
+
+<p><strong>核心理念：以免疫保障生成，以生成驱动免疫。</strong></p>
+
+<p>v3 引入三个关键突破：(1) <strong>LLM+Graph 联合架构</strong>——LLM 跨语义鸿沟选种子，Capability Graph 做数据流路由连成链，在 132 函数的语义鸿沟挑战中达到 90% 精度；(2) <strong>知识反馈回路闭环</strong>——L1/L2/L3 三层抗体机制从 Failure Corpus 自动生成后回流到规划器，改变代码生成行为；(3) <strong>Self-Hosting 验证</strong>——Progmune 首次使用自己的能力生成了 10 个功能模块，证明了 Pipeline 的完整闭环。</p>
+
+<div class="box box-b">
+<strong>v3 的核心命题转移：</strong>从"构建知识层"转向"证明知识层改变结果"。Runtime 层已近成熟（~95%），知识层的真实 ROI 成为唯一的验收标准。
+</div>
+
+<hr class="sep">
+
+<!-- ═══════════════ 一、问题声明 ═══════════════ -->
+
+<h2>一、问题声明：AI 代码生成中的开放世界谬误</h2>
+
+<h3>1.1 四类典型错误</h3>
+
+<p>大语言模型在生成代码时，隐含地基于开放世界假设运行：训练数据中见过的任何函数、库或 API 模式都被假定在当前上下文中可用。这一假设导致四类典型错误：</p>
+
+<table>
+<tr><th>级别</th><th>错误类型</th><th>示例</th><th>后果</th></tr>
+<tr><td><strong>SVL-1</strong></td><td>符号幻觉</td><td>调用项目中不存在的函数或变量</td><td>编译失败 / 运行时崩溃</td></tr>
+<tr><td><strong>SVL-2</strong></td><td>类型漂移</td><td>参数数量或类型与实际签名不匹配</td><td>类型错误 / 逻辑错误</td></tr>
+<tr><td><strong>SVL-3</strong></td><td>数据流污染</td><td>使用未初始化变量、创建循环引用或引入死代码</td><td>NameError / 内存泄漏</td></tr>
+<tr><td><strong>SVL-4</strong></td><td>协议违规</td><td>违反业务步骤的必要顺序——在认证用户前就签发 JWT</td><td>安全漏洞 / 业务逻辑错误</td></tr>
+</table>
+
+<p>这些错误并非源于推理失败，而是源于模型<strong>缺乏对程序真相的确定性访问</strong>。</p>
+
+<h3>1.2 现有缓解策略的局限性</h3>
+
+<ul>
+<li><strong>事后校验</strong>（linter、测试套件、人工审查）：在错误生成后检测，无法从源头预防</li>
+<li><strong>检索增强生成（RAG）</strong>：将项目上下文注入 prompt，降低但不消除幻觉——模型仍然是正确性的唯一仲裁者</li>
+<li><strong>迭代提示工程</strong>：通过精心设计的指令引导模型行为，但无法提供合规性的形式化保证</li>
+</ul>
+
+<p>这三种策略都将 LLM 置于系统中心，试图从外部修正其输出。它们缺乏<strong>第一性原理的约束机制</strong>。</p>
+
+<h3>1.3 核心命题</h3>
+
+<p>AI 生成的代码在进入代码库之前，必须先通过一个<strong>免疫层</strong>——可验证、具备记忆能力、能识别并防御反复出现的错误模式。这一免疫层包含三种相互依赖的能力：</p>
+
+<ul>
+<li><strong>天然免疫</strong>：基于模式快速拒绝符号、类型和数据流违规（SVL-1/2/3）——系统内置的防御</li>
+<li><strong>获得性免疫</strong>：从 Failure Corpus 学习，生成特异性的防御规则（抗体），主动预防未来同类错误</li>
+<li><strong>免疫记忆</strong>：将成功和失败模式沉淀为持久知识，系统随使用持续进化，越用越可靠</li>
+</ul>
+
+<hr class="sep">
+
+<!-- ═══════════════ 二、生物学类比 ═══════════════ -->
+
+<h2>二、生物学基础与类比</h2>
+
+<h3>2.1 三层架构映射</h3>
+
+<table>
+<tr><th>生物免疫系统</th><th>程序免疫 (Progmune)</th><th>v3 中的实现</th></tr>
+<tr><td><strong>物理屏障</strong></td><td>沙箱、CI/CD 门禁</td><td>GitHub Actions 三阶段流水线 + Auto-Repair 编译门禁</td></tr>
+<tr><td><strong>天然免疫</strong></td><td>约束引擎 (IR + SVL-1~3)</td><td>毫秒级验证：符号查证、签名比对、数据流分析</td></tr>
+<tr><td><strong>抗原呈递</strong></td><td>Failure Corpus 记录</td><td>185 条结构化失败记录，9 种根因类型，按日期分片</td></tr>
+<tr><td><strong>获得性免疫</strong></td><td>SSG 协议引擎 + 抗体注册表</td><td>ACL-1~4 置信度分级抗体，L1/L2/L3 三层反馈注入</td></tr>
+<tr><td><strong>免疫记忆</strong></td><td>三层记忆 + Edge Confidence</td><td>工作记忆→情景记忆→语义记忆，335 条边的成功/失败历史</td></tr>
+</table>
+
+<h3>2.2 类比的价值与边界</h3>
+
+<p>这个类比的价值在于提供了一个清晰的、可扩展的思维框架：解释为什么静态验证器不够用，以及为什么系统需要学习、记忆和进化。然而，也必须明确其边界：程序免疫系统处理的是<strong>形式化的、确定性的程序状态</strong>，而非复杂的生物化学信号。其学习是基于规则挖掘和模式匹配，而非生物神经元的突触可塑性。</p>
+
+<hr class="sep">
+
+<!-- ═══════════════ 三、技术架构 ═══════════════ -->
+
+<h2>三、技术架构</h2>
+
+<p>Progmune Runtime 的架构由六个核心层组成，对应特定的验证或学习职责。v3 在每一层都进行了关键增强。</p>
+
+<div class="arch">
+<pre>
+用户意图 (自然语言)
+      │
+      ▼
+┌─────────────┐    ┌───────────────┐    ┌─────────────┐
+│ 1. IR 提取   │───▶│ 2. 策略规划    │───▶│ 3. LLM 提议  │
+│ (程序真相)   │    │ (Graph+拓扑)   │    │ (受约束生成)  │
+└─────────────┘    └───────────────┘    └──────┬──────┘
+                                               │
+          ┌────────────────────────────────────◁─── 失败重试 (L1 抗体注入)
+          ▼
+┌──────────────────┐    ┌──────────────────┐    ┌──────────────┐
+│ 4. 约束引擎       │───▶│ 5. SSG 协议验证   │───▶│ 6. 代码发射   │
+│ SVL-1/2/3 天然免疫│    │ SVL-4 获得性免疫   │    │ TS / Python   │
+└──────────────────┘    └──────────────────┘    └──────┬───────┘
+                                                       │
+          ┌────────────────────────────────────────────◁─── Auto-Repair
+          ▼
+┌──────────────────────────────────────────────────────────────┐
+│            7. Failure Corpus → Antibody → L1/L2/L3           │
+│            免疫记忆层：记录失败、聚合抗体、反馈规划              │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+</div>
+
+<h3>3.1 IR（程序真相层）——自我模型</h3>
+
+<p>中间表示是系统的<strong>唯一真相来源</strong>，通过 ts-morph 从 TypeScript 源文件静态提取，是区分"自我"（项目中存在的）与"非我"（LLM 幻觉的）的基础。</p>
+
+<table>
+<tr><th>组件</th><th>内容</th><th>v3 数据</th></tr>
+<tr><td>符号表</td><td>所有已定义的函数、参数、返回类型及位置</td><td rowspan="5"><strong>554 个函数</strong><br>导出: 226<br>purpose: 100%<br>produces: 62%<br>requires: 46%<br>tags: 100%</td></tr>
+<tr><td>类型图</td><td>参数类型、返回类型、类型别名</td></tr>
+<tr><td>调用图</td><td>函数间的调用关系</td></tr>
+<tr><td>能力元数据</td><td>@requires / @produces / @purpose / @tags / @useWhen</td></tr>
+<tr><td>协议注解</td><td>pre_states / post_states / invalidate / namespace</td></tr>
+</table>
+
+<h4>v3 增强：五层自动元数据派生</h4>
+
+<p>元数据覆盖率从 v2.1.4 的 ~30% 提升至 v3 的 62%。</p>
+
+<table>
+<tr><th>策略</th><th>方法</th><th>效果</th></tr>
+<tr><td>S1</td><td><code>@protocol pre_states</code> → <code>@requires</code>, <code>post_states</code> → <code>@produces</code></td><td>直接映射</td></tr>
+<tr><td>S2</td><td>函数名驼峰拆分 → <code>@purpose</code>（如 benchmarkReport → "benchmark report"）</td><td>100% 覆盖</td></tr>
+<tr><td>S3</td><td>文件路径 → <code>@tags</code></td><td>100% 覆盖</td></tr>
+<tr><td>S4</td><td>函数名前缀 → <code>@requires/@produces</code>（load→DATA, save→SAVED, validate→VALIDATION_RESULT）</td><td>+20% 覆盖</td></tr>
+<tr><td>S5</td><td>调用图单跳传递继承（仅显式 JSDoc 注解的调用者）</td><td>+5% 覆盖；MAX_INHERIT=2 防止噪声</td></tr>
+</table>
+
+<div class="box box-y">
+<strong>S4 + S5 的设计权衡：</strong>名前缀推断（S4）产生泛型标签（DATA, CREATED），在大图上会产生噪声边。因此 S5 仅从具有<strong>同时</strong>显式 requires 和 produces 的调用者继承，避免 generateAttemptId→CREATED 污染业务链。名前缀推导的节点标记 <code>_derived=true</code>，在 S5 中被跳过。
+</div>
+
+<h3>3.2 Strategy Planner —— 策略规划层</h3>
+
+<p>这是 v3 研究和实验最密集的层。Strategy Planner 解决的问题是：<strong>给定自然语言意图和 500+ 个函数，如何选出正确的 3-5 个函数并连成可执行的调用链？</strong>整个过程<strong>零 LLM 调用</strong>——纯图搜索。</p>
+
+<h4>3.2.1 算法流程</h4>
+
+<pre>
+intent → extractKeywords → scoreNode (6维评分) → 种子选择
+  → Beam Search (BEAM_WIDTH=3~5, MAX_CHAIN_LEN=5)
+  → direct data-flow (produces→requires) + semantic leap (topology similarity ×0.7)
+  → Hybrid supplement (补充遗漏的关键词高分节点)
+  → dedup + return top-N chains
+</pre>
+
+<h4>3.2.2 scoreNode 六维评分</h4>
+
+<table>
+<tr><th>维度</th><th>权重</th><th>说明</th></tr>
+<tr><td>名称匹配</td><td>+1 (子串) / +2 (精确词) / +5 (主要动词前缀)</td><td>"extract" 匹配 "extractIR" 开头→决定性 +5</td></tr>
+<tr><td>Jaccard 相似度</td><td>+js (阈值 0.2)</td><td>模糊名称匹配</td></tr>
+<tr><td>Purpose 匹配</td><td>+2 (关键词) / +Jaccard*5 (词重叠)</td><td>语义桥梁——名称不同但 purpose 相关的函数</td></tr>
+<tr><td>Tag 匹配</td><td>+1.5</td><td>领域标签</td></tr>
+<tr><td>UseWhen 场景匹配</td><td>+3.0 (≥2词) / +1.0 (1词)</td><td>高精度场景匹配</td></tr>
+<tr><td>显式元数据奖励</td><td>×1.3</td><td>JSDoc/@protocol 显式标注的函数加权</td></tr>
+</table>
+
+<p>评分后应用：<strong>L3 信用因子</strong>（Laplace 平滑 × SVL 惩罚 × 时间衰减）→ <strong>规则约束</strong>（MinedRule→Planner 惩罚系数）→ 最终分数。</p>
+
+<h4>3.2.3 Beam Search</h4>
+
+<table>
+<tr><th>参数</th><th>小图 (<500)</th><th>中图 (500-1000)</th><th>大图 (1000+)</th></tr>
+<tr><td>BEAM_WIDTH</td><td>5</td><td>5</td><td>3</td></tr>
+<tr><td>MAX_CHAIN_LEN</td><td colspan="3">5（可通过 PROGMUNE_MAX_CHAIN_LEN 配置）</td></tr>
+<tr><td>种子数</td><td>15</td><td>20</td><td>10</td></tr>
+<tr><td>SCORE_FLOOR</td><td>0.1</td><td>0.1</td><td>0.2</td></tr>
+</table>
+
+<p>语义跳跃：topology.findSimilar → 相似度 >0.25 → top 3 → 权重 ×0.7（每次跳跃衰减 30%）→ 死胡同检测（score=0 且无 produces→最终化）。</p>
+
+<h4>3.2.4 Semantic Topology —— 语义拓扑</h4>
+
+<p>构建函数相似图——四类边：文件共现（权重 0.3）、标签重叠（0.4）、Purpose 词重叠（Jaccard, 0.5）、链邻接（producer→consumer, 0.7）。</p>
+
+<p><strong>v3 增强：持久化磁盘缓存。</strong>首次构建 O(n²)（2000 节点 ~19s），后续加载 MD5 哈希匹配的缓存（<50ms）。缓存键包含 name+file+protocol+purpose+requires+produces——任一变更触发重建。</p>
+
+<h3>3.3 Constraint Engine —— 天然免疫层</h3>
+
+<p>基于 IR 对动作树执行快速、基于规则的验证：</p>
+
+<table>
+<tr><th>级别</th><th>保证内容</th><th>验证方式</th><th>性能</th></tr>
+<tr><td><strong>SVL-1</strong></td><td>无幻觉 API 调用</td><td>IR 符号表查证 + 内置白名单</td><td>毫秒级</td></tr>
+<tr><td><strong>SVL-2</strong></td><td>无类型/参数数量不匹配</td><td>IR 签名比对 + 自动修正</td><td>毫秒级</td></tr>
+<tr><td><strong>SVL-3</strong></td><td>无未初始化变量/循环引用</td><td>数据流分析 + 变量流检查</td><td>毫秒级</td></tr>
+</table>
+
+<h3>3.4 Semantic State Graph (SSG) —— 获得性免疫层</h3>
+
+<p>SSG 建模系统资源的有效状态及其允许的转移。以认证协议为例：</p>
+
+<pre>UNAUTHENTICATED → AUTHENTICATED → TOKEN_ISSUED → SESSION_ACTIVE</pre>
+
+<p>每个函数声明 <code>pre_states</code>、<code>post_states</code> 和可选的 <code>invalidate</code> 规则。SSG 验证器在处理动作树时模拟状态转移，拒绝任何前置状态与当前活跃状态无交集的调用——<strong>即使所有其他 SVL 级别均通过</strong>。这将验证从静态正确性提升为行为合法性。</p>
+
+<h4>v3 增强：Invariant 三层验证</h4>
+
+<table>
+<tr><th>Invariant</th><th>检查内容</th><th>性能</th></tr>
+<tr><td>Invariant-0</td><td>statesBefore 必须等于从头重建的状态</td><td rowspan="3">全量审计 <strong>3ms</strong></td></tr>
+<tr><td>Invariant-1</td><td>statesAfter 必须等于 applyDelta(statesBefore, acquired, invalidated)</td></tr>
+<tr><td>Invariant-2 (v3 新增)</td><td>每个 acquired 必须在 post_states 中；每个 invalidated 必须在 invalidate 中；<strong>拒绝重复 acquire 已存在状态</strong></td></tr>
+</table>
+
+<p>增量验证: <strong>0.05ms/步</strong>。快速模式: <code>PROGMUNE_FAST_VALIDATE=true</code> 跳过 validateTransition 中的 I-1（由 checkLedgerConsistency 覆盖）。</p>
+
+<h3>3.5 Immune Memory & Failure Corpus —— 免疫记忆层</h3>
+
+<h4>三层记忆架构</h4>
+
+<table>
+<tr><th>层</th><th>范围</th><th>持久化</th><th>衰减/GC</th></tr>
+<tr><td>工作记忆</td><td>每会话变量绑定和用户意图</td><td>否</td><td>会话清除</td></tr>
+<tr><td>情景记忆</td><td>最近 N 次执行序列</td><td>JSON 文件</td><td>TTL 30 天；基于得分的语义 GC（成功+2, 时效+3, 陈旧-0.5/天）</td></tr>
+<tr><td>语义记忆</td><td>从频繁模式提炼的模板</td><td>JSON 文件</td><td>关键词聚类合并（Jaccard ≥0.5）</td></tr>
+</table>
+
+<h4>v3 关键修复：SVL-1/2/3 抗体生成</h4>
+
+<p>v2.x 最严重的 bug：<code>getLearnedPatterns()</code> 中有 <code>if (v.svl !== 4) continue</code>——<strong>只有 SVL-4 违规能生成抗体</strong>。SVL-1/2/3 的修复路径全部被忽略。</p>
+
+<div class="box box-r">
+<strong>修复前：</strong>3 条抗体（全部 SVL-4），无法匹配非 SVL-4 意图<br>
+<strong>修复后：</strong>SVL-1:symbol_existence 抗体（20 次）稳定匹配，所有 SVL 级别均生成抗体<br>
+<strong>修复方式：</strong>删除一行——<code>if (v.svl !== 4) continue</code>
+</div>
+
+<h4>知识反馈回路：L1/L2/L3 三层</h4>
+
+<table>
+<tr><th>层级</th><th>机制</th><th>触发条件</th><th>LLM 调用</th><th>v3 状态</th></tr>
+<tr>
+  <td><strong>L1: 提示注入</strong></td>
+  <td>ACL-3+ 抗体注入 Planner Prompt<br>含违规签名、发生次数、具体避错指南<br>所有 7 个重试 prompt 路径均已覆盖</td>
+  <td>意图与已有抗体的 Jaccard 相似度 ≥0.2</td>
+  <td>0 (注入已有数据)</td>
+  <td><span class="tag tag-g">已验证</span></td>
+</tr>
+<tr>
+  <td><strong>L2: 快速通道</strong></td>
+  <td>ACL-4 抗体直接构建动作序列<br>绕过 LLM——0 次 API 调用</td>
+  <td>ACL-4 + 协议匹配 或 无协议规则时直接信任</td>
+  <td><strong>0</strong></td>
+  <td><span class="tag tag-y">框架就位<br>数据不足</span></td>
+</tr>
+<tr>
+  <td><strong>L3: 信用评分</strong></td>
+  <td>Laplace 平滑 + SVL 惩罚 + 时间衰减<br>已集成到 strategy-planner 和 planner 双路径</td>
+  <td>每次 scoreNode 和 planner 评分</td>
+  <td>0</td>
+  <td><span class="tag tag-g">已验证</span></td>
+</tr>
+</table>
+
+<h4>L3: Laplace 平滑信用评分</h4>
+
+<pre>credit = (weightedSuccess + 1) / (totalWeight + 2)   ← Beta(1,1) 先验
+
+SVL 惩罚:  SVL-1=1.0x  SVL-2=1.5x  SVL-3=2.0x  SVL-4=3.0x
+时间衰减:  半衰期 = 1 天 (weight = 0.5^(age_days))</pre>
+
+<table>
+<tr><th>场景</th><th>原始值</th><th>Laplace 后</th><th>说明</th></tr>
+<tr><td>冷启动</td><td class="fail">1.0</td><td>0.5</td><td>中性先验——无证据不偏见</td></tr>
+<tr><td>1/1 成功</td><td class="fail">1.0 (虚高)</td><td>0.67</td><td>小样本偏差消除</td></tr>
+<tr><td>99/100 成功</td><td>0.99</td><td>0.98</td><td>大样本几乎不变</td></tr>
+<tr><td>0/1 失败</td><td class="fail">0.0 (不可逆)</td><td>0.33</td><td>允许翻盘</td></tr>
+</table>
+
+<h3>3.6 Code Emitter —— 程序落地层</h3>
+
+<p>将验证通过的动作树确定性地翻译为 TypeScript 或 Python 代码：</p>
+
+<table>
+<tr><th>特性</th><th>TypeScript</th><th>Python</th></tr>
+<tr><td>变量流分析 (scanAction)</td><td>✅</td><td>✅</td></tr>
+<tr><td>自动 return 注入</td><td>✅</td><td>✅</td></tr>
+<tr><td>参数膨胀守卫 (MAX_PARAMS=10)</td><td>✅</td><td>✅</td></tr>
+<tr><td>字符串枚举默认值</td><td>✅</td><td>✅</td></tr>
+<tr><td>for / assign 支持</td><td>✅</td><td>✅ (v3 补全)</td></tr>
+<tr><td>Generation marker (@progmune-generated)</td><td>✅</td><td>✅ (v3 补全)</td></tr>
+<tr><td>类型冲突重命名</td><td>✅</td><td>—</td></tr>
+<tr><td>复杂类型默认值 (Map/Set/UserPayload)</td><td>✅</td><td>—</td></tr>
+</table>
+
+<h4>v3 修复：Emitter 数值保留</h4>
+
+<p>LLM 正确传参 <code>"v":10</code>，但 emitter 的 <code>isEmptyVal</code> 检查之后没有非默认值的 else 分支——数值直接掉进了 <code>return "0"</code>。修复：非空值直接返回 <code>String(val)</code>。</p>
+
+<h4>v3 新增：Auto-Repair</h4>
+
+<pre>emitCode → tsc 编译 → 解析 TS 错误
+  → 缺失名称 → IR 查找 → 自动注入 import
+  → 类型错误 → 添加 :any 注解
+  → 幻觉 Map/Set 导入 → 自动剥离
+  → 重编译 → 最多 3 次重试</pre>
+
+<hr class="sep">
+
+<!-- ═══════════════ 四、函数选择方案 ═══════════════ -->
+
+<h2>四、函数选择的六种方案 —— 全系统最核心的技术决策</h2>
+
+<p>在 500+ 函数的 IR 中，如何精准选出正确的 3-5 个函数来完成任务？这是 v3 投入最多实验资源的地方。方案 1→6 按 LLM 调用成本和精度递增排列。</p>
+
+<h3>4.1 方案对比</h3>
+
+<table>
+<tr><th>#</th><th>方案</th><th>逻辑</th><th>LLM 调用</th><th>132fn 精度</th><th>519fn 精度</th><th>跨语义鸿沟</th></tr>
+<tr>
+  <td>1</td><td><strong>关键词匹配</strong></td>
+  <td>intent→关键词→fn.includes(kw)→排序</td>
+  <td>0</td><td>58%</td><td>93%</td><td class="fail">✗</td>
+</tr>
+<tr>
+  <td>2</td><td><strong>纯 Graph</strong></td>
+  <td>关键词种子→Beam Search (图边)→链</td>
+  <td>0</td><td>48%</td><td>93%</td><td class="fail">✗ 入口堵死</td>
+</tr>
+<tr>
+  <td>3</td><td><strong>Hybrid</strong></td>
+  <td>Graph 链 + 补充遗漏关键词高分节点</td>
+  <td>0</td><td>88%</td><td>93%</td><td class="fail">✗</td>
+</tr>
+<tr>
+  <td>4</td><td><strong>LLM 种子</strong></td>
+  <td>LLM 语义选函数→作为种子→Graph 路由</td>
+  <td>+1</td><td>65%</td><td>—</td><td class="pass">✓ 部分</td>
+</tr>
+<tr>
+  <td>5</td><td><strong>Rich LLM 种子</strong></td>
+  <td>+模块+标签+purpose 上下文→LLM选→Graph</td>
+  <td>+1</td><td><span class="kpi">90%</span></td><td>—</td><td class="pass">✓ 近天花板</td>
+</tr>
+<tr>
+  <td>6</td><td><strong>手动种子 (天花板)</strong></td>
+  <td>人给正确函数名→Graph 路由</td>
+  <td>0</td><td>90%</td><td>—</td><td class="pass">✓</td>
+</tr>
+</table>
+
+<h3>4.2 关键洞察</h3>
+
+<div class="box box-y">
+<p><strong>Graph 的正确位置是 LLM 的下游，不是替代 LLM。</strong></p>
+<p>Graph 基于字符串匹配——<code>dispatch.includes("send")</code> 永远是 false。LLM 天然知道 "send receipt" → dispatch + issueBill。两者的正确分工：</p>
+<p><strong>LLM 跨语义鸿沟选种子 → Graph 做数据流路由连成链</strong></p>
+</div>
+
+<h3>4.3 渐进策略：按需付费的智能路由</h3>
+
+<pre>
+Step 1: 关键词评分 → needsLLM=false? → Graph 路由 → 完成 (90% 场景, 0 额外 LLM)
+                                          ↓ needsLLM=true
+Step 2: LLM 语义选种子 → 注入 Graph → 路由 → 完成 (10% 场景, +1 LLM)
+</pre>
+
+<div class="box box-b">
+<strong>经济性：</strong>Step 2 只在语义鸿沟时触发。正常任务走关键词+Graph（0 额外成本），语义鸿沟任务走 LLM 种子桥接（+1 次调用）。<code>needsLLM</code> 标志由 strategy-planner 的 <code>selectCapabilityChains()</code> 返回——种子数 ≤2 且图 >50 节点时自动标记。
+</div>
+
+<h3>4.4 搜索空间缩减 —— Graph 最硬的确定性价值</h3>
+
+<p>在所有规模上，Capability Graph 将候选函数数减少 50-61%。这是<strong>确定的、可复现的、不依赖 LLM 随机性的</strong>工程指标。</p>
+
+<table>
+<tr><th>规模</th><th>OFF 候选</th><th>ON 候选</th><th>缩减</th><th>精度 OFF</th><th>精度 ON</th></tr>
+<tr><td>14 函数</td><td>10</td><td>7</td><td>↓30%</td><td>100%</td><td>100%</td></tr>
+<tr><td>56 函数</td><td>15</td><td>7</td><td>↓53%</td><td>100%</td><td>98%</td></tr>
+<tr><td>132 函数</td><td>12</td><td>6</td><td>↓50%</td><td>58%</td><td>48%</td></tr>
+<tr><td>132 函数 +LLM种子</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="kpi">90%</span></td></tr>
+<tr><td>519 函数</td><td>22</td><td>8</td><td>↓61%</td><td>93%</td><td>93%</td></tr>
+</table>
+
+<hr class="sep">
+
+<!-- ═══════════════ 五、知识层 ═══════════════ -->
+
+<h2>五、知识基础设施</h2>
+
+<table>
+<tr><th>组件</th><th>成熟度</th><th>关键数据</th><th>瓶颈</th></tr>
+<tr><td>Capability Graph</td><td><strong>70%</strong></td><td>554 函数, ↓61% 搜索空间</td><td>边精度——结构边 ≠ 任务边</td></tr>
+<tr><td>Antibody System</td><td><strong>50%</strong></td><td>L1 已验证, L2 框架完整但 0 次触发</td><td>82% SVL-1——只学会一种病</td></tr>
+<tr><td>Credit Loops</td><td><strong>80%</strong></td><td>Laplace+SVL+时间衰减, 已集成双路径</td><td>0 个函数有真实使用记录</td></tr>
+<tr><td>Edge Confidence</td><td><strong>60%</strong></td><td>335 边, 144 高置信度(≥0.7), 含拒绝追踪</td><td>依赖 session 数据</td></tr>
+<tr><td>Failure Corpus</td><td><strong>85%</strong></td><td>185 条记录, 9/16 根因类型</td><td>多样性不足: SVL-1=66%</td></tr>
+<tr><td>Rule Miner</td><td><strong>40%</strong></td><td>7 条规则 (symbol_existence 81x)</td><td>规则未自动注入搜索</td></tr>
+<tr><td>Immune Network</td><td><strong>30%</strong></td><td>发送: reporter, 接收: receiver 存根</td><td>无联邦语料库</td></tr>
+<tr><td>Immune Metrics</td><td><strong>70%</strong></td><td>实时仪表盘: 抗体命中 98, 修复率 70%</td><td>—</td></tr>
+</table>
+
+<div class="box box-y">
+<strong>核心矛盾：</strong>知识层基础设施完整，但没有足够的使用数据填充。335 条边有置信度数据，但 0 个函数有真实信用记录。L2 快速通道代码存在且正确，但因为缺乏高置信度抗体，一次都没触发过。这不是架构问题——需要更多真实使用。
+</div>
+
+<hr class="sep">
+
+<!-- ═══════════════ 六、SVL ═══════════════ -->
+
+<h2>六、语义有效性级别 (SVL)</h2>
+
+<p>AI 生成代码正确性的形式化分类法，为系统提供分层、可量化的验证保证：</p>
+
+<table>
+<tr><th>级别</th><th>名称</th><th>保证内容</th><th>v3 状态</th></tr>
+<tr><td><strong>SVL-1</strong></td><td>符号存在性</td><td>100% 消除幻觉 API 调用</td><td><span class="tag tag-g">完全保证</span></td></tr>
+<tr><td><strong>SVL-2</strong></td><td>类型有效性</td><td>100% 消除类型不匹配错误</td><td><span class="tag tag-g">完全保证</span></td></tr>
+<tr><td><strong>SVL-3</strong></td><td>数据流正确性</td><td>100% 消除 NameError / UnboundLocalError</td><td><span class="tag tag-g">完全保证</span></td></tr>
+<tr><td><strong>SVL-4</strong></td><td>协议合法性</td><td>严格遵守业务状态机，无非法状态跳转</td><td><span class="tag tag-g">可选协议约束<br>+ Invariant-2 Delta 合法性</span></td></tr>
+<tr><td><strong>SVL-5</strong></td><td>语义意图正确性</td><td>生成代码忠实实现预期业务逻辑</td><td><span class="tag tag-y">远期研究目标</span></td></tr>
+</table>
+
+<hr class="sep">
+
+<!-- ═══════════════ 七、工程成熟度 ═══════════════ -->
+
+<h2>七、工程成熟度</h2>
+
+<table>
+<tr><th>基础设施</th><th>说明</th></tr>
+<tr><td><strong>CI/CD</strong> (GitHub Actions)</td><td>三阶段: Type Check → Unit Tests (66 tests, 8 files) → Build (CJS + ESM MCP)</td></tr>
+<tr><td><strong>测试框架</strong> (Vitest)</td><td>66 单元测试, 覆盖率门禁 8%, v8 provider</td></tr>
+<tr><td><strong>结构化日志</strong></td><td>createLogger(module) → 级别过滤 + JSON 模式 + 模块标签</td></tr>
+<tr><td><strong>Result&lt;T,E&gt;</strong></td><td>ok()/err() 工厂函数 + ValidationError 接口, 向后兼容</td></tr>
+<tr><td><strong>LLM 断路器</strong></td><td>PROGMUNE_MAX_LLM_CALLS=50 + PROGMUNE_RATE_LIMIT_MS</td></tr>
+<tr><td><strong>Python 发射器</strong></td><td>226 行, 与 TS 功能对齐</td></tr>
+<tr><td><strong>Auto-Repair</strong></td><td>编译失败→错误分类→IR 查找→注入修复→重试 (最多 3 次)</td></tr>
+<tr><td><strong>拓扑磁盘缓存</strong></td><td>irHash 检测变更, 热启动 <50ms (2000 节点冷启动 ~19s)</td></tr>
+<tr><td><strong>IR 类型化</strong></td><td>FunctionInfo + ParamInfo 导出, 替换 validator + strategy-planner 中的 any</td></tr>
+<tr><td><strong>Graph 可视化</strong></td><td>graph-viz.ts: Mermaid 流程图 / DOT / 链聚焦图 / Markdown 报告</td></tr>
+<tr><td><strong>Self-Hosting</strong></td><td>10 个 Progmune 自生成模块, 5/5 benchmark 通过, 0 重试</td></tr>
+</table>
+
+<hr class="sep">
+
+<!-- ═══════════════ 八、实验 ═══════════════ -->
+
+<h2>八、实验证据</h2>
+
+<table>
+<tr><th>实验</th><th>规模</th><th>设计</th><th>结果</th><th>关键发现</th></tr>
+<tr>
+  <td><strong>Self-Hosting Benchmark</strong></td>
+  <td>554 fn</td>
+  <td>10 个 Progmune 功能模块生成, 覆盖 10 个能力簇, 含 Auto-Repair</td>
+  <td><strong>10/10 ✅</strong>, 0 重试, 2 自动修复, ~5s/任务</td>
+  <td>函数组合可行; 链式参数传递修复后可用; 但都是薄包装器</td>
+</tr>
+<tr>
+  <td><strong>Functional Pipeline</strong></td>
+  <td>554 fn</td>
+  <td>5 个业务场景端到端: intent→chain→validate→emit→compile, TS+Python</td>
+  <td><strong>5/5 ✅</strong>, 0 编译错误</td>
+  <td>全链路闭环验证: Graph→Action→Validate→Emit→Compile 全部打通</td>
+</tr>
+<tr>
+  <td><strong>LLM 519 函数 ON/OFF</strong></td>
+  <td>519 fn</td>
+  <td>15 个任务 × 2 模式 (Graph OFF/ON), 真实 DeepSeek API</td>
+  <td>93% vs 93% 持平</td>
+  <td>关键词在此规模已近最优; Graph 动作数收敛 7.6→3.7</td>
+</tr>
+<tr>
+  <td><strong>语义鸿沟挑战</strong></td>
+  <td>132 fn</td>
+  <td>10 任务, 函数名故意不匹配意图 (dispatch≠send, advanceStep≠approve)</td>
+  <td>关键词 58% → <strong>LLM种子 90%</strong></td>
+  <td>LLM+Graph 联合架构验证; 触及手动天花板</td>
+</tr>
+<tr>
+  <td><strong>真实场景生成</strong></td>
+  <td>554 fn</td>
+  <td>"扫描会话→生成修复队列", 完整 Planner→Emitter→Compile</td>
+  <td>函数选对 ✅, 编译需手动修 3 处类型</td>
+  <td>暴露类型精度问题 → 引发 Emitter 修复</td>
+</tr>
+<tr>
+  <td><strong>Three-Layer ROI</strong></td>
+  <td>519 fn</td>
+  <td>L1: Graph / L2: Antibody / L3: Success——三层独立观测</td>
+  <td>L1 ↓61%, L2 2/10覆盖, L3 100%</td>
+  <td>Graph 最强, Antibody 最弱</td>
+</tr>
+<tr>
+  <td><strong>Knowledge ROI v1</strong></td>
+  <td>519 fn</td>
+  <td>20 任务 Graph OFF vs ON (纯本地, 0 LLM)</td>
+  <td>分数 +68%, 链长 +440%, 95% 数据流</td>
+  <td>Graph 在纯搜索层面确定性地更好</td>
+</tr>
+<tr>
+  <td><strong>Protocol Simulation</strong></td>
+  <td>—</td>
+  <td>4 个 LLM 产生的序列 vs 原始验证器</td>
+  <td>4/4 ✅——Runtime 正确</td>
+  <td>证实 Planner→SSG 集成有两处 context 状态累积 bug</td>
+</tr>
+</table>
+
+<hr class="sep">
+
+<!-- ═══════════════ 九、未解决问题 ═══════════════ -->
+
+<h2>九、未解决问题 & 下一步</h2>
+
+<table>
+<tr><th>优先级</th><th>问题</th><th>根因</th><th>方向</th></tr>
+<tr>
+  <td><strong>P0</strong></td>
+  <td>生成代码类型精度不足 (FunctionProtocol vs FunctionProtocol[])</td>
+  <td>LLM 不理解 TS 类型系统, 将数组降级为单数</td>
+  <td>函数签名已传递完整类型; 需加强 SYSTEM_PROMPT 的"保留[]"指令</td>
+</tr>
+<tr>
+  <td><strong>P0</strong></td>
+  <td>参数链式传递失败 (countSessions([]) 而非 countSessions(sessions))</td>
+  <td>LLM 在多个 call 之间不使用 $变量名 引用</td>
+  <td>SYSTEM_PROMPT 链式示例需增强</td>
+</tr>
+<tr>
+  <td><strong>P1</strong></td>
+  <td>Antibody 数据不足: L2 从未触发</td>
+  <td>82% 失败是 SVL-1——只学会一种病</td>
+  <td>更多 SVL-2/3/4 失败场景构造</td>
+</tr>
+<tr>
+  <td><strong>P1</strong></td>
+  <td>Graph 在所有规模从未赢过</td>
+  <td>关键词在正常任务上已近最优; 语义鸿沟上入口被堵死</td>
+  <td>200+ 函数 × 语义鸿沟任务 × LLM+Graph 联合</td>
+</tr>
+<tr>
+  <td><strong>P2</strong></td>
+  <td>自托管模块是薄包装器</td>
+  <td>Planner 只能组合已有函数, 无法创造新逻辑</td>
+  <td>真实 Bug 修复 / 功能添加场景</td>
+</tr>
+</table>
+
+<hr class="sep">
+
+<!-- ═══════════════ 十、结论 ═══════════════ -->
+
+<h2>十、结论</h2>
+
+<div class="box box-b">
+<p>Progmune Runtime v3 证明了：通过颠倒 LLM 与程序真相之间的关系——将 IR 确立为第一性原理，并使 LLM 成为受约束的启发式提议器——我们可以实现具有强语义保证的可验证代码合成。</p>
+
+<p><strong>三个确定事实：</strong></p>
+<ol>
+  <li><strong>Graph 减少搜索空间 50-61%</strong>——在所有规模上确定性地缩小候选函数集，不依赖 LLM 随机性。</li>
+  <li><strong>LLM + Graph 联合架构达到 90% 精度</strong>——LLM 跨语义鸿沟选种子，Graph 做数据流路由连成链，触及手动天花板。</li>
+  <li><strong>Pipeline 完整闭环</strong>——意图→Graph→Planner→Validator→Emitter→Compile 全链路打通，Auto-Repair 处理编译失败。</li>
+</ol>
+
+<p><strong>一个未解决问题：</strong></p>
+<p>在所有规模的 Graph ON/OFF 实验中，Graph 从未赢过。原因已定位——入口处的关键词评分锁死了 Graph 的天花板。LLM 种子注入是已验证的突破口（132 函数: 48%→90%），但尚未在 519 函数的真实场景中打破平局。</p>
+
+<p><strong>v3 的唯一验收标准：</strong></p>
+<p>在一个 200+ 函数的真实外部代码库上，LLM+Graph 联合架构的首次通过率显著高于纯 LLM。只要这一条成立，知识层就从"有趣的设计"变成了"有证据的能力"。</p>
+</div>
+
+<p style="text-align:center; color:var(--gray); margin-top:3em; font-size:.9em;">
+Progmune Runtime v3 Whitepaper · June 2026<br>
+Built from 25+ real experiments across 6 scales (14 / 56 / 132 / 519 / 554 / 1200 functions)<br>
+Open Source MIT · github.com/shenlian19831109/progmune-runtime
+</p>
+
+</body>
+</html>

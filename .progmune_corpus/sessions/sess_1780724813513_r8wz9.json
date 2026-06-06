@@ -1,0 +1,529 @@
+{
+  "sessionId": "sess_1780724813513_r8wz9",
+  "intent": "handle null pointer when corpus directory is empty",
+  "attempts": [
+    {
+      "id": "att_1780724815965_qro2e",
+      "sessionId": "sess_1780724813513_r8wz9",
+      "attemptNumber": 1,
+      "inputIntent": "handle null pointer when corpus directory is empty",
+      "plannerSeed": "b3a5aa3c",
+      "constraintSnapshotId": "snap_1780724813513_e07521d2be9c",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "listLowStock",
+          "args": [
+            {
+              "name": "threshold",
+              "type": "number",
+              "value": 1
+            }
+          ],
+          "assignTo": "lowStock"
+        },
+        {
+          "kind": "call",
+          "function": "hasPermission",
+          "args": [
+            {
+              "name": "userId",
+              "type": "string",
+              "value": "admin"
+            },
+            {
+              "name": "permission",
+              "type": "string",
+              "value": "view_inventory"
+            }
+          ],
+          "assignTo": "perm"
+        },
+        {
+          "kind": "call",
+          "function": "validateUserRole",
+          "args": [
+            {
+              "name": "userId",
+              "type": "string",
+              "value": "admin"
+            },
+            {
+              "name": "requiredRole",
+              "type": "string",
+              "value": "inventory_manager"
+            }
+          ],
+          "assignTo": "roleValid"
+        },
+        {
+          "kind": "call",
+          "function": "generateInventoryReport",
+          "args": [],
+          "assignTo": "report"
+        },
+        {
+          "kind": "call",
+          "function": "saveReport",
+          "args": [
+            {
+              "name": "report",
+              "type": "string",
+              "value": "report"
+            },
+            {
+              "name": "filename",
+              "type": "string",
+              "value": "inventory_report.txt"
+            }
+          ],
+          "assignTo": "saved"
+        },
+        {
+          "kind": "return",
+          "value": "saved"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "listLowStock",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 1,
+          "function": "hasPermission",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 2,
+          "function": "validateUserRole",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 3,
+          "function": "generateInventoryReport",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        },
+        {
+          "actionIndex": 4,
+          "function": "saveReport",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "9dec68bc2995e92a"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780724815965,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "antibodyHit": {
+        "level": "ACL-3",
+        "signature": "SVL-3:null_reference",
+        "fixPath": [
+          "addNullCheck",
+          "provideDefault",
+          "earlyReturn"
+        ],
+        "similarityScore": 0.25,
+        "action": "injected_hint",
+        "llmCallsSaved": 0,
+        "estimatedTokensSaved": 0
+      },
+      "ruleHash": "9dec68bc2995e92a"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780724813513,
+  "ruleHash": "9dec68bc2995e92a",
+  "successfulAttempt": {
+    "id": "att_1780724815965_qro2e",
+    "sessionId": "sess_1780724813513_r8wz9",
+    "attemptNumber": 1,
+    "inputIntent": "handle null pointer when corpus directory is empty",
+    "plannerSeed": "b3a5aa3c",
+    "constraintSnapshotId": "snap_1780724813513_e07521d2be9c",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "listLowStock",
+        "args": [
+          {
+            "name": "threshold",
+            "type": "number",
+            "value": 1
+          }
+        ],
+        "assignTo": "lowStock"
+      },
+      {
+        "kind": "call",
+        "function": "hasPermission",
+        "args": [
+          {
+            "name": "userId",
+            "type": "string",
+            "value": "admin"
+          },
+          {
+            "name": "permission",
+            "type": "string",
+            "value": "view_inventory"
+          }
+        ],
+        "assignTo": "perm"
+      },
+      {
+        "kind": "call",
+        "function": "validateUserRole",
+        "args": [
+          {
+            "name": "userId",
+            "type": "string",
+            "value": "admin"
+          },
+          {
+            "name": "requiredRole",
+            "type": "string",
+            "value": "inventory_manager"
+          }
+        ],
+        "assignTo": "roleValid"
+      },
+      {
+        "kind": "call",
+        "function": "generateInventoryReport",
+        "args": [],
+        "assignTo": "report"
+      },
+      {
+        "kind": "call",
+        "function": "saveReport",
+        "args": [
+          {
+            "name": "report",
+            "type": "string",
+            "value": "report"
+          },
+          {
+            "name": "filename",
+            "type": "string",
+            "value": "inventory_report.txt"
+          }
+        ],
+        "assignTo": "saved"
+      },
+      {
+        "kind": "return",
+        "value": "saved"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "listLowStock",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 1,
+        "function": "hasPermission",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 2,
+        "function": "validateUserRole",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 3,
+        "function": "generateInventoryReport",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      },
+      {
+        "actionIndex": 4,
+        "function": "saveReport",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "9dec68bc2995e92a"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780724815965,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "antibodyHit": {
+      "level": "ACL-3",
+      "signature": "SVL-3:null_reference",
+      "fixPath": [
+        "addNullCheck",
+        "provideDefault",
+        "earlyReturn"
+      ],
+      "similarityScore": 0.25,
+      "action": "injected_hint",
+      "llmCallsSaved": 0,
+      "estimatedTokensSaved": 0
+    },
+    "ruleHash": "9dec68bc2995e92a"
+  },
+  "snapshotId": "snap_1780724813513_e07521d2be9c",
+  "endedAt": 1780724815969
+}

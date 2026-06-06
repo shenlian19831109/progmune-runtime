@@ -1,0 +1,121 @@
+{
+  "intent": "refactor the protocol validator to use a single entry point",
+  "projectFunctions": [
+    "trackEvent",
+    "getEventsByType",
+    "getEventsByUser",
+    "getEventCount",
+    "getDailyActiveUsers",
+    "getConversionRate",
+    "getTopEvents",
+    "login",
+    "validateToken",
+    "logout",
+    "refreshToken",
+    "hasPermission",
+    "getActiveSessions",
+    "revokeAllSessions",
+    "addProduct",
+    "getProduct",
+    "updateStock",
+    "listLowStock",
+    "getInventoryValue",
+    "searchProducts",
+    "removeProduct",
+    "getStockSummary",
+    "sendNotification",
+    "getUnreadNotifications",
+    "markAsRead",
+    "createOrder",
+    "getOrdersByUser",
+    "updateOrderStatus",
+    "calculateRevenue",
+    "processPayment",
+    "refundPayment",
+    "getOrderPayments",
+    "generateInventoryReport",
+    "generateRevenueReport",
+    "generateActivityReport",
+    "generateShippingReport",
+    "generateFullReport",
+    "formatReportAsHTML",
+    "formatReportAsJSON",
+    "saveReport",
+    "createShipment",
+    "assignTracking",
+    "updateShipmentStatus",
+    "getShipmentsByOrder",
+    "getPendingShipments",
+    "calculateShippingCost",
+    "validateAddress",
+    "estimateDelivery",
+    "findUserByEmail",
+    "createUser",
+    "validateUserRole",
+    "listUsersByRole",
+    "now",
+    "add",
+    "findIndex",
+    "stringify"
+  ],
+  "violatedSVL": "SVL-1",
+  "constraintType": "symbol_existence",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "extractIR",
+      "args": [],
+      "assignTo": "ir"
+    },
+    {
+      "kind": "call",
+      "function": "validateAddress",
+      "args": [
+        {
+          "name": "address",
+          "type": "string",
+          "value": ""
+        }
+      ],
+      "assignTo": "action"
+    },
+    {
+      "kind": "call",
+      "function": "validateToken",
+      "args": [
+        {
+          "name": "token",
+          "type": "string",
+          "value": ""
+        }
+      ],
+      "assignTo": "sequence"
+    },
+    {
+      "kind": "call",
+      "function": "emitCode",
+      "args": [],
+      "assignTo": "code"
+    },
+    {
+      "kind": "call",
+      "function": "revokeAllSessions",
+      "args": [
+        {
+          "name": "userId",
+          "type": "string",
+          "value": ""
+        }
+      ],
+      "assignTo": "session"
+    }
+  ],
+  "errorDetail": "extractIR: 函数不存在于 IR; emitCode: 函数不存在于 IR; 函数 'extractIR' 不存在; 函数 'emitCode' 不存在",
+  "ssgMissingFunctions": [
+    "extractIR"
+  ],
+  "plannerAttempt": 2,
+  "plannerRetryTotal": 3,
+  "id": "fail_1780724793338_301",
+  "timestamp": "2026-06-06T05:46:33.338Z"
+}
