@@ -1,14 +1,11 @@
-import { buildCapabilityGraph } from "./strategy-planner";
-// @progmune-generated session=sess_1780689047148_ulnlx timestamp=2026-06-05T19:50:50.301Z
+// @progmune-generated session=sess_1780732025580_z8fuu timestamp=2026-06-06T07:47:08.327Z
 // Generated with IR constraint: 549 functions, 7 protocol rules
 import { getExportedDeclarations } from "./ir-utils";
-import { formatChainHint } from "./strategy-planner";
-import type { CapabilityChain } from "./strategy-planner";
+import { extractIRWithTypes } from "./extract-ir";
 
 export function main() {
   const declarations = getExportedDeclarations();
-  const graph = buildCapabilityGraph(declarations);
-  const catalog = formatChainHint(graph);
-  return catalog;
+  const irWithTypes = extractIRWithTypes(declarations);
+  return irWithTypes;
 }
 main();

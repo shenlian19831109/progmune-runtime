@@ -1,7 +1,7 @@
-// @progmune-generated session=sess_1780689128692_kdzyv timestamp=2026-06-05T19:52:13.853Z
+// @progmune-generated session=sess_1780732088225_ap5p4 timestamp=2026-06-06T07:48:15.098Z
 // Generated with IR constraint: 549 functions, 7 protocol rules
 
-export function main(exampleFunction: string) {
-  const similarFunctions = SemanticTopology.findSimilar(exampleFunction, 5);
+export function main(funcName: string) {
+  const similarFunctions = SemanticTopology.findSimilar(funcName, 1);
   return similarFunctions;
 }
