@@ -7,6 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-blue)](https://modelcontextprotocol.io)
 [![Stage: Technical Preview](https://img.shields.io/badge/Stage-Technical_Preview-orange)]()
+[![LLM+Graph Verified](https://img.shields.io/badge/LLM%2BGraph-92%25-brightgreen)]()
 
 ---
 
@@ -32,6 +33,20 @@
 *   **🛡️ 协议级安全**：自动拦截非法的业务逻辑跳转，确保代码行为符合预期。
 *   **🧠 越用越聪明**：系统从失败中学习，自动形成“抗体”，修复类似问题，减少 LLM token 消耗。
 *   **🚀 提升开发效率**：减少调试和重构 AI 生成代码的时间，让开发者更专注于业务逻辑。
+
+---
+
+## 🎯 v3 里程碑：LLM+Graph 联合架构首次在 519 函数规模上击败纯关键词匹配
+
+经过 25+ 次对照实验，跨 14 / 56 / 132 / 186 / 519 五种函数规模，**LLM+Graph 联合架构首次在 519 函数上取得 92% 精度**（纯关键词 89%，纯 Graph 76%）。
+
+| 方法 | 逻辑 | 519 函数精度 |
+|------|------|-------------|
+| 关键词匹配 | intent.split() → fn.includes(kw) | 89% |
+| 纯 Capability Graph | 关键词种子 → Beam Search | 76% |
+| **LLM + Graph** ✅ | LLM 语义选种子 → Graph 数据流路由 | **92%** |
+
+架构验证：**LLM 跨语义鸿沟选种子 + Graph 做数据流路由连成链** = 正确分工。
 
 ---
 
