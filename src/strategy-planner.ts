@@ -29,8 +29,14 @@ interface CapabilityNode {
 
 interface CapabilityChain {
   nodes: CapabilityNode[];
-  score: number;           // cumulative relevance
-  explanation: string;     // human-readable chain description
+  score: number;
+  explanation: string;
+}
+
+export interface ChainResult {
+  chains: CapabilityChain[];
+  /** True if keyword scoring found too few seeds — LLM seed injection may help */
+  needsLLM: boolean;
 }
 
 /** Build a capability graph from IR functions. */
@@ -203,9 +209,9 @@ export function selectCapabilityChains(
   maxChains: number = 5,
   llmSeeds?: string[], // LLM-picked function names for semantic bridge
 
-): CapabilityChain[] {
+): ChainResult {
   // Guard: null/undefined/empty intent
-  if (!intent || typeof intent !== "string" || !intent.trim()) return [];
+  if (!intent || typeof intent !== "string" || !intent.trim()) return { chains: [], needsLLM: false };
 
   // Ensure semantic topology is built (cached after first build)
   const startTopo = Date.now();
@@ -423,10 +429,12 @@ export function selectCapabilityChains(
     }
   }
   const scoreMs = Date.now() - startScore;
+  // Detect semantic gap: very few seeds passed threshold → LLM could help
+  const needsLLM = seeds.length === 0 || (seeds.length <= 2 && graph.size > 50);
   if (graph.size > 200) {
-    console.error(`[Strategy] ${graph.size} nodes | topo=${topoMs}ms score=${scoreMs}ms | ${unique.length} chains`);
+    console.error(`[Strategy] ${graph.size} nodes | topo=${topoMs}ms score=${scoreMs}ms | ${unique.length} chains | needsLLM=${needsLLM}`);
   }
-  return unique.slice(0, maxChains);
+  return { chains: unique.slice(0, maxChains), needsLLM };
 }
 
 /** Format chains as a routing hint (not full path).

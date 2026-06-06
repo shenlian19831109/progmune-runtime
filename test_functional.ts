@@ -89,7 +89,7 @@ for (const scenario of SCENARIOS) {
   console.log(`  Intent: "${scenario.intent}"`);
 
   // Step 1: Capability Graph chain derivation
-  const chains = selectCapabilityChains(scenario.intent, ir, 3);
+  const { chains } = selectCapabilityChains(scenario.intent, ir, 3);
   const chainLen = chains.length > 0 ? chains[0].nodes.length : 0;
   const chainScore = chains.length > 0 ? chains[0].score : 0;
   console.log(`  Step 1: Chains found = ${chains.length}, top len = ${chainLen}, score = ${chainScore.toFixed(1)}`);
@@ -209,7 +209,7 @@ try {
   // Emit all scenarios into a single test file
   let testFile = '// Auto-generated functional test\n';
   for (const scenario of SCENARIOS) {
-    const chains = selectCapabilityChains(scenario.intent, ir, 3);
+    const { chains } = selectCapabilityChains(scenario.intent, ir, 3);
     if (chains.length === 0) continue;
     const actions: Action[] = [];
     for (const node of chains[0].nodes) {

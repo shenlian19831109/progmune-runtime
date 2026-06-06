@@ -63,12 +63,12 @@ async function runNoLLM(graphOn: boolean): Promise<TaskResult[]> {
   if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
 
   for (const task of TASKS) {
-    let chains: ReturnType<typeof selectCapabilityChains>;
+    let chainResult: ReturnType<typeof selectCapabilityChains>;
     let actions: Action[];
 
     if (graphOn) {
       // Graph ON: full capability chain + constraints
-      chains = selectCapabilityChains(task.intent, ir, 3);
+      chainResult = selectCapabilityChains(task.intent, ir, 3);
     } else {
       // Graph OFF: simple keyword scoring, no topology, no constraints
       const keywords = task.intent.toLowerCase().split(/[\s,]+/);
@@ -85,7 +85,7 @@ async function runNoLLM(graphOn: boolean): Promise<TaskResult[]> {
         .filter((f: any) => f.score > 0)
         .sort((a: any, b: any) => b.score - a.score)
         .slice(0, 3);
-      chains = scored.map((f: any) => ({
+      const chains = scored.map((f: any) => ({
         nodes: [f],
         score: f.score,
         explanation: f.name,
@@ -93,8 +93,8 @@ async function runNoLLM(graphOn: boolean): Promise<TaskResult[]> {
     }
 
     // Build action sequence from chain
-    if (chains.length > 0) {
-      actions = chains[0].nodes.map((node: any) => {
+    if (offChains.length > 0) {
+      actions = offChains[0].nodes.map((node: any) => {
         const def = ir.find((f: any) => f.name === node.name);
         const args = (def?.params || []).map((p: any) => ({
           name: p.name, type: p.type || "string", value: "",
@@ -138,9 +138,9 @@ async function runNoLLM(graphOn: boolean): Promise<TaskResult[]> {
     results.push({
       intent: task.intent,
       category: task.category,
-      chainsFound: chains.length,
-      chainLen: chains.length > 0 ? chains[0].nodes.length : 0,
-      chainScore: chains.length > 0 ? chains[0].score : 0,
+      chainsFound: offChains.length,
+      chainLen: offChains.length > 0 ? offChains[0].nodes.length : 0,
+      chainScore: offChains.length > 0 ? offChains[0].score : 0,
       validationPassed: validation.valid,
       validationErrors: validation.errors.length,
       tsCompiled,

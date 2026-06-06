@@ -108,7 +108,7 @@ function runGraphOff(intent: string, ir: any[]): TaskResult {
 console.log("═══════ Round B: Graph ON  (capability chains + topology) ═══");
 
 function runGraphOn(intent: string, ir: any[]): TaskResult {
-  const chains = selectCapabilityChains(intent, ir, 5);
+  const { chains } = selectCapabilityChains(intent, ir, 5);
 
   if (chains.length === 0) {
     return { task: intent, chains: 0, avgScore: 0, avgLen: 0, hasDataFlow: false, topChain: "NONE" };

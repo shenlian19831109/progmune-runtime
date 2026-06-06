@@ -32,7 +32,7 @@ const testIntents = [
 ];
 
 for (const intent of testIntents) {
-  const chains = selectCapabilityChains(intent, functions, 3);
+  const { chains } = selectCapabilityChains(intent, functions, 3);
   const hint = formatChainHint(chains);
 
   if (chains.length > 0) {

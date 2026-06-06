@@ -53,7 +53,7 @@ for (const task of TASKS) {
     });
 
   // Graph ON: capability chain nodes
-  const chains = selectCapabilityChains(task, ir, 3);
+  const { chains } = selectCapabilityChains(task, ir, 3);
   const onNodes = new Set<string>();
   for (const c of chains) {
     for (const n of c.nodes) onNodes.add(n.name);
@@ -112,7 +112,7 @@ console.log("\n── Layer 3: Success Rate ──");
 
 let valPass = 0, valTotal = 0;
 for (const task of TASKS) {
-  const chains = selectCapabilityChains(task, ir, 3);
+  const { chains } = selectCapabilityChains(task, ir, 3);
   if (chains.length === 0) continue;
 
   const actions: Action[] = chains[0].nodes.map((node: any) => {

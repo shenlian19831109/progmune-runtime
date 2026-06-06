@@ -45,7 +45,7 @@ for (const t of TASKS) {
     });
 
   // Graph ON: capability chains
-  const chains = selectCapabilityChains(t.intent, ir, 3);
+  const { chains } = selectCapabilityChains(t.intent, ir, 3);
   const onNodes = new Set<string>();
   for (const c of chains) for (const n of c.nodes) onNodes.add(n.name);
 

@@ -74,7 +74,7 @@ const mockIR = [
 
 describe("selectCapabilityChains", () => {
   it("returns chains for an auth intent", () => {
-    const chains = selectCapabilityChains("authenticate user", mockIR, 3);
+    const { chains } = selectCapabilityChains("authenticate user", mockIR, 3);
     expect(chains.length).toBeGreaterThan(0);
     // Should find at least validatePassword or generateJWT
     const names = chains.flatMap(c => c.nodes.map(n => n.name));
@@ -82,14 +82,14 @@ describe("selectCapabilityChains", () => {
   });
 
   it("returns chains for a data intent", () => {
-    const chains = selectCapabilityChains("fetch user data", mockIR, 3);
+    const { chains } = selectCapabilityChains("fetch user data", mockIR, 3);
     expect(chains.length).toBeGreaterThan(0);
     const names = chains.flatMap(c => c.nodes.map(n => n.name));
     expect(names.some(n => n.includes("fetchUser"))).toBe(true);
   });
 
   it("respects maxChains limit", () => {
-    const chains = selectCapabilityChains("data", mockIR, 1);
+    const { chains } = selectCapabilityChains("data", mockIR, 1);
     expect(chains.length).toBeLessThanOrEqual(1);
   });
 
@@ -105,7 +105,7 @@ describe("selectCapabilityChains", () => {
       params: [],
       returnType: "any",
     }];
-    const chains = selectCapabilityChains("planning", selfIR, 3);
+    const { chains } = selectCapabilityChains("planning", selfIR, 3);
     // strategy-planner.ts and planner.ts should be filtered out
     const names = chains.flatMap(c => c.nodes.map(n => n.name));
     expect(names).not.toContain("selectCapabilityChains");
@@ -136,7 +136,7 @@ describe("formatChainHint", () => {
   });
 
   it("formats a single chain", () => {
-    const chains = selectCapabilityChains("authenticate user", mockIR, 1);
+    const { chains } = selectCapabilityChains("authenticate user", mockIR, 1);
     const hint = formatChainHint(chains);
     expect(hint).toContain("建议的下一步调用");
     expect(hint).toContain("★");

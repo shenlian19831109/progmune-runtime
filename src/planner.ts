@@ -658,7 +658,8 @@ export async function plan(userIntent: string): Promise<PlanResult> {
   const topFuncs = scored.slice(0, 15);
 
   // Strategy Layer: select capability chain (local, 0 LLM calls)
-  const chains = graphMode !== "off" ? selectCapabilityChains(userIntent, ir, 3) : [];
+  const chainResult = graphMode !== "off" ? selectCapabilityChains(userIntent, ir, 3) : { chains: [], needsLLM: false };
+  const chains = chainResult.chains;
   const strategyHint = graphMode !== "off" ? formatChainHint(chains) : "";
 
   // Action Layer: filter functions to those in selected chains
