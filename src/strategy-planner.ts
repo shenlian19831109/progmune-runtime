@@ -265,13 +265,30 @@ export function selectCapabilityChains(
     const seedNames = new Set(seeds.map(n => n.name));
     const maxScore = seeds.length > 0 ? Math.max(...seeds.map(n => n.score)) : 1;
     for (const fnName of llmSeeds) {
-      if (seedNames.has(fnName)) continue; // already a seed
+      if (seedNames.has(fnName)) continue;
       const node = graph.get(fnName);
       if (node) {
         node.score = Math.max(node.score, maxScore);
         seeds.unshift(node);
+        seedNames.add(fnName); // keep seedNames in sync for edge expansion
       }
     }
+
+    // Edge Confidence expansion: high-conf downstream from seeds
+    let edgeAdded = 0;
+    for (const [edgeKey, conf] of edgeConfMap) {
+      if (conf < 0.9) continue;
+      const [prod, cons] = edgeKey.split("→");
+      if (!seedNames.has(prod)) continue;
+      if (seedNames.has(cons)) continue;
+      const consumerNode = graph.get(cons);
+      if (consumerNode) {
+        consumerNode.score = Math.max(consumerNode.score, maxScore * 0.8);
+        seeds.push(consumerNode);
+        edgeAdded++;
+      }
+    }
+    if (edgeAdded > 0) console.error(`[EdgeExp] ${edgeAdded}高置信边扩展种子 (+${edgeAdded} nodes)`);
 
   }
 
