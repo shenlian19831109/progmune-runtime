@@ -478,7 +478,7 @@ export async function plan(userIntent: string, llmSeeds?: string[]): Promise<Pla
   // llmSeeds absent  → Graph ON (keyword mode, 0 extra cost)
   // chains empty     → auto-fallback to OFF (no graph interference)
   const explicitMode = process.env.PROGMUNE_GRAPH_MODE;
-  const graphMode = explicitMode || "on";
+  const graphMode = explicitMode || "on"; // Graph always ON for validation
 
   // ── 抗体免疫系统：查询历史失败模式，注入知识回流 ──
   const antibodies = graphMode !== "off" ? queryAntibodies(userIntent, "ACL-3") : [];
@@ -689,7 +689,9 @@ export async function plan(userIntent: string, llmSeeds?: string[]): Promise<Pla
   }
 
   const compactFuncList = buildCompactFuncList(chainFuncs, ir);
-  const chainHints = buildChainHints(topFuncs);
+  // Graph recommendations: only inject when explicitly enabled (default: off)
+  // Graph validation (SVL, protocol, dataflow) always runs regardless
+  const chainHints = graphMode === "on" ? buildChainHints(topFuncs) : "";
 
   // Known string-enum types: tell LLM these are strings, not objects
   const STRING_ENUMS: Record<string, string> = {
