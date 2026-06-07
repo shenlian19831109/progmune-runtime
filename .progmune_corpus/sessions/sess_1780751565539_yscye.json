@@ -1,0 +1,141 @@
+{
+  "sessionId": "sess_1780751565539_yscye",
+  "intent": "check if generated TypeScript code has the progmune-generated session marker",
+  "attempts": [
+    {
+      "id": "att_1780751568212_kmlp3",
+      "sessionId": "sess_1780751565539_yscye",
+      "attemptNumber": 1,
+      "inputIntent": "check if generated TypeScript code has the progmune-generated session marker",
+      "plannerSeed": "ff8f9fa2",
+      "constraintSnapshotId": "snap_1780751565540_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "verifyFileMarker",
+          "args": [
+            {
+              "name": "filePath",
+              "type": "string",
+              "value": "code"
+            }
+          ],
+          "assignTo": "marker"
+        },
+        {
+          "kind": "return",
+          "value": "marker"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "verifyFileMarker",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780751568212,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780751565539,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780751568212_kmlp3",
+    "sessionId": "sess_1780751565539_yscye",
+    "attemptNumber": 1,
+    "inputIntent": "check if generated TypeScript code has the progmune-generated session marker",
+    "plannerSeed": "ff8f9fa2",
+    "constraintSnapshotId": "snap_1780751565540_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "verifyFileMarker",
+        "args": [
+          {
+            "name": "filePath",
+            "type": "string",
+            "value": "code"
+          }
+        ],
+        "assignTo": "marker"
+      },
+      {
+        "kind": "return",
+        "value": "marker"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "verifyFileMarker",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780751568212,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780751565540_d85b13b3d2c5",
+  "endedAt": 1780751568217
+}

@@ -1,0 +1,485 @@
+{
+  "sessionId": "sess_1780751224111_sodtp",
+  "intent": "get failure adjusted credit scores for all functions in the repair pipeline",
+  "attempts": [
+    {
+      "id": "att_1780751233155_251jy",
+      "sessionId": "sess_1780751224111_sodtp",
+      "attemptNumber": 1,
+      "inputIntent": "get failure adjusted credit scores for all functions in the repair pipeline",
+      "plannerSeed": "5f6d8e2d",
+      "constraintSnapshotId": "snap_1780751224112_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getFailureAdjustedCredit",
+          "args": [
+            {
+              "name": "funcName",
+              "type": "string",
+              "value": "extractIR"
+            }
+          ],
+          "assignTo": "credit1"
+        },
+        {
+          "kind": "call",
+          "function": "getFailureAdjustedCredit",
+          "args": [
+            {
+              "name": "funcName",
+              "type": "string",
+              "value": "validateAction"
+            }
+          ],
+          "assignTo": "credit2"
+        },
+        {
+          "kind": "call",
+          "function": "getFailureAdjustedCredit",
+          "args": [
+            {
+              "name": "funcName",
+              "type": "string",
+              "value": "validateActionSequence"
+            }
+          ],
+          "assignTo": "credit3"
+        },
+        {
+          "kind": "call",
+          "function": "getFailureAdjustedCredit",
+          "args": [
+            {
+              "name": "funcName",
+              "type": "string",
+              "value": "emitCode"
+            }
+          ],
+          "assignTo": "credit4"
+        },
+        {
+          "kind": "call",
+          "function": "getFailureAdjustedCredit",
+          "args": [
+            {
+              "name": "funcName",
+              "type": "string",
+              "value": "recordSession"
+            }
+          ],
+          "assignTo": "credit5"
+        },
+        {
+          "kind": "return",
+          "value": "credit5"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getFailureAdjustedCredit",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "getFailureAdjustedCredit",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 2,
+          "function": "getFailureAdjustedCredit",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 3,
+          "function": "getFailureAdjustedCredit",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 4,
+          "function": "getFailureAdjustedCredit",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780751233155,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780751224111,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780751233155_251jy",
+    "sessionId": "sess_1780751224111_sodtp",
+    "attemptNumber": 1,
+    "inputIntent": "get failure adjusted credit scores for all functions in the repair pipeline",
+    "plannerSeed": "5f6d8e2d",
+    "constraintSnapshotId": "snap_1780751224112_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getFailureAdjustedCredit",
+        "args": [
+          {
+            "name": "funcName",
+            "type": "string",
+            "value": "extractIR"
+          }
+        ],
+        "assignTo": "credit1"
+      },
+      {
+        "kind": "call",
+        "function": "getFailureAdjustedCredit",
+        "args": [
+          {
+            "name": "funcName",
+            "type": "string",
+            "value": "validateAction"
+          }
+        ],
+        "assignTo": "credit2"
+      },
+      {
+        "kind": "call",
+        "function": "getFailureAdjustedCredit",
+        "args": [
+          {
+            "name": "funcName",
+            "type": "string",
+            "value": "validateActionSequence"
+          }
+        ],
+        "assignTo": "credit3"
+      },
+      {
+        "kind": "call",
+        "function": "getFailureAdjustedCredit",
+        "args": [
+          {
+            "name": "funcName",
+            "type": "string",
+            "value": "emitCode"
+          }
+        ],
+        "assignTo": "credit4"
+      },
+      {
+        "kind": "call",
+        "function": "getFailureAdjustedCredit",
+        "args": [
+          {
+            "name": "funcName",
+            "type": "string",
+            "value": "recordSession"
+          }
+        ],
+        "assignTo": "credit5"
+      },
+      {
+        "kind": "return",
+        "value": "credit5"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getFailureAdjustedCredit",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "getFailureAdjustedCredit",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 2,
+        "function": "getFailureAdjustedCredit",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 3,
+        "function": "getFailureAdjustedCredit",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 4,
+        "function": "getFailureAdjustedCredit",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780751233155,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780751224112_d85b13b3d2c5",
+  "endedAt": 1780751233162
+}

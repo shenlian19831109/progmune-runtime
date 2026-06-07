@@ -231,6 +231,11 @@ export function selectCapabilityChains(intent, ir, maxChains = 5, llmSeeds) {
         seeds = [...graph.values()].filter(n => n.score > 0).slice(0, 3);
     }
     seeds = seeds.slice(0, graph.size > 1000 ? 10 : graph.size > 500 ? 20 : 15);
+    // ── Capability Ranking: preload edge confidence from session history ──
+    const edgeConfMap = new Map();
+    for (const ec of getEdgeConfidence()) {
+        edgeConfMap.set(`${ec.producer}→${ec.consumer}`, ec.confidence);
+    }
     // ── LLM seed injection: bridge the semantic gap ──
     if (llmSeeds && llmSeeds.length > 0) {
         const seedNames = new Set(seeds.map(n => n.name));
@@ -240,21 +245,35 @@ export function selectCapabilityChains(intent, ir, maxChains = 5, llmSeeds) {
                 continue; // already a seed
             const node = graph.get(fnName);
             if (node) {
-                node.score = Math.max(node.score, maxScore); // give it top seed priority
+                node.score = Math.max(node.score, maxScore);
                 seeds.unshift(node);
             }
         }
+        // Edge Confidence expansion: high-conf downstream from seeds
+        let edgeAdded = 0;
+        for (const [edgeKey, conf] of edgeConfMap) {
+            if (conf < 0.9)
+                continue;
+            const [prod, cons] = edgeKey.split("→");
+            if (!seedNames.has(prod))
+                continue;
+            if (seedNames.has(cons))
+                continue;
+            const consumerNode = graph.get(cons);
+            if (consumerNode) {
+                consumerNode.score = Math.max(consumerNode.score, maxScore * 0.8);
+                seeds.push(consumerNode);
+                edgeAdded++;
+            }
+        }
+        if (edgeAdded > 0)
+            console.error(`[EdgeExp] ${edgeAdded}高置信边扩展种子 (+${edgeAdded} nodes)`);
     }
     const allNodes = [...graph.values()];
     const chains = [];
     const BEAM_WIDTH = graph.size > 500 ? 3 : 5;
     const MAX_CHAIN_LEN = parseInt(process.env.PROGMUNE_MAX_CHAIN_LEN || "5", 10);
     const SCORE_FLOOR = graph.size > 1000 ? 0.2 : 0.1; // always filter noise
-    // ── Capability Ranking: preload edge confidence from session history ──
-    const edgeConfMap = new Map();
-    for (const ec of getEdgeConfidence()) {
-        edgeConfMap.set(`${ec.producer}→${ec.consumer}`, ec.confidence);
-    }
     for (const seed of seeds) {
         let beam = [{
                 chain: [seed],

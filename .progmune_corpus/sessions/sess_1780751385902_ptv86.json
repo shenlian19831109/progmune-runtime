@@ -1,0 +1,161 @@
+{
+  "sessionId": "sess_1780751385902_ptv86",
+  "intent": "suggest invariant repairs for a given ledger consistency violation",
+  "attempts": [
+    {
+      "id": "att_1780751390107_ayjts",
+      "sessionId": "sess_1780751385902_ptv86",
+      "attemptNumber": 1,
+      "inputIntent": "suggest invariant repairs for a given ledger consistency violation",
+      "plannerSeed": "2bd5f693",
+      "constraintSnapshotId": "snap_1780751385904_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "suggestInvariantRepair",
+          "args": [
+            {
+              "name": "violation",
+              "type": "LedgerConsistencyViolation",
+              "value": "violation"
+            },
+            {
+              "name": "ledger",
+              "type": "StateTransition[]",
+              "value": "ledger"
+            },
+            {
+              "name": "namespaceInitialStates",
+              "type": "Map<string, string>",
+              "value": "namespaceInitialStates"
+            }
+          ],
+          "assignTo": "repairProposals"
+        },
+        {
+          "kind": "return",
+          "value": "repairProposals"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "suggestInvariantRepair",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780751390107,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780751385902,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780751390107_ayjts",
+    "sessionId": "sess_1780751385902_ptv86",
+    "attemptNumber": 1,
+    "inputIntent": "suggest invariant repairs for a given ledger consistency violation",
+    "plannerSeed": "2bd5f693",
+    "constraintSnapshotId": "snap_1780751385904_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "suggestInvariantRepair",
+        "args": [
+          {
+            "name": "violation",
+            "type": "LedgerConsistencyViolation",
+            "value": "violation"
+          },
+          {
+            "name": "ledger",
+            "type": "StateTransition[]",
+            "value": "ledger"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "namespaceInitialStates"
+          }
+        ],
+        "assignTo": "repairProposals"
+      },
+      {
+        "kind": "return",
+        "value": "repairProposals"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "suggestInvariantRepair",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780751390107,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780751385904_d85b13b3d2c5",
+  "endedAt": 1780751390122
+}

@@ -1,0 +1,35 @@
+{
+  "intent": "load the latest benchmark results and compare with previous run, reporting regressions",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "symbol_existence",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "benchmarkLoadLatest",
+      "args": [],
+      "assignTo": "latest"
+    },
+    {
+      "kind": "call",
+      "function": "benchmarkPassRate",
+      "args": [],
+      "assignTo": "passRate"
+    },
+    {
+      "kind": "call",
+      "function": "benchmarkReport",
+      "args": [],
+      "assignTo": "report"
+    },
+    {
+      "kind": "return",
+      "value": "report"
+    }
+  ],
+  "errorDetail": "benchmarkReport: 协议违规 — 需要先调用 loadBenchmarks",
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 2,
+  "id": "fail_1780751106372_319",
+  "timestamp": "2026-06-06T13:05:06.372Z"
+}

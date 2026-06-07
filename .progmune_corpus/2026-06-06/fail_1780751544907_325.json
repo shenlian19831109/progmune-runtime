@@ -1,0 +1,46 @@
+{
+  "intent": "emit valid TypeScript code from a sequence of validated actions with proper imports",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "symbol_existence",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "validateActionResult",
+      "args": [
+        {
+          "name": "actions",
+          "type": "Action[]",
+          "value": ""
+        }
+      ],
+      "assignTo": "validationResult"
+    },
+    {
+      "kind": "call",
+      "function": "emitCode",
+      "args": [
+        {
+          "name": "actions",
+          "type": "Action[]",
+          "value": "validationResult"
+        },
+        {
+          "name": "meta",
+          "type": "{ sessionId?: string; ruleHash?: string; irFunctionCount?: number; protocolRuleCount?: number }",
+          "value": {}
+        }
+      ],
+      "assignTo": "code"
+    },
+    {
+      "kind": "return",
+      "value": "code"
+    }
+  ],
+  "errorDetail": "emitCode: 协议违规 — 需要先调用 extractIR → validateAction → validateActionSequence",
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 2,
+  "id": "fail_1780751544907_325",
+  "timestamp": "2026-06-06T13:12:24.907Z"
+}

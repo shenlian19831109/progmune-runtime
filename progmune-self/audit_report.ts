@@ -1,4 +1,4 @@
-// @progmune-generated session=sess_1780732077065_3s85z timestamp=2026-06-06T07:47:59.892Z
+// @progmune-generated session=sess_1780750745331_yqzx7 timestamp=2026-06-06T12:59:09.980Z
 // Generated with IR constraint: 549 functions, 7 protocol rules
 import { formatAuditResult } from "./audit";
 import { formatFailureStats } from "./failure-collector";

@@ -1,0 +1,215 @@
+{
+  "sessionId": "sess_1780751587102_l3a0t",
+  "intent": "record a successful episode in the episodic memory with its action sequence",
+  "attempts": [
+    {
+      "id": "att_1780751589901_gzwn9",
+      "sessionId": "sess_1780751587102_l3a0t",
+      "attemptNumber": 1,
+      "inputIntent": "record a successful episode in the episodic memory with its action sequence",
+      "plannerSeed": "8d1d17c9",
+      "constraintSnapshotId": "snap_1780751587103_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "pruneEpisodicMemory",
+          "args": [],
+          "assignTo": "pruned"
+        },
+        {
+          "kind": "call",
+          "function": "recordEpisode",
+          "args": [
+            {
+              "name": "episode",
+              "type": "Omit<Episode, \"id\" | \"timestamp\">",
+              "value": "pruned"
+            }
+          ],
+          "assignTo": "episode"
+        },
+        {
+          "kind": "return",
+          "value": "episode"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "pruneEpisodicMemory",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "recordEpisode",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780751589901,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780751587102,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780751589901_gzwn9",
+    "sessionId": "sess_1780751587102_l3a0t",
+    "attemptNumber": 1,
+    "inputIntent": "record a successful episode in the episodic memory with its action sequence",
+    "plannerSeed": "8d1d17c9",
+    "constraintSnapshotId": "snap_1780751587103_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "pruneEpisodicMemory",
+        "args": [],
+        "assignTo": "pruned"
+      },
+      {
+        "kind": "call",
+        "function": "recordEpisode",
+        "args": [
+          {
+            "name": "episode",
+            "type": "Omit<Episode, \"id\" | \"timestamp\">",
+            "value": "pruned"
+          }
+        ],
+        "assignTo": "episode"
+      },
+      {
+        "kind": "return",
+        "value": "episode"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "pruneEpisodicMemory",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "recordEpisode",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780751589901,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780751587103_d85b13b3d2c5",
+  "endedAt": 1780751589905
+}

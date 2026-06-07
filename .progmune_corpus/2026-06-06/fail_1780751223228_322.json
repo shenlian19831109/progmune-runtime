@@ -1,0 +1,36 @@
+{
+  "intent": "query antibodies for a given intent and report their confidence levels and fix paths",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "symbol_existence",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "queryAntibodies",
+      "args": [
+        {
+          "name": "intent",
+          "type": "string",
+          "value": null
+        },
+        {
+          "name": "minACL",
+          "type": "AntibodyLevel",
+          "value": ""
+        }
+      ],
+      "assignTo": "patterns"
+    },
+    {
+      "kind": "call",
+      "function": "benchmarkReport",
+      "args": [],
+      "assignTo": "report"
+    }
+  ],
+  "errorDetail": "benchmarkReport: 协议违规 — 需要先调用 loadBenchmarks",
+  "plannerAttempt": 2,
+  "plannerRetryTotal": 3,
+  "id": "fail_1780751223228_322",
+  "timestamp": "2026-06-06T13:07:03.228Z"
+}

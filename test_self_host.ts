@@ -60,6 +60,62 @@ const TASKS = [
     intent: "load the semantic topology and find similar functions for a given function name, returning top matches",
     desc: "Topology similarity explorer",
   },
+  // ── v3.3: 40 additional tasks for Edge Confidence accumulation ──
+  // Cluster: benchmark
+  { name: "bench_runner", intent: "load all benchmark tasks and run them one by one, saving results after each", desc: "Benchmark task runner" },
+  { name: "bench_history", intent: "load the latest benchmark results and compare with previous run, reporting regressions", desc: "Benchmark history comparator" },
+  // Cluster: failure/corpus
+  { name: "failure_explorer", intent: "get all failures grouped by SVL level and format as a distribution chart", desc: "Failure distribution explorer" },
+  { name: "corpus_stats", intent: "count total sessions and compute average retries to success from the failure corpus", desc: "Corpus statistics" },
+  { name: "pattern_detector", intent: "get top failure patterns and check if any new patterns emerged in recent sessions", desc: "Pattern emergence detector" },
+  // Cluster: immune/knowledge
+  { name: "antibody_checker", intent: "query antibodies for a given intent and report their confidence levels and fix paths", desc: "Antibody confidence checker" },
+  { name: "credit_auditor", intent: "get failure adjusted credit scores for all functions in the repair pipeline", desc: "Credit score auditor" },
+  { name: "l1_injector", intent: "format antibody hints for a given intent showing violation signatures and fix paths", desc: "L1 hint formatter" },
+  // Cluster: ledger/governance
+  { name: "ledger_validator", intent: "check ledger consistency for all sessions and report any invariant violations found", desc: "Ledger invariant validator" },
+  { name: "fingerprint_checker", intent: "register fingerprints for all sessions and verify them against the current rule hash", desc: "Fingerprint registry checker" },
+  { name: "replay_viewer", intent: "replay a session deterministically and display the state transitions step by step", desc: "Session replay viewer" },
+  { name: "branch_viewer", intent: "describe the branch tree for a session showing all forks merges and their reasons", desc: "Branch tree viewer" },
+  // Cluster: repair
+  { name: "repair_proposer", intent: "suggest invariant repairs for a given ledger consistency violation", desc: "Invariant repair proposer" },
+  { name: "repair_applier", intent: "apply a repair proposal as a new branch on the session ledger", desc: "Repair branch applier" },
+  { name: "repair_validator", intent: "validate a repair proposal against the current ledger and namespace initial states", desc: "Repair proposal validator" },
+  { name: "minimal_fixer", intent: "get the minimal set of fixes needed to resolve all violations in a session", desc: "Minimal fix set selector" },
+  // Cluster: SSG/protocol
+  { name: "protocol_checker", intent: "validate a sequence of actions against SSG protocol rules and report rejected transitions", desc: "Protocol transition checker" },
+  { name: "state_viewer", intent: "list all states defined in the protocol rules grouped by namespace", desc: "Protocol state viewer" },
+  { name: "bfs_repairer", intent: "find a BFS repair path to fix a protocol violation in the dev pipeline namespace", desc: "BFS protocol repair finder" },
+  // Cluster: IR/extraction
+  { name: "ir_extractor", intent: "extract IR from the current project and report the count of exported functions", desc: "IR extraction reporter" },
+  { name: "ir_validator", intent: "validate that all IR functions have consistent parameter types and return signatures", desc: "IR consistency validator" },
+  { name: "export_lister", intent: "list all exported functions with their file location and return type", desc: "Exported function lister" },
+  // Cluster: emitter/code gen
+  { name: "ts_emitter", intent: "emit valid TypeScript code from a sequence of validated actions with proper imports", desc: "TypeScript code emitter" },
+  { name: "py_emitter", intent: "emit valid Python code from a sequence of validated actions with from-imports", desc: "Python code emitter" },
+  { name: "marker_checker", intent: "check if generated TypeScript code has the progmune-generated session marker", desc: "Generation marker checker" },
+  // Cluster: session/memory
+  { name: "session_lister", intent: "list all execution sessions sorted by start time with their resolution status", desc: "Session list viewer" },
+  { name: "episode_recorder", intent: "record a successful episode in the episodic memory with its action sequence", desc: "Episode memory recorder" },
+  { name: "template_finder", intent: "find a semantic template matching a given intent using keyword overlap search", desc: "Semantic template finder" },
+  // Cluster: planner/strategy
+  { name: "chain_selector", intent: "select the best capability chain for an intent without calling LLM", desc: "Capability chain selector" },
+  { name: "seed_scorer", intent: "score all candidate functions against an intent and return the top scoring ones", desc: "Seed function scorer" },
+  // Cluster: metrics/health
+  { name: "health_reporter", intent: "compute overall immune system health and format it as a human readable status", desc: "Health status reporter" },
+  { name: "metrics_collector", intent: "collect execution metrics including LLM call counts and generation timings", desc: "Execution metrics collector" },
+  // Cluster: audit
+  { name: "audit_runner", intent: "run a full audit on source files checking for progmune-generated markers", desc: "Full audit runner" },
+  { name: "audit_reporter", intent: "format audit results as a coverage report with pass fail and skip counts", desc: "Audit report formatter" },
+  // Cluster: constraints
+  { name: "constraint_checker", intent: "derive planner constraints from mined rules and apply them to a set of candidate functions", desc: "Constraint application checker" },
+  { name: "rule_lister", intent: "mine rules from failure patterns and list them with their confidence scores", desc: "Mined rule lister" },
+  // Cluster: data/snapshot
+  { name: "snapshot_creator", intent: "create a semantic snapshot from IR and user intent and save it to disk", desc: "Snapshot creation saver" },
+  { name: "snapshot_lister", intent: "list all saved snapshots with their creation timestamps", desc: "Snapshot list viewer" },
+  // Cross-cluster compositions
+  { name: "full_pipeline", intent: "extract IR then validate all actions then emit TypeScript code and audit the result", desc: "Full pipeline orchestrator" },
+  { name: "immune_workflow", intent: "get failure genome then query antibodies then compute health score then format report", desc: "Immune analysis workflow" },
 ];
 
 async function main() {

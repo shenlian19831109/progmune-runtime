@@ -1,0 +1,141 @@
+{
+  "sessionId": "sess_1780751693711_ziwd1",
+  "intent": "format audit results as a coverage report with pass fail and skip counts",
+  "attempts": [
+    {
+      "id": "att_1780751697568_dmjc3",
+      "sessionId": "sess_1780751693711_ziwd1",
+      "attemptNumber": 1,
+      "inputIntent": "format audit results as a coverage report with pass fail and skip counts",
+      "plannerSeed": "1d10e4c5",
+      "constraintSnapshotId": "snap_1780751693712_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "formatAuditResult",
+          "args": [
+            {
+              "name": "result",
+              "type": "AuditResult",
+              "value": ""
+            }
+          ],
+          "assignTo": "report"
+        },
+        {
+          "kind": "return",
+          "value": "report"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "formatAuditResult",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780751697568,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780751693711,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780751697568_dmjc3",
+    "sessionId": "sess_1780751693711_ziwd1",
+    "attemptNumber": 1,
+    "inputIntent": "format audit results as a coverage report with pass fail and skip counts",
+    "plannerSeed": "1d10e4c5",
+    "constraintSnapshotId": "snap_1780751693712_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "formatAuditResult",
+        "args": [
+          {
+            "name": "result",
+            "type": "AuditResult",
+            "value": ""
+          }
+        ],
+        "assignTo": "report"
+      },
+      {
+        "kind": "return",
+        "value": "report"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "formatAuditResult",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780751697568,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780751693712_d85b13b3d2c5",
+  "endedAt": 1780751697576
+}
