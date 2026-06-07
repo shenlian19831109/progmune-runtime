@@ -1,12 +1,13 @@
 import { formatSnapshotDiff } from "./semantic-trace";
-// @progmune-generated session=sess_1780750732328_2smum timestamp=2026-06-06T12:58:55.588Z
+// @progmune-generated session=sess_1780828866278_t1ux2 timestamp=2026-06-07T10:41:10.585Z
 // Generated with IR constraint: 549 functions, 7 protocol rules
 import { getAllSessions } from "./failure-corpus";
 import { createSnapshot } from "./semantic-snapshot";
 
-export function main(intent: string, sessionId: string, snapIdA: string, snapIdB: string) {
+export function main(intent: string, sessionId: string) {
   const sessions = getAllSessions();
   const snap1 = createSnapshot(sessions, intent, sessionId);
-  const diff = formatSnapshotDiff(snapIdA, snapIdB);
+  const snap2 = createSnapshot(sessions, intent, sessionId);
+  const diff = formatSnapshotDiff(snap1, snap2);
   return diff;
 }

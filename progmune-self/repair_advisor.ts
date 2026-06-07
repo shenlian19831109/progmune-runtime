@@ -1,4 +1,4 @@
-// @progmune-generated session=sess_1780750719781_hi498 timestamp=2026-06-06T12:58:43.654Z
+// @progmune-generated session=sess_1780828852675_5ky0l timestamp=2026-06-07T10:40:56.402Z
 // Generated with IR constraint: 549 functions, 7 protocol rules
 import { suggestRepairs, getMinimalFixSet, generateRepairSummary } from "./repair-proposal";
 import type { ConstraintViolation, StateTransition } from "./runtime-types";

@@ -1,5 +1,5 @@
 import { formatAnomalyReport } from "./semantic-trace";
-// @progmune-generated session=sess_1780750660826_ayv9k timestamp=2026-06-06T12:57:44.586Z
+// @progmune-generated session=sess_1780828781852_goexp timestamp=2026-06-07T10:39:46.553Z
 // Generated with IR constraint: 549 functions, 7 protocol rules
 import { getFailureGenome, getTopFailurePatterns } from "./failure-corpus";
 

@@ -1,5 +1,5 @@
 import { getSessionTransitions } from "./obs-web";
-// @progmune-generated session=sess_1780751401406_rh7z7 timestamp=2026-06-06T13:10:05.358Z
+// @progmune-generated session=sess_1780829069665_9ecy3 timestamp=2026-06-07T10:44:33.006Z
 // Generated with IR constraint: 549 functions, 7 protocol rules
 import { getAllSessions } from "./failure-corpus";
 import { applyProposalAsBranch } from "./repair-proposal";

@@ -1,4 +1,4 @@
-// @progmune-generated session=sess_1780751477014_o6x29 timestamp=2026-06-06T13:11:21.332Z
+// @progmune-generated session=sess_1780829129525_v10b3 timestamp=2026-06-07T10:45:32.704Z
 // Generated with IR constraint: 549 functions, 7 protocol rules
 import { findFixPathStatic } from "./ssg-validator";
 import type { Map } from "./ssg-validator";

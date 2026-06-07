@@ -1,4 +1,4 @@
-// @progmune-generated session=sess_1780751133480_ni8so timestamp=2026-06-06T13:05:40.461Z
+// @progmune-generated session=sess_1780828944149_og7nn timestamp=2026-06-07T10:42:28.725Z
 // Generated with IR constraint: 549 functions, 7 protocol rules
 import { getAllFailures, getFailuresBySVL } from "./failure-corpus";
 import { formatFailureStats } from "./failure-collector";

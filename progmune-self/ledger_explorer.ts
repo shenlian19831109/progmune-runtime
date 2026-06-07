@@ -1,4 +1,4 @@
-// @progmune-generated session=sess_1780750672366_3z1wh timestamp=2026-06-06T12:57:56.461Z
+// @progmune-generated session=sess_1780828796028_mecy3 timestamp=2026-06-07T10:39:59.249Z
 // Generated with IR constraint: 549 functions, 7 protocol rules
 import { getAllSessions } from "./failure-corpus";
 import { countSessionLedgers } from "./health-utils";

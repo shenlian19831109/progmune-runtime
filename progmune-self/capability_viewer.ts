@@ -1,4 +1,4 @@
-// @progmune-generated session=sess_1780750696004_oyt6o timestamp=2026-06-06T12:58:18.760Z
+// @progmune-generated session=sess_1780828821698_d2uyh timestamp=2026-06-07T10:40:24.246Z
 // Generated with IR constraint: 549 functions, 7 protocol rules
 import { getExportedDeclarations } from "./ir-utils";
 import { extractIRWithTypes } from "./extract-ir";
