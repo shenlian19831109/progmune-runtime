@@ -1,0 +1,215 @@
+{
+  "sessionId": "sess_1780828666650_2r0vy",
+  "intent": "create health check endpoint returning immune metrics",
+  "attempts": [
+    {
+      "id": "att_1780828669452_pqmaq",
+      "sessionId": "sess_1780828666650_2r0vy",
+      "attemptNumber": 1,
+      "inputIntent": "create health check endpoint returning immune metrics",
+      "plannerSeed": "45e5146e",
+      "constraintSnapshotId": "snap_1780828666650_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "computeImmuneMetrics",
+          "args": [],
+          "assignTo": "metrics"
+        },
+        {
+          "kind": "call",
+          "function": "formatImmuneMetrics",
+          "args": [
+            {
+              "name": "m",
+              "type": "ImmuneMetrics",
+              "value": "metrics"
+            }
+          ],
+          "assignTo": "formatted"
+        },
+        {
+          "kind": "return",
+          "value": "formatted"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "computeImmuneMetrics",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "formatImmuneMetrics",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780828669452,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780828666650,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780828669452_pqmaq",
+    "sessionId": "sess_1780828666650_2r0vy",
+    "attemptNumber": 1,
+    "inputIntent": "create health check endpoint returning immune metrics",
+    "plannerSeed": "45e5146e",
+    "constraintSnapshotId": "snap_1780828666650_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "computeImmuneMetrics",
+        "args": [],
+        "assignTo": "metrics"
+      },
+      {
+        "kind": "call",
+        "function": "formatImmuneMetrics",
+        "args": [
+          {
+            "name": "m",
+            "type": "ImmuneMetrics",
+            "value": "metrics"
+          }
+        ],
+        "assignTo": "formatted"
+      },
+      {
+        "kind": "return",
+        "value": "formatted"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "computeImmuneMetrics",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "formatImmuneMetrics",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780828669452,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780828666650_d85b13b3d2c5",
+  "endedAt": 1780828669456
+}

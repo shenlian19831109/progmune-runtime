@@ -1,0 +1,289 @@
+{
+  "sessionId": "sess_1780828944149_og7nn",
+  "intent": "get all failures grouped by SVL level and format as a distribution chart",
+  "attempts": [
+    {
+      "id": "att_1780828948701_ufi5v",
+      "sessionId": "sess_1780828944149_og7nn",
+      "attemptNumber": 1,
+      "inputIntent": "get all failures grouped by SVL level and format as a distribution chart",
+      "plannerSeed": "221d4119",
+      "constraintSnapshotId": "snap_1780828944150_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getAllFailures",
+          "args": [],
+          "assignTo": "failures"
+        },
+        {
+          "kind": "call",
+          "function": "getFailuresBySVL",
+          "args": [
+            {
+              "name": "level",
+              "type": "SVL",
+              "value": "failures"
+            }
+          ],
+          "assignTo": "svlFailures"
+        },
+        {
+          "kind": "call",
+          "function": "formatFailureStats",
+          "args": [],
+          "assignTo": "report"
+        },
+        {
+          "kind": "return",
+          "value": "report"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getAllFailures",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "getFailuresBySVL",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 2,
+          "function": "formatFailureStats",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780828948701,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780828944149,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780828948701_ufi5v",
+    "sessionId": "sess_1780828944149_og7nn",
+    "attemptNumber": 1,
+    "inputIntent": "get all failures grouped by SVL level and format as a distribution chart",
+    "plannerSeed": "221d4119",
+    "constraintSnapshotId": "snap_1780828944150_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getAllFailures",
+        "args": [],
+        "assignTo": "failures"
+      },
+      {
+        "kind": "call",
+        "function": "getFailuresBySVL",
+        "args": [
+          {
+            "name": "level",
+            "type": "SVL",
+            "value": "failures"
+          }
+        ],
+        "assignTo": "svlFailures"
+      },
+      {
+        "kind": "call",
+        "function": "formatFailureStats",
+        "args": [],
+        "assignTo": "report"
+      },
+      {
+        "kind": "return",
+        "value": "report"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getAllFailures",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "getFailuresBySVL",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 2,
+        "function": "formatFailureStats",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780828948701,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780828944150_d85b13b3d2c5",
+  "endedAt": 1780828948718
+}

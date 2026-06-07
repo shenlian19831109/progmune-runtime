@@ -1,0 +1,227 @@
+{
+  "sessionId": "sess_1780834828688_7qafj",
+  "intent": "cache package metadata",
+  "attempts": [
+    {
+      "id": "att_1780834831769_i6wzf",
+      "sessionId": "sess_1780834828688_7qafj",
+      "attemptNumber": 1,
+      "inputIntent": "cache package metadata",
+      "plannerSeed": "06b2b9f4",
+      "constraintSnapshotId": "snap_1780834828693_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "deriveMetadata",
+          "args": [
+            {
+              "name": "srcDir",
+              "type": "string",
+              "value": "srcDir"
+            }
+          ],
+          "assignTo": "meta"
+        },
+        {
+          "kind": "call",
+          "function": "applyDerivedMetadata",
+          "args": [
+            {
+              "name": "dryRun",
+              "type": "boolean",
+              "value": false
+            }
+          ],
+          "assignTo": "result"
+        },
+        {
+          "kind": "return",
+          "value": "result"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "deriveMetadata",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "applyDerivedMetadata",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780834831769,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780834828688,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780834831769_i6wzf",
+    "sessionId": "sess_1780834828688_7qafj",
+    "attemptNumber": 1,
+    "inputIntent": "cache package metadata",
+    "plannerSeed": "06b2b9f4",
+    "constraintSnapshotId": "snap_1780834828693_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "deriveMetadata",
+        "args": [
+          {
+            "name": "srcDir",
+            "type": "string",
+            "value": "srcDir"
+          }
+        ],
+        "assignTo": "meta"
+      },
+      {
+        "kind": "call",
+        "function": "applyDerivedMetadata",
+        "args": [
+          {
+            "name": "dryRun",
+            "type": "boolean",
+            "value": false
+          }
+        ],
+        "assignTo": "result"
+      },
+      {
+        "kind": "return",
+        "value": "result"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "deriveMetadata",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "applyDerivedMetadata",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780834831769,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780834828693_d85b13b3d2c5",
+  "endedAt": 1780834831790
+}

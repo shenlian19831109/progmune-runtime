@@ -450,8 +450,30 @@ export async function plan(userIntent, llmSeeds) {
     }
     // 提前加载协议（后续多处使用）
     const { protocols, namespaceInitialStates } = loadProtocols(ir);
-    // Graph ON/OFF switch for ROI experiments
-    const graphMode = process.env.PROGMUNE_GRAPH_MODE || "on";
+    // ── Auto Router: repo-specific tasks → Graph ON, generic tasks → OFF ──
+    const explicitMode = process.env.PROGMUNE_GRAPH_MODE;
+    let graphMode = explicitMode || "off"; // default OFF
+    if (!explicitMode) {
+        // Extract repo-specific terms from IR
+        const repoNames = new Set();
+        for (const f of ir) {
+            for (const word of f.name.replace(/([A-Z])/g, " $1").toLowerCase().split(/[\s_]+/))
+                if (word.length > 3)
+                    repoNames.add(word);
+            for (const tag of (f.tags || []))
+                repoNames.add(tag.toLowerCase());
+        }
+        const stopWords = new Set(["this", "that", "with", "from", "have", "been", "their", "will", "would", "could", "should", "about", "which", "there"]);
+        for (const w of stopWords)
+            repoNames.delete(w);
+        const intentWords = userIntent.toLowerCase().split(/[\s,，]+/).filter((w) => w.length > 2);
+        const repoHits = intentWords.filter((w) => repoNames.has(w)).length;
+        const density = intentWords.length > 0 ? repoHits / intentWords.length : 0;
+        if (density > 0.25) {
+            graphMode = "on";
+            console.error("[AutoRouter] " + Math.round(density * 100) + "% repo terms → Graph ON");
+        }
+    }
     // ── 抗体免疫系统：查询历史失败模式，注入知识回流 ──
     const antibodies = graphMode !== "off" ? queryAntibodies(userIntent, "ACL-3") : [];
     let antibodyHint = "";
@@ -671,7 +693,9 @@ export async function plan(userIntent, llmSeeds) {
         chainFuncs = [...inChain, ...outChain].slice(0, 15);
     }
     const compactFuncList = buildCompactFuncList(chainFuncs, ir);
-    const chainHints = buildChainHints(topFuncs);
+    // Graph recommendations: only inject when explicitly enabled (default: off)
+    // Graph validation (SVL, protocol, dataflow) always runs regardless
+    const chainHints = graphMode === "on" ? buildChainHints(topFuncs) : "";
     // Known string-enum types: tell LLM these are strings, not objects
     const STRING_ENUMS = {
         "SVL": '"SVL-1"|"SVL-2"|"SVL-3"|"SVL-4"',

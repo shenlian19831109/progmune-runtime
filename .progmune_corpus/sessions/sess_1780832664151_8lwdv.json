@@ -1,0 +1,151 @@
+{
+  "sessionId": "sess_1780832664151_8lwdv",
+  "intent": "fix the bug where count returns wrong number",
+  "attempts": [
+    {
+      "id": "att_1780832666055_50c85",
+      "sessionId": "sess_1780832664151_8lwdv",
+      "attemptNumber": 1,
+      "inputIntent": "fix the bug where count returns wrong number",
+      "plannerSeed": "00c799a5",
+      "constraintSnapshotId": "snap_1780832664153_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "countSubstring",
+          "args": [
+            {
+              "name": "str",
+              "type": "string",
+              "value": "str"
+            },
+            {
+              "name": "sub",
+              "type": "string",
+              "value": "sub"
+            }
+          ],
+          "assignTo": "c"
+        },
+        {
+          "kind": "return",
+          "value": "c"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "countSubstring",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780832666055,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780832664151,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780832666055_50c85",
+    "sessionId": "sess_1780832664151_8lwdv",
+    "attemptNumber": 1,
+    "inputIntent": "fix the bug where count returns wrong number",
+    "plannerSeed": "00c799a5",
+    "constraintSnapshotId": "snap_1780832664153_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "countSubstring",
+        "args": [
+          {
+            "name": "str",
+            "type": "string",
+            "value": "str"
+          },
+          {
+            "name": "sub",
+            "type": "string",
+            "value": "sub"
+          }
+        ],
+        "assignTo": "c"
+      },
+      {
+        "kind": "return",
+        "value": "c"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "countSubstring",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780832666055,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780832664153_d85b13b3d2c5",
+  "endedAt": 1780832666060
+}

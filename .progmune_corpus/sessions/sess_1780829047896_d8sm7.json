@@ -1,0 +1,343 @@
+{
+  "sessionId": "sess_1780829047896_d8sm7",
+  "intent": "describe the branch tree for a session showing all forks merges and their reasons",
+  "attempts": [
+    {
+      "id": "att_1780829050472_63u6m",
+      "sessionId": "sess_1780829047896_d8sm7",
+      "attemptNumber": 1,
+      "inputIntent": "describe the branch tree for a session showing all forks merges and their reasons",
+      "plannerSeed": "3c1c7111",
+      "constraintSnapshotId": "snap_1780829047898_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getAllSessions",
+          "args": [],
+          "assignTo": "sessions"
+        },
+        {
+          "kind": "call",
+          "function": "formatSessionTimeline",
+          "args": [
+            {
+              "name": "session",
+              "type": "ExecutionSession",
+              "value": "sessions"
+            }
+          ],
+          "assignTo": "timeline"
+        },
+        {
+          "kind": "call",
+          "function": "describeBranchTree",
+          "args": [
+            {
+              "name": "root",
+              "type": "Branch",
+              "value": "timeline"
+            },
+            {
+              "name": "allBranches",
+              "type": "Map<string, Branch>",
+              "value": "sessions"
+            },
+            {
+              "name": "indent",
+              "type": "any",
+              "value": "timeline"
+            }
+          ],
+          "assignTo": "tree"
+        },
+        {
+          "kind": "return",
+          "value": "tree"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getAllSessions",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "formatSessionTimeline",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 2,
+          "function": "describeBranchTree",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780829050472,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "antibodyHit": {
+        "level": "ACL-4",
+        "signature": "SVL-4:protocol",
+        "fixPath": [
+          "validateAction"
+        ],
+        "similarityScore": 0.21739130434782608,
+        "action": "injected_hint",
+        "llmCallsSaved": 0,
+        "estimatedTokensSaved": 0
+      },
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780829047896,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780829050472_63u6m",
+    "sessionId": "sess_1780829047896_d8sm7",
+    "attemptNumber": 1,
+    "inputIntent": "describe the branch tree for a session showing all forks merges and their reasons",
+    "plannerSeed": "3c1c7111",
+    "constraintSnapshotId": "snap_1780829047898_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "formatSessionTimeline",
+        "args": [
+          {
+            "name": "session",
+            "type": "ExecutionSession",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "timeline"
+      },
+      {
+        "kind": "call",
+        "function": "describeBranchTree",
+        "args": [
+          {
+            "name": "root",
+            "type": "Branch",
+            "value": "timeline"
+          },
+          {
+            "name": "allBranches",
+            "type": "Map<string, Branch>",
+            "value": "sessions"
+          },
+          {
+            "name": "indent",
+            "type": "any",
+            "value": "timeline"
+          }
+        ],
+        "assignTo": "tree"
+      },
+      {
+        "kind": "return",
+        "value": "tree"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getAllSessions",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "formatSessionTimeline",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 2,
+        "function": "describeBranchTree",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780829050472,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "antibodyHit": {
+      "level": "ACL-4",
+      "signature": "SVL-4:protocol",
+      "fixPath": [
+        "validateAction"
+      ],
+      "similarityScore": 0.21739130434782608,
+      "action": "injected_hint",
+      "llmCallsSaved": 0,
+      "estimatedTokensSaved": 0
+    },
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780829047898_d85b13b3d2c5",
+  "endedAt": 1780829050474
+}

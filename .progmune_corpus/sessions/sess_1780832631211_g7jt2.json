@@ -1,0 +1,321 @@
+{
+  "sessionId": "sess_1780832631211_g7jt2",
+  "intent": "replay session deterministically and verify fingerprints",
+  "attempts": [
+    {
+      "id": "att_1780832635482_mkhhl",
+      "sessionId": "sess_1780832631211_g7jt2",
+      "attemptNumber": 1,
+      "inputIntent": "replay session deterministically and verify fingerprints",
+      "plannerSeed": "461243bb",
+      "constraintSnapshotId": "snap_1780832631215_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getAllSessions",
+          "args": [],
+          "assignTo": "sessions"
+        },
+        {
+          "kind": "call",
+          "function": "replaySession",
+          "args": [
+            {
+              "name": "sessionId",
+              "type": "string",
+              "value": "sessions"
+            },
+            {
+              "name": "currentRules",
+              "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>",
+              "value": "sessions"
+            },
+            {
+              "name": "namespaceInitialStates",
+              "type": "Map<string, string>",
+              "value": "sessions"
+            }
+          ],
+          "assignTo": "replayResult"
+        },
+        {
+          "kind": "call",
+          "function": "verifyAllFingerprints",
+          "args": [
+            {
+              "name": "currentRuleHash",
+              "type": "string",
+              "value": "currentRuleHash"
+            }
+          ],
+          "assignTo": "verificationResult"
+        },
+        {
+          "kind": "return",
+          "value": "verificationResult"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getAllSessions",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "replaySession",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 2,
+          "function": "verifyAllFingerprints",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780832635482,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780832631211,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780832635482_mkhhl",
+    "sessionId": "sess_1780832631211_g7jt2",
+    "attemptNumber": 1,
+    "inputIntent": "replay session deterministically and verify fingerprints",
+    "plannerSeed": "461243bb",
+    "constraintSnapshotId": "snap_1780832631215_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "replaySession",
+        "args": [
+          {
+            "name": "sessionId",
+            "type": "string",
+            "value": "sessions"
+          },
+          {
+            "name": "currentRules",
+            "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>",
+            "value": "sessions"
+          },
+          {
+            "name": "namespaceInitialStates",
+            "type": "Map<string, string>",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "replayResult"
+      },
+      {
+        "kind": "call",
+        "function": "verifyAllFingerprints",
+        "args": [
+          {
+            "name": "currentRuleHash",
+            "type": "string",
+            "value": "currentRuleHash"
+          }
+        ],
+        "assignTo": "verificationResult"
+      },
+      {
+        "kind": "return",
+        "value": "verificationResult"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getAllSessions",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "replaySession",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 2,
+        "function": "verifyAllFingerprints",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780832635482,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780832631215_d85b13b3d2c5",
+  "endedAt": 1780832635494
+}

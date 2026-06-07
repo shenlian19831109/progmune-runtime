@@ -1,0 +1,68 @@
+{
+  "intent": "refactor duplicate validation code",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "symbol_existence",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "execute",
+      "args": [
+        {
+          "name": "intent",
+          "type": "string",
+          "value": "refactor duplicate validation code"
+        },
+        {
+          "name": "projectPath",
+          "type": "string",
+          "value": "."
+        },
+        {
+          "name": "filePath",
+          "type": "string",
+          "value": ""
+        }
+      ],
+      "assignTo": "code"
+    },
+    {
+      "kind": "call",
+      "function": "executeActionCode",
+      "args": [
+        {
+          "name": "code",
+          "type": "string",
+          "value": "code"
+        }
+      ],
+      "assignTo": "actions"
+    },
+    {
+      "kind": "call",
+      "function": "validateAction",
+      "args": [
+        {
+          "name": "action",
+          "type": "Action",
+          "value": "actions"
+        },
+        {
+          "name": "actionIndex",
+          "type": "number",
+          "value": 1
+        }
+      ],
+      "assignTo": "validation"
+    },
+    {
+      "kind": "return",
+      "value": "validation"
+    }
+  ],
+  "errorDetail": "validateAction: 协议违规 — 需要先调用 extractIR",
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 2,
+  "id": "fail_1780832676439_357",
+  "timestamp": "2026-06-07T11:44:36.439Z"
+}

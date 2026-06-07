@@ -1,0 +1,227 @@
+{
+  "sessionId": "sess_1780834799265_tdk3t",
+  "intent": "check for outdated dependencies and list updates",
+  "attempts": [
+    {
+      "id": "att_1780834808349_sp8uz",
+      "sessionId": "sess_1780834799265_tdk3t",
+      "attemptNumber": 1,
+      "inputIntent": "check for outdated dependencies and list updates",
+      "plannerSeed": "c787d61a",
+      "constraintSnapshotId": "snap_1780834799266_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "runAndCheck",
+          "args": [
+            {
+              "name": "code",
+              "type": "string",
+              "value": "npm outdated --json"
+            }
+          ],
+          "assignTo": "checkResult"
+        },
+        {
+          "kind": "call",
+          "function": "formatActionList",
+          "args": [
+            {
+              "name": "actions",
+              "type": "{ kind: string; function?: string }[]",
+              "value": "checkResult"
+            }
+          ],
+          "assignTo": "formatted"
+        },
+        {
+          "kind": "return",
+          "value": "formatted"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "runAndCheck",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "formatActionList",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780834808349,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780834799265,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780834808349_sp8uz",
+    "sessionId": "sess_1780834799265_tdk3t",
+    "attemptNumber": 1,
+    "inputIntent": "check for outdated dependencies and list updates",
+    "plannerSeed": "c787d61a",
+    "constraintSnapshotId": "snap_1780834799266_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "runAndCheck",
+        "args": [
+          {
+            "name": "code",
+            "type": "string",
+            "value": "npm outdated --json"
+          }
+        ],
+        "assignTo": "checkResult"
+      },
+      {
+        "kind": "call",
+        "function": "formatActionList",
+        "args": [
+          {
+            "name": "actions",
+            "type": "{ kind: string; function?: string }[]",
+            "value": "checkResult"
+          }
+        ],
+        "assignTo": "formatted"
+      },
+      {
+        "kind": "return",
+        "value": "formatted"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "runAndCheck",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "formatActionList",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780834808349,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780834799266_d85b13b3d2c5",
+  "endedAt": 1780834808358
+}

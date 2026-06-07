@@ -1,0 +1,249 @@
+{
+  "sessionId": "sess_1780832660526_1zf0r",
+  "intent": "add input validation before saving data",
+  "attempts": [
+    {
+      "id": "att_1780832663911_9ak03",
+      "sessionId": "sess_1780832660526_1zf0r",
+      "attemptNumber": 1,
+      "inputIntent": "add input validation before saving data",
+      "plannerSeed": "8b385247",
+      "constraintSnapshotId": "snap_1780832660527_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "validateActionSchema",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": ""
+            }
+          ],
+          "assignTo": "validationResult"
+        },
+        {
+          "kind": "call",
+          "function": "isValidEmail",
+          "args": [
+            {
+              "name": "str",
+              "type": "string",
+              "value": "validationResult"
+            }
+          ],
+          "assignTo": "emailValid"
+        },
+        {
+          "kind": "return",
+          "value": "emailValid"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "validateActionSchema",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "isValidEmail",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780832663911,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "antibodyHit": {
+        "level": "ACL-4",
+        "signature": "SVL-4:protocol",
+        "fixPath": [
+          "validateAction"
+        ],
+        "similarityScore": 0.2222222222222222,
+        "action": "injected_hint",
+        "llmCallsSaved": 0,
+        "estimatedTokensSaved": 0
+      },
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780832660526,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780832663911_9ak03",
+    "sessionId": "sess_1780832660526_1zf0r",
+    "attemptNumber": 1,
+    "inputIntent": "add input validation before saving data",
+    "plannerSeed": "8b385247",
+    "constraintSnapshotId": "snap_1780832660527_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "validateActionSchema",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": ""
+          }
+        ],
+        "assignTo": "validationResult"
+      },
+      {
+        "kind": "call",
+        "function": "isValidEmail",
+        "args": [
+          {
+            "name": "str",
+            "type": "string",
+            "value": "validationResult"
+          }
+        ],
+        "assignTo": "emailValid"
+      },
+      {
+        "kind": "return",
+        "value": "emailValid"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "validateActionSchema",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "isValidEmail",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780832663911,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "antibodyHit": {
+      "level": "ACL-4",
+      "signature": "SVL-4:protocol",
+      "fixPath": [
+        "validateAction"
+      ],
+      "similarityScore": 0.2222222222222222,
+      "action": "injected_hint",
+      "llmCallsSaved": 0,
+      "estimatedTokensSaved": 0
+    },
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780832660527_d85b13b3d2c5",
+  "endedAt": 1780832663916
+}

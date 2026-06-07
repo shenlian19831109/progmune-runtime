@@ -1,0 +1,215 @@
+{
+  "sessionId": "sess_1780834756962_lp3d8",
+  "intent": "add logging to package resolution",
+  "attempts": [
+    {
+      "id": "att_1780834759468_4d3k2",
+      "sessionId": "sess_1780834756962_lp3d8",
+      "attemptNumber": 1,
+      "inputIntent": "add logging to package resolution",
+      "plannerSeed": "7f9b529d",
+      "constraintSnapshotId": "snap_1780834756964_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "readdirSync",
+          "args": [
+            {
+              "name": "path",
+              "type": "string",
+              "value": "path"
+            }
+          ],
+          "assignTo": "files"
+        },
+        {
+          "kind": "call",
+          "function": "add",
+          "args": [],
+          "assignTo": "result"
+        },
+        {
+          "kind": "return",
+          "value": "result"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "readdirSync",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "add",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780834759468,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780834756962,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780834759468_4d3k2",
+    "sessionId": "sess_1780834756962_lp3d8",
+    "attemptNumber": 1,
+    "inputIntent": "add logging to package resolution",
+    "plannerSeed": "7f9b529d",
+    "constraintSnapshotId": "snap_1780834756964_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "readdirSync",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "path"
+          }
+        ],
+        "assignTo": "files"
+      },
+      {
+        "kind": "call",
+        "function": "add",
+        "args": [],
+        "assignTo": "result"
+      },
+      {
+        "kind": "return",
+        "value": "result"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "readdirSync",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "add",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780834759468,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780834756964_d85b13b3d2c5",
+  "endedAt": 1780834759475
+}

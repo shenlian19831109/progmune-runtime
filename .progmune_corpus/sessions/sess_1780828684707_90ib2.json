@@ -1,0 +1,217 @@
+{
+  "sessionId": "sess_1780828684707_90ib2",
+  "intent": "add retry logic to session loading when corpus locked",
+  "attempts": [
+    {
+      "id": "att_1780828687480_ufq6g",
+      "sessionId": "sess_1780828684707_90ib2",
+      "attemptNumber": 1,
+      "inputIntent": "add retry logic to session loading when corpus locked",
+      "plannerSeed": "d1445efc",
+      "constraintSnapshotId": "snap_1780828684709_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getAllSessions",
+          "args": [],
+          "assignTo": "sessions"
+        },
+        {
+          "kind": "call",
+          "function": "retry",
+          "args": [
+            {
+              "name": "fn",
+              "type": "() => Promise<T>",
+              "value": "sessions"
+            },
+            {
+              "name": "maxRetries",
+              "type": "number",
+              "value": 3
+            }
+          ],
+          "assignTo": "retryResult"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getAllSessions",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "retry",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780828687480,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780828684707,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780828687480_ufq6g",
+    "sessionId": "sess_1780828684707_90ib2",
+    "attemptNumber": 1,
+    "inputIntent": "add retry logic to session loading when corpus locked",
+    "plannerSeed": "d1445efc",
+    "constraintSnapshotId": "snap_1780828684709_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "retry",
+        "args": [
+          {
+            "name": "fn",
+            "type": "() => Promise<T>",
+            "value": "sessions"
+          },
+          {
+            "name": "maxRetries",
+            "type": "number",
+            "value": 3
+          }
+        ],
+        "assignTo": "retryResult"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getAllSessions",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "retry",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780828687480,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780828684709_d85b13b3d2c5",
+  "endedAt": 1780828687484
+}

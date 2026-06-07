@@ -1,0 +1,237 @@
+{
+  "sessionId": "sess_1780832647119_9sksc",
+  "intent": "audit source files and report progmune coverage",
+  "attempts": [
+    {
+      "id": "att_1780832650739_31wt2",
+      "sessionId": "sess_1780832647119_9sksc",
+      "attemptNumber": 1,
+      "inputIntent": "audit source files and report progmune coverage",
+      "plannerSeed": "0169ec89",
+      "constraintSnapshotId": "snap_1780832647124_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "auditDirectory",
+          "args": [
+            {
+              "name": "dir",
+              "type": "string",
+              "value": "srcDir"
+            },
+            {
+              "name": "threshold",
+              "type": "any",
+              "value": {}
+            }
+          ],
+          "assignTo": "auditResult"
+        },
+        {
+          "kind": "call",
+          "function": "formatAuditResult",
+          "args": [
+            {
+              "name": "result",
+              "type": "AuditResult",
+              "value": "auditResult"
+            }
+          ],
+          "assignTo": "report"
+        },
+        {
+          "kind": "return",
+          "value": "report"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "auditDirectory",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "formatAuditResult",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780832650739,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780832647119,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780832650739_31wt2",
+    "sessionId": "sess_1780832647119_9sksc",
+    "attemptNumber": 1,
+    "inputIntent": "audit source files and report progmune coverage",
+    "plannerSeed": "0169ec89",
+    "constraintSnapshotId": "snap_1780832647124_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "auditDirectory",
+        "args": [
+          {
+            "name": "dir",
+            "type": "string",
+            "value": "srcDir"
+          },
+          {
+            "name": "threshold",
+            "type": "any",
+            "value": {}
+          }
+        ],
+        "assignTo": "auditResult"
+      },
+      {
+        "kind": "call",
+        "function": "formatAuditResult",
+        "args": [
+          {
+            "name": "result",
+            "type": "AuditResult",
+            "value": "auditResult"
+          }
+        ],
+        "assignTo": "report"
+      },
+      {
+        "kind": "return",
+        "value": "report"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "auditDirectory",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "formatAuditResult",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780832650739,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780832647124_d85b13b3d2c5",
+  "endedAt": 1780832650744
+}

@@ -1,0 +1,289 @@
+{
+  "sessionId": "sess_1780828676639_v5xlr",
+  "intent": "generate weekly report of failure trends and antibody efficacy",
+  "attempts": [
+    {
+      "id": "att_1780828679702_vo03u",
+      "sessionId": "sess_1780828676639_v5xlr",
+      "attemptNumber": 1,
+      "inputIntent": "generate weekly report of failure trends and antibody efficacy",
+      "plannerSeed": "1fc04890",
+      "constraintSnapshotId": "snap_1780828676640_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getFailureGenome",
+          "args": [],
+          "assignTo": "fg"
+        },
+        {
+          "kind": "call",
+          "function": "getAntibodyStats",
+          "args": [],
+          "assignTo": "as"
+        },
+        {
+          "kind": "call",
+          "function": "generateGraphReport",
+          "args": [
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": "fg"
+            }
+          ],
+          "assignTo": "report"
+        },
+        {
+          "kind": "return",
+          "value": "report"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getFailureGenome",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "getAntibodyStats",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 2,
+          "function": "generateGraphReport",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780828679702,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780828676639,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780828679702_vo03u",
+    "sessionId": "sess_1780828676639_v5xlr",
+    "attemptNumber": 1,
+    "inputIntent": "generate weekly report of failure trends and antibody efficacy",
+    "plannerSeed": "1fc04890",
+    "constraintSnapshotId": "snap_1780828676640_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getFailureGenome",
+        "args": [],
+        "assignTo": "fg"
+      },
+      {
+        "kind": "call",
+        "function": "getAntibodyStats",
+        "args": [],
+        "assignTo": "as"
+      },
+      {
+        "kind": "call",
+        "function": "generateGraphReport",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "fg"
+          }
+        ],
+        "assignTo": "report"
+      },
+      {
+        "kind": "return",
+        "value": "report"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getFailureGenome",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "getAntibodyStats",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 2,
+        "function": "generateGraphReport",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780828679702,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780828676640_d85b13b3d2c5",
+  "endedAt": 1780828679703
+}

@@ -1,0 +1,387 @@
+{
+  "sessionId": "sess_1780832668275_63yel",
+  "intent": "create health check endpoint returning status",
+  "attempts": [
+    {
+      "id": "att_1780832672054_999l4",
+      "sessionId": "sess_1780832668275_63yel",
+      "attemptNumber": 1,
+      "inputIntent": "create health check endpoint returning status",
+      "plannerSeed": "fb21b7d8",
+      "constraintSnapshotId": "snap_1780832668276_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "create",
+          "args": [],
+          "assignTo": "healthCheck"
+        },
+        {
+          "kind": "call",
+          "function": "checkpointPath",
+          "args": [
+            {
+              "name": "intent",
+              "type": "string",
+              "value": "healthCheck"
+            }
+          ],
+          "assignTo": "path"
+        },
+        {
+          "kind": "call",
+          "function": "checkVariableFlow",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": "path"
+            }
+          ],
+          "assignTo": "flowResult"
+        },
+        {
+          "kind": "call",
+          "function": "validateActionSchema",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": "flowResult"
+            }
+          ],
+          "assignTo": "schemaResult"
+        },
+        {
+          "kind": "return",
+          "value": "schemaResult"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "create",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "checkpointPath",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 2,
+          "function": "checkVariableFlow",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 3,
+          "function": "validateActionSchema",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780832672054,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780832668275,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780832672054_999l4",
+    "sessionId": "sess_1780832668275_63yel",
+    "attemptNumber": 1,
+    "inputIntent": "create health check endpoint returning status",
+    "plannerSeed": "fb21b7d8",
+    "constraintSnapshotId": "snap_1780832668276_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "create",
+        "args": [],
+        "assignTo": "healthCheck"
+      },
+      {
+        "kind": "call",
+        "function": "checkpointPath",
+        "args": [
+          {
+            "name": "intent",
+            "type": "string",
+            "value": "healthCheck"
+          }
+        ],
+        "assignTo": "path"
+      },
+      {
+        "kind": "call",
+        "function": "checkVariableFlow",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "path"
+          }
+        ],
+        "assignTo": "flowResult"
+      },
+      {
+        "kind": "call",
+        "function": "validateActionSchema",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "flowResult"
+          }
+        ],
+        "assignTo": "schemaResult"
+      },
+      {
+        "kind": "return",
+        "value": "schemaResult"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "create",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "checkpointPath",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 2,
+        "function": "checkVariableFlow",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 3,
+        "function": "validateActionSchema",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780832672054,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780832668276_d85b13b3d2c5",
+  "endedAt": 1780832672060
+}

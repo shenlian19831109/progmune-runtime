@@ -1,0 +1,313 @@
+{
+  "sessionId": "sess_1780834832024_preh8",
+  "intent": "schedule periodic outdated check",
+  "attempts": [
+    {
+      "id": "att_1780834834339_dffzx",
+      "sessionId": "sess_1780834832024_preh8",
+      "attemptNumber": 1,
+      "inputIntent": "schedule periodic outdated check",
+      "plannerSeed": "0db01f02",
+      "constraintSnapshotId": "snap_1780834832025_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "checkpointPath",
+          "args": [
+            {
+              "name": "intent",
+              "type": "string",
+              "value": "schedule periodic outdated check"
+            }
+          ],
+          "assignTo": "path"
+        },
+        {
+          "kind": "call",
+          "function": "loadCheckpoint",
+          "args": [
+            {
+              "name": "intent",
+              "type": "string",
+              "value": "schedule periodic outdated check"
+            }
+          ],
+          "assignTo": "checkpoint"
+        },
+        {
+          "kind": "call",
+          "function": "hasViolations",
+          "args": [
+            {
+              "name": "session",
+              "type": "any",
+              "value": "checkpoint"
+            }
+          ],
+          "assignTo": "hasViolations"
+        },
+        {
+          "kind": "return",
+          "value": "hasViolations"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "checkpointPath",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "loadCheckpoint",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 2,
+          "function": "hasViolations",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780834834339,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780834832024,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780834834339_dffzx",
+    "sessionId": "sess_1780834832024_preh8",
+    "attemptNumber": 1,
+    "inputIntent": "schedule periodic outdated check",
+    "plannerSeed": "0db01f02",
+    "constraintSnapshotId": "snap_1780834832025_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "checkpointPath",
+        "args": [
+          {
+            "name": "intent",
+            "type": "string",
+            "value": "schedule periodic outdated check"
+          }
+        ],
+        "assignTo": "path"
+      },
+      {
+        "kind": "call",
+        "function": "loadCheckpoint",
+        "args": [
+          {
+            "name": "intent",
+            "type": "string",
+            "value": "schedule periodic outdated check"
+          }
+        ],
+        "assignTo": "checkpoint"
+      },
+      {
+        "kind": "call",
+        "function": "hasViolations",
+        "args": [
+          {
+            "name": "session",
+            "type": "any",
+            "value": "checkpoint"
+          }
+        ],
+        "assignTo": "hasViolations"
+      },
+      {
+        "kind": "return",
+        "value": "hasViolations"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "checkpointPath",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "loadCheckpoint",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 2,
+        "function": "hasViolations",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780834834339,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780834832025_d85b13b3d2c5",
+  "endedAt": 1780834834346
+}

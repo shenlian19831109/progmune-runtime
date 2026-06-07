@@ -1,0 +1,141 @@
+{
+  "sessionId": "sess_1780832643530_4s213",
+  "intent": "rebuild semantic topology from the latest IR",
+  "attempts": [
+    {
+      "id": "att_1780832646931_qgqes",
+      "sessionId": "sess_1780832643530_4s213",
+      "attemptNumber": 1,
+      "inputIntent": "rebuild semantic topology from the latest IR",
+      "plannerSeed": "7406ed7e",
+      "constraintSnapshotId": "snap_1780832643533_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "rebuildTopology",
+          "args": [
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": "latestIR"
+            }
+          ],
+          "assignTo": "topology"
+        },
+        {
+          "kind": "return",
+          "value": "topology"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "rebuildTopology",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780832646931,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780832643530,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780832646931_qgqes",
+    "sessionId": "sess_1780832643530_4s213",
+    "attemptNumber": 1,
+    "inputIntent": "rebuild semantic topology from the latest IR",
+    "plannerSeed": "7406ed7e",
+    "constraintSnapshotId": "snap_1780832643533_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "rebuildTopology",
+        "args": [
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "latestIR"
+          }
+        ],
+        "assignTo": "topology"
+      },
+      {
+        "kind": "return",
+        "value": "topology"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "rebuildTopology",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780832646931,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780832643533_d85b13b3d2c5",
+  "endedAt": 1780832646940
+}

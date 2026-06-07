@@ -1,0 +1,237 @@
+{
+  "sessionId": "sess_1780829168698_dikvb",
+  "intent": "list all exported functions with their file location and return type",
+  "attempts": [
+    {
+      "id": "att_1780829171604_zdfqh",
+      "sessionId": "sess_1780829168698_dikvb",
+      "attemptNumber": 1,
+      "inputIntent": "list all exported functions with their file location and return type",
+      "plannerSeed": "a9446194",
+      "constraintSnapshotId": "snap_1780829168716_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getExportedDeclarations",
+          "args": [],
+          "assignTo": "exported"
+        },
+        {
+          "kind": "call",
+          "function": "extractIRWithTypes",
+          "args": [
+            {
+              "name": "projectRoot",
+              "type": "string",
+              "value": "exported"
+            }
+          ],
+          "assignTo": "ir"
+        },
+        {
+          "kind": "return",
+          "value": "ir"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getExportedDeclarations",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "extractIRWithTypes",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780829171604,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "antibodyHit": {
+        "level": "ACL-4",
+        "signature": "SVL-4:protocol",
+        "fixPath": [
+          "validateAction"
+        ],
+        "similarityScore": 0.25,
+        "action": "injected_hint",
+        "llmCallsSaved": 0,
+        "estimatedTokensSaved": 0
+      },
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780829168698,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780829171604_zdfqh",
+    "sessionId": "sess_1780829168698_dikvb",
+    "attemptNumber": 1,
+    "inputIntent": "list all exported functions with their file location and return type",
+    "plannerSeed": "a9446194",
+    "constraintSnapshotId": "snap_1780829168716_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getExportedDeclarations",
+        "args": [],
+        "assignTo": "exported"
+      },
+      {
+        "kind": "call",
+        "function": "extractIRWithTypes",
+        "args": [
+          {
+            "name": "projectRoot",
+            "type": "string",
+            "value": "exported"
+          }
+        ],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "return",
+        "value": "ir"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getExportedDeclarations",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "extractIRWithTypes",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780829171604,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "antibodyHit": {
+      "level": "ACL-4",
+      "signature": "SVL-4:protocol",
+      "fixPath": [
+        "validateAction"
+      ],
+      "similarityScore": 0.25,
+      "action": "injected_hint",
+      "llmCallsSaved": 0,
+      "estimatedTokensSaved": 0
+    },
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780829168716_d85b13b3d2c5",
+  "endedAt": 1780829171605
+}

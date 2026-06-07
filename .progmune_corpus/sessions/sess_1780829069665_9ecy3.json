@@ -1,0 +1,331 @@
+{
+  "sessionId": "sess_1780829069665_9ecy3",
+  "intent": "apply a repair proposal as a new branch on the session ledger",
+  "attempts": [
+    {
+      "id": "att_1780829072997_qbqrx",
+      "sessionId": "sess_1780829069665_9ecy3",
+      "attemptNumber": 1,
+      "inputIntent": "apply a repair proposal as a new branch on the session ledger",
+      "plannerSeed": "321cf1ce",
+      "constraintSnapshotId": "snap_1780829069678_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getAllSessions",
+          "args": [],
+          "assignTo": "sessions"
+        },
+        {
+          "kind": "call",
+          "function": "getSessionTransitions",
+          "args": [
+            {
+              "name": "session",
+              "type": "any",
+              "value": "sessions"
+            }
+          ],
+          "assignTo": "transitions"
+        },
+        {
+          "kind": "call",
+          "function": "applyProposalAsBranch",
+          "args": [
+            {
+              "name": "proposal",
+              "type": "RepairProposal",
+              "value": "transitions"
+            },
+            {
+              "name": "parentBranch",
+              "type": "Branch",
+              "value": "transitions"
+            },
+            {
+              "name": "currentLedger",
+              "type": "StateTransition[]",
+              "value": "transitions"
+            },
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": "transitions"
+            }
+          ],
+          "assignTo": "branch"
+        },
+        {
+          "kind": "return",
+          "value": "branch"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getAllSessions",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "getSessionTransitions",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 2,
+          "function": "applyProposalAsBranch",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780829072997,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780829069665,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780829072997_qbqrx",
+    "sessionId": "sess_1780829069665_9ecy3",
+    "attemptNumber": 1,
+    "inputIntent": "apply a repair proposal as a new branch on the session ledger",
+    "plannerSeed": "321cf1ce",
+    "constraintSnapshotId": "snap_1780829069678_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "getSessionTransitions",
+        "args": [
+          {
+            "name": "session",
+            "type": "any",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "transitions"
+      },
+      {
+        "kind": "call",
+        "function": "applyProposalAsBranch",
+        "args": [
+          {
+            "name": "proposal",
+            "type": "RepairProposal",
+            "value": "transitions"
+          },
+          {
+            "name": "parentBranch",
+            "type": "Branch",
+            "value": "transitions"
+          },
+          {
+            "name": "currentLedger",
+            "type": "StateTransition[]",
+            "value": "transitions"
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": "transitions"
+          }
+        ],
+        "assignTo": "branch"
+      },
+      {
+        "kind": "return",
+        "value": "branch"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getAllSessions",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "getSessionTransitions",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 2,
+        "function": "applyProposalAsBranch",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780829072997,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780829069678_d85b13b3d2c5",
+  "endedAt": 1780829073001
+}

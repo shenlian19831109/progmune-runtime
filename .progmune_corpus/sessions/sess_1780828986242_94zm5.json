@@ -1,0 +1,215 @@
+{
+  "sessionId": "sess_1780828986242_94zm5",
+  "intent": "get failure adjusted credit scores for all functions in the repair pipeline",
+  "attempts": [
+    {
+      "id": "att_1780828989338_eb2d5",
+      "sessionId": "sess_1780828986242_94zm5",
+      "attemptNumber": 1,
+      "inputIntent": "get failure adjusted credit scores for all functions in the repair pipeline",
+      "plannerSeed": "09e59ce0",
+      "constraintSnapshotId": "snap_1780828986244_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getAllFailures",
+          "args": [],
+          "assignTo": "failures"
+        },
+        {
+          "kind": "call",
+          "function": "getFailureAdjustedCredit",
+          "args": [
+            {
+              "name": "funcName",
+              "type": "string",
+              "value": "failures"
+            }
+          ],
+          "assignTo": "credit"
+        },
+        {
+          "kind": "return",
+          "value": "credit"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getAllFailures",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "getFailureAdjustedCredit",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780828989338,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780828986242,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780828989338_eb2d5",
+    "sessionId": "sess_1780828986242_94zm5",
+    "attemptNumber": 1,
+    "inputIntent": "get failure adjusted credit scores for all functions in the repair pipeline",
+    "plannerSeed": "09e59ce0",
+    "constraintSnapshotId": "snap_1780828986244_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getAllFailures",
+        "args": [],
+        "assignTo": "failures"
+      },
+      {
+        "kind": "call",
+        "function": "getFailureAdjustedCredit",
+        "args": [
+          {
+            "name": "funcName",
+            "type": "string",
+            "value": "failures"
+          }
+        ],
+        "assignTo": "credit"
+      },
+      {
+        "kind": "return",
+        "value": "credit"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getAllFailures",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "getFailureAdjustedCredit",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780828989338,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780828986244_d85b13b3d2c5",
+  "endedAt": 1780828989340
+}

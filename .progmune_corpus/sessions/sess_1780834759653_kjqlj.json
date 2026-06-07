@@ -1,0 +1,141 @@
+{
+  "sessionId": "sess_1780834759653_kjqlj",
+  "intent": "format upgrade results as JSON",
+  "attempts": [
+    {
+      "id": "att_1780834772281_icn66",
+      "sessionId": "sess_1780834759653_kjqlj",
+      "attemptNumber": 1,
+      "inputIntent": "format upgrade results as JSON",
+      "plannerSeed": "cd47fbe9",
+      "constraintSnapshotId": "snap_1780834759654_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "rejectionToJSON",
+          "args": [
+            {
+              "name": "rejection",
+              "type": "SSGRejection",
+              "value": "{} as SSGRejection"
+            }
+          ],
+          "assignTo": "json"
+        },
+        {
+          "kind": "return",
+          "value": "json"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "rejectionToJSON",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780834772281,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780834759653,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780834772281_icn66",
+    "sessionId": "sess_1780834759653_kjqlj",
+    "attemptNumber": 1,
+    "inputIntent": "format upgrade results as JSON",
+    "plannerSeed": "cd47fbe9",
+    "constraintSnapshotId": "snap_1780834759654_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "rejectionToJSON",
+        "args": [
+          {
+            "name": "rejection",
+            "type": "SSGRejection",
+            "value": "{} as SSGRejection"
+          }
+        ],
+        "assignTo": "json"
+      },
+      {
+        "kind": "return",
+        "value": "json"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "rejectionToJSON",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780834772281,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780834759654_d85b13b3d2c5",
+  "endedAt": 1780834772286
+}

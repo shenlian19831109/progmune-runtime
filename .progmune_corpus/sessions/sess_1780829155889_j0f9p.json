@@ -1,0 +1,249 @@
+{
+  "sessionId": "sess_1780829155889_j0f9p",
+  "intent": "validate that all IR functions have consistent parameter types and return signatures",
+  "attempts": [
+    {
+      "id": "att_1780829160077_ou7et",
+      "sessionId": "sess_1780829155889_j0f9p",
+      "attemptNumber": 1,
+      "inputIntent": "validate that all IR functions have consistent parameter types and return signatures",
+      "plannerSeed": "4837fb52",
+      "constraintSnapshotId": "snap_1780829155928_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "loadIR",
+          "args": [
+            {
+              "name": "filePath",
+              "type": "string",
+              "value": "filePath"
+            }
+          ],
+          "assignTo": "ir"
+        },
+        {
+          "kind": "call",
+          "function": "validateActionSchema",
+          "args": [
+            {
+              "name": "actions",
+              "type": "Action[]",
+              "value": "ir"
+            }
+          ],
+          "assignTo": "validation"
+        },
+        {
+          "kind": "return",
+          "value": "validation"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "loadIR",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "validateActionSchema",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780829160077,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "antibodyHit": {
+        "level": "ACL-4",
+        "signature": "SVL-4:protocol",
+        "fixPath": [
+          "validateAction"
+        ],
+        "similarityScore": 0.21428571428571427,
+        "action": "injected_hint",
+        "llmCallsSaved": 0,
+        "estimatedTokensSaved": 0
+      },
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780829155889,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780829160077_ou7et",
+    "sessionId": "sess_1780829155889_j0f9p",
+    "attemptNumber": 1,
+    "inputIntent": "validate that all IR functions have consistent parameter types and return signatures",
+    "plannerSeed": "4837fb52",
+    "constraintSnapshotId": "snap_1780829155928_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "loadIR",
+        "args": [
+          {
+            "name": "filePath",
+            "type": "string",
+            "value": "filePath"
+          }
+        ],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "validateActionSchema",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "ir"
+          }
+        ],
+        "assignTo": "validation"
+      },
+      {
+        "kind": "return",
+        "value": "validation"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "loadIR",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "validateActionSchema",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780829160077,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "antibodyHit": {
+      "level": "ACL-4",
+      "signature": "SVL-4:protocol",
+      "fixPath": [
+        "validateAction"
+      ],
+      "similarityScore": 0.21428571428571427,
+      "action": "injected_hint",
+      "llmCallsSaved": 0,
+      "estimatedTokensSaved": 0
+    },
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780829155928_d85b13b3d2c5",
+  "endedAt": 1780829160079
+}

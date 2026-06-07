@@ -1,0 +1,297 @@
+{
+  "sessionId": "sess_1780828765827_i7saw",
+  "intent": "load benchmarks and compute pass rate, then format a readable report with pass/fail counts",
+  "attempts": [
+    {
+      "id": "att_1780828771564_e1mf8",
+      "sessionId": "sess_1780828765827_i7saw",
+      "attemptNumber": 1,
+      "inputIntent": "load benchmarks and compute pass rate, then format a readable report with pass/fail counts",
+      "plannerSeed": "4024fd64",
+      "constraintSnapshotId": "snap_1780828765828_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "loadBenchmarks",
+          "args": [],
+          "assignTo": "benchmarks"
+        },
+        {
+          "kind": "call",
+          "function": "benchmarkPassRate",
+          "args": [],
+          "assignTo": "passRate"
+        },
+        {
+          "kind": "call",
+          "function": "benchmarkReport",
+          "args": [],
+          "assignTo": "report"
+        },
+        {
+          "kind": "return",
+          "value": "report"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "loadBenchmarks",
+          "namespace": "_global",
+          "acquired": [
+            "BENCHMARKS_LOADED"
+          ],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "BENCHMARKS_LOADED",
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "benchmarkPassRate",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "BENCHMARKS_LOADED",
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "BENCHMARKS_LOADED",
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 2,
+          "function": "benchmarkReport",
+          "namespace": "_global",
+          "acquired": [
+            "REPORT_FORMATTED"
+          ],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "BENCHMARKS_LOADED",
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "BENCHMARKS_LOADED",
+              "REPORT_FORMATTED",
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780828771564,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780828765827,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780828771564_e1mf8",
+    "sessionId": "sess_1780828765827_i7saw",
+    "attemptNumber": 1,
+    "inputIntent": "load benchmarks and compute pass rate, then format a readable report with pass/fail counts",
+    "plannerSeed": "4024fd64",
+    "constraintSnapshotId": "snap_1780828765828_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "loadBenchmarks",
+        "args": [],
+        "assignTo": "benchmarks"
+      },
+      {
+        "kind": "call",
+        "function": "benchmarkPassRate",
+        "args": [],
+        "assignTo": "passRate"
+      },
+      {
+        "kind": "call",
+        "function": "benchmarkReport",
+        "args": [],
+        "assignTo": "report"
+      },
+      {
+        "kind": "return",
+        "value": "report"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "loadBenchmarks",
+        "namespace": "_global",
+        "acquired": [
+          "BENCHMARKS_LOADED"
+        ],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "BENCHMARKS_LOADED",
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "benchmarkPassRate",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "BENCHMARKS_LOADED",
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "BENCHMARKS_LOADED",
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 2,
+        "function": "benchmarkReport",
+        "namespace": "_global",
+        "acquired": [
+          "REPORT_FORMATTED"
+        ],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "BENCHMARKS_LOADED",
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "BENCHMARKS_LOADED",
+            "REPORT_FORMATTED",
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780828771564,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780828765828_d85b13b3d2c5",
+  "endedAt": 1780828771567
+}

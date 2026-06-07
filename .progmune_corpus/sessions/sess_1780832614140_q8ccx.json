@@ -1,0 +1,299 @@
+{
+  "sessionId": "sess_1780832614140_q8ccx",
+  "intent": "compute immune health score from failure patterns and antibody stats",
+  "attempts": [
+    {
+      "id": "att_1780832623825_ctuys",
+      "sessionId": "sess_1780832614140_q8ccx",
+      "attemptNumber": 1,
+      "inputIntent": "compute immune health score from failure patterns and antibody stats",
+      "plannerSeed": "80e5c9e2",
+      "constraintSnapshotId": "snap_1780832614141_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "getFailureGenome",
+          "args": [],
+          "assignTo": "fg"
+        },
+        {
+          "kind": "call",
+          "function": "getAntibodyStats",
+          "args": [],
+          "assignTo": "as"
+        },
+        {
+          "kind": "call",
+          "function": "computeHealthScore",
+          "args": [
+            {
+              "name": "failureGenome",
+              "type": "any",
+              "value": "fg"
+            },
+            {
+              "name": "antibodyStats",
+              "type": "any",
+              "value": "as"
+            }
+          ],
+          "assignTo": "hs"
+        },
+        {
+          "kind": "return",
+          "value": "hs"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "getFailureGenome",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "getAntibodyStats",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 2,
+          "function": "computeHealthScore",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780832623825,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780832614140,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780832623825_ctuys",
+    "sessionId": "sess_1780832614140_q8ccx",
+    "attemptNumber": 1,
+    "inputIntent": "compute immune health score from failure patterns and antibody stats",
+    "plannerSeed": "80e5c9e2",
+    "constraintSnapshotId": "snap_1780832614141_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "getFailureGenome",
+        "args": [],
+        "assignTo": "fg"
+      },
+      {
+        "kind": "call",
+        "function": "getAntibodyStats",
+        "args": [],
+        "assignTo": "as"
+      },
+      {
+        "kind": "call",
+        "function": "computeHealthScore",
+        "args": [
+          {
+            "name": "failureGenome",
+            "type": "any",
+            "value": "fg"
+          },
+          {
+            "name": "antibodyStats",
+            "type": "any",
+            "value": "as"
+          }
+        ],
+        "assignTo": "hs"
+      },
+      {
+        "kind": "return",
+        "value": "hs"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "getFailureGenome",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "getAntibodyStats",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 2,
+        "function": "computeHealthScore",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780832623825,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780832614141_d85b13b3d2c5",
+  "endedAt": 1780832623844
+}

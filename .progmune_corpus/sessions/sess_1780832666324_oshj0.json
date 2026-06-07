@@ -1,0 +1,129 @@
+{
+  "sessionId": "sess_1780832666324_oshj0",
+  "intent": "add logging to all service functions",
+  "attempts": [
+    {
+      "id": "att_1780832667991_tz7aa",
+      "sessionId": "sess_1780832666324_oshj0",
+      "attemptNumber": 1,
+      "inputIntent": "add logging to all service functions",
+      "plannerSeed": "3ea1baf4",
+      "constraintSnapshotId": "snap_1780832666325_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "add",
+          "args": [],
+          "assignTo": "logging"
+        },
+        {
+          "kind": "return",
+          "value": "logging"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "add",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780832667993,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780832666324,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780832667991_tz7aa",
+    "sessionId": "sess_1780832666324_oshj0",
+    "attemptNumber": 1,
+    "inputIntent": "add logging to all service functions",
+    "plannerSeed": "3ea1baf4",
+    "constraintSnapshotId": "snap_1780832666325_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "add",
+        "args": [],
+        "assignTo": "logging"
+      },
+      {
+        "kind": "return",
+        "value": "logging"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "add",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780832667993,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780832666325_d85b13b3d2c5",
+  "endedAt": 1780832668002
+}
