@@ -473,8 +473,12 @@ export async function plan(userIntent: string, llmSeeds?: string[]): Promise<Pla
   // 提前加载协议（后续多处使用）
   const { protocols, namespaceInitialStates } = loadProtocols(ir);
 
-  // Graph ON/OFF switch for ROI experiments
-  const graphMode = process.env.PROGMUNE_GRAPH_MODE || "on";
+  // Adaptive cascade: LLM seeds → keyword seeds → Graph OFF
+  // llmSeeds provided → Graph ON (LLM+Graph mode)
+  // llmSeeds absent  → Graph ON (keyword mode, 0 extra cost)
+  // chains empty     → auto-fallback to OFF (no graph interference)
+  const explicitMode = process.env.PROGMUNE_GRAPH_MODE;
+  const graphMode = explicitMode || "on";
 
   // ── 抗体免疫系统：查询历史失败模式，注入知识回流 ──
   const antibodies = graphMode !== "off" ? queryAntibodies(userIntent, "ACL-3") : [];
