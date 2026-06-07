@@ -242,11 +242,12 @@ export function selectCapabilityChains(intent, ir, maxChains = 5, llmSeeds) {
         const maxScore = seeds.length > 0 ? Math.max(...seeds.map(n => n.score)) : 1;
         for (const fnName of llmSeeds) {
             if (seedNames.has(fnName))
-                continue; // already a seed
+                continue;
             const node = graph.get(fnName);
             if (node) {
                 node.score = Math.max(node.score, maxScore);
                 seeds.unshift(node);
+                seedNames.add(fnName); // keep seedNames in sync for edge expansion
             }
         }
         // Edge Confidence expansion: high-conf downstream from seeds

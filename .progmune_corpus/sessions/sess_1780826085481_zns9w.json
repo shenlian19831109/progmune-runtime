@@ -1,0 +1,247 @@
+{
+  "sessionId": "sess_1780826085481_zns9w",
+  "intent": "add logging to all repair proposal functions",
+  "attempts": [
+    {
+      "id": "att_1780826088835_gl4uk",
+      "sessionId": "sess_1780826085481_zns9w",
+      "attemptNumber": 1,
+      "inputIntent": "add logging to all repair proposal functions",
+      "plannerSeed": "d2553e04",
+      "constraintSnapshotId": "snap_1780826085482_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "suggestRepairs",
+          "args": [
+            {
+              "name": "violations",
+              "type": "ConstraintViolation[]",
+              "value": ""
+            },
+            {
+              "name": "ir",
+              "type": "any[]",
+              "value": ""
+            },
+            {
+              "name": "protocols",
+              "type": "FunctionProtocol[]",
+              "value": ""
+            }
+          ],
+          "assignTo": "repairs"
+        },
+        {
+          "kind": "call",
+          "function": "getMinimalFixSet",
+          "args": [
+            {
+              "name": "proposals",
+              "type": "RepairProposal[]",
+              "value": "repairs"
+            }
+          ],
+          "assignTo": "minimal"
+        },
+        {
+          "kind": "return",
+          "value": "minimal"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "suggestRepairs",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "getMinimalFixSet",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780826088835,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780826085481,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780826088835_gl4uk",
+    "sessionId": "sess_1780826085481_zns9w",
+    "attemptNumber": 1,
+    "inputIntent": "add logging to all repair proposal functions",
+    "plannerSeed": "d2553e04",
+    "constraintSnapshotId": "snap_1780826085482_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "suggestRepairs",
+        "args": [
+          {
+            "name": "violations",
+            "type": "ConstraintViolation[]",
+            "value": ""
+          },
+          {
+            "name": "ir",
+            "type": "any[]",
+            "value": ""
+          },
+          {
+            "name": "protocols",
+            "type": "FunctionProtocol[]",
+            "value": ""
+          }
+        ],
+        "assignTo": "repairs"
+      },
+      {
+        "kind": "call",
+        "function": "getMinimalFixSet",
+        "args": [
+          {
+            "name": "proposals",
+            "type": "RepairProposal[]",
+            "value": "repairs"
+          }
+        ],
+        "assignTo": "minimal"
+      },
+      {
+        "kind": "return",
+        "value": "minimal"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "suggestRepairs",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "getMinimalFixSet",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780826088835,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780826085482_d85b13b3d2c5",
+  "endedAt": 1780826088837
+}

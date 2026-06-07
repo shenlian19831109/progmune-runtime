@@ -410,7 +410,7 @@ function attemptSSGRepair(actions, rejection, ir, protocols, namespaceInitialSta
     return null;
 }
 /** @requires INTENT @produces ACTION_PLAN */
-export async function plan(userIntent) {
+export async function plan(userIntent, llmSeeds) {
     resetCallCount();
     const irRaw = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
     // Support both old (array) and new ({typeMap, functions}) formats
@@ -654,7 +654,7 @@ export async function plan(userIntent) {
     scored.sort((a, b) => b.score - a.score);
     const topFuncs = scored.slice(0, 15);
     // Strategy Layer: select capability chain (local, 0 LLM calls)
-    const chainResult = graphMode !== "off" ? selectCapabilityChains(userIntent, ir, 3) : { chains: [], needsLLM: false };
+    const chainResult = graphMode !== "off" ? selectCapabilityChains(userIntent, ir, 3, llmSeeds) : { chains: [], needsLLM: false };
     const chains = chainResult.chains;
     const strategyHint = graphMode !== "off" ? formatChainHint(chains) : "";
     // Action Layer: filter functions to those in selected chains

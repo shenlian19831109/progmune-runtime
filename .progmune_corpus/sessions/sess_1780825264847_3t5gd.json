@@ -1,0 +1,227 @@
+{
+  "sessionId": "sess_1780825264847_3t5gd",
+  "intent": "add input validation to benchmark save function",
+  "attempts": [
+    {
+      "id": "att_1780825268984_6hcpo",
+      "sessionId": "sess_1780825264847_3t5gd",
+      "attemptNumber": 1,
+      "inputIntent": "add input validation to benchmark save function",
+      "plannerSeed": "a3488a8e",
+      "constraintSnapshotId": "snap_1780825264849_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "isValidEmail",
+          "args": [
+            {
+              "name": "str",
+              "type": "string",
+              "value": "benchmark@test.com"
+            }
+          ],
+          "assignTo": "emailValid"
+        },
+        {
+          "kind": "call",
+          "function": "benchmarkSave",
+          "args": [
+            {
+              "name": "data",
+              "type": "any",
+              "value": "emailValid"
+            }
+          ],
+          "assignTo": "savedPath"
+        },
+        {
+          "kind": "return",
+          "value": "savedPath"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "isValidEmail",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "benchmarkSave",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780825268985,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780825264847,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780825268984_6hcpo",
+    "sessionId": "sess_1780825264847_3t5gd",
+    "attemptNumber": 1,
+    "inputIntent": "add input validation to benchmark save function",
+    "plannerSeed": "a3488a8e",
+    "constraintSnapshotId": "snap_1780825264849_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "isValidEmail",
+        "args": [
+          {
+            "name": "str",
+            "type": "string",
+            "value": "benchmark@test.com"
+          }
+        ],
+        "assignTo": "emailValid"
+      },
+      {
+        "kind": "call",
+        "function": "benchmarkSave",
+        "args": [
+          {
+            "name": "data",
+            "type": "any",
+            "value": "emailValid"
+          }
+        ],
+        "assignTo": "savedPath"
+      },
+      {
+        "kind": "return",
+        "value": "savedPath"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "isValidEmail",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "benchmarkSave",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780825268985,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780825264849_d85b13b3d2c5",
+  "endedAt": 1780825268987
+}

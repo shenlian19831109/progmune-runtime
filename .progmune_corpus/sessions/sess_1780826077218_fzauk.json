@@ -1,0 +1,289 @@
+{
+  "sessionId": "sess_1780826077218_fzauk",
+  "intent": "fix getTopFailurePatterns returning wrong count",
+  "attempts": [
+    {
+      "id": "att_1780826077387_xsopm",
+      "sessionId": "sess_1780826077218_fzauk",
+      "attemptNumber": 1,
+      "inputIntent": "fix getTopFailurePatterns returning wrong count",
+      "plannerSeed": "6d85e4cc",
+      "constraintSnapshotId": "snap_1780826077222_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "checkParams",
+          "args": []
+        },
+        {
+          "kind": "call",
+          "function": "verifyTypeSignature",
+          "args": []
+        },
+        {
+          "kind": "call",
+          "function": "correctArgs",
+          "args": []
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "checkParams",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 1,
+          "function": "verifyTypeSignature",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        },
+        {
+          "actionIndex": 2,
+          "function": "correctArgs",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780826077387,
+      "llmCallCount": 0,
+      "durationMs": 0,
+      "antibodyHit": {
+        "level": "ACL-4",
+        "signature": "SVL-2:type_mismatch",
+        "fixPath": [
+          "checkParams",
+          "verifyTypeSignature",
+          "correctArgs"
+        ],
+        "similarityScore": 0.2222222222222222,
+        "action": "fast_path",
+        "llmCallsSaved": 1,
+        "estimatedTokensSaved": 656
+      },
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780826077219,
+  "successfulAttempt": {
+    "id": "att_1780826077387_xsopm",
+    "sessionId": "sess_1780826077218_fzauk",
+    "attemptNumber": 1,
+    "inputIntent": "fix getTopFailurePatterns returning wrong count",
+    "plannerSeed": "6d85e4cc",
+    "constraintSnapshotId": "snap_1780826077222_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "checkParams",
+        "args": []
+      },
+      {
+        "kind": "call",
+        "function": "verifyTypeSignature",
+        "args": []
+      },
+      {
+        "kind": "call",
+        "function": "correctArgs",
+        "args": []
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "checkParams",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 1,
+        "function": "verifyTypeSignature",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      },
+      {
+        "actionIndex": 2,
+        "function": "correctArgs",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780826077387,
+    "llmCallCount": 0,
+    "durationMs": 0,
+    "antibodyHit": {
+      "level": "ACL-4",
+      "signature": "SVL-2:type_mismatch",
+      "fixPath": [
+        "checkParams",
+        "verifyTypeSignature",
+        "correctArgs"
+      ],
+      "similarityScore": 0.2222222222222222,
+      "action": "fast_path",
+      "llmCallsSaved": 1,
+      "estimatedTokensSaved": 656
+    },
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "ruleHash": "d30865f03acb2b07",
+  "snapshotId": "snap_1780826077222_d85b13b3d2c5",
+  "endedAt": 1780826077387
+}

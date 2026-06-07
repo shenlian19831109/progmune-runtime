@@ -1,0 +1,70 @@
+{
+  "intent": "extract IR validate all actions emit clean TypeScript",
+  "projectFunctions": [],
+  "violatedSVL": "SVL-1",
+  "constraintType": "symbol_existence",
+  "actionSequence": [
+    {
+      "kind": "call",
+      "function": "extractIR",
+      "args": [
+        {
+          "name": "projectRoot",
+          "type": "string",
+          "value": "projectRoot"
+        }
+      ],
+      "assignTo": "ir"
+    },
+    {
+      "kind": "call",
+      "function": "validateActionSchema",
+      "args": [
+        {
+          "name": "actions",
+          "type": "Action[]",
+          "value": "ir"
+        }
+      ],
+      "assignTo": "validation"
+    },
+    {
+      "kind": "call",
+      "function": "validateActionResult",
+      "args": [
+        {
+          "name": "actions",
+          "type": "Action[]",
+          "value": "validation"
+        }
+      ],
+      "assignTo": "result"
+    },
+    {
+      "kind": "call",
+      "function": "emitCode",
+      "args": [
+        {
+          "name": "actions",
+          "type": "Action[]",
+          "value": "result"
+        },
+        {
+          "name": "meta",
+          "type": "{ sessionId?: string; ruleHash?: string; irFunctionCount?: number; protocolRuleCount?: number }",
+          "value": "result"
+        }
+      ],
+      "assignTo": "code"
+    },
+    {
+      "kind": "return",
+      "value": "code"
+    }
+  ],
+  "errorDetail": "emitCode: 协议违规 — 需要先调用 validateAction → validateActionSequence",
+  "plannerAttempt": 1,
+  "plannerRetryTotal": 2,
+  "id": "fail_1780825351697_333",
+  "timestamp": "2026-06-07T09:42:31.697Z"
+}
