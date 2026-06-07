@@ -429,7 +429,7 @@ export interface PlanResult {
 }
 
 /** @requires INTENT @produces ACTION_PLAN */
-export async function plan(userIntent: string): Promise<PlanResult> {
+export async function plan(userIntent: string, llmSeeds?: string[]): Promise<PlanResult> {
   resetCallCount();
   const irRaw = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
   // Support both old (array) and new ({typeMap, functions}) formats
@@ -667,7 +667,7 @@ export async function plan(userIntent: string): Promise<PlanResult> {
   const topFuncs = scored.slice(0, 15);
 
   // Strategy Layer: select capability chain (local, 0 LLM calls)
-  const chainResult = graphMode !== "off" ? selectCapabilityChains(userIntent, ir, 3) : { chains: [], needsLLM: false };
+  const chainResult = graphMode !== "off" ? selectCapabilityChains(userIntent, ir, 3, llmSeeds) : { chains: [], needsLLM: false };
   const chains = chainResult.chains;
   const strategyHint = graphMode !== "off" ? formatChainHint(chains) : "";
 
