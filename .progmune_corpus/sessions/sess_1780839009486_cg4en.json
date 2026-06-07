@@ -1,0 +1,129 @@
+{
+  "sessionId": "sess_1780839009486_cg4en",
+  "intent": "format upgrade results as JSON for CI",
+  "attempts": [
+    {
+      "id": "att_1780839011748_54yed",
+      "sessionId": "sess_1780839009486_cg4en",
+      "attemptNumber": 1,
+      "inputIntent": "format upgrade results as JSON for CI",
+      "plannerSeed": "3c9544c1",
+      "constraintSnapshotId": "snap_1780839009487_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "formatGenomeSummary",
+          "args": [],
+          "assignTo": "genomeSummary"
+        },
+        {
+          "kind": "return",
+          "value": "genomeSummary"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "formatGenomeSummary",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780839011748,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780839009486,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780839011748_54yed",
+    "sessionId": "sess_1780839009486_cg4en",
+    "attemptNumber": 1,
+    "inputIntent": "format upgrade results as JSON for CI",
+    "plannerSeed": "3c9544c1",
+    "constraintSnapshotId": "snap_1780839009487_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "formatGenomeSummary",
+        "args": [],
+        "assignTo": "genomeSummary"
+      },
+      {
+        "kind": "return",
+        "value": "genomeSummary"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "formatGenomeSummary",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780839011748,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780839009487_d85b13b3d2c5",
+  "endedAt": 1780839011751
+}

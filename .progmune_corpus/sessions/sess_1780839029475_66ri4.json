@@ -1,0 +1,141 @@
+{
+  "sessionId": "sess_1780839029475_66ri4",
+  "intent": "exclude packages from upgrade check",
+  "attempts": [
+    {
+      "id": "att_1780839031396_z7ocw",
+      "sessionId": "sess_1780839029475_66ri4",
+      "attemptNumber": 1,
+      "inputIntent": "exclude packages from upgrade check",
+      "plannerSeed": "08a41123",
+      "constraintSnapshotId": "snap_1780839029476_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "loadProtocolsFromFile",
+          "args": [
+            {
+              "name": "filePath",
+              "type": "string",
+              "value": "exclude packages from upgrade check"
+            }
+          ],
+          "assignTo": "protocols"
+        },
+        {
+          "kind": "return",
+          "value": "protocols"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "loadProtocolsFromFile",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780839031396,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780839029475,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780839031396_z7ocw",
+    "sessionId": "sess_1780839029475_66ri4",
+    "attemptNumber": 1,
+    "inputIntent": "exclude packages from upgrade check",
+    "plannerSeed": "08a41123",
+    "constraintSnapshotId": "snap_1780839029476_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "loadProtocolsFromFile",
+        "args": [
+          {
+            "name": "filePath",
+            "type": "string",
+            "value": "exclude packages from upgrade check"
+          }
+        ],
+        "assignTo": "protocols"
+      },
+      {
+        "kind": "return",
+        "value": "protocols"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "loadProtocolsFromFile",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780839031396,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780839029476_d85b13b3d2c5",
+  "endedAt": 1780839031398
+}

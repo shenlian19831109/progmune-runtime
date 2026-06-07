@@ -1,0 +1,141 @@
+{
+  "sessionId": "sess_1780839049237_1zai0",
+  "intent": "cache package metadata",
+  "attempts": [
+    {
+      "id": "att_1780839051404_1i45s",
+      "sessionId": "sess_1780839049237_1zai0",
+      "attemptNumber": 1,
+      "inputIntent": "cache package metadata",
+      "plannerSeed": "2cd9b650",
+      "constraintSnapshotId": "snap_1780839049237_d85b13b3d2c5",
+      "generatedActions": [
+        {
+          "kind": "call",
+          "function": "deriveMetadata",
+          "args": [
+            {
+              "name": "srcDir",
+              "type": "string",
+              "value": "srcDir"
+            }
+          ],
+          "assignTo": "meta"
+        },
+        {
+          "kind": "return",
+          "value": "meta"
+        }
+      ],
+      "transitions": [
+        {
+          "actionIndex": 0,
+          "function": "deriveMetadata",
+          "namespace": "_global",
+          "acquired": [],
+          "invalidated": [],
+          "statesBefore": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "statesAfter": {
+            "_global": [
+              "UNAUTHENTICATED"
+            ],
+            "auth": [
+              "UNAUTHENTICATED"
+            ],
+            "dev_pipeline": [
+              "IR_STALE"
+            ]
+          },
+          "valid": true,
+          "ruleHash": "d30865f03acb2b07"
+        }
+      ],
+      "violations": [],
+      "outcome": "success",
+      "timestamp": 1780839051405,
+      "llmCallCount": 1,
+      "durationMs": 0,
+      "ruleHash": "d30865f03acb2b07"
+    }
+  ],
+  "resolved": true,
+  "startedAt": 1780839049237,
+  "ruleHash": "d30865f03acb2b07",
+  "successfulAttempt": {
+    "id": "att_1780839051404_1i45s",
+    "sessionId": "sess_1780839049237_1zai0",
+    "attemptNumber": 1,
+    "inputIntent": "cache package metadata",
+    "plannerSeed": "2cd9b650",
+    "constraintSnapshotId": "snap_1780839049237_d85b13b3d2c5",
+    "generatedActions": [
+      {
+        "kind": "call",
+        "function": "deriveMetadata",
+        "args": [
+          {
+            "name": "srcDir",
+            "type": "string",
+            "value": "srcDir"
+          }
+        ],
+        "assignTo": "meta"
+      },
+      {
+        "kind": "return",
+        "value": "meta"
+      }
+    ],
+    "transitions": [
+      {
+        "actionIndex": 0,
+        "function": "deriveMetadata",
+        "namespace": "_global",
+        "acquired": [],
+        "invalidated": [],
+        "statesBefore": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "statesAfter": {
+          "_global": [
+            "UNAUTHENTICATED"
+          ],
+          "auth": [
+            "UNAUTHENTICATED"
+          ],
+          "dev_pipeline": [
+            "IR_STALE"
+          ]
+        },
+        "valid": true,
+        "ruleHash": "d30865f03acb2b07"
+      }
+    ],
+    "violations": [],
+    "outcome": "success",
+    "timestamp": 1780839051405,
+    "llmCallCount": 1,
+    "durationMs": 0,
+    "ruleHash": "d30865f03acb2b07"
+  },
+  "snapshotId": "snap_1780839049237_d85b13b3d2c5",
+  "endedAt": 1780839051407
+}

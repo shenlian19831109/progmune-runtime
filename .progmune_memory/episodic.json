@@ -1,5 +1,775 @@
 [
   {
+    "intent": "add input validation before upgrades",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "validateActionSchema",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "actions"
+          }
+        ],
+        "assignTo": "validationResult"
+      },
+      {
+        "kind": "call",
+        "function": "isValidEmail",
+        "args": [
+          {
+            "name": "str",
+            "type": "string",
+            "value": "email"
+          }
+        ],
+        "assignTo": "emailValid"
+      },
+      {
+        "kind": "return",
+        "value": "emailValid"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780839066329",
+    "timestamp": "2026-06-07T13:31:06.329Z"
+  },
+  {
+    "intent": "add input validation before upgrades",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "validateActionSchema",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "actions"
+          }
+        ],
+        "assignTo": "validationResult"
+      },
+      {
+        "kind": "call",
+        "function": "isValidEmail",
+        "args": [
+          {
+            "name": "str",
+            "type": "string",
+            "value": "email"
+          }
+        ],
+        "assignTo": "emailValid"
+      },
+      {
+        "kind": "call",
+        "function": "validateActionResult",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "validationResult"
+          }
+        ],
+        "assignTo": "result"
+      },
+      {
+        "kind": "return",
+        "value": "result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780839063406",
+    "timestamp": "2026-06-07T13:31:03.406Z"
+  },
+  {
+    "intent": "add input validation before upgrades",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "validateActionSchema",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "actions"
+          }
+        ],
+        "assignTo": "validationResult"
+      },
+      {
+        "kind": "call",
+        "function": "isValidEmail",
+        "args": [
+          {
+            "name": "str",
+            "type": "string",
+            "value": "email"
+          }
+        ],
+        "assignTo": "emailValid"
+      },
+      {
+        "kind": "return",
+        "value": "emailValid"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780839059884",
+    "timestamp": "2026-06-07T13:30:59.884Z"
+  },
+  {
+    "intent": "cache package metadata",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "deriveMetadata",
+        "args": [
+          {
+            "name": "srcDir",
+            "type": "string",
+            "value": "srcDir"
+          }
+        ],
+        "assignTo": "meta"
+      },
+      {
+        "kind": "call",
+        "function": "applyDerivedMetadata",
+        "args": [
+          {
+            "name": "dryRun",
+            "type": "boolean",
+            "value": false
+          }
+        ],
+        "assignTo": "result"
+      },
+      {
+        "kind": "return",
+        "value": "result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780839057635",
+    "timestamp": "2026-06-07T13:30:57.635Z"
+  },
+  {
+    "intent": "cache package metadata",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "deriveMetadata",
+        "args": [
+          {
+            "name": "srcDir",
+            "type": "string",
+            "value": "srcDir"
+          }
+        ],
+        "assignTo": "meta"
+      },
+      {
+        "kind": "call",
+        "function": "applyDerivedMetadata",
+        "args": [
+          {
+            "name": "dryRun",
+            "type": "boolean",
+            "value": false
+          }
+        ],
+        "assignTo": "result"
+      },
+      {
+        "kind": "return",
+        "value": "result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780839054655",
+    "timestamp": "2026-06-07T13:30:54.655Z"
+  },
+  {
+    "intent": "cache package metadata",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "deriveMetadata",
+        "args": [
+          {
+            "name": "srcDir",
+            "type": "string",
+            "value": "srcDir"
+          }
+        ],
+        "assignTo": "meta"
+      },
+      {
+        "kind": "return",
+        "value": "meta"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780839051406",
+    "timestamp": "2026-06-07T13:30:51.406Z"
+  },
+  {
+    "intent": "add retry logic when network fails",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "retry",
+        "args": [
+          {
+            "name": "fn",
+            "type": "() => Promise<T>",
+            "value": "networkCall"
+          },
+          {
+            "name": "maxRetries",
+            "type": "number",
+            "value": 3
+          }
+        ],
+        "assignTo": "retryResult"
+      },
+      {
+        "kind": "return",
+        "value": "retryResult"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780839049091",
+    "timestamp": "2026-06-07T13:30:49.091Z"
+  },
+  {
+    "intent": "add retry logic when network fails",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "retry",
+        "args": [
+          {
+            "name": "fn",
+            "type": "() => Promise<T>",
+            "value": "networkCall"
+          },
+          {
+            "name": "maxRetries",
+            "type": "number",
+            "value": 3
+          }
+        ],
+        "assignTo": "retryResult"
+      },
+      {
+        "kind": "return",
+        "value": "retryResult"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780839046711",
+    "timestamp": "2026-06-07T13:30:46.711Z"
+  },
+  {
+    "intent": "add retry logic when network fails",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "retry",
+        "args": [
+          {
+            "name": "fn",
+            "type": "() => Promise<T>",
+            "value": "networkCall"
+          },
+          {
+            "name": "maxRetries",
+            "type": "number",
+            "value": 3
+          }
+        ],
+        "assignTo": "retryResult"
+      },
+      {
+        "kind": "return",
+        "value": "retryResult"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780839043727",
+    "timestamp": "2026-06-07T13:30:43.727Z"
+  },
+  {
+    "intent": "add logging to package resolution",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "add",
+        "args": [],
+        "assignTo": "logging"
+      },
+      {
+        "kind": "return",
+        "value": "logging"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780839041111",
+    "timestamp": "2026-06-07T13:30:41.111Z"
+  },
+  {
+    "intent": "add logging to package resolution",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "add",
+        "args": [],
+        "assignTo": "logging"
+      },
+      {
+        "kind": "return",
+        "value": "logging"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780839038162",
+    "timestamp": "2026-06-07T13:30:38.162Z"
+  },
+  {
+    "intent": "add logging to package resolution",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "readdirSync",
+        "args": [
+          {
+            "name": "path",
+            "type": "string",
+            "value": "path"
+          }
+        ],
+        "assignTo": "files"
+      },
+      {
+        "kind": "call",
+        "function": "add",
+        "args": [],
+        "assignTo": "result"
+      },
+      {
+        "kind": "return",
+        "value": "result"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780839034421",
+    "timestamp": "2026-06-07T13:30:34.421Z"
+  },
+  {
+    "intent": "exclude packages from upgrade check",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "loadProtocolsFromFile",
+        "args": [
+          {
+            "name": "filePath",
+            "type": "string",
+            "value": "exclude packages from upgrade check"
+          }
+        ],
+        "assignTo": "protocols"
+      },
+      {
+        "kind": "return",
+        "value": "protocols"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780839031397",
+    "timestamp": "2026-06-07T13:30:31.397Z"
+  },
+  {
+    "intent": "exclude packages from upgrade check",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "loadCheckpoint",
+        "args": [
+          {
+            "name": "intent",
+            "type": "string",
+            "value": "exclude packages from upgrade check"
+          }
+        ],
+        "assignTo": "checkpoint"
+      },
+      {
+        "kind": "call",
+        "function": "checkVariableFlow",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "checkpoint"
+          }
+        ],
+        "assignTo": "flowResult"
+      },
+      {
+        "kind": "return",
+        "value": "flowResult"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780839029262",
+    "timestamp": "2026-06-07T13:30:29.262Z"
+  },
+  {
+    "intent": "exclude packages from upgrade check",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "loadProtocolsFromFile",
+        "args": [
+          {
+            "name": "filePath",
+            "type": "string",
+            "value": "exclude packages from upgrade check"
+          }
+        ],
+        "assignTo": "protocols"
+      },
+      {
+        "kind": "call",
+        "function": "checkVariableFlow",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "protocols"
+          }
+        ],
+        "assignTo": "flowResult"
+      },
+      {
+        "kind": "return",
+        "value": "flowResult"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780839025059",
+    "timestamp": "2026-06-07T13:30:25.059Z"
+  },
+  {
+    "intent": "format upgrade results as JSON for CI",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "formatLine",
+        "args": [
+          {
+            "name": "level",
+            "type": "Level",
+            "value": ""
+          },
+          {
+            "name": "module",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "message",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "data",
+            "type": "unknown",
+            "value": ""
+          }
+        ],
+        "assignTo": "line"
+      },
+      {
+        "kind": "call",
+        "function": "formatHeatmap",
+        "args": [],
+        "assignTo": "heatmap"
+      },
+      {
+        "kind": "return",
+        "value": "heatmap"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780839022205",
+    "timestamp": "2026-06-07T13:30:22.205Z"
+  },
+  {
+    "intent": "format upgrade results as JSON for CI",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "formatLine",
+        "args": [
+          {
+            "name": "level",
+            "type": "Level",
+            "value": ""
+          },
+          {
+            "name": "module",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "message",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "data",
+            "type": "unknown",
+            "value": ""
+          }
+        ],
+        "assignTo": "line"
+      },
+      {
+        "kind": "call",
+        "function": "formatHeatmap",
+        "args": [],
+        "assignTo": "heatmap"
+      },
+      {
+        "kind": "return",
+        "value": "heatmap"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780839017025",
+    "timestamp": "2026-06-07T13:30:17.025Z"
+  },
+  {
+    "intent": "format upgrade results as JSON for CI",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "formatGenomeSummary",
+        "args": [],
+        "assignTo": "genomeSummary"
+      },
+      {
+        "kind": "return",
+        "value": "genomeSummary"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780839011749",
+    "timestamp": "2026-06-07T13:30:11.749Z"
+  },
+  {
+    "intent": "filter packages by version range",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "loadIR",
+        "args": [
+          {
+            "name": "filePath",
+            "type": "string",
+            "value": "packages.ir"
+          }
+        ],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "parseSemver",
+        "args": [
+          {
+            "name": "version",
+            "type": "string",
+            "value": "1.0.0"
+          }
+        ],
+        "assignTo": "version"
+      },
+      {
+        "kind": "return",
+        "value": "ir"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780839009328",
+    "timestamp": "2026-06-07T13:30:09.328Z"
+  },
+  {
+    "intent": "filter packages by version range",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "parseSemver",
+        "args": [
+          {
+            "name": "version",
+            "type": "string",
+            "value": "version"
+          }
+        ],
+        "assignTo": "parsed"
+      },
+      {
+        "kind": "call",
+        "function": "pick",
+        "args": [
+          {
+            "name": "obj",
+            "type": "T",
+            "value": "parsed"
+          },
+          {
+            "name": "keys",
+            "type": "string[]",
+            "value": "keys"
+          }
+        ],
+        "assignTo": "filtered"
+      },
+      {
+        "kind": "return",
+        "value": "filtered"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780839006867",
+    "timestamp": "2026-06-07T13:30:06.867Z"
+  },
+  {
+    "intent": "filter packages by version range",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "loadIR",
+        "args": [
+          {
+            "name": "filePath",
+            "type": "string",
+            "value": "packages.ir"
+          }
+        ],
+        "assignTo": "ir"
+      },
+      {
+        "kind": "call",
+        "function": "topByScore",
+        "args": [
+          {
+            "name": "nodes",
+            "type": "CapabilityNode[]",
+            "value": "ir"
+          }
+        ],
+        "assignTo": "best"
+      },
+      {
+        "kind": "return",
+        "value": "best"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780839003295",
+    "timestamp": "2026-06-07T13:30:03.295Z"
+  },
+  {
+    "intent": "check for outdated dependencies",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "checkVariableFlow",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "flowErrors"
+      },
+      {
+        "kind": "return",
+        "value": "flowErrors"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780839001000",
+    "timestamp": "2026-06-07T13:30:01.000Z"
+  },
+  {
+    "intent": "check for outdated dependencies",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "checkVariableFlow",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "actions"
+          }
+        ],
+        "assignTo": "v"
+      },
+      {
+        "kind": "return",
+        "value": "v"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780838998245",
+    "timestamp": "2026-06-07T13:29:58.245Z"
+  },
+  {
+    "intent": "check for outdated dependencies",
+    "actions": [
+      {
+        "kind": "call",
+        "function": "getAllSessions",
+        "args": [],
+        "assignTo": "sessions"
+      },
+      {
+        "kind": "call",
+        "function": "checkVariableFlow",
+        "args": [
+          {
+            "name": "actions",
+            "type": "Action[]",
+            "value": "sessions"
+          }
+        ],
+        "assignTo": "flowErrors"
+      },
+      {
+        "kind": "return",
+        "value": "flowErrors"
+      }
+    ],
+    "success": true,
+    "id": "ep_1780838983201",
+    "timestamp": "2026-06-07T13:29:43.201Z"
+  },
+  {
     "intent": "schedule periodic outdated check",
     "actions": [
       {
@@ -861,5568 +1631,5 @@
     "success": true,
     "id": "ep_1780832663913",
     "timestamp": "2026-06-07T11:44:23.913Z"
-  },
-  {
-    "intent": "suggest invariant repairs for ledger consistency violations",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "suggestInvariantRepair",
-        "args": [
-          {
-            "name": "violation",
-            "type": "LedgerConsistencyViolation",
-            "value": "{} as LedgerConsistencyViolation"
-          },
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{} as StateTransition[]"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "new Map()"
-          }
-        ],
-        "assignTo": "repairs"
-      },
-      {
-        "kind": "return",
-        "value": "repairs"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780832660310",
-    "timestamp": "2026-06-07T11:44:20.310Z"
-  },
-  {
-    "intent": "get failure genome and top patterns then format trend report",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getFailureGenome",
-        "args": [],
-        "assignTo": "genome"
-      },
-      {
-        "kind": "call",
-        "function": "getTopFailurePatterns",
-        "args": [
-          {
-            "name": "limit",
-            "type": "number",
-            "value": 10
-          }
-        ],
-        "assignTo": "patterns"
-      },
-      {
-        "kind": "call",
-        "function": "formatFailureStats",
-        "args": [],
-        "assignTo": "report"
-      },
-      {
-        "kind": "return",
-        "value": "report"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780832656187",
-    "timestamp": "2026-06-07T11:44:16.187Z"
-  },
-  {
-    "intent": "audit source files and report progmune coverage",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "auditDirectory",
-        "args": [
-          {
-            "name": "dir",
-            "type": "string",
-            "value": "srcDir"
-          },
-          {
-            "name": "threshold",
-            "type": "any",
-            "value": {}
-          }
-        ],
-        "assignTo": "auditResult"
-      },
-      {
-        "kind": "call",
-        "function": "formatAuditResult",
-        "args": [
-          {
-            "name": "result",
-            "type": "AuditResult",
-            "value": "auditResult"
-          }
-        ],
-        "assignTo": "report"
-      },
-      {
-        "kind": "return",
-        "value": "report"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780832650741",
-    "timestamp": "2026-06-07T11:44:10.741Z"
-  },
-  {
-    "intent": "rebuild semantic topology from the latest IR",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "rebuildTopology",
-        "args": [
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "latestIR"
-          }
-        ],
-        "assignTo": "topology"
-      },
-      {
-        "kind": "return",
-        "value": "topology"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780832646935",
-    "timestamp": "2026-06-07T11:44:06.935Z"
-  },
-  {
-    "intent": "generate prioritized repair queue from failure corpus",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "loadFailures",
-        "args": [],
-        "assignTo": "failures"
-      },
-      {
-        "kind": "call",
-        "function": "getAllFailures",
-        "args": [],
-        "assignTo": "allFailures"
-      },
-      {
-        "kind": "call",
-        "function": "getTopFailurePatterns",
-        "args": [
-          {
-            "name": "limit",
-            "type": "number",
-            "value": 10
-          }
-        ],
-        "assignTo": "patterns"
-      },
-      {
-        "kind": "call",
-        "function": "generateCandidateRules",
-        "args": [],
-        "assignTo": "rules"
-      },
-      {
-        "kind": "call",
-        "function": "generateRepairSummary",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "allFailures"
-          },
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "rules"
-          },
-          {
-            "name": "protocols",
-            "type": "FunctionProtocol[]",
-            "value": "rules"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "rules"
-          }
-        ],
-        "assignTo": "summary"
-      },
-      {
-        "kind": "return",
-        "value": "summary"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780832643286",
-    "timestamp": "2026-06-07T11:44:03.286Z"
-  },
-  {
-    "intent": "extract IR and validate exported function count",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "extractIR",
-        "args": [
-          {
-            "name": "projectRoot",
-            "type": "string",
-            "value": "projectRoot"
-          }
-        ],
-        "assignTo": "ir"
-      },
-      {
-        "kind": "call",
-        "function": "countExported",
-        "args": [
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "ir"
-          }
-        ],
-        "assignTo": "count"
-      },
-      {
-        "kind": "return",
-        "value": "count"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780832639293",
-    "timestamp": "2026-06-07T11:43:59.293Z"
-  },
-  {
-    "intent": "replay session deterministically and verify fingerprints",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "call",
-        "function": "replaySession",
-        "args": [
-          {
-            "name": "sessionId",
-            "type": "string",
-            "value": "sessions"
-          },
-          {
-            "name": "currentRules",
-            "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>",
-            "value": "sessions"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "sessions"
-          }
-        ],
-        "assignTo": "replayResult"
-      },
-      {
-        "kind": "call",
-        "function": "verifyAllFingerprints",
-        "args": [
-          {
-            "name": "currentRuleHash",
-            "type": "string",
-            "value": "currentRuleHash"
-          }
-        ],
-        "assignTo": "verificationResult"
-      },
-      {
-        "kind": "return",
-        "value": "verificationResult"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780832635484",
-    "timestamp": "2026-06-07T11:43:55.484Z"
-  },
-  {
-    "intent": "query antibody registry for known fix patterns",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "queryAntibodies",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "known fix patterns"
-          },
-          {
-            "name": "minACL",
-            "type": "AntibodyLevel",
-            "value": {}
-          }
-        ],
-        "assignTo": "patterns"
-      },
-      {
-        "kind": "return",
-        "value": "patterns"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780832631058",
-    "timestamp": "2026-06-07T11:43:51.058Z"
-  },
-  {
-    "intent": "check ledger consistency and report invariant violations",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "checkLedgerConsistency",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": ""
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": ""
-          },
-          {
-            "name": "protocolRules",
-            "type": "Map<string, StateAnnotation>",
-            "value": ""
-          }
-        ],
-        "assignTo": "consistencyResult"
-      },
-      {
-        "kind": "call",
-        "function": "assertLedgerInvariants",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "consistencyResult"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "consistencyResult"
-          },
-          {
-            "name": "expectedRuleHash",
-            "type": "string",
-            "value": "consistencyResult"
-          }
-        ],
-        "assignTo": "invariantResult"
-      },
-      {
-        "kind": "return",
-        "value": "invariantResult"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780832627769",
-    "timestamp": "2026-06-07T11:43:47.769Z"
-  },
-  {
-    "intent": "compute immune health score from failure patterns and antibody stats",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getFailureGenome",
-        "args": [],
-        "assignTo": "fg"
-      },
-      {
-        "kind": "call",
-        "function": "getAntibodyStats",
-        "args": [],
-        "assignTo": "as"
-      },
-      {
-        "kind": "call",
-        "function": "computeHealthScore",
-        "args": [
-          {
-            "name": "failureGenome",
-            "type": "any",
-            "value": "fg"
-          },
-          {
-            "name": "antibodyStats",
-            "type": "any",
-            "value": "as"
-          }
-        ],
-        "assignTo": "hs"
-      },
-      {
-        "kind": "return",
-        "value": "hs"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780832623835",
-    "timestamp": "2026-06-07T11:43:43.835Z"
-  },
-  {
-    "intent": "get failure genome then query antibodies then compute health score then format report",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getFailureGenome",
-        "args": [],
-        "assignTo": "genome"
-      },
-      {
-        "kind": "call",
-        "function": "computeHealthScore",
-        "args": [
-          {
-            "name": "failureGenome",
-            "type": "any",
-            "value": "genome"
-          },
-          {
-            "name": "antibodyStats",
-            "type": "any",
-            "value": {}
-          }
-        ],
-        "assignTo": "healthScore"
-      },
-      {
-        "kind": "call",
-        "function": "formatHealthLevel",
-        "args": [
-          {
-            "name": "score",
-            "type": "number",
-            "value": "healthScore"
-          }
-        ],
-        "assignTo": "report"
-      },
-      {
-        "kind": "return",
-        "value": "report"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780831451295",
-    "timestamp": "2026-06-07T11:24:11.295Z"
-  },
-  {
-    "intent": "extract IR then validate all actions then emit TypeScript code and audit the result",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "extractIR",
-        "args": [
-          {
-            "name": "projectRoot",
-            "type": "string",
-            "value": null
-          }
-        ],
-        "assignTo": "ir"
-      },
-      {
-        "kind": "call",
-        "function": "validateAction",
-        "args": [
-          {
-            "name": "action",
-            "type": "Action",
-            "value": null
-          },
-          {
-            "name": "actionIndex",
-            "type": "number",
-            "value": "ir"
-          }
-        ],
-        "assignTo": "validated"
-      },
-      {
-        "kind": "call",
-        "function": "validateActionSequence",
-        "args": [
-          {
-            "name": "actions",
-            "type": "Action[]",
-            "value": null
-          }
-        ],
-        "assignTo": "seqValidated"
-      },
-      {
-        "kind": "call",
-        "function": "emitCode",
-        "args": [
-          {
-            "name": "actions",
-            "type": "Action[]",
-            "value": null
-          },
-          {
-            "name": "meta",
-            "type": "{ sessionId?: string; ruleHash?: string; irFunctionCount?: number; protocolRuleCount?: number }",
-            "value": null
-          }
-        ],
-        "assignTo": "code"
-      },
-      {
-        "kind": "call",
-        "function": "auditDirectory",
-        "args": [
-          {
-            "name": "dir",
-            "type": "string",
-            "value": null
-          },
-          {
-            "name": "threshold",
-            "type": "any",
-            "value": null
-          }
-        ],
-        "assignTo": "audit"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780831419533",
-    "timestamp": "2026-06-07T11:23:39.533Z"
-  },
-  {
-    "intent": "extract IR then validate all actions then emit TypeScript code and audit the result",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "extractIR",
-        "args": [
-          {
-            "name": "projectRoot",
-            "type": "string",
-            "value": "projectRoot"
-          }
-        ],
-        "assignTo": "ir"
-      },
-      {
-        "kind": "call",
-        "function": "validateActionSchema",
-        "args": [
-          {
-            "name": "actions",
-            "type": "Action[]",
-            "value": "ir"
-          }
-        ],
-        "assignTo": "validation"
-      },
-      {
-        "kind": "call",
-        "function": "emitCode",
-        "args": [
-          {
-            "name": "actions",
-            "type": "Action[]",
-            "value": "validation"
-          },
-          {
-            "name": "meta",
-            "type": "{ sessionId?: string; ruleHash?: string; irFunctionCount?: number; protocolRuleCount?: number }",
-            "value": "{}"
-          }
-        ],
-        "assignTo": "code"
-      },
-      {
-        "kind": "call",
-        "function": "auditDirectory",
-        "args": [
-          {
-            "name": "dir",
-            "type": "string",
-            "value": "projectRoot"
-          },
-          {
-            "name": "threshold",
-            "type": "any",
-            "value": "{}"
-          }
-        ],
-        "assignTo": "audit"
-      },
-      {
-        "kind": "return",
-        "value": "audit"
-      }
-    ],
-    "success": false,
-    "svlViolated": "SVL-1",
-    "id": "ep_1780831417709",
-    "timestamp": "2026-06-07T11:23:37.709Z"
-  },
-  {
-    "intent": "list all saved snapshots with their creation timestamps",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "sessions"
-      },
-      {
-        "kind": "return",
-        "value": "sessions"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780831392493",
-    "timestamp": "2026-06-07T11:23:12.493Z"
-  },
-  {
-    "intent": "create a semantic snapshot from IR and user intent and save it to disk",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "loadIR",
-        "args": [
-          {
-            "name": "filePath",
-            "type": "string",
-            "value": "filePath"
-          }
-        ],
-        "assignTo": "ir"
-      },
-      {
-        "kind": "call",
-        "function": "saveSemantic",
-        "args": [
-          {
-            "name": "templates",
-            "type": "SemanticTemplate[]",
-            "value": "ir"
-          }
-        ],
-        "assignTo": "result"
-      },
-      {
-        "kind": "return",
-        "value": "result"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780831371610",
-    "timestamp": "2026-06-07T11:22:51.610Z"
-  },
-  {
-    "intent": "mine rules from failure patterns and list them with their confidence scores",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "mineRules",
-        "args": [],
-        "assignTo": "rules"
-      },
-      {
-        "kind": "return",
-        "value": "rules"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780831349418",
-    "timestamp": "2026-06-07T11:22:29.418Z"
-  },
-  {
-    "intent": "derive planner constraints from mined rules and apply them to a set of candidate functions",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "deriveConstraints",
-        "args": [],
-        "assignTo": "constraints"
-      },
-      {
-        "kind": "call",
-        "function": "applyConstraints",
-        "args": [
-          {
-            "name": "funcName",
-            "type": "string",
-            "value": "funcName"
-          },
-          {
-            "name": "funcPurpose",
-            "type": "string",
-            "value": "funcPurpose"
-          },
-          {
-            "name": "constraints",
-            "type": "PlannerConstraint[]",
-            "value": "constraints"
-          }
-        ],
-        "assignTo": "result"
-      },
-      {
-        "kind": "return",
-        "value": "result"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780831313378",
-    "timestamp": "2026-06-07T11:21:53.378Z"
-  },
-  {
-    "intent": "format audit results as a coverage report with pass fail and skip counts",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "formatAuditResult",
-        "args": [
-          {
-            "name": "result",
-            "type": "AuditResult",
-            "value": ""
-          }
-        ],
-        "assignTo": "auditResult"
-      },
-      {
-        "kind": "call",
-        "function": "formatFailureStats",
-        "args": [],
-        "assignTo": "failureStats"
-      },
-      {
-        "kind": "return",
-        "value": "failureStats"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780831281123",
-    "timestamp": "2026-06-07T11:21:21.123Z"
-  },
-  {
-    "intent": "run a full audit on source files checking for progmune-generated markers",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "deriveMetadata",
-        "args": [
-          {
-            "name": "srcDir",
-            "type": "string",
-            "value": "srcDir"
-          }
-        ],
-        "assignTo": "meta"
-      },
-      {
-        "kind": "call",
-        "function": "auditDirectory",
-        "args": [
-          {
-            "name": "dir",
-            "type": "string",
-            "value": "srcDir"
-          },
-          {
-            "name": "threshold",
-            "type": "any",
-            "value": {}
-          }
-        ],
-        "assignTo": "audit"
-      },
-      {
-        "kind": "call",
-        "function": "formatAuditResult",
-        "args": [
-          {
-            "name": "result",
-            "type": "AuditResult",
-            "value": "audit"
-          }
-        ],
-        "assignTo": "report"
-      },
-      {
-        "kind": "return",
-        "value": "report"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780831260758",
-    "timestamp": "2026-06-07T11:21:00.758Z"
-  },
-  {
-    "intent": "collect execution metrics including LLM call counts and generation timings",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "getExecutionMetrics",
-        "args": [],
-        "assignTo": "metrics"
-      },
-      {
-        "kind": "return",
-        "value": "metrics"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780831224091",
-    "timestamp": "2026-06-07T11:20:24.091Z"
-  },
-  {
-    "intent": "compute overall immune system health and format it as a human readable status",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "computeACL",
-        "args": [
-          {
-            "name": "count",
-            "type": "number",
-            "value": "{{count}}"
-          },
-          {
-            "name": "distinctIntents",
-            "type": "number",
-            "value": "{{distinctIntents}}"
-          },
-          {
-            "name": "resolvedRate",
-            "type": "number",
-            "value": "{{resolvedRate}}"
-          }
-        ],
-        "assignTo": "computeACL_result"
-      },
-      {
-        "kind": "call",
-        "function": "computeHealthScore",
-        "args": [
-          {
-            "name": "failureGenome",
-            "type": "any",
-            "value": "{{failureGenome}}"
-          },
-          {
-            "name": "antibodyStats",
-            "type": "any",
-            "value": "{{antibodyStats}}"
-          }
-        ],
-        "assignTo": "computeHealthScore_result"
-      },
-      {
-        "kind": "call",
-        "function": "computeImmuneMetrics",
-        "args": [],
-        "assignTo": "computeImmuneMetrics_result"
-      },
-      {
-        "kind": "call",
-        "function": "computeDelta",
-        "args": [
-          {
-            "name": "beforeSnap",
-            "type": "Record<string, string[]>",
-            "value": "{{beforeSnap}}"
-          },
-          {
-            "name": "afterSnap",
-            "type": "Record<string, string[]>",
-            "value": "{{afterSnap}}"
-          },
-          {
-            "name": "namespace",
-            "type": "string",
-            "value": "{{namespace}}"
-          }
-        ],
-        "assignTo": "computeDelta_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatImmuneMetrics",
-        "args": [
-          {
-            "name": "m",
-            "type": "ImmuneMetrics",
-            "value": "{{m}}"
-          }
-        ],
-        "assignTo": "formatImmuneMetrics_result"
-      },
-      {
-        "kind": "call",
-        "function": "reportImmuneMetrics",
-        "args": [],
-        "assignTo": "reportImmuneMetrics_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatImmuneResponse",
-        "args": [
-          {
-            "name": "a",
-            "type": "Attempt",
-            "value": "{{a}}"
-          }
-        ],
-        "assignTo": "formatImmuneResponse_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatHealthLevel",
-        "args": [
-          {
-            "name": "score",
-            "type": "number",
-            "value": "{{score}}"
-          }
-        ],
-        "assignTo": "formatHealthLevel_result"
-      },
-      {
-        "kind": "call",
-        "function": "scanDir",
-        "args": [
-          {
-            "name": "rootDir",
-            "type": "string",
-            "value": "{{rootDir}}"
-          },
-          {
-            "name": "currentDir",
-            "type": "string",
-            "value": "{{currentDir}}"
-          },
-          {
-            "name": "result",
-            "type": "AuditResult",
-            "value": "{{result}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "generateCandidateRules",
-        "args": [],
-        "assignTo": "generateCandidateRules_result"
-      },
-      {
-        "kind": "call",
-        "function": "handleAPI",
-        "args": [
-          {
-            "name": "req",
-            "type": "http.IncomingMessage",
-            "value": "{{req}}"
-          },
-          {
-            "name": "res",
-            "type": "http.ServerResponse",
-            "value": "{{res}}"
-          }
-        ],
-        "assignTo": "handleAPI_result"
-      },
-      {
-        "kind": "call",
-        "function": "handleLedgerAPI",
-        "args": [
-          {
-            "name": "res",
-            "type": "http.ServerResponse",
-            "value": "{{res}}"
-          },
-          {
-            "name": "url",
-            "type": "URL",
-            "value": "{{url}}"
-          }
-        ],
-        "assignTo": "handleLedgerAPI_result"
-      },
-      {
-        "kind": "call",
-        "function": "handleConsistencyAPI",
-        "args": [
-          {
-            "name": "res",
-            "type": "http.ServerResponse",
-            "value": "{{res}}"
-          },
-          {
-            "name": "url",
-            "type": "URL",
-            "value": "{{url}}"
-          }
-        ],
-        "assignTo": "handleConsistencyAPI_result"
-      },
-      {
-        "kind": "call",
-        "function": "handleDiffAPI",
-        "args": [
-          {
-            "name": "res",
-            "type": "http.ServerResponse",
-            "value": "{{res}}"
-          },
-          {
-            "name": "url",
-            "type": "URL",
-            "value": "{{url}}"
-          }
-        ],
-        "assignTo": "handleDiffAPI_result"
-      },
-      {
-        "kind": "call",
-        "function": "handleReplayAPI",
-        "args": [
-          {
-            "name": "res",
-            "type": "http.ServerResponse",
-            "value": "{{res}}"
-          },
-          {
-            "name": "url",
-            "type": "URL",
-            "value": "{{url}}"
-          }
-        ],
-        "assignTo": "handleReplayAPI_result"
-      },
-      {
-        "kind": "call",
-        "function": "runAndCheck",
-        "args": [
-          {
-            "name": "code",
-            "type": "string",
-            "value": "{{code}}"
-          }
-        ],
-        "assignTo": "runAndCheck_result"
-      },
-      {
-        "kind": "call",
-        "function": "randomInt",
-        "args": [
-          {
-            "name": "min",
-            "type": "number",
-            "value": "{{min}}"
-          },
-          {
-            "name": "max",
-            "type": "number",
-            "value": "{{max}}"
-          }
-        ],
-        "assignTo": "randomInt_result"
-      },
-      {
-        "kind": "call",
-        "function": "random",
-        "args": [],
-        "assignTo": "random_result"
-      },
-      {
-        "kind": "call",
-        "function": "handler",
-        "args": [],
-        "assignTo": "handler_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatAuditResult",
-        "args": [
-          {
-            "name": "result",
-            "type": "AuditResult",
-            "value": "{{result}}"
-          }
-        ],
-        "assignTo": "formatAuditResult_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatFailureStats",
-        "args": [],
-        "assignTo": "formatFailureStats_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatTransitionCount",
-        "args": [
-          {
-            "name": "count",
-            "type": "number",
-            "value": "{{count}}"
-          }
-        ],
-        "assignTo": "formatTransitionCount_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatLine",
-        "args": [
-          {
-            "name": "level",
-            "type": "Level",
-            "value": "{{level}}"
-          },
-          {
-            "name": "module",
-            "type": "string",
-            "value": "{{module}}"
-          },
-          {
-            "name": "message",
-            "type": "string",
-            "value": "{{message}}"
-          },
-          {
-            "name": "data",
-            "type": "unknown",
-            "value": "{{data}}"
-          }
-        ],
-        "assignTo": "formatLine_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatConstraints",
-        "args": [
-          {
-            "name": "constraints",
-            "type": "PlannerConstraint[]",
-            "value": "{{constraints}}"
-          }
-        ],
-        "assignTo": "formatConstraints_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatActionSequence",
-        "args": [
-          {
-            "name": "actions",
-            "type": "{ kind: string; function?: string }[]",
-            "value": "{{actions}}"
-          }
-        ],
-        "assignTo": "formatActionSequence_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatSessionTimeline",
-        "args": [
-          {
-            "name": "session",
-            "type": "ExecutionSession",
-            "value": "{{session}}"
-          }
-        ],
-        "assignTo": "formatSessionTimeline_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatSessionSummary",
-        "args": [
-          {
-            "name": "sessions",
-            "type": "ReturnType<typeof getAllSessions>",
-            "value": "{{sessions}}"
-          }
-        ],
-        "assignTo": "formatSessionSummary_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatGenomeSummary",
-        "args": [],
-        "assignTo": "formatGenomeSummary_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatLearnedPatterns",
-        "args": [],
-        "assignTo": "formatLearnedPatterns_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatAntibodyStats",
-        "args": [],
-        "assignTo": "formatAntibodyStats_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatHeatmap",
-        "args": [],
-        "assignTo": "formatHeatmap_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatStateTransitionPathFromLedger",
-        "args": [
-          {
-            "name": "transitions",
-            "type": "StateTransition[]",
-            "value": "{{transitions}}"
-          }
-        ],
-        "assignTo": "formatStateTransitionPathFromLedger_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatStateTransitions",
-        "args": [
-          {
-            "name": "session",
-            "type": "ExecutionSession",
-            "value": "{{session}}"
-          }
-        ],
-        "assignTo": "formatStateTransitions_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatReplayHeader",
-        "args": [
-          {
-            "name": "session",
-            "type": "ExecutionSession",
-            "value": "{{session}}"
-          }
-        ],
-        "assignTo": "formatReplayHeader_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatActionList",
-        "args": [
-          {
-            "name": "actions",
-            "type": "{ kind: string; function?: string }[]",
-            "value": "{{actions}}"
-          }
-        ],
-        "assignTo": "formatActionList_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatAdaptationDiff",
-        "args": [
-          {
-            "name": "prev",
-            "type": "Attempt",
-            "value": "{{prev}}"
-          },
-          {
-            "name": "current",
-            "type": "Attempt",
-            "value": "{{current}}"
-          }
-        ],
-        "assignTo": "formatAdaptationDiff_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatAnomalyReport",
-        "args": [
-          {
-            "name": "a",
-            "type": "Attempt",
-            "value": "{{a}}"
-          }
-        ],
-        "assignTo": "formatAnomalyReport_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatReplayProgress",
-        "args": [
-          {
-            "name": "current",
-            "type": "number",
-            "value": "{{current}}"
-          },
-          {
-            "name": "total",
-            "type": "number",
-            "value": "{{total}}"
-          }
-        ],
-        "assignTo": "formatReplayProgress_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatLedgerReplayValidation",
-        "args": [
-          {
-            "name": "session",
-            "type": "ExecutionSession",
-            "value": "{{session}}"
-          }
-        ],
-        "assignTo": "formatLedgerReplayValidation_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatLedgerStats",
-        "args": [],
-        "assignTo": "formatLedgerStats_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatCrossSessionQuery",
-        "args": [
-          {
-            "name": "operation",
-            "type": "string",
-            "value": "{{operation}}"
-          },
-          {
-            "name": "state",
-            "type": "string",
-            "value": "{{state}}"
-          }
-        ],
-        "assignTo": "formatCrossSessionQuery_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatSnapshotList",
-        "args": [],
-        "assignTo": "formatSnapshotList_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatSnapshotDiff",
-        "args": [
-          {
-            "name": "snapIdA",
-            "type": "string",
-            "value": "{{snapIdA}}"
-          },
-          {
-            "name": "snapIdB",
-            "type": "string",
-            "value": "{{snapIdB}}"
-          }
-        ],
-        "assignTo": "formatSnapshotDiff_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatSessionValidation",
-        "args": [
-          {
-            "name": "session",
-            "type": "ExecutionSession",
-            "value": "{{session}}"
-          }
-        ],
-        "assignTo": "formatSessionValidation_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatSessionCounts",
-        "args": [
-          {
-            "name": "counts",
-            "type": "{ resolved: number; unresolved: number; total: number }",
-            "value": "{{counts}}"
-          }
-        ],
-        "assignTo": "formatSessionCounts_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatDuration",
-        "args": [
-          {
-            "name": "ms",
-            "type": "number",
-            "value": "{{ms}}"
-          }
-        ],
-        "assignTo": "formatDuration_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatFileSize",
-        "args": [
-          {
-            "name": "bytes",
-            "type": "number",
-            "value": "{{bytes}}"
-          }
-        ],
-        "assignTo": "formatFileSize_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatChainHint",
-        "args": [
-          {
-            "name": "chains",
-            "type": "CapabilityChain[]",
-            "value": "{{chains}}"
-          }
-        ],
-        "assignTo": "formatChainHint_result"
-      },
-      {
-        "kind": "call",
-        "function": "auditDirectory",
-        "args": [
-          {
-            "name": "dir",
-            "type": "string",
-            "value": "{{dir}}"
-          },
-          {
-            "name": "threshold",
-            "type": "any",
-            "value": "{{threshold}}"
-          }
-        ],
-        "assignTo": "auditDirectory_result"
-      },
-      {
-        "kind": "call",
-        "function": "replayWithDetail",
-        "args": [
-          {
-            "name": "transitions",
-            "type": "StateTransition[]",
-            "value": "{{transitions}}"
-          },
-          {
-            "name": "currentRules",
-            "type": "Map<string, import(\"./ssg-validator\").StateAnnotation>",
-            "value": "{{currentRules}}"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "{{namespaceInitialStates}}"
-          }
-        ],
-        "assignTo": "replayWithDetail_result"
-      },
-      {
-        "kind": "call",
-        "function": "emitCode",
-        "args": [
-          {
-            "name": "actions",
-            "type": "Action[]",
-            "value": "{{actions}}"
-          },
-          {
-            "name": "meta",
-            "type": "{ sessionId?: string; ruleHash?: string; irFunctionCount?: number; protocolRuleCount?: number }",
-            "value": "{{meta}}"
-          }
-        ],
-        "assignTo": "emitCode_result"
-      },
-      {
-        "kind": "call",
-        "function": "parseCapabilityFromJSDoc",
-        "args": [
-          {
-            "name": "node",
-            "type": "any",
-            "value": "{{node}}"
-          }
-        ],
-        "assignTo": "parseCapabilityFromJSDoc_result"
-      },
-      {
-        "kind": "call",
-        "function": "extractIRWithTypes",
-        "args": [
-          {
-            "name": "projectRoot",
-            "type": "string",
-            "value": "{{projectRoot}}"
-          }
-        ],
-        "assignTo": "extractIRWithTypes_result"
-      },
-      {
-        "kind": "call",
-        "function": "getFailureAdjustedCredit",
-        "args": [
-          {
-            "name": "funcName",
-            "type": "string",
-            "value": "{{funcName}}"
-          }
-        ],
-        "assignTo": "getFailureAdjustedCredit_result"
-      },
-      {
-        "kind": "call",
-        "function": "withLock",
-        "args": [
-          {
-            "name": "name",
-            "type": "string",
-            "value": "{{name}}"
-          },
-          {
-            "name": "fn",
-            "type": "() => T",
-            "value": "{{fn}}"
-          }
-        ],
-        "assignTo": "withLock_result"
-      },
-      {
-        "kind": "call",
-        "function": "countTotalTransitions",
-        "args": [
-          {
-            "name": "sessions",
-            "type": "any[]",
-            "value": "{{sessions}}"
-          }
-        ],
-        "assignTo": "countTotalTransitions_result"
-      },
-      {
-        "kind": "call",
-        "function": "countSessionsWithViolations",
-        "args": [
-          {
-            "name": "sessions",
-            "type": "any[]",
-            "value": "{{sessions}}"
-          }
-        ],
-        "assignTo": "countSessionsWithViolations_result"
-      },
-      {
-        "kind": "call",
-        "function": "assertCallLimit",
-        "args": []
-      },
-      {
-        "kind": "call",
-        "function": "applyRateLimit",
-        "args": [],
-        "assignTo": "applyRateLimit_result"
-      },
-      {
-        "kind": "call",
-        "function": "getSessionTransitions",
-        "args": [
-          {
-            "name": "session",
-            "type": "any",
-            "value": "{{session}}"
-          }
-        ],
-        "assignTo": "getSessionTransitions_result"
-      },
-      {
-        "kind": "call",
-        "function": "validateProtocolWithTransitions",
-        "args": [
-          {
-            "name": "actions",
-            "type": "Action[]",
-            "value": "{{actions}}"
-          },
-          {
-            "name": "protocols",
-            "type": "FunctionProtocol[]",
-            "value": "{{protocols}}"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "{{namespaceInitialStates}}"
-          }
-        ],
-        "assignTo": "validateProtocolWithTransitions_result"
-      },
-      {
-        "kind": "call",
-        "function": "getNsInit",
-        "args": [],
-        "assignTo": "getNsInit_result"
-      },
-      {
-        "kind": "call",
-        "function": "emitPython",
-        "args": [
-          {
-            "name": "actions",
-            "type": "Action[]",
-            "value": "{{actions}}"
-          },
-          {
-            "name": "meta",
-            "type": "{ sessionId?: string; ruleHash?: string; irFunctionCount?: number; protocolRuleCount?: number }",
-            "value": "{{meta}}"
-          }
-        ],
-        "assignTo": "emitPython_result"
-      },
-      {
-        "kind": "call",
-        "function": "jaccardSimilarity",
-        "args": [
-          {
-            "name": "a",
-            "type": "string",
-            "value": "{{a}}"
-          },
-          {
-            "name": "b",
-            "type": "string",
-            "value": "{{b}}"
-          }
-        ],
-        "assignTo": "jaccardSimilarity_result"
-      },
-      {
-        "kind": "call",
-        "function": "assertTransitionOrder",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{{ledger}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "SemanticTopology.similarity",
-        "args": [
-          {
-            "name": "funcA",
-            "type": "string",
-            "value": "{{funcA}}"
-          },
-          {
-            "name": "funcB",
-            "type": "string",
-            "value": "{{funcB}}"
-          }
-        ],
-        "assignTo": "SemanticTopology.similarity_result"
-      },
-      {
-        "kind": "call",
-        "function": "SemanticTopology.capabilityMatch",
-        "args": [
-          {
-            "name": "produce",
-            "type": "string",
-            "value": "{{produce}}"
-          },
-          {
-            "name": "require",
-            "type": "string",
-            "value": "{{require}}"
-          }
-        ],
-        "assignTo": "SemanticTopology.capabilityMatch_result"
-      },
-      {
-        "kind": "call",
-        "function": "applyTransitionDelta",
-        "args": [
-          {
-            "name": "stateMap",
-            "type": "Map<string, Set<string>>",
-            "value": "{{stateMap}}"
-          },
-          {
-            "name": "transition",
-            "type": "StateTransition",
-            "value": "{{transition}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "validateTransition",
-        "args": [
-          {
-            "name": "ctx",
-            "type": "ValidationContext",
-            "value": "{{ctx}}"
-          },
-          {
-            "name": "candidateFunctionName",
-            "type": "string",
-            "value": "{{candidateFunctionName}}"
-          },
-          {
-            "name": "actionIndex",
-            "type": "number",
-            "value": "{{actionIndex}}"
-          },
-          {
-            "name": "rules",
-            "type": "Map<string, StateAnnotation>",
-            "value": "{{rules}}"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "{{namespaceInitialStates}}"
-          },
-          {
-            "name": "ruleHash",
-            "type": "string",
-            "value": "{{ruleHash}}"
-          }
-        ],
-        "assignTo": "validateTransition_result"
-      },
-      {
-        "kind": "call",
-        "function": "findTransition",
-        "args": [
-          {
-            "name": "actionIndex",
-            "type": "number",
-            "value": "{{actionIndex}}"
-          },
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{{ledger}}"
-          }
-        ],
-        "assignTo": "findTransition_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.setNamespaceInitialState",
-        "args": [
-          {
-            "name": "namespace",
-            "type": "string",
-            "value": "{{namespace}}"
-          },
-          {
-            "name": "state",
-            "type": "string",
-            "value": "{{state}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.applyWithTransition",
-        "args": [
-          {
-            "name": "functionName",
-            "type": "string",
-            "value": "{{functionName}}"
-          },
-          {
-            "name": "actionIndex",
-            "type": "number",
-            "value": "{{actionIndex}}"
-          }
-        ],
-        "assignTo": "StateMachineValidator.applyWithTransition_result"
-      },
-      {
-        "kind": "call",
-        "function": "capitalizeWords",
-        "args": [
-          {
-            "name": "str",
-            "type": "string",
-            "value": "{{str}}"
-          }
-        ],
-        "assignTo": "capitalizeWords_result"
-      },
-      {
-        "kind": "call",
-        "function": "removeWhitespace",
-        "args": [
-          {
-            "name": "str",
-            "type": "string",
-            "value": "{{str}}"
-          }
-        ],
-        "assignTo": "removeWhitespace_result"
-      },
-      {
-        "kind": "call",
-        "function": "buildCapabilityGraph",
-        "args": [
-          {
-            "name": "ir",
-            "type": "FunctionInfo[]",
-            "value": "{{ir}}"
-          }
-        ],
-        "assignTo": "buildCapabilityGraph_result"
-      },
-      {
-        "kind": "call",
-        "function": "selectCapabilityChains",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          },
-          {
-            "name": "ir",
-            "type": "FunctionInfo[]",
-            "value": "{{ir}}"
-          },
-          {
-            "name": "maxChains",
-            "type": "number",
-            "value": "{{maxChains}}"
-          },
-          {
-            "name": "llmSeeds",
-            "type": "string[]",
-            "value": "{{llmSeeds}}"
-          }
-        ],
-        "assignTo": "selectCapabilityChains_result"
-      },
-      {
-        "kind": "call",
-        "function": "writeFileSync",
-        "args": [
-          {
-            "name": "path",
-            "type": "string",
-            "value": "{{path}}"
-          },
-          {
-            "name": "data",
-            "type": "string",
-            "value": "{{data}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "writeHead",
-        "args": [],
-        "assignTo": "writeHead_result"
-      },
-      {
-        "kind": "call",
-        "function": "capabilityMatch",
-        "args": [],
-        "assignTo": "capabilityMatch_result"
-      },
-      {
-        "kind": "call",
-        "function": "write",
-        "args": [],
-        "assignTo": "write_result"
-      },
-      {
-        "kind": "call",
-        "function": "exit",
-        "args": [
-          {
-            "name": "code",
-            "type": "number",
-            "value": "{{code}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "ActionBuilder.assign",
-        "args": [
-          {
-            "name": "target",
-            "type": "string",
-            "value": "{{target}}"
-          },
-          {
-            "name": "value",
-            "type": "any",
-            "value": "{{value}}"
-          }
-        ],
-        "assignTo": "ActionBuilder.assign_result"
-      },
-      {
-        "kind": "call",
-        "function": "benchmarkPassRate",
-        "args": [],
-        "assignTo": "benchmarkPassRate_result"
-      },
-      {
-        "kind": "call",
-        "function": "wrapAsBranch",
-        "args": [
-          {
-            "name": "transitions",
-            "type": "StateTransition[]",
-            "value": "{{transitions}}"
-          }
-        ],
-        "assignTo": "wrapAsBranch_result"
-      },
-      {
-        "kind": "call",
-        "function": "pass",
-        "args": [
-          {
-            "name": "msg",
-            "type": "string",
-            "value": "{{msg}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "classifyError",
-        "args": [
-          {
-            "name": "error",
-            "type": "string",
-            "value": "{{error}}"
-          }
-        ],
-        "assignTo": "classifyError_result"
-      },
-      {
-        "kind": "call",
-        "function": "classifyPlanError",
-        "args": [
-          {
-            "name": "error",
-            "type": "string",
-            "value": "{{error}}"
-          }
-        ],
-        "assignTo": "classifyPlanError_result"
-      },
-      {
-        "kind": "call",
-        "function": "hashFingerprint",
-        "args": [
-          {
-            "name": "fp",
-            "type": "ImmuneFingerprint",
-            "value": "{{fp}}"
-          }
-        ],
-        "assignTo": "hashFingerprint_result"
-      },
-      {
-        "kind": "call",
-        "function": "getReceivedHashes",
-        "args": [],
-        "assignTo": "getReceivedHashes_result"
-      },
-      {
-        "kind": "call",
-        "function": "saveReceivedHashes",
-        "args": [
-          {
-            "name": "hashes",
-            "type": "Set<string>",
-            "value": "{{hashes}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "hasViolations",
-        "args": [
-          {
-            "name": "session",
-            "type": "any",
-            "value": "{{session}}"
-          }
-        ],
-        "assignTo": "hasViolations_result"
-      },
-      {
-        "kind": "call",
-        "function": "getRuleHash",
-        "args": [],
-        "assignTo": "getRuleHash_result"
-      },
-      {
-        "kind": "call",
-        "function": "applyProposalAsBranch",
-        "args": [
-          {
-            "name": "proposal",
-            "type": "RepairProposal",
-            "value": "{{proposal}}"
-          },
-          {
-            "name": "parentBranch",
-            "type": "Branch",
-            "value": "{{parentBranch}}"
-          },
-          {
-            "name": "currentLedger",
-            "type": "StateTransition[]",
-            "value": "{{currentLedger}}"
-          },
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "{{ir}}"
-          }
-        ],
-        "assignTo": "applyProposalAsBranch_result"
-      },
-      {
-        "kind": "call",
-        "function": "assertLedgerConsistency",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{{ledger}}"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "{{namespaceInitialStates}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "assertDeltaConsistency",
-        "args": [
-          {
-            "name": "transition",
-            "type": "StateTransition",
-            "value": "{{transition}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "assertRuleHashMatch",
-        "args": [
-          {
-            "name": "expected",
-            "type": "string",
-            "value": "{{expected}}"
-          },
-          {
-            "name": "actual",
-            "type": "string",
-            "value": "{{actual}}"
-          },
-          {
-            "name": "context",
-            "type": "string",
-            "value": "{{context}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "assertLedgerInvariants",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{{ledger}}"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "{{namespaceInitialStates}}"
-          },
-          {
-            "name": "expectedRuleHash",
-            "type": "string",
-            "value": "{{expectedRuleHash}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "irHash",
-        "args": [
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "{{ir}}"
-          }
-        ],
-        "assignTo": "irHash_result"
-      },
-      {
-        "kind": "call",
-        "function": "hashRules",
-        "args": [
-          {
-            "name": "rules",
-            "type": "Map<string, StateAnnotation>",
-            "value": "{{rules}}"
-          }
-        ],
-        "assignTo": "hashRules_result"
-      },
-      {
-        "kind": "call",
-        "function": "hashLedger",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{{ledger}}"
-          }
-        ],
-        "assignTo": "hashLedger_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.getRuleHash",
-        "args": [],
-        "assignTo": "StateMachineValidator.getRuleHash_result"
-      },
-      {
-        "kind": "call",
-        "function": "hasRequiredFields",
-        "args": [
-          {
-            "name": "obj",
-            "type": "any",
-            "value": "{{obj}}"
-          },
-          {
-            "name": "fields",
-            "type": "string[]",
-            "value": "{{fields}}"
-          }
-        ],
-        "assignTo": "hasRequiredFields_result"
-      },
-      {
-        "kind": "call",
-        "function": "createHash",
-        "args": [
-          {
-            "name": "algorithm",
-            "type": "string",
-            "value": "{{algorithm}}"
-          }
-        ],
-        "assignTo": "createHash_result"
-      },
-      {
-        "kind": "call",
-        "function": "getClasses",
-        "args": [],
-        "assignTo": "getClasses_result"
-      },
-      {
-        "kind": "call",
-        "function": "getTypeAliases",
-        "args": [],
-        "assignTo": "getTypeAliases_result"
-      },
-      {
-        "kind": "call",
-        "function": "getMaskedFuncList",
-        "args": [],
-        "assignTo": "getMaskedFuncList_result"
-      },
-      {
-        "kind": "call",
-        "function": "hash",
-        "args": [],
-        "assignTo": "hash_result"
-      },
-      {
-        "kind": "call",
-        "function": "humanize",
-        "args": [
-          {
-            "name": "name",
-            "type": "string",
-            "value": "{{name}}"
-          }
-        ],
-        "assignTo": "humanize_result"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780831212196",
-    "timestamp": "2026-06-07T11:20:12.196Z"
-  },
-  {
-    "intent": "score all candidate functions against an intent and return the top scoring ones",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "computeHealthScore",
-        "args": [
-          {
-            "name": "failureGenome",
-            "type": "any",
-            "value": "{{failureGenome}}"
-          },
-          {
-            "name": "antibodyStats",
-            "type": "any",
-            "value": "{{antibodyStats}}"
-          }
-        ],
-        "assignTo": "computeHealthScore_result"
-      },
-      {
-        "kind": "call",
-        "function": "getStaticScore",
-        "args": [
-          {
-            "name": "funcName",
-            "type": "string",
-            "value": "{{funcName}}"
-          },
-          {
-            "name": "goal",
-            "type": "string",
-            "value": "{{goal}}"
-          }
-        ],
-        "assignTo": "getStaticScore_result"
-      },
-      {
-        "kind": "call",
-        "function": "batchScoreFuncs",
-        "args": [
-          {
-            "name": "funcs",
-            "type": "{name: string; staticScore: number}[]",
-            "value": "{{funcs}}"
-          },
-          {
-            "name": "goal",
-            "type": "string",
-            "value": "{{goal}}"
-          }
-        ],
-        "assignTo": "batchScoreFuncs_result"
-      },
-      {
-        "kind": "call",
-        "function": "scoreNode",
-        "args": [
-          {
-            "name": "node",
-            "type": "CapabilityNode",
-            "value": "{{node}}"
-          },
-          {
-            "name": "intentLower",
-            "type": "string",
-            "value": "{{intentLower}}"
-          },
-          {
-            "name": "keywords",
-            "type": "string[]",
-            "value": "{{keywords}}"
-          }
-        ],
-        "assignTo": "scoreNode_result"
-      },
-      {
-        "kind": "call",
-        "function": "topByScore",
-        "args": [
-          {
-            "name": "nodes",
-            "type": "CapabilityNode[]",
-            "value": "{{nodes}}"
-          }
-        ],
-        "assignTo": "topByScore_result"
-      },
-      {
-        "kind": "call",
-        "function": "ActionBuilder.call",
-        "args": [
-          {
-            "name": "func",
-            "type": "string",
-            "value": "{{func}}"
-          },
-          {
-            "name": "args",
-            "type": "any[]",
-            "value": "{{args}}"
-          },
-          {
-            "name": "assignTo",
-            "type": "string",
-            "value": "{{assignTo}}"
-          }
-        ],
-        "assignTo": "ActionBuilder.call_result"
-      },
-      {
-        "kind": "call",
-        "function": "extractDirectCalls",
-        "args": [
-          {
-            "name": "func",
-            "type": "FunctionDeclaration | ArrowFunction",
-            "value": "{{func}}"
-          }
-        ],
-        "assignTo": "extractDirectCalls_result"
-      },
-      {
-        "kind": "call",
-        "function": "getAllFailures",
-        "args": [],
-        "assignTo": "getAllFailures_result"
-      },
-      {
-        "kind": "call",
-        "function": "getAllSessions",
-        "args": [],
-        "assignTo": "getAllSessions_result"
-      },
-      {
-        "kind": "call",
-        "function": "verifyAllFingerprints",
-        "args": [
-          {
-            "name": "currentRuleHash",
-            "type": "string",
-            "value": "{{currentRuleHash}}"
-          }
-        ],
-        "assignTo": "verifyAllFingerprints_result"
-      },
-      {
-        "kind": "call",
-        "function": "registerAllMissingFingerprints",
-        "args": [],
-        "assignTo": "registerAllMissingFingerprints_result"
-      },
-      {
-        "kind": "call",
-        "function": "resetCallCount",
-        "args": [],
-        "assignTo": "resetCallCount_result"
-      },
-      {
-        "kind": "call",
-        "function": "assertCallLimit",
-        "args": []
-      },
-      {
-        "kind": "call",
-        "function": "generateFallbackPlan",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          },
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "{{ir}}"
-          }
-        ],
-        "assignTo": "generateFallbackPlan_result"
-      },
-      {
-        "kind": "call",
-        "function": "listAllStates",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{{ledger}}"
-          }
-        ],
-        "assignTo": "listAllStates_result"
-      },
-      {
-        "kind": "call",
-        "function": "matchAll",
-        "args": [],
-        "assignTo": "matchAll_result"
-      },
-      {
-        "kind": "call",
-        "function": "generateCandidateRules",
-        "args": [],
-        "assignTo": "generateCandidateRules_result"
-      },
-      {
-        "kind": "call",
-        "function": "getFunctionSuccessRate",
-        "args": [
-          {
-            "name": "funcName",
-            "type": "string",
-            "value": "{{funcName}}"
-          }
-        ],
-        "assignTo": "getFunctionSuccessRate_result"
-      },
-      {
-        "kind": "call",
-        "function": "scanDir",
-        "args": [
-          {
-            "name": "rootDir",
-            "type": "string",
-            "value": "{{rootDir}}"
-          },
-          {
-            "name": "currentDir",
-            "type": "string",
-            "value": "{{currentDir}}"
-          },
-          {
-            "name": "result",
-            "type": "AuditResult",
-            "value": "{{result}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "generateBranchId",
-        "args": [],
-        "assignTo": "generateBranchId_result"
-      },
-      {
-        "kind": "call",
-        "function": "createRootBranch",
-        "args": [
-          {
-            "name": "transitions",
-            "type": "StateTransition[]",
-            "value": "{{transitions}}"
-          }
-        ],
-        "assignTo": "createRootBranch_result"
-      },
-      {
-        "kind": "call",
-        "function": "createBranch",
-        "args": [
-          {
-            "name": "parent",
-            "type": "Branch",
-            "value": "{{parent}}"
-          },
-          {
-            "name": "reason",
-            "type": "BranchReason",
-            "value": "{{reason}}"
-          },
-          {
-            "name": "initialTransitions",
-            "type": "StateTransition[]",
-            "value": "{{initialTransitions}}"
-          }
-        ],
-        "assignTo": "createBranch_result"
-      },
-      {
-        "kind": "call",
-        "function": "forkBranch",
-        "args": [
-          {
-            "name": "branch",
-            "type": "Branch",
-            "value": "{{branch}}"
-          },
-          {
-            "name": "splitIndex",
-            "type": "number",
-            "value": "{{splitIndex}}"
-          },
-          {
-            "name": "reason",
-            "type": "BranchReason",
-            "value": "{{reason}}"
-          }
-        ],
-        "assignTo": "forkBranch_result"
-      },
-      {
-        "kind": "call",
-        "function": "mergeBranches",
-        "args": [
-          {
-            "name": "branches",
-            "type": "Branch[]",
-            "value": "{{branches}}"
-          }
-        ],
-        "assignTo": "mergeBranches_result"
-      },
-      {
-        "kind": "call",
-        "function": "flattenBranch",
-        "args": [
-          {
-            "name": "branch",
-            "type": "Branch",
-            "value": "{{branch}}"
-          },
-          {
-            "name": "allBranches",
-            "type": "Map<string, Branch>",
-            "value": "{{allBranches}}"
-          }
-        ],
-        "assignTo": "flattenBranch_result"
-      },
-      {
-        "kind": "call",
-        "function": "getBranchPath",
-        "args": [
-          {
-            "name": "branch",
-            "type": "Branch",
-            "value": "{{branch}}"
-          },
-          {
-            "name": "allBranches",
-            "type": "Map<string, Branch>",
-            "value": "{{allBranches}}"
-          }
-        ],
-        "assignTo": "getBranchPath_result"
-      },
-      {
-        "kind": "call",
-        "function": "replayBranch",
-        "args": [
-          {
-            "name": "branch",
-            "type": "Branch",
-            "value": "{{branch}}"
-          },
-          {
-            "name": "allBranches",
-            "type": "Map<string, Branch>",
-            "value": "{{allBranches}}"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "{{namespaceInitialStates}}"
-          }
-        ],
-        "assignTo": "replayBranch_result"
-      },
-      {
-        "kind": "call",
-        "function": "buildBranchMap",
-        "args": [
-          {
-            "name": "branches",
-            "type": "Branch[]",
-            "value": "{{branches}}"
-          }
-        ],
-        "assignTo": "buildBranchMap_result"
-      },
-      {
-        "kind": "call",
-        "function": "findRootBranch",
-        "args": [
-          {
-            "name": "branches",
-            "type": "Branch[]",
-            "value": "{{branches}}"
-          }
-        ],
-        "assignTo": "findRootBranch_result"
-      },
-      {
-        "kind": "call",
-        "function": "findChildBranches",
-        "args": [
-          {
-            "name": "parent",
-            "type": "Branch",
-            "value": "{{parent}}"
-          },
-          {
-            "name": "allBranches",
-            "type": "Map<string, Branch>",
-            "value": "{{allBranches}}"
-          }
-        ],
-        "assignTo": "findChildBranches_result"
-      },
-      {
-        "kind": "call",
-        "function": "describeBranchTree",
-        "args": [
-          {
-            "name": "root",
-            "type": "Branch",
-            "value": "{{root}}"
-          },
-          {
-            "name": "allBranches",
-            "type": "Map<string, Branch>",
-            "value": "{{allBranches}}"
-          },
-          {
-            "name": "indent",
-            "type": "any",
-            "value": "{{indent}}"
-          }
-        ],
-        "assignTo": "describeBranchTree_result"
-      },
-      {
-        "kind": "call",
-        "function": "evaluateBranches",
-        "args": [
-          {
-            "name": "branches",
-            "type": "Branch[]",
-            "value": "{{branches}}"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "{{namespaceInitialStates}}"
-          }
-        ],
-        "assignTo": "evaluateBranches_result"
-      },
-      {
-        "kind": "call",
-        "function": "wrapAsBranch",
-        "args": [
-          {
-            "name": "transitions",
-            "type": "StateTransition[]",
-            "value": "{{transitions}}"
-          }
-        ],
-        "assignTo": "wrapAsBranch_result"
-      },
-      {
-        "kind": "call",
-        "function": "unwrapBranchTree",
-        "args": [
-          {
-            "name": "branches",
-            "type": "Branch[]",
-            "value": "{{branches}}"
-          }
-        ],
-        "assignTo": "unwrapBranchTree_result"
-      },
-      {
-        "kind": "call",
-        "function": "humanize",
-        "args": [
-          {
-            "name": "name",
-            "type": "string",
-            "value": "{{name}}"
-          }
-        ],
-        "assignTo": "humanize_result"
-      },
-      {
-        "kind": "call",
-        "function": "parseProtocolAnnotation",
-        "args": [
-          {
-            "name": "source",
-            "type": "string",
-            "value": "{{source}}"
-          }
-        ],
-        "assignTo": "parseProtocolAnnotation_result"
-      },
-      {
-        "kind": "call",
-        "function": "classifyPlanError",
-        "args": [
-          {
-            "name": "error",
-            "type": "string",
-            "value": "{{error}}"
-          }
-        ],
-        "assignTo": "classifyPlanError_result"
-      },
-      {
-        "kind": "call",
-        "function": "queryAntibodies",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          },
-          {
-            "name": "minACL",
-            "type": "AntibodyLevel",
-            "value": "{{minACL}}"
-          }
-        ],
-        "assignTo": "queryAntibodies_result"
-      },
-      {
-        "kind": "call",
-        "function": "getSemanticHeatmap",
-        "args": [],
-        "assignTo": "getSemanticHeatmap_result"
-      },
-      {
-        "kind": "call",
-        "function": "getAntibodyStats",
-        "args": [],
-        "assignTo": "getAntibodyStats_result"
-      },
-      {
-        "kind": "call",
-        "function": "getInstanceId",
-        "args": [],
-        "assignTo": "getInstanceId_result"
-      },
-      {
-        "kind": "call",
-        "function": "countTotalTransitions",
-        "args": [
-          {
-            "name": "sessions",
-            "type": "any[]",
-            "value": "{{sessions}}"
-          }
-        ],
-        "assignTo": "countTotalTransitions_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatTransitionCount",
-        "args": [
-          {
-            "name": "count",
-            "type": "number",
-            "value": "{{count}}"
-          }
-        ],
-        "assignTo": "formatTransitionCount_result"
-      },
-      {
-        "kind": "call",
-        "function": "loadSemantic",
-        "args": [],
-        "assignTo": "loadSemantic_result"
-      },
-      {
-        "kind": "call",
-        "function": "saveSemantic",
-        "args": [
-          {
-            "name": "templates",
-            "type": "SemanticTemplate[]",
-            "value": "{{templates}}"
-          }
-        ],
-        "assignTo": "saveSemantic_result"
-      },
-      {
-        "kind": "call",
-        "function": "consolidateSemantic",
-        "args": [
-          {
-            "name": "minOccurrences",
-            "type": "number",
-            "value": "{{minOccurrences}}"
-          }
-        ],
-        "assignTo": "consolidateSemantic_result"
-      },
-      {
-        "kind": "call",
-        "function": "findSemanticTemplate",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          }
-        ],
-        "assignTo": "findSemanticTemplate_result"
-      },
-      {
-        "kind": "call",
-        "function": "handleAPI",
-        "args": [
-          {
-            "name": "req",
-            "type": "http.IncomingMessage",
-            "value": "{{req}}"
-          },
-          {
-            "name": "res",
-            "type": "http.ServerResponse",
-            "value": "{{res}}"
-          }
-        ],
-        "assignTo": "handleAPI_result"
-      },
-      {
-        "kind": "call",
-        "function": "getSessionTransitions",
-        "args": [
-          {
-            "name": "session",
-            "type": "any",
-            "value": "{{session}}"
-          }
-        ],
-        "assignTo": "getSessionTransitions_result"
-      },
-      {
-        "kind": "call",
-        "function": "handleLedgerAPI",
-        "args": [
-          {
-            "name": "res",
-            "type": "http.ServerResponse",
-            "value": "{{res}}"
-          },
-          {
-            "name": "url",
-            "type": "URL",
-            "value": "{{url}}"
-          }
-        ],
-        "assignTo": "handleLedgerAPI_result"
-      },
-      {
-        "kind": "call",
-        "function": "handleConsistencyAPI",
-        "args": [
-          {
-            "name": "res",
-            "type": "http.ServerResponse",
-            "value": "{{res}}"
-          },
-          {
-            "name": "url",
-            "type": "URL",
-            "value": "{{url}}"
-          }
-        ],
-        "assignTo": "handleConsistencyAPI_result"
-      },
-      {
-        "kind": "call",
-        "function": "handleDiffAPI",
-        "args": [
-          {
-            "name": "res",
-            "type": "http.ServerResponse",
-            "value": "{{res}}"
-          },
-          {
-            "name": "url",
-            "type": "URL",
-            "value": "{{url}}"
-          }
-        ],
-        "assignTo": "handleDiffAPI_result"
-      },
-      {
-        "kind": "call",
-        "function": "handleReplayAPI",
-        "args": [
-          {
-            "name": "res",
-            "type": "http.ServerResponse",
-            "value": "{{res}}"
-          },
-          {
-            "name": "url",
-            "type": "URL",
-            "value": "{{url}}"
-          }
-        ],
-        "assignTo": "handleReplayAPI_result"
-      },
-      {
-        "kind": "call",
-        "function": "semanticMatch",
-        "args": [
-          {
-            "name": "a",
-            "type": "string",
-            "value": "{{a}}"
-          },
-          {
-            "name": "b",
-            "type": "string",
-            "value": "{{b}}"
-          }
-        ],
-        "assignTo": "semanticMatch_result"
-      },
-      {
-        "kind": "call",
-        "function": "validateProtocolWithTransitions",
-        "args": [
-          {
-            "name": "actions",
-            "type": "Action[]",
-            "value": "{{actions}}"
-          },
-          {
-            "name": "protocols",
-            "type": "FunctionProtocol[]",
-            "value": "{{protocols}}"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "{{namespaceInitialStates}}"
-          }
-        ],
-        "assignTo": "validateProtocolWithTransitions_result"
-      },
-      {
-        "kind": "call",
-        "function": "plan",
-        "args": [
-          {
-            "name": "userIntent",
-            "type": "string",
-            "value": "{{userIntent}}"
-          }
-        ],
-        "assignTo": "plan_result"
-      },
-      {
-        "kind": "call",
-        "function": "suggestInvariantRepair",
-        "args": [
-          {
-            "name": "violation",
-            "type": "LedgerConsistencyViolation",
-            "value": "{{violation}}"
-          },
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{{ledger}}"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "{{namespaceInitialStates}}"
-          }
-        ],
-        "assignTo": "suggestInvariantRepair_result"
-      },
-      {
-        "kind": "call",
-        "function": "applyProposalAsBranch",
-        "args": [
-          {
-            "name": "proposal",
-            "type": "RepairProposal",
-            "value": "{{proposal}}"
-          },
-          {
-            "name": "parentBranch",
-            "type": "Branch",
-            "value": "{{parentBranch}}"
-          },
-          {
-            "name": "currentLedger",
-            "type": "StateTransition[]",
-            "value": "{{currentLedger}}"
-          },
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "{{ir}}"
-          }
-        ],
-        "assignTo": "applyProposalAsBranch_result"
-      },
-      {
-        "kind": "call",
-        "function": "assertTransitionOrder",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{{ledger}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "assertLedgerInvariants",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{{ledger}}"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "{{namespaceInitialStates}}"
-          },
-          {
-            "name": "expectedRuleHash",
-            "type": "string",
-            "value": "{{expectedRuleHash}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "generatePlannerSeed",
-        "args": [
-          {
-            "name": "prompt",
-            "type": "string",
-            "value": "{{prompt}}"
-          },
-          {
-            "name": "model",
-            "type": "string",
-            "value": "{{model}}"
-          }
-        ],
-        "assignTo": "generatePlannerSeed_result"
-      },
-      {
-        "kind": "call",
-        "function": "runAndCheck",
-        "args": [
-          {
-            "name": "code",
-            "type": "string",
-            "value": "{{code}}"
-          }
-        ],
-        "assignTo": "runAndCheck_result"
-      },
-      {
-        "kind": "call",
-        "function": "searchPlan",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          },
-          {
-            "name": "beamWidth",
-            "type": "any",
-            "value": "{{beamWidth}}"
-          },
-          {
-            "name": "maxDepth",
-            "type": "any",
-            "value": "{{maxDepth}}"
-          }
-        ],
-        "assignTo": "searchPlan_result"
-      },
-      {
-        "kind": "call",
-        "function": "runSemanticTest",
-        "args": [],
-        "assignTo": "runSemanticTest_result"
-      },
-      {
-        "kind": "call",
-        "function": "SemanticTopology.build",
-        "args": [
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "{{ir}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "SemanticTopology.addEdge",
-        "args": [
-          {
-            "name": "a",
-            "type": "string",
-            "value": "{{a}}"
-          },
-          {
-            "name": "b",
-            "type": "string",
-            "value": "{{b}}"
-          },
-          {
-            "name": "weight",
-            "type": "number",
-            "value": "{{weight}}"
-          },
-          {
-            "name": "reason",
-            "type": "string",
-            "value": "{{reason}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "SemanticTopology.similarity",
-        "args": [
-          {
-            "name": "funcA",
-            "type": "string",
-            "value": "{{funcA}}"
-          },
-          {
-            "name": "funcB",
-            "type": "string",
-            "value": "{{funcB}}"
-          }
-        ],
-        "assignTo": "SemanticTopology.similarity_result"
-      },
-      {
-        "kind": "call",
-        "function": "SemanticTopology.findSimilar",
-        "args": [
-          {
-            "name": "funcName",
-            "type": "string",
-            "value": "{{funcName}}"
-          },
-          {
-            "name": "topN",
-            "type": "number",
-            "value": "{{topN}}"
-          }
-        ],
-        "assignTo": "SemanticTopology.findSimilar_result"
-      },
-      {
-        "kind": "call",
-        "function": "SemanticTopology.capabilityMatch",
-        "args": [
-          {
-            "name": "produce",
-            "type": "string",
-            "value": "{{produce}}"
-          },
-          {
-            "name": "require",
-            "type": "string",
-            "value": "{{require}}"
-          }
-        ],
-        "assignTo": "SemanticTopology.capabilityMatch_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatAntibodyStats",
-        "args": [],
-        "assignTo": "formatAntibodyStats_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatStateTransitionPathFromLedger",
-        "args": [
-          {
-            "name": "transitions",
-            "type": "StateTransition[]",
-            "value": "{{transitions}}"
-          }
-        ],
-        "assignTo": "formatStateTransitionPathFromLedger_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatStateTransitions",
-        "args": [
-          {
-            "name": "session",
-            "type": "ExecutionSession",
-            "value": "{{session}}"
-          }
-        ],
-        "assignTo": "formatStateTransitions_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatAnomalyReport",
-        "args": [
-          {
-            "name": "a",
-            "type": "Attempt",
-            "value": "{{a}}"
-          }
-        ],
-        "assignTo": "formatAnomalyReport_result"
-      },
-      {
-        "kind": "call",
-        "function": "checkSemantic",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          },
-          {
-            "name": "actions",
-            "type": "Action[]",
-            "value": "{{actions}}"
-          }
-        ],
-        "assignTo": "checkSemantic_result"
-      },
-      {
-        "kind": "call",
-        "function": "applyTransitionDelta",
-        "args": [
-          {
-            "name": "stateMap",
-            "type": "Map<string, Set<string>>",
-            "value": "{{stateMap}}"
-          },
-          {
-            "name": "transition",
-            "type": "StateTransition",
-            "value": "{{transition}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "validateTransition",
-        "args": [
-          {
-            "name": "ctx",
-            "type": "ValidationContext",
-            "value": "{{ctx}}"
-          },
-          {
-            "name": "candidateFunctionName",
-            "type": "string",
-            "value": "{{candidateFunctionName}}"
-          },
-          {
-            "name": "actionIndex",
-            "type": "number",
-            "value": "{{actionIndex}}"
-          },
-          {
-            "name": "rules",
-            "type": "Map<string, StateAnnotation>",
-            "value": "{{rules}}"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "{{namespaceInitialStates}}"
-          },
-          {
-            "name": "ruleHash",
-            "type": "string",
-            "value": "{{ruleHash}}"
-          }
-        ],
-        "assignTo": "validateTransition_result"
-      },
-      {
-        "kind": "call",
-        "function": "findTransition",
-        "args": [
-          {
-            "name": "actionIndex",
-            "type": "number",
-            "value": "{{actionIndex}}"
-          },
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{{ledger}}"
-          }
-        ],
-        "assignTo": "findTransition_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.applyWithTransition",
-        "args": [
-          {
-            "name": "functionName",
-            "type": "string",
-            "value": "{{functionName}}"
-          },
-          {
-            "name": "actionIndex",
-            "type": "number",
-            "value": "{{actionIndex}}"
-          }
-        ],
-        "assignTo": "StateMachineValidator.applyWithTransition_result"
-      },
-      {
-        "kind": "call",
-        "function": "median",
-        "args": [
-          {
-            "name": "nums",
-            "type": "number[]",
-            "value": "{{nums}}"
-          }
-        ],
-        "assignTo": "median_result"
-      },
-      {
-        "kind": "call",
-        "function": "randomInt",
-        "args": [
-          {
-            "name": "min",
-            "type": "number",
-            "value": "{{min}}"
-          },
-          {
-            "name": "max",
-            "type": "number",
-            "value": "{{max}}"
-          }
-        ],
-        "assignTo": "randomInt_result"
-      },
-      {
-        "kind": "call",
-        "function": "random",
-        "args": [],
-        "assignTo": "random_result"
-      },
-      {
-        "kind": "call",
-        "function": "scanAction",
-        "args": [],
-        "assignTo": "scanAction_result"
-      },
-      {
-        "kind": "call",
-        "function": "forEachDescendant",
-        "args": [],
-        "assignTo": "forEachDescendant_result"
-      },
-      {
-        "kind": "call",
-        "function": "handler",
-        "args": [],
-        "assignTo": "handler_result"
-      },
-      {
-        "kind": "call",
-        "function": "WorkMemory.setIntent",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          }
-        ],
-        "assignTo": "WorkMemory.setIntent_result"
-      },
-      {
-        "kind": "call",
-        "function": "WorkMemory.getIntent",
-        "args": [],
-        "assignTo": "WorkMemory.getIntent_result"
-      },
-      {
-        "kind": "call",
-        "function": "matchIntent",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          },
-          {
-            "name": "keywords",
-            "type": "string[]",
-            "value": "{{keywords}}"
-          }
-        ],
-        "assignTo": "matchIntent_result"
-      },
-      {
-        "kind": "call",
-        "function": "getReturnType",
-        "args": [
-          {
-            "name": "func",
-            "type": "FunctionDeclaration | ArrowFunction",
-            "value": "{{func}}"
-          }
-        ],
-        "assignTo": "getReturnType_result"
-      },
-      {
-        "kind": "call",
-        "function": "getReturnTypeDetail",
-        "args": [
-          {
-            "name": "func",
-            "type": "FunctionDeclaration | ArrowFunction",
-            "value": "{{func}}"
-          }
-        ],
-        "assignTo": "getReturnTypeDetail_result"
-      },
-      {
-        "kind": "call",
-        "function": "getReturnTypeNode",
-        "args": [],
-        "assignTo": "getReturnTypeNode_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatHealthLevel",
-        "args": [
-          {
-            "name": "score",
-            "type": "number",
-            "value": "{{score}}"
-          }
-        ],
-        "assignTo": "formatHealthLevel_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatHeatmap",
-        "args": [],
-        "assignTo": "formatHeatmap_result"
-      },
-      {
-        "kind": "call",
-        "function": "getTopFailurePatterns",
-        "args": [
-          {
-            "name": "limit",
-            "type": "number",
-            "value": "{{limit}}"
-          }
-        ],
-        "assignTo": "getTopFailurePatterns_result"
-      },
-      {
-        "kind": "call",
-        "function": "toPythonModule",
-        "args": [
-          {
-            "name": "filePath",
-            "type": "string",
-            "value": "{{filePath}}"
-          }
-        ],
-        "assignTo": "toPythonModule_result"
-      },
-      {
-        "kind": "call",
-        "function": "toProtocolEntries",
-        "args": [
-          {
-            "name": "rules",
-            "type": "MinedRule[]",
-            "value": "{{rules}}"
-          }
-        ],
-        "assignTo": "toProtocolEntries_result"
-      },
-      {
-        "kind": "call",
-        "function": "serializeTopology",
-        "args": [
-          {
-            "name": "topo",
-            "type": "SemanticTopology",
-            "value": "{{topo}}"
-          },
-          {
-            "name": "hash",
-            "type": "string",
-            "value": "{{hash}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "deserializeTopology",
-        "args": [],
-        "assignTo": "deserializeTopology_result"
-      },
-      {
-        "kind": "call",
-        "function": "getTopology",
-        "args": [
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "{{ir}}"
-          }
-        ],
-        "assignTo": "getTopology_result"
-      },
-      {
-        "kind": "call",
-        "function": "rebuildTopology",
-        "args": [
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "{{ir}}"
-          }
-        ],
-        "assignTo": "rebuildTopology_result"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780831199661",
-    "timestamp": "2026-06-07T11:19:59.661Z"
-  },
-  {
-    "intent": "select the best capability chain for an intent without calling LLM",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "selectCapabilityChains",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          },
-          {
-            "name": "ir",
-            "type": "FunctionInfo[]",
-            "value": "{{ir}}"
-          },
-          {
-            "name": "maxChains",
-            "type": "number",
-            "value": "{{maxChains}}"
-          },
-          {
-            "name": "llmSeeds",
-            "type": "string[]",
-            "value": "{{llmSeeds}}"
-          }
-        ],
-        "assignTo": "selectCapabilityChains_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatHealthLevel",
-        "args": [
-          {
-            "name": "score",
-            "type": "number",
-            "value": "{{score}}"
-          }
-        ],
-        "assignTo": "formatHealthLevel_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatHeatmap",
-        "args": [],
-        "assignTo": "formatHeatmap_result"
-      },
-      {
-        "kind": "call",
-        "function": "parseCapabilityFromJSDoc",
-        "args": [
-          {
-            "name": "node",
-            "type": "any",
-            "value": "{{node}}"
-          }
-        ],
-        "assignTo": "parseCapabilityFromJSDoc_result"
-      },
-      {
-        "kind": "call",
-        "function": "SemanticTopology.capabilityMatch",
-        "args": [
-          {
-            "name": "produce",
-            "type": "string",
-            "value": "{{produce}}"
-          },
-          {
-            "name": "require",
-            "type": "string",
-            "value": "{{require}}"
-          }
-        ],
-        "assignTo": "SemanticTopology.capabilityMatch_result"
-      },
-      {
-        "kind": "call",
-        "function": "buildCapabilityGraph",
-        "args": [
-          {
-            "name": "ir",
-            "type": "FunctionInfo[]",
-            "value": "{{ir}}"
-          }
-        ],
-        "assignTo": "buildCapabilityGraph_result"
-      },
-      {
-        "kind": "call",
-        "function": "capabilityMatch",
-        "args": [],
-        "assignTo": "capabilityMatch_result"
-      },
-      {
-        "kind": "call",
-        "function": "generateChainViz",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          },
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "{{ir}}"
-          },
-          {
-            "name": "maxChains",
-            "type": "number",
-            "value": "{{maxChains}}"
-          }
-        ],
-        "assignTo": "generateChainViz_result"
-      },
-      {
-        "kind": "call",
-        "function": "buildChainHints",
-        "args": [
-          {
-            "name": "funcs",
-            "type": "any[]",
-            "value": "{{funcs}}"
-          }
-        ],
-        "assignTo": "buildChainHints_result"
-      },
-      {
-        "kind": "call",
-        "function": "buildProtocolChainHint",
-        "args": [
-          {
-            "name": "protocols",
-            "type": "FunctionProtocol[]",
-            "value": "{{protocols}}"
-          }
-        ],
-        "assignTo": "buildProtocolChainHint_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatChainHint",
-        "args": [
-          {
-            "name": "chains",
-            "type": "CapabilityChain[]",
-            "value": "{{chains}}"
-          }
-        ],
-        "assignTo": "formatChainHint_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatAuditResult",
-        "args": [
-          {
-            "name": "result",
-            "type": "AuditResult",
-            "value": "{{result}}"
-          }
-        ],
-        "assignTo": "formatAuditResult_result"
-      },
-      {
-        "kind": "call",
-        "function": "forkBranch",
-        "args": [
-          {
-            "name": "branch",
-            "type": "Branch",
-            "value": "{{branch}}"
-          },
-          {
-            "name": "splitIndex",
-            "type": "number",
-            "value": "{{splitIndex}}"
-          },
-          {
-            "name": "reason",
-            "type": "BranchReason",
-            "value": "{{reason}}"
-          }
-        ],
-        "assignTo": "forkBranch_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatFailureStats",
-        "args": [],
-        "assignTo": "formatFailureStats_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatImmuneMetrics",
-        "args": [
-          {
-            "name": "m",
-            "type": "ImmuneMetrics",
-            "value": "{{m}}"
-          }
-        ],
-        "assignTo": "formatImmuneMetrics_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatTransitionCount",
-        "args": [
-          {
-            "name": "count",
-            "type": "number",
-            "value": "{{count}}"
-          }
-        ],
-        "assignTo": "formatTransitionCount_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatLine",
-        "args": [
-          {
-            "name": "level",
-            "type": "Level",
-            "value": "{{level}}"
-          },
-          {
-            "name": "module",
-            "type": "string",
-            "value": "{{module}}"
-          },
-          {
-            "name": "message",
-            "type": "string",
-            "value": "{{message}}"
-          },
-          {
-            "name": "data",
-            "type": "unknown",
-            "value": "{{data}}"
-          }
-        ],
-        "assignTo": "formatLine_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatConstraints",
-        "args": [
-          {
-            "name": "constraints",
-            "type": "PlannerConstraint[]",
-            "value": "{{constraints}}"
-          }
-        ],
-        "assignTo": "formatConstraints_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatActionSequence",
-        "args": [
-          {
-            "name": "actions",
-            "type": "{ kind: string; function?: string }[]",
-            "value": "{{actions}}"
-          }
-        ],
-        "assignTo": "formatActionSequence_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatSessionTimeline",
-        "args": [
-          {
-            "name": "session",
-            "type": "ExecutionSession",
-            "value": "{{session}}"
-          }
-        ],
-        "assignTo": "formatSessionTimeline_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatSessionSummary",
-        "args": [
-          {
-            "name": "sessions",
-            "type": "ReturnType<typeof getAllSessions>",
-            "value": "{{sessions}}"
-          }
-        ],
-        "assignTo": "formatSessionSummary_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatGenomeSummary",
-        "args": [],
-        "assignTo": "formatGenomeSummary_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatLearnedPatterns",
-        "args": [],
-        "assignTo": "formatLearnedPatterns_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatAntibodyStats",
-        "args": [],
-        "assignTo": "formatAntibodyStats_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatStateTransitionPathFromLedger",
-        "args": [
-          {
-            "name": "transitions",
-            "type": "StateTransition[]",
-            "value": "{{transitions}}"
-          }
-        ],
-        "assignTo": "formatStateTransitionPathFromLedger_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatStateTransitions",
-        "args": [
-          {
-            "name": "session",
-            "type": "ExecutionSession",
-            "value": "{{session}}"
-          }
-        ],
-        "assignTo": "formatStateTransitions_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatReplayHeader",
-        "args": [
-          {
-            "name": "session",
-            "type": "ExecutionSession",
-            "value": "{{session}}"
-          }
-        ],
-        "assignTo": "formatReplayHeader_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatActionList",
-        "args": [
-          {
-            "name": "actions",
-            "type": "{ kind: string; function?: string }[]",
-            "value": "{{actions}}"
-          }
-        ],
-        "assignTo": "formatActionList_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatAdaptationDiff",
-        "args": [
-          {
-            "name": "prev",
-            "type": "Attempt",
-            "value": "{{prev}}"
-          },
-          {
-            "name": "current",
-            "type": "Attempt",
-            "value": "{{current}}"
-          }
-        ],
-        "assignTo": "formatAdaptationDiff_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatAnomalyReport",
-        "args": [
-          {
-            "name": "a",
-            "type": "Attempt",
-            "value": "{{a}}"
-          }
-        ],
-        "assignTo": "formatAnomalyReport_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatImmuneResponse",
-        "args": [
-          {
-            "name": "a",
-            "type": "Attempt",
-            "value": "{{a}}"
-          }
-        ],
-        "assignTo": "formatImmuneResponse_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatReplayProgress",
-        "args": [
-          {
-            "name": "current",
-            "type": "number",
-            "value": "{{current}}"
-          },
-          {
-            "name": "total",
-            "type": "number",
-            "value": "{{total}}"
-          }
-        ],
-        "assignTo": "formatReplayProgress_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatLedgerReplayValidation",
-        "args": [
-          {
-            "name": "session",
-            "type": "ExecutionSession",
-            "value": "{{session}}"
-          }
-        ],
-        "assignTo": "formatLedgerReplayValidation_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatLedgerStats",
-        "args": [],
-        "assignTo": "formatLedgerStats_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatCrossSessionQuery",
-        "args": [
-          {
-            "name": "operation",
-            "type": "string",
-            "value": "{{operation}}"
-          },
-          {
-            "name": "state",
-            "type": "string",
-            "value": "{{state}}"
-          }
-        ],
-        "assignTo": "formatCrossSessionQuery_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatSnapshotList",
-        "args": [],
-        "assignTo": "formatSnapshotList_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatSnapshotDiff",
-        "args": [
-          {
-            "name": "snapIdA",
-            "type": "string",
-            "value": "{{snapIdA}}"
-          },
-          {
-            "name": "snapIdB",
-            "type": "string",
-            "value": "{{snapIdB}}"
-          }
-        ],
-        "assignTo": "formatSnapshotDiff_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatSessionValidation",
-        "args": [
-          {
-            "name": "session",
-            "type": "ExecutionSession",
-            "value": "{{session}}"
-          }
-        ],
-        "assignTo": "formatSessionValidation_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatSessionCounts",
-        "args": [
-          {
-            "name": "counts",
-            "type": "{ resolved: number; unresolved: number; total: number }",
-            "value": "{{counts}}"
-          }
-        ],
-        "assignTo": "formatSessionCounts_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatDuration",
-        "args": [
-          {
-            "name": "ms",
-            "type": "number",
-            "value": "{{ms}}"
-          }
-        ],
-        "assignTo": "formatDuration_result"
-      },
-      {
-        "kind": "call",
-        "function": "formatFileSize",
-        "args": [
-          {
-            "name": "bytes",
-            "type": "number",
-            "value": "{{bytes}}"
-          }
-        ],
-        "assignTo": "formatFileSize_result"
-      },
-      {
-        "kind": "call",
-        "function": "forEachDescendant",
-        "args": [],
-        "assignTo": "forEachDescendant_result"
-      },
-      {
-        "kind": "call",
-        "function": "scanDir",
-        "args": [
-          {
-            "name": "rootDir",
-            "type": "string",
-            "value": "{{rootDir}}"
-          },
-          {
-            "name": "currentDir",
-            "type": "string",
-            "value": "{{currentDir}}"
-          },
-          {
-            "name": "result",
-            "type": "AuditResult",
-            "value": "{{result}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "generateBranchId",
-        "args": [],
-        "assignTo": "generateBranchId_result"
-      },
-      {
-        "kind": "call",
-        "function": "createRootBranch",
-        "args": [
-          {
-            "name": "transitions",
-            "type": "StateTransition[]",
-            "value": "{{transitions}}"
-          }
-        ],
-        "assignTo": "createRootBranch_result"
-      },
-      {
-        "kind": "call",
-        "function": "createBranch",
-        "args": [
-          {
-            "name": "parent",
-            "type": "Branch",
-            "value": "{{parent}}"
-          },
-          {
-            "name": "reason",
-            "type": "BranchReason",
-            "value": "{{reason}}"
-          },
-          {
-            "name": "initialTransitions",
-            "type": "StateTransition[]",
-            "value": "{{initialTransitions}}"
-          }
-        ],
-        "assignTo": "createBranch_result"
-      },
-      {
-        "kind": "call",
-        "function": "mergeBranches",
-        "args": [
-          {
-            "name": "branches",
-            "type": "Branch[]",
-            "value": "{{branches}}"
-          }
-        ],
-        "assignTo": "mergeBranches_result"
-      },
-      {
-        "kind": "call",
-        "function": "flattenBranch",
-        "args": [
-          {
-            "name": "branch",
-            "type": "Branch",
-            "value": "{{branch}}"
-          },
-          {
-            "name": "allBranches",
-            "type": "Map<string, Branch>",
-            "value": "{{allBranches}}"
-          }
-        ],
-        "assignTo": "flattenBranch_result"
-      },
-      {
-        "kind": "call",
-        "function": "getBranchPath",
-        "args": [
-          {
-            "name": "branch",
-            "type": "Branch",
-            "value": "{{branch}}"
-          },
-          {
-            "name": "allBranches",
-            "type": "Map<string, Branch>",
-            "value": "{{allBranches}}"
-          }
-        ],
-        "assignTo": "getBranchPath_result"
-      },
-      {
-        "kind": "call",
-        "function": "replayBranch",
-        "args": [
-          {
-            "name": "branch",
-            "type": "Branch",
-            "value": "{{branch}}"
-          },
-          {
-            "name": "allBranches",
-            "type": "Map<string, Branch>",
-            "value": "{{allBranches}}"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "{{namespaceInitialStates}}"
-          }
-        ],
-        "assignTo": "replayBranch_result"
-      },
-      {
-        "kind": "call",
-        "function": "buildBranchMap",
-        "args": [
-          {
-            "name": "branches",
-            "type": "Branch[]",
-            "value": "{{branches}}"
-          }
-        ],
-        "assignTo": "buildBranchMap_result"
-      },
-      {
-        "kind": "call",
-        "function": "findRootBranch",
-        "args": [
-          {
-            "name": "branches",
-            "type": "Branch[]",
-            "value": "{{branches}}"
-          }
-        ],
-        "assignTo": "findRootBranch_result"
-      },
-      {
-        "kind": "call",
-        "function": "findChildBranches",
-        "args": [
-          {
-            "name": "parent",
-            "type": "Branch",
-            "value": "{{parent}}"
-          },
-          {
-            "name": "allBranches",
-            "type": "Map<string, Branch>",
-            "value": "{{allBranches}}"
-          }
-        ],
-        "assignTo": "findChildBranches_result"
-      },
-      {
-        "kind": "call",
-        "function": "describeBranchTree",
-        "args": [
-          {
-            "name": "root",
-            "type": "Branch",
-            "value": "{{root}}"
-          },
-          {
-            "name": "allBranches",
-            "type": "Map<string, Branch>",
-            "value": "{{allBranches}}"
-          },
-          {
-            "name": "indent",
-            "type": "any",
-            "value": "{{indent}}"
-          }
-        ],
-        "assignTo": "describeBranchTree_result"
-      },
-      {
-        "kind": "call",
-        "function": "evaluateBranches",
-        "args": [
-          {
-            "name": "branches",
-            "type": "Branch[]",
-            "value": "{{branches}}"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "{{namespaceInitialStates}}"
-          }
-        ],
-        "assignTo": "evaluateBranches_result"
-      },
-      {
-        "kind": "call",
-        "function": "wrapAsBranch",
-        "args": [
-          {
-            "name": "transitions",
-            "type": "StateTransition[]",
-            "value": "{{transitions}}"
-          }
-        ],
-        "assignTo": "wrapAsBranch_result"
-      },
-      {
-        "kind": "call",
-        "function": "unwrapBranchTree",
-        "args": [
-          {
-            "name": "branches",
-            "type": "Branch[]",
-            "value": "{{branches}}"
-          }
-        ],
-        "assignTo": "unwrapBranchTree_result"
-      },
-      {
-        "kind": "call",
-        "function": "humanize",
-        "args": [
-          {
-            "name": "name",
-            "type": "string",
-            "value": "{{name}}"
-          }
-        ],
-        "assignTo": "humanize_result"
-      },
-      {
-        "kind": "call",
-        "function": "parseProtocolAnnotation",
-        "args": [
-          {
-            "name": "source",
-            "type": "string",
-            "value": "{{source}}"
-          }
-        ],
-        "assignTo": "parseProtocolAnnotation_result"
-      },
-      {
-        "kind": "call",
-        "function": "classifyPlanError",
-        "args": [
-          {
-            "name": "error",
-            "type": "string",
-            "value": "{{error}}"
-          }
-        ],
-        "assignTo": "classifyPlanError_result"
-      },
-      {
-        "kind": "call",
-        "function": "queryAntibodies",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          },
-          {
-            "name": "minACL",
-            "type": "AntibodyLevel",
-            "value": "{{minACL}}"
-          }
-        ],
-        "assignTo": "queryAntibodies_result"
-      },
-      {
-        "kind": "call",
-        "function": "getSemanticHeatmap",
-        "args": [],
-        "assignTo": "getSemanticHeatmap_result"
-      },
-      {
-        "kind": "call",
-        "function": "getAntibodyStats",
-        "args": [],
-        "assignTo": "getAntibodyStats_result"
-      },
-      {
-        "kind": "call",
-        "function": "generateCandidateRules",
-        "args": [],
-        "assignTo": "generateCandidateRules_result"
-      },
-      {
-        "kind": "call",
-        "function": "getInstanceId",
-        "args": [],
-        "assignTo": "getInstanceId_result"
-      },
-      {
-        "kind": "call",
-        "function": "countTotalTransitions",
-        "args": [
-          {
-            "name": "sessions",
-            "type": "any[]",
-            "value": "{{sessions}}"
-          }
-        ],
-        "assignTo": "countTotalTransitions_result"
-      },
-      {
-        "kind": "call",
-        "function": "loadSemantic",
-        "args": [],
-        "assignTo": "loadSemantic_result"
-      },
-      {
-        "kind": "call",
-        "function": "saveSemantic",
-        "args": [
-          {
-            "name": "templates",
-            "type": "SemanticTemplate[]",
-            "value": "{{templates}}"
-          }
-        ],
-        "assignTo": "saveSemantic_result"
-      },
-      {
-        "kind": "call",
-        "function": "consolidateSemantic",
-        "args": [
-          {
-            "name": "minOccurrences",
-            "type": "number",
-            "value": "{{minOccurrences}}"
-          }
-        ],
-        "assignTo": "consolidateSemantic_result"
-      },
-      {
-        "kind": "call",
-        "function": "findSemanticTemplate",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          }
-        ],
-        "assignTo": "findSemanticTemplate_result"
-      },
-      {
-        "kind": "call",
-        "function": "handleAPI",
-        "args": [
-          {
-            "name": "req",
-            "type": "http.IncomingMessage",
-            "value": "{{req}}"
-          },
-          {
-            "name": "res",
-            "type": "http.ServerResponse",
-            "value": "{{res}}"
-          }
-        ],
-        "assignTo": "handleAPI_result"
-      },
-      {
-        "kind": "call",
-        "function": "getSessionTransitions",
-        "args": [
-          {
-            "name": "session",
-            "type": "any",
-            "value": "{{session}}"
-          }
-        ],
-        "assignTo": "getSessionTransitions_result"
-      },
-      {
-        "kind": "call",
-        "function": "handleLedgerAPI",
-        "args": [
-          {
-            "name": "res",
-            "type": "http.ServerResponse",
-            "value": "{{res}}"
-          },
-          {
-            "name": "url",
-            "type": "URL",
-            "value": "{{url}}"
-          }
-        ],
-        "assignTo": "handleLedgerAPI_result"
-      },
-      {
-        "kind": "call",
-        "function": "handleConsistencyAPI",
-        "args": [
-          {
-            "name": "res",
-            "type": "http.ServerResponse",
-            "value": "{{res}}"
-          },
-          {
-            "name": "url",
-            "type": "URL",
-            "value": "{{url}}"
-          }
-        ],
-        "assignTo": "handleConsistencyAPI_result"
-      },
-      {
-        "kind": "call",
-        "function": "handleDiffAPI",
-        "args": [
-          {
-            "name": "res",
-            "type": "http.ServerResponse",
-            "value": "{{res}}"
-          },
-          {
-            "name": "url",
-            "type": "URL",
-            "value": "{{url}}"
-          }
-        ],
-        "assignTo": "handleDiffAPI_result"
-      },
-      {
-        "kind": "call",
-        "function": "handleReplayAPI",
-        "args": [
-          {
-            "name": "res",
-            "type": "http.ServerResponse",
-            "value": "{{res}}"
-          },
-          {
-            "name": "url",
-            "type": "URL",
-            "value": "{{url}}"
-          }
-        ],
-        "assignTo": "handleReplayAPI_result"
-      },
-      {
-        "kind": "call",
-        "function": "semanticMatch",
-        "args": [
-          {
-            "name": "a",
-            "type": "string",
-            "value": "{{a}}"
-          },
-          {
-            "name": "b",
-            "type": "string",
-            "value": "{{b}}"
-          }
-        ],
-        "assignTo": "semanticMatch_result"
-      },
-      {
-        "kind": "call",
-        "function": "validateProtocolWithTransitions",
-        "args": [
-          {
-            "name": "actions",
-            "type": "Action[]",
-            "value": "{{actions}}"
-          },
-          {
-            "name": "protocols",
-            "type": "FunctionProtocol[]",
-            "value": "{{protocols}}"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "{{namespaceInitialStates}}"
-          }
-        ],
-        "assignTo": "validateProtocolWithTransitions_result"
-      },
-      {
-        "kind": "call",
-        "function": "plan",
-        "args": [
-          {
-            "name": "userIntent",
-            "type": "string",
-            "value": "{{userIntent}}"
-          }
-        ],
-        "assignTo": "plan_result"
-      },
-      {
-        "kind": "call",
-        "function": "generateFallbackPlan",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          },
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "{{ir}}"
-          }
-        ],
-        "assignTo": "generateFallbackPlan_result"
-      },
-      {
-        "kind": "call",
-        "function": "suggestInvariantRepair",
-        "args": [
-          {
-            "name": "violation",
-            "type": "LedgerConsistencyViolation",
-            "value": "{{violation}}"
-          },
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{{ledger}}"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "{{namespaceInitialStates}}"
-          }
-        ],
-        "assignTo": "suggestInvariantRepair_result"
-      },
-      {
-        "kind": "call",
-        "function": "applyProposalAsBranch",
-        "args": [
-          {
-            "name": "proposal",
-            "type": "RepairProposal",
-            "value": "{{proposal}}"
-          },
-          {
-            "name": "parentBranch",
-            "type": "Branch",
-            "value": "{{parentBranch}}"
-          },
-          {
-            "name": "currentLedger",
-            "type": "StateTransition[]",
-            "value": "{{currentLedger}}"
-          },
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "{{ir}}"
-          }
-        ],
-        "assignTo": "applyProposalAsBranch_result"
-      },
-      {
-        "kind": "call",
-        "function": "assertTransitionOrder",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{{ledger}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "assertLedgerInvariants",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{{ledger}}"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "{{namespaceInitialStates}}"
-          },
-          {
-            "name": "expectedRuleHash",
-            "type": "string",
-            "value": "{{expectedRuleHash}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "generatePlannerSeed",
-        "args": [
-          {
-            "name": "prompt",
-            "type": "string",
-            "value": "{{prompt}}"
-          },
-          {
-            "name": "model",
-            "type": "string",
-            "value": "{{model}}"
-          }
-        ],
-        "assignTo": "generatePlannerSeed_result"
-      },
-      {
-        "kind": "call",
-        "function": "runAndCheck",
-        "args": [
-          {
-            "name": "code",
-            "type": "string",
-            "value": "{{code}}"
-          }
-        ],
-        "assignTo": "runAndCheck_result"
-      },
-      {
-        "kind": "call",
-        "function": "searchPlan",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          },
-          {
-            "name": "beamWidth",
-            "type": "any",
-            "value": "{{beamWidth}}"
-          },
-          {
-            "name": "maxDepth",
-            "type": "any",
-            "value": "{{maxDepth}}"
-          }
-        ],
-        "assignTo": "searchPlan_result"
-      },
-      {
-        "kind": "call",
-        "function": "runSemanticTest",
-        "args": [],
-        "assignTo": "runSemanticTest_result"
-      },
-      {
-        "kind": "call",
-        "function": "SemanticTopology.build",
-        "args": [
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "{{ir}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "SemanticTopology.addEdge",
-        "args": [
-          {
-            "name": "a",
-            "type": "string",
-            "value": "{{a}}"
-          },
-          {
-            "name": "b",
-            "type": "string",
-            "value": "{{b}}"
-          },
-          {
-            "name": "weight",
-            "type": "number",
-            "value": "{{weight}}"
-          },
-          {
-            "name": "reason",
-            "type": "string",
-            "value": "{{reason}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "SemanticTopology.similarity",
-        "args": [
-          {
-            "name": "funcA",
-            "type": "string",
-            "value": "{{funcA}}"
-          },
-          {
-            "name": "funcB",
-            "type": "string",
-            "value": "{{funcB}}"
-          }
-        ],
-        "assignTo": "SemanticTopology.similarity_result"
-      },
-      {
-        "kind": "call",
-        "function": "SemanticTopology.findSimilar",
-        "args": [
-          {
-            "name": "funcName",
-            "type": "string",
-            "value": "{{funcName}}"
-          },
-          {
-            "name": "topN",
-            "type": "number",
-            "value": "{{topN}}"
-          }
-        ],
-        "assignTo": "SemanticTopology.findSimilar_result"
-      },
-      {
-        "kind": "call",
-        "function": "checkSemantic",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          },
-          {
-            "name": "actions",
-            "type": "Action[]",
-            "value": "{{actions}}"
-          }
-        ],
-        "assignTo": "checkSemantic_result"
-      },
-      {
-        "kind": "call",
-        "function": "applyTransitionDelta",
-        "args": [
-          {
-            "name": "stateMap",
-            "type": "Map<string, Set<string>>",
-            "value": "{{stateMap}}"
-          },
-          {
-            "name": "transition",
-            "type": "StateTransition",
-            "value": "{{transition}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "validateTransition",
-        "args": [
-          {
-            "name": "ctx",
-            "type": "ValidationContext",
-            "value": "{{ctx}}"
-          },
-          {
-            "name": "candidateFunctionName",
-            "type": "string",
-            "value": "{{candidateFunctionName}}"
-          },
-          {
-            "name": "actionIndex",
-            "type": "number",
-            "value": "{{actionIndex}}"
-          },
-          {
-            "name": "rules",
-            "type": "Map<string, StateAnnotation>",
-            "value": "{{rules}}"
-          },
-          {
-            "name": "namespaceInitialStates",
-            "type": "Map<string, string>",
-            "value": "{{namespaceInitialStates}}"
-          },
-          {
-            "name": "ruleHash",
-            "type": "string",
-            "value": "{{ruleHash}}"
-          }
-        ],
-        "assignTo": "validateTransition_result"
-      },
-      {
-        "kind": "call",
-        "function": "findTransition",
-        "args": [
-          {
-            "name": "actionIndex",
-            "type": "number",
-            "value": "{{actionIndex}}"
-          },
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{{ledger}}"
-          }
-        ],
-        "assignTo": "findTransition_result"
-      },
-      {
-        "kind": "call",
-        "function": "StateMachineValidator.applyWithTransition",
-        "args": [
-          {
-            "name": "functionName",
-            "type": "string",
-            "value": "{{functionName}}"
-          },
-          {
-            "name": "actionIndex",
-            "type": "number",
-            "value": "{{actionIndex}}"
-          }
-        ],
-        "assignTo": "StateMachineValidator.applyWithTransition_result"
-      },
-      {
-        "kind": "call",
-        "function": "median",
-        "args": [
-          {
-            "name": "nums",
-            "type": "number[]",
-            "value": "{{nums}}"
-          }
-        ],
-        "assignTo": "median_result"
-      },
-      {
-        "kind": "call",
-        "function": "randomInt",
-        "args": [
-          {
-            "name": "min",
-            "type": "number",
-            "value": "{{min}}"
-          },
-          {
-            "name": "max",
-            "type": "number",
-            "value": "{{max}}"
-          }
-        ],
-        "assignTo": "randomInt_result"
-      },
-      {
-        "kind": "call",
-        "function": "random",
-        "args": [],
-        "assignTo": "random_result"
-      },
-      {
-        "kind": "call",
-        "function": "scanAction",
-        "args": [],
-        "assignTo": "scanAction_result"
-      },
-      {
-        "kind": "call",
-        "function": "handler",
-        "args": [],
-        "assignTo": "handler_result"
-      },
-      {
-        "kind": "call",
-        "function": "WorkMemory.setIntent",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          }
-        ],
-        "assignTo": "WorkMemory.setIntent_result"
-      },
-      {
-        "kind": "call",
-        "function": "WorkMemory.getIntent",
-        "args": [],
-        "assignTo": "WorkMemory.getIntent_result"
-      },
-      {
-        "kind": "call",
-        "function": "matchIntent",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          },
-          {
-            "name": "keywords",
-            "type": "string[]",
-            "value": "{{keywords}}"
-          }
-        ],
-        "assignTo": "matchIntent_result"
-      },
-      {
-        "kind": "call",
-        "function": "registerAllMissingFingerprints",
-        "args": [],
-        "assignTo": "registerAllMissingFingerprints_result"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780831192792",
-    "timestamp": "2026-06-07T11:19:52.792Z"
-  },
-  {
-    "intent": "find a semantic template matching a given intent using keyword overlap search",
-    "actions": [
-      {
-        "kind": "call",
-        "function": "findRootBranch",
-        "args": [
-          {
-            "name": "branches",
-            "type": "Branch[]",
-            "value": "{{branches}}"
-          }
-        ],
-        "assignTo": "findRootBranch_result"
-      },
-      {
-        "kind": "call",
-        "function": "findChildBranches",
-        "args": [
-          {
-            "name": "parent",
-            "type": "Branch",
-            "value": "{{parent}}"
-          },
-          {
-            "name": "allBranches",
-            "type": "Map<string, Branch>",
-            "value": "{{allBranches}}"
-          }
-        ],
-        "assignTo": "findChildBranches_result"
-      },
-      {
-        "kind": "call",
-        "function": "findSuccessfulLeaf",
-        "args": [
-          {
-            "name": "branch",
-            "type": "Branch",
-            "value": "{{branch}}"
-          },
-          {
-            "name": "allBranches",
-            "type": "Map<string, Branch>",
-            "value": "{{allBranches}}"
-          }
-        ],
-        "assignTo": "findSuccessfulLeaf_result"
-      },
-      {
-        "kind": "call",
-        "function": "findSemanticTemplate",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          }
-        ],
-        "assignTo": "findSemanticTemplate_result"
-      },
-      {
-        "kind": "call",
-        "function": "findCompatibleVar",
-        "args": [
-          {
-            "name": "declaredVars",
-            "type": "Map<string, string>",
-            "value": "{{declaredVars}}"
-          },
-          {
-            "name": "neededType",
-            "type": "string",
-            "value": "{{neededType}}"
-          }
-        ],
-        "assignTo": "findCompatibleVar_result"
-      },
-      {
-        "kind": "call",
-        "function": "findSnapshotBySession",
-        "args": [
-          {
-            "name": "sessionId",
-            "type": "string",
-            "value": "{{sessionId}}"
-          }
-        ],
-        "assignTo": "findSnapshotBySession_result"
-      },
-      {
-        "kind": "call",
-        "function": "SemanticTopology.findSimilar",
-        "args": [
-          {
-            "name": "funcName",
-            "type": "string",
-            "value": "{{funcName}}"
-          },
-          {
-            "name": "topN",
-            "type": "number",
-            "value": "{{topN}}"
-          }
-        ],
-        "assignTo": "SemanticTopology.findSimilar_result"
-      },
-      {
-        "kind": "call",
-        "function": "findFixPathStatic",
-        "args": [
-          {
-            "name": "rules",
-            "type": "Map<string, StateAnnotation>",
-            "value": "{{rules}}"
-          },
-          {
-            "name": "namespace",
-            "type": "string",
-            "value": "{{namespace}}"
-          },
-          {
-            "name": "current",
-            "type": "string[]",
-            "value": "{{current}}"
-          },
-          {
-            "name": "targetPreStates",
-            "type": "string[]",
-            "value": "{{targetPreStates}}"
-          }
-        ],
-        "assignTo": "findFixPathStatic_result"
-      },
-      {
-        "kind": "call",
-        "function": "findProducer",
-        "args": [
-          {
-            "name": "state",
-            "type": "string",
-            "value": "{{state}}"
-          },
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{{ledger}}"
-          }
-        ],
-        "assignTo": "findProducer_result"
-      },
-      {
-        "kind": "call",
-        "function": "findConsumer",
-        "args": [
-          {
-            "name": "state",
-            "type": "string",
-            "value": "{{state}}"
-          },
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{{ledger}}"
-          }
-        ],
-        "assignTo": "findConsumer_result"
-      },
-      {
-        "kind": "call",
-        "function": "findViolations",
-        "args": [
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{{ledger}}"
-          }
-        ],
-        "assignTo": "findViolations_result"
-      },
-      {
-        "kind": "call",
-        "function": "findTransition",
-        "args": [
-          {
-            "name": "actionIndex",
-            "type": "number",
-            "value": "{{actionIndex}}"
-          },
-          {
-            "name": "ledger",
-            "type": "StateTransition[]",
-            "value": "{{ledger}}"
-          }
-        ],
-        "assignTo": "findTransition_result"
-      },
-      {
-        "kind": "call",
-        "function": "findRelated",
-        "args": [
-          {
-            "name": "graph",
-            "type": "Map<string, CapabilityNode>",
-            "value": "{{graph}}"
-          },
-          {
-            "name": "capability",
-            "type": "string",
-            "value": "{{capability}}"
-          },
-          {
-            "name": "allNodes",
-            "type": "CapabilityNode[]",
-            "value": "{{allNodes}}"
-          },
-          {
-            "name": "field",
-            "type": "\"produces\" | \"requires\"",
-            "value": "{{field}}"
-          },
-          {
-            "name": "isProducer",
-            "type": "boolean",
-            "value": "{{isProducer}}"
-          }
-        ],
-        "assignTo": "findRelated_result"
-      },
-      {
-        "kind": "call",
-        "function": "findProducers",
-        "args": [
-          {
-            "name": "graph",
-            "type": "Map<string, CapabilityNode>",
-            "value": "{{graph}}"
-          },
-          {
-            "name": "capability",
-            "type": "string",
-            "value": "{{capability}}"
-          },
-          {
-            "name": "allNodes",
-            "type": "CapabilityNode[]",
-            "value": "{{allNodes}}"
-          }
-        ],
-        "assignTo": "findProducers_result"
-      },
-      {
-        "kind": "call",
-        "function": "findConsumers",
-        "args": [
-          {
-            "name": "graph",
-            "type": "Map<string, CapabilityNode>",
-            "value": "{{graph}}"
-          },
-          {
-            "name": "capability",
-            "type": "string",
-            "value": "{{capability}}"
-          },
-          {
-            "name": "allNodes",
-            "type": "CapabilityNode[]",
-            "value": "{{allNodes}}"
-          }
-        ],
-        "assignTo": "findConsumers_result"
-      },
-      {
-        "kind": "call",
-        "function": "findIndex",
-        "args": [],
-        "assignTo": "findIndex_result"
-      },
-      {
-        "kind": "call",
-        "function": "findSimilar",
-        "args": [],
-        "assignTo": "findSimilar_result"
-      },
-      {
-        "kind": "call",
-        "function": "getSemanticHeatmap",
-        "args": [],
-        "assignTo": "getSemanticHeatmap_result"
-      },
-      {
-        "kind": "call",
-        "function": "loadSemantic",
-        "args": [],
-        "assignTo": "loadSemantic_result"
-      },
-      {
-        "kind": "call",
-        "function": "saveSemantic",
-        "args": [
-          {
-            "name": "templates",
-            "type": "SemanticTemplate[]",
-            "value": "{{templates}}"
-          }
-        ],
-        "assignTo": "saveSemantic_result"
-      },
-      {
-        "kind": "call",
-        "function": "consolidateSemantic",
-        "args": [
-          {
-            "name": "minOccurrences",
-            "type": "number",
-            "value": "{{minOccurrences}}"
-          }
-        ],
-        "assignTo": "consolidateSemantic_result"
-      },
-      {
-        "kind": "call",
-        "function": "semanticMatch",
-        "args": [
-          {
-            "name": "a",
-            "type": "string",
-            "value": "{{a}}"
-          },
-          {
-            "name": "b",
-            "type": "string",
-            "value": "{{b}}"
-          }
-        ],
-        "assignTo": "semanticMatch_result"
-      },
-      {
-        "kind": "call",
-        "function": "runSemanticTest",
-        "args": [],
-        "assignTo": "runSemanticTest_result"
-      },
-      {
-        "kind": "call",
-        "function": "SemanticTopology.build",
-        "args": [
-          {
-            "name": "ir",
-            "type": "any[]",
-            "value": "{{ir}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "SemanticTopology.addEdge",
-        "args": [
-          {
-            "name": "a",
-            "type": "string",
-            "value": "{{a}}"
-          },
-          {
-            "name": "b",
-            "type": "string",
-            "value": "{{b}}"
-          },
-          {
-            "name": "weight",
-            "type": "number",
-            "value": "{{weight}}"
-          },
-          {
-            "name": "reason",
-            "type": "string",
-            "value": "{{reason}}"
-          }
-        ]
-      },
-      {
-        "kind": "call",
-        "function": "SemanticTopology.similarity",
-        "args": [
-          {
-            "name": "funcA",
-            "type": "string",
-            "value": "{{funcA}}"
-          },
-          {
-            "name": "funcB",
-            "type": "string",
-            "value": "{{funcB}}"
-          }
-        ],
-        "assignTo": "SemanticTopology.similarity_result"
-      },
-      {
-        "kind": "call",
-        "function": "SemanticTopology.capabilityMatch",
-        "args": [
-          {
-            "name": "produce",
-            "type": "string",
-            "value": "{{produce}}"
-          },
-          {
-            "name": "require",
-            "type": "string",
-            "value": "{{require}}"
-          }
-        ],
-        "assignTo": "SemanticTopology.capabilityMatch_result"
-      },
-      {
-        "kind": "call",
-        "function": "checkSemantic",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          },
-          {
-            "name": "actions",
-            "type": "Action[]",
-            "value": "{{actions}}"
-          }
-        ],
-        "assignTo": "checkSemantic_result"
-      },
-      {
-        "kind": "call",
-        "function": "WorkMemory.setIntent",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          }
-        ],
-        "assignTo": "WorkMemory.setIntent_result"
-      },
-      {
-        "kind": "call",
-        "function": "WorkMemory.getIntent",
-        "args": [],
-        "assignTo": "WorkMemory.getIntent_result"
-      },
-      {
-        "kind": "call",
-        "function": "matchIntent",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          },
-          {
-            "name": "keywords",
-            "type": "string[]",
-            "value": "{{keywords}}"
-          }
-        ],
-        "assignTo": "matchIntent_result"
-      },
-      {
-        "kind": "call",
-        "function": "extractKeywords",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          }
-        ],
-        "assignTo": "extractKeywords_result"
-      },
-      {
-        "kind": "call",
-        "function": "keywordKey",
-        "args": [],
-        "assignTo": "keywordKey_result"
-      },
-      {
-        "kind": "call",
-        "function": "searchPlan",
-        "args": [
-          {
-            "name": "intent",
-            "type": "string",
-            "value": "{{intent}}"
-          },
-          {
-            "name": "beamWidth",
-            "type": "any",
-            "value": "{{beamWidth}}"
-          },
-          {
-            "name": "maxDepth",
-            "type": "any",
-            "value": "{{maxDepth}}"
-          }
-        ],
-        "assignTo": "searchPlan_result"
-      }
-    ],
-    "success": true,
-    "id": "ep_1780831156478",
-    "timestamp": "2026-06-07T11:19:16.478Z"
   }
 ]

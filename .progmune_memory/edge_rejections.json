@@ -94,5 +94,14 @@
   "formatFailureStats→formatImmuneMetrics": 1,
   "formatImmuneMetrics→benchmarkPassRate": 1,
   "benchmarkReport→formatHealthLevel": 1,
-  "formatHealthLevel→formatTransitionCount": 1
+  "formatHealthLevel→formatTransitionCount": 3,
+  "runAndCheck→checkLedgerConsistency": 2,
+  "checkLedgerConsistency→checkSemantic": 2,
+  "findSnapshotBySession→getFailureGenome": 1,
+  "getFailureGenome→getFailuresBySVL": 1,
+  "getFailuresBySVL→findSnapshotBySession": 1,
+  "rejectionToJSON→formatHealthLevel": 2,
+  "toQueryString→camelToSnake": 1,
+  "camelToSnake→roundTo": 1,
+  "roundTo→toQueryString": 1
 }

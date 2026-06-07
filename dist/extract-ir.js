@@ -190,6 +190,11 @@ export function extractIRWithTypes(projectRoot) {
     const project = new Project({
         tsConfigFilePath: path.join(absRoot, "tsconfig.json"),
         skipAddingFilesFromTsConfig: false,
+        skipFileDependencyResolution: true, // compatible with NodeNext/ESM tsconfigs
+        compilerOptions: {
+            module: 1, // CommonJS — overrides project tsconfig for extraction
+            moduleResolution: 2, // Classic Node resolution
+        },
     });
     if (!fs.existsSync(path.join(absRoot, "tsconfig.json"))) {
         project.addSourceFilesAtPaths(path.join(absRoot, "**/*.ts"));
