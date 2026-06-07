@@ -473,12 +473,27 @@ export async function plan(userIntent: string, llmSeeds?: string[]): Promise<Pla
   // 提前加载协议（后续多处使用）
   const { protocols, namespaceInitialStates } = loadProtocols(ir);
 
-  // Adaptive cascade: LLM seeds → keyword seeds → Graph OFF
-  // llmSeeds provided → Graph ON (LLM+Graph mode)
-  // llmSeeds absent  → Graph ON (keyword mode, 0 extra cost)
-  // chains empty     → auto-fallback to OFF (no graph interference)
+  // ── Auto Router: repo-specific tasks → Graph ON, generic tasks → OFF ──
   const explicitMode = process.env.PROGMUNE_GRAPH_MODE;
-  const graphMode = explicitMode || "on"; // Graph always ON for validation
+  let graphMode = explicitMode || "off"; // default OFF
+
+  if (!explicitMode) {
+    // Extract repo-specific terms from IR
+    const repoNames = new Set<string>();
+    for (const f of ir) {
+      for (const word of f.name.replace(/([A-Z])/g, " $1").toLowerCase().split(/[\s_]+/))
+        if (word.length > 3) repoNames.add(word);
+      for (const tag of (f.tags || [])) repoNames.add(tag.toLowerCase());
+    }
+    const stopWords = new Set(["this","that","with","from","have","been","their","will","would","could","should","about","which","there"]);
+    for (const w of stopWords) repoNames.delete(w);
+
+    const intentWords = userIntent.toLowerCase().split(/[\s,，]+/).filter((w: string) => w.length > 2);
+    const repoHits = intentWords.filter((w: string) => repoNames.has(w)).length;
+    const density = intentWords.length > 0 ? repoHits / intentWords.length : 0;
+
+    if (density > 0.25) { graphMode = "on"; console.error("[AutoRouter] "+Math.round(density*100)+"% repo terms → Graph ON"); }
+  }
 
   // ── 抗体免疫系统：查询历史失败模式，注入知识回流 ──
   const antibodies = graphMode !== "off" ? queryAntibodies(userIntent, "ACL-3") : [];
