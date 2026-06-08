@@ -67,6 +67,8 @@ function extractCapabilities(intent: string): string[] {
  */
 function capabilityExists(cap: string, ir: FunctionInfo[]): { exists: boolean; matches: string[] } {
   const capLower = cap.toLowerCase().replace(/[\s_]+/g, "");
+  // Word boundary regex — prevents "oauth2" from matching "auth" via substring
+  const capWordBoundary = new RegExp('\\b' + capLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
   const matches: string[] = [];
 
   for (const f of ir) {
@@ -75,18 +77,22 @@ function capabilityExists(cap: string, ir: FunctionInfo[]): { exists: boolean; m
     const purposeLower = (f.purpose || "").toLowerCase();
     const tagsLower = (f.tags || []).map(t => t.toLowerCase());
 
-    // Direct name match (only for meaningful names, skip single-char helpers)
-    if (nameLower.length > 2 && (nameLower.includes(capLower) || capLower.includes(nameLower))) {
+    // Direct name match: whole-word boundary OR exact full-string match
+    if (nameLower.length > 2 && (capWordBoundary.test(nameLower) || nameLower === capLower)) {
       matches.push(f.name);
       continue;
     }
-    // Purpose match
-    if (purposeLower.length > 2 && purposeLower.includes(capLower)) {
+    // Purpose match: word boundary only
+    if (purposeLower.length > 2 && capWordBoundary.test(purposeLower)) {
       matches.push(f.name);
       continue;
     }
-    // Tag match
-    if (tagsLower.some(t => t.length > 2 && (capLower.includes(t) || t.includes(capLower)))) {
+    // Tag match: exact match OR whole-word boundary (NOT substring)
+    // e.g., tag "auth" should NOT match capability "oauth2"
+    // but tag "auth" SHOULD match capability "auth"
+    if (tagsLower.some(t => t.length > 2 && t === capLower)) {
+      matches.push(f.name);
+    } else if (tagsLower.some(t => t.length > 2 && capWordBoundary.test(t))) {
       matches.push(f.name);
     }
   }

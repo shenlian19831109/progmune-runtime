@@ -488,11 +488,16 @@ export async function plan(userIntent: string, llmSeeds?: string[]): Promise<Pla
     const stopWords = new Set(["this","that","with","from","have","been","their","will","would","could","should","about","which","there"]);
     for (const w of stopWords) repoNames.delete(w);
 
-    const intentWords = userIntent.toLowerCase().split(/[\s,，]+/).filter((w: string) => w.length > 2);
+    // Split intent words the same way as function names: split on whitespace + camelCase
+    const intentWords = userIntent.toLowerCase()
+      .replace(/([a-z])([A-Z])/g, "$1 $2")  // camelCase → "camel Case"
+      .split(/[\s,，]+/)
+      .filter((w: string) => w.length > 2);
     const repoHits = intentWords.filter((w: string) => repoNames.has(w)).length;
     const density = intentWords.length > 0 ? repoHits / intentWords.length : 0;
 
-    if (density > 0.25) { graphMode = "on"; console.error("[AutoRouter] "+Math.round(density*100)+"% repo terms → Graph ON"); }
+    // 0.20 threshold — lower bound for short intents (3-5 words) still triggers correctly
+    if (density > 0.20) { graphMode = "on"; console.error("[AutoRouter] "+Math.round(density*100)+"% repo terms → Graph ON"); }
   }
 
   // ── 抗体免疫系统：查询历史失败模式，注入知识回流 ──
