@@ -87,6 +87,31 @@ export interface TrajectoryRecord {
     intent?: string;
     sessionId?: string;
   };
+  /** P1: Goal Skeleton — the goal that produced this trajectory (optional). */
+  goal?: GoalRecord;
+}
+
+// ── P1: Goal Skeleton ──
+// Lightweight goal→trajectory pairing. Collected from natural language goals
+// via async LLM annotation. No graph structure — just raw (goal, outcome) pairs.
+// When enough data accumulates, Goal Graphs will be mined from this corpus.
+
+/** A recorded goal and its structured extraction. */
+export interface GoalRecord {
+  /** Original natural language goal text. */
+  text: string;
+  /** Extracted protocol namespace. */
+  protocol: string;
+  /** Extracted initial state. */
+  initial_state: string;
+  /** Extracted target state. */
+  target_state: string;
+  /** Extracted constraint labels. */
+  constraints: string[];
+  /** Extraction method. */
+  method: "llm_extracted" | "manual" | "inferred" | "failed";
+  /** LLM confidence (0-1) if llm_extracted. */
+  confidence: number;
 }
 
 /** Violation info embedded in trajectory records. */

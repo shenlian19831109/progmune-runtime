@@ -278,6 +278,77 @@ export function validateActionResult(actions: Action[]): Result<Action[], Valida
 }
 
 // ═══════════════════════════════════════════════════════════════
+// P1: Validation with Goal Skeleton annotation
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Validate actions with an associated goal. The goal is annotated asynchronously
+ * (best-effort, non-blocking) and attached to the trajectory record.
+ *
+ * This is the P1 entry point — use this when the user provides a natural language goal.
+ */
+export async function validateWithGoal(
+  actions: Action[],
+  goalText: string,
+  params?: {
+    protocol?: string;
+    targetState?: string[];
+  }
+): Promise<{
+  valid: boolean;
+  errors: string[];
+  violations: ConstraintViolation[];
+}> {
+  // Run validation first (never block on goal annotation)
+  const result = validateActionSequence(actions);
+
+  // Fire-and-forget: annotate the goal and write trajectory with goal attached
+  const { annotateGoal } = await import("./goal-annotator");
+  const actionNames = actions.map(a => (a as any).function || (a as any).kind || "?");
+  const ctx: ContextFeatures = {
+    nestingDepth: 0, exceptionHandled: false, insideLoop: false, branchCount: 0, asyncContext: false,
+  };
+
+  annotateGoal(goalText).then(goalRecord => {
+    const { recordTrajectory } = require("./failure-corpus");
+    if (result.valid) {
+      recordTrajectory({
+        protocol: goalRecord.protocol,
+        initialState: [goalRecord.initial_state],
+        finalState: [goalRecord.target_state],
+        trajectory: actionNames,
+        result: "success",
+        context: ctx,
+        source: "llm",
+        intent: goalText,
+        goal: goalRecord,
+      });
+    } else {
+      for (const v of result.violations) {
+        recordTrajectory({
+          protocol: goalRecord.protocol,
+          initialState: [goalRecord.initial_state],
+          finalState: [goalRecord.target_state],
+          trajectory: actionNames,
+          result: "violation",
+          violationType: svlToViolationType(v.svl, v.description),
+          violationDesc: v.description,
+          failingStepIndex: v.actionIndex,
+          fixPath: v.fixPath,
+          context: ctx,
+          intent: goalText,
+          goal: goalRecord,
+        });
+      }
+    }
+  }).catch(() => { /* annotation failure is silent */ });
+
+  // Enrich with repair alternatives
+  const enriched = await validateWithRepair(actions, params);
+  return enriched;
+}
+
+// ═══════════════════════════════════════════════════════════════
 // P2 V3: Validation with Counterfactual Repair
 // ═══════════════════════════════════════════════════════════════
 

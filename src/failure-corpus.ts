@@ -197,6 +197,7 @@ export function recordTrajectory(params: {
   source?: "human" | "llm" | "planner" | "antibody";
   intent?: string;
   sessionId?: string;
+  goal?: import("./runtime-types").GoalRecord;
 }): void {
   ensureDir(TRAJECTORY_DIR);
 
@@ -228,6 +229,7 @@ export function recordTrajectory(params: {
       intent: params.intent,
       sessionId: params.sessionId,
     },
+    goal: params.goal,
   };
 
   writeTrajectoryFile(record);
