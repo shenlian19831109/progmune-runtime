@@ -141,6 +141,162 @@ export function recordFailure(
   });
 }
 
+// ═══════════════════════════════════════════════════════════════
+// P0: Schema v2 auto-collection
+// Called from validator on every constraint violation — non-blocking.
+// ═══════════════════════════════════════════════════════════════
+
+import type { FailureRecordV2, ViolationType, ContextFeatures } from "./runtime-types";
+import { mapLegacyFCode } from "./runtime-types";
+
+const V2_CORPUS_DIR = path.join(CORPUS_DIR, "failures");
+
+/** Write a Schema v2 failure record to the corpus (async-safe, non-blocking). */
+export function recordFailureV2(record: Omit<FailureRecordV2, "failureId" | "timestamp">): void {
+  ensureDir(V2_CORPUS_DIR);
+
+  const date = new Date().toISOString().slice(0, 10);
+  const dateDir = path.join(V2_CORPUS_DIR, date);
+  ensureDir(dateDir);
+
+  const seqFile = path.join(V2_CORPUS_DIR, ".seq");
+  let seq = 0;
+  try { seq = parseInt(fs.readFileSync(seqFile, "utf-8"), 10); } catch {}
+  seq++;
+  fs.writeFileSync(seqFile, String(seq));
+
+  const failureId = `F-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+  const full: FailureRecordV2 = {
+    ...record,
+    failureId,
+    timestamp: new Date().toISOString(),
+  };
+
+  // Non-blocking write using setImmediate
+  setImmediate(() => {
+    try {
+      fs.writeFileSync(path.join(dateDir, `${failureId}.json`), JSON.stringify(full, null, 2));
+    } catch { /* corpus write must never crash the validator */ }
+  });
+
+  console.error(`[CorpusV2] ${record.violationType} | protocol=${record.protocol} | ${failureId}`);
+}
+
+/**
+ * Convenience: build a V2 record from a ConstraintViolation + context.
+ * Call this from validateAction / validateActionSequence when violations are found.
+ */
+export function buildFailureFromViolation(params: {
+  violation: { svl: number; violatedConstraint: string; actionIndex: number; description: string };
+  protocol: string;
+  codeSnippet: string;
+  expectedStates: string[];
+  actualStates: string[];
+  contextFeatures: ContextFeatures;
+  actionSequence: string[];
+  intent?: string;
+  parentSessionId?: string;
+}): Omit<FailureRecordV2, "failureId" | "timestamp"> {
+  const violationType: ViolationType = (() => {
+    const d = params.violation.description || "";
+    if (d.includes("protocol") || d.includes("state")) return "protocol_violation";
+    if (d.includes("symbol") || d.includes("undefined")) return "undefined_variable";
+    if (d.includes("type")) return "wrong_arg_type";
+    if (d.includes("import") || d.includes("module")) return "wrong_import_path";
+    if (d.includes("arg") || d.includes("parameter")) return "wrong_arg_count";
+    return "other";
+  })();
+
+  return {
+    protocol: params.protocol,
+    codeSnippet: params.codeSnippet,
+    expectedStateSequence: params.expectedStates,
+    actualStateSequence: params.actualStates,
+    violationType,
+    failingStepIndex: params.violation.actionIndex,
+    contextFeatures: params.contextFeatures,
+    repairAttempts: [],
+    successRate: 0,
+    actionSequence: params.actionSequence,
+    intent: params.intent,
+    parentSessionId: params.parentSessionId,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// P0: Schema v2 query helpers
+// ═══════════════════════════════════════════════════════════════
+
+/** Load all Schema v2 failure records from the corpus. */
+export function loadFailuresV2(): FailureRecordV2[] {
+  const results: FailureRecordV2[] = [];
+  if (!fs.existsSync(V2_CORPUS_DIR)) return results;
+
+  const dateDirs = fs.readdirSync(V2_CORPUS_DIR, { withFileTypes: true });
+  for (const entry of dateDirs) {
+    if (!entry.isDirectory()) continue;
+    const files = fs.readdirSync(path.join(V2_CORPUS_DIR, entry.name));
+    for (const file of files) {
+      if (!file.endsWith(".json")) continue;
+      try {
+        const raw = fs.readFileSync(path.join(V2_CORPUS_DIR, entry.name, file), "utf-8");
+        results.push(JSON.parse(raw) as FailureRecordV2);
+      } catch { /* skip corrupted files */ }
+    }
+  }
+  return results.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+}
+
+/** Query failures by violation type. */
+export function queryByViolationType(type: ViolationType): FailureRecordV2[] {
+  return loadFailuresV2().filter(f => f.violationType === type);
+}
+
+/** Query failures by protocol namespace. */
+export function queryByProtocol(protocol: string): FailureRecordV2[] {
+  return loadFailuresV2().filter(f => f.protocol === protocol);
+}
+
+/** Get top N violation × context feature patterns by frequency. */
+export function getTopPatterns(limit: number = 10): { violationType: ViolationType; contextKey: string; count: number; avgSuccessRate: number }[] {
+  const all = loadFailuresV2();
+  const buckets: Record<string, { records: FailureRecordV2[] }> = {};
+
+  for (const f of all) {
+    const ctx = f.contextFeatures;
+    const key = `${f.violationType}|d${ctx.nestingDepth}|${ctx.exceptionHandled ? "try" : "no-try"}|${ctx.insideLoop ? "loop" : "no-loop"}`;
+    if (!buckets[key]) buckets[key] = { records: [] };
+    buckets[key].records.push(f);
+  }
+
+  return Object.entries(buckets)
+    .sort((a, b) => b[1].records.length - a[1].records.length)
+    .slice(0, limit)
+    .map(([key, bucket]) => {
+      const [vt, ...rest] = key.split("|");
+      const avg = bucket.records.reduce((s, f) => s + f.successRate, 0) / bucket.records.length;
+      return {
+        violationType: vt as ViolationType,
+        contextKey: rest.join(" "),
+        count: bucket.records.length,
+        avgSuccessRate: avg,
+      };
+    });
+}
+
+/** Get total v2 corpus size. */
+export function corpusV2Size(): number {
+  if (!fs.existsSync(V2_CORPUS_DIR)) return 0;
+  let count = 0;
+  const dateDirs = fs.readdirSync(V2_CORPUS_DIR, { withFileTypes: true });
+  for (const entry of dateDirs) {
+    if (entry.isDirectory()) {
+      count += fs.readdirSync(path.join(V2_CORPUS_DIR, entry.name)).filter(f => f.endsWith(".json")).length;
+    }
+  }
+  return count;
+}
+
 /** 记录一个完整的意图会话（支持 ExecutionSession 和旧 IntentSession） */
 /**
  * 保存执行会话（含所有尝试、违规、状态转移）。

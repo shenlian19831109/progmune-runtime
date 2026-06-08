@@ -9,8 +9,9 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import { getTopFailurePatterns, getFailureGenome } from "./failure-corpus";
+import { getTopFailurePatterns, getFailureGenome, loadFailuresV2, getTopPatterns } from "./failure-corpus";
 import type { FunctionProtocol } from "./ssg-validator";
+import type { ViolationType, ContextFeatures, FailureRecordV2 } from "./runtime-types";
 
 interface MinedRule {
   /** Function name the rule applies to */
@@ -176,6 +177,71 @@ export function applyMinedRules(apply: boolean = false): {
   }
 
   return { rules: mined, merged, skipped, dryRun: !apply };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// P0: Schema v2 Antibody Mining
+// ═══════════════════════════════════════════════════════════════
+
+interface AntibodyCandidateV2 {
+  id: string;
+  violationType: ViolationType;
+  protocol: string;
+  contextPattern: Partial<ContextFeatures>;
+  fixPath: string[];
+  promoteToStatic: boolean;
+  occurrenceCount: number;
+  avgSuccessRate: number;
+  firstSeen: string;
+  lastSeen: string;
+  minedAt: string;
+}
+
+/**
+ * Mine antibody candidates from Schema v2 failure records.
+ * Returns patterns that recurred >= minCount times.
+ */
+export function mineAntibodiesV2(minCount: number = 3): AntibodyCandidateV2[] {
+  const all = loadFailuresV2();
+  if (all.length === 0) return [];
+
+  const groups: Record<string, FailureRecordV2[]> = {};
+  for (const f of all) {
+    const key = `${f.violationType}|${f.protocol}`;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(f);
+  }
+
+  const candidates: AntibodyCandidateV2[] = [];
+
+  for (const [key, records] of Object.entries(groups)) {
+    if (records.length < minCount) continue;
+    const [violationType, protocol] = key.split("|");
+
+    const avgDepth = Math.round(records.reduce((s, f) => s + f.contextFeatures.nestingDepth, 0) / records.length);
+    const fixPaths = [...new Set(records.flatMap(f => f.ssgFixPath || []))];
+    const withRepairs = records.filter(f => f.repairAttempts.length > 0);
+    const avgSuccess = withRepairs.length > 0
+      ? withRepairs.reduce((s, f) => s + f.successRate, 0) / withRepairs.length
+      : 0;
+    const timestamps = records.map(f => f.timestamp).sort();
+
+    candidates.push({
+      id: `ab2_${violationType}_${protocol}_${Date.now()}`,
+      violationType: violationType as ViolationType,
+      protocol,
+      contextPattern: { nestingDepth: avgDepth },
+      fixPath: fixPaths.slice(0, 5),
+      promoteToStatic: ["resource_leak", "protocol_violation", "illegal_state_transition"].includes(violationType),
+      occurrenceCount: records.length,
+      avgSuccessRate: avgSuccess,
+      firstSeen: timestamps[0] || "N/A",
+      lastSeen: timestamps[timestamps.length - 1] || "N/A",
+      minedAt: new Date().toISOString(),
+    });
+  }
+
+  return candidates.sort((a, b) => b.occurrenceCount - a.occurrenceCount);
 }
 
 /** CLI entry point: print mined rules without applying. */

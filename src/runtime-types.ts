@@ -24,7 +24,112 @@ export type { RepairProposal, RepairStrategy, RepairSummary } from "./repair-pro
 // Phase 4: Deterministic Replay
 export { replaySession, replayLedger, replayWithDetail } from "./deterministic-replay";
 export type { ReplayResult, ReplayTransition } from "./deterministic-replay";
-export type { SVL } from "./failure-corpus";
+export { SVL as LegacySVL } from "./failure-corpus";
+
+// ── P0: Failure Schema v2 ──
+// Structured failure records for building a Code Behavior Dynamics Dataset.
+// Design goal: each validation failure auto-collects enough context for
+// counterfactual search and pattern mining — not just an error log.
+
+/** Root cause categories mapped from legacy F01-F10 codes. */
+export type ViolationType =
+  | "unexported_function"      // F01 — function in IR but not exported
+  | "wrong_import_path"        // F02 — import path doesn't resolve
+  | "type_name_error"          // F03 — type import has wrong name/module
+  | "wrong_arg_count"          // F04 — parameter count mismatch
+  | "wrong_arg_type"           // F05 — parameter type mismatch
+  | "undefined_variable"       // F06 — variable used but never declared
+  | "planning_failure"         // F07 — LLM output unparseable
+  | "return_type_error"        // F08 — wrong return type annotation
+  | "protocol_violation"       // F09 — SSG state machine blocked
+  | "resource_leak"            // protocol implied but state not closed
+  | "missing_prerequisite"     // required function not called before action
+  | "illegal_state_transition" // SSG transition not in allowed set
+  | "timeout"                  // operation exceeded time boundary
+  | "other";                   // F10 — uncategorized
+
+/** Structural context around the failure site. */
+export interface ContextFeatures {
+  /** How deeply nested is the failing call (0 = top-level). */
+  nestingDepth: number;
+  /** Is the failing call inside a try/catch block? */
+  exceptionHandled: boolean;
+  /** Is the failing call inside a loop? */
+  insideLoop: boolean;
+  /** Number of conditional branches in scope. */
+  branchCount: number;
+  /** Is there an async/await in the call chain? */
+  asyncContext: boolean;
+}
+
+/** A single repair attempt and its outcome. */
+export interface RepairAttempt {
+  /** The suggested fix (code snippet or function name). */
+  suggestedAction: string;
+  /** Source of the suggestion: antibody | graph | llm | manual. */
+  source: "antibody" | "graph" | "llm" | "manual";
+  /** Did the user accept this suggestion? */
+  accepted: boolean;
+  /** Did applying the fix resolve the violation? */
+  success: boolean;
+  /** How many ms the repair took to apply. */
+  latencyMs: number;
+  /** Timestamp of the repair attempt. */
+  timestamp: string;
+}
+
+/** Schema v2 failure record — the core unit of the Code Behavior Dynamics Dataset. */
+export interface FailureRecordV2 {
+  /** Unique failure ID, e.g. "F-1780379347057-0ubd". */
+  failureId: string;
+  /** ISO 8601 timestamp when the violation was detected. */
+  timestamp: string;
+  /** The protocol namespace that was violated, e.g. "FileProtocol". */
+  protocol: string;
+  /** The violating code snippet (extracted from AST, not full file). */
+  codeSnippet: string;
+  /** The sequence of protocol states that the code intended to follow. */
+  expectedStateSequence: string[];
+  /** The actual state trace observed by the SSG validator. */
+  actualStateSequence: string[];
+  /** Structured category of the violation. */
+  violationType: ViolationType;
+  /** Index into the action sequence where the failure was detected. */
+  failingStepIndex: number;
+  /** Structural context around the failure site. */
+  contextFeatures: ContextFeatures;
+  /** All repair attempts made for this failure (may be empty). */
+  repairAttempts: RepairAttempt[];
+  /** Historical success rate of the most-applied repair pattern for this failure type (0-1). */
+  successRate: number;
+  /** The action sequence that triggered the violation (sanitized). */
+  actionSequence: string[];
+  /** The SSG state snapshot at the point of violation. */
+  ssgStateAtViolation?: string[];
+  /** The SSG fix path: which functions to call to reach the target state. */
+  ssgFixPath?: string[];
+  /** Link to parent session for longitudinal tracking. */
+  parentSessionId?: string;
+  /** Intent that produced this failure. */
+  intent?: string;
+}
+
+/** Legacy F-code → ViolationType mapping. */
+export function mapLegacyFCode(fCode: string): ViolationType {
+  const map: Record<string, ViolationType> = {
+    F01: "unexported_function",
+    F02: "wrong_import_path",
+    F03: "type_name_error",
+    F04: "wrong_arg_count",
+    F05: "wrong_arg_type",
+    F06: "undefined_variable",
+    F07: "planning_failure",
+    F08: "return_type_error",
+    F09: "protocol_violation",
+    F10: "other",
+  };
+  return map[fCode] || "other";
+}
 
 // ── Result type — replaces { success: boolean; error?: string } ──
 

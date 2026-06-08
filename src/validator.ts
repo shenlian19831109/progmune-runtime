@@ -2,7 +2,8 @@ import type { Action, ConstraintViolation } from "./runtime-types";
 import type { FunctionInfo } from "./extract-ir";
 import { loadIR } from "./ir-utils";
 import { ok, err } from "./runtime-types";
-import type { Result, ValidationError } from "./runtime-types";
+import type { Result, ValidationError, ContextFeatures } from "./runtime-types";
+import { recordFailureV2 } from "./failure-corpus";
 
 const BUILTIN_WHITELIST = new Set([
   "console.log", "setTimeout", "setInterval", "clearTimeout",
@@ -198,7 +199,51 @@ export function validateActionSequence(actions: Action[]): { valid: boolean; err
       }
     }
   }
+
+  // ── P0: Auto-collect failures to Schema v2 corpus ──
+  for (const v of violations) {
+    const codeSnippet = actions[v.actionIndex]
+      ? JSON.stringify(actions[v.actionIndex]).slice(0, 200)
+      : "(unknown)";
+    const ctx: ContextFeatures = {
+      nestingDepth: 0,
+      exceptionHandled: false,
+      insideLoop: false,
+      branchCount: 0,
+      asyncContext: false,
+    };
+    const actionNames = actions.map(a => (a as any).function || (a as any).kind || "?");
+
+    try {
+      recordFailureV2({
+        protocol: v.namespace || "default",
+        codeSnippet,
+        expectedStateSequence: v.requiredStates || [],
+        actualStateSequence: v.currentStates || [],
+        violationType: svlToViolationType(v.svl, v.description),
+        failingStepIndex: v.actionIndex,
+        contextFeatures: ctx,
+        repairAttempts: [],
+        successRate: 0,
+        actionSequence: actionNames,
+        ssgStateAtViolation: v.currentStates,
+        ssgFixPath: v.fixPath,
+        intent: v.description,
+      });
+    } catch { /* auto-collection must never crash validation */ }
+  }
+
   return { valid: errors.length === 0, errors, violations };
+}
+
+/** Map SVL level to ViolationType for auto-collection. */
+function svlToViolationType(svl: number, desc: string): import("./runtime-types").ViolationType {
+  if (svl === 4) return "protocol_violation";
+  if (svl === 1) return "undefined_variable";
+  if (desc.includes("type")) return "wrong_arg_type";
+  if (desc.includes("import") || desc.includes("module")) return "wrong_import_path";
+  if (desc.includes("arg") || desc.includes("parameter")) return "wrong_arg_count";
+  return "other";
 }
 
 /**

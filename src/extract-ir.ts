@@ -191,6 +191,164 @@ function deriveOutputs(returnType: string): string[] {
   return (t === "void" || t === "any") ? [] : [t];
 }
 
+// ═══════════════════════════════════════════════════════════════
+// P0: Original tsconfig reader + manual module resolution
+// Handles bundler path aliases, NodeNext .js→.ts, extends chain
+// ═══════════════════════════════════════════════════════════════
+
+interface OriginalTsConfig {
+  paths?: Record<string, string[]>;
+  baseUrl?: string;
+  moduleResolution?: string;
+}
+
+/** Read tsconfig.json resolving the extends chain via TypeScript's config parser. */
+function readOriginalTsConfig(tsconfigPath: string): OriginalTsConfig | null {
+  try {
+    const raw = ts.readConfigFile(tsconfigPath, ts.sys.readFile);
+    if (raw.error) return null;
+    const parsed = ts.parseJsonConfigFileContent(
+      raw.config,
+      ts.sys,
+      path.dirname(tsconfigPath)
+    );
+    if (parsed.errors?.length > 0) {
+      // Non-fatal — config may still be usable
+    }
+    const co = parsed.options;
+    // Convert numeric ModuleResolutionKind to string
+    let modRes: string | undefined;
+    if (co.moduleResolution !== undefined && typeof co.moduleResolution === 'number') {
+      modRes = ts.ModuleResolutionKind[co.moduleResolution];
+    }
+    return {
+      paths: (co.paths && Object.keys(co.paths).length > 0) ? co.paths as Record<string, string[]> : undefined,
+      baseUrl: co.baseUrl,
+      moduleResolution: modRes?.toLowerCase(),
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Manual module resolution for bundler/NodeNext projects.
+ * Falls back after ts-morph's built-in resolution fails.
+ */
+function manualResolveModule(
+  moduleSpecifier: string,
+  sourceFilePath: string,
+  projectRoot: string,
+  originalConfig: OriginalTsConfig | null
+): string | null {
+  if (!moduleSpecifier || !moduleSpecifier.startsWith('.') && !moduleSpecifier.startsWith('@')) {
+    return null; // Not a relative or aliased import — skip
+  }
+
+  // ── 1. Path alias resolution (bundler) ──
+  if (originalConfig?.paths) {
+    const baseUrlPath = originalConfig.baseUrl
+      ? path.resolve(projectRoot, originalConfig.baseUrl)
+      : projectRoot;
+
+    for (const [aliasPattern, targets] of Object.entries(originalConfig.paths)) {
+      // Convert TypeScript glob pattern to regex: "@/*" → /^@\/(.*)$/
+      // Handle both glob ("@/*") and bare ("libnpmconfig") aliases
+      const hasWildcard = aliasPattern.includes('*');
+      let wildcard = '';
+      let matched = false;
+
+      if (hasWildcard) {
+        const aliasRegexSrc = '^' + aliasPattern.replace(/\*/g, '(.*)') + '$';
+        const aliasRegex = new RegExp(aliasRegexSrc);
+        const match = moduleSpecifier.match(aliasRegex);
+        if (!match) continue;
+        wildcard = match[1] || '';
+        matched = true;
+      } else {
+        // Bare alias: must be an exact match
+        if (moduleSpecifier !== aliasPattern && !moduleSpecifier.startsWith(aliasPattern + '/')) {
+          continue;
+        }
+        matched = true;
+        // For bare alias with subpath: "libnpmconfig/foo" → wildcard = "/foo"
+        if (moduleSpecifier.startsWith(aliasPattern + '/')) {
+          wildcard = moduleSpecifier.slice(aliasPattern.length); // "/foo"
+        }
+      }
+
+      if (!matched) continue;
+
+      for (const target of targets) {
+        const resolvedRel = hasWildcard ? target.replace(/\*/g, wildcard) : (target + wildcard);
+        const candidateBase = path.resolve(baseUrlPath, resolvedRel);
+
+        // Try candidate as a file first
+        try {
+          const st = fs.statSync(candidateBase);
+          if (st.isFile()) return candidateBase;
+        } catch {}
+
+        // Try adding .ts / .tsx / .d.ts extensions
+        for (const ext of ['.ts', '.tsx', '.d.ts']) {
+          try {
+            const withExt = candidateBase + ext;
+            const st = fs.statSync(withExt);
+            if (st.isFile()) return withExt;
+          } catch {}
+        }
+
+        // Try as directory with index file
+        try {
+          const idxTs = path.join(candidateBase, 'index.ts');
+          if (fs.statSync(idxTs).isFile()) return idxTs;
+        } catch {}
+        try {
+          const idxTsx = path.join(candidateBase, 'index.tsx');
+          if (fs.statSync(idxTsx).isFile()) return idxTsx;
+        } catch {}
+      }
+      break; // First matching alias pattern wins
+    }
+  }
+
+  // ── 2. NodeNext .js → .ts mapping ──
+  if (moduleSpecifier.startsWith('.')) {
+    const sourceDir = path.dirname(sourceFilePath);
+
+    // Try the specifier as-is first (extensionless or explicit)
+    for (const suffix of ['', '.ts', '.tsx', '.d.ts']) {
+      try {
+        const candidate = path.resolve(sourceDir, moduleSpecifier + suffix);
+        if (fs.statSync(candidate).isFile()) return candidate;
+      } catch {}
+    }
+
+    // NodeNext style: "./foo.js" → "./foo.ts"
+    if (moduleSpecifier.endsWith('.js') || moduleSpecifier.endsWith('.jsx')) {
+      const stripped = moduleSpecifier.replace(/\.jsx?$/, '');
+      for (const suffix of ['.ts', '.tsx', '.d.ts']) {
+        try {
+          const candidate = path.resolve(sourceDir, stripped + suffix);
+          if (fs.statSync(candidate).isFile()) return candidate;
+        } catch {}
+      }
+    }
+
+    // Try as directory with index file
+    try {
+      const idxTs = path.resolve(sourceDir, moduleSpecifier, 'index.ts');
+      if (fs.existsSync(idxTs)) return idxTs;
+    } catch {}
+    try {
+      const idxTsx = path.resolve(sourceDir, moduleSpecifier, 'index.tsx');
+      if (fs.existsSync(idxTsx)) return idxTsx;
+    } catch {}
+  }
+
+  return null;
+}
+
 function extractDirectCalls(func: FunctionDeclaration | ArrowFunction): string[] {
   const body = func.getBody();
   if (!body) return [];
@@ -219,13 +377,82 @@ export function extractIR(projectRoot: string): FunctionInfo[] {
 /** Extract both functions and type→file mapping. */
 /** @requires PROJECT_PATH @produces IR_WITH_TYPES */
 /** @requires PROJECT_PATH @produces IR_WITH_TYPES */
-export function extractIRWithTypes(projectRoot: string): {
+export function extractIRWithTypes(
+  projectRoot: string,
+  _visited: Set<string> = new Set()
+): {
   functions: FunctionInfo[];
   typeMap: Record<string, string>;
 } {
   const absRoot = path.resolve(projectRoot);
+  const tsconfigPath = path.join(absRoot, "tsconfig.json");
+
+  // Prevent infinite recursion for circular project references
+  if (_visited.has(absRoot)) {
+    return { functions: [], typeMap: {} };
+  }
+  _visited.add(absRoot);
+
+  // ── P0: Monorepo / project references detection ──
+  let references: string[] = [];
+  if (fs.existsSync(tsconfigPath)) {
+    try {
+      const tsconfigRaw = JSON.parse(fs.readFileSync(tsconfigPath, "utf-8"));
+      if (tsconfigRaw.references && Array.isArray(tsconfigRaw.references)) {
+        references = tsconfigRaw.references
+          .map((ref: { path?: string }) => ref.path ? path.resolve(absRoot, ref.path) : null)
+          .filter((p: string | null): p is string => p !== null && fs.existsSync(path.join(p, "tsconfig.json")));
+      }
+    } catch { /* invalid tsconfig JSON */ }
+  }
+
+  if (references.length > 0) {
+    console.error(`🔧 检测到 monorepo: ${references.length} 个子项目`);
+    const allFunctions: FunctionInfo[] = [];
+    const allTypeMap: Record<string, string> = {};
+
+    // Only extract from referenced sub-projects — root tsconfig is just a container
+    for (const refDir of references) {
+      const childResult = extractIRWithTypes(refDir, _visited);
+      // Adjust file paths to be relative to the root project
+      for (const f of childResult.functions) {
+        const absolutePath = path.resolve(refDir, f.file);
+        f.file = path.relative(absRoot, absolutePath);
+      }
+      allFunctions.push(...childResult.functions);
+      Object.assign(allTypeMap, childResult.typeMap);
+    }
+
+    return { functions: allFunctions, typeMap: allTypeMap };
+  }
+
+  return _extractSingleProject(absRoot, tsconfigPath);
+}
+
+/** Extract IR from a single project (no references handling). */
+function _extractSingleProject(
+  absRoot: string,
+  tsconfigPath: string
+): {
+  functions: FunctionInfo[];
+  typeMap: Record<string, string>;
+} {
+
+  // ── P0: Read original tsconfig (with extends chain) for paths/baseUrl ──
+  const originalTsConfig = fs.existsSync(tsconfigPath)
+    ? readOriginalTsConfig(tsconfigPath)
+    : null;
+
+  if (originalTsConfig?.paths) {
+    console.error(`🔧 检测到路径别名: ${Object.keys(originalTsConfig.paths).join(', ')}`);
+  }
+  const modRes = (originalTsConfig?.moduleResolution || '').toLowerCase();
+  if (modRes === 'nodenext' || modRes === 'node16') {
+    console.error(`🔧 检测到 ${modRes} — 启用 .js→.ts 映射`);
+  }
+
   const project = new Project({
-    tsConfigFilePath: path.join(absRoot, "tsconfig.json"),
+    tsConfigFilePath: tsconfigPath,
     skipAddingFilesFromTsConfig: false,
     skipFileDependencyResolution: true, // compatible with NodeNext/ESM tsconfigs
     compilerOptions: {
@@ -233,7 +460,7 @@ export function extractIRWithTypes(projectRoot: string): {
       moduleResolution: 2, // Classic Node resolution
     },
   });
-  if (!fs.existsSync(path.join(absRoot, "tsconfig.json"))) {
+  if (!fs.existsSync(tsconfigPath)) {
     project.addSourceFilesAtPaths(path.join(absRoot, "**/*.ts"));
   }
   const funcs: FunctionInfo[] = [];
@@ -368,6 +595,18 @@ export function extractIRWithTypes(projectRoot: string): {
             const sig = extractSignatureFromDts(name, resolvedPath, project);
             if (sig) { externalFuncs.set(name, sig); continue; }
           }
+
+          // ── P0 fallback: manual resolution for bundler aliases & NodeNext .js→.ts ──
+          const manualPath = manualResolveModule(mod, sf.getFilePath(), absRoot, originalTsConfig);
+          if (manualPath) {
+            try {
+              const manualFile = project.addSourceFileAtPathIfExists(manualPath);
+              if (manualFile) {
+                const sig = extractSignatureFromFile(name, manualFile);
+                if (sig) { externalFuncs.set(name, sig); continue; }
+              }
+            } catch { /* manual file may be a directory or invalid */ }
+          }
         } catch { /* IR parse fallback */ }
       }
 
@@ -385,11 +624,20 @@ export function extractIRWithTypes(projectRoot: string): {
               const dtsFile = project.addSourceFileAtPathIfExists(resolvedPath);
               if (dtsFile) namespaceImports.set(nsImport.getText(), dtsFile);
             } else {
-              // Node.js built-in: try @types/node
-              const nodeTypesPath = path.join(absRoot, "node_modules/@types/node", mod + ".d.ts");
-              if (fs.existsSync(nodeTypesPath)) {
-                const nodeDts = project.addSourceFileAtPathIfExists(nodeTypesPath);
-                if (nodeDts) namespaceImports.set(nsImport.getText(), nodeDts);
+              // ── P0 fallback: manual resolution for namespace imports ──
+              const manualPath = manualResolveModule(mod, sf.getFilePath(), absRoot, originalTsConfig);
+              if (manualPath) {
+                try {
+                  const manualFile = project.addSourceFileAtPathIfExists(manualPath);
+                  if (manualFile) namespaceImports.set(nsImport.getText(), manualFile);
+                } catch { /* manual file may be a directory */ }
+              } else {
+                // Node.js built-in: try @types/node
+                const nodeTypesPath = path.join(absRoot, "node_modules/@types/node", mod + ".d.ts");
+                if (fs.existsSync(nodeTypesPath)) {
+                  const nodeDts = project.addSourceFileAtPathIfExists(nodeTypesPath);
+                  if (nodeDts) namespaceImports.set(nsImport.getText(), nodeDts);
+                }
               }
             }
           }
@@ -595,6 +843,34 @@ export function extractIRWithTypes(projectRoot: string): {
       // Try each known namespace to find the function
       for (const [nsPrefix] of namespaceImports) {
         if (tryResolveFromNamespace(callName, nsPrefix)) break;
+      }
+    }
+
+    // ── P0 fallback: try manual resolution for named-import-style unknown calls ──
+    // Some imports may not have been resolved as named imports in ts-morph
+    // (e.g., when the import declaration itself wasn't parsed correctly)
+    if (!externalFuncs.has(callName) && !knownExternals[callName]) {
+      // Scan all source file imports again with manual resolution
+      for (const sf of project.getSourceFiles()) {
+        if (sf.getFilePath().includes('node_modules')) continue;
+        for (const imp of sf.getImportDeclarations()) {
+          const mod = imp.getModuleSpecifierValue();
+          const manualPath = manualResolveModule(mod, sf.getFilePath(), absRoot, originalTsConfig);
+          if (!manualPath) continue;
+          // Check if this module exports the callName
+          let manualFile;
+          try {
+            manualFile = project.addSourceFileAtPathIfExists(manualPath);
+          } catch { continue; }
+          if (!manualFile) continue;
+          const sig = extractSignatureFromFile(callName, manualFile);
+          if (sig) {
+            externalFuncs.set(callName, sig);
+            dynamicCount++;
+            break;
+          }
+        }
+        if (externalFuncs.has(callName)) break;
       }
     }
 

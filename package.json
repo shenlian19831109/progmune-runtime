@@ -19,7 +19,9 @@
     "obs-web": "npx ts-node src/obs-web.ts",
     "check": "npx ts-node src/check.ts",
     "audit": "npx ts-node src/audit.ts",
-    "replay-golden": "npx ts-node --transpile-only test/replay-golden.ts"
+    "replay-golden": "npx ts-node --transpile-only test/replay-golden.ts",
+    "corpus:stats": "npx ts-node src/corpus-stats.ts",
+    "corpus:mine": "npx ts-node src/rule-miner.ts"
   },
   "keywords": [
     "program-synthesis",
