@@ -26,6 +26,13 @@ export { replaySession, replayLedger, replayWithDetail } from "./deterministic-r
 export type { ReplayResult, ReplayTransition } from "./deterministic-replay";
 export { SVL as LegacySVL } from "./failure-corpus";
 
+// ── P2: Goal constraint (shared between intent parser and counterfactual engine) ──
+export interface GoalConstraint {
+  type: "retry" | "safety" | "latency" | "maintainability" | "security";
+  value: number;     // 0-1 weight
+  description: string;
+}
+
 // ── P0: Failure Schema v2 ──
 // Structured failure records for building a Code Behavior Dynamics Dataset.
 // Design goal: each validation failure auto-collects enough context for
@@ -185,6 +192,15 @@ export interface ConstraintViolation {
   fixPath?: string[];
   namespace?: string;
   description: string;
+  /** P2 V3: Counterfactual repair alternatives (top-3). */
+  repairAlternatives?: {
+    rank: number;
+    description: string;
+    fixPath: string[];
+    source: string;
+    score: number;
+    historicalSuccessRate: number;
+  }[];
 }
 
 // ── State Transition ──

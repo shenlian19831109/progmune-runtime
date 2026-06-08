@@ -265,3 +265,65 @@ export function validateActionResult(actions: Action[]): Result<Action[], Valida
   });
   return err(mapped);
 }
+
+// ═══════════════════════════════════════════════════════════════
+// P2 V3: Validation with Counterfactual Repair
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Validate an action sequence and enrich any violations with
+ * counterfactual repair alternatives (top-3).
+ *
+ * This is the async V3 entry point — use this instead of
+ * validateActionSequence when you want repair suggestions.
+ */
+export async function validateWithRepair(
+  actions: Action[],
+  params?: {
+    protocol?: string;
+    targetState?: string[];
+    rules?: Map<string, { pre_states: string[]; post_states: string[]; invalidate?: string[]; namespace?: string }>;
+  }
+): Promise<{
+  valid: boolean;
+  errors: string[];
+  violations: ConstraintViolation[];
+}> {
+  // Run the sync validation first
+  const result = validateActionSequence(actions);
+
+  if (result.valid || result.violations.length === 0) return result;
+
+  // Enrich each violation with counterfactual alternatives
+  const { suggestAlternatives } = await import("./counterfactual-engine");
+  const enrichedViolations = [...result.violations];
+
+  for (let i = 0; i < enrichedViolations.length; i++) {
+    const v = enrichedViolations[i];
+    try {
+      const alts = await suggestAlternatives({
+        violation: v,
+        protocol: params?.protocol || v.namespace || "default",
+        currentState: v.currentStates || [],
+        targetState: params?.targetState || v.requiredStates || ["COMPLETED"],
+        rules: params?.rules || new Map(),
+      });
+
+      enrichedViolations[i] = {
+        ...v,
+        repairAlternatives: alts.map(a => ({
+          rank: a.rank,
+          description: a.description,
+          fixPath: a.fixPath,
+          source: a.source,
+          score: a.score,
+          historicalSuccessRate: a.historicalSuccessRate,
+        })),
+      };
+    } catch {
+      // repair suggestion failure must never invalidate the base validation
+    }
+  }
+
+  return { valid: false, errors: result.errors, violations: enrichedViolations };
+}
