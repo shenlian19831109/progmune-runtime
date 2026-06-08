@@ -14,10 +14,10 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import { loadFailuresV2 } from "./failure-corpus";
+import { loadTrajectories } from "./failure-corpus";
 import { findFixPathStatic } from "./ssg-validator";
 import type { StateAnnotation } from "./ssg-validator";
-import type { FailureRecordV2, ConstraintViolation, GoalConstraint } from "./runtime-types";
+import type { TrajectoryRecord, ConstraintViolation, GoalConstraint } from "./runtime-types";
 
 // ═══════════════════════════════════════════════════════════════
 // Types
@@ -58,35 +58,32 @@ interface SearchContext {
 // ═══════════════════════════════════════════════════════════════
 
 function searchCorpus(ctx: SearchContext): CounterfactualAlternative[] {
-  const all = loadFailuresV2();
+  const all = loadTrajectories().filter(t => t.result === "violation" || t.result === "repair");
   if (all.length === 0) return [];
 
   // Filter: same violation type, same protocol
   const relevant = all.filter(
-    f => f.violationType === ctx.violationType || f.protocol === ctx.protocol
+    t => (t.violation?.type === ctx.violationType) || t.protocol === ctx.protocol
   );
 
   if (relevant.length === 0) return [];
 
   // Group by fix path (deduplicate)
-  const pathGroups = new Map<string, FailureRecordV2[]>();
-  for (const f of relevant) {
-    if (!f.ssgFixPath || f.ssgFixPath.length === 0) continue;
-    const key = f.ssgFixPath.join(" → ");
+  const pathGroups = new Map<string, TrajectoryRecord[]>();
+  for (const t of relevant) {
+    const fixPath = t.violation?.fixPath;
+    if (!fixPath || fixPath.length === 0) continue;
+    const key = fixPath.join(" → ");
     if (!pathGroups.has(key)) pathGroups.set(key, []);
-    pathGroups.get(key)!.push(f);
+    pathGroups.get(key)!.push(t);
   }
 
   const alternatives: CounterfactualAlternative[] = [];
 
   for (const [pathKey, records] of pathGroups) {
     const fixPath = pathKey.split(" → ");
-    const successCount = records.reduce(
-      (s, f) => s + f.repairAttempts.filter(a => a.success).length, 0
-    );
-    const totalAttempts = records.reduce((s, f) => s + f.repairAttempts.length, 0);
-    const successRate = totalAttempts > 0 ? successCount / totalAttempts : records.reduce((s, f) => s + f.successRate, 0) / records.length;
-    const avgSuccessRate = records.reduce((s, f) => s + f.successRate, 0) / records.length;
+    const successRate = records.reduce((s, t) => s + t.successRate, 0) / records.length;
+    const avgSuccessRate = successRate;
 
     // Score: corpus evidence × success rate
     const score = Math.min(1, (Math.log(records.length + 1) / Math.log(10)) * 0.4 + successRate * 0.6);

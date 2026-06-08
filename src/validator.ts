@@ -3,7 +3,7 @@ import type { FunctionInfo } from "./extract-ir";
 import { loadIR } from "./ir-utils";
 import { ok, err } from "./runtime-types";
 import type { Result, ValidationError, ContextFeatures } from "./runtime-types";
-import { recordFailureV2 } from "./failure-corpus";
+import { recordTrajectory, recordSuccess } from "./failure-corpus";
 
 const BUILTIN_WHITELIST = new Set([
   "console.log", "setTimeout", "setInterval", "clearTimeout",
@@ -200,35 +200,46 @@ export function validateActionSequence(actions: Action[]): { valid: boolean; err
     }
   }
 
-  // ── P0: Auto-collect failures to Schema v2 corpus ──
-  for (const v of violations) {
-    const codeSnippet = actions[v.actionIndex]
-      ? JSON.stringify(actions[v.actionIndex]).slice(0, 200)
-      : "(unknown)";
-    const ctx: ContextFeatures = {
-      nestingDepth: 0,
-      exceptionHandled: false,
-      insideLoop: false,
-      branchCount: 0,
-      asyncContext: false,
-    };
-    const actionNames = actions.map(a => (a as any).function || (a as any).kind || "?");
+  // ── P0: Trajectory auto-collection — record ALL outcomes ──
+  const actionNames = actions.map(a => (a as any).function || (a as any).kind || "?");
+  const ctx: ContextFeatures = {
+    nestingDepth: 0,
+    exceptionHandled: false,
+    insideLoop: false,
+    branchCount: 0,
+    asyncContext: false,
+  };
 
+  if (violations.length > 0) {
+    // Record violation trajectories
+    for (const v of violations) {
+      try {
+        recordTrajectory({
+          protocol: v.namespace || "default",
+          initialState: v.currentStates || [],
+          finalState: v.requiredStates || [],
+          trajectory: actionNames,
+          result: "violation",
+          violationType: svlToViolationType(v.svl, v.description),
+          violationDesc: v.description,
+          failingStepIndex: v.actionIndex,
+          fixPath: v.fixPath,
+          context: ctx,
+          successRate: 0,
+          intent: v.description,
+        });
+      } catch { /* auto-collection must never crash validation */ }
+    }
+  } else {
+    // Record success trajectory — positive sample for reward learning
     try {
-      recordFailureV2({
-        protocol: v.namespace || "default",
-        codeSnippet,
-        expectedStateSequence: v.requiredStates || [],
-        actualStateSequence: v.currentStates || [],
-        violationType: svlToViolationType(v.svl, v.description),
-        failingStepIndex: v.actionIndex,
-        contextFeatures: ctx,
-        repairAttempts: [],
-        successRate: 0,
-        actionSequence: actionNames,
-        ssgStateAtViolation: v.currentStates,
-        ssgFixPath: v.fixPath,
-        intent: v.description,
+      recordSuccess({
+        protocol: "default",
+        initialState: ["INIT"],
+        finalState: ["COMPLETED"],
+        trajectory: actionNames,
+        context: ctx,
+        source: "planner",
       });
     } catch { /* auto-collection must never crash validation */ }
   }

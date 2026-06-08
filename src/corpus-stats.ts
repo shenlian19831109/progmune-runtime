@@ -1,7 +1,7 @@
 /**
  * P0: Corpus Quality Dashboard
  *
- * Reads all FailureRecordV2 files from .progmune_corpus/failures/
+ * Reads all FailureRecordV2 files from .progmune_corpus/trajectories/
  * and outputs quality metrics as terminal table + JSON report.
  *
  * Usage:
@@ -11,33 +11,15 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import type { FailureRecordV2 } from "./runtime-types";
-
-const CORPUS_DIR = process.env.PROGMUNE_CORPUS_DIR
-  || path.resolve(process.env.PROGMUNE_PROJECT_DIR || process.cwd(), ".progmune_corpus");
-const V2_DIR = path.join(CORPUS_DIR, "failures");
+import type { TrajectoryRecord } from "./runtime-types";
+import { loadTrajectories, corpusTrajectoryStats } from "./failure-corpus";
 
 // ═══════════════════════════════════════════════════════════════
 // Data loading
 // ═══════════════════════════════════════════════════════════════
 
-function loadAllFailures(): FailureRecordV2[] {
-  const results: FailureRecordV2[] = [];
-  if (!fs.existsSync(V2_DIR)) return results;
-
-  const entries = fs.readdirSync(V2_DIR, { withFileTypes: true });
-  for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
-    const dateDir = path.join(V2_DIR, entry.name);
-    const files = fs.readdirSync(dateDir).filter(f => f.endsWith(".json"));
-    for (const file of files) {
-      try {
-        const raw = fs.readFileSync(path.join(dateDir, file), "utf-8");
-        results.push(JSON.parse(raw) as FailureRecordV2);
-      } catch { /* skip corrupted files */ }
-    }
-  }
-  return results;
+function loadAllTrajectories(): TrajectoryRecord[] {
+  return loadTrajectories();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -69,57 +51,57 @@ interface CorpusStats {
   topPatterns: { violationType: string; context: string; count: number }[];
 }
 
-function computeStats(failures: FailureRecordV2[]): CorpusStats {
-  // Duplication: fraction of pairs with action sequence similarity > 0.9
+function computeStats(trajectories: TrajectoryRecord[]): CorpusStats {
+  const violations = trajectories.filter(t => t.result === "violation");
+
+  // Duplication: fraction of pairs with trajectory similarity > 0.9
   let duplicatePairs = 0;
   let totalPairs = 0;
-  for (let i = 0; i < failures.length; i++) {
-    for (let j = i + 1; j < failures.length; j++) {
+  for (let i = 0; i < violations.length; i++) {
+    for (let j = i + 1; j < violations.length; j++) {
       totalPairs++;
-      if (jaccardSimilarity(failures[i].actionSequence, failures[j].actionSequence) > 0.9) {
+      if (jaccardSimilarity(violations[i].trajectory, violations[j].trajectory) > 0.9) {
         duplicatePairs++;
       }
     }
   }
 
-  // Repair stats
-  const withRepairs = failures.filter(f => f.repairAttempts.length > 0);
-  const totalAttempts = withRepairs.reduce((s, f) => s + f.repairAttempts.length, 0);
-  const acceptedAttempts = withRepairs.reduce(
-    (s, f) => s + f.repairAttempts.filter(a => a.accepted).length, 0
-  );
-  const successfulRepairs = withRepairs.reduce(
-    (s, f) => s + f.repairAttempts.filter(a => a.success).length, 0
-  );
+  // Repair stats: count repair trajectories
+  const repairs = trajectories.filter(t => t.result === "repair");
+  const totalAttempts = repairs.length;
+  const acceptedAttempts = repairs.filter(t => t.successRate > 0.5).length;
+  const successfulRepairs = repairs.filter(t => t.successRate > 0.8).length;
 
   // Violation type counts
   const byViolationType: Record<string, number> = {};
-  for (const f of failures) {
-    byViolationType[f.violationType] = (byViolationType[f.violationType] || 0) + 1;
+  for (const t of violations) {
+    const vt = t.violation?.type || "other";
+    byViolationType[vt] = (byViolationType[vt] || 0) + 1;
   }
 
   // Protocol counts
   const byProtocol: Record<string, number> = {};
-  for (const f of failures) {
-    byProtocol[f.protocol] = (byProtocol[f.protocol] || 0) + 1;
+  for (const t of trajectories) {
+    byProtocol[t.protocol] = (byProtocol[t.protocol] || 0) + 1;
   }
 
   // Context feature combinations
   const byContextFeature: Record<string, number> = {};
-  for (const f of failures) {
+  for (const t of trajectories) {
     const key = [
-      `depth=${f.contextFeatures.nestingDepth}`,
-      f.contextFeatures.exceptionHandled ? "try" : "no-try",
-      f.contextFeatures.insideLoop ? "loop" : "no-loop",
+      `depth=${t.context.nestingDepth}`,
+      t.context.exceptionHandled ? "try" : "no-try",
+      t.context.insideLoop ? "loop" : "no-loop",
     ].join(" ");
     byContextFeature[key] = (byContextFeature[key] || 0) + 1;
   }
 
   // Top violation × context patterns
   const patternCounts: Record<string, number> = {};
-  for (const f of failures) {
-    const ctx = f.contextFeatures;
-    const key = `${f.violationType} | depth=${ctx.nestingDepth} ${ctx.exceptionHandled ? "try" : "no-try"} ${ctx.insideLoop ? "loop" : "no-loop"}`;
+  for (const t of violations) {
+    const vt = t.violation?.type || "other";
+    const ctx = t.context;
+    const key = `${vt} | depth=${ctx.nestingDepth} ${ctx.exceptionHandled ? "try" : "no-try"} ${ctx.insideLoop ? "loop" : "no-loop"}`;
     patternCounts[key] = (patternCounts[key] || 0) + 1;
   }
   const topPatterns = Object.entries(patternCounts)
@@ -130,10 +112,10 @@ function computeStats(failures: FailureRecordV2[]): CorpusStats {
       return { violationType, context: rest.join(" | "), count: c };
     });
 
-  const timestamps = failures.map(f => f.timestamp).sort();
+  const timestamps = trajectories.map(f => f.timestamp).sort();
 
   return {
-    totalFailures: failures.length,
+    totalFailures: trajectories.length,
     dateRange: {
       earliest: timestamps[0] || "N/A",
       latest: timestamps[timestamps.length - 1] || "N/A",
@@ -145,8 +127,8 @@ function computeStats(failures: FailureRecordV2[]): CorpusStats {
     repairAcceptanceRate: totalAttempts > 0 ? acceptedAttempts / totalAttempts : 0,
     repairSuccessRate: totalAttempts > 0 ? successfulRepairs / totalAttempts : 0,
     totalRepairAttempts: totalAttempts,
-    avgPatternSuccessRate: failures.length > 0
-      ? failures.reduce((s, f) => s + f.successRate, 0) / failures.length
+    avgPatternSuccessRate: trajectories.length > 0
+      ? trajectories.reduce((s, t) => s + t.successRate, 0) / trajectories.length
       : 0,
     topPatterns,
   };
@@ -160,12 +142,13 @@ function formatPercent(v: number): string {
   return `${(v * 100).toFixed(1)}%`;
 }
 
-function printTable(stats: CorpusStats): void {
+function printTable(stats: CorpusStats, breakdown: { total: number; success: number; violation: number; repair: number; optimal: number }): void {
   console.log("\n╔══════════════════════════════════════════════╗");
-  console.log("║    Corpus Quality Dashboard (Schema v2)      ║");
+  console.log("║   Trajectory Corpus Dashboard (Schema v1)    ║");
   console.log("╚══════════════════════════════════════════════╝");
 
-  console.log(`\n📊 Total failures: ${stats.totalFailures}`);
+  console.log(`\n📊 Total trajectories: ${breakdown.total}`);
+  console.log(`   ✅ Success: ${breakdown.success}  ❌ Violation: ${breakdown.violation}  🔧 Repair: ${breakdown.repair}  ⭐ Optimal: ${breakdown.optimal}`);
   console.log(`📅 Date range: ${stats.dateRange.earliest} → ${stats.dateRange.latest}`);
 
   // Violation distribution
@@ -219,24 +202,20 @@ function printTable(stats: CorpusStats): void {
 async function main(): Promise<void> {
   const useJson = process.argv.includes("--json");
 
-  if (!fs.existsSync(V2_DIR)) {
-    console.error("⚠️  No Schema v2 corpus found. Run validation first to auto-collect failures.");
+  const trajectories = loadAllTrajectories();
+  const breakdown = corpusTrajectoryStats();
+
+  if (trajectories.length === 0) {
+    console.error("✅ Trajectory corpus is empty — run validation to start collecting.");
     process.exit(0);
   }
 
-  const failures = loadAllFailures();
-
-  if (failures.length === 0) {
-    console.error("✅ Corpus is empty — no failures recorded yet.");
-    process.exit(0);
-  }
-
-  const stats = computeStats(failures);
+  const stats = computeStats(trajectories);
 
   if (useJson) {
-    console.log(JSON.stringify(stats, null, 2));
+    console.log(JSON.stringify({ stats, breakdown }, null, 2));
   } else {
-    printTable(stats);
+    printTable(stats, breakdown);
   }
 }
 

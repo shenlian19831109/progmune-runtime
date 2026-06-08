@@ -33,10 +33,96 @@ export interface GoalConstraint {
   description: string;
 }
 
-// ── P0: Failure Schema v2 ──
-// Structured failure records for building a Code Behavior Dynamics Dataset.
-// Design goal: each validation failure auto-collects enough context for
-// counterfactual search and pattern mining — not just an error log.
+// ── P0: Trajectory Schema v1 ──
+// Records ALL behavior — success, violation, repair, optimal — not just failures.
+// This is the "Code World Model Dataset": the training fuel for future planning,
+// reward learning, and latent protocol models.
+//
+// Design principle: every (state, action, next_state, verdict) tuple is a data point.
+// Just as MuZero trains on (s,a,s',r), Progmune trains on trajectory records.
+
+/** Multi-dimensional reward vector — protocol-specific weights. */
+export interface RewardVector {
+  safety: number;          // 0-1
+  latency: number;         // 0-1 (inverted: 1=fast)
+  maintainability: number; // 0-1
+  security: number;        // 0-1
+  auditability: number;    // 0-1
+  /** Domain-specific dimensions (e.g., "throughput", "compliance"). */
+  custom: Record<string, number>;
+}
+
+/** Outcome type for trajectory records. */
+export type TrajectoryResult = "success" | "violation" | "repair" | "optimal";
+
+/** A single trajectory record — the atomic unit of the Code World Model Dataset. */
+export interface TrajectoryRecord {
+  /** Unique ID, e.g. "T-1780928181015-a1b2". */
+  id: string;
+  /** ISO 8601 timestamp. */
+  timestamp: string;
+  /** Protocol namespace, e.g. "FileProtocol". */
+  protocol: string;
+  /** Initial protocol state(s) before the trajectory began. */
+  initialState: string[];
+  /** Final protocol state(s) after the trajectory completed. */
+  finalState: string[];
+  /** The action/function sequence executed. */
+  trajectory: string[];
+  /** Outcome classification. */
+  result: TrajectoryResult;
+  /** Estimated reward vector (required for "optimal" records). */
+  reward?: RewardVector;
+  /** Violation details (present only for "violation" and "repair" results). */
+  violation?: TrajectoryViolation;
+  /** For "repair" results: the failure ID this repair was derived from. */
+  repairFrom?: string;
+  /** Structural context at the time of recording. */
+  context: ContextFeatures;
+  /** Historical success rate of the action pattern (0-1, updated incrementally). */
+  successRate: number;
+  /** Source of the trajectory. */
+  metadata: {
+    source: "human" | "llm" | "planner" | "antibody";
+    intent?: string;
+    sessionId?: string;
+  };
+}
+
+/** Violation info embedded in trajectory records. */
+export interface TrajectoryViolation {
+  type: ViolationType;
+  failingStepIndex: number;
+  expectedStates: string[];
+  actualStates: string[];
+  fixPath?: string[];
+  description: string;
+}
+
+// ── Legacy Schema v2 types (kept for backward compat, use TrajectoryRecord for new code) ──
+
+/** @deprecated Use ViolationType from above. */
+export type LegacyViolationType = ViolationType;
+
+/** @deprecated Use TrajectoryRecord for new code. */
+export interface FailureRecordV2 {
+  failureId: string;
+  timestamp: string;
+  protocol: string;
+  codeSnippet: string;
+  expectedStateSequence: string[];
+  actualStateSequence: string[];
+  violationType: ViolationType;
+  failingStepIndex: number;
+  contextFeatures: ContextFeatures;
+  repairAttempts: RepairAttempt[];
+  successRate: number;
+  actionSequence: string[];
+  ssgStateAtViolation?: string[];
+  ssgFixPath?: string[];
+  parentSessionId?: string;
+  intent?: string;
+}
 
 /** Root cause categories mapped from legacy F01-F10 codes. */
 export type ViolationType =
@@ -83,42 +169,6 @@ export interface RepairAttempt {
   latencyMs: number;
   /** Timestamp of the repair attempt. */
   timestamp: string;
-}
-
-/** Schema v2 failure record — the core unit of the Code Behavior Dynamics Dataset. */
-export interface FailureRecordV2 {
-  /** Unique failure ID, e.g. "F-1780379347057-0ubd". */
-  failureId: string;
-  /** ISO 8601 timestamp when the violation was detected. */
-  timestamp: string;
-  /** The protocol namespace that was violated, e.g. "FileProtocol". */
-  protocol: string;
-  /** The violating code snippet (extracted from AST, not full file). */
-  codeSnippet: string;
-  /** The sequence of protocol states that the code intended to follow. */
-  expectedStateSequence: string[];
-  /** The actual state trace observed by the SSG validator. */
-  actualStateSequence: string[];
-  /** Structured category of the violation. */
-  violationType: ViolationType;
-  /** Index into the action sequence where the failure was detected. */
-  failingStepIndex: number;
-  /** Structural context around the failure site. */
-  contextFeatures: ContextFeatures;
-  /** All repair attempts made for this failure (may be empty). */
-  repairAttempts: RepairAttempt[];
-  /** Historical success rate of the most-applied repair pattern for this failure type (0-1). */
-  successRate: number;
-  /** The action sequence that triggered the violation (sanitized). */
-  actionSequence: string[];
-  /** The SSG state snapshot at the point of violation. */
-  ssgStateAtViolation?: string[];
-  /** The SSG fix path: which functions to call to reach the target state. */
-  ssgFixPath?: string[];
-  /** Link to parent session for longitudinal tracking. */
-  parentSessionId?: string;
-  /** Intent that produced this failure. */
-  intent?: string;
 }
 
 /** Legacy F-code → ViolationType mapping. */

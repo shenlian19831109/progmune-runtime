@@ -142,131 +142,235 @@ export function recordFailure(
 }
 
 // ═══════════════════════════════════════════════════════════════
-// P0: Schema v2 auto-collection
-// Called from validator on every constraint violation — non-blocking.
+// P0: Trajectory Schema v1 — Code World Model Dataset
+// Records ALL outcomes: success, violation, repair, optimal.
+// Just as MuZero trains on (s,a,s',r), Progmune trains on trajectories.
 // ═══════════════════════════════════════════════════════════════
 
-import type { FailureRecordV2, ViolationType, ContextFeatures } from "./runtime-types";
+import type { TrajectoryRecord, TrajectoryResult, ContextFeatures, ViolationType, RewardVector } from "./runtime-types";
 import { mapLegacyFCode } from "./runtime-types";
 
-const V2_CORPUS_DIR = path.join(CORPUS_DIR, "failures");
+const TRAJECTORY_DIR = path.join(CORPUS_DIR, "trajectories");
 
-/** Write a Schema v2 failure record to the corpus (async-safe, non-blocking). */
-export function recordFailureV2(record: Omit<FailureRecordV2, "failureId" | "timestamp">): void {
-  ensureDir(V2_CORPUS_DIR);
-
-  const date = new Date().toISOString().slice(0, 10);
-  const dateDir = path.join(V2_CORPUS_DIR, date);
-  ensureDir(dateDir);
-
-  const seqFile = path.join(V2_CORPUS_DIR, ".seq");
-  let seq = 0;
-  try { seq = parseInt(fs.readFileSync(seqFile, "utf-8"), 10); } catch {}
-  seq++;
-  fs.writeFileSync(seqFile, String(seq));
-
-  const failureId = `F-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-  const full: FailureRecordV2 = {
-    ...record,
-    failureId,
-    timestamp: new Date().toISOString(),
-  };
-
-  // Non-blocking write using setImmediate
+function writeTrajectoryFile(record: TrajectoryRecord): void {
   setImmediate(() => {
     try {
-      fs.writeFileSync(path.join(dateDir, `${failureId}.json`), JSON.stringify(full, null, 2));
-    } catch { /* corpus write must never crash the validator */ }
+      const date = record.timestamp.slice(0, 10);
+      const dateDir = path.join(TRAJECTORY_DIR, date);
+      ensureDir(dateDir);
+      fs.writeFileSync(path.join(dateDir, `${record.id}.json`), JSON.stringify(record, null, 2));
+    } catch { /* corpus write must never crash */ }
   });
+}
 
-  console.error(`[CorpusV2] ${record.violationType} | protocol=${record.protocol} | ${failureId}`);
+let _trajSeq = 0;
+function nextTrajId(): string {
+  if (_trajSeq === 0) {
+    const seqFile = path.join(TRAJECTORY_DIR, ".seq");
+    try { _trajSeq = parseInt(fs.readFileSync(seqFile, "utf-8"), 10); } catch {}
+  }
+  _trajSeq++;
+  setImmediate(() => {
+    try { fs.writeFileSync(path.join(TRAJECTORY_DIR, ".seq"), String(_trajSeq)); } catch {}
+  });
+  return `T-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 }
 
 /**
- * Convenience: build a V2 record from a ConstraintViolation + context.
- * Call this from validateAction / validateActionSequence when violations are found.
+ * Record any trajectory — success, violation, repair, or optimal.
+ * This is the single entry point for the Code World Model Dataset.
  */
-export function buildFailureFromViolation(params: {
-  violation: { svl: number; violatedConstraint: string; actionIndex: number; description: string };
+export function recordTrajectory(params: {
   protocol: string;
-  codeSnippet: string;
-  expectedStates: string[];
-  actualStates: string[];
-  contextFeatures: ContextFeatures;
-  actionSequence: string[];
+  initialState: string[];
+  finalState: string[];
+  trajectory: string[];
+  result: TrajectoryResult;
+  reward?: RewardVector;
+  violationType?: ViolationType;
+  violationDesc?: string;
+  failingStepIndex?: number;
+  fixPath?: string[];
+  repairFrom?: string;
+  context?: ContextFeatures;
+  successRate?: number;
+  source?: "human" | "llm" | "planner" | "antibody";
   intent?: string;
-  parentSessionId?: string;
-}): Omit<FailureRecordV2, "failureId" | "timestamp"> {
-  const violationType: ViolationType = (() => {
-    const d = params.violation.description || "";
-    if (d.includes("protocol") || d.includes("state")) return "protocol_violation";
-    if (d.includes("symbol") || d.includes("undefined")) return "undefined_variable";
-    if (d.includes("type")) return "wrong_arg_type";
-    if (d.includes("import") || d.includes("module")) return "wrong_import_path";
-    if (d.includes("arg") || d.includes("parameter")) return "wrong_arg_count";
-    return "other";
-  })();
+  sessionId?: string;
+}): void {
+  ensureDir(TRAJECTORY_DIR);
 
-  return {
+  const defaultCtx: ContextFeatures = { nestingDepth: 0, exceptionHandled: false, insideLoop: false, branchCount: 0, asyncContext: false };
+  const defaultReward: RewardVector = { safety: 0.5, latency: 0.5, maintainability: 0.5, security: 0.5, auditability: 0.5, custom: {} };
+
+  const record: TrajectoryRecord = {
+    id: nextTrajId(),
+    timestamp: new Date().toISOString(),
     protocol: params.protocol,
-    codeSnippet: params.codeSnippet,
-    expectedStateSequence: params.expectedStates,
-    actualStateSequence: params.actualStates,
-    violationType,
-    failingStepIndex: params.violation.actionIndex,
-    contextFeatures: params.contextFeatures,
-    repairAttempts: [],
-    successRate: 0,
-    actionSequence: params.actionSequence,
-    intent: params.intent,
-    parentSessionId: params.parentSessionId,
+    initialState: params.initialState,
+    finalState: params.finalState,
+    trajectory: params.trajectory,
+    result: params.result,
+    reward: params.result === "success" || params.result === "optimal" ? (params.reward || defaultReward) : undefined,
+    violation: params.result === "violation" || params.result === "repair" ? {
+      type: params.violationType || "other",
+      failingStepIndex: params.failingStepIndex || 0,
+      expectedStates: params.finalState,
+      actualStates: params.initialState,
+      fixPath: params.fixPath,
+      description: params.violationDesc || "",
+    } : undefined,
+    repairFrom: params.repairFrom,
+    context: params.context || defaultCtx,
+    successRate: params.successRate || 0,
+    metadata: {
+      source: params.source || "llm",
+      intent: params.intent,
+      sessionId: params.sessionId,
+    },
   };
+
+  writeTrajectoryFile(record);
+  console.error(`[Trajectory] ${record.result} | ${params.protocol} | ${record.id}`);
+}
+
+/**
+ * Record a successful trajectory — positive sample for reward learning.
+ * Call this when validation passes without violations.
+ */
+export function recordSuccess(params: {
+  protocol: string;
+  initialState: string[];
+  finalState: string[];
+  trajectory: string[];
+  reward?: RewardVector;
+  context?: ContextFeatures;
+  source?: "human" | "llm" | "planner" | "antibody";
+  intent?: string;
+  sessionId?: string;
+}): void {
+  recordTrajectory({ ...params, result: "success", successRate: 1.0 });
+}
+
+/**
+ * Record a repair trajectory — shows what fix was applied and whether it worked.
+ */
+export function recordRepair(params: {
+  protocol: string;
+  initialState: string[];
+  finalState: string[];
+  trajectory: string[];
+  violationType: ViolationType;
+  violationDesc: string;
+  repairFrom: string;
+  fixPath: string[];
+  success: boolean;
+  source?: "human" | "llm" | "planner" | "antibody";
+  intent?: string;
+  sessionId?: string;
+}): void {
+  recordTrajectory({
+    ...params,
+    result: "repair",
+    successRate: params.success ? 1.0 : 0.0,
+    failingStepIndex: 0,
+  });
+}
+
+// ── Backward-compatible wrappers ──
+
+/** @deprecated Use recordTrajectory() with result: "violation" instead. */
+export function recordFailureV2(record: Omit<import("./runtime-types").FailureRecordV2, "failureId" | "timestamp">): void {
+  recordTrajectory({
+    protocol: record.protocol,
+    initialState: record.actualStateSequence,
+    finalState: record.expectedStateSequence,
+    trajectory: record.actionSequence,
+    result: "violation",
+    violationType: record.violationType,
+    violationDesc: record.violationType,
+    failingStepIndex: record.failingStepIndex,
+    fixPath: record.ssgFixPath,
+    context: record.contextFeatures,
+    successRate: record.successRate,
+    intent: record.intent,
+    sessionId: record.parentSessionId,
+  });
+}
+
+/** @deprecated Use loadTrajectories() instead. */
+export function loadFailuresV2(): import("./runtime-types").FailureRecordV2[] {
+  return loadTrajectories()
+    .filter(t => t.result === "violation")
+    .map(t => ({
+      failureId: t.id,
+      timestamp: t.timestamp,
+      protocol: t.protocol,
+      codeSnippet: t.trajectory.join("; "),
+      expectedStateSequence: t.finalState,
+      actualStateSequence: t.initialState,
+      violationType: t.violation?.type || "other",
+      failingStepIndex: t.violation?.failingStepIndex || 0,
+      contextFeatures: t.context,
+      repairAttempts: [],
+      successRate: t.successRate,
+      actionSequence: t.trajectory,
+      ssgStateAtViolation: t.initialState,
+      ssgFixPath: t.violation?.fixPath,
+      parentSessionId: t.metadata.sessionId,
+      intent: t.metadata.intent,
+    }));
 }
 
 // ═══════════════════════════════════════════════════════════════
-// P0: Schema v2 query helpers
+// P0: Trajectory query API
 // ═══════════════════════════════════════════════════════════════
 
-/** Load all Schema v2 failure records from the corpus. */
-export function loadFailuresV2(): FailureRecordV2[] {
-  const results: FailureRecordV2[] = [];
-  if (!fs.existsSync(V2_CORPUS_DIR)) return results;
+/** Load all trajectory records from the corpus. */
+export function loadTrajectories(): TrajectoryRecord[] {
+  const results: TrajectoryRecord[] = [];
+  if (!fs.existsSync(TRAJECTORY_DIR)) return results;
 
-  const dateDirs = fs.readdirSync(V2_CORPUS_DIR, { withFileTypes: true });
+  const dateDirs = fs.readdirSync(TRAJECTORY_DIR, { withFileTypes: true });
   for (const entry of dateDirs) {
     if (!entry.isDirectory()) continue;
-    const files = fs.readdirSync(path.join(V2_CORPUS_DIR, entry.name));
+    const files = fs.readdirSync(path.join(TRAJECTORY_DIR, entry.name));
     for (const file of files) {
       if (!file.endsWith(".json")) continue;
       try {
-        const raw = fs.readFileSync(path.join(V2_CORPUS_DIR, entry.name, file), "utf-8");
-        results.push(JSON.parse(raw) as FailureRecordV2);
+        const raw = fs.readFileSync(path.join(TRAJECTORY_DIR, entry.name, file), "utf-8");
+        results.push(JSON.parse(raw) as TrajectoryRecord);
       } catch { /* skip corrupted files */ }
     }
   }
   return results.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
 }
 
-/** Query failures by violation type. */
-export function queryByViolationType(type: ViolationType): FailureRecordV2[] {
-  return loadFailuresV2().filter(f => f.violationType === type);
+/** Query trajectories by result type. */
+export function queryByResult(result: TrajectoryResult): TrajectoryRecord[] {
+  return loadTrajectories().filter(t => t.result === result);
 }
 
-/** Query failures by protocol namespace. */
-export function queryByProtocol(protocol: string): FailureRecordV2[] {
-  return loadFailuresV2().filter(f => f.protocol === protocol);
+/** Query violations by type. */
+export function queryByViolationType(type: ViolationType): TrajectoryRecord[] {
+  return loadTrajectories().filter(t => t.violation?.type === type);
 }
 
-/** Get top N violation × context feature patterns by frequency. */
+/** Query trajectories by protocol. */
+export function queryByProtocol(protocol: string): TrajectoryRecord[] {
+  return loadTrajectories().filter(t => t.protocol === protocol);
+}
+
+/** Get top N violation patterns across all trajectories. */
 export function getTopPatterns(limit: number = 10): { violationType: ViolationType; contextKey: string; count: number; avgSuccessRate: number }[] {
-  const all = loadFailuresV2();
-  const buckets: Record<string, { records: FailureRecordV2[] }> = {};
+  const all = loadTrajectories().filter(t => t.result === "violation");
+  const buckets: Record<string, { records: TrajectoryRecord[] }> = {};
 
-  for (const f of all) {
-    const ctx = f.contextFeatures;
-    const key = `${f.violationType}|d${ctx.nestingDepth}|${ctx.exceptionHandled ? "try" : "no-try"}|${ctx.insideLoop ? "loop" : "no-loop"}`;
+  for (const t of all) {
+    const ctx = t.context;
+    const key = `${t.violation?.type || "other"}|d${ctx.nestingDepth}|${ctx.exceptionHandled ? "try" : "no-try"}|${ctx.insideLoop ? "loop" : "no-loop"}`;
     if (!buckets[key]) buckets[key] = { records: [] };
-    buckets[key].records.push(f);
+    buckets[key].records.push(t);
   }
 
   return Object.entries(buckets)
@@ -274,7 +378,7 @@ export function getTopPatterns(limit: number = 10): { violationType: ViolationTy
     .slice(0, limit)
     .map(([key, bucket]) => {
       const [vt, ...rest] = key.split("|");
-      const avg = bucket.records.reduce((s, f) => s + f.successRate, 0) / bucket.records.length;
+      const avg = bucket.records.reduce((s, t) => s + t.successRate, 0) / bucket.records.length;
       return {
         violationType: vt as ViolationType,
         contextKey: rest.join(" "),
@@ -284,17 +388,21 @@ export function getTopPatterns(limit: number = 10): { violationType: ViolationTy
     });
 }
 
-/** Get total v2 corpus size. */
+/** Get total trajectory count and breakdown by result type. */
+export function corpusTrajectoryStats(): { total: number; success: number; violation: number; repair: number; optimal: number } {
+  const all = loadTrajectories();
+  return {
+    total: all.length,
+    success: all.filter(t => t.result === "success").length,
+    violation: all.filter(t => t.result === "violation").length,
+    repair: all.filter(t => t.result === "repair").length,
+    optimal: all.filter(t => t.result === "optimal").length,
+  };
+}
+
+/** @deprecated Use corpusTrajectoryStats() instead. */
 export function corpusV2Size(): number {
-  if (!fs.existsSync(V2_CORPUS_DIR)) return 0;
-  let count = 0;
-  const dateDirs = fs.readdirSync(V2_CORPUS_DIR, { withFileTypes: true });
-  for (const entry of dateDirs) {
-    if (entry.isDirectory()) {
-      count += fs.readdirSync(path.join(V2_CORPUS_DIR, entry.name)).filter(f => f.endsWith(".json")).length;
-    }
-  }
-  return count;
+  return corpusTrajectoryStats().total;
 }
 
 /** 记录一个完整的意图会话（支持 ExecutionSession 和旧 IntentSession） */

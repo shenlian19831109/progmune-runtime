@@ -9,9 +9,9 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import { getTopFailurePatterns, getFailureGenome, loadFailuresV2, getTopPatterns } from "./failure-corpus";
+import { getTopFailurePatterns, getFailureGenome, loadTrajectories, getTopPatterns } from "./failure-corpus";
 import type { FunctionProtocol } from "./ssg-validator";
-import type { ViolationType, ContextFeatures, FailureRecordV2 } from "./runtime-types";
+import type { ViolationType, ContextFeatures, TrajectoryRecord } from "./runtime-types";
 
 interface MinedRule {
   /** Function name the rule applies to */
@@ -202,14 +202,14 @@ interface AntibodyCandidateV2 {
  * Returns patterns that recurred >= minCount times.
  */
 export function mineAntibodiesV2(minCount: number = 3): AntibodyCandidateV2[] {
-  const all = loadFailuresV2();
+  const all = loadTrajectories().filter(t => t.result === "violation");
   if (all.length === 0) return [];
 
-  const groups: Record<string, FailureRecordV2[]> = {};
-  for (const f of all) {
-    const key = `${f.violationType}|${f.protocol}`;
+  const groups: Record<string, TrajectoryRecord[]> = {};
+  for (const t of all) {
+    const key = `${t.violation?.type || "other"}|${t.protocol}`;
     if (!groups[key]) groups[key] = [];
-    groups[key].push(f);
+    groups[key].push(t);
   }
 
   const candidates: AntibodyCandidateV2[] = [];
@@ -218,11 +218,10 @@ export function mineAntibodiesV2(minCount: number = 3): AntibodyCandidateV2[] {
     if (records.length < minCount) continue;
     const [violationType, protocol] = key.split("|");
 
-    const avgDepth = Math.round(records.reduce((s, f) => s + f.contextFeatures.nestingDepth, 0) / records.length);
-    const fixPaths = [...new Set(records.flatMap(f => f.ssgFixPath || []))];
-    const withRepairs = records.filter(f => f.repairAttempts.length > 0);
-    const avgSuccess = withRepairs.length > 0
-      ? withRepairs.reduce((s, f) => s + f.successRate, 0) / withRepairs.length
+    const avgDepth = Math.round(records.reduce((s, t) => s + t.context.nestingDepth, 0) / records.length);
+    const fixPaths = [...new Set(records.flatMap(t => t.violation?.fixPath || []))];
+    const avgSuccess = records.length > 0
+      ? records.reduce((s, t) => s + t.successRate, 0) / records.length
       : 0;
     const timestamps = records.map(f => f.timestamp).sort();
 
