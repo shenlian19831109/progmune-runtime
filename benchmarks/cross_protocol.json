@@ -1,0 +1,58 @@
+[
+  {
+    "goal": "full transaction with rollback",
+    "protocol": "_global",
+    "broken": ["connect_db", "query_db"],
+    "expected": ["connect_db", "query_db", "disconnect_db"],
+    "violationType": "resource_leak"
+  },
+  {
+    "goal": "nested transaction",
+    "protocol": "_global",
+    "broken": ["connect_db", "query_db"],
+    "expected": ["connect_db", "query_db", "disconnect_db"],
+    "violationType": "resource_leak"
+  },
+  {
+    "goal": "transaction timeout recovery",
+    "protocol": "_global",
+    "broken": ["connect_db"],
+    "expected": ["connect_db", "disconnect_db"],
+    "violationType": "resource_leak"
+  },
+  {
+    "goal": "auth then file then db",
+    "protocol": "_global",
+    "broken": ["verify_password", "open_file", "write_file"],
+    "expected": ["verify_password", "generate_jwt", "create_session", "open_file", "write_file", "close_file"],
+    "violationType": "missing_prerequisite"
+  },
+  {
+    "goal": "db query then file write",
+    "protocol": "_global",
+    "broken": ["connect_db", "query_db", "open_file", "write_file"],
+    "expected": ["connect_db", "query_db", "disconnect_db", "open_file", "write_file", "close_file"],
+    "violationType": "resource_leak"
+  },
+  {
+    "goal": "auth with resource cleanup",
+    "protocol": "_global",
+    "broken": ["verify_password", "generate_jwt", "open_file", "write_file"],
+    "expected": ["verify_password", "generate_jwt", "create_session", "logout", "open_file", "write_file", "close_file"],
+    "violationType": "resource_leak"
+  },
+  {
+    "goal": "pipeline then db persist",
+    "protocol": "_global",
+    "broken": ["extractIR", "validateAction", "connect_db"],
+    "expected": ["extractIR", "validateAction", "validateActionSequence", "emitCode", "connect_db", "disconnect_db"],
+    "violationType": "missing_prerequisite"
+  },
+  {
+    "goal": "ir pipeline with auth gate",
+    "protocol": "_global",
+    "broken": ["extractIR", "validateAction"],
+    "expected": ["verify_password", "generate_jwt", "extractIR", "validateAction", "validateActionSequence"],
+    "violationType": "illegal_state_transition"
+  }
+]

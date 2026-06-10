@@ -198,6 +198,8 @@ export function recordTrajectory(params: {
   intent?: string;
   sessionId?: string;
   goal?: import("./runtime-types").GoalRecord;
+  feedback?: { accepted?: boolean; rejected?: boolean };
+  cost?: { latency?: number; actions?: number };
 }): void {
   ensureDir(TRAJECTORY_DIR);
 
@@ -230,6 +232,8 @@ export function recordTrajectory(params: {
       sessionId: params.sessionId,
     },
     goal: params.goal,
+    feedback: params.feedback,
+    cost: params.cost,
   };
 
   writeTrajectoryFile(record);
@@ -308,19 +312,19 @@ export function loadFailuresV2(): import("./runtime-types").FailureRecordV2[] {
       failureId: t.id,
       timestamp: t.timestamp,
       protocol: t.protocol,
-      codeSnippet: t.trajectory.join("; "),
-      expectedStateSequence: t.finalState,
-      actualStateSequence: t.initialState,
+      codeSnippet: (t.trajectory || []).join("; "),
+      expectedStateSequence: t.finalState || [],
+      actualStateSequence: t.initialState || [],
       violationType: t.violation?.type || "other",
       failingStepIndex: t.violation?.failingStepIndex || 0,
       contextFeatures: t.context,
       repairAttempts: [],
       successRate: t.successRate,
-      actionSequence: t.trajectory,
-      ssgStateAtViolation: t.initialState,
-      ssgFixPath: t.violation?.fixPath,
-      parentSessionId: t.metadata.sessionId,
-      intent: t.metadata.intent,
+      actionSequence: t.trajectory || [],
+      ssgStateAtViolation: t.initialState || [],
+      ssgFixPath: t.violation?.fixPath || [],
+      parentSessionId: t.metadata?.sessionId,
+      intent: t.metadata?.intent || "",
     }));
 }
 
@@ -400,6 +404,28 @@ export function corpusTrajectoryStats(): { total: number; success: number; viola
     repair: all.filter(t => t.result === "repair").length,
     optimal: all.filter(t => t.result === "optimal").length,
   };
+}
+
+/** Get repair acceptance statistics for P4 Reward Model training data. */
+export function getRepairStats(): {
+  acceptedRepairs: number;
+  rejectedRepairs: number;
+  totalRepairs: number;
+  acceptanceRate: number;
+  avgLatency: number;
+} {
+  const all = loadTrajectories().filter(t => t.result === "repair");
+  const accepted = all.filter(t => t.feedback?.accepted === true).length;
+  const rejected = all.filter(t => t.feedback?.rejected === true).length;
+  const total = all.length;
+  const acceptanceRate = total > 0 ? accepted / total : 0;
+  const costs = all
+    .map(t => t.cost?.latency)
+    .filter((l): l is number => l !== undefined);
+  const avgLatency = costs.length > 0
+    ? costs.reduce((s, l) => s + l, 0) / costs.length
+    : 0;
+  return { acceptedRepairs: accepted, rejectedRepairs: rejected, totalRepairs: total, acceptanceRate, avgLatency };
 }
 
 /** @deprecated Use corpusTrajectoryStats() instead. */

@@ -1,0 +1,171 @@
+/**
+ * P2: Repair Ranker — Feature Extraction & Linear Ranking
+ *
+ * FeatureExtractor: RepairCandidate → CandidateFeatures
+ * LinearRanker:    CandidateFeatures[] → ranked RepairCandidate[]
+ *
+ * Default weights (P3 — manual):
+ *   score = 0.4 * protocolSafety + 0.3 * historicalSuccessRate
+ *         + 0.2 * performance + 0.1 * auditability
+ *
+ * Future P4: swap LinearRanker for RewardModelRanker — same interface.
+ */
+
+import type {
+  RepairCandidate,
+  CandidateFeatures,
+  CandidateRanker,
+  SearchContext,
+} from "./repair-types";
+
+// ═══════════════════════════════════════════════════════════════
+// Feature Extractor
+// ═══════════════════════════════════════════════════════════════
+
+export interface CorpusStats {
+  /** Maximum number of actions across all candidates (for normalization). */
+  maxActions: number;
+}
+
+/**
+ * Extract a feature vector from a repair candidate.
+ *
+ * All features are in [0, 1] range where possible, so the Ranker
+ * can combine them with simple linear weights.
+ */
+export function extractFeatures(
+  candidate: RepairCandidate,
+  ctx: SearchContext,
+  corpusStats?: CorpusStats
+): CandidateFeatures {
+  const actionCount = candidate.actions.length;
+  const maxActions = corpusStats?.maxActions || Math.max(actionCount, 8);
+
+  // ── protocolSafety ──
+  // Candidates that satisfy more constraints are safer.
+  // Shorter paths are inherently safer (fewer things can go wrong).
+  const safetyFromLength = 1.0 - actionCount / 10;
+  const constraintMatch = ctx.constraints.length > 0
+    ? ctx.constraints.filter(c => c.type === "safety" || c.type === "security").length
+      / Math.max(1, ctx.constraints.length)
+    : 0.5;
+  const protocolSafety = Math.max(0, Math.min(1, safetyFromLength * 0.6 + constraintMatch * 0.4));
+
+  // ── historicalSuccessRate ──
+  // From corpus strategy metadata, or 0 if not available.
+  const historicalSuccessRate =
+    (candidate.metadata?.historicalSuccessRate as number) || 0;
+
+  // ── actionCount ──
+  // Raw count — used by rankPerformance.
+
+  // ── latencyCost ──
+  // Inverted: more actions = higher latency cost.
+  const latencyCost = Math.min(1, actionCount / maxActions);
+
+  // ── auditability ──
+  // Shorter paths are easier to audit.
+  const auditability = Math.max(0, 1.0 - actionCount / maxActions);
+
+  // ── corpusEvidence ──
+  const corpusEvidence =
+    (candidate.metadata?.corpusEvidenceCount as number) || 0;
+
+  return {
+    protocolSafety,
+    historicalSuccessRate,
+    actionCount,
+    latencyCost,
+    auditability,
+    corpusEvidence,
+    source: candidate.source,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Linear Ranker
+// ═══════════════════════════════════════════════════════════════
+
+/** Default P3 manual weights. Tune these from corpus data. */
+const DEFAULT_WEIGHTS = {
+  safety: 0.4,
+  successRate: 0.3,
+  performance: 0.2,
+  auditability: 0.1,
+};
+
+/**
+ * Create a linear ranker with configurable weights.
+ *
+ * Usage:
+ *   const ranker = createLinearRanker();                    // defaults
+ *   const ranker = createLinearRanker({ safety: 0.5 });     // safety-first
+ */
+export function createLinearRanker(
+  weights?: Partial<typeof DEFAULT_WEIGHTS>
+): CandidateRanker {
+  const w = { ...DEFAULT_WEIGHTS, ...weights };
+
+  /** Compute performance from features: fewer actions = better. */
+  function performanceScore(f: CandidateFeatures): number {
+    return 1.0 - Math.min(1, f.actionCount / Math.max(1, f.actionCount + 3));
+  }
+
+  /** Compute the weighted overall score. */
+  function overallScore(f: CandidateFeatures): number {
+    return (
+      w.safety * f.protocolSafety +
+      w.successRate * f.historicalSuccessRate +
+      w.performance * performanceScore(f) +
+      w.auditability * f.auditability
+    );
+  }
+
+  /** Zip candidates with features and sort by a scoring function. */
+  function rankBy(
+    candidates: RepairCandidate[],
+    features: CandidateFeatures[],
+    scoreFn: (f: CandidateFeatures) => number
+  ): RepairCandidate[] {
+    const paired = candidates.map((c, i) => ({
+      candidate: c,
+      score: scoreFn(features[i]),
+    }));
+    paired.sort((a, b) => b.score - a.score);
+    return paired.map(p => p.candidate);
+  }
+
+  return {
+    score(features: CandidateFeatures): number {
+      return overallScore(features);
+    },
+
+    rankSafety(
+      candidates: RepairCandidate[],
+      features: CandidateFeatures[]
+    ): RepairCandidate[] {
+      return rankBy(candidates, features, f => f.protocolSafety);
+    },
+
+    rankPerformance(
+      candidates: RepairCandidate[],
+      features: CandidateFeatures[]
+    ): RepairCandidate[] {
+      return rankBy(candidates, features, f => performanceScore(f));
+    },
+
+    rankAuditability(
+      candidates: RepairCandidate[],
+      features: CandidateFeatures[]
+    ): RepairCandidate[] {
+      return rankBy(candidates, features, f => f.auditability);
+    },
+
+    rankOverall(
+      candidates: RepairCandidate[],
+      features: CandidateFeatures[]
+    ): RepairCandidate[] {
+      return rankBy(candidates, features, f => overallScore(f));
+    },
+  };
+}

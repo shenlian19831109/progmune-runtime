@@ -489,8 +489,9 @@ export async function plan(userIntent: string, llmSeeds?: string[]): Promise<Pla
     for (const w of stopWords) repoNames.delete(w);
 
     // Split intent words the same way as function names: split on whitespace + camelCase
-    const intentWords = userIntent.toLowerCase()
-      .replace(/([a-z])([A-Z])/g, "$1 $2")  // camelCase → "camel Case"
+    const intentWords = userIntent
+      .replace(/([A-Z])/g, " $1")            // camelCase → "camel Case" (before toLowerCase!)
+      .toLowerCase()
       .split(/[\s,，]+/)
       .filter((w: string) => w.length > 2);
     const repoHits = intentWords.filter((w: string) => repoNames.has(w)).length;

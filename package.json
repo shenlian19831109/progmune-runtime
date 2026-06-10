@@ -7,7 +7,7 @@
     "progmune-runtime": "dist/mcp-server.mjs"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json && tsc -p tsconfig.mcp.json && mv dist/mcp-server.js dist/mcp-server.mjs",
+    "build": "tsc -p tsconfig.json && tsc -p tsconfig.mcp.json && mv dist-mcp/mcp-server.js dist/mcp-server.mjs && rm -rf dist-mcp",
     "start": "node dist/mcp-server.mjs",
     "test": "node dist/mcp-server.mjs test",
     "test:unit": "vitest run",

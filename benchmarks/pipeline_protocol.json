@@ -1,0 +1,58 @@
+[
+  {
+    "goal": "process IR pipeline end-to-end",
+    "protocol": "_global",
+    "broken": ["extractIR"],
+    "expected": ["extractIR", "validateAction", "validateActionSequence", "emitCode", "recordSession"],
+    "violationType": "missing_prerequisite"
+  },
+  {
+    "goal": "validate and emit code",
+    "protocol": "_global",
+    "broken": ["validateAction"],
+    "expected": ["extractIR", "validateAction", "validateActionSequence", "emitCode"],
+    "violationType": "missing_prerequisite"
+  },
+  {
+    "goal": "emit code without validation",
+    "protocol": "_global",
+    "broken": ["emitCode"],
+    "expected": ["extractIR", "validateAction", "validateActionSequence", "emitCode"],
+    "violationType": "illegal_state_transition"
+  },
+  {
+    "goal": "record session without code emission",
+    "protocol": "_global",
+    "broken": ["recordSession"],
+    "expected": ["extractIR", "validateAction", "validateActionSequence", "emitCode", "recordSession"],
+    "violationType": "missing_prerequisite"
+  },
+  {
+    "goal": "re-extract IR after stale",
+    "protocol": "_global",
+    "broken": ["extractIR", "validateAction", "extractIR"],
+    "expected": ["extractIR", "validateAction", "extractIR", "validateAction"],
+    "violationType": "illegal_state_transition"
+  },
+  {
+    "goal": "full pipeline with session record",
+    "protocol": "_global",
+    "broken": ["extractIR", "validateAction"],
+    "expected": ["extractIR", "validateAction", "validateActionSequence", "emitCode", "recordSession"],
+    "violationType": "missing_prerequisite"
+  },
+  {
+    "goal": "validate sequence without action validation",
+    "protocol": "_global",
+    "broken": ["validateActionSequence"],
+    "expected": ["extractIR", "validateAction", "validateActionSequence"],
+    "violationType": "illegal_state_transition"
+  },
+  {
+    "goal": "emit without recording",
+    "protocol": "_global",
+    "broken": ["extractIR", "validateAction", "validateActionSequence", "emitCode"],
+    "expected": ["extractIR", "validateAction", "validateActionSequence", "emitCode", "recordSession"],
+    "violationType": "missing_prerequisite"
+  }
+]

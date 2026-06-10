@@ -47,7 +47,7 @@ function extractCapabilities(intent: string): string[] {
     /\b(auth|authenticate|login|logout|session)\b/gi,
     /\b(encrypt|decrypt|hash|sign|verify)\b/gi,
     /\b(queue|publish|subscribe|event\s*bus)\b/gi,
-    /\b(rate\s*limit|throttle|quota)\b/gi,
+    /\b(rate\s*limiting?|throttle|quota)\b/gi,
     /\b(export|import|serialize|deserialize)\b/gi,
     /\b(notify|notification|alert|webhook)\b/gi,
     /\b(schedule|cron|timer|recurring)\b/gi,

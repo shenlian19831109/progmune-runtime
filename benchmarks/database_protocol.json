@@ -1,0 +1,58 @@
+[
+  {
+    "goal": "query database safely",
+    "protocol": "_global",
+    "broken": ["query_db"],
+    "expected": ["connect_db", "query_db", "disconnect_db"],
+    "violationType": "missing_prerequisite"
+  },
+  {
+    "goal": "insert record with transaction",
+    "protocol": "_global",
+    "broken": ["query_db", "disconnect_db"],
+    "expected": ["connect_db", "query_db", "disconnect_db"],
+    "violationType": "missing_prerequisite"
+  },
+  {
+    "goal": "connect and disconnect cleanly",
+    "protocol": "_global",
+    "broken": ["connect_db"],
+    "expected": ["connect_db", "disconnect_db"],
+    "violationType": "resource_leak"
+  },
+  {
+    "goal": "multi-query session",
+    "protocol": "_global",
+    "broken": ["connect_db", "query_db"],
+    "expected": ["connect_db", "query_db", "disconnect_db"],
+    "violationType": "resource_leak"
+  },
+  {
+    "goal": "reconnect after disconnect",
+    "protocol": "_global",
+    "broken": ["connect_db", "disconnect_db", "query_db"],
+    "expected": ["connect_db", "disconnect_db", "connect_db", "query_db", "disconnect_db"],
+    "violationType": "illegal_state_transition"
+  },
+  {
+    "goal": "query without connection",
+    "protocol": "_global",
+    "broken": ["query_db"],
+    "expected": ["connect_db", "query_db", "disconnect_db"],
+    "violationType": "missing_prerequisite"
+  },
+  {
+    "goal": "bulk insert with cleanup",
+    "protocol": "_global",
+    "broken": ["connect_db"],
+    "expected": ["connect_db", "disconnect_db"],
+    "violationType": "resource_leak"
+  },
+  {
+    "goal": "long-running query session",
+    "protocol": "_global",
+    "broken": ["connect_db", "query_db"],
+    "expected": ["connect_db", "query_db", "disconnect_db"],
+    "violationType": "resource_leak"
+  }
+]

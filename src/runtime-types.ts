@@ -89,6 +89,16 @@ export interface TrajectoryRecord {
   };
   /** P1: Goal Skeleton — the goal that produced this trajectory (optional). */
   goal?: GoalRecord;
+  /** P3: User feedback on this trajectory (for reinforcement learning). */
+  feedback?: {
+    accepted?: boolean;
+    rejected?: boolean;
+  };
+  /** P3: Measured cost of this trajectory (for performance-aware ranking). */
+  cost?: {
+    latency?: number;
+    actions?: number;
+  };
 }
 
 // ── P1: Goal Skeleton ──

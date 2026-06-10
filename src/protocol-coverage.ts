@@ -1,0 +1,285 @@
+/**
+ * P3.6: Protocol Coverage Engine
+ *
+ * Analyzes Trajectory Corpus against Protocol Definitions to determine
+ * which states and transitions have been observed in real execution data.
+ *
+ * Core question: "What does the system NOT know yet?"
+ *
+ * Coverage gaps drive:
+ *   1. Benchmark generation (targeted test cases)
+ *   2. Data acquisition priorities (where to collect more feedback)
+ *   3. Risk assessment (which protocols are under-observed)
+ *
+ * Architecture:
+ *   Protocol definitions → All possible states + transitions
+ *   Trajectory records    → Observed states + transitions
+ *   Coverage engine       → Gap analysis + risk ranking
+ */
+
+import type { TrajectoryRecord } from "./runtime-types";
+import type { StateAnnotation } from "./ssg-validator";
+
+// ═══════════════════════════════════════════════════════════════
+// Types
+// ═══════════════════════════════════════════════════════════════
+
+export interface ProtocolTransition {
+  from: string;       // pre-state (or "INIT" for precondition-less)
+  to: string;         // post-state (or "∅" for invalidation)
+  rule: string;       // function name that causes this transition
+  type: "acquire" | "invalidate";
+}
+
+export interface ProtocolDefinition {
+  name: string;
+  states: string[];           // all possible states
+  initialState: string;
+  transitions: ProtocolTransition[];
+  rules: Map<string, StateAnnotation>;
+}
+
+export interface StateCoverage {
+  protocol: string;
+  totalStates: number;
+  visitedStates: number;
+  stateCoverage: number;
+  missingStates: string[];
+}
+
+export interface TransitionCoverage {
+  protocol: string;
+  totalTransitions: number;
+  visitedTransitions: number;
+  transitionCoverage: number;
+  missingTransitions: { from: string; to: string; rule: string }[];
+}
+
+export interface CoverageReport {
+  protocol: string;
+  stateCoverage: StateCoverage;
+  transitionCoverage: TransitionCoverage;
+  trajectoryCount: number;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Protocol Parser
+// ═══════════════════════════════════════════════════════════════
+
+function parseTransitions(rules: Map<string, StateAnnotation>): ProtocolTransition[] {
+  const transitions: ProtocolTransition[] = [];
+  for (const [fn, rule] of rules) {
+    // Acquire transitions: pre_states (or INIT) → post_states
+    const pres = rule.pre_states.length > 0 ? rule.pre_states : ["INIT"];
+    for (const pre of pres) {
+      for (const post of rule.post_states) {
+        transitions.push({ from: pre, to: post, rule: fn, type: "acquire" });
+      }
+    }
+    // Invalidation transitions: state → ∅
+    if (rule.invalidate) {
+      for (const inv of rule.invalidate) {
+        transitions.push({ from: inv, to: "∅", rule: fn, type: "invalidate" });
+      }
+    }
+  }
+  return transitions;
+}
+
+function allStatesFromRules(rules: Map<string, StateAnnotation>, initialState: string): string[] {
+  const states = new Set<string>();
+  states.add(initialState);
+  states.add("INIT");
+  for (const rule of rules.values()) {
+    for (const s of rule.pre_states) states.add(s);
+    for (const s of rule.post_states) states.add(s);
+    if (rule.invalidate) for (const s of rule.invalidate) states.add(s);
+  }
+  return [...states].sort();
+}
+
+/** Parse a protocol definition from its rules. */
+export function parseProtocolDefinition(
+  name: string,
+  rules: Map<string, StateAnnotation>,
+  initialState: string
+): ProtocolDefinition {
+  return {
+    name,
+    states: allStatesFromRules(rules, initialState),
+    initialState,
+    transitions: parseTransitions(rules),
+    rules,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Coverage Analyzer
+// ═══════════════════════════════════════════════════════════════
+
+/** Extract observed states from a trajectory. */
+function extractVisitedStates(trajectory: string[], rules: Map<string, StateAnnotation>, initial?: string): Set<string> {
+  const visited = new Set<string>();
+  if (initial) visited.add(initial);
+
+  let current = new Set<string>();
+  if (initial) current.add(initial);
+
+  for (const fn of trajectory) {
+    const rule = rules.get(fn);
+    if (!rule) continue;
+    for (const pre of rule.pre_states) visited.add(pre);
+    for (const post of rule.post_states) { visited.add(post); current.add(post); }
+    if (rule.invalidate) rule.invalidate.forEach(s => { visited.add(s); current.delete(s); });
+  }
+  return visited;
+}
+
+/** Extract observed transitions from a trajectory. */
+function extractVisitedTransitions(trajectory: string[], rules: Map<string, StateAnnotation>, initial?: string): Set<string> {
+  const visited = new Set<string>();
+  let current = new Set<string>();
+  if (initial) current.add(initial);
+
+  for (const fn of trajectory) {
+    const rule = rules.get(fn);
+    if (!rule) continue;
+    for (const pre of rule.pre_states) {
+      for (const post of rule.post_states) {
+        visited.add(`${pre}→${post}`);
+      }
+    }
+    if (rule.invalidate) {
+      for (const inv of rule.invalidate) {
+        visited.add(`${inv}→∅`);
+      }
+    }
+    // Advance state
+    if (rule.invalidate) rule.invalidate.forEach(s => current.delete(s));
+    for (const post of rule.post_states) current.add(post);
+  }
+  return visited;
+}
+
+/**
+ * Compute coverage for a single protocol from trajectory data.
+ */
+export function analyzeCoverage(
+  protocol: ProtocolDefinition,
+  trajectories: TrajectoryRecord[]
+): CoverageReport {
+  // Filter trajectories relevant to this protocol
+  const relevant = trajectories.filter(t => t.protocol === protocol.name || t.protocol === "_global");
+
+  // Aggregate visited states + transitions
+  const visitedStates = new Set<string>();
+  const visitedTransitions = new Set<string>();
+  for (const t of relevant) {
+    const initialState = t.initialState?.length > 0 ? t.initialState[0] : undefined;
+    for (const s of extractVisitedStates(t.trajectory, protocol.rules, initialState)) visitedStates.add(s);
+    for (const tr of extractVisitedTransitions(t.trajectory, protocol.rules, initialState)) visitedTransitions.add(tr);
+  }
+
+  const totalStates = protocol.states.length;
+  const visitedStateCount = [...visitedStates].filter(s => protocol.states.includes(s)).length;
+
+  const totalTransitions = protocol.transitions.length;
+  const visitedTransitionKeys = new Set(
+    protocol.transitions.filter(t => visitedTransitions.has(`${t.from}→${t.to}`)).map(t => `${t.from}→${t.to}`)
+  );
+
+  const missingStates = protocol.states.filter(s => !visitedStates.has(s));
+  const missingTransitions = protocol.transitions
+    .filter(t => !visitedTransitions.has(`${t.from}→${t.to}`))
+    .map(t => ({ from: t.from, to: t.to, rule: t.rule }));
+
+  return {
+    protocol: protocol.name,
+    stateCoverage: {
+      protocol: protocol.name,
+      totalStates,
+      visitedStates: visitedStateCount,
+      stateCoverage: totalStates > 0 ? visitedStateCount / totalStates : 0,
+      missingStates,
+    },
+    transitionCoverage: {
+      protocol: protocol.name,
+      totalTransitions,
+      visitedTransitions: visitedTransitionKeys.size,
+      transitionCoverage: totalTransitions > 0 ? visitedTransitionKeys.size / totalTransitions : 0,
+      missingTransitions,
+    },
+    trajectoryCount: relevant.length,
+  };
+}
+
+/**
+ * Analyze coverage across all protocols.
+ */
+export function analyzeAllCoverage(
+  protocols: ProtocolDefinition[],
+  trajectories: TrajectoryRecord[]
+): CoverageReport[] {
+  return protocols.map(p => analyzeCoverage(p, trajectories));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Default protocol definitions (from protocols.json)
+// ═══════════════════════════════════════════════════════════════
+
+import * as fs from "fs";
+import * as path from "path";
+import { parseProtocolsFromJSON } from "./ssg-validator";
+
+let _cachedProtocols: ProtocolDefinition[] | null = null;
+
+export function loadDefaultProtocolDefinitions(): ProtocolDefinition[] {
+  if (_cachedProtocols) return _cachedProtocols;
+
+  const protoDef = JSON.parse(
+    fs.readFileSync(path.resolve(__dirname, "..", "protocols.json"), "utf-8")
+  );
+  const fns = parseProtocolsFromJSON(protoDef);
+  const rules = new Map<string, StateAnnotation>();
+  for (const p of fns) rules.set(p.function, p.protocol);
+
+  // Split rules into logical protocol groups by state namespace
+  const protocolGroups: { name: string; ruleFilter: (fn: string, rule: StateAnnotation) => boolean; initialState: string }[] = [
+    {
+      name: "FileProtocol",
+      ruleFilter: (_fn, rule) =>
+        rule.pre_states.some(s => s.includes("FILE")) || rule.post_states.some(s => s.includes("FILE")) || (rule.invalidate || []).some(s => s.includes("FILE")),
+      initialState: "INIT",
+    },
+    {
+      name: "AuthProtocol",
+      ruleFilter: (_fn, rule) =>
+        rule.pre_states.some(s => ["UNAUTHENTICATED", "PASSWORD_VERIFIED", "TOKEN_ISSUED", "SESSION_ACTIVE"].includes(s)) ||
+        rule.post_states.some(s => ["UNAUTHENTICATED", "PASSWORD_VERIFIED", "TOKEN_ISSUED", "SESSION_ACTIVE"].includes(s)),
+      initialState: "UNAUTHENTICATED",
+    },
+    {
+      name: "DBProtocol",
+      ruleFilter: (_fn, rule) =>
+        rule.pre_states.some(s => s.includes("DB")) || rule.post_states.some(s => s.includes("DB")) || (rule.invalidate || []).some(s => s.includes("DB")),
+      initialState: "INIT",
+    },
+    {
+      name: "IRProtocol",
+      ruleFilter: (_fn, rule) =>
+        rule.pre_states.some(s => s.includes("IR_") || s.includes("ACTION_") || s.includes("SEQUENCE_") || s.includes("CODE_") || s.includes("SESSION_")) ||
+        rule.post_states.some(s => s.includes("IR_") || s.includes("ACTION_") || s.includes("SEQUENCE_") || s.includes("CODE_") || s.includes("SESSION_")),
+      initialState: "IR_STALE",
+    },
+  ];
+
+  _cachedProtocols = protocolGroups.map(g => {
+    const groupRules = new Map<string, StateAnnotation>();
+    for (const [fn, rule] of rules) {
+      if (g.ruleFilter(fn, rule)) groupRules.set(fn, rule);
+    }
+    return parseProtocolDefinition(g.name, groupRules, g.initialState);
+  });
+
+  return _cachedProtocols;
+}

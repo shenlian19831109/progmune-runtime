@@ -1,0 +1,30 @@
+[
+  {
+    "goal": "safely write config file",
+    "protocol": "_global",
+    "broken": ["open_file", "write_file"],
+    "expected": ["open_file", "write_file", "close_file"],
+    "violationType": "resource_leak"
+  },
+  {
+    "goal": "authenticate user with full session lifecycle",
+    "protocol": "_global",
+    "broken": ["verify_password", "generate_jwt"],
+    "expected": ["verify_password", "generate_jwt", "create_session", "logout"],
+    "violationType": "missing_prerequisite"
+  },
+  {
+    "goal": "connect, query, disconnect",
+    "protocol": "_global",
+    "broken": ["connect_db"],
+    "expected": ["connect_db", "query_db", "disconnect_db"],
+    "violationType": "resource_leak"
+  },
+  {
+    "goal": "full IR pipeline",
+    "protocol": "_global",
+    "broken": ["extractIR"],
+    "expected": ["extractIR", "validateAction", "validateActionSequence", "emitCode", "recordSession"],
+    "violationType": "missing_prerequisite"
+  }
+]

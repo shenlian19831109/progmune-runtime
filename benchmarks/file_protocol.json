@@ -1,0 +1,37 @@
+[
+  {
+    "goal": "safely write config file",
+    "protocol": "_global",
+    "broken": ["open_file", "write_file"],
+    "expected": ["open_file", "write_file", "close_file"],
+    "violationType": "resource_leak"
+  },
+  {
+    "goal": "read file and close it",
+    "protocol": "_global",
+    "broken": ["open_file", "read_file"],
+    "expected": ["open_file", "read_file", "close_file"],
+    "violationType": "resource_leak"
+  },
+  {
+    "goal": "authenticate user and create session",
+    "protocol": "_global",
+    "broken": ["verify_password"],
+    "expected": ["verify_password", "generate_jwt", "create_session"],
+    "violationType": "missing_prerequisite"
+  },
+  {
+    "goal": "connect to database and query",
+    "protocol": "_global",
+    "broken": ["query_db"],
+    "expected": ["connect_db", "query_db", "disconnect_db"],
+    "violationType": "missing_prerequisite"
+  },
+  {
+    "goal": "extract IR and validate action",
+    "protocol": "_global",
+    "broken": ["validateAction"],
+    "expected": ["extractIR", "validateAction"],
+    "violationType": "missing_prerequisite"
+  }
+]

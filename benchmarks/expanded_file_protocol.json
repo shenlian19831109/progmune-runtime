@@ -1,0 +1,58 @@
+[
+  {
+    "goal": "read file and close",
+    "protocol": "_global",
+    "broken": ["open_file", "read_file"],
+    "expected": ["open_file", "read_file", "close_file"],
+    "violationType": "resource_leak"
+  },
+  {
+    "goal": "write file with close",
+    "protocol": "_global",
+    "broken": ["open_file", "write_file"],
+    "expected": ["open_file", "write_file", "close_file"],
+    "violationType": "resource_leak"
+  },
+  {
+    "goal": "write without opening",
+    "protocol": "_global",
+    "broken": ["write_file"],
+    "expected": ["open_file", "write_file", "close_file"],
+    "violationType": "missing_prerequisite"
+  },
+  {
+    "goal": "read without opening",
+    "protocol": "_global",
+    "broken": ["read_file"],
+    "expected": ["open_file", "read_file", "close_file"],
+    "violationType": "missing_prerequisite"
+  },
+  {
+    "goal": "double open",
+    "protocol": "_global",
+    "broken": ["open_file", "open_file"],
+    "expected": ["open_file", "close_file"],
+    "violationType": "resource_leak"
+  },
+  {
+    "goal": "close without open",
+    "protocol": "_global",
+    "broken": ["close_file"],
+    "expected": ["open_file", "close_file"],
+    "violationType": "illegal_state_transition"
+  },
+  {
+    "goal": "read after close",
+    "protocol": "_global",
+    "broken": ["open_file", "close_file", "read_file"],
+    "expected": ["open_file", "close_file", "open_file", "read_file", "close_file"],
+    "violationType": "illegal_state_transition"
+  },
+  {
+    "goal": "write after close",
+    "protocol": "_global",
+    "broken": ["open_file", "close_file", "write_file"],
+    "expected": ["open_file", "close_file", "open_file", "write_file", "close_file"],
+    "violationType": "illegal_state_transition"
+  }
+]
