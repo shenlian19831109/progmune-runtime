@@ -60,13 +60,13 @@ export interface MacroGraph {
 // State Inference
 // ═══════════════════════════════════════════════════════════════
 
-/** Infer pre/post conditions by running actions through protocol rules. */
+/** Infer pre/post conditions — only preconditions NOT produced by the chain are true preconditions. */
 function inferConditions(
   actions: string[],
   rules: Map<string, StateAnnotation>
 ): { preconditions: string[]; postconditions: string[] } {
-  const pre = new Set<string>();
-  const post = new Set<string>();
+  const allPre = new Set<string>();
+  const produced = new Set<string>();
   const invalidated = new Set<string>();
 
   let current = new Set<string>();
@@ -75,25 +75,22 @@ function inferConditions(
     const rule = rules.get(fn);
     if (!rule) continue;
 
-    // Preconditions: states needed before this action
+    // Collect all preconditions needed at any step
     for (const p of rule.pre_states) {
-      if (p.length > 0) pre.add(p);
+      if (p.length > 0) allPre.add(p);
     }
 
-    // Apply state changes
+    // Apply: invalidate current, then produce
     if (rule.invalidate) rule.invalidate.forEach(s => { invalidated.add(s); current.delete(s); });
-    for (const p of rule.post_states) current.add(p);
+    for (const p of rule.post_states) { current.add(p); produced.add(p); }
   }
 
-  // Postconditions: states active after all actions
-  for (const s of current) post.add(s);
-  // Final postconditions exclude initial preconditions
-  const finalPost = [...post].filter(s => !pre.has(s));
+  // True preconditions: needed but NOT produced by any action in the chain
+  const preconditions = [...allPre].filter(p => !produced.has(p));
+  // Postconditions: active states + invalidated states
+  const postconditions = [...current, ...invalidated].filter(s => s.length > 0);
 
-  return {
-    preconditions: [...pre],
-    postconditions: [...finalPost, ...invalidated].map(s => s),
-  };
+  return { preconditions, postconditions };
 }
 
 // ═══════════════════════════════════════════════════════════════
