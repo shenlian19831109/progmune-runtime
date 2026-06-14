@@ -1,0 +1,389 @@
+[
+  {
+    "name": "verify_password",
+    "params": [
+      {
+        "name": "plain",
+        "type": "str"
+      },
+      {
+        "name": "hash",
+        "type": "PasswordHash"
+      }
+    ],
+    "returnType": "bool",
+    "file": "auth_service.py",
+    "calls": [
+      "progmune",
+      "verify"
+    ],
+    "exported": true,
+    "external": false,
+    "description": "verify user credentials",
+    "purpose": "verify user credentials",
+    "tags": [],
+    "inputs": [],
+    "outputs": [],
+    "requires": "plain password and stored hash",
+    "produces": "verification result",
+    "useWhen": "",
+    "language": "python",
+    "protocol": {
+      "namespace": "auth",
+      "pre_states": [
+        "UNAUTHENTICATED"
+      ],
+      "post_states": [
+        "PASSWORD_VERIFIED"
+      ],
+      "invalidate": []
+    }
+  },
+  {
+    "name": "generate_jwt",
+    "params": [
+      {
+        "name": "payload",
+        "type": "UserPayload"
+      }
+    ],
+    "returnType": "Token",
+    "file": "auth_service.py",
+    "calls": [
+      "progmune",
+      "Token"
+    ],
+    "exported": true,
+    "external": false,
+    "description": "issue authentication token",
+    "purpose": "issue authentication token",
+    "tags": [],
+    "inputs": [],
+    "outputs": [],
+    "requires": "verified password",
+    "produces": "JWT token",
+    "useWhen": "",
+    "language": "python",
+    "protocol": {
+      "namespace": "auth",
+      "pre_states": [
+        "PASSWORD_VERIFIED"
+      ],
+      "post_states": [
+        "TOKEN_ISSUED"
+      ],
+      "invalidate": [
+        "PASSWORD_VERIFIED"
+      ]
+    }
+  },
+  {
+    "name": "create_session",
+    "params": [
+      {
+        "name": "user",
+        "type": "UserPayload"
+      },
+      {
+        "name": "token",
+        "type": "Token"
+      }
+    ],
+    "returnType": "dict",
+    "file": "auth_service.py",
+    "calls": [
+      "progmune"
+    ],
+    "exported": true,
+    "external": false,
+    "description": "establish active session",
+    "purpose": "establish active session",
+    "tags": [],
+    "inputs": [],
+    "outputs": [],
+    "requires": "issued token",
+    "produces": "active session",
+    "useWhen": "",
+    "language": "python",
+    "protocol": {
+      "namespace": "auth",
+      "pre_states": [
+        "TOKEN_ISSUED"
+      ],
+      "post_states": [
+        "SESSION_ACTIVE"
+      ],
+      "invalidate": [
+        "TOKEN_ISSUED"
+      ]
+    }
+  },
+  {
+    "name": "logout",
+    "params": [
+      {
+        "name": "session",
+        "type": "dict"
+      }
+    ],
+    "returnType": "None",
+    "file": "auth_service.py",
+    "calls": [
+      "progmune"
+    ],
+    "exported": true,
+    "external": false,
+    "description": "terminate user session",
+    "purpose": "terminate user session",
+    "tags": [],
+    "inputs": [],
+    "outputs": [],
+    "requires": "active session",
+    "produces": "",
+    "useWhen": "",
+    "language": "python",
+    "protocol": {
+      "namespace": "auth",
+      "pre_states": [
+        "SESSION_ACTIVE"
+      ],
+      "post_states": [
+        "UNAUTHENTICATED"
+      ],
+      "invalidate": [
+        "SESSION_ACTIVE"
+      ]
+    }
+  },
+  {
+    "name": "compute_hash",
+    "params": [
+      {
+        "name": "data",
+        "type": "str"
+      }
+    ],
+    "returnType": "str",
+    "file": "auth_service.py",
+    "calls": [
+      "hexdigest",
+      "sha256",
+      "encode"
+    ],
+    "exported": true,
+    "external": false,
+    "description": "compute hash digest",
+    "purpose": "compute hash digest",
+    "tags": [
+      "stateless",
+      "crypto"
+    ],
+    "inputs": [],
+    "outputs": [],
+    "requires": "",
+    "produces": "",
+    "useWhen": "",
+    "language": "python"
+  },
+  {
+    "name": "validate_input",
+    "params": [
+      {
+        "name": "data",
+        "type": "str"
+      }
+    ],
+    "returnType": "bool",
+    "file": "auth_service.py",
+    "calls": [
+      "len",
+      "startswith"
+    ],
+    "exported": true,
+    "external": false,
+    "description": "validate input format",
+    "purpose": "validate input format",
+    "tags": [
+      "stateless",
+      "validation"
+    ],
+    "inputs": [],
+    "outputs": [],
+    "requires": "",
+    "produces": "",
+    "useWhen": "",
+    "language": "python"
+  },
+  {
+    "name": "open_config",
+    "params": [
+      {
+        "name": "path",
+        "type": "str"
+      }
+    ],
+    "returnType": "object",
+    "file": "auth_service.py",
+    "calls": [
+      "progmune",
+      "open"
+    ],
+    "exported": true,
+    "external": false,
+    "description": "open configuration file",
+    "purpose": "open configuration file",
+    "tags": [],
+    "inputs": [],
+    "outputs": [],
+    "requires": "",
+    "produces": "file handle",
+    "useWhen": "",
+    "language": "python",
+    "protocol": {
+      "namespace": "file",
+      "pre_states": [],
+      "post_states": [
+        "FILE_OPEN"
+      ],
+      "invalidate": []
+    }
+  },
+  {
+    "name": "read_config",
+    "params": [
+      {
+        "name": "fh",
+        "type": "object"
+      }
+    ],
+    "returnType": "dict",
+    "file": "auth_service.py",
+    "calls": [
+      "progmune"
+    ],
+    "exported": true,
+    "external": false,
+    "description": "read configuration from file handle",
+    "purpose": "read configuration from file handle",
+    "tags": [],
+    "inputs": [],
+    "outputs": [],
+    "requires": "open file handle",
+    "produces": "",
+    "useWhen": "",
+    "language": "python",
+    "protocol": {
+      "namespace": "file",
+      "pre_states": [
+        "FILE_OPEN"
+      ],
+      "post_states": [],
+      "invalidate": []
+    }
+  },
+  {
+    "name": "close_config",
+    "params": [
+      {
+        "name": "fh",
+        "type": "object"
+      }
+    ],
+    "returnType": "None",
+    "file": "auth_service.py",
+    "calls": [
+      "progmune",
+      "close"
+    ],
+    "exported": true,
+    "external": false,
+    "description": "close configuration file handle",
+    "purpose": "close configuration file handle",
+    "tags": [],
+    "inputs": [],
+    "outputs": [],
+    "requires": "",
+    "produces": "",
+    "useWhen": "",
+    "language": "python",
+    "protocol": {
+      "namespace": "file",
+      "pre_states": [
+        "FILE_OPEN"
+      ],
+      "post_states": [],
+      "invalidate": [
+        "FILE_OPEN"
+      ]
+    }
+  },
+  {
+    "name": "authenticate_and_open",
+    "params": [
+      {
+        "name": "filename",
+        "type": "str"
+      }
+    ],
+    "returnType": "dict",
+    "file": "auth_service.py",
+    "calls": [
+      "progmune",
+      "verify_password",
+      "create_session",
+      "open_config",
+      "read_config",
+      "close_config",
+      "logout",
+      "PasswordHash",
+      "UserPayload",
+      "Token"
+    ],
+    "exported": true,
+    "external": false,
+    "description": "authenticate and open file in one step",
+    "purpose": "authenticate and open file in one step",
+    "tags": [
+      "cross-protocol"
+    ],
+    "inputs": [],
+    "outputs": [],
+    "requires": "",
+    "produces": "",
+    "useWhen": "",
+    "language": "python",
+    "protocol": {
+      "namespace": "cross",
+      "pre_states": [
+        "UNAUTHENTICATED"
+      ],
+      "post_states": [
+        "AUTH_READY"
+      ],
+      "invalidate": []
+    }
+  },
+  {
+    "name": "PasswordHash.verify",
+    "params": [
+      {
+        "name": "plain",
+        "type": "str"
+      }
+    ],
+    "returnType": "bool",
+    "file": "auth_service.py",
+    "calls": [],
+    "exported": true,
+    "external": false,
+    "description": "",
+    "purpose": "",
+    "tags": [],
+    "inputs": [],
+    "outputs": [],
+    "requires": "",
+    "produces": "",
+    "useWhen": "",
+    "language": "python"
+  }
+]

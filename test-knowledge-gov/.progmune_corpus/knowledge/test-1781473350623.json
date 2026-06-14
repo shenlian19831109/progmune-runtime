@@ -1,0 +1,34 @@
+[
+  {
+    "id": "KP-1781473350623-enkf",
+    "generatedBy": "transition-synthesizer",
+    "protocol": "FileProtocol",
+    "change": "open_file → flush_file",
+    "fromState": "FILE_OPEN",
+    "toState": "FILE_DIRTY",
+    "confidence": 1,
+    "evidenceCount": 3,
+    "createdAt": "2026-06-14T21:42:30.623Z",
+    "status": "rolled_back",
+    "approvedAt": "2026-06-14T21:42:30.627Z",
+    "approvalMetrics": {
+      "top1Before": 0.5,
+      "top1After": 0.55,
+      "top3Before": 0.7,
+      "top3After": 0.75
+    },
+    "rolledBackAt": "2026-06-14T21:42:30.679Z"
+  },
+  {
+    "id": "KP-1781473350680-hthn",
+    "generatedBy": "transition-synthesizer",
+    "protocol": "FileProtocol",
+    "change": "open_file → flush_file",
+    "fromState": "FILE_OPEN",
+    "toState": "FILE_DIRTY",
+    "confidence": 1,
+    "evidenceCount": 3,
+    "createdAt": "2026-06-14T21:42:30.680Z",
+    "status": "rejected"
+  }
+]

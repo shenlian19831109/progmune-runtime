@@ -8,10 +8,10 @@
     ],
     "protocol": "FileProtocol",
     "violationType": "resource_leak",
-    "acceptanceRate": 0.8666666666666667,
-    "executionSuccessRate": 0.8666666666666667,
+    "acceptanceRate": 0.9333333333333333,
+    "executionSuccessRate": 0.9333333333333333,
     "frequency": 60,
-    "avgLatencyMs": 5.446511645841258,
+    "avgLatencyMs": 5.525569712589208,
     "goal": "safely write config file"
   },
   {
@@ -23,7 +23,7 @@
     ],
     "protocol": "AuthProtocol",
     "violationType": "missing_prerequisite",
-    "acceptanceRate": 0.8666666666666667,
+    "acceptanceRate": 0.9,
     "executionSuccessRate": 1,
     "frequency": 60,
     "avgLatencyMs": 0,
