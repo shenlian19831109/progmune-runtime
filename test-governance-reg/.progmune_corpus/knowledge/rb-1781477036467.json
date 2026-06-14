@@ -1,0 +1,22 @@
+[
+  {
+    "id": "KP-1781477036467-i32v",
+    "generatedBy": "transition-synthesizer",
+    "protocol": "FileProtocol",
+    "change": "open_file → close_file",
+    "fromState": "FILE_OPEN",
+    "toState": "FILE_CLOSED",
+    "confidence": 1,
+    "evidenceCount": 10,
+    "createdAt": "2026-06-14T22:43:56.467Z",
+    "status": "rolled_back",
+    "approvedAt": "2026-06-14T22:43:56.468Z",
+    "approvalMetrics": {
+      "top1Before": 0.14,
+      "top1After": 0.15,
+      "top3Before": 0.39,
+      "top3After": 0.4
+    },
+    "rolledBackAt": "2026-06-14T22:43:56.470Z"
+  }
+]

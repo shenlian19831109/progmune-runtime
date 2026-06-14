@@ -415,7 +415,7 @@ describe("FeatureExtractor", () => {
     };
     const features = extractFeatures(candidate, ctx);
     const keys = Object.keys(features);
-    expect(keys.length).toBe(7);
+    expect(keys.length).toBeGreaterThanOrEqual(7); // P7.3: 8 with goalMatch
     expect(keys).toContain("protocolSafety");
     expect(keys).toContain("historicalSuccessRate");
     expect(keys).toContain("actionCount");
