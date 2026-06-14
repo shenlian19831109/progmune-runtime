@@ -69,13 +69,19 @@ for (const [canonical, variants] of Object.entries(SYNONYM_GROUPS)) {
  * Normalize a function name to its canonical form.
  *
  * Steps:
+ *   0. Extract method name after last dot (fs.open → open)
  *   1. Strip library prefixes (sqlite3_, ngx_, etc.)
  *   2. Convert CamelCase to snake_case
- *   3. Look up in synonym map
- *   4. Return canonical form or cleaned original
+ *   3. Remove leading/trailing underscores
+ *   4. Look up in synonym map → return canonical form or cleaned original
  */
 function normalizeFunctionName(fn) {
     let cleaned = fn;
+    // Step 0: Extract method name after last dot (e.g., fs.open → open)
+    const dotIdx = cleaned.lastIndexOf(".");
+    if (dotIdx >= 0) {
+        cleaned = cleaned.slice(dotIdx + 1);
+    }
     // Step 1: Strip known prefixes
     for (const prefix of STRIP_PREFIXES) {
         if (cleaned.startsWith(prefix)) {
