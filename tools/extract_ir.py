@@ -76,19 +76,23 @@ def extract_protocol_from_decorators(node):
             continue
         if not dec_str:
             continue
-        # Match @progmune(...) or @protocol(...)
-        m = re.search(r'@(?:progmune|protocol)\s*\((.*)\)', dec_str)
+        # Match @progmune(...) or @protocol(...) — unparse drops the @ prefix
+        m = re.search(r'(?:progmune|protocol)\s*\((.*)\)', dec_str)
         if m:
             kwargs_str = m.group(1)
             kwargs = {}
             # Parse keyword arguments: key=value, key="value", key=[...]
             for match in re.finditer(
-                r'(\w+)\s*=\s*(?:(\[[^\]]*\])|"([^"]*)"|\'([^\']*)\'|(\w+))',
+                r'''(\w+)\s*=\s*(?:(\[[^\]]*\])|"([^"]*)"|'([^']*)'|(\w+))''',
                 kwargs_str
             ):
                 key = match.group(1)
                 if match.group(2):  # list [...]
-                    items = re.findall(r'"([^"]*)"', match.group(2))
+                    # Handle both single and double quoted items inside list
+                    items = re.findall(r'''["']([^"']*)["']''', match.group(2))
+                    if not items:
+                        # Also try bare words in list
+                        items = [w.strip() for w in match.group(2).strip('[]').split(',') if w.strip()]
                     kwargs[key] = items
                 elif match.group(3):  # "string"
                     kwargs[key] = match.group(3)
