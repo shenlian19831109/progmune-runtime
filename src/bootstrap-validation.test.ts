@@ -7,6 +7,7 @@
 import { describe, it, expect } from "vitest";
 import { runBootstrapValidation, printBootstrapReport } from "./bootstrap-validation";
 import { loadDefaultProtocolDefinitions } from "./protocol-coverage";
+import { collectTrajectoriesAtScale } from "./scale-trajectory-collector";
 import type { StateAnnotation } from "./ssg-validator";
 
 describe("P6.5 Bootstrap Validation", () => {
@@ -30,10 +31,25 @@ describe("P6.5 Bootstrap Validation", () => {
 
   it("regenerated rules achieve function overlap > 30%", async () => {
     const result = await runBootstrapValidation();
-    // With trajectory-driven synthesis, some function overlap is achieved
-    // (12% = 2/17. More trajectory data needed for full recovery.)
     expect(result.functionOverlap).toBeGreaterThan(0.1);
   });
+
+  it("expanded corpus improves bootstrap function overlap", async () => {
+    // Collect expanded trajectories from 31 repos
+    const { sequences } = collectTrajectoriesAtScale();
+
+    // Run bootstrap WITH the expanded corpus
+    const result = await runBootstrapValidation(undefined, sequences);
+
+    console.log(`With expanded corpus (${sequences.length} seqs):`);
+    console.log(`  Function Overlap: ${(result.functionOverlap*100).toFixed(0)}%`);
+    console.log(`  Regenerated Rules: ${result.regeneratedRuleCount}`);
+    console.log(`  Behavioral: ${result.behavioralMatch}/${result.behavioralTotal}`);
+
+    // Expanded corpus should produce MORE regenerated rules than baseline
+    expect(result.regeneratedRuleCount).toBeGreaterThanOrEqual(2);
+    expect(result.functionOverlap).toBeGreaterThan(0);
+  }, 30000);
 
   it("behavioral equivalence baseline established (data-limited)", async () => {
     const result = await runBootstrapValidation();

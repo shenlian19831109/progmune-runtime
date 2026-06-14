@@ -101,15 +101,17 @@ export interface BootstrapResult {
  * Run the bootstrap validation experiment.
  */
 export async function runBootstrapValidation(
-  existingRules?: Map<string, StateAnnotation>
+  existingRules?: Map<string, StateAnnotation>,
+  extraSequences?: string[][]
 ): Promise<BootstrapResult> {
   // 1. Ground truth
   const defs = loadDefaultProtocolDefinitions();
   const originalRules = existingRules || new Map<string, StateAnnotation>();
   for (const p of defs) for (const [fn, rule] of p.rules) originalRules.set(fn, rule);
 
-  // 2. Generate trajectories from original rules
-  const sequences = rulesToSequences(originalRules);
+  // 2. Generate trajectories from original rules + extra corpus
+  const ruleSeqs = rulesToSequences(originalRules);
+  const sequences = extraSequences ? [...ruleSeqs, ...extraSequences] : ruleSeqs;
   if (sequences.length < 3) {
     return {
       originalRuleCount: originalRules.size,
