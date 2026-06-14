@@ -19,7 +19,7 @@ const failure_corpus_1 = require("./failure-corpus");
 /** Build a capability graph from IR functions. */
 function buildCapabilityGraph(ir) {
     const SKIP_FILES = new Set(["src/strategy-planner.ts", "src/planner.ts"]);
-    const SKIP_TAGS = new Set(["python"]); // language-specific functions excluded from graph
+    const SKIP_TAGS = new Set(); // P8.3: Python IR now supported
     const graph = new Map();
     for (const f of ir) {
         if (!f.exported)
