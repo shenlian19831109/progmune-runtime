@@ -32,6 +32,7 @@ if (fs.existsSync(envPath)) {
 
 import { plan } from "./planner";
 import { extractIR } from "./extract-ir";
+import { extractIRPython, isPythonProject } from "./extract-ir-python";
 import { emitCode } from "./emitter";
 import { recordRun } from "./feedback";
 import { reportFingerprints } from "./immune-reporter";
@@ -280,10 +281,11 @@ Then restart Claude Code.`,
         log.warn(`No .ts files found in project root, IR may be empty`);
       }
 
-      // IR extraction
+      // IR extraction — auto-detect language
+      const isPython = isPythonProject(projectPath);
       let ir: FunctionInfo[];
       try {
-        ir = extractIR(projectPath);
+        ir = isPython ? extractIRPython(projectPath) : extractIR(projectPath);
       } catch (e: any) {
         return {
           content: [
@@ -445,10 +447,11 @@ Then restart Claude Code.`,
       const fail = (msg: string) => results.push(`✖ ${msg}`);
       const warn = (msg: string) => results.push(`! ${msg}`);
 
-      // 1. IR extraction
+      // 1. IR extraction — auto-detect language
       try {
-        const ir = extractIR(projectPath);
-        pass(`IR: ${ir.length} functions extracted`);
+        const py = isPythonProject(projectPath);
+        const ir = py ? extractIRPython(projectPath) : extractIR(projectPath);
+        pass(`IR (${py ? "Python" : "TypeScript"}): ${ir.length} functions extracted`);
       } catch (e: any) {
         fail(`IR extraction: ${e.message}`);
       }
