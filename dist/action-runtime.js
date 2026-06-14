@@ -1,3 +1,6 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.executeActionCode = executeActionCode;
 class ActionBuilder {
     constructor() {
         this.actions = [];
@@ -49,7 +52,7 @@ class ActionBuilder {
 }
 let currentVars = {};
 /** @requires ACTION_CODE @produces ACTION_RESULT */
-export function executeActionCode(code) {
+function executeActionCode(code) {
     const root = new ActionBuilder();
     currentVars = {};
     const apiFuncs = {

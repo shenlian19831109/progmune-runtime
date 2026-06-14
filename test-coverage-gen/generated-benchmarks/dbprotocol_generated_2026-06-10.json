@@ -1,0 +1,42 @@
+{
+  "protocol": "DBProtocol",
+  "generatedAt": "2026-06-10T20:19:33.910Z",
+  "cases": [
+    {
+      "goal": "cover transition: INIT → DB_CONNECTED via connect_db",
+      "protocol": "_global",
+      "broken": [
+        "disconnect_db"
+      ],
+      "expected": [
+        "connect_db",
+        "connect_db",
+        "disconnect_db"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "INIT",
+        "to": "DB_CONNECTED",
+        "rule": "connect_db"
+      }
+    },
+    {
+      "goal": "cover transition: DB_CONNECTED → ∅ via disconnect_db",
+      "protocol": "_global",
+      "broken": [
+        "connect_db"
+      ],
+      "expected": [
+        "connect_db",
+        "disconnect_db"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "DB_CONNECTED",
+        "to": "∅",
+        "rule": "disconnect_db"
+      }
+    }
+  ],
+  "source": "coverage-gap"
+}

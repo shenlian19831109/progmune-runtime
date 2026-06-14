@@ -1,3 +1,4 @@
+"use strict";
 /**
  * Phase 8: Multi-Level Planning — Strategy Layer
  *
@@ -7,11 +8,14 @@
  * The Action Layer (planner.ts) then uses this chain to constrain
  * the LLM's function selection space.
  */
-import { jaccardSimilarity, extractKeywords } from "./utils";
-import { getFailureAdjustedCredit } from "./feedback";
-import { getTopology } from "./semantic-topology";
-import { getConstraints, applyConstraints } from "./planner-constraints";
-import { getEdgeConfidence } from "./failure-corpus";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.selectCapabilityChains = selectCapabilityChains;
+exports.formatChainHint = formatChainHint;
+const utils_1 = require("./utils");
+const feedback_1 = require("./feedback");
+const semantic_topology_1 = require("./semantic-topology");
+const planner_constraints_1 = require("./planner-constraints");
+const failure_corpus_1 = require("./failure-corpus");
 /** Build a capability graph from IR functions. */
 function buildCapabilityGraph(ir) {
     const SKIP_FILES = new Set(["src/strategy-planner.ts", "src/planner.ts"]);
@@ -63,7 +67,7 @@ function scoreNode(node, intentLower, keywords) {
                     score += 2;
             }
         }
-        const js = jaccardSimilarity(nameLower, kw);
+        const js = (0, utils_1.jaccardSimilarity)(nameLower, kw);
         if (js > 0.2) {
             score += js;
             hasMatch = true;
@@ -127,12 +131,12 @@ function scoreNode(node, intentLower, keywords) {
     if (node.hasExplicitMeta)
         score *= 1.3;
     // L3: Dynamic Credit — multiply by actual success rate
-    const successRate = getFailureAdjustedCredit(node.name);
+    const successRate = (0, feedback_1.getFailureAdjustedCredit)(node.name);
     const creditFactor = 0.3 + successRate * 0.7;
     score *= creditFactor;
     // Rule → Planner: apply mined rule constraints
-    const constraints = getConstraints();
-    const { multiplier } = applyConstraints(node.name, node.purpose, constraints);
+    const constraints = (0, planner_constraints_1.getConstraints)();
+    const { multiplier } = (0, planner_constraints_1.applyConstraints)(node.name, node.purpose, constraints);
     return score * multiplier;
 }
 /** Pick the highest-scoring node from a list. */
@@ -155,7 +159,7 @@ function findRelated(graph, capability, allNodes, field, isProducer) {
     // Topology fallback: find semantically related nodes via capabilityMatch
     if (results.length === 0) {
         try {
-            const topo = getTopology();
+            const topo = (0, semantic_topology_1.getTopology)();
             for (const node of allNodes) {
                 if (node[field].length > 0) {
                     for (const v of node[field]) {
@@ -191,16 +195,16 @@ function findConsumers(graph, capability, allNodes) {
  * 3. For each producer, trace forward: producer → consumer → consumer...
  * 4. Score each chain and return top N
  */
-export function selectCapabilityChains(intent, ir, maxChains = 5, llmSeeds) {
+function selectCapabilityChains(intent, ir, maxChains = 5, llmSeeds) {
     // Guard: null/undefined/empty intent
     if (!intent || typeof intent !== "string" || !intent.trim())
         return { chains: [], needsLLM: false };
     // Ensure semantic topology is built (cached after first build)
     const startTopo = Date.now();
-    getTopology(ir);
+    (0, semantic_topology_1.getTopology)(ir);
     const topoMs = Date.now() - startTopo;
     const intentLower = intent.toLowerCase();
-    const keywords = extractKeywords(intent);
+    const keywords = (0, utils_1.extractKeywords)(intent);
     const graph = buildCapabilityGraph(ir);
     // Score all nodes
     const startScore = Date.now();
@@ -233,7 +237,7 @@ export function selectCapabilityChains(intent, ir, maxChains = 5, llmSeeds) {
     seeds = seeds.slice(0, graph.size > 1000 ? 10 : graph.size > 500 ? 20 : 15);
     // ── Capability Ranking: preload edge confidence from session history ──
     const edgeConfMap = new Map();
-    for (const ec of getEdgeConfidence()) {
+    for (const ec of (0, failure_corpus_1.getEdgeConfidence)()) {
         edgeConfMap.set(`${ec.producer}→${ec.consumer}`, ec.confidence);
     }
     // ── LLM seed injection: bridge the semantic gap ──
@@ -320,7 +324,7 @@ export function selectCapabilityChains(intent, ir, maxChains = 5, llmSeeds) {
                 // Strategy 2: semantic leap — topology similarity
                 if (!expanded) {
                     try {
-                        const topo = getTopology();
+                        const topo = (0, semantic_topology_1.getTopology)();
                         const similar = topo.findSimilar(current.name, 10)
                             .filter(s => !entry.visited.has(s.name) && s.similarity > 0.25);
                         for (const s of similar.slice(0, 3)) {
@@ -413,7 +417,7 @@ export function selectCapabilityChains(intent, ir, maxChains = 5, llmSeeds) {
 /** Format chains as a routing hint (not full path).
  *  Only shows top 2 high-confidence next steps per entry,
  *  so the LLM gets guidance without being forced into long chains. */
-export function formatChainHint(chains) {
+function formatChainHint(chains) {
     if (chains.length === 0)
         return "";
     const lines = ["\n建议的下一步调用 (已从历史成功链中验证):"];

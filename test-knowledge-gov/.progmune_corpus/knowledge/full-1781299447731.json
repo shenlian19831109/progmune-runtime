@@ -1,0 +1,21 @@
+[
+  {
+    "id": "KP-1781299447738-2l91",
+    "generatedBy": "transition-synthesizer",
+    "protocol": "AuthProtocol",
+    "change": "revoke_token → create_session",
+    "fromState": "UNAUTHENTICATED",
+    "toState": "TOKEN_ISSUED",
+    "confidence": 1,
+    "evidenceCount": 2,
+    "createdAt": "2026-06-12T21:24:07.738Z",
+    "status": "approved",
+    "approvedAt": "2026-06-12T21:24:07.749Z",
+    "approvalMetrics": {
+      "top1Before": 0,
+      "top1After": 0,
+      "top3Before": 0,
+      "top3After": 0
+    }
+  }
+]

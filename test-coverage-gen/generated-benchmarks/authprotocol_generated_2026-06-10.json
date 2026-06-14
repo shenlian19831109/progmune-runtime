@@ -1,0 +1,170 @@
+{
+  "protocol": "AuthProtocol",
+  "generatedAt": "2026-06-10T20:19:33.906Z",
+  "cases": [
+    {
+      "goal": "cover transition: UNAUTHENTICATED → PASSWORD_VERIFIED via verify_password",
+      "protocol": "_global",
+      "broken": [
+        "revoke_token",
+        "logout",
+        "generate_jwt"
+      ],
+      "expected": [
+        "revoke_token",
+        "logout",
+        "verify_password",
+        "generate_jwt"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "UNAUTHENTICATED",
+        "to": "PASSWORD_VERIFIED",
+        "rule": "verify_password"
+      }
+    },
+    {
+      "goal": "cover transition: PASSWORD_VERIFIED → TOKEN_ISSUED via generate_jwt",
+      "protocol": "_global",
+      "broken": [
+        "verify_password",
+        "create_session",
+        "revoke_token"
+      ],
+      "expected": [
+        "verify_password",
+        "generate_jwt",
+        "create_session",
+        "revoke_token"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "PASSWORD_VERIFIED",
+        "to": "TOKEN_ISSUED",
+        "rule": "generate_jwt"
+      }
+    },
+    {
+      "goal": "cover transition: PASSWORD_VERIFIED → ∅ via generate_jwt",
+      "protocol": "_global",
+      "broken": [
+        "verify_password"
+      ],
+      "expected": [
+        "verify_password",
+        "generate_jwt"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "PASSWORD_VERIFIED",
+        "to": "∅",
+        "rule": "generate_jwt"
+      }
+    },
+    {
+      "goal": "cover transition: TOKEN_ISSUED → SESSION_ACTIVE via create_session",
+      "protocol": "_global",
+      "broken": [
+        "generate_jwt",
+        "logout"
+      ],
+      "expected": [
+        "generate_jwt",
+        "create_session",
+        "logout"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "TOKEN_ISSUED",
+        "to": "SESSION_ACTIVE",
+        "rule": "create_session"
+      }
+    },
+    {
+      "goal": "cover transition: TOKEN_ISSUED → ∅ via create_session",
+      "protocol": "_global",
+      "broken": [
+        "generate_jwt"
+      ],
+      "expected": [
+        "generate_jwt",
+        "create_session"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "TOKEN_ISSUED",
+        "to": "∅",
+        "rule": "create_session"
+      }
+    },
+    {
+      "goal": "cover transition: TOKEN_ISSUED → UNAUTHENTICATED via revoke_token",
+      "protocol": "_global",
+      "broken": [
+        "generate_jwt"
+      ],
+      "expected": [
+        "generate_jwt",
+        "revoke_token"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "TOKEN_ISSUED",
+        "to": "UNAUTHENTICATED",
+        "rule": "revoke_token"
+      }
+    },
+    {
+      "goal": "cover transition: TOKEN_ISSUED → ∅ via revoke_token",
+      "protocol": "_global",
+      "broken": [
+        "generate_jwt"
+      ],
+      "expected": [
+        "generate_jwt",
+        "revoke_token"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "TOKEN_ISSUED",
+        "to": "∅",
+        "rule": "revoke_token"
+      }
+    },
+    {
+      "goal": "cover transition: SESSION_ACTIVE → UNAUTHENTICATED via logout",
+      "protocol": "_global",
+      "broken": [
+        "create_session"
+      ],
+      "expected": [
+        "create_session",
+        "logout"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "SESSION_ACTIVE",
+        "to": "UNAUTHENTICATED",
+        "rule": "logout"
+      }
+    },
+    {
+      "goal": "cover transition: SESSION_ACTIVE → ∅ via logout",
+      "protocol": "_global",
+      "broken": [
+        "create_session"
+      ],
+      "expected": [
+        "create_session",
+        "logout"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "SESSION_ACTIVE",
+        "to": "∅",
+        "rule": "logout"
+      }
+    }
+  ],
+  "source": "coverage-gap"
+}

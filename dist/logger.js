@@ -1,3 +1,4 @@
+"use strict";
 /**
  * Structured logger for Progmune Runtime.
  *
@@ -8,6 +9,8 @@
  *   PROGMUNE_LOG_LEVEL  — debug | info | warn | error (default: info)
  *   PROGMUNE_LOG_JSON   — "true" for machine-readable JSON lines
  */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.createLogger = createLogger;
 const LEVEL_ORDER = { debug: 0, info: 1, warn: 2, error: 3 };
 const minLevel = (process.env.PROGMUNE_LOG_LEVEL || "info");
 const jsonMode = process.env.PROGMUNE_LOG_JSON === "true";
@@ -41,7 +44,7 @@ function formatLine(level, module, message, data) {
     }
     return line;
 }
-export function createLogger(module) {
+function createLogger(module) {
     return {
         debug(message, data) {
             if (shouldLog("debug"))

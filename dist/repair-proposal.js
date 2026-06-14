@@ -1,3 +1,4 @@
+"use strict";
 /**
  * Phase 4: Repair Proposal Engine (P2)
  *
@@ -12,15 +13,23 @@
  * The engine produces Proposal JSON. The caller (Planner, human, future Repair Planner)
  * decides whether to accept and create a Branch.
  */
-import { checkLedgerConsistency, } from "./ssg-validator";
-import { assertDeltaConsistency } from "./runtime-invariants";
-import { getNsInit } from "./protocol-registry";
-import { createBranch } from "./branch-ledger";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.suggestRepairs = suggestRepairs;
+exports.suggestProtocolRepair = suggestProtocolRepair;
+exports.suggestInvariantRepair = suggestInvariantRepair;
+exports.applyProposalAsBranch = applyProposalAsBranch;
+exports.validateProposal = validateProposal;
+exports.generateRepairSummary = generateRepairSummary;
+exports.getMinimalFixSet = getMinimalFixSet;
+const ssg_validator_1 = require("./ssg-validator");
+const runtime_invariants_1 = require("./runtime-invariants");
+const protocol_registry_1 = require("./protocol-registry");
+const branch_ledger_1 = require("./branch-ledger");
 // ── Proposal Generation ──
 /** Generate repair proposals for all detected violations in a ledger. */
 /** Generate repair proposals for all detected violations. */
 /** @requires VIOLATIONS @produces REPAIR_PROPOSALS */
-export function suggestRepairs(violations, ir, protocols) {
+function suggestRepairs(violations, ir, protocols) {
     const proposals = [];
     for (const v of violations) {
         if (v.violatedConstraint === "protocol") {
@@ -37,7 +46,7 @@ export function suggestRepairs(violations, ir, protocols) {
 }
 /** Protocol violation repair: use SSG fixPath to suggest insertions. */
 /** Generate repair proposals for SSG protocol violations. */
-export function suggestProtocolRepair(rejection, ir) {
+function suggestProtocolRepair(rejection, ir) {
     const proposals = [];
     if (rejection.fixPath && rejection.fixPath.length > 0) {
         // Each missing function in the fix path is a separate insert proposal
@@ -89,7 +98,7 @@ export function suggestProtocolRepair(rejection, ir) {
 }
 /** Invariant violation repair: use rebuildState to compute correct transition data. */
 /** Generate repair proposals for invariant consistency violations. */
-export function suggestInvariantRepair(violation, ledger, namespaceInitialStates = getNsInit()) {
+function suggestInvariantRepair(violation, ledger, namespaceInitialStates = (0, protocol_registry_1.getNsInit)()) {
     const proposals = [];
     if (violation.invariant === "before-consistency") {
         // statesBefore is wrong — can be recomputed from rebuildState
@@ -103,7 +112,7 @@ export function suggestInvariantRepair(violation, ledger, namespaceInitialStates
         };
         // Ontology: verify corrected transition passes delta consistency
         try {
-            assertDeltaConsistency(correctedTransition);
+            (0, runtime_invariants_1.assertDeltaConsistency)(correctedTransition);
         }
         catch { /* consistency assertion — best-effort */ }
         proposals.push({
@@ -128,7 +137,7 @@ export function suggestInvariantRepair(violation, ledger, namespaceInitialStates
             statesAfter: correctStatesAfter,
         };
         try {
-            assertDeltaConsistency(correctedTransition);
+            (0, runtime_invariants_1.assertDeltaConsistency)(correctedTransition);
         }
         catch { /* consistency assertion — best-effort */ }
         proposals.push({
@@ -219,8 +228,8 @@ function suggestGenericRepair(violation, ir) {
  *  Creates a child branch with the proposed fix applied.
  *  The original ledger is never modified. */
 /** Convert an accepted repair proposal into a new branch. */
-export function applyProposalAsBranch(proposal, parentBranch, currentLedger, ir) {
-    const branch = createBranch(parentBranch, "repair_attempt");
+function applyProposalAsBranch(proposal, parentBranch, currentLedger, ir) {
+    const branch = (0, branch_ledger_1.createBranch)(parentBranch, "repair_attempt");
     switch (proposal.strategy) {
         case "insert": {
             if (proposal.insertBefore !== undefined && proposal.insertBefore < currentLedger.length) {
@@ -272,7 +281,7 @@ export function applyProposalAsBranch(proposal, parentBranch, currentLedger, ir)
 /** Validate a repair proposal: does applying it fix the violation?
  *  Returns true if a re-check passes after applying the proposal. */
 /** Validate whether a repair proposal fixes the violation. */
-export function validateProposal(proposal, currentLedger, namespaceInitialStates = getNsInit()) {
+function validateProposal(proposal, currentLedger, namespaceInitialStates = (0, protocol_registry_1.getNsInit)()) {
     let proposedLedger;
     switch (proposal.strategy) {
         case "replace":
@@ -287,7 +296,7 @@ export function validateProposal(proposal, currentLedger, namespaceInitialStates
         default:
             proposedLedger = [...currentLedger];
     }
-    const result = checkLedgerConsistency(proposedLedger, namespaceInitialStates);
+    const result = (0, ssg_validator_1.checkLedgerConsistency)(proposedLedger, namespaceInitialStates);
     return {
         valid: result.consistent,
         remainingViolations: result.violations,
@@ -297,8 +306,8 @@ export function validateProposal(proposal, currentLedger, namespaceInitialStates
 /** Generate a comprehensive repair summary from a ledger and IR context. */
 /** Generate a comprehensive repair summary with minimal fix set. */
 /** @requires LEDGER_DATA @produces REPAIR_SUMMARY */
-export function generateRepairSummary(ledger, ir, protocols, namespaceInitialStates = getNsInit()) {
-    const consistency = checkLedgerConsistency(ledger, namespaceInitialStates);
+function generateRepairSummary(ledger, ir, protocols, namespaceInitialStates = (0, protocol_registry_1.getNsInit)()) {
+    const consistency = (0, ssg_validator_1.checkLedgerConsistency)(ledger, namespaceInitialStates);
     const allProposals = [];
     // Generate invariant repair proposals
     for (const v of consistency.violations) {
@@ -320,7 +329,7 @@ export function generateRepairSummary(ledger, ir, protocols, namespaceInitialSta
  */
 /** Get the minimal set of repair proposals by deduplication. */
 /** @requires REPAIR_PROPOSALS @produces MINIMAL_FIX_SET */
-export function getMinimalFixSet(proposals) {
+function getMinimalFixSet(proposals) {
     const seen = new Map();
     for (const p of proposals) {
         const existing = seen.get(p.violationIndex);

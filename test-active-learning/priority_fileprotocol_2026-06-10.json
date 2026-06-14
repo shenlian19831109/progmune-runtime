@@ -1,0 +1,28 @@
+{
+  "generatedAt": "2026-06-10T14:18:17.061Z",
+  "protocol": "FileProtocol",
+  "topK": 8,
+  "source": "active-learning",
+  "cases": [
+    {
+      "goal": "cover transition: INIT → FILE_OPEN via open_file",
+      "protocol": "_global",
+      "broken": [
+        "close_file"
+      ],
+      "expected": [
+        "open_file",
+        "open_file",
+        "close_file"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "INIT",
+        "to": "FILE_OPEN",
+        "rule": "open_file"
+      },
+      "importance": 0,
+      "difficulty": 0
+    }
+  ]
+}

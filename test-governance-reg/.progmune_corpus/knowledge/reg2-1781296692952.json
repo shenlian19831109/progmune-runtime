@@ -1,0 +1,14 @@
+[
+  {
+    "id": "KP-1781296692952-kw3s",
+    "generatedBy": "transition-synthesizer",
+    "protocol": "FileProtocol",
+    "change": "close_file → open_file",
+    "fromState": "FILE_OPEN",
+    "toState": "FILE_CLOSED",
+    "confidence": 0.2,
+    "evidenceCount": 1,
+    "createdAt": "2026-06-12T20:38:12.952Z",
+    "status": "proposed"
+  }
+]

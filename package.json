@@ -1,7 +1,7 @@
 {
   "name": "progmune-runtime",
   "version": "3.2.0",
-  "description": "Progmune Runtime — Program Immunology: Constraint-Guided Program Synthesis Runtime",
+  "description": "Progmune Runtime \u2014 Program Immunology: Constraint-Guided Program Synthesis Runtime",
   "main": "dist/mcp-server.mjs",
   "bin": {
     "progmune-runtime": "dist/mcp-server.mjs"
@@ -14,14 +14,22 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "ir": "npx ts-node src/extract-ir.ts .",
-    "guard": "node -e \"require('./dist/validator.js'); console.log('✅ 校验器已加载')\"",
+    "guard": "node -e \"require('./dist/validator.js'); console.log('\u2705 \u6821\u9a8c\u5668\u5df2\u52a0\u8f7d')\"",
     "obs": "npx ts-node src/semantic-trace.ts",
     "obs-web": "npx ts-node src/obs-web.ts",
     "check": "npx ts-node src/check.ts",
     "audit": "npx ts-node src/audit.ts",
     "replay-golden": "npx ts-node --transpile-only test/replay-golden.ts",
     "corpus:stats": "npx ts-node src/corpus-stats.ts",
-    "corpus:mine": "npx ts-node src/rule-miner.ts"
+    "corpus:mine": "npx ts-node src/rule-miner.ts",
+    "test:integration": "vitest run tests/integration/",
+    "test:perf": "vitest run tests/performance/",
+    "test:e2e": "vitest run tests/e2e/",
+    "test:chaos": "vitest run tests/chaos/",
+    "test:all": "vitest run src/ tests/",
+    "test:stress": "vitest run tests/stress/",
+    "test:soak": "vitest run tests/soak/",
+    "test:p7": "vitest run tests/p7-*/"
   },
   "keywords": [
     "program-synthesis",

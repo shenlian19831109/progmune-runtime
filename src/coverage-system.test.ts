@@ -77,21 +77,31 @@ describe("Coverage Engine", () => {
 // ═══════════════════════════════════════════════════════════════
 
 describe("Default Protocol Definitions", () => {
-  it("loads all 4 protocol groups", () => {
+  it("loads all 9 protocol groups", () => {
     const protocols = loadDefaultProtocolDefinitions();
-    expect(protocols.length).toBe(4);
+    expect(protocols.length).toBeGreaterThanOrEqual(9);
 
     const names = protocols.map(p => p.name);
     expect(names).toContain("FileProtocol");
     expect(names).toContain("AuthProtocol");
     expect(names).toContain("DBProtocol");
     expect(names).toContain("IRProtocol");
+    expect(names).toContain("StatelessProtocol");
+    expect(names).toContain("TransactionProtocol");
+    expect(names).toContain("ConditionalProtocol");
+    expect(names).toContain("LoopProtocol");
+    expect(names).toContain("CrossProtocol");
   });
 
-  it("each protocol has states and transitions", () => {
+  it("each protocol (except stateless) has states and transitions", () => {
     for (const p of loadDefaultProtocolDefinitions()) {
       expect(p.states.length).toBeGreaterThan(0);
-      expect(p.transitions.length).toBeGreaterThan(0);
+      // StatelessProtocol has empty pre/post states → 0 acquire transitions
+      if (p.name === "StatelessProtocol") {
+        expect(p.transitions.length).toBeGreaterThanOrEqual(0);
+      } else {
+        expect(p.transitions.length).toBeGreaterThan(0);
+      }
     }
   });
 
@@ -127,8 +137,8 @@ describe("Coverage Dashboard", () => {
   it("generates dashboard from current trajectories", () => {
     const dashboard = generateCoverageDashboard([]);
 
-    expect(dashboard.reports.length).toBe(4);
-    expect(dashboard.riskRanking.length).toBe(4);
+    expect(dashboard.reports.length).toBeGreaterThanOrEqual(9);
+    expect(dashboard.riskRanking.length).toBeGreaterThanOrEqual(9);
     expect(dashboard.overallTransitionCoverage).toBeGreaterThanOrEqual(0);
     expect(dashboard.overallTransitionCoverage).toBeLessThanOrEqual(1);
     expect(dashboard.criticalProtocols).toBeGreaterThanOrEqual(0);

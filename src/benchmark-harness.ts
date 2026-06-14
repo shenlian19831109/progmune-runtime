@@ -117,6 +117,7 @@ export async function runBenchmark(
           targetState: [],
           constraints: [],
           rules,
+          goal: tc.goal,
         });
 
         candidatesReturned = alts.length;
@@ -196,4 +197,25 @@ export function printBenchmarkReport(report: BenchmarkReport): void {
   }
 
   console.log();
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// Convenience: Load benchmark fixtures
+// ═══════════════════════════════════════════════════════════════
+
+/** Load all benchmark fixture cases from the benchmarks directory. */
+export function loadBenchmarkFixtures(suitePath?: string): BenchmarkCase[] {
+  const benchmarksDir = suitePath || path.resolve(__dirname, "..", "benchmarks");
+  const files = fs.readdirSync(benchmarksDir).filter(f => f.endsWith(".json"));
+  const all: BenchmarkCase[] = [];
+  for (const file of files) {
+    try {
+      const cases: BenchmarkCase[] = JSON.parse(
+        fs.readFileSync(path.join(benchmarksDir, file), "utf-8")
+      );
+      all.push(...cases);
+    } catch { /* skip */ }
+  }
+  return all;
 }

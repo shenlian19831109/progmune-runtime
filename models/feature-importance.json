@@ -1,0 +1,37 @@
+[
+  {
+    "name": "latencyCost",
+    "weight": 0.7655417331048938,
+    "importance": 0.2458049923999403
+  },
+  {
+    "name": "normActionCount",
+    "weight": 0.7653113807135039,
+    "importance": 0.2457310293939194
+  },
+  {
+    "name": "acceptanceRate",
+    "weight": 0.4175632855878658,
+    "importance": 0.13407386665144216
+  },
+  {
+    "name": "executionSuccessRate",
+    "weight": 0.3892593326981564,
+    "importance": 0.12498585404012967
+  },
+  {
+    "name": "historicalSuccessRate",
+    "weight": 0.38908519528512503,
+    "importance": 0.12492994089570433
+  },
+  {
+    "name": "protocolSafety",
+    "weight": 0.24907823792540199,
+    "importance": 0.07997561952883764
+  },
+  {
+    "name": "auditability",
+    "weight": 0.13858794875810165,
+    "importance": 0.044498697090026386
+  }
+]

@@ -27,7 +27,7 @@ function extractCapabilities(intent) {
         /\b(auth|authenticate|login|logout|session)\b/gi,
         /\b(encrypt|decrypt|hash|sign|verify)\b/gi,
         /\b(queue|publish|subscribe|event\s*bus)\b/gi,
-        /\b(rate\s*limit|throttle|quota)\b/gi,
+        /\b(rate\s*limiting?|throttle|quota)\b/gi,
         /\b(export|import|serialize|deserialize)\b/gi,
         /\b(notify|notification|alert|webhook)\b/gi,
         /\b(schedule|cron|timer|recurring)\b/gi,
@@ -45,6 +45,8 @@ function extractCapabilities(intent) {
  */
 function capabilityExists(cap, ir) {
     const capLower = cap.toLowerCase().replace(/[\s_]+/g, "");
+    // Word boundary regex — prevents "oauth2" from matching "auth" via substring
+    const capWordBoundary = new RegExp('\\b' + capLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
     const matches = [];
     for (const f of ir) {
         if (!f.exported)
@@ -52,18 +54,23 @@ function capabilityExists(cap, ir) {
         const nameLower = f.name.toLowerCase();
         const purposeLower = (f.purpose || "").toLowerCase();
         const tagsLower = (f.tags || []).map(t => t.toLowerCase());
-        // Direct name match (only for meaningful names, skip single-char helpers)
-        if (nameLower.length > 2 && (nameLower.includes(capLower) || capLower.includes(nameLower))) {
+        // Direct name match: whole-word boundary OR exact full-string match
+        if (nameLower.length > 2 && (capWordBoundary.test(nameLower) || nameLower === capLower)) {
             matches.push(f.name);
             continue;
         }
-        // Purpose match
-        if (purposeLower.length > 2 && purposeLower.includes(capLower)) {
+        // Purpose match: word boundary only
+        if (purposeLower.length > 2 && capWordBoundary.test(purposeLower)) {
             matches.push(f.name);
             continue;
         }
-        // Tag match
-        if (tagsLower.some(t => t.length > 2 && (capLower.includes(t) || t.includes(capLower)))) {
+        // Tag match: exact match OR whole-word boundary (NOT substring)
+        // e.g., tag "auth" should NOT match capability "oauth2"
+        // but tag "auth" SHOULD match capability "auth"
+        if (tagsLower.some(t => t.length > 2 && t === capLower)) {
+            matches.push(f.name);
+        }
+        else if (tagsLower.some(t => t.length > 2 && capWordBoundary.test(t))) {
             matches.push(f.name);
         }
     }

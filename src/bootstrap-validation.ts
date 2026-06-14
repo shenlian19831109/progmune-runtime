@@ -160,10 +160,17 @@ export async function runBootstrapValidation(
   const stateOverlap = stateUnion > 0 ? stateIntersection / stateUnion : 0;
 
   // 6. Behavioral equivalence: test on common repair scenarios
+  // P7.3: Extended with per-protocol behavioral checks
   const testCases = [
+    // Standard acquire-release protocols (state names known to both rule sets)
     { current: ["FILE_OPEN"], target: [] },
     { current: ["UNAUTHENTICATED"], target: ["SESSION_ACTIVE"] },
     { current: ["DB_CONNECTED"], target: [] },
+    // New protocol types: test reachability from INIT (shared initial state)
+    // Both original and regenerated rules understand INIT as the synthesizer default
+    { current: ["INIT"], target: ["TX_ACTIVE"] },      // can begin a transaction?
+    { current: ["INIT"], target: ["COND_RESOLVED"] },  // can resolve a condition?
+    { current: ["INIT"], target: ["LOOP_DONE"] },      // can complete a loop?
   ];
 
   let behavioralMatch = 0;

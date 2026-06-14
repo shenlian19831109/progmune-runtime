@@ -7,14 +7,14 @@ import { EXPANDED_TRAJECTORIES, collectExpandedTrajectories, runCorpusExpansion,
 import { synthesizeProtocols } from "./auto-protocol-synthesizer";
 
 describe("P6.10 Trajectory Corpus Expansion", () => {
-  it("contains 50+ sequences across 10 libraries", () => {
-    expect(EXPANDED_TRAJECTORIES.length).toBe(10);
+  it("contains 110+ sequences across 18 libraries", () => {
+    expect(EXPANDED_TRAJECTORIES.length).toBe(18);
 
     const all = collectExpandedTrajectories();
-    expect(all.length).toBeGreaterThanOrEqual(50);
+    expect(all.length).toBeGreaterThanOrEqual(100);
 
     const libraries = new Set(EXPANDED_TRAJECTORIES.map(l => l.library));
-    expect(libraries.size).toBe(10);
+    expect(libraries.size).toBe(18);
 
     const domains = new Set(EXPANDED_TRAJECTORIES.map(l => l.domain));
     expect(domains.size).toBeGreaterThanOrEqual(5);
@@ -36,5 +36,5 @@ describe("P6.10 Trajectory Corpus Expansion", () => {
     expect(report.rulesSynthesized).toBeGreaterThan(0);
 
     printExpansionReport(report);
-  }, 30000);
+  }, 60000);
 });

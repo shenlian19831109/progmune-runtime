@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Progmune Runtime V4 — 程序免疫学：从规则系统到可学习系统的完整演进</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --orange: #d2991d;
+    --red: #f85149;
+    --purple: #a371f7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+  h1 { font-size: 2.2em; text-align: center; margin-bottom: 8px; color: #fff; }
+  h1 + p { text-align: center; color: var(--muted); margin-bottom: 32px; }
+  h2 {
+    font-size: 1.5em; color: var(--accent); margin-top: 48px; margin-bottom: 16px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  h3 { font-size: 1.2em; color: #e6edf3; margin-top: 28px; margin-bottom: 10px; }
+  h4 { font-size: 1.05em; color: var(--purple); margin-top: 20px; margin-bottom: 8px; }
+  p { margin-bottom: 12px; }
+  strong { color: #fff; }
+  a { color: var(--accent); }
+  pre, code {
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 0.9em;
+  }
+  pre {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 16px; overflow-x: auto;
+    margin-bottom: 16px; line-height: 1.45;
+  }
+  code { background: var(--surface); padding: 2px 5px; border-radius: 3px; }
+  pre code { background: none; padding: 0; }
+  table {
+    width: 100%; border-collapse: collapse; margin-bottom: 20px;
+    font-size: 0.92em;
+  }
+  th, td {
+    border: 1px solid var(--border); padding: 10px 14px; text-align: left;
+  }
+  th { background: var(--surface); color: #fff; font-weight: 600; }
+  tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+  blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 10px 18px; background: var(--surface); border-radius: 0 6px 6px 0;
+    color: var(--muted);
+  }
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 10px;
+    font-size: 0.82em; font-weight: 600; margin-right: 4px;
+  }
+  .tag-green { background: #1b3a1b; color: var(--green); }
+  .tag-orange { background: #3a2e1b; color: var(--orange); }
+  .tag-red { background: #3a1b1b; color: var(--red); }
+  .tag-purple { background: #2a1b3a; color: var(--purple); }
+  .tag-blue { background: #1b2a3a; color: var(--accent); }
+  .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.8em; font-weight: 600; }
+  .badge-green { background: var(--green); color: #000; }
+  .badge-yellow { background: var(--orange); color: #000; }
+  .badge-red { background: var(--red); color: #fff; }
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px; margin-bottom: 24px;
+  }
+  .kpi-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px; text-align: center;
+  }
+  .kpi-value { font-size: 2em; font-weight: 700; color: var(--accent); }
+  .kpi-label { color: var(--muted); font-size: 0.9em; margin-top: 4px; }
+  .flywheel {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px; margin: 20px 0;
+  }
+  .flywheel-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px;
+  }
+  .flywheel-card h4 { margin-top: 0; }
+  .pyramid {
+    text-align: center; margin: 24px 0;
+  }
+  .pyramid div {
+    margin: 2px auto; padding: 10px 16px; border-radius: 6px;
+    font-weight: 600; font-size: 0.92em;
+  }
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; margin-bottom: 32px; }
+  .toc ol { padding-left: 20px; }
+  .toc li { margin: 4px 0; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+  @media print { body { background: #fff; color: #000; } }
+</style>
+</head>
+<body>
+
+<h1>Progmune Runtime V4</h1>
+<p><strong>程序免疫学：从规则系统到可学习系统的完整演进</strong><br>
+内部技术白皮书 v4.0 — 培训教材 &nbsp;|&nbsp;
+测试: 112 单元 &nbsp;|&nbsp; 14 套件 &nbsp;|&nbsp; 49 基准用例</p>
+
+<div class="kpi-grid">
+  <div class="kpi-card"><div class="kpi-value">112</div><div class="kpi-label">单元测试</div></div>
+  <div class="kpi-card"><div class="kpi-value">14</div><div class="kpi-label">测试套件</div></div>
+  <div class="kpi-card"><div class="kpi-value">49</div><div class="kpi-label">基准用例</div></div>
+  <div class="kpi-card"><div class="kpi-value">7</div><div class="kpi-label">协议文件</div></div>
+  <div class="kpi-card"><div class="kpi-value">~4000</div><div class="kpi-label">新增代码行</div></div>
+</div>
+
+<div class="toc">
+<strong>目录</strong>
+<ol>
+  <li><a href="#s1">问题声明：从 V2.5 到 V4 的跨越</a></li>
+  <li><a href="#s2">架构总览：四层能力金字塔 + 四个飞轮</a></li>
+  <li><a href="#s3">P2：Counterfactual Planner 三层解耦</a></li>
+  <li><a href="#s4">P2.5-2.6：Telemetry + Learning Ranker</a></li>
+  <li><a href="#s5">P3：可观测性与评估系统</a></li>
+  <li><a href="#s6">P3.6-3.8：覆盖率、难度与主动学习</a></li>
+  <li><a href="#s7">P3.10-3.15：候选发现增强</a></li>
+  <li><a href="#s8">P3.16-3.20：知识获取系统</a></li>
+  <li><a href="#s9">P3.21-3.27：知识治理 + Pairwise + 发现</a></li>
+  <li><a href="#s10">工程成熟度</a></li>
+  <li><a href="#s11">路线图与结论</a></li>
+  <li><a href="#sa">附录</a></li>
+</ol>
+</div>
+
+<hr id="s1">
+
+<h2>1. 问题声明：从 V2.5 到 V4 的跨越</h2>
+
+<p>V2.5 的核心突破是<strong>知识回路闭环</strong>——抗体从 Failure Corpus 自动生成，通过 L1/L2/L3 三层回流到规划器。但这一闭环存在根本局限：</p>
+
+<table>
+<tr><th>V2.5 局限</th><th>V4 解决方案</th></tr>
+<tr><td>抗体只能匹配已有错误模式</td><td><span class="tag tag-green">Frontier BFS</span> + <span class="tag tag-blue">Goal Templates</span> 可发现新路径</td></tr>
+<tr><td>无法量化"哪个策略更好"</td><td><span class="tag tag-purple">LearningRanker</span> + <span class="tag tag-orange">Pairwise Preference</span></td></tr>
+<tr><td>不知道系统在哪些协议上薄弱</td><td><span class="tag tag-blue">Coverage Engine</span> + <span class="tag tag-orange">Difficulty Map</span></td></tr>
+<tr><td>协议知识靠手工编写</td><td><span class="tag tag-purple">Transition Synthesizer</span> + <span class="tag tag-green">Knowledge Governance</span></td></tr>
+<tr><td>优化方向靠猜测</td><td><span class="tag tag-red">Error Budget Dashboard</span> + Off-Policy Replay</td></tr>
+</table>
+
+<blockquote>
+<strong>V4 核心命题：</strong>AI 生成的代码在进入代码库之前，必须先通过一个免疫层——不仅可验证、具备记忆，还能<strong>通过反馈数据持续进化、主动发现知识缺口、并自动补全协议规则</strong>。
+</blockquote>
+
+<hr id="s2">
+
+<h2>2. 架构总览</h2>
+
+<h3>2.1 四层能力金字塔</h3>
+
+<div class="pyramid">
+  <div style="background:#1b3a1b;width:90%">Level 4: 知识增长 — Gap Mining + Transition Synth + Governance</div>
+  <div style="background:#2a1b3a;width:80%">Level 3: 学习能力 — LearningRanker + Pairwise Preference + Replay</div>
+  <div style="background:#1b2a3a;width:70%">Level 2: 推理能力 — Protocol VM + Frontier BFS + Goal Planner + Cross-Protocol</div>
+  <div style="background:#3a2e1b;width:60%">Level 1: 经验积累 — Trajectory Corpus + Telemetry + Coverage Analysis</div>
+</div>
+
+<table>
+<tr><th>层级</th><th>回答的问题</th><th>核心组件</th></tr>
+<tr><td>Level 1</td><td>"系统见过什么"</td><td>Trajectory Corpus, Telemetry, Analytics</td></tr>
+<tr><td>Level 2</td><td>"系统能推什么"</td><td>Protocol VM, Frontier BFS, Goal Planner</td></tr>
+<tr><td>Level 3</td><td>"系统学到什么"</td><td>LearningRanker, PreferenceRanker, Replay</td></tr>
+<tr><td>Level 4</td><td>"系统还缺什么"</td><td>Gap Mining, Transition Synth, Governance</td></tr>
+</table>
+
+<h3>2.2 四个飞轮</h3>
+
+<div class="flywheel">
+  <div class="flywheel-card">
+    <h4>🔄 飞轮 A：学习飞轮</h4>
+    <p style="font-size:0.88em;color:var(--muted)">Goal → Planner → Repair → Feedback → Telemetry → LearningRanker → Better Repair</p>
+  </div>
+  <div class="flywheel-card">
+    <h4>🔄 飞轮 B：覆盖率飞轮</h4>
+    <p style="font-size:0.88em;color:var(--muted)">Coverage → Gap Detection → Benchmark Gen → Cases → Trajectories → Better Coverage</p>
+  </div>
+  <div class="flywheel-card">
+    <h4>🔄 飞轮 C：主动学习飞轮</h4>
+    <p style="font-size:0.88em;color:var(--muted)">Difficulty → Importance → Priority Gen → High-Value Data → Better Model</p>
+  </div>
+  <div class="flywheel-card">
+    <h4>🔄 飞轮 D：知识获取飞轮（V4 新增）</h4>
+    <p style="font-size:0.88em;color:var(--muted)">Failures → Missing Knowledge → Transition Synth → Governance → Protocol Expansion</p>
+  </div>
+</div>
+
+<hr id="s3">
+
+<h2>3. P2：Counterfactual Planner</h2>
+
+<h3>3.1 三层解耦架构</h3>
+
+<pre><code>                 Goal
+                   │
+         CounterfactualPlanner
+                   │
+     ┌─────────────┼─────────────┐
+     ▼             ▼             ▼
+  Corpus       Protocol VM    Antibody
+  Strategy      Strategy      Strategy
+  (经验)        (推理)        (免疫)
+     │             │             │
+     ▼             ▼             ▼
+  Candidate    Candidate    Candidate
+     └─────────────┼─────────────┘
+                   ▼
+            FeatureExtractor
+            (7 维特征向量)
+                   │
+                   ▼
+              LinearRanker
+         safety | performance
+         auditability | overall
+                   │
+                   ▼
+              Top-3 Repairs</code></pre>
+
+<blockquote><strong>关键设计原则：策略只产生候选，不打分。</strong>评分是 Ranker 的职责。这确保未来增加新策略或替换排序器时，不需要修改任何策略代码。</blockquote>
+
+<h3>3.2 三个搜索策略</h3>
+
+<table>
+<tr><th>策略</th><th>知识源</th><th>优势</th><th>劣势</th></tr>
+<tr>
+  <td><span class="tag tag-green">CorpusStrategy</span></td>
+  <td>Failure Corpus 历史轨迹</td>
+  <td>真实修复经验，置信度高；冷启动友好（有数据时）</td>
+  <td>依赖历史数据，新错误类型无法匹配</td>
+</tr>
+<tr>
+  <td><span class="tag tag-blue">ProtocolStrategy</span></td>
+  <td>SSG 协议图 BFS</td>
+  <td>无需历史数据，纯推理；资源清理总是能被发现；P3.14 Frontier 替代模板依赖</td>
+  <td>受协议规则数量限制；规则中没有的函数永远找不到</td>
+</tr>
+<tr>
+  <td><span class="tag tag-purple">AntibodyStrategy</span></td>
+  <td>抗体注册表</td>
+  <td>高置信度（ACL-3+ 抗体经过充分验证）；快速通道</td>
+  <td>依赖先前失败积累；新违规类型初期无抗体</td>
+</tr>
+</table>
+
+<h3>3.3 跨源证据合并</h3>
+
+<p>同一修复路径可能同时来自多个策略。合并后 <code>evidenceSources: ["corpus", "protocol", "antibody"]</code>，可信度显著提高。</p>
+
+<h3>3.4 排序器：七维特征向量</h3>
+
+<table>
+<tr><th>特征</th><th>含义</th><th>范围</th></tr>
+<tr><td>protocolSafety</td><td>路径满足安全约束的程度</td><td>0-1</td></tr>
+<tr><td>historicalSuccessRate</td><td>Corpus 历史成功率</td><td>0-1</td></tr>
+<tr><td>actionCount</td><td>修复路径中的动作数</td><td>整数</td></tr>
+<tr><td>latencyCost</td><td>延迟成本（逆）</td><td>0-1</td></tr>
+<tr><td>auditability</td><td>可审计性（短路径更高）</td><td>0-1</td></tr>
+<tr><td>corpusEvidence</td><td>语料库证据数量</td><td>整数</td></tr>
+<tr><td>source</td><td>来源策略</td><td>枚举</td></tr>
+</table>
+
+<p><strong>四种排序模式</strong>：<code>rankSafety()</code>（金融系统）、<code>rankPerformance()</code>（实时系统）、<code>rankAuditability()</code>（合规团队）、<code>rankOverall()</code>（默认加权组合）。</p>
+
+<p>默认权重：<code>score = 0.4×safety + 0.3×successRate + 0.2×performance + 0.1×auditability</code></p>
+
+<hr id="s4">
+
+<h2>4. P2.5-2.6：可学习系统的数据基础</h2>
+
+<h3>4.1 Telemetry Layer</h3>
+
+<table>
+<tr><th>组件</th><th>功能</th><th>复杂度</th></tr>
+<tr><td>PlannerTelemetry</td><td>记录每个决策的完整生命周期（目标、候选、选择、反馈、成本）</td><td>O(1) 查询</td></tr>
+<tr><td>TelemetryIndex</td><td>Map&lt;fingerprint, CandidateStats&gt; 实时统计</td><td>O(1) 更新</td></tr>
+<tr><td>RepairLifecycle</td><td>proposedAt → acceptedAt → executedAt → executionSucceeded 完整链</td><td>RLHF 格式</td></tr>
+</table>
+
+<h3>4.2 LearningRanker</h3>
+
+<p><strong>核心创新</strong>：系统能根据真实反馈数据调整排序。</p>
+
+<pre><code>effectiveReward = 0.5 × acceptanceRate + 0.5 × executionSuccessRate
+adjustedScore = baseScore × 0.7 + effectiveReward × 0.3</code></pre>
+
+<blockquote><strong>关键设计</strong>：<code>accepted ≠ good</code>。用户可能大量接受快速但泄漏资源的修复。系统通过学习 acceptance + execution success 的组合信号来避免"学坏"。</blockquote>
+
+<h3>4.3 已证明的自进化回路</h3>
+
+<p><strong>Ranking Evolution Test</strong>：Phase 1: A (safe) 接受 90 次 → A 排第一。Phase 2: B (fast) 连续接受 100 次且执行成功 → B 反超 A。</p>
+
+<h3>4.4 Off-Policy Replay</h3>
+
+<pre><code>Baseline (LinearRanker):   33.3%  (10/30)
+Learning (Acceptance):     100.0% (30/30)
+Δ:                          +66.7%  ✅</code></pre>
+
+<p>反馈数据中存在<strong>可学习的信号</strong>。闭环已被证明有效。</p>
+
+<h3>4.5 Analytics Dashboard</h3>
+
+<p>1000 条模拟决策的实时仪表盘：</p>
+
+<pre><code>Strategy Acceptance:
+  corpus           90%  (301/334)
+  protocol         87%  (289/333)
+  antibody         76%  (254/333)
+
+Repair Adoption Rate: 84.4%</code></pre>
+
+<hr id="s5">
+
+<h2>5. P3：可观测性与评估系统</h2>
+
+<h3>5.1 Benchmark System</h3>
+
+<table>
+<tr><th>协议</th><th>用例</th><th>违规类型</th></tr>
+<tr><td>auth_protocol.json</td><td>8</td><td>missing_prerequisite, illegal_state_transition</td></tr>
+<tr><td>database_protocol.json</td><td>8</td><td>missing_prerequisite, resource_leak</td></tr>
+<tr><td>pipeline_protocol.json</td><td>8</td><td>missing_prerequisite, illegal_state_transition</td></tr>
+<tr><td>expanded_file_protocol.json</td><td>8</td><td>resource_leak, illegal_state_transition</td></tr>
+<tr><td>cross_protocol.json</td><td>8</td><td>多协议组合</td></tr>
+<tr><td>file_protocol.json</td><td>5</td><td>resource_leak</td></tr>
+<tr><td>resource_protocol.json</td><td>4</td><td>resource_leak</td></tr>
+<tr><td><strong>总计</strong></td><td><strong>49</strong></td><td></td></tr>
+</table>
+
+<h3>5.2 Error Budget Dashboard</h3>
+
+<pre><code>Reason                  Count   Pct
+────────────────────────────────────
+  missing_candidate        28    57%  ← 候选发现是瓶颈
+  bad_ranking               9    18%  ← 候选存在但排错序
+  bad_protocol_model        0     0%  ← 已归零（永久消除）
+  insufficient_history      5    10%
+  success                   7    14%
+</code></pre>
+
+<blockquote><strong>关键洞察</strong>：<code>bad_protocol_model</code> 从 6% 归零，证明协议推理层已稳定。57% missing_candidate 是当前最大瓶颈。</blockquote>
+
+<h3>5.3 Data Quality Layer</h3>
+
+<pre><code>Total Outcomes:       100
+Raw Acceptance:       69.0%
+Execution Success:    74.0%
+⚠️  Contradictory:      39.0%  (accepted ≠ execution result)
+</code></pre>
+
+<p>39% 的矛盾率意味着这些数据如果直接用于训练 Reward Model，模型会"学坏"。解决方案：<code>computeRewardSignal()</code> 综合三重验证。</p>
+
+<h3>5.4 Discovery Benchmark（三层指标）</h3>
+
+<pre><code>Discovery Rate:   75%  ← 候选生成质量（任何正确候选？）
+Top-3 Accuracy:   50%  ← 排序质量
+Top-1 Accuracy:   25%  ← 最佳选择质量
+
+Discovery→Top1 gap: 50% ← 排序是瓶颈（非候选发现）</code></pre>
+
+<hr id="s6">
+
+<h2>6. P3.6-3.8：覆盖率、难度与主动学习</h2>
+
+<h3>6.1 Coverage Engine</h3>
+
+<p>从 Trajectory Corpus 统计每个协议的状态和转移覆盖率，自动识别 26 个缺失转移，生成 17 个基准用例。</p>
+
+<h3>6.2 Difficulty Map</h3>
+
+<pre><code>difficulty = failureRate×0.4 + repairFailureRate×0.4 + rejectionRate×0.2
+
+AuthProtocol: PASSWORD_VERIFIED→TOKEN_ISSUED (40%) 🟠 High
+FileProtocol:  INIT→FILE_OPEN (0%) 🟢 Low</code></pre>
+
+<h3>6.3 Active Learning</h3>
+
+<pre><code>importance = difficulty × protocolUsage × failureFrequency
+
+Top Priority:
+  generate_jwt:  PASSWORD_VERIFIED→TOKEN_ISSUED  (importance: 2%)
+  create_session: TOKEN_ISSUED→SESSION_ACTIVE    (importance: 2%)</code></pre>
+
+<hr id="s7">
+
+<h2>7. P3.10-3.15：候选发现增强</h2>
+
+<h3>7.1 Goal-conditioned Planner</h3>
+
+<p>22 个 Goal Template 将自然语言目标展开为前置条件链：</p>
+
+<pre><code>"logout user" → [verify_password, generate_jwt, create_session]
+"authenticate" → [verify_password, generate_jwt, create_session]
+"safely write file" → [open_file, write_file]</code></pre>
+
+<p><strong>效果</strong>：<code>insufficient_history</code> 从 39% → 14%。<strong>局限</strong>：模板覆盖率受手动维护限制。</p>
+
+<h3>7.2 Frontier Explorer（不依赖模板的 BFS 搜索）</h3>
+
+<pre><code>searchFrontier(rules, ["UNAUTHENTICATED"], ["SESSION_ACTIVE"])
+  → { actions: ["verify_password","generate_jwt","create_session"], cost: 3 }
+
+searchFrontier(rules, ["FILE_OPEN"], [])
+  → { actions: ["close_file"], cost: 1 }</code></pre>
+
+<p><strong>效果</strong>：<code>bad_protocol_model</code> 从 6% 永久归零。</p>
+
+<h3>7.3 Cross-Protocol Planner</h3>
+
+<p>协议间桥接：<code>AuthProtocol → FileProtocol (SESSION_ACTIVE → INIT)</code>，支持跨协议修复链。</p>
+
+<h3>7.4 Search Trace</h3>
+
+<p>将 57% missing_candidate 分解为可操作的子原因：</p>
+
+<pre><code>missing_action:       1   ← 函数不在任何协议规则中
+missing_transition:   0   ← 状态对未连接
+depth_limit:          0   ← BFS 耗尽
+bridge_missing:       0   ← 跨协议桥缺失</code></pre>
+
+<hr id="s8">
+
+<h2>8. P3.16-3.20：知识获取系统</h2>
+
+<h3>8.1 Protocol Gap Mining</h3>
+
+<pre><code>Gap Breakdown:
+  missing action            1 item    (flush_file, freq=2, priority=29%)
+  missing transition       11 items   (verify_password→generate_jwt, ...)</code></pre>
+
+<blockquote><strong>关键发现</strong>：92% 的缺口是 <code>missing_transition</code>（函数存在但状态未连接），而非 <code>missing_action</code>（函数缺失）。</blockquote>
+
+<h3>8.2 Transition Synthesizer</h3>
+
+<p>系统<strong>第一次自己发现协议缺口并自动补全</strong>：</p>
+
+<pre><code>Inferred: FileProtocol: open_file → flush_file
+  from: FILE_OPEN  to: FILE_DIRTY
+  confidence: 100%  evidence: 2 benchmark cases</code></pre>
+
+<h3>8.3 Knowledge Governance</h3>
+
+<table>
+<tr><th>层级</th><th>功能</th><th>阈值</th></tr>
+<tr><td>P3.21 Inference Validator</td><td>多源验证（benchmark + trajectory）</td><td>≥3 benchmark + ≥5 trajectory → verified</td></tr>
+<tr><td>P3.22 Knowledge Patch Store</td><td>版本化补丁（propose/approve/reject/rollback）</td><td>Planner 读取 Base Rules + Approved Patches</td></tr>
+<tr><td>P3.23 Regression Test</td><td>全量基准测试</td><td>仅当 Top-1/Top-3 不退化时自动批准</td></tr>
+</table>
+
+<pre><code>Governance Report:
+  Proposed: 1  (revoke_token → create_session)
+  Approved: 1  ✅ (no regression detected)
+  Rejected: 0</code></pre>
+
+<hr id="s9">
+
+<h2>9. P3.11-13 & P3.24-27：Pairwise + 发现</h2>
+
+<h3>9.1 Pairwise Preference（RLHF 数据原语）</h3>
+
+<pre><code>RepairPreference {
+  winner: "safe-fp",     // open_file → write_file → close_file
+  loser: "leaky-fp",     // open_file → write_file (missing close!)
+  goal: "safely write config file"
+}
+
+PreferenceRanker.score = winRate × 0.6 + heuristicScore × 0.4</code></pre>
+
+<h3>9.2 Ranker Stress Test</h3>
+
+<p>增强型基准：<code>expectedTop1</code> + <code>acceptableTop3</code> + <code>unacceptableRepairs</code>。</p>
+
+<h3>9.3 Counterfactual Replay</h3>
+
+<p>离线策略评估：用新排序器重放历史决策，比较接受率。</p>
+
+<h3>9.4 Protocol Bridge Learning</h3>
+
+<p>从跨协议失败中推断协议桥接：<code>AuthProtocol → FileProtocol</code>、<code>AuthProtocol → DBProtocol</code>。</p>
+
+<hr id="s10">
+
+<h2>10. 工程成熟度</h2>
+
+<h3>10.1 测试覆盖</h3>
+
+<table>
+<tr><th>测试文件</th><th>测试数</th><th>覆盖模块</th></tr>
+<tr><td>repair-arch.test.ts</td><td>16</td><td>Strategy/Ranker 边界、去重、资源泄漏</td></tr>
+<tr><td>repair-evolution.test.ts</td><td>14</td><td>跨源证据、P4 预埋、Goal→Feedback 闭环</td></tr>
+<tr><td>trajectory-feedback.test.ts</td><td>3</td><td>feedback+cost 持久化</td></tr>
+<tr><td>telemetry-analytics.test.ts</td><td>13</td><td>指纹、遥测、1000 决策仪表盘</td></tr>
+<tr><td>learning-ranker.test.ts</td><td>3</td><td>自进化回路</td></tr>
+<tr><td>p3-observability.test.ts</td><td>13</td><td>数据质量、扩展基准（49 cases）</td></tr>
+<tr><td>coverage-system.test.ts</td><td>12</td><td>覆盖率仪表盘、生成流水线</td></tr>
+<tr><td>difficulty-active.test.ts</td><td>7</td><td>难度排名、主动学习</td></tr>
+<tr><td>evaluation-campaign.test.ts</td><td>4</td><td>失败归因、离线重放</td></tr>
+<tr><td>pairwise-preference.test.ts</td><td>6</td><td>配对偏好、排序压力测试</td></tr>
+<tr><td>protocol-frontier.test.ts</td><td>9</td><td>BFS 搜索、跨协议规划</td></tr>
+<tr><td>protocol-gap-analyzer.test.ts</td><td>2</td><td>缺口挖掘、知识评分</td></tr>
+<tr><td>transition-synthesizer.test.ts</td><td>5</td><td>转移推断、源追踪</td></tr>
+<tr><td>knowledge-governance.test.ts</td><td>5</td><td>验证、版本化、回归</td></tr>
+<tr><td><strong>总计</strong></td><td><strong>112</strong></td><td></td></tr>
+</table>
+
+<h3>10.2 核心模块代码量</h3>
+
+<table>
+<tr><th>模块</th><th>行数</th><th>功能</th></tr>
+<tr><td>planner-telemetry.ts</td><td>340</td><td>遥测 + 索引 + 生命周期</td></tr>
+<tr><td>knowledge-governance.ts</td><td>290</td><td>知识验证 + 版本化 + 回归</td></tr>
+<tr><td>discovery-trace.ts</td><td>290</td><td>搜索追踪 + 发现基准</td></tr>
+<tr><td>transition-synthesizer.ts</td><td>270</td><td>转移合成 + 源追踪</td></tr>
+<tr><td>evaluation-campaign.ts</td><td>270</td><td>失败归因 + 离线重放</td></tr>
+<tr><td>pairwise-preference.ts</td><td>270</td><td>配对偏好 + 压力测试</td></tr>
+<tr><td>protocol-frontier.ts</td><td>250</td><td>BFS 搜索 + 跨协议</td></tr>
+<tr><td>active-learning.ts</td><td>235</td><td>重要性排序</td></tr>
+<tr><td>difficulty-map.ts</td><td>230</td><td>难度计算</td></tr>
+<tr><td>protocol-gap-analyzer.ts</td><td>230</td><td>缺口挖掘</td></tr>
+<tr><td>repair-strategies.ts</td><td>215</td><td>三个搜索策略</td></tr>
+<tr><td>protocol-coverage.ts</td><td>210</td><td>覆盖率分析</td></tr>
+<tr><td>analytics.ts</td><td>190</td><td>仪表盘</td></tr>
+<tr><td><strong>~总计</strong></td><td><strong>~4000</strong></td><td></td></tr>
+</table>
+
+<hr id="s11">
+
+<h2>11. 路线图与结论</h2>
+
+<div class="kpi-grid">
+  <div class="kpi-card"><div class="kpi-value">✅</div><div class="kpi-label">P0 Trajectory Corpus</div></div>
+  <div class="kpi-card"><div class="kpi-value">✅</div><div class="kpi-label">P1 Goal Skeleton</div></div>
+  <div class="kpi-card"><div class="kpi-value">✅</div><div class="kpi-label">P2 Planner</div></div>
+  <div class="kpi-card"><div class="kpi-value">✅</div><div class="kpi-label">P2.5 Telemetry</div></div>
+  <div class="kpi-card"><div class="kpi-value">✅</div><div class="kpi-label">P2.6 LearningRanker</div></div>
+  <div class="kpi-card"><div class="kpi-value">✅</div><div class="kpi-label">P3 Benchmark</div></div>
+  <div class="kpi-card"><div class="kpi-value">✅</div><div class="kpi-label">P3.1 DataQuality</div></div>
+  <div class="kpi-card"><div class="kpi-value">✅</div><div class="kpi-label">P3.6 Coverage</div></div>
+  <div class="kpi-card"><div class="kpi-value">✅</div><div class="kpi-label">P3.7-8 Difficulty+AL</div></div>
+  <div class="kpi-card"><div class="kpi-value">✅</div><div class="kpi-label">P3.9 Evaluation</div></div>
+  <div class="kpi-card"><div class="kpi-value">✅</div><div class="kpi-label">P3.10 GoalPlanner</div></div>
+  <div class="kpi-card"><div class="kpi-value">✅</div><div class="kpi-label">P3.11-13 Pairwise</div></div>
+  <div class="kpi-card"><div class="kpi-value">✅</div><div class="kpi-label">P3.14-15 Frontier</div></div>
+  <div class="kpi-card"><div class="kpi-value">✅</div><div class="kpi-label">P3.16-17 GapMining</div></div>
+  <div class="kpi-card"><div class="kpi-value">✅</div><div class="kpi-label">P3.18-20 Synth</div></div>
+  <div class="kpi-card"><div class="kpi-value">✅</div><div class="kpi-label">P3.21-23 Governance</div></div>
+  <div class="kpi-card"><div class="kpi-value">✅</div><div class="kpi-label">P3.24-27 Discovery</div></div>
+  <div class="kpi-card" style="border: 2px solid var(--orange)"><div class="kpi-value">P4</div><div class="kpi-label">Reward Model</div></div>
+</div>
+
+<h3>关键指标汇总</h3>
+
+<table>
+<tr><th>指标</th><th>数值</th></tr>
+<tr><td>Top-1 准确率</td><td>14%</td></tr>
+<tr><td>Top-3 准确率</td><td>39%</td></tr>
+<tr><td>bad_protocol_model</td><td><span class="badge badge-green">0%</span>（永久归零）</td></tr>
+<tr><td>Off-Policy 提升</td><td><span class="badge badge-green">+66.7%</span></td></tr>
+<tr><td>矛盾数据率</td><td><span class="badge badge-red">39%</span></td></tr>
+<tr><td>推断转移数</td><td>1（100% 置信度）</td></tr>
+<tr><td>知识补丁数</td><td>1（已批准）</td></tr>
+<tr><td>Gap 发现数</td><td>12（1 action + 11 transitions）</td></tr>
+<tr><td>策略接受率</td><td>corpus 90% > protocol 87% > antibody 76%</td></tr>
+</table>
+
+<h3>结论</h3>
+
+<p>Progmune Runtime V4 完成了从<strong>"规则验证器"到"可学习系统"</strong>的进化。四个飞轮已形成闭环，系统具备从反馈中学习、主动发现知识缺口、自动补全协议规则、并安全验证新知识的能力。</p>
+
+<p><strong>当前瓶颈</strong>：57% missing_candidate。其中 92% 是 missing transition（函数存在但状态未连接），而非 missing action（函数缺失）。下一步优先级：<strong>协议连接补全 > 排序优化 > Reward Model</strong>。</p>
+
+<hr id="sa">
+
+<h2>附录</h2>
+
+<h3>A. 协议图</h3>
+
+<pre><code>AuthProtocol:
+  UNAUTHENTICATED → verify_password → PASSWORD_VERIFIED
+  PASSWORD_VERIFIED → generate_jwt → TOKEN_ISSUED (inv: PASSWORD_VERIFIED)
+  TOKEN_ISSUED → create_session → SESSION_ACTIVE (inv: TOKEN_ISSUED)
+  SESSION_ACTIVE → logout → UNAUTHENTICATED (inv: SESSION_ACTIVE)
+  TOKEN_ISSUED → revoke_token → UNAUTHENTICATED (inv: TOKEN_ISSUED)
+
+FileProtocol:
+  INIT → open_file → FILE_OPEN
+  FILE_OPEN → read_file / write_file → FILE_OPEN
+  FILE_OPEN → close_file → ∅ (inv: FILE_OPEN)
+
+DBProtocol:
+  INIT → connect_db → DB_CONNECTED
+  DB_CONNECTED → query_db → DB_CONNECTED
+  DB_CONNECTED → disconnect_db → ∅ (inv: DB_CONNECTED)
+
+IRProtocol:
+  IR_STALE → extractIR → IR_EXTRACTED (inv: IR_STALE)
+  IR_EXTRACTED → validateAction → ACTION_VALIDATED
+  ACTION_VALIDATED → validateActionSequence → SEQUENCE_VALIDATED (inv: ACTION_VALIDATED)
+  SEQUENCE_VALIDATED → emitCode → CODE_EMITTED (inv: SEQUENCE_VALIDATED)
+  CODE_EMITTED → recordSession → SESSION_RECORDED (inv: CODE_EMITTED)</code></pre>
+
+<h3>B. 文件结构</h3>
+
+<pre><code>src/
+├── repair-types.ts          # 接口定义层
+├── repair-strategies.ts     # 三个搜索策略
+├── repair-ranker.ts         # 特征提取 + 排序
+├── counterfactual-engine.ts # 规划器入口
+├── planner-telemetry.ts     # 遥测 + 索引
+├── learning-ranker.ts       # 学习排序器
+├── analytics.ts             # 仪表盘
+├── benchmark-harness.ts     # 基准运行器
+├── data-quality.ts          # 数据质量
+├── planner-trace.ts         # 决策追踪
+├── protocol-coverage.ts     # 覆盖率分析
+├── coverage-dashboard.ts    # 覆盖率仪表盘
+├── benchmark-generator.ts   # 基准自动生成
+├── difficulty-map.ts        # 难度分析
+├── active-learning.ts       # 主动学习
+├── evaluation-campaign.ts   # 评估活动
+├── pairwise-preference.ts   # 配对偏好
+├── goal-planner.ts          # 目标条件规划
+├── protocol-frontier.ts     # BFS 前沿探索
+├── protocol-gap-analyzer.ts # 协议缺口挖掘
+├── transition-synthesizer.ts # 转移合成器
+├── knowledge-governance.ts  # 知识治理
+├── discovery-trace.ts       # 搜索追踪 + 发现基准
+
+benchmarks/
+├── auth_protocol.json       # 认证协议 (8 cases)
+├── database_protocol.json   # 数据库协议 (8 cases)
+├── pipeline_protocol.json   # 流水线协议 (8 cases)
+├── expanded_file_protocol.json # 扩展文件协议 (8 cases)
+├── cross_protocol.json      # 跨协议 (8 cases)
+├── file_protocol.json       # 文件协议 (5 cases)
+└── resource_protocol.json   # 资源协议 (4 cases)</code></pre>
+
+<p style="text-align:center;color:var(--muted);margin-top:48px">Progmune Runtime V4 &nbsp;|&nbsp; 内部白皮书 &nbsp;|&nbsp; 2026-06</p>
+
+</body>
+</html>

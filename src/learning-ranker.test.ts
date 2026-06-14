@@ -53,7 +53,8 @@ describe("Ranking Evolution", () => {
     const fpA = candidateFingerprint(`fp-${runId}`, ["open_file", "write_file", "close_file"], "resource_leak");
     const fpB = candidateFingerprint(`fp-${runId}`, ["atomic_write"], "resource_leak");
 
-    const base = createLinearRanker();
+    // Use weights that favor historical success (learning test — not goal-match)
+    const base = createLinearRanker({ safety: 0.4, successRate: 0.3, performance: 0.2, auditability: 0.1, goalMatch: 0 });
     const learner = new LearningRanker(base, t);
 
     // Two candidates: A (safe) and B (fast)
@@ -63,10 +64,12 @@ describe("Ranking Evolution", () => {
     const safeFeatures: CandidateFeatures = {
       protocolSafety: 1.0, historicalSuccessRate: 0.5, actionCount: 3,
       latencyCost: 0.6, auditability: 0.8, corpusEvidence: 0, source: "protocol",
+      goalMatch: 0,
     };
     const fastFeatures: CandidateFeatures = {
       protocolSafety: 0.7, historicalSuccessRate: 0.99, actionCount: 1,
       latencyCost: 0.1, auditability: 0.5, corpusEvidence: 42, source: "corpus",
+      goalMatch: 0,
     };
 
     // ── Phase 1: A accepted 90 times, B accepted 10 times ──

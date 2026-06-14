@@ -33,9 +33,9 @@ describe("Real-world Defect Benchmark", () => {
   it("runs planner against real-world defects", async () => {
     const report = await runRealWorldBenchmark();
 
-    expect(report.totalDefects).toBe(10);
+    expect(report.totalDefects).toBe(20);
     expect(report.detectionRate).toBeGreaterThanOrEqual(0);
-    expect(report.top3RepairRate).toBeGreaterThanOrEqual(0);
+    expect(report.top3RepairRate).toBeGreaterThanOrEqual(0.45); // 10 new protocol types reduce ceiling
 
     printRealWorldReport(report);
   }, 30000);

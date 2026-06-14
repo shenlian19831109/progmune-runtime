@@ -91,6 +91,48 @@ const PHYSICS_KEYWORDS: Record<string, { pattern: PhysicsPattern; phase: Physics
   logout:  { pattern: "RESOURCE_RELEASE", phase: "release" },
   signin:  { pattern: "AUTHENTICATE", phase: "acquire" },
   signout: { pattern: "RESOURCE_RELEASE", phase: "release" },
+
+  // Transaction / savepoint patterns (P7.3 expansion)
+  insert:  { pattern: "TRANSACTION_BEGIN", phase: "use" },
+  update:  { pattern: "TRANSACTION_BEGIN", phase: "use" },
+  delete:  { pattern: "TRANSACTION_BEGIN", phase: "use" },
+  savepoint: { pattern: "TRANSACTION_BEGIN", phase: "acquire" },
+  prep_two:  { pattern: "TRANSACTION_COMMIT", phase: "release" },
+
+  // Conditional patterns (P7.3 expansion)
+  evaluate: { pattern: "RESOURCE_ACQUIRE", phase: "acquire" },
+  grant:    { pattern: "RESOURCE_USE", phase: "use" },
+  deny:     { pattern: "RESOURCE_USE", phase: "use" },
+  escalate: { pattern: "RESOURCE_USE", phase: "use" },
+  bypass:   { pattern: "RESOURCE_USE", phase: "use" },
+  retry:    { pattern: "RESOURCE_USE", phase: "use" },
+  audit:    { pattern: "RESOURCE_USE", phase: "use" },
+  log_:     { pattern: "RESOURCE_USE", phase: "use" },
+
+  // Loop / iteration patterns (P7.3 expansion)
+  init_fetch: { pattern: "RESOURCE_ACQUIRE", phase: "acquire" },
+  init_:   { pattern: "RESOURCE_ACQUIRE", phase: "acquire" },
+  fetch_batch: { pattern: "RESOURCE_USE", phase: "use" },
+  fetch_:  { pattern: "RESOURCE_USE", phase: "use" },
+  has_more: { pattern: "RESOURCE_USE", phase: "use" },
+  process: { pattern: "RESOURCE_USE", phase: "use" },
+  poll_:   { pattern: "RESOURCE_USE", phase: "use" },
+  next_iter: { pattern: "RESOURCE_USE", phase: "use" },
+  next_:   { pattern: "RESOURCE_USE", phase: "use" },
+  exit_loop: { pattern: "RESOURCE_RELEASE", phase: "release" },
+  exit_:   { pattern: "RESOURCE_RELEASE", phase: "release" },
+  timeout_exit: { pattern: "RESOURCE_RELEASE", phase: "release" },
+  timeout_: { pattern: "RESOURCE_RELEASE", phase: "release" },
+
+  // Stateless / pure compute patterns (P7.3 expansion)
+  compute:  { pattern: "UNKNOWN", phase: "other" },
+  validate: { pattern: "UNKNOWN", phase: "other" },
+  sanitize: { pattern: "UNKNOWN", phase: "other" },
+  encode:   { pattern: "UNKNOWN", phase: "other" },
+  decode:   { pattern: "UNKNOWN", phase: "other" },
+  compress: { pattern: "UNKNOWN", phase: "other" },
+  decompress: { pattern: "UNKNOWN", phase: "other" },
+  checksum: { pattern: "UNKNOWN", phase: "other" },
 };
 
 /**
@@ -147,19 +189,37 @@ export function isValidPhysicsSequence(fns: string[]): { valid: boolean; pattern
 
   const seq = canonicalizeSequence(fns);
   const phases = seq.map(s => s.phase);
+  const patterns = [...new Set(seq.map(s => s.pattern).filter(p => p !== "UNKNOWN"))];
 
   const hasAcquire = phases.includes("acquire");
   const hasRelease = phases.includes("release");
+  const hasUse = phases.includes("use");
+  const hasOther = phases.includes("other");
   const lastRelease = phases.lastIndexOf("release");
   const firstAcquire = phases.indexOf("acquire");
 
-  // Valid: acquire comes before release
+  // Valid acquire-use-release pattern: acquire before release
   if (hasAcquire && hasRelease && firstAcquire < lastRelease) {
-    const patterns = [...new Set(seq.map(s => s.pattern))];
     return { valid: true, pattern: patterns.join("→"), detail: `${patterns.length} physics patterns in valid order` };
   }
 
-  return { valid: false, pattern: "incomplete", detail: "Missing acquire or release phase" };
+  // Valid: acquire-use pattern (no explicit release) — e.g., conditional branches
+  if (hasAcquire && hasUse && !hasRelease) {
+    return { valid: true, pattern: patterns.join("→"), detail: `Acquire-use sequence (open-ended), ${patterns.length} patterns` };
+  }
+
+  // Valid: pure stateless computation (all "other" phase) — e.g., hash, validate, encode
+  if (!hasAcquire && !hasRelease && hasOther && phases.every(p => p === "other")) {
+    return { valid: true, pattern: "stateless", detail: `Stateless computation, ${fns.length} actions` };
+  }
+
+  // Valid: mixed stateless + use actions (no acquire/release required)
+  if (!hasAcquire && !hasRelease) {
+    return { valid: true, pattern: patterns.join("→") || "generic", detail: `Non-resource sequence, ${fns.length} actions` };
+  }
+
+  // Invalid: release without acquire, or acquire after release
+  return { valid: false, pattern: "incomplete", detail: "Release without preceding acquire, or invalid ordering" };
 }
 
 // ═══════════════════════════════════════════════════════════════

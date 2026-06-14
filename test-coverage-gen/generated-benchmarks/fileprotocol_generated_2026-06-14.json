@@ -1,0 +1,117 @@
+{
+  "protocol": "FileProtocol",
+  "generatedAt": "2026-06-14T14:02:02.150Z",
+  "cases": [
+    {
+      "goal": "cover transition: INIT → FILE_OPEN via open_file",
+      "protocol": "_global",
+      "broken": [
+        "close_file"
+      ],
+      "expected": [
+        "open_file",
+        "open_file",
+        "close_file"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "INIT",
+        "to": "FILE_OPEN",
+        "rule": "open_file"
+      }
+    },
+    {
+      "goal": "cover transition: FILE_OPEN → ∅ via close_file",
+      "protocol": "_global",
+      "broken": [
+        "open_file"
+      ],
+      "expected": [
+        "open_file",
+        "close_file"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "FILE_OPEN",
+        "to": "∅",
+        "rule": "close_file"
+      }
+    },
+    {
+      "goal": "cover transition: UNAUTHENTICATED → AUTH_FILE_GATE via auth_file_open",
+      "protocol": "_global",
+      "broken": [
+        "auth_file_close"
+      ],
+      "expected": [
+        "auth_file_close",
+        "auth_file_open"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "UNAUTHENTICATED",
+        "to": "AUTH_FILE_GATE",
+        "rule": "auth_file_open"
+      }
+    },
+    {
+      "goal": "cover transition: AUTH_FILE_GATE → AUTH_FILE_GATE via auth_file_read",
+      "protocol": "_global",
+      "broken": [
+        "auth_file_open",
+        "auth_file_close"
+      ],
+      "expected": [
+        "auth_file_open",
+        "auth_file_read",
+        "auth_file_read",
+        "auth_file_close"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "AUTH_FILE_GATE",
+        "to": "AUTH_FILE_GATE",
+        "rule": "auth_file_read"
+      }
+    },
+    {
+      "goal": "cover transition: AUTH_FILE_GATE → UNAUTHENTICATED via auth_file_close",
+      "protocol": "_global",
+      "broken": [
+        "auth_file_open",
+        "auth_file_read"
+      ],
+      "expected": [
+        "auth_file_open",
+        "auth_file_read",
+        "auth_file_close"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "AUTH_FILE_GATE",
+        "to": "UNAUTHENTICATED",
+        "rule": "auth_file_close"
+      }
+    },
+    {
+      "goal": "cover transition: AUTH_FILE_GATE → ∅ via auth_file_close",
+      "protocol": "_global",
+      "broken": [
+        "auth_file_open",
+        "auth_file_read"
+      ],
+      "expected": [
+        "auth_file_open",
+        "auth_file_read",
+        "auth_file_close"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "AUTH_FILE_GATE",
+        "to": "∅",
+        "rule": "auth_file_close"
+      }
+    }
+  ],
+  "source": "coverage-gap"
+}

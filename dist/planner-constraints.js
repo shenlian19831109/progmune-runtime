@@ -1,3 +1,4 @@
+"use strict";
 /**
  * Planner Constraints — mined rules injected into the search space.
  *
@@ -9,14 +10,20 @@
  *   L2 (medium): Deprioritize functions matching high-risk patterns
  *   L3 (hard): Blacklist functions that consistently cause violations
  */
-import { mineRules } from "./rule-miner";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.deriveConstraints = deriveConstraints;
+exports.applyConstraints = applyConstraints;
+exports.formatConstraints = formatConstraints;
+exports.getConstraints = getConstraints;
+exports.clearConstraintsCache = clearConstraintsCache;
+const rule_miner_1 = require("./rule-miner");
 /**
  * Derive planner constraints from mined rules.
  * Each mined rule becomes a scoring constraint that modifies
  * how functions are weighted during capability graph construction.
  */
-export function deriveConstraints() {
-    const rules = mineRules();
+function deriveConstraints() {
+    const rules = (0, rule_miner_1.mineRules)();
     const constraints = [];
     for (const rule of rules) {
         // High-confidence rules → stronger penalties
@@ -61,7 +68,7 @@ export function deriveConstraints() {
  * Apply constraints to adjust a function's score.
  * Returns a multiplier in [0, 1] — multiply the raw score by this.
  */
-export function applyConstraints(funcName, funcPurpose, constraints) {
+function applyConstraints(funcName, funcPurpose, constraints) {
     let multiplier = 1.0;
     const matched = [];
     const searchText = (funcName + " " + funcPurpose).toLowerCase();
@@ -77,7 +84,7 @@ export function applyConstraints(funcName, funcPurpose, constraints) {
 /**
  * Get a human-readable summary of active constraints.
  */
-export function formatConstraints(constraints) {
+function formatConstraints(constraints) {
     if (constraints.length === 0)
         return "";
     const lines = ["\n📋 规则约束 (Rule → Planner):"];
@@ -89,9 +96,9 @@ export function formatConstraints(constraints) {
 }
 // Cache constraints (derived once per session)
 let _constraints = null;
-export function getConstraints() {
+function getConstraints() {
     if (!_constraints)
         _constraints = deriveConstraints();
     return _constraints;
 }
-export function clearConstraintsCache() { _constraints = null; }
+function clearConstraintsCache() { _constraints = null; }

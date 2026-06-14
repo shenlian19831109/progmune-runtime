@@ -1,0 +1,288 @@
+{
+  "protocol": "AuthProtocol",
+  "generatedAt": "2026-06-14T14:02:02.154Z",
+  "cases": [
+    {
+      "goal": "cover transition: UNAUTHENTICATED → PASSWORD_VERIFIED via verify_password",
+      "protocol": "_global",
+      "broken": [
+        "revoke_token",
+        "logout",
+        "auth_file_close",
+        "auth_db_disconnect",
+        "generate_jwt"
+      ],
+      "expected": [
+        "revoke_token",
+        "logout",
+        "auth_file_close",
+        "auth_db_disconnect",
+        "verify_password",
+        "generate_jwt"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "UNAUTHENTICATED",
+        "to": "PASSWORD_VERIFIED",
+        "rule": "verify_password"
+      }
+    },
+    {
+      "goal": "cover transition: PASSWORD_VERIFIED → TOKEN_ISSUED via generate_jwt",
+      "protocol": "_global",
+      "broken": [
+        "verify_password",
+        "create_session",
+        "revoke_token"
+      ],
+      "expected": [
+        "verify_password",
+        "generate_jwt",
+        "create_session",
+        "revoke_token"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "PASSWORD_VERIFIED",
+        "to": "TOKEN_ISSUED",
+        "rule": "generate_jwt"
+      }
+    },
+    {
+      "goal": "cover transition: PASSWORD_VERIFIED → ∅ via generate_jwt",
+      "protocol": "_global",
+      "broken": [
+        "verify_password"
+      ],
+      "expected": [
+        "verify_password",
+        "generate_jwt"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "PASSWORD_VERIFIED",
+        "to": "∅",
+        "rule": "generate_jwt"
+      }
+    },
+    {
+      "goal": "cover transition: TOKEN_ISSUED → SESSION_ACTIVE via create_session",
+      "protocol": "_global",
+      "broken": [
+        "generate_jwt",
+        "logout"
+      ],
+      "expected": [
+        "generate_jwt",
+        "create_session",
+        "logout"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "TOKEN_ISSUED",
+        "to": "SESSION_ACTIVE",
+        "rule": "create_session"
+      }
+    },
+    {
+      "goal": "cover transition: TOKEN_ISSUED → ∅ via create_session",
+      "protocol": "_global",
+      "broken": [
+        "generate_jwt"
+      ],
+      "expected": [
+        "generate_jwt",
+        "create_session"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "TOKEN_ISSUED",
+        "to": "∅",
+        "rule": "create_session"
+      }
+    },
+    {
+      "goal": "cover transition: TOKEN_ISSUED → UNAUTHENTICATED via revoke_token",
+      "protocol": "_global",
+      "broken": [
+        "generate_jwt"
+      ],
+      "expected": [
+        "generate_jwt",
+        "revoke_token"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "TOKEN_ISSUED",
+        "to": "UNAUTHENTICATED",
+        "rule": "revoke_token"
+      }
+    },
+    {
+      "goal": "cover transition: TOKEN_ISSUED → ∅ via revoke_token",
+      "protocol": "_global",
+      "broken": [
+        "generate_jwt"
+      ],
+      "expected": [
+        "generate_jwt",
+        "revoke_token"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "TOKEN_ISSUED",
+        "to": "∅",
+        "rule": "revoke_token"
+      }
+    },
+    {
+      "goal": "cover transition: SESSION_ACTIVE → UNAUTHENTICATED via logout",
+      "protocol": "_global",
+      "broken": [
+        "create_session"
+      ],
+      "expected": [
+        "create_session",
+        "logout"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "SESSION_ACTIVE",
+        "to": "UNAUTHENTICATED",
+        "rule": "logout"
+      }
+    },
+    {
+      "goal": "cover transition: SESSION_ACTIVE → ∅ via logout",
+      "protocol": "_global",
+      "broken": [
+        "create_session"
+      ],
+      "expected": [
+        "create_session",
+        "logout"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "SESSION_ACTIVE",
+        "to": "∅",
+        "rule": "logout"
+      }
+    },
+    {
+      "goal": "cover transition: UNAUTHENTICATED → AUTH_FILE_GATE via auth_file_open",
+      "protocol": "_global",
+      "broken": [
+        "revoke_token",
+        "logout",
+        "auth_file_close",
+        "auth_db_disconnect"
+      ],
+      "expected": [
+        "revoke_token",
+        "logout",
+        "auth_file_close",
+        "auth_db_disconnect",
+        "auth_file_open"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "UNAUTHENTICATED",
+        "to": "AUTH_FILE_GATE",
+        "rule": "auth_file_open"
+      }
+    },
+    {
+      "goal": "cover transition: AUTH_FILE_GATE → UNAUTHENTICATED via auth_file_close",
+      "protocol": "_global",
+      "broken": [
+        "auth_file_open"
+      ],
+      "expected": [
+        "auth_file_open",
+        "auth_file_close"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "AUTH_FILE_GATE",
+        "to": "UNAUTHENTICATED",
+        "rule": "auth_file_close"
+      }
+    },
+    {
+      "goal": "cover transition: AUTH_FILE_GATE → ∅ via auth_file_close",
+      "protocol": "_global",
+      "broken": [
+        "auth_file_open"
+      ],
+      "expected": [
+        "auth_file_open",
+        "auth_file_close"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "AUTH_FILE_GATE",
+        "to": "∅",
+        "rule": "auth_file_close"
+      }
+    },
+    {
+      "goal": "cover transition: UNAUTHENTICATED → AUTH_DB_GATE via auth_db_connect",
+      "protocol": "_global",
+      "broken": [
+        "revoke_token",
+        "logout",
+        "auth_file_close",
+        "auth_db_disconnect"
+      ],
+      "expected": [
+        "revoke_token",
+        "logout",
+        "auth_file_close",
+        "auth_db_disconnect",
+        "auth_db_connect"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "UNAUTHENTICATED",
+        "to": "AUTH_DB_GATE",
+        "rule": "auth_db_connect"
+      }
+    },
+    {
+      "goal": "cover transition: AUTH_DB_GATE → UNAUTHENTICATED via auth_db_disconnect",
+      "protocol": "_global",
+      "broken": [
+        "auth_db_connect"
+      ],
+      "expected": [
+        "auth_db_connect",
+        "auth_db_disconnect"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "AUTH_DB_GATE",
+        "to": "UNAUTHENTICATED",
+        "rule": "auth_db_disconnect"
+      }
+    },
+    {
+      "goal": "cover transition: AUTH_DB_GATE → ∅ via auth_db_disconnect",
+      "protocol": "_global",
+      "broken": [
+        "auth_db_connect"
+      ],
+      "expected": [
+        "auth_db_connect",
+        "auth_db_disconnect"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "AUTH_DB_GATE",
+        "to": "∅",
+        "rule": "auth_db_disconnect"
+      }
+    }
+  ],
+  "source": "coverage-gap"
+}

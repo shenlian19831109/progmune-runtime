@@ -32,15 +32,22 @@ export function generateRandomWalks(
   rules: Map<string, StateAnnotation>,
   count: number = 500,
   minLen: number = 2,
-  maxLen: number = 6
+  maxLen: number = 6,
+  nsInit?: Map<string, string>  // namespace → initial state (e.g., TX_IDLE for transaction)
 ): string[][] {
   const sequences: string[][] = [];
   const ruleEntries = [...rules.entries()];
 
-  // Find entry points (rules with no preconditions)
-  const entryPoints = ruleEntries.filter(([, rule]) =>
-    rule.pre_states.length === 0
-  );
+  // Build the initial state set: per-namespace starting states
+  const initialStateSet = new Set<string>(nsInit?.values() || []);
+
+  // Find entry points: rules with no preconditions, OR rules whose
+  // pre_states are all namespace-initial states (allowing protocol-specific starts).
+  const entryPoints = ruleEntries.filter(([, rule]) => {
+    if (rule.pre_states.length === 0) return true;
+    // Also include rules that can start from namespace initial states
+    return rule.pre_states.every(s => initialStateSet.has(s));
+  });
 
   if (entryPoints.length === 0) {
     // Use all rules as potential starts
@@ -60,11 +67,18 @@ export function generateRandomWalks(
       const currentRule = rules.get(currentFn);
       if (!currentRule) break;
 
-      // Find next functions whose pre_states match our post_states
-      const candidates = ruleEntries.filter(([fn, r]) =>
-        !visited.has(fn) &&
-        currentRule.post_states.some(ps => r.pre_states.includes(ps))
-      );
+      // Find next functions whose pre_states match our post_states,
+      // OR functions with empty pre_states (always callable).
+      // Allow revisiting functions that have self-transitions (post == pre).
+      const candidates = ruleEntries.filter(([fn, r]) => {
+        if (visited.has(fn) && !currentRule.post_states.some(ps => r.pre_states.includes(ps) && r.post_states.some(p => p === ps))) {
+          // Only allow revisit if it's a self-transition (same state in pre and post)
+          return false;
+        }
+        // Match: our post_state is in their pre_states, OR they have no preconditions
+        return currentRule.post_states.some(ps => r.pre_states.includes(ps)) ||
+               r.pre_states.length === 0;
+      });
 
       if (candidates.length === 0) {
         // Try to close with an invalidation rule
@@ -101,6 +115,12 @@ export function generateAllRandomWalks(count: number = 500): string[][] {
   const allRules = new Map<string, StateAnnotation>();
   for (const p of defs) for (const [fn, rule] of p.rules) allRules.set(fn, rule);
 
+  // Build namespace initial states from protocol definitions
+  const nsInit = new Map<string, string>();
+  for (const p of defs) {
+    nsInit.set(p.name, p.initialState);
+  }
+
   // Add synthesized rules
   const synthesized = synthesizeAllKnownProtocols();
   for (const sp of synthesized) {
@@ -113,7 +133,7 @@ export function generateAllRandomWalks(count: number = 500): string[][] {
     }
   }
 
-  return generateRandomWalks(allRules, count);
+  return generateRandomWalks(allRules, count, 2, 6, nsInit);
 }
 
 // ═══════════════════════════════════════════════════════════════

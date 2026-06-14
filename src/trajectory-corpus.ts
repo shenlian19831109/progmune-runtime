@@ -99,6 +99,104 @@ export const EXPANDED_TRAJECTORIES: { library: string; domain: string; sequences
     ["register", "disconnect_db"],
     ["register", "release_lock"],
   ]},
+
+  // ═══════════════════════════════════════════════════════════════
+  // P7.3: 5 New Protocol Types — breaking the corpus ceiling
+  // Adding 60 sequences across 8 new libraries for:
+  //   stateless, transaction, conditional, loop, cross-protocol
+  // ═══════════════════════════════════════════════════════════════
+
+  // ── 11. hashlib (Cryptography — stateless) ──
+  { library: "hashlib", domain: "Cryptography", sequences: [
+    ["compute_hash", "verify_checksum"],
+    ["compute_hash", "encode_payload"],
+    ["compute_hash", "compute_hash", "verify_checksum"],
+    ["compute_hash", "encode_payload", "decode_payload"],
+    ["compute_hash", "compress_buffer", "verify_checksum"],
+    ["encode_payload", "compress_buffer", "decode_payload"],
+    ["compute_hash", "encode_payload", "compress_buffer"],
+    ["compute_hash", "encode_payload", "decode_payload", "verify_checksum"],
+  ]},
+
+  // ── 12. validators (Validation — stateless) ──
+  { library: "validators", domain: "Validation", sequences: [
+    ["sanitize_input", "validate_schema"],
+    ["validate_schema", "sanitize_input"],
+    ["sanitize_input", "validate_schema", "encode_payload"],
+    ["validate_schema", "sanitize_input", "verify_checksum"],
+    ["sanitize_input", "compute_hash", "validate_schema"],
+    ["sanitize_input", "encode_payload", "validate_schema"],
+  ]},
+
+  // ── 13. sqlalchemy (Transaction — savepoint/commit/rollback) ──
+  { library: "sqlalchemy", domain: "Transaction", sequences: [
+    ["begin_tx", "insert_record", "commit_tx"],
+    ["begin_tx", "update_record", "commit_tx"],
+    ["begin_tx", "delete_record", "rollback_tx"],
+    ["begin_tx", "insert_record", "update_record", "commit_tx"],
+    ["begin_tx", "savepoint_create", "update_record", "savepoint_release", "commit_tx"],
+    ["begin_tx", "savepoint_create", "delete_record", "rollback_to_savepoint", "commit_tx"],
+    ["begin_tx", "insert_record", "delete_record", "rollback_tx"],
+    ["begin_tx", "insert_record", "savepoint_create", "update_record", "rollback_to_savepoint", "commit_tx"],
+  ]},
+
+  // ── 14. psycopg2 (Transaction — two-phase & batch) ──
+  { library: "psycopg2", domain: "Transaction", sequences: [
+    ["begin_tx", "insert_record", "prep_two_phase"],
+    ["begin_tx", "update_record", "update_record", "commit_tx"],
+    ["begin_tx", "insert_record", "insert_record", "commit_tx"],
+    ["begin_tx", "delete_record", "commit_tx"],
+    ["begin_tx", "update_record", "rollback_tx"],
+    ["begin_tx", "insert_record", "update_record", "delete_record", "commit_tx"],
+  ]},
+
+  // ── 15. tenacity (Retry — loop) ──
+  { library: "tenacity", domain: "Retry", sequences: [
+    ["init_fetch_loop", "fetch_batch", "has_more_data", "process_item", "next_iteration", "fetch_batch", "has_more_data", "process_item", "exit_loop"],
+    ["init_fetch_loop", "fetch_batch", "has_more_data", "process_item", "exit_loop"],
+    ["init_fetch_loop", "fetch_batch", "retry_batch", "fetch_batch", "has_more_data", "process_item", "exit_loop"],
+    ["init_fetch_loop", "fetch_batch", "has_more_data", "process_item", "process_item", "next_iteration", "fetch_batch", "has_more_data", "process_item", "exit_loop"],
+    ["init_fetch_loop", "fetch_batch", "has_more_data", "process_item", "poll_status", "next_iteration", "fetch_batch", "has_more_data", "process_item", "exit_loop"],
+    ["init_fetch_loop", "fetch_batch", "retry_batch", "fetch_batch", "retry_batch", "fetch_batch", "has_more_data", "process_item", "exit_loop"],
+    ["init_fetch_loop", "fetch_batch", "has_more_data", "timeout_exit"],
+    ["init_fetch_loop", "fetch_batch", "has_more_data", "process_item", "process_item", "process_item", "exit_loop"],
+  ]},
+
+  // ── 16. casbin (Authorization — conditional) ──
+  { library: "casbin", domain: "Authorization", sequences: [
+    ["evaluate_access", "grant_access", "log_granted"],
+    ["evaluate_access", "deny_access", "log_denied"],
+    ["evaluate_access", "grant_access", "log_granted"],
+    ["evaluate_access", "deny_access", "escalate_access", "log_granted"],
+    ["evaluate_access", "bypass_condition"],
+    ["evaluate_access", "retry_evaluation", "evaluate_access", "grant_access", "log_granted"],
+    ["evaluate_access", "deny_access", "log_denied"],
+    ["evaluate_access", "grant_access", "audit_condition"],
+  ]},
+
+  // ── 17. watchdog (Filesystem-Events — loop/poll) ──
+  { library: "watchdog", domain: "Filesystem-Events", sequences: [
+    ["init_fetch_loop", "fetch_batch", "has_more_data", "process_item", "next_iteration", "fetch_batch", "has_more_data", "process_item", "exit_loop"],
+    ["init_fetch_loop", "fetch_batch", "has_more_data", "process_item", "poll_status", "exit_loop"],
+    ["init_fetch_loop", "fetch_batch", "has_more_data", "process_item", "next_iteration", "fetch_batch", "has_more_data", "timeout_exit"],
+    ["init_fetch_loop", "fetch_batch", "retry_batch", "fetch_batch", "has_more_data", "process_item", "exit_loop"],
+    ["init_fetch_loop", "fetch_batch", "has_more_data", "process_item", "poll_status", "process_item", "exit_loop"],
+    ["init_fetch_loop", "fetch_batch", "has_more_data", "process_item", "next_iteration", "fetch_batch", "has_more_data", "process_item", "next_iteration", "fetch_batch", "has_more_data", "process_item", "exit_loop"],
+  ]},
+
+  // ── 18. cross (Cross-Protocol — mixed namespace sequences) ──
+  { library: "cross", domain: "Cross-Protocol", sequences: [
+    ["verify_password", "open_file", "read_file", "close_file", "logout"],
+    ["verify_password", "create_session", "open_file", "write_file", "close_file", "logout"],
+    ["connect_db", "query_db", "disconnect_db", "open_file", "read_file", "close_file"],
+    ["open_file", "read_file", "connect_db", "query_db", "disconnect_db", "close_file"],
+    ["verify_password", "connect_db", "query_db", "disconnect_db", "logout"],
+    ["verify_password", "create_session", "open_file", "read_file", "connect_db", "query_db", "close_file", "disconnect_db", "logout"],
+    ["open_file", "connect_db", "read_file", "query_db", "close_file", "disconnect_db"],
+    ["verify_password", "open_file", "connect_db", "read_file", "query_db", "close_file", "disconnect_db", "logout"],
+    ["verify_password", "generate_jwt", "open_file", "write_file", "close_file"],
+    ["verify_password", "open_file", "read_file", "connect_db", "query_db", "close_file", "disconnect_db", "logout"],
+  ]},
 ];
 
 // ═══════════════════════════════════════════════════════════════

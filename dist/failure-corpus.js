@@ -1,6 +1,71 @@
-import * as fs from "fs";
-import * as path from "path";
-import { withLock } from "./file-lock";
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.saveCheckpoint = saveCheckpoint;
+exports.loadCheckpoint = loadCheckpoint;
+exports.clearCheckpoint = clearCheckpoint;
+exports.recordFailure = recordFailure;
+exports.recordTrajectory = recordTrajectory;
+exports.recordSuccess = recordSuccess;
+exports.recordRepair = recordRepair;
+exports.recordFailureV2 = recordFailureV2;
+exports.loadFailuresV2 = loadFailuresV2;
+exports.loadTrajectories = loadTrajectories;
+exports.queryByResult = queryByResult;
+exports.queryByViolationType = queryByViolationType;
+exports.queryByProtocol = queryByProtocol;
+exports.getTopPatterns = getTopPatterns;
+exports.corpusTrajectoryStats = corpusTrajectoryStats;
+exports.getRepairStats = getRepairStats;
+exports.corpusV2Size = corpusV2Size;
+exports.recordSession = recordSession;
+exports.getAllFailures = getAllFailures;
+exports.getFailuresBySVL = getFailuresBySVL;
+exports.getTopFailurePatterns = getTopFailurePatterns;
+exports.getFailureGenome = getFailureGenome;
+exports.getAllSessions = getAllSessions;
+exports.getLearnedPatterns = getLearnedPatterns;
+exports.queryAntibodies = queryAntibodies;
+exports.getSemanticHeatmap = getSemanticHeatmap;
+exports.getAntibodyStats = getAntibodyStats;
+exports.recordEdgeRejection = recordEdgeRejection;
+exports.getEdgeConfidence = getEdgeConfidence;
+exports.generateCandidateRules = generateCandidateRules;
+const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
+const file_lock_1 = require("./file-lock");
 // 优先使用 PROGMUNE_PROJECT_DIR（由 MCP 服务器在调用时设置），确保多项目隔离
 const projectDir = process.env.PROGMUNE_PROJECT_DIR || process.cwd();
 const CORPUS_DIR = process.env.PROGMUNE_CORPUS_DIR
@@ -17,7 +82,7 @@ function checkpointPath(intent) {
     return path.join(CHECKPOINT_DIR, `ckpt_${hash}.json`);
 }
 /** Save planner checkpoint for crash recovery. */
-export function saveCheckpoint(intent, data) {
+function saveCheckpoint(intent, data) {
     ensureDir(CHECKPOINT_DIR);
     const cp = {
         ...data,
@@ -27,7 +92,7 @@ export function saveCheckpoint(intent, data) {
     fs.writeFileSync(checkpointPath(intent), JSON.stringify(cp, null, 2));
 }
 /** Load a previously saved planner checkpoint. */
-export function loadCheckpoint(intent) {
+function loadCheckpoint(intent) {
     try {
         const raw = fs.readFileSync(checkpointPath(intent), "utf-8");
         return JSON.parse(raw);
@@ -37,15 +102,15 @@ export function loadCheckpoint(intent) {
     }
 }
 /** Clear a saved planner checkpoint. */
-export function clearCheckpoint(intent) {
+function clearCheckpoint(intent) {
     try {
         fs.unlinkSync(checkpointPath(intent));
     }
     catch { /* checkpoint file may not exist */ }
 }
 /** Record a constraint violation to the failure corpus. */
-export function recordFailure(record) {
-    withLock("failure-corpus", () => {
+function recordFailure(record) {
+    (0, file_lock_1.withLock)("failure-corpus", () => {
         ensureDir(CORPUS_DIR);
         const date = new Date().toISOString().slice(0, 10);
         const dateDir = path.join(CORPUS_DIR, date);
@@ -71,6 +136,228 @@ export function recordFailure(record) {
         console.error(`[FailureCorpus] ${record.violatedSVL} | 尝试 ${record.plannerAttempt}/${record.plannerRetryTotal} | ${id}`);
     });
 }
+const TRAJECTORY_DIR = path.join(CORPUS_DIR, "trajectories");
+function writeTrajectoryFile(record) {
+    setImmediate(() => {
+        try {
+            const date = record.timestamp.slice(0, 10);
+            const dateDir = path.join(TRAJECTORY_DIR, date);
+            ensureDir(dateDir);
+            fs.writeFileSync(path.join(dateDir, `${record.id}.json`), JSON.stringify(record, null, 2));
+        }
+        catch { /* corpus write must never crash */ }
+    });
+}
+let _trajSeq = 0;
+function nextTrajId() {
+    if (_trajSeq === 0) {
+        const seqFile = path.join(TRAJECTORY_DIR, ".seq");
+        try {
+            _trajSeq = parseInt(fs.readFileSync(seqFile, "utf-8"), 10);
+        }
+        catch { }
+    }
+    _trajSeq++;
+    setImmediate(() => {
+        try {
+            fs.writeFileSync(path.join(TRAJECTORY_DIR, ".seq"), String(_trajSeq));
+        }
+        catch { }
+    });
+    return `T-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+}
+/**
+ * Record any trajectory — success, violation, repair, or optimal.
+ * This is the single entry point for the Code World Model Dataset.
+ */
+function recordTrajectory(params) {
+    ensureDir(TRAJECTORY_DIR);
+    const defaultCtx = { nestingDepth: 0, exceptionHandled: false, insideLoop: false, branchCount: 0, asyncContext: false };
+    const defaultReward = { safety: 0.5, latency: 0.5, maintainability: 0.5, security: 0.5, auditability: 0.5, custom: {} };
+    const record = {
+        id: nextTrajId(),
+        timestamp: new Date().toISOString(),
+        protocol: params.protocol,
+        initialState: params.initialState,
+        finalState: params.finalState,
+        trajectory: params.trajectory,
+        result: params.result,
+        reward: params.result === "success" || params.result === "optimal" ? (params.reward || defaultReward) : undefined,
+        violation: params.result === "violation" || params.result === "repair" ? {
+            type: params.violationType || "other",
+            failingStepIndex: params.failingStepIndex || 0,
+            expectedStates: params.finalState,
+            actualStates: params.initialState,
+            fixPath: params.fixPath,
+            description: params.violationDesc || "",
+        } : undefined,
+        repairFrom: params.repairFrom,
+        context: params.context || defaultCtx,
+        successRate: params.successRate || 0,
+        metadata: {
+            source: params.source || "llm",
+            intent: params.intent,
+            sessionId: params.sessionId,
+        },
+        goal: params.goal,
+        feedback: params.feedback,
+        cost: params.cost,
+    };
+    writeTrajectoryFile(record);
+    console.error(`[Trajectory] ${record.result} | ${params.protocol} | ${record.id}`);
+}
+/**
+ * Record a successful trajectory — positive sample for reward learning.
+ * Call this when validation passes without violations.
+ */
+function recordSuccess(params) {
+    recordTrajectory({ ...params, result: "success", successRate: 1.0 });
+}
+/**
+ * Record a repair trajectory — shows what fix was applied and whether it worked.
+ */
+function recordRepair(params) {
+    recordTrajectory({
+        ...params,
+        result: "repair",
+        successRate: params.success ? 1.0 : 0.0,
+        failingStepIndex: 0,
+    });
+}
+// ── Backward-compatible wrappers ──
+/** @deprecated Use recordTrajectory() with result: "violation" instead. */
+function recordFailureV2(record) {
+    recordTrajectory({
+        protocol: record.protocol,
+        initialState: record.actualStateSequence,
+        finalState: record.expectedStateSequence,
+        trajectory: record.actionSequence,
+        result: "violation",
+        violationType: record.violationType,
+        violationDesc: record.violationType,
+        failingStepIndex: record.failingStepIndex,
+        fixPath: record.ssgFixPath,
+        context: record.contextFeatures,
+        successRate: record.successRate,
+        intent: record.intent,
+        sessionId: record.parentSessionId,
+    });
+}
+/** @deprecated Use loadTrajectories() instead. */
+function loadFailuresV2() {
+    return loadTrajectories()
+        .filter(t => t.result === "violation")
+        .map(t => ({
+        failureId: t.id,
+        timestamp: t.timestamp,
+        protocol: t.protocol,
+        codeSnippet: (t.trajectory || []).join("; "),
+        expectedStateSequence: t.finalState || [],
+        actualStateSequence: t.initialState || [],
+        violationType: t.violation?.type || "other",
+        failingStepIndex: t.violation?.failingStepIndex || 0,
+        contextFeatures: t.context,
+        repairAttempts: [],
+        successRate: t.successRate,
+        actionSequence: t.trajectory || [],
+        ssgStateAtViolation: t.initialState || [],
+        ssgFixPath: t.violation?.fixPath || [],
+        parentSessionId: t.metadata?.sessionId,
+        intent: t.metadata?.intent || "",
+    }));
+}
+// ═══════════════════════════════════════════════════════════════
+// P0: Trajectory query API
+// ═══════════════════════════════════════════════════════════════
+/** Load all trajectory records from the corpus. */
+function loadTrajectories() {
+    const results = [];
+    if (!fs.existsSync(TRAJECTORY_DIR))
+        return results;
+    const dateDirs = fs.readdirSync(TRAJECTORY_DIR, { withFileTypes: true });
+    for (const entry of dateDirs) {
+        if (!entry.isDirectory())
+            continue;
+        const files = fs.readdirSync(path.join(TRAJECTORY_DIR, entry.name));
+        for (const file of files) {
+            if (!file.endsWith(".json"))
+                continue;
+            try {
+                const raw = fs.readFileSync(path.join(TRAJECTORY_DIR, entry.name, file), "utf-8");
+                results.push(JSON.parse(raw));
+            }
+            catch { /* skip corrupted files */ }
+        }
+    }
+    return results.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+}
+/** Query trajectories by result type. */
+function queryByResult(result) {
+    return loadTrajectories().filter(t => t.result === result);
+}
+/** Query violations by type. */
+function queryByViolationType(type) {
+    return loadTrajectories().filter(t => t.violation?.type === type);
+}
+/** Query trajectories by protocol. */
+function queryByProtocol(protocol) {
+    return loadTrajectories().filter(t => t.protocol === protocol);
+}
+/** Get top N violation patterns across all trajectories. */
+function getTopPatterns(limit = 10) {
+    const all = loadTrajectories().filter(t => t.result === "violation");
+    const buckets = {};
+    for (const t of all) {
+        const ctx = t.context;
+        const key = `${t.violation?.type || "other"}|d${ctx.nestingDepth}|${ctx.exceptionHandled ? "try" : "no-try"}|${ctx.insideLoop ? "loop" : "no-loop"}`;
+        if (!buckets[key])
+            buckets[key] = { records: [] };
+        buckets[key].records.push(t);
+    }
+    return Object.entries(buckets)
+        .sort((a, b) => b[1].records.length - a[1].records.length)
+        .slice(0, limit)
+        .map(([key, bucket]) => {
+        const [vt, ...rest] = key.split("|");
+        const avg = bucket.records.reduce((s, t) => s + t.successRate, 0) / bucket.records.length;
+        return {
+            violationType: vt,
+            contextKey: rest.join(" "),
+            count: bucket.records.length,
+            avgSuccessRate: avg,
+        };
+    });
+}
+/** Get total trajectory count and breakdown by result type. */
+function corpusTrajectoryStats() {
+    const all = loadTrajectories();
+    return {
+        total: all.length,
+        success: all.filter(t => t.result === "success").length,
+        violation: all.filter(t => t.result === "violation").length,
+        repair: all.filter(t => t.result === "repair").length,
+        optimal: all.filter(t => t.result === "optimal").length,
+    };
+}
+/** Get repair acceptance statistics for P4 Reward Model training data. */
+function getRepairStats() {
+    const all = loadTrajectories().filter(t => t.result === "repair");
+    const accepted = all.filter(t => t.feedback?.accepted === true).length;
+    const rejected = all.filter(t => t.feedback?.rejected === true).length;
+    const total = all.length;
+    const acceptanceRate = total > 0 ? accepted / total : 0;
+    const costs = all
+        .map(t => t.cost?.latency)
+        .filter((l) => l !== undefined);
+    const avgLatency = costs.length > 0
+        ? costs.reduce((s, l) => s + l, 0) / costs.length
+        : 0;
+    return { acceptedRepairs: accepted, rejectedRepairs: rejected, totalRepairs: total, acceptanceRate, avgLatency };
+}
+/** @deprecated Use corpusTrajectoryStats() instead. */
+function corpusV2Size() {
+    return corpusTrajectoryStats().total;
+}
 /** 记录一个完整的意图会话（支持 ExecutionSession 和旧 IntentSession） */
 /**
  * 保存执行会话（含所有尝试、违规、状态转移）。
@@ -78,7 +365,7 @@ export function recordFailure(record) {
  */
 /** @requires EXECUTION_DATA @produces SESSION_ID */
 /** @requires EXECUTION_DATA @produces SESSION_ID */
-export function recordSession(session) {
+function recordSession(session) {
     ensureDir(SESSIONS_DIR);
     const sessionId = session.sessionId || `sess_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     // 检测新格式：ExecutionSession has .attempts[0]?.violations
@@ -115,7 +402,7 @@ export function recordSession(session) {
     return sessionId;
 }
 /** @requires FAILURE_CORPUS @produces FAILURE_LIST */
-export function getAllFailures() {
+function getAllFailures() {
     const records = [];
     if (!fs.existsSync(CORPUS_DIR))
         return records;
@@ -136,11 +423,11 @@ export function getAllFailures() {
     return records;
 }
 /** @requires FAILURE_LIST @produces FILTERED_FAILURES */
-export function getFailuresBySVL(level) {
+function getFailuresBySVL(level) {
     return getAllFailures().filter(r => r.violatedSVL === level);
 }
 /** @requires FAILURE_LIST @produces FAILURE_PATTERNS */
-export function getTopFailurePatterns(limit = 5) {
+function getTopFailurePatterns(limit = 5) {
     const groups = new Map();
     for (const r of getAllFailures()) {
         const key = `${r.violatedSVL}:${r.constraintType}`;
@@ -163,7 +450,7 @@ export function getTopFailurePatterns(limit = 5) {
 /** @requires FAILURE_DATA @produces FAILURE_GENOME */
 /** @requires FAILURE_DATA @produces FAILURE_GENOME */
 /** @useWhen user asks why generation failed; benchmark compile rate drops; analyzing error patterns */
-export function getFailureGenome() {
+function getFailureGenome() {
     const sessions = getAllSessions();
     const bySVL = { "SVL-1": 0, "SVL-2": 0, "SVL-3": 0, "SVL-4": 0 };
     const byConstraint = {};
@@ -227,7 +514,7 @@ export function getFailureGenome() {
 /** @requires SESSION_CORPUS @produces SESSION_LIST */
 /** @requires SESSION_CORPUS @produces SESSION_LIST */
 /** @useWhen listing all past executions; auditing session history; checking coverage */
-export function getAllSessions() {
+function getAllSessions() {
     const sessions = [];
     if (!fs.existsSync(SESSIONS_DIR))
         return sessions;
@@ -320,7 +607,7 @@ function computeACL(count, distinctIntents, resolvedRate) {
 /** Get antibody patterns learned from failure history. */
 /** @requires FAILURE_HISTORY @produces LEARNED_PATTERNS */
 /** @useWhen finding what fixes worked before; reusing successful repairs */
-export function getLearnedPatterns() {
+function getLearnedPatterns() {
     const sessions = getAllSessions();
     const agg = new Map();
     for (const s of sessions) {
@@ -380,7 +667,7 @@ export function getLearnedPatterns() {
 /** 查询匹配当前意图的高置信度抗体（ACL-3+），用于推理层免疫加速 */
 /** Query antibody registry for matching repair patterns. */
 /** @requires FAILURE_SIGNATURE @produces ANTIBODY_MATCH */
-export function queryAntibodies(intent, minACL = "ACL-3") {
+function queryAntibodies(intent, minACL = "ACL-3") {
     const { failureToFix } = getLearnedPatterns();
     const aclRank = { "ACL-1": 1, "ACL-2": 2, "ACL-3": 3, "ACL-4": 4 };
     const minRank = aclRank[minACL];
@@ -407,7 +694,7 @@ export function queryAntibodies(intent, minACL = "ACL-3") {
 /** Get semantic heatmap showing fragile protocols and SVL hotspots. */
 /** @requires FAILURE_DATA @produces HEATMAP */
 /** @requires FAILURE_HEATMAP @produces HEATMAP_DATA */
-export function getSemanticHeatmap() {
+function getSemanticHeatmap() {
     const sessions = getAllSessions();
     // Count total violations from sessions
     let totalViolations = 0;
@@ -472,7 +759,7 @@ export function getSemanticHeatmap() {
 /** @requires ANTIBODY_DATA @produces ANTIBODY_STATS */
 /** @requires ANTIBODY_DATA @produces ANTIBODY_STATS */
 /** @useWhen checking immune system effectiveness; measuring token savings */
-export function getAntibodyStats() {
+function getAntibodyStats() {
     const sessions = getAllSessions();
     let totalHits = 0;
     let fastPathHits = 0;
@@ -520,8 +807,8 @@ export function getAntibodyStats() {
 const MEMORY_DIR = path.join(CORPUS_DIR, "..", ".progmune_memory");
 const REJECTION_FILE = path.join(MEMORY_DIR, "edge_rejections.json");
 /** Record that the LLM rejected a recommended edge (picked a different function). */
-export function recordEdgeRejection(producer, consumer) {
-    withLock("edge_rejections", () => {
+function recordEdgeRejection(producer, consumer) {
+    (0, file_lock_1.withLock)("edge_rejections", () => {
         let data = {};
         try {
             if (fs.existsSync(REJECTION_FILE))
@@ -544,7 +831,7 @@ function getEdgeRejections() {
         return new Map();
     }
 }
-export function getEdgeConfidence(producer, consumer) {
+function getEdgeConfidence(producer, consumer) {
     const sessions = getAllSessions();
     const edgeStats = new Map();
     for (const s of sessions) {
@@ -593,7 +880,7 @@ export function getEdgeConfidence(producer, consumer) {
     return results;
 }
 /** Generate candidate immune rules from failure patterns. */
-export function generateCandidateRules() {
+function generateCandidateRules() {
     const genome = getFailureGenome();
     const rules = [];
     // SVL-4 修复路径

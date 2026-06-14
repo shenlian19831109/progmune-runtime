@@ -71,6 +71,15 @@ export function extractFeatures(
   const corpusEvidence =
     (candidate.metadata?.corpusEvidenceCount as number) || 0;
 
+  // ── goalMatch (P7.3) ──
+  // Candidates from goal-template matching get a 1.0 boost.
+  // Cross-protocol and frontier candidates get a 0.3 partial boost
+  // since they still represent structured protocol knowledge.
+  const metaSource = candidate.metadata?.source as string | undefined;
+  const goalMatch = metaSource === "goal-template" ? 1.0
+    : metaSource === "cross-protocol" ? 0.3
+    : 0.0;
+
   return {
     protocolSafety,
     historicalSuccessRate,
@@ -79,6 +88,7 @@ export function extractFeatures(
     auditability,
     corpusEvidence,
     source: candidate.source,
+    goalMatch,
   };
 }
 
@@ -88,10 +98,11 @@ export function extractFeatures(
 
 /** Default P3 manual weights. Tune these from corpus data. */
 const DEFAULT_WEIGHTS = {
-  safety: 0.4,
-  successRate: 0.3,
-  performance: 0.2,
-  auditability: 0.1,
+  safety: 0.30,
+  successRate: 0.15,
+  performance: 0.10,
+  auditability: 0.10,
+  goalMatch: 0.35,   // P7.3: boost goal-template candidates heavily
 };
 
 /**
@@ -117,7 +128,8 @@ export function createLinearRanker(
       w.safety * f.protocolSafety +
       w.successRate * f.historicalSuccessRate +
       w.performance * performanceScore(f) +
-      w.auditability * f.auditability
+      w.auditability * f.auditability +
+      w.goalMatch * (f.goalMatch || 0)
     );
   }
 
@@ -168,4 +180,26 @@ export function createLinearRanker(
       return rankBy(candidates, features, f => overallScore(f));
     },
   };
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// Convenience: rankCandidates
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Rank candidates using the linear ranker in one call.
+ * Convenience wrapper around extractFeatures + createLinearRanker.
+ */
+export function rankCandidates(
+  candidates: RepairCandidate[],
+  ctx: SearchContext & { intent?: string; currentState?: string[]; requiredState?: string[] },
+  mode: "safety" | "performance" | "auditability" | "overall" = "overall"
+): RepairCandidate[] {
+  const maxActions = Math.max(...candidates.map(c => c.actions.length), 8);
+  const features: CandidateFeatures[] = candidates.map(c => extractFeatures(c, ctx, { maxActions }));
+  const ranker = createLinearRanker();
+  const ranked = ranker.rankOverall(candidates, features);
+  // Assign rank fields
+  return ranked.map((c, i) => ({ ...c, rank: i + 1 }));
 }

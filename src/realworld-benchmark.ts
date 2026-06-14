@@ -99,7 +99,7 @@ export const REAL_WORLD_DEFECTS: RealWorldDefect[] = [
   // ── Auth Bypass ──
   {
     id: "RW-005",
-    title: "Missing authentication before sensitive operation",
+    title: "Missing authentication before database query (auth bypass)",
     source: "OWASP Top 10: Broken Access Control",
     severity: "critical",
     category: "auth_bypass",
@@ -172,6 +172,140 @@ export const REAL_WORLD_DEFECTS: RealWorldDefect[] = [
     expected: ["open_file", "read_file", "close_file"],
     protocol: "_global",
     violationType: "resource_leak",
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // P7.3: New protocol type defects (10 cases)
+  // ═══════════════════════════════════════════════════════════
+
+  // ── Transaction Defects ──
+  {
+    id: "RW-011",
+    title: "Missing commit after transaction (lost writes)",
+    source: "Common OLTP outage pattern",
+    severity: "critical",
+    category: "data_corruption",
+    description: "Transaction opened and rows inserted but never committed — all writes lost on connection close",
+    broken: ["begin_tx", "insert_record", "update_record"],
+    expected: ["begin_tx", "insert_record", "update_record", "commit_tx"],
+    protocol: "_global",
+    violationType: "resource_leak",
+  },
+  {
+    id: "RW-012",
+    title: "Missing rollback on error path (data inconsistency)",
+    source: "Postmortem: partial commit on exception",
+    severity: "high",
+    category: "data_corruption",
+    description: "Transaction opened with savepoint, error occurs, but no rollback — partial state persisted",
+    broken: ["begin_tx", "savepoint_create", "update_record"],
+    expected: ["begin_tx", "savepoint_create", "update_record", "rollback_to_savepoint", "rollback_tx"],
+    protocol: "_global",
+    violationType: "resource_leak",
+  },
+
+  // ── Conditional Defects ──
+  {
+    id: "RW-013",
+    title: "Missing access evaluation before grant (privilege escalation)",
+    source: "OWASP Top 10: Broken Access Control",
+    severity: "critical",
+    category: "auth_bypass",
+    description: "Access granted without prior policy evaluation — anyone can get access",
+    broken: ["grant_access", "log_granted"],
+    expected: ["evaluate_access", "grant_access", "log_granted"],
+    protocol: "_global",
+    violationType: "missing_prerequisite",
+  },
+  {
+    id: "RW-014",
+    title: "Access denied without audit logging (stealth denial)",
+    source: "SOC 2 audit finding",
+    severity: "high",
+    category: "auth_bypass",
+    description: "Access denied but not logged — security team has no visibility into rejection patterns",
+    broken: ["evaluate_access", "deny_access"],
+    expected: ["evaluate_access", "deny_access", "log_denied"],
+    protocol: "_global",
+    violationType: "resource_leak",
+  },
+
+  // ── Loop Defects ──
+  {
+    id: "RW-015",
+    title: "Infinite loop: missing exit condition (resource exhaustion)",
+    source: "Common production hang pattern",
+    severity: "critical",
+    category: "resource_leak",
+    description: "Fetch loop started but exit_loop never called — process hangs indefinitely",
+    broken: ["init_fetch_loop", "fetch_batch", "has_more_data", "process_item", "next_iteration", "fetch_batch", "has_more_data", "process_item"],
+    expected: ["init_fetch_loop", "fetch_batch", "has_more_data", "process_item", "next_iteration", "fetch_batch", "has_more_data", "process_item", "exit_loop"],
+    protocol: "_global",
+    violationType: "resource_leak",
+  },
+  {
+    id: "RW-016",
+    title: "Missing retry on transient failure (brittle pipeline)",
+    source: "Common distributed system outage",
+    severity: "high",
+    category: "resource_leak",
+    description: "Batch fetch failed but no retry attempted — pipeline aborts on first transient error",
+    broken: ["init_fetch_loop", "fetch_batch", "timeout_exit"],
+    expected: ["init_fetch_loop", "fetch_batch", "retry_batch", "fetch_batch", "has_more_data", "process_item", "exit_loop"],
+    protocol: "_global",
+    violationType: "resource_leak",
+  },
+
+  // ── Cross-Protocol Defects ──
+  {
+    id: "RW-017",
+    title: "File access without authentication gate (auth bypass)",
+    source: "CWE-306: Missing Authentication for Critical Function",
+    severity: "critical",
+    category: "auth_bypass",
+    description: "File opened and read without prior authentication — unauthenticated data exposure",
+    broken: ["open_file", "read_file", "close_file"],
+    expected: ["verify_password", "create_session", "open_file", "read_file", "close_file", "logout"],
+    protocol: "_global",
+    violationType: "missing_prerequisite",
+  },
+  {
+    id: "RW-018",
+    title: "Database queried without auth gate (data breach)",
+    source: "GDPR Article 32 audit finding",
+    severity: "critical",
+    category: "auth_bypass",
+    description: "Database connect and query without auth check — unauthorized data access",
+    broken: ["connect_db", "query_db", "disconnect_db"],
+    expected: ["verify_password", "create_session", "connect_db", "query_db", "disconnect_db", "logout"],
+    protocol: "_global",
+    violationType: "missing_prerequisite",
+  },
+
+  // ── Stateless / Validation Defects ──
+  {
+    id: "RW-019",
+    title: "Unsanitized input before encoding (XSS/injection vector)",
+    source: "CWE-79: Cross-Site Scripting",
+    severity: "high",
+    category: "data_corruption",
+    description: "Payload encoded without prior sanitization — XSS payload survives encoding",
+    broken: ["encode_payload", "decode_payload"],
+    expected: ["sanitize_input", "validate_schema", "encode_payload", "decode_payload"],
+    protocol: "_global",
+    violationType: "missing_prerequisite",
+  },
+  {
+    id: "RW-020",
+    title: "Missing checksum verification after decompress (data integrity)",
+    source: "CWE-345: Insufficient Verification of Data Authenticity",
+    severity: "medium",
+    category: "data_corruption",
+    description: "Data decompressed but checksum never verified — corrupted data passed downstream",
+    broken: ["decode_payload", "decompress_buffer"],
+    expected: ["decode_payload", "decompress_buffer", "verify_checksum"],
+    protocol: "_global",
+    violationType: "missing_prerequisite",
   },
 ];
 

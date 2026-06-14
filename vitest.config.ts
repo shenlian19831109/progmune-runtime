@@ -2,10 +2,12 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    include: ["src/**/*.test.ts", "test/**/*.test.ts"],
+    include: ["src/**/*.test.ts", "test/**/*.test.ts", "tests/**/*.test.ts", "tests/**/*.perf.ts", "tests/**/*.stress.ts", "tests/**/*.soak.ts"],
     exclude: ["node_modules", "dist"],
     environment: "node",
     testTimeout: 30_000,
+    // Stress/soak tests may need longer
+    hookTimeout: 120_000,
 
     // Coverage
     coverage: {

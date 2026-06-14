@@ -15,6 +15,8 @@ import * as path from "path";
 import { loadTrajectories } from "./failure-corpus";
 import { findFixPathStatic } from "./ssg-validator";
 import type { RepairCandidate, CandidateSearchStrategy, SearchContext } from "./repair-types";
+import { getGoalPlanner } from "./goal-planner";
+import { searchFrontier, exploreFrontier, expandCrossProtocolCandidates } from "./protocol-frontier";
 
 // ═══════════════════════════════════════════════════════════════
 // Helpers
@@ -51,6 +53,27 @@ function findCleanupFunctions(ctx: SearchContext): RepairCandidate[] {
   }
   return candidates;
 }
+
+// ═══════════════════════════════════════════════════════════════
+// P3.10: Goal-expanded candidate generation
+// ═══════════════════════════════════════════════════════════════
+
+/** Expand a goal into protocol candidates using Goal Templates. */
+function expandGoalAsCandidates(goal: string, ctx: SearchContext): RepairCandidate[] {
+  const planner = getGoalPlanner();
+  const actionSets = planner.getCandidateActions(goal);
+  if (actionSets.length === 0) return [];
+
+  return actionSets.map(actions => ({
+    id: candidateId("protocol", actions.map(fnToAction)),
+    source: "protocol" as const,
+    actions: actions.map(fnToAction),
+    explanation: `目标展开: "${goal}" → ${actions.join(" → ")}`,
+    evidence: 0,
+    metadata: { pathLength: actions.length, source: "goal-template" },
+  }));
+}
+
 
 // ═══════════════════════════════════════════════════════════════
 // Strategy 1: Corpus Search — historical trajectory data
@@ -117,7 +140,50 @@ export class ProtocolSearchStrategy implements CandidateSearchStrategy {
       // Resource cleanup case: no target state means we need to invalidate current states
       if (ctx.targetState.length === 0 && ctx.currentState.length > 0) {
         const cleanupCandidates = findCleanupFunctions(ctx);
-        if (cleanupCandidates.length > 0) return cleanupCandidates;
+
+        // P3.10: Goal expansion — add prerequisite chains from goal templates
+        const goalCandidates = ctx.goal ? expandGoalAsCandidates(ctx.goal, ctx) : [];
+        const all = [...cleanupCandidates, ...goalCandidates];
+        if (all.length > 0) return all;
+      }
+
+      // P3.10: Try goal expansion before giving up
+      if (ctx.goal) {
+        const goalCandidates = expandGoalAsCandidates(ctx.goal, ctx);
+        if (goalCandidates.length > 0) return goalCandidates;
+      }
+
+      // P3.14: Frontier exploration — BFS from current state for any path
+      const frontierPaths = exploreFrontier(ctx.rules, ctx.currentState, 10, 6);
+      if (frontierPaths.length > 0) {
+        return frontierPaths.map(actions => ({
+          id: candidateId("protocol", actions.map(fnToAction)),
+          source: "protocol" as const,
+          actions: actions.map(fnToAction),
+          explanation: `协议前沿探索: ${actions.join(" → ")}`,
+          evidence: 0,
+          metadata: { pathLength: actions.length, source: "frontier-bfs" },
+        }));
+      }
+
+      // P3.15: Cross-protocol candidates — expanded to all 9 protocol groups (P7.3)
+      const xProtoPaths = expandCrossProtocolCandidates(
+        ctx.goal || "repair",
+        [
+          "AuthProtocol", "FileProtocol", "DBProtocol", "IRProtocol",
+          "TransactionProtocol", "ConditionalProtocol", "LoopProtocol",
+          "CrossProtocol", "StatelessProtocol",
+        ]
+      );
+      if (xProtoPaths.length > 0) {
+        return xProtoPaths.map(actions => ({
+          id: candidateId("protocol", actions.map(fnToAction)),
+          source: "protocol" as const,
+          actions: actions.map(fnToAction),
+          explanation: `跨协议规划: ${actions.join(" → ")}`,
+          evidence: 0,
+          metadata: { pathLength: actions.length, source: "cross-protocol" },
+        }));
       }
 
       const fixPath = findFixPathStatic(

@@ -1,0 +1,34 @@
+[
+  {
+    "id": "KP-1781253147512-pbsp",
+    "generatedBy": "transition-synthesizer",
+    "protocol": "FileProtocol",
+    "change": "open_file → flush_file",
+    "fromState": "FILE_OPEN",
+    "toState": "FILE_DIRTY",
+    "confidence": 1,
+    "evidenceCount": 3,
+    "createdAt": "2026-06-12T08:32:27.512Z",
+    "status": "rolled_back",
+    "approvedAt": "2026-06-12T08:32:27.513Z",
+    "approvalMetrics": {
+      "top1Before": 0.5,
+      "top1After": 0.55,
+      "top3Before": 0.7,
+      "top3After": 0.75
+    },
+    "rolledBackAt": "2026-06-12T08:32:27.514Z"
+  },
+  {
+    "id": "KP-1781253147515-ue1b",
+    "generatedBy": "transition-synthesizer",
+    "protocol": "FileProtocol",
+    "change": "open_file → flush_file",
+    "fromState": "FILE_OPEN",
+    "toState": "FILE_DIRTY",
+    "confidence": 1,
+    "evidenceCount": 3,
+    "createdAt": "2026-06-12T08:32:27.515Z",
+    "status": "rejected"
+  }
+]

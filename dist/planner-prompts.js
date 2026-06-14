@@ -1,3 +1,4 @@
+"use strict";
 /**
  * Phase 6C: Planner — Prompt Builder
  *
@@ -6,9 +7,15 @@
  *
  * Extracted from planner.ts to keep the main planning module focused.
  */
-import { getTopology } from "./semantic-topology";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.RETRY_HINT = exports.SYSTEM_PROMPT = void 0;
+exports.buildCompactFuncList = buildCompactFuncList;
+exports.semanticMatch = semanticMatch;
+exports.buildChainHints = buildChainHints;
+exports.buildProtocolChainHint = buildProtocolChainHint;
+const semantic_topology_1 = require("./semantic-topology");
 // ── Constants ──
-export const SYSTEM_PROMPT = `你是程序合成助手。只输出 JSON 数组，不输出解释。
+exports.SYSTEM_PROMPT = `你是程序合成助手。只输出 JSON 数组，不输出解释。
 
 格式：[{"f":"函数名","to":"变量名","a":[{"n":"参数名","t":"类型","v":值}]},{"r":"变量名"}]
 
@@ -29,10 +36,10 @@ export const SYSTEM_PROMPT = `你是程序合成助手。只输出 JSON 数组�
   - 0 参数函数用 "a":[]，非 0 参数函数绝对不能 "a":[]
   - 最后一个 action 必须是 {"r":"变量名"}
   - 只输出 JSON，不输出解释`;
-export const RETRY_HINT = `输出格式：紧凑 JSON 数组 [{"f":"函数名","to":"变量名","a":[...]}]`;
+exports.RETRY_HINT = `输出格式：紧凑 JSON 数组 [{"f":"函数名","to":"变量名","a":[...]}]`;
 // ── Formatters ──
 /** Build a compact function list with parameter examples for LLM precision. */
-export function buildCompactFuncList(funcs, allFuncs) {
+function buildCompactFuncList(funcs, allFuncs) {
     // Example values for each type — helps LLM fill meaningful args
     function exampleValue(type, paramName) {
         const t = (type || "any").replace(/\[\]$/, "").toLowerCase();
@@ -85,9 +92,9 @@ export function buildCompactFuncList(funcs, allFuncs) {
     }).join("\n");
 }
 /** Semantic matching: check if two capability labels are related via SemanticTopology. */
-export function semanticMatch(a, b) {
+function semanticMatch(a, b) {
     try {
-        const topo = getTopology();
+        const topo = (0, semantic_topology_1.getTopology)();
         if (topo.size > 0)
             return topo.capabilityMatch(a, b);
     }
@@ -99,7 +106,7 @@ export function semanticMatch(a, b) {
     return false;
 }
 /** Build capability chain hints: producer→consumer relationships using semantic matching. */
-export function buildChainHints(funcs) {
+function buildChainHints(funcs) {
     const chains = [];
     const seen = new Set();
     for (const f of funcs) {
@@ -123,7 +130,7 @@ export function buildChainHints(funcs) {
     return "\n推荐调用链（先调生产者，用 $变量名 传给消费者）:\n" + chains.map(c => `  ${c}`).join("\n");
 }
 /** Build protocol constraint hints for the LLM prompt. */
-export function buildProtocolChainHint(protocols) {
+function buildProtocolChainHint(protocols) {
     if (protocols.length === 0)
         return "";
     const byNs = new Map();

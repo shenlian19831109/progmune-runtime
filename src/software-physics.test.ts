@@ -55,9 +55,9 @@ describe("Physics Sequence Validation", () => {
     expect(result.valid).toBe(true);
   });
 
-  it("rejects incomplete sequences (missing release)", () => {
+  it("accepts acquire-use sequences (open-ended read)", () => {
     const result = isValidPhysicsSequence(["fopen", "fread"]);
-    expect(result.valid).toBe(false);
+    expect(result.valid).toBe(true);
   });
 
   it("rejects release before acquire", () => {

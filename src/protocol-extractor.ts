@@ -118,6 +118,8 @@ function isBuiltin(name: string): boolean {
     "require", "import", "export", "print", "len", "push", "pop",
     "map", "filter", "reduce", "forEach", "toString", "valueOf",
     "assert", "expect", "test", "describe", "it",
+    "main", "printf", "write_config", "sprintf", "fprintf",
+    "setup", "teardown", "init", "destroy", "cleanup",
   ]);
   const normalized = normalizeFn(name);
   return builtins.has(normalized) || normalized.length <= 2;

@@ -1,3 +1,4 @@
+"use strict";
 /**
  * Phase 6C: Single Source of Protocol Truth
  *
@@ -8,21 +9,59 @@
  *   import { getProtocolConfig } from "./protocol-registry";
  *   const { nsInit, rules, ruleHash, version } = getProtocolConfig();
  */
-import * as fs from "fs";
-import * as path from "path";
-import { parseProtocolsFromJSON, hashRules } from "./ssg-validator";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.invalidateProtocolCache = invalidateProtocolCache;
+exports.getProtocolConfig = getProtocolConfig;
+exports.getNsInit = getNsInit;
+exports.getRuleHash = getRuleHash;
+const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
+const ssg_validator_1 = require("./ssg-validator");
 // ── Singleton cache ──
 let cached = null;
 /** Invalidate the cache (call after protocols.json changes). */
 /** Invalidate cached protocol configuration for reload. */
-export function invalidateProtocolCache() {
+function invalidateProtocolCache() {
     cached = null;
 }
 /** Get the authoritative protocol configuration.
  *  Cached after first call; call invalidateProtocolCache() to force reload. */
 /** Get the authoritative protocol configuration from the single source of truth. */
 /** @requires PROJECT_CONFIG @produces PROTOCOL_CONFIG */
-export function getProtocolConfig() {
+function getProtocolConfig() {
     if (cached)
         return cached;
     const nsInit = new Map();
@@ -41,7 +80,7 @@ export function getProtocolConfig() {
                 }
             }
             // Parse rules
-            rules = parseProtocolsFromJSON(proto);
+            rules = (0, ssg_validator_1.parseProtocolsFromJSON)(proto);
         }
         catch { /* protocol load — optional */ }
     }
@@ -54,7 +93,7 @@ export function getProtocolConfig() {
     for (const r of rules) {
         ruleMap.set(r.function, r.protocol);
     }
-    const ruleHash = hashRules(ruleMap);
+    const ruleHash = (0, ssg_validator_1.hashRules)(ruleMap);
     cached = { nsInit, rules, ruleHash, version };
     return cached;
 }
@@ -62,12 +101,12 @@ export function getProtocolConfig() {
 /** Get namespace initial states only (most common need). */
 /** Get namespace initial states from protocol configuration. */
 /** @requires PROJECT_CONFIG @produces NAMESPACE_STATES */
-export function getNsInit() {
+function getNsInit() {
     return new Map(getProtocolConfig().nsInit);
 }
 /** Get current rule hash without loading full config. */
 /** Get the current rule set hash. */
 /** @requires PROTOCOL_CONFIG @produces RULE_HASH */
-export function getRuleHash() {
+function getRuleHash() {
     return getProtocolConfig().ruleHash;
 }

@@ -57,6 +57,15 @@ export interface GoalPlan {
 const GOAL_TEMPLATES: GoalTemplate[] = [
   // ── Auth Protocol ──
   {
+    pattern: /\b(missing.*(auth|authent)|no.*(auth|authent)|without.*(auth|authent)|unauthenticated|not.*authenticated)\b/i,
+    protocol: "AuthProtocol",
+    prerequisiteChains: [
+      ["verify_password", "generate_jwt", "create_session"],
+    ],
+    requiredStates: ["SESSION_ACTIVE"],
+    targetStates: ["SESSION_ACTIVE"],
+  },
+  {
     pattern: /\b(logout|log\s*out|sign\s*out|terminate\s*session|end\s*session)\b/i,
     protocol: "AuthProtocol",
     prerequisiteChains: [
@@ -271,6 +280,181 @@ const GOAL_TEMPLATES: GoalTemplate[] = [
     requiredStates: [],
     targetStates: [],
   },
+
+  // ═══════════════════════════════════════════════════════════
+  // P7.3: New protocol type templates (12 templates)
+  // ═══════════════════════════════════════════════════════════
+
+  // ── Transaction Protocol ──
+  {
+    pattern: /\b(commit|finish\s*transaction|save\s*transaction|end\s*tx)\b/i,
+    protocol: "TransactionProtocol",
+    prerequisiteChains: [
+      ["begin_tx", "insert_record", "commit_tx"],
+      ["begin_tx", "update_record", "commit_tx"],
+    ],
+    requiredStates: ["TX_IDLE"],
+    targetStates: ["TX_IDLE"],
+  },
+  {
+    pattern: /\b(rollback|abort|undo|cancel\s*transaction|revert)\b/i,
+    protocol: "TransactionProtocol",
+    prerequisiteChains: [
+      ["begin_tx", "rollback_tx"],
+      ["begin_tx", "update_record", "rollback_tx"],
+    ],
+    requiredStates: ["TX_IDLE"],
+    targetStates: ["TX_IDLE"],
+  },
+  {
+    pattern: /\b(savepoint|checkpoint|partial\s*commit|nested\s*transaction)\b/i,
+    protocol: "TransactionProtocol",
+    prerequisiteChains: [
+      ["begin_tx", "savepoint_create", "update_record", "savepoint_release", "commit_tx"],
+      ["begin_tx", "savepoint_create", "delete_record", "rollback_to_savepoint", "rollback_tx"],
+    ],
+    requiredStates: ["TX_IDLE"],
+    targetStates: ["TX_IDLE"],
+  },
+
+  // ── Conditional Protocol ──
+  {
+    pattern: /\b(access\s*(check|eval\w*)|permission|authorize|policy\s*check|evaluat(e|ion)\s*access)\b/i,
+    protocol: "ConditionalProtocol",
+    prerequisiteChains: [
+      ["evaluate_access", "grant_access", "log_granted"],
+      ["evaluate_access", "deny_access", "log_denied"],
+    ],
+    requiredStates: ["COND_RESOLVED"],
+    targetStates: ["COND_RESOLVED"],
+  },
+  {
+    pattern: /\b(escalate|override|bypass.*policy|elevate)\b/i,
+    protocol: "ConditionalProtocol",
+    prerequisiteChains: [
+      ["evaluate_access", "deny_access", "escalate_access", "log_granted"],
+    ],
+    requiredStates: ["COND_RESOLVED"],
+    targetStates: ["COND_RESOLVED"],
+  },
+  {
+    pattern: /\b(audit.*access|log.*access|access.*log|compliance\s*check)\b/i,
+    protocol: "ConditionalProtocol",
+    prerequisiteChains: [
+      ["evaluate_access", "grant_access", "audit_condition"],
+      ["evaluate_access", "deny_access", "audit_condition"],
+    ],
+    requiredStates: ["COND_RESOLVED"],
+    targetStates: ["COND_RESOLVED"],
+  },
+
+  // ── Loop Protocol ──
+  {
+    pattern: /\b(fetch|paginate|iterate|process.*batch|batch.*process|loop.*data)\b/i,
+    protocol: "LoopProtocol",
+    prerequisiteChains: [
+      ["init_fetch_loop", "fetch_batch", "has_more_data", "process_item", "exit_loop"],
+    ],
+    requiredStates: ["LOOP_DONE"],
+    targetStates: ["LOOP_DONE"],
+  },
+  {
+    pattern: /\b(retry|re-?try|recover|re-?attempt|fallback)\b/i,
+    protocol: "LoopProtocol",
+    prerequisiteChains: [
+      ["init_fetch_loop", "fetch_batch", "retry_batch", "fetch_batch", "has_more_data", "process_item", "exit_loop"],
+    ],
+    requiredStates: ["LOOP_DONE"],
+    targetStates: ["LOOP_DONE"],
+  },
+  {
+    pattern: /\b(poll|wait.*for|monitor|watch|observe)\b/i,
+    protocol: "LoopProtocol",
+    prerequisiteChains: [
+      ["init_fetch_loop", "fetch_batch", "has_more_data", "process_item", "poll_status", "exit_loop"],
+    ],
+    requiredStates: ["LOOP_DONE"],
+    targetStates: ["LOOP_DONE"],
+  },
+
+  // ── Cross-Protocol (auth-gated resources) ──
+  {
+    pattern: /\b(auth.*db|secure.*db|gated.*db|database.*auth|login.*query)\b/i,
+    protocol: "CrossProtocol",
+    prerequisiteChains: [
+      ["verify_password", "create_session", "connect_db", "query_db", "disconnect_db", "logout"],
+    ],
+    requiredStates: [],
+    targetStates: ["UNAUTHENTICATED"],
+  },
+  {
+    pattern: /\b(auth.*file.*db|full.*secure|gated.*resource|end.*to.*end.*secure)\b/i,
+    protocol: "CrossProtocol",
+    prerequisiteChains: [
+      ["verify_password", "create_session", "open_file", "read_file", "connect_db", "query_db", "close_file", "disconnect_db", "logout"],
+    ],
+    requiredStates: [],
+    targetStates: ["UNAUTHENTICATED"],
+  },
+
+  // ── Stateless / Validation ──
+  {
+    pattern: /(sanitiz|clean.*input|validate.*input|input.*valid|schema.*valid)/i,
+    protocol: "StatelessProtocol",
+    prerequisiteChains: [
+      ["sanitize_input", "validate_schema"],
+    ],
+    requiredStates: [],
+    targetStates: [],
+  },
+  {
+    pattern: /\b(checksum|integrity|verify.*data|data.*integrity|hash.*verif|verif.*hash)\b/i,
+    protocol: "StatelessProtocol",
+    prerequisiteChains: [
+      ["compute_hash", "verify_checksum"],
+      ["decode_payload", "decompress_buffer", "verify_checksum"],
+    ],
+    requiredStates: [],
+    targetStates: [],
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // P7.3: Cross-protocol auth + resource chains (fix RW-005, RW-017)
+  // ═══════════════════════════════════════════════════════════
+
+  // ── Auth-gated database access ──
+  {
+    pattern: /\b(auth.*(db|database|query)|login.*(db|database|query)|authenticate.*(db|database|query)|missing.*auth.*(db|database))\b/i,
+    protocol: "CrossProtocol",
+    prerequisiteChains: [
+      ["verify_password", "generate_jwt", "create_session", "disconnect_db"],
+      ["verify_password", "generate_jwt", "create_session", "connect_db", "query_db", "disconnect_db"],
+    ],
+    requiredStates: ["UNAUTHENTICATED"],
+    targetStates: ["UNAUTHENTICATED"],
+  },
+  // ── Auth-gated file access ──
+  {
+    pattern: /\b(auth.*(file|write|read)|login.*(file|write|read)|gated.*(file|resource)|auth.*gate)\b/i,
+    protocol: "CrossProtocol",
+    prerequisiteChains: [
+      ["verify_password", "create_session", "open_file", "read_file", "close_file", "logout"],
+      ["verify_password", "create_session", "open_file", "write_file", "close_file", "logout"],
+    ],
+    requiredStates: ["UNAUTHENTICATED"],
+    targetStates: ["UNAUTHENTICATED"],
+  },
+
+  // ── Transaction error handling (RW-012) ──
+  {
+    pattern: /\b(transaction.*(error|fail)|tx.*(error|fail)|error.*(transaction|tx|rollback|savepoint)|savepoint.*(error|fail|rollback)|rollback.*(error|fail|savepoint))\b/i,
+    protocol: "TransactionProtocol",
+    prerequisiteChains: [
+      ["begin_tx", "savepoint_create", "update_record", "rollback_to_savepoint", "rollback_tx"],
+    ],
+    requiredStates: ["TX_IDLE"],
+    targetStates: ["TX_IDLE"],
+  },
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -313,6 +497,7 @@ export class GoalPlanner {
         generate_jwt: "issue authentication token",
         create_session: "establish active session",
         logout: "terminate session",
+        revoke_token: "revoke token",
         open_file: "open file handle",
         read_file: "read file contents",
         write_file: "write file contents",
@@ -325,6 +510,53 @@ export class GoalPlanner {
         validateActionSequence: "validate action sequence",
         emitCode: "emit target code",
         recordSession: "record execution session",
+        // Transaction
+        begin_tx: "begin transaction",
+        commit_tx: "commit transaction",
+        rollback_tx: "rollback transaction",
+        insert_record: "insert record in transaction",
+        update_record: "update record in transaction",
+        delete_record: "delete record in transaction",
+        savepoint_create: "create savepoint",
+        savepoint_release: "release savepoint",
+        rollback_to_savepoint: "rollback to savepoint",
+        prep_two_phase: "prepare two-phase commit",
+        // Conditional
+        evaluate_access: "evaluate access policy",
+        grant_access: "grant access (true branch)",
+        deny_access: "deny access (false branch)",
+        log_granted: "log access granted",
+        log_denied: "log access denied",
+        escalate_access: "escalate denied access to grant",
+        bypass_condition: "bypass condition check",
+        retry_evaluation: "retry condition evaluation",
+        audit_condition: "audit condition outcome",
+        // Loop
+        init_fetch_loop: "initialize fetch loop",
+        fetch_batch: "fetch next data batch",
+        has_more_data: "check for more data",
+        process_item: "process data item",
+        next_iteration: "advance to next iteration",
+        exit_loop: "exit loop normally",
+        retry_batch: "retry failed batch fetch",
+        timeout_exit: "exit loop on timeout",
+        poll_status: "poll status in iteration",
+        // Stateless
+        compute_hash: "compute hash digest",
+        validate_schema: "validate data against schema",
+        sanitize_input: "sanitize user input",
+        verify_checksum: "verify data integrity checksum",
+        encode_payload: "encode data payload",
+        decode_payload: "decode data payload",
+        compress_buffer: "compress data buffer",
+        decompress_buffer: "decompress data buffer",
+        // Cross-protocol
+        auth_file_open: "open auth-gated file",
+        auth_file_read: "read through auth gate",
+        auth_file_close: "close auth-gated file session",
+        auth_db_connect: "connect through auth gate",
+        auth_db_query: "query through auth gate",
+        auth_db_disconnect: "disconnect auth-gated db",
       };
       return stepNames[fn] || `step ${i + 1}: ${fn}`;
     });

@@ -223,6 +223,7 @@ describe("Test 3: Ranking mode switching", () => {
     auditability: 0.8,
     corpusEvidence: 0,
     source: "protocol",
+    goalMatch: 0,
   };
 
   const fastFeatures: CandidateFeatures = {
@@ -233,6 +234,7 @@ describe("Test 3: Ranking mode switching", () => {
     auditability: 0.5,
     corpusEvidence: 42,
     source: "corpus",
+    goalMatch: 0,
   };
 
   it("ranks safe higher under safety objective", () => {

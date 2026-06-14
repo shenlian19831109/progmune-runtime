@@ -1,3 +1,4 @@
+"use strict";
 /**
  * Rule Miner — generates actionable protocol rules from failure patterns.
  *
@@ -6,18 +7,56 @@
  *   2. Generates FunctionProtocol entries from fix paths
  *   3. Can merge rules into protocols.json (dry-run by default)
  */
-import * as fs from "fs";
-import * as path from "path";
-import { getTopFailurePatterns, getFailureGenome } from "./failure-corpus";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.mineRules = mineRules;
+exports.toProtocolEntries = toProtocolEntries;
+exports.applyMinedRules = applyMinedRules;
+exports.mineAntibodiesV2 = mineAntibodiesV2;
+const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
+const failure_corpus_1 = require("./failure-corpus");
 /**
  * Mine protocol rules from failure patterns.
  *
  * Analyses SVL-4 protocol violations to infer state transitions
  * that should be encoded as permanent protocol rules.
  */
-export function mineRules() {
-    const genome = getFailureGenome();
-    const patterns = getTopFailurePatterns(10);
+function mineRules() {
+    const genome = (0, failure_corpus_1.getFailureGenome)();
+    const patterns = (0, failure_corpus_1.getTopFailurePatterns)(10);
     const mined = [];
     // Strategy 1: Convert common fix paths into protocol rules
     const ssgFixes = genome.commonFixPaths.filter(f => f.violation === "SVL-4");
@@ -96,7 +135,7 @@ export function mineRules() {
 /**
  * Convert mined rules to FunctionProtocol format compatible with protocols.json.
  */
-export function toProtocolEntries(rules) {
+function toProtocolEntries(rules) {
     const entries = {};
     for (const r of rules) {
         entries[r.function] = {
@@ -113,7 +152,7 @@ export function toProtocolEntries(rules) {
  * Merge mined rules into protocols.json.
  * Dry-run by default — set apply=true to write.
  */
-export function applyMinedRules(apply = false) {
+function applyMinedRules(apply = false) {
     const mined = mineRules();
     const protocolsPath = path.resolve(__dirname, "..", "protocols.json");
     let existing = {};
@@ -141,6 +180,48 @@ export function applyMinedRules(apply = false) {
         console.error(`[规则挖掘] 已将 ${merged} 条规则写入 ${protocolsPath}（备份: ${backup}）`);
     }
     return { rules: mined, merged, skipped, dryRun: !apply };
+}
+/**
+ * Mine antibody candidates from Schema v2 failure records.
+ * Returns patterns that recurred >= minCount times.
+ */
+function mineAntibodiesV2(minCount = 3) {
+    const all = (0, failure_corpus_1.loadTrajectories)().filter(t => t.result === "violation");
+    if (all.length === 0)
+        return [];
+    const groups = {};
+    for (const t of all) {
+        const key = `${t.violation?.type || "other"}|${t.protocol}`;
+        if (!groups[key])
+            groups[key] = [];
+        groups[key].push(t);
+    }
+    const candidates = [];
+    for (const [key, records] of Object.entries(groups)) {
+        if (records.length < minCount)
+            continue;
+        const [violationType, protocol] = key.split("|");
+        const avgDepth = Math.round(records.reduce((s, t) => s + t.context.nestingDepth, 0) / records.length);
+        const fixPaths = [...new Set(records.flatMap(t => t.violation?.fixPath || []))];
+        const avgSuccess = records.length > 0
+            ? records.reduce((s, t) => s + t.successRate, 0) / records.length
+            : 0;
+        const timestamps = records.map(f => f.timestamp).sort();
+        candidates.push({
+            id: `ab2_${violationType}_${protocol}_${Date.now()}`,
+            violationType: violationType,
+            protocol,
+            contextPattern: { nestingDepth: avgDepth },
+            fixPath: fixPaths.slice(0, 5),
+            promoteToStatic: ["resource_leak", "protocol_violation", "illegal_state_transition"].includes(violationType),
+            occurrenceCount: records.length,
+            avgSuccessRate: avgSuccess,
+            firstSeen: timestamps[0] || "N/A",
+            lastSeen: timestamps[timestamps.length - 1] || "N/A",
+            minedAt: new Date().toISOString(),
+        });
+    }
+    return candidates.sort((a, b) => b.occurrenceCount - a.occurrenceCount);
 }
 /** CLI entry point: print mined rules without applying. */
 if (require.main === module) {

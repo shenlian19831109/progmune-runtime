@@ -152,6 +152,7 @@ export class PlannerTraceStore {
   }
 
   get size(): number { return this.traces.length; }
+  all(): readonly PlannerTrace[] { return this.traces; }
 
   // ── Persistence ──
 

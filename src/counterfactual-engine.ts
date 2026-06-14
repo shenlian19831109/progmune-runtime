@@ -15,11 +15,16 @@
  * @requires VALIDATION_FAILURE @produces REPAIR_ALTERNATIVES
  */
 
+import * as fs from "fs";
+import * as path from "path";
 import type { StateAnnotation } from "./ssg-validator";
 import type { GoalConstraint, ConstraintViolation } from "./runtime-types";
 import type { RepairCandidate, SearchContext, CandidateFeatures } from "./repair-types";
 import { createDefaultStrategies } from "./repair-strategies";
 import { extractFeatures, createLinearRanker, CorpusStats } from "./repair-ranker";
+import { LearningRanker, createLearningRanker } from "./learning-ranker";
+import { PlannerTelemetry } from "./planner-telemetry";
+import { LogisticRewardModel } from "./logistic-reward";
 
 // ═══════════════════════════════════════════════════════════════
 // Cross-source evidence merge
@@ -96,6 +101,70 @@ export interface CounterfactualAlternative {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// P7.3: Ranker Factory — env-var-driven ranker selection
+// ═══════════════════════════════════════════════════════════════
+
+let _activeLearningRanker: LearningRanker | null = null;
+let _rankerType: "heuristic" | "learning" = "heuristic";
+let _modelWeight: number = 0.3;
+let _modelSampleCount: number = 0;
+let _rankerStartTime: number = 0;
+
+/** Get (or create) the LearningRanker singleton with pre-trained model. */
+function getActiveLearningRanker(): LearningRanker {
+  if (_activeLearningRanker) return _activeLearningRanker;
+
+  _rankerType = "learning";
+  _rankerStartTime = Date.now();
+  _modelWeight = parseFloat(process.env.PROGMUNE_MODEL_WEIGHT || "0.3");
+
+  const baseRanker = createLinearRanker();
+  const telemetry = new PlannerTelemetry();
+
+  // Try to load pre-trained reward model from models/
+  let rewardModel: LogisticRewardModel | undefined;
+  try {
+    const modelPath = path.resolve(
+      process.env.PROGMUNE_PROJECT_DIR || process.cwd(),
+      "models", "reward-model.json"
+    );
+    if (fs.existsSync(modelPath)) {
+      const data = JSON.parse(fs.readFileSync(modelPath, "utf-8"));
+      rewardModel = LogisticRewardModel.importWeights(data);
+    }
+  } catch {
+    // No pre-trained model → fall back to telemetry-only learning
+  }
+
+  _modelSampleCount = (rewardModel ? rewardModel.sampleCount : 0);
+
+  _activeLearningRanker = new LearningRanker(
+    baseRanker,
+    telemetry,
+    { baseWeight: 0.7, feedbackWeight: 0.3, minSamples: 5 },
+    rewardModel,
+    _modelWeight
+  );
+
+  return _activeLearningRanker;
+}
+
+/** Return the current ranker status and metrics. */
+export function getRankerStatus(): {
+  type: string;
+  modelWeight: number;
+  modelSamples: number;
+  uptimeSeconds: number;
+} {
+  return {
+    type: _rankerType,
+    modelWeight: _rankerType === "learning" ? _modelWeight : 0,
+    modelSamples: _rankerType === "learning" ? _modelSampleCount : 0,
+    uptimeSeconds: _rankerStartTime > 0 ? Math.round((Date.now() - _rankerStartTime) / 1000) : 0,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════
 // Public API
 // ═══════════════════════════════════════════════════════════════
 
@@ -113,6 +182,8 @@ export async function suggestAlternatives(params: {
   targetState: string[];
   constraints?: GoalConstraint[];
   rules?: Map<string, StateAnnotation>;
+  /** P3.10: Natural language goal for goal-conditioned planning. */
+  goal?: string;
 }): Promise<CounterfactualAlternative[]> {
   // 1. Build search context
   const ctx: SearchContext = {
@@ -129,6 +200,7 @@ export async function suggestAlternatives(params: {
       params.violation.violatedConstraint || "protocol_violation",
     constraints: params.constraints || [],
     rules: params.rules || new Map(),
+    goal: params.goal,
   };
 
   // 2. Run all strategies to collect candidates (no scoring in strategies)
@@ -152,8 +224,22 @@ export async function suggestAlternatives(params: {
     extractFeatures(c, ctx, { maxActions })
   );
 
-  const ranker = createLinearRanker();
-  const ranked = ranker.rankOverall(uniqueCandidates, features);
+  // P7.3: Ranker selection via PROGMUNE_RANKER env var
+  //   "learning" → LearningRanker with pre-trained reward model
+  //   "heuristic" (default) → LinearRanker with goalMatch weights
+  const rankerType = process.env.PROGMUNE_RANKER || "heuristic";
+  let ranked: RepairCandidate[];
+
+  if (rankerType === "learning") {
+    const learner = getActiveLearningRanker();
+    ranked = learner.rank(uniqueCandidates, features, {
+      protocol: ctx.protocol,
+      violationType: ctx.violationType,
+    });
+  } else {
+    const ranker = createLinearRanker();
+    ranked = ranker.rankOverall(uniqueCandidates, features);
+  }
 
   // 5. Map back to CounterfactualAlternative (backward-compat)
   const top3 = ranked.slice(0, 3);
@@ -163,6 +249,11 @@ export async function suggestAlternatives(params: {
       features[uniqueCandidates.indexOf(c)] ||
       extractFeatures(c, ctx, { maxActions });
 
+    // Score: use LearningRanker score if available, otherwise compute from LinearRanker
+    const score = (c as any).score !== undefined
+      ? (c as any).score
+      : createLinearRanker().score(f);
+
     return {
       rank: i + 1,
       description: c.explanation,
@@ -170,7 +261,7 @@ export async function suggestAlternatives(params: {
         .filter(a => a.kind === "call")
         .map(a => (a as { function: string }).function),
       targetState: ctx.targetState,
-      score: ranker.score(f),
+      score,
       source: c.source === "protocol" ? "ssg_bfs" : c.source,
       historicalSuccessRate: f.historicalSuccessRate,
       corpusEvidenceCount: f.corpusEvidence,

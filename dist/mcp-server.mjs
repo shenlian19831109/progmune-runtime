@@ -341,8 +341,15 @@ Then restart Claude Code.`,
                     hubReachable = false;
                 }
             }
+            // P7.3: Ranker status (heuristic vs learning)
+            let rankerStatus = { type: "heuristic", modelWeight: 0, modelSamples: 0, uptimeSeconds: 0 };
+            try {
+                const { getRankerStatus } = require("./counterfactual-engine");
+                rankerStatus = getRankerStatus();
+            }
+            catch { }
             const status = {
-                version: "2.2.0",
+                version: "3.2.0",
                 llm: {
                     model: process.env.LLM_MODEL || "deepseek-chat",
                     baseUrl: process.env.LLM_BASE_URL || "https://api.deepseek.com/v1",
@@ -359,6 +366,7 @@ Then restart Claude Code.`,
                 memory: {
                     recentEpisodes: episodes.length,
                 },
+                ranker: rankerStatus,
             };
             return {
                 content: [{ type: "text", text: JSON.stringify(status, null, 2) }],

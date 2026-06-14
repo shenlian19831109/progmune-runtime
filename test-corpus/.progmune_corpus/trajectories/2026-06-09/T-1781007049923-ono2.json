@@ -1,0 +1,43 @@
+{
+  "id": "T-1781007049923-ono2",
+  "timestamp": "2026-06-09T12:10:49.923Z",
+  "protocol": "a",
+  "initialState": [
+    "I"
+  ],
+  "finalState": [
+    "T"
+  ],
+  "trajectory": [
+    "x",
+    "y"
+  ],
+  "result": "violation",
+  "violation": {
+    "type": "pv",
+    "failingStepIndex": 0,
+    "expectedStates": [
+      "T"
+    ],
+    "actualStates": [
+      "I"
+    ],
+    "fixPath": [
+      "x",
+      "y"
+    ],
+    "description": "pv"
+  },
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "successRate": 1,
+  "metadata": {
+    "source": "llm",
+    "intent": "t"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "generatedAt": "2026-06-10T20:19:32.624Z",
+  "protocol": "IRProtocol",
+  "topK": 8,
+  "source": "active-learning",
+  "cases": [
+    {
+      "goal": "cover transition: TOKEN_ISSUED → UNAUTHENTICATED via revoke_token",
+      "protocol": "_global",
+      "broken": [
+        "generate_jwt"
+      ],
+      "expected": [
+        "generate_jwt",
+        "revoke_token"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "TOKEN_ISSUED",
+        "to": "UNAUTHENTICATED",
+        "rule": "revoke_token"
+      },
+      "importance": 0.015,
+      "difficulty": 0.5
+    },
+    {
+      "goal": "cover transition: TOKEN_ISSUED → ∅ via revoke_token",
+      "protocol": "_global",
+      "broken": [
+        "generate_jwt"
+      ],
+      "expected": [
+        "generate_jwt",
+        "revoke_token"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "TOKEN_ISSUED",
+        "to": "∅",
+        "rule": "revoke_token"
+      },
+      "importance": 0.015,
+      "difficulty": 0.5
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "protocol": "FileProtocol",
+  "generatedAt": "2026-06-12T22:32:45.071Z",
+  "cases": [
+    {
+      "goal": "cover transition: INIT → FILE_OPEN via open_file",
+      "protocol": "_global",
+      "broken": [
+        "close_file"
+      ],
+      "expected": [
+        "open_file",
+        "open_file",
+        "close_file"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "INIT",
+        "to": "FILE_OPEN",
+        "rule": "open_file"
+      }
+    },
+    {
+      "goal": "cover transition: FILE_OPEN → ∅ via close_file",
+      "protocol": "_global",
+      "broken": [
+        "open_file"
+      ],
+      "expected": [
+        "open_file",
+        "close_file"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "FILE_OPEN",
+        "to": "∅",
+        "rule": "close_file"
+      }
+    }
+  ],
+  "source": "coverage-gap"
+}

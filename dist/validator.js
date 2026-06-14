@@ -1,5 +1,46 @@
-import { loadIR } from "./ir-utils";
-import { ok, err } from "./runtime-types";
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.validateAction = validateAction;
+exports.validateActionSequence = validateActionSequence;
+exports.validateActionResult = validateActionResult;
+exports.validateWithGoal = validateWithGoal;
+exports.validateWithRepair = validateWithRepair;
+const ir_utils_1 = require("./ir-utils");
+const runtime_types_1 = require("./runtime-types");
+const failure_corpus_1 = require("./failure-corpus");
 const BUILTIN_WHITELIST = new Set([
     "console.log", "setTimeout", "setInterval", "clearTimeout",
     "JSON.stringify", "JSON.parse", "fetch"
@@ -107,8 +148,8 @@ function checkVariableFlow(actions) {
  * @protocol namespace=dev_pipeline pre_states=["IR_EXTRACTED"] post_states=["ACTION_VALIDATED"]
  */
 /** @requires ACTION @produces VALIDATION_RESULT */
-export function validateAction(action, actionIndex) {
-    const functions = loadIR();
+function validateAction(action, actionIndex) {
+    const functions = (0, ir_utils_1.loadIR)();
     const errors = [];
     const violations = [];
     const idx = actionIndex ?? 0;
@@ -187,7 +228,7 @@ export function validateAction(action, actionIndex) {
  * @protocol namespace=dev_pipeline pre_states=["ACTION_VALIDATED"] post_states=["SEQUENCE_VALIDATED"] invalidate=["ACTION_VALIDATED"]
  */
 /** @requires ACTIONS @produces VALIDATION_RESULT */
-export function validateActionSequence(actions) {
+function validateActionSequence(actions) {
     const errors = [];
     const violations = [];
     for (let i = 0; i < actions.length; i++) {
@@ -206,17 +247,76 @@ export function validateActionSequence(actions) {
             }
         }
     }
+    // ── P0: Trajectory auto-collection — record ALL outcomes ──
+    const actionNames = actions.map(a => a.function || a.kind || "?");
+    const ctx = {
+        nestingDepth: 0,
+        exceptionHandled: false,
+        insideLoop: false,
+        branchCount: 0,
+        asyncContext: false,
+    };
+    if (violations.length > 0) {
+        // Record violation trajectories
+        for (const v of violations) {
+            try {
+                (0, failure_corpus_1.recordTrajectory)({
+                    protocol: v.namespace || "default",
+                    initialState: v.currentStates || [],
+                    finalState: v.requiredStates || [],
+                    trajectory: actionNames,
+                    result: "violation",
+                    violationType: svlToViolationType(v.svl, v.description),
+                    violationDesc: v.description,
+                    failingStepIndex: v.actionIndex,
+                    fixPath: v.fixPath,
+                    context: ctx,
+                    successRate: 0,
+                    intent: v.description,
+                });
+            }
+            catch { /* auto-collection must never crash validation */ }
+        }
+    }
+    else {
+        // Record success trajectory — positive sample for reward learning
+        try {
+            (0, failure_corpus_1.recordSuccess)({
+                protocol: "default",
+                initialState: ["INIT"],
+                finalState: ["COMPLETED"],
+                trajectory: actionNames,
+                context: ctx,
+                source: "planner",
+            });
+        }
+        catch { /* auto-collection must never crash validation */ }
+    }
     return { valid: errors.length === 0, errors, violations };
+}
+/** Map SVL level to ViolationType for auto-collection. */
+function svlToViolationType(svl, desc) {
+    if (svl === 4)
+        return "protocol_violation";
+    if (svl === 1)
+        return "undefined_variable";
+    if (desc.includes("type"))
+        return "wrong_arg_type";
+    if (desc.includes("import") || desc.includes("module"))
+        return "wrong_import_path";
+    if (desc.includes("arg") || desc.includes("parameter"))
+        return "wrong_arg_count";
+    return "other";
 }
 /**
  * Result-typed variant of validateActionSequence.
  * Returns Ok<Action[]> on success, Err<ValidationError[]> on failure.
  * Use this for new code; the legacy {valid, errors} API remains for backward compat.
  */
-export function validateActionResult(actions) {
+function validateActionResult(actions) {
     const legacy = validateActionSequence(actions);
     if (legacy.valid)
-        return ok(actions);
+        return (0, runtime_types_1.ok)(actions);
     const mapped = legacy.errors.map((msg, i) => {
         const v = legacy.violations[i];
         return {
@@ -225,5 +325,107 @@ export function validateActionResult(actions) {
             index: v?.actionIndex,
         };
     });
-    return err(mapped);
+    return (0, runtime_types_1.err)(mapped);
+}
+// ═══════════════════════════════════════════════════════════════
+// P1: Validation with Goal Skeleton annotation
+// ═══════════════════════════════════════════════════════════════
+/**
+ * Validate actions with an associated goal. The goal is annotated asynchronously
+ * (best-effort, non-blocking) and attached to the trajectory record.
+ *
+ * This is the P1 entry point — use this when the user provides a natural language goal.
+ */
+async function validateWithGoal(actions, goalText, params) {
+    // Run validation first (never block on goal annotation)
+    const result = validateActionSequence(actions);
+    // Fire-and-forget: annotate the goal and write trajectory with goal attached
+    const { annotateGoal } = await Promise.resolve().then(() => __importStar(require("./goal-annotator")));
+    const actionNames = actions.map(a => a.function || a.kind || "?");
+    const ctx = {
+        nestingDepth: 0, exceptionHandled: false, insideLoop: false, branchCount: 0, asyncContext: false,
+    };
+    annotateGoal(goalText).then(goalRecord => {
+        const { recordTrajectory } = require("./failure-corpus");
+        if (result.valid) {
+            recordTrajectory({
+                protocol: goalRecord.protocol,
+                initialState: [goalRecord.initial_state],
+                finalState: [goalRecord.target_state],
+                trajectory: actionNames,
+                result: "success",
+                context: ctx,
+                source: "llm",
+                intent: goalText,
+                goal: goalRecord,
+            });
+        }
+        else {
+            for (const v of result.violations) {
+                recordTrajectory({
+                    protocol: goalRecord.protocol,
+                    initialState: [goalRecord.initial_state],
+                    finalState: [goalRecord.target_state],
+                    trajectory: actionNames,
+                    result: "violation",
+                    violationType: svlToViolationType(v.svl, v.description),
+                    violationDesc: v.description,
+                    failingStepIndex: v.actionIndex,
+                    fixPath: v.fixPath,
+                    context: ctx,
+                    intent: goalText,
+                    goal: goalRecord,
+                });
+            }
+        }
+    }).catch(() => { });
+    // Enrich with repair alternatives
+    const enriched = await validateWithRepair(actions, params);
+    return enriched;
+}
+// ═══════════════════════════════════════════════════════════════
+// P2 V3: Validation with Counterfactual Repair
+// ═══════════════════════════════════════════════════════════════
+/**
+ * Validate an action sequence and enrich any violations with
+ * counterfactual repair alternatives (top-3).
+ *
+ * This is the async V3 entry point — use this instead of
+ * validateActionSequence when you want repair suggestions.
+ */
+async function validateWithRepair(actions, params) {
+    // Run the sync validation first
+    const result = validateActionSequence(actions);
+    if (result.valid || result.violations.length === 0)
+        return result;
+    // Enrich each violation with counterfactual alternatives
+    const { suggestAlternatives } = await Promise.resolve().then(() => __importStar(require("./counterfactual-engine")));
+    const enrichedViolations = [...result.violations];
+    for (let i = 0; i < enrichedViolations.length; i++) {
+        const v = enrichedViolations[i];
+        try {
+            const alts = await suggestAlternatives({
+                violation: v,
+                protocol: params?.protocol || v.namespace || "default",
+                currentState: v.currentStates || [],
+                targetState: params?.targetState || v.requiredStates || ["COMPLETED"],
+                rules: params?.rules || new Map(),
+            });
+            enrichedViolations[i] = {
+                ...v,
+                repairAlternatives: alts.map(a => ({
+                    rank: a.rank,
+                    description: a.description,
+                    fixPath: a.fixPath,
+                    source: a.source,
+                    score: a.score,
+                    historicalSuccessRate: a.historicalSuccessRate,
+                })),
+            };
+        }
+        catch {
+            // repair suggestion failure must never invalidate the base validation
+        }
+    }
+    return { valid: false, errors: result.errors, violations: enrichedViolations };
 }

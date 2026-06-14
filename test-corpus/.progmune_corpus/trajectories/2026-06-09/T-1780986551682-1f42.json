@@ -1,0 +1,22 @@
+{
+  "id": "T-1780986551682-1f42",
+  "timestamp": "2026-06-09T06:29:11.683Z",
+  "result": "violation",
+  "violation": {
+    "type": "other",
+    "failingStepIndex": 0,
+    "description": ""
+  },
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "successRate": 0,
+  "metadata": {
+    "source": "llm",
+    "intent": "用户认证流程"
+  }
+}

@@ -1,6 +1,43 @@
-import * as fs from "fs";
-import * as path from "path";
-import { execSync } from "child_process";
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.emitCode = emitCode;
+exports.autoRepair = autoRepair;
+const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
+const child_process_1 = require("child_process");
 const BASIC_TYPES = new Set([
     "string", "number", "boolean", "any", "void", "undefined", "null",
     "str", "int", "float", "bool", "list", "dict", "tuple", "bytes",
@@ -40,7 +77,7 @@ function getImportPath(file) {
  */
 /** @requires ACTIONS @produces TYPESCRIPT_CODE */
 /** @requires ACTIONS @produces TYPESCRIPT_CODE */
-export function emitCode(actions, meta) {
+function emitCode(actions, meta) {
     const irRaw = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
     // Support both old format (array) and new format ({typeMap, functions})
     const typeMap = irRaw.typeMap || {};
@@ -379,7 +416,7 @@ export function emitCode(actions, meta) {
  * Auto-repair: compile emitted code, fix common errors, retry.
  * Returns { code, repaired, errors }.
  */
-export function autoRepair(code, maxRetries = 3) {
+function autoRepair(code, maxRetries = 3) {
     const tmpDir = path.join(process.cwd(), ".progmune_repair_tmp");
     if (!fs.existsSync(tmpDir))
         fs.mkdirSync(tmpDir, { recursive: true });
@@ -392,7 +429,7 @@ export function autoRepair(code, maxRetries = 3) {
         const tmpFile = path.join(tmpDir, `repair_${Date.now()}.ts`);
         fs.writeFileSync(tmpFile, currentCode);
         try {
-            const out = execSync(`npx tsc --noEmit --strict --skipLibCheck --ignoreConfig ${tmpFile} 2>&1 || true`, {
+            const out = (0, child_process_1.execSync)(`npx tsc --noEmit --strict --skipLibCheck --ignoreConfig ${tmpFile} 2>&1 || true`, {
                 cwd: process.cwd(), timeout: 15000, encoding: "utf-8",
             });
             const errCount = (out.match(/error TS/g) || []).length;

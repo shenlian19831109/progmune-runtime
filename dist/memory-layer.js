@@ -1,6 +1,48 @@
-import * as fs from "fs";
-import * as path from "path";
-import { withLock } from "./file-lock";
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.WorkMemory = void 0;
+exports.recordEpisode = recordEpisode;
+exports.getRecentEpisodes = getRecentEpisodes;
+exports.getSuccessfulEpisodes = getSuccessfulEpisodes;
+exports.pruneEpisodicMemory = pruneEpisodicMemory;
+exports.consolidateSemantic = consolidateSemantic;
+exports.findSemanticTemplate = findSemanticTemplate;
+const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
+const file_lock_1 = require("./file-lock");
 // 基于项目路径的隔离记忆目录，可通过环境变量 PROGMUNE_MEMORY_DIR 自定义
 // 优先使用 PROGMUNE_PROJECT_DIR（由 MCP 服务器在调用时设置），确保多项目隔离
 const projectDir = process.env.PROGMUNE_PROJECT_DIR || process.cwd();
@@ -11,7 +53,7 @@ function ensureDir(dir) {
         fs.mkdirSync(dir, { recursive: true });
 }
 // ========== 工作记忆 ==========
-export class WorkMemory {
+class WorkMemory {
     constructor() {
         this.bindings = new Map();
         this.intent = "";
@@ -22,6 +64,7 @@ export class WorkMemory {
     get(name) { return this.bindings.get(name); }
     clear() { this.bindings.clear(); this.intent = ""; }
 }
+exports.WorkMemory = WorkMemory;
 const EPISODIC_FILE = path.join(MEMORY_DIR, "episodic.json");
 const MAX_EPISODES = 50;
 const EPISODE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 天
@@ -39,7 +82,7 @@ function loadEpisodes() {
     return fresh;
 }
 function saveEpisodes(episodes) {
-    withLock("episodic.json", () => {
+    (0, file_lock_1.withLock)("episodic.json", () => {
         ensureDir(MEMORY_DIR);
         const cutoff = Date.now() - EPISODE_TTL_MS;
         const fresh = episodes.filter(e => new Date(e.timestamp).getTime() > cutoff);
@@ -50,7 +93,7 @@ function saveEpisodes(episodes) {
     });
 }
 /** @requires EXECUTION_DATA @produces MEMORY_ID */
-export function recordEpisode(episode) {
+function recordEpisode(episode) {
     const episodes = loadEpisodes();
     const newEpisode = {
         ...episode,
@@ -68,10 +111,10 @@ export function recordEpisode(episode) {
         pruneEpisodicMemory();
 }
 /** @requires LIMIT @produces EPISODE_LIST */
-export function getRecentEpisodes(limit = 10) {
+function getRecentEpisodes(limit = 10) {
     return loadEpisodes().slice(0, limit);
 }
-export function getSuccessfulEpisodes(limit = 10) {
+function getSuccessfulEpisodes(limit = 10) {
     return loadEpisodes().filter(e => e.success).slice(0, limit);
 }
 // ── Semantic GC: prune episodic memory ──
@@ -80,7 +123,7 @@ const MAX_AGE_DAYS = 30;
 /** Prune episodic memory: keep high-value, recent, diverse episodes.
  *  Removes: old failures (>30 days), low-value duplicates, excess beyond max.
  *  Called periodically after recording new episodes. */
-export function pruneEpisodicMemory() {
+function pruneEpisodicMemory() {
     const episodes = loadEpisodes();
     if (episodes.length <= MAX_EPISODE_COUNT)
         return 0;
@@ -119,7 +162,7 @@ function loadSemantic() {
     return fresh;
 }
 function saveSemantic(templates) {
-    withLock("semantic.json", () => {
+    (0, file_lock_1.withLock)("semantic.json", () => {
         ensureDir(MEMORY_DIR);
         // TTL 衰减：清理超过 30 天未使用的语义模板
         const cutoff = Date.now() - SEMANTIC_TTL_MS;
@@ -130,7 +173,7 @@ function saveSemantic(templates) {
         fs.writeFileSync(SEMANTIC_FILE, JSON.stringify(fresh, null, 2));
     });
 }
-export function consolidateSemantic(minOccurrences = 3) {
+function consolidateSemantic(minOccurrences = 3) {
     const episodes = getSuccessfulEpisodes(MAX_EPISODES);
     // Extract the first 3 meaningful keywords as the grouping key
     // (replaces fragile 20-char prefix — two intents with the same first
@@ -204,7 +247,7 @@ export function consolidateSemantic(minOccurrences = 3) {
 }
 /** @requires INTENT @produces TEMPLATE
  *  Uses keyword overlap (replaces prefix matching) for semantic recall. */
-export function findSemanticTemplate(intent) {
+function findSemanticTemplate(intent) {
     const templates = loadSemantic();
     if (templates.length === 0)
         return undefined;

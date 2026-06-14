@@ -1,0 +1,46 @@
+{
+  "id": "T-1780995348490-ggiq",
+  "timestamp": "2026-06-09T08:55:48.490Z",
+  "protocol": "auth",
+  "initialState": [
+    "INIT"
+  ],
+  "finalState": [
+    "USER_CREATED"
+  ],
+  "trajectory": [
+    "verifyEmail",
+    "hashPassword",
+    "createUser",
+    "generateToken"
+  ],
+  "result": "violation",
+  "violation": {
+    "type": "protocol_violation",
+    "failingStepIndex": 0,
+    "expectedStates": [
+      "USER_CREATED"
+    ],
+    "actualStates": [
+      "INIT"
+    ],
+    "fixPath": [
+      "verifyEmail",
+      "hashPassword",
+      "createUser"
+    ],
+    "description": "protocol_violation"
+  },
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "successRate": 1,
+  "metadata": {
+    "source": "llm",
+    "intent": "用户认证流程"
+  }
+}

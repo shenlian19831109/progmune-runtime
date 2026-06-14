@@ -1,12 +1,65 @@
-import * as crypto from "crypto";
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.StateMachineValidator = exports.InvariantViolationError = void 0;
+exports.rebuildState = rebuildState;
+exports.applyTransitionDelta = applyTransitionDelta;
+exports.findFixPathStatic = findFixPathStatic;
+exports.validateTransition = validateTransition;
+exports.checkLedgerConsistency = checkLedgerConsistency;
+exports.hashRules = hashRules;
+exports.hashLedger = hashLedger;
+exports.diffLedgers = diffLedgers;
+exports.findProducer = findProducer;
+exports.findConsumer = findConsumer;
+exports.findViolations = findViolations;
+exports.findTransition = findTransition;
+exports.listAllStates = listAllStates;
+exports.explainRejection = explainRejection;
+exports.rejectionToJSON = rejectionToJSON;
+exports.parseProtocolsFromJSON = parseProtocolsFromJSON;
+const crypto = __importStar(require("crypto"));
 const DEFAULT_NAMESPACE = "_global";
-export class InvariantViolationError extends Error {
+class InvariantViolationError extends Error {
     constructor(message, detail) {
         super(message);
         this.name = "InvariantViolationError";
         this.detail = detail;
     }
 }
+exports.InvariantViolationError = InvariantViolationError;
 // ═══════════════════════════════════════════════════════════════
 // Phase 3: Pure Functions — Semantic Ledger Kernel
 // ═══════════════════════════════════════════════════════════════
@@ -46,7 +99,7 @@ function deepEqualSnapshots(a, b) {
 }
 // ── rebuildState: pure fold over ledger → per-namespace state snapshot ──
 /** @requires LEDGER_DATA @produces STATE_SNAPSHOT */
-export function rebuildState(ledger, namespaceInitialStates = new Map([["_global", "INIT"]])) {
+function rebuildState(ledger, namespaceInitialStates = new Map([["_global", "INIT"]])) {
     const stateMap = fromSnapshot({});
     for (const [ns, initState] of namespaceInitialStates) {
         stateMap.set(ns, new Set([initState]));
@@ -61,7 +114,7 @@ export function rebuildState(ledger, namespaceInitialStates = new Map([["_global
     return toSnapshot(stateMap);
 }
 // ── applyTransitionDelta: incremental primitive for O(n) loops ──
-export function applyTransitionDelta(stateMap, transition) {
+function applyTransitionDelta(stateMap, transition) {
     const ns = transition.namespace || DEFAULT_NAMESPACE;
     const nsStates = stateMap.get(ns) || new Set();
     for (const s of transition.invalidated)
@@ -80,7 +133,7 @@ function computeDelta(beforeSnap, afterSnap, namespace) {
 }
 // ── findFixPathStatic: BFS state graph search (extracted from class) ──
 /** @requires CURRENT_STATES @produces FIX_PATH */
-export function findFixPathStatic(rules, namespace, current, targetPreStates) {
+function findFixPathStatic(rules, namespace, current, targetPreStates) {
     const nsFuncs = [];
     for (const [fn, rule] of rules) {
         if ((rule.namespace || DEFAULT_NAMESPACE) === namespace) {
@@ -134,7 +187,7 @@ export function findFixPathStatic(rules, namespace, current, targetPreStates) {
 }
 // ── validateTransition: pure function, stateless ──
 /** @requires TRANSITION_CONTEXT @produces VALIDATION_RESULT */
-export function validateTransition(ctx, candidateFunctionName, actionIndex, rules, namespaceInitialStates, ruleHash) {
+function validateTransition(ctx, candidateFunctionName, actionIndex, rules, namespaceInitialStates, ruleHash) {
     const currentState = ctx.currentState;
     const rule = rules.get(candidateFunctionName);
     if (!rule) {
@@ -234,7 +287,7 @@ export function validateTransition(ctx, candidateFunctionName, actionIndex, rule
 }
 // ── checkLedgerConsistency: Invariant-0 + Invariant-1 over full ledger ──
 /** @requires LEDGER_DATA @produces CONSISTENCY_RESULT */
-export function checkLedgerConsistency(ledger, namespaceInitialStates = new Map([["_global", "INIT"]]), protocolRules) {
+function checkLedgerConsistency(ledger, namespaceInitialStates = new Map([["_global", "INIT"]]), protocolRules) {
     const violations = [];
     const running = fromSnapshot({});
     // Pre-scan: collect all namespaces referenced in any transition
@@ -349,7 +402,7 @@ export function checkLedgerConsistency(ledger, namespaceInitialStates = new Map(
 }
 // ── hashRules: stable hash of rule set for constraint snapshot (P1) ──
 /** @requires RULES @produces RULE_HASH */
-export function hashRules(rules) {
+function hashRules(rules) {
     const sorted = [...rules.entries()]
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([name, rule]) => ({
@@ -363,7 +416,7 @@ export function hashRules(rules) {
 }
 /** Compute a deterministic SHA256 hash of an entire ledger (P1: Tamper-evident integrity). */
 /** @requires LEDGER_DATA @produces LEDGER_HASH */
-export function hashLedger(ledger) {
+function hashLedger(ledger) {
     const canonical = ledger.map(t => ({
         actionIndex: t.actionIndex,
         function: t.function,
@@ -379,7 +432,7 @@ export function hashLedger(ledger) {
 }
 /** Compare two ledgers and identify structural differences. */
 /** @requires TWO_LEDGERS @produces LEDGER_DIFF */
-export function diffLedgers(ledgerA, ledgerB) {
+function diffLedgers(ledgerA, ledgerB) {
     const hash = (t) => crypto.createHash("sha256").update(JSON.stringify({
         i: t.actionIndex, f: t.function, n: t.namespace,
         a: [...t.acquired].sort(), x: [...t.invalidated].sort(),
@@ -423,32 +476,32 @@ export function diffLedgers(ledgerA, ledgerB) {
     };
 }
 /** Find all transitions that acquire (produce) a given state in the ledger. */
-export function findProducer(state, ledger) {
+function findProducer(state, ledger) {
     return ledger
         .map((t, i) => ({ transition: t, index: i, namespace: t.namespace }))
         .filter(r => r.transition.acquired.includes(state));
 }
 /** Find all transitions that have a given state in their pre_states (consume it). */
-export function findConsumer(state, ledger) {
+function findConsumer(state, ledger) {
     return ledger
         .map((t, i) => ({ transition: t, index: i, namespace: t.namespace }))
         .filter(r => (r.transition.statesBefore[r.namespace] || []).includes(state));
 }
 /** Find all invalid transitions in a ledger. */
-export function findViolations(ledger) {
+function findViolations(ledger) {
     return ledger
         .map((t, i) => ({ transition: t, index: i, namespace: t.namespace }))
         .filter(r => !r.transition.valid);
 }
 /** Find a transition by its action index. */
-export function findTransition(actionIndex, ledger) {
+function findTransition(actionIndex, ledger) {
     const idx = ledger.findIndex(t => t.actionIndex === actionIndex);
     if (idx === -1)
         return null;
     return { transition: ledger[idx], index: idx, namespace: ledger[idx].namespace };
 }
 /** List all unique states present across all namespaces in a ledger. */
-export function listAllStates(ledger) {
+function listAllStates(ledger) {
     const seen = new Set();
     const result = [];
     for (const t of ledger) {
@@ -483,7 +536,7 @@ export function listAllStates(ledger) {
 // StateMachineValidator — backward-compatible class wrapper
 // Delegates to pure functions internally (Strangler Pattern)
 // ═══════════════════════════════════════════════════════════════
-export class StateMachineValidator {
+class StateMachineValidator {
     constructor(rules, initialState = 'INIT', namespaceInitialStates) {
         /** Internal ledger — the truth source. State is derived from this. */
         this.ledger = [];
@@ -615,12 +668,13 @@ export class StateMachineValidator {
         return rejectionToJSON(rejection);
     }
 }
+exports.StateMachineValidator = StateMachineValidator;
 // ═══════════════════════════════════════════════════════════════
 // Standalone presentation utilities (formerly static methods)
 // ═══════════════════════════════════════════════════════════════
 /** Format an SSG rejection as a human-readable multi-line string. */
 /** @requires SSG_REJECTION @produces EXPLANATION */
-export function explainRejection(rejection) {
+function explainRejection(rejection) {
     const nsLabel = rejection.namespace && rejection.namespace !== DEFAULT_NAMESPACE
         ? ` [namespace: ${rejection.namespace}]` : '';
     const lines = [
@@ -639,7 +693,7 @@ export function explainRejection(rejection) {
     return lines.join('\n');
 }
 /** Format an SSG rejection as a structured JSON object. */
-export function rejectionToJSON(rejection) {
+function rejectionToJSON(rejection) {
     return {
         protocol_violation: {
             blocked_function: rejection.blocked,
@@ -656,7 +710,7 @@ export function rejectionToJSON(rejection) {
 // ═══════════════════════════════════════════════════════════════
 // parseProtocolsFromJSON (unchanged)
 // ═══════════════════════════════════════════════════════════════
-export function parseProtocolsFromJSON(protocolDef) {
+function parseProtocolsFromJSON(protocolDef) {
     const protocols = [];
     for (const [funcName, rule] of Object.entries(protocolDef.rules)) {
         protocols.push({

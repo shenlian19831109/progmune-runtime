@@ -76,7 +76,11 @@ export function collectTrajectoriesAtScale(): { sequences: string[][]; report: C
   // Build protocol rules for validation
   const defs = loadDefaultProtocolDefinitions();
   const rules = new Map<string, StateAnnotation>();
-  for (const p of defs) for (const [fn, rule] of p.rules) rules.set(fn, rule);
+  const nsInit = new Map<string, string>();
+  for (const p of defs) {
+    nsInit.set(p.name, p.initialState);
+    for (const [fn, rule] of p.rules) rules.set(fn, rule);
+  }
 
   const synthesized = synthesizeAllKnownProtocols();
   for (const sp of synthesized) {
@@ -89,13 +93,13 @@ export function collectTrajectoriesAtScale(): { sequences: string[][]; report: C
     }
   }
 
-  // Generate random walks from all rules (scale up)
-  const walks = generateRandomWalks(rules, 1000, 2, 6);
+  // Generate random walks from all rules + synthesized (push to 200+)
+  const walks = generateRandomWalks(rules, 5000, 2, 10, nsInit);
   const normalizedWalks = walks.map(seq => seq.map(normalizeFunctionName));
 
-  // Generate mutations (scale up)
+  // Generate mutations at scale
   const seedForMutations = [...normalized, ...normalizedWalks];
-  const mutations = mutateTrajectories(seedForMutations.slice(0, 300), rules, 500);
+  const mutations = mutateTrajectories(seedForMutations.slice(0, 800), rules, 3000);
   const normalizedMutations = mutations.map(seq => seq.map(normalizeFunctionName));
 
   // Combine all

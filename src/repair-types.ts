@@ -24,6 +24,8 @@ export interface SearchContext {
   violationType: string;
   constraints: GoalConstraint[];
   rules: Map<string, StateAnnotation>;
+  /** P3.10: Natural language goal (for goal-conditioned planning). */
+  goal?: string;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -83,6 +85,8 @@ export interface CandidateFeatures {
   corpusEvidence: number;
   /** Which strategy produced this candidate (preserved for analytics). */
   source: "corpus" | "protocol" | "antibody";
+  /** P7.3: 1.0 if this candidate came from a goal-template match (higher priority). */
+  goalMatch?: number;
 }
 
 // ═══════════════════════════════════════════════════════════════

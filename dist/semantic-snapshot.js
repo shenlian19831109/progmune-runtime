@@ -1,6 +1,48 @@
-import * as fs from "fs";
-import * as path from "path";
-import * as crypto from "crypto";
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.createSnapshot = createSnapshot;
+exports.saveSnapshot = saveSnapshot;
+exports.loadSnapshot = loadSnapshot;
+exports.listSnapshots = listSnapshots;
+exports.diffSnapshots = diffSnapshots;
+exports.summarizeSnapshot = summarizeSnapshot;
+exports.findSnapshotBySession = findSnapshotBySession;
+const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
+const crypto = __importStar(require("crypto"));
 const projectDir = process.env.PROGMUNE_PROJECT_DIR || process.cwd();
 const SNAPSHOT_DIR = path.resolve(projectDir, ".progmune_corpus", "snapshots");
 function ensureDir(dir) {
@@ -9,7 +51,7 @@ function ensureDir(dir) {
 }
 /** 从 IR 数据创建快照 */
 /** @requires IR_DATA @produces SNAPSHOT */
-export function createSnapshot(ir, intent, sessionId) {
+function createSnapshot(ir, intent, sessionId) {
     const functions = ir.map((f) => ({
         name: f.name,
         params: (f.params || []).map((p) => ({ name: p.name, type: p.type })),
@@ -29,13 +71,13 @@ export function createSnapshot(ir, intent, sessionId) {
 }
 /** 持久化快照 */
 /** @requires SNAPSHOT @produces SNAPSHOT_ID */
-export function saveSnapshot(snapshot) {
+function saveSnapshot(snapshot) {
     ensureDir(SNAPSHOT_DIR);
     fs.writeFileSync(path.join(SNAPSHOT_DIR, `${snapshot.id}.json`), JSON.stringify(snapshot, null, 2));
     return snapshot.id;
 }
 /** 加载快照 */
-export function loadSnapshot(snapshotId) {
+function loadSnapshot(snapshotId) {
     try {
         const raw = fs.readFileSync(path.join(SNAPSHOT_DIR, `${snapshotId}.json`), "utf-8");
         return JSON.parse(raw);
@@ -45,7 +87,7 @@ export function loadSnapshot(snapshotId) {
     }
 }
 /** 列出所有快照 */
-export function listSnapshots() {
+function listSnapshots() {
     const snapshots = [];
     if (!fs.existsSync(SNAPSHOT_DIR))
         return snapshots;
@@ -61,7 +103,7 @@ export function listSnapshots() {
     return snapshots;
 }
 /** 计算两个快照之间的差异 */
-export function diffSnapshots(before, after) {
+function diffSnapshots(before, after) {
     const beforeMap = new Map();
     const afterMap = new Map();
     for (const f of before.functions)
@@ -96,7 +138,7 @@ export function diffSnapshots(before, after) {
     return { added, removed, changed, unchanged };
 }
 /** 生成快照摘要 */
-export function summarizeSnapshot(snapshot) {
+function summarizeSnapshot(snapshot) {
     const lines = [
         `Snapshot: ${snapshot.id}`,
         `Timestamp: ${snapshot.timestamp}`,
@@ -109,7 +151,7 @@ export function summarizeSnapshot(snapshot) {
     return lines.join("\n");
 }
 /** 按 sessionId 查找快照，返回最近的一个（或 undefined） */
-export function findSnapshotBySession(sessionId) {
+function findSnapshotBySession(sessionId) {
     const snapshots = listSnapshots();
     return snapshots.find(s => s.sessionId === sessionId);
 }

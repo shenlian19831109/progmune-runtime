@@ -271,6 +271,48 @@ export function loadDefaultProtocolDefinitions(): ProtocolDefinition[] {
         rule.post_states.some(s => s.includes("IR_") || s.includes("ACTION_") || s.includes("SEQUENCE_") || s.includes("CODE_") || s.includes("SESSION_")),
       initialState: "IR_STALE",
     },
+    {
+      name: "StatelessProtocol",
+      ruleFilter: (_fn, rule) =>
+        rule.namespace === "stateless" ||
+        (rule.pre_states.length === 0 && rule.post_states.length === 0),
+      initialState: "IDLE",
+    },
+    {
+      name: "TransactionProtocol",
+      ruleFilter: (_fn, rule) =>
+        rule.namespace === "transaction" ||
+        rule.pre_states.some(s => s.startsWith("TX_") || s === "SAVEPOINT_HELD") ||
+        rule.post_states.some(s => s.startsWith("TX_") || s === "SAVEPOINT_HELD") ||
+        (rule.invalidate || []).some(s => s.startsWith("TX_") || s === "SAVEPOINT_HELD"),
+      initialState: "TX_IDLE",
+    },
+    {
+      name: "ConditionalProtocol",
+      ruleFilter: (_fn, rule) =>
+        rule.namespace === "conditional" ||
+        rule.pre_states.some(s => s.startsWith("COND_")) ||
+        rule.post_states.some(s => s.startsWith("COND_")) ||
+        (rule.invalidate || []).some(s => s.startsWith("COND_")),
+      initialState: "COND_IDLE",
+    },
+    {
+      name: "LoopProtocol",
+      ruleFilter: (_fn, rule) =>
+        rule.namespace === "loop" ||
+        rule.pre_states.some(s => s.startsWith("LOOP_") || s === "FETCHING" || s === "BATCH_READY" || s === "ITERATING") ||
+        rule.post_states.some(s => s.startsWith("LOOP_") || s === "FETCHING" || s === "BATCH_READY" || s === "ITERATING") ||
+        (rule.invalidate || []).some(s => s.startsWith("LOOP_") || s === "FETCHING" || s === "BATCH_READY" || s === "ITERATING"),
+      initialState: "LOOP_IDLE",
+    },
+    {
+      name: "CrossProtocol",
+      ruleFilter: (_fn, rule) =>
+        rule.namespace === "cross" ||
+        rule.pre_states.some(s => s.includes("AUTH_FILE_GATE") || s.includes("AUTH_DB_GATE")) ||
+        rule.post_states.some(s => s.includes("AUTH_FILE_GATE") || s.includes("AUTH_DB_GATE")),
+      initialState: "UNAUTHENTICATED",
+    },
   ];
 
   _cachedProtocols = protocolGroups.map(g => {

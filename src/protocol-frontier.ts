@@ -205,11 +205,27 @@ export interface CrossProtocolPlan {
 
 /** Known bridges between protocols. */
 const PROTOCOL_BRIDGES: ProtocolBridge[] = [
+  // Original bridges
   { from: "AuthProtocol", to: "FileProtocol", outputState: "SESSION_ACTIVE", inputState: "INIT" },
   { from: "AuthProtocol", to: "DBProtocol", outputState: "SESSION_ACTIVE", inputState: "INIT" },
   { from: "FileProtocol", to: "DBProtocol", outputState: "FILE_OPEN", inputState: "INIT" },
   { from: "DBProtocol", to: "IRProtocol", outputState: "DB_CONNECTED", inputState: "IR_STALE" },
   { from: "IRProtocol", to: "FileProtocol", outputState: "CODE_EMITTED", inputState: "INIT" },
+  // P7.3: New protocol bridges
+  { from: "AuthProtocol", to: "TransactionProtocol", outputState: "SESSION_ACTIVE", inputState: "TX_IDLE" },
+  { from: "AuthProtocol", to: "ConditionalProtocol", outputState: "SESSION_ACTIVE", inputState: "COND_IDLE" },
+  { from: "AuthProtocol", to: "LoopProtocol", outputState: "SESSION_ACTIVE", inputState: "LOOP_IDLE" },
+  { from: "AuthProtocol", to: "CrossProtocol", outputState: "SESSION_ACTIVE", inputState: "UNAUTHENTICATED" },
+  { from: "TransactionProtocol", to: "DBProtocol", outputState: "TX_IDLE", inputState: "INIT" },
+  { from: "ConditionalProtocol", to: "FileProtocol", outputState: "COND_ACCEPTED", inputState: "INIT" },
+  { from: "ConditionalProtocol", to: "DBProtocol", outputState: "COND_ACCEPTED", inputState: "INIT" },
+  { from: "LoopProtocol", to: "FileProtocol", outputState: "LOOP_DONE", inputState: "INIT" },
+  { from: "LoopProtocol", to: "DBProtocol", outputState: "LOOP_DONE", inputState: "INIT" },
+  { from: "FileProtocol", to: "CrossProtocol", outputState: "FILE_OPEN", inputState: "AUTH_FILE_GATE" },
+  { from: "DBProtocol", to: "CrossProtocol", outputState: "DB_CONNECTED", inputState: "AUTH_DB_GATE" },
+  { from: "StatelessProtocol", to: "FileProtocol", outputState: "IDLE", inputState: "INIT" },
+  { from: "StatelessProtocol", to: "DBProtocol", outputState: "IDLE", inputState: "INIT" },
+  { from: "StatelessProtocol", to: "TransactionProtocol", outputState: "IDLE", inputState: "TX_IDLE" },
 ];
 
 /**

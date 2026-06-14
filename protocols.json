@@ -5,7 +5,12 @@
   "namespaceInitialStates": {
     "_global": "UNAUTHENTICATED",
     "auth": "UNAUTHENTICATED",
-    "dev_pipeline": "IR_STALE"
+    "dev_pipeline": "IR_STALE",
+    "stateless": "IDLE",
+    "transaction": "TX_IDLE",
+    "conditional": "COND_IDLE",
+    "loop": "LOOP_IDLE",
+    "cross": "UNAUTHENTICATED"
   },
   "states": {
     "UNAUTHENTICATED": "初始状态：用户未认证",
@@ -17,7 +22,23 @@
     "ACTION_VALIDATED": "动作已通过 SVL 校验",
     "SEQUENCE_VALIDATED": "动作序列 + 变量流向已通过校验",
     "CODE_EMITTED": "目标代码已生成",
-    "SESSION_RECORDED": "执行会话已保存"
+    "SESSION_RECORDED": "执行会话已保存",
+    "IDLE": "空闲状态：无状态函数可随时调用",
+    "TX_IDLE": "事务空闲：无活动事务",
+    "TX_ACTIVE": "事务进行中：可执行事务内操作",
+    "SAVEPOINT_HELD": "保存点已创建：可回滚或释放",
+    "COND_IDLE": "条件判断空闲：等待评估",
+    "COND_EVALUATED": "条件已评估：等待分支选择",
+    "COND_ACCEPTED": "条件通过（TRUE 分支）",
+    "COND_REJECTED": "条件拒绝（FALSE 分支）",
+    "COND_RESOLVED": "条件已解决：分支执行完毕",
+    "LOOP_IDLE": "循环空闲：等待开始迭代",
+    "FETCHING": "正在获取下一批数据",
+    "BATCH_READY": "批次数据就绪",
+    "ITERATING": "正在迭代处理数据项",
+    "LOOP_DONE": "循环已退出",
+    "AUTH_FILE_GATE": "跨协议桥：认证通过，文件操作就绪",
+    "AUTH_DB_GATE": "跨协议桥：认证通过，数据库操作就绪"
   },
   "rules": {
     "verify_password": {
@@ -131,6 +152,283 @@
       "post_states": ["SESSION_RECORDED"],
       "invalidate": ["CODE_EMITTED"],
       "description": "保存执行会话到语料库 → 需要代码已生成"
+    },
+
+    "compute_hash": {
+      "namespace": "stateless",
+      "pre_states": [],
+      "post_states": [],
+      "description": "计算输入数据的哈希摘要 —— 纯函数/幂等"
+    },
+    "validate_schema": {
+      "namespace": "stateless",
+      "pre_states": [],
+      "post_states": [],
+      "description": "对数据做 Schema 校验 —— 无副作用"
+    },
+    "sanitize_input": {
+      "namespace": "stateless",
+      "pre_states": [],
+      "post_states": [],
+      "description": "清理用户输入，去除危险字符"
+    },
+    "verify_checksum": {
+      "namespace": "stateless",
+      "pre_states": [],
+      "post_states": [],
+      "description": "通过校验和验证数据完整性"
+    },
+    "encode_payload": {
+      "namespace": "stateless",
+      "pre_states": [],
+      "post_states": [],
+      "description": "将数据编码为 base64 / wire format"
+    },
+    "decode_payload": {
+      "namespace": "stateless",
+      "pre_states": [],
+      "post_states": [],
+      "description": "从 wire format 解码回原始数据"
+    },
+    "compress_buffer": {
+      "namespace": "stateless",
+      "pre_states": [],
+      "post_states": [],
+      "description": "压缩数据缓冲区"
+    },
+    "decompress_buffer": {
+      "namespace": "stateless",
+      "pre_states": [],
+      "post_states": [],
+      "description": "解压数据缓冲区"
+    },
+
+    "begin_tx": {
+      "namespace": "transaction",
+      "pre_states": ["TX_IDLE"],
+      "post_states": ["TX_ACTIVE"],
+      "description": "开启新事务 → 必须在空闲状态下"
+    },
+    "commit_tx": {
+      "namespace": "transaction",
+      "pre_states": ["TX_ACTIVE"],
+      "post_states": ["TX_IDLE"],
+      "invalidate": ["TX_ACTIVE"],
+      "description": "提交活跃事务中的所有变更"
+    },
+    "rollback_tx": {
+      "namespace": "transaction",
+      "pre_states": ["TX_ACTIVE"],
+      "post_states": ["TX_IDLE"],
+      "invalidate": ["TX_ACTIVE"],
+      "description": "回滚活跃事务中的所有变更"
+    },
+    "insert_record": {
+      "namespace": "transaction",
+      "pre_states": ["TX_ACTIVE"],
+      "post_states": ["TX_ACTIVE"],
+      "description": "在活跃事务中插入记录（自保持）"
+    },
+    "update_record": {
+      "namespace": "transaction",
+      "pre_states": ["TX_ACTIVE"],
+      "post_states": ["TX_ACTIVE"],
+      "description": "在活跃事务中更新记录（自保持）"
+    },
+    "delete_record": {
+      "namespace": "transaction",
+      "pre_states": ["TX_ACTIVE"],
+      "post_states": ["TX_ACTIVE"],
+      "description": "在活跃事务中删除记录（自保持）"
+    },
+    "savepoint_create": {
+      "namespace": "transaction",
+      "pre_states": ["TX_ACTIVE"],
+      "post_states": ["SAVEPOINT_HELD"],
+      "description": "在活跃事务中创建具名保存点"
+    },
+    "savepoint_release": {
+      "namespace": "transaction",
+      "pre_states": ["SAVEPOINT_HELD"],
+      "post_states": ["TX_ACTIVE"],
+      "invalidate": ["SAVEPOINT_HELD"],
+      "description": "释放保存点，保留后续变更"
+    },
+    "rollback_to_savepoint": {
+      "namespace": "transaction",
+      "pre_states": ["SAVEPOINT_HELD"],
+      "post_states": ["TX_ACTIVE"],
+      "invalidate": ["SAVEPOINT_HELD"],
+      "description": "回滚到保存点，撤销保存点之后的变更"
+    },
+    "prep_two_phase": {
+      "namespace": "transaction",
+      "pre_states": ["TX_ACTIVE"],
+      "post_states": ["TX_IDLE"],
+      "invalidate": ["TX_ACTIVE"],
+      "description": "准备两阶段提交（表决阶段）"
+    },
+
+    "evaluate_access": {
+      "namespace": "conditional",
+      "pre_states": ["COND_IDLE"],
+      "post_states": ["COND_EVALUATED"],
+      "description": "根据权限策略评估访问条件"
+    },
+    "grant_access": {
+      "namespace": "conditional",
+      "pre_states": ["COND_EVALUATED"],
+      "post_states": ["COND_ACCEPTED"],
+      "invalidate": ["COND_EVALUATED"],
+      "description": "TRUE 分支：授予访问权限"
+    },
+    "deny_access": {
+      "namespace": "conditional",
+      "pre_states": ["COND_EVALUATED"],
+      "post_states": ["COND_REJECTED"],
+      "invalidate": ["COND_EVALUATED"],
+      "description": "FALSE 分支：拒绝访问"
+    },
+    "log_granted": {
+      "namespace": "conditional",
+      "pre_states": ["COND_ACCEPTED"],
+      "post_states": ["COND_RESOLVED"],
+      "invalidate": ["COND_ACCEPTED", "COND_RESOLVED"],
+      "description": "记录授权访问并结束条件判断"
+    },
+    "log_denied": {
+      "namespace": "conditional",
+      "pre_states": ["COND_REJECTED"],
+      "post_states": ["COND_RESOLVED"],
+      "invalidate": ["COND_REJECTED", "COND_RESOLVED"],
+      "description": "记录拒绝访问并结束条件判断"
+    },
+    "bypass_condition": {
+      "namespace": "conditional",
+      "pre_states": ["COND_EVALUATED"],
+      "post_states": ["COND_RESOLVED"],
+      "invalidate": ["COND_EVALUATED", "COND_RESOLVED"],
+      "description": "短路：直接绕过条件检查"
+    },
+    "retry_evaluation": {
+      "namespace": "conditional",
+      "pre_states": ["COND_EVALUATED"],
+      "post_states": ["COND_IDLE"],
+      "invalidate": ["COND_EVALUATED"],
+      "description": "重试：回到空闲状态重新评估"
+    },
+    "escalate_access": {
+      "namespace": "conditional",
+      "pre_states": ["COND_REJECTED"],
+      "post_states": ["COND_ACCEPTED"],
+      "invalidate": ["COND_REJECTED"],
+      "description": "升级：将被拒绝的访问升级为通过"
+    },
+    "audit_condition": {
+      "namespace": "conditional",
+      "pre_states": ["COND_ACCEPTED", "COND_REJECTED"],
+      "post_states": ["COND_RESOLVED"],
+      "invalidate": ["COND_ACCEPTED", "COND_REJECTED", "COND_RESOLVED"],
+      "description": "审计：无论分支结果如何，记录条件判断结果"
+    },
+
+    "init_fetch_loop": {
+      "namespace": "loop",
+      "pre_states": ["LOOP_IDLE"],
+      "post_states": ["FETCHING"],
+      "description": "初始化获取循环，开始获取数据"
+    },
+    "fetch_batch": {
+      "namespace": "loop",
+      "pre_states": ["FETCHING"],
+      "post_states": ["BATCH_READY"],
+      "invalidate": ["FETCHING"],
+      "description": "获取下一批数据"
+    },
+    "has_more_data": {
+      "namespace": "loop",
+      "pre_states": ["BATCH_READY"],
+      "post_states": ["ITERATING"],
+      "invalidate": ["BATCH_READY"],
+      "description": "检查还有更多数据 → 进入迭代体"
+    },
+    "process_item": {
+      "namespace": "loop",
+      "pre_states": ["ITERATING"],
+      "post_states": ["ITERATING"],
+      "description": "处理单个数据项（在迭代体内自循环）"
+    },
+    "next_iteration": {
+      "namespace": "loop",
+      "pre_states": ["ITERATING"],
+      "post_states": ["FETCHING"],
+      "invalidate": ["ITERATING"],
+      "description": "结束当前迭代 → 返回获取下一批"
+    },
+    "exit_loop": {
+      "namespace": "loop",
+      "pre_states": ["ITERATING"],
+      "post_states": ["LOOP_DONE"],
+      "invalidate": ["ITERATING", "LOOP_DONE"],
+      "description": "正常退出循环（所有数据已处理完毕）"
+    },
+    "retry_batch": {
+      "namespace": "loop",
+      "pre_states": ["BATCH_READY", "ITERATING"],
+      "post_states": ["FETCHING"],
+      "description": "获取失败 → 重试当前批次"
+    },
+    "timeout_exit": {
+      "namespace": "loop",
+      "pre_states": ["FETCHING", "ITERATING"],
+      "post_states": ["LOOP_DONE"],
+      "invalidate": ["FETCHING", "ITERATING", "LOOP_DONE"],
+      "description": "超时紧急退出循环"
+    },
+    "poll_status": {
+      "namespace": "loop",
+      "pre_states": ["ITERATING"],
+      "post_states": ["ITERATING"],
+      "description": "轮询状态更新（在迭代体内自循环）"
+    },
+
+    "auth_file_open": {
+      "namespace": "cross",
+      "pre_states": ["UNAUTHENTICATED"],
+      "post_states": ["AUTH_FILE_GATE"],
+      "description": "跨协议桥：认证 → 打开文件访问门"
+    },
+    "auth_file_read": {
+      "namespace": "cross",
+      "pre_states": ["AUTH_FILE_GATE"],
+      "post_states": ["AUTH_FILE_GATE"],
+      "description": "跨协议：通过认证门读取文件"
+    },
+    "auth_file_close": {
+      "namespace": "cross",
+      "pre_states": ["AUTH_FILE_GATE"],
+      "post_states": ["UNAUTHENTICATED"],
+      "invalidate": ["AUTH_FILE_GATE"],
+      "description": "跨协议：关闭经认证门的文件会话"
+    },
+    "auth_db_connect": {
+      "namespace": "cross",
+      "pre_states": ["UNAUTHENTICATED"],
+      "post_states": ["AUTH_DB_GATE"],
+      "description": "跨协议桥：认证 → 打开数据库连接"
+    },
+    "auth_db_query": {
+      "namespace": "cross",
+      "pre_states": ["AUTH_DB_GATE"],
+      "post_states": ["AUTH_DB_GATE"],
+      "description": "跨协议：通过认证门查询数据库"
+    },
+    "auth_db_disconnect": {
+      "namespace": "cross",
+      "pre_states": ["AUTH_DB_GATE"],
+      "post_states": ["UNAUTHENTICATED"],
+      "invalidate": ["AUTH_DB_GATE"],
+      "description": "跨协议：关闭经认证门的数据库连接"
     }
   }
 }

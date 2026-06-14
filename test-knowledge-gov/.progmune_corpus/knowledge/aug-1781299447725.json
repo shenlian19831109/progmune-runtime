@@ -1,0 +1,21 @@
+[
+  {
+    "id": "KP-1781299447725-fyin",
+    "generatedBy": "transition-synthesizer",
+    "protocol": "FileProtocol",
+    "change": "open_file → flush_file",
+    "fromState": "FILE_OPEN",
+    "toState": "FILE_DIRTY",
+    "confidence": 1,
+    "evidenceCount": 3,
+    "createdAt": "2026-06-12T21:24:07.725Z",
+    "status": "approved",
+    "approvedAt": "2026-06-12T21:24:07.725Z",
+    "approvalMetrics": {
+      "top1Before": 0.5,
+      "top1After": 0.6,
+      "top3Before": 0.7,
+      "top3After": 0.8
+    }
+  }
+]

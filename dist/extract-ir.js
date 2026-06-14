@@ -1,7 +1,44 @@
-import { Project, Node } from "ts-morph";
-import * as path from "path";
-import * as fs from "fs";
-import * as ts from "typescript";
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.extractIR = extractIR;
+exports.extractIRWithTypes = extractIRWithTypes;
+const ts_morph_1 = require("ts-morph");
+const path = __importStar(require("path"));
+const fs = __importStar(require("fs"));
+const ts = __importStar(require("typescript"));
 /** 从 JSDoc 注释中解析 capability 注解 (@purpose, @tags, @requires, @produces) */
 function parseCapabilityFromJSDoc(node) {
     const jsdocs = node.getJsDocs?.();
@@ -107,11 +144,11 @@ function getTypeDetail(typeNode) {
         return "";
     const text = typeNode.getText();
     // 简单处理联合类型
-    if (Node.isUnionTypeNode(typeNode)) {
+    if (ts_morph_1.Node.isUnionTypeNode(typeNode)) {
         return typeNode.getTypeNodes().map((t) => getTypeDetail(t)).join(" | ");
     }
     // 处理泛型
-    if (Node.isTypeReference(typeNode)) {
+    if (ts_morph_1.Node.isTypeReference(typeNode)) {
         const typeName = typeNode.getTypeName().getText();
         const typeArgs = typeNode.getTypeArguments();
         if (typeArgs.length > 0) {
@@ -121,7 +158,7 @@ function getTypeDetail(typeNode) {
         return typeName;
     }
     // 处理数组/元组
-    if (Node.isArrayTypeNode(typeNode)) {
+    if (ts_morph_1.Node.isArrayTypeNode(typeNode)) {
         return getTypeDetail(typeNode.getElementTypeNode()) + "[]";
     }
     // 其他类型直接返回文本
@@ -155,20 +192,164 @@ function deriveOutputs(returnType) {
     const t = returnType.replace(/\[\]$/, "").replace(/<[^>]*>/g, "").split("|")[0].trim();
     return (t === "void" || t === "any") ? [] : [t];
 }
+/** Read tsconfig.json resolving the extends chain via TypeScript's config parser. */
+function readOriginalTsConfig(tsconfigPath) {
+    try {
+        const raw = ts.readConfigFile(tsconfigPath, ts.sys.readFile);
+        if (raw.error)
+            return null;
+        const parsed = ts.parseJsonConfigFileContent(raw.config, ts.sys, path.dirname(tsconfigPath));
+        if (parsed.errors?.length > 0) {
+            // Non-fatal — config may still be usable
+        }
+        const co = parsed.options;
+        // Convert numeric ModuleResolutionKind to string
+        let modRes;
+        if (co.moduleResolution !== undefined && typeof co.moduleResolution === 'number') {
+            modRes = ts.ModuleResolutionKind[co.moduleResolution];
+        }
+        return {
+            paths: (co.paths && Object.keys(co.paths).length > 0) ? co.paths : undefined,
+            baseUrl: co.baseUrl,
+            moduleResolution: modRes?.toLowerCase(),
+        };
+    }
+    catch {
+        return null;
+    }
+}
+/**
+ * Manual module resolution for bundler/NodeNext projects.
+ * Falls back after ts-morph's built-in resolution fails.
+ */
+function manualResolveModule(moduleSpecifier, sourceFilePath, projectRoot, originalConfig) {
+    if (!moduleSpecifier || !moduleSpecifier.startsWith('.') && !moduleSpecifier.startsWith('@')) {
+        return null; // Not a relative or aliased import — skip
+    }
+    // ── 1. Path alias resolution (bundler) ──
+    if (originalConfig?.paths) {
+        const baseUrlPath = originalConfig.baseUrl
+            ? path.resolve(projectRoot, originalConfig.baseUrl)
+            : projectRoot;
+        for (const [aliasPattern, targets] of Object.entries(originalConfig.paths)) {
+            // Convert TypeScript glob pattern to regex: "@/*" → /^@\/(.*)$/
+            // Handle both glob ("@/*") and bare ("libnpmconfig") aliases
+            const hasWildcard = aliasPattern.includes('*');
+            let wildcard = '';
+            let matched = false;
+            if (hasWildcard) {
+                const aliasRegexSrc = '^' + aliasPattern.replace(/\*/g, '(.*)') + '$';
+                const aliasRegex = new RegExp(aliasRegexSrc);
+                const match = moduleSpecifier.match(aliasRegex);
+                if (!match)
+                    continue;
+                wildcard = match[1] || '';
+                matched = true;
+            }
+            else {
+                // Bare alias: must be an exact match
+                if (moduleSpecifier !== aliasPattern && !moduleSpecifier.startsWith(aliasPattern + '/')) {
+                    continue;
+                }
+                matched = true;
+                // For bare alias with subpath: "libnpmconfig/foo" → wildcard = "/foo"
+                if (moduleSpecifier.startsWith(aliasPattern + '/')) {
+                    wildcard = moduleSpecifier.slice(aliasPattern.length); // "/foo"
+                }
+            }
+            if (!matched)
+                continue;
+            for (const target of targets) {
+                const resolvedRel = hasWildcard ? target.replace(/\*/g, wildcard) : (target + wildcard);
+                const candidateBase = path.resolve(baseUrlPath, resolvedRel);
+                // Try candidate as a file first
+                try {
+                    const st = fs.statSync(candidateBase);
+                    if (st.isFile())
+                        return candidateBase;
+                }
+                catch { }
+                // Try adding .ts / .tsx / .d.ts extensions
+                for (const ext of ['.ts', '.tsx', '.d.ts']) {
+                    try {
+                        const withExt = candidateBase + ext;
+                        const st = fs.statSync(withExt);
+                        if (st.isFile())
+                            return withExt;
+                    }
+                    catch { }
+                }
+                // Try as directory with index file
+                try {
+                    const idxTs = path.join(candidateBase, 'index.ts');
+                    if (fs.statSync(idxTs).isFile())
+                        return idxTs;
+                }
+                catch { }
+                try {
+                    const idxTsx = path.join(candidateBase, 'index.tsx');
+                    if (fs.statSync(idxTsx).isFile())
+                        return idxTsx;
+                }
+                catch { }
+            }
+            break; // First matching alias pattern wins
+        }
+    }
+    // ── 2. NodeNext .js → .ts mapping ──
+    if (moduleSpecifier.startsWith('.')) {
+        const sourceDir = path.dirname(sourceFilePath);
+        // Try the specifier as-is first (extensionless or explicit)
+        for (const suffix of ['', '.ts', '.tsx', '.d.ts']) {
+            try {
+                const candidate = path.resolve(sourceDir, moduleSpecifier + suffix);
+                if (fs.statSync(candidate).isFile())
+                    return candidate;
+            }
+            catch { }
+        }
+        // NodeNext style: "./foo.js" → "./foo.ts"
+        if (moduleSpecifier.endsWith('.js') || moduleSpecifier.endsWith('.jsx')) {
+            const stripped = moduleSpecifier.replace(/\.jsx?$/, '');
+            for (const suffix of ['.ts', '.tsx', '.d.ts']) {
+                try {
+                    const candidate = path.resolve(sourceDir, stripped + suffix);
+                    if (fs.statSync(candidate).isFile())
+                        return candidate;
+                }
+                catch { }
+            }
+        }
+        // Try as directory with index file
+        try {
+            const idxTs = path.resolve(sourceDir, moduleSpecifier, 'index.ts');
+            if (fs.existsSync(idxTs))
+                return idxTs;
+        }
+        catch { }
+        try {
+            const idxTsx = path.resolve(sourceDir, moduleSpecifier, 'index.tsx');
+            if (fs.existsSync(idxTsx))
+                return idxTsx;
+        }
+        catch { }
+    }
+    return null;
+}
 function extractDirectCalls(func) {
     const body = func.getBody();
     if (!body)
         return [];
     const calls = [];
     body.forEachDescendant((node, traversal) => {
-        if (Node.isCallExpression(node)) {
+        if (ts_morph_1.Node.isCallExpression(node)) {
             const expr = node.getExpression();
-            if (Node.isIdentifier(expr))
+            if (ts_morph_1.Node.isIdentifier(expr))
                 calls.push(expr.getText());
-            else if (Node.isPropertyAccessExpression(expr))
+            else if (ts_morph_1.Node.isPropertyAccessExpression(expr))
                 calls.push(expr.getName());
         }
-        if (Node.isFunctionDeclaration(node) || Node.isArrowFunction(node))
+        if (ts_morph_1.Node.isFunctionDeclaration(node) || ts_morph_1.Node.isArrowFunction(node))
             traversal.skip();
     });
     return [...new Set(calls)];
@@ -179,16 +360,67 @@ function extractDirectCalls(func) {
  */
 /** @requires PROJECT_PATH @produces IR_FUNCTIONS */
 /** @requires PROJECT_PATH @produces IR_FUNCTIONS */
-export function extractIR(projectRoot) {
+function extractIR(projectRoot) {
     return extractIRWithTypes(projectRoot).functions;
 }
 /** Extract both functions and type→file mapping. */
 /** @requires PROJECT_PATH @produces IR_WITH_TYPES */
 /** @requires PROJECT_PATH @produces IR_WITH_TYPES */
-export function extractIRWithTypes(projectRoot) {
+function extractIRWithTypes(projectRoot, _visited = new Set()) {
     const absRoot = path.resolve(projectRoot);
-    const project = new Project({
-        tsConfigFilePath: path.join(absRoot, "tsconfig.json"),
+    const tsconfigPath = path.join(absRoot, "tsconfig.json");
+    // Prevent infinite recursion for circular project references
+    if (_visited.has(absRoot)) {
+        return { functions: [], typeMap: {} };
+    }
+    _visited.add(absRoot);
+    // ── P0: Monorepo / project references detection ──
+    let references = [];
+    if (fs.existsSync(tsconfigPath)) {
+        try {
+            const tsconfigRaw = JSON.parse(fs.readFileSync(tsconfigPath, "utf-8"));
+            if (tsconfigRaw.references && Array.isArray(tsconfigRaw.references)) {
+                references = tsconfigRaw.references
+                    .map((ref) => ref.path ? path.resolve(absRoot, ref.path) : null)
+                    .filter((p) => p !== null && fs.existsSync(path.join(p, "tsconfig.json")));
+            }
+        }
+        catch { /* invalid tsconfig JSON */ }
+    }
+    if (references.length > 0) {
+        console.error(`🔧 检测到 monorepo: ${references.length} 个子项目`);
+        const allFunctions = [];
+        const allTypeMap = {};
+        // Only extract from referenced sub-projects — root tsconfig is just a container
+        for (const refDir of references) {
+            const childResult = extractIRWithTypes(refDir, _visited);
+            // Adjust file paths to be relative to the root project
+            for (const f of childResult.functions) {
+                const absolutePath = path.resolve(refDir, f.file);
+                f.file = path.relative(absRoot, absolutePath);
+            }
+            allFunctions.push(...childResult.functions);
+            Object.assign(allTypeMap, childResult.typeMap);
+        }
+        return { functions: allFunctions, typeMap: allTypeMap };
+    }
+    return _extractSingleProject(absRoot, tsconfigPath);
+}
+/** Extract IR from a single project (no references handling). */
+function _extractSingleProject(absRoot, tsconfigPath) {
+    // ── P0: Read original tsconfig (with extends chain) for paths/baseUrl ──
+    const originalTsConfig = fs.existsSync(tsconfigPath)
+        ? readOriginalTsConfig(tsconfigPath)
+        : null;
+    if (originalTsConfig?.paths) {
+        console.error(`🔧 检测到路径别名: ${Object.keys(originalTsConfig.paths).join(', ')}`);
+    }
+    const modRes = (originalTsConfig?.moduleResolution || '').toLowerCase();
+    if (modRes === 'nodenext' || modRes === 'node16') {
+        console.error(`🔧 检测到 ${modRes} — 启用 .js→.ts 映射`);
+    }
+    const project = new ts_morph_1.Project({
+        tsConfigFilePath: tsconfigPath,
         skipAddingFilesFromTsConfig: false,
         skipFileDependencyResolution: true, // compatible with NodeNext/ESM tsconfigs
         compilerOptions: {
@@ -196,7 +428,7 @@ export function extractIRWithTypes(projectRoot) {
             moduleResolution: 2, // Classic Node resolution
         },
     });
-    if (!fs.existsSync(path.join(absRoot, "tsconfig.json"))) {
+    if (!fs.existsSync(tsconfigPath)) {
         project.addSourceFilesAtPaths(path.join(absRoot, "**/*.ts"));
     }
     const funcs = [];
@@ -230,7 +462,7 @@ export function extractIRWithTypes(projectRoot) {
             if (!init)
                 continue;
             // 直接箭头函数: const fn = () => {}
-            if (Node.isArrowFunction(init)) {
+            if (ts_morph_1.Node.isArrowFunction(init)) {
                 const name = vd.getName();
                 funcs.push({
                     name,
@@ -250,9 +482,9 @@ export function extractIRWithTypes(projectRoot) {
                 continue;
             }
             // 包装的箭头函数: const fn = debounce(() => {})
-            if (Node.isCallExpression(init)) {
+            if (ts_morph_1.Node.isCallExpression(init)) {
                 for (const arg of init.getArguments()) {
-                    if (Node.isArrowFunction(arg)) {
+                    if (ts_morph_1.Node.isArrowFunction(arg)) {
                         const name = vd.getName();
                         funcs.push({
                             name,
@@ -337,6 +569,21 @@ export function extractIRWithTypes(projectRoot) {
                             continue;
                         }
                     }
+                    // ── P0 fallback: manual resolution for bundler aliases & NodeNext .js→.ts ──
+                    const manualPath = manualResolveModule(mod, sf.getFilePath(), absRoot, originalTsConfig);
+                    if (manualPath) {
+                        try {
+                            const manualFile = project.addSourceFileAtPathIfExists(manualPath);
+                            if (manualFile) {
+                                const sig = extractSignatureFromFile(name, manualFile);
+                                if (sig) {
+                                    externalFuncs.set(name, sig);
+                                    continue;
+                                }
+                            }
+                        }
+                        catch { /* manual file may be a directory or invalid */ }
+                    }
                 }
                 catch { /* IR parse fallback */ }
             }
@@ -357,12 +604,24 @@ export function extractIRWithTypes(projectRoot) {
                                 namespaceImports.set(nsImport.getText(), dtsFile);
                         }
                         else {
-                            // Node.js built-in: try @types/node
-                            const nodeTypesPath = path.join(absRoot, "node_modules/@types/node", mod + ".d.ts");
-                            if (fs.existsSync(nodeTypesPath)) {
-                                const nodeDts = project.addSourceFileAtPathIfExists(nodeTypesPath);
-                                if (nodeDts)
-                                    namespaceImports.set(nsImport.getText(), nodeDts);
+                            // ── P0 fallback: manual resolution for namespace imports ──
+                            const manualPath = manualResolveModule(mod, sf.getFilePath(), absRoot, originalTsConfig);
+                            if (manualPath) {
+                                try {
+                                    const manualFile = project.addSourceFileAtPathIfExists(manualPath);
+                                    if (manualFile)
+                                        namespaceImports.set(nsImport.getText(), manualFile);
+                                }
+                                catch { /* manual file may be a directory */ }
+                            }
+                            else {
+                                // Node.js built-in: try @types/node
+                                const nodeTypesPath = path.join(absRoot, "node_modules/@types/node", mod + ".d.ts");
+                                if (fs.existsSync(nodeTypesPath)) {
+                                    const nodeDts = project.addSourceFileAtPathIfExists(nodeTypesPath);
+                                    if (nodeDts)
+                                        namespaceImports.set(nsImport.getText(), nodeDts);
+                                }
                             }
                         }
                     }
@@ -569,6 +828,40 @@ export function extractIRWithTypes(projectRoot) {
                     break;
             }
         }
+        // ── P0 fallback: try manual resolution for named-import-style unknown calls ──
+        // Some imports may not have been resolved as named imports in ts-morph
+        // (e.g., when the import declaration itself wasn't parsed correctly)
+        if (!externalFuncs.has(callName) && !knownExternals[callName]) {
+            // Scan all source file imports again with manual resolution
+            for (const sf of project.getSourceFiles()) {
+                if (sf.getFilePath().includes('node_modules'))
+                    continue;
+                for (const imp of sf.getImportDeclarations()) {
+                    const mod = imp.getModuleSpecifierValue();
+                    const manualPath = manualResolveModule(mod, sf.getFilePath(), absRoot, originalTsConfig);
+                    if (!manualPath)
+                        continue;
+                    // Check if this module exports the callName
+                    let manualFile;
+                    try {
+                        manualFile = project.addSourceFileAtPathIfExists(manualPath);
+                    }
+                    catch {
+                        continue;
+                    }
+                    if (!manualFile)
+                        continue;
+                    const sig = extractSignatureFromFile(callName, manualFile);
+                    if (sig) {
+                        externalFuncs.set(callName, sig);
+                        dynamicCount++;
+                        break;
+                    }
+                }
+                if (externalFuncs.has(callName))
+                    break;
+            }
+        }
         // Priority: dynamic resolution > knownExternals fallback > any
         const dynamic = externalFuncs.get(callName);
         const fallback = knownExternals[callName];
@@ -752,7 +1045,7 @@ function extractSignatureFromFile(name, sf) {
         if (exp[0] !== name)
             continue;
         for (const decl of exp[1]) {
-            if (Node.isFunctionDeclaration(decl)) {
+            if (ts_morph_1.Node.isFunctionDeclaration(decl)) {
                 const params = decl.getParameters().map(p => ({
                     name: p.getName(),
                     type: p.getTypeNode()?.getText() || "any",
@@ -763,9 +1056,9 @@ function extractSignatureFromFile(name, sf) {
                     description: `auto-resolved from ${sf.getFilePath()}`,
                 };
             }
-            if (Node.isVariableDeclaration(decl)) {
+            if (ts_morph_1.Node.isVariableDeclaration(decl)) {
                 const init = decl.getInitializer();
-                if (init && Node.isArrowFunction(init)) {
+                if (init && ts_morph_1.Node.isArrowFunction(init)) {
                     const params = init.getParameters().map(p => ({
                         name: p.getName(),
                         type: p.getTypeNode()?.getText() || "any",

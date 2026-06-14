@@ -1,19 +1,55 @@
-import { generate, chat, resetCallCount, estimateTokens } from "./llm";
-import { generateAttemptId, generateSessionId, generatePlannerSeed } from "./runtime-types";
-import { executeActionCode } from "./action-runtime";
-import { validateActionSequence } from "./validator";
-import { checkSemantic } from "./semantic-validator";
-import { getFailureAdjustedCredit } from "./feedback";
-import { jaccardSimilarity, extractKeywords } from "./utils";
-import { recordFailure, recordSession, saveCheckpoint, loadCheckpoint, clearCheckpoint, queryAntibodies, recordEdgeRejection } from "./failure-corpus";
-import { recordEpisode, findSemanticTemplate } from "./memory-layer";
-import { parseProtocolsFromJSON, validateTransition, checkLedgerConsistency, rebuildState, hashRules, explainRejection, rejectionToJSON } from "./ssg-validator";
-import { getNsInit } from "./protocol-registry";
-import { createSnapshot, saveSnapshot } from "./semantic-snapshot";
-import { selectCapabilityChains, formatChainHint } from "./strategy-planner";
-import { rebuildTopology } from "./semantic-topology";
-import { SYSTEM_PROMPT, RETRY_HINT, buildCompactFuncList, buildChainHints, buildProtocolChainHint } from "./planner-prompts";
-import * as fs from "fs";
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.plan = plan;
+const llm_1 = require("./llm");
+const runtime_types_1 = require("./runtime-types");
+const action_runtime_1 = require("./action-runtime");
+const validator_1 = require("./validator");
+const semantic_validator_1 = require("./semantic-validator");
+const feedback_1 = require("./feedback");
+const utils_1 = require("./utils");
+const failure_corpus_1 = require("./failure-corpus");
+const memory_layer_1 = require("./memory-layer");
+const ssg_validator_1 = require("./ssg-validator");
+const protocol_registry_1 = require("./protocol-registry");
+const semantic_snapshot_1 = require("./semantic-snapshot");
+const strategy_planner_1 = require("./strategy-planner");
+const semantic_topology_1 = require("./semantic-topology");
+const planner_prompts_1 = require("./planner-prompts");
+const fs = __importStar(require("fs"));
 function enrichActions(actions, ir) {
     return actions.map(a => {
         if (!a || !a.kind)
@@ -129,7 +165,7 @@ function correctFunctionNames(actions, ir) {
         let bestScore = 0;
         const target = a.function.toLowerCase();
         for (const fn of ir) {
-            const score = jaccardSimilarity(target, fn.name.toLowerCase());
+            const score = (0, utils_1.jaccardSimilarity)(target, fn.name.toLowerCase());
             if (score > bestScore) {
                 bestScore = score;
                 bestMatch = fn.name;
@@ -303,12 +339,12 @@ function loadProtocols(ir) {
         .filter((f) => f.protocol)
         .map((f) => ({ function: f.name, protocol: f.protocol }));
     // Phase 6C: use ProtocolRegistry for nsInit (single source of truth)
-    const namespaceInitialStates = getNsInit();
+    const namespaceInitialStates = (0, protocol_registry_1.getNsInit)();
     // Parse protocol rules from JSON (rules themselves still need the JSON for definitions)
     let jsonProtocols = [];
     try {
         const protoDef = JSON.parse(fs.readFileSync("protocols.json", "utf-8"));
-        jsonProtocols = parseProtocolsFromJSON(protoDef);
+        jsonProtocols = (0, ssg_validator_1.parseProtocolsFromJSON)(protoDef);
     }
     catch { /* topology rebuild — optional */ }
     // Merge: IR @protocol takes priority, but inherits JSON namespace
@@ -329,16 +365,16 @@ function validateProtocolWithTransitions(actions, protocols, namespaceInitialSta
     const rules = new Map();
     for (const p of protocols)
         rules.set(p.function, p.protocol);
-    const ruleHash = hashRules(rules);
+    const ruleHash = (0, ssg_validator_1.hashRules)(rules);
     const ctx = {
         ledger: [],
-        currentState: rebuildState([], namespaceInitialStates),
+        currentState: (0, ssg_validator_1.rebuildState)([], namespaceInitialStates),
     };
     const transitions = [];
     for (let i = 0; i < actions.length; i++) {
         const a = actions[i];
         if (a.kind === "call" && a.function) {
-            const { valid, transition, rejection } = validateTransition(ctx, a.function, i, rules, namespaceInitialStates, ruleHash);
+            const { valid, transition, rejection } = (0, ssg_validator_1.validateTransition)(ctx, a.function, i, rules, namespaceInitialStates, ruleHash);
             transitions.push(transition);
             if (!valid) {
                 const trace = transitions.map(t => ({
@@ -354,7 +390,7 @@ function validateProtocolWithTransitions(actions, protocols, namespaceInitialSta
         }
     }
     // Invariant check on full ledger
-    const consistency = checkLedgerConsistency(transitions, namespaceInitialStates);
+    const consistency = (0, ssg_validator_1.checkLedgerConsistency)(transitions, namespaceInitialStates);
     if (!consistency.consistent) {
         console.error(`[Invariant] Ledger consistency violations: ${consistency.violations.length}`);
         for (const v of consistency.violations) {
@@ -410,14 +446,14 @@ function attemptSSGRepair(actions, rejection, ir, protocols, namespaceInitialSta
     return null;
 }
 /** @requires INTENT @produces ACTION_PLAN */
-export async function plan(userIntent, llmSeeds) {
-    resetCallCount();
+async function plan(userIntent, llmSeeds) {
+    (0, llm_1.resetCallCount)();
     const irRaw = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
     // Support both old (array) and new ({typeMap, functions}) formats
     const ir = Array.isArray(irRaw) ? irRaw : (irRaw.functions || []);
     // P1: Build Semantic Topology (once per plan call, cached)
     try {
-        rebuildTopology(ir);
+        (0, semantic_topology_1.rebuildTopology)(ir);
     }
     catch { /* topology rebuild — optional */ }
     // Helper: wrap actions into PlanResult
@@ -431,7 +467,7 @@ export async function plan(userIntent, llmSeeds) {
         repairBranchIds: repair?.branchIds ?? repairMetrics.branchIds,
     });
     // 初始化执行会话和快照（需在抗体快速通道前创建，以便记录 antibody hits）
-    const sessionId = generateSessionId();
+    const sessionId = (0, runtime_types_1.generateSessionId)();
     const session = {
         sessionId,
         intent: userIntent,
@@ -439,13 +475,13 @@ export async function plan(userIntent, llmSeeds) {
         resolved: false,
         startedAt: Date.now(),
     };
-    const snapshot = createSnapshot(ir, userIntent);
-    const snapshotId = saveSnapshot(snapshot);
+    const snapshot = (0, semantic_snapshot_1.createSnapshot)(ir, userIntent);
+    const snapshotId = (0, semantic_snapshot_1.saveSnapshot)(snapshot);
     // 语义模板快速通道
-    const cachedTemplate = findSemanticTemplate(userIntent);
+    const cachedTemplate = (0, memory_layer_1.findSemanticTemplate)(userIntent);
     if (cachedTemplate && cachedTemplate.successRate >= 0.8 && cachedTemplate.useCount >= 2) {
         console.error("⚡ 命中语义模板，直接复用已验证序列");
-        recordEpisode({ intent: userIntent, actions: cachedTemplate.actionSequence, success: true });
+        (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: cachedTemplate.actionSequence, success: true });
         return wrapResult(cachedTemplate.actionSequence);
     }
     // 提前加载协议（后续多处使用）
@@ -466,16 +502,22 @@ export async function plan(userIntent, llmSeeds) {
         const stopWords = new Set(["this", "that", "with", "from", "have", "been", "their", "will", "would", "could", "should", "about", "which", "there"]);
         for (const w of stopWords)
             repoNames.delete(w);
-        const intentWords = userIntent.toLowerCase().split(/[\s,，]+/).filter((w) => w.length > 2);
+        // Split intent words the same way as function names: split on whitespace + camelCase
+        const intentWords = userIntent
+            .replace(/([A-Z])/g, " $1") // camelCase → "camel Case" (before toLowerCase!)
+            .toLowerCase()
+            .split(/[\s,，]+/)
+            .filter((w) => w.length > 2);
         const repoHits = intentWords.filter((w) => repoNames.has(w)).length;
         const density = intentWords.length > 0 ? repoHits / intentWords.length : 0;
-        if (density > 0.25) {
+        // 0.20 threshold — lower bound for short intents (3-5 words) still triggers correctly
+        if (density > 0.20) {
             graphMode = "on";
             console.error("[AutoRouter] " + Math.round(density * 100) + "% repo terms → Graph ON");
         }
     }
     // ── 抗体免疫系统：查询历史失败模式，注入知识回流 ──
-    const antibodies = graphMode !== "off" ? queryAntibodies(userIntent, "ACL-3") : [];
+    const antibodies = graphMode !== "off" ? (0, failure_corpus_1.queryAntibodies)(userIntent, "ACL-3") : [];
     let antibodyHint = "";
     if (antibodies.length > 0) {
         const top = antibodies[0];
@@ -504,25 +546,25 @@ export async function plan(userIntent, llmSeeds) {
                 similarityScore: top._score,
                 action: "fast_path",
                 llmCallsSaved: 1,
-                estimatedTokensSaved: Math.ceil(estimateTokens(SYSTEM_PROMPT + userIntent) * 1.2),
+                estimatedTokensSaved: Math.ceil((0, llm_1.estimateTokens)(planner_prompts_1.SYSTEM_PROMPT + userIntent) * 1.2),
             };
             // 验证抗体序列
             const antibodyRuleHash = (() => {
                 const rules = new Map();
                 for (const p of protocols)
                     rules.set(p.function, p.protocol);
-                return hashRules(rules);
+                return (0, ssg_validator_1.hashRules)(rules);
             })();
             if (protocols.length > 0) {
                 const validation = validateProtocolWithTransitions(antibodyActions, protocols, namespaceInitialStates);
                 if (validation.valid) {
-                    console.error(`⚡ ACL-4 抗体快速通道: 0 LLM 调用，节省 ~${Math.ceil(estimateTokens(SYSTEM_PROMPT + userIntent) * 1.2)} tokens (est.)`);
+                    console.error(`⚡ ACL-4 抗体快速通道: 0 LLM 调用，节省 ~${Math.ceil((0, llm_1.estimateTokens)(planner_prompts_1.SYSTEM_PROMPT + userIntent) * 1.2)} tokens (est.)`);
                     const antibodyAttempt = {
-                        id: generateAttemptId(),
+                        id: (0, runtime_types_1.generateAttemptId)(),
                         sessionId: session.sessionId,
                         attemptNumber: 1,
                         inputIntent: userIntent,
-                        plannerSeed: generatePlannerSeed("antibody-acl4", "immune"),
+                        plannerSeed: (0, runtime_types_1.generatePlannerSeed)("antibody-acl4", "immune"),
                         constraintSnapshotId: snapshotId,
                         generatedActions: antibodyActions,
                         transitions: validation.transitions,
@@ -540,20 +582,20 @@ export async function plan(userIntent, llmSeeds) {
                     session.resolved = true;
                     session.snapshotId = snapshotId;
                     session.endedAt = Date.now();
-                    recordSession(session);
-                    recordEpisode({ intent: userIntent, actions: antibodyActions, success: true });
+                    (0, failure_corpus_1.recordSession)(session);
+                    (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: antibodyActions, success: true });
                     return wrapResult(antibodyActions);
                 }
             }
             else {
                 // 无协议规则，直接信任抗体
-                console.error(`⚡ ACL-4 抗体快速通道: 0 LLM 调用（无协议约束），节省 ~${Math.ceil(estimateTokens(SYSTEM_PROMPT + userIntent) * 1.2)} tokens (est.)`);
+                console.error(`⚡ ACL-4 抗体快速通道: 0 LLM 调用（无协议约束），节省 ~${Math.ceil((0, llm_1.estimateTokens)(planner_prompts_1.SYSTEM_PROMPT + userIntent) * 1.2)} tokens (est.)`);
                 const antibodyAttempt = {
-                    id: generateAttemptId(),
+                    id: (0, runtime_types_1.generateAttemptId)(),
                     sessionId: session.sessionId,
                     attemptNumber: 1,
                     inputIntent: userIntent,
-                    plannerSeed: generatePlannerSeed("antibody-acl4", "immune"),
+                    plannerSeed: (0, runtime_types_1.generatePlannerSeed)("antibody-acl4", "immune"),
                     constraintSnapshotId: snapshotId,
                     generatedActions: antibodyActions,
                     transitions: [],
@@ -571,8 +613,8 @@ export async function plan(userIntent, llmSeeds) {
                 session.resolved = true;
                 session.snapshotId = snapshotId;
                 session.endedAt = Date.now();
-                recordSession(session);
-                recordEpisode({ intent: userIntent, actions: antibodyActions, success: true });
+                (0, failure_corpus_1.recordSession)(session);
+                (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: antibodyActions, success: true });
                 return wrapResult(antibodyActions);
             }
         }
@@ -595,13 +637,13 @@ export async function plan(userIntent, llmSeeds) {
         antibodyHint = `\n\n⚠️ 免疫系统警告（来自 ${antibodies.length} 条历史抗体记录）：\n${hints.join("\n")}\n请避免上述已知错误模式。`;
         console.error(`💉 L1 抗体注入: ${antibodies.length} 条抗体 → ${hints.length} 条注入提示`);
     }
-    const keywords = extractKeywords(userIntent);
+    const keywords = (0, utils_1.extractKeywords)(userIntent);
     const intentLower = userIntent.toLowerCase();
     const scored = ir.map((f) => {
         let score = 0;
         // Name match (existing)
         for (const kw of keywords) {
-            score += jaccardSimilarity(f.name.toLowerCase(), kw);
+            score += (0, utils_1.jaccardSimilarity)(f.name.toLowerCase(), kw);
             if (f.name.toLowerCase().includes(kw))
                 score += 0.5;
         }
@@ -667,7 +709,7 @@ export async function plan(userIntent, llmSeeds) {
             }
         }
         // Dynamic Credit: multiply by actual success rate (0.1-1.0)
-        const successRate = getFailureAdjustedCredit(f.name);
+        const successRate = (0, feedback_1.getFailureAdjustedCredit)(f.name);
         const creditFactor = 0.3 + successRate * 0.7; // range: 0.3 (always fail) to 1.0 (always succeed)
         if (f.exported && !f.external)
             score *= creditFactor;
@@ -676,9 +718,9 @@ export async function plan(userIntent, llmSeeds) {
     scored.sort((a, b) => b.score - a.score);
     const topFuncs = scored.slice(0, 15);
     // Strategy Layer: select capability chain (local, 0 LLM calls)
-    const chainResult = graphMode !== "off" ? selectCapabilityChains(userIntent, ir, 3, llmSeeds) : { chains: [], needsLLM: false };
+    const chainResult = graphMode !== "off" ? (0, strategy_planner_1.selectCapabilityChains)(userIntent, ir, 3, llmSeeds) : { chains: [], needsLLM: false };
     const chains = chainResult.chains;
-    const strategyHint = graphMode !== "off" ? formatChainHint(chains) : "";
+    const strategyHint = graphMode !== "off" ? (0, strategy_planner_1.formatChainHint)(chains) : "";
     // Action Layer: filter functions to those in selected chains
     let chainFuncs = topFuncs;
     if (chains.length > 0) {
@@ -692,10 +734,10 @@ export async function plan(userIntent, llmSeeds) {
         const outChain = topFuncs.filter((f) => !chainNames.has(f.name));
         chainFuncs = [...inChain, ...outChain].slice(0, 15);
     }
-    const compactFuncList = buildCompactFuncList(chainFuncs, ir);
+    const compactFuncList = (0, planner_prompts_1.buildCompactFuncList)(chainFuncs, ir);
     // Graph recommendations: only inject when explicitly enabled (default: off)
     // Graph validation (SVL, protocol, dataflow) always runs regardless
-    const chainHints = graphMode === "on" ? buildChainHints(topFuncs) : "";
+    const chainHints = graphMode === "on" ? (0, planner_prompts_1.buildChainHints)(topFuncs) : "";
     // Known string-enum types: tell LLM these are strings, not objects
     const STRING_ENUMS = {
         "SVL": '"SVL-1"|"SVL-2"|"SVL-3"|"SVL-4"',
@@ -714,18 +756,18 @@ export async function plan(userIntent, llmSeeds) {
             forbiddenFuncs.push(targetName);
         }
     }
-    const protocolChainHint = buildProtocolChainHint(protocols);
+    const protocolChainHint = (0, planner_prompts_1.buildProtocolChainHint)(protocols);
     const userPrompt = `可用函数：
 ${compactFuncList}${protocolChainHint}${chainHints}${typeHints}${strategyHint}
 
 需求：${userIntent}${antibodyHint}
 
-${RETRY_HINT}
+${planner_prompts_1.RETRY_HINT}
 只输出 JSON。`;
-    const estimatedTokens = estimateTokens(SYSTEM_PROMPT + userPrompt);
+    const estimatedTokens = (0, llm_1.estimateTokens)(planner_prompts_1.SYSTEM_PROMPT + userPrompt);
     console.error(`💰 估算 prompt token: ${estimatedTokens}`);
     // ── 执行持久化：检查是否有未完成的 checkpoint ──
-    const cp = loadCheckpoint(userIntent);
+    const cp = (0, failure_corpus_1.loadCheckpoint)(userIntent);
     let startRetry = 0;
     let finalActions = [];
     let currentPrompt = userPrompt;
@@ -744,7 +786,7 @@ ${RETRY_HINT}
         const rules = new Map();
         for (const p of protocols)
             rules.set(p.function, p.protocol);
-        return hashRules(rules);
+        return (0, ssg_validator_1.hashRules)(rules);
     })();
     session.ruleHash = sessionRuleHash;
     function getMaskedFuncList() {
@@ -753,25 +795,25 @@ ${RETRY_HINT}
         const rules = new Map();
         for (const p of protocols)
             rules.set(p.function, p.protocol);
-        const ctx = { ledger: [], currentState: rebuildState([], namespaceInitialStates) };
+        const ctx = { ledger: [], currentState: (0, ssg_validator_1.rebuildState)([], namespaceInitialStates) };
         const legalFuncs = topFuncs.filter((f) => {
             const proto = protocols.find((p) => p.function === f.name);
             if (!proto)
                 return true;
-            const { valid } = validateTransition(ctx, f.name, 0, rules, namespaceInitialStates);
+            const { valid } = (0, ssg_validator_1.validateTransition)(ctx, f.name, 0, rules, namespaceInitialStates);
             return valid;
         });
         if (legalFuncs.length === topFuncs.length)
             return compactFuncList;
-        return buildCompactFuncList(legalFuncs, ir);
+        return (0, planner_prompts_1.buildCompactFuncList)(legalFuncs, ir);
     }
     const maxRetries = 3;
     for (let r = startRetry; r < maxRetries; r++) {
         let text;
         try {
             text = useSystem
-                ? await chat(SYSTEM_PROMPT, currentPrompt)
-                : await generate(`你是程序合成助手。\n\n${currentPrompt}`);
+                ? await (0, llm_1.chat)(planner_prompts_1.SYSTEM_PROMPT, currentPrompt)
+                : await (0, llm_1.generate)(`你是程序合成助手。\n\n${currentPrompt}`);
         }
         catch (e) {
             continue;
@@ -784,11 +826,11 @@ ${RETRY_HINT}
         let rawActions = parseActionJSON(text);
         if (!rawActions || !Array.isArray(rawActions)) {
             console.error("⚠️ JSON 解析失败，尝试 DSL 回退...");
-            rawActions = executeActionCode(text);
+            rawActions = (0, action_runtime_1.executeActionCode)(text);
         }
         if (!rawActions || !Array.isArray(rawActions) || rawActions.length === 0) {
             console.error("⚠️ 解析失败，重试...");
-            currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}${antibodyHint}\n\n上一次输出无效。请严格输出 JSON 数组。\n${RETRY_HINT}\n只输出 JSON。`;
+            currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}${antibodyHint}\n\n上一次输出无效。请严格输出 JSON 数组。\n${planner_prompts_1.RETRY_HINT}\n只输出 JSON。`;
             useSystem = false;
             continue;
         }
@@ -812,7 +854,7 @@ ${RETRY_HINT}
         const schemaCheck = validateActionSchema(rawActions);
         if (!schemaCheck.valid) {
             console.error("⚠️ JSON schema 校验失败:", schemaCheck.errors.join("; "));
-            currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}${antibodyHint}\n\n输出格式错误：${schemaCheck.errors.join("；")}。请修正 JSON 结构。\n${RETRY_HINT}\n只输出 JSON。`;
+            currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}${antibodyHint}\n\n输出格式错误：${schemaCheck.errors.join("；")}。请修正 JSON 结构。\n${planner_prompts_1.RETRY_HINT}\n只输出 JSON。`;
             useSystem = false;
             const schemaViolation = {
                 svl: 1,
@@ -821,11 +863,11 @@ ${RETRY_HINT}
                 description: schemaCheck.errors.join("; "),
             };
             const schemaAttempt = {
-                id: generateAttemptId(),
+                id: (0, runtime_types_1.generateAttemptId)(),
                 sessionId: session.sessionId,
                 attemptNumber: r + 1,
                 inputIntent: userIntent,
-                plannerSeed: generatePlannerSeed(currentPrompt, process.env.LLM_MODEL || "deepseek-chat"),
+                plannerSeed: (0, runtime_types_1.generatePlannerSeed)(currentPrompt, process.env.LLM_MODEL || "deepseek-chat"),
                 constraintSnapshotId: snapshotId,
                 generatedActions: rawActions,
                 transitions: [],
@@ -837,8 +879,8 @@ ${RETRY_HINT}
                 ruleHash: sessionRuleHash,
             };
             session.attempts.push(schemaAttempt);
-            recordEpisode({ intent: userIntent, actions: rawActions, success: false, svlViolated: "SVL-1" });
-            saveCheckpoint(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });
+            (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: rawActions, success: false, svlViolated: "SVL-1" });
+            (0, failure_corpus_1.saveCheckpoint)(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });
             continue;
         }
         // 解析 $变量名 引用为实际变量名
@@ -862,7 +904,7 @@ ${RETRY_HINT}
         for (const p of protocols)
             preCheckRules.set(p.function, p.protocol);
         // Protocol pre-check: state must accumulate across the sequence
-        const preCheckCtx = { ledger: [], currentState: rebuildState([], namespaceInitialStates) };
+        const preCheckCtx = { ledger: [], currentState: (0, ssg_validator_1.rebuildState)([], namespaceInitialStates) };
         const preCheckErrors = [];
         for (let ai = 0; ai < filtered.length; ai++) {
             const a = filtered[ai];
@@ -878,7 +920,7 @@ ${RETRY_HINT}
             }
             // Protocol pre-check: verify function is callable in ACCUMULATED namespace state
             if (def.protocol && preCheckRules.size > 0) {
-                const { valid, transition, rejection } = validateTransition(preCheckCtx, a.function, ai, preCheckRules, namespaceInitialStates);
+                const { valid, transition, rejection } = (0, ssg_validator_1.validateTransition)(preCheckCtx, a.function, ai, preCheckRules, namespaceInitialStates);
                 if (!valid && rejection) {
                     preCheckErrors.push(`${a.function}: 协议违规 — 需要先调用 ${rejection.fixPath?.join(" → ") || "?"}`);
                 }
@@ -898,12 +940,12 @@ ${RETRY_HINT}
                 console.error(`⚠️ 策略提示: LLM 未使用推荐链中的任何函数 (推荐: ${topChain.explanation})`);
                 // Record negative feedback on recommended edges
                 for (let i = 0; i < topChain.nodes.length - 1; i++) {
-                    recordEdgeRejection(topChain.nodes[i].name, topChain.nodes[i + 1].name);
+                    (0, failure_corpus_1.recordEdgeRejection)(topChain.nodes[i].name, topChain.nodes[i + 1].name);
                 }
             }
         }
         // 1) 基础序列校验
-        const seqResult = validateActionSequence(filtered);
+        const seqResult = (0, validator_1.validateActionSequence)(filtered);
         if (!seqResult.valid || preCheckErrors.length > 0) {
             const errorsFlat = [...preCheckErrors, ...seqResult.errors.flat()];
             console.error("⚠️ 序列校验失败:", errorsFlat.join(", "));
@@ -915,11 +957,11 @@ ${RETRY_HINT}
                     : [{ svl: 1, violatedConstraint: "symbol_existence", actionIndex: 0, description: errorsFlat.join("; ") }];
             const primarySvl = `SVL-${violations[0].svl}`;
             const attempt = {
-                id: generateAttemptId(),
+                id: (0, runtime_types_1.generateAttemptId)(),
                 sessionId: session.sessionId,
                 attemptNumber: r + 1,
                 inputIntent: userIntent,
-                plannerSeed: generatePlannerSeed(currentPrompt, process.env.LLM_MODEL || "deepseek-chat"),
+                plannerSeed: (0, runtime_types_1.generatePlannerSeed)(currentPrompt, process.env.LLM_MODEL || "deepseek-chat"),
                 constraintSnapshotId: snapshotId,
                 generatedActions: filtered,
                 transitions: [],
@@ -931,7 +973,7 @@ ${RETRY_HINT}
                 ruleHash: sessionRuleHash,
             };
             session.attempts.push(attempt);
-            recordFailure({
+            (0, failure_corpus_1.recordFailure)({
                 intent: userIntent,
                 projectFunctions: ir.map((f) => f.name),
                 violatedSVL: primarySvl,
@@ -942,14 +984,14 @@ ${RETRY_HINT}
                 plannerAttempt: r + 1,
                 plannerRetryTotal: maxRetries,
             });
-            recordEpisode({ intent: userIntent, actions: filtered, success: false, svlViolated: primarySvl });
+            (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: filtered, success: false, svlViolated: primarySvl });
             // Build targeted retry prompt based on pre-check results
             const specificErrors = preCheckErrors.length > 0
                 ? `精确错误:\n${preCheckErrors.map(e => `  - ${e}`).join("\n")}`
                 : `错误：${errorsFlat.join("；")}`;
-            currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}${antibodyHint}\n\n${specificErrors}\n请修正上述问题。\n${RETRY_HINT}\n只输出 JSON。`;
+            currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}${antibodyHint}\n\n${specificErrors}\n请修正上述问题。\n${planner_prompts_1.RETRY_HINT}\n只输出 JSON。`;
             useSystem = false;
-            saveCheckpoint(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });
+            (0, failure_corpus_1.saveCheckpoint)(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });
             continue;
         }
         // 2) 协议状态机校验 (SSG)
@@ -957,7 +999,7 @@ ${RETRY_HINT}
             const protoResult = validateProtocolWithTransitions(filtered, protocols, namespaceInitialStates);
             if (!protoResult.valid && protoResult.rejection) {
                 const rej = protoResult.rejection;
-                const explain = explainRejection(rej);
+                const explain = (0, ssg_validator_1.explainRejection)(rej);
                 console.error(explain);
                 const violation = {
                     svl: 4,
@@ -968,14 +1010,14 @@ ${RETRY_HINT}
                     missingStates: rej.missingFunctions,
                     fixPath: rej.fixPath,
                     namespace: rej.namespace,
-                    description: JSON.stringify(rejectionToJSON(rej)),
+                    description: JSON.stringify((0, ssg_validator_1.rejectionToJSON)(rej)),
                 };
                 const attempt = {
-                    id: generateAttemptId(),
+                    id: (0, runtime_types_1.generateAttemptId)(),
                     sessionId: session.sessionId,
                     attemptNumber: r + 1,
                     inputIntent: userIntent,
-                    plannerSeed: generatePlannerSeed(currentPrompt, process.env.LLM_MODEL || "deepseek-chat"),
+                    plannerSeed: (0, runtime_types_1.generatePlannerSeed)(currentPrompt, process.env.LLM_MODEL || "deepseek-chat"),
                     constraintSnapshotId: snapshotId,
                     generatedActions: filtered,
                     transitions: protoResult.transitions,
@@ -987,13 +1029,13 @@ ${RETRY_HINT}
                     ruleHash: sessionRuleHash,
                 };
                 session.attempts.push(attempt);
-                recordFailure({
+                (0, failure_corpus_1.recordFailure)({
                     intent: userIntent,
                     projectFunctions: ir.map((f) => f.name),
                     violatedSVL: "SVL-4",
                     constraintType: "protocol",
                     actionSequence: filtered,
-                    errorDetail: JSON.stringify(rejectionToJSON(rej)),
+                    errorDetail: JSON.stringify((0, ssg_validator_1.rejectionToJSON)(rej)),
                     ssgState: rej.currentState,
                     ssgTrace: protoResult.trace,
                     ssgFixPath: rej.fixPath,
@@ -1001,7 +1043,7 @@ ${RETRY_HINT}
                     plannerAttempt: r + 1,
                     plannerRetryTotal: maxRetries,
                 });
-                recordEpisode({ intent: userIntent, actions: filtered, success: false, svlViolated: "SVL-4" });
+                (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: filtered, success: false, svlViolated: "SVL-4" });
                 // 尝试确定性修复：用 SSG 的 fixPath 自动插入缺失函数
                 const repaired = attemptSSGRepair(filtered, rej, ir, protocols, namespaceInitialStates);
                 if (repaired) {
@@ -1044,16 +1086,16 @@ ${RETRY_HINT}
                     break;
                 }
                 const maskedFuncList = getMaskedFuncList();
-                currentPrompt = `当前协议状态只允许以下函数：\n${maskedFuncList}${protocolChainHint}\n\n需求：${userIntent}${antibodyHint}\n\n协议违规：${explain.replace(/\n/g, '；')}。请修正。\n${RETRY_HINT}\n只输出 JSON。`;
+                currentPrompt = `当前协议状态只允许以下函数：\n${maskedFuncList}${protocolChainHint}\n\n需求：${userIntent}${antibodyHint}\n\n协议违规：${explain.replace(/\n/g, '；')}。请修正。\n${planner_prompts_1.RETRY_HINT}\n只输出 JSON。`;
                 useSystem = false;
-                saveCheckpoint(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });
+                (0, failure_corpus_1.saveCheckpoint)(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });
                 continue;
             }
             // SSG passed — capture transitions
             ssgTransitions = protoResult.transitions;
         }
         // 3) 语义合约校验
-        const semResult = checkSemantic(userIntent, filtered);
+        const semResult = (0, semantic_validator_1.checkSemantic)(userIntent, filtered);
         if (!semResult.valid) {
             console.error("⚠️ 语义校验失败:", semResult.errors.join(", "));
             const violation = {
@@ -1063,11 +1105,11 @@ ${RETRY_HINT}
                 description: semResult.errors.join("; "),
             };
             const attempt = {
-                id: generateAttemptId(),
+                id: (0, runtime_types_1.generateAttemptId)(),
                 sessionId: session.sessionId,
                 attemptNumber: r + 1,
                 inputIntent: userIntent,
-                plannerSeed: generatePlannerSeed(currentPrompt, process.env.LLM_MODEL || "deepseek-chat"),
+                plannerSeed: (0, runtime_types_1.generatePlannerSeed)(currentPrompt, process.env.LLM_MODEL || "deepseek-chat"),
                 constraintSnapshotId: snapshotId,
                 generatedActions: filtered,
                 transitions: ssgTransitions,
@@ -1079,7 +1121,7 @@ ${RETRY_HINT}
                 ruleHash: sessionRuleHash,
             };
             session.attempts.push(attempt);
-            recordFailure({
+            (0, failure_corpus_1.recordFailure)({
                 intent: userIntent,
                 projectFunctions: ir.map((f) => f.name),
                 violatedSVL: "SVL-4",
@@ -1089,10 +1131,10 @@ ${RETRY_HINT}
                 plannerAttempt: r + 1,
                 plannerRetryTotal: maxRetries,
             });
-            recordEpisode({ intent: userIntent, actions: filtered, success: false, svlViolated: "SVL-4" });
-            currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}${antibodyHint}\n\n语义错误：${semResult.errors.join("；")}。请修正。\n${RETRY_HINT}\n只输出 JSON。`;
+            (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: filtered, success: false, svlViolated: "SVL-4" });
+            currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}${antibodyHint}\n\n语义错误：${semResult.errors.join("；")}。请修正。\n${planner_prompts_1.RETRY_HINT}\n只输出 JSON。`;
             useSystem = false;
-            saveCheckpoint(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });
+            (0, failure_corpus_1.saveCheckpoint)(userIntent, { attemptIndex: r + 1, sessionAttempts: session.attempts, currentPrompt, useSystem });
             continue;
         }
         // Phase 8: Refinement — detect empty args, ask LLM to fill meaningful values
@@ -1113,7 +1155,7 @@ ${RETRY_HINT}
         if (emptyArgs.length > 0 && r < maxRetries - 1 && (!seqResult.valid || preCheckErrors.length > 0)) {
             const argDetails = emptyArgs.map(e => `  ${e.fn}() 参数 "${e.param}" (${e.type}) 是空值`).join("\n");
             console.error(`🔍 检测到 ${emptyArgs.length} 个空参数，启动精炼...`);
-            currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}${antibodyHint}\n\n上一次生成的 JSON 中以下参数为空值：\n${argDetails}\n\n请为这些参数填入有意义的示例值（字符串用描述性值，数字用合理数值，对象用 {} as Type）。\n${RETRY_HINT}\n只输出 JSON。`;
+            currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}${antibodyHint}\n\n上一次生成的 JSON 中以下参数为空值：\n${argDetails}\n\n请为这些参数填入有意义的示例值（字符串用描述性值，数字用合理数值，对象用 {} as Type）。\n${planner_prompts_1.RETRY_HINT}\n只输出 JSON。`;
             useSystem = false;
             continue;
         }
@@ -1150,11 +1192,11 @@ ${RETRY_HINT}
             }
             : undefined;
         const successAttempt = {
-            id: generateAttemptId(),
+            id: (0, runtime_types_1.generateAttemptId)(),
             sessionId: session.sessionId,
             attemptNumber: r + 1,
             inputIntent: userIntent,
-            plannerSeed: generatePlannerSeed(currentPrompt, process.env.LLM_MODEL || "deepseek-chat"),
+            plannerSeed: (0, runtime_types_1.generatePlannerSeed)(currentPrompt, process.env.LLM_MODEL || "deepseek-chat"),
             constraintSnapshotId: snapshotId,
             generatedActions: filtered,
             transitions: ssgTransitions,
@@ -1172,12 +1214,12 @@ ${RETRY_HINT}
         break;
     }
     if (finalActions.length > 0) {
-        recordEpisode({ intent: userIntent, actions: finalActions, success: true });
+        (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: finalActions, success: true });
         session.resolved = true;
         session.snapshotId = snapshotId;
         session.endedAt = Date.now();
-        recordSession(session); // Phase 5 will update recordSession to accept ExecutionSession
-        clearCheckpoint(userIntent);
+        (0, failure_corpus_1.recordSession)(session); // Phase 5 will update recordSession to accept ExecutionSession
+        (0, failure_corpus_1.clearCheckpoint)(userIntent);
     }
     else {
         // LLM 3 次重试失败，尝试本地规则回退
@@ -1185,13 +1227,13 @@ ${RETRY_HINT}
         const fallback = generateFallbackPlan(userIntent, ir);
         if (fallback.length > 0) {
             console.error(`[降级] 本地规则生成了 ${fallback.length} 个动作`);
-            recordEpisode({ intent: userIntent, actions: fallback, success: true });
+            (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: fallback, success: true });
             const fallbackAttempt = {
-                id: generateAttemptId(),
+                id: (0, runtime_types_1.generateAttemptId)(),
                 sessionId: session.sessionId,
                 attemptNumber: session.attempts.length + 1,
                 inputIntent: userIntent,
-                plannerSeed: generatePlannerSeed("fallback", "local-rule"),
+                plannerSeed: (0, runtime_types_1.generatePlannerSeed)("fallback", "local-rule"),
                 constraintSnapshotId: snapshotId,
                 generatedActions: fallback,
                 transitions: [],
@@ -1207,16 +1249,16 @@ ${RETRY_HINT}
             session.resolved = true;
             session.snapshotId = snapshotId;
             session.endedAt = Date.now();
-            recordSession(session);
-            clearCheckpoint(userIntent);
+            (0, failure_corpus_1.recordSession)(session);
+            (0, failure_corpus_1.clearCheckpoint)(userIntent);
             return wrapResult(fallback);
         }
-        recordEpisode({ intent: userIntent, actions: [], success: false });
+        (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: [], success: false });
         session.resolved = false;
         session.snapshotId = snapshotId;
         session.endedAt = Date.now();
-        recordSession(session);
-        clearCheckpoint(userIntent);
+        (0, failure_corpus_1.recordSession)(session);
+        (0, failure_corpus_1.clearCheckpoint)(userIntent);
     }
     return wrapResult(finalActions);
 }

@@ -1,3 +1,4 @@
+"use strict";
 /**
  * Phase 8: Semantic Topology (P1)
  *
@@ -9,7 +10,44 @@
  *
  * Replaces simple string matching in capability search.
  */
-export class SemanticTopology {
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SemanticTopology = void 0;
+exports.getTopology = getTopology;
+exports.rebuildTopology = rebuildTopology;
+class SemanticTopology {
     constructor() {
         this.nodes = new Map();
         this.edges = new Map();
@@ -138,10 +176,11 @@ export class SemanticTopology {
     /** Get node count */
     get size() { return this.nodes.size; }
 }
+exports.SemanticTopology = SemanticTopology;
 // ── Persistence cache: avoid O(n²) rebuild on every run ──
-import * as crypto from "crypto";
-import * as fs from "fs";
-import * as path from "path";
+const crypto = __importStar(require("crypto"));
+const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
 const CACHE_DIR = path.resolve(__dirname, "..", ".progmune");
 const TOPO_CACHE = path.join(CACHE_DIR, "topology.json");
 function irHash(ir) {
@@ -205,7 +244,7 @@ function deserializeTopology() {
 // Singleton
 let _topology = null;
 let _topoHash = null;
-export function getTopology(ir) {
+function getTopology(ir) {
     if (!_topology && ir) {
         const hash = irHash(ir);
         // Try disk cache first
@@ -233,7 +272,7 @@ export function getTopology(ir) {
     }
     return _topology || new SemanticTopology();
 }
-export function rebuildTopology(ir) {
+function rebuildTopology(ir) {
     _topology = new SemanticTopology();
     _topology.build(ir);
     _topoHash = irHash(ir);
