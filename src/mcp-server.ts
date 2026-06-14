@@ -155,6 +155,32 @@ async function main() {
           required: ["sessionId", "proposalId"],
         },
       },
+      // P8.2: Zero-shot protocol discovery & repair
+      {
+        name: "progmune_discover",
+        description: "Discover protocol state machines from a codebase using name-free topology analysis. Extracts call sequences, clusters by graph fingerprint, and returns discovered protocols with confidence scores.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            projectPath: { type: "string", description: "Absolute path to project root" },
+            repoName: { type: "string", description: "Repository name for identification (e.g., 'redis', 'postgresql')" },
+          },
+          required: ["projectPath"],
+        },
+      },
+      {
+        name: "progmune_zeroshot",
+        description: "Zero-shot repair: attempt to fix a broken action sequence using discovered protocol knowledge, without any hand-written rules for the target library. Returns Top-3 repair candidates.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            brokenSequence: { type: "array", items: { type: "string" }, description: "The broken (incomplete) action sequence" },
+            expectedPattern: { type: "string", description: "Expected protocol pattern (e.g., 'acquire_use_release', 'transaction')" },
+            projectPath: { type: "string", description: "Absolute path to project root" },
+          },
+          required: ["brokenSequence"],
+        },
+      },
     ],
   }));
 
@@ -747,6 +773,110 @@ This project uses [Progmune](https://github.com/shenlian19831109/progmune-runtim
       } catch (e: any) {
         return { content: [{ type: "text", text: `❌ Accept failed: ${e.message}` }] };
       }
+    }
+
+    if (request.params.name === "progmune_discover") {
+      const { projectPath, repoName } = request.params.arguments as {
+        projectPath: string;
+        repoName?: string;
+      };
+      process.env.PROGMUNE_PROJECT_DIR = projectPath;
+
+      const { buildKnownFingerprintLibrary, extractUnknownRepoSequences, discoverProtocolsFromSequences } = require("./unknown-protocol-discovery");
+      const { CROSS_REPO_SEQUENCES } = require("./unsupervised-physics");
+
+      const known = buildKnownFingerprintLibrary();
+      const name = repoName || path.basename(projectPath);
+
+      // Try to extract sequences from the trajectory corpus
+      const { loadTrajectories } = require("./failure-corpus");
+      const trajectories = (loadTrajectories() as any[]).filter((t: any) => t.trajectory.length >= 2);
+      const seqs = trajectories.length > 0
+        ? trajectories.map(t => t.trajectory)
+        : (CROSS_REPO_SEQUENCES[name] || []);
+
+      const discovered = discoverProtocolsFromSequences(seqs, name, known);
+
+      const result = {
+        repo: name,
+        discoveredCount: discovered.length,
+        protocols: discovered.map((p: any) => ({
+          name: p.name,
+          prototype: p.prototype,
+          states: p.fingerprint.stateCount,
+          transitions: p.fingerprint.transitions.length,
+          entryPoints: p.fingerprint.entryStates.length,
+          exitPoints: p.fingerprint.exitStates.length,
+          isDAG: p.fingerprint.isDAG,
+          closestKnown: p.closestKnown || "novel",
+          confidence: p.matchConfidence,
+          rules: p.rules.map((r: any) => ({
+            function: r.function,
+            pre_states: r.pre_states,
+            post_states: r.post_states,
+            invalidate: r.invalidate,
+          })),
+        })),
+      };
+
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      };
+    }
+
+    if (request.params.name === "progmune_zeroshot") {
+      const { brokenSequence, expectedPattern, projectPath } = request.params.arguments as {
+        brokenSequence: string[];
+        expectedPattern?: string;
+        projectPath?: string;
+      };
+      if (projectPath) process.env.PROGMUNE_PROJECT_DIR = projectPath;
+
+      const { buildKnownFingerprintLibrary, discoverProtocolsFromSequences, evaluateZeroShotRepair } = require("./unknown-protocol-discovery");
+      const { loadTrajectories } = require("./failure-corpus");
+
+      const known = buildKnownFingerprintLibrary();
+      const trajectories = (loadTrajectories() as any[]).filter((t: any) => t.trajectory.length >= 2);
+      const seqs = trajectories.length > 0
+        ? trajectories.map(t => t.trajectory)
+        : [brokenSequence];
+
+      const discovered = discoverProtocolsFromSequences(seqs, "zeroshot", known);
+
+      // Build defect cases from the broken sequence
+      const expected = expectedPattern === "transaction"
+        ? [...brokenSequence, "commit_tx"]
+        : expectedPattern === "acquire_use_release"
+          ? [...brokenSequence, "close_file"]
+          : brokenSequence;
+
+      const defectCases = [{
+        broken: brokenSequence,
+        expected,
+        description: `zeroshot: ${brokenSequence.join(" → ")} (pattern: ${expectedPattern || "auto"})`,
+      }];
+
+      const repairResult = evaluateZeroShotRepair(discovered, defectCases);
+
+      const result = {
+        brokenSequence,
+        expectedPattern: expectedPattern || "auto-detected",
+        discoveredProtocols: discovered.length,
+        repairSuccess: repairResult.success,
+        repairTotal: repairResult.total,
+        repairRate: repairResult.repairRate,
+        details: repairResult.details,
+        topMatches: discovered.slice(0, 3).map((p: any) => ({
+          name: p.name,
+          prototype: p.prototype,
+          closestKnown: p.closestKnown || "none",
+          confidence: p.matchConfidence,
+        })),
+      };
+
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      };
     }
 
     throw new Error(`Unknown tool: ${request.params.name}`);

@@ -1,0 +1,2181 @@
+{
+  "sequences": [
+    {
+      "id": "loop_19",
+      "topology": "loop",
+      "actions": [
+        "init_loop",
+        "timeout",
+        "process",
+        "timeout",
+        "exit_loop",
+        "process"
+      ]
+    },
+    {
+      "id": "stateless_13",
+      "topology": "stateless",
+      "actions": [
+        "encode_payload",
+        "validate_input",
+        "encode_payload",
+        "compute_hash",
+        "encode_payload"
+      ]
+    },
+    {
+      "id": "linear_19",
+      "topology": "linear",
+      "actions": [
+        "open",
+        "op1",
+        "op2",
+        "close"
+      ]
+    },
+    {
+      "id": "tree_3",
+      "topology": "tree",
+      "actions": [
+        "enter",
+        "branch_d0_b0",
+        "branch_d0_b1"
+      ]
+    },
+    {
+      "id": "tree_0",
+      "topology": "tree",
+      "actions": [
+        "enter",
+        "branch_d0_b0",
+        "branch_d0_b1",
+        "branch_d0_b0"
+      ]
+    },
+    {
+      "id": "fan_out_7",
+      "topology": "fan_out",
+      "actions": [
+        "fork_a",
+        "fork_b",
+        "fork_c",
+        "fork_a",
+        "op_c"
+      ]
+    },
+    {
+      "id": "tree_5",
+      "topology": "tree",
+      "actions": [
+        "enter",
+        "branch_d0_b0"
+      ]
+    },
+    {
+      "id": "auth_bridge_9",
+      "topology": "auth_bridge",
+      "actions": [
+        "authenticate",
+        "open_file"
+      ]
+    },
+    {
+      "id": "star_19",
+      "topology": "star",
+      "actions": [
+        "acquire",
+        "use_c",
+        "destroy",
+        "use_b"
+      ]
+    },
+    {
+      "id": "two_phase_commit_15",
+      "topology": "two_phase_commit",
+      "actions": [
+        "begin_tx",
+        "update",
+        "insert",
+        "prepare",
+        "insert"
+      ]
+    },
+    {
+      "id": "nested_1",
+      "topology": "nested",
+      "actions": [
+        "acquire_outer",
+        "release_outer",
+        "acquire_inner",
+        "release_outer",
+        "release_inner",
+        "acquire_inner"
+      ]
+    },
+    {
+      "id": "loop_10",
+      "topology": "loop",
+      "actions": [
+        "init_loop",
+        "process",
+        "poll",
+        "timeout"
+      ]
+    },
+    {
+      "id": "stateless_5",
+      "topology": "stateless",
+      "actions": [
+        "decode_payload",
+        "compute_hash",
+        "encode_payload",
+        "compute_hash",
+        "decode_payload",
+        "encode_payload",
+        "compute_hash"
+      ]
+    },
+    {
+      "id": "rollback_4",
+      "topology": "rollback",
+      "actions": [
+        "step1",
+        "step2",
+        "step3",
+        "undo_step2"
+      ]
+    },
+    {
+      "id": "fan_out_16",
+      "topology": "fan_out",
+      "actions": [
+        "fork_b",
+        "fork_c",
+        "fork_a",
+        "op_c",
+        "fork_c",
+        "merge",
+        "op_c"
+      ]
+    },
+    {
+      "id": "loop_4",
+      "topology": "loop",
+      "actions": [
+        "init_loop",
+        "timeout",
+        "process",
+        "timeout",
+        "exit_loop",
+        "process",
+        "exit_loop",
+        "process"
+      ]
+    },
+    {
+      "id": "two_phase_commit_9",
+      "topology": "two_phase_commit",
+      "actions": [
+        "begin_tx",
+        "insert",
+        "prepare",
+        "commit",
+        "update"
+      ]
+    },
+    {
+      "id": "tree_9",
+      "topology": "tree",
+      "actions": [
+        "enter",
+        "branch_d0_b1",
+        "branch_d0_b0",
+        "branch_d0_b1",
+        "branch_d0_b0"
+      ]
+    },
+    {
+      "id": "rollback_13",
+      "topology": "rollback",
+      "actions": [
+        "step1",
+        "step2",
+        "undo_step2",
+        "step2",
+        "undo_step2"
+      ]
+    },
+    {
+      "id": "tree_18",
+      "topology": "tree",
+      "actions": [
+        "enter",
+        "branch_d0_b0",
+        "branch_d0_b1",
+        "branch_d0_b0",
+        "branch_d0_b1",
+        "branch_d0_b0",
+        "branch_d0_b1"
+      ]
+    },
+    {
+      "id": "fan_out_2",
+      "topology": "fan_out",
+      "actions": [
+        "fork_b",
+        "op_b",
+        "fork_c"
+      ]
+    },
+    {
+      "id": "nested_5",
+      "topology": "nested",
+      "actions": [
+        "acquire_outer",
+        "acquire_inner",
+        "release_inner"
+      ]
+    },
+    {
+      "id": "auth_bridge_12",
+      "topology": "auth_bridge",
+      "actions": [
+        "authenticate",
+        "logout",
+        "open_file"
+      ]
+    },
+    {
+      "id": "tree_14",
+      "topology": "tree",
+      "actions": [
+        "enter",
+        "branch_d0_b1",
+        "branch_d0_b0",
+        "branch_d0_b1",
+        "branch_d0_b0"
+      ]
+    },
+    {
+      "id": "auth_bridge_8",
+      "topology": "auth_bridge",
+      "actions": [
+        "authenticate",
+        "connect_db",
+        "disconnect_db",
+        "logout",
+        "connect_db",
+        "authenticate",
+        "open_file"
+      ]
+    },
+    {
+      "id": "star_11",
+      "topology": "star",
+      "actions": [
+        "acquire",
+        "use_a",
+        "use_c"
+      ]
+    },
+    {
+      "id": "rollback_8",
+      "topology": "rollback",
+      "actions": [
+        "step1",
+        "step2",
+        "step3",
+        "commit_all",
+        "undo_step3",
+        "step3",
+        "commit_all",
+        "undo_step3"
+      ]
+    },
+    {
+      "id": "auth_bridge_17",
+      "topology": "auth_bridge",
+      "actions": [
+        "authenticate",
+        "logout",
+        "open_file",
+        "close_file",
+        "authenticate",
+        "open_file",
+        "connect_db",
+        "disconnect_db"
+      ]
+    },
+    {
+      "id": "rollback_11",
+      "topology": "rollback",
+      "actions": [
+        "step1",
+        "step2",
+        "undo_step2",
+        "step2",
+        "undo_step2",
+        "step2"
+      ]
+    },
+    {
+      "id": "tree_12",
+      "topology": "tree",
+      "actions": [
+        "enter",
+        "branch_d0_b1",
+        "branch_d0_b0",
+        "branch_d0_b1",
+        "branch_d0_b0",
+        "branch_d0_b1",
+        "branch_d0_b0"
+      ]
+    },
+    {
+      "id": "rollback_9",
+      "topology": "rollback",
+      "actions": [
+        "step1",
+        "step2",
+        "undo_step2",
+        "step2",
+        "undo_step2"
+      ]
+    },
+    {
+      "id": "tree_1",
+      "topology": "tree",
+      "actions": [
+        "enter",
+        "branch_d0_b0",
+        "branch_d0_b1"
+      ]
+    },
+    {
+      "id": "rollback_19",
+      "topology": "rollback",
+      "actions": [
+        "step1",
+        "step2",
+        "step3"
+      ]
+    },
+    {
+      "id": "star_13",
+      "topology": "star",
+      "actions": [
+        "acquire",
+        "use_a",
+        "use_c"
+      ]
+    },
+    {
+      "id": "rollback_5",
+      "topology": "rollback",
+      "actions": [
+        "step1",
+        "step2",
+        "step3",
+        "undo_step2",
+        "step2",
+        "undo_step3",
+        "step3",
+        "commit_all"
+      ]
+    },
+    {
+      "id": "auth_bridge_7",
+      "topology": "auth_bridge",
+      "actions": [
+        "authenticate",
+        "connect_db",
+        "logout",
+        "open_file",
+        "logout"
+      ]
+    },
+    {
+      "id": "tree_15",
+      "topology": "tree",
+      "actions": [
+        "enter",
+        "branch_d0_b1",
+        "branch_d0_b0",
+        "branch_d0_b1",
+        "branch_d0_b0",
+        "branch_d0_b1"
+      ]
+    },
+    {
+      "id": "nested_13",
+      "topology": "nested",
+      "actions": [
+        "acquire_outer",
+        "acquire_inner"
+      ]
+    },
+    {
+      "id": "stateless_3",
+      "topology": "stateless",
+      "actions": [
+        "decode_payload",
+        "compute_hash",
+        "decode_payload",
+        "encode_payload",
+        "decode_payload"
+      ]
+    },
+    {
+      "id": "star_14",
+      "topology": "star",
+      "actions": [
+        "acquire",
+        "use_b",
+        "destroy"
+      ]
+    },
+    {
+      "id": "tree_11",
+      "topology": "tree",
+      "actions": [
+        "enter",
+        "branch_d0_b0"
+      ]
+    },
+    {
+      "id": "tree_10",
+      "topology": "tree",
+      "actions": [
+        "enter",
+        "branch_d0_b0",
+        "branch_d0_b1",
+        "branch_d0_b0",
+        "branch_d0_b1",
+        "branch_d0_b0",
+        "branch_d0_b1"
+      ]
+    },
+    {
+      "id": "linear_0",
+      "topology": "linear",
+      "actions": [
+        "open",
+        "op1",
+        "op2",
+        "close"
+      ]
+    },
+    {
+      "id": "stateless_14",
+      "topology": "stateless",
+      "actions": [
+        "encode_payload",
+        "decode_payload"
+      ]
+    },
+    {
+      "id": "two_phase_commit_11",
+      "topology": "two_phase_commit",
+      "actions": [
+        "begin_tx",
+        "insert",
+        "prepare",
+        "rollback",
+        "prepare"
+      ]
+    },
+    {
+      "id": "two_phase_commit_3",
+      "topology": "two_phase_commit",
+      "actions": [
+        "begin_tx",
+        "prepare",
+        "insert",
+        "rollback"
+      ]
+    },
+    {
+      "id": "linear_8",
+      "topology": "linear",
+      "actions": [
+        "open",
+        "op1",
+        "op2",
+        "close"
+      ]
+    },
+    {
+      "id": "fan_out_12",
+      "topology": "fan_out",
+      "actions": [
+        "fork_a",
+        "fork_b",
+        "fork_a",
+        "fork_c",
+        "fork_b",
+        "op_c"
+      ]
+    },
+    {
+      "id": "linear_13",
+      "topology": "linear",
+      "actions": [
+        "open",
+        "op1",
+        "op2",
+        "close"
+      ]
+    },
+    {
+      "id": "auth_bridge_18",
+      "topology": "auth_bridge",
+      "actions": [
+        "authenticate",
+        "logout",
+        "authenticate",
+        "logout",
+        "open_file"
+      ]
+    },
+    {
+      "id": "fan_out_0",
+      "topology": "fan_out",
+      "actions": [
+        "fork_c",
+        "fork_b",
+        "fork_a",
+        "fork_c",
+        "op_b"
+      ]
+    },
+    {
+      "id": "stateless_2",
+      "topology": "stateless",
+      "actions": [
+        "decode_payload",
+        "encode_payload",
+        "decode_payload"
+      ]
+    },
+    {
+      "id": "fan_out_6",
+      "topology": "fan_out",
+      "actions": [
+        "fork_a",
+        "fork_b",
+        "fork_c",
+        "op_a",
+        "op_c",
+        "fork_b",
+        "merge",
+        "fork_a"
+      ]
+    },
+    {
+      "id": "tree_19",
+      "topology": "tree",
+      "actions": [
+        "enter",
+        "branch_d0_b1",
+        "branch_d0_b0",
+        "branch_d0_b1",
+        "branch_d0_b0"
+      ]
+    },
+    {
+      "id": "auth_bridge_5",
+      "topology": "auth_bridge",
+      "actions": [
+        "authenticate",
+        "connect_db",
+        "logout",
+        "disconnect_db",
+        "logout",
+        "open_file",
+        "logout"
+      ]
+    },
+    {
+      "id": "stateless_6",
+      "topology": "stateless",
+      "actions": [
+        "compute_hash",
+        "encode_payload"
+      ]
+    },
+    {
+      "id": "fan_out_13",
+      "topology": "fan_out",
+      "actions": [
+        "fork_b",
+        "op_b"
+      ]
+    },
+    {
+      "id": "rollback_3",
+      "topology": "rollback",
+      "actions": [
+        "step1",
+        "step2",
+        "step3",
+        "undo_step2"
+      ]
+    },
+    {
+      "id": "loop_14",
+      "topology": "loop",
+      "actions": [
+        "init_loop",
+        "exit_loop",
+        "process",
+        "exit_loop",
+        "process",
+        "timeout",
+        "poll",
+        "process"
+      ]
+    },
+    {
+      "id": "linear_17",
+      "topology": "linear",
+      "actions": [
+        "open",
+        "op1",
+        "op2",
+        "close"
+      ]
+    },
+    {
+      "id": "stateless_8",
+      "topology": "stateless",
+      "actions": [
+        "compute_hash",
+        "decode_payload",
+        "compute_hash",
+        "encode_payload"
+      ]
+    },
+    {
+      "id": "star_8",
+      "topology": "star",
+      "actions": [
+        "acquire",
+        "use_a",
+        "release_a",
+        "use_a",
+        "destroy"
+      ]
+    },
+    {
+      "id": "linear_12",
+      "topology": "linear",
+      "actions": [
+        "open",
+        "op1",
+        "op2",
+        "close"
+      ]
+    },
+    {
+      "id": "auth_bridge_11",
+      "topology": "auth_bridge",
+      "actions": [
+        "authenticate",
+        "open_file",
+        "close_file",
+        "open_file",
+        "logout",
+        "authenticate",
+        "open_file",
+        "close_file"
+      ]
+    },
+    {
+      "id": "loop_12",
+      "topology": "loop",
+      "actions": [
+        "init_loop",
+        "poll",
+        "exit_loop",
+        "poll",
+        "exit_loop",
+        "process"
+      ]
+    },
+    {
+      "id": "rollback_18",
+      "topology": "rollback",
+      "actions": [
+        "step1",
+        "step2",
+        "undo_step2",
+        "step2",
+        "undo_step2",
+        "step3",
+        "commit_all"
+      ]
+    },
+    {
+      "id": "auth_bridge_3",
+      "topology": "auth_bridge",
+      "actions": [
+        "authenticate",
+        "logout",
+        "connect_db",
+        "logout",
+        "disconnect_db"
+      ]
+    },
+    {
+      "id": "fan_out_8",
+      "topology": "fan_out",
+      "actions": [
+        "fork_a",
+        "fork_b",
+        "fork_a"
+      ]
+    },
+    {
+      "id": "loop_9",
+      "topology": "loop",
+      "actions": [
+        "init_loop",
+        "process",
+        "exit_loop",
+        "process",
+        "poll",
+        "process",
+        "poll",
+        "timeout"
+      ]
+    },
+    {
+      "id": "fan_out_9",
+      "topology": "fan_out",
+      "actions": [
+        "fork_a",
+        "fork_b",
+        "fork_a",
+        "op_a",
+        "fork_a"
+      ]
+    },
+    {
+      "id": "loop_7",
+      "topology": "loop",
+      "actions": [
+        "init_loop",
+        "process",
+        "poll",
+        "timeout",
+        "exit_loop",
+        "process",
+        "exit_loop",
+        "process"
+      ]
+    },
+    {
+      "id": "nested_16",
+      "topology": "nested",
+      "actions": [
+        "acquire_outer",
+        "acquire_inner",
+        "release_outer",
+        "release_inner",
+        "release_outer"
+      ]
+    },
+    {
+      "id": "rollback_10",
+      "topology": "rollback",
+      "actions": [
+        "step1",
+        "step2"
+      ]
+    },
+    {
+      "id": "star_9",
+      "topology": "star",
+      "actions": [
+        "acquire",
+        "use_a",
+        "use_b",
+        "use_c",
+        "release_a"
+      ]
+    },
+    {
+      "id": "fan_out_19",
+      "topology": "fan_out",
+      "actions": [
+        "fork_b",
+        "op_b",
+        "merge",
+        "fork_a"
+      ]
+    },
+    {
+      "id": "rollback_2",
+      "topology": "rollback",
+      "actions": [
+        "step1",
+        "step2",
+        "step3",
+        "commit_all",
+        "step3"
+      ]
+    },
+    {
+      "id": "stateless_16",
+      "topology": "stateless",
+      "actions": [
+        "decode_payload",
+        "encode_payload",
+        "decode_payload",
+        "encode_payload",
+        "validate_input",
+        "decode_payload",
+        "validate_input"
+      ]
+    },
+    {
+      "id": "linear_3",
+      "topology": "linear",
+      "actions": [
+        "open",
+        "op1",
+        "op2",
+        "close"
+      ]
+    },
+    {
+      "id": "auth_bridge_19",
+      "topology": "auth_bridge",
+      "actions": [
+        "authenticate",
+        "open_file",
+        "logout",
+        "connect_db",
+        "open_file",
+        "disconnect_db"
+      ]
+    },
+    {
+      "id": "nested_18",
+      "topology": "nested",
+      "actions": [
+        "acquire_outer",
+        "release_outer",
+        "acquire_inner",
+        "release_inner",
+        "acquire_inner",
+        "release_outer",
+        "release_inner",
+        "acquire_inner"
+      ]
+    },
+    {
+      "id": "rollback_17",
+      "topology": "rollback",
+      "actions": [
+        "step1",
+        "step2",
+        "step3",
+        "undo_step3"
+      ]
+    },
+    {
+      "id": "linear_2",
+      "topology": "linear",
+      "actions": [
+        "open",
+        "op1",
+        "op2",
+        "close"
+      ]
+    },
+    {
+      "id": "tree_16",
+      "topology": "tree",
+      "actions": [
+        "enter",
+        "branch_d0_b0",
+        "branch_d0_b1",
+        "branch_d0_b0",
+        "branch_d0_b1",
+        "branch_d0_b0",
+        "branch_d0_b1"
+      ]
+    },
+    {
+      "id": "stateless_1",
+      "topology": "stateless",
+      "actions": [
+        "encode_payload",
+        "compute_hash"
+      ]
+    },
+    {
+      "id": "auth_bridge_10",
+      "topology": "auth_bridge",
+      "actions": [
+        "authenticate",
+        "logout"
+      ]
+    },
+    {
+      "id": "nested_11",
+      "topology": "nested",
+      "actions": [
+        "acquire_outer",
+        "release_outer",
+        "acquire_inner",
+        "release_outer"
+      ]
+    },
+    {
+      "id": "stateless_9",
+      "topology": "stateless",
+      "actions": [
+        "compute_hash",
+        "encode_payload",
+        "compute_hash"
+      ]
+    },
+    {
+      "id": "auth_bridge_1",
+      "topology": "auth_bridge",
+      "actions": [
+        "authenticate",
+        "connect_db",
+        "open_file",
+        "disconnect_db"
+      ]
+    },
+    {
+      "id": "star_18",
+      "topology": "star",
+      "actions": [
+        "acquire",
+        "use_a",
+        "use_c",
+        "use_b"
+      ]
+    },
+    {
+      "id": "star_1",
+      "topology": "star",
+      "actions": [
+        "acquire",
+        "destroy"
+      ]
+    },
+    {
+      "id": "stateless_10",
+      "topology": "stateless",
+      "actions": [
+        "validate_input",
+        "compute_hash",
+        "encode_payload",
+        "compute_hash",
+        "encode_payload",
+        "validate_input",
+        "compute_hash"
+      ]
+    },
+    {
+      "id": "tree_2",
+      "topology": "tree",
+      "actions": [
+        "enter",
+        "branch_d0_b0"
+      ]
+    },
+    {
+      "id": "tree_13",
+      "topology": "tree",
+      "actions": [
+        "enter",
+        "branch_d0_b0",
+        "branch_d0_b1",
+        "branch_d0_b0",
+        "branch_d0_b1"
+      ]
+    },
+    {
+      "id": "auth_bridge_6",
+      "topology": "auth_bridge",
+      "actions": [
+        "authenticate",
+        "connect_db",
+        "open_file"
+      ]
+    },
+    {
+      "id": "fan_out_1",
+      "topology": "fan_out",
+      "actions": [
+        "fork_a",
+        "fork_b",
+        "op_a",
+        "merge"
+      ]
+    },
+    {
+      "id": "fan_out_11",
+      "topology": "fan_out",
+      "actions": [
+        "fork_a",
+        "fork_c",
+        "fork_b",
+        "op_c",
+        "fork_a",
+        "op_a",
+        "op_b"
+      ]
+    },
+    {
+      "id": "tree_17",
+      "topology": "tree",
+      "actions": [
+        "enter",
+        "branch_d0_b1",
+        "branch_d0_b0",
+        "branch_d0_b1",
+        "branch_d0_b0",
+        "branch_d0_b1"
+      ]
+    },
+    {
+      "id": "loop_11",
+      "topology": "loop",
+      "actions": [
+        "init_loop",
+        "poll",
+        "exit_loop",
+        "process",
+        "poll",
+        "exit_loop"
+      ]
+    },
+    {
+      "id": "rollback_16",
+      "topology": "rollback",
+      "actions": [
+        "step1",
+        "step2",
+        "step3",
+        "undo_step2",
+        "undo_step3",
+        "undo_step2"
+      ]
+    },
+    {
+      "id": "rollback_15",
+      "topology": "rollback",
+      "actions": [
+        "step1",
+        "step2",
+        "step3",
+        "undo_step2",
+        "step3",
+        "undo_step2"
+      ]
+    },
+    {
+      "id": "nested_8",
+      "topology": "nested",
+      "actions": [
+        "acquire_outer",
+        "release_outer",
+        "acquire_inner",
+        "release_outer",
+        "acquire_inner",
+        "release_inner"
+      ]
+    },
+    {
+      "id": "fan_out_18",
+      "topology": "fan_out",
+      "actions": [
+        "fork_a",
+        "fork_c",
+        "op_c",
+        "fork_c"
+      ]
+    },
+    {
+      "id": "rollback_14",
+      "topology": "rollback",
+      "actions": [
+        "step1",
+        "step2",
+        "undo_step2",
+        "step2",
+        "undo_step2",
+        "step3",
+        "undo_step3"
+      ]
+    },
+    {
+      "id": "loop_0",
+      "topology": "loop",
+      "actions": [
+        "init_loop",
+        "process"
+      ]
+    },
+    {
+      "id": "linear_1",
+      "topology": "linear",
+      "actions": [
+        "open",
+        "op1",
+        "op2",
+        "close"
+      ]
+    },
+    {
+      "id": "star_4",
+      "topology": "star",
+      "actions": [
+        "acquire",
+        "destroy",
+        "use_b"
+      ]
+    },
+    {
+      "id": "linear_16",
+      "topology": "linear",
+      "actions": [
+        "open",
+        "op1",
+        "op2"
+      ]
+    },
+    {
+      "id": "stateless_7",
+      "topology": "stateless",
+      "actions": [
+        "validate_input",
+        "compute_hash"
+      ]
+    },
+    {
+      "id": "nested_3",
+      "topology": "nested",
+      "actions": [
+        "acquire_outer",
+        "acquire_inner",
+        "release_inner",
+        "acquire_inner"
+      ]
+    },
+    {
+      "id": "fan_out_15",
+      "topology": "fan_out",
+      "actions": [
+        "fork_b",
+        "op_b",
+        "fork_b",
+        "merge"
+      ]
+    },
+    {
+      "id": "star_5",
+      "topology": "star",
+      "actions": [
+        "acquire",
+        "use_a",
+        "use_c",
+        "release_c",
+        "release_a",
+        "use_b",
+        "release_b"
+      ]
+    },
+    {
+      "id": "fan_out_14",
+      "topology": "fan_out",
+      "actions": [
+        "fork_c",
+        "fork_a",
+        "fork_b",
+        "op_a"
+      ]
+    },
+    {
+      "id": "stateless_18",
+      "topology": "stateless",
+      "actions": [
+        "validate_input",
+        "encode_payload",
+        "decode_payload",
+        "compute_hash"
+      ]
+    },
+    {
+      "id": "linear_15",
+      "topology": "linear",
+      "actions": [
+        "open",
+        "op1",
+        "op2",
+        "close"
+      ]
+    },
+    {
+      "id": "fan_out_4",
+      "topology": "fan_out",
+      "actions": [
+        "fork_c",
+        "fork_a",
+        "fork_b",
+        "op_c",
+        "fork_c"
+      ]
+    },
+    {
+      "id": "tree_4",
+      "topology": "tree",
+      "actions": [
+        "enter",
+        "branch_d0_b0"
+      ]
+    },
+    {
+      "id": "nested_4",
+      "topology": "nested",
+      "actions": [
+        "acquire_outer",
+        "release_outer",
+        "acquire_inner"
+      ]
+    },
+    {
+      "id": "linear_14",
+      "topology": "linear",
+      "actions": [
+        "open",
+        "op1"
+      ]
+    },
+    {
+      "id": "stateless_11",
+      "topology": "stateless",
+      "actions": [
+        "decode_payload",
+        "encode_payload",
+        "validate_input",
+        "compute_hash",
+        "validate_input",
+        "compute_hash",
+        "validate_input"
+      ]
+    },
+    {
+      "id": "linear_11",
+      "topology": "linear",
+      "actions": [
+        "open",
+        "op1",
+        "op2",
+        "close"
+      ]
+    },
+    {
+      "id": "star_16",
+      "topology": "star",
+      "actions": [
+        "acquire",
+        "destroy",
+        "use_a",
+        "use_b"
+      ]
+    },
+    {
+      "id": "auth_bridge_14",
+      "topology": "auth_bridge",
+      "actions": [
+        "authenticate",
+        "logout",
+        "connect_db",
+        "disconnect_db",
+        "connect_db",
+        "logout",
+        "open_file",
+        "disconnect_db"
+      ]
+    },
+    {
+      "id": "nested_2",
+      "topology": "nested",
+      "actions": [
+        "acquire_outer",
+        "acquire_inner",
+        "release_outer",
+        "acquire_inner",
+        "release_inner"
+      ]
+    },
+    {
+      "id": "two_phase_commit_4",
+      "topology": "two_phase_commit",
+      "actions": [
+        "begin_tx",
+        "prepare",
+        "rollback",
+        "update",
+        "insert",
+        "prepare"
+      ]
+    },
+    {
+      "id": "nested_17",
+      "topology": "nested",
+      "actions": [
+        "acquire_outer",
+        "acquire_inner",
+        "release_inner"
+      ]
+    },
+    {
+      "id": "rollback_1",
+      "topology": "rollback",
+      "actions": [
+        "step1",
+        "step2",
+        "step3",
+        "undo_step3",
+        "undo_step2",
+        "undo_step3",
+        "commit_all"
+      ]
+    },
+    {
+      "id": "loop_8",
+      "topology": "loop",
+      "actions": [
+        "init_loop",
+        "poll",
+        "timeout",
+        "poll"
+      ]
+    },
+    {
+      "id": "linear_4",
+      "topology": "linear",
+      "actions": [
+        "open",
+        "op1",
+        "op2",
+        "close"
+      ]
+    },
+    {
+      "id": "tree_6",
+      "topology": "tree",
+      "actions": [
+        "enter",
+        "branch_d0_b0",
+        "branch_d0_b1",
+        "branch_d0_b0",
+        "branch_d0_b1"
+      ]
+    },
+    {
+      "id": "linear_18",
+      "topology": "linear",
+      "actions": [
+        "open",
+        "op1",
+        "op2",
+        "close"
+      ]
+    },
+    {
+      "id": "star_6",
+      "topology": "star",
+      "actions": [
+        "acquire",
+        "destroy",
+        "use_b"
+      ]
+    },
+    {
+      "id": "star_2",
+      "topology": "star",
+      "actions": [
+        "acquire",
+        "use_a",
+        "destroy"
+      ]
+    },
+    {
+      "id": "fan_out_17",
+      "topology": "fan_out",
+      "actions": [
+        "fork_c",
+        "fork_b",
+        "op_b"
+      ]
+    },
+    {
+      "id": "fan_out_10",
+      "topology": "fan_out",
+      "actions": [
+        "fork_c",
+        "fork_b",
+        "fork_a",
+        "fork_c",
+        "op_c"
+      ]
+    },
+    {
+      "id": "fan_out_3",
+      "topology": "fan_out",
+      "actions": [
+        "fork_a",
+        "fork_b",
+        "op_a",
+        "fork_c",
+        "fork_a",
+        "op_c"
+      ]
+    },
+    {
+      "id": "loop_17",
+      "topology": "loop",
+      "actions": [
+        "init_loop",
+        "exit_loop"
+      ]
+    },
+    {
+      "id": "linear_10",
+      "topology": "linear",
+      "actions": [
+        "open",
+        "op1",
+        "op2",
+        "close"
+      ]
+    },
+    {
+      "id": "loop_5",
+      "topology": "loop",
+      "actions": [
+        "init_loop",
+        "process",
+        "poll",
+        "timeout",
+        "exit_loop",
+        "timeout",
+        "exit_loop"
+      ]
+    },
+    {
+      "id": "loop_1",
+      "topology": "loop",
+      "actions": [
+        "init_loop",
+        "exit_loop",
+        "process",
+        "timeout",
+        "exit_loop",
+        "poll"
+      ]
+    },
+    {
+      "id": "stateless_4",
+      "topology": "stateless",
+      "actions": [
+        "compute_hash",
+        "validate_input",
+        "decode_payload",
+        "compute_hash"
+      ]
+    },
+    {
+      "id": "tree_7",
+      "topology": "tree",
+      "actions": [
+        "enter",
+        "branch_d0_b1"
+      ]
+    },
+    {
+      "id": "two_phase_commit_18",
+      "topology": "two_phase_commit",
+      "actions": [
+        "begin_tx",
+        "insert",
+        "update",
+        "prepare",
+        "insert",
+        "prepare",
+        "update"
+      ]
+    },
+    {
+      "id": "star_15",
+      "topology": "star",
+      "actions": [
+        "acquire",
+        "use_b",
+        "use_c",
+        "release_b"
+      ]
+    },
+    {
+      "id": "two_phase_commit_19",
+      "topology": "two_phase_commit",
+      "actions": [
+        "begin_tx",
+        "insert",
+        "update",
+        "insert",
+        "prepare",
+        "insert"
+      ]
+    },
+    {
+      "id": "two_phase_commit_17",
+      "topology": "two_phase_commit",
+      "actions": [
+        "begin_tx",
+        "update",
+        "prepare",
+        "update",
+        "commit",
+        "prepare",
+        "update"
+      ]
+    },
+    {
+      "id": "stateless_12",
+      "topology": "stateless",
+      "actions": [
+        "validate_input",
+        "decode_payload",
+        "encode_payload",
+        "compute_hash"
+      ]
+    },
+    {
+      "id": "nested_6",
+      "topology": "nested",
+      "actions": [
+        "acquire_outer",
+        "release_outer",
+        "acquire_inner"
+      ]
+    },
+    {
+      "id": "nested_7",
+      "topology": "nested",
+      "actions": [
+        "acquire_outer",
+        "acquire_inner",
+        "release_inner"
+      ]
+    },
+    {
+      "id": "star_0",
+      "topology": "star",
+      "actions": [
+        "acquire",
+        "use_b",
+        "use_c"
+      ]
+    },
+    {
+      "id": "loop_18",
+      "topology": "loop",
+      "actions": [
+        "init_loop",
+        "exit_loop",
+        "poll",
+        "process"
+      ]
+    },
+    {
+      "id": "loop_3",
+      "topology": "loop",
+      "actions": [
+        "init_loop",
+        "process",
+        "timeout",
+        "exit_loop",
+        "timeout",
+        "process",
+        "poll",
+        "exit_loop"
+      ]
+    },
+    {
+      "id": "nested_19",
+      "topology": "nested",
+      "actions": [
+        "acquire_outer",
+        "release_outer"
+      ]
+    },
+    {
+      "id": "two_phase_commit_2",
+      "topology": "two_phase_commit",
+      "actions": [
+        "begin_tx",
+        "update",
+        "prepare",
+        "update",
+        "insert",
+        "prepare",
+        "update"
+      ]
+    },
+    {
+      "id": "rollback_12",
+      "topology": "rollback",
+      "actions": [
+        "step1",
+        "step2",
+        "undo_step2",
+        "step2",
+        "undo_step2",
+        "step2",
+        "undo_step2",
+        "step3"
+      ]
+    },
+    {
+      "id": "nested_10",
+      "topology": "nested",
+      "actions": [
+        "acquire_outer",
+        "acquire_inner",
+        "release_inner",
+        "release_outer",
+        "acquire_inner",
+        "release_outer"
+      ]
+    },
+    {
+      "id": "nested_9",
+      "topology": "nested",
+      "actions": [
+        "acquire_outer",
+        "release_outer"
+      ]
+    },
+    {
+      "id": "stateless_0",
+      "topology": "stateless",
+      "actions": [
+        "validate_input",
+        "decode_payload",
+        "compute_hash",
+        "decode_payload",
+        "compute_hash",
+        "encode_payload"
+      ]
+    },
+    {
+      "id": "stateless_17",
+      "topology": "stateless",
+      "actions": [
+        "encode_payload",
+        "decode_payload",
+        "encode_payload",
+        "decode_payload",
+        "encode_payload",
+        "compute_hash",
+        "validate_input",
+        "encode_payload"
+      ]
+    },
+    {
+      "id": "star_12",
+      "topology": "star",
+      "actions": [
+        "acquire",
+        "use_a",
+        "use_c",
+        "use_a"
+      ]
+    },
+    {
+      "id": "rollback_7",
+      "topology": "rollback",
+      "actions": [
+        "step1",
+        "step2",
+        "step3",
+        "undo_step3",
+        "commit_all"
+      ]
+    },
+    {
+      "id": "loop_2",
+      "topology": "loop",
+      "actions": [
+        "init_loop",
+        "process",
+        "timeout",
+        "process",
+        "timeout"
+      ]
+    },
+    {
+      "id": "loop_6",
+      "topology": "loop",
+      "actions": [
+        "init_loop",
+        "timeout",
+        "exit_loop",
+        "process",
+        "exit_loop",
+        "poll",
+        "process",
+        "timeout"
+      ]
+    },
+    {
+      "id": "two_phase_commit_10",
+      "topology": "two_phase_commit",
+      "actions": [
+        "begin_tx",
+        "insert",
+        "prepare",
+        "insert",
+        "commit"
+      ]
+    },
+    {
+      "id": "two_phase_commit_16",
+      "topology": "two_phase_commit",
+      "actions": [
+        "begin_tx",
+        "prepare",
+        "insert",
+        "update",
+        "prepare"
+      ]
+    },
+    {
+      "id": "nested_0",
+      "topology": "nested",
+      "actions": [
+        "acquire_outer",
+        "release_outer",
+        "acquire_inner",
+        "release_inner",
+        "release_outer",
+        "acquire_inner",
+        "release_inner",
+        "acquire_inner"
+      ]
+    },
+    {
+      "id": "stateless_15",
+      "topology": "stateless",
+      "actions": [
+        "compute_hash",
+        "validate_input"
+      ]
+    },
+    {
+      "id": "two_phase_commit_14",
+      "topology": "two_phase_commit",
+      "actions": [
+        "begin_tx",
+        "prepare",
+        "commit",
+        "rollback",
+        "prepare"
+      ]
+    },
+    {
+      "id": "linear_6",
+      "topology": "linear",
+      "actions": [
+        "open",
+        "op1",
+        "op2"
+      ]
+    },
+    {
+      "id": "linear_9",
+      "topology": "linear",
+      "actions": [
+        "open",
+        "op1",
+        "op2",
+        "close"
+      ]
+    },
+    {
+      "id": "nested_14",
+      "topology": "nested",
+      "actions": [
+        "acquire_outer",
+        "acquire_inner",
+        "release_outer",
+        "release_inner"
+      ]
+    },
+    {
+      "id": "loop_15",
+      "topology": "loop",
+      "actions": [
+        "init_loop",
+        "exit_loop",
+        "process",
+        "exit_loop",
+        "process",
+        "exit_loop"
+      ]
+    },
+    {
+      "id": "star_10",
+      "topology": "star",
+      "actions": [
+        "acquire",
+        "use_c",
+        "use_b",
+        "release_b",
+        "use_a"
+      ]
+    },
+    {
+      "id": "rollback_6",
+      "topology": "rollback",
+      "actions": [
+        "step1",
+        "step2",
+        "step3",
+        "commit_all",
+        "undo_step2",
+        "undo_step3"
+      ]
+    },
+    {
+      "id": "fan_out_5",
+      "topology": "fan_out",
+      "actions": [
+        "fork_a",
+        "fork_b",
+        "fork_c",
+        "op_c"
+      ]
+    },
+    {
+      "id": "rollback_0",
+      "topology": "rollback",
+      "actions": [
+        "step1",
+        "step2",
+        "step3",
+        "undo_step2",
+        "commit_all",
+        "undo_step2",
+        "step2"
+      ]
+    },
+    {
+      "id": "star_17",
+      "topology": "star",
+      "actions": [
+        "acquire",
+        "use_c"
+      ]
+    },
+    {
+      "id": "star_7",
+      "topology": "star",
+      "actions": [
+        "acquire",
+        "destroy",
+        "use_a",
+        "destroy",
+        "use_c"
+      ]
+    },
+    {
+      "id": "two_phase_commit_1",
+      "topology": "two_phase_commit",
+      "actions": [
+        "begin_tx",
+        "insert",
+        "update",
+        "insert",
+        "prepare",
+        "commit",
+        "update"
+      ]
+    },
+    {
+      "id": "auth_bridge_15",
+      "topology": "auth_bridge",
+      "actions": [
+        "authenticate",
+        "open_file",
+        "close_file",
+        "logout"
+      ]
+    },
+    {
+      "id": "auth_bridge_13",
+      "topology": "auth_bridge",
+      "actions": [
+        "authenticate",
+        "connect_db",
+        "open_file",
+        "close_file",
+        "open_file",
+        "close_file",
+        "connect_db",
+        "open_file"
+      ]
+    },
+    {
+      "id": "two_phase_commit_8",
+      "topology": "two_phase_commit",
+      "actions": [
+        "begin_tx",
+        "prepare",
+        "commit",
+        "rollback",
+        "update",
+        "insert",
+        "update"
+      ]
+    },
+    {
+      "id": "two_phase_commit_0",
+      "topology": "two_phase_commit",
+      "actions": [
+        "begin_tx",
+        "update",
+        "insert"
+      ]
+    },
+    {
+      "id": "two_phase_commit_7",
+      "topology": "two_phase_commit",
+      "actions": [
+        "begin_tx",
+        "prepare",
+        "rollback",
+        "prepare",
+        "insert",
+        "update",
+        "prepare",
+        "rollback"
+      ]
+    },
+    {
+      "id": "auth_bridge_4",
+      "topology": "auth_bridge",
+      "actions": [
+        "authenticate",
+        "open_file"
+      ]
+    },
+    {
+      "id": "linear_5",
+      "topology": "linear",
+      "actions": [
+        "open",
+        "op1",
+        "op2",
+        "close"
+      ]
+    },
+    {
+      "id": "stateless_19",
+      "topology": "stateless",
+      "actions": [
+        "compute_hash",
+        "validate_input",
+        "decode_payload",
+        "validate_input",
+        "decode_payload",
+        "validate_input",
+        "compute_hash"
+      ]
+    },
+    {
+      "id": "two_phase_commit_13",
+      "topology": "two_phase_commit",
+      "actions": [
+        "begin_tx",
+        "prepare",
+        "commit",
+        "insert",
+        "update",
+        "rollback",
+        "insert",
+        "prepare"
+      ]
+    },
+    {
+      "id": "auth_bridge_0",
+      "topology": "auth_bridge",
+      "actions": [
+        "authenticate",
+        "open_file",
+        "logout",
+        "authenticate",
+        "connect_db"
+      ]
+    },
+    {
+      "id": "two_phase_commit_5",
+      "topology": "two_phase_commit",
+      "actions": [
+        "begin_tx",
+        "update",
+        "prepare",
+        "insert",
+        "prepare",
+        "update",
+        "insert"
+      ]
+    },
+    {
+      "id": "nested_12",
+      "topology": "nested",
+      "actions": [
+        "acquire_outer",
+        "release_outer"
+      ]
+    },
+    {
+      "id": "nested_15",
+      "topology": "nested",
+      "actions": [
+        "acquire_outer",
+        "release_outer",
+        "acquire_inner",
+        "release_outer",
+        "acquire_inner",
+        "release_inner"
+      ]
+    },
+    {
+      "id": "loop_13",
+      "topology": "loop",
+      "actions": [
+        "init_loop",
+        "poll",
+        "exit_loop",
+        "timeout",
+        "poll"
+      ]
+    },
+    {
+      "id": "auth_bridge_16",
+      "topology": "auth_bridge",
+      "actions": [
+        "authenticate",
+        "logout"
+      ]
+    },
+    {
+      "id": "linear_7",
+      "topology": "linear",
+      "actions": [
+        "open",
+        "op1",
+        "op2",
+        "close"
+      ]
+    },
+    {
+      "id": "two_phase_commit_12",
+      "topology": "two_phase_commit",
+      "actions": [
+        "begin_tx",
+        "update",
+        "insert",
+        "update",
+        "prepare",
+        "update"
+      ]
+    },
+    {
+      "id": "auth_bridge_2",
+      "topology": "auth_bridge",
+      "actions": [
+        "authenticate",
+        "open_file",
+        "connect_db",
+        "disconnect_db",
+        "logout"
+      ]
+    },
+    {
+      "id": "star_3",
+      "topology": "star",
+      "actions": [
+        "acquire",
+        "use_b",
+        "use_c",
+        "use_a",
+        "release_c"
+      ]
+    },
+    {
+      "id": "loop_16",
+      "topology": "loop",
+      "actions": [
+        "init_loop",
+        "timeout",
+        "poll",
+        "exit_loop",
+        "poll"
+      ]
+    },
+    {
+      "id": "two_phase_commit_6",
+      "topology": "two_phase_commit",
+      "actions": [
+        "begin_tx",
+        "insert",
+        "update",
+        "insert"
+      ]
+    },
+    {
+      "id": "tree_8",
+      "topology": "tree",
+      "actions": [
+        "enter",
+        "branch_d0_b1",
+        "branch_d0_b0",
+        "branch_d0_b1",
+        "branch_d0_b0",
+        "branch_d0_b1",
+        "branch_d0_b0"
+      ]
+    }
+  ],
+  "metadata": {
+    "total": 200,
+    "topologies": [
+      "linear",
+      "star",
+      "tree",
+      "loop",
+      "two_phase_commit",
+      "auth_bridge",
+      "nested",
+      "rollback",
+      "fan_out",
+      "stateless"
+    ],
+    "tracesPerTopology": 20,
+    "date": "2026-06-14T20:40:42.917Z"
+  }
+}

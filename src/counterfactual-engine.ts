@@ -210,6 +210,13 @@ export async function suggestAlternatives(params: {
     allCandidates.push(...strategy.search(ctx));
   }
 
+  // P8.3: If no candidates found, try ZeroShotStrategy
+  if (allCandidates.length === 0) {
+    const { ZeroShotStrategy } = require("./zeroshot-strategy");
+    const zeroShot = new ZeroShotStrategy();
+    allCandidates.push(...zeroShot.search(ctx));
+  }
+
   // 3. Deduplicate by action signature, merge evidence sources
   const uniqueCandidates = deduplicateCandidates(allCandidates);
 
