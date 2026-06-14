@@ -1,0 +1,42 @@
+[
+  {
+    "id": "macro-ca034e29e11cd2e2",
+    "goal": "open file then write file then close file",
+    "protocol": "FileProtocol",
+    "preconditions": [],
+    "effects": [
+      "FILE_OPEN"
+    ],
+    "macro": [
+      "open_file",
+      "write_file",
+      "close_file"
+    ],
+    "successRate": 0.9649999999999999,
+    "acceptanceRate": 0.9649999999999999,
+    "frequency": 40,
+    "avgLatencyMs": 5
+  },
+  {
+    "id": "macro-59a3e5ab409ff263",
+    "goal": "verify password then generate jwt then create session",
+    "protocol": "AuthProtocol",
+    "preconditions": [
+      "UNAUTHENTICATED"
+    ],
+    "effects": [
+      "SESSION_ACTIVE",
+      "PASSWORD_VERIFIED",
+      "TOKEN_ISSUED"
+    ],
+    "macro": [
+      "verify_password",
+      "generate_jwt",
+      "create_session"
+    ],
+    "successRate": 0.9475,
+    "acceptanceRate": 0.9475,
+    "frequency": 40,
+    "avgLatencyMs": 0
+  }
+]

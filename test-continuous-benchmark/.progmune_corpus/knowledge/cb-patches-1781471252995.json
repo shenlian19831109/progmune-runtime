@@ -1,0 +1,21 @@
+[
+  {
+    "id": "KP-1781471252995-6h7m",
+    "generatedBy": "transition-synthesizer",
+    "protocol": "FileProtocol",
+    "change": "open_file → write_file",
+    "fromState": "FILE_OPEN",
+    "toState": "FILE_DIRTY",
+    "confidence": 1,
+    "evidenceCount": 10,
+    "createdAt": "2026-06-14T21:07:32.995Z",
+    "status": "approved",
+    "approvedAt": "2026-06-14T21:07:32.997Z",
+    "approvalMetrics": {
+      "top1Before": 0.5,
+      "top1After": 0.6,
+      "top3Before": 0.7,
+      "top3After": 0.8
+    }
+  }
+]

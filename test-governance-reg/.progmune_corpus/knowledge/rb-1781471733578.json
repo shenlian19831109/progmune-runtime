@@ -1,0 +1,22 @@
+[
+  {
+    "id": "KP-1781471733578-vae0",
+    "generatedBy": "transition-synthesizer",
+    "protocol": "FileProtocol",
+    "change": "open_file → close_file",
+    "fromState": "FILE_OPEN",
+    "toState": "FILE_CLOSED",
+    "confidence": 1,
+    "evidenceCount": 10,
+    "createdAt": "2026-06-14T21:15:33.578Z",
+    "status": "rolled_back",
+    "approvedAt": "2026-06-14T21:15:33.579Z",
+    "approvalMetrics": {
+      "top1Before": 0.14,
+      "top1After": 0.15,
+      "top3Before": 0.39,
+      "top3After": 0.4
+    },
+    "rolledBackAt": "2026-06-14T21:15:33.580Z"
+  }
+]

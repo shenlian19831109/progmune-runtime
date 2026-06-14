@@ -1,0 +1,32 @@
+[
+  {
+    "id": "macro-ca034e29e11cd2e2",
+    "actions": [
+      "open_file",
+      "write_file",
+      "close_file"
+    ],
+    "protocol": "FileProtocol",
+    "violationType": "resource_leak",
+    "acceptanceRate": 0.8666666666666667,
+    "executionSuccessRate": 0.8666666666666667,
+    "frequency": 60,
+    "avgLatencyMs": 5.446511645841258,
+    "goal": "safely write config file"
+  },
+  {
+    "id": "macro-59a3e5ab409ff263",
+    "actions": [
+      "verify_password",
+      "generate_jwt",
+      "create_session"
+    ],
+    "protocol": "AuthProtocol",
+    "violationType": "missing_prerequisite",
+    "acceptanceRate": 0.8666666666666667,
+    "executionSuccessRate": 1,
+    "frequency": 60,
+    "avgLatencyMs": 0,
+    "goal": "authenticate user"
+  }
+]

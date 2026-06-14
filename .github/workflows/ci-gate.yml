@@ -1,0 +1,28 @@
+name: CI Gate — Build + Test
+on: [push, pull_request]
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        node-version: [18, 20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '${{ matrix.node-version }}' }
+      - run: npm ci
+      - name: Build (TypeScript)
+        run: npm run build
+      - name: Test (core suites)
+        run: npx vitest run --reporter=verbose
+      - name: Verify canary mode
+        run: |
+          PROGMUNE_RANKER=learning PROGMUNE_MODEL_WEIGHT=0.3 node -e "
+          const { getRankerStatus } = require('./dist/counterfactual-engine');
+          console.log(JSON.stringify(getRankerStatus()));
+          " 2>&1 | grep '"type":"learning"'
+          PROGMUNE_RANKER=heuristic node -e "
+          const { getRankerStatus } = require('./dist/counterfactual-engine');
+          console.log(JSON.stringify(getRankerStatus()));
+          " 2>&1 | grep '"type":"heuristic"'

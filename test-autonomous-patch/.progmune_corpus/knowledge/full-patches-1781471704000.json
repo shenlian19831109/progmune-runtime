@@ -1,0 +1,40 @@
+[
+  {
+    "id": "KP-1781471704001-tl0l",
+    "generatedBy": "transition-synthesizer",
+    "protocol": "FileProtocol",
+    "change": "open_file → write_file → close_file",
+    "fromState": "INIT",
+    "toState": "FILE_OPEN",
+    "confidence": 0.9766666666666666,
+    "evidenceCount": 30,
+    "createdAt": "2026-06-14T21:15:04.001Z",
+    "status": "approved",
+    "approvedAt": "2026-06-14T21:15:04.005Z",
+    "approvalMetrics": {
+      "top1Before": 0.5,
+      "top1After": 0.5,
+      "top3Before": 1,
+      "top3After": 1
+    }
+  },
+  {
+    "id": "KP-1781471704006-usfp",
+    "generatedBy": "transition-synthesizer",
+    "protocol": "AuthProtocol",
+    "change": "verify_password → generate_jwt → create_session",
+    "fromState": "UNAUTHENTICATED",
+    "toState": "SESSION_ACTIVE",
+    "confidence": 0.9066666666666667,
+    "evidenceCount": 30,
+    "createdAt": "2026-06-14T21:15:04.006Z",
+    "status": "approved",
+    "approvedAt": "2026-06-14T21:15:04.255Z",
+    "approvalMetrics": {
+      "top1Before": 0.5,
+      "top1After": 0.5,
+      "top3Before": 1,
+      "top3After": 1
+    }
+  }
+]
