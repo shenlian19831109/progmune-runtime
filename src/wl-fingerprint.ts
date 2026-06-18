@@ -35,11 +35,11 @@ import type { InferredStateMachine } from "./state-inference";
 export function wlRelabel(
   adj: number[][],
   iterations: number = 3
-): number[][][] {
+): number[][] {
   const N = adj.length;
   if (N === 0) return [];
 
-  const labels: number[][][] = [];
+  const labels: number[][] = [];
   let currentLabels = new Array(N).fill(0);
 
   // Initialize: label = degree (structural role)
