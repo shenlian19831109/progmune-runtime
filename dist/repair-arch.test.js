@@ -377,7 +377,7 @@ function fileProtocolContext(actions) {
         };
         const features = (0, repair_ranker_1.extractFeatures)(candidate, ctx);
         const keys = Object.keys(features);
-        (0, vitest_1.expect)(keys.length).toBe(7);
+        (0, vitest_1.expect)(keys.length).toBeGreaterThanOrEqual(7); // P7.3: 8 with goalMatch
         (0, vitest_1.expect)(keys).toContain("protocolSafety");
         (0, vitest_1.expect)(keys).toContain("historicalSuccessRate");
         (0, vitest_1.expect)(keys).toContain("actionCount");

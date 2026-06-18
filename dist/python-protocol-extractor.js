@@ -76,7 +76,7 @@ function extractCallSequencesFromIR(ir) {
     // Build adjacency: which functions are called by which
     const calledBy = new Map();
     for (const fn of ir) {
-        for (const call of fn.calls) {
+        for (const call of (fn.calls || [])) {
             if (!calledBy.has(call))
                 calledBy.set(call, []);
             calledBy.get(call).push(fn.name);
