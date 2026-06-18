@@ -114,7 +114,7 @@ function extractWLFingerprint(sm, iterations = 3) {
     // Bin into fixed-size histogram
     const vector = new Array(DIMS).fill(0);
     const uniqueSet = new Set(allValues);
-    const maxLabel = Math.max(1, ...allValues);
+    const maxLabel = allValues.length > 0 ? Math.max(...allValues) : 1;
     for (const label of allValues) {
         const bin = Math.floor((label / maxLabel) * (DIMS - 1));
         vector[Math.min(bin, DIMS - 1)]++;
