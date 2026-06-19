@@ -1,0 +1,52 @@
+[
+  {
+    "cve": "CVE-YYYY-NNNNN",
+    "project": "project-name",
+    "before": ["acquire_resource", "use_resource"],
+    "after":  ["acquire_resource", "use_resource", "release_resource"],
+    "category": "resource_leak",
+    "pls_id": "PLS-001",
+    "severity": "high",
+    "notes": "Missing release. What happened: error path returned without calling release. Fixed by adding release_resource() before return."
+  },
+  {
+    "cve": "CVE-2021-4034",
+    "project": "linux",
+    "before": ["parse_args", "execute_command"],
+    "after":  ["validate_argv", "parse_args", "authorize_caller", "execute_command"],
+    "category": "auth_bypass",
+    "pls_id": "PLS-004",
+    "severity": "critical",
+    "notes": "pkexec local privilege escalation. Missing argv validation and authorization check."
+  },
+  {
+    "cve": "CVE-YYYY-NNNNN",
+    "project": "project-name",
+    "before": ["malloc", "free", "free"],
+    "after":  ["malloc", "free"],
+    "category": "double_free",
+    "pls_id": "PLS-010",
+    "severity": "critical",
+    "notes": "Double free. What happened: resource freed twice in error-handling path. Fixed by removing second free() call."
+  },
+  {
+    "cve": "CVE-YYYY-NNNNN",
+    "project": "project-name",
+    "before": ["login_user", "create_session", "logout"],
+    "after":  ["login_user", "create_session", "invalidate_session", "logout"],
+    "category": "session_fixation",
+    "pls_id": "PLS-005",
+    "severity": "high",
+    "notes": "Session fixation. What happened: session not invalidated on logout. Fixed by adding invalidate_session() before logout."
+  },
+  {
+    "cve": "CVE-YYYY-NNNNN",
+    "project": "project-name",
+    "before": ["begin_tx", "insert_record", "update_record"],
+    "after":  ["begin_tx", "insert_record", "update_record", "commit_tx"],
+    "category": "transaction_violation",
+    "pls_id": "PLS-007",
+    "severity": "high",
+    "notes": "Missing commit. What happened: transaction never committed — writes lost. Fixed by adding commit_tx()."
+  }
+]
