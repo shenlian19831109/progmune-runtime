@@ -1,73 +1,58 @@
 /**
- * P9.1: Protocol Invariant Mining & Violation Detection
+ * P9.1+P9.3: Protocol Invariant Mining, Violation Detection & Illegal Transitions
  *
- * Upgrades from "graph shape comparison" to "temporal logic reasoning."
- * Defects don't live in graph topology — they live in STATE CONSTRAINT
- * violations (resource leaks, auth bypasses, double-frees).
+ * Three detection modes:
+ *   1. MISSING_STATE:  template has N states, test has M<N (resource leak, auth bypass)
+ *   2. MISSING_EDGE:   template has transition A→B, test doesn't (broken lifecycle)
+ *   3. ILLEGAL_EDGE:   test has transition that template NEVER allows (use-after-free, double-free)
  *
- * Core insight:
- *   P8 learns:    Acquire → Use (a valid graph shape)
- *   P9.1 detects: Acquire → Use ... END (violates "Eventually Release")
- *
- * Three invariant types:
- *   1. MUST_RELEASE:   Acquire ⇒ Eventually Release
- *   2. MUST_COMMIT:    Begin ⇒ Eventually Commit | Rollback
- *   3. MUST_PRECEDE:   Verify ⇒ Before PrivilegedAction
- *
- * Pipeline:
- *   State Machine → mine invariants → check sequences → report violations
+ * Mode 3 is P9.3: upgrades from "State Completeness" to "Protocol Correctness"
  */
 
 import type { InferredStateMachine } from "./state-inference";
-import { inferStateMachine, InferredState } from "./state-inference";
+import { inferStateMachine } from "./state-inference";
 
 // ═══════════════════════════════════════════════════════════════
-// Invariant Types
+// Types
 // ═══════════════════════════════════════════════════════════════
 
 export type InvariantType = "MUST_RELEASE" | "MUST_COMMIT" | "MUST_PRECEDE";
 
 export interface ProtocolInvariant {
   type: InvariantType;
-  /** Which state must eventually follow. */
   requiredState: string;
-  /** Which state triggers this obligation. */
   triggerState: string;
-  /** Human-readable description. */
   description: string;
-  /** Confidence from mining (0-1). */
   confidence: number;
 }
 
+export type ViolationSubtype = "missing_release" | "missing_prerequisite" | "missing_commit"
+  | "illegal_transition" | "broken_lifecycle" | "other";
+
 export interface InvariantViolation {
   invariant: ProtocolInvariant;
-  /** The sequence that violated the invariant. */
   sequence: string[];
-  /** Index of the trigger step. */
   triggerIndex: number;
-  /** Description of the violation. */
   description: string;
-  /** Specific type of the violation (for classification). */
-  violationSubtype: "missing_release" | "missing_commit" | "missing_prerequisite" | "other";
+  violationSubtype: ViolationSubtype;
 }
 
-/** Compare a test state machine against a template and report structural violations. */
+// ═══════════════════════════════════════════════════════════════
+// Core Detection: Structural Violation (P9.1)
+// ═══════════════════════════════════════════════════════════════
+
 export function detectStructuralViolations(
   testSM: InferredStateMachine,
   templateSM: InferredStateMachine
 ): InvariantViolation[] {
   const violations: InvariantViolation[] = [];
 
-  // Compare state counts: fewer states in test → something is missing
   const templateExits = templateSM.states.filter(s => s.role === "exit");
-  const testExits = testSM.states.filter(s => s.role === "exit");
   const templateBridges = templateSM.states.filter(s => s.role === "bridge");
 
-  if (templateSM.stateCount > testSM.stateCount) {
-    const stateDiff = templateSM.stateCount - testSM.stateCount;
+  // ── MODE 1: Missing State Detection ──
 
-    // The missing state is likely an exit or terminal state
-    // (test SM truncated early, so the last state(s) of the template are absent)
+  if (templateSM.stateCount > testSM.stateCount) {
     violations.push({
       invariant: {
         type: "MUST_RELEASE",
@@ -78,7 +63,7 @@ export function detectStructuralViolations(
       },
       sequence: [],
       triggerIndex: 0,
-      description: `Missing release: template has ${templateSM.stateCount} states, test has ${testSM.stateCount}. ${stateDiff} state(s) missing — resource leak detected.`,
+      description: `Missing release: template has ${templateSM.stateCount} states, test has ${testSM.stateCount}. ${templateSM.stateCount - testSM.stateCount} state(s) missing — resource leak detected.`,
       violationSubtype: "missing_release",
     });
   }
@@ -102,18 +87,13 @@ export function detectStructuralViolations(
     }
   }
 
-  // Missing transition edges
-  const templateEdges = new Set<string>();
-  const testEdges = new Set<string>();
-  for (let i = 0; i < templateSM.stateTransitions.length; i++)
-    for (let j = 0; j < (templateSM.stateTransitions[i] || []).length; j++)
-      if (templateSM.stateTransitions[i][j] > 0) templateEdges.add(`${i}→${j}`);
-  if (testSM.stateTransitions.length > 0)
-    for (let i = 0; i < testSM.stateTransitions.length; i++)
-      for (let j = 0; j < (testSM.stateTransitions[i] || []).length; j++)
-        if (testSM.stateTransitions[i][j] > 0) testEdges.add(`${i}→${j}`);
+  // ── MODE 2: Missing Edge Detection (broken lifecycle) ──
 
-  if (templateEdges.size > testEdges.size * 1.5) {
+  const templateEdges = extractEdgeSet(templateSM);
+  const testEdges = extractEdgeSet(testSM);
+  const missingEdges = [...templateEdges].filter(e => !testEdges.has(e));
+
+  if (missingEdges.length > 0 && templateSM.stateCount <= testSM.stateCount + 1) {
     violations.push({
       invariant: {
         type: "MUST_COMMIT",
@@ -124,45 +104,62 @@ export function detectStructuralViolations(
       },
       sequence: [],
       triggerIndex: 0,
-      description: `Incomplete lifecycle: template has ${templateEdges.size} transitions, test has ${testEdges.size}. Missing commit/rollback step.`,
+      description: `Incomplete lifecycle: template has ${templateEdges.size} transitions, test has ${testEdges.size}. Missing ${missingEdges.length} transition(s): ${missingEdges.slice(0,3).join(", ")}.`,
       violationSubtype: "missing_commit",
+    });
+  }
+
+  // ── MODE 3 (P9.3): Illegal Transition Detection ──
+
+  const illegalEdges = [...testEdges].filter(e => !templateEdges.has(e));
+
+  if (illegalEdges.length > 0) {
+    violations.push({
+      invariant: {
+        type: "MUST_RELEASE",
+        triggerState: "any",
+        requiredState: "any",
+        description: "No transition in the template allows this state change",
+        confidence: 0.95,
+      },
+      sequence: [],
+      triggerIndex: 0,
+      description: `Illegal transition detected: ${illegalEdges.length} edge(s) present in test but absent from template. Possible use-after-free, double-free, or auth bypass.`,
+      violationSubtype: "illegal_transition",
     });
   }
 
   return violations;
 }
 
+function extractEdgeSet(sm: InferredStateMachine): Set<string> {
+  const edges = new Set<string>();
+  for (let i = 0; i < sm.stateTransitions.length; i++) {
+    for (let j = 0; j < (sm.stateTransitions[i] || []).length; j++) {
+      if (sm.stateTransitions[i][j] > 0) edges.add(`${i}→${j}`);
+    }
+  }
+  return edges;
+}
+
 // ═══════════════════════════════════════════════════════════════
-// Invariant Mining
+// Invariant Mining (from state machine)
 // ═══════════════════════════════════════════════════════════════
 
-/**
- * Mine protocol invariants from a state machine.
- *
- * Strategy:
- *   MUST_RELEASE:  entry state whose reachable exit states include ∅
- *                  → every path from entry must pass through exit
- *   MUST_COMMIT:   state with two distinct exit paths (commit/rollback)
- *                  → every path through that state must reach one exit
- *   MUST_PRECEDE:  bridge state that always precedes an exit state
- *                  → exit state requires bridge state to precede it
- */
+import { InferredState } from "./state-inference";
+
 export function mineInvariants(sm: InferredStateMachine): ProtocolInvariant[] {
   const invariants: ProtocolInvariant[] = [];
-
   if (sm.states.length === 0) return invariants;
 
   const entryStates = sm.states.filter(s => s.role === "entry");
   const exitStates = sm.states.filter(s => s.role === "exit");
   const bridgeStates = sm.states.filter(s => s.role === "bridge");
 
-  // MUST_RELEASE: every entry that has at least one path to an exit
   for (const entry of entryStates) {
     for (const exit of exitStates) {
       if (exit.outDegree === 0 && entry.outDegree > 0) {
-        // Check reachability: is there a path from entry to exit?
-        const path = findPath(sm, entry, exit);
-        if (path) {
+        if (findPath(sm, entry, exit)) {
           invariants.push({
             type: "MUST_RELEASE",
             triggerState: entry.id,
@@ -170,17 +167,14 @@ export function mineInvariants(sm: InferredStateMachine): ProtocolInvariant[] {
             description: `${entry.id} ⇒ Eventually ${exit.id} (resource acquired must be released)`,
             confidence: 0.9,
           });
-          break; // one exit per entry is enough
+          break;
         }
       }
     }
   }
 
-  // MUST_COMMIT: any bridge state that connects to two different exits
   for (const bridge of bridgeStates) {
-    const reachableExits = exitStates.filter(exit =>
-      findPath(sm, bridge, exit) !== null
-    );
+    const reachableExits = exitStates.filter(e => findPath(sm, bridge, e) !== null);
     if (reachableExits.length >= 2) {
       invariants.push({
         type: "MUST_COMMIT",
@@ -192,11 +186,8 @@ export function mineInvariants(sm: InferredStateMachine): ProtocolInvariant[] {
     }
   }
 
-  // MUST_PRECEDE: exit state requires at least one bridge to precede it
   for (const exit of exitStates) {
-    const predecessors = bridgeStates.filter(bridge =>
-      findPath(sm, bridge, exit) !== null
-    );
+    const predecessors = bridgeStates.filter(b => findPath(sm, b, exit) !== null);
     if (predecessors.length > 0) {
       invariants.push({
         type: "MUST_PRECEDE",
@@ -211,12 +202,7 @@ export function mineInvariants(sm: InferredStateMachine): ProtocolInvariant[] {
   return invariants;
 }
 
-/** BFS from source to target. Returns path if reachable, null otherwise. */
-function findPath(
-  sm: InferredStateMachine,
-  from: InferredState,
-  to: InferredState
-): number[] | null {
+function findPath(sm: InferredStateMachine, from: InferredState, to: InferredState): number[] | null {
   const S = sm.states.length;
   const fromIdx = sm.states.indexOf(from);
   const toIdx = sm.states.indexOf(to);
@@ -230,13 +216,9 @@ function findPath(
   while (queue.length > 0) {
     const curr = queue.shift()!;
     if (curr === toIdx) {
-      // Reconstruct path
       const path = [curr];
       let node = curr;
-      while (parent.has(node)) {
-        node = parent.get(node)!;
-        path.unshift(node);
-      }
+      while (parent.has(node)) { node = parent.get(node)!; path.unshift(node); }
       return path;
     }
     for (let j = 0; j < S; j++) {
@@ -247,88 +229,39 @@ function findPath(
       }
     }
   }
-
   return null;
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Violation Detection
+// Sequence-based invariant checking (for inline use)
 // ═══════════════════════════════════════════════════════════════
 
-/**
- * Check a call sequence against mined invariants and report violations.
- *
- * For each invariant:
- *   MUST_RELEASE: look for trigger without required continuation
- *   MUST_COMMIT: look for trigger without commit/rollback continuation
- *   MUST_PRECEDE: look for required state without preceding trigger
- *
- * This uses STATE INFERENCE to map the call sequence to states,
- * then checks whether invariants hold in the inferred state machine.
- *
- * @param sequence   The call sequence to check
- * @param invariants Mined protocol invariants
- * @returns Violations found
- */
 export function checkInvariants(
   sequence: string[],
   invariants: ProtocolInvariant[]
 ): InvariantViolation[] {
   if (sequence.length < 2 || invariants.length === 0) return [];
-
-  // Infer state machine from the sequence
   const sm = inferStateMachine([sequence]);
   const violations: InvariantViolation[] = [];
 
   for (const inv of invariants) {
-    switch (inv.type) {
-      case "MUST_RELEASE": {
-        // Look for entry state without matching exit in the sequence's state machine
-        const hasEntry = sm.states.some(s => s.role === "entry");
-        const hasExit = sm.states.some(s => s.role === "exit");
-        if (hasEntry && !hasExit) {
-          violations.push({
-            invariant: inv,
-            sequence,
-            triggerIndex: 0,
-            description: `Missing release: sequence starts with acquire but never releases (violates: ${inv.description})`,
-            violationSubtype: "missing_release",
-          });
-        }
-        break;
-      }
+    const hasEntry = sm.states.some((s: InferredState) => s.role === "entry");
+    const hasExit = sm.states.some((s: InferredState) => s.role === "exit");
+    const hasBridge = sm.states.some((s: InferredState) => s.role === "bridge");
 
-      case "MUST_COMMIT": {
-        // Look for bridge state with self-loops but no exit
-        const bridges = sm.states.filter(s => s.role === "bridge" && s.outDegree > 0);
-        const exits = sm.states.filter(s => s.role === "exit");
-        if (bridges.length > 0 && exits.length === 0) {
-          violations.push({
-            invariant: inv,
-            sequence,
-            triggerIndex: sequence.length - 1,
-            description: `Missing commit/rollback: transaction started but not terminated (violates: ${inv.description})`,
-            violationSubtype: "missing_commit",
-          });
-        }
-        break;
-      }
-
-      case "MUST_PRECEDE": {
-        // Look for exit state without preceding bridge
-        const hasBridge = sm.states.some(s => s.role === "bridge");
-        const hasExit = sm.states.some(s => s.role === "exit");
-        if (hasExit && !hasBridge) {
-          violations.push({
-            invariant: inv,
-            sequence,
-            triggerIndex: 0,
-            description: `Missing prerequisite: privileged action without prior verification (violates: ${inv.description})`,
-            violationSubtype: "missing_prerequisite",
-          });
-        }
-        break;
-      }
+    if (hasEntry && !hasExit && inv.type === "MUST_RELEASE") {
+      violations.push({
+        invariant: inv, sequence, triggerIndex: 0,
+        description: `Missing release: ${inv.description}`,
+        violationSubtype: "missing_release",
+      });
+    }
+    if (hasExit && !hasBridge && inv.type === "MUST_PRECEDE") {
+      violations.push({
+        invariant: inv, sequence, triggerIndex: 0,
+        description: `Missing prerequisite: ${inv.description}`,
+        violationSubtype: "missing_prerequisite",
+      });
     }
   }
 
@@ -336,75 +269,59 @@ export function checkInvariants(
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Repair Suggestion
+// P9.3: Illegal Transition Detection (standalone)
 // ═══════════════════════════════════════════════════════════════
 
-export interface RepairSuggestion {
-  violation: InvariantViolation;
-  /** Suggested fix: what to append to the sequence. */
-  suggestedFix: string[];
-  /** Human-readable repair description. */
-  description: string;
+export interface IllegalTransition {
+  /** Source state index in test SM. */
+  from: number;
+  /** Target state index in test SM. */
+  to: number;
+  /** Why it's illegal. */
+  reason: "not_in_template" | "reversed" | "double_free" | "self_loop_never_allowed";
 }
 
 /**
- * Suggest repairs for detected invariant violations.
+ * Find transitions in testSM that are NEVER allowed in templateSM.
  *
- * @param violation The detected violation
- * @param sm Full state machine (from training/protocol definition)
+ * This detects:
+ *   - use-after-free:  free → use (edge exists in test, not in template)
+ *   - double-free:     free → free (self-loop not in template)
+ *   - auth resurrection: logout → access (reversed edge)
+ *   - rollback→commit  (cross-branch transition)
  */
-export function suggestRepair(
-  violation: InvariantViolation,
-  sm: InferredStateMachine
-): RepairSuggestion | null {
-  const inv = violation.invariant;
+export function detectIllegalTransitions(
+  testSM: InferredStateMachine,
+  templateSM: InferredStateMachine
+): IllegalTransition[] {
+  const templateEdges = extractEdgeSet(templateSM);
+  const testEdges = extractEdgeSet(testSM);
+  const illegal: IllegalTransition[] = [];
 
-  switch (inv.type) {
-    case "MUST_RELEASE": {
-      // Find the exit state and suggest its associated function
-      const exitState = sm.states.find(
-        s => s.role === "exit" && inv.requiredState.includes(s.id)
-      );
-      if (exitState) {
-        return {
-          violation,
-          suggestedFix: [`release_${exitState.id}`],
-          description: `Add release step to satisfy: ${inv.description}`,
-        };
-      }
-      break;
-    }
+  for (const edge of testEdges) {
+    if (templateEdges.has(edge)) continue;
+    const [from, to] = edge.split("→").map(Number);
 
-    case "MUST_COMMIT": {
-      const exitStates = sm.states.filter(
-        s => s.role === "exit" && inv.requiredState.includes(s.id)
-      );
-      if (exitStates.length > 0) {
-        return {
-          violation,
-          suggestedFix: [`commit_${exitStates[0].id}`],
-          description: `Add commit/rollback to satisfy: ${inv.description}`,
-        };
-      }
-      break;
-    }
+    // Check if the reverse edge exists in template (reversed transition)
+    const reverseEdge = `${to}→${from}`;
+    const isReversed = templateEdges.has(reverseEdge);
 
-    case "MUST_PRECEDE": {
-      const bridgeStates = sm.states.filter(
-        s => s.role === "bridge" && inv.triggerState.includes(s.id)
-      );
-      if (bridgeStates.length > 0) {
-        return {
-          violation,
-          suggestedFix: [`verify_${bridgeStates[0].id}`],
-          description: `Add verification step before privileged action: ${inv.description}`,
-        };
-      }
-      break;
-    }
+    // Check if it's a self-loop (possible double-free)
+    const isSelfLoop = from === to;
+
+    // Check if the template has ANY edge from this node
+    const templateHasFrom = [...templateEdges].some(e => e.startsWith(`${from}→`));
+    const templateHasTo = [...templateEdges].some(e => e.endsWith(`→${to}`));
+
+    let reason: IllegalTransition["reason"] = "not_in_template";
+    if (isSelfLoop && templateEdges.size > 0) reason = "double_free";
+    else if (isReversed) reason = "reversed";
+    else if (!templateHasFrom && templateHasTo) reason = "not_in_template";
+
+    illegal.push({ from, to, reason });
   }
 
-  return null;
+  return illegal;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -426,7 +343,8 @@ export function printViolations(violations: InvariantViolation[]): void {
   }
   console.log(`\n─── Invariant Violations (${violations.length}) ───`);
   for (const v of violations) {
-    console.log(`  ❌ ${v.description}`);
-    console.log(`     Sequence: ${v.sequence.join(" → ")}`);
+    const icon = v.violationSubtype === "illegal_transition" ? "🚫" : "❌";
+    console.log(`  ${icon} [${v.violationSubtype}] ${v.description}`);
+    if (v.sequence.length > 0) console.log(`     Sequence: ${v.sequence.join(" → ")}`);
   }
 }
