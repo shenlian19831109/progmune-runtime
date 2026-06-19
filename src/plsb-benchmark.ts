@@ -29,9 +29,8 @@
  * a new security category.
  */
 
-import { loadGoldDataset } from "./gold-cve";
+import { loadGoldDataset, runGoldBenchmark, GoldBenchmarkResult } from "./gold-cve";
 import { buildTieredDataset } from "./gold-tiers";
-import { runGoldBenchmark, GoldBenchmarkResult } from "./gold-cve";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -287,8 +286,7 @@ export function printPLSBReport(benchmark: PLSBenchmark): void {
 
   // Run detector benchmark against this dataset
   console.log(`  ── Detector Performance ──`);
-  const { runGoldBenchmark } = require("./gold-cve");
-  const goldDataset = {
+  const goldDataset: any = {
     cases: benchmark.entries.filter(e => e.verified).map(e => ({
       id: e.id, category: e.category, severity: e.severity,
       broken: e.broken, expected: e.expected,

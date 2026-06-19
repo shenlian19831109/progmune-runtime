@@ -266,7 +266,6 @@ function printPLSBReport(benchmark) {
     console.log();
     // Run detector benchmark against this dataset
     console.log(`  ── Detector Performance ──`);
-    const { runGoldBenchmark } = require("./gold-cve");
     const goldDataset = {
         cases: benchmark.entries.filter(e => e.verified).map(e => ({
             id: e.id, category: e.category, severity: e.severity,
@@ -276,7 +275,7 @@ function printPLSBReport(benchmark) {
         metadata: { total: benchmark.metadata.verified, byCategory: {}, verifiedBy: {} },
     };
     if (goldDataset.cases.length > 0) {
-        const result = runGoldBenchmark(goldDataset);
+        const result = (0, gold_cve_1.runGoldBenchmark)(goldDataset);
         console.log(`  Verified recall:    ${(result.recall * 100).toFixed(0)}%`);
         console.log(`  Verified precision: ${(result.precision * 100).toFixed(0)}%`);
     }
