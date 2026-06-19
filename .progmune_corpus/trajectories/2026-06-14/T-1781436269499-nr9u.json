@@ -1,0 +1,29 @@
+{
+  "id": "T-1781436269499-nr9u",
+  "timestamp": "2026-06-14T11:24:29.499Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "select_db",
+    "decompress_buffer",
+    "compute_hash",
+    "validate_schema",
+    "encode_payload",
+    "open",
+    "write_file",
+    "connect_db"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

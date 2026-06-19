@@ -1,0 +1,24 @@
+{
+  "protocol": "AuthProtocol",
+  "generatedAt": "2026-06-14T22:37:32.017Z",
+  "cases": [
+    {
+      "goal": "cover transition: TOKEN_ISSUED → UNAUTHENTICATED via revoke_token",
+      "protocol": "_global",
+      "broken": [
+        "generate_jwt"
+      ],
+      "expected": [
+        "generate_jwt",
+        "revoke_token"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "TOKEN_ISSUED",
+        "to": "UNAUTHENTICATED",
+        "rule": "revoke_token"
+      }
+    }
+  ],
+  "source": "coverage-gap"
+}

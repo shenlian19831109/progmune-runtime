@@ -1,0 +1,31 @@
+{
+  "id": "T-1781436269148-5s25",
+  "timestamp": "2026-06-14T11:24:29.148Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "select_db",
+    "open",
+    "compute_hash",
+    "decompress_buffer",
+    "verify_checksum",
+    "sanitize_input",
+    "validate_schema",
+    "encode_payload",
+    "connect_db",
+    "disconnect_db"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

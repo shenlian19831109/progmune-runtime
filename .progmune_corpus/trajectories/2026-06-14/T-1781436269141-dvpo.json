@@ -1,0 +1,25 @@
+{
+  "id": "T-1781436269141-dvpo",
+  "timestamp": "2026-06-14T11:24:29.141Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "create_client",
+    "send_command",
+    "read_reply",
+    "close_client"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

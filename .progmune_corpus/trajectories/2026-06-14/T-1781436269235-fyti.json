@@ -1,0 +1,30 @@
+{
+  "id": "T-1781436269235-fyti",
+  "timestamp": "2026-06-14T11:24:29.235Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "encode_payload",
+    "verify_checksum",
+    "decompress_buffer",
+    "extract_ir",
+    "validate_action",
+    "compress_buffer",
+    "open",
+    "write_file",
+    "validate_schema"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

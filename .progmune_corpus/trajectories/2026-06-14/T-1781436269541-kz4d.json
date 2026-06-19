@@ -1,0 +1,30 @@
+{
+  "id": "T-1781436269541-kz4d",
+  "timestamp": "2026-06-14T11:24:29.541Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "sanitize_input",
+    "connect_db",
+    "disconnect_db",
+    "verify_checksum",
+    "compress_buffer",
+    "open",
+    "read_file",
+    "compute_hash",
+    "validate_schema"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

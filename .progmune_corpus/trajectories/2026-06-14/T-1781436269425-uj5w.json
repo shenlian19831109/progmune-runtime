@@ -1,0 +1,29 @@
+{
+  "id": "T-1781436269425-uj5w",
+  "timestamp": "2026-06-14T11:24:29.425Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "select_db",
+    "extract_ir",
+    "compute_hash",
+    "decode_payload",
+    "open",
+    "query",
+    "verify_checksum",
+    "encode_payload"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

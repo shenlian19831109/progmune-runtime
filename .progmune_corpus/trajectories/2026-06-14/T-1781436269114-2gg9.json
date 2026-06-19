@@ -1,0 +1,26 @@
+{
+  "id": "T-1781436269114-2gg9",
+  "timestamp": "2026-06-14T11:24:29.114Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "connect",
+    "sendall",
+    "recv",
+    "disconnect",
+    "close"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "id": "T-1781436269628-oaxx",
+  "timestamp": "2026-06-14T11:24:29.628Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "create_client",
+    "compress_buffer",
+    "open",
+    "read_file",
+    "compute_hash",
+    "encode_payload",
+    "sanitize_input",
+    "verify_checksum",
+    "extract_ir"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "id": "T-1781436269714-jzm2",
+  "timestamp": "2026-06-14T11:24:29.714Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "auth_db_connect",
+    "auth_db_disconnect",
+    "verify_password",
+    "encode_payload",
+    "validate_schema",
+    "compress_buffer"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

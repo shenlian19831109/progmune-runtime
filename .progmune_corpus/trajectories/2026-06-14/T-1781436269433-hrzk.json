@@ -1,0 +1,31 @@
+{
+  "id": "T-1781436269433-hrzk",
+  "timestamp": "2026-06-14T11:24:29.433Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "begin_tx",
+    "insert_record",
+    "decode_payload",
+    "open",
+    "validate_schema",
+    "compress_buffer",
+    "encode_payload",
+    "extract_ir",
+    "validate_action",
+    "verify_checksum"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

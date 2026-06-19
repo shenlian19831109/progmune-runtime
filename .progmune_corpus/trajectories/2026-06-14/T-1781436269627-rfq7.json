@@ -1,0 +1,29 @@
+{
+  "id": "T-1781436269627-rfq7",
+  "timestamp": "2026-06-14T11:24:29.627Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "open",
+    "query",
+    "get_key",
+    "validate_schema",
+    "connect_db",
+    "verify_checksum",
+    "sanitize_input",
+    "extract_ir"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

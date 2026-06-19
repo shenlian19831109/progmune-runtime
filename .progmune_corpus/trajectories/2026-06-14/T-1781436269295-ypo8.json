@@ -1,0 +1,30 @@
+{
+  "id": "T-1781436269295-ypo8",
+  "timestamp": "2026-06-14T11:24:29.295Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "select_db",
+    "encode_payload",
+    "compress_buffer",
+    "open",
+    "query",
+    "connect_db",
+    "decompress_buffer",
+    "decode_payload",
+    "sanitize_input"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

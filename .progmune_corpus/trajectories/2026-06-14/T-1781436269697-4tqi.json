@@ -1,0 +1,26 @@
+{
+  "id": "T-1781436269697-4tqi",
+  "timestamp": "2026-06-14T11:24:29.697Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "decode_payload",
+    "connect_db",
+    "disconnect_db",
+    "extract_ir",
+    "compress_buffer"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

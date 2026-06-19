@@ -1,0 +1,28 @@
+{
+  "id": "T-1781436269729-9fy6",
+  "timestamp": "2026-06-14T11:24:29.729Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "evaluate_access",
+    "bypass_condition",
+    "retry_evaluation",
+    "extract_ir",
+    "connect_db",
+    "sanitize_input",
+    "verify_checksum"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

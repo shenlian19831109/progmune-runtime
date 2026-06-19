@@ -1,0 +1,30 @@
+{
+  "id": "T-1781436269145-gez3",
+  "timestamp": "2026-06-14T11:24:29.145Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "evaluate_access",
+    "bypass_condition",
+    "connect_db",
+    "disconnect_db",
+    "validate_schema",
+    "extract_ir",
+    "compute_hash",
+    "sanitize_input",
+    "open"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

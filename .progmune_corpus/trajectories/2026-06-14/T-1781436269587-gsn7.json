@@ -1,0 +1,31 @@
+{
+  "id": "T-1781436269587-gsn7",
+  "timestamp": "2026-06-14T11:24:29.587Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "create_client",
+    "encode_payload",
+    "decompress_buffer",
+    "open",
+    "close",
+    "decode_payload",
+    "validate_schema",
+    "verify_checksum",
+    "extract_ir",
+    "compress_buffer"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

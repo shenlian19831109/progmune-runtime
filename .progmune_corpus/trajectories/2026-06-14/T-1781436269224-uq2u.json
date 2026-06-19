@@ -1,0 +1,30 @@
+{
+  "id": "T-1781436269224-uq2u",
+  "timestamp": "2026-06-14T11:24:29.224Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "auth_db_connect",
+    "decompress_buffer",
+    "open",
+    "compress_buffer",
+    "encode_payload",
+    "validate_schema",
+    "connect_db",
+    "query_db",
+    "decode_payload"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "id": "T-1781436269326-2l63",
+  "timestamp": "2026-06-14T11:24:29.326Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "auth_file_open",
+    "decode_payload",
+    "sanitize_input",
+    "decompress_buffer",
+    "open",
+    "query",
+    "verify_checksum"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "protocol": "DBProtocol",
+  "generatedAt": "2026-06-14T22:37:32.017Z",
+  "cases": [
+    {
+      "goal": "cover transition: INIT → DB_CONNECTED via connect_db",
+      "protocol": "_global",
+      "broken": [
+        "disconnect_db"
+      ],
+      "expected": [
+        "connect_db",
+        "connect_db",
+        "disconnect_db"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "INIT",
+        "to": "DB_CONNECTED",
+        "rule": "connect_db"
+      }
+    }
+  ],
+  "source": "coverage-gap"
+}

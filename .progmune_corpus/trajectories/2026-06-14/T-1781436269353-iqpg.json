@@ -1,0 +1,29 @@
+{
+  "id": "T-1781436269353-iqpg",
+  "timestamp": "2026-06-14T11:24:29.353Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "create_client",
+    "connect_db",
+    "open",
+    "read_file",
+    "extract_ir",
+    "verify_checksum",
+    "encode_payload",
+    "decode_payload"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

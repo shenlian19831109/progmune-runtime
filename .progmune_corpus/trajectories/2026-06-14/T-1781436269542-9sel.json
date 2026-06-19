@@ -1,0 +1,25 @@
+{
+  "id": "T-1781436269542-9sel",
+  "timestamp": "2026-06-14T11:24:29.542Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "verify_checksum",
+    "decode_payload",
+    "encode_payload",
+    "compute_hash"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

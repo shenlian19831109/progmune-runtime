@@ -1,0 +1,28 @@
+{
+  "id": "T-1781436269192-v6os",
+  "timestamp": "2026-06-14T11:24:29.192Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "begin_tx",
+    "rollback_tx",
+    "compress_buffer",
+    "sanitize_input",
+    "decompress_buffer",
+    "extract_ir",
+    "compute_hash"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "id": "T-1781436269487-wzjx",
+  "timestamp": "2026-06-14T11:24:29.487Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "evaluate_access",
+    "retry_evaluation",
+    "open",
+    "connect_db",
+    "decode_payload",
+    "compress_buffer",
+    "extract_ir",
+    "compute_hash"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

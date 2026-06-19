@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Progmune 团队" />
+  <meta name="dcterms.date" content="2026-05-30" />
+  <title>Progmune Runtime 内部技术白皮书 v2.2</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen { div.sourceCode { overflow: auto; } }
+    @media print { pre > code.sourceCode { white-space: pre-wrap; } pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; } }
+    pre.numberSource code { counter-reset: source-line 0; }
+    pre.numberSource code > span { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before { content: counter(source-line); position: relative; left: -1em; text-align: right; vertical-align: baseline; border: none; display: inline-block; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; padding: 0 4px; width: 4em; color: #aaaaaa; }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+    div.sourceCode { }
+    @media screen { pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; } }
+    code span.al { color: #ff0000; font-weight: bold; }
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; }
+    code span.at { color: #7d9029; }
+    code span.bn { color: #40a070; }
+    code span.cf { color: #007020; font-weight: bold; }
+    code span.ch { color: #4070a0; }
+    code span.cn { color: #880000; }
+    code span.co { color: #60a0b0; font-style: italic; }
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; }
+    code span.do { color: #ba2121; font-style: italic; }
+    code span.dt { color: #902000; }
+    code span.dv { color: #40a070; }
+    code span.er { color: #ff0000; font-weight: bold; }
+    code span.fl { color: #40a070; }
+    code span.fu { color: #06287e; }
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; }
+    code span.kw { color: #007020; font-weight: bold; }
+    code span.op { color: #666666; }
+    code span.ot { color: #007020; }
+    code span.pp { color: #bc7a00; }
+    code span.sc { color: #4070a0; }
+    code span.ss { color: #bb6688; }
+    code span.st { color: #4070a0; }
+    code span.va { color: #19177c; }
+    code span.vs { color: #4070a0; }
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="data:text/css,body%20%7B%0Afont%2Dfamily%3A%20%22PingFang%20SC%22%2C%20%22Helvetica%20Neue%22%2C%20Arial%2C%20sans%2Dserif%3B%0Amax%2Dwidth%3A%20900px%3B%0Amargin%3A%200%20auto%3B%0Apadding%3A%2040px%2060px%3B%0Acolor%3A%20%231a1a1a%3B%0Aline%2Dheight%3A%201%2E8%3B%0Afont%2Dsize%3A%2015px%3B%0Abackground%3A%20%23fdfdfd%3B%0A%7D%0Ah1%20%7B%20font%2Dsize%3A%2028px%3B%20color%3A%20%231b4332%3B%20border%2Dbottom%3A%202px%20solid%20%232d6a4f%3B%20padding%2Dbottom%3A%2012px%3B%20margin%2Dtop%3A%2048px%3B%20%7D%0Ah2%20%7B%20font%2Dsize%3A%2022px%3B%20color%3A%20%232d6a4f%3B%20margin%2Dtop%3A%2036px%3B%20%7D%0Ah3%20%7B%20font%2Dsize%3A%2018px%3B%20color%3A%20%2340916c%3B%20margin%2Dtop%3A%2028px%3B%20%7D%0Ah4%20%7B%20font%2Dsize%3A%2015px%3B%20color%3A%20%2352b788%3B%20margin%2Dtop%3A%2020px%3B%20%7D%0Apre%20%7B%20background%3A%20%23f6f8fa%3B%20border%3A%201px%20solid%20%23d0d7de%3B%20border%2Dradius%3A%206px%3B%20padding%3A%2016px%3B%20overflow%2Dx%3A%20auto%3B%20font%2Dsize%3A%2013px%3B%20line%2Dheight%3A%201%2E5%3B%20%7D%0Acode%20%7B%20font%2Dfamily%3A%20%22SF%20Mono%22%2C%20%22Menlo%22%2C%20%22Monaco%22%2C%20monospace%3B%20font%2Dsize%3A%2013px%3B%20background%3A%20%23f6f8fa%3B%20padding%3A%202px%206px%3B%20border%2Dradius%3A%204px%3B%20%7D%0Apre%20code%20%7B%20background%3A%20none%3B%20padding%3A%200%3B%20%7D%0Atable%20%7B%20border%2Dcollapse%3A%20collapse%3B%20width%3A%20100%25%3B%20margin%3A%2016px%200%3B%20%7D%0Ath%2C%20td%20%7B%20border%3A%201px%20solid%20%23d0d7de%3B%20padding%3A%2010px%2014px%3B%20text%2Dalign%3A%20left%3B%20%7D%0Ath%20%7B%20background%3A%20%23f6f8fa%3B%20font%2Dweight%3A%20600%3B%20%7D%0Ablockquote%20%7B%20border%2Dleft%3A%204px%20solid%20%232d6a4f%3B%20margin%3A%2016px%200%3B%20padding%3A%208px%2020px%3B%20background%3A%20%23f0faf5%3B%20%7D%0Astrong%20%7B%20color%3A%20%231b4332%3B%20%7D%0Aa%20%7B%20color%3A%20%232d6a4f%3B%20%7D%0A%2Ev2%2Dnew%20%7B%20background%3A%20%23f0faf5%3B%20border%2Dleft%3A%203px%20solid%20%2352b788%3B%20padding%3A%202px%208px%3B%20border%2Dradius%3A%203px%3B%20font%2Dsize%3A%200%2E85em%3B%20font%2Dweight%3A%20600%3B%20color%3A%20%232d6a4f%3B%20%7D%0A%2Ediagram%2Dtitle%20%7B%20text%2Dalign%3A%20center%3B%20font%2Dsize%3A%200%2E9em%3B%20color%3A%20%23666%3B%20margin%2Dtop%3A%20%2D8px%3B%20margin%2Dbottom%3A%2020px%3B%20%7D%0A" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Progmune Runtime 内部技术白皮书 v2.2</h1>
+<p class="subtitle">程序免疫学：约束引导的程序合成运行时 —— 逻辑框架与技术细节</p>
+<p class="subtitle"><span class="v2-new">★ v2.2 核心跨越: Semantic Ledger Runtime — 事件溯源架构，纯函数不变式系统，可重放、可查询、可证明的账本运行时</span></p>
+<p class="author">Progmune 团队</p>
+<p class="date">2026-05-30</p>
+</header>
+
+<h1 id="第一章-概述与设计哲学">第一章 概述与设计哲学</h1>
+<h2 id="问题背景">1.1 问题背景</h2>
+<p>大语言模型（LLM）在代码生成领域取得了显著进展，但 LLM 输出的代码存在固有的不确定性问题：幻觉函数名、类型不匹配、变量未定义即使用、违反 API 调用协议等。传统方法依赖人工审查或单元测试来捕获这些错误，但人工审查不可扩展，单元测试覆盖有限。</p>
+<p>Progmune Runtime 提出了一种根本不同的方案：<strong>程序免疫学（Program Immunology）</strong>——借鉴生物免疫系统识别和清除病原体的原理，构建多层约束验证运行时，自动检测、诊断并修复 LLM 生成代码中的语义异常。</p>
+
+<h2 id="核心设计原则">1.2 核心设计原则</h2>
+<h3 id="原则一约束即规范">原则一：约束即规范（Constraints as Specifications）</h3>
+<p>程序的合法空间由约束定义，而非由生成模型定义。任何 LLM 输出必须通过四层语义验证层（SVL-1 到 SVL-4）才能被接受。</p>
+<h3 id="原则二免疫记忆">原则二：免疫记忆（Immune Memory）</h3>
+<p>每一次约束违规都是一次"感染事件"。系统记录违规的模式、上下文和修复路径，形成"抗体"。当相同或相似的意图再次出现时，免疫记忆可以跳过 LLM 推理直接提供已验证的解，或注入修复提示。</p>
+<h3 id="原则三确定性修复">原则三：确定性修复（Deterministic Repair）</h3>
+<p>当协议违规有已知修复路径时，系统不应回退到 LLM 重新生成，而应通过 SSG 状态图的 BFS 搜索自动插入缺失的函数调用。</p>
+<h3 id="原则四可观测性优先">原则四：可观测性优先（Observability First）</h3>
+<p>每次规划会话产生完整的执行记录：Attempt（每次尝试）、StateTransition（状态转移）、ConstraintViolation（约束违规）。这些记录支持终端回放、Web 仪表盘和统计分析。</p>
+<h3 id="原则五事件溯源"><span class="v2-new">★ v2.2</span> 原则五：事件溯源（Event Sourcing）</h3>
+<p>v2.1 的 StateTransition[] 是验证过程的被动日志——真正的真相源是 StateMachineValidator 实例中的可变状态。v2.2 反转这一关系：<strong>StateTransition[] 成为系统的唯一真相源（Single Source of Truth），命名空间状态是从 Ledger 中派生出来的视图，而非独立存储的可变对象。</strong>这意味着：任何时刻的系统状态都可以通过从空状态出发重放完整的 StateTransition 序列来重建；任何验证决策都可以被独立审计和复现；约束规则的变更可以被检测和追溯。</p>
+
+<h2 id="系统定位">1.3 系统定位</h2>
+<p>Progmune Runtime 是一个 <strong>MCP（Model Context Protocol）服务器</strong>，作为 LLM 与目标代码库之间的约束验证中间层。它不替代 LLM，而是为 LLM 提供一个"免疫沙箱"——LLM 输出在沙箱中经过多层验证后才能进入代码库。</p>
+
+<h2 id="v21-v22-版本演进">1.4 v2.1 → v2.2 版本演进 <span class="v2-new">★ v2.2</span></h2>
+<p>v2.1 完成了运行时本体论（Runtime Ontology）的建立——将 Attempt、StateTransition、ConstraintViolation、ExecutionSession 提升为第一类类型，并构建了以 StateMachineValidator 为核心的有状态验证架构。但在这个架构中，StateTransition[] 只是被动日志——决策来自 StateMachineValidator 实例中的可变状态，而非来自不可变的事件记录。</p>
+<p>v2.2 的核心跨越是将架构从 <strong>Event Logging（事件记录）</strong> 推进到 <strong>Event Sourcing（事件溯源）</strong>。具体而言：</p>
+<table>
+<thead><tr><th>维度</th><th>v2.1 (Event Logging)</th><th>v2.2 (Event Sourcing)</th></tr></thead>
+<tbody>
+<tr><td>真相源</td><td>StateMachineValidator 可变实例</td><td>StateTransition[] 不可变账本</td></tr>
+<tr><td>状态获取</td><td>ssv.snapshotNamespaceStates() 读可变状态</td><td>rebuildState(ledger) 纯函数派生</td></tr>
+<tr><td>验证逻辑</td><td>StateMachineValidator.apply() 有状态方法</td><td>validateTransition() 纯函数</td></tr>
+<tr><td>一致性保证</td><td>无系统化不变式</td><td>Invariant-0（历史一致性）+ Invariant-1（增量自洽）</td></tr>
+<tr><td>约束追溯</td><td>无</td><td>ruleHash（SHA256 约束快照）贯穿所有层级</td></tr>
+<tr><td>账本完整性</td><td>无</td><td>hashLedger()（SHA256 防篡改指纹）</td></tr>
+<tr><td>查询能力</td><td>遍历日志文件</td><td>5 个纯查询函数（findProducer/Consumer 等）</td></tr>
+<tr><td>跨会话比较</td><td>无</td><td>diffLedgers() 结构化差异</td></tr>
+<tr><td>向后兼容</td><td>—</td><td>StateMachineValidator 类保留，内部委托给纯函数</td></tr>
+</tbody>
+</table>
+
+<h1 id="第二章-核心架构">第二章 核心架构</h1>
+<h2 id="系统分层">2.1 系统分层</h2>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│                      MCP Server Layer                        │
+│  mcp-server.mts — Tool dispatch, session management         │
+├─────────────────────────────────────────────────────────────┤
+│                      Planner Layer                           │
+│  planner.ts — Core planning loop, immune acceleration       │
+│  search-planner.ts — Search-based planning                  │
+├─────────────────────────────────────────────────────────────┤
+│                   Validation Layer (Immune System)           │
+│  ┌──────────┬──────────┬──────────┬──────────────────────┐  │
+│  │  SVL-1   │  SVL-2   │  SVL-3   │       SVL-4          │  │
+│  │ Symbol   │  Type    │ Dataflow │ Protocol (SSG)        │  │
+│  │validator │validator │validator │ ssg-validator.ts      │  │
+│  └──────────┴──────────┴──────────┴──────────────────────┘  │
+│  semantic-validator.ts — Semantic contract checking         │
+├─────────────────────────────────────────────────────────────┤
+│              ★ v2.2 Semantic Ledger Runtime                  │
+│  ┌──────────────┬──────────────┬────────────────────────┐   │
+│  │ Pure Funcs   │  Invariants  │  Query &amp; Integrity     │   │
+│  │ rebuildState │  Invariant-0 │  findProducer/Consumer │   │
+│  │ validateTrans│  Invariant-1 │  hashLedger/hashRules  │   │
+│  │ checkConsist │(before+delta)│  diffLedgers           │   │
+│  └──────────────┴──────────────┴────────────────────────┘   │
+├─────────────────────────────────────────────────────────────┤
+│                   IR Layer                                   │
+│  extract-ir.ts — ts-morph AST → FunctionInfo[]              │
+│  ir.json — Serialized IR cache                              │
+├─────────────────────────────────────────────────────────────┤
+│                Immune Memory Layer                           │
+│  failure-corpus.ts — Failure genome, antibodies, heatmap    │
+│  memory-layer.ts — Semantic templates                       │
+│  semantic-snapshot.ts — IR snapshots for replay             │
+├─────────────────────────────────────────────────────────────┤
+│                Code Emission Layer                           │
+│  emitter.ts — TypeScript code generation from Action[]      │
+│  action-runtime.ts — Action DSL execution sandbox           │
+├─────────────────────────────────────────────────────────────┤
+│                Observatory Layer                             │
+│  semantic-trace.ts — Terminal-based replay dashboard        │
+│  obs-web.ts — Web-based dashboard (port 3100)               │
+│  check.ts — One-command immune health inspection            │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+<p class="diagram-title">图 2.1: 系统分层架构（★ v2.2 新增 Semantic Ledger Runtime 层，位于验证层与 IR 层之间，是整个系统的状态派生引擎）</p>
+
+<h2 id="核心数据流">2.2 核心数据流</h2>
+<pre><code>User Intent (自然语言)
+        │
+        ▼
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│  IR 提取      │────▶│  规划器       │────▶│  约束验证     │
+│ extract-ir   │     │  planner.ts  │     │  validator   │
+│ (ts-morph)   │     │  (LLM调用)   │     │  (4层SVL)    │
+└──────────────┘     └──────────────┘     └──────────────┘
+       │                    │                     │
+       ▼                    ▼                     ▼
+  ir.json           ExecutionSession      ConstraintViolation[]
+                    Attempt[]             StateTransition[]
+                           │                     │
+                           ▼                     ▼
+                    ┌──────────────┐     ┌──────────────────┐
+                    │  免疫记忆     │◀────│  ★ v2.2 Ledger   │
+                    │  corpus      │     │  (唯一真相源)     │
+                    └──────────────┘     └──────────────────┘
+                           │                     │
+                           ▼                     ▼
+                    ┌──────────────┐     ┌──────────────────┐
+                    │  观测站       │     │  代码发射         │
+                    │  trace/web   │     │  emitter.ts      │
+                    └──────────────┘     └──────────────────┘</code></pre>
+<p class="diagram-title">图 2.2: 核心数据流（★ v2.2: Transition Ledger 取代 StateMachineValidator 成为系统中心，所有下游消费者从 Ledger 派生状态）</p>
+
+<h2 id="v22-架构跨越">2.3 ★ v2.2 架构跨越：Event Logging → Event Sourcing</h2>
+<p>这是 v2.2 最根本的架构变更。理解这一跨越，是理解整个 Semantic Ledger Runtime 的前提。</p>
+<h3 id="v21-模式">2.3.1 v2.1 模式：Event Logging</h3>
+<pre><code>  StateMachineValidator (可变状态, 真相源)
+       │
+       │ apply(functionName, actionIndex)
+       │ → 更新内部 this.state (Map&lt;ns, Set&lt;state&gt;&gt;)
+       │ → 返回 { valid, transition }
+       ▼
+  StateTransition[] (被动日志, 非真相源)
+
+  问题:
+  - 真相在可变对象中，无法从日志独立重建
+  - 验证逻辑与状态耦合，无法独立测试
+  - 无法审计"为什么这个转移被接受"
+  - 每条转移的验证依赖前一条转移的副作用</code></pre>
+
+<h3 id="v22-模式">2.3.2 v2.2 模式：Event Sourcing</h3>
+<pre><code>  StateTransition[] (不可变账本, 唯一真相源)
+       │
+       │ rebuildState(ledger) → 派生状态视图
+       │ validateTransition(ctx, fn, i, rules, nsInit, ruleHash) → 纯函数验证
+       ▼
+  CurrentState (派生视图, 非真相源)
+       │
+       ├── Replayable: 任何人都可以从空状态重放 Ledger 得到相同结果
+       ├── Queryable: 5 个纯查询函数在 Ledger 上运行
+       └── Provable: hashLedger + ruleHash 提供防篡改完整性证明
+
+  优势:
+  - 真相在不可变账本中，任何时刻的状态都是确定性的派生结果
+  - 验证逻辑是纯函数，可在任何上下文中独立测试
+  - 每条转移携带完整的前后状态快照，支持独立审计
+  - 约束变更可通过 ruleHash 检测和追溯</code></pre>
+
+<h2 id="strangler-pattern">2.4 Strangler Pattern 向后兼容策略</h2>
+<p>StateMachineValidator 被 planner.ts、semantic-trace.ts、check.ts、p0_ssg_demo.ts 等多个文件使用。v2.2 不删除这个类，而是将其重构为向后兼容的包装器：</p>
+<pre><code>  StateMachineValidator (保留, 向后兼容包装器)
+       │
+       ├── apply()              → 委托给 validateTransition()
+       ├── applyWithTransition() → 委托给 validateTransition()
+       ├── snapshotNamespaceStates() → 委托给 rebuildState(this.ledger)
+       └── getTrace()           → 返回 this.ledger
+
+  新代码直接使用纯函数:
+   planner.ts      → validateTransition() + ValidationContext
+   semantic-trace.ts → rebuildState() + checkLedgerConsistency()
+   check.ts        → 纯函数循环 + Invariant-0 + Invariant-1
+   p0_ssg_demo.ts  → createPureContext() 零实例化</code></pre>
+
+<h1 id="第三章-运行时本体论">第三章 运行时本体论（Runtime Ontology）</h1>
+<p>运行时本体论定义了 Progmune 执行语义的所有基本对象。这些类型集中定义在 <code>src/runtime-types.ts</code> 中，是整个系统的单一权威来源（Single Source of Truth for Types）。</p>
+
+<h2 id="action-dsl">3.1 Action DSL</h2>
+<p>Action 是 Progmune 中程序行为的原子单位——一个 discriminated union，表示 LLM 生成的每个操作。</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Action <span class="op">=</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> { kind<span class="op">:</span> <span class="st">&quot;call&quot;</span><span class="op">;</span> function<span class="op">:</span> <span class="dt">string</span><span class="op">;</span> args<span class="op">:</span> Arg[]<span class="op">;</span> assignTo<span class="op">?:</span> <span class="dt">string</span> }</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> { kind<span class="op">:</span> <span class="st">&quot;assign&quot;</span><span class="op">;</span> target<span class="op">:</span> <span class="dt">string</span><span class="op">;</span> value<span class="op">:</span> <span class="dt">string</span> <span class="op">|</span> Action }</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> { kind<span class="op">:</span> <span class="st">&quot;return&quot;</span><span class="op">;</span> value<span class="op">:</span> <span class="dt">string</span> <span class="op">|</span> Action }</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> { kind<span class="op">:</span> <span class="st">&quot;if&quot;</span><span class="op">;</span> condition<span class="op">:</span> <span class="dt">string</span><span class="op">;</span> thenActions<span class="op">:</span> Action[]<span class="op">;</span> elseActions<span class="op">?:</span> Action[] }</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> { kind<span class="op">:</span> <span class="st">&quot;for&quot;</span><span class="op">;</span> variable<span class="op">:</span> <span class="dt">string</span><span class="op">;</span> iterable<span class="op">:</span> <span class="dt">string</span><span class="op">;</span> bodyActions<span class="op">:</span> Action[] }</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Arg <span class="op">=</span> { name<span class="op">:</span> <span class="dt">string</span><span class="op">;</span> type<span class="op">:</span> <span class="dt">string</span><span class="op">;</span> value<span class="op">:</span> <span class="dt">string</span> <span class="op">|</span> Action }</span></code></pre></div>
+<p>Action DSL 的设计要点：</p>
+<ol type="1">
+<li><strong><code>call</code></strong> — 函数调用，args 携带静态类型信息（name， type， value），assignTo 表示返回值绑定</li>
+<li><strong><code>assign</code></strong> — 变量赋值，value 可以是字面量或嵌套 Action</li>
+<li><strong><code>return</code></strong> — 返回语句，value 可以是变量名引用（以 <code>$</code> 前缀区分的 JSON wire format）或嵌套 Action</li>
+<li><strong><code>if</code></strong> — 条件分支，thenActions/elseActions 各自是完整的 Action[]</li>
+<li><strong><code>for</code></strong> — 循环，bodyActions 是循环体</li>
+</ol>
+
+<h3 id="json-wire-format">JSON Wire Format</h3>
+<p>LLM 输出的紧凑 JSON 格式（用于减少 token 消耗）：</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ot">[</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">{</span><span class="dt">&quot;f&quot;</span><span class="fu">:</span><span class="st">&quot;extractIR&quot;</span><span class="fu">,</span><span class="dt">&quot;to&quot;</span><span class="fu">:</span><span class="st">&quot;ir&quot;</span><span class="fu">,</span><span class="dt">&quot;a&quot;</span><span class="fu">:</span><span class="ot">[</span><span class="fu">{</span><span class="dt">&quot;n&quot;</span><span class="fu">:</span><span class="st">&quot;root&quot;</span><span class="fu">,</span><span class="dt">&quot;t&quot;</span><span class="fu">:</span><span class="st">&quot;str&quot;</span><span class="fu">,</span><span class="dt">&quot;v&quot;</span><span class="fu">:</span><span class="st">&quot;.&quot;</span><span class="fu">}</span><span class="ot">]</span><span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">{</span><span class="dt">&quot;f&quot;</span><span class="fu">:</span><span class="st">&quot;validateAction&quot;</span><span class="fu">,</span><span class="dt">&quot;to&quot;</span><span class="fu">:</span><span class="st">&quot;ok&quot;</span><span class="fu">,</span><span class="dt">&quot;a&quot;</span><span class="fu">:</span><span class="ot">[</span><span class="fu">{</span><span class="dt">&quot;n&quot;</span><span class="fu">:</span><span class="st">&quot;action&quot;</span><span class="fu">,</span><span class="dt">&quot;t&quot;</span><span class="fu">:</span><span class="st">&quot;any&quot;</span><span class="fu">,</span><span class="dt">&quot;v&quot;</span><span class="fu">:</span><span class="st">&quot;$ir&quot;</span><span class="fu">}</span><span class="ot">]</span><span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">{</span><span class="dt">&quot;r&quot;</span><span class="fu">:</span><span class="st">&quot;ok&quot;</span><span class="fu">}</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="ot">]</span></span></code></pre></div>
+<ul>
+<li><code>f</code> → function name, <code>to</code> → assignTo, <code>a</code> → args</li>
+<li><code>$变量名</code> 表示对之前返回值的引用</li>
+<li><code>r</code> → return</li>
+</ul>
+<p>解析函数 <code>parseActionJSON()</code> 负责将紧凑 JSON 转换为 <code>Action[]</code>。</p>
+
+<h2 id="constraintviolation">3.2 ConstraintViolation</h2>
+<p>每次约束违规都产生一个结构化的 <code>ConstraintViolation</code> 对象：</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>interface ConstraintViolation {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  svl<span class="op">:</span> <span class="dv">1</span> <span class="op">|</span> <span class="dv">2</span> <span class="op">|</span> <span class="dv">3</span> <span class="op">|</span> <span class="dv">4</span><span class="op">;</span>              <span class="co">// 违规层级</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  violatedConstraint<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>        <span class="co">// 违规约束类型</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  actionIndex<span class="op">:</span> <span class="dt">number</span><span class="op">;</span>               <span class="co">// 违规动作索引</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  currentStates<span class="op">?:</span> <span class="dt">string</span>[]<span class="op">;</span>          <span class="co">// 当前 SSG 状态（SVL-4）</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  requiredStates<span class="op">?:</span> <span class="dt">string</span>[]<span class="op">;</span>         <span class="co">// 所需 SSG 状态（SVL-4）</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  missingStates<span class="op">?:</span> <span class="dt">string</span>[]<span class="op">;</span>          <span class="co">// 缺失的前置函数（SVL-4）</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  conflictingStates<span class="op">?:</span> <span class="dt">string</span>[]<span class="op">;</span>      <span class="co">// 冲突状态</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  fixPath<span class="op">?:</span> <span class="dt">string</span>[]<span class="op">;</span>                <span class="co">// BFS 搜索的修复路径</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  namespace<span class="op">?:</span> <span class="dt">string</span><span class="op">;</span>                <span class="co">// 命名空间</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  description<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>               <span class="co">// 人类可读描述</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+
+<h2 id="statetransition">3.3 StateTransition <span class="v2-new">★ v2.2 ruleHash</span></h2>
+<p>协议状态机的每次合法调用产生一个 <code>StateTransition</code>：</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>interface StateTransition {</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  actionIndex<span class="op">:</span> <span class="dt">number</span><span class="op">;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  function<span class="op">:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  namespace<span class="op">:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  acquired<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span>                           <span class="co">// 新获得的状态</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  invalidated<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span>                        <span class="co">// 被失效的状态</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  statesBefore<span class="op">:</span> <span class="bu">Record</span><span class="op">&lt;</span><span class="dt">string</span><span class="op">,</span> <span class="dt">string</span>[]<span class="op">&gt;;</span>       <span class="co">// per-namespace 快照（执行前）</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  statesAfter<span class="op">:</span> <span class="bu">Record</span><span class="op">&lt;</span><span class="dt">string</span><span class="op">,</span> <span class="dt">string</span>[]<span class="op">&gt;;</span>        <span class="co">// per-namespace 快照（执行后）</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  valid<span class="op">:</span> <span class="dt">boolean</span><span class="op">;</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  ruleHash<span class="op">?:</span> <span class="dt">string</span><span class="op">;</span>                            <span class="co">// ★ v2.2 约束快照</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p><strong>关键设计决策</strong>：<code>statesBefore</code> 和 <code>statesAfter</code> 使用 <code>Record&lt;string, string[]&gt;</code>（per-namespace），而非合并的 <code>string[]</code>。这样每个命名空间（auth、file、db、dev_pipeline）的状态变化可以独立追踪。</p>
+<p><strong><span class="v2-new">★ v2.2</span> ruleHash 字段</strong>：存储创建此转移时协议规则集的 SHA256 哈希。这个字段是实现跨版本确定性回放的关键基础设施——如果 2027 年的规则集与 2026 年不同，回放 2026 年的 Ledger 时会检测到 ruleHash 不匹配，系统可以明确报告"确定性回放不可行：约束集已变更"，而不是静默产生不同的结果。同样添加到 <code>Attempt</code> 和 <code>ExecutionSession</code> 中，形成从单条转移到会话级别的完整约束谱系。</p>
+
+<h2 id="attempt">3.4 Attempt <span class="v2-new">★ v2.2 ruleHash</span></h2>
+<p>一次"尝试"是规划器的单次推理循环：</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>interface Attempt {</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  id<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>                        <span class="co">// att_&lt;timestamp&gt;_&lt;random&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  sessionId<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>                 <span class="co">// 所属会话</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  attemptNumber<span class="op">:</span> <span class="dt">number</span><span class="op">;</span>             <span class="co">// 1-based</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  parentAttemptId<span class="op">?:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  inputIntent<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>               <span class="co">// 用户意图原文</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  plannerSeed<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>               <span class="co">// MD5(prompt|model|timestamp)</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  constraintSnapshotId<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>      <span class="co">// IR 快照链接</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  generatedActions<span class="op">:</span> Action[]<span class="op">;</span>        <span class="co">// LLM 输出</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  transitions<span class="op">:</span> StateTransition[]<span class="op">;</span>    <span class="co">// SSG 状态转移</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  violations<span class="op">:</span> ConstraintViolation[]<span class="op">;</span> <span class="co">// 约束违规列表</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  outcome<span class="op">:</span> <span class="st">&quot;success&quot;</span> <span class="op">|</span> <span class="st">&quot;constraint_violation&quot;</span> <span class="op">|</span> <span class="st">&quot;planner_failure&quot;</span><span class="op">;</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  timestamp<span class="op">:</span> <span class="dt">number</span><span class="op">;</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  llmCallCount<span class="op">:</span> <span class="dt">number</span><span class="op">;</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  durationMs<span class="op">:</span> <span class="dt">number</span><span class="op">;</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  antibodyHit<span class="op">?:</span> AntibodyHit<span class="op">;</span>         <span class="co">// 如果被免疫加速</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  ruleHash<span class="op">?:</span> <span class="dt">string</span><span class="op">;</span>                   <span class="co">// ★ v2.2 约束快照</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+
+<h2 id="executionsession">3.5 ExecutionSession <span class="v2-new">★ v2.2 ruleHash</span></h2>
+<p>一次完整的规划会话：</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>interface ExecutionSession {</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  sessionId<span class="op">:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  intent<span class="op">:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  attempts<span class="op">:</span> Attempt[]<span class="op">;</span>              <span class="co">// 所有尝试（按时间顺序）</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  successfulAttempt<span class="op">?:</span> Attempt<span class="op">;</span>      <span class="co">// 成功的尝试</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  resolved<span class="op">:</span> <span class="dt">boolean</span><span class="op">;</span>                <span class="co">// 是否最终解决</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  snapshotId<span class="op">?:</span> <span class="dt">string</span><span class="op">;</span>              <span class="co">// IR 快照 ID</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  ruleHash<span class="op">?:</span> <span class="dt">string</span><span class="op">;</span>                 <span class="co">// ★ v2.2 约束快照</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  startedAt<span class="op">:</span> <span class="dt">number</span><span class="op">;</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  endedAt<span class="op">?:</span> <span class="dt">number</span><span class="op">;</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p><strong><span class="v2-new">★ v2.2</span></strong> ruleHash 出现在 StateTransition、Attempt、ExecutionSession 三个层级，形成完整的约束谱系链：<code>ExecutionSession.ruleHash = Attempt.ruleHash = StateTransition.ruleHash</code>。这个不变式由 planner.ts 在会话初始化时通过 <code>hashRules()</code> 计算一次，然后注入到所有子结构中。</p>
+
+<h2 id="antibodyhit">3.6 AntibodyHit</h2>
+<p>抗体命中记录，捕获免疫系统加速规划器的每次事件：</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>interface AntibodyHit {</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  level<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>              <span class="co">// ACL-1 | ACL-2 | ACL-3 | ACL-4</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  signature<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>          <span class="co">// 失效模式签名</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  fixPath<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span>          <span class="co">// 修复路径</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  similarityScore<span class="op">:</span> <span class="dt">number</span><span class="op">;</span>    <span class="co">// Jaccard 相似度</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  action<span class="op">:</span> <span class="st">&quot;fast_path&quot;</span> <span class="op">|</span> <span class="st">&quot;injected_hint&quot;</span><span class="op">;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  llmCallsSaved<span class="op">:</span> <span class="dt">number</span><span class="op">;</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  estimatedTokensSaved<span class="op">:</span> <span class="dt">number</span><span class="op">;</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+
+<h2 id="validationcontext">3.7 ValidationContext <span class="v2-new">★ v2.2 新增</span></h2>
+<p>ValidationContext 是 v2.2 纯函数验证循环的核心数据结构，封装了当前账本和派生状态：</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>interface ValidationContext {</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  ledger<span class="op">:</span> StateTransition[]<span class="op">;</span>                      <span class="co">// 已确认的转移列表</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  currentState<span class="op">:</span> <span class="bu">Record</span><span class="op">&lt;</span><span class="dt">string</span><span class="op">,</span> <span class="dt">string</span>[]<span class="op">&gt;;</span>       <span class="co">// 派生状态快照</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>使用模式：初始时 <code>ctx = { ledger: [], currentState: rebuildState([], nsInit) }</code>。每次验证后，调用方将 transition 推入 ctx.ledger 并更新 ctx.currentState。这使得验证循环从 O(n²) 降为 O(n)——不再需要每次在循环内重建整个账本的状态。</p>
+</body>
+</html>
+<h1 id="第四章-ir-提取系统">第四章 IR 提取系统</h1>
+<h2 id="设计目标">4.1 设计目标</h2>
+<p>IR（Intermediate Representation，中间表示）是 Progmune 对目标代码库的模型。它将 TypeScript 源码抽象为结构化的函数签名列表，供 LLM 和验证器使用。IR 是系统与代码库之间的唯一接口——所有约束验证、协议检查、类型匹配都基于 IR 提供的信息。</p>
+
+<h2 id="技术实现">4.2 技术实现</h2>
+<p><code>extractIR(projectRoot: string): FunctionInfo[]</code> 使用 <code>ts-morph</code>（TypeScript 编译器 API 的包装）提取函数签名信息。ts-morph 提供了比正则表达式更可靠的 AST 级别解析能力。</p>
+
+<h3 id="提取范围">提取范围</h3>
+<ol type="1">
+<li><strong>函数声明</strong>（<code>function foo() {}</code>）—— 名称、参数、返回类型</li>
+<li><strong>箭头函数变量</strong>（<code>const foo = () =&gt; {}</code>）—— 包括简单箭头函数和由高阶函数（如 <code>debounce(() =&gt; {})</code>）包装的箭头函数。系统会递归检查 CallExpression 的参数来发现包装的箭头函数</li>
+<li><strong>JSDoc @protocol 注解</strong> —— 解析 <code>@protocol namespace=xxx pre_states=["A"] post_states=["B"] invalidate=["C"]</code> 格式，提取协议状态机定义</li>
+<li><strong>直接调用图</strong> —— 每个函数体内调用的其他函数名，用于 SVL-3 数据流分析和依赖关系推断</li>
+<li><strong>外部依赖</strong> —— 从调用图中识别非项目声明但被引用的函数（如 <code>fs.readFileSync</code>、<code>path.resolve</code>），从已知外部函数注册表（约 40+ 条目）补充签名信息</li>
+</ol>
+
+<h3 id="类型系统">类型系统</h3>
+<ul>
+<li>保留原始 TypeScript 类型字符串（<code>string</code>、<code>number</code>、<code>Promise&lt;User&gt;</code> 等）</li>
+<li>提供结构化类型细节（<code>typeDetail</code>）：联合类型展开（<code>string | null</code>）、泛型展开（<code>Array&lt;string&gt;</code>）</li>
+<li>标准化类型简写：<code>str</code>、<code>int</code>、<code>bool</code>、<code>dict</code>、<code>list</code> 用于 LLM prompt 紧凑表示</li>
+<li>类型别名展开：如果参数类型是项目中定义的类型别名，IR 会解析到最终的具体类型</li>
+</ul>
+
+<h3 id="外部函数注册表">外部函数注册表</h3>
+<p>系统维护了一个包含约 40 个常用 Node.js/JS 标准库函数的签名注册表，覆盖：</p>
+<ul>
+<li><code>fs</code> 模块（readFileSync、writeFileSync、existsSync、mkdirSync、readdirSync、unlinkSync 等）</li>
+<li><code>path</code> 模块（resolve、relative、dirname、basename、extname、join 等）</li>
+<li><code>JSON</code>（parse、stringify）</li>
+<li><code>console</code>（log、error、warn）</li>
+<li><code>process</code>（exit、cwd、env）</li>
+<li><code>crypto</code>（createHash、digest）</li>
+<li><code>child_process</code>（execSync、spawn）</li>
+<li><code>setTimeout</code>、<code>Math</code> 等</li>
+</ul>
+<p>过滤掉的 JS 内置方法（约 60+ 个）：<code>map</code>、<code>filter</code>、<code>reduce</code>、<code>toString</code>、<code>push</code>、<code>forEach</code>、<code>find</code>、<code>sort</code>、<code>slice</code> 等。这些方法不需要在 IR 中出现，因为它们不参与协议状态机的构建。</p>
+
+<h3 id="协议注解提取">协议注解提取</h3>
+<div class="sourceCode" id="cb11"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">parseProtocolFromJSDoc</span>(node<span class="op">:</span> <span class="dt">any</span>)<span class="op">:</span> FunctionInfo[<span class="st">&#39;protocol&#39;</span>] <span class="op">|</span> <span class="dt">undefined</span> {</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 解析格式: @protocol namespace=file pre_states=[&quot;A&quot;,&quot;B&quot;] post_states=[&quot;C&quot;] invalidate=[&quot;A&quot;]</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 提取: namespace (string), pre_states (string[]), post_states (string[]), invalidate (string[]?)</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>JSDoc 注解是协议规则的代码内定义方式，与 protocols.json 互补。两种来源合并时，IR 中的 @protocol 注解优先，但 JSON 中的 namespace 定义作为权威命名空间声明。</p>
+
+<h2 id="输出格式">4.3 输出格式</h2>
+<p><code>ir.json</code> 是一个 <code>FunctionInfo[]</code> 数组，每个条目包含：</p>
+<table>
+<thead><tr><th>字段</th><th>类型</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td><code>name</code></td><td><code>string</code></td><td>函数名</td></tr>
+<tr><td><code>params</code></td><td><code>ParamInfo[]</code></td><td>参数列表（name、type、typeDetail）</td></tr>
+<tr><td><code>returnType</code></td><td><code>string</code></td><td>返回类型</td></tr>
+<tr><td><code>file</code></td><td><code>string</code></td><td>源文件路径</td></tr>
+<tr><td><code>calls</code></td><td><code>string[]</code></td><td>直接调用的函数名</td></tr>
+<tr><td><code>external</code></td><td><code>boolean?</code></td><td>是否为外部函数</td></tr>
+<tr><td><code>description</code></td><td><code>string?</code></td><td>外部函数的描述</td></tr>
+<tr><td><code>protocol</code></td><td><code>object?</code></td><td>JSDoc @protocol 注解</td></tr>
+</tbody>
+</table>
+
+<h2 id="协议状态注解">4.4 协议状态注解</h2>
+<p>IR 提取本身也是 SSG 协议的一部分：</p>
+<pre><code>@protocol namespace=dev_pipeline pre_states=[] post_states=["IR_EXTRACTED"] invalidate=["IR_STALE"]</code></pre>
+<p>这使得整个 dev_pipeline 的顺序约束（先提取 IR，再验证 Action，再验证序列，再发射代码，最后记录会话）可以被 SSG 状态机统一管理。</p>
+
+<h1 id="第五章-约束验证引擎">第五章 约束验证引擎（Immune System）</h1>
+<h2 id="四层语义验证层">5.1 四层语义验证层（SVL）</h2>
+<p>Progmune 的免疫系统由四个递进的验证层组成，每一层捕获不同类别的语义异常。四层按顺序执行，前一层通过后才会进入下一层。这种分层设计使得错误可以尽早被捕获，并且每层的检查都是独立、可测试的。</p>
+
+<h3 id="svl-1">SVL-1：符号存在性（Symbol Existence）</h3>
+<p><strong>文件</strong>：<code>src/validator.ts</code>，函数 <code>validateAction()</code></p>
+<p><strong>检查内容</strong>：</p>
+<ul>
+<li>函数名是否在 IR 中存在（或在内置白名单中）</li>
+<li>动作类型（kind）是否合法（call、if、for、assign、return）</li>
+</ul>
+<p><strong>检查方式</strong>：O(1) 集合查找。IR 中的所有函数名在验证开始时构建为一个 Set，每个 Action 的 function 字段在 Set 中查找。</p>
+<p><strong>触发条件</strong>：LLM 幻觉出不存在的函数名、输出无效的动作结构、引用了项目代码库中不存在的 API。</p>
+<p><strong>白名单</strong>：内置白名单包括 console.log、JSON.parse 等常用 JS 标准库函数，这些不需要在 IR 中出现也能通过 SVL-1。</p>
+
+<h3 id="svl-2">SVL-2：类型完整性（Type Integrity）</h3>
+<p><strong>文件</strong>：<code>src/validator.ts</code>，函数 <code>validateAction()</code></p>
+<p><strong>检查内容</strong>：</p>
+<ul>
+<li>参数数量是否与 IR 签名匹配</li>
+<li>参数类型是否兼容（标准化后比较：str、int、bool、dict、list 等）</li>
+<li><code>any</code> 类型兼容所有其他类型（作为逃生舱）</li>
+</ul>
+<p><strong>检查方式</strong>：逐参数比较标准化类型字符串。类型标准化规则包括：将 TypeScript 类型映射到简化类型系统（string→str, number→int, boolean→bool, object→dict, Array→list），泛型参数展开为独立类型检查。</p>
+<p><strong>触发条件</strong>：LLM 调用函数时传入错误数量的参数、参数类型不匹配（如传入 string 但需要 number）、或者参数名与签名不符。</p>
+
+<h3 id="svl-3">SVL-3：数据流有效性（Dataflow Validity）</h3>
+<p><strong>文件</strong>：<code>src/validator.ts</code>，函数 <code>checkVariableFlow()</code></p>
+<p><strong>检查内容</strong>：</p>
+<ul>
+<li>变量是否在引用前被声明（通过 <code>assignTo</code> 或独立的 <code>assign</code> 动作）</li>
+<li>返回语句是否引用了已声明的变量</li>
+<li>条件表达式是否引用了未声明的变量</li>
+</ul>
+<p><strong>检查方式</strong>：声明追踪 —— 遍历 Action 序列，维护已声明变量的 <code>Map&lt;string, string&gt;</code>（变量名 → 类型）。对于每个值引用，区分字面量（字符串、数字、布尔）和变量引用（合法的 JavaScript 标识符且不在声明表中）。字面量直接通过，变量引用必须已在声明表中。</p>
+<p><strong>触发条件</strong>：LLM 生成的代码使用 <code>$变量名</code> 引用但目标变量尚未被任何 <code>call</code> 的 <code>assignTo</code> 或独立 <code>assign</code> 声明。这在 LLM 输出顺序混乱时常见——比如先引用了 <code>$token</code> 但生成 <code>$token</code> 的函数调用在后面。</p>
+
+<h3 id="svl-4">SVL-4：协议合法性（Protocol Legality）</h3>
+<p><strong>文件</strong>：<code>src/ssg-validator.ts</code></p>
+<p>这是最复杂的一层。SVL-4 检查函数调用是否遵循协议状态机定义的顺序约束。详见第六章和第七章。</p>
+<p><strong><span class="v2-new">★ v2.2</span></strong>：SVL-4 在 v2.2 中从有状态的 StateMachineValidator 重构为纯函数 <code>validateTransition()</code>。验证逻辑不再依赖可变实例状态，而是从 ValidationContext（包含当前 Ledger 和派生状态）中读取上下文。这使得 SVL-4 的每次检查都是独立可审计的。</p>
+
+<h2 id="验证器返回结构">5.2 验证器的返回结构</h2>
+<p>每个验证函数返回结构化结果：</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">// validateAction 和 validateActionSequence</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>{ valid<span class="op">:</span> <span class="dt">boolean</span><span class="op">;</span> errors<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span> violations<span class="op">:</span> ConstraintViolation[] }</span></code></pre></div>
+<p>每个 <code>error</code> 都有对应的 <code>ConstraintViolation</code>，携带完整的诊断信息（svl、violatedConstraint、actionIndex、description）。这个结构的设计使得验证结果既可以用于程序化处理（检查 valid 字段），也可以用于人类诊断（查看 violations 中的 description）。</p>
+
+<h2 id="批量验证流程">5.3 批量验证流程</h2>
+<p><code>validateActionSequence(actions: Action[])</code> 的完整流程：</p>
+<ol type="1">
+<li>遍历每个 Action，调用 <code>validateAction(action, i)</code> —— 执行 SVL-1 和 SVL-2 检查</li>
+<li>递归处理子 Action（if 的 thenActions/elseActions、for 的 bodyActions）—— 子 Action 的索引使用父 Action 的索引</li>
+<li>汇总所有 <code>ConstraintViolation[]</code></li>
+<li>如果前两层通过，执行 <code>checkVariableFlow()</code> —— SVL-3 数据流检查</li>
+<li>返回聚合的 <code>{ valid, errors, violations }</code></li>
+</ol>
+<p>注意：SVL-4（协议验证）不在此函数中执行，而是由 planner 在 SVL-1/2/3 通过后单独调用。这是为了支持 SSG 修复循环——如果 SVL-4 失败，planner 可以尝试 BFS 修复后再重新验证。</p>
+
+<h2 id="json-schema-预验证">5.4 JSON Schema 预验证</h2>
+<p><strong>文件</strong>：<code>src/planner.ts</code>，函数 <code>validateActionSchema()</code></p>
+<p>在 IR 感知验证之前，先进行结构完整性检查：</p>
+<ul>
+<li>每个 Action 是否有 <code>kind</code> 字段</li>
+<li><code>call</code> 是否有 <code>function</code>（字符串）和 <code>args</code>（数组）</li>
+<li><code>assign</code> 的 target 是否为合法变量名</li>
+<li><code>return</code> 是否在序列末尾（否则后续动作不可达）</li>
+<li>变量名是否重复赋值（同一个 assignTo 目标被两个不同的 call 使用）</li>
+<li><code>if</code>/<code>for</code> 的子 Action 结构递归检查</li>
+</ul>
+<p>这是 P2 阶段增加的防御层，在 JSON.parse 成功后、IR 验证前执行，捕获格式上合法但语义结构无效的输出。例如 LLM 可能输出 <code>{"kind": "call"}</code> 但没有 <code>function</code> 字段——这在 JSON 层面是合法的，但不符合 Action DSL 的要求。</p>
+
+<h1 id="第六章-ssg-状态机协议">第六章 SSG 状态机协议</h1>
+<h2 id="设计原理">6.1 设计原理</h2>
+<p>SSG（State-Guided Generation，状态引导生成）是 Progmune 的核心创新。它将函数调用建模为有限状态机中的状态转移，确保 LLM 生成的代码遵循正确的 API 调用顺序。</p>
+<p><strong>核心思想</strong>：每个函数声明其前置状态（调用前必须满足的状态）和后置状态（调用后产生的状态），验证器维护每个命名空间的独立状态集合，在每次函数调用时检查前置条件。这类似于操作系统中系统调用的权限检查——调用者必须处于正确的状态才能执行操作。</p>
+<p>例如，一个"生成 JWT"的函数不应该在"密码验证"之前被调用——就像你不可能在没有通过安检的情况下登机一样。SSG 状态机编码了这些顺序约束。</p>
+
+<h2 id="命名空间隔离">6.2 命名空间隔离</h2>
+<p>不同资源类型的状态机在独立的命名空间中运行：</p>
+<pre><code>_global:        UNAUTHENTICATED
+auth:           UNAUTHENTICATED → PASSWORD_VERIFIED → TOKEN_ISSUED → SESSION_ACTIVE
+file:           (empty) → FILE_OPEN → (read/write/close)
+db:             (empty) → DB_CONNECTED → (query/disconnect)
+dev_pipeline:   IR_STALE → IR_EXTRACTED → ACTION_VALIDATED → SEQUENCE_VALIDATED → CODE_EMITTED → SESSION_RECORDED</code></pre>
+<p>每个命名空间的状态变化互不影响。例如，auth 命名空间的 <code>SESSION_ACTIVE</code> 状态不会影响 file 命名空间的 <code>FILE_OPEN</code> 检查。这种隔离设计使得不同资源类型的协议可以独立演进，一个命名空间的规则变更不会破坏其他命名空间的验证逻辑。</p>
+
+<h2 id="核心数据结构">6.3 核心数据结构</h2>
+<h3 id="stateannotation">StateAnnotation（协议注解）</h3>
+<div class="sourceCode" id="cb15"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>interface StateAnnotation {</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  pre_states<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span>    <span class="co">// 调用前必须全部满足的状态</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  post_states<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span>   <span class="co">// 调用后新增的状态</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  invalidate<span class="op">?:</span> <span class="dt">string</span>[]<span class="op">;</span>   <span class="co">// 调用后失效的状态</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  namespace<span class="op">?:</span> <span class="dt">string</span><span class="op">;</span>      <span class="co">// 所属命名空间</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+
+<h3 id="ssgrejection">SSGRejection（协议拒绝）</h3>
+<div class="sourceCode" id="cb16"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>interface SSGRejection {</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  blocked<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>           <span class="co">// 被拦截的函数名</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  currentState<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span>    <span class="co">// 当前命名空间的当前状态</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  requiredState<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span>   <span class="co">// 被拦截函数所需的状态</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  missingFunctions<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span><span class="co">// 缺失的前置函数</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  fixPath<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span>         <span class="co">// BFS 找到的修复路径</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  namespace<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>         <span class="co">// 违规所在的命名空间</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+
+<h2 id="bfs-状态图搜索">6.4 BFS 状态图搜索（确定性修复）</h2>
+<p>当函数调用违反协议时，<code>findFixPath()</code>（v2.2: <code>findFixPathStatic()</code>）在违规命名空间内执行 BFS 搜索：</p>
+<pre><code>算法: BFS 状态图搜索
+输入: namespace, currentStates, targetPreStates
+输出: 最短函数调用路径 (string[])
+
+1. 收集命名空间内所有协议规则
+2. startState = currentStates 的排序集合
+3. 队列初始化为 [{states: startState, path: []}]
+4. visited 集合跟踪已访问状态
+5. while 队列非空:
+   a. 取出队首 {states, path}
+   b. 如果 targetPreStates 中的所有状态都在 states 中 → 返回 path
+   c. 遍历命名空间内的每个函数:
+      - 如果函数的 pre_states 都满足 → 模拟执行
+      - 计算 nextStates（添加 post_states，删除 invalidate）
+      - 如果 nextStates 未访问过 → 入队
+   d. 如果 visited > 1000 → 退出（状态爆炸保护）
+6. 回退: 单跳直接查找（逐个目标状态找能产出的函数）</code></pre>
+<p>这个算法的关键特性：</p>
+<ul>
+<li><strong>最优性</strong>：BFS 保证找到最短修复路径（最小步数）</li>
+<li><strong>状态爆炸保护</strong>：visited 集合上限 1000，防止在复杂状态图中无限扩展</li>
+<li><strong>回退机制</strong>：BFS 找不到时，退化为贪心单跳匹配——逐个检查 targetPreStates 中的每个状态，找到能产生该状态的函数</li>
+</ul>
+
+<h3 id="ssg-repair">确定性的 SSG 修复（<code>attemptSSGRepair()</code>）</h3>
+<p>当 SSG 拒绝发生时，系统不仅仅报告错误——它尝试自动修复：</p>
+<ol type="1">
+<li>从 <code>SSGRejection.fixPath</code> 获取缺失函数的调用链</li>
+<li>为每个函数创建合成 Action（从 IR 推断参数类型，生成形参占位符）</li>
+<li>在被拦截的函数调用前插入修复函数</li>
+<li>重新验证修复后的序列</li>
+<li>如果仍违规且存在递归修复路径，尝试嵌套修复</li>
+</ol>
+<p>只有修复成功（重新验证通过）才使用修复后的序列。这保证了确定性修复的安全性和正确性——不会因为修复而引入新的违规。</p>
+
+<h2 id="multi-namespace-状态快照">6.5 Multi-namespace 状态快照</h2>
+<p><code>snapshotNamespaceStates()</code>（v2.2: <code>rebuildState()</code>）返回 <code>Record&lt;string, string[]&gt;</code>：</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;_global&quot;</span><span class="op">:</span> [<span class="st">&quot;UNAUTHENTICATED&quot;</span>]<span class="op">,</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;auth&quot;</span><span class="op">:</span> [<span class="st">&quot;SESSION_ACTIVE&quot;</span>]<span class="op">,</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;file&quot;</span><span class="op">:</span> [<span class="st">&quot;FILE_OPEN&quot;</span>]<span class="op">,</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;dev_pipeline&quot;</span><span class="op">:</span> [<span class="st">&quot;IR_EXTRACTED&quot;</span><span class="op">,</span> <span class="st">&quot;ACTION_VALIDATED&quot;</span>]</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>每个 StateTransition 的 <code>statesBefore</code> 和 <code>statesAfter</code> 使用此格式，实现对每个命名空间的独立追踪。<code>acquired</code> 和 <code>invalidated</code> 字段预计算每次转移的变化（仅针对当前命名空间），供观测站直接使用而无需重新计算。</p>
+
+<h2 id="协议定义格式">6.6 协议定义格式</h2>
+<p><code>protocols.json</code> 是协议的声明式定义（17 条规则，4 个命名空间），支持：</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;namespaceInitialStates&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;_global&quot;</span><span class="fu">:</span> <span class="st">&quot;UNAUTHENTICATED&quot;</span><span class="fu">,</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;auth&quot;</span><span class="fu">:</span> <span class="st">&quot;UNAUTHENTICATED&quot;</span><span class="fu">,</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;dev_pipeline&quot;</span><span class="fu">:</span> <span class="st">&quot;IR_STALE&quot;</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;rules&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;verify_password&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;namespace&quot;</span><span class="fu">:</span> <span class="st">&quot;auth&quot;</span><span class="fu">,</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;pre_states&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;UNAUTHENTICATED&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;post_states&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;PASSWORD_VERIFIED&quot;</span><span class="ot">]</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>协议规则也可以从代码中的 JSDoc <code>@protocol</code> 注解提取。两种来源合并时，IR 中的 @protocol 注解优先，但 JSON 中的 namespace 定义作为权威命名空间声明。</p>
+
+<h1 id="第七章-semantic-ledger-runtime">第七章 Semantic Ledger Runtime <span class="v2-new">★ v2.2 核心新增</span></h1>
+
+<h2 id="ledger-设计原理">7.1 设计原理</h2>
+<p>v2.1 中，<code>StateMachineValidator</code> 实例维护可变状态（<code>Map&lt;string, Set&lt;string&gt;&gt;</code>），<code>StateTransition[]</code> 是被动日志。验证决策来自可变对象，而非不可变的事件记录。</p>
+<p>v2.2 反转这一关系：<strong>StateTransition[] 成为系统唯一真相源（Single Source of Truth），命名空间状态从中派生。</strong></p>
+
+<blockquote>
+<p><strong>核心洞察</strong>：Event Sourcing 不仅使系统可审计——它将验证逻辑从有状态对象中解放出来，变为可组合、可测试、可在任何上下文中独立验证的纯函数。一个 validateTransition() 调用不依赖任何外部可变状态——给它相同的输入，它永远返回相同的输出。</p>
+</blockquote>
+
+<h2 id="纯函数架构">7.2 纯函数架构（Pure Function Architecture）</h2>
+<p>v2.2 将所有验证逻辑提取为 16 个纯函数，消除对 StateMachineValidator 可变实例的依赖。其中 5 个核心函数构成了验证引擎的主体：</p>
+
+<table>
+<thead><tr><th>纯函数</th><th>签名</th><th>职责</th></tr></thead>
+<tbody>
+<tr><td><code>rebuildState()</code></td><td><code>(ledger, nsInit?) → Record&lt;string, string[]&gt;</code></td><td>从 Ledger 折叠重建 per-namespace 状态快照。遍历整个 Ledger，对每条有效转移应用其 acquired/invalidated 增量。无效转移被跳过。</td></tr>
+<tr><td><code>applyTransitionDelta()</code></td><td><code>(stateMap, transition) → void</code></td><td>将单条转移的增量应用到可变状态映射。用于增量更新（O(1) per transition），避免在循环中反复调用 rebuildState()。</td></tr>
+<tr><td><code>validateTransition()</code></td><td><code>(ctx, fn, idx, rules, nsInit, hash) → {valid, transition, rejection?}</code></td><td>纯函数验证单条转移，无副作用。检查 ctx.currentState 是否满足候选函数的 pre_states，构建 statesBefore/statesAfter，运行 Invariant-1 自检。</td></tr>
+<tr><td><code>checkLedgerConsistency()</code></td><td><code>(ledger, nsInit?) → {consistent, violations[]}</code></td><td>单遍 O(n) 检查整个 Ledger 的 Invariant-0 + Invariant-1。使用 applyTransitionDelta() 增量维护预期状态，不与 rebuildState() 重复计算。</td></tr>
+<tr><td><code>findFixPathStatic()</code></td><td><code>(rules, ns, current, target) → string[]</code></td><td>BFS 静态搜索修复路径。不依赖任何实例状态，所有输入显式传递。</td></tr>
+</tbody>
+</table>
+
+<p>其余 11 个纯函数覆盖完整性、查询和诊断：<code>hashRules()</code>、<code>hashLedger()</code>、<code>diffLedgers()</code>、<code>findProducer()</code>、<code>findConsumer()</code>、<code>findViolations()</code>、<code>findTransition()</code>、<code>listAllStates()</code>、<code>explainRejection()</code>、<code>rejectionToJSON()</code>、<code>toSnapshot()</code>。</p>
+
+<h3 id="validationcontext-详解">ValidationContext — O(n) 循环模式</h3>
+<p>v2.1 在验证循环中每次调用 <code>rebuildState()</code>（O(n) per iteration），导致总复杂度 O(n²)。v2.2 引入 <code>ValidationContext</code> 预计算状态，降为 O(n)：</p>
+
+<div class="sourceCode" id="cb20"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>interface ValidationContext {</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  ledger<span class="op">:</span> StateTransition[]<span class="op">;</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  currentState<span class="op">:</span> <span class="bu">Record</span><span class="op">&lt;</span><span class="dt">string</span><span class="op">,</span> <span class="dt">string</span>[]<span class="op">&gt;;</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="co">// O(n) 验证循环 —— 每次迭代 O(1) 状态更新：</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>ctx <span class="op">=</span> { ledger<span class="op">:</span> []<span class="op">,</span> currentState<span class="op">:</span> <span class="fu">rebuildState</span>([]<span class="op">,</span> nsInit) }</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> each action<span class="op">:</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  { valid<span class="op">,</span> transition } <span class="op">=</span> <span class="fu">validateTransition</span>(ctx<span class="op">,</span> fn<span class="op">,</span> i<span class="op">,</span> rules<span class="op">,</span> nsStates<span class="op">,</span> ruleHash)</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  ctx<span class="op">.</span><span class="at">ledger</span><span class="op">.</span><span class="fu">push</span>(transition)</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>  ctx<span class="op">.</span><span class="at">currentState</span> <span class="op">=</span> transition<span class="op">.</span><span class="at">statesAfter</span>  <span class="co">// O(1) 增量更新</span></span></code></pre></div>
+
+<p><strong>向后兼容</strong>：<code>StateMachineValidator</code> 类保留，内部全部委托给纯函数：</p>
+<ul>
+<li><code>apply()</code> → 委托给 <code>validateTransition()</code></li>
+<li><code>applyWithTransition()</code> → 委托给 <code>validateTransition()</code></li>
+<li><code>snapshotNamespaceStates()</code> → 委托给 <code>rebuildState(this.ledger)</code></li>
+<li><code>getTrace()</code> → 返回 <code>this.ledger</code></li>
+</ul>
+<p>生产代码（planner、semantic-trace、check、p0_ssg_demo）全部直接使用纯函数，零 StateMachineValidator 实例化。</p>
+
+<h2 id="不变式系统">7.3 不变式系统（Invariant System）</h2>
+<p>v2.2 引入双重不变式，为每条 StateTransition 提供类似 DNA 聚合酶校对的一致性保证。两个不变式互补——Invariant-0 保证转移与历史一致，Invariant-1 保证转移内部自洽。</p>
+
+<h3 id="invariant-0">Invariant-0 — Before Consistency（前置一致性）</h3>
+<blockquote>
+<p><strong>transition.statesBefore ≡ rebuildState(ledger[0..i-1])</strong><br/>
+转移执行前的状态快照必须等于从历史 Ledger 重建的状态。</p>
+</blockquote>
+<p>这个不变式回答的问题是："转移声称自己是在某个状态下执行的，这个声称与历史记录一致吗？"如果一条转移声称自己是在 <code>auth: [TOKEN_ISSUED]</code> 状态下执行的，但从历史 Ledger 重建出来的状态是 <code>auth: [PASSWORD_VERIFIED]</code>，那么 Invariant-0 就会标记违规。这意味着要么转移的 statesBefore 被错误记录，要么历史 Ledger 缺失了某些转移。</p>
+
+<h3 id="invariant-1">Invariant-1 — Delta Consistency（增量一致性）</h3>
+<blockquote>
+<p><strong>transition.statesAfter ≡ applyDelta(statesBefore, acquired, invalidated)</strong><br/>
+转移执行后的状态快照必须等于对执行前状态应用增量的结果。</p>
+</blockquote>
+<p>这个不变式回答的问题是："转移声称自己产生的效果，与它记录的增量变化一致吗？"Invariant-1 捕获 Invariant-0 漏掉的 <em>内部不一致</em> 转移——即 statesBefore 与历史一致但 statesAfter 与自身的 acquired/invalidated 不符的转移：</p>
+
+<div class="sourceCode" id="cb21"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">// 声称获取 TOKEN_ISSUED，但 statesAfter 中没有 —— Invariant-1 会捕获</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;statesBefore&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="dt">&quot;auth&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;PASSWORD_VERIFIED&quot;</span><span class="ot">]</span><span class="fu">}</span><span class="fu">,</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;acquired&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;TOKEN_ISSUED&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;invalidated&quot;</span><span class="fu">:</span> <span class="ot">[]</span><span class="fu">,</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;statesAfter&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="dt">&quot;auth&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;PASSWORD_VERIFIED&quot;</span><span class="ot">]</span><span class="fu">}</span>    <span class="co">// ← TOKEN_ISSUED 缺失！</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+
+<p>Invariant-1 是关键的安全网：即使历史账本完全一致，单条转移内部的记录错误（如 acquired 和 statesAfter 不匹配）也会被捕获。这种错误可能由序列化 bug、并发写入问题或手动编辑会话 JSON 文件引入。</p>
+
+<h3 id="double-entry">不变式可视化</h3>
+<pre><code>  Ledger: [T0, T1, T2, ... Ti]
+
+  Invariant-0 校验:                 Invariant-1 校验:
+  ┌──────────────────────┐         ┌──────────────────────┐
+  │ Ti.statesBefore      │         │ Ti.statesBefore      │
+  │        ≡             │         │   + acquired         │
+  │ rebuildState([T0..   │         │   - invalidated      │
+  │   Ti-1])             │         │        ≡             │
+  │                      │         │ Ti.statesAfter       │
+  │ → 历史一致性         │         │ → 增量自洽性         │
+  └──────────────────────┘         └──────────────────────┘</code></pre>
+
+<h3 id="invariant-check">checkLedgerConsistency() 算法</h3>
+<p>单个 O(n) 遍历完成两个不变式的检查：</p>
+<pre><code>算法: checkLedgerConsistency(ledger, nsInit)
+输入: StateTransition[], Map&lt;string, string&gt;
+输出: { consistent: boolean, violations: LedgerConsistencyViolation[] }
+
+1. 初始化 stateMap = fromSnapshot(rebuildState([], nsInit))
+2. 初始化 violations = []
+3. for i = 0; i < ledger.length; i++:
+   a. T = ledger[i]
+   b. // Invariant-0: statesBefore 是否等于当前 stateMap?
+   c. expected = toSnapshot(stateMap)
+   d. if JSON.stringify(norm(T.statesBefore)) !== JSON.stringify(norm(expected)):
+        violations.push({ index: i, invariant: "before-consistency", expected, actual: T.statesBefore })
+   e. // Invariant-1: statesAfter 是否等于 applyDelta(statesBefore, acquired, invalidated)?
+   f. expectedAfter = applyDelta(T.statesBefore, T.acquired, T.invalidated)
+   g. if JSON.stringify(norm(T.statesAfter)) !== JSON.stringify(norm(expectedAfter)):
+        violations.push({ index: i, invariant: "delta-consistency", expected: expectedAfter, actual: T.statesAfter })
+   h. // 更新 stateMap（仅当转移有效时）
+   i. if T.valid: applyTransitionDelta(stateMap, T)
+4. return { consistent: violations.length === 0, violations }</code></pre>
+<p>关键实现细节：使用 <code>applyTransitionDelta()</code> 增量更新 stateMap，而不是在循环内调用 <code>rebuildState()</code>（那会导致 O(n²)）。两个不变式在同一个循环中完成，不需要额外的遍历。</p>
+
+<h2 id="约束快照">7.4 约束快照（Constraint Snapshot）</h2>
+<p><code>hashRules(rules: Map&lt;string, StateAnnotation&gt;): string</code> 对协议规则集进行确定性 SHA256 哈希。规则按函数名排序，每个规则的字段按固定顺序序列化，确保相同规则集永远产生相同的哈希：</p>
+
+<pre><code>  Transition @ 2026: ruleHash = "7d8f9a..."
+  2027 年规则变更 → ruleHash = "a1b2c3..."
+  回放 2026 Ledger → ruleHash 不匹配
+  → "确定性回放不可行：约束集已变更"</code></pre>
+
+<p><code>ruleHash</code> 在会话初始化时由 planner.ts 计算一次，然后注入到每条 StateTransition、每个 Attempt 和 ExecutionSession 中。这个不变式保证了从单条转移到完整会话的约束谱系一致性。</p>
+
+<h2 id="ledger-完整性">7.5 账本完整性指纹（Ledger Integrity Fingerprint）</h2>
+<p><code>hashLedger(ledger: StateTransition[]): string</code> 对整个 Ledger 进行确定性 SHA256 哈希：</p>
+
+<div class="sourceCode" id="cb23"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co">// 规范化排序后哈希，确保确定性</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">hashLedger</span>(ledger) <span class="co">→</span> <span class="st">&quot;b44f80a2b4d1d1f6&quot;</span></span></code></pre></div>
+
+<p>每条转移的 <code>statesBefore</code> 和 <code>statesAfter</code> 在哈希前按命名空间排序，确保 JSON 序列化的确定性。这个指纹是一个防篡改的完整性证明——如果 Ledger 文件被手动修改（即使是一个空格），指纹也会改变。check.ts 在每次健康检查时输出当前全局账本的完整性指纹。</p>
+
+<h2 id="ledger-query-api">7.6 Ledger Query API</h2>
+<p>v2.2 将账本转化为可查询数据库，提供 5 个纯查询函数：</p>
+
+<table>
+<thead><tr><th>查询函数</th><th>签名</th><th>用途</th></tr></thead>
+<tbody>
+<tr><td><code>findProducer(state, L)</code></td><td><code>(state: string, ledger: StateTransition[]) → TransitionMatch[]</code></td><td>查找哪些转移产生了指定状态（按 acquired 匹配）</td></tr>
+<tr><td><code>findConsumer(state, L)</code></td><td><code>(state: string, ledger: StateTransition[]) → TransitionMatch[]</code></td><td>查找哪些转移以指定状态为前置条件</td></tr>
+<tr><td><code>findViolations(L)</code></td><td><code>(ledger: StateTransition[]) → StateTransition[]</code></td><td>返回所有 invalid 转移</td></tr>
+<tr><td><code>findTransition(idx, L)</code></td><td><code>(index: number, ledger: StateTransition[]) → StateTransition | null</code></td><td>按 actionIndex 查找转移</td></tr>
+<tr><td><code>listAllStates(L)</code></td><td><code>(ledger: StateTransition[]) → {ns: string, state: string}[]</code></td><td>列出账本中出现的所有 (namespace, state) 对</td></tr>
+</tbody>
+</table>
+
+<p>这些函数是纯函数——它们不依赖任何外部状态或可变对象。给定相同的 Ledger，永远返回相同的结果。这为终端观测站（semantic-trace.ts）的 <code>--query</code> 和 <code>--query-all</code> 命令提供了底层支持。</p>
+
+<h2 id="ledger-diff">7.7 账本差异比较（Ledger Diff）</h2>
+<p><code>diffLedgers(ledgerA, ledgerB): LedgerDiff</code> 比较两个账本，返回结构化差异报告：</p>
+
+<div class="sourceCode" id="cb24"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>interface LedgerDiff {</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  unchanged<span class="op">:</span> <span class="dt">number</span><span class="op">;</span>       <span class="co">// 两个账本中 hash 完全相同的转移数</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  onlyInA<span class="op">:</span> <span class="dt">number</span><span class="op">;</span>         <span class="co">// 仅在 A 中出现的转移数</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  onlyInB<span class="op">:</span> <span class="dt">number</span><span class="op">;</span>         <span class="co">// 仅在 B 中出现的转移数</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  changed<span class="op">:</span> <span class="dt">number</span><span class="op">;</span>         <span class="co">// 索引相同但 hash 不同的转移数</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+
+<pre><code>  Ledger Diff: A (2 transitions) vs B (3 transitions)
+  ├── Unchanged:  1      ← 转移 hash 完全相同
+  ├── Only in A:  0      ← 仅在 A 中出现的
+  ├── Only in B:  1      ← 仅在 B 中出现的
+  └── Changed:    1      ← 索引相同但 hash 不同</code></pre>
+
+<p>Ledger Diff 的用途包括：比较同一意图的两次不同执行（看 LLM 输出如何变化）、比较修复前后的账本（看 SSG 修复插入了什么）、比较规则变更前后的回放结果（检测约束变更的影响）。终端可通过 <code>semantic-trace.ts --diff-ledgers &lt;A&gt; &lt;B&gt;</code> 使用。</p>
+
+<h2 id="三大支柱">7.8 三大支柱：可重放 → 可查询 → 可证明</h2>
+<pre><code>          ┌─────────────────────────────────┐
+          │         PROVABLE                 │
+          │  hashLedger + ruleHash           │
+          │  + diffLedgers                   │
+          │  → 防篡改完整性                   │
+          │  → 跨版本约束谱系                  │
+          │  → 账本差异审计                    │
+          │        ┌───────────────────┐     │
+          │        │    QUERYABLE       │     │
+          │        │  findProducer      │     │
+          │        │  findConsumer      │     │
+          │        │  findViolations    │     │
+          │        │  findTransition    │     │
+          │        │  listAllStates     │     │
+          │        │   ┌─────────┐      │     │
+          │        │   │REPLAYABLE│     │     │
+          │        │   │rebuildSt│      │     │
+          │        │   │validateTr│     │     │
+          │        │   │Invariants│     │     │
+          │        │   │O(n) loop │     │     │
+          │        │   └─────────┘      │     │
+          │        └───────────────────┘     │
+          └─────────────────────────────────┘</code></pre>
+<p class="diagram-title">图 7.1: Semantic Ledger Runtime 三大支柱——从核心到外延的能力递进</p>
+
+<p>这三大支柱是递进关系：</p>
+<ol type="1">
+<li><strong>Replayable（可重放）</strong>是基础——任何人都可以从空状态出发重放 Ledger 得到相同的状态。没有这个能力，后续的查询和证明都无从谈起。</li>
+<li><strong>Queryable（可查询）</strong>建立在可重放之上——既然状态可以从 Ledger 确定性派生，我们就可以在 Ledger 上运行结构化查询。findProducer/Consumer 回答"谁产生了/消费了某个状态"；findViolations 回答"哪些转移有问题"。</li>
+<li><strong>Provable（可证明）</strong>是最外层——hashLedger 提供防篡改的完整性证明，ruleHash 提供跨版本的约束谱系追溯，diffLedgers 提供审计级的差异比较。</li>
+</ol>
+
+<h2 id="不变式验证结果">7.9 实验验证</h2>
+<p>对 6 个真实执行会话（11 条转移：7 有效，4 无效）进行完整检查：</p>
+<ul>
+<li><strong>全部通过</strong> Invariant-0 + Invariant-1 + Replay 三重验证。所有 6 个会话的不变式检查均返回 <code>consistent: true</code>。</li>
+<li><strong>完整性指纹</strong>: <code>2f701ec86643dc63</code>（全局账本的 SHA256 指纹，在 check.ts Step 4 中计算和输出）</li>
+<li><strong>Invariant-1 负向测试</strong>：手工构造内部不一致转移（acquired=["TOKEN_ISSUED"]、statesAfter 中无 TOKEN_ISSUED）→ 正确检出 1 个 delta-consistency 违规，验证了不变式系统的故障检测能力</li>
+<li><strong>纯函数验证</strong>：p0_ssg_demo.ts 覆盖 7 个端到端场景（含 auth 协议完整流程、dev_pipeline 5 阶段验证、协议违规拦截、Invariant 负向测试、Query API 演示），零 StateMachineValidator 实例化</li>
+</ul>
+
+<h1 id="第八章-规划器">第八章 规划器（Planner）<span class="v2-new">★ v2.2 更新</span></h1>
+<h2 id="核心规划循环">8.1 核心规划循环</h2>
+<p><code>plan(userIntent: string): Promise&lt;Action[]&gt;</code> 是系统的核心入口，位于 <code>src/planner.ts</code>（~920 行 <span class="v2-new">★ v2.2 更新</span>）。</p>
+
+<h3 id="规划流程">规划流程</h3>
+<pre><code>1. 初始化
+   ├── 加载 IR (ir.json)
+   ├── 创建 ExecutionSession { sessionId, intent, attempts: [] }
+   ├── hashRules() 计算 ruleHash  ★ v2.2
+   ├── 创建 IRSnapshot (用于确定性回放)
+   └── 估算 prompt tokens
+
+2. 快速通道检查
+   ├── 语义模板缓存 (memory-layer)
+   │   └── 命中 &amp; successRate ≥ 0.8 &amp; useCount ≥ 2 → 直接返回
+   └── 抗体免疫查询 (failure-corpus)
+       ├── ACL-4: 0 LLM 调用，直接构建 Action[]
+       └── ACL-3: 注入修复路径提示到 prompt
+
+3. 函数排序与提示构建
+   ├── Jaccard 相似度排序（意图关键词 vs 函数名）
+   ├── 取 top-15 函数
+   └── 构建紧凑函数列表
+
+4. 检查点恢复（如果存在之前的检查点）
+
+5. 主重试循环 (maxRetries = 3)
+   ├── LLM 调用 (chat 或 generate, temperature=0.0)
+   ├── parseActionJSON() 解析输出
+   ├── validateActionSchema() JSON 结构预验证
+   ├── enrichActions() 补充 IR 元数据
+   ├── validateActionSequence() SVL-1/2/3 序列验证
+   ├── ★ v2.2 validateTransition() 纯函数 SVL-4 验证 (使用 ValidationContext)
+   ├── attemptSSGRepair() 确定性修复
+   └── checkSemantic() 语义合约验证
+
+6. ★ v2.2 checkLedgerConsistency() 不变式验证
+   └── 对整个 Attempt 的 Ledger 运行 Invariant-0 + Invariant-1
+
+7. 失败降级
+   └── generateFallbackPlan() 本地规则回退</code></pre>
+
+<p><strong><span class="v2-new">★ v2.2 关键变更</span></strong>：步骤 5 中的 SVL-4 验证不再实例化 StateMachineValidator。而是使用 ValidationContext 模式：</p>
+<pre><code>  const ctx: ValidationContext = { ledger: [], currentState: rebuildState([], nsInit) };
+  for (let i = 0; i < actions.length; i++) {
+    const { valid, transition, rejection } = validateTransition(ctx, fn, i, rules, nsStates, ruleHash);
+    ctx.ledger.push(transition);
+    if (valid) ctx.currentState = transition.statesAfter;
+    // 处理违规...
+  }
+  // 循环结束后:
+  checkLedgerConsistency(ctx.ledger, nsInit);  // 不变式验证</code></pre>
+
+<h2 id="llm-交互设计">8.2 LLM 交互设计</h2>
+<h3 id="系统提示">系统提示（System Prompt）</h3>
+<pre><code>你是程序合成助手。只输出 JSON 数组，不输出解释。
+
+格式（紧凑一行）：
+[{"f":"函数名","to":"变量名","a":[{"n":"参数名","t":"类型","v":值}]},{"r":"变量名"}]
+
+铁律：只输出 JSON 数组，双引号，不输出解释</code></pre>
+<p>关键设计决策：</p>
+<ul>
+<li><strong>System/User 分离</strong>：静态规则放 system prompt，动态内容（函数列表、意图）放 user prompt。利用各 LLM 平台的 system prompt 缓存机制降低延迟和成本</li>
+<li><strong>温度 0.0</strong>：所有 LLM 调用使用 <code>temperature: 0.0</code>，最大化确定性</li>
+<li><strong>紧凑 JSON</strong>：单字母键名减少 token 消耗（f=function, to=assignTo, a=args, n=name, t=type, v=value, r=return）</li>
+</ul>
+
+<h3 id="提示构建策略">提示构建策略</h3>
+<ul>
+<li>从 IR 中选出与意图关键词 Jaccard 相似度最高的 top-15 函数</li>
+<li>使用 <code>buildCompactFuncList()</code> 生成紧凑格式：<code>fnName(p1:type,p2:type)-&gt;returnType</code></li>
+<li>如果检测到意图中提到的函数名已在 IR 中存在，将其加入禁止列表（防止 LLM 尝试"实现"已有函数）</li>
+<li>重试时在 prompt 中注入具体错误信息（来自上轮验证失败的 ConstraintViolation[]）</li>
+</ul>
+
+<h2 id="免疫加速机制">8.3 免疫加速机制</h2>
+<h3 id="语义模板缓存">语义模板缓存</h3>
+<p><code>findSemanticTemplate(userIntent)</code> 检查 memory-layer 中是否有高置信度（successRate ≥ 0.8, 使用 ≥ 2 次）的模板匹配。命中后直接返回缓存的 Action[]，跳过 LLM 调用。</p>
+
+<h3 id="抗体推理">抗体推理</h3>
+<p><code>queryAntibodies(userIntent, minACL)</code> 查询免疫记忆：</p>
+<ol type="1">
+<li>收集所有失败模式及其修复路径</li>
+<li>按 ACL 等级过滤（默认 ACL-3+）</li>
+<li>计算当前意图与历史意图的 Jaccard 相似度（基于词语重叠）</li>
+<li>过滤相似度 ≥ 0.2 的结果</li>
+<li>按相似度降序排序</li>
+</ol>
+<p><strong>ACL-4（全局稳定抗体）</strong>：修复路径在 ≥ 10 次出现且跨 ≥ 5 个不同意图。触发时完全跳过 LLM，直接从修复路径构建 Action[]。</p>
+<p><strong>ACL-3（跨任务验证抗体）</strong>：出现在 ≥ 4 次或跨 ≥ 3 个不同意图。将修复路径作为提示注入 LLM prompt，帮助 LLM 生成正确的调用顺序。</p>
+
+<h2 id="规划器检查点">8.4 规划器检查点</h2>
+<p><code>saveCheckpoint()</code> / <code>loadCheckpoint()</code> 实现执行持久化：</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>interface PlannerCheckpoint {</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  intent<span class="op">:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  attemptIndex<span class="op">:</span> <span class="dt">number</span><span class="op">;</span>        <span class="co">// 已完成的尝试次数</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  sessionAttempts<span class="op">:</span> Attempt[]<span class="op">;</span>   <span class="co">// 序列化的尝试记录</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  currentPrompt<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>        <span class="co">// 当前重试 prompt</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  useSystem<span class="op">:</span> <span class="dt">boolean</span><span class="op">;</span>           <span class="co">// 是否使用 system prompt</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  timestamp<span class="op">:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>检查点用 intent 的 base64 hash 作为文件名，存储于 <code>.progmune_corpus/checkpoints/</code>。在 LLM 调用失败或进程重启后可从检查点恢复。</p>
+
+<h2 id="降级策略">8.5 降级策略</h2>
+<p>当 LLM 3 次重试全部失败时，系统进入本地规则回退：</p>
+<p><code>generateFallbackPlan(intent, ir)</code> 从意图中提取关键词，匹配 IR 中名称包含这些关键词的函数，生成简单的顺序调用 Action[]。这个回退方案保证了系统在任何情况下都能产生输出（尽管质量可能不如 LLM 生成的方案）。</p>
+
+<h1 id="第九章-免疫记忆与抗体推理">第九章 免疫记忆与抗体推理</h1>
+<h2 id="失败语料库">9.1 失败语料库（Failure Corpus）</h2>
+<p><strong>文件</strong>：<code>src/failure-corpus.ts</code>（~650 行）</p>
+<p>失败语料库是 Progmune 的"免疫记忆"——存储每次约束违规的详细记录，支持模式挖掘、统计分析和抗体生成。就像生物免疫系统在感染后保留记忆 B 细胞以便快速应对相同的病原体，Progmune 的失败语料库在每次约束违规后保留完整的上下文，以便未来遇到相似意图时加速修复。</p>
+
+<h3 id="数据存储">数据存储</h3>
+<pre><code>.progmune_corpus/
+├── .seq                    # 全局递增序列号（保证跨进程唯一 ID）
+├── sessions/               # 执行会话（ExecutionSession JSON）
+│   └── sess_*.json
+├── checkpoints/            # 规划器检查点
+│   └── ckpt_*.json
+└── YYYY-MM-DD/             # 按日期分区的失败记录
+    └── fail_*.json</code></pre>
+
+<h3 id="failurerecord-结构">FailureRecord 结构</h3>
+<div class="sourceCode" id="cb29"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>interface FailureRecord {</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  id<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>                        <span class="co">// fail_&lt;timestamp&gt;_&lt;seq&gt;</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  timestamp<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>                 <span class="co">// ISO 8601</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  intent<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>                    <span class="co">// 用户意图</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  projectFunctions<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span>        <span class="co">// IR 中的全部函数名</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  violatedSVL<span class="op">:</span> SVL<span class="op">;</span>                  <span class="co">// 违规层级</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  constraintType<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>            <span class="co">// 具体约束类型</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>  actionSequence<span class="op">:</span> <span class="dt">any</span>[]<span class="op">;</span>             <span class="co">// 导致违规的动作序列</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>  errorDetail<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>               <span class="co">// 详细错误信息</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>  ssgState<span class="op">?:</span> <span class="dt">string</span>[]<span class="op">;</span>               <span class="co">// 违规时的 SSG 状态</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>  ssgTrace<span class="op">?:</span> { <span class="op">...</span> }[]<span class="op">;</span>              <span class="co">// SSG 完整跟踪</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>  ssgFixPath<span class="op">?:</span> <span class="dt">string</span>[]<span class="op">;</span>             <span class="co">// SSG 修复路径</span></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>  ssgMissingFunctions<span class="op">?:</span> <span class="dt">string</span>[]<span class="op">;</span>    <span class="co">// 缺失的前置函数</span></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>  plannerAttempt<span class="op">:</span> <span class="dt">number</span><span class="op">;</span>            <span class="co">// 第几次尝试</span></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>  plannerRetryTotal<span class="op">:</span> <span class="dt">number</span><span class="op">;</span>         <span class="co">// 总重试次数</span></span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+
+<h2 id="会话归一化">9.2 会话归一化</h2>
+<p><code>normalizeSession()</code> 检测新旧两种会话格式：</p>
+<ul>
+<li><strong>新格式</strong>（ExecutionSession）：<code>attempts[0].violations</code> 存在</li>
+<li><strong>旧格式</strong>（IntentSession）：<code>attempts[0].violatedSVL</code> 存在</li>
+</ul>
+<p>旧格式通过 <code>convertOldSession()</code> 上转为 ExecutionSession，确保所有下游消费者看到统一的接口。这个归一化层使得系统可以无缝处理 v2.0、v2.1 和 v2.2 产生的会话数据。</p>
+
+<h2 id="失败基因组">9.3 失败基因组（Failure Genome）</h2>
+<p><code>getFailureGenome()</code> 对所有会话进行统计分析：</p>
+<table>
+<thead><tr><th>指标</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td><code>totalFailures</code></td><td>总违规次数</td></tr>
+<tr><td><code>bySVL</code></td><td>按 SVL 层级的分布（{ "SVL-1": n, "SVL-2": m, ... }）</td></tr>
+<tr><td><code>byConstraintType</code></td><td>按约束类型的分布（如 "function_not_found": n）</td></tr>
+<tr><td><code>topPatterns</code></td><td>最常见的失效模式（SVL:constraintType 组合，按频次排序）</td></tr>
+<tr><td><code>commonFixPaths</code></td><td>最常用的修复路径（按使用次数排序，含 count 和 fixPath）</td></tr>
+<tr><td><code>averageRetriesToSuccess</code></td><td>平均成功所需重试次数</td></tr>
+</tbody>
+</table>
+
+<h2 id="抗体推理引擎">9.4 抗体推理引擎</h2>
+<h3 id="acl-等级体系">ACL 等级体系</h3>
+<pre><code>ACL-1 (单例观察):       count ≥ 1
+ACL-2 (重复观察):       count ≥ 2
+ACL-3 (跨任务验证):     count ≥ 4 或 distinctIntents ≥ 3
+ACL-4 (全局稳定):       count ≥ 10 且 distinctIntents ≥ 5</code></pre>
+<p>阈值可通过环境变量配置：</p>
+<ul>
+<li><code>PROGMUNE_ACL4_COUNT</code>（默认 10）</li>
+<li><code>PROGMUNE_ACL4_INTENTS</code>（默认 5）</li>
+<li><code>PROGMUNE_ACL3_COUNT</code>（默认 4）</li>
+<li><code>PROGMUNE_ACL3_INTENTS</code>（默认 3）</li>
+<li><code>PROGMUNE_ACL2_COUNT</code>（默认 2）</li>
+</ul>
+
+<h3 id="学习模式">学习模式（LearnedPattern）</h3>
+<div class="sourceCode" id="cb31"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>interface LearnedPattern {</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  signature<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>          <span class="co">// &quot;SVL-4:missingFunc1,missingFunc2&quot;</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  violation<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>          <span class="co">// 人类可读的违规描述</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  fixPath<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span>          <span class="co">// 修复路径</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  occurrenceCount<span class="op">:</span> <span class="dt">number</span><span class="op">;</span>    <span class="co">// 出现次数</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  distinctIntents<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span>  <span class="co">// 涉及的不同意图</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  resolvedRate<span class="op">:</span> <span class="dt">number</span><span class="op">;</span>       <span class="co">// 修复成功率</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>  antibodyLevel<span class="op">:</span> AntibodyLevel<span class="op">;</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>  firstSeen<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>          <span class="co">// 首次出现时间</span></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>  lastSeen<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>           <span class="co">// 最近出现时间</span></span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+
+<h3 id="查询匹配算法">查询匹配算法</h3>
+<p><code>queryAntibodies(intent, minACL)</code> 的匹配逻辑：</p>
+<ol type="1">
+<li>过滤 ACL 等级 ≥ minACL 的模式</li>
+<li>过滤有修复路径的模式（无修复路径的抗体无法用于加速）</li>
+<li>对每个模式计算与当前意图的 Jaccard 相似度（基于词语重叠）</li>
+<li>过滤相似度 ≥ 0.2 的模式</li>
+<li>按相似度降序排序，返回最佳匹配</li>
+</ol>
+
+<h2 id="语义热力图">9.5 语义热力图</h2>
+<p><code>getSemanticHeatmap()</code> 提供四维分析：</p>
+<ol type="1">
+<li><strong>fragileProtocols</strong>：最常被违规协议拦截的函数（按拦截次数排序）</li>
+<li><strong>svlHotspots</strong>：各 SVL 层级的热度分布（百分比），标识哪个验证层最常被触发</li>
+<li><strong>constraintClusters</strong>：同一会话中多种约束类型共现的集群，揭示相关的失效模式</li>
+<li><strong>highFrictionIntents</strong>：需要最多适配次数的意图任务，标识系统的高摩擦点</li>
+</ol>
+
+<h2 id="抗体效能统计">9.6 抗体效能统计</h2>
+<p><code>getAntibodyStats()</code> 量化免疫系统的实际效益：</p>
+<table>
+<thead><tr><th>指标</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td><code>totalHits</code></td><td>抗体总命中数</td></tr>
+<tr><td><code>fastPathHits</code></td><td>ACL-4 快速通道命中（0 LLM 调用）</td></tr>
+<tr><td><code>injectedHintHits</code></td><td>ACL-3 提示注入命中</td></tr>
+<tr><td><code>totalLLMCallsSaved</code></td><td>节省的 LLM 调用次数</td></tr>
+<tr><td><code>totalTokensSaved</code></td><td>估算节省的 token 数</td></tr>
+<tr><td><code>byLevel</code></td><td>按 ACL 等级的命中分布</td></tr>
+<tr><td><code>topSignatures</code></td><td>最常见的抗体签名</td></tr>
+</tbody>
+</table>
+
+<h1 id="第十章-代码发射">第十章 代码发射</h1>
+<h2 id="设计原理-1">10.1 设计原理</h2>
+<p>当 LLM 输出的 Action 序列通过所有四层验证和不变式检查后，<code>emitter.ts</code> 将其编译为可执行的 TypeScript 代码。发射器是系统中唯一的"写"操作——将经过验证的语义结构转化为可编译的代码文本。</p>
+<p>发射器的设计原则是"保守翻译"：只做直接的语法映射，不在发射过程中添加任何业务逻辑或优化。这样可以保证发射输出的行为与验证通过的 Action 序列完全一致。</p>
+
+<h2 id="发射流程">10.2 发射流程</h2>
+<pre><code>Action[] → 遍历 → 类型分发 → emitCall | emitAssign | emitReturn | emitIf | emitFor → TypeScript 代码字符串</code></pre>
+<ul>
+<li><strong>call</strong>：生成 <code>const varName = functionName(arg1, arg2);</code>（有 assignTo）或 <code>functionName(arg1, arg2);</code>（无 assignTo）</li>
+<li><strong>assign</strong>：生成 <code>target = value;</code>（value 为字面量时直接输出，为嵌套 Action 时递归发射）</li>
+<li><strong>return</strong>：生成 <code>return value;</code>（value 处理同 assign）</li>
+<li><strong>if</strong>：生成 <code>if (condition) { ... } else { ... }</code>，thenActions 和 elseActions 各自递归发射</li>
+<li><strong>for</strong>：生成 <code>for (const variable of iterable) { ... }</code>，bodyActions 递归发射</li>
+</ul>
+<p>发射器还负责合理的缩进（4 空格）和换行，使输出的 TypeScript 代码可读。变量名引用（以 <code>$</code> 为前缀的 JSON wire format）在发射时去掉 <code>$</code> 前缀。</p>
+
+<h2 id="action-运行时沙箱">10.3 Action 运行时沙箱</h2>
+<p><code>action-runtime.ts</code> 提供 <code>executeActionCode(code: string): Action[]</code>，将自由格式的 DSL 代码解析为 Action[]。这作为 LLM JSON 输出解析失败时的降级路径——如果 LLM 无法生成符合 JSON wire format 的输出，它可以生成更自由的 DSL 格式。</p>
+<p>沙箱使用 <code>new Function()</code> 构造受限执行环境，暴露 <code>call</code>、<code>callAssign</code>、<code>ifBlock</code>、<code>ifElse</code>、<code>assign</code>、<code>output</code> 六个 API 函数。变量通过 Proxy 对象管理，确保沙箱内的变量不会泄漏到外部作用域。</p>
+
+<h1 id="第十一章-观测站系统">第十一章 观测站系统 <span class="v2-new">★ v2.2 大幅扩展</span></h1>
+
+<h2 id="终端观测站">11.1 终端观测站（semantic-trace.ts）</h2>
+<p><strong>文件</strong>：<code>src/semantic-trace.ts</code>（~1800 行 <span class="v2-new">★ v2.2 扩展</span>）</p>
+<p>提供丰富的终端 UI，支持以下命令：</p>
+
+<table>
+<thead><tr><th>命令</th><th>功能</th><th><span class="v2-new">v2.2</span></th></tr></thead>
+<tbody>
+<tr><td><code>ts-node src/semantic-trace.ts</code></td><td>所有会话摘要（ID、意图、Attempt 数、成功率）</td><td></td></tr>
+<tr><td><code>ts-node src/semantic-trace.ts &lt;id&gt;</code></td><td>单会话完整时间线（含每轮尝试的转移详情）</td><td></td></tr>
+<tr><td><code>ts-node src/semantic-trace.ts replay &lt;id&gt;</code></td><td>逐步认知回放（动画展示每次尝试的决策过程）</td><td></td></tr>
+<tr><td><code>ts-node src/semantic-trace.ts --states &lt;id&gt;</code></td><td>状态转移可视化（per-namespace 的状态变化图）</td><td></td></tr>
+<tr><td><code>ts-node src/semantic-trace.ts --validate &lt;id&gt;</code></td><td>确定性回放验证（重建状态 + Invariant 检查）</td><td><span class="v2-new">★ 扩展为纯函数实现</span></td></tr>
+<tr><td><code>ts-node src/semantic-trace.ts --ledger &lt;id&gt;</code></td><td>单会话 Ledger 深度验证（Invariant-0 + Invariant-1 + Replay + 指纹）</td><td><span class="v2-new">★ 新增</span></td></tr>
+<tr><td><code>ts-node src/semantic-trace.ts --query &lt;id&gt; &lt;op&gt;</code></td><td>单账本查询（producer/consumer/violations/transition/states）</td><td><span class="v2-new">★ 新增</span></td></tr>
+<tr><td><code>ts-node src/semantic-trace.ts --query-all &lt;op&gt; &lt;state&gt;</code></td><td>跨会话聚合查询（如查找所有产生 TOKEN_ISSUED 的转移）</td><td><span class="v2-new">★ 新增</span></td></tr>
+<tr><td><code>ts-node src/semantic-trace.ts --stats</code></td><td>语料库级别账本统计（总会话数、总转移数、有效/无效比例等）</td><td><span class="v2-new">★ 新增</span></td></tr>
+<tr><td><code>ts-node src/semantic-trace.ts --diff-ledgers &lt;A&gt; &lt;B&gt;</code></td><td>跨会话账本差异比较（新增/删除/变更/不变转移数）</td><td><span class="v2-new">★ 新增</span></td></tr>
+<tr><td><code>ts-node src/semantic-trace.ts --genome</code></td><td>失败基因组摘要（按 SVL/约束类型的分布）</td><td></td></tr>
+<tr><td><code>ts-node src/semantic-trace.ts --learned</code></td><td>抗体注册表（含 ACL 等级、签名、成功率）</td><td></td></tr>
+<tr><td><code>ts-node src/semantic-trace.ts --antibodies</code></td><td>抗体效能指标（命中数、LLM 节省、token 节省）</td><td></td></tr>
+<tr><td><code>ts-node src/semantic-trace.ts --heatmap</code></td><td>语义热力图（脆弱协议、SVL 热点、约束集群、高摩擦意图）</td><td></td></tr>
+<tr><td><code>ts-node src/semantic-trace.ts --snapshots</code></td><td>IR 快照列表</td><td></td></tr>
+<tr><td><code>ts-node src/semantic-trace.ts --diff &lt;A&gt; &lt;B&gt;</code></td><td>IR 快照差异对比（函数新增/删除/修改）</td><td></td></tr>
+</tbody>
+</table>
+
+<h3 id="认知回放">认知回放（Cognitive Replay）</h3>
+<p><code>replaySession()</code> 以动画形式逐步展示规划器的每一次尝试：</p>
+<ol type="1">
+<li>显示尝试序号和总次数（如"尝试 2/3"）</li>
+<li>列出 LLM 生成的动作序列</li>
+<li>展示检测到的语义异常及所属免疫层（SVL-1/2/3/4）</li>
+<li>展示免疫响应（修复路径激活 / 适配请求）</li>
+<li>对比前后尝试的差异（persisted/dropped/acquired 状态）</li>
+<li>显示进度条</li>
+<li>最终展示成功路径和状态机跟踪</li>
+</ol>
+
+<h2 id="web-仪表盘">11.2 Web 仪表盘（obs-web.ts）</h2>
+<p><strong>文件</strong>：<code>src/obs-web.ts</code>（~365 行）</p>
+<p>零依赖 HTTP 服务器（使用 Node 内置 <code>http</code> 模块），运行于端口 3100。</p>
+
+<h3 id="api-端点">API 端点</h3>
+<table>
+<thead><tr><th>端点</th><th>返回</th></tr></thead>
+<tbody>
+<tr><td><code>GET /api/sessions</code></td><td>所有会话列表（含 ID、意图、状态、时间）</td></tr>
+<tr><td><code>GET /api/sessions/:id</code></td><td>单会话详细信息（含所有 Attempt 和 Transition）</td></tr>
+<tr><td><code>GET /api/genome</code></td><td>失败基因组统计</td></tr>
+<tr><td><code>GET /api/heatmap</code></td><td>语义热力图数据</td></tr>
+<tr><td><code>GET /api/antibodies</code></td><td>抗体效能统计</td></tr>
+<tr><td><code>GET /api/learned</code></td><td>学习模式注册表</td></tr>
+</tbody>
+</table>
+
+<h3 id="前端界面">前端界面</h3>
+<p>单页应用（inline HTML/CSS/JS），包含五个选项卡：</p>
+<ul>
+<li><strong>Overview</strong>：总览面板——会话数、违规数、抗体命中率、平均重试次数</li>
+<li><strong>Sessions</strong>：会话列表，点击查看完整时间线（含 transitions 和 violations 的详细卡片）</li>
+<li><strong>Genome</strong>：失败基因组可视化——按 SVL 和约束类型的分组柱状图</li>
+<li><strong>Heatmap</strong>：语义热力图——高摩擦意图和脆弱协议的交互式表格</li>
+<li><strong>Antibodies</strong>：抗体效能——ACL 分布饼图和 Top 10 签名</li>
+</ul>
+<p>暗色主题，GitHub 风格颜色方案。数据通过 fetch API 获取，页面无刷新切换。</p>
+
+<h2 id="免疫健康检查">11.3 免疫健康检查（check.ts）<span class="v2-new">★ v2.2 更新</span></h2>
+<p><strong>文件</strong>：<code>src/check.ts</code>（~380 行 <span class="v2-new">★ v2.2 扩展</span>）</p>
+<p><code>npm run check</code> 一键执行六项健康检查：</p>
+
+<table>
+<thead><tr><th>步骤</th><th>检查内容</th><th>方式</th><th><span class="v2-new">v2.2</span></th></tr></thead>
+<tbody>
+<tr><td>1/6</td><td>IR 重新提取</td><td><code>npx ts-node src/extract-ir.ts .</code></td><td></td></tr>
+<tr><td>2/6</td><td>TypeScript 类型检查</td><td><code>npx tsc --noEmit</code></td><td></td></tr>
+<tr><td>3/6</td><td>SSG dev_pipeline 协议验证</td><td>纯函数 validateTransition() 循环（5 阶段 pipeline）</td><td><span class="v2-new">★ 纯函数化（零 StateMachineValidator 实例化）</span></td></tr>
+<tr><td>4/6</td><td>Ledger 不变量 + 回放 + 完整性指纹</td><td>Invariant-0 + Invariant-1 + Replay + hashLedger()</td><td><span class="v2-new">★ 新增</span></td></tr>
+<tr><td>5/6</td><td>失败基因组概要</td><td><code>getFailureGenome()</code></td><td></td></tr>
+<tr><td>6/6</td><td>抗体效能统计</td><td><code>getAntibodyStats()</code></td><td></td></tr>
+</tbody>
+</table>
+
+<p>新增 <code>--ledger &lt;sessionId&gt;</code> 参数支持单会话 Ledger 深度验证（per-attempt 转移详情 + 一致性 + 回放）。彩色 ANSI 输出，退出码 1 表示存在失败。</p>
+
+<h1 id="第十二章-mcp-服务器">第十二章 MCP 服务器</h1>
+<h2 id="设计">12.1 设计</h2>
+<p><code>mcp-server.mts</code> 将 Progmune Runtime 暴露为 MCP（Model Context Protocol）工具服务器，使任何支持 MCP 的 LLM 客户端（Claude Desktop、VS Code、Cline 等）可以调用 Progmune 的约束验证能力。</p>
+<p>MCP 服务器是系统的"对外接口层"。它将内部的规划、验证、发射流程封装为 6 个标准化工具，每个工具有明确的输入/输出 JSON Schema。</p>
+
+<h2 id="暴露的工具">12.2 暴露的工具</h2>
+<table>
+<thead><tr><th>工具名</th><th>功能</th></tr></thead>
+<tbody>
+<tr><td><code>progmune_plan</code></td><td>调用规划器，从自然语言意图生成 Action 序列。输入：intent 字符串。输出：Action[] 和生成的 TypeScript 代码</td></tr>
+<tr><td><code>progmune_validate</code></td><td>验证给定的 Action 序列（JSON wire format）。返回验证结果（valid + violations）</td></tr>
+<tr><td><code>progmune_emit</code></td><td>将 Action 序列编译为目标代码（TypeScript）。返回编译后的代码字符串</td></tr>
+<tr><td><code>progmune_ir_extract</code></td><td>从项目根提取 IR，重新生成 ir.json。返回提取的函数数量和外部函数数量</td></tr>
+<tr><td><code>progmune_observatory</code></td><td>查询观测站数据（会话列表、基因组、抗体统计）。返回请求的数据类型</td></tr>
+<tr><td><code>progmune_check</code></td><td>运行免疫健康检查（6 步 pipeline）。返回检查结果和免疫状态总结</td></tr>
+</tbody>
+</table>
+
+<h2 id="多项目隔离">12.3 多项目隔离</h2>
+<p>通过 <code>PROGMUNE_PROJECT_DIR</code> 环境变量支持多项目隔离：</p>
+<ul>
+<li>每个项目有独立的 <code>.progmune_corpus/</code>（会话、失败记录、检查点）</li>
+<li>每个项目有独立的 <code>ir.json</code>（函数签名）</li>
+<li>MCP 服务器在调用工具时设置此变量，确保工具在正确的项目上下文中执行</li>
+</ul>
+
+<h1 id="第十三章-关键辅助系统">第十三章 关键辅助系统</h1>
+<h2 id="llm-抽象层">13.1 LLM 抽象层</h2>
+<p><strong>文件</strong>：<code>src/llm.ts</code></p>
+<p>支持多个 LLM 提供商：</p>
+<table>
+<thead><tr><th>提供商</th><th>默认模型</th><th>配置方式</th></tr></thead>
+<tbody>
+<tr><td>DeepSeek</td><td>deepseek-chat</td><td>默认（无需额外配置）</td></tr>
+<tr><td>OpenAI</td><td>gpt-4</td><td><code>LLM_PROVIDER=openai</code></td></tr>
+<tr><td>Ollama</td><td>llama3</td><td><code>LLM_PROVIDER=ollama</code></td></tr>
+</tbody>
+</table>
+<p>环境变量：<code>LLM_API_KEY</code>、<code>LLM_BASE_URL</code>、<code>LLM_MODEL</code>、<code>LLM_PROVIDER</code>。</p>
+<p>Token 估算：CJK 字符 ~1.5 token/字，其他 ~0.4 token/字符。用于在构建 prompt 前估算 token 消耗，防止超出模型上下文窗口。</p>
+
+<h2 id="语义快照">13.2 语义快照</h2>
+<p><strong>文件</strong>：<code>src/semantic-snapshot.ts</code></p>
+<p><code>createSnapshot(ir, intent)</code> 在每次规划会话开始时创建 IR 的快照（<code>IRSnapshot</code>），包含完整函数签名和时间戳。快照支持：</p>
+<ul>
+<li>确定性回放（验证历史会话在当时 IR 下是否合法——即使当前 IR 已经变化）</li>
+<li>差异对比（<code>diffSnapshots(a, b)</code> 显示函数的新增/删除/修改）</li>
+<li>回归检测（会话中引用的函数是否在后续 IR 版本中消失——如果消失，说明代码库发生了 breaking change）</li>
+</ul>
+
+<h2 id="记忆层">13.3 记忆层</h2>
+<p><strong>文件</strong>：<code>src/memory-layer.ts</code></p>
+<p>基于语义模板的记忆系统：</p>
+<ul>
+<li><code>findSemanticTemplate(intent)</code>：匹配历史成功模板，返回最相似的 Action[]</li>
+<li><code>recordEpisode({intent, actions, success})</code>：记录每次规划结果，更新模板库</li>
+<li>维护使用次数和成功率统计（successRate = 成功次数 / 总使用次数）</li>
+</ul>
+
+<h2 id="反馈系统">13.4 反馈系统</h2>
+<p><strong>文件</strong>：<code>src/feedback.ts</code></p>
+<p>追踪每个函数在成功/失败会话中的使用频率，计算成功率：</p>
+<ul>
+<li><code>getFunctionSuccessRate(functionName)</code>：返回 0-1 成功率</li>
+<li>用于规划器中的函数排序和 LLM prompt 优化——高成功率函数在 top-15 排序中获得加分</li>
+<li>函数在失败会话中出现频次过高时，其权重被降低</li>
+</ul>
+
+<h2 id="工具模块">13.5 工具模块</h2>
+<table>
+<thead><tr><th>文件</th><th>功能</th></tr></thead>
+<tbody>
+<tr><td><code>utils.ts</code></td><td>Jaccard 相似度（用于意图匹配和抗体查询）、关键词提取（中英文分词 + 函数名驼峰分词）</td></tr>
+<tr><td><code>file-lock.ts</code></td><td>基于文件的并发锁（通过 lock 文件确保 corpus 写入的原子性，防止多进程竞争）</td></tr>
+<tr><td><code>search-planner.ts</code></td><td>基于搜索的备用规划器（无需 LLM，直接在 IR 中搜索匹配函数组合）</td></tr>
+<tr><td><code>immune-reporter.ts</code></td><td>免疫报告生成（将 Failure Genome 和 Antibody Stats 格式化为可打印报告）</td></tr>
+</tbody>
+</table>
+
+<h1 id="第十四章-数据流总览">第十四章 数据流总览 <span class="v2-new">★ v2.2 更新</span></h1>
+<h2 id="完整交互序列">14.1 完整交互序列</h2>
+<pre><code>1. 用户输入意图: "实现用户登录功能"
+
+2. MCP Server 接收 → 调用 plan("实现用户登录功能")
+
+3. Planner 初始化:
+   ├── 加载 ir.json (IR 提取的函数签名列表)
+   ├── 创建 ExecutionSession { sessionId, intent, attempts: [] }
+   ├── hashRules() 计算 ruleHash → "7d8f9a..."  ★ v2.2
+   ├── 创建 IRSnapshot (用于确定性回放)
+   ├── 检查语义模板缓存 → 未命中
+   └── 检查抗体 → 命中 ACL-3 抗体
+       └── 注入提示: "已知正确调用顺序: verify_password → generate_jwt → create_session"
+
+4. Planner 构建 LLM Prompt:
+   ├── System: 静态规则（JSON 格式要求）
+   ├── User: top-15 相关函数 + 意图 + 抗体提示
+   └── 估算 tokens: ~1200
+
+5. LLM 返回 JSON:
+   [{"f":"verify_password","to":"pwdOk","a":[{"n":"password","t":"str","v":"..."}]},
+    {"f":"generate_jwt","to":"token","a":[{"n":"userId","t":"str","v":"$pwdOk"}]},
+    {"f":"create_session","to":"session","a":[{"n":"token","t":"str","v":"$token"}]}]
+
+6. parseActionJSON() → Action[]
+   validateActionSchema() → ✓ 结构合法
+
+7. enrichActions() → 补充 IR 元数据（完整类型信息）
+
+8. validateActionSequence():
+   ├── SVL-1: verify_password ✓, generate_jwt ✓, create_session ✓
+   ├── SVL-2: 参数类型兼容 ✓ (password:str→str, userId:str→str, token:str→str)
+   └── SVL-3: $pwdOk 已声明 ✓, $token 已声明 ✓
+   → 返回 { valid: true, violations: [] }
+
+9. ★ v2.2 validateTransition() 纯函数 SVL-4 验证:
+   ├── ctx = { ledger: [], currentState: rebuildState([], nsInit) }
+   ├── verify_password: validateTransition(ctx, ...) → auth: UNAUTHENTICATED → PASSWORD_VERIFIED ✓
+   ├── ctx.ledger.push(transition); ctx.currentState = transition.statesAfter
+   ├── generate_jwt: validateTransition(ctx, ...) → auth: PASSWORD_VERIFIED → TOKEN_ISSUED ✓
+   ├── ctx.ledger.push(transition); ctx.currentState = transition.statesAfter
+   ├── create_session: validateTransition(ctx, ...) → auth: TOKEN_ISSUED → SESSION_ACTIVE ✓
+   └── 每条转移均写入 ruleHash = "7d8f9a..."
+   → 协议合法，StateTransition[] 构建完成
+
+10. ★ v2.2 checkLedgerConsistency(ledger) → Invariant-0 + Invariant-1 ✓
+
+11. ★ v2.2 hashLedger(ledger) → 完整性指纹 "b44f80a2b4d1d1f6"
+
+12. checkSemantic() → ✓ 语义合约通过
+
+13. 构建成功 Attempt:
+    { outcome: "success", violations: [],
+      transitions: [StateTransition×3],
+      ruleHash: "7d8f9a...",
+      antibodyHit: { level: "ACL-3", action: "injected_hint" } }
+
+14. recordSession() → 保存 ExecutionSession 到 .progmune_corpus/sessions/
+    recordEpisode() → 更新记忆层统计
+
+15. emitter.ts 编译为 TypeScript 代码 → 返回给 MCP 客户端</code></pre>
+
+<h2 id="异常路径示例">14.2 异常路径示例</h2>
+<p>如果 LLM 输出的序列未遵循协议（如直接调用 <code>create_session</code> 而不先调用 <code>verify_password</code> 和 <code>generate_jwt</code>），则：</p>
+<pre><code>8. validateActionSequence() → SVL-1/2/3 通过
+
+9. ★ v2.2 validateTransition() SVL-4 验证:
+   ├── create_session: auth 命名空间当前状态 = UNAUTHENTICATED
+   │   create_session 需要 pre_states = [TOKEN_ISSUED]
+   │   当前状态 ≠ 所需状态 ✗
+   ├── validateTransition() 返回 { valid: false, transition, rejection }
+   │   rejection = {
+   │     blocked: "create_session",
+   │     currentState: ["UNAUTHENTICATED"],
+   │     requiredState: ["TOKEN_ISSUED"],
+   │     missingFunctions: ["verify_password", "generate_jwt"],
+   │     fixPath: ["verify_password", "generate_jwt"]  // BFS 搜索结果
+   │   }
+   └── transition 仍被记录（valid=false），但被标记为无效
+
+10. 构建失败 Attempt:
+    { outcome: "constraint_violation",
+      violations: [{ svl: 4, violatedConstraint: "protocol_violation",
+                    fixPath: ["verify_password", "generate_jwt"] }] }
+
+11. attemptSSGRepair() → 在 create_session 前插入 verify_password → generate_jwt
+    → 合成 Action[]: [verify_password(...), generate_jwt(...), create_session(...)]
+    → 重新验证通过 ✓
+
+12. 使用修复后的序列继续 → 成功
+
+13. recordFailure() → 记录 SVL-4 违规到失败语料库
+    （修复成功 + 违规记录 = "感染后免疫"——系统从这次违规中学习）
+    → 下次相同意图可直接使用修复路径（ACL 升级）</code></pre>
+
+<h2 id="ledger-中心数据流">14.3 ★ v2.2 Ledger 中心化数据流</h2>
+<pre><code>                    ┌──────────────────────┐
+                    │   Transition Ledger   │  ← 唯一真相源（不可变）
+                    │  (StateTransition[]) │
+                    └──────────┬───────────┘
+                               │
+          ┌────────────────────┼────────────────────┐
+          │                    │                    │
+          ▼                    ▼                    ▼
+   rebuildState()      findProducer()        hashLedger()
+   状态派生视图         consumer()            完整性指纹
+   (Record&lt;ns,         violations()           ruleHash
+    string[]&gt;)         transition()           约束谱系
+                       listAllStates()
+          │                    │                    │
+          ▼                    ▼                    ▼
+      Replayable           Queryable            Provable
+   (任何时刻可重建)    (结构化查询账本)     (防篡改完整性证明)</code></pre>
+<p class="diagram-title">图 14.1: v2.2 以 Ledger 为中心的数据流——状态是派生视图，不是可变对象</p>
+
+<h1 id="附录-a">附录 A：文件清单 <span class="v2-new">★ v2.2 更新</span></h1>
+<table>
+<thead><tr><th>文件</th><th>行数（约）</th><th>核心职责</th><th><span class="v2-new">v2.2</span></th></tr></thead>
+<tbody>
+<tr><td><code>src/runtime-types.ts</code></td><td>115</td><td>运行时本体论，所有类型的单一来源（含 ValidationContext、LedgerConsistencyViolation）</td><td><span class="v2-new">+ruleHash 在三层接口中, +新类型 re-export</span></td></tr>
+<tr><td><code>src/ssg-validator.ts</code></td><td>760</td><td>SSG 状态机 + Semantic Ledger 16 个纯函数（rebuildState、validateTransition、checkLedgerConsistency、hashRules、hashLedger、diffLedgers、findProducer、findConsumer 等）</td><td><span class="v2-new">+~400 行纯函数 + 不变式系统</span></td></tr>
+<tr><td><code>src/planner.ts</code></td><td>920</td><td>核心规划循环，免疫加速，ValidationContext 循环</td><td><span class="v2-new">纯函数化 SVL-4, +ruleHash 注入, +不变式验证</span></td></tr>
+<tr><td><code>src/check.ts</code></td><td>380</td><td>一键免疫健康检查（6 步：IR + tsc + SSG + Ledger + Genome + Antibody）</td><td><span class="v2-new">+Ledger 不变式步骤, +--ledger 单会话深度验证</span></td></tr>
+<tr><td><code>src/semantic-trace.ts</code></td><td>1800</td><td>终端观测站（16 个命令：摘要、时间线、回放、验证、Ledger、查询、聚合查询、统计、差异、基因组、抗体列表、抗体效能、热力图、快照）</td><td><span class="v2-new">+600 行纯函数查询/统计/差异/Ledger 验证</span></td></tr>
+<tr><td><code>src/p0_ssg_demo.ts</code></td><td>280</td><td>SSG 端到端演示（7 场景：auth 完整流程、dev_pipeline 5 阶段、违规拦截、Invariant 负向测试、Query API、差异比较）</td><td><span class="v2-new">纯函数化, +Ledger 场景, +Query API 演示</span></td></tr>
+<tr><td><code>src/validator.ts</code></td><td>205</td><td>SVL-1/2/3 约束验证引擎（validateAction、validateActionSequence、checkVariableFlow）</td><td></td></tr>
+<tr><td><code>src/failure-corpus.ts</code></td><td>650</td><td>失败语料库、失败基因组、抗体推理（LearnedPattern、抗体匹配、ACL 等级）、语义热力图、抗体效能统计</td><td></td></tr>
+<tr><td><code>src/extract-ir.ts</code></td><td>407</td><td>ts-morph AST 遍历 IR 提取（函数声明、箭头函数、JSDoc @protocol、调用图、外部函数注册表）</td><td></td></tr>
+<tr><td><code>src/emitter.ts</code></td><td>~110</td><td>Action→TypeScript 代码发射（类型分发：call/assign/return/if/for）</td><td></td></tr>
+<tr><td><code>src/action-runtime.ts</code></td><td>103</td><td>Action DSL 执行沙箱（Proxy 变量管理、自由格式 DSL 解析）</td><td></td></tr>
+<tr><td><code>src/llm.ts</code></td><td>62</td><td>LLM 抽象层（DeepSeek/OpenAI/Ollama、token 估算）</td><td></td></tr>
+<tr><td><code>src/mcp-server.mts</code></td><td>~200</td><td>MCP 工具服务器（6 个工具：plan / validate / emit / ir_extract / observatory / check）</td><td></td></tr>
+<tr><td><code>src/memory-layer.ts</code></td><td>~80</td><td>语义模板记忆层（模板匹配、episode 记录、成功率统计）</td><td></td></tr>
+<tr><td><code>src/semantic-validator.ts</code></td><td>~60</td><td>语义合约校验</td><td></td></tr>
+<tr><td><code>src/semantic-snapshot.ts</code></td><td>~80</td><td>IR 快照与差分（createSnapshot、diffSnapshots、回归检测）</td><td></td></tr>
+<tr><td><code>src/feedback.ts</code></td><td>~40</td><td>函数成功率统计（用于 LLM prompt 优化）</td><td></td></tr>
+<tr><td><code>src/utils.ts</code></td><td>~30</td><td>Jaccard 相似度、关键词提取（中英文分词、驼峰分词）</td><td></td></tr>
+<tr><td><code>src/file-lock.ts</code></td><td>~30</td><td>文件锁（corpus 写入原子性、多进程互斥）</td><td></td></tr>
+<tr><td><code>src/search-planner.ts</code></td><td>~50</td><td>基于搜索的备用规划器（无需 LLM，IR 函数组合搜索）</td><td></td></tr>
+<tr><td><code>src/immune-reporter.ts</code></td><td>~40</td><td>免疫报告生成（Failure Genome + Antibody Stats 格式化）</td><td></td></tr>
+<tr><td><code>protocols.json</code></td><td>136</td><td>协议定义（17 条规则，4 个命名空间：_global、auth、file、dev_pipeline）</td><td></td></tr>
+</tbody>
+</table>
+
+<h1 id="附录-b">附录 B：配置参考</h1>
+<table>
+<thead><tr><th>环境变量</th><th>默认值</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td><code>LLM_PROVIDER</code></td><td><code>deepseek</code></td><td>LLM 提供商（deepseek / openai / ollama）</td></tr>
+<tr><td><code>LLM_API_KEY</code></td><td>—</td><td>API 密钥</td></tr>
+<tr><td><code>LLM_BASE_URL</code></td><td>提供商默认</td><td>自定义 API 端点</td></tr>
+<tr><td><code>LLM_MODEL</code></td><td>提供商默认</td><td>模型名称（如 deepseek-chat、gpt-4、llama3）</td></tr>
+<tr><td><code>PROGMUNE_PROJECT_DIR</code></td><td><code>cwd</code></td><td>项目根目录（多项目隔离的基础）</td></tr>
+<tr><td><code>PROGMUNE_CORPUS_DIR</code></td><td><code>.progmune_corpus</code></td><td>语料库目录（会话、失败记录、检查点）</td></tr>
+<tr><td><code>PROGMUNE_ACL4_COUNT</code></td><td><code>10</code></td><td>ACL-4 出现次数阈值</td></tr>
+<tr><td><code>PROGMUNE_ACL4_INTENTS</code></td><td><code>5</code></td><td>ACL-4 跨意图阈值</td></tr>
+<tr><td><code>PROGMUNE_ACL3_COUNT</code></td><td><code>4</code></td><td>ACL-3 出现次数阈值</td></tr>
+<tr><td><code>PROGMUNE_ACL3_INTENTS</code></td><td><code>3</code></td><td>ACL-3 跨意图阈值</td></tr>
+<tr><td><code>PROGMUNE_ACL2_COUNT</code></td><td><code>2</code></td><td>ACL-2 出现次数阈值</td></tr>
+</tbody>
+</table>
+
+<h1 id="附录-c">附录 C：术语表 <span class="v2-new">★ v2.2 新增</span></h1>
+<table>
+<thead><tr><th>术语</th><th>英文</th><th>定义</th><th><span class="v2-new">v2.2</span></th></tr></thead>
+<tbody>
+<tr><td>IR</td><td>Intermediate Representation</td><td>从 TypeScript 源码提取的函数签名中间表示（FunctionInfo[]），是系统与代码库之间的唯一接口</td><td></td></tr>
+<tr><td>SVL</td><td>Semantic Validation Layer</td><td>四层语义验证层：SVL-1 符号存在性、SVL-2 类型完整性、SVL-3 数据流有效性、SVL-4 协议合法性</td><td></td></tr>
+<tr><td>SSG</td><td>State-Guided Generation</td><td>状态引导生成——将函数调用建模为有限状态机转移的协议验证系统</td><td></td></tr>
+<tr><td>ACL</td><td>Antibody Confidence Level</td><td>抗体置信等级（ACL-1 到 ACL-4），基于出现频次和跨意图数量的自适应分级</td><td></td></tr>
+<tr><td>Semantic Ledger</td><td>Semantic Ledger</td><td>StateTransition[] 作为唯一真相源的事件溯源架构——状态是派生视图，Ledger 是不可变历史</td><td><span class="v2-new">★ 新增</span></td></tr>
+<tr><td>ValidationContext</td><td>ValidationContext</td><td>{ ledger: StateTransition[], currentState: Record<string, string[]> }——O(n) 验证循环的核心数据结构</td><td><span class="v2-new">★ 新增</span></td></tr>
+<tr><td>Invariant-0</td><td>Before Consistency</td><td>前置一致性不变式：transition.statesBefore ≡ rebuildState(ledger[0..i-1])，保证转移与历史一致</td><td><span class="v2-new">★ 新增</span></td></tr>
+<tr><td>Invariant-1</td><td>Delta Consistency</td><td>增量一致性不变式：transition.statesAfter ≡ applyDelta(statesBefore, acquired, invalidated)，保证转移内部自洽</td><td><span class="v2-new">★ 新增</span></td></tr>
+<tr><td>ruleHash</td><td>Constraint Snapshot</td><td>协议规则集的 SHA256 哈希，存储在 StateTransition、Attempt、ExecutionSession 三个层级，实现跨版本确定性回放验证</td><td><span class="v2-new">★ 新增</span></td></tr>
+<tr><td>hashLedger</td><td>Ledger Fingerprint</td><td>整个 StateTransition[] 账本的防篡改 SHA256 完整性指纹，在 check.ts 中验证</td><td><span class="v2-new">★ 新增</span></td></tr>
+<tr><td>diffLedgers</td><td>Ledger Diff</td><td>两个账本的结构化差异比较（不变/仅A/仅B/变更转移数），用于跨会话审计</td><td><span class="v2-new">★ 新增</span></td></tr>
+<tr><td>Event Sourcing</td><td>Event Sourcing</td><td>以不可变事件序列为真相源的架构模式——v2.2 的核心架构跨越，从 Event Logging 进化为 Event Sourcing</td><td><span class="v2-new">★ 新增</span></td></tr>
+<tr><td>Action</td><td>—</td><td>程序行为的原子单位（call/assign/return/if/for），LLM 输出的最小单元</td><td></td></tr>
+<tr><td>Attempt</td><td>—</td><td>规划器的单次推理尝试（LLM 调用 + 验证 + 可能的修复），一次会话可包含多次尝试</td><td></td></tr>
+<tr><td>StateTransition</td><td>—</td><td>协议状态机的单次合法（或非法）转移，携带完整的前后状态快照和增量变化</td><td></td></tr>
+<tr><td>ConstraintViolation</td><td>—</td><td>约束违规的结构化记录（SVL 层级、违规类型、修复路径、命名空间等诊断信息）</td><td></td></tr>
+<tr><td>ExecutionSession</td><td>—</td><td>一次完整的规划会话，包含所有 Attempt、最终结果和时间线</td><td></td></tr>
+<tr><td>AntibodyHit</td><td>—</td><td>抗体命中记录（ACL 等级、签名、修复路径、相似度、节省的 LLM 调用和 token 数）</td><td></td></tr>
+<tr><td>Failure Genome</td><td>—</td><td>所有失败记录的统计画像（按 SVL/约束类型/修复路径的分布），终端可通过 --genome 查看</td><td></td></tr>
+<tr><td>Semantic Heatmap</td><td>—</td><td>语义脆弱点的四维热度分析（脆弱协议、SVL 热点、约束集群、高摩擦意图）</td><td></td></tr>
+<tr><td>Cognitive Replay</td><td>—</td><td>规划器尝试序列的逐步动画回放，展示每次尝试的动作、违规、修复和最终成功路径</td><td></td></tr>
+<tr><td>Strangler Pattern</td><td>—</td><td>v2.2 使用的向后兼容策略：保留 StateMachineValidator 类但内部委托给纯函数，新代码直接使用纯函数</td><td><span class="v2-new">★ 新增</span></td></tr>
+</tbody>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "id": "T-1781436269773-y7gr",
+  "timestamp": "2026-06-14T11:24:29.773Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "evaluate_access",
+    "retry_evaluation",
+    "evaluate_access",
+    "grant_access",
+    "audit_condition",
+    "log_granted"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

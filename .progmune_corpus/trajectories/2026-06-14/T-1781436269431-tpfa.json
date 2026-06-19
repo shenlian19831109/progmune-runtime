@@ -1,0 +1,26 @@
+{
+  "id": "T-1781436269431-tpfa",
+  "timestamp": "2026-06-14T11:24:29.431Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "decode_payload",
+    "verify_checksum",
+    "encode_payload",
+    "validate_schema",
+    "compress_buffer"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

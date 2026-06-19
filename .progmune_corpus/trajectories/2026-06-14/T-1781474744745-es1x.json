@@ -1,0 +1,48 @@
+{
+  "id": "T-1781474744745-es1x",
+  "timestamp": "2026-06-14T22:05:44.745Z",
+  "protocol": "FileProtocol",
+  "initialState": [
+    "FILE_OPEN"
+  ],
+  "finalState": [
+    "FILE_OPEN"
+  ],
+  "trajectory": [
+    "open_file",
+    "write_file"
+  ],
+  "result": "repair",
+  "violation": {
+    "type": "resource_leak",
+    "failingStepIndex": 0,
+    "expectedStates": [
+      "FILE_OPEN"
+    ],
+    "actualStates": [
+      "FILE_OPEN"
+    ],
+    "fixPath": [],
+    "description": "flywheel-rejected-1781474744745"
+  },
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "successRate": 0,
+  "metadata": {
+    "source": "llm",
+    "intent": "safely write config file"
+  },
+  "feedback": {
+    "accepted": false,
+    "rejected": true
+  },
+  "cost": {
+    "latency": 8,
+    "actions": 2
+  }
+}

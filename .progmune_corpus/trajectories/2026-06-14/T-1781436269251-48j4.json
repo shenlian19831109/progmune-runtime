@@ -1,0 +1,28 @@
+{
+  "id": "T-1781436269251-48j4",
+  "timestamp": "2026-06-14T11:24:29.251Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "connect_db",
+    "open",
+    "read_file",
+    "encode_payload",
+    "compress_buffer",
+    "decode_payload",
+    "validate_schema"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

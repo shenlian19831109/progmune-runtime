@@ -1,0 +1,26 @@
+{
+  "id": "T-1781436269481-w57r",
+  "timestamp": "2026-06-14T11:24:29.481Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "extract_ir",
+    "sanitize_input",
+    "compute_hash",
+    "compress_buffer",
+    "verify_checksum"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

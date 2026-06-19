@@ -1,0 +1,28 @@
+{
+  "id": "T-1781436269395-cbbs",
+  "timestamp": "2026-06-14T11:24:29.395Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "begin_tx",
+    "rollback_tx",
+    "encode_payload",
+    "extract_ir",
+    "validate_schema",
+    "sanitize_input",
+    "decode_payload"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

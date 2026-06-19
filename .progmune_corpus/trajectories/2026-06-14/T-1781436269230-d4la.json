@@ -1,0 +1,26 @@
+{
+  "id": "T-1781436269230-d4la",
+  "timestamp": "2026-06-14T11:24:29.230Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "decode_payload",
+    "decompress_buffer",
+    "extract_ir",
+    "encode_payload",
+    "validate_schema"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

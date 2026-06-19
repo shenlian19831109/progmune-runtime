@@ -1,0 +1,29 @@
+{
+  "id": "T-1781436269579-wws7",
+  "timestamp": "2026-06-14T11:24:29.579Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "auth_file_open",
+    "auth_file_close",
+    "decode_payload",
+    "decompress_buffer",
+    "encode_payload",
+    "compress_buffer",
+    "open",
+    "connect_db"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

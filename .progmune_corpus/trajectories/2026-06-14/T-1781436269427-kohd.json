@@ -1,0 +1,30 @@
+{
+  "id": "T-1781436269427-kohd",
+  "timestamp": "2026-06-14T11:24:29.427Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "auth_file_open",
+    "validate_schema",
+    "encode_payload",
+    "extract_ir",
+    "compute_hash",
+    "connect_db",
+    "decompress_buffer",
+    "open",
+    "close"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

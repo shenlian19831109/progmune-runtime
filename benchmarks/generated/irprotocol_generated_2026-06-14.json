@@ -1,0 +1,149 @@
+{
+  "protocol": "IRProtocol",
+  "generatedAt": "2026-06-14T22:37:32.017Z",
+  "cases": [
+    {
+      "goal": "cover transition: INIT → IR_EXTRACTED via extractIR",
+      "protocol": "_global",
+      "broken": [
+        "extractIR"
+      ],
+      "expected": [
+        "extractIR",
+        "extractIR"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "INIT",
+        "to": "IR_EXTRACTED",
+        "rule": "extractIR"
+      }
+    },
+    {
+      "goal": "cover transition: IR_EXTRACTED → ACTION_VALIDATED via validateAction",
+      "protocol": "_global",
+      "broken": [
+        "extractIR",
+        "validateActionSequence"
+      ],
+      "expected": [
+        "extractIR",
+        "validateAction",
+        "validateActionSequence"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "IR_EXTRACTED",
+        "to": "ACTION_VALIDATED",
+        "rule": "validateAction"
+      }
+    },
+    {
+      "goal": "cover transition: ACTION_VALIDATED → SEQUENCE_VALIDATED via validateActionSequence",
+      "protocol": "_global",
+      "broken": [
+        "validateAction",
+        "emitCode"
+      ],
+      "expected": [
+        "validateAction",
+        "validateActionSequence",
+        "emitCode"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "ACTION_VALIDATED",
+        "to": "SEQUENCE_VALIDATED",
+        "rule": "validateActionSequence"
+      }
+    },
+    {
+      "goal": "cover transition: ACTION_VALIDATED → ∅ via validateActionSequence",
+      "protocol": "_global",
+      "broken": [
+        "validateAction"
+      ],
+      "expected": [
+        "validateAction",
+        "validateActionSequence"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "ACTION_VALIDATED",
+        "to": "∅",
+        "rule": "validateActionSequence"
+      }
+    },
+    {
+      "goal": "cover transition: SEQUENCE_VALIDATED → CODE_EMITTED via emitCode",
+      "protocol": "_global",
+      "broken": [
+        "validateActionSequence",
+        "recordSession"
+      ],
+      "expected": [
+        "validateActionSequence",
+        "emitCode",
+        "recordSession"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "SEQUENCE_VALIDATED",
+        "to": "CODE_EMITTED",
+        "rule": "emitCode"
+      }
+    },
+    {
+      "goal": "cover transition: SEQUENCE_VALIDATED → ∅ via emitCode",
+      "protocol": "_global",
+      "broken": [
+        "validateActionSequence"
+      ],
+      "expected": [
+        "validateActionSequence",
+        "emitCode"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "SEQUENCE_VALIDATED",
+        "to": "∅",
+        "rule": "emitCode"
+      }
+    },
+    {
+      "goal": "cover transition: CODE_EMITTED → SESSION_RECORDED via recordSession",
+      "protocol": "_global",
+      "broken": [
+        "emitCode"
+      ],
+      "expected": [
+        "emitCode",
+        "recordSession"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "CODE_EMITTED",
+        "to": "SESSION_RECORDED",
+        "rule": "recordSession"
+      }
+    },
+    {
+      "goal": "cover transition: CODE_EMITTED → ∅ via recordSession",
+      "protocol": "_global",
+      "broken": [
+        "emitCode"
+      ],
+      "expected": [
+        "emitCode",
+        "recordSession"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "CODE_EMITTED",
+        "to": "∅",
+        "rule": "recordSession"
+      }
+    }
+  ],
+  "source": "coverage-gap"
+}

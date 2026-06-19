@@ -1,0 +1,29 @@
+{
+  "id": "T-1781436269507-vrzj",
+  "timestamp": "2026-06-14T11:24:29.507Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "validate_schema",
+    "open",
+    "write_file",
+    "decode_payload",
+    "extract_ir",
+    "compute_hash",
+    "connect_db",
+    "verify_checksum"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

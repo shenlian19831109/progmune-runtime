@@ -1,0 +1,31 @@
+{
+  "id": "T-1781436269682-p4sr",
+  "timestamp": "2026-06-14T11:24:29.682Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "compute_hash",
+    "validate_schema",
+    "verify_checksum",
+    "connect_db",
+    "compress_buffer",
+    "decode_payload",
+    "extract_ir",
+    "sanitize_input",
+    "open",
+    "query"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

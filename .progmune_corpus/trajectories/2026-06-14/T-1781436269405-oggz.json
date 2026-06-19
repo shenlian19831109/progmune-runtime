@@ -1,0 +1,31 @@
+{
+  "id": "T-1781436269405-oggz",
+  "timestamp": "2026-06-14T11:24:29.405Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "validate_schema",
+    "compress_buffer",
+    "sanitize_input",
+    "extract_ir",
+    "verify_checksum",
+    "connect_db",
+    "encode_payload",
+    "open",
+    "write_file",
+    "decode_payload"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

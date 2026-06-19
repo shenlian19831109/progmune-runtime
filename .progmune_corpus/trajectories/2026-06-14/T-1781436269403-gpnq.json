@@ -1,0 +1,24 @@
+{
+  "id": "T-1781436269403-gpnq",
+  "timestamp": "2026-06-14T11:24:29.403Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "decompress_buffer",
+    "connect_db",
+    "disconnect_db"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

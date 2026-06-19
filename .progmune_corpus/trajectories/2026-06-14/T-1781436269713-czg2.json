@@ -1,0 +1,30 @@
+{
+  "id": "T-1781436269713-czg2",
+  "timestamp": "2026-06-14T11:24:29.713Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "verify_password",
+    "generate_jwt",
+    "validate_schema",
+    "connect_db",
+    "decompress_buffer",
+    "open",
+    "write_file",
+    "sanitize_input",
+    "compute_hash"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

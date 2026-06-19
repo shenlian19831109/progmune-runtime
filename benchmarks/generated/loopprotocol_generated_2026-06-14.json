@@ -1,0 +1,418 @@
+{
+  "protocol": "LoopProtocol",
+  "generatedAt": "2026-06-14T11:00:26.938Z",
+  "cases": [
+    {
+      "goal": "cover transition: LOOP_IDLE → FETCHING via init_fetch_loop",
+      "protocol": "_global",
+      "broken": [
+        "fetch_batch",
+        "timeout_exit"
+      ],
+      "expected": [
+        "init_fetch_loop",
+        "fetch_batch",
+        "timeout_exit"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "LOOP_IDLE",
+        "to": "FETCHING",
+        "rule": "init_fetch_loop"
+      }
+    },
+    {
+      "goal": "cover transition: FETCHING → BATCH_READY via fetch_batch",
+      "protocol": "_global",
+      "broken": [
+        "init_fetch_loop",
+        "next_iteration",
+        "retry_batch",
+        "has_more_data"
+      ],
+      "expected": [
+        "init_fetch_loop",
+        "next_iteration",
+        "retry_batch",
+        "fetch_batch",
+        "has_more_data"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "FETCHING",
+        "to": "BATCH_READY",
+        "rule": "fetch_batch"
+      }
+    },
+    {
+      "goal": "cover transition: FETCHING → ∅ via fetch_batch",
+      "protocol": "_global",
+      "broken": [
+        "init_fetch_loop",
+        "next_iteration",
+        "retry_batch"
+      ],
+      "expected": [
+        "init_fetch_loop",
+        "next_iteration",
+        "retry_batch",
+        "fetch_batch"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "FETCHING",
+        "to": "∅",
+        "rule": "fetch_batch"
+      }
+    },
+    {
+      "goal": "cover transition: BATCH_READY → ITERATING via has_more_data",
+      "protocol": "_global",
+      "broken": [
+        "fetch_batch",
+        "next_iteration",
+        "exit_loop",
+        "timeout_exit"
+      ],
+      "expected": [
+        "fetch_batch",
+        "has_more_data",
+        "next_iteration",
+        "exit_loop",
+        "timeout_exit"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "BATCH_READY",
+        "to": "ITERATING",
+        "rule": "has_more_data"
+      }
+    },
+    {
+      "goal": "cover transition: BATCH_READY → ∅ via has_more_data",
+      "protocol": "_global",
+      "broken": [
+        "fetch_batch"
+      ],
+      "expected": [
+        "fetch_batch",
+        "has_more_data"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "BATCH_READY",
+        "to": "∅",
+        "rule": "has_more_data"
+      }
+    },
+    {
+      "goal": "cover transition: ITERATING → ITERATING via process_item",
+      "protocol": "_global",
+      "broken": [
+        "has_more_data",
+        "poll_status",
+        "next_iteration",
+        "exit_loop",
+        "timeout_exit"
+      ],
+      "expected": [
+        "has_more_data",
+        "process_item",
+        "poll_status",
+        "process_item",
+        "next_iteration",
+        "exit_loop",
+        "timeout_exit"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "ITERATING",
+        "to": "ITERATING",
+        "rule": "process_item"
+      }
+    },
+    {
+      "goal": "cover transition: ITERATING → FETCHING via next_iteration",
+      "protocol": "_global",
+      "broken": [
+        "has_more_data",
+        "process_item",
+        "poll_status",
+        "fetch_batch",
+        "timeout_exit"
+      ],
+      "expected": [
+        "has_more_data",
+        "process_item",
+        "poll_status",
+        "next_iteration",
+        "fetch_batch",
+        "timeout_exit"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "ITERATING",
+        "to": "FETCHING",
+        "rule": "next_iteration"
+      }
+    },
+    {
+      "goal": "cover transition: ITERATING → ∅ via next_iteration",
+      "protocol": "_global",
+      "broken": [
+        "has_more_data",
+        "process_item",
+        "poll_status"
+      ],
+      "expected": [
+        "has_more_data",
+        "process_item",
+        "poll_status",
+        "next_iteration"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "ITERATING",
+        "to": "∅",
+        "rule": "next_iteration"
+      }
+    },
+    {
+      "goal": "cover transition: ITERATING → LOOP_DONE via exit_loop",
+      "protocol": "_global",
+      "broken": [
+        "has_more_data",
+        "process_item",
+        "poll_status",
+        "timeout_exit"
+      ],
+      "expected": [
+        "has_more_data",
+        "process_item",
+        "poll_status",
+        "exit_loop",
+        "timeout_exit"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "ITERATING",
+        "to": "LOOP_DONE",
+        "rule": "exit_loop"
+      }
+    },
+    {
+      "goal": "cover transition: ITERATING → ∅ via exit_loop",
+      "protocol": "_global",
+      "broken": [
+        "has_more_data",
+        "process_item",
+        "poll_status"
+      ],
+      "expected": [
+        "has_more_data",
+        "process_item",
+        "poll_status",
+        "exit_loop"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "ITERATING",
+        "to": "∅",
+        "rule": "exit_loop"
+      }
+    },
+    {
+      "goal": "cover transition: LOOP_DONE → ∅ via exit_loop",
+      "protocol": "_global",
+      "broken": [
+        "timeout_exit"
+      ],
+      "expected": [
+        "exit_loop",
+        "timeout_exit"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "LOOP_DONE",
+        "to": "∅",
+        "rule": "exit_loop"
+      }
+    },
+    {
+      "goal": "cover transition: BATCH_READY → FETCHING via retry_batch",
+      "protocol": "_global",
+      "broken": [
+        "fetch_batch",
+        "timeout_exit"
+      ],
+      "expected": [
+        "fetch_batch",
+        "retry_batch",
+        "timeout_exit"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "BATCH_READY",
+        "to": "FETCHING",
+        "rule": "retry_batch"
+      }
+    },
+    {
+      "goal": "cover transition: ITERATING → FETCHING via retry_batch",
+      "protocol": "_global",
+      "broken": [
+        "has_more_data",
+        "process_item",
+        "poll_status",
+        "fetch_batch",
+        "timeout_exit"
+      ],
+      "expected": [
+        "has_more_data",
+        "process_item",
+        "poll_status",
+        "retry_batch",
+        "fetch_batch",
+        "timeout_exit"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "ITERATING",
+        "to": "FETCHING",
+        "rule": "retry_batch"
+      }
+    },
+    {
+      "goal": "cover transition: FETCHING → LOOP_DONE via timeout_exit",
+      "protocol": "_global",
+      "broken": [
+        "init_fetch_loop",
+        "next_iteration",
+        "retry_batch",
+        "exit_loop"
+      ],
+      "expected": [
+        "init_fetch_loop",
+        "next_iteration",
+        "retry_batch",
+        "timeout_exit",
+        "exit_loop"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "FETCHING",
+        "to": "LOOP_DONE",
+        "rule": "timeout_exit"
+      }
+    },
+    {
+      "goal": "cover transition: ITERATING → LOOP_DONE via timeout_exit",
+      "protocol": "_global",
+      "broken": [
+        "has_more_data",
+        "process_item",
+        "poll_status",
+        "exit_loop"
+      ],
+      "expected": [
+        "has_more_data",
+        "process_item",
+        "poll_status",
+        "timeout_exit",
+        "exit_loop"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "ITERATING",
+        "to": "LOOP_DONE",
+        "rule": "timeout_exit"
+      }
+    },
+    {
+      "goal": "cover transition: FETCHING → ∅ via timeout_exit",
+      "protocol": "_global",
+      "broken": [
+        "init_fetch_loop",
+        "next_iteration",
+        "retry_batch"
+      ],
+      "expected": [
+        "init_fetch_loop",
+        "next_iteration",
+        "retry_batch",
+        "timeout_exit"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "FETCHING",
+        "to": "∅",
+        "rule": "timeout_exit"
+      }
+    },
+    {
+      "goal": "cover transition: ITERATING → ∅ via timeout_exit",
+      "protocol": "_global",
+      "broken": [
+        "has_more_data",
+        "process_item",
+        "poll_status"
+      ],
+      "expected": [
+        "has_more_data",
+        "process_item",
+        "poll_status",
+        "timeout_exit"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "ITERATING",
+        "to": "∅",
+        "rule": "timeout_exit"
+      }
+    },
+    {
+      "goal": "cover transition: LOOP_DONE → ∅ via timeout_exit",
+      "protocol": "_global",
+      "broken": [
+        "exit_loop"
+      ],
+      "expected": [
+        "exit_loop",
+        "timeout_exit"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "LOOP_DONE",
+        "to": "∅",
+        "rule": "timeout_exit"
+      }
+    },
+    {
+      "goal": "cover transition: ITERATING → ITERATING via poll_status",
+      "protocol": "_global",
+      "broken": [
+        "has_more_data",
+        "process_item",
+        "next_iteration",
+        "exit_loop",
+        "timeout_exit"
+      ],
+      "expected": [
+        "has_more_data",
+        "process_item",
+        "poll_status",
+        "poll_status",
+        "next_iteration",
+        "exit_loop",
+        "timeout_exit"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "ITERATING",
+        "to": "ITERATING",
+        "rule": "poll_status"
+      }
+    }
+  ],
+  "source": "coverage-gap"
+}

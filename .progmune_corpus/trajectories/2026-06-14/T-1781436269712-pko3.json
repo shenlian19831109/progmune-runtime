@@ -1,0 +1,27 @@
+{
+  "id": "T-1781436269712-pko3",
+  "timestamp": "2026-06-14T11:24:29.712Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "begin_tx",
+    "savepoint_create",
+    "update_record",
+    "prep_two_phase",
+    "savepoint_release",
+    "commit_tx"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

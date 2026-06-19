@@ -1,0 +1,27 @@
+{
+  "id": "T-1781436269280-w4pf",
+  "timestamp": "2026-06-14T11:24:29.280Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "auth_file_open",
+    "auth_file_read",
+    "extract_ir",
+    "verify_checksum",
+    "decompress_buffer",
+    "decode_payload"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

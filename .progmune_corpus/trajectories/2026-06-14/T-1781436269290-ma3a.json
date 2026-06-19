@@ -1,0 +1,30 @@
+{
+  "id": "T-1781436269290-ma3a",
+  "timestamp": "2026-06-14T11:24:29.290Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "auth_db_connect",
+    "auth_db_disconnect",
+    "sanitize_input",
+    "open",
+    "connect_db",
+    "decompress_buffer",
+    "verify_checksum",
+    "validate_schema",
+    "compute_hash"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "id": "T-1781436269296-ei42",
+  "timestamp": "2026-06-14T11:24:29.296Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "open",
+    "query",
+    "open",
+    "connect_db",
+    "query_db",
+    "encode_payload",
+    "sanitize_input",
+    "validate_schema"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

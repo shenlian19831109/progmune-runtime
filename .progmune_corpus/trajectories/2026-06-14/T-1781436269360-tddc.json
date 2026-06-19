@@ -1,0 +1,27 @@
+{
+  "id": "T-1781436269360-tddc",
+  "timestamp": "2026-06-14T11:24:29.360Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "auth_file_open",
+    "connect_db",
+    "disconnect_db",
+    "open",
+    "decompress_buffer",
+    "compute_hash"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

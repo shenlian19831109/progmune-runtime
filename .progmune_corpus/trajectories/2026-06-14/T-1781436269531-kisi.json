@@ -1,0 +1,31 @@
+{
+  "id": "T-1781436269531-kisi",
+  "timestamp": "2026-06-14T11:24:29.532Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "auth_file_open",
+    "decode_payload",
+    "open",
+    "decompress_buffer",
+    "compute_hash",
+    "validate_schema",
+    "extract_ir",
+    "encode_payload",
+    "connect_db",
+    "query_db"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

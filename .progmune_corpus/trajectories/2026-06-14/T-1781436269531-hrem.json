@@ -1,0 +1,30 @@
+{
+  "id": "T-1781436269531-hrem",
+  "timestamp": "2026-06-14T11:24:29.531Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "select_db",
+    "verify_checksum",
+    "decode_payload",
+    "open",
+    "read_file",
+    "sanitize_input",
+    "encode_payload",
+    "extract_ir",
+    "validate_schema"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

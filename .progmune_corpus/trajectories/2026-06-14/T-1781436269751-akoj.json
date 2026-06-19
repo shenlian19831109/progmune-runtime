@@ -1,0 +1,32 @@
+{
+  "id": "T-1781436269751-akoj",
+  "timestamp": "2026-06-14T11:24:29.751Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "init_fetch_loop",
+    "fetch_batch",
+    "timeout_exit",
+    "sanitize_input",
+    "decode_payload",
+    "decompress_buffer",
+    "encode_payload",
+    "connect_db",
+    "open",
+    "validate_schema",
+    "compute_hash"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

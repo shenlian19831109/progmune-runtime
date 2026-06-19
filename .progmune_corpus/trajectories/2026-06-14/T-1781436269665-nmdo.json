@@ -1,0 +1,30 @@
+{
+  "id": "T-1781436269665-nmdo",
+  "timestamp": "2026-06-14T11:24:29.665Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "verify_checksum",
+    "connect_db",
+    "sanitize_input",
+    "validate_schema",
+    "encode_payload",
+    "compute_hash",
+    "compress_buffer",
+    "open",
+    "query"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

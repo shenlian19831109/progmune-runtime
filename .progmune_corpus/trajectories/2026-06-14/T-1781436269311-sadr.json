@@ -1,0 +1,31 @@
+{
+  "id": "T-1781436269311-sadr",
+  "timestamp": "2026-06-14T11:24:29.311Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "create_client",
+    "compress_buffer",
+    "compute_hash",
+    "encode_payload",
+    "decode_payload",
+    "connect_db",
+    "verify_checksum",
+    "sanitize_input",
+    "open",
+    "write_file"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

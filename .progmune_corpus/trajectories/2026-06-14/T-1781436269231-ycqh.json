@@ -1,0 +1,31 @@
+{
+  "id": "T-1781436269231-ycqh",
+  "timestamp": "2026-06-14T11:24:29.231Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "auth_db_connect",
+    "open",
+    "read_file",
+    "extract_ir",
+    "decompress_buffer",
+    "validate_schema",
+    "sanitize_input",
+    "verify_checksum",
+    "decode_payload",
+    "compute_hash"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

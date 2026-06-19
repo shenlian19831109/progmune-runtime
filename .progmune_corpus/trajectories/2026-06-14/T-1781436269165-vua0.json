@@ -1,0 +1,30 @@
+{
+  "id": "T-1781436269165-vua0",
+  "timestamp": "2026-06-14T11:24:29.165Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "open",
+    "connect_db",
+    "disconnect_db",
+    "sanitize_input",
+    "decompress_buffer",
+    "extract_ir",
+    "encode_payload",
+    "validate_schema",
+    "decode_payload"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

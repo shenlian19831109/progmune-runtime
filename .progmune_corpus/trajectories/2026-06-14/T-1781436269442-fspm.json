@@ -1,0 +1,28 @@
+{
+  "id": "T-1781436269442-fspm",
+  "timestamp": "2026-06-14T11:24:29.442Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "verify_password",
+    "compress_buffer",
+    "verify_checksum",
+    "connect_db",
+    "query_db",
+    "validate_schema",
+    "extract_ir"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

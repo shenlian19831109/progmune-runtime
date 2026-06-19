@@ -1,0 +1,29 @@
+{
+  "id": "T-1781436269222-ivyj",
+  "timestamp": "2026-06-14T11:24:29.222Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "verify_checksum",
+    "encode_payload",
+    "sanitize_input",
+    "validate_schema",
+    "extract_ir",
+    "compress_buffer",
+    "decode_payload",
+    "compute_hash"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

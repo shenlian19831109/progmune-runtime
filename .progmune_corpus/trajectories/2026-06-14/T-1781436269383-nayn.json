@@ -1,0 +1,30 @@
+{
+  "id": "T-1781436269383-nayn",
+  "timestamp": "2026-06-14T11:24:29.383Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "verify_password",
+    "validate_schema",
+    "extract_ir",
+    "decode_payload",
+    "open",
+    "query",
+    "encode_payload",
+    "decompress_buffer",
+    "sanitize_input"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "id": "T-1781122771212-hkpl",
+  "timestamp": "2026-06-10T20:19:31.213Z",
+  "protocol": "AuthProtocol",
+  "initialState": [
+    "UNAUTHENTICATED"
+  ],
+  "finalState": [
+    "SESSION_ACTIVE"
+  ],
+  "trajectory": [
+    "verify_password",
+    "generate_jwt",
+    "create_session"
+  ],
+  "result": "repair",
+  "violation": {
+    "type": "missing_prerequisite",
+    "failingStepIndex": 0,
+    "expectedStates": [
+      "SESSION_ACTIVE"
+    ],
+    "actualStates": [
+      "UNAUTHENTICATED"
+    ],
+    "fixPath": [
+      "verify_password"
+    ],
+    "description": "Skipped verification"
+  },
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "successRate": 1,
+  "metadata": {
+    "source": "planner"
+  },
+  "feedback": {
+    "accepted": true,
+    "rejected": false
+  },
+  "cost": {
+    "latency": 25,
+    "actions": 3
+  }
+}

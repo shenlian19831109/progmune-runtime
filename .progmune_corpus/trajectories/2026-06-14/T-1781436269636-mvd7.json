@@ -1,0 +1,29 @@
+{
+  "id": "T-1781436269636-mvd7",
+  "timestamp": "2026-06-14T11:24:29.636Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "compress_buffer",
+    "decompress_buffer",
+    "decode_payload",
+    "sanitize_input",
+    "extract_ir",
+    "compute_hash",
+    "open",
+    "query"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

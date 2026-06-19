@@ -1,0 +1,30 @@
+{
+  "id": "T-1781436269491-h5gf",
+  "timestamp": "2026-06-14T11:24:29.491Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "open",
+    "read_file",
+    "sanitize_input",
+    "extract_ir",
+    "validate_action",
+    "compress_buffer",
+    "encode_payload",
+    "decompress_buffer",
+    "connect_db"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

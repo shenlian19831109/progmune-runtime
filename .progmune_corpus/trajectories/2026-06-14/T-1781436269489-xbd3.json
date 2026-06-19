@@ -1,0 +1,29 @@
+{
+  "id": "T-1781436269489-xbd3",
+  "timestamp": "2026-06-14T11:24:29.489Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "compress_buffer",
+    "compute_hash",
+    "open",
+    "connect_db",
+    "disconnect_db",
+    "verify_checksum",
+    "extract_ir",
+    "decompress_buffer"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

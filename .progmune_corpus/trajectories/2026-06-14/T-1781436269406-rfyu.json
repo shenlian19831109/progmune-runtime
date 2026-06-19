@@ -1,0 +1,30 @@
+{
+  "id": "T-1781436269406-rfyu",
+  "timestamp": "2026-06-14T11:24:29.406Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "verify_password",
+    "verify_checksum",
+    "encode_payload",
+    "decompress_buffer",
+    "connect_db",
+    "open",
+    "read_file",
+    "compute_hash",
+    "compress_buffer"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

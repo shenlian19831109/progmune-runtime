@@ -1,0 +1,26 @@
+{
+  "id": "T-1781436269411-6vaf",
+  "timestamp": "2026-06-14T11:24:29.411Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "begin_tx",
+    "savepoint_create",
+    "rollback_to_savepoint",
+    "update_record",
+    "extract_ir"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

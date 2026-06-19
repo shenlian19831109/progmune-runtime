@@ -1,0 +1,31 @@
+{
+  "id": "T-1781436269185-3cad",
+  "timestamp": "2026-06-14T11:24:29.185Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "decompress_buffer",
+    "compute_hash",
+    "extract_ir",
+    "encode_payload",
+    "compress_buffer",
+    "verify_checksum",
+    "decode_payload",
+    "connect_db",
+    "open",
+    "close"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

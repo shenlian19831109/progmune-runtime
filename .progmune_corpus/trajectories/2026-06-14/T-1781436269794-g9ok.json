@@ -1,0 +1,28 @@
+{
+  "id": "T-1781436269794-g9ok",
+  "timestamp": "2026-06-14T11:24:29.794Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "begin_tx",
+    "insert_record",
+    "savepoint_create",
+    "update_record",
+    "prep_two_phase",
+    "rollback_to_savepoint",
+    "commit_tx"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "id": "T-1781436269488-uw94",
+  "timestamp": "2026-06-14T11:24:29.488Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "verify_checksum",
+    "decompress_buffer",
+    "open",
+    "read_file",
+    "compute_hash",
+    "extract_ir",
+    "validate_schema",
+    "compress_buffer"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

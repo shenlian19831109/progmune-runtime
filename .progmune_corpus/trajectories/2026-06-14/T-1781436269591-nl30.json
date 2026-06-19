@@ -1,0 +1,26 @@
+{
+  "id": "T-1781436269591-nl30",
+  "timestamp": "2026-06-14T11:24:29.591Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "verify_checksum",
+    "compute_hash",
+    "validate_schema",
+    "open",
+    "write_file"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

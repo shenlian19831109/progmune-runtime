@@ -1,0 +1,25 @@
+{
+  "id": "T-1781436269303-n82d",
+  "timestamp": "2026-06-14T11:24:29.303Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "evaluate_access",
+    "deny_access",
+    "compress_buffer",
+    "open"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}

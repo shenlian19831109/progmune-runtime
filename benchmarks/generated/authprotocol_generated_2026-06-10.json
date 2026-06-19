@@ -1,0 +1,58 @@
+{
+  "protocol": "AuthProtocol",
+  "generatedAt": "2026-06-10T20:19:34.086Z",
+  "cases": [
+    {
+      "goal": "cover transition: TOKEN_ISSUED → UNAUTHENTICATED via revoke_token",
+      "protocol": "_global",
+      "broken": [
+        "generate_jwt"
+      ],
+      "expected": [
+        "generate_jwt",
+        "revoke_token"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "TOKEN_ISSUED",
+        "to": "UNAUTHENTICATED",
+        "rule": "revoke_token"
+      }
+    },
+    {
+      "goal": "cover transition: SESSION_ACTIVE → UNAUTHENTICATED via logout",
+      "protocol": "_global",
+      "broken": [
+        "create_session"
+      ],
+      "expected": [
+        "create_session",
+        "logout"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "SESSION_ACTIVE",
+        "to": "UNAUTHENTICATED",
+        "rule": "logout"
+      }
+    },
+    {
+      "goal": "cover transition: SESSION_ACTIVE → ∅ via logout",
+      "protocol": "_global",
+      "broken": [
+        "create_session"
+      ],
+      "expected": [
+        "create_session",
+        "logout"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "SESSION_ACTIVE",
+        "to": "∅",
+        "rule": "logout"
+      }
+    }
+  ],
+  "source": "coverage-gap"
+}

@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Progmune 团队" />
+  <meta name="dcterms.date" content="2026-05-30" />
+  <title>Progmune Runtime 内部技术白皮书 v2.1</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="data:text/css,body%20%7B%0Afont%2Dfamily%3A%20%22PingFang%20SC%22%2C%20%22Helvetica%20Neue%22%2C%20Arial%2C%20sans%2Dserif%3B%0Amax%2Dwidth%3A%20900px%3B%0Amargin%3A%200%20auto%3B%0Apadding%3A%2040px%2060px%3B%0Acolor%3A%20%231a1a1a%3B%0Aline%2Dheight%3A%201%2E8%3B%0Afont%2Dsize%3A%2015px%3B%0Abackground%3A%20%23fdfdfd%3B%0A%7D%0Ah1%20%7B%20font%2Dsize%3A%2028px%3B%20color%3A%20%231b4332%3B%20border%2Dbottom%3A%202px%20solid%20%232d6a4f%3B%20padding%2Dbottom%3A%2012px%3B%20margin%2Dtop%3A%2048px%3B%20%7D%0Ah2%20%7B%20font%2Dsize%3A%2022px%3B%20color%3A%20%232d6a4f%3B%20margin%2Dtop%3A%2036px%3B%20%7D%0Ah3%20%7B%20font%2Dsize%3A%2018px%3B%20color%3A%20%2340916c%3B%20margin%2Dtop%3A%2028px%3B%20%7D%0Ah4%20%7B%20font%2Dsize%3A%2015px%3B%20color%3A%20%2352b788%3B%20margin%2Dtop%3A%2020px%3B%20%7D%0Apre%20%7B%20background%3A%20%23f6f8fa%3B%20border%3A%201px%20solid%20%23d0d7de%3B%20border%2Dradius%3A%206px%3B%20padding%3A%2016px%3B%20overflow%2Dx%3A%20auto%3B%20font%2Dsize%3A%2013px%3B%20line%2Dheight%3A%201%2E5%3B%20%7D%0Acode%20%7B%20font%2Dfamily%3A%20%22SF%20Mono%22%2C%20%22Menlo%22%2C%20%22Monaco%22%2C%20monospace%3B%20font%2Dsize%3A%2013px%3B%20background%3A%20%23f6f8fa%3B%20padding%3A%202px%206px%3B%20border%2Dradius%3A%204px%3B%20%7D%0Apre%20code%20%7B%20background%3A%20none%3B%20padding%3A%200%3B%20%7D%0Atable%20%7B%20border%2Dcollapse%3A%20collapse%3B%20width%3A%20100%25%3B%20margin%3A%2016px%200%3B%20%7D%0Ath%2C%20td%20%7B%20border%3A%201px%20solid%20%23d0d7de%3B%20padding%3A%2010px%2014px%3B%20text%2Dalign%3A%20left%3B%20%7D%0Ath%20%7B%20background%3A%20%23f6f8fa%3B%20font%2Dweight%3A%20600%3B%20%7D%0Ablockquote%20%7B%20border%2Dleft%3A%204px%20solid%20%232d6a4f%3B%20margin%3A%2016px%200%3B%20padding%3A%208px%2020px%3B%20background%3A%20%23f0faf5%3B%20%7D%0Astrong%20%7B%20color%3A%20%231b4332%3B%20%7D%0Aa%20%7B%20color%3A%20%232d6a4f%3B%20%7D%0A" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Progmune Runtime 内部技术白皮书 v2.1</h1>
+<p class="subtitle">程序免疫学：约束引导的程序合成运行时 —— 逻辑框架与技术细节</p>
+<p class="author">Progmune 团队</p>
+<p class="date">2026-05-30</p>
+</header>
+<nav id="TOC" role="doc-toc">
+
+</nav>
+<h1 id="第一章-概述与设计哲学">第一章 概述与设计哲学</h1>
+<h2 id="问题背景">1.1 问题背景</h2>
+<p>大语言模型（LLM）在代码生成领域取得了显著进展，但 LLM 输出的代码存在固有的不确定性问题：幻觉函数名、类型不匹配、变量未定义即使用、违反 API 调用协议等。传统方法依赖人工审查或单元测试来捕获这些错误，但人工审查不可扩展，单元测试覆盖有限。</p>
+<p>Progmune Runtime 提出了一种根本不同的方案：<strong>程序免疫学（Program Immunology）</strong>——借鉴生物免疫系统识别和清除病原体的原理，构建多层约束验证运行时，自动检测、诊断并修复 LLM 生成代码中的语义异常。</p>
+<h2 id="核心设计原则">1.2 核心设计原则</h2>
+<h3 id="原则一约束即规范constraints-as-specifications">原则一：约束即规范（Constraints as Specifications）</h3>
+<p>程序的合法空间由约束定义，而非由生成模型定义。任何 LLM 输出必须通过四层语义验证层（SVL-1 到 SVL-4）才能被接受。</p>
+<h3 id="原则二免疫记忆immune-memory">原则二：免疫记忆（Immune Memory）</h3>
+<p>每一次约束违规都是一次“感染事件”。系统记录违规的模式、上下文和修复路径，形成“抗体”。当相同或相似的意图再次出现时，免疫记忆可以跳过 LLM 推理直接提供已验证的解，或注入修复提示。</p>
+<h3 id="原则三确定性修复deterministic-repair">原则三：确定性修复（Deterministic Repair）</h3>
+<p>当协议违规有已知修复路径时，系统不应回退到 LLM 重新生成，而应通过 SSG 状态图的 BFS 搜索自动插入缺失的函数调用。</p>
+<h3 id="原则四可观测性优先observability-first">原则四：可观测性优先（Observability First）</h3>
+<p>每次规划会话产生完整的执行记录：Attempt（每次尝试）、StateTransition（状态转移）、ConstraintViolation（约束违规）。这些记录支持终端回放、Web 仪表盘和统计分析。</p>
+<h2 id="系统定位">1.3 系统定位</h2>
+<p>Progmune Runtime 是一个 <strong>MCP（Model Context Protocol）服务器</strong>，作为 LLM 与目标代码库之间的约束验证中间层。它不替代 LLM，而是为 LLM 提供一个“免疫沙箱”——LLM 输出在沙箱中经过多层验证后才能进入代码库。</p>
+<h1 id="第二章-核心架构">第二章 核心架构</h1>
+<h2 id="系统分层">2.1 系统分层</h2>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│                      MCP Server Layer                        │
+│  mcp-server.mts — Tool dispatch, session management         │
+├─────────────────────────────────────────────────────────────┤
+│                      Planner Layer                           │
+│  planner.ts — Core planning loop, immune acceleration       │
+│  search-planner.ts — Search-based planning                  │
+├─────────────────────────────────────────────────────────────┤
+│                   Validation Layer (Immune System)           │
+│  ┌──────────┬──────────┬──────────┬──────────────────────┐  │
+│  │  SVL-1   │  SVL-2   │  SVL-3   │       SVL-4          │  │
+│  │ Symbol   │  Type    │ Dataflow │ Protocol (SSG)        │  │
+│  │validator │validator │validator │ ssg-validator.ts      │  │
+│  └──────────┴──────────┴──────────┴──────────────────────┘  │
+│  semantic-validator.ts — Semantic contract checking         │
+├─────────────────────────────────────────────────────────────┤
+│                   IR Layer                                   │
+│  extract-ir.ts — ts-morph AST → FunctionInfo[]              │
+│  ir.json — Serialized IR cache                              │
+├─────────────────────────────────────────────────────────────┤
+│                Immune Memory Layer                           │
+│  failure-corpus.ts — Failure genome, antibodies, heatmap    │
+│  memory-layer.ts — Semantic templates                       │
+│  semantic-snapshot.ts — IR snapshots for replay             │
+├─────────────────────────────────────────────────────────────┤
+│                Code Emission Layer                           │
+│  emitter.ts — TypeScript code generation from Action[]      │
+│  action-runtime.ts — Action DSL execution sandbox           │
+├─────────────────────────────────────────────────────────────┤
+│                Observatory Layer                             │
+│  semantic-trace.ts — Terminal-based replay dashboard        │
+│  obs-web.ts — Web-based dashboard (port 3100)               │
+│  check.ts — One-command immune health inspection            │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+<h2 id="核心数据流">2.2 核心数据流</h2>
+<pre><code>User Intent (自然语言)
+    │
+    ▼
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│  IR 提取      │────▶│  规划器       │────▶│  约束验证     │
+│ extract-ir   │     │  planner.ts  │     │  validator   │
+│ (ts-morph)   │     │  (LLM调用)   │     │  (4层SVL)    │
+└──────────────┘     └──────────────┘     └──────────────┘
+       │                    │                     │
+       ▼                    ▼                     ▼
+  ir.json           ExecutionSession      ConstraintViolation[]
+                    Attempt[]             StateTransition[]
+                           │                     │
+                           ▼                     ▼
+                    ┌──────────────┐     ┌──────────────┐
+                    │  免疫记忆     │◀────│  代码发射     │
+                    │  corpus      │     │  emitter.ts  │
+                    └──────────────┘     └──────────────┘
+                           │
+                           ▼
+                    ┌──────────────┐
+                    │  观测站       │
+                    │  trace/web   │
+                    └──────────────┘</code></pre>
+<h1 id="第三章-运行时本体论runtime-ontology">第三章 运行时本体论（Runtime Ontology）</h1>
+<p>运行时本体论定义了 Progmune 执行语义的所有基本对象。这些类型集中定义在 <code>src/runtime-types.ts</code> 中，是整个系统的单一权威来源（Single Source of Truth）。</p>
+<h2 id="action-dsl">3.1 Action DSL</h2>
+<p>Action 是 Progmune 中程序行为的原子单位——一个 discriminated union，表示 LLM 生成的每个操作。</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Action <span class="op">=</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> { kind<span class="op">:</span> <span class="st">&quot;call&quot;</span><span class="op">;</span> function<span class="op">:</span> <span class="dt">string</span><span class="op">;</span> args<span class="op">:</span> Arg[]<span class="op">;</span> assignTo<span class="op">?:</span> <span class="dt">string</span> }</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> { kind<span class="op">:</span> <span class="st">&quot;assign&quot;</span><span class="op">;</span> target<span class="op">:</span> <span class="dt">string</span><span class="op">;</span> value<span class="op">:</span> <span class="dt">string</span> <span class="op">|</span> Action }</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> { kind<span class="op">:</span> <span class="st">&quot;return&quot;</span><span class="op">;</span> value<span class="op">:</span> <span class="dt">string</span> <span class="op">|</span> Action }</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> { kind<span class="op">:</span> <span class="st">&quot;if&quot;</span><span class="op">;</span> condition<span class="op">:</span> <span class="dt">string</span><span class="op">;</span> thenActions<span class="op">:</span> Action[]<span class="op">;</span> elseActions<span class="op">?:</span> Action[] }</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> { kind<span class="op">:</span> <span class="st">&quot;for&quot;</span><span class="op">;</span> variable<span class="op">:</span> <span class="dt">string</span><span class="op">;</span> iterable<span class="op">:</span> <span class="dt">string</span><span class="op">;</span> bodyActions<span class="op">:</span> Action[] }</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Arg <span class="op">=</span> { name<span class="op">:</span> <span class="dt">string</span><span class="op">;</span> type<span class="op">:</span> <span class="dt">string</span><span class="op">;</span> value<span class="op">:</span> <span class="dt">string</span> <span class="op">|</span> Action }</span></code></pre></div>
+<p>Action DSL 的设计要点：</p>
+<ol type="1">
+<li><strong><code>call</code></strong> — 函数调用，args 携带静态类型信息（name， type， value），assignTo 表示返回值绑定</li>
+<li><strong><code>assign</code></strong> — 变量赋值，value 可以是字面量或嵌套 Action</li>
+<li><strong><code>return</code></strong> — 返回语句，value 可以是变量名引用（以 <code>$</code> 前缀区分的 JSON wire format）或嵌套 Action</li>
+<li><strong><code>if</code></strong> — 条件分支，thenActions/elseActions 各自是完整的 Action[]</li>
+<li><strong><code>for</code></strong> — 循环，bodyActions 是循环体</li>
+</ol>
+<h3 id="json-wire-format">JSON Wire Format</h3>
+<p>LLM 输出的紧凑 JSON 格式（用于减少 token 消耗）：</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ot">[</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">{</span><span class="dt">&quot;f&quot;</span><span class="fu">:</span><span class="st">&quot;extractIR&quot;</span><span class="fu">,</span><span class="dt">&quot;to&quot;</span><span class="fu">:</span><span class="st">&quot;ir&quot;</span><span class="fu">,</span><span class="dt">&quot;a&quot;</span><span class="fu">:</span><span class="ot">[</span><span class="fu">{</span><span class="dt">&quot;n&quot;</span><span class="fu">:</span><span class="st">&quot;root&quot;</span><span class="fu">,</span><span class="dt">&quot;t&quot;</span><span class="fu">:</span><span class="st">&quot;str&quot;</span><span class="fu">,</span><span class="dt">&quot;v&quot;</span><span class="fu">:</span><span class="st">&quot;.&quot;</span><span class="fu">}</span><span class="ot">]</span><span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">{</span><span class="dt">&quot;f&quot;</span><span class="fu">:</span><span class="st">&quot;validateAction&quot;</span><span class="fu">,</span><span class="dt">&quot;to&quot;</span><span class="fu">:</span><span class="st">&quot;ok&quot;</span><span class="fu">,</span><span class="dt">&quot;a&quot;</span><span class="fu">:</span><span class="ot">[</span><span class="fu">{</span><span class="dt">&quot;n&quot;</span><span class="fu">:</span><span class="st">&quot;action&quot;</span><span class="fu">,</span><span class="dt">&quot;t&quot;</span><span class="fu">:</span><span class="st">&quot;any&quot;</span><span class="fu">,</span><span class="dt">&quot;v&quot;</span><span class="fu">:</span><span class="st">&quot;$ir&quot;</span><span class="fu">}</span><span class="ot">]</span><span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">{</span><span class="dt">&quot;r&quot;</span><span class="fu">:</span><span class="st">&quot;ok&quot;</span><span class="fu">}</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="ot">]</span></span></code></pre></div>
+<ul>
+<li><code>f</code> → function name, <code>to</code> → assignTo, <code>a</code> → args</li>
+<li><code>$变量名</code> 表示对之前返回值的引用</li>
+<li><code>r</code> → return</li>
+</ul>
+<p>解析函数 <code>parseActionJSON()</code> 负责将紧凑 JSON 转换为 <code>Action[]</code>。</p>
+<h2 id="constraintviolation">3.2 ConstraintViolation</h2>
+<p>每次约束违规都产生一个结构化的 <code>ConstraintViolation</code> 对象：</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>interface ConstraintViolation {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  svl<span class="op">:</span> <span class="dv">1</span> <span class="op">|</span> <span class="dv">2</span> <span class="op">|</span> <span class="dv">3</span> <span class="op">|</span> <span class="dv">4</span><span class="op">;</span>              <span class="co">// 违规层级</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  violatedConstraint<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>        <span class="co">// 违规约束类型</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  actionIndex<span class="op">:</span> <span class="dt">number</span><span class="op">;</span>               <span class="co">// 违规动作索引</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  currentStates<span class="op">?:</span> <span class="dt">string</span>[]<span class="op">;</span>          <span class="co">// 当前 SSG 状态（SVL-4）</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  requiredStates<span class="op">?:</span> <span class="dt">string</span>[]<span class="op">;</span>         <span class="co">// 所需 SSG 状态（SVL-4）</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  missingStates<span class="op">?:</span> <span class="dt">string</span>[]<span class="op">;</span>          <span class="co">// 缺失的前置函数（SVL-4）</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  conflictingStates<span class="op">?:</span> <span class="dt">string</span>[]<span class="op">;</span>      <span class="co">// 冲突状态</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  fixPath<span class="op">?:</span> <span class="dt">string</span>[]<span class="op">;</span>                <span class="co">// BFS 搜索的修复路径</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  namespace<span class="op">?:</span> <span class="dt">string</span><span class="op">;</span>                <span class="co">// 命名空间</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  description<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>               <span class="co">// 人类可读描述</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<h2 id="statetransition">3.3 StateTransition</h2>
+<p>协议状态机的每次合法调用产生一个 <code>StateTransition</code>：</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>interface StateTransition {</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  actionIndex<span class="op">:</span> <span class="dt">number</span><span class="op">;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  function<span class="op">:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  namespace<span class="op">:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  acquired<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span>                           <span class="co">// 新获得的状态</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  invalidated<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span>                        <span class="co">// 被失效的状态</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  statesBefore<span class="op">:</span> <span class="bu">Record</span><span class="op">&lt;</span><span class="dt">string</span><span class="op">,</span> <span class="dt">string</span>[]<span class="op">&gt;;</span>       <span class="co">// per-namespace 快照（执行前）</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  statesAfter<span class="op">:</span> <span class="bu">Record</span><span class="op">&lt;</span><span class="dt">string</span><span class="op">,</span> <span class="dt">string</span>[]<span class="op">&gt;;</span>        <span class="co">// per-namespace 快照（执行后）</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  valid<span class="op">:</span> <span class="dt">boolean</span><span class="op">;</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p><strong>关键设计决策</strong>：<code>statesBefore</code> 和 <code>statesAfter</code> 使用 <code>Record&lt;string, string[]&gt;</code>（per-namespace），而非合并的 <code>string[]</code>。这样每个命名空间（auth、file、db、dev_pipeline）的状态变化可以独立追踪。</p>
+<h2 id="attempt">3.4 Attempt</h2>
+<p>一次“尝试”是规划器的单次推理循环：</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>interface Attempt {</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  id<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>                        <span class="co">// att_&lt;timestamp&gt;_&lt;random&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  sessionId<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>                 <span class="co">// 所属会话</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  attemptNumber<span class="op">:</span> <span class="dt">number</span><span class="op">;</span>             <span class="co">// 1-based</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  parentAttemptId<span class="op">?:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  inputIntent<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>               <span class="co">// 用户意图原文</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  plannerSeed<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>               <span class="co">// MD5(prompt|model|timestamp)</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  constraintSnapshotId<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>      <span class="co">// IR 快照链接</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  generatedActions<span class="op">:</span> Action[]<span class="op">;</span>        <span class="co">// LLM 输出</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  transitions<span class="op">:</span> StateTransition[]<span class="op">;</span>    <span class="co">// SSG 状态转移</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  violations<span class="op">:</span> ConstraintViolation[]<span class="op">;</span> <span class="co">// 约束违规列表</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  outcome<span class="op">:</span> <span class="st">&quot;success&quot;</span> <span class="op">|</span> <span class="st">&quot;constraint_violation&quot;</span> <span class="op">|</span> <span class="st">&quot;planner_failure&quot;</span><span class="op">;</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  timestamp<span class="op">:</span> <span class="dt">number</span><span class="op">;</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  llmCallCount<span class="op">:</span> <span class="dt">number</span><span class="op">;</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  durationMs<span class="op">:</span> <span class="dt">number</span><span class="op">;</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  antibodyHit<span class="op">?:</span> AntibodyHit<span class="op">;</span>         <span class="co">// 如果被免疫加速</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<h2 id="executionsession">3.5 ExecutionSession</h2>
+<p>一次完整的规划会话：</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>interface ExecutionSession {</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  sessionId<span class="op">:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  intent<span class="op">:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  attempts<span class="op">:</span> Attempt[]<span class="op">;</span>              <span class="co">// 所有尝试（按时间顺序）</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  successfulAttempt<span class="op">?:</span> Attempt<span class="op">;</span>      <span class="co">// 成功的尝试</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  resolved<span class="op">:</span> <span class="dt">boolean</span><span class="op">;</span>                <span class="co">// 是否最终解决</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  snapshotId<span class="op">?:</span> <span class="dt">string</span><span class="op">;</span>              <span class="co">// IR 快照 ID</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  startedAt<span class="op">:</span> <span class="dt">number</span><span class="op">;</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  endedAt<span class="op">?:</span> <span class="dt">number</span><span class="op">;</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<h2 id="antibodyhit">3.6 AntibodyHit</h2>
+<p>抗体命中记录，捕获免疫系统加速规划器的每次事件：</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>interface AntibodyHit {</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  level<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>              <span class="co">// ACL-1 | ACL-2 | ACL-3 | ACL-4</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  signature<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>          <span class="co">// 失效模式签名</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  fixPath<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span>          <span class="co">// 修复路径</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  similarityScore<span class="op">:</span> <span class="dt">number</span><span class="op">;</span>    <span class="co">// Jaccard 相似度</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  action<span class="op">:</span> <span class="st">&quot;fast_path&quot;</span> <span class="op">|</span> <span class="st">&quot;injected_hint&quot;</span><span class="op">;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  llmCallsSaved<span class="op">:</span> <span class="dt">number</span><span class="op">;</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  estimatedTokensSaved<span class="op">:</span> <span class="dt">number</span><span class="op">;</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<h1 id="第四章-ir-提取系统">第四章 IR 提取系统</h1>
+<h2 id="设计目标">4.1 设计目标</h2>
+<p>IR（Intermediate Representation，中间表示）是 Progmune 对目标代码库的模型。它将 TypeScript 源码抽象为结构化的函数签名列表，供 LLM 和验证器使用。</p>
+<h2 id="技术实现">4.2 技术实现</h2>
+<p><code>extractIR(projectRoot: string): FunctionInfo[]</code> 使用 <code>ts-morph</code>（TypeScript 编译器 API 的包装）提取：</p>
+<h3 id="提取范围">提取范围</h3>
+<ol type="1">
+<li><strong>函数声明</strong>（<code>function foo() {}</code>）—— 名称、参数、返回类型</li>
+<li><strong>箭头函数变量</strong>（<code>const foo = () =&gt; {}</code>）—— 包括简单箭头函数和由高阶函数（如 <code>debounce(() =&gt; {})</code>）包装的箭头函数</li>
+<li><strong>JSDoc <span class="citation" data-cites="protocol">@protocol</span> 注解</strong> —— 解析 <code>@protocol namespace=xxx pre_states=[&quot;A&quot;] post_states=[&quot;B&quot;]</code> 格式</li>
+<li><strong>直接调用图</strong> —— 每个函数体内调用的其他函数名</li>
+<li><strong>外部依赖</strong> —— 从调用图中识别非项目声明但被引用的函数（如 <code>fs.readFileSync</code>、<code>path.resolve</code>），从已知外部函数注册表（约 40+ 条目）补充签名信息</li>
+</ol>
+<h3 id="类型系统">类型系统</h3>
+<ul>
+<li>保留原始 TypeScript 类型字符串（<code>string</code>、<code>number</code>、<code>Promise&lt;User&gt;</code> 等）</li>
+<li>提供结构化类型细节（<code>typeDetail</code>）：联合类型展开（<code>string | null</code>）、泛型展开（<code>Array&lt;string&gt;</code>）</li>
+<li>标准化类型简写：<code>str</code>、<code>int</code>、<code>bool</code>、<code>dict</code>、<code>list</code> 用于 LLM prompt 紧凑表示</li>
+</ul>
+<h3 id="外部函数注册表">外部函数注册表</h3>
+<p>系统维护了一个包含约 40 个常用 Node.js/JS 标准库函数的签名注册表，覆盖： - <code>fs</code> 模块（readFileSync、writeFileSync、existsSync 等） - <code>path</code> 模块（resolve、relative、dirname 等） - <code>JSON</code>（parse、stringify） - <code>console</code>（log、error、warn） - <code>process</code>（exit、cwd） - <code>crypto</code>（createHash、digest） - <code>child_process</code>（execSync） - <code>setTimeout</code>、<code>Math</code> 等</p>
+<p>过滤掉的 JS 内置方法（约 60+ 个）：<code>map</code>、<code>filter</code>、<code>reduce</code>、<code>toString</code>、<code>push</code> 等。</p>
+<h3 id="协议注解提取">协议注解提取</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">parseProtocolFromJSDoc</span>(node<span class="op">:</span> <span class="dt">any</span>)<span class="op">:</span> FunctionInfo[<span class="st">&#39;protocol&#39;</span>] <span class="op">|</span> <span class="dt">undefined</span> {</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 解析格式: @protocol namespace=file pre_states=[&quot;A&quot;,&quot;B&quot;] post_states=[&quot;C&quot;] invalidate=[&quot;A&quot;]</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<h2 id="输出格式">4.3 输出格式</h2>
+<p><code>ir.json</code> 是一个 <code>FunctionInfo[]</code> 数组，每个条目包含：</p>
+<table>
+<thead>
+<tr class="header">
+<th>字段</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>name</code></td>
+<td><code>string</code></td>
+<td>函数名</td>
+</tr>
+<tr class="even">
+<td><code>params</code></td>
+<td><code>ParamInfo[]</code></td>
+<td>参数列表（name、type、typeDetail）</td>
+</tr>
+<tr class="odd">
+<td><code>returnType</code></td>
+<td><code>string</code></td>
+<td>返回类型</td>
+</tr>
+<tr class="even">
+<td><code>file</code></td>
+<td><code>string</code></td>
+<td>源文件路径</td>
+</tr>
+<tr class="odd">
+<td><code>calls</code></td>
+<td><code>string[]</code></td>
+<td>直接调用的函数名</td>
+</tr>
+<tr class="even">
+<td><code>external</code></td>
+<td><code>boolean?</code></td>
+<td>是否为外部函数</td>
+</tr>
+<tr class="odd">
+<td><code>description</code></td>
+<td><code>string?</code></td>
+<td>外部函数的描述</td>
+</tr>
+<tr class="even">
+<td><code>protocol</code></td>
+<td><code>object?</code></td>
+<td>JSDoc <span class="citation" data-cites="protocol">@protocol</span> 注解</td>
+</tr>
+</tbody>
+</table>
+<h2 id="协议状态注解">4.4 协议状态注解</h2>
+<p>IR 提取本身也是 SSG 协议的一部分：</p>
+<pre><code>@protocol namespace=dev_pipeline pre_states=[] post_states=[&quot;IR_EXTRACTED&quot;] invalidate=[&quot;IR_STALE&quot;]</code></pre>
+<h1 id="第五章-约束验证引擎immune-system">第五章 约束验证引擎（Immune System）</h1>
+<h2 id="四层语义验证层svl">5.1 四层语义验证层（SVL）</h2>
+<p>Progmune 的免疫系统由四个递进的验证层组成，每一层捕获不同类别的语义异常。</p>
+<h3 id="svl-1符号存在性symbol-existence">SVL-1：符号存在性（Symbol Existence）</h3>
+<p><strong>文件</strong>：<code>src/validator.ts</code>，函数 <code>validateAction()</code></p>
+<p><strong>检查内容</strong>： - 函数名是否在 IR 中存在（或在内置白名单中） - 动作类型（kind）是否合法（call、if、for、assign、return）</p>
+<p><strong>检查方式</strong>：O(1) 集合查找</p>
+<p><strong>触发条件</strong>：LLM 幻觉出不存在的函数名、输出无效的动作结构</p>
+<h3 id="svl-2类型完整性type-integrity">SVL-2：类型完整性（Type Integrity）</h3>
+<p><strong>文件</strong>：<code>src/validator.ts</code>，函数 <code>validateAction()</code></p>
+<p><strong>检查内容</strong>： - 参数数量是否与 IR 签名匹配 - 参数类型是否兼容（标准化后比较：str、int、bool、dict、list 等） - <code>any</code> 类型兼容所有其他类型</p>
+<p><strong>检查方式</strong>：逐参数比较标准化类型字符串</p>
+<p><strong>触发条件</strong>：LLM 调用函数时传入错误数量的参数或类型不匹配的参数</p>
+<h3 id="svl-3数据流有效性dataflow-validity">SVL-3：数据流有效性（Dataflow Validity）</h3>
+<p><strong>文件</strong>：<code>src/validator.ts</code>，函数 <code>checkVariableFlow()</code></p>
+<p><strong>检查内容</strong>： - 变量是否在引用前被声明（通过 <code>assignTo</code> 或独立的 <code>assign</code> 动作） - 返回语句是否引用了已声明的变量 - 条件表达式是否引用了未声明的变量</p>
+<p><strong>检查方式</strong>：声明追踪 —— 遍历 Action 序列，维护已声明变量的 <code>Map&lt;string, string&gt;</code>，区分字面量（字符串、数字、布尔）和变量引用（合法的 JavaScript 标识符且不在声明表中）</p>
+<p><strong>触发条件</strong>：LLM 生成的代码使用 <code>$变量名</code> 引用但目标变量尚未被任何 <code>call</code> 的 <code>assignTo</code> 或独立 <code>assign</code> 声明</p>
+<h3 id="svl-4协议合法性protocol-legality">SVL-4：协议合法性（Protocol Legality）</h3>
+<p><strong>文件</strong>：<code>src/ssg-validator.ts</code>，<code>StateMachineValidator</code></p>
+<p>这是最复杂的一层。详见第六章。</p>
+<h2 id="验证器的返回结构">5.2 验证器的返回结构</h2>
+<p>每个验证函数返回结构化结果：</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">// validateAction 和 validateActionSequence</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>{ valid<span class="op">:</span> <span class="dt">boolean</span><span class="op">;</span> errors<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span> violations<span class="op">:</span> ConstraintViolation[] }</span></code></pre></div>
+<p>每个 <code>error</code> 都有对应的 <code>ConstraintViolation</code>，携带完整的诊断信息（svl、violatedConstraint、actionIndex、description）。</p>
+<h2 id="批量验证流程">5.3 批量验证流程</h2>
+<p><code>validateActionSequence(actions: Action[])</code> 的完整流程：</p>
+<ol type="1">
+<li>遍历每个 Action，调用 <code>validateAction(action, i)</code> —— 执行 SVL-1 和 SVL-2 检查</li>
+<li>递归处理子 Action（if 的 thenActions/elseActions、for 的 bodyActions）</li>
+<li>汇总所有 <code>ConstraintViolation[]</code></li>
+<li>如果前两层通过，执行 <code>checkVariableFlow()</code> —— SVL-3 数据流检查</li>
+<li>返回聚合的 <code>{ valid, errors, violations }</code></li>
+</ol>
+<h2 id="json-schema-预验证">5.4 JSON Schema 预验证</h2>
+<p><strong>文件</strong>：<code>src/planner.ts</code>，函数 <code>validateActionSchema()</code></p>
+<p>在 IR 感知验证之前，先进行结构完整性检查：</p>
+<ul>
+<li>每个 Action 是否有 <code>kind</code> 字段</li>
+<li><code>call</code> 是否有 <code>function</code>（字符串）和 <code>args</code>（数组）</li>
+<li><code>assign</code> 的 target 是否为合法变量名</li>
+<li><code>return</code> 是否在序列末尾（否则后续动作不可达）</li>
+<li>变量名是否重复赋值</li>
+<li><code>if</code>/<code>for</code> 的子 Action 结构递归检查</li>
+</ul>
+<p>这是 P2 阶段增加的防御层，在 JSON.parse 成功后、IR 验证前执行，捕获格式上合法但语义结构无效的输出。</p>
+<h1 id="第六章-ssg-状态机协议">第六章 SSG 状态机协议</h1>
+<h2 id="设计原理">6.1 设计原理</h2>
+<p>SSG（State-Guided Generation，状态引导生成）是 Progmune 的核心创新。它将函数调用建模为有限状态机中的状态转移，确保 LLM 生成的代码遵循正确的 API 调用顺序。</p>
+<p><strong>核心思想</strong>：每个函数声明其前置状态（调用前必须满足的状态）和后置状态（调用后产生的状态），验证器维护每个命名空间的独立状态集合，在每次函数调用时检查前置条件。</p>
+<h2 id="命名空间隔离">6.2 命名空间隔离</h2>
+<p>不同资源类型的状态机在独立的命名空间中运行：</p>
+<pre><code>_global:        UNAUTHENTICATED
+auth:           UNAUTHENTICATED → PASSWORD_VERIFIED → TOKEN_ISSUED → SESSION_ACTIVE
+file:           (empty) → FILE_OPEN → (read/write/close)
+db:             (empty) → DB_CONNECTED → (query/disconnect)
+dev_pipeline:   IR_STALE → IR_EXTRACTED → ACTION_VALIDATED → SEQUENCE_VALIDATED → CODE_EMITTED → SESSION_RECORDED</code></pre>
+<p>每个命名空间的状态变化互不影响。例如，auth 命名空间的 <code>SESSION_ACTIVE</code> 状态不会影响 file 命名空间的 <code>FILE_OPEN</code> 检查。</p>
+<h2 id="核心数据结构">6.3 核心数据结构</h2>
+<h3 id="stateannotation协议注解">StateAnnotation（协议注解）</h3>
+<div class="sourceCode" id="cb14"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>interface StateAnnotation {</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  pre_states<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span>    <span class="co">// 调用前必须全部满足的状态</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  post_states<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span>   <span class="co">// 调用后新增的状态</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  invalidate<span class="op">?:</span> <span class="dt">string</span>[]<span class="op">;</span>   <span class="co">// 调用后失效的状态</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  namespace<span class="op">?:</span> <span class="dt">string</span><span class="op">;</span>      <span class="co">// 所属命名空间</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<h3 id="ssgrejection协议拒绝">SSGRejection（协议拒绝）</h3>
+<div class="sourceCode" id="cb15"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>interface SSGRejection {</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  blocked<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>           <span class="co">// 被拦截的函数名</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  currentState<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span>    <span class="co">// 当前命名空间的当前状态</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  requiredState<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span>   <span class="co">// 被拦截函数所需的状态</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  missingFunctions<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span><span class="co">// 缺失的前置函数</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  fixPath<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span>         <span class="co">// BFS 找到的修复路径</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  namespace<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>         <span class="co">// 违规所在的命名空间</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<h2 id="bfs-状态图搜索确定性修复">6.4 BFS 状态图搜索（确定性修复）</h2>
+<p>当函数调用违反协议时，<code>findFixPath()</code> 在违规命名空间内执行 BFS 搜索：</p>
+<pre><code>算法: BFS 状态图搜索
+输入: namespace, currentStates, targetPreStates
+输出: 最短函数调用路径 (string[])
+
+1. 收集命名空间内所有协议规则
+2. startState = currentStates 的排序集合
+3. 队列初始化为 [{states: startState, path: []}]
+4. visited 集合跟踪已访问状态
+5. while 队列非空:
+   a. 取出队首 {states, path}
+   b. 如果 targetPreStates 中的所有状态都在 states 中 → 返回 path
+   c. 遍历命名空间内的每个函数:
+      - 如果函数的 pre_states 都满足 → 模拟执行
+      - 计算 nextStates（添加 post_states，删除 invalidate）
+      - 如果 nextStates 未访问过 → 入队
+   d. 如果 visited &gt; 1000 → 退出（状态爆炸保护）
+6. 回退: 单跳直接查找（逐个目标状态找能产出的函数）</code></pre>
+<p>这个算法的关键特性：</p>
+<ul>
+<li><strong>最优性</strong>：BFS 保证找到最短修复路径（最小步数）</li>
+<li><strong>状态爆炸保护</strong>：visited 集合上限 1000，防止无限扩展</li>
+<li><strong>回退机制</strong>：BFS 找不到时，退化为贪心单跳匹配</li>
+</ul>
+<h3 id="确定性的-ssg-修复attemptssgrepair">确定性的 SSG 修复（<code>attemptSSGRepair()</code>）</h3>
+<p>当 SSG 拒绝发生时，系统不仅仅报告错误——它尝试自动修复：</p>
+<ol type="1">
+<li>从 <code>SSGRejection.fixPath</code> 获取缺失函数的调用链</li>
+<li>为每个函数创建合成 Action（从 IR 推断参数类型，生成形参占位符）</li>
+<li>在被拦截的函数调用前插入修复函数</li>
+<li>重新验证修复后的序列</li>
+<li>如果仍违规且存在递归修复路径，尝试嵌套修复</li>
+</ol>
+<p>只有修复成功（重新验证通过）才使用修复后的序列。这保证了确定性修复的安全性和正确性。</p>
+<h2 id="multi-namespace-状态快照">6.5 Multi-namespace 状态快照</h2>
+<p><code>snapshotNamespaceStates()</code> 返回 <code>Record&lt;string, string[]&gt;</code>：</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;_global&quot;</span><span class="op">:</span> [<span class="st">&quot;UNAUTHENTICATED&quot;</span>]<span class="op">,</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;auth&quot;</span><span class="op">:</span> [<span class="st">&quot;SESSION_ACTIVE&quot;</span>]<span class="op">,</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;file&quot;</span><span class="op">:</span> [<span class="st">&quot;FILE_OPEN&quot;</span>]<span class="op">,</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;dev_pipeline&quot;</span><span class="op">:</span> [<span class="st">&quot;IR_EXTRACTED&quot;</span><span class="op">,</span> <span class="st">&quot;ACTION_VALIDATED&quot;</span>]</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>每个 StateTransition 的 <code>statesBefore</code> 和 <code>statesAfter</code> 使用此格式，实现对每个命名空间的独立追踪。</p>
+<p><code>acquired</code> 和 <code>invalidated</code> 字段预计算每次转移的变化（仅针对当前命名空间），供观测站直接使用而无需重新计算。</p>
+<h2 id="协议定义格式">6.6 协议定义格式</h2>
+<p><code>protocols.json</code> 是协议的声明式定义（17 条规则，4 个命名空间），支持：</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;namespaceInitialStates&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;_global&quot;</span><span class="fu">:</span> <span class="st">&quot;UNAUTHENTICATED&quot;</span><span class="fu">,</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;auth&quot;</span><span class="fu">:</span> <span class="st">&quot;UNAUTHENTICATED&quot;</span><span class="fu">,</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;dev_pipeline&quot;</span><span class="fu">:</span> <span class="st">&quot;IR_STALE&quot;</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;rules&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;verify_password&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;namespace&quot;</span><span class="fu">:</span> <span class="st">&quot;auth&quot;</span><span class="fu">,</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;pre_states&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;UNAUTHENTICATED&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;post_states&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;PASSWORD_VERIFIED&quot;</span><span class="ot">]</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>协议规则也可以从代码中的 JSDoc <code>@protocol</code> 注解提取。两种来源合并时，IR 中的 <span class="citation" data-cites="protocol">@protocol</span> 注解优先，但 JSON 中的 namespace 定义作为权威命名空间声明。</p>
+<h1 id="第七章-规划器planner">第七章 规划器（Planner）</h1>
+<h2 id="核心规划循环">7.1 核心规划循环</h2>
+<p><code>plan(userIntent: string): Promise&lt;Action[]&gt;</code> 是系统的核心入口，位于 <code>src/planner.ts</code>（917 行）。</p>
+<h3 id="规划流程">规划流程</h3>
+<pre><code>1. 初始化
+   ├── 加载 IR (ir.json)
+   ├── 创建 ExecutionSession
+   ├── 创建 IR 语义快照
+   └── 估算 prompt tokens
+
+2. 快速通道检查
+   ├── 语义模板缓存 (memory-layer)
+   │   └── 命中 &amp; successRate ≥ 0.8 &amp; useCount ≥ 2 → 直接返回
+   └── 抗体免疫查询 (failure-corpus)
+       ├── ACL-4: 0 LLM 调用，直接构建 Action[]
+       └── ACL-3: 注入修复路径提示到 prompt
+
+3. 函数排序与提示构建
+   ├── Jaccard 相似度排序（意图关键词 vs 函数名）
+   ├── 取 top-15 函数
+   └── 构建紧凑函数列表
+
+4. 检查点恢复（如果存在）
+
+5. 主重试循环 (maxRetries = 3)
+   ├── LLM 调用 (chat 或 generate)
+   ├── parseActionJSON() 解析输出
+   ├── validateActionSchema() JSON 结构预验证
+   ├── enrichActions() 补充 IR 元数据
+   ├── validateActionSequence() SVL-1/2/3 序列验证
+   ├── validateProtocolWithTransitions() SVL-4 SSG 协议验证
+   ├── attemptSSGRepair() 确定性修复
+   └── checkSemantic() 语义合约验证
+
+6. 失败降级
+   └── generateFallbackPlan() 本地规则回退</code></pre>
+<h2 id="llm-交互设计">7.2 LLM 交互设计</h2>
+<h3 id="系统提示system-prompt">系统提示（System Prompt）</h3>
+<pre><code>你是程序合成助手。只输出 JSON 数组，不输出解释。
+
+格式（紧凑一行）：
+[{&quot;f&quot;:&quot;函数名&quot;,&quot;to&quot;:&quot;变量名&quot;,&quot;a&quot;:[{&quot;n&quot;:&quot;参数名&quot;,&quot;t&quot;:&quot;类型&quot;,&quot;v&quot;:值}]},{&quot;r&quot;:&quot;变量名&quot;}]
+
+铁律：只输出 JSON 数组，双引号，不输出解释</code></pre>
+<p>关键设计决策： - <strong>System/User 分离</strong>：静态规则放 system prompt，动态内容（函数列表、意图）放 user prompt。利用各 LLM 平台的 system prompt 缓存机制降低延迟和成本 - <strong>温度 0.0</strong>：所有 LLM 调用使用 <code>temperature: 0.0</code>，最大化确定性 - <strong>紧凑 JSON</strong>：单字母键名减少 token 消耗</p>
+<h3 id="提示构建策略">提示构建策略</h3>
+<ul>
+<li>从 IR 中选出与意图关键词 Jaccard 相似度最高的 top-15 函数</li>
+<li>使用 <code>buildCompactFuncList()</code> 生成紧凑格式：<code>fnName(p1:type,p2:type)-&gt;returnType</code></li>
+<li>如果检测到意图中提到的函数名已在 IR 中存在，将其加入禁止列表（防止 LLM 尝试“实现”已有函数）</li>
+<li>重试时在 prompt 中注入具体错误信息</li>
+</ul>
+<h2 id="免疫加速机制">7.3 免疫加速机制</h2>
+<h3 id="语义模板缓存">语义模板缓存</h3>
+<p><code>findSemanticTemplate(userIntent)</code> 检查 memory-layer 中是否有高置信度（successRate ≥ 0.8, 使用 ≥ 2 次）的模板匹配。</p>
+<h3 id="抗体推理">抗体推理</h3>
+<p><code>queryAntibodies(userIntent, minACL)</code> 查询免疫记忆：</p>
+<ol type="1">
+<li>收集所有失败模式及其修复路径</li>
+<li>按 ACL 等级过滤（默认 ACL-3+）</li>
+<li>计算当前意图与历史意图的 Jaccard 相似度</li>
+<li>过滤相似度 ≥ 0.2 的结果</li>
+</ol>
+<p><strong>ACL-4（全局稳定抗体）</strong>：修复路径在 ≥ 10 次出现且跨 ≥ 5 个不同意图。触发时完全跳过 LLM，直接从修复路径构建 Action[]。</p>
+<p><strong>ACL-3（跨任务验证抗体）</strong>：出现在 ≥ 4 次或跨 ≥ 3 个不同意图。将修复路径作为提示注入 LLM prompt。</p>
+<h2 id="规划器检查点">7.4 规划器检查点</h2>
+<p><code>saveCheckpoint()</code> / <code>loadCheckpoint()</code> 实现执行持久化：</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>interface PlannerCheckpoint {</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  intent<span class="op">:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  attemptIndex<span class="op">:</span> <span class="dt">number</span><span class="op">;</span>        <span class="co">// 已完成的尝试次数</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  sessionAttempts<span class="op">:</span> Attempt[]<span class="op">;</span>   <span class="co">// 序列化的尝试记录</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  currentPrompt<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>        <span class="co">// 当前重试 prompt</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  useSystem<span class="op">:</span> <span class="dt">boolean</span><span class="op">;</span>           <span class="co">// 是否使用 system prompt</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  timestamp<span class="op">:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>检查点用 intent 的 base64 hash 作为文件名，存储于 <code>.progmune_corpus/checkpoints/</code>。</p>
+<h2 id="降级策略">7.5 降级策略</h2>
+<p>当 LLM 3 次重试全部失败时，系统进入本地规则回退：</p>
+<p><code>generateFallbackPlan(intent, ir)</code> 从意图中提取关键词，匹配 IR 中名称包含这些关键词的函数，生成简单的顺序调用 Action[]。</p>
+<h1 id="第八章-免疫记忆与抗体推理">第八章 免疫记忆与抗体推理</h1>
+<h2 id="失败语料库failure-corpus">8.1 失败语料库（Failure Corpus）</h2>
+<p><strong>文件</strong>：<code>src/failure-corpus.ts</code>（647 行）</p>
+<p>失败语料库是 Progmune 的“免疫记忆”——存储每次约束违规的详细记录，支持模式挖掘、统计分析和抗体生成。</p>
+<h3 id="数据存储">数据存储</h3>
+<pre><code>.progmune_corpus/
+├── .seq                    # 全局递增序列号
+├── sessions/               # 执行会话（ExecutionSession JSON）
+│   └── sess_*.json
+├── checkpoints/            # 规划器检查点
+│   └── ckpt_*.json
+└── YYYY-MM-DD/             # 按日期分区的失败记录
+    └── fail_*.json</code></pre>
+<h3 id="failurerecord-结构">FailureRecord 结构</h3>
+<div class="sourceCode" id="cb23"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>interface FailureRecord {</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  id<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>                        <span class="co">// fail_&lt;timestamp&gt;_&lt;seq&gt;</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  timestamp<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>                 <span class="co">// ISO 8601</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  intent<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>                    <span class="co">// 用户意图</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  projectFunctions<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span>        <span class="co">// IR 中的全部函数名</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  violatedSVL<span class="op">:</span> SVL<span class="op">;</span>                  <span class="co">// 违规层级</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  constraintType<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>            <span class="co">// 具体约束类型</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  actionSequence<span class="op">:</span> <span class="dt">any</span>[]<span class="op">;</span>             <span class="co">// 导致违规的动作序列</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  errorDetail<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>               <span class="co">// 详细错误信息</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>  ssgState<span class="op">?:</span> <span class="dt">string</span>[]<span class="op">;</span>               <span class="co">// 违规时的 SSG 状态</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  ssgTrace<span class="op">?:</span> { <span class="op">...</span> }[]<span class="op">;</span>              <span class="co">// SSG 完整跟踪</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>  ssgFixPath<span class="op">?:</span> <span class="dt">string</span>[]<span class="op">;</span>             <span class="co">// SSG 修复路径</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>  ssgMissingFunctions<span class="op">?:</span> <span class="dt">string</span>[]<span class="op">;</span>    <span class="co">// 缺失的前置函数</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>  plannerAttempt<span class="op">:</span> <span class="dt">number</span><span class="op">;</span>            <span class="co">// 第几次尝试</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>  plannerRetryTotal<span class="op">:</span> <span class="dt">number</span><span class="op">;</span>         <span class="co">// 总重试次数</span></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<h2 id="会话归一化">8.2 会话归一化</h2>
+<p><code>normalizeSession()</code> 检测新旧两种会话格式：</p>
+<ul>
+<li><strong>新格式</strong>（ExecutionSession）：<code>attempts[0].violations</code> 存在</li>
+<li><strong>旧格式</strong>（IntentSession）：<code>attempts[0].violatedSVL</code> 存在</li>
+</ul>
+<p>旧格式通过 <code>convertOldSession()</code> 上转为 ExecutionSession，确保所有下游消费者看到统一的接口。</p>
+<h2 id="失败基因组failure-genome">8.3 失败基因组（Failure Genome）</h2>
+<p><code>getFailureGenome()</code> 对所有会话进行统计分析：</p>
+<table>
+<thead>
+<tr class="header">
+<th>指标</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>totalFailures</code></td>
+<td>总违规次数</td>
+</tr>
+<tr class="even">
+<td><code>bySVL</code></td>
+<td>按 SVL 层级的分布</td>
+</tr>
+<tr class="odd">
+<td><code>byConstraintType</code></td>
+<td>按约束类型的分布</td>
+</tr>
+<tr class="even">
+<td><code>topPatterns</code></td>
+<td>最常见的失效模式（SVL:constraintType 组合）</td>
+</tr>
+<tr class="odd">
+<td><code>commonFixPaths</code></td>
+<td>最常用的修复路径（按使用次数排序）</td>
+</tr>
+<tr class="even">
+<td><code>averageRetriesToSuccess</code></td>
+<td>平均成功所需重试次数</td>
+</tr>
+</tbody>
+</table>
+<h2 id="抗体推理引擎">8.4 抗体推理引擎</h2>
+<h3 id="acl-等级体系">ACL 等级体系</h3>
+<pre><code>ACL-1 (单例观察):       count ≥ 1
+ACL-2 (重复观察):       count ≥ 2
+ACL-3 (跨任务验证):     count ≥ 4 或 distinctIntents ≥ 3
+ACL-4 (全局稳定):       count ≥ 10 且 distinctIntents ≥ 5</code></pre>
+<p>阈值可通过环境变量配置： - <code>PROGMUNE_ACL4_COUNT</code>（默认 10） - <code>PROGMUNE_ACL4_INTENTS</code>（默认 5） - <code>PROGMUNE_ACL3_COUNT</code>（默认 4） - <code>PROGMUNE_ACL3_INTENTS</code>（默认 3） - <code>PROGMUNE_ACL2_COUNT</code>（默认 2）</p>
+<h3 id="学习模式learnedpattern">学习模式（LearnedPattern）</h3>
+<div class="sourceCode" id="cb25"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>interface LearnedPattern {</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  signature<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>          <span class="co">// &quot;SVL-4:missingFunc1,missingFunc2&quot;</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  violation<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>          <span class="co">// 人类可读的违规描述</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  fixPath<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span>          <span class="co">// 修复路径</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  occurrenceCount<span class="op">:</span> <span class="dt">number</span><span class="op">;</span>    <span class="co">// 出现次数</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  distinctIntents<span class="op">:</span> <span class="dt">string</span>[]<span class="op">;</span>  <span class="co">// 涉及的不同意图</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  resolvedRate<span class="op">:</span> <span class="dt">number</span><span class="op">;</span>       <span class="co">// 修复成功率</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  antibodyLevel<span class="op">:</span> AntibodyLevel<span class="op">;</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>  firstSeen<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>          <span class="co">// 首次出现时间</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  lastSeen<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>           <span class="co">// 最近出现时间</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<h3 id="查询匹配算法">查询匹配算法</h3>
+<p><code>queryAntibodies(intent, minACL)</code> 的匹配逻辑：</p>
+<ol type="1">
+<li>过滤 ACL 等级 ≥ minACL 的模式</li>
+<li>过滤有修复路径的模式</li>
+<li>对每个模式计算与当前意图的 Jaccard 相似度（基于词语重叠）</li>
+<li>过滤相似度 ≥ 0.2 的模式</li>
+<li>按相似度降序排序</li>
+</ol>
+<h2 id="语义热力图">8.5 语义热力图</h2>
+<p><code>getSemanticHeatmap()</code> 提供四维分析：</p>
+<ol type="1">
+<li><strong>fragileProtocols</strong>：最常被违规协议拦截的函数</li>
+<li><strong>svlHotspots</strong>：各 SVL 层级的热度分布（百分比）</li>
+<li><strong>constraintClusters</strong>：同一会话中多种约束类型共现的集群</li>
+<li><strong>highFrictionIntents</strong>：需要最多适配次数的意图任务</li>
+</ol>
+<h2 id="抗体效能统计">8.6 抗体效能统计</h2>
+<p><code>getAntibodyStats()</code> 量化免疫系统的实际效益：</p>
+<table>
+<thead>
+<tr class="header">
+<th>指标</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>totalHits</code></td>
+<td>抗体总命中数</td>
+</tr>
+<tr class="even">
+<td><code>fastPathHits</code></td>
+<td>ACL-4 快速通道命中（0 LLM）</td>
+</tr>
+<tr class="odd">
+<td><code>injectedHintHits</code></td>
+<td>ACL-3 提示注入命中</td>
+</tr>
+<tr class="even">
+<td><code>totalLLMCallsSaved</code></td>
+<td>节省的 LLM 调用次数</td>
+</tr>
+<tr class="odd">
+<td><code>totalTokensSaved</code></td>
+<td>估算节省的 token 数</td>
+</tr>
+<tr class="even">
+<td><code>byLevel</code></td>
+<td>按 ACL 等级的分布</td>
+</tr>
+<tr class="odd">
+<td><code>topSignatures</code></td>
+<td>最常见的抗体签名</td>
+</tr>
+</tbody>
+</table>
+<h1 id="第九章-代码发射">第九章 代码发射</h1>
+<h2 id="设计原理-1">9.1 设计原理</h2>
+<p>当 LLM 输出的 Action 序列通过所有四层验证后，<code>emitter.ts</code> 将其编译为可执行的 TypeScript 代码。</p>
+<h2 id="发射流程">9.2 发射流程</h2>
+<pre><code>Action[] → 遍历 → 类型分发 → emitCall | emitAssign | emitReturn | emitIf | emitFor → TypeScript 代码字符串</code></pre>
+<ul>
+<li><strong>call</strong>：生成 <code>const varName = functionName(arg1, arg2);</code> 或 <code>functionName(arg1, arg2);</code></li>
+<li><strong>assign</strong>：生成 <code>target = value;</code></li>
+<li><strong>return</strong>：生成 <code>return value;</code></li>
+<li><strong>if</strong>：生成 <code>if (condition) { ... } else { ... }</code></li>
+<li><strong>for</strong>：生成 <code>for (const variable of iterable) { ... }</code></li>
+</ul>
+<h2 id="action-运行时沙箱">9.3 Action 运行时沙箱</h2>
+<p><code>action-runtime.ts</code> 提供 <code>executeActionCode(code: string): Action[]</code>，将自由格式的 DSL 代码解析为 Action[]。这作为 LLM JSON 输出解析失败时的降级路径。</p>
+<p>沙箱使用 <code>new Function()</code> 构造受限执行环境，暴露 <code>call</code>、<code>callAssign</code>、<code>ifBlock</code>、<code>ifElse</code>、<code>assign</code>、<code>output</code> 六个 API 函数。变量通过 Proxy 对象管理。</p>
+<h1 id="第十章-观测站系统">第十章 观测站系统</h1>
+<h2 id="终端观测站semantic-trace.ts">10.1 终端观测站（semantic-trace.ts）</h2>
+<p><strong>文件</strong>：<code>src/semantic-trace.ts</code>（1163 行）</p>
+<p>提供丰富的终端 UI，支持以下命令：</p>
+<table>
+<thead>
+<tr class="header">
+<th>命令</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>ts-node src/semantic-trace.ts</code></td>
+<td>所有会话摘要</td>
+</tr>
+<tr class="even">
+<td><code>ts-node src/semantic-trace.ts &lt;id&gt;</code></td>
+<td>单会话完整时间线</td>
+</tr>
+<tr class="odd">
+<td><code>ts-node src/semantic-trace.ts replay &lt;id&gt;</code></td>
+<td>逐步认知回放</td>
+</tr>
+<tr class="even">
+<td><code>ts-node src/semantic-trace.ts --states &lt;id&gt;</code></td>
+<td>状态转移可视化</td>
+</tr>
+<tr class="odd">
+<td><code>ts-node src/semantic-trace.ts --genome</code></td>
+<td>失败基因组摘要</td>
+</tr>
+<tr class="even">
+<td><code>ts-node src/semantic-trace.ts --learned</code></td>
+<td>抗体注册表（含 ACL 等级）</td>
+</tr>
+<tr class="odd">
+<td><code>ts-node src/semantic-trace.ts --antibodies</code></td>
+<td>抗体效能指标</td>
+</tr>
+<tr class="even">
+<td><code>ts-node src/semantic-trace.ts --heatmap</code></td>
+<td>语义热力图</td>
+</tr>
+<tr class="odd">
+<td><code>ts-node src/semantic-trace.ts --snapshots</code></td>
+<td>IR 快照列表</td>
+</tr>
+<tr class="even">
+<td><code>ts-node src/semantic-trace.ts --diff &lt;A&gt; &lt;B&gt;</code></td>
+<td>IR 快照差异对比</td>
+</tr>
+<tr class="odd">
+<td><code>ts-node src/semantic-trace.ts --validate &lt;id&gt;</code></td>
+<td>确定性回放验证</td>
+</tr>
+</tbody>
+</table>
+<h3 id="认知回放cognitive-replay">认知回放（Cognitive Replay）</h3>
+<p><code>replaySession()</code> 以动画形式逐步展示规划器的每一次尝试： 1. 显示尝试序号和总次数 2. 列出 LLM 生成的动作序列 3. 展示检测到的语义异常及所属免疫层 4. 展示免疫响应（修复路径激活/适配请求） 5. 对比前后尝试的差异（persisted/dropped/acquired） 6. 显示进度条 7. 最终展示成功路径和状态机跟踪</p>
+<h2 id="web-仪表盘obs-web.ts">10.2 Web 仪表盘（obs-web.ts）</h2>
+<p><strong>文件</strong>：<code>src/obs-web.ts</code>（365 行）</p>
+<p>零依赖 HTTP 服务器（使用 Node 内置 <code>http</code> 模块），运行于端口 3100。</p>
+<h3 id="api-端点">API 端点</h3>
+<table>
+<thead>
+<tr class="header">
+<th>端点</th>
+<th>返回</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>GET /api/sessions</code></td>
+<td>所有会话列表</td>
+</tr>
+<tr class="even">
+<td><code>GET /api/sessions/:id</code></td>
+<td>单会话详细信息</td>
+</tr>
+<tr class="odd">
+<td><code>GET /api/genome</code></td>
+<td>失败基因组统计</td>
+</tr>
+<tr class="even">
+<td><code>GET /api/heatmap</code></td>
+<td>语义热力图数据</td>
+</tr>
+<tr class="odd">
+<td><code>GET /api/antibodies</code></td>
+<td>抗体效能统计</td>
+</tr>
+<tr class="even">
+<td><code>GET /api/learned</code></td>
+<td>学习模式注册表</td>
+</tr>
+</tbody>
+</table>
+<h3 id="前端界面">前端界面</h3>
+<p>单页应用（inline HTML/CSS/JS），包含五个选项卡： - <strong>Overview</strong>：总览面板 - <strong>Sessions</strong>：会话列表，点击查看完整时间线（含 transitions 和 violations） - <strong>Genome</strong>：失败基因组可视化 - <strong>Heatmap</strong>：语义热力图 - <strong>Antibodies</strong>：抗体效能</p>
+<p>暗色主题，GitHub 风格颜色方案。</p>
+<h2 id="免疫健康检查check.ts">10.3 免疫健康检查（check.ts）</h2>
+<p><strong>文件</strong>：<code>src/check.ts</code>（190 行）</p>
+<p><code>npm run check</code> 一键执行五项健康检查：</p>
+<table>
+<thead>
+<tr class="header">
+<th>步骤</th>
+<th>检查内容</th>
+<th>方式</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1/5</td>
+<td>IR 重新提取</td>
+<td><code>npx ts-node src/extract-ir.ts .</code></td>
+</tr>
+<tr class="even">
+<td>2/5</td>
+<td>TypeScript 类型检查</td>
+<td><code>npx tsc --noEmit</code></td>
+</tr>
+<tr class="odd">
+<td>3/5</td>
+<td>SSG dev_pipeline 协议验证</td>
+<td>依次执行 5 个 pipeline 函数</td>
+</tr>
+<tr class="even">
+<td>4/5</td>
+<td>失败基因组概要</td>
+<td><code>getFailureGenome()</code></td>
+</tr>
+<tr class="odd">
+<td>5/5</td>
+<td>抗体效能统计</td>
+<td><code>getAntibodyStats()</code></td>
+</tr>
+</tbody>
+</table>
+<p>彩色 ANSI 输出，退出码 1 表示存在失败。</p>
+<h1 id="第十一章-mcp-服务器">第十一章 MCP 服务器</h1>
+<h2 id="设计">11.1 设计</h2>
+<p><code>mcp-server.mts</code> 将 Progmune Runtime 暴露为 MCP（Model Context Protocol）工具服务器，使任何支持 MCP 的 LLM 客户端（Claude Desktop、VS Code 等）可以调用 Progmune 的约束验证能力。</p>
+<h2 id="暴露的工具">11.2 暴露的工具</h2>
+<table>
+<thead>
+<tr class="header">
+<th>工具名</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>progmune_plan</code></td>
+<td>调用规划器，从意图生成 Action 序列</td>
+</tr>
+<tr class="even">
+<td><code>progmune_validate</code></td>
+<td>验证给定的 Action 序列</td>
+</tr>
+<tr class="odd">
+<td><code>progmune_emit</code></td>
+<td>将 Action 序列编译为目标代码</td>
+</tr>
+<tr class="even">
+<td><code>progmune_ir_extract</code></td>
+<td>从项目根提取 IR</td>
+</tr>
+<tr class="odd">
+<td><code>progmune_observatory</code></td>
+<td>查询观测站数据（会话、基因组、抗体）</td>
+</tr>
+<tr class="even">
+<td><code>progmune_check</code></td>
+<td>运行免疫健康检查</td>
+</tr>
+</tbody>
+</table>
+<h2 id="多项目隔离">11.3 多项目隔离</h2>
+<p>通过 <code>PROGMUNE_PROJECT_DIR</code> 环境变量支持多项目隔离： - 每个项目有独立的 <code>.progmune_corpus/</code> 和 <code>ir.json</code> - MCP 服务器在调用工具时设置此变量</p>
+<h1 id="第十二章-关键辅助系统">第十二章 关键辅助系统</h1>
+<h2 id="llm-抽象层">12.1 LLM 抽象层</h2>
+<p><strong>文件</strong>：<code>src/llm.ts</code></p>
+<p>支持多个 LLM 提供商：</p>
+<table>
+<thead>
+<tr class="header">
+<th>提供商</th>
+<th>默认模型</th>
+<th>配置方式</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>DeepSeek</td>
+<td>deepseek-chat</td>
+<td>默认</td>
+</tr>
+<tr class="even">
+<td>OpenAI</td>
+<td>gpt-4</td>
+<td><code>LLM_PROVIDER=openai</code></td>
+</tr>
+<tr class="odd">
+<td>Ollama</td>
+<td>llama3</td>
+<td><code>LLM_PROVIDER=ollama</code></td>
+</tr>
+</tbody>
+</table>
+<p>环境变量：<code>LLM_API_KEY</code>、<code>LLM_BASE_URL</code>、<code>LLM_MODEL</code>、<code>LLM_PROVIDER</code></p>
+<p>Token 估算：CJK 字符 ~1.5 token/字，其他 ~0.4 token/字符。</p>
+<h2 id="语义快照">12.2 语义快照</h2>
+<p><strong>文件</strong>：<code>src/semantic-snapshot.ts</code></p>
+<p><code>createSnapshot(ir, intent)</code> 在每次规划会话开始时创建 IR 的快照（<code>IRSnapshot</code>），包含完整函数签名和时间戳。快照支持：</p>
+<ul>
+<li>确定性回放（验证历史会话在当时 IR 下是否合法）</li>
+<li>差异对比（<code>diffSnapshots(a, b)</code> 显示函数的新增/删除/修改）</li>
+<li>回归检测（会话中引用的函数是否在后续 IR 版本中消失）</li>
+</ul>
+<h2 id="记忆层">12.3 记忆层</h2>
+<p><strong>文件</strong>：<code>src/memory-layer.ts</code></p>
+<p>基于语义模板的记忆系统： - <code>findSemanticTemplate(intent)</code>：匹配历史成功模板 - <code>recordEpisode({intent, actions, success})</code>：记录每次规划结果 - 维护使用次数和成功率统计</p>
+<h2 id="反馈系统">12.4 反馈系统</h2>
+<p><strong>文件</strong>：<code>src/feedback.ts</code></p>
+<p>追踪每个函数在成功/失败会话中的使用频率，计算成功率： - <code>getFunctionSuccessRate(functionName)</code>：返回 0-1 成功率 - 用于规划器中的函数排序和 LLM prompt 优化</p>
+<h2 id="工具模块">12.5 工具模块</h2>
+<table>
+<thead>
+<tr class="header">
+<th>文件</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>utils.ts</code></td>
+<td>Jaccard 相似度、关键词提取</td>
+</tr>
+<tr class="even">
+<td><code>file-lock.ts</code></td>
+<td>基于文件的并发锁（确保 corpus 写入的原子性）</td>
+</tr>
+<tr class="odd">
+<td><code>search-planner.ts</code></td>
+<td>基于搜索的备用规划器（无需 LLM）</td>
+</tr>
+<tr class="even">
+<td><code>immune-reporter.ts</code></td>
+<td>免疫报告生成</td>
+</tr>
+</tbody>
+</table>
+<h1 id="第十三章-数据流总览">第十三章 数据流总览</h1>
+<h2 id="完整交互序列">13.1 完整交互序列</h2>
+<pre><code>1. 用户输入意图: &quot;实现用户登录功能&quot;
+
+2. MCP Server 接收 → 调用 plan(&quot;实现用户登录功能&quot;)
+
+3. Planner 初始化:
+   ├── 加载 ir.json (IR 提取的 228 个函数签名)
+   ├── 创建 ExecutionSession { sessionId, intent, attempts: [] }
+   ├── 创建 IRSnapshot (用于确定性回放)
+   ├── 检查语义模板缓存 → 未命中
+   └── 检查抗体 → 命中 ACL-3 抗体
+       └── 注入提示: &quot;已知正确调用顺序: verify_password → generate_jwt → create_session&quot;
+
+4. Planner 构建 LLM Prompt:
+   ├── System: 静态规则（JSON 格式要求）
+   ├── User: top-15 相关函数 + 意图 + 抗体提示
+   └── 估算 tokens: ~1200
+
+5. LLM 返回 JSON:
+   [{&quot;f&quot;:&quot;verify_password&quot;,&quot;to&quot;:&quot;pwdOk&quot;,&quot;a&quot;:[{&quot;n&quot;:&quot;password&quot;,&quot;t&quot;:&quot;str&quot;,&quot;v&quot;:&quot;...&quot;}]},
+    {&quot;f&quot;:&quot;generate_jwt&quot;,&quot;to&quot;:&quot;token&quot;,&quot;a&quot;:[{&quot;n&quot;:&quot;userId&quot;,&quot;t&quot;:&quot;str&quot;,&quot;v&quot;:&quot;$pwdOk&quot;}]},
+    {&quot;f&quot;:&quot;create_session&quot;,&quot;to&quot;:&quot;session&quot;,&quot;a&quot;:[{&quot;n&quot;:&quot;token&quot;,&quot;t&quot;:&quot;str&quot;,&quot;v&quot;:&quot;$token&quot;}]}]
+
+6. parseActionJSON() → Action[]
+   validateActionSchema() → ✓ 结构合法
+
+7. enrichActions() → 补充 IR 元数据
+
+8. validateActionSequence():
+   ├── SVL-1: verify_password ✓, generate_jwt ✓, create_session ✓
+   ├── SVL-2: 参数类型兼容 ✓
+   └── SVL-3: $pwdOk 已声明 ✓, $token 已声明 ✓
+   → 返回 { valid: true, violations: [] }
+
+9. validateProtocolWithTransitions():
+   ├── verify_password: auth: UNAUTHENTICATED → PASSWORD_VERIFIED ✓
+   ├── generate_jwt: auth: PASSWORD_VERIFIED → TOKEN_ISSUED ✓
+   └── create_session: auth: TOKEN_ISSUED → SESSION_ACTIVE ✓
+   → 协议合法，StateTransition[] 已记录
+
+10. checkSemantic() → ✓ 语义合约通过
+
+11. 构建成功 Attempt:
+    { outcome: &quot;success&quot;, violations: [],
+      transitions: [StateTransition×3],
+      antibodyHit: { level: &quot;ACL-3&quot;, action: &quot;injected_hint&quot; } }
+
+12. recordSession() → 保存 ExecutionSession 到 .progmune_corpus/sessions/
+    recordEpisode() → 更新记忆层统计
+
+13. emitter.ts 编译为 TypeScript 代码 → 返回给 MCP 客户端</code></pre>
+<h2 id="异常路径示例">13.2 异常路径示例</h2>
+<p>如果 LLM 输出的序列未遵循协议（如直接调用 <code>create_session</code> 而不先调用 <code>verify_password</code> 和 <code>generate_jwt</code>），则：</p>
+<pre><code>8. validateActionSequence() → SVL-1/2/3 通过
+
+9. validateProtocolWithTransitions():
+   ├── create_session: auth 命名空间当前状态 = UNAUTHENTICATED
+   │   所需前置状态 = TOKEN_ISSUED ✗
+   ├── BFS 搜索修复路径: [&quot;verify_password&quot;, &quot;generate_jwt&quot;]
+   └── 返回 { valid: false, rejection: { fixPath: [...] } }
+
+10. 构建失败 Attempt:
+    { outcome: &quot;constraint_violation&quot;,
+      violations: [{ svl: 4, fixPath: [&quot;verify_password&quot;, &quot;generate_jwt&quot;] }] }
+
+11. attemptSSGRepair() → 在 create_session 前插入 verify_password → generate_jwt
+    → 重新验证通过 ✓
+
+12. 使用修复后的序列继续 → 成功
+
+13. recordFailure() → 记录 SVL-4 违规到失败语料库
+    （修复成功 + 违规记录 = &quot;感染后免疫&quot;）</code></pre>
+<h1 id="附录-a文件清单">附录 A：文件清单</h1>
+<table>
+<thead>
+<tr class="header">
+<th>文件</th>
+<th>行数（约）</th>
+<th>核心职责</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>src/runtime-types.ts</code></td>
+<td>107</td>
+<td>运行时本体论，所有类型的单一来源</td>
+</tr>
+<tr class="even">
+<td><code>src/ssg-validator.ts</code></td>
+<td>355</td>
+<td>SSG 状态机验证器，BFS 修复路径搜索</td>
+</tr>
+<tr class="odd">
+<td><code>src/planner.ts</code></td>
+<td>917</td>
+<td>核心规划循环，免疫加速</td>
+</tr>
+<tr class="even">
+<td><code>src/validator.ts</code></td>
+<td>205</td>
+<td>SVL-1/2/3 约束验证引擎</td>
+</tr>
+<tr class="odd">
+<td><code>src/failure-corpus.ts</code></td>
+<td>647</td>
+<td>失败语料库、抗体推理、热力图</td>
+</tr>
+<tr class="even">
+<td><code>src/semantic-trace.ts</code></td>
+<td>1163</td>
+<td>终端观测站，认知回放</td>
+</tr>
+<tr class="odd">
+<td><code>src/obs-web.ts</code></td>
+<td>365</td>
+<td>Web 仪表盘</td>
+</tr>
+<tr class="even">
+<td><code>src/check.ts</code></td>
+<td>190</td>
+<td>一键免疫健康检查</td>
+</tr>
+<tr class="odd">
+<td><code>src/extract-ir.ts</code></td>
+<td>407</td>
+<td>ts-morph IR 提取</td>
+</tr>
+<tr class="even">
+<td><code>src/emitter.ts</code></td>
+<td>~110</td>
+<td>Action→TypeScript 代码发射</td>
+</tr>
+<tr class="odd">
+<td><code>src/action-runtime.ts</code></td>
+<td>103</td>
+<td>Action DSL 执行沙箱</td>
+</tr>
+<tr class="even">
+<td><code>src/llm.ts</code></td>
+<td>62</td>
+<td>LLM 抽象层（DeepSeek/OpenAI/Ollama）</td>
+</tr>
+<tr class="odd">
+<td><code>src/mcp-server.mts</code></td>
+<td>~200</td>
+<td>MCP 工具服务器</td>
+</tr>
+<tr class="even">
+<td><code>src/memory-layer.ts</code></td>
+<td>~80</td>
+<td>语义模板记忆层</td>
+</tr>
+<tr class="odd">
+<td><code>src/semantic-validator.ts</code></td>
+<td>~60</td>
+<td>语义合约校验</td>
+</tr>
+<tr class="even">
+<td><code>src/semantic-snapshot.ts</code></td>
+<td>~80</td>
+<td>IR 快照与差分</td>
+</tr>
+<tr class="odd">
+<td><code>src/feedback.ts</code></td>
+<td>~40</td>
+<td>函数成功率统计</td>
+</tr>
+<tr class="even">
+<td><code>src/utils.ts</code></td>
+<td>~30</td>
+<td>Jaccard 相似度等工具函数</td>
+</tr>
+<tr class="odd">
+<td><code>src/file-lock.ts</code></td>
+<td>~30</td>
+<td>文件锁（corpus 写入原子性）</td>
+</tr>
+<tr class="even">
+<td><code>src/search-planner.ts</code></td>
+<td>~50</td>
+<td>基于搜索的备用规划器</td>
+</tr>
+<tr class="odd">
+<td><code>src/immune-reporter.ts</code></td>
+<td>~40</td>
+<td>免疫报告生成</td>
+</tr>
+<tr class="even">
+<td><code>protocols.json</code></td>
+<td>136</td>
+<td>协议定义（17 条规则，4 个命名空间）</td>
+</tr>
+</tbody>
+</table>
+<h1 id="附录-b配置参考">附录 B：配置参考</h1>
+<table>
+<thead>
+<tr class="header">
+<th>环境变量</th>
+<th>默认值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>LLM_PROVIDER</code></td>
+<td><code>deepseek</code></td>
+<td>LLM 提供商</td>
+</tr>
+<tr class="even">
+<td><code>LLM_API_KEY</code></td>
+<td>—</td>
+<td>API 密钥</td>
+</tr>
+<tr class="odd">
+<td><code>LLM_BASE_URL</code></td>
+<td>提供商默认</td>
+<td>自定义 API 端点</td>
+</tr>
+<tr class="even">
+<td><code>LLM_MODEL</code></td>
+<td>提供商默认</td>
+<td>模型名称</td>
+</tr>
+<tr class="odd">
+<td><code>PROGMUNE_PROJECT_DIR</code></td>
+<td><code>cwd</code></td>
+<td>项目根目录（多项目隔离）</td>
+</tr>
+<tr class="even">
+<td><code>PROGMUNE_CORPUS_DIR</code></td>
+<td><code>.progmune_corpus</code></td>
+<td>语料库目录</td>
+</tr>
+<tr class="odd">
+<td><code>PROGMUNE_ACL4_COUNT</code></td>
+<td><code>10</code></td>
+<td>ACL-4 出现次数阈值</td>
+</tr>
+<tr class="even">
+<td><code>PROGMUNE_ACL4_INTENTS</code></td>
+<td><code>5</code></td>
+<td>ACL-4 跨意图阈值</td>
+</tr>
+<tr class="odd">
+<td><code>PROGMUNE_ACL3_COUNT</code></td>
+<td><code>4</code></td>
+<td>ACL-3 出现次数阈值</td>
+</tr>
+<tr class="even">
+<td><code>PROGMUNE_ACL3_INTENTS</code></td>
+<td><code>3</code></td>
+<td>ACL-3 跨意图阈值</td>
+</tr>
+<tr class="odd">
+<td><code>PROGMUNE_ACL2_COUNT</code></td>
+<td><code>2</code></td>
+<td>ACL-2 出现次数阈值</td>
+</tr>
+</tbody>
+</table>
+<h1 id="附录-c术语表">附录 C：术语表</h1>
+<table>
+<thead>
+<tr class="header">
+<th>术语</th>
+<th>英文</th>
+<th>定义</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>IR</td>
+<td>Intermediate Representation</td>
+<td>从 TypeScript 源码提取的函数签名中间表示</td>
+</tr>
+<tr class="even">
+<td>SVL</td>
+<td>Semantic Validation Layer</td>
+<td>四层语义验证层（SVL-1 到 SVL-4）</td>
+</tr>
+<tr class="odd">
+<td>SSG</td>
+<td>State-Guided Generation</td>
+<td>状态引导生成 —— 协议状态机</td>
+</tr>
+<tr class="even">
+<td>ACL</td>
+<td>Antibody Confidence Level</td>
+<td>抗体置信等级（ACL-1 到 ACL-4）</td>
+</tr>
+<tr class="odd">
+<td>Action</td>
+<td>—</td>
+<td>程序行为的原子单位（call/assign/return/if/for）</td>
+</tr>
+<tr class="even">
+<td>Attempt</td>
+<td>—</td>
+<td>规划器的单次推理尝试</td>
+</tr>
+<tr class="odd">
+<td>StateTransition</td>
+<td>—</td>
+<td>协议状态机的单次合法转移</td>
+</tr>
+<tr class="even">
+<td>ConstraintViolation</td>
+<td>—</td>
+<td>约束违规的结构化记录</td>
+</tr>
+<tr class="odd">
+<td>ExecutionSession</td>
+<td>—</td>
+<td>一次完整的规划会话</td>
+</tr>
+<tr class="even">
+<td>AntibodyHit</td>
+<td>—</td>
+<td>抗体命中记录</td>
+</tr>
+<tr class="odd">
+<td>Failure Genome</td>
+<td>—</td>
+<td>所有失败记录的统计画像</td>
+</tr>
+<tr class="even">
+<td>Semantic Heatmap</td>
+<td>—</td>
+<td>语义脆弱点的四维热度分析</td>
+</tr>
+<tr class="odd">
+<td>Cognitive Replay</td>
+<td>—</td>
+<td>规划器尝试序列的逐步动画回放</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

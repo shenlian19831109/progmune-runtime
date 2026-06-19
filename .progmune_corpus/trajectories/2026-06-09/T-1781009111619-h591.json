@@ -1,0 +1,47 @@
+{
+  "id": "T-1781009111619-h591",
+  "timestamp": "2026-06-09T12:45:11.619Z",
+  "protocol": "FileProtocol",
+  "initialState": [
+    "FILE_OPEN"
+  ],
+  "finalState": [],
+  "trajectory": [
+    "open_file",
+    "write_file",
+    "close_file"
+  ],
+  "result": "repair",
+  "violation": {
+    "type": "resource_leak",
+    "failingStepIndex": 0,
+    "expectedStates": [],
+    "actualStates": [
+      "FILE_OPEN"
+    ],
+    "fixPath": [
+      "close_file"
+    ],
+    "description": "flywheel-accepted-1781009111594"
+  },
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "successRate": 1,
+  "metadata": {
+    "source": "planner",
+    "intent": "safely write config file"
+  },
+  "feedback": {
+    "accepted": true,
+    "rejected": false
+  },
+  "cost": {
+    "latency": 15,
+    "actions": 3
+  }
+}

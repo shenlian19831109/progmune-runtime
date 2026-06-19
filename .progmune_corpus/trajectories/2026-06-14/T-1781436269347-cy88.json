@@ -1,0 +1,28 @@
+{
+  "id": "T-1781436269347-cy88",
+  "timestamp": "2026-06-14T11:24:29.347Z",
+  "protocol": "_global",
+  "initialState": [],
+  "finalState": [],
+  "trajectory": [
+    "evaluate_access",
+    "retry_evaluation",
+    "decompress_buffer",
+    "compress_buffer",
+    "verify_checksum",
+    "extract_ir",
+    "sanitize_input"
+  ],
+  "result": "success",
+  "successRate": 1,
+  "context": {
+    "nestingDepth": 0,
+    "exceptionHandled": false,
+    "insideLoop": false,
+    "branchCount": 0,
+    "asyncContext": false
+  },
+  "metadata": {
+    "source": "random-walk"
+  }
+}
