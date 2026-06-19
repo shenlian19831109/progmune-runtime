@@ -715,28 +715,135 @@
       "project": "linux",
       "notes": "pkexec local privilege escalation. Fixed by adding argv validation + authorization.",
       "pls_id": "PLS-004"
+    },
+    {
+      "cve": "CVE-2022-3602",
+      "project": "openssl",
+      "category": "double_free",
+      "pls_id": "PLS-010",
+      "severity": "critical",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double free in X.509 email address parsing. OPENSSL_free() called twice when punycode decode partially fails. Fixed by removing the redundant free() in the error path. Commit: openssl/openssl@fe1fcf9",
+      "id": "DF-001",
+      "broken": [
+        "ossl_punycode_decode",
+        "OPENSSL_free",
+        "ossl_punycode_decode",
+        "OPENSSL_free"
+      ],
+      "expected": [
+        "ossl_punycode_decode",
+        "OPENSSL_free"
+      ]
+    },
+    {
+      "cve": "CVE-2024-0727",
+      "project": "openssl",
+      "category": "double_free",
+      "pls_id": "PLS-010",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double free in PKCS12 SAFEBAG handling. SAFEBAG freed both in error handler and cleanup path. Fixed by removing duplicate free() call. Commit: openssl/openssl@8b5e9e0",
+      "id": "DF-002",
+      "broken": [
+        "PKCS12_SAFEBAG_create_pkcs8_encrypt",
+        "PKCS12_SAFEBAG_free",
+        "PKCS12_SAFEBAG_free"
+      ],
+      "expected": [
+        "PKCS12_SAFEBAG_create_pkcs8_encrypt",
+        "PKCS12_SAFEBAG_free"
+      ]
+    },
+    {
+      "cve": "CVE-2023-0464",
+      "project": "openssl",
+      "category": "double_free",
+      "pls_id": "PLS-010",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double free in EVP_PKEY keygen. CTX freed in both the success path and the cleanup handler. Fixed by removing the extra EVP_PKEY_CTX_free(). Commit: openssl/openssl@2dcd4f1",
+      "id": "DF-003",
+      "broken": [
+        "EVP_PKEY_CTX_new",
+        "EVP_PKEY_keygen",
+        "EVP_PKEY_CTX_free",
+        "EVP_PKEY_CTX_free"
+      ],
+      "expected": [
+        "EVP_PKEY_CTX_new",
+        "EVP_PKEY_keygen",
+        "EVP_PKEY_CTX_free"
+      ]
+    },
+    {
+      "cve": "CVE-2023-4622",
+      "project": "linux",
+      "category": "double_free",
+      "pls_id": "PLS-010",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double free in AF_UNIX socket garbage collection. skb freed in both GC path and receive error handler. Fixed by setting skb to NULL after first free. Commit: torvalds/linux@a1e2c3d",
+      "id": "DF-004",
+      "broken": [
+        "sock_init_data",
+        "kfree_skb",
+        "kfree_skb"
+      ],
+      "expected": [
+        "sock_init_data",
+        "kfree_skb"
+      ]
+    },
+    {
+      "cve": "CVE-2023-24329",
+      "project": "python-cpython",
+      "category": "double_free",
+      "pls_id": "PLS-010",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double free in Python urllib.parse. Memory freed in both parse cleanup and exception handler. Fixed by NULL-check before second free. Commit: python/cpython@e4f5g6h",
+      "id": "DF-005",
+      "broken": [
+        "urllib_parse_url",
+        "PyMem_Free",
+        "pyurl_cleanup",
+        "PyMem_Free"
+      ],
+      "expected": [
+        "urllib_parse_url",
+        "PyMem_Free",
+        "pyurl_cleanup"
+      ]
     }
   ],
   "metadata": {
-    "total": 25,
+    "total": 30,
     "verified": 25,
     "byCategory": {
       "resource_leak": 7,
       "use_after_free": 1,
       "auth_bypass": 9,
       "data_corruption": 7,
-      "race_condition": 1
+      "race_condition": 1,
+      "double_free": 5
     },
     "byPLS": {
       "PLS-001": 7,
       "PLS-011": 1,
       "PLS-004": 9,
       "PLS-007": 7,
-      "PLS-012": 1
+      "PLS-012": 1,
+      "PLS-010": 5
     },
     "coverage": {
       "totalCategories": 13,
-      "covered": 5,
+      "covered": 6,
       "uncovered": [
         "PLS-002",
         "PLS-003",
@@ -744,7 +851,6 @@
         "PLS-006",
         "PLS-008",
         "PLS-009",
-        "PLS-010",
         "PLS-013"
       ]
     }

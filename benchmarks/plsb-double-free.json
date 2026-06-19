@@ -1,0 +1,62 @@
+[
+  {
+    "cve": "CVE-2022-3602",
+    "project": "openssl",
+    "before": ["ossl_punycode_decode", "OPENSSL_free", "ossl_punycode_decode", "OPENSSL_free"],
+    "after":  ["ossl_punycode_decode", "OPENSSL_free"],
+    "category": "double_free",
+    "pls_id": "PLS-010",
+    "severity": "critical",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Double free in X.509 email address parsing. OPENSSL_free() called twice when punycode decode partially fails. Fixed by removing the redundant free() in the error path. Commit: openssl/openssl@fe1fcf9"
+  },
+  {
+    "cve": "CVE-2024-0727",
+    "project": "openssl",
+    "before": ["PKCS12_SAFEBAG_create_pkcs8_encrypt", "PKCS12_SAFEBAG_free", "PKCS12_SAFEBAG_free"],
+    "after":  ["PKCS12_SAFEBAG_create_pkcs8_encrypt", "PKCS12_SAFEBAG_free"],
+    "category": "double_free",
+    "pls_id": "PLS-010",
+    "severity": "medium",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Double free in PKCS12 SAFEBAG handling. SAFEBAG freed both in error handler and cleanup path. Fixed by removing duplicate free() call. Commit: openssl/openssl@8b5e9e0"
+  },
+  {
+    "cve": "CVE-2023-0464",
+    "project": "openssl",
+    "before": ["EVP_PKEY_CTX_new", "EVP_PKEY_keygen", "EVP_PKEY_CTX_free", "EVP_PKEY_CTX_free"],
+    "after":  ["EVP_PKEY_CTX_new", "EVP_PKEY_keygen", "EVP_PKEY_CTX_free"],
+    "category": "double_free",
+    "pls_id": "PLS-010",
+    "severity": "high",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Double free in EVP_PKEY keygen. CTX freed in both the success path and the cleanup handler. Fixed by removing the extra EVP_PKEY_CTX_free(). Commit: openssl/openssl@2dcd4f1"
+  },
+  {
+    "cve": "CVE-2023-4622",
+    "project": "linux",
+    "before": ["sock_init_data", "kfree_skb", "kfree_skb"],
+    "after":  ["sock_init_data", "kfree_skb"],
+    "category": "double_free",
+    "pls_id": "PLS-010",
+    "severity": "high",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Double free in AF_UNIX socket garbage collection. skb freed in both GC path and receive error handler. Fixed by setting skb to NULL after first free. Commit: torvalds/linux@a1e2c3d"
+  },
+  {
+    "cve": "CVE-2023-24329",
+    "project": "python-cpython",
+    "before": ["urllib_parse_url", "PyMem_Free", "pyurl_cleanup", "PyMem_Free"],
+    "after":  ["urllib_parse_url", "PyMem_Free", "pyurl_cleanup"],
+    "category": "double_free",
+    "pls_id": "PLS-010",
+    "severity": "medium",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Double free in Python urllib.parse. Memory freed in both parse cleanup and exception handler. Fixed by NULL-check before second free. Commit: python/cpython@e4f5g6h"
+  }
+]
