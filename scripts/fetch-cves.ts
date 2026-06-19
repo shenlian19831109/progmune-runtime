@@ -1,77 +1,34 @@
-#!/usr/bin/env npx tsx
-/**
- * P9.2b: Fetch 100 CVEs from NVD and build the independent benchmark.
- *
- * Usage:
- *   npx tsx scripts/fetch-cves.ts
- *   npx tsx scripts/fetch-cves.ts --output benchmarks/cve-100.json --limit 100
- *
- * Output: benchmarks/cve-100.json
- * Then run: npx vitest run src/cve-benchmark.test.ts
- */
+import { fetchCVEsFromNVD } from '../src/cve-collector';
+import * as fs from 'fs';
+import * as path from 'path';
 
-import * as path from "path";
-import * as fs from "fs";
-import { fetchNVDCVEs, loadCuratedBenchmark, buildDataset, saveDataset } from "../src/cve-collector";
+function categorizeCVE(cve: any): string {
+  const text = (cve.description || '').toLowerCase();
+  if (text.includes('resource') || text.includes('leak') || text.includes('memory')) return 'resource_leak';
+  if (text.includes('auth') || text.includes('bypass') || text.includes('privilege')) return 'auth_bypass';
+  if (text.includes('use after free') || text.includes('double free')) return 'use_after_free';
+  if (text.includes('race') || text.includes('toctou')) return 'race_condition';
+  if (text.includes('transaction') || text.includes('commit') || text.includes('rollback')) return 'transaction';
+  if (text.includes('sql') || text.includes('injection')) return 'sql_injection';
+  if (text.includes('xss') || text.includes('cross-site')) return 'xss';
+  if (text.includes('rce') || text.includes('remote code')) return 'rce';
+  if (text.includes('ssrf')) return 'ssrf';
+  return 'other';
+}
 
 async function main() {
-  const args = process.argv.slice(2);
-  const outputPath = args.includes("--output")
-    ? args[args.indexOf("--output") + 1]
-    : path.resolve(__dirname, "..", "benchmarks", "cve-100.json");
-  const limit = args.includes("--limit")
-    ? parseInt(args[args.indexOf("--limit") + 1])
-    : 100;
+  console.log('Fetching CVE data from NVD...');
+  const cves = await fetchCVEsFromNVD({ limit: 500, severity: 'HIGH' });
+  console.log(`Fetched ${cves.length} CVEs.`);
 
-  console.log("╔════════════════════════════════════════════════════╗");
-  console.log("║   P9.2b: Fetch 100 CVEs — Independent Benchmark    ║");
-  console.log("╚════════════════════════════════════════════════════╝\n");
+  const shuffled = cves.sort(() => Math.random() - 0.5);
+  const sample = shuffled.slice(0, 100);
 
-  // Start with the 20 curated cases as baseline
-  const curated = loadCuratedBenchmark();
-  console.log(`  Curated baseline: ${curated.length} cases`);
-
-  // Fetch from NVD (network required)
-  console.log(`\n  Fetching from NVD (limit: ${limit})...`);
-  let nvdCases = [];
-  try {
-    nvdCases = await fetchNVDCVEs({ limit, minSeverity: "HIGH" });
-    console.log(`  NVD fetched: ${nvdCases.length} cases`);
-  } catch (err: any) {
-    console.error(`  NVD fetch failed: ${err.message}`);
-    console.log(`  Falling back to curated-only dataset.`);
-  }
-
-  // Combine: curated + NVD, ensuring unique IDs
-  const seen = new Set(curated.map(c => c.id));
-  const uniqueNvd = nvdCases.filter(c => {
-    if (seen.has(c.id)) return false;
-    seen.add(c.id);
-    return true;
-  });
-
-  // Take up to `limit` total cases, prioritizing lifecycle-relevant categories
-  const lifecycle = [...curated, ...uniqueNvd].filter(
-    c => ["resource_leak", "auth_bypass", "use_after_free", "race_condition", "data_corruption"].includes(c.category)
-  );
-  const nonLifecycle = [...curated, ...uniqueNvd].filter(
-    c => !lifecycle.includes(c)
-  );
-
-  // Build final dataset: 70 lifecycle + 30 non-lifecycle (approx)
-  const total = Math.min(limit, curated.length + uniqueNvd.length);
-  const lifecycleTarget = Math.min(70, lifecycle.length);
-  const nonLifecycleTarget = Math.min(30, nonLifecycle.length, total - lifecycleTarget);
-
-  const finalCases = [
-    ...lifecycle.slice(0, lifecycleTarget),
-    ...nonLifecycle.slice(0, nonLifecycleTarget),
-  ];
-
-  const dataset = buildDataset(finalCases);
-  saveDataset(dataset, outputPath);
-
-  console.log(`\n  Next: npx vitest run src/cve-benchmark.test.ts`);
+  const categorized = sample.map(cve => ({ ...cve, category: categorizeCVE(cve) }));
+  const outputPath = path.join(__dirname, '../benchmarks/cve-100.json');
+  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+  fs.writeFileSync(outputPath, JSON.stringify(categorized, null, 2));
+  console.log(`Saved ${categorized.length} CVEs to ${outputPath}`);
 }
 
 main().catch(console.error);
