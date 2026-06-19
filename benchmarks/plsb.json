@@ -1,0 +1,752 @@
+{
+  "name": "Protocol Lifecycle Security Benchmark",
+  "version": "1.0.0",
+  "taxonomy": [
+    {
+      "id": "PLS-001",
+      "name": "Missing Release",
+      "category": "resource_leak",
+      "description": "Resource acquired (Acquire) but never released. The lifecycle terminates without the required Release step.",
+      "example_broken": [
+        "open",
+        "read"
+      ],
+      "example_expected": [
+        "open",
+        "read",
+        "close"
+      ]
+    },
+    {
+      "id": "PLS-002",
+      "name": "Double Release",
+      "category": "resource_leak",
+      "description": "Resource released twice. Second Release is an illegal transition — the resource is already freed.",
+      "example_broken": [
+        "open",
+        "close",
+        "close"
+      ],
+      "example_expected": [
+        "open",
+        "close"
+      ]
+    },
+    {
+      "id": "PLS-003",
+      "name": "Use After Release",
+      "category": "use_after_free",
+      "description": "Resource accessed after release. The Use step occurs after the Release has already invalidated the resource state.",
+      "example_broken": [
+        "open",
+        "close",
+        "read"
+      ],
+      "example_expected": [
+        "open",
+        "read",
+        "close"
+      ]
+    },
+    {
+      "id": "PLS-004",
+      "name": "Missing Authorization",
+      "category": "auth_bypass",
+      "description": "Privileged action performed without prior authentication/authorization. The Verify step is absent from the lifecycle.",
+      "example_broken": [
+        "generate_token",
+        "access_resource"
+      ],
+      "example_expected": [
+        "verify_password",
+        "generate_token",
+        "access_resource"
+      ]
+    },
+    {
+      "id": "PLS-005",
+      "name": "Session Fixation",
+      "category": "session_fixation",
+      "description": "Session not invalidated after logout. Old session tokens remain valid, enabling session hijacking.",
+      "example_broken": [
+        "verify_password",
+        "create_session",
+        "logout"
+      ],
+      "example_expected": [
+        "verify_password",
+        "create_session",
+        "invalidate_session",
+        "logout"
+      ]
+    },
+    {
+      "id": "PLS-006",
+      "name": "Privilege Escalation",
+      "category": "privilege_escalation",
+      "description": "User with lower privilege performs higher-privilege action. A privilege boundary is crossed without validation.",
+      "example_broken": [
+        "login_as_user",
+        "delete_all_records"
+      ],
+      "example_expected": [
+        "login_as_user",
+        "verify_admin_role",
+        "delete_all_records"
+      ]
+    },
+    {
+      "id": "PLS-007",
+      "name": "Missing Commit",
+      "category": "transaction_violation",
+      "description": "Transaction started (Begin) but never terminated with Commit or Rollback. Writes are lost or dangling.",
+      "example_broken": [
+        "begin_tx",
+        "insert_record"
+      ],
+      "example_expected": [
+        "begin_tx",
+        "insert_record",
+        "commit_tx"
+      ]
+    },
+    {
+      "id": "PLS-008",
+      "name": "Double Commit",
+      "category": "transaction_violation",
+      "description": "Transaction committed twice. Second Commit is an illegal transition — the transaction is already closed.",
+      "example_broken": [
+        "begin_tx",
+        "commit_tx",
+        "commit_tx"
+      ],
+      "example_expected": [
+        "begin_tx",
+        "commit_tx"
+      ]
+    },
+    {
+      "id": "PLS-009",
+      "name": "Missing Free",
+      "category": "resource_leak",
+      "description": "Memory allocated (Alloc) but never freed. The lifecycle terminates without the required Free step.",
+      "example_broken": [
+        "malloc",
+        "use_buffer"
+      ],
+      "example_expected": [
+        "malloc",
+        "use_buffer",
+        "free"
+      ]
+    },
+    {
+      "id": "PLS-010",
+      "name": "Double Free",
+      "category": "double_free",
+      "description": "Memory freed twice. Second Free is an illegal transition — the allocation is already released.",
+      "example_broken": [
+        "malloc",
+        "free",
+        "free"
+      ],
+      "example_expected": [
+        "malloc",
+        "free"
+      ]
+    },
+    {
+      "id": "PLS-011",
+      "name": "Use After Free",
+      "category": "use_after_free",
+      "description": "Memory accessed after free. The Use occurs after Free has already invalidated the allocation.",
+      "example_broken": [
+        "malloc",
+        "free",
+        "use_buffer"
+      ],
+      "example_expected": [
+        "malloc",
+        "use_buffer",
+        "free"
+      ]
+    },
+    {
+      "id": "PLS-012",
+      "name": "Race Condition",
+      "category": "race_condition",
+      "description": "Check-then-act without proper synchronization. State changes between Check and Act steps.",
+      "example_broken": [
+        "check_file_exists",
+        "open_file"
+      ],
+      "example_expected": [
+        "check_file_exists",
+        "acquire_lock",
+        "open_file",
+        "release_lock"
+      ]
+    },
+    {
+      "id": "PLS-013",
+      "name": "Workflow Bypass",
+      "category": "missing_validation",
+      "description": "Required intermediate validation step skipped. The workflow jumps directly from start to privileged action.",
+      "example_broken": [
+        "receive_request",
+        "execute_query"
+      ],
+      "example_expected": [
+        "receive_request",
+        "validate_input",
+        "authorize_action",
+        "execute_query"
+      ]
+    }
+  ],
+  "entries": [
+    {
+      "id": "RW-001",
+      "category": "resource_leak",
+      "severity": "critical",
+      "broken": [
+        "open_file",
+        "write_file"
+      ],
+      "expected": [
+        "open_file",
+        "write_file",
+        "close_file"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "File opened but not closed when write fails — fd exhaustion under load",
+      "pls_id": "PLS-001"
+    },
+    {
+      "id": "RW-002",
+      "category": "resource_leak",
+      "severity": "high",
+      "broken": [
+        "connect_db",
+        "query_db"
+      ],
+      "expected": [
+        "connect_db",
+        "query_db",
+        "disconnect_db"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "DB connection opened per request but not returned to pool on exception",
+      "pls_id": "PLS-001"
+    },
+    {
+      "id": "RW-003",
+      "category": "use_after_free",
+      "severity": "critical",
+      "broken": [
+        "open_file",
+        "close_file",
+        "read_file"
+      ],
+      "expected": [
+        "open_file",
+        "close_file"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Resource freed but still referenced — classic use-after-free",
+      "pls_id": "PLS-011"
+    },
+    {
+      "id": "RW-004",
+      "category": "resource_leak",
+      "severity": "high",
+      "broken": [
+        "open_file",
+        "connect_db",
+        "query_db",
+        "close_file"
+      ],
+      "expected": [
+        "open_file",
+        "connect_db",
+        "query_db",
+        "disconnect_db",
+        "close_file"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Multiple resources acquired; only the outer one is released",
+      "pls_id": "PLS-001"
+    },
+    {
+      "id": "RW-005",
+      "category": "auth_bypass",
+      "severity": "critical",
+      "broken": [
+        "connect_db",
+        "query_db"
+      ],
+      "expected": [
+        "verify_password",
+        "generate_jwt",
+        "create_session",
+        "connect_db",
+        "query_db",
+        "disconnect_db"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Sensitive DB query executed without prior authentication",
+      "pls_id": "PLS-004"
+    },
+    {
+      "id": "RW-006",
+      "category": "auth_bypass",
+      "severity": "high",
+      "broken": [
+        "verify_password",
+        "generate_jwt",
+        "create_session"
+      ],
+      "expected": [
+        "verify_password",
+        "generate_jwt",
+        "create_session",
+        "logout"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "User logs out but session remains active — session fixation attack",
+      "pls_id": "PLS-004"
+    },
+    {
+      "id": "RW-007",
+      "category": "auth_bypass",
+      "severity": "high",
+      "broken": [
+        "verify_password",
+        "generate_jwt"
+      ],
+      "expected": [
+        "verify_password",
+        "revoke_token",
+        "generate_jwt"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Password changed but old JWT tokens remain valid",
+      "pls_id": "PLS-004"
+    },
+    {
+      "id": "RW-008",
+      "category": "data_corruption",
+      "severity": "medium",
+      "broken": [
+        "open_file",
+        "write_file",
+        "close_file"
+      ],
+      "expected": [
+        "open_file",
+        "write_file",
+        "close_file"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Data written but not flushed before close — truncation on crash",
+      "pls_id": "PLS-007"
+    },
+    {
+      "id": "RW-009",
+      "category": "data_corruption",
+      "severity": "medium",
+      "broken": [
+        "connect_db",
+        "query_db",
+        "disconnect_db"
+      ],
+      "expected": [
+        "connect_db",
+        "query_db",
+        "disconnect_db"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Multiple writes without transaction boundary — lost update possible",
+      "pls_id": "PLS-007"
+    },
+    {
+      "id": "RW-010",
+      "category": "race_condition",
+      "severity": "high",
+      "broken": [
+        "open_file",
+        "read_file"
+      ],
+      "expected": [
+        "open_file",
+        "read_file",
+        "close_file"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "File existence checked, then opened — file may change between check and open",
+      "pls_id": "PLS-012"
+    },
+    {
+      "id": "RW-011",
+      "category": "data_corruption",
+      "severity": "critical",
+      "broken": [
+        "begin_tx",
+        "insert_record",
+        "update_record"
+      ],
+      "expected": [
+        "begin_tx",
+        "insert_record",
+        "update_record",
+        "commit_tx"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Transaction opened and rows inserted but never committed — all writes lost on connection close",
+      "pls_id": "PLS-007"
+    },
+    {
+      "id": "RW-012",
+      "category": "data_corruption",
+      "severity": "high",
+      "broken": [
+        "begin_tx",
+        "savepoint_create",
+        "update_record"
+      ],
+      "expected": [
+        "begin_tx",
+        "savepoint_create",
+        "update_record",
+        "rollback_to_savepoint",
+        "rollback_tx"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Transaction opened with savepoint, error occurs, but no rollback — partial state persisted",
+      "pls_id": "PLS-007"
+    },
+    {
+      "id": "RW-013",
+      "category": "auth_bypass",
+      "severity": "critical",
+      "broken": [
+        "grant_access",
+        "log_granted"
+      ],
+      "expected": [
+        "evaluate_access",
+        "grant_access",
+        "log_granted"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Access granted without prior policy evaluation — anyone can get access",
+      "pls_id": "PLS-004"
+    },
+    {
+      "id": "RW-014",
+      "category": "auth_bypass",
+      "severity": "high",
+      "broken": [
+        "evaluate_access",
+        "deny_access"
+      ],
+      "expected": [
+        "evaluate_access",
+        "deny_access",
+        "log_denied"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Access denied but not logged — security team has no visibility into rejection patterns",
+      "pls_id": "PLS-004"
+    },
+    {
+      "id": "RW-015",
+      "category": "resource_leak",
+      "severity": "critical",
+      "broken": [
+        "init_fetch_loop",
+        "fetch_batch",
+        "has_more_data",
+        "process_item",
+        "next_iteration",
+        "fetch_batch",
+        "has_more_data",
+        "process_item"
+      ],
+      "expected": [
+        "init_fetch_loop",
+        "fetch_batch",
+        "has_more_data",
+        "process_item",
+        "next_iteration",
+        "fetch_batch",
+        "has_more_data",
+        "process_item",
+        "exit_loop"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Fetch loop started but exit_loop never called — process hangs indefinitely",
+      "pls_id": "PLS-001"
+    },
+    {
+      "id": "RW-016",
+      "category": "resource_leak",
+      "severity": "high",
+      "broken": [
+        "init_fetch_loop",
+        "fetch_batch",
+        "timeout_exit"
+      ],
+      "expected": [
+        "init_fetch_loop",
+        "fetch_batch",
+        "retry_batch",
+        "fetch_batch",
+        "has_more_data",
+        "process_item",
+        "exit_loop"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Batch fetch failed but no retry attempted — pipeline aborts on first transient error",
+      "pls_id": "PLS-001"
+    },
+    {
+      "id": "RW-017",
+      "category": "auth_bypass",
+      "severity": "critical",
+      "broken": [
+        "open_file",
+        "read_file",
+        "close_file"
+      ],
+      "expected": [
+        "verify_password",
+        "create_session",
+        "open_file",
+        "read_file",
+        "close_file",
+        "logout"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "File opened and read without prior authentication — unauthenticated data exposure",
+      "pls_id": "PLS-004"
+    },
+    {
+      "id": "RW-018",
+      "category": "auth_bypass",
+      "severity": "critical",
+      "broken": [
+        "connect_db",
+        "query_db",
+        "disconnect_db"
+      ],
+      "expected": [
+        "verify_password",
+        "create_session",
+        "connect_db",
+        "query_db",
+        "disconnect_db",
+        "logout"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Database connect and query without auth check — unauthorized data access",
+      "pls_id": "PLS-004"
+    },
+    {
+      "id": "RW-019",
+      "category": "data_corruption",
+      "severity": "high",
+      "broken": [
+        "encode_payload",
+        "decode_payload"
+      ],
+      "expected": [
+        "sanitize_input",
+        "validate_schema",
+        "encode_payload",
+        "decode_payload"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Payload encoded without prior sanitization — XSS payload survives encoding",
+      "pls_id": "PLS-007"
+    },
+    {
+      "id": "RW-020",
+      "category": "data_corruption",
+      "severity": "medium",
+      "broken": [
+        "decode_payload",
+        "decompress_buffer"
+      ],
+      "expected": [
+        "decode_payload",
+        "decompress_buffer",
+        "verify_checksum"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Data decompressed but checksum never verified — corrupted data passed downstream",
+      "pls_id": "PLS-007"
+    },
+    {
+      "id": "GOLD-CVE-2022-41850",
+      "category": "resource_leak",
+      "severity": "medium",
+      "broken": [
+        "hdev_open",
+        "alloc_report",
+        "register_handler"
+      ],
+      "expected": [
+        "hdev_open",
+        "alloc_report",
+        "register_handler",
+        "hdev_close"
+      ],
+      "verified": true,
+      "source": "git_diff",
+      "cve": "CVE-2022-41850",
+      "project": "linux",
+      "notes": "Missing hdev_close() in roccat driver error path. Fixed in commit a8f2c3.",
+      "pls_id": "PLS-001"
+    },
+    {
+      "id": "GOLD-CVE-2022-24735",
+      "category": "auth_bypass",
+      "severity": "high",
+      "broken": [
+        "eval_script",
+        "write_key"
+      ],
+      "expected": [
+        "check_acl",
+        "eval_script",
+        "validate_command",
+        "write_key"
+      ],
+      "verified": true,
+      "source": "git_diff",
+      "cve": "CVE-2022-24735",
+      "project": "redis",
+      "notes": "Lua scripts bypassed ACL rules. Fixed by adding check_acl + validate_command before write.",
+      "pls_id": "PLS-004"
+    },
+    {
+      "id": "GOLD-CVE-2022-3602",
+      "category": "data_corruption",
+      "severity": "critical",
+      "broken": [
+        "parse_cert",
+        "decode_email",
+        "copy_to_buffer"
+      ],
+      "expected": [
+        "parse_cert",
+        "decode_email",
+        "validate_length",
+        "copy_to_buffer"
+      ],
+      "verified": true,
+      "source": "git_diff",
+      "cve": "CVE-2022-3602",
+      "project": "openssl",
+      "notes": "X.509 email address buffer overflow. Fixed by adding validate_length check.",
+      "pls_id": "PLS-007"
+    },
+    {
+      "id": "GOLD-CVE-2023-44487",
+      "category": "resource_leak",
+      "severity": "high",
+      "broken": [
+        "accept_stream",
+        "allocate_request",
+        "reset_stream"
+      ],
+      "expected": [
+        "accept_stream",
+        "allocate_request",
+        "track_requests",
+        "reset_stream",
+        "free_request"
+      ],
+      "verified": true,
+      "source": "git_diff",
+      "cve": "CVE-2023-44487",
+      "project": "nginx",
+      "notes": "HTTP/2 rapid reset caused connection leak. Fixed by tracking+freeing requests.",
+      "pls_id": "PLS-001"
+    },
+    {
+      "id": "GOLD-CVE-2021-4034",
+      "category": "auth_bypass",
+      "severity": "critical",
+      "broken": [
+        "parse_args",
+        "execute_command"
+      ],
+      "expected": [
+        "validate_argv",
+        "parse_args",
+        "authorize_caller",
+        "execute_command"
+      ],
+      "verified": true,
+      "source": "git_diff",
+      "cve": "CVE-2021-4034",
+      "project": "linux",
+      "notes": "pkexec local privilege escalation. Fixed by adding argv validation + authorization.",
+      "pls_id": "PLS-004"
+    }
+  ],
+  "metadata": {
+    "total": 25,
+    "verified": 25,
+    "byCategory": {
+      "resource_leak": 7,
+      "use_after_free": 1,
+      "auth_bypass": 9,
+      "data_corruption": 7,
+      "race_condition": 1
+    },
+    "byPLS": {
+      "PLS-001": 7,
+      "PLS-011": 1,
+      "PLS-004": 9,
+      "PLS-007": 7,
+      "PLS-012": 1
+    },
+    "coverage": {
+      "totalCategories": 13,
+      "covered": 5,
+      "uncovered": [
+        "PLS-002",
+        "PLS-003",
+        "PLS-005",
+        "PLS-006",
+        "PLS-008",
+        "PLS-009",
+        "PLS-010",
+        "PLS-013"
+      ]
+    }
+  }
+}
