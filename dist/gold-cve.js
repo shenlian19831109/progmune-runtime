@@ -26,12 +26,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadGoldDataset = loadGoldDataset;
 exports.runGoldBenchmark = runGoldBenchmark;
 exports.printGoldReport = printGoldReport;
+const realworld_benchmark_1 = require("./realworld-benchmark");
+const state_inference_1 = require("./state-inference");
+const protocol_invariants_1 = require("./protocol-invariants");
 // ═══════════════════════════════════════════════════════════════
 // Load the gold dataset from curated 20 cases (already verified)
 // ═══════════════════════════════════════════════════════════════
 function loadGoldDataset() {
-    const { REAL_WORLD_DEFECTS } = require("./realworld-benchmark");
-    const cases = REAL_WORLD_DEFECTS.map((d) => ({
+    const cases = realworld_benchmark_1.REAL_WORLD_DEFECTS.map((d) => ({
         id: d.id,
         cve: d.source?.replace(" pattern", ""),
         title: d.title,
@@ -65,8 +67,6 @@ const CWE_TO_VIOLATION = {
     race_condition: "missing_prerequisite",
 };
 function runGoldBenchmark(dataset) {
-    const { inferStateMachine } = require("./state-inference");
-    const { detectStructuralViolations } = require("./protocol-invariants");
     let detected = 0;
     let categoryMatched = 0;
     const byCategory = {};
@@ -78,11 +78,11 @@ function runGoldBenchmark(dataset) {
         if (isLifecycle)
             lifecycleCount++;
         // Build template SM from verified expected sequence
-        const templateSM = inferStateMachine([c.expected]);
+        const templateSM = (0, state_inference_1.inferStateMachine)([c.expected]);
         // Build test SM from verified broken sequence
-        const brokenSM = inferStateMachine([c.broken]);
+        const brokenSM = (0, state_inference_1.inferStateMachine)([c.broken]);
         // Run structural violation detection
-        const violations = detectStructuralViolations(brokenSM, templateSM);
+        const violations = (0, protocol_invariants_1.detectStructuralViolations)(brokenSM, templateSM);
         if (!byCategory[c.category]) {
             byCategory[c.category] = { total: 0, detected: 0, matched: 0 };
         }

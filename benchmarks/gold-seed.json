@@ -1,0 +1,47 @@
+[
+  {
+    "cve": "CVE-2022-41850",
+    "project": "linux",
+    "before": ["hdev_open", "alloc_report", "register_handler"],
+    "after":  ["hdev_open", "alloc_report", "register_handler", "hdev_close"],
+    "category": "resource_leak",
+    "severity": "medium",
+    "notes": "Missing hdev_close() in roccat driver error path. Fixed in commit a8f2c3."
+  },
+  {
+    "cve": "CVE-2022-24735",
+    "project": "redis",
+    "before": ["eval_script", "write_key"],
+    "after":  ["check_acl", "eval_script", "validate_command", "write_key"],
+    "category": "auth_bypass",
+    "severity": "high",
+    "notes": "Lua scripts bypassed ACL rules. Fixed by adding check_acl + validate_command before write."
+  },
+  {
+    "cve": "CVE-2022-3602",
+    "project": "openssl",
+    "before": ["parse_cert", "decode_email", "copy_to_buffer"],
+    "after":  ["parse_cert", "decode_email", "validate_length", "copy_to_buffer"],
+    "category": "data_corruption",
+    "severity": "critical",
+    "notes": "X.509 email address buffer overflow. Fixed by adding validate_length check."
+  },
+  {
+    "cve": "CVE-2023-44487",
+    "project": "nginx",
+    "before": ["accept_stream", "allocate_request", "reset_stream"],
+    "after":  ["accept_stream", "allocate_request", "track_requests", "reset_stream", "free_request"],
+    "category": "resource_leak",
+    "severity": "high",
+    "notes": "HTTP/2 rapid reset caused connection leak. Fixed by tracking+freeing requests."
+  },
+  {
+    "cve": "CVE-2021-4034",
+    "project": "linux",
+    "before": ["parse_args", "execute_command"],
+    "after":  ["validate_argv", "parse_args", "authorize_caller", "execute_command"],
+    "category": "auth_bypass",
+    "severity": "critical",
+    "notes": "pkexec local privilege escalation. Fixed by adding argv validation + authorization."
+  }
+]

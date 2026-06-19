@@ -23,6 +23,9 @@
  */
 
 import type { CVECase } from "./cve-collector";
+import { REAL_WORLD_DEFECTS } from "./realworld-benchmark";
+import { inferStateMachine } from "./state-inference";
+import { detectStructuralViolations } from "./protocol-invariants";
 
 // ═══════════════════════════════════════════════════════════════
 // Gold CVE types
@@ -80,8 +83,6 @@ export interface GoldBenchmarkResult {
 // ═══════════════════════════════════════════════════════════════
 
 export function loadGoldDataset(): GoldDataset {
-  const { REAL_WORLD_DEFECTS } = require("./realworld-benchmark");
-
   const cases: GoldCVECase[] = REAL_WORLD_DEFECTS.map((d: any) => ({
     id: d.id,
     cve: d.source?.replace(" pattern", ""),
@@ -121,8 +122,6 @@ const CWE_TO_VIOLATION: Record<string, string> = {
 };
 
 export function runGoldBenchmark(dataset: GoldDataset): GoldBenchmarkResult {
-  const { inferStateMachine } = require("./state-inference");
-  const { detectStructuralViolations } = require("./protocol-invariants");
 
   let detected = 0;
   let categoryMatched = 0;
