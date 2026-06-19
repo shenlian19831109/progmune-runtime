@@ -30,7 +30,7 @@ import type { CVECase } from "./cve-collector";
 export interface ProtocolSecurityCase {
   id: string;
   category: string;
-  severity: "critical" | "high" | "medium";
+  severity: "critical" | "high" | "medium" | "low";
   /** The vulnerable sequence — what the buggy code does. */
   broken: string[];
   /** The corrected sequence — what the fix should do. */
