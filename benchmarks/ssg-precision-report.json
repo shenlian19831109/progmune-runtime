@@ -1,0 +1,37 @@
+{
+  "timestamp": "2026-06-20T20:38:23.530Z",
+  "result": {
+    "total": 25,
+    "truePositive": 0,
+    "falsePositive": 3,
+    "trueNegative": 22,
+    "falseNegative": 0,
+    "precision": 0,
+    "recall": null,
+    "f1": 0,
+    "discoveredRules": 8,
+    "mismatches": [
+      {
+        "index": 9,
+        "functionName": "if",
+        "expected": "clean",
+        "detected": "violation",
+        "reason": "failf requires [STATE_PRODUCED_2] but state has [INIT] (namespace: RESOURCE_ACQUIRE)"
+      },
+      {
+        "index": 22,
+        "functionName": "if",
+        "expected": "clean",
+        "detected": "violation",
+        "reason": "strlen requires [STATE_PRODUCED] but state has [INIT] (namespace: RESOURCE_ACQUIRE)"
+      },
+      {
+        "index": 23,
+        "functionName": "if",
+        "expected": "clean",
+        "detected": "violation",
+        "reason": "strlen requires [STATE_PRODUCED] but state has [INIT] (namespace: RESOURCE_ACQUIRE)"
+      }
+    ]
+  }
+}
