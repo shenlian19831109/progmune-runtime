@@ -1514,19 +1514,19 @@
       "category": "missing_validation",
       "pls_id": "PLS-013",
       "severity": "high",
-      "source": "github_advisory",
+      "source": "git_diff_verified",
       "verified": true,
-      "notes": "REAL CVE: redirect_uri validation bypass in Keycloak <23.0.3. verifyRedirectUri only stripped query component, allowing user-info smuggling (https://keycloak.org@evil.com bypassed wildcard check). Fix: added stripOffRedirectForWildcard() which also strips userInfo and fragment. Fix commit: keycloak/keycloak@b2e91105315ccf2c1df549b4f6c5948322cbfd1b",
+      "notes": "VERIFIED FROM REAL DIFF: commit b2e91105315ccf. Before: only query string stripped before wildcard comparison. After: new stripOffRedirectForWildcard() strips userInfo, query, AND fragment using KeycloakUriBuilder. Prevents user@evil.com redirect_uri bypass. New testUserInfo() validates the fix.",
       "id": "WB-001",
       "broken": [
-        "oauth_redirect",
-        "strip_query",
-        "validate_wildcard"
+        "matchesRedirects",
+        "stripQueryComponent",
+        "compareWildcard"
       ],
       "expected": [
-        "oauth_redirect",
-        "strip_userinfo_query_fragment",
-        "validate_wildcard"
+        "matchesRedirects",
+        "stripOffRedirectForWildcard",
+        "compareWildcard"
       ]
     },
     {
