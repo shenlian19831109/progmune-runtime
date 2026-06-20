@@ -1,58 +1,16 @@
 {
-  "timestamp": "2026-06-20T20:57:51.378Z",
+  "timestamp": "2026-06-20T21:08:29.074Z",
   "result": {
     "total": 48,
-    "truePositive": 20,
-    "falsePositive": 13,
-    "trueNegative": 12,
-    "falseNegative": 3,
-    "precision": 0.6060606060606061,
-    "recall": 0.8695652173913043,
-    "f1": 0.7142857142857143,
+    "truePositive": 18,
+    "falsePositive": 7,
+    "trueNegative": 18,
+    "falseNegative": 5,
+    "precision": 0.72,
+    "recall": 0.782608695652174,
+    "f1": 0.7499999999999999,
     "discoveredRules": 17,
     "mismatches": [
-      {
-        "index": 0,
-        "functionName": "if",
-        "expected": "clean",
-        "detected": "violation",
-        "reason": "Incomplete lifecycle: acquired states [RESOURCE_ACQUIRE:C1_S0→get] not released — missing closer call"
-      },
-      {
-        "index": 3,
-        "functionName": "if",
-        "expected": "clean",
-        "detected": "violation",
-        "reason": "Incomplete lifecycle: acquired states [RESOURCE_ACQUIRE:C1_S0→get] not released — missing closer call"
-      },
-      {
-        "index": 4,
-        "functionName": "if",
-        "expected": "clean",
-        "detected": "violation",
-        "reason": "Incomplete lifecycle: acquired states [RESOURCE_ACQUIRE:C1_S0→get] not released — missing closer call"
-      },
-      {
-        "index": 5,
-        "functionName": "if",
-        "expected": "clean",
-        "detected": "violation",
-        "reason": "Incomplete lifecycle: acquired states [RESOURCE_ACQUIRE:C1_S0→get] not released — missing closer call"
-      },
-      {
-        "index": 6,
-        "functionName": "if",
-        "expected": "clean",
-        "detected": "violation",
-        "reason": "Incomplete lifecycle: acquired states [RESOURCE_ACQUIRE:C1_S0→get] not released — missing closer call"
-      },
-      {
-        "index": 7,
-        "functionName": "if",
-        "expected": "clean",
-        "detected": "violation",
-        "reason": "Incomplete lifecycle: acquired states [RESOURCE_ACQUIRE:C1_S0→get] not released — missing closer call"
-      },
       {
         "index": 9,
         "functionName": "if",
@@ -79,7 +37,7 @@
         "functionName": "if",
         "expected": "clean",
         "detected": "violation",
-        "reason": "Incomplete lifecycle: acquired states [RESOURCE_ACQUIRE:C1_S1→curl_pgrs_now] not released — missing closer call"
+        "reason": "Order violation: curlx_ptimediff_ms should come AFTER infof (state [INIT] must be produced first)"
       },
       {
         "index": 21,
@@ -103,6 +61,13 @@
         "reason": "Incomplete lifecycle: acquired states [RESOURCE_ACQUIRE:C3_S1→failf] not released — missing closer call"
       },
       {
+        "index": 415,
+        "functionName": "if_TRUNCATED",
+        "expected": "violation",
+        "detected": "clean",
+        "reason": "SSG passed — no pre_state violation detected"
+      },
+      {
         "index": 418,
         "functionName": "if_TRUNCATED",
         "expected": "violation",
@@ -112,6 +77,13 @@
       {
         "index": 421,
         "functionName": "if_TRUNCATED",
+        "expected": "violation",
+        "detected": "clean",
+        "reason": "SSG passed — no pre_state violation detected"
+      },
+      {
+        "index": 426,
+        "functionName": "if_REORDERED",
         "expected": "violation",
         "detected": "clean",
         "reason": "SSG passed — no pre_state violation detected"
