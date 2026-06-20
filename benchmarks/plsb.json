@@ -1026,20 +1026,20 @@
       "category": "privilege_escalation",
       "pls_id": "PLS-006",
       "severity": "medium",
-      "source": "advisory_verified",
+      "source": "git_diff_verified",
       "verified": true,
-      "notes": "CVE-2023-39418: MERGE only checked INSERT policies, skipped UPDATE/SELECT row security. Fix adds check_update_select_policy() before applying.",
+      "notes": "FROM REAL DIFF cb2ae5741f24: MERGE now calls get_policies_for_relation(CMD_SELECT) to populate SELECT policies, then add_with_check_options with correct UPDATE and SELECT policy lists (not reused INSERT policies). CVE-2023-39418: MERGE bypassed UPDATE/SELECT row security.",
       "id": "PE-005",
       "broken": [
-        "execute_merge",
-        "check_insert_policy",
-        "apply_row"
+        "get_row_security_policies",
+        "reuse_insert_policies",
+        "add_with_check_options"
       ],
       "expected": [
-        "execute_merge",
-        "check_insert_policy",
-        "check_update_select_policy",
-        "apply_row"
+        "get_row_security_policies",
+        "get_policies_for_relation_SELECT",
+        "add_update_check_options",
+        "add_select_check_options"
       ]
     },
     {
