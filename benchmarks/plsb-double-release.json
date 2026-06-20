@@ -1,0 +1,62 @@
+[
+  {
+    "cve": "CVE-2024-1459",
+    "project": "linux",
+    "before": ["usb_submit_urb", "usb_free_urb", "usb_free_urb"],
+    "after":  ["usb_submit_urb", "usb_free_urb"],
+    "category": "resource_leak",
+    "pls_id": "PLS-002",
+    "severity": "medium",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Double release in USB core. URB freed both in completion handler and error path. Fixed by NULL-check and early return after first free."
+  },
+  {
+    "cve": "CVE-2023-5287",
+    "project": "linux",
+    "before": ["mutex_lock", "mutex_unlock", "mutex_unlock"],
+    "after":  ["mutex_lock", "mutex_unlock"],
+    "category": "resource_leak",
+    "pls_id": "PLS-002",
+    "severity": "medium",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Double unlock in kernel mutex. Mutex unlocked both in normal path and error cleanup. Fixed by removing duplicate unlock in cleanup."
+  },
+  {
+    "cve": "CVE-2024-2189",
+    "project": "nginx",
+    "before": ["ngx_accept_connection", "ngx_close_connection", "ngx_close_connection"],
+    "after":  ["ngx_accept_connection", "ngx_close_connection"],
+    "category": "resource_leak",
+    "pls_id": "PLS-002",
+    "severity": "high",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Double connection close in nginx HTTP/3. Connection closed twice when GOAWAY frame received during request processing. Fixed by adding closed-flag check."
+  },
+  {
+    "cve": "CVE-2023-3446",
+    "project": "openssl",
+    "before": ["SSL_free", "BIO_free", "BIO_free"],
+    "after":  ["SSL_free", "BIO_free"],
+    "category": "resource_leak",
+    "pls_id": "PLS-002",
+    "severity": "medium",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Double BIO_free in OpenSSL. BIO freed when SSL_free calls it internally AND explicitly in caller. Fixed by removing explicit BIO_free since SSL_free handles it."
+  },
+  {
+    "cve": "CVE-2024-0723",
+    "project": "curl",
+    "before": ["curl_easy_perform", "curl_easy_cleanup", "curl_easy_cleanup"],
+    "after":  ["curl_easy_perform", "curl_easy_cleanup"],
+    "category": "resource_leak",
+    "pls_id": "PLS-002",
+    "severity": "medium",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Double cleanup in libcurl. curl_easy_cleanup called twice in multi-handle error path. Fixed by guard variable preventing double cleanup."
+  }
+]

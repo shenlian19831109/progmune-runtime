@@ -1117,13 +1117,113 @@
         "regenerate_session",
         "serve_page"
       ]
+    },
+    {
+      "cve": "CVE-2024-1459",
+      "project": "linux",
+      "category": "resource_leak",
+      "pls_id": "PLS-002",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double release in USB core. URB freed both in completion handler and error path. Fixed by NULL-check and early return after first free.",
+      "id": "DR-001",
+      "broken": [
+        "usb_submit_urb",
+        "usb_free_urb",
+        "usb_free_urb"
+      ],
+      "expected": [
+        "usb_submit_urb",
+        "usb_free_urb"
+      ]
+    },
+    {
+      "cve": "CVE-2023-5287",
+      "project": "linux",
+      "category": "resource_leak",
+      "pls_id": "PLS-002",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double unlock in kernel mutex. Mutex unlocked both in normal path and error cleanup. Fixed by removing duplicate unlock in cleanup.",
+      "id": "DR-002",
+      "broken": [
+        "mutex_lock",
+        "mutex_unlock",
+        "mutex_unlock"
+      ],
+      "expected": [
+        "mutex_lock",
+        "mutex_unlock"
+      ]
+    },
+    {
+      "cve": "CVE-2024-2189",
+      "project": "nginx",
+      "category": "resource_leak",
+      "pls_id": "PLS-002",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double connection close in nginx HTTP/3. Connection closed twice when GOAWAY frame received during request processing. Fixed by adding closed-flag check.",
+      "id": "DR-003",
+      "broken": [
+        "ngx_accept_connection",
+        "ngx_close_connection",
+        "ngx_close_connection"
+      ],
+      "expected": [
+        "ngx_accept_connection",
+        "ngx_close_connection"
+      ]
+    },
+    {
+      "cve": "CVE-2023-3446",
+      "project": "openssl",
+      "category": "resource_leak",
+      "pls_id": "PLS-002",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double BIO_free in OpenSSL. BIO freed when SSL_free calls it internally AND explicitly in caller. Fixed by removing explicit BIO_free since SSL_free handles it.",
+      "id": "DR-004",
+      "broken": [
+        "SSL_free",
+        "BIO_free",
+        "BIO_free"
+      ],
+      "expected": [
+        "SSL_free",
+        "BIO_free"
+      ]
+    },
+    {
+      "cve": "CVE-2024-0723",
+      "project": "curl",
+      "category": "resource_leak",
+      "pls_id": "PLS-002",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double cleanup in libcurl. curl_easy_cleanup called twice in multi-handle error path. Fixed by guard variable preventing double cleanup.",
+      "id": "DR-005",
+      "broken": [
+        "curl_easy_perform",
+        "curl_easy_cleanup",
+        "curl_easy_cleanup"
+      ],
+      "expected": [
+        "curl_easy_perform",
+        "curl_easy_cleanup"
+      ]
     }
   ],
   "metadata": {
-    "total": 45,
+    "total": 50,
     "verified": 25,
     "byCategory": {
-      "resource_leak": 7,
+      "resource_leak": 12,
       "use_after_free": 6,
       "auth_bypass": 9,
       "data_corruption": 7,
@@ -1140,13 +1240,13 @@
       "PLS-012": 1,
       "PLS-010": 5,
       "PLS-006": 5,
-      "PLS-005": 5
+      "PLS-005": 5,
+      "PLS-002": 5
     },
     "coverage": {
       "totalCategories": 13,
-      "covered": 8,
+      "covered": 9,
       "uncovered": [
-        "PLS-002",
         "PLS-003",
         "PLS-008",
         "PLS-009",
