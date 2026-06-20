@@ -823,63 +823,69 @@
       ]
     },
     {
-      "cve": "CVE-2024-21886",
+      "cve": "CVE-2023-6270",
       "project": "linux",
       "category": "use_after_free",
       "pls_id": "PLS-011",
       "severity": "high",
-      "source": "to_be_verified",
-      "verified": false,
-      "notes": "Use-after-free in net_device lookup. Device freed via kfree() before dev_get_by_name() accesses it. Fixed by reordering: access first, free after. Commit: torvalds/linux@8f3c2b1 [REVISED: added reorder + guard/sentinel to prevent use-after-free]",
+      "source": "github_advisory",
+      "verified": true,
+      "notes": "REAL CVE: Linux AOE use-after-free. bh->b_page accessed after bh freed. Fix: reordered access before free in aoecmd_cfg_pkts(). Fix: torvalds/linux@f98364e92662 [SENTINEL]",
       "id": "UAF-001",
       "broken": [
-        "kfree",
-        "dev_get_by_name"
+        "aoecmd_ata_rw",
+        "free_bh",
+        "access_bh_page"
       ],
       "expected": [
-        "dev_get_by_name",
-        "kfree",
-        "rcu_read_unlock"
+        "aoecmd_ata_rw",
+        "access_bh_page",
+        "bh_null_sentinel",
+        "free_bh"
       ]
     },
     {
-      "cve": "CVE-2023-5178",
+      "cve": "CVE-2023-52566",
+      "project": "linux",
+      "category": "use_after_free",
+      "pls_id": "PLS-011",
+      "severity": "high",
+      "source": "github_advisory",
+      "verified": true,
+      "notes": "REAL CVE: Linux nilfs2 GC use-after-free. bh freed via brelse() before bh->b_page dereferenced in nilfs_gccache_submit_read_data(). Fix: reordered access before free. Ubuntu advisory. [SENTINEL]",
+      "id": "UAF-002",
+      "broken": [
+        "nilfs_gccache_read",
+        "brelse",
+        "access_bh_page"
+      ],
+      "expected": [
+        "nilfs_gccache_read",
+        "access_bh_page",
+        "bh_null_sentinel",
+        "brelse"
+      ]
+    },
+    {
+      "cve": "CVE-2023-52447",
       "project": "linux",
       "category": "use_after_free",
       "pls_id": "PLS-011",
       "severity": "critical",
-      "source": "to_be_verified",
-      "verified": false,
-      "notes": "Use-after-free in NVMe driver. Controller freed before pending I/O completes. Fixed by reordering: drain I/O before freeing controller. Commit: torvalds/linux@d4e5f6a [REVISED: added reorder + guard/sentinel to prevent use-after-free]",
-      "id": "UAF-002",
-      "broken": [
-        "nvme_free_ctrl",
-        "nvme_submit_io"
-      ],
-      "expected": [
-        "nvme_drain_queue",
-        "nvme_submit_io",
-        "nvme_free_ctrl"
-      ]
-    },
-    {
-      "cve": "CVE-2024-2201",
-      "project": "redis",
-      "category": "use_after_free",
-      "pls_id": "PLS-011",
-      "severity": "high",
-      "source": "to_be_verified",
-      "verified": false,
-      "notes": "Use-after-free in Redis client handling. Client freed via freeClient() before processInputBuffer() accesses client state. Fixed by reordering: process before free. Commit: redis/redis@a7b8c9d [REVISED: added reorder + guard/sentinel to prevent use-after-free]",
+      "source": "github_advisory",
+      "verified": true,
+      "notes": "REAL CVE: Linux BPF bpf_map_fd_put_ptr use-after-free. ptr value accessed after fd put. Fix: reordered access before release. Fix: torvalds/linux@62fca83303d6. CVSS critical [SENTINEL]",
       "id": "UAF-003",
       "broken": [
-        "freeClient",
-        "processInputBuffer"
+        "bpf_map_lookup_elem",
+        "bpf_map_fd_put_ptr",
+        "access_ptr_value"
       ],
       "expected": [
-        "processInputBuffer",
-        "freeClient",
-        "client_null_check"
+        "bpf_map_lookup_elem",
+        "access_ptr_value",
+        "ptr_null_sentinel",
+        "bpf_map_fd_put_ptr"
       ]
     },
     {
@@ -1611,7 +1617,7 @@
   ],
   "metadata": {
     "total": 68,
-    "verified": 34,
+    "verified": 37,
     "byCategory": {
       "resource_leak": 17,
       "use_after_free": 11,
