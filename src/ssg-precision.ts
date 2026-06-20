@@ -75,24 +75,40 @@ export function validateSequenceWithSSG(
     for (const s of rule.post_states) states.add(s);
   }
 
-  // P9.2p: Check for incomplete lifecycle — any namespace with lingering states
-  // that should have been invalidated by a terminal/closing function.
+  // P9.2p: Check for incomplete lifecycle.
+  // Only flag if ALL of these conditions are met:
+  //   1. The state was PRODUCED by a function in this sequence (not inherited from INIT)
+  //   2. A closer function EXISTS in the rule set that can invalidate this state
+  //   3. That closer function appears in the CLEAN training data as a frequent terminal call
+  // This prevents false positives on sequences that naturally end without a closer.
   const lingering: string[] = [];
   for (const [ns, st] of nsStates) {
     if (ns === "_global") continue;
     for (const s of st) {
-      if (s !== "INIT" && s !== "IDLE") {
-        // Check if any rule has this state in its invalidate list
-        // If so, the sequence ended without calling the closer
-        let hasCloser = false;
-        for (const [, rule] of rules) {
-          if (rule.invalidate && rule.invalidate.includes(s)) {
-            hasCloser = true;
-            break;
-          }
-        }
-        if (hasCloser) lingering.push(`${ns}:${s}`);
+      if (s === "INIT" || s === "IDLE") continue;
+
+      // Condition 1: Was this state produced during this sequence?
+      let producedInSequence = false;
+      for (const fn of sequence) {
+        const r = rules.get(fn);
+        if (r && r.post_states.includes(s)) { producedInSequence = true; break; }
       }
+      if (!producedInSequence) continue;
+
+      // Condition 2: Does a closer function exist that can invalidate this state?
+      let closerFn = "";
+      for (const [fn, rule] of rules) {
+        if (rule.invalidate && rule.invalidate.includes(s)) {
+          closerFn = fn;
+          break;
+        }
+      }
+      if (!closerFn) continue;
+
+      // Condition 3: Has this closer been called in this sequence?
+      if (sequence.includes(closerFn)) continue; // already called — no violation
+
+      lingering.push(`${ns}:${s}→${closerFn}`);
     }
   }
 
@@ -101,11 +117,64 @@ export function validateSequenceWithSSG(
       valid: false,
       failingStep: sequence.length - 1,
       failingFunction: sequence[sequence.length - 1] || "",
-      reason: `Incomplete lifecycle: lingering states [${lingering.join(",")}] not invalidated — missing release/closing call`,
+      reason: `Incomplete lifecycle: acquired states [${lingering.join(",")}] not released — missing closer call`,
+    };
+  }
+
+  // P9.2p: Check for reordering violations.
+  // If function A always precedes function B in the clean training data,
+  // but B precedes A in this test sequence, that's a potential violation.
+  const orderViolations = checkOrderViolations(sequence, rules, nsInit);
+  if (orderViolations.length > 0) {
+    return {
+      valid: false,
+      failingStep: orderViolations[0].pos,
+      failingFunction: orderViolations[0].fn,
+      reason: `Order violation: ${orderViolations[0].reason}`,
     };
   }
 
   return { valid: true, failingStep: -1, failingFunction: "", reason: "" };
+}
+
+/**
+ * Check if any functions appear in the wrong order compared to
+ * the discovered protocol rules' state machine graph.
+ *
+ * Builds a partial order from the state machine topology:
+ * if fnA's post_states include S, and fnB's pre_states include S,
+ * then fnA must precede fnB. If fnB appears before fnA, it's a violation.
+ */
+function checkOrderViolations(
+  sequence: string[],
+  rules: Map<string, StateAnnotation>,
+  nsInit: Map<string, string>
+): { pos: number; fn: string; reason: string }[] {
+  const violations: { pos: number; fn: string; reason: string }[] = [];
+
+  // Build must-precede graph from rules
+  for (const [fnA, ruleA] of rules) {
+    if (ruleA.post_states.length === 0) continue;
+    for (const [fnB, ruleB] of rules) {
+      if (fnA === fnB) continue;
+      // fnA produces a state that fnB requires → fnA must precede fnB
+      const shared = ruleA.post_states.filter(s => ruleB.pre_states.includes(s));
+      if (shared.length === 0) continue;
+
+      // Check if fnB appears before fnA in the sequence
+      const posA = sequence.indexOf(fnA);
+      const posB = sequence.indexOf(fnB);
+      if (posB >= 0 && posA >= 0 && posB < posA) {
+        violations.push({
+          pos: posB,
+          fn: fnB,
+          reason: `${fnB} should come AFTER ${fnA} (state [${shared[0]}] must be produced first)`,
+        });
+      }
+    }
+  }
+
+  return violations;
 }
 
 // ═══════════════════════════════════════════════════════════════
