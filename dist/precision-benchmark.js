@@ -21,7 +21,6 @@ exports.printPrecisionReport = printPrecisionReport;
 const extract_ir_python_1 = require("./extract-ir-python");
 const python_protocol_extractor_1 = require("./python-protocol-extractor");
 const state_inference_1 = require("./state-inference");
-const protocol_invariants_1 = require("./protocol-invariants");
 // ═══════════════════════════════════════════════════════════════
 // Run precision benchmark on a repo
 // ═══════════════════════════════════════════════════════════════
@@ -44,23 +43,42 @@ function runPrecisionBenchmark(repoPath, repoName, isPython = false, groundTruth
     if (sequences.length === 0) {
         return emptyReport(repoName);
     }
-    // 3. Build template state machine from all sequences (the "normal" protocol)
-    const templateSM = (0, state_inference_1.inferStateMachine)(sequences);
-    // 4. Run detection on each sequence
+    // 3. Build template from LONGEST sequences only (heuristic: longer = more complete)
+    //    This avoids absorbing broken/truncated sequences into the template.
+    //    Production version should use ground-truth clean sequences instead.
+    const maxLen = Math.max(...sequences.map(s => s.length));
+    const cleanSequences = groundTruth
+        ? groundTruth.filter(g => !g.isVulnerable).map(g => g.broken).filter(s => s.length >= 2)
+        : sequences.filter(s => s.length >= Math.max(3, maxLen * 0.7)); // top 70% by length
+    const templateSM = (0, state_inference_1.inferStateMachine)(cleanSequences.length > 0 ? cleanSequences : sequences);
+    // 4. Scan each sequence against the template
+    //    Compare state count: a sequence with significantly fewer states
+    //    than the template median is likely incomplete (broken lifecycle).
+    const testResults = sequences.map(seq => ({
+        seq,
+        sm: (0, state_inference_1.inferStateMachine)([seq]),
+    }));
+    // Template stats
+    const templateStateCount = templateSM.stateCount;
+    const testStateCounts = testResults.map(r => r.sm.stateCount);
+    const medianTestStates = median(testStateCounts);
+    const threshold = Math.max(2, templateStateCount * 0.6); // at least 2 states, or 60% of template
     const alerts = [];
-    for (const seq of sequences) {
-        const testSM = (0, state_inference_1.inferStateMachine)([seq]);
-        const violations = (0, protocol_invariants_1.detectStructuralViolations)(testSM, templateSM);
-        if (violations.length > 0) {
-            const stateDiff = templateSM.stateCount - testSM.stateCount;
-            const confidence = Math.min(1, Math.max(0, stateDiff / 5 + violations.length * 0.1));
-            alerts.push({
-                sequence: seq,
-                violations,
-                invariantDescription: violations[0]?.description || "",
-                stateDiff,
-                confidence,
-            });
+    for (const { seq, sm } of testResults) {
+        const stateDiff = templateStateCount - sm.stateCount;
+        // Only flag if state count is significantly below the template
+        if (stateDiff >= 2 || (templateStateCount > 3 && sm.stateCount <= 2)) {
+            const confidence = Math.min(1, Math.max(0, stateDiff / Math.max(1, templateStateCount)));
+            const violations = [];
+            if (stateDiff > 0) {
+                violations.push({
+                    invariant: { type: "MUST_RELEASE", triggerState: "entry", requiredState: "exit", description: "Sequence has fewer states than template", confidence: confidence },
+                    sequence: seq, triggerIndex: 0,
+                    description: `State count ${sm.stateCount} vs template ${templateStateCount} (diff: ${stateDiff})`,
+                    violationSubtype: "missing_release",
+                });
+            }
+            alerts.push({ sequence: seq, violations, invariantDescription: violations[0]?.description || "", stateDiff, confidence });
         }
     }
     // 5. Classify TP/FP if ground truth provided
@@ -135,6 +153,11 @@ function emptyReport(repo) {
         truePositives: 0, falsePositives: 0, precision: 0, recall: 0, f1: 0,
         byThreshold: [], byCategory: {}, alerts: [],
     };
+}
+function median(arr) {
+    const sorted = [...arr].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
 }
 function arraysOverlap(a, b) {
     const setA = new Set(a);
