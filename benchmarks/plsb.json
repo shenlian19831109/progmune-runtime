@@ -958,18 +958,23 @@
       "category": "privilege_escalation",
       "pls_id": "PLS-006",
       "severity": "critical",
-      "source": "advisory_verified",
+      "source": "git_diff_verified",
       "verified": true,
-      "notes": "CVE-2022-0492: cgroup v1 release_agent writable without CAP_SYS_ADMIN in init_userns → container escape. Fix adds capability check.",
+      "notes": "FROM REAL DIFF 24f6008564183a: cgroup_release_agent_write() now checks capable(CAP_SYS_ADMIN) && (user_ns == init_user_ns) before allowing write. Returns -EPERM if checks fail. Pre-CVE: no capability check → container escape by writing release_agent.",
       "id": "PE-002",
       "broken": [
-        "unshare_userns",
-        "write_release_agent"
+        "cgroup_release_agent_write",
+        "BUILD_BUG_ON",
+        "cgroup_kn_lock_live",
+        "write_agent"
       ],
       "expected": [
-        "unshare_userns",
-        "validate_cap_sys_admin",
-        "write_release_agent"
+        "cgroup_release_agent_write",
+        "BUILD_BUG_ON",
+        "capable_CAP_SYS_ADMIN",
+        "check_init_user_ns",
+        "cgroup_kn_lock_live",
+        "write_agent"
       ]
     },
     {
