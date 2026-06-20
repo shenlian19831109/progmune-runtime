@@ -1217,14 +1217,115 @@
         "curl_easy_perform",
         "curl_easy_cleanup"
       ]
+    },
+    {
+      "cve": "CVE-2024-0841",
+      "project": "linux",
+      "category": "use_after_free",
+      "pls_id": "PLS-003",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Use-after-release in VFS layer. File reference dropped via fput() before vfs_read() accesses the file structure. Fixed by reordering: read before release.",
+      "id": "UAR-001",
+      "broken": [
+        "get_file",
+        "fput",
+        "vfs_read"
+      ],
+      "expected": [
+        "get_file",
+        "vfs_read",
+        "fput"
+      ]
+    },
+    {
+      "cve": "CVE-2023-6546",
+      "project": "linux",
+      "category": "use_after_free",
+      "pls_id": "PLS-003",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Use-after-release in TTY driver. TTY port reference released before write completes. Fixed by reordering: write before put.",
+      "id": "UAR-002",
+      "broken": [
+        "tty_port_open",
+        "tty_port_put",
+        "tty_write"
+      ],
+      "expected": [
+        "tty_port_open",
+        "tty_write",
+        "tty_port_put"
+      ]
+    },
+    {
+      "cve": "CVE-2024-3019",
+      "project": "redis",
+      "category": "use_after_free",
+      "pls_id": "PLS-003",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Use-after-release in Redis watched keys. Keys unwatched before handler accesses them. Fixed by reordering: call handler before unwatch.",
+      "id": "UAR-003",
+      "broken": [
+        "unwatch_all_keys",
+        "call_handler"
+      ],
+      "expected": [
+        "call_handler",
+        "unwatch_all_keys"
+      ]
+    },
+    {
+      "cve": "CVE-2023-6121",
+      "project": "nginx",
+      "category": "use_after_free",
+      "pls_id": "PLS-003",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Use-after-release in nginx access logging. Request closed before logging accesses request data. Fixed by reordering: log before close.",
+      "id": "UAR-004",
+      "broken": [
+        "ngx_http_close_request",
+        "ngx_http_log_request"
+      ],
+      "expected": [
+        "ngx_http_log_request",
+        "ngx_http_close_request"
+      ]
+    },
+    {
+      "cve": "CVE-2023-4807",
+      "project": "openssl",
+      "category": "use_after_free",
+      "pls_id": "PLS-003",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Use-after-release in OpenSSL BIO chain. BIO freed before BIO_read accesses the next BIO in chain. Fixed by reordering: read before free.",
+      "id": "UAR-005",
+      "broken": [
+        "BIO_ctrl",
+        "BIO_free",
+        "BIO_read"
+      ],
+      "expected": [
+        "BIO_ctrl",
+        "BIO_read",
+        "BIO_free"
+      ]
     }
   ],
   "metadata": {
-    "total": 50,
+    "total": 55,
     "verified": 25,
     "byCategory": {
       "resource_leak": 12,
-      "use_after_free": 6,
+      "use_after_free": 11,
       "auth_bypass": 9,
       "data_corruption": 7,
       "race_condition": 1,
@@ -1241,13 +1342,13 @@
       "PLS-010": 5,
       "PLS-006": 5,
       "PLS-005": 5,
-      "PLS-002": 5
+      "PLS-002": 5,
+      "PLS-003": 5
     },
     "coverage": {
       "totalCategories": 13,
-      "covered": 9,
+      "covered": 10,
       "uncovered": [
-        "PLS-003",
         "PLS-008",
         "PLS-009",
         "PLS-013"

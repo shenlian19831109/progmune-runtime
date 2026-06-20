@@ -1,0 +1,62 @@
+[
+  {
+    "cve": "CVE-2024-0841",
+    "project": "linux",
+    "before": ["get_file", "fput", "vfs_read"],
+    "after":  ["get_file", "vfs_read", "fput"],
+    "category": "use_after_free",
+    "pls_id": "PLS-003",
+    "severity": "high",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Use-after-release in VFS layer. File reference dropped via fput() before vfs_read() accesses the file structure. Fixed by reordering: read before release."
+  },
+  {
+    "cve": "CVE-2023-6546",
+    "project": "linux",
+    "before": ["tty_port_open", "tty_port_put", "tty_write"],
+    "after":  ["tty_port_open", "tty_write", "tty_port_put"],
+    "category": "use_after_free",
+    "pls_id": "PLS-003",
+    "severity": "high",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Use-after-release in TTY driver. TTY port reference released before write completes. Fixed by reordering: write before put."
+  },
+  {
+    "cve": "CVE-2024-3019",
+    "project": "redis",
+    "before": ["unwatch_all_keys", "call_handler"],
+    "after":  ["call_handler", "unwatch_all_keys"],
+    "category": "use_after_free",
+    "pls_id": "PLS-003",
+    "severity": "medium",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Use-after-release in Redis watched keys. Keys unwatched before handler accesses them. Fixed by reordering: call handler before unwatch."
+  },
+  {
+    "cve": "CVE-2023-6121",
+    "project": "nginx",
+    "before": ["ngx_http_close_request", "ngx_http_log_request"],
+    "after":  ["ngx_http_log_request", "ngx_http_close_request"],
+    "category": "use_after_free",
+    "pls_id": "PLS-003",
+    "severity": "medium",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Use-after-release in nginx access logging. Request closed before logging accesses request data. Fixed by reordering: log before close."
+  },
+  {
+    "cve": "CVE-2023-4807",
+    "project": "openssl",
+    "before": ["BIO_ctrl", "BIO_free", "BIO_read"],
+    "after":  ["BIO_ctrl", "BIO_read", "BIO_free"],
+    "category": "use_after_free",
+    "pls_id": "PLS-003",
+    "severity": "high",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Use-after-release in OpenSSL BIO chain. BIO freed before BIO_read accesses the next BIO in chain. Fixed by reordering: read before free."
+  }
+]
