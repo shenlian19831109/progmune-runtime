@@ -236,9 +236,9 @@ function buildOrderConstraints(sequences: string[][]): Map<string, Set<string>> 
   for (const [fnA, pbs] of pairs) {
     for (const [fnB, counts] of pbs) {
       const total = counts.aBeforeB + counts.bBeforeA;
-      // Require ≥5 co-occurrences AND ≥90% ordering confidence
-      // to avoid false positives from small sample sizes.
-      if (total >= 5 && counts.aBeforeB / total >= 0.9) {
+      // Require ≥2 co-occurrences AND ≥80% ordering confidence.
+      // Lower threshold catches more violations; higher precision trades off recall.
+      if (total >= 2 && counts.aBeforeB / total >= 0.8) {
         if (!constraints.has(fnA)) constraints.set(fnA, new Set());
         constraints.get(fnA)!.add(fnB);
       }
