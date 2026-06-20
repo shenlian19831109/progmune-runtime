@@ -1,0 +1,94 @@
+{
+  "rules": {
+    "Curl_open": {
+      "namespace": "curl_connection",
+      "pre_states": [],
+      "post_states": ["CONNECTION_CREATED"],
+      "description": "Initialize curl easy handle"
+    },
+    "Curl_connect": {
+      "namespace": "curl_connection",
+      "pre_states": ["CONNECTION_CREATED"],
+      "post_states": ["CONNECTED"],
+      "invalidate": ["CONNECTION_CREATED"],
+      "description": "Establish connection to remote host"
+    },
+    "Curl_do": {
+      "namespace": "curl_connection",
+      "pre_states": ["CONNECTED"],
+      "post_states": ["TRANSFER_DONE"],
+      "description": "Perform the actual transfer"
+    },
+    "Curl_close": {
+      "namespace": "curl_connection",
+      "pre_states": ["TRANSFER_DONE", "CONNECTED"],
+      "post_states": [],
+      "invalidate": ["CONNECTION_CREATED", "CONNECTED", "TRANSFER_DONE"],
+      "description": "Cleanup and close connection"
+    },
+    "Curl_setopt": {
+      "namespace": "curl_transfer",
+      "pre_states": [],
+      "post_states": ["OPTIONS_SET"],
+      "description": "Set transfer options"
+    },
+    "Curl_perform": {
+      "namespace": "curl_transfer",
+      "pre_states": ["OPTIONS_SET"],
+      "post_states": ["PERFORMED"],
+      "invalidate": ["OPTIONS_SET"],
+      "description": "Execute the transfer"
+    },
+    "Curl_cleanup": {
+      "namespace": "curl_transfer",
+      "pre_states": ["PERFORMED"],
+      "post_states": [],
+      "invalidate": ["OPTIONS_SET", "PERFORMED"],
+      "description": "Clean up curl handle"
+    },
+    "curl_share_init": {
+      "namespace": "curl_share",
+      "pre_states": [],
+      "post_states": ["SHARE_CREATED"],
+      "description": "Initialize share interface"
+    },
+    "curl_share_setopt": {
+      "namespace": "curl_share",
+      "pre_states": ["SHARE_CREATED"],
+      "post_states": ["SHARE_CONFIGURED"],
+      "description": "Configure share options"
+    },
+    "curl_share_cleanup": {
+      "namespace": "curl_share",
+      "pre_states": ["SHARE_CONFIGURED", "SHARE_CREATED"],
+      "post_states": [],
+      "invalidate": ["SHARE_CREATED", "SHARE_CONFIGURED"],
+      "description": "Clean up share interface"
+    },
+    "Curl_conncache_add": {
+      "namespace": "curl_connection",
+      "pre_states": ["CONNECTED"],
+      "post_states": ["CONNECTION_CACHED"],
+      "description": "Add connection to cache"
+    },
+    "Curl_conncache_remove": {
+      "namespace": "curl_connection",
+      "pre_states": ["CONNECTION_CACHED"],
+      "post_states": [],
+      "invalidate": ["CONNECTION_CACHED"],
+      "description": "Remove connection from cache"
+    },
+    "Curl_sendrecv": {
+      "namespace": "curl_connection",
+      "pre_states": ["CONNECTED", "CONNECTION_CACHED"],
+      "post_states": ["TRANSFER_DONE"],
+      "description": "Send request and receive response"
+    }
+  },
+  "namespaceInitialStates": {
+    "_global": "INIT",
+    "curl_connection": "INIT",
+    "curl_transfer": "INIT",
+    "curl_share": "INIT"
+  }
+}

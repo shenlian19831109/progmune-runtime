@@ -14,8 +14,10 @@
  */
 
 import * as fs from "fs";
+import * as path from "path";
 import { inferStateMachine } from "./state-inference";
 import { synthesizeProtocols } from "./auto-protocol-synthesizer";
+import { parseProtocolsFromJSON } from "./ssg-validator";
 import type { StateAnnotation } from "./ssg-validator";
 
 // ═══════════════════════════════════════════════════════════════
@@ -182,6 +184,93 @@ function checkOrderViolations(
 // ═══════════════════════════════════════════════════════════════
 
 /**
+ * Load hand-written protocol rules from a JSON file (like protocols.json format).
+ */
+export function loadHandWrittenRules(protoPath: string): {
+  rules: Map<string, StateAnnotation>;
+  nsInit: Map<string, string>;
+} {
+  const protoDef = JSON.parse(fs.readFileSync(protoPath, "utf-8"));
+  const fns = parseProtocolsFromJSON(protoDef);
+  const rules = new Map<string, StateAnnotation>();
+  for (const p of fns) rules.set(p.function, p.protocol);
+
+  const nsInit = new Map<string, string>();
+  nsInit.set("_global", "INIT");
+  if (protoDef.namespaceInitialStates) {
+    for (const [ns, init] of Object.entries(protoDef.namespaceInitialStates)) {
+      nsInit.set(ns, init as string);
+    }
+  }
+
+  return { rules, nsInit };
+}
+
+/**
+ * Build ordering constraints from clean sequences.
+ * If fnA appears before fnB in ≥80% of sequences where both appear,
+ * then fnA must precede fnB.
+ */
+function buildOrderConstraints(sequences: string[][]): Map<string, Set<string>> {
+  const pairs = new Map<string, Map<string, { aBeforeB: number; bBeforeA: number }>>();
+
+  for (const seq of sequences) {
+    for (let i = 0; i < seq.length; i++) {
+      for (let j = i + 1; j < seq.length; j++) {
+        const a = seq[i], b = seq[j];
+        if (a === b) continue;
+        if (!pairs.has(a)) pairs.set(a, new Map());
+        if (!pairs.get(a)!.has(b)) pairs.get(a)!.set(b, { aBeforeB: 0, bBeforeA: 0 });
+        pairs.get(a)!.get(b)!.aBeforeB++;
+      }
+    }
+  }
+
+  const constraints = new Map<string, Set<string>>();
+  for (const [fnA, pbs] of pairs) {
+    for (const [fnB, counts] of pbs) {
+      const total = counts.aBeforeB + counts.bBeforeA;
+      if (total >= 2 && counts.aBeforeB / total >= 0.8) {
+        if (!constraints.has(fnA)) constraints.set(fnA, new Set());
+        constraints.get(fnA)!.add(fnB);
+      }
+    }
+  }
+  return constraints;
+}
+
+/** Validate a sequence against ordering constraints + SSG rules. */
+function validateWithOrdering(
+  sequence: string[],
+  rules: Map<string, StateAnnotation>,
+  nsInit: Map<string, string>,
+  orderConstraints: Map<string, Set<string>>
+): { valid: boolean; failingStep: number; failingFunction: string; reason: string } {
+  // First: SSG validation
+  const ssgResult = validateSequenceWithSSG(sequence, rules, nsInit);
+  if (!ssgResult.valid) return ssgResult;
+
+  // Second: ordering constraint check
+  for (let i = 0; i < sequence.length; i++) {
+    const fnA = sequence[i];
+    const mustFollow = orderConstraints.get(fnA);
+    if (!mustFollow) continue;
+    // Check if any required follower is BEFORE fnA in this sequence
+    for (let j = 0; j < i; j++) {
+      const fnB = sequence[j];
+      if (mustFollow.has(fnB)) {
+        return {
+          valid: false, failingStep: j, failingFunction: fnB,
+          reason: `Order violation: ${fnB} should come AFTER ${fnA} (appears before in ${Math.round(sequence.length/2)} of clean sequences)`,
+        };
+      }
+    }
+  }
+
+  return { valid: true, failingStep: -1, failingFunction: "", reason: "" };
+}
+
+/**
  * Discover protocol rules from call sequences using the auto-protocol-synthesizer.
  * Returns SSG-compatible StateAnnotation rules ready for validation.
  */
@@ -271,6 +360,9 @@ export function runSSGPrecisionBenchmark(
   // 2. Auto-discover protocol rules
   const { rules, nsInit } = discoverRulesFromSequences(cleanSeqs);
 
+  // 2b. Build ordering constraints from clean data
+  const orderConstraints = buildOrderConstraints(cleanSeqs);
+
   // 3. Validate each sequence
   let tp = 0, fp = 0, tn = 0, fn = 0;
   const mismatches: SSGPrecisionResult["mismatches"] = [];
@@ -279,7 +371,7 @@ export function runSSGPrecisionBenchmark(
     const expected = labels[seq.index];
     if (!expected) continue;
 
-    const result = validateSequenceWithSSG(seq.calls, rules, nsInit);
+    const result = validateWithOrdering(seq.calls, rules, nsInit, orderConstraints);
     const detected = result.valid ? "clean" : "violation";
 
     if (expected === "clean" && detected === "clean") { tn++; }
@@ -302,9 +394,54 @@ export function runSSGPrecisionBenchmark(
 }
 
 // ═══════════════════════════════════════════════════════════════
-// CLI
+// Hand-written rule precision benchmark
 // ═══════════════════════════════════════════════════════════════
 
+/**
+ * Run precision benchmark using HAND-WRITTEN protocol rules instead of auto-discovered ones.
+ * This measures the UPPER BOUND of what the SSG validator can achieve.
+ */
+export function runHandWrittenPrecisionBenchmark(
+  sequences: LabeledSequence[],
+  labels: Record<number, "clean" | "violation">,
+  protoPath: string
+): SSGPrecisionResult {
+  const { rules, nsInit } = loadHandWrittenRules(protoPath);
+
+  let tp = 0, fp = 0, tn = 0, fn = 0;
+  const mismatches: SSGPrecisionResult["mismatches"] = [];
+
+  for (const seq of sequences) {
+    const expected = labels[seq.index];
+    if (!expected) continue;
+
+    const result = validateSequenceWithSSG(seq.calls, rules, nsInit);
+    const detected = result.valid ? "clean" : "violation";
+
+    if (expected === "clean" && detected === "clean") { tn++; }
+    else if (expected === "violation" && detected === "violation") { tp++; }
+    else if (expected === "clean" && detected === "violation") {
+      fp++;
+      mismatches.push({ index: seq.index, functionName: seq.functionName, expected, detected, reason: result.reason });
+    } else if (expected === "violation" && detected === "clean") {
+      fn++;
+      mismatches.push({ index: seq.index, functionName: seq.functionName, expected, detected, reason: "SSG passed — no violation detected" });
+    }
+  }
+
+  const total = tp + fp + tn + fn;
+  const precision = total > 0 ? tp / (tp + fp) : 0;
+  const recall = total > 0 ? tp / (tp + fn) : 0;
+  const f1 = precision + recall > 0 ? 2 * precision * recall / (precision + recall) : 0;
+
+  return { total, truePositive: tp, falsePositive: fp, trueNegative: tn, falseNegative: fn, precision, recall, f1, discoveredRules: rules.size, mismatches };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CLI — only runs when executed directly (not required from tests)
+// ═══════════════════════════════════════════════════════════════
+
+if (require.main === module) {
 const args = process.argv.slice(2);
 const seqFile = args[0];
 const labelFile = args[1];
@@ -352,3 +489,4 @@ if (result.mismatches.length > 0) {
 
 fs.writeFileSync("benchmarks/ssg-precision-report.json", JSON.stringify({ timestamp: new Date().toISOString(), result }, null, 2));
 console.log("\nReport saved to benchmarks/ssg-precision-report.json");
+} // end if (require.main === module)

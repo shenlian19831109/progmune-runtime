@@ -1,14 +1,14 @@
 {
-  "timestamp": "2026-06-20T20:48:59.409Z",
+  "timestamp": "2026-06-20T20:57:51.378Z",
   "result": {
     "total": 48,
-    "truePositive": 14,
-    "falsePositive": 10,
-    "trueNegative": 15,
-    "falseNegative": 9,
-    "precision": 0.5833333333333334,
-    "recall": 0.6086956521739131,
-    "f1": 0.5957446808510638,
+    "truePositive": 20,
+    "falsePositive": 13,
+    "trueNegative": 12,
+    "falseNegative": 3,
+    "precision": 0.6060606060606061,
+    "recall": 0.8695652173913043,
+    "f1": 0.7142857142857143,
     "discoveredRules": 17,
     "mismatches": [
       {
@@ -61,11 +61,32 @@
         "reason": "failf requires [C3_S1] but state has [INIT] (namespace: RESOURCE_ACQUIRE)"
       },
       {
+        "index": 11,
+        "functionName": "if",
+        "expected": "clean",
+        "detected": "violation",
+        "reason": "Order violation: infof should come AFTER STRCONST (appears before in 3 of clean sequences)"
+      },
+      {
+        "index": 14,
+        "functionName": "if",
+        "expected": "clean",
+        "detected": "violation",
+        "reason": "Order violation: infof should come AFTER STRCONST (appears before in 3 of clean sequences)"
+      },
+      {
         "index": 20,
         "functionName": "if",
         "expected": "clean",
         "detected": "violation",
         "reason": "Incomplete lifecycle: acquired states [RESOURCE_ACQUIRE:C1_S1→curl_pgrs_now] not released — missing closer call"
+      },
+      {
+        "index": 21,
+        "functionName": "if",
+        "expected": "clean",
+        "detected": "violation",
+        "reason": "Order violation: CURL_TRC_CF should come AFTER VERBOSE (appears before in 2 of clean sequences)"
       },
       {
         "index": 22,
@@ -82,21 +103,7 @@
         "reason": "Incomplete lifecycle: acquired states [RESOURCE_ACQUIRE:C3_S1→failf] not released — missing closer call"
       },
       {
-        "index": 417,
-        "functionName": "if_TRUNCATED",
-        "expected": "violation",
-        "detected": "clean",
-        "reason": "SSG passed — no pre_state violation detected"
-      },
-      {
         "index": 418,
-        "functionName": "if_TRUNCATED",
-        "expected": "violation",
-        "detected": "clean",
-        "reason": "SSG passed — no pre_state violation detected"
-      },
-      {
-        "index": 420,
         "functionName": "if_TRUNCATED",
         "expected": "violation",
         "detected": "clean",
@@ -110,35 +117,7 @@
         "reason": "SSG passed — no pre_state violation detected"
       },
       {
-        "index": 429,
-        "functionName": "if_REORDERED",
-        "expected": "violation",
-        "detected": "clean",
-        "reason": "SSG passed — no pre_state violation detected"
-      },
-      {
-        "index": 430,
-        "functionName": "if_REORDERED",
-        "expected": "violation",
-        "detected": "clean",
-        "reason": "SSG passed — no pre_state violation detected"
-      },
-      {
-        "index": 432,
-        "functionName": "if_REORDERED",
-        "expected": "violation",
-        "detected": "clean",
-        "reason": "SSG passed — no pre_state violation detected"
-      },
-      {
         "index": 433,
-        "functionName": "if_REORDERED",
-        "expected": "violation",
-        "detected": "clean",
-        "reason": "SSG passed — no pre_state violation detected"
-      },
-      {
-        "index": 435,
         "functionName": "if_REORDERED",
         "expected": "violation",
         "detected": "clean",
