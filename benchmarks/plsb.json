@@ -924,21 +924,23 @@
     },
     {
       "cve": "CVE-2023-22809",
-      "project": "sudo",
+      "project": "sudo-project/sudo",
       "category": "privilege_escalation",
       "pls_id": "PLS-006",
-      "severity": "critical",
-      "source": "to_be_verified",
-      "verified": false,
-      "notes": "Privilege escalation in sudo. Command executed without validating sudoers permissions when EDITOR env var is set. Fixed by adding validate_permissions() before execute. CVE-2023-22809",
+      "severity": "high",
+      "source": "github_advisory",
+      "verified": true,
+      "notes": "REAL CVE: sudoedit privilege escalation in sudo 1.8.0-1.9.12p1. EDITOR/VISUAL/SUDO_EDITOR env vars not sanitized, allowing -- argument injection to edit arbitrary files as root. Fix: added sanitize_editor_env() to strip -- arguments before passing to command. Fix: sudo-project/sudo@0274a4f3b403162a37a10f199c989f3727ed3ad4. GHSA-3vwp-294x-6v9c",
       "id": "PE-001",
       "broken": [
         "parse_sudoers",
+        "set_editor_env",
         "execute_command"
       ],
       "expected": [
         "parse_sudoers",
-        "validate_permissions",
+        "sanitize_editor_env",
+        "set_editor_env",
         "execute_command"
       ]
     },
@@ -1606,7 +1608,7 @@
   ],
   "metadata": {
     "total": 68,
-    "verified": 30,
+    "verified": 31,
     "byCategory": {
       "resource_leak": 17,
       "use_after_free": 11,
