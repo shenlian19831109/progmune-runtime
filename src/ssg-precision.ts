@@ -40,7 +40,8 @@ import type { StateAnnotation } from "./ssg-validator";
 export function validateSequenceWithSSG(
   sequence: string[],
   rules: Map<string, StateAnnotation>,
-  nsInit: Map<string, string> = new Map([["_global", "INIT"]])
+  nsInit: Map<string, string> = new Map([["_global", "INIT"]]),
+  trainingSeqs?: string[][]
 ): { valid: boolean; failingStep: number; failingFunction: string; reason: string } {
   // Initialize per-namespace state sets
   const nsStates = new Map<string, Set<string>>();
@@ -109,6 +110,11 @@ export function validateSequenceWithSSG(
 
       // Condition 3: Has this closer been called in this sequence?
       if (sequence.includes(closerFn)) continue; // already called — no violation
+
+      // Condition 4: Is this closer a frequent terminal call?
+      // Only flag if ≥50% of sequences containing the state's producer
+      // also call the closer as the last step.
+      if (trainingSeqs && !isFrequentTerminal(closerFn, s, trainingSeqs, rules)) continue;
 
       lingering.push(`${ns}:${s}→${closerFn}`);
     }
@@ -239,15 +245,45 @@ function buildOrderConstraints(sequences: string[][]): Map<string, Set<string>> 
   return constraints;
 }
 
+/**
+ * Check if a closer function is a frequent terminal call for sequences
+ * that produce a given state. Prevents flagging sequences that naturally
+ * end without a closer.
+ */
+function isFrequentTerminal(
+  closerFn: string,
+  targetState: string,
+  sequences: string[][],
+  rules: Map<string, StateAnnotation>
+): boolean {
+  let producesState = 0;
+  let closerAsLast = 0;
+
+  for (const seq of sequences) {
+    let hasProducer = false;
+    for (const fn of seq) {
+      const r = rules.get(fn);
+      if (r && r.post_states.includes(targetState)) { hasProducer = true; break; }
+    }
+    if (!hasProducer) continue;
+    producesState++;
+    if (seq.length > 0 && seq[seq.length - 1] === closerFn) closerAsLast++;
+  }
+
+  // Closer must appear as last call in ≥50% of sequences that produce this state
+  return producesState >= 2 && closerAsLast / producesState >= 0.5;
+}
+
 /** Validate a sequence against ordering constraints + SSG rules. */
 function validateWithOrdering(
   sequence: string[],
   rules: Map<string, StateAnnotation>,
   nsInit: Map<string, string>,
-  orderConstraints: Map<string, Set<string>>
+  orderConstraints: Map<string, Set<string>>,
+  trainingSeqs?: string[][]
 ): { valid: boolean; failingStep: number; failingFunction: string; reason: string } {
   // First: SSG validation
-  const ssgResult = validateSequenceWithSSG(sequence, rules, nsInit);
+  const ssgResult = validateSequenceWithSSG(sequence, rules, nsInit, trainingSeqs);
   if (!ssgResult.valid) return ssgResult;
 
   // Second: ordering constraint check
@@ -371,7 +407,7 @@ export function runSSGPrecisionBenchmark(
     const expected = labels[seq.index];
     if (!expected) continue;
 
-    const result = validateWithOrdering(seq.calls, rules, nsInit, orderConstraints);
+    const result = validateWithOrdering(seq.calls, rules, nsInit, orderConstraints, cleanSeqs);
     const detected = result.valid ? "clean" : "violation";
 
     if (expected === "clean" && detected === "clean") { tn++; }
