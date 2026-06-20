@@ -828,20 +828,23 @@
       "category": "use_after_free",
       "pls_id": "PLS-011",
       "severity": "high",
-      "source": "github_advisory",
+      "source": "git_diff_verified",
       "verified": true,
-      "notes": "REAL CVE: Linux AOE use-after-free. bh->b_page accessed after bh freed. Fix: reordered access before free in aoecmd_cfg_pkts(). Fix: torvalds/linux@f98364e92662 [SENTINEL]",
+      "notes": "FROM REAL DIFF f98364e92662: dev_put() moved to error paths only.",
       "id": "UAF-001",
       "broken": [
-        "aoecmd_ata_rw",
-        "free_bh",
-        "access_bh_page"
+        "dev_hold",
+        "check_netif",
+        "new_skb",
+        "skb_queue_tail",
+        "dev_put_always"
       ],
       "expected": [
-        "aoecmd_ata_rw",
-        "access_bh_page",
-        "bh_null_sentinel",
-        "free_bh"
+        "dev_hold",
+        "check_netif",
+        "new_skb",
+        "skb_queue_tail",
+        "skb_owns_ref"
       ]
     },
     {
