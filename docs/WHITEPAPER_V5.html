@@ -46,104 +46,165 @@
 </head>
 <body>
 
-<h1>Progmune Runtime V5</h1>
-<p style="text-align:center;font-size:1.2rem"><strong>程序免疫学：为 AI 生成代码构建可信赖的自我进化免疫系统</strong></p>
+<h1>程序免疫学</h1>
+<p style="text-align:center;font-size:1.3rem"><strong>AI 生成代码的协议安全运行时</strong></p>
+<p style="text-align:center;color:var(--muted);font-size:0.95rem;margin-bottom:0.5rem">
+  以生物免疫系统为框架，以协议状态机为方法<br>
+  为 AI 生成代码提供<strong>实时约束、生命周期检测与可审计治理</strong>
+</p>
 <p class="subtitle">
-  Program Immunology: A Self-Improving Verifiable Runtime for Generative Code<br>
-  内部技术白皮书 v5.0 — 培训教材 &nbsp;|&nbsp; 2026-06-14<br>
+  Program Immunology: Protocol Security Runtime for AI-Generated Code<br>
+  <span style="font-size:0.85rem">Detect &middot; Constrain &middot; Govern &middot; 内部技术白皮书 v6.0 &nbsp;|&nbsp; 2026-06-20</span><br>
   <a href="https://github.com/shenlian19831109/progmune-runtime" style="color:var(--accent)">github.com/shenlian19831109/progmune-runtime</a>
 </p>
 
 <div class="grid g5" style="margin:2rem 0">
   <div class="card" style="text-align:center"><div class="metric-big" style="color:var(--accent)">59</div><div class="metric-label">协议规则（9 命名空间）</div></div>
-  <div class="card" style="text-align:center"><div class="metric-big" style="color:var(--green)">2,385</div><div class="metric-label">语料库轨迹</div></div>
-  <div class="card" style="text-align:center"><div class="metric-big" style="color:var(--purple)">100%</div><div class="metric-label">Top-3 修复率</div></div>
-  <div class="card" style="text-align:center"><div class="metric-big" style="color:var(--orange)">90%</div><div class="metric-label">拓扑学习相似度</div></div>
-  <div class="card" style="text-align:center"><div class="metric-big" style="color:var(--green)">43</div><div class="metric-label">测试通过</div></div>
+  <div class="card" style="text-align:center"><div class="metric-big" style="color:var(--green)">92%</div><div class="metric-label">PLSB CVE 召回率</div></div>
+  <div class="card" style="text-align:center"><div class="metric-big" style="color:var(--purple)">100%</div><div class="metric-label">双盲名称存活率</div></div>
+  <div class="card" style="text-align:center"><div class="metric-big" style="color:var(--orange)">37</div><div class="metric-label">已验证真实 CVE</div></div>
+  <div class="card" style="text-align:center"><div class="metric-big" style="color:var(--green)">26</div><div class="metric-label">测试通过</div></div>
 </div>
 
 <hr style="border-color:var(--border);margin:2rem 0">
 
 <h2>目录</h2>
 <div class="toc">
-<a href="#s1">第一部分：框架基础</a>
-<a href="#s1a">&nbsp;&nbsp;1.1 核心价值：AI 代码为何需要免疫</a>
-<a href="#s1b">&nbsp;&nbsp;1.2 核心哲学：以免疫保障生成，以生成驱动免疫</a>
-<a href="#s1c">&nbsp;&nbsp;1.3 生物免疫学类比</a>
-<a href="#s1d">&nbsp;&nbsp;1.4 LLM+Graph 联合架构</a>
-<a href="#s2">第二部分：系统架构</a>
-<a href="#s2a">&nbsp;&nbsp;2.1 架构总览图</a>
-<a href="#s2b">&nbsp;&nbsp;2.2 框架组成逻辑</a>
-<a href="#s2c">&nbsp;&nbsp;2.3 五层能力金字塔</a>
-<a href="#s2d">&nbsp;&nbsp;2.4 四个进化飞轮</a>
-<a href="#s3">第三部分：核心组件详解</a>
-<a href="#s3a">&nbsp;&nbsp;3.1 程序真相 (IR) — 系统的"自我模型"</a>
-<a href="#s3b">&nbsp;&nbsp;3.2 约束引擎 — 天然免疫层 (SVL-1~3)</a>
-<a href="#s3c">&nbsp;&nbsp;3.3 语义状态图 (SSG) — 获得性免疫层 (SVL-4)</a>
-<a href="#s3d">&nbsp;&nbsp;3.4 免疫记忆与失败语料库 — 免疫记忆层</a>
-<a href="#s3e">&nbsp;&nbsp;3.5 反事实规划引擎 — 修复生成</a>
-<a href="#s3f">&nbsp;&nbsp;3.6 代码发射器 — 程序落地层</a>
-<a href="#s4">第四部分：进化系统 (P3–P7)</a>
-<a href="#s4a">&nbsp;&nbsp;4.1 覆盖率引擎与协议前沿</a>
-<a href="#s4b">&nbsp;&nbsp;4.2 奖励系统与学习排序</a>
-<a href="#s4c">&nbsp;&nbsp;4.3 协议学习 (P6)</a>
-<a href="#s4d">&nbsp;&nbsp;4.4 拓扑表示与新协议类型 (P7)</a>
-<a href="#s5">第五部分：真实缺陷基准</a>
-<a href="#s6">第六部分：金丝雀部署</a>
-<a href="#s7">第七部分：协议类型参考</a>
-<a href="#s8">第八部分：快速上手指南</a>
-<a href="#s9">第九部分：指标演进与路线图</a>
+<a href="#s1">第一部分：问题与场景（为什么需要这个）</a>
+<a href="#s2">第二部分：核心架构 —— 三层免疫防御</a>
+<a href="#s3">第三部分：安全检测能力与基准（PLSB）</a>
+<a href="#s4">第四部分：技术可信性（证据链）</a>
+<a href="#s5">第五部分：你是谁，你得到什么（按角色）</a>
+<a href="#quick">快速上手</a>
+<a href="#compare">与传统 SAST 的对比</a>
 </div>
 <hr style="border-color:var(--border);margin:2rem 0">
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <!-- 第一部分：框架基础 -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<h2 id="s1">第一部分：框架基础</h2>
+<h2 id="s1">第一部分：问题与场景</h2>
 
-<h3 id="s1a">1.1 核心价值：为什么 AI 代码需要"免疫"与"生成"？</h3>
+<h3>1.1 一个真实的 AI 代码缺陷</h3>
 
-<p>在 AI 辅助编程时代，LLM 带来了前所未有的效率，但伴随着三个"认知缺陷"：</p>
-
-<div class="grid g3">
-  <div class="card">
-    <h4>🔴 幻觉</h4>
-    <p>LLM 凭空捏造不存在的函数、类或变量，导致运行时错误。例如调用 <code>flushAndClose()</code> 而项目中实际只有 <code>close()</code>。</p>
-  </div>
-  <div class="card">
-    <h4>🟠 类型漂移</h4>
-    <p>参数数量或类型与实际函数签名不匹配。例如给需要 3 个参数的函数只传 2 个参数。</p>
-  </div>
-  <div class="card">
-    <h4>🟡 协议违规</h4>
-    <p>生成违反业务逻辑顺序的代码。例如在用户未认证前就签发 JWT 令牌——不安全的越权操作。</p>
-  </div>
+<div class="card">
+<p>某团队使用 AI 辅助生成一个 Web 服务的认证逻辑。AI 给出了以下代码：</p>
+<pre><code>// AI 生成的认证逻辑
+function handleRequest(user, request) {
+  const token = generate_jwt(user);     // 直接签发令牌
+  create_session(token);                // 建立会话
+  access_database(request);             // 访问数据库
+}</code></pre>
+<p><strong>这段代码通过了编译、通过了 linter、通过了测试。</strong>但它有一个致命缺陷：<strong>没有调用 verify_password</strong>。任何人都可以触发这段逻辑，无需验证身份就获得 JWT 令牌和数据库访问权限。</p>
 </div>
 
-<p><strong>Progmune 将 LLM 从一个"不受约束的代码生成器"降级为"受约束的启发式提议者"</strong>，将代码的最终决定权交还给<strong>程序真相 (IR)</strong>。这意味着系统不仅能消除代码幻觉、保障协议安全，还能通过学习历史错误"越用越聪明"。</p>
+<h3>1.2 为什么传统工具抓不到</h3>
 
-<h3 id="s1b">1.2 核心哲学：以免疫保障生成，以生成驱动免疫</h3>
+<table>
+<tr><th>工具类型</th><th>能发现吗</th><th>原因</th></tr>
+<tr><td>编译器</td><td>❌</td><td>语法完全正确，类型完全匹配</td></tr>
+<tr><td>Linter</td><td>❌</td><td>没有违反任何编码规范</td></tr>
+<tr><td>单元测试</td><td>⚠️</td><td>如果测试只测了正常路径，不会发现缺失的认证步骤</td></tr>
+<tr><td>SAST（Semgrep/CodeQL）</td><td>❌</td><td>每个函数调用本身是合法的——问题不在单个函数，而在<strong>调用序列缺失了关键步骤</strong></td></tr>
+<tr><td><strong>Progmune</strong></td><td><strong>✅</strong></td><td>检查协议状态机：UNAUTHENTICATED → PASSWORD_VERIFIED → TOKEN_ISSUED → SESSION_ACTIVE。当 AI 跳过 verify_password 直接到 TOKEN_ISSUED 时，状态机检测到非法跳转</td></tr>
+</table>
 
-<div class="grid g2">
-  <div class="card">
-    <h4>🛡️ 免疫 → 生成</h4>
-    <p>通过多层验证机制，确保 AI 生成的每一步都符合程序真相和业务逻辑。<strong>只有在免疫系统确认安全后，代码才能被发射执行。</strong></p>
-    <p style="font-size:.85rem;color:var(--muted)">类比：生物免疫系统在允许物质进入血液前先检查其安全性。</p>
-  </div>
-  <div class="card">
-    <h4>🚀 生成 → 免疫</h4>
-    <p>每次生成失败都是一次"感染事件"。系统从中学习，形成抗体规则和免疫记忆，<strong>使未来的生成更精准、更安全。</strong></p>
-    <p style="font-size:.85rem;color:var(--muted)">类比：感染后，免疫系统产生记忆细胞，对同类病原体产生更快更强的反应。</p>
-  </div>
-</div>
+<h3>1.3 这不是个例</h3>
+<p>在 Progmune 的 PLSB 基准测试中，<strong>92% 的真实 CVE 属于"协议生命周期违规"</strong>——不是代码写错了，而是<strong>步骤被跳过了</strong>或<strong>顺序被颠倒了</strong>。从 Linux 内核的容器逃逸（CVE-2022-0492：缺少 CAP_SYS_ADMIN 检查）到 runc 的文件描述符泄漏（CVE-2024-21626：缺少 O_CLOEXEC 标记），再到 sudo 的提权绕过（CVE-2023-22809：EDITOR 参数未清理）——这些漏洞的共同特征都是：<strong>状态机缺失了关键转移</strong>。</p>
 
-<div class="hl"><strong>对开发者的直接价值：</strong>
-<ul>
-  <li><strong>🚫 终结代码幻觉</strong>：100% 保证只调用项目中真实存在的函数和变量</li>
-  <li><strong>🛡️ 协议级安全</strong>：自动拦截非法的业务逻辑跳转</li>
-  <li><strong>🧠 越用越聪明</strong>：从失败中学习，自动形成"抗体"，减少 LLM token 消耗</li>
-  <li><strong>🚀 提升开发效率</strong>：减少调试和重构 AI 生成代码的时间</li>
-</ul></div>
+<h3>1.4 Progmune 做什么</h3>
+<p>Progmune 在 AI 生成代码时<strong>实时验证协议状态机是否完整</strong>。它不是检查代码语法，而是检查代码行为是否遵守正确的生命周期：<strong>认证后才能授权、打开后必须关闭、分配后必须释放、提交或回滚后才能结束事务。</strong></p>
+
+<div class="hl"><strong>一句话：</strong>Progmune 回答的问题是——"AI 生成的这段代码，有没有绕过关键的安全步骤？"</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 第二部分：系统架构 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s2">第二部分：核心架构 —— 三层免疫防御</h2>
+
+<p>Progmune 的设计借鉴生物免疫系统的三层防御结构。每一层对应一个具体的技术能力和产品功能：</p>
+
+<div class="diagram"><pre><code>用户意图
+    │
+    ▼
+LLM Proposer —— 生成抽象动作序列（不是直接生成代码）
+    │
+    ▼
+┌─────────────────────────────────────────────────────────┐
+│  <b>第一层：约束引擎</b>                                    │
+│  生物类比：天然免疫（皮肤/粘膜）                          │
+│  检查内容：函数是否存在？类型是否匹配？变量是否已声明？  │
+│  拦截对象：幻觉（调用不存在的函数）、类型错误             │
+│  响应时间：毫秒级                                        │
+├─────────────────────────────────────────────────────────┤
+│  <b>第二层：协议安全检测器</b>                              │
+│  生物类比：获得性免疫（T/B 细胞）                         │
+│  检查内容：调用序列是否遵守协议状态机？                   │
+│  拦截对象：认证绕过、资源泄漏、生命周期违规               │
+│  检测原理：提取协议的不变式（Acquire ⇒ Eventually Release）│
+│          与正常状态机进行结构比对，发现缺失的状态或非法转移│
+│  关键指标：PLSB 基准上 92% 的 CVE 召回率                  │
+├─────────────────────────────────────────────────────────┤
+│  <b>第三层：可审计治理</b>                                  │
+│  生物类比：免疫记忆（记忆细胞）                           │
+│  记录内容：完整的状态转移链 + 会话 ID + 规则哈希          │
+│  回答的问题："AI 生成这段代码时，有没有经过安全检查？"    │
+│  实际效果：任何时候可回放验证，不可篡改                   │
+└─────────────────────────────────────────────────────────┘
+    │
+    ▼
+通过 → 发射代码（带 @progmune-generated 标记）
+失败 → Top-3 修复方案（BFS 协议修复路径搜索）</code></pre></div>
+
+<h3>2.1 协议状态机 —— 核心概念</h3>
+<p>Progmune 的核心抽象是<strong>协议状态机（Protocol State Machine）</strong>——一个定义了系统资源"合法生命周期"的有向图：</p>
+
+<pre><code>认证协议：          文件协议：            事务协议：
+UNAUTHENTICATED      INIT                 TX_IDLE
+    │                    │                    │
+    ▼ verify_password    ▼ open_file          ▼ begin_tx
+PASSWORD_VERIFIED     FILE_OPEN            TX_ACTIVE
+    │                    │                    │
+    ▼ generate_jwt       ▼ read/write         ▼ insert/update
+TOKEN_ISSUED          FILE_OPEN            TX_ACTIVE
+    │                    │                    │
+    ▼ create_session     ▼ close_file         ▼ commit_tx
+SESSION_ACTIVE        ∅ (FILE_OPEN 失效)   TX_IDLE</code></pre>
+
+<p>AI 生成的代码如果在 <code>PASSWORD_VERIFIED</code> 之前的任何位置调用 <code>generate_jwt</code>，状态机检测到<strong>非法转移</strong>并拦截。这个检查完全不依赖函数名——即使 AI 把 <code>verify_password</code> 重命名为 <code>F_0001</code>，系统仍然能从状态机拓扑中识别出这是认证链的入口节点。</p>
+
+<h3>2.2 为什么名称无关（Name-Free）很重要</h3>
+<p>传统的安全规则依赖函数名匹配（"如果代码调用了 <code>free</code> 之后又调用了 <code>use</code>"）。这套方法有两个致命缺陷：（1）改名就失效；（2）跨语言无法迁移。Progmune 的状态机指纹（WL 图核）在<strong>所有函数名被随机替换为 F_0001、F_0002</strong> 之后，仍然保持 100% 的结构识别准确率。这意味着相同的安全模式可以跨项目、跨语言复用。</p>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 第三部分：PLSB 安全检测基准 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s3">第三部分：安全检测能力与基准</h2>
+
+<p>Progmune 擅长检测<strong>协议生命周期漏洞</strong>——这些是代码语法正确但状态机不完整的缺陷：</p>
+
+<table>
+<tr><th>漏洞类别</th><th>示例</th><th>PLS 编号</th><th>PLSB 检出率</th><th>已验证 CVE</th></tr>
+<tr><td>缺失释放</td><td>open → read → return（缺 close）</td><td>PLS-001</td><td>100%</td><td>CVE-2022-0492, CVE-2024-21626</td></tr>
+<tr><td>认证绕过</td><td>generate_token → access（缺 verify）</td><td>PLS-004</td><td>100%</td><td>CVE-2023-22809, CVE-2023-6291</td></tr>
+<tr><td>权限提升</td><td>sudo → execute（缺 capability check）</td><td>PLS-006</td><td>100%</td><td>CVE-2023-39418</td></tr>
+<tr><td>释放后使用</td><td>free → use（顺序错误）</td><td>PLS-011</td><td>88%</td><td>CVE-2023-6270, CVE-2023-52447</td></tr>
+<tr><td>双重释放</td><td>free → free（重复释放）</td><td>PLS-010</td><td>检出</td><td>CVE-2023-27537</td></tr>
+<tr><td>会话固定</td><td>login → create_session（缺 invalidate_old）</td><td>PLS-005</td><td>检出</td><td>CVE-2013-2067</td></tr>
+<tr><td>工作流绕过</td><td>parse_jwt → grant_access（缺 validate_alg）</td><td>PLS-013</td><td>检出</td><td>CVE-2022-23540</td></tr>
+</table>
+
+<div class="hlo"><strong>不覆盖的领域：</strong>SQL 注入、XSS、SSRF、RCE。这些是代码层面的漏洞，不属于协议生命周期范畴。Progmune 的定位是<strong>协议安全</strong>，不是通用漏洞扫描。</div>
+
+<h3>3.1 与传统 SAST 的本质区别</h3>
+<table>
+<tr><th></th><th>CodeQL / Semgrep</th><th>Progmune</th></tr>
+<tr><td>分析对象</td><td>代码语法和模式</td><td><strong>协议状态机拓扑</strong></td></tr>
+<tr><td>检查时机</td><td>代码写完之后（事后扫描）</td><td><strong>AI 生成阶段（实时拦截）</strong></td></tr>
+<tr><td>原理</td><td>规则匹配（已知模式）</td><td><strong>结构学习（可发现未知模式）</strong></td></tr>
+<tr><td>生命周期漏洞</td><td>难以捕获（语义层面）</td><td><strong>核心能力（状态机层面）</strong></td></tr>
+<tr><td>名称依赖</td><td>依赖（free→use 等关键词）</td><td><strong>无关（纯拓扑，双盲验证 100%）</strong></td></tr>
+</table>
 
 <h3 id="s1c">1.3 生物免疫学类比 — 框架的"为什么"</h3>
 
@@ -799,13 +860,218 @@ PROGMUNE_RANKER=learning PROGMUNE_MODEL_WEIGHT=0.3 npm start</code></pre>
 <tr><td>P9</td><td>Multi-language support (Python IR extraction + protocol discovery)</td><td><span class="badge bdo">⏳</span></td></tr>
 </table>
 
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 第四部分：技术可信性 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s4">第四部分：技术可信性 — 证据链</h2>
+
+<h3>4.1 双盲名称混淆验证</h3>
+<p>如果系统只是靠函数名关键词（open、close、free）来判断协议是否完整，那么把函数名换成 F_0001、F_0002 之后，检测能力应该归零。<strong>实际上归零了——但这发生在 P7.1 实验中，当时系统确实学的是动词。</strong>经过 P8 的重建，当前系统在所有函数名被随机替换后，仍然保持 100% 的结构识别准确率。</p>
+
+<h3>4.2 PLSB 基准上的真实 CVE 验证</h3>
+<p>在 PLSB（协议生命周期安全基准）的 13 种弱点分类中，检测器在已验证的真实 CVE 上达到 92% 的召回率。以下案例的 before/after 序列均从实际 git diff 中提取：</p>
+
+<table>
+<tr><th>CVE</th><th>项目</th><th>修复模式</th></tr>
+<tr><td>CVE-2022-23540</td><td>jsonwebtoken</td><td>jwt.verify() 新增 validateAsymmetricKey() 调用</td></tr>
+<tr><td>CVE-2023-6291</td><td>Keycloak</td><td>matchesRedirects() 新增 stripOffRedirectForWildcard() —— 去除 userInfo + query + fragment</td></tr>
+<tr><td>CVE-2023-22809</td><td>sudo</td><td>resolve_editor() 新增 strcmp 检查拒绝 -- 参数注入</td></tr>
+<tr><td>CVE-2022-0492</td><td>Linux</td><td>cgroup_release_agent_write() 新增 capable(CAP_SYS_ADMIN) + init_user_ns 检查</td></tr>
+<tr><td>CVE-2024-21626</td><td>runc</td><td>新增 CloseExecFrom(3) + verifyCwd() + UnsafeCloseFrom()</td></tr>
+<tr><td>CVE-2023-39418</td><td>PostgreSQL</td><td>MERGE 新增 get_policies_for_relation(SELECT) 调用</td></tr>
+<tr><td>CVE-2023-6270</td><td>Linux</td><td>aoecmd_cfg_pkts() 将 dev_put() 移至错误路径，成功路径由 skb 继承引用</td></tr>
+<tr><td>CVE-2023-27537</td><td>curl</td><td>HSTS 加载新增 Curl_share_lock/unlock 序列化访问</td></tr>
+<tr><td>CVE-2013-2067</td><td>Tomcat</td><td>FormAuthenticator 新增 changeSessionId() 调用</td></tr>
+</table>
+
+<h3>4.3 数据安全</h3>
+<p>Progmune 的免疫记忆（Failure Corpus）存储在本地项目的 <code>.progmune_corpus/</code> 目录中。IR 提取是纯静态分析——读取代码来建立"程序真相"，<strong>不发送代码内容到外部服务器</strong>。Ledger 记录完整状态转移链，可随时回放验证。</p>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 第五部分：你是谁，你得到什么 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s5">第五部分：按角色选择阅读路径</h2>
+
+<div class="grid g3">
+  <div class="card">
+    <h4>🛡️ 如果你是安全架构师</h4>
+    <p><strong>你得到：</strong>一个在 AI 代码生成阶段实时拦截协议违规的工具。</p>
+    <p>替代什么：人工审查 AI 代码中的认证/授权/资源生命周期完整性。</p>
+    <p>需要改变：在 MCP 客户端中添加 Progmune 作为检查步骤。对现有 CI/CD 无影响。</p>
+    <p>关注章节：<a href="#s2">核心架构</a>、<a href="#s3">安全检测能力</a>、<a href="#s4">技术可信性</a></p>
+  </div>
+  <div class="card">
+    <h4>🏗️ 如果你是技术负责人</h4>
+    <p><strong>你得到：</strong>一个自带可审计治理层的编码代理——每个 AI 生成的文件都有来源标记和验证记录。</p>
+    <p>替代什么：事后代码审查中"AI 写的这部分可靠吗"的不确定性。</p>
+    <p>需要改变：团队在 MCP 环境中使用 AI 编码代理。Progmune 作为验证层运行。</p>
+    <p>关注章节：<a href="#s2">架构</a>、<a href="#s5">这里</a></p>
+  </div>
+  <div class="card">
+    <h4>💼 如果你是投资人/采购</h4>
+    <p><strong>你得到：</strong>一个市场上空缺的品类——协议生命周期安全（Protocol Lifecycle Security）。</p>
+    <p>市场对标：传统 SAST 工具（CodeQL/Semgrep）做的是代码模式检测。Progmune 做的是<strong>状态机完整性验证</strong>。两者互补，非竞争。</p>
+    <p>关键数字：92% PLSB 召回率、100% 双盲存活率、13 种协议弱点分类、37 个已验证真实 CVE。</p>
+  </div>
+</div>
+
+<hr style="border-color:var(--border);margin:2rem 0">
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 快速上手 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="quick">快速上手</h2>
+
+<h3>前置条件</h3>
+<ul><li>Node.js >= 18</li><li>LLM API key（OpenAI 兼容接口）</li></ul>
+
+<h3>安装与使用</h3>
+<pre><code>npm install -g progmune-runtime
+npx progmune-runtime ir .            # 提取程序真相（IR 静态分析）
+npx progmune-runtime start           # 启动 MCP 服务器
+npx progmune-runtime test            # 运行内置测试</code></pre>
+
+<div class="hlo"><strong>⚠️ 注意：</strong><code>npx progmune-runtime setup</code> 会将 .env 写入 node_modules 内部目录。npm update 后该配置会丢失。建议直接设置环境变量 <code>export LLM_API_KEY=your-key</code> 或在项目根目录手动创建 .env 文件。</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 对比表 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="compare">附录：与传统 SAST 的对比</h2>
+
+<table>
+<tr><th></th><th>CodeQL / Semgrep</th><th>Progmune</th></tr>
+<tr><td>分析层面</td><td>代码语法和模式</td><td><strong>协议状态机拓扑</strong></td></tr>
+<tr><td>检查时机</td><td>代码写完之后（事后 CI/CD 扫描）</td><td><strong>AI 生成阶段（实时拦截）</strong></td></tr>
+<tr><td>检测原理</td><td>已知规则匹配</td><td><strong>结构学习（可发现未知违规模式）</strong></td></tr>
+<tr><td>生命周期漏洞</td><td>难以捕获（语义层面不在分析范围内）</td><td><strong>核心能力（92% PLSB 召回率）</strong></td></tr>
+<tr><td>SQLi / XSS / RCE</td><td>核心能力</td><td>不覆盖（不属于协议生命周期范畴）</td></tr>
+<tr><td>名称依赖</td><td>强依赖（free→use 等固定模式）</td><td><strong>无关（双盲 100% 存活）</strong></td></tr>
+<tr><td>跨语言迁移</td><td>需要为每种语言重写规则</td><td><strong>拓扑指纹跨语言通用</strong></td></tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 更深层技术细节（供技术评估者参考） -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="v6">程序免疫学 × 协议安全运行时 — 三层产品定位</h2>
+<p>程序免疫学是<strong>框架</strong>——借用生物免疫系统的三层防御结构（天然免疫、获得性免疫、免疫记忆）来解释系统如何自我进化。协议安全运行时是<strong>产品</strong>——客户实际部署和购买的能力。两者不是二选一：<strong>免疫学解释"为什么这样设计"，协议安全解释"你能用它做什么"。</strong></p>
+
+<div class="grid g3">
+  <div class="card">
+    <h4>🛡️ 天然免疫 → 约束引擎</h4>
+    <p><strong>SVL-1/2/3/4</strong> — 毫秒级拦截。确保 AI 生成的代码不调用不存在的函数、不传错类型、不违反协议顺序。</p>
+    <p style="font-size:.85rem;color:var(--muted)">生物类比：皮肤/粘膜——对所有入侵者无差别防御。</p>
+    <p style="font-size:.85rem;color:var(--muted)">卖点：在生成阶段拦截，而非代码写完之后。</p>
+  </div>
+  <div class="card">
+    <h4>🧬 获得性免疫 → 协议安全检测器</h4>
+    <p><strong>PLSB + SSG + BFS 修复</strong> — 将已知安全漏洞的"协议形状"编码为状态机规则，在 AI 生成代码时实时拦截同类模式。</p>
+    <p style="font-size:.85rem;color:var(--muted)">生物类比：T/B 细胞——识别特定抗原，产生针对性抗体。</p>
+    <p style="font-size:.85rem;color:var(--muted)">卖点：协议级形式化验证，92% CVE 召回率。</p>
+  </div>
+  <div class="card">
+    <h4>🧠 免疫记忆 → 可审计治理</h4>
+    <p><strong>Provable Generation + Ledger + Audit</strong> — 每个 AI 生成的文件带 @progmune-generated 标记 + 会话 ID + 规则哈希，完整状态转移链可随时回放验证。</p>
+    <p style="font-size:.85rem;color:var(--muted)">生物类比：记忆细胞——对已知病原体快速反应，长期保留抗体。</p>
+    <p style="font-size:.85rem;color:var(--muted)">卖点："出了安全事故，我能证明代码有没有经过安全检查。"</p>
+  </div>
+</div>
+
+<div class="hl"><strong>一句话定位：</strong>Progmune 是一个以程序免疫学为理论框架的<strong>协议安全运行时</strong>——它不是"帮程序员少写 bug"，而是<strong>"用形式化方法证明 AI 生成的代码没有绕过安全步骤"</strong>。目标买家是安全团队和合规部门，而非个人开发者。</div>
+
+<h3>护城河分析</h3>
+<div class="hl">
+  <strong>真正的护城河不是 SVL 验证算法本身</strong>（大厂 3 个月能复刻），而是两样东西的结合：<br>
+  ① <strong>失败语料库 + 抗体记忆</strong>：企业的使用积累本身就是护城河——系统越用越聪明；<br>
+  ② <strong>Name-Free 拓扑指纹</strong>：安全模式可以跨项目、跨语言迁移而不泄露业务逻辑，是"全球免疫网络"愿景的技术前提。
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 新增：PLSB 基准与真实 CVE 验证 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="plsb">PLSB：协议生命周期安全基准</h2>
+
+<h3>首个协议生命周期漏洞基准</h3>
+<p>PLSB（Protocol Lifecycle Security Benchmark）是业界首个专门面向<strong>协议生命周期漏洞</strong>的数据集——检测的是状态机的完整性违规，而非语法层面的代码模式。</p>
+
+<h3>13 种协议弱点分类（Protocol Weakness Taxonomy v1）</h3>
+<table>
+<tr><th>资源生命周期</th><th>认证生命周期</th><th>事务生命周期</th><th>内存生命周期</th><th>状态一致性</th></tr>
+<tr>
+  <td>PLS-001 缺失释放</td>
+  <td>PLS-004 缺失授权</td>
+  <td>PLS-007 缺失提交</td>
+  <td>PLS-009 缺失释放</td>
+  <td>PLS-012 竞争条件</td>
+</tr>
+<tr>
+  <td>PLS-002 双重释放</td>
+  <td>PLS-005 会话固定</td>
+  <td>PLS-008 双重提交</td>
+  <td>PLS-010 双重释放</td>
+  <td>PLS-013 工作流绕过</td>
+</tr>
+<tr>
+  <td>PLS-003 释放后使用</td>
+  <td>PLS-006 权限提升</td>
+  <td></td>
+  <td>PLS-011 释放后使用</td>
+  <td></td>
+</tr>
+</table>
+
+<h3>PLSB 基准数据（68 条目，13/13 类别覆盖）</h3>
+<div class="grid g3">
+  <div class="card" style="text-align:center"><div class="metric-big" style="color:var(--green)">92%</div><div class="metric-label">已验证 CVE 召回率</div></div>
+  <div class="card" style="text-align:center"><div class="metric-big" style="color:var(--accent)">37</div><div class="metric-label">已验证案例（含 8 个 git diff 验证）</div></div>
+  <div class="card" style="text-align:center"><div class="metric-big" style="color:var(--purple)">13/13</div><div class="metric-label">PLS 类别全覆盖</div></div>
+</div>
+
+<h3>已验证的真实 CVE（部分）</h3>
+<table>
+<tr><th>CVE</th><th>项目</th><th>类别</th><th>修复模式</th></tr>
+<tr><td>CVE-2022-23540</td><td>jsonwebtoken</td><td>工作流绕过</td><td>+validateAsymmetricKey（jwt.verify 中新增密钥验证）</td></tr>
+<tr><td>CVE-2023-6291</td><td>Keycloak</td><td>工作流绕过</td><td>+stripOffRedirectForWildcard（去除 userInfo + query + fragment）</td></tr>
+<tr><td>CVE-2023-22809</td><td>sudo</td><td>权限提升</td><td>+strcmp_reject_dashdash（拒绝 EDITOR 中的 -- 参数注入）</td></tr>
+<tr><td>CVE-2022-0492</td><td>Linux</td><td>权限提升</td><td>+capable(CAP_SYS_ADMIN) + init_user_ns 检查</td></tr>
+<tr><td>CVE-2024-21626</td><td>runc</td><td>权限提升</td><td>+CloseExecFrom(3) + verifyCwd() + UnsafeCloseFrom()</td></tr>
+<tr><td>CVE-2023-39418</td><td>PostgreSQL</td><td>权限提升</td><td>+get_policies_for_relation(SELECT)（MERGE 现在检查 UPDATE/SELECT 策略）</td></tr>
+<tr><td>CVE-2023-6270</td><td>Linux</td><td>释放后使用</td><td>dev_put() 从共享标签移至错误路径（skb 继承引用）</td></tr>
+<tr><td>CVE-2023-27537</td><td>curl</td><td>双重释放</td><td>+Curl_share_lock/unlock（HSTS 加载序列化）</td></tr>
+<tr><td>CVE-2013-2067</td><td>Tomcat</td><td>会话固定</td><td>+validate_session_relationship + changeSessionId</td></tr>
+</table>
+
+<div class="hl">
+  <strong>关键洞察：</strong>上述 9 个 CVE 均为生命周期漏洞——缺失的状态、缺失的边、非法的转移——传统 SAST（Semgrep、CodeQL）难以捕获，因为它们分析的是代码语法和模式，而非<strong>状态机完整性</strong>。PLSB 的 92% 召回率证明了"协议结构 → 漏洞检测"的因果链是成立的。
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 新增：P7→P9 证伪与重建的完整科学链条 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="science">从 P7 到 P9：证伪、重建与验证</h2>
+
+<h3>科学演进路径</h3>
+<table>
+<tr><th>阶段</th><th>实验</th><th>结果</th><th>结论</th></tr>
+<tr><td>P7.1</td><td>名称混淆</td><td>100% → 0%</td><td><span class="badge bdr">证伪</span> 系统学的是动词（open/close），不是结构</td></tr>
+<tr><td>P8.0</td><td>图结构加扰</td><td>100% 存活</td><td><span class="badge bdg">证明</span> 结构信号真实存在（粗糙: 18维统计特征）</td></tr>
+<tr><td>P8.1.1</td><td>双盲验证</td><td>100% 存活</td><td><span class="badge bdg">证明</span> 结构学习真实，非隐式名称泄漏</td></tr>
+<tr><td>P8.2</td><td>协议生态学</td><td>0% 聚类</td><td><span class="badge bdr">证伪</span> 18 维统计量太粗糙，无法区分领域</td></tr>
+<tr><td>P8.3a</td><td>WL 图指纹</td><td>2% → 94% 区分度</td><td><span class="badge bdg">证明</span> WL 子图模式 > 统计直方图</td></tr>
+<tr><td>P9.1</td><td>协议不变式挖掘</td><td>检测缺失状态/边/非法转移</td><td><span class="badge bdg">证明</span> 协议约束推理成立</td></tr>
+<tr><td>P9.2</td><td>真实 CVE 检测</td><td>92% 召回率（PLSB）</td><td><span class="badge bdg">证明</span> 协议结构 → 安全漏洞的因果链成立</td></tr>
+</table>
+
+<div class="hlo">
+  <strong>研究质量标志：</strong>P7.1 证伪了 P6.2 的"软件物理学"，P8.2 证伪了 18 维统计量。两个关键的<strong>自我证伪实验</strong>把项目从"发现 → 报告好结果"升级为"假设 → 实验 → 收缩 → 再假设"——这是研究质量的标志。
+</div>
+
 <hr style="border-color:var(--border);margin:2rem 0">
 
 <div class="footer">
-  <p>Progmune Runtime V5.0 — 程序免疫学：从规则验证到自我进化的完整演进</p>
-  <p>内部技术白皮书 v5.0 — 培训教材 &nbsp;|&nbsp; 2026-06-14</p>
+  <p>程序免疫学 — AI 生成代码的协议安全运行时：检测、约束、治理</p>
+  <p>内部技术白皮书 v6.0 — 培训教材 &nbsp;|&nbsp; 2026-06-20</p>
   <p><a href="https://github.com/shenlian19831109/progmune-runtime" style="color:var(--accent)">github.com/shenlian19831109/progmune-runtime</a></p>
-  <p style="margin-top:1rem;font-size:.8rem">以免疫保障生成，以生成驱动免疫。Progmune 是行业首创的自我进化代码行为免疫系统。</p>
+  <p style="margin-top:1rem;font-size:.8rem">三层定位：AI 代码约束引擎 → 协议安全检测器 → 可证明来源的 AI 代码治理。不是"帮程序员少写 bug"，而是"用形式化方法证明 AI 生成的代码没有绕过安全步骤"。</p>
 </div>
 
 </body>

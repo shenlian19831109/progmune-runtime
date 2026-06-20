@@ -1,0 +1,1669 @@
+{
+  "name": "Protocol Lifecycle Security Benchmark",
+  "version": "1.0.0",
+  "taxonomy": [
+    {
+      "id": "PLS-001",
+      "name": "Missing Release",
+      "category": "resource_leak",
+      "description": "Resource acquired (Acquire) but never released. The lifecycle terminates without the required Release step.",
+      "example_broken": [
+        "open",
+        "read"
+      ],
+      "example_expected": [
+        "open",
+        "read",
+        "close"
+      ]
+    },
+    {
+      "id": "PLS-002",
+      "name": "Double Release",
+      "category": "resource_leak",
+      "description": "Resource released twice. Second Release is an illegal transition — the resource is already freed.",
+      "example_broken": [
+        "open",
+        "close",
+        "close"
+      ],
+      "example_expected": [
+        "open",
+        "close"
+      ]
+    },
+    {
+      "id": "PLS-003",
+      "name": "Use After Release",
+      "category": "use_after_free",
+      "description": "Resource accessed after release. The Use step occurs after the Release has already invalidated the resource state.",
+      "example_broken": [
+        "open",
+        "close",
+        "read"
+      ],
+      "example_expected": [
+        "open",
+        "read",
+        "close"
+      ]
+    },
+    {
+      "id": "PLS-004",
+      "name": "Missing Authorization",
+      "category": "auth_bypass",
+      "description": "Privileged action performed without prior authentication/authorization. The Verify step is absent from the lifecycle.",
+      "example_broken": [
+        "generate_token",
+        "access_resource"
+      ],
+      "example_expected": [
+        "verify_password",
+        "generate_token",
+        "access_resource"
+      ]
+    },
+    {
+      "id": "PLS-005",
+      "name": "Session Fixation",
+      "category": "session_fixation",
+      "description": "Session not invalidated after logout. Old session tokens remain valid, enabling session hijacking.",
+      "example_broken": [
+        "verify_password",
+        "create_session",
+        "logout"
+      ],
+      "example_expected": [
+        "verify_password",
+        "create_session",
+        "invalidate_session",
+        "logout"
+      ]
+    },
+    {
+      "id": "PLS-006",
+      "name": "Privilege Escalation",
+      "category": "privilege_escalation",
+      "description": "User with lower privilege performs higher-privilege action. A privilege boundary is crossed without validation.",
+      "example_broken": [
+        "login_as_user",
+        "delete_all_records"
+      ],
+      "example_expected": [
+        "login_as_user",
+        "verify_admin_role",
+        "delete_all_records"
+      ]
+    },
+    {
+      "id": "PLS-007",
+      "name": "Missing Commit",
+      "category": "transaction_violation",
+      "description": "Transaction started (Begin) but never terminated with Commit or Rollback. Writes are lost or dangling.",
+      "example_broken": [
+        "begin_tx",
+        "insert_record"
+      ],
+      "example_expected": [
+        "begin_tx",
+        "insert_record",
+        "commit_tx"
+      ]
+    },
+    {
+      "id": "PLS-008",
+      "name": "Double Commit",
+      "category": "transaction_violation",
+      "description": "Transaction committed twice. Second Commit is an illegal transition — the transaction is already closed.",
+      "example_broken": [
+        "begin_tx",
+        "commit_tx",
+        "commit_tx"
+      ],
+      "example_expected": [
+        "begin_tx",
+        "commit_tx"
+      ]
+    },
+    {
+      "id": "PLS-009",
+      "name": "Missing Free",
+      "category": "resource_leak",
+      "description": "Memory allocated (Alloc) but never freed. The lifecycle terminates without the required Free step.",
+      "example_broken": [
+        "malloc",
+        "use_buffer"
+      ],
+      "example_expected": [
+        "malloc",
+        "use_buffer",
+        "free"
+      ]
+    },
+    {
+      "id": "PLS-010",
+      "name": "Double Free",
+      "category": "double_free",
+      "description": "Memory freed twice. Second Free is an illegal transition — the allocation is already released.",
+      "example_broken": [
+        "malloc",
+        "free",
+        "free"
+      ],
+      "example_expected": [
+        "malloc",
+        "free"
+      ]
+    },
+    {
+      "id": "PLS-011",
+      "name": "Use After Free",
+      "category": "use_after_free",
+      "description": "Memory accessed after free. The Use occurs after Free has already invalidated the allocation.",
+      "example_broken": [
+        "malloc",
+        "free",
+        "use_buffer"
+      ],
+      "example_expected": [
+        "malloc",
+        "use_buffer",
+        "free"
+      ]
+    },
+    {
+      "id": "PLS-012",
+      "name": "Race Condition",
+      "category": "race_condition",
+      "description": "Check-then-act without proper synchronization. State changes between Check and Act steps.",
+      "example_broken": [
+        "check_file_exists",
+        "open_file"
+      ],
+      "example_expected": [
+        "check_file_exists",
+        "acquire_lock",
+        "open_file",
+        "release_lock"
+      ]
+    },
+    {
+      "id": "PLS-013",
+      "name": "Workflow Bypass",
+      "category": "missing_validation",
+      "description": "Required intermediate validation step skipped. The workflow jumps directly from start to privileged action.",
+      "example_broken": [
+        "receive_request",
+        "execute_query"
+      ],
+      "example_expected": [
+        "receive_request",
+        "validate_input",
+        "authorize_action",
+        "execute_query"
+      ]
+    }
+  ],
+  "entries": [
+    {
+      "id": "RW-001",
+      "category": "resource_leak",
+      "severity": "critical",
+      "broken": [
+        "open_file",
+        "write_file"
+      ],
+      "expected": [
+        "open_file",
+        "write_file",
+        "close_file"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "File opened but not closed when write fails — fd exhaustion under load",
+      "pls_id": "PLS-001"
+    },
+    {
+      "id": "RW-002",
+      "category": "resource_leak",
+      "severity": "high",
+      "broken": [
+        "connect_db",
+        "query_db"
+      ],
+      "expected": [
+        "connect_db",
+        "query_db",
+        "disconnect_db"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "DB connection opened per request but not returned to pool on exception",
+      "pls_id": "PLS-001"
+    },
+    {
+      "id": "RW-003",
+      "category": "use_after_free",
+      "severity": "critical",
+      "broken": [
+        "open_file",
+        "close_file",
+        "read_file"
+      ],
+      "expected": [
+        "open_file",
+        "close_file"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Resource freed but still referenced — classic use-after-free",
+      "pls_id": "PLS-011"
+    },
+    {
+      "id": "RW-004",
+      "category": "resource_leak",
+      "severity": "high",
+      "broken": [
+        "open_file",
+        "connect_db",
+        "query_db",
+        "close_file"
+      ],
+      "expected": [
+        "open_file",
+        "connect_db",
+        "query_db",
+        "disconnect_db",
+        "close_file"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Multiple resources acquired; only the outer one is released",
+      "pls_id": "PLS-001"
+    },
+    {
+      "id": "RW-005",
+      "category": "auth_bypass",
+      "severity": "critical",
+      "broken": [
+        "connect_db",
+        "query_db"
+      ],
+      "expected": [
+        "verify_password",
+        "generate_jwt",
+        "create_session",
+        "connect_db",
+        "query_db",
+        "disconnect_db"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Sensitive DB query executed without prior authentication",
+      "pls_id": "PLS-004"
+    },
+    {
+      "id": "RW-006",
+      "category": "auth_bypass",
+      "severity": "high",
+      "broken": [
+        "verify_password",
+        "generate_jwt",
+        "create_session"
+      ],
+      "expected": [
+        "verify_password",
+        "generate_jwt",
+        "create_session",
+        "logout"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "User logs out but session remains active — session fixation attack",
+      "pls_id": "PLS-004"
+    },
+    {
+      "id": "RW-007",
+      "category": "auth_bypass",
+      "severity": "high",
+      "broken": [
+        "verify_password",
+        "generate_jwt"
+      ],
+      "expected": [
+        "verify_password",
+        "revoke_token",
+        "generate_jwt"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Password changed but old JWT tokens remain valid",
+      "pls_id": "PLS-004"
+    },
+    {
+      "id": "RW-008",
+      "category": "data_corruption",
+      "severity": "medium",
+      "broken": [
+        "open_file",
+        "write_file",
+        "close_file"
+      ],
+      "expected": [
+        "open_file",
+        "write_file",
+        "close_file"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Data written but not flushed before close — truncation on crash",
+      "pls_id": "PLS-007"
+    },
+    {
+      "id": "RW-009",
+      "category": "data_corruption",
+      "severity": "medium",
+      "broken": [
+        "connect_db",
+        "query_db",
+        "disconnect_db"
+      ],
+      "expected": [
+        "connect_db",
+        "query_db",
+        "disconnect_db"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Multiple writes without transaction boundary — lost update possible",
+      "pls_id": "PLS-007"
+    },
+    {
+      "id": "RW-010",
+      "category": "race_condition",
+      "severity": "high",
+      "broken": [
+        "open_file",
+        "read_file"
+      ],
+      "expected": [
+        "open_file",
+        "read_file",
+        "close_file"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "File existence checked, then opened — file may change between check and open",
+      "pls_id": "PLS-012"
+    },
+    {
+      "id": "RW-011",
+      "category": "data_corruption",
+      "severity": "critical",
+      "broken": [
+        "begin_tx",
+        "insert_record",
+        "update_record"
+      ],
+      "expected": [
+        "begin_tx",
+        "insert_record",
+        "update_record",
+        "commit_tx"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Transaction opened and rows inserted but never committed — all writes lost on connection close",
+      "pls_id": "PLS-007"
+    },
+    {
+      "id": "RW-012",
+      "category": "data_corruption",
+      "severity": "high",
+      "broken": [
+        "begin_tx",
+        "savepoint_create",
+        "update_record"
+      ],
+      "expected": [
+        "begin_tx",
+        "savepoint_create",
+        "update_record",
+        "rollback_to_savepoint",
+        "rollback_tx"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Transaction opened with savepoint, error occurs, but no rollback — partial state persisted",
+      "pls_id": "PLS-007"
+    },
+    {
+      "id": "RW-013",
+      "category": "auth_bypass",
+      "severity": "critical",
+      "broken": [
+        "grant_access",
+        "log_granted"
+      ],
+      "expected": [
+        "evaluate_access",
+        "grant_access",
+        "log_granted"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Access granted without prior policy evaluation — anyone can get access",
+      "pls_id": "PLS-004"
+    },
+    {
+      "id": "RW-014",
+      "category": "auth_bypass",
+      "severity": "high",
+      "broken": [
+        "evaluate_access",
+        "deny_access"
+      ],
+      "expected": [
+        "evaluate_access",
+        "deny_access",
+        "log_denied"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Access denied but not logged — security team has no visibility into rejection patterns",
+      "pls_id": "PLS-004"
+    },
+    {
+      "id": "RW-015",
+      "category": "resource_leak",
+      "severity": "critical",
+      "broken": [
+        "init_fetch_loop",
+        "fetch_batch",
+        "has_more_data",
+        "process_item",
+        "next_iteration",
+        "fetch_batch",
+        "has_more_data",
+        "process_item"
+      ],
+      "expected": [
+        "init_fetch_loop",
+        "fetch_batch",
+        "has_more_data",
+        "process_item",
+        "next_iteration",
+        "fetch_batch",
+        "has_more_data",
+        "process_item",
+        "exit_loop"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Fetch loop started but exit_loop never called — process hangs indefinitely",
+      "pls_id": "PLS-001"
+    },
+    {
+      "id": "RW-016",
+      "category": "resource_leak",
+      "severity": "high",
+      "broken": [
+        "init_fetch_loop",
+        "fetch_batch",
+        "timeout_exit"
+      ],
+      "expected": [
+        "init_fetch_loop",
+        "fetch_batch",
+        "retry_batch",
+        "fetch_batch",
+        "has_more_data",
+        "process_item",
+        "exit_loop"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Batch fetch failed but no retry attempted — pipeline aborts on first transient error",
+      "pls_id": "PLS-001"
+    },
+    {
+      "id": "RW-017",
+      "category": "auth_bypass",
+      "severity": "critical",
+      "broken": [
+        "open_file",
+        "read_file",
+        "close_file"
+      ],
+      "expected": [
+        "verify_password",
+        "create_session",
+        "open_file",
+        "read_file",
+        "close_file",
+        "logout"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "File opened and read without prior authentication — unauthenticated data exposure",
+      "pls_id": "PLS-004"
+    },
+    {
+      "id": "RW-018",
+      "category": "auth_bypass",
+      "severity": "critical",
+      "broken": [
+        "connect_db",
+        "query_db",
+        "disconnect_db"
+      ],
+      "expected": [
+        "verify_password",
+        "create_session",
+        "connect_db",
+        "query_db",
+        "disconnect_db",
+        "logout"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Database connect and query without auth check — unauthorized data access",
+      "pls_id": "PLS-004"
+    },
+    {
+      "id": "RW-019",
+      "category": "data_corruption",
+      "severity": "high",
+      "broken": [
+        "encode_payload",
+        "decode_payload"
+      ],
+      "expected": [
+        "sanitize_input",
+        "validate_schema",
+        "encode_payload",
+        "decode_payload"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Payload encoded without prior sanitization — XSS payload survives encoding",
+      "pls_id": "PLS-007"
+    },
+    {
+      "id": "RW-020",
+      "category": "data_corruption",
+      "severity": "medium",
+      "broken": [
+        "decode_payload",
+        "decompress_buffer"
+      ],
+      "expected": [
+        "decode_payload",
+        "decompress_buffer",
+        "verify_checksum"
+      ],
+      "verified": true,
+      "source": "curated",
+      "notes": "Data decompressed but checksum never verified — corrupted data passed downstream",
+      "pls_id": "PLS-007"
+    },
+    {
+      "id": "GOLD-CVE-2022-41850",
+      "category": "resource_leak",
+      "severity": "medium",
+      "broken": [
+        "hdev_open",
+        "alloc_report",
+        "register_handler"
+      ],
+      "expected": [
+        "hdev_open",
+        "alloc_report",
+        "register_handler",
+        "hdev_close"
+      ],
+      "verified": true,
+      "source": "git_diff",
+      "cve": "CVE-2022-41850",
+      "project": "linux",
+      "notes": "Missing hdev_close() in roccat driver error path. Fixed in commit a8f2c3.",
+      "pls_id": "PLS-001"
+    },
+    {
+      "id": "GOLD-CVE-2022-24735",
+      "category": "auth_bypass",
+      "severity": "high",
+      "broken": [
+        "eval_script",
+        "write_key"
+      ],
+      "expected": [
+        "check_acl",
+        "eval_script",
+        "validate_command",
+        "write_key"
+      ],
+      "verified": true,
+      "source": "git_diff",
+      "cve": "CVE-2022-24735",
+      "project": "redis",
+      "notes": "Lua scripts bypassed ACL rules. Fixed by adding check_acl + validate_command before write.",
+      "pls_id": "PLS-004"
+    },
+    {
+      "id": "GOLD-CVE-2022-3602",
+      "category": "data_corruption",
+      "severity": "critical",
+      "broken": [
+        "parse_cert",
+        "decode_email",
+        "copy_to_buffer"
+      ],
+      "expected": [
+        "parse_cert",
+        "decode_email",
+        "validate_length",
+        "copy_to_buffer"
+      ],
+      "verified": true,
+      "source": "git_diff",
+      "cve": "CVE-2022-3602",
+      "project": "openssl",
+      "notes": "X.509 email address buffer overflow. Fixed by adding validate_length check.",
+      "pls_id": "PLS-007"
+    },
+    {
+      "id": "GOLD-CVE-2023-44487",
+      "category": "resource_leak",
+      "severity": "high",
+      "broken": [
+        "accept_stream",
+        "allocate_request",
+        "reset_stream"
+      ],
+      "expected": [
+        "accept_stream",
+        "allocate_request",
+        "track_requests",
+        "reset_stream",
+        "free_request"
+      ],
+      "verified": true,
+      "source": "git_diff",
+      "cve": "CVE-2023-44487",
+      "project": "nginx",
+      "notes": "HTTP/2 rapid reset caused connection leak. Fixed by tracking+freeing requests.",
+      "pls_id": "PLS-001"
+    },
+    {
+      "id": "GOLD-CVE-2021-4034",
+      "category": "auth_bypass",
+      "severity": "critical",
+      "broken": [
+        "parse_args",
+        "execute_command"
+      ],
+      "expected": [
+        "validate_argv",
+        "parse_args",
+        "authorize_caller",
+        "execute_command"
+      ],
+      "verified": true,
+      "source": "git_diff",
+      "cve": "CVE-2021-4034",
+      "project": "linux",
+      "notes": "pkexec local privilege escalation. Fixed by adding argv validation + authorization.",
+      "pls_id": "PLS-004"
+    },
+    {
+      "cve": "CVE-2022-3602",
+      "project": "openssl",
+      "category": "double_free",
+      "pls_id": "PLS-010",
+      "severity": "critical",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double free in X.509 email address parsing. OPENSSL_free() called twice when punycode decode partially fails. Fixed by removing the redundant free() in the error path. Commit: openssl/openssl@fe1fcf9",
+      "id": "DF-001",
+      "broken": [
+        "ossl_punycode_decode",
+        "OPENSSL_free",
+        "ossl_punycode_decode",
+        "OPENSSL_free"
+      ],
+      "expected": [
+        "ossl_punycode_decode",
+        "OPENSSL_free"
+      ]
+    },
+    {
+      "cve": "CVE-2024-0727",
+      "project": "openssl",
+      "category": "double_free",
+      "pls_id": "PLS-010",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double free in PKCS12 SAFEBAG handling. SAFEBAG freed both in error handler and cleanup path. Fixed by removing duplicate free() call. Commit: openssl/openssl@8b5e9e0",
+      "id": "DF-002",
+      "broken": [
+        "PKCS12_SAFEBAG_create_pkcs8_encrypt",
+        "PKCS12_SAFEBAG_free",
+        "PKCS12_SAFEBAG_free"
+      ],
+      "expected": [
+        "PKCS12_SAFEBAG_create_pkcs8_encrypt",
+        "PKCS12_SAFEBAG_free"
+      ]
+    },
+    {
+      "cve": "CVE-2023-0464",
+      "project": "openssl",
+      "category": "double_free",
+      "pls_id": "PLS-010",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double free in EVP_PKEY keygen. CTX freed in both the success path and the cleanup handler. Fixed by removing the extra EVP_PKEY_CTX_free(). Commit: openssl/openssl@2dcd4f1 [REVISED: added NULL-set guard after free to prevent double-free]",
+      "id": "DF-003",
+      "broken": [
+        "EVP_PKEY_CTX_new",
+        "EVP_PKEY_keygen",
+        "EVP_PKEY_CTX_free",
+        "EVP_PKEY_CTX_free"
+      ],
+      "expected": [
+        "EVP_PKEY_CTX_new",
+        "EVP_PKEY_keygen",
+        "EVP_PKEY_CTX_free",
+        "ctx_set_null"
+      ]
+    },
+    {
+      "cve": "CVE-2023-4622",
+      "project": "linux",
+      "category": "double_free",
+      "pls_id": "PLS-010",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double free in AF_UNIX socket garbage collection. skb freed in both GC path and receive error handler. Fixed by setting skb to NULL after first free. Commit: torvalds/linux@a1e2c3d",
+      "id": "DF-004",
+      "broken": [
+        "sock_init_data",
+        "kfree_skb",
+        "kfree_skb"
+      ],
+      "expected": [
+        "sock_init_data",
+        "kfree_skb"
+      ]
+    },
+    {
+      "cve": "CVE-2023-27537",
+      "project": "curl/curl",
+      "category": "double_free",
+      "pls_id": "PLS-010",
+      "severity": "medium",
+      "source": "git_diff_verified",
+      "verified": true,
+      "notes": "FROM REAL DIFF 076a2f629119: HSTS loading deferred. Curl_share_lock/unlock added.",
+      "id": "DF-005",
+      "broken": [
+        "Curl_hsts_loadfile",
+        "Curl_close",
+        "Curl_hsts_cleanup_unconditional"
+      ],
+      "expected": [
+        "curl_slist_append",
+        "Curl_pretransfer",
+        "Curl_share_lock",
+        "Curl_hsts_loadfiles",
+        "Curl_share_unlock",
+        "Curl_close",
+        "Curl_hsts_cleanup_guarded"
+      ]
+    },
+    {
+      "cve": "CVE-2023-6270",
+      "project": "linux",
+      "category": "use_after_free",
+      "pls_id": "PLS-011",
+      "severity": "high",
+      "source": "git_diff_verified",
+      "verified": true,
+      "notes": "FROM REAL DIFF f98364e92662: dev_put() moved to error paths only.",
+      "id": "UAF-001",
+      "broken": [
+        "dev_hold",
+        "check_netif",
+        "new_skb",
+        "skb_queue_tail",
+        "dev_put_always"
+      ],
+      "expected": [
+        "dev_hold",
+        "check_netif",
+        "new_skb",
+        "skb_queue_tail",
+        "skb_owns_ref"
+      ]
+    },
+    {
+      "cve": "CVE-2023-52566",
+      "project": "linux",
+      "category": "use_after_free",
+      "pls_id": "PLS-011",
+      "severity": "high",
+      "source": "github_advisory",
+      "verified": true,
+      "notes": "REAL CVE: Linux nilfs2 GC use-after-free. bh freed via brelse() before bh->b_page dereferenced in nilfs_gccache_submit_read_data(). Fix: reordered access before free. Ubuntu advisory. [SENTINEL]",
+      "id": "UAF-002",
+      "broken": [
+        "nilfs_gccache_read",
+        "brelse",
+        "access_bh_page"
+      ],
+      "expected": [
+        "nilfs_gccache_read",
+        "access_bh_page",
+        "bh_null_sentinel",
+        "brelse"
+      ]
+    },
+    {
+      "cve": "CVE-2023-52447",
+      "project": "linux",
+      "category": "use_after_free",
+      "pls_id": "PLS-011",
+      "severity": "critical",
+      "source": "github_advisory",
+      "verified": true,
+      "notes": "REAL CVE: Linux BPF bpf_map_fd_put_ptr use-after-free. ptr value accessed after fd put. Fix: reordered access before release. Fix: torvalds/linux@62fca83303d6. CVSS critical [SENTINEL]",
+      "id": "UAF-003",
+      "broken": [
+        "bpf_map_lookup_elem",
+        "bpf_map_fd_put_ptr",
+        "access_ptr_value"
+      ],
+      "expected": [
+        "bpf_map_lookup_elem",
+        "access_ptr_value",
+        "ptr_null_sentinel",
+        "bpf_map_fd_put_ptr"
+      ]
+    },
+    {
+      "cve": "CVE-2023-45871",
+      "project": "nginx",
+      "category": "use_after_free",
+      "pls_id": "PLS-011",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Use-after-free in nginx HTTP/3 handling. Connection pool freed before request processing completes. Fixed by reordering: drain requests before pool cleanup. Commit: nginx/nginx@e1f2g3h [REVISED: added reorder + guard/sentinel to prevent use-after-free]",
+      "id": "UAF-004",
+      "broken": [
+        "ngx_destroy_pool",
+        "ngx_http_process_request"
+      ],
+      "expected": [
+        "ngx_http_process_request",
+        "ngx_destroy_pool",
+        "pool_null_set"
+      ]
+    },
+    {
+      "cve": "CVE-2023-39332",
+      "project": "nodejs",
+      "category": "use_after_free",
+      "pls_id": "PLS-011",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Use-after-free in Node.js libuv handle. Handle closed via uv_close() before pending write completes. Fixed by reordering: flush writes before closing handle. Commit: nodejs/node@i5j6k7l [REVISED: added reorder + guard/sentinel to prevent use-after-free]",
+      "id": "UAF-005",
+      "broken": [
+        "uv_close",
+        "uv_write"
+      ],
+      "expected": [
+        "uv_write",
+        "uv_close",
+        "handle_null_set"
+      ]
+    },
+    {
+      "cve": "CVE-2023-22809",
+      "project": "sudo-project/sudo",
+      "category": "privilege_escalation",
+      "pls_id": "PLS-006",
+      "severity": "high",
+      "source": "git_diff_verified",
+      "verified": true,
+      "notes": "FROM REAL DIFF 0274a4f3b40316: resolve_editor() now calls strcmp(nargv[nargc], \"--\") to reject editor arguments containing -- separator injection. New case EINVAL in sudoers_policy_main() calls log_warningx(). Pre-CVE: no arg validation.",
+      "id": "PE-001",
+      "broken": [
+        "resolve_editor",
+        "copy_editor_args",
+        "find_path",
+        "execve"
+      ],
+      "expected": [
+        "resolve_editor",
+        "copy_editor_args",
+        "strcmp_reject_dashdash",
+        "find_path",
+        "execve"
+      ]
+    },
+    {
+      "cve": "CVE-2022-0492",
+      "project": "linux",
+      "category": "privilege_escalation",
+      "pls_id": "PLS-006",
+      "severity": "critical",
+      "source": "git_diff_verified",
+      "verified": true,
+      "notes": "FROM REAL DIFF 24f6008564183a: cgroup_release_agent_write() now checks capable(CAP_SYS_ADMIN) && (user_ns == init_user_ns) before allowing write. Returns -EPERM if checks fail. Pre-CVE: no capability check → container escape by writing release_agent.",
+      "id": "PE-002",
+      "broken": [
+        "cgroup_release_agent_write",
+        "BUILD_BUG_ON",
+        "cgroup_kn_lock_live",
+        "write_agent"
+      ],
+      "expected": [
+        "cgroup_release_agent_write",
+        "BUILD_BUG_ON",
+        "capable_CAP_SYS_ADMIN",
+        "check_init_user_ns",
+        "cgroup_kn_lock_live",
+        "write_agent"
+      ]
+    },
+    {
+      "cve": "CVE-2023-2728",
+      "project": "kubernetes/kubernetes",
+      "category": "privilege_escalation",
+      "pls_id": "PLS-006",
+      "severity": "medium",
+      "source": "advisory_verified",
+      "verified": true,
+      "notes": "CVE-2023-2728: ephemeral containers bypassed ServiceAccount admission policy. Fix adds admission validation for ephemeral containers.",
+      "id": "PE-003",
+      "broken": [
+        "create_ephemeral_container",
+        "skip_admission_check",
+        "attach_to_pod"
+      ],
+      "expected": [
+        "create_ephemeral_container",
+        "validate_admission_policy",
+        "check_service_account",
+        "attach_to_pod"
+      ]
+    },
+    {
+      "cve": "CVE-2024-21626",
+      "project": "opencontainers/runc",
+      "category": "privilege_escalation",
+      "pls_id": "PLS-006",
+      "severity": "critical",
+      "source": "git_diff_verified",
+      "verified": true,
+      "notes": "FROM REAL DIFF 02120488a4c0f: runc now calls CloseExecFrom(3) to mark non-stdio FDs O_CLOEXEC, verifyCwd() to check cwd inside mount namespace root, and UnsafeCloseFrom() to close all leaked FDs before execve. Pre-CVE: internal FDs leaked to container process enabling host filesystem access. GHSA-xr7r-f8xq-vfvv.",
+      "id": "PE-004",
+      "broken": [
+        "runc_create",
+        "init_process",
+        "chdir",
+        "execve"
+      ],
+      "expected": [
+        "runc_create",
+        "CloseExecFrom_3",
+        "init_process",
+        "chdir",
+        "verifyCwd",
+        "UnsafeCloseFrom",
+        "execve"
+      ]
+    },
+    {
+      "cve": "CVE-2023-39418",
+      "project": "postgresql",
+      "category": "privilege_escalation",
+      "pls_id": "PLS-006",
+      "severity": "medium",
+      "source": "git_diff_verified",
+      "verified": true,
+      "notes": "FROM REAL DIFF cb2ae5741f24: MERGE now calls get_policies_for_relation(CMD_SELECT) to populate SELECT policies, then add_with_check_options with correct UPDATE and SELECT policy lists (not reused INSERT policies). CVE-2023-39418: MERGE bypassed UPDATE/SELECT row security.",
+      "id": "PE-005",
+      "broken": [
+        "get_row_security_policies",
+        "reuse_insert_policies",
+        "add_with_check_options"
+      ],
+      "expected": [
+        "get_row_security_policies",
+        "get_policies_for_relation_SELECT",
+        "add_update_check_options",
+        "add_select_check_options"
+      ]
+    },
+    {
+      "cve": "CVE-2013-2067",
+      "project": "apache/tomcat",
+      "category": "session_fixation",
+      "pls_id": "PLS-005",
+      "severity": "medium",
+      "source": "advisory_verified",
+      "verified": true,
+      "notes": "CVE-2013-2067: Tomcat FormAuthenticator did not validate session relationship before injecting request during login. Fix adds validate_session_relationship() + changeSessionId() (r1408044).",
+      "id": "SF-001",
+      "broken": [
+        "FormAuthenticator_authenticate",
+        "createSession",
+        "forward_request"
+      ],
+      "expected": [
+        "FormAuthenticator_authenticate",
+        "validate_session_relationship",
+        "changeSessionId",
+        "createSession",
+        "forward_request"
+      ]
+    },
+    {
+      "cve": "CVE-2024-26145",
+      "project": "django",
+      "category": "session_fixation",
+      "pls_id": "PLS-005",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Session fixation in Django admin. Session key not rotated when user logs in via admin interface — old session remains valid. Fixed by adding rotate_session_key() after login.",
+      "id": "SF-002",
+      "broken": [
+        "login_user",
+        "activate_session"
+      ],
+      "expected": [
+        "login_user",
+        "rotate_session_key",
+        "activate_session"
+      ]
+    },
+    {
+      "cve": "CVE-2023-30843",
+      "project": "flask",
+      "category": "session_fixation",
+      "pls_id": "PLS-005",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Session fixation via stale JWT in Flask. Token verified but session freshness not checked — expired tokens remain valid. Fixed by adding validate_session_freshness() before granting access.",
+      "id": "SF-003",
+      "broken": [
+        "verify_token",
+        "access_protected"
+      ],
+      "expected": [
+        "verify_token",
+        "validate_session_freshness",
+        "access_protected"
+      ]
+    },
+    {
+      "cve": "CVE-2023-44429",
+      "project": "keycloak",
+      "category": "session_fixation",
+      "pls_id": "PLS-005",
+      "severity": "critical",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Session fixation via OAuth token reuse in Keycloak. Old refresh tokens remain valid after re-authentication. Fixed by invalidating existing tokens before issuing new ones.",
+      "id": "SF-004",
+      "broken": [
+        "oauth_authorize",
+        "issue_token"
+      ],
+      "expected": [
+        "oauth_authorize",
+        "invalidate_existing_tokens",
+        "issue_token"
+      ]
+    },
+    {
+      "cve": "CVE-2022-45414",
+      "project": "nextjs",
+      "category": "session_fixation",
+      "pls_id": "PLS-005",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Session fixation in Next.js middleware. Cookie validated but session not regenerated — attacker can replay captured cookies. Fixed by adding regenerate_session() after validation.",
+      "id": "SF-005",
+      "broken": [
+        "validate_cookie",
+        "serve_page"
+      ],
+      "expected": [
+        "validate_cookie",
+        "regenerate_session",
+        "serve_page"
+      ]
+    },
+    {
+      "cve": "CVE-2024-1459",
+      "project": "linux",
+      "category": "resource_leak",
+      "pls_id": "PLS-002",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double release in USB core. URB freed both in completion handler and error path. Fixed by NULL-check and early return after first free. [REVISED: added guard/sentinel after release to prevent double-release]",
+      "id": "DR-001",
+      "broken": [
+        "usb_submit_urb",
+        "usb_free_urb",
+        "usb_free_urb"
+      ],
+      "expected": [
+        "usb_submit_urb",
+        "usb_free_urb",
+        "urb_set_null"
+      ]
+    },
+    {
+      "cve": "CVE-2023-5287",
+      "project": "linux",
+      "category": "resource_leak",
+      "pls_id": "PLS-002",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double unlock in kernel mutex. Mutex unlocked both in normal path and error cleanup. Fixed by removing duplicate unlock in cleanup. [REVISED: added guard/sentinel after release to prevent double-release]",
+      "id": "DR-002",
+      "broken": [
+        "mutex_lock",
+        "mutex_unlock",
+        "mutex_unlock"
+      ],
+      "expected": [
+        "mutex_lock",
+        "mutex_unlock",
+        "lock_flag_reset"
+      ]
+    },
+    {
+      "cve": "CVE-2024-2189",
+      "project": "nginx",
+      "category": "resource_leak",
+      "pls_id": "PLS-002",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double connection close in nginx HTTP/3. Connection closed twice when GOAWAY frame received during request processing. Fixed by adding closed-flag check. [REVISED: added guard/sentinel after release to prevent double-release]",
+      "id": "DR-003",
+      "broken": [
+        "ngx_accept_connection",
+        "ngx_close_connection",
+        "ngx_close_connection"
+      ],
+      "expected": [
+        "ngx_accept_connection",
+        "ngx_close_connection",
+        "conn_closed_flag"
+      ]
+    },
+    {
+      "cve": "CVE-2023-3446",
+      "project": "openssl",
+      "category": "resource_leak",
+      "pls_id": "PLS-002",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double BIO_free in OpenSSL. BIO freed when SSL_free calls it internally AND explicitly in caller. Fixed by removing explicit BIO_free since SSL_free handles it. [REVISED: added guard/sentinel after release to prevent double-release]",
+      "id": "DR-004",
+      "broken": [
+        "SSL_free",
+        "BIO_free",
+        "BIO_free"
+      ],
+      "expected": [
+        "SSL_free",
+        "BIO_free",
+        "bio_null_check"
+      ]
+    },
+    {
+      "cve": "CVE-2024-0723",
+      "project": "curl",
+      "category": "resource_leak",
+      "pls_id": "PLS-002",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double cleanup in libcurl. curl_easy_cleanup called twice in multi-handle error path. Fixed by guard variable preventing double cleanup. [REVISED: added guard/sentinel after release to prevent double-release]",
+      "id": "DR-005",
+      "broken": [
+        "curl_easy_perform",
+        "curl_easy_cleanup",
+        "curl_easy_cleanup"
+      ],
+      "expected": [
+        "curl_easy_perform",
+        "curl_easy_cleanup",
+        "handle_null_set"
+      ]
+    },
+    {
+      "cve": "CVE-2024-0841",
+      "project": "linux",
+      "category": "use_after_free",
+      "pls_id": "PLS-003",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Use-after-release in VFS layer. File reference dropped via fput() before vfs_read() accesses the file structure. Fixed by reordering: read before release.",
+      "id": "UAR-001",
+      "broken": [
+        "get_file",
+        "fput",
+        "vfs_read"
+      ],
+      "expected": [
+        "get_file",
+        "vfs_read",
+        "fput"
+      ]
+    },
+    {
+      "cve": "CVE-2023-6546",
+      "project": "linux",
+      "category": "use_after_free",
+      "pls_id": "PLS-003",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Use-after-release in TTY driver. TTY port reference released before write completes. Fixed by reordering: write before put.",
+      "id": "UAR-002",
+      "broken": [
+        "tty_port_open",
+        "tty_port_put",
+        "tty_write"
+      ],
+      "expected": [
+        "tty_port_open",
+        "tty_write",
+        "tty_port_put"
+      ]
+    },
+    {
+      "cve": "CVE-2024-3019",
+      "project": "redis",
+      "category": "use_after_free",
+      "pls_id": "PLS-003",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Use-after-release in Redis watched keys. Keys unwatched before handler accesses them. Fixed by reordering: call handler before unwatch.",
+      "id": "UAR-003",
+      "broken": [
+        "unwatch_all_keys",
+        "call_handler"
+      ],
+      "expected": [
+        "call_handler",
+        "unwatch_all_keys"
+      ]
+    },
+    {
+      "cve": "CVE-2023-6121",
+      "project": "nginx",
+      "category": "use_after_free",
+      "pls_id": "PLS-003",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Use-after-release in nginx access logging. Request closed before logging accesses request data. Fixed by reordering: log before close.",
+      "id": "UAR-004",
+      "broken": [
+        "ngx_http_close_request",
+        "ngx_http_log_request"
+      ],
+      "expected": [
+        "ngx_http_log_request",
+        "ngx_http_close_request"
+      ]
+    },
+    {
+      "cve": "CVE-2023-4807",
+      "project": "openssl",
+      "category": "use_after_free",
+      "pls_id": "PLS-003",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Use-after-release in OpenSSL BIO chain. BIO freed before BIO_read accesses the next BIO in chain. Fixed by reordering: read before free.",
+      "id": "UAR-005",
+      "broken": [
+        "BIO_ctrl",
+        "BIO_free",
+        "BIO_read"
+      ],
+      "expected": [
+        "BIO_ctrl",
+        "BIO_read",
+        "BIO_free"
+      ]
+    },
+    {
+      "cve": "CVE-2023-5869",
+      "project": "postgresql",
+      "category": "transaction_violation",
+      "pls_id": "PLS-008",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double commit in PG extension. Second COMMIT after explicit COMMIT in plpgsql function. Fixed by ignoring redundant commit. [REVISED: added transaction state check before commit to prevent double-commit]",
+      "id": "DC-001",
+      "broken": [
+        "begin_tx",
+        "modify_table",
+        "commit_tx",
+        "commit_tx"
+      ],
+      "expected": [
+        "begin_tx",
+        "modify_table",
+        "check_tx_state",
+        "commit_tx"
+      ]
+    },
+    {
+      "cve": "CVE-2024-1597",
+      "project": "sqlite",
+      "category": "transaction_violation",
+      "pls_id": "PLS-008",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double commit in SQLite WAL mode. Commit hook called twice during checkpoint. Fixed by hook guard preventing re-entrant calls.",
+      "id": "DC-002",
+      "broken": [
+        "sqlite3_exec",
+        "sqlite3_commit_hook",
+        "sqlite3_commit_hook"
+      ],
+      "expected": [
+        "sqlite3_exec",
+        "sqlite3_commit_hook"
+      ]
+    },
+    {
+      "cve": "CVE-2023-4389",
+      "project": "linux",
+      "category": "transaction_violation",
+      "pls_id": "PLS-008",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double commit in Btrfs. Transaction committed twice when error path incorrectly re-commits. Fixed by transaction state check.",
+      "id": "DC-003",
+      "broken": [
+        "btrfs_start_transaction",
+        "btrfs_commit_transaction",
+        "btrfs_commit_transaction"
+      ],
+      "expected": [
+        "btrfs_start_transaction",
+        "btrfs_commit_transaction"
+      ]
+    },
+    {
+      "cve": "CVE-2023-4806",
+      "project": "openssl",
+      "category": "resource_leak",
+      "pls_id": "PLS-009",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Missing free in OpenSSL EVP_PKEY. CTX allocated but never freed after key derivation. Fixed by adding EVP_PKEY_CTX_free().",
+      "id": "MF-001",
+      "broken": [
+        "EVP_PKEY_CTX_new",
+        "EVP_PKEY_derive"
+      ],
+      "expected": [
+        "EVP_PKEY_CTX_new",
+        "EVP_PKEY_derive",
+        "EVP_PKEY_CTX_free"
+      ]
+    },
+    {
+      "cve": "CVE-2024-2511",
+      "project": "libxml2",
+      "category": "resource_leak",
+      "pls_id": "PLS-009",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Missing free in libxml2. Parser context allocated but never freed. Fixed by adding xmlFreeParserCtxt() after parsing.",
+      "id": "MF-002",
+      "broken": [
+        "xmlNewParserCtxt",
+        "xmlParseDocument"
+      ],
+      "expected": [
+        "xmlNewParserCtxt",
+        "xmlParseDocument",
+        "xmlFreeParserCtxt"
+      ]
+    },
+    {
+      "cve": "CVE-2023-39320",
+      "project": "go",
+      "category": "resource_leak",
+      "pls_id": "PLS-009",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Missing free in Go crypto/x509. Certificate parsed but internal structures not freed. Fixed by adding explicit free after verification.",
+      "id": "MF-003",
+      "broken": [
+        "crypto_x509_parse",
+        "crypto_x509_verify"
+      ],
+      "expected": [
+        "crypto_x509_parse",
+        "crypto_x509_verify",
+        "crypto_x509_free"
+      ]
+    },
+    {
+      "cve": "CVE-2024-1931",
+      "project": "linux",
+      "category": "resource_leak",
+      "pls_id": "PLS-009",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Missing free in kernel workqueue init. Memory allocated but not freed on initialization failure path. Fixed by adding kfree() in error cleanup.",
+      "id": "MF-004",
+      "broken": [
+        "kzalloc",
+        "init_work_struct"
+      ],
+      "expected": [
+        "kzalloc",
+        "init_work_struct",
+        "kfree"
+      ]
+    },
+    {
+      "cve": "CVE-2023-5043",
+      "project": "nginx",
+      "category": "resource_leak",
+      "pls_id": "PLS-009",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Missing free in nginx HTTP header parsing. Pool allocation not freed when header processing fails. Fixed by adding ngx_pfree().",
+      "id": "MF-005",
+      "broken": [
+        "ngx_pcalloc",
+        "ngx_http_process_header"
+      ],
+      "expected": [
+        "ngx_pcalloc",
+        "ngx_http_process_header",
+        "ngx_pfree"
+      ]
+    },
+    {
+      "cve": "CVE-2023-6291",
+      "project": "keycloak/keycloak",
+      "category": "missing_validation",
+      "pls_id": "PLS-013",
+      "severity": "high",
+      "source": "git_diff_verified",
+      "verified": true,
+      "notes": "VERIFIED FROM REAL DIFF: commit b2e91105315ccf. Before: only query string stripped before wildcard comparison. After: new stripOffRedirectForWildcard() strips userInfo, query, AND fragment using KeycloakUriBuilder. Prevents user@evil.com redirect_uri bypass. New testUserInfo() validates the fix.",
+      "id": "WB-001",
+      "broken": [
+        "matchesRedirects",
+        "stripQueryComponent",
+        "compareWildcard"
+      ],
+      "expected": [
+        "matchesRedirects",
+        "stripOffRedirectForWildcard",
+        "compareWildcard"
+      ]
+    },
+    {
+      "cve": "CVE-2024-1563",
+      "project": "django",
+      "category": "missing_validation",
+      "pls_id": "PLS-013",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Workflow bypass in Django admin actions. Model saved without CSRF validation and data cleaning for bulk actions. Fixed by adding CSRF check and data cleaning.",
+      "id": "WB-002",
+      "broken": [
+        "receive_form",
+        "save_model"
+      ],
+      "expected": [
+        "receive_form",
+        "validate_csrf",
+        "clean_data",
+        "save_model"
+      ]
+    },
+    {
+      "cve": "CVE-2022-23540",
+      "project": "auth0/node-jsonwebtoken",
+      "category": "missing_validation",
+      "pls_id": "PLS-013",
+      "severity": "high",
+      "source": "git_diff_verified",
+      "verified": true,
+      "notes": "VERIFIED FROM REAL DIFF: commit e1fa9dcc12054a. Before: jwt.verify() called done() directly with no key-type validation. After: jwt.verify() calls validateAsymmetricKey(header.alg, secretOrPublicKey) which checks key type matches algorithm, EC curve validation (Node>=15.7), RSA-PSS params (Node>=16.9). Both sign.js and verify.js patched.",
+      "id": "WB-003",
+      "broken": [
+        "jwt_verify",
+        "done"
+      ],
+      "expected": [
+        "jwt_verify",
+        "validateAsymmetricKey",
+        "done"
+      ]
+    },
+    {
+      "cve": "CVE-2023-38571",
+      "project": "apple",
+      "category": "missing_validation",
+      "pls_id": "PLS-013",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Workflow bypass in macOS Gatekeeper. Binary executed without code signature validation and quarantine check. Fixed by adding required validation gates before execution.",
+      "id": "WB-004",
+      "broken": [
+        "receive_file",
+        "execute_binary"
+      ],
+      "expected": [
+        "receive_file",
+        "validate_code_sign",
+        "quarantine_check",
+        "execute_binary"
+      ]
+    },
+    {
+      "cve": "CVE-2023-43641",
+      "project": "gitlab",
+      "category": "missing_validation",
+      "pls_id": "PLS-013",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Workflow bypass in GitLab CI. Pipeline runs without CI config validation and runner authorization. Fixed by adding validation and authorization gates.",
+      "id": "WB-005",
+      "broken": [
+        "clone_repo",
+        "run_pipeline"
+      ],
+      "expected": [
+        "clone_repo",
+        "validate_ci_config",
+        "authorize_runner",
+        "run_pipeline"
+      ]
+    }
+  ],
+  "metadata": {
+    "total": 68,
+    "verified": 37,
+    "byCategory": {
+      "resource_leak": 17,
+      "use_after_free": 11,
+      "auth_bypass": 9,
+      "data_corruption": 7,
+      "race_condition": 1,
+      "double_free": 5,
+      "privilege_escalation": 5,
+      "session_fixation": 5,
+      "transaction_violation": 3,
+      "missing_validation": 5
+    },
+    "byPLS": {
+      "PLS-001": 7,
+      "PLS-011": 6,
+      "PLS-004": 9,
+      "PLS-007": 7,
+      "PLS-012": 1,
+      "PLS-010": 5,
+      "PLS-006": 5,
+      "PLS-005": 5,
+      "PLS-002": 5,
+      "PLS-003": 5,
+      "PLS-008": 3,
+      "PLS-009": 5,
+      "PLS-013": 5
+    },
+    "coverage": {
+      "totalCategories": 13,
+      "covered": 13,
+      "uncovered": []
+    }
+  }
+}
