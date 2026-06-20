@@ -1494,24 +1494,24 @@
       ]
     },
     {
-      "cve": "CVE-2023-5072",
-      "project": "keycloak",
+      "cve": "CVE-2023-6291",
+      "project": "keycloak/keycloak",
       "category": "missing_validation",
       "pls_id": "PLS-013",
       "severity": "high",
-      "source": "to_be_verified",
-      "verified": false,
-      "notes": "Workflow bypass in OAuth authorization code flow. Token issued without validating redirect_uri and state parameter. Fixed by adding validation steps before token issuance.",
+      "source": "github_advisory",
+      "verified": true,
+      "notes": "REAL CVE: redirect_uri validation bypass in Keycloak <23.0.3. verifyRedirectUri only stripped query component, allowing user-info smuggling (https://keycloak.org@evil.com bypassed wildcard check). Fix: added stripOffRedirectForWildcard() which also strips userInfo and fragment. Fix commit: keycloak/keycloak@b2e91105315ccf2c1df549b4f6c5948322cbfd1b",
       "id": "WB-001",
       "broken": [
         "oauth_redirect",
-        "issue_token"
+        "strip_query",
+        "validate_wildcard"
       ],
       "expected": [
         "oauth_redirect",
-        "validate_redirect_uri",
-        "validate_state",
-        "issue_token"
+        "strip_userinfo_query_fragment",
+        "validate_wildcard"
       ]
     },
     {
@@ -1602,7 +1602,7 @@
   ],
   "metadata": {
     "total": 68,
-    "verified": 26,
+    "verified": 27,
     "byCategory": {
       "resource_leak": 17,
       "use_after_free": 11,
