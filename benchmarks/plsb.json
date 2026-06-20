@@ -801,25 +801,25 @@
       ]
     },
     {
-      "cve": "CVE-2023-24329",
-      "project": "python-cpython",
+      "cve": "CVE-2023-27537",
+      "project": "curl/curl",
       "category": "double_free",
       "pls_id": "PLS-010",
       "severity": "medium",
-      "source": "to_be_verified",
-      "verified": false,
-      "notes": "Double free in Python urllib.parse. Memory freed in both parse cleanup and exception handler. Fixed by NULL-check before second free. Commit: python/cpython@e4f5g6h",
+      "source": "github_advisory",
+      "verified": true,
+      "notes": "REAL CVE: curl HSTS double-free when sharing HSTS data across threads without mutex protection (libcurl 7.88.0-7.88.1). Fix: added acquire_mutex_lock()/release_mutex_lock() around cleanup to prevent double-free. Fix: curl/curl@dca4cdf071be. CWE-415",
       "id": "DF-005",
       "broken": [
-        "urllib_parse_url",
-        "PyMem_Free",
-        "pyurl_cleanup",
-        "PyMem_Free"
+        "share_hsts_data",
+        "cleanup_handle",
+        "cleanup_handle"
       ],
       "expected": [
-        "urllib_parse_url",
-        "PyMem_Free",
-        "pyurl_cleanup"
+        "share_hsts_data",
+        "acquire_mutex_lock",
+        "cleanup_handle",
+        "release_mutex_lock"
       ]
     },
     {
@@ -1611,7 +1611,7 @@
   ],
   "metadata": {
     "total": 68,
-    "verified": 33,
+    "verified": 34,
     "byCategory": {
       "resource_leak": 17,
       "use_after_free": 11,
