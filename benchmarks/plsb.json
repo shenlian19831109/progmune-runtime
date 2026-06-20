@@ -1003,23 +1003,25 @@
       ]
     },
     {
-      "cve": "CVE-2023-46850",
+      "cve": "CVE-2023-39418",
       "project": "postgresql",
       "category": "privilege_escalation",
       "pls_id": "PLS-006",
-      "severity": "high",
-      "source": "to_be_verified",
-      "verified": false,
-      "notes": "Row-level security bypass in PostgreSQL. SECURITY INVOKER function accesses tables without enforcing row-level policies. Fixed by adding check_row_security() before table access.",
+      "severity": "medium",
+      "source": "github_advisory",
+      "verified": true,
+      "notes": "REAL CVE: PostgreSQL MERGE row security bypass. MERGE checked INSERT policies but failed to test new rows against UPDATE/SELECT row security policies, enabling policy bypass. Fix: added check_update_select_policy() before applying rows. Fix: postgresql@cb2ae5741f2458a474ed3c31458d242e678ff229",
       "id": "PE-005",
       "broken": [
-        "exec_sql",
-        "access_table"
+        "execute_merge",
+        "check_insert_policy",
+        "apply_row"
       ],
       "expected": [
-        "exec_sql",
-        "check_row_security",
-        "access_table"
+        "execute_merge",
+        "check_insert_policy",
+        "check_update_select_policy",
+        "apply_row"
       ]
     },
     {
@@ -1602,7 +1604,7 @@
   ],
   "metadata": {
     "total": 68,
-    "verified": 28,
+    "verified": 29,
     "byCategory": {
       "resource_leak": 17,
       "use_after_free": 11,
