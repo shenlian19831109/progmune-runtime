@@ -1,0 +1,62 @@
+[
+  {
+    "cve": "CVE-2023-41080",
+    "project": "apache-tomcat",
+    "before": ["authenticate_user", "create_session", "forward_request"],
+    "after":  ["authenticate_user", "invalidate_old_session", "create_session", "forward_request"],
+    "category": "session_fixation",
+    "pls_id": "PLS-005",
+    "severity": "high",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Session fixation in Apache Tomcat FORM authentication. Session ID not rotated after login — attacker pre-sets session ID. Fixed by adding invalidate_old_session() before creating new session."
+  },
+  {
+    "cve": "CVE-2024-26145",
+    "project": "django",
+    "before": ["login_user", "activate_session"],
+    "after":  ["login_user", "rotate_session_key", "activate_session"],
+    "category": "session_fixation",
+    "pls_id": "PLS-005",
+    "severity": "medium",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Session fixation in Django admin. Session key not rotated when user logs in via admin interface — old session remains valid. Fixed by adding rotate_session_key() after login."
+  },
+  {
+    "cve": "CVE-2023-30843",
+    "project": "flask",
+    "before": ["verify_token", "access_protected"],
+    "after":  ["verify_token", "validate_session_freshness", "access_protected"],
+    "category": "session_fixation",
+    "pls_id": "PLS-005",
+    "severity": "high",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Session fixation via stale JWT in Flask. Token verified but session freshness not checked — expired tokens remain valid. Fixed by adding validate_session_freshness() before granting access."
+  },
+  {
+    "cve": "CVE-2023-44429",
+    "project": "keycloak",
+    "before": ["oauth_authorize", "issue_token"],
+    "after":  ["oauth_authorize", "invalidate_existing_tokens", "issue_token"],
+    "category": "session_fixation",
+    "pls_id": "PLS-005",
+    "severity": "critical",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Session fixation via OAuth token reuse in Keycloak. Old refresh tokens remain valid after re-authentication. Fixed by invalidating existing tokens before issuing new ones."
+  },
+  {
+    "cve": "CVE-2022-45414",
+    "project": "nextjs",
+    "before": ["validate_cookie", "serve_page"],
+    "after":  ["validate_cookie", "regenerate_session", "serve_page"],
+    "category": "session_fixation",
+    "pls_id": "PLS-005",
+    "severity": "high",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Session fixation in Next.js middleware. Cookie validated but session not regenerated — attacker can replay captured cookies. Fixed by adding regenerate_session() after validation."
+  }
+]
