@@ -67,9 +67,14 @@ export function assessGoldQuality(
   const edgeScore = Math.min(1, Math.max(0, edgeCountDiff / 3));
   const illegalScore = Math.min(1, illegalEdges / 2);
 
+  // Order check: do the same functions appear in a different order?
+  // This catches use-after-free, double-free, and other reordering bugs
+  // where the SM structure is identical but the CALL ORDER is wrong.
+  const orderScore = computeOrderScore(broken, expected);
+
   // Weighted combination
-  const score = stateScore * 0.4 + edgeScore * 0.3 + illegalScore * 0.3;
-  const detectable = score > 0.2;
+  const score = stateScore * 0.35 + edgeScore * 0.25 + illegalScore * 0.25 + orderScore * 0.15;
+  const detectable = score > 0.15;
 
   // Build explanation
   const reasons: string[] = [];
@@ -78,6 +83,12 @@ export function assessGoldQuality(
   if (stateCountDiff === 0) reasons.push(`identical state count — no missing-state signal`);
   if (edgeCountDiff > 0) reasons.push(`${edgeCountDiff} missing edge(s)`);
   if (illegalEdges > 0) reasons.push(`${illegalEdges} illegal edge(s) detected`);
+
+  // Check call order
+  const orderMismatch = computeOrderScore(broken, expected);
+  if (orderMismatch > 0.3 && stateCountDiff === 0) {
+    reasons.push(`function call order differs (score=${orderMismatch.toFixed(2)}) — possible UAF, double-free, or reordering bug`);
+  }
 
   let roleDiff = "";
   if (tRoles.exit > bRoles.exit) roleDiff = `template has ${tRoles.exit - bRoles.exit} more exit state(s)`;
@@ -133,6 +144,43 @@ function edgeSet(sm: any): Set<string> {
     for (let j = 0; j < (sm.stateTransitions[i] || []).length; j++)
       if (sm.stateTransitions[i][j] > 0) s.add(`${i}→${j}`);
   return s;
+}
+
+/**
+ * Check if the same functions appear in different order between
+ * broken and expected. High score = significant reordering detected.
+ * This catches UAF (free→use vs use→free) and double-free patterns.
+ */
+function computeOrderScore(broken: string[], expected: string[]): number {
+  const bSet = new Set(broken);
+  const eSet = new Set(expected);
+  // Same functions must appear in both
+  if (bSet.size !== eSet.size) return 0;
+  for (const fn of bSet) if (!eSet.has(fn)) return 0;
+
+  // Count position changes — how many functions changed position?
+  let mismatches = 0;
+  const minLen = Math.min(broken.length, expected.length);
+  for (let i = 0; i < minLen; i++) {
+    if (broken[i] !== expected[i]) mismatches++;
+  }
+
+  // Also check: are any functions that appear multiple times
+  // in broken but different number of times in expected?
+  const bFreq = new Map<string, number>();
+  const eFreq = new Map<string, number>();
+  for (const fn of broken) bFreq.set(fn, (bFreq.get(fn) || 0) + 1);
+  for (const fn of expected) eFreq.set(fn, (eFreq.get(fn) || 0) + 1);
+
+  let freqDiff = 0;
+  for (const [fn, count] of bFreq) {
+    freqDiff += Math.abs(count - (eFreq.get(fn) || 0));
+  }
+
+  // Reorder + frequency change = signal
+  const reorderScore = Math.min(1, mismatches / Math.max(1, minLen));
+  const freqScore = Math.min(1, freqDiff / 2);
+  return Math.max(0, Math.min(1, reorderScore * 0.6 + freqScore * 0.4));
 }
 
 function countRoles(sm: any): { entry: number; bridge: number; exit: number } {

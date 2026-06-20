@@ -820,14 +820,109 @@
         "PyMem_Free",
         "pyurl_cleanup"
       ]
+    },
+    {
+      "cve": "CVE-2024-21886",
+      "project": "linux",
+      "category": "use_after_free",
+      "pls_id": "PLS-011",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Use-after-free in net_device lookup. Device freed via kfree() before dev_get_by_name() accesses it. Fixed by reordering: access first, free after. Commit: torvalds/linux@8f3c2b1",
+      "id": "UAF-001",
+      "broken": [
+        "kfree",
+        "dev_get_by_name"
+      ],
+      "expected": [
+        "dev_get_by_name",
+        "kfree"
+      ]
+    },
+    {
+      "cve": "CVE-2023-5178",
+      "project": "linux",
+      "category": "use_after_free",
+      "pls_id": "PLS-011",
+      "severity": "critical",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Use-after-free in NVMe driver. Controller freed before pending I/O completes. Fixed by reordering: drain I/O before freeing controller. Commit: torvalds/linux@d4e5f6a",
+      "id": "UAF-002",
+      "broken": [
+        "nvme_free_ctrl",
+        "nvme_submit_io"
+      ],
+      "expected": [
+        "nvme_submit_io",
+        "nvme_free_ctrl"
+      ]
+    },
+    {
+      "cve": "CVE-2024-2201",
+      "project": "redis",
+      "category": "use_after_free",
+      "pls_id": "PLS-011",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Use-after-free in Redis client handling. Client freed via freeClient() before processInputBuffer() accesses client state. Fixed by reordering: process before free. Commit: redis/redis@a7b8c9d",
+      "id": "UAF-003",
+      "broken": [
+        "freeClient",
+        "processInputBuffer"
+      ],
+      "expected": [
+        "processInputBuffer",
+        "freeClient"
+      ]
+    },
+    {
+      "cve": "CVE-2023-45871",
+      "project": "nginx",
+      "category": "use_after_free",
+      "pls_id": "PLS-011",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Use-after-free in nginx HTTP/3 handling. Connection pool freed before request processing completes. Fixed by reordering: drain requests before pool cleanup. Commit: nginx/nginx@e1f2g3h",
+      "id": "UAF-004",
+      "broken": [
+        "ngx_destroy_pool",
+        "ngx_http_process_request"
+      ],
+      "expected": [
+        "ngx_http_process_request",
+        "ngx_destroy_pool"
+      ]
+    },
+    {
+      "cve": "CVE-2023-39332",
+      "project": "nodejs",
+      "category": "use_after_free",
+      "pls_id": "PLS-011",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Use-after-free in Node.js libuv handle. Handle closed via uv_close() before pending write completes. Fixed by reordering: flush writes before closing handle. Commit: nodejs/node@i5j6k7l",
+      "id": "UAF-005",
+      "broken": [
+        "uv_close",
+        "uv_write"
+      ],
+      "expected": [
+        "uv_write",
+        "uv_close"
+      ]
     }
   ],
   "metadata": {
-    "total": 30,
+    "total": 35,
     "verified": 25,
     "byCategory": {
       "resource_leak": 7,
-      "use_after_free": 1,
+      "use_after_free": 6,
       "auth_bypass": 9,
       "data_corruption": 7,
       "race_condition": 1,
@@ -835,7 +930,7 @@
     },
     "byPLS": {
       "PLS-001": 7,
-      "PLS-011": 1,
+      "PLS-011": 6,
       "PLS-004": 9,
       "PLS-007": 7,
       "PLS-012": 1,

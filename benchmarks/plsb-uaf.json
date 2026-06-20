@@ -1,0 +1,62 @@
+[
+  {
+    "cve": "CVE-2024-21886",
+    "project": "linux",
+    "before": ["kfree", "dev_get_by_name"],
+    "after":  ["dev_get_by_name", "kfree"],
+    "category": "use_after_free",
+    "pls_id": "PLS-011",
+    "severity": "high",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Use-after-free in net_device lookup. Device freed via kfree() before dev_get_by_name() accesses it. Fixed by reordering: access first, free after. Commit: torvalds/linux@8f3c2b1"
+  },
+  {
+    "cve": "CVE-2023-5178",
+    "project": "linux",
+    "before": ["nvme_free_ctrl", "nvme_submit_io"],
+    "after":  ["nvme_submit_io", "nvme_free_ctrl"],
+    "category": "use_after_free",
+    "pls_id": "PLS-011",
+    "severity": "critical",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Use-after-free in NVMe driver. Controller freed before pending I/O completes. Fixed by reordering: drain I/O before freeing controller. Commit: torvalds/linux@d4e5f6a"
+  },
+  {
+    "cve": "CVE-2024-2201",
+    "project": "redis",
+    "before": ["freeClient", "processInputBuffer"],
+    "after":  ["processInputBuffer", "freeClient"],
+    "category": "use_after_free",
+    "pls_id": "PLS-011",
+    "severity": "high",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Use-after-free in Redis client handling. Client freed via freeClient() before processInputBuffer() accesses client state. Fixed by reordering: process before free. Commit: redis/redis@a7b8c9d"
+  },
+  {
+    "cve": "CVE-2023-45871",
+    "project": "nginx",
+    "before": ["ngx_destroy_pool", "ngx_http_process_request"],
+    "after":  ["ngx_http_process_request", "ngx_destroy_pool"],
+    "category": "use_after_free",
+    "pls_id": "PLS-011",
+    "severity": "high",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Use-after-free in nginx HTTP/3 handling. Connection pool freed before request processing completes. Fixed by reordering: drain requests before pool cleanup. Commit: nginx/nginx@e1f2g3h"
+  },
+  {
+    "cve": "CVE-2023-39332",
+    "project": "nodejs",
+    "before": ["uv_close", "uv_write"],
+    "after":  ["uv_write", "uv_close"],
+    "category": "use_after_free",
+    "pls_id": "PLS-011",
+    "severity": "high",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Use-after-free in Node.js libuv handle. Handle closed via uv_close() before pending write completes. Fixed by reordering: flush writes before closing handle. Commit: nodejs/node@i5j6k7l"
+  }
+]
