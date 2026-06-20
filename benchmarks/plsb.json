@@ -1061,18 +1061,18 @@
       "severity": "medium",
       "source": "advisory_verified",
       "verified": true,
-      "notes": "CVE-2013-2067: FormAuthenticator session fixation — attacker injects request into another session during login. Fix adds session validation + invalidation.",
+      "notes": "CVE-2013-2067: Tomcat FormAuthenticator did not validate session relationship before injecting request during login. Fix adds validate_session_relationship() + changeSessionId() (r1408044).",
       "id": "SF-001",
       "broken": [
-        "authenticate_user",
-        "create_session",
+        "FormAuthenticator_authenticate",
+        "createSession",
         "forward_request"
       ],
       "expected": [
-        "authenticate_user",
+        "FormAuthenticator_authenticate",
         "validate_session_relationship",
-        "invalidate_old_session",
-        "create_session",
+        "changeSessionId",
+        "createSession",
         "forward_request"
       ]
     },
