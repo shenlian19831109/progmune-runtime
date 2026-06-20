@@ -1556,20 +1556,18 @@
       "category": "missing_validation",
       "pls_id": "PLS-013",
       "severity": "high",
-      "source": "github_advisory",
+      "source": "git_diff_verified",
       "verified": true,
-      "notes": "REAL CVE: JWT alg:none bypass in jsonwebtoken <=8.5.1. jwt.verify() defaulted to none algorithm when no algorithms specified and falsy secret passed. Fix: added validate_asymmetric_key(), removed none default, added explicit algorithm verification. Fix commit: auth0/node-jsonwebtoken@e1fa9dcc12054a8681db4e6373da1b30cf7016e3",
+      "notes": "VERIFIED FROM REAL DIFF: commit e1fa9dcc12054a. Before: jwt.verify() called done() directly with no key-type validation. After: jwt.verify() calls validateAsymmetricKey(header.alg, secretOrPublicKey) which checks key type matches algorithm, EC curve validation (Node>=15.7), RSA-PSS params (Node>=16.9). Both sign.js and verify.js patched.",
       "id": "WB-003",
       "broken": [
         "jwt_verify",
-        "return_payload"
+        "done"
       ],
       "expected": [
         "jwt_verify",
-        "validate_asymmetric_key",
-        "verify_algorithm_not_none",
-        "verify_signature",
-        "return_payload"
+        "validateAsymmetricKey",
+        "done"
       ]
     },
     {
