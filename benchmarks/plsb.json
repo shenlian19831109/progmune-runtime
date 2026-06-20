@@ -984,22 +984,24 @@
     },
     {
       "cve": "CVE-2024-21626",
-      "project": "docker",
+      "project": "opencontainers/runc",
       "category": "privilege_escalation",
       "pls_id": "PLS-006",
-      "severity": "high",
-      "source": "to_be_verified",
-      "verified": false,
-      "notes": "Container breakout via runc WORKDIR. Special file descriptors leak into container allowing host filesystem escape. Fixed by adding masked path validation before file operations.",
+      "severity": "critical",
+      "source": "github_advisory",
+      "verified": true,
+      "notes": "REAL CVE: runc container breakout via file descriptor leak. Internal FDs leaked to container process, allowing /proc/self/fd/ path traversal to host filesystem. Fix: mark all non-stdio FDs O_CLOEXEC before spawn, close internal FDs before execve, verify cwd stays inside container. Fix: opencontainers/runc@02120488a4c0f. GHSA-xr7r-f8xq-vfvv",
       "id": "PE-004",
       "broken": [
         "runc_create_container",
-        "set_special_file"
+        "spawn_init_process"
       ],
       "expected": [
         "runc_create_container",
-        "validate_masked_paths",
-        "set_special_file"
+        "mark_fds_cloexec",
+        "close_internal_fds",
+        "verify_cwd_in_container",
+        "spawn_init_process"
       ]
     },
     {
@@ -1604,7 +1606,7 @@
   ],
   "metadata": {
     "total": 68,
-    "verified": 29,
+    "verified": 30,
     "byCategory": {
       "resource_leak": 17,
       "use_after_free": 11,
