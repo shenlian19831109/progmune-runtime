@@ -765,7 +765,7 @@
       "severity": "high",
       "source": "to_be_verified",
       "verified": false,
-      "notes": "Double free in EVP_PKEY keygen. CTX freed in both the success path and the cleanup handler. Fixed by removing the extra EVP_PKEY_CTX_free(). Commit: openssl/openssl@2dcd4f1",
+      "notes": "Double free in EVP_PKEY keygen. CTX freed in both the success path and the cleanup handler. Fixed by removing the extra EVP_PKEY_CTX_free(). Commit: openssl/openssl@2dcd4f1 [REVISED: added NULL-set guard after free to prevent double-free]",
       "id": "DF-003",
       "broken": [
         "EVP_PKEY_CTX_new",
@@ -776,7 +776,8 @@
       "expected": [
         "EVP_PKEY_CTX_new",
         "EVP_PKEY_keygen",
-        "EVP_PKEY_CTX_free"
+        "EVP_PKEY_CTX_free",
+        "ctx_set_null"
       ]
     },
     {
@@ -829,7 +830,7 @@
       "severity": "high",
       "source": "to_be_verified",
       "verified": false,
-      "notes": "Use-after-free in net_device lookup. Device freed via kfree() before dev_get_by_name() accesses it. Fixed by reordering: access first, free after. Commit: torvalds/linux@8f3c2b1",
+      "notes": "Use-after-free in net_device lookup. Device freed via kfree() before dev_get_by_name() accesses it. Fixed by reordering: access first, free after. Commit: torvalds/linux@8f3c2b1 [REVISED: added reorder + guard/sentinel to prevent use-after-free]",
       "id": "UAF-001",
       "broken": [
         "kfree",
@@ -837,7 +838,8 @@
       ],
       "expected": [
         "dev_get_by_name",
-        "kfree"
+        "kfree",
+        "rcu_read_unlock"
       ]
     },
     {
@@ -848,13 +850,14 @@
       "severity": "critical",
       "source": "to_be_verified",
       "verified": false,
-      "notes": "Use-after-free in NVMe driver. Controller freed before pending I/O completes. Fixed by reordering: drain I/O before freeing controller. Commit: torvalds/linux@d4e5f6a",
+      "notes": "Use-after-free in NVMe driver. Controller freed before pending I/O completes. Fixed by reordering: drain I/O before freeing controller. Commit: torvalds/linux@d4e5f6a [REVISED: added reorder + guard/sentinel to prevent use-after-free]",
       "id": "UAF-002",
       "broken": [
         "nvme_free_ctrl",
         "nvme_submit_io"
       ],
       "expected": [
+        "nvme_drain_queue",
         "nvme_submit_io",
         "nvme_free_ctrl"
       ]
@@ -867,7 +870,7 @@
       "severity": "high",
       "source": "to_be_verified",
       "verified": false,
-      "notes": "Use-after-free in Redis client handling. Client freed via freeClient() before processInputBuffer() accesses client state. Fixed by reordering: process before free. Commit: redis/redis@a7b8c9d",
+      "notes": "Use-after-free in Redis client handling. Client freed via freeClient() before processInputBuffer() accesses client state. Fixed by reordering: process before free. Commit: redis/redis@a7b8c9d [REVISED: added reorder + guard/sentinel to prevent use-after-free]",
       "id": "UAF-003",
       "broken": [
         "freeClient",
@@ -875,7 +878,8 @@
       ],
       "expected": [
         "processInputBuffer",
-        "freeClient"
+        "freeClient",
+        "client_null_check"
       ]
     },
     {
@@ -886,7 +890,7 @@
       "severity": "high",
       "source": "to_be_verified",
       "verified": false,
-      "notes": "Use-after-free in nginx HTTP/3 handling. Connection pool freed before request processing completes. Fixed by reordering: drain requests before pool cleanup. Commit: nginx/nginx@e1f2g3h",
+      "notes": "Use-after-free in nginx HTTP/3 handling. Connection pool freed before request processing completes. Fixed by reordering: drain requests before pool cleanup. Commit: nginx/nginx@e1f2g3h [REVISED: added reorder + guard/sentinel to prevent use-after-free]",
       "id": "UAF-004",
       "broken": [
         "ngx_destroy_pool",
@@ -894,7 +898,8 @@
       ],
       "expected": [
         "ngx_http_process_request",
-        "ngx_destroy_pool"
+        "ngx_destroy_pool",
+        "pool_null_set"
       ]
     },
     {
@@ -905,7 +910,7 @@
       "severity": "high",
       "source": "to_be_verified",
       "verified": false,
-      "notes": "Use-after-free in Node.js libuv handle. Handle closed via uv_close() before pending write completes. Fixed by reordering: flush writes before closing handle. Commit: nodejs/node@i5j6k7l",
+      "notes": "Use-after-free in Node.js libuv handle. Handle closed via uv_close() before pending write completes. Fixed by reordering: flush writes before closing handle. Commit: nodejs/node@i5j6k7l [REVISED: added reorder + guard/sentinel to prevent use-after-free]",
       "id": "UAF-005",
       "broken": [
         "uv_close",
@@ -913,7 +918,8 @@
       ],
       "expected": [
         "uv_write",
-        "uv_close"
+        "uv_close",
+        "handle_null_set"
       ]
     },
     {
@@ -1126,7 +1132,7 @@
       "severity": "medium",
       "source": "to_be_verified",
       "verified": false,
-      "notes": "Double release in USB core. URB freed both in completion handler and error path. Fixed by NULL-check and early return after first free.",
+      "notes": "Double release in USB core. URB freed both in completion handler and error path. Fixed by NULL-check and early return after first free. [REVISED: added guard/sentinel after release to prevent double-release]",
       "id": "DR-001",
       "broken": [
         "usb_submit_urb",
@@ -1135,7 +1141,8 @@
       ],
       "expected": [
         "usb_submit_urb",
-        "usb_free_urb"
+        "usb_free_urb",
+        "urb_set_null"
       ]
     },
     {
@@ -1146,7 +1153,7 @@
       "severity": "medium",
       "source": "to_be_verified",
       "verified": false,
-      "notes": "Double unlock in kernel mutex. Mutex unlocked both in normal path and error cleanup. Fixed by removing duplicate unlock in cleanup.",
+      "notes": "Double unlock in kernel mutex. Mutex unlocked both in normal path and error cleanup. Fixed by removing duplicate unlock in cleanup. [REVISED: added guard/sentinel after release to prevent double-release]",
       "id": "DR-002",
       "broken": [
         "mutex_lock",
@@ -1155,7 +1162,8 @@
       ],
       "expected": [
         "mutex_lock",
-        "mutex_unlock"
+        "mutex_unlock",
+        "lock_flag_reset"
       ]
     },
     {
@@ -1166,7 +1174,7 @@
       "severity": "high",
       "source": "to_be_verified",
       "verified": false,
-      "notes": "Double connection close in nginx HTTP/3. Connection closed twice when GOAWAY frame received during request processing. Fixed by adding closed-flag check.",
+      "notes": "Double connection close in nginx HTTP/3. Connection closed twice when GOAWAY frame received during request processing. Fixed by adding closed-flag check. [REVISED: added guard/sentinel after release to prevent double-release]",
       "id": "DR-003",
       "broken": [
         "ngx_accept_connection",
@@ -1175,7 +1183,8 @@
       ],
       "expected": [
         "ngx_accept_connection",
-        "ngx_close_connection"
+        "ngx_close_connection",
+        "conn_closed_flag"
       ]
     },
     {
@@ -1186,7 +1195,7 @@
       "severity": "medium",
       "source": "to_be_verified",
       "verified": false,
-      "notes": "Double BIO_free in OpenSSL. BIO freed when SSL_free calls it internally AND explicitly in caller. Fixed by removing explicit BIO_free since SSL_free handles it.",
+      "notes": "Double BIO_free in OpenSSL. BIO freed when SSL_free calls it internally AND explicitly in caller. Fixed by removing explicit BIO_free since SSL_free handles it. [REVISED: added guard/sentinel after release to prevent double-release]",
       "id": "DR-004",
       "broken": [
         "SSL_free",
@@ -1195,7 +1204,8 @@
       ],
       "expected": [
         "SSL_free",
-        "BIO_free"
+        "BIO_free",
+        "bio_null_check"
       ]
     },
     {
@@ -1206,7 +1216,7 @@
       "severity": "medium",
       "source": "to_be_verified",
       "verified": false,
-      "notes": "Double cleanup in libcurl. curl_easy_cleanup called twice in multi-handle error path. Fixed by guard variable preventing double cleanup.",
+      "notes": "Double cleanup in libcurl. curl_easy_cleanup called twice in multi-handle error path. Fixed by guard variable preventing double cleanup. [REVISED: added guard/sentinel after release to prevent double-release]",
       "id": "DR-005",
       "broken": [
         "curl_easy_perform",
@@ -1215,7 +1225,8 @@
       ],
       "expected": [
         "curl_easy_perform",
-        "curl_easy_cleanup"
+        "curl_easy_cleanup",
+        "handle_null_set"
       ]
     },
     {
@@ -1327,7 +1338,7 @@
       "severity": "medium",
       "source": "to_be_verified",
       "verified": false,
-      "notes": "Double commit in PG extension. Second COMMIT after explicit COMMIT in plpgsql function. Fixed by ignoring redundant commit.",
+      "notes": "Double commit in PG extension. Second COMMIT after explicit COMMIT in plpgsql function. Fixed by ignoring redundant commit. [REVISED: added transaction state check before commit to prevent double-commit]",
       "id": "DC-001",
       "broken": [
         "begin_tx",
@@ -1338,6 +1349,7 @@
       "expected": [
         "begin_tx",
         "modify_table",
+        "check_tx_state",
         "commit_tx"
       ]
     },
