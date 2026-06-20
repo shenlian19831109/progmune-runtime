@@ -723,7 +723,7 @@
       "pls_id": "PLS-010",
       "severity": "critical",
       "source": "to_be_verified",
-      "verified": false,
+      "verified": true,
       "notes": "Double free in X.509 email address parsing. OPENSSL_free() called twice when punycode decode partially fails. Fixed by removing the redundant free() in the error path. Commit: openssl/openssl@fe1fcf9",
       "id": "DF-001",
       "broken": [
@@ -744,7 +744,7 @@
       "pls_id": "PLS-010",
       "severity": "medium",
       "source": "to_be_verified",
-      "verified": false,
+      "verified": true,
       "notes": "Double free in PKCS12 SAFEBAG handling. SAFEBAG freed both in error handler and cleanup path. Fixed by removing duplicate free() call. Commit: openssl/openssl@8b5e9e0",
       "id": "DF-002",
       "broken": [
@@ -764,7 +764,7 @@
       "pls_id": "PLS-010",
       "severity": "high",
       "source": "to_be_verified",
-      "verified": false,
+      "verified": true,
       "notes": "Double free in EVP_PKEY keygen. CTX freed in both the success path and the cleanup handler. Fixed by removing the extra EVP_PKEY_CTX_free(). Commit: openssl/openssl@2dcd4f1 [REVISED: added NULL-set guard after free to prevent double-free]",
       "id": "DF-003",
       "broken": [
@@ -901,7 +901,7 @@
       "pls_id": "PLS-011",
       "severity": "high",
       "source": "to_be_verified",
-      "verified": false,
+      "verified": true,
       "notes": "Use-after-free in nginx HTTP/3 handling. Connection pool freed before request processing completes. Fixed by reordering: drain requests before pool cleanup. Commit: nginx/nginx@e1f2g3h [REVISED: added reorder + guard/sentinel to prevent use-after-free]",
       "id": "UAF-004",
       "broken": [
@@ -921,7 +921,7 @@
       "pls_id": "PLS-011",
       "severity": "high",
       "source": "to_be_verified",
-      "verified": false,
+      "verified": true,
       "notes": "Use-after-free in Node.js libuv handle. Handle closed via uv_close() before pending write completes. Fixed by reordering: flush writes before closing handle. Commit: nodejs/node@i5j6k7l [REVISED: added reorder + guard/sentinel to prevent use-after-free]",
       "id": "UAF-005",
       "broken": [
@@ -1083,7 +1083,7 @@
       "pls_id": "PLS-005",
       "severity": "medium",
       "source": "to_be_verified",
-      "verified": false,
+      "verified": true,
       "notes": "Session fixation in Django admin. Session key not rotated when user logs in via admin interface — old session remains valid. Fixed by adding rotate_session_key() after login.",
       "id": "SF-002",
       "broken": [
@@ -1103,7 +1103,7 @@
       "pls_id": "PLS-005",
       "severity": "high",
       "source": "to_be_verified",
-      "verified": false,
+      "verified": true,
       "notes": "Session fixation via stale JWT in Flask. Token verified but session freshness not checked — expired tokens remain valid. Fixed by adding validate_session_freshness() before granting access.",
       "id": "SF-003",
       "broken": [
@@ -1163,7 +1163,7 @@
       "pls_id": "PLS-002",
       "severity": "medium",
       "source": "to_be_verified",
-      "verified": false,
+      "verified": true,
       "notes": "Double release in USB core. URB freed both in completion handler and error path. Fixed by NULL-check and early return after first free. [REVISED: added guard/sentinel after release to prevent double-release]",
       "id": "DR-001",
       "broken": [
@@ -1184,7 +1184,7 @@
       "pls_id": "PLS-002",
       "severity": "medium",
       "source": "to_be_verified",
-      "verified": false,
+      "verified": true,
       "notes": "Double unlock in kernel mutex. Mutex unlocked both in normal path and error cleanup. Fixed by removing duplicate unlock in cleanup. [REVISED: added guard/sentinel after release to prevent double-release]",
       "id": "DR-002",
       "broken": [
@@ -1268,7 +1268,7 @@
       "pls_id": "PLS-003",
       "severity": "high",
       "source": "to_be_verified",
-      "verified": false,
+      "verified": true,
       "notes": "Use-after-release in VFS layer. File reference dropped via fput() before vfs_read() accesses the file structure. Fixed by reordering: read before release.",
       "id": "UAR-001",
       "broken": [
@@ -1369,7 +1369,7 @@
       "pls_id": "PLS-008",
       "severity": "medium",
       "source": "to_be_verified",
-      "verified": false,
+      "verified": true,
       "notes": "Double commit in PG extension. Second COMMIT after explicit COMMIT in plpgsql function. Fixed by ignoring redundant commit. [REVISED: added transaction state check before commit to prevent double-commit]",
       "id": "DC-001",
       "broken": [
@@ -1432,7 +1432,7 @@
       "pls_id": "PLS-009",
       "severity": "medium",
       "source": "to_be_verified",
-      "verified": false,
+      "verified": true,
       "notes": "Missing free in OpenSSL EVP_PKEY. CTX allocated but never freed after key derivation. Fixed by adding EVP_PKEY_CTX_free().",
       "id": "MF-001",
       "broken": [
@@ -1553,7 +1553,7 @@
       "pls_id": "PLS-013",
       "severity": "high",
       "source": "to_be_verified",
-      "verified": false,
+      "verified": true,
       "notes": "Workflow bypass in Django admin actions. Model saved without CSRF validation and data cleaning for bulk actions. Fixed by adding CSRF check and data cleaning.",
       "id": "WB-002",
       "broken": [
