@@ -1,0 +1,190 @@
+{
+  "timestamp": "2026-06-20T17:47:11.887Z",
+  "result": {
+    "total": 25,
+    "truePositive": 0,
+    "falsePositive": 24,
+    "trueNegative": 1,
+    "falseNegative": 0,
+    "precision": 0,
+    "recall": null,
+    "f1": 0,
+    "details": [
+      {
+        "index": 0,
+        "functionName": "curl_easy_perform",
+        "expected": "clean",
+        "detected": "clean",
+        "matched": true
+      },
+      {
+        "index": 1,
+        "functionName": "Curl_connect",
+        "expected": "clean",
+        "detected": "violation",
+        "matched": false
+      },
+      {
+        "index": 2,
+        "functionName": "Curl_close",
+        "expected": "clean",
+        "detected": "violation",
+        "matched": false
+      },
+      {
+        "index": 3,
+        "functionName": "Curl_ssl_connect",
+        "expected": "clean",
+        "detected": "violation",
+        "matched": false
+      },
+      {
+        "index": 4,
+        "functionName": "Curl_sendrecv",
+        "expected": "clean",
+        "detected": "violation",
+        "matched": false
+      },
+      {
+        "index": 5,
+        "functionName": "curl_easy_init",
+        "expected": "clean",
+        "detected": "violation",
+        "matched": false
+      },
+      {
+        "index": 6,
+        "functionName": "curl_easy_cleanup",
+        "expected": "clean",
+        "detected": "violation",
+        "matched": false
+      },
+      {
+        "index": 7,
+        "functionName": "Curl_conncache_add",
+        "expected": "clean",
+        "detected": "violation",
+        "matched": false
+      },
+      {
+        "index": 8,
+        "functionName": "Curl_hash_add",
+        "expected": "clean",
+        "detected": "violation",
+        "matched": false
+      },
+      {
+        "index": 9,
+        "functionName": "Curl_hash_add_entry",
+        "expected": "clean",
+        "detected": "violation",
+        "matched": false
+      },
+      {
+        "index": 10,
+        "functionName": "Curl_hash_do_add",
+        "expected": "clean",
+        "detected": "violation",
+        "matched": false
+      },
+      {
+        "index": 11,
+        "functionName": "Curl_hash_find",
+        "expected": "clean",
+        "detected": "violation",
+        "matched": false
+      },
+      {
+        "index": 12,
+        "functionName": "Curl_readwrite",
+        "expected": "clean",
+        "detected": "violation",
+        "matched": false
+      },
+      {
+        "index": 13,
+        "functionName": "Curl_read",
+        "expected": "clean",
+        "detected": "violation",
+        "matched": false
+      },
+      {
+        "index": 14,
+        "functionName": "Curl_write",
+        "expected": "clean",
+        "detected": "violation",
+        "matched": false
+      },
+      {
+        "index": 15,
+        "functionName": "Curl_resolv",
+        "expected": "clean",
+        "detected": "violation",
+        "matched": false
+      },
+      {
+        "index": 16,
+        "functionName": "Curl_addrinfo_copy",
+        "expected": "clean",
+        "detected": "violation",
+        "matched": false
+      },
+      {
+        "index": 17,
+        "functionName": "Curl_disconnect",
+        "expected": "clean",
+        "detected": "violation",
+        "matched": false
+      },
+      {
+        "index": 18,
+        "functionName": "Curl_ssl_cleanup",
+        "expected": "clean",
+        "detected": "violation",
+        "matched": false
+      },
+      {
+        "index": 19,
+        "functionName": "curl_multi_add_handle",
+        "expected": "clean",
+        "detected": "violation",
+        "matched": false
+      },
+      {
+        "index": 20,
+        "functionName": "Curl_multi_add_handle_do",
+        "expected": "clean",
+        "detected": "violation",
+        "matched": false
+      },
+      {
+        "index": 21,
+        "functionName": "curl_multi_remove_handle",
+        "expected": "clean",
+        "detected": "violation",
+        "matched": false
+      },
+      {
+        "index": 22,
+        "functionName": "Curl_conncache_remove",
+        "expected": "clean",
+        "detected": "violation",
+        "matched": false
+      },
+      {
+        "index": 23,
+        "functionName": "Curl_llist_insert",
+        "expected": "clean",
+        "detected": "violation",
+        "matched": false
+      },
+      {
+        "index": 24,
+        "functionName": "Curl_llist_remove",
+        "expected": "clean",
+        "detected": "violation",
+        "matched": false
+      }
+    ]
+  }
+}

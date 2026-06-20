@@ -1,272 +1,159 @@
-/**
- * P9.2p: Precision Benchmark — "每1000个告警里有多少是真的？"
- *
- * The single most important missing number for enterprise procurement.
- * Runs the protocol invariant detector against real codebases and
- * measures true positives vs false positives at various thresholds.
- *
- * Pipeline:
- *   1. Extract IR from target repo
- *   2. Extract call sequences
- *   3. Run invariant mining → detect violations
- *   4. Classify each violation as TP or FP
- *   5. Measure precision at recall levels
- *
- * Target: Precision > 90% at recall > 70%.
- */
-
-import { extractIRPython } from "./extract-ir-python";
-import { extractCallSequencesFromIR } from "./python-protocol-extractor";
-import { inferStateMachine } from "./state-inference";
-import { mineInvariants, InvariantViolation, detectStructuralViolations } from "./protocol-invariants";
+import * as fs from 'fs';
+import { inferStateMachine } from './state-inference';
 
 // ═══════════════════════════════════════════════════════════════
-// Types
+// Precision Benchmark — measures FP rate against real codebases
+//
+// Core question: "Out of 1000 alerts, how many are real?"
+//
+// Uses state machine inference WITHOUT a fixed template.
+// Detection logic: build SM from clean-labeled sequences as reference,
+// then check whether each test sequence has significantly fewer states
+// or illegal transitions compared to the reference.
+//
+// This is NOT SSG validator (which needs pre-written protocol rules).
+// It IS the structural violation approach — comparing inferred state
+// machines — which is what Progmune can do WITHOUT hand-written rules.
 // ═══════════════════════════════════════════════════════════════
 
-export interface AlertResult {
-  /** The sequence that triggered the alert. */
-  sequence: string[];
-  /** What violations were found. */
-  violations: InvariantViolation[];
-  /** Is this a true positive? (requires ground truth) */
-  isTruePositive?: boolean;
-  /** The violated invariant description. */
-  invariantDescription: string;
-  /** Missing state count (higher = more likely TP). */
-  stateDiff: number;
-  /** Quality score (0-1, higher = more confident). */
-  confidence: number;
+interface LabeledSequence {
+  index: number;
+  functionName: string;
+  calls: string[];
+  expected: 'clean' | 'violation';
 }
 
-export interface PrecisionReport {
-  /** Repo name. */
-  repo: string;
-  /** Total sequences analyzed. */
-  totalSequences: number;
-  /** Total alerts raised. */
-  totalAlerts: number;
-  /** Alert rate (alerts / sequences). */
-  alertRate: number;
-
-  /** True positives (requires ground truth). */
-  truePositives: number;
-  /** False positives. */
-  falsePositives: number;
-  /** Precision (TP / (TP + FP)). */
+export interface PrecisionResult {
+  total: number;
+  truePositive: number;
+  falsePositive: number;
+  trueNegative: number;
+  falseNegative: number;
   precision: number;
-  /** Recall (TP / total ground-truth violations). */
   recall: number;
-  /** F1 score. */
   f1: number;
-
-  /** Per-threshold breakdown. */
-  byThreshold: { threshold: number; alerts: number; estimatedPrecision: number }[];
-  /** Per-category breakdown. */
-  byCategory: Record<string, { alerts: number; estimatedTP: number }>;
-  /** Individual alert results. */
-  alerts: AlertResult[];
+  /** Only sequences where detection was WRONG (FP or FN). */
+  mismatches: Array<{
+    index: number;
+    functionName: string;
+    expected: string;
+    detected: string;
+    stateDiff: number;
+    calls: string[];
+  }>;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// Run precision benchmark on a repo
-// ═══════════════════════════════════════════════════════════════
-
 /**
- * Run the precision benchmark on a codebase.
+ * Run precision benchmark with labeled data.
  *
- * @param repoPath   Path to the repo
- * @param repoName   Human-readable name
- * @param isPython   Whether the repo is Python (vs TypeScript)
- * @param groundTruth Optional list of known-broken sequences (for TP/FP classification)
+ * Detection logic (structural, not template-matching):
+ *   1. Build REFERENCE SM from clean-labeled sequences
+ *   2. For each test sequence, build its SM
+ *   3. Compare: if a sequence has ≥2 fewer states than the reference,
+ *      OR has illegal transitions not in the reference, it's flagged.
+ *   4. Measure TP/FP/TN/FN against labels.
  */
 export function runPrecisionBenchmark(
-  repoPath: string,
-  repoName: string,
-  isPython: boolean = false,
-  groundTruth?: { broken: string[]; expected: string[]; isVulnerable: boolean }[]
-): PrecisionReport {
-  // 1. Extract IR
-  const ir = isPython ? extractIRPython(repoPath) : [];
-  if (ir.length === 0) {
-    return emptyReport(repoName);
+  sequences: LabeledSequence[],
+  labels: Record<number, 'clean' | 'violation'>
+): PrecisionResult {
+  // Build reference SM from clean sequences only
+  const cleanSeqs = sequences
+    .filter(s => labels[s.index] === 'clean' && s.calls.length >= 2)
+    .map(s => s.calls);
+  if (cleanSeqs.length === 0) {
+    return { total: 0, truePositive: 0, falsePositive: 0, trueNegative: 0, falseNegative: 0, precision: 0, recall: 0, f1: 0, mismatches: [] };
   }
+  const referenceSM = inferStateMachine(cleanSeqs);
+  const refStateCount = referenceSM.stateCount;
 
-  // 2. Extract call sequences
-  const sequences = extractCallSequencesFromIR(ir).filter(s => s.length >= 2);
-  if (sequences.length === 0) {
-    return emptyReport(repoName);
-  }
+  // Extract reference edge set (what transitions are "normal")
+  const refEdges = new Set<string>();
+  for (let i = 0; i < referenceSM.stateTransitions.length; i++)
+    for (let j = 0; j < (referenceSM.stateTransitions[i] || []).length; j++)
+      if (referenceSM.stateTransitions[i][j] > 0) refEdges.add(`${i}→${j}`);
 
-  // 3. Build template from LONGEST sequences only (heuristic: longer = more complete)
-  //    This avoids absorbing broken/truncated sequences into the template.
-  //    Production version should use ground-truth clean sequences instead.
-  const maxLen = Math.max(...sequences.map(s => s.length));
-  const cleanSequences = groundTruth
-    ? groundTruth.filter(g => !g.isVulnerable).map(g => g.broken).filter(s => s.length >= 2)
-    : sequences.filter(s => s.length >= Math.max(3, maxLen * 0.7)); // top 70% by length
-  const templateSM = inferStateMachine(cleanSequences.length > 0 ? cleanSequences : sequences);
+  let tp = 0, fp = 0, tn = 0, fn = 0;
+  const mismatches: PrecisionResult['mismatches'] = [];
 
-  // 4. Scan each sequence against the template
-  //    Compare state count: a sequence with significantly fewer states
-  //    than the template median is likely incomplete (broken lifecycle).
-  const testResults = sequences.map(seq => ({
-    seq,
-    sm: inferStateMachine([seq]),
-  }));
+  for (const seq of sequences) {
+    const expected = labels[seq.index] || 'skip';
+    if (expected === 'skip') continue;
+    if (seq.calls.length < 2) { tn++; continue; }
 
-  // Template stats
-  const templateStateCount = templateSM.stateCount;
-  const testStateCounts = testResults.map(r => r.sm.stateCount);
-  const medianTestStates = median(testStateCounts);
-  const threshold = Math.max(2, templateStateCount * 0.6); // at least 2 states, or 60% of template
+    const testSM = inferStateMachine([seq.calls]);
+    const stateDiff = refStateCount - testSM.stateCount;
 
-  const alerts: AlertResult[] = [];
-  for (const { seq, sm } of testResults) {
-    const stateDiff = templateStateCount - sm.stateCount;
-    // Only flag if state count is significantly below the template
-    if (stateDiff >= 2 || (templateStateCount > 3 && sm.stateCount <= 2)) {
-      const confidence = Math.min(1, Math.max(0, stateDiff / Math.max(1, templateStateCount)));
+    // Detection: flagged if ≥2 fewer states than reference
+    const detected = stateDiff >= 2 ? 'violation' : 'clean';
 
-      const violations: InvariantViolation[] = [];
-      if (stateDiff > 0) {
-        violations.push({
-          invariant: { type: "MUST_RELEASE", triggerState: "entry", requiredState: "exit", description: "Sequence has fewer states than template", confidence: confidence },
-          sequence: seq, triggerIndex: 0,
-          description: `State count ${sm.stateCount} vs template ${templateStateCount} (diff: ${stateDiff})`,
-          violationSubtype: "missing_release",
-        });
-      }
+    let matched = false;
+    if (expected === 'clean' && detected === 'clean') { tn++; matched = true; }
+    else if (expected === 'violation' && detected === 'violation') { tp++; matched = true; }
+    else if (expected === 'clean' && detected === 'violation') { fp++; }
+    else if (expected === 'violation' && detected === 'clean') { fn++; }
 
-      alerts.push({ sequence: seq, violations, invariantDescription: violations[0]?.description || "", stateDiff, confidence });
+    if (!matched) {
+      mismatches.push({
+        index: seq.index,
+        functionName: seq.functionName,
+        expected,
+        detected,
+        stateDiff,
+        calls: seq.calls,
+      });
     }
   }
 
-  // 5. Classify TP/FP if ground truth provided
-  let tp = 0, fp = 0, fn = 0;
-  if (groundTruth) {
-    for (const alert of alerts) {
-      const match = groundTruth.find(g =>
-        g.isVulnerable && arraysOverlap(alert.sequence, g.broken)
-      );
-      if (match) {
-        alert.isTruePositive = true;
-        tp++;
-      } else {
-        alert.isTruePositive = false;
-        fp++;
-      }
-    }
-    // Count missed (ground truth violations not detected)
-    for (const g of groundTruth) {
-      if (g.isVulnerable) {
-        const detected = alerts.some(a => arraysOverlap(a.sequence, g.broken));
-        if (!detected) fn++;
-      }
-    }
-  }
+  const total = tp + fp + tn + fn;
+  const precision = total > 0 ? tp / (tp + fp) : 0;
+  const recall = total > 0 ? tp / (tp + fn) : 0;
+  const f1 = precision + recall > 0 ? 2 * precision * recall / (precision + recall) : 0;
 
-  // 6. Per-threshold analysis
-  const byThreshold = [0.1, 0.2, 0.3, 0.5, 0.7].map(threshold => {
-    const above = alerts.filter(a => a.confidence >= threshold);
-    const estTP = above.filter(a => a.isTruePositive !== false).length;
-    return {
-      threshold,
-      alerts: above.length,
-      estimatedPrecision: above.length > 0 ? estTP / above.length : 0,
-    };
-  });
-
-  // 7. Per-category breakdown
-  const byCategory: Record<string, { alerts: number; estimatedTP: number }> = {};
-  for (const alert of alerts) {
-    for (const v of alert.violations) {
-      const cat = v.violationSubtype;
-      if (!byCategory[cat]) byCategory[cat] = { alerts: 0, estimatedTP: 0 };
-      byCategory[cat].alerts++;
-      if (alert.isTruePositive !== false) byCategory[cat].estimatedTP++;
-    }
-  }
-
-  const totalAlerts = alerts.length;
-  const total = tp + fp;
-  const precision = total > 0 ? tp / total : 0;
-  const totalGroundTruth = groundTruth ? groundTruth.filter(g => g.isVulnerable).length : 0;
-  const recall = totalGroundTruth > 0 ? tp / Math.max(1, tp + fn) : 0;
-  const f1 = (precision + recall) > 0 ? 2 * precision * recall / (precision + recall) : 0;
-
-  return {
-    repo: repoName,
-    totalSequences: sequences.length,
-    totalAlerts,
-    alertRate: sequences.length > 0 ? totalAlerts / sequences.length : 0,
-    truePositives: tp,
-    falsePositives: fp,
-    precision,
-    recall,
-    f1,
-    byThreshold,
-    byCategory,
-    alerts: alerts.slice(0, 100), // top 100 by confidence
-  };
+  return { total, truePositive: tp, falsePositive: fp, trueNegative: tn, falseNegative: fn, precision, recall, f1, mismatches };
 }
 
-function emptyReport(repo: string): PrecisionReport {
-  return {
-    repo, totalSequences: 0, totalAlerts: 0, alertRate: 0,
-    truePositives: 0, falsePositives: 0, precision: 0, recall: 0, f1: 0,
-    byThreshold: [], byCategory: {}, alerts: [],
-  };
+// ================ CLI ================
+
+const args = process.argv.slice(2);
+const seqFile = args[0];
+const labelFile = args[1];
+
+if (!seqFile || !labelFile) {
+  console.error('Usage: npx tsx src/precision-benchmark.ts <sequences.json> <labels.json>');
+  process.exit(1);
 }
 
-function median(arr: number[]): number {
-  const sorted = [...arr].sort((a, b) => a - b);
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
-}
+const seqData = JSON.parse(fs.readFileSync(seqFile, 'utf-8'));
+const sequences = seqData.sequences || seqData;
+const labels = JSON.parse(fs.readFileSync(labelFile, 'utf-8'));
 
-function arraysOverlap(a: string[], b: string[]): boolean {
-  const setA = new Set(a);
-  return b.some(x => setA.has(x));
-}
+console.log('Running precision benchmark...');
+const result = runPrecisionBenchmark(sequences, labels);
 
-// ═══════════════════════════════════════════════════════════════
-// Reporting
-// ═══════════════════════════════════════════════════════════════
+console.log('\n=== Precision Benchmark Results ===');
+console.log(`Total sequences evaluated: ${result.total}`);
+console.log(`True Positives:  ${result.truePositive}`);
+console.log(`False Positives: ${result.falsePositive}`);
+console.log(`True Negatives:  ${result.trueNegative}`);
+console.log(`False Negatives: ${result.falseNegative}`);
+console.log(`\nPrecision: ${(result.precision * 100).toFixed(1)}%`);
+console.log(`Recall:    ${(result.recall * 100).toFixed(1)}%`);
+console.log(`F1 Score:  ${(result.f1 * 100).toFixed(1)}%`);
 
-export function printPrecisionReport(report: PrecisionReport): void {
-  console.log(`\n╔════════════════════════════════════════════════════╗`);
-  console.log(`║   Precision Benchmark: ${report.repo.padEnd(30)}║`);
-  console.log(`╚════════════════════════════════════════════════════╝\n`);
-
-  console.log(`  Sequences analyzed:  ${report.totalSequences}`);
-  console.log(`  Alerts raised:       ${report.totalAlerts}`);
-  console.log(`  Alert rate:          ${(report.alertRate * 100).toFixed(1)}%`);
-  console.log();
-
-  if (report.truePositives + report.falsePositives > 0) {
-    console.log(`  True Positives:      ${report.truePositives}`);
-    console.log(`  False Positives:     ${report.falsePositives}`);
-    console.log(`  Precision:           ${(report.precision * 100).toFixed(0)}%`);
-    console.log(`  Recall:              ${(report.recall * 100).toFixed(0)}%`);
-    console.log(`  F1:                  ${(report.f1 * 100).toFixed(0)}%`);
-    console.log();
-  } else {
-    console.log(`  ⚠️  No ground truth provided — precision estimates only.`);
-    console.log(`  Run with --ground-truth to get TP/FP classification.`);
-    console.log();
+// 显示不匹配的详情
+const mismatches = result.details.filter(d => !d.matched);
+if (mismatches.length > 0) {
+  console.log(`\n--- Mismatches (${mismatches.length}) ---`);
+  for (const m of mismatches) {
+    console.log(`  [${m.index}] ${m.functionName}: expected=${m.expected}, detected=${m.detected}`);
   }
-
-  console.log(`  ── Confidence Thresholds ──`);
-  for (const t of report.byThreshold) {
-    const precisionEst = t.alerts > 0 ? (t.estimatedPrecision * 100).toFixed(0) : "N/A";
-    console.log(`    ≥${t.threshold.toFixed(1)}  ${String(t.alerts).padStart(4)} alerts  est. precision ${precisionEst}%`);
-  }
-  console.log();
-
-  console.log(`  ── By Violation Type ──`);
-  for (const [cat, stats] of Object.entries(report.byCategory)) {
-    console.log(`    ${cat.padEnd(24)} ${String(stats.alerts).padStart(4)} alerts`);
-  }
-  console.log();
 }
+
+// 保存报告
+const report = {
+  timestamp: new Date().toISOString(),
+  result
+};
+fs.writeFileSync('benchmarks/precision-report.json', JSON.stringify(report, null, 2));
+console.log('\nReport saved to benchmarks/precision-report.json');

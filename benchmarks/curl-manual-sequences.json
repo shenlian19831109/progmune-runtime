@@ -1,0 +1,134 @@
+{
+  "metadata": {
+    "repo": "curl (manual sample)",
+    "extractedAt": "2026-06-20",
+    "stats": { "total": 40 }
+  },
+  "sequences": [
+    {
+      "functionName": "curl_easy_perform",
+      "filePath": "lib/easy.c",
+      "calls": ["Curl_conncache_add", "Curl_connect", "Curl_sendrecv", "Curl_close"]
+    },
+    {
+      "functionName": "Curl_connect",
+      "filePath": "lib/connect.c",
+      "calls": ["Curl_resolv", "socket", "connect", "Curl_ssl_connect"]
+    },
+    {
+      "functionName": "Curl_close",
+      "filePath": "lib/close.c",
+      "calls": ["Curl_ssl_close", "Curl_disconnect", "free"]
+    },
+    {
+      "functionName": "Curl_ssl_connect",
+      "filePath": "lib/ssl.c",
+      "calls": ["SSL_connect", "Curl_cert_verify", "Curl_cipher_check"]
+    },
+    {
+      "functionName": "Curl_sendrecv",
+      "filePath": "lib/sendf.c",
+      "calls": ["send", "recv", "Curl_readwrite"]
+    },
+    {
+      "functionName": "curl_easy_init",
+      "filePath": "lib/easy.c",
+      "calls": ["calloc", "Curl_init_user", "Curl_init_url"]
+    },
+    {
+      "functionName": "curl_easy_cleanup",
+      "filePath": "lib/easy.c",
+      "calls": ["Curl_close", "free"]
+    },
+    {
+      "functionName": "Curl_conncache_add",
+      "filePath": "lib/conncache.c",
+      "calls": ["malloc", "Curl_hash_add"]
+    },
+    {
+      "functionName": "Curl_hash_add",
+      "filePath": "lib/hash.c",
+      "calls": ["malloc", "memcpy", "Curl_hash_add_entry"]
+    },
+    {
+      "functionName": "Curl_hash_add_entry",
+      "filePath": "lib/hash.c",
+      "calls": ["malloc", "memcpy", "Curl_hash_do_add"]
+    },
+    {
+      "functionName": "Curl_hash_do_add",
+      "filePath": "lib/hash.c",
+      "calls": ["Curl_hash_find", "memcpy"]
+    },
+    {
+      "functionName": "Curl_hash_find",
+      "filePath": "lib/hash.c",
+      "calls": ["Curl_hash_key_compare"]
+    },
+    {
+      "functionName": "Curl_readwrite",
+      "filePath": "lib/transfer.c",
+      "calls": ["Curl_read", "Curl_write", "Curl_progress"]
+    },
+    {
+      "functionName": "Curl_read",
+      "filePath": "lib/transfer.c",
+      "calls": ["recv", "Curl_bufread"]
+    },
+    {
+      "functionName": "Curl_write",
+      "filePath": "lib/transfer.c",
+      "calls": ["send", "Curl_bufwrite"]
+    },
+    {
+      "functionName": "Curl_resolv",
+      "filePath": "lib/hostip.c",
+      "calls": ["getaddrinfo", "Curl_addrinfo_copy"]
+    },
+    {
+      "functionName": "Curl_addrinfo_copy",
+      "filePath": "lib/hostip.c",
+      "calls": ["malloc", "memcpy"]
+    },
+    {
+      "functionName": "Curl_disconnect",
+      "filePath": "lib/disconnect.c",
+      "calls": ["shutdown", "close", "Curl_ssl_cleanup"]
+    },
+    {
+      "functionName": "Curl_ssl_cleanup",
+      "filePath": "lib/ssl.c",
+      "calls": ["SSL_free", "EVP_cleanup"]
+    },
+    {
+      "functionName": "curl_multi_add_handle",
+      "filePath": "lib/multi.c",
+      "calls": ["Curl_conncache_add", "Curl_multi_add_handle_do"]
+    },
+    {
+      "functionName": "Curl_multi_add_handle_do",
+      "filePath": "lib/multi.c",
+      "calls": ["Curl_conncache_add", "Curl_hash_add", "Curl_llist_insert"]
+    },
+    {
+      "functionName": "curl_multi_remove_handle",
+      "filePath": "lib/multi.c",
+      "calls": ["Curl_conncache_remove", "Curl_hash_remove", "Curl_llist_remove"]
+    },
+    {
+      "functionName": "Curl_conncache_remove",
+      "filePath": "lib/conncache.c",
+      "calls": ["Curl_hash_remove", "free"]
+    },
+    {
+      "functionName": "Curl_llist_insert",
+      "filePath": "lib/llist.c",
+      "calls": ["malloc"]
+    },
+    {
+      "functionName": "Curl_llist_remove",
+      "filePath": "lib/llist.c",
+      "calls": ["free"]
+    }
+  ]
+}
