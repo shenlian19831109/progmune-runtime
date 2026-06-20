@@ -1000,20 +1000,24 @@
       "category": "privilege_escalation",
       "pls_id": "PLS-006",
       "severity": "critical",
-      "source": "advisory_verified",
+      "source": "git_diff_verified",
       "verified": true,
-      "notes": "CVE-2024-21626: internal FDs leaked to container → host filesystem access. Fix: O_CLOEXEC marking, FD closure, cwd verification before spawn.",
+      "notes": "FROM REAL DIFF 02120488a4c0f: runc now calls CloseExecFrom(3) to mark non-stdio FDs O_CLOEXEC, verifyCwd() to check cwd inside mount namespace root, and UnsafeCloseFrom() to close all leaked FDs before execve. Pre-CVE: internal FDs leaked to container process enabling host filesystem access. GHSA-xr7r-f8xq-vfvv.",
       "id": "PE-004",
       "broken": [
-        "runc_create_container",
-        "spawn_init_process"
+        "runc_create",
+        "init_process",
+        "chdir",
+        "execve"
       ],
       "expected": [
-        "runc_create_container",
-        "mark_fds_cloexec",
-        "close_internal_fds",
-        "verify_cwd_in_container",
-        "spawn_init_process"
+        "runc_create",
+        "CloseExecFrom_3",
+        "init_process",
+        "chdir",
+        "verifyCwd",
+        "UnsafeCloseFrom",
+        "execve"
       ]
     },
     {
