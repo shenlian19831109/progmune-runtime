@@ -1031,14 +1031,14 @@
       ]
     },
     {
-      "cve": "CVE-2023-41080",
-      "project": "apache-tomcat",
+      "cve": "CVE-2013-2067",
+      "project": "apache/tomcat",
       "category": "session_fixation",
       "pls_id": "PLS-005",
-      "severity": "high",
-      "source": "to_be_verified",
-      "verified": false,
-      "notes": "Session fixation in Apache Tomcat FORM authentication. Session ID not rotated after login — attacker pre-sets session ID. Fixed by adding invalidate_old_session() before creating new session.",
+      "severity": "medium",
+      "source": "github_advisory",
+      "verified": true,
+      "notes": "REAL CVE: Tomcat FormAuthenticator session fixation. Attacker could inject request into another users session during login form completion. Fix: added validate_session_relationship() to verify session ownership + invalidate_old_session() before creating new session. Fix: svn revision r1408044 (Tomcat 7.0.33). GHSA-6m48-jxwx-76q7",
       "id": "SF-001",
       "broken": [
         "authenticate_user",
@@ -1047,6 +1047,7 @@
       ],
       "expected": [
         "authenticate_user",
+        "validate_session_relationship",
         "invalidate_old_session",
         "create_session",
         "forward_request"
@@ -1610,7 +1611,7 @@
   ],
   "metadata": {
     "total": 68,
-    "verified": 32,
+    "verified": 33,
     "byCategory": {
       "resource_leak": 17,
       "use_after_free": 11,
