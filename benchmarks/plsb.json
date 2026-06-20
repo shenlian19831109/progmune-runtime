@@ -948,18 +948,18 @@
       "category": "privilege_escalation",
       "pls_id": "PLS-006",
       "severity": "critical",
-      "source": "to_be_verified",
-      "verified": false,
-      "notes": "Privilege escalation via user namespace. cgroup release_agent allows unprivileged user to execute commands as root. Fixed by adding capability validation before credential commit.",
+      "source": "github_advisory",
+      "verified": true,
+      "notes": "REAL CVE: Linux kernel cgroup v1 privilege escalation. release_agent could be written without CAP_SYS_ADMIN in initial user namespace, enabling container escape. Fix: added capability check requiring CAP_SYS_ADMIN in init_userns. Fix: torvalds/linux@24f6008564183aa120d07c03d9289519c2fe02af",
       "id": "PE-002",
       "broken": [
         "unshare_userns",
-        "commit_creds"
+        "write_release_agent"
       ],
       "expected": [
         "unshare_userns",
-        "validate_capabilities",
-        "commit_creds"
+        "validate_cap_sys_admin",
+        "write_release_agent"
       ]
     },
     {
@@ -1602,7 +1602,7 @@
   ],
   "metadata": {
     "total": 68,
-    "verified": 27,
+    "verified": 28,
     "byCategory": {
       "resource_leak": 17,
       "use_after_free": 11,
