@@ -1,0 +1,62 @@
+[
+  {
+    "cve": "CVE-2023-22809",
+    "project": "sudo",
+    "before": ["parse_sudoers", "execute_command"],
+    "after":  ["parse_sudoers", "validate_permissions", "execute_command"],
+    "category": "privilege_escalation",
+    "pls_id": "PLS-006",
+    "severity": "critical",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Privilege escalation in sudo. Command executed without validating sudoers permissions when EDITOR env var is set. Fixed by adding validate_permissions() before execute. CVE-2023-22809"
+  },
+  {
+    "cve": "CVE-2022-0492",
+    "project": "linux",
+    "before": ["unshare_userns", "commit_creds"],
+    "after":  ["unshare_userns", "validate_capabilities", "commit_creds"],
+    "category": "privilege_escalation",
+    "pls_id": "PLS-006",
+    "severity": "critical",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Privilege escalation via user namespace. cgroup release_agent allows unprivileged user to execute commands as root. Fixed by adding capability validation before credential commit."
+  },
+  {
+    "cve": "CVE-2023-44487",
+    "project": "kubernetes",
+    "before": ["create_pod", "mount_host_path"],
+    "after":  ["create_pod", "validate_pod_security", "mount_host_path"],
+    "category": "privilege_escalation",
+    "pls_id": "PLS-006",
+    "severity": "high",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Privilege escalation via Kubernetes volume mount. Pod Security admission bypass allows mounting host paths without validation. Fixed by adding validate_pod_security() check."
+  },
+  {
+    "cve": "CVE-2024-21626",
+    "project": "docker",
+    "before": ["runc_create_container", "set_special_file"],
+    "after":  ["runc_create_container", "validate_masked_paths", "set_special_file"],
+    "category": "privilege_escalation",
+    "pls_id": "PLS-006",
+    "severity": "high",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Container breakout via runc WORKDIR. Special file descriptors leak into container allowing host filesystem escape. Fixed by adding masked path validation before file operations."
+  },
+  {
+    "cve": "CVE-2023-46850",
+    "project": "postgresql",
+    "before": ["exec_sql", "access_table"],
+    "after":  ["exec_sql", "check_row_security", "access_table"],
+    "category": "privilege_escalation",
+    "pls_id": "PLS-006",
+    "severity": "high",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Row-level security bypass in PostgreSQL. SECURITY INVOKER function accesses tables without enforcing row-level policies. Fixed by adding check_row_security() before table access."
+  }
+]

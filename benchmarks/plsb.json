@@ -915,10 +915,110 @@
         "uv_write",
         "uv_close"
       ]
+    },
+    {
+      "cve": "CVE-2023-22809",
+      "project": "sudo",
+      "category": "privilege_escalation",
+      "pls_id": "PLS-006",
+      "severity": "critical",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Privilege escalation in sudo. Command executed without validating sudoers permissions when EDITOR env var is set. Fixed by adding validate_permissions() before execute. CVE-2023-22809",
+      "id": "PE-001",
+      "broken": [
+        "parse_sudoers",
+        "execute_command"
+      ],
+      "expected": [
+        "parse_sudoers",
+        "validate_permissions",
+        "execute_command"
+      ]
+    },
+    {
+      "cve": "CVE-2022-0492",
+      "project": "linux",
+      "category": "privilege_escalation",
+      "pls_id": "PLS-006",
+      "severity": "critical",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Privilege escalation via user namespace. cgroup release_agent allows unprivileged user to execute commands as root. Fixed by adding capability validation before credential commit.",
+      "id": "PE-002",
+      "broken": [
+        "unshare_userns",
+        "commit_creds"
+      ],
+      "expected": [
+        "unshare_userns",
+        "validate_capabilities",
+        "commit_creds"
+      ]
+    },
+    {
+      "cve": "CVE-2023-44487",
+      "project": "kubernetes",
+      "category": "privilege_escalation",
+      "pls_id": "PLS-006",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Privilege escalation via Kubernetes volume mount. Pod Security admission bypass allows mounting host paths without validation. Fixed by adding validate_pod_security() check.",
+      "id": "PE-003",
+      "broken": [
+        "create_pod",
+        "mount_host_path"
+      ],
+      "expected": [
+        "create_pod",
+        "validate_pod_security",
+        "mount_host_path"
+      ]
+    },
+    {
+      "cve": "CVE-2024-21626",
+      "project": "docker",
+      "category": "privilege_escalation",
+      "pls_id": "PLS-006",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Container breakout via runc WORKDIR. Special file descriptors leak into container allowing host filesystem escape. Fixed by adding masked path validation before file operations.",
+      "id": "PE-004",
+      "broken": [
+        "runc_create_container",
+        "set_special_file"
+      ],
+      "expected": [
+        "runc_create_container",
+        "validate_masked_paths",
+        "set_special_file"
+      ]
+    },
+    {
+      "cve": "CVE-2023-46850",
+      "project": "postgresql",
+      "category": "privilege_escalation",
+      "pls_id": "PLS-006",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Row-level security bypass in PostgreSQL. SECURITY INVOKER function accesses tables without enforcing row-level policies. Fixed by adding check_row_security() before table access.",
+      "id": "PE-005",
+      "broken": [
+        "exec_sql",
+        "access_table"
+      ],
+      "expected": [
+        "exec_sql",
+        "check_row_security",
+        "access_table"
+      ]
     }
   ],
   "metadata": {
-    "total": 35,
+    "total": 40,
     "verified": 25,
     "byCategory": {
       "resource_leak": 7,
@@ -926,7 +1026,8 @@
       "auth_bypass": 9,
       "data_corruption": 7,
       "race_condition": 1,
-      "double_free": 5
+      "double_free": 5,
+      "privilege_escalation": 5
     },
     "byPLS": {
       "PLS-001": 7,
@@ -934,16 +1035,16 @@
       "PLS-004": 9,
       "PLS-007": 7,
       "PLS-012": 1,
-      "PLS-010": 5
+      "PLS-010": 5,
+      "PLS-006": 5
     },
     "coverage": {
       "totalCategories": 13,
-      "covered": 6,
+      "covered": 7,
       "uncovered": [
         "PLS-002",
         "PLS-003",
         "PLS-005",
-        "PLS-006",
         "PLS-008",
         "PLS-009",
         "PLS-013"
