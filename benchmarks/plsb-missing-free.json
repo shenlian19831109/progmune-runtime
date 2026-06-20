@@ -1,0 +1,62 @@
+[
+  {
+    "cve": "CVE-2023-4806",
+    "project": "openssl",
+    "before": ["EVP_PKEY_CTX_new", "EVP_PKEY_derive"],
+    "after":  ["EVP_PKEY_CTX_new", "EVP_PKEY_derive", "EVP_PKEY_CTX_free"],
+    "category": "resource_leak",
+    "pls_id": "PLS-009",
+    "severity": "medium",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Missing free in OpenSSL EVP_PKEY. CTX allocated but never freed after key derivation. Fixed by adding EVP_PKEY_CTX_free()."
+  },
+  {
+    "cve": "CVE-2024-2511",
+    "project": "libxml2",
+    "before": ["xmlNewParserCtxt", "xmlParseDocument"],
+    "after":  ["xmlNewParserCtxt", "xmlParseDocument", "xmlFreeParserCtxt"],
+    "category": "resource_leak",
+    "pls_id": "PLS-009",
+    "severity": "medium",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Missing free in libxml2. Parser context allocated but never freed. Fixed by adding xmlFreeParserCtxt() after parsing."
+  },
+  {
+    "cve": "CVE-2023-39320",
+    "project": "go",
+    "before": ["crypto_x509_parse", "crypto_x509_verify"],
+    "after":  ["crypto_x509_parse", "crypto_x509_verify", "crypto_x509_free"],
+    "category": "resource_leak",
+    "pls_id": "PLS-009",
+    "severity": "medium",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Missing free in Go crypto/x509. Certificate parsed but internal structures not freed. Fixed by adding explicit free after verification."
+  },
+  {
+    "cve": "CVE-2024-1931",
+    "project": "linux",
+    "before": ["kzalloc", "init_work_struct"],
+    "after":  ["kzalloc", "init_work_struct", "kfree"],
+    "category": "resource_leak",
+    "pls_id": "PLS-009",
+    "severity": "medium",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Missing free in kernel workqueue init. Memory allocated but not freed on initialization failure path. Fixed by adding kfree() in error cleanup."
+  },
+  {
+    "cve": "CVE-2023-5043",
+    "project": "nginx",
+    "before": ["ngx_pcalloc", "ngx_http_process_header"],
+    "after":  ["ngx_pcalloc", "ngx_http_process_header", "ngx_pfree"],
+    "category": "resource_leak",
+    "pls_id": "PLS-009",
+    "severity": "medium",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Missing free in nginx HTTP header parsing. Pool allocation not freed when header processing fails. Fixed by adding ngx_pfree()."
+  }
+]

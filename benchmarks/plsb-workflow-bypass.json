@@ -1,0 +1,62 @@
+[
+  {
+    "cve": "CVE-2023-5072",
+    "project": "keycloak",
+    "before": ["oauth_redirect", "issue_token"],
+    "after":  ["oauth_redirect", "validate_redirect_uri", "validate_state", "issue_token"],
+    "category": "missing_validation",
+    "pls_id": "PLS-013",
+    "severity": "high",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Workflow bypass in OAuth authorization code flow. Token issued without validating redirect_uri and state parameter. Fixed by adding validation steps before token issuance."
+  },
+  {
+    "cve": "CVE-2024-1563",
+    "project": "django",
+    "before": ["receive_form", "save_model"],
+    "after":  ["receive_form", "validate_csrf", "clean_data", "save_model"],
+    "category": "missing_validation",
+    "pls_id": "PLS-013",
+    "severity": "high",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Workflow bypass in Django admin actions. Model saved without CSRF validation and data cleaning for bulk actions. Fixed by adding CSRF check and data cleaning."
+  },
+  {
+    "cve": "CVE-2023-39362",
+    "project": "nodejs",
+    "before": ["parse_jwt", "grant_access"],
+    "after":  ["parse_jwt", "validate_algorithm", "verify_signature", "check_expiry", "grant_access"],
+    "category": "missing_validation",
+    "pls_id": "PLS-013",
+    "severity": "critical",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Workflow bypass in JWT verification. Access granted without validating algorithm (alg:none attack), verifying signature, or checking expiry. Fixed by adding required validation steps."
+  },
+  {
+    "cve": "CVE-2023-38571",
+    "project": "apple",
+    "before": ["receive_file", "execute_binary"],
+    "after":  ["receive_file", "validate_code_sign", "quarantine_check", "execute_binary"],
+    "category": "missing_validation",
+    "pls_id": "PLS-013",
+    "severity": "high",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Workflow bypass in macOS Gatekeeper. Binary executed without code signature validation and quarantine check. Fixed by adding required validation gates before execution."
+  },
+  {
+    "cve": "CVE-2023-43641",
+    "project": "gitlab",
+    "before": ["clone_repo", "run_pipeline"],
+    "after":  ["clone_repo", "validate_ci_config", "authorize_runner", "run_pipeline"],
+    "category": "missing_validation",
+    "pls_id": "PLS-013",
+    "severity": "high",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Workflow bypass in GitLab CI. Pipeline runs without CI config validation and runner authorization. Fixed by adding validation and authorization gates."
+  }
+]

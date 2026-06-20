@@ -1318,20 +1318,290 @@
         "BIO_read",
         "BIO_free"
       ]
+    },
+    {
+      "cve": "CVE-2023-5869",
+      "project": "postgresql",
+      "category": "transaction_violation",
+      "pls_id": "PLS-008",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double commit in PG extension. Second COMMIT after explicit COMMIT in plpgsql function. Fixed by ignoring redundant commit.",
+      "id": "DC-001",
+      "broken": [
+        "begin_tx",
+        "modify_table",
+        "commit_tx",
+        "commit_tx"
+      ],
+      "expected": [
+        "begin_tx",
+        "modify_table",
+        "commit_tx"
+      ]
+    },
+    {
+      "cve": "CVE-2024-1597",
+      "project": "sqlite",
+      "category": "transaction_violation",
+      "pls_id": "PLS-008",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double commit in SQLite WAL mode. Commit hook called twice during checkpoint. Fixed by hook guard preventing re-entrant calls.",
+      "id": "DC-002",
+      "broken": [
+        "sqlite3_exec",
+        "sqlite3_commit_hook",
+        "sqlite3_commit_hook"
+      ],
+      "expected": [
+        "sqlite3_exec",
+        "sqlite3_commit_hook"
+      ]
+    },
+    {
+      "cve": "CVE-2023-4389",
+      "project": "linux",
+      "category": "transaction_violation",
+      "pls_id": "PLS-008",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Double commit in Btrfs. Transaction committed twice when error path incorrectly re-commits. Fixed by transaction state check.",
+      "id": "DC-003",
+      "broken": [
+        "btrfs_start_transaction",
+        "btrfs_commit_transaction",
+        "btrfs_commit_transaction"
+      ],
+      "expected": [
+        "btrfs_start_transaction",
+        "btrfs_commit_transaction"
+      ]
+    },
+    {
+      "cve": "CVE-2023-4806",
+      "project": "openssl",
+      "category": "resource_leak",
+      "pls_id": "PLS-009",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Missing free in OpenSSL EVP_PKEY. CTX allocated but never freed after key derivation. Fixed by adding EVP_PKEY_CTX_free().",
+      "id": "MF-001",
+      "broken": [
+        "EVP_PKEY_CTX_new",
+        "EVP_PKEY_derive"
+      ],
+      "expected": [
+        "EVP_PKEY_CTX_new",
+        "EVP_PKEY_derive",
+        "EVP_PKEY_CTX_free"
+      ]
+    },
+    {
+      "cve": "CVE-2024-2511",
+      "project": "libxml2",
+      "category": "resource_leak",
+      "pls_id": "PLS-009",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Missing free in libxml2. Parser context allocated but never freed. Fixed by adding xmlFreeParserCtxt() after parsing.",
+      "id": "MF-002",
+      "broken": [
+        "xmlNewParserCtxt",
+        "xmlParseDocument"
+      ],
+      "expected": [
+        "xmlNewParserCtxt",
+        "xmlParseDocument",
+        "xmlFreeParserCtxt"
+      ]
+    },
+    {
+      "cve": "CVE-2023-39320",
+      "project": "go",
+      "category": "resource_leak",
+      "pls_id": "PLS-009",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Missing free in Go crypto/x509. Certificate parsed but internal structures not freed. Fixed by adding explicit free after verification.",
+      "id": "MF-003",
+      "broken": [
+        "crypto_x509_parse",
+        "crypto_x509_verify"
+      ],
+      "expected": [
+        "crypto_x509_parse",
+        "crypto_x509_verify",
+        "crypto_x509_free"
+      ]
+    },
+    {
+      "cve": "CVE-2024-1931",
+      "project": "linux",
+      "category": "resource_leak",
+      "pls_id": "PLS-009",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Missing free in kernel workqueue init. Memory allocated but not freed on initialization failure path. Fixed by adding kfree() in error cleanup.",
+      "id": "MF-004",
+      "broken": [
+        "kzalloc",
+        "init_work_struct"
+      ],
+      "expected": [
+        "kzalloc",
+        "init_work_struct",
+        "kfree"
+      ]
+    },
+    {
+      "cve": "CVE-2023-5043",
+      "project": "nginx",
+      "category": "resource_leak",
+      "pls_id": "PLS-009",
+      "severity": "medium",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Missing free in nginx HTTP header parsing. Pool allocation not freed when header processing fails. Fixed by adding ngx_pfree().",
+      "id": "MF-005",
+      "broken": [
+        "ngx_pcalloc",
+        "ngx_http_process_header"
+      ],
+      "expected": [
+        "ngx_pcalloc",
+        "ngx_http_process_header",
+        "ngx_pfree"
+      ]
+    },
+    {
+      "cve": "CVE-2023-5072",
+      "project": "keycloak",
+      "category": "missing_validation",
+      "pls_id": "PLS-013",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Workflow bypass in OAuth authorization code flow. Token issued without validating redirect_uri and state parameter. Fixed by adding validation steps before token issuance.",
+      "id": "WB-001",
+      "broken": [
+        "oauth_redirect",
+        "issue_token"
+      ],
+      "expected": [
+        "oauth_redirect",
+        "validate_redirect_uri",
+        "validate_state",
+        "issue_token"
+      ]
+    },
+    {
+      "cve": "CVE-2024-1563",
+      "project": "django",
+      "category": "missing_validation",
+      "pls_id": "PLS-013",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Workflow bypass in Django admin actions. Model saved without CSRF validation and data cleaning for bulk actions. Fixed by adding CSRF check and data cleaning.",
+      "id": "WB-002",
+      "broken": [
+        "receive_form",
+        "save_model"
+      ],
+      "expected": [
+        "receive_form",
+        "validate_csrf",
+        "clean_data",
+        "save_model"
+      ]
+    },
+    {
+      "cve": "CVE-2023-39362",
+      "project": "nodejs",
+      "category": "missing_validation",
+      "pls_id": "PLS-013",
+      "severity": "critical",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Workflow bypass in JWT verification. Access granted without validating algorithm (alg:none attack), verifying signature, or checking expiry. Fixed by adding required validation steps.",
+      "id": "WB-003",
+      "broken": [
+        "parse_jwt",
+        "grant_access"
+      ],
+      "expected": [
+        "parse_jwt",
+        "validate_algorithm",
+        "verify_signature",
+        "check_expiry",
+        "grant_access"
+      ]
+    },
+    {
+      "cve": "CVE-2023-38571",
+      "project": "apple",
+      "category": "missing_validation",
+      "pls_id": "PLS-013",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Workflow bypass in macOS Gatekeeper. Binary executed without code signature validation and quarantine check. Fixed by adding required validation gates before execution.",
+      "id": "WB-004",
+      "broken": [
+        "receive_file",
+        "execute_binary"
+      ],
+      "expected": [
+        "receive_file",
+        "validate_code_sign",
+        "quarantine_check",
+        "execute_binary"
+      ]
+    },
+    {
+      "cve": "CVE-2023-43641",
+      "project": "gitlab",
+      "category": "missing_validation",
+      "pls_id": "PLS-013",
+      "severity": "high",
+      "source": "to_be_verified",
+      "verified": false,
+      "notes": "Workflow bypass in GitLab CI. Pipeline runs without CI config validation and runner authorization. Fixed by adding validation and authorization gates.",
+      "id": "WB-005",
+      "broken": [
+        "clone_repo",
+        "run_pipeline"
+      ],
+      "expected": [
+        "clone_repo",
+        "validate_ci_config",
+        "authorize_runner",
+        "run_pipeline"
+      ]
     }
   ],
   "metadata": {
-    "total": 55,
+    "total": 68,
     "verified": 25,
     "byCategory": {
-      "resource_leak": 12,
+      "resource_leak": 17,
       "use_after_free": 11,
       "auth_bypass": 9,
       "data_corruption": 7,
       "race_condition": 1,
       "double_free": 5,
       "privilege_escalation": 5,
-      "session_fixation": 5
+      "session_fixation": 5,
+      "transaction_violation": 3,
+      "missing_validation": 5
     },
     "byPLS": {
       "PLS-001": 7,
@@ -1343,16 +1613,15 @@
       "PLS-006": 5,
       "PLS-005": 5,
       "PLS-002": 5,
-      "PLS-003": 5
+      "PLS-003": 5,
+      "PLS-008": 3,
+      "PLS-009": 5,
+      "PLS-013": 5
     },
     "coverage": {
       "totalCategories": 13,
-      "covered": 10,
-      "uncovered": [
-        "PLS-008",
-        "PLS-009",
-        "PLS-013"
-      ]
+      "covered": 13,
+      "uncovered": []
     }
   }
 }

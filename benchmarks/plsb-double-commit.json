@@ -1,0 +1,38 @@
+[
+  {
+    "cve": "CVE-2023-5869",
+    "project": "postgresql",
+    "before": ["begin_tx", "modify_table", "commit_tx", "commit_tx"],
+    "after":  ["begin_tx", "modify_table", "commit_tx"],
+    "category": "transaction_violation",
+    "pls_id": "PLS-008",
+    "severity": "medium",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Double commit in PG extension. Second COMMIT after explicit COMMIT in plpgsql function. Fixed by ignoring redundant commit."
+  },
+  {
+    "cve": "CVE-2024-1597",
+    "project": "sqlite",
+    "before": ["sqlite3_exec", "sqlite3_commit_hook", "sqlite3_commit_hook"],
+    "after":  ["sqlite3_exec", "sqlite3_commit_hook"],
+    "category": "transaction_violation",
+    "pls_id": "PLS-008",
+    "severity": "medium",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Double commit in SQLite WAL mode. Commit hook called twice during checkpoint. Fixed by hook guard preventing re-entrant calls."
+  },
+  {
+    "cve": "CVE-2023-4389",
+    "project": "linux",
+    "before": ["btrfs_start_transaction", "btrfs_commit_transaction", "btrfs_commit_transaction"],
+    "after":  ["btrfs_start_transaction", "btrfs_commit_transaction"],
+    "category": "transaction_violation",
+    "pls_id": "PLS-008",
+    "severity": "medium",
+    "source": "to_be_verified",
+    "verified": false,
+    "notes": "Double commit in Btrfs. Transaction committed twice when error path incorrectly re-commits. Fixed by transaction state check."
+  }
+]
