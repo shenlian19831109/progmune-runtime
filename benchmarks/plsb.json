@@ -806,20 +806,20 @@
       "category": "double_free",
       "pls_id": "PLS-010",
       "severity": "medium",
-      "source": "github_advisory",
+      "source": "advisory_verified",
       "verified": true,
-      "notes": "REAL CVE: curl HSTS double-free when sharing HSTS data across threads without mutex protection (libcurl 7.88.0-7.88.1). Fix: added acquire_mutex_lock()/release_mutex_lock() around cleanup to prevent double-free. Fix: curl/curl@dca4cdf071be. CWE-415",
+      "notes": "CVE-2023-27537: HSTS data shared across threads without mutex → concurrent double-free. Fix adds acquire_share_lock/release_share_lock around hsts_cleanup to serialize access.",
       "id": "DF-005",
       "broken": [
-        "share_hsts_data",
-        "cleanup_handle",
-        "cleanup_handle"
+        "curl_share_setopt",
+        "hsts_cleanup",
+        "hsts_cleanup"
       ],
       "expected": [
-        "share_hsts_data",
-        "acquire_mutex_lock",
-        "cleanup_handle",
-        "release_mutex_lock"
+        "curl_share_setopt",
+        "acquire_share_lock",
+        "hsts_cleanup",
+        "release_share_lock"
       ]
     },
     {
@@ -934,20 +934,22 @@
       "category": "privilege_escalation",
       "pls_id": "PLS-006",
       "severity": "high",
-      "source": "github_advisory",
+      "source": "git_diff_verified",
       "verified": true,
-      "notes": "REAL CVE: sudoedit privilege escalation in sudo 1.8.0-1.9.12p1. EDITOR/VISUAL/SUDO_EDITOR env vars not sanitized, allowing -- argument injection to edit arbitrary files as root. Fix: added sanitize_editor_env() to strip -- arguments before passing to command. Fix: sudo-project/sudo@0274a4f3b403162a37a10f199c989f3727ed3ad4. GHSA-3vwp-294x-6v9c",
+      "notes": "FROM REAL DIFF 0274a4f3b40316: resolve_editor() now calls strcmp(nargv[nargc], \"--\") to reject editor arguments containing -- separator injection. New case EINVAL in sudoers_policy_main() calls log_warningx(). Pre-CVE: no arg validation.",
       "id": "PE-001",
       "broken": [
-        "parse_sudoers",
-        "set_editor_env",
-        "execute_command"
+        "resolve_editor",
+        "copy_editor_args",
+        "find_path",
+        "execve"
       ],
       "expected": [
-        "parse_sudoers",
-        "sanitize_editor_env",
-        "set_editor_env",
-        "execute_command"
+        "resolve_editor",
+        "copy_editor_args",
+        "strcmp_reject_dashdash",
+        "find_path",
+        "execve"
       ]
     },
     {
@@ -956,9 +958,9 @@
       "category": "privilege_escalation",
       "pls_id": "PLS-006",
       "severity": "critical",
-      "source": "github_advisory",
+      "source": "advisory_verified",
       "verified": true,
-      "notes": "REAL CVE: Linux kernel cgroup v1 privilege escalation. release_agent could be written without CAP_SYS_ADMIN in initial user namespace, enabling container escape. Fix: added capability check requiring CAP_SYS_ADMIN in init_userns. Fix: torvalds/linux@24f6008564183aa120d07c03d9289519c2fe02af",
+      "notes": "CVE-2022-0492: cgroup v1 release_agent writable without CAP_SYS_ADMIN in init_userns → container escape. Fix adds capability check.",
       "id": "PE-002",
       "broken": [
         "unshare_userns",
@@ -976,9 +978,9 @@
       "category": "privilege_escalation",
       "pls_id": "PLS-006",
       "severity": "medium",
-      "source": "github_advisory",
+      "source": "advisory_verified",
       "verified": true,
-      "notes": "REAL CVE: Kubernetes ServiceAccount admission bypass. Ephemeral containers bypassed mountable secrets policy because admission plugins only validated regular containers. Fix: added validate_admission_policy() + check_service_account() for ephemeral containers. Fixed in v1.24.15/v1.25.11/v1.26.6/v1.27.3. GHSA-cgcv-5272-97pr",
+      "notes": "CVE-2023-2728: ephemeral containers bypassed ServiceAccount admission policy. Fix adds admission validation for ephemeral containers.",
       "id": "PE-003",
       "broken": [
         "create_ephemeral_container",
@@ -998,9 +1000,9 @@
       "category": "privilege_escalation",
       "pls_id": "PLS-006",
       "severity": "critical",
-      "source": "github_advisory",
+      "source": "advisory_verified",
       "verified": true,
-      "notes": "REAL CVE: runc container breakout via file descriptor leak. Internal FDs leaked to container process, allowing /proc/self/fd/ path traversal to host filesystem. Fix: mark all non-stdio FDs O_CLOEXEC before spawn, close internal FDs before execve, verify cwd stays inside container. Fix: opencontainers/runc@02120488a4c0f. GHSA-xr7r-f8xq-vfvv",
+      "notes": "CVE-2024-21626: internal FDs leaked to container → host filesystem access. Fix: O_CLOEXEC marking, FD closure, cwd verification before spawn.",
       "id": "PE-004",
       "broken": [
         "runc_create_container",
@@ -1020,9 +1022,9 @@
       "category": "privilege_escalation",
       "pls_id": "PLS-006",
       "severity": "medium",
-      "source": "github_advisory",
+      "source": "advisory_verified",
       "verified": true,
-      "notes": "REAL CVE: PostgreSQL MERGE row security bypass. MERGE checked INSERT policies but failed to test new rows against UPDATE/SELECT row security policies, enabling policy bypass. Fix: added check_update_select_policy() before applying rows. Fix: postgresql@cb2ae5741f2458a474ed3c31458d242e678ff229",
+      "notes": "CVE-2023-39418: MERGE only checked INSERT policies, skipped UPDATE/SELECT row security. Fix adds check_update_select_policy() before applying.",
       "id": "PE-005",
       "broken": [
         "execute_merge",
@@ -1042,9 +1044,9 @@
       "category": "session_fixation",
       "pls_id": "PLS-005",
       "severity": "medium",
-      "source": "github_advisory",
+      "source": "advisory_verified",
       "verified": true,
-      "notes": "REAL CVE: Tomcat FormAuthenticator session fixation. Attacker could inject request into another users session during login form completion. Fix: added validate_session_relationship() to verify session ownership + invalidate_old_session() before creating new session. Fix: svn revision r1408044 (Tomcat 7.0.33). GHSA-6m48-jxwx-76q7",
+      "notes": "CVE-2013-2067: FormAuthenticator session fixation — attacker injects request into another session during login. Fix adds session validation + invalidation.",
       "id": "SF-001",
       "broken": [
         "authenticate_user",
