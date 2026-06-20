@@ -965,23 +965,25 @@
       ]
     },
     {
-      "cve": "CVE-2023-44487",
-      "project": "kubernetes",
+      "cve": "CVE-2023-2728",
+      "project": "kubernetes/kubernetes",
       "category": "privilege_escalation",
       "pls_id": "PLS-006",
-      "severity": "high",
-      "source": "to_be_verified",
-      "verified": false,
-      "notes": "Privilege escalation via Kubernetes volume mount. Pod Security admission bypass allows mounting host paths without validation. Fixed by adding validate_pod_security() check.",
+      "severity": "medium",
+      "source": "github_advisory",
+      "verified": true,
+      "notes": "REAL CVE: Kubernetes ServiceAccount admission bypass. Ephemeral containers bypassed mountable secrets policy because admission plugins only validated regular containers. Fix: added validate_admission_policy() + check_service_account() for ephemeral containers. Fixed in v1.24.15/v1.25.11/v1.26.6/v1.27.3. GHSA-cgcv-5272-97pr",
       "id": "PE-003",
       "broken": [
-        "create_pod",
-        "mount_host_path"
+        "create_ephemeral_container",
+        "skip_admission_check",
+        "attach_to_pod"
       ],
       "expected": [
-        "create_pod",
-        "validate_pod_security",
-        "mount_host_path"
+        "create_ephemeral_container",
+        "validate_admission_policy",
+        "check_service_account",
+        "attach_to_pod"
       ]
     },
     {
@@ -1608,7 +1610,7 @@
   ],
   "metadata": {
     "total": 68,
-    "verified": 31,
+    "verified": 32,
     "byCategory": {
       "resource_leak": 17,
       "use_after_free": 11,
