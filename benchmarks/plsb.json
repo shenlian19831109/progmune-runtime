@@ -1536,25 +1536,25 @@
       ]
     },
     {
-      "cve": "CVE-2023-39362",
-      "project": "nodejs",
+      "cve": "CVE-2022-23540",
+      "project": "auth0/node-jsonwebtoken",
       "category": "missing_validation",
       "pls_id": "PLS-013",
-      "severity": "critical",
-      "source": "to_be_verified",
-      "verified": false,
-      "notes": "Workflow bypass in JWT verification. Access granted without validating algorithm (alg:none attack), verifying signature, or checking expiry. Fixed by adding required validation steps.",
+      "severity": "high",
+      "source": "github_advisory",
+      "verified": true,
+      "notes": "REAL CVE: JWT alg:none bypass in jsonwebtoken <=8.5.1. jwt.verify() defaulted to none algorithm when no algorithms specified and falsy secret passed. Fix: added validate_asymmetric_key(), removed none default, added explicit algorithm verification. Fix commit: auth0/node-jsonwebtoken@e1fa9dcc12054a8681db4e6373da1b30cf7016e3",
       "id": "WB-003",
       "broken": [
-        "parse_jwt",
-        "grant_access"
+        "jwt_verify",
+        "return_payload"
       ],
       "expected": [
-        "parse_jwt",
-        "validate_algorithm",
+        "jwt_verify",
+        "validate_asymmetric_key",
+        "verify_algorithm_not_none",
         "verify_signature",
-        "check_expiry",
-        "grant_access"
+        "return_payload"
       ]
     },
     {
@@ -1602,7 +1602,7 @@
   ],
   "metadata": {
     "total": 68,
-    "verified": 25,
+    "verified": 26,
     "byCategory": {
       "resource_leak": 17,
       "use_after_free": 11,
