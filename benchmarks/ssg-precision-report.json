@@ -1,50 +1,85 @@
 {
-  "timestamp": "2026-06-20T20:43:00.263Z",
+  "timestamp": "2026-06-20T20:46:46.060Z",
   "result": {
     "total": 48,
-    "truePositive": 6,
-    "falsePositive": 3,
-    "trueNegative": 22,
-    "falseNegative": 17,
-    "precision": 0.6666666666666666,
-    "recall": 0.2608695652173913,
-    "f1": 0.37500000000000006,
-    "discoveredRules": 8,
+    "truePositive": 14,
+    "falsePositive": 10,
+    "trueNegative": 15,
+    "falseNegative": 9,
+    "precision": 0.5833333333333334,
+    "recall": 0.6086956521739131,
+    "f1": 0.5957446808510638,
+    "discoveredRules": 17,
     "mismatches": [
+      {
+        "index": 0,
+        "functionName": "if",
+        "expected": "clean",
+        "detected": "violation",
+        "reason": "Incomplete lifecycle: lingering states [RESOURCE_ACQUIRE:C1_S0] not invalidated — missing release/closing call"
+      },
+      {
+        "index": 3,
+        "functionName": "if",
+        "expected": "clean",
+        "detected": "violation",
+        "reason": "Incomplete lifecycle: lingering states [RESOURCE_ACQUIRE:C1_S0] not invalidated — missing release/closing call"
+      },
+      {
+        "index": 4,
+        "functionName": "if",
+        "expected": "clean",
+        "detected": "violation",
+        "reason": "Incomplete lifecycle: lingering states [RESOURCE_ACQUIRE:C1_S0] not invalidated — missing release/closing call"
+      },
+      {
+        "index": 5,
+        "functionName": "if",
+        "expected": "clean",
+        "detected": "violation",
+        "reason": "Incomplete lifecycle: lingering states [RESOURCE_ACQUIRE:C1_S0] not invalidated — missing release/closing call"
+      },
+      {
+        "index": 6,
+        "functionName": "if",
+        "expected": "clean",
+        "detected": "violation",
+        "reason": "Incomplete lifecycle: lingering states [RESOURCE_ACQUIRE:C1_S0] not invalidated — missing release/closing call"
+      },
+      {
+        "index": 7,
+        "functionName": "if",
+        "expected": "clean",
+        "detected": "violation",
+        "reason": "Incomplete lifecycle: lingering states [RESOURCE_ACQUIRE:C1_S0] not invalidated — missing release/closing call"
+      },
       {
         "index": 9,
         "functionName": "if",
         "expected": "clean",
         "detected": "violation",
-        "reason": "failf requires [STATE_PRODUCED_2] but state has [INIT] (namespace: RESOURCE_ACQUIRE)"
+        "reason": "failf requires [C3_S1] but state has [INIT] (namespace: RESOURCE_ACQUIRE)"
+      },
+      {
+        "index": 20,
+        "functionName": "if",
+        "expected": "clean",
+        "detected": "violation",
+        "reason": "Incomplete lifecycle: lingering states [RESOURCE_ACQUIRE:C1_S1] not invalidated — missing release/closing call"
       },
       {
         "index": 22,
         "functionName": "if",
         "expected": "clean",
         "detected": "violation",
-        "reason": "strlen requires [STATE_PRODUCED] but state has [INIT] (namespace: RESOURCE_ACQUIRE)"
+        "reason": "Incomplete lifecycle: lingering states [RESOURCE_ACQUIRE:C3_S1] not invalidated — missing release/closing call"
       },
       {
         "index": 23,
         "functionName": "if",
         "expected": "clean",
         "detected": "violation",
-        "reason": "strlen requires [STATE_PRODUCED] but state has [INIT] (namespace: RESOURCE_ACQUIRE)"
-      },
-      {
-        "index": 415,
-        "functionName": "if_TRUNCATED",
-        "expected": "violation",
-        "detected": "clean",
-        "reason": "SSG passed — no pre_state violation detected"
-      },
-      {
-        "index": 416,
-        "functionName": "if_TRUNCATED",
-        "expected": "violation",
-        "detected": "clean",
-        "reason": "SSG passed — no pre_state violation detected"
+        "reason": "Incomplete lifecycle: lingering states [RESOURCE_ACQUIRE:C3_S1] not invalidated — missing release/closing call"
       },
       {
         "index": 417,
@@ -61,13 +96,6 @@
         "reason": "SSG passed — no pre_state violation detected"
       },
       {
-        "index": 419,
-        "functionName": "if_TRUNCATED",
-        "expected": "violation",
-        "detected": "clean",
-        "reason": "SSG passed — no pre_state violation detected"
-      },
-      {
         "index": 420,
         "functionName": "if_TRUNCATED",
         "expected": "violation",
@@ -77,34 +105,6 @@
       {
         "index": 421,
         "functionName": "if_TRUNCATED",
-        "expected": "violation",
-        "detected": "clean",
-        "reason": "SSG passed — no pre_state violation detected"
-      },
-      {
-        "index": 422,
-        "functionName": "if_TRUNCATED",
-        "expected": "violation",
-        "detected": "clean",
-        "reason": "SSG passed — no pre_state violation detected"
-      },
-      {
-        "index": 424,
-        "functionName": "if_REORDERED",
-        "expected": "violation",
-        "detected": "clean",
-        "reason": "SSG passed — no pre_state violation detected"
-      },
-      {
-        "index": 425,
-        "functionName": "if_REORDERED",
-        "expected": "violation",
-        "detected": "clean",
-        "reason": "SSG passed — no pre_state violation detected"
-      },
-      {
-        "index": 426,
-        "functionName": "if_REORDERED",
         "expected": "violation",
         "detected": "clean",
         "reason": "SSG passed — no pre_state violation detected"
@@ -132,13 +132,6 @@
       },
       {
         "index": 433,
-        "functionName": "if_REORDERED",
-        "expected": "violation",
-        "detected": "clean",
-        "reason": "SSG passed — no pre_state violation detected"
-      },
-      {
-        "index": 434,
         "functionName": "if_REORDERED",
         "expected": "violation",
         "detected": "clean",

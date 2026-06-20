@@ -75,6 +75,36 @@ export function validateSequenceWithSSG(
     for (const s of rule.post_states) states.add(s);
   }
 
+  // P9.2p: Check for incomplete lifecycle — any namespace with lingering states
+  // that should have been invalidated by a terminal/closing function.
+  const lingering: string[] = [];
+  for (const [ns, st] of nsStates) {
+    if (ns === "_global") continue;
+    for (const s of st) {
+      if (s !== "INIT" && s !== "IDLE") {
+        // Check if any rule has this state in its invalidate list
+        // If so, the sequence ended without calling the closer
+        let hasCloser = false;
+        for (const [, rule] of rules) {
+          if (rule.invalidate && rule.invalidate.includes(s)) {
+            hasCloser = true;
+            break;
+          }
+        }
+        if (hasCloser) lingering.push(`${ns}:${s}`);
+      }
+    }
+  }
+
+  if (lingering.length > 0) {
+    return {
+      valid: false,
+      failingStep: sequence.length - 1,
+      failingFunction: sequence[sequence.length - 1] || "",
+      reason: `Incomplete lifecycle: lingering states [${lingering.join(",")}] not invalidated — missing release/closing call`,
+    };
+  }
+
   return { valid: true, failingStep: -1, failingFunction: "", reason: "" };
 }
 

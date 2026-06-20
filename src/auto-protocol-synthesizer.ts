@@ -163,7 +163,8 @@ export function synthesizeProtocols(
     if (!c.inferredPattern || c.sequences.length < 2) continue;
 
     const prototype = findPrototype(c.sequences);
-    const rules = generateStateMachine(prototype, c.id);
+    // P9.2p: Use V2 state machine generation for richer rules
+    const rules = generateStateMachineV2(c.sequences, c.id);
 
     results.push({
       clusterId: c.id,
@@ -176,6 +177,133 @@ export function synthesizeProtocols(
   }
 
   return results;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// P9.2p: State Machine V2 — frequency-based, multi-path rules
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Generate richer protocol rules using ALL sequences in a cluster,
+ * not just the centroid prototype.
+ *
+ * Improvements over V1 (linear chain only):
+ *   1. Frequency-based pre_states: each function can have multiple
+ *      valid pre_states based on what actually precedes it in the data.
+ *   2. Self-transitions: functions that appear consecutively with
+ *      themselves (e.g., process→process) get self-loops.
+ *   3. Multiple exit paths: any function that appears as the last
+ *      call in a sequence is allowed to invalidate states.
+ *   4. Entry points: functions that appear as first call in sequences
+ *      get empty pre_states (always callable).
+ */
+function generateStateMachineV2(
+  sequences: string[][],
+  clusterId: string
+): SynthesizedRule[] {
+  if (sequences.length === 0) return [];
+
+  // Collect frequency data
+  const fnPositions = new Map<string, { first: number; last: number; mid: number; total: number }>();
+  const transitions = new Map<string, Map<string, number>>(); // from → {to → count}
+
+  for (const seq of sequences) {
+    if (seq.length === 0) continue;
+    for (let i = 0; i < seq.length; i++) {
+      const fn = seq[i];
+      if (!fnPositions.has(fn)) fnPositions.set(fn, { first: 0, last: 0, mid: 0, total: 0 });
+      const pos = fnPositions.get(fn)!;
+      pos.total++;
+      if (i === 0) pos.first++;
+      if (i === seq.length - 1) pos.last++;
+      if (i > 0 && i < seq.length - 1) pos.mid++;
+
+      // Track transitions
+      if (i < seq.length - 1) {
+        const from = fn;
+        const to = seq[i + 1];
+        if (!transitions.has(from)) transitions.set(from, new Map());
+        const toMap = transitions.get(from)!;
+        toMap.set(to, (toMap.get(to) || 0) + 1);
+      }
+    }
+  }
+
+  const totalSeqs = sequences.length;
+  const rules: SynthesizedRule[] = [];
+  const statePrefix = clusterId.replace(/[^a-zA-Z0-9]/g, "_");
+  let stateCounter = 0;
+  const fnToState = new Map<string, string>();
+
+  // Assign states to functions
+  for (const [fn, pos] of fnPositions) {
+    const stateName = pos.first / pos.total > 0.5 ? "INIT"
+      : pos.last / pos.total > 0.5 ? `${statePrefix}_EXIT`
+      : `${statePrefix}_S${stateCounter++}`;
+    fnToState.set(fn, stateName);
+  }
+
+  // Generate rules
+  for (const [fn, pos] of fnPositions) {
+    const preStates = new Set<string>();
+    const postStates = new Set<string>();
+    const invalidateStates = new Set<string>();
+
+    // PRE_STATES: collect all unique predecessors
+    for (const seq of sequences) {
+      for (let i = 0; i < seq.length; i++) {
+        if (seq[i] === fn) {
+          if (i === 0) {
+            preStates.add("INIT");
+          } else {
+            const predState = fnToState.get(seq[i - 1]);
+            if (predState) preStates.add(predState);
+          }
+        }
+      }
+    }
+
+    // POST_STATES: from fnToState, and from successors
+    postStates.add(fnToState.get(fn) || `${statePrefix}_S${stateCounter++}`);
+    const toMap = transitions.get(fn);
+    if (toMap) {
+      for (const [toFn] of toMap) {
+        const toState = fnToState.get(toFn);
+        if (toState && toState !== fnToState.get(fn)) postStates.add(toState);
+      }
+    }
+
+    // INVALIDATE: functions that frequently end sequences
+    if (pos.last / Math.max(1, pos.total) > 0.3) {
+      // This function often ends sequences — it should invalidate accumulated states
+      for (const pred of findPredecessors(fn, sequences)) {
+        const predState = fnToState.get(pred);
+        if (predState && predState !== "INIT") invalidateStates.add(predState);
+      }
+    }
+
+    // ENTRY POINTS: functions that frequently start sequences
+    const preStatesArr = pos.first / Math.max(1, pos.total) > 0.5 ? [] : [...preStates];
+
+    rules.push({
+      function: fn,
+      pre_states: preStatesArr,
+      post_states: [...postStates],
+      invalidate: invalidateStates.size > 0 ? [...invalidateStates] : undefined,
+    });
+  }
+
+  return rules;
+}
+
+function findPredecessors(fn: string, sequences: string[][]): string[] {
+  const preds = new Set<string>();
+  for (const seq of sequences) {
+    for (let i = 1; i < seq.length; i++) {
+      if (seq[i] === fn) preds.add(seq[i - 1]);
+    }
+  }
+  return [...preds];
 }
 
 /**
