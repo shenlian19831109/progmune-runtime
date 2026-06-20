@@ -1,14 +1,14 @@
 {
-  "timestamp": "2026-06-20T21:32:57.785Z",
+  "timestamp": "2026-06-20T21:38:10.519Z",
   "result": {
     "total": 48,
-    "truePositive": 10,
-    "falsePositive": 4,
-    "trueNegative": 21,
-    "falseNegative": 13,
-    "precision": 0.7142857142857143,
-    "recall": 0.43478260869565216,
-    "f1": 0.5405405405405405,
+    "truePositive": 18,
+    "falsePositive": 7,
+    "trueNegative": 18,
+    "falseNegative": 5,
+    "precision": 0.72,
+    "recall": 0.782608695652174,
+    "f1": 0.7499999999999999,
     "discoveredRules": 17,
     "mismatches": [
       {
@@ -19,11 +19,32 @@
         "reason": "failf requires [C3_S1] but state has [INIT] (namespace: RESOURCE_ACQUIRE)"
       },
       {
+        "index": 11,
+        "functionName": "if",
+        "expected": "clean",
+        "detected": "violation",
+        "reason": "Order violation: infof should come AFTER STRCONST (appears before in 3 of clean sequences)"
+      },
+      {
+        "index": 14,
+        "functionName": "if",
+        "expected": "clean",
+        "detected": "violation",
+        "reason": "Order violation: infof should come AFTER STRCONST (appears before in 3 of clean sequences)"
+      },
+      {
         "index": 20,
         "functionName": "if",
         "expected": "clean",
         "detected": "violation",
         "reason": "Order violation: curlx_ptimediff_ms should come AFTER infof (state [INIT] must be produced first)"
+      },
+      {
+        "index": 21,
+        "functionName": "if",
+        "expected": "clean",
+        "detected": "violation",
+        "reason": "Order violation: CURL_TRC_CF should come AFTER VERBOSE (appears before in 2 of clean sequences)"
       },
       {
         "index": 22,
@@ -47,21 +68,7 @@
         "reason": "SSG passed — no pre_state violation detected"
       },
       {
-        "index": 417,
-        "functionName": "if_TRUNCATED",
-        "expected": "violation",
-        "detected": "clean",
-        "reason": "SSG passed — no pre_state violation detected"
-      },
-      {
         "index": 418,
-        "functionName": "if_TRUNCATED",
-        "expected": "violation",
-        "detected": "clean",
-        "reason": "SSG passed — no pre_state violation detected"
-      },
-      {
-        "index": 420,
         "functionName": "if_TRUNCATED",
         "expected": "violation",
         "detected": "clean",
@@ -75,20 +82,6 @@
         "reason": "SSG passed — no pre_state violation detected"
       },
       {
-        "index": 424,
-        "functionName": "if_REORDERED",
-        "expected": "violation",
-        "detected": "clean",
-        "reason": "SSG passed — no pre_state violation detected"
-      },
-      {
-        "index": 425,
-        "functionName": "if_REORDERED",
-        "expected": "violation",
-        "detected": "clean",
-        "reason": "SSG passed — no pre_state violation detected"
-      },
-      {
         "index": 426,
         "functionName": "if_REORDERED",
         "expected": "violation",
@@ -96,35 +89,7 @@
         "reason": "SSG passed — no pre_state violation detected"
       },
       {
-        "index": 429,
-        "functionName": "if_REORDERED",
-        "expected": "violation",
-        "detected": "clean",
-        "reason": "SSG passed — no pre_state violation detected"
-      },
-      {
-        "index": 430,
-        "functionName": "if_REORDERED",
-        "expected": "violation",
-        "detected": "clean",
-        "reason": "SSG passed — no pre_state violation detected"
-      },
-      {
-        "index": 432,
-        "functionName": "if_REORDERED",
-        "expected": "violation",
-        "detected": "clean",
-        "reason": "SSG passed — no pre_state violation detected"
-      },
-      {
         "index": 433,
-        "functionName": "if_REORDERED",
-        "expected": "violation",
-        "detected": "clean",
-        "reason": "SSG passed — no pre_state violation detected"
-      },
-      {
-        "index": 435,
         "functionName": "if_REORDERED",
         "expected": "violation",
         "detected": "clean",
