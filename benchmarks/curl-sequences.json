@@ -3,7 +3,7 @@
     "repo": "/tmp/curl",
     "extractedAt": "2026-06-20T17:29:30.704Z",
     "stats": {
-      "total": 415,
+      "total": 438,
       "avgCalls": 2.633734939759036,
       "maxCalls": 23,
       "files": 99
@@ -4422,6 +4422,285 @@
         "CURL_UNCONST"
       ],
       "bodyLength": 15
+    },
+    {
+      "functionName": "if_TRUNCATED",
+      "filePath": "/tmp/curl/docs/examples/xmlstream.c",
+      "lineNumber": 1154,
+      "calls": [
+        "XML_Parse",
+        "XML_GetErrorCode",
+        "fprintf",
+        "d",
+        "XML_ErrorString",
+        "printf"
+      ]
+    },
+    {
+      "functionName": "if_TRUNCATED",
+      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
+      "lineNumber": 1326,
+      "calls": [
+        "infof",
+        "strlen",
+        "curlx_str_numblanks"
+      ]
+    },
+    {
+      "functionName": "if_TRUNCATED",
+      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
+      "lineNumber": 1339,
+      "calls": [
+        "infof",
+        "Curl_compareheader",
+        "STRCONST",
+        "STRCONST",
+        "CURL_TRC_CF"
+      ]
+    },
+    {
+      "functionName": "if_TRUNCATED",
+      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
+      "lineNumber": 1354,
+      "calls": [
+        "Curl_compareheader",
+        "STRCONST",
+        "STRCONST"
+      ]
+    },
+    {
+      "functionName": "if_TRUNCATED",
+      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
+      "lineNumber": 1413,
+      "calls": [
+        "infof",
+        "strlen",
+        "curlx_str_numblanks"
+      ]
+    },
+    {
+      "functionName": "if_TRUNCATED",
+      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
+      "lineNumber": 1432,
+      "calls": [
+        "infof",
+        "Curl_compareheader",
+        "STRCONST",
+        "STRCONST",
+        "infof"
+      ]
+    },
+    {
+      "functionName": "if_TRUNCATED",
+      "filePath": "/tmp/curl/lib/cf-h2-proxy.c",
+      "lineNumber": 2140,
+      "calls": [
+        "CF_DATA_SAVE",
+        "nghttp2_session_want_write",
+        "Curl_bufq_is_empty",
+        "Curl_bufq_is_empty",
+        "nghttp2_session_want_read",
+        "Curl_pollset_set",
+        "CURL_TRC_CF"
+      ]
+    },
+    {
+      "functionName": "if_TRUNCATED",
+      "filePath": "/tmp/curl/lib/cf-ip-happy.c",
+      "lineNumber": 1519,
+      "calls": [
+        "curlx_ptimediff_ms",
+        "Curl_pgrs_now",
+        "CURL_TRC_CF",
+        "VERBOSE",
+        "VERBOSE",
+        "cf_ip_attempt_restart",
+        "CURL_TRC_CF",
+        "Curl_pgrs_now",
+        "DEBUGASSERT",
+        "infof"
+      ]
+    },
+    {
+      "functionName": "if_TRUNCATED",
+      "filePath": "/tmp/curl/lib/cf-socket.c",
+      "lineNumber": 1607,
+      "calls": [
+        "strlen",
+        "strlen",
+        "memchr",
+        "curlx_memdup0",
+        "curlx_memdup0"
+      ]
+    },
+    {
+      "functionName": "if_REORDERED",
+      "filePath": "/tmp/curl/docs/examples/websocket.c",
+      "lineNumber": 2052,
+      "calls": [
+        "fprintf",
+        "select",
+        "sleep"
+      ]
+    },
+    {
+      "functionName": "if_REORDERED",
+      "filePath": "/tmp/curl/docs/examples/websocket.c",
+      "lineNumber": 2101,
+      "calls": [
+        "fprintf",
+        "select",
+        "sleep"
+      ]
+    },
+    {
+      "functionName": "if_REORDERED",
+      "filePath": "/tmp/curl/docs/examples/xmlstream.c",
+      "lineNumber": 2154,
+      "calls": [
+        "XML_Parse",
+        "XML_GetErrorCode",
+        "fprintf",
+        "d",
+        "XML_ErrorString",
+        "printf",
+        "printf"
+      ]
+    },
+    {
+      "functionName": "if_REORDERED",
+      "filePath": "/tmp/curl/lib/cf-dns.c",
+      "lineNumber": 2195,
+      "calls": [
+        "failf",
+        "Curl_pgrs_now",
+        "curlx_ptimediff_ms"
+      ]
+    },
+    {
+      "functionName": "if_REORDERED",
+      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
+      "lineNumber": 2326,
+      "calls": [
+        "infof",
+        "strlen",
+        "failf",
+        "curlx_str_numblanks"
+      ]
+    },
+    {
+      "functionName": "if_REORDERED",
+      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
+      "lineNumber": 2339,
+      "calls": [
+        "infof",
+        "Curl_compareheader",
+        "STRCONST",
+        "STRCONST",
+        "Curl_httpchunk_reset",
+        "CURL_TRC_CF"
+      ]
+    },
+    {
+      "functionName": "if_REORDERED",
+      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
+      "lineNumber": 2354,
+      "calls": [
+        "Curl_compareheader",
+        "STRCONST",
+        "CURL_TRC_CF",
+        "STRCONST"
+      ]
+    },
+    {
+      "functionName": "if_REORDERED",
+      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
+      "lineNumber": 2413,
+      "calls": [
+        "infof",
+        "strlen",
+        "failf",
+        "curlx_str_numblanks"
+      ]
+    },
+    {
+      "functionName": "if_REORDERED",
+      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
+      "lineNumber": 2432,
+      "calls": [
+        "infof",
+        "Curl_compareheader",
+        "STRCONST",
+        "STRCONST",
+        "Curl_httpchunk_reset",
+        "infof"
+      ]
+    },
+    {
+      "functionName": "if_REORDERED",
+      "filePath": "/tmp/curl/lib/cf-h2-proxy.c",
+      "lineNumber": 3140,
+      "calls": [
+        "CF_DATA_SAVE",
+        "nghttp2_session_want_write",
+        "Curl_bufq_is_empty",
+        "Curl_bufq_is_empty",
+        "nghttp2_session_want_read",
+        "Curl_pollset_set",
+        "CF_DATA_RESTORE",
+        "CURL_TRC_CF"
+      ]
+    },
+    {
+      "functionName": "if_REORDERED",
+      "filePath": "/tmp/curl/lib/cf-ip-happy.c",
+      "lineNumber": 2519,
+      "calls": [
+        "curlx_ptimediff_ms",
+        "Curl_pgrs_now",
+        "CURL_TRC_CF",
+        "VERBOSE",
+        "VERBOSE",
+        "cf_ip_attempt_restart",
+        "CURL_TRC_CF",
+        "Curl_pgrs_now",
+        "DEBUGASSERT",
+        "Curl_expire",
+        "infof"
+      ]
+    },
+    {
+      "functionName": "if_REORDERED",
+      "filePath": "/tmp/curl/lib/cf-ip-happy.c",
+      "lineNumber": 2550,
+      "calls": [
+        "CURL_TRC_CF",
+        "CURL_TRC_CF",
+        "VERBOSE"
+      ]
+    },
+    {
+      "functionName": "if_REORDERED",
+      "filePath": "/tmp/curl/lib/cf-socket.c",
+      "lineNumber": 2600,
+      "calls": [
+        "strlen",
+        "strlen",
+        "curlx_memdup0"
+      ]
+    },
+    {
+      "functionName": "if_REORDERED",
+      "filePath": "/tmp/curl/lib/cf-socket.c",
+      "lineNumber": 2607,
+      "calls": [
+        "strlen",
+        "strlen",
+        "memchr",
+        "curlx_memdup0",
+        "curlx_safefree",
+        "curlx_memdup0"
+      ]
     }
   ]
 }
