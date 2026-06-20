@@ -806,20 +806,23 @@
       "category": "double_free",
       "pls_id": "PLS-010",
       "severity": "medium",
-      "source": "advisory_verified",
+      "source": "git_diff_verified",
       "verified": true,
-      "notes": "CVE-2023-27537: HSTS data shared across threads without mutex → concurrent double-free. Fix adds acquire_share_lock/release_share_lock around hsts_cleanup to serialize access.",
+      "notes": "FROM REAL DIFF 076a2f629119: HSTS loading deferred. Curl_share_lock/unlock added.",
       "id": "DF-005",
       "broken": [
-        "curl_share_setopt",
-        "hsts_cleanup",
-        "hsts_cleanup"
+        "Curl_hsts_loadfile",
+        "Curl_close",
+        "Curl_hsts_cleanup_unconditional"
       ],
       "expected": [
-        "curl_share_setopt",
-        "acquire_share_lock",
-        "hsts_cleanup",
-        "release_share_lock"
+        "curl_slist_append",
+        "Curl_pretransfer",
+        "Curl_share_lock",
+        "Curl_hsts_loadfiles",
+        "Curl_share_unlock",
+        "Curl_close",
+        "Curl_hsts_cleanup_guarded"
       ]
     },
     {
