@@ -26,6 +26,38 @@ const model = process.env.LLM_MODEL || selected.model;
 
 const client = new OpenAI({ apiKey, baseURL });
 
+// ── API Key validation ──
+const KNOWN_KEY_PREFIXES: Record<string, string> = {
+  "ghp_":        "GitHub Personal Access Token (classic)",
+  "github_pat_": "GitHub Personal Access Token (fine-grained)",
+  "glpat-":      "GitLab Personal Access Token",
+  "sk-xxxx":     "placeholder / default value",
+  "your-key":    "placeholder / default value",
+};
+
+function validateApiKey(key: string): string[] {
+  const warnings: string[] = [];
+  if (!key || key === "sk-xxxx" || key === "your-key") {
+    warnings.push("❌ LLM_API_KEY is not set or is a placeholder. Configure via .env: LLM_API_KEY=your-deepseek-key");
+    return warnings;
+  }
+  for (const [prefix, label] of Object.entries(KNOWN_KEY_PREFIXES)) {
+    if (key.startsWith(prefix)) {
+      warnings.push(`⚠️  LLM_API_KEY looks like a ${label} (prefix: "${prefix}"), not an LLM API key. DeepSeek keys start with "sk-". Get one at https://platform.deepseek.com/api_keys`);
+      break;
+    }
+  }
+  if (key.length < 20) {
+    warnings.push(`⚠️  LLM_API_KEY is unusually short (${key.length} chars). Most API keys are 30+ characters.`);
+  }
+  return warnings;
+}
+
+const keyWarnings = validateApiKey(apiKey);
+for (const w of keyWarnings) {
+  console.error(w);
+}
+
 export let callCount = 0;
 export function resetCallCount() { callCount = 0; }
 
@@ -58,18 +90,33 @@ export function estimateTokens(text: string): number {
   return Math.ceil(cjk * 1.5 + other * 0.4);
 }
 
+// ── Verbose debug logging ──
+const VERBOSE = process.env.PROGMUNE_VERBOSE === "1";
+function vlog(label: string, content: string, maxLen = 2000): void {
+  if (!VERBOSE) return;
+  const truncated = content.length > maxLen
+    ? content.slice(0, maxLen) + `\n... [truncated, ${content.length} total chars]`
+    : content;
+  console.error(`\n${"═".repeat(60)}\n🔍 [VERBOSE] ${label}\n${"─".repeat(60)}\n${truncated}\n${"═".repeat(60)}`);
+}
+
+export function isVerbose(): boolean { return VERBOSE; }
+
 /** @requires PROMPT @produces LLM_RESPONSE */
 export async function generate(prompt: string): Promise<string> {
   assertCallLimit();
   await applyRateLimit();
   callCount++;
   lastCallTime = Date.now();
+  vlog(`LLM Call #${callCount} (generate) | Model: ${model} | Prompt (${estimateTokens(prompt)} est. tokens)`, prompt);
   const resp = await client.chat.completions.create({
     model,
     messages: [{ role: "user", content: prompt }],
     temperature: 0.0,
   });
-  return resp.choices[0]?.message?.content || "";
+  const content = resp.choices[0]?.message?.content || "";
+  vlog(`LLM Response #${callCount} (${estimateTokens(content)} est. tokens, finish=${resp.choices[0]?.finish_reason})`, content);
+  return content;
 }
 
 /** 带 system prompt 的调用：静态规则放 system，动态内容放 user，语义分离便于未来对接各平台缓存策略 */
@@ -79,6 +126,9 @@ export async function chat(systemPrompt: string, userPrompt: string): Promise<st
   await applyRateLimit();
   callCount++;
   lastCallTime = Date.now();
+  const totalTokens = estimateTokens(systemPrompt) + estimateTokens(userPrompt);
+  vlog(`LLM Call #${callCount} (chat) | Model: ${model} | System (${estimateTokens(systemPrompt)}t) + User (${estimateTokens(userPrompt)}t) = ${totalTokens} est. tokens`,
+    `── SYSTEM ──\n${systemPrompt}\n── USER ──\n${userPrompt}`);
   const resp = await client.chat.completions.create({
     model,
     messages: [
@@ -87,5 +137,7 @@ export async function chat(systemPrompt: string, userPrompt: string): Promise<st
     ],
     temperature: 0.0,
   });
-  return resp.choices[0]?.message?.content || "";
+  const content = resp.choices[0]?.message?.content || "";
+  vlog(`LLM Response #${callCount} (${estimateTokens(content)} est. tokens, finish=${resp.choices[0]?.finish_reason})`, content);
+  return content;
 }

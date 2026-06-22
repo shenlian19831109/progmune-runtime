@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>X-like — Simple Text Sharing</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f0f0f;
+      color: #e0e0e0;
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 24px;
+      color: #fff;
+      border-bottom: 1px solid #2a2a2a;
+      padding-bottom: 12px;
+    }
+    .compose {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+    .compose input, .compose textarea {
+      width: 100%;
+      background: #0f0f0f;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #e0e0e0;
+      font-size: 15px;
+      outline: none;
+      margin-bottom: 10px;
+      font-family: inherit;
+    }
+    .compose input:focus, .compose textarea:focus {
+      border-color: #4a9eff;
+    }
+    .compose textarea {
+      resize: vertical;
+      min-height: 80px;
+      max-height: 200px;
+    }
+    .compose .meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .compose .char-count {
+      font-size: 12px;
+      color: #888;
+    }
+    .compose .char-count.warn { color: #f0a040; }
+    .compose button {
+      background: #4a9eff;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .compose button:hover { background: #3a8eef; }
+    .compose button:disabled { background: #333; color: #666; cursor: not-allowed; }
+
+    .error-msg {
+      color: #ff5c5c;
+      font-size: 13px;
+      margin-bottom: 8px;
+      display: none;
+    }
+
+    .posts { display: flex; flex-direction: column; gap: 2px; }
+
+    .post {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 0;
+      padding: 16px;
+      transition: background 0.2s;
+    }
+    .post:first-of-type { border-radius: 12px 12px 0 0; }
+    .post:last-of-type { border-radius: 0 0 12px 12px; }
+    .post:only-of-type { border-radius: 12px; }
+    .post:hover { background: #1e1e1e; }
+    .post-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6px;
+    }
+    .post-username {
+      font-weight: 700;
+      color: #fff;
+      font-size: 15px;
+    }
+    .post-time {
+      font-size: 12px;
+      color: #666;
+    }
+    .post-content {
+      font-size: 15px;
+      line-height: 1.5;
+      color: #d0d0d0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .post-delete {
+      background: none;
+      border: none;
+      color: #666;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: color 0.2s;
+    }
+    .post-delete:hover { color: #ff5c5c; }
+
+    .loading {
+      text-align: center;
+      color: #888;
+      padding: 40px;
+    }
+
+    .empty {
+      text-align: center;
+      color: #666;
+      padding: 60px 20px;
+    }
+    .empty p { margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <h1>✕ X-like</h1>
+
+  <div class="compose">
+    <input type="text" id="username" placeholder="Your name" maxlength="30" autocomplete="off">
+    <textarea id="content" placeholder="What's on your mind?" maxlength="500"></textarea>
+    <div class="error-msg" id="error"></div>
+    <div class="meta">
+      <span class="char-count" id="charCount">0 / 500</span>
+      <button id="postBtn">Post</button>
+    </div>
+  </div>
+
+  <div class="posts" id="posts"></div>
+
+  <script>
+    const $ = (s) => document.querySelector(s);
+    const usernameEl = $("#username");
+    const contentEl = $("#content");
+    const errorEl = $("#error");
+    const charCount = $("#charCount");
+    const postBtn = $("#postBtn");
+    const postsEl = $("#posts");
+
+    // ── Character counter ──
+    contentEl.addEventListener("input", () => {
+      const n = contentEl.value.length;
+      charCount.textContent = `${n} / 500`;
+      charCount.className = n > 450 ? "char-count warn" : "char-count";
+    });
+
+    // ── Post ──
+    postBtn.addEventListener("click", async () => {
+      const username = usernameEl.value.trim();
+      const content = contentEl.value.trim();
+      errorEl.style.display = "none";
+
+      if (!username) return showError("Please enter a name");
+      if (!content) return showError("Content cannot be empty");
+      if (content.length > 500) return showError("Content too long (max 500)");
+
+      postBtn.disabled = true;
+      postBtn.textContent = "Posting...";
+
+      try {
+        const res = await fetch("/api/posts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, content }),
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || "Failed to post");
+        }
+        contentEl.value = "";
+        charCount.textContent = "0 / 500";
+        loadPosts();
+      } catch (e) {
+        showError(e.message);
+      } finally {
+        postBtn.disabled = false;
+        postBtn.textContent = "Post";
+      }
+    });
+
+    // ── Delete ──
+    async function deletePost(id) {
+      try {
+        const res = await fetch(`/api/posts/${id}`, { method: "DELETE" });
+        if (!res.ok) throw new Error("Failed to delete");
+        loadPosts();
+      } catch (e) {
+        showError(e.message);
+      }
+    }
+
+    // ── Load posts ──
+    async function loadPosts() {
+      postsEl.innerHTML = '<div class="loading">Loading...</div>';
+      try {
+        const res = await fetch("/api/posts?limit=50");
+        const data = await res.json();
+        if (data.posts.length === 0) {
+          postsEl.innerHTML = '<div class="empty"><p>📝</p><p>No posts yet. Be the first!</p></div>';
+          return;
+        }
+        postsEl.innerHTML = data.posts.map(p => `
+          <div class="post">
+            <div class="post-header">
+              <span class="post-username">@${esc(p.username)}</span>
+              <span class="post-time">${fmtTime(p.created_at)}</span>
+            </div>
+            <div class="post-content">${esc(p.content)}</div>
+            <button class="post-delete" onclick="deletePost(${p.id})" title="Delete">✕</button>
+          </div>
+        `).join("");
+      } catch (e) {
+        postsEl.innerHTML = `<div class="empty"><p>Failed to load posts</p></div>`;
+      }
+    }
+
+    function showError(msg) {
+      errorEl.textContent = msg;
+      errorEl.style.display = "block";
+      setTimeout(() => { errorEl.style.display = "none"; }, 3000);
+    }
+
+    function esc(s) {
+      const d = document.createElement("div");
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    function fmtTime(ts) {
+      const d = new Date(ts + "Z");
+      if (isNaN(d.getTime())) return ts;
+      const now = new Date();
+      const diff = now - d;
+      if (diff < 60000) return "just now";
+      if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+      if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+      return d.toLocaleDateString();
+    }
+
+    // ── Init ──
+    loadPosts();
+  </script>
+</body>
+</html>

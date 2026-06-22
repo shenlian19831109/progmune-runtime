@@ -24,6 +24,9 @@ export interface ExecuteResult {
   irFunctionCount: number;
   protocolRuleCount: number;
   violations: number;
+  /** True if LLM generation failed and a rule-based fallback was used.
+   *  The generated code may be minimal / low-quality. */
+  degraded: boolean;
   /** Phase 6: Repair metrics — true if SSG deterministic repair was applied */
   repairApplied: boolean;
   /** Phase 6: Number of repair actions inserted */
@@ -109,7 +112,14 @@ export async function execute(
   try {
     ir = extractIR(projectPath);
   } catch (e: any) {
-    return { success: false, code: "", sessionId: "", hash: "", ruleHash: "", irFunctionCount: 0, protocolRuleCount: 0, violations: 0, repairApplied: false, repairCount: 0, repairBranchIds: [], branchWinner: undefined, error: `IR extraction failed: ${e.message}` };
+    return { success: false, degraded: false, code: "", sessionId: "", hash: "", ruleHash: "", irFunctionCount: 0, protocolRuleCount: 0, violations: 0, repairApplied: false, repairCount: 0, repairBranchIds: [], branchWinner: undefined, error: `IR extraction failed: ${e.message}` };
+  }
+
+  // 1.5 Write ir.json — planner reads from disk
+  try {
+    fs.writeFileSync("ir.json", JSON.stringify(ir, null, 2));
+  } catch (e: any) {
+    return { success: false, degraded: false, code: "", sessionId: "", hash: "", ruleHash: "", irFunctionCount: ir.length, protocolRuleCount: 0, violations: 0, repairApplied: false, repairCount: 0, repairBranchIds: [], branchWinner: undefined, error: `ir.json write failed: ${e.message}` };
   }
 
   // 2. Protocol rule count
@@ -134,12 +144,12 @@ export async function execute(
       rootCause: classifyPlanError(e.message),
       sessionId: undefined,
     });
-    return { success: false, code: "", sessionId: "", hash: "", ruleHash: "", irFunctionCount: ir.length, protocolRuleCount, violations: 0, repairApplied: false, repairCount: 0, repairBranchIds: [], branchWinner: undefined, error: `Planning failed: ${e.message}` };
+    return { success: false, degraded: false, code: "", sessionId: "", hash: "", ruleHash: "", irFunctionCount: ir.length, protocolRuleCount, violations: 0, repairApplied: false, repairCount: 0, repairBranchIds: [], branchWinner: undefined, error: `Planning failed: ${e.message}` };
   }
 
   const actions = planResult!.actions || [];
   if (actions.length === 0) {
-    return { success: false, code: "", sessionId: planResult!.sessionId, hash: "", ruleHash: planResult!.ruleHash || "", irFunctionCount: ir.length, protocolRuleCount, violations: 0, repairApplied: false, repairCount: 0, repairBranchIds: [], branchWinner: undefined, error: "Planner returned empty action sequence" };
+    return { success: false, degraded: false, code: "", sessionId: planResult!.sessionId, hash: "", ruleHash: planResult!.ruleHash || "", irFunctionCount: ir.length, protocolRuleCount, violations: 0, repairApplied: false, repairCount: 0, repairBranchIds: [], branchWinner: undefined, error: "Planner returned empty action sequence" };
   }
 
   // 4. Emit code with generation marker
@@ -193,6 +203,7 @@ export async function execute(
     irFunctionCount: ir.length,
     protocolRuleCount,
     violations: 0,
+    degraded: planResult!.degraded || false,
     repairApplied: planResult!.repairApplied,
     repairCount: planResult!.repairCount,
     repairBranchIds: planResult!.repairBranchIds,

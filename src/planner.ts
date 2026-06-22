@@ -1,4 +1,4 @@
-import { generate, chat, resetCallCount, estimateTokens } from "./llm";
+import { generate, chat, resetCallCount, estimateTokens, isVerbose } from "./llm";
 import type { Action, ConstraintViolation, Attempt, ExecutionSession, AntibodyHit, StateTransition } from "./runtime-types";
 import { generateAttemptId, generateSessionId, generatePlannerSeed } from "./runtime-types";
 import { executeActionCode } from "./action-runtime";
@@ -422,6 +422,9 @@ export interface PlanResult {
   actions: Action[];
   sessionId: string;
   ruleHash?: string;
+  /** If true, LLM generation was exhausted and a rule-based fallback was used.
+   *  The generated code may be minimal or low-quality. Callers should warn users. */
+  degraded: boolean;
   /** Phase 6: Repair metrics */
   repairApplied: boolean;
   repairCount: number;
@@ -441,10 +444,11 @@ export async function plan(userIntent: string, llmSeeds?: string[]): Promise<Pla
   // Helper: wrap actions into PlanResult
   let repairMetrics = { applied: false, count: 0, branchIds: [] as string[] };
 
-  const wrapResult = (actions: Action[], repair?: { applied: boolean; count: number; branchIds: string[] }): PlanResult => ({
+  const wrapResult = (actions: Action[], repair?: { applied: boolean; count: number; branchIds: string[] }, degraded = false): PlanResult => ({
     actions,
     sessionId: session?.sessionId || "",
     ruleHash: session?.ruleHash,
+    degraded,
     repairApplied: repair?.applied ?? repairMetrics.applied,
     repairCount: repair?.count ?? repairMetrics.count,
     repairBranchIds: repair?.branchIds ?? repairMetrics.branchIds,
@@ -799,7 +803,11 @@ ${RETRY_HINT}
     if (!text) continue;
 
     text = text.replace(/```(?:json|javascript)?\s*/gi, '').replace(/```\s*/g, '').trim();
-    console.error("📝 LLM 输出:\n", text);
+    if (isVerbose()) {
+      console.error(`\n📝 [VERBOSE] LLM raw output (attempt ${r + 1}/${maxRetries}):\n${text.slice(0, 3000)}${text.length > 3000 ? `\n... [${text.length - 3000} more chars]` : ""}\n`);
+    } else {
+      console.error("📝 LLM 输出:\n", text);
+    }
 
     // 优先尝试 JSON 解析，失败则回退到 DSL 执行
     let rawActions = parseActionJSON(text);
@@ -880,6 +888,18 @@ ${RETRY_HINT}
     const enriched = enrichActions(rawActions, ir);
     const filtered = enriched.filter(a => !forbiddenFuncs.includes(a.kind === "call" ? a.function : ''));
     let ssgTransitions: StateTransition[] = [];
+
+    if (isVerbose()) {
+      console.error(`🔬 [VERBOSE] Parsed ${rawActions.length} actions → ${enriched.length} enriched → ${filtered.length} after filtering`);
+      for (let ai = 0; ai < filtered.length; ai++) {
+        const a = filtered[ai];
+        if (a.kind === "call") {
+          console.error(`  [${ai}] call ${a.function}(${(a.args || []).map((x: any) => `${x.name}=${JSON.stringify(x.value)}`).join(", ")})`);
+        } else {
+          console.error(`  [${ai}] ${a.kind}`);
+        }
+      }
+    }
 
     // 0) Hard Constraint Pre-check: local scan before full validation
     //    Saves LLM tokens by detecting obvious violations first
@@ -1094,10 +1114,22 @@ ${RETRY_HINT}
 
       // SSG passed — capture transitions
       ssgTransitions = protoResult.transitions;
+      if (isVerbose()) {
+        console.error(`✅ [VERBOSE] Protocol (SSG) validation passed — ${ssgTransitions.length} transitions recorded`);
+        for (const t of ssgTransitions.slice(0, 5)) {
+          const ns = t.namespace || "_global";
+          const before = t.statesBefore?.[ns] || [];
+          const after = t.statesAfter?.[ns] || [];
+          console.error(`  ${t.function}: [${before.join(",") || "·"}] → [${after.join(",") || "·"}] (ns=${ns})`);
+        }
+      }
     }
 
     // 3) 语义合约校验
     const semResult = checkSemantic(userIntent, filtered);
+    if (isVerbose() && semResult.valid) {
+      console.error(`✅ [VERBOSE] Semantic contract validation passed`);
+    }
     if (!semResult.valid) {
       console.error("⚠️ 语义校验失败:", semResult.errors.join(", "));
 
@@ -1262,7 +1294,8 @@ ${RETRY_HINT}
       session.endedAt = Date.now();
       recordSession(session);
       clearCheckpoint(userIntent);
-      return wrapResult(fallback);
+      console.error("[降级] 返回回退结果 — 代码质量可能不高，建议人工审核。");
+      return wrapResult(fallback, undefined, true);
     }
     recordEpisode({ intent: userIntent, actions: [], success: false });
     session.resolved = false;
@@ -1275,7 +1308,8 @@ ${RETRY_HINT}
   return wrapResult(finalActions);
 }
 
-/** 本地规则回退：当 LLM 不可用时，根据意图关键词生成简单动作序列 */
+/** 本地规则回退：当 LLM 不可用时，根据意图关键词生成简单动作序列。
+ *  使用实际的默认值（而非占位符），确保生成的代码至少可以编译运行。 */
 function generateFallbackPlan(intent: string, ir: any[]): Action[] {
   const intentLower = intent.toLowerCase();
   const actions: Action[] = [];
@@ -1289,18 +1323,28 @@ function generateFallbackPlan(intent: string, ir: any[]): Action[] {
     }
   }
   if (matchedFuncs.length === 0) return [];
+
+  // Sensible default values per type — no placeholder strings
+  function defaultValue(typeName: string): any {
+    const t = (typeName || "string").toLowerCase();
+    if (t === "number") return 0;
+    if (t === "boolean") return false;
+    if (t.includes("[]") || t.includes("array")) return [];
+    return ""; // string default
+  }
+
   for (const fn of matchedFuncs) {
     const args = (fn.params || []).map((p: any, i: number) => ({
       name: p.name || `p${i}`,
-      type: p.type || 'any',
-      value: `{{${p.name || `p${i}`}}}`
+      type: p.type || "string",
+      value: defaultValue(p.type || "string"),
     }));
-    const assignTo = fn.returnType && fn.returnType !== 'void' && fn.returnType !== 'undefined'
+    const assignTo = fn.returnType && fn.returnType !== "void" && fn.returnType !== "undefined"
       ? `${fn.name}_result` : undefined;
     if (assignTo) {
-      actions.push({ kind: 'call', function: fn.name, args, assignTo } as Action);
+      actions.push({ kind: "call", function: fn.name, args, assignTo } as Action);
     } else {
-      actions.push({ kind: 'call', function: fn.name, args } as Action);
+      actions.push({ kind: "call", function: fn.name, args } as Action);
     }
   }
   return actions;

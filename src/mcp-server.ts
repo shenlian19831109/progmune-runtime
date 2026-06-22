@@ -182,6 +182,20 @@ async function main() {
           required: ["brokenSequence"],
         },
       },
+      {
+        name: "progmune_scaffold",
+        description: "Generate complete project files from templates (Express API, CLI tool, static site). Uses LLM to parameterize templates with project context. Complements progmune_generate which generates function-call-level code. Use this for architecture-level code: servers, pages, CLI entry points.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            intent: { type: "string", description: "Natural-language description of what to build" },
+            scaffoldType: { type: "string", enum: ["express-api", "cli-tool", "static-site"], description: "Template type: 'express-api' (REST server with SQLite), 'cli-tool' (CLI with arg parsing), 'static-site' (single-file HTML page)" },
+            filePath: { type: "string", description: "Relative or absolute path to write the generated file" },
+            projectPath: { type: "string", description: "Absolute path to project root" },
+          },
+          required: ["intent", "scaffoldType", "projectPath"],
+        },
+      },
     ],
   }));
 
@@ -536,8 +550,11 @@ Then restart Claude Code.`,
       if (result.success) {
         const marker = `// @progmune-generated session=${result.sessionId}`;
         let extra = "";
+        if (result.degraded) {
+          extra = `\n⚠️  LLM generation exhausted — used rule-based fallback. Code quality may be low. Review the output carefully.`;
+        }
         if (result.repairApplied) {
-          extra = `\n🔧 SSG Repair: ${result.repairCount} fix(es) applied, branches: ${result.repairBranchIds.map((id: string) => id.slice(0, 12)).join(", ")}`;
+          extra += `\n🔧 SSG Repair: ${result.repairCount} fix(es) applied, branches: ${result.repairBranchIds.map((id: string) => id.slice(0, 12)).join(", ")}`;
         }
         return { content: [{ type: "text", text: `✅ Generated and written to ${result.filePath}${extra}
 
@@ -880,6 +897,39 @@ This project uses [Progmune](https://github.com/shenlian19831109/progmune-runtim
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
       };
+    }
+
+    if (request.params.name === "progmune_scaffold") {
+      const { intent, scaffoldType, filePath, projectPath } = request.params.arguments as {
+        intent: string; scaffoldType: string; filePath?: string; projectPath: string;
+      };
+      if (!intent || !scaffoldType || !projectPath) {
+        return { content: [{ type: "text", text: "❌ intent, scaffoldType, and projectPath are required." }] };
+      }
+      if (!["express-api", "cli-tool", "static-site"].includes(scaffoldType)) {
+        return { content: [{ type: "text", text: `❌ Unknown scaffold type: ${scaffoldType}. Available: express-api, cli-tool, static-site` }] };
+      }
+
+      const { scaffold } = require("./scaffold");
+      const result = await scaffold(scaffoldType as any, intent, projectPath, filePath);
+
+      if (result.success) {
+        const marker = result.filePath?.endsWith(".html")
+          ? `<!-- @progmune-scaffolded type=${result.scaffoldType} -->`
+          : `// @progmune-scaffolded type=${result.scaffoldType}`;
+        let extra = "";
+        if (result.filePath) {
+          extra = `\n📁 Written to: ${result.filePath}`;
+        }
+        return { content: [{ type: "text", text: `✅ Scaffold generated (${result.scaffoldType})${extra}
+
+${marker}
+Code length: ${result.code.length} chars
+
+Preview (first 80 lines):
+${result.code.split("\n").slice(0, 80).join("\n")}` }] };
+      }
+      return { content: [{ type: "text", text: `❌ Scaffold failed: ${result.error}` }] };
     }
 
     throw new Error(`Unknown tool: ${request.params.name}`);
