@@ -1,0 +1,252 @@
+{
+  "$schema": "https://progmune.io/plsb/v1.0/schema.json",
+  "@id": "https://progmune.io/plsb/v1.0",
+  "@version": "1.0.0",
+  "generated": "2026-06-22T20:33:21.930Z",
+  "benchmark": {
+    "name": "Protocol Lifecycle Security Benchmark",
+    "version": "1.0.0",
+    "taxonomy": [
+      {
+        "id": "PLS-001",
+        "name": "Missing Release",
+        "category": "resource_leak",
+        "description": "Resource acquired (Acquire) but never released. The lifecycle terminates without the required Release step.",
+        "example_broken": [
+          "open",
+          "read"
+        ],
+        "example_expected": [
+          "open",
+          "read",
+          "close"
+        ]
+      },
+      {
+        "id": "PLS-002",
+        "name": "Double Release",
+        "category": "resource_leak",
+        "description": "Resource released twice. Second Release is an illegal transition — the resource is already freed.",
+        "example_broken": [
+          "open",
+          "close",
+          "close"
+        ],
+        "example_expected": [
+          "open",
+          "close"
+        ]
+      },
+      {
+        "id": "PLS-003",
+        "name": "Use After Release",
+        "category": "use_after_free",
+        "description": "Resource accessed after release. The Use step occurs after the Release has already invalidated the resource state.",
+        "example_broken": [
+          "open",
+          "close",
+          "read"
+        ],
+        "example_expected": [
+          "open",
+          "read",
+          "close"
+        ]
+      },
+      {
+        "id": "PLS-004",
+        "name": "Missing Authorization",
+        "category": "auth_bypass",
+        "description": "Privileged action performed without prior authentication/authorization. The Verify step is absent from the lifecycle.",
+        "example_broken": [
+          "generate_token",
+          "access_resource"
+        ],
+        "example_expected": [
+          "verify_password",
+          "generate_token",
+          "access_resource"
+        ]
+      },
+      {
+        "id": "PLS-005",
+        "name": "Session Fixation",
+        "category": "session_fixation",
+        "description": "Session not invalidated after logout. Old session tokens remain valid, enabling session hijacking.",
+        "example_broken": [
+          "verify_password",
+          "create_session",
+          "logout"
+        ],
+        "example_expected": [
+          "verify_password",
+          "create_session",
+          "invalidate_session",
+          "logout"
+        ]
+      },
+      {
+        "id": "PLS-006",
+        "name": "Privilege Escalation",
+        "category": "privilege_escalation",
+        "description": "User with lower privilege performs higher-privilege action. A privilege boundary is crossed without validation.",
+        "example_broken": [
+          "login_as_user",
+          "delete_all_records"
+        ],
+        "example_expected": [
+          "login_as_user",
+          "verify_admin_role",
+          "delete_all_records"
+        ]
+      },
+      {
+        "id": "PLS-007",
+        "name": "Missing Commit",
+        "category": "transaction_violation",
+        "description": "Transaction started (Begin) but never terminated with Commit or Rollback. Writes are lost or dangling.",
+        "example_broken": [
+          "begin_tx",
+          "insert_record"
+        ],
+        "example_expected": [
+          "begin_tx",
+          "insert_record",
+          "commit_tx"
+        ]
+      },
+      {
+        "id": "PLS-008",
+        "name": "Double Commit",
+        "category": "transaction_violation",
+        "description": "Transaction committed twice. Second Commit is an illegal transition — the transaction is already closed.",
+        "example_broken": [
+          "begin_tx",
+          "commit_tx",
+          "commit_tx"
+        ],
+        "example_expected": [
+          "begin_tx",
+          "commit_tx"
+        ]
+      },
+      {
+        "id": "PLS-009",
+        "name": "Missing Free",
+        "category": "resource_leak",
+        "description": "Memory allocated (Alloc) but never freed. The lifecycle terminates without the required Free step.",
+        "example_broken": [
+          "malloc",
+          "use_buffer"
+        ],
+        "example_expected": [
+          "malloc",
+          "use_buffer",
+          "free"
+        ]
+      },
+      {
+        "id": "PLS-010",
+        "name": "Double Free",
+        "category": "double_free",
+        "description": "Memory freed twice. Second Free is an illegal transition — the allocation is already released.",
+        "example_broken": [
+          "malloc",
+          "free",
+          "free"
+        ],
+        "example_expected": [
+          "malloc",
+          "free"
+        ]
+      },
+      {
+        "id": "PLS-011",
+        "name": "Use After Free",
+        "category": "use_after_free",
+        "description": "Memory accessed after free. The Use occurs after Free has already invalidated the allocation.",
+        "example_broken": [
+          "malloc",
+          "free",
+          "use_buffer"
+        ],
+        "example_expected": [
+          "malloc",
+          "use_buffer",
+          "free"
+        ]
+      },
+      {
+        "id": "PLS-012",
+        "name": "Race Condition",
+        "category": "race_condition",
+        "description": "Check-then-act without proper synchronization. State changes between Check and Act steps.",
+        "example_broken": [
+          "check_file_exists",
+          "open_file"
+        ],
+        "example_expected": [
+          "check_file_exists",
+          "acquire_lock",
+          "open_file",
+          "release_lock"
+        ]
+      },
+      {
+        "id": "PLS-013",
+        "name": "Workflow Bypass",
+        "category": "missing_validation",
+        "description": "Required intermediate validation step skipped. The workflow jumps directly from start to privileged action.",
+        "example_broken": [
+          "receive_request",
+          "execute_query"
+        ],
+        "example_expected": [
+          "receive_request",
+          "validate_input",
+          "authorize_action",
+          "execute_query"
+        ]
+      }
+    ],
+    "metadata": {
+      "total": 25,
+      "verified": 25,
+      "byCategory": {
+        "resource_leak": 7,
+        "use_after_free": 1,
+        "auth_bypass": 9,
+        "data_corruption": 7,
+        "race_condition": 1
+      },
+      "byPLS": {
+        "PLS-001": 7,
+        "PLS-011": 1,
+        "PLS-004": 9,
+        "PLS-007": 7,
+        "PLS-012": 1
+      },
+      "coverage": {
+        "totalCategories": 13,
+        "covered": 5,
+        "uncovered": [
+          "PLS-002",
+          "PLS-003",
+          "PLS-005",
+          "PLS-006",
+          "PLS-008",
+          "PLS-009",
+          "PLS-010",
+          "PLS-013"
+        ]
+      },
+      "recall": 0,
+      "precision": 0
+    }
+  },
+  "provenance": {
+    "source": "progmune-runtime",
+    "version": "3.2.0",
+    "corpusHash": "302ec0c768b61a0d"
+  }
+}
