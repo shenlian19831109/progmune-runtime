@@ -1,0 +1,56 @@
+{
+  "generated": "2026-06-23T14:48:23.356Z",
+  "version": "1.0.0",
+  "repos": [
+    {
+      "repo": "progmune-self",
+      "size": "small",
+      "linesOfCode": 76999,
+      "functionsExtracted": 1373,
+      "sequencesExtracted": 7,
+      "rulesDiscovered": 14,
+      "protocolsFound": [
+        "benchmarks_loaded",
+        "benchmark_report",
+        "report_formatted",
+        "sequence_validated",
+        "emit_code",
+        "code_emitted",
+        "record_session",
+        "session_recorded",
+        "ir_extracted",
+        "validate_action",
+        "action_validated",
+        "validate_action_sequence",
+        "extract_ir",
+        "load_benchmarks"
+      ],
+      "cvePatternsMatched": 0,
+      "annotatedSamples": 0,
+      "needsAnnotation": true,
+      "errors": []
+    },
+    {
+      "repo": "demo-xlike",
+      "size": "small",
+      "linesOfCode": 266,
+      "functionsExtracted": 21,
+      "sequencesExtracted": 1,
+      "rulesDiscovered": 0,
+      "protocolsFound": [],
+      "cvePatternsMatched": 0,
+      "annotatedSamples": 0,
+      "needsAnnotation": true,
+      "errors": []
+    }
+  ],
+  "summary": {
+    "totalRepos": 2,
+    "reposWithPrecision": 0,
+    "reposNeedingAnnotation": 2,
+    "averageF1": 0,
+    "totalFunctions": 1394,
+    "totalSequences": 8,
+    "totalRules": 14
+  }
+}
