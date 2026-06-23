@@ -11,6 +11,7 @@
 import { generatePLSBArtifact, PLSB_ARTIFACT_PATH } from "./artifact";
 import { generatePLSBSchema, PLSB_SCHEMA_PATH } from "./schema";
 import { generatePLSBReportMarkdown, PLSB_REPORT_PATH } from "./report-md";
+import { exportLeaderboard } from "./leaderboard";
 
 const args = process.argv.slice(2);
 
@@ -24,9 +25,10 @@ Usage:
 Options:
   --export      Generate ${PLSB_ARTIFACT_PATH}
   --report      Generate ${PLSB_REPORT_PATH}
-  --all         Generate both artifact and report
-  --summary     Print terminal summary
-  --help, -h    Show this help
+  --all          Generate both artifact and report
+  --leaderboard  Generate PLSB Leaderboard (JSON + Markdown)
+  --summary      Print terminal summary
+  --help, -h     Show this help
   `);
   process.exit(0);
 }
@@ -34,6 +36,11 @@ Options:
 const doExport = args.includes("--export") || args.includes("--all");
 const doReport = args.includes("--report") || args.includes("--all");
 const doSummary = args.includes("--summary") || (!doExport && !doReport);
+
+if (args.includes("--leaderboard")) {
+  exportLeaderboard();
+  process.exit(0);
+}
 
 if (doExport) {
   const artifact = generatePLSBArtifact(PLSB_ARTIFACT_PATH);
