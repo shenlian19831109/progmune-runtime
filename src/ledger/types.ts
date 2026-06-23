@@ -64,7 +64,8 @@ export interface AccountabilityEvent {
   hash: string;               // SHA-256 of this event
   prevHash: string;           // Hash of previous event (chain link)
   result: "passed" | "failed" | "repaired" | "approved";
-  signature?: string;         // Cryptographic signature (when available)
+  signature?: string;         // Ed25519 signature (hex-encoded, when available)
+  signatureVerified?: boolean; // true if signature was verified, undefined if unsigned
   detail?: string;
 }
 

@@ -12,6 +12,7 @@
 
 import * as crypto from "crypto";
 import { buildProvenanceChain } from "./chain-builder";
+import { buildSignPayload, trySign } from "./signatures";
 import type {
   AccountabilityChain,
   AccountabilityEvent,
@@ -172,6 +173,17 @@ export function buildAccountabilityChain(
 
     custodyGaps.push(hasGap);
 
+    // Try to sign the event
+    let signature: string | undefined;
+    try {
+      const payload = buildSignPayload(
+        provEvent.index, actorId, provEvent.step, provEvent.artifact,
+        provEvent.timestamp, provEvent.result, prevHash
+      );
+      const sigResult = trySign(actorId, payload);
+      if (sigResult) signature = sigResult.signature;
+    } catch { /* signing is best-effort */ }
+
     const aev: AccountabilityEvent = {
       index: provEvent.index,
       step: provEvent.step,
@@ -184,6 +196,7 @@ export function buildAccountabilityChain(
       hash: eventHash,
       prevHash,
       result: provEvent.result,
+      signature,
       detail: provEvent.detail,
     };
 
@@ -325,9 +338,13 @@ function computeAccountabilityChainHash(events: AccountabilityEvent[]): string {
 
 export function verifyAccountabilityChain(
   chain: AccountabilityChain
-): { valid: boolean; brokenAt?: number; detail?: string } {
+): { valid: boolean; brokenAt?: number; detail?: string; unsignedCount: number; signedCount: number } {
   let ph = "";
+  let unsignedCount = 0;
+  let signedCount = 0;
+
   for (const e of chain.events) {
+    // 1. Verify hash chain
     const recomputed = hashAccountabilityEvent(
       e.index, e.actorId, e.actorType, e.step, e.artifact, ph, e.timestamp, e.result
     );
@@ -336,12 +353,41 @@ export function verifyAccountabilityChain(
         valid: false,
         brokenAt: e.index,
         detail: `Hash mismatch at event ${e.index}: expected ${recomputed}, got ${e.hash}`,
+        unsignedCount, signedCount,
       };
     }
+
+    // 2. Verify signature (if present)
+    if (e.signature) {
+      try {
+        const { verifySignature, loadPublicKey } = require("./signatures");
+        const payload = buildSignPayload(
+          e.index, e.actorId, e.step, e.artifact, e.timestamp, e.result, e.prevHash
+        );
+        const pubKey = loadPublicKey(e.actorId);
+        if (pubKey) {
+          const verification = verifySignature(payload, e.signature, pubKey);
+          e.signatureVerified = verification.valid;
+          if (!verification.valid) {
+            return {
+              valid: false,
+              brokenAt: e.index,
+              detail: `Signature verification failed at event ${e.index}: ${verification.detail}`,
+              unsignedCount, signedCount,
+            };
+          }
+        }
+        signedCount++;
+      } catch { /* skip signature check if verification fails */ }
+    } else {
+      unsignedCount++;
+    }
+
     ph = e.hash;
   }
+
   if (computeAccountabilityChainHash(chain.events) !== chain.chainHash) {
-    return { valid: false, detail: "Chain root hash mismatch" };
+    return { valid: false, detail: "Chain root hash mismatch", unsignedCount, signedCount };
   }
-  return { valid: true };
+  return { valid: true, unsignedCount, signedCount };
 }

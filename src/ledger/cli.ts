@@ -192,6 +192,9 @@ function formatAccountabilityChain(chain: AccountabilityChain): string {
   lines.push(`  Chain hash:    ${C.bold}${chain.chainHash}${C.reset}`);
   lines.push(`  Integrity:     ${integrityIcon}`);
   lines.push(`  Custody:       ${custodyIcon}`);
+  const signed = chain.events.filter(e => e.signature).length;
+  const sigIcon = signed > 0 ? `${C.green}${signed} signed${C.reset}` : `${C.dim}unsigned${C.reset}`;
+  lines.push(`  Signatures:    ${sigIcon}  /  ${chain.totalEvents} events`);
   lines.push(`  Actors:        ${C.blue}${chain.humanEvents} human${C.reset}  ${C.magenta}${chain.aiEvents} AI${C.reset}  ${C.cyan}${chain.automatedEvents} automated${C.reset}`);
   lines.push("");
 
