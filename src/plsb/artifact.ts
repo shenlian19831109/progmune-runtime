@@ -19,6 +19,19 @@ export interface PLSBArtifact {
   "@id": string;               // Public reference URI (permanent)
   "@version": string;          // Semantic version
   generated: string;           // ISO 8601 timestamp
+  entries: Array<{
+    id: string;
+    pls_id?: string;
+    category: string;
+    severity: "critical" | "high" | "medium" | "low";
+    broken: string[];
+    expected: string[];
+    verified: boolean;
+    source: string;
+    cve?: string;
+    project?: string;
+    notes?: string;
+  }>;
   benchmark: {
     name: string;
     version: string;
@@ -65,6 +78,19 @@ export function generatePLSBArtifact(
     "@id": PLSB_PUBLIC_URI,
     "@version": "1.0.0",
     generated: new Date().toISOString(),
+    entries: (benchmark.entries || []).map((e: any) => ({
+      id: e.id,
+      pls_id: e.pls_id || undefined,
+      category: e.category,
+      severity: e.severity,
+      broken: e.broken || [],
+      expected: e.expected || [],
+      verified: e.verified || false,
+      source: e.source || "unknown",
+      cve: e.cve || undefined,
+      project: e.project || undefined,
+      notes: e.notes || undefined,
+    })),
     benchmark: {
       name: benchmark.name || "PLSB-100",
       version: benchmark.version || "1.0",

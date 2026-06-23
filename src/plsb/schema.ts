@@ -22,7 +22,7 @@ export function generatePLSBSchema(outputPath?: string): object {
       "13-category taxonomy covering resource leaks, auth bypass, transaction violations, " +
       "memory safety, and state consistency.",
     type: "object",
-    required: ["$schema", "@id", "@version", "generated", "benchmark", "provenance"],
+    required: ["$schema", "@id", "@version", "generated", "entries", "benchmark", "provenance"],
     properties: {
       $schema: {
         type: "string",
@@ -44,6 +44,27 @@ export function generatePLSBSchema(outputPath?: string): object {
         type: "string",
         format: "date-time",
         description: "ISO 8601 timestamp of generation",
+      },
+      entries: {
+        type: "array",
+        description: "Individual benchmark cases (vulnerability sequences)",
+        items: {
+          type: "object",
+          required: ["id", "category", "severity", "broken", "expected", "verified", "source"],
+          properties: {
+            id: { type: "string" },
+            pls_id: { type: "string", pattern: "^PLS-\\d{3}$" },
+            category: { type: "string" },
+            severity: { type: "string", enum: ["critical", "high", "medium", "low"] },
+            broken: { type: "array", items: { type: "string" } },
+            expected: { type: "array", items: { type: "string" } },
+            verified: { type: "boolean" },
+            source: { type: "string" },
+            cve: { type: "string" },
+            project: { type: "string" },
+            notes: { type: "string" },
+          },
+        },
       },
       benchmark: {
         type: "object",

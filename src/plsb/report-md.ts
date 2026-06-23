@@ -50,6 +50,23 @@ export function generatePLSBReportMarkdown(
   }
   lines.push("");
 
+  // ── Entries Table ──
+  const entries = benchmark.entries || [];
+  if (entries.length > 0) {
+    lines.push("## Entries");
+    lines.push("");
+    lines.push(`| ID | PLS | Category | Severity | Verified | CVE / Source |`);
+    lines.push(`|----|-----|----------|----------|----------|-------------|`);
+    for (const e of entries.slice(0, 30)) {
+      const cveRef = e.cve ? `CVE-${e.cve}` : e.source || "—";
+      lines.push(`| ${e.id} | ${e.pls_id || "—"} | ${e.category} | ${e.severity} | ${e.verified ? "✅" : "—"} | ${cveRef} |`);
+    }
+    if (entries.length > 30) {
+      lines.push(`| ... | ... | ${entries.length - 30} more entries ... |`);
+    }
+    lines.push("");
+  }
+
   // ── Per-Category Detail ──
   lines.push("## Category Breakdown");
   lines.push("");

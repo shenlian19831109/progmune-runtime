@@ -223,6 +223,36 @@ async function main() {
         },
       },
       {
+        name: "progmune_accountability",
+        description: "Build the AI Code Supply Chain accountability ledger for a session. Maps every action to a responsible actor (human, LLM, validator, reviewer, deployer) with identity, role, and cryptographic signatures. Detects custody gaps where actor identity cannot be verified.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            sessionId: { type: "string", description: "Session ID to trace" },
+            author: { type: "string", description: "Email of human who initiated generation" },
+            reviewer: { type: "string", description: "Email of human reviewer" },
+            approver: { type: "string", description: "Email of human who approved deployment" },
+            deployer: { type: "string", description: "CI/CD system ID that deployed" },
+            format: { type: "string", enum: ["terminal", "json"], description: "Output format" },
+          },
+          required: ["sessionId"],
+        },
+      },
+      {
+        name: "progmune_policy_check",
+        description: "Run the Policy Engine against a file. Evaluates 6 rules (confidence, provenance, PLSB coverage, human review, fingerprint, violations) and returns ALLOW, WARN, or BLOCK. This is the deploy gate — use it in CI/CD to block deployment of unverified AI-generated code.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            filePath: { type: "string", description: "Absolute path to the file to check" },
+            author: { type: "string", description: "Email of human who initiated generation" },
+            reviewer: { type: "string", description: "Email of human reviewer" },
+            format: { type: "string", enum: ["terminal", "json"], description: "Output format" },
+          },
+          required: ["filePath"],
+        },
+      },
+      {
         name: "progmune_plsb",
         description: "Query the Protocol Lifecycle Security Benchmark (PLSB). Get taxonomy coverage, recall/precision metrics, and per-category detection status. Use this to check if protocol vulnerability categories are covered.",
         inputSchema: {
@@ -1075,6 +1105,124 @@ ${result.code.split("\n").slice(0, 80).join("\n")}` }] };
         return { content: [{ type: "text", text: output }] };
       } catch (e: any) {
         return { content: [{ type: "text", text: `❌ PLSB query failed: ${e.message}` }] };
+      }
+    }
+
+    if (request.params.name === "progmune_policy_check") {
+      const { filePath, author, reviewer, format } = request.params.arguments as {
+        filePath: string; author?: string; reviewer?: string; format?: string;
+      };
+
+      try {
+        const { certify } = require("./certify");
+        const { buildAccountabilityChain } = require("./ledger");
+        const { evaluatePolicy } = require("./policy");
+        const cert = certify(filePath);
+
+        let acct;
+        try {
+          const opts: any = {};
+          if (author) opts.author = { id: author, name: author.split("@")[0], role: "developer" };
+          if (reviewer) opts.reviewers = [{ id: reviewer, name: reviewer.split("@")[0], role: "reviewer" }];
+          acct = buildAccountabilityChain(cert.sessionId, opts);
+        } catch { /* no accountability */ }
+
+        const ctx = {
+          certificate: {
+            validated: cert.validated,
+            confidence: cert.confidence,
+            provenanceIntact: cert.provenanceIntact,
+            fingerprint: cert.fingerprint,
+            violations: cert.violations,
+            plsbCoverage: cert.plsbCoverage,
+            plsbRecall: cert.plsbRecall,
+            degraded: cert.degraded,
+            sessionId: cert.sessionId,
+            file: cert.file,
+          },
+          accountability: acct ? {
+            humanEvents: acct.humanEvents,
+            aiEvents: acct.aiEvents,
+            automatedEvents: acct.automatedEvents,
+            custodyGap: acct.custodyGap,
+          } : undefined,
+        };
+
+        const result = evaluatePolicy(ctx);
+
+        if (format === "json") {
+          return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+        }
+
+        const verdictEmoji = result.verdict === "ALLOW" ? "✅" : result.verdict === "WARN" ? "⚠️" : "❌";
+        let output = `Policy Engine: ${verdictEmoji} ${result.verdict}\n\n`;
+        output += `File: ${filePath}\n`;
+        output += `${result.passed_rules}/${result.rules} rules passed\n\n`;
+
+        if (result.violations.length > 0) {
+          for (const v of result.violations) {
+            output += `  [${v.rule.severity.toUpperCase()}] ${v.rule.type}: ${v.actual} → ${v.expected}\n`;
+            if (v.detail) output += `       ${v.detail.slice(0, 100)}\n`;
+          }
+          output += "\n";
+        }
+
+        output += result.summary;
+        return { content: [{ type: "text", text: output }] };
+      } catch (e: any) {
+        return { content: [{ type: "text", text: `❌ Policy check failed: ${e.message}` }] };
+      }
+    }
+
+    if (request.params.name === "progmune_accountability") {
+      const { sessionId, author, reviewer, approver, deployer, format } = request.params.arguments as {
+        sessionId: string; author?: string; reviewer?: string; approver?: string; deployer?: string; format?: string;
+      };
+      if (!sessionId) {
+        return { content: [{ type: "text", text: "❌ sessionId is required." }] };
+      }
+
+      try {
+        const { buildAccountabilityChain, verifyAccountabilityChain } = require("./ledger");
+        const opts: any = {};
+        if (author) opts.author = { id: author, name: author.split("@")[0], role: "developer" };
+        if (reviewer) opts.reviewers = [{ id: reviewer, name: reviewer.split("@")[0], role: "reviewer" }];
+        if (approver) opts.approver = { id: approver, name: approver.split("@")[0], role: "security_engineer" };
+        if (deployer) opts.deployer = { id: deployer, name: deployer };
+
+        const chain = buildAccountabilityChain(sessionId, opts);
+
+        if (format === "json") {
+          return { content: [{ type: "text", text: JSON.stringify(chain, null, 2) }] };
+        }
+
+        // Terminal format
+        const actors = `${chain.humanEvents} human · ${chain.aiEvents} AI · ${chain.automatedEvents} automated`;
+        const custody = chain.custodyGap ? "⚠️ GAPS" : "✅ VERIFIED";
+        let output = `🔗 Accountability Ledger: ${chain.sessionId}\n\n`;
+        output += `Intent:    ${chain.intent}\n`;
+        output += `Integrity: ${chain.integrity.toUpperCase()}\n`;
+        output += `Custody:   ${custody}\n`;
+        output += `Actors:    ${actors}\n`;
+        output += `Chain:     ${chain.chainHash}\n\n`;
+
+        for (let i = 0; i < chain.events.length; i++) {
+          const e = chain.events[i];
+          const typeIcon = e.actorType === "human" ? "👤" : e.actorType === "llm" ? "🤖"
+            : e.actorType === "reviewer" ? "✅" : e.actorType === "deployer" ? "🚀" : "⚙";
+          const resultIcon = e.result === "passed" || e.result === "approved" ? "✅" : e.result === "failed" ? "❌" : "🔧";
+          output += `[${String(i).padStart(2, "0")}] ${typeIcon} ${e.actorLabel.padEnd(30).slice(0, 30)} ${resultIcon} ${e.action}\n`;
+          output += `     hash: ${e.hash} ← ${e.prevHash ? e.prevHash.slice(0, 12) : "genesis"}\n`;
+          if (i < chain.events.length - 1) output += `  │\n`;
+        }
+
+        if (chain.custodyGap) {
+          output += `\n⚠️  Custody gaps detected. Use --author, --reviewer, --approver to identify human actors.\n`;
+        }
+
+        return { content: [{ type: "text", text: output }] };
+      } catch (e: any) {
+        return { content: [{ type: "text", text: `❌ Accountability chain failed: ${e.message}` }] };
       }
     }
 

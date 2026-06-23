@@ -1,7 +1,7 @@
 # PLSB Report: Protocol Lifecycle Security Benchmark
 
 **Version:** 1.0.0
-**Generated:** 2026-06-22T20:33:21.939Z
+**Generated:** 2026-06-23T07:22:44.233Z
 **Source:** Progmune Runtime v3.2.0
 
 ## Summary
@@ -31,6 +31,36 @@
 | PLS-011 | Use After Free | use_after_free | 1 | ✅ Covered |
 | PLS-012 | Race Condition | race_condition | 1 | ✅ Covered |
 | PLS-013 | Workflow Bypass | missing_validation | 0 | ⚠️ Uncovered |
+
+## Entries
+
+| ID | PLS | Category | Severity | Verified | CVE / Source |
+|----|-----|----------|----------|----------|-------------|
+| RW-001 | PLS-001 | resource_leak | critical | ✅ | curated |
+| RW-002 | PLS-001 | resource_leak | high | ✅ | curated |
+| RW-003 | PLS-011 | use_after_free | critical | ✅ | curated |
+| RW-004 | PLS-001 | resource_leak | high | ✅ | curated |
+| RW-005 | PLS-004 | auth_bypass | critical | ✅ | curated |
+| RW-006 | PLS-004 | auth_bypass | high | ✅ | curated |
+| RW-007 | PLS-004 | auth_bypass | high | ✅ | curated |
+| RW-008 | PLS-007 | data_corruption | medium | ✅ | curated |
+| RW-009 | PLS-007 | data_corruption | medium | ✅ | curated |
+| RW-010 | PLS-012 | race_condition | high | ✅ | curated |
+| RW-011 | PLS-007 | data_corruption | critical | ✅ | curated |
+| RW-012 | PLS-007 | data_corruption | high | ✅ | curated |
+| RW-013 | PLS-004 | auth_bypass | critical | ✅ | curated |
+| RW-014 | PLS-004 | auth_bypass | high | ✅ | curated |
+| RW-015 | PLS-001 | resource_leak | critical | ✅ | curated |
+| RW-016 | PLS-001 | resource_leak | high | ✅ | curated |
+| RW-017 | PLS-004 | auth_bypass | critical | ✅ | curated |
+| RW-018 | PLS-004 | auth_bypass | critical | ✅ | curated |
+| RW-019 | PLS-007 | data_corruption | high | ✅ | curated |
+| RW-020 | PLS-007 | data_corruption | medium | ✅ | curated |
+| GOLD-CVE-2022-41850 | PLS-001 | resource_leak | medium | ✅ | CVE-CVE-2022-41850 |
+| GOLD-CVE-2022-24735 | PLS-004 | auth_bypass | high | ✅ | CVE-CVE-2022-24735 |
+| GOLD-CVE-2022-3602 | PLS-007 | data_corruption | critical | ✅ | CVE-CVE-2022-3602 |
+| GOLD-CVE-2023-44487 | PLS-001 | resource_leak | high | ✅ | CVE-CVE-2023-44487 |
+| GOLD-CVE-2021-4034 | PLS-004 | auth_bypass | critical | ✅ | CVE-CVE-2021-4034 |
 
 ## Category Breakdown
 

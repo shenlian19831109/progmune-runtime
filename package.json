@@ -23,6 +23,7 @@
     "governance:json": "npx ts-node src/audit/cli.ts --all --json",
     "governance:md": "npx ts-node src/audit/cli.ts --all --markdown",
     "certify": "npx ts-node src/certify.ts",
+    "policy": "npx ts-node src/policy/cli.ts check",
     "provenance": "npx ts-node src/ledger/cli.ts",
     "plsb": "npx ts-node src/plsb/cli.ts --summary",
     "plsb:export": "npx ts-node src/plsb/cli.ts --all",
