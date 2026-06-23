@@ -17,7 +17,7 @@ import * as crypto from "crypto";
 
 // ── Types ──
 
-interface Certificate {
+export interface Certificate {
   file: string;
   generatedBy: string;
   sessionId: string;
