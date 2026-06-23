@@ -1,0 +1,35 @@
+# Progmune Policy Check — PR Workflow
+#
+# Runs on every PR to verify AI-generated code meets governance policies.
+# Blocks merge if BLOCK verdict, warns if WARN.
+
+name: Progmune Policy Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "**.ts"
+      - "**.tsx"
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  policy-check:
+    name: "AI Code Governance"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Progmune Policy Check
+        uses: ./
+        with:
+          project_path: .
+          strict: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          author: ${{ github.actor }}@users.noreply.github.com
+          files: ${{ steps.changed-files.outputs.all_changed_files }}

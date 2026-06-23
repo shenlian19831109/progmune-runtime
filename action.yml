@@ -1,0 +1,138 @@
+# Progmune Policy Check — GitHub Action
+#
+# Runs the AI Code Governance Policy Engine on changed files.
+# Blocks PR merge if AI-generated code fails policy checks.
+#
+# Usage in workflow:
+#   - uses: shenlian19831109/progmune-runtime@main
+#     with:
+#       project_path: .
+#       strict: false
+#       author: ${{ github.actor }}@users.noreply.github.com
+
+name: "Progmune Policy Check"
+description: "Verify AI-generated code meets governance policies before merge"
+
+branding:
+  icon: "shield"
+  color: "green"
+
+inputs:
+  project_path:
+    description: "Path to the project root"
+    required: false
+    default: "."
+
+  strict:
+    description: "Block on WARN verdicts (default: only block on BLOCK)"
+    required: false
+    default: "false"
+
+  author:
+    description: "Email of the PR author (used as human actor in accountability chain)"
+    required: false
+
+  reviewer:
+    description: "Email of the PR reviewer"
+    required: false
+
+  files:
+    description: "Specific files to check (space-separated). If empty, auto-detects changed .ts files."
+    required: false
+
+outputs:
+  verdict:
+    description: "Policy verdict: ALLOW, WARN, or BLOCK"
+  summary:
+    description: "Human-readable summary of the policy check"
+  violations:
+    description: "Number of policy violations found"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+
+    - name: Install Progmune dependencies
+      shell: bash
+      run: |
+        npm install --production
+        npm install typescript ts-node
+
+    - name: Build Progmune
+      shell: bash
+      run: npm run build 2>/dev/null || npx tsc
+
+    - name: Run Policy Check
+      id: policy
+      shell: bash
+      run: |
+        AUTHOR_FLAG=""
+        REVIEWER_FLAG=""
+        FILES_FLAG=""
+
+        if [ -n "${{ inputs.author }}" ]; then
+          AUTHOR_FLAG="--author ${{ inputs.author }}"
+        fi
+        if [ -n "${{ inputs.reviewer }}" ]; then
+          REVIEWER_FLAG="--reviewer ${{ inputs.reviewer }}"
+        fi
+        if [ -n "${{ inputs.files }}" ]; then
+          FILES_FLAG="--files ${{ inputs.files }}"
+        fi
+
+        npx ts-node --transpile-only --project tsconfig.json \
+          bin/progmune-ci.ts \
+          --project "${{ inputs.project_path }}" \
+          --strict "${{ inputs.strict }}" \
+          $AUTHOR_FLAG \
+          $REVIEWER_FLAG \
+          $FILES_FLAG \
+          --output /tmp/progmune-policy-result.json
+
+    - name: Report
+      shell: bash
+      run: |
+        if [ -f /tmp/progmune-policy-result.json ]; then
+          cat /tmp/progmune-policy-result.json | python3 -c "
+          import json,sys
+          d=json.load(sys.stdin)
+          print(f'verdict={d[\"verdict\"]}')
+          print(f'summary={d[\"summary\"][:200]}')
+          print(f'violations={d[\"failed_rules\"]}')
+          " >> $GITHUB_OUTPUT
+        fi
+
+    - name: Post PR Comment
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const result = JSON.parse(fs.readFileSync('/tmp/progmune-policy-result.json', 'utf8'));
+
+          const emoji = result.verdict === 'ALLOW' ? '✅' : result.verdict === 'WARN' ? '⚠️' : '❌';
+          let body = `## ${emoji} Progmune Policy Check: **${result.verdict}**\n\n`;
+          body += `**${result.passed_rules}** of **${result.rules}** rules passed.\n\n`;
+
+          if (result.violations && result.violations.length > 0) {
+            body += '### Violations\n\n';
+            for (const v of result.violations) {
+              body += `- **[${v.rule.severity.toUpperCase()}]** \`${v.rule.type}\`: ${v.actual} → ${v.expected}\n`;
+              if (v.detail) body += `  - ${v.detail}\n`;
+            }
+            body += '\n';
+          }
+
+          body += `**${result.summary}**\n\n`;
+          body += '---\n*Verified by [Progmune Runtime](https://github.com/shenlian19831109/progmune-runtime)*';
+
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body
+          });
