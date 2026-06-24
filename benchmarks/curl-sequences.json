@@ -1,4706 +1,1702 @@
-{
-  "metadata": {
-    "repo": "/tmp/curl",
-    "extractedAt": "2026-06-20T17:29:30.704Z",
-    "stats": {
-      "total": 438,
-      "avgCalls": 2.633734939759036,
-      "maxCalls": 23,
-      "files": 99
-    }
+[
+  {
+    "function": "ossl_connect_step2",
+    "file": "lib/vtls/openssl.c",
+    "calls": [
+      "Curl_ssl_cf_get_config",
+      "ERR_clear_error",
+      "SSL_connect",
+      "Curl_ssl_setup_x509_store",
+      "defined",
+      "secrets",
+      "Curl_tls_keylog_enabled",
+      "ossl_log_tls12_secret",
+      "SSL_get_error",
+      "CURL_TRC_CF"
+    ],
+    "totalCalls": 139
   },
-  "sequences": [
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/docs/examples/block_ip.c",
-      "lineNumber": 273,
-      "calls": [
-        "inet_ntop",
-        "fprintf"
-      ],
-      "bodyLength": 7
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/docs/examples/ephiperfifo.c",
-      "lineNumber": 535,
-      "calls": [
-        "timer_cb"
-      ],
-      "bodyLength": 1
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/docs/examples/sslbackend.c",
-      "lineNumber": 61,
-      "calls": [
-        "atoi",
-        "curl_global_sslset"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/docs/examples/websocket.c",
-      "lineNumber": 52,
-      "calls": [
-        "fprintf",
-        "sleep",
-        "select"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/docs/examples/websocket.c",
-      "lineNumber": 87,
-      "calls": [
-        "fprintf"
-      ],
-      "bodyLength": 1
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/docs/examples/websocket.c",
-      "lineNumber": 90,
-      "calls": [
-        "fprintf"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/docs/examples/websocket.c",
-      "lineNumber": 101,
-      "calls": [
-        "fprintf",
-        "sleep",
-        "select"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/docs/examples/xmlstream.c",
-      "lineNumber": 154,
-      "calls": [
-        "XML_Parse",
-        "XML_GetErrorCode",
-        "fprintf",
-        "d",
-        "XML_ErrorString",
-        "printf",
-        "printf"
-      ],
-      "bodyLength": 10
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/bufq.c",
-      "lineNumber": 72,
-      "calls": [
-        "memcpy"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cf-dns.c",
-      "lineNumber": 195,
-      "calls": [
-        "failf",
-        "curlx_ptimediff_ms",
-        "Curl_pgrs_now"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
-      "lineNumber": 326,
-      "calls": [
-        "infof",
-        "strlen",
-        "curlx_str_numblanks",
-        "failf"
-      ],
-      "bodyLength": 11
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
-      "lineNumber": 339,
-      "calls": [
-        "infof",
-        "Curl_compareheader",
-        "STRCONST",
-        "STRCONST",
-        "CURL_TRC_CF",
-        "Curl_httpchunk_reset"
-      ],
-      "bodyLength": 13
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
-      "lineNumber": 354,
-      "calls": [
-        "Curl_compareheader",
-        "STRCONST",
-        "STRCONST",
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
-      "lineNumber": 413,
-      "calls": [
-        "infof",
-        "strlen",
-        "curlx_str_numblanks",
-        "failf"
-      ],
-      "bodyLength": 14
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
-      "lineNumber": 432,
-      "calls": [
-        "infof",
-        "Curl_compareheader",
-        "STRCONST",
-        "STRCONST",
-        "infof",
-        "Curl_httpchunk_reset"
-      ],
-      "bodyLength": 15
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
-      "lineNumber": 512,
-      "calls": [
-        "infof"
-      ],
-      "bodyLength": 1
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cf-h2-proxy.c",
-      "lineNumber": 381,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cf-h2-proxy.c",
-      "lineNumber": 1140,
-      "calls": [
-        "CF_DATA_SAVE",
-        "nghttp2_session_want_write",
-        "Curl_bufq_is_empty",
-        "Curl_bufq_is_empty",
-        "nghttp2_session_want_read",
-        "Curl_pollset_set",
-        "CURL_TRC_CF",
-        "CF_DATA_RESTORE"
-      ],
-      "bodyLength": 10
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cf-https-connect.c",
-      "lineNumber": 257,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cf-https-connect.c",
-      "lineNumber": 270,
-      "calls": [
-        "cf_hc_baller_reply_ms",
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 7
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cf-ip-happy.c",
-      "lineNumber": 519,
-      "calls": [
-        "curlx_ptimediff_ms",
-        "Curl_pgrs_now",
-        "CURL_TRC_CF",
-        "VERBOSE",
-        "VERBOSE",
-        "cf_ip_attempt_restart",
-        "CURL_TRC_CF",
-        "Curl_pgrs_now",
-        "DEBUGASSERT",
-        "infof",
-        "Curl_expire"
-      ],
-      "bodyLength": 29
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cf-ip-happy.c",
-      "lineNumber": 550,
-      "calls": [
-        "CURL_TRC_CF",
-        "VERBOSE",
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 9
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cf-socket.c",
-      "lineNumber": 600,
-      "calls": [
-        "strlen",
-        "curlx_memdup0",
-        "strlen"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cf-socket.c",
-      "lineNumber": 607,
-      "calls": [
-        "strlen",
-        "strlen",
-        "memchr",
-        "curlx_memdup0",
-        "curlx_memdup0",
-        "curlx_safefree"
-      ],
-      "bodyLength": 16
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cf-socket.c",
-      "lineNumber": 1287,
-      "calls": [
-        "set_local_ip",
-        "Curl_pgrs_now"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cf-socket.c",
-      "lineNumber": 1405,
-      "calls": [
-        "verifyconnect",
-        "Curl_pgrs_now",
-        "set_local_ip",
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 9
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cf-socket.c",
-      "lineNumber": 1416,
-      "calls": [
-        "CURL_TRC_CF",
-        "verifyconnect"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cf-socket.c",
-      "lineNumber": 1464,
-      "calls": [
-        "Curl_pollset_set_out_only",
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cf-socket.c",
-      "lineNumber": 1469,
-      "calls": [
-        "Curl_pollset_add_in",
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cf-socket.c",
-      "lineNumber": 1703,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cf-socket.c",
-      "lineNumber": 1707,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cfilters.c",
-      "lineNumber": 208,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/connect.c",
-      "lineNumber": 53,
-      "calls": [
-        "memcmp"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/connect.c",
-      "lineNumber": 86,
-      "calls": [
-        "curlx_ptimediff_ms"
-      ],
-      "bodyLength": 6
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/connect.c",
-      "lineNumber": 402,
-      "calls": [
-        "CURL_TRC_CF",
-        "Curl_conn_connect",
-        "VERBOSE",
-        "Curl_conn_trc_filters",
-        "conn_report_connect_stats"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cookie.c",
-      "lineNumber": 388,
-      "calls": [
-        "strrchr",
-        "strlen"
-      ],
-      "bodyLength": 6
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cookie.c",
-      "lineNumber": 407,
-      "calls": [
-        "curlx_strdup"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cookie.c",
-      "lineNumber": 644,
-      "calls": [
-        "parse_flag"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cookie.c",
-      "lineNumber": 650,
-      "calls": [
-        "parse_domain"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/curl_addrinfo.c",
-      "lineNumber": 183,
-      "calls": [
-        "SET_SOCKERRNO"
-      ],
-      "bodyLength": 10
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/curl_fnmatch.c",
-      "lineNumber": 181,
-      "calls": [
-        "parsekeyword"
-      ],
-      "bodyLength": 9
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/curl_fnmatch.c",
-      "lineNumber": 205,
-      "calls": [
-        "setcharorrange"
-      ],
-      "bodyLength": 6
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/curl_range.c",
-      "lineNumber": 54,
-      "calls": [
-        "DEBUGF",
-        "infof"
-      ],
-      "bodyLength": 8
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/curl_sasl.c",
-      "lineNumber": 706,
-      "calls": [
-        "Curl_auth_create_gssapi_user_message"
-      ],
-      "bodyLength": 8
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/curl_sasl.c",
-      "lineNumber": 762,
-      "calls": [
-        "Curl_bufref_set"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/curl_trc.c",
-      "lineNumber": 652,
-      "calls": [
-        "trc_apply_level_by_name"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/curlx/dynbuf.c",
-      "lineNumber": 86,
-      "calls": [
-        "DEBUGASSERT"
-      ],
-      "bodyLength": 8
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/curlx/dynbuf.c",
-      "lineNumber": 148,
-      "calls": [
-        "curlx_dyn_reset"
-      ],
-      "bodyLength": 1
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cw-out.c",
-      "lineNumber": 208,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cw-out.c",
-      "lineNumber": 212,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/cw-pause.c",
-      "lineNumber": 128,
-      "calls": [
-        "Curl_cwriter_write",
-        "CURL_TRC_WRITE"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/dnscache.c",
-      "lineNumber": 263,
-      "calls": [
-        "CURL_TRC_DNS",
-        "Curl_resolv_query_str"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/dnscache.c",
-      "lineNumber": 308,
-      "calls": [
-        "DEBUGASSERT"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/doh.c",
-      "lineNumber": 889,
-      "calls": [
-        "strlen",
-        "curl_msnprintf",
-        "strlen",
-        "infof"
-      ],
-      "bodyLength": 15
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/doh.c",
-      "lineNumber": 1237,
-      "calls": [
-        "memset",
-        "doh_close",
-        "de_init",
-        "doh_resp_decode",
-        "curlx_dyn_uptr",
-        "curlx_dyn_len",
-        "CURL_TRC_DNS",
-        "doh_strerror",
-        "doh_type2name",
-        "Curl_trc_ft_is_verbose",
-        "CURL_TRC_DNS",
-        "doh_show",
-        "doh2ai",
-        "Curl_dnscache_mk_entry",
-        "doh_resp_decode_httpsrr",
-        "infof",
-        "Curl_dns_entry_unlink",
-        "infof",
-        "defined",
-        "defined",
-        "doh_print_httpsrr",
-        "Curl_dns_entry_set_https_rr",
-        "Curl_dnscache_add"
-      ],
-      "bodyLength": 71
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/file.c",
-      "lineNumber": 195,
-      "calls": [
-        "curlx_safefree"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/file.c",
-      "lineNumber": 227,
-      "calls": [
-        "curlx_open"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/formdata.c",
-      "lineNumber": 533,
-      "calls": [
-        "Curl_bufref_memdup0",
-        "strlen"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/formdata.c",
-      "lineNumber": 810,
-      "calls": [
-        "curl_mime_data_cb"
-      ],
-      "bodyLength": 6
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ftp.c",
-      "lineNumber": 431,
-      "calls": [
-        "Curl_cwriter_write",
-        "Curl_cwriter_write"
-      ],
-      "bodyLength": 7
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ftp.c",
-      "lineNumber": 695,
-      "calls": [
-        "Curl_pp_needs_flush",
-        "Curl_socket_check",
-        "failf",
-        "Curl_pgrsUpdate"
-      ],
-      "bodyLength": 12
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ftp.c",
-      "lineNumber": 1473,
-      "calls": [
-        "PORT",
-        "ftp_state_use_port"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ftp.c",
-      "lineNumber": 2135,
-      "calls": [
-        "ftp_epsv_disable"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ftp.c",
-      "lineNumber": 2309,
-      "calls": [
-        "ftp_nb_type",
-        "ftp_statemach",
-        "ftp_nb_type"
-      ],
-      "bodyLength": 12
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ftp.c",
-      "lineNumber": 2682,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 6
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ftp.c",
-      "lineNumber": 2704,
-      "calls": [
-        "Curl_pgrsSetDownloadSize",
-        "ftp_state_retr"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ftp.c",
-      "lineNumber": 2708,
-      "calls": [
-        "ftp_state_ul_setup"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ftp.c",
-      "lineNumber": 2945,
-      "calls": [
-        "ftp_state_loggedin"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ftp.c",
-      "lineNumber": 2950,
-      "calls": [
-        "Curl_pp_sendf",
-        "ftp_state",
-        "failf"
-      ],
-      "bodyLength": 10
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ftp.c",
-      "lineNumber": 3120,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ftp.c",
-      "lineNumber": 3212,
-      "calls": [
-        "Curl_pp_sendf"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ftp.c",
-      "lineNumber": 3772,
-      "calls": [
-        "failf",
-        "size"
-      ],
-      "bodyLength": 12
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ftp.c",
-      "lineNumber": 4340,
-      "calls": [
-        "ftp_dophase_done",
-        "CURL_TRC_FTP",
-        "FTP_CSTATE"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ftplistparser.c",
-      "lineNumber": 409,
-      "calls": [
-        "strncmp",
-        "curlx_str_passblanks",
-        "ISDIGIT",
-        "curlx_dyn_reset"
-      ],
-      "bodyLength": 16
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ftplistparser.c",
-      "lineNumber": 441,
-      "calls": [
-        "ftp_pl_get_permission"
-      ],
-      "bodyLength": 16
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ftplistparser.c",
-      "lineNumber": 703,
-      "calls": [
-        "ftp_pl_insert_finfo"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ftplistparser.c",
-      "lineNumber": 800,
-      "calls": [
-        "ftp_pl_insert_finfo"
-      ],
-      "bodyLength": 7
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ftplistparser.c",
-      "lineNumber": 980,
-      "calls": [
-        "ftp_pl_insert_finfo"
-      ],
-      "bodyLength": 8
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/hostip.c",
-      "lineNumber": 455,
-      "calls": [
-        "Curl_async_failed"
-      ],
-      "bodyLength": 1
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/hostip.c",
-      "lineNumber": 716,
-      "calls": [
-        "infof",
-        "hostip_resolv_failed"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/hostip.c",
-      "lineNumber": 740,
-      "calls": [
-        "Curl_dnscache_add",
-        "Curl_dns_entry_unlink"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/hostip.c",
-      "lineNumber": 1056,
-      "calls": [
-        "Curl_async_shutdown",
-        "Curl_async_failed"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/hostip.c",
-      "lineNumber": 1069,
-      "calls": [
-        "Curl_dnscache_add_negative",
-        "failf"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/hostip.c",
-      "lineNumber": 1074,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http.c",
-      "lineNumber": 972,
-      "calls": [
-        "Curl_input_digest",
-        "infof"
-      ],
-      "bodyLength": 16
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http.c",
-      "lineNumber": 2131,
-      "calls": [
-        "curl_url_set",
-        "curl_url_set",
-        "curl_url_cleanup",
-        "Curl_uc_to_curlcode"
-      ],
-      "bodyLength": 10
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http.c",
-      "lineNumber": 2303,
-      "calls": [
-        "curlx_sotouz_range",
-        "Curl_creader_set_buf",
-        "Curl_creader_set_null"
-      ],
-      "bodyLength": 7
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http.c",
-      "lineNumber": 2436,
-      "calls": [
-        "operations",
-        "Curl_creader_client_length",
-        "curlx_dyn_addn",
-        "STRCONST"
-      ],
-      "bodyLength": 10
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http.c",
-      "lineNumber": 2638,
-      "calls": [
-        "curl_maprintf"
-      ],
-      "bodyLength": 11
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http.c",
-      "lineNumber": 2742,
-      "calls": [
-        "Curl_conn_http_version",
-        "Curl_http2_switch",
-        "DEBUGASSERT",
-        "Curl_conn_http_version"
-      ],
-      "bodyLength": 11
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http.c",
-      "lineNumber": 3799,
-      "calls": [
-        "failf",
-        "infof",
-        "Curl_pgrsSetDownloadSize"
-      ],
-      "bodyLength": 10
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http.c",
-      "lineNumber": 4069,
-      "calls": [
-        "infof",
-        "http_exp100_send_anyway"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http.c",
-      "lineNumber": 4129,
-      "calls": [
-        "http_on_1xx_response"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http.c",
-      "lineNumber": 4333,
-      "calls": [
-        "curlx_str_until",
-        "curlx_str_single",
-        "curlx_str_number",
-        "curlx_str_trimblanks",
-        "curlx_str_cmp"
-      ],
-      "bodyLength": 17
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http.c",
-      "lineNumber": 4937,
-      "calls": [
-        "Curl_checkheaders",
-        "STRCONST",
-        "curlx_str_passblanks",
-        "infof"
-      ],
-      "bodyLength": 9
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http.c",
-      "lineNumber": 4983,
-      "calls": [
-        "Curl_dynhds_add"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http1.c",
-      "lineNumber": 122,
-      "calls": [
-        "curlx_dyn_addn"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http1.c",
-      "lineNumber": 295,
-      "calls": [
-        "start_req"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http1.c",
-      "lineNumber": 300,
-      "calls": [
-        "curlx_dyn_reset"
-      ],
-      "bodyLength": 8
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http2.c",
-      "lineNumber": 922,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http2.c",
-      "lineNumber": 926,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http2.c",
-      "lineNumber": 1003,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http2.c",
-      "lineNumber": 1020,
-      "calls": [
-        "nghttp2_session_resume_data",
-        "nghttp2_is_fatal"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http2.c",
-      "lineNumber": 1693,
-      "calls": [
-        "CURL_TRC_CF",
-        "s",
-        "nghttp2_http2_strerror"
-      ],
-      "bodyLength": 6
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http2.c",
-      "lineNumber": 1707,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http2.c",
-      "lineNumber": 1843,
-      "calls": [
-        "CURL_TRC_CF",
-        "http2_handle_stream_close"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http2.c",
-      "lineNumber": 1899,
-      "calls": [
-        "DEBUGASSERT"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http2.c",
-      "lineNumber": 1913,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http2.c",
-      "lineNumber": 2212,
-      "calls": [
-        "DEBUGASSERT",
-        "cf_h2_body_send",
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 12
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http2.c",
-      "lineNumber": 2358,
-      "calls": [
-        "CF_DATA_SAVE",
-        "nghttp2_session_want_write",
-        "Curl_bufq_is_empty",
-        "nghttp2_session_want_read",
-        "Curl_pollset_set",
-        "CF_DATA_RESTORE"
-      ],
-      "bodyLength": 7
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http_chunks.c",
-      "lineNumber": 457,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http_negotiate.c",
-      "lineNumber": 96,
-      "calls": [
-        "http_auth_nego_reset"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http_ntlm.c",
-      "lineNumber": 93,
-      "calls": [
-        "infof",
-        "Curl_auth_ntlm_remove",
-        "Curl_peer_unlink",
-        "Curl_creds_unlink"
-      ],
-      "bodyLength": 6
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http_ntlm.c",
-      "lineNumber": 101,
-      "calls": [
-        "infof",
-        "failure"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http_proxy.c",
-      "lineNumber": 347,
-      "calls": [
-        "Curl_http_req_make",
-        "strlen",
-        "strlen",
-        "strlen"
-      ],
-      "bodyLength": 6
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http_proxy.c",
-      "lineNumber": 491,
-      "calls": [
-        "Curl_dynhds_cget"
-      ],
-      "bodyLength": 1
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http_proxy.c",
-      "lineNumber": 587,
-      "calls": [
-        "infof"
-      ],
-      "bodyLength": 16
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http_proxy.c",
-      "lineNumber": 613,
-      "calls": [
-        "CURL_TRC_CF",
-        "Curl_cf_h1_proxy_insert_after"
-      ],
-      "bodyLength": 7
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http_proxy.c",
-      "lineNumber": 623,
-      "calls": [
-        "CURL_TRC_CF",
-        "Curl_cf_h2_proxy_insert_after"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/http_proxy.c",
-      "lineNumber": 633,
-      "calls": [
-        "CURL_TRC_CF",
-        "Curl_cf_h3_proxy_insert_after"
-      ],
-      "bodyLength": 6
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/imap.c",
-      "lineNumber": 826,
-      "calls": [
-        "imap_sendf",
-        "imap_sendf"
-      ],
-      "bodyLength": 8
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/imap.c",
-      "lineNumber": 1013,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/imap.c",
-      "lineNumber": 1063,
-      "calls": [
-        "Curl_sasl_decode_mech"
-      ],
-      "bodyLength": 10
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/imap.c",
-      "lineNumber": 1079,
-      "calls": [
-        "imap_perform_starttls",
-        "imap_perform_authentication",
-        "failf"
-      ],
-      "bodyLength": 11
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/imap.c",
-      "lineNumber": 1203,
-      "calls": [
-        "is_custom_fetch_listing_match"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/imap.c",
-      "lineNumber": 1207,
-      "calls": [
-        "curl_strnequal",
-        "is_custom_fetch_listing_match"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/imap.c",
-      "lineNumber": 1235,
-      "calls": [
-        "literal",
-        "memchr",
-        "imap_find_literal",
-        "curlx_str_number",
-        "curlx_str_single",
-        "curlx_dyn_len",
-        "infof",
-        "Curl_client_write",
-        "curlx_dyn_tail",
-        "Curl_client_write",
-        "curlx_dyn_ptr",
-        "buffer",
-        "curlx_dyn_tail",
-        "curlx_dyn_reset",
-        "Curl_pgrsSetDownloadSize",
-        "transferred",
-        "Curl_xfer_setup_nop",
-        "Curl_xfer_setup_recv",
-        "imap_state",
-        "Curl_client_write"
-      ],
-      "bodyLength": 92
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/imap.c",
-      "lineNumber": 1366,
-      "calls": [
-        "failf",
-        "DEBUGASSERT",
-        "curlx_strdup",
-        "imap_perform_list",
-        "imap_perform_search",
-        "imap_perform_fetch"
-      ],
-      "bodyLength": 20
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/imap.c",
-      "lineNumber": 1756,
-      "calls": [
-        "Curl_sasl_parse_url_auth_option"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/imap.c",
-      "lineNumber": 2228,
-      "calls": [
-        "imap_dophase_done",
-        "DEBUGF",
-        "infof"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ldap.c",
-      "lineNumber": 403,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/mime.c",
-      "lineNumber": 1940,
-      "calls": [
-        "Curl_mime_read",
-        "CURL_TRC_READ",
-        "cr_mime_read",
-        "Curl_mime_read",
-        "Curl_bufq_write",
-        "Curl_bufq_cread"
-      ],
-      "bodyLength": 22
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/mqtt.c",
-      "lineNumber": 694,
-      "calls": [
-        "mqstate"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/mqtt.c",
-      "lineNumber": 698,
-      "calls": [
-        "infof"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/mqtt.c",
-      "lineNumber": 861,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/multi.c",
-      "lineNumber": 672,
-      "calls": [
-        "CURL_TRC_M",
-        "connclose",
-        "Curl_conn_terminate"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/multi.c",
-      "lineNumber": 1089,
-      "calls": [
-        "Curl_pollset_add_out"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/multi.c",
-      "lineNumber": 1108,
-      "calls": [
-        "Curl_pollset_add_out"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/multi.c",
-      "lineNumber": 1528,
-      "calls": [
-        "Curl_poll",
-        "curlx_wait_ms"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/multi.c",
-      "lineNumber": 2105,
-      "calls": [
-        "multi_posttransfer",
-        "curlx_free",
-        "multi_done",
-        "multi_done",
-        "multi_follow",
-        "multistate",
-        "curlx_free",
-        "multi_follow",
-        "multi_done",
-        "multistate"
-      ],
-      "bodyLength": 48
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/multi.c",
-      "lineNumber": 2224,
-      "calls": [
-        "multistate"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/multi.c",
-      "lineNumber": 2400,
-      "calls": [
-        "Curl_connect",
-        "multi_posttransfer",
-        "Curl_pgrsUpdate_nometer"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/multi.c",
-      "lineNumber": 2410,
-      "calls": [
-        "Curl_pgrsUpdate",
-        "streamclose",
-        "multistate"
-      ],
-      "bodyLength": 11
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/multi.c",
-      "lineNumber": 2538,
-      "calls": [
-        "CURL_TRC_M",
-        "multi_posttransfer",
-        "multi_done"
-      ],
-      "bodyLength": 6
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/multi.c",
-      "lineNumber": 2571,
-      "calls": [
-        "multistate"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/multi.c",
-      "lineNumber": 2597,
-      "calls": [
-        "multi_posttransfer",
-        "multi_done"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/multi.c",
-      "lineNumber": 3533,
-      "calls": [
-        "multi_now",
-        "Curl_splay",
-        "curlx_ptimediff_us",
-        "curlx_timediff_ceil_ms",
-        "VERBOSE",
-        "Curl_splayget",
-        "VERBOSE",
-        "Curl_splayget"
-      ],
-      "bodyLength": 25
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/multi.c",
-      "lineNumber": 3612,
-      "calls": [
-        "CURL_TRC_M"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/multi.c",
-      "lineNumber": 3618,
-      "calls": [
-        "CURL_TRC_M"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/multi.c",
-      "lineNumber": 3622,
-      "calls": [
-        "CURL_TRC_M"
-      ],
-      "bodyLength": 6
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/multi_ev.c",
-      "lineNumber": 341,
-      "calls": [
-        "mev_sh_entry_conn_known"
-      ],
-      "bodyLength": 1
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/openldap.c",
-      "lineNumber": 912,
-      "calls": [
-        "oldap_perform_mechs",
-        "oldap_perform_bind",
-        "oldap_state"
-      ],
-      "bodyLength": 9
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/peer.c",
-      "lineNumber": 379,
-      "calls": [
-        "failf",
-        "hostname"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/pop3.c",
-      "lineNumber": 812,
-      "calls": [
-        "memchr",
-        "memchr",
-        "memchr",
-        "not",
-        "curlx_memdup0",
-        "pop3_perform_capa"
-      ],
-      "bodyLength": 28
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/pop3.c",
-      "lineNumber": 874,
-      "calls": [
-        "ISBLANK",
-        "ISNEWLINE",
-        "ISBLANK",
-        "ISNEWLINE",
-        "Curl_sasl_decode_mech"
-      ],
-      "bodyLength": 33
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/pop3.c",
-      "lineNumber": 1167,
-      "calls": [
-        "Curl_client_write"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/pop3.c",
-      "lineNumber": 1645,
-      "calls": [
-        "pop3_dophase_done",
-        "DEBUGF",
-        "infof"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/progress.c",
-      "lineNumber": 679,
-      "calls": [
-        "Curl_set_in_callback",
-        "fprogress",
-        "Curl_set_in_callback",
-        "failf"
-      ],
-      "bodyLength": 15
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/proxy.c",
-      "lineNumber": 153,
-      "calls": [
-        "curl_strnequal"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/proxy.c",
-      "lineNumber": 337,
-      "calls": [
-        "curl_getenv",
-        "curl_getenv"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ratelimit.c",
-      "lineNumber": 205,
-      "calls": [
-        "rlimit_update"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/request.c",
-      "lineNumber": 289,
-      "calls": [
-        "DEBUGASSERT",
-        "Curl_bufq_is_empty",
-        "infof",
-        "Curl_creader_total_length"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/request.c",
-      "lineNumber": 316,
-      "calls": [
-        "DEBUGF",
-        "infof",
-        "Curl_req_flush",
-        "Curl_xfer_flush"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/rtsp.c",
-      "lineNumber": 221,
-      "calls": [
-        "Curl_creader_set_fread"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/rtsp.c",
-      "lineNumber": 262,
-      "calls": [
-        "GET_PARAMETER"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/rtsp.c",
-      "lineNumber": 980,
-      "calls": [
-        "curlx_str_passblanks",
-        "failf",
-        "strlen",
-        "strncmp",
-        "failf",
-        "curlx_memdup0"
-      ],
-      "bodyLength": 43
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/rtsp.c",
-      "lineNumber": 1025,
-      "calls": [
-        "rtsp_parse_transport"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/sendf.c",
-      "lineNumber": 286,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/sendf.c",
-      "lineNumber": 840,
-      "calls": [
-        "Curl_set_in_callback",
-        "Curl_set_in_callback",
-        "CURL_TRC_READ",
-        "failf"
-      ],
-      "bodyLength": 11
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/setopt.c",
-      "lineNumber": 1271,
-      "calls": [
-        "Curl_hsts_cleanup",
-        "curl_slist_free_all"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/setopt.c",
-      "lineNumber": 1543,
-      "calls": [
-        "Curl_share_lock",
-        "Curl_cookie_clearsess",
-        "Curl_share_unlock"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/setopt.c",
-      "lineNumber": 1549,
-      "calls": [
-        "Curl_flush_cookies"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/setopt.c",
-      "lineNumber": 1553,
-      "calls": [
-        "Curl_cookie_loadfiles"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/setopt.c",
-      "lineNumber": 1867,
-      "calls": [
-        "Curl_setstropt"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/setopt.c",
-      "lineNumber": 1872,
-      "calls": [
-        "Curl_setstropt"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/setopt.c",
-      "lineNumber": 2888,
-      "calls": [
-        "setopt_slist",
-        "va_arg",
-        "setopt_pointers",
-        "setopt_cptr",
-        "va_arg"
-      ],
-      "bodyLength": 27
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/smb.c",
-      "lineNumber": 543,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/smtp.c",
-      "lineNumber": 1209,
-      "calls": [
-        "curl_strnequal",
-        "curl_strnequal",
-        "curl_strnequal",
-        "curl_strnequal",
-        "ISBLANK",
-        "ISNEWLINE",
-        "ISBLANK",
-        "ISNEWLINE",
-        "Curl_sasl_decode_mech",
-        "Curl_conn_is_ssl",
-        "smtp_perform_starttls",
-        "smtp_perform_authentication",
-        "failf",
-        "smtp_perform_authentication"
-      ],
-      "bodyLength": 69
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/smtp.c",
-      "lineNumber": 1933,
-      "calls": [
-        "smtp_dophase_done",
-        "DEBUGF",
-        "infof"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/socketpair.c",
-      "lineNumber": 338,
-      "calls": [
-        "SOCK_EAGAIN"
-      ],
-      "bodyLength": 9
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/socks.c",
-      "lineNumber": 219,
-      "calls": [
-        "failf",
-        "curl_easy_strerror",
-        "socks_failed"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/socks.c",
-      "lineNumber": 245,
-      "calls": [
-        "failf",
-        "curl_easy_strerror"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/socks.c",
-      "lineNumber": 250,
-      "calls": [
-        "Curl_bufq_len",
-        "failf"
-      ],
-      "bodyLength": 6
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/socks.c",
-      "lineNumber": 889,
-      "calls": [
-        "CURL_TRC_CF",
-        "u"
-      ],
-      "bodyLength": 7
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/socks.c",
-      "lineNumber": 970,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 20
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/splay.c",
-      "lineNumber": 68,
-      "calls": [
-        "splay_compare"
-      ],
-      "bodyLength": 13
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/telnet.c",
-      "lineNumber": 731,
-      "calls": [
-        "send_negotiation",
-        "sendsuboption"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/tftp.c",
-      "lineNumber": 293,
-      "calls": [
-        "failf",
-        "s"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/tftp.c",
-      "lineNumber": 298,
-      "calls": [
-        "failf",
-        "allocated"
-      ],
-      "bodyLength": 6
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/tftp.c",
-      "lineNumber": 538,
-      "calls": [
-        "infof"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/tftp.c",
-      "lineNumber": 1205,
-      "calls": [
-        "tftp_receive_packet",
-        "tftp_state_machine",
-        "Curl_xfer_setup_nop"
-      ],
-      "bodyLength": 10
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/tftp.c",
-      "lineNumber": 1238,
-      "calls": [
-        "Curl_pgrsCheck"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/thrdpool.c",
-      "lineNumber": 457,
-      "calls": [
-        "Curl_trc_feat_infof"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/thrdpool.c",
-      "lineNumber": 461,
-      "calls": [
-        "Curl_trc_feat_infof"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/url.c",
-      "lineNumber": 621,
-      "calls": [
-        "Curl_attach_connection",
-        "connection_is_dead",
-        "Curl_detach_connection"
-      ],
-      "bodyLength": 6
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/url.c",
-      "lineNumber": 828,
-      "calls": [
-        "get_protocol_family"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/url.c",
-      "lineNumber": 943,
-      "calls": [
-        "ftp_conns_match"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/url.c",
-      "lineNumber": 1201,
-      "calls": [
-        "infof"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/url.c",
-      "lineNumber": 1474,
-      "calls": [
-        "Curl_netrc_strerror",
-        "failf"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/url.c",
-      "lineNumber": 1480,
-      "calls": [
-        "str_has_ctrl",
-        "str_has_ctrl",
-        "failf",
-        "CURL_TRC_M",
-        "Curl_creds_merge",
-        "curl_url_set",
-        "Curl_creds_user",
-        "curl_url_set",
-        "Curl_creds_passwd",
-        "Curl_uc_to_curlcode"
-      ],
-      "bodyLength": 25
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/url.c",
-      "lineNumber": 1616,
-      "calls": [
-        "curlx_strdup"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/url.c",
-      "lineNumber": 1819,
-      "calls": [
-        "Curl_peer_link",
-        "Curl_creds_link"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/url.c",
-      "lineNumber": 1995,
-      "calls": [
-        "Curl_peer_create",
-        "infof",
-        "Curl_alpnid2str",
-        "Curl_alpnid2str"
-      ],
-      "bodyLength": 28
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/url.c",
-      "lineNumber": 2556,
-      "calls": [
-        "Curl_pgrsTime"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/urlapi.c",
-      "lineNumber": 154,
-      "calls": [
-        "Curl_hexbyte",
-        "curlx_dyn_addn"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/urlapi.c",
-      "lineNumber": 786,
-      "calls": [
-        "ISSLASH"
-      ],
-      "bodyLength": 8
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/urlapi.c",
-      "lineNumber": 820,
-      "calls": [
-        "curlx_dyn_len",
-        "curlx_dyn_ptr",
-        "memrchr",
-        "curlx_dyn_setlen",
-        "curlx_dyn_addn"
-      ],
-      "bodyLength": 17
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/urlapi.c",
-      "lineNumber": 1178,
-      "calls": [
-        "curlx_dyn_add"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/urlapi.c",
-      "lineNumber": 1431,
-      "calls": [
-        "Curl_is_ASCII_name",
-        "host_decode",
-        "curlx_free"
-      ],
-      "bodyLength": 8
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/urlapi.c",
-      "lineNumber": 1441,
-      "calls": [
-        "Curl_is_ASCII_name",
-        "host_encode",
-        "curlx_free"
-      ],
-      "bodyLength": 8
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/urlapi.c",
-      "lineNumber": 1526,
-      "calls": [
-        "curl_easy_escape"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/urlapi.c",
-      "lineNumber": 1531,
-      "calls": [
-        "Curl_is_ASCII_name",
-        "host_decode"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/urlapi.c",
-      "lineNumber": 1538,
-      "calls": [
-        "Curl_is_ASCII_name",
-        "host_encode"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/urlapi.c",
-      "lineNumber": 1629,
-      "calls": [
-        "Curl_get_scheme"
-      ],
-      "bodyLength": 6
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/urlapi.c",
-      "lineNumber": 1945,
-      "calls": [
-        "Curl_urldecode",
-        "hostname_check",
-        "curlx_free"
-      ],
-      "bodyLength": 8
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vauth/digest.c",
-      "lineNumber": 167,
-      "calls": [
-        "Curl_hexbyte",
-        "curlx_dyn_addn"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vauth/digest.c",
-      "lineNumber": 548,
-      "calls": [
-        "curl_strequal"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vauth/digest.c",
-      "lineNumber": 554,
-      "calls": [
-        "curlx_free",
-        "curlx_strdup"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vauth/digest.c",
-      "lineNumber": 560,
-      "calls": [
-        "curlx_free",
-        "curlx_strdup"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vauth/digest.c",
-      "lineNumber": 566,
-      "calls": [
-        "ISBLANK",
-        "curlx_str_until",
-        "curlx_str_casecompare",
-        "curlx_str_casecompare",
-        "curlx_str_single",
-        "ISBLANK",
-        "curlx_free",
-        "curlx_strdup",
-        "curlx_free",
-        "curlx_strdup"
-      ],
-      "bodyLength": 32
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vauth/digest.c",
-      "lineNumber": 600,
-      "calls": [
-        "curlx_free",
-        "curlx_strdup",
-        "curl_strequal",
-        "curl_strequal",
-        "curl_strequal",
-        "curl_strequal",
-        "curl_strequal",
-        "curl_strequal"
-      ],
-      "bodyLength": 29
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vauth/digest.c",
-      "lineNumber": 631,
-      "calls": [
-        "curl_strequal"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vauth/digest_sspi.c",
-      "lineNumber": 198,
-      "calls": [
-        "VERBOSE",
-        "FreeCredentialsHandle",
-        "Curl_sspi_free_identity",
-        "curlx_free",
-        "curlx_free",
-        "infof",
-        "Curl_sspi_strerror"
-      ],
-      "bodyLength": 14
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vauth/digest_sspi.c",
-      "lineNumber": 571,
-      "calls": [
-        "VERBOSE",
-        "FreeCredentialsHandle",
-        "Curl_sspi_free_identity",
-        "curlx_free",
-        "curlx_safefree",
-        "infof",
-        "Curl_sspi_strerror"
-      ],
-      "bodyLength": 16
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/capsule.c",
-      "lineNumber": 79,
-      "calls": [
-        "ntohs",
-        "memcpy"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/capsule.c",
-      "lineNumber": 85,
-      "calls": [
-        "ntohl",
-        "memcpy"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-ngtcp2-cmn.c",
-      "lineNumber": 852,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 1
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-ngtcp2-cmn.c",
-      "lineNumber": 855,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 1
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-ngtcp2-cmn.c",
-      "lineNumber": 865,
-      "calls": [
-        "infof",
-        "init_h3_conn_cb"
-      ],
-      "bodyLength": 8
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-ngtcp2-cmn.c",
-      "lineNumber": 1118,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-ngtcp2-cmn.c",
-      "lineNumber": 1185,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-ngtcp2-cmn.c",
-      "lineNumber": 1233,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-ngtcp2-cmn.c",
-      "lineNumber": 1409,
-      "calls": [
-        "DEBUGASSERT",
-        "nghttp3_conn_block_stream",
-        "CURL_TRC_CF",
-        "cf_ngtcp2_get_stream",
-        "DEBUGASSERT",
-        "nghttp3_conn_shutdown_stream_write",
-        "DEBUGASSERT",
-        "DEBUGASSERT",
-        "failf",
-        "ngtcp2_strerror",
-        "Curl_cf_ngtcp2_cmn_err_set"
-      ],
-      "bodyLength": 31
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-ngtcp2-cmn.c",
-      "lineNumber": 1792,
-      "calls": [
-        "ngtcp2_conn_set_keep_alive_timeout",
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-ngtcp2-proxy.c",
-      "lineNumber": 673,
-      "calls": [
-        "CURL_TRC_CF",
-        "vquic_h3_err_str"
-      ],
-      "bodyLength": 6
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-ngtcp2-proxy.c",
-      "lineNumber": 687,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 6
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-ngtcp2-proxy.c",
-      "lineNumber": 861,
-      "calls": [
-        "cf_h3_proxy_recv_closed_stream"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-ngtcp2.c",
-      "lineNumber": 456,
-      "calls": [
-        "CURL_TRC_CF",
-        "vquic_h3_err_str"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-ngtcp2.c",
-      "lineNumber": 468,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-ngtcp2.c",
-      "lineNumber": 527,
-      "calls": [
-        "recv_closed_stream"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-ngtcp2.c",
-      "lineNumber": 636,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-ngtcp2.c",
-      "lineNumber": 826,
-      "calls": [
-        "CURL_TRC_CF",
-        "Curl_cf_ngtcp2_h3_stream_close"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-ngtcp2.c",
-      "lineNumber": 832,
-      "calls": [
-        "CURL_TRC_CF",
-        "CURL_TRC_CF",
-        "send_body"
-      ],
-      "bodyLength": 16
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-ngtcp2.c",
-      "lineNumber": 850,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-ngtcp2.c",
-      "lineNumber": 1127,
-      "calls": [
-        "Curl_cf_ngtcp2_ctx_cleanup",
-        "curlx_free"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-quiche.c",
-      "lineNumber": 504,
-      "calls": [
-        "CURL_TRC_CF",
-        "failf"
-      ],
-      "bodyLength": 9
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-quiche.c",
-      "lineNumber": 616,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-quiche.c",
-      "lineNumber": 688,
-      "calls": [
-        "SSL_get_verify_result",
-        "failf",
-        "X509_verify_cert_error_string",
-        "failf"
-      ],
-      "bodyLength": 8
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-quiche.c",
-      "lineNumber": 703,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-quiche.c",
-      "lineNumber": 873,
-      "calls": [
-        "CURL_TRC_CF",
-        "vquic_h3_err_str"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-quiche.c",
-      "lineNumber": 887,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-quiche.c",
-      "lineNumber": 924,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-quiche.c",
-      "lineNumber": 963,
-      "calls": [
-        "CURL_TRC_CF",
-        "send_body"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-quiche.c",
-      "lineNumber": 968,
-      "calls": [
-        "CURL_TRC_CF",
-        "send_body"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-quiche.c",
-      "lineNumber": 973,
-      "calls": [
-        "CURL_TRC_CF",
-        "send_body"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-quiche.c",
-      "lineNumber": 1129,
-      "calls": [
-        "cf_quiche_stream_close"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/cf-quiche.c",
-      "lineNumber": 1133,
-      "calls": [
-        "CURL_TRC_CF",
-        "CURL_TRC_CF",
-        "send_body"
-      ],
-      "bodyLength": 19
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vquic/vquic.c",
-      "lineNumber": 191,
-      "calls": [
-        "failf",
-        "sendmsg"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh.c",
-      "lineNumber": 510,
-      "calls": [
-        "myssh_to"
-      ],
-      "bodyLength": 1
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh.c",
-      "lineNumber": 634,
-      "calls": [
-        "defined",
-        "curl_maprintf",
-        "sftp_statvfs_free",
-        "Curl_client_write",
-        "strlen",
-        "curlx_free",
-        "myssh_to"
-      ],
-      "bodyLength": 40
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh.c",
-      "lineNumber": 714,
-      "calls": [
-        "ssh_userauth_kbdint_getnprompts"
-      ],
-      "bodyLength": 6
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh.c",
-      "lineNumber": 789,
-      "calls": [
-        "failf",
-        "myssh_to_ERROR"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh.c",
-      "lineNumber": 815,
-      "calls": [
-        "myssh_to_ERROR"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh.c",
-      "lineNumber": 840,
-      "calls": [
-        "myssh_to"
-      ],
-      "bodyLength": 1
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh.c",
-      "lineNumber": 843,
-      "calls": [
-        "myssh_to"
-      ],
-      "bodyLength": 1
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh.c",
-      "lineNumber": 846,
-      "calls": [
-        "myssh_to"
-      ],
-      "bodyLength": 1
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh.c",
-      "lineNumber": 916,
-      "calls": [
-        "infof",
-        "myssh_to"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh.c",
-      "lineNumber": 966,
-      "calls": [
-        "infof",
-        "myssh_to"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh.c",
-      "lineNumber": 992,
-      "calls": [
-        "infof",
-        "myssh_to"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh.c",
-      "lineNumber": 1060,
-      "calls": [
-        "seek"
-      ],
-      "bodyLength": 6
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh.c",
-      "lineNumber": 1411,
-      "calls": [
-        "infof",
-        "myssh_to"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh.c",
-      "lineNumber": 1586,
-      "calls": [
-        "quote_error",
-        "myssh_to"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh.c",
-      "lineNumber": 1593,
-      "calls": [
-        "Curl_get_pathname",
-        "failf",
-        "failf",
-        "curlx_safefree",
-        "myssh_to",
-        "quote_error",
-        "myssh_to"
-      ],
-      "bodyLength": 19
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh.c",
-      "lineNumber": 1614,
-      "calls": [
-        "quote_error",
-        "myssh_to"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh.c",
-      "lineNumber": 1621,
-      "calls": [
-        "quote_error",
-        "myssh_to"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh.c",
-      "lineNumber": 1628,
-      "calls": [
-        "quote_error",
-        "myssh_to"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh.c",
-      "lineNumber": 1711,
-      "calls": [
-        "curlx_str_octal",
-        "failf",
-        "myssh_quote_error"
-      ],
-      "bodyLength": 9
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh.c",
-      "lineNumber": 1722,
-      "calls": [
-        "curlx_str_number",
-        "failf",
-        "myssh_quote_error"
-      ],
-      "bodyLength": 9
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh.c",
-      "lineNumber": 1742,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh2.c",
-      "lineNumber": 860,
-      "calls": [
-        "quote_error",
-        "myssh_to"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh2.c",
-      "lineNumber": 867,
-      "calls": [
-        "Curl_get_pathname",
-        "failf",
-        "curlx_safefree",
-        "quote_error",
-        "myssh_to"
-      ],
-      "bodyLength": 14
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh2.c",
-      "lineNumber": 883,
-      "calls": [
-        "quote_error",
-        "myssh_to"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh2.c",
-      "lineNumber": 890,
-      "calls": [
-        "quote_error",
-        "myssh_to"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh2.c",
-      "lineNumber": 896,
-      "calls": [
-        "quote_error",
-        "myssh_to"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh2.c",
-      "lineNumber": 951,
-      "calls": [
-        "seek"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh2.c",
-      "lineNumber": 1122,
-      "calls": [
-        "curlx_free",
-        "curl_maprintf",
-        "curlx_stat",
-        "curlx_safefree"
-      ],
-      "bodyLength": 7
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh2.c",
-      "lineNumber": 1232,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh2.c",
-      "lineNumber": 1237,
-      "calls": [
-        "curlx_str_octal",
-        "failf"
-      ],
-      "bodyLength": 10
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh2.c",
-      "lineNumber": 1249,
-      "calls": [
-        "curlx_str_number",
-        "failf"
-      ],
-      "bodyLength": 10
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh2.c",
-      "lineNumber": 1436,
-      "calls": [
-        "myssh_to"
-      ],
-      "bodyLength": 1
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh2.c",
-      "lineNumber": 2141,
-      "calls": [
-        "curl_maprintf",
-        "myssh_to",
-        "Curl_client_write",
-        "strlen",
-        "curlx_free",
-        "myssh_to"
-      ],
-      "bodyLength": 37
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh2.c",
-      "lineNumber": 2664,
-      "calls": [
-        "strlen",
-        "myssh_to",
-        "myssh_to"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/libssh2.c",
-      "lineNumber": 3297,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vssh/vssh.c",
-      "lineNumber": 313,
-      "calls": [
-        "failf",
-        "Offset",
-        "size"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/gtls.c",
-      "lineNumber": 266,
-      "calls": [
-        "gnutls_alert_get",
-        "gnutls_alert_get_name",
-        "gnutls_strerror",
-        "infof",
-        "gnutls_handshake"
-      ],
-      "bodyLength": 14
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/gtls.c",
-      "lineNumber": 285,
-      "calls": [
-        "gnutls_alert_get",
-        "gnutls_alert_get_name",
-        "gnutls_strerror",
-        "failf"
-      ],
-      "bodyLength": 12
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/gtls.c",
-      "lineNumber": 505,
-      "calls": [
-        "gnutls_certificate_set_verify_flags",
-        "gnutls_certificate_set_x509_trust_file",
-        "infof",
-        "s",
-        "gnutls_strerror",
-        "infof"
-      ],
-      "bodyLength": 19
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/gtls.c",
-      "lineNumber": 907,
-      "calls": [
-        "failf",
-        "gnutls_srp_allocate_client_cred",
-        "gnutls_strerror"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/gtls.c",
-      "lineNumber": 1449,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/gtls.c",
-      "lineNumber": 1989,
-      "calls": [
-        "gtls_send_earlydata"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/gtls.c",
-      "lineNumber": 2194,
-      "calls": [
-        "gnutls_record_get_direction"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/gtls.c",
-      "lineNumber": 2255,
-      "calls": [
-        "cf_gtls_handshake"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/mbedtls.c",
-      "lineNumber": 1048,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/mbedtls.c",
-      "lineNumber": 1052,
-      "calls": [
-        "CURL_TRC_CF",
-        "mbedtls_ssl_get_version_number",
-        "mbedtls_strerror",
-        "failf"
-      ],
-      "bodyLength": 7
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/mbedtls.c",
-      "lineNumber": 1337,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/mbedtls.c",
-      "lineNumber": 1342,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/mbedtls.c",
-      "lineNumber": 1346,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/openssl.c",
-      "lineNumber": 915,
-      "calls": [
-        "PEM_read_bio_X509",
-        "CURL_UNCONST"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/openssl.c",
-      "lineNumber": 1877,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 7
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/openssl.c",
-      "lineNumber": 2144,
-      "calls": [
-        "infof",
-        "failf"
-      ],
-      "bodyLength": 8
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/openssl.c",
-      "lineNumber": 2194,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/openssl.c",
-      "lineNumber": 2206,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/openssl.c",
-      "lineNumber": 2539,
-      "calls": [
-        "SSL_alert_desc_string_long"
-      ],
-      "bodyLength": 6
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/openssl.c",
-      "lineNumber": 2547,
-      "calls": [
-        "ssl_msg_type"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/openssl.c",
-      "lineNumber": 3460,
-      "calls": [
-        "infof",
-        "strlen",
-        "curlx_base64_decode",
-        "infof",
-        "SSL_set1_ech_config_list",
-        "infof",
-        "curlx_free",
-        "curlx_free",
-        "infof",
-        "strlen",
-        "SSL_set1_ech_config_list",
-        "infof",
-        "infof"
-      ],
-      "bodyLength": 41
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/openssl.c",
-      "lineNumber": 4523,
-      "calls": [
-        "BIO_new",
-        "BIO_s_file",
-        "failf",
-        "ossl_strerror",
-        "ERR_get_error",
-        "BIO_read_filename",
-        "failf",
-        "cert"
-      ],
-      "bodyLength": 15
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/openssl.c",
-      "lineNumber": 4990,
-      "calls": [
-        "ossl_send_earlydata"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/openssl.c",
-      "lineNumber": 5213,
-      "calls": [
-        "failf",
-        "curlx_strerror",
-        "curl_msnprintf",
-        "failf"
-      ],
-      "bodyLength": 23
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/openssl.c",
-      "lineNumber": 5322,
-      "calls": [
-        "signer",
-        "EVP_PKEY_get_default_digest_name",
-        "strcmp",
-        "infof",
-        "s"
-      ],
-      "bodyLength": 17
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/rustls.c",
-      "lineNumber": 173,
-      "calls": [
-        "failf",
-        "curlx_strerror"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/rustls.c",
-      "lineNumber": 231,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/rustls.c",
-      "lineNumber": 237,
-      "calls": [
-        "rustls_failf"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/rustls.c",
-      "lineNumber": 284,
-      "calls": [
-        "failf",
-        "curlx_strerror"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/rustls.c",
-      "lineNumber": 359,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/rustls.c",
-      "lineNumber": 734,
-      "calls": [
-        "rustls_root_cert_store_builder_load_roots_from_file",
-        "rustls_failf"
-      ],
-      "bodyLength": 8
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/rustls.c",
-      "lineNumber": 859,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/rustls.c",
-      "lineNumber": 1052,
-      "calls": [
-        "failf",
-        "rustls_client_config_builder_free",
-        "init_config_builder_platform_verifier",
-        "rustls_client_config_builder_free"
-      ],
-      "bodyLength": 11
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/rustls.c",
-      "lineNumber": 1065,
-      "calls": [
-        "init_config_builder_verifier",
-        "rustls_client_config_builder_free"
-      ],
-      "bodyLength": 9
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/rustls.c",
-      "lineNumber": 1384,
-      "calls": [
-        "DEBUGASSERT",
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/schannel.c",
-      "lineNumber": 744,
-      "calls": [
-        "DEBUGF",
-        "infof"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/schannel.c",
-      "lineNumber": 1303,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/schannel.c",
-      "lineNumber": 1936,
-      "calls": [
-        "SCH_DEV",
-        "infof"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/schannel.c",
-      "lineNumber": 2073,
-      "calls": [
-        "failf",
-        "data"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/schannel.c",
-      "lineNumber": 2156,
-      "calls": [
-        "infof"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/schannel.c",
-      "lineNumber": 2161,
-      "calls": [
-        "infof"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/schannel.c",
-      "lineNumber": 2170,
-      "calls": [
-        "ensure_encoding_size",
-        "SCH_DEV",
-        "infof",
-        "Curl_conn_cf_recv",
-        "SCH_DEV",
-        "infof",
-        "infof",
-        "DEBUGF",
-        "infof",
-        "SCH_DEV",
-        "infof"
-      ],
-      "bodyLength": 38
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/schannel.c",
-      "lineNumber": 2307,
-      "calls": [
-        "SEC_I_CONTEXT_EXPIRED",
-        "afterwards",
-        "infof",
-        "received"
-      ],
-      "bodyLength": 13
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/schannel.c",
-      "lineNumber": 2323,
-      "calls": [
-        "SCH_DEV",
-        "infof"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/schannel.c",
-      "lineNumber": 2537,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/schannel.c",
-      "lineNumber": 2833,
-      "calls": [
-        "curlx_strdup"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/vtls.c",
-      "lineNumber": 1538,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/vtls.c",
-      "lineNumber": 1701,
-      "calls": [
-        "DEBUGASSERT"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/vtls.c",
-      "lineNumber": 1763,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 1
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/vtls_scache.c",
-      "lineNumber": 523,
-      "calls": [
-        "memcpy",
-        "memcpy"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/vtls_scache.c",
-      "lineNumber": 1141,
-      "calls": [
-        "Curl_hmacit",
-        "strlen",
-        "memcmp",
-        "memcpy",
-        "memcpy"
-      ],
-      "bodyLength": 19
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/wolfssl.c",
-      "lineNumber": 804,
-      "calls": [
-        "wolfSSL_CTX_set_cert_store"
-      ],
-      "bodyLength": 1
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/wolfssl.c",
-      "lineNumber": 807,
-      "calls": [
-        "wolfSSL_X509_STORE_new",
-        "failf",
-        "wolfSSL_CTX_set_cert_store",
-        "wssl_populate_x509_store",
-        "wssl_set_cached_x509_store"
-      ],
-      "bodyLength": 13
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/wolfssl.c",
-      "lineNumber": 1399,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 6
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/wolfssl.c",
-      "lineNumber": 1734,
-      "calls": [
-        "failf",
-        "name"
-      ],
-      "bodyLength": 6
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/wolfssl.c",
-      "lineNumber": 1742,
-      "calls": [
-        "failf",
-        "infof"
-      ],
-      "bodyLength": 9
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/wolfssl.c",
-      "lineNumber": 1753,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/wolfssl.c",
-      "lineNumber": 1757,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/wolfssl.c",
-      "lineNumber": 1771,
-      "calls": [
-        "wolfSSL_GetEchConfigs",
-        "infof",
-        "curlx_base64_encode",
-        "infof",
-        "curlx_free"
-      ],
-      "bodyLength": 21
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/wolfssl.c",
-      "lineNumber": 1904,
-      "calls": [
-        "CURL_TRC_CF"
-      ],
-      "bodyLength": 7
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/wolfssl.c",
-      "lineNumber": 2032,
-      "calls": [
-        "CURL_TRC_CF",
-        "wssl_recv",
-        "failf"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/x509asn1.c",
-      "lineNumber": 1042,
-      "calls": [
-        "getASN1Element",
-        "do_pubkey_field",
-        "dsa",
-        "getASN1Element",
-        "do_pubkey_field",
-        "dsa",
-        "getASN1Element",
-        "do_pubkey_field",
-        "dsa",
-        "do_pubkey_field",
-        "dsa"
-      ],
-      "bodyLength": 16
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/vtls/x509asn1.c",
-      "lineNumber": 1060,
-      "calls": [
-        "getASN1Element",
-        "do_pubkey_field",
-        "dh",
-        "getASN1Element",
-        "do_pubkey_field",
-        "dh",
-        "do_pubkey_field",
-        "dh"
-      ],
-      "bodyLength": 11
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ws.c",
-      "lineNumber": 391,
-      "calls": [
-        "Curl_bufq_skip",
-        "failf",
-        "ws_dec_reset",
-        "failf",
-        "ws_dec_reset",
-        "failf",
-        "ws_dec_reset",
-        "failf",
-        "ws_dec_reset"
-      ],
-      "bodyLength": 41
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ws.c",
-      "lineNumber": 692,
-      "calls": [
-        "update_meta",
-        "Curl_cwriter_write"
-      ],
-      "bodyLength": 9
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ws.c",
-      "lineNumber": 749,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ws.c",
-      "lineNumber": 1100,
-      "calls": [
-        "Curl_bufq_len",
-        "Curl_bufq_len",
-        "send",
-        "CURL_TRC_WS",
-        "DEBUGASSERT"
-      ],
-      "bodyLength": 16
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ws.c",
-      "lineNumber": 1581,
-      "calls": [
-        "infof"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/lib/ws.c",
-      "lineNumber": 1682,
-      "calls": [
-        "failf"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/config2setopts.c",
-      "lineNumber": 241,
-      "calls": [
-        "errorf"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/config2setopts.c",
-      "lineNumber": 719,
-      "calls": [
-        "my_setopt_long",
-        "my_setopt_ptr",
-        "my_setopt_ptr"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_cb_hdr.c",
-      "lineNumber": 333,
-      "calls": [
-        "parameter",
-        "filenames",
-        "ISALPHA",
-        "memcmp",
-        "curlx_str_passblanks",
-        "parse_filename",
-        "curlx_free",
-        "curlx_safefree",
-        "curl_maprintf",
-        "curlx_free",
-        "curlx_strdup",
-        "curl_free",
-        "tool_create_output_file",
-        "tool_write_headers",
-        "tool_create_output_file",
-        "tool_write_headers"
-      ],
-      "bodyLength": 65
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_cb_hdr.c",
-      "lineNumber": 497,
-      "calls": [
-        "content_disposition"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_cb_wrt.c",
-      "lineNumber": 188,
-      "calls": [
-        "IS_TRAILING_BYTE"
-      ],
-      "bodyLength": 15
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_doswin.c",
-      "lineNumber": 223,
-      "calls": [
-        "memcpy"
-      ],
-      "bodyLength": 21
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_filetime.c",
-      "lineNumber": 66,
-      "calls": [
-        "warnf",
-        "GetLastError"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_filetime.c",
-      "lineNumber": 100,
-      "calls": [
-        "warnf"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_formparse.c",
-      "lineNumber": 707,
-      "calls": [
-        "param_headers"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_formparse.c",
-      "lineNumber": 713,
-      "calls": [
-        "ISBLANK"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_formparse.c",
-      "lineNumber": 752,
-      "calls": [
-        "warnf",
-        "curl_slist_free_all"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_formparse.c",
-      "lineNumber": 870,
-      "calls": [
-        "warnf"
-      ],
-      "bodyLength": 6
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_formparse.c",
-      "lineNumber": 878,
-      "calls": [
-        "filename",
-        "get_param_part",
-        "tool_mime_new_parts",
-        "tool_mime_new_filedata",
-        "warnf",
-        "curlx_safefree",
-        "SET_TOOL_MIME_PTR",
-        "SET_TOOL_MIME_PTR",
-        "SET_TOOL_MIME_PTR"
-      ],
-      "bodyLength": 51
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_getparam.c",
-      "lineNumber": 946,
-      "calls": [
-        "strcmp",
-        "CURL_BINMODE",
-        "curlx_fopen",
-        "errorf",
-        "file2memory",
-        "file2string",
-        "strlen",
-        "curlx_fclose",
-        "curlx_strdup"
-      ],
-      "bodyLength": 39
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_getparam.c",
-      "lineNumber": 1236,
-      "calls": [
-        "getstr"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_getparam.c",
-      "lineNumber": 1240,
-      "calls": [
-        "getstr",
-        "strcmp",
-        "curlx_fopen",
-        "warnf",
-        "file2string",
-        "curlx_fclose",
-        "curl_maprintf",
-        "curlx_free",
-        "curlx_strdup",
-        "curl_free"
-      ],
-      "bodyLength": 38
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_getparam.c",
-      "lineNumber": 1534,
-      "calls": [
-        "set_trace_config"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_getparam.c",
-      "lineNumber": 3013,
-      "calls": [
-        "ARGTYPE",
-        "varexpand",
-        "curlx_dyn_free",
-        "curlx_dyn_ptr"
-      ],
-      "bodyLength": 17
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_getparam.c",
-      "lineNumber": 3052,
-      "calls": [
-        "tool_help",
-        "opt_depr",
-        "has_leading_unicode",
-        "warnf",
-        "ARGTYPE",
-        "opt_file",
-        "opt_string",
-        "opt_secs",
-        "opt_unum",
-        "DEBUGASSERT",
-        "cleanarg",
-        "CURL_UNCONST"
-      ],
-      "bodyLength": 47
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_help.c",
-      "lineNumber": 144,
-      "calls": [
-        "curl_mprintf"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_help.c",
-      "lineNumber": 254,
-      "calls": [
-        "strncmp",
-        "findlongopt",
-        "ARGTYPE",
-        "findshortopt",
-        "curl_mfprintf",
-        "curl_msnprintf",
-        "curl_msnprintf",
-        "curl_msnprintf",
-        "showhelp",
-        "showhelp",
-        "curl_mfprintf"
-      ],
-      "bodyLength": 40
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_help.c",
-      "lineNumber": 297,
-      "calls": [
-        "puts",
-        "get_categories"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_helpers.c",
-      "lineNumber": 115,
-      "calls": [
-        "notef"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_helpers.c",
-      "lineNumber": 119,
-      "calls": [
-        "warnf"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_operate.c",
-      "lineNumber": 493,
-      "calls": [
-        "curl_easy_getinfo",
-        "curl_easy_getinfo",
-        "proto_token"
-      ],
-      "bodyLength": 14
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_operate.c",
-      "lineNumber": 624,
-      "calls": [
-        "curl_easy_getinfo",
-        "curl_mfprintf"
-      ],
-      "bodyLength": 10
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_operate.c",
-      "lineNumber": 978,
-      "calls": [
-        "create_dir_hierarchy",
-        "curlx_fopen",
-        "curlx_fclose",
-        "curlx_fopen",
-        "errorf"
-      ],
-      "bodyLength": 34
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_operate.c",
-      "lineNumber": 1051,
-      "calls": [
-        "errorf"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_operate.c",
-      "lineNumber": 1056,
-      "calls": [
-        "glob_match_url",
-        "glob_inuse",
-        "warnf",
-        "glob_show_error",
-        "warnf",
-        "warnf"
-      ],
-      "bodyLength": 28
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_operate.c",
-      "lineNumber": 1204,
-      "calls": [
-        "warnf",
-        "sclose"
-      ],
-      "bodyLength": 6
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_operate.c",
-      "lineNumber": 1311,
-      "calls": [
-        "curlx_strdup"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_operate.c",
-      "lineNumber": 2026,
-      "calls": [
-        "add_parallel_transfers"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_operate.c",
-      "lineNumber": 2433,
-      "calls": [
-        "hugehelp",
-        "warnf"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_operate.c",
-      "lineNumber": 2447,
-      "calls": [
-        "curl_mprintf"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_parsecfg.c",
-      "lineNumber": 355,
-      "calls": [
-        "curlx_dyn_len",
-        "curlx_dyn_setlen"
-      ],
-      "bodyLength": 5
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_progress.c",
-      "lineNumber": 54,
-      "calls": [
-        "curl_msnprintf"
-      ],
-      "bodyLength": 4
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_progress.c",
-      "lineNumber": 205,
-      "calls": [
-        "add_offt"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_progress.c",
-      "lineNumber": 212,
-      "calls": [
-        "add_offt"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_urlglob.c",
-      "lineNumber": 143,
-      "calls": [
-        "curlx_realloc",
-        "globerror"
-      ],
-      "bodyLength": 7
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_urlglob.c",
-      "lineNumber": 293,
-      "calls": [
-        "ISDIGIT",
-        "curlx_str_number",
-        "curlx_str_single",
-        "curlx_str_passblanks",
-        "curlx_str_number",
-        "curlx_str_single",
-        "curlx_str_single",
-        "curlx_str_number",
-        "curlx_str_single",
-        "globerror",
-        "globerror",
-        "multiply",
-        "globerror"
-      ],
-      "bodyLength": 56
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_urlglob.c",
-      "lineNumber": 506,
-      "calls": [
-        "curlx_str_single",
-        "curlx_str_until",
-        "curlx_str_single",
-        "syntax",
-        "curlx_str_init",
-        "glob_find_name",
-        "globerror",
-        "glob_set",
-        "glob_range",
-        "add_glob"
-      ],
-      "bodyLength": 33
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_urlglob.c",
-      "lineNumber": 737,
-      "calls": [
-        "curlx_str_until",
-        "curlx_str_single",
-        "glob_inuse",
-        "glob_find_name",
-        "glob_inuse",
-        "glob_find_name",
-        "curlx_dyn_free",
-        "globerror"
-      ],
-      "bodyLength": 22
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_writeout.c",
-      "lineNumber": 822,
-      "calls": [
-        "output_header"
-      ],
-      "bodyLength": 2
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_writeout.c",
-      "lineNumber": 826,
-      "calls": [
-        "outtime"
-      ],
-      "bodyLength": 1
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/tool_writeout.c",
-      "lineNumber": 867,
-      "calls": [
-        "fputc",
-        "fputc",
-        "fputc",
-        "fputc",
-        "fputc"
-      ],
-      "bodyLength": 17
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/var.c",
-      "lineNumber": 113,
-      "calls": [
-        "curlx_dyn_reset",
-        "jsonquoted"
-      ],
-      "bodyLength": 8
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/var.c",
-      "lineNumber": 123,
-      "calls": [
-        "curlx_dyn_reset",
-        "curl_easy_escape",
-        "curlx_dyn_add",
-        "curl_free"
-      ],
-      "bodyLength": 16
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/var.c",
-      "lineNumber": 141,
-      "calls": [
-        "curlx_dyn_reset",
-        "curlx_base64_encode",
-        "curlx_dyn_addn",
-        "curlx_free"
-      ],
-      "bodyLength": 18
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/var.c",
-      "lineNumber": 161,
-      "calls": [
-        "curlx_dyn_reset",
-        "curlx_base64_decode",
-        "curlx_dyn_add",
-        "curlx_dyn_addn",
-        "curlx_free"
-      ],
-      "bodyLength": 19
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/var.c",
-      "lineNumber": 414,
-      "calls": [
-        "strlen"
-      ],
-      "bodyLength": 3
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/var.c",
-      "lineNumber": 436,
-      "calls": [
-        "strcmp",
-        "curlx_fopen",
-        "errorf",
-        "curlx_strerror",
-        "file2memory_range",
-        "curlx_fclose"
-      ],
-      "bodyLength": 27
-    },
-    {
-      "functionName": "if",
-      "filePath": "/tmp/curl/src/var.c",
-      "lineNumber": 465,
-      "calls": [
-        "strlen",
-        "CURL_UNCONST"
-      ],
-      "bodyLength": 15
-    },
-    {
-      "functionName": "if_TRUNCATED",
-      "filePath": "/tmp/curl/docs/examples/xmlstream.c",
-      "lineNumber": 1154,
-      "calls": [
-        "XML_Parse",
-        "XML_GetErrorCode",
-        "fprintf",
-        "d",
-        "XML_ErrorString",
-        "printf"
-      ]
-    },
-    {
-      "functionName": "if_TRUNCATED",
-      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
-      "lineNumber": 1326,
-      "calls": [
-        "infof",
-        "strlen",
-        "curlx_str_numblanks"
-      ]
-    },
-    {
-      "functionName": "if_TRUNCATED",
-      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
-      "lineNumber": 1339,
-      "calls": [
-        "infof",
-        "Curl_compareheader",
-        "STRCONST",
-        "STRCONST",
-        "CURL_TRC_CF"
-      ]
-    },
-    {
-      "functionName": "if_TRUNCATED",
-      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
-      "lineNumber": 1354,
-      "calls": [
-        "Curl_compareheader",
-        "STRCONST",
-        "STRCONST"
-      ]
-    },
-    {
-      "functionName": "if_TRUNCATED",
-      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
-      "lineNumber": 1413,
-      "calls": [
-        "infof",
-        "strlen",
-        "curlx_str_numblanks"
-      ]
-    },
-    {
-      "functionName": "if_TRUNCATED",
-      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
-      "lineNumber": 1432,
-      "calls": [
-        "infof",
-        "Curl_compareheader",
-        "STRCONST",
-        "STRCONST",
-        "infof"
-      ]
-    },
-    {
-      "functionName": "if_TRUNCATED",
-      "filePath": "/tmp/curl/lib/cf-h2-proxy.c",
-      "lineNumber": 2140,
-      "calls": [
-        "CF_DATA_SAVE",
-        "nghttp2_session_want_write",
-        "Curl_bufq_is_empty",
-        "Curl_bufq_is_empty",
-        "nghttp2_session_want_read",
-        "Curl_pollset_set",
-        "CURL_TRC_CF"
-      ]
-    },
-    {
-      "functionName": "if_TRUNCATED",
-      "filePath": "/tmp/curl/lib/cf-ip-happy.c",
-      "lineNumber": 1519,
-      "calls": [
-        "curlx_ptimediff_ms",
-        "Curl_pgrs_now",
-        "CURL_TRC_CF",
-        "VERBOSE",
-        "VERBOSE",
-        "cf_ip_attempt_restart",
-        "CURL_TRC_CF",
-        "Curl_pgrs_now",
-        "DEBUGASSERT",
-        "infof"
-      ]
-    },
-    {
-      "functionName": "if_TRUNCATED",
-      "filePath": "/tmp/curl/lib/cf-socket.c",
-      "lineNumber": 1607,
-      "calls": [
-        "strlen",
-        "strlen",
-        "memchr",
-        "curlx_memdup0",
-        "curlx_memdup0"
-      ]
-    },
-    {
-      "functionName": "if_REORDERED",
-      "filePath": "/tmp/curl/docs/examples/websocket.c",
-      "lineNumber": 2052,
-      "calls": [
-        "fprintf",
-        "select",
-        "sleep"
-      ]
-    },
-    {
-      "functionName": "if_REORDERED",
-      "filePath": "/tmp/curl/docs/examples/websocket.c",
-      "lineNumber": 2101,
-      "calls": [
-        "fprintf",
-        "select",
-        "sleep"
-      ]
-    },
-    {
-      "functionName": "if_REORDERED",
-      "filePath": "/tmp/curl/docs/examples/xmlstream.c",
-      "lineNumber": 2154,
-      "calls": [
-        "XML_Parse",
-        "XML_GetErrorCode",
-        "fprintf",
-        "d",
-        "XML_ErrorString",
-        "printf",
-        "printf"
-      ]
-    },
-    {
-      "functionName": "if_REORDERED",
-      "filePath": "/tmp/curl/lib/cf-dns.c",
-      "lineNumber": 2195,
-      "calls": [
-        "failf",
-        "Curl_pgrs_now",
-        "curlx_ptimediff_ms"
-      ]
-    },
-    {
-      "functionName": "if_REORDERED",
-      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
-      "lineNumber": 2326,
-      "calls": [
-        "infof",
-        "strlen",
-        "failf",
-        "curlx_str_numblanks"
-      ]
-    },
-    {
-      "functionName": "if_REORDERED",
-      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
-      "lineNumber": 2339,
-      "calls": [
-        "infof",
-        "Curl_compareheader",
-        "STRCONST",
-        "STRCONST",
-        "Curl_httpchunk_reset",
-        "CURL_TRC_CF"
-      ]
-    },
-    {
-      "functionName": "if_REORDERED",
-      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
-      "lineNumber": 2354,
-      "calls": [
-        "Curl_compareheader",
-        "STRCONST",
-        "CURL_TRC_CF",
-        "STRCONST"
-      ]
-    },
-    {
-      "functionName": "if_REORDERED",
-      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
-      "lineNumber": 2413,
-      "calls": [
-        "infof",
-        "strlen",
-        "failf",
-        "curlx_str_numblanks"
-      ]
-    },
-    {
-      "functionName": "if_REORDERED",
-      "filePath": "/tmp/curl/lib/cf-h1-proxy.c",
-      "lineNumber": 2432,
-      "calls": [
-        "infof",
-        "Curl_compareheader",
-        "STRCONST",
-        "STRCONST",
-        "Curl_httpchunk_reset",
-        "infof"
-      ]
-    },
-    {
-      "functionName": "if_REORDERED",
-      "filePath": "/tmp/curl/lib/cf-h2-proxy.c",
-      "lineNumber": 3140,
-      "calls": [
-        "CF_DATA_SAVE",
-        "nghttp2_session_want_write",
-        "Curl_bufq_is_empty",
-        "Curl_bufq_is_empty",
-        "nghttp2_session_want_read",
-        "Curl_pollset_set",
-        "CF_DATA_RESTORE",
-        "CURL_TRC_CF"
-      ]
-    },
-    {
-      "functionName": "if_REORDERED",
-      "filePath": "/tmp/curl/lib/cf-ip-happy.c",
-      "lineNumber": 2519,
-      "calls": [
-        "curlx_ptimediff_ms",
-        "Curl_pgrs_now",
-        "CURL_TRC_CF",
-        "VERBOSE",
-        "VERBOSE",
-        "cf_ip_attempt_restart",
-        "CURL_TRC_CF",
-        "Curl_pgrs_now",
-        "DEBUGASSERT",
-        "Curl_expire",
-        "infof"
-      ]
-    },
-    {
-      "functionName": "if_REORDERED",
-      "filePath": "/tmp/curl/lib/cf-ip-happy.c",
-      "lineNumber": 2550,
-      "calls": [
-        "CURL_TRC_CF",
-        "CURL_TRC_CF",
-        "VERBOSE"
-      ]
-    },
-    {
-      "functionName": "if_REORDERED",
-      "filePath": "/tmp/curl/lib/cf-socket.c",
-      "lineNumber": 2600,
-      "calls": [
-        "strlen",
-        "strlen",
-        "curlx_memdup0"
-      ]
-    },
-    {
-      "functionName": "if_REORDERED",
-      "filePath": "/tmp/curl/lib/cf-socket.c",
-      "lineNumber": 2607,
-      "calls": [
-        "strlen",
-        "strlen",
-        "memchr",
-        "curlx_memdup0",
-        "curlx_safefree",
-        "curlx_memdup0"
-      ]
-    }
-  ]
-}
+  {
+    "function": "mbed_configure_ssl",
+    "file": "lib/vtls/mbedtls.c",
+    "calls": [
+      "Curl_ssl_cf_get_primary_config",
+      "Curl_ssl_cf_get_config",
+      "mbedtls_ssl_config_init",
+      "mbedtls_ssl_config_defaults",
+      "mbedtls_ssl_conf_dbg",
+      "mbedtls_debug_set_threshold",
+      "defined",
+      "mbedtls_ssl_conf_tls13_enable_signal_new_session_tickets",
+      "mbedtls_ssl_conf_verify",
+      "mbedtls_ssl_conf_authmode"
+    ],
+    "totalCalls": 101
+  },
+  {
+    "function": "ssh_statemachine",
+    "file": "lib/vssh/libssh2.c",
+    "calls": [
+      "ssh_state_init",
+      "FALLTHROUGH",
+      "ssh_state_startup",
+      "ssh_state_hostkey",
+      "ssh_state_authlist",
+      "ssh_state_pkey_init",
+      "ssh_state_auth_pkey",
+      "ssh_state_auth_pass_init",
+      "ssh_state_auth_pass",
+      "ssh_state_auth_host_init"
+    ],
+    "totalCalls": 61
+  },
+  {
+    "function": "myssh_statemachine",
+    "file": "lib/vssh/libssh.c",
+    "calls": [
+      "myssh_state_init",
+      "FALLTHROUGH",
+      "myssh_in_S_STARTUP",
+      "myssh_is_known",
+      "myssh_to_ERROR",
+      "myssh_to",
+      "myssh_in_AUTHLIST",
+      "myssh_in_AUTH_PKEY_INIT",
+      "myssh_in_AUTH_PKEY",
+      "myssh_in_AUTH_GSSAPI"
+    ],
+    "totalCalls": 58
+  },
+  {
+    "function": "ftp_pp_statemachine",
+    "file": "lib/ftp.c",
+    "calls": [
+      "Curl_conn_meta_get",
+      "Curl_meta_get",
+      "Curl_pp_flushsend",
+      "ftp_readresp",
+      "ftp_wait_resp",
+      "RFC2228",
+      "Curl_conn_is_ssl",
+      "Curl_ssl_cfilter_add",
+      "Curl_conn_get_origin",
+      "Curl_conn_connect"
+    ],
+    "totalCalls": 40
+  },
+  {
+    "function": "ldap_do",
+    "file": "lib/ldap.c",
+    "calls": [
+      "Curl_creds_has_user",
+      "Curl_creds_has_passwd",
+      "Curl_bufref_ptr",
+      "ldap_url_parse",
+      "ldap_url_parse_low",
+      "ldap_err2string",
+      "Curl_conn_get_ip_info",
+      "scheme",
+      "Curl_conn_is_ssl",
+      "curlx_convert_UTF8_to_tchar"
+    ],
+    "totalCalls": 40
+  },
+  {
+    "function": "Curl_ossl_ctx_init",
+    "file": "lib/vtls/openssl.c",
+    "calls": [
+      "Curl_ssl_cf_get_primary_config",
+      "Curl_ssl_cf_get_config",
+      "ossl_seed",
+      "ossl_init_method",
+      "SSL_CTX_new_ex",
+      "SSL_CTX_new",
+      "ossl_strerror",
+      "ERR_peek_error",
+      "cb_setup",
+      "SSL_CTX_set_msg_callback"
+    ],
+    "totalCalls": 39
+  },
+  {
+    "function": "ossl_certchain",
+    "file": "lib/vtls/openssl.c",
+    "calls": [
+      "STACK_OF",
+      "SSL_get_peer_cert_chain",
+      "sk_X509_num",
+      "allowed",
+      "Curl_ssl_init_certinfo",
+      "BIO_new",
+      "BIO_s_mem",
+      "sk_X509_value",
+      "X509_NAME_print_ex",
+      "X509_get_subject_name"
+    ],
+    "totalCalls": 38
+  },
+  {
+    "function": "Curl_close",
+    "file": "lib/url.c",
+    "calls": [
+      "curl_multi_remove_handle",
+      "send",
+      "Curl_detach_connection",
+      "curl_easy_perform",
+      "curl_multi_cleanup",
+      "Curl_expire_clear",
+      "curlx_free",
+      "Curl_resolv_destroy_all",
+      "Curl_req_free",
+      "Curl_ssl_close_all"
+    ],
+    "totalCalls": 33
+  },
+  {
+    "function": "Curl_sasl_continue",
+    "file": "lib/curl_sasl.c",
+    "calls": [
+      "Curl_conn_get_current_host",
+      "Curl_bufref_init",
+      "sasl_state",
+      "Curl_auth_create_plain_message",
+      "Curl_auth_create_login_message",
+      "Curl_creds_user",
+      "Curl_creds_passwd",
+      "Curl_auth_create_external_message",
+      "get_server_message",
+      "Curl_auth_gsasl_get"
+    ],
+    "totalCalls": 30
+  },
+  {
+    "function": "multi_runsingle",
+    "file": "lib/multi.c",
+    "calls": [
+      "GOOD_EASY_HANDLE",
+      "multi_posttransfer",
+      "multi_done",
+      "multistate",
+      "multi_warn_debug",
+      "Curl_uint32_bset_remove",
+      "Curl_wakeup_consume",
+      "Curl_async_thrdd_multi_process",
+      "Curl_cshutdn_perform",
+      "sigpipe_apply"
+    ],
+    "totalCalls": 30
+  },
+  {
+    "function": "Curl_auth_create_ntlm_type3_message",
+    "file": "lib/vauth/ntlm.c",
+    "calls": [
+      "buffer",
+      "bytes",
+      "block",
+      "Curl_creds_user",
+      "Curl_creds_passwd",
+      "memset",
+      "strchr",
+      "strlen",
+      "Curl_rand",
+      "Curl_ntlm_core_mk_nt_hash"
+    ],
+    "totalCalls": 30
+  },
+  {
+    "function": "telnet_do",
+    "file": "lib/telnet.c",
+    "calls": [
+      "init_telnet",
+      "Curl_meta_get",
+      "check_telnet_options",
+      "select",
+      "WaitForMultipleObjects",
+      "WSACreateEvent",
+      "failed",
+      "WSAEventSelect",
+      "WSACloseEvent",
+      "GetStdHandle"
+    ],
+    "totalCalls": 29
+  },
+  {
+    "function": "client_cert",
+    "file": "lib/vtls/openssl.c",
+    "calls": [
+      "ossl_do_file_type",
+      "SSL_CTX_set_default_passwd_cb_userdata",
+      "SSL_CTX_set_default_passwd_cb",
+      "SSL_CTX_use_certificate_chain_file",
+      "use_certificate_chain_blob",
+      "ossl_strerror",
+      "ERR_get_error",
+      "SSL_CTX_use_certificate_file",
+      "use_certificate_blob",
+      "engineload"
+    ],
+    "totalCalls": 29
+  },
+  {
+    "function": "Curl_auth_create_digest_http_message",
+    "file": "lib/vauth/digest_sspi.c",
+    "calls": [
+      "QuerySecurityPackageInfo",
+      "CURL_UNCONST",
+      "TEXT",
+      "FreeContextBuffer",
+      "curlx_malloc",
+      "Curl_creds_same",
+      "DeleteSecurityContext",
+      "curlx_safefree",
+      "Curl_creds_unlink",
+      "curlx_uztoul"
+    ],
+    "totalCalls": 27
+  },
+  {
+    "function": "Curl_vtls_apple_verify",
+    "file": "lib/vtls/apple.c",
+    "calls": [
+      "Curl_ssl_cf_get_primary_config",
+      "CFStringCreateWithCString",
+      "CFArrayCreateMutable",
+      "SecPolicyCreateSSL",
+      "CFArrayAppendValue",
+      "CFRelease",
+      "defined",
+      "Curl_ssl_cf_get_config",
+      "__builtin_available",
+      "status"
+    ],
+    "totalCalls": 27
+  },
+  {
+    "function": "Curl_conn_connect",
+    "file": "lib/connect.c",
+    "calls": [
+      "CONN_SOCK_IDX_VALID",
+      "Curl_pollset_init",
+      "Curl_pollfds_init",
+      "Curl_conn_needs_flush",
+      "Curl_conn_flush",
+      "do_connect",
+      "CURL_TRC_CF",
+      "Curl_conn_is_ssl",
+      "Curl_conn_cntrl_update_info",
+      "conn_report_connect_stats"
+    ],
+    "totalCalls": 26
+  },
+  {
+    "function": "file_do",
+    "file": "lib/file.c",
+    "calls": [
+      "files",
+      "directories",
+      "Curl_meta_get",
+      "file_upload",
+      "curlx_fstat",
+      "S_ISDIR",
+      "Curl_meets_timecondition",
+      "curl_msnprintf",
+      "Curl_client_write",
+      "curlx_gmtime"
+    ],
+    "totalCalls": 26
+  },
+  {
+    "function": "on_header",
+    "file": "lib/http2.c",
+    "calls": [
+      "nghttp2_session_get_stream_user_data",
+      "GOOD_EASY_HANDLE",
+      "H2_STREAM_CTX",
+      "strncmp",
+      "curl_maprintf",
+      "curl_strequal",
+      "nghttp2_submit_rst_stream",
+      "curlx_free",
+      "curlx_malloc",
+      "free_push_headers"
+    ],
+    "totalCalls": 26
+  },
+  {
+    "function": "curl_multi_remove_handle",
+    "file": "lib/multi.c",
+    "calls": [
+      "GOOD_MULTI_HANDLE",
+      "GOOD_EASY_HANDLE",
+      "Curl_uint32_tbl_get",
+      "streamclose",
+      "multi_done",
+      "Curl_expire_clear",
+      "Curl_uint32_bset_contains",
+      "multi_assess_wakeup",
+      "Curl_wildcard_dtor",
+      "Curl_detach_connection"
+    ],
+    "totalCalls": 26
+  },
+  {
+    "function": "Curl_pretransfer",
+    "file": "lib/transfer.c",
+    "calls": [
+      "curlx_free",
+      "curl_url_get",
+      "Curl_bufref_set",
+      "perform",
+      "Curl_peer_unlink",
+      "Curl_http_neg_init",
+      "curlx_safefree",
+      "Curl_data_priority_clear_state",
+      "Curl_bufref_free",
+      "strlen"
+    ],
+    "totalCalls": 26
+  },
+  {
+    "function": "Curl_gtls_verifyserver",
+    "file": "lib/vtls/gtls.c",
+    "calls": [
+      "certificate",
+      "format",
+      "gnutls_certificate_get_peers",
+      "gnutls_cipher_get",
+      "allowed",
+      "Curl_ssl_init_certinfo",
+      "Curl_extract_certinfo",
+      "gtls_verify_cert",
+      "gnutls_x509_crt_init",
+      "gnutls_x509_crt_import"
+    ],
+    "totalCalls": 26
+  },
+  {
+    "function": "schannel_connect_step2",
+    "file": "lib/vtls/schannel.c",
+    "calls": [
+      "Curl_ssl_cf_get_primary_config",
+      "curlx_malloc",
+      "ensure_encoding_size",
+      "Curl_conn_cf_recv",
+      "SCH_DEV",
+      "InitSecBuffer",
+      "curlx_uztoul",
+      "InitSecBufferDesc",
+      "memcpy",
+      "writable"
+    ],
+    "totalCalls": 26
+  },
+  {
+    "function": "curl_multi_cleanup",
+    "file": "lib/multi.c",
+    "calls": [
+      "GOOD_MULTI_HANDLE",
+      "Curl_uint32_tbl_first",
+      "GOOD_EASY_HANDLE",
+      "CURL_TRC_M",
+      "multi_done",
+      "Curl_uint32_tbl_remove",
+      "Curl_close",
+      "Curl_uint32_tbl_next",
+      "Curl_async_thrdd_multi_destroy",
+      "Curl_cpool_destroy"
+    ],
+    "totalCalls": 25
+  },
+  {
+    "function": "Curl_ws_accept",
+    "file": "lib/ws.c",
+    "calls": [
+      "Curl_conn_meta_get",
+      "curlx_calloc",
+      "getenv",
+      "curlx_str_number",
+      "CURL_TRC_WS",
+      "Curl_bufq_init2",
+      "ws_dec_init",
+      "ws_enc_init",
+      "Curl_conn_meta_set",
+      "Curl_bufq_reset"
+    ],
+    "totalCalls": 25
+  },
+  {
+    "function": "http_rw_hd",
+    "file": "lib/http.c",
+    "calls": [
+      "curlx_dyn_init",
+      "curlx_dyn_addn",
+      "curlx_dyn_reset",
+      "http_on_response",
+      "curlx_dyn_ptr",
+      "curlx_dyn_len",
+      "curlx_dyn_free",
+      "curlx_str_passblanks",
+      "strncmp",
+      "ISBLANK"
+    ],
+    "totalCalls": 24
+  },
+  {
+    "function": "Curl_auth_create_digest_md5_message",
+    "file": "lib/vauth/digest_sspi.c",
+    "calls": [
+      "Curl_creds_has_sasl_service",
+      "Curl_creds_sasl_service",
+      "Curl_bufref_len",
+      "failure",
+      "QuerySecurityPackageInfo",
+      "CURL_UNCONST",
+      "TEXT",
+      "FreeContextBuffer",
+      "curlx_malloc",
+      "Curl_auth_build_spn"
+    ],
+    "totalCalls": 24
+  },
+  {
+    "function": "Curl_auth_decode_spnego_message",
+    "file": "lib/vauth/spnego_sspi.c",
+    "calls": [
+      "Curl_auth_cleanup_spnego",
+      "Curl_creds_has_sasl_service",
+      "Curl_creds_sasl_service",
+      "Curl_auth_build_spn",
+      "QuerySecurityPackageInfo",
+      "CURL_UNCONST",
+      "TEXT",
+      "FreeContextBuffer",
+      "curlx_malloc",
+      "Curl_creds_has_user"
+    ],
+    "totalCalls": 24
+  },
+  {
+    "function": "cf_quiche_ctx_open",
+    "file": "lib/vquic/cf-quiche.c",
+    "calls": [
+      "vquic_ctx_init",
+      "quiche_config_new",
+      "quiche_config_enable_pacing",
+      "quiche_config_set_initial_max_data",
+      "quiche_config_set_initial_max_streams_bidi",
+      "quiche_config_set_initial_max_streams_uni",
+      "quiche_config_set_initial_max_stream_data_bidi_local",
+      "quiche_config_set_initial_max_stream_data_bidi_remote",
+      "quiche_config_set_initial_max_stream_data_uni",
+      "quiche_config_set_disable_active_migration"
+    ],
+    "totalCalls": 24
+  },
+  {
+    "function": "gtls_client_init",
+    "file": "lib/vtls/gtls.c",
+    "calls": [
+      "Curl_ssl_cf_get_primary_config",
+      "Curl_ssl_cf_get_config",
+      "Curl_gtls_shared_creds_create",
+      "Curl_auth_allowed_to_host",
+      "gnutls_srp_allocate_client_credentials",
+      "gnutls_strerror",
+      "gnutls_srp_allocate_client_cred",
+      "gnutls_srp_set_client_credentials",
+      "gnutls_srp_set_client_cred",
+      "CURL_TRC_CF"
+    ],
+    "totalCalls": 24
+  },
+  {
+    "function": "pkcs12load",
+    "file": "lib/vtls/openssl.c",
+    "calls": [
+      "STACK_OF",
+      "BIO_new_mem_buf",
+      "ossl_strerror",
+      "ERR_get_error",
+      "BIO_new",
+      "BIO_s_file",
+      "BIO_read_filename",
+      "CURL_UNCONST",
+      "BIO_free",
+      "d2i_PKCS12_bio"
+    ],
+    "totalCalls": 24
+  },
+  {
+    "function": "Curl_wssl_ctx_init",
+    "file": "lib/vtls/wolfssl.c",
+    "calls": [
+      "Curl_ssl_cf_get_config",
+      "Curl_ssl_cf_get_primary_config",
+      "Curl_alpn_copy",
+      "Curl_conn_cf_get_transport",
+      "wolfTLS_client_method",
+      "wolfSSL_CTX_free",
+      "wolfSSL_CTX_new",
+      "ssl_version",
+      "wssl_init_ciphers",
+      "wssl_init_curves"
+    ],
+    "totalCalls": 24
+  },
+  {
+    "function": "cf_h2_ctx_open",
+    "file": "lib/http2.c",
+    "calls": [
+      "nghttp2_session_callbacks_new",
+      "nghttp2_session_callbacks_set_send_callback",
+      "nghttp2_session_callbacks_set_on_frame_recv_callback",
+      "nghttp2_session_callbacks_set_on_invalid_frame_recv_callback",
+      "nghttp2_session_callbacks_set_on_frame_send_callback",
+      "nghttp2_session_callbacks_set_on_data_chunk_recv_callback",
+      "nghttp2_session_callbacks_set_on_stream_close_callback",
+      "nghttp2_session_callbacks_set_on_begin_headers_callback",
+      "nghttp2_session_callbacks_set_on_header_callback",
+      "nghttp2_session_callbacks_set_error_callback"
+    ],
+    "totalCalls": 23
+  },
+  {
+    "function": "make_headers",
+    "file": "lib/http_aws_sigv4.c",
+    "calls": [
+      "curl_msnprintf",
+      "Curl_strntolower",
+      "Curl_raw_toupper",
+      "Curl_checkheaders",
+      "STRCONST",
+      "strcspn",
+      "curlx_memdup0",
+      "curl_maprintf",
+      "Curl_slist_append_nodup",
+      "curlx_free"
+    ],
+    "totalCalls": 23
+  },
+  {
+    "function": "Curl_auth_create_gssapi_user_message",
+    "file": "lib/vauth/krb5_sspi.c",
+    "calls": [
+      "Curl_creds_has_sasl_service",
+      "Curl_creds_sasl_service",
+      "Curl_auth_build_spn",
+      "QuerySecurityPackageInfo",
+      "CURL_UNCONST",
+      "TEXT",
+      "FreeContextBuffer",
+      "curlx_malloc",
+      "Curl_creds_has_user",
+      "Curl_create_sspi_identity"
+    ],
+    "totalCalls": 23
+  },
+  {
+    "function": "verifystatus",
+    "file": "lib/vtls/openssl.c",
+    "calls": [
+      "STACK_OF",
+      "SSL_get_tlsext_status_ocsp_resp",
+      "d2i_OCSP_RESPONSE",
+      "OCSP_response_status",
+      "OCSP_response_status_str",
+      "OCSP_response_get1_basic",
+      "SSL_get_peer_cert_chain",
+      "SSL_CTX_get_cert_store",
+      "OCSP_basic_verify",
+      "SSL_get1_peer_certificate"
+    ],
+    "totalCalls": 23
+  },
+  {
+    "function": "wssl_handshake",
+    "file": "lib/vtls/wolfssl.c",
+    "calls": [
+      "Curl_ssl_cf_get_primary_config",
+      "wssl_send_earlydata",
+      "wolfSSL_ERR_clear_error",
+      "wolfSSL_connect",
+      "Curl_wssl_setup_x509_store",
+      "CURL_TRC_CF",
+      "Curl_tls_keylog_enabled",
+      "secrets",
+      "handshake",
+      "wolfSSL_want_read"
+    ],
+    "totalCalls": 23
+  },
+  {
+    "function": "auth_create_digest_http_message",
+    "file": "lib/vauth/digest.c",
+    "calls": [
+      "Curl_creds_user",
+      "Curl_creds_passwd",
+      "curlx_dyn_init",
+      "memset",
+      "Curl_rand_bytes",
+      "endif",
+      "curlx_base64_encode",
+      "curl_maprintf",
+      "hash",
+      "strlen"
+    ],
+    "totalCalls": 22
+  },
+  {
+    "function": "myssh_in_UPLOAD_INIT",
+    "file": "lib/vssh/libssh.c",
+    "calls": [
+      "myssh_to_ERROR",
+      "sftp_stat",
+      "sftp_attributes_free",
+      "size",
+      "seek",
+      "writing",
+      "sftp_close",
+      "sftp_open",
+      "sftp_get_error",
+      "strlen"
+    ],
+    "totalCalls": 22
+  },
+  {
+    "function": "sftp_upload_init",
+    "file": "lib/vssh/libssh2.c",
+    "calls": [
+      "libssh2_sftp_stat_ex",
+      "curlx_uztoui",
+      "strlen",
+      "size",
+      "seek",
+      "writing",
+      "libssh2_sftp_open_ex",
+      "libssh2_session_last_errno",
+      "libssh2_sftp_last_error",
+      "myssh_to"
+    ],
+    "totalCalls": 22
+  },
+  {
+    "function": "providercheck",
+    "file": "lib/vtls/openssl.c",
+    "calls": [
+      "is_pkcs11_uri",
+      "ossl_set_provider",
+      "UI_create_method",
+      "UI_method_set_opener",
+      "UI_method_get_opener",
+      "UI_OpenSSL",
+      "UI_method_set_closer",
+      "UI_method_get_closer",
+      "UI_method_set_reader",
+      "UI_method_set_writer"
+    ],
+    "totalCalls": 22
+  },
+  {
+    "function": "get_client_cert",
+    "file": "lib/vtls/schannel.c",
+    "calls": [
+      "Curl_ssl_cf_get_primary_config",
+      "curlx_convert_UTF8_to_tchar",
+      "get_cert_location",
+      "memcpy",
+      "curlx_free",
+      "curlx_fopen",
+      "curl_strequal",
+      "curlx_fclose",
+      "fseek",
+      "ftell"
+    ],
+    "totalCalls": 22
+  },
+  {
+    "function": "schannel_connect_step1",
+    "file": "lib/vtls/schannel.c",
+    "calls": [
+      "Curl_ssl_cf_get_primary_config",
+      "Curl_ssl_cf_get_config",
+      "curlx_verify_windows_version",
+      "Curl_ssl_scache_use",
+      "Curl_ssl_scache_lock",
+      "Curl_ssl_scache_get_obj",
+      "Curl_ssl_scache_unlock",
+      "schannel_acquire_credential_handle",
+      "curlx_convert_UTF8_to_tchar",
+      "Curl_alpn_to_proto_buf"
+    ],
+    "totalCalls": 22
+  },
+  {
+    "function": "Curl_doh_take_result",
+    "file": "lib/doh.c",
+    "calls": [
+      "memset",
+      "doh_close",
+      "de_init",
+      "doh_resp_decode",
+      "curlx_dyn_uptr",
+      "curlx_dyn_len",
+      "CURL_TRC_DNS",
+      "doh_strerror",
+      "doh_type2name",
+      "Curl_trc_ft_is_verbose"
+    ],
+    "totalCalls": 21
+  },
+  {
+    "function": "Curl_http_follow",
+    "file": "lib/http.c",
+    "calls": [
+      "Curl_bufref_free",
+      "curl_url",
+      "curl_url_set",
+      "Curl_bufref_ptr",
+      "curl_url_get",
+      "curl_url_cleanup",
+      "Curl_bufref_set",
+      "Curl_is_absolute_url",
+      "curl_url_strerror",
+      "Curl_uc_to_curlcode"
+    ],
+    "totalCalls": 21
+  },
+  {
+    "function": "h2_submit",
+    "file": "lib/http2.c",
+    "calls": [
+      "Curl_dynhds_init",
+      "http2_data_setup",
+      "Curl_h1_req_parse_read",
+      "Curl_http_req_to_h2",
+      "Curl_h1_req_parse_free",
+      "Curl_dynhds_to_nva",
+      "h2_pri_spec",
+      "nghttp2_session_check_request_allowed",
+      "CURL_TRC_CF",
+      "allowed"
+    ],
+    "totalCalls": 21
+  },
+  {
+    "function": "multi_perform",
+    "file": "lib/multi.c",
+    "calls": [
+      "multi_now",
+      "sigpipe_init",
+      "Curl_uint32_bset_first",
+      "CURL_TRC_M",
+      "Curl_multi_xfers_running",
+      "Curl_multi_get_easy",
+      "Curl_uint32_bset_remove",
+      "multi_runsingle",
+      "Curl_uint32_bset_next",
+      "sigpipe_restore"
+    ],
+    "totalCalls": 21
+  },
+  {
+    "function": "oldap_connect",
+    "file": "lib/openldap.c",
+    "calls": [
+      "endif",
+      "curlx_calloc",
+      "Curl_conn_meta_set",
+      "ldap_pvt_url_scheme2proto",
+      "Curl_sasl_init",
+      "oldap_parse_login_options",
+      "curl_maprintf",
+      "ldap_init_fd",
+      "ldap_err2string",
+      "getenv"
+    ],
+    "totalCalls": 21
+  },
+  {
+    "function": "smb_request_state",
+    "file": "lib/smb.c",
+    "calls": [
+      "Curl_conn_meta_get",
+      "Curl_meta_get",
+      "smb_send_tree_connect",
+      "connclose",
+      "request_state",
+      "smb_send_and_recv",
+      "smb_swap32",
+      "smb_swap16",
+      "Curl_pgrsSetUploadSize",
+      "smb_swap64"
+    ],
+    "totalCalls": 21
+  },
+  {
+    "function": "wakeup_inet",
+    "file": "lib/socketpair.c",
+    "calls": [
+      "CURL_SOCKET",
+      "memset",
+      "htonl",
+      "defined",
+      "setsockopt",
+      "bind",
+      "getsockname",
+      "listen",
+      "connect",
+      "curlx_nonblock"
+    ],
+    "totalCalls": 21
+  },
+  {
+    "function": "url_find_or_create_conn",
+    "file": "lib/url.c",
+    "calls": [
+      "url_create_needle",
+      "connect_it",
+      "Curl_attach_connection",
+      "Curl_cpool_add",
+      "setup_range",
+      "Curl_xfer_setup_nop",
+      "Curl_init_do",
+      "done",
+      "Curl_ssl_easy_config_complete",
+      "Curl_cpool_prune_dead"
+    ],
+    "totalCalls": 21
+  },
+  {
+    "function": "mbed_connect_step2",
+    "file": "lib/vtls/mbedtls.c",
+    "calls": [
+      "defined",
+      "Curl_ssl_cf_is_proxy",
+      "mbedtls_ssl_handshake",
+      "CURL_TRC_CF",
+      "mbedtls_ssl_get_version_number",
+      "mbedtls_strerror",
+      "mbedtls_ssl_get_ciphersuite_id_from_ssl",
+      "mbed_cipher_suite_get_str",
+      "mbedtls_ssl_get_version",
+      "mbedtls_ssl_get_peer_cert"
+    ],
+    "totalCalls": 21
+  },
+  {
+    "function": "Curl_verify_certificate",
+    "file": "lib/vtls/schannel_verify.c",
+    "calls": [
+      "Curl_ssl_cf_get_primary_config",
+      "Curl_ssl_cf_get_config",
+      "QueryContextAttributes",
+      "Curl_sspi_strerror",
+      "curlx_verify_windows_version",
+      "Curl_schannel_get_cached_cert_store",
+      "CertOpenStore",
+      "curlx_winapi_strerror",
+      "GetLastError",
+      "add_certs_data_to_store"
+    ],
+    "totalCalls": 21
+  },
+  {
+    "function": "hostip_resolv_start",
+    "file": "lib/hostip.c",
+    "calls": [
+      "Curl_is_ipaddr",
+      "Curl_resolv_announce_start",
+      "Curl_str2addr",
+      "strlen",
+      "curl_strequal",
+      "tailmatch",
+      "STRCONST",
+      "get_localhost",
+      "hostip_async_new",
+      "Curl_doh"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "http_add_hd",
+    "file": "lib/http.c",
+    "calls": [
+      "defined",
+      "curlx_dyn_addf",
+      "http_target",
+      "get_http_string",
+      "curlx_dyn_add",
+      "Curl_checkheaders",
+      "STRCONST",
+      "curlx_safefree",
+      "Curl_bufref_ptr",
+      "Curl_checkProxyheaders"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "oldap_connecting",
+    "file": "lib/openldap.c",
+    "calls": [
+      "Curl_conn_meta_get",
+      "ldap_result",
+      "ldap_err2string",
+      "oldap_map_error",
+      "ldap_parse_result",
+      "USE_SSL",
+      "ssl_installed",
+      "ldap_set_option",
+      "ldap_msgfree",
+      "oldap_perform_bind"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "oldap_recv",
+    "file": "lib/openldap.c",
+    "calls": [
+      "Curl_conn_meta_get",
+      "Curl_meta_get",
+      "ldap_result",
+      "ldap_err2string",
+      "ldap_msgtype",
+      "ldap_parse_result",
+      "FALLTHROUGH",
+      "ldap_memfree",
+      "ldap_get_dn_ber",
+      "client_write"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "rtsp_do",
+    "file": "lib/rtsp.c",
+    "calls": [
+      "Curl_meta_get",
+      "curlx_dyn_init",
+      "Curl_xfer_setup_recv",
+      "Curl_checkheaders",
+      "STRCONST",
+      "curlx_free",
+      "curl_maprintf",
+      "curlx_safefree",
+      "Curl_http_output_auth",
+      "Curl_bufref_ptr"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "cf_connect_start",
+    "file": "lib/vquic/cf-ngtcp2-cmn.c",
+    "calls": [
+      "Curl_rand",
+      "Curl_qlogdir",
+      "quic_settings",
+      "vquic_ctx_init",
+      "Curl_cf_socket_peek",
+      "QUIC",
+      "getsockname",
+      "ngtcp2_addr_init",
+      "ngtcp2_conn_client_new",
+      "Curl_ngtcp2_mem"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "ossl_verifyhost",
+    "file": "lib/vtls/openssl.c",
+    "calls": [
+      "STACK_OF",
+      "strlen",
+      "curlx_inet_pton",
+      "X509_get_ext_d2i",
+      "sk_GENERAL_NAME_num",
+      "sk_GENERAL_NAME_value",
+      "ASN1_STRING_get0_data",
+      "ASN1_STRING_length",
+      "ASN1_STRING_data",
+      "Curl_cert_hostcheck"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "ossl_win_load_store",
+    "file": "lib/vtls/openssl.c",
+    "calls": [
+      "CertOpenSystemStoreA",
+      "VERBOSE",
+      "conditions",
+      "CertEnumCertificatesInStore",
+      "defined",
+      "CertGetNameStringA",
+      "GetSystemTimeAsFileTime",
+      "CompareFileTime",
+      "CertGetIntendedKeyUsage",
+      "GetLastError"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "ossl_init_session_and_alpns",
+    "file": "lib/vtls/openssl.c",
+    "calls": [
+      "Curl_ssl_cf_get_config",
+      "Curl_ssl_cf_get_primary_config",
+      "Curl_alpn_copy",
+      "Curl_ssl_scache_use",
+      "Curl_ssl_scache_take",
+      "d2i_SSL_SESSION",
+      "SSL_set_session",
+      "VERBOSE",
+      "ossl_strerror",
+      "ERR_get_error"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "cr_connect",
+    "file": "lib/vtls/rustls.c",
+    "calls": [
+      "CURL_TRC_CF",
+      "cr_ech_need_httpsrr",
+      "Curl_conn_dns_resolved_https",
+      "cr_init_backend",
+      "rustls_connection_is_handshaking",
+      "cr_set_negotiated_alpn",
+      "cr_send",
+      "rustls_connection_get_protocol_version",
+      "rustls_connection_get_negotiated_ciphersuite_name",
+      "rustls_connection_get_negotiated_key_exchange_group_name"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "Curl_verify_host",
+    "file": "lib/vtls/schannel_verify.c",
+    "calls": [
+      "strlen",
+      "QueryContextAttributes",
+      "Curl_sspi_strerror",
+      "curlx_verify_windows_version",
+      "get_num_host_info",
+      "get_alt_name_info",
+      "memcmp",
+      "hostname",
+      "cert_get_name_string",
+      "CertGetNameString"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "Curl_cookie_getlist",
+    "file": "lib/cookie.c",
+    "calls": [
+      "Curl_host_is_ipnum",
+      "cookiehash",
+      "Curl_secure_context",
+      "Curl_llist_init",
+      "Curl_llist_count",
+      "remove_expired",
+      "Curl_llist_head",
+      "Curl_node_next",
+      "Curl_node_elem",
+      "cookie_tailmatch"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "curl_multi_add_handle",
+    "file": "lib/multi.c",
+    "calls": [
+      "GOOD_MULTI_HANDLE",
+      "GOOD_EASY_HANDLE",
+      "Curl_uint32_tbl_count",
+      "Curl_uint32_tbl_contains",
+      "Curl_uint32_bset_clear",
+      "curl_easy_perform",
+      "curl_multi_cleanup",
+      "multi_xfers_add",
+      "Curl_llist_init",
+      "Curl_expire"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "socks5_gss_negotiate_enc",
+    "file": "lib/socks_gssapi.c",
+    "calls": [
+      "gss_seal",
+      "gss_wrap",
+      "gss_unseal",
+      "gss_unwrap",
+      "htons",
+      "memcpy",
+      "curlx_memdup",
+      "Curl_gss_delete_sec_context",
+      "check_gss_err",
+      "curlx_safefree"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "Curl_auth_create_digest_md5_message",
+    "file": "lib/vauth/digest.c",
+    "calls": [
+      "Curl_creds_has_sasl_service",
+      "Curl_creds_sasl_service",
+      "Curl_creds_user",
+      "Curl_creds_passwd",
+      "auth_decode_digest_md5_message",
+      "strcmp",
+      "auth_digest_get_qop_values",
+      "Curl_rand_hex",
+      "Curl_MD5_init",
+      "Curl_MD5_update"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "Curl_auth_decode_spnego_message",
+    "file": "lib/vauth/spnego_gssapi.c",
+    "calls": [
+      "endif",
+      "Curl_auth_cleanup_spnego",
+      "Curl_creds_has_sasl_service",
+      "Curl_creds_sasl_service",
+      "Curl_auth_build_spn",
+      "strlen",
+      "gss_import_name",
+      "GSS_ERROR",
+      "Curl_gss_log_error",
+      "curlx_free"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "h3_stream_open",
+    "file": "lib/vquic/cf-ngtcp2.c",
+    "calls": [
+      "Curl_dynhds_init",
+      "Curl_cf_ngtcp2_h3_stream_setup",
+      "H3_STREAM_CTX",
+      "Curl_h1_req_parse_read",
+      "Curl_http_req_to_h2",
+      "Curl_h1_req_parse_free",
+      "Curl_dynhds_count",
+      "curlx_malloc",
+      "Curl_dynhds_getn",
+      "ngtcp2_conn_open_bidi_stream"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "ssh_connect",
+    "file": "lib/vssh/libssh2.c",
+    "calls": [
+      "Curl_conn_meta_get",
+      "libssh2_crypto_engine",
+      "Curl_creds_user",
+      "Curl_creds_passwd",
+      "libssh2_session_init_ex",
+      "libssh2_session_set_read_timeout",
+      "recvcb",
+      "sendcb",
+      "defined",
+      "libssh2_session_callback_set2"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "Curl_pin_peer_pubkey",
+    "file": "lib/vtls/vtls.c",
+    "calls": [
+      "strncmp",
+      "curlx_malloc",
+      "sha256sum",
+      "curlx_base64_encode",
+      "curlx_safefree",
+      "strchr",
+      "strlen",
+      "memcmp",
+      "curlx_fopen",
+      "curlx_dyn_init"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "Curl_ssl_session_export",
+    "file": "lib/vtls/vtls_scache.c",
+    "calls": [
+      "cf_ssl_scache_get",
+      "time",
+      "Curl_ssl_scache_lock",
+      "curlx_dyn_init",
+      "curlx_dyn_reset",
+      "cf_scache_peer_remove_expired",
+      "Curl_llist_head",
+      "VERBOSE",
+      "Curl_node_elem",
+      "cf_ssl_scache_peer_set_hmac"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "Curl_altsvc_parse",
+    "file": "lib/altsvc.c",
+    "calls": [
+      "curlx_str_cspn",
+      "curlx_str_trimblanks",
+      "curlx_str_casecompare",
+      "altsvc_flush",
+      "curlx_str_until",
+      "curlx_str_single",
+      "Curl_str2alpnid",
+      "curlx_str_assign",
+      "strlen",
+      "curlx_str_number"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "cf_ip_ballers_run",
+    "file": "lib/cf-ip-happy.c",
+    "calls": [
+      "VERBOSE",
+      "cf_ip_attempt_connect",
+      "CURL_TRC_CF",
+      "cf_ip_attempt_free",
+      "Curl_pgrs_now",
+      "cf_ai_iter_has_more",
+      "curlx_ptimediff_ms",
+      "cf_ai_iter_next",
+      "are",
+      "Curl_reset_fail"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "bindlocal",
+    "file": "lib/cf-socket.c",
+    "calls": [
+      "USE_IPV6",
+      "strlen",
+      "memset",
+      "setsockopt",
+      "Curl_if2ip",
+      "curlx_strerror",
+      "endif",
+      "Curl_resolv_blocking",
+      "Curl_printable_address",
+      "Curl_dns_entry_unlink"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "Curl_sasl_start",
+    "file": "lib/curl_sasl.c",
+    "calls": [
+      "memset",
+      "Curl_bufref_init",
+      "sasl_choose_external",
+      "sasl_choose_krb5",
+      "sasl_choose_gsasl",
+      "sasl_choose_digest",
+      "sasl_choose_ntlm",
+      "sasl_choose_oauth",
+      "sasl_choose_oauth2",
+      "sasl_choose_plain"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "Curl_loadhostpairs",
+    "file": "lib/dnscache.c",
+    "calls": [
+      "dnscache_get",
+      "curlx_str_single",
+      "curlx_str_until",
+      "curlx_str_number",
+      "create_dnscache_id",
+      "curlx_str",
+      "curlx_strlen",
+      "dnscache_lock",
+      "Curl_hash_delete",
+      "dnscache_unlock"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "imap_perform_append",
+    "file": "lib/imap.c",
+    "calls": [
+      "IS_MIME_POST",
+      "curl_mime_headers",
+      "Curl_mime_prepare_headers",
+      "Curl_checkheaders",
+      "STRCONST",
+      "Curl_mime_add_header",
+      "Curl_creader_set_mime",
+      "Curl_creader_client_length",
+      "Curl_creader_set_fread",
+      "imap_atom"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "imap_state_listsearch_resp",
+    "file": "lib/imap.c",
+    "calls": [
+      "curlx_dyn_ptr",
+      "Curl_meta_get",
+      "is_custom_fetch_listing",
+      "literal",
+      "memchr",
+      "imap_find_literal",
+      "curlx_str_number",
+      "curlx_str_single",
+      "curlx_dyn_len",
+      "Curl_client_write"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "imap_pp_statemachine",
+    "file": "lib/imap.c",
+    "calls": [
+      "Curl_conn_meta_get",
+      "Curl_meta_get",
+      "imap_perform_upgrade_tls",
+      "Curl_pp_flushsend",
+      "Curl_pp_readresp",
+      "imap_state_servergreet_resp",
+      "imap_state_capability_resp",
+      "imap_state_starttls_resp",
+      "imap_state_auth_resp",
+      "imap_state_login_resp"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "mqtt_doing",
+    "file": "lib/mqtt.c",
+    "calls": [
+      "Curl_meta_get",
+      "Curl_conn_meta_get",
+      "curlx_dyn_len",
+      "mqtt_send",
+      "curlx_dyn_ptr",
+      "mqtt_ping",
+      "Curl_xfer_recv",
+      "Curl_debug",
+      "Curl_pgrs_now",
+      "mqstate"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "multi_socket",
+    "file": "lib/multi.c",
+    "calls": [
+      "sigpipe_init",
+      "perform",
+      "multi_perform",
+      "Curl_multi_ev_assess_xfer_bset",
+      "Curl_multi_ev_dirty_xfers",
+      "Curl_update_timer",
+      "memset",
+      "curl_multi_socket_action",
+      "multi_assess_wakeup",
+      "multi_mark_expired_as_dirty"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "smtp_perform_mail",
+    "file": "lib/smtp.c",
+    "calls": [
+      "smtp_parse_address",
+      "Curl_is_ASCII_name",
+      "curl_maprintf",
+      "Curl_free_idnconverted_hostname",
+      "curlx_free",
+      "curlx_strdup",
+      "IS_MIME_POST",
+      "curl_mime_headers",
+      "Curl_mime_prepare_headers",
+      "Curl_checkheaders"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "parseurl",
+    "file": "lib/urlapi.c",
+    "calls": [
+      "curlx_dyn_init",
+      "Curl_junkscan",
+      "Curl_is_absolute_url",
+      "strcmp",
+      "parse_file",
+      "parse_scheme",
+      "strcspn",
+      "parse_authority",
+      "guess_scheme",
+      "curlx_dyn_add"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "Curl_auth_create_ntlm_type1_message",
+    "file": "lib/vauth/ntlm_sspi.c",
+    "calls": [
+      "Curl_creds_has_sasl_service",
+      "Curl_creds_sasl_service",
+      "Curl_auth_cleanup_ntlm",
+      "QuerySecurityPackageInfo",
+      "CURL_UNCONST",
+      "TEXT",
+      "FreeContextBuffer",
+      "curlx_malloc",
+      "Curl_creds_has_user",
+      "Curl_create_sspi_identity"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "h3_open_stream",
+    "file": "lib/vquic/cf-quiche.c",
+    "calls": [
+      "H3_STREAM_CTX",
+      "h3_data_setup",
+      "Curl_dynhds_init",
+      "Curl_h1_req_parse_read",
+      "Curl_http_req_to_h2",
+      "Curl_h1_req_parse_free",
+      "Curl_dynhds_count",
+      "curlx_malloc",
+      "Curl_dynhds_getn",
+      "quiche_h3_send_request"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "myssh_is_known",
+    "file": "lib/vssh/libssh.c",
+    "calls": [
+      "ssh_get_server_publickey",
+      "ssh_get_publickey_hash",
+      "curlx_base64_encode",
+      "strncmp",
+      "curlx_free",
+      "curl_msnprintf",
+      "curl_strequal",
+      "ssh_session_get_known_hosts_entry",
+      "ssh_pki_export_pubkey_base64",
+      "strlen"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "Curl_gtls_ctx_init",
+    "file": "lib/vtls/gtls.c",
+    "calls": [
+      "Curl_ssl_cf_get_primary_config",
+      "Curl_ssl_cf_get_config",
+      "Curl_alpn_copy",
+      "Curl_ssl_scache_take",
+      "Curl_alpn_contains_proto",
+      "gtls_client_init",
+      "gnutls_session_set_data",
+      "sess_reuse_cb",
+      "Curl_alpn_restrict_to",
+      "gnutls_session_set_ptr"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "ossl_infof_cert",
+    "file": "lib/vtls/openssl.c",
+    "calls": [
+      "Curl_trc_is_verbose",
+      "curlx_dyn_init",
+      "BIO_new",
+      "BIO_s_mem",
+      "ossl_strerror",
+      "ERR_get_error",
+      "Curl_ssl_cf_is_proxy",
+      "x509_name_oneline",
+      "X509_get_subject_name",
+      "curlx_dyn_ptr"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "schannel_recv",
+    "file": "lib/vtls/schannel.c",
+    "calls": [
+      "schannel_recv_renegotiate",
+      "SCH_DEV",
+      "decrypt",
+      "ensure_encoding_size",
+      "Curl_conn_cf_recv",
+      "InitSecBuffer",
+      "curlx_uztoul",
+      "InitSecBufferDesc",
+      "DecryptMessage",
+      "fine"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "cf_h2_proxy_ctx_init",
+    "file": "lib/cf-h2-proxy.c",
+    "calls": [
+      "memset",
+      "Curl_bufq_init",
+      "tunnel_stream_init",
+      "nghttp2_session_callbacks_new",
+      "nghttp2_session_callbacks_set_send_callback",
+      "nghttp2_session_callbacks_set_on_frame_recv_callback",
+      "nghttp2_session_callbacks_set_on_frame_send_callback",
+      "nghttp2_session_callbacks_set_on_data_chunk_recv_callback",
+      "nghttp2_session_callbacks_set_on_stream_close_callback",
+      "nghttp2_session_callbacks_set_on_header_callback"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "cf_tcp_accept_connect",
+    "file": "lib/cf-socket.c",
+    "calls": [
+      "cf_tcp_accept_timeleft",
+      "CURL_TRC_CF",
+      "SOCKET_READABLE",
+      "CURL_ACCEPT4",
+      "CURL_ACCEPT",
+      "accept",
+      "curlx_strerror",
+      "fcntl",
+      "Curl_socket_close",
+      "curlx_nonblock"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "Curl_output_ntlm",
+    "file": "lib/http_ntlm.c",
+    "calls": [
+      "Curl_auth_ntlm_get",
+      "curl_global_init",
+      "Curl_sspi_global_init",
+      "Curl_bufref_init",
+      "Curl_peer_equal",
+      "Curl_creds_same",
+      "Curl_peer_link",
+      "Curl_creds_link",
+      "Curl_auth_create_ntlm_type1_message",
+      "Curl_bufref_len"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "Curl_multi_pollset",
+    "file": "lib/multi.c",
+    "calls": [
+      "Curl_pollset_reset",
+      "CURL_TRC_M",
+      "Curl_pollset_add_in",
+      "curl_multi_remove_handle",
+      "Curl_multi_ev_assess",
+      "Curl_resolv_pollset",
+      "mstate_connecting_pollset",
+      "mstate_protocol_pollset",
+      "mstate_do_pollset",
+      "mstate_domore_pollset"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "smtp_pp_statemachine",
+    "file": "lib/smtp.c",
+    "calls": [
+      "Curl_conn_meta_get",
+      "Curl_meta_get",
+      "smtp_perform_upgrade_tls",
+      "Curl_pp_flushsend",
+      "Curl_pp_readresp",
+      "smtp_state_servergreet_resp",
+      "smtp_state_ehlo_resp",
+      "smtp_state_helo_resp",
+      "smtp_state_starttls_resp",
+      "smtp_state_auth_resp"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "Curl_auth_create_gssapi_user_message",
+    "file": "lib/vauth/krb5_gssapi.c",
+    "calls": [
+      "Curl_creds_has_sasl_service",
+      "Curl_creds_sasl_service",
+      "Curl_auth_build_spn",
+      "strlen",
+      "gss_import_name",
+      "GSS_ERROR",
+      "Curl_gss_log_error",
+      "curlx_free",
+      "Curl_bufref_len",
+      "failure"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "Curl_cf_ngtcp2_cmn_connect",
+    "file": "lib/vquic/cf-ngtcp2-cmn.c",
+    "calls": [
+      "Curl_conn_cf_connect",
+      "cf_ngtcp2_need_httpsrr",
+      "Curl_conn_dns_resolved_https",
+      "CURL_TRC_CF",
+      "Curl_cf_ngtcp2_io_ctx_init",
+      "CF_DATA_SAVE",
+      "Curl_pgrs_now",
+      "cf_connect_start",
+      "Curl_cf_ngtcp2_progress_egress",
+      "Curl_cf_ngtcp2_progress_ingress"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "Curl_cf_ngtcp2_progress_egress",
+    "file": "lib/vquic/cf-ngtcp2-cmn.c",
+    "calls": [
+      "Curl_cf_ngtcp2_io_ctx_init",
+      "Curl_cf_ngtcp2_io_ctx_update_time",
+      "ngtcp2_path_storage_zero",
+      "vquic_flush",
+      "Curl_expire",
+      "PMTUD",
+      "ngtcp2_conn_get_max_tx_udp_payload_size",
+      "ngtcp2_conn_get_path_max_tx_udp_payload_size",
+      "ngtcp2_conn_get_send_quantum",
+      "CURL_TRC_CF"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "cf_ngtcp2_send",
+    "file": "lib/vquic/cf-ngtcp2.c",
+    "calls": [
+      "H3_STREAM_CTX",
+      "CF_DATA_SAVE",
+      "Curl_cf_ngtcp2_io_ctx_init",
+      "Curl_cf_ngtcp2_progress_ingress",
+      "CURL_TRC_CF",
+      "h3_stream_open",
+      "VERBOSE",
+      "Curl_cf_ngtcp2_h3_stream_close",
+      "send_body",
+      "Curl_bufq_write"
+    ],
+    "totalCalls": 17
+  }
+]
