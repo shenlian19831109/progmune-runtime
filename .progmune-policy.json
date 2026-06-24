@@ -1,0 +1,30 @@
+{
+  "name": "Progmune Self-Hosted Policy",
+  "description": "Strict policy for Progmune's own development — requires high confidence, intact provenance, zero violations, human review, and full fingerprint verification.",
+  "inherit": true,
+  "rules": [
+    {
+      "type": "confidence",
+      "severity": "block",
+      "description": "Certificate confidence must be high",
+      "threshold": 2
+    },
+    {
+      "type": "human_review",
+      "severity": "block",
+      "description": "At least 2 humans must be in the accountability chain",
+      "require": 2
+    },
+    {
+      "type": "plsb_coverage",
+      "severity": "block",
+      "description": "PLSB must cover at least 9/13 categories for Progmune self-hosting",
+      "threshold": 9
+    },
+    {
+      "type": "fingerprint",
+      "severity": "block",
+      "description": "Fingerprint must be registered and verified"
+    }
+  ]
+}

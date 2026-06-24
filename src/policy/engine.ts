@@ -6,9 +6,12 @@
  * Returns ALLOW, WARN, or BLOCK.
  */
 
+import * as fs from "fs";
+import * as path from "path";
 import type {
   PolicyRule,
   PolicyResult,
+  PolicyConfig,
   RuleViolation,
 } from "./types";
 import { DEFAULT_POLICY } from "./types";
@@ -47,13 +50,61 @@ function parsePlsbCovered(coverage: string): number {
   return m ? parseInt(m[1], 10) : 0;
 }
 
+/** Load policy from project config file, merged with defaults */
+export function loadPolicyConfig(
+  projectPath: string,
+  configPath?: string
+): { rules: PolicyRule[]; source: string } {
+  const cfgFile = configPath
+    ? path.resolve(configPath)
+    : path.join(projectPath, ".progmune-policy.json");
+
+  if (!fs.existsSync(cfgFile)) {
+    return { rules: [...DEFAULT_POLICY], source: "built-in defaults" };
+  }
+
+  try {
+    const cfg: PolicyConfig = JSON.parse(fs.readFileSync(cfgFile, "utf-8"));
+    const inherit = cfg.inherit !== false; // default: inherit
+
+    if (!inherit) {
+      return { rules: cfg.rules || [...DEFAULT_POLICY], source: cfgFile };
+    }
+
+    // Merge: project rules override defaults by type
+    const merged = [...DEFAULT_POLICY];
+    for (const pr of cfg.rules || []) {
+      const idx = merged.findIndex(dr => dr.type === pr.type);
+      if (idx >= 0) {
+        // Override existing rule
+        merged[idx] = {
+          type: merged[idx].type,
+          severity: pr.severity || merged[idx].severity,
+          description: pr.description || merged[idx].description,
+          threshold: pr.threshold ?? merged[idx].threshold,
+          require: pr.require ?? merged[idx].require,
+        };
+      } else {
+        // Add new rule
+        merged.push(pr);
+      }
+    }
+
+    return { rules: merged, source: cfgFile };
+  } catch (e: any) {
+    console.error(`⚠️  Failed to load policy config: ${e.message}. Using defaults.`);
+    return { rules: [...DEFAULT_POLICY], source: "built-in defaults (config error)" };
+  }
+}
+
 export function evaluatePolicy(
   ctx: PolicyContext,
-  rules: PolicyRule[] = DEFAULT_POLICY
+  rules?: PolicyRule[]
 ): PolicyResult {
+  const activeRules = rules || DEFAULT_POLICY;
   const violations: RuleViolation[] = [];
 
-  for (const rule of rules) {
+  for (const rule of activeRules) {
     switch (rule.type) {
       // ── Confidence ──
       case "confidence": {
@@ -159,13 +210,13 @@ export function evaluatePolicy(
     verdict = "ALLOW";
   }
 
-  const passed = rules.length - violations.length;
+  const passed = activeRules.length - violations.length;
 
   let summary: string;
   if (verdict === "ALLOW") {
-    summary = `✅ ALLOW — all ${rules.length} policy rules passed. Safe to deploy.`;
+    summary = `✅ ALLOW — all ${activeRules.length} policy rules passed. Safe to deploy.`;
   } else if (verdict === "WARN") {
-    summary = `⚠️ WARN — ${passed}/${rules.length} rules passed, ${warnViolations.length} warning(s). Review before deploy.`;
+    summary = `⚠️ WARN — ${passed}/${activeRules.length} rules passed, ${warnViolations.length} warning(s). Review before deploy.`;
   } else {
     summary = `❌ BLOCK — ${blockViolations.length} blocking violation(s). Deployment is blocked until these are resolved.`;
   }
@@ -173,7 +224,7 @@ export function evaluatePolicy(
   return {
     passed: verdict !== "BLOCK",
     verdict,
-    rules: rules.length,
+    rules: activeRules.length,
     passed_rules: passed,
     failed_rules: violations.length,
     violations,

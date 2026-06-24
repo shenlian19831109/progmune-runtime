@@ -9,10 +9,9 @@
 
 import { certify } from "../certify";
 import { buildAccountabilityChain } from "../ledger/accountability";
-import { evaluatePolicy } from "./engine";
+import { evaluatePolicy, loadPolicyConfig } from "./engine";
 import type { PolicyContext } from "./engine";
 import type { HumanActor } from "../ledger/accountability";
-import { DEFAULT_POLICY } from "./types";
 
 const C = {
   reset: "\x1b[0m", bold: "\x1b[1m", dim: "\x1b[2m",
@@ -31,6 +30,7 @@ Usage:
 Options:
   --author <email>     Human who initiated generation
   --reviewer <email>   Human reviewer
+  --policy <path>      Policy config file (default: .progmune-policy.json)
   --json               Output as JSON
 
 Examples:
@@ -54,6 +54,8 @@ function parseHumanOpt(flag: string): HumanActor | undefined {
 const useJson = args.includes("--json");
 const author = parseHumanOpt("--author");
 const reviewer = parseHumanOpt("--reviewer");
+const policyIdx = args.indexOf("--policy");
+const policyPath = policyIdx >= 0 ? args[policyIdx + 1] : undefined;
 
 if (cmd !== "check" || !filePath) {
   console.error("❌ Usage: npx ts-node src/policy/cli.ts check <file.ts>");
@@ -74,7 +76,11 @@ try {
   // Accountability unavailable — policy will flag human_review violations
 }
 
-// 3. Evaluate policy
+// 3. Load policy (from project config or defaults)
+const projectDir = process.env.PROGMUNE_PROJECT_DIR || process.cwd();
+const { rules, source } = loadPolicyConfig(projectDir, policyPath);
+
+// 4. Evaluate policy
 const ctx: PolicyContext = {
   certificate: {
     validated: cert.validated,
@@ -96,19 +102,19 @@ const ctx: PolicyContext = {
   } : undefined,
 };
 
-const result = evaluatePolicy(ctx);
+const result = evaluatePolicy(ctx, rules);
 
 if (useJson) {
-  console.log(JSON.stringify(result, null, 2));
+  console.log(JSON.stringify({ ...result, policySource: source }, null, 2));
 } else {
-  console.log(formatPolicyResult(result, cert.file));
+  console.log(formatPolicyResult(result, cert.file, source));
 }
 
 process.exit(result.passed ? 0 : 1);
 
 // ── Formatter ──
 
-function formatPolicyResult(result: import("./types").PolicyResult, file: string): string {
+function formatPolicyResult(result: import("./types").PolicyResult, file: string, policySource?: string): string {
   const lines: string[] = [];
 
   const verdictColor = result.verdict === "ALLOW" ? C.green
@@ -123,6 +129,7 @@ function formatPolicyResult(result: import("./types").PolicyResult, file: string
   lines.push(`${C.bold}${C.cyan}╚════════════════════════════════════════════════════╝${C.reset}`);
   lines.push("");
   lines.push(`  File:     ${file}`);
+  lines.push(`  Policy:   ${C.dim}${policySource || "built-in defaults"}${C.reset}`);
   lines.push(`  Verdict:  ${verdictColor}${C.bold}${box} ${result.verdict}${C.reset}`);
   lines.push(`  Rules:    ${C.green}${result.passed_rules} passed${C.reset}, ${result.failed_rules > 0 ? C.red : ""}${result.failed_rules} failed${C.reset} / ${result.rules} total`);
   lines.push("");

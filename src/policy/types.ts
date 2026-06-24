@@ -42,7 +42,16 @@ export interface PolicyResult {
   summary: string;
 }
 
-/** Default policy — can be overridden by project config */
+/** Project-level policy configuration file format */
+export interface PolicyConfig {
+  name?: string;
+  description?: string;
+  rules: PolicyRule[];
+  /** Inherit default rules (true) or replace entirely (false) */
+  inherit?: boolean;
+}
+
+/** Default policy — can be overridden by .progmune-policy.json */
 export const DEFAULT_POLICY: PolicyRule[] = [
   {
     type: "confidence",
