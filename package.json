@@ -29,6 +29,7 @@
     "precision:json": "npx ts-node src/multi-repo-precision.ts --json",
     "ci": "npx ts-node bin/progmune-ci.ts --project .",
     "dashboard": "npx ts-node src/governance-dashboard.ts",
+    "verify-api": "npx ts-node src/verify-api.ts",
     "provenance": "npx ts-node src/ledger/cli.ts",
     "plsb": "npx ts-node src/plsb/cli.ts --summary",
     "plsb:export": "npx ts-node src/plsb/cli.ts --all",
