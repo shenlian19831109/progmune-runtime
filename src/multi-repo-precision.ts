@@ -16,6 +16,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as crypto from "crypto";
+import { execSync } from "child_process";
 import { extractIR } from "./extract-ir";
 import { discoverRulesFromSequences } from "./ssg-precision";
 import { validateSequenceWithSSG } from "./ssg-precision";
@@ -80,7 +81,7 @@ interface RepoTarget {
   expectedProtocols: string[];
 }
 
-// Default targets — uses repos we can access locally or via existing test data
+// Default targets — local repos + external repos (auto-cloned)
 const DEFAULT_TARGETS: RepoTarget[] = [
   {
     name: "progmune-self",
@@ -94,7 +95,49 @@ const DEFAULT_TARGETS: RepoTarget[] = [
     localPath: path.resolve(process.cwd(), "demo-xlike"),
     expectedProtocols: ["insertPost", "getRecentPosts", "deletePost", "validatePostContent", "initDatabase"],
   },
+  // External precision-program repos (auto-cloned into benchmarks/)
+  {
+    name: "curl",
+    size: "medium",
+    localPath: path.resolve(process.cwd(), "benchmarks", "curl"),
+    expectedProtocols: ["curl_easy_init", "curl_easy_perform", "curl_easy_cleanup", "curl_easy_setopt"],
+  },
+  {
+    name: "nginx",
+    size: "large",
+    localPath: path.resolve(process.cwd(), "benchmarks", "nginx"),
+    expectedProtocols: ["ngx_http_init_connection", "ngx_http_process_request", "ngx_http_finalize_request"],
+  },
+  {
+    name: "redis",
+    size: "medium",
+    localPath: path.resolve(process.cwd(), "benchmarks", "redis"),
+    expectedProtocols: ["createClient", "readQueryFromClient", "freeClient", "processCommand"],
+  },
 ];
+
+const EXTERNAL_REPOS: Record<string, { url: string; depth?: number }> = {
+  curl: { url: "https://github.com/curl/curl.git", depth: 100 },
+  nginx: { url: "https://github.com/nginx/nginx.git", depth: 100 },
+  redis: { url: "https://github.com/redis/redis.git", depth: 100 },
+};
+
+/** Clone or pull an external repo into benchmarks/<name>/ */
+function ensureRepo(name: string): string {
+  const dir = path.resolve(process.cwd(), "benchmarks", name);
+  if (fs.existsSync(path.join(dir, ".git"))) {
+    console.error(`  ↻ Updating ${name}...`);
+    try { execSync(`cd ${dir} && git pull --ff-only 2>/dev/null || true`, { stdio: "ignore", timeout: 30000 }); } catch { /* skip */ }
+  } else {
+    const cfg = EXTERNAL_REPOS[name];
+    if (!cfg) throw new Error(`No clone URL for: ${name}`);
+    console.error(`  ↓ Cloning ${name} (depth=${cfg.depth || 100})...`);
+    const parent = path.dirname(dir);
+    if (!fs.existsSync(parent)) fs.mkdirSync(parent, { recursive: true });
+    execSync(`git clone --depth=${cfg.depth || 100} ${cfg.url} ${dir}`, { stdio: "ignore", timeout: 120000 });
+  }
+  return dir;
+}
 
 // ═══════════════════════════════════════════════════════════════
 // Engine
@@ -182,7 +225,16 @@ function groupByPrefix(names: string[]): Record<string, string[]> {
 
 function runRepoPrecision(target: RepoTarget): RepoPrecisionResult {
   const errors: string[] = [];
-  const dir = target.localPath || process.cwd();
+
+  // Auto-clone external repos
+  let dir = target.localPath || process.cwd();
+  if (EXTERNAL_REPOS[target.name] && !fs.existsSync(path.join(dir, ".git"))) {
+    try {
+      dir = ensureRepo(target.name);
+    } catch (e: any) {
+      errors.push(`Clone failed: ${e.message}`);
+    }
+  }
 
   // 1. Count lines of code
   const loc = countLinesOfCode(dir);
@@ -387,11 +439,20 @@ export function exportMultiRepoReportJSON(report: MultiRepoReport, outputPath?: 
 if (require.main === module) {
   const args = process.argv.slice(2);
   const reposArg = args.includes("--repos") ? args[args.indexOf("--repos") + 1] : null;
+  const all = args.includes("--all");
+  const localOnly = args.includes("--local");
 
   let targets = DEFAULT_TARGETS;
   if (reposArg) {
     const names = new Set(reposArg.split(","));
     targets = DEFAULT_TARGETS.filter(t => names.has(t.name));
+  } else if (localOnly) {
+    targets = DEFAULT_TARGETS.filter(t => !EXTERNAL_REPOS[t.name]);
+  } else if (all) {
+    // all targets including external
+  } else {
+    // default: local only (fast)
+    targets = DEFAULT_TARGETS.filter(t => !EXTERNAL_REPOS[t.name]);
   }
 
   const report = runMultiRepoPrecision(targets);
