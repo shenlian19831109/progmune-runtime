@@ -1,0 +1,1702 @@
+[
+  {
+    "function": "patternHashSlot",
+    "file": "src/cluster.c",
+    "calls": [
+      "crc16",
+      "getSlotOrReply",
+      "getLongLongFromObject",
+      "addReplyError",
+      "connTypeOfCluster",
+      "connectionTypeTls",
+      "connectionTypeTcp",
+      "createDumpPayload",
+      "rioInitWithBuffer",
+      "sdsempty"
+    ],
+    "totalCalls": 271
+  },
+  {
+    "function": "debugCommand",
+    "file": "src/debug.c",
+    "calls": [
+      "strcasecmp",
+      "delay",
+      "secret",
+      "startup",
+      "keys",
+      "accessed",
+      "stringmatchlen",
+      "argument",
+      "info",
+      "time"
+    ],
+    "totalCalls": 113
+  },
+  {
+    "function": "main",
+    "file": "src/server.c",
+    "calls": [
+      "monotonicInit",
+      "strcasecmp",
+      "proc",
+      "printf",
+      "test_report",
+      "getTestProcByName",
+      "spt_init",
+      "tzset",
+      "zmalloc_set_oom_handler",
+      "time"
+    ],
+    "totalCalls": 92
+  },
+  {
+    "function": "genRedisInfoString",
+    "file": "src/server.c",
+    "calls": [
+      "sdsempty",
+      "dictFind",
+      "uname",
+      "sdscatfmt",
+      "FMTARGS",
+      "redisGitSHA1",
+      "strtol",
+      "redisGitDirty",
+      "redisBuildIdString",
+      "monotonicInfoString"
+    ],
+    "totalCalls": 76
+  },
+  {
+    "function": "listpackTest",
+    "file": "src/listpack.c",
+    "calls": [
+      "UNUSED",
+      "TEST",
+      "createIntList",
+      "assert",
+      "lpLength",
+      "lpFree",
+      "createList",
+      "lpNew",
+      "lpPrepend",
+      "verifyEntry"
+    ],
+    "totalCalls": 71
+  },
+  {
+    "function": "sortCommandGeneric",
+    "file": "src/sort.c",
+    "calls": [
+      "listCreate",
+      "listSetFreeMethod",
+      "ACLUserCheckCmdWithUnrestrictedKeyAccess",
+      "strcasecmp",
+      "getLongFromObjectOrReply",
+      "strchr",
+      "patternHashSlot",
+      "sdslen",
+      "getKeySlot",
+      "addReplyError"
+    ],
+    "totalCalls": 68
+  },
+  {
+    "function": "readSyncBulkPayload",
+    "file": "src/replication.c",
+    "calls": [
+      "isInsideYieldingLongCommand",
+      "useDisklessLoad",
+      "connSyncReadLine",
+      "connGetLastError",
+      "syncReadLine",
+      "atomicIncr",
+      "strncmp",
+      "strlen",
+      "memcpy",
+      "memset"
+    ],
+    "totalCalls": 66
+  },
+  {
+    "function": "clientCommand",
+    "file": "src/networking.c",
+    "calls": [
+      "strcasecmp",
+      "CACHING",
+      "ADDR",
+      "LADDR",
+      "TYPE",
+      "SKIPME",
+      "connection",
+      "REPLY",
+      "TRACKING",
+      "EVICT"
+    ],
+    "totalCalls": 64
+  },
+  {
+    "function": "clusterProcessPacket",
+    "file": "src/cluster_legacy.c",
+    "calls": [
+      "ntohl",
+      "ntohs",
+      "mstime",
+      "clusterGetMessageTypeString",
+      "getInitialPingExt",
+      "getPingExtLength",
+      "padding",
+      "length",
+      "verifyClusterNodeId",
+      "getNextPingExt"
+    ],
+    "totalCalls": 59
+  },
+  {
+    "function": "rdbLoadRioWithLoadingCtx",
+    "file": "src/rdb.c",
+    "calls": [
+      "rioRead",
+      "memcmp",
+      "atoi",
+      "mstime",
+      "LRU_CLOCK",
+      "keyMetaSpecInit",
+      "rdbLoadType",
+      "rdbLoadTime",
+      "keyMetaSpecAdd",
+      "rioGetReadError"
+    ],
+    "totalCalls": 59
+  },
+  {
+    "function": "zunionInterDiffGenericCommand",
+    "file": "src/t_zset.c",
+    "calls": [
+      "getLongFromObjectOrReply",
+      "addReplyErrorFormat",
+      "addReplyErrorObject",
+      "ztrycalloc",
+      "addReplyError",
+      "lookupKeyRead",
+      "kvobjAllocSize",
+      "strcasecmp",
+      "getDoubleFromObjectOrReply",
+      "getPositiveLongFromObjectOrReply"
+    ],
+    "totalCalls": 59
+  },
+  {
+    "function": "quicklistTest",
+    "file": "src/quicklist.c",
+    "calls": [
+      "UNUSED",
+      "printf",
+      "mstime",
+      "TEST",
+      "quicklistNew",
+      "ql_verify",
+      "quicklistRelease",
+      "quicklistPushTail",
+      "quicklistPushHead",
+      "TEST_DESC"
+    ],
+    "totalCalls": 58
+  },
+  {
+    "function": "sentinelCommand",
+    "file": "src/sentinel.c",
+    "calls": [
+      "strcasecmp",
+      "values",
+      "addReplyHelp",
+      "addReplyDictOfRedisInstances",
+      "sentinelGetMasterByNameOrReplyError",
+      "addReplySentinelRedisInstance",
+      "addReplyBulkCBuffer",
+      "getLongFromObjectOrReply",
+      "getLongLongFromObjectOrReply",
+      "getSentinelRedisInstanceByAddrAndRunID"
+    ],
+    "totalCalls": 57
+  },
+  {
+    "function": "aclCommand",
+    "file": "src/acl.c",
+    "calls": [
+      "strcasecmp",
+      "redactClientCommandArgument",
+      "ACLStringHasSpaces",
+      "sdslen",
+      "addReplyError",
+      "ACLGetUserByName",
+      "ACLStringSetUser",
+      "addReply",
+      "addReplyErrorSdsSafe",
+      "strcmp"
+    ],
+    "totalCalls": 55
+  },
+  {
+    "function": "clusterSyncSlotsCommand",
+    "file": "src/cluster_asm.c",
+    "calls": [
+      "addReplyError",
+      "clusterNodeIsMaster",
+      "getMyClusterNode",
+      "strcasecmp",
+      "addReplyErrorArity",
+      "parseSlotRangesOrReply",
+      "validateImportSlotRanges",
+      "addReplyErrorSds",
+      "slotRangeArrayFree",
+      "clusterLookupNode"
+    ],
+    "totalCalls": 52
+  },
+  {
+    "function": "processCommand",
+    "file": "src/server.c",
+    "calls": [
+      "scriptIsTimedout",
+      "call",
+      "scriptIsRunning",
+      "moduleCallCommandFilters",
+      "reqresAppendRequest",
+      "blockPostponeClient",
+      "modules",
+      "isCommandReusable",
+      "lookupCommand",
+      "strcasecmp"
+    ],
+    "totalCalls": 52
+  },
+  {
+    "function": "ziplistTest",
+    "file": "src/ziplist.c",
+    "calls": [
+      "srand",
+      "atoi",
+      "createIntList",
+      "ziplistRepr",
+      "createList",
+      "pop",
+      "printf",
+      "ziplistIndex",
+      "ziplistGet",
+      "fwrite"
+    ],
+    "totalCalls": 52
+  },
+  {
+    "function": "xorObjectDigest",
+    "file": "src/debug.c",
+    "calls": [
+      "htonl",
+      "mixDigest",
+      "getExpire",
+      "mixStringObjectDigest",
+      "listTypeInitIterator",
+      "listTypeNext",
+      "listTypeGet",
+      "decrRefCount",
+      "listTypeResetIterator",
+      "setTypeInitIterator"
+    ],
+    "totalCalls": 47
+  },
+  {
+    "function": "main",
+    "file": "src/redis-benchmark.c",
+    "calls": [
+      "srandom",
+      "time",
+      "getpid",
+      "init_genrand64",
+      "ustime",
+      "signal",
+      "memset",
+      "aeCreateEventLoop",
+      "aeCreateTimeEvent",
+      "listCreate"
+    ],
+    "totalCalls": 47
+  },
+  {
+    "function": "clusterCommandSpecial",
+    "file": "src/cluster_legacy.c",
+    "calls": [
+      "strcasecmp",
+      "getLongLongFromObject",
+      "addReplyErrorFormat",
+      "clusterStartHandshake",
+      "addReply",
+      "kvstoreSize",
+      "addReplyError",
+      "clusterDelNodeSlots",
+      "clusterDoBeforeSleep",
+      "memset"
+    ],
+    "totalCalls": 46
+  },
+  {
+    "function": "serverCron",
+    "file": "src/server.c",
+    "calls": [
+      "UNUSED",
+      "watchdogScheduleSignal",
+      "listLength",
+      "getMonotonicUs",
+      "run_with_period",
+      "atomicGet",
+      "trackInstantaneousMetric",
+      "statsUpdateActiveClients",
+      "getLRUClock",
+      "cronUpdateMemoryStats"
+    ],
+    "totalCalls": 46
+  },
+  {
+    "function": "xautoclaimCommand",
+    "file": "src/t_stream.c",
+    "calls": [
+      "lookupKeyRead",
+      "getLongLongFromObjectOrReply",
+      "streamParseIntervalIDOrReply",
+      "streamIncrID",
+      "addReplyError",
+      "strcasecmp",
+      "max",
+      "getRangeLongFromObjectOrReply",
+      "addReplyErrorObject",
+      "checkType"
+    ],
+    "totalCalls": 46
+  },
+  {
+    "function": "rdbSaveObject",
+    "file": "src/rdb.c",
+    "calls": [
+      "rdbSaveStringObject",
+      "rdbSaveLen",
+      "quicklistNodeIsCompressed",
+      "quicklistGetLzf",
+      "rdbSaveLzfBlob",
+      "rdbSaveRawString",
+      "lpBytes",
+      "serverPanic",
+      "dictSize",
+      "dictInitIterator"
+    ],
+    "totalCalls": 45
+  },
+  {
+    "function": "initServer",
+    "file": "src/server.c",
+    "calls": [
+      "signal",
+      "setupSignalHandlers",
+      "ThreadsManager_init",
+      "makeThreadKillable",
+      "openlog",
+      "getpid",
+      "pthread_self",
+      "raxNew",
+      "listCreate",
+      "raxNewEx"
+    ],
+    "totalCalls": 45
+  },
+  {
+    "function": "loadSingleAppendOnlyFile",
+    "file": "src/aof.c",
+    "calls": [
+      "makePath",
+      "fopen",
+      "redis_stat",
+      "strerror",
+      "redis_fstat",
+      "fileno",
+      "fclose",
+      "createAOFClient",
+      "format",
+      "fread"
+    ],
+    "totalCalls": 44
+  },
+  {
+    "function": "beforeSleep",
+    "file": "src/server.c",
+    "calls": [
+      "UNUSED",
+      "updatePeakMemory",
+      "processEventsWhileBlocked",
+      "connTypeProcessPendingData",
+      "flushAppendOnlyFile",
+      "handleClientsWithPendingWrites",
+      "freeClientsInAsyncFreeQueue",
+      "processClientsOfAllIOThreads",
+      "sendPendingClientsToIOThreads",
+      "data"
+    ],
+    "totalCalls": 41
+  },
+  {
+    "function": "xreadCommand",
+    "file": "src/t_stream.c",
+    "calls": [
+      "sdslen",
+      "strcasecmp",
+      "addReplyError",
+      "getLongLongFromObjectOrReply",
+      "getTimeoutFromObjectOrReply",
+      "addReplyErrorFormat",
+      "addReplyErrorObject",
+      "lookupKeyRead",
+      "checkType",
+      "streamLookupCG"
+    ],
+    "totalCalls": 41
+  },
+  {
+    "function": "zrandmemberWithCountCommand",
+    "file": "src/t_zset.c",
+    "calls": [
+      "lookupKeyReadOrReply",
+      "checkType",
+      "zsetLength",
+      "addReply",
+      "kvobjAllocSize",
+      "addReplyArrayLen",
+      "dictGetFairRandomKey",
+      "dictGetKey",
+      "zslGetNodeElement",
+      "addReplyBulkCBuffer"
+    ],
+    "totalCalls": 40
+  },
+  {
+    "function": "raxTest",
+    "file": "src/rax.c",
+    "calls": [
+      "UNUSED",
+      "TEST",
+      "raxAllocSize",
+      "raxInsert",
+      "raxRemove",
+      "raxNewEx",
+      "createTestValue",
+      "assert",
+      "_rax_verify_alloc_size",
+      "rax_free"
+    ],
+    "totalCalls": 39
+  },
+  {
+    "function": "main",
+    "file": "src/redis-cli.c",
+    "calls": [
+      "memset",
+      "isatty",
+      "fileno",
+      "getenv",
+      "parseOptions",
+      "parseEnv",
+      "askPassword",
+      "cliSecureInit",
+      "gettimeofday",
+      "init_genrand64"
+    ],
+    "totalCalls": 39
+  },
+  {
+    "function": "spopWithCountCommand",
+    "file": "src/t_set.c",
+    "calls": [
+      "getPositiveLongFromObjectOrReply",
+      "lookupKeyWriteOrReply",
+      "checkType",
+      "addReply",
+      "setTypeSize",
+      "notifyKeyspaceEvent",
+      "sunionDiffGenericCommand",
+      "dbDelete",
+      "rewriteClientCommandVector",
+      "keyModified"
+    ],
+    "totalCalls": 39
+  },
+  {
+    "function": "clusterLoadConfig",
+    "file": "src/cluster_legacy.c",
+    "calls": [
+      "fopen",
+      "strerror",
+      "exit",
+      "redis_fstat",
+      "fileno",
+      "fclose",
+      "fgets",
+      "truncate",
+      "sdssplitargs",
+      "strcasecmp"
+    ],
+    "totalCalls": 38
+  },
+  {
+    "function": "clusterManagerCommandCreate",
+    "file": "src/redis-cli.c",
+    "calls": [
+      "listCreate",
+      "parseClusterNodeAddress",
+      "fprintf",
+      "clusterManagerNewNode",
+      "clusterManagerNodeConnect",
+      "freeClusterManagerNode",
+      "clusterManagerNodeIsCluster",
+      "clusterManagerPrintNotClusterNodeError",
+      "clusterManagerNodeLoadInfo",
+      "CLUSTER_MANAGER_PRINT_REPLY_ERROR"
+    ],
+    "totalCalls": 38
+  },
+  {
+    "function": "migrateCommand",
+    "file": "src/cluster.c",
+    "calls": [
+      "strcasecmp",
+      "addReplyErrorObject",
+      "redactClientCommandArgument",
+      "sdslen",
+      "addReplyError",
+      "getLongFromObjectOrReply",
+      "lookupKeyRead",
+      "addReplySds",
+      "migrateGetSocket",
+      "rioInitWithBuffer"
+    ],
+    "totalCalls": 37
+  },
+  {
+    "function": "xclaimCommand",
+    "file": "src/t_stream.c",
+    "calls": [
+      "lookupKeyRead",
+      "checkType",
+      "streamLookupCG",
+      "addReplyErrorFormat",
+      "getLongLongFromObjectOrReply",
+      "streamParseStrictIDOrReply",
+      "commandTimeSnapshot",
+      "strcasecmp",
+      "streamCompareID",
+      "streamUpdateCGroupLastId"
+    ],
+    "totalCalls": 37
+  },
+  {
+    "function": "scanGenericCommand",
+    "file": "src/db.c",
+    "calls": [
+      "strcasecmp",
+      "getLongFromObjectOrReply",
+      "addReplyErrorObject",
+      "sdslen",
+      "getObjectTypeByName",
+      "addReplyErrorFormat",
+      "addReplyError",
+      "vecInit",
+      "vecSetFreeMethod",
+      "state"
+    ],
+    "totalCalls": 36
+  },
+  {
+    "function": "freeClient",
+    "file": "src/networking.c",
+    "calls": [
+      "freeClientAsync",
+      "fetchClientFromIOThread",
+      "keepClientInMainThread",
+      "moduleFireServerEvent",
+      "asmCallbackOnFreeClient",
+      "moduleNotifyUserChanged",
+      "replicationCacheMaster",
+      "listSearchKey",
+      "listDelNode",
+      "clientTypeIsSlave"
+    ],
+    "totalCalls": 36
+  },
+  {
+    "function": "repl",
+    "file": "src/redis-cli.c",
+    "calls": [
+      "commands",
+      "isatty",
+      "fileno",
+      "cliInitHelp",
+      "linenoiseSetMultiLine",
+      "linenoiseSetCompletionCallback",
+      "linenoiseSetHintsCallback",
+      "linenoiseSetFreeHintsCallback",
+      "getenv",
+      "getDotfilePath"
+    ],
+    "totalCalls": 36
+  },
+  {
+    "function": "keyStats",
+    "file": "src/redis-cli.c",
+    "calls": [
+      "mstime",
+      "listCreate",
+      "fprintf",
+      "exit",
+      "dictCreate",
+      "typeinfo_add",
+      "findBigKeys",
+      "sizeDistInit",
+      "hdr_init",
+      "signal"
+    ],
+    "totalCalls": 36
+  },
+  {
+    "function": "streamReplyWithRange",
+    "file": "src/t_stream.c",
+    "calls": [
+      "commandTimeSnapshot",
+      "createStringObject",
+      "sdslen",
+      "createStringObjectFromLongLong",
+      "createObjectFromStreamID",
+      "addReplyDeferredLen",
+      "list",
+      "pelListUpdate",
+      "modifications",
+      "streamIteratorStart"
+    ],
+    "totalCalls": 36
+  },
+  {
+    "function": "clusterCommand",
+    "file": "src/cluster.c",
+    "calls": [
+      "addReplyError",
+      "strcasecmp",
+      "clusterCommandHelp",
+      "clusterGenNodesDescription",
+      "shouldReturnTlsInfo",
+      "addReplyVerbatim",
+      "sdslen",
+      "clusterCommandMyId",
+      "clusterCommandMyShardId",
+      "clusterCommandSlots"
+    ],
+    "totalCalls": 35
+  },
+  {
+    "function": "sunionDiffGenericCommand",
+    "file": "src/t_set.c",
+    "calls": [
+      "approximate",
+      "lookupKeyRead",
+      "checkType",
+      "setTypeCreate",
+      "kvobjAllocSize",
+      "setTypeSize",
+      "qsort",
+      "createIntsetObject",
+      "createSetObject",
+      "set"
+    ],
+    "totalCalls": 35
+  },
+  {
+    "function": "ACLLoadFromFile",
+    "file": "src/acl.c",
+    "calls": [
+      "fopen",
+      "sdscatprintf",
+      "sdsempty",
+      "strerror",
+      "fgets",
+      "fclose",
+      "sdssplitlen",
+      "strlen",
+      "raxNew",
+      "sdstrim"
+    ],
+    "totalCalls": 34
+  },
+  {
+    "function": "clusterManagerFixSlotsCoverage",
+    "file": "src/redis-cli.c",
+    "calls": [
+      "clusterManagerLogWarn",
+      "exit",
+      "clusterManagerLogInfo",
+      "sdsfromlonglong",
+      "listCreate",
+      "sdsempty",
+      "listRewind",
+      "listNext",
+      "CLUSTER_MANAGER_COMMAND",
+      "clusterManagerCheckRedisReply"
+    ],
+    "totalCalls": 34
+  },
+  {
+    "function": "luaReplyToRedisReply",
+    "file": "src/script_lua.c",
+    "calls": [
+      "lua_type",
+      "lua_checkstack",
+      "addReplyError",
+      "lua_pop",
+      "addReplyBulkCBuffer",
+      "lua_tostring",
+      "lua_strlen",
+      "addReply",
+      "lua_toboolean",
+      "addReplyBool"
+    ],
+    "totalCalls": 34
+  },
+  {
+    "function": "xpendingCommand",
+    "file": "src/t_stream.c",
+    "calls": [
+      "addReplyErrorObject",
+      "strcasecmp",
+      "getLongLongFromObjectOrReply",
+      "streamParseIntervalIDOrReply",
+      "streamIncrID",
+      "addReplyError",
+      "streamDecrID",
+      "lookupKeyRead",
+      "checkType",
+      "streamLookupCG"
+    ],
+    "totalCalls": 34
+  },
+  {
+    "function": "loadServerConfigFromString",
+    "file": "src/config.c",
+    "calls": [
+      "sdssplitlen",
+      "strlen",
+      "sdstrim",
+      "sdssplitargs",
+      "sdsfreesplitres",
+      "sdstolower",
+      "lookupConfig",
+      "sdslen",
+      "set",
+      "strcasecmp"
+    ],
+    "totalCalls": 33
+  },
+  {
+    "function": "dictTest",
+    "file": "src/dict.c",
+    "calls": [
+      "dictCreate",
+      "strtol",
+      "TEST",
+      "dictSetResizeEnabled",
+      "dictAdd",
+      "stringFromLongLong",
+      "assert",
+      "dictIsRehashing",
+      "dictRehashMicroseconds",
+      "dictSize"
+    ],
+    "totalCalls": 33
+  },
+  {
+    "function": "georadiusGeneric",
+    "file": "src/geo.c",
+    "calls": [
+      "lookupKeyRead",
+      "checkType",
+      "extractLongLatOrReply",
+      "extractDistanceOrReply",
+      "longLatFromMember",
+      "addReplyError",
+      "strcasecmp",
+      "getLongLongFromObjectOrReply",
+      "extractBoxOrReply",
+      "addReplyErrorObject"
+    ],
+    "totalCalls": 33
+  },
+  {
+    "function": "restoreCommand",
+    "file": "src/cluster.c",
+    "calls": [
+      "strcasecmp",
+      "getLongLongFromObjectOrReply",
+      "addReplyError",
+      "LRU_CLOCK",
+      "addReplyErrorObject",
+      "lookupKeyWrite",
+      "verifyDumpPayload",
+      "sdslen",
+      "rioInitWithBuffer",
+      "keyMetaSpecInit"
+    ],
+    "totalCalls": 32
+  },
+  {
+    "function": "asmSyncWithSource",
+    "file": "src/cluster_asm.c",
+    "calls": [
+      "connGetPrivateData",
+      "connect",
+      "connGetState",
+      "unlikely",
+      "asmDebugIsFailPointActive",
+      "shutdown",
+      "connRead",
+      "connSetReadHandler",
+      "connSetWriteHandler",
+      "asmSendInternalAuth"
+    ],
+    "totalCalls": 32
+  },
+  {
+    "function": "raxInsertAt",
+    "file": "src/rax.c",
+    "calls": [
+      "assert",
+      "raxFindLink",
+      "debugAssert",
+      "raxLinkStillValid",
+      "raxLowWalk",
+      "debugf",
+      "loop",
+      "raxLeafParentReadSlot",
+      "raxLeafParentWriteSlot",
+      "raxReallocForData"
+    ],
+    "totalCalls": 32
+  },
+  {
+    "function": "clusterManagerCheckCluster",
+    "file": "src/redis-cli.c",
+    "calls": [
+      "listFirst",
+      "clusterManagerLogInfo",
+      "Check",
+      "clusterManagerShowNodes",
+      "clusterManagerIsConfigConsistent",
+      "clusterManagerOnError",
+      "clusterManagerLogOk",
+      "listRewind",
+      "listNext",
+      "dictCreate"
+    ],
+    "totalCalls": 32
+  },
+  {
+    "function": "syncWithMaster",
+    "file": "src/replication.c",
+    "calls": [
+      "connClose",
+      "connect",
+      "connGetState",
+      "connGetLastError",
+      "connSetReadHandler",
+      "connSetWriteHandler",
+      "sendCommand",
+      "receiveSynchronousResponse",
+      "strncmp",
+      "strlen"
+    ],
+    "totalCalls": 32
+  },
+  {
+    "function": "sdstemplate",
+    "file": "src/sds.c",
+    "calls": [
+      "sdsempty",
+      "strchr",
+      "sdscatlen",
+      "sdsnewlen",
+      "cb_func",
+      "UNUSED",
+      "sdsTestTemplateCallback",
+      "strcmp",
+      "sdsTest",
+      "test_cond"
+    ],
+    "totalCalls": 32
+  },
+  {
+    "function": "hrandfieldWithCountCommand",
+    "file": "src/t_hash.c",
+    "calls": [
+      "lookupKeyReadOrReply",
+      "checkType",
+      "hashTypeExpireIfNeeded",
+      "addReply",
+      "hashTypeLength",
+      "kvobjAllocSize",
+      "addReplyArrayLen",
+      "dictGetFairRandomKey",
+      "dictGetKey",
+      "entryGetField"
+    ],
+    "totalCalls": 32
+  },
+  {
+    "function": "srandmemberWithCountCommand",
+    "file": "src/t_set.c",
+    "calls": [
+      "getRangeLongFromObjectOrReply",
+      "lookupKeyReadOrReply",
+      "checkType",
+      "setTypeSize",
+      "addReply",
+      "addReplyArrayLen",
+      "lpRandomEntries",
+      "addReplyBulkCBuffer",
+      "addReplyBulkLongLong",
+      "setTypeRandomElement"
+    ],
+    "totalCalls": 32
+  },
+  {
+    "function": "sinterGenericCommand",
+    "file": "src/t_set.c",
+    "calls": [
+      "lookupKeyRead",
+      "checkType",
+      "kvobjAllocSize",
+      "dbDelete",
+      "keyModified",
+      "notifyKeyspaceEvent",
+      "addReply",
+      "addReplyLongLong",
+      "qsort",
+      "createIntsetObject"
+    ],
+    "totalCalls": 32
+  },
+  {
+    "function": "xgroupCommand",
+    "file": "src/t_stream.c",
+    "calls": [
+      "strcasecmp",
+      "getLongLongFromObjectOrReply",
+      "addReplyError",
+      "addReplySubcommandSyntaxError",
+      "lookupKeyWrite",
+      "checkType",
+      "streamLookupCG",
+      "addReplyErrorFormat",
+      "counter",
+      "addReplyHelp"
+    ],
+    "totalCalls": 32
+  },
+  {
+    "function": "increxCommand",
+    "file": "src/t_string.c",
+    "calls": [
+      "parseIncrExArgumentsOrReply",
+      "lookupKeyWriteWithLink",
+      "checkType",
+      "getLongDoubleFromObjectOrReply",
+      "Infinity",
+      "isinf",
+      "addReplyError",
+      "reject",
+      "addReplyArrayLen",
+      "addReplyHumanLongDouble"
+    ],
+    "totalCalls": 32
+  },
+  {
+    "function": "clusterManagerFixOpenSlot",
+    "file": "src/redis-cli.c",
+    "calls": [
+      "clusterManagerLogWarn",
+      "exit",
+      "clusterManagerLogInfo",
+      "listCreate",
+      "sdsempty",
+      "listRewind",
+      "listNext",
+      "listAddNodeTail",
+      "CLUSTER_MANAGER_COMMAND",
+      "clusterManagerCheckRedisReply"
+    ],
+    "totalCalls": 31
+  },
+  {
+    "function": "clusterManagerCommandAddNode",
+    "file": "src/redis-cli.c",
+    "calls": [
+      "getClusterHostFromCmdArgs",
+      "clusterManagerLogInfo",
+      "clusterManagerNewNode",
+      "clusterManagerLoadInfoFromNode",
+      "clusterManagerCheckCluster",
+      "clusterManagerNodeByName",
+      "clusterManagerLogErr",
+      "clusterManagerNodeWithLeastReplicas",
+      "assert",
+      "printf"
+    ],
+    "totalCalls": 31
+  },
+  {
+    "function": "clusterManagerCommandReshard",
+    "file": "src/redis-cli.c",
+    "calls": [
+      "getClusterHostFromCmdArgs",
+      "clusterManagerNewNode",
+      "clusterManagerLoadInfoFromNode",
+      "clusterManagerCheckCluster",
+      "listLength",
+      "fflush",
+      "fprintf",
+      "printf",
+      "move",
+      "read"
+    ],
+    "totalCalls": 31
+  },
+  {
+    "function": "finishShutdown",
+    "file": "src/server.c",
+    "calls": [
+      "listRewind",
+      "listNext",
+      "listNodeValue",
+      "pauseIOThread",
+      "time",
+      "replicationGetSlaveName",
+      "replstateToString",
+      "resumeIOThread",
+      "ldbKillForkedSessions",
+      "killRDBChild"
+    ],
+    "totalCalls": 31
+  },
+  {
+    "function": "hsetexCommand",
+    "file": "src/t_hash.c",
+    "calls": [
+      "parseHashFieldExpireArgs",
+      "lookupKeyWriteWithLink",
+      "checkType",
+      "addReplyLongLong",
+      "createHashObject",
+      "dbAddByLink",
+      "hashTypeLength",
+      "kvobjAllocSize",
+      "fieldvecInit",
+      "hashTypeGetValue"
+    ],
+    "totalCalls": 31
+  },
+  {
+    "function": "genericZpopCommand",
+    "file": "src/t_zset.c",
+    "calls": [
+      "lookupKeyWrite",
+      "checkType",
+      "addReplyNullArray",
+      "addReply",
+      "kvobjAllocSize",
+      "zsetLength",
+      "addReplyArrayLen",
+      "addReplyBulk",
+      "lpSeek",
+      "serverAssertWithInfo"
+    ],
+    "totalCalls": 31
+  },
+  {
+    "function": "performEvictions",
+    "file": "src/evict.c",
+    "calls": [
+      "isSafeToPerformEvictions",
+      "listLength",
+      "getMaxmemoryState",
+      "evictionTimeLimitUs",
+      "latencyStartMonitor",
+      "elapsedStart",
+      "bugs",
+      "kvstoreSize",
+      "kvstoreNumNonEmptyDicts",
+      "evictionPoolPopulate"
+    ],
+    "totalCalls": 30
+  },
+  {
+    "function": "hotkeysCommand",
+    "file": "src/hotkeys.c",
+    "calls": [
+      "addReplyError",
+      "strcasecmp",
+      "empty",
+      "addReplyHelp",
+      "snprintf",
+      "getRangeLongFromObjectOrReply",
+      "slotRangeArrayFree",
+      "getSlotOrReply",
+      "clusterNodeCoversSlot",
+      "getMyClusterNode"
+    ],
+    "totalCalls": 30
+  },
+  {
+    "function": "ebucketsTest",
+    "file": "src/ebuckets.c",
+    "calls": [
+      "UNUSED",
+      "srand",
+      "TEST",
+      "printf",
+      "distributeTest",
+      "ARRAY_SIZE",
+      "ebAdd",
+      "ebStart",
+      "assert",
+      "ebNext"
+    ],
+    "totalCalls": 29
+  },
+  {
+    "function": "pfdebugCommand",
+    "file": "src/hyperloglog.c",
+    "calls": [
+      "strcasecmp",
+      "defined",
+      "addReplyError",
+      "addReplyStatus",
+      "lookupKeyWrite",
+      "isHLLObjectOrReply",
+      "dbUnshareStringValue",
+      "kvobjAllocSize",
+      "stringObjectLen",
+      "hllSparseToDense"
+    ],
+    "totalCalls": 29
+  },
+  {
+    "function": "processInputBuffer",
+    "file": "src/networking.c",
+    "calls": [
+      "atomicIncr",
+      "only",
+      "serverCron",
+      "statsUpdateActiveClients",
+      "authRequired",
+      "sdslen",
+      "stream",
+      "isInsideYieldingLongCommand",
+      "set",
+      "acquirePendingCommand"
+    ],
+    "totalCalls": 29
+  },
+  {
+    "function": "hpersistCommand",
+    "file": "src/t_hash.c",
+    "calls": [
+      "lookupKeyWrite",
+      "checkType",
+      "strcasecmp",
+      "addReplyError",
+      "getRangeLongFromObjectOrReply",
+      "addReplyArrayLen",
+      "addReplyLongLong",
+      "fieldvecInit",
+      "lpFirst",
+      "lpFind"
+    ],
+    "totalCalls": 29
+  },
+  {
+    "function": "streamAppendItem",
+    "file": "src/t_stream.c",
+    "calls": [
+      "zero",
+      "streamNextID",
+      "overflow",
+      "streamCompareID",
+      "stream",
+      "sdslen",
+      "raxStart",
+      "raxSeek",
+      "raxEOF",
+      "lpBytes"
+    ],
+    "totalCalls": 29
+  },
+  {
+    "function": "zremrangeGenericCommand",
+    "file": "src/t_zset.c",
+    "calls": [
+      "getLongFromObjectOrReply",
+      "zslParseRange",
+      "addReplyError",
+      "zslParseLexRange",
+      "serverPanic",
+      "lookupKeyWriteOrReply",
+      "checkType",
+      "zsetLength",
+      "addReply",
+      "kvobjAllocSize"
+    ],
+    "totalCalls": 29
+  },
+  {
+    "function": "copyCommand",
+    "file": "src/db.c",
+    "calls": [
+      "strcasecmp",
+      "getIntFromObjectOrReply",
+      "selectDb",
+      "addReplyError",
+      "addReplyErrorObject",
+      "sdscmp",
+      "lookupKeyRead",
+      "addReply",
+      "lookupKeyWrite",
+      "dupStringObject"
+    ],
+    "totalCalls": 28
+  },
+  {
+    "function": "gcraCommand",
+    "file": "src/gcra.c",
+    "calls": [
+      "addReplyErrorArity",
+      "getPositiveLongFromObjectOrReply",
+      "likely",
+      "getRangeLongFromObjectOrReply",
+      "getDoubleFromObjectOrReply",
+      "addReplyError",
+      "strcasecmp",
+      "addReplyErrorObject",
+      "commandTimeSnapshot",
+      "lookupKeyWriteWithLink"
+    ],
+    "totalCalls": 28
+  },
+  {
+    "function": "rdbSaveToSlavesSockets",
+    "file": "src/rdb.c",
+    "calls": [
+      "hasActiveChildProcess",
+      "anetPipe",
+      "close",
+      "listLength",
+      "listRewind",
+      "listNext",
+      "replicationSetupSlaveForFullResync",
+      "getPsyncInitialOffset",
+      "connSendTimeout",
+      "connBlock"
+    ],
+    "totalCalls": 28
+  },
+  {
+    "function": "syncCommand",
+    "file": "src/replication.c",
+    "calls": [
+      "strcasecmp",
+      "addReplyError",
+      "clusterPromoteSelfToMaster",
+      "replicationUnsetMaster",
+      "catClientInfoString",
+      "sdsempty",
+      "enabled",
+      "clientHasPendingReplies",
+      "replicationGetSlaveName",
+      "getLongLongFromObjectOrReply"
+    ],
+    "totalCalls": 28
+  },
+  {
+    "function": "hexpireGenericCommand",
+    "file": "src/t_hash.c",
+    "calls": [
+      "lookupKeyWrite",
+      "checkType",
+      "parseHashCommandArgs",
+      "addReplyArrayLen",
+      "addReplyLongLong",
+      "hashTypeLength",
+      "kvobjAllocSize",
+      "hashTypeSetExInit",
+      "fieldvecInit",
+      "hashTypeSetEx"
+    ],
+    "totalCalls": 28
+  },
+  {
+    "function": "xaddCommand",
+    "file": "src/t_stream.c",
+    "calls": [
+      "streamParseAddOrTrimArgsOrReply",
+      "addReplyErrorArity",
+      "addReplyError",
+      "streamTypeLookupWriteOrCreate",
+      "kvobjAllocSize",
+      "sdslen",
+      "idmpGetOrCreateProducer",
+      "createIdempotencyHash",
+      "idmpEntryCreate",
+      "idmpLookupAndReply"
+    ],
+    "totalCalls": 28
+  },
+  {
+    "function": "xinfoReplyWithStreamInfo",
+    "file": "src/t_stream.c",
+    "calls": [
+      "addReplySubcommandSyntaxError",
+      "strcasecmp",
+      "getLongLongFromObjectOrReply",
+      "addReplyMapLen",
+      "addReplyBulkCString",
+      "addReplyLongLong",
+      "raxSize",
+      "addReplyStreamID",
+      "raxStart",
+      "raxSeek"
+    ],
+    "totalCalls": 28
+  },
+  {
+    "function": "clusterCron",
+    "file": "src/cluster_legacy.c",
+    "calls": [
+      "master",
+      "mstime",
+      "clusterUpdateMyselfHostname",
+      "dictInitSafeIterator",
+      "dictNext",
+      "dictGetVal",
+      "clusterNodeCronFreeLinkOnBufferLimitReached",
+      "function",
+      "clusterNodeCronHandleReconnect",
+      "dictResetIterator"
+    ],
+    "totalCalls": 27
+  },
+  {
+    "function": "scriptingInit",
+    "file": "src/eval.c",
+    "calls": [
+      "ldbInit",
+      "createLuaState",
+      "exit",
+      "dictCreate",
+      "listCreate",
+      "luaRegisterRedisAPI",
+      "lua_getglobal",
+      "lua_pushstring",
+      "lua_pushcfunction",
+      "lua_settable"
+    ],
+    "totalCalls": 27
+  },
+  {
+    "function": "luaEngineInitEngine",
+    "file": "src/function_lua.c",
+    "calls": [
+      "createLuaState",
+      "luaRegisterRedisAPI",
+      "lua_newtable",
+      "lua_pushstring",
+      "lua_pushcfunction",
+      "lua_settable",
+      "luaRegisterLogFunction",
+      "luaRegisterVersion",
+      "luaSetErrorMetatable",
+      "lua_setfield"
+    ],
+    "totalCalls": 27
+  },
+  {
+    "function": "redis_check_rdb",
+    "file": "src/redis-check-rdb.c",
+    "calls": [
+      "mstime",
+      "fopen",
+      "fstat",
+      "fileno",
+      "startLoadingFile",
+      "rioInitWithFile",
+      "rioRead",
+      "memcmp",
+      "rdbCheckError",
+      "atoi"
+    ],
+    "totalCalls": 27
+  },
+  {
+    "function": "clusterManagerCommandRebalance",
+    "file": "src/redis-cli.c",
+    "calls": [
+      "getClusterHostFromCmdArgs",
+      "clusterManagerNewNode",
+      "clusterManagerLoadInfoFromNode",
+      "strchr",
+      "clusterManagerLogErr",
+      "atof",
+      "clusterManagerNodeByAbbreviatedName",
+      "listCreate",
+      "listRewind",
+      "listNext"
+    ],
+    "totalCalls": 27
+  },
+  {
+    "function": "sdsTest",
+    "file": "src/sds.c",
+    "calls": [
+      "UNUSED",
+      "test_cond",
+      "sdslen",
+      "memcmp",
+      "sdsnewlen",
+      "sdscatprintf",
+      "sdsempty",
+      "sdscatfmt",
+      "printf",
+      "sdstrim"
+    ],
+    "totalCalls": 27
+  },
+  {
+    "function": "sentinelRefreshInstanceInfo",
+    "file": "src/sentinel.c",
+    "calls": [
+      "sdssplitlen",
+      "strlen",
+      "sdslen",
+      "memcmp",
+      "sdsnewlen",
+      "strncmp",
+      "sentinelEvent",
+      "mstime",
+      "isdigit",
+      "strstr"
+    ],
+    "totalCalls": 27
+  },
+  {
+    "function": "call",
+    "file": "src/server.c",
+    "calls": [
+      "isAOFLoadingContext",
+      "again",
+      "processCommand",
+      "context",
+      "incrCommandStatsOnError",
+      "monotonicGetType",
+      "getMonotonicUs",
+      "updateCachedTime",
+      "ustime",
+      "enterExecutionUnit"
+    ],
+    "totalCalls": 27
+  },
+  {
+    "function": "hgetexCommand",
+    "file": "src/t_hash.c",
+    "calls": [
+      "lookupKeyWrite",
+      "checkType",
+      "parseHashFieldExpireArgs",
+      "addReplyArrayLen",
+      "addReplyNull",
+      "kvobjAllocSize",
+      "hashTypeLength",
+      "hashTypeSetExInit",
+      "fieldvecInit",
+      "addHashFieldToReply"
+    ],
+    "totalCalls": 27
+  },
+  {
+    "function": "xnackCommand",
+    "file": "src/t_stream.c",
+    "calls": [
+      "lookupKeyWrite",
+      "checkType",
+      "streamLookupCG",
+      "addReplyErrorFormat",
+      "strcasecmp",
+      "addReplyError",
+      "getRangeLongFromObjectOrReply",
+      "getLongLongFromObjectOrReply",
+      "streamParseStrictIDOrReply",
+      "kvobjAllocSize"
+    ],
+    "totalCalls": 27
+  },
+  {
+    "function": "rewriteAppendOnlyFileRio",
+    "file": "src/aof.c",
+    "calls": [
+      "genAofTimestampAnnotationIfNeeded",
+      "rioWrite",
+      "sdslen",
+      "rewriteFunctions",
+      "kvstoreSize",
+      "rioWriteBulkLongLong",
+      "kvstoreIteratorInit",
+      "kvstoreIteratorNext",
+      "kvstoreIteratorGetCurrentDictIndex",
+      "dismissDictBucketsMemory"
+    ],
+    "totalCalls": 26
+  },
+  {
+    "function": "dbSetValue",
+    "file": "src/db.c",
+    "calls": [
+      "getKeySlot",
+      "kvstoreDictFindLink",
+      "serverAssertWithInfo",
+      "dictGetKV",
+      "getObjectLength",
+      "estoreRemove",
+      "streamKeyRemoved",
+      "getExpire",
+      "incrRefCount",
+      "metadata"
+    ],
+    "totalCalls": 26
+  },
+  {
+    "function": "readQueryFromClient",
+    "file": "src/networking.c",
+    "calls": [
+      "connGetPrivateData",
+      "atomicSetWithSync",
+      "atomicIncr",
+      "read",
+      "processMultiBulkBuffer",
+      "sdsempty",
+      "sdslen",
+      "BIG_ARG",
+      "unlikely",
+      "processEventsWhileBlocked"
+    ],
+    "totalCalls": 26
+  },
+  {
+    "function": "vsetRecallMode",
+    "file": "src/redis-cli.c",
+    "calls": [
+      "mstime",
+      "exit",
+      "hdr_init",
+      "fprintf",
+      "reconnectingRedisCommand",
+      "freeReplyObject",
+      "printf",
+      "signal",
+      "atof",
+      "rand"
+    ],
+    "totalCalls": 26
+  },
+  {
+    "function": "findBigKeys",
+    "file": "src/redis-cli.c",
+    "calls": [
+      "mstime",
+      "dictCreate",
+      "typeinfo_add",
+      "signal",
+      "getDbSize",
+      "printf",
+      "commands",
+      "sendReadOnly",
+      "sendScan",
+      "fprintf"
+    ],
+    "totalCalls": 26
+  },
+  {
+    "function": "replicationCron",
+    "file": "src/replication.c",
+    "calls": [
+      "updateFailoverStatus",
+      "slaveIsInHandshakeState",
+      "time",
+      "cancelReplicationHandshake",
+      "connectWithMaster",
+      "replicationCronRunMasterClient",
+      "listLength",
+      "clusterManualFailoverTimeLimit",
+      "isPausedActionsWithUpdate",
+      "replicationFeedSlaves"
+    ],
+    "totalCalls": 26
+  },
+  {
+    "function": "hgetdelCommand",
+    "file": "src/t_hash.c",
+    "calls": [
+      "lookupKeyWrite",
+      "checkType",
+      "strcasecmp",
+      "addReplyError",
+      "getRangeLongFromObjectOrReply",
+      "hashTypeIsFieldsWithExpire",
+      "hashTypeLength",
+      "kvobjAllocSize",
+      "fieldvecInit",
+      "addReplyArrayLen"
+    ],
+    "totalCalls": 26
+  },
+  {
+    "function": "setTypeAddAux",
+    "file": "src/t_set.c",
+    "calls": [
+      "intsetAdd",
+      "maybeConvertIntset",
+      "ll2string",
+      "sdsnewlen",
+      "dictFindLink",
+      "sdsdup",
+      "dictSetKeyAtLink",
+      "htGetMetadataSize",
+      "sdsAllocSize",
+      "lpFirst"
+    ],
+    "totalCalls": 26
+  },
+  {
+    "function": "setGenericCommand",
+    "file": "src/t_string.c",
+    "calls": [
+      "getExpireMillisecondsOrReply",
+      "getGenericCommand",
+      "lookupKeyWriteWithLink",
+      "addReply",
+      "lookupKeyRead",
+      "checkType",
+      "getDecodedObject",
+      "sdscmp",
+      "decrRefCount",
+      "validateHexDigest"
+    ],
+    "totalCalls": 26
+  }
+]

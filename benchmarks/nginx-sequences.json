@@ -1,0 +1,1702 @@
+[
+  {
+    "function": "ngx_ssl_client_certificate",
+    "file": "src/event/ngx_event_openssl.c",
+    "calls": [
+      "STACK_OF",
+      "SSL_CTX_set_verify",
+      "SSL_CTX_set_verify_depth",
+      "sk_X509_NAME_new",
+      "SSL_CTX_get_cert_store",
+      "ngx_ssl_error",
+      "ngx_ssl_cache_fetch",
+      "sk_X509_NAME_pop_free",
+      "sk_X509_num",
+      "sk_X509_value"
+    ],
+    "totalCalls": 382
+  },
+  {
+    "function": "ngx_conf_handler",
+    "file": "src/core/ngx_conf_file.c",
+    "calls": [
+      "ngx_strcmp",
+      "ngx_conf_log_error",
+      "set",
+      "ngx_conf_read_token",
+      "ngx_file_size",
+      "ngx_read_file",
+      "ngx_cpymem",
+      "ngx_array_push",
+      "ngx_pnalloc",
+      "ngx_conf_include"
+    ],
+    "totalCalls": 52
+  },
+  {
+    "function": "ngx_conf_read_token",
+    "file": "src/core/ngx_conf_file.c",
+    "calls": [
+      "ngx_file_size",
+      "ngx_conf_log_error",
+      "ngx_read_file",
+      "ngx_cpymem",
+      "ngx_array_push",
+      "ngx_pnalloc",
+      "ngx_conf_include",
+      "ngx_log_debug1",
+      "ngx_conf_full_name",
+      "strpbrk"
+    ],
+    "totalCalls": 50
+  },
+  {
+    "function": "main",
+    "file": "src/core/nginx.c",
+    "calls": [
+      "ngx_debug_init",
+      "ngx_strerror_init",
+      "ngx_get_options",
+      "ngx_show_version_info",
+      "ngx_time_init",
+      "ngx_regex_init",
+      "ngx_getpid",
+      "ngx_getppid",
+      "ngx_log_init",
+      "ngx_ssl_init"
+    ],
+    "totalCalls": 33
+  },
+  {
+    "function": "ngx_http_perl_eval_anon_sub",
+    "file": "src/http/modules/perl/ngx_http_perl_module.c",
+    "calls": [
+      "ngx_strncmp",
+      "eval_pv",
+      "ngx_http_perl_create_main_conf",
+      "ngx_pcalloc",
+      "ngx_http_perl_init_main_conf",
+      "ngx_http_perl_init_interpreter",
+      "ngx_http_perl_cleanup_perl",
+      "PERL_SET_CONTEXT",
+      "PERL_SET_INTERP",
+      "perl_destruct"
+    ],
+    "totalCalls": 32
+  },
+  {
+    "function": "ngx_http_autoindex_handler",
+    "file": "src/http/modules/ngx_http_autoindex_module.c",
+    "calls": [
+      "ngx_http_get_module_loc_conf",
+      "ngx_http_discard_request_body",
+      "ngx_http_map_uri_to_path",
+      "ngx_log_debug1",
+      "ngx_http_autoindex_jsonp_callback",
+      "ngx_open_dir",
+      "ngx_memzero",
+      "ngx_array_init",
+      "ngx_http_autoindex_error",
+      "ngx_str_set"
+    ],
+    "totalCalls": 30
+  },
+  {
+    "function": "ngx_http_upstream_send_response",
+    "file": "src/http/ngx_http_upstream.c",
+    "calls": [
+      "ngx_http_send_header",
+      "ngx_http_upstream_finalize_request",
+      "ngx_http_file_cache_free",
+      "ngx_http_upstream_upgrade",
+      "ngx_pool_run_cleanup_file",
+      "ngx_http_get_module_loc_conf",
+      "input_filter_init",
+      "ngx_tcp_nodelay",
+      "input_filter",
+      "ngx_http_upstream_process_non_buffered_downstream"
+    ],
+    "totalCalls": 27
+  },
+  {
+    "function": "ngx_open_cached_file",
+    "file": "src/core/ngx_open_file_cache.c",
+    "calls": [
+      "ngx_file_info_wrapper",
+      "ngx_file_uniq",
+      "ngx_file_mtime",
+      "ngx_file_size",
+      "ngx_file_fs_size",
+      "ngx_is_dir",
+      "ngx_is_file",
+      "ngx_is_link",
+      "ngx_is_exec",
+      "ngx_pool_cleanup_add"
+    ],
+    "totalCalls": 26
+  },
+  {
+    "function": "ngx_http_proxy_v2_create_request",
+    "file": "src/http/modules/ngx_http_proxy_v2_module.c",
+    "calls": [
+      "ngx_http_get_module_loc_conf",
+      "ngx_http_complex_value",
+      "ngx_http_get_module_ctx",
+      "ngx_strncasecmp",
+      "ngx_strncmp",
+      "ngx_min",
+      "ngx_escape_uri",
+      "ngx_memzero",
+      "ngx_http_script_flush_no_cacheable_variables",
+      "lcode"
+    ],
+    "totalCalls": 26
+  },
+  {
+    "function": "ngx_http_upstream_zone_resolve_handler",
+    "file": "src/http/modules/ngx_http_upstream_zone_module.c",
+    "calls": [
+      "ngx_http_upstream_rr_peers_wlock",
+      "ngx_time",
+      "resolved",
+      "ngx_resolver_strerror",
+      "ngx_http_upstream_rr_peers_unlock",
+      "ngx_resolve_name_done",
+      "ngx_add_timer",
+      "ngx_max",
+      "ngx_min",
+      "ngx_sock_ntop"
+    ],
+    "totalCalls": 26
+  },
+  {
+    "function": "ngx_http_v2_header_filter",
+    "file": "src/http/v2/ngx_http_v2_filter_module.c",
+    "calls": [
+      "ngx_http_v2_literal_size",
+      "ngx_http_next_header_filter",
+      "ngx_log_debug0",
+      "ngx_http_v2_indexed",
+      "ngx_str_null",
+      "ngx_http_get_module_loc_conf",
+      "ngx_http_v2_integer_octets",
+      "ngx_http_get_module_srv_conf",
+      "ngx_connection_local_sockaddr",
+      "ngx_inet_get_port"
+    ],
+    "totalCalls": 26
+  },
+  {
+    "function": "ngx_master_process_cycle",
+    "file": "src/os/unix/ngx_process_cycle.c",
+    "calls": [
+      "sigemptyset",
+      "sigaddset",
+      "ngx_signal_value",
+      "sigprocmask",
+      "ngx_strlen",
+      "ngx_pnalloc",
+      "exit",
+      "ngx_cpymem",
+      "ngx_cpystrn",
+      "ngx_setproctitle"
+    ],
+    "totalCalls": 26
+  },
+  {
+    "function": "ngx_event_accept",
+    "file": "src/event/ngx_event_accept.c",
+    "calls": [
+      "ngx_enable_accept_events",
+      "ngx_event_get_conf",
+      "ngx_log_debug2",
+      "accept4",
+      "accept",
+      "ngx_log_debug0",
+      "ngx_disable_accept_events",
+      "ngx_shmtx_unlock",
+      "ngx_add_timer",
+      "ngx_atomic_fetch_add"
+    ],
+    "totalCalls": 25
+  },
+  {
+    "function": "ngx_quic_recvmsg",
+    "file": "src/event/quic/ngx_event_quic_udp.c",
+    "calls": [
+      "CMSG_SPACE",
+      "ngx_enable_accept_events",
+      "ngx_event_get_conf",
+      "ngx_log_debug2",
+      "ngx_memzero",
+      "recvmsg",
+      "ngx_log_debug0",
+      "offsetof",
+      "CMSG_FIRSTHDR",
+      "CMSG_NXTHDR"
+    ],
+    "totalCalls": 25
+  },
+  {
+    "function": "ngx_http_v3_header_filter",
+    "file": "src/http/v3/ngx_http_v3_filter_module.c",
+    "calls": [
+      "ngx_http_next_header_filter",
+      "ngx_http_v3_get_session",
+      "ngx_str_null",
+      "ngx_http_v3_encode_field_section_prefix",
+      "ngx_http_v3_encode_field_ri",
+      "ngx_http_v3_encode_field_lri",
+      "ngx_http_get_module_loc_conf",
+      "ngx_http_get_module_srv_conf",
+      "ngx_connection_local_sockaddr",
+      "ngx_inet_get_port"
+    ],
+    "totalCalls": 25
+  },
+  {
+    "function": "ngx_stream_upstream_zone_resolve_handler",
+    "file": "src/stream/ngx_stream_upstream_zone_module.c",
+    "calls": [
+      "ngx_stream_upstream_rr_peers_wlock",
+      "ngx_time",
+      "resolved",
+      "ngx_resolver_strerror",
+      "ngx_stream_upstream_rr_peers_unlock",
+      "ngx_resolve_name_done",
+      "ngx_add_timer",
+      "ngx_max",
+      "ngx_min",
+      "ngx_sock_ntop"
+    ],
+    "totalCalls": 25
+  },
+  {
+    "function": "ngx_resolve_name_locked",
+    "file": "src/core/ngx_resolver.c",
+    "calls": [
+      "ngx_strlow",
+      "ngx_crc32_short",
+      "ngx_resolver_lookup_srv",
+      "ngx_resolver_lookup_name",
+      "ngx_time",
+      "ngx_log_debug0",
+      "ngx_queue_remove",
+      "ngx_queue_insert_head",
+      "ngx_resolver_export",
+      "ngx_memzero"
+    ],
+    "totalCalls": 24
+  },
+  {
+    "function": "ngx_worker_process_init",
+    "file": "src/os/unix/ngx_process_cycle.c",
+    "calls": [
+      "ngx_set_environment",
+      "exit",
+      "ngx_get_conf",
+      "setpriority",
+      "setrlimit",
+      "geteuid",
+      "setgid",
+      "initgroups",
+      "prctl",
+      "setuid"
+    ],
+    "totalCalls": 24
+  },
+  {
+    "function": "ngx_event_recvmsg",
+    "file": "src/event/ngx_event_udp.c",
+    "calls": [
+      "CMSG_SPACE",
+      "ngx_enable_accept_events",
+      "ngx_event_get_conf",
+      "ngx_log_debug2",
+      "ngx_memzero",
+      "recvmsg",
+      "ngx_log_debug0",
+      "CMSG_FIRSTHDR",
+      "CMSG_NXTHDR",
+      "ngx_get_srcaddr_cmsg"
+    ],
+    "totalCalls": 23
+  },
+  {
+    "function": "ngx_quic_handle_frames",
+    "file": "src/event/quic/ngx_event_quic.c",
+    "calls": [
+      "ngx_quic_get_connection",
+      "ngx_memzero",
+      "ngx_quic_parse_frame",
+      "ngx_quic_log_frame",
+      "ngx_quic_handle_ack_frame",
+      "ngx_quic_handle_crypto_frame",
+      "ngx_quic_handle_stream_frame",
+      "ngx_quic_handle_max_data_frame",
+      "ngx_quic_handle_streams_blocked_frame",
+      "ngx_quic_handle_data_blocked_frame"
+    ],
+    "totalCalls": 23
+  },
+  {
+    "function": "ngx_http_grpc_create_request",
+    "file": "src/http/modules/ngx_http_grpc_module.c",
+    "calls": [
+      "ngx_http_get_module_loc_conf",
+      "ngx_http_get_module_ctx",
+      "ngx_escape_uri",
+      "ngx_http_script_flush_no_cacheable_variables",
+      "ngx_memzero",
+      "lcode",
+      "ngx_hash_find",
+      "ngx_create_temp_buf",
+      "ngx_alloc_chain_link",
+      "ngx_copy"
+    ],
+    "totalCalls": 23
+  },
+  {
+    "function": "ngx_http_ssi_body_filter",
+    "file": "src/http/modules/ngx_http_ssi_filter_module.c",
+    "calls": [
+      "ngx_http_get_module_ctx",
+      "ngx_http_next_body_filter",
+      "ngx_chain_add_copy",
+      "ngx_log_debug2",
+      "ngx_http_get_module_loc_conf",
+      "ngx_free_chain",
+      "ngx_http_ssi_parse",
+      "ngx_log_debug4",
+      "ngx_log_debug1",
+      "ngx_memzero"
+    ],
+    "totalCalls": 23
+  },
+  {
+    "function": "ngx_http_set_keepalive",
+    "file": "src/http/ngx_http_request.c",
+    "calls": [
+      "ngx_http_get_module_loc_conf",
+      "ngx_log_debug0",
+      "request",
+      "ngx_http_create_request",
+      "ngx_free_chain",
+      "ngx_alloc_chain_link",
+      "ngx_http_close_request",
+      "ngx_http_finalize_connection",
+      "ngx_http_free_request",
+      "ngx_handle_read_event"
+    ],
+    "totalCalls": 23
+  },
+  {
+    "function": "ngx_os_init",
+    "file": "src/os/win32/ngx_win32_init.c",
+    "calls": [
+      "ngx_memzero",
+      "warning",
+      "GetVersionEx",
+      "GetSystemInfo",
+      "_wcsicmp",
+      "setlocale",
+      "WSAStartup",
+      "MAKEWORD",
+      "AcceptEx",
+      "GetAcceptExSockAddrs"
+    ],
+    "totalCalls": 23
+  },
+  {
+    "function": "ngx_walk_tree",
+    "file": "src/core/ngx_file.c",
+    "calls": [
+      "ngx_str_null",
+      "ngx_log_debug1",
+      "ngx_open_dir",
+      "init_handler",
+      "ngx_set_errno",
+      "ngx_read_dir",
+      "ngx_de_namelen",
+      "ngx_de_name",
+      "ngx_log_debug2",
+      "ngx_cpymem"
+    ],
+    "totalCalls": 22
+  },
+  {
+    "function": "ngx_ssl_certificate",
+    "file": "src/event/ngx_event_openssl.c",
+    "calls": [
+      "STACK_OF",
+      "ngx_ssl_cache_fetch",
+      "ngx_ssl_error",
+      "sk_X509_shift",
+      "SSL_CTX_use_certificate",
+      "X509_free",
+      "sk_X509_pop_free",
+      "X509_set_ex_data",
+      "ngx_array_init",
+      "ngx_array_push"
+    ],
+    "totalCalls": 22
+  },
+  {
+    "function": "ngx_ssl_ocsp_validate",
+    "file": "src/event/ngx_event_openssl_stapling.c",
+    "calls": [
+      "STACK_OF",
+      "ngx_handle_read_event",
+      "ngx_handle_write_event",
+      "SSL_get_SSL_CTX",
+      "SSL_CTX_get_ex_data",
+      "SSL_get_verify_result",
+      "SSL_get_peer_certificate",
+      "ngx_pcalloc",
+      "X509_free",
+      "SSL_get0_verified_chain"
+    ],
+    "totalCalls": 22
+  },
+  {
+    "function": "ngx_quic_close_connection",
+    "file": "src/event/quic/ngx_event_quic.c",
+    "calls": [
+      "ngx_quic_get_connection",
+      "ngx_log_debug1",
+      "ngx_log_debug2",
+      "ngx_quic_free_frames",
+      "ngx_del_timer",
+      "parameters",
+      "ngx_quic_run",
+      "frame",
+      "ngx_log_debug5",
+      "ngx_quic_keys_available"
+    ],
+    "totalCalls": 22
+  },
+  {
+    "function": "ngx_http_mp4_process",
+    "file": "src/http/modules/ngx_http_mp4_module.c",
+    "calls": [
+      "ngx_log_debug2",
+      "ngx_http_get_module_loc_conf",
+      "ngx_http_mp4_read_atom",
+      "ngx_http_mp4_update_stts_atom",
+      "ngx_http_mp4_update_stss_atom",
+      "ngx_http_mp4_update_ctts_atom",
+      "ngx_http_mp4_update_stsc_atom",
+      "ngx_http_mp4_update_stsz_atom",
+      "ngx_http_mp4_update_co64_atom",
+      "ngx_http_mp4_update_stco_atom"
+    ],
+    "totalCalls": 22
+  },
+  {
+    "function": "ngx_master_process_cycle",
+    "file": "src/os/win32/ngx_process_cycle.c",
+    "calls": [
+      "ngx_sprintf",
+      "ngx_worker_process_cycle",
+      "ngx_log_debug0",
+      "ngx_console_init",
+      "SetEnvironmentVariable",
+      "CreateEvent",
+      "exit",
+      "ngx_create_signal_events",
+      "CreateMutex",
+      "ngx_close_listening_sockets"
+    ],
+    "totalCalls": 22
+  },
+  {
+    "function": "ngx_event_connect_peer",
+    "file": "src/event/ngx_event_connect.c",
+    "calls": [
+      "get",
+      "ngx_socket",
+      "ngx_log_debug2",
+      "ngx_get_connection",
+      "ngx_close_socket",
+      "setsockopt",
+      "ngx_nonblocking",
+      "ngx_event_connect_set_transparent",
+      "ngx_inet_get_port",
+      "bind"
+    ],
+    "totalCalls": 21
+  },
+  {
+    "function": "ngx_http_grpc_process_header",
+    "file": "src/http/modules/ngx_http_grpc_module.c",
+    "calls": [
+      "ngx_log_debug4",
+      "ngx_min",
+      "ngx_http_grpc_get_ctx",
+      "ngx_http_get_module_main_conf",
+      "ngx_http_grpc_parse_frame",
+      "ngx_http_grpc_parse_rst_stream",
+      "ngx_http_grpc_parse_goaway",
+      "normally",
+      "ngx_http_grpc_parse_window_update",
+      "ngx_post_event"
+    ],
+    "totalCalls": 21
+  },
+  {
+    "function": "ngx_http_random_index_handler",
+    "file": "src/http/modules/ngx_http_random_index_module.c",
+    "calls": [
+      "ngx_http_get_module_loc_conf",
+      "ngx_http_map_uri_to_path",
+      "ngx_log_debug1",
+      "ngx_open_dir",
+      "ngx_array_init",
+      "ngx_http_random_index_error",
+      "ngx_set_errno",
+      "ngx_read_dir",
+      "ngx_de_name",
+      "ngx_de_namelen"
+    ],
+    "totalCalls": 21
+  },
+  {
+    "function": "ngx_quic_handle_path_response_frame",
+    "file": "src/event/quic/ngx_event_quic_migration.c",
+    "calls": [
+      "ngx_quic_get_connection",
+      "ngx_queue_head",
+      "ngx_queue_sentinel",
+      "ngx_queue_next",
+      "ngx_queue_data",
+      "ngx_memcmp",
+      "ngx_log_debug0",
+      "ngx_quic_get_path",
+      "ngx_cmp_sockaddr",
+      "ngx_quic_get_send_ctx"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "ngx_quic_output_packet",
+    "file": "src/event/quic/ngx_event_quic_output.c",
+    "calls": [
+      "ngx_queue_empty",
+      "ngx_log_debug3",
+      "ngx_quic_level_name",
+      "ngx_quic_get_connection",
+      "ngx_quic_keys_available",
+      "ngx_queue_head",
+      "ngx_queue_remove",
+      "ngx_queue_data",
+      "ngx_quic_free_frame",
+      "ngx_quic_init_packet"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "ngx_http_dav_copy_move_handler",
+    "file": "src/http/modules/ngx_http_dav_module.c",
+    "calls": [
+      "ngx_strncmp",
+      "ngx_http_parse_unsafe_uri",
+      "ngx_http_get_module_loc_conf",
+      "ngx_http_dav_depth",
+      "ngx_http_map_uri_to_path",
+      "ngx_log_debug1",
+      "ngx_http_dav_merge_slashes",
+      "ngx_http_dav_validate_paths",
+      "ngx_link_info",
+      "ngx_http_dav_error"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "ngx_http_static_handler",
+    "file": "src/http/modules/ngx_http_static_module.c",
+    "calls": [
+      "ngx_http_map_uri_to_path",
+      "ngx_log_debug1",
+      "ngx_http_get_module_loc_conf",
+      "ngx_memzero",
+      "ngx_http_set_disable_symlinks",
+      "ngx_open_cached_file",
+      "ngx_log_debug0",
+      "ngx_http_clear_location",
+      "ngx_list_push",
+      "ngx_escape_uri"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "ngx_http_ssl_servername",
+    "file": "src/http/ngx_http_request.c",
+    "calls": [
+      "ngx_ssl_get_connection",
+      "ngx_log_debug0",
+      "SSL_get_servername",
+      "ngx_strlen",
+      "ngx_log_debug1",
+      "ngx_http_validate_host",
+      "ngx_http_find_virtual_server",
+      "ngx_http_get_module_loc_conf",
+      "ngx_set_connection_log",
+      "ngx_http_get_module_srv_conf"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "ngx_http_upstream_init_request",
+    "file": "src/http/ngx_http_upstream.c",
+    "calls": [
+      "ngx_http_upstream_cache",
+      "ngx_http_finalize_request",
+      "ngx_http_upstream_cache_send",
+      "ngx_post_event",
+      "ngx_handle_read_event",
+      "create_request",
+      "ngx_http_upstream_set_local",
+      "ngx_http_get_module_loc_conf",
+      "ngx_array_create",
+      "ngx_array_push"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "ngx_mail_imap_auth_state",
+    "file": "src/mail/ngx_mail_imap_handler.c",
+    "calls": [
+      "ngx_log_debug0",
+      "ngx_mail_close_connection",
+      "ngx_handle_read_event",
+      "ngx_mail_read_command",
+      "ngx_mail_session_internal_server_error",
+      "ngx_str_set",
+      "ngx_log_debug1",
+      "ngx_mail_imap_login",
+      "ngx_mail_imap_authenticate",
+      "ngx_mail_imap_capability"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "ngx_resolve_addr",
+    "file": "src/core/ngx_resolver.c",
+    "calls": [
+      "ngx_crc32_short",
+      "ngx_resolver_lookup_addr6",
+      "ntohl",
+      "ngx_resolver_lookup_addr",
+      "ngx_time",
+      "ngx_log_debug0",
+      "ngx_queue_remove",
+      "ngx_queue_insert_head",
+      "ngx_resolver_dup",
+      "ngx_resolver_free"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "ngx_resolver_process_a",
+    "file": "src/core/ngx_resolver.c",
+    "calls": [
+      "ngx_resolver_copy",
+      "ngx_log_debug1",
+      "ngx_crc32_short",
+      "ngx_resolver_lookup_name",
+      "ngx_resolver_free",
+      "ngx_queue_remove",
+      "ngx_rbtree_delete",
+      "ngx_resolver_free_node",
+      "ngx_resolver_send_tcp_query",
+      "ngx_time"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "ngx_ssl_init",
+    "file": "src/event/ngx_event_openssl.c",
+    "calls": [
+      "getenv",
+      "OPENSSL_INIT_new",
+      "ngx_ssl_error",
+      "OPENSSL_INIT_set_config_appname",
+      "OPENSSL_init_ssl",
+      "OPENSSL_INIT_free",
+      "ERR_clear_error",
+      "OPENSSL_no_config",
+      "OPENSSL_config",
+      "SSL_library_init"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "ngx_http_fastcgi_process_header",
+    "file": "src/http/modules/ngx_http_fastcgi_module.c",
+    "calls": [
+      "ngx_http_get_module_ctx",
+      "ngx_http_get_module_main_conf",
+      "ngx_http_fastcgi_process_record",
+      "ngx_http_get_module_loc_conf",
+      "ngx_strnstr",
+      "ngx_http_parse_header_line",
+      "ngx_log_debug1",
+      "ngx_list_push",
+      "ngx_pnalloc",
+      "ngx_cpymem"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "ngx_mail_pop3_auth_state",
+    "file": "src/mail/ngx_mail_pop3_handler.c",
+    "calls": [
+      "ngx_log_debug0",
+      "ngx_mail_close_connection",
+      "ngx_handle_read_event",
+      "ngx_mail_read_command",
+      "ngx_mail_session_internal_server_error",
+      "ngx_str_set",
+      "ngx_mail_pop3_user",
+      "ngx_mail_pop3_capa",
+      "ngx_mail_pop3_apop",
+      "ngx_mail_pop3_auth"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "ngx_mail_proxy_smtp_handler",
+    "file": "src/mail/ngx_mail_proxy_module.c",
+    "calls": [
+      "ngx_log_debug0",
+      "ngx_mail_proxy_internal_server_error",
+      "ngx_handle_read_event",
+      "ngx_mail_proxy_read_response",
+      "ngx_mail_proxy_upstream_error",
+      "ngx_mail_get_module_srv_conf",
+      "ngx_pnalloc",
+      "ngx_cpymem",
+      "ngx_escape_uri",
+      "ngx_copy"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "ngx_mail_smtp_auth_state",
+    "file": "src/mail/ngx_mail_smtp_handler.c",
+    "calls": [
+      "ngx_log_debug0",
+      "ngx_mail_close_connection",
+      "ngx_handle_read_event",
+      "ngx_mail_read_command",
+      "ngx_mail_session_internal_server_error",
+      "ngx_str_set",
+      "ngx_mail_smtp_helo",
+      "ngx_mail_smtp_auth",
+      "ngx_mail_smtp_mail",
+      "ngx_mail_smtp_rcpt"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "ngx_stream_ssl_servername",
+    "file": "src/stream/ngx_stream_ssl_module.c",
+    "calls": [
+      "ngx_ssl_get_connection",
+      "ngx_log_debug0",
+      "SSL_get_servername",
+      "ngx_strlen",
+      "ngx_log_debug1",
+      "ngx_stream_validate_host",
+      "ngx_stream_find_virtual_server",
+      "ngx_set_connection_log",
+      "ngx_stream_get_module_srv_conf",
+      "SSL_set_SSL_CTX"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "ngx_resolver_process_srv",
+    "file": "src/core/ngx_resolver.c",
+    "calls": [
+      "ngx_resolver_copy",
+      "ngx_log_debug1",
+      "ngx_crc32_short",
+      "ngx_resolver_lookup_srv",
+      "ngx_resolver_free",
+      "ngx_queue_remove",
+      "ngx_rbtree_delete",
+      "ngx_resolver_free_node",
+      "ngx_resolver_send_tcp_query",
+      "ngx_time"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "ngx_resolver_process_ptr",
+    "file": "src/core/ngx_resolver.c",
+    "calls": [
+      "ngx_resolver_copy",
+      "ngx_log_debug1",
+      "ngx_atoi",
+      "ngx_strcasecmp",
+      "ngx_resolver_lookup_addr",
+      "ngx_hextoi",
+      "ngx_crc32_short",
+      "ngx_resolver_lookup_addr6",
+      "ngx_resolver_free",
+      "ngx_queue_remove"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "ngx_ssl_handshake",
+    "file": "src/event/ngx_event_openssl.c",
+    "calls": [
+      "ngx_ssl_try_early_data",
+      "ngx_ssl_ocsp_validate",
+      "ngx_ssl_clear_error",
+      "SSL_do_handshake",
+      "ngx_log_debug1",
+      "ngx_handle_read_event",
+      "ngx_handle_write_event",
+      "ngx_ssl_handshake_log",
+      "renegotiation",
+      "SSL_is_server"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "ngx_ssl_new_session",
+    "file": "src/event/ngx_event_openssl.c",
+    "calls": [
+      "SSL_version",
+      "SSL_get_options",
+      "i2d_SSL_SESSION",
+      "SSL_SESSION_get_id",
+      "ngx_ssl_get_connection",
+      "SSL_CTX_get_ex_data",
+      "ngx_shmtx_lock",
+      "ngx_ssl_expire_sessions",
+      "offsetof",
+      "ngx_slab_alloc_locked"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "ngx_ssl_ticket_key_callback",
+    "file": "src/event/ngx_event_openssl.c",
+    "calls": [
+      "ngx_ssl_get_connection",
+      "ngx_ssl_rotate_ticket_keys",
+      "EVP_sha1",
+      "EVP_sha256",
+      "SSL_CTX_get_ex_data",
+      "ngx_log_debug3",
+      "SSL_session_reused",
+      "EVP_aes_128_cbc",
+      "EVP_aes_256_cbc",
+      "RAND_bytes"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "ngx_quic_frame_sendto",
+    "file": "src/event/quic/ngx_event_quic_output.c",
+    "calls": [
+      "ngx_quic_get_connection",
+      "ngx_quic_get_send_ctx",
+      "ngx_quic_path_limit",
+      "ngx_log_debug3",
+      "ngx_quic_level_name",
+      "ngx_quic_free_frame",
+      "ngx_quic_init_packet",
+      "ngx_quic_payload_size",
+      "ngx_max",
+      "ngx_quic_log_frame"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "ngx_quic_handshake",
+    "file": "src/event/quic/ngx_event_quic_ssl.c",
+    "calls": [
+      "ngx_quic_get_connection",
+      "SSL_do_handshake",
+      "ngx_log_debug1",
+      "SSL_get_error",
+      "ngx_connection_error",
+      "ERR_clear_error",
+      "ngx_ssl_connection_error",
+      "SSL_is_init_finished",
+      "ngx_quic_keys_available",
+      "ngx_quic_init_streams"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "ngx_http_grpc_filter",
+    "file": "src/http/modules/ngx_http_grpc_module.c",
+    "calls": [
+      "ngx_log_debug1",
+      "ngx_http_grpc_parse_frame",
+      "ngx_post_event",
+      "ngx_http_grpc_send_window_update",
+      "ngx_http_grpc_parse_rst_stream",
+      "ngx_http_grpc_parse_goaway",
+      "normally",
+      "ngx_http_grpc_parse_window_update",
+      "ngx_http_grpc_parse_settings",
+      "ngx_http_grpc_parse_ping"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "ngx_http_mp4_handler",
+    "file": "src/http/modules/ngx_http_mp4_module.c",
+    "calls": [
+      "ngx_http_discard_request_body",
+      "ngx_http_map_uri_to_path",
+      "ngx_log_debug1",
+      "ngx_http_get_module_loc_conf",
+      "ngx_memzero",
+      "ngx_http_set_disable_symlinks",
+      "ngx_open_cached_file",
+      "ngx_http_arg",
+      "ngx_atofp",
+      "ngx_http_mp4_atofp"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "ngx_http_try_files_handler",
+    "file": "src/http/modules/ngx_http_try_files_module.c",
+    "calls": [
+      "ngx_http_get_module_loc_conf",
+      "ngx_log_debug0",
+      "ngx_memzero",
+      "lcode",
+      "ngx_http_map_uri_to_path",
+      "code",
+      "ngx_strncmp",
+      "ngx_log_debug3",
+      "ngx_http_named_location",
+      "ngx_http_split_args"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "ngx_ssl_session_ticket_keys",
+    "file": "src/event/ngx_event_openssl.c",
+    "calls": [
+      "SSL_CTX_get_ex_data",
+      "ngx_array_create",
+      "ngx_pool_cleanup_add",
+      "SSL_CTX_set_ex_data",
+      "ngx_ssl_error",
+      "SSL_CTX_set_tlsext_ticket_key_cb",
+      "ngx_array_push_n",
+      "ngx_conf_full_name",
+      "ngx_memzero",
+      "ngx_open_file"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "ngx_ssl_check_host",
+    "file": "src/event/ngx_event_openssl.c",
+    "calls": [
+      "SSL_get_peer_certificate",
+      "X509_check_host",
+      "ngx_log_debug0",
+      "STACK_OF",
+      "X509_get_ext_d2i",
+      "sk_GENERAL_NAME_num",
+      "sk_GENERAL_NAME_value",
+      "ngx_log_debug2",
+      "ASN1_STRING_length",
+      "ASN1_STRING_data"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "ngx_ssl_ocsp_verify",
+    "file": "src/event/ngx_event_openssl_stapling.c",
+    "calls": [
+      "d2i_OCSP_RESPONSE",
+      "ngx_ssl_error",
+      "OCSP_response_status",
+      "successful",
+      "OCSP_response_status_str",
+      "OCSP_response_get1_basic",
+      "SSL_CTX_get_cert_store",
+      "OCSP_basic_verify",
+      "OCSP_cert_to_id",
+      "OCSP_resp_find_status"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "ngx_http_fastcgi_create_request",
+    "file": "src/http/modules/ngx_http_fastcgi_module.c",
+    "calls": [
+      "ngx_http_get_module_loc_conf",
+      "ngx_memzero",
+      "ngx_http_script_flush_no_cacheable_variables",
+      "lcode",
+      "ngx_http_link_multi_headers",
+      "ngx_pnalloc",
+      "ngx_hash",
+      "ngx_hash_find",
+      "ngx_create_temp_buf",
+      "ngx_alloc_chain_link"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "ngx_http_grpc_parse_fragment",
+    "file": "src/http/modules/ngx_http_grpc_module.c",
+    "calls": [
+      "ngx_log_debug3",
+      "ngx_log_debug2",
+      "Index",
+      "ngx_log_debug1",
+      "Length",
+      "String",
+      "size",
+      "ngx_pnalloc",
+      "ngx_log_debug4",
+      "ngx_min"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "ngx_http_gzip_static_handler",
+    "file": "src/http/modules/ngx_http_gzip_static_module.c",
+    "calls": [
+      "ngx_http_get_module_loc_conf",
+      "ngx_http_gzip_ok",
+      "ngx_http_map_uri_to_path",
+      "ngx_log_debug1",
+      "ngx_memzero",
+      "ngx_http_set_disable_symlinks",
+      "ngx_open_cached_file",
+      "ngx_log_debug0",
+      "ngx_http_discard_request_body",
+      "ngx_http_set_etag"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "ngx_http_proxy_create_request",
+    "file": "src/http/modules/ngx_http_proxy_module.c",
+    "calls": [
+      "ngx_http_get_module_loc_conf",
+      "ngx_http_complex_value",
+      "ngx_http_get_module_ctx",
+      "ngx_strncasecmp",
+      "ngx_min",
+      "ngx_escape_uri",
+      "ngx_memzero",
+      "ngx_http_script_flush_no_cacheable_variables",
+      "lcode",
+      "ngx_hash_find"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "ngx_http_proxy_v2_process_header",
+    "file": "src/http/modules/ngx_http_proxy_v2_module.c",
+    "calls": [
+      "ngx_log_debug4",
+      "ngx_min",
+      "ngx_http_proxy_v2_get_ctx",
+      "ngx_http_get_module_main_conf",
+      "ngx_http_proxy_v2_parse_frame",
+      "ngx_http_proxy_v2_parse_rst_stream",
+      "ngx_http_proxy_v2_process_control_frame",
+      "ngx_http_proxy_v2_skip_frame",
+      "ngx_http_proxy_v2_parse_header",
+      "ngx_log_debug2"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "ngx_http_proxy_v2_parse_fragment",
+    "file": "src/http/modules/ngx_http_proxy_v2_module.c",
+    "calls": [
+      "ngx_log_debug3",
+      "ngx_log_debug2",
+      "Index",
+      "ngx_log_debug1",
+      "Length",
+      "String",
+      "size",
+      "ngx_pnalloc",
+      "ngx_log_debug4",
+      "ngx_min"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "ngx_http_scgi_create_request",
+    "file": "src/http/modules/ngx_http_scgi_module.c",
+    "calls": [
+      "ngx_sprintf",
+      "ngx_http_get_module_loc_conf",
+      "ngx_memzero",
+      "ngx_http_script_flush_no_cacheable_variables",
+      "lcode",
+      "ngx_http_link_multi_headers",
+      "ngx_pnalloc",
+      "ngx_hash",
+      "ngx_hash_find",
+      "ngx_create_temp_buf"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "ngx_http_perl_handle_request",
+    "file": "src/http/modules/perl/ngx_http_perl_module.c",
+    "calls": [
+      "ngx_log_debug0",
+      "ngx_http_get_module_ctx",
+      "ngx_pcalloc",
+      "ngx_http_finalize_request",
+      "ngx_http_set_ctx",
+      "ngx_http_get_module_main_conf",
+      "dTHXa",
+      "PERL_SET_CONTEXT",
+      "PERL_SET_INTERP",
+      "ngx_http_get_module_loc_conf"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "ngx_http_ssl_handshake",
+    "file": "src/http/ngx_http_request.c",
+    "calls": [
+      "ngx_log_debug0",
+      "ngx_http_close_connection",
+      "recv",
+      "ngx_log_debug1",
+      "ngx_http_get_module_srv_conf",
+      "ngx_add_timer",
+      "ngx_reusable_connection",
+      "ngx_handle_read_event",
+      "ngx_connection_error",
+      "ngx_proxy_protocol_read"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "ngx_http_process_request_headers",
+    "file": "src/http/ngx_http_request.c",
+    "calls": [
+      "ngx_log_debug0",
+      "ngx_http_close_request",
+      "ngx_http_get_module_main_conf",
+      "ngx_http_alloc_large_header_buffer",
+      "ngx_http_finalize_request",
+      "ngx_http_read_request_header",
+      "ngx_http_get_module_srv_conf",
+      "ngx_http_parse_header_line",
+      "ngx_list_push",
+      "ngx_pnalloc"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "ngx_http_v2_init",
+    "file": "src/http/v2/ngx_http_v2.c",
+    "calls": [
+      "ngx_log_debug0",
+      "ngx_http_get_module_main_conf",
+      "ngx_http_close_connection",
+      "ngx_pcalloc",
+      "ngx_http_get_module_srv_conf",
+      "ngx_max",
+      "ngx_create_pool",
+      "ngx_pool_cleanup_add",
+      "ngx_http_v2_index_size",
+      "ngx_http_v2_send_settings"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "ngx_mail_auth_http_process_headers",
+    "file": "src/mail/ngx_mail_auth_http_module.c",
+    "calls": [
+      "ngx_log_debug0",
+      "ngx_mail_auth_http_parse_header_line",
+      "ngx_log_debug2",
+      "ngx_strncasecmp",
+      "ngx_pnalloc",
+      "ngx_close_connection",
+      "ngx_destroy_pool",
+      "ngx_mail_session_internal_server_error",
+      "ngx_cpymem",
+      "ngx_atoi"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "ngx_stream_init_connection",
+    "file": "src/stream/ngx_stream_handler.c",
+    "calls": [
+      "getsockname",
+      "AcceptEx",
+      "recvmsg",
+      "ngx_connection_local_sockaddr",
+      "ngx_stream_close_connection",
+      "ngx_memcmp",
+      "ngx_pcalloc",
+      "ngx_stream_get_module_srv_conf",
+      "ngx_set_connection_log",
+      "ngx_sock_ntop"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "ngx_stream_proxy_handler",
+    "file": "src/stream/ngx_stream_proxy_module.c",
+    "calls": [
+      "ngx_stream_get_module_srv_conf",
+      "ngx_log_debug0",
+      "ngx_pcalloc",
+      "ngx_stream_proxy_finalize",
+      "ngx_stream_proxy_set_local",
+      "ngx_time",
+      "ngx_array_create",
+      "ngx_pnalloc",
+      "ngx_post_event",
+      "ngx_stream_proxy_eval"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "ngx_ssl_info_callback",
+    "file": "src/event/ngx_event_openssl.c",
+    "calls": [
+      "SSL_is_server",
+      "ngx_ssl_get_connection",
+      "ngx_log_debug0",
+      "SSL_version",
+      "SSL_get0_session",
+      "ngx_time",
+      "SSL_SESSION_get_time",
+      "SSL_SESSION_get_timeout",
+      "SSL_CTX_get_timeout",
+      "ngx_min"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "ngx_ssl_try_early_data",
+    "file": "src/event/ngx_event_openssl.c",
+    "calls": [
+      "ngx_ssl_clear_error",
+      "SSL_read_early_data",
+      "ngx_log_debug2",
+      "ngx_ssl_handshake",
+      "ngx_handle_read_event",
+      "ngx_handle_write_event",
+      "ngx_ssl_handshake_log",
+      "BIO_get_ktls_send",
+      "SSL_get_wbio",
+      "ngx_log_debug0"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "ngx_quic_handle_packet",
+    "file": "src/event/quic/ngx_event_quic.c",
+    "calls": [
+      "ngx_quic_parse_packet",
+      "ngx_log_debug2",
+      "ngx_quic_get_connection",
+      "ngx_quic_get_socket",
+      "ngx_cmp_sockaddr",
+      "ngx_log_debug0",
+      "ngx_quic_check_csid",
+      "ngx_quic_handle_payload",
+      "ngx_quic_handle_stateless_reset",
+      "ngx_post_event"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "ngx_quic_init_connection",
+    "file": "src/event/quic/ngx_event_quic_ssl.c",
+    "calls": [
+      "ngx_quic_get_connection",
+      "ngx_ssl_create_connection",
+      "SSL_set_quic_tls_cbs",
+      "ngx_ssl_error",
+      "SSL_CTX_get_max_early_data",
+      "SSL_set_quic_tls_early_data_enabled",
+      "SSL_set_quic_method",
+      "SSL_set_quic_early_data_enabled",
+      "ngx_quic_get_socket",
+      "ngx_quic_new_sr_token"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "ngx_quic_create_frame",
+    "file": "src/event/quic/ngx_event_quic_transport.c",
+    "calls": [
+      "ngx_quic_create_ping",
+      "ngx_quic_create_ack",
+      "ngx_quic_create_reset_stream",
+      "ngx_quic_create_stop_sending",
+      "ngx_quic_create_crypto",
+      "ngx_quic_create_hs_done",
+      "ngx_quic_create_new_token",
+      "ngx_quic_create_stream",
+      "ngx_quic_create_close",
+      "ngx_quic_create_max_streams"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "ngx_http_uwsgi_create_request",
+    "file": "src/http/modules/ngx_http_uwsgi_module.c",
+    "calls": [
+      "ngx_http_get_module_loc_conf",
+      "ngx_memzero",
+      "ngx_http_script_flush_no_cacheable_variables",
+      "lcode",
+      "ngx_http_link_multi_headers",
+      "ngx_pnalloc",
+      "ngx_hash",
+      "ngx_hash_find",
+      "ngx_create_temp_buf",
+      "ngx_alloc_chain_link"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "ngx_http_v3_process_request",
+    "file": "src/http/v3/ngx_http_v3_request.c",
+    "calls": [
+      "ngx_log_debug0",
+      "ngx_http_close_request",
+      "ngx_http_v3_get_session",
+      "recv",
+      "ngx_http_get_module_srv_conf",
+      "ngx_add_timer",
+      "ngx_handle_read_event",
+      "ngx_http_finalize_request",
+      "ngx_http_v3_parse_headers",
+      "ngx_quic_reset_stream"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "ngx_stream_proxy_init_upstream",
+    "file": "src/stream/ngx_stream_proxy_module.c",
+    "calls": [
+      "ngx_stream_get_module_srv_conf",
+      "ngx_tcp_nodelay",
+      "ngx_stream_proxy_next_upstream",
+      "ngx_stream_proxy_send_proxy_protocol",
+      "ngx_stream_proxy_ssl_init_connection",
+      "ngx_connection_local_sockaddr",
+      "notify",
+      "ngx_pnalloc",
+      "ngx_stream_proxy_finalize",
+      "ngx_log_debug1"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "ngx_stream_proxy_process",
+    "file": "src/stream/ngx_stream_proxy_module.c",
+    "calls": [
+      "ngx_stream_proxy_finalize",
+      "ngx_stream_get_module_srv_conf",
+      "ngx_stream_top_filter",
+      "ngx_chain_update_chains",
+      "ngx_time",
+      "ngx_add_timer",
+      "recv",
+      "notify",
+      "ngx_chain_get_free_buf",
+      "ngx_stream_proxy_test_finalize"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "ngx_open_and_stat_file",
+    "file": "src/core/ngx_open_file_cache.c",
+    "calls": [
+      "ngx_file_info_wrapper",
+      "ngx_file_uniq",
+      "ngx_is_dir",
+      "open",
+      "ngx_open_file_wrapper",
+      "ngx_fd_info",
+      "ngx_close_file",
+      "ngx_file_size",
+      "ngx_read_ahead",
+      "ngx_directio_on"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "ngx_event_process_init",
+    "file": "src/event/ngx_event.c",
+    "calls": [
+      "ngx_get_conf",
+      "ngx_event_get_conf",
+      "ngx_queue_init",
+      "ngx_event_timer_init",
+      "init",
+      "exit",
+      "ngx_memzero",
+      "sigemptyset",
+      "sigaction",
+      "setitimer"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "ngx_ssl_cert_compression_callback",
+    "file": "src/event/ngx_event_openssl.c",
+    "calls": [
+      "SSL_get_SSL_CTX",
+      "SSL_CTX_get_ex_data",
+      "SSL_get_certificate",
+      "X509_get_ex_data",
+      "CBB_add_bytes",
+      "ngx_ssl_get_connection",
+      "ngx_create_pool",
+      "ngx_memzero",
+      "deflateInit",
+      "deflateBound"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "ngx_ssl_shutdown",
+    "file": "src/event/ngx_event_openssl.c",
+    "calls": [
+      "ngx_ssl_ocsp_cleanup",
+      "SSL_in_init",
+      "SSL_shutdown",
+      "SSL_set_quiet_shutdown",
+      "SSL_get_shutdown",
+      "SSL_set_shutdown",
+      "ngx_ssl_clear_error",
+      "ngx_log_debug1",
+      "SSL_get_error",
+      "ngx_handle_read_event"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "ngx_ssl_session_id_context",
+    "file": "src/event/ngx_event_openssl.c",
+    "calls": [
+      "STACK_OF",
+      "EVP_MD_CTX_create",
+      "EVP_DigestInit_ex",
+      "EVP_sha1",
+      "ngx_ssl_error",
+      "EVP_DigestUpdate",
+      "X509_digest",
+      "configuration",
+      "SSL_CTX_get_client_CA_list",
+      "sk_X509_NAME_num"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "ngx_ssl_ocsp_cache_store",
+    "file": "src/event/ngx_event_openssl_stapling.c",
+    "calls": [
+      "ngx_time",
+      "ngx_log_debug1",
+      "ngx_hash_key",
+      "ngx_shmtx_lock",
+      "ngx_slab_calloc_locked",
+      "ngx_queue_empty",
+      "ngx_queue_last",
+      "ngx_queue_data",
+      "ngx_rbtree_delete",
+      "ngx_queue_remove"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "ngx_quic_set_path",
+    "file": "src/event/quic/ngx_event_quic_migration.c",
+    "calls": [
+      "ngx_quic_get_connection",
+      "ngx_quic_get_socket",
+      "ngx_queue_head",
+      "ngx_queue_sentinel",
+      "ngx_queue_next",
+      "ngx_queue_data",
+      "ngx_cmp_sockaddr",
+      "ngx_quic_get_send_ctx",
+      "ngx_quic_free_path",
+      "ngx_quic_next_client_id"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "ngx_http_flv_handler",
+    "file": "src/http/modules/ngx_http_flv_module.c",
+    "calls": [
+      "ngx_http_discard_request_body",
+      "ngx_http_map_uri_to_path",
+      "ngx_log_debug1",
+      "ngx_http_get_module_loc_conf",
+      "ngx_memzero",
+      "ngx_http_set_disable_symlinks",
+      "ngx_open_cached_file",
+      "ngx_http_arg",
+      "ngx_atoof",
+      "ngx_http_set_etag"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "ngx_http_log_handler",
+    "file": "src/http/modules/ngx_http_log_module.c",
+    "calls": [
+      "ngx_log_debug0",
+      "ngx_http_get_module_loc_conf",
+      "ngx_http_complex_value",
+      "ngx_time",
+      "ngx_http_script_flush_no_cacheable_variables",
+      "getlen",
+      "ngx_http_log_write",
+      "ngx_add_timer",
+      "run",
+      "ngx_linefeed"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "ngx_http_sub_body_filter",
+    "file": "src/http/modules/ngx_http_sub_filter_module.c",
+    "calls": [
+      "ngx_http_get_module_ctx",
+      "ngx_http_next_body_filter",
+      "ngx_http_sub_output",
+      "ngx_chain_add_copy",
+      "ngx_log_debug1",
+      "ngx_free_chain",
+      "ngx_http_sub_parse",
+      "ngx_log_debug4",
+      "ngx_chain_get_free_buf",
+      "ngx_memzero"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "ngx_http_upstream_get_hash_peer",
+    "file": "src/http/modules/ngx_http_upstream_hash_module.c",
+    "calls": [
+      "ngx_log_debug1",
+      "ngx_http_upstream_rr_peers_rlock",
+      "ngx_http_upstream_rr_peers_unlock",
+      "get_rr_peer",
+      "ngx_time",
+      "ngx_http_upstream_get_rr_peer_by_sid",
+      "crc32",
+      "ngx_crc32_init",
+      "ngx_sprintf",
+      "ngx_crc32_update"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "ngx_http_perl_call_handler",
+    "file": "src/http/modules/perl/ngx_http_perl_module.c",
+    "calls": [
+      "PUSHMARK",
+      "sv_2mortal",
+      "sv_bless",
+      "newRV_noinc",
+      "newSViv",
+      "PTR2IV",
+      "XPUSHs",
+      "EXTEND",
+      "PUSHs",
+      "call_sv"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "ngx_http_wait_request_handler",
+    "file": "src/http/ngx_http_request.c",
+    "calls": [
+      "ngx_log_debug0",
+      "ngx_http_close_connection",
+      "ngx_http_get_module_srv_conf",
+      "ngx_create_temp_buf",
+      "recv",
+      "ngx_add_timer",
+      "ngx_reusable_connection",
+      "ngx_handle_read_event",
+      "ngx_proxy_protocol_read",
+      "ngx_post_event"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "ngx_http_upstream_connect",
+    "file": "src/http/ngx_http_upstream.c",
+    "calls": [
+      "ngx_array_push",
+      "ngx_http_upstream_finalize_request",
+      "ngx_memzero",
+      "ngx_event_connect_peer",
+      "ngx_log_debug1",
+      "ngx_http_upstream_next",
+      "ngx_create_pool",
+      "ngx_output_chain",
+      "ngx_chain_writer",
+      "ngx_http_get_module_loc_conf"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "ngx_http_upstream_process_header",
+    "file": "src/http/ngx_http_upstream.c",
+    "calls": [
+      "ngx_log_debug0",
+      "ngx_http_upstream_next",
+      "ngx_http_upstream_test_connect",
+      "ngx_http_upstream_finalize_request",
+      "ngx_list_init",
+      "process_header",
+      "recv",
+      "ngx_add_timer",
+      "ngx_handle_read_event",
+      "ngx_http_upstream_process_early_hints"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "ngx_http_v2_early_hints_filter",
+    "file": "src/http/v2/ngx_http_v2_filter_module.c",
+    "calls": [
+      "ngx_http_next_early_hints_filter",
+      "ngx_http_v2_literal_size",
+      "ngx_pnalloc",
+      "ngx_log_debug0",
+      "ngx_log_debug1",
+      "ngx_http_v2_inc_indexed",
+      "ngx_sprintf",
+      "ngx_strlow",
+      "ngx_log_debug3",
+      "ngx_http_v2_write_name"
+    ],
+    "totalCalls": 15
+  }
+]
