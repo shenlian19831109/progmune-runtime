@@ -27,6 +27,8 @@
     "policy": "npx ts-node src/policy/cli.ts check",
     "precision": "npx ts-node src/multi-repo-precision.ts",
     "precision:json": "npx ts-node src/multi-repo-precision.ts --json",
+    "precision:label": "npx ts-node src/precision-label.ts",
+    "precision:report": "npx ts-node src/precision-report.ts",
     "ci": "npx ts-node bin/progmune-ci.ts --project .",
     "dashboard": "npx ts-node src/governance-dashboard.ts",
     "verify-api": "npx ts-node src/verify-api.ts",

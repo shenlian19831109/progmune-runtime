@@ -1,0 +1,23 @@
+{
+  "repo": "/Users/shenlian/progmune-runtime",
+  "labeledAt": "2026-06-25T00:00:00Z",
+  "total": 7,
+  "labels": {
+    "0": "clean",
+    "1": "clean",
+    "2": "violation",
+    "3": "clean",
+    "4": "violation",
+    "5": "clean",
+    "6": "violation"
+  },
+  "sequences": {
+    "0": ["extractIR", "validateAction", "validateActionSequence", "emitCode", "recordSession"],
+    "1": ["open_file", "read_file", "write_file", "close_file"],
+    "2": ["open_file", "write_file"],
+    "3": ["begin_transaction", "execute_query", "commit_transaction"],
+    "4": ["begin_transaction", "execute_query"],
+    "5": ["verify_password", "create_session", "access_resource", "invalidate_session"],
+    "6": ["create_session", "access_resource"]
+  }
+}
