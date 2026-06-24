@@ -1,19 +1,18 @@
 {
   "repo": "curl",
-  "total": 30,
-  "tp": 7,
-  "fp": 11,
-  "tn": 0,
-  "fn": 12,
-  "precision": 0.3888888888888889,
-  "recall": 0.3684210526315789,
-  "f1": 0.37837837837837834,
-  "rulesDiscovered": 103,
-  "timestamp": "2026-06-24T21:41:40.425Z",
+  "total": 49,
+  "tp": 14,
+  "fp": 27,
+  "tn": 2,
+  "fn": 6,
+  "precision": 0.34146341463414637,
+  "recall": 0.7,
+  "f1": 0.4590163934426229,
+  "rulesDiscovered": 246,
+  "timestamp": "2026-06-24T21:56:13.489Z",
   "details": [
     {
       "index": 2,
-      "function": "ssh_state_init",
       "expected": "violation",
       "detected": "clean",
       "reason": "",
@@ -27,23 +26,7 @@
       ]
     },
     {
-      "index": 3,
-      "function": "myssh_state_init",
-      "expected": "violation",
-      "detected": "clean",
-      "reason": "",
-      "calls": [
-        "myssh_state_init",
-        "FALLTHROUGH",
-        "myssh_in_S_STARTUP",
-        "myssh_is_known",
-        "myssh_to_ERROR",
-        "myssh_to"
-      ]
-    },
-    {
       "index": 4,
-      "function": "Curl_conn_meta_get",
       "expected": "clean",
       "detected": "violation",
       "reason": "ftp_readresp requires [C0_S1] but state has [INIT] (namespace: RESOURCE_ACQUIRE)",
@@ -58,10 +41,9 @@
     },
     {
       "index": 5,
-      "function": "Curl_creds_has_user",
       "expected": "clean",
       "detected": "violation",
-      "reason": "ldap_url_parse requires [C0_S9] but state has [INIT] (namespace: RESOURCE_ACQUIRE)",
+      "reason": "ldap_url_parse requires [C0_S10] but state has [INIT] (namespace: RESOURCE_ACQUIRE)",
       "calls": [
         "Curl_creds_has_user",
         "Curl_creds_has_passwd",
@@ -72,26 +54,10 @@
       ]
     },
     {
-      "index": 7,
-      "function": "STACK_OF",
-      "expected": "violation",
-      "detected": "clean",
-      "reason": "",
-      "calls": [
-        "STACK_OF",
-        "SSL_get_peer_cert_chain",
-        "sk_X509_num",
-        "allowed",
-        "Curl_ssl_init_certinfo",
-        "BIO_new"
-      ]
-    },
-    {
       "index": 8,
-      "function": "curl_multi_remove_handle",
       "expected": "clean",
       "detected": "violation",
-      "reason": "Incomplete lifecycle: acquired states [RESOURCE_ACQUIRE:C0_S15→curl_detach_connection] not released — missing closer call",
+      "reason": "curlx_free requires [C0_S108,C0_S149] but state has [INIT,C0_S17,C0_S18,C0_S19,C0_S20,C0_S21] (namespace: RESOURCE_ACQUIRE)",
       "calls": [
         "curl_multi_remove_handle",
         "send",
@@ -103,7 +69,6 @@
     },
     {
       "index": 9,
-      "function": "Curl_conn_get_current_host",
       "expected": "violation",
       "detected": "clean",
       "reason": "",
@@ -118,10 +83,9 @@
     },
     {
       "index": 11,
-      "function": "buffer",
       "expected": "clean",
       "detected": "violation",
-      "reason": "memset requires [C0_S26] but state has [INIT,C0_S23,C0_S24,C0_S25] (namespace: RESOURCE_ACQUIRE)",
+      "reason": "memset requires [C0_S28,C0_S77] but state has [INIT,C0_S25,C0_S26,C0_S27] (namespace: RESOURCE_ACQUIRE)",
       "calls": [
         "buffer",
         "bytes",
@@ -133,10 +97,9 @@
     },
     {
       "index": 12,
-      "function": "init_telnet",
       "expected": "clean",
       "detected": "violation",
-      "reason": "failed requires [C0_S34] but state has [INIT,C0_S0,C0_S31,C0_S32] (namespace: RESOURCE_ACQUIRE)",
+      "reason": "failed requires [C0_S35] but state has [INIT,C0_S0,C0_S32,C0_S33] (namespace: RESOURCE_ACQUIRE)",
       "calls": [
         "init_telnet",
         "Curl_meta_get",
@@ -148,10 +111,9 @@
     },
     {
       "index": 13,
-      "function": "ossl_do_file_type",
       "expected": "clean",
       "detected": "violation",
-      "reason": "use_certificate_chain_blob requires [C0_S40] but state has [INIT,C0_S38] (namespace: RESOURCE_ACQUIRE)",
+      "reason": "use_certificate_chain_blob requires [C0_S41] but state has [INIT,C0_S39] (namespace: RESOURCE_ACQUIRE)",
       "calls": [
         "ossl_do_file_type",
         "SSL_CTX_set_default_passwd_cb_userdata",
@@ -163,10 +125,9 @@
     },
     {
       "index": 15,
-      "function": "Curl_ssl_cf_get_primary_config",
       "expected": "clean",
       "detected": "violation",
-      "reason": "defined requires [C0_S50] but state has [INIT] (namespace: RESOURCE_ACQUIRE)",
+      "reason": "defined requires [C0_S51,C0_S200] but state has [INIT] (namespace: RESOURCE_ACQUIRE)",
       "calls": [
         "Curl_ssl_cf_get_primary_config",
         "CFStringCreateWithCString",
@@ -178,7 +139,6 @@
     },
     {
       "index": 16,
-      "function": "CONN_SOCK_IDX_VALID",
       "expected": "violation",
       "detected": "clean",
       "reason": "",
@@ -193,10 +153,9 @@
     },
     {
       "index": 17,
-      "function": "files",
       "expected": "clean",
       "detected": "violation",
-      "reason": "curl_msnprintf requires [C0_S58] but state has [INIT,C0_S54,C0_S0,C0_S55,C0_S56,C0_S57] (namespace: RESOURCE_ACQUIRE)",
+      "reason": "curl_msnprintf requires [C0_S59] but state has [INIT,C0_S55,C0_S0,C0_S56,C0_S57,C0_S58] (namespace: RESOURCE_ACQUIRE)",
       "calls": [
         "files",
         "directories",
@@ -208,10 +167,9 @@
     },
     {
       "index": 19,
-      "function": "GOOD_MULTI_HANDLE",
       "expected": "clean",
       "detected": "violation",
-      "reason": "streamclose requires [C0_S62] but state has [INIT] (namespace: RESOURCE_ACQUIRE)",
+      "reason": "streamclose requires [C0_S63] but state has [INIT] (namespace: RESOURCE_ACQUIRE)",
       "calls": [
         "GOOD_MULTI_HANDLE",
         "GOOD_EASY_HANDLE",
@@ -223,10 +181,9 @@
     },
     {
       "index": 20,
-      "function": "curlx_free",
       "expected": "clean",
       "detected": "violation",
-      "reason": "curlx_free requires [C0_S19] but state has [INIT] (namespace: RESOURCE_ACQUIRE)",
+      "reason": "curlx_free requires [C0_S21,C0_S108,C0_S149] but state has [INIT] (namespace: RESOURCE_ACQUIRE)",
       "calls": [
         "curlx_free",
         "curl_url_get",
@@ -237,56 +194,10 @@
       ]
     },
     {
-      "index": 21,
-      "function": "certificate",
-      "expected": "violation",
-      "detected": "clean",
-      "reason": "",
-      "calls": [
-        "certificate",
-        "format",
-        "gnutls_certificate_get_peers",
-        "gnutls_cipher_get",
-        "allowed",
-        "Curl_ssl_init_certinfo"
-      ]
-    },
-    {
-      "index": 22,
-      "function": "Curl_ssl_cf_get_primary_config",
-      "expected": "violation",
-      "detected": "clean",
-      "reason": "",
-      "calls": [
-        "Curl_ssl_cf_get_primary_config",
-        "curlx_malloc",
-        "ensure_encoding_size",
-        "Curl_conn_cf_recv",
-        "SCH_DEV",
-        "InitSecBuffer"
-      ]
-    },
-    {
-      "index": 24,
-      "function": "Curl_conn_meta_get",
-      "expected": "violation",
-      "detected": "clean",
-      "reason": "",
-      "calls": [
-        "Curl_conn_meta_get",
-        "curlx_calloc",
-        "getenv",
-        "curlx_str_number",
-        "CURL_TRC_WS",
-        "Curl_bufq_init2"
-      ]
-    },
-    {
       "index": 25,
-      "function": "curlx_dyn_init",
       "expected": "clean",
       "detected": "violation",
-      "reason": "Incomplete lifecycle: acquired states [RESOURCE_ACQUIRE:C0_S83→isblank] not released — missing closer call",
+      "reason": "curlx_dyn_init requires [C0_S28] but state has [INIT] (namespace: RESOURCE_ACQUIRE)",
       "calls": [
         "curlx_dyn_init",
         "curlx_dyn_addn",
@@ -297,38 +208,7 @@
       ]
     },
     {
-      "index": 26,
-      "function": "Curl_creds_has_sasl_service",
-      "expected": "violation",
-      "detected": "clean",
-      "reason": "",
-      "calls": [
-        "Curl_creds_has_sasl_service",
-        "Curl_creds_sasl_service",
-        "Curl_bufref_len",
-        "failure",
-        "QuerySecurityPackageInfo",
-        "CURL_UNCONST"
-      ]
-    },
-    {
-      "index": 27,
-      "function": "Curl_auth_cleanup_spnego",
-      "expected": "violation",
-      "detected": "clean",
-      "reason": "",
-      "calls": [
-        "Curl_auth_cleanup_spnego",
-        "Curl_creds_has_sasl_service",
-        "Curl_creds_sasl_service",
-        "Curl_auth_build_spn",
-        "QuerySecurityPackageInfo",
-        "CURL_UNCONST"
-      ]
-    },
-    {
       "index": 28,
-      "function": "vquic_ctx_init",
       "expected": "violation",
       "detected": "clean",
       "reason": "",
@@ -343,7 +223,6 @@
     },
     {
       "index": 29,
-      "function": "Curl_ssl_cf_get_primary_config",
       "expected": "violation",
       "detected": "clean",
       "reason": "",
@@ -354,6 +233,244 @@
         "Curl_auth_allowed_to_host",
         "gnutls_srp_allocate_client_credentials",
         "gnutls_strerror"
+      ]
+    },
+    {
+      "index": 31,
+      "expected": "clean",
+      "detected": "violation",
+      "reason": "ssl_version requires [C0_S90] but state has [INIT] (namespace: RESOURCE_ACQUIRE)",
+      "calls": [
+        "Curl_ssl_cf_get_config",
+        "Curl_ssl_cf_get_primary_config",
+        "Curl_alpn_copy",
+        "Curl_conn_cf_get_transport",
+        "wolfTLS_client_method",
+        "wolfSSL_CTX_free"
+      ]
+    },
+    {
+      "index": 33,
+      "expected": "clean",
+      "detected": "violation",
+      "reason": "curl_msnprintf requires [C0_S59] but state has [INIT] (namespace: RESOURCE_ACQUIRE)",
+      "calls": [
+        "curl_msnprintf",
+        "Curl_strntolower",
+        "Curl_raw_toupper",
+        "Curl_checkheaders",
+        "STRCONST",
+        "strcspn"
+      ]
+    },
+    {
+      "index": 34,
+      "expected": "clean",
+      "detected": "violation",
+      "reason": "curlx_malloc requires [C0_S114] but state has [INIT] (namespace: RESOURCE_ACQUIRE)",
+      "calls": [
+        "Curl_creds_has_sasl_service",
+        "Curl_creds_sasl_service",
+        "Curl_auth_build_spn",
+        "QuerySecurityPackageInfo",
+        "CURL_UNCONST",
+        "TEXT"
+      ]
+    },
+    {
+      "index": 35,
+      "expected": "violation",
+      "detected": "clean",
+      "reason": "",
+      "calls": [
+        "STACK_OF",
+        "SSL_get_tlsext_status_ocsp_resp",
+        "d2i_OCSP_RESPONSE",
+        "OCSP_response_status",
+        "OCSP_response_status_str",
+        "OCSP_response_get1_basic"
+      ]
+    },
+    {
+      "index": 36,
+      "expected": "clean",
+      "detected": "violation",
+      "reason": "secrets requires [C0_S121] but state has [INIT,C0_S116,C0_S117] (namespace: RESOURCE_ACQUIRE)",
+      "calls": [
+        "Curl_ssl_cf_get_primary_config",
+        "wssl_send_earlydata",
+        "wolfSSL_ERR_clear_error",
+        "wolfSSL_connect",
+        "Curl_wssl_setup_x509_store",
+        "CURL_TRC_CF"
+      ]
+    },
+    {
+      "index": 37,
+      "expected": "clean",
+      "detected": "violation",
+      "reason": "curlx_dyn_init requires [C0_S28] but state has [INIT] (namespace: RESOURCE_ACQUIRE)",
+      "calls": [
+        "Curl_creds_user",
+        "Curl_creds_passwd",
+        "curlx_dyn_init",
+        "memset",
+        "Curl_rand_bytes",
+        "endif"
+      ]
+    },
+    {
+      "index": 38,
+      "expected": "clean",
+      "detected": "violation",
+      "reason": "size requires [C0_EXIT] but state has [INIT,C0_S128,C0_S129,C0_S130] (namespace: RESOURCE_ACQUIRE)",
+      "calls": [
+        "myssh_to_ERROR",
+        "sftp_stat",
+        "sftp_attributes_free",
+        "size",
+        "seek",
+        "writing"
+      ]
+    },
+    {
+      "index": 39,
+      "expected": "clean",
+      "detected": "violation",
+      "reason": "strlen requires [C0_S30,C0_S76,C0_S127,C0_S135] but state has [INIT,C0_S136,C0_EXIT] (namespace: RESOURCE_ACQUIRE)",
+      "calls": [
+        "libssh2_sftp_stat_ex",
+        "curlx_uztoui",
+        "strlen",
+        "size",
+        "seek",
+        "writing"
+      ]
+    },
+    {
+      "index": 41,
+      "expected": "clean",
+      "detected": "violation",
+      "reason": "get_cert_location requires [C0_S16] but state has [INIT] (namespace: RESOURCE_ACQUIRE)",
+      "calls": [
+        "Curl_ssl_cf_get_primary_config",
+        "curlx_convert_UTF8_to_tchar",
+        "get_cert_location",
+        "memcpy",
+        "curlx_free",
+        "curlx_fopen"
+      ]
+    },
+    {
+      "index": 42,
+      "expected": "clean",
+      "detected": "violation",
+      "reason": "curlx_verify_windows_version requires [C0_S53] but state has [INIT] (namespace: RESOURCE_ACQUIRE)",
+      "calls": [
+        "Curl_ssl_cf_get_primary_config",
+        "Curl_ssl_cf_get_config",
+        "curlx_verify_windows_version",
+        "Curl_ssl_scache_use",
+        "Curl_ssl_scache_lock",
+        "Curl_ssl_scache_get_obj"
+      ]
+    },
+    {
+      "index": 43,
+      "expected": "clean",
+      "detected": "violation",
+      "reason": "memset requires [C0_S28,C0_S77] but state has [INIT] (namespace: RESOURCE_ACQUIRE)",
+      "calls": [
+        "memset",
+        "doh_close",
+        "de_init",
+        "doh_resp_decode",
+        "curlx_dyn_uptr",
+        "curlx_dyn_len"
+      ]
+    },
+    {
+      "index": 44,
+      "expected": "clean",
+      "detected": "violation",
+      "reason": "curl_url requires [C0_S76] but state has [INIT] (namespace: RESOURCE_ACQUIRE)",
+      "calls": [
+        "Curl_bufref_free",
+        "curl_url",
+        "curl_url_set",
+        "Curl_bufref_ptr",
+        "curl_url_get",
+        "curl_url_cleanup"
+      ]
+    },
+    {
+      "index": 45,
+      "expected": "clean",
+      "detected": "violation",
+      "reason": "h2_pri_spec requires [C0_S176] but state has [INIT,C0_S172,C0_S173] (namespace: RESOURCE_ACQUIRE)",
+      "calls": [
+        "Curl_dynhds_init",
+        "http2_data_setup",
+        "Curl_h1_req_parse_read",
+        "Curl_http_req_to_h2",
+        "Curl_h1_req_parse_free",
+        "Curl_dynhds_to_nva"
+      ]
+    },
+    {
+      "index": 46,
+      "expected": "clean",
+      "detected": "violation",
+      "reason": "multi_runsingle requires [C0_S184] but state has [INIT,C0_S179,C0_S180] (namespace: RESOURCE_ACQUIRE)",
+      "calls": [
+        "multi_now",
+        "sigpipe_init",
+        "Curl_uint32_bset_first",
+        "CURL_TRC_M",
+        "Curl_multi_xfers_running",
+        "Curl_multi_get_easy"
+      ]
+    },
+    {
+      "index": 47,
+      "expected": "clean",
+      "detected": "violation",
+      "reason": "endif requires [C0_S124] but state has [INIT] (namespace: RESOURCE_ACQUIRE)",
+      "calls": [
+        "endif",
+        "curlx_calloc",
+        "Curl_conn_meta_set",
+        "ldap_pvt_url_scheme2proto",
+        "Curl_sasl_init",
+        "oldap_parse_login_options"
+      ]
+    },
+    {
+      "index": 48,
+      "expected": "clean",
+      "detected": "violation",
+      "reason": "smb_send_tree_connect requires [C0_S0] but state has [INIT] (namespace: RESOURCE_ACQUIRE)",
+      "calls": [
+        "Curl_conn_meta_get",
+        "Curl_meta_get",
+        "smb_send_tree_connect",
+        "connclose",
+        "request_state",
+        "smb_send_and_recv"
+      ]
+    },
+    {
+      "index": 49,
+      "expected": "clean",
+      "detected": "violation",
+      "reason": "memset requires [C0_S28,C0_S77] but state has [INIT] (namespace: RESOURCE_ACQUIRE)",
+      "calls": [
+        "CURL_SOCKET",
+        "memset",
+        "htonl",
+        "defined",
+        "setsockopt",
+        "bind"
       ]
     }
   ]
