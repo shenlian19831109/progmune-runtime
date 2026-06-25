@@ -1,0 +1,421 @@
+{
+  "repo": "curl",
+  "detector": "resource-lifecycle",
+  "total": 49,
+  "tp": 7,
+  "fp": 7,
+  "tn": 22,
+  "fn": 13,
+  "precision": 0.5,
+  "recall": 0.35,
+  "f1": 0.4117647058823529,
+  "timestamp": "2026-06-25T06:32:54.373Z",
+  "mismatches": [
+    {
+      "idx": 0,
+      "expected": "violation",
+      "detected": "clean",
+      "calls": [
+        "Curl_ssl_cf_get_config",
+        "ERR_clear_error",
+        "SSL_connect",
+        "Curl_ssl_setup_x509_store",
+        "defined",
+        "secrets"
+      ],
+      "violations": []
+    },
+    {
+      "idx": 1,
+      "expected": "violation",
+      "detected": "clean",
+      "calls": [
+        "Curl_ssl_cf_get_primary_config",
+        "Curl_ssl_cf_get_config",
+        "mbedtls_ssl_config_init",
+        "mbedtls_ssl_config_defaults",
+        "mbedtls_ssl_conf_dbg",
+        "mbedtls_debug_set_threshold"
+      ],
+      "violations": []
+    },
+    {
+      "idx": 2,
+      "expected": "violation",
+      "detected": "clean",
+      "calls": [
+        "ssh_state_init",
+        "FALLTHROUGH",
+        "ssh_state_startup",
+        "ssh_state_hostkey",
+        "ssh_state_authlist",
+        "ssh_state_pkey_init"
+      ],
+      "violations": []
+    },
+    {
+      "idx": 3,
+      "expected": "violation",
+      "detected": "clean",
+      "calls": [
+        "myssh_state_init",
+        "FALLTHROUGH",
+        "myssh_in_S_STARTUP",
+        "myssh_is_known",
+        "myssh_to_ERROR",
+        "myssh_to"
+      ],
+      "violations": []
+    },
+    {
+      "idx": 6,
+      "expected": "violation",
+      "detected": "clean",
+      "calls": [
+        "Curl_ssl_cf_get_primary_config",
+        "Curl_ssl_cf_get_config",
+        "ossl_seed",
+        "ossl_init_method",
+        "SSL_CTX_new_ex",
+        "SSL_CTX_new"
+      ],
+      "violations": []
+    },
+    {
+      "idx": 7,
+      "expected": "violation",
+      "detected": "violation",
+      "calls": [
+        "STACK_OF",
+        "SSL_get_peer_cert_chain",
+        "sk_X509_num",
+        "allowed",
+        "Curl_ssl_init_certinfo",
+        "BIO_new"
+      ],
+      "violations": [
+        "BIO_new acquired without matching \\b(SSL_free|TLS_free|wolfSSL_free|gtls_free|BIO_free|ossl_free|nghttp2_session_del)\\b — possible resource leak"
+      ]
+    },
+    {
+      "idx": 8,
+      "expected": "clean",
+      "detected": "violation",
+      "calls": [
+        "curl_multi_remove_handle",
+        "send",
+        "Curl_detach_connection",
+        "curl_easy_perform",
+        "curl_multi_cleanup",
+        "Curl_expire_clear"
+      ],
+      "violations": [
+        "curlx_free called without prior acquire — possible double-free or use-after-release"
+      ]
+    },
+    {
+      "idx": 9,
+      "expected": "violation",
+      "detected": "clean",
+      "calls": [
+        "Curl_conn_get_current_host",
+        "Curl_bufref_init",
+        "sasl_state",
+        "Curl_auth_create_plain_message",
+        "Curl_auth_create_login_message",
+        "Curl_creds_user"
+      ],
+      "violations": []
+    },
+    {
+      "idx": 10,
+      "expected": "violation",
+      "detected": "clean",
+      "calls": [
+        "GOOD_EASY_HANDLE",
+        "multi_posttransfer",
+        "multi_done",
+        "multistate",
+        "multi_warn_debug",
+        "Curl_uint32_bset_remove"
+      ],
+      "violations": []
+    },
+    {
+      "idx": 14,
+      "expected": "violation",
+      "detected": "violation",
+      "calls": [
+        "QuerySecurityPackageInfo",
+        "CURL_UNCONST",
+        "TEXT",
+        "FreeContextBuffer",
+        "curlx_malloc",
+        "Curl_creds_same"
+      ],
+      "violations": [
+        "curlx_malloc acquired without matching \\b(free|curlx_free|zfree|ngx_free|ngx_pfree)\\b — possible resource leak"
+      ]
+    },
+    {
+      "idx": 16,
+      "expected": "violation",
+      "detected": "clean",
+      "calls": [
+        "CONN_SOCK_IDX_VALID",
+        "Curl_pollset_init",
+        "Curl_pollfds_init",
+        "Curl_conn_needs_flush",
+        "Curl_conn_flush",
+        "do_connect"
+      ],
+      "violations": []
+    },
+    {
+      "idx": 18,
+      "expected": "violation",
+      "detected": "violation",
+      "calls": [
+        "nghttp2_session_get_stream_user_data",
+        "GOOD_EASY_HANDLE",
+        "H2_STREAM_CTX",
+        "strncmp",
+        "curl_maprintf",
+        "curl_strequal"
+      ],
+      "violations": [
+        "curlx_free called before any \\b(malloc|calloc|realloc|curlx_malloc|curlx_calloc|curlx_realloc|zmalloc|zcalloc|zrealloc|ngx_alloc|ngx_calloc|ngx_palloc)\\b — possible double-free"
+      ]
+    },
+    {
+      "idx": 20,
+      "expected": "clean",
+      "detected": "violation",
+      "calls": [
+        "curlx_free",
+        "curl_url_get",
+        "Curl_bufref_set",
+        "perform",
+        "Curl_peer_unlink",
+        "Curl_http_neg_init"
+      ],
+      "violations": [
+        "curlx_free called without prior acquire — possible double-free or use-after-release"
+      ]
+    },
+    {
+      "idx": 21,
+      "expected": "violation",
+      "detected": "clean",
+      "calls": [
+        "certificate",
+        "format",
+        "gnutls_certificate_get_peers",
+        "gnutls_cipher_get",
+        "allowed",
+        "Curl_ssl_init_certinfo"
+      ],
+      "violations": []
+    },
+    {
+      "idx": 22,
+      "expected": "violation",
+      "detected": "violation",
+      "calls": [
+        "Curl_ssl_cf_get_primary_config",
+        "curlx_malloc",
+        "ensure_encoding_size",
+        "Curl_conn_cf_recv",
+        "SCH_DEV",
+        "InitSecBuffer"
+      ],
+      "violations": [
+        "curlx_malloc acquired without matching \\b(free|curlx_free|zfree|ngx_free|ngx_pfree)\\b — possible resource leak"
+      ]
+    },
+    {
+      "idx": 23,
+      "expected": "violation",
+      "detected": "clean",
+      "calls": [
+        "GOOD_MULTI_HANDLE",
+        "Curl_uint32_tbl_first",
+        "GOOD_EASY_HANDLE",
+        "CURL_TRC_M",
+        "multi_done",
+        "Curl_uint32_tbl_remove"
+      ],
+      "violations": []
+    },
+    {
+      "idx": 24,
+      "expected": "violation",
+      "detected": "violation",
+      "calls": [
+        "Curl_conn_meta_get",
+        "curlx_calloc",
+        "getenv",
+        "curlx_str_number",
+        "CURL_TRC_WS",
+        "Curl_bufq_init2"
+      ],
+      "violations": [
+        "curlx_calloc acquired without matching \\b(free|curlx_free|zfree|ngx_free|ngx_pfree)\\b — possible resource leak"
+      ]
+    },
+    {
+      "idx": 26,
+      "expected": "violation",
+      "detected": "violation",
+      "calls": [
+        "Curl_creds_has_sasl_service",
+        "Curl_creds_sasl_service",
+        "Curl_bufref_len",
+        "failure",
+        "QuerySecurityPackageInfo",
+        "CURL_UNCONST"
+      ],
+      "violations": [
+        "curlx_malloc acquired without matching \\b(free|curlx_free|zfree|ngx_free|ngx_pfree)\\b — possible resource leak"
+      ]
+    },
+    {
+      "idx": 27,
+      "expected": "violation",
+      "detected": "violation",
+      "calls": [
+        "Curl_auth_cleanup_spnego",
+        "Curl_creds_has_sasl_service",
+        "Curl_creds_sasl_service",
+        "Curl_auth_build_spn",
+        "QuerySecurityPackageInfo",
+        "CURL_UNCONST"
+      ],
+      "violations": [
+        "curlx_malloc acquired without matching \\b(free|curlx_free|zfree|ngx_free|ngx_pfree)\\b — possible resource leak"
+      ]
+    },
+    {
+      "idx": 28,
+      "expected": "violation",
+      "detected": "clean",
+      "calls": [
+        "vquic_ctx_init",
+        "quiche_config_new",
+        "quiche_config_enable_pacing",
+        "quiche_config_set_initial_max_data",
+        "quiche_config_set_initial_max_streams_bidi",
+        "quiche_config_set_initial_max_streams_uni"
+      ],
+      "violations": []
+    },
+    {
+      "idx": 29,
+      "expected": "violation",
+      "detected": "clean",
+      "calls": [
+        "Curl_ssl_cf_get_primary_config",
+        "Curl_ssl_cf_get_config",
+        "Curl_gtls_shared_creds_create",
+        "Curl_auth_allowed_to_host",
+        "gnutls_srp_allocate_client_credentials",
+        "gnutls_strerror"
+      ],
+      "violations": []
+    },
+    {
+      "idx": 33,
+      "expected": "clean",
+      "detected": "violation",
+      "calls": [
+        "curl_msnprintf",
+        "Curl_strntolower",
+        "Curl_raw_toupper",
+        "Curl_checkheaders",
+        "STRCONST",
+        "strcspn"
+      ],
+      "violations": [
+        "curlx_free called without prior acquire — possible double-free or use-after-release"
+      ]
+    },
+    {
+      "idx": 34,
+      "expected": "clean",
+      "detected": "violation",
+      "calls": [
+        "Curl_creds_has_sasl_service",
+        "Curl_creds_sasl_service",
+        "Curl_auth_build_spn",
+        "QuerySecurityPackageInfo",
+        "CURL_UNCONST",
+        "TEXT"
+      ],
+      "violations": [
+        "curlx_malloc acquired without matching \\b(free|curlx_free|zfree|ngx_free|ngx_pfree)\\b — possible resource leak"
+      ]
+    },
+    {
+      "idx": 35,
+      "expected": "violation",
+      "detected": "clean",
+      "calls": [
+        "STACK_OF",
+        "SSL_get_tlsext_status_ocsp_resp",
+        "d2i_OCSP_RESPONSE",
+        "OCSP_response_status",
+        "OCSP_response_status_str",
+        "OCSP_response_get1_basic"
+      ],
+      "violations": []
+    },
+    {
+      "idx": 41,
+      "expected": "clean",
+      "detected": "violation",
+      "calls": [
+        "Curl_ssl_cf_get_primary_config",
+        "curlx_convert_UTF8_to_tchar",
+        "get_cert_location",
+        "memcpy",
+        "curlx_free",
+        "curlx_fopen"
+      ],
+      "violations": [
+        "curlx_free called without prior acquire — possible double-free or use-after-release"
+      ]
+    },
+    {
+      "idx": 47,
+      "expected": "clean",
+      "detected": "violation",
+      "calls": [
+        "endif",
+        "curlx_calloc",
+        "Curl_conn_meta_set",
+        "ldap_pvt_url_scheme2proto",
+        "Curl_sasl_init",
+        "oldap_parse_login_options"
+      ],
+      "violations": [
+        "curlx_calloc acquired without matching \\b(free|curlx_free|zfree|ngx_free|ngx_pfree)\\b — possible resource leak"
+      ]
+    },
+    {
+      "idx": 49,
+      "expected": "clean",
+      "detected": "violation",
+      "calls": [
+        "CURL_SOCKET",
+        "memset",
+        "htonl",
+        "defined",
+        "setsockopt",
+        "bind"
+      ],
+      "violations": [
+        "connect acquired without matching \\b(disconnect|Curl_disconnect|ngx_disconnect|redisFree)\\b — possible resource leak"
+      ]
+    }
+  ]
+}
