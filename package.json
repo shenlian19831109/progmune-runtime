@@ -32,6 +32,7 @@
     "precision:label:c": "npx ts-node src/precision-label-c.ts",
     "precision:report": "npx ts-node src/precision-report.ts",
     "precision:report:c": "npx ts-node src/precision-report-c.ts",
+    "precision:resource": "npx ts-node src/resource-detector.ts",
     "ci": "npx ts-node bin/progmune-ci.ts --project .",
     "dashboard": "npx ts-node src/governance-dashboard.ts",
     "verify-api": "npx ts-node src/verify-api.ts",

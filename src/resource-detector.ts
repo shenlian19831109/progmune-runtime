@@ -139,3 +139,84 @@ export function validateResourceLifecycle(calls: string[]): {
     detail,
   };
 }
+
+// ═══════════════════════════════════════════════════════════════
+// CLI — Precision Report
+// ═══════════════════════════════════════════════════════════════
+
+if (require.main === module) {
+  const fs = require("fs");
+  const path = require("path");
+  const args = process.argv.slice(2);
+  const repoPath = path.resolve(args.find(a => !a.startsWith("--")) || ".");
+
+  const baseDir = path.dirname(repoPath);
+  const repoName = path.basename(repoPath);
+  const seqFile = path.join(baseDir, `${repoName}-sequences.json`);
+  const labelFile = path.join(baseDir, `${repoName}-labels.json`);
+
+  if (!fs.existsSync(seqFile) || !fs.existsSync(labelFile)) {
+    console.error(`❌ Files not found: ${seqFile}, ${labelFile}`);
+    process.exit(1);
+  }
+
+  const seqData = JSON.parse(fs.readFileSync(seqFile, "utf-8"));
+  const labelData = JSON.parse(fs.readFileSync(labelFile, "utf-8"));
+  const sequences = seqData.sequences || seqData;
+  const labels = labelData.labels || labelData;
+
+  let tp = 0, fp = 0, tn = 0, fn = 0;
+  const mismatches: any[] = [];
+
+  for (const seq of sequences) {
+    const idx = sequences.indexOf(seq);
+    const expected = labels[idx];
+    if (!expected || expected === "s" || expected === "skip") continue;
+
+    const result = validateResourceLifecycle(seq.calls || []);
+    const detected = result.valid ? "clean" : "violation";
+
+    if (expected === "clean" && detected === "clean") tn++;
+    else if (expected === "violation" && detected === "violation") tp++;
+    else if (expected === "clean" && detected === "violation") fp++;
+    else if (expected === "violation" && detected === "clean") fn++;
+
+    if (expected !== detected || result.violations.length > 0) {
+      mismatches.push({ idx, fn: seq.function, expected, detected, calls: (seq.calls||[]).slice(0,5), vios: result.violations.map(v => v.detail) });
+    }
+  }
+
+  const total = tp + fp + tn + fn;
+  const precision = tp + fp > 0 ? tp / (tp + fp) : 0;
+  const recall = tp + fn > 0 ? tp / (tp + fn) : 0;
+  const f1 = precision + recall > 0 ? 2 * precision * recall / (precision + recall) : 0;
+  const pct = (v: number) => `${(v * 100).toFixed(0)}%`;
+
+  const C = { reset: "\x1b[0m", bold: "\x1b[1m", dim: "\x1b[2m", green: "\x1b[32m", red: "\x1b[31m", yellow: "\x1b[33m", cyan: "\x1b[36m" };
+  const color = (v: number) => v >= 0.7 ? C.green : v >= 0.5 ? C.yellow : C.red;
+
+  console.log(`\n${C.bold}${C.cyan}╔══════════════════════════════════════════════╗${C.reset}`);
+  console.log(`${C.bold}${C.cyan}║${C.reset}  ${C.bold}Resource Lifecycle Precision — ${repoName}${C.reset}${" ".repeat(Math.max(0,19-repoName.length))}${C.bold}${C.cyan}║${C.reset}`);
+  console.log(`${C.bold}${C.cyan}╚══════════════════════════════════════════════╝${C.reset}`);
+  console.log("");
+  console.log(`  Samples:    ${total}`);
+  console.log(`  TP: ${C.green}${tp}${C.reset}  FP: ${C.red}${fp}${C.reset}  TN: ${C.green}${tn}${C.reset}  FN: ${C.red}${fn}${C.reset}`);
+  console.log("");
+  console.log(`  Precision:  ${color(precision)}${pct(precision)}${C.reset}`);
+  console.log(`  Recall:     ${color(recall)}${pct(recall)}${C.reset}`);
+  console.log(`  F1:         ${color(f1)}${pct(f1)}${C.reset}`);
+  console.log("");
+
+  if (mismatches.length > 0) {
+    console.log(`  ${C.yellow}Details:${C.reset}`);
+    for (const m of mismatches.slice(0, 12)) {
+      const icon = m.expected === "violation" ? `${C.red}FN${C.reset}` : `${C.yellow}FP${C.reset}`;
+      console.log(`    ${icon} [${m.idx}] ${m.expected}→${m.detected}  ${(m.calls||[]).join(" → ")}`);
+      if (m.vios.length) console.log(`       ${C.dim}${m.vios[0]}${C.reset}`);
+    }
+  }
+
+  console.log("");
+  const rating = f1 >= 0.7 ? `${C.green}GOOD${C.reset}` : f1 >= 0.5 ? `${C.yellow}FAIR${C.reset}` : `${C.red}NEEDS IMPROVEMENT${C.reset}`;
+  console.log(`  Rating: ${rating}\n`);
+}
