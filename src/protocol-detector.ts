@@ -45,17 +45,22 @@ const PROTOCOLS: ProtocolDefinition[] = [
     ],
   },
 
-  // ── SSL/TLS Handshake ──
+  // ── SSL/TLS Handshake (OpenSSL, mbedTLS, GnuTLS, Schannel, wolfSSL, BearSSL) ──
   {
-    name: "SSL/TLS Handshake",
+    name: "TLS Handshake",
     category: "ssl",
-    minCompleteness: 0.6,
+    minCompleteness: 0.5,
     steps: [
-      { pattern: /\b(SSL_CTX_new|ssl_ctx_new|ossl_init|ssl_init|ssl_setup)\b/i, label: "ssl_init", required: true },
-      { pattern: /\b(SSL_CTX_set_verify|ssl_set_verify|ssl_config)\b/i, label: "ssl_config", required: false },
-      { pattern: /\b(SSL_connect|ssl_connect|ssl_handshake|ssl_do_handshake)\b/i, label: "ssl_connect", required: true },
-      { pattern: /\b(SSL_get_verify|ssl_verify|ssl_check)\b/i, label: "ssl_verify", required: false },
-      { pattern: /\b(SSL_free|ssl_free|SSL_CTX_free|ssl_cleanup|ssl_shutdown)\b/i, label: "ssl_free", required: true },
+      // Init phase (any SSL library)
+      { pattern: /\b(SSL_CTX_new|ssl_ctx_new|ossl_init|ssl_init|ssl_setup|mbedtls_ssl_config_init|gnutls_init|gtls_client_init|schannel_connect_step1|wolfSSL_CTX_new|wolfSSL_init|Curl_ssl_cf_get_primary_config)\b/i, label: "tls_init", required: true },
+      // Config phase
+      { pattern: /\b(SSL_CTX_set_verify|ssl_set_verify|ssl_config|mbedtls_ssl_config_defaults|gnutls_certificate_allocate|schannel_connect_step2|wolfSSL_CTX_set_verify|Curl_ssl_cf_get_config)\b/i, label: "tls_config", required: false },
+      // Connect/handshake phase
+      { pattern: /\b(SSL_connect|ssl_connect|ssl_handshake|ssl_do_handshake|mbedtls_ssl_handshake|gnutls_handshake|schannel_handshake|wolfSSL_connect)\b/i, label: "tls_connect", required: true },
+      // Verify phase
+      { pattern: /\b(SSL_get_verify|ssl_verify|ssl_check|mbedtls_ssl_get_verify|gnutls_certificate_verify|Curl_gtls_verifyserver|ossl_certchain)\b/i, label: "tls_verify", required: false },
+      // Cleanup
+      { pattern: /\b(SSL_free|ssl_free|SSL_CTX_free|ssl_cleanup|ssl_shutdown|mbedtls_ssl_free|gnutls_deinit|schannel_cleanup|wolfSSL_free|wolfSSL_CTX_free)\b/i, label: "tls_free", required: true },
     ],
   },
 
