@@ -30,18 +30,19 @@ interface ProtocolDefinition {
 }
 
 const PROTOCOLS: ProtocolDefinition[] = [
-  // ── SSH State Machine ──
+  // ── SSH State Machine (libssh2 + libssh) ──
   {
     name: "SSH Connection",
     category: "ssh",
-    minCompleteness: 0.7,
+    minCompleteness: 0.5,
     steps: [
-      { pattern: /\b(ssh_state_init|ssh.*_init|ssh_setup)\b/i, label: "ssh_init", required: true },
-      { pattern: /\b(ssh.*startup|ssh_state_startup)\b/i, label: "ssh_startup", required: true },
-      { pattern: /\b(ssh.*hostkey|ssh_state_hostkey)\b/i, label: "ssh_hostkey", required: true },
-      { pattern: /\b(ssh.*auth|ssh_state_authlist|ssh_state_auth)\b/i, label: "ssh_auth", required: true },
-      { pattern: /\b(ssh.*pkey|ssh_state_pkey|ssh.*key)\b/i, label: "ssh_key", required: false },
-      { pattern: /\b(ssh.*done|ssh.*finish|ssh.*close|ssh.*cleanup)\b/i, label: "ssh_done", required: true },
+      { pattern: /\b(ssh_state_init|ssh.*_init|ssh_setup|myssh_state_init)\b/i, label: "ssh_init", required: true },
+      { pattern: /\b(ssh.*startup|ssh_state_startup|myssh_in_S_STARTUP|ssh_state_startup)\b/i, label: "ssh_startup", required: true },
+      { pattern: /\b(ssh.*hostkey|ssh_state_hostkey|myssh_is_known)\b/i, label: "ssh_hostkey", required: false },
+      { pattern: /\b(ssh.*authlist|ssh.*auth|ssh_state_authlist|myssh_in_AUTHLIST|ssh_state_auth)\b/i, label: "ssh_auth", required: true },
+      { pattern: /\b(ssh.*pkey|ssh_state_pkey|myssh_in_AUTH_PKEY_INIT|ssh.*key)\b/i, label: "ssh_key", required: false },
+      { pattern: /\b(ssh.*pass|ssh_state_auth_pass|myssh.*PASS)\b/i, label: "ssh_pass", required: false },
+      { pattern: /\b(ssh.*done|ssh.*finish|ssh.*close|ssh.*cleanup|myssh_to_ERROR|ssh_state_error)\b/i, label: "ssh_done", required: true },
     ],
   },
 
@@ -146,11 +147,24 @@ const PROTOCOLS: ProtocolDefinition[] = [
   {
     name: "QUIC Connection",
     category: "connection",
-    minCompleteness: 0.5,
+    minCompleteness: 0.4,
     steps: [
       { pattern: /\b(vquic_ctx_init|quiche_config_new|cf_quiche_ctx_open)\b/i, label: "quic_init", required: true },
-      { pattern: /\b(quiche_config_set|quiche_config_enable|cf_quiche_connect)\b/i, label: "quic_config", required: false },
-      { pattern: /\b(quiche_conn_send|quiche_conn_recv|quic_send)\b/i, label: "quic_transfer", required: true },
+      { pattern: /\b(quiche_config_set|quiche_config_enable|cf_quiche_connect|quiche_config_set_initial_max)\b/i, label: "quic_config", required: false },
+      { pattern: /\b(quiche_conn_send|quiche_conn_recv|quic_send|quic_recv)\b/i, label: "quic_transfer", required: true },
+      { pattern: /\b(quiche_conn_free|quiche_config_free|quic_close|cf_quiche_close)\b/i, label: "quic_close", required: false },
+    ],
+  },
+
+  // ── OCSP Stapling ──
+  {
+    name: "OCSP Stapling",
+    category: "ssl",
+    minCompleteness: 0.5,
+    steps: [
+      { pattern: /\b(SSL_get_tlsext_status_ocsp_resp|OCSP_response_status)\b/i, label: "ocsp_fetch", required: true },
+      { pattern: /\b(d2i_OCSP_RESPONSE|OCSP_response_status_str|OCSP_check_validity)\b/i, label: "ocsp_parse", required: true },
+      { pattern: /\b(OCSP_BASICRESP_free|OCSP_RESPONSE_free)\b/i, label: "ocsp_free", required: false },
     ],
   },
 
