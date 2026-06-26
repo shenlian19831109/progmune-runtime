@@ -1,0 +1,177 @@
+{
+  "name": "Progmune Protocol Knowledge Base",
+  "version": "1.0.0",
+  "generated": "2026-06-26T11:10:03.707Z",
+  "assets": [
+    {
+      "id": "PROTO-TLS-1.0",
+      "name": "TLS Handshake",
+      "category": "ssl",
+      "version": "1.0.0",
+      "confidence": 85,
+      "validatedRepos": [
+        "curl",
+        "nginx"
+      ],
+      "validatedSequences": 135,
+      "stability": "High",
+      "crossRepoMatrix": {
+        "curl": true,
+        "nginx": true,
+        "redis": false
+      },
+      "description": "SSL/TLS handshake lifecycle: init → connect → cleanup. Validated across curl (OpenSSL/mbedTLS/GnuTLS/Schannel/wolfSSL) and nginx (OpenSSL).",
+      "steps": [
+        "tls_init (SSL_CTX_new / *_ssl_*_init)",
+        "tls_connect (SSL_connect / *_ssl_*_handshake)",
+        "tls_free (SSL_free / *_ssl_*_cleanup)"
+      ],
+      "lastUpdated": "2026-06-26"
+    },
+    {
+      "id": "PROTO-SSH-0.6",
+      "name": "SSH Connection",
+      "category": "ssh",
+      "version": "0.6.0",
+      "confidence": 60,
+      "validatedRepos": [
+        "curl"
+      ],
+      "validatedSequences": 85,
+      "stability": "Low",
+      "crossRepoMatrix": {
+        "curl": true,
+        "nginx": false,
+        "redis": false
+      },
+      "description": "SSH connection state machine: init → auth → done. Validated on curl (libssh2/libssh). Needs libssh validation.",
+      "steps": [
+        "ssh_init (*_ssh_*_init)",
+        "ssh_auth (*_ssh_*_auth)",
+        "ssh_done (*_ssh_*_done / *_ssh_*_close)"
+      ],
+      "lastUpdated": "2026-06-26"
+    },
+    {
+      "id": "PROTO-HTTP-0.8",
+      "name": "HTTP Request",
+      "category": "http",
+      "version": "0.8.0",
+      "confidence": 70,
+      "validatedRepos": [
+        "nginx"
+      ],
+      "validatedSequences": 50,
+      "stability": "Medium",
+      "crossRepoMatrix": {
+        "curl": false,
+        "nginx": true,
+        "redis": false
+      },
+      "description": "HTTP request lifecycle: init → send → cleanup. Validated on nginx (ngx_http_*). Needs curl HTTP validation.",
+      "steps": [
+        "http_init (*http*init / *http*handler)",
+        "http_send (*http*send / *http*process)",
+        "http_cleanup (*http*cleanup / *http*finalize)"
+      ],
+      "lastUpdated": "2026-06-26"
+    },
+    {
+      "id": "PROTO-CONN-0.5",
+      "name": "Connection Lifecycle",
+      "category": "connection",
+      "version": "0.5.0",
+      "confidence": 55,
+      "validatedRepos": [
+        "curl"
+      ],
+      "validatedSequences": 85,
+      "stability": "Low",
+      "crossRepoMatrix": {
+        "curl": true,
+        "nginx": false,
+        "redis": false
+      },
+      "description": "Generic connection lifecycle: connect → transfer → disconnect. Validated on curl. Patterns may be too broad.",
+      "steps": [
+        "conn_init (*connect / *conn*init)",
+        "conn_transfer (*send / *recv / *transfer)",
+        "conn_done (*disconnect / *conn*cleanup)"
+      ],
+      "lastUpdated": "2026-06-26"
+    },
+    {
+      "id": "PROTO-AUTH-0.4",
+      "name": "Authentication",
+      "category": "auth",
+      "version": "0.4.0",
+      "confidence": 40,
+      "validatedRepos": [],
+      "validatedSequences": 0,
+      "stability": "Low",
+      "crossRepoMatrix": {
+        "curl": false,
+        "nginx": false,
+        "redis": false
+      },
+      "description": "Authentication lifecycle: init → credentials → cleanup. Not yet validated on any real project.",
+      "steps": [
+        "auth_init (*auth*init / *auth*create)",
+        "auth_cleanup (*auth*cleanup / *auth*free)"
+      ],
+      "lastUpdated": "2026-06-26"
+    },
+    {
+      "id": "PROTO-H2-0.3",
+      "name": "HTTP/2 Session",
+      "category": "http2",
+      "version": "0.3.0",
+      "confidence": 35,
+      "validatedRepos": [],
+      "validatedSequences": 0,
+      "stability": "Low",
+      "crossRepoMatrix": {
+        "curl": false,
+        "nginx": false,
+        "redis": false
+      },
+      "description": "HTTP/2 session lifecycle: init → send → close. Needs nghttp2 library validation.",
+      "steps": [
+        "h2_init (*h2*init / nghttp2_session_new)",
+        "h2_send (*h2*send / nghttp2_submit)",
+        "h2_close (*h2*close / nghttp2_session_del)"
+      ],
+      "lastUpdated": "2026-06-26"
+    },
+    {
+      "id": "PROTO-QUIC-0.2",
+      "name": "QUIC Connection",
+      "category": "connection",
+      "version": "0.2.0",
+      "confidence": 25,
+      "validatedRepos": [],
+      "validatedSequences": 0,
+      "stability": "Low",
+      "crossRepoMatrix": {
+        "curl": false,
+        "nginx": false,
+        "redis": false
+      },
+      "description": "QUIC connection lifecycle: init → transfer. Minimal validation. Needs quiche/ngtcp2 library testing.",
+      "steps": [
+        "quic_init (*quic*init / quiche_config_new)",
+        "quic_transfer (*quic*send / quiche_conn)"
+      ],
+      "lastUpdated": "2026-06-26"
+    }
+  ],
+  "summary": {
+    "totalAssets": 7,
+    "highStability": 1,
+    "mediumStability": 1,
+    "lowStability": 5,
+    "averageConfidence": 53,
+    "totalValidatedRepos": 2,
+    "totalValidatedSequences": 355
+  }
+}
