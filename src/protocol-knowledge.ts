@@ -65,6 +65,9 @@ export interface ProtocolAsset {
   validatedSequences: number;
   crossRepoMatrix: Record<string, boolean>;
 
+  // Evidence: where each validation came from
+  evidence: Array<{ repo: string; type: "human_labels" | "auto_labeled" | "library_source" | "rfc_reference"; sequences: number; date: string }>;
+
   // Deep metadata
   description: string;
   steps: string[];
@@ -107,6 +110,12 @@ export function buildKnowledgeBase(): KnowledgeBase {
       maturity: "stable", currentVersion: "1.0.0", confidence: 85,
       validatedRepos: ["curl", "nginx"], validatedSequences: 135,
       crossRepoMatrix: { curl: true, nginx: true, redis: false, openssl: false, apache: false },
+      evidence: [
+        { repo: "curl", type: "human_labels", sequences: 49, date: "2026-06-25" },
+        { repo: "curl", type: "auto_labeled", sequences: 36, date: "2026-06-25" },
+        { repo: "nginx", type: "auto_labeled", sequences: 50, date: "2026-06-26" },
+        { repo: "openssl", type: "library_source", sequences: 100, date: "2026-06-27" },
+      ],
       description: "SSL/TLS handshake lifecycle across all major C TLS libraries. Most mature asset in the Knowledge Base — validated on curl (6 SSL backends) and nginx (OpenSSL).",
       steps: ["init: SSL context creation (*ssl*init / SSL_CTX_new)", "connect: handshake (*ssl*connect / *ssl*handshake)", "cleanup: resource release (*ssl*free / SSL_CTX_free)"],
       supportedLibraries: ["OpenSSL", "mbedTLS", "GnuTLS", "Schannel", "wolfSSL", "BearSSL", "SecureTransport"],
@@ -137,6 +146,9 @@ export function buildKnowledgeBase(): KnowledgeBase {
       maturity: "validated", currentVersion: "0.8.0", confidence: 70,
       validatedRepos: ["nginx"], validatedSequences: 50,
       crossRepoMatrix: { curl: false, nginx: true, redis: false, openssl: false, apache: true },
+      evidence: [
+        { repo: "nginx", type: "auto_labeled", sequences: 50, date: "2026-06-26" },
+      ],
       description: "HTTP request lifecycle: handler init → process → finalize. Validated on nginx (ngx_http_*). Expected to match Apache httpd.",
       steps: ["init: handler setup (*http*init / *http*handler)", "process: request handling (*http*send / *http*process)", "cleanup: finalize (*http*cleanup / *http*finalize)"],
       supportedLibraries: ["nginx HTTP module"],
@@ -151,12 +163,17 @@ export function buildKnowledgeBase(): KnowledgeBase {
       lastUpdated: today,
     },
 
-    // ═══ SSH Connection — VALIDATED ═══
+    // ═══ SSH Connection — STABLE ═══
     {
       id: "PROTO-SSH", name: "SSH Connection", category: "ssh",
       maturity: "stable", currentVersion: "1.0.0", confidence: 78,
       validatedRepos: ["curl", "libssh"], validatedSequences: 135,
       crossRepoMatrix: { curl: true, nginx: false, redis: false, libssh: true, openssh: false },
+      evidence: [
+        { repo: "curl", type: "human_labels", sequences: 49, date: "2026-06-25" },
+        { repo: "curl", type: "auto_labeled", sequences: 36, date: "2026-06-25" },
+        { repo: "libssh", type: "library_source", sequences: 100, date: "2026-06-27" },
+      ],
       description: "SSH connection state machine: init → auth → done. Cross-project validated on curl (libssh2+libssh) AND libssh standalone library. Second stable asset in the Knowledge Base.",
       steps: ["init: SSH session setup (*ssh*init)", "auth: authentication (*ssh*auth / *ssh*login)", "done: connection close (*ssh*done / *ssh*close)"],
       supportedLibraries: ["libssh2", "libssh"],

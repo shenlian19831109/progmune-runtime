@@ -1,7 +1,7 @@
 {
   "name": "Progmune Protocol Knowledge Base",
   "version": "2.0.0",
-  "generated": "2026-06-27T07:51:06.498Z",
+  "generated": "2026-06-27T08:02:31.595Z",
   "maturityModel": {
     "experimental": {
       "repos": 0,
@@ -48,6 +48,32 @@
         "openssl": false,
         "apache": false
       },
+      "evidence": [
+        {
+          "repo": "curl",
+          "type": "human_labels",
+          "sequences": 49,
+          "date": "2026-06-25"
+        },
+        {
+          "repo": "curl",
+          "type": "auto_labeled",
+          "sequences": 36,
+          "date": "2026-06-25"
+        },
+        {
+          "repo": "nginx",
+          "type": "auto_labeled",
+          "sequences": 50,
+          "date": "2026-06-26"
+        },
+        {
+          "repo": "openssl",
+          "type": "library_source",
+          "sequences": 100,
+          "date": "2026-06-27"
+        }
+      ],
       "description": "SSL/TLS handshake lifecycle across all major C TLS libraries. Most mature asset in the Knowledge Base — validated on curl (6 SSL backends) and nginx (OpenSSL).",
       "steps": [
         "init: SSL context creation (*ssl*init / SSL_CTX_new)",
@@ -162,6 +188,14 @@
         "openssl": false,
         "apache": true
       },
+      "evidence": [
+        {
+          "repo": "nginx",
+          "type": "auto_labeled",
+          "sequences": 50,
+          "date": "2026-06-26"
+        }
+      ],
       "description": "HTTP request lifecycle: handler init → process → finalize. Validated on nginx (ngx_http_*). Expected to match Apache httpd.",
       "steps": [
         "init: handler setup (*http*init / *http*handler)",
@@ -234,6 +268,26 @@
         "libssh": true,
         "openssh": false
       },
+      "evidence": [
+        {
+          "repo": "curl",
+          "type": "human_labels",
+          "sequences": 49,
+          "date": "2026-06-25"
+        },
+        {
+          "repo": "curl",
+          "type": "auto_labeled",
+          "sequences": 36,
+          "date": "2026-06-25"
+        },
+        {
+          "repo": "libssh",
+          "type": "library_source",
+          "sequences": 100,
+          "date": "2026-06-27"
+        }
+      ],
       "description": "SSH connection state machine: init → auth → done. Cross-project validated on curl (libssh2+libssh) AND libssh standalone library. Second stable asset in the Knowledge Base.",
       "steps": [
         "init: SSH session setup (*ssh*init)",
