@@ -1,0 +1,1678 @@
+[
+  {
+    "function": "ecdh_kex_type_to_curve",
+    "file": "src/ecdh_crypto.c",
+    "calls": [
+      "ssh_ecdh_generate",
+      "SSH_LOG",
+      "EC_KEY_new_by_curve_name",
+      "EVP_EC_gen",
+      "EC_KEY_get0_group",
+      "EC_KEY_generate_key",
+      "EC_KEY_get0_public_key",
+      "pki_key_make_ecpoint_string",
+      "EVP_PKEY_todata",
+      "EVP_PKEY_free"
+    ],
+    "totalCalls": 68
+  },
+  {
+    "function": "atomicio",
+    "file": "src/agent.c",
+    "calls": [
+      "ssh_socket_get_fd",
+      "recv",
+      "send",
+      "endif",
+      "ssh_poll",
+      "ssh_channel_read",
+      "ssh_channel_write",
+      "ssh_agent_new",
+      "calloc",
+      "ssh_socket_new"
+    ],
+    "totalCalls": 66
+  },
+  {
+    "function": "ssh_config_parse_line_internal",
+    "file": "src/config.c",
+    "calls": [
+      "strdup",
+      "ssh_set_error_oom",
+      "strlen",
+      "isspace",
+      "ssh_config_get_token",
+      "SAFE_FREE",
+      "ssh_config_get_opcode",
+      "ssh_config_is_cli_supported",
+      "ssh_set_error",
+      "ssh_config_get_str_tok"
+    ],
+    "totalCalls": 49
+  },
+  {
+    "function": "ssh_server_gss_kex_process_init",
+    "file": "src/kex-gss.c",
+    "calls": [
+      "ssh_buffer_unpack",
+      "ssh_set_error",
+      "ssh_string_len",
+      "ssh_string_data",
+      "dh_init",
+      "dh_import_peer_key",
+      "ssh_dh_compute_shared_secret",
+      "ssh_dh_debug_crypto",
+      "ssh_ecdh_init",
+      "ssh_string_copy"
+    ],
+    "totalCalls": 41
+  },
+  {
+    "function": "SSH_PACKET_CALLBACK",
+    "file": "src/hybrid_mlkem.c",
+    "calls": [
+      "SSH_LOG",
+      "ssh_packet_remove_callbacks",
+      "kex_type_to_mlkem_info",
+      "ssh_set_error",
+      "ssh_curve25519_init",
+      "ssh_log_hexdump",
+      "ssh_ecdh_init",
+      "ssh_string_data",
+      "ssh_string_len",
+      "ssh_string_free"
+    ],
+    "totalCalls": 34
+  },
+  {
+    "function": "ecdh_build_k",
+    "file": "src/ecdh_crypto.c",
+    "calls": [
+      "EC_KEY_get0_group",
+      "EC_GROUP_get_degree",
+      "bignum_ctx_new",
+      "EC_POINT_new",
+      "bignum_ctx_free",
+      "EC_POINT_oct2point",
+      "ssh_string_data",
+      "ssh_string_len",
+      "EC_POINT_clear_free",
+      "malloc"
+    ],
+    "totalCalls": 33
+  },
+  {
+    "function": "libcrux_sha3_generic_keccak_rho_80_04",
+    "file": "src/external/libcrux_mlkem768_sha3.c",
+    "calls": [
+      "libcrux_sha3_generic_keccak_set_80_04",
+      "libcrux_sha3_simd_portable_xor_d2",
+      "libcrux_sha3_generic_keccak_index_c2_04",
+      "KRML_CLITERAL",
+      "libcrux_sha3_simd_portable_xor_and_rotate_d2_02",
+      "libcrux_sha3_simd_portable_xor_and_rotate_d2_ac",
+      "libcrux_sha3_simd_portable_xor_and_rotate_d2_020",
+      "libcrux_sha3_simd_portable_xor_and_rotate_d2_a9",
+      "libcrux_sha3_simd_portable_xor_and_rotate_d2_76",
+      "libcrux_sha3_simd_portable_xor_and_rotate_d2_58"
+    ],
+    "totalCalls": 28
+  },
+  {
+    "function": "ssh_agent_sign_data",
+    "file": "src/agent.c",
+    "calls": [
+      "ssh_buffer_new",
+      "ssh_buffer_add_u8",
+      "SSH_BUFFER_FREE",
+      "ssh_pki_export_pubkey_blob",
+      "ssh_string",
+      "ssh_string_len",
+      "ssh_buffer_allocate_size",
+      "SSH_STRING_FREE",
+      "ssh_buffer_add_ssh_string",
+      "ssh_buffer_get_len"
+    ],
+    "totalCalls": 23
+  },
+  {
+    "function": "ssh_buffer_unpack_va",
+    "file": "src/buffer.c",
+    "calls": [
+      "ssh_buffer_get_len",
+      "va_copy",
+      "va_arg",
+      "ssh_buffer_get_u8",
+      "ssh_buffer_get_data",
+      "ntohs",
+      "ssh_buffer_get_u32",
+      "ntohl",
+      "ssh_buffer_get_u64",
+      "ntohll"
+    ],
+    "totalCalls": 23
+  },
+  {
+    "function": "SSH_PACKET_CALLBACK",
+    "file": "src/curve25519.c",
+    "calls": [
+      "keys",
+      "ssh_packet_remove_callbacks",
+      "ssh_buffer_get_ssh_string",
+      "ssh_set_error",
+      "ssh_string_len",
+      "memcpy",
+      "ssh_string_data",
+      "SSH_STRING_FREE",
+      "ssh_curve25519_init",
+      "ssh_buffer_add_u8"
+    ],
+    "totalCalls": 23
+  },
+  {
+    "function": "ssh_ecdh_generate",
+    "file": "src/ecdh_crypto.c",
+    "calls": [
+      "ecdh_kex_type_to_curve",
+      "SSH_LOG",
+      "EC_KEY_new_by_curve_name",
+      "EVP_EC_gen",
+      "EC_KEY_get0_group",
+      "EC_KEY_generate_key",
+      "EC_KEY_get0_public_key",
+      "pki_key_make_ecpoint_string",
+      "EVP_PKEY_todata",
+      "EVP_PKEY_free"
+    ],
+    "totalCalls": 23
+  },
+  {
+    "function": "ssh_gssapi_check_client_config",
+    "file": "src/gssapi.c",
+    "calls": [
+      "gss_indicate_mechs",
+      "ssh_gssapi_log_error",
+      "calloc",
+      "ssh_set_error_oom",
+      "memcmp",
+      "gss_create_empty_oid_set",
+      "gss_add_oid_set_member",
+      "strlen",
+      "gss_import_name",
+      "GSS_ERROR"
+    ],
+    "totalCalls": 23
+  },
+  {
+    "function": "SSH_PACKET_CALLBACK",
+    "file": "src/hybrid_mlkem.c",
+    "calls": [
+      "SSH_LOG",
+      "ssh_client_hybrid_mlkem_remove_callbacks",
+      "kex_type_to_mlkem_info",
+      "ssh_set_error",
+      "ssh_buffer_get_ssh_string",
+      "ssh_dh_import_next_pubkey_blob",
+      "ssh_string_free",
+      "ssh_buffer_new",
+      "ssh_set_error_oom",
+      "ssh_buffer_add_data"
+    ],
+    "totalCalls": 23
+  },
+  {
+    "function": "ssh_make_sessionid",
+    "file": "src/kex.c",
+    "calls": [
+      "defined",
+      "ssh_buffer_new",
+      "ssh_set_error_oom",
+      "ssh_buffer_pack",
+      "ssh_set_error",
+      "ssh_dh_get_next_server_publickey_blob",
+      "ssh_kex_is_gss",
+      "ssh_string_new",
+      "ssh_buffer_get_len",
+      "ssh_buffer_get"
+    ],
+    "totalCalls": 23
+  },
+  {
+    "function": "ssh_userauth_agent",
+    "file": "src/auth.c",
+    "calls": [
+      "SSH_LOG",
+      "ssh_agent_is_running",
+      "calloc",
+      "ssh_set_error_oom",
+      "ssh_agent_get_first_ident",
+      "ssh_list_count",
+      "ssh_list_get_iterator",
+      "malloc",
+      "free",
+      "ssh_pki_import_pubkey_file"
+    ],
+    "totalCalls": 22
+  },
+  {
+    "function": "ssh_userauth_publickey_auto",
+    "file": "src/auth.c",
+    "calls": [
+      "SSH_LOG",
+      "calloc",
+      "ssh_set_error_oom",
+      "ssh_userauth_agent",
+      "ssh_list_get_iterator",
+      "ssh_pki_is_uri",
+      "ssh_pki_export_pub_uri_from_priv_uri",
+      "snprintf",
+      "SAFE_FREE",
+      "ssh_pki_import_pubkey_file"
+    ],
+    "totalCalls": 22
+  },
+  {
+    "function": "ssh_client_gss_kex_init",
+    "file": "src/kex-gss.c",
+    "calls": [
+      "dh_init",
+      "ssh_set_error",
+      "ssh_ecdh_init",
+      "ssh_string_copy",
+      "ssh_curve25519_init",
+      "ssh_string_new",
+      "ssh_set_error_oom",
+      "ssh_string_fill",
+      "ssh_gssapi_init",
+      "ssh_gssapi_import_name"
+    ],
+    "totalCalls": 22
+  },
+  {
+    "function": "ssh_userauth_publickey",
+    "file": "src/auth.c",
+    "calls": [
+      "ssh_key_is_private",
+      "ssh_set_error",
+      "check_pubkey_auth_mode",
+      "ssh_userauth_request_service",
+      "name",
+      "ssh_key_get_signature_algorithm",
+      "type",
+      "ssh_key_algorithm_allowed",
+      "ssh_key_size_allowed",
+      "ssh_key_size"
+    ],
+    "totalCalls": 21
+  },
+  {
+    "function": "ssh_server_dh_process_init",
+    "file": "src/dh.c",
+    "calls": [
+      "defined",
+      "ssh_buffer_unpack",
+      "ssh_set_error",
+      "ssh_dh_keypair_set_keys",
+      "bignum_safe_free",
+      "ssh_dh_keypair_gen_keys",
+      "ssh_get_key_params",
+      "ssh_dh_compute_shared_secret",
+      "ssh_dh_debug_crypto",
+      "ssh_make_sessionid"
+    ],
+    "totalCalls": 21
+  },
+  {
+    "function": "ecdh_build_k",
+    "file": "src/ecdh_gcrypt.c",
+    "calls": [
+      "ecdh_kex_type_to_curve",
+      "gcry_sexp_build",
+      "data",
+      "key",
+      "ecdh",
+      "ssh_string_len",
+      "ssh_string_data",
+      "ssh_sexp_extract_mpi",
+      "gcry_pk_encrypt",
+      "gcry_sexp_extract_param"
+    ],
+    "totalCalls": 21
+  },
+  {
+    "function": "ssh_gssapi_handle_userauth",
+    "file": "src/gssapi.c",
+    "calls": [
+      "ssh_gssapi_free",
+      "ssh_gssapi_init",
+      "ssh_callbacks_exists",
+      "SAFE_FREE",
+      "strdup",
+      "gssapi_select_oid_function",
+      "ssh_gssapi_send_response",
+      "ssh_auth_reply_default",
+      "gss_create_empty_oid_set",
+      "ssh_gssapi_server_oids"
+    ],
+    "totalCalls": 21
+  },
+  {
+    "function": "ssh_bind_config_parse_line",
+    "file": "src/bind_config.c",
+    "calls": [
+      "ssh_set_error_invalid",
+      "strdup",
+      "ssh_set_error_oom",
+      "strlen",
+      "isspace",
+      "ssh_config_get_token",
+      "SAFE_FREE",
+      "ssh_bind_config_get_opcode",
+      "ssh_config_get_str_tok",
+      "defined"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "ssh_connect",
+    "file": "src/client.c",
+    "calls": [
+      "is_ssh_initialized",
+      "ssh_set_error",
+      "ssh_options_parse_config",
+      "ssh_options_apply",
+      "SSH_LOG",
+      "ssh_copyright",
+      "ssh_threads_get_type",
+      "ssh_socket_set_callbacks",
+      "ssh_socket_set_fd",
+      "ssh_libssh_proxy_jumps"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "ssh_client_hybrid_mlkem_init",
+    "file": "src/hybrid_mlkem.c",
+    "calls": [
+      "SSH_LOG",
+      "ssh_buffer_new",
+      "ssh_set_error_oom",
+      "ssh_mlkem_init",
+      "ssh_set_error",
+      "ssh_log_hexdump",
+      "ssh_string_data",
+      "ssh_string_len",
+      "ssh_curve25519_init",
+      "ssh_buffer_pack"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "ssh_send_kex",
+    "file": "src/kex.c",
+    "calls": [
+      "SSH_LOG",
+      "ssh_buffer_pack",
+      "ssh_hashbufout_add_cookie",
+      "ssh_list_kex",
+      "ssh_string_from_char",
+      "ssh_buffer_add_ssh_string",
+      "SSH_STRING_FREE",
+      "ssh_buffer_add_u8",
+      "ssh_buffer_add_u32",
+      "ssh_packet_send"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "ssh_userauth_try_publickey",
+    "file": "src/auth.c",
+    "calls": [
+      "ssh_key_is_public",
+      "ssh_set_error",
+      "check_pubkey_auth_mode",
+      "state",
+      "ssh_userauth_request_service",
+      "ssh_key_get_signature_algorithm",
+      "type",
+      "ssh_key_algorithm_allowed",
+      "ssh_key_size_allowed",
+      "ssh_key_size"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "ssh_disconnect",
+    "file": "src/client.c",
+    "calls": [
+      "strdup",
+      "ssh_set_error_oom",
+      "ssh_socket_is_open",
+      "ssh_buffer_pack",
+      "ssh_packet_send",
+      "ssh_session_socket_close",
+      "ssh_socket_reset",
+      "ssh_list_get_iterator",
+      "ssh_channel_do_free",
+      "ssh_iterator_value"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "ssh_exec_shell",
+    "file": "src/config.c",
+    "calls": [
+      "getenv",
+      "access",
+      "SSH_LOG",
+      "open",
+      "SSH_LOG_STRERROR",
+      "fork",
+      "dup2",
+      "exit",
+      "close",
+      "strdup"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "ssh_userauth_agent_publickey",
+    "file": "src/auth.c",
+    "calls": [
+      "check_pubkey_auth_mode",
+      "ssh_set_error",
+      "ssh_userauth_request_service",
+      "ssh_pki_export_pubkey_blob",
+      "ssh_key_get_signature_algorithm",
+      "type",
+      "SSH_STRING_FREE",
+      "ssh_key_algorithm_allowed",
+      "ssh_key_size_allowed",
+      "ssh_key_size"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "ssh_config_parse_uri",
+    "file": "src/config_parser.c",
+    "calls": [
+      "part",
+      "strrchr",
+      "strndup",
+      "ssh_check_username_syntax",
+      "strchr",
+      "colon",
+      "ssh_is_ipaddr",
+      "ssh_check_hostname_syntax",
+      "chars",
+      "valid_hostname"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "ssh_client_connection_callback",
+    "file": "src/client.c",
+    "calls": [
+      "SSH_LOG",
+      "ssh_set_fd_towrite",
+      "ssh_send_banner",
+      "set_status",
+      "ssh_analyze_banner",
+      "ssh_set_error",
+      "usable",
+      "ssh_packet_register_socket_callback",
+      "ssh_packet_set_default_callbacks",
+      "ssh_set_client_kex"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "ssh_config_parse_proxy_jump",
+    "file": "src/config.c",
+    "calls": [
+      "ssh_libssh_proxy_jumps",
+      "SAFE_FREE",
+      "ssh_proxyjumps_free",
+      "strcasecmp",
+      "ssh_options_set",
+      "strdup",
+      "ssh_set_error_oom",
+      "free",
+      "strchr",
+      "calloc"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "ecdh_build_k",
+    "file": "src/ecdh_mbedcrypto.c",
+    "calls": [
+      "ssh_get_mbedtls_ctr_drbg_context",
+      "ecdh_kex_type_to_curve",
+      "mbedtls_ecp_group_init",
+      "mbedtls_ecp_point_init",
+      "mbedtls_ecp_group_load",
+      "mbedtls_ecp_point_read_binary",
+      "ssh_string_data",
+      "ssh_string_len",
+      "malloc",
+      "mbedtls_mpi_init"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "libcrux_ml_kem_ind_cca_decapsulate_62",
+    "file": "src/external/libcrux_mlkem768_sha3.c",
+    "calls": [
+      "libcrux_ml_kem_types_unpack_private_key_b4",
+      "Eurydice_array_to_slice",
+      "libcrux_ml_kem_ind_cpa_decrypt_42",
+      "libcrux_ml_kem_utils_into_padded_array_24",
+      "Eurydice_slice_copy",
+      "Eurydice_array_to_subslice_from",
+      "libcrux_ml_kem_hash_functions_portable_G_4a_e0",
+      "Eurydice_slice_split_at",
+      "libcrux_ml_kem_utils_into_padded_array_15",
+      "libcrux_ml_kem_types_as_ref_d3_80"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "ssh_bind_accept_fd",
+    "file": "src/bind.c",
+    "calls": [
+      "ssh_set_error",
+      "strdup",
+      "SAFE_FREE",
+      "ssh_set_error_oom",
+      "ssh_find_all_matching",
+      "ssh_socket_free",
+      "ssh_socket_new",
+      "ssh_socket_set_fd",
+      "ssh_socket_get_poll_handle",
+      "ssh_socket_set_connected"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "ssh_buffer_pack_va",
+    "file": "src/buffer.c",
+    "calls": [
+      "va_arg",
+      "ssh_buffer_add_u8",
+      "htons",
+      "ssh_buffer_add_u16",
+      "htonl",
+      "ssh_buffer_add_u32",
+      "htonll",
+      "ssh_buffer_add_u64",
+      "ssh_buffer_add_ssh_string",
+      "strlen"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "ssh_dh_set_parameters",
+    "file": "src/dh_crypto.c",
+    "calls": [
+      "EVP_PKEY_CTX_new_from_name",
+      "DH_free",
+      "DH_new",
+      "BN_dup",
+      "DH_set0_pqg",
+      "BN_free",
+      "OSSL_PARAM_BLD_new",
+      "OSSL_PARAM_BLD_push_BN",
+      "OSSL_PARAM_BLD_to_param",
+      "OSSL_PARAM_BLD_free"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "derive_hybrid_secret",
+    "file": "src/hybrid_mlkem.c",
+    "calls": [
+      "ssh_set_error",
+      "ssh_buffer_new",
+      "ssh_set_error_oom",
+      "ssh_buffer_set_secure",
+      "ssh_buffer_pack",
+      "ssh_string_len",
+      "ssh_string_data",
+      "ssh_log_hexdump",
+      "ssh_buffer_get",
+      "ssh_buffer_get_len"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "ssh_agent_remove_identity",
+    "file": "src/agent.c",
+    "calls": [
+      "ssh_set_error",
+      "ssh_socket_is_open",
+      "agent_connect",
+      "ssh_buffer_new",
+      "ssh_set_error_oom",
+      "ssh_buffer_add_u8",
+      "ssh_pki_export_pubkey_blob",
+      "ssh_buffer_add_ssh_string",
+      "agent_talk",
+      "ssh_buffer_get_u8"
+    ],
+    "totalCalls": 14
+  },
+  {
+    "function": "ssh_select",
+    "file": "src/connect.c",
+    "calls": [
+      "ssh_event_new",
+      "ssh_event_add_session",
+      "ZERO_STRUCT",
+      "FD_ZERO",
+      "FD_ISSET",
+      "ssh_event_add_fd",
+      "FD_SET",
+      "ssh_timestamp_init",
+      "ssh_channel_poll",
+      "ssh_timeout_elapsed"
+    ],
+    "totalCalls": 14
+  },
+  {
+    "function": "curve25519_do_create_k",
+    "file": "src/curve25519_gcrypt.c",
+    "calls": [
+      "gcry_sexp_build",
+      "data",
+      "key",
+      "ecdh",
+      "SSH_LOG",
+      "gcry_strerror",
+      "ssh_sexp_extract_mpi",
+      "ssh_string_len",
+      "ssh_string_data",
+      "gcry_pk_encrypt"
+    ],
+    "totalCalls": 14
+  },
+  {
+    "function": "ssh_dh_compute_shared_secret",
+    "file": "src/dh_crypto.c",
+    "calls": [
+      "malloc",
+      "DH_size",
+      "ssh_dh_keypair_get_keys",
+      "DH_compute_key",
+      "EVP_PKEY_CTX_new_from_pkey",
+      "EVP_PKEY_derive_init",
+      "EVP_PKEY_derive_set_peer",
+      "SSH_LOG",
+      "ERR_error_string",
+      "ERR_get_error"
+    ],
+    "totalCalls": 14
+  },
+  {
+    "function": "ssh_gssapi_client_identity",
+    "file": "src/gssapi.c",
+    "calls": [
+      "strlen",
+      "gss_import_name",
+      "GSS_ERROR",
+      "gss_acquire_cred",
+      "ssh_gssapi_log_error",
+      "gss_inquire_cred",
+      "SSH_LOG",
+      "gss_create_empty_oid_set",
+      "gss_inquire_cred_by_mech",
+      "gss_add_oid_set_member"
+    ],
+    "totalCalls": 14
+  },
+  {
+    "function": "ssh_gssapi_auth_mic",
+    "file": "src/gssapi.c",
+    "calls": [
+      "ssh_gssapi_free",
+      "ssh_gssapi_init",
+      "ssh_gssapi_import_name",
+      "strdup",
+      "ssh_set_error_oom",
+      "SSH_LOG",
+      "ssh_gssapi_client_identity",
+      "calloc",
+      "ssh_string_new",
+      "memcpy"
+    ],
+    "totalCalls": 14
+  },
+  {
+    "function": "ssh_agent_get_ident_count",
+    "file": "src/agent.c",
+    "calls": [
+      "ssh_buffer_new",
+      "ssh_set_error_oom",
+      "ssh_buffer_add_u8",
+      "SSH_BUFFER_FREE",
+      "ssh_set_error",
+      "agent_talk",
+      "ssh_buffer_get_u8",
+      "bswap_32",
+      "SSH_LOG",
+      "agent_failed"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "ssh_userauth_gssapi_keyex",
+    "file": "src/auth.c",
+    "calls": [
+      "ssh_set_error",
+      "state",
+      "ssh_kex_is_gss",
+      "ssh_userauth_request_service",
+      "SSH_LOG",
+      "SAFE_FREE",
+      "strdup",
+      "ssh_set_error_oom",
+      "ssh_gssapi_auth_keyex_mic",
+      "ssh_buffer_pack"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "channel_write_common",
+    "file": "src/channels.c",
+    "calls": [
+      "ssh_set_error_invalid",
+      "SSH_LOG",
+      "Length",
+      "ssh_set_error",
+      "ssh_waitsession_unblocked",
+      "ssh_handle_packets_termination",
+      "ssh_channel_waitwindow_termination",
+      "MIN",
+      "ssh_buffer_pack",
+      "ssh_set_error_oom"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "ssh_channel_select",
+    "file": "src/channels.c",
+    "calls": [
+      "ssh_timestamp_init",
+      "calloc",
+      "count_ptrs",
+      "SAFE_FREE",
+      "channel_protocol_select",
+      "ssh_event_new",
+      "ssh_poll_get_default_ctx",
+      "ssh_event_add_session",
+      "ssh_timeout_elapsed",
+      "ssh_event_dopoll"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "ssh_connect_host_nonblocking",
+    "file": "src/connect.c",
+    "calls": [
+      "SSH_LOG",
+      "getai",
+      "ssh_set_error",
+      "gai_strerror",
+      "socket",
+      "ssh_strerror",
+      "ssh_connect_socket_close",
+      "bind",
+      "freeaddrinfo",
+      "ssh_socket_set_nonblocking"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "ssh_connector_channel_data_cb",
+    "file": "src/connector.c",
+    "calls": [
+      "SSH_LOG",
+      "data",
+      "channel",
+      "ssh_channel_window_size",
+      "MIN",
+      "ssh_channel_write",
+      "ssh_channel_write_stderr",
+      "ssh_connector_except_channel",
+      "ssh_connector_fd_write",
+      "ssh_connector_except"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "ssh_connector_channel_write_wontblock_cb",
+    "file": "src/connector.c",
+    "calls": [
+      "SSH_LOG",
+      "block",
+      "channel",
+      "MIN",
+      "ssh_channel_read_nonblocking",
+      "ssh_connector_except_channel",
+      "ssh_channel_is_eof",
+      "ssh_channel_send_eof",
+      "ssh_channel_write",
+      "ssh_connector_fd_in_cb"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "ssh_curve25519_init",
+    "file": "src/curve25519_gcrypt.c",
+    "calls": [
+      "gcry_sexp_build",
+      "genkey",
+      "ecdh",
+      "SSH_LOG",
+      "gcry_strerror",
+      "gcry_pk_genkey",
+      "ssh_sexp_extract_mpi",
+      "ssh_string_data",
+      "ssh_string_len",
+      "memcpy"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "ssh_dh_keypair_set_keys",
+    "file": "src/dh_crypto.c",
+    "calls": [
+      "DH_set0_key",
+      "EVP_PKEY_todata",
+      "OSSL_PARAM_BLD_new",
+      "EVP_PKEY_CTX_new_from_pkey",
+      "EVP_PKEY_fromdata_init",
+      "OSSL_PARAM_BLD_push_BN",
+      "OSSL_PARAM_BLD_to_param",
+      "OSSL_PARAM_BLD_free",
+      "OSSL_PARAM_merge",
+      "EVP_PKEY_fromdata"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "ssh_ecdh_init",
+    "file": "src/ecdh_mbedcrypto.c",
+    "calls": [
+      "ssh_get_mbedtls_ctr_drbg_context",
+      "ecdh_kex_type_to_curve",
+      "mbedtls_ecp_keypair_free",
+      "SAFE_FREE",
+      "malloc",
+      "mbedtls_ecp_keypair_init",
+      "mbedtls_ecp_group_init",
+      "mbedtls_ecp_group_load",
+      "mbedtls_ecp_gen_keypair",
+      "MBEDTLS_PRIVATE"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "libcrux_ml_kem_ind_cca_encapsulate_ca",
+    "file": "src/external/libcrux_mlkem768_sha3.c",
+    "calls": [
+      "libcrux_ml_kem_variant_entropy_preprocess_39_9c",
+      "Eurydice_array_to_slice",
+      "libcrux_ml_kem_utils_into_padded_array_24",
+      "Eurydice_array_to_subslice_from",
+      "libcrux_ml_kem_hash_functions_portable_H_4a_e0",
+      "libcrux_ml_kem_types_as_slice_e6_d0",
+      "Eurydice_slice_copy",
+      "libcrux_ml_kem_hash_functions_portable_G_4a_e0",
+      "Eurydice_slice_split_at",
+      "libcrux_ml_kem_ind_cpa_encrypt_2a"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "libcrux_ml_kem_ind_cpa_generate_keypair_unpacked_1c",
+    "file": "src/external/libcrux_mlkem768_sha3.c",
+    "calls": [
+      "libcrux_ml_kem_variant_cpa_keygen_seed_39_9c",
+      "Eurydice_slice_split_at",
+      "Eurydice_array_to_slice",
+      "libcrux_ml_kem_polynomial_PolynomialRingElement_1d",
+      "libcrux_ml_kem_utils_into_padded_array_b6",
+      "libcrux_ml_kem_matrix_sample_matrix_A_2b",
+      "libcrux_ml_kem_utils_into_padded_array_c8",
+      "libcrux_ml_kem_ind_cpa_sample_vector_cbd_then_ntt_3b",
+      "libcrux_ml_kem_ind_cpa_generate_keypair_unpacked_call_mut_73_1c",
+      "libcrux_ml_kem_matrix_compute_As_plus_e_1b"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "ssh_set_client_kex",
+    "file": "src/kex.c",
+    "calls": [
+      "ssh_get_random",
+      "ssh_set_error",
+      "ssh_gssapi_init",
+      "ssh_set_error_oom",
+      "ssh_gssapi_import_name",
+      "ssh_gssapi_kex_mechs",
+      "ssh_fips_mode",
+      "ssh_prefix_without_duplicates",
+      "SAFE_FREE",
+      "ssh_client_select_hostkeys"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "ssh_connector_fd_in_cb",
+    "file": "src/connector.c",
+    "calls": [
+      "SSH_LOG",
+      "ssh_channel_window_size",
+      "MIN",
+      "ssh_connector_fd_read",
+      "ssh_connector_except",
+      "ssh_channel_send_eof",
+      "ssh_channel_write",
+      "ssh_channel_write_stderr",
+      "close",
+      "ssh_connector_fd_write"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "curve25519_do_create_k",
+    "file": "src/curve25519_mbedcrypto.c",
+    "calls": [
+      "ssh_get_mbedtls_ctr_drbg_context",
+      "mbedtls_ecdh_init",
+      "mbedtls_ecdh_setup",
+      "mbedtls_strerror",
+      "SSH_LOG",
+      "MBEDTLS_ECDH_PARAMS",
+      "mbedtls_mpi_read_binary_le",
+      "MBEDTLS_ECDH_PRIVATE",
+      "mbedtls_mpi_lset",
+      "mbedtls_ecdh_compute_shared"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "SSH_PACKET_CALLBACK",
+    "file": "src/dh-gex.c",
+    "calls": [
+      "SSH_LOG",
+      "ssh_client_dhgex_remove_callbacks",
+      "ssh_buffer_unpack",
+      "ssh_set_error",
+      "ssh_dh_keypair_set_keys",
+      "bignum_safe_free",
+      "ssh_dh_import_next_pubkey_blob",
+      "SSH_STRING_FREE",
+      "ssh_dh_compute_shared_secret",
+      "ssh_dh_debug_crypto"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "ssh_gets",
+    "file": "src/getpass.c",
+    "calls": [
+      "calloc",
+      "fprintf",
+      "fflush",
+      "fgets",
+      "free",
+      "strchr",
+      "strlcpy",
+      "ssh_burn",
+      "SAFE_FREE",
+      "clearerr"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "ssh_gssapi_send_mic",
+    "file": "src/gssapi.c",
+    "calls": [
+      "SSH_LOG",
+      "ssh_gssapi_build_mic",
+      "ssh_set_error_oom",
+      "ssh_buffer_get_len",
+      "ssh_buffer_get",
+      "gss_get_mic",
+      "SSH_BUFFER_FREE",
+      "GSS_ERROR",
+      "ssh_gssapi_log_error",
+      "ssh_buffer_pack"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "bind_socket",
+    "file": "src/bind.c",
+    "calls": [
+      "ZERO_STRUCT",
+      "snprintf",
+      "getaddrinfo",
+      "ssh_set_error",
+      "gai_strerror",
+      "socket",
+      "ssh_strerror",
+      "freeaddrinfo",
+      "setsockopt",
+      "CLOSE_SOCKET"
+    ],
+    "totalCalls": 11
+  },
+  {
+    "function": "ssh_channel_accept",
+    "file": "src/channels.c",
+    "calls": [
+      "ssh_handle_packets",
+      "ssh_list_get_iterator",
+      "ssh_message_type",
+      "ssh_message_subtype",
+      "ssh_list_remove",
+      "ssh_message_channel_request_open_reply_accept",
+      "strdup",
+      "ssh_message_free",
+      "Sleep",
+      "nanosleep"
+    ],
+    "totalCalls": 11
+  },
+  {
+    "function": "ssh_channel_read_timeout",
+    "file": "src/channels.c",
+    "calls": [
+      "ssh_set_error_invalid",
+      "SSH_LOG",
+      "Read",
+      "ssh_buffer_get_len",
+      "ssh_handle_packets_termination",
+      "ssh_set_error",
+      "memcpy",
+      "ssh_buffer_get",
+      "ssh_buffer_pass_bytes",
+      "ssh_channel_has_unread_data"
+    ],
+    "totalCalls": 11
+  },
+  {
+    "function": "ssh_dh_keypair_gen_keys",
+    "file": "src/dh_key.c",
+    "calls": [
+      "bignum_ctx_new",
+      "bignum_ctx_invalid",
+      "bignum_new",
+      "bignum_num_bits",
+      "MIN",
+      "rnd",
+      "bignum_rand",
+      "bignum_mod",
+      "bignum_mod_exp",
+      "bignum_safe_free"
+    ],
+    "totalCalls": 11
+  },
+  {
+    "function": "crypto_sign_ed25519",
+    "file": "src/external/ed25519.c",
+    "calls": [
+      "sha512_init",
+      "sha512_update",
+      "sha512_final",
+      "sc25519_from64bytes",
+      "ge25519_scalarmult_base",
+      "ge25519_pack",
+      "get_hram",
+      "sc25519_from32bytes",
+      "sc25519_mul",
+      "sc25519_add"
+    ],
+    "totalCalls": 11
+  },
+  {
+    "function": "ge25519_unpackneg_vartime",
+    "file": "src/external/ge25519.c",
+    "calls": [
+      "fe25519_setone",
+      "fe25519_unpack",
+      "fe25519_square",
+      "fe25519_mul",
+      "fe25519_sub",
+      "fe25519_add",
+      "sqrt",
+      "fe25519_pow2523",
+      "fe25519_iseq_vartime",
+      "fe25519_getparity"
+    ],
+    "totalCalls": 11
+  },
+  {
+    "function": "libcrux_ml_kem_ind_cpa_encrypt_c1_85",
+    "file": "src/external/libcrux_mlkem768_sha3.c",
+    "calls": [
+      "libcrux_ml_kem_utils_into_padded_array_c8",
+      "libcrux_ml_kem_ind_cpa_encrypt_c1_call_mut_f1_85",
+      "libcrux_ml_kem_ind_cpa_sample_vector_cbd_then_ntt_3b",
+      "libcrux_ml_kem_ind_cpa_encrypt_c1_call_mut_dd_85",
+      "libcrux_ml_kem_ind_cpa_sample_ring_element_cbd_3b",
+      "libcrux_ml_kem_hash_functions_portable_PRF_4a_410",
+      "Eurydice_array_to_slice",
+      "libcrux_ml_kem_sampling_sample_from_binomial_distribution_a0",
+      "libcrux_ml_kem_matrix_compute_vector_u_1b",
+      "memcpy"
+    ],
+    "totalCalls": 11
+  },
+  {
+    "function": "ssh_generate_session_keys",
+    "file": "src/kex.c",
+    "calls": [
+      "ssh_string_copy",
+      "ssh_make_bignum_string",
+      "ssh_set_error_oom",
+      "ssh_string_len",
+      "hmac_digest_len",
+      "malloc",
+      "ssh_kdf",
+      "ssh_log_hexdump",
+      "ssh_string_burn",
+      "SSH_STRING_FREE"
+    ],
+    "totalCalls": 11
+  },
+  {
+    "function": "agent_talk",
+    "file": "src/agent.c",
+    "calls": [
+      "ssh_buffer_get_len",
+      "SSH_LOG",
+      "PUSH_BE_U32",
+      "atomicio",
+      "ssh_buffer_get",
+      "SSH_LOG_STRERROR",
+      "PULL_BE_U32",
+      "ssh_set_error",
+      "ssh_buffer_allocate",
+      "ssh_buffer_pass_bytes_end"
+    ],
+    "totalCalls": 10
+  },
+  {
+    "function": "ssh_userauth_password",
+    "file": "src/auth.c",
+    "calls": [
+      "SSH_LOG",
+      "ssh_set_error",
+      "state",
+      "ssh_userauth_request_service",
+      "ssh_buffer_pack",
+      "ssh_buffer_set_secure",
+      "ssh_packet_send",
+      "ssh_userauth_get_response",
+      "ssh_set_error_oom",
+      "ssh_buffer_reinit"
+    ],
+    "totalCalls": 10
+  },
+  {
+    "function": "channel_request",
+    "file": "src/channels.c",
+    "calls": [
+      "ssh_buffer_pack",
+      "ssh_set_error_oom",
+      "ssh_buffer_add_data",
+      "ssh_buffer_get",
+      "ssh_buffer_get_len",
+      "ssh_packet_send",
+      "SSH_LOG",
+      "ssh_handle_packets_termination",
+      "ssh_set_error",
+      "ssh_buffer_reinit"
+    ],
+    "totalCalls": 10
+  },
+  {
+    "function": "ssh_global_request",
+    "file": "src/channels.c",
+    "calls": [
+      "ssh_buffer_pack",
+      "ssh_set_error_oom",
+      "ssh_buffer_add_data",
+      "ssh_buffer_get",
+      "ssh_buffer_get_len",
+      "ssh_packet_send",
+      "SSH_LOG",
+      "ssh_handle_packets_termination",
+      "ssh_set_error",
+      "ssh_buffer_reinit"
+    ],
+    "totalCalls": 10
+  },
+  {
+    "function": "ssh_connector_fd_out_cb",
+    "file": "src/connector.c",
+    "calls": [
+      "SSH_LOG",
+      "ssh_channel_read_nonblocking",
+      "ssh_connector_except_channel",
+      "ssh_channel_is_eof",
+      "close",
+      "ssh_connector_fd_write",
+      "ssh_connector_except",
+      "ssh_connector_fd_in_cb",
+      "ssh_set_error",
+      "ssh_connector_update_flags_after_io"
+    ],
+    "totalCalls": 10
+  },
+  {
+    "function": "SSH_PACKET_CALLBACK",
+    "file": "src/curve25519.c",
+    "calls": [
+      "ssh_client_curve25519_remove_callbacks",
+      "ssh_buffer_get_ssh_string",
+      "ssh_set_error",
+      "ssh_dh_import_next_pubkey_blob",
+      "SSH_STRING_FREE",
+      "ssh_string_len",
+      "memcpy",
+      "ssh_string_data",
+      "ssh_curve25519_build_k",
+      "ssh_packet_send_newkeys"
+    ],
+    "totalCalls": 10
+  },
+  {
+    "function": "curve25519_do_create_k",
+    "file": "src/curve25519_crypto.c",
+    "calls": [
+      "SSH_LOG",
+      "ERR_error_string",
+      "ERR_get_error",
+      "EVP_PKEY_CTX_new",
+      "EVP_PKEY_derive_init",
+      "EVP_PKEY_new_raw_public_key",
+      "EVP_PKEY_derive_set_peer",
+      "EVP_PKEY_derive",
+      "EVP_PKEY_free",
+      "EVP_PKEY_CTX_free"
+    ],
+    "totalCalls": 10
+  },
+  {
+    "function": "ssh_curve25519_init",
+    "file": "src/curve25519_mbedcrypto.c",
+    "calls": [
+      "ssh_get_mbedtls_ctr_drbg_context",
+      "mbedtls_ecdh_init",
+      "mbedtls_ecdh_setup",
+      "mbedtls_strerror",
+      "SSH_LOG",
+      "MBEDTLS_ECDH_PARAMS",
+      "mbedtls_ecdh_gen_public",
+      "MBEDTLS_ECDH_PRIVATE",
+      "mbedtls_mpi_write_binary_le",
+      "mbedtls_ecdh_free"
+    ],
+    "totalCalls": 10
+  },
+  {
+    "function": "ssh_retrieve_dhgroup",
+    "file": "src/dh-gex.c",
+    "calls": [
+      "ssh_fips_mode",
+      "SSH_LOG",
+      "ssh_fallback_group",
+      "ssh_strict_fopen",
+      "SSH_LOG_STRERROR",
+      "ssh_retrieve_dhgroup_file",
+      "fclose",
+      "bignum_hex2bn",
+      "SAFE_FREE",
+      "bignum_safe_free"
+    ],
+    "totalCalls": 10
+  },
+  {
+    "function": "bcrypt_pbkdf",
+    "file": "src/external/bcrypt_pbkdf.c",
+    "calls": [
+      "calloc",
+      "memcpy",
+      "malloc",
+      "free",
+      "sha512_init",
+      "sha512_update",
+      "sha512_final",
+      "bcrypt_hash",
+      "MIN",
+      "ssh_burn"
+    ],
+    "totalCalls": 10
+  },
+  {
+    "function": "ssh_userauth_kbdint_init",
+    "file": "src/auth.c",
+    "calls": [
+      "ssh_set_error_invalid",
+      "ssh_userauth_request_service",
+      "ssh_buffer_pack",
+      "lang",
+      "SSH_LOG",
+      "ssh_packet_send",
+      "ssh_userauth_get_response",
+      "ssh_set_error_oom",
+      "ssh_buffer_reinit"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "base64_to_bin",
+    "file": "src/base64.c",
+    "calls": [
+      "strdup",
+      "get_equals",
+      "SAFE_FREE",
+      "ssh_buffer_new",
+      "ssh_buffer_set_secure",
+      "strlen",
+      "_base64_to_bin",
+      "ssh_buffer_add_data",
+      "SSH_BUFFER_FREE"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "ssh_bind_listen",
+    "file": "src/bind.c",
+    "calls": [
+      "ssh_bind_options_parse_config",
+      "ssh_set_error",
+      "strdup",
+      "ssh_bind_import_keys",
+      "SSH_LOG",
+      "bind_socket",
+      "listen",
+      "ssh_strerror",
+      "CLOSE_SOCKET"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "grow_window",
+    "file": "src/channels.c",
+    "calls": [
+      "buffered",
+      "ssh_buffer_get_len",
+      "SSH_LOG",
+      "window",
+      "needed",
+      "ssh_buffer_pack",
+      "ssh_set_error_oom",
+      "ssh_packet_send",
+      "ssh_buffer_reinit"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "channel_read_buffer",
+    "file": "src/channels.c",
+    "calls": [
+      "ssh_set_error_invalid",
+      "ssh_buffer_reinit",
+      "ssh_channel_poll",
+      "ssh_buffer_allocate",
+      "ssh_set_error_oom",
+      "ssh_channel_read",
+      "ssh_buffer_pass_bytes_end",
+      "ssh_channel_is_eof",
+      "ssh_handle_packets"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "dh_handshake",
+    "file": "src/client.c",
+    "calls": [
+      "SSH_LOG",
+      "ssh_client_gss_kex_init",
+      "ssh_client_dh_init",
+      "ssh_client_dhgex_init",
+      "ssh_client_ecdh_init",
+      "ssh_client_curve25519_init",
+      "ssh_client_sntrup761x25519_init",
+      "ssh_client_hybrid_mlkem_init",
+      "ssh_set_error"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "ssh_curve25519_init",
+    "file": "src/curve25519_crypto.c",
+    "calls": [
+      "EVP_PKEY_CTX_new_id",
+      "SSH_LOG",
+      "ERR_error_string",
+      "ERR_get_error",
+      "EVP_PKEY_keygen_init",
+      "EVP_PKEY_CTX_free",
+      "EVP_PKEY_keygen",
+      "EVP_PKEY_get_raw_public_key",
+      "EVP_PKEY_free"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "SSH_PACKET_CALLBACK",
+    "file": "src/dh-gex.c",
+    "calls": [
+      "ssh_set_error",
+      "ssh_buffer_unpack",
+      "ssh_set_error_invalid",
+      "SSH_LOG",
+      "ssh_retrieve_dhgroup",
+      "ssh_dh_set_parameters",
+      "bignum_safe_free",
+      "ssh_buffer_pack",
+      "ssh_packet_send"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "ssh_client_dh_init",
+    "file": "src/dh.c",
+    "calls": [
+      "defined",
+      "ssh_dh_init_common",
+      "ssh_dh_keypair_gen_keys",
+      "ssh_dh_keypair_get_keys",
+      "ssh_buffer_pack",
+      "bignum_safe_free",
+      "ssh_packet_set_callbacks",
+      "ssh_packet_send",
+      "ssh_dh_cleanup"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "libcrux_ml_kem_ind_cca_generate_keypair_15",
+    "file": "src/external/libcrux_mlkem768_sha3.c",
+    "calls": [
+      "Eurydice_array_to_subslice3",
+      "Eurydice_array_to_subslice_from",
+      "libcrux_ml_kem_ind_cpa_generate_keypair_ea",
+      "memcpy",
+      "libcrux_ml_kem_ind_cca_serialize_kem_secret_key_d6",
+      "Eurydice_array_to_slice",
+      "libcrux_ml_kem_types_from_77_28",
+      "libcrux_ml_kem_types_from_17_74",
+      "libcrux_ml_kem_types_from_fd_d0"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "ssh_getpass",
+    "file": "src/getpass.c",
+    "calls": [
+      "isatty",
+      "ZERO_STRUCT",
+      "tcgetattr",
+      "perror",
+      "memcpy",
+      "fcntl",
+      "tcsetattr",
+      "ssh_gets",
+      "ssh_burn"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "ssh_gssapi_auth_keyex_mic",
+    "file": "src/gssapi.c",
+    "calls": [
+      "ssh_set_error",
+      "ssh_gssapi_build_mic",
+      "ssh_set_error_oom",
+      "ssh_buffer_get_len",
+      "ssh_buffer_get",
+      "gss_get_mic",
+      "GSS_ERROR",
+      "ssh_gssapi_log_error",
+      "SSH_BUFFER_FREE"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "gzip_compress",
+    "file": "src/gzip.c",
+    "calls": [
+      "ssh_buffer_get",
+      "ssh_buffer_get_len",
+      "ssh_packet_get_current_crypto",
+      "initcompress",
+      "ssh_buffer_new",
+      "deflate",
+      "SSH_BUFFER_FREE",
+      "ssh_set_error",
+      "ssh_buffer_add_data"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "gzip_decompress",
+    "file": "src/gzip.c",
+    "calls": [
+      "ssh_buffer_get",
+      "ssh_buffer_get_len",
+      "ssh_packet_get_current_crypto",
+      "initdecompress",
+      "ssh_buffer_new",
+      "inflate",
+      "ssh_set_error",
+      "SSH_BUFFER_FREE",
+      "ssh_buffer_add_data"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "_ssh_finalize",
+    "file": "src/init.c",
+    "calls": [
+      "ssh_mutex_lock",
+      "ssh_mutex_unlock",
+      "ssh_dh_finalize",
+      "ssh_crypto_finalize",
+      "ssh_socket_cleanup",
+      "ssh_threads_finalize",
+      "defined",
+      "DeleteCriticalSection",
+      "SAFE_FREE"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "ssh_kex_select_methods",
+    "file": "src/kex.c",
+    "calls": [
+      "strstr",
+      "ssh_find_matching",
+      "ssh_find_aead_hmac",
+      "free",
+      "strdup",
+      "ssh_set_error",
+      "kex_select_kex_type",
+      "SSH_LOG",
+      "revert_kex_callbacks"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "ssh_userauth_none",
+    "file": "src/auth.c",
+    "calls": [
+      "ssh_set_error",
+      "state",
+      "ssh_userauth_request_service",
+      "ssh_buffer_pack",
+      "ssh_packet_send",
+      "ssh_userauth_get_response",
+      "ssh_set_error_oom",
+      "ssh_buffer_reinit"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "ssh_userauth_kbdint_send",
+    "file": "src/auth.c",
+    "calls": [
+      "ssh_set_error_invalid",
+      "ssh_buffer_pack",
+      "ssh_kbdint_free",
+      "SSH_LOG",
+      "ssh_packet_send",
+      "ssh_userauth_get_response",
+      "ssh_set_error_oom",
+      "ssh_buffer_reinit"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "chacha20_poly1305_aead_decrypt",
+    "file": "src/chachapoly.c",
+    "calls": [
+      "htonll",
+      "ZERO_STRUCT",
+      "chacha_ivsetup",
+      "chacha_encrypt_bytes",
+      "ssh_log_hexdump",
+      "poly1305_auth",
+      "secure_memcmp",
+      "SSH_LOG"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "channel_open",
+    "file": "src/channels.c",
+    "calls": [
+      "ssh_set_error",
+      "ssh_channel_new_id",
+      "SSH_LOG",
+      "ssh_buffer_pack",
+      "ssh_set_error_oom",
+      "ssh_buffer_add_buffer",
+      "ssh_packet_send",
+      "ssh_handle_packets_termination"
+    ],
+    "totalCalls": 8
+  }
+]

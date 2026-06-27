@@ -1,0 +1,1619 @@
+[
+  {
+    "function": "DTLSv1_listen",
+    "file": "ssl/d1_lib.c",
+    "calls": [
+      "SSL_CONNECTION_FROM_SSL_ONLY",
+      "SSL_set_accept_state",
+      "SSL_clear",
+      "ERR_clear_error",
+      "SSL_get_rbio",
+      "SSL_get_wbio",
+      "ERR_raise",
+      "manner",
+      "OPENSSL_malloc",
+      "OPENSSL_free"
+    ],
+    "totalCalls": 57
+  },
+  {
+    "function": "ch_on_transport_params",
+    "file": "ssl/quic/quic_channel.c",
+    "calls": [
+      "PACKET_buf_init",
+      "ossl_quic_channel_raise_protocol_error",
+      "error",
+      "PACKET_remaining",
+      "ossl_quic_wire_peek_transport_param",
+      "TP_REASON_DUP",
+      "TP_REASON_SERVER_ONLY",
+      "ossl_quic_wire_decode_transport_param_cid",
+      "TP_REASON_MALFORMED",
+      "ossl_quic_conn_id_eq"
+    ],
+    "totalCalls": 37
+  },
+  {
+    "function": "qrx_process_pkt",
+    "file": "ssl/quic/quic_record_rx.c",
+    "calls": [
+      "PACKET_data",
+      "qrx_ensure_free_rxe",
+      "PACKET_remaining",
+      "pkt_is_marked",
+      "header",
+      "ossl_quic_wire_decode_pkt_hdr",
+      "qrx_validate_hdr_early",
+      "ossl_quic_pkt_type_is_encrypted",
+      "qrx_reserve_rxe",
+      "memcpy"
+    ],
+    "totalCalls": 37
+  },
+  {
+    "function": "ssl_ctrl",
+    "file": "ssl/bio_ssl.c",
+    "calls": [
+      "BIO_get_data",
+      "BIO_next",
+      "TODO",
+      "SSL_clear",
+      "SSL_CONNECTION_FROM_SSL_ONLY",
+      "SSL_shutdown",
+      "SSL_set_connect_state",
+      "SSL_set_accept_state",
+      "BIO_ctrl",
+      "time"
+    ],
+    "totalCalls": 35
+  },
+  {
+    "function": "ch_init",
+    "file": "ssl/quic/quic_channel.c",
+    "calls": [
+      "ossl_quic_port_get_rx_short_dcid_len",
+      "ossl_quic_port_get_tx_init_dcid_len",
+      "ossl_quic_gen_rand_conn_id",
+      "ossl_time_infinite",
+      "ossl_qtx_new",
+      "ossl_quic_txpim_new",
+      "ossl_quic_cfq_new",
+      "ossl_quic_txfc_init",
+      "ossl_quic_rxfc_init",
+      "ossl_quic_rxfc_init_standalone"
+    ],
+    "totalCalls": 29
+  },
+  {
+    "function": "depack_process_frames",
+    "file": "ssl/quic/quic_rx_depack.c",
+    "calls": [
+      "ossl_quic_enc_level_to_pn_space",
+      "PACKET_remaining",
+      "ossl_quic_channel_raise_protocol_error",
+      "PACKET_data",
+      "ossl_quic_wire_peek_frame_header",
+      "depack_do_frame_ping",
+      "depack_do_frame_padding",
+      "depack_do_frame_ack",
+      "depack_do_frame_reset_stream",
+      "depack_do_frame_stop_sending"
+    ],
+    "totalCalls": 28
+  },
+  {
+    "function": "ossl_quic_tls_tick",
+    "file": "ssl/quic/quic_tls.c",
+    "calls": [
+      "SSL_read",
+      "SSL_get_error",
+      "ERR_clear_to_mark",
+      "ERR_set_mark",
+      "SSL_CONNECTION_FROM_SSL",
+      "SSL_CONNECTION_GET_CTX",
+      "RAISE_INTERNAL_ERROR",
+      "RAISE_ERROR",
+      "SSL_set_min_proto_version",
+      "SSL_clear_options"
+    ],
+    "totalCalls": 23
+  },
+  {
+    "function": "trace_frame_data",
+    "file": "ssl/quic/quic_trace.c",
+    "calls": [
+      "ossl_quic_wire_peek_frame_header",
+      "BIO_puts",
+      "ossl_quic_wire_decode_frame_ping",
+      "ossl_quic_wire_decode_padding",
+      "frame_ack",
+      "frame_reset_stream",
+      "frame_stop_sending",
+      "frame_crypto",
+      "frame_new_token",
+      "frame_stream"
+    ],
+    "totalCalls": 23
+  },
+  {
+    "function": "ossl_quic_channel_subtick",
+    "file": "ssl/quic/quic_channel.c",
+    "calls": [
+      "fire",
+      "ossl_quic_channel_is_terminated",
+      "ossl_time_infinite",
+      "ossl_quic_channel_is_terminating",
+      "get_time",
+      "ossl_time_compare",
+      "ch_on_terminating_timeout",
+      "ch_rxku_tick",
+      "ch_rx",
+      "ch_tick_tls"
+    ],
+    "totalCalls": 22
+  },
+  {
+    "function": "ch_cleanup",
+    "file": "ssl/quic/quic_channel.c",
+    "calls": [
+      "ossl_ackm_on_pkt_space_discarded",
+      "ossl_quic_lcidm_cull",
+      "ossl_quic_srtm_cull",
+      "ossl_quic_tx_packetiser_free",
+      "ossl_quic_txpim_free",
+      "ossl_quic_cfq_free",
+      "ossl_qtx_free",
+      "free",
+      "ossl_statm_destroy",
+      "ossl_ackm_free"
+    ],
+    "totalCalls": 21
+  },
+  {
+    "function": "ch_rx_handle_packet",
+    "file": "ssl/quic/quic_channel.c",
+    "calls": [
+      "ossl_quic_channel_is_active",
+      "ossl_quic_pkt_type_is_encrypted",
+      "ossl_quic_tx_packetiser_set_cur_dcid",
+      "ossl_quic_pkt_type_to_enc_level",
+      "BIO_ADDR_family",
+      "bio_addr_eq",
+      "ossl_quic_pkt_type_has_scid",
+      "ossl_quic_conn_id_eq",
+      "ossl_quic_pkt_type_has_version",
+      "ossl_quic_channel_raise_protocol_error"
+    ],
+    "totalCalls": 21
+  },
+  {
+    "function": "quic_do_handshake",
+    "file": "ssl/quic/quic_impl.c",
+    "calls": [
+      "ossl_quic_channel_is_handshake_complete",
+      "quic_mutation_allowed",
+      "QUIC_RAISE_NON_NORMAL_ERROR",
+      "BIO_s_dgram_pair",
+      "BIO_dgram_get_effective_caps",
+      "BIO_ADDR_family",
+      "BIOs",
+      "csm_analyse_init_peer_addr",
+      "BIO_ADDR_clear",
+      "ossl_quic_channel_set_peer_addr"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "ch_generate_transport_params",
+    "file": "ssl/quic/quic_channel.c",
+    "calls": [
+      "BUF_MEM_new",
+      "WPACKET_init",
+      "ossl_quic_wire_encode_transport_param_bytes",
+      "ossl_quic_wire_encode_transport_param_cid",
+      "ossl_quic_wire_encode_transport_param_int",
+      "ossl_quic_rxfc_get_cwm",
+      "WPACKET_finish",
+      "WPACKET_get_total_written",
+      "ossl_quic_tls_set_transport_params",
+      "QLOG_EVENT_BEGIN"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "ossl_quic_free",
+    "file": "ssl/quic/quic_impl.c",
+    "calls": [
+      "expect_quic",
+      "quic_lock",
+      "ossl_quic_sstream_get_final_size",
+      "ossl_quic_stream_map_reset_stream_send_part",
+      "ossl_quic_channel_get_qsm",
+      "ossl_quic_stream_map_stop_sending_recv_part",
+      "ossl_quic_stream_map_update_state",
+      "quic_unlock",
+      "SSL_free",
+      "OPENSSL_free"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "ossl_qrl_enc_level_set_provide_secret",
+    "file": "ssl/quic/quic_record_shared.c",
+    "calls": [
+      "ossl_qrl_enc_level_set_get",
+      "ossl_qrl_get_suite_md_name",
+      "ERR_raise",
+      "ossl_qrl_enc_level_set_discard",
+      "ossl_qrl_get_suite_hdr_prot_key_len",
+      "EVP_MD_fetch",
+      "ossl_qrl_get_suite_cipher_tag_len",
+      "tls13_hkdf_expand_ex",
+      "KS0",
+      "el_setup_keyslot"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "demux_recv",
+    "file": "ssl/quic/quic_demux.c",
+    "calls": [
+      "ossl_list_urxe_head",
+      "ossl_list_urxe_next",
+      "demux_reserve_urxe",
+      "memset",
+      "ossl_quic_urxe_data",
+      "BIO_ADDR_clear",
+      "ERR_set_mark",
+      "BIO_recvmmsg",
+      "BIO_err_is_non_fatal",
+      "ERR_peek_last_error"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "el_setup_keyslot",
+    "file": "ssl/quic/quic_record_shared.c",
+    "calls": [
+      "ossl_qrl_enc_level_set_get",
+      "ossl_qrl_enc_level_set_has_keyslot",
+      "ERR_raise",
+      "ossl_qrl_get_suite_cipher_name",
+      "ossl_qrl_get_suite_cipher_iv_len",
+      "ossl_qrl_get_suite_cipher_key_len",
+      "ossl_qrl_get_suite_secret_len",
+      "tls13_hkdf_expand_ex",
+      "EVP_CIPHER_fetch",
+      "EVP_CIPHER_CTX_new"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "log_packet",
+    "file": "ssl/quic/qlog_event_helpers.c",
+    "calls": [
+      "QLOG_BEGIN",
+      "quic_pkt_type_to_qlog",
+      "QLOG_STR",
+      "ossl_quic_pkt_type_has_pn",
+      "QLOG_U64",
+      "QLOG_CID",
+      "ossl_quic_pkt_type_has_scid",
+      "QLOG_BIN",
+      "QLOG_END",
+      "TODO"
+    ],
+    "totalCalls": 14
+  },
+  {
+    "function": "ossl_quic_write_flags",
+    "file": "ssl/quic/quic_impl.c",
+    "calls": [
+      "expect_quic",
+      "quic_lock_for_io",
+      "expect_quic_with_stream_lock",
+      "QUIC_RAISE_NON_NORMAL_ERROR",
+      "quic_mutation_allowed",
+      "quic_do_handshake",
+      "quic_validate_for_write",
+      "quic_post_write",
+      "qctx_should_autotick",
+      "xso_blocking_mode"
+    ],
+    "totalCalls": 14
+  },
+  {
+    "function": "quic_read",
+    "file": "ssl/quic/quic_impl.c",
+    "calls": [
+      "expect_quic",
+      "quic_lock_for_io",
+      "quic_mutation_allowed",
+      "QUIC_RAISE_NON_NORMAL_ERROR",
+      "quic_do_handshake",
+      "peer",
+      "yet",
+      "qc_wait_for_default_xso_for_read",
+      "quic_read_actual",
+      "qctx_maybe_autotick"
+    ],
+    "totalCalls": 14
+  },
+  {
+    "function": "poll_two_fds",
+    "file": "ssl/quic/quic_reactor.c",
+    "calls": [
+      "defined",
+      "value",
+      "FD_ZERO",
+      "openssl_fdset",
+      "ossl_time_is_infinite",
+      "ossl_crypto_mutex_unlock",
+      "ossl_time_now",
+      "ossl_time_subtract",
+      "ossl_time_to_timeval",
+      "select"
+    ],
+    "totalCalls": 14
+  },
+  {
+    "function": "depack_do_frame_stream",
+    "file": "ssl/quic/quic_rx_depack.c",
+    "calls": [
+      "ossl_quic_wire_decode_frame_stream",
+      "ossl_quic_channel_raise_protocol_error",
+      "depack_do_implicit_stream_create",
+      "ossl_quic_stream_has_recv",
+      "ossl_quic_rxfc_on_rx_stream_frame",
+      "error",
+      "ossl_quic_rxfc_get_error",
+      "ossl_quic_stream_recv_get_final_size",
+      "ossl_quic_stream_map_notify_size_known_recv_part",
+      "control"
+    ],
+    "totalCalls": 14
+  },
+  {
+    "function": "ossl_quic_stream_map_update_state",
+    "file": "ssl/quic/quic_stream_map.c",
+    "calls": [
+      "ossl_quic_stream_is_server_init",
+      "ossl_quic_stream_is_bidi",
+      "ossl_quic_stream_map_is_local_allowed_by_stream_limit",
+      "ossl_quic_sstream_is_totally_acked",
+      "ossl_quic_stream_map_notify_totally_acked",
+      "shutdown_flush_done",
+      "qsm_ready_for_gc",
+      "list_insert_tail",
+      "ossl_quic_stream_has_recv",
+      "ossl_quic_stream_recv_is_reset"
+    ],
+    "totalCalls": 14
+  },
+  {
+    "function": "assist_thread_main",
+    "file": "ssl/quic/quic_thread_assist.c",
+    "calls": [
+      "ossl_quic_channel_get_mutex",
+      "ossl_crypto_mutex_lock",
+      "ossl_quic_channel_get_reactor",
+      "ossl_quic_reactor_get_tick_deadline",
+      "ossl_time_is_zero",
+      "ossl_time_is_infinite",
+      "ossl_time_add",
+      "ossl_time_subtract",
+      "now_cb",
+      "ossl_time_now"
+    ],
+    "totalCalls": 14
+  },
+  {
+    "function": "qlog_event_seq_header",
+    "file": "ssl/quic/qlog.c",
+    "calls": [
+      "ossl_json_object_begin",
+      "ossl_json_key",
+      "ossl_json_str",
+      "write_str_once",
+      "ossl_json_array_begin",
+      "ossl_json_array_end",
+      "ossl_json_u64",
+      "defined",
+      "getpid",
+      "GetCurrentProcessId"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "ossl_qlog_set_filter",
+    "file": "ssl/quic/qlog.c",
+    "calls": [
+      "memcpy",
+      "lex_init",
+      "strlen",
+      "lex_do",
+      "lex_peek_char",
+      "lex_skip_char",
+      "is_name_char",
+      "lex_fail",
+      "lex_match",
+      "filter_apply"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "ossl_ackm_on_rx_ack_frame",
+    "file": "ssl/quic/quic_ackm.c",
+    "calls": [
+      "ossl_quic_pn_max",
+      "ackm_detect_and_remove_newly_acked_pkts",
+      "ackm_set_loss_detection_timer",
+      "ack_includes_ack_eliciting",
+      "now",
+      "ossl_time_is_zero",
+      "ossl_time_min",
+      "ossl_statm_update_rtt",
+      "ossl_time_subtract",
+      "ackm_process_ecn"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "ossl_quic_conn_shutdown",
+    "file": "ssl/quic/quic_impl.c",
+    "calls": [
+      "expect_quic",
+      "QUIC_RAISE_NON_NORMAL_ERROR",
+      "quic_lock",
+      "ossl_quic_channel_is_terminated",
+      "quic_unlock",
+      "qc_shutdown_flush_init",
+      "qc_shutdown_flush_finished",
+      "qc_blocking_mode",
+      "block_until_pred",
+      "qctx_maybe_autotick"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "qc_wait_for_default_xso_for_read",
+    "file": "ssl/quic/quic_impl.c",
+    "calls": [
+      "QUIC_RAISE_NON_NORMAL_ERROR",
+      "ossl_quic_stream_map_get_by_id",
+      "ossl_quic_channel_get_qsm",
+      "qctx_maybe_autotick",
+      "qc_blocking_mode",
+      "QUIC_RAISE_NORMAL_ERROR",
+      "block_until_pred",
+      "ossl_statm_get_rtt_info",
+      "ossl_quic_channel_get_statm",
+      "ossl_quic_stream_map_remove_from_accept_queue"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "ossl_quic_conn_poll_events",
+    "file": "ssl/quic/quic_impl.c",
+    "calls": [
+      "expect_quic",
+      "quic_lock",
+      "ossl_quic_reactor_tick",
+      "ossl_quic_channel_get_reactor",
+      "test_poll_event_r",
+      "test_poll_event_er",
+      "test_poll_event_w",
+      "test_poll_event_ew",
+      "test_poll_event_ec",
+      "test_poll_event_ecd"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "qtx_encrypt_into_txe",
+    "file": "ssl/quic/quic_record_tx.c",
+    "calls": [
+      "ossl_qrl_enc_level_set_get",
+      "ERR_raise",
+      "ossl_qrl_get_suite_max_pkt",
+      "nonce",
+      "EVP_CIPHER_CTX_get_iv_length",
+      "memcpy",
+      "EVP_CipherInit_ex",
+      "EVP_CipherUpdate",
+      "iovec_cur_get_buffer",
+      "txe_data"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "rxku_detected",
+    "file": "ssl/quic/quic_channel.c",
+    "calls": [
+      "COOLDOWN",
+      "rxku_allowed",
+      "initiated",
+      "ossl_quic_channel_raise_protocol_error",
+      "ossl_ackm_get_pto_duration",
+      "ossl_time_add",
+      "get_time",
+      "txku_allowed",
+      "ch_trigger_txku",
+      "subsequent"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "ch_tx",
+    "file": "ssl/quic/quic_channel.c",
+    "calls": [
+      "ossl_quic_channel_is_draining",
+      "ossl_quic_channel_is_closing",
+      "ch_maybe_trigger_spontaneous_txku",
+      "ossl_quic_tx_packetiser_generate",
+      "Packet",
+      "ch_update_idle",
+      "ch_discard_el",
+      "ch_update_ping_deadline",
+      "ossl_quic_channel_raise_protocol_error",
+      "error"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "quic_read_actual",
+    "file": "ssl/quic/quic_impl.c",
+    "calls": [
+      "quic_validate_for_read",
+      "QUIC_RAISE_NORMAL_ERROR",
+      "QUIC_RAISE_NON_NORMAL_ERROR",
+      "ossl_quic_rstream_peek",
+      "ossl_quic_rstream_read",
+      "status",
+      "ossl_statm_get_rtt_info",
+      "ossl_quic_channel_get_statm",
+      "ossl_quic_rxfc_on_retire",
+      "ossl_quic_channel_get_qsm"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "ossl_quic_reactor_block_until_pred",
+    "file": "ssl/quic/quic_reactor.c",
+    "calls": [
+      "ossl_quic_reactor_tick",
+      "pred",
+      "poll_two_descriptors",
+      "ossl_quic_reactor_get_poll_r",
+      "ossl_quic_reactor_net_read_desired",
+      "ossl_quic_reactor_get_poll_w",
+      "ossl_quic_reactor_net_write_desired",
+      "ossl_quic_reactor_get_tick_deadline",
+      "succeeded",
+      "TODO"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "qtx_write",
+    "file": "ssl/quic/quic_record_tx.c",
+    "calls": [
+      "ossl_quic_pkt_type_is_encrypted",
+      "ossl_qrl_enc_level_set_get",
+      "iovec_cur_init",
+      "ossl_qtx_calculate_ciphertext_payload_len",
+      "ossl_quic_wire_get_encoded_pkt_hdr_len",
+      "ossl_quic_pkt_type_has_pn",
+      "ossl_quic_wire_encode_pkt_hdr_pn",
+      "txe_data",
+      "qtx_write_hdr",
+      "iovec_cur_get_buffer"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "dtls1_start_timer",
+    "file": "ssl/d1_lib.c",
+    "calls": [
+      "SSL_CONNECTION_GET_SSL",
+      "BIO_dgram_is_sctp",
+      "SSL_get_wbio",
+      "ossl_time_zero",
+      "ossl_time_is_zero",
+      "timer_cb",
+      "ossl_us2time",
+      "ossl_time_add",
+      "ossl_time_now",
+      "dtls1_bio_set_next_timeout"
+    ],
+    "totalCalls": 11
+  },
+  {
+    "function": "ackm_get_pto_time_and_space",
+    "file": "ssl/quic/quic_ackm.c",
+    "calls": [
+      "ossl_time_infinite",
+      "ossl_statm_get_rtt_info",
+      "ossl_time_add",
+      "ossl_time_max",
+      "ossl_time_multiply",
+      "ossl_ticks2time",
+      "min_u32",
+      "ackm_ack_eliciting_bytes_in_flight",
+      "now",
+      "ossl_time_is_infinite"
+    ],
+    "totalCalls": 11
+  },
+  {
+    "function": "ch_determine_next_tick_deadline",
+    "file": "ssl/quic/quic_channel.c",
+    "calls": [
+      "ossl_quic_channel_is_terminated",
+      "ossl_time_infinite",
+      "ossl_ackm_get_loss_detection_deadline",
+      "ossl_time_is_zero",
+      "ossl_qtx_is_enc_level_provisioned",
+      "ossl_time_min",
+      "ossl_ackm_get_ack_deadline",
+      "ossl_quic_enc_level_to_pn_space",
+      "ossl_time_is_infinite",
+      "ossl_quic_tx_packetiser_get_deadline"
+    ],
+    "totalCalls": 11
+  },
+  {
+    "function": "ossl_quic_demux_inject",
+    "file": "ssl/quic/quic_demux.c",
+    "calls": [
+      "demux_ensure_free_urxe",
+      "ossl_list_urxe_head",
+      "demux_reserve_urxe",
+      "memcpy",
+      "ossl_quic_urxe_data",
+      "BIO_ADDR_clear",
+      "now",
+      "ossl_time_zero",
+      "ossl_list_urxe_remove",
+      "ossl_list_urxe_insert_tail"
+    ],
+    "totalCalls": 11
+  },
+  {
+    "function": "on_lost",
+    "file": "ssl/quic/quic_fifd.c",
+    "calls": [
+      "ossl_quic_txpim_pkt_get_chunks",
+      "ossl_quic_txpim_pkt_get_num_chunks",
+      "ossl_qlog_event_recovery_packet_lost",
+      "fifd_get_qlog",
+      "get_sstream_by_id",
+      "ossl_quic_sstream_mark_lost",
+      "ossl_quic_sstream_mark_lost_fin",
+      "regen_frame",
+      "sstream_updated",
+      "ossl_quic_cfq_mark_lost"
+    ],
+    "totalCalls": 11
+  },
+  {
+    "function": "port_default_packet_handler",
+    "file": "ssl/quic/quic_port.c",
+    "calls": [
+      "ossl_quic_port_is_running",
+      "port_try_handle_stateless_reset",
+      "ossl_quic_lcidm_lookup",
+      "ossl_quic_channel_inject",
+      "TODO",
+      "PACKET_buf_init",
+      "ossl_quic_urxe_data",
+      "ossl_quic_wire_decode_pkt_hdr",
+      "port_on_new_conn",
+      "ossl_qrx_inject_urxe"
+    ],
+    "totalCalls": 11
+  },
+  {
+    "function": "ossl_qtx_flush_net",
+    "file": "ssl/quic/quic_record_tx.c",
+    "calls": [
+      "ossl_list_txe_head",
+      "ossl_list_txe_next",
+      "txe_to_msg",
+      "ERR_set_mark",
+      "BIO_sendmmsg",
+      "ERR_clear_last_mark",
+      "BIO_err_is_non_fatal",
+      "ERR_peek_last_error",
+      "ERR_pop_to_mark",
+      "msg_callback"
+    ],
+    "totalCalls": 11
+  },
+  {
+    "function": "ossl_quic_tserver_read",
+    "file": "ssl/quic/quic_tserver.c",
+    "calls": [
+      "ossl_quic_stream_map_get_by_id",
+      "ossl_quic_channel_get_qsm",
+      "ossl_quic_channel_is_active",
+      "ossl_quic_stream_has_recv_buffer",
+      "ossl_quic_rstream_read",
+      "status",
+      "ossl_statm_get_rtt_info",
+      "ossl_quic_channel_get_statm",
+      "ossl_quic_rxfc_on_retire",
+      "ossl_quic_stream_map_notify_totally_read"
+    ],
+    "totalCalls": 11
+  },
+  {
+    "function": "ssl_read",
+    "file": "ssl/bio_ssl.c",
+    "calls": [
+      "BIO_get_data",
+      "BIO_clear_retry_flags",
+      "ssl_read_internal",
+      "SSL_get_error",
+      "SSL_renegotiate",
+      "time",
+      "BIO_set_retry_read",
+      "BIO_set_retry_write",
+      "BIO_set_retry_special",
+      "BIO_set_retry_reason"
+    ],
+    "totalCalls": 10
+  },
+  {
+    "function": "ssl_write",
+    "file": "ssl/bio_ssl.c",
+    "calls": [
+      "BIO_get_data",
+      "BIO_clear_retry_flags",
+      "ssl_write_internal",
+      "SSL_get_error",
+      "SSL_renegotiate",
+      "time",
+      "BIO_set_retry_write",
+      "BIO_set_retry_read",
+      "BIO_set_retry_special",
+      "BIO_set_retry_reason"
+    ],
+    "totalCalls": 10
+  },
+  {
+    "function": "ossl_ackm_on_timeout",
+    "file": "ssl/quic/quic_ackm.c",
+    "calls": [
+      "ackm_get_loss_time_and_space",
+      "ossl_time_is_zero",
+      "ackm_detect_and_remove_lost_pkts",
+      "ackm_on_pkts_lost",
+      "ackm_set_loss_detection_timer",
+      "ackm_ack_eliciting_bytes_in_flight",
+      "ackm_queue_probe_anti_deadlock_handshake",
+      "ackm_queue_probe_anti_deadlock_initial",
+      "ackm_get_pto_time_and_space",
+      "ackm_queue_probe"
+    ],
+    "totalCalls": 10
+  },
+  {
+    "function": "ossl_quic_channel_start",
+    "file": "ssl/quic/quic_channel.c",
+    "calls": [
+      "ossl_quic_tx_packetiser_set_peer",
+      "ossl_quic_provide_initial_secret",
+      "ch_generate_transport_params",
+      "ch_record_state_transition",
+      "ossl_qlog_event_connectivity_connection_started",
+      "ch_get_qlog",
+      "start",
+      "ch_tick_tls",
+      "ossl_quic_reactor_tick",
+      "ossl_quic_port_get0_reactor"
+    ],
+    "totalCalls": 10
+  },
+  {
+    "function": "ch_start_terminating",
+    "file": "ssl/quic/quic_channel.c",
+    "calls": [
+      "copy_tcause",
+      "ch_on_terminating_timeout",
+      "ossl_qlog_event_connectivity_connection_closed",
+      "ch_get_qlog",
+      "ch_record_state_transition",
+      "ossl_time_add",
+      "get_time",
+      "ossl_time_multiply",
+      "ossl_ackm_get_pto_duration",
+      "ossl_quic_tx_packetiser_schedule_conn_close"
+    ],
+    "totalCalls": 10
+  },
+  {
+    "function": "ch_enqueue_retire_conn_id",
+    "file": "ssl/quic/quic_channel.c",
+    "calls": [
+      "ossl_quic_srtm_remove",
+      "BUF_MEM_new",
+      "WPACKET_init",
+      "ossl_quic_wire_encode_frame_retire_conn_id",
+      "WPACKET_cleanup",
+      "WPACKET_finish",
+      "WPACKET_get_total_written",
+      "ossl_quic_cfq_add_frame",
+      "BUF_MEM_free",
+      "ossl_quic_channel_raise_protocol_error"
+    ],
+    "totalCalls": 10
+  },
+  {
+    "function": "ossl_quic_get_event_timeout",
+    "file": "ssl/quic/quic_impl.c",
+    "calls": [
+      "ossl_time_infinite",
+      "expect_quic",
+      "quic_lock",
+      "ossl_quic_reactor_get_tick_deadline",
+      "ossl_quic_channel_get_reactor",
+      "ossl_time_is_infinite",
+      "quic_unlock",
+      "ossl_time_to_timeval",
+      "ossl_time_subtract",
+      "get_time"
+    ],
+    "totalCalls": 10
+  },
+  {
+    "function": "qrx_decrypt_pkt_body",
+    "file": "ssl/quic/quic_record_rx.c",
+    "calls": [
+      "ossl_qrl_enc_level_set_get",
+      "ossl_qrl_get_suite_max_forged_pkt",
+      "qrx_get_cipher_ctx_idx",
+      "nonce",
+      "EVP_CIPHER_CTX_get_iv_length",
+      "memcpy",
+      "EVP_CipherInit_ex",
+      "EVP_CIPHER_CTX_ctrl",
+      "EVP_CipherUpdate",
+      "EVP_CipherFinal_ex"
+    ],
+    "totalCalls": 10
+  },
+  {
+    "function": "ossl_qtx_write_pkt",
+    "file": "ssl/quic/quic_record_tx.c",
+    "calls": [
+      "ossl_quic_pkt_type_to_enc_level",
+      "ossl_quic_pkt_type_can_share_dgram",
+      "ossl_qtx_finish_dgram",
+      "ossl_qrl_enc_level_set_have_el",
+      "addr_eq",
+      "qtx_ensure_cons",
+      "qtx_reserve_txe",
+      "BIO_ADDR_clear",
+      "qtx_mutate_write",
+      "ossl_quic_pkt_type_must_be_last"
+    ],
+    "totalCalls": 10
+  },
+  {
+    "function": "ossl_quic_hkdf_extract",
+    "file": "ssl/quic/quic_record_util.c",
+    "calls": [
+      "EVP_MD_get0_name",
+      "EVP_KDF_fetch",
+      "EVP_KDF_CTX_new",
+      "OSSL_PARAM_construct_int",
+      "OSSL_PARAM_construct_utf8_string",
+      "OSSL_PARAM_construct_octet_string",
+      "OSSL_PARAM_construct_end",
+      "EVP_KDF_derive",
+      "EVP_KDF_CTX_free",
+      "EVP_KDF_free"
+    ],
+    "totalCalls": 10
+  },
+  {
+    "function": "depack_do_frame_reset_stream",
+    "file": "ssl/quic/quic_rx_depack.c",
+    "calls": [
+      "ossl_quic_wire_decode_frame_reset_stream",
+      "ossl_quic_channel_raise_protocol_error",
+      "depack_do_implicit_stream_create",
+      "ossl_quic_stream_has_recv",
+      "otherwise",
+      "ossl_quic_rxfc_on_rx_stream_frame",
+      "error",
+      "ossl_quic_rxfc_get_error",
+      "ossl_quic_stream_map_notify_reset_recv_part",
+      "ossl_quic_stream_map_update_state"
+    ],
+    "totalCalls": 10
+  },
+  {
+    "function": "depack_do_frame_path_challenge",
+    "file": "ssl/quic/quic_rx_depack.c",
+    "calls": [
+      "ossl_quic_wire_decode_frame_path_challenge",
+      "ossl_quic_channel_raise_protocol_error",
+      "TODO",
+      "OPENSSL_malloc",
+      "WPACKET_init_static_len",
+      "ossl_quic_wire_encode_frame_path_response",
+      "WPACKET_cleanup",
+      "WPACKET_finish",
+      "ossl_quic_cfq_add_frame",
+      "OPENSSL_free"
+    ],
+    "totalCalls": 10
+  },
+  {
+    "function": "quic_new_record_layer",
+    "file": "ssl/quic/quic_tls.c",
+    "calls": [
+      "OPENSSL_zalloc",
+      "QUIC_TLS_FATAL",
+      "quic_set1_bio",
+      "OSSL_FUNC_rlayer_msg_callback",
+      "EVP_CIPHER_is_a",
+      "TODO",
+      "EVP_MD_up_ref",
+      "yield_secret_cb",
+      "EVP_MD_free",
+      "quic_free"
+    ],
+    "totalCalls": 10
+  },
+  {
+    "function": "ssl_free",
+    "file": "ssl/bio_ssl.c",
+    "calls": [
+      "BIO_get_data",
+      "BIO_get_shutdown",
+      "SSL_in_init",
+      "SSL_shutdown",
+      "BIO_get_init",
+      "SSL_free",
+      "BIO_clear_flags",
+      "BIO_set_init",
+      "OPENSSL_free"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "dtls1_new",
+    "file": "ssl/d1_lib.c",
+    "calls": [
+      "SSL_CONNECTION_FROM_SSL_ONLY",
+      "DTLS_RECORD_LAYER_new",
+      "ssl3_new",
+      "OPENSSL_zalloc",
+      "ssl3_free",
+      "pqueue_new",
+      "pqueue_free",
+      "OPENSSL_free",
+      "ssl_clear"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "ssl_ctx_make_profiles",
+    "file": "ssl/d1_srtp.c",
+    "calls": [
+      "STACK_OF",
+      "sk_SRTP_PROTECTION_PROFILE_new_null",
+      "ERR_raise",
+      "strchr",
+      "find_profile_by_name",
+      "strlen",
+      "sk_SRTP_PROTECTION_PROFILE_find",
+      "sk_SRTP_PROTECTION_PROFILE_push",
+      "sk_SRTP_PROTECTION_PROFILE_free"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "ossl_ackm_on_pkt_space_discarded",
+    "file": "ssl/quic/quic_ackm.c",
+    "calls": [
+      "ossl_list_tx_history_head",
+      "get_tx_history",
+      "ossl_list_tx_history_next",
+      "on_discarded",
+      "tx_pkt_history_destroy",
+      "rx_pkt_history_destroy",
+      "on_data_invalidated",
+      "ossl_time_zero",
+      "ackm_set_loss_detection_timer"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "ossl_quic_channel_on_new_conn",
+    "file": "ssl/quic/quic_channel.c",
+    "calls": [
+      "ossl_quic_lcidm_generate_initial",
+      "ossl_quic_tx_packetiser_set_peer",
+      "ossl_quic_tx_packetiser_set_cur_dcid",
+      "ossl_quic_tx_packetiser_set_cur_scid",
+      "ossl_qtx_set_qlog_cb",
+      "ossl_quic_tx_packetiser_set_qlog_cb",
+      "ossl_quic_provide_initial_secret",
+      "ossl_quic_lcidm_enrol_odcid",
+      "ch_record_state_transition"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "ch_init_new_stream",
+    "file": "ssl/quic/quic_channel.c",
+    "calls": [
+      "ossl_quic_stream_is_server_init",
+      "ossl_quic_stream_is_bidi",
+      "ossl_quic_sstream_new",
+      "ossl_quic_rstream_new",
+      "ossl_quic_txfc_init",
+      "ossl_quic_txfc_bump_cwm",
+      "ossl_quic_rxfc_init",
+      "ossl_quic_sstream_free",
+      "ossl_quic_rstream_free"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "expect_quic_with_stream_lock",
+    "file": "ssl/quic/quic_impl.c",
+    "calls": [
+      "expect_quic",
+      "quic_lock_for_io",
+      "quic_lock",
+      "quic_mutation_allowed",
+      "QUIC_RAISE_NON_NORMAL_ERROR",
+      "quic_do_handshake",
+      "qc_try_create_default_xso_for_write",
+      "qc_wait_for_default_xso_for_read",
+      "quic_unlock"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "quic_write_nonblocking_aon",
+    "file": "ssl/quic/quic_impl.c",
+    "calls": [
+      "write",
+      "Write",
+      "QUIC_RAISE_NON_NORMAL_ERROR",
+      "xso_sstream_append",
+      "quic_post_write",
+      "qctx_should_autotick",
+      "aon_write_finish",
+      "QUIC_RAISE_NORMAL_ERROR",
+      "aon_write_begin"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "ossl_quic_conn_stream_conclude",
+    "file": "ssl/quic/quic_impl.c",
+    "calls": [
+      "expect_quic_with_stream_lock",
+      "quic_mutation_allowed",
+      "quic_unlock",
+      "QUIC_RAISE_NON_NORMAL_ERROR",
+      "quic_validate_for_write",
+      "ossl_quic_sstream_get_final_size",
+      "ossl_quic_sstream_fin",
+      "quic_post_write",
+      "qctx_should_autotick"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "qc_getset_idle_timeout",
+    "file": "ssl/quic/quic_impl.c",
+    "calls": [
+      "quic_lock",
+      "ossl_quic_channel_get_max_idle_timeout_request",
+      "QUIC_RAISE_NON_NORMAL_ERROR",
+      "ossl_quic_channel_have_generated_transport_params",
+      "ossl_quic_channel_set_max_idle_timeout_request",
+      "ossl_quic_channel_is_handshake_complete",
+      "ossl_quic_channel_get_max_idle_timeout_actual",
+      "ossl_quic_channel_get_max_idle_timeout_peer_request",
+      "quic_unlock"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "ossl_qrl_enc_level_set_key_cooldown_done",
+    "file": "ssl/quic/quic_record_shared.c",
+    "calls": [
+      "ossl_qrl_enc_level_set_get",
+      "ERR_raise",
+      "ossl_qrl_enc_level_set_key_update_done",
+      "ossl_qrl_get_suite_secret_len",
+      "el_setup_keyslot",
+      "key",
+      "tls13_hkdf_expand_ex",
+      "el_teardown_keyslot",
+      "memcpy"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "ossl_quic_srtm_add",
+    "file": "ssl/quic/quic_srtm.c",
+    "calls": [
+      "srtm_find",
+      "OPENSSL_zalloc",
+      "srtm_compute_blinded",
+      "OPENSSL_free",
+      "lh_SRTM_ITEM_insert",
+      "srtm_check_lh",
+      "sorted_insert_seq_num",
+      "lh_SRTM_ITEM_retrieve",
+      "sorted_insert_srt"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "quic_write_records",
+    "file": "ssl/quic/quic_tls.c",
+    "calls": [
+      "quic_get_max_records",
+      "QUIC_TLS_FATAL",
+      "BIO_clear_retry_flags",
+      "msg_callback",
+      "level",
+      "alert_cb",
+      "error",
+      "crypto_send_cb",
+      "BIO_set_retry_write"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "ossl_quic_trace",
+    "file": "ssl/quic/quic_trace.c",
+    "calls": [
+      "BIO_puts",
+      "PACKET_buf_init",
+      "TODO",
+      "SSL_get_short_conn_id_len",
+      "ossl_quic_wire_decode_pkt_hdr",
+      "packet_type",
+      "put_conn_id",
+      "put_token",
+      "trace_frame_data"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "ossl_quic_tserver_free",
+    "file": "ssl/quic/quic_tserver.c",
+    "calls": [
+      "SSL_free",
+      "ossl_quic_channel_free",
+      "ossl_quic_port_free",
+      "ossl_quic_engine_free",
+      "BIO_free_all",
+      "OPENSSL_free",
+      "SSL_CTX_free",
+      "defined",
+      "ossl_crypto_mutex_free"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "ossl_quic_tserver_has_read_ended",
+    "file": "ssl/quic/quic_tserver.c",
+    "calls": [
+      "ossl_quic_stream_map_get_by_id",
+      "ossl_quic_channel_get_qsm",
+      "ossl_quic_stream_has_recv_buffer",
+      "FIN",
+      "ossl_quic_tserver_read",
+      "ossl_quic_rstream_peek",
+      "ossl_quic_rstream_read",
+      "ossl_quic_stream_map_notify_totally_read",
+      "ossl_quic_stream_map_update_state"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "dtls1_handle_timeout",
+    "file": "ssl/d1_lib.c",
+    "calls": [
+      "dtls1_is_timer_expired",
+      "timer_cb",
+      "SSL_CONNECTION_GET_USER_SSL",
+      "dtls1_double_timeout",
+      "dtls1_check_timeout_num",
+      "SSLfatal",
+      "dtls1_start_timer",
+      "dtls1_retransmit_buffered_messages"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "ossl_json_f64",
+    "file": "ssl/quic/json_enc.c",
+    "calls": [
+      "json_pre_item",
+      "defined",
+      "isnan",
+      "isinf",
+      "json_raise_error",
+      "BIO_snprintf",
+      "json_write_str",
+      "json_post_item"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "ossl_qlog_event_connectivity_connection_closed",
+    "file": "ssl/quic/qlog_event_helpers.c",
+    "calls": [
+      "QLOG_EVENT_BEGIN",
+      "QLOG_STR",
+      "QLOG_U64",
+      "quic_err_to_qlog",
+      "BIO_snprintf",
+      "TODO",
+      "QLOG_STR_LEN",
+      "QLOG_EVENT_END"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "ossl_qlog_event_recovery_packet_lost",
+    "file": "ssl/quic/qlog_event_helpers.c",
+    "calls": [
+      "QLOG_EVENT_BEGIN",
+      "QLOG_BEGIN",
+      "QLOG_STR",
+      "quic_pkt_type_to_qlog",
+      "ossl_quic_pkt_type_has_pn",
+      "QLOG_U64",
+      "QLOG_END",
+      "QLOG_EVENT_END"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "ackm_on_rx_ack_eliciting",
+    "file": "ssl/quic/quic_ackm.c",
+    "calls": [
+      "ackm_has_newly_missing",
+      "frame",
+      "ackm_queue_ack",
+      "ossl_time_zero",
+      "ossl_time_is_infinite",
+      "ackm_set_flush_deadline",
+      "ossl_time_add",
+      "ossl_time_min"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "ch_rx",
+    "file": "ssl/quic/quic_channel.c",
+    "calls": [
+      "ossl_quic_channel_is_closing",
+      "ossl_qrx_read_pkt",
+      "ossl_quic_tx_packetiser_record_received_closing_bytes",
+      "ch_update_idle",
+      "ch_update_ping_deadline",
+      "ch_rx_handle_packet",
+      "ossl_qrx_pkt_release",
+      "ch_rx_check_forged_pkt_limit"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "ch_retry",
+    "file": "ssl/quic/quic_channel.c",
+    "calls": [
+      "ossl_quic_conn_id_eq",
+      "ossl_quic_tx_packetiser_set_cur_dcid",
+      "OPENSSL_memdup",
+      "ossl_quic_tx_packetiser_set_initial_token",
+      "ossl_quic_channel_raise_protocol_error",
+      "OPENSSL_free",
+      "ossl_ackm_mark_packet_pseudo_lost",
+      "ossl_quic_provide_initial_secret"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "ossl_quic_channel_raise_protocol_error_loc",
+    "file": "ssl/quic/quic_channel.c",
+    "calls": [
+      "ossl_quic_err_to_string",
+      "OSSL_ERR_STATE_restore",
+      "ossl_quic_frame_type_to_string",
+      "ERR_raise_data",
+      "ERR_set_debug",
+      "ch_save_err_state",
+      "strlen",
+      "ch_start_terminating"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "ch_update_ping_deadline",
+    "file": "ssl/quic/quic_channel.c",
+    "calls": [
+      "ch_get_effective_idle_timeout_duration",
+      "ossl_time_is_infinite",
+      "ossl_time_infinite",
+      "out",
+      "ossl_time_divide",
+      "ossl_time_min",
+      "ossl_time_add",
+      "get_time"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "ossl_quic_fifd_pkt_commit",
+    "file": "ssl/quic/quic_fifd.c",
+    "calls": [
+      "ossl_list_tx_history_init_elem",
+      "ossl_quic_cfq_mark_tx",
+      "ossl_quic_txpim_pkt_get_chunks",
+      "ossl_quic_txpim_pkt_get_num_chunks",
+      "get_sstream_by_id",
+      "ossl_quic_sstream_mark_transmitted",
+      "ossl_quic_sstream_mark_transmitted_fin",
+      "ossl_ackm_on_tx_packet"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "ossl_quic_pending_int",
+    "file": "ssl/quic/quic_impl.c",
+    "calls": [
+      "expect_quic",
+      "quic_lock",
+      "qc_wait_for_default_xso_for_read",
+      "QUIC_RAISE_NON_NORMAL_ERROR",
+      "ossl_quic_stream_recv_pending",
+      "ossl_quic_channel_has_pending",
+      "ossl_quic_channel_is_term_any",
+      "quic_unlock"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "ossl_qrl_enc_level_set_key_update",
+    "file": "ssl/quic/quic_record_shared.c",
+    "calls": [
+      "ossl_qrl_enc_level_set_get",
+      "ERR_raise",
+      "ossl_qrl_get_suite_secret_len",
+      "key",
+      "tls13_hkdf_expand_ex",
+      "el_teardown_keyslot",
+      "el_setup_keyslot",
+      "memcpy"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "depack_do_implicit_stream_create",
+    "file": "ssl/quic/quic_rx_depack.c",
+    "calls": [
+      "ossl_quic_stream_map_get_by_id",
+      "between",
+      "and",
+      "ossl_quic_rxfc_on_rx_stream_frame",
+      "ossl_quic_channel_raise_protocol_error",
+      "error",
+      "ossl_quic_rxfc_get_error",
+      "ossl_quic_channel_new_stream_remote"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "ossl_quic_tserver_conclude",
+    "file": "ssl/quic/quic_tserver.c",
+    "calls": [
+      "ossl_quic_channel_is_active",
+      "ossl_quic_stream_map_get_by_id",
+      "ossl_quic_channel_get_qsm",
+      "ossl_quic_stream_has_send_buffer",
+      "ossl_quic_sstream_get_final_size",
+      "ossl_quic_sstream_fin",
+      "ossl_quic_stream_map_update_state",
+      "ossl_quic_tserver_tick"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "dtls1_ctrl",
+    "file": "ssl/d1_lib.c",
+    "calls": [
+      "SSL_CONNECTION_FROM_SSL_ONLY",
+      "dtls1_get_timeout",
+      "ossl_time_to_timeval",
+      "dtls1_handle_timeout",
+      "dtls1_link_min_mtu",
+      "dtls1_min_mtu",
+      "ssl3_ctrl"
+    ],
+    "totalCalls": 7
+  },
+  {
+    "function": "composite_end",
+    "file": "ssl/quic/json_enc.c",
+    "calls": [
+      "ossl_json_in_error",
+      "json_peek",
+      "json_raise_error",
+      "json_pop",
+      "json_indent",
+      "json_write_char",
+      "json_post_item"
+    ],
+    "totalCalls": 7
+  },
+  {
+    "function": "ossl_json_key",
+    "file": "ssl/quic/json_enc.c",
+    "calls": [
+      "ossl_json_in_error",
+      "json_peek",
+      "json_raise_error",
+      "json_write_char",
+      "json_indent",
+      "json_write_qstring",
+      "in_pretty"
+    ],
+    "totalCalls": 7
+  },
+  {
+    "function": "ackm_on_pkts_lost",
+    "file": "ssl/quic/quic_ackm.c",
+    "calls": [
+      "loss",
+      "on_data_lost",
+      "on_lost",
+      "ossl_statm_get_rtt_info",
+      "ossl_time_is_zero",
+      "ackm_in_persistent_congestion",
+      "on_data_lost_finished"
+    ],
+    "totalCalls": 7
+  },
+  {
+    "function": "ch_on_handshake_complete",
+    "file": "ssl/quic/quic_channel.c",
+    "calls": [
+      "ossl_quic_channel_raise_protocol_error",
+      "OPENSSL_free",
+      "ossl_qrx_allow_1rtt_processing",
+      "ossl_quic_tx_packetiser_notify_handshake_complete",
+      "ossl_quic_channel_on_handshake_confirmed",
+      "ossl_quic_tx_packetiser_schedule_handshake_done",
+      "ch_record_state_transition"
+    ],
+    "totalCalls": 7
+  },
+  {
+    "function": "ch_discard_el",
+    "file": "ssl/quic/quic_channel.c",
+    "calls": [
+      "ossl_quic_tx_packetiser_discard_enc_level",
+      "ossl_qrx_discard_enc_level",
+      "ossl_qtx_discard_enc_level",
+      "ossl_quic_enc_level_to_pn_space",
+      "ossl_ackm_on_pkt_space_discarded",
+      "ossl_quic_sstream_free",
+      "ossl_quic_rstream_free"
+    ],
+    "totalCalls": 7
+  },
+  {
+    "function": "quic_raise_non_normal_error",
+    "file": "ssl/quic/quic_impl.c",
+    "calls": [
+      "quic_set_last_error",
+      "ossl_quic_channel_restore_err_state",
+      "ERR_new",
+      "ERR_set_debug",
+      "va_start",
+      "ERR_vset_error",
+      "va_end"
+    ],
+    "totalCalls": 7
+  },
+  {
+    "function": "ossl_quic_conn_set_blocking_mode",
+    "file": "ssl/quic/quic_impl.c",
+    "calls": [
+      "expect_quic",
+      "quic_lock",
+      "qc_update_can_support_blocking",
+      "qc_can_support_blocking_cached",
+      "QUIC_RAISE_NON_NORMAL_ERROR",
+      "qc_update_blocking_mode",
+      "quic_unlock"
+    ],
+    "totalCalls": 7
+  },
+  {
+    "function": "port_init",
+    "file": "ssl/quic/quic_port.c",
+    "calls": [
+      "OSSL_ERR_STATE_new",
+      "ossl_quic_demux_new",
+      "ossl_quic_demux_set_default_handler",
+      "ossl_quic_srtm_new",
+      "ossl_quic_lcidm_new",
+      "ossl_list_port_insert_tail",
+      "port_cleanup"
+    ],
+    "totalCalls": 7
+  },
+  {
+    "function": "port_rx_pre",
+    "file": "ssl/quic/quic_port.c",
+    "calls": [
+      "check",
+      "recvfrom",
+      "bind",
+      "called",
+      "sendto",
+      "ossl_quic_demux_pump",
+      "ossl_quic_port_raise_net_error"
+    ],
+    "totalCalls": 7
+  },
+  {
+    "function": "ossl_quic_port_raise_net_error",
+    "file": "ssl/quic/quic_port.c",
+    "calls": [
+      "ossl_quic_port_is_running",
+      "ERR_raise_data",
+      "OSSL_ERR_STATE_save",
+      "port_transition_failed",
+      "channel",
+      "ossl_quic_channel_raise_net_error",
+      "OSSL_LIST_FOREACH"
+    ],
+    "totalCalls": 7
+  },
+  {
+    "function": "ossl_quic_provide_initial_secret",
+    "file": "ssl/quic/quic_record_util.c",
+    "calls": [
+      "EVP_MD_fetch",
+      "ossl_quic_hkdf_extract",
+      "tls13_hkdf_expand_ex",
+      "ossl_qrx_provide_secret",
+      "EVP_MD_up_ref",
+      "ossl_qtx_provide_secret",
+      "EVP_MD_free"
+    ],
+    "totalCalls": 7
+  },
+  {
+    "function": "depack_do_frame_ack",
+    "file": "ssl/quic/quic_rx_depack.c",
+    "calls": [
+      "ossl_quic_wire_peek_frame_ack_num_ranges",
+      "OPENSSL_realloc",
+      "ossl_quic_wire_decode_frame_ack",
+      "ossl_qrx_get_key_epoch",
+      "response",
+      "ossl_quic_channel_raise_protocol_error",
+      "ossl_ackm_on_rx_ack_frame"
+    ],
+    "totalCalls": 7
+  }
+]
