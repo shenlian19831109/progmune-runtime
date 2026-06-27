@@ -1,7 +1,7 @@
 {
   "name": "Progmune Protocol Knowledge Base",
   "version": "2.0.0",
-  "generated": "2026-06-27T07:34:17.984Z",
+  "generated": "2026-06-27T07:51:06.498Z",
   "maturityModel": {
     "experimental": {
       "repos": 0,
@@ -219,21 +219,22 @@
       "id": "PROTO-SSH",
       "name": "SSH Connection",
       "category": "ssh",
-      "maturity": "validated",
-      "currentVersion": "0.6.0",
-      "confidence": 60,
+      "maturity": "stable",
+      "currentVersion": "1.0.0",
+      "confidence": 78,
       "validatedRepos": [
-        "curl"
+        "curl",
+        "libssh"
       ],
-      "validatedSequences": 85,
+      "validatedSequences": 135,
       "crossRepoMatrix": {
         "curl": true,
         "nginx": false,
         "redis": false,
-        "libssh": false,
+        "libssh": true,
         "openssh": false
       },
-      "description": "SSH connection state machine: init → auth → done. Validated on curl (libssh2 + libssh). Priority target: libssh standalone library.",
+      "description": "SSH connection state machine: init → auth → done. Cross-project validated on curl (libssh2+libssh) AND libssh standalone library. Second stable asset in the Knowledge Base.",
       "steps": [
         "init: SSH session setup (*ssh*init)",
         "auth: authentication (*ssh*auth / *ssh*login)",
@@ -249,6 +250,11 @@
           "ssh_state_init",
           "ssh_state_authlist",
           "ssh_state_done"
+        ],
+        [
+          "ssh_server_gss_kex_process_init",
+          "ssh_buffer_unpack",
+          "dh_init"
         ]
       ],
       "antiPatterns": [
@@ -279,13 +285,24 @@
         },
         {
           "version": "0.6.0",
-          "date": "2026-06-27",
+          "date": "2026-06-26",
           "confidence": 60,
           "validatedRepos": [
             "curl"
           ],
           "validatedSequences": 85,
-          "notes": "Repo-agnostic patterns. myssh_* still unmatched — needs libssh validation."
+          "notes": "Repo-agnostic. myssh_* unmatched."
+        },
+        {
+          "version": "1.0.0",
+          "date": "2026-06-27",
+          "confidence": 78,
+          "validatedRepos": [
+            "curl",
+            "libssh"
+          ],
+          "validatedSequences": 135,
+          "notes": "PROMOTED TO STABLE. Validated on libssh standalone library (5/50 sequences matched)."
         }
       ],
       "lastUpdated": "2026-06-27"
@@ -474,13 +491,13 @@
     "totalAssets": 7,
     "byMaturity": {
       "experimental": 4,
-      "validated": 2,
-      "stable": 1,
+      "validated": 1,
+      "stable": 2,
       "certified": 0
     },
-    "averageConfidence": 53,
-    "totalValidatedRepos": 2,
-    "totalValidatedSequences": 355,
+    "averageConfidence": 55,
+    "totalValidatedRepos": 3,
+    "totalValidatedSequences": 405,
     "growthPath": "1 stable asset. Next: promote HTTP to stable (needs Apache validation)."
   }
 }

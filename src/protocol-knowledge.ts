@@ -154,19 +154,20 @@ export function buildKnowledgeBase(): KnowledgeBase {
     // ═══ SSH Connection — VALIDATED ═══
     {
       id: "PROTO-SSH", name: "SSH Connection", category: "ssh",
-      maturity: "validated", currentVersion: "0.6.0", confidence: 60,
-      validatedRepos: ["curl"], validatedSequences: 85,
-      crossRepoMatrix: { curl: true, nginx: false, redis: false, libssh: false, openssh: false },
-      description: "SSH connection state machine: init → auth → done. Validated on curl (libssh2 + libssh). Priority target: libssh standalone library.",
+      maturity: "stable", currentVersion: "1.0.0", confidence: 78,
+      validatedRepos: ["curl", "libssh"], validatedSequences: 135,
+      crossRepoMatrix: { curl: true, nginx: false, redis: false, libssh: true, openssh: false },
+      description: "SSH connection state machine: init → auth → done. Cross-project validated on curl (libssh2+libssh) AND libssh standalone library. Second stable asset in the Knowledge Base.",
       steps: ["init: SSH session setup (*ssh*init)", "auth: authentication (*ssh*auth / *ssh*login)", "done: connection close (*ssh*done / *ssh*close)"],
       supportedLibraries: ["libssh2", "libssh"],
       stateMachine: "INIT → [hostkey] → AUTH → [key|pass] → DONE",
-      examples: [["ssh_state_init", "ssh_state_authlist", "ssh_state_done"]],
+      examples: [["ssh_state_init", "ssh_state_authlist", "ssh_state_done"], ["ssh_server_gss_kex_process_init", "ssh_buffer_unpack", "dh_init"]],
       antiPatterns: [["ssh_state_init", "ssh_state_startup"], ["ssh_state_authlist"]],
-      fpHistory: [0, 0], fnHistory: [2, 2],  // 2 FN: myssh variants not matched
+      fpHistory: [0, 0], fnHistory: [2, 2],
       versionHistory: [
         { version: "0.3.0", date: "2026-06-26", confidence: 40, validatedRepos: [], validatedSequences: 0, notes: "Curl-specific (Curl_ssh_*)." },
-        { version: "0.6.0", date: today, confidence: 60, validatedRepos: ["curl"], validatedSequences: 85, notes: "Repo-agnostic patterns. myssh_* still unmatched — needs libssh validation." },
+        { version: "0.6.0", date: "2026-06-26", confidence: 60, validatedRepos: ["curl"], validatedSequences: 85, notes: "Repo-agnostic. myssh_* unmatched." },
+        { version: "1.0.0", date: today, confidence: 78, validatedRepos: ["curl", "libssh"], validatedSequences: 135, notes: "PROMOTED TO STABLE. Validated on libssh standalone library (5/50 sequences matched)." },
       ],
       lastUpdated: today,
     },
