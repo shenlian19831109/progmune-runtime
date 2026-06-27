@@ -1,0 +1,1702 @@
+[
+  {
+    "function": "cache_save_filter",
+    "file": "modules/cache/mod_cache.c",
+    "calls": [
+      "ap_get_module_config",
+      "APLOGNO",
+      "ap_remove_output_filter",
+      "ap_pass_brigade",
+      "section",
+      "cache_save_store",
+      "directive",
+      "ap_set_content_type",
+      "apr_table_get",
+      "ap_strstr_c"
+    ],
+    "totalCalls": 60
+  },
+  {
+    "function": "deflate_out_filter",
+    "file": "modules/filters/mod_deflate.c",
+    "calls": [
+      "APR_BRIGADE_EMPTY",
+      "ap_get_module_config",
+      "have_ssl_compression",
+      "ap_remove_output_filter",
+      "ap_pass_brigade",
+      "APR_BRIGADE_LAST",
+      "APR_BUCKET_IS_EOS",
+      "APR_BRIGADE_FIRST",
+      "APR_BUCKET_IS_METADATA",
+      "APR_BUCKET_NEXT"
+    ],
+    "totalCalls": 51
+  },
+  {
+    "function": "deflate_in_filter",
+    "file": "modules/filters/mod_deflate.c",
+    "calls": [
+      "ap_get_brigade",
+      "ap_get_module_config",
+      "ap_is_initial_req",
+      "ap_remove_input_filter",
+      "apr_table_get",
+      "check_gzip",
+      "apr_brigade_create",
+      "apr_brigade_cleanup",
+      "block",
+      "APR_BRIGADE_EMPTY"
+    ],
+    "totalCalls": 42
+  },
+  {
+    "function": "dav_method_put",
+    "file": "modules/dav/main/mod_dav.c",
+    "calls": [
+      "DAV_GET_HOOKS_LOCKS",
+      "ap_get_module_config",
+      "dav_get_resource",
+      "dav_handle_err",
+      "dav_run_method_precondition",
+      "apr_psprintf",
+      "ap_escape_html",
+      "dav_error_response",
+      "dav_get_resource_state",
+      "exist"
+    ],
+    "totalCalls": 38
+  },
+  {
+    "function": "regfnServerSupportFunction",
+    "file": "modules/arch/win32/mod_isapi.c",
+    "calls": [
+      "HttpExtensionProc",
+      "apr_table_set",
+      "ap_get_status_line",
+      "ap_get_client_block",
+      "apr_table_unset",
+      "apr_pstrdup",
+      "ap_internal_redirect",
+      "strlen",
+      "send_response_header",
+      "apr_set_os_error"
+    ],
+    "totalCalls": 36
+  },
+  {
+    "function": "inflate_out_filter",
+    "file": "modules/filters/mod_deflate.c",
+    "calls": [
+      "APR_BRIGADE_EMPTY",
+      "ap_get_module_config",
+      "headers",
+      "ap_is_initial_req",
+      "apr_table_get",
+      "check_gzip",
+      "ap_remove_output_filter",
+      "ap_pass_brigade",
+      "apr_table_unset",
+      "deflate_check_etag"
+    ],
+    "totalCalls": 36
+  },
+  {
+    "function": "dav_method_copymove",
+    "file": "modules/dav/main/mod_dav.c",
+    "calls": [
+      "dav_get_resource",
+      "dav_handle_err",
+      "dav_run_method_precondition",
+      "apr_psprintf",
+      "ap_escape_html",
+      "dav_error_response",
+      "apr_table_get",
+      "apr_pstrcat",
+      "APLOGNO",
+      "dav_lookup_uri"
+    ],
+    "totalCalls": 33
+  },
+  {
+    "function": "compress_filter",
+    "file": "modules/filters/mod_brotli.c",
+    "calls": [
+      "APR_BRIGADE_EMPTY",
+      "ap_get_module_config",
+      "headers",
+      "apr_table_get",
+      "ap_remove_output_filter",
+      "ap_pass_brigade",
+      "get_content_encoding",
+      "ap_get_token",
+      "strcmp",
+      "apr_table_mergen"
+    ],
+    "totalCalls": 33
+  },
+  {
+    "function": "dav_method_options",
+    "file": "modules/dav/main/mod_dav.c",
+    "calls": [
+      "DAV_GET_HOOKS_LOCKS",
+      "DAV_GET_HOOKS_VSN",
+      "DAV_GET_HOOKS_BINDING",
+      "DAV_GET_HOOKS_SEARCH",
+      "apr_table_make",
+      "dav_get_resource",
+      "dav_handle_err",
+      "ap_xml_parse_input",
+      "dav_run_method_precondition",
+      "dav_validate_root"
+    ],
+    "totalCalls": 32
+  },
+  {
+    "function": "x_register_hooks",
+    "file": "modules/examples/mod_example_hooks.c",
+    "calls": [
+      "ap_hook_pre_config",
+      "ap_hook_check_config",
+      "ap_hook_test_config",
+      "ap_hook_open_logs",
+      "ap_hook_post_config",
+      "ap_hook_child_init",
+      "ap_hook_handler",
+      "ap_hook_quick_handler",
+      "ap_hook_pre_connection",
+      "ap_hook_process_connection"
+    ],
+    "totalCalls": 32
+  },
+  {
+    "function": "dav_method_lock",
+    "file": "modules/dav/main/mod_dav.c",
+    "calls": [
+      "DAV_GET_HOOKS_LOCKS",
+      "ap_xml_parse_input",
+      "dav_get_depth",
+      "APLOGNO",
+      "dav_get_resource",
+      "dav_handle_err",
+      "dav_run_method_precondition",
+      "get_parent_resource",
+      "dav_new_error",
+      "apr_psprintf"
+    ],
+    "totalCalls": 30
+  },
+  {
+    "function": "dav_handler",
+    "file": "modules/dav/main/mod_dav.c",
+    "calls": [
+      "ap_get_module_config",
+      "dav_mswdv_preprocessing",
+      "strcmp",
+      "APLOGNO",
+      "dav_error_response",
+      "methods",
+      "dav_method_get",
+      "dav_method_put",
+      "dav_method_post",
+      "dav_method_delete"
+    ],
+    "totalCalls": 30
+  },
+  {
+    "function": "hm_file_update_stat",
+    "file": "modules/cluster/mod_heartmonitor.c",
+    "calls": [
+      "apr_pstrcat",
+      "file",
+      "apr_file_mktemp",
+      "APLOGNO",
+      "apr_file_open",
+      "apr_time_now",
+      "apr_table_make",
+      "apr_file_info_get",
+      "apr_bucket_alloc_create",
+      "apr_brigade_create"
+    ],
+    "totalCalls": 29
+  },
+  {
+    "function": "data_out_filter",
+    "file": "modules/filters/mod_data.c",
+    "calls": [
+      "ap_is_initial_req",
+      "ap_remove_output_filter",
+      "ap_pass_brigade",
+      "apr_brigade_create",
+      "apr_pstrdup",
+      "strchr",
+      "apr_brigade_printf",
+      "apr_table_get",
+      "apr_brigade_length",
+      "ap_parse_strict_length"
+    ],
+    "totalCalls": 28
+  },
+  {
+    "function": "open_entity",
+    "file": "modules/cache/mod_cache_socache.c",
+    "calls": [
+      "ap_get_module_config",
+      "apr_pool_create",
+      "apr_pool_tag",
+      "mod_cache_socache",
+      "apr_global_mutex_lock",
+      "APLOGNO",
+      "apr_pool_destroy",
+      "retrieve",
+      "strlen",
+      "apr_global_mutex_unlock"
+    ],
+    "totalCalls": 27
+  },
+  {
+    "function": "dav_method_proppatch",
+    "file": "modules/dav/main/mod_dav.c",
+    "calls": [
+      "dav_get_resource",
+      "dav_handle_err",
+      "ap_xml_parse_input",
+      "dav_run_method_precondition",
+      "dav_validate_root",
+      "APLOGNO",
+      "dav_validate_request",
+      "modified",
+      "dav_auto_checkout",
+      "dav_open_propdb"
+    ],
+    "totalCalls": 27
+  },
+  {
+    "function": "xlate_out_filter",
+    "file": "modules/filters/mod_charset_lite.c",
+    "calls": [
+      "ap_get_module_config",
+      "ap_cstr_casecmpn",
+      "set",
+      "strcmp",
+      "apr_xlate_open",
+      "APLOGNO",
+      "apr_xlate_sb_get",
+      "chk_filter_chain",
+      "apr_table_unset",
+      "ap_pass_brigade"
+    ],
+    "totalCalls": 27
+  },
+  {
+    "function": "dav_method_vsn_control",
+    "file": "modules/dav/main/mod_dav.c",
+    "calls": [
+      "DAV_GET_HOOKS_LOCKS",
+      "DAV_GET_HOOKS_VSN",
+      "dav_get_resource",
+      "dav_handle_err",
+      "body",
+      "ap_xml_parse_input",
+      "dav_run_method_precondition",
+      "dav_get_resource_state",
+      "dav_validate_root",
+      "APLOGNO"
+    ],
+    "totalCalls": 25
+  },
+  {
+    "function": "cache_canonicalise_key",
+    "file": "modules/cache/cache_storage.c",
+    "calls": [
+      "ap_get_module_config",
+      "hook",
+      "run",
+      "ap_get_server_name",
+      "apr_pstrdup",
+      "ap_str_tolower",
+      "manner",
+      "ap_http_scheme",
+      "request",
+      "string"
+    ],
+    "totalCalls": 24
+  },
+  {
+    "function": "isapi_handler",
+    "file": "modules/arch/win32/mod_isapi.c",
+    "calls": [
+      "strcmp",
+      "ap_get_module_config",
+      "ap_allow_options",
+      "isapi_lookup",
+      "ap_add_common_vars",
+      "ap_add_cgi_vars",
+      "apr_table_setn",
+      "apr_table_get",
+      "strcpy",
+      "ap_setup_client_block"
+    ],
+    "totalCalls": 23
+  },
+  {
+    "function": "dav_method_bind",
+    "file": "modules/dav/main/mod_dav.c",
+    "calls": [
+      "DAV_GET_HOOKS_BINDING",
+      "dav_get_resource",
+      "dav_handle_err",
+      "dav_run_method_precondition",
+      "apr_table_get",
+      "APLOGNO",
+      "dav_lookup_uri",
+      "dav_error_response",
+      "dav_get_overwrite",
+      "target"
+    ],
+    "totalCalls": 23
+  },
+  {
+    "function": "authenticate_digest_user",
+    "file": "modules/aaa/mod_auth_digest.c",
+    "calls": [
+      "ap_auth_type",
+      "ap_cstr_casecmp",
+      "ap_auth_name",
+      "APLOGNO",
+      "ap_get_module_config",
+      "note_digest_auth_failure",
+      "strcmp",
+      "work",
+      "copy_uri_components",
+      "apr_uri_parse"
+    ],
+    "totalCalls": 22
+  },
+  {
+    "function": "authenticate_form_authn",
+    "file": "modules/aaa/mod_auth_form.c",
+    "calls": [
+      "ap_get_module_config",
+      "ap_auth_type",
+      "ap_cstr_casecmp",
+      "APLOGNO",
+      "ap_auth_name",
+      "get_notes_auth",
+      "get_session_auth",
+      "check_site",
+      "fake_basic_authentication",
+      "check_authn"
+    ],
+    "totalCalls": 22
+  },
+  {
+    "function": "cache_handler",
+    "file": "modules/cache/mod_cache.c",
+    "calls": [
+      "ap_get_module_config",
+      "module",
+      "cache_get_providers",
+      "apr_brigade_create",
+      "ap_cache_check_no_store",
+      "APLOGNO",
+      "successful",
+      "ap_add_output_filter_handle",
+      "file",
+      "cache_select"
+    ],
+    "totalCalls": 22
+  },
+  {
+    "function": "dav_method_propfind",
+    "file": "modules/dav/main/mod_dav.c",
+    "calls": [
+      "dav_get_resource",
+      "dav_handle_err",
+      "ap_xml_parse_input",
+      "dav_run_method_precondition",
+      "dav_get_resource_state",
+      "dav_get_depth",
+      "ap_get_module_config",
+      "dav_error_response",
+      "apr_psprintf",
+      "ap_escape_html"
+    ],
+    "totalCalls": 22
+  },
+  {
+    "function": "ef_unified_filter",
+    "file": "modules/filters/mod_ext_filter.c",
+    "calls": [
+      "apr_brigade_create",
+      "APR_BRIGADE_FIRST",
+      "APR_BRIGADE_SENTINEL",
+      "APR_BUCKET_NEXT",
+      "APR_BUCKET_IS_EOS",
+      "AP_BUCKET_IS_ERROR",
+      "apr_bucket_copy",
+      "APR_BRIGADE_INSERT_TAIL",
+      "apr_bucket_read",
+      "APLOGNO"
+    ],
+    "totalCalls": 22
+  },
+  {
+    "function": "check_token",
+    "file": "modules/aaa/mod_autht_jwt.c",
+    "calls": [
+      "apr_brigade_create",
+      "apr_brigade_write",
+      "strlen",
+      "apr_jose_decode",
+      "apr_jose_error",
+      "APLOGNO",
+      "apr_json_object_first",
+      "strncmp",
+      "apr_pstrndup",
+      "apr_json_object_next"
+    ],
+    "totalCalls": 21
+  },
+  {
+    "function": "dav_method_mkcol",
+    "file": "modules/dav/main/mod_dav.c",
+    "calls": [
+      "DAV_GET_HOOKS_LOCKS",
+      "ap_get_module_config",
+      "process_mkcol_body",
+      "dav_get_resource",
+      "dav_handle_err",
+      "dav_run_method_precondition",
+      "dav_parse_mtime",
+      "dav_error_response",
+      "apr_psprintf",
+      "ap_escape_html"
+    ],
+    "totalCalls": 21
+  },
+  {
+    "function": "dav_method_checkout",
+    "file": "modules/dav/main/mod_dav.c",
+    "calls": [
+      "DAV_GET_HOOKS_VSN",
+      "ap_xml_parse_input",
+      "dav_validate_root",
+      "APLOGNO",
+      "dav_find_child",
+      "apr_table_get",
+      "dav_error_response",
+      "apr_array_make",
+      "strcmp",
+      "dav_xml_get_cdata"
+    ],
+    "totalCalls": 21
+  },
+  {
+    "function": "cache_select",
+    "file": "modules/cache/cache_storage.c",
+    "calls": [
+      "APLOGNO",
+      "ap_cache_check_no_cache",
+      "cache_generate_key",
+      "open_entity",
+      "recall_headers",
+      "cache_strqtok",
+      "apr_pstrdup",
+      "cache_table_getm",
+      "strcmp",
+      "ap_condition_if_match"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "cache_quick_handler",
+    "file": "modules/cache/mod_cache.c",
+    "calls": [
+      "ap_get_module_config",
+      "module",
+      "cache_get_providers",
+      "apr_brigade_create",
+      "ap_cache_check_no_store",
+      "apr_table_get",
+      "APLOGNO",
+      "successful",
+      "ap_add_output_filter_handle",
+      "file"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "open_entity",
+    "file": "modules/cache/mod_cache_disk.c",
+    "calls": [
+      "ap_get_module_config",
+      "ap_get_core_module_config",
+      "APLOGNO",
+      "apr_pstrmemdup",
+      "header_file",
+      "apr_file_open",
+      "apr_file_read_full",
+      "apr_array_make",
+      "read_array",
+      "apr_file_close"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "bucketeer_out_filter",
+    "file": "modules/debugging/mod_bucketeer.c",
+    "calls": [
+      "ap_get_module_config",
+      "strncmp",
+      "ap_remove_output_filter",
+      "ap_pass_brigade",
+      "apr_brigade_create",
+      "apr_table_unset",
+      "APR_BRIGADE_EMPTY",
+      "APR_BRIGADE_FIRST",
+      "APR_BUCKET_IS_EOS",
+      "APR_BUCKET_REMOVE"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "init_ext_filter_process",
+    "file": "modules/filters/mod_ext_filter.c",
+    "calls": [
+      "apr_procattr_create",
+      "apr_procattr_io_set",
+      "set_resource_limits",
+      "apr_procattr_child_err_set",
+      "apr_procattr_child_errfn_set",
+      "apr_pool_userdata_set",
+      "apr_procattr_error_check_set",
+      "ap_add_cgi_vars",
+      "ap_add_common_vars",
+      "apr_table_setn"
+    ],
+    "totalCalls": 20
+  },
+  {
+    "function": "verify_cb",
+    "file": "modules/aaa/mod_autht_jwt.c",
+    "calls": [
+      "ap_get_module_config",
+      "apr_json_object_get",
+      "apr_errprintf",
+      "APR_ARRAY_IDX",
+      "strncmp",
+      "configured",
+      "apr_crypto_key_rec_make",
+      "apr_crypto_key",
+      "apr_strerror",
+      "apr_crypto_digest_rec_make"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "ap_cgi_build_command",
+    "file": "modules/arch/win32/mod_win32.c",
+    "calls": [
+      "apr_table_elts",
+      "ap_get_module_config",
+      "ap_strchr_c",
+      "strrchr",
+      "apr_filepath_name_get",
+      "strcasecmp",
+      "get_interpreter_from_win32_registry",
+      "APLOGNO",
+      "apr_file_open",
+      "apr_file_read"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "write_headers",
+    "file": "modules/cache/mod_cache_disk.c",
+    "calls": [
+      "ap_get_module_config",
+      "memset",
+      "apr_table_get",
+      "mkdir_structure",
+      "apr_file_mktemp",
+      "APLOGNO",
+      "apr_file_write_full",
+      "apr_file_close",
+      "apr_pool_destroy",
+      "apr_array_make"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "store_body",
+    "file": "modules/cache/mod_cache_disk.c",
+    "calls": [
+      "ap_get_module_config",
+      "apr_time_now",
+      "apr_brigade_partition",
+      "APR_BRIGADE_EMPTY",
+      "APR_BRIGADE_FIRST",
+      "APR_BUCKET_REMOVE",
+      "APR_BRIGADE_INSERT_TAIL",
+      "APR_BUCKET_IS_EOS",
+      "APR_BUCKET_IS_FLUSH",
+      "APR_BUCKET_IS_METADATA"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "store_headers",
+    "file": "modules/cache/mod_cache_socache.c",
+    "calls": [
+      "ap_get_module_config",
+      "memcpy",
+      "ap_cache_cacheable_headers_out",
+      "ap_cache_cacheable_headers_in",
+      "apr_pool_create",
+      "apr_pool_tag",
+      "mod_cache_socache",
+      "apr_table_get",
+      "apr_array_make",
+      "tokens_to_array"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "dav_method_delete",
+    "file": "modules/dav/main/mod_dav.c",
+    "calls": [
+      "ap_discard_request_body",
+      "dav_get_resource",
+      "dav_handle_err",
+      "dav_run_method_precondition",
+      "value",
+      "dav_get_depth",
+      "APLOGNO",
+      "dav_validate_request",
+      "dav_push_error",
+      "apr_psprintf"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "dav_method_merge",
+    "file": "modules/dav/main/mod_dav.c",
+    "calls": [
+      "DAV_GET_HOOKS_VSN",
+      "ap_xml_parse_input",
+      "dav_validate_root",
+      "APLOGNO",
+      "dav_find_child",
+      "dav_xml_get_cdata",
+      "dav_lookup_uri",
+      "dav_error_response",
+      "dav_get_resource",
+      "dav_handle_err"
+    ],
+    "totalCalls": 19
+  },
+  {
+    "function": "groups_for_user",
+    "file": "modules/aaa/mod_authz_groupfile.c",
+    "calls": [
+      "apr_table_make",
+      "ap_pcfg_openfile",
+      "apr_pool_create",
+      "apr_pool_tag",
+      "authz_groupfile",
+      "ap_varbuf_init",
+      "ap_varbuf_cfg_getline",
+      "apr_pool_clear",
+      "ap_getword",
+      "strlen"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "cache_check_freshness",
+    "file": "modules/cache/cache_util.c",
+    "calls": [
+      "ap_get_module_config",
+      "apr_table_get",
+      "ap_cache_control",
+      "APLOGNO",
+      "apr_strtoff",
+      "ap_cache_current_age",
+      "MIN",
+      "age",
+      "header",
+      "APR_INT64_C"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "hm_handler",
+    "file": "modules/cluster/mod_heartmonitor.c",
+    "calls": [
+      "strcmp",
+      "ap_get_module_config",
+      "apr_brigade_create",
+      "ap_get_brigade",
+      "ap_map_http_request_error",
+      "apr_brigade_flatten",
+      "hm_get_server",
+      "apr_table_make",
+      "qs_to_table",
+      "apr_sockaddr_ip_get"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "dav_method_update",
+    "file": "modules/dav/main/mod_dav.c",
+    "calls": [
+      "DAV_GET_HOOKS_VSN",
+      "dav_get_depth",
+      "ap_xml_parse_input",
+      "dav_validate_root",
+      "APLOGNO",
+      "dav_find_child",
+      "value",
+      "apr_xml_to_text",
+      "dav_get_resource",
+      "dav_handle_err"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "dav_method_unlock",
+    "file": "modules/dav/main/mod_dav.c",
+    "calls": [
+      "DAV_GET_HOOKS_LOCKS",
+      "apr_table_get",
+      "APLOGNO",
+      "failed",
+      "apr_pstrdup",
+      "strlen",
+      "dav_push_error",
+      "apr_psprintf",
+      "ap_escape_html",
+      "dav_handle_err"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "crypto_in_filter",
+    "file": "modules/filters/mod_crypto.c",
+    "calls": [
+      "apr_brigade_create",
+      "ap_get_brigade",
+      "APR_BRIGADE_EMPTY",
+      "APR_STATUS_IS_EAGAIN",
+      "APR_BRIGADE_FIRST",
+      "APR_BUCKET_IS_EOS",
+      "do_crypto",
+      "apr_brigade_write",
+      "APR_BUCKET_REMOVE",
+      "APR_BRIGADE_INSERT_TAIL"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "authn_dbd_password",
+    "file": "modules/aaa/mod_authn_dbd.c",
+    "calls": [
+      "ap_get_module_config",
+      "authn_dbd_acquire_fn",
+      "APLOGNO",
+      "apr_hash_get",
+      "apr_dbd_pvselect",
+      "apr_dbd_error",
+      "apr_dbd_get_row",
+      "apr_dbd_get_name",
+      "apr_pstrcat",
+      "apr_isalnum"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "handle_response",
+    "file": "modules/aaa/mod_authnz_fcgi.c",
+    "calls": [
+      "apr_brigade_create",
+      "AP_FCGI_END_REQUEST",
+      "recv_data_full",
+      "APLOGNO",
+      "ap_fcgi_header_fields_from_array",
+      "recv_data",
+      "apr_bucket_transient_create",
+      "APR_BRIGADE_INSERT_TAIL",
+      "handle_headers",
+      "ap_scan_script_header_err_brigade_ex"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "authnz_ldap_post_config",
+    "file": "modules/aaa/mod_authnz_ldap.c",
+    "calls": [
+      "ap_get_module_config",
+      "util_ldap_ssl_supported",
+      "APLOGNO",
+      "connections",
+      "mod_ldap",
+      "ap_find_linked_module",
+      "Mod_ldap",
+      "ap_server_root_relative",
+      "ap_pcfg_openfile",
+      "apr_hash_make"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "store_body",
+    "file": "modules/cache/mod_cache_socache.c",
+    "calls": [
+      "ap_get_module_config",
+      "apr_time_now",
+      "apr_brigade_partition",
+      "APR_BRIGADE_EMPTY",
+      "APR_BRIGADE_FIRST",
+      "APR_BUCKET_REMOVE",
+      "APR_BRIGADE_INSERT_TAIL",
+      "APR_BUCKET_IS_EOS",
+      "APR_BUCKET_IS_FLUSH",
+      "APR_BUCKET_IS_METADATA"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "wd_post_config_hook",
+    "file": "modules/core/mod_watchdog.c",
+    "calls": [
+      "ap_state_query",
+      "apr_pool_userdata_get",
+      "apr_pool_create",
+      "apr_pool_tag",
+      "apr_pool_userdata_set",
+      "APLOGNO",
+      "apr_time_as_msec",
+      "ap_list_provider_names",
+      "ap_lookup_provider",
+      "parent"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "process_echo_connection",
+    "file": "modules/echo/mod_echo.c",
+    "calls": [
+      "ap_get_module_config",
+      "ap_time_process_request",
+      "update_echo_child_status",
+      "apr_brigade_create",
+      "ap_get_brigade",
+      "apr_brigade_cleanup",
+      "APR_STATUS_IS_EOF",
+      "APR_STATUS_IS_TIMEUP",
+      "APLOGNO",
+      "APR_BRIGADE_EMPTY"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "buffer_out_filter",
+    "file": "modules/filters/mod_buffer.c",
+    "calls": [
+      "ap_remove_output_filter",
+      "ap_pass_brigade",
+      "apr_brigade_create",
+      "ap_get_module_config",
+      "APR_BRIGADE_EMPTY",
+      "APR_BRIGADE_FIRST",
+      "APR_BUCKET_IS_EOS",
+      "APR_BUCKET_REMOVE",
+      "APR_BRIGADE_INSERT_TAIL",
+      "APR_BUCKET_IS_FLUSH"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "buffer_in_filter",
+    "file": "modules/filters/mod_buffer.c",
+    "calls": [
+      "ap_is_initial_req",
+      "ap_remove_input_filter",
+      "ap_get_brigade",
+      "apr_brigade_create",
+      "ap_get_module_config",
+      "APR_BRIGADE_EMPTY",
+      "APR_BRIGADE_FIRST",
+      "APR_BUCKET_IS_EOS",
+      "APR_BUCKET_REMOVE",
+      "APR_BRIGADE_INSERT_TAIL"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "xlate_in_filter",
+    "file": "modules/filters/mod_charset_lite.c",
+    "calls": [
+      "ap_get_module_config",
+      "ap_get_brigade",
+      "chk_filter_chain",
+      "apr_table_get",
+      "APR_BRIGADE_EMPTY",
+      "APR_BRIGADE_PREPEND",
+      "xlate_brigade",
+      "APR_BRIGADE_CONCAT",
+      "apr_bucket_heap_create",
+      "APR_BRIGADE_INSERT_HEAD"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "authenticate_basic_user",
+    "file": "modules/aaa/mod_auth_basic.c",
+    "calls": [
+      "ap_get_module_config",
+      "ap_auth_type",
+      "ap_cstr_casecmp",
+      "ap_auth_name",
+      "APLOGNO",
+      "get_basic_auth",
+      "ap_md5",
+      "apr_pstrcat",
+      "ap_lookup_provider",
+      "apr_table_setn"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "authn_dbd_realm",
+    "file": "modules/aaa/mod_authn_dbd.c",
+    "calls": [
+      "ap_get_module_config",
+      "authn_dbd_acquire_fn",
+      "APLOGNO",
+      "apr_hash_get",
+      "apr_dbd_pvselect",
+      "apr_dbd_error",
+      "apr_dbd_get_row",
+      "apr_dbd_get_name",
+      "apr_pstrcat",
+      "apr_isalnum"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "req_rsp",
+    "file": "modules/aaa/mod_authnz_fcgi.c",
+    "calls": [
+      "apr_table_copy",
+      "apr_pool_create",
+      "apr_pool_tag",
+      "mod_authnz_fcgi",
+      "setupenv",
+      "connect_to_peer",
+      "send_begin_request",
+      "APLOGNO",
+      "send_environment",
+      "handle_response"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "fcgi_check_authn",
+    "file": "modules/aaa/mod_authnz_fcgi.c",
+    "calls": [
+      "ap_get_module_config",
+      "ap_cstr_casecmp",
+      "ap_auth_type",
+      "APLOGNO",
+      "ap_get_basic_auth_pw",
+      "apr_hash_get",
+      "APLOGrdebug",
+      "log_provider_info",
+      "req_rsp",
+      "ap_expr_str_exec"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "ldapgroup_check_authorization",
+    "file": "modules/aaa/mod_authnz_ldap.c",
+    "calls": [
+      "ap_get_module_config",
+      "APLOGNO",
+      "build_request_config",
+      "get_connection_for_authz",
+      "get_dn_for_nonldap_authn",
+      "apr_thread_mutex_lock",
+      "apr_array_push",
+      "apr_thread_mutex_unlock",
+      "ap_expr_str_exec",
+      "util_ldap_cache_compare"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "cache_the_file",
+    "file": "modules/cache/mod_file_cache.c",
+    "calls": [
+      "ap_server_root_relative",
+      "APLOGNO",
+      "apr_stat",
+      "stat",
+      "apr_file_open",
+      "open",
+      "apr_file_inherit_set",
+      "MAX",
+      "apr_mmap_create",
+      "apr_file_close"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "file_cache_handler",
+    "file": "modules/cache/mod_file_cache.c",
+    "calls": [
+      "ap_strcmp_match",
+      "AP_IS_DEFAULT_HANDLER_NAME",
+      "ap_get_module_config",
+      "body",
+      "ap_discard_request_body",
+      "ap_update_mtime",
+      "ap_set_last_modified",
+      "ap_rationalize_mtime",
+      "apr_rfc822_date",
+      "apr_table_setn"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "dav_method_make_workspace",
+    "file": "modules/dav/main/mod_dav.c",
+    "calls": [
+      "DAV_GET_HOOKS_VSN",
+      "dav_get_resource",
+      "dav_handle_err",
+      "body",
+      "ap_xml_parse_input",
+      "dav_run_method_precondition",
+      "dav_validate_root",
+      "APLOGNO",
+      "dav_new_error",
+      "dav_push_error"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "crypto_out_filter",
+    "file": "modules/filters/mod_crypto.c",
+    "calls": [
+      "APR_BRIGADE_EMPTY",
+      "ap_pass_brigade",
+      "apr_table_unset",
+      "apr_brigade_partition",
+      "APR_BRIGADE_FIRST",
+      "APR_BUCKET_IS_EOS",
+      "do_crypto",
+      "apr_brigade_write",
+      "APR_BUCKET_REMOVE",
+      "APR_BRIGADE_INSERT_TAIL"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "authn_ldap_check_password",
+    "file": "modules/aaa/mod_authnz_ldap.c",
+    "calls": [
+      "ap_get_module_config",
+      "APLOGNO",
+      "ldap_determine_binddn",
+      "build_request_config",
+      "util_ldap_connection_find",
+      "authn_ldap_build_filter",
+      "release_ldc",
+      "authn_ldap_xlate_password",
+      "util_ldap_cache_checkuserid",
+      "ldap_err2string"
+    ],
+    "totalCalls": 14
+  },
+  {
+    "function": "sign_cb",
+    "file": "modules/aaa/mod_autht_jwt.c",
+    "calls": [
+      "ap_get_module_config",
+      "configured",
+      "apr_crypto_key_rec_make",
+      "apr_crypto_key",
+      "apr_strerror",
+      "apr_crypto_digest_rec_make",
+      "apr_crypto_digest_init",
+      "APR_BRIGADE_FIRST",
+      "APR_BRIGADE_SENTINEL",
+      "APR_BUCKET_NEXT"
+    ],
+    "totalCalls": 14
+  },
+  {
+    "function": "ssl_io_filter_Upgrade",
+    "file": "modules/arch/netware/mod_nw_ssl.c",
+    "calls": [
+      "ap_remove_output_filter",
+      "APLOGNO",
+      "ap_pass_brigade",
+      "apr_table_get",
+      "ap_find_token",
+      "apr_table_unset",
+      "ap_get_module_config",
+      "apr_brigade_create",
+      "ap_fputs",
+      "apr_bucket_flush_create"
+    ],
+    "totalCalls": 14
+  },
+  {
+    "function": "cache_out_filter",
+    "file": "modules/cache/mod_cache.c",
+    "calls": [
+      "APLOGNO",
+      "ap_remove_output_filter",
+      "ap_pass_brigade",
+      "APR_BRIGADE_EMPTY",
+      "APR_BRIGADE_FIRST",
+      "APR_BUCKET_IS_EOS",
+      "apr_brigade_create",
+      "apr_table_get",
+      "ap_set_content_type",
+      "recall_headers"
+    ],
+    "totalCalls": 14
+  },
+  {
+    "function": "hm_file_update_stats",
+    "file": "modules/cluster/mod_heartmonitor.c",
+    "calls": [
+      "apr_pstrcat",
+      "file",
+      "apr_file_mktemp",
+      "APLOGNO",
+      "apr_time_now",
+      "apr_hash_first",
+      "apr_hash_next",
+      "apr_hash_this",
+      "apr_time_sec",
+      "apr_file_printf"
+    ],
+    "totalCalls": 14
+  },
+  {
+    "function": "dav_method_label",
+    "file": "modules/dav/main/mod_dav.c",
+    "calls": [
+      "DAV_GET_HOOKS_VSN",
+      "ap_xml_parse_input",
+      "dav_get_resource",
+      "dav_handle_err",
+      "dav_run_method_precondition",
+      "dav_get_depth",
+      "dav_validate_root",
+      "APLOGNO",
+      "dav_find_child",
+      "apr_xml_to_text"
+    ],
+    "totalCalls": 14
+  },
+  {
+    "function": "CaseFilterOutFilter",
+    "file": "modules/examples/mod_case_filter.c",
+    "calls": [
+      "apr_brigade_create",
+      "APR_BRIGADE_FIRST",
+      "APR_BRIGADE_SENTINEL",
+      "APR_BUCKET_NEXT",
+      "APR_BUCKET_IS_EOS",
+      "apr_bucket_eos_create",
+      "APR_BRIGADE_INSERT_TAIL",
+      "apr_bucket_read",
+      "apr_bucket_alloc",
+      "apr_toupper"
+    ],
+    "totalCalls": 14
+  },
+  {
+    "function": "x_handler",
+    "file": "modules/examples/mod_example_hooks.c",
+    "calls": [
+      "our_dconfig",
+      "apr_pstrcat",
+      "trace_request",
+      "strcmp",
+      "ap_set_content_type_ex",
+      "information",
+      "ap_rputs",
+      "ap_rprintf",
+      "ap_get_server_banner",
+      "ap_get_server_built"
+    ],
+    "totalCalls": 14
+  },
+  {
+    "function": "isapi_lookup",
+    "file": "modules/arch/win32/mod_isapi.c",
+    "calls": [
+      "apr_thread_mutex_lock",
+      "apr_hash_get",
+      "dll",
+      "apr_thread_mutex_unlock",
+      "apr_thread_rwlock_rdlock",
+      "apr_thread_rwlock_unlock",
+      "apr_time_now",
+      "apr_thread_rwlock_wrlock",
+      "retry",
+      "isapi_load"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "cache_try_lock",
+    "file": "modules/cache/cache_util.c",
+    "calls": [
+      "apr_time_now",
+      "apr_pool_userdata_get",
+      "apr_pstrdup",
+      "cache_generate_key",
+      "ap_cache_generate_name",
+      "apr_pstrcat",
+      "apr_dir_make_recursive",
+      "APLOGNO",
+      "apr_pool_userdata_set",
+      "apr_stat"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "socache_dbm_expire",
+    "file": "modules/cache/mod_socache_dbm.c",
+    "calls": [
+      "apr_time_now",
+      "apr_dbm_get_driver",
+      "APLOGNO",
+      "apr_pool_clear",
+      "apr_dbm_open2",
+      "apr_dbm_open",
+      "apr_dbm_firstkey",
+      "apr_dbm_fetch",
+      "memcpy",
+      "apr_pmemdup"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "socache_shmcb_init",
+    "file": "modules/cache/mod_socache_shmcb.c",
+    "calls": [
+      "apr_pstrcat",
+      "ap_runtime_dir_relative",
+      "apr_shm_create",
+      "APR_STATUS_IS_ENOTIMPL",
+      "APLOGNO",
+      "apr_shm_remove",
+      "apr_pool_cleanup_register",
+      "apr_shm_baseaddr_get",
+      "apr_shm_size_get",
+      "bytes"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "dbd_construct",
+    "file": "modules/database/mod_dbd.c",
+    "calls": [
+      "apr_pool_create",
+      "APLOGNO",
+      "apr_pool_tag",
+      "apr_dbd_get_driver",
+      "APR_STATUS_IS_ENOTIMPL",
+      "APR_STATUS_IS_EDSOOPEN",
+      "APR_STATUS_IS_ESYMNOTFOUND",
+      "apr_pool_destroy",
+      "apr_dbd_open_ex",
+      "apr_pool_cleanup_register"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "dav_fs_insert_prop",
+    "file": "modules/dav/fs/repos.c",
+    "calls": [
+      "ctime",
+      "dav_format_time",
+      "apr_snprintf",
+      "dav_fs_getetag",
+      "dav_fs_get_available_bytes",
+      "dav_fs_get_request_rec",
+      "dav_fs_fname",
+      "dav_fs_get_used_bytes",
+      "dav_get_liveprop_info",
+      "DBG3"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "dav_method_checkin",
+    "file": "modules/dav/main/mod_dav.c",
+    "calls": [
+      "DAV_GET_HOOKS_VSN",
+      "ap_xml_parse_input",
+      "dav_validate_root",
+      "APLOGNO",
+      "dav_find_child",
+      "dav_get_resource",
+      "dav_handle_err",
+      "dav_run_method_precondition",
+      "dav_error_response",
+      "dav_push_error"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "exipc_handler",
+    "file": "modules/examples/mod_example_ipc.c",
+    "calls": [
+      "strcmp",
+      "apr_global_mutex_trylock",
+      "APR_STATUS_IS_EBUSY",
+      "apr_sleep",
+      "APR_STATUS_IS_ENOTIMPL",
+      "apr_time_now",
+      "apr_global_mutex_lock",
+      "APLOGNO",
+      "getpid",
+      "ap_rputs"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "noloris_monitor",
+    "file": "modules/experimental/mod_noloris.c",
+    "calls": [
+      "apr_time_now",
+      "apr_hash_make",
+      "ap_get_scoreboard_worker_from_indexes",
+      "apr_hash_get",
+      "apr_hash_set",
+      "apr_shm_baseaddr_get",
+      "memset",
+      "apr_hash_first",
+      "apr_hash_next",
+      "apr_hash_this"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "initialize_tables",
+    "file": "modules/aaa/mod_auth_digest.c",
+    "calls": [
+      "ap_runtime_dir_relative",
+      "ap_append_pid",
+      "apr_shm_create",
+      "APR_STATUS_IS_ENOTIMPL",
+      "apr_shm_remove",
+      "APLOGNO",
+      "log_error_and_cleanup",
+      "apr_rmm_init",
+      "apr_shm_baseaddr_get",
+      "rmm_malloc"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "note_digest_auth_failure",
+    "file": "modules/aaa/mod_auth_digest.c",
+    "calls": [
+      "apr_is_empty_array",
+      "ap_cstr_casecmp",
+      "apr_pstrcat",
+      "apr_array_pstrcat",
+      "gen_client",
+      "ltox",
+      "gen_nonce",
+      "ap_auth_name",
+      "memcpy",
+      "unnecessarily"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "ldapfilter_check_authorization",
+    "file": "modules/aaa/mod_authnz_ldap.c",
+    "calls": [
+      "ap_get_module_config",
+      "APLOGNO",
+      "build_request_config",
+      "get_connection_for_authz",
+      "get_dn_for_nonldap_authn",
+      "ap_expr_str_exec",
+      "authn_ldap_build_filter",
+      "util_ldap_cache_getuserdn",
+      "release_ldc",
+      "util_ldap_cache_comparedn"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "authz_dbd_login",
+    "file": "modules/aaa/mod_authz_dbd.c",
+    "calls": [
+      "APLOGNO",
+      "dbd_handle",
+      "apr_hash_get",
+      "apr_dbd_pvquery",
+      "apr_dbd_error",
+      "apr_table_get",
+      "apr_dbd_pvselect",
+      "apr_dbd_get_row",
+      "apr_pstrdup",
+      "apr_dbd_get_entry"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "send_response_header",
+    "file": "modules/arch/win32/mod_isapi.c",
+    "calls": [
+      "memchr",
+      "strlen",
+      "apr_isdigit",
+      "apr_isspace",
+      "strcpy",
+      "apr_cpystrn",
+      "apr_pstrndup",
+      "ap_scan_script_header_err_strs_ex",
+      "ap_get_status_line",
+      "one"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "cache_save_store",
+    "file": "modules/cache/mod_cache.c",
+    "calls": [
+      "APR_BRIGADE_EMPTY",
+      "store_body",
+      "APLOGNO",
+      "ap_remove_output_filter",
+      "cache_remove_lock",
+      "APR_BRIGADE_PREPEND",
+      "ap_pass_brigade",
+      "APR_BRIGADE_FIRST",
+      "APR_BRIGADE_SENTINEL",
+      "APR_BUCKET_NEXT"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "socache_dbm_init",
+    "file": "modules/cache/mod_socache_dbm.c",
+    "calls": [
+      "apr_pstrcat",
+      "ap_runtime_dir_relative",
+      "APLOGNO",
+      "apr_pool_clear",
+      "apr_dbm_get_driver",
+      "apr_dbm_open2",
+      "apr_dbm_open",
+      "apr_dbm_close",
+      "apr_time_from_sec",
+      "geteuid"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "socache_mc_init",
+    "file": "modules/cache/mod_socache_memcache.c",
+    "calls": [
+      "ap_get_module_config",
+      "ap_mpm_query",
+      "apr_pstrdup",
+      "apr_strtok",
+      "apr_memcache_create",
+      "APLOGNO",
+      "apr_parse_addr_port",
+      "apr_memcache_server_create",
+      "apr_memcache_add_server",
+      "apr_pstrcat"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "socache_rd_init",
+    "file": "modules/cache/mod_socache_redis.c",
+    "calls": [
+      "ap_get_module_config",
+      "ap_mpm_query",
+      "apr_pstrdup",
+      "apr_strtok",
+      "apr_redis_create",
+      "APLOGNO",
+      "apr_parse_addr_port",
+      "apr_redis_server_create",
+      "apr_redis_add_server",
+      "apr_pstrcat"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "hm_watchdog_callback",
+    "file": "modules/cluster/mod_heartmonitor.c",
+    "calls": [
+      "hm_listen",
+      "APLOGNO",
+      "hm_update_stats",
+      "apr_time_sec",
+      "apr_time_now",
+      "apr_pool_create",
+      "apr_pool_tag",
+      "apr_time_from_sec",
+      "apr_poll",
+      "apr_pool_destroy"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "dav_method_make_activity",
+    "file": "modules/dav/main/mod_dav.c",
+    "calls": [
+      "DAV_GET_HOOKS_VSN",
+      "dav_get_resource",
+      "dav_handle_err",
+      "dav_run_method_precondition",
+      "ap_discard_request_body",
+      "dav_new_error",
+      "dav_push_error",
+      "apr_psprintf",
+      "ap_escape_html",
+      "apr_table_setn"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "CaseFilterInFilter",
+    "file": "modules/examples/mod_case_filter_in.c",
+    "calls": [
+      "apr_brigade_create",
+      "APR_BRIGADE_EMPTY",
+      "ap_get_brigade",
+      "APR_BRIGADE_FIRST",
+      "APR_BUCKET_REMOVE",
+      "APR_BRIGADE_INSERT_TAIL",
+      "APR_BUCKET_IS_EOS",
+      "apr_bucket_read",
+      "ap_malloc",
+      "apr_toupper"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "xlate_brigade",
+    "file": "modules/filters/mod_charset_lite.c",
+    "calls": [
+      "apr_bucket_delete",
+      "APR_BRIGADE_FIRST",
+      "APR_BRIGADE_SENTINEL",
+      "APR_BUCKET_IS_METADATA",
+      "apr_bucket_read",
+      "finish_partial_char",
+      "apr_xlate_conv_buffer",
+      "byte",
+      "set_aside_partial_char",
+      "apr_bucket_split"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "authenticate_bearer_token",
+    "file": "modules/aaa/mod_auth_bearer.c",
+    "calls": [
+      "ap_get_module_config",
+      "ap_auth_type",
+      "strcasecmp",
+      "ap_auth_name",
+      "APLOGNO",
+      "get_bearer_auth",
+      "ap_lookup_provider",
+      "apr_table_setn",
+      "check_token",
+      "apr_table_unset"
+    ],
+    "totalCalls": 11
+  },
+  {
+    "function": "add_auth_info",
+    "file": "modules/aaa/mod_auth_digest.c",
+    "calls": [
+      "ap_get_module_config",
+      "supported",
+      "apr_pstrcat",
+      "gen_nonce",
+      "ap_auth_name",
+      "memcpy",
+      "apr_is_empty_array",
+      "ap_cstr_casecmp",
+      "ap_md5",
+      "ap_escape_quotes"
+    ],
+    "totalCalls": 11
+  },
+  {
+    "function": "ap_authn_cache_store",
+    "file": "modules/aaa/mod_authn_socache.c",
+    "calls": [
+      "ap_get_module_config",
+      "ap_array_str_contains",
+      "apr_global_mutex_trylock",
+      "APR_STATUS_IS_EBUSY",
+      "APLOGNO",
+      "cached",
+      "construct_key",
+      "apr_time_now",
+      "store",
+      "strlen"
+    ],
+    "totalCalls": 11
+  },
+  {
+    "function": "ldapattribute_check_authorization",
+    "file": "modules/aaa/mod_authnz_ldap.c",
+    "calls": [
+      "ap_get_module_config",
+      "APLOGNO",
+      "build_request_config",
+      "get_connection_for_authz",
+      "get_dn_for_nonldap_authn",
+      "ap_expr_str_exec",
+      "ap_getword",
+      "ap_getword_conf",
+      "util_ldap_cache_compare",
+      "set_request_vars"
+    ],
+    "totalCalls": 11
+  },
+  {
+    "function": "dbmgroup_check_authorization",
+    "file": "modules/aaa/mod_authz_dbm.c",
+    "calls": [
+      "ap_get_module_config",
+      "ap_auth_name",
+      "APLOGNO",
+      "get_dbm_grp",
+      "apr_pstrcat",
+      "file",
+      "ap_expr_str_exec",
+      "ap_getword_white",
+      "ap_getword",
+      "strcmp"
+    ],
+    "totalCalls": 11
+  }
+]

@@ -1,0 +1,1339 @@
+[
+  {
+    "function": "nghttp2_session_mem_recv2",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "DEBUGF",
+      "nghttp2_session_want_read",
+      "nghttp2_min_size",
+      "memcmp",
+      "session_inbound_frame_reset",
+      "inbound_frame_buf_read",
+      "nghttp2_buf_mark_avail",
+      "session_call_error_callback",
+      "nghttp2_is_fatal",
+      "nghttp2_session_terminate_session_with_reason"
+    ],
+    "totalCalls": 56
+  },
+  {
+    "function": "session_prep_frame",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_session_get_stream",
+      "nghttp2_session_predicate_data_send",
+      "nghttp2_session_get_stream_raw",
+      "session_detach_stream_item",
+      "nghttp2_session_next_data_read",
+      "session_defer_stream_item",
+      "active_outbound_item_reset",
+      "nghttp2_session_pack_data",
+      "nghttp2_session_add_rst_stream",
+      "nghttp2_is_fatal"
+    ],
+    "totalCalls": 40
+  },
+  {
+    "function": "nghttp2_session_mem_send_internal",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_session_pop_next_ob_item",
+      "session_prep_frame",
+      "DEBUGF",
+      "nghttp2_strerror",
+      "is_non_fatal",
+      "on_frame_not_send_callback",
+      "nghttp2_outbound_item_free",
+      "nghttp2_mem_free",
+      "nghttp2_session_close_stream",
+      "active_outbound_item_reset"
+    ],
+    "totalCalls": 21
+  },
+  {
+    "function": "nghttp2_hd_inflate_hd_nv",
+    "file": "lib/nghttp2_hd.c",
+    "calls": [
+      "DEBUGF",
+      "hd_inflate_keep_free",
+      "hd_inflate_read_len",
+      "nghttp2_min_size",
+      "hd_context_shrink_table_size",
+      "get_max_index",
+      "hd_inflate_commit_indexed",
+      "hd_inflate_set_huffman_encoded",
+      "nghttp2_hd_huff_decode_context_init",
+      "nghttp2_rcbuf_new"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "session_after_frame_sent1",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_session_get_stream",
+      "session_detach_stream_item",
+      "nghttp2_stream_detach_item",
+      "nghttp2_submit_data2",
+      "session_call_on_frame_send",
+      "nghttp2_is_fatal",
+      "nghttp2_stream_shutdown",
+      "nghttp2_session_close_stream_if_shut_rdwr",
+      "nghttp2_bufs_next_present",
+      "DEBUGF"
+    ],
+    "totalCalls": 18
+  },
+  {
+    "function": "session_inbound_frame_reset",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_session_new",
+      "nghttp2_frame_headers_free",
+      "nghttp2_frame_priority_free",
+      "nghttp2_frame_rst_stream_free",
+      "nghttp2_frame_settings_free",
+      "nghttp2_mem_free",
+      "nghttp2_frame_push_promise_free",
+      "nghttp2_frame_ping_free",
+      "nghttp2_frame_goaway_free",
+      "nghttp2_frame_window_update_free"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "session_new",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_mem_default",
+      "nghttp2_mem_calloc",
+      "nghttp2_ratelim_init",
+      "init_settings",
+      "memcpy",
+      "nghttp2_hd_deflate_init2",
+      "nghttp2_hd_inflate_init",
+      "nghttp2_bufs_init3",
+      "rand_callback",
+      "nghttp2_map_init"
+    ],
+    "totalCalls": 17
+  },
+  {
+    "function": "http_request_on_header",
+    "file": "lib/nghttp2_http.c",
+    "calls": [
+      "check_authority",
+      "check_pseudo_header",
+      "nghttp2_check_method",
+      "lstreq",
+      "nghttp2_check_path",
+      "check_scheme",
+      "memieq",
+      "lws",
+      "nghttp2_check_header_value",
+      "nghttp2_check_header_value_rfc9113"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "nghttp2_session_pack_data",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "read_length_callback2",
+      "read_length_callback",
+      "DEBUGF",
+      "nghttp2_session_enforce_flow_control_limits",
+      "nghttp2_buf_avail",
+      "buffer",
+      "nghttp2_bufs_realloc",
+      "read_callback",
+      "abort",
+      "nghttp2_strerror"
+    ],
+    "totalCalls": 16
+  },
+  {
+    "function": "inflate_header_block",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_session_get_stream",
+      "session_trailer_headers",
+      "DEBUGF",
+      "nghttp2_hd_inflate_hd_nv",
+      "nghttp2_is_fatal",
+      "nghttp2_session_add_rst_stream",
+      "nghttp2_session_terminate_session",
+      "session_enforce_http_messaging",
+      "nghttp2_http_on_header",
+      "session_call_on_invalid_header"
+    ],
+    "totalCalls": 15
+  },
+  {
+    "function": "deflate_nv",
+    "file": "lib/nghttp2_hd.c",
+    "calls": [
+      "DEBUGF",
+      "lookup_token",
+      "name_hash",
+      "data",
+      "hd_deflate_decide_indexing",
+      "search_hd_table",
+      "emit_indexed_block",
+      "nghttp2_hd_table_get",
+      "nghttp2_rcbuf_incref",
+      "nghttp2_rcbuf_new2"
+    ],
+    "totalCalls": 14
+  },
+  {
+    "function": "nghttp2_outbound_item_free",
+    "file": "lib/nghttp2_outbound_item.c",
+    "calls": [
+      "nghttp2_frame_data_free",
+      "nghttp2_frame_headers_free",
+      "nghttp2_frame_priority_free",
+      "nghttp2_frame_rst_stream_free",
+      "nghttp2_frame_settings_free",
+      "nghttp2_frame_push_promise_free",
+      "nghttp2_frame_ping_free",
+      "nghttp2_frame_goaway_free",
+      "nghttp2_frame_window_update_free",
+      "nghttp2_frame_extension_free"
+    ],
+    "totalCalls": 13
+  },
+  {
+    "function": "nghttp2_session_close_stream",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_session_get_stream",
+      "DEBUGF",
+      "stream",
+      "on_stream_close_callback",
+      "session_detach_stream_item",
+      "popped",
+      "nghttp2_session_prep_frame",
+      "active_outbound_item_reset",
+      "nghttp2_outbound_item_free",
+      "nghttp2_mem_free"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "session_after_header_block_received",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_session_get_stream",
+      "session_enforce_http_messaging",
+      "nghttp2_http_on_request_headers",
+      "nghttp2_http_on_response_headers",
+      "nghttp2_http_on_trailer_headers",
+      "nghttp2_http_on_remote_end_stream",
+      "session_handle_invalid_stream2",
+      "nghttp2_is_fatal",
+      "session_update_glitch_ratelim",
+      "nghttp2_stream_shutdown"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "nghttp2_session_on_request_headers_received",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "session_inflate_handle_invalid_connection",
+      "session_detect_idle_stream",
+      "session_is_new_peer_stream_id",
+      "nghttp2_session_is_my_stream_id",
+      "closed",
+      "nghttp2_session_get_stream_raw",
+      "session_is_incoming_concurrent_streams_max",
+      "session_allow_incoming_new_stream",
+      "session_is_incoming_concurrent_streams_pending_max",
+      "session_inflate_handle_invalid_stream"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "nghttp2_session_add_settings",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_iv_check",
+      "nghttp2_mem_malloc",
+      "nghttp2_frame_iv_copy",
+      "nghttp2_mem_free",
+      "inflight_settings_new",
+      "nghttp2_is_fatal",
+      "nghttp2_outbound_item_init",
+      "nghttp2_frame_settings_init",
+      "nghttp2_session_add_item",
+      "inflight_settings_del"
+    ],
+    "totalCalls": 12
+  },
+  {
+    "function": "add_hd_table_incremental",
+    "file": "lib/nghttp2_hd.c",
+    "calls": [
+      "entry_room",
+      "hd_ringbuf_get",
+      "DEBUGF",
+      "hd_ringbuf_pop_back",
+      "hd_map_remove",
+      "nghttp2_hd_entry_free",
+      "nghttp2_mem_free",
+      "nghttp2_mem_malloc",
+      "nghttp2_hd_entry_init",
+      "hd_ringbuf_push_front"
+    ],
+    "totalCalls": 11
+  },
+  {
+    "function": "nghttp2_session_del",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "inflight_settings_del",
+      "nghttp2_pq_free",
+      "nghttp2_map_each",
+      "nghttp2_map_free",
+      "ob_q_free",
+      "active_outbound_item_reset",
+      "session_inbound_frame_reset",
+      "nghttp2_hd_deflate_free",
+      "nghttp2_hd_inflate_free",
+      "nghttp2_bufs_free"
+    ],
+    "totalCalls": 11
+  },
+  {
+    "function": "nghttp2_session_on_priority_update_received",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "session_handle_invalid_connection",
+      "nghttp2_session_is_my_stream_id",
+      "session_detect_idle_stream",
+      "session_call_on_frame_received",
+      "nghttp2_session_get_stream_raw",
+      "nghttp2_session_open_stream",
+      "nghttp2_http_parse_priority",
+      "session_update_stream_priority",
+      "nghttp2_extpri_to_uint8",
+      "nghttp2_is_fatal"
+    ],
+    "totalCalls": 10
+  },
+  {
+    "function": "nghttp2_session_add_rst_stream_continue",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_session_get_stream",
+      "nghttp2_session_is_my_stream_id",
+      "nghttp2_outbound_queue_top",
+      "nghttp2_mem_malloc",
+      "nghttp2_outbound_item_init",
+      "nghttp2_frame_rst_stream_init",
+      "nghttp2_session_add_item",
+      "nghttp2_frame_rst_stream_free",
+      "nghttp2_mem_free"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "session_after_frame_sent2",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_bufs_next_present",
+      "DEBUGF",
+      "nghttp2_buf_len",
+      "active_outbound_item_reset",
+      "nghttp2_submit_data2",
+      "on_frame_send_callback",
+      "nghttp2_session_get_stream",
+      "nghttp2_session_predicate_data_send",
+      "session_detach_stream_item"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "nghttp2_session_on_settings_received",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "session_handle_invalid_connection",
+      "nghttp2_session_update_local_settings",
+      "inflight_settings_del",
+      "nghttp2_is_fatal",
+      "session_call_on_frame_received",
+      "nghttp2_hd_deflate_change_table_size",
+      "session_update_remote_initial_window_size",
+      "session_is_closing",
+      "nghttp2_session_add_settings"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "nghttp2_session_on_push_promise_received",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "session_inflate_handle_invalid_connection",
+      "nghttp2_session_is_my_stream_id",
+      "session_allow_incoming_new_stream",
+      "session_is_new_peer_stream_id",
+      "session_detect_idle_stream",
+      "nghttp2_session_get_stream",
+      "session_handle_invalid_stream2",
+      "nghttp2_session_open_stream",
+      "session_call_on_begin_headers"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "nghttp2_session_on_data_received",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_session_get_stream",
+      "session_enforce_http_messaging",
+      "nghttp2_http_on_remote_end_stream",
+      "session_handle_invalid_stream2",
+      "nghttp2_is_fatal",
+      "session_update_glitch_ratelim",
+      "nghttp2_stream_shutdown",
+      "session_call_on_frame_received",
+      "nghttp2_session_close_stream_if_shut_rdwr"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "nghttp2_session_add_goaway",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_session_is_my_stream_id",
+      "nghttp2_mem_malloc",
+      "memcpy",
+      "nghttp2_mem_free",
+      "nghttp2_outbound_item_init",
+      "nghttp2_min_int32",
+      "nghttp2_frame_goaway_init",
+      "nghttp2_session_add_item",
+      "nghttp2_frame_goaway_free"
+    ],
+    "totalCalls": 9
+  },
+  {
+    "function": "session_call_error_callback",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "va_start",
+      "vsnprintf",
+      "va_end",
+      "nghttp2_mem_malloc",
+      "nghttp2_mem_free",
+      "DEBUGF",
+      "error_callback2",
+      "error_callback"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "nghttp2_session_on_push_response_headers_received",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "session_inflate_handle_invalid_connection",
+      "session_is_incoming_concurrent_streams_max",
+      "session_allow_incoming_new_stream",
+      "session_is_incoming_concurrent_streams_pending_max",
+      "session_inflate_handle_invalid_stream",
+      "nghttp2_stream_promise_fulfilled",
+      "nghttp2_session_is_my_stream_id",
+      "session_call_on_begin_headers"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "nghttp2_session_on_rst_stream_received",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "session_handle_invalid_connection",
+      "session_detect_idle_stream",
+      "nghttp2_session_get_stream",
+      "nghttp2_stream_shutdown",
+      "session_call_on_frame_received",
+      "nghttp2_session_close_stream",
+      "nghttp2_is_fatal",
+      "session_update_stream_reset_ratelim"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "session_on_stream_window_update_received",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "session_detect_idle_stream",
+      "session_handle_invalid_connection",
+      "nghttp2_session_get_stream",
+      "state_reserved_remote",
+      "nghttp2_stream_check_deferred_by_flow_control",
+      "session_resume_deferred_stream_item",
+      "nghttp2_is_fatal",
+      "session_call_on_frame_received"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "submit_headers_shared",
+    "file": "lib/nghttp2_submit.c",
+    "calls": [
+      "nghttp2_mem_malloc",
+      "nghttp2_outbound_item_init",
+      "nghttp2_data_provider_wrap_contains_read_callback",
+      "nghttp2_frame_headers_init",
+      "nghttp2_session_add_item",
+      "nghttp2_frame_headers_free",
+      "nghttp2_nv_array_del",
+      "nghttp2_mem_free"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "nghttp2_submit_push_promise",
+    "file": "lib/nghttp2_submit.c",
+    "calls": [
+      "nghttp2_session_is_my_stream_id",
+      "nghttp2_mem_malloc",
+      "nghttp2_outbound_item_init",
+      "nghttp2_nv_array_copy",
+      "nghttp2_mem_free",
+      "nghttp2_frame_push_promise_init",
+      "nghttp2_session_add_item",
+      "nghttp2_frame_push_promise_free"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "parser_bare_item",
+    "file": "lib/sfparse.c",
+    "calls": [
+      "parser_string",
+      "parser_number",
+      "parser_date",
+      "parser_byteseq",
+      "parser_boolean",
+      "parser_token",
+      "parser_dispstring",
+      "abort"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "sfparse_parser_dict",
+    "file": "lib/sfparse.c",
+    "calls": [
+      "parser_skip_inner_list",
+      "parser_skip_params",
+      "parser_next_key_or_item",
+      "parser_discard_sp",
+      "parser_eof",
+      "abort",
+      "parser_key",
+      "parser_dict_value"
+    ],
+    "totalCalls": 8
+  },
+  {
+    "function": "session_process_headers_frame",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_frame_unpack_headers_payload",
+      "nghttp2_session_get_stream",
+      "nghttp2_session_on_request_headers_received",
+      "nghttp2_session_on_push_response_headers_received",
+      "nghttp2_session_is_my_stream_id",
+      "nghttp2_session_on_response_headers_received",
+      "nghttp2_session_on_headers_received"
+    ],
+    "totalCalls": 7
+  },
+  {
+    "function": "session_on_data_received_fail_fast",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "session_detect_idle_stream",
+      "nghttp2_session_get_stream",
+      "nghttp2_session_get_stream_raw",
+      "closed",
+      "nghttp2_session_is_my_stream_id",
+      "nghttp2_session_terminate_session_with_reason",
+      "nghttp2_is_fatal"
+    ],
+    "totalCalls": 7
+  },
+  {
+    "function": "nghttp2_session_upgrade_internal",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_frame_unpack_settings_payload2",
+      "nghttp2_frame_hd_init",
+      "nghttp2_session_on_settings_received",
+      "nghttp2_submit_settings",
+      "nghttp2_mem_free",
+      "nghttp2_session_open_stream",
+      "nghttp2_stream_shutdown"
+    ],
+    "totalCalls": 7
+  },
+  {
+    "function": "nghttp2_submit_altsvc",
+    "file": "lib/nghttp2_submit.c",
+    "calls": [
+      "nghttp2_mem_malloc",
+      "nghttp2_cpymem",
+      "nghttp2_outbound_item_init",
+      "nghttp2_frame_altsvc_init",
+      "nghttp2_session_add_item",
+      "nghttp2_frame_altsvc_free",
+      "nghttp2_mem_free"
+    ],
+    "totalCalls": 7
+  },
+  {
+    "function": "nghttp2_submit_origin",
+    "file": "lib/nghttp2_submit.c",
+    "calls": [
+      "nghttp2_mem_malloc",
+      "nghttp2_cpymem",
+      "nghttp2_outbound_item_init",
+      "nghttp2_frame_origin_init",
+      "nghttp2_session_add_item",
+      "nghttp2_frame_origin_free",
+      "nghttp2_mem_free"
+    ],
+    "totalCalls": 7
+  },
+  {
+    "function": "nghttp2_submit_priority_update",
+    "file": "lib/nghttp2_submit.c",
+    "calls": [
+      "nghttp2_mem_malloc",
+      "nghttp2_cpymem",
+      "nghttp2_outbound_item_init",
+      "nghttp2_frame_priority_update_init",
+      "nghttp2_session_add_item",
+      "nghttp2_frame_priority_update_free",
+      "nghttp2_mem_free"
+    ],
+    "totalCalls": 7
+  },
+  {
+    "function": "sfparse_parser_param",
+    "file": "lib/sfparse.c",
+    "calls": [
+      "parser_skip_inner_list",
+      "parser_set_op_state",
+      "abort",
+      "parser_eof",
+      "parser_discard_sp",
+      "parser_key",
+      "parser_bare_item"
+    ],
+    "totalCalls": 7
+  },
+  {
+    "function": "sfparse_parser_inner_list",
+    "file": "lib/sfparse.c",
+    "calls": [
+      "parser_discard_sp",
+      "parser_eof",
+      "parser_skip_params",
+      "parser_set_op_state",
+      "abort",
+      "parser_unset_inner_list_state",
+      "parser_bare_item"
+    ],
+    "totalCalls": 7
+  },
+  {
+    "function": "sfparse_parser_list",
+    "file": "lib/sfparse.c",
+    "calls": [
+      "parser_skip_inner_list",
+      "parser_skip_params",
+      "parser_next_key_or_item",
+      "parser_discard_sp",
+      "parser_eof",
+      "abort",
+      "parser_bare_item"
+    ],
+    "totalCalls": 7
+  },
+  {
+    "function": "frame_set_pad",
+    "file": "lib/nghttp2_frame.c",
+    "calls": [
+      "DEBUGF",
+      "memmove",
+      "nghttp2_get_uint32",
+      "nghttp2_put_uint32be",
+      "memset",
+      "byte"
+    ],
+    "totalCalls": 6
+  },
+  {
+    "function": "emit_string",
+    "file": "lib/nghttp2_hd.c",
+    "calls": [
+      "nghttp2_hd_huff_encode_count",
+      "count_encoded_length",
+      "DEBUGF",
+      "encode_length",
+      "nghttp2_bufs_add",
+      "nghttp2_hd_huff_encode"
+    ],
+    "totalCalls": 6
+  },
+  {
+    "function": "emit_indname_block",
+    "file": "lib/nghttp2_hd.c",
+    "calls": [
+      "DEBUGF",
+      "count_encoded_length",
+      "pack_first_byte",
+      "encode_length",
+      "nghttp2_bufs_add",
+      "emit_string"
+    ],
+    "totalCalls": 6
+  },
+  {
+    "function": "hd_context_shrink_table_size",
+    "file": "lib/nghttp2_hd.c",
+    "calls": [
+      "hd_ringbuf_get",
+      "entry_room",
+      "hd_ringbuf_pop_back",
+      "hd_map_remove",
+      "nghttp2_hd_entry_free",
+      "nghttp2_mem_free"
+    ],
+    "totalCalls": 6
+  },
+  {
+    "function": "nghttp2_session_destroy_stream",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "DEBUGF",
+      "stream",
+      "session_ob_data_remove",
+      "nghttp2_map_remove",
+      "nghttp2_stream_free",
+      "nghttp2_mem_free"
+    ],
+    "totalCalls": 6
+  },
+  {
+    "function": "nghttp2_session_add_ping",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_mem_malloc",
+      "nghttp2_outbound_item_init",
+      "nghttp2_frame_ping_init",
+      "nghttp2_session_add_item",
+      "nghttp2_frame_ping_free",
+      "nghttp2_mem_free"
+    ],
+    "totalCalls": 6
+  },
+  {
+    "function": "nghttp2_session_add_window_update",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_mem_malloc",
+      "nghttp2_outbound_item_init",
+      "nghttp2_frame_window_update_init",
+      "nghttp2_session_add_item",
+      "nghttp2_frame_window_update_free",
+      "nghttp2_mem_free"
+    ],
+    "totalCalls": 6
+  },
+  {
+    "function": "nghttp2_session_set_local_window_size",
+    "file": "lib/nghttp2_submit.c",
+    "calls": [
+      "nghttp2_adjust_local_window_size",
+      "nghttp2_increase_local_window_size",
+      "nghttp2_session_add_window_update",
+      "nghttp2_session_update_recv_connection_window_size",
+      "nghttp2_session_get_stream",
+      "nghttp2_session_update_recv_stream_window_size"
+    ],
+    "totalCalls": 6
+  },
+  {
+    "function": "nghttp2_submit_data_shared",
+    "file": "lib/nghttp2_submit.c",
+    "calls": [
+      "nghttp2_mem_malloc",
+      "nghttp2_outbound_item_init",
+      "nghttp2_frame_data_init",
+      "nghttp2_session_add_item",
+      "nghttp2_frame_data_free",
+      "nghttp2_mem_free"
+    ],
+    "totalCalls": 6
+  },
+  {
+    "function": "nghttp2_submit_extension",
+    "file": "lib/nghttp2_submit.c",
+    "calls": [
+      "nghttp2_mem_malloc",
+      "nghttp2_outbound_item_init",
+      "nghttp2_frame_extension_init",
+      "nghttp2_session_add_item",
+      "nghttp2_frame_extension_free",
+      "nghttp2_mem_free"
+    ],
+    "totalCalls": 6
+  },
+  {
+    "function": "sfparse_parser_item",
+    "file": "lib/sfparse.c",
+    "calls": [
+      "parser_discard_sp",
+      "parser_eof",
+      "parser_skip_inner_list",
+      "parser_skip_params",
+      "abort",
+      "parser_bare_item"
+    ],
+    "totalCalls": 6
+  },
+  {
+    "function": "nghttp2_frame_pack_headers",
+    "file": "lib/nghttp2_frame.c",
+    "calls": [
+      "nghttp2_frame_headers_payload_nv_offset",
+      "nghttp2_hd_deflate_hd_bufs",
+      "nghttp2_frame_pack_priority_spec",
+      "nghttp2_bufs_len",
+      "frame_pack_headers_shared"
+    ],
+    "totalCalls": 5
+  },
+  {
+    "function": "nghttp2_frame_pack_origin",
+    "file": "lib/nghttp2_frame.c",
+    "calls": [
+      "nghttp2_buf_avail",
+      "nghttp2_frame_pack_frame_hd",
+      "nghttp2_put_uint16be",
+      "nghttp2_cpymem",
+      "nghttp2_buf_len"
+    ],
+    "totalCalls": 5
+  },
+  {
+    "function": "hd_inflate_commit_indname",
+    "file": "lib/nghttp2_hd.c",
+    "calls": [
+      "nghttp2_hd_table_get",
+      "nghttp2_rcbuf_incref",
+      "add_hd_table_incremental",
+      "nghttp2_rcbuf_decref",
+      "emit_header"
+    ],
+    "totalCalls": 5
+  },
+  {
+    "function": "http_response_on_header",
+    "file": "lib/nghttp2_http.c",
+    "calls": [
+      "check_pseudo_header",
+      "parse_status_code",
+      "lstrieq",
+      "parse_uint",
+      "check_header_value"
+    ],
+    "totalCalls": 5
+  },
+  {
+    "function": "session_sched_reschedule_stream",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_extpri_uint8_urgency",
+      "nghttp2_extpri_uint8_inc",
+      "nghttp2_pq_size",
+      "nghttp2_pq_remove",
+      "nghttp2_pq_push"
+    ],
+    "totalCalls": 5
+  },
+  {
+    "function": "session_headers_add_pad",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_min_size",
+      "session_call_select_padding",
+      "nghttp2_is_fatal",
+      "DEBUGF",
+      "nghttp2_frame_add_pad"
+    ],
+    "totalCalls": 5
+  },
+  {
+    "function": "session_pack_extension",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_min_size",
+      "nghttp2_buf_avail",
+      "pack_extension_callback2",
+      "pack_extension_callback",
+      "nghttp2_frame_pack_frame_hd"
+    ],
+    "totalCalls": 5
+  },
+  {
+    "function": "session_end_stream_headers_received",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "session_enforce_http_messaging",
+      "session_update_stream_priority",
+      "nghttp2_is_fatal",
+      "nghttp2_stream_shutdown",
+      "nghttp2_session_close_stream_if_shut_rdwr"
+    ],
+    "totalCalls": 5
+  },
+  {
+    "function": "nghttp2_session_on_response_headers_received",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_session_is_my_stream_id",
+      "session_inflate_handle_invalid_connection",
+      "closed",
+      "error",
+      "session_call_on_begin_headers"
+    ],
+    "totalCalls": 5
+  },
+  {
+    "function": "nghttp2_session_on_headers_received",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "session_inflate_handle_invalid_connection",
+      "closed",
+      "error",
+      "nghttp2_session_is_my_stream_id",
+      "session_call_on_begin_headers"
+    ],
+    "totalCalls": 5
+  },
+  {
+    "function": "nghttp2_session_on_goaway_received",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "session_handle_invalid_connection",
+      "nghttp2_session_is_my_stream_id",
+      "session_call_on_frame_received",
+      "nghttp2_is_fatal",
+      "session_close_stream_on_goaway"
+    ],
+    "totalCalls": 5
+  },
+  {
+    "function": "session_process_altsvc_frame",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_frame_unpack_altsvc_payload",
+      "nghttp2_get_uint16",
+      "nghttp2_buf_len",
+      "nghttp2_buf_wrap_init",
+      "nghttp2_session_on_altsvc_received"
+    ],
+    "totalCalls": 5
+  },
+  {
+    "function": "session_update_consumed_size",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_session_terminate_session",
+      "nghttp2_submit_window_update",
+      "nghttp2_min_int32",
+      "nghttp2_should_send_window_update",
+      "nghttp2_session_add_window_update"
+    ],
+    "totalCalls": 5
+  },
+  {
+    "function": "nghttp2_bufs_add",
+    "file": "lib/nghttp2_buf.c",
+    "calls": [
+      "nghttp2_min_size",
+      "nghttp2_buf_avail",
+      "bufs_alloc_chain",
+      "nghttp2_cpymem"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "nghttp2_bufs_remove",
+    "file": "lib/nghttp2_buf.c",
+    "calls": [
+      "nghttp2_buf_len",
+      "nghttp2_mem_malloc",
+      "nghttp2_buf_wrap_init",
+      "nghttp2_cpymem"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "nghttp2_bufs_remove_copy",
+    "file": "lib/nghttp2_buf.c",
+    "calls": [
+      "nghttp2_bufs_len",
+      "nghttp2_buf_wrap_init",
+      "nghttp2_cpymem",
+      "nghttp2_buf_len"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "nghttp2_frame_pack_push_promise",
+    "file": "lib/nghttp2_frame.c",
+    "calls": [
+      "nghttp2_hd_deflate_hd_bufs",
+      "nghttp2_put_uint32be",
+      "nghttp2_bufs_len",
+      "frame_pack_headers_shared"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "nghttp2_frame_pack_altsvc",
+    "file": "lib/nghttp2_frame.c",
+    "calls": [
+      "nghttp2_buf_avail",
+      "nghttp2_frame_pack_frame_hd",
+      "nghttp2_put_uint16be",
+      "nghttp2_bufs_add"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "nghttp2_frame_unpack_altsvc_payload2",
+    "file": "lib/nghttp2_frame.c",
+    "calls": [
+      "nghttp2_get_uint16",
+      "nghttp2_mem_malloc",
+      "nghttp2_cpymem",
+      "nghttp2_frame_unpack_altsvc_payload"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "nghttp2_frame_pack_priority_update",
+    "file": "lib/nghttp2_frame.c",
+    "calls": [
+      "nghttp2_buf_avail",
+      "nghttp2_frame_pack_frame_hd",
+      "nghttp2_put_uint32be",
+      "nghttp2_bufs_add"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "nghttp2_frame_add_pad",
+    "file": "lib/nghttp2_frame.c",
+    "calls": [
+      "DEBUGF",
+      "serialize",
+      "nghttp2_buf_avail",
+      "frame_set_pad"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "emit_table_size",
+    "file": "lib/nghttp2_hd.c",
+    "calls": [
+      "DEBUGF",
+      "count_encoded_length",
+      "encode_length",
+      "nghttp2_bufs_add"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "emit_indexed_block",
+    "file": "lib/nghttp2_hd.c",
+    "calls": [
+      "count_encoded_length",
+      "DEBUGF",
+      "encode_length",
+      "nghttp2_bufs_add"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "emit_newname_block",
+    "file": "lib/nghttp2_hd.c",
+    "calls": [
+      "DEBUGF",
+      "nghttp2_bufs_addb",
+      "pack_first_byte",
+      "emit_string"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "nghttp2_hd_deflate_hd2",
+    "file": "lib/nghttp2_hd.c",
+    "calls": [
+      "nghttp2_bufs_wrap_init",
+      "nghttp2_hd_deflate_hd_bufs",
+      "nghttp2_bufs_len",
+      "nghttp2_bufs_wrap_free"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "nghttp2_hd_deflate_hd_vec2",
+    "file": "lib/nghttp2_hd.c",
+    "calls": [
+      "nghttp2_bufs_wrap_init2",
+      "nghttp2_hd_deflate_hd_bufs",
+      "nghttp2_bufs_len",
+      "nghttp2_bufs_wrap_free"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "nghttp2_hd_deflate_new2",
+    "file": "lib/nghttp2_hd.c",
+    "calls": [
+      "nghttp2_mem_default",
+      "nghttp2_mem_malloc",
+      "nghttp2_hd_deflate_init2",
+      "nghttp2_mem_free"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "nghttp2_hd_inflate_new2",
+    "file": "lib/nghttp2_hd.c",
+    "calls": [
+      "nghttp2_mem_default",
+      "nghttp2_mem_malloc",
+      "nghttp2_hd_inflate_init",
+      "nghttp2_mem_free"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "nghttp2_hd_huff_encode",
+    "file": "lib/nghttp2_hd_huffman.c",
+    "calls": [
+      "nghttp2_bufs_cur_avail",
+      "htonl",
+      "memcpy",
+      "nghttp2_bufs_addb"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "nghttp2_adjust_local_window_size",
+    "file": "lib/nghttp2_helper.c",
+    "calls": [
+      "nghttp2_max_int32",
+      "nghttp2_min_int32",
+      "peer",
+      "reduction"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "nghttp2_pq_remove",
+    "file": "lib/nghttp2_pq.c",
+    "calls": [
+      "nghttp2_pq_pop",
+      "less",
+      "bubble_down",
+      "bubble_up"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "active_outbound_item_reset",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "DEBUGF",
+      "nghttp2_outbound_item_free",
+      "nghttp2_mem_free",
+      "nghttp2_bufs_reset"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "session_ob_data_push",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_extpri_uint8_urgency",
+      "nghttp2_extpri_uint8_inc",
+      "pq_get_first_cycle",
+      "nghttp2_pq_push"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "nghttp2_session_add_item",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_session_get_stream",
+      "session_attach_stream_item",
+      "nghttp2_outbound_queue_push",
+      "nghttp2_session_open_stream"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "session_update_glitch_ratelim",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_ratelim_update",
+      "nghttp2_time_now_sec",
+      "nghttp2_ratelim_drain",
+      "nghttp2_session_terminate_session"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "session_update_stream_reset_ratelim",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_ratelim_update",
+      "nghttp2_time_now_sec",
+      "nghttp2_ratelim_drain",
+      "nghttp2_session_add_goaway"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "update_remote_initial_window_size_func",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_stream_update_remote_initial_window_size",
+      "nghttp2_stream_check_deferred_by_flow_control",
+      "session_resume_deferred_stream_item",
+      "nghttp2_is_fatal"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "update_local_initial_window_size_func",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_stream_update_local_initial_window_size",
+      "session_update_stream_consumed_size",
+      "nghttp2_should_send_window_update",
+      "nghttp2_session_add_window_update"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "nghttp2_session_on_ping_received",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "session_handle_invalid_connection",
+      "session_is_closing",
+      "nghttp2_session_add_ping",
+      "session_call_on_frame_received"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "session_process_goaway_frame",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_frame_unpack_goaway_payload",
+      "nghttp2_buf_len",
+      "nghttp2_buf_wrap_init",
+      "nghttp2_session_on_goaway_received"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "session_process_origin_frame",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_frame_unpack_origin_payload",
+      "nghttp2_buf_len",
+      "nghttp2_is_fatal",
+      "nghttp2_session_on_origin_received"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "nghttp2_session_update_recv_stream_window_size",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "adjust_recv_window_size",
+      "nghttp2_session_terminate_session",
+      "nghttp2_should_send_window_update",
+      "nghttp2_session_add_window_update"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "nghttp2_session_update_recv_connection_window_size",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "adjust_recv_window_size",
+      "nghttp2_session_terminate_session",
+      "nghttp2_should_send_window_update",
+      "nghttp2_session_add_window_update"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "nghttp2_session_resume_data",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "nghttp2_session_get_stream",
+      "nghttp2_stream_check_deferred_item",
+      "session_resume_deferred_stream_item",
+      "nghttp2_is_fatal"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "nghttp2_session_consume",
+    "file": "lib/nghttp2_session.c",
+    "calls": [
+      "session_update_connection_consumed_size",
+      "nghttp2_is_fatal",
+      "nghttp2_session_get_stream",
+      "session_update_stream_consumed_size"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "nghttp2_submit_window_update",
+    "file": "lib/nghttp2_submit.c",
+    "calls": [
+      "nghttp2_adjust_local_window_size",
+      "nghttp2_session_get_stream",
+      "nghttp2_max_int32",
+      "nghttp2_session_add_window_update"
+    ],
+    "totalCalls": 4
+  },
+  {
+    "function": "nghttp2_buf_reserve",
+    "file": "lib/nghttp2_buf.c",
+    "calls": [
+      "nghttp2_buf_cap",
+      "nghttp2_max_size",
+      "nghttp2_mem_realloc"
+    ],
+    "totalCalls": 3
+  }
+]
