@@ -57,6 +57,7 @@ export interface VersionSnapshot {
 
 export interface ProtocolAsset {
   id: string; name: string;
+  domain: string;           // Parent domain (e.g., "TLS", "SSH", "HTTP")
   category: "ssl" | "ssh" | "http" | "http2" | "connection" | "auth";
   maturity: MaturityLevel;
   currentVersion: string;
@@ -86,8 +87,10 @@ export interface KnowledgeBase {
   name: string; version: string; generated: string;
   maturityModel: typeof MATURITY_CRITERIA;
   assets: ProtocolAsset[];
+  domains: Record<string, { name: string; assetCount: number; stableCount: number; description: string }>;
   summary: {
     totalAssets: number;
+    totalDomains: number;
     byMaturity: Record<MaturityLevel, number>;
     averageConfidence: number;
     totalValidatedRepos: number;
@@ -106,7 +109,7 @@ export function buildKnowledgeBase(): KnowledgeBase {
   const assets: ProtocolAsset[] = [
     // ═══ TLS Handshake — STABLE ═══
     {
-      id: "PROTO-TLS", name: "TLS Handshake", category: "ssl",
+      id: "PROTO-TLS", name: "TLS Handshake", domain: "TLS", category: "ssl",
       maturity: "stable", currentVersion: "1.0.0", confidence: 85,
       validatedRepos: ["curl", "nginx"], validatedSequences: 135,
       crossRepoMatrix: { curl: true, nginx: true, redis: false, openssl: false, apache: false },
@@ -140,9 +143,53 @@ export function buildKnowledgeBase(): KnowledgeBase {
       lastUpdated: today,
     },
 
+    // TLS Domain sub-assets
+    {
+      id: "PROTO-TLS-CERT", name: "TLS Certificate", domain: "TLS", category: "ssl",
+      maturity: "experimental", currentVersion: "0.2.0", confidence: 30,
+      validatedRepos: [], validatedSequences: 0,
+      crossRepoMatrix: { curl: false, nginx: false, openssl: true },
+      evidence: [],
+      description: "TLS certificate validation lifecycle: load → verify → free. Pattern identified in OpenSSL. Needs cross-repo validation.",
+      steps: ["cert_load (SSL_CTX_use_certificate / *_cert_*_load)", "cert_verify (*_cert_*_verify / SSL_get_verify_result)", "cert_free (X509_free / *_cert_free)"],
+      supportedLibraries: ["OpenSSL"],
+      stateMachine: "CERT_LOAD → CERT_VERIFY → CERT_FREE",
+      examples: [], antiPatterns: [], fpHistory: [], fnHistory: [],
+      versionHistory: [{ version: "0.2.0", date: today, confidence: 30, validatedRepos: [], validatedSequences: 0, notes: "Pattern extracted from OpenSSL cert verification code." }],
+      lastUpdated: today,
+    },
+    {
+      id: "PROTO-TLS-SESS", name: "TLS Session", domain: "TLS", category: "ssl",
+      maturity: "experimental", currentVersion: "0.1.0", confidence: 20,
+      validatedRepos: [], validatedSequences: 0,
+      crossRepoMatrix: {},
+      evidence: [],
+      description: "TLS session resumption lifecycle. Defined from RFC 8446. No code validation yet.",
+      steps: ["session_new (SSL_SESSION_new / *_session_create)", "session_use (SSL_set_session / *_session_reuse)", "session_free (SSL_SESSION_free)"],
+      supportedLibraries: [],
+      stateMachine: "SESSION_NEW → SESSION_USE → SESSION_FREE",
+      examples: [], antiPatterns: [], fpHistory: [], fnHistory: [],
+      versionHistory: [{ version: "0.1.0", date: today, confidence: 20, validatedRepos: [], validatedSequences: 0, notes: "RFC-defined. Awaiting code validation." }],
+      lastUpdated: today,
+    },
+    {
+      id: "PROTO-TLS-ALPN", name: "TLS ALPN", domain: "TLS", category: "ssl",
+      maturity: "experimental", currentVersion: "0.1.0", confidence: 20,
+      validatedRepos: [], validatedSequences: 0,
+      crossRepoMatrix: {},
+      evidence: [],
+      description: "TLS Application-Layer Protocol Negotiation. Defined from RFC 7301.",
+      steps: ["alpn_set (SSL_CTX_set_alpn_protos / *_alpn_select)", "alpn_get (SSL_get0_alpn_selected / *_alpn_get)"],
+      supportedLibraries: [],
+      stateMachine: "ALPN_SET → ALPN_GET",
+      examples: [], antiPatterns: [], fpHistory: [], fnHistory: [],
+      versionHistory: [{ version: "0.1.0", date: today, confidence: 20, validatedRepos: [], validatedSequences: 0, notes: "RFC 7301. Awaiting code validation." }],
+      lastUpdated: today,
+    },
+
     // ═══ HTTP Request — STABLE ═══
     {
-      id: "PROTO-HTTP", name: "HTTP Request", category: "http",
+      id: "PROTO-HTTP", name: "HTTP Request", domain: "HTTP", category: "http",
       maturity: "stable", currentVersion: "1.0.0", confidence: 80,
       validatedRepos: ["nginx", "apache"], validatedSequences: 150,
       crossRepoMatrix: { curl: false, nginx: true, redis: false, openssl: false, apache: true },
@@ -167,7 +214,7 @@ export function buildKnowledgeBase(): KnowledgeBase {
 
     // ═══ SSH Connection — STABLE ═══
     {
-      id: "PROTO-SSH", name: "SSH Connection", category: "ssh",
+      id: "PROTO-SSH", name: "SSH Connection", domain: "SSH", category: "ssh",
       maturity: "stable", currentVersion: "1.0.0", confidence: 78,
       validatedRepos: ["curl", "libssh"], validatedSequences: 135,
       crossRepoMatrix: { curl: true, nginx: false, redis: false, libssh: true, openssh: false },
@@ -193,7 +240,7 @@ export function buildKnowledgeBase(): KnowledgeBase {
 
     // ═══ Connection Lifecycle — EXPERIMENTAL ═══
     {
-      id: "PROTO-CONN", name: "Connection Lifecycle", category: "connection",
+      id: "PROTO-CONN", name: "Connection Lifecycle", domain: "Connection", category: "connection",
       maturity: "experimental", currentVersion: "0.5.0", confidence: 55,
       validatedRepos: ["curl"], validatedSequences: 85,
       crossRepoMatrix: { curl: true, nginx: false, redis: false },
@@ -212,7 +259,7 @@ export function buildKnowledgeBase(): KnowledgeBase {
 
     // ═══ Remaining experimental assets ═══
     {
-      id: "PROTO-AUTH", name: "Authentication", category: "auth",
+      id: "PROTO-AUTH", name: "Authentication", domain: "Auth", category: "auth",
       maturity: "experimental", currentVersion: "0.4.0", confidence: 40,
       validatedRepos: [], validatedSequences: 0,
       crossRepoMatrix: { curl: false, nginx: false, redis: false },
@@ -225,7 +272,7 @@ export function buildKnowledgeBase(): KnowledgeBase {
       lastUpdated: today,
     },
     {
-      id: "PROTO-H2", name: "HTTP/2 Session", category: "http2",
+      id: "PROTO-H2", name: "HTTP/2 Session", domain: "HTTP", category: "http2",
       maturity: "validated", currentVersion: "0.8.0", confidence: 68,
       validatedRepos: ["nghttp2"], validatedSequences: 100,
       crossRepoMatrix: { curl: false, nginx: false, redis: false, nghttp2: true },
@@ -246,7 +293,7 @@ export function buildKnowledgeBase(): KnowledgeBase {
       lastUpdated: today,
     },
     {
-      id: "PROTO-QUIC", name: "QUIC Connection", category: "connection",
+      id: "PROTO-QUIC", name: "QUIC Connection", domain: "QUIC", category: "connection",
       maturity: "experimental", currentVersion: "0.2.0", confidence: 25,
       validatedRepos: [], validatedSequences: 0,
       crossRepoMatrix: { curl: false, nginx: false, redis: false },
@@ -267,18 +314,37 @@ export function buildKnowledgeBase(): KnowledgeBase {
   const totalRepos = [...new Set(assets.flatMap(a => a.validatedRepos))].length;
   const totalSeqs = assets.reduce((s, a) => s + a.validatedSequences, 0);
 
+  // Build domain summary
+  const domainMap: Record<string, { name: string; assetCount: number; stableCount: number; description: string }> = {};
+  for (const a of assets) {
+    if (!domainMap[a.domain]) {
+      domainMap[a.domain] = { name: a.domain, assetCount: 0, stableCount: 0, description: "" };
+    }
+    domainMap[a.domain].assetCount++;
+    if (a.maturity === "stable") domainMap[a.domain].stableCount++;
+  }
+  domainMap["TLS"].description = "Transport Layer Security — handshake, certificate, session, ALPN";
+  domainMap["SSH"].description = "Secure Shell — connection, authentication, channel";
+  domainMap["HTTP"].description = "Hypertext Transfer — request/response, HTTP/2";
+  domainMap["Connection"].description = "Generic TCP/TLS connection lifecycle";
+  domainMap["Auth"].description = "Authentication protocols — NTLM, SPNEGO, Digest";
+  domainMap["QUIC"].description = "QUIC transport protocol";
+
   const stableCount = byMaturity["stable"];
-  const nextMilestone = stableCount >= 3 ? "3+ stable assets → publish Knowledge Base v1.0 whitepaper"
-    : stableCount >= 1 ? "1 stable asset. Next: promote HTTP to stable (needs Apache validation)."
-    : "Promote TLS to stable (needs OpenSSL validation).";
+  const domainCount = Object.keys(domainMap).length;
+  const nextMilestone = stableCount >= 3 && domainCount >= 4
+    ? `${stableCount} stable assets across ${domainCount} domains. Next: TLS Domain depth (certificate, session, ALPN).`
+    : "Grow domains and stable assets.";
 
   return {
     name: "Progmune Protocol Knowledge Base",
-    version: "2.0.0", generated: new Date().toISOString(),
+    version: "3.0.0", generated: new Date().toISOString(),
     maturityModel: MATURITY_CRITERIA,
     assets,
+    domains: domainMap,
     summary: {
       totalAssets: assets.length,
+      totalDomains: domainCount,
       byMaturity,
       averageConfidence: avgConf,
       totalValidatedRepos: totalRepos,
@@ -306,8 +372,13 @@ export function formatKnowledgeBase(kb: KnowledgeBase, assetFilter?: string): st
   l.push(`\n${C.b}${C.c}╔══════════════════════════════════════════════════════════════╗${C.r}`);
   l.push(`${C.b}${C.c}║${C.r}  ${C.b}Protocol Knowledge Base v2${C.r}  —  Knowledge Asset System              ${C.b}${C.c}║${C.r}`);
   l.push(`${C.b}${C.c}╚══════════════════════════════════════════════════════════════╝${C.r}`);
-  l.push(`\n  ${C.d}${kb.summary.totalAssets} assets · ${kb.summary.byMaturity["stable"]} stable · ${kb.summary.byMaturity["validated"]} validated · ${kb.summary.byMaturity["experimental"]} experimental · ${kb.summary.averageConfidence}% avg confidence${C.r}`);
+  l.push(`\n  ${C.d}${kb.summary.totalAssets} assets · ${kb.summary.totalDomains} domains · ${kb.summary.byMaturity["stable"]} stable · ${kb.summary.byMaturity["validated"]} validated · ${kb.summary.byMaturity["experimental"]} experimental · ${kb.summary.averageConfidence}% avg confidence${C.r}`);
   l.push(`  ${C.d}${kb.summary.totalValidatedRepos} repos · ${kb.summary.totalValidatedSequences} validated sequences${C.r}`);
+  l.push(`\n  ${C.b}Domains:${C.r}`);
+  for (const [key, d] of Object.entries(kb.domains)) {
+    const bar = "█".repeat(d.stableCount) + "░".repeat(Math.max(0, d.assetCount - d.stableCount));
+    l.push(`  ${bar} ${C.b}${d.name}${C.r}: ${d.assetCount} assets (${d.stableCount} stable) — ${C.d}${d.description}${C.r}`);
+  }
   l.push(`\n  ${C.d}→ ${kb.summary.growthPath}${C.r}`);
 
   l.push(`\n  ${C.b}Maturity Model:${C.r}`);

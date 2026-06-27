@@ -1,7 +1,7 @@
 {
   "name": "Progmune Protocol Knowledge Base",
-  "version": "2.0.0",
-  "generated": "2026-06-27T08:20:52.367Z",
+  "version": "3.0.0",
+  "generated": "2026-06-27T08:41:37.039Z",
   "maturityModel": {
     "experimental": {
       "repos": 0,
@@ -32,6 +32,7 @@
     {
       "id": "PROTO-TLS",
       "name": "TLS Handshake",
+      "domain": "TLS",
       "category": "ssl",
       "maturity": "stable",
       "currentVersion": "1.0.0",
@@ -171,8 +172,122 @@
       "lastUpdated": "2026-06-27"
     },
     {
+      "id": "PROTO-TLS-CERT",
+      "name": "TLS Certificate",
+      "domain": "TLS",
+      "category": "ssl",
+      "maturity": "experimental",
+      "currentVersion": "0.2.0",
+      "confidence": 30,
+      "validatedRepos": [],
+      "validatedSequences": 0,
+      "crossRepoMatrix": {
+        "curl": false,
+        "nginx": false,
+        "openssl": true
+      },
+      "evidence": [],
+      "description": "TLS certificate validation lifecycle: load → verify → free. Pattern identified in OpenSSL. Needs cross-repo validation.",
+      "steps": [
+        "cert_load (SSL_CTX_use_certificate / *_cert_*_load)",
+        "cert_verify (*_cert_*_verify / SSL_get_verify_result)",
+        "cert_free (X509_free / *_cert_free)"
+      ],
+      "supportedLibraries": [
+        "OpenSSL"
+      ],
+      "stateMachine": "CERT_LOAD → CERT_VERIFY → CERT_FREE",
+      "examples": [],
+      "antiPatterns": [],
+      "fpHistory": [],
+      "fnHistory": [],
+      "versionHistory": [
+        {
+          "version": "0.2.0",
+          "date": "2026-06-27",
+          "confidence": 30,
+          "validatedRepos": [],
+          "validatedSequences": 0,
+          "notes": "Pattern extracted from OpenSSL cert verification code."
+        }
+      ],
+      "lastUpdated": "2026-06-27"
+    },
+    {
+      "id": "PROTO-TLS-SESS",
+      "name": "TLS Session",
+      "domain": "TLS",
+      "category": "ssl",
+      "maturity": "experimental",
+      "currentVersion": "0.1.0",
+      "confidence": 20,
+      "validatedRepos": [],
+      "validatedSequences": 0,
+      "crossRepoMatrix": {},
+      "evidence": [],
+      "description": "TLS session resumption lifecycle. Defined from RFC 8446. No code validation yet.",
+      "steps": [
+        "session_new (SSL_SESSION_new / *_session_create)",
+        "session_use (SSL_set_session / *_session_reuse)",
+        "session_free (SSL_SESSION_free)"
+      ],
+      "supportedLibraries": [],
+      "stateMachine": "SESSION_NEW → SESSION_USE → SESSION_FREE",
+      "examples": [],
+      "antiPatterns": [],
+      "fpHistory": [],
+      "fnHistory": [],
+      "versionHistory": [
+        {
+          "version": "0.1.0",
+          "date": "2026-06-27",
+          "confidence": 20,
+          "validatedRepos": [],
+          "validatedSequences": 0,
+          "notes": "RFC-defined. Awaiting code validation."
+        }
+      ],
+      "lastUpdated": "2026-06-27"
+    },
+    {
+      "id": "PROTO-TLS-ALPN",
+      "name": "TLS ALPN",
+      "domain": "TLS",
+      "category": "ssl",
+      "maturity": "experimental",
+      "currentVersion": "0.1.0",
+      "confidence": 20,
+      "validatedRepos": [],
+      "validatedSequences": 0,
+      "crossRepoMatrix": {},
+      "evidence": [],
+      "description": "TLS Application-Layer Protocol Negotiation. Defined from RFC 7301.",
+      "steps": [
+        "alpn_set (SSL_CTX_set_alpn_protos / *_alpn_select)",
+        "alpn_get (SSL_get0_alpn_selected / *_alpn_get)"
+      ],
+      "supportedLibraries": [],
+      "stateMachine": "ALPN_SET → ALPN_GET",
+      "examples": [],
+      "antiPatterns": [],
+      "fpHistory": [],
+      "fnHistory": [],
+      "versionHistory": [
+        {
+          "version": "0.1.0",
+          "date": "2026-06-27",
+          "confidence": 20,
+          "validatedRepos": [],
+          "validatedSequences": 0,
+          "notes": "RFC 7301. Awaiting code validation."
+        }
+      ],
+      "lastUpdated": "2026-06-27"
+    },
+    {
       "id": "PROTO-HTTP",
       "name": "HTTP Request",
+      "domain": "HTTP",
       "category": "http",
       "maturity": "stable",
       "currentVersion": "1.0.0",
@@ -270,6 +385,7 @@
     {
       "id": "PROTO-SSH",
       "name": "SSH Connection",
+      "domain": "SSH",
       "category": "ssh",
       "maturity": "stable",
       "currentVersion": "1.0.0",
@@ -382,6 +498,7 @@
     {
       "id": "PROTO-CONN",
       "name": "Connection Lifecycle",
+      "domain": "Connection",
       "category": "connection",
       "maturity": "experimental",
       "currentVersion": "0.5.0",
@@ -444,6 +561,7 @@
     {
       "id": "PROTO-AUTH",
       "name": "Authentication",
+      "domain": "Auth",
       "category": "auth",
       "maturity": "experimental",
       "currentVersion": "0.4.0",
@@ -481,6 +599,7 @@
     {
       "id": "PROTO-H2",
       "name": "HTTP/2 Session",
+      "domain": "HTTP",
       "category": "http2",
       "maturity": "validated",
       "currentVersion": "0.8.0",
@@ -557,6 +676,7 @@
     {
       "id": "PROTO-QUIC",
       "name": "QUIC Connection",
+      "domain": "QUIC",
       "category": "connection",
       "maturity": "experimental",
       "currentVersion": "0.2.0",
@@ -595,17 +715,56 @@
       "lastUpdated": "2026-06-27"
     }
   ],
+  "domains": {
+    "TLS": {
+      "name": "TLS",
+      "assetCount": 4,
+      "stableCount": 1,
+      "description": "Transport Layer Security — handshake, certificate, session, ALPN"
+    },
+    "HTTP": {
+      "name": "HTTP",
+      "assetCount": 2,
+      "stableCount": 1,
+      "description": "Hypertext Transfer — request/response, HTTP/2"
+    },
+    "SSH": {
+      "name": "SSH",
+      "assetCount": 1,
+      "stableCount": 1,
+      "description": "Secure Shell — connection, authentication, channel"
+    },
+    "Connection": {
+      "name": "Connection",
+      "assetCount": 1,
+      "stableCount": 0,
+      "description": "Generic TCP/TLS connection lifecycle"
+    },
+    "Auth": {
+      "name": "Auth",
+      "assetCount": 1,
+      "stableCount": 0,
+      "description": "Authentication protocols — NTLM, SPNEGO, Digest"
+    },
+    "QUIC": {
+      "name": "QUIC",
+      "assetCount": 1,
+      "stableCount": 0,
+      "description": "QUIC transport protocol"
+    }
+  },
   "summary": {
-    "totalAssets": 7,
+    "totalAssets": 10,
+    "totalDomains": 6,
     "byMaturity": {
-      "experimental": 3,
+      "experimental": 6,
       "validated": 1,
       "stable": 3,
       "certified": 0
     },
-    "averageConfidence": 62,
+    "averageConfidence": 50,
     "totalValidatedRepos": 5,
     "totalValidatedSequences": 605,
-    "growthPath": "3+ stable assets → publish Knowledge Base v1.0 whitepaper"
+    "growthPath": "3 stable assets across 6 domains. Next: TLS Domain depth (certificate, session, ALPN)."
   }
 }
