@@ -260,6 +260,42 @@ function generateChangelog(changes: KnowledgeProposal["changes"], repo: string):
   return lines.join("\n");
 }
 
+function formatUnitEvolution(unit: any): string {
+  const l: string[] = [];
+  l.push(`\nKnowledge Evolution: ${unit.name} (${unit.id})`);
+  l.push(`Domain: ${unit.domain}  |  Maturity: ${unit.maturity}  |  Version: ${unit.currentVersion}`);
+  l.push(`Confidence: ${unit.confidence}%  |  RFC: ${unit.rfcReference || "none"}`);
+  l.push(`Repos: ${unit.validatedRepos.join(", ")}  |  Sequences: ${unit.validatedSequences}`);
+  l.push(`\nVersion History:`);
+  for (const v of unit.versionHistory) {
+    const f1Str = v.f1 !== undefined ? ` F1=${(v.f1*100).toFixed(0)}%` : "";
+    const reposStr = v.validatedRepos.length > 0 ? ` repos=[${v.validatedRepos.join(",")}]` : "";
+    l.push(`  v${v.version} (${v.date}) → ${v.confidence}% conf, ${v.validatedSequences} seqs${reposStr}${f1Str}`);
+    l.push(`    ${v.notes}`);
+  }
+  if (unit.concepts && unit.concepts.length > 0) {
+    l.push(`\nConcepts (${unit.concepts.length}):`);
+    for (const c of unit.concepts) {
+      l.push(`  ${c.name} (${c.required ? "required" : "optional"}) — ${c.description}`);
+      l.push(`    Constraints: ${c.constraints.join("; ")}`);
+    }
+  }
+  if (unit.relations && unit.relations.length > 0) {
+    l.push(`\nRelations:`);
+    for (const r of unit.relations) {
+      l.push(`  ${r.type} → ${r.targetId}: ${r.description}`);
+    }
+  }
+  if (unit.evidence && unit.evidence.length > 0) {
+    l.push(`\nEvidence (${unit.evidence.length}):`);
+    for (const e of unit.evidence) {
+      l.push(`  ${e.repo} (${e.type}): ${e.sequences} sequences, ${e.date}`);
+    }
+  }
+  l.push("");
+  return l.join("\n");
+}
+
 export function generateFullChangelog(): string {
   const kb = buildKnowledgeBase();
   const lines: string[] = [];
@@ -333,7 +369,15 @@ if (require.main === module) {
       process.exit(1);
     }
   } else if (cmd === "changelog") {
-    console.log(generateFullChangelog());
+    const unitFilter = args.includes("--unit") ? args[args.indexOf("--unit") + 1] : undefined;
+    if (unitFilter) {
+      const kb = buildKnowledgeBase();
+      const unit = kb.units.find(u => u.id === unitFilter || u.name === unitFilter);
+      if (!unit) { console.error(`Unit not found: ${unitFilter}`); process.exit(1); }
+      console.log(formatUnitEvolution(unit));
+    } else {
+      console.log(generateFullChangelog());
+    }
   } else {
     console.log(`
 ${C.b}Knowledge Evolution Pipeline${C.r}

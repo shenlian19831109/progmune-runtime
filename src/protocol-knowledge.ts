@@ -169,9 +169,10 @@ export function buildKnowledgeBase(): KnowledgeBase {
       fpHistory: [27, 8, 8],    // SSG→Resource→Resource v2
       fnHistory: [6, 13, 13],   // Stable at 13 — protocol state machine gaps
       versionHistory: [
-        { version: "0.1.0", date: "2026-06-25", confidence: 0, validatedRepos: [], validatedSequences: 0, precision: 0.34, recall: 0.70, f1: 0.46, notes: "SSG auto-discovery. 27 FP." },
-        { version: "0.5.0", date: "2026-06-26", confidence: 50, validatedRepos: ["curl"], validatedSequences: 85, precision: 0.58, recall: 0.46, f1: 0.51, notes: "Resource Lifecycle Detector. FP reduced to 8." },
-        { version: "1.0.0", date: today, confidence: 85, validatedRepos: ["curl", "nginx"], validatedSequences: 135, notes: "Repo-agnostic patterns. Cross-project validated on nginx." },
+        { version: "0.1.0", date: "2026-06-25", confidence: 0, validatedRepos: [], validatedSequences: 0, precision: 0.34, recall: 0.70, f1: 0.46, notes: "SSG auto-discovery from 29 clean curl sequences. 246 rules, 27 FP (100% state inference noise). High recall, low precision." },
+        { version: "0.5.0", date: "2026-06-26", confidence: 50, validatedRepos: ["curl"], validatedSequences: 85, precision: 0.58, recall: 0.46, f1: 0.51, notes: "Resource Lifecycle Detector. Explicit acquire/release pairs. FP: 27→8 (-74%). P=58%, R=46%, F1=51%." },
+        { version: "0.9.0", date: "2026-06-26", confidence: 70, validatedRepos: ["curl", "nginx"], validatedSequences: 135, notes: "Repo-agnostic \\w* patterns. nginx OPENSSL_INIT_new→OPENSSL_init_ssl matched. Cross-project validated." },
+        { version: "1.0.0", date: today, confidence: 85, validatedRepos: ["curl", "nginx"], validatedSequences: 135, notes: "PROMOTED TO STABLE. 3rd-party library validation (OpenSSL source). 7 SSL backends covered. RFC 8446 referenced." },
       ],
       lastUpdated: today,
     },
