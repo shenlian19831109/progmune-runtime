@@ -41,6 +41,7 @@
     "knowledge:propose": "npx ts-node src/knowledge-evolution.ts propose",
     "knowledge:changelog": "npx ts-node src/knowledge-evolution.ts changelog",
     "status": "npx ts-node src/progmune-status.ts",
+    "badge": "npx ts-node src/badge/badge-server.ts",
     "provenance": "npx ts-node src/ledger/cli.ts",
     "plsb": "npx ts-node src/plsb/cli.ts --summary",
     "plsb:export": "npx ts-node src/plsb/cli.ts --all",
