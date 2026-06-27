@@ -1,0 +1,353 @@
+{
+  "name": "Progmune Evidence Repository",
+  "version": "1.0.0",
+  "generated": "2026-06-27T13:18:32.369Z",
+  "repos": [
+    {
+      "repo": "curl",
+      "repoType": "application",
+      "totalSequences": 100,
+      "labeledSequences": 85,
+      "protocolMatches": [
+        {
+          "protocol": "Connection Lifecycle",
+          "unitId": "PROTO-CONN",
+          "matchCount": 3,
+          "totalSequences": 50,
+          "matchRate": 6,
+          "examples": [
+            [
+              "Curl_conn_meta_get",
+              "Curl_meta_get",
+              "Curl_pp_flushsend",
+              "ftp_readresp",
+              "ftp_wait_resp"
+            ],
+            [
+              "GOOD_EASY_HANDLE",
+              "multi_posttransfer",
+              "multi_done",
+              "multistate",
+              "multi_warn_debug"
+            ],
+            [
+              "Curl_conn_meta_get",
+              "Curl_meta_get",
+              "smb_send_tree_connect",
+              "connclose",
+              "request_state"
+            ]
+          ]
+        },
+        {
+          "protocol": "SSH Connection",
+          "unitId": "PROTO-SSH",
+          "matchCount": 1,
+          "totalSequences": 50,
+          "matchRate": 2,
+          "examples": [
+            [
+              "myssh_state_init",
+              "FALLTHROUGH",
+              "myssh_in_S_STARTUP",
+              "myssh_is_known",
+              "myssh_to_ERROR"
+            ]
+          ]
+        },
+        {
+          "protocol": "TLS Handshake",
+          "unitId": "PROTO-TLS",
+          "matchCount": 1,
+          "totalSequences": 50,
+          "matchRate": 2,
+          "examples": [
+            [
+              "Curl_ssl_cf_get_config",
+              "Curl_ssl_cf_get_primary_config",
+              "Curl_alpn_copy",
+              "Curl_conn_cf_get_transport",
+              "wolfTLS_client_method"
+            ]
+          ]
+        }
+      ],
+      "timestamp": "2026-06-27"
+    },
+    {
+      "repo": "nginx",
+      "repoType": "application",
+      "totalSequences": 100,
+      "labeledSequences": 50,
+      "protocolMatches": [
+        {
+          "protocol": "HTTP Request",
+          "unitId": "PROTO-HTTP",
+          "matchCount": 1,
+          "totalSequences": 50,
+          "matchRate": 2,
+          "examples": [
+            [
+              "ngx_http_send_header",
+              "ngx_http_upstream_finalize_request",
+              "ngx_http_file_cache_free",
+              "ngx_http_upstream_upgrade",
+              "ngx_pool_run_cleanup_file"
+            ]
+          ]
+        },
+        {
+          "protocol": "TLS Handshake",
+          "unitId": "PROTO-TLS",
+          "matchCount": 1,
+          "totalSequences": 50,
+          "matchRate": 2,
+          "examples": [
+            [
+              "getenv",
+              "OPENSSL_INIT_new",
+              "ngx_ssl_error",
+              "OPENSSL_INIT_set_config_appname",
+              "OPENSSL_init_ssl"
+            ]
+          ]
+        }
+      ],
+      "timestamp": "2026-06-27"
+    },
+    {
+      "repo": "redis",
+      "repoType": "application",
+      "totalSequences": 100,
+      "labeledSequences": 50,
+      "protocolMatches": [],
+      "timestamp": "2026-06-27"
+    },
+    {
+      "repo": "apache",
+      "repoType": "application",
+      "totalSequences": 100,
+      "labeledSequences": 0,
+      "protocolMatches": [
+        {
+          "protocol": "HTTP Request",
+          "unitId": "PROTO-HTTP",
+          "matchCount": 6,
+          "totalSequences": 50,
+          "matchRate": 12,
+          "examples": [
+            [
+              "ap_get_module_config",
+              "APLOGNO",
+              "ap_remove_output_filter",
+              "ap_pass_brigade",
+              "section"
+            ],
+            [
+              "APR_BRIGADE_EMPTY",
+              "ap_get_module_config",
+              "have_ssl_compression",
+              "ap_remove_output_filter",
+              "ap_pass_brigade"
+            ],
+            [
+              "APR_BRIGADE_EMPTY",
+              "ap_get_module_config",
+              "headers",
+              "ap_is_initial_req",
+              "apr_table_get"
+            ]
+          ]
+        }
+      ],
+      "timestamp": "2026-06-27"
+    },
+    {
+      "repo": "openssl",
+      "repoType": "protocol_library",
+      "totalSequences": 100,
+      "labeledSequences": 0,
+      "protocolMatches": [
+        {
+          "protocol": "Connection Lifecycle",
+          "unitId": "PROTO-CONN",
+          "matchCount": 1,
+          "totalSequences": 50,
+          "matchRate": 2,
+          "examples": [
+            [
+              "ossl_quic_stream_is_server_init",
+              "ossl_quic_stream_is_bidi",
+              "ossl_quic_stream_map_is_local_allowed_by_stream_limit",
+              "ossl_quic_sstream_is_totally_acked",
+              "ossl_quic_stream_map_notify_totally_acked"
+            ]
+          ]
+        }
+      ],
+      "timestamp": "2026-06-27"
+    },
+    {
+      "repo": "libssh",
+      "repoType": "library",
+      "totalSequences": 100,
+      "labeledSequences": 0,
+      "protocolMatches": [
+        {
+          "protocol": "SSH Connection",
+          "unitId": "PROTO-SSH",
+          "matchCount": 5,
+          "totalSequences": 50,
+          "matchRate": 10,
+          "examples": [
+            [
+              "ssh_buffer_unpack",
+              "ssh_set_error",
+              "ssh_string_len",
+              "ssh_string_data",
+              "dh_init"
+            ],
+            [
+              "SSH_LOG",
+              "ssh_packet_remove_callbacks",
+              "kex_type_to_mlkem_info",
+              "ssh_set_error",
+              "ssh_curve25519_init"
+            ],
+            [
+              "keys",
+              "ssh_packet_remove_callbacks",
+              "ssh_buffer_get_ssh_string",
+              "ssh_set_error",
+              "ssh_string_len"
+            ]
+          ]
+        },
+        {
+          "protocol": "TLS Handshake",
+          "unitId": "PROTO-TLS",
+          "matchCount": 1,
+          "totalSequences": 50,
+          "matchRate": 2,
+          "examples": [
+            [
+              "EVP_PKEY_CTX_new_from_name",
+              "DH_free",
+              "DH_new",
+              "BN_dup",
+              "DH_set0_pqg"
+            ]
+          ]
+        }
+      ],
+      "timestamp": "2026-06-27"
+    },
+    {
+      "repo": "nghttp2",
+      "repoType": "library",
+      "totalSequences": 100,
+      "labeledSequences": 0,
+      "protocolMatches": [
+        {
+          "protocol": "HTTP/2 Session",
+          "unitId": "PROTO-H2",
+          "matchCount": 13,
+          "totalSequences": 50,
+          "matchRate": 26,
+          "examples": [
+            [
+              "nghttp2_session_new",
+              "nghttp2_frame_headers_free",
+              "nghttp2_frame_priority_free",
+              "nghttp2_frame_rst_stream_free",
+              "nghttp2_frame_settings_free"
+            ],
+            [
+              "nghttp2_iv_check",
+              "nghttp2_mem_malloc",
+              "nghttp2_frame_iv_copy",
+              "nghttp2_mem_free",
+              "inflight_settings_new"
+            ],
+            [
+              "entry_room",
+              "hd_ringbuf_get",
+              "DEBUGF",
+              "hd_ringbuf_pop_back",
+              "hd_map_remove"
+            ]
+          ]
+        },
+        {
+          "protocol": "HTTP Request",
+          "unitId": "PROTO-HTTP",
+          "matchCount": 12,
+          "totalSequences": 50,
+          "matchRate": 24,
+          "examples": [
+            [
+              "nghttp2_iv_check",
+              "nghttp2_mem_malloc",
+              "nghttp2_frame_iv_copy",
+              "nghttp2_mem_free",
+              "inflight_settings_new"
+            ],
+            [
+              "entry_room",
+              "hd_ringbuf_get",
+              "DEBUGF",
+              "hd_ringbuf_pop_back",
+              "hd_map_remove"
+            ],
+            [
+              "nghttp2_session_get_stream",
+              "nghttp2_session_is_my_stream_id",
+              "nghttp2_outbound_queue_top",
+              "nghttp2_mem_malloc",
+              "nghttp2_outbound_item_init"
+            ]
+          ]
+        }
+      ],
+      "timestamp": "2026-06-27"
+    }
+  ],
+  "summary": {
+    "totalRepos": 7,
+    "totalSequences": 700,
+    "totalLabeledSequences": 185,
+    "totalProtocolMatches": 11,
+    "reposByType": {
+      "application": 4,
+      "library": 2,
+      "protocol_library": 1
+    },
+    "topProtocols": [
+      {
+        "protocol": "HTTP Request",
+        "repos": 3,
+        "totalMatches": 19
+      },
+      {
+        "protocol": "TLS Handshake",
+        "repos": 3,
+        "totalMatches": 3
+      },
+      {
+        "protocol": "SSH Connection",
+        "repos": 2,
+        "totalMatches": 6
+      },
+      {
+        "protocol": "Connection Lifecycle",
+        "repos": 2,
+        "totalMatches": 4
+      },
+      {
+        "protocol": "HTTP/2 Session",
+        "repos": 1,
+        "totalMatches": 13
+      }
+    ]
+  }
+}

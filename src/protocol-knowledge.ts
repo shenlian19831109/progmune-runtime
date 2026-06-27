@@ -297,6 +297,7 @@ export function buildKnowledgeBase(): KnowledgeBase {
     {
       id: "PROTO-CONN", name: "Connection Lifecycle", domain: "Connection", category: "connection",
       maturity: "experimental", currentVersion: "0.5.0", confidence: 55,
+      rfcReference: undefined, relations: [], concepts: [],
       validatedRepos: ["curl"], validatedSequences: 85,
       crossRepoMatrix: { curl: true, nginx: false, redis: false },
       description: "Generic TCP/TLS connection lifecycle. Patterns may be too broad — connect/transfer/done terms appear in many non-protocol contexts.",
@@ -316,6 +317,7 @@ export function buildKnowledgeBase(): KnowledgeBase {
     {
       id: "PROTO-AUTH", name: "Authentication", domain: "Auth", category: "auth",
       maturity: "experimental", currentVersion: "0.4.0", confidence: 40,
+      rfcReference: undefined, relations: [], concepts: [],
       validatedRepos: [], validatedSequences: 0,
       crossRepoMatrix: { curl: false, nginx: false, redis: false },
       description: "Auth lifecycle: init → credentials → cleanup. Not yet validated on any project.",
@@ -329,6 +331,7 @@ export function buildKnowledgeBase(): KnowledgeBase {
     {
       id: "PROTO-H2", name: "HTTP/2 Session", domain: "HTTP", category: "http2",
       maturity: "validated", currentVersion: "0.8.0", confidence: 68,
+      rfcReference: "RFC 9113", relations: [{ targetId: "PROTO-HTTP", type: "extends", description: "HTTP/2 extends HTTP/1.1 semantics" }], concepts: [],
       validatedRepos: ["nghttp2"], validatedSequences: 100,
       crossRepoMatrix: { curl: false, nginx: false, redis: false, nghttp2: true },
       evidence: [
@@ -350,6 +353,7 @@ export function buildKnowledgeBase(): KnowledgeBase {
     {
       id: "PROTO-QUIC", name: "QUIC Connection", domain: "QUIC", category: "connection",
       maturity: "experimental", currentVersion: "0.2.0", confidence: 25,
+      rfcReference: "RFC 9000", relations: [], concepts: [],
       validatedRepos: [], validatedSequences: 0,
       crossRepoMatrix: { curl: false, nginx: false, redis: false },
       description: "QUIC connection lifecycle. Needs quiche/ngtcp2 library testing.",
