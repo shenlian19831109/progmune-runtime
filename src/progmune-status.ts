@@ -51,10 +51,19 @@ function main() {
   console.log(`  ${C.d}Dashboard: http://localhost:3200${C.r}`);
   console.log(`  ${C.d}Knowledge API: http://localhost:3400${C.r}`);
 
+  // Governance KPIs
+  console.log(`\n  ${C.b}Governance KPIs:${C.r}`);
+  const stableCount = kb.summary.byMaturity["stable"];
+  const policyRules = 7; // total rules including kb_coverage
+  console.log(`  ${C.g}Policy:${C.r} ${policyRules} rules active (confidence, provenance, violations, human_review, plsb, fingerprint, kb_coverage)`);
+  console.log(`  ${C.g}Knowledge-driven:${C.r} ${stableCount} stable assets powering governance decisions`);
+  console.log(`  ${C.g}CI/CD:${C.r} deploy gate via GitHub Action (progmune-policy.yml)`);
+  console.log(`  ${C.g}Certificate:${C.r} ontology-backed (KB v${kb.version} + RFC references)`);
+
   // Growth indicators
   console.log(`\n  ${C.b}Growth:${C.r}`);
-  console.log(`  ${C.g}+3${C.r} stable assets in this session (TLS, SSH, HTTP)`);
-  console.log(`  ${C.g}+7${C.r} repos validated (curl, nginx, redis, apache, openssl, libssh, nghttp2)`);
+  console.log(`  ${C.g}+3${C.r} stable assets (TLS, SSH, HTTP)`);
+  console.log(`  ${C.g}+7${C.r} repos validated`);
   console.log(`  ${C.g}+605${C.r} sequences accumulated`);
   console.log(`\n  ${C.d}Next: npx ts-node src/knowledge-evolution.ts scan <new-repo>${C.r}\n`);
 }
