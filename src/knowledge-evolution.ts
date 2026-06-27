@@ -386,6 +386,28 @@ if (require.main === module) {
     if (ver1.f1 !== undefined && ver2.f1 !== undefined) console.log(`  F1: ${(ver1.f1*100).toFixed(0)}% → ${(ver2.f1*100).toFixed(0)}%`);
     console.log(`  ${ver2.notes}\n`);
 
+  } else if (cmd === "benchmark") {
+    const unitId = args[1];
+    if (!unitId) { console.error("Usage: benchmark <unitId>"); process.exit(1); }
+    const kb = buildKnowledgeBase();
+    const unit = kb.units.find(u => u.id === unitId || u.name === unitId);
+    if (!unit) { console.error(`Unit not found: ${unitId}`); process.exit(1); }
+    console.log(`\n${unit.name} — Benchmark History`);
+    console.log(`Version   Date        F1     Prec   Recall  FP    FN    Confidence`);
+    console.log(`───────   ──────────  ─────  ─────  ─────  ────  ────  ──────────`);
+    for (const v of unit.versionHistory) {
+      const f1 = v.f1 !== undefined ? `${(v.f1*100).toFixed(0)}%`.padStart(5) : "  N/A ";
+      const p = v.precision !== undefined ? `${(v.precision*100).toFixed(0)}%`.padStart(5) : "  N/A ";
+      const r = v.recall !== undefined ? `${(v.recall*100).toFixed(0)}%`.padStart(5) : "  N/A ";
+      console.log(`v${v.version.padEnd(7)} ${v.date}  ${f1}  ${p}  ${r}  ${String(unit.fpHistory[unit.versionHistory.indexOf(v)] || "—").padStart(4)}  ${String(unit.fnHistory[unit.versionHistory.indexOf(v)] || "—").padStart(4)}  ${v.confidence}%`);
+    }
+    const first = unit.versionHistory[0];
+    const last = unit.versionHistory[unit.versionHistory.length - 1];
+    if (first.f1 !== undefined && last.f1 !== undefined) {
+      console.log(`\n  F1 improvement: ${(first.f1*100).toFixed(0)}% → ${(last.f1*100).toFixed(0)}% (${last.f1 > first.f1 ? "+" : ""}${((last.f1 - first.f1)*100).toFixed(0)}pp)`);
+    }
+    console.log("");
+
   } else if (cmd === "changelog") {
     const unitFilter = args.includes("--unit") ? args[args.indexOf("--unit") + 1] : undefined;
     if (unitFilter) {
