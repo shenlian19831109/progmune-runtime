@@ -20,6 +20,7 @@
 
 import * as http from "http";
 import { buildKnowledgeBase } from "./protocol-knowledge";
+import { buildEvidenceRepository } from "./evidence-repository";
 
 const PORT = parseInt(process.env.PROGMUNE_KB_PORT || "3400", 10);
 
@@ -65,8 +66,8 @@ const server = http.createServer((req, res) => {
   if (url === "/knowledge/summary") {
     json(res, {
       ...kb.summary,
-      stableAssets: kb.assets.filter(a => a.maturity === "stable").map(a => a.name),
-      validatedAssets: kb.assets.filter(a => a.maturity === "validated").map(a => a.name),
+      stableAssets: kb.units.filter(a => a.maturity === "stable").map(a => a.name),
+      validatedAssets: kb.units.filter(a => a.maturity === "validated").map(a => a.name),
       generated: kb.generated,
     });
     return;
@@ -74,7 +75,7 @@ const server = http.createServer((req, res) => {
 
   // GET /knowledge/assets
   if (url === "/knowledge/assets") {
-    const summary = kb.assets.map(a => ({
+    const summary = kb.units.map(a => ({
       id: a.id, name: a.name, category: a.category,
       version: a.currentVersion, maturity: a.maturity,
       confidence: a.confidence, validatedRepos: a.validatedRepos,
@@ -87,7 +88,7 @@ const server = http.createServer((req, res) => {
   // GET /knowledge/assets/:id/versions
   if (url.startsWith("/knowledge/assets/") && url.endsWith("/versions")) {
     const id = url.split("/knowledge/assets/")[1]?.replace("/versions", "");
-    const asset = kb.assets.find(a => a.id === id);
+    const asset = kb.units.find(a => a.id === id);
     if (!asset) { json(res, { error: "Asset not found" }, 404); return; }
     json(res, { id: asset.id, name: asset.name, currentVersion: asset.currentVersion, history: asset.versionHistory });
     return;
@@ -96,7 +97,7 @@ const server = http.createServer((req, res) => {
   // GET /knowledge/assets/:id/evidence
   if (url.startsWith("/knowledge/assets/") && url.endsWith("/evidence")) {
     const id = url.split("/knowledge/assets/")[1]?.replace("/evidence", "");
-    const asset = kb.assets.find(a => a.id === id);
+    const asset = kb.units.find(a => a.id === id);
     if (!asset) { json(res, { error: "Asset not found" }, 404); return; }
     json(res, { id: asset.id, name: asset.name, evidence: asset.evidence || [] });
     return;
@@ -105,9 +106,26 @@ const server = http.createServer((req, res) => {
   // GET /knowledge/assets/:id
   if (url.startsWith("/knowledge/assets/")) {
     const id = url.split("/knowledge/assets/")[1];
-    const asset = kb.assets.find(a => a.id === id);
+    const asset = kb.units.find(a => a.id === id);
     if (!asset) { json(res, { error: "Asset not found" }, 404); return; }
     json(res, asset);
+    return;
+  }
+
+  // GET /knowledge/evidence
+  if (url === "/knowledge/evidence") {
+    const er = buildEvidenceRepository();
+    json(res, er);
+    return;
+  }
+
+  // GET /knowledge/evidence/:repo
+  if (url.startsWith("/knowledge/evidence/")) {
+    const repo = url.split("/knowledge/evidence/")[1];
+    const er = buildEvidenceRepository();
+    const record = er.repos.find(r => r.repo === repo);
+    if (!record) { json(res, { error: "Repo not found" }, 404); return; }
+    json(res, record);
     return;
   }
 
