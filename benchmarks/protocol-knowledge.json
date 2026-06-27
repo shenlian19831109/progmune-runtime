@@ -1,7 +1,7 @@
 {
   "name": "Progmune Protocol Knowledge Base",
   "version": "2.0.0",
-  "generated": "2026-06-27T08:04:50.472Z",
+  "generated": "2026-06-27T08:20:52.367Z",
   "maturityModel": {
     "experimental": {
       "repos": 0,
@@ -174,13 +174,14 @@
       "id": "PROTO-HTTP",
       "name": "HTTP Request",
       "category": "http",
-      "maturity": "validated",
-      "currentVersion": "0.8.0",
-      "confidence": 70,
+      "maturity": "stable",
+      "currentVersion": "1.0.0",
+      "confidence": 80,
       "validatedRepos": [
-        "nginx"
+        "nginx",
+        "apache"
       ],
-      "validatedSequences": 50,
+      "validatedSequences": 150,
       "crossRepoMatrix": {
         "curl": false,
         "nginx": true,
@@ -194,9 +195,15 @@
           "type": "auto_labeled",
           "sequences": 50,
           "date": "2026-06-26"
+        },
+        {
+          "repo": "apache",
+          "type": "library_source",
+          "sequences": 100,
+          "date": "2026-06-27"
         }
       ],
-      "description": "HTTP request lifecycle: handler init → process → finalize. Validated on nginx (ngx_http_*). Expected to match Apache httpd.",
+      "description": "HTTP request lifecycle: handler init → process → finalize. Cross-project validated on nginx (ngx_http_*) AND Apache httpd (ap_*). Third stable asset.",
       "steps": [
         "init: handler setup (*http*init / *http*handler)",
         "process: request handling (*http*send / *http*process)",
@@ -238,13 +245,24 @@
         },
         {
           "version": "0.8.0",
-          "date": "2026-06-27",
+          "date": "2026-06-26",
           "confidence": 70,
           "validatedRepos": [
             "nginx"
           ],
           "validatedSequences": 50,
-          "notes": "Validated on nginx HTTP module sequences."
+          "notes": "Validated on nginx HTTP module."
+        },
+        {
+          "version": "1.0.0",
+          "date": "2026-06-27",
+          "confidence": 80,
+          "validatedRepos": [
+            "nginx",
+            "apache"
+          ],
+          "validatedSequences": 150,
+          "notes": "PROMOTED TO STABLE. Extended patterns match Apache (ap_*) — 6/50 sequences matched."
         }
       ],
       "lastUpdated": "2026-06-27"
@@ -581,13 +599,13 @@
     "totalAssets": 7,
     "byMaturity": {
       "experimental": 3,
-      "validated": 2,
-      "stable": 2,
+      "validated": 1,
+      "stable": 3,
       "certified": 0
     },
-    "averageConfidence": 60,
-    "totalValidatedRepos": 4,
-    "totalValidatedSequences": 505,
-    "growthPath": "1 stable asset. Next: promote HTTP to stable (needs Apache validation)."
+    "averageConfidence": 62,
+    "totalValidatedRepos": 5,
+    "totalValidatedSequences": 605,
+    "growthPath": "3+ stable assets → publish Knowledge Base v1.0 whitepaper"
   }
 }

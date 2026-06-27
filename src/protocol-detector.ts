@@ -28,9 +28,12 @@ const PROTOCOLS: ProtocolDefinition[] = [
   {
     name: "HTTP Request", category: "http", minCompleteness: 0.5,
     steps: [
-      { pattern: /\b(\w*http\w*init|\w*http\w*create|\w*http\w*setup|\w*http\w*handler|curl_easy_init)\b/i, label: "http_init", required: true },
-      { pattern: /\b(\w*http\w*perform|\w*http\w*send|\w*http\w*request|\w*http\w*process|curl_easy_perform|\w*http\w*response)\b/i, label: "http_send", required: true },
-      { pattern: /\b(\w*http\w*cleanup|\w*http\w*free|\w*http\w*close|\w*http\w*done|curl_easy_cleanup|\w*http\w*finalize)\b/i, label: "http_cleanup", required: true },
+      // init: handler setup, hook registration (nginx + Apache + curl)
+      { pattern: /\b(\w*http\w*init|\w*http\w*create|\w*http\w*setup|\w*http\w*handler|\w*hook_handler|\w*hook_pre_config|curl_easy_init)\b/i, label: "http_init", required: true },
+      // process: request handling (all naming conventions)
+      { pattern: /\b(\w*http\w*perform|\w*http\w*send|\w*http\w*request|\w*http\w*process|\w*process_request|\w*run_method|curl_easy_perform|\w*http\w*response|ap_pass_brigade)\b/i, label: "http_send", required: true },
+      // cleanup: finalize (all naming conventions)
+      { pattern: /\b(\w*http\w*cleanup|\w*http\w*free|\w*http\w*close|\w*http\w*done|\w*finalize_request|curl_easy_cleanup|\w*http\w*finalize|ap_remove_output_filter)\b/i, label: "http_cleanup", required: true },
     ],
   },
   {
