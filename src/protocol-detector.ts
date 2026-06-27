@@ -76,6 +76,29 @@ export interface ProtocolViolation {
   protocol: string; category: string;
   type: "missing_step" | "wrong_order" | "incomplete";
   missing: string[]; detail: string;
+  /** Concept-level explanation: which specific protocol concepts are missing */
+  conceptDetail?: string;
+  missingConcepts?: string[];
+  foundConcepts?: string[];
+}
+
+// ── Concept Mapping (Ontology → Detector) ──
+
+const CONCEPT_MAP: Record<string, Record<string, string[]>> = {
+  "TLS Handshake": { "tls_init": ["ClientHello"], "tls_connect": ["ServerHello", "Certificate"], "tls_free": ["Finished"] },
+  "SSH Connection": { "ssh_init": ["Connection"], "ssh_auth": ["Authentication"], "ssh_done": ["Channel"] },
+  "HTTP Request": { "http_init": ["Request"], "http_send": ["Response"], "http_cleanup": ["Cleanup"] },
+  "HTTP/2 Session": { "h2_init": ["Session Init"], "h2_send": ["Stream Submit"], "h2_close": ["Session Close"] },
+};
+
+function enrichWithConcepts(v: ProtocolViolation, matchedLabels: string[]): ProtocolViolation {
+  const m = CONCEPT_MAP[v.protocol]; if (!m) return v;
+  const mc: string[] = [], fc: string[] = [];
+  for (const l of v.missing) { const c = m[l] || [l]; mc.push(...c); }
+  for (const l of matchedLabels) { const c = m[l] || [l]; fc.push(...c); }
+  v.missingConcepts = [...new Set(mc)]; v.foundConcepts = [...new Set(fc)];
+  v.conceptDetail = `Missing: ${v.missingConcepts.join(", ")}. Found: ${v.foundConcepts.join(", ")}`;
+  return v;
 }
 
 export function detectProtocolViolations(calls: string[]): ProtocolViolation[] {
@@ -98,13 +121,13 @@ export function detectProtocolViolations(calls: string[]): ProtocolViolation[] {
     for (const rs of requiredSteps) {
       if (!matchedRequired.some(m => m.label === rs.label)) missing.push(rs.label);
     }
+    const labels = matched.map(m => m.label);
     if (missing.length > 0) {
-      violations.push({ protocol: proto.name, category: proto.category, type: "missing_step", missing, detail: `${proto.name} missing: ${missing.join(", ")}. Found: ${matched.map(m => m.label).join(" → ")}` });
+      violations.push(enrichWithConcepts({ protocol: proto.name, category: proto.category, type: "missing_step", missing, detail: `${proto.name} missing: ${missing.join(", ")}. Found: ${labels.join(" → ")}` }, labels));
       continue;
     }
     if (completeness < proto.minCompleteness) {
-      const found = matched.map(m => m.label);
-      violations.push({ protocol: proto.name, category: proto.category, type: "incomplete", missing: proto.steps.filter(s => s.required && !found.includes(s.label)).map(s => s.label), detail: `${proto.name}: ${(completeness * 100).toFixed(0)}% complete (min ${(proto.minCompleteness * 100).toFixed(0)}%). Found: ${found.join(" → ")}` });
+      violations.push(enrichWithConcepts({ protocol: proto.name, category: proto.category, type: "incomplete", missing: proto.steps.filter(s => s.required && !labels.includes(s.label)).map(s => s.label), detail: `${proto.name}: ${(completeness * 100).toFixed(0)}% complete. Found: ${labels.join(" → ")}` }, labels));
     }
   }
   return violations;
@@ -113,7 +136,8 @@ export function detectProtocolViolations(calls: string[]): ProtocolViolation[] {
 export function validateProtocolState(calls: string[]): { valid: boolean; violations: ProtocolViolation[]; matchedProtocols: string[]; detail: string } {
   const violations = detectProtocolViolations(calls);
   const matchedProtocols = [...new Set(violations.map(v => v.protocol))];
-  return { valid: violations.length === 0, violations, matchedProtocols, detail: violations.length === 0 ? "Protocol state complete" : violations.map(v => v.detail).join("; ") };
+  const detail = violations.length === 0 ? "Protocol state complete" : violations.map(v => v.conceptDetail || v.detail).join("; ");
+  return { valid: violations.length === 0, violations, matchedProtocols, detail };
 }
 
 export function validateCombined(calls: string[], enclosingFuncName?: string): { valid: boolean; resourceViolations: any[]; protocolViolations: ProtocolViolation[]; detail: string } {
