@@ -22,7 +22,7 @@ const PROTOCOLS: ProtocolDefinition[] = [
     steps: [
       { pattern: /\b(\w*ssh\w*init|ssh\w*setup|\w*ssh_state_init)\b/i, label: "ssh_init", required: true },
       { pattern: /\b(\w*ssh\w*auth|\w*ssh\w*login|\w*ssh\w*cred)\b/i, label: "ssh_auth", required: true },
-      { pattern: /\b(\w*ssh\w*done|\w*ssh\w*close|\w*ssh\w*cleanup|\w*ssh\w*error|\w*ssh\w*finish)\b/i, label: "ssh_done", required: true },
+      { pattern: /\b(\w*ssh\w*done|\w*ssh\w*close|\w*ssh\w*cleanup|\w*ssh\w*error|\w*ssh\w*finish|\w*ssh\w*free|\w*ssh\w*disconnect)\b/i, label: "ssh_done", required: true },
     ],
   },
   {
