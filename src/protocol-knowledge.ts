@@ -254,9 +254,9 @@ export function buildKnowledgeBase(): KnowledgeBase {
       antiPatterns: [["ngx_http_handler", "ngx_http_finalize_request"]],  // Missing process
       fpHistory: [0, 0], fnHistory: [0, 0],
       versionHistory: [
-        { version: "0.5.0", date: "2026-06-26", confidence: 40, validatedRepos: [], validatedSequences: 0, notes: "Initial pattern definition." },
-        { version: "0.8.0", date: "2026-06-26", confidence: 70, validatedRepos: ["nginx"], validatedSequences: 50, notes: "Validated on nginx HTTP module." },
-        { version: "1.0.0", date: today, confidence: 80, validatedRepos: ["nginx", "apache"], validatedSequences: 150, notes: "PROMOTED TO STABLE. Extended patterns match Apache (ap_*) — 6/50 sequences matched." },
+        { version: "0.5.0", date: "2026-06-26", confidence: 40, validatedRepos: [], validatedSequences: 0, notes: "Initial pattern definition. nginx-specific (ngx_http_*)." },
+        { version: "0.8.0", date: "2026-06-26", confidence: 70, validatedRepos: ["nginx"], validatedSequences: 50, notes: "Validated on nginx HTTP module (ngx_http_handler → ngx_http_process_request → ngx_http_finalize_request)." },
+        { version: "1.0.0", date: today, confidence: 80, validatedRepos: ["nginx", "apache"], validatedSequences: 150, notes: "PROMOTED TO STABLE. Extended patterns match Apache httpd (ap_pass_brigade, ap_remove_output_filter). 6/50 Apache sequences matched. RFC 9110 referenced. Third stable asset." },
       ],
       lastUpdated: today,
     },
@@ -287,9 +287,9 @@ export function buildKnowledgeBase(): KnowledgeBase {
       antiPatterns: [["ssh_state_init", "ssh_state_startup"], ["ssh_state_authlist"]],
       fpHistory: [0, 0], fnHistory: [2, 2],
       versionHistory: [
-        { version: "0.3.0", date: "2026-06-26", confidence: 40, validatedRepos: [], validatedSequences: 0, notes: "Curl-specific (Curl_ssh_*)." },
-        { version: "0.6.0", date: "2026-06-26", confidence: 60, validatedRepos: ["curl"], validatedSequences: 85, notes: "Repo-agnostic. myssh_* unmatched." },
-        { version: "1.0.0", date: today, confidence: 78, validatedRepos: ["curl", "libssh"], validatedSequences: 135, notes: "PROMOTED TO STABLE. Validated on libssh standalone library (5/50 sequences matched)." },
+        { version: "0.3.0", date: "2026-06-26", confidence: 40, validatedRepos: [], validatedSequences: 0, notes: "Curl-specific patterns (Curl_ssh_*). Initial rule extraction from curl/libssh2 state machine." },
+        { version: "0.6.0", date: "2026-06-26", confidence: 60, validatedRepos: ["curl"], validatedSequences: 85, notes: "Repo-agnostic \\w*ssh\\w* patterns. Validated on curl (libssh2+libssh). myssh_* variants still unmatched." },
+        { version: "1.0.0", date: today, confidence: 78, validatedRepos: ["curl", "libssh"], validatedSequences: 135, notes: "PROMOTED TO STABLE. Cross-project validated on libssh standalone library (5/50 sequences matched). RFC 4253 referenced. Second stable asset." },
       ],
       lastUpdated: today,
     },

@@ -368,6 +368,24 @@ if (require.main === module) {
       console.error(`${C.r2}❌ ${e.message}${C.r}`);
       process.exit(1);
     }
+  } else if (cmd === "diff") {
+    const unitId = args[1];
+    const v1 = args[2];
+    const v2 = args[3];
+    if (!unitId || !v1 || !v2) { console.error("Usage: diff <unitId> <v1> <v2>"); process.exit(1); }
+    const kb = buildKnowledgeBase();
+    const unit = kb.units.find(u => u.id === unitId || u.name === unitId);
+    if (!unit) { console.error(`Unit not found: ${unitId}`); process.exit(1); }
+    const ver1 = unit.versionHistory.find((v: any) => v.version === v1);
+    const ver2 = unit.versionHistory.find((v: any) => v.version === v2);
+    if (!ver1 || !ver2) { console.error("Version not found"); process.exit(1); }
+    console.log(`\n${unit.name}: v${v1} → v${v2}`);
+    console.log(`  Confidence: ${ver1.confidence}% → ${ver2.confidence}% (${ver2.confidence - ver1.confidence >= 0 ? "+" : ""}${ver2.confidence - ver1.confidence}%)`);
+    console.log(`  Repos: ${ver1.validatedRepos.length} → ${ver2.validatedRepos.length} (added: ${ver2.validatedRepos.filter((r: string) => !ver1.validatedRepos.includes(r)).join(", ") || "none"})`);
+    console.log(`  Sequences: ${ver1.validatedSequences} → ${ver2.validatedSequences} (+${ver2.validatedSequences - ver1.validatedSequences})`);
+    if (ver1.f1 !== undefined && ver2.f1 !== undefined) console.log(`  F1: ${(ver1.f1*100).toFixed(0)}% → ${(ver2.f1*100).toFixed(0)}%`);
+    console.log(`  ${ver2.notes}\n`);
+
   } else if (cmd === "changelog") {
     const unitFilter = args.includes("--unit") ? args[args.indexOf("--unit") + 1] : undefined;
     if (unitFilter) {
