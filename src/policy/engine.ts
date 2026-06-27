@@ -181,6 +181,27 @@ export function evaluatePolicy(
         break;
       }
 
+      // ── Knowledge Base Coverage ──
+      case "kb_coverage": {
+        const minStable = rule.threshold ?? 3;
+        let stableCount = 0;
+        try {
+          const { buildKnowledgeBase } = require("../protocol-knowledge");
+          const kb = buildKnowledgeBase();
+          stableCount = kb.units.filter((u: any) => u.maturity === "stable").length;
+        } catch { /* KB unavailable */ }
+
+        if (stableCount < minStable) {
+          violations.push({
+            rule,
+            actual: `${stableCount} stable assets`,
+            expected: `>= ${minStable} stable assets`,
+            detail: `The Knowledge Base has ${stableCount} stable protocol assets. Need at least ${minStable} for production governance. Run 'npm run status' to see coverage.`,
+          });
+        }
+        break;
+      }
+
       // ── Violations ──
       case "violations": {
         const maxViolations = rule.threshold ?? 0;

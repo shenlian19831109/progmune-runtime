@@ -13,7 +13,8 @@ export type RuleType =
   | "plsb_coverage"    // PLSB categories covered must meet threshold
   | "human_review"     // At least N human reviewers in accountability chain
   | "fingerprint"      // Fingerprint must exist and be verified
-  | "violations";      // No SSG ledger violations allowed
+  | "violations"       // No SSG ledger violations allowed
+  | "kb_coverage";     // Knowledge Base must have at least N stable assets covering this protocol
 
 export interface PolicyRule {
   type: RuleType;
@@ -86,5 +87,11 @@ export const DEFAULT_POLICY: PolicyRule[] = [
     severity: "block",
     description: "No SSG ledger violations allowed",
     threshold: 0,
+  },
+  {
+    type: "kb_coverage",
+    severity: "warn",
+    description: "Knowledge Base must have at least 3 stable protocol assets",
+    threshold: 3,
   },
 ];
