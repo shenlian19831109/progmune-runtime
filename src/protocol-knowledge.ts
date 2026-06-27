@@ -55,11 +55,22 @@ export interface VersionSnapshot {
   notes: string;
 }
 
-export interface ProtocolAsset {
+/** Relationships between Knowledge Units */
+export type UnitRelationship = "depends_on" | "requires" | "extends" | "compatible_with" | "deprecated_by";
+
+export interface KnowledgeUnitRelation {
+  targetId: string;         // ID of related Knowledge Unit
+  type: UnitRelationship;
+  description: string;
+}
+
+export interface KnowledgeUnit {
   id: string; name: string;
-  domain: string;           // Parent domain (e.g., "TLS", "SSH", "HTTP")
+  domain: string;           // Parent Protocol Domain (e.g., "TLS", "SSH", "HTTP")
   category: "ssl" | "ssh" | "http" | "http2" | "connection" | "auth";
   maturity: MaturityLevel;
+  rfcReference?: string;    // RFC number (e.g., "RFC 8446")
+  relations: KnowledgeUnitRelation[];  // Links to other Knowledge Units
   currentVersion: string;
   confidence: number;
   validatedRepos: string[];
@@ -86,10 +97,10 @@ export interface ProtocolAsset {
 export interface KnowledgeBase {
   name: string; version: string; generated: string;
   maturityModel: typeof MATURITY_CRITERIA;
-  assets: ProtocolAsset[];
-  domains: Record<string, { name: string; assetCount: number; stableCount: number; description: string }>;
+  units: KnowledgeUnit[];       // Knowledge Units (renamed from assets)
+  domains: Record<string, { name: string; unitCount: number; stableCount: number; description: string }>;
   summary: {
-    totalAssets: number;
+    totalUnits: number;
     totalDomains: number;
     byMaturity: Record<MaturityLevel, number>;
     averageConfidence: number;
@@ -106,11 +117,13 @@ export interface KnowledgeBase {
 export function buildKnowledgeBase(): KnowledgeBase {
   const today = new Date().toISOString().slice(0, 10);
 
-  const assets: ProtocolAsset[] = [
+  const units: KnowledgeUnit[] = [
     // ═══ TLS Handshake — STABLE ═══
     {
       id: "PROTO-TLS", name: "TLS Handshake", domain: "TLS", category: "ssl",
       maturity: "stable", currentVersion: "1.0.0", confidence: 85,
+      rfcReference: "RFC 8446",
+      relations: [],
       validatedRepos: ["curl", "nginx"], validatedSequences: 135,
       crossRepoMatrix: { curl: true, nginx: true, redis: false, openssl: false, apache: false },
       evidence: [
@@ -143,10 +156,12 @@ export function buildKnowledgeBase(): KnowledgeBase {
       lastUpdated: today,
     },
 
-    // TLS Domain sub-assets
+    // TLS Domain — Knowledge Units
     {
       id: "PROTO-TLS-CERT", name: "TLS Certificate", domain: "TLS", category: "ssl",
       maturity: "experimental", currentVersion: "0.2.0", confidence: 30,
+      rfcReference: "RFC 8446 §4.4",
+      relations: [{ targetId: "PROTO-TLS", type: "extends", description: "Extends TLS Handshake with certificate validation" }],
       validatedRepos: [], validatedSequences: 0,
       crossRepoMatrix: { curl: false, nginx: false, openssl: true },
       evidence: [],
@@ -161,6 +176,11 @@ export function buildKnowledgeBase(): KnowledgeBase {
     {
       id: "PROTO-TLS-SESS", name: "TLS Session", domain: "TLS", category: "ssl",
       maturity: "experimental", currentVersion: "0.1.0", confidence: 20,
+      rfcReference: "RFC 8446 §2.2",
+      relations: [
+        { targetId: "PROTO-TLS", type: "depends_on", description: "Session resumption requires completed handshake" },
+        { targetId: "PROTO-TLS-CERT", type: "compatible_with", description: "Session tickets may include certificate info" },
+      ],
       validatedRepos: [], validatedSequences: 0,
       crossRepoMatrix: {},
       evidence: [],
@@ -175,6 +195,8 @@ export function buildKnowledgeBase(): KnowledgeBase {
     {
       id: "PROTO-TLS-ALPN", name: "TLS ALPN", domain: "TLS", category: "ssl",
       maturity: "experimental", currentVersion: "0.1.0", confidence: 20,
+      rfcReference: "RFC 7301",
+      relations: [{ targetId: "PROTO-TLS", type: "extends", description: "ALPN negotiation during TLS handshake" }],
       validatedRepos: [], validatedSequences: 0,
       crossRepoMatrix: {},
       evidence: [],
@@ -191,6 +213,8 @@ export function buildKnowledgeBase(): KnowledgeBase {
     {
       id: "PROTO-HTTP", name: "HTTP Request", domain: "HTTP", category: "http",
       maturity: "stable", currentVersion: "1.0.0", confidence: 80,
+      rfcReference: "RFC 9110",
+      relations: [{ targetId: "PROTO-H2", type: "compatible_with", description: "HTTP/2 extends HTTP request semantics" }],
       validatedRepos: ["nginx", "apache"], validatedSequences: 150,
       crossRepoMatrix: { curl: false, nginx: true, redis: false, openssl: false, apache: true },
       evidence: [
@@ -216,6 +240,8 @@ export function buildKnowledgeBase(): KnowledgeBase {
     {
       id: "PROTO-SSH", name: "SSH Connection", domain: "SSH", category: "ssh",
       maturity: "stable", currentVersion: "1.0.0", confidence: 78,
+      rfcReference: "RFC 4253",
+      relations: [],
       validatedRepos: ["curl", "libssh"], validatedSequences: 135,
       crossRepoMatrix: { curl: true, nginx: false, redis: false, libssh: true, openssh: false },
       evidence: [
@@ -308,20 +334,20 @@ export function buildKnowledgeBase(): KnowledgeBase {
   ];
 
   const byMaturity = { experimental: 0, validated: 0, stable: 0, certified: 0 } as Record<MaturityLevel, number>;
-  for (const a of assets) byMaturity[a.maturity]++;
+  for (const u of units) byMaturity[u.maturity]++;
 
-  const avgConf = Math.round(assets.reduce((s, a) => s + a.confidence, 0) / assets.length);
-  const totalRepos = [...new Set(assets.flatMap(a => a.validatedRepos))].length;
-  const totalSeqs = assets.reduce((s, a) => s + a.validatedSequences, 0);
+  const avgConf = Math.round(units.reduce((s, u) => s + u.confidence, 0) / units.length);
+  const totalRepos = [...new Set(units.flatMap(u => u.validatedRepos))].length;
+  const totalSeqs = units.reduce((s, u) => s + u.validatedSequences, 0);
 
   // Build domain summary
-  const domainMap: Record<string, { name: string; assetCount: number; stableCount: number; description: string }> = {};
-  for (const a of assets) {
-    if (!domainMap[a.domain]) {
-      domainMap[a.domain] = { name: a.domain, assetCount: 0, stableCount: 0, description: "" };
+  const domainMap: Record<string, { name: string; unitCount: number; stableCount: number; description: string }> = {};
+  for (const u of units) {
+    if (!domainMap[u.domain]) {
+      domainMap[u.domain] = { name: u.domain, unitCount: 0, stableCount: 0, description: "" };
     }
-    domainMap[a.domain].assetCount++;
-    if (a.maturity === "stable") domainMap[a.domain].stableCount++;
+    domainMap[u.domain].unitCount++;
+    if (u.maturity === "stable") domainMap[u.domain].stableCount++;
   }
   domainMap["TLS"].description = "Transport Layer Security — handshake, certificate, session, ALPN";
   domainMap["SSH"].description = "Secure Shell — connection, authentication, channel";
@@ -332,24 +358,21 @@ export function buildKnowledgeBase(): KnowledgeBase {
 
   const stableCount = byMaturity["stable"];
   const domainCount = Object.keys(domainMap).length;
-  const nextMilestone = stableCount >= 3 && domainCount >= 4
-    ? `${stableCount} stable assets across ${domainCount} domains. Next: TLS Domain depth (certificate, session, ALPN).`
-    : "Grow domains and stable assets.";
 
   return {
     name: "Progmune Protocol Knowledge Base",
     version: "3.0.0", generated: new Date().toISOString(),
     maturityModel: MATURITY_CRITERIA,
-    assets,
+    units,
     domains: domainMap,
     summary: {
-      totalAssets: assets.length,
+      totalUnits: units.length,
       totalDomains: domainCount,
       byMaturity,
       averageConfidence: avgConf,
       totalValidatedRepos: totalRepos,
       totalValidatedSequences: totalSeqs,
-      growthPath: nextMilestone,
+      growthPath: `${stableCount} stable across ${domainCount} domains. Next: TLS depth (cert, session, ALPN).`,
     },
   };
 }
@@ -372,12 +395,13 @@ export function formatKnowledgeBase(kb: KnowledgeBase, assetFilter?: string): st
   l.push(`\n${C.b}${C.c}╔══════════════════════════════════════════════════════════════╗${C.r}`);
   l.push(`${C.b}${C.c}║${C.r}  ${C.b}Protocol Knowledge Base v2${C.r}  —  Knowledge Asset System              ${C.b}${C.c}║${C.r}`);
   l.push(`${C.b}${C.c}╚══════════════════════════════════════════════════════════════╝${C.r}`);
-  l.push(`\n  ${C.d}${kb.summary.totalAssets} assets · ${kb.summary.totalDomains} domains · ${kb.summary.byMaturity["stable"]} stable · ${kb.summary.byMaturity["validated"]} validated · ${kb.summary.byMaturity["experimental"]} experimental · ${kb.summary.averageConfidence}% avg confidence${C.r}`);
+  l.push(`\n  ${C.d}${kb.summary.totalUnits} knowledge units · ${kb.summary.totalDomains} protocol domains · ${kb.summary.byMaturity["stable"]} stable · ${kb.summary.byMaturity["validated"]} validated · ${kb.summary.byMaturity["experimental"]} experimental · ${kb.summary.averageConfidence}% avg confidence${C.r}`);
   l.push(`  ${C.d}${kb.summary.totalValidatedRepos} repos · ${kb.summary.totalValidatedSequences} validated sequences${C.r}`);
-  l.push(`\n  ${C.b}Domains:${C.r}`);
+  l.push(`\n  ${C.b}Protocol Domains:${C.r}`);
   for (const [key, d] of Object.entries(kb.domains)) {
-    const bar = "█".repeat(d.stableCount) + "░".repeat(Math.max(0, d.assetCount - d.stableCount));
-    l.push(`  ${bar} ${C.b}${d.name}${C.r}: ${d.assetCount} assets (${d.stableCount} stable) — ${C.d}${d.description}${C.r}`);
+    const bar = "█".repeat(d.stableCount) + "░".repeat(Math.max(0, d.unitCount - d.stableCount));
+    const rfcInfo = key === "TLS" ? " (RFC 8446, 7301)" : key === "HTTP" ? " (RFC 9110)" : key === "SSH" ? " (RFC 4253)" : "";
+    l.push(`  ${bar} ${C.b}${d.name}${C.r}: ${d.unitCount} units (${d.stableCount} stable)${rfcInfo} — ${C.d}${d.description}${C.r}`);
   }
   l.push(`\n  ${C.d}→ ${kb.summary.growthPath}${C.r}`);
 
@@ -390,7 +414,7 @@ export function formatKnowledgeBase(kb: KnowledgeBase, assetFilter?: string): st
     l.push(`  ${maturityIcon[level]} ${maturityBar[level].padEnd(30)} ${bar} ${count}  ${C.d}≥${crit.repos} repos, ≥${crit.sequences} seqs, ≥${crit.confidence}% conf${C.r}`);
   }
 
-  const filter = assetFilter ? kb.assets.filter(a => a.name.toLowerCase().includes(assetFilter.toLowerCase()) || a.id === assetFilter) : kb.assets;
+  const filter = assetFilter ? kb.units.filter(a => a.name.toLowerCase().includes(assetFilter.toLowerCase()) || a.id === assetFilter) : kb.units;
 
   for (const a of filter) {
     l.push(`\n  ${C.b}${C.c}${"─".repeat(60)}${C.r}`);

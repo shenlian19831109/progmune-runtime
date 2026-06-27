@@ -1,7 +1,7 @@
 {
   "name": "Progmune Protocol Knowledge Base",
   "version": "3.0.0",
-  "generated": "2026-06-27T08:41:37.039Z",
+  "generated": "2026-06-27T09:01:09.791Z",
   "maturityModel": {
     "experimental": {
       "repos": 0,
@@ -28,7 +28,7 @@
       "description": "Validated on 3+ repos with 500+ sequences. Audit-grade."
     }
   },
-  "assets": [
+  "units": [
     {
       "id": "PROTO-TLS",
       "name": "TLS Handshake",
@@ -37,6 +37,8 @@
       "maturity": "stable",
       "currentVersion": "1.0.0",
       "confidence": 85,
+      "rfcReference": "RFC 8446",
+      "relations": [],
       "validatedRepos": [
         "curl",
         "nginx"
@@ -179,6 +181,14 @@
       "maturity": "experimental",
       "currentVersion": "0.2.0",
       "confidence": 30,
+      "rfcReference": "RFC 8446 §4.4",
+      "relations": [
+        {
+          "targetId": "PROTO-TLS",
+          "type": "extends",
+          "description": "Extends TLS Handshake with certificate validation"
+        }
+      ],
       "validatedRepos": [],
       "validatedSequences": 0,
       "crossRepoMatrix": {
@@ -221,6 +231,19 @@
       "maturity": "experimental",
       "currentVersion": "0.1.0",
       "confidence": 20,
+      "rfcReference": "RFC 8446 §2.2",
+      "relations": [
+        {
+          "targetId": "PROTO-TLS",
+          "type": "depends_on",
+          "description": "Session resumption requires completed handshake"
+        },
+        {
+          "targetId": "PROTO-TLS-CERT",
+          "type": "compatible_with",
+          "description": "Session tickets may include certificate info"
+        }
+      ],
       "validatedRepos": [],
       "validatedSequences": 0,
       "crossRepoMatrix": {},
@@ -257,6 +280,14 @@
       "maturity": "experimental",
       "currentVersion": "0.1.0",
       "confidence": 20,
+      "rfcReference": "RFC 7301",
+      "relations": [
+        {
+          "targetId": "PROTO-TLS",
+          "type": "extends",
+          "description": "ALPN negotiation during TLS handshake"
+        }
+      ],
       "validatedRepos": [],
       "validatedSequences": 0,
       "crossRepoMatrix": {},
@@ -292,6 +323,14 @@
       "maturity": "stable",
       "currentVersion": "1.0.0",
       "confidence": 80,
+      "rfcReference": "RFC 9110",
+      "relations": [
+        {
+          "targetId": "PROTO-H2",
+          "type": "compatible_with",
+          "description": "HTTP/2 extends HTTP request semantics"
+        }
+      ],
       "validatedRepos": [
         "nginx",
         "apache"
@@ -390,6 +429,8 @@
       "maturity": "stable",
       "currentVersion": "1.0.0",
       "confidence": 78,
+      "rfcReference": "RFC 4253",
+      "relations": [],
       "validatedRepos": [
         "curl",
         "libssh"
@@ -718,43 +759,43 @@
   "domains": {
     "TLS": {
       "name": "TLS",
-      "assetCount": 4,
+      "unitCount": 4,
       "stableCount": 1,
       "description": "Transport Layer Security — handshake, certificate, session, ALPN"
     },
     "HTTP": {
       "name": "HTTP",
-      "assetCount": 2,
+      "unitCount": 2,
       "stableCount": 1,
       "description": "Hypertext Transfer — request/response, HTTP/2"
     },
     "SSH": {
       "name": "SSH",
-      "assetCount": 1,
+      "unitCount": 1,
       "stableCount": 1,
       "description": "Secure Shell — connection, authentication, channel"
     },
     "Connection": {
       "name": "Connection",
-      "assetCount": 1,
+      "unitCount": 1,
       "stableCount": 0,
       "description": "Generic TCP/TLS connection lifecycle"
     },
     "Auth": {
       "name": "Auth",
-      "assetCount": 1,
+      "unitCount": 1,
       "stableCount": 0,
       "description": "Authentication protocols — NTLM, SPNEGO, Digest"
     },
     "QUIC": {
       "name": "QUIC",
-      "assetCount": 1,
+      "unitCount": 1,
       "stableCount": 0,
       "description": "QUIC transport protocol"
     }
   },
   "summary": {
-    "totalAssets": 10,
+    "totalUnits": 10,
     "totalDomains": 6,
     "byMaturity": {
       "experimental": 6,
@@ -765,6 +806,6 @@
     "averageConfidence": 50,
     "totalValidatedRepos": 5,
     "totalValidatedSequences": 605,
-    "growthPath": "3 stable assets across 6 domains. Next: TLS Domain depth (certificate, session, ALPN)."
+    "growthPath": "3 stable across 6 domains. Next: TLS depth (cert, session, ALPN)."
   }
 }
