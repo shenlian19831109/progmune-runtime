@@ -1,7 +1,7 @@
 {
   "name": "Progmune Protocol Knowledge Base",
   "version": "3.0.0",
-  "generated": "2026-06-27T09:01:09.791Z",
+  "generated": "2026-06-27T13:10:32.081Z",
   "maturityModel": {
     "experimental": {
       "repos": 0,
@@ -39,6 +39,55 @@
       "confidence": 85,
       "rfcReference": "RFC 8446",
       "relations": [],
+      "concepts": [
+        {
+          "id": "TLS-HS-CHello",
+          "name": "ClientHello",
+          "description": "Client initiates handshake with supported cipher suites and extensions",
+          "required": true,
+          "inheritedConfidence": 85,
+          "inheritedEvidence": 135,
+          "constraints": [
+            "must precede ServerHello"
+          ]
+        },
+        {
+          "id": "TLS-HS-SHello",
+          "name": "ServerHello",
+          "description": "Server responds with selected cipher suite and extensions",
+          "required": true,
+          "inheritedConfidence": 85,
+          "inheritedEvidence": 135,
+          "constraints": [
+            "must follow ClientHello",
+            "must select from client cipher suites"
+          ]
+        },
+        {
+          "id": "TLS-HS-Cert",
+          "name": "Certificate",
+          "description": "Server sends certificate chain for authentication",
+          "required": true,
+          "inheritedConfidence": 85,
+          "inheritedEvidence": 135,
+          "constraints": [
+            "must follow ServerHello",
+            "must be verifiable"
+          ]
+        },
+        {
+          "id": "TLS-HS-Fin",
+          "name": "Finished",
+          "description": "Handshake complete — both sides verify the exchange",
+          "required": true,
+          "inheritedConfidence": 85,
+          "inheritedEvidence": 135,
+          "constraints": [
+            "must be the final step",
+            "must verify handshake integrity"
+          ]
+        }
+      ],
       "validatedRepos": [
         "curl",
         "nginx"
@@ -331,6 +380,31 @@
           "description": "HTTP/2 extends HTTP request semantics"
         }
       ],
+      "concepts": [
+        {
+          "id": "HTTP-Req",
+          "name": "Request",
+          "description": "HTTP request method, URI, headers",
+          "required": true,
+          "inheritedConfidence": 80,
+          "inheritedEvidence": 150,
+          "constraints": [
+            "must precede Response"
+          ]
+        },
+        {
+          "id": "HTTP-Res",
+          "name": "Response",
+          "description": "HTTP status code, headers, body",
+          "required": true,
+          "inheritedConfidence": 80,
+          "inheritedEvidence": 150,
+          "constraints": [
+            "must follow Request",
+            "status must be valid"
+          ]
+        }
+      ],
       "validatedRepos": [
         "nginx",
         "apache"
@@ -431,6 +505,41 @@
       "confidence": 78,
       "rfcReference": "RFC 4253",
       "relations": [],
+      "concepts": [
+        {
+          "id": "SSH-Conn",
+          "name": "Connection",
+          "description": "TCP connection + version exchange",
+          "required": true,
+          "inheritedConfidence": 78,
+          "inheritedEvidence": 135,
+          "constraints": [
+            "must be established first"
+          ]
+        },
+        {
+          "id": "SSH-Auth",
+          "name": "Authentication",
+          "description": "Password, publickey, or host-based auth",
+          "required": true,
+          "inheritedConfidence": 78,
+          "inheritedEvidence": 135,
+          "constraints": [
+            "must follow Connection"
+          ]
+        },
+        {
+          "id": "SSH-Chan",
+          "name": "Channel",
+          "description": "Multiplexed session channels",
+          "required": false,
+          "inheritedConfidence": 78,
+          "inheritedEvidence": 135,
+          "constraints": [
+            "must follow Authentication"
+          ]
+        }
+      ],
       "validatedRepos": [
         "curl",
         "libssh"

@@ -64,6 +64,19 @@ export interface KnowledgeUnitRelation {
   description: string;
 }
 
+/** A Protocol Concept — finer-grained than a Knowledge Unit.
+ *  e.g., "ClientHello" is a concept within "TLS Handshake".
+ *  Concepts inherit evidence and confidence from their parent unit. */
+export interface ProtocolConcept {
+  id: string;               // e.g., "TLS-HS-CHello"
+  name: string;             // e.g., "ClientHello"
+  description: string;
+  required: boolean;        // Is this concept required for protocol completion?
+  inheritedConfidence: number;  // Inherited from parent unit
+  inheritedEvidence: number;    // Inherited from parent unit's validated sequences
+  constraints: string[];    // e.g., ["must precede ServerHello", "must include cipher suites"]
+}
+
 export interface KnowledgeUnit {
   id: string; name: string;
   domain: string;           // Parent Protocol Domain (e.g., "TLS", "SSH", "HTTP")
@@ -71,6 +84,7 @@ export interface KnowledgeUnit {
   maturity: MaturityLevel;
   rfcReference?: string;    // RFC number (e.g., "RFC 8446")
   relations: KnowledgeUnitRelation[];  // Links to other Knowledge Units
+  concepts: ProtocolConcept[];         // Finer-grained protocol concepts
   currentVersion: string;
   confidence: number;
   validatedRepos: string[];
@@ -124,6 +138,12 @@ export function buildKnowledgeBase(): KnowledgeBase {
       maturity: "stable", currentVersion: "1.0.0", confidence: 85,
       rfcReference: "RFC 8446",
       relations: [],
+      concepts: [
+        { id: "TLS-HS-CHello", name: "ClientHello", description: "Client initiates handshake with supported cipher suites and extensions", required: true, inheritedConfidence: 85, inheritedEvidence: 135, constraints: ["must precede ServerHello"] },
+        { id: "TLS-HS-SHello", name: "ServerHello", description: "Server responds with selected cipher suite and extensions", required: true, inheritedConfidence: 85, inheritedEvidence: 135, constraints: ["must follow ClientHello", "must select from client cipher suites"] },
+        { id: "TLS-HS-Cert",   name: "Certificate",  description: "Server sends certificate chain for authentication", required: true, inheritedConfidence: 85, inheritedEvidence: 135, constraints: ["must follow ServerHello", "must be verifiable"] },
+        { id: "TLS-HS-Fin",    name: "Finished",     description: "Handshake complete — both sides verify the exchange", required: true, inheritedConfidence: 85, inheritedEvidence: 135, constraints: ["must be the final step", "must verify handshake integrity"] },
+      ],
       validatedRepos: ["curl", "nginx"], validatedSequences: 135,
       crossRepoMatrix: { curl: true, nginx: true, redis: false, openssl: false, apache: false },
       evidence: [
@@ -215,6 +235,10 @@ export function buildKnowledgeBase(): KnowledgeBase {
       maturity: "stable", currentVersion: "1.0.0", confidence: 80,
       rfcReference: "RFC 9110",
       relations: [{ targetId: "PROTO-H2", type: "compatible_with", description: "HTTP/2 extends HTTP request semantics" }],
+      concepts: [
+        { id: "HTTP-Req", name: "Request", description: "HTTP request method, URI, headers", required: true, inheritedConfidence: 80, inheritedEvidence: 150, constraints: ["must precede Response"] },
+        { id: "HTTP-Res", name: "Response", description: "HTTP status code, headers, body", required: true, inheritedConfidence: 80, inheritedEvidence: 150, constraints: ["must follow Request", "status must be valid"] },
+      ],
       validatedRepos: ["nginx", "apache"], validatedSequences: 150,
       crossRepoMatrix: { curl: false, nginx: true, redis: false, openssl: false, apache: true },
       evidence: [
@@ -242,6 +266,11 @@ export function buildKnowledgeBase(): KnowledgeBase {
       maturity: "stable", currentVersion: "1.0.0", confidence: 78,
       rfcReference: "RFC 4253",
       relations: [],
+      concepts: [
+        { id: "SSH-Conn", name: "Connection", description: "TCP connection + version exchange", required: true, inheritedConfidence: 78, inheritedEvidence: 135, constraints: ["must be established first"] },
+        { id: "SSH-Auth", name: "Authentication", description: "Password, publickey, or host-based auth", required: true, inheritedConfidence: 78, inheritedEvidence: 135, constraints: ["must follow Connection"] },
+        { id: "SSH-Chan", name: "Channel", description: "Multiplexed session channels", required: false, inheritedConfidence: 78, inheritedEvidence: 135, constraints: ["must follow Authentication"] },
+      ],
       validatedRepos: ["curl", "libssh"], validatedSequences: 135,
       crossRepoMatrix: { curl: true, nginx: false, redis: false, libssh: true, openssh: false },
       evidence: [
@@ -424,6 +453,15 @@ export function formatKnowledgeBase(kb: KnowledgeBase, assetFilter?: string): st
     l.push(`  ${C.d}Libraries:${C.r} ${a.supportedLibraries.join(", ") || "(pending)"}`);
     l.push(`  ${C.d}State Machine:${C.r} ${a.stateMachine}`);
     l.push(`  ${C.d}${a.description}${C.r}`);
+
+    if (a.concepts && a.concepts.length > 0) {
+      l.push(`  ${C.m}Concepts:${C.r}`);
+      for (const c of a.concepts) {
+        const req = c.required ? C.r2 + "(required)" + C.r : C.d + "(optional)" + C.r;
+        l.push(`    ${C.b}${c.name}${C.r} ${req} — ${C.d}${c.description}${C.r}`);
+        if (c.constraints.length > 0) l.push(`      ${C.d}Constraints: ${c.constraints.join("; ")}${C.r}`);
+      }
+    }
 
     if (a.examples.length > 0) {
       l.push(`  ${C.g}Examples:${C.r}`);
