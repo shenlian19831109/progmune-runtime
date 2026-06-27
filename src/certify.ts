@@ -38,6 +38,10 @@ export interface Certificate {
    *  low:    Fallback/degraded generation or no session data */
   confidence: "high" | "medium" | "low";
   degraded: boolean;
+  /** Knowledge Base version used for verification */
+  kbVersion?: string;
+  /** Matching protocol assets from the Knowledge Base */
+  kbAssets?: Array<{ id: string; name: string; version: string; confidence: number; rfc?: string }>;
 }
 
 // ── Core ──
@@ -166,6 +170,20 @@ export function certify(filePath: string): Certificate {
 
   const validTrans = allTransitions.filter((t: any) => t.valid !== false).length;
 
+  // 10. Query Knowledge Base for matching protocol assets
+  let kbVersion: string | undefined;
+  let kbAssets: Certificate["kbAssets"];
+  try {
+    const { buildKnowledgeBase } = require("./protocol-knowledge");
+    const kb = buildKnowledgeBase();
+    kbVersion = kb.version;
+    const stableAssets = kb.units.filter(u => u.maturity === "stable");
+    kbAssets = stableAssets.map(u => ({
+      id: u.id, name: u.name, version: u.currentVersion,
+      confidence: u.confidence, rfc: u.rfcReference,
+    }));
+  } catch { /* KB unavailable */ }
+
   return {
     file: absPath,
     generatedBy,
@@ -183,6 +201,8 @@ export function certify(filePath: string): Certificate {
     provenanceIntact,
     confidence,
     degraded,
+    kbVersion,
+    kbAssets,
   };
 }
 
@@ -302,6 +322,8 @@ export function formatCertificate(cert: Certificate): string {
       ? `  ${C.yellow}⚠️  This session used fallback generation — review code carefully.${C.reset}\n`
       : "",
     `  ${C.dim}Replay: npx ts-node src/ledger/cli.ts replay ${cert.sessionId.slice(0, 24)}${C.reset}`,
+    cert.kbVersion ? `  ${C.dim}Ontology: Protocol Knowledge Base v${cert.kbVersion} (${cert.kbAssets?.length || 0} stable assets)${C.reset}` : "",
+    cert.kbAssets?.length ? `  ${C.dim}Assets: ${cert.kbAssets.map(a => `${a.name} v${a.version} (${a.confidence}%)`).join(", ")}${C.reset}` : "",
     `  ${C.dim}Report: npm run governance${C.reset}`,
     "",
   ];
