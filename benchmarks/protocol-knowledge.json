@@ -1,0 +1,486 @@
+{
+  "name": "Progmune Protocol Knowledge Base",
+  "version": "2.0.0",
+  "generated": "2026-06-27T07:34:17.984Z",
+  "maturityModel": {
+    "experimental": {
+      "repos": 0,
+      "sequences": 0,
+      "confidence": 0,
+      "description": "Rule defined in code. No cross-repo validation yet."
+    },
+    "validated": {
+      "repos": 1,
+      "sequences": 10,
+      "confidence": 40,
+      "description": "Validated on 1+ repo with 10+ labeled sequences."
+    },
+    "stable": {
+      "repos": 2,
+      "sequences": 100,
+      "confidence": 70,
+      "description": "Validated on 2+ repos with 100+ sequences. Production-ready."
+    },
+    "certified": {
+      "repos": 3,
+      "sequences": 500,
+      "confidence": 90,
+      "description": "Validated on 3+ repos with 500+ sequences. Audit-grade."
+    }
+  },
+  "assets": [
+    {
+      "id": "PROTO-TLS",
+      "name": "TLS Handshake",
+      "category": "ssl",
+      "maturity": "stable",
+      "currentVersion": "1.0.0",
+      "confidence": 85,
+      "validatedRepos": [
+        "curl",
+        "nginx"
+      ],
+      "validatedSequences": 135,
+      "crossRepoMatrix": {
+        "curl": true,
+        "nginx": true,
+        "redis": false,
+        "openssl": false,
+        "apache": false
+      },
+      "description": "SSL/TLS handshake lifecycle across all major C TLS libraries. Most mature asset in the Knowledge Base — validated on curl (6 SSL backends) and nginx (OpenSSL).",
+      "steps": [
+        "init: SSL context creation (*ssl*init / SSL_CTX_new)",
+        "connect: handshake (*ssl*connect / *ssl*handshake)",
+        "cleanup: resource release (*ssl*free / SSL_CTX_free)"
+      ],
+      "supportedLibraries": [
+        "OpenSSL",
+        "mbedTLS",
+        "GnuTLS",
+        "Schannel",
+        "wolfSSL",
+        "BearSSL",
+        "SecureTransport"
+      ],
+      "stateMachine": "INIT → [config] → CONNECT → [verify] → CLEANUP",
+      "examples": [
+        [
+          "SSL_CTX_new",
+          "SSL_connect",
+          "SSL_free"
+        ],
+        [
+          "mbedtls_ssl_config_init",
+          "mbedtls_ssl_handshake",
+          "mbedtls_ssl_free"
+        ],
+        [
+          "OPENSSL_INIT_new",
+          "OPENSSL_init_ssl",
+          "SSL_CTX_free"
+        ]
+      ],
+      "antiPatterns": [
+        [
+          "SSL_CTX_new",
+          "SSL_connect"
+        ],
+        [
+          "SSL_free"
+        ],
+        [
+          "SSL_CTX_new",
+          "SSL_free",
+          "SSL_connect"
+        ]
+      ],
+      "fpHistory": [
+        27,
+        8,
+        8
+      ],
+      "fnHistory": [
+        6,
+        13,
+        13
+      ],
+      "versionHistory": [
+        {
+          "version": "0.1.0",
+          "date": "2026-06-25",
+          "confidence": 0,
+          "validatedRepos": [],
+          "validatedSequences": 0,
+          "precision": 0.34,
+          "recall": 0.7,
+          "f1": 0.46,
+          "notes": "SSG auto-discovery. 27 FP."
+        },
+        {
+          "version": "0.5.0",
+          "date": "2026-06-26",
+          "confidence": 50,
+          "validatedRepos": [
+            "curl"
+          ],
+          "validatedSequences": 85,
+          "precision": 0.58,
+          "recall": 0.46,
+          "f1": 0.51,
+          "notes": "Resource Lifecycle Detector. FP reduced to 8."
+        },
+        {
+          "version": "1.0.0",
+          "date": "2026-06-27",
+          "confidence": 85,
+          "validatedRepos": [
+            "curl",
+            "nginx"
+          ],
+          "validatedSequences": 135,
+          "notes": "Repo-agnostic patterns. Cross-project validated on nginx."
+        }
+      ],
+      "lastUpdated": "2026-06-27"
+    },
+    {
+      "id": "PROTO-HTTP",
+      "name": "HTTP Request",
+      "category": "http",
+      "maturity": "validated",
+      "currentVersion": "0.8.0",
+      "confidence": 70,
+      "validatedRepos": [
+        "nginx"
+      ],
+      "validatedSequences": 50,
+      "crossRepoMatrix": {
+        "curl": false,
+        "nginx": true,
+        "redis": false,
+        "openssl": false,
+        "apache": true
+      },
+      "description": "HTTP request lifecycle: handler init → process → finalize. Validated on nginx (ngx_http_*). Expected to match Apache httpd.",
+      "steps": [
+        "init: handler setup (*http*init / *http*handler)",
+        "process: request handling (*http*send / *http*process)",
+        "cleanup: finalize (*http*cleanup / *http*finalize)"
+      ],
+      "supportedLibraries": [
+        "nginx HTTP module"
+      ],
+      "stateMachine": "HANDLER_INIT → PROCESS_REQUEST → FINALIZE",
+      "examples": [
+        [
+          "ngx_http_handler",
+          "ngx_http_process_request",
+          "ngx_http_finalize_request"
+        ]
+      ],
+      "antiPatterns": [
+        [
+          "ngx_http_handler",
+          "ngx_http_finalize_request"
+        ]
+      ],
+      "fpHistory": [
+        0,
+        0
+      ],
+      "fnHistory": [
+        0,
+        0
+      ],
+      "versionHistory": [
+        {
+          "version": "0.5.0",
+          "date": "2026-06-26",
+          "confidence": 40,
+          "validatedRepos": [],
+          "validatedSequences": 0,
+          "notes": "Initial pattern definition."
+        },
+        {
+          "version": "0.8.0",
+          "date": "2026-06-27",
+          "confidence": 70,
+          "validatedRepos": [
+            "nginx"
+          ],
+          "validatedSequences": 50,
+          "notes": "Validated on nginx HTTP module sequences."
+        }
+      ],
+      "lastUpdated": "2026-06-27"
+    },
+    {
+      "id": "PROTO-SSH",
+      "name": "SSH Connection",
+      "category": "ssh",
+      "maturity": "validated",
+      "currentVersion": "0.6.0",
+      "confidence": 60,
+      "validatedRepos": [
+        "curl"
+      ],
+      "validatedSequences": 85,
+      "crossRepoMatrix": {
+        "curl": true,
+        "nginx": false,
+        "redis": false,
+        "libssh": false,
+        "openssh": false
+      },
+      "description": "SSH connection state machine: init → auth → done. Validated on curl (libssh2 + libssh). Priority target: libssh standalone library.",
+      "steps": [
+        "init: SSH session setup (*ssh*init)",
+        "auth: authentication (*ssh*auth / *ssh*login)",
+        "done: connection close (*ssh*done / *ssh*close)"
+      ],
+      "supportedLibraries": [
+        "libssh2",
+        "libssh"
+      ],
+      "stateMachine": "INIT → [hostkey] → AUTH → [key|pass] → DONE",
+      "examples": [
+        [
+          "ssh_state_init",
+          "ssh_state_authlist",
+          "ssh_state_done"
+        ]
+      ],
+      "antiPatterns": [
+        [
+          "ssh_state_init",
+          "ssh_state_startup"
+        ],
+        [
+          "ssh_state_authlist"
+        ]
+      ],
+      "fpHistory": [
+        0,
+        0
+      ],
+      "fnHistory": [
+        2,
+        2
+      ],
+      "versionHistory": [
+        {
+          "version": "0.3.0",
+          "date": "2026-06-26",
+          "confidence": 40,
+          "validatedRepos": [],
+          "validatedSequences": 0,
+          "notes": "Curl-specific (Curl_ssh_*)."
+        },
+        {
+          "version": "0.6.0",
+          "date": "2026-06-27",
+          "confidence": 60,
+          "validatedRepos": [
+            "curl"
+          ],
+          "validatedSequences": 85,
+          "notes": "Repo-agnostic patterns. myssh_* still unmatched — needs libssh validation."
+        }
+      ],
+      "lastUpdated": "2026-06-27"
+    },
+    {
+      "id": "PROTO-CONN",
+      "name": "Connection Lifecycle",
+      "category": "connection",
+      "maturity": "experimental",
+      "currentVersion": "0.5.0",
+      "confidence": 55,
+      "validatedRepos": [
+        "curl"
+      ],
+      "validatedSequences": 85,
+      "crossRepoMatrix": {
+        "curl": true,
+        "nginx": false,
+        "redis": false
+      },
+      "description": "Generic TCP/TLS connection lifecycle. Patterns may be too broad — connect/transfer/done terms appear in many non-protocol contexts.",
+      "steps": [
+        "init: connection setup (*connect / *conn*init)",
+        "transfer: data exchange (*send / *recv)",
+        "done: disconnect (*disconnect / *conn*done)"
+      ],
+      "supportedLibraries": [
+        "libcurl internal"
+      ],
+      "stateMachine": "CONNECT → TRANSFER → DISCONNECT",
+      "examples": [
+        [
+          "Curl_connect",
+          "Curl_readwrite",
+          "Curl_done"
+        ]
+      ],
+      "antiPatterns": [
+        [
+          "Curl_connect"
+        ],
+        [
+          "Curl_readwrite",
+          "Curl_done"
+        ]
+      ],
+      "fpHistory": [
+        3
+      ],
+      "fnHistory": [
+        2
+      ],
+      "versionHistory": [
+        {
+          "version": "0.5.0",
+          "date": "2026-06-27",
+          "confidence": 55,
+          "validatedRepos": [
+            "curl"
+          ],
+          "validatedSequences": 85,
+          "notes": "Too broad. Needs refinement or narrower protocol scoping."
+        }
+      ],
+      "lastUpdated": "2026-06-27"
+    },
+    {
+      "id": "PROTO-AUTH",
+      "name": "Authentication",
+      "category": "auth",
+      "maturity": "experimental",
+      "currentVersion": "0.4.0",
+      "confidence": 40,
+      "validatedRepos": [],
+      "validatedSequences": 0,
+      "crossRepoMatrix": {
+        "curl": false,
+        "nginx": false,
+        "redis": false
+      },
+      "description": "Auth lifecycle: init → credentials → cleanup. Not yet validated on any project.",
+      "steps": [
+        "init (*auth*init / *auth*create)",
+        "cleanup (*auth*cleanup / *auth*free)"
+      ],
+      "supportedLibraries": [],
+      "stateMachine": "AUTH_INIT → [credentials] → AUTH_CLEANUP",
+      "examples": [],
+      "antiPatterns": [],
+      "fpHistory": [],
+      "fnHistory": [],
+      "versionHistory": [
+        {
+          "version": "0.4.0",
+          "date": "2026-06-27",
+          "confidence": 40,
+          "validatedRepos": [],
+          "validatedSequences": 0,
+          "notes": "Awaiting first repo validation."
+        }
+      ],
+      "lastUpdated": "2026-06-27"
+    },
+    {
+      "id": "PROTO-H2",
+      "name": "HTTP/2 Session",
+      "category": "http2",
+      "maturity": "experimental",
+      "currentVersion": "0.3.0",
+      "confidence": 35,
+      "validatedRepos": [],
+      "validatedSequences": 0,
+      "crossRepoMatrix": {
+        "curl": false,
+        "nginx": false,
+        "redis": false
+      },
+      "description": "HTTP/2 session lifecycle. Needs nghttp2 library validation.",
+      "steps": [
+        "init (*h2*init / nghttp2_session_new)",
+        "send (*h2*send / nghttp2_submit)",
+        "close (*h2*close / nghttp2_session_del)"
+      ],
+      "supportedLibraries": [
+        "nghttp2"
+      ],
+      "stateMachine": "SESSION_NEW → SUBMIT → SEND → DEL",
+      "examples": [],
+      "antiPatterns": [],
+      "fpHistory": [],
+      "fnHistory": [],
+      "versionHistory": [
+        {
+          "version": "0.3.0",
+          "date": "2026-06-27",
+          "confidence": 35,
+          "validatedRepos": [],
+          "validatedSequences": 0,
+          "notes": "Pattern defined. Awaiting nghttp2 validation."
+        }
+      ],
+      "lastUpdated": "2026-06-27"
+    },
+    {
+      "id": "PROTO-QUIC",
+      "name": "QUIC Connection",
+      "category": "connection",
+      "maturity": "experimental",
+      "currentVersion": "0.2.0",
+      "confidence": 25,
+      "validatedRepos": [],
+      "validatedSequences": 0,
+      "crossRepoMatrix": {
+        "curl": false,
+        "nginx": false,
+        "redis": false
+      },
+      "description": "QUIC connection lifecycle. Needs quiche/ngtcp2 library testing.",
+      "steps": [
+        "init (*quic*init / quiche_config_new)",
+        "transfer (*quic*send / quiche_conn)"
+      ],
+      "supportedLibraries": [
+        "quiche",
+        "ngtcp2"
+      ],
+      "stateMachine": "CONFIG_NEW → [configure] → CONN_SEND/RECV → [close]",
+      "examples": [],
+      "antiPatterns": [],
+      "fpHistory": [],
+      "fnHistory": [],
+      "versionHistory": [
+        {
+          "version": "0.2.0",
+          "date": "2026-06-27",
+          "confidence": 25,
+          "validatedRepos": [],
+          "validatedSequences": 0,
+          "notes": "Minimal pattern. Needs quiche library sequences."
+        }
+      ],
+      "lastUpdated": "2026-06-27"
+    }
+  ],
+  "summary": {
+    "totalAssets": 7,
+    "byMaturity": {
+      "experimental": 4,
+      "validated": 2,
+      "stable": 1,
+      "certified": 0
+    },
+    "averageConfidence": 53,
+    "totalValidatedRepos": 2,
+    "totalValidatedSequences": 355,
+    "growthPath": "1 stable asset. Next: promote HTTP to stable (needs Apache validation)."
+  }
+}
