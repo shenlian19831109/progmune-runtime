@@ -54,11 +54,23 @@ function main() {
   // Governance KPIs
   console.log(`\n  ${C.b}Governance KPIs:${C.r}`);
   const stableCount = kb.summary.byMaturity["stable"];
-  const policyRules = 7; // total rules including kb_coverage
-  console.log(`  ${C.g}Policy:${C.r} ${policyRules} rules active (confidence, provenance, violations, human_review, plsb, fingerprint, kb_coverage)`);
-  console.log(`  ${C.g}Knowledge-driven:${C.r} ${stableCount} stable assets powering governance decisions`);
-  console.log(`  ${C.g}CI/CD:${C.r} deploy gate via GitHub Action (progmune-policy.yml)`);
+  const policyRules = 7;
+  console.log(`  ${C.g}Policy:${C.r} ${policyRules} rules active`);
+  console.log(`  ${C.g}Knowledge-driven:${C.r} ${stableCount} stable assets → governance decisions`);
+  console.log(`  ${C.g}CI/CD:${C.r} deploy gate via GitHub Action`);
   console.log(`  ${C.g}Certificate:${C.r} ontology-backed (KB v${kb.version} + RFC references)`);
+
+  // Knowledge Evolution Velocity
+  console.log(`\n  ${C.b}Knowledge Evolution Velocity:${C.r}`);
+  for (const u of kb.units.filter(u => u.versionHistory.length >= 2)) {
+    const versions = u.versionHistory.length - 1; // number of upgrades
+    const firstDate = new Date(u.versionHistory[0].date);
+    const lastDate = new Date(u.versionHistory[u.versionHistory.length - 1].date);
+    const days = Math.max(1, Math.round((lastDate.getTime() - firstDate.getTime()) / 86400000));
+    const velocity = (versions / days * 7).toFixed(1); // versions per week
+    const confGain = u.versionHistory[u.versionHistory.length - 1].confidence - u.versionHistory[0].confidence;
+    console.log(`  ${C.b}${u.name.padEnd(18)}${C.r} ${versions} upgrades in ${days}d (${velocity}/wk)  +${confGain}% confidence  ${u.maturity === "stable" ? C.g + "★" + C.r : C.y + "◉" + C.r}`);
+  }
 
   // Growth indicators
   console.log(`\n  ${C.b}Growth:${C.r}`);
