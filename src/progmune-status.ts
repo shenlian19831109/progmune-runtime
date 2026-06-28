@@ -63,13 +63,24 @@ function main() {
   // Knowledge Evolution Velocity
   console.log(`\n  ${C.b}Knowledge Evolution Velocity:${C.r}`);
   for (const u of kb.units.filter(u => u.versionHistory.length >= 2)) {
-    const versions = u.versionHistory.length - 1; // number of upgrades
+    const versions = u.versionHistory.length - 1;
     const firstDate = new Date(u.versionHistory[0].date);
     const lastDate = new Date(u.versionHistory[u.versionHistory.length - 1].date);
     const days = Math.max(1, Math.round((lastDate.getTime() - firstDate.getTime()) / 86400000));
-    const velocity = (versions / days * 7).toFixed(1); // versions per week
+    const velocity = (versions / days * 7).toFixed(1);
     const confGain = u.versionHistory[u.versionHistory.length - 1].confidence - u.versionHistory[0].confidence;
     console.log(`  ${C.b}${u.name.padEnd(18)}${C.r} ${versions} upgrades in ${days}d (${velocity}/wk)  +${confGain}% confidence  ${u.maturity === "stable" ? C.g + "★" + C.r : C.y + "◉" + C.r}`);
+  }
+
+  // Knowledge Coverage
+  console.log(`\n  ${C.b}Knowledge Coverage:${C.r}`);
+  for (const u of kb.units.filter(u => u.maturity === "stable" || u.maturity === "validated")) {
+    const conceptCov = u.concepts?.length || 0;
+    const evidenceCov = u.evidence?.length || 0;
+    const repoCount = u.validatedRepos.length;
+    const covPct = Math.round((evidenceCov / Math.max(1, repoCount * 2)) * 100);
+    const bar = "█".repeat(Math.min(10, Math.round(covPct / 10))) + "░".repeat(Math.max(0, 10 - Math.round(covPct / 10)));
+    console.log(`  ${bar} ${C.b}${u.name.padEnd(18)}${C.r} ${C.d}${conceptCv} concepts · ${evidenceCov} evidence · ${repoCount} repos · ${u.confidence}% conf${C.r}`);
   }
 
   // Growth indicators

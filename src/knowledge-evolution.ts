@@ -384,12 +384,34 @@ if (require.main === module) {
     const ver1 = unit.versionHistory.find((v: any) => v.version === v1);
     const ver2 = unit.versionHistory.find((v: any) => v.version === v2);
     if (!ver1 || !ver2) { console.error("Version not found"); process.exit(1); }
-    console.log(`\n${unit.name}: v${v1} → v${v2}`);
-    console.log(`  Confidence: ${ver1.confidence}% → ${ver2.confidence}% (${ver2.confidence - ver1.confidence >= 0 ? "+" : ""}${ver2.confidence - ver1.confidence}%)`);
-    console.log(`  Repos: ${ver1.validatedRepos.length} → ${ver2.validatedRepos.length} (added: ${ver2.validatedRepos.filter((r: string) => !ver1.validatedRepos.includes(r)).join(", ") || "none"})`);
-    console.log(`  Sequences: ${ver1.validatedSequences} → ${ver2.validatedSequences} (+${ver2.validatedSequences - ver1.validatedSequences})`);
-    if (ver1.f1 !== undefined && ver2.f1 !== undefined) console.log(`  F1: ${(ver1.f1*100).toFixed(0)}% → ${(ver2.f1*100).toFixed(0)}%`);
-    console.log(`  ${ver2.notes}\n`);
+    const C = { r: "\x1b[0m", b: "\x1b[1m", d: "\x1b[2m", g: "\x1b[32m", r2: "\x1b[31m", y: "\x1b[33m" };
+    const delta = (a: number, b: number) => `${b - a >= 0 ? "+" : ""}${b - a}`;
+    console.log(`\n${C.b}Knowledge Diff: ${unit.name}${C.r}`);
+    console.log(`${C.d}${v1} → ${v2}  (${ver1.date} → ${ver2.date})${C.r}\n`);
+    console.log(`  Confidence:    ${ver1.confidence}% → ${C.b}${ver2.confidence}%${C.r}  (${delta(ver1.confidence, ver2.confidence)}%)`);
+    console.log(`  Repos:         ${ver1.validatedRepos.length} → ${ver2.validatedRepos.length}  ${ver2.validatedRepos.filter((r: string) => !ver1.validatedRepos.includes(r)).length > 0 ? C.g + "+ " + ver2.validatedRepos.filter((r: string) => !ver1.validatedRepos.includes(r)).join(", ") + C.r : ""}`);
+    console.log(`  Sequences:     ${ver1.validatedSequences} → ${ver2.validatedSequences}  (${delta(ver1.validatedSequences, ver2.validatedSequences)})`);
+    if (ver1.f1 !== undefined && ver2.f1 !== undefined) {
+      const f1Delta = ver2.f1 - ver1.f1;
+      console.log(`  F1 Score:      ${(ver1.f1*100).toFixed(0)}% → ${(ver2.f1*100).toFixed(0)}%  (${f1Delta >= 0 ? "+" : ""}${(f1Delta*100).toFixed(0)}pp)`);
+    }
+    if (ver1.precision !== undefined && ver2.precision !== undefined) {
+      console.log(`  Precision:     ${(ver1.precision*100).toFixed(0)}% → ${(ver2.precision*100).toFixed(0)}%`);
+    }
+    if (ver1.recall !== undefined && ver2.recall !== undefined) {
+      console.log(`  Recall:        ${(ver1.recall*100).toFixed(0)}% → ${(ver2.recall*100).toFixed(0)}%`);
+    }
+    // Concept changes
+    const v1Concepts = unit.concepts?.length || 0;
+    const v2Concepts = v1Concepts; // concepts tracked at unit level currently
+    console.log(`  Concepts:      ${v1Concepts} defined`);
+    // Decision trail
+    if (ver1.decision && ver2.decision) {
+      console.log(`\n  Decision Trail:`);
+      console.log(`  v${v1}: ${ver1.decision.outcome.toUpperCase()} by ${ver1.decision.decidedBy}`);
+      console.log(`  v${v2}: ${ver2.decision.outcome.toUpperCase()} by ${ver2.decision.decidedBy}`);
+    }
+    console.log(`\n  ${C.d}${ver2.notes}${C.r}\n`);
 
   } else if (cmd === "benchmark") {
     const unitId = args[1];
