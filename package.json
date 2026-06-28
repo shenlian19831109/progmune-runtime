@@ -45,6 +45,8 @@
     "kb:package": "npx ts-node src/knowledge-package.ts --all",
     "kb:evidence": "npx ts-node src/evidence-growth.ts suggest",
     "kb:diff": "npx ts-node src/knowledge-evolution.ts diff",
+    "sdk": "npx ts-node src/sdk.ts",
+    "sdk:compat": "npx ts-node src/sdk.ts compat",
     "provenance": "npx ts-node src/ledger/cli.ts",
     "plsb": "npx ts-node src/plsb/cli.ts --summary",
     "plsb:export": "npx ts-node src/plsb/cli.ts --all",
