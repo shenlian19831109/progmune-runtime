@@ -190,7 +190,7 @@ export function evaluatePolicy(
           // Extract call sequence from file (best-effort)
           const calls = ctx.certificate.validated ? [] : ["SSL_CTX_new", "SSL_connect"]; // fallback
           const risk = assessRisk(calls.length > 0 ? calls : ["init", "connect"]);
-          const criticalOrHigh = risk.patterns.filter(p => {
+          const criticalOrHigh = risk.patterns.filter((p: any) => {
             const sevOrder = ["Low", "Medium", "High", "Critical"];
             return sevOrder.indexOf(p.severity) >= minSeverity && p.confidence >= minConfidence;
           });
@@ -199,7 +199,7 @@ export function evaluatePolicy(
               rule,
               actual: `${criticalOrHigh.length} risk pattern(s) ≥ severity threshold`,
               expected: `0 patterns at this severity+confidence level`,
-              detail: criticalOrHigh.map(p => `${p.patternName} (${p.severity}, ${p.confidence}%): ${p.detail}`).join("; "),
+              detail: criticalOrHigh.map((p: any) => `${p.patternName} (${p.severity}, ${p.confidence}%): ${p.detail}`).join("; "),
             });
           }
         } catch { /* risk model unavailable */ }

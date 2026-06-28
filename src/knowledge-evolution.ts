@@ -127,7 +127,7 @@ function generateProposals(
   for (const u of unmatched) {
     // Find the closest existing protocol by call pattern similarity
     for (const call of u.calls) {
-      for (const asset of kb.assets) {
+      for (const asset of kb.units) {
         if (asset.steps.some(s => new RegExp(s.split(" ")[0] || "", "i").test(call))) {
           const key = asset.name;
           if (!groups[key]) groups[key] = [];
@@ -142,7 +142,7 @@ function generateProposals(
       const uniqueCalls = [...new Set(calls)];
       candidates.push({
         protocolName: proto,
-        category: kb.assets.find(a => a.name === proto)?.category || "connection",
+        category: kb.units.find(a => a.name === proto)?.category || "connection",
         newPatterns: uniqueCalls.slice(0, 5),
         evidenceRepo: repoName,
         evidenceSequences: unmatched.length,
@@ -167,7 +167,7 @@ export function proposeUpdate(repoPath: string): KnowledgeProposal {
 
   // For each matched protocol, propose evidence addition
   for (const match of scan.existingMatches) {
-    const asset = kb.assets.find(a => a.name === match.protocol);
+    const asset = kb.units.find(a => a.name === match.protocol);
     if (!asset) continue;
 
     const alreadyValidated = asset.validatedRepos.includes(scan.repo);
@@ -189,7 +189,7 @@ export function proposeUpdate(repoPath: string): KnowledgeProposal {
 
   // For proposal candidates, suggest extensions
   for (const cand of scan.proposalCandidates) {
-    const asset = kb.assets.find(a => a.name === cand.protocolName);
+    const asset = kb.units.find(a => a.name === cand.protocolName);
     if (!asset || cand.suggestedAction !== "extend") continue;
 
     changes.push({
@@ -306,7 +306,7 @@ export function generateFullChangelog(): string {
   const lines: string[] = [];
   lines.push("# Knowledge Base Full Changelog\n");
 
-  for (const asset of kb.assets) {
+  for (const asset of kb.units) {
     lines.push(`## ${asset.name} (${asset.id})\n`);
     lines.push(`**Current:** v${asset.currentVersion} · ${asset.maturity} · ${asset.confidence}% confidence\n`);
     lines.push(`| Version | Date | Confidence | Repos | Seqs | Notes |`);

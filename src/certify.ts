@@ -177,8 +177,8 @@ export function certify(filePath: string): Certificate {
     const { buildKnowledgeBase } = require("./protocol-knowledge");
     const kb = buildKnowledgeBase();
     kbVersion = kb.version;
-    const stableAssets = kb.units.filter(u => u.maturity === "stable");
-    kbAssets = stableAssets.map(u => ({
+    const stableAssets = kb.units.filter((u: any) => u.maturity === "stable");
+    kbAssets = stableAssets.map((u: any) => ({
       id: u.id, name: u.name, version: u.currentVersion,
       confidence: u.confidence, rfc: u.rfcReference,
     }));

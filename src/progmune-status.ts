@@ -80,7 +80,7 @@ function main() {
     const repoCount = u.validatedRepos.length;
     const covPct = Math.round((evidenceCov / Math.max(1, repoCount * 2)) * 100);
     const bar = "█".repeat(Math.min(10, Math.round(covPct / 10))) + "░".repeat(Math.max(0, 10 - Math.round(covPct / 10)));
-    console.log(`  ${bar} ${C.b}${u.name.padEnd(18)}${C.r} ${C.d}${conceptCv} concepts · ${evidenceCov} evidence · ${repoCount} repos · ${u.confidence}% conf${C.r}`);
+    console.log(`  ${bar} ${C.b}${u.name.padEnd(18)}${C.r} ${C.d}${conceptCov} concepts · ${evidenceCov} evidence · ${repoCount} repos · ${u.confidence}% conf${C.r}`);
   }
 
   // Growth indicators

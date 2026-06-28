@@ -249,7 +249,7 @@ export function buildKnowledgeBase(): KnowledgeBase {
     },
     {
       id: "PROTO-TLS-ALPN", name: "TLS ALPN", domain: "TLS", category: "ssl",
-      maturity: "experimental", lifecycle: "experimental", consumers: [], currentVersion: "0.1.0", confidence: 20,
+      maturity: "experimental", lifecycle: "experimental", consumers: [], concepts: [], currentVersion: "0.1.0", confidence: 20,
       rfcReference: "RFC 7301",
       relations: [{ targetId: "PROTO-TLS", type: "extends", description: "ALPN negotiation during TLS handshake" }],
       validatedRepos: [], validatedSequences: 0,
