@@ -14,7 +14,8 @@ export type RuleType =
   | "human_review"     // At least N human reviewers in accountability chain
   | "fingerprint"      // Fingerprint must exist and be verified
   | "violations"       // No SSG ledger violations allowed
-  | "kb_coverage";     // Knowledge Base must have at least N stable assets covering this protocol
+  | "kb_coverage"      // Knowledge Base must have at least N stable assets
+  | "risk";             // Risk-based: block if severity >= threshold, confidence >= threshold
 
 export interface PolicyRule {
   type: RuleType;
@@ -93,5 +94,12 @@ export const DEFAULT_POLICY: PolicyRule[] = [
     severity: "warn",
     description: "Knowledge Base must have at least 3 stable protocol assets",
     threshold: 3,
+  },
+  {
+    type: "risk",
+    severity: "block",
+    description: "Block Critical risks with ≥90% confidence. Warn on High risks with ≥70% confidence.",
+    threshold: 2,  // severity: 0=Low, 1=Medium, 2=High, 3=Critical → block if >= 2 with enough confidence
+    require: 70,   // minimum confidence %
   },
 ];

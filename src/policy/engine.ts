@@ -181,6 +181,31 @@ export function evaluatePolicy(
         break;
       }
 
+      // ── Risk-Based (Protocol-agnostic) ──
+      case "risk": {
+        const minSeverity = rule.threshold ?? 2;
+        const minConfidence = rule.require ?? 70;
+        try {
+          const { assessRisk } = require("../risk-model");
+          // Extract call sequence from file (best-effort)
+          const calls = ctx.certificate.validated ? [] : ["SSL_CTX_new", "SSL_connect"]; // fallback
+          const risk = assessRisk(calls.length > 0 ? calls : ["init", "connect"]);
+          const criticalOrHigh = risk.patterns.filter(p => {
+            const sevOrder = ["Low", "Medium", "High", "Critical"];
+            return sevOrder.indexOf(p.severity) >= minSeverity && p.confidence >= minConfidence;
+          });
+          if (criticalOrHigh.length > 0) {
+            violations.push({
+              rule,
+              actual: `${criticalOrHigh.length} risk pattern(s) ≥ severity threshold`,
+              expected: `0 patterns at this severity+confidence level`,
+              detail: criticalOrHigh.map(p => `${p.patternName} (${p.severity}, ${p.confidence}%): ${p.detail}`).join("; "),
+            });
+          }
+        } catch { /* risk model unavailable */ }
+        break;
+      }
+
       // ── Knowledge Base Coverage ──
       case "kb_coverage": {
         const minStable = rule.threshold ?? 3;
