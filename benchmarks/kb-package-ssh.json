@@ -1,0 +1,186 @@
+{
+  "name": "SSH Protocol Domain",
+  "domain": "SSH",
+  "version": "3.0.0",
+  "exported": "2026-06-28T09:00:02.742Z",
+  "units": [
+    {
+      "id": "PROTO-SSH",
+      "name": "SSH Connection",
+      "domain": "SSH",
+      "category": "ssh",
+      "maturity": "stable",
+      "lifecycle": "stable",
+      "currentVersion": "1.0.0",
+      "confidence": 78,
+      "rfcReference": "RFC 4253",
+      "relations": [],
+      "consumers": [
+        {
+          "type": "policy",
+          "id": "default-policy",
+          "description": "Default Policy Engine",
+          "enabled": true
+        },
+        {
+          "type": "certificate",
+          "id": "certify",
+          "description": "AI Code Certificate",
+          "enabled": true
+        }
+      ],
+      "concepts": [
+        {
+          "id": "SSH-Conn",
+          "name": "Connection",
+          "description": "TCP connection + version exchange",
+          "required": true,
+          "inheritedConfidence": 78,
+          "inheritedEvidence": 135,
+          "constraints": [
+            "must be established first"
+          ]
+        },
+        {
+          "id": "SSH-Auth",
+          "name": "Authentication",
+          "description": "Password, publickey, or host-based auth",
+          "required": true,
+          "inheritedConfidence": 78,
+          "inheritedEvidence": 135,
+          "constraints": [
+            "must follow Connection"
+          ]
+        },
+        {
+          "id": "SSH-Chan",
+          "name": "Channel",
+          "description": "Multiplexed session channels",
+          "required": false,
+          "inheritedConfidence": 78,
+          "inheritedEvidence": 135,
+          "constraints": [
+            "must follow Authentication"
+          ]
+        }
+      ],
+      "validatedRepos": [
+        "curl",
+        "libssh"
+      ],
+      "validatedSequences": 135,
+      "crossRepoMatrix": {
+        "curl": true,
+        "nginx": false,
+        "redis": false,
+        "libssh": true,
+        "openssh": false
+      },
+      "evidence": [
+        {
+          "repo": "curl",
+          "type": "human_labels",
+          "sequences": 49,
+          "date": "2026-06-25"
+        },
+        {
+          "repo": "curl",
+          "type": "auto_labeled",
+          "sequences": 36,
+          "date": "2026-06-25"
+        },
+        {
+          "repo": "libssh",
+          "type": "library_source",
+          "sequences": 100,
+          "date": "2026-06-27"
+        }
+      ],
+      "description": "SSH connection state machine: init → auth → done. Cross-project validated on curl (libssh2+libssh) AND libssh standalone library. Second stable asset in the Knowledge Base.",
+      "steps": [
+        "init: SSH session setup (*ssh*init)",
+        "auth: authentication (*ssh*auth / *ssh*login)",
+        "done: connection close (*ssh*done / *ssh*close)"
+      ],
+      "supportedLibraries": [
+        "libssh2",
+        "libssh"
+      ],
+      "stateMachine": "INIT → [hostkey] → AUTH → [key|pass] → DONE",
+      "examples": [
+        [
+          "ssh_state_init",
+          "ssh_state_authlist",
+          "ssh_state_done"
+        ],
+        [
+          "ssh_server_gss_kex_process_init",
+          "ssh_buffer_unpack",
+          "dh_init"
+        ]
+      ],
+      "antiPatterns": [
+        [
+          "ssh_state_init",
+          "ssh_state_startup"
+        ],
+        [
+          "ssh_state_authlist"
+        ]
+      ],
+      "fpHistory": [
+        0,
+        0
+      ],
+      "fnHistory": [
+        2,
+        2
+      ],
+      "versionHistory": [
+        {
+          "version": "0.3.0",
+          "date": "2026-06-26",
+          "confidence": 40,
+          "validatedRepos": [],
+          "validatedSequences": 0,
+          "notes": "Curl-specific patterns (Curl_ssh_*). Initial rule extraction from curl/libssh2 state machine."
+        },
+        {
+          "version": "0.6.0",
+          "date": "2026-06-26",
+          "confidence": 60,
+          "validatedRepos": [
+            "curl"
+          ],
+          "validatedSequences": 85,
+          "notes": "Repo-agnostic \\w*ssh\\w* patterns. Validated on curl (libssh2+libssh). myssh_* variants still unmatched."
+        },
+        {
+          "version": "1.0.0",
+          "date": "2026-06-28",
+          "confidence": 78,
+          "validatedRepos": [
+            "curl",
+            "libssh"
+          ],
+          "validatedSequences": 135,
+          "notes": "PROMOTED TO STABLE. Cross-project validated on libssh standalone library (5/50 sequences matched). RFC 4253 referenced. Second stable asset."
+        }
+      ],
+      "lastUpdated": "2026-06-28"
+    }
+  ],
+  "summary": {
+    "totalUnits": 1,
+    "stableUnits": 1,
+    "totalConcepts": 3,
+    "totalEvidence": 3,
+    "validatedRepos": [
+      "curl",
+      "libssh"
+    ],
+    "rfcReferences": [
+      "RFC 4253"
+    ]
+  }
+}

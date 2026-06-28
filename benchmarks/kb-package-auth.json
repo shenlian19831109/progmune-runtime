@@ -1,0 +1,59 @@
+{
+  "name": "Auth Protocol Domain",
+  "domain": "Auth",
+  "version": "3.0.0",
+  "exported": "2026-06-28T09:00:02.743Z",
+  "units": [
+    {
+      "id": "PROTO-AUTH",
+      "name": "Authentication",
+      "domain": "Auth",
+      "category": "auth",
+      "maturity": "experimental",
+      "lifecycle": "experimental",
+      "consumers": [],
+      "currentVersion": "0.4.0",
+      "confidence": 40,
+      "relations": [],
+      "concepts": [],
+      "evidence": [],
+      "validatedRepos": [],
+      "validatedSequences": 0,
+      "crossRepoMatrix": {
+        "curl": false,
+        "nginx": false,
+        "redis": false
+      },
+      "description": "Auth lifecycle: init → credentials → cleanup. Not yet validated on any project.",
+      "steps": [
+        "init (*auth*init / *auth*create)",
+        "cleanup (*auth*cleanup / *auth*free)"
+      ],
+      "supportedLibraries": [],
+      "stateMachine": "AUTH_INIT → [credentials] → AUTH_CLEANUP",
+      "examples": [],
+      "antiPatterns": [],
+      "fpHistory": [],
+      "fnHistory": [],
+      "versionHistory": [
+        {
+          "version": "0.4.0",
+          "date": "2026-06-28",
+          "confidence": 40,
+          "validatedRepos": [],
+          "validatedSequences": 0,
+          "notes": "Awaiting first repo validation."
+        }
+      ],
+      "lastUpdated": "2026-06-28"
+    }
+  ],
+  "summary": {
+    "totalUnits": 1,
+    "stableUnits": 0,
+    "totalConcepts": 0,
+    "totalEvidence": 0,
+    "validatedRepos": [],
+    "rfcReferences": []
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "name": "QUIC Protocol Domain",
+  "domain": "QUIC",
+  "version": "3.0.0",
+  "exported": "2026-06-28T09:00:02.743Z",
+  "units": [
+    {
+      "id": "PROTO-QUIC",
+      "name": "QUIC Connection",
+      "domain": "QUIC",
+      "category": "connection",
+      "maturity": "experimental",
+      "lifecycle": "experimental",
+      "consumers": [],
+      "currentVersion": "0.2.0",
+      "confidence": 25,
+      "rfcReference": "RFC 9000",
+      "relations": [],
+      "concepts": [],
+      "evidence": [],
+      "validatedRepos": [],
+      "validatedSequences": 0,
+      "crossRepoMatrix": {
+        "curl": false,
+        "nginx": false,
+        "redis": false
+      },
+      "description": "QUIC connection lifecycle. Needs quiche/ngtcp2 library testing.",
+      "steps": [
+        "init (*quic*init / quiche_config_new)",
+        "transfer (*quic*send / quiche_conn)"
+      ],
+      "supportedLibraries": [
+        "quiche",
+        "ngtcp2"
+      ],
+      "stateMachine": "CONFIG_NEW → [configure] → CONN_SEND/RECV → [close]",
+      "examples": [],
+      "antiPatterns": [],
+      "fpHistory": [],
+      "fnHistory": [],
+      "versionHistory": [
+        {
+          "version": "0.2.0",
+          "date": "2026-06-28",
+          "confidence": 25,
+          "validatedRepos": [],
+          "validatedSequences": 0,
+          "notes": "Minimal pattern. Needs quiche library sequences."
+        }
+      ],
+      "lastUpdated": "2026-06-28"
+    }
+  ],
+  "summary": {
+    "totalUnits": 1,
+    "stableUnits": 0,
+    "totalConcepts": 0,
+    "totalEvidence": 0,
+    "validatedRepos": [],
+    "rfcReferences": [
+      "RFC 9000"
+    ]
+  }
+}

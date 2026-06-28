@@ -1,0 +1,86 @@
+{
+  "name": "Connection Protocol Domain",
+  "domain": "Connection",
+  "version": "3.0.0",
+  "exported": "2026-06-28T09:00:02.743Z",
+  "units": [
+    {
+      "id": "PROTO-CONN",
+      "name": "Connection Lifecycle",
+      "domain": "Connection",
+      "category": "connection",
+      "maturity": "experimental",
+      "lifecycle": "experimental",
+      "consumers": [],
+      "currentVersion": "0.5.0",
+      "confidence": 55,
+      "relations": [],
+      "concepts": [],
+      "evidence": [],
+      "validatedRepos": [
+        "curl"
+      ],
+      "validatedSequences": 85,
+      "crossRepoMatrix": {
+        "curl": true,
+        "nginx": false,
+        "redis": false
+      },
+      "description": "Generic TCP/TLS connection lifecycle. Patterns may be too broad — connect/transfer/done terms appear in many non-protocol contexts.",
+      "steps": [
+        "init: connection setup (*connect / *conn*init)",
+        "transfer: data exchange (*send / *recv)",
+        "done: disconnect (*disconnect / *conn*done)"
+      ],
+      "supportedLibraries": [
+        "libcurl internal"
+      ],
+      "stateMachine": "CONNECT → TRANSFER → DISCONNECT",
+      "examples": [
+        [
+          "Curl_connect",
+          "Curl_readwrite",
+          "Curl_done"
+        ]
+      ],
+      "antiPatterns": [
+        [
+          "Curl_connect"
+        ],
+        [
+          "Curl_readwrite",
+          "Curl_done"
+        ]
+      ],
+      "fpHistory": [
+        3
+      ],
+      "fnHistory": [
+        2
+      ],
+      "versionHistory": [
+        {
+          "version": "0.5.0",
+          "date": "2026-06-28",
+          "confidence": 55,
+          "validatedRepos": [
+            "curl"
+          ],
+          "validatedSequences": 85,
+          "notes": "Too broad. Needs refinement or narrower protocol scoping."
+        }
+      ],
+      "lastUpdated": "2026-06-28"
+    }
+  ],
+  "summary": {
+    "totalUnits": 1,
+    "stableUnits": 0,
+    "totalConcepts": 0,
+    "totalEvidence": 0,
+    "validatedRepos": [
+      "curl"
+    ],
+    "rfcReferences": []
+  }
+}
