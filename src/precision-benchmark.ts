@@ -77,7 +77,7 @@ export function runPrecisionBenchmark(
   const mismatches: PrecisionResult['mismatches'] = [];
 
   for (const seq of sequences) {
-    const expected = labels[seq.index] || 'skip';
+    const expected: string = labels[seq.index] || 'skip';
     if (expected === 'skip') continue;
     if (seq.calls.length < 2) { tn++; continue; }
 
@@ -142,7 +142,7 @@ console.log(`Recall:    ${(result.recall * 100).toFixed(1)}%`);
 console.log(`F1 Score:  ${(result.f1 * 100).toFixed(1)}%`);
 
 // 显示不匹配的详情
-const mismatches = result.details.filter(d => !d.matched);
+const mismatches = ((result as any).details || []).filter((d: any) => !d.matched);
 if (mismatches.length > 0) {
   console.log(`\n--- Mismatches (${mismatches.length}) ---`);
   for (const m of mismatches) {
