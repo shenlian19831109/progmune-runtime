@@ -270,8 +270,13 @@ function formatUnitEvolution(unit: any): string {
   for (const v of unit.versionHistory) {
     const f1Str = v.f1 !== undefined ? ` F1=${(v.f1*100).toFixed(0)}%` : "";
     const reposStr = v.validatedRepos.length > 0 ? ` repos=[${v.validatedRepos.join(",")}]` : "";
-    l.push(`  v${v.version} (${v.date}) → ${v.confidence}% conf, ${v.validatedSequences} seqs${reposStr}${f1Str}`);
+    const decisionIcon = v.decision?.outcome === "approved" ? "✅" : v.decision?.outcome === "rejected" ? "❌" : "↻";
+    l.push(`  ${decisionIcon} v${v.version} (${v.date}) → ${v.confidence}% conf, ${v.validatedSequences} seqs${reposStr}${f1Str}`);
     l.push(`    ${v.notes}`);
+    if (v.decision) {
+      l.push(`    Decision: ${v.decision.outcome.toUpperCase()} by ${v.decision.decidedBy} — ${v.decision.reason}`);
+      l.push(`    Evidence: ${v.decision.evidence.join("; ")}`);
+    }
   }
   if (unit.concepts && unit.concepts.length > 0) {
     l.push(`\nConcepts (${unit.concepts.length}):`);
