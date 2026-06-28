@@ -128,10 +128,12 @@ export interface CompatibilityMatrix {
   }>;
 }
 
-export function getCompatibility(): CompatibilityMatrix {
+export function getCompatibility(): CompatibilityMatrix & { sdkVersion: string; protocols: string[] } {
   const kb = buildKnowledgeBase();
   return {
+    sdkVersion: "1.0.0",
     knowledgeVersion: kb.version,
+    protocols: kb.units.filter((u: any) => u.maturity === "stable").map((u: any) => u.name),
     compatibleWith: [
       { component: "Policy Engine", version: "2.0.0", compatible: true, notes: "All 8 rules operational" },
       { component: "Certificate", version: "2.0.0", compatible: true, notes: "Ontology-backed certificates" },

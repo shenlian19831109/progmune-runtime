@@ -72,9 +72,17 @@ export function buildEvidenceRepository(): EvidenceRepository {
   const kb = buildKnowledgeBase();
   const repos: EvidenceRecord[] = [];
 
+  // Resolve benchmarks dir relative to project root (works from both src/ and dist/)
+  const projectRoot = path.resolve(__dirname, "..");
+  const benchDir = (() => {
+    if (fs.existsSync(path.join(projectRoot, "benchmarks"))) return path.join(projectRoot, "benchmarks");
+    if (fs.existsSync(path.join(process.cwd(), "benchmarks"))) return path.join(process.cwd(), "benchmarks");
+    return path.join(projectRoot, "benchmarks");
+  })();
+
   for (const repo of BENCHMARK_REPOS) {
-    const seqFile = path.join("benchmarks", `${repo.name}-sequences.json`);
-    const labelFile = path.join("benchmarks", `${repo.name}-labels.json`);
+    const seqFile = path.join(benchDir, `${repo.name}-sequences.json`);
+    const labelFile = path.join(benchDir, `${repo.name}-labels.json`);
 
     if (!fs.existsSync(seqFile)) continue;
 

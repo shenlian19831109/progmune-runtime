@@ -90,17 +90,18 @@ export const DETECTION_PATTERNS: DetectionPattern[] = [
   {
     id: "TLS-DOUBLE-FREE",
     name: "TLS Double Free",
-    description: "SSL free called multiple times or without matching init — possible double-free or use-after-free.",
+    description: "SSL free called more times than init — possible double-free. Normal cleanup (1:1) is safe.",
     protocolName: "TLS Handshake",
     conceptName: "Finished",
     severity: "Critical",
     confidence: 88,
     evidenceSequences: 135,
     detect: (calls) => {
+      const initCount = calls.filter(c => /\b(\w*SSL\w*new|\w*ssl\w*init|\w*SSL_CTX_new)\b/i.test(c)).length;
       const freeCount = calls.filter(c => /\b(\w*ssl\w*free|\w*SSL_CTX_free)\b/i.test(c)).length;
-      return freeCount >= 2;
+      return freeCount > initCount && freeCount >= 2;
     },
-    detail: "SSL free/cleanup called multiple times. Double-free vulnerability.",
+    detail: "SSL free/cleanup called more times than init. Double-free vulnerability. Normal cleanup with matching init+free pairs is safe.",
   },
 
   // ── SSH Patterns ──
