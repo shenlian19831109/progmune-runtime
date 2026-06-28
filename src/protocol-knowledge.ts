@@ -214,7 +214,7 @@ export function buildKnowledgeBase(): KnowledgeBase {
     // TLS Domain — Knowledge Units
     {
       id: "PROTO-TLS-CERT", name: "TLS Certificate", domain: "TLS", category: "ssl",
-      maturity: "experimental", lifecycle: "experimental", consumers: [], currentVersion: "0.2.0", confidence: 30,
+      maturity: "experimental", lifecycle: "experimental", consumers: [], concepts: [], currentVersion: "0.2.0", confidence: 30,
       rfcReference: "RFC 8446 §4.4",
       relations: [{ targetId: "PROTO-TLS", type: "extends", description: "Extends TLS Handshake with certificate validation" }],
       validatedRepos: [], validatedSequences: 0,
@@ -230,7 +230,7 @@ export function buildKnowledgeBase(): KnowledgeBase {
     },
     {
       id: "PROTO-TLS-SESS", name: "TLS Session", domain: "TLS", category: "ssl",
-      maturity: "experimental", lifecycle: "experimental", consumers: [], currentVersion: "0.1.0", confidence: 20,
+      maturity: "experimental", lifecycle: "experimental", consumers: [], concepts: [], currentVersion: "0.1.0", confidence: 20,
       rfcReference: "RFC 8446 §2.2",
       relations: [
         { targetId: "PROTO-TLS", type: "depends_on", description: "Session resumption requires completed handshake" },

@@ -14,7 +14,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { validateProtocolState } from "./protocol-detector";
 import { buildKnowledgeBase } from "./protocol-knowledge";
-import type { ProtocolAsset, VersionSnapshot } from "./protocol-knowledge";
+import type { KnowledgeUnit, VersionSnapshot } from "./protocol-knowledge";
 
 // ═══════════════════════════════════════════════════════════════
 // Types
