@@ -298,7 +298,7 @@ export function buildKnowledgeBase(): KnowledgeBase {
     {
       id: "PROTO-CONN", name: "Connection Lifecycle", domain: "Connection", category: "connection",
       maturity: "experimental", currentVersion: "0.5.0", confidence: 55,
-      rfcReference: undefined, relations: [], concepts: [],
+      rfcReference: undefined, relations: [], concepts: [], evidence: [],
       validatedRepos: ["curl"], validatedSequences: 85,
       crossRepoMatrix: { curl: true, nginx: false, redis: false },
       description: "Generic TCP/TLS connection lifecycle. Patterns may be too broad — connect/transfer/done terms appear in many non-protocol contexts.",
@@ -318,7 +318,7 @@ export function buildKnowledgeBase(): KnowledgeBase {
     {
       id: "PROTO-AUTH", name: "Authentication", domain: "Auth", category: "auth",
       maturity: "experimental", currentVersion: "0.4.0", confidence: 40,
-      rfcReference: undefined, relations: [], concepts: [],
+      rfcReference: undefined, relations: [], concepts: [], evidence: [],
       validatedRepos: [], validatedSequences: 0,
       crossRepoMatrix: { curl: false, nginx: false, redis: false },
       description: "Auth lifecycle: init → credentials → cleanup. Not yet validated on any project.",
@@ -354,7 +354,7 @@ export function buildKnowledgeBase(): KnowledgeBase {
     {
       id: "PROTO-QUIC", name: "QUIC Connection", domain: "QUIC", category: "connection",
       maturity: "experimental", currentVersion: "0.2.0", confidence: 25,
-      rfcReference: "RFC 9000", relations: [], concepts: [],
+      rfcReference: "RFC 9000", relations: [], concepts: [], evidence: [],
       validatedRepos: [], validatedSequences: 0,
       crossRepoMatrix: { curl: false, nginx: false, redis: false },
       description: "QUIC connection lifecycle. Needs quiche/ngtcp2 library testing.",
