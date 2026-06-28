@@ -25,6 +25,17 @@ import * as fs from "fs";
 /** Protocol Asset Maturity Level */
 export type MaturityLevel = "experimental" | "validated" | "stable" | "certified";
 
+/** Knowledge Lifecycle — governs the full lifespan of a Knowledge Unit */
+export type LifecycleStage = "draft" | "experimental" | "validated" | "stable" | "deprecated" | "archived";
+
+/** What consumes this Knowledge Unit */
+export interface KnowledgeConsumer {
+  type: "policy" | "certificate" | "ci_gate" | "dashboard" | "api";
+  id: string;
+  description: string;
+  enabled: boolean;
+}
+
 const MATURITY_CRITERIA: Record<MaturityLevel, { repos: number; sequences: number; confidence: number; description: string }> = {
   experimental: { repos: 0, sequences: 0, confidence: 0,   description: "Rule defined in code. No cross-repo validation yet." },
   validated:     { repos: 1, sequences: 10, confidence: 40, description: "Validated on 1+ repo with 10+ labeled sequences." },
@@ -96,6 +107,8 @@ export interface KnowledgeUnit {
   rfcReference?: string;    // RFC number (e.g., "RFC 8446")
   relations: KnowledgeUnitRelation[];  // Links to other Knowledge Units
   concepts: ProtocolConcept[];         // Finer-grained protocol concepts
+  lifecycle: LifecycleStage;           // Knowledge lifecycle stage
+  consumers: KnowledgeConsumer[];      // What consumes this unit (policies, certs, CI)
   currentVersion: string;
   confidence: number;
   validatedRepos: string[];
@@ -146,9 +159,15 @@ export function buildKnowledgeBase(): KnowledgeBase {
     // ═══ TLS Handshake — STABLE ═══
     {
       id: "PROTO-TLS", name: "TLS Handshake", domain: "TLS", category: "ssl",
-      maturity: "stable", currentVersion: "1.0.0", confidence: 85,
+      maturity: "stable", lifecycle: "stable", currentVersion: "1.0.0", confidence: 85,
       rfcReference: "RFC 8446",
       relations: [],
+      consumers: [
+        { type: "policy", id: "default-policy", description: "Default Policy Engine (kb_coverage rule)", enabled: true },
+        { type: "certificate", id: "certify", description: "AI Code Certificate (ontology-backed)", enabled: true },
+        { type: "ci_gate", id: "github-action", description: "GitHub Action deploy gate", enabled: true },
+        { type: "api", id: "knowledge-api", description: "Knowledge API /assets/PROTO-TLS", enabled: true },
+      ],
       concepts: [
         { id: "TLS-HS-CHello", name: "ClientHello", description: "Client initiates handshake with supported cipher suites and extensions", required: true, inheritedConfidence: 85, inheritedEvidence: 135, constraints: ["must precede ServerHello"] },
         { id: "TLS-HS-SHello", name: "ServerHello", description: "Server responds with selected cipher suite and extensions", required: true, inheritedConfidence: 85, inheritedEvidence: 135, constraints: ["must follow ClientHello", "must select from client cipher suites"] },
@@ -195,7 +214,7 @@ export function buildKnowledgeBase(): KnowledgeBase {
     // TLS Domain — Knowledge Units
     {
       id: "PROTO-TLS-CERT", name: "TLS Certificate", domain: "TLS", category: "ssl",
-      maturity: "experimental", currentVersion: "0.2.0", confidence: 30,
+      maturity: "experimental", lifecycle: "experimental", consumers: [], currentVersion: "0.2.0", confidence: 30,
       rfcReference: "RFC 8446 §4.4",
       relations: [{ targetId: "PROTO-TLS", type: "extends", description: "Extends TLS Handshake with certificate validation" }],
       validatedRepos: [], validatedSequences: 0,
@@ -211,7 +230,7 @@ export function buildKnowledgeBase(): KnowledgeBase {
     },
     {
       id: "PROTO-TLS-SESS", name: "TLS Session", domain: "TLS", category: "ssl",
-      maturity: "experimental", currentVersion: "0.1.0", confidence: 20,
+      maturity: "experimental", lifecycle: "experimental", consumers: [], currentVersion: "0.1.0", confidence: 20,
       rfcReference: "RFC 8446 §2.2",
       relations: [
         { targetId: "PROTO-TLS", type: "depends_on", description: "Session resumption requires completed handshake" },
@@ -230,7 +249,7 @@ export function buildKnowledgeBase(): KnowledgeBase {
     },
     {
       id: "PROTO-TLS-ALPN", name: "TLS ALPN", domain: "TLS", category: "ssl",
-      maturity: "experimental", currentVersion: "0.1.0", confidence: 20,
+      maturity: "experimental", lifecycle: "experimental", consumers: [], currentVersion: "0.1.0", confidence: 20,
       rfcReference: "RFC 7301",
       relations: [{ targetId: "PROTO-TLS", type: "extends", description: "ALPN negotiation during TLS handshake" }],
       validatedRepos: [], validatedSequences: 0,
@@ -248,9 +267,13 @@ export function buildKnowledgeBase(): KnowledgeBase {
     // ═══ HTTP Request — STABLE ═══
     {
       id: "PROTO-HTTP", name: "HTTP Request", domain: "HTTP", category: "http",
-      maturity: "stable", currentVersion: "1.0.0", confidence: 80,
+      maturity: "stable", lifecycle: "stable", currentVersion: "1.0.0", confidence: 80,
       rfcReference: "RFC 9110",
       relations: [{ targetId: "PROTO-H2", type: "compatible_with", description: "HTTP/2 extends HTTP request semantics" }],
+      consumers: [
+        { type: "policy", id: "default-policy", description: "Default Policy Engine", enabled: true },
+        { type: "certificate", id: "certify", description: "AI Code Certificate", enabled: true },
+      ],
       concepts: [
         { id: "HTTP-Req", name: "Request", description: "HTTP request method, URI, headers", required: true, inheritedConfidence: 80, inheritedEvidence: 150, constraints: ["must precede Response"] },
         { id: "HTTP-Res", name: "Response", description: "HTTP status code, headers, body", required: true, inheritedConfidence: 80, inheritedEvidence: 150, constraints: ["must follow Request", "status must be valid"] },
@@ -279,9 +302,13 @@ export function buildKnowledgeBase(): KnowledgeBase {
     // ═══ SSH Connection — STABLE ═══
     {
       id: "PROTO-SSH", name: "SSH Connection", domain: "SSH", category: "ssh",
-      maturity: "stable", currentVersion: "1.0.0", confidence: 78,
+      maturity: "stable", lifecycle: "stable", currentVersion: "1.0.0", confidence: 78,
       rfcReference: "RFC 4253",
       relations: [],
+      consumers: [
+        { type: "policy", id: "default-policy", description: "Default Policy Engine", enabled: true },
+        { type: "certificate", id: "certify", description: "AI Code Certificate", enabled: true },
+      ],
       concepts: [
         { id: "SSH-Conn", name: "Connection", description: "TCP connection + version exchange", required: true, inheritedConfidence: 78, inheritedEvidence: 135, constraints: ["must be established first"] },
         { id: "SSH-Auth", name: "Authentication", description: "Password, publickey, or host-based auth", required: true, inheritedConfidence: 78, inheritedEvidence: 135, constraints: ["must follow Connection"] },
@@ -312,7 +339,7 @@ export function buildKnowledgeBase(): KnowledgeBase {
     // ═══ Connection Lifecycle — EXPERIMENTAL ═══
     {
       id: "PROTO-CONN", name: "Connection Lifecycle", domain: "Connection", category: "connection",
-      maturity: "experimental", currentVersion: "0.5.0", confidence: 55,
+      maturity: "experimental", lifecycle: "experimental", consumers: [], currentVersion: "0.5.0", confidence: 55,
       rfcReference: undefined, relations: [], concepts: [], evidence: [],
       validatedRepos: ["curl"], validatedSequences: 85,
       crossRepoMatrix: { curl: true, nginx: false, redis: false },
@@ -332,7 +359,7 @@ export function buildKnowledgeBase(): KnowledgeBase {
     // ═══ Remaining experimental assets ═══
     {
       id: "PROTO-AUTH", name: "Authentication", domain: "Auth", category: "auth",
-      maturity: "experimental", currentVersion: "0.4.0", confidence: 40,
+      maturity: "experimental", lifecycle: "experimental", consumers: [], currentVersion: "0.4.0", confidence: 40,
       rfcReference: undefined, relations: [], concepts: [], evidence: [],
       validatedRepos: [], validatedSequences: 0,
       crossRepoMatrix: { curl: false, nginx: false, redis: false },
@@ -346,7 +373,7 @@ export function buildKnowledgeBase(): KnowledgeBase {
     },
     {
       id: "PROTO-H2", name: "HTTP/2 Session", domain: "HTTP", category: "http2",
-      maturity: "validated", currentVersion: "0.8.0", confidence: 68,
+      maturity: "validated", lifecycle: "validated", consumers: [], currentVersion: "0.8.0", confidence: 68,
       rfcReference: "RFC 9113", relations: [{ targetId: "PROTO-HTTP", type: "extends", description: "HTTP/2 extends HTTP/1.1 semantics" }], concepts: [],
       validatedRepos: ["nghttp2"], validatedSequences: 100,
       crossRepoMatrix: { curl: false, nginx: false, redis: false, nghttp2: true },
@@ -368,7 +395,7 @@ export function buildKnowledgeBase(): KnowledgeBase {
     },
     {
       id: "PROTO-QUIC", name: "QUIC Connection", domain: "QUIC", category: "connection",
-      maturity: "experimental", currentVersion: "0.2.0", confidence: 25,
+      maturity: "experimental", lifecycle: "experimental", consumers: [], currentVersion: "0.2.0", confidence: 25,
       rfcReference: "RFC 9000", relations: [], concepts: [], evidence: [],
       validatedRepos: [], validatedSequences: 0,
       crossRepoMatrix: { curl: false, nginx: false, redis: false },
