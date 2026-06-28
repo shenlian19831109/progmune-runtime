@@ -14,8 +14,17 @@ import { assessRisk } from "./risk-model";
 import { buildKnowledgeBase } from "./protocol-knowledge";
 import { buildEvidenceRepository } from "./evidence-repository";
 
-/** Stable public API — do not break. Consumers depend on this interface. */
+/** Runtime version — stable public identifier. Internal layers evolve underneath. */
+export const RUNTIME_VERSION = "1.0.0";
+
+/** Stable public API — do not break. Consumers depend on this interface.
+ *  This is the IR (Intermediate Representation) of Progmune Runtime.
+ *  All consumers (CLI, CI, IDE, Dashboard, LLM) consume this object. */
 export interface VerificationResult {
+  /** Runtime version at time of verification */
+  runtimeVersion: string;
+  /** Final governance decision: BLOCK | WARN | ALLOW */
+  decision: "BLOCK" | "WARN" | "ALLOW";
   certificate: ReturnType<typeof certify>;
   knowledge: {
     version: string;
@@ -48,7 +57,15 @@ export function verify(filePath: string): VerificationResult {
   const er = buildEvidenceRepository();
   const risk = assessRisk(["SSL_CTX_new", "SSL_connect"]);
 
+  // Decision: Risk → Policy → Decision
+  let decision: VerificationResult["decision"];
+  if (risk.riskLevel === "Critical") decision = "BLOCK";
+  else if (risk.riskLevel === "High") decision = "WARN";
+  else decision = "ALLOW";
+
   return {
+    runtimeVersion: RUNTIME_VERSION,
+    decision,
     certificate: cert,
     knowledge: {
       version: kb.version,
@@ -73,6 +90,14 @@ export function verify(filePath: string): VerificationResult {
   };
 }
 
+/** Stub for future AI-driven repair. Consumes VerificationResult. */
+export function fix(_result: VerificationResult): { possible: boolean; patch?: string; reason: string } {
+  return {
+    possible: false,
+    reason: "AI repair not yet available. Coming in Runtime 2.0.",
+  };
+}
+
 /**
  * explain() — Human-readable governance explanation.
  * Answers: WHY is this risk Critical? WHAT knowledge backs it?
@@ -80,6 +105,7 @@ export function verify(filePath: string): VerificationResult {
 export function explain(result: VerificationResult): string {
   const lines: string[] = [];
   lines.push("Progmune Governance Explanation");
+  lines.push(`Runtime v${result.runtimeVersion}  |  Decision: ${result.decision}`);
   lines.push("================================\n");
 
   lines.push(`Risk Level: ${result.risk.level}`);
