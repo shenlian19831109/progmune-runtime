@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Progmune Runtime — AI-generated Software Governance</title>
+<style>
+  @page { size: A4; margin: 20mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 11pt; line-height: 1.7; color: #1a1a1a;
+    max-width: 800px; margin: 0 auto; padding: 40px 20px;
+  }
+  h1 { font-size: 26pt; color: #0d9488; margin-bottom: 4px; }
+  h2 { font-size: 16pt; color: #0d9488; margin: 32px 0 12px; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; }
+  h3 { font-size: 13pt; color: #374151; margin: 20px 0 8px; }
+  .subtitle { font-size: 12pt; color: #6b7280; margin-bottom: 24px; }
+  .meta { font-size: 9pt; color: #9ca3af; margin-bottom: 32px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 10pt; }
+  th { background: #0d9488; color: #fff; padding: 8px 12px; text-align: left; font-weight: 600; }
+  td { padding: 8px 12px; border-bottom: 1px solid #e5e7eb; }
+  tr:nth-child(even) td { background: #f9fafb; }
+  pre { background: #1e293b; color: #e2e8f0; padding: 16px; border-radius: 6px; font-size: 9.5pt; overflow-x: auto; margin: 12px 0; }
+  code { font-family: 'SF Mono', Menlo, Consolas, monospace; font-size: 9.5pt; background: #f1f5f9; padding: 2px 6px; border-radius: 3px; }
+  pre code { background: none; padding: 0; }
+  blockquote { border-left: 4px solid #0d9488; padding: 12px 20px; margin: 16px 0; background: #f0fdfa; font-style: italic; color: #374151; }
+  .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 9pt; font-weight: 700; }
+  .badge-green { background: #dcfce7; color: #16a34a; }
+  .badge-amber { background: #fef3c7; color: #d97706; }
+  .badge-red { background: #fee2e2; color: #dc2626; }
+  .toc { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px 24px; margin: 24px 0; }
+  .toc a { color: #0d9488; text-decoration: none; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #e5e7eb; font-size: 9pt; color: #9ca3af; text-align: center; }
+  @media print { body { padding: 0; } }
+</style>
+</head>
+<body>
+
+<h1>Progmune Runtime</h1>
+<div class="subtitle">Knowledge-driven Governance for AI-generated Software</div>
+<div class="meta">External Whitepaper · Version 1.0 · June 2026<br>Audience: CISO, Compliance Officers, Engineering VPs, Security Teams</div>
+
+<div class="toc">
+<strong>Contents</strong><br>
+<a href="#s1">1. Executive Summary</a> ·
+<a href="#s2">2. The Problem</a> ·
+<a href="#s3">3. What Progmune Does</a> ·
+<a href="#s4">4. How It Works</a> ·
+<a href="#s5">5. Who It's For</a> ·
+<a href="#s6">6. Deployment</a> ·
+<a href="#s7">7. Comparison</a> ·
+<a href="#s8">8. Enterprise Readiness</a> ·
+<a href="#s9">9. Getting Started</a> ·
+<a href="#s10">10. The Trust Layer</a>
+</div>
+
+<h2 id="s1">1. Executive Summary</h2>
+
+<p>AI code generators produce syntactically correct code at unprecedented speed. <strong>But syntax is not safety.</strong></p>
+
+<p>Progmune Runtime answers the question no other tool addresses:</p>
+
+<blockquote>"Does this AI-generated code follow the security protocols it's supposed to?"</blockquote>
+
+<p>It's not a code scanner. It's not a linter. It's a <strong>governance runtime</strong> — a system that verifies, certifies, and enforces protocol-level security for AI-generated software, backed by continuously evolving protocol knowledge.</p>
+
+<h2 id="s2">2. The Problem</h2>
+
+<h3>AI writes code. Who checks the protocol?</h3>
+
+<p>Traditional security tools (SAST, SCA) analyze code structure — syntax, data flow, known vulnerabilities. They cannot see <strong>protocol lifecycle violations</strong>: missing authentication steps, unreleased resources, session fixation, use-after-free patterns that emerge across a sequence of function calls.</p>
+
+<p>When an AI generates code, it may:</p>
+<ul>
+  <li>Skip the authentication step before accessing sensitive data</li>
+  <li>Allocate a resource and never release it</li>
+  <li>Close a connection without properly invalidating the session</li>
+  <li>Commit a transaction without first checking authorization</li>
+</ul>
+
+<p><strong>These are not bugs in the code. They are violations of the protocol the code is supposed to follow.</strong> And they are invisible to every existing security tool.</p>
+
+<h3>The compliance gap</h3>
+
+<p>As AI-generated code enters production, enterprises face a new question from regulators, auditors, and customers:</p>
+
+<blockquote>"Can you prove this AI-generated code was properly validated?"</blockquote>
+
+<p>Without a governance system, the answer is no.</p>
+
+<h2 id="s3">3. What Progmune Does</h2>
+
+<h3>Verify</h3>
+<pre><code>npx progmune-runtime verify ./src/server.ts</code></pre>
+<p>One command checks whether AI-generated code follows the required security protocols. The result is a clear decision:</p>
+<p>
+  <span class="badge badge-green">ALLOW</span>
+  <span class="badge badge-amber">WARN</span>
+  <span class="badge badge-red">BLOCK</span>
+</p>
+
+<h3>Explain</h3>
+<p>Every decision comes with a human-readable explanation:</p>
+<pre><code>Decision: BLOCK
+Risk: Missing Finished (Critical, 91% confidence, RFC 8446)
+Protocol: TLS Handshake v1.0.0
+Verified against: curl, nginx, libssh (135 validated sequences)
+Action: The TLS handshake was initiated but never completed.
+        This connection may remain open or unverified.</code></pre>
+
+<h3>Certify</h3>
+<p>Progmune issues an <strong>AI Code Certificate</strong> — a signed, timestamped document proving that a specific file passed protocol security verification. Certificates reference the Knowledge Base version, RFC standards, and validation evidence. <strong>Audit-ready.</strong></p>
+
+<h2 id="s4">4. How It Works</h2>
+
+<p>Progmune is built on a continuously evolving <strong>Protocol Knowledge Base</strong> — a curated, versioned collection of protocol definitions (TLS, SSH, HTTP, HTTP/2) validated across real-world codebases.</p>
+
+<table>
+  <tr><th>Protocol Domain</th><th>Status</th><th>Validated On</th><th>Confidence</th><th>RFC</th></tr>
+  <tr><td>TLS Handshake</td><td><span class="badge badge-green">Stable</span></td><td>curl, nginx</td><td>85%</td><td>RFC 8446</td></tr>
+  <tr><td>SSH Connection</td><td><span class="badge badge-green">Stable</span></td><td>curl, libssh</td><td>78%</td><td>RFC 4253</td></tr>
+  <tr><td>HTTP Request</td><td><span class="badge badge-green">Stable</span></td><td>nginx, Apache</td><td>80%</td><td>RFC 9110</td></tr>
+  <tr><td>HTTP/2 Session</td><td><span class="badge badge-amber">Validated</span></td><td>nghttp2</td><td>68%</td><td>RFC 9113</td></tr>
+</table>
+
+<p><strong>700+ validated sequences</strong> from <strong>7 repositories</strong> (curl, nginx, Apache, libssh, OpenSSL, nghttp2, redis).</p>
+
+<h2 id="s5">5. Who It's For</h2>
+
+<h3>Security Teams (AppSec)</h3>
+<table><tr><td><strong>Problem</strong></td><td>AI-generated code bypasses protocol requirements in ways SAST tools cannot detect.</td></tr>
+<tr><td><strong>Solution</strong></td><td>Progmune catches protocol violations at the CI gate — before they reach production.</td></tr>
+<tr><td><strong>Result</strong></td><td>Protocol-level security coverage where existing tools are blind.</td></tr></table>
+
+<h3>Compliance & Audit Teams</h3>
+<table><tr><td><strong>Problem</strong></td><td>"Can we prove this AI-generated code was checked?" — regulators, auditors, customers.</td></tr>
+<tr><td><strong>Solution</strong></td><td>AI Code Certificate + full provenance chain + RFC-referenced decisions.</td></tr>
+<tr><td><strong>Result</strong></td><td>Audit-ready evidence that governance was performed.</td></tr></table>
+
+<h3>Engineering Leadership</h3>
+<table><tr><td><strong>Problem</strong></td><td>AI accelerates code production, but quality and security risk scale with volume.</td></tr>
+<tr><td><strong>Solution</strong></td><td>Automated governance gate in CI/CD — every AI-generated file verified before merge.</td></tr>
+<tr><td><strong>Result</strong></td><td>Velocity without vulnerability.</td></tr></table>
+
+<h2 id="s6">6. Deployment</h2>
+
+<h3>GitHub Action (CI/CD Gate)</h3>
+<pre><code>- uses: shenlian19831109/progmune-runtime@main
+  with:
+    project_path: .</code></pre>
+<p>Every PR with AI-generated code is automatically verified. BLOCK verdicts prevent merge.</p>
+
+<h3>SDK Integration</h3>
+<pre><code>import { verify } from "@progmune/sdk"
+const result = verify("./src/server.ts")
+if (result.decision === "BLOCK") process.exit(1)</code></pre>
+
+<h3>CLI</h3>
+<pre><code>npm install progmune-runtime
+npm run status              # System health
+npm run dashboard           # Governance dashboard (localhost:3200)</code></pre>
+
+<h2 id="s7">7. Comparison</h2>
+
+<table>
+  <tr><th>Capability</th><th>Progmune</th><th>SAST</th><th>AI Code Review</th></tr>
+  <tr><td>Protocol lifecycle detection</td><td>✅ Core</td><td>❌</td><td>⚠️ Probabilistic</td></tr>
+  <tr><td>Cross-function sequence analysis</td><td>✅</td><td>❌</td><td>❌</td></tr>
+  <tr><td>RFC-referenced decisions</td><td>✅</td><td>❌</td><td>❌</td></tr>
+  <tr><td>Audit-ready certificate</td><td>✅</td><td>❌</td><td>❌</td></tr>
+  <tr><td>CI/CD deploy gate</td><td>✅</td><td>✅</td><td>❌</td></tr>
+  <tr><td>Knowledge evolution (versioned)</td><td>✅</td><td>❌</td><td>❌</td></tr>
+</table>
+
+<p>Progmune does not replace SAST. It covers the gap SAST cannot see — <strong>protocol-level violations in AI-generated code sequences.</strong></p>
+
+<h2 id="s8">8. Enterprise Readiness</h2>
+
+<ul>
+  <li><strong>Open Source</strong> (MIT License)</li>
+  <li><strong>On-premises deployment</strong> — no data leaves your infrastructure</li>
+  <li><strong>Configurable policy</strong> — define your own governance rules per project</li>
+  <li><strong>Knowledge Packages</strong> — deploy only the protocol domains you need</li>
+  <li><strong>Compatibility</strong> — Policy Engine, Certificate, CI Gate, Dashboard, API all version-locked</li>
+</ul>
+
+<h2 id="s9">9. Getting Started</h2>
+
+<pre><code># Install
+npm install progmune-runtime
+
+# Verify a file
+npm run sdk src/server.ts --explain
+
+# View governance dashboard
+npm run dashboard</code></pre>
+
+<p>Full documentation: <a href="https://github.com/shenlian19831109/progmune-runtime">github.com/shenlian19831109/progmune-runtime</a></p>
+
+<h2 id="s10">10. The Trust Layer for AI-Generated Code</h2>
+
+<p>AI code generation is here. The question is no longer "can AI write code" — it's <strong>"can we trust what AI wrote."</strong></p>
+
+<p>Progmune Runtime provides the trust layer: verify every AI-generated file against continuously evolving protocol knowledge, explain every decision, and certify every verification. Not a scanner. Not a linter. A governance runtime.</p>
+
+<blockquote>"Govern AI-generated software with continuously evolving protocol knowledge."</blockquote>
+
+<div class="footer">
+  <strong>Progmune Runtime v1.0</strong> — Knowledge-driven Governance for AI-generated Software<br>
+  June 2026 · <a href="https://github.com/shenlian19831109/progmune-runtime">github.com/shenlian19831109/progmune-runtime</a>
+</div>
+
+</body>
+</html>
