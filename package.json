@@ -10,7 +10,7 @@
     "build": "tsc -p tsconfig.json && tsc -p tsconfig.mcp.json && mv dist-mcp/mcp-server.js dist/mcp-server.mjs && rm -rf dist-mcp",
     "start": "node dist/mcp-server.mjs",
     "test": "node dist/mcp-server.mjs test",
-    "test:unit": "vitest run",
+    "test:unit": "vitest run --exclude '**/stress/**' --exclude '**/soak/**' --exclude '**/chaos/**'",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "ir": "npx ts-node src/extract-ir.ts .",
