@@ -28,6 +28,25 @@ export type MaturityLevel = "experimental" | "validated" | "stable" | "certified
 /** Knowledge Lifecycle — governs the full lifespan of a Knowledge Unit */
 export type LifecycleStage = "draft" | "experimental" | "validated" | "stable" | "deprecated" | "archived";
 
+/** Decomposed confidence — three independent dimensions */
+export interface ConfidenceBreakdown {
+  structural: number;     // State machine stability (0-100)
+  crossRepo: number;      // Cross-repository validation (0-100)
+  deployment: number;     // Real-world acceptance rate (0-100)
+}
+
+/** Real-world deployment feedback — Observation */
+export interface Observation {
+  id: string;
+  timestamp: string;
+  source: string;           // Which deployment produced this (repo, org, CI pipeline)
+  type: "accepted" | "rejected" | "ignored" | "false_positive" | "confirmed";
+  unitId: string;
+  unitName: string;
+  confidence: number;       // Confidence at time of observation
+  detail?: string;
+}
+
 /** What consumes this Knowledge Unit */
 export interface KnowledgeConsumer {
   type: "policy" | "certificate" | "ci_gate" | "dashboard" | "api";
@@ -109,6 +128,8 @@ export interface KnowledgeUnit {
   concepts: ProtocolConcept[];         // Finer-grained protocol concepts
   lifecycle: LifecycleStage;           // Knowledge lifecycle stage
   consumers: KnowledgeConsumer[];      // What consumes this unit (policies, certs, CI)
+  confidenceBreakdown?: ConfidenceBreakdown;  // Decomposed confidence
+  observations?: Observation[];              // Real-world deployment feedback
   currentVersion: string;
   confidence: number;
   validatedRepos: string[];
@@ -160,6 +181,11 @@ export function buildKnowledgeBase(): KnowledgeBase {
     {
       id: "PROTO-TLS", name: "TLS Handshake", domain: "TLS", category: "ssl",
       maturity: "stable", lifecycle: "stable", currentVersion: "1.0.0", confidence: 85,
+      confidenceBreakdown: { structural: 92, crossRepo: 88, deployment: 64 },
+      observations: [
+        { id: "OBS-001", timestamp: "2026-06-27T10:00:00Z", source: "curl-ci-pipeline", type: "confirmed", unitId: "PROTO-TLS", unitName: "TLS Handshake", confidence: 85, detail: "TLS violation correctly blocked in CI — confirmed by security team." },
+        { id: "OBS-002", timestamp: "2026-06-28T14:30:00Z", source: "nginx-deploy", type: "accepted", unitId: "PROTO-TLS", unitName: "TLS Handshake", confidence: 85, detail: "TLS check passed — deployment allowed." },
+      ],
       rfcReference: "RFC 8446",
       relations: [],
       consumers: [

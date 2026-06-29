@@ -205,6 +205,34 @@ if (require.main === module) {
     }
     console.log("");
 
+  } else if (args[0] === "roi") {
+    const m = loadMetrics();
+    const kb = buildKnowledgeBase();
+    console.log(`\n${C.b}${C.c}Knowledge ROI Report${C.r}\n`);
+    console.log(`  Flywheel Stats:`);
+    console.log(`    Scans:        ${m.totalScans} repos`);
+    console.log(`    Proposals:    ${m.totalProposals} generated, ${m.acceptedProposals} accepted`);
+    console.log(`    Velocity:     ${m.knowledgeVelocity} proposals/scan`);
+    console.log(`    Avg Gain:     +${m.averageConfidenceGain.toFixed(1)}% per proposal`);
+    console.log(`\n  Knowledge Growth:`);
+    const stableCount = kb.units.filter(u => u.maturity === "stable").length;
+    console.log(`    Stable Units: ${stableCount} (from 0)`);
+    console.log(`    Repos:        ${kb.summary.totalValidatedRepos} validated`);
+    console.log(`    Evidence:     ${kb.summary.totalValidatedSequences} sequences`);
+    console.log(`\n  Per-Unit ROI:`);
+    for (const u of kb.units.filter(u => u.maturity === "stable")) {
+      const breakdown = u.confidenceBreakdown;
+      console.log(`    ${C.b}${u.name}${C.r} v${u.currentVersion}`);
+      if (breakdown) {
+        console.log(`      Structural:  ${breakdown.structural}%  (state machine stability)`);
+        console.log(`      Cross-Repo:  ${breakdown.crossRepo}%  (multi-repo validation)`);
+        console.log(`      Deployment:  ${breakdown.deployment}%  (real-world acceptance)`);
+      }
+      const obs = u.observations?.length || 0;
+      console.log(`      Observations: ${obs} deployment feedback events`);
+    }
+    console.log(`\n  ${C.d}Flywheel: ${m.totalScans} scans → ${m.totalProposals} proposals → ${m.acceptedProposals} accepted → ${stableCount} stable → +${m.averageConfidenceGain.toFixed(1)}% avg confidence${C.r}\n`);
+
   } else if (args[0] === "metrics") {
     console.log(JSON.stringify(loadMetrics(), null, 2));
 
