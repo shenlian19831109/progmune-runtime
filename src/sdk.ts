@@ -48,6 +48,12 @@ export interface VerificationResult {
       detail: string;
     }>;
   };
+  /** Knowledge Network — what this file's protocols depend on and relate to */
+  network?: {
+    totalNodes: number;
+    totalEdges: number;
+    relatedProtocols: string[];
+  };
   timestamp: string;
 }
 
@@ -62,6 +68,18 @@ export function verify(filePath: string): VerificationResult {
   if (risk.riskLevel === "Critical") decision = "BLOCK";
   else if (risk.riskLevel === "High") decision = "WARN";
   else decision = "ALLOW";
+
+  // Knowledge Network context
+  let network: VerificationResult["network"];
+  try {
+    const { buildKnowledgeGraph, getDependencies, getDependents } = require("./knowledge-graph");
+    const g = buildKnowledgeGraph();
+    const related = [...new Set([
+      ...getDependencies(g, "PROTO-TLS").map((n: any) => n.name),
+      ...getDependents(g, "PROTO-TLS").map((n: any) => n.name),
+    ])];
+    network = { totalNodes: g.nodes.length, totalEdges: g.edges.length, relatedProtocols: related };
+  } catch { /* graph unavailable */ }
 
   return {
     runtimeVersion: RUNTIME_VERSION,
@@ -86,6 +104,7 @@ export function verify(filePath: string): VerificationResult {
         concept: p.concept, detail: p.detail,
       })),
     },
+    network,
     timestamp: new Date().toISOString(),
   };
 }
@@ -135,6 +154,12 @@ export function explain(result: VerificationResult): string {
       const rfc = a.rfc ? ` (${a.rfc})` : "";
       lines.push(`  ${a.name} v${a.version} — ${a.confidence}% confidence${rfc}`);
     }
+  }
+
+  if (result.network && result.network.relatedProtocols.length > 0) {
+    lines.push(`\nProtocol Network Context:`);
+    lines.push(`  ${result.network.totalNodes} nodes, ${result.network.totalEdges} edges in Knowledge Graph`);
+    lines.push(`  Related: ${result.network.relatedProtocols.join(" · ")}`);
   }
 
   return lines.join("\n");
