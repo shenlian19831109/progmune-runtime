@@ -15,7 +15,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { validateProtocolState } from "./protocol-detector";
 import { buildKnowledgeBase } from "./protocol-knowledge";
-import type { KnowledgeUnit } from "./protocol-knowledge";
+import type { KnowledgeUnit, KnowledgeDebt, Hypothesis } from "./protocol-knowledge";
 
 // ═══════════════════════════════════════════════════════════════
 // Types
@@ -204,6 +204,24 @@ if (require.main === module) {
       }
     }
     console.log("");
+
+  } else if (args[0] === "debt") {
+    const kb = buildKnowledgeBase();
+    console.log(`\n${C.b}${C.c}Knowledge Debt Dashboard${C.r}\n`);
+    for (const u of kb.units.filter(u => u.maturity === "stable" || u.maturity === "validated")) {
+      const b = u.confidenceBreakdown;
+      if (!b) continue;
+      const sDebt = 100 - b.structural;
+      const cDebt = 100 - b.crossRepo;
+      const dDebt = 100 - b.deployment;
+      const total = Math.round(sDebt * 0.3 + cDebt * 0.3 + dDebt * 0.4);
+      const bar = "█".repeat(Math.min(10, Math.round(total / 10))) + "░".repeat(Math.max(0, 10 - Math.round(total / 10)));
+      const rec = dDebt > 30 ? "Need more deployment observations" : sDebt > 10 ? "Refine state machine" : "Healthy";
+      console.log(`  ${bar} ${C.b}${u.name}${C.r}  Debt: ${total}%`);
+      console.log(`     Structural:  ${b.structural}% (gap: ${sDebt}%)  |  Cross-Repo: ${b.crossRepo}% (gap: ${cDebt}%)  |  Deployment: ${b.deployment}% (gap: ${dDebt}%)`);
+      console.log(`     → ${rec}`);
+    }
+    console.log(`\n  ${C.d}Debt = weighted gap from 100%. Fix deployment debt first — it's the weakest link.${C.r}\n`);
 
   } else if (args[0] === "roi") {
     const m = loadMetrics();

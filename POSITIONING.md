@@ -1,11 +1,21 @@
-# Progmune Runtime — Positioning
+# Progmune — Verification Knowledge Network
 
 ## One sentence
 
-> Progmune is an **evidence-driven verification runtime for AI-generated software**.
-> It does not trust what the model says — it verifies what the program actually does.
+> Progmune is a **self-evolving verification knowledge network for AI-generated software**.
+> Every new codebase makes every verification stronger.
 
-*不信任模型的自述。只信任程序的真相。*
+*每新增一个代码库，所有验证都变得更强。*
+
+## What we are
+
+A **network** — not a base, not a graph. A network grows. Every node strengthens every other.
+
+```
+Evidence → Knowledge → Verification → Governance → Observation → Knowledge
+    ↑                                                                     │
+    └────────────────── Every new repo strengthens all ────────────────────┘
+```
 
 ## Academic foundation (ICML 2026)
 

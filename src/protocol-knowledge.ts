@@ -47,6 +47,29 @@ export interface Observation {
   detail?: string;
 }
 
+/** A testable hypothesis generated from observations */
+export interface Hypothesis {
+  id: string;
+  timestamp: string;
+  unitId: string;
+  statement: string;        // e.g., "Certificate step is optional in TLS handshake"
+  triggeredBy: string[];    // Observation IDs that generated this hypothesis
+  confidence: number;       // How strongly the evidence supports this
+  status: "proposed" | "experimenting" | "confirmed" | "rejected";
+  experiment?: string;      // Suggested experiment to test this hypothesis
+  result?: string;          // Outcome of experiment
+}
+
+/** Knowledge Debt — tracks what needs improvement */
+export interface KnowledgeDebt {
+  unitId: string;
+  structuralDebt: number;    // 0-100: gap between current and ideal structural confidence
+  crossRepoDebt: number;     // 0-100: gap for cross-repo validation
+  deploymentDebt: number;    // 0-100: gap for real-world acceptance
+  totalDebt: number;         // Weighted sum
+  recommendation: string;
+}
+
 /** What consumes this Knowledge Unit */
 export interface KnowledgeConsumer {
   type: "policy" | "certificate" | "ci_gate" | "dashboard" | "api";
