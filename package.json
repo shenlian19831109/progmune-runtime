@@ -1,7 +1,7 @@
 {
   "name": "progmune-runtime",
   "version": "3.2.0",
-  "description": "Progmune Runtime — Knowledge-driven Governance for AI-generated Software. verify() → explain() → trust.",
+  "description": "Progmune Runtime — Evidence-driven verification for AI-generated software. Does not trust what the model says — verifies what the program actually does. verify() → explain() → trust.",
   "main": "dist/mcp-server.mjs",
   "bin": {
     "progmune-runtime": "dist/mcp-server.mjs"

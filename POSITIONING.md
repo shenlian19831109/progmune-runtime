@@ -2,7 +2,25 @@
 
 ## One sentence
 
-> Progmune is a **Knowledge-driven Governance Runtime for AI-generated Software**.
+> Progmune is an **evidence-driven verification runtime for AI-generated software**.
+> It does not trust what the model says — it verifies what the program actually does.
+
+*不信任模型的自述。只信任程序的真相。*
+
+## Academic foundation (ICML 2026)
+
+Kambhampati et al., *Stop Anthropomorphizing Intermediate Tokens as Reasoning/Thinking Traces!*
+
+> LLM 输出的"逐步推理"是统计表演。中间 token 与真实推理之间没有可靠因果对应。
+
+Progmune 从第一天就建立在这个前提上：LLM 是提案者，程序真相是裁决者。
+
+| CoT approach | Progmune approach |
+|-------------|-------------------|
+| Trust the model's self-explanation | Trust program semantics (IR, CFG, Call Graph) |
+| "Let's think step by step" | "Let's verify against protocol knowledge" |
+| Intermediate tokens = presumed reasoning | External verification = ground truth |
+| CoT is slow, expensive, hallucinated | Verification is deterministic, evidence-backed |
 
 ## What we do
 
