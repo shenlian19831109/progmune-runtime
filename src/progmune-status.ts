@@ -72,6 +72,14 @@ function main() {
     console.log(`  ${C.b}${u.name.padEnd(18)}${C.r} ${versions} upgrades in ${days}d (${velocity}/wk)  +${confGain}% confidence  ${u.maturity === "stable" ? C.g + "★" + C.r : C.y + "◉" + C.r}`);
   }
 
+  // Knowledge Network
+  try {
+    const { buildKnowledgeGraph } = require("./knowledge-graph");
+    const g = buildKnowledgeGraph();
+    const top3 = g.nodes.map((n: any) => ({ name: n.name, t: (g.inDegree[n.id] || 0) + (g.outDegree[n.id] || 0) })).sort((a: any, b: any) => b.t - a.t).slice(0, 3);
+    console.log(`\n  ${C.b}Knowledge Network:${C.r} ${C.d}${g.nodes.length} nodes, ${g.edges.length} edges · Top: ${top3.map((r: any) => r.name + "(" + r.t + ")").join(", ")}${C.r}`);
+  } catch { /* graph unavailable */ }
+
   // Knowledge Coverage
   console.log(`\n  ${C.b}Knowledge Coverage:${C.r}`);
   for (const u of kb.units.filter(u => u.maturity === "stable" || u.maturity === "validated")) {
