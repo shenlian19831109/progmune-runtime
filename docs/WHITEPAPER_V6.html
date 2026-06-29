@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Progmune Runtime V6 — Knowledge-driven Governance for AI-generated Software 知识驱动的AI软件治理运行时</title>
+<style>
+  :root { --bg:#ffffff; --card:#f8f9fa; --border:#dee2e6; --text:#212529; --muted:#6c757d; --accent:#0d9488; --green:#16a34a; --orange:#d97706; --red:#dc2626; --purple:#7c3aed; --blue:#2563eb; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; line-height:1.8; max-width:1100px; margin:0 auto; padding:2rem; }
+  h1 { font-size:2.4rem; text-align:center; margin-bottom:.5rem; background:linear-gradient(135deg,var(--accent),var(--blue)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  h2 { font-size:1.5rem; margin:3rem 0 1rem; padding-bottom:.5rem; border-bottom:2px solid var(--border); color:var(--accent); }
+  h3 { font-size:1.2rem; margin:2rem 0 .8rem; color:#1e293b; }
+  h4 { font-size:1rem; margin:1.2rem 0 .5rem; color:var(--orange); }
+  p,li { margin:.5rem 0; }
+  ul,ol { padding-left:1.5rem; }
+  .subtitle { text-align:center; color:var(--muted); font-size:1rem; margin-bottom:.5rem; }
+  .version { text-align:center; color:var(--muted); font-size:.85rem; margin-bottom:2rem; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:1.5rem; margin:1rem 0; }
+  .card h4 { margin-top:0; color:var(--accent); }
+  .card.accent { border-left:4px solid var(--accent); }
+  .card.blue { border-left:4px solid var(--blue); }
+  .card.green { border-left:4px solid var(--green); }
+  .card.orange { border-left:4px solid var(--orange); }
+  .card.red { border-left:4px solid var(--red); }
+  .card.purple { border-left:4px solid var(--purple); }
+  table { width:100%; border-collapse:collapse; margin:1rem 0; font-size:.9rem; }
+  th,td { padding:8px 12px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background:var(--card); color:var(--accent); font-weight:600; }
+  .metric-big { font-size:2.2rem; font-weight:800; color:var(--accent); }
+  .metric-label { font-size:.8rem; color:var(--muted); text-transform:uppercase; }
+  .grid { display:grid; gap:1rem; }
+  .g2 { grid-template-columns:1fr 1fr; } .g3 { grid-template-columns:1fr 1fr 1fr; } .g4 { grid-template-columns:1fr 1fr 1fr 1fr; } .g5 { grid-template-columns:1fr 1fr 1fr 1fr 1fr; }
+  @media (max-width:768px) { .g2,.g3,.g4,.g5 { grid-template-columns:1fr; } }
+  pre { background:#1e293b; color:#e2e8f0; border-radius:8px; padding:1.2rem; overflow-x:auto; font-size:.85rem; line-height:1.6; }
+  code { font-family:'SF Mono','Fira Code',monospace; font-size:.9em; background:#e9ecef; padding:2px 6px; border-radius:3px; }
+  pre code { background:none; padding:0; }
+  blockquote { border-left:4px solid var(--accent); padding:12px 20px; margin:1rem 0; background:#f0fdfa; font-style:italic; }
+  .en { color:var(--muted); font-size:.9em; }
+  .badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:700; }
+  .b-green { background:#dcfce7; color:#16a34a; } .b-red { background:#fee2e2; color:#dc2626; } .b-amber { background:#fef3c7; color:#d97706; } .b-blue { background:#dbeafe; color:#2563eb; }
+  .toc { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:1.5rem 2rem; margin:2rem 0; columns:2; }
+  .toc a { color:var(--accent); text-decoration:none; }
+  .footer { margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--border); text-align:center; color:var(--muted); font-size:.85rem; }
+  @media print { body { padding:1rem; font-size:10pt; } .toc { columns:1; } }
+</style>
+</head>
+<body>
+
+<h1>Progmune Runtime V6</h1>
+<div class="subtitle">Knowledge-driven Governance for AI-generated Software</div>
+<div class="subtitle en">知识驱动的AI生成软件治理运行时</div>
+<div class="version">Comprehensive Whitepaper · 综合技术白皮书 · June 2026</div>
+
+<div class="toc">
+<a href="#s1">1. 定位与愿景 Positioning</a><br>
+<a href="#s2">2. 问题与市场 Problem &amp; Market</a><br>
+<a href="#s3">3. 产品架构 Architecture</a><br>
+<a href="#s4">4. 技术体系 Technical System</a><br>
+<a href="#s5">5. 知识体系 Knowledge Base</a><br>
+<a href="#s6">6. 治理体系 Governance</a><br>
+<a href="#s7">7. Runtime API</a><br>
+<a href="#s8">8. 基准与数据 Benchmarks</a><br>
+<a href="#s9">9. 竞争力与护城河 Moat</a><br>
+<a href="#s10">10. 商业模型 Business Model</a><br>
+<a href="#s11">11. 市场策略 Market Strategy</a><br>
+<a href="#s12">12. 路线图 Roadmap</a><br>
+<a href="#s13">13. 版本演进 Version History</a><br>
+<a href="#s14">14. 附录 Appendix</a>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 1 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s1">1. 定位与愿景 <span class="en">Positioning &amp; Vision</span></h2>
+
+<div class="card accent">
+<h4>一句话定位 · One-sentence Positioning</h4>
+<blockquote>Progmune is a <strong>Knowledge-driven Governance Runtime for AI-generated Software</strong>.<br>
+<span class="en">Progmune 是<strong>知识驱动的AI生成软件治理运行时</strong>。</span></blockquote>
+</div>
+
+<div class="grid g3">
+<div class="card green">
+<h4>我们做什么 · What We Do</h4>
+<p>AI generates code. Progmune governs it.</p>
+<p class="en">AI 生成代码。Progmune 治理代码。</p>
+<p>Not "does the code look right" (SAST). Not "is this a known CVE" (SCA). <strong>"Does this AI-generated code follow the protocol it's supposed to."</strong></p>
+</div>
+<div class="card blue">
+<h4>我们不是什么 · What We Are NOT</h4>
+<p>❌ AI 代码生成器<br>❌ CodeQL/Semgrep 竞品<br>❌ 静态分析工具<br>❌ 规则库</p>
+</div>
+<div class="card purple">
+<h4>我们卖什么 · What We Sell</h4>
+<p><strong>Governance decisions backed by continuously evolving protocol knowledge.</strong></p>
+<p>不是检测器。不是规则集。是<strong>可审计的治理决策</strong>。</p>
+</div>
+</div>
+
+<div class="card">
+<h4>三层价值主张 · Three-tier Value Proposition</h4>
+<table>
+<tr><th>层 · Tier</th><th>核心 · Core</th><th>价值 · Value</th></tr>
+<tr><td><strong>Knowledge</strong></td><td>持续演化的协议知识库</td><td>护城河 —— 不可复制</td></tr>
+<tr><td><strong>Runtime</strong></td><td>verify() → explain() → fix()</td><td>产品 —— 稳定API</td></tr>
+<tr><td><strong>Governance</strong></td><td>Policy → Certificate → CI Gate</td><td>企业买单的原因</td></tr>
+</table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 2 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s2">2. 问题与市场 <span class="en">Problem &amp; Market</span></h2>
+
+<h3>2.1 核心问题 · The Core Problem</h3>
+
+<div class="card red">
+<p>AI 代码生成器（Claude、GPT、Copilot、Cursor）以史无前例的速度产出语法正确的代码。<strong>但语法正确 ≠ 安全。</strong></p>
+<p class="en">AI code generators produce syntactically correct code at unprecedented speed. <strong>But syntax is not safety.</strong></p>
+</div>
+
+<p>当 AI 生成代码时，它可能：</p>
+<ul>
+<li>跳过认证步骤直接访问敏感数据</li>
+<li>分配资源后从不释放</li>
+<li>关闭连接但未失效会话</li>
+<li>提交事务但未检查授权</li>
+</ul>
+<p class="en">These are <strong>protocol lifecycle violations</strong> — invisible to every existing security tool.</p>
+
+<h3>2.2 市场空白 · Market Gap</h3>
+
+<table>
+<tr><th>工具类型</th><th>能检测</th><th>不能检测</th></tr>
+<tr><td>SAST (CodeQL, Semgrep)</td><td>代码模式、数据流、已知CVE</td><td>协议生命周期违规</td></tr>
+<tr><td>AI Code Review</td><td>代码风格、常见错误</td><td>跨函数协议序列违规</td></tr>
+<tr><td>Linter</td><td>语法风格</td><td>安全协议完整性</td></tr>
+<tr><td><strong>Progmune</strong></td><td><strong>协议状态机违规</strong></td><td>（与SAST互补，不替代）</td></tr>
+</table>
+
+<h3>2.3 合规驱动力 · Compliance Drivers</h3>
+<div class="grid g2">
+<div class="card orange"><strong>EU AI Act</strong> (2026执行)<br>要求 AI 系统输出可解释、可追溯</div>
+<div class="card orange"><strong>FDA 医疗软件指南</strong><br>AI 辅助诊断代码需审计追溯</div>
+<div class="card orange"><strong>金融监管</strong><br>AI 决策系统需证明安全审查</div>
+<div class="card orange"><strong>ISO 42001 / SOC2</strong><br>AI 治理需可审计证据链</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 3 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s3">3. 产品架构 <span class="en">Product Architecture</span></h2>
+
+<pre><code>Enterprise:  verify("./server.ts") → BLOCK / WARN / ALLOW
+                ↑
+Layer 5: Runtime API     verify() | explain() | fix()       ← Stable Public API
+                ↑
+Layer 4: Governance      Policy Engine | Certificate | CI/CD  ← Product
+                ↑
+Layer 3: Verification    Resource | Protocol | State Machine  ← Capability
+                ↑
+Layer 2: Knowledge       Units | Ontology | Evolution         ← Moat
+                ↑
+Layer 1: Evidence        Repos | Sequences | Benchmarks | RFC ← Foundation</code></pre>
+
+<div class="card accent">
+<h4>数据流 · Data Flow</h4>
+<pre><code>Source Code → IR Extraction → Protocol Detection → Risk Assessment
+  → Knowledge Base Query → Policy Evaluation → Decision → Certificate → CI Gate</code></pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 4 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s4">4. 技术体系 <span class="en">Technical System</span></h2>
+
+<h3>4.1 检测引擎三重奏 · Detection Triad</h3>
+
+<h4>Resource Lifecycle Detector <span class="en">资源生命周期检测器</span></h4>
+<table>
+<tr><th>Category</th><th>Acquire</th><th>Release</th></tr>
+<tr><td>Memory 内存</td><td>malloc, calloc, zmalloc, ngx_alloc</td><td>free, zfree, ngx_free</td></tr>
+<tr><td>File 文件</td><td>open, fopen, socket</td><td>close, fclose, shutdown</td></tr>
+<tr><td>SSL/TLS</td><td>SSL_CTX_new, SSL_new, BIO_new</td><td>SSL_CTX_free, SSL_free, BIO_free</td></tr>
+<tr><td>Connection</td><td>connect, Curl_connect</td><td>disconnect, Curl_disconnect</td></tr>
+</table>
+
+<h4>Protocol State Machine Detector <span class="en">协议状态机检测器</span></h4>
+<p>7 个协议定义，全部使用 <code>\w*</code> 模式实现跨仓库泛化。</p>
+<table>
+<tr><th>Protocol</th><th>Steps</th><th>curl</th><th>nginx</th><th>redis</th><th>libssh</th><th>nghttp2</th></tr>
+<tr><td>TLS Handshake</td><td>init→connect→cleanup</td><td>✅</td><td>✅</td><td>—</td><td>✅</td><td>—</td></tr>
+<tr><td>SSH Connection</td><td>init→auth→done</td><td>✅</td><td>—</td><td>—</td><td>✅</td><td>—</td></tr>
+<tr><td>HTTP Request</td><td>init→send→cleanup</td><td>—</td><td>✅</td><td>—</td><td>—</td><td>✅</td></tr>
+<tr><td>HTTP/2 Session</td><td>init→send→close</td><td>—</td><td>—</td><td>—</td><td>—</td><td>✅</td></tr>
+</table>
+
+<h4>Risk Model <span class="en">风险模型</span></h4>
+<p>9 个 Detection Pattern，从布尔值升级为结构化风险评估。</p>
+<table>
+<tr><th>Pattern</th><th>Severity</th><th>Confidence</th><th>Evidence</th></tr>
+<tr><td>Missing Finished (TLS)</td><td><span class="badge b-red">Critical</span></td><td>91%</td><td>135 seqs</td></tr>
+<tr><td>Resource Acquire No Release</td><td><span class="badge b-red">Critical</span></td><td>98%</td><td>250 seqs</td></tr>
+<tr><td>SSH Without Auth</td><td><span class="badge b-red">Critical</span></td><td>78%</td><td>135 seqs</td></tr>
+<tr><td>TLS Without Init</td><td><span class="badge b-amber">High</span></td><td>85%</td><td>135 seqs</td></tr>
+<tr><td>HTTP No Response</td><td><span class="badge b-blue">Medium</span></td><td>80%</td><td>150 seqs</td></tr>
+</table>
+
+<div class="card accent">
+<h4>Pattern → Severity → Policy → Decision</h4>
+<p>Completeness 退为知识指标。风险驱动治理决策。<br>
+<span class="en">Completeness = knowledge metric. Risk = governance driver.</span></p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 5 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s5">5. 知识体系 <span class="en">Knowledge Base</span></h2>
+
+<h3>5.1 对象模型演进 · Object Model Evolution</h3>
+
+<div class="grid g5">
+<div class="card"><h4>v1: Rule</h4><p>一条正则规则<br>regex + score</p></div>
+<div class="card"><h4>v2: Asset</h4><p>版本 + 置信度 + 证据<br>version + evidence</p></div>
+<div class="card"><h4>v3: Knowledge Unit</h4><p>RFC引用 + 关系 + 域<br>RFC + relations + domain</p></div>
+<div class="card"><h4>v4: Ontology</h4><p>概念分解 + 约束 + 继承<br>Concepts + constraints</p></div>
+<div class="card green"><h4>v5: Runtime</h4><p>稳定API<br>verify() + explain()</p></div>
+</div>
+
+<h3>5.2 Knowledge Unit 结构</h3>
+<pre><code>KnowledgeUnit {
+  id, name, domain, category, maturity, lifecycle
+  currentVersion, confidence, rfcReference
+  concepts[]        // ClientHello, ServerHello, Certificate, Finished
+  relations[]       // depends_on, extends, compatible_with, deprecated_by
+  consumers[]       // Policy Engine, Certificate, CI Gate, API
+  evidence[]        // Per-repo: type, sequences, date
+  versionHistory[]  // VersionSnapshot + DecisionRecord
+  fpHistory[], fnHistory[]
+}</code></pre>
+
+<h3>5.3 Knowledge Base Inventory <span class="en">知识库清单</span></h3>
+<table>
+<tr><th>Unit</th><th>Maturity</th><th>Ver</th><th>Repos</th><th>Seqs</th><th>Conf</th><th>RFC</th></tr>
+<tr><td>TLS Handshake</td><td><span class="badge b-green">Stable ★</span></td><td>1.0.0</td><td>curl, nginx</td><td>135</td><td>85%</td><td>8446</td></tr>
+<tr><td>SSH Connection</td><td><span class="badge b-green">Stable ★</span></td><td>1.0.0</td><td>curl, libssh</td><td>135</td><td>78%</td><td>4253</td></tr>
+<tr><td>HTTP Request</td><td><span class="badge b-green">Stable ★</span></td><td>1.0.0</td><td>nginx, apache</td><td>150</td><td>80%</td><td>9110</td></tr>
+<tr><td>HTTP/2 Session</td><td><span class="badge b-amber">Validated ◉</span></td><td>0.8.0</td><td>nghttp2</td><td>100</td><td>68%</td><td>9113</td></tr>
+<tr><td>TLS Certificate</td><td>Experimental ●</td><td>0.2.0</td><td>—</td><td>0</td><td>30%</td><td>8446§4.4</td></tr>
+<tr><td>TLS Session</td><td>Experimental ●</td><td>0.1.0</td><td>—</td><td>0</td><td>20%</td><td>8446§2.2</td></tr>
+<tr><td>TLS ALPN</td><td>Experimental ●</td><td>0.1.0</td><td>—</td><td>0</td><td>20%</td><td>7301</td></tr>
+<tr><td>Connection</td><td>Experimental ●</td><td>0.5.0</td><td>curl</td><td>85</td><td>55%</td><td>—</td></tr>
+<tr><td>Authentication</td><td>Experimental ●</td><td>0.4.0</td><td>—</td><td>0</td><td>40%</td><td>—</td></tr>
+<tr><td>QUIC Connection</td><td>Experimental ●</td><td>0.2.0</td><td>—</td><td>0</td><td>25%</td><td>9000</td></tr>
+</table>
+
+<h3>5.4 Maturity Model <span class="en">成熟度模型</span></h3>
+<table>
+<tr><th>Level</th><th>Repos</th><th>Seqs</th><th>Confidence</th><th>Description</th></tr>
+<tr><td>experimental 实验</td><td>0</td><td>0</td><td>0%</td><td>Rule defined, not validated</td></tr>
+<tr><td>validated 验证</td><td>≥1</td><td>≥10</td><td>≥40%</td><td>Validated on 1+ repo</td></tr>
+<tr><td>stable 稳定</td><td>≥2</td><td>≥100</td><td>≥70%</td><td>Cross-repo validated, production-ready</td></tr>
+<tr><td>certified 认证</td><td>≥3</td><td>≥500</td><td>≥90%</td><td>Multi-repo, audit-grade</td></tr>
+</table>
+
+<h3>5.5 Knowledge Evolution — TLS 案例</h3>
+<pre><code>❌ v0.1.0  REJECTED   (2026-06-25)  SSG auto-discovery, 27 FP, F1=46%
+    Decision: benchmark. Reason: Precision=34% too low for governance.
+    Evidence: curl 85 labeled seqs · FP Taxonomy: 100% state inference noise
+
+✅ v0.5.0  APPROVED   (2026-06-26)  Resource Lifecycle, FP→8 (-74%), F1=51%
+    Decision: benchmark. Reason: P=58%, acceptable for dev. R=46% trade-off.
+
+✅ v0.9.0  APPROVED   (2026-06-26)  Repo-agnostic patterns. nginx confirmed.
+    Decision: cross_repo_validation. Reason: 2-repo validation achieved.
+
+✅ v1.0.0  APPROVED   (2026-06-28)  STABLE — 7 SSL backends, RFC 8446
+    Decision: cross_repo_validation. Reason: OpenSSL verified. Production ready.</code></pre>
+
+<div class="card green">
+<h4>这为什么是护城河 · Why This Is The Moat</h4>
+<p>竞争对手可以复制 TLS Rule。但无法复制<strong>为什么 TLS 从 v0.1 变成 v1.0</strong>——包括每次升级的决策链、基准数据、证据来源和版本演化历史。</p>
+<p class="en">Competitors can copy the TLS Rule. They cannot copy <strong>why TLS became v1.0</strong> — the complete decision chain, benchmark data, evidence sources, and version evolution history.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 6 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s6">6. 治理体系 <span class="en">Governance System</span></h2>
+
+<h3>6.1 Policy Engine <span class="en">策略引擎</span></h3>
+<table>
+<tr><th>Rule 规则</th><th>Severity</th><th>Threshold</th><th>说明</th></tr>
+<tr><td>confidence</td><td><span class="badge b-red">block</span></td><td>≥ medium</td><td>证书置信度门槛</td></tr>
+<tr><td>provenance</td><td><span class="badge b-red">block</span></td><td>intact</td><td>来源链完整性</td></tr>
+<tr><td>violations</td><td><span class="badge b-red">block</span></td><td>≤ 0</td><td>SSG 账本违规</td></tr>
+<tr><td>human_review</td><td><span class="badge b-red">block</span></td><td>≥ 1</td><td>人类在责任链中</td></tr>
+<tr><td>risk</td><td><span class="badge b-red">block</span></td><td>≥ High, ≥70%</td><td>风险驱动（协议无关）</td></tr>
+<tr><td>plsb_coverage</td><td><span class="badge b-amber">warn</span></td><td>≥ 5 categories</td><td>PLSB 基准覆盖</td></tr>
+<tr><td>fingerprint</td><td><span class="badge b-amber">warn</span></td><td>registered</td><td>指纹注册</td></tr>
+<tr><td>kb_coverage</td><td><span class="badge b-amber">warn</span></td><td>≥ 3 stable</td><td>KB 成熟度</td></tr>
+</table>
+
+<h3>6.2 Certificate <span class="en">AI 代码证书</span></h3>
+<table>
+<tr><th>字段</th><th>说明</th></tr>
+<tr><td>decision</td><td>BLOCK / WARN / ALLOW</td></tr>
+<tr><td>confidence</td><td>high / medium / low</td></tr>
+<tr><td>kbVersion</td><td>Knowledge Base version (e.g. 3.0.0)</td></tr>
+<tr><td>kbAssets</td><td>Stable protocol assets referenced (TLS v1.0.0, etc.)</td></tr>
+<tr><td>fingerprint</td><td>Ledger fingerprint hash</td></tr>
+<tr><td>provenanceIntact</td><td>是否来源链完整</td></tr>
+<tr><td>timestamp</td><td>验证时间戳</td></tr>
+</table>
+
+<h3>6.3 CI/CD Gate <span class="en">CI/CD 门禁</span></h3>
+<pre><code># .github/workflows/progmune-policy.yml
+- uses: shenlian19831109/progmune-runtime@main
+  with:
+    project_path: .
+    author: ${{ github.actor }}@users.noreply.github.com</code></pre>
+<p>PR 触发 → certify → policy check → BLOCK 时 exit 1 → 阻止合并。</p>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 7 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s7">7. Runtime API <span class="en">运行时 API</span></h2>
+
+<div class="card accent">
+<h4>Stable Public API · 稳定公共接口（永不变更）</h4>
+<pre><code>import { verify, explain, fix, RUNTIME_VERSION } from "@progmune/sdk"
+
+const r = verify("./src/server.ts")
+// → { runtimeVersion:"1.0.0", decision:"BLOCK", certificate, knowledge, evidence, risk }
+
+console.log(explain(r))
+// → Decision: BLOCK
+// → Risk: Missing Finished (Critical, 91% confidence, RFC 8446)
+// → Verified against: TLS Handshake v1.0.0, SSH v1.0.0, HTTP v1.0.0
+
+const patch = fix(r)  // AI repair — Runtime 2.0</code></pre>
+</div>
+
+<div class="card green">
+<h4>VerificationResult — Runtime IR</h4>
+<p>所有消费者（CLI, CI, IDE, Dashboard, LLM）都消费同一个对象。内部 Knowledge 可以任意演化，公共接口保持稳定。</p>
+<p class="en">All consumers depend on the same IR. Internal Knowledge evolves freely underneath.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 8 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s8">8. 基准与数据 <span class="en">Benchmarks &amp; Data</span></h2>
+
+<h3>8.1 Detection Evolution (curl, 85 labeled seqs)</h3>
+<table>
+<tr><th>Detector</th><th>Precision</th><th>Recall</th><th>F1</th><th>FP</th><th>特征</th></tr>
+<tr><td>SSG Auto-Discovery</td><td>34%</td><td>70%</td><td>46%</td><td>27</td><td>高召回，误报极高</td></tr>
+<tr><td>Resource Lifecycle</td><td>58%</td><td>46%</td><td>51%</td><td>8</td><td>高精度，误报-74%</td></tr>
+<tr><td>Combined (R+P)</td><td>54%</td><td>58%</td><td>56%</td><td>12</td><td>平衡：精度+协议补漏</td></tr>
+</table>
+
+<h3>8.2 Evidence Repository <span class="en">证据库</span></h3>
+<div class="grid g2">
+<div>
+<table>
+<tr><th>Repo</th><th>Type</th><th>Seqs</th><th>Labeled</th></tr>
+<tr><td>curl</td><td>application</td><td>100</td><td>85</td></tr>
+<tr><td>nginx</td><td>application</td><td>100</td><td>50</td></tr>
+<tr><td>redis</td><td>application</td><td>100</td><td>50</td></tr>
+<tr><td>apache</td><td>application</td><td>100</td><td>—</td></tr>
+</table>
+</div>
+<div>
+<table>
+<tr><th>Repo</th><th>Type</th><th>Seqs</th><th>Labeled</th></tr>
+<tr><td>openssl</td><td>protocol_library</td><td>100</td><td>—</td></tr>
+<tr><td>libssh</td><td>library</td><td>100</td><td>—</td></tr>
+<tr><td>nghttp2</td><td>library</td><td>100</td><td>—</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>7 repos</strong></td><td><strong>700</strong></td><td><strong>185</strong></td></tr>
+</table>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 9 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s9">9. 竞争力与护城河 <span class="en">Competitive Moat</span></h2>
+
+<div class="card red">
+<h4>★★★★★ Knowledge Evolution <span class="en">知识演化</span></h4>
+<p>不可复制。TLS v0.1→v0.5→v0.9→v1.0 的完整决策链——为什么 rejected、为什么 approved、基于什么证据、谁决定的。竞争对手可以复制 TLS Rule，但无法复制为什么变成 v1.0。</p>
+</div>
+
+<div class="card orange">
+<h4>★★★★★ Evidence Network <span class="en">证据网络</span></h4>
+<p>7 仓库、700+ 序列。每新增一个验证仓库，整个知识库的置信度都在提升。网络效应——增加覆盖面使所有已有资产更可信。</p>
+</div>
+
+<div class="card blue">
+<h4>★★★★★ Decision Chain <span class="en">决策链</span></h4>
+<p>Evidence → Knowledge → Decision → Policy → Certificate。完整的审计追溯链。其他产品只报告"发现问题"，Progmune 回答"为什么判定、依据是什么、谁批准、什么时候升级"。</p>
+</div>
+
+<div class="card purple">
+<h4>★★★★ Ontology <span class="en">本体</span></h4>
+<p>Protocol Concepts with RFC references, relations, constraints. 长期壁垒——随着知识图谱增长，竞争对手的规则越来越难以匹敌。</p>
+</div>
+
+<table>
+<tr><th>护城河维度</th><th>Progmune</th><th>CodeQL</th><th>Semgrep</th><th>AI Code Review</th></tr>
+<tr><td>协议生命周期检测</td><td>✅</td><td>❌</td><td>❌</td><td>⚠️</td></tr>
+<tr><td>版本化知识演化</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+<tr><td>跨仓库证据积累</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+<tr><td>RFC 引用决策</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+<tr><td>可审计决策链</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+<tr><td>CI 门禁</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td></tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 10 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s10">10. 商业模型 <span class="en">Business Model</span></h2>
+
+<h3>10.1 目标客户 · Target Customers</h3>
+<div class="grid g3">
+<div class="card green">
+<h4>开发者 Developer</h4>
+<p><code>npm install</code> → <code>verify()</code><br>免费 / 社区版<br>定价: $0</p>
+</div>
+<div class="card blue">
+<h4>安全团队 Security Team</h4>
+<p>Policy · Certificate · Audit<br>专业版<br>定价: $29-99/月</p>
+</div>
+<div class="card purple">
+<h4>平台团队 Platform Team</h4>
+<p>Knowledge Packages · CI/CD · Compliance<br>企业版<br>定价: $5000-50000/年</p>
+</div>
+</div>
+
+<h3>10.2 市场规模 · Market Size</h3>
+<div class="grid g2">
+<div class="card"><strong>AI 代码治理市场</strong><br>新兴品类，竞争者空白<br>EU AI Act / FDA / 金融监管驱动</div>
+<div class="card"><strong>合规预算 > 安全预算</strong><br>CIO 买的是"可审计的治理"<br>不是"更好的检测器"</div>
+</div>
+
+<h3>10.3 价值主张 · Value Proposition</h3>
+<blockquote>企业不会为"检测到协议违规"买单。企业会为"<strong>证明 AI 生成的代码经过了协议安全验证</strong>"买单。</blockquote>
+<p class="en">Enterprises don't pay for "detecting protocol violations." They pay for "<strong>proving AI-generated code passed protocol security verification.</strong>"</p>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 11 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s11">11. 市场策略 <span class="en">Market Strategy</span></h2>
+
+<h3>11.1 定位策略 · Positioning</h3>
+<div class="card accent">
+<p><strong>不与 CodeQL 竞争。在 CodeQL 的盲区建立新品类。</strong></p>
+<p>"CodeQL 检查代码有没有写错。Progmune 检查 AI 有没有跳过安全步骤。"</p>
+<p class="en">"CodeQL checks if code is written wrong. Progmune checks if AI skipped safety steps."</p>
+</div>
+
+<h3>11.2 进入策略 · Go-to-Market</h3>
+<ol>
+<li><strong>从合规切入，而非安全。</strong>合规预算更大、竞争更少、付费意愿更强。</li>
+<li><strong>PLSB 作为行业标准。</strong>让市场接受"PLSB Recall/Precision"作为协议安全检测的衡量标准。</li>
+<li><strong>MCP + GitHub Action 分发。</strong>无缝集成 Claude Code、Cursor 等 AI 编程环境。</li>
+</ol>
+
+<h3>11.3 叙事框架 · Narrative</h3>
+<table>
+<tr><th>阶段</th><th>问题</th><th>叙事</th></tr>
+<tr><td>研究期</td><td>能检测吗？</td><td>技术验证</td></tr>
+<tr><td>产品期</td><td>覆盖哪些协议？效果如何？</td><td>产品能力描述</td></tr>
+<tr><td>商业期</td><td>我的项目用的协议覆盖了吗？</td><td>客户价值对齐</td></tr>
+</table>
+<p><strong>当前阶段：</strong>研究期 → 产品期交界处。已证明 TLS/SSH/HTTP 三层检测器成立，正在建立 Protocol Coverage 矩阵。</p>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 12 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s12">12. 路线图 <span class="en">Roadmap</span></h2>
+
+<div class="grid g3">
+<div class="card green">
+<h4>Phase 1 (已完成 ✅)</h4>
+<p>Evidence → Knowledge → Runtime → Governance<br>环路闭环。3 个 Stable 资产。<br>Runtime v1.0 发布。</p>
+</div>
+<div class="card blue">
+<h4>Phase 2 (3-6 个月)</h4>
+<p>Knowledge Network<br>协议间互相引用<br>至少 10 个 Stable 资产<br>企业试点客户</p>
+</div>
+<div class="card purple">
+<h4>Phase 3 (6-12 个月)</h4>
+<p>Knowledge Marketplace<br>跨语言 Runtime<br>第三方 Knowledge Package<br>PLSB 行业标准发布</p>
+</div>
+</div>
+
+<h3>12.1 Knowledge Program KPIs</h3>
+<table>
+<tr><th>KPI</th><th>当前</th><th>6个月目标</th><th>12个月目标</th></tr>
+<tr><td>Stable Assets</td><td>3</td><td>10</td><td>30</td></tr>
+<tr><td>Validated Repos</td><td>7</td><td>20</td><td>100</td></tr>
+<tr><td>Evidence Sequences</td><td>700</td><td>4,000</td><td>40,000</td></tr>
+<tr><td>Average Confidence</td><td>62%</td><td>75%</td><td>90%</td></tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 13 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s13">13. 版本演进 <span class="en">Version History</span></h2>
+
+<table>
+<tr><th>版本</th><th>时间</th><th>核心变化</th><th>定位</th></tr>
+<tr><td>v1 (P0-P4)</td><td>2026 Q1</td><td>SSG, SVL1-4, IR Extraction, Planner, Emitter</td><td>AI Code Generator</td></tr>
+<tr><td>v2 (P5-P8)</td><td>2026 Q2</td><td>Protocol Invariants, State Machine, Fingerprint, Name-Free Topology</td><td>Protocol Security Detector</td></tr>
+<tr><td>v3 (P9-P11)</td><td>2026 Q2</td><td>Certificate, Provenance, Accountability, Policy Engine, Governance Report</td><td>AI Code Governance Runtime</td></tr>
+<tr><td>v4 (P0-P5 new)</td><td>2026 Q2</td><td>Precision Program, GitHub Action, Ed25519, Certificate PDF, PLSB Leaderboard, Dashboard</td><td>Product validation</td></tr>
+<tr><td>v5</td><td>2026 Q2</td><td>Knowledge Base v2, Rule Registry, Cross-Repo Validation, Protocol Generalization</td><td>Knowledge Platform</td></tr>
+<tr><td><strong>v6</strong></td><td><strong>2026 Q2-Q3</strong></td><td><strong>Ontology, Risk Model, Knowledge Evolution, SDK, Runtime API, Evidence Repository</strong></td><td><strong>Knowledge-driven Governance Runtime</strong></td></tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 14 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s14">14. 附录 <span class="en">Appendix</span></h2>
+
+<h3>14.1 关键指标 · Key Metrics</h3>
+<div class="grid g4">
+<div class="card"><div class="metric-big">10</div><div class="metric-label">Knowledge Units</div></div>
+<div class="card"><div class="metric-big">6</div><div class="metric-label">Protocol Domains</div></div>
+<div class="card"><div class="metric-big">3</div><div class="metric-label">Stable Assets ★</div></div>
+<div class="card"><div class="metric-big">7</div><div class="metric-label">Validated Repos</div></div>
+<div class="card"><div class="metric-big">700+</div><div class="metric-label">Evidence Sequences</div></div>
+<div class="card"><div class="metric-big">9</div><div class="metric-label">Detection Patterns</div></div>
+<div class="card"><div class="metric-big">8</div><div class="metric-label">Policy Rules</div></div>
+<div class="card"><div class="metric-big">62%</div><div class="metric-label">Avg Confidence</div></div>
+</div>
+
+<h3>14.2 技术栈 · Tech Stack</h3>
+<table>
+<tr><td>Language</td><td>TypeScript (86.4%)</td></tr>
+<tr><td>LLM Integration</td><td>OpenAI SDK (DeepSeek, GPT, Ollama)</td></tr>
+<tr><td>IR Extraction</td><td>ts-morph (TypeScript AST), Python subprocess</td></tr>
+<tr><td>State Machine</td><td>Custom SSG validator (872 lines)</td></tr>
+<tr><td>Database</td><td>File-based JSON corpus (.progmune_corpus/)</td></tr>
+<tr><td>Signatures</td><td>Ed25519 (Node crypto)</td></tr>
+<tr><td>Testing</td><td>Vitest (170+ tests)</td></tr>
+<tr><td>License</td><td>MIT</td></tr>
+</table>
+
+<h3>14.3 命令参考 · Command Reference</h3>
+<pre><code>npm run status              # Full system health (all 5 layers)
+npm run sdk <file>          # One-call verify()
+npm run dashboard           # Governance dashboard (:3200)
+npm run knowledge-api       # Knowledge API (:3400)
+npm run badge               # SVG badges (:3500)
+npm run precision           # Multi-repo precision benchmark
+npm run ci                  # CI gate simulation
+npm run certify <file>      # AI Code Certificate
+npm run policy check <file> # Policy Engine deploy gate</code></pre>
+
+<div class="footer">
+  <strong>Progmune Runtime V6</strong> — Comprehensive Whitepaper<br>
+  Knowledge-driven Governance for AI-generated Software · 知识驱动的AI生成软件治理运行时<br>
+  June 2026 · <a href="https://github.com/shenlian19831109/progmune-runtime">github.com/shenlian19831109/progmune-runtime</a>
+</div>
+
+</body>
+</html>
