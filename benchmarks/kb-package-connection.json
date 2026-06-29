@@ -2,7 +2,7 @@
   "name": "Connection Protocol Domain",
   "domain": "Connection",
   "version": "3.0.0",
-  "exported": "2026-06-28T09:00:02.743Z",
+  "exported": "2026-06-29T13:35:58.897Z",
   "units": [
     {
       "id": "PROTO-CONN",
@@ -61,7 +61,7 @@
       "versionHistory": [
         {
           "version": "0.5.0",
-          "date": "2026-06-28",
+          "date": "2026-06-29",
           "confidence": 55,
           "validatedRepos": [
             "curl"
@@ -70,7 +70,7 @@
           "notes": "Too broad. Needs refinement or narrower protocol scoping."
         }
       ],
-      "lastUpdated": "2026-06-28"
+      "lastUpdated": "2026-06-29"
     }
   ],
   "summary": {

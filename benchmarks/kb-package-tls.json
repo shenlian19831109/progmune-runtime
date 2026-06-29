@@ -2,7 +2,7 @@
   "name": "TLS Protocol Domain",
   "domain": "TLS",
   "version": "3.0.0",
-  "exported": "2026-06-28T09:00:02.741Z",
+  "exported": "2026-06-29T13:35:58.896Z",
   "units": [
     {
       "id": "PROTO-TLS",
@@ -253,7 +253,7 @@
         },
         {
           "version": "1.0.0",
-          "date": "2026-06-28",
+          "date": "2026-06-29",
           "confidence": 85,
           "validatedRepos": [
             "curl",
@@ -270,11 +270,11 @@
               "RFC 8446 §4-§6"
             ],
             "decidedBy": "cross_repo_validation",
-            "date": "2026-06-28"
+            "date": "2026-06-29"
           }
         }
       ],
-      "lastUpdated": "2026-06-28"
+      "lastUpdated": "2026-06-29"
     },
     {
       "id": "PROTO-TLS-CERT",
@@ -320,14 +320,14 @@
       "versionHistory": [
         {
           "version": "0.2.0",
-          "date": "2026-06-28",
+          "date": "2026-06-29",
           "confidence": 30,
           "validatedRepos": [],
           "validatedSequences": 0,
           "notes": "Pattern extracted from OpenSSL cert verification code."
         }
       ],
-      "lastUpdated": "2026-06-28"
+      "lastUpdated": "2026-06-29"
     },
     {
       "id": "PROTO-TLS-SESS",
@@ -372,14 +372,14 @@
       "versionHistory": [
         {
           "version": "0.1.0",
-          "date": "2026-06-28",
+          "date": "2026-06-29",
           "confidence": 20,
           "validatedRepos": [],
           "validatedSequences": 0,
           "notes": "RFC-defined. Awaiting code validation."
         }
       ],
-      "lastUpdated": "2026-06-28"
+      "lastUpdated": "2026-06-29"
     },
     {
       "id": "PROTO-TLS-ALPN",
@@ -389,6 +389,7 @@
       "maturity": "experimental",
       "lifecycle": "experimental",
       "consumers": [],
+      "concepts": [],
       "currentVersion": "0.1.0",
       "confidence": 20,
       "rfcReference": "RFC 7301",
@@ -417,14 +418,14 @@
       "versionHistory": [
         {
           "version": "0.1.0",
-          "date": "2026-06-28",
+          "date": "2026-06-29",
           "confidence": 20,
           "validatedRepos": [],
           "validatedSequences": 0,
           "notes": "RFC 7301. Awaiting code validation."
         }
       ],
-      "lastUpdated": "2026-06-28"
+      "lastUpdated": "2026-06-29"
     }
   ],
   "summary": {

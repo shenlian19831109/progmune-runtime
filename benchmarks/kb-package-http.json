@@ -2,7 +2,7 @@
   "name": "HTTP Protocol Domain",
   "domain": "HTTP",
   "version": "3.0.0",
-  "exported": "2026-06-28T09:00:02.741Z",
+  "exported": "2026-06-29T13:35:58.896Z",
   "units": [
     {
       "id": "PROTO-HTTP",
@@ -138,7 +138,7 @@
         },
         {
           "version": "1.0.0",
-          "date": "2026-06-28",
+          "date": "2026-06-29",
           "confidence": 80,
           "validatedRepos": [
             "nginx",
@@ -148,7 +148,7 @@
           "notes": "PROMOTED TO STABLE. Extended patterns match Apache httpd (ap_pass_brigade, ap_remove_output_filter). 6/50 Apache sequences matched. RFC 9110 referenced. Third stable asset."
         }
       ],
-      "lastUpdated": "2026-06-28"
+      "lastUpdated": "2026-06-29"
     },
     {
       "id": "PROTO-H2",
@@ -227,7 +227,7 @@
         },
         {
           "version": "0.8.0",
-          "date": "2026-06-28",
+          "date": "2026-06-29",
           "confidence": 68,
           "validatedRepos": [
             "nghttp2"
@@ -236,7 +236,7 @@
           "notes": "PROMOTED TO VALIDATED. 13/50 sequences matched in nghttp2 reference library."
         }
       ],
-      "lastUpdated": "2026-06-28"
+      "lastUpdated": "2026-06-29"
     }
   ],
   "summary": {

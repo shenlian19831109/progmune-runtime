@@ -2,7 +2,7 @@
   "name": "SSH Protocol Domain",
   "domain": "SSH",
   "version": "3.0.0",
-  "exported": "2026-06-28T09:00:02.742Z",
+  "exported": "2026-06-29T13:35:58.896Z",
   "units": [
     {
       "id": "PROTO-SSH",
@@ -157,7 +157,7 @@
         },
         {
           "version": "1.0.0",
-          "date": "2026-06-28",
+          "date": "2026-06-29",
           "confidence": 78,
           "validatedRepos": [
             "curl",
@@ -167,7 +167,7 @@
           "notes": "PROMOTED TO STABLE. Cross-project validated on libssh standalone library (5/50 sequences matched). RFC 4253 referenced. Second stable asset."
         }
       ],
-      "lastUpdated": "2026-06-28"
+      "lastUpdated": "2026-06-29"
     }
   ],
   "summary": {

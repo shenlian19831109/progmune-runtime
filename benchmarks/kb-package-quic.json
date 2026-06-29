@@ -2,7 +2,7 @@
   "name": "QUIC Protocol Domain",
   "domain": "QUIC",
   "version": "3.0.0",
-  "exported": "2026-06-28T09:00:02.743Z",
+  "exported": "2026-06-29T13:35:58.897Z",
   "units": [
     {
       "id": "PROTO-QUIC",
@@ -42,14 +42,14 @@
       "versionHistory": [
         {
           "version": "0.2.0",
-          "date": "2026-06-28",
+          "date": "2026-06-29",
           "confidence": 25,
           "validatedRepos": [],
           "validatedSequences": 0,
           "notes": "Minimal pattern. Needs quiche library sequences."
         }
       ],
-      "lastUpdated": "2026-06-28"
+      "lastUpdated": "2026-06-29"
     }
   ],
   "summary": {
