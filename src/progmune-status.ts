@@ -51,6 +51,23 @@ function main() {
   console.log(`  ${C.d}Dashboard: http://localhost:3200${C.r}`);
   console.log(`  ${C.d}Knowledge API: http://localhost:3400${C.r}`);
 
+  // Knowledge Health (Debt + Velocity + ROI)
+  try {
+    const { loadMetrics } = require("./knowledge-flywheel");
+    const m = loadMetrics ? loadMetrics() : null;
+    if (m && m.totalScans > 0) {
+      console.log(`\n  ${C.b}Knowledge Health:${C.r}`);
+      const stableList = kb.units.filter((u: any) => u.maturity === "stable");
+      const totalDebt = stableList.reduce((s: number, u: any) => {
+        const b = u.confidenceBreakdown;
+        return s + (b ? Math.round((100 - b.structural) * 0.3 + (100 - b.crossRepo) * 0.3 + (100 - b.deployment) * 0.4) : 0);
+      }, 0);
+      const avgDebt = stableList.length > 0 ? Math.round(totalDebt / stableList.length) : 0;
+      const healthBar = avgDebt < 20 ? C.g + "█".repeat(5) : avgDebt < 40 ? C.y + "█".repeat(3) + "░".repeat(2) : C.r2 + "█".repeat(2) + "░".repeat(3);
+      console.log(`  ${healthBar}${C.r} ${C.d}Debt: ${avgDebt}% · Velocity: ${m.knowledgeVelocity} proposals/scan · ${m.totalProposals} proposals · ${m.acceptedProposals} accepted${C.r}`);
+    }
+  } catch { /* flywheel unavailable */ }
+
   // Governance KPIs
   console.log(`\n  ${C.b}Governance KPIs:${C.r}`);
   const stableCount = kb.summary.byMaturity["stable"];

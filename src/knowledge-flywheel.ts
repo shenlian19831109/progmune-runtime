@@ -144,7 +144,7 @@ export function scanRepo(repoPath: string): FlywheelProposal[] {
 
 const METRICS_FILE = ".progmune_corpus/flywheel-metrics.json";
 
-function loadMetrics(): FlywheelMetrics {
+export function loadMetrics(): FlywheelMetrics {
   try { return JSON.parse(fs.readFileSync(METRICS_FILE, "utf-8")); } catch {
     return { totalScans: 0, totalProposals: 0, acceptedProposals: 0, rejectedProposals: 0, pendingProposals: 0, knowledgeVelocity: 0, averageConfidenceGain: 0, reposScanned: [], history: [] };
   }
