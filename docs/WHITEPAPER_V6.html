@@ -55,6 +55,7 @@
 <div class="toc">
 <a href="#s1">1. 定位与愿景 Positioning</a><br>
 <a href="#s2">2. 问题与市场 Problem &amp; Market</a><br>
+<a href="#s2d">2.4 设计哲学：程序免疫学 Program Immunology</a><br>
 <a href="#s3">3. 产品架构 Architecture</a><br>
 <a href="#s4">4. 技术体系 Technical System</a><br>
 <a href="#s5">5. 知识体系 Knowledge Base</a><br>
@@ -145,6 +146,75 @@
 <div class="card orange"><strong>FDA 医疗软件指南</strong><br>AI 辅助诊断代码需审计追溯</div>
 <div class="card orange"><strong>金融监管</strong><br>AI 决策系统需证明安全审查</div>
 <div class="card orange"><strong>ISO 42001 / SOC2</strong><br>AI 治理需可审计证据链</div>
+</div>
+
+
+<h2 id="s2d">2.4 设计哲学：程序免疫学 <span class="en">Design Philosophy: Program Immunology</span></h2>
+
+<div class="card accent">
+<h4>为什么叫 Progmune？· Why "Progmune"?</h4>
+<p><strong>Program</strong> + <strong>Immune</strong> = <strong>Progmune</strong></p>
+<p class="en">程序（Program）+ 免疫（Immune）= 程序免疫系统</p>
+<p>Progmune 借鉴生物免疫系统的三层防御结构，构建 AI 生成代码的安全防线。生物免疫系统不依靠"预测病原体长什么样"——它依靠<strong>识别"自己"和"非自己"</strong>。Progmune 同理：不预测 LLM 会犯什么错，而是从项目中提取<strong>程序真相（IR）</strong>，用它来识别"不符合协议的代码"。</p>
+</div>
+
+<h3>三层免疫防御 · Three-layer Immune Defense</h3>
+
+<div class="grid g3">
+<div class="card green">
+<h4>🛡️ 第一层：天然免疫 <span class="en">Innate Immunity</span></h4>
+<p><strong>生物类比：</strong>皮肤、粘膜——非特异性防御，对所有入侵者一视同仁</p>
+<p><strong>技术实现：</strong>约束引擎 (SVL-1~3)</p>
+<ul><li>SVL-1: 符号存在性——函数是否存在？</li><li>SVL-2: 类型匹配——参数个数和类型是否正确？</li><li>SVL-3: 数据流——变量是否先声明后使用？</li></ul>
+<p><strong>拦截对象：</strong>幻觉函数、类型错误、未声明变量</p>
+<p class="en"><em>Like skin blocking all pathogens — catches hallucinated functions, type errors. Fast, universal, no learning needed.</em></p>
+</div>
+<div class="card orange">
+<h4>🦠 第二层：获得性免疫 <span class="en">Adaptive Immunity</span></h4>
+<p><strong>生物类比：</strong>T细胞、B细胞——特异性防御，识别特定抗原</p>
+<p><strong>技术实现：</strong>协议安全检测器 (SSG + Protocol State Machine)</p>
+<ul><li>语义状态图 (SSG) 强制执行协议步骤顺序</li><li>协议状态机检测跨函数生命周期违规</li><li>名称无关指纹——改名不影响检测</li></ul>
+<p><strong>拦截对象：</strong>认证绕过、资源泄漏、生命周期违规</p>
+<p class="en"><em>Like T/B cells recognizing specific pathogens — catches auth bypass, resource leaks. Learned from protocol knowledge.</em></p>
+</div>
+<div class="card purple">
+<h4>🧠 第三层：免疫记忆 <span class="en">Immune Memory</span></h4>
+<p><strong>生物类比：</strong>记忆细胞——记录每次感染，下次更快响应</p>
+<p><strong>技术实现：</strong>可审计治理 (Ledger + Certificate + Evolution)</p>
+<ul><li>分类账 (Ledger) 记录完整状态转移链</li><li>AI 代码证书 (Certificate) 证明验证通过</li><li>知识演化 (Evolution) 记录每次版本升级决策</li></ul>
+<p><strong>记录对象：</strong>完整决策链——谁验证、为什么通过、基于什么证据</p>
+<p class="en"><em>Like memory cells — ledger records every transition, certificate proves verification, evolution tracks decisions.</em></p>
+</div>
+</div>
+
+<h3>核心设计原则 · Core Design Principle</h3>
+
+<div class="card accent">
+<blockquote>Progmune <strong>不信任 LLM 的输出</strong>。它从项目中提取"程序真相"（IR）——符号表、类型图、调用图和协议注解——然后用这套真相去约束 LLM 的提议。LLM 被降级为"受约束的提议者"，最终决定权在程序真相。</blockquote>
+<p class="en"><strong>Progmune does not trust LLM output.</strong> It extracts the "program truth" (IR) and uses it to constrain LLM proposals. The LLM is demoted to a "constrained proposer." Final authority rests with the program truth.</p>
+</div>
+
+<div class="card">
+<h4>免疫系统 → Runtime 映射 · Immune → Runtime Mapping</h4>
+<table>
+<tr><th>生物免疫 · Biological</th><th>Progmune Runtime</th><th>用户价值 · User Value</th></tr>
+<tr><td>天然免疫 Innate</td><td>SVL-1/2/3 约束引擎</td><td>零配置自动校验 (fast, universal)</td></tr>
+<tr><td>获得性免疫 Adaptive</td><td>SSG + Protocol Detector</td><td>协议级别精准检测 (specific, learned)</td></tr>
+<tr><td>免疫记忆 Memory</td><td>Ledger + Certificate + Evolution</td><td>可追溯可审计 (auditable, evolving)</td></tr>
+<tr><td>自身/非自身 Self/Non-self</td><td>IR 程序真相提取</td><td>不依赖 LLM 自述 (model-independent)</td></tr>
+</table>
+</div>
+
+<div class="card green">
+<h4>与 CoT 路线的根本区别 · vs Chain-of-Thought</h4>
+<table>
+<tr><th>CoT 路线</th><th>Progmune 路线</th></tr>
+<tr><td>相信模型的"思考过程"</td><td><strong>不信任模型的自述</strong></td></tr>
+<tr><td>LLM 既当运动员又当裁判</td><td><strong>LLM 是提案者，程序真相是裁决者</strong></td></tr>
+<tr><td>中间 token = 推理（ICML 2026 已证伪）</td><td><strong>外部验证 = 真值</strong></td></tr>
+<tr><td>越慢（越多思考）越准确</td><td><strong>确定性验证，不依赖思考长度</strong></td></tr>
+</table>
+<p class="en">ICML 2026 (Kambhampati et al.) proved LLM intermediate tokens ≠ reasoning. Progmune was built on this premise from day one.</p>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
