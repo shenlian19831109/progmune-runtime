@@ -164,7 +164,58 @@ const server = http.createServer((req, res) => {
         }
       }
     }
-    json(res, { total: pkgs.length, packages: pkgs.map(p => ({ domain: p.domain, version: p.version, units: p.summary?.totalUnits, stable: p.summary?.stableUnits, repos: p.summary?.validatedRepos })) });
+    json(res, {
+      registry: "Progmune Knowledge Package Registry",
+      version: "1.0.0",
+      total: pkgs.length,
+      packages: pkgs.map(p => ({
+        name: p.domain,
+        version: p.version,
+        units: p.summary?.totalUnits,
+        stable: p.summary?.stableUnits,
+        concepts: p.summary?.totalConcepts,
+        repos: p.summary?.validatedRepos,
+        rfcs: p.summary?.rfcReferences,
+        download: `/knowledge/packages/${p.domain.toLowerCase()}`,
+      })),
+    });
+    return;
+  }
+
+  // GET /knowledge/packages/:domain — download package
+  if (url.startsWith("/knowledge/packages/")) {
+    const domain = url.split("/knowledge/packages/")[1];
+    const pkgFile = `benchmarks/kb-package-${domain.toLowerCase()}.json`;
+    const fs = require("fs");
+    if (!fs.existsSync(pkgFile)) { json(res, { error: "Package not found" }, 404); return; }
+    const pkg = JSON.parse(fs.readFileSync(pkgFile, "utf-8"));
+    res.writeHead(200, {
+      "Content-Type": "application/json",
+      "Content-Disposition": `attachment; filename="kb-package-${domain.toLowerCase()}.json"`,
+      "X-Package-Version": pkg.version,
+      "X-Package-Domain": pkg.domain,
+      "X-Package-Units": String(pkg.summary?.totalUnits || 0),
+      "Access-Control-Allow-Origin": "*",
+    });
+    res.end(JSON.stringify(pkg, null, 2));
+    return;
+  }
+
+  // GET /knowledge/compatibility
+  if (url === "/knowledge/compatibility") {
+    const kb = buildKnowledgeBase();
+    json(res, {
+      knowledgeVersion: kb.version,
+      runtimeVersion: "1.0.0",
+      packages: kb.units.map(u => u.domain).filter((v, i, a) => a.indexOf(v) === i).map(d => ({
+        domain: d,
+        packageVersion: "1.0.0",
+        knowledgeVersion: kb.version,
+        compatible: true,
+        units: kb.units.filter(u => u.domain === d).length,
+        stableUnits: kb.units.filter(u => u.domain === d && u.maturity === "stable").length,
+      })),
+    });
     return;
   }
 
