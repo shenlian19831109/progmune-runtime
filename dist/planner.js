@@ -458,10 +458,11 @@ async function plan(userIntent, llmSeeds) {
     catch { /* topology rebuild — optional */ }
     // Helper: wrap actions into PlanResult
     let repairMetrics = { applied: false, count: 0, branchIds: [] };
-    const wrapResult = (actions, repair) => ({
+    const wrapResult = (actions, repair, degraded = false) => ({
         actions,
         sessionId: session?.sessionId || "",
         ruleHash: session?.ruleHash,
+        degraded,
         repairApplied: repair?.applied ?? repairMetrics.applied,
         repairCount: repair?.count ?? repairMetrics.count,
         repairBranchIds: repair?.branchIds ?? repairMetrics.branchIds,
@@ -821,7 +822,12 @@ ${planner_prompts_1.RETRY_HINT}
         if (!text)
             continue;
         text = text.replace(/```(?:json|javascript)?\s*/gi, '').replace(/```\s*/g, '').trim();
-        console.error("📝 LLM 输出:\n", text);
+        if ((0, llm_1.isVerbose)()) {
+            console.error(`\n📝 [VERBOSE] LLM raw output (attempt ${r + 1}/${maxRetries}):\n${text.slice(0, 3000)}${text.length > 3000 ? `\n... [${text.length - 3000} more chars]` : ""}\n`);
+        }
+        else {
+            console.error("📝 LLM 输出:\n", text);
+        }
         // 优先尝试 JSON 解析，失败则回退到 DSL 执行
         let rawActions = parseActionJSON(text);
         if (!rawActions || !Array.isArray(rawActions)) {
@@ -898,6 +904,18 @@ ${planner_prompts_1.RETRY_HINT}
         const enriched = enrichActions(rawActions, ir);
         const filtered = enriched.filter(a => !forbiddenFuncs.includes(a.kind === "call" ? a.function : ''));
         let ssgTransitions = [];
+        if ((0, llm_1.isVerbose)()) {
+            console.error(`🔬 [VERBOSE] Parsed ${rawActions.length} actions → ${enriched.length} enriched → ${filtered.length} after filtering`);
+            for (let ai = 0; ai < filtered.length; ai++) {
+                const a = filtered[ai];
+                if (a.kind === "call") {
+                    console.error(`  [${ai}] call ${a.function}(${(a.args || []).map((x) => `${x.name}=${JSON.stringify(x.value)}`).join(", ")})`);
+                }
+                else {
+                    console.error(`  [${ai}] ${a.kind}`);
+                }
+            }
+        }
         // 0) Hard Constraint Pre-check: local scan before full validation
         //    Saves LLM tokens by detecting obvious violations first
         const preCheckRules = new Map();
@@ -1093,9 +1111,21 @@ ${planner_prompts_1.RETRY_HINT}
             }
             // SSG passed — capture transitions
             ssgTransitions = protoResult.transitions;
+            if ((0, llm_1.isVerbose)()) {
+                console.error(`✅ [VERBOSE] Protocol (SSG) validation passed — ${ssgTransitions.length} transitions recorded`);
+                for (const t of ssgTransitions.slice(0, 5)) {
+                    const ns = t.namespace || "_global";
+                    const before = t.statesBefore?.[ns] || [];
+                    const after = t.statesAfter?.[ns] || [];
+                    console.error(`  ${t.function}: [${before.join(",") || "·"}] → [${after.join(",") || "·"}] (ns=${ns})`);
+                }
+            }
         }
         // 3) 语义合约校验
         const semResult = (0, semantic_validator_1.checkSemantic)(userIntent, filtered);
+        if ((0, llm_1.isVerbose)() && semResult.valid) {
+            console.error(`✅ [VERBOSE] Semantic contract validation passed`);
+        }
         if (!semResult.valid) {
             console.error("⚠️ 语义校验失败:", semResult.errors.join(", "));
             const violation = {
@@ -1251,7 +1281,8 @@ ${planner_prompts_1.RETRY_HINT}
             session.endedAt = Date.now();
             (0, failure_corpus_1.recordSession)(session);
             (0, failure_corpus_1.clearCheckpoint)(userIntent);
-            return wrapResult(fallback);
+            console.error("[降级] 返回回退结果 — 代码质量可能不高，建议人工审核。");
+            return wrapResult(fallback, undefined, true);
         }
         (0, memory_layer_1.recordEpisode)({ intent: userIntent, actions: [], success: false });
         session.resolved = false;
@@ -1262,7 +1293,8 @@ ${planner_prompts_1.RETRY_HINT}
     }
     return wrapResult(finalActions);
 }
-/** 本地规则回退：当 LLM 不可用时，根据意图关键词生成简单动作序列 */
+/** 本地规则回退：当 LLM 不可用时，根据意图关键词生成简单动作序列。
+ *  使用实际的默认值（而非占位符），确保生成的代码至少可以编译运行。 */
 function generateFallbackPlan(intent, ir) {
     const intentLower = intent.toLowerCase();
     const actions = [];
@@ -1277,19 +1309,30 @@ function generateFallbackPlan(intent, ir) {
     }
     if (matchedFuncs.length === 0)
         return [];
+    // Sensible default values per type — no placeholder strings
+    function defaultValue(typeName) {
+        const t = (typeName || "string").toLowerCase();
+        if (t === "number")
+            return 0;
+        if (t === "boolean")
+            return false;
+        if (t.includes("[]") || t.includes("array"))
+            return [];
+        return ""; // string default
+    }
     for (const fn of matchedFuncs) {
         const args = (fn.params || []).map((p, i) => ({
             name: p.name || `p${i}`,
-            type: p.type || 'any',
-            value: `{{${p.name || `p${i}`}}}`
+            type: p.type || "string",
+            value: defaultValue(p.type || "string"),
         }));
-        const assignTo = fn.returnType && fn.returnType !== 'void' && fn.returnType !== 'undefined'
+        const assignTo = fn.returnType && fn.returnType !== "void" && fn.returnType !== "undefined"
             ? `${fn.name}_result` : undefined;
         if (assignTo) {
-            actions.push({ kind: 'call', function: fn.name, args, assignTo });
+            actions.push({ kind: "call", function: fn.name, args, assignTo });
         }
         else {
-            actions.push({ kind: 'call', function: fn.name, args });
+            actions.push({ kind: "call", function: fn.name, args });
         }
     }
     return actions;

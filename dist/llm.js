@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.callCount = void 0;
 exports.resetCallCount = resetCallCount;
 exports.estimateTokens = estimateTokens;
+exports.isVerbose = isVerbose;
 exports.generate = generate;
 exports.chat = chat;
 try {
@@ -33,6 +34,35 @@ const apiKey = process.env.LLM_API_KEY || "sk-xxxx";
 const baseURL = process.env.LLM_BASE_URL || selected.baseURL;
 const model = process.env.LLM_MODEL || selected.model;
 const client = new openai_1.default({ apiKey, baseURL });
+// ── API Key validation ──
+const KNOWN_KEY_PREFIXES = {
+    "ghp_": "GitHub Personal Access Token (classic)",
+    "github_pat_": "GitHub Personal Access Token (fine-grained)",
+    "glpat-": "GitLab Personal Access Token",
+    "sk-xxxx": "placeholder / default value",
+    "your-key": "placeholder / default value",
+};
+function validateApiKey(key) {
+    const warnings = [];
+    if (!key || key === "sk-xxxx" || key === "your-key") {
+        warnings.push("❌ LLM_API_KEY is not set or is a placeholder. Configure via .env: LLM_API_KEY=your-deepseek-key");
+        return warnings;
+    }
+    for (const [prefix, label] of Object.entries(KNOWN_KEY_PREFIXES)) {
+        if (key.startsWith(prefix)) {
+            warnings.push(`⚠️  LLM_API_KEY looks like a ${label} (prefix: "${prefix}"), not an LLM API key. DeepSeek keys start with "sk-". Get one at https://platform.deepseek.com/api_keys`);
+            break;
+        }
+    }
+    if (key.length < 20) {
+        warnings.push(`⚠️  LLM_API_KEY is unusually short (${key.length} chars). Most API keys are 30+ characters.`);
+    }
+    return warnings;
+}
+const keyWarnings = validateApiKey(apiKey);
+for (const w of keyWarnings) {
+    console.error(w);
+}
 exports.callCount = 0;
 function resetCallCount() { exports.callCount = 0; }
 const MAX_LLM_CALLS = parseInt(process.env.PROGMUNE_MAX_LLM_CALLS || "50", 10);
@@ -59,18 +89,32 @@ function estimateTokens(text) {
     const other = text.length - cjk;
     return Math.ceil(cjk * 1.5 + other * 0.4);
 }
+// ── Verbose debug logging ──
+const VERBOSE = process.env.PROGMUNE_VERBOSE === "1";
+function vlog(label, content, maxLen = 2000) {
+    if (!VERBOSE)
+        return;
+    const truncated = content.length > maxLen
+        ? content.slice(0, maxLen) + `\n... [truncated, ${content.length} total chars]`
+        : content;
+    console.error(`\n${"═".repeat(60)}\n🔍 [VERBOSE] ${label}\n${"─".repeat(60)}\n${truncated}\n${"═".repeat(60)}`);
+}
+function isVerbose() { return VERBOSE; }
 /** @requires PROMPT @produces LLM_RESPONSE */
 async function generate(prompt) {
     assertCallLimit();
     await applyRateLimit();
     exports.callCount++;
     lastCallTime = Date.now();
+    vlog(`LLM Call #${exports.callCount} (generate) | Model: ${model} | Prompt (${estimateTokens(prompt)} est. tokens)`, prompt);
     const resp = await client.chat.completions.create({
         model,
         messages: [{ role: "user", content: prompt }],
         temperature: 0.0,
     });
-    return resp.choices[0]?.message?.content || "";
+    const content = resp.choices[0]?.message?.content || "";
+    vlog(`LLM Response #${exports.callCount} (${estimateTokens(content)} est. tokens, finish=${resp.choices[0]?.finish_reason})`, content);
+    return content;
 }
 /** 带 system prompt 的调用：静态规则放 system，动态内容放 user，语义分离便于未来对接各平台缓存策略 */
 /** @requires SYSTEM_PROMPT @produces LLM_RESPONSE */
@@ -79,6 +123,8 @@ async function chat(systemPrompt, userPrompt) {
     await applyRateLimit();
     exports.callCount++;
     lastCallTime = Date.now();
+    const totalTokens = estimateTokens(systemPrompt) + estimateTokens(userPrompt);
+    vlog(`LLM Call #${exports.callCount} (chat) | Model: ${model} | System (${estimateTokens(systemPrompt)}t) + User (${estimateTokens(userPrompt)}t) = ${totalTokens} est. tokens`, `── SYSTEM ──\n${systemPrompt}\n── USER ──\n${userPrompt}`);
     const resp = await client.chat.completions.create({
         model,
         messages: [
@@ -87,5 +133,7 @@ async function chat(systemPrompt, userPrompt) {
         ],
         temperature: 0.0,
     });
-    return resp.choices[0]?.message?.content || "";
+    const content = resp.choices[0]?.message?.content || "";
+    vlog(`LLM Response #${exports.callCount} (${estimateTokens(content)} est. tokens, finish=${resp.choices[0]?.finish_reason})`, content);
+    return content;
 }

@@ -131,7 +131,7 @@ console.log(`\nPrecision: ${(result.precision * 100).toFixed(1)}%`);
 console.log(`Recall:    ${(result.recall * 100).toFixed(1)}%`);
 console.log(`F1 Score:  ${(result.f1 * 100).toFixed(1)}%`);
 // 显示不匹配的详情
-const mismatches = result.details.filter(d => !d.matched);
+const mismatches = (result.details || []).filter((d) => !d.matched);
 if (mismatches.length > 0) {
     console.log(`\n--- Mismatches (${mismatches.length}) ---`);
     for (const m of mismatches) {

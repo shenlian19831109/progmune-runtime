@@ -1,0 +1,156 @@
+"use strict";
+/**
+ * Phase 9: PLSB Markdown Report Generator
+ *
+ * Generates a self-contained markdown report for the PLSB benchmark.
+ * Suitable for human stakeholders, CI artifacts, and PDF conversion.
+ */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.PLSB_REPORT_PATH = void 0;
+exports.generatePLSBReportMarkdown = generatePLSBReportMarkdown;
+const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
+function generatePLSBReportMarkdown(outputPath) {
+    const { buildPLSB, PROTOCOL_WEAKNESS_TAXONOMY } = require("../plsb-benchmark");
+    const benchmark = buildPLSB();
+    const taxonomy = PROTOCOL_WEAKNESS_TAXONOMY;
+    const lines = [];
+    lines.push("# PLSB Report: Protocol Lifecycle Security Benchmark");
+    lines.push("");
+    lines.push(`**Version:** ${benchmark.version || "1.0"}`);
+    lines.push(`**Generated:** ${new Date().toISOString()}`);
+    lines.push(`**Source:** Progmune Runtime v3.2.0`);
+    lines.push("");
+    // ── Summary ──
+    lines.push("## Summary");
+    lines.push("");
+    lines.push(`| Metric | Value |`);
+    lines.push(`|--------|-------|`);
+    lines.push(`| Total Entries | ${benchmark.metadata?.total || 0} |`);
+    lines.push(`| Verified Entries | ${benchmark.metadata?.verified || 0} |`);
+    lines.push(`| Recall | ${((benchmark.metadata?.recall || 0) * 100).toFixed(0)}% |`);
+    lines.push(`| Precision | ${((benchmark.metadata?.precision || 0) * 100).toFixed(0)}% |`);
+    lines.push(`| Categories Covered | ${Object.keys(benchmark.metadata?.byPLS || {}).length} / ${taxonomy.length} |`);
+    lines.push("");
+    // ── Taxonomy Grid ──
+    lines.push("## Protocol Weakness Taxonomy");
+    lines.push("");
+    lines.push(`| PLS-ID | Name | Category | Entries | Status |`);
+    lines.push(`|--------|------|----------|---------|--------|`);
+    const byPLS = benchmark.metadata?.byPLS || {};
+    for (const t of taxonomy) {
+        const count = byPLS[t.id] || 0;
+        const status = count > 0 ? "✅ Covered" : "⚠️ Uncovered";
+        lines.push(`| ${t.id} | ${t.name} | ${t.category} | ${count} | ${status} |`);
+    }
+    lines.push("");
+    // ── Entries Table ──
+    const entries = benchmark.entries || [];
+    if (entries.length > 0) {
+        lines.push("## Entries");
+        lines.push("");
+        lines.push(`| ID | PLS | Category | Severity | Verified | CVE / Source |`);
+        lines.push(`|----|-----|----------|----------|----------|-------------|`);
+        for (const e of entries.slice(0, 30)) {
+            const cveRef = e.cve ? `CVE-${e.cve}` : e.source || "—";
+            lines.push(`| ${e.id} | ${e.pls_id || "—"} | ${e.category} | ${e.severity} | ${e.verified ? "✅" : "—"} | ${cveRef} |`);
+        }
+        if (entries.length > 30) {
+            lines.push(`| ... | ... | ${entries.length - 30} more entries ... |`);
+        }
+        lines.push("");
+    }
+    // ── Per-Category Detail ──
+    lines.push("## Category Breakdown");
+    lines.push("");
+    const byCategory = benchmark.metadata?.byCategory || {};
+    const categories = [...new Set(taxonomy.map((t) => t.category))];
+    for (const cat of categories) {
+        const count = byCategory[cat] || 0;
+        const plsInCat = taxonomy.filter((t) => t.category === cat).map((t) => t.id);
+        lines.push(`### ${cat} (${count} entries)`);
+        lines.push(`Covered PLS: ${plsInCat.filter((id) => (byPLS[id] || 0) > 0).join(", ") || "none"}`);
+        lines.push("");
+    }
+    // ── Detector Performance ──
+    lines.push("## Detector Performance");
+    lines.push("");
+    const recall = (benchmark.metadata?.recall || 0) * 100;
+    const precision = (benchmark.metadata?.precision || 0) * 100;
+    lines.push(`| Metric | Value | Rating |`);
+    lines.push(`|--------|-------|--------|`);
+    lines.push(`| Recall | ${recall.toFixed(0)}% | ${recall > 85 ? "✅ Excellent" : recall > 70 ? "⚠️ Good" : "❌ Needs Improvement"} |`);
+    lines.push(`| Precision | ${precision.toFixed(0)}% | ${precision > 80 ? "✅ Excellent" : precision > 60 ? "⚠️ Good" : "❌ Needs Improvement"} |`);
+    lines.push("");
+    // ── Certification ──
+    lines.push("## Certification");
+    lines.push("");
+    lines.push("This benchmark was generated by **Progmune Runtime** — an AI-generated software governance system.");
+    lines.push("");
+    lines.push("- **Detector:** Protocol Lifecycle Security (13-category taxonomy)");
+    lines.push("- **Methodology:** State machine fingerprint comparison (structural violation detection)");
+    lines.push("- **Gold Standard:** 20 manually-verified real-world defect cases");
+    lines.push("");
+    if (recall > 85) {
+        lines.push("### Verdict: CERTIFIED ✅");
+        lines.push("");
+        lines.push("The PLSB detector exceeds the 85% recall threshold for protocol lifecycle vulnerability detection.");
+    }
+    else if (recall > 70) {
+        lines.push("### Verdict: PROMISING ⚠️");
+        lines.push("");
+        lines.push("The PLSB detector exceeds 70% recall. Additional gold cases are needed for uncovered categories.");
+    }
+    else {
+        lines.push("### Verdict: IN DEVELOPMENT 🔬");
+        lines.push("");
+        lines.push("The PLSB detector is under active development. Recall is below 70% — more protocol rules and gold cases needed.");
+    }
+    lines.push("");
+    lines.push("---");
+    lines.push("*Generated by [Progmune Runtime](https://github.com/shenlian19831109/progmune-runtime)*");
+    const output = lines.join("\n");
+    // Write to disk
+    if (outputPath) {
+        const outDir = path.dirname(outputPath);
+        if (!fs.existsSync(outDir)) {
+            fs.mkdirSync(outDir, { recursive: true });
+        }
+        fs.writeFileSync(outputPath, output, "utf-8");
+    }
+    return output;
+}
+exports.PLSB_REPORT_PATH = "benchmarks/plsb-report.md";
