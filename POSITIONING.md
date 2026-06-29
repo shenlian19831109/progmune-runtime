@@ -1,4 +1,4 @@
-# Progmune — Verification Knowledge Network
+# Progmune — AI Software Verification Infrastructure
 
 ## One sentence
 
@@ -9,7 +9,22 @@
 
 ## What we are
 
-A **network** — not a base, not a graph. A network grows. Every node strengthens every other.
+**AI Software Verification Infrastructure** — not "Global AI Governance" (too broad).
+We verify one thing deeply: protocol lifecycle compliance in AI-generated code.
+The network effect: every verified repo strengthens every Knowledge Unit.
+
+## What we are NOT
+
+❌ Global AI Governance Infrastructure (covers model, data, agent, prompt, identity — we don't)
+❌ A CodeQL/Semgrep competitor (we detect what they cannot see)
+❌ An AI code generator (we govern, we don't generate)
+
+## Scope
+
+We focus on **protocol lifecycle verification** — the gap SAST cannot see.
+Our Knowledge Network covers TLS, SSH, HTTP, HTTP/2 today.
+Future: Filesystem, Database, Container, Workflow, MCP, Identity, Agent, GPU.
+The network grows. The verification deepens. The evidence accumulates.
 
 ```
 Evidence → Knowledge → Verification → Governance → Observation → Knowledge
