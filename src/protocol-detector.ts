@@ -66,6 +66,15 @@ const PROTOCOLS: ProtocolDefinition[] = [
       { pattern: /\b(\w*quic\w*send|\w*quic\w*recv|\w*quiche_conn)\b/i, label: "quic_transfer", required: true },
     ],
   },
+  {
+    name: "Auth Protocol", category: "auth", minCompleteness: 0.5,
+    steps: [
+      { pattern: /\b(login|register|authenticate|signin)\b/i, label: "auth_login", required: true },
+      { pattern: /\b(generate_token|issue_token|create_session|jwt_sign)\b/i, label: "auth_token", required: true },
+      { pattern: /\b(get_profile|access_resource|verify_token|authorize)\b/i, label: "auth_access", required: true },
+      { pattern: /\b(logout|destroy_session|revoke_token|invalidate)\b/i, label: "auth_logout", required: true },
+    ],
+  },
 ];
 
 // ═══════════════════════════════════════════════════════════════
