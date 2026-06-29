@@ -70,9 +70,9 @@ const PROTOCOLS: ProtocolDefinition[] = [
     name: "Auth Protocol", category: "auth", minCompleteness: 0.5,
     steps: [
       { pattern: /\b(login|register|authenticate|signin)\b/i, label: "auth_login", required: true },
-      { pattern: /\b(generate_token|issue_token|create_session|jwt_sign)\b/i, label: "auth_token", required: true },
-      { pattern: /\b(get_profile|access_resource|verify_token|authorize)\b/i, label: "auth_access", required: true },
-      { pattern: /\b(logout|destroy_session|revoke_token|invalidate)\b/i, label: "auth_logout", required: true },
+      { pattern: /\b(generate_token|generate_access_token|issue_token|create_session|jwt_sign)\b/i, label: "auth_token", required: true },
+      { pattern: /\b(refresh_token|get_profile|access_resource|verify_token|authorize|access_token)\b/i, label: "auth_access", required: true },
+      { pattern: /\b(logout|destroy_session|revoke_token|token_revoke|invalidate)\b/i, label: "auth_logout", required: true },
     ],
   },
 ];

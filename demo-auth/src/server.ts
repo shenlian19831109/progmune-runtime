@@ -1,30 +1,40 @@
-// @progmune-generated session=demo-auth-001 timestamp=2026-06-29T09:00:00Z ruleHash=auth001
+// @progmune-generated session=demo-auth-002 timestamp=2026-06-29T10:00:00Z ruleHash=auth002
 /**
  * @protocol AuthProtocol
  * @state UNAUTHENTICATED
  * @state AUTHENTICATED
- * @state TOKEN_ISSUED
+ * @state ACCESS_ISSUED
+ * @state REFRESHED
  * @state AUTHORIZED
  * @state TERMINATED
  *
  * @transition login: UNAUTHENTICATED -> AUTHENTICATED
- * @transition generate_token: AUTHENTICATED -> TOKEN_ISSUED
- * @transition access_resource: TOKEN_ISSUED -> AUTHORIZED
+ * @transition generate_access_token: AUTHENTICATED -> ACCESS_ISSUED
+ * @transition refresh_token: ACCESS_ISSUED -> REFRESHED
+ * @transition access_resource: ACCESS_ISSUED -> AUTHORIZED
+ * @transition access_resource: REFRESHED -> AUTHORIZED
  * @transition logout: AUTHORIZED -> TERMINATED
+ * @transition token_revoke: AUTHORIZED -> TERMINATED
+ * @transition token_revoke: REFRESHED -> TERMINATED
  *
- * @purpose Authentication and session management microservice
- * @tags auth, jwt, session, express
+ * @purpose JWT + Refresh Token authentication microservice
+ * @tags auth, jwt, refresh-token, session, express
  */
 
 import express from 'express';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 
 const app = express();
 app.use(express.json());
 
-// 模拟用户数据库
 const users: Record<string, { password: string }> = {};
-const sessions: Record<string, string> = {};
+const accessTokens: Record<string, { username: string; expiresAt: number }> = {};
+const refreshTokens: Record<string, { username: string; used: boolean; expiresAt: number }> = {};
+
+// ═══════════════════════════════════════════════════════════════
+// Protocol Functions (annotated for Progmune)
+// ═══════════════════════════════════════════════════════════════
 
 /**
  * @protocol AuthProtocol
@@ -38,36 +48,84 @@ function login(username: string, password: string): boolean {
 /**
  * @protocol AuthProtocol
  * @pre_states AUTHENTICATED
- * @post_states TOKEN_ISSUED
+ * @post_states ACCESS_ISSUED
  */
-function generateToken(username: string): string {
-  const token = jwt.sign({ username }, 'secret', { expiresIn: '1h' });
-  sessions[username] = token;
-  // ❌ 违规 2：资源泄漏 — JWT 生成后未记录失效时间或清理旧 token
-  // sessions 中的旧 token 从未被清理，也没有设置过期检查
+function generateAccessToken(username: string): string {
+  const token = jwt.sign({ username, type: 'access' }, 'secret', { expiresIn: '15m' });
+  accessTokens[token] = { username, expiresAt: Date.now() + 15 * 60 * 1000 };
   return token;
 }
 
 /**
  * @protocol AuthProtocol
- * @pre_states TOKEN_ISSUED
- * @post_states AUTHORIZED
+ * @pre_states AUTHENTICATED
+ * @post_states ACCESS_ISSUED
  */
-function accessResource(token: string): boolean {
-  const decoded = jwt.verify(token, 'secret') as { username: string };
-  return !!sessions[decoded.username];
+function generateRefreshToken(username: string): string {
+  const token = crypto.randomBytes(32).toString('hex');
+  refreshTokens[token] = { username, used: false, expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000 };
+  // ❌ 违规 3：refreshtoken 创建后从未被清理——资源泄漏
+  return token;
 }
 
 /**
  * @protocol AuthProtocol
- * @pre_states AUTHORIZED
+ * @pre_states ACCESS_ISSUED
+ * @post_states REFRESHED
+ */
+function refreshAccessToken(refreshToken: string): { accessToken: string } | null {
+  const rt = refreshTokens[refreshToken];
+  // ❌ 违规 1：refresh token 绕过——未检查是否过期或已使用，直接生成新 token
+  // 协议要求：必须验证 refresh token 有效性，标记为已使用
+  if (!rt) return null;
+
+  // ❌ 违规 2：Token 重用——未将 refreshToken 标记为 used=true
+  // 应该：rt.used = true 或 delete refreshTokens[refreshToken]
+
+  const newAccess = generateAccessToken(rt.username);
+  return { accessToken: newAccess };
+}
+
+/**
+ * @protocol AuthProtocol
+ * @pre_states ACCESS_ISSUED, REFRESHED
+ * @post_states AUTHORIZED
+ */
+function accessResource(accessToken: string): { username: string } | null {
+  const at = accessTokens[accessToken];
+  if (!at || at.expiresAt < Date.now()) return null;
+  return { username: at.username };
+}
+
+/**
+ * @protocol AuthProtocol
+ * @pre_states AUTHORIZED, REFRESHED
  * @post_states TERMINATED
  */
 function logoutUser(username: string): void {
-  delete sessions[username];
+  for (const [token, data] of Object.entries(accessTokens)) {
+    if (data.username === username) delete accessTokens[token];
+  }
+  // ❌ 违规 4：logout 只清理 access token，未清理 refresh token——资源泄漏
+  // 应该同时清理 refreshTokens 中对应 username 的条目
 }
 
-// ── Routes ──
+/**
+ * @protocol AuthProtocol
+ * @pre_states AUTHORIZED, REFRESHED
+ * @post_states TERMINATED
+ */
+function revokeToken(token: string): boolean {
+  if (refreshTokens[token]) {
+    delete refreshTokens[token];
+    return true;
+  }
+  return false;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Routes
+// ═══════════════════════════════════════════════════════════════
 
 app.post('/register', (req, res) => {
   const { username, password } = req.body;
@@ -79,25 +137,33 @@ app.post('/register', (req, res) => {
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
   if (login(username, password)) {
-    // 调用 generateToken 生成 JWT —— 合法步骤
-    const token = generateToken(username);
-    res.json({ token });
+    const accessToken = generateAccessToken(username);
+    const refreshToken = generateRefreshToken(username);
+    res.json({ accessToken, refreshToken });
   } else {
     res.status(401).json({ error: 'Invalid credentials' });
   }
 });
 
-// ❌ 违规 1：认证绕过
-// /profile 端点缺少 JWT 验证 —— 直接从 UNAUTHENTICATED 访问受保护资源
-// 协议要求：必须先 login → generate_token → 才能 access_resource
-// 但这里跳过了所有这些步骤，仅靠 query 参数判断
+app.post('/refresh', (req, res) => {
+  const { refreshToken } = req.body;
+  if (!refreshToken) return res.status(400).json({ error: 'Refresh token required' });
+
+  const result = refreshAccessToken(refreshToken);
+  if (!result) return res.status(401).json({ error: 'Invalid refresh token' });
+
+  // ❌ 违规：refresh 后未更新协议状态就直接返回
+  res.json(result);
+});
+
 app.get('/profile', (req, res) => {
-  const { userId } = req.query;
-  if (userId && users[userId as string]) {
-    res.json({ user: userId, data: 'sensitive info' });
-  } else {
-    res.status(401).json({ error: 'Unauthorized' });
-  }
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) return res.status(401).json({ error: 'No token provided' });
+
+  const user = accessResource(token);
+  if (!user) return res.status(401).json({ error: 'Invalid or expired token' });
+
+  res.json({ user: user.username, data: 'sensitive profile data' });
 });
 
 app.post('/logout', (req, res) => {
@@ -106,6 +172,15 @@ app.post('/logout', (req, res) => {
   res.json({ message: 'Logged out' });
 });
 
-app.listen(3000, () => console.log('Server running on port 3000'));
+app.post('/revoke', (req, res) => {
+  const { token } = req.body;
+  if (revokeToken(token)) {
+    res.json({ message: 'Token revoked' });
+  } else {
+    res.status(404).json({ error: 'Token not found' });
+  }
+});
+
+app.listen(3000, () => console.log('JWT + Refresh Token server running on port 3000'));
 
 export default app;
