@@ -21,6 +21,7 @@
 import * as http from "http";
 import { buildKnowledgeBase } from "./protocol-knowledge";
 import { buildEvidenceRepository } from "./evidence-repository";
+import { buildKnowledgeGraph } from "./knowledge-graph";
 
 const PORT = parseInt(process.env.PROGMUNE_KB_PORT || "3400", 10);
 
@@ -126,6 +127,44 @@ const server = http.createServer((req, res) => {
     const record = er.repos.find(r => r.repo === repo);
     if (!record) { json(res, { error: "Repo not found" }, 404); return; }
     json(res, record);
+    return;
+  }
+
+  // GET /knowledge/network
+  if (url === "/knowledge/network") {
+    const g = buildKnowledgeGraph();
+    json(res, { nodes: g.nodes.length, edges: g.edges.length, adjacency: g.adjacency, topNodes: g.nodes.map(n => ({ id: n.id, name: n.name, domain: n.domain, maturity: n.maturity, inDegree: g.inDegree[n.id] || 0, outDegree: g.outDegree[n.id] || 0 })).sort((a: any, b: any) => (b.inDegree + b.outDegree) - (a.inDegree + a.outDegree)) });
+    return;
+  }
+
+  // GET /knowledge/network/:nodeId
+  if (url.startsWith("/knowledge/network/")) {
+    const nodeId = url.split("/knowledge/network/")[1];
+    const g = buildKnowledgeGraph();
+    const node = g.nodes.find(n => n.id === nodeId);
+    if (!node) { json(res, { error: "Node not found" }, 404); return; }
+    const { getDependencies, getDependents } = require("./knowledge-graph");
+    json(res, {
+      node,
+      dependsOn: getDependencies(g, nodeId).map(n => ({ id: n.id, name: n.name })),
+      dependedBy: getDependents(g, nodeId).map(n => ({ id: n.id, name: n.name })),
+      edges: g.edges.filter(e => e.from === nodeId || e.to === nodeId),
+    });
+    return;
+  }
+
+  // GET /knowledge/packages
+  if (url === "/knowledge/packages") {
+    const fs = require("fs");
+    const pkgs: any[] = [];
+    if (fs.existsSync("benchmarks")) {
+      for (const f of fs.readdirSync("benchmarks")) {
+        if (f.startsWith("kb-package-") && f.endsWith(".json")) {
+          try { pkgs.push(JSON.parse(fs.readFileSync(`benchmarks/${f}`, "utf-8"))); } catch {}
+        }
+      }
+    }
+    json(res, { total: pkgs.length, packages: pkgs.map(p => ({ domain: p.domain, version: p.version, units: p.summary?.totalUnits, stable: p.summary?.stableUnits, repos: p.summary?.validatedRepos })) });
     return;
   }
 
