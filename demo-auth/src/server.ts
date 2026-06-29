@@ -1,3 +1,4 @@
+// @progmune-generated session=demo-auth-001 timestamp=2026-06-29T09:00:00Z ruleHash=auth001
 /**
  * @protocol AuthProtocol
  * @state UNAUTHENTICATED
@@ -14,8 +15,6 @@
  * @purpose Authentication and session management microservice
  * @tags auth, jwt, session, express
  */
-
-// @progmune-generated session=demo-auth-001 timestamp=2026-06-29T09:00:00Z ruleHash=auth001
 
 import express from 'express';
 import jwt from 'jsonwebtoken';
