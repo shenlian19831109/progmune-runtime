@@ -77,6 +77,46 @@ th{color:var(--accent);font-weight:600;font-size:.8rem;text-transform:uppercase}
 <tr><td>Resource Acquire No Release</td><td>Resource</td><td><span class="badge b-red">Critical</span></td><td>98%</td><td>250 seqs</td></tr>
 </table>
 
+<h2>FP/FN Root Cause Analysis (curl, 85 labeled)</h2>
+<div class="grid g2">
+<div class="card">
+<h3>False Positives (8 cases, Precision=58%)</h3>
+<p><strong>Why are clean sequences flagged?</strong></p>
+<table>
+<tr><th>Category</th><th>Count</th><th>Pct</th></tr>
+<tr><td>Double-Free FP (cleanup functions)</td><td>4</td><td>50%</td></tr>
+<tr><td>Memory Leak FP (allocator patterns)</td><td>2</td><td>25%</td></tr>
+<tr><td>SSL Leak FP</td><td>1</td><td>13%</td></tr>
+<tr><td>Lifecycle Leak FP</td><td>1</td><td>13%</td></tr>
+</table>
+<p><strong>Root cause:</strong> 50% of FP are <code>curlx_free</code> in cleanup functions where the corresponding <code>malloc</code> happened in a different function. The detector's cleanup-function exemption catches some but not all cases. <strong>Fix target:</strong> expand cleanup patterns to include curl_multi_cleanup, Curl_close, etc.</p>
+</div>
+<div class="card">
+<h3>False Negatives (13 cases, Recall=46%)</h3>
+<p><strong>Why are real violations missed?</strong></p>
+<table>
+<tr><th>Category</th><th>Count</th><th>Pct</th></tr>
+<tr><td>SSL Config (no acquire/release pairs)</td><td>5</td><td>38%</td></tr>
+<tr><td>SSH State Machine (not in resource detector)</td><td>2</td><td>15%</td></tr>
+<tr><td>Multi Handle (cross-function lifecycle)</td><td>2</td><td>15%</td></tr>
+<tr><td>Auth Protocol (no resource pair)</td><td>1</td><td>8%</td></tr>
+<tr><td>Connection Lifecycle</td><td>1</td><td>8%</td></tr>
+<tr><td>QUIC/H2 (not in resource detector)</td><td>1</td><td>8%</td></tr>
+</table>
+<p><strong>Root cause:</strong> 38% of FN are SSL configuration functions (ossl_*, mbedtls_*) — these have no malloc/free pairs, the detector has nothing to latch onto. Protocol State Machine detector recovers some but not all. <strong>Fix target:</strong> add SSL config lifecycle patterns to Protocol Detector.</p>
+</div>
+</div>
+
+<h2>Auto-Labeling Reliability</h2>
+<div class="card">
+<p><strong>nginx/redis auto-labeling is unreliable for two distinct reasons:</strong></p>
+<ol>
+<li><strong>Heuristic limitation:</strong> Auto-labeling uses simple rules (has init+cleanup → clean). nginx's event-driven callback pattern (ngx_http_handler → ngx_http_process_request → ngx_http_finalize_request) doesn't match the init/use/cleanup heuristic, so all sequences are labeled "clean" — producing P=0%/R=0%.</li>
+<li><strong>Knowledge Base mismatch:</strong> nginx uses <code>ngx_*</code> prefix naming. The KB's protocol patterns (originally built on curl/libcurl naming) don't match nginx's naming conventions well. This is a <em>useful signal</em> — it reveals that current protocol definitions may have limited generalization to event-driven, callback-heavy code styles.</li>
+</ol>
+<p>This is not a data problem. It's a <strong>KB generalization gap</strong> — worth documenting, not just dismissing as "unreliable."</p>
+</div>
+
 <h2>Known Issues & Resolution</h2>
 <div class="card">
 <h3>TLS-DOUBLE-FREE (Fixed v3, 2026-06-30)</h3>
