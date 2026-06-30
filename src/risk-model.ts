@@ -90,18 +90,24 @@ export const DETECTION_PATTERNS: DetectionPattern[] = [
   {
     id: "TLS-DOUBLE-FREE",
     name: "TLS Double Free",
-    description: "SSL free called more times than init — possible double-free. Normal cleanup (1:1) is safe.",
+    description: "SSL free called on same object twice, or free without matching init. Normal cleanup (SSL_free + SSL_CTX_free for SSL_new + SSL_CTX_new) is safe.",
     protocolName: "TLS Handshake",
     conceptName: "Finished",
     severity: "Critical",
     confidence: 88,
     evidenceSequences: 135,
     detect: (calls) => {
-      const initCount = calls.filter(c => /\b(\w*SSL\w*new|\w*ssl\w*init|\w*SSL_CTX_new)\b/i.test(c)).length;
-      const freeCount = calls.filter(c => /\b(\w*ssl\w*free|\w*SSL_CTX_free)\b/i.test(c)).length;
-      return freeCount > initCount && freeCount >= 2;
+      // Count distinct SSL object types freed (not just total free calls)
+      const sslFreeCount = calls.filter(c => /\bSSL_free\b/i.test(c)).length;
+      const ctxFreeCount = calls.filter(c => /\bSSL_CTX_free\b/i.test(c)).length;
+      const sslNewCount = calls.filter(c => /\bSSL_new\b/i.test(c)).length;
+      const ctxNewCount = calls.filter(c => /\bSSL_CTX_new\b/i.test(c)).length;
+      // Violation: more frees than news for the SAME object type
+      const sslDoubleFree = sslFreeCount > sslNewCount;
+      const ctxDoubleFree = ctxFreeCount > ctxNewCount;
+      return (sslDoubleFree || ctxDoubleFree) && (sslFreeCount + ctxFreeCount >= 2);
     },
-    detail: "SSL free/cleanup called more times than init. Double-free vulnerability. Normal cleanup with matching init+free pairs is safe.",
+    detail: "SSL_free or SSL_CTX_free called more times than their matching init. Normal cleanup (1 SSL_free + 1 SSL_CTX_free for 1 SSL_new + 1 SSL_CTX_new) is safe.",
   },
 
   // ── SSH Patterns ──

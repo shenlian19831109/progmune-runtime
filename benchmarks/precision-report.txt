@@ -1,0 +1,33 @@
+
+[1m[36m╔══════════════════════════════════════════════╗[0m
+[1m[36m║[0m  [1mResource Lifecycle Precision — curl[0m               [1m[36m║[0m
+[1m[36m╚══════════════════════════════════════════════╝[0m
+
+  Samples:    85
+  TP: [32m11[0m  FP: [31m8[0m  TN: [32m53[0m  FN: [31m13[0m
+
+  Precision:  [33m58%[0m
+  Recall:     [31m46%[0m
+  F1:         [33m51%[0m
+
+  [33mDetails:[0m
+    [31mFN[0m [0] violation→clean  Curl_ssl_cf_get_config → ERR_clear_error → SSL_connect → Curl_ssl_setup_x509_store → defined
+    [31mFN[0m [1] violation→clean  Curl_ssl_cf_get_primary_config → Curl_ssl_cf_get_config → mbedtls_ssl_config_init → mbedtls_ssl_config_defaults → mbedtls_ssl_conf_dbg
+    [31mFN[0m [2] violation→clean  ssh_state_init → FALLTHROUGH → ssh_state_startup → ssh_state_hostkey → ssh_state_authlist
+    [31mFN[0m [3] violation→clean  myssh_state_init → FALLTHROUGH → myssh_in_S_STARTUP → myssh_is_known → myssh_to_ERROR
+    [31mFN[0m [6] violation→violation  Curl_ssl_cf_get_primary_config → Curl_ssl_cf_get_config → ossl_seed → ossl_init_method → SSL_CTX_new_ex
+       [2mSSL_CTX_new acquired without matching \b(SSL_free|TLS_free|wolfSSL_free|gtls_free|BIO_free|ossl_free|nghttp2_session_del|SSL_CTX_free|BIO_free_all)\b — possible resource leak[0m
+    [31mFN[0m [7] violation→violation  STACK_OF → SSL_get_peer_cert_chain → sk_X509_num → allowed → Curl_ssl_init_certinfo
+       [2mBIO_new acquired without matching \b(SSL_free|TLS_free|wolfSSL_free|gtls_free|BIO_free|ossl_free|nghttp2_session_del|SSL_CTX_free|BIO_free_all)\b — possible resource leak[0m
+    [33mFP[0m [8] clean→violation  curl_multi_remove_handle → send → Curl_detach_connection → curl_easy_perform → curl_multi_cleanup
+       [2mcurlx_free called without prior acquire — possible double-free or use-after-release[0m
+    [31mFN[0m [9] violation→clean  Curl_conn_get_current_host → Curl_bufref_init → sasl_state → Curl_auth_create_plain_message → Curl_auth_create_login_message
+    [31mFN[0m [10] violation→clean  GOOD_EASY_HANDLE → multi_posttransfer → multi_done → multistate → multi_warn_debug
+    [31mFN[0m [14] violation→violation  QuerySecurityPackageInfo → CURL_UNCONST → TEXT → FreeContextBuffer → curlx_malloc
+       [2mcurlx_malloc acquired without matching \b(free|curlx_free|zfree|ngx_free|ngx_pfree)\b — possible resource leak[0m
+    [31mFN[0m [16] violation→clean  CONN_SOCK_IDX_VALID → Curl_pollset_init → Curl_pollfds_init → Curl_conn_needs_flush → Curl_conn_flush
+    [31mFN[0m [18] violation→violation  nghttp2_session_get_stream_user_data → GOOD_EASY_HANDLE → H2_STREAM_CTX → strncmp → curl_maprintf
+       [2mcurlx_free called before any \b(malloc|calloc|realloc|curlx_malloc|curlx_calloc|curlx_realloc|zmalloc|zcalloc|zrealloc|ngx_alloc|ngx_calloc|ngx_palloc)\b — possible double-free[0m
+
+  Rating: [33mFAIR[0m
+
