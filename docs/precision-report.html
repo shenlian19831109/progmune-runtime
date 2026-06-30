@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Progmune Precision Report — Public Benchmark Data</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--border:#334155;--text:#e2e8f0;--muted:#94a3b8;--accent:#22d3ee;--green:#4ade80;--amber:#fbbf24;--red:#f87171;--blue:#60a5fa}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;line-height:1.7;max-width:960px;margin:0 auto;padding:2rem}
+h1{font-size:2rem;color:#fff;margin-bottom:.25rem}
+h2{font-size:1.3rem;color:var(--accent);margin:2rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.5rem}
+h3{font-size:1rem;color:#fff;margin:1.5rem 0 .5rem}
+.sub{color:var(--muted);font-size:.9rem;margin-bottom:2rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.25rem;margin:1rem 0}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.85rem}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--border)}
+th{color:var(--accent);font-weight:600;font-size:.8rem;text-transform:uppercase}
+.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:700}
+.b-green{background:#14532d;color:var(--green)}.b-amber{background:#713f12;color:var(--amber)}.b-red{background:#450a0a;color:var(--red)}
+.metric{text-align:center;padding:1rem}.metric .val{font-size:2rem;font-weight:800;color:var(--accent)}.metric .lbl{font-size:.7rem;color:var(--muted);text-transform:uppercase}
+.grid{display:grid;gap:1rem}.g4{grid-template-columns:repeat(4,1fr)}.g2{grid-template-columns:1fr 1fr}@media(max-width:640px){.g4{grid-template-columns:repeat(2,1fr)}.g2{grid-template-columns:1fr}}
+.progress{height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin:4px 0}
+.progress div{height:100%;border-radius:4px}
+.footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border);text-align:center;color:var(--muted);font-size:.8rem}
+</style>
+</head>
+<body>
+
+<h1>Progmune Precision Report</h1>
+<div class="sub">Public Benchmark Data — curl C Codebase · 85 Labeled Sequences · June 2026</div>
+
+<h2>Detector Evolution</h2>
+<table>
+<tr><th>Detector</th><th>Precision</th><th>Recall</th><th>F1</th><th>FP</th><th>FN</th><th>Characteristics</th></tr>
+<tr><td>SSG Auto-Discovery (v0.1)</td><td><span class="badge b-red">34%</span></td><td>70%</td><td>46%</td><td>27</td><td>6</td><td>246 rules, 100% FP from state inference noise</td></tr>
+<tr><td>Resource Lifecycle (v0.5)</td><td><span class="badge b-amber">58%</span></td><td>46%</td><td>51%</td><td>8</td><td>13</td><td>Explicit acquire/release pairs, FP -74%</td></tr>
+<tr><td>Combined R+P (v1.0)</td><td><span class="badge b-amber">54%</span></td><td>58%</td><td>56%</td><td>12</td><td>10</td><td>Balanced: precision + protocol coverage</td></tr>
+</table>
+
+<div class="card">
+<h3>FP Taxonomy (SSG → Resource, 85 seqs)</h3>
+<p><strong>Root cause:</strong> 100% State Inference Noise — auto-discovered rules overfit to call adjacency in 29 training sequences.<br>
+<strong>Fix:</strong> Replaced with explicit resource pairs + protocol state machines. FP: 27 → 8 (-74%).</p>
+<p><strong>Trade-off:</strong> Recall dropped from 70% → 46% (lost SSG's broad coverage). Protocol Detector later recovered to 58%.</p>
+</div>
+
+<h2>Evidence Repository</h2>
+<div class="grid g4">
+<div class="metric"><div class="val">7</div><div class="lbl">Repositories</div></div>
+<div class="metric"><div class="val">700</div><div class="lbl">Total Sequences</div></div>
+<div class="metric"><div class="val">185</div><div class="lbl">Labeled Seqs</div></div>
+<div class="metric"><div class="val">11</div><div class="lbl">Protocol Matches</div></div>
+</div>
+
+<table>
+<tr><th>Repo</th><th>Type</th><th>Sequences</th><th>Labeled</th><th>Protocols Matched</th></tr>
+<tr><td>curl</td><td>application</td><td>100</td><td>85</td><td>TLS, SSH, Connection (3)</td></tr>
+<tr><td>nginx</td><td>application</td><td>100</td><td>50</td><td>TLS, HTTP (2)</td></tr>
+<tr><td>redis</td><td>application</td><td>100</td><td>50</td><td>—</td></tr>
+<tr><td>apache</td><td>application</td><td>100</td><td>—</td><td>HTTP (1)</td></tr>
+<tr><td>openssl</td><td>protocol_library</td><td>100</td><td>—</td><td>Connection (1)</td></tr>
+<tr><td>libssh</td><td>library</td><td>100</td><td>—</td><td>SSH, TLS (2)</td></tr>
+<tr><td>nghttp2</td><td>library</td><td>100</td><td>—</td><td>HTTP/2, HTTP (2)</td></tr>
+</table>
+
+<h2>Risk Model Performance</h2>
+<table>
+<tr><th>Pattern</th><th>Protocol</th><th>Severity</th><th>Confidence</th><th>Evidence</th></tr>
+<tr><td>Missing Finished</td><td>TLS</td><td><span class="badge b-red">Critical</span></td><td>91%</td><td>135 seqs</td></tr>
+<tr><td>TLS Double Free</td><td>TLS</td><td><span class="badge b-red">Critical</span></td><td>88%</td><td>135 seqs</td></tr>
+<tr><td>TLS Without Init</td><td>TLS</td><td><span class="badge b-amber">High</span></td><td>85%</td><td>135 seqs</td></tr>
+<tr><td>SSH Without Auth</td><td>SSH</td><td><span class="badge b-red">Critical</span></td><td>78%</td><td>135 seqs</td></tr>
+<tr><td>SSH Missing Cleanup</td><td>SSH</td><td><span class="badge b-amber">High</span></td><td>78%</td><td>135 seqs</td></tr>
+<tr><td>HTTP No Response</td><td>HTTP</td><td><span class="badge b-amber">Medium</span></td><td>80%</td><td>150 seqs</td></tr>
+<tr><td>Resource Acquire No Release</td><td>Resource</td><td><span class="badge b-red">Critical</span></td><td>98%</td><td>250 seqs</td></tr>
+</table>
+
+<h2>Known Issues & Resolution</h2>
+<div class="card">
+<h3>TLS-DOUBLE-FREE (Fixed v3, 2026-06-30)</h3>
+<p><strong>Bug:</strong> SSL_free + SSL_CTX_free counted as 2 "free" calls vs 2 "new" calls → clean sequence flagged as double-free.</p>
+<p><strong>Fix:</strong> Per-object-type tracking — SSL_free vs SSL_new, SSL_CTX_free vs SSL_CTX_new counted separately.</p>
+<p><strong>Verification:</strong> Clean TLS sequence [SSL_CTX_new,SSL_new,...,SSL_free,SSL_CTX_free] → <span class="badge b-green">PASS</span>. Double SSL_free still caught (<span class="badge b-red">Critical</span>).</p>
+</div>
+
+<h2>Methodology</h2>
+<p>All precision measurements use 85 hand-labeled call sequences extracted from curl's C source code (lib/ directory). Labels: 49 human-annotated + 36 auto-labeled. Detection runs against actual SSG state machine validation, not keyword matching. Reproducible via <code>npm run precision</code>.</p>
+
+<div class="footer">
+Progmune Runtime v1.0 — Public Precision Report · June 2026<br>
+<a href="https://github.com/shenlian19831109/progmune-runtime">github.com/shenlian19831109/progmune-runtime</a>
+</div>
+</body>
+</html>
