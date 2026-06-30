@@ -67,6 +67,14 @@ const PROTOCOLS: ProtocolDefinition[] = [
     ],
   },
   {
+    name: "SSL Configuration", category: "ssl", minCompleteness: 0.4,
+    steps: [
+      { pattern: /\b(\w*ssl\w*get_config|\w*ssl_cf_get|\w*ssl\w*setup|\w*ssl\w*seed)\b/i, label: "ssl_cfg_init", required: true },
+      { pattern: /\b(\w*ssl\w*config|\w*ssl\w*set|\w*ssl\w*default|\w*ssl\w*init_method)\b/i, label: "ssl_cfg_apply", required: true },
+      { pattern: /\b(\w*ssl\w*verify|\w*ssl\w*cert|\w*ssl\w*handshake|\w*ssl\w*connect)\b/i, label: "ssl_cfg_done", required: true },
+    ],
+  },
+  {
     name: "Auth Protocol", category: "auth", minCompleteness: 0.5,
     steps: [
       { pattern: /\b(login|register|authenticate|signin)\b/i, label: "auth_login", required: true },
