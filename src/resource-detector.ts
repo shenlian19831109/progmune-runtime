@@ -52,7 +52,7 @@ function isCleanupFunction(funcName: string): boolean {
 // ── Detection ──
 
 export interface ResourceViolation {
-  type: "missing_release" | "double_release" | "use_after_release";
+  type: "missing_release" | "double_release" | "use_after_release" | "double_free";
   category: string;
   acquireCall?: string;
   releaseCall?: string;
@@ -90,15 +90,16 @@ export function detectResourceViolations(calls: string[], enclosingFuncName?: st
       }
     }
 
-    // Rule 2: release before any acquire → possible double-free or UAF
-    // Exception: cleanup/destructor functions expected to call release
-    if (releases.length > 0 && acquires.length === 0) {
+    // Rule 2: release without acquire → only flag if 2+ releases (true double-free)
+    // Single release without acquire = cross-function cleanup (normal in C code)
+    // Exception: cleanup/destructor functions always exempt
+    if (releases.length >= 2 && acquires.length === 0) {
       if (!isCleanupFunction(funcName)) {
         violations.push({
-          type: "use_after_release",
+          type: "double_free",
           category: pair.category,
           releaseCall: calls[releases[0]],
-          detail: `${calls[releases[0]]} called without prior acquire — possible double-free or use-after-release`,
+          detail: `${calls[releases[0]]} → ${calls[releases[releases.length-1]]}: multiple releases without any acquire — possible double-free`,
         });
       }
     }
