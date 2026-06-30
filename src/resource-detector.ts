@@ -37,6 +37,8 @@ const ALLOCATOR_PATTERNS = [
 
 const CLEANUP_PATTERNS = [
   /\b(remove|cleanup|destroy|free|close|delete|detach|release|shutdown|teardown|done|finish)\w*\b/i,
+  // Curl-specific cleanup functions (cross-function alloc/free patterns)
+  /\b(Curl_close|curl_multi_cleanup|Curl_detach_connection|curl_easy_cleanup|Curl_expire_clear|Curl_resolv_destroy_all|Curl_conncache_remove|Curl_ssl_close_all|Curl_req_free)\b/i,
 ];
 
 function isAllocatorFunction(funcName: string): boolean {
