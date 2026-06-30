@@ -44,24 +44,26 @@ th{color:var(--accent);font-weight:600;font-size:.8rem;text-transform:uppercase}
 <p><strong>Trade-off:</strong> Recall dropped from 70% → 46% (lost SSG's broad coverage). Protocol Detector later recovered to 58%.</p>
 </div>
 
-<h2>Evidence Repository</h2>
+<h2>Multi-Repository Precision</h2>
 <div class="grid g4">
 <div class="metric"><div class="val">7</div><div class="lbl">Repositories</div></div>
 <div class="metric"><div class="val">700</div><div class="lbl">Total Sequences</div></div>
 <div class="metric"><div class="val">185</div><div class="lbl">Labeled Seqs</div></div>
-<div class="metric"><div class="val">11</div><div class="lbl">Protocol Matches</div></div>
+<div class="metric"><div class="val">1</div><div class="lbl">Measured</div></div>
 </div>
 
 <table>
-<tr><th>Repo</th><th>Type</th><th>Sequences</th><th>Labeled</th><th>Protocols Matched</th></tr>
-<tr><td>curl</td><td>application</td><td>100</td><td>85</td><td>TLS, SSH, Connection (3)</td></tr>
-<tr><td>nginx</td><td>application</td><td>100</td><td>50</td><td>TLS, HTTP (2)</td></tr>
-<tr><td>redis</td><td>application</td><td>100</td><td>50</td><td>—</td></tr>
-<tr><td>apache</td><td>application</td><td>100</td><td>—</td><td>HTTP (1)</td></tr>
-<tr><td>openssl</td><td>protocol_library</td><td>100</td><td>—</td><td>Connection (1)</td></tr>
-<tr><td>libssh</td><td>library</td><td>100</td><td>—</td><td>SSH, TLS (2)</td></tr>
-<tr><td>nghttp2</td><td>library</td><td>100</td><td>—</td><td>HTTP/2, HTTP (2)</td></tr>
+<tr><th>Repo</th><th>Type</th><th>Seqs</th><th>Labeled</th><th>Resource Vios</th><th>Protocol Vios</th><th>Precision (P/R/F1)</th><th>Status</th></tr>
+<tr><td><strong>curl</strong></td><td>application</td><td>100</td><td>85</td><td>16</td><td>5</td><td><strong>50% / 40% / 44%</strong></td><td><span class="badge b-green">MEASURED</span></td></tr>
+<tr><td>nginx</td><td>application</td><td>100</td><td>50*</td><td>0</td><td>2</td><td>0% / 0% / 0%</td><td><span class="badge b-amber">AUTO-LABELED</span></td></tr>
+<tr><td>redis</td><td>application</td><td>100</td><td>50*</td><td>0</td><td>0</td><td>0% / 0% / 0%</td><td><span class="badge b-amber">AUTO-LABELED</span></td></tr>
+<tr><td>apache</td><td>application</td><td>100</td><td>—</td><td>0</td><td>6</td><td>—</td><td><span class="badge" style="background:#1e293b;color:#94a3b8">NEEDS LABELS</span></td></tr>
+<tr><td>openssl</td><td>protocol_library</td><td>100</td><td>—</td><td>2</td><td>1</td><td>—</td><td><span class="badge" style="background:#1e293b;color:#94a3b8">NEEDS LABELS</span></td></tr>
+<tr><td>libssh</td><td>library</td><td>100</td><td>—</td><td>12</td><td>8</td><td>—</td><td><span class="badge" style="background:#1e293b;color:#94a3b8">NEEDS LABELS</span></td></tr>
+<tr><td>nghttp2</td><td>library</td><td>100</td><td>—</td><td>1</td><td>13</td><td>—</td><td><span class="badge" style="background:#1e293b;color:#94a3b8">NEEDS LABELS</span></td></tr>
 </table>
+<p>* Auto-labeled = all sequences labeled 'clean' by heuristic — precision data is unreliable. <strong>Only curl has human-annotated ground truth.</strong></p>
+<p><strong>libssh</strong> shows highest resource violations (12) and protocol violations (8) among unlabeled repos — priority candidate for human labeling.</p>
 
 <h2>Risk Model Performance</h2>
 <table>
