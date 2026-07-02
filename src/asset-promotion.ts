@@ -29,28 +29,34 @@ import * as path from "path";
 
 export type AssetStage =
   | "evidence"      // Raw observation — seen in sequences
-  | "candidate"     // Promoted from evidence — worth reviewing
+  | "hypothesis"    // Pattern recognized — "these look like Resource Release"
+  | "candidate"     // Formalized candidate — worth reviewing
   | "observed"      // Cross-repo validated — pattern is real
   | "validated"     // RFC-aligned OR human-reviewed — trusted
-  | "stable"        // Deployed, no regressions — production
+  | "deployment"    // Deployed to staging/production — real-world validated
+  | "stable"        // No regressions in deployment — production
   | "deprecated"    // Superseded or confidence dropped
   | "archived";     // No longer referenced — historical record
 
 export const STAGE_ORDER: Record<AssetStage, number> = {
   evidence: 0,
-  candidate: 1,
-  observed: 2,
-  validated: 3,
-  stable: 4,
-  deprecated: 5,
-  archived: 6,
+  hypothesis: 1,
+  candidate: 2,
+  observed: 3,
+  validated: 4,
+  deployment: 5,
+  stable: 6,
+  deprecated: 7,
+  archived: 8,
 };
 
 export const STAGE_LABELS: Record<AssetStage, string> = {
   evidence:   "Evidence",
+  hypothesis: "Hypothesis",
   candidate:  "Candidate",
   observed:   "Observed",
   validated:  "Validated",
+  deployment: "Deployment",
   stable:     "Stable",
   deprecated: "Deprecated",
   archived:   "Archived",
@@ -130,6 +136,24 @@ export const PROMOTION_GATES: Record<string, PromotionGate> = {
       : `Only ${a.evidence.sequenceCount} sequences — need ≥2`,
   }),
 
+  /** Evidence → Hypothesis: ≥3 sequences OR ≥2 repos with similar pattern */
+  "evidence→hypothesis": (a) => ({
+    passed: a.evidence.sequenceCount >= 3 || a.evidence.crossRepoCount >= 2,
+    reason: a.evidence.sequenceCount >= 3
+      ? `Pattern observed in ${a.evidence.sequenceCount} sequences`
+      : a.evidence.crossRepoCount >= 2
+        ? `Pattern observed across ${a.evidence.crossRepoCount} repos`
+        : `Only ${a.evidence.sequenceCount} sequences — need ≥3 for hypothesis`,
+  }),
+
+  /** Hypothesis → Candidate: hypothesis formalized with clear semantic role */
+  "hypothesis→candidate": (a) => ({
+    passed: a.evidence.sequenceCount >= 5 && a.evidence.crossRepoCount >= 1,
+    reason: a.evidence.sequenceCount >= 5
+      ? `Formalized candidate: ${a.evidence.sequenceCount} sequences, ${a.evidence.crossRepoCount} repos`
+      : `Need ≥5 sequences to formalize candidate`,
+  }),
+
   /** Candidate → Observed: cross-repo evidence ≥2 */
   "candidate→observed": (a) => ({
     passed: a.evidence.crossRepoCount >= 2,
@@ -148,12 +172,20 @@ export const PROMOTION_GATES: Record<string, PromotionGate> = {
         : "Needs RFC alignment or human review",
   }),
 
-  /** Validated → Stable: deployed + confidence ≥80% + no regressions */
-  "validated→stable": (a) => ({
+  /** Validated → Deployment: ready for real-world validation */
+  "validated→deployment": (a) => ({
+    passed: a.confidence >= 0.70 && a.evidence.crossRepoCount >= 2,
+    reason: a.confidence >= 0.70
+      ? `Ready for deployment validation: ${(a.confidence*100).toFixed(0)}% confidence, ${a.evidence.crossRepoCount} repos`
+      : `Confidence ${(a.confidence*100).toFixed(0)}% < 70% — not ready for deployment`,
+  }),
+
+  /** Deployment → Stable: deployed + FP rate acceptable + no regressions */
+  "deployment→stable": (a) => ({
     passed: a.confidence >= 0.80,
     reason: a.confidence >= 0.80
-      ? `Confidence ${(a.confidence*100).toFixed(0)}% ≥ 80%`
-      : `Confidence ${(a.confidence*100).toFixed(0)}% < 80% threshold`,
+      ? `Production-validated: confidence ${(a.confidence*100).toFixed(0)}% ≥ 80%`
+      : `Confidence ${(a.confidence*100).toFixed(0)}% < 80% — deployment didn't confirm`,
   }),
 
   /** Stable → Deprecated: superseded OR confidence dropped below 40% */
@@ -354,8 +386,8 @@ export class AssetPromotionEngine {
 
       if (!nextStage) break;
 
-      // Auto-promotion stops AFTER validated (human required for stable+)
-      if (triggeredBy === "auto" && STAGE_ORDER[nextStage] > STAGE_ORDER.validated) {
+      // Auto-promotion stops at deployment (requires real deployment data)
+      if (triggeredBy === "auto" && STAGE_ORDER[nextStage] > STAGE_ORDER.deployment) {
         break;
       }
 
