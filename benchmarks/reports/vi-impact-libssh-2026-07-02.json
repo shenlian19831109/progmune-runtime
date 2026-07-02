@@ -1,0 +1,708 @@
+{
+  "repo": "libssh",
+  "generated": "2026-07-02T16:30:55.656Z",
+  "before": {
+    "total": 47,
+    "tp": 12,
+    "fp": 32,
+    "tn": 1,
+    "fn": 2,
+    "precision": 0.2727272727272727,
+    "recall": 0.8571428571428571,
+    "f1": 0.41379310344827586
+  },
+  "after": {
+    "total": 47,
+    "tp": 12,
+    "fp": 19,
+    "tn": 14,
+    "fn": 2,
+    "precision": 0.3870967741935484,
+    "recall": 0.8571428571428571,
+    "f1": 0.5333333333333333,
+    "suppressedFPs": 13
+  },
+  "fpBreakdown": {
+    "RULE_TOO_BROAD": 22,
+    "CONTEXT_MISMATCH": 10
+  },
+  "suppressedRules": [
+    {
+      "rule": "libssh:libssh:rule_SSH_LOG",
+      "fps": 5,
+      "confidence": 0.14285714285714285
+    },
+    {
+      "rule": "libssh:libssh:rule_ssh_buffer_new",
+      "fps": 2,
+      "confidence": 0.25
+    },
+    {
+      "rule": "libssh:libssh:rule_ssh_gssapi_free",
+      "fps": 2,
+      "confidence": 0.25
+    },
+    {
+      "rule": "libssh:libssh:rule_ssh_set_error_invalid",
+      "fps": 2,
+      "confidence": 0.25
+    },
+    {
+      "rule": "libssh:libssh:rule_ssh_set_error",
+      "fps": 2,
+      "confidence": 0.25
+    }
+  ],
+  "mismatches": [
+    {
+      "index": 1,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ssh_socket_get_fd",
+        "recv",
+        "send",
+        "endif",
+        "ssh_poll",
+        "ssh_channel_read",
+        "ssh_channel_write",
+        "ssh_agent_new",
+        "calloc",
+        "ssh_socket_new"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 2,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "strdup",
+        "ssh_set_error_oom",
+        "strlen",
+        "isspace",
+        "ssh_config_get_token",
+        "SAFE_FREE",
+        "ssh_config_get_opcode",
+        "ssh_config_is_cli_supported",
+        "ssh_set_error",
+        "ssh_config_get_str_tok"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 3,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ssh_buffer_unpack",
+        "ssh_set_error",
+        "ssh_string_len",
+        "ssh_string_data",
+        "dh_init",
+        "dh_import_peer_key",
+        "ssh_dh_compute_shared_secret",
+        "ssh_dh_debug_crypto",
+        "ssh_ecdh_init",
+        "ssh_string_copy"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 4,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "SSH_LOG",
+        "ssh_packet_remove_callbacks",
+        "kex_type_to_mlkem_info",
+        "ssh_set_error",
+        "ssh_curve25519_init",
+        "ssh_log_hexdump",
+        "ssh_ecdh_init",
+        "ssh_string_data",
+        "ssh_string_len",
+        "ssh_string_free"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 5,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "EC_KEY_get0_group",
+        "EC_GROUP_get_degree",
+        "bignum_ctx_new",
+        "EC_POINT_new",
+        "bignum_ctx_free",
+        "EC_POINT_oct2point",
+        "ssh_string_data",
+        "ssh_string_len",
+        "EC_POINT_clear_free",
+        "malloc"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 7,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ssh_buffer_new",
+        "ssh_buffer_add_u8",
+        "SSH_BUFFER_FREE",
+        "ssh_pki_export_pubkey_blob",
+        "ssh_string",
+        "ssh_string_len",
+        "ssh_buffer_allocate_size",
+        "SSH_STRING_FREE",
+        "ssh_buffer_add_ssh_string",
+        "ssh_buffer_get_len"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 8,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ssh_buffer_get_len",
+        "va_copy",
+        "va_arg",
+        "ssh_buffer_get_u8",
+        "ssh_buffer_get_data",
+        "ntohs",
+        "ssh_buffer_get_u32",
+        "ntohl",
+        "ssh_buffer_get_u64",
+        "ntohll"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 9,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "keys",
+        "ssh_packet_remove_callbacks",
+        "ssh_buffer_get_ssh_string",
+        "ssh_set_error",
+        "ssh_string_len",
+        "memcpy",
+        "ssh_string_data",
+        "SSH_STRING_FREE",
+        "ssh_curve25519_init",
+        "ssh_buffer_add_u8"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 10,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ecdh_kex_type_to_curve",
+        "SSH_LOG",
+        "EC_KEY_new_by_curve_name",
+        "EVP_EC_gen",
+        "EC_KEY_get0_group",
+        "EC_KEY_generate_key",
+        "EC_KEY_get0_public_key",
+        "pki_key_make_ecpoint_string",
+        "EVP_PKEY_todata",
+        "EVP_PKEY_free"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 11,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "gss_indicate_mechs",
+        "ssh_gssapi_log_error",
+        "calloc",
+        "ssh_set_error_oom",
+        "memcmp",
+        "gss_create_empty_oid_set",
+        "gss_add_oid_set_member",
+        "strlen",
+        "gss_import_name",
+        "GSS_ERROR"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 17,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ssh_key_is_private",
+        "ssh_set_error",
+        "check_pubkey_auth_mode",
+        "ssh_userauth_request_service",
+        "name",
+        "ssh_key_get_signature_algorithm",
+        "type",
+        "ssh_key_algorithm_allowed",
+        "ssh_key_size_allowed",
+        "ssh_key_size"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 18,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "defined",
+        "ssh_buffer_unpack",
+        "ssh_set_error",
+        "ssh_dh_keypair_set_keys",
+        "bignum_safe_free",
+        "ssh_dh_keypair_gen_keys",
+        "ssh_get_key_params",
+        "ssh_dh_compute_shared_secret",
+        "ssh_dh_debug_crypto",
+        "ssh_make_sessionid"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 20,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ssh_gssapi_free",
+        "ssh_gssapi_init",
+        "ssh_callbacks_exists",
+        "SAFE_FREE",
+        "strdup",
+        "gssapi_select_oid_function",
+        "ssh_gssapi_send_response",
+        "ssh_auth_reply_default",
+        "gss_create_empty_oid_set",
+        "ssh_gssapi_server_oids"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 21,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ssh_set_error_invalid",
+        "strdup",
+        "ssh_set_error_oom",
+        "strlen",
+        "isspace",
+        "ssh_config_get_token",
+        "SAFE_FREE",
+        "ssh_bind_config_get_opcode",
+        "ssh_config_get_str_tok",
+        "defined"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 22,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "is_ssh_initialized",
+        "ssh_set_error",
+        "ssh_options_parse_config",
+        "ssh_options_apply",
+        "SSH_LOG",
+        "ssh_copyright",
+        "ssh_threads_get_type",
+        "ssh_socket_set_callbacks",
+        "ssh_socket_set_fd",
+        "ssh_libssh_proxy_jumps"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 23,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "SSH_LOG",
+        "ssh_buffer_new",
+        "ssh_set_error_oom",
+        "ssh_mlkem_init",
+        "ssh_set_error",
+        "ssh_log_hexdump",
+        "ssh_string_data",
+        "ssh_string_len",
+        "ssh_curve25519_init",
+        "ssh_buffer_pack"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 24,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "SSH_LOG",
+        "ssh_buffer_pack",
+        "ssh_hashbufout_add_cookie",
+        "ssh_list_kex",
+        "ssh_string_from_char",
+        "ssh_buffer_add_ssh_string",
+        "SSH_STRING_FREE",
+        "ssh_buffer_add_u8",
+        "ssh_buffer_add_u32",
+        "ssh_packet_send"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 25,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ssh_key_is_public",
+        "ssh_set_error",
+        "check_pubkey_auth_mode",
+        "state",
+        "ssh_userauth_request_service",
+        "ssh_key_get_signature_algorithm",
+        "type",
+        "ssh_key_algorithm_allowed",
+        "ssh_key_size_allowed",
+        "ssh_key_size"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 28,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "check_pubkey_auth_mode",
+        "ssh_set_error",
+        "ssh_userauth_request_service",
+        "ssh_pki_export_pubkey_blob",
+        "ssh_key_get_signature_algorithm",
+        "type",
+        "SSH_STRING_FREE",
+        "ssh_key_algorithm_allowed",
+        "ssh_key_size_allowed",
+        "ssh_key_size"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 29,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "part",
+        "strrchr",
+        "strndup",
+        "ssh_check_username_syntax",
+        "strchr",
+        "colon",
+        "ssh_is_ipaddr",
+        "ssh_check_hostname_syntax",
+        "chars",
+        "valid_hostname"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 30,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "SSH_LOG",
+        "ssh_set_fd_towrite",
+        "ssh_send_banner",
+        "set_status",
+        "ssh_analyze_banner",
+        "ssh_set_error",
+        "usable",
+        "ssh_packet_register_socket_callback",
+        "ssh_packet_set_default_callbacks",
+        "ssh_set_client_kex"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 31,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ssh_libssh_proxy_jumps",
+        "SAFE_FREE",
+        "ssh_proxyjumps_free",
+        "strcasecmp",
+        "ssh_options_set",
+        "strdup",
+        "ssh_set_error_oom",
+        "free",
+        "strchr",
+        "calloc"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 33,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "libcrux_ml_kem_types_unpack_private_key_b4",
+        "Eurydice_array_to_slice",
+        "libcrux_ml_kem_ind_cpa_decrypt_42",
+        "libcrux_ml_kem_utils_into_padded_array_24",
+        "Eurydice_slice_copy",
+        "Eurydice_array_to_subslice_from",
+        "libcrux_ml_kem_hash_functions_portable_G_4a_e0",
+        "Eurydice_slice_split_at",
+        "libcrux_ml_kem_utils_into_padded_array_15",
+        "libcrux_ml_kem_types_as_ref_d3_80"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 34,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ssh_set_error",
+        "strdup",
+        "SAFE_FREE",
+        "ssh_set_error_oom",
+        "ssh_find_all_matching",
+        "ssh_socket_free",
+        "ssh_socket_new",
+        "ssh_socket_set_fd",
+        "ssh_socket_get_poll_handle",
+        "ssh_socket_set_connected"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 35,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "va_arg",
+        "ssh_buffer_add_u8",
+        "htons",
+        "ssh_buffer_add_u16",
+        "htonl",
+        "ssh_buffer_add_u32",
+        "htonll",
+        "ssh_buffer_add_u64",
+        "ssh_buffer_add_ssh_string",
+        "strlen"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 36,
+      "expected": "violation",
+      "got": "clean",
+      "calls": [
+        "EVP_PKEY_CTX_new_from_name",
+        "DH_free",
+        "DH_new",
+        "BN_dup",
+        "DH_set0_pqg",
+        "BN_free",
+        "OSSL_PARAM_BLD_new",
+        "OSSL_PARAM_BLD_push_BN",
+        "OSSL_PARAM_BLD_to_param",
+        "OSSL_PARAM_BLD_free"
+      ],
+      "suppressedAfter": false
+    },
+    {
+      "index": 41,
+      "expected": "violation",
+      "got": "clean",
+      "calls": [
+        "malloc",
+        "DH_size",
+        "ssh_dh_keypair_get_keys",
+        "DH_compute_key",
+        "EVP_PKEY_CTX_new_from_pkey",
+        "EVP_PKEY_derive_init",
+        "EVP_PKEY_derive_set_peer",
+        "SSH_LOG",
+        "ERR_error_string",
+        "ERR_get_error"
+      ],
+      "suppressedAfter": false
+    },
+    {
+      "index": 42,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "strlen",
+        "gss_import_name",
+        "GSS_ERROR",
+        "gss_acquire_cred",
+        "ssh_gssapi_log_error",
+        "gss_inquire_cred",
+        "SSH_LOG",
+        "gss_create_empty_oid_set",
+        "gss_inquire_cred_by_mech",
+        "gss_add_oid_set_member"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 43,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ssh_gssapi_free",
+        "ssh_gssapi_init",
+        "ssh_gssapi_import_name",
+        "strdup",
+        "ssh_set_error_oom",
+        "SSH_LOG",
+        "ssh_gssapi_client_identity",
+        "calloc",
+        "ssh_string_new",
+        "memcpy"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 44,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ssh_buffer_new",
+        "ssh_set_error_oom",
+        "ssh_buffer_add_u8",
+        "SSH_BUFFER_FREE",
+        "ssh_set_error",
+        "agent_talk",
+        "ssh_buffer_get_u8",
+        "bswap_32",
+        "SSH_LOG",
+        "agent_failed"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 45,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ssh_set_error",
+        "state",
+        "ssh_kex_is_gss",
+        "ssh_userauth_request_service",
+        "SSH_LOG",
+        "SAFE_FREE",
+        "strdup",
+        "ssh_set_error_oom",
+        "ssh_gssapi_auth_keyex_mic",
+        "ssh_buffer_pack"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 46,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ssh_set_error_invalid",
+        "SSH_LOG",
+        "Length",
+        "ssh_set_error",
+        "ssh_waitsession_unblocked",
+        "ssh_handle_packets_termination",
+        "ssh_channel_waitwindow_termination",
+        "MIN",
+        "ssh_buffer_pack",
+        "ssh_set_error_oom"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 47,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ssh_timestamp_init",
+        "calloc",
+        "count_ptrs",
+        "SAFE_FREE",
+        "channel_protocol_select",
+        "ssh_event_new",
+        "ssh_poll_get_default_ctx",
+        "ssh_event_add_session",
+        "ssh_timeout_elapsed",
+        "ssh_event_dopoll"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 48,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "SSH_LOG",
+        "getai",
+        "ssh_set_error",
+        "gai_strerror",
+        "socket",
+        "ssh_strerror",
+        "ssh_connect_socket_close",
+        "bind",
+        "freeaddrinfo",
+        "ssh_socket_set_nonblocking"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    }
+  ],
+  "improvement": {
+    "fpReduction": 0.40625,
+    "f1Gain": 0.11954022988505747,
+    "rulesSuppressed": 5,
+    "summary": "VI suppressed 13/32 FPs (41% reduction). F1: 41% → 53% (+12pp). 5 rules suppressed."
+  }
+}

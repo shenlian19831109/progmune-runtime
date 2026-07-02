@@ -1,0 +1,1313 @@
+{
+  "repo": "curl",
+  "generated": "2026-07-02T16:30:55.549Z",
+  "before": {
+    "total": 85,
+    "tp": 18,
+    "fp": 59,
+    "tn": 2,
+    "fn": 6,
+    "precision": 0.23376623376623376,
+    "recall": 0.75,
+    "f1": 0.3564356435643565
+  },
+  "after": {
+    "total": 85,
+    "tp": 18,
+    "fp": 31,
+    "tn": 30,
+    "fn": 6,
+    "precision": 0.3673469387755102,
+    "recall": 0.75,
+    "f1": 0.49315068493150693,
+    "suppressedFPs": 28
+  },
+  "fpBreakdown": {
+    "RULE_TOO_BROAD": 32,
+    "CONTEXT_MISMATCH": 27
+  },
+  "suppressedRules": [
+    {
+      "rule": "curl:curl:rule_Curl_conn_meta_get",
+      "fps": 7,
+      "confidence": 0.1111111111111111
+    },
+    {
+      "rule": "curl:curl:rule_Curl_ssl_cf_get_primary_config",
+      "fps": 6,
+      "confidence": 0.125
+    },
+    {
+      "rule": "curl:curl:rule_memset",
+      "fps": 3,
+      "confidence": 0.2
+    },
+    {
+      "rule": "curl:curl:rule_GOOD_MULTI_HANDLE",
+      "fps": 2,
+      "confidence": 0.25
+    },
+    {
+      "rule": "curl:curl:rule_curlx_dyn_init",
+      "fps": 2,
+      "confidence": 0.25
+    },
+    {
+      "rule": "curl:curl:rule_STACK_OF",
+      "fps": 2,
+      "confidence": 0.25
+    },
+    {
+      "rule": "curl:curl:rule_Curl_ssl_cf_get_config",
+      "fps": 2,
+      "confidence": 0.25
+    },
+    {
+      "rule": "curl:curl:rule_Curl_creds_has_sasl_service",
+      "fps": 2,
+      "confidence": 0.25
+    },
+    {
+      "rule": "curl:curl:rule_defined",
+      "fps": 2,
+      "confidence": 0.25
+    }
+  ],
+  "mismatches": [
+    {
+      "index": 2,
+      "expected": "violation",
+      "got": "clean",
+      "calls": [
+        "ssh_state_init",
+        "FALLTHROUGH",
+        "ssh_state_startup",
+        "ssh_state_hostkey",
+        "ssh_state_authlist",
+        "ssh_state_pkey_init",
+        "ssh_state_auth_pkey",
+        "ssh_state_auth_pass_init",
+        "ssh_state_auth_pass",
+        "ssh_state_auth_host_init"
+      ],
+      "suppressedAfter": false
+    },
+    {
+      "index": 4,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_conn_meta_get",
+        "Curl_meta_get",
+        "Curl_pp_flushsend",
+        "ftp_readresp",
+        "ftp_wait_resp",
+        "RFC2228",
+        "Curl_conn_is_ssl",
+        "Curl_ssl_cfilter_add",
+        "Curl_conn_get_origin",
+        "Curl_conn_connect"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 5,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_creds_has_user",
+        "Curl_creds_has_passwd",
+        "Curl_bufref_ptr",
+        "ldap_url_parse",
+        "ldap_url_parse_low",
+        "ldap_err2string",
+        "Curl_conn_get_ip_info",
+        "scheme",
+        "Curl_conn_is_ssl",
+        "curlx_convert_UTF8_to_tchar"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 8,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "curl_multi_remove_handle",
+        "send",
+        "Curl_detach_connection",
+        "curl_easy_perform",
+        "curl_multi_cleanup",
+        "Curl_expire_clear",
+        "curlx_free",
+        "Curl_resolv_destroy_all",
+        "Curl_req_free",
+        "Curl_ssl_close_all"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 9,
+      "expected": "violation",
+      "got": "clean",
+      "calls": [
+        "Curl_conn_get_current_host",
+        "Curl_bufref_init",
+        "sasl_state",
+        "Curl_auth_create_plain_message",
+        "Curl_auth_create_login_message",
+        "Curl_creds_user",
+        "Curl_creds_passwd",
+        "Curl_auth_create_external_message",
+        "get_server_message",
+        "Curl_auth_gsasl_get"
+      ],
+      "suppressedAfter": false
+    },
+    {
+      "index": 11,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "buffer",
+        "bytes",
+        "block",
+        "Curl_creds_user",
+        "Curl_creds_passwd",
+        "memset",
+        "strchr",
+        "strlen",
+        "Curl_rand",
+        "Curl_ntlm_core_mk_nt_hash"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 12,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "init_telnet",
+        "Curl_meta_get",
+        "check_telnet_options",
+        "select",
+        "WaitForMultipleObjects",
+        "WSACreateEvent",
+        "failed",
+        "WSAEventSelect",
+        "WSACloseEvent",
+        "GetStdHandle"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 13,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ossl_do_file_type",
+        "SSL_CTX_set_default_passwd_cb_userdata",
+        "SSL_CTX_set_default_passwd_cb",
+        "SSL_CTX_use_certificate_chain_file",
+        "use_certificate_chain_blob",
+        "ossl_strerror",
+        "ERR_get_error",
+        "SSL_CTX_use_certificate_file",
+        "use_certificate_blob",
+        "engineload"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 15,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_ssl_cf_get_primary_config",
+        "CFStringCreateWithCString",
+        "CFArrayCreateMutable",
+        "SecPolicyCreateSSL",
+        "CFArrayAppendValue",
+        "CFRelease",
+        "defined",
+        "Curl_ssl_cf_get_config",
+        "__builtin_available",
+        "status"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 16,
+      "expected": "violation",
+      "got": "clean",
+      "calls": [
+        "CONN_SOCK_IDX_VALID",
+        "Curl_pollset_init",
+        "Curl_pollfds_init",
+        "Curl_conn_needs_flush",
+        "Curl_conn_flush",
+        "do_connect",
+        "CURL_TRC_CF",
+        "Curl_conn_is_ssl",
+        "Curl_conn_cntrl_update_info",
+        "conn_report_connect_stats"
+      ],
+      "suppressedAfter": false
+    },
+    {
+      "index": 17,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "files",
+        "directories",
+        "Curl_meta_get",
+        "file_upload",
+        "curlx_fstat",
+        "S_ISDIR",
+        "Curl_meets_timecondition",
+        "curl_msnprintf",
+        "Curl_client_write",
+        "curlx_gmtime"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 19,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "GOOD_MULTI_HANDLE",
+        "GOOD_EASY_HANDLE",
+        "Curl_uint32_tbl_get",
+        "streamclose",
+        "multi_done",
+        "Curl_expire_clear",
+        "Curl_uint32_bset_contains",
+        "multi_assess_wakeup",
+        "Curl_wildcard_dtor",
+        "Curl_detach_connection"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 20,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "curlx_free",
+        "curl_url_get",
+        "Curl_bufref_set",
+        "perform",
+        "Curl_peer_unlink",
+        "Curl_http_neg_init",
+        "curlx_safefree",
+        "Curl_data_priority_clear_state",
+        "Curl_bufref_free",
+        "strlen"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 25,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "curlx_dyn_init",
+        "curlx_dyn_addn",
+        "curlx_dyn_reset",
+        "http_on_response",
+        "curlx_dyn_ptr",
+        "curlx_dyn_len",
+        "curlx_dyn_free",
+        "curlx_str_passblanks",
+        "strncmp",
+        "ISBLANK"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 28,
+      "expected": "violation",
+      "got": "clean",
+      "calls": [
+        "vquic_ctx_init",
+        "quiche_config_new",
+        "quiche_config_enable_pacing",
+        "quiche_config_set_initial_max_data",
+        "quiche_config_set_initial_max_streams_bidi",
+        "quiche_config_set_initial_max_streams_uni",
+        "quiche_config_set_initial_max_stream_data_bidi_local",
+        "quiche_config_set_initial_max_stream_data_bidi_remote",
+        "quiche_config_set_initial_max_stream_data_uni",
+        "quiche_config_set_disable_active_migration"
+      ],
+      "suppressedAfter": false
+    },
+    {
+      "index": 29,
+      "expected": "violation",
+      "got": "clean",
+      "calls": [
+        "Curl_ssl_cf_get_primary_config",
+        "Curl_ssl_cf_get_config",
+        "Curl_gtls_shared_creds_create",
+        "Curl_auth_allowed_to_host",
+        "gnutls_srp_allocate_client_credentials",
+        "gnutls_strerror",
+        "gnutls_srp_allocate_client_cred",
+        "gnutls_srp_set_client_credentials",
+        "gnutls_srp_set_client_cred",
+        "CURL_TRC_CF"
+      ],
+      "suppressedAfter": false
+    },
+    {
+      "index": 30,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "STACK_OF",
+        "BIO_new_mem_buf",
+        "ossl_strerror",
+        "ERR_get_error",
+        "BIO_new",
+        "BIO_s_file",
+        "BIO_read_filename",
+        "CURL_UNCONST",
+        "BIO_free",
+        "d2i_PKCS12_bio"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 31,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_ssl_cf_get_config",
+        "Curl_ssl_cf_get_primary_config",
+        "Curl_alpn_copy",
+        "Curl_conn_cf_get_transport",
+        "wolfTLS_client_method",
+        "wolfSSL_CTX_free",
+        "wolfSSL_CTX_new",
+        "ssl_version",
+        "wssl_init_ciphers",
+        "wssl_init_curves"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 32,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "nghttp2_session_callbacks_new",
+        "nghttp2_session_callbacks_set_send_callback",
+        "nghttp2_session_callbacks_set_on_frame_recv_callback",
+        "nghttp2_session_callbacks_set_on_invalid_frame_recv_callback",
+        "nghttp2_session_callbacks_set_on_frame_send_callback",
+        "nghttp2_session_callbacks_set_on_data_chunk_recv_callback",
+        "nghttp2_session_callbacks_set_on_stream_close_callback",
+        "nghttp2_session_callbacks_set_on_begin_headers_callback",
+        "nghttp2_session_callbacks_set_on_header_callback",
+        "nghttp2_session_callbacks_set_error_callback"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 33,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "curl_msnprintf",
+        "Curl_strntolower",
+        "Curl_raw_toupper",
+        "Curl_checkheaders",
+        "STRCONST",
+        "strcspn",
+        "curlx_memdup0",
+        "curl_maprintf",
+        "Curl_slist_append_nodup",
+        "curlx_free"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 34,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_creds_has_sasl_service",
+        "Curl_creds_sasl_service",
+        "Curl_auth_build_spn",
+        "QuerySecurityPackageInfo",
+        "CURL_UNCONST",
+        "TEXT",
+        "FreeContextBuffer",
+        "curlx_malloc",
+        "Curl_creds_has_user",
+        "Curl_create_sspi_identity"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 35,
+      "expected": "violation",
+      "got": "clean",
+      "calls": [
+        "STACK_OF",
+        "SSL_get_tlsext_status_ocsp_resp",
+        "d2i_OCSP_RESPONSE",
+        "OCSP_response_status",
+        "OCSP_response_status_str",
+        "OCSP_response_get1_basic",
+        "SSL_get_peer_cert_chain",
+        "SSL_CTX_get_cert_store",
+        "OCSP_basic_verify",
+        "SSL_get1_peer_certificate"
+      ],
+      "suppressedAfter": false
+    },
+    {
+      "index": 36,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_ssl_cf_get_primary_config",
+        "wssl_send_earlydata",
+        "wolfSSL_ERR_clear_error",
+        "wolfSSL_connect",
+        "Curl_wssl_setup_x509_store",
+        "CURL_TRC_CF",
+        "Curl_tls_keylog_enabled",
+        "secrets",
+        "handshake",
+        "wolfSSL_want_read"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 37,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_creds_user",
+        "Curl_creds_passwd",
+        "curlx_dyn_init",
+        "memset",
+        "Curl_rand_bytes",
+        "endif",
+        "curlx_base64_encode",
+        "curl_maprintf",
+        "hash",
+        "strlen"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 38,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "myssh_to_ERROR",
+        "sftp_stat",
+        "sftp_attributes_free",
+        "size",
+        "seek",
+        "writing",
+        "sftp_close",
+        "sftp_open",
+        "sftp_get_error",
+        "strlen"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 39,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "libssh2_sftp_stat_ex",
+        "curlx_uztoui",
+        "strlen",
+        "size",
+        "seek",
+        "writing",
+        "libssh2_sftp_open_ex",
+        "libssh2_session_last_errno",
+        "libssh2_sftp_last_error",
+        "myssh_to"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 41,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_ssl_cf_get_primary_config",
+        "curlx_convert_UTF8_to_tchar",
+        "get_cert_location",
+        "memcpy",
+        "curlx_free",
+        "curlx_fopen",
+        "curl_strequal",
+        "curlx_fclose",
+        "fseek",
+        "ftell"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 42,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_ssl_cf_get_primary_config",
+        "Curl_ssl_cf_get_config",
+        "curlx_verify_windows_version",
+        "Curl_ssl_scache_use",
+        "Curl_ssl_scache_lock",
+        "Curl_ssl_scache_get_obj",
+        "Curl_ssl_scache_unlock",
+        "schannel_acquire_credential_handle",
+        "curlx_convert_UTF8_to_tchar",
+        "Curl_alpn_to_proto_buf"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 43,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "memset",
+        "doh_close",
+        "de_init",
+        "doh_resp_decode",
+        "curlx_dyn_uptr",
+        "curlx_dyn_len",
+        "CURL_TRC_DNS",
+        "doh_strerror",
+        "doh_type2name",
+        "Curl_trc_ft_is_verbose"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 44,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_bufref_free",
+        "curl_url",
+        "curl_url_set",
+        "Curl_bufref_ptr",
+        "curl_url_get",
+        "curl_url_cleanup",
+        "Curl_bufref_set",
+        "Curl_is_absolute_url",
+        "curl_url_strerror",
+        "Curl_uc_to_curlcode"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 45,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_dynhds_init",
+        "http2_data_setup",
+        "Curl_h1_req_parse_read",
+        "Curl_http_req_to_h2",
+        "Curl_h1_req_parse_free",
+        "Curl_dynhds_to_nva",
+        "h2_pri_spec",
+        "nghttp2_session_check_request_allowed",
+        "CURL_TRC_CF",
+        "allowed"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 46,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "multi_now",
+        "sigpipe_init",
+        "Curl_uint32_bset_first",
+        "CURL_TRC_M",
+        "Curl_multi_xfers_running",
+        "Curl_multi_get_easy",
+        "Curl_uint32_bset_remove",
+        "multi_runsingle",
+        "Curl_uint32_bset_next",
+        "sigpipe_restore"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 47,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "endif",
+        "curlx_calloc",
+        "Curl_conn_meta_set",
+        "ldap_pvt_url_scheme2proto",
+        "Curl_sasl_init",
+        "oldap_parse_login_options",
+        "curl_maprintf",
+        "ldap_init_fd",
+        "ldap_err2string",
+        "getenv"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 48,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_conn_meta_get",
+        "Curl_meta_get",
+        "smb_send_tree_connect",
+        "connclose",
+        "request_state",
+        "smb_send_and_recv",
+        "smb_swap32",
+        "smb_swap16",
+        "Curl_pgrsSetUploadSize",
+        "smb_swap64"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 49,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "CURL_SOCKET",
+        "memset",
+        "htonl",
+        "defined",
+        "setsockopt",
+        "bind",
+        "getsockname",
+        "listen",
+        "connect",
+        "curlx_nonblock"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 51,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "defined",
+        "Curl_ssl_cf_is_proxy",
+        "mbedtls_ssl_handshake",
+        "CURL_TRC_CF",
+        "mbedtls_ssl_get_version_number",
+        "mbedtls_strerror",
+        "mbedtls_ssl_get_ciphersuite_id_from_ssl",
+        "mbed_cipher_suite_get_str",
+        "mbedtls_ssl_get_version",
+        "mbedtls_ssl_get_peer_cert"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 52,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_ssl_cf_get_primary_config",
+        "Curl_ssl_cf_get_config",
+        "QueryContextAttributes",
+        "Curl_sspi_strerror",
+        "curlx_verify_windows_version",
+        "Curl_schannel_get_cached_cert_store",
+        "CertOpenStore",
+        "curlx_winapi_strerror",
+        "GetLastError",
+        "add_certs_data_to_store"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 53,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_is_ipaddr",
+        "Curl_resolv_announce_start",
+        "Curl_str2addr",
+        "strlen",
+        "curl_strequal",
+        "tailmatch",
+        "STRCONST",
+        "get_localhost",
+        "hostip_async_new",
+        "Curl_doh"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 54,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "defined",
+        "curlx_dyn_addf",
+        "http_target",
+        "get_http_string",
+        "curlx_dyn_add",
+        "Curl_checkheaders",
+        "STRCONST",
+        "curlx_safefree",
+        "Curl_bufref_ptr",
+        "Curl_checkProxyheaders"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 55,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_conn_meta_get",
+        "ldap_result",
+        "ldap_err2string",
+        "oldap_map_error",
+        "ldap_parse_result",
+        "USE_SSL",
+        "ssl_installed",
+        "ldap_set_option",
+        "ldap_msgfree",
+        "oldap_perform_bind"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 56,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_conn_meta_get",
+        "Curl_meta_get",
+        "ldap_result",
+        "ldap_err2string",
+        "ldap_msgtype",
+        "ldap_parse_result",
+        "FALLTHROUGH",
+        "ldap_memfree",
+        "ldap_get_dn_ber",
+        "client_write"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 59,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "STACK_OF",
+        "strlen",
+        "curlx_inet_pton",
+        "X509_get_ext_d2i",
+        "sk_GENERAL_NAME_num",
+        "sk_GENERAL_NAME_value",
+        "ASN1_STRING_get0_data",
+        "ASN1_STRING_length",
+        "ASN1_STRING_data",
+        "Curl_cert_hostcheck"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 60,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "CertOpenSystemStoreA",
+        "VERBOSE",
+        "conditions",
+        "CertEnumCertificatesInStore",
+        "defined",
+        "CertGetNameStringA",
+        "GetSystemTimeAsFileTime",
+        "CompareFileTime",
+        "CertGetIntendedKeyUsage",
+        "GetLastError"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 61,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_ssl_cf_get_config",
+        "Curl_ssl_cf_get_primary_config",
+        "Curl_alpn_copy",
+        "Curl_ssl_scache_use",
+        "Curl_ssl_scache_take",
+        "d2i_SSL_SESSION",
+        "SSL_set_session",
+        "VERBOSE",
+        "ossl_strerror",
+        "ERR_get_error"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 62,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "CURL_TRC_CF",
+        "cr_ech_need_httpsrr",
+        "Curl_conn_dns_resolved_https",
+        "cr_init_backend",
+        "rustls_connection_is_handshaking",
+        "cr_set_negotiated_alpn",
+        "cr_send",
+        "rustls_connection_get_protocol_version",
+        "rustls_connection_get_negotiated_ciphersuite_name",
+        "rustls_connection_get_negotiated_key_exchange_group_name"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 63,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "strlen",
+        "QueryContextAttributes",
+        "Curl_sspi_strerror",
+        "curlx_verify_windows_version",
+        "get_num_host_info",
+        "get_alt_name_info",
+        "memcmp",
+        "hostname",
+        "cert_get_name_string",
+        "CertGetNameString"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 64,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_host_is_ipnum",
+        "cookiehash",
+        "Curl_secure_context",
+        "Curl_llist_init",
+        "Curl_llist_count",
+        "remove_expired",
+        "Curl_llist_head",
+        "Curl_node_next",
+        "Curl_node_elem",
+        "cookie_tailmatch"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 65,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "GOOD_MULTI_HANDLE",
+        "GOOD_EASY_HANDLE",
+        "Curl_uint32_tbl_count",
+        "Curl_uint32_tbl_contains",
+        "Curl_uint32_bset_clear",
+        "curl_easy_perform",
+        "curl_multi_cleanup",
+        "multi_xfers_add",
+        "Curl_llist_init",
+        "Curl_expire"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 66,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "gss_seal",
+        "gss_wrap",
+        "gss_unseal",
+        "gss_unwrap",
+        "htons",
+        "memcpy",
+        "curlx_memdup",
+        "Curl_gss_delete_sec_context",
+        "check_gss_err",
+        "curlx_safefree"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 67,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_creds_has_sasl_service",
+        "Curl_creds_sasl_service",
+        "Curl_creds_user",
+        "Curl_creds_passwd",
+        "auth_decode_digest_md5_message",
+        "strcmp",
+        "auth_digest_get_qop_values",
+        "Curl_rand_hex",
+        "Curl_MD5_init",
+        "Curl_MD5_update"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 70,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_conn_meta_get",
+        "libssh2_crypto_engine",
+        "Curl_creds_user",
+        "Curl_creds_passwd",
+        "libssh2_session_init_ex",
+        "libssh2_session_set_read_timeout",
+        "recvcb",
+        "sendcb",
+        "defined",
+        "libssh2_session_callback_set2"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 72,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "cf_ssl_scache_get",
+        "time",
+        "Curl_ssl_scache_lock",
+        "curlx_dyn_init",
+        "curlx_dyn_reset",
+        "cf_scache_peer_remove_expired",
+        "Curl_llist_head",
+        "VERBOSE",
+        "Curl_node_elem",
+        "cf_ssl_scache_peer_set_hmac"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 73,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "curlx_str_cspn",
+        "curlx_str_trimblanks",
+        "curlx_str_casecompare",
+        "altsvc_flush",
+        "curlx_str_until",
+        "curlx_str_single",
+        "Curl_str2alpnid",
+        "curlx_str_assign",
+        "strlen",
+        "curlx_str_number"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 74,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "VERBOSE",
+        "cf_ip_attempt_connect",
+        "CURL_TRC_CF",
+        "cf_ip_attempt_free",
+        "Curl_pgrs_now",
+        "cf_ai_iter_has_more",
+        "curlx_ptimediff_ms",
+        "cf_ai_iter_next",
+        "are",
+        "Curl_reset_fail"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 76,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "memset",
+        "Curl_bufref_init",
+        "sasl_choose_external",
+        "sasl_choose_krb5",
+        "sasl_choose_gsasl",
+        "sasl_choose_digest",
+        "sasl_choose_ntlm",
+        "sasl_choose_oauth",
+        "sasl_choose_oauth2",
+        "sasl_choose_plain"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 78,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "IS_MIME_POST",
+        "curl_mime_headers",
+        "Curl_mime_prepare_headers",
+        "Curl_checkheaders",
+        "STRCONST",
+        "Curl_mime_add_header",
+        "Curl_creader_set_mime",
+        "Curl_creader_client_length",
+        "Curl_creader_set_fread",
+        "imap_atom"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 79,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "curlx_dyn_ptr",
+        "Curl_meta_get",
+        "is_custom_fetch_listing",
+        "literal",
+        "memchr",
+        "imap_find_literal",
+        "curlx_str_number",
+        "curlx_str_single",
+        "curlx_dyn_len",
+        "Curl_client_write"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 80,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_conn_meta_get",
+        "Curl_meta_get",
+        "imap_perform_upgrade_tls",
+        "Curl_pp_flushsend",
+        "Curl_pp_readresp",
+        "imap_state_servergreet_resp",
+        "imap_state_capability_resp",
+        "imap_state_starttls_resp",
+        "imap_state_auth_resp",
+        "imap_state_login_resp"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 81,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_meta_get",
+        "Curl_conn_meta_get",
+        "curlx_dyn_len",
+        "mqtt_send",
+        "curlx_dyn_ptr",
+        "mqtt_ping",
+        "Curl_xfer_recv",
+        "Curl_debug",
+        "Curl_pgrs_now",
+        "mqstate"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 82,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "sigpipe_init",
+        "perform",
+        "multi_perform",
+        "Curl_multi_ev_assess_xfer_bset",
+        "Curl_multi_ev_dirty_xfers",
+        "Curl_update_timer",
+        "memset",
+        "curl_multi_socket_action",
+        "multi_assess_wakeup",
+        "multi_mark_expired_as_dirty"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 84,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "curlx_dyn_init",
+        "Curl_junkscan",
+        "Curl_is_absolute_url",
+        "strcmp",
+        "parse_file",
+        "parse_scheme",
+        "strcspn",
+        "parse_authority",
+        "guess_scheme",
+        "curlx_dyn_add"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 88,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_ssl_cf_get_primary_config",
+        "Curl_ssl_cf_get_config",
+        "Curl_alpn_copy",
+        "Curl_ssl_scache_take",
+        "Curl_alpn_contains_proto",
+        "gtls_client_init",
+        "gnutls_session_set_data",
+        "sess_reuse_cb",
+        "Curl_alpn_restrict_to",
+        "gnutls_session_set_ptr"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 91,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "memset",
+        "Curl_bufq_init",
+        "tunnel_stream_init",
+        "nghttp2_session_callbacks_new",
+        "nghttp2_session_callbacks_set_send_callback",
+        "nghttp2_session_callbacks_set_on_frame_recv_callback",
+        "nghttp2_session_callbacks_set_on_frame_send_callback",
+        "nghttp2_session_callbacks_set_on_data_chunk_recv_callback",
+        "nghttp2_session_callbacks_set_on_stream_close_callback",
+        "nghttp2_session_callbacks_set_on_header_callback"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 94,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_pollset_reset",
+        "CURL_TRC_M",
+        "Curl_pollset_add_in",
+        "curl_multi_remove_handle",
+        "Curl_multi_ev_assess",
+        "Curl_resolv_pollset",
+        "mstate_connecting_pollset",
+        "mstate_protocol_pollset",
+        "mstate_do_pollset",
+        "mstate_domore_pollset"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 95,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "Curl_conn_meta_get",
+        "Curl_meta_get",
+        "smtp_perform_upgrade_tls",
+        "Curl_pp_flushsend",
+        "Curl_pp_readresp",
+        "smtp_state_servergreet_resp",
+        "smtp_state_ehlo_resp",
+        "smtp_state_helo_resp",
+        "smtp_state_starttls_resp",
+        "smtp_state_auth_resp"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    }
+  ],
+  "improvement": {
+    "fpReduction": 0.4745762711864407,
+    "f1Gain": 0.13671504136715046,
+    "rulesSuppressed": 9,
+    "summary": "VI suppressed 28/59 FPs (47% reduction). F1: 36% → 49% (+14pp). 9 rules suppressed."
+  }
+}
