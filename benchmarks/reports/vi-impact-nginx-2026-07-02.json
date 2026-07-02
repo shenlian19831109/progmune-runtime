@@ -1,0 +1,468 @@
+{
+  "repo": "nginx",
+  "generated": "2026-07-02T16:51:07.136Z",
+  "before": {
+    "total": 50,
+    "tp": 0,
+    "fp": 22,
+    "tn": 28,
+    "fn": 0,
+    "precision": 0,
+    "recall": 0,
+    "f1": null
+  },
+  "after": {
+    "total": 50,
+    "tp": 0,
+    "fp": 17,
+    "tn": 33,
+    "fn": 0,
+    "precision": 0,
+    "recall": 0,
+    "f1": null,
+    "suppressedFPs": 5
+  },
+  "fpBreakdown": {
+    "RULE_TOO_BROAD": 16,
+    "CONTEXT_MISMATCH": 5,
+    "DOMAIN_IRRELEVANT": 1
+  },
+  "suppressedRules": [
+    {
+      "rule": "nginx:nginx:rule_ngx_http_get_module_loc_conf",
+      "fps": 3,
+      "confidence": 0.2
+    },
+    {
+      "rule": "nginx:nginx:rule_CMSG_SPACE",
+      "fps": 2,
+      "confidence": 0.25
+    }
+  ],
+  "mismatches": [
+    {
+      "index": 1,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ngx_strcmp",
+        "ngx_conf_log_error",
+        "set",
+        "ngx_conf_read_token",
+        "ngx_file_size",
+        "ngx_read_file",
+        "ngx_cpymem",
+        "ngx_array_push",
+        "ngx_pnalloc",
+        "ngx_conf_include"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 2,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ngx_file_size",
+        "ngx_conf_log_error",
+        "ngx_read_file",
+        "ngx_cpymem",
+        "ngx_array_push",
+        "ngx_pnalloc",
+        "ngx_conf_include",
+        "ngx_log_debug1",
+        "ngx_conf_full_name",
+        "strpbrk"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 4,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ngx_strncmp",
+        "eval_pv",
+        "ngx_http_perl_create_main_conf",
+        "ngx_pcalloc",
+        "ngx_http_perl_init_main_conf",
+        "ngx_http_perl_init_interpreter",
+        "ngx_http_perl_cleanup_perl",
+        "PERL_SET_CONTEXT",
+        "PERL_SET_INTERP",
+        "perl_destruct"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 6,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ngx_http_send_header",
+        "ngx_http_upstream_finalize_request",
+        "ngx_http_file_cache_free",
+        "ngx_http_upstream_upgrade",
+        "ngx_pool_run_cleanup_file",
+        "ngx_http_get_module_loc_conf",
+        "input_filter_init",
+        "ngx_tcp_nodelay",
+        "input_filter",
+        "ngx_http_upstream_process_non_buffered_downstream"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 8,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ngx_http_get_module_loc_conf",
+        "ngx_http_complex_value",
+        "ngx_http_get_module_ctx",
+        "ngx_strncasecmp",
+        "ngx_strncmp",
+        "ngx_min",
+        "ngx_escape_uri",
+        "ngx_memzero",
+        "ngx_http_script_flush_no_cacheable_variables",
+        "lcode"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 9,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ngx_http_upstream_rr_peers_wlock",
+        "ngx_time",
+        "resolved",
+        "ngx_resolver_strerror",
+        "ngx_http_upstream_rr_peers_unlock",
+        "ngx_resolve_name_done",
+        "ngx_add_timer",
+        "ngx_max",
+        "ngx_min",
+        "ngx_sock_ntop"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 11,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "sigemptyset",
+        "sigaddset",
+        "ngx_signal_value",
+        "sigprocmask",
+        "ngx_strlen",
+        "ngx_pnalloc",
+        "exit",
+        "ngx_cpymem",
+        "ngx_cpystrn",
+        "ngx_setproctitle"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 12,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ngx_enable_accept_events",
+        "ngx_event_get_conf",
+        "ngx_log_debug2",
+        "accept4",
+        "accept",
+        "ngx_log_debug0",
+        "ngx_disable_accept_events",
+        "ngx_shmtx_unlock",
+        "ngx_add_timer",
+        "ngx_atomic_fetch_add"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 13,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "CMSG_SPACE",
+        "ngx_enable_accept_events",
+        "ngx_event_get_conf",
+        "ngx_log_debug2",
+        "ngx_memzero",
+        "recvmsg",
+        "ngx_log_debug0",
+        "offsetof",
+        "CMSG_FIRSTHDR",
+        "CMSG_NXTHDR"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 15,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ngx_stream_upstream_rr_peers_wlock",
+        "ngx_time",
+        "resolved",
+        "ngx_resolver_strerror",
+        "ngx_stream_upstream_rr_peers_unlock",
+        "ngx_resolve_name_done",
+        "ngx_add_timer",
+        "ngx_max",
+        "ngx_min",
+        "ngx_sock_ntop"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 17,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ngx_set_environment",
+        "exit",
+        "ngx_get_conf",
+        "setpriority",
+        "setrlimit",
+        "geteuid",
+        "setgid",
+        "initgroups",
+        "prctl",
+        "setuid"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 18,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "CMSG_SPACE",
+        "ngx_enable_accept_events",
+        "ngx_event_get_conf",
+        "ngx_log_debug2",
+        "ngx_memzero",
+        "recvmsg",
+        "ngx_log_debug0",
+        "CMSG_FIRSTHDR",
+        "CMSG_NXTHDR",
+        "ngx_get_srcaddr_cmsg"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 20,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ngx_http_get_module_loc_conf",
+        "ngx_http_get_module_ctx",
+        "ngx_escape_uri",
+        "ngx_http_script_flush_no_cacheable_variables",
+        "ngx_memzero",
+        "lcode",
+        "ngx_hash_find",
+        "ngx_create_temp_buf",
+        "ngx_alloc_chain_link",
+        "ngx_copy"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 22,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ngx_http_get_module_loc_conf",
+        "ngx_log_debug0",
+        "request",
+        "ngx_http_create_request",
+        "ngx_free_chain",
+        "ngx_alloc_chain_link",
+        "ngx_http_close_request",
+        "ngx_http_finalize_connection",
+        "ngx_http_free_request",
+        "ngx_handle_read_event"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 23,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ngx_memzero",
+        "warning",
+        "GetVersionEx",
+        "GetSystemInfo",
+        "_wcsicmp",
+        "setlocale",
+        "WSAStartup",
+        "MAKEWORD",
+        "AcceptEx",
+        "GetAcceptExSockAddrs"
+      ],
+      "fpReason": "DOMAIN_IRRELEVANT",
+      "suppressedAfter": false
+    },
+    {
+      "index": 24,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ngx_str_null",
+        "ngx_log_debug1",
+        "ngx_open_dir",
+        "init_handler",
+        "ngx_set_errno",
+        "ngx_read_dir",
+        "ngx_de_namelen",
+        "ngx_de_name",
+        "ngx_log_debug2",
+        "ngx_cpymem"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 27,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ngx_quic_get_connection",
+        "ngx_log_debug1",
+        "ngx_log_debug2",
+        "ngx_quic_free_frames",
+        "ngx_del_timer",
+        "parameters",
+        "ngx_quic_run",
+        "frame",
+        "ngx_log_debug5",
+        "ngx_quic_keys_available"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 29,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ngx_sprintf",
+        "ngx_worker_process_cycle",
+        "ngx_log_debug0",
+        "ngx_console_init",
+        "SetEnvironmentVariable",
+        "CreateEvent",
+        "exit",
+        "ngx_create_signal_events",
+        "CreateMutex",
+        "ngx_close_listening_sockets"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 30,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "get",
+        "ngx_socket",
+        "ngx_log_debug2",
+        "ngx_get_connection",
+        "ngx_close_socket",
+        "setsockopt",
+        "ngx_nonblocking",
+        "ngx_event_connect_set_transparent",
+        "ngx_inet_get_port",
+        "bind"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 31,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ngx_log_debug4",
+        "ngx_min",
+        "ngx_http_grpc_get_ctx",
+        "ngx_http_get_module_main_conf",
+        "ngx_http_grpc_parse_frame",
+        "ngx_http_grpc_parse_rst_stream",
+        "ngx_http_grpc_parse_goaway",
+        "normally",
+        "ngx_http_grpc_parse_window_update",
+        "ngx_post_event"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 38,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ngx_http_upstream_cache",
+        "ngx_http_finalize_request",
+        "ngx_http_upstream_cache_send",
+        "ngx_post_event",
+        "ngx_handle_read_event",
+        "create_request",
+        "ngx_http_upstream_set_local",
+        "ngx_http_get_module_loc_conf",
+        "ngx_array_create",
+        "ngx_array_push"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 40,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ngx_crc32_short",
+        "ngx_resolver_lookup_addr6",
+        "ntohl",
+        "ngx_resolver_lookup_addr",
+        "ngx_time",
+        "ngx_log_debug0",
+        "ngx_queue_remove",
+        "ngx_queue_insert_head",
+        "ngx_resolver_dup",
+        "ngx_resolver_free"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    }
+  ],
+  "improvement": {
+    "fpReduction": 0.22727272727272727,
+    "f1Gain": null,
+    "rulesSuppressed": 2,
+    "summary": "VI suppressed 5/22 FPs (23% reduction). F1: NaN% → NaN% (+NaNpp). 2 rules suppressed."
+  }
+}

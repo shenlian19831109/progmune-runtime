@@ -1,0 +1,924 @@
+{
+  "repo": "redis",
+  "generated": "2026-07-02T16:51:07.358Z",
+  "before": {
+    "total": 50,
+    "tp": 0,
+    "fp": 45,
+    "tn": 5,
+    "fn": 0,
+    "precision": 0,
+    "recall": 0,
+    "f1": null
+  },
+  "after": {
+    "total": 50,
+    "tp": 0,
+    "fp": 23,
+    "tn": 27,
+    "fn": 0,
+    "precision": 0,
+    "recall": 0,
+    "f1": null,
+    "suppressedFPs": 22
+  },
+  "fpBreakdown": {
+    "CONTEXT_MISMATCH": 18,
+    "RULE_TOO_BROAD": 27
+  },
+  "suppressedRules": [
+    {
+      "rule": "redis:redis:rule_strcasecmp",
+      "fps": 8,
+      "confidence": 0.1
+    },
+    {
+      "rule": "redis:redis:rule_UNUSED",
+      "fps": 5,
+      "confidence": 0.14285714285714285
+    },
+    {
+      "rule": "redis:redis:rule_lookupKeyRead",
+      "fps": 3,
+      "confidence": 0.2
+    },
+    {
+      "rule": "redis:redis:rule_listCreate",
+      "fps": 2,
+      "confidence": 0.25
+    },
+    {
+      "rule": "redis:redis:rule_addReplyError",
+      "fps": 2,
+      "confidence": 0.25
+    },
+    {
+      "rule": "redis:redis:rule_fopen",
+      "fps": 2,
+      "confidence": 0.25
+    }
+  ],
+  "mismatches": [
+    {
+      "index": 0,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "crc16",
+        "getSlotOrReply",
+        "getLongLongFromObject",
+        "addReplyError",
+        "connTypeOfCluster",
+        "connectionTypeTls",
+        "connectionTypeTcp",
+        "createDumpPayload",
+        "rioInitWithBuffer",
+        "sdsempty"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 1,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "strcasecmp",
+        "delay",
+        "secret",
+        "startup",
+        "keys",
+        "accessed",
+        "stringmatchlen",
+        "argument",
+        "info",
+        "time"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 2,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "monotonicInit",
+        "strcasecmp",
+        "proc",
+        "printf",
+        "test_report",
+        "getTestProcByName",
+        "spt_init",
+        "tzset",
+        "zmalloc_set_oom_handler",
+        "time"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 3,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "sdsempty",
+        "dictFind",
+        "uname",
+        "sdscatfmt",
+        "FMTARGS",
+        "redisGitSHA1",
+        "strtol",
+        "redisGitDirty",
+        "redisBuildIdString",
+        "monotonicInfoString"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 4,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "UNUSED",
+        "TEST",
+        "createIntList",
+        "assert",
+        "lpLength",
+        "lpFree",
+        "createList",
+        "lpNew",
+        "lpPrepend",
+        "verifyEntry"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 5,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "listCreate",
+        "listSetFreeMethod",
+        "ACLUserCheckCmdWithUnrestrictedKeyAccess",
+        "strcasecmp",
+        "getLongFromObjectOrReply",
+        "strchr",
+        "patternHashSlot",
+        "sdslen",
+        "getKeySlot",
+        "addReplyError"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 6,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "isInsideYieldingLongCommand",
+        "useDisklessLoad",
+        "connSyncReadLine",
+        "connGetLastError",
+        "syncReadLine",
+        "atomicIncr",
+        "strncmp",
+        "strlen",
+        "memcpy",
+        "memset"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 7,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "strcasecmp",
+        "CACHING",
+        "ADDR",
+        "LADDR",
+        "TYPE",
+        "SKIPME",
+        "connection",
+        "REPLY",
+        "TRACKING",
+        "EVICT"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 8,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "ntohl",
+        "ntohs",
+        "mstime",
+        "clusterGetMessageTypeString",
+        "getInitialPingExt",
+        "getPingExtLength",
+        "padding",
+        "length",
+        "verifyClusterNodeId",
+        "getNextPingExt"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 9,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "rioRead",
+        "memcmp",
+        "atoi",
+        "mstime",
+        "LRU_CLOCK",
+        "keyMetaSpecInit",
+        "rdbLoadType",
+        "rdbLoadTime",
+        "keyMetaSpecAdd",
+        "rioGetReadError"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 10,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "getLongFromObjectOrReply",
+        "addReplyErrorFormat",
+        "addReplyErrorObject",
+        "ztrycalloc",
+        "addReplyError",
+        "lookupKeyRead",
+        "kvobjAllocSize",
+        "strcasecmp",
+        "getDoubleFromObjectOrReply",
+        "getPositiveLongFromObjectOrReply"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 11,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "UNUSED",
+        "printf",
+        "mstime",
+        "TEST",
+        "quicklistNew",
+        "ql_verify",
+        "quicklistRelease",
+        "quicklistPushTail",
+        "quicklistPushHead",
+        "TEST_DESC"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 12,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "strcasecmp",
+        "values",
+        "addReplyHelp",
+        "addReplyDictOfRedisInstances",
+        "sentinelGetMasterByNameOrReplyError",
+        "addReplySentinelRedisInstance",
+        "addReplyBulkCBuffer",
+        "getLongFromObjectOrReply",
+        "getLongLongFromObjectOrReply",
+        "getSentinelRedisInstanceByAddrAndRunID"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 13,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "strcasecmp",
+        "redactClientCommandArgument",
+        "ACLStringHasSpaces",
+        "sdslen",
+        "addReplyError",
+        "ACLGetUserByName",
+        "ACLStringSetUser",
+        "addReply",
+        "addReplyErrorSdsSafe",
+        "strcmp"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 14,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "addReplyError",
+        "clusterNodeIsMaster",
+        "getMyClusterNode",
+        "strcasecmp",
+        "addReplyErrorArity",
+        "parseSlotRangesOrReply",
+        "validateImportSlotRanges",
+        "addReplyErrorSds",
+        "slotRangeArrayFree",
+        "clusterLookupNode"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 15,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "scriptIsTimedout",
+        "call",
+        "scriptIsRunning",
+        "moduleCallCommandFilters",
+        "reqresAppendRequest",
+        "blockPostponeClient",
+        "modules",
+        "isCommandReusable",
+        "lookupCommand",
+        "strcasecmp"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 16,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "srand",
+        "atoi",
+        "createIntList",
+        "ziplistRepr",
+        "createList",
+        "pop",
+        "printf",
+        "ziplistIndex",
+        "ziplistGet",
+        "fwrite"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 18,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "srandom",
+        "time",
+        "getpid",
+        "init_genrand64",
+        "ustime",
+        "signal",
+        "memset",
+        "aeCreateEventLoop",
+        "aeCreateTimeEvent",
+        "listCreate"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 19,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "strcasecmp",
+        "getLongLongFromObject",
+        "addReplyErrorFormat",
+        "clusterStartHandshake",
+        "addReply",
+        "kvstoreSize",
+        "addReplyError",
+        "clusterDelNodeSlots",
+        "clusterDoBeforeSleep",
+        "memset"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 20,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "UNUSED",
+        "watchdogScheduleSignal",
+        "listLength",
+        "getMonotonicUs",
+        "run_with_period",
+        "atomicGet",
+        "trackInstantaneousMetric",
+        "statsUpdateActiveClients",
+        "getLRUClock",
+        "cronUpdateMemoryStats"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 21,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "lookupKeyRead",
+        "getLongLongFromObjectOrReply",
+        "streamParseIntervalIDOrReply",
+        "streamIncrID",
+        "addReplyError",
+        "strcasecmp",
+        "max",
+        "getRangeLongFromObjectOrReply",
+        "addReplyErrorObject",
+        "checkType"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 23,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "signal",
+        "setupSignalHandlers",
+        "ThreadsManager_init",
+        "makeThreadKillable",
+        "openlog",
+        "getpid",
+        "pthread_self",
+        "raxNew",
+        "listCreate",
+        "raxNewEx"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 24,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "makePath",
+        "fopen",
+        "redis_stat",
+        "strerror",
+        "redis_fstat",
+        "fileno",
+        "fclose",
+        "createAOFClient",
+        "format",
+        "fread"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 25,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "UNUSED",
+        "updatePeakMemory",
+        "processEventsWhileBlocked",
+        "connTypeProcessPendingData",
+        "flushAppendOnlyFile",
+        "handleClientsWithPendingWrites",
+        "freeClientsInAsyncFreeQueue",
+        "processClientsOfAllIOThreads",
+        "sendPendingClientsToIOThreads",
+        "data"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 26,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "sdslen",
+        "strcasecmp",
+        "addReplyError",
+        "getLongLongFromObjectOrReply",
+        "getTimeoutFromObjectOrReply",
+        "addReplyErrorFormat",
+        "addReplyErrorObject",
+        "lookupKeyRead",
+        "checkType",
+        "streamLookupCG"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 28,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "UNUSED",
+        "TEST",
+        "raxAllocSize",
+        "raxInsert",
+        "raxRemove",
+        "raxNewEx",
+        "createTestValue",
+        "assert",
+        "_rax_verify_alloc_size",
+        "rax_free"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 29,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "memset",
+        "isatty",
+        "fileno",
+        "getenv",
+        "parseOptions",
+        "parseEnv",
+        "askPassword",
+        "cliSecureInit",
+        "gettimeofday",
+        "init_genrand64"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 31,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "fopen",
+        "strerror",
+        "exit",
+        "redis_fstat",
+        "fileno",
+        "fclose",
+        "fgets",
+        "truncate",
+        "sdssplitargs",
+        "strcasecmp"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 32,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "listCreate",
+        "parseClusterNodeAddress",
+        "fprintf",
+        "clusterManagerNewNode",
+        "clusterManagerNodeConnect",
+        "freeClusterManagerNode",
+        "clusterManagerNodeIsCluster",
+        "clusterManagerPrintNotClusterNodeError",
+        "clusterManagerNodeLoadInfo",
+        "CLUSTER_MANAGER_PRINT_REPLY_ERROR"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 33,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "strcasecmp",
+        "addReplyErrorObject",
+        "redactClientCommandArgument",
+        "sdslen",
+        "addReplyError",
+        "getLongFromObjectOrReply",
+        "lookupKeyRead",
+        "addReplySds",
+        "migrateGetSocket",
+        "rioInitWithBuffer"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 34,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "lookupKeyRead",
+        "checkType",
+        "streamLookupCG",
+        "addReplyErrorFormat",
+        "getLongLongFromObjectOrReply",
+        "streamParseStrictIDOrReply",
+        "commandTimeSnapshot",
+        "strcasecmp",
+        "streamCompareID",
+        "streamUpdateCGroupLastId"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 35,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "strcasecmp",
+        "getLongFromObjectOrReply",
+        "addReplyErrorObject",
+        "sdslen",
+        "getObjectTypeByName",
+        "addReplyErrorFormat",
+        "addReplyError",
+        "vecInit",
+        "vecSetFreeMethod",
+        "state"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    },
+    {
+      "index": 37,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "commands",
+        "isatty",
+        "fileno",
+        "cliInitHelp",
+        "linenoiseSetMultiLine",
+        "linenoiseSetCompletionCallback",
+        "linenoiseSetHintsCallback",
+        "linenoiseSetFreeHintsCallback",
+        "getenv",
+        "getDotfilePath"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 38,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "mstime",
+        "listCreate",
+        "fprintf",
+        "exit",
+        "dictCreate",
+        "typeinfo_add",
+        "findBigKeys",
+        "sizeDistInit",
+        "hdr_init",
+        "signal"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 39,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "commandTimeSnapshot",
+        "createStringObject",
+        "sdslen",
+        "createStringObjectFromLongLong",
+        "createObjectFromStreamID",
+        "addReplyDeferredLen",
+        "list",
+        "pelListUpdate",
+        "modifications",
+        "streamIteratorStart"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 40,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "addReplyError",
+        "strcasecmp",
+        "clusterCommandHelp",
+        "clusterGenNodesDescription",
+        "shouldReturnTlsInfo",
+        "addReplyVerbatim",
+        "sdslen",
+        "clusterCommandMyId",
+        "clusterCommandMyShardId",
+        "clusterCommandSlots"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 41,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "approximate",
+        "lookupKeyRead",
+        "checkType",
+        "setTypeCreate",
+        "kvobjAllocSize",
+        "setTypeSize",
+        "qsort",
+        "createIntsetObject",
+        "createSetObject",
+        "set"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 42,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "fopen",
+        "sdscatprintf",
+        "sdsempty",
+        "strerror",
+        "fgets",
+        "fclose",
+        "sdssplitlen",
+        "strlen",
+        "raxNew",
+        "sdstrim"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 43,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "clusterManagerLogWarn",
+        "exit",
+        "clusterManagerLogInfo",
+        "sdsfromlonglong",
+        "listCreate",
+        "sdsempty",
+        "listRewind",
+        "listNext",
+        "CLUSTER_MANAGER_COMMAND",
+        "clusterManagerCheckRedisReply"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 44,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "lua_type",
+        "lua_checkstack",
+        "addReplyError",
+        "lua_pop",
+        "addReplyBulkCBuffer",
+        "lua_tostring",
+        "lua_strlen",
+        "addReply",
+        "lua_toboolean",
+        "addReplyBool"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 45,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "addReplyErrorObject",
+        "strcasecmp",
+        "getLongLongFromObjectOrReply",
+        "streamParseIntervalIDOrReply",
+        "streamIncrID",
+        "addReplyError",
+        "streamDecrID",
+        "lookupKeyRead",
+        "checkType",
+        "streamLookupCG"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": false
+    },
+    {
+      "index": 46,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "sdssplitlen",
+        "strlen",
+        "sdstrim",
+        "sdssplitargs",
+        "sdsfreesplitres",
+        "sdstolower",
+        "lookupConfig",
+        "sdslen",
+        "set",
+        "strcasecmp"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 47,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "dictCreate",
+        "strtol",
+        "TEST",
+        "dictSetResizeEnabled",
+        "dictAdd",
+        "stringFromLongLong",
+        "assert",
+        "dictIsRehashing",
+        "dictRehashMicroseconds",
+        "dictSize"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": false
+    },
+    {
+      "index": 48,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "lookupKeyRead",
+        "checkType",
+        "extractLongLatOrReply",
+        "extractDistanceOrReply",
+        "longLatFromMember",
+        "addReplyError",
+        "strcasecmp",
+        "getLongLongFromObjectOrReply",
+        "extractBoxOrReply",
+        "addReplyErrorObject"
+      ],
+      "fpReason": "RULE_TOO_BROAD",
+      "suppressedAfter": true
+    },
+    {
+      "index": 49,
+      "expected": "clean",
+      "got": "violation",
+      "calls": [
+        "strcasecmp",
+        "getLongLongFromObjectOrReply",
+        "addReplyError",
+        "LRU_CLOCK",
+        "addReplyErrorObject",
+        "lookupKeyWrite",
+        "verifyDumpPayload",
+        "sdslen",
+        "rioInitWithBuffer",
+        "keyMetaSpecInit"
+      ],
+      "fpReason": "CONTEXT_MISMATCH",
+      "suppressedAfter": true
+    }
+  ],
+  "improvement": {
+    "fpReduction": 0.4888888888888889,
+    "f1Gain": null,
+    "rulesSuppressed": 6,
+    "summary": "VI suppressed 22/45 FPs (49% reduction). F1: NaN% → NaN% (+NaNpp). 6 rules suppressed."
+  }
+}

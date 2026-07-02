@@ -144,15 +144,17 @@ function runVIImpact(repoName: string): VIImpactReport {
       const primaryFn = m.calls[0] || "unknown";
       const ruleKey = `${repoName}:rule_${primaryFn}`;
 
+      const ctx = {
+        isTestCode: m.calls.some(fn => /test|mock|demo|_test/i.test(fn)),
+        isInitCode: m.calls.some(fn => /init|setup|config|_init/i.test(fn)),
+        isInternal: m.calls.some(fn => fn.startsWith("_")),
+      };
+
       // Auto-classify the FP
       const reason = vi.autoClassifyFP({
         ruleName: ruleKey,
         sequence: m.calls,
-        context: {
-          isTestCode: m.calls.some(fn => /test|mock|demo/i.test(fn)),
-          isInitCode: m.calls.some(fn => /init|setup|config/i.test(fn)),
-          isInternal: m.calls.some(fn => fn.startsWith("_")),
-        },
+        context: ctx,
       });
 
       m.fpReason = reason;
@@ -166,11 +168,16 @@ function runVIImpact(repoName: string): VIImpactReport {
         repo: repoName,
         sequence: m.calls,
         reason,
-        context: {
-          isTestCode: m.calls.some(fn => /test|mock|demo/i.test(fn)),
-          isInitCode: m.calls.some(fn => /init|setup|config/i.test(fn)),
-        },
+        context: ctx,
       });
+
+      // P6: Activate context filter — if CONTEXT_MISMATCH, add filter to suppress
+      // future FPs from the same context for this rule
+      if (reason === "CONTEXT_MISMATCH") {
+        if (ctx.isTestCode) vi.addContextFilter(ruleKey, "test");
+        if (ctx.isInitCode) vi.addContextFilter(ruleKey, "init");
+        if (ctx.isInternal) vi.addContextFilter(ruleKey, "internal");
+      }
     }
   }
 
@@ -303,10 +310,15 @@ function formatImpactReport(report: VIImpactReport): string {
 
 function main() {
   const args = process.argv.slice(2);
-  const repoArg = args.find(a => a.startsWith("--repo="));
+  const repoArgIdx = args.findIndex(a => a === "--repo" || a.startsWith("--repo="));
+  const repoArg = repoArgIdx >= 0
+    ? (args[repoArgIdx].startsWith("--repo=")
+        ? args[repoArgIdx].replace("--repo=", "")
+        : args[repoArgIdx + 1])
+    : null;
   const repos = repoArg
-    ? [repoArg.replace("--repo=", "")]
-    : ["curl", "libssh"];
+    ? [repoArg]
+    : ["curl", "libssh", "nginx", "redis"];
 
   for (const repo of repos) {
     try {
