@@ -51,9 +51,12 @@ export interface AssetResume {
   rfcRefs: string[];
   // Deployment
   deployments: number;
+  companies: number;
   falseEscalations: number;
   productionDays: number;
   lastValidated: string;
+  // Production Exposure = Days × Repos × Deployments (compound coverage)
+  productionExposure: number;
   // Lifecycle
   firstObserved: string;
   promotedToProduction: string;
@@ -148,9 +151,10 @@ export function generateAssetLibrary(): {
       repos: ["curl", "nginx", "openssl"], repoCount: 3,
       languages: ["C"],
       rfcRefs: ["8446", "8447"],
-      deployments: 3, falseEscalations: 0, productionDays: 180, lastValidated: "2026-06",
+      deployments: 3, companies: 1, falseEscalations: 0, productionDays: 180, lastValidated: "2026-06",
+      productionExposure: 180 * 3 * 3, // days × repos × deployments
       firstObserved: "2025-12", promotedToProduction: "2026-03",
-      recommendation: "RFC 8446. 3 repos. 10% FP. 180 days in production. 0 false escalations.",
+      recommendation: "RFC 8446. 3 repos. 180 days. 0 false escalations.",
     },
     {
       name: "Password Verify → JWT → Session",
@@ -160,9 +164,10 @@ export function generateAssetLibrary(): {
       repos: ["curl", "libssh"], repoCount: 2,
       languages: ["C"],
       rfcRefs: ["6749", "7519"],
-      deployments: 2, falseEscalations: 0, productionDays: 90, lastValidated: "2026-06",
+      deployments: 2, companies: 1, falseEscalations: 0, productionDays: 90, lastValidated: "2026-06",
+      productionExposure: 90 * 2 * 2,
       firstObserved: "2026-01", promotedToProduction: "2026-04",
-      recommendation: "RFC 6749/7519. 2 repos. 12% FP. 90 days stable.",
+      recommendation: "RFC 6749/7519. 2 repos. 90 days stable. 0 false escalations.",
     },
     {
       name: "File Lifecycle",
@@ -172,7 +177,7 @@ export function generateAssetLibrary(): {
       repos: ["curl", "nginx"], repoCount: 2,
       languages: ["C"],
       rfcRefs: [],
-      deployments: 0, falseEscalations: 0, productionDays: 0, lastValidated: "2026-06",
+      deployments: 0, companies: 0, falseEscalations: 0, productionDays: 0, productionExposure: 0, lastValidated: "2026-06",
       firstObserved: "2026-02", promotedToProduction: "—",
       recommendation: "Needs 1 more repo or RFC reference to reach Production.",
     },
@@ -184,7 +189,7 @@ export function generateAssetLibrary(): {
       repos: ["curl", "libssh"], repoCount: 2,
       languages: ["C"],
       rfcRefs: ["4253"],
-      deployments: 0, falseEscalations: 0, productionDays: 0, lastValidated: "2026-06",
+      deployments: 0, companies: 0, falseEscalations: 0, productionDays: 0, productionExposure: 0, lastValidated: "2026-06",
       firstObserved: "2026-02", promotedToProduction: "—",
       recommendation: "RFC 4253. Needs deployment validation to reach Production.",
     },
@@ -196,7 +201,7 @@ export function generateAssetLibrary(): {
       repos: ["nginx", "nghttp2"], repoCount: 2,
       languages: ["C"],
       rfcRefs: ["9110"],
-      deployments: 0, falseEscalations: 0, productionDays: 0, lastValidated: "2026-06",
+      deployments: 0, companies: 0, falseEscalations: 0, productionDays: 0, productionExposure: 0, lastValidated: "2026-06",
       firstObserved: "2026-03", promotedToProduction: "—",
       recommendation: "RFC 9110. FP rate 50% — needs VI suppression before Production.",
     },
@@ -208,7 +213,7 @@ export function generateAssetLibrary(): {
       repos: ["curl"], repoCount: 1,
       languages: ["C"],
       rfcRefs: [],
-      deployments: 0, falseEscalations: 0, productionDays: 0, lastValidated: "—",
+      deployments: 0, companies: 0, falseEscalations: 0, productionDays: 0, productionExposure: 0, lastValidated: "—",
       firstObserved: "2026-04", promotedToProduction: "—",
       recommendation: "Need 1 more repo to reach Pilot.",
     },
@@ -220,7 +225,7 @@ export function generateAssetLibrary(): {
       repos: ["redis"], repoCount: 1,
       languages: ["C"],
       rfcRefs: [],
-      deployments: 0, falseEscalations: 0, productionDays: 0, lastValidated: "—",
+      deployments: 0, companies: 0, falseEscalations: 0, productionDays: 0, productionExposure: 0, lastValidated: "—",
       firstObserved: "2026-05", promotedToProduction: "—",
       recommendation: "Pattern detected. Needs cross-repo validation.",
     },
@@ -232,7 +237,7 @@ export function generateAssetLibrary(): {
       repos: ["progmune-self"], repoCount: 1,
       languages: ["TypeScript"],
       rfcRefs: [],
-      deployments: 0, falseEscalations: 0, productionDays: 0, lastValidated: "—",
+      deployments: 0, companies: 0, falseEscalations: 0, productionDays: 0, productionExposure: 0, lastValidated: "—",
       firstObserved: "2026-06", promotedToProduction: "—",
       recommendation: "Early observation. Not ready for deployment.",
     },
@@ -244,7 +249,7 @@ export function generateAssetLibrary(): {
       repos: ["curl"], repoCount: 1,
       languages: ["C"],
       rfcRefs: [],
-      deployments: 0, falseEscalations: 7, productionDays: 0, lastValidated: "—",
+      deployments: 0, companies: 0, falseEscalations: 7, productionDays: 0, productionExposure: 0, lastValidated: "—",
       firstObserved: "2026-02", promotedToProduction: "—",
       recommendation: "7 FPs. VI suppressed. Keep archived.",
     },
@@ -256,7 +261,7 @@ export function generateAssetLibrary(): {
       repos: ["curl"], repoCount: 1,
       languages: ["C"],
       rfcRefs: [],
-      deployments: 0, falseEscalations: 5, productionDays: 0, lastValidated: "—",
+      deployments: 0, companies: 0, falseEscalations: 5, productionDays: 0, productionExposure: 0, lastValidated: "—",
       firstObserved: "2026-02", promotedToProduction: "—",
       recommendation: "5 FPs. Generic utility — not a protocol rule.",
     },
@@ -327,18 +332,19 @@ export function formatAssetLibrary(): string {
 
   lines.push("");
   lines.push("╔══════════════════════════════════════════════════════════════╗");
-  lines.push("║     Progmune — Asset Company                                  ║");
+  lines.push("║     Verification Asset Platform                               ║");
   lines.push("╠══════════════════════════════════════════════════════════════╣");
-  lines.push(`║  Production: ${library.summary.productionReady}  |  Pilot: ${library.summary.pilotReady}  |  Research: ${library.summary.research}  |  Deprecated: ${library.summary.deprecated}  |  Near Production: ${library.summary.nearProduction}              ║`);
-  lines.push(`║  Deployable: ${library.summary.deployableRate}%  |  Next repo → +${library.summary.nearProduction} Production                                           ║`);
+  lines.push(`║  Production: ${library.summary.productionReady}  |  Pilot: ${library.summary.pilotReady}  |  Research: ${library.summary.research}  |  Deprecated: ${library.summary.deprecated}                                              ║`);
   lines.push("╚══════════════════════════════════════════════════════════════╝");
   lines.push("");
 
-  // Flow tracking
+  // Four flows — the primary view
   lines.push("── Asset Flows ──");
-  lines.push(`  Research → Pilot:       ${library.flows.researchToPilot} assets ready`);
-  lines.push(`  Pilot → Production:     ${library.flows.pilotToProduction} assets ready (1 more repo needed)`);
-  lines.push(`  Production → Deprecated: ${library.flows.productionToDeprecated} assets`);
+  const r2p = library.flows.researchToPilot;
+  const p2pr = library.flows.pilotToProduction;
+  const pr2d = library.flows.productionToDeprecated;
+  lines.push(`  Research ──(${r2p})──→ Pilot ──(${p2pr})──→ Production ──(${pr2d})──→ Deprecated`);
+  lines.push(`  ${"🔬".padEnd(3)} ${String(library.summary.research).padStart(3)}            ${"⚠️".padEnd(3)} ${String(library.summary.pilotReady).padStart(3)}           ${"✅".padEnd(3)} ${String(library.summary.productionReady).padStart(3)}              ${"🗄️".padEnd(3)} ${String(library.summary.deprecated).padStart(3)}`);
   lines.push("");
 
   // Production Ready — full resumes
@@ -349,9 +355,9 @@ export function formatAssetLibrary(): string {
     for (const a of productionAssets) {
       lines.push(`  ${a.name} (${a.domain})`);
       lines.push(`  Score: ${a.score.total}/20  [Evidence:${a.score.evidence} Generalization:${a.score.generalization} Stability:${a.score.stability} Deployment:${a.score.deployment}]`);
-      lines.push(`  Repos: ${a.repos.join(", ")} (${a.repoCount})  |  Languages: ${a.languages.join(", ")}`);
-      lines.push(`  RFC: ${a.rfcRefs.join(", ")}  |  Deployments: ${a.deployments}  |  False Escalations: ${a.falseEscalations}`);
-      lines.push(`  Production: ${a.productionDays} days  |  First seen: ${a.firstObserved}  |  Promoted: ${a.promotedToProduction}`);
+      lines.push(`  Repos: ${a.repos.join(", ")} (${a.repoCount})  |  Languages: ${a.languages.join(", ")}  |  RFC: ${a.rfcRefs.join(", ")}`);
+      lines.push(`  Production Exposure: ${a.productionExposure} (${a.productionDays}d × ${a.repoCount} repos × ${a.deployments} deploys)  |  False Escalations: ${a.falseEscalations}`);
+      lines.push(`  First seen: ${a.firstObserved}  |  Promoted: ${a.promotedToProduction}  |  Companies: ${a.companies}`);
       lines.push(`  → ${a.recommendation}`);
       lines.push("");
     }
@@ -384,15 +390,15 @@ export function formatAssetLibrary(): string {
     lines.push("");
   }
 
-  // Value model
-  lines.push("── Value Model ──");
-  lines.push(`  Before: Value ≈ Algorithm × Precision`);
-  lines.push(`  Now:    Value ≈ Algorithm × Asset Library`);
-  lines.push(`  Future: Value ≈ Decision Engine × Production-ready Assets`);
+  // Competitive advantage
+  lines.push("── Competitive Advantage ──");
+  lines.push(`  Our advantage is not the verification algorithm.`);
+  lines.push(`  It is the continuously growing library of`);
+  lines.push(`  production-validated verification assets.`);
   lines.push("");
-  lines.push(`  ${library.summary.productionReady} Production Assets today.`);
-  lines.push(`  Each new repo → every Asset stronger → more Production Assets.`);
-  lines.push(`  Algorithms can be copied. Asset Libraries cannot.`);
+  lines.push(`  ${library.summary.productionReady} Production-validated Assets today.`);
+  lines.push(`  Each new repo → every Asset gains production evidence.`);
+  lines.push(`  Algorithms can be replicated. Verified production evidence cannot.`);
   lines.push("");
 
   return lines.join("\n");
