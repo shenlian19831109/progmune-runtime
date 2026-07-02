@@ -121,9 +121,11 @@ Alert → FP detected → Classify reason → Adjust confidence → Better decis
 |------|-----------|----------|-------------|-----------------|
 | curl | 36% | **49%** | 47% (28/59) | 9 |
 | libssh | 41% | **53%** | 41% (13/32) | 5 |
-| **Combined** | **38%** | **51%** | **45%** | **14** |
+| nginx | — | — | 23% (5/22) | 2 |
+| redis | — | — | 49% (22/45) | 6 |
+| **Combined** | | | **43%** (68/158) | **22** |
 
-**Why this matters:** Without VI, 77% of alerts are false positives. With VI, this drops to 63% — and improves with every deployment. The engine learns what NOT to alert on.
+FP root cause: rule explosion — 452 SSG rules from 61 clean sequences (curl). VI suppresses the noisiest 22.
 
 ---
 
