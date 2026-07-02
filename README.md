@@ -1,16 +1,43 @@
-# Progmune Runtime
+# Progmune
 
-## AI Software Verification Infrastructure
+## The Verification Runtime for AI-generated software.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-blue)](https://modelcontextprotocol.io)
-[![KB](https://img.shields.io/badge/KB-10_units_·_3_stable-22d3ee)]()
-[![Precision](https://img.shields.io/badge/Precision-58%25_(curl)-fbbf24)]()
+[![Precision](https://img.shields.io/badge/Precision-curl%2036%25%20F1-fbbf24)]()
+[![Tests](https://img.shields.io/badge/Tests-92%20passing-22c55e)]()
 
-*Knowledge-driven governance for AI-generated software. Every new codebase makes every verification stronger.*
+**Verify AI-generated software before production.** Detect protocol violations. Certify AI code. Enforce governance. Every new codebase makes every verification stronger.
 
-**Progmune does not trust what the model says — it verifies what the program actually does.**
-It checks whether AI-generated code follows the security protocols it's supposed to follow, backed by a continuously evolving protocol knowledge base.
+Progmune does not trust what the model says — it verifies what the program actually does.
+
+---
+
+## One Command
+
+```bash
+npm run sdk src/server.ts --explain
+```
+
+Output: `BLOCK` / `WARN` / `ALLOW` — with evidence, RFC references, and repair suggestions.
+
+---
+
+## The Runtime Pipeline
+
+```
+Source Code → Extract IR → Verify → Explain → Repair → Validate → BLOCK/WARN/ALLOW
+```
+
+Progmune is not a scanner. It is a **Runtime** — it answers not just "what's wrong?" but "what should we do about it?"
+
+| Capability | What it does |
+|-----------|-------------|
+| **Verify** | Protocol state machine validation against RFCs |
+| **Explain** | Human-readable violation report with evidence chains |
+| **Repair** | Automatic fix generation + verification + rollback |
+| **Certify** | Ontology-backed AI Code Certificate (audit-ready) |
+| **Govern** | CI/CD deploy gate — blocks unverified AI code |
 
 ---
 
@@ -19,111 +46,98 @@ It checks whether AI-generated code follows the security protocols it's supposed
 ```bash
 npm install progmune-runtime
 
-# One-command verification
-npm run sdk src/server.ts --explain
+# Verify a file
+npm run sdk src/server.ts
 
-# Full system demo (30 seconds)
-bash demo/demo.sh
+# Full explanation with repair suggestions
+npm run sdk src/server.ts --explain
 
 # Governance dashboard
 npm run dashboard
+
+# Run benchmark suite
+npm run precision:all
 ```
-
----
-
-## What It Does
-
-| Capability | Command | Description |
-|-----------|---------|-------------|
-| **Verify** | `npm run sdk <file>` | One-call AI code governance (→ BLOCK/WARN/ALLOW) |
-| **Explain** | `npm run sdk <file> --explain` | Human-readable governance report with RFC refs |
-| **Certify** | `npm run certify <file>` | AI Code Certificate (ontology-backed, audit-ready) |
-| **Policy** | `npm run policy check <file>` | Deploy gate — blocks unverified AI code |
-| **Status** | `npm run status` | Full system health (5 layers, debt, velocity) |
-| **Dashboard** | `npm run dashboard` | Governance dashboard (localhost:3200) |
 
 ---
 
 ## Architecture
 
 ```
-Enterprise:  verify("./server.ts") → BLOCK / WARN / ALLOW
-                ↑
-Runtime API:     verify() | explain() | fix()          [Stable]
-                ↑
-Governance:      Policy Engine | Certificate | CI/CD    [Product]
-                ↑
-Verification:    Resource | Protocol | Risk Model       [Capability]
-                ↑
-Knowledge:       Units | Ontology | Evolution           [Moat]
-                ↑
-Evidence:        Repos | Sequences | Benchmarks | RFC   [Foundation]
+SDK:         verify("./server.ts") → BLOCK / WARN / ALLOW
+               ↑
+Runtime:       verify() | explain() | repair() | validate()
+               ↑
+Governance:    Policy Engine | Certificate | CI/CD Gate
+               ↑
+Verification:  SSG State Machine | Protocol Rules | Risk Model
+               ↑
+Knowledge:     Units | Ontology | Evolution | Evidence
+               ↑
+Intelligence:  FP Learning | Confidence Calibration | Decision Engine
 ```
+
+---
+
+## Benchmarks
+
+Public, reproducible precision data across repositories:
+
+| Repo | Precision | Recall | F1 | Samples |
+|------|-----------|--------|-----|---------|
+| curl | 23% | 75% | 36% | 85 |
+| libssh | 27% | 86% | 41% | 47 |
+| nginx | — | — | — | 50 |
+| redis | — | — | — | 50 |
+
+**[Full Benchmark Report →](benchmarks/reports/cross-repo-precision-latest.json)**
 
 ---
 
 ## Knowledge Base
 
-| Domain | Asset | Maturity | Confidence | Validated On | RFC |
-|--------|-------|----------|------------|-------------|-----|
-| TLS | Handshake v1.0.0 | Stable ★ | 85% | curl, nginx | 8446 |
-| SSH | Connection v1.0.0 | Stable ★ | 78% | curl, libssh | 4253 |
-| HTTP | Request v1.0.0 | Stable ★ | 80% | nginx, Apache | 9110 |
-| HTTP/2 | Session v0.8.0 | Validated ◉ | 68% | nghttp2 | 9113 |
+Deep, not broad. Each knowledge unit is RFC-backed, multi-repo validated, and continuously evolving.
 
-**10 Knowledge Units · 6 Protocol Domains · 7 Repos · 605 Evidence Sequences**
-
----
-
-## Detection Engine
-
-**7 Risk Patterns** — evidence-backed, severity-weighted, RFC-referenced.
-
-| Pattern | Severity | Confidence |
-|---------|----------|------------|
-| Missing Finished (TLS) | Critical | 91% |
-| Resource Acquire No Release | Critical | 98% |
-| SSH Without Auth | Critical | 78% |
-| TLS Without Init | High | 85% |
-
-**Precision** (curl, 85 labeled seqs): P=58% R=46% F1=51% (Resource Lifecycle) · [Full Report](docs/precision-report.html)
+| Domain | Unit | Confidence | Validated On | RFC |
+|--------|------|------------|-------------|-----|
+| TLS | Handshake v1.0.0 | 85% | curl, nginx | 8446 |
+| SSH | Connection v1.0.0 | 78% | curl, libssh | 4253 |
+| HTTP | Request v1.0.0 | 80% | nginx, Apache | 9110 |
+| HTTP/2 | Session v0.8.0 | 68% | nghttp2 | 9113 |
 
 ---
 
-## Demo
+## Verification Intelligence
 
-```bash
-bash demo/demo.sh
+The engine learns from every false positive. Rules that produce too many false alarms are automatically suppressed. Confidence is calibrated by evidence, not hardcoded.
+
+```
+Alert → FP detected → Classify reason → Adjust confidence → Better decisions
 ```
 
-Shows 6 steps: verify → certify → policy → knowledge → network → explain.  
-Also: `demo-auth/` — Express JWT + Refresh Token microservice with deliberate protocol violations (all caught).
+**Why this matters:** A detector with 97% false positive rate is unusable. Verification Intelligence reduces noise by learning what NOT to alert on.
 
 ---
 
-## Documentation
+## Why "Progmune"?
 
-| Document | Audience |
-|----------|----------|
-| [POSITIONING.md](POSITIONING.md) | Product strategy |
-| [docs/WHITEPAPER_V6.html](docs/WHITEPAPER_V6.html) | Comprehensive (bilingual) |
-| [docs/WHITEPAPER_EXTERNAL.html](docs/WHITEPAPER_EXTERNAL.html) | CISO, VP, Compliance |
-| [docs/WHITEPAPER_INTERNAL.html](docs/WHITEPAPER_INTERNAL.html) | Engineering training |
-| [docs/precision-report.html](docs/precision-report.html) | Public benchmark data |
-| [docs/knowledge-index.html](docs/knowledge-index.html) | KB ecosystem page |
+The verification engine draws inspiration from program immunology — distinguishing "self" (correct code) from "non-self" (protocol violations) — but the product is a **verification runtime**, not an immunology metaphor.
+
+For the academic foundation, see the [Whitepaper →](WHITEPAPER.md).
 
 ---
 
-## CI/CD Integration
+## Status
 
-```yaml
-- uses: shenlian19831109/progmune-runtime@main
-  with:
-    project_path: .
-```
+- **Runtime Pipeline:** Detect → Explain → Repair → Validate (L1–L4)
+- **Tests:** 92 passing
+- **Repair simulation:** 100% (standard violations)
+- **Cross-repo benchmark:** 4 repos measured
+- **Knowledge:** 10 units, 3 stable, 7 repos validated
+- **Current focus:** FP reduction (97% → 40%) via Verification Intelligence
 
 ---
 
 ## License
 
-MIT · [github.com/shenlian19831109/progmune-runtime](https://github.com/shenlian19831109/progmune-runtime)
+MIT — [LICENSE](LICENSE)

@@ -14,6 +14,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { loadTrajectories } from "./failure-corpus";
 import { findFixPathStatic } from "./ssg-validator";
+import type { StateAnnotation } from "./ssg-validator";
 import type { RepairCandidate, CandidateSearchStrategy, SearchContext } from "./repair-types";
 import { getGoalPlanner } from "./goal-planner";
 import { searchFrontier, exploreFrontier, expandCrossProtocolCandidates } from "./protocol-frontier";
@@ -36,6 +37,8 @@ function candidateId(source: string, actions: { kind: string; function?: string 
 /** Find functions that invalidate current states (resource cleanup). */
 function findCleanupFunctions(ctx: SearchContext): RepairCandidate[] {
   const candidates: RepairCandidate[] = [];
+
+  // Pass 1: exact match — function invalidates a current state AND all pre-states are satisfied
   for (const [funcName, rule] of ctx.rules) {
     const invalidates = rule.invalidate || [];
     const matchesCurrent = invalidates.some(s => ctx.currentState.includes(s));
@@ -47,10 +50,60 @@ function findCleanupFunctions(ctx: SearchContext): RepairCandidate[] {
         actions,
         explanation: `资源清理: 调用 ${funcName} 以释放 ${invalidates.filter(s => ctx.currentState.includes(s)).join(", ")}`,
         evidence: 0,
-        metadata: { pathLength: 1, cleanupTargets: invalidates },
+        metadata: { pathLength: 1, cleanupTargets: invalidates, source: "cleanup" },
       });
     }
   }
+
+  // Pass 2 (P0): relaxed match — function invalidates a current state even if not all
+  // pre-states are satisfied. This catches cases where the current state snapshot
+  // is incomplete (e.g., namespace mismatch).
+  // But we still require at least one pre-state to be present — completely unrelated
+  // cleanup functions should not be suggested.
+  if (candidates.length === 0) {
+    for (const [funcName, rule] of ctx.rules) {
+      const invalidates = rule.invalidate || [];
+      const matchesCurrent = invalidates.some(s => ctx.currentState.includes(s));
+      const hasAnyPreState = rule.pre_states.length === 0 ||
+        rule.pre_states.some(p => ctx.currentState.includes(p));
+      if (matchesCurrent && hasAnyPreState) {
+        const actions = [fnToAction(funcName)];
+        candidates.push({
+          id: candidateId("protocol", actions),
+          source: "protocol",
+          actions,
+          explanation: `资源清理(fuzzy): 调用 ${funcName} 以释放 ${invalidates.filter(s => ctx.currentState.includes(s)).join(", ")}`,
+          evidence: 0,
+          metadata: { pathLength: 1, cleanupTargets: invalidates, source: "cleanup-fuzzy" },
+        });
+      }
+    }
+  }
+
+  // Pass 3 (P0): last-resort — ANY function that invalidates ANY resource-like state
+  // that looks like it could be leaked (contains OPEN, CONNECTED, ACTIVE, LOCKED).
+  if (candidates.length === 0) {
+    const leakableStates = ctx.currentState.filter(s =>
+      /OPEN|CONNECTED|ACTIVE|LOCKED|ALLOCATED|ACQUIRED|HELD/i.test(s)
+    );
+    if (leakableStates.length > 0) {
+      for (const [funcName, rule] of ctx.rules) {
+        const invalidates = rule.invalidate || [];
+        if (invalidates.some(s => leakableStates.includes(s))) {
+          const actions = [fnToAction(funcName)];
+          candidates.push({
+            id: candidateId("protocol", actions),
+            source: "protocol",
+            actions,
+            explanation: `推测性资源清理: 调用 ${funcName} 以释放疑似泄漏状态 ${leakableStates.join(", ")}`,
+            evidence: 0,
+            metadata: { pathLength: 1, cleanupTargets: invalidates, source: "cleanup-heuristic" },
+          });
+        }
+      }
+    }
+  }
+
   return candidates;
 }
 
@@ -74,6 +127,45 @@ function expandGoalAsCandidates(goal: string, ctx: SearchContext): RepairCandida
   }));
 }
 
+
+// ═══════════════════════════════════════════════════════════════
+// P0: Protocol rules loader — fallback for empty rules Maps
+// ═══════════════════════════════════════════════════════════════
+
+let _cachedProtocolRules: Map<string, StateAnnotation> | null = null;
+
+/** Load protocol rules from protocols.json as a fallback. */
+function loadProtocolRules(): Map<string, StateAnnotation> {
+  if (_cachedProtocolRules) return _cachedProtocolRules;
+  try {
+    const protocolsPath = path.resolve(
+      process.env.PROGMUNE_PROJECT_DIR || process.cwd(),
+      "protocols.json"
+    );
+    if (fs.existsSync(protocolsPath)) {
+      const raw = JSON.parse(fs.readFileSync(protocolsPath, "utf-8"));
+      _cachedProtocolRules = new Map<string, StateAnnotation>();
+      if (raw.rules) {
+        for (const [fn, rule] of Object.entries(raw.rules)) {
+          const r = rule as any;
+          _cachedProtocolRules.set(fn, {
+            pre_states: r.pre_states || [],
+            post_states: r.post_states || [],
+            invalidate: r.invalidate,
+            namespace: r.namespace,
+          });
+        }
+      }
+    }
+  } catch { /* use whatever rules are available */ }
+  return _cachedProtocolRules || new Map();
+}
+
+/** Ensure rules Map has entries — fall back to protocols.json if empty. */
+function ensureRules(ctx: SearchContext): Map<string, StateAnnotation> {
+  if (ctx.rules.size > 0) return ctx.rules;
+  return loadProtocolRules();
+}
 
 // ═══════════════════════════════════════════════════════════════
 // Strategy 1: Corpus Search — historical trajectory data
@@ -135,26 +227,30 @@ export class ProtocolSearchStrategy implements CandidateSearchStrategy {
   readonly name = "protocol";
 
   search(ctx: SearchContext): RepairCandidate[] {
+    // P0: Ensure we have rules to work with
+    const rules = ensureRules(ctx);
+    const effectiveCtx: SearchContext = { ...ctx, rules };
+
     // Short-circuit: fall back to generic fix path search
-    if (ctx.currentState.length === 0 || ctx.targetState.length === 0) {
+    if (effectiveCtx.currentState.length === 0 || effectiveCtx.targetState.length === 0) {
       // Resource cleanup case: no target state means we need to invalidate current states
-      if (ctx.targetState.length === 0 && ctx.currentState.length > 0) {
-        const cleanupCandidates = findCleanupFunctions(ctx);
+      if (effectiveCtx.targetState.length === 0 && effectiveCtx.currentState.length > 0) {
+        const cleanupCandidates = findCleanupFunctions(effectiveCtx);
 
         // P3.10: Goal expansion — add prerequisite chains from goal templates
-        const goalCandidates = ctx.goal ? expandGoalAsCandidates(ctx.goal, ctx) : [];
+        const goalCandidates = effectiveCtx.goal ? expandGoalAsCandidates(effectiveCtx.goal, effectiveCtx) : [];
         const all = [...cleanupCandidates, ...goalCandidates];
         if (all.length > 0) return all;
       }
 
       // P3.10: Try goal expansion before giving up
-      if (ctx.goal) {
-        const goalCandidates = expandGoalAsCandidates(ctx.goal, ctx);
+      if (effectiveCtx.goal) {
+        const goalCandidates = expandGoalAsCandidates(effectiveCtx.goal, effectiveCtx);
         if (goalCandidates.length > 0) return goalCandidates;
       }
 
       // P3.14: Frontier exploration — BFS from current state for any path
-      const frontierPaths = exploreFrontier(ctx.rules, ctx.currentState, 10, 6);
+      const frontierPaths = exploreFrontier(effectiveCtx.rules, effectiveCtx.currentState, 10, 6);
       if (frontierPaths.length > 0) {
         return frontierPaths.map(actions => ({
           id: candidateId("protocol", actions.map(fnToAction)),
@@ -168,7 +264,7 @@ export class ProtocolSearchStrategy implements CandidateSearchStrategy {
 
       // P3.15: Cross-protocol candidates — expanded to all 9 protocol groups (P7.3)
       const xProtoPaths = expandCrossProtocolCandidates(
-        ctx.goal || "repair",
+        effectiveCtx.goal || "repair",
         [
           "AuthProtocol", "FileProtocol", "DBProtocol", "IRProtocol",
           "TransactionProtocol", "ConditionalProtocol", "LoopProtocol",
@@ -187,7 +283,7 @@ export class ProtocolSearchStrategy implements CandidateSearchStrategy {
       }
 
       const fixPath = findFixPathStatic(
-        ctx.rules, ctx.protocol, ctx.currentState, ctx.targetState
+        effectiveCtx.rules, effectiveCtx.protocol, effectiveCtx.currentState, effectiveCtx.targetState
       );
       if (fixPath.length === 0) return [];
 
@@ -204,10 +300,10 @@ export class ProtocolSearchStrategy implements CandidateSearchStrategy {
     // Full BFS: find multiple distinct paths from currentState to targetState
     const allPaths: string[][] = [];
     const queue: { state: string[]; path: string[]; depth: number }[] = [
-      { state: [...ctx.currentState], path: [], depth: 0 },
+      { state: [...effectiveCtx.currentState], path: [], depth: 0 },
     ];
     const visited = new Set<string>();
-    visited.add(ctx.currentState.join(","));
+    visited.add(effectiveCtx.currentState.join(","));
     const MAX_PATHS = 10;
     const MAX_DEPTH = 8;
 
@@ -216,13 +312,13 @@ export class ProtocolSearchStrategy implements CandidateSearchStrategy {
       if (depth >= MAX_DEPTH) continue;
 
       // Check if target states are a subset of current state
-      if (ctx.targetState.every(t => state.includes(t)) && path.length > 0) {
+      if (effectiveCtx.targetState.every(t => state.includes(t)) && path.length > 0) {
         allPaths.push([...path]);
         continue;
       }
 
       // Find all functions that can be called from current state
-      for (const [funcName, rule] of ctx.rules) {
+      for (const [funcName, rule] of effectiveCtx.rules) {
         if (rule.pre_states.every((pre: string) => state.includes(pre))) {
           const newState = [...state];
           if (rule.invalidate) rule.invalidate.forEach(s => {

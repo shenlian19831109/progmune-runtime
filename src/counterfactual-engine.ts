@@ -19,6 +19,7 @@ import * as fs from "fs";
 import * as path from "path";
 import type { StateAnnotation } from "./ssg-validator";
 import type { GoalConstraint, ConstraintViolation } from "./runtime-types";
+import { ZeroShotStrategy } from "./zeroshot-strategy";
 import type { RepairCandidate, SearchContext, CandidateFeatures } from "./repair-types";
 import { createDefaultStrategies } from "./repair-strategies";
 import { extractFeatures, createLinearRanker, CorpusStats } from "./repair-ranker";
@@ -98,6 +99,8 @@ export interface CounterfactualAlternative {
   corpusEvidenceCount: number;
   /** Relevant constraints this path satisfies. */
   satisfiedConstraints: string[];
+  /** P0: Repair strategy hint — cleanup, prerequisite, goal-template, etc. */
+  repairStrategy?: string;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -195,7 +198,9 @@ export async function suggestAlternatives(params: {
     targetState:
       (params.targetState?.length ?? 0) > 0
         ? params.targetState
-        : params.violation.requiredStates || ["COMPLETED"],
+        : (params.violation.requiredStates?.length ?? 0) > 0
+          ? (params.violation.requiredStates as string[])
+          : [], // Keep empty to trigger cleanup path — don't fake COMPLETED
     violationType:
       params.violation.violatedConstraint || "protocol_violation",
     constraints: params.constraints || [],
@@ -212,7 +217,6 @@ export async function suggestAlternatives(params: {
 
   // P8.3: If no candidates found, try ZeroShotStrategy
   if (allCandidates.length === 0) {
-    const { ZeroShotStrategy } = require("./zeroshot-strategy");
     const zeroShot = new ZeroShotStrategy();
     allCandidates.push(...zeroShot.search(ctx));
   }
@@ -279,6 +283,7 @@ export async function suggestAlternatives(params: {
             c.actions.length <= 5
         )
         .map(cn => cn.description),
+      repairStrategy: c.metadata?.source as string | undefined,
     };
   });
 

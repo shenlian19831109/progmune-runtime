@@ -1,0 +1,2920 @@
+{
+  "generated": "2026-07-02T10:49:39.519Z",
+  "version": "3.2.0",
+  "repos": [
+    {
+      "repo": "curl",
+      "status": "measured",
+      "total": 85,
+      "cleanLabels": 61,
+      "violationLabels": 24,
+      "tp": 18,
+      "fp": 59,
+      "tn": 2,
+      "fn": 6,
+      "precision": 0.23376623376623376,
+      "recall": 0.75,
+      "f1": 0.3564356435643565,
+      "falsePositiveRate": 0.9672131147540983,
+      "falseNegativeRate": 0.25,
+      "rulesDiscovered": 452,
+      "mismatches": [
+        {
+          "index": 2,
+          "expected": "violation",
+          "got": "clean",
+          "calls": [
+            "ssh_state_init",
+            "FALLTHROUGH",
+            "ssh_state_startup",
+            "ssh_state_hostkey",
+            "ssh_state_authlist",
+            "ssh_state_pkey_init",
+            "ssh_state_auth_pkey",
+            "ssh_state_auth_pass_init",
+            "ssh_state_auth_pass",
+            "ssh_state_auth_host_init"
+          ]
+        },
+        {
+          "index": 4,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_conn_meta_get",
+            "Curl_meta_get",
+            "Curl_pp_flushsend",
+            "ftp_readresp",
+            "ftp_wait_resp",
+            "RFC2228",
+            "Curl_conn_is_ssl",
+            "Curl_ssl_cfilter_add",
+            "Curl_conn_get_origin",
+            "Curl_conn_connect"
+          ]
+        },
+        {
+          "index": 5,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_creds_has_user",
+            "Curl_creds_has_passwd",
+            "Curl_bufref_ptr",
+            "ldap_url_parse",
+            "ldap_url_parse_low",
+            "ldap_err2string",
+            "Curl_conn_get_ip_info",
+            "scheme",
+            "Curl_conn_is_ssl",
+            "curlx_convert_UTF8_to_tchar"
+          ]
+        },
+        {
+          "index": 8,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "curl_multi_remove_handle",
+            "send",
+            "Curl_detach_connection",
+            "curl_easy_perform",
+            "curl_multi_cleanup",
+            "Curl_expire_clear",
+            "curlx_free",
+            "Curl_resolv_destroy_all",
+            "Curl_req_free",
+            "Curl_ssl_close_all"
+          ]
+        },
+        {
+          "index": 9,
+          "expected": "violation",
+          "got": "clean",
+          "calls": [
+            "Curl_conn_get_current_host",
+            "Curl_bufref_init",
+            "sasl_state",
+            "Curl_auth_create_plain_message",
+            "Curl_auth_create_login_message",
+            "Curl_creds_user",
+            "Curl_creds_passwd",
+            "Curl_auth_create_external_message",
+            "get_server_message",
+            "Curl_auth_gsasl_get"
+          ]
+        },
+        {
+          "index": 11,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "buffer",
+            "bytes",
+            "block",
+            "Curl_creds_user",
+            "Curl_creds_passwd",
+            "memset",
+            "strchr",
+            "strlen",
+            "Curl_rand",
+            "Curl_ntlm_core_mk_nt_hash"
+          ]
+        },
+        {
+          "index": 12,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "init_telnet",
+            "Curl_meta_get",
+            "check_telnet_options",
+            "select",
+            "WaitForMultipleObjects",
+            "WSACreateEvent",
+            "failed",
+            "WSAEventSelect",
+            "WSACloseEvent",
+            "GetStdHandle"
+          ]
+        },
+        {
+          "index": 13,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ossl_do_file_type",
+            "SSL_CTX_set_default_passwd_cb_userdata",
+            "SSL_CTX_set_default_passwd_cb",
+            "SSL_CTX_use_certificate_chain_file",
+            "use_certificate_chain_blob",
+            "ossl_strerror",
+            "ERR_get_error",
+            "SSL_CTX_use_certificate_file",
+            "use_certificate_blob",
+            "engineload"
+          ]
+        },
+        {
+          "index": 15,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_ssl_cf_get_primary_config",
+            "CFStringCreateWithCString",
+            "CFArrayCreateMutable",
+            "SecPolicyCreateSSL",
+            "CFArrayAppendValue",
+            "CFRelease",
+            "defined",
+            "Curl_ssl_cf_get_config",
+            "__builtin_available",
+            "status"
+          ]
+        },
+        {
+          "index": 16,
+          "expected": "violation",
+          "got": "clean",
+          "calls": [
+            "CONN_SOCK_IDX_VALID",
+            "Curl_pollset_init",
+            "Curl_pollfds_init",
+            "Curl_conn_needs_flush",
+            "Curl_conn_flush",
+            "do_connect",
+            "CURL_TRC_CF",
+            "Curl_conn_is_ssl",
+            "Curl_conn_cntrl_update_info",
+            "conn_report_connect_stats"
+          ]
+        },
+        {
+          "index": 17,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "files",
+            "directories",
+            "Curl_meta_get",
+            "file_upload",
+            "curlx_fstat",
+            "S_ISDIR",
+            "Curl_meets_timecondition",
+            "curl_msnprintf",
+            "Curl_client_write",
+            "curlx_gmtime"
+          ]
+        },
+        {
+          "index": 19,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "GOOD_MULTI_HANDLE",
+            "GOOD_EASY_HANDLE",
+            "Curl_uint32_tbl_get",
+            "streamclose",
+            "multi_done",
+            "Curl_expire_clear",
+            "Curl_uint32_bset_contains",
+            "multi_assess_wakeup",
+            "Curl_wildcard_dtor",
+            "Curl_detach_connection"
+          ]
+        },
+        {
+          "index": 20,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "curlx_free",
+            "curl_url_get",
+            "Curl_bufref_set",
+            "perform",
+            "Curl_peer_unlink",
+            "Curl_http_neg_init",
+            "curlx_safefree",
+            "Curl_data_priority_clear_state",
+            "Curl_bufref_free",
+            "strlen"
+          ]
+        },
+        {
+          "index": 25,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "curlx_dyn_init",
+            "curlx_dyn_addn",
+            "curlx_dyn_reset",
+            "http_on_response",
+            "curlx_dyn_ptr",
+            "curlx_dyn_len",
+            "curlx_dyn_free",
+            "curlx_str_passblanks",
+            "strncmp",
+            "ISBLANK"
+          ]
+        },
+        {
+          "index": 28,
+          "expected": "violation",
+          "got": "clean",
+          "calls": [
+            "vquic_ctx_init",
+            "quiche_config_new",
+            "quiche_config_enable_pacing",
+            "quiche_config_set_initial_max_data",
+            "quiche_config_set_initial_max_streams_bidi",
+            "quiche_config_set_initial_max_streams_uni",
+            "quiche_config_set_initial_max_stream_data_bidi_local",
+            "quiche_config_set_initial_max_stream_data_bidi_remote",
+            "quiche_config_set_initial_max_stream_data_uni",
+            "quiche_config_set_disable_active_migration"
+          ]
+        },
+        {
+          "index": 29,
+          "expected": "violation",
+          "got": "clean",
+          "calls": [
+            "Curl_ssl_cf_get_primary_config",
+            "Curl_ssl_cf_get_config",
+            "Curl_gtls_shared_creds_create",
+            "Curl_auth_allowed_to_host",
+            "gnutls_srp_allocate_client_credentials",
+            "gnutls_strerror",
+            "gnutls_srp_allocate_client_cred",
+            "gnutls_srp_set_client_credentials",
+            "gnutls_srp_set_client_cred",
+            "CURL_TRC_CF"
+          ]
+        },
+        {
+          "index": 30,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "STACK_OF",
+            "BIO_new_mem_buf",
+            "ossl_strerror",
+            "ERR_get_error",
+            "BIO_new",
+            "BIO_s_file",
+            "BIO_read_filename",
+            "CURL_UNCONST",
+            "BIO_free",
+            "d2i_PKCS12_bio"
+          ]
+        },
+        {
+          "index": 31,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_ssl_cf_get_config",
+            "Curl_ssl_cf_get_primary_config",
+            "Curl_alpn_copy",
+            "Curl_conn_cf_get_transport",
+            "wolfTLS_client_method",
+            "wolfSSL_CTX_free",
+            "wolfSSL_CTX_new",
+            "ssl_version",
+            "wssl_init_ciphers",
+            "wssl_init_curves"
+          ]
+        },
+        {
+          "index": 32,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "nghttp2_session_callbacks_new",
+            "nghttp2_session_callbacks_set_send_callback",
+            "nghttp2_session_callbacks_set_on_frame_recv_callback",
+            "nghttp2_session_callbacks_set_on_invalid_frame_recv_callback",
+            "nghttp2_session_callbacks_set_on_frame_send_callback",
+            "nghttp2_session_callbacks_set_on_data_chunk_recv_callback",
+            "nghttp2_session_callbacks_set_on_stream_close_callback",
+            "nghttp2_session_callbacks_set_on_begin_headers_callback",
+            "nghttp2_session_callbacks_set_on_header_callback",
+            "nghttp2_session_callbacks_set_error_callback"
+          ]
+        },
+        {
+          "index": 33,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "curl_msnprintf",
+            "Curl_strntolower",
+            "Curl_raw_toupper",
+            "Curl_checkheaders",
+            "STRCONST",
+            "strcspn",
+            "curlx_memdup0",
+            "curl_maprintf",
+            "Curl_slist_append_nodup",
+            "curlx_free"
+          ]
+        },
+        {
+          "index": 34,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_creds_has_sasl_service",
+            "Curl_creds_sasl_service",
+            "Curl_auth_build_spn",
+            "QuerySecurityPackageInfo",
+            "CURL_UNCONST",
+            "TEXT",
+            "FreeContextBuffer",
+            "curlx_malloc",
+            "Curl_creds_has_user",
+            "Curl_create_sspi_identity"
+          ]
+        },
+        {
+          "index": 35,
+          "expected": "violation",
+          "got": "clean",
+          "calls": [
+            "STACK_OF",
+            "SSL_get_tlsext_status_ocsp_resp",
+            "d2i_OCSP_RESPONSE",
+            "OCSP_response_status",
+            "OCSP_response_status_str",
+            "OCSP_response_get1_basic",
+            "SSL_get_peer_cert_chain",
+            "SSL_CTX_get_cert_store",
+            "OCSP_basic_verify",
+            "SSL_get1_peer_certificate"
+          ]
+        },
+        {
+          "index": 36,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_ssl_cf_get_primary_config",
+            "wssl_send_earlydata",
+            "wolfSSL_ERR_clear_error",
+            "wolfSSL_connect",
+            "Curl_wssl_setup_x509_store",
+            "CURL_TRC_CF",
+            "Curl_tls_keylog_enabled",
+            "secrets",
+            "handshake",
+            "wolfSSL_want_read"
+          ]
+        },
+        {
+          "index": 37,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_creds_user",
+            "Curl_creds_passwd",
+            "curlx_dyn_init",
+            "memset",
+            "Curl_rand_bytes",
+            "endif",
+            "curlx_base64_encode",
+            "curl_maprintf",
+            "hash",
+            "strlen"
+          ]
+        },
+        {
+          "index": 38,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "myssh_to_ERROR",
+            "sftp_stat",
+            "sftp_attributes_free",
+            "size",
+            "seek",
+            "writing",
+            "sftp_close",
+            "sftp_open",
+            "sftp_get_error",
+            "strlen"
+          ]
+        },
+        {
+          "index": 39,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "libssh2_sftp_stat_ex",
+            "curlx_uztoui",
+            "strlen",
+            "size",
+            "seek",
+            "writing",
+            "libssh2_sftp_open_ex",
+            "libssh2_session_last_errno",
+            "libssh2_sftp_last_error",
+            "myssh_to"
+          ]
+        },
+        {
+          "index": 41,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_ssl_cf_get_primary_config",
+            "curlx_convert_UTF8_to_tchar",
+            "get_cert_location",
+            "memcpy",
+            "curlx_free",
+            "curlx_fopen",
+            "curl_strequal",
+            "curlx_fclose",
+            "fseek",
+            "ftell"
+          ]
+        },
+        {
+          "index": 42,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_ssl_cf_get_primary_config",
+            "Curl_ssl_cf_get_config",
+            "curlx_verify_windows_version",
+            "Curl_ssl_scache_use",
+            "Curl_ssl_scache_lock",
+            "Curl_ssl_scache_get_obj",
+            "Curl_ssl_scache_unlock",
+            "schannel_acquire_credential_handle",
+            "curlx_convert_UTF8_to_tchar",
+            "Curl_alpn_to_proto_buf"
+          ]
+        },
+        {
+          "index": 43,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "memset",
+            "doh_close",
+            "de_init",
+            "doh_resp_decode",
+            "curlx_dyn_uptr",
+            "curlx_dyn_len",
+            "CURL_TRC_DNS",
+            "doh_strerror",
+            "doh_type2name",
+            "Curl_trc_ft_is_verbose"
+          ]
+        },
+        {
+          "index": 44,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_bufref_free",
+            "curl_url",
+            "curl_url_set",
+            "Curl_bufref_ptr",
+            "curl_url_get",
+            "curl_url_cleanup",
+            "Curl_bufref_set",
+            "Curl_is_absolute_url",
+            "curl_url_strerror",
+            "Curl_uc_to_curlcode"
+          ]
+        },
+        {
+          "index": 45,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_dynhds_init",
+            "http2_data_setup",
+            "Curl_h1_req_parse_read",
+            "Curl_http_req_to_h2",
+            "Curl_h1_req_parse_free",
+            "Curl_dynhds_to_nva",
+            "h2_pri_spec",
+            "nghttp2_session_check_request_allowed",
+            "CURL_TRC_CF",
+            "allowed"
+          ]
+        },
+        {
+          "index": 46,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "multi_now",
+            "sigpipe_init",
+            "Curl_uint32_bset_first",
+            "CURL_TRC_M",
+            "Curl_multi_xfers_running",
+            "Curl_multi_get_easy",
+            "Curl_uint32_bset_remove",
+            "multi_runsingle",
+            "Curl_uint32_bset_next",
+            "sigpipe_restore"
+          ]
+        },
+        {
+          "index": 47,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "endif",
+            "curlx_calloc",
+            "Curl_conn_meta_set",
+            "ldap_pvt_url_scheme2proto",
+            "Curl_sasl_init",
+            "oldap_parse_login_options",
+            "curl_maprintf",
+            "ldap_init_fd",
+            "ldap_err2string",
+            "getenv"
+          ]
+        },
+        {
+          "index": 48,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_conn_meta_get",
+            "Curl_meta_get",
+            "smb_send_tree_connect",
+            "connclose",
+            "request_state",
+            "smb_send_and_recv",
+            "smb_swap32",
+            "smb_swap16",
+            "Curl_pgrsSetUploadSize",
+            "smb_swap64"
+          ]
+        },
+        {
+          "index": 49,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "CURL_SOCKET",
+            "memset",
+            "htonl",
+            "defined",
+            "setsockopt",
+            "bind",
+            "getsockname",
+            "listen",
+            "connect",
+            "curlx_nonblock"
+          ]
+        },
+        {
+          "index": 51,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "defined",
+            "Curl_ssl_cf_is_proxy",
+            "mbedtls_ssl_handshake",
+            "CURL_TRC_CF",
+            "mbedtls_ssl_get_version_number",
+            "mbedtls_strerror",
+            "mbedtls_ssl_get_ciphersuite_id_from_ssl",
+            "mbed_cipher_suite_get_str",
+            "mbedtls_ssl_get_version",
+            "mbedtls_ssl_get_peer_cert"
+          ]
+        },
+        {
+          "index": 52,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_ssl_cf_get_primary_config",
+            "Curl_ssl_cf_get_config",
+            "QueryContextAttributes",
+            "Curl_sspi_strerror",
+            "curlx_verify_windows_version",
+            "Curl_schannel_get_cached_cert_store",
+            "CertOpenStore",
+            "curlx_winapi_strerror",
+            "GetLastError",
+            "add_certs_data_to_store"
+          ]
+        },
+        {
+          "index": 53,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_is_ipaddr",
+            "Curl_resolv_announce_start",
+            "Curl_str2addr",
+            "strlen",
+            "curl_strequal",
+            "tailmatch",
+            "STRCONST",
+            "get_localhost",
+            "hostip_async_new",
+            "Curl_doh"
+          ]
+        },
+        {
+          "index": 54,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "defined",
+            "curlx_dyn_addf",
+            "http_target",
+            "get_http_string",
+            "curlx_dyn_add",
+            "Curl_checkheaders",
+            "STRCONST",
+            "curlx_safefree",
+            "Curl_bufref_ptr",
+            "Curl_checkProxyheaders"
+          ]
+        },
+        {
+          "index": 55,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_conn_meta_get",
+            "ldap_result",
+            "ldap_err2string",
+            "oldap_map_error",
+            "ldap_parse_result",
+            "USE_SSL",
+            "ssl_installed",
+            "ldap_set_option",
+            "ldap_msgfree",
+            "oldap_perform_bind"
+          ]
+        },
+        {
+          "index": 56,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_conn_meta_get",
+            "Curl_meta_get",
+            "ldap_result",
+            "ldap_err2string",
+            "ldap_msgtype",
+            "ldap_parse_result",
+            "FALLTHROUGH",
+            "ldap_memfree",
+            "ldap_get_dn_ber",
+            "client_write"
+          ]
+        },
+        {
+          "index": 59,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "STACK_OF",
+            "strlen",
+            "curlx_inet_pton",
+            "X509_get_ext_d2i",
+            "sk_GENERAL_NAME_num",
+            "sk_GENERAL_NAME_value",
+            "ASN1_STRING_get0_data",
+            "ASN1_STRING_length",
+            "ASN1_STRING_data",
+            "Curl_cert_hostcheck"
+          ]
+        },
+        {
+          "index": 60,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "CertOpenSystemStoreA",
+            "VERBOSE",
+            "conditions",
+            "CertEnumCertificatesInStore",
+            "defined",
+            "CertGetNameStringA",
+            "GetSystemTimeAsFileTime",
+            "CompareFileTime",
+            "CertGetIntendedKeyUsage",
+            "GetLastError"
+          ]
+        },
+        {
+          "index": 61,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_ssl_cf_get_config",
+            "Curl_ssl_cf_get_primary_config",
+            "Curl_alpn_copy",
+            "Curl_ssl_scache_use",
+            "Curl_ssl_scache_take",
+            "d2i_SSL_SESSION",
+            "SSL_set_session",
+            "VERBOSE",
+            "ossl_strerror",
+            "ERR_get_error"
+          ]
+        },
+        {
+          "index": 62,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "CURL_TRC_CF",
+            "cr_ech_need_httpsrr",
+            "Curl_conn_dns_resolved_https",
+            "cr_init_backend",
+            "rustls_connection_is_handshaking",
+            "cr_set_negotiated_alpn",
+            "cr_send",
+            "rustls_connection_get_protocol_version",
+            "rustls_connection_get_negotiated_ciphersuite_name",
+            "rustls_connection_get_negotiated_key_exchange_group_name"
+          ]
+        },
+        {
+          "index": 63,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "strlen",
+            "QueryContextAttributes",
+            "Curl_sspi_strerror",
+            "curlx_verify_windows_version",
+            "get_num_host_info",
+            "get_alt_name_info",
+            "memcmp",
+            "hostname",
+            "cert_get_name_string",
+            "CertGetNameString"
+          ]
+        },
+        {
+          "index": 64,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_host_is_ipnum",
+            "cookiehash",
+            "Curl_secure_context",
+            "Curl_llist_init",
+            "Curl_llist_count",
+            "remove_expired",
+            "Curl_llist_head",
+            "Curl_node_next",
+            "Curl_node_elem",
+            "cookie_tailmatch"
+          ]
+        },
+        {
+          "index": 65,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "GOOD_MULTI_HANDLE",
+            "GOOD_EASY_HANDLE",
+            "Curl_uint32_tbl_count",
+            "Curl_uint32_tbl_contains",
+            "Curl_uint32_bset_clear",
+            "curl_easy_perform",
+            "curl_multi_cleanup",
+            "multi_xfers_add",
+            "Curl_llist_init",
+            "Curl_expire"
+          ]
+        },
+        {
+          "index": 66,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "gss_seal",
+            "gss_wrap",
+            "gss_unseal",
+            "gss_unwrap",
+            "htons",
+            "memcpy",
+            "curlx_memdup",
+            "Curl_gss_delete_sec_context",
+            "check_gss_err",
+            "curlx_safefree"
+          ]
+        },
+        {
+          "index": 67,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_creds_has_sasl_service",
+            "Curl_creds_sasl_service",
+            "Curl_creds_user",
+            "Curl_creds_passwd",
+            "auth_decode_digest_md5_message",
+            "strcmp",
+            "auth_digest_get_qop_values",
+            "Curl_rand_hex",
+            "Curl_MD5_init",
+            "Curl_MD5_update"
+          ]
+        },
+        {
+          "index": 70,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_conn_meta_get",
+            "libssh2_crypto_engine",
+            "Curl_creds_user",
+            "Curl_creds_passwd",
+            "libssh2_session_init_ex",
+            "libssh2_session_set_read_timeout",
+            "recvcb",
+            "sendcb",
+            "defined",
+            "libssh2_session_callback_set2"
+          ]
+        },
+        {
+          "index": 72,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "cf_ssl_scache_get",
+            "time",
+            "Curl_ssl_scache_lock",
+            "curlx_dyn_init",
+            "curlx_dyn_reset",
+            "cf_scache_peer_remove_expired",
+            "Curl_llist_head",
+            "VERBOSE",
+            "Curl_node_elem",
+            "cf_ssl_scache_peer_set_hmac"
+          ]
+        },
+        {
+          "index": 73,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "curlx_str_cspn",
+            "curlx_str_trimblanks",
+            "curlx_str_casecompare",
+            "altsvc_flush",
+            "curlx_str_until",
+            "curlx_str_single",
+            "Curl_str2alpnid",
+            "curlx_str_assign",
+            "strlen",
+            "curlx_str_number"
+          ]
+        },
+        {
+          "index": 74,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "VERBOSE",
+            "cf_ip_attempt_connect",
+            "CURL_TRC_CF",
+            "cf_ip_attempt_free",
+            "Curl_pgrs_now",
+            "cf_ai_iter_has_more",
+            "curlx_ptimediff_ms",
+            "cf_ai_iter_next",
+            "are",
+            "Curl_reset_fail"
+          ]
+        },
+        {
+          "index": 76,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "memset",
+            "Curl_bufref_init",
+            "sasl_choose_external",
+            "sasl_choose_krb5",
+            "sasl_choose_gsasl",
+            "sasl_choose_digest",
+            "sasl_choose_ntlm",
+            "sasl_choose_oauth",
+            "sasl_choose_oauth2",
+            "sasl_choose_plain"
+          ]
+        },
+        {
+          "index": 78,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "IS_MIME_POST",
+            "curl_mime_headers",
+            "Curl_mime_prepare_headers",
+            "Curl_checkheaders",
+            "STRCONST",
+            "Curl_mime_add_header",
+            "Curl_creader_set_mime",
+            "Curl_creader_client_length",
+            "Curl_creader_set_fread",
+            "imap_atom"
+          ]
+        },
+        {
+          "index": 79,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "curlx_dyn_ptr",
+            "Curl_meta_get",
+            "is_custom_fetch_listing",
+            "literal",
+            "memchr",
+            "imap_find_literal",
+            "curlx_str_number",
+            "curlx_str_single",
+            "curlx_dyn_len",
+            "Curl_client_write"
+          ]
+        },
+        {
+          "index": 80,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_conn_meta_get",
+            "Curl_meta_get",
+            "imap_perform_upgrade_tls",
+            "Curl_pp_flushsend",
+            "Curl_pp_readresp",
+            "imap_state_servergreet_resp",
+            "imap_state_capability_resp",
+            "imap_state_starttls_resp",
+            "imap_state_auth_resp",
+            "imap_state_login_resp"
+          ]
+        },
+        {
+          "index": 81,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_meta_get",
+            "Curl_conn_meta_get",
+            "curlx_dyn_len",
+            "mqtt_send",
+            "curlx_dyn_ptr",
+            "mqtt_ping",
+            "Curl_xfer_recv",
+            "Curl_debug",
+            "Curl_pgrs_now",
+            "mqstate"
+          ]
+        },
+        {
+          "index": 82,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "sigpipe_init",
+            "perform",
+            "multi_perform",
+            "Curl_multi_ev_assess_xfer_bset",
+            "Curl_multi_ev_dirty_xfers",
+            "Curl_update_timer",
+            "memset",
+            "curl_multi_socket_action",
+            "multi_assess_wakeup",
+            "multi_mark_expired_as_dirty"
+          ]
+        },
+        {
+          "index": 84,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "curlx_dyn_init",
+            "Curl_junkscan",
+            "Curl_is_absolute_url",
+            "strcmp",
+            "parse_file",
+            "parse_scheme",
+            "strcspn",
+            "parse_authority",
+            "guess_scheme",
+            "curlx_dyn_add"
+          ]
+        },
+        {
+          "index": 88,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_ssl_cf_get_primary_config",
+            "Curl_ssl_cf_get_config",
+            "Curl_alpn_copy",
+            "Curl_ssl_scache_take",
+            "Curl_alpn_contains_proto",
+            "gtls_client_init",
+            "gnutls_session_set_data",
+            "sess_reuse_cb",
+            "Curl_alpn_restrict_to",
+            "gnutls_session_set_ptr"
+          ]
+        },
+        {
+          "index": 91,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "memset",
+            "Curl_bufq_init",
+            "tunnel_stream_init",
+            "nghttp2_session_callbacks_new",
+            "nghttp2_session_callbacks_set_send_callback",
+            "nghttp2_session_callbacks_set_on_frame_recv_callback",
+            "nghttp2_session_callbacks_set_on_frame_send_callback",
+            "nghttp2_session_callbacks_set_on_data_chunk_recv_callback",
+            "nghttp2_session_callbacks_set_on_stream_close_callback",
+            "nghttp2_session_callbacks_set_on_header_callback"
+          ]
+        },
+        {
+          "index": 94,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_pollset_reset",
+            "CURL_TRC_M",
+            "Curl_pollset_add_in",
+            "curl_multi_remove_handle",
+            "Curl_multi_ev_assess",
+            "Curl_resolv_pollset",
+            "mstate_connecting_pollset",
+            "mstate_protocol_pollset",
+            "mstate_do_pollset",
+            "mstate_domore_pollset"
+          ]
+        },
+        {
+          "index": 95,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "Curl_conn_meta_get",
+            "Curl_meta_get",
+            "smtp_perform_upgrade_tls",
+            "Curl_pp_flushsend",
+            "Curl_pp_readresp",
+            "smtp_state_servergreet_resp",
+            "smtp_state_ehlo_resp",
+            "smtp_state_helo_resp",
+            "smtp_state_starttls_resp",
+            "smtp_state_auth_resp"
+          ]
+        }
+      ]
+    },
+    {
+      "repo": "libssh",
+      "status": "measured",
+      "total": 47,
+      "cleanLabels": 33,
+      "violationLabels": 14,
+      "tp": 12,
+      "fp": 32,
+      "tn": 1,
+      "fn": 2,
+      "precision": 0.2727272727272727,
+      "recall": 0.8571428571428571,
+      "f1": 0.41379310344827586,
+      "falsePositiveRate": 0.9696969696969697,
+      "falseNegativeRate": 0.14285714285714285,
+      "rulesDiscovered": 201,
+      "mismatches": [
+        {
+          "index": 1,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ssh_socket_get_fd",
+            "recv",
+            "send",
+            "endif",
+            "ssh_poll",
+            "ssh_channel_read",
+            "ssh_channel_write",
+            "ssh_agent_new",
+            "calloc",
+            "ssh_socket_new"
+          ]
+        },
+        {
+          "index": 2,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "strdup",
+            "ssh_set_error_oom",
+            "strlen",
+            "isspace",
+            "ssh_config_get_token",
+            "SAFE_FREE",
+            "ssh_config_get_opcode",
+            "ssh_config_is_cli_supported",
+            "ssh_set_error",
+            "ssh_config_get_str_tok"
+          ]
+        },
+        {
+          "index": 3,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ssh_buffer_unpack",
+            "ssh_set_error",
+            "ssh_string_len",
+            "ssh_string_data",
+            "dh_init",
+            "dh_import_peer_key",
+            "ssh_dh_compute_shared_secret",
+            "ssh_dh_debug_crypto",
+            "ssh_ecdh_init",
+            "ssh_string_copy"
+          ]
+        },
+        {
+          "index": 4,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "SSH_LOG",
+            "ssh_packet_remove_callbacks",
+            "kex_type_to_mlkem_info",
+            "ssh_set_error",
+            "ssh_curve25519_init",
+            "ssh_log_hexdump",
+            "ssh_ecdh_init",
+            "ssh_string_data",
+            "ssh_string_len",
+            "ssh_string_free"
+          ]
+        },
+        {
+          "index": 5,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "EC_KEY_get0_group",
+            "EC_GROUP_get_degree",
+            "bignum_ctx_new",
+            "EC_POINT_new",
+            "bignum_ctx_free",
+            "EC_POINT_oct2point",
+            "ssh_string_data",
+            "ssh_string_len",
+            "EC_POINT_clear_free",
+            "malloc"
+          ]
+        },
+        {
+          "index": 7,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ssh_buffer_new",
+            "ssh_buffer_add_u8",
+            "SSH_BUFFER_FREE",
+            "ssh_pki_export_pubkey_blob",
+            "ssh_string",
+            "ssh_string_len",
+            "ssh_buffer_allocate_size",
+            "SSH_STRING_FREE",
+            "ssh_buffer_add_ssh_string",
+            "ssh_buffer_get_len"
+          ]
+        },
+        {
+          "index": 8,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ssh_buffer_get_len",
+            "va_copy",
+            "va_arg",
+            "ssh_buffer_get_u8",
+            "ssh_buffer_get_data",
+            "ntohs",
+            "ssh_buffer_get_u32",
+            "ntohl",
+            "ssh_buffer_get_u64",
+            "ntohll"
+          ]
+        },
+        {
+          "index": 9,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "keys",
+            "ssh_packet_remove_callbacks",
+            "ssh_buffer_get_ssh_string",
+            "ssh_set_error",
+            "ssh_string_len",
+            "memcpy",
+            "ssh_string_data",
+            "SSH_STRING_FREE",
+            "ssh_curve25519_init",
+            "ssh_buffer_add_u8"
+          ]
+        },
+        {
+          "index": 10,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ecdh_kex_type_to_curve",
+            "SSH_LOG",
+            "EC_KEY_new_by_curve_name",
+            "EVP_EC_gen",
+            "EC_KEY_get0_group",
+            "EC_KEY_generate_key",
+            "EC_KEY_get0_public_key",
+            "pki_key_make_ecpoint_string",
+            "EVP_PKEY_todata",
+            "EVP_PKEY_free"
+          ]
+        },
+        {
+          "index": 11,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "gss_indicate_mechs",
+            "ssh_gssapi_log_error",
+            "calloc",
+            "ssh_set_error_oom",
+            "memcmp",
+            "gss_create_empty_oid_set",
+            "gss_add_oid_set_member",
+            "strlen",
+            "gss_import_name",
+            "GSS_ERROR"
+          ]
+        },
+        {
+          "index": 17,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ssh_key_is_private",
+            "ssh_set_error",
+            "check_pubkey_auth_mode",
+            "ssh_userauth_request_service",
+            "name",
+            "ssh_key_get_signature_algorithm",
+            "type",
+            "ssh_key_algorithm_allowed",
+            "ssh_key_size_allowed",
+            "ssh_key_size"
+          ]
+        },
+        {
+          "index": 18,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "defined",
+            "ssh_buffer_unpack",
+            "ssh_set_error",
+            "ssh_dh_keypair_set_keys",
+            "bignum_safe_free",
+            "ssh_dh_keypair_gen_keys",
+            "ssh_get_key_params",
+            "ssh_dh_compute_shared_secret",
+            "ssh_dh_debug_crypto",
+            "ssh_make_sessionid"
+          ]
+        },
+        {
+          "index": 20,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ssh_gssapi_free",
+            "ssh_gssapi_init",
+            "ssh_callbacks_exists",
+            "SAFE_FREE",
+            "strdup",
+            "gssapi_select_oid_function",
+            "ssh_gssapi_send_response",
+            "ssh_auth_reply_default",
+            "gss_create_empty_oid_set",
+            "ssh_gssapi_server_oids"
+          ]
+        },
+        {
+          "index": 21,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ssh_set_error_invalid",
+            "strdup",
+            "ssh_set_error_oom",
+            "strlen",
+            "isspace",
+            "ssh_config_get_token",
+            "SAFE_FREE",
+            "ssh_bind_config_get_opcode",
+            "ssh_config_get_str_tok",
+            "defined"
+          ]
+        },
+        {
+          "index": 22,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "is_ssh_initialized",
+            "ssh_set_error",
+            "ssh_options_parse_config",
+            "ssh_options_apply",
+            "SSH_LOG",
+            "ssh_copyright",
+            "ssh_threads_get_type",
+            "ssh_socket_set_callbacks",
+            "ssh_socket_set_fd",
+            "ssh_libssh_proxy_jumps"
+          ]
+        },
+        {
+          "index": 23,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "SSH_LOG",
+            "ssh_buffer_new",
+            "ssh_set_error_oom",
+            "ssh_mlkem_init",
+            "ssh_set_error",
+            "ssh_log_hexdump",
+            "ssh_string_data",
+            "ssh_string_len",
+            "ssh_curve25519_init",
+            "ssh_buffer_pack"
+          ]
+        },
+        {
+          "index": 24,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "SSH_LOG",
+            "ssh_buffer_pack",
+            "ssh_hashbufout_add_cookie",
+            "ssh_list_kex",
+            "ssh_string_from_char",
+            "ssh_buffer_add_ssh_string",
+            "SSH_STRING_FREE",
+            "ssh_buffer_add_u8",
+            "ssh_buffer_add_u32",
+            "ssh_packet_send"
+          ]
+        },
+        {
+          "index": 25,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ssh_key_is_public",
+            "ssh_set_error",
+            "check_pubkey_auth_mode",
+            "state",
+            "ssh_userauth_request_service",
+            "ssh_key_get_signature_algorithm",
+            "type",
+            "ssh_key_algorithm_allowed",
+            "ssh_key_size_allowed",
+            "ssh_key_size"
+          ]
+        },
+        {
+          "index": 28,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "check_pubkey_auth_mode",
+            "ssh_set_error",
+            "ssh_userauth_request_service",
+            "ssh_pki_export_pubkey_blob",
+            "ssh_key_get_signature_algorithm",
+            "type",
+            "SSH_STRING_FREE",
+            "ssh_key_algorithm_allowed",
+            "ssh_key_size_allowed",
+            "ssh_key_size"
+          ]
+        },
+        {
+          "index": 29,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "part",
+            "strrchr",
+            "strndup",
+            "ssh_check_username_syntax",
+            "strchr",
+            "colon",
+            "ssh_is_ipaddr",
+            "ssh_check_hostname_syntax",
+            "chars",
+            "valid_hostname"
+          ]
+        },
+        {
+          "index": 30,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "SSH_LOG",
+            "ssh_set_fd_towrite",
+            "ssh_send_banner",
+            "set_status",
+            "ssh_analyze_banner",
+            "ssh_set_error",
+            "usable",
+            "ssh_packet_register_socket_callback",
+            "ssh_packet_set_default_callbacks",
+            "ssh_set_client_kex"
+          ]
+        },
+        {
+          "index": 31,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ssh_libssh_proxy_jumps",
+            "SAFE_FREE",
+            "ssh_proxyjumps_free",
+            "strcasecmp",
+            "ssh_options_set",
+            "strdup",
+            "ssh_set_error_oom",
+            "free",
+            "strchr",
+            "calloc"
+          ]
+        },
+        {
+          "index": 33,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "libcrux_ml_kem_types_unpack_private_key_b4",
+            "Eurydice_array_to_slice",
+            "libcrux_ml_kem_ind_cpa_decrypt_42",
+            "libcrux_ml_kem_utils_into_padded_array_24",
+            "Eurydice_slice_copy",
+            "Eurydice_array_to_subslice_from",
+            "libcrux_ml_kem_hash_functions_portable_G_4a_e0",
+            "Eurydice_slice_split_at",
+            "libcrux_ml_kem_utils_into_padded_array_15",
+            "libcrux_ml_kem_types_as_ref_d3_80"
+          ]
+        },
+        {
+          "index": 34,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ssh_set_error",
+            "strdup",
+            "SAFE_FREE",
+            "ssh_set_error_oom",
+            "ssh_find_all_matching",
+            "ssh_socket_free",
+            "ssh_socket_new",
+            "ssh_socket_set_fd",
+            "ssh_socket_get_poll_handle",
+            "ssh_socket_set_connected"
+          ]
+        },
+        {
+          "index": 35,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "va_arg",
+            "ssh_buffer_add_u8",
+            "htons",
+            "ssh_buffer_add_u16",
+            "htonl",
+            "ssh_buffer_add_u32",
+            "htonll",
+            "ssh_buffer_add_u64",
+            "ssh_buffer_add_ssh_string",
+            "strlen"
+          ]
+        },
+        {
+          "index": 36,
+          "expected": "violation",
+          "got": "clean",
+          "calls": [
+            "EVP_PKEY_CTX_new_from_name",
+            "DH_free",
+            "DH_new",
+            "BN_dup",
+            "DH_set0_pqg",
+            "BN_free",
+            "OSSL_PARAM_BLD_new",
+            "OSSL_PARAM_BLD_push_BN",
+            "OSSL_PARAM_BLD_to_param",
+            "OSSL_PARAM_BLD_free"
+          ]
+        },
+        {
+          "index": 41,
+          "expected": "violation",
+          "got": "clean",
+          "calls": [
+            "malloc",
+            "DH_size",
+            "ssh_dh_keypair_get_keys",
+            "DH_compute_key",
+            "EVP_PKEY_CTX_new_from_pkey",
+            "EVP_PKEY_derive_init",
+            "EVP_PKEY_derive_set_peer",
+            "SSH_LOG",
+            "ERR_error_string",
+            "ERR_get_error"
+          ]
+        },
+        {
+          "index": 42,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "strlen",
+            "gss_import_name",
+            "GSS_ERROR",
+            "gss_acquire_cred",
+            "ssh_gssapi_log_error",
+            "gss_inquire_cred",
+            "SSH_LOG",
+            "gss_create_empty_oid_set",
+            "gss_inquire_cred_by_mech",
+            "gss_add_oid_set_member"
+          ]
+        },
+        {
+          "index": 43,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ssh_gssapi_free",
+            "ssh_gssapi_init",
+            "ssh_gssapi_import_name",
+            "strdup",
+            "ssh_set_error_oom",
+            "SSH_LOG",
+            "ssh_gssapi_client_identity",
+            "calloc",
+            "ssh_string_new",
+            "memcpy"
+          ]
+        },
+        {
+          "index": 44,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ssh_buffer_new",
+            "ssh_set_error_oom",
+            "ssh_buffer_add_u8",
+            "SSH_BUFFER_FREE",
+            "ssh_set_error",
+            "agent_talk",
+            "ssh_buffer_get_u8",
+            "bswap_32",
+            "SSH_LOG",
+            "agent_failed"
+          ]
+        },
+        {
+          "index": 45,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ssh_set_error",
+            "state",
+            "ssh_kex_is_gss",
+            "ssh_userauth_request_service",
+            "SSH_LOG",
+            "SAFE_FREE",
+            "strdup",
+            "ssh_set_error_oom",
+            "ssh_gssapi_auth_keyex_mic",
+            "ssh_buffer_pack"
+          ]
+        },
+        {
+          "index": 46,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ssh_set_error_invalid",
+            "SSH_LOG",
+            "Length",
+            "ssh_set_error",
+            "ssh_waitsession_unblocked",
+            "ssh_handle_packets_termination",
+            "ssh_channel_waitwindow_termination",
+            "MIN",
+            "ssh_buffer_pack",
+            "ssh_set_error_oom"
+          ]
+        },
+        {
+          "index": 47,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ssh_timestamp_init",
+            "calloc",
+            "count_ptrs",
+            "SAFE_FREE",
+            "channel_protocol_select",
+            "ssh_event_new",
+            "ssh_poll_get_default_ctx",
+            "ssh_event_add_session",
+            "ssh_timeout_elapsed",
+            "ssh_event_dopoll"
+          ]
+        },
+        {
+          "index": 48,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "SSH_LOG",
+            "getai",
+            "ssh_set_error",
+            "gai_strerror",
+            "socket",
+            "ssh_strerror",
+            "ssh_connect_socket_close",
+            "bind",
+            "freeaddrinfo",
+            "ssh_socket_set_nonblocking"
+          ]
+        }
+      ]
+    },
+    {
+      "repo": "nginx",
+      "status": "measured",
+      "total": 50,
+      "cleanLabels": 50,
+      "violationLabels": 0,
+      "tp": 0,
+      "fp": 22,
+      "tn": 28,
+      "fn": 0,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "falsePositiveRate": 0.44,
+      "falseNegativeRate": 0,
+      "rulesDiscovered": 307,
+      "mismatches": [
+        {
+          "index": 1,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ngx_strcmp",
+            "ngx_conf_log_error",
+            "set",
+            "ngx_conf_read_token",
+            "ngx_file_size",
+            "ngx_read_file",
+            "ngx_cpymem",
+            "ngx_array_push",
+            "ngx_pnalloc",
+            "ngx_conf_include"
+          ]
+        },
+        {
+          "index": 2,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ngx_file_size",
+            "ngx_conf_log_error",
+            "ngx_read_file",
+            "ngx_cpymem",
+            "ngx_array_push",
+            "ngx_pnalloc",
+            "ngx_conf_include",
+            "ngx_log_debug1",
+            "ngx_conf_full_name",
+            "strpbrk"
+          ]
+        },
+        {
+          "index": 4,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ngx_strncmp",
+            "eval_pv",
+            "ngx_http_perl_create_main_conf",
+            "ngx_pcalloc",
+            "ngx_http_perl_init_main_conf",
+            "ngx_http_perl_init_interpreter",
+            "ngx_http_perl_cleanup_perl",
+            "PERL_SET_CONTEXT",
+            "PERL_SET_INTERP",
+            "perl_destruct"
+          ]
+        },
+        {
+          "index": 6,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ngx_http_send_header",
+            "ngx_http_upstream_finalize_request",
+            "ngx_http_file_cache_free",
+            "ngx_http_upstream_upgrade",
+            "ngx_pool_run_cleanup_file",
+            "ngx_http_get_module_loc_conf",
+            "input_filter_init",
+            "ngx_tcp_nodelay",
+            "input_filter",
+            "ngx_http_upstream_process_non_buffered_downstream"
+          ]
+        },
+        {
+          "index": 8,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ngx_http_get_module_loc_conf",
+            "ngx_http_complex_value",
+            "ngx_http_get_module_ctx",
+            "ngx_strncasecmp",
+            "ngx_strncmp",
+            "ngx_min",
+            "ngx_escape_uri",
+            "ngx_memzero",
+            "ngx_http_script_flush_no_cacheable_variables",
+            "lcode"
+          ]
+        },
+        {
+          "index": 9,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ngx_http_upstream_rr_peers_wlock",
+            "ngx_time",
+            "resolved",
+            "ngx_resolver_strerror",
+            "ngx_http_upstream_rr_peers_unlock",
+            "ngx_resolve_name_done",
+            "ngx_add_timer",
+            "ngx_max",
+            "ngx_min",
+            "ngx_sock_ntop"
+          ]
+        },
+        {
+          "index": 11,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "sigemptyset",
+            "sigaddset",
+            "ngx_signal_value",
+            "sigprocmask",
+            "ngx_strlen",
+            "ngx_pnalloc",
+            "exit",
+            "ngx_cpymem",
+            "ngx_cpystrn",
+            "ngx_setproctitle"
+          ]
+        },
+        {
+          "index": 12,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ngx_enable_accept_events",
+            "ngx_event_get_conf",
+            "ngx_log_debug2",
+            "accept4",
+            "accept",
+            "ngx_log_debug0",
+            "ngx_disable_accept_events",
+            "ngx_shmtx_unlock",
+            "ngx_add_timer",
+            "ngx_atomic_fetch_add"
+          ]
+        },
+        {
+          "index": 13,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "CMSG_SPACE",
+            "ngx_enable_accept_events",
+            "ngx_event_get_conf",
+            "ngx_log_debug2",
+            "ngx_memzero",
+            "recvmsg",
+            "ngx_log_debug0",
+            "offsetof",
+            "CMSG_FIRSTHDR",
+            "CMSG_NXTHDR"
+          ]
+        },
+        {
+          "index": 15,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ngx_stream_upstream_rr_peers_wlock",
+            "ngx_time",
+            "resolved",
+            "ngx_resolver_strerror",
+            "ngx_stream_upstream_rr_peers_unlock",
+            "ngx_resolve_name_done",
+            "ngx_add_timer",
+            "ngx_max",
+            "ngx_min",
+            "ngx_sock_ntop"
+          ]
+        },
+        {
+          "index": 17,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ngx_set_environment",
+            "exit",
+            "ngx_get_conf",
+            "setpriority",
+            "setrlimit",
+            "geteuid",
+            "setgid",
+            "initgroups",
+            "prctl",
+            "setuid"
+          ]
+        },
+        {
+          "index": 18,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "CMSG_SPACE",
+            "ngx_enable_accept_events",
+            "ngx_event_get_conf",
+            "ngx_log_debug2",
+            "ngx_memzero",
+            "recvmsg",
+            "ngx_log_debug0",
+            "CMSG_FIRSTHDR",
+            "CMSG_NXTHDR",
+            "ngx_get_srcaddr_cmsg"
+          ]
+        },
+        {
+          "index": 20,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ngx_http_get_module_loc_conf",
+            "ngx_http_get_module_ctx",
+            "ngx_escape_uri",
+            "ngx_http_script_flush_no_cacheable_variables",
+            "ngx_memzero",
+            "lcode",
+            "ngx_hash_find",
+            "ngx_create_temp_buf",
+            "ngx_alloc_chain_link",
+            "ngx_copy"
+          ]
+        },
+        {
+          "index": 22,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ngx_http_get_module_loc_conf",
+            "ngx_log_debug0",
+            "request",
+            "ngx_http_create_request",
+            "ngx_free_chain",
+            "ngx_alloc_chain_link",
+            "ngx_http_close_request",
+            "ngx_http_finalize_connection",
+            "ngx_http_free_request",
+            "ngx_handle_read_event"
+          ]
+        },
+        {
+          "index": 23,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ngx_memzero",
+            "warning",
+            "GetVersionEx",
+            "GetSystemInfo",
+            "_wcsicmp",
+            "setlocale",
+            "WSAStartup",
+            "MAKEWORD",
+            "AcceptEx",
+            "GetAcceptExSockAddrs"
+          ]
+        },
+        {
+          "index": 24,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ngx_str_null",
+            "ngx_log_debug1",
+            "ngx_open_dir",
+            "init_handler",
+            "ngx_set_errno",
+            "ngx_read_dir",
+            "ngx_de_namelen",
+            "ngx_de_name",
+            "ngx_log_debug2",
+            "ngx_cpymem"
+          ]
+        },
+        {
+          "index": 27,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ngx_quic_get_connection",
+            "ngx_log_debug1",
+            "ngx_log_debug2",
+            "ngx_quic_free_frames",
+            "ngx_del_timer",
+            "parameters",
+            "ngx_quic_run",
+            "frame",
+            "ngx_log_debug5",
+            "ngx_quic_keys_available"
+          ]
+        },
+        {
+          "index": 29,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ngx_sprintf",
+            "ngx_worker_process_cycle",
+            "ngx_log_debug0",
+            "ngx_console_init",
+            "SetEnvironmentVariable",
+            "CreateEvent",
+            "exit",
+            "ngx_create_signal_events",
+            "CreateMutex",
+            "ngx_close_listening_sockets"
+          ]
+        },
+        {
+          "index": 30,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "get",
+            "ngx_socket",
+            "ngx_log_debug2",
+            "ngx_get_connection",
+            "ngx_close_socket",
+            "setsockopt",
+            "ngx_nonblocking",
+            "ngx_event_connect_set_transparent",
+            "ngx_inet_get_port",
+            "bind"
+          ]
+        },
+        {
+          "index": 31,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ngx_log_debug4",
+            "ngx_min",
+            "ngx_http_grpc_get_ctx",
+            "ngx_http_get_module_main_conf",
+            "ngx_http_grpc_parse_frame",
+            "ngx_http_grpc_parse_rst_stream",
+            "ngx_http_grpc_parse_goaway",
+            "normally",
+            "ngx_http_grpc_parse_window_update",
+            "ngx_post_event"
+          ]
+        },
+        {
+          "index": 38,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ngx_http_upstream_cache",
+            "ngx_http_finalize_request",
+            "ngx_http_upstream_cache_send",
+            "ngx_post_event",
+            "ngx_handle_read_event",
+            "create_request",
+            "ngx_http_upstream_set_local",
+            "ngx_http_get_module_loc_conf",
+            "ngx_array_create",
+            "ngx_array_push"
+          ]
+        },
+        {
+          "index": 40,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ngx_crc32_short",
+            "ngx_resolver_lookup_addr6",
+            "ntohl",
+            "ngx_resolver_lookup_addr",
+            "ngx_time",
+            "ngx_log_debug0",
+            "ngx_queue_remove",
+            "ngx_queue_insert_head",
+            "ngx_resolver_dup",
+            "ngx_resolver_free"
+          ]
+        }
+      ]
+    },
+    {
+      "repo": "redis",
+      "status": "measured",
+      "total": 50,
+      "cleanLabels": 50,
+      "violationLabels": 0,
+      "tp": 0,
+      "fp": 45,
+      "tn": 5,
+      "fn": 0,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "falsePositiveRate": 0.9,
+      "falseNegativeRate": 0,
+      "rulesDiscovered": 341,
+      "mismatches": [
+        {
+          "index": 0,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "crc16",
+            "getSlotOrReply",
+            "getLongLongFromObject",
+            "addReplyError",
+            "connTypeOfCluster",
+            "connectionTypeTls",
+            "connectionTypeTcp",
+            "createDumpPayload",
+            "rioInitWithBuffer",
+            "sdsempty"
+          ]
+        },
+        {
+          "index": 1,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "strcasecmp",
+            "delay",
+            "secret",
+            "startup",
+            "keys",
+            "accessed",
+            "stringmatchlen",
+            "argument",
+            "info",
+            "time"
+          ]
+        },
+        {
+          "index": 2,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "monotonicInit",
+            "strcasecmp",
+            "proc",
+            "printf",
+            "test_report",
+            "getTestProcByName",
+            "spt_init",
+            "tzset",
+            "zmalloc_set_oom_handler",
+            "time"
+          ]
+        },
+        {
+          "index": 3,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "sdsempty",
+            "dictFind",
+            "uname",
+            "sdscatfmt",
+            "FMTARGS",
+            "redisGitSHA1",
+            "strtol",
+            "redisGitDirty",
+            "redisBuildIdString",
+            "monotonicInfoString"
+          ]
+        },
+        {
+          "index": 4,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "UNUSED",
+            "TEST",
+            "createIntList",
+            "assert",
+            "lpLength",
+            "lpFree",
+            "createList",
+            "lpNew",
+            "lpPrepend",
+            "verifyEntry"
+          ]
+        },
+        {
+          "index": 5,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "listCreate",
+            "listSetFreeMethod",
+            "ACLUserCheckCmdWithUnrestrictedKeyAccess",
+            "strcasecmp",
+            "getLongFromObjectOrReply",
+            "strchr",
+            "patternHashSlot",
+            "sdslen",
+            "getKeySlot",
+            "addReplyError"
+          ]
+        },
+        {
+          "index": 6,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "isInsideYieldingLongCommand",
+            "useDisklessLoad",
+            "connSyncReadLine",
+            "connGetLastError",
+            "syncReadLine",
+            "atomicIncr",
+            "strncmp",
+            "strlen",
+            "memcpy",
+            "memset"
+          ]
+        },
+        {
+          "index": 7,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "strcasecmp",
+            "CACHING",
+            "ADDR",
+            "LADDR",
+            "TYPE",
+            "SKIPME",
+            "connection",
+            "REPLY",
+            "TRACKING",
+            "EVICT"
+          ]
+        },
+        {
+          "index": 8,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "ntohl",
+            "ntohs",
+            "mstime",
+            "clusterGetMessageTypeString",
+            "getInitialPingExt",
+            "getPingExtLength",
+            "padding",
+            "length",
+            "verifyClusterNodeId",
+            "getNextPingExt"
+          ]
+        },
+        {
+          "index": 9,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "rioRead",
+            "memcmp",
+            "atoi",
+            "mstime",
+            "LRU_CLOCK",
+            "keyMetaSpecInit",
+            "rdbLoadType",
+            "rdbLoadTime",
+            "keyMetaSpecAdd",
+            "rioGetReadError"
+          ]
+        },
+        {
+          "index": 10,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "getLongFromObjectOrReply",
+            "addReplyErrorFormat",
+            "addReplyErrorObject",
+            "ztrycalloc",
+            "addReplyError",
+            "lookupKeyRead",
+            "kvobjAllocSize",
+            "strcasecmp",
+            "getDoubleFromObjectOrReply",
+            "getPositiveLongFromObjectOrReply"
+          ]
+        },
+        {
+          "index": 11,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "UNUSED",
+            "printf",
+            "mstime",
+            "TEST",
+            "quicklistNew",
+            "ql_verify",
+            "quicklistRelease",
+            "quicklistPushTail",
+            "quicklistPushHead",
+            "TEST_DESC"
+          ]
+        },
+        {
+          "index": 12,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "strcasecmp",
+            "values",
+            "addReplyHelp",
+            "addReplyDictOfRedisInstances",
+            "sentinelGetMasterByNameOrReplyError",
+            "addReplySentinelRedisInstance",
+            "addReplyBulkCBuffer",
+            "getLongFromObjectOrReply",
+            "getLongLongFromObjectOrReply",
+            "getSentinelRedisInstanceByAddrAndRunID"
+          ]
+        },
+        {
+          "index": 13,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "strcasecmp",
+            "redactClientCommandArgument",
+            "ACLStringHasSpaces",
+            "sdslen",
+            "addReplyError",
+            "ACLGetUserByName",
+            "ACLStringSetUser",
+            "addReply",
+            "addReplyErrorSdsSafe",
+            "strcmp"
+          ]
+        },
+        {
+          "index": 14,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "addReplyError",
+            "clusterNodeIsMaster",
+            "getMyClusterNode",
+            "strcasecmp",
+            "addReplyErrorArity",
+            "parseSlotRangesOrReply",
+            "validateImportSlotRanges",
+            "addReplyErrorSds",
+            "slotRangeArrayFree",
+            "clusterLookupNode"
+          ]
+        },
+        {
+          "index": 15,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "scriptIsTimedout",
+            "call",
+            "scriptIsRunning",
+            "moduleCallCommandFilters",
+            "reqresAppendRequest",
+            "blockPostponeClient",
+            "modules",
+            "isCommandReusable",
+            "lookupCommand",
+            "strcasecmp"
+          ]
+        },
+        {
+          "index": 16,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "srand",
+            "atoi",
+            "createIntList",
+            "ziplistRepr",
+            "createList",
+            "pop",
+            "printf",
+            "ziplistIndex",
+            "ziplistGet",
+            "fwrite"
+          ]
+        },
+        {
+          "index": 18,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "srandom",
+            "time",
+            "getpid",
+            "init_genrand64",
+            "ustime",
+            "signal",
+            "memset",
+            "aeCreateEventLoop",
+            "aeCreateTimeEvent",
+            "listCreate"
+          ]
+        },
+        {
+          "index": 19,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "strcasecmp",
+            "getLongLongFromObject",
+            "addReplyErrorFormat",
+            "clusterStartHandshake",
+            "addReply",
+            "kvstoreSize",
+            "addReplyError",
+            "clusterDelNodeSlots",
+            "clusterDoBeforeSleep",
+            "memset"
+          ]
+        },
+        {
+          "index": 20,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "UNUSED",
+            "watchdogScheduleSignal",
+            "listLength",
+            "getMonotonicUs",
+            "run_with_period",
+            "atomicGet",
+            "trackInstantaneousMetric",
+            "statsUpdateActiveClients",
+            "getLRUClock",
+            "cronUpdateMemoryStats"
+          ]
+        },
+        {
+          "index": 21,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "lookupKeyRead",
+            "getLongLongFromObjectOrReply",
+            "streamParseIntervalIDOrReply",
+            "streamIncrID",
+            "addReplyError",
+            "strcasecmp",
+            "max",
+            "getRangeLongFromObjectOrReply",
+            "addReplyErrorObject",
+            "checkType"
+          ]
+        },
+        {
+          "index": 23,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "signal",
+            "setupSignalHandlers",
+            "ThreadsManager_init",
+            "makeThreadKillable",
+            "openlog",
+            "getpid",
+            "pthread_self",
+            "raxNew",
+            "listCreate",
+            "raxNewEx"
+          ]
+        },
+        {
+          "index": 24,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "makePath",
+            "fopen",
+            "redis_stat",
+            "strerror",
+            "redis_fstat",
+            "fileno",
+            "fclose",
+            "createAOFClient",
+            "format",
+            "fread"
+          ]
+        },
+        {
+          "index": 25,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "UNUSED",
+            "updatePeakMemory",
+            "processEventsWhileBlocked",
+            "connTypeProcessPendingData",
+            "flushAppendOnlyFile",
+            "handleClientsWithPendingWrites",
+            "freeClientsInAsyncFreeQueue",
+            "processClientsOfAllIOThreads",
+            "sendPendingClientsToIOThreads",
+            "data"
+          ]
+        },
+        {
+          "index": 26,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "sdslen",
+            "strcasecmp",
+            "addReplyError",
+            "getLongLongFromObjectOrReply",
+            "getTimeoutFromObjectOrReply",
+            "addReplyErrorFormat",
+            "addReplyErrorObject",
+            "lookupKeyRead",
+            "checkType",
+            "streamLookupCG"
+          ]
+        },
+        {
+          "index": 28,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "UNUSED",
+            "TEST",
+            "raxAllocSize",
+            "raxInsert",
+            "raxRemove",
+            "raxNewEx",
+            "createTestValue",
+            "assert",
+            "_rax_verify_alloc_size",
+            "rax_free"
+          ]
+        },
+        {
+          "index": 29,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "memset",
+            "isatty",
+            "fileno",
+            "getenv",
+            "parseOptions",
+            "parseEnv",
+            "askPassword",
+            "cliSecureInit",
+            "gettimeofday",
+            "init_genrand64"
+          ]
+        },
+        {
+          "index": 31,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "fopen",
+            "strerror",
+            "exit",
+            "redis_fstat",
+            "fileno",
+            "fclose",
+            "fgets",
+            "truncate",
+            "sdssplitargs",
+            "strcasecmp"
+          ]
+        },
+        {
+          "index": 32,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "listCreate",
+            "parseClusterNodeAddress",
+            "fprintf",
+            "clusterManagerNewNode",
+            "clusterManagerNodeConnect",
+            "freeClusterManagerNode",
+            "clusterManagerNodeIsCluster",
+            "clusterManagerPrintNotClusterNodeError",
+            "clusterManagerNodeLoadInfo",
+            "CLUSTER_MANAGER_PRINT_REPLY_ERROR"
+          ]
+        },
+        {
+          "index": 33,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "strcasecmp",
+            "addReplyErrorObject",
+            "redactClientCommandArgument",
+            "sdslen",
+            "addReplyError",
+            "getLongFromObjectOrReply",
+            "lookupKeyRead",
+            "addReplySds",
+            "migrateGetSocket",
+            "rioInitWithBuffer"
+          ]
+        },
+        {
+          "index": 34,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "lookupKeyRead",
+            "checkType",
+            "streamLookupCG",
+            "addReplyErrorFormat",
+            "getLongLongFromObjectOrReply",
+            "streamParseStrictIDOrReply",
+            "commandTimeSnapshot",
+            "strcasecmp",
+            "streamCompareID",
+            "streamUpdateCGroupLastId"
+          ]
+        },
+        {
+          "index": 35,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "strcasecmp",
+            "getLongFromObjectOrReply",
+            "addReplyErrorObject",
+            "sdslen",
+            "getObjectTypeByName",
+            "addReplyErrorFormat",
+            "addReplyError",
+            "vecInit",
+            "vecSetFreeMethod",
+            "state"
+          ]
+        },
+        {
+          "index": 37,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "commands",
+            "isatty",
+            "fileno",
+            "cliInitHelp",
+            "linenoiseSetMultiLine",
+            "linenoiseSetCompletionCallback",
+            "linenoiseSetHintsCallback",
+            "linenoiseSetFreeHintsCallback",
+            "getenv",
+            "getDotfilePath"
+          ]
+        },
+        {
+          "index": 38,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "mstime",
+            "listCreate",
+            "fprintf",
+            "exit",
+            "dictCreate",
+            "typeinfo_add",
+            "findBigKeys",
+            "sizeDistInit",
+            "hdr_init",
+            "signal"
+          ]
+        },
+        {
+          "index": 39,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "commandTimeSnapshot",
+            "createStringObject",
+            "sdslen",
+            "createStringObjectFromLongLong",
+            "createObjectFromStreamID",
+            "addReplyDeferredLen",
+            "list",
+            "pelListUpdate",
+            "modifications",
+            "streamIteratorStart"
+          ]
+        },
+        {
+          "index": 40,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "addReplyError",
+            "strcasecmp",
+            "clusterCommandHelp",
+            "clusterGenNodesDescription",
+            "shouldReturnTlsInfo",
+            "addReplyVerbatim",
+            "sdslen",
+            "clusterCommandMyId",
+            "clusterCommandMyShardId",
+            "clusterCommandSlots"
+          ]
+        },
+        {
+          "index": 41,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "approximate",
+            "lookupKeyRead",
+            "checkType",
+            "setTypeCreate",
+            "kvobjAllocSize",
+            "setTypeSize",
+            "qsort",
+            "createIntsetObject",
+            "createSetObject",
+            "set"
+          ]
+        },
+        {
+          "index": 42,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "fopen",
+            "sdscatprintf",
+            "sdsempty",
+            "strerror",
+            "fgets",
+            "fclose",
+            "sdssplitlen",
+            "strlen",
+            "raxNew",
+            "sdstrim"
+          ]
+        },
+        {
+          "index": 43,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "clusterManagerLogWarn",
+            "exit",
+            "clusterManagerLogInfo",
+            "sdsfromlonglong",
+            "listCreate",
+            "sdsempty",
+            "listRewind",
+            "listNext",
+            "CLUSTER_MANAGER_COMMAND",
+            "clusterManagerCheckRedisReply"
+          ]
+        },
+        {
+          "index": 44,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "lua_type",
+            "lua_checkstack",
+            "addReplyError",
+            "lua_pop",
+            "addReplyBulkCBuffer",
+            "lua_tostring",
+            "lua_strlen",
+            "addReply",
+            "lua_toboolean",
+            "addReplyBool"
+          ]
+        },
+        {
+          "index": 45,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "addReplyErrorObject",
+            "strcasecmp",
+            "getLongLongFromObjectOrReply",
+            "streamParseIntervalIDOrReply",
+            "streamIncrID",
+            "addReplyError",
+            "streamDecrID",
+            "lookupKeyRead",
+            "checkType",
+            "streamLookupCG"
+          ]
+        },
+        {
+          "index": 46,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "sdssplitlen",
+            "strlen",
+            "sdstrim",
+            "sdssplitargs",
+            "sdsfreesplitres",
+            "sdstolower",
+            "lookupConfig",
+            "sdslen",
+            "set",
+            "strcasecmp"
+          ]
+        },
+        {
+          "index": 47,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "dictCreate",
+            "strtol",
+            "TEST",
+            "dictSetResizeEnabled",
+            "dictAdd",
+            "stringFromLongLong",
+            "assert",
+            "dictIsRehashing",
+            "dictRehashMicroseconds",
+            "dictSize"
+          ]
+        },
+        {
+          "index": 48,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "lookupKeyRead",
+            "checkType",
+            "extractLongLatOrReply",
+            "extractDistanceOrReply",
+            "longLatFromMember",
+            "addReplyError",
+            "strcasecmp",
+            "getLongLongFromObjectOrReply",
+            "extractBoxOrReply",
+            "addReplyErrorObject"
+          ]
+        },
+        {
+          "index": 49,
+          "expected": "clean",
+          "got": "violation",
+          "calls": [
+            "strcasecmp",
+            "getLongLongFromObjectOrReply",
+            "addReplyError",
+            "LRU_CLOCK",
+            "addReplyErrorObject",
+            "lookupKeyWrite",
+            "verifyDumpPayload",
+            "sdslen",
+            "rioInitWithBuffer",
+            "keyMetaSpecInit"
+          ]
+        }
+      ]
+    }
+  ],
+  "overall": {
+    "reposMeasured": 4,
+    "totalSamples": 232,
+    "totalTP": 30,
+    "totalFP": 158,
+    "totalFN": 8,
+    "macroF1": 0.19255718675315808,
+    "microPrecision": 0.1595744680851064,
+    "microRecall": 0.7894736842105263,
+    "microF1": 0.26548672566371684,
+    "bestRepo": "libssh",
+    "worstRepo": "redis",
+    "assessment": "EARLY STAGE",
+    "avgFPRate": 0.819227521112767,
+    "avgFNRate": 0.09821428571428571
+  }
+}
