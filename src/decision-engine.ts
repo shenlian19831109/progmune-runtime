@@ -174,9 +174,14 @@ export function computeImportance(asset: UnifiedAsset): number {
 // Decision Engine
 // ═══════════════════════════════════════════════════════════════
 
+/** Sprint 14: Context Segmentation — what kind of code is being verified? */
+export type CodeContext = "production" | "test" | "example" | "benchmark" | "init" | "unknown";
+
 export interface DecisionContext {
   /** Deployment environment (production, staging, test). */
   environment?: "production" | "staging" | "test";
+  /** Sprint 14: what kind of code is this? */
+  codeContext?: CodeContext;
   /** Has this asset been observed in deployment? */
   deploymentObservations?: number;
   /** Recent FP count for this asset. */
@@ -186,6 +191,41 @@ export interface DecisionContext {
   /** Human overrides. */
   humanOverride?: DecisionAction;
 }
+
+/**
+ * Sprint 14: Classify code context from function names and patterns.
+ *
+ * Production code gets strict thresholds.
+ * Test/example/benchmark code gets relaxed thresholds.
+ * Enterprises only care about Production FP.
+ */
+export function classifyCodeContext(functions: string[]): CodeContext {
+  const all = functions.join(" ").toLowerCase();
+
+  // Test patterns
+  if (/test|_test|testing|mock|stub|fake|assert|expect/i.test(all)) return "test";
+
+  // Example patterns
+  if (/example|demo|sample|tutorial|showcase/i.test(all)) return "example";
+
+  // Benchmark patterns
+  if (/bench|benchmark|perf|performance|stress|soak|load/i.test(all)) return "benchmark";
+
+  // Init/setup patterns
+  if (/^(init_|setup|config|bootstrap|startup)/i.test(all)) return "init";
+
+  return "production";
+}
+
+/** Sprint 14: Per-context confidence thresholds. */
+const CONTEXT_THRESHOLDS: Record<CodeContext, { block: number; warn: number; allow: number }> = {
+  production:  { block: 0.80, warn: 0.60, allow: 0.40 },
+  test:        { block: 0.95, warn: 0.85, allow: 0.70 },
+  example:     { block: 0.95, warn: 0.85, allow: 0.70 },
+  benchmark:   { block: 0.90, warn: 0.80, allow: 0.60 },
+  init:        { block: 0.85, warn: 0.70, allow: 0.50 },
+  unknown:     { block: 0.80, warn: 0.60, allow: 0.40 },
+};
 
 export class DecisionEngine {
   private history: Decision[] = [];
@@ -204,10 +244,14 @@ export class DecisionEngine {
 
     const confidence = asset.confidence * (1 - fpRate) * envFactor;
 
+    // Sprint 14: Context-aware thresholds
+    const ctx = context.codeContext || "production";
+    const thresholds = CONTEXT_THRESHOLDS[ctx];
+
     let action: VerificationAction;
-    if (confidence >= 0.80) action = "BLOCK";
-    else if (confidence >= 0.60) action = "WARN";
-    else if (confidence >= 0.40) action = "ALLOW";
+    if (confidence >= thresholds.block) action = "BLOCK";
+    else if (confidence >= thresholds.warn) action = "WARN";
+    else if (confidence >= thresholds.allow) action = "ALLOW";
     else action = "SUPPRESS";
 
     // Importance override: high-importance assets alert even at lower confidence
