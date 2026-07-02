@@ -280,12 +280,96 @@ export function formatRNDDetail(): string {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// Sprint 15: Deployment Runbook
+// ═══════════════════════════════════════════════════════════════
+
+export interface DeploymentPhase {
+  phase: number;
+  name: string;
+  duration: string;
+  domains: string[];
+  mode: "BLOCK" | "WARN";
+  expectedFPPerWeek: number;
+  rollbackCriteria: string;
+  successCriteria: string;
+}
+
+export function generateDeploymentRunbook(coverage: EnterpriseCoverage): DeploymentPhase[] {
+  return [
+    {
+      phase: 1,
+      name: "Critical Path Protection",
+      duration: "Week 1-2",
+      domains: coverage.domains.filter(d => d.mode === "BLOCK").map(d => d.domain),
+      mode: "BLOCK",
+      expectedFPPerWeek: 2,
+      rollbackCriteria: ">5 false positives in any 7-day period → downgrade to WARN",
+      successCriteria: "≤2 FP/week for 14 consecutive days → proceed to Phase 2",
+    },
+    {
+      phase: 2,
+      name: "High-Value Coverage",
+      duration: "Week 3-4",
+      domains: coverage.domains.filter(d => d.mode === "WARN" && d.confidence === "Medium").map(d => d.domain),
+      mode: "WARN",
+      expectedFPPerWeek: 8,
+      rollbackCriteria: ">15 warnings confirmed as FP in any 7-day period → downgrade to INFO",
+      successCriteria: "≤8 FP/week for 14 consecutive days → promote File Lifecycle to BLOCK",
+    },
+    {
+      phase: 3,
+      name: "Broad Coverage",
+      duration: "Month 2-3",
+      domains: coverage.domains.filter(d => d.mode === "INFO" && d.coverage >= 30).map(d => d.domain),
+      mode: "WARN",
+      expectedFPPerWeek: 20,
+      rollbackCriteria: ">30 warnings in any 7-day period → keep at INFO",
+      successCriteria: "≤15 FP/week for 30 consecutive days → promote to WARN permanently",
+    },
+  ];
+}
+
+export function formatDeploymentRunbook(phases: DeploymentPhase[]): string {
+  const lines: string[] = [];
+
+  lines.push("── Deployment Runbook ──");
+  lines.push("  'How do I deploy this in my organization?'");
+  lines.push("");
+
+  for (const p of phases) {
+    const icon = p.mode === "BLOCK" ? "✅" : "⚠️";
+    lines.push(`  Phase ${p.phase}: ${p.name} (${p.duration})`);
+    lines.push(`  Mode:      ${icon} ${p.mode}`);
+    lines.push(`  Domains:   ${p.domains.join(", ")}`);
+    lines.push(`  Est. FP/wk: ${p.expectedFPPerWeek}`);
+    lines.push(`  Rollback:  ${p.rollbackCriteria}`);
+    lines.push(`  Success:   ${p.successCriteria}`);
+    lines.push("");
+  }
+
+  // Summary
+  const totalWeeks = 12;
+  lines.push("  ── Deployment Timeline ──");
+  lines.push(`  Week 1-2:  ████████ BLOCK on Critical domains`);
+  lines.push(`  Week 3-4:  ████████ WARN on High domains`);
+  lines.push(`  Month 2-3: ████████████████████████████ Graduated rollout`);
+  lines.push(`  Total:     ${totalWeeks} weeks to full coverage`);
+  lines.push("");
+  lines.push("  Rollback safety: WARN → INFO downgrade at each phase if FP exceeds threshold.");
+  lines.push("  No production code is ever blocked without human review in Phase 1.");
+  lines.push("");
+
+  return lines.join("\n");
+}
+
+// ═══════════════════════════════════════════════════════════════
 // Full Dashboard
 // ═══════════════════════════════════════════════════════════════
 
 export function formatFullDashboard(): string {
   const coverage = generateEnterpriseCoverage();
-  return formatEnterpriseCoverage(coverage) + formatRNDDetail();
+  const phases = generateDeploymentRunbook(coverage);
+  return formatEnterpriseCoverage(coverage) + formatDeploymentRunbook(phases) + formatRNDDetail();
 }
 
 // ═══════════════════════════════════════════════════════════════
