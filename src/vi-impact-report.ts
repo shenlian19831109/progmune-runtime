@@ -100,7 +100,7 @@ function runVIImpact(repoName: string): VIImpactReport {
     // Override load/save to isolate VI state per repo run
     private load() { /* no-op: isolated instance */ }
     private save() { /* no-op: isolated instance */ }
-  })() as VerificationIntelligence;
+  })() as unknown as VerificationIntelligence;
 
   for (const idx of labeledIndices) {
     const expected = labels[idx];
