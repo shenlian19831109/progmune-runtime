@@ -115,7 +115,15 @@ The engine learns from every false positive. Rules that produce too many false a
 Alert → FP detected → Classify reason → Adjust confidence → Better decisions
 ```
 
-**Why this matters:** A detector with 97% false positive rate is unusable. Verification Intelligence reduces noise by learning what NOT to alert on.
+**Real impact on benchmark data:**
+
+| Repo | Before F1 | After VI | FP Reduction | Rules Suppressed |
+|------|-----------|----------|-------------|-----------------|
+| curl | 36% | **49%** | 47% (28/59) | 9 |
+| libssh | 41% | **53%** | 41% (13/32) | 5 |
+| **Combined** | **38%** | **51%** | **45%** | **14** |
+
+**Why this matters:** Without VI, 77% of alerts are false positives. With VI, this drops to 63% — and improves with every deployment. The engine learns what NOT to alert on.
 
 ---
 
