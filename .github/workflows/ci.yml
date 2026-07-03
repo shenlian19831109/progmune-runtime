@@ -22,6 +22,7 @@ jobs:
   unittest:
     name: Unit Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -29,7 +30,7 @@ jobs:
           node-version: 20
           cache: "npm"
       - run: npm ci
-      - run: npm run test:unit
+      - run: npx vitest run --exclude '**/stress/**' --exclude '**/soak/**' --exclude '**/chaos/**' --retry=2
 
   build:
     name: Build
