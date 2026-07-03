@@ -306,6 +306,63 @@ export function generateAssetLibrary(): {
       freshness: { age: 0, status: "Fresh", action: "Needs deployment validation" },
     },
     {
+      // P1 curation: expanded protocol domains
+      name: "TLS Certificate Validation",
+      domain: "TLS",
+      tier: "Pilot Ready",
+      score: { evidence: 2, generalization: 3, stability: 3, deployment: 2, total: 10 },
+      repos: ["curl", "openssl"], repoCount: 2,
+      languages: ["C"],
+      rfcRefs: ["5280", "6818"],
+      deployments: 0, companies: 0, falseEscalations: 0, productionDays: 0, productionExposure: 0, lastValidated: "2026-06",
+      firstObserved: "2026-05", promotedToProduction: "—",
+      recommendation: "RFC 5280. 2 repos. Needs deployment validation.",
+      economics: { maintenanceCostHours: 2, roi: "High", growth: "Growing", evidenceGrowthRate: 20 },
+      freshness: { age: 30, status: "Fresh", action: "Deploy to staging" },
+    },
+    {
+      name: "OAuth 2.0 Authorization Code Flow",
+      domain: "Auth",
+      tier: "Pilot Ready",
+      score: { evidence: 2, generalization: 3, stability: 3, deployment: 2, total: 10 },
+      repos: ["curl", "nghttp2"], repoCount: 2,
+      languages: ["C"],
+      rfcRefs: ["6749"],
+      deployments: 0, companies: 0, falseEscalations: 0, productionDays: 0, productionExposure: 0, lastValidated: "2026-07",
+      firstObserved: "2026-06", promotedToProduction: "—",
+      recommendation: "RFC 6749. Needs 1 more repo for Production readiness.",
+      economics: { maintenanceCostHours: 3, roi: "High", growth: "Growing", evidenceGrowthRate: 15 },
+      freshness: { age: 1, status: "Fresh", action: "Cross-validate with additional repo" },
+    },
+    {
+      name: "HTTP/2 Session Lifecycle",
+      domain: "HTTP",
+      tier: "Pilot Ready",
+      score: { evidence: 1, generalization: 3, stability: 2, deployment: 1, total: 7 },
+      repos: ["nghttp2"], repoCount: 1,
+      languages: ["C"],
+      rfcRefs: ["9113"],
+      deployments: 0, companies: 0, falseEscalations: 0, productionDays: 0, productionExposure: 0, lastValidated: "2026-06",
+      firstObserved: "2026-04", promotedToProduction: "—",
+      recommendation: "RFC 9113. 1 repo — needs cross-repo validation.",
+      economics: { maintenanceCostHours: 3, roi: "Medium", growth: "Stable", evidenceGrowthRate: 10 },
+      freshness: { age: 30, status: "Fresh", action: "Scan additional repo" },
+    },
+    {
+      name: "DNS Resolution",
+      domain: "Network",
+      tier: "Research",
+      score: { evidence: 1, generalization: 2, stability: 1, deployment: 1, total: 5 },
+      repos: ["curl"], repoCount: 1,
+      languages: ["C"],
+      rfcRefs: ["1035"],
+      deployments: 0, companies: 0, falseEscalations: 0, productionDays: 0, productionExposure: 0, lastValidated: "—",
+      firstObserved: "2026-06", promotedToProduction: "—",
+      recommendation: "RFC 1035. Pattern detected in curl. Needs cross-repo evidence.",
+      economics: { maintenanceCostHours: 2, roi: "Medium", growth: "Stable", evidenceGrowthRate: 5 },
+      freshness: { age: 0, status: "Fresh", action: "Validate with additional repos" },
+    },
+    {
       name: "memset (utility)",
       domain: "Memory",
       tier: "Deprecated",
@@ -539,11 +596,12 @@ export function formatAssetLibrary(): string {
 
   // Research backlog
   lines.push("── Research Backlog (not product blockers) ──");
-  lines.push("  libssh generalization (F1=41% vs curl F1=49%):");
-  lines.push("    Root cause: State Graph Coupling in synthesizer");
-  lines.push("    Status: Deferred to Runtime v4 (architecture frozen)");
-  lines.push("    Impact: Does NOT block TLS/Auth BLOCK deployment");
-  lines.push("    Path: Multi-cluster synthesis when v4 architecture opens");
+  lines.push("  libssh F1=41% (vs curl F1=49%):");
+  lines.push("    Cause: State Graph Coupling — 201 rules in 1 giant cluster");
+  lines.push("    Top FP sources: SSH_LOG(5), ssh_buffer_new(2), ssh_set_error(2)");
+  lines.push("    Fix: Multi-cluster synthesis (deferred to Runtime v4)");
+  lines.push("    Workaround: VI suppresses 41% of libssh FPs (13/32)");
+  lines.push("    Commercial impact: None — TLS/Auth BLOCK unaffected");
   lines.push("");
 
   // Competitive advantage
