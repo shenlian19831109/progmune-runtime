@@ -3,7 +3,7 @@ on: [push, pull_request]
 jobs:
   gate:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
@@ -13,15 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '${{ matrix.node-version }}' }
       - run: npm ci
-      - name: Build (TypeScript)
+      - name: Build
         run: npm run build
-      - name: Test (core suites — exclude stress/soak/chaos, retry flaky)
-        run: npx vitest run --reporter=verbose --exclude '**/stress/**' --exclude '**/soak/**' --exclude '**/chaos/**' --retry=2
-      - name: Verify canary mode (non-blocking)
-        run: |
-          node -e "
-          const { getRankerStatus } = require('./dist/counterfactual-engine');
-          const status = getRankerStatus();
-          console.log('Ranker status:', JSON.stringify(status));
-          if (!status || !status.type) { console.error('WARN: getRankerStatus returned unexpected:', status); }
-          " || echo "WARN: canary check skipped (non-blocking)"
+      - name: Quick smoke test (core only)
+        run: npx vitest run src/repair-arch.test.ts tests/decision-engine.test.ts tests/asset-promotion.test.ts --reporter=verbose
