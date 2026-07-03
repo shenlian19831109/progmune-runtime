@@ -487,13 +487,13 @@ export function formatAssetLibrary(): string {
   const totalMaint = prods.reduce((s, a) => s + (a.economics?.maintenanceCostHours || 0), 0);
   lines.push("── Asset Economics ──");
   lines.push(`  Total maintenance:  ${totalMaint}h/month across ${prods.length} Production assets`);
-  lines.push(`  Avg ROI:            ${prods.map(a => a.economics?.roi).join(\" / \")}`);
+  lines.push(`  Avg ROI:            ${prods.map(a => a.economics?.roi).join(" / ")}`);
   lines.push("");
   for (const a of prods) {
     const e = a.economics;
     const f = a.freshness;
     if (!e) continue;
-    lines.push(`  ${a.name}: ${e.maintenanceCostHours}h/mo | ROI: ${e.roi} | Growth: ${e.growth} (+${e.evidenceGrowthRate}%/yr) | Evidence: ${f?.status || \"N/A\"} (${f?.age || \"?\"}d)`);
+    lines.push(`  ${a.name}: ${e.maintenanceCostHours}h/mo | ROI: ${e.roi} | Growth: ${e.growth} (+${e.evidenceGrowthRate}%/yr) | Evidence: ${f?.status || "N/A"} (${f?.age || "?"}d)`);
   }
   lines.push("");
 
