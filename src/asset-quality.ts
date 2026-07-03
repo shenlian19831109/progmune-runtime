@@ -22,6 +22,8 @@
  *   npx ts-node --transpile-only src/asset-quality.ts
  */
 
+import * as fs from "fs";
+import * as path from "path";
 import type { UnifiedAsset } from "./asset-promotion";
 
 // ═══════════════════════════════════════════════════════════════
@@ -161,22 +163,40 @@ export function classifyAssetTier(score: DeploymentScore): AssetTier {
 }
 
 /**
- * Generate the Asset Library — all known assets with their tiers.
+ * Load asset registry from JSON file.
+ * Adding a new asset = editing assets/registry.json. No code changes needed.
  */
-export function generateAssetLibrary(): {
-  assets: AssetResume[];
-  flows: { researchToPilot: number; pilotToProduction: number; productionToDeprecated: number };
-  summary: {
-    productionReady: number;
-    pilotReady: number;
-    research: number;
-    deprecated: number;
-    deployableRate: number;
-    /** % of Pilot+Research that could become Production with 1 more repo */
-    nearProduction: number;
-  };
-} {
-  const assets: AssetResume[] = [
+function loadAssetRegistry(): AssetResume[] {
+  const registryPath = path.resolve(process.cwd(), "assets", "registry.json");
+  if (!fs.existsSync(registryPath)) {
+    console.warn("Asset registry not found, using embedded defaults");
+    return getEmbeddedAssets();
+  }
+  try {
+    const data = JSON.parse(fs.readFileSync(registryPath, "utf-8"));
+    return (data.assets || []).map((a: any) => ({
+      ...a,
+      productionExposure: a.productionDays * (a.repos?.length || 1) * (a.deployments || 1),
+      promotedToProduction: a.promotedToProduction || "—",
+      freshness: {
+        age: a.lastValidated && a.lastValidated !== "—"
+          ? Math.round((Date.now() - new Date(a.lastValidated).getTime()) / 86400000)
+          : 0,
+        status: a.lastValidated && a.lastValidated !== "—"
+          ? (Math.round((Date.now() - new Date(a.lastValidated).getTime()) / 86400000) <= 180 ? "Fresh" : "Stale")
+          : "Fresh",
+        action: "No action needed",
+      },
+    }));
+  } catch (e) {
+    console.warn("Failed to load asset registry:", e);
+    return getEmbeddedAssets();
+  }
+}
+
+/** Fallback embedded assets (mirrors registry.json). */
+function getEmbeddedAssets(): AssetResume[] {
+  return [
     {
       name: "TLS Handshake",
       domain: "TLS",
@@ -362,21 +382,22 @@ export function generateAssetLibrary(): {
       economics: { maintenanceCostHours: 2, roi: "Medium", growth: "Stable", evidenceGrowthRate: 5 },
       freshness: { age: 0, status: "Fresh", action: "Validate with additional repos" },
     },
-    {
-      name: "memset (utility)",
-      domain: "Memory",
-      tier: "Deprecated",
-      score: { evidence: 1, generalization: 1, stability: 1, deployment: 1, total: 4 },
-      repos: ["curl"], repoCount: 1,
-      languages: ["C"],
-      rfcRefs: [],
-      deployments: 0, companies: 0, falseEscalations: 5, productionDays: 0, productionExposure: 0, lastValidated: "—",
-      firstObserved: "2026-02", promotedToProduction: "—",
-      recommendation: "5 FPs. Generic utility — not a protocol rule.",
-      economics: { maintenanceCostHours: 4, roi: "Medium", growth: "Stable", evidenceGrowthRate: 10 },
-      freshness: { age: 0, status: "Fresh", action: "Needs deployment validation" },
-    },
   ];
+}
+
+export function generateAssetLibrary(): {
+  assets: AssetResume[];
+  flows: { researchToPilot: number; pilotToProduction: number; productionToDeprecated: number };
+  summary: {
+    productionReady: number;
+    pilotReady: number;
+    research: number;
+    deprecated: number;
+    deployableRate: number;
+    nearProduction: number;
+  };
+} {
+  const assets = loadAssetRegistry();
 
   const productionReady = assets.filter(a => a.tier === "Production Ready").length;
   const pilotReady = assets.filter(a => a.tier === "Pilot Ready").length;
