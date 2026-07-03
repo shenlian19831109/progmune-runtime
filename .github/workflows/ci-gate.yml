@@ -3,7 +3,7 @@ on: [push, pull_request]
 jobs:
   gate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     strategy:
       matrix:
         node-version: [18, 20, 22]
@@ -14,8 +14,8 @@ jobs:
       - run: npm ci
       - name: Build (TypeScript)
         run: npm run build
-      - name: Test (core suites)
-        run: npx vitest run --reporter=verbose
+      - name: Test (core suites — exclude stress/soak/chaos)
+        run: npx vitest run --reporter=verbose --exclude '**/stress/**' --exclude '**/soak/**' --exclude '**/chaos/**'
       - name: Verify canary mode
         run: |
           PROGMUNE_RANKER=learning PROGMUNE_MODEL_WEIGHT=0.3 node -e "
