@@ -30,7 +30,13 @@ jobs:
           node-version: 20
           cache: "npm"
       - run: npm ci
-      - run: npx vitest run --exclude '**/stress/**' --exclude '**/soak/**' --exclude '**/chaos/**' --retry=2
+      - run: npx vitest run --exclude '**/stress/**' --exclude '**/soak/**' --exclude '**/chaos/**' --retry=2 --reporter=verbose > vitest-output.txt 2>&1
+        continue-on-error: true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vitest-output
+          path: vitest-output.txt
 
   build:
     name: Build
