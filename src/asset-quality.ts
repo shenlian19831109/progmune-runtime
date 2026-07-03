@@ -390,15 +390,27 @@ export function formatAssetLibrary(): string {
     lines.push("");
   }
 
+  // Growth model
+  lines.push("── Growth Model ──");
+  lines.push("  Automated discovery has a ceiling. Semantic matching needs humans.");
+  lines.push("");
+  lines.push("  Tier        │ Source              │ Automation");
+  lines.push("  Research    │ Repo scan           │ Fully automated");
+  lines.push("  Pilot       │ Cross-repo evidence │ Semi-automated");
+  lines.push("  Production  │ RFC + deployment    │ Human-curated");
+  lines.push("");
+  lines.push(`  Current: ${library.summary.productionReady} Production, ${library.summary.pilotReady} Pilot, ${library.summary.research} Research`);
+  lines.push(`  Each human-reviewed promotion → permanent Asset Library growth.`);
+  lines.push(`  This is the moat: curated evidence, not automated rules.`);
+  lines.push("");
+
   // Competitive advantage
   lines.push("── Competitive Advantage ──");
   lines.push(`  Our advantage is not the verification algorithm.`);
   lines.push(`  It is the continuously growing library of`);
   lines.push(`  production-validated verification assets.`);
   lines.push("");
-  lines.push(`  ${library.summary.productionReady} Production-validated Assets today.`);
-  lines.push(`  Each new repo → every Asset gains production evidence.`);
-  lines.push(`  Algorithms can be replicated. Verified production evidence cannot.`);
+  lines.push(`  Algorithms can be replicated. Curated production evidence cannot.`);
   lines.push("");
 
   return lines.join("\n");
