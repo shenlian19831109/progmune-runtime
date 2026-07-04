@@ -1,6 +1,6 @@
 {
   "$schema": "https://progmune.dev/schemas/protocols.json",
-  "$description": "Progmune 协议定义 —— 函数调用的合法状态转换规则。支持命名空间（namespace）隔离不同资源的状态机。",
+  "$description": "Progmune \u534f\u8bae\u5b9a\u4e49 \u2014\u2014 \u51fd\u6570\u8c03\u7528\u7684\u5408\u6cd5\u72b6\u6001\u8f6c\u6362\u89c4\u5219\u3002\u652f\u6301\u547d\u540d\u7a7a\u95f4\uff08namespace\uff09\u9694\u79bb\u4e0d\u540c\u8d44\u6e90\u7684\u72b6\u6001\u673a\u3002",
   "initialState": "UNAUTHENTICATED",
   "namespaceInitialStates": {
     "_global": "UNAUTHENTICATED",
@@ -13,422 +13,793 @@
     "cross": "UNAUTHENTICATED"
   },
   "states": {
-    "UNAUTHENTICATED": "初始状态：用户未认证",
-    "PASSWORD_VERIFIED": "密码已通过验证",
-    "TOKEN_ISSUED": "JWT 令牌已签发",
-    "SESSION_ACTIVE": "会话已激活",
-    "IR_STALE": "IR 已过期或未生成",
-    "IR_EXTRACTED": "IR 已从源码提取",
-    "ACTION_VALIDATED": "动作已通过 SVL 校验",
-    "SEQUENCE_VALIDATED": "动作序列 + 变量流向已通过校验",
-    "CODE_EMITTED": "目标代码已生成",
-    "SESSION_RECORDED": "执行会话已保存",
-    "IDLE": "空闲状态：无状态函数可随时调用",
-    "TX_IDLE": "事务空闲：无活动事务",
-    "TX_ACTIVE": "事务进行中：可执行事务内操作",
-    "SAVEPOINT_HELD": "保存点已创建：可回滚或释放",
-    "COND_IDLE": "条件判断空闲：等待评估",
-    "COND_EVALUATED": "条件已评估：等待分支选择",
-    "COND_ACCEPTED": "条件通过（TRUE 分支）",
-    "COND_REJECTED": "条件拒绝（FALSE 分支）",
-    "COND_RESOLVED": "条件已解决：分支执行完毕",
-    "LOOP_IDLE": "循环空闲：等待开始迭代",
-    "FETCHING": "正在获取下一批数据",
-    "BATCH_READY": "批次数据就绪",
-    "ITERATING": "正在迭代处理数据项",
-    "LOOP_DONE": "循环已退出",
-    "AUTH_FILE_GATE": "跨协议桥：认证通过，文件操作就绪",
-    "AUTH_DB_GATE": "跨协议桥：认证通过，数据库操作就绪"
+    "UNAUTHENTICATED": "\u521d\u59cb\u72b6\u6001\uff1a\u7528\u6237\u672a\u8ba4\u8bc1",
+    "PASSWORD_VERIFIED": "\u5bc6\u7801\u5df2\u901a\u8fc7\u9a8c\u8bc1",
+    "TOKEN_ISSUED": "JWT \u4ee4\u724c\u5df2\u7b7e\u53d1",
+    "SESSION_ACTIVE": "\u4f1a\u8bdd\u5df2\u6fc0\u6d3b",
+    "IR_STALE": "IR \u5df2\u8fc7\u671f\u6216\u672a\u751f\u6210",
+    "IR_EXTRACTED": "IR \u5df2\u4ece\u6e90\u7801\u63d0\u53d6",
+    "ACTION_VALIDATED": "\u52a8\u4f5c\u5df2\u901a\u8fc7 SVL \u6821\u9a8c",
+    "SEQUENCE_VALIDATED": "\u52a8\u4f5c\u5e8f\u5217 + \u53d8\u91cf\u6d41\u5411\u5df2\u901a\u8fc7\u6821\u9a8c",
+    "CODE_EMITTED": "\u76ee\u6807\u4ee3\u7801\u5df2\u751f\u6210",
+    "SESSION_RECORDED": "\u6267\u884c\u4f1a\u8bdd\u5df2\u4fdd\u5b58",
+    "IDLE": "\u7a7a\u95f2\u72b6\u6001\uff1a\u65e0\u72b6\u6001\u51fd\u6570\u53ef\u968f\u65f6\u8c03\u7528",
+    "TX_IDLE": "\u4e8b\u52a1\u7a7a\u95f2\uff1a\u65e0\u6d3b\u52a8\u4e8b\u52a1",
+    "TX_ACTIVE": "\u4e8b\u52a1\u8fdb\u884c\u4e2d\uff1a\u53ef\u6267\u884c\u4e8b\u52a1\u5185\u64cd\u4f5c",
+    "SAVEPOINT_HELD": "\u4fdd\u5b58\u70b9\u5df2\u521b\u5efa\uff1a\u53ef\u56de\u6eda\u6216\u91ca\u653e",
+    "COND_IDLE": "\u6761\u4ef6\u5224\u65ad\u7a7a\u95f2\uff1a\u7b49\u5f85\u8bc4\u4f30",
+    "COND_EVALUATED": "\u6761\u4ef6\u5df2\u8bc4\u4f30\uff1a\u7b49\u5f85\u5206\u652f\u9009\u62e9",
+    "COND_ACCEPTED": "\u6761\u4ef6\u901a\u8fc7\uff08TRUE \u5206\u652f\uff09",
+    "COND_REJECTED": "\u6761\u4ef6\u62d2\u7edd\uff08FALSE \u5206\u652f\uff09",
+    "COND_RESOLVED": "\u6761\u4ef6\u5df2\u89e3\u51b3\uff1a\u5206\u652f\u6267\u884c\u5b8c\u6bd5",
+    "LOOP_IDLE": "\u5faa\u73af\u7a7a\u95f2\uff1a\u7b49\u5f85\u5f00\u59cb\u8fed\u4ee3",
+    "FETCHING": "\u6b63\u5728\u83b7\u53d6\u4e0b\u4e00\u6279\u6570\u636e",
+    "BATCH_READY": "\u6279\u6b21\u6570\u636e\u5c31\u7eea",
+    "ITERATING": "\u6b63\u5728\u8fed\u4ee3\u5904\u7406\u6570\u636e\u9879",
+    "LOOP_DONE": "\u5faa\u73af\u5df2\u9000\u51fa",
+    "AUTH_FILE_GATE": "\u8de8\u534f\u8bae\u6865\uff1a\u8ba4\u8bc1\u901a\u8fc7\uff0c\u6587\u4ef6\u64cd\u4f5c\u5c31\u7eea",
+    "AUTH_DB_GATE": "\u8de8\u534f\u8bae\u6865\uff1a\u8ba4\u8bc1\u901a\u8fc7\uff0c\u6570\u636e\u5e93\u64cd\u4f5c\u5c31\u7eea",
+    "TLS_CONFIGURED": "Auto-generated state for Investment Roadmap",
+    "SERVER_STARTED": "Auto-generated state for Investment Roadmap",
+    "PASSWORD_RECEIVED": "Auto-generated state for Investment Roadmap",
+    "PASSWORD_HASHED": "Auto-generated state for Investment Roadmap",
+    "AUTHENTICATED": "Auto-generated state for Investment Roadmap",
+    "AUTHORIZED": "Auto-generated state for Investment Roadmap",
+    "REFERENCE_VALID": "Auto-generated state for Investment Roadmap",
+    "REFERENCE_CREATED": "Auto-generated state for Investment Roadmap",
+    "CONTENT_SANITIZED": "Auto-generated state for Investment Roadmap",
+    "TYPE_VALIDATED": "Auto-generated state for Investment Roadmap"
   },
   "rules": {
     "verify_password": {
       "namespace": "auth",
-      "pre_states": ["UNAUTHENTICATED"],
-      "post_states": ["PASSWORD_VERIFIED"],
-      "description": "验证用户密码 → 进入已认证状态"
+      "pre_states": [
+        "UNAUTHENTICATED"
+      ],
+      "post_states": [
+        "PASSWORD_VERIFIED"
+      ],
+      "description": "\u9a8c\u8bc1\u7528\u6237\u5bc6\u7801 \u2192 \u8fdb\u5165\u5df2\u8ba4\u8bc1\u72b6\u6001"
     },
     "generate_jwt": {
       "namespace": "auth",
-      "pre_states": ["PASSWORD_VERIFIED"],
-      "post_states": ["TOKEN_ISSUED"],
-      "invalidate": ["PASSWORD_VERIFIED"],
-      "description": "签发 JWT 令牌 → 必须在密码验证之后，签发后密码验证状态失效"
+      "pre_states": [
+        "PASSWORD_VERIFIED"
+      ],
+      "post_states": [
+        "TOKEN_ISSUED"
+      ],
+      "invalidate": [
+        "PASSWORD_VERIFIED"
+      ],
+      "description": "\u7b7e\u53d1 JWT \u4ee4\u724c \u2192 \u5fc5\u987b\u5728\u5bc6\u7801\u9a8c\u8bc1\u4e4b\u540e\uff0c\u7b7e\u53d1\u540e\u5bc6\u7801\u9a8c\u8bc1\u72b6\u6001\u5931\u6548"
     },
     "create_session": {
       "namespace": "auth",
-      "pre_states": ["TOKEN_ISSUED"],
-      "post_states": ["SESSION_ACTIVE"],
-      "invalidate": ["TOKEN_ISSUED"],
-      "description": "创建会话 → 必须在令牌签发之后，创建后令牌状态失效"
+      "pre_states": [
+        "TOKEN_ISSUED"
+      ],
+      "post_states": [
+        "SESSION_ACTIVE"
+      ],
+      "invalidate": [
+        "TOKEN_ISSUED"
+      ],
+      "description": "\u521b\u5efa\u4f1a\u8bdd \u2192 \u5fc5\u987b\u5728\u4ee4\u724c\u7b7e\u53d1\u4e4b\u540e\uff0c\u521b\u5efa\u540e\u4ee4\u724c\u72b6\u6001\u5931\u6548"
     },
     "revoke_token": {
       "namespace": "auth",
-      "pre_states": ["TOKEN_ISSUED"],
-      "post_states": ["UNAUTHENTICATED"],
-      "invalidate": ["TOKEN_ISSUED"],
-      "description": "撤销令牌 → 回到未认证状态"
+      "pre_states": [
+        "TOKEN_ISSUED"
+      ],
+      "post_states": [
+        "UNAUTHENTICATED"
+      ],
+      "invalidate": [
+        "TOKEN_ISSUED"
+      ],
+      "description": "\u64a4\u9500\u4ee4\u724c \u2192 \u56de\u5230\u672a\u8ba4\u8bc1\u72b6\u6001"
     },
     "logout": {
       "namespace": "auth",
-      "pre_states": ["SESSION_ACTIVE"],
-      "post_states": ["UNAUTHENTICATED"],
-      "invalidate": ["SESSION_ACTIVE"],
-      "description": "登出 → 清除会话，回到未认证状态"
+      "pre_states": [
+        "SESSION_ACTIVE"
+      ],
+      "post_states": [
+        "UNAUTHENTICATED"
+      ],
+      "invalidate": [
+        "SESSION_ACTIVE"
+      ],
+      "description": "\u767b\u51fa \u2192 \u6e05\u9664\u4f1a\u8bdd\uff0c\u56de\u5230\u672a\u8ba4\u8bc1\u72b6\u6001"
     },
     "open_file": {
       "namespace": "file",
       "pre_states": [],
-      "post_states": ["FILE_OPEN"],
-      "description": "打开文件 → 获得文件句柄"
+      "post_states": [
+        "FILE_OPEN"
+      ],
+      "description": "\u6253\u5f00\u6587\u4ef6 \u2192 \u83b7\u5f97\u6587\u4ef6\u53e5\u67c4"
     },
     "read_file": {
       "namespace": "file",
-      "pre_states": ["FILE_OPEN"],
+      "pre_states": [
+        "FILE_OPEN"
+      ],
       "post_states": [],
-      "description": "读取文件内容 → 需要文件已打开"
+      "description": "\u8bfb\u53d6\u6587\u4ef6\u5185\u5bb9 \u2192 \u9700\u8981\u6587\u4ef6\u5df2\u6253\u5f00"
     },
     "write_file": {
       "namespace": "file",
-      "pre_states": ["FILE_OPEN"],
+      "pre_states": [
+        "FILE_OPEN"
+      ],
       "post_states": [],
-      "description": "写入文件内容 → 需要文件已打开"
+      "description": "\u5199\u5165\u6587\u4ef6\u5185\u5bb9 \u2192 \u9700\u8981\u6587\u4ef6\u5df2\u6253\u5f00"
     },
     "close_file": {
       "namespace": "file",
-      "pre_states": ["FILE_OPEN"],
+      "pre_states": [
+        "FILE_OPEN"
+      ],
       "post_states": [],
-      "invalidate": ["FILE_OPEN"],
-      "description": "关闭文件句柄 → 释放文件资源"
+      "invalidate": [
+        "FILE_OPEN"
+      ],
+      "description": "\u5173\u95ed\u6587\u4ef6\u53e5\u67c4 \u2192 \u91ca\u653e\u6587\u4ef6\u8d44\u6e90"
     },
     "connect_db": {
       "namespace": "db",
       "pre_states": [],
-      "post_states": ["DB_CONNECTED"],
-      "description": "建立数据库连接"
+      "post_states": [
+        "DB_CONNECTED"
+      ],
+      "description": "\u5efa\u7acb\u6570\u636e\u5e93\u8fde\u63a5"
     },
     "query_db": {
       "namespace": "db",
-      "pre_states": ["DB_CONNECTED"],
+      "pre_states": [
+        "DB_CONNECTED"
+      ],
       "post_states": [],
-      "description": "执行数据库查询 → 需要已连接"
+      "description": "\u6267\u884c\u6570\u636e\u5e93\u67e5\u8be2 \u2192 \u9700\u8981\u5df2\u8fde\u63a5"
     },
     "disconnect_db": {
       "namespace": "db",
-      "pre_states": ["DB_CONNECTED"],
+      "pre_states": [
+        "DB_CONNECTED"
+      ],
       "post_states": [],
-      "invalidate": ["DB_CONNECTED"],
-      "description": "断开数据库连接"
+      "invalidate": [
+        "DB_CONNECTED"
+      ],
+      "description": "\u65ad\u5f00\u6570\u636e\u5e93\u8fde\u63a5"
     },
     "extractIR": {
       "namespace": "dev_pipeline",
       "pre_states": [],
-      "post_states": ["IR_EXTRACTED"],
-      "invalidate": ["IR_STALE"],
-      "description": "从源码提取 IR → 产出 IR_EXTRACTED 状态"
+      "post_states": [
+        "IR_EXTRACTED"
+      ],
+      "invalidate": [
+        "IR_STALE"
+      ],
+      "description": "\u4ece\u6e90\u7801\u63d0\u53d6 IR \u2192 \u4ea7\u51fa IR_EXTRACTED \u72b6\u6001"
     },
     "validateAction": {
       "namespace": "dev_pipeline",
-      "pre_states": ["IR_EXTRACTED"],
-      "post_states": ["ACTION_VALIDATED"],
-      "description": "校验单个动作合法性 → 需要 IR 已提取"
+      "pre_states": [
+        "IR_EXTRACTED"
+      ],
+      "post_states": [
+        "ACTION_VALIDATED"
+      ],
+      "description": "\u6821\u9a8c\u5355\u4e2a\u52a8\u4f5c\u5408\u6cd5\u6027 \u2192 \u9700\u8981 IR \u5df2\u63d0\u53d6"
     },
     "validateActionSequence": {
       "namespace": "dev_pipeline",
-      "pre_states": ["ACTION_VALIDATED"],
-      "post_states": ["SEQUENCE_VALIDATED"],
-      "invalidate": ["ACTION_VALIDATED"],
-      "description": "批量校验动作序列 → 需要动作已验证，校验后消耗"
+      "pre_states": [
+        "ACTION_VALIDATED"
+      ],
+      "post_states": [
+        "SEQUENCE_VALIDATED"
+      ],
+      "invalidate": [
+        "ACTION_VALIDATED"
+      ],
+      "description": "\u6279\u91cf\u6821\u9a8c\u52a8\u4f5c\u5e8f\u5217 \u2192 \u9700\u8981\u52a8\u4f5c\u5df2\u9a8c\u8bc1\uff0c\u6821\u9a8c\u540e\u6d88\u8017"
     },
     "emitCode": {
       "namespace": "dev_pipeline",
-      "pre_states": ["SEQUENCE_VALIDATED"],
-      "post_states": ["CODE_EMITTED"],
-      "invalidate": ["SEQUENCE_VALIDATED"],
-      "description": "编译动作序列为目标代码 → 需要序列已验证"
+      "pre_states": [
+        "SEQUENCE_VALIDATED"
+      ],
+      "post_states": [
+        "CODE_EMITTED"
+      ],
+      "invalidate": [
+        "SEQUENCE_VALIDATED"
+      ],
+      "description": "\u7f16\u8bd1\u52a8\u4f5c\u5e8f\u5217\u4e3a\u76ee\u6807\u4ee3\u7801 \u2192 \u9700\u8981\u5e8f\u5217\u5df2\u9a8c\u8bc1"
     },
     "recordSession": {
       "namespace": "dev_pipeline",
-      "pre_states": ["CODE_EMITTED"],
-      "post_states": ["SESSION_RECORDED"],
-      "invalidate": ["CODE_EMITTED"],
-      "description": "保存执行会话到语料库 → 需要代码已生成"
+      "pre_states": [
+        "CODE_EMITTED"
+      ],
+      "post_states": [
+        "SESSION_RECORDED"
+      ],
+      "invalidate": [
+        "CODE_EMITTED"
+      ],
+      "description": "\u4fdd\u5b58\u6267\u884c\u4f1a\u8bdd\u5230\u8bed\u6599\u5e93 \u2192 \u9700\u8981\u4ee3\u7801\u5df2\u751f\u6210"
     },
-
     "compute_hash": {
       "namespace": "stateless",
       "pre_states": [],
       "post_states": [],
-      "description": "计算输入数据的哈希摘要 —— 纯函数/幂等"
+      "description": "\u8ba1\u7b97\u8f93\u5165\u6570\u636e\u7684\u54c8\u5e0c\u6458\u8981 \u2014\u2014 \u7eaf\u51fd\u6570/\u5e42\u7b49"
     },
     "validate_schema": {
       "namespace": "stateless",
       "pre_states": [],
       "post_states": [],
-      "description": "对数据做 Schema 校验 —— 无副作用"
+      "description": "\u5bf9\u6570\u636e\u505a Schema \u6821\u9a8c \u2014\u2014 \u65e0\u526f\u4f5c\u7528"
     },
     "sanitize_input": {
       "namespace": "stateless",
       "pre_states": [],
       "post_states": [],
-      "description": "清理用户输入，去除危险字符"
+      "description": "\u6e05\u7406\u7528\u6237\u8f93\u5165\uff0c\u53bb\u9664\u5371\u9669\u5b57\u7b26"
     },
     "verify_checksum": {
       "namespace": "stateless",
       "pre_states": [],
       "post_states": [],
-      "description": "通过校验和验证数据完整性"
+      "description": "\u901a\u8fc7\u6821\u9a8c\u548c\u9a8c\u8bc1\u6570\u636e\u5b8c\u6574\u6027"
     },
     "encode_payload": {
       "namespace": "stateless",
       "pre_states": [],
       "post_states": [],
-      "description": "将数据编码为 base64 / wire format"
+      "description": "\u5c06\u6570\u636e\u7f16\u7801\u4e3a base64 / wire format"
     },
     "decode_payload": {
       "namespace": "stateless",
       "pre_states": [],
       "post_states": [],
-      "description": "从 wire format 解码回原始数据"
+      "description": "\u4ece wire format \u89e3\u7801\u56de\u539f\u59cb\u6570\u636e"
     },
     "compress_buffer": {
       "namespace": "stateless",
       "pre_states": [],
       "post_states": [],
-      "description": "压缩数据缓冲区"
+      "description": "\u538b\u7f29\u6570\u636e\u7f13\u51b2\u533a"
     },
     "decompress_buffer": {
       "namespace": "stateless",
       "pre_states": [],
       "post_states": [],
-      "description": "解压数据缓冲区"
+      "description": "\u89e3\u538b\u6570\u636e\u7f13\u51b2\u533a"
     },
-
     "begin_tx": {
       "namespace": "transaction",
-      "pre_states": ["TX_IDLE"],
-      "post_states": ["TX_ACTIVE"],
-      "description": "开启新事务 → 必须在空闲状态下"
+      "pre_states": [
+        "TX_IDLE"
+      ],
+      "post_states": [
+        "TX_ACTIVE"
+      ],
+      "description": "\u5f00\u542f\u65b0\u4e8b\u52a1 \u2192 \u5fc5\u987b\u5728\u7a7a\u95f2\u72b6\u6001\u4e0b"
     },
     "commit_tx": {
       "namespace": "transaction",
-      "pre_states": ["TX_ACTIVE"],
-      "post_states": ["TX_IDLE"],
-      "invalidate": ["TX_ACTIVE"],
-      "description": "提交活跃事务中的所有变更"
+      "pre_states": [
+        "TX_ACTIVE"
+      ],
+      "post_states": [
+        "TX_IDLE"
+      ],
+      "invalidate": [
+        "TX_ACTIVE"
+      ],
+      "description": "\u63d0\u4ea4\u6d3b\u8dc3\u4e8b\u52a1\u4e2d\u7684\u6240\u6709\u53d8\u66f4"
     },
     "rollback_tx": {
       "namespace": "transaction",
-      "pre_states": ["TX_ACTIVE"],
-      "post_states": ["TX_IDLE"],
-      "invalidate": ["TX_ACTIVE"],
-      "description": "回滚活跃事务中的所有变更"
+      "pre_states": [
+        "TX_ACTIVE"
+      ],
+      "post_states": [
+        "TX_IDLE"
+      ],
+      "invalidate": [
+        "TX_ACTIVE"
+      ],
+      "description": "\u56de\u6eda\u6d3b\u8dc3\u4e8b\u52a1\u4e2d\u7684\u6240\u6709\u53d8\u66f4"
     },
     "insert_record": {
       "namespace": "transaction",
-      "pre_states": ["TX_ACTIVE"],
-      "post_states": ["TX_ACTIVE"],
-      "description": "在活跃事务中插入记录（自保持）"
+      "pre_states": [
+        "TX_ACTIVE"
+      ],
+      "post_states": [
+        "TX_ACTIVE"
+      ],
+      "description": "\u5728\u6d3b\u8dc3\u4e8b\u52a1\u4e2d\u63d2\u5165\u8bb0\u5f55\uff08\u81ea\u4fdd\u6301\uff09"
     },
     "update_record": {
       "namespace": "transaction",
-      "pre_states": ["TX_ACTIVE"],
-      "post_states": ["TX_ACTIVE"],
-      "description": "在活跃事务中更新记录（自保持）"
+      "pre_states": [
+        "TX_ACTIVE"
+      ],
+      "post_states": [
+        "TX_ACTIVE"
+      ],
+      "description": "\u5728\u6d3b\u8dc3\u4e8b\u52a1\u4e2d\u66f4\u65b0\u8bb0\u5f55\uff08\u81ea\u4fdd\u6301\uff09"
     },
     "delete_record": {
       "namespace": "transaction",
-      "pre_states": ["TX_ACTIVE"],
-      "post_states": ["TX_ACTIVE"],
-      "description": "在活跃事务中删除记录（自保持）"
+      "pre_states": [
+        "TX_ACTIVE"
+      ],
+      "post_states": [
+        "TX_ACTIVE"
+      ],
+      "description": "\u5728\u6d3b\u8dc3\u4e8b\u52a1\u4e2d\u5220\u9664\u8bb0\u5f55\uff08\u81ea\u4fdd\u6301\uff09"
     },
     "savepoint_create": {
       "namespace": "transaction",
-      "pre_states": ["TX_ACTIVE"],
-      "post_states": ["SAVEPOINT_HELD"],
-      "description": "在活跃事务中创建具名保存点"
+      "pre_states": [
+        "TX_ACTIVE"
+      ],
+      "post_states": [
+        "SAVEPOINT_HELD"
+      ],
+      "description": "\u5728\u6d3b\u8dc3\u4e8b\u52a1\u4e2d\u521b\u5efa\u5177\u540d\u4fdd\u5b58\u70b9"
     },
     "savepoint_release": {
       "namespace": "transaction",
-      "pre_states": ["SAVEPOINT_HELD"],
-      "post_states": ["TX_ACTIVE"],
-      "invalidate": ["SAVEPOINT_HELD"],
-      "description": "释放保存点，保留后续变更"
+      "pre_states": [
+        "SAVEPOINT_HELD"
+      ],
+      "post_states": [
+        "TX_ACTIVE"
+      ],
+      "invalidate": [
+        "SAVEPOINT_HELD"
+      ],
+      "description": "\u91ca\u653e\u4fdd\u5b58\u70b9\uff0c\u4fdd\u7559\u540e\u7eed\u53d8\u66f4"
     },
     "rollback_to_savepoint": {
       "namespace": "transaction",
-      "pre_states": ["SAVEPOINT_HELD"],
-      "post_states": ["TX_ACTIVE"],
-      "invalidate": ["SAVEPOINT_HELD"],
-      "description": "回滚到保存点，撤销保存点之后的变更"
+      "pre_states": [
+        "SAVEPOINT_HELD"
+      ],
+      "post_states": [
+        "TX_ACTIVE"
+      ],
+      "invalidate": [
+        "SAVEPOINT_HELD"
+      ],
+      "description": "\u56de\u6eda\u5230\u4fdd\u5b58\u70b9\uff0c\u64a4\u9500\u4fdd\u5b58\u70b9\u4e4b\u540e\u7684\u53d8\u66f4"
     },
     "prep_two_phase": {
       "namespace": "transaction",
-      "pre_states": ["TX_ACTIVE"],
-      "post_states": ["TX_IDLE"],
-      "invalidate": ["TX_ACTIVE"],
-      "description": "准备两阶段提交（表决阶段）"
+      "pre_states": [
+        "TX_ACTIVE"
+      ],
+      "post_states": [
+        "TX_IDLE"
+      ],
+      "invalidate": [
+        "TX_ACTIVE"
+      ],
+      "description": "\u51c6\u5907\u4e24\u9636\u6bb5\u63d0\u4ea4\uff08\u8868\u51b3\u9636\u6bb5\uff09"
     },
-
     "evaluate_access": {
       "namespace": "conditional",
-      "pre_states": ["COND_IDLE"],
-      "post_states": ["COND_EVALUATED"],
-      "description": "根据权限策略评估访问条件"
+      "pre_states": [
+        "COND_IDLE"
+      ],
+      "post_states": [
+        "COND_EVALUATED"
+      ],
+      "description": "\u6839\u636e\u6743\u9650\u7b56\u7565\u8bc4\u4f30\u8bbf\u95ee\u6761\u4ef6"
     },
     "grant_access": {
       "namespace": "conditional",
-      "pre_states": ["COND_EVALUATED"],
-      "post_states": ["COND_ACCEPTED"],
-      "invalidate": ["COND_EVALUATED"],
-      "description": "TRUE 分支：授予访问权限"
+      "pre_states": [
+        "COND_EVALUATED"
+      ],
+      "post_states": [
+        "COND_ACCEPTED"
+      ],
+      "invalidate": [
+        "COND_EVALUATED"
+      ],
+      "description": "TRUE \u5206\u652f\uff1a\u6388\u4e88\u8bbf\u95ee\u6743\u9650"
     },
     "deny_access": {
       "namespace": "conditional",
-      "pre_states": ["COND_EVALUATED"],
-      "post_states": ["COND_REJECTED"],
-      "invalidate": ["COND_EVALUATED"],
-      "description": "FALSE 分支：拒绝访问"
+      "pre_states": [
+        "COND_EVALUATED"
+      ],
+      "post_states": [
+        "COND_REJECTED"
+      ],
+      "invalidate": [
+        "COND_EVALUATED"
+      ],
+      "description": "FALSE \u5206\u652f\uff1a\u62d2\u7edd\u8bbf\u95ee"
     },
     "log_granted": {
       "namespace": "conditional",
-      "pre_states": ["COND_ACCEPTED"],
-      "post_states": ["COND_RESOLVED"],
-      "invalidate": ["COND_ACCEPTED", "COND_RESOLVED"],
-      "description": "记录授权访问并结束条件判断"
+      "pre_states": [
+        "COND_ACCEPTED"
+      ],
+      "post_states": [
+        "COND_RESOLVED"
+      ],
+      "invalidate": [
+        "COND_ACCEPTED",
+        "COND_RESOLVED"
+      ],
+      "description": "\u8bb0\u5f55\u6388\u6743\u8bbf\u95ee\u5e76\u7ed3\u675f\u6761\u4ef6\u5224\u65ad"
     },
     "log_denied": {
       "namespace": "conditional",
-      "pre_states": ["COND_REJECTED"],
-      "post_states": ["COND_RESOLVED"],
-      "invalidate": ["COND_REJECTED", "COND_RESOLVED"],
-      "description": "记录拒绝访问并结束条件判断"
+      "pre_states": [
+        "COND_REJECTED"
+      ],
+      "post_states": [
+        "COND_RESOLVED"
+      ],
+      "invalidate": [
+        "COND_REJECTED",
+        "COND_RESOLVED"
+      ],
+      "description": "\u8bb0\u5f55\u62d2\u7edd\u8bbf\u95ee\u5e76\u7ed3\u675f\u6761\u4ef6\u5224\u65ad"
     },
     "bypass_condition": {
       "namespace": "conditional",
-      "pre_states": ["COND_EVALUATED"],
-      "post_states": ["COND_RESOLVED"],
-      "invalidate": ["COND_EVALUATED", "COND_RESOLVED"],
-      "description": "短路：直接绕过条件检查"
+      "pre_states": [
+        "COND_EVALUATED"
+      ],
+      "post_states": [
+        "COND_RESOLVED"
+      ],
+      "invalidate": [
+        "COND_EVALUATED",
+        "COND_RESOLVED"
+      ],
+      "description": "\u77ed\u8def\uff1a\u76f4\u63a5\u7ed5\u8fc7\u6761\u4ef6\u68c0\u67e5"
     },
     "retry_evaluation": {
       "namespace": "conditional",
-      "pre_states": ["COND_EVALUATED"],
-      "post_states": ["COND_IDLE"],
-      "invalidate": ["COND_EVALUATED"],
-      "description": "重试：回到空闲状态重新评估"
+      "pre_states": [
+        "COND_EVALUATED"
+      ],
+      "post_states": [
+        "COND_IDLE"
+      ],
+      "invalidate": [
+        "COND_EVALUATED"
+      ],
+      "description": "\u91cd\u8bd5\uff1a\u56de\u5230\u7a7a\u95f2\u72b6\u6001\u91cd\u65b0\u8bc4\u4f30"
     },
     "escalate_access": {
       "namespace": "conditional",
-      "pre_states": ["COND_REJECTED"],
-      "post_states": ["COND_ACCEPTED"],
-      "invalidate": ["COND_REJECTED"],
-      "description": "升级：将被拒绝的访问升级为通过"
+      "pre_states": [
+        "COND_REJECTED"
+      ],
+      "post_states": [
+        "COND_ACCEPTED"
+      ],
+      "invalidate": [
+        "COND_REJECTED"
+      ],
+      "description": "\u5347\u7ea7\uff1a\u5c06\u88ab\u62d2\u7edd\u7684\u8bbf\u95ee\u5347\u7ea7\u4e3a\u901a\u8fc7"
     },
     "audit_condition": {
       "namespace": "conditional",
-      "pre_states": ["COND_ACCEPTED", "COND_REJECTED"],
-      "post_states": ["COND_RESOLVED"],
-      "invalidate": ["COND_ACCEPTED", "COND_REJECTED", "COND_RESOLVED"],
-      "description": "审计：无论分支结果如何，记录条件判断结果"
+      "pre_states": [
+        "COND_ACCEPTED",
+        "COND_REJECTED"
+      ],
+      "post_states": [
+        "COND_RESOLVED"
+      ],
+      "invalidate": [
+        "COND_ACCEPTED",
+        "COND_REJECTED",
+        "COND_RESOLVED"
+      ],
+      "description": "\u5ba1\u8ba1\uff1a\u65e0\u8bba\u5206\u652f\u7ed3\u679c\u5982\u4f55\uff0c\u8bb0\u5f55\u6761\u4ef6\u5224\u65ad\u7ed3\u679c"
     },
-
     "init_fetch_loop": {
       "namespace": "loop",
-      "pre_states": ["LOOP_IDLE"],
-      "post_states": ["FETCHING"],
-      "description": "初始化获取循环，开始获取数据"
+      "pre_states": [
+        "LOOP_IDLE"
+      ],
+      "post_states": [
+        "FETCHING"
+      ],
+      "description": "\u521d\u59cb\u5316\u83b7\u53d6\u5faa\u73af\uff0c\u5f00\u59cb\u83b7\u53d6\u6570\u636e"
     },
     "fetch_batch": {
       "namespace": "loop",
-      "pre_states": ["FETCHING"],
-      "post_states": ["BATCH_READY"],
-      "invalidate": ["FETCHING"],
-      "description": "获取下一批数据"
+      "pre_states": [
+        "FETCHING"
+      ],
+      "post_states": [
+        "BATCH_READY"
+      ],
+      "invalidate": [
+        "FETCHING"
+      ],
+      "description": "\u83b7\u53d6\u4e0b\u4e00\u6279\u6570\u636e"
     },
     "has_more_data": {
       "namespace": "loop",
-      "pre_states": ["BATCH_READY"],
-      "post_states": ["ITERATING"],
-      "invalidate": ["BATCH_READY"],
-      "description": "检查还有更多数据 → 进入迭代体"
+      "pre_states": [
+        "BATCH_READY"
+      ],
+      "post_states": [
+        "ITERATING"
+      ],
+      "invalidate": [
+        "BATCH_READY"
+      ],
+      "description": "\u68c0\u67e5\u8fd8\u6709\u66f4\u591a\u6570\u636e \u2192 \u8fdb\u5165\u8fed\u4ee3\u4f53"
     },
     "process_item": {
       "namespace": "loop",
-      "pre_states": ["ITERATING"],
-      "post_states": ["ITERATING"],
-      "description": "处理单个数据项（在迭代体内自循环）"
+      "pre_states": [
+        "ITERATING"
+      ],
+      "post_states": [
+        "ITERATING"
+      ],
+      "description": "\u5904\u7406\u5355\u4e2a\u6570\u636e\u9879\uff08\u5728\u8fed\u4ee3\u4f53\u5185\u81ea\u5faa\u73af\uff09"
     },
     "next_iteration": {
       "namespace": "loop",
-      "pre_states": ["ITERATING"],
-      "post_states": ["FETCHING"],
-      "invalidate": ["ITERATING"],
-      "description": "结束当前迭代 → 返回获取下一批"
+      "pre_states": [
+        "ITERATING"
+      ],
+      "post_states": [
+        "FETCHING"
+      ],
+      "invalidate": [
+        "ITERATING"
+      ],
+      "description": "\u7ed3\u675f\u5f53\u524d\u8fed\u4ee3 \u2192 \u8fd4\u56de\u83b7\u53d6\u4e0b\u4e00\u6279"
     },
     "exit_loop": {
       "namespace": "loop",
-      "pre_states": ["ITERATING"],
-      "post_states": ["LOOP_DONE"],
-      "invalidate": ["ITERATING", "LOOP_DONE"],
-      "description": "正常退出循环（所有数据已处理完毕）"
+      "pre_states": [
+        "ITERATING"
+      ],
+      "post_states": [
+        "LOOP_DONE"
+      ],
+      "invalidate": [
+        "ITERATING",
+        "LOOP_DONE"
+      ],
+      "description": "\u6b63\u5e38\u9000\u51fa\u5faa\u73af\uff08\u6240\u6709\u6570\u636e\u5df2\u5904\u7406\u5b8c\u6bd5\uff09"
     },
     "retry_batch": {
       "namespace": "loop",
-      "pre_states": ["BATCH_READY", "ITERATING"],
-      "post_states": ["FETCHING"],
-      "description": "获取失败 → 重试当前批次"
+      "pre_states": [
+        "BATCH_READY",
+        "ITERATING"
+      ],
+      "post_states": [
+        "FETCHING"
+      ],
+      "description": "\u83b7\u53d6\u5931\u8d25 \u2192 \u91cd\u8bd5\u5f53\u524d\u6279\u6b21"
     },
     "timeout_exit": {
       "namespace": "loop",
-      "pre_states": ["FETCHING", "ITERATING"],
-      "post_states": ["LOOP_DONE"],
-      "invalidate": ["FETCHING", "ITERATING", "LOOP_DONE"],
-      "description": "超时紧急退出循环"
+      "pre_states": [
+        "FETCHING",
+        "ITERATING"
+      ],
+      "post_states": [
+        "LOOP_DONE"
+      ],
+      "invalidate": [
+        "FETCHING",
+        "ITERATING",
+        "LOOP_DONE"
+      ],
+      "description": "\u8d85\u65f6\u7d27\u6025\u9000\u51fa\u5faa\u73af"
     },
     "poll_status": {
       "namespace": "loop",
-      "pre_states": ["ITERATING"],
-      "post_states": ["ITERATING"],
-      "description": "轮询状态更新（在迭代体内自循环）"
+      "pre_states": [
+        "ITERATING"
+      ],
+      "post_states": [
+        "ITERATING"
+      ],
+      "description": "\u8f6e\u8be2\u72b6\u6001\u66f4\u65b0\uff08\u5728\u8fed\u4ee3\u4f53\u5185\u81ea\u5faa\u73af\uff09"
     },
-
     "auth_file_open": {
       "namespace": "cross",
-      "pre_states": ["UNAUTHENTICATED"],
-      "post_states": ["AUTH_FILE_GATE"],
-      "description": "跨协议桥：认证 → 打开文件访问门"
+      "pre_states": [
+        "UNAUTHENTICATED"
+      ],
+      "post_states": [
+        "AUTH_FILE_GATE"
+      ],
+      "description": "\u8de8\u534f\u8bae\u6865\uff1a\u8ba4\u8bc1 \u2192 \u6253\u5f00\u6587\u4ef6\u8bbf\u95ee\u95e8"
     },
     "auth_file_read": {
       "namespace": "cross",
-      "pre_states": ["AUTH_FILE_GATE"],
-      "post_states": ["AUTH_FILE_GATE"],
-      "description": "跨协议：通过认证门读取文件"
+      "pre_states": [
+        "AUTH_FILE_GATE"
+      ],
+      "post_states": [
+        "AUTH_FILE_GATE"
+      ],
+      "description": "\u8de8\u534f\u8bae\uff1a\u901a\u8fc7\u8ba4\u8bc1\u95e8\u8bfb\u53d6\u6587\u4ef6"
     },
     "auth_file_close": {
       "namespace": "cross",
-      "pre_states": ["AUTH_FILE_GATE"],
-      "post_states": ["UNAUTHENTICATED"],
-      "invalidate": ["AUTH_FILE_GATE"],
-      "description": "跨协议：关闭经认证门的文件会话"
+      "pre_states": [
+        "AUTH_FILE_GATE"
+      ],
+      "post_states": [
+        "UNAUTHENTICATED"
+      ],
+      "invalidate": [
+        "AUTH_FILE_GATE"
+      ],
+      "description": "\u8de8\u534f\u8bae\uff1a\u5173\u95ed\u7ecf\u8ba4\u8bc1\u95e8\u7684\u6587\u4ef6\u4f1a\u8bdd"
     },
     "auth_db_connect": {
       "namespace": "cross",
-      "pre_states": ["UNAUTHENTICATED"],
-      "post_states": ["AUTH_DB_GATE"],
-      "description": "跨协议桥：认证 → 打开数据库连接"
+      "pre_states": [
+        "UNAUTHENTICATED"
+      ],
+      "post_states": [
+        "AUTH_DB_GATE"
+      ],
+      "description": "\u8de8\u534f\u8bae\u6865\uff1a\u8ba4\u8bc1 \u2192 \u6253\u5f00\u6570\u636e\u5e93\u8fde\u63a5"
     },
     "auth_db_query": {
       "namespace": "cross",
-      "pre_states": ["AUTH_DB_GATE"],
-      "post_states": ["AUTH_DB_GATE"],
-      "description": "跨协议：通过认证门查询数据库"
+      "pre_states": [
+        "AUTH_DB_GATE"
+      ],
+      "post_states": [
+        "AUTH_DB_GATE"
+      ],
+      "description": "\u8de8\u534f\u8bae\uff1a\u901a\u8fc7\u8ba4\u8bc1\u95e8\u67e5\u8be2\u6570\u636e\u5e93"
     },
     "auth_db_disconnect": {
       "namespace": "cross",
-      "pre_states": ["AUTH_DB_GATE"],
-      "post_states": ["UNAUTHENTICATED"],
-      "invalidate": ["AUTH_DB_GATE"],
-      "description": "跨协议：关闭经认证门的数据库连接"
+      "pre_states": [
+        "AUTH_DB_GATE"
+      ],
+      "post_states": [
+        "UNAUTHENTICATED"
+      ],
+      "invalidate": [
+        "AUTH_DB_GATE"
+      ],
+      "description": "\u8de8\u534f\u8bae\uff1a\u5173\u95ed\u7ecf\u8ba4\u8bc1\u95e8\u7684\u6570\u636e\u5e93\u8fde\u63a5"
+    },
+    "http_create_server": {
+      "namespace": "tls",
+      "pre_states": [
+        "TLS_CONFIGURED"
+      ],
+      "post_states": [
+        "SERVER_STARTED"
+      ],
+      "description": "HTTP server must use HTTPS with TLS configured"
+    },
+    "load_tls_config": {
+      "namespace": "tls",
+      "pre_states": [],
+      "post_states": [
+        "TLS_CONFIGURED"
+      ],
+      "description": "Load TLS certificate and key before starting server"
+    },
+    "hash_password": {
+      "namespace": "auth",
+      "pre_states": [
+        "PASSWORD_RECEIVED"
+      ],
+      "post_states": [
+        "PASSWORD_HASHED"
+      ],
+      "description": "Hash password with bcrypt/argon2 before storage"
+    },
+    "verify_hash": {
+      "namespace": "auth",
+      "pre_states": [
+        "PASSWORD_HASHED"
+      ],
+      "post_states": [
+        "PASSWORD_VERIFIED"
+      ],
+      "invalidate": [
+        "PASSWORD_HASHED"
+      ],
+      "description": "Verify password against stored hash"
+    },
+    "verify_token": {
+      "namespace": "auth",
+      "pre_states": [
+        "TOKEN_ISSUED"
+      ],
+      "post_states": [
+        "AUTHENTICATED"
+      ],
+      "description": "Verify auth token before protected operations"
+    },
+    "check_owner": {
+      "namespace": "auth",
+      "pre_states": [
+        "AUTHENTICATED"
+      ],
+      "post_states": [
+        "AUTHORIZED"
+      ],
+      "description": "Check resource ownership before mutating operations"
+    },
+    "check_exists": {
+      "namespace": "data_integrity",
+      "pre_states": [],
+      "post_states": [
+        "REFERENCE_VALID"
+      ],
+      "description": "Verify referenced resource exists before creating a reference to it"
+    },
+    "create_reference": {
+      "namespace": "data_integrity",
+      "pre_states": [
+        "REFERENCE_VALID"
+      ],
+      "post_states": [
+        "REFERENCE_CREATED"
+      ],
+      "description": "Create reference to existing resource"
+    },
+    "sanitize": {
+      "namespace": "resource",
+      "pre_states": [],
+      "post_states": [
+        "CONTENT_SANITIZED"
+      ],
+      "description": "Sanitize input before processing"
+    },
+    "validate_type": {
+      "namespace": "resource",
+      "pre_states": [
+        "CONTENT_SANITIZED"
+      ],
+      "post_states": [
+        "TYPE_VALIDATED"
+      ],
+      "description": "Validate input type matches expected schema"
+    },
+    "validate_range": {
+      "namespace": "resource",
+      "pre_states": [
+        "TYPE_VALIDATED"
+      ],
+      "post_states": [
+        "CONTENT_VALID"
+      ],
+      "description": "Validate input within acceptable range/limits"
     }
   }
 }

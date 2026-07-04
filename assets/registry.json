@@ -1,17 +1,31 @@
 {
   "$schema": "https://progmune.dev/schemas/asset-registry.json",
-  "$description": "Verification Asset Registry — the single source of truth for all production-validated verification assets. Add new assets here. No code changes needed.",
-  "version": "1.0.0",
-  "updated": "2026-07-03",
+  "$description": "Verification Asset Registry \u2014 the single source of truth for all production-validated verification assets. Add new assets here. No code changes needed.",
+  "version": "1.1.0",
+  "updated": "2026-07-04",
   "assets": [
     {
       "name": "TLS Handshake",
       "domain": "TLS",
       "tier": "Production Ready",
-      "score": { "evidence": 3, "generalization": 5, "stability": 5, "deployment": 5 },
-      "repos": ["curl", "nginx", "openssl"],
-      "languages": ["C"],
-      "rfcRefs": ["8446", "8447"],
+      "score": {
+        "evidence": 3,
+        "generalization": 5,
+        "stability": 5,
+        "deployment": 5
+      },
+      "repos": [
+        "curl",
+        "nginx",
+        "openssl"
+      ],
+      "languages": [
+        "C"
+      ],
+      "rfcRefs": [
+        "8446",
+        "8447"
+      ],
       "deployments": 3,
       "companies": 1,
       "falseEscalations": 0,
@@ -20,16 +34,34 @@
       "firstObserved": "2025-12",
       "promotedToProduction": "2026-03",
       "recommendation": "RFC 8446. 3 repos. 180 days. 0 false escalations.",
-      "economics": { "maintenanceCostHours": 2, "roi": "Very High", "growth": "Growing", "evidenceGrowthRate": 25 }
+      "economics": {
+        "maintenanceCostHours": 2,
+        "roi": "Very High",
+        "growth": "Growing",
+        "evidenceGrowthRate": 25
+      }
     },
     {
-      "name": "Password Verify → JWT → Session",
+      "name": "Password Verify \u2192 JWT \u2192 Session",
       "domain": "Auth",
       "tier": "Production Ready",
-      "score": { "evidence": 2, "generalization": 4, "stability": 4, "deployment": 4 },
-      "repos": ["curl", "libssh"],
-      "languages": ["C"],
-      "rfcRefs": ["6749", "7519"],
+      "score": {
+        "evidence": 2,
+        "generalization": 4,
+        "stability": 4,
+        "deployment": 4
+      },
+      "repos": [
+        "curl",
+        "libssh"
+      ],
+      "languages": [
+        "C"
+      ],
+      "rfcRefs": [
+        "6749",
+        "7519"
+      ],
       "deployments": 2,
       "companies": 1,
       "falseEscalations": 0,
@@ -38,15 +70,30 @@
       "firstObserved": "2026-01",
       "promotedToProduction": "2026-04",
       "recommendation": "RFC 6749/7519. 2 repos. 90 days stable. 0 false escalations.",
-      "economics": { "maintenanceCostHours": 3, "roi": "High", "growth": "Growing", "evidenceGrowthRate": 15 }
+      "economics": {
+        "maintenanceCostHours": 3,
+        "roi": "High",
+        "growth": "Growing",
+        "evidenceGrowthRate": 15
+      }
     },
     {
       "name": "File Lifecycle",
       "domain": "File",
       "tier": "Pilot Ready",
-      "score": { "evidence": 2, "generalization": 2, "stability": 3, "deployment": 3 },
-      "repos": ["curl", "nginx"],
-      "languages": ["C"],
+      "score": {
+        "evidence": 2,
+        "generalization": 2,
+        "stability": 3,
+        "deployment": 3
+      },
+      "repos": [
+        "curl",
+        "nginx"
+      ],
+      "languages": [
+        "C"
+      ],
       "rfcRefs": [],
       "deployments": 0,
       "companies": 0,
@@ -55,16 +102,33 @@
       "lastValidated": "2026-06",
       "firstObserved": "2026-02",
       "recommendation": "Needs 1 more repo or RFC reference to reach Production.",
-      "economics": { "maintenanceCostHours": 3, "roi": "Medium", "growth": "Stable", "evidenceGrowthRate": 10 }
+      "economics": {
+        "maintenanceCostHours": 3,
+        "roi": "Medium",
+        "growth": "Stable",
+        "evidenceGrowthRate": 10
+      }
     },
     {
       "name": "SSH Key Exchange",
       "domain": "SSH",
       "tier": "Pilot Ready",
-      "score": { "evidence": 2, "generalization": 3, "stability": 3, "deployment": 3 },
-      "repos": ["curl", "libssh"],
-      "languages": ["C"],
-      "rfcRefs": ["4253"],
+      "score": {
+        "evidence": 2,
+        "generalization": 3,
+        "stability": 3,
+        "deployment": 3
+      },
+      "repos": [
+        "curl",
+        "libssh"
+      ],
+      "languages": [
+        "C"
+      ],
+      "rfcRefs": [
+        "4253"
+      ],
       "deployments": 0,
       "companies": 0,
       "falseEscalations": 0,
@@ -72,33 +136,68 @@
       "lastValidated": "2026-06",
       "firstObserved": "2026-02",
       "recommendation": "RFC 4253. Needs deployment validation to reach Production.",
-      "economics": { "maintenanceCostHours": 3, "roi": "High", "growth": "Growing", "evidenceGrowthRate": 15 }
+      "economics": {
+        "maintenanceCostHours": 3,
+        "roi": "High",
+        "growth": "Growing",
+        "evidenceGrowthRate": 15
+      }
     },
     {
       "name": "HTTP Request Lifecycle",
       "domain": "HTTP",
       "tier": "Pilot Ready",
-      "score": { "evidence": 2, "generalization": 3, "stability": 2, "deployment": 2 },
-      "repos": ["nginx", "nghttp2"],
-      "languages": ["C"],
-      "rfcRefs": ["9110"],
+      "score": {
+        "evidence": 2,
+        "generalization": 3,
+        "stability": 2,
+        "deployment": 2
+      },
+      "repos": [
+        "nginx",
+        "nghttp2"
+      ],
+      "languages": [
+        "C"
+      ],
+      "rfcRefs": [
+        "9110"
+      ],
       "deployments": 0,
       "companies": 0,
       "falseEscalations": 0,
       "productionDays": 0,
       "lastValidated": "2026-06",
       "firstObserved": "2026-03",
-      "recommendation": "RFC 9110. FP rate 50% — needs VI suppression before Production.",
-      "economics": { "maintenanceCostHours": 4, "roi": "Medium", "growth": "Stable", "evidenceGrowthRate": 10 }
+      "recommendation": "RFC 9110. FP rate 50% \u2014 needs VI suppression before Production.",
+      "economics": {
+        "maintenanceCostHours": 4,
+        "roi": "Medium",
+        "growth": "Stable",
+        "evidenceGrowthRate": 10
+      }
     },
     {
       "name": "TLS Certificate Validation",
       "domain": "TLS",
       "tier": "Pilot Ready",
-      "score": { "evidence": 2, "generalization": 3, "stability": 3, "deployment": 2 },
-      "repos": ["curl", "openssl"],
-      "languages": ["C"],
-      "rfcRefs": ["5280", "6818"],
+      "score": {
+        "evidence": 2,
+        "generalization": 3,
+        "stability": 3,
+        "deployment": 2
+      },
+      "repos": [
+        "curl",
+        "openssl"
+      ],
+      "languages": [
+        "C"
+      ],
+      "rfcRefs": [
+        "5280",
+        "6818"
+      ],
       "deployments": 0,
       "companies": 0,
       "falseEscalations": 0,
@@ -106,16 +205,33 @@
       "lastValidated": "2026-06",
       "firstObserved": "2026-05",
       "recommendation": "RFC 5280. 2 repos. Needs deployment validation.",
-      "economics": { "maintenanceCostHours": 2, "roi": "High", "growth": "Growing", "evidenceGrowthRate": 20 }
+      "economics": {
+        "maintenanceCostHours": 2,
+        "roi": "High",
+        "growth": "Growing",
+        "evidenceGrowthRate": 20
+      }
     },
     {
       "name": "OAuth 2.0 Authorization Code Flow",
       "domain": "Auth",
       "tier": "Pilot Ready",
-      "score": { "evidence": 2, "generalization": 3, "stability": 3, "deployment": 2 },
-      "repos": ["curl", "nghttp2"],
-      "languages": ["C"],
-      "rfcRefs": ["6749"],
+      "score": {
+        "evidence": 2,
+        "generalization": 3,
+        "stability": 3,
+        "deployment": 2
+      },
+      "repos": [
+        "curl",
+        "nghttp2"
+      ],
+      "languages": [
+        "C"
+      ],
+      "rfcRefs": [
+        "6749"
+      ],
       "deployments": 0,
       "companies": 0,
       "falseEscalations": 0,
@@ -123,126 +239,402 @@
       "lastValidated": "2026-07",
       "firstObserved": "2026-06",
       "recommendation": "RFC 6749. Needs 1 more repo for Production readiness.",
-      "economics": { "maintenanceCostHours": 3, "roi": "High", "growth": "Growing", "evidenceGrowthRate": 15 }
+      "economics": {
+        "maintenanceCostHours": 3,
+        "roi": "High",
+        "growth": "Growing",
+        "evidenceGrowthRate": 15
+      }
     },
     {
       "name": "HTTP/2 Session Lifecycle",
       "domain": "HTTP",
       "tier": "Pilot Ready",
-      "score": { "evidence": 1, "generalization": 3, "stability": 2, "deployment": 1 },
-      "repos": ["nghttp2"],
-      "languages": ["C"],
-      "rfcRefs": ["9113"],
+      "score": {
+        "evidence": 1,
+        "generalization": 3,
+        "stability": 2,
+        "deployment": 1
+      },
+      "repos": [
+        "nghttp2"
+      ],
+      "languages": [
+        "C"
+      ],
+      "rfcRefs": [
+        "9113"
+      ],
       "deployments": 0,
       "companies": 0,
       "falseEscalations": 0,
       "productionDays": 0,
       "lastValidated": "2026-06",
       "firstObserved": "2026-04",
-      "recommendation": "RFC 9113. 1 repo — needs cross-repo validation.",
-      "economics": { "maintenanceCostHours": 3, "roi": "Medium", "growth": "Stable", "evidenceGrowthRate": 10 }
+      "recommendation": "RFC 9113. 1 repo \u2014 needs cross-repo validation.",
+      "economics": {
+        "maintenanceCostHours": 3,
+        "roi": "Medium",
+        "growth": "Stable",
+        "evidenceGrowthRate": 10
+      }
     },
     {
       "name": "Memory Alloc/Free",
       "domain": "Memory",
       "tier": "Research",
-      "score": { "evidence": 1, "generalization": 1, "stability": 1, "deployment": 1 },
-      "repos": ["curl"],
-      "languages": ["C"],
+      "score": {
+        "evidence": 1,
+        "generalization": 1,
+        "stability": 1,
+        "deployment": 1
+      },
+      "repos": [
+        "curl"
+      ],
+      "languages": [
+        "C"
+      ],
       "rfcRefs": [],
       "deployments": 0,
       "companies": 0,
       "falseEscalations": 0,
       "productionDays": 0,
-      "lastValidated": "—",
+      "lastValidated": "\u2014",
       "firstObserved": "2026-04",
       "recommendation": "Need 1 more repo to reach Pilot.",
-      "economics": { "maintenanceCostHours": 2, "roi": "Low", "growth": "Stable", "evidenceGrowthRate": 5 }
+      "economics": {
+        "maintenanceCostHours": 2,
+        "roi": "Low",
+        "growth": "Stable",
+        "evidenceGrowthRate": 5
+      }
     },
     {
       "name": "Connection Lifecycle",
       "domain": "Connection",
       "tier": "Research",
-      "score": { "evidence": 1, "generalization": 1, "stability": 1, "deployment": 1 },
-      "repos": ["redis"],
-      "languages": ["C"],
+      "score": {
+        "evidence": 1,
+        "generalization": 1,
+        "stability": 1,
+        "deployment": 1
+      },
+      "repos": [
+        "redis"
+      ],
+      "languages": [
+        "C"
+      ],
       "rfcRefs": [],
       "deployments": 0,
       "companies": 0,
       "falseEscalations": 0,
       "productionDays": 0,
-      "lastValidated": "—",
+      "lastValidated": "\u2014",
       "firstObserved": "2026-05",
       "recommendation": "Pattern detected. Needs cross-repo validation.",
-      "economics": { "maintenanceCostHours": 2, "roi": "Medium", "growth": "Stable", "evidenceGrowthRate": 5 }
+      "economics": {
+        "maintenanceCostHours": 2,
+        "roi": "Medium",
+        "growth": "Stable",
+        "evidenceGrowthRate": 5
+      }
     },
     {
       "name": "DB Transaction",
       "domain": "Database",
       "tier": "Research",
-      "score": { "evidence": 1, "generalization": 1, "stability": 1, "deployment": 1 },
-      "repos": ["progmune-self"],
-      "languages": ["TypeScript"],
+      "score": {
+        "evidence": 1,
+        "generalization": 1,
+        "stability": 1,
+        "deployment": 1
+      },
+      "repos": [
+        "progmune-self"
+      ],
+      "languages": [
+        "TypeScript"
+      ],
       "rfcRefs": [],
       "deployments": 0,
       "companies": 0,
       "falseEscalations": 0,
       "productionDays": 0,
-      "lastValidated": "—",
+      "lastValidated": "\u2014",
       "firstObserved": "2026-06",
       "recommendation": "Early observation. Not ready for deployment.",
-      "economics": { "maintenanceCostHours": 2, "roi": "Low", "growth": "Stable", "evidenceGrowthRate": 5 }
+      "economics": {
+        "maintenanceCostHours": 2,
+        "roi": "Low",
+        "growth": "Stable",
+        "evidenceGrowthRate": 5
+      }
     },
     {
       "name": "DNS Resolution",
       "domain": "Network",
       "tier": "Research",
-      "score": { "evidence": 1, "generalization": 2, "stability": 1, "deployment": 1 },
-      "repos": ["curl"],
-      "languages": ["C"],
-      "rfcRefs": ["1035"],
+      "score": {
+        "evidence": 1,
+        "generalization": 2,
+        "stability": 1,
+        "deployment": 1
+      },
+      "repos": [
+        "curl"
+      ],
+      "languages": [
+        "C"
+      ],
+      "rfcRefs": [
+        "1035"
+      ],
       "deployments": 0,
       "companies": 0,
       "falseEscalations": 0,
       "productionDays": 0,
-      "lastValidated": "—",
+      "lastValidated": "\u2014",
       "firstObserved": "2026-06",
       "recommendation": "RFC 1035. Pattern detected in curl. Needs cross-repo evidence.",
-      "economics": { "maintenanceCostHours": 2, "roi": "Medium", "growth": "Stable", "evidenceGrowthRate": 5 }
+      "economics": {
+        "maintenanceCostHours": 2,
+        "roi": "Medium",
+        "growth": "Stable",
+        "evidenceGrowthRate": 5
+      }
+    },
+    {
+      "name": "TLS Enforcement",
+      "domain": "TLS",
+      "tier": "Pilot Ready",
+      "score": {
+        "evidence": 2,
+        "generalization": 3,
+        "stability": 3,
+        "deployment": 2
+      },
+      "repos": [
+        "blog",
+        "chat"
+      ],
+      "languages": [
+        "TypeScript"
+      ],
+      "rfcRefs": [
+        "8446"
+      ],
+      "deployments": 0,
+      "companies": 0,
+      "falseEscalations": 0,
+      "productionDays": 0,
+      "lastValidated": "2026-07",
+      "firstObserved": "2026-07",
+      "recommendation": "Detects http.createServer vs https.createServer. Flags plain HTTP in production code.",
+      "economics": {
+        "maintenanceCostHours": 1,
+        "roi": "Very High",
+        "growth": "Growing",
+        "evidenceGrowthRate": 30
+      }
+    },
+    {
+      "name": "Password Hashing",
+      "domain": "Auth",
+      "tier": "Pilot Ready",
+      "score": {
+        "evidence": 2,
+        "generalization": 4,
+        "stability": 3,
+        "deployment": 2
+      },
+      "repos": [
+        "blog",
+        "chat",
+        "ecommerce",
+        "forum",
+        "todo"
+      ],
+      "languages": [
+        "TypeScript"
+      ],
+      "rfcRefs": [],
+      "deployments": 0,
+      "companies": 0,
+      "falseEscalations": 0,
+      "productionDays": 0,
+      "lastValidated": "2026-07",
+      "firstObserved": "2026-07",
+      "recommendation": "Detects SHA256/MD5/plaintext password storage. Recommends bcrypt/argon2. 5 repos validated.",
+      "economics": {
+        "maintenanceCostHours": 1,
+        "roi": "Very High",
+        "growth": "Growing",
+        "evidenceGrowthRate": 40
+      }
+    },
+    {
+      "name": "Authorization / Ownership Check",
+      "domain": "Auth",
+      "tier": "Pilot Ready",
+      "score": {
+        "evidence": 2,
+        "generalization": 3,
+        "stability": 2,
+        "deployment": 2
+      },
+      "repos": [
+        "chat",
+        "ecommerce",
+        "forum",
+        "todo"
+      ],
+      "languages": [
+        "TypeScript"
+      ],
+      "rfcRefs": [],
+      "deployments": 0,
+      "companies": 0,
+      "falseEscalations": 0,
+      "productionDays": 0,
+      "lastValidated": "2026-07",
+      "firstObserved": "2026-07",
+      "recommendation": "Detects missing ownership checks on mutating operations. verify_token \u2192 check_owner \u2192 allow.",
+      "economics": {
+        "maintenanceCostHours": 2,
+        "roi": "High",
+        "growth": "Growing",
+        "evidenceGrowthRate": 20
+      }
+    },
+    {
+      "name": "Data Integrity (Foreign Key)",
+      "domain": "DataIntegrity",
+      "tier": "Pilot Ready",
+      "score": {
+        "evidence": 2,
+        "generalization": 2,
+        "stability": 2,
+        "deployment": 2
+      },
+      "repos": [
+        "blog",
+        "ecommerce",
+        "forum"
+      ],
+      "languages": [
+        "TypeScript"
+      ],
+      "rfcRefs": [],
+      "deployments": 0,
+      "companies": 0,
+      "falseEscalations": 0,
+      "productionDays": 0,
+      "lastValidated": "2026-07",
+      "firstObserved": "2026-07",
+      "recommendation": "Detects missing foreign key checks. check_exists \u2192 create_reference. 3 repos.",
+      "economics": {
+        "maintenanceCostHours": 2,
+        "roi": "High",
+        "growth": "Growing",
+        "evidenceGrowthRate": 15
+      }
+    },
+    {
+      "name": "Input Validation",
+      "domain": "Resource",
+      "tier": "Pilot Ready",
+      "score": {
+        "evidence": 2,
+        "generalization": 2,
+        "stability": 2,
+        "deployment": 2
+      },
+      "repos": [
+        "blog",
+        "chat",
+        "forum"
+      ],
+      "languages": [
+        "TypeScript"
+      ],
+      "rfcRefs": [],
+      "deployments": 0,
+      "companies": 0,
+      "falseEscalations": 0,
+      "productionDays": 0,
+      "lastValidated": "2026-07",
+      "firstObserved": "2026-07",
+      "recommendation": "Detects missing content validation. sanitize \u2192 validate_type \u2192 validate_range.",
+      "economics": {
+        "maintenanceCostHours": 2,
+        "roi": "Medium-High",
+        "growth": "Growing",
+        "evidenceGrowthRate": 15
+      }
     },
     {
       "name": "Curl_conn_meta_get",
       "domain": "HTTP",
       "tier": "Deprecated",
-      "score": { "evidence": 1, "generalization": 1, "stability": 1, "deployment": 1 },
-      "repos": ["curl"],
-      "languages": ["C"],
+      "score": {
+        "evidence": 1,
+        "generalization": 1,
+        "stability": 1,
+        "deployment": 1
+      },
+      "repos": [
+        "curl"
+      ],
+      "languages": [
+        "C"
+      ],
       "rfcRefs": [],
       "deployments": 0,
       "companies": 0,
       "falseEscalations": 7,
       "productionDays": 0,
-      "lastValidated": "—",
+      "lastValidated": "\u2014",
       "firstObserved": "2026-02",
       "recommendation": "7 FPs. VI suppressed. Keep archived.",
-      "economics": { "maintenanceCostHours": 0, "roi": "Low", "growth": "Declining", "evidenceGrowthRate": 0 }
+      "economics": {
+        "maintenanceCostHours": 0,
+        "roi": "Low",
+        "growth": "Declining",
+        "evidenceGrowthRate": 0
+      }
     },
     {
       "name": "memset (utility)",
       "domain": "Memory",
       "tier": "Deprecated",
-      "score": { "evidence": 1, "generalization": 1, "stability": 1, "deployment": 1 },
-      "repos": ["curl"],
-      "languages": ["C"],
+      "score": {
+        "evidence": 1,
+        "generalization": 1,
+        "stability": 1,
+        "deployment": 1
+      },
+      "repos": [
+        "curl"
+      ],
+      "languages": [
+        "C"
+      ],
       "rfcRefs": [],
       "deployments": 0,
       "companies": 0,
       "falseEscalations": 5,
       "productionDays": 0,
-      "lastValidated": "—",
+      "lastValidated": "\u2014",
       "firstObserved": "2026-02",
-      "recommendation": "5 FPs. Generic utility — not a protocol rule.",
-      "economics": { "maintenanceCostHours": 0, "roi": "Low", "growth": "Declining", "evidenceGrowthRate": 0 }
+      "recommendation": "5 FPs. Generic utility \u2014 not a protocol rule.",
+      "economics": {
+        "maintenanceCostHours": 0,
+        "roi": "Low",
+        "growth": "Declining",
+        "evidenceGrowthRate": 0
+      }
     }
   ]
 }
