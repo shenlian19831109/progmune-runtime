@@ -1,0 +1,145 @@
+{
+  "$description": "Q3 Asset Graduation Plan — move Pilot Assets to Production. Not more Pilot. Better Production.",
+  "generated": "2026-07-04",
+
+  "q3_kpis": {
+    "production_assets": { "current": 2, "target": 5, "note": "Graduate 3 Pilot to Production" },
+    "pilot_assets": { "current": 11, "target": 8, "note": "Graduate 3, add 0 new" },
+    "cross_repo_validated": { "current": 3, "target": 10, "note": "Every Pilot needs 2+ repos" },
+    "deployment_validated": { "current": 2, "target": 5, "note": "Real deployment evidence" },
+    "measured_blind_recall": { "current": 7.7, "target": 50, "note": "MEASURED, not projected" },
+    "projected_blind_recall": { "current": 92, "target": 95, "note": "Updated as Assets graduate" }
+  },
+
+  "recall_separation": {
+    "description": "Measured recall ≠ Projected recall. Measured = actually run benchmark. Projected = Asset coverage estimate.",
+    "measured": {
+      "value": 7.7,
+      "method": "Run blind-benchmark/run.sh with current detector against all 5 generated projects",
+      "frequency": "Weekly",
+      "note": "This is the number enterprises care about. It is what Progmune actually detects TODAY."
+    },
+    "projected": {
+      "value": 92,
+      "method": "Count gold FNs that map to existing Assets",
+      "frequency": "Per Asset addition",
+      "note": "This is the theoretical ceiling. It assumes perfect detection once an Asset exists."
+    },
+    "gap": {
+      "description": "84.3pp gap between measured and projected. This gap IS the detector quality gap.",
+      "composition": {
+        "detector_not_finding": "~50pp — patterns exist but detector can't find them in real code",
+        "evidence_insufficient": "~20pp — Asset has rules but not enough examples for reliable matching",
+        "interprocedural": "~8pp — function calls hidden inside helpers",
+        "other": "~6pp — token format, edge cases"
+      }
+    }
+  },
+
+  "graduation_tracker": {
+    "description": "Every Pilot Asset needs: 2+ repos, deployment evidence, RFC/standard alignment. Status shows what's missing.",
+    "assets": [
+      {
+        "name": "TLS Enforcement",
+        "current_tier": "Pilot Ready",
+        "score": "11/20",
+        "evidence_strength": 3,
+        "deployments": 0,
+        "rfc_aligned": true,
+        "cross_repo": 2,
+        "needs_for_production": "Deployment evidence (staging run with real HTTPS check)",
+        "est_weeks_to_production": 2
+      },
+      {
+        "name": "Password Hashing",
+        "current_tier": "Pilot Ready",
+        "score": "11/20",
+        "evidence_strength": 5,
+        "deployments": 0,
+        "rfc_aligned": false,
+        "cross_repo": 5,
+        "needs_for_production": "OWASP standard alignment + deployment evidence",
+        "est_weeks_to_production": 3
+      },
+      {
+        "name": "Authorization",
+        "current_tier": "Pilot Ready",
+        "score": "10/20",
+        "evidence_strength": 4,
+        "deployments": 0,
+        "rfc_aligned": false,
+        "cross_repo": 4,
+        "needs_for_production": "NIST alignment + deployment evidence + false escalation tracking",
+        "est_weeks_to_production": 4
+      },
+      {
+        "name": "Data Integrity",
+        "current_tier": "Pilot Ready",
+        "score": "9/20",
+        "evidence_strength": 3,
+        "deployments": 0,
+        "rfc_aligned": false,
+        "cross_repo": 3,
+        "needs_for_production": "Cross-repo validation (need 2 more) + deployment evidence",
+        "est_weeks_to_production": 5
+      },
+      {
+        "name": "Input Validation",
+        "current_tier": "Pilot Ready",
+        "score": "9/20",
+        "evidence_strength": 3,
+        "deployments": 0,
+        "rfc_aligned": false,
+        "cross_repo": 3,
+        "needs_for_production": "Cross-repo validation (need 2 more) + deployment evidence",
+        "est_weeks_to_production": 6
+      },
+      {
+        "name": "TLS Handshake",
+        "current_tier": "Production Ready",
+        "score": "18/20",
+        "evidence_strength": 5,
+        "deployments": 3,
+        "rfc_aligned": true,
+        "cross_repo": 3,
+        "needs_for_production": "NONE — already Production",
+        "est_weeks_to_production": 0
+      },
+      {
+        "name": "Authentication",
+        "current_tier": "Production Ready",
+        "score": "14/20",
+        "evidence_strength": 4,
+        "deployments": 2,
+        "rfc_aligned": true,
+        "cross_repo": 2,
+        "needs_for_production": "NONE — already Production",
+        "est_weeks_to_production": 0
+      }
+    ],
+    "q3_target": {
+      "description": "Graduate the 3 highest-scoring Pilot assets to Production: TLS Enforcement, Password Hashing, Authorization",
+      "graduation_candidates": ["TLS Enforcement", "Password Hashing", "Authorization"],
+      "total_effort_weeks": 9,
+      "result": "5 Production Assets (from 2)"
+    }
+  },
+
+  "what_not_to_do": {
+    "description": "Things that will NOT move Pilot to Production. Don't do these.",
+    "dont": [
+      "Add more Pilot Assets (11 is enough for Q3)",
+      "Rewrite the detector (deferred to v4)",
+      "Build Interprocedural analysis (0.3pp/day ROI)",
+      "Refactor directory structure",
+      "Update dependencies (unless critical CVE)"
+    ],
+    "do": [
+      "Cross-repo validation for top 3 Pilot assets",
+      "Deployment evidence collection (staging runs)",
+      "Standard alignment (OWASP, NIST for Password/AuthZ)",
+      "False escalation tracking per Asset",
+      "Weekly measured recall benchmark re-run"
+    ]
+  }
+}
