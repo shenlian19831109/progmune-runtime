@@ -1,0 +1,206 @@
+{
+  "$description": "Investment Roadmap — the most important table in Progmune. Connects Blind Benchmark → Asset Library → ROI. Answers: what should we build next, what will it cost, what will we gain?",
+  "generated": "2026-07-04",
+  "data_source": "5-project blind benchmark (blog, chat, ecommerce, forum, todo)",
+  "total_findings": 26,
+  "current_recall": 7.7,
+  "current_precision": 100,
+
+  "three_dimensional_gap_model": {
+    "description": "Every FN is classified by which layer it fails at: Asset (do we have a rule?), Detector (can we find it?), Evidence (can we recognize the pattern?)",
+    "layers": {
+      "asset": "Does Progmune have a Verification Asset for this protocol category?",
+      "detector": "Given an Asset exists, can the detector find violations of it in code?",
+      "evidence": "Given an Asset and a working detector, do we have enough examples to recognize the pattern?"
+    },
+    "gap_distribution": {
+      "asset_missing": { "count": 22, "pct": 84.6, "description": "No Asset exists for this protocol category" },
+      "detector_missing": { "count": 2, "pct": 7.7, "description": "Asset exists but detector can't find it (interprocedural gap)" },
+      "evidence_missing": { "count": 2, "pct": 7.7, "description": "Asset exists, pattern known, but evidence insufficient for reliable detection" }
+    }
+  },
+
+  "capability_status_matrix": {
+    "description": "Per-capability status across all 3 dimensions. ✅ = covered, ⚠️ = partial, ❌ = missing.",
+    "capabilities": [
+      {
+        "capability": "Password Hashing Detection",
+        "risk_level": "Critical",
+        "asset": "❌",
+        "detector": "❌",
+        "evidence": "❌",
+        "fn_count": 5,
+        "recall_gain_pp": 19.2,
+        "effort_days": 2,
+        "roi": "Very High",
+        "priority": "P1",
+        "rationale": "5 Critical FNs. Pattern is well-known (bcrypt/argon2 vs SHA256/MD5). Low implementation effort. Highest ROI."
+      },
+      {
+        "capability": "Authorization / Ownership Check",
+        "risk_level": "Critical",
+        "asset": "❌",
+        "detector": "❌",
+        "evidence": "❌",
+        "fn_count": 6,
+        "recall_gain_pp": 23.1,
+        "effort_days": 5,
+        "roi": "High",
+        "priority": "P1",
+        "rationale": "6 Critical FNs. Highest recall gain. Requires Asset definition + interprocedural check. Medium effort but high impact."
+      },
+      {
+        "capability": "TLS Enforcement Detection",
+        "risk_level": "Critical",
+        "asset": "⚠️",
+        "detector": "⚠️",
+        "evidence": "✅",
+        "fn_count": 3,
+        "recall_gain_pp": 11.5,
+        "effort_days": 1,
+        "roi": "Very High",
+        "priority": "P1",
+        "rationale": "3 Critical FNs. TLS Asset already exists (91% confidence). Just needs extension to detect http vs https. 1 day effort. Do this first."
+      },
+      {
+        "capability": "Data Integrity (Foreign Key)",
+        "risk_level": "High",
+        "asset": "❌",
+        "detector": "❌",
+        "evidence": "❌",
+        "fn_count": 4,
+        "recall_gain_pp": 15.4,
+        "effort_days": 3,
+        "roi": "High",
+        "priority": "P2",
+        "rationale": "4 High FNs. Pattern is clear: check_exists before create_reference. Moderate effort."
+      },
+      {
+        "capability": "Input Validation",
+        "risk_level": "High",
+        "asset": "❌",
+        "detector": "❌",
+        "evidence": "❌",
+        "fn_count": 4,
+        "recall_gain_pp": 15.4,
+        "effort_days": 4,
+        "roi": "Medium-High",
+        "priority": "P2",
+        "rationale": "4 High FNs. Pattern: sanitize → validate_type → validate_range. More complex due to varied validation types."
+      },
+      {
+        "capability": "Interprocedural Analysis",
+        "risk_level": "Medium",
+        "asset": "✅",
+        "detector": "❌",
+        "evidence": "✅",
+        "fn_count": 2,
+        "recall_gain_pp": 7.7,
+        "effort_days": 30,
+        "roi": "Low",
+        "priority": "P3",
+        "rationale": "Only 2 Medium FNs. 1 month effort. Low ROI. Do NOT do this first — let the Asset-first approach close the gap. Revisit when recall > 50%."
+      },
+      {
+        "capability": "Rate Limiting",
+        "risk_level": "Low",
+        "asset": "❌",
+        "detector": "❌",
+        "evidence": "❌",
+        "fn_count": 1,
+        "recall_gain_pp": 3.8,
+        "effort_days": 3,
+        "roi": "Low",
+        "priority": "P3",
+        "rationale": "1 Low FN. Wait until higher-priority Assets are in place."
+      },
+      {
+        "capability": "Token Security",
+        "risk_level": "Medium",
+        "asset": "❌",
+        "detector": "❌",
+        "evidence": "❌",
+        "fn_count": 1,
+        "recall_gain_pp": 3.8,
+        "effort_days": 2,
+        "roi": "Medium",
+        "priority": "P3",
+        "rationale": "1 Medium FN. Can be bundled with Password Hashing Asset."
+      }
+    ]
+  },
+
+  "investment_roadmap": {
+    "description": "Prioritized by ROI. Each step independently verifiable via benchmark re-run.",
+    "steps": [
+      {
+        "order": 1,
+        "capability": "TLS Enforcement",
+        "effort_days": 1,
+        "recall_gain_pp": 11.5,
+        "cumulative_recall": "7.7% → 19.2%",
+        "roi": "Very High",
+        "rationale": "1 day. Highest ROI. Start here."
+      },
+      {
+        "order": 2,
+        "capability": "Password Hashing",
+        "effort_days": 2,
+        "recall_gain_pp": 19.2,
+        "cumulative_recall": "19.2% → 38.5%",
+        "roi": "Very High",
+        "rationale": "2 days. +19pp. Critical risk. Do this second."
+      },
+      {
+        "order": 3,
+        "capability": "Authorization",
+        "effort_days": 5,
+        "recall_gain_pp": 23.1,
+        "cumulative_recall": "38.5% → 61.5%",
+        "roi": "High",
+        "rationale": "1 week. Crosses 50% recall threshold. Major milestone."
+      },
+      {
+        "order": 4,
+        "capability": "Data Integrity",
+        "effort_days": 3,
+        "recall_gain_pp": 15.4,
+        "cumulative_recall": "61.5% → 76.9%",
+        "roi": "High",
+        "rationale": "3 days. Approaches 80% recall."
+      },
+      {
+        "order": 5,
+        "capability": "Input Validation",
+        "effort_days": 4,
+        "recall_gain_pp": 15.4,
+        "cumulative_recall": "76.9% → 92.3%",
+        "roi": "Medium-High",
+        "rationale": "4 days. Crosses 90% recall. Production-grade."
+      }
+    ],
+    "deferred": [
+      {
+        "capability": "Interprocedural Analysis",
+        "reason": "Only 2 FNs. 30 day effort. Low ROI. Revisit when other gaps are closed and recall is above 50%.",
+        "trigger": "recall > 50% AND asset gaps < 5"
+      }
+    ],
+    "total_effort_p1_p2": "15 days across 5 capabilities",
+    "total_recall_gain_p1_p2": "+84.6pp (7.7% → 92.3%)",
+    "verification": "Re-run bash blind-benchmark/run.sh after each capability is delivered. The numbers must change."
+  },
+
+  "roi_summary": {
+    "description": "Why start with TLS Enforcement and Password Hashing? Data-driven, not intuition.",
+    "best_roi_first": [
+      "TLS Enforcement:     1 day  → +11.5pp  (11.5pp/day)",
+      "Password Hashing:    2 days → +19.2pp  (9.6pp/day)",
+      "Data Integrity:      3 days → +15.4pp  (5.1pp/day)",
+      "Input Validation:    4 days → +15.4pp  (3.9pp/day)",
+      "Authorization:       5 days → +23.1pp  (4.6pp/day)",
+      "Interprocedural:    30 days → +7.7pp   (0.3pp/day) ← Do NOT start here"
+    ],
+    "key_insight": "TLS Enforcement gives 38× more recall per day than Interprocedural Analysis. Do the easy, high-impact things first. Let the hard things wait until they're the bottleneck."
+  }
+}
