@@ -103,7 +103,7 @@ for proj in data['projects']:
     print(f'  Progmune detected: {proj[\"progmune_summary\"][\"detected\"]}')
     print(f'  Progmune missed: {proj[\"progmune_summary\"][\"missed\"]}')
     print(f'  Detection rate: {proj[\"progmune_summary\"][\"detection_rate\"]}%')
-    print(f'  Missed: {proj[\"progmune_summary\"][\"missed_finding\"]}')
+    print(f'  Missed: {proj[\"progmune_summary\"][\"missed_findings[0]\"]}')
     print()
 
 agg = data['aggregate']
@@ -115,7 +115,36 @@ print(f'  Target: {agg[\"target_projects\"]} projects for statistical significan
 " 2>&1
 
 echo ""
-echo "Step 4: Asset Coverage Matrix"
+echo "Step 4: Capability Gap Analysis"
+python3 -c "
+import json
+with open('$REPORT_DIR/capability-gap-analysis.json') as f:
+    data = json.load(f)
+
+d = data['metric_decomposition']
+print()
+print('── Metric Decomposition ──')
+print(f'  Overall Recall:           {data[\"overall_metrics\"][\"recall\"]}%')
+print(f'  Asset-bounded Recall:     Auth=50%, Resource=0%')
+print(f'  Algorithm Failure:        {d[\"algorithm_failure_vs_asset_missing\"][\"algorithm_failure\"][\"count\"]}/24 FN ({d[\"algorithm_failure_vs_asset_missing\"][\"algorithm_failure\"][\"pct_of_fn\"]}%)')
+print(f'  Asset Missing:            {d[\"algorithm_failure_vs_asset_missing\"][\"asset_missing\"][\"count\"]}/24 FN ({d[\"algorithm_failure_vs_asset_missing\"][\"asset_missing\"][\"pct_of_fn\"]}%)')
+print()
+print('  91.7% of missed findings are because Progmune has no Asset for that category.')
+print('  Only 8.3% are true algorithm failures (interprocedural gap).')
+print()
+print('── Missing Assets (→ Recall Gain) ──')
+for asset, info in d['algorithm_failure_vs_asset_missing']['asset_missing']['by_missing_asset'].items():
+    print(f'  {asset}: {info[\"count\"]} FN — {info[\"fix\"]}')
+print()
+print('── Cumulative Recall Path ──')
+for step in data['capability_gap_map']['cumulative_recall_path']['steps']:
+    print(f'  {step[\"baseline\"]}% → {step.get(\"after_gap_06\", step[\"baseline\"]) if \"after_gap_06\" in step else \"\"}  {step[\"note\"]}')
+print()
+print('  Each Asset added → +12pp recall. Verifiable via benchmark re-run.')
+" 2>&1
+
+echo ""
+echo "Step 5: Asset Coverage Matrix"
 python3 -c "
 import json
 with open('$REPORT_DIR/asset-coverage-matrix.json') as f:

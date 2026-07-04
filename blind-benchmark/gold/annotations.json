@@ -2,88 +2,267 @@
   "$description": "Gold-standard human annotations for blind benchmark projects. Each finding is manually verified.",
   "annotated_by": "human",
   "annotated_at": "2026-07-04",
+  "version": "2.0",
+
   "projects": [
     {
-      "project_id": "demo-xlike",
+      "project_id": "blog",
       "model": "claude",
-      "project_type": "X-like social platform",
-      "files": ["auth.ts", "posts.ts", "comments.ts", "social.ts", "server.ts"],
-      "total_findings": 6,
+      "project_type": "Blog platform",
+      "files": ["auth.ts", "posts.ts", "comments.ts", "server.ts"],
+      "total_findings": 5,
       "findings": [
         {
-          "id": "XL-001",
+          "id": "BLOG-001",
           "file": "auth.ts",
-          "function": "insecureQuickLogin",
+          "function": "handleRequest",
           "category": "missing_prerequisite",
-          "severity": "critical",
-          "description": "create_session() called without verify_password() + generate_jwt(). Session issued to potentially unauthenticated user.",
+          "severity": "high",
+          "description": "No explicit token generation or session creation step visible at orchestrator level. Token creation hidden inside login(). No explicit verify_token step before protected endpoints.",
           "protocol": "Auth",
-          "fix_suggestion": "Insert verify_password() → generate_jwt() before create_session()",
-          "progmune_detected": true,
-          "progmune_verdict": "BLOCK",
-          "false_positive": false
-        },
-        {
-          "id": "XL-002",
-          "file": "auth.ts",
-          "function": "registerAndPostDirect",
-          "category": "missing_prerequisite",
-          "severity": "critical",
-          "description": "User registered but login session never created. Direct user object returned — no auth context for API calls.",
-          "protocol": "Auth",
-          "fix_suggestion": "Call create_session(user.id) after register(), return session token",
-          "progmune_detected": true,
-          "progmune_verdict": "BLOCK",
-          "false_positive": false
-        },
-        {
-          "id": "XL-003",
-          "file": "posts.ts",
-          "function": "quickPost",
-          "category": "protocol_violation",
-          "severity": "medium",
-          "description": "Post created without content validation. Empty strings and >280 char allowed.",
-          "protocol": "Resource",
-          "fix_suggestion": "Add validate_content() before create_post()",
+          "fix_suggestion": "Add generate_token() and verify_token() as explicit middleware steps",
           "progmune_detected": true,
           "progmune_verdict": "WARN",
           "false_positive": false
         },
         {
-          "id": "XL-004",
+          "id": "BLOG-002",
+          "file": "auth.ts",
+          "function": "register",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "description": "Password hashed with SHA256 (fast hash) instead of bcrypt/argon2. Vulnerable to brute force.",
+          "protocol": "Auth",
+          "fix_suggestion": "Use bcrypt or argon2 for password hashing",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
+          "false_positive": false
+        },
+        {
+          "id": "BLOG-003",
           "file": "comments.ts",
-          "function": "unsafeComment",
+          "function": "addComment",
           "category": "data_integrity",
-          "severity": "high",
-          "description": "Comment created without checking if post exists. Orphaned comments possible.",
+          "severity": "medium",
+          "description": "Comment added without verifying referenced post exists. Orphaned comments possible.",
           "protocol": "DataIntegrity",
-          "fix_suggestion": "Add check_post_exists() before create_comment()",
-          "progmune_detected": true,
-          "progmune_verdict": "BLOCK",
+          "fix_suggestion": "Add check_post_exists(postId) before creating comment",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
-          "id": "XL-005",
-          "file": "social.ts",
-          "function": "silentFollow",
-          "category": "other",
-          "severity": "low",
-          "description": "Follow succeeds but no notification sent. User unaware of new follower.",
-          "protocol": "Other",
-          "fix_suggestion": "Add send_notification() after follow_user()",
-          "progmune_detected": true,
-          "progmune_verdict": "INFO",
-          "false_positive": false
-        },
-        {
-          "id": "XL-006",
+          "id": "BLOG-004",
           "file": "server.ts",
           "function": "handleRequest",
           "category": "resource_leak",
           "severity": "medium",
-          "description": "No TLS configuration. HTTP (not HTTPS) — connections not encrypted.",
+          "description": "No input validation on post content, titles, or comment content. XSS and content injection possible.",
+          "protocol": "Resource",
+          "fix_suggestion": "Add validate_content() before create_post() and add_comment()",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
+          "false_positive": false
+        },
+        {
+          "id": "BLOG-005",
+          "file": "server.ts",
+          "function": "handleRequest",
+          "category": "resource_leak",
+          "severity": "low",
+          "description": "No TLS configuration. Server uses plain HTTP, connections not encrypted.",
           "protocol": "TLS",
-          "fix_suggestion": "Use https.createServer with TLS cert",
+          "fix_suggestion": "Use HTTPS with TLS certificate",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
+          "false_positive": false
+        }
+      ],
+      "progmune_summary": {
+        "total_findings": 5,
+        "detected": 1,
+        "missed": 4,
+        "detection_rate": 20,
+        "false_positives": 0,
+        "by_severity": {
+          "high": { "total": 1, "detected": 1 },
+          "medium": { "total": 3, "detected": 0 },
+          "low": { "total": 1, "detected": 0 }
+        },
+        "missed_findings": ["BLOG-002: SHA256 instead of bcrypt", "BLOG-003: Comments without post existence check", "BLOG-004: No content validation", "BLOG-005: No TLS"]
+      }
+    },
+
+    {
+      "project_id": "chat",
+      "model": "claude",
+      "project_type": "Real-time chat backend",
+      "files": ["auth.ts", "rooms.ts", "messages.ts", "files.ts", "server.ts"],
+      "total_findings": 5,
+      "findings": [
+        {
+          "id": "CHAT-001",
+          "file": "messages.ts",
+          "function": "sendMessage",
+          "category": "missing_prerequisite",
+          "severity": "high",
+          "description": "Message sent to room without verifying user is a member of that room. Anyone can send messages to any room.",
+          "protocol": "Auth",
+          "fix_suggestion": "Add check_room_membership(user, roomId) before sendMessage()",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
+          "false_positive": false
+        },
+        {
+          "id": "CHAT-002",
+          "file": "files.ts",
+          "function": "downloadFile",
+          "category": "auth_bypass",
+          "severity": "critical",
+          "description": "File download has NO authentication check. Anyone can download any file by ID.",
+          "protocol": "Auth",
+          "fix_suggestion": "Add token verification before file download",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
+          "false_positive": false
+        },
+        {
+          "id": "CHAT-003",
+          "file": "files.ts",
+          "function": "uploadFile",
+          "category": "protocol_violation",
+          "severity": "high",
+          "description": "No file type or size validation. Path traversal possible via fileName parameter.",
+          "protocol": "Resource",
+          "fix_suggestion": "Validate file type, enforce size limit, sanitize fileName to prevent path traversal",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
+          "false_positive": false
+        },
+        {
+          "id": "CHAT-004",
+          "file": "auth.ts",
+          "function": "createUser",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "description": "Password stored as plaintext. No hashing at all.",
+          "protocol": "Auth",
+          "fix_suggestion": "Hash passwords with bcrypt/argon2 before storage",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
+          "false_positive": false
+        },
+        {
+          "id": "CHAT-005",
+          "file": "auth.ts",
+          "function": "authenticate",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "description": "Token generated as base64(userId:timestamp) — not a cryptographically secure token. Predictable and forgeable.",
+          "protocol": "Auth",
+          "fix_suggestion": "Use crypto.randomUUID() or JWT with proper signing",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
+          "false_positive": false
+        }
+      ],
+      "progmune_summary": {
+        "total_findings": 5,
+        "detected": 0,
+        "missed": 5,
+        "detection_rate": 0,
+        "false_positives": 0,
+        "by_severity": {
+          "critical": { "total": 1, "detected": 0 },
+          "high": { "total": 2, "detected": 0 },
+          "medium": { "total": 2, "detected": 0 },
+          "low": { "total": 0, "detected": 0 }
+        },
+        "missed_findings": ["CHAT-001: No room membership check", "CHAT-002: downloadFile has no auth", "CHAT-003: Path traversal in file upload", "CHAT-004: Plaintext password", "CHAT-005: Predictable token"]
+      }
+    },
+
+    {
+      "project_id": "ecommerce",
+      "model": "claude",
+      "project_type": "E-commerce backend",
+      "files": ["auth.ts", "products.ts", "cart.ts", "orders.ts", "payment.ts", "server.ts"],
+      "total_findings": 6,
+      "findings": [
+        {
+          "id": "ECOM-001",
+          "file": "payment.ts",
+          "function": "processPayment",
+          "category": "missing_prerequisite",
+          "severity": "critical",
+          "description": "Payment processed without verifying the order exists and belongs to the user. Anyone can pay for any order ID, or pay for non-existent orders.",
+          "protocol": "Auth",
+          "fix_suggestion": "Add verify_order_ownership(user, orderId) before processPayment()",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
+          "false_positive": false
+        },
+        {
+          "id": "ECOM-002",
+          "file": "products.ts",
+          "function": "addProduct",
+          "category": "auth_bypass",
+          "severity": "high",
+          "description": "addProduct() has no authentication check. Any unauthenticated user can add products.",
+          "protocol": "Auth",
+          "fix_suggestion": "Require admin authentication for addProduct()",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
+          "false_positive": false
+        },
+        {
+          "id": "ECOM-003",
+          "file": "orders.ts",
+          "function": "placeOrder",
+          "category": "data_integrity",
+          "severity": "high",
+          "description": "placeOrder uses hardcoded price (quantity * 10) instead of actual product prices. Incorrect order totals.",
+          "protocol": "DataIntegrity",
+          "fix_suggestion": "Look up actual product prices from products module",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
+          "false_positive": false
+        },
+        {
+          "id": "ECOM-004",
+          "file": "auth.ts",
+          "function": "signUp",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "description": "Password stored as plaintext. No hashing.",
+          "protocol": "Auth",
+          "fix_suggestion": "Hash passwords before storage",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
+          "false_positive": false
+        },
+        {
+          "id": "ECOM-005",
+          "file": "payment.ts",
+          "function": "refundPayment",
+          "category": "data_integrity",
+          "severity": "medium",
+          "description": "Refund doesn't verify order status or check for duplicate refunds.",
+          "protocol": "DataIntegrity",
+          "fix_suggestion": "Check order status is 'confirmed' before refund, prevent double refunds",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
+          "false_positive": false
+        },
+        {
+          "id": "ECOM-006",
+          "file": "server.ts",
+          "function": "handleRequest",
+          "category": "resource_leak",
+          "severity": "low",
+          "description": "No rate limiting on payment or order endpoints. Brute force and abuse possible.",
+          "protocol": "Resource",
+          "fix_suggestion": "Add rate limiting middleware",
           "progmune_detected": false,
           "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
@@ -91,29 +270,219 @@
       ],
       "progmune_summary": {
         "total_findings": 6,
-        "detected": 5,
-        "missed": 1,
-        "detection_rate": 83.3,
+        "detected": 0,
+        "missed": 6,
+        "detection_rate": 0,
         "false_positives": 0,
         "by_severity": {
-          "critical": { "total": 2, "detected": 2 },
-          "high": { "total": 1, "detected": 1 },
-          "medium": { "total": 2, "detected": 2 },
-          "low": { "total": 1, "detected": 1 }
+          "critical": { "total": 1, "detected": 0 },
+          "high": { "total": 2, "detected": 0 },
+          "medium": { "total": 2, "detected": 0 },
+          "low": { "total": 1, "detected": 0 }
         },
-        "missed_finding": "XL-006: TLS not enforced on server (HTTP instead of HTTPS)"
+        "missed_findings": ["ECOM-001: Payment without order verification", "ECOM-002: addProduct without auth", "ECOM-003: Hardcoded prices", "ECOM-004: Plaintext password", "ECOM-005: Refund without status check", "ECOM-006: No rate limiting"]
+      }
+    },
+
+    {
+      "project_id": "forum",
+      "model": "claude",
+      "project_type": "Discussion forum",
+      "files": ["auth.ts", "categories.ts", "topics.ts", "replies.ts", "moderation.ts", "server.ts"],
+      "total_findings": 6,
+      "findings": [
+        {
+          "id": "FORUM-001",
+          "file": "server.ts",
+          "function": "handleRequest",
+          "category": "missing_prerequisite",
+          "severity": "high",
+          "description": "No explicit token generation or verification step visible at orchestrator level. Token creation/verification embedded inside functions.",
+          "protocol": "Auth",
+          "fix_suggestion": "Add explicit token generation and verification middleware",
+          "progmune_detected": true,
+          "progmune_verdict": "WARN",
+          "false_positive": false
+        },
+        {
+          "id": "FORUM-002",
+          "file": "categories.ts",
+          "function": "addCategory",
+          "category": "auth_bypass",
+          "severity": "high",
+          "description": "addCategory() has NO authentication check. Anyone can create categories.",
+          "protocol": "Auth",
+          "fix_suggestion": "Require moderator/admin auth for addCategory()",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
+          "false_positive": false
+        },
+        {
+          "id": "FORUM-003",
+          "file": "topics.ts",
+          "function": "lockTopic",
+          "category": "auth_bypass",
+          "severity": "high",
+          "description": "lockTopic() has NO authentication check. Anyone can lock any topic.",
+          "protocol": "Auth",
+          "fix_suggestion": "Require moderator auth for lockTopic()",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
+          "false_positive": false
+        },
+        {
+          "id": "FORUM-004",
+          "file": "replies.ts",
+          "function": "createReply",
+          "category": "data_integrity",
+          "severity": "medium",
+          "description": "Reply created without checking if topic exists and is not locked. Replies can be added to non-existent or locked topics.",
+          "protocol": "DataIntegrity",
+          "fix_suggestion": "Add check_topic_exists() and verify !topic.locked before createReply()",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
+          "false_positive": false
+        },
+        {
+          "id": "FORUM-005",
+          "file": "moderation.ts",
+          "function": "getModLogs",
+          "category": "auth_bypass",
+          "severity": "medium",
+          "description": "getModLogs() has NO authentication check. Anyone can view moderation logs.",
+          "protocol": "Auth",
+          "fix_suggestion": "Require moderator auth for getModLogs()",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
+          "false_positive": false
+        },
+        {
+          "id": "FORUM-006",
+          "file": "auth.ts",
+          "function": "createAccount",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "description": "Password stored as plaintext. No hashing.",
+          "protocol": "Auth",
+          "fix_suggestion": "Hash passwords before storage",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
+          "false_positive": false
+        }
+      ],
+      "progmune_summary": {
+        "total_findings": 6,
+        "detected": 1,
+        "missed": 5,
+        "detection_rate": 16.7,
+        "false_positives": 0,
+        "by_severity": {
+          "high": { "total": 3, "detected": 1 },
+          "medium": { "total": 3, "detected": 0 },
+          "low": { "total": 0, "detected": 0 }
+        },
+        "missed_findings": ["FORUM-002: addCategory without auth", "FORUM-003: lockTopic without auth", "FORUM-004: Reply without topic/lock check", "FORUM-005: getModLogs without auth", "FORUM-006: Plaintext password"]
+      }
+    },
+
+    {
+      "project_id": "todo",
+      "model": "claude",
+      "project_type": "Todo list API",
+      "files": ["auth.ts", "tasks.ts", "projects.ts", "server.ts"],
+      "total_findings": 4,
+      "findings": [
+        {
+          "id": "TODO-001",
+          "file": "tasks.ts",
+          "function": "toggleTask",
+          "category": "auth_bypass",
+          "severity": "high",
+          "description": "toggleTask doesn't verify the task belongs to the requesting user. Anyone can toggle any task.",
+          "protocol": "Auth",
+          "fix_suggestion": "Check task.ownerId === user.id before toggling",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
+          "false_positive": false
+        },
+        {
+          "id": "TODO-002",
+          "file": "tasks.ts",
+          "function": "removeTask",
+          "category": "auth_bypass",
+          "severity": "medium",
+          "description": "removeTask doesn't verify the task belongs to the requesting user. Anyone can delete any task.",
+          "protocol": "Auth",
+          "fix_suggestion": "Check task.ownerId === user.id before deleting",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
+          "false_positive": false
+        },
+        {
+          "id": "TODO-003",
+          "file": "auth.ts",
+          "function": "registerUser",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "description": "Password stored as plaintext. No hashing.",
+          "protocol": "Auth",
+          "fix_suggestion": "Hash passwords before storage",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
+          "false_positive": false
+        },
+        {
+          "id": "TODO-004",
+          "file": "tasks.ts",
+          "function": "addTask",
+          "category": "protocol_violation",
+          "severity": "low",
+          "description": "No title length/format validation. Empty or extremely long task titles allowed.",
+          "protocol": "Resource",
+          "fix_suggestion": "Add content validation for task title",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
+          "false_positive": false
+        }
+      ],
+      "progmune_summary": {
+        "total_findings": 4,
+        "detected": 0,
+        "missed": 4,
+        "detection_rate": 0,
+        "false_positives": 0,
+        "by_severity": {
+          "high": { "total": 1, "detected": 0 },
+          "medium": { "total": 2, "detected": 0 },
+          "low": { "total": 1, "detected": 0 }
+        },
+        "missed_findings": ["TODO-001: toggleTask without ownership check", "TODO-002: removeTask without ownership check", "TODO-003: Plaintext password", "TODO-004: No title validation"]
       }
     }
   ],
+
   "aggregate": {
-    "projects_annotated": 1,
+    "projects_annotated": 5,
     "target_projects": 20,
-    "total_findings": 6,
-    "progmune_detected": 5,
-    "progmune_missed": 1,
-    "overall_recall": 83.3,
+    "total_findings": 26,
+    "progmune_detected": 2,
+    "progmune_missed": 24,
+    "overall_recall": 7.7,
     "overall_precision": 100,
     "false_positive_rate": 0,
-    "notes": "Single-project pilot. Need 19 more projects for statistical significance."
+    "by_category": {
+      "auth_bypass": { "total": 6, "detected": 0, "recall": 0 },
+      "missing_prerequisite": { "total": 4, "detected": 2, "recall": 50 },
+      "protocol_violation": { "total": 8, "detected": 0, "recall": 0 },
+      "data_integrity": { "total": 4, "detected": 0, "recall": 0 },
+      "resource_leak": { "total": 4, "detected": 0, "recall": 0 }
+    },
+    "by_protocol": {
+      "Auth": { "total": 16, "detected": 2, "recall": 12.5 },
+      "DataIntegrity": { "total": 4, "detected": 0, "recall": 0 },
+      "Resource": { "total": 4, "detected": 0, "recall": 0 },
+      "TLS": { "total": 2, "detected": 0, "recall": 0 }
+    },
+    "notes": "5-project pilot. Progmune's current protocol-detector only catches top-level orchestrator-level auth chain gaps. Most findings are embedded within individual functions (missing ownership checks, missing auth on specific endpoints, plaintext passwords) which the current regex-based detector cannot see."
   }
 }
