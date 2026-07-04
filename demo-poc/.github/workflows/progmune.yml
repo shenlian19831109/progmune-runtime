@@ -1,0 +1,11 @@
+name: Progmune Policy Check
+on: [pull_request]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shenlian19831109/progmune-runtime@main
+        with:
+          project_path: demo-poc
+          strict: true

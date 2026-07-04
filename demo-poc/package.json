@@ -1,0 +1,13 @@
+{
+  "name": "demo-poc",
+  "version": "1.0.0",
+  "description": "AI-generated API server — verified by Progmune",
+  "scripts": {
+    "start": "ts-node src/server.ts",
+    "verify": "npx progmune-runtime verify src/",
+    "explain": "npx progmune-runtime verify src/ --explain",
+    "certify": "npx progmune-runtime certify src/",
+    "policy": "npx progmune-runtime policy check src/",
+    "demo": "bash demo.sh"
+  }
+}
