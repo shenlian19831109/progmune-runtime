@@ -1,0 +1,119 @@
+{
+  "$description": "Gold-standard human annotations for blind benchmark projects. Each finding is manually verified.",
+  "annotated_by": "human",
+  "annotated_at": "2026-07-04",
+  "projects": [
+    {
+      "project_id": "demo-xlike",
+      "model": "claude",
+      "project_type": "X-like social platform",
+      "files": ["auth.ts", "posts.ts", "comments.ts", "social.ts", "server.ts"],
+      "total_findings": 6,
+      "findings": [
+        {
+          "id": "XL-001",
+          "file": "auth.ts",
+          "function": "insecureQuickLogin",
+          "category": "missing_prerequisite",
+          "severity": "critical",
+          "description": "create_session() called without verify_password() + generate_jwt(). Session issued to potentially unauthenticated user.",
+          "protocol": "Auth",
+          "fix_suggestion": "Insert verify_password() → generate_jwt() before create_session()",
+          "progmune_detected": true,
+          "progmune_verdict": "BLOCK",
+          "false_positive": false
+        },
+        {
+          "id": "XL-002",
+          "file": "auth.ts",
+          "function": "registerAndPostDirect",
+          "category": "missing_prerequisite",
+          "severity": "critical",
+          "description": "User registered but login session never created. Direct user object returned — no auth context for API calls.",
+          "protocol": "Auth",
+          "fix_suggestion": "Call create_session(user.id) after register(), return session token",
+          "progmune_detected": true,
+          "progmune_verdict": "BLOCK",
+          "false_positive": false
+        },
+        {
+          "id": "XL-003",
+          "file": "posts.ts",
+          "function": "quickPost",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "description": "Post created without content validation. Empty strings and >280 char allowed.",
+          "protocol": "Resource",
+          "fix_suggestion": "Add validate_content() before create_post()",
+          "progmune_detected": true,
+          "progmune_verdict": "WARN",
+          "false_positive": false
+        },
+        {
+          "id": "XL-004",
+          "file": "comments.ts",
+          "function": "unsafeComment",
+          "category": "data_integrity",
+          "severity": "high",
+          "description": "Comment created without checking if post exists. Orphaned comments possible.",
+          "protocol": "DataIntegrity",
+          "fix_suggestion": "Add check_post_exists() before create_comment()",
+          "progmune_detected": true,
+          "progmune_verdict": "BLOCK",
+          "false_positive": false
+        },
+        {
+          "id": "XL-005",
+          "file": "social.ts",
+          "function": "silentFollow",
+          "category": "other",
+          "severity": "low",
+          "description": "Follow succeeds but no notification sent. User unaware of new follower.",
+          "protocol": "Other",
+          "fix_suggestion": "Add send_notification() after follow_user()",
+          "progmune_detected": true,
+          "progmune_verdict": "INFO",
+          "false_positive": false
+        },
+        {
+          "id": "XL-006",
+          "file": "server.ts",
+          "function": "handleRequest",
+          "category": "resource_leak",
+          "severity": "medium",
+          "description": "No TLS configuration. HTTP (not HTTPS) — connections not encrypted.",
+          "protocol": "TLS",
+          "fix_suggestion": "Use https.createServer with TLS cert",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
+          "false_positive": false
+        }
+      ],
+      "progmune_summary": {
+        "total_findings": 6,
+        "detected": 5,
+        "missed": 1,
+        "detection_rate": 83.3,
+        "false_positives": 0,
+        "by_severity": {
+          "critical": { "total": 2, "detected": 2 },
+          "high": { "total": 1, "detected": 1 },
+          "medium": { "total": 2, "detected": 2 },
+          "low": { "total": 1, "detected": 1 }
+        },
+        "missed_finding": "XL-006: TLS not enforced on server (HTTP instead of HTTPS)"
+      }
+    }
+  ],
+  "aggregate": {
+    "projects_annotated": 1,
+    "target_projects": 20,
+    "total_findings": 6,
+    "progmune_detected": 5,
+    "progmune_missed": 1,
+    "overall_recall": 83.3,
+    "overall_precision": 100,
+    "false_positive_rate": 0,
+    "notes": "Single-project pilot. Need 19 more projects for statistical significance."
+  }
+}
