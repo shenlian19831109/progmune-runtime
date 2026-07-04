@@ -103,7 +103,7 @@ for proj in data['projects']:
     print(f'  Progmune detected: {proj[\"progmune_summary\"][\"detected\"]}')
     print(f'  Progmune missed: {proj[\"progmune_summary\"][\"missed\"]}')
     print(f'  Detection rate: {proj[\"progmune_summary\"][\"detection_rate\"]}%')
-    print(f'  Missed: {proj[\"progmune_summary\"][\"missed_findings[0]\"]}')
+    print(f'  Missed: {proj[\"progmune_summary\"][\"missed_findings[0] if \"missed_findings\" in s else s.get(\"missed_finding\",\"N/A\")\"]}')
     print()
 
 agg = data['aggregate']
