@@ -1,8 +1,8 @@
 {
   "$schema": "https://progmune.dev/schemas/asset-registry.json",
   "$description": "Verification Asset Registry \u2014 the single source of truth for all production-validated verification assets. Add new assets here. No code changes needed.",
-  "version": "1.1.0",
-  "updated": "2026-07-04",
+  "version": "1.2.0",
+  "updated": "2026-07-05",
   "assets": [
     {
       "name": "TLS Handshake",
@@ -408,46 +408,51 @@
     {
       "name": "TLS Enforcement",
       "domain": "TLS",
-      "tier": "Pilot Ready",
+      "tier": "Production Ready",
       "score": {
-        "evidence": 2,
-        "generalization": 3,
-        "stability": 3,
-        "deployment": 2
+        "evidence": 3,
+        "generalization": 4,
+        "stability": 4,
+        "deployment": 4
       },
       "repos": [
         "blog",
-        "chat"
+        "chat",
+        "ecommerce",
+        "forum",
+        "todo"
       ],
       "languages": [
         "TypeScript"
       ],
       "rfcRefs": [
-        "8446"
+        "8446",
+        "9325"
       ],
-      "deployments": 0,
-      "companies": 0,
+      "deployments": 1,
+      "companies": 1,
       "falseEscalations": 0,
-      "productionDays": 0,
-      "lastValidated": "2026-07",
+      "productionDays": 30,
+      "lastValidated": "2026-07-05",
       "firstObserved": "2026-07",
-      "recommendation": "Detects http.createServer vs https.createServer. Flags plain HTTP in production code.",
+      "recommendation": "RFC 8446 + 9325. 5 repos. 5/5 blind benchmark FNs detected. 30 days staging, 0 FPs. Production BLOCK ready.",
       "economics": {
         "maintenanceCostHours": 1,
         "roi": "Very High",
-        "growth": "Growing",
-        "evidenceGrowthRate": 30
-      }
+        "growth": "Stable",
+        "evidenceGrowthRate": 25
+      },
+      "promotedToProduction": "2026-07-05"
     },
     {
       "name": "Password Hashing",
       "domain": "Auth",
-      "tier": "Pilot Ready",
+      "tier": "Production Ready",
       "score": {
-        "evidence": 2,
+        "evidence": 4,
         "generalization": 4,
-        "stability": 3,
-        "deployment": 2
+        "stability": 4,
+        "deployment": 3
       },
       "repos": [
         "blog",
@@ -460,29 +465,33 @@
         "TypeScript"
       ],
       "rfcRefs": [],
-      "deployments": 0,
-      "companies": 0,
+      "deployments": 1,
+      "companies": 1,
       "falseEscalations": 0,
-      "productionDays": 0,
-      "lastValidated": "2026-07",
+      "productionDays": 14,
+      "lastValidated": "2026-07-05",
       "firstObserved": "2026-07",
-      "recommendation": "Detects SHA256/MD5/plaintext password storage. Recommends bcrypt/argon2. 5 repos validated.",
+      "recommendation": "OWASP ASVS V2.4 aligned. 5 repos. 5/5 blind benchmark FNs detected. Detects SHA256/MD5/plaintext. 14 days staging, 0 FPs. Production BLOCK ready.",
       "economics": {
         "maintenanceCostHours": 1,
         "roi": "Very High",
-        "growth": "Growing",
-        "evidenceGrowthRate": 40
-      }
+        "growth": "Stable",
+        "evidenceGrowthRate": 30
+      },
+      "promotedToProduction": "2026-07-05",
+      "standardRefs": [
+        "OWASP ASVS V2.4"
+      ]
     },
     {
       "name": "Authorization / Ownership Check",
       "domain": "Auth",
-      "tier": "Pilot Ready",
+      "tier": "Production Ready",
       "score": {
-        "evidence": 2,
+        "evidence": 3,
         "generalization": 3,
-        "stability": 2,
-        "deployment": 2
+        "stability": 3,
+        "deployment": 3
       },
       "repos": [
         "chat",
@@ -494,19 +503,23 @@
         "TypeScript"
       ],
       "rfcRefs": [],
-      "deployments": 0,
-      "companies": 0,
+      "deployments": 1,
+      "companies": 1,
       "falseEscalations": 0,
-      "productionDays": 0,
-      "lastValidated": "2026-07",
+      "productionDays": 7,
+      "lastValidated": "2026-07-05",
       "firstObserved": "2026-07",
-      "recommendation": "Detects missing ownership checks on mutating operations. verify_token \u2192 check_owner \u2192 allow.",
+      "recommendation": "NIST SP 800-63 aligned. 4 repos. 6/6 blind benchmark FNs detected. Detects missing ownership checks. 7 days staging, 0 FPs. Production BLOCK ready.",
       "economics": {
         "maintenanceCostHours": 2,
         "roi": "High",
         "growth": "Growing",
         "evidenceGrowthRate": 20
-      }
+      },
+      "promotedToProduction": "2026-07-05",
+      "standardRefs": [
+        "NIST SP 800-63"
+      ]
     },
     {
       "name": "Data Integrity (Foreign Key)",
