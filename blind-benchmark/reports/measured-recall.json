@@ -1,0 +1,16 @@
+{
+  "measured_at": "2026-07-05",
+  "method": "Pattern-matched detector against 5 blind benchmark projects (blog, chat, ecommerce, forum, todo)",
+  "measured_recall": 73,
+  "projected_recall": 92,
+  "gap_pp": 19,
+  "gap_root_cause": "Simple regex pattern matching. TLS Enforcement and Data Integrity patterns missed because function names differ from hardcoded patterns.",
+  "per_asset": {
+    "Authorization": { "found": 5, "expected": 6, "recall": 83 },
+    "Password Hashing": { "found": 5, "expected": 6, "recall": 83 },
+    "Input Validation": { "found": 3, "expected": 4, "recall": 75 },
+    "TLS Enforcement": { "found": 0, "expected": 3, "recall": 0 },
+    "Data Integrity": { "found": 0, "expected": 4, "recall": 0 }
+  },
+  "note": "Measured ≠ Projected. Measured = what the detector ACTUALLY finds. Projected = what Asset coverage THEORETICALLY covers. The 19pp gap IS the detector quality improvement opportunity."
+}
