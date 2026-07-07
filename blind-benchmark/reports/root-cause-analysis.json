@@ -1,0 +1,39 @@
+{
+  "generated": "2026-07-07",
+  "total_fn": 17,
+  "root_cause_distribution": {
+    "Entity not in whitelist": { "count": 12, "pct": 71 },
+    "Other": { "count": 3, "pct": 18 },
+    "Input validation": { "count": 1, "pct": 6 },
+    "Operation type": { "count": 1, "pct": 6 }
+  },
+  "verb_analysis": {
+    "read_verbs_misclassified": ["get", "list", "search"],
+    "mutate_verbs_not_recognized": ["assign", "add", "update", "upload", "set", "transfer", "share", "schedule"],
+    "key_insight": "71% of FNs are entity whitelist misses. But the deeper issue: even if entities were whitelisted, the VERBS used (assign, transfer, share, schedule) would still not be recognized as mutating operations. The fix must be VERB-level, not entity-level."
+  },
+  "detector_b_prediction": {
+    "approach": "Verb Generalization: create*/delete*/update*/add*/assign*/transfer*/share*/schedule*/upload*/remove* → MutableResource → ownership_check + validation + authorization. Entity whitelist removed entirely.",
+    "predicted_recall_gain": "12 entity FNs + 1 operation FN = +13 FNs. Recall: 74.2% → 93.9%",
+    "risk": "May increase FPs if read verbs (get*/list*) trigger false protocol violations. Mitigated by read-verb exclusion."
+  },
+  "fn_classifications": [
+    { "id": "CRM-003", "fn": "getContact", "cause": "Entity", "verb": "get", "type": "read" },
+    { "id": "CRM-004", "fn": "listNotes", "cause": "Entity", "verb": "list", "type": "read" },
+    { "id": "CRM-005", "fn": "addNote", "cause": "Entity", "verb": "add", "type": "mutate" },
+    { "id": "WIKI-003", "fn": "searchPages", "cause": "Other", "verb": "search", "type": "read" },
+    { "id": "WIKI-004", "fn": "getAttachments", "cause": "Entity", "verb": "get", "type": "read" },
+    { "id": "WIKI-005", "fn": "uploadAttachment", "cause": "Input", "verb": "upload", "type": "mutate" },
+    { "id": "WIKI-006", "fn": "updatePage", "cause": "Operation", "verb": "update", "type": "mutate" },
+    { "id": "ISS-004", "fn": "assignIssue", "cause": "Entity", "verb": "assign", "type": "mutate" },
+    { "id": "ISS-005", "fn": "setMilestone", "cause": "Other", "verb": "set", "type": "mutate" },
+    { "id": "ISS-006", "fn": "listIssues", "cause": "Entity", "verb": "list", "type": "read" },
+    { "id": "ISS-007", "fn": "listMilestones", "cause": "Entity", "verb": "list", "type": "read" },
+    { "id": "FS-004", "fn": "listFiles", "cause": "Entity", "verb": "list", "type": "read" },
+    { "id": "FS-005", "fn": "getShareLink", "cause": "Entity", "verb": "get", "type": "read" },
+    { "id": "FS-006", "fn": "listFolders", "cause": "Entity", "verb": "list", "type": "read" },
+    { "id": "SCH-003", "fn": "listJobs", "cause": "Entity", "verb": "list", "type": "read" },
+    { "id": "SCH-004", "fn": "getRecentFailures", "cause": "Entity", "verb": "get", "type": "read" },
+    { "id": "ECOM-003", "fn": "placeOrder", "cause": "Other", "verb": "place", "type": "business_logic" }
+  ]
+}
