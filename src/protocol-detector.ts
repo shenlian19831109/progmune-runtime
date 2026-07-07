@@ -136,7 +136,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     category: "authorization",
     trigger: /\b(add|create|delete|remove|update|toggle|modify|edit|lock|ban|process|refund|assign|transfer|share|schedule|upload|set)[A-Z]\w*\b/i,
     safeguards: [
-      { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|checkOwner|authorId|ownerId|userId\s*===)/i, label: "auth_check" },
+      { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|checkOwner|authorId\s*[!=]==?|ownerId\s*[!=]==?|userId\s*[!=]==?|\.owner\s*[!=]==?)/i, label: "auth_check" },
     ],
     violationMessage: "Mutation operation does not verify user ownership or authorization before modifying data.",
     conceptMissing: ["OwnershipCheck", "AuthorizationGuard"],
@@ -208,7 +208,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     category: "authorization",
     trigger: /\b(toggle|remove)[A-Z]\w*\b/i,
     safeguards: [
-      { pattern: /\b(ownerId|authorId|userId\s*===|createdBy|\.owner)/i, label: "ownership_comparison" },
+      { pattern: /\b(ownerId\s*[!=]==?|authorId\s*[!=]==?|userId\s*[!=]==?|createdBy|\.owner\s*[!=]==?)/i, label: "ownership_comparison" },
     ],
     violationMessage: "Resource mutation checks authentication but does NOT verify the resource belongs to the requesting user. Missing ownerId/authorId comparison.",
     conceptMissing: ["ResourceOwnership", "HorizontalAuthorization"],
@@ -277,19 +277,56 @@ export interface SafeguardViolation {
 }
 
 /**
+ * Identifier Parser: splits camelCase/PascalCase/snake_case into words.
+ * registerNewUser → ["register", "New", "User"]
+ * doLogin         → ["do", "Login"]
+ * verifyToken     → ["verify", "Token"]
+ * Not AST. Just smarter string splitting.
+ */
+export function identifierParse(name: string): string[] {
+  // Split on snake_case, kebab-case, dots
+  const parts = name.split(/[_\-\.]/);
+  const words: string[] = [];
+  for (const part of parts) {
+    // Split camelCase/PascalCase: "registerNewUser" → ["register", "New", "User"]
+    const camelWords = part.replace(/([a-z])([A-Z])/g, "$1 $2").split(" ");
+    for (const w of camelWords) {
+      if (w.length > 0) words.push(w);
+    }
+  }
+  return words;
+}
+
+/**
  * Detect missing safeguards in function call sequences.
- * For each safeguard rule, if the trigger pattern matches any call in the sequence,
- * check that at least one safeguard pattern also matches.
- * If not → violation.
+ * Uses identifier parsing to match compound names (registerNewUser → register).
  */
 export function detectSafeguardViolations(calls: string[], enclosingFuncName?: string): SafeguardViolation[] {
   const violations: SafeguardViolation[] = [];
-  const effectiveCalls = enclosingFuncName ? [enclosingFuncName, ...calls] : calls;
+
+  // Build effective calls: raw names + identifier-parsed words
+  const rawCalls = enclosingFuncName ? [enclosingFuncName, ...calls] : [...calls];
+  const parsedWords: string[] = [];
+  for (const c of rawCalls) {
+    parsedWords.push(...identifierParse(c));
+  }
+  const effectiveCalls = [...new Set([...rawCalls, ...parsedWords])];
+
+  // Skip authorization rules for auth functions — check both raw lowercased name and parsed words
+  const rawLower = enclosingFuncName?.toLowerCase() || "";
+  const AUTH_PATTERN = /\b(register|signup|signin|login|authenticate|createuser|createaccount|registeruser|registernewuser|dologin|verifytoken|validatesession|getuser|getsessionuser|getcurrentuser|endsession|logout|signout|dologout|destroysession|invalidatesession|invalidate|signout)\b/i;
+  const isAuthFunction = enclosingFuncName != null && (
+    AUTH_PATTERN.test(rawLower) ||
+    identifierParse(enclosingFuncName).some(w => AUTH_PATTERN.test(w))
+  );
 
   for (const rule of SAFEGUARD_RULES) {
     // Check if trigger matches
     const triggerMatch = effectiveCalls.some(c => rule.trigger.test(c));
     if (!triggerMatch) continue;
+
+    // Skip authorization rules for auth functions — they ARE the auth
+    if (isAuthFunction && rule.category === "authorization") continue;
 
     // Check if at least one safeguard matches
     const matchedSafeguard = rule.safeguards.find(s => effectiveCalls.some(c => s.pattern.test(c)));
