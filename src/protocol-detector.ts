@@ -86,7 +86,232 @@ const PROTOCOLS: ProtocolDefinition[] = [
 ];
 
 // ═══════════════════════════════════════════════════════════════
-// Detection (unchanged)
+// P2: Safeguard Rules — "if trigger present, safeguard MUST also be present"
+// These detect missing protections in individual functions, not just
+// orchestrator-level protocol chains.
+// ═══════════════════════════════════════════════════════════════
+
+interface SafeguardRule {
+  name: string;
+  category: string;
+  /** Function name pattern that triggers this rule */
+  trigger: RegExp;
+  /** Required safeguard patterns — at least one must match */
+  safeguards: Array<{ pattern: RegExp; label: string }>;
+  /** Human-readable description of what's missing */
+  violationMessage: string;
+  /** Concept mapping */
+  conceptMissing: string[];
+  conceptExpected: string[];
+}
+
+const SAFEGUARD_RULES: SafeguardRule[] = [
+  // ── Password Hashing ──
+  {
+    name: "Password Hashing",
+    category: "password_hashing",
+    trigger: /\b(register|signUp|createUser|createAccount|registerUser)\b/i,
+    safeguards: [
+      { pattern: /\b(bcrypt|argon2|scrypt|pbkdf2|hash|hashPassword|createHash|hashSync|hash_password)\b/i, label: "secure_hash" },
+    ],
+    violationMessage: "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+    conceptMissing: ["PasswordHash", "KeyDerivation"],
+    conceptExpected: ["bcrypt", "argon2", "scrypt"],
+  },
+  // Catch SHA256/MD5 specifically
+  {
+    name: "Password Hashing (Weak)",
+    category: "password_hashing",
+    trigger: /\b(register|signUp|createUser|createAccount|registerUser)\b/i,
+    safeguards: [
+      { pattern: /\b(bcrypt|argon2|scrypt|pbkdf2)\b/i, label: "strong_hash" },
+    ],
+    violationMessage: "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+    conceptMissing: ["StrongHash", "SaltGeneration"],
+    conceptExpected: ["bcrypt", "argon2"],
+  },
+  // ── Authorization / Ownership Check ──
+  {
+    name: "Authorization (Ownership Check)",
+    category: "authorization",
+    trigger: /\b(add|create|delete|remove|update|toggle|modify|edit|lock|ban|process|refund|assign|transfer|share|schedule|upload)[A-Z]\w*\b/i,
+    safeguards: [
+      { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|checkOwner|authorId|ownerId|userId\s*===)/i, label: "auth_check" },
+    ],
+    violationMessage: "Mutation operation does not verify user ownership or authorization before modifying data.",
+    conceptMissing: ["OwnershipCheck", "AuthorizationGuard"],
+    conceptExpected: ["getUser", "validateToken", "ownerId check"],
+  },
+  // Functions that serve data without any auth
+  {
+    name: "Authorization (Unauthenticated Access)",
+    category: "authorization",
+    trigger: /\b(get|list|download|view|read|fetch|find)[A-Z]\w*\b/i,
+    safeguards: [
+      { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|token|session)\b/i, label: "auth_check" },
+    ],
+    violationMessage: "Data access function does not check authentication. Anyone can access data without credentials.",
+    conceptMissing: ["AuthenticationCheck", "AccessControl"],
+    conceptExpected: ["token validation", "session check"],
+  },
+  // ── Data Integrity (Foreign Key Validation) ──
+  {
+    name: "Data Integrity (Foreign Key)",
+    category: "data_integrity",
+    trigger: /\b(add|create|post|refund|process|send)[A-Z]\w*\b/i,
+    safeguards: [
+      { pattern: /\b(get|find|check|exists|lookup|status)[A-Z]\w*\b/i, label: "fk_check" },
+    ],
+    violationMessage: "Creates a child entity without verifying the parent entity exists. Orphaned references possible.",
+    conceptMissing: ["ForeignKeyValidation", "ReferentialIntegrity"],
+    conceptExpected: ["checkExists", "getParent", "validateReference"],
+  },
+  // ── Input Validation ──
+  {
+    name: "Input Validation",
+    category: "input_validation",
+    trigger: /\b(create|add|post|send|upload)[A-Z]\w*\b/i,
+    safeguards: [
+      { pattern: /\b(validate|sanitize|check|verify)\w*(Content|Input|Length|Title|Body|Type|Size|File)\b/i, label: "input_validation" },
+    ],
+    violationMessage: "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+    conceptMissing: ["InputSanitization", "ContentValidation", "SizeLimit"],
+    conceptExpected: ["validateContent", "sanitizeInput", "checkLength"],
+  },
+  // ── TLS Enforcement ──
+  {
+    name: "TLS Enforcement",
+    category: "tls_enforcement",
+    trigger: /\b(createServer|listen|handleRequest|app\.listen|express)\b/i,
+    safeguards: [
+      { pattern: /\b(https|tls|ssl|cert|key|TLS|SSL|HTTPS|createSecureContext|credentials)\b/i, label: "tls_config" },
+    ],
+    violationMessage: "Server created without TLS configuration. Connections will be unencrypted HTTP.",
+    conceptMissing: ["TLSConfiguration", "HTTPSEnforcement", "CertificateSetup"],
+    conceptExpected: ["https.createServer", "TLS cert", "SSL configuration"],
+  },
+  // ── Token Security ──
+  {
+    name: "Token Security (Weak Generation)",
+    category: "token_security",
+    trigger: /\b(authenticate|login|signIn|logIn|createSession|generateToken)\b/i,
+    safeguards: [
+      { pattern: /\b(crypto\.randomUUID|jwt\.sign|jsonwebtoken|nanoid|randomBytes|cryptoRandomString)\b/i, label: "secure_token" },
+    ],
+    violationMessage: "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+    conceptMissing: ["SecureRandom", "TokenEntropy", "CryptographicSignature"],
+    conceptExpected: ["crypto.randomUUID", "jwt.sign", "nanoid"],
+  },
+  // ── Stricter Ownership Check (for resource mutation) ──
+  {
+    name: "Authorization (Resource Ownership)",
+    category: "authorization",
+    trigger: /\b(toggle|remove)[A-Z]\w*\b/i,
+    safeguards: [
+      { pattern: /\b(ownerId|authorId|userId\s*===|createdBy|\.owner)/i, label: "ownership_comparison" },
+    ],
+    violationMessage: "Resource mutation checks authentication but does NOT verify the resource belongs to the requesting user. Missing ownerId/authorId comparison.",
+    conceptMissing: ["ResourceOwnership", "HorizontalAuthorization"],
+    conceptExpected: ["ownerId comparison", "authorId check", "userId === resource.ownerId"],
+  },
+  // ── Payment Verification ──
+  {
+    name: "Payment Order Verification",
+    category: "data_integrity",
+    trigger: /\b(process|create|make|submit)\w*(Payment|Charge|Transaction)\b/i,
+    safeguards: [
+      { pattern: /\b(getOrder|verifyOrder|checkOrder|findOrder|orderExists|order\b)\b/i, label: "order_verification" },
+    ],
+    violationMessage: "Payment processed without verifying the associated order exists and belongs to the user.",
+    conceptMissing: ["OrderVerification", "PaymentAuthorization"],
+    conceptExpected: ["getOrder", "verifyOrder", "checkOrder"],
+  },
+  // ── Room Membership ──
+  {
+    name: "Room Membership Check",
+    category: "authorization",
+    trigger: /\b(send|post|publish)\w*(Message|Msg)\b/i,
+    safeguards: [
+      { pattern: /\b(joinRoom|roomMember|checkMember|isMember|members\.includes|members\.find|memberOf|inRoom)\b/i, label: "room_membership" },
+    ],
+    violationMessage: "Message sent to room without verifying the user is a room member.",
+    conceptMissing: ["RoomMembership", "ChannelAuthorization"],
+    conceptExpected: ["joinRoom", "isMember", "members.includes"],
+  },
+  // ── Refund Status Check ──
+  {
+    name: "Refund Status Verification",
+    category: "data_integrity",
+    trigger: /\b(refund|cancel|void|reverse)\w*(Payment|Order|Charge|Transaction)\b/i,
+    safeguards: [
+      { pattern: /\b(status|\.status|getStatus|checkStatus|orderStatus|paymentStatus)\b/i, label: "status_check" },
+    ],
+    violationMessage: "Refund/cancellation processed without verifying the current order/payment status.",
+    conceptMissing: ["StatusVerification", "IdempotencyCheck"],
+    conceptExpected: ["status check", "orderStatus", "paymentStatus"],
+  },
+  // ── Rate Limiting ──
+  {
+    name: "Rate Limiting",
+    category: "rate_limiting",
+    trigger: /\b(createServer|listen|handleRequest|app\.listen|express|router\.(post|get|put|delete|patch))\b/i,
+    safeguards: [
+      { pattern: /\b(rateLimit|rate_limit|throttle|RateLimiter|expressRateLimit|rateLimiterMiddleware|limiter)\b/i, label: "rate_limit" },
+    ],
+    violationMessage: "Server/API endpoint created without rate limiting. Vulnerable to brute force and abuse.",
+    conceptMissing: ["RateLimiting", "DoSProtection", "AbusePrevention"],
+    conceptExpected: ["rateLimit", "throttle", "express-rate-limit"],
+  },
+];
+
+// ── Safeguard Detection ──
+
+export interface SafeguardViolation {
+  rule: string;
+  category: string;
+  type: "missing_safeguard";
+  detail: string;
+  conceptDetail?: string;
+  missingConcepts?: string[];
+  expectedConcepts?: string[];
+}
+
+/**
+ * Detect missing safeguards in function call sequences.
+ * For each safeguard rule, if the trigger pattern matches any call in the sequence,
+ * check that at least one safeguard pattern also matches.
+ * If not → violation.
+ */
+export function detectSafeguardViolations(calls: string[], enclosingFuncName?: string): SafeguardViolation[] {
+  const violations: SafeguardViolation[] = [];
+  const effectiveCalls = enclosingFuncName ? [enclosingFuncName, ...calls] : calls;
+
+  for (const rule of SAFEGUARD_RULES) {
+    // Check if trigger matches
+    const triggerMatch = effectiveCalls.some(c => rule.trigger.test(c));
+    if (!triggerMatch) continue;
+
+    // Check if at least one safeguard matches
+    const matchedSafeguard = rule.safeguards.find(s => effectiveCalls.some(c => s.pattern.test(c)));
+    if (matchedSafeguard) continue;
+
+    // No safeguard matched → violation
+    violations.push({
+      rule: rule.name,
+      category: rule.category,
+      type: "missing_safeguard",
+      detail: rule.violationMessage,
+      conceptDetail: `Missing: ${rule.conceptMissing.join(", ")}. Expected at least one of: ${rule.conceptExpected.join(", ")}`,
+      missingConcepts: rule.conceptMissing,
+      expectedConcepts: rule.conceptExpected,
+    });
+  }
+
+  return violations;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Detection
 // ═══════════════════════════════════════════════════════════════
 
 export interface ProtocolViolation {
@@ -157,12 +382,13 @@ export function validateProtocolState(calls: string[]): { valid: boolean; violat
   return { valid: violations.length === 0, violations, matchedProtocols, detail };
 }
 
-export function validateCombined(calls: string[], enclosingFuncName?: string): { valid: boolean; resourceViolations: any[]; protocolViolations: ProtocolViolation[]; detail: string } {
+export function validateCombined(calls: string[], enclosingFuncName?: string): { valid: boolean; resourceViolations: any[]; protocolViolations: ProtocolViolation[]; safeguardViolations: SafeguardViolation[]; detail: string } {
   const { validateResourceLifecycle } = require("./resource-detector");
   const res = validateResourceLifecycle(calls, enclosingFuncName);
   const proto = validateProtocolState(calls);
-  const all = [...res.violations, ...proto.violations];
-  return { valid: all.length === 0, resourceViolations: res.violations, protocolViolations: proto.violations, detail: all.map((v: any) => v.detail || "").join("; ") || "All checks passed" };
+  const safe = detectSafeguardViolations(calls, enclosingFuncName);
+  const all = [...res.violations, ...proto.violations, ...safe];
+  return { valid: all.length === 0, resourceViolations: res.violations, protocolViolations: proto.violations, safeguardViolations: safe, detail: all.map((v: any) => v.detail || "").join("; ") || "All checks passed" };
 }
 
 // ═══════════════════════════════════════════════════════════════
