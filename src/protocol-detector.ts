@@ -134,7 +134,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
   {
     name: "Authorization (Ownership Check)",
     category: "authorization",
-    trigger: /\b(add|create|delete|remove|update|toggle|modify|edit|lock|ban|process|refund|assign|transfer|share|schedule|upload)[A-Z]\w*\b/i,
+    trigger: /\b(add|create|delete|remove|update|toggle|modify|edit|lock|ban|process|refund|assign|transfer|share|schedule|upload|set)[A-Z]\w*\b/i,
     safeguards: [
       { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|checkOwner|authorId|ownerId|userId\s*===)/i, label: "auth_check" },
     ],
