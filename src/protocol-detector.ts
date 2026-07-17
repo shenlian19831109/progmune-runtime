@@ -348,6 +348,142 @@ export function detectSafeguardViolations(calls: string[], enclosingFuncName?: s
 }
 
 // ═══════════════════════════════════════════════════════════════
+// v7: Call Graph — Function-level Context
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Build a reverse call graph: function name → list of caller function names.
+ * From IR FunctionInfo[].calls[], computes the inverse: who calls each function.
+ */
+export function buildCallerMap(funcs: Array<{ name: string; calls?: string[] }>): Map<string, string[]> {
+  const callerMap = new Map<string, string[]>();
+  for (const f of funcs) {
+    if (!f.calls) continue;
+    for (const callee of f.calls) {
+      if (!callerMap.has(callee)) callerMap.set(callee, []);
+      callerMap.get(callee)!.push(f.name);
+    }
+  }
+  return callerMap;
+}
+
+/**
+ * v7: Build safeguard context — own → same-file → caller chain.
+ *
+ * Hierarchy:
+ *   1. Function's own calls + identifier-parsed words
+ *   2. Same-file functions' calls (file-level, as v6)
+ *   3. Transitive caller chain calls (new in v7)
+ */
+function buildSafeguardContext(
+  funcName: string,
+  callerMap: Map<string, string[]>,
+  funcCalls: Map<string, Set<string>>,
+  fileCalls: Map<string, Set<string>>,
+  funcFile: Map<string, string>,
+  visited: Set<string> = new Set()
+): Set<string> {
+  if (visited.has(funcName)) return new Set();
+  visited.add(funcName);
+
+  const context = new Set<string>(funcCalls.get(funcName) || []);
+  // Parse identifier words from funcName itself
+  for (const w of identifierParse(funcName)) context.add(w);
+
+  // ▸ Same-file context (inherited from v6)
+  const file = funcFile.get(funcName);
+  if (file && fileCalls.has(file)) {
+    for (const c of fileCalls.get(file)!) context.add(c);
+  }
+
+  // ▸ Caller chain context (new in v7)
+  const callers = callerMap.get(funcName) || [];
+  for (const caller of callers) {
+    const callerContext = buildSafeguardContext(caller, callerMap, funcCalls, fileCalls, funcFile, visited);
+    for (const c of callerContext) context.add(c);
+  }
+
+  return context;
+}
+
+/**
+ * v7: Detect missing safeguards — Function Context + Call Graph.
+ *
+ * Trigger check: function's own body + file-level calls (same scope as v6).
+ * Safeguard check: own → same-file → transitive caller chain (superset of v6).
+ *
+ * Rationale: narrow triggers (own-body only) break Recall on C projects where
+ * function names don't carry trigger keywords. Keeping v6's file-level trigger
+ * while expanding safeguard context to include caller chain preserves Recall
+ * and improves Precision.
+ */
+export function detectSafeguardViolationsV7(
+  calls: string[],
+  enclosingFuncName: string | undefined,
+  callerMap: Map<string, string[]>,
+  funcCalls: Map<string, Set<string>>,
+  fileCalls: Map<string, Set<string>>,
+  funcFile: Map<string, string>
+): SafeguardViolation[] {
+  const violations: SafeguardViolation[] = [];
+
+  // Build effective calls for trigger scope: own body + file-level (same as v6)
+  const rawCalls = enclosingFuncName ? [enclosingFuncName, ...calls] : [...calls];
+
+  // Add file-level calls to trigger scope (preserves v6 Recall)
+  const file = enclosingFuncName ? funcFile.get(enclosingFuncName) : undefined;
+  const fileLevelCalls = file && fileCalls.has(file) ? [...fileCalls.get(file)!] : [];
+  const triggerRawCalls = [...new Set([...rawCalls, ...fileLevelCalls])];
+
+  const triggerParsedWords: string[] = [];
+  for (const c of triggerRawCalls) {
+    triggerParsedWords.push(...identifierParse(c));
+  }
+  const triggerEffectiveCalls = [...new Set([...triggerRawCalls, ...triggerParsedWords])];
+
+  // Build safeguard context: own + file + all transitive callers
+  const safeContext: Set<string> = enclosingFuncName
+    ? buildSafeguardContext(enclosingFuncName, callerMap, funcCalls, fileCalls, funcFile)
+    : new Set(triggerEffectiveCalls);
+
+  for (const c of triggerEffectiveCalls) safeContext.add(c);
+
+  // Skip authorization rules for auth functions
+  const rawLower = enclosingFuncName?.toLowerCase() || "";
+  const AUTH_PATTERN = /\b(register|signup|signin|login|authenticate|createuser|createaccount|registeruser|registernewuser|dologin|verifytoken|validatesession|getuser|getsessionuser|getcurrentuser|endsession|logout|signout|dologout|destroysession|invalidatesession|invalidate|signout)\b/i;
+  const isAuthFunction = enclosingFuncName != null && (
+    AUTH_PATTERN.test(rawLower) ||
+    identifierParse(enclosingFuncName).some(w => AUTH_PATTERN.test(w))
+  );
+
+  for (const rule of SAFEGUARD_RULES) {
+    // v7b: trigger check against own body + file-level (same scope as v6)
+    const triggerMatch = triggerEffectiveCalls.some(c => rule.trigger.test(c));
+    if (!triggerMatch) continue;
+
+    if (isAuthFunction && rule.category === "authorization") continue;
+
+    // v7: safeguard check against FULL context (own + file + callers)
+    const matchedSafeguard = rule.safeguards.find(s =>
+      [...safeContext].some(c => s.pattern.test(c))
+    );
+    if (matchedSafeguard) continue;
+
+    violations.push({
+      rule: rule.name,
+      category: rule.category,
+      type: "missing_safeguard",
+      detail: rule.violationMessage,
+      conceptDetail: `Missing: ${rule.conceptMissing.join(", ")}. Expected at least one of: ${rule.conceptExpected.join(", ")}`,
+      missingConcepts: rule.conceptMissing,
+      expectedConcepts: rule.conceptExpected,
+    });
+  }
+
+  return violations;
+}
+
+// ═══════════════════════════════════════════════════════════════
 // Detection
 // ═══════════════════════════════════════════════════════════════
 

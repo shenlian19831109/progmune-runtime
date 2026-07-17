@@ -1,0 +1,175 @@
+{
+  "generated": "2026-07-17T08:02:10.027Z",
+  "repos": 7,
+  "totalFunctions": 27668,
+  "totalFindings": 7740,
+  "distribution": {
+    "L1": 6398,
+    "L2": 382,
+    "L3": 960,
+    "L4": 0
+  },
+  "perRepo": [
+    {
+      "repo": "apache",
+      "functions": 5030,
+      "findings": 1464,
+      "L1": 1214,
+      "L2": 52,
+      "L3": 198,
+      "L4": 0
+    },
+    {
+      "repo": "curl",
+      "functions": 2826,
+      "findings": 937,
+      "L1": 771,
+      "L2": 27,
+      "L3": 139,
+      "L4": 0
+    },
+    {
+      "repo": "libssh",
+      "functions": 1320,
+      "findings": 132,
+      "L1": 100,
+      "L2": 16,
+      "L3": 16,
+      "L4": 0
+    },
+    {
+      "repo": "nghttp2",
+      "functions": 421,
+      "findings": 74,
+      "L1": 71,
+      "L2": 1,
+      "L3": 2,
+      "L4": 0
+    },
+    {
+      "repo": "nginx",
+      "functions": 2548,
+      "findings": 608,
+      "L1": 546,
+      "L2": 5,
+      "L3": 57,
+      "L4": 0
+    },
+    {
+      "repo": "openssl",
+      "functions": 9872,
+      "findings": 1212,
+      "L1": 1121,
+      "L2": 33,
+      "L3": 58,
+      "L4": 0
+    },
+    {
+      "repo": "redis",
+      "functions": 5651,
+      "findings": 3313,
+      "L1": 2575,
+      "L2": 248,
+      "L3": 490,
+      "L4": 0
+    }
+  ],
+  "topRules": [
+    {
+      "rule": "Authorization (Ownership)",
+      "total": 2655,
+      "l1": 2653,
+      "l2": 1,
+      "l3": 1,
+      "l4": 0
+    },
+    {
+      "rule": "Authorization (Unauth Access)",
+      "total": 1923,
+      "l1": 1746,
+      "l2": 14,
+      "l3": 163,
+      "l4": 0
+    },
+    {
+      "rule": "Data Integrity (FK)",
+      "total": 1261,
+      "l1": 437,
+      "l2": 248,
+      "l3": 576,
+      "l4": 0
+    },
+    {
+      "rule": "Input Validation",
+      "total": 1210,
+      "l1": 1077,
+      "l2": 61,
+      "l3": 72,
+      "l4": 0
+    },
+    {
+      "rule": "Password Hashing",
+      "total": 452,
+      "l1": 314,
+      "l2": 29,
+      "l3": 109,
+      "l4": 0
+    },
+    {
+      "rule": "Key Derivation Safety",
+      "total": 64,
+      "l1": 13,
+      "l2": 26,
+      "l3": 25,
+      "l4": 0
+    },
+    {
+      "rule": "TLS Enforcement",
+      "total": 40,
+      "l1": 26,
+      "l2": 3,
+      "l3": 11,
+      "l4": 0
+    },
+    {
+      "rule": "Rate Limiting",
+      "total": 40,
+      "l1": 40,
+      "l2": 0,
+      "l3": 0,
+      "l4": 0
+    },
+    {
+      "rule": "Token Security",
+      "total": 37,
+      "l1": 37,
+      "l2": 0,
+      "l3": 0,
+      "l4": 0
+    },
+    {
+      "rule": "Resource Ownership",
+      "total": 30,
+      "l1": 30,
+      "l2": 0,
+      "l3": 0,
+      "l4": 0
+    },
+    {
+      "rule": "Room Membership",
+      "total": 24,
+      "l1": 24,
+      "l2": 0,
+      "l3": 0,
+      "l4": 0
+    },
+    {
+      "rule": "Certificate Pinning",
+      "total": 4,
+      "l1": 1,
+      "l2": 0,
+      "l3": 3,
+      "l4": 0
+    }
+  ]
+}

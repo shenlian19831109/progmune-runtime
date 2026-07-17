@@ -1,0 +1,435 @@
+{
+  "generated": "2026-07-16T11:21:01.205Z",
+  "summary": {
+    "totalSequences": 232,
+    "v5": {
+      "tp": 38,
+      "fp": 194,
+      "tn": 0,
+      "fn": 0,
+      "total": 232,
+      "precision": 0.16379310344827586,
+      "recall": 1,
+      "f1": 0.2814814814814815
+    },
+    "v6": {
+      "tp": 19,
+      "fp": 106,
+      "tn": 88,
+      "fn": 19,
+      "total": 232,
+      "precision": 0.152,
+      "recall": 0.5,
+      "f1": 0.2331288343558282
+    },
+    "v7": {
+      "tp": 19,
+      "fp": 108,
+      "tn": 86,
+      "fn": 19,
+      "total": 232,
+      "precision": 0.14960629921259844,
+      "recall": 0.5,
+      "f1": 0.23030303030303034
+    },
+    "delta_v6_to_v7": {
+      "deltaPrecision": -0.0023937007874015592,
+      "deltaRecall": 0,
+      "deltaF1": -0.0028258040527978645,
+      "netFPFixed": -2,
+      "netTPNew": 0
+    }
+  },
+  "migration": {
+    "v5_to_v6": {
+      "FP→TN (fixed)": {
+        "count": 88,
+        "examples": [
+          "[5] ldap_do (ldap.c)",
+          "[11] Curl_auth_create_ntlm_type3_message (ntlm.c)",
+          "[15] Curl_vtls_apple_verify (apple.c)"
+        ]
+      },
+      "TN→FP (regression)": {
+        "count": 0,
+        "examples": []
+      },
+      "TP→FN (broken)": {
+        "count": 19,
+        "examples": [
+          "[1] mbed_configure_ssl (mbedtls.c)",
+          "[3] myssh_statemachine (libssh.c)",
+          "[16] Curl_conn_connect (connect.c)"
+        ]
+      },
+      "FN→TP (new catch)": {
+        "count": 0,
+        "examples": []
+      },
+      "unchanged": 125
+    },
+    "v6_to_v7": {
+      "FP→TN (fixed)": {
+        "count": 0,
+        "examples": []
+      },
+      "TN→FP (regression)": {
+        "count": 2,
+        "examples": [
+          "[4] SSH_PACKET_CALLBACK (hybrid_mlkem.c)",
+          "[9] SSH_PACKET_CALLBACK (curve25519.c)"
+        ]
+      },
+      "TP→FN (broken)": {
+        "count": 1,
+        "examples": [
+          "[26] Curl_auth_create_digest_md5_message (digest_sspi.c)"
+        ]
+      },
+      "FN→TP (new catch)": {
+        "count": 1,
+        "examples": [
+          "[12] SSH_PACKET_CALLBACK (hybrid_mlkem.c)"
+        ]
+      },
+      "unchanged": 228
+    }
+  },
+  "repos": [
+    {
+      "repo": "curl",
+      "totalLabeled": 85,
+      "cleanCount": 61,
+      "violationCount": 24,
+      "v5": {
+        "tp": 24,
+        "fp": 61,
+        "tn": 0,
+        "fn": 0,
+        "total": 85,
+        "precision": 0.2823529411764706,
+        "recall": 1,
+        "f1": 0.44036697247706424
+      },
+      "v6": {
+        "tp": 17,
+        "fp": 36,
+        "tn": 25,
+        "fn": 7,
+        "total": 85,
+        "precision": 0.32075471698113206,
+        "recall": 0.7083333333333334,
+        "f1": 0.44155844155844154
+      },
+      "v7": {
+        "tp": 16,
+        "fp": 36,
+        "tn": 25,
+        "fn": 8,
+        "total": 85,
+        "precision": 0.3076923076923077,
+        "recall": 0.6666666666666666,
+        "f1": 0.42105263157894735
+      },
+      "migration": {
+        "v5_to_v6": {
+          "FP→TN (fixed)": {
+            "count": 25,
+            "examples": [
+              "[5] ldap_do (ldap.c)",
+              "[11] Curl_auth_create_ntlm_type3_message (ntlm.c)",
+              "[15] Curl_vtls_apple_verify (apple.c)"
+            ]
+          },
+          "TN→FP (regression)": {
+            "count": 0,
+            "examples": []
+          },
+          "TP→FN (broken)": {
+            "count": 7,
+            "examples": [
+              "[1] mbed_configure_ssl (mbedtls.c)",
+              "[3] myssh_statemachine (libssh.c)",
+              "[16] Curl_conn_connect (connect.c)"
+            ]
+          },
+          "FN→TP (new catch)": {
+            "count": 0,
+            "examples": []
+          },
+          "unchanged": 53
+        },
+        "v6_to_v7": {
+          "FP→TN (fixed)": {
+            "count": 0,
+            "examples": []
+          },
+          "TN→FP (regression)": {
+            "count": 0,
+            "examples": []
+          },
+          "TP→FN (broken)": {
+            "count": 1,
+            "examples": [
+              "[26] Curl_auth_create_digest_md5_message (digest_sspi.c)"
+            ]
+          },
+          "FN→TP (new catch)": {
+            "count": 0,
+            "examples": []
+          },
+          "unchanged": 84
+        }
+      }
+    },
+    {
+      "repo": "libssh",
+      "totalLabeled": 47,
+      "cleanCount": 33,
+      "violationCount": 14,
+      "v5": {
+        "tp": 14,
+        "fp": 33,
+        "tn": 0,
+        "fn": 0,
+        "total": 47,
+        "precision": 0.2978723404255319,
+        "recall": 1,
+        "f1": 0.45901639344262296
+      },
+      "v6": {
+        "tp": 2,
+        "fp": 5,
+        "tn": 28,
+        "fn": 12,
+        "total": 47,
+        "precision": 0.2857142857142857,
+        "recall": 0.14285714285714285,
+        "f1": 0.19047619047619047
+      },
+      "v7": {
+        "tp": 3,
+        "fp": 7,
+        "tn": 26,
+        "fn": 11,
+        "total": 47,
+        "precision": 0.3,
+        "recall": 0.21428571428571427,
+        "f1": 0.25
+      },
+      "migration": {
+        "v5_to_v6": {
+          "FP→TN (fixed)": {
+            "count": 28,
+            "examples": [
+              "[1] atomicio (agent.c)",
+              "[2] ssh_config_parse_line_internal (config.c)",
+              "[4] SSH_PACKET_CALLBACK (hybrid_mlkem.c)"
+            ]
+          },
+          "TN→FP (regression)": {
+            "count": 0,
+            "examples": []
+          },
+          "TP→FN (broken)": {
+            "count": 12,
+            "examples": [
+              "[0] ecdh_kex_type_to_curve (ecdh_crypto.c)",
+              "[12] SSH_PACKET_CALLBACK (hybrid_mlkem.c)",
+              "[14] ssh_userauth_agent (auth.c)"
+            ]
+          },
+          "FN→TP (new catch)": {
+            "count": 0,
+            "examples": []
+          },
+          "unchanged": 7
+        },
+        "v6_to_v7": {
+          "FP→TN (fixed)": {
+            "count": 0,
+            "examples": []
+          },
+          "TN→FP (regression)": {
+            "count": 2,
+            "examples": [
+              "[4] SSH_PACKET_CALLBACK (hybrid_mlkem.c)",
+              "[9] SSH_PACKET_CALLBACK (curve25519.c)"
+            ]
+          },
+          "TP→FN (broken)": {
+            "count": 0,
+            "examples": []
+          },
+          "FN→TP (new catch)": {
+            "count": 1,
+            "examples": [
+              "[12] SSH_PACKET_CALLBACK (hybrid_mlkem.c)"
+            ]
+          },
+          "unchanged": 44
+        }
+      }
+    },
+    {
+      "repo": "nginx",
+      "totalLabeled": 50,
+      "cleanCount": 50,
+      "violationCount": 0,
+      "v5": {
+        "tp": 0,
+        "fp": 50,
+        "tn": 0,
+        "fn": 0,
+        "total": 50,
+        "precision": 0,
+        "recall": 0,
+        "f1": 0
+      },
+      "v6": {
+        "tp": 0,
+        "fp": 18,
+        "tn": 32,
+        "fn": 0,
+        "total": 50,
+        "precision": 0,
+        "recall": 0,
+        "f1": 0
+      },
+      "v7": {
+        "tp": 0,
+        "fp": 18,
+        "tn": 32,
+        "fn": 0,
+        "total": 50,
+        "precision": 0,
+        "recall": 0,
+        "f1": 0
+      },
+      "migration": {
+        "v5_to_v6": {
+          "FP→TN (fixed)": {
+            "count": 32,
+            "examples": [
+              "[1] ngx_conf_handler (ngx_conf_file.c)",
+              "[2] ngx_conf_read_token (ngx_conf_file.c)",
+              "[4] ngx_http_perl_eval_anon_sub (ngx_http_perl_module.c)"
+            ]
+          },
+          "TN→FP (regression)": {
+            "count": 0,
+            "examples": []
+          },
+          "TP→FN (broken)": {
+            "count": 0,
+            "examples": []
+          },
+          "FN→TP (new catch)": {
+            "count": 0,
+            "examples": []
+          },
+          "unchanged": 18
+        },
+        "v6_to_v7": {
+          "FP→TN (fixed)": {
+            "count": 0,
+            "examples": []
+          },
+          "TN→FP (regression)": {
+            "count": 0,
+            "examples": []
+          },
+          "TP→FN (broken)": {
+            "count": 0,
+            "examples": []
+          },
+          "FN→TP (new catch)": {
+            "count": 0,
+            "examples": []
+          },
+          "unchanged": 50
+        }
+      }
+    },
+    {
+      "repo": "redis",
+      "totalLabeled": 50,
+      "cleanCount": 50,
+      "violationCount": 0,
+      "v5": {
+        "tp": 0,
+        "fp": 50,
+        "tn": 0,
+        "fn": 0,
+        "total": 50,
+        "precision": 0,
+        "recall": 0,
+        "f1": 0
+      },
+      "v6": {
+        "tp": 0,
+        "fp": 47,
+        "tn": 3,
+        "fn": 0,
+        "total": 50,
+        "precision": 0,
+        "recall": 0,
+        "f1": 0
+      },
+      "v7": {
+        "tp": 0,
+        "fp": 47,
+        "tn": 3,
+        "fn": 0,
+        "total": 50,
+        "precision": 0,
+        "recall": 0,
+        "f1": 0
+      },
+      "migration": {
+        "v5_to_v6": {
+          "FP→TN (fixed)": {
+            "count": 3,
+            "examples": [
+              "[11] quicklistTest (quicklist.c)",
+              "[46] loadServerConfigFromString (config.c)",
+              "[47] dictTest (dict.c)"
+            ]
+          },
+          "TN→FP (regression)": {
+            "count": 0,
+            "examples": []
+          },
+          "TP→FN (broken)": {
+            "count": 0,
+            "examples": []
+          },
+          "FN→TP (new catch)": {
+            "count": 0,
+            "examples": []
+          },
+          "unchanged": 47
+        },
+        "v6_to_v7": {
+          "FP→TN (fixed)": {
+            "count": 0,
+            "examples": []
+          },
+          "TN→FP (regression)": {
+            "count": 0,
+            "examples": []
+          },
+          "TP→FN (broken)": {
+            "count": 0,
+            "examples": []
+          },
+          "FN→TP (new catch)": {
+            "count": 0,
+            "examples": []
+          },
+          "unchanged": 50
+        }
+      }
+    }
+  ]
+}

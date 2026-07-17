@@ -1,0 +1,81 @@
+{
+  "generated": "2026-07-17T08:04:33.606Z",
+  "metric": "functions per 1000 lines of C code",
+  "qualifiedThreshold": 10,
+  "qualifiedRepos": [
+    "apache",
+    "curl",
+    "libssh",
+    "nghttp2",
+    "nginx",
+    "openssl",
+    "redis"
+  ],
+  "marginalRepos": [],
+  "excludedRepos": [],
+  "coverages": [
+    {
+      "repo": "apache",
+      "cFiles": 325,
+      "hFiles": 0,
+      "cLines": 297184,
+      "parsedFunctions": 5028,
+      "funcPerKLOC": 16.9188112415204,
+      "qualified": true
+    },
+    {
+      "repo": "curl",
+      "cFiles": 244,
+      "hFiles": 0,
+      "cLines": 176602,
+      "parsedFunctions": 2826,
+      "funcPerKLOC": 16.002083781610626,
+      "qualified": true
+    },
+    {
+      "repo": "libssh",
+      "cFiles": 128,
+      "hFiles": 0,
+      "cLines": 105010,
+      "parsedFunctions": 1320,
+      "funcPerKLOC": 12.570231406532711,
+      "qualified": true
+    },
+    {
+      "repo": "nghttp2",
+      "cFiles": 38,
+      "hFiles": 0,
+      "cLines": 37076,
+      "parsedFunctions": 421,
+      "funcPerKLOC": 11.355054482684215,
+      "qualified": true
+    },
+    {
+      "repo": "nginx",
+      "cFiles": 264,
+      "hFiles": 0,
+      "cLines": 232821,
+      "parsedFunctions": 2548,
+      "funcPerKLOC": 10.944029962932897,
+      "qualified": true
+    },
+    {
+      "repo": "openssl",
+      "cFiles": 1291,
+      "hFiles": 0,
+      "cLines": 558127,
+      "parsedFunctions": 9835,
+      "funcPerKLOC": 17.62143741478194,
+      "qualified": true
+    },
+    {
+      "repo": "redis",
+      "cFiles": 286,
+      "hFiles": 0,
+      "cLines": 261870,
+      "parsedFunctions": 5651,
+      "funcPerKLOC": 21.579409630732805,
+      "qualified": true
+    }
+  ]
+}

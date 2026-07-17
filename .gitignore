@@ -16,3 +16,30 @@ docs/Progmune_Runtime_内部技术白皮书*
 docs/Progmune_Runtime_技术白皮书*
 dist-mcp
 benchmarks/generated/
+# Large benchmark repo clones (gitignored, use scripts/extract-sequences.ts to regenerate)
+benchmarks/apache/
+benchmarks/curl/
+benchmarks/libssh/
+benchmarks/nghttp2/
+benchmarks/nginx/
+benchmarks/openssl/
+benchmarks/redis/
+benchmark-pilot/
+# Blind benchmark generated projects
+blind-benchmark/generated/
+# Large data files
+.progmune_corpus/
+.progmune_generated/
+.progmune_keys/
+.progmune_memory/
+.progmune_repair_tmp/
+.locks/
+test-real-requests/
+dist/
+ir.json
+ir_large.json
+feedback.json
+protocols.json
+blind-benchmark/reports/batch-scan-results.json
+blind-benchmark/reports/asset-coverage-matrix.json
+blind-benchmark/reports/capability-gap-analysis.json

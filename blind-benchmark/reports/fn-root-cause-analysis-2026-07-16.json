@@ -1,0 +1,186 @@
+{
+  "generated": "2026-07-16T11:47:54.052Z",
+  "totalFNs": 19,
+  "distribution": {
+    "rule_missing": 12,
+    "parser_failed": 5,
+    "rule_logic_flawed": 2
+  },
+  "details": [
+    {
+      "repo": "curl",
+      "idx": 1,
+      "function": "mbed_configure_ssl",
+      "file": "lib/vtls/mbedtls.c",
+      "rootCause": "rule_missing",
+      "explanation": "No safeguard rule's trigger matches function \"mbed_configure_ssl\" or its file context. Rules are designed for TS/web patterns and don't cover C protocol functions.",
+      "triggeredRules": []
+    },
+    {
+      "repo": "curl",
+      "idx": 3,
+      "function": "myssh_statemachine",
+      "file": "lib/vssh/libssh.c",
+      "rootCause": "rule_missing",
+      "explanation": "No safeguard rule's trigger matches function \"myssh_statemachine\" or its file context. Rules are designed for TS/web patterns and don't cover C protocol functions.",
+      "triggeredRules": []
+    },
+    {
+      "repo": "curl",
+      "idx": 16,
+      "function": "Curl_conn_connect",
+      "file": "lib/connect.c",
+      "rootCause": "parser_failed",
+      "explanation": "Function \"Curl_conn_connect\" contains action words (connect) but no trigger matches. Rules need C-specific patterns.",
+      "triggeredRules": []
+    },
+    {
+      "repo": "curl",
+      "idx": 22,
+      "function": "schannel_connect_step2",
+      "file": "lib/vtls/schannel.c",
+      "rootCause": "parser_failed",
+      "explanation": "Function \"schannel_connect_step2\" contains action words (connect) but no trigger matches. Rules need C-specific patterns.",
+      "triggeredRules": []
+    },
+    {
+      "repo": "curl",
+      "idx": 27,
+      "function": "Curl_auth_decode_spnego_message",
+      "file": "lib/vauth/spnego_sspi.c",
+      "rootCause": "parser_failed",
+      "explanation": "Function \"Curl_auth_decode_spnego_message\" contains action words (auth) but no trigger matches. Rules need C-specific patterns.",
+      "triggeredRules": []
+    },
+    {
+      "repo": "curl",
+      "idx": 71,
+      "function": "Curl_pin_peer_pubkey",
+      "file": "lib/vtls/vtls.c",
+      "rootCause": "rule_missing",
+      "explanation": "No safeguard rule's trigger matches function \"Curl_pin_peer_pubkey\" or its file context. Rules are designed for TS/web patterns and don't cover C protocol functions.",
+      "triggeredRules": []
+    },
+    {
+      "repo": "curl",
+      "idx": 85,
+      "function": "Curl_auth_create_ntlm_type1_message",
+      "file": "lib/vauth/ntlm_sspi.c",
+      "rootCause": "parser_failed",
+      "explanation": "Function \"Curl_auth_create_ntlm_type1_message\" contains action words (auth, create) but no trigger matches. Rules need C-specific patterns.",
+      "triggeredRules": []
+    },
+    {
+      "repo": "libssh",
+      "idx": 0,
+      "function": "ecdh_kex_type_to_curve",
+      "file": "src/ecdh_crypto.c",
+      "rootCause": "rule_missing",
+      "explanation": "No safeguard rule's trigger matches function \"ecdh_kex_type_to_curve\" or its file context. Rules are designed for TS/web patterns and don't cover C protocol functions.",
+      "triggeredRules": []
+    },
+    {
+      "repo": "libssh",
+      "idx": 12,
+      "function": "SSH_PACKET_CALLBACK",
+      "file": "src/hybrid_mlkem.c",
+      "rootCause": "rule_missing",
+      "explanation": "No safeguard rule's trigger matches function \"SSH_PACKET_CALLBACK\" or its file context. Rules are designed for TS/web patterns and don't cover C protocol functions.",
+      "triggeredRules": []
+    },
+    {
+      "repo": "libssh",
+      "idx": 14,
+      "function": "ssh_userauth_agent",
+      "file": "src/auth.c",
+      "rootCause": "rule_missing",
+      "explanation": "No safeguard rule's trigger matches function \"ssh_userauth_agent\" or its file context. Rules are designed for TS/web patterns and don't cover C protocol functions.",
+      "triggeredRules": []
+    },
+    {
+      "repo": "libssh",
+      "idx": 15,
+      "function": "ssh_userauth_publickey_auto",
+      "file": "src/auth.c",
+      "rootCause": "rule_missing",
+      "explanation": "No safeguard rule's trigger matches function \"ssh_userauth_publickey_auto\" or its file context. Rules are designed for TS/web patterns and don't cover C protocol functions.",
+      "triggeredRules": []
+    },
+    {
+      "repo": "libssh",
+      "idx": 19,
+      "function": "ecdh_build_k",
+      "file": "src/ecdh_gcrypt.c",
+      "rootCause": "rule_missing",
+      "explanation": "No safeguard rule's trigger matches function \"ecdh_build_k\" or its file context. Rules are designed for TS/web patterns and don't cover C protocol functions.",
+      "triggeredRules": []
+    },
+    {
+      "repo": "libssh",
+      "idx": 27,
+      "function": "ssh_exec_shell",
+      "file": "src/config.c",
+      "rootCause": "rule_logic_flawed",
+      "explanation": "Rules triggered but safeguards found in file context. The safeguard is a false match — the file happens to contain a word that matches the safeguard regex but doesn't actually provide the protection.",
+      "triggeredRules": [
+        "Authorization (Unauthenticated Access)"
+      ]
+    },
+    {
+      "repo": "libssh",
+      "idx": 32,
+      "function": "ecdh_build_k",
+      "file": "src/ecdh_mbedcrypto.c",
+      "rootCause": "rule_missing",
+      "explanation": "No safeguard rule's trigger matches function \"ecdh_build_k\" or its file context. Rules are designed for TS/web patterns and don't cover C protocol functions.",
+      "triggeredRules": []
+    },
+    {
+      "repo": "libssh",
+      "idx": 36,
+      "function": "ssh_dh_set_parameters",
+      "file": "src/dh_crypto.c",
+      "rootCause": "rule_missing",
+      "explanation": "No safeguard rule's trigger matches function \"ssh_dh_set_parameters\" or its file context. Rules are designed for TS/web patterns and don't cover C protocol functions.",
+      "triggeredRules": []
+    },
+    {
+      "repo": "libssh",
+      "idx": 37,
+      "function": "derive_hybrid_secret",
+      "file": "src/hybrid_mlkem.c",
+      "rootCause": "rule_missing",
+      "explanation": "No safeguard rule's trigger matches function \"derive_hybrid_secret\" or its file context. Rules are designed for TS/web patterns and don't cover C protocol functions.",
+      "triggeredRules": []
+    },
+    {
+      "repo": "libssh",
+      "idx": 38,
+      "function": "ssh_agent_remove_identity",
+      "file": "src/agent.c",
+      "rootCause": "rule_missing",
+      "explanation": "No safeguard rule's trigger matches function \"ssh_agent_remove_identity\" or its file context. Rules are designed for TS/web patterns and don't cover C protocol functions.",
+      "triggeredRules": []
+    },
+    {
+      "repo": "libssh",
+      "idx": 39,
+      "function": "ssh_select",
+      "file": "src/connect.c",
+      "rootCause": "rule_logic_flawed",
+      "explanation": "Rules triggered but safeguards found in file context. The safeguard is a false match — the file happens to contain a word that matches the safeguard regex but doesn't actually provide the protection.",
+      "triggeredRules": [
+        "Authorization (Unauthenticated Access)"
+      ]
+    },
+    {
+      "repo": "libssh",
+      "idx": 40,
+      "function": "curve25519_do_create_k",
+      "file": "src/curve25519_gcrypt.c",
+      "rootCause": "parser_failed",
+      "explanation": "Function \"curve25519_do_create_k\" contains action words (create) but no trigger matches. Rules need C-specific patterns.",
+      "triggeredRules": []
+    }
+  ]
+}

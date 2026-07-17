@@ -1,0 +1,241 @@
+{
+  "experimentId": "019",
+  "question": "Does Auth Message Lifecycle deserve to be a protocol category?",
+  "independentVariable": "One new rule: Auth Message Lifecycle (NTLM/SPNEGO/SSH userauth)",
+  "benchmark": "Gold v1 (curl + libssh)",
+  "baseline": {
+    "TP": 22,
+    "FP": 41,
+    "TN": 53,
+    "FN": 16,
+    "precision": 0.3492063492063492,
+    "recall": 0.5789473684210527,
+    "f1": 0.43564356435643564
+  },
+  "experiment": {
+    "TP": 27,
+    "FP": 52,
+    "TN": 42,
+    "FN": 11,
+    "precision": 0.34177215189873417,
+    "recall": 0.7105263157894737,
+    "f1": 0.4615384615384615
+  },
+  "delta": {
+    "TP": 5,
+    "FP": 11,
+    "TN": -11,
+    "FN": -5
+  },
+  "authFNRecovery": "5/5",
+  "changedSequences": [
+    {
+      "repo": "curl",
+      "idx": 11,
+      "function": "Curl_auth_create_ntlm_type3_message",
+      "file": "ntlm.c",
+      "expected": "clean",
+      "baselineVerdict": "clean",
+      "experimentalVerdict": "violation",
+      "baselineVios": [],
+      "experimentalVios": [
+        "Auth Message Lifecycle"
+      ]
+    },
+    {
+      "repo": "curl",
+      "idx": 27,
+      "function": "Curl_auth_decode_spnego_message",
+      "file": "spnego_sspi.c",
+      "expected": "violation",
+      "baselineVerdict": "clean",
+      "experimentalVerdict": "violation",
+      "baselineVios": [],
+      "experimentalVios": [
+        "Auth Message Lifecycle"
+      ]
+    },
+    {
+      "repo": "curl",
+      "idx": 34,
+      "function": "Curl_auth_create_gssapi_user_message",
+      "file": "krb5_sspi.c",
+      "expected": "clean",
+      "baselineVerdict": "clean",
+      "experimentalVerdict": "violation",
+      "baselineVios": [],
+      "experimentalVios": [
+        "Auth Message Lifecycle"
+      ]
+    },
+    {
+      "repo": "curl",
+      "idx": 67,
+      "function": "Curl_auth_create_digest_md5_message",
+      "file": "digest.c",
+      "expected": "clean",
+      "baselineVerdict": "clean",
+      "experimentalVerdict": "violation",
+      "baselineVios": [],
+      "experimentalVios": [
+        "Auth Message Lifecycle"
+      ]
+    },
+    {
+      "repo": "curl",
+      "idx": 85,
+      "function": "Curl_auth_create_ntlm_type1_message",
+      "file": "ntlm_sspi.c",
+      "expected": "violation",
+      "baselineVerdict": "clean",
+      "experimentalVerdict": "violation",
+      "baselineVios": [],
+      "experimentalVios": [
+        "Auth Message Lifecycle"
+      ]
+    },
+    {
+      "repo": "curl",
+      "idx": 93,
+      "function": "Curl_output_ntlm",
+      "file": "http_ntlm.c",
+      "expected": "clean",
+      "baselineVerdict": "clean",
+      "experimentalVerdict": "violation",
+      "baselineVios": [],
+      "experimentalVios": [
+        "Auth Message Lifecycle"
+      ]
+    },
+    {
+      "repo": "libssh",
+      "idx": 1,
+      "function": "atomicio",
+      "file": "agent.c",
+      "expected": "clean",
+      "baselineVerdict": "clean",
+      "experimentalVerdict": "violation",
+      "baselineVios": [],
+      "experimentalVios": [
+        "Auth Message Lifecycle"
+      ]
+    },
+    {
+      "repo": "libssh",
+      "idx": 7,
+      "function": "ssh_agent_sign_data",
+      "file": "agent.c",
+      "expected": "clean",
+      "baselineVerdict": "clean",
+      "experimentalVerdict": "violation",
+      "baselineVios": [],
+      "experimentalVios": [
+        "Auth Message Lifecycle"
+      ]
+    },
+    {
+      "repo": "libssh",
+      "idx": 14,
+      "function": "ssh_userauth_agent",
+      "file": "auth.c",
+      "expected": "violation",
+      "baselineVerdict": "clean",
+      "experimentalVerdict": "violation",
+      "baselineVios": [],
+      "experimentalVios": [
+        "Auth Message Lifecycle"
+      ]
+    },
+    {
+      "repo": "libssh",
+      "idx": 15,
+      "function": "ssh_userauth_publickey_auto",
+      "file": "auth.c",
+      "expected": "violation",
+      "baselineVerdict": "clean",
+      "experimentalVerdict": "violation",
+      "baselineVios": [],
+      "experimentalVios": [
+        "Auth Message Lifecycle"
+      ]
+    },
+    {
+      "repo": "libssh",
+      "idx": 17,
+      "function": "ssh_userauth_publickey",
+      "file": "auth.c",
+      "expected": "clean",
+      "baselineVerdict": "clean",
+      "experimentalVerdict": "violation",
+      "baselineVios": [],
+      "experimentalVios": [
+        "Auth Message Lifecycle"
+      ]
+    },
+    {
+      "repo": "libssh",
+      "idx": 25,
+      "function": "ssh_userauth_try_publickey",
+      "file": "auth.c",
+      "expected": "clean",
+      "baselineVerdict": "clean",
+      "experimentalVerdict": "violation",
+      "baselineVios": [],
+      "experimentalVios": [
+        "Auth Message Lifecycle"
+      ]
+    },
+    {
+      "repo": "libssh",
+      "idx": 28,
+      "function": "ssh_userauth_agent_publickey",
+      "file": "auth.c",
+      "expected": "clean",
+      "baselineVerdict": "clean",
+      "experimentalVerdict": "violation",
+      "baselineVios": [],
+      "experimentalVios": [
+        "Auth Message Lifecycle"
+      ]
+    },
+    {
+      "repo": "libssh",
+      "idx": 38,
+      "function": "ssh_agent_remove_identity",
+      "file": "agent.c",
+      "expected": "violation",
+      "baselineVerdict": "clean",
+      "experimentalVerdict": "violation",
+      "baselineVios": [],
+      "experimentalVios": [
+        "Auth Message Lifecycle"
+      ]
+    },
+    {
+      "repo": "libssh",
+      "idx": 44,
+      "function": "ssh_agent_get_ident_count",
+      "file": "agent.c",
+      "expected": "clean",
+      "baselineVerdict": "clean",
+      "experimentalVerdict": "violation",
+      "baselineVios": [],
+      "experimentalVios": [
+        "Auth Message Lifecycle"
+      ]
+    },
+    {
+      "repo": "libssh",
+      "idx": 45,
+      "function": "ssh_userauth_gssapi_keyex",
+      "file": "auth.c",
+      "expected": "clean",
+      "baselineVerdict": "clean",
+      "experimentalVerdict": "violation",
+      "baselineVios": [],
+      "experimentalVios": [
+        "Auth Message Lifecycle"
+      ]
+    }
+  ]
+}

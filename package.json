@@ -51,6 +51,7 @@
     "kb:flywheel": "npx ts-node src/knowledge-flywheel.ts",
     "kb:flywheel:scan": "npx ts-node src/knowledge-flywheel.ts scan",
     "kb:flywheel:status": "npx ts-node src/knowledge-flywheel.ts status",
+    "coverage": "npx ts-node blind-benchmark/taxonomy/coverage-dashboard.ts",
     "sdk": "npx ts-node src/sdk.ts",
     "sdk:compat": "npx ts-node src/sdk.ts compat",
     "provenance": "npx ts-node src/ledger/cli.ts",

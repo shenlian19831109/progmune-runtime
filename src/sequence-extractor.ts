@@ -84,20 +84,56 @@ function extractFromCFile(filePath: string, maxBodyLines: number): CallSequence[
   const lines = content.split('\n');
   const sequences: CallSequence[] = [];
 
-  const funcRegex = /^\s*(?:static\s+)?(?:inline\s+)?(?:[a-zA-Z_][a-zA-Z0-9_]*\s+)+?([a-zA-Z_][a-zA-Z0-9_]*)\s*\([^;]*\)\s*\{/;
+  // v2: Multi-line function signature matching.
+  // Handles: Type *func(...) {, static Type\nfunc(...) {, MACRO\nType func(...) {
+  // Strategy: scan for identifier(...) { pattern, then backtrack for return type.
+
+  const C_KEYWORDS = new Set([
+    'if', 'for', 'while', 'switch', 'return', 'sizeof', 'typeof',
+    'goto', 'break', 'continue', 'case', 'default', 'do', 'else',
+    'struct', 'union', 'enum', 'typedef', 'extern', 'volatile', 'const',
+  ]);
 
   let i = 0;
   while (i < lines.length) {
-    const line = lines[i];
-    const match = line.match(funcRegex);
-    if (match) {
-      const funcName = match[1];
-      const startLine = i;
-      let bodyLines = 0;
-      let braceCount = 1;
+    // Build a multi-line buffer: join consecutive lines until we see '{' or ';'
+    let buf = '';
+    let bufStart = i;
+    while (i < lines.length) {
+      const line = lines[i].trim();
+      buf += (buf ? ' ' : '') + line;
+      if (line.includes('{') || line.includes(';')) break;
+      i++;
+    }
+
+    if (i >= lines.length) break;
+
+    // Skip preprocessor directives, comments, and declarations (lines ending with ;)
+    if (buf.trim().startsWith('#') || buf.trim().startsWith('//') || buf.trim().startsWith('/*')) {
+      i++;
+      continue;
+    }
+
+    // v2 regex: handles pointer types, struct types, multi-word return types
+    // Matches: [static] [inline] [attributes] ReturnType [*] funcName(params) {
+    const funcMatch = buf.match(
+      /(?:^|\s)(?:static\s+)?(?:inline\s+)?(?:__attribute__\s*\([^)]*\)\s*)?(?:OSSL_DEPRECATEDIN\S*\s*)?(?:[a-zA-Z_][a-zA-Z0-9_]*\s+(?:\*\s*)?)*?([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^;]*?)\)\s*\{/
+    );
+
+    if (funcMatch && !C_KEYWORDS.has(funcMatch[1]) && !funcMatch[1].startsWith('__')) {
+      const funcName = funcMatch[1];
+      const startLine = bufStart;
+      let braceCount = 0;
       const calls: string[] = [];
 
+      // Find the opening brace position
+      const braceIdx = buf.indexOf('{', funcMatch.index! + funcMatch[0].length - 1);
+      if (braceIdx >= 0) braceCount = 1;
+
+      // Advance i past the current line if it's been consumed in buf
       i++;
+
+      let bodyLines = 0;
       while (i < lines.length && braceCount > 0) {
         const currentLine = lines[i];
         for (const char of currentLine) {
@@ -107,11 +143,13 @@ function extractFromCFile(filePath: string, maxBodyLines: number): CallSequence[
 
         if (braceCount > 0) {
           bodyLines++;
-          const callMatches = currentLine.matchAll(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/g);
-          for (const cm of callMatches) {
-            const called = cm[1];
-            if (!['if', 'for', 'while', 'switch', 'return', 'sizeof', 'typeof'].includes(called)) {
-              calls.push(called);
+          if (bodyLines <= maxBodyLines) {
+            const callMatches = currentLine.matchAll(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/g);
+            for (const cm of callMatches) {
+              const called = cm[1];
+              if (!C_KEYWORDS.has(called) && !called.startsWith('__')) {
+                calls.push(called);
+              }
             }
           }
         }

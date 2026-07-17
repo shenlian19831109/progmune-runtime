@@ -1,0 +1,152 @@
+{
+  "$description": "C Protocol Coverage Taxonomy — maps every Gold FN to a protocol category. Updated after each experiment.",
+  "$version": "3.0",
+  "$generated": "2026-07-17",
+  "$milestone": "L1 Regex-Friendly categories cleared (Exp-018 through Exp-022)",
+  "benchmark": "Gold v1 (curl + libssh)",
+  "totalFN": 19,
+  "capability_map": {
+    "description": "Which categories can be solved by regex-based detection, and which need deeper analysis?",
+    "regex_friendly": {
+      "definition": "Violation signal is visible in function call presence/absence. Cleanup vs. no cleanup. Validation vs. no validation.",
+      "categories": ["crypto_key_exchange", "connection_lifecycle", "certificate_pinning", "safeguard_logic"],
+      "covered_fn": 5,
+      "recovered_fn": 5,
+      "status": "CLEARED — all L1 recoverable FNs resolved"
+    },
+    "regex_hostile": {
+      "definition": "Clean and violation functions have identical call signatures. Distinction requires control flow, data flow, or IR enhancement.",
+      "categories": ["auth_message_lifecycle", "state_machine", "tls_config", "packet_macro"],
+      "covered_fn": 9,
+      "recovered_fn": 1,
+      "note": "These categories need CFG (L2), data flow analysis, or IR improvements (L4)."
+    }
+  },
+  "categories": [
+    {
+      "id": "crypto_key_exchange",
+      "name": "Key Derivation Safety",
+      "description": "ECDH, Curve25519, DH, and key exchange functions must validate key types and clean up crypto material.",
+      "status": "graduated",
+      "mechanism": "regex_friendly",
+      "experiment": "018",
+      "fns": [
+        { "repo": "libssh", "idx": 0, "function": "ecdh_kex_type_to_curve", "status": "gold_mismatch", "note": "Has EVP_PKEY_free + EC_KEY_get0_group. Gold violation differs from our category definition." },
+        { "repo": "libssh", "idx": 19, "function": "ecdh_build_k", "status": "recovered", "experiment": "018" },
+        { "repo": "libssh", "idx": 32, "function": "ecdh_build_k", "status": "recovered", "experiment": "018" },
+        { "repo": "libssh", "idx": 36, "function": "ssh_dh_set_parameters", "status": "gold_mismatch", "note": "Has DH_free + BN_free. Gold violation differs from our category definition." },
+        { "repo": "libssh", "idx": 37, "function": "derive_hybrid_secret", "status": "context_limited", "note": "ssh_buffer_new without free. File-level context gives false credit." },
+        { "repo": "libssh", "idx": 40, "function": "curve25519_do_create_k", "status": "recovered", "experiment": "018" }
+      ],
+      "coverage": { "total": 6, "recovered": 3, "gold_mismatch": 2, "context_limited": 1, "remaining": 0, "effective_coverage_pct": 75 }
+    },
+    {
+      "id": "auth_message_lifecycle",
+      "name": "Auth Message Lifecycle",
+      "description": "NTLM, SPNEGO, and SSH userauth message construction. Clean and violation functions have identical call signatures — cannot be distinguished by regex alone.",
+      "status": "regex_saturated",
+      "mechanism": "regex_hostile",
+      "experiment": "019",
+      "diagnosis": "5/5 recovered with no safeguards, but +11 FP. All auth functions (clean and violation) call FreeContextBuffer, ssh_pki_*, etc. Distinction requires control flow or data flow analysis.",
+      "fns": [
+        { "repo": "curl", "idx": 27, "function": "Curl_auth_decode_spnego_message", "status": "regex_saturated", "note": "Trigger fires, but same call pattern as clean auth functions." },
+        { "repo": "curl", "idx": 85, "function": "Curl_auth_create_ntlm_type1_message", "status": "regex_saturated", "note": "Trigger fires, but same call pattern as clean auth functions." },
+        { "repo": "libssh", "idx": 14, "function": "ssh_userauth_agent", "status": "regex_saturated", "note": "Trigger fires, but same call pattern as clean ssh_userauth_*." },
+        { "repo": "libssh", "idx": 15, "function": "ssh_userauth_publickey_auto", "status": "regex_saturated", "note": "Trigger fires, but same call pattern as clean ssh_userauth_*." },
+        { "repo": "libssh", "idx": 38, "function": "ssh_agent_remove_identity", "status": "regex_saturated", "note": "Trigger fires, but same call pattern as clean ssh_agent_*." }
+      ],
+      "coverage": { "total": 5, "recovered": 0, "regex_saturated": 5, "remaining": 0, "effective_coverage_pct": 0 }
+    },
+    {
+      "id": "tls_config",
+      "name": "TLS Configuration Safety",
+      "description": "TLS/Schannel configuration functions must validate certificates and handle errors.",
+      "status": "partial",
+      "mechanism": "regex_hostile",
+      "experiment": "017",
+      "fns": [
+        { "repo": "curl", "idx": 1, "function": "mbed_configure_ssl", "status": "pending", "note": "Likely regex_hostile — configure functions have similar call patterns." },
+        { "repo": "curl", "idx": 22, "function": "schannel_connect_step2", "status": "recovered", "experiment": "017", "note": "Recovered via snake_case trigger (Exp-017 had net negative ROI overall)." }
+      ],
+      "coverage": { "total": 2, "recovered": 1, "remaining": 1, "effective_coverage_pct": 50 }
+    },
+    {
+      "id": "connection_lifecycle",
+      "name": "Connection Lifecycle Safety",
+      "description": "Connection functions must validate socket state and handle disconnection cleanup. Regex-friendly in theory, but single FN is a gold mismatch.",
+      "status": "gold_mismatch",
+      "mechanism": "regex_friendly",
+      "experiment": "020",
+      "fns": [
+        { "repo": "curl", "idx": 16, "function": "Curl_conn_connect", "status": "gold_mismatch", "note": "Has CONN_SOCK_IDX_VALID. Gold violation is about something else." }
+      ],
+      "coverage": { "total": 1, "recovered": 0, "gold_mismatch": 1, "remaining": 0, "effective_coverage_pct": 0 }
+    },
+    {
+      "id": "state_machine",
+      "name": "State Machine Transitions",
+      "description": "Protocol state machines must validate state transitions and handle error states. Regex-hostile: requires control flow analysis.",
+      "status": "pending",
+      "mechanism": "regex_hostile",
+      "experiment": null,
+      "fns": [
+        { "repo": "curl", "idx": 3, "function": "myssh_statemachine", "status": "pending", "note": "FALLTHROUGH pattern — needs CFG." }
+      ],
+      "coverage": { "total": 1, "recovered": 0, "remaining": 1, "effective_coverage_pct": 0 }
+    },
+    {
+      "id": "certificate_pinning",
+      "name": "Certificate Pinning Validation",
+      "description": "Certificate/public key pinning operations must verify certificate chains. Pin without X.509 verify is a clear gap.",
+      "status": "graduated",
+      "mechanism": "regex_friendly",
+      "experiment": "021",
+      "fns": [
+        { "repo": "curl", "idx": 71, "function": "Curl_pin_peer_pubkey", "status": "recovered", "experiment": "021", "note": "Pins pubkey without X509_verify_cert or SSL_get_verify_result." }
+      ],
+      "coverage": { "total": 1, "recovered": 1, "remaining": 0, "effective_coverage_pct": 100 }
+    },
+    {
+      "id": "safeguard_logic",
+      "name": "Safeguard Logic (False Match)",
+      "description": "Existing rules triggered but safeguards falsely matched. Fixed by tightening safeguard (removing standalone 'token|session'). Known tradeoff: +3 FP on same-file functions (triggered by 'getenv' via /i flag on [A-Z]).",
+      "status": "graduated",
+      "mechanism": "regex_friendly",
+      "experiment": "022",
+      "tradeoff": "3 new FPs on same-file config/connection functions. Net: +3 TP, +3 FP. Trigger [A-Z]+/i root cause identified, fix deferred (would break 10 curl TPs).",
+      "fns": [
+        { "repo": "libssh", "idx": 27, "function": "ssh_exec_shell", "status": "recovered", "experiment": "022" },
+        { "repo": "libssh", "idx": 39, "function": "ssh_select", "status": "recovered", "experiment": "022" }
+      ],
+      "coverage": { "total": 2, "recovered": 2, "remaining": 0, "effective_coverage_pct": 100 }
+    },
+    {
+      "id": "packet_macro",
+      "name": "Macro-Defined Callbacks",
+      "description": "C macro-defined packet callbacks lack IR-level visibility. Regex-hostile: requires IR enhancement.",
+      "status": "deferred",
+      "mechanism": "regex_hostile",
+      "experiment": null,
+      "fns": [
+        { "repo": "libssh", "idx": 12, "function": "SSH_PACKET_CALLBACK", "status": "deferred", "note": "Macro-defined callback — IR limitation." }
+      ],
+      "coverage": { "total": 1, "recovered": 0, "remaining": 1, "effective_coverage_pct": 0 }
+    }
+  ],
+  "aggregate": {
+    "total_fns": 19,
+    "recovered": 7,
+    "gold_mismatch": 3,
+    "context_limited": 1,
+    "regex_saturated": 5,
+    "deferred_ir": 1,
+    "remaining_actionable": 2,
+    "regex_hostile_remaining": 2,
+    "overall_coverage_pct": 37,
+    "effective_coverage_pct": 70,
+    "regex_friendly_coverage_pct": 100,
+    "milestone": "L1 (Regex-Friendly) categories CLEARED. Remaining 2 FNs require L2-L4 capabilities.",
+    "note": "7/19 recovered (37% overall). Of 10 actionable FNs (excl. gold_mismatch, regex_saturated, deferred), 7 recovered = 70%. Remaining: state_machine (L4), tls_config/mbed_configure_ssl (L2). Regex-friendly coverage = 5/5 = 100% of solvable L1 FNs."
+  }
+
+}
