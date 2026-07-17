@@ -136,6 +136,7 @@ export function parseResourceName(functionName: string): { verb: string; entity:
     "upload", "download", "send", "receive",
     "toggle", "lock", "unlock", "enable", "disable",
     "follow", "unfollow", "like", "unlike",
+    "hash", "generate", "sign", "encrypt", "decrypt",
   ];
 
   for (const verb of verbPatterns) {
@@ -188,11 +189,17 @@ export function abstractResource(functionName: string): ResourceAbstraction | nu
 
   const { kind, protocols, confidence } = classifyResource(parsed.entity);
 
+  // Read operations on mutable resources: classify as reference_data
+  // (accessing a resource doesn't mutate it; the entity type reflects the access mode)
+  const adjustedKind: ResourceKind = READ_VERBS.has(parsed.verb) && kind === "mutable_resource"
+    ? "reference_data"
+    : kind;
+
   return {
     original: functionName,
     verb: parsed.verb,
     entity: parsed.entity,
-    kind,
+    kind: adjustedKind,
     requiredProtocols: protocols,
     confidence,
   };
