@@ -1,0 +1,472 @@
+{
+  "protocol": "ConditionalProtocol",
+  "generatedAt": "2026-07-03T15:34:23.107Z",
+  "cases": [
+    {
+      "goal": "cover transition: COND_IDLE → COND_EVALUATED via evaluate_access",
+      "protocol": "_global",
+      "broken": [
+        "retry_evaluation",
+        "grant_access",
+        "deny_access",
+        "bypass_condition"
+      ],
+      "expected": [
+        "retry_evaluation",
+        "evaluate_access",
+        "grant_access",
+        "deny_access",
+        "bypass_condition"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "COND_IDLE",
+        "to": "COND_EVALUATED",
+        "rule": "evaluate_access"
+      }
+    },
+    {
+      "goal": "cover transition: COND_EVALUATED → COND_ACCEPTED via grant_access",
+      "protocol": "_global",
+      "broken": [
+        "evaluate_access",
+        "log_granted",
+        "audit_condition"
+      ],
+      "expected": [
+        "evaluate_access",
+        "grant_access",
+        "log_granted",
+        "audit_condition"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "COND_EVALUATED",
+        "to": "COND_ACCEPTED",
+        "rule": "grant_access"
+      }
+    },
+    {
+      "goal": "cover transition: COND_EVALUATED → ∅ via grant_access",
+      "protocol": "_global",
+      "broken": [
+        "evaluate_access"
+      ],
+      "expected": [
+        "evaluate_access",
+        "grant_access"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "COND_EVALUATED",
+        "to": "∅",
+        "rule": "grant_access"
+      }
+    },
+    {
+      "goal": "cover transition: COND_EVALUATED → COND_REJECTED via deny_access",
+      "protocol": "_global",
+      "broken": [
+        "evaluate_access",
+        "log_denied",
+        "escalate_access",
+        "audit_condition"
+      ],
+      "expected": [
+        "evaluate_access",
+        "deny_access",
+        "log_denied",
+        "escalate_access",
+        "audit_condition"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "COND_EVALUATED",
+        "to": "COND_REJECTED",
+        "rule": "deny_access"
+      }
+    },
+    {
+      "goal": "cover transition: COND_EVALUATED → ∅ via deny_access",
+      "protocol": "_global",
+      "broken": [
+        "evaluate_access"
+      ],
+      "expected": [
+        "evaluate_access",
+        "deny_access"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "COND_EVALUATED",
+        "to": "∅",
+        "rule": "deny_access"
+      }
+    },
+    {
+      "goal": "cover transition: COND_ACCEPTED → COND_RESOLVED via log_granted",
+      "protocol": "_global",
+      "broken": [
+        "grant_access",
+        "escalate_access",
+        "log_denied",
+        "bypass_condition",
+        "audit_condition"
+      ],
+      "expected": [
+        "grant_access",
+        "escalate_access",
+        "log_granted",
+        "log_denied",
+        "bypass_condition",
+        "audit_condition"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "COND_ACCEPTED",
+        "to": "COND_RESOLVED",
+        "rule": "log_granted"
+      }
+    },
+    {
+      "goal": "cover transition: COND_ACCEPTED → ∅ via log_granted",
+      "protocol": "_global",
+      "broken": [
+        "grant_access",
+        "escalate_access"
+      ],
+      "expected": [
+        "grant_access",
+        "escalate_access",
+        "log_granted"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "COND_ACCEPTED",
+        "to": "∅",
+        "rule": "log_granted"
+      }
+    },
+    {
+      "goal": "cover transition: COND_RESOLVED → ∅ via log_granted",
+      "protocol": "_global",
+      "broken": [
+        "log_denied",
+        "bypass_condition",
+        "audit_condition"
+      ],
+      "expected": [
+        "log_granted",
+        "log_denied",
+        "bypass_condition",
+        "audit_condition"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "COND_RESOLVED",
+        "to": "∅",
+        "rule": "log_granted"
+      }
+    },
+    {
+      "goal": "cover transition: COND_REJECTED → COND_RESOLVED via log_denied",
+      "protocol": "_global",
+      "broken": [
+        "deny_access",
+        "log_granted",
+        "bypass_condition",
+        "audit_condition"
+      ],
+      "expected": [
+        "deny_access",
+        "log_denied",
+        "log_granted",
+        "bypass_condition",
+        "audit_condition"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "COND_REJECTED",
+        "to": "COND_RESOLVED",
+        "rule": "log_denied"
+      }
+    },
+    {
+      "goal": "cover transition: COND_REJECTED → ∅ via log_denied",
+      "protocol": "_global",
+      "broken": [
+        "deny_access"
+      ],
+      "expected": [
+        "deny_access",
+        "log_denied"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "COND_REJECTED",
+        "to": "∅",
+        "rule": "log_denied"
+      }
+    },
+    {
+      "goal": "cover transition: COND_RESOLVED → ∅ via log_denied",
+      "protocol": "_global",
+      "broken": [
+        "log_granted",
+        "bypass_condition",
+        "audit_condition"
+      ],
+      "expected": [
+        "log_granted",
+        "log_denied",
+        "bypass_condition",
+        "audit_condition"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "COND_RESOLVED",
+        "to": "∅",
+        "rule": "log_denied"
+      }
+    },
+    {
+      "goal": "cover transition: COND_EVALUATED → COND_RESOLVED via bypass_condition",
+      "protocol": "_global",
+      "broken": [
+        "evaluate_access",
+        "log_granted",
+        "log_denied",
+        "audit_condition"
+      ],
+      "expected": [
+        "evaluate_access",
+        "bypass_condition",
+        "log_granted",
+        "log_denied",
+        "audit_condition"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "COND_EVALUATED",
+        "to": "COND_RESOLVED",
+        "rule": "bypass_condition"
+      }
+    },
+    {
+      "goal": "cover transition: COND_EVALUATED → ∅ via bypass_condition",
+      "protocol": "_global",
+      "broken": [
+        "evaluate_access"
+      ],
+      "expected": [
+        "evaluate_access",
+        "bypass_condition"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "COND_EVALUATED",
+        "to": "∅",
+        "rule": "bypass_condition"
+      }
+    },
+    {
+      "goal": "cover transition: COND_RESOLVED → ∅ via bypass_condition",
+      "protocol": "_global",
+      "broken": [
+        "log_granted",
+        "log_denied",
+        "audit_condition"
+      ],
+      "expected": [
+        "log_granted",
+        "log_denied",
+        "bypass_condition",
+        "audit_condition"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "COND_RESOLVED",
+        "to": "∅",
+        "rule": "bypass_condition"
+      }
+    },
+    {
+      "goal": "cover transition: COND_EVALUATED → COND_IDLE via retry_evaluation",
+      "protocol": "_global",
+      "broken": [
+        "evaluate_access"
+      ],
+      "expected": [
+        "evaluate_access",
+        "retry_evaluation"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "COND_EVALUATED",
+        "to": "COND_IDLE",
+        "rule": "retry_evaluation"
+      }
+    },
+    {
+      "goal": "cover transition: COND_EVALUATED → ∅ via retry_evaluation",
+      "protocol": "_global",
+      "broken": [
+        "evaluate_access"
+      ],
+      "expected": [
+        "evaluate_access",
+        "retry_evaluation"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "COND_EVALUATED",
+        "to": "∅",
+        "rule": "retry_evaluation"
+      }
+    },
+    {
+      "goal": "cover transition: COND_REJECTED → COND_ACCEPTED via escalate_access",
+      "protocol": "_global",
+      "broken": [
+        "deny_access",
+        "log_granted",
+        "audit_condition"
+      ],
+      "expected": [
+        "deny_access",
+        "escalate_access",
+        "log_granted",
+        "audit_condition"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "COND_REJECTED",
+        "to": "COND_ACCEPTED",
+        "rule": "escalate_access"
+      }
+    },
+    {
+      "goal": "cover transition: COND_REJECTED → ∅ via escalate_access",
+      "protocol": "_global",
+      "broken": [
+        "deny_access"
+      ],
+      "expected": [
+        "deny_access",
+        "escalate_access"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "COND_REJECTED",
+        "to": "∅",
+        "rule": "escalate_access"
+      }
+    },
+    {
+      "goal": "cover transition: COND_ACCEPTED → COND_RESOLVED via audit_condition",
+      "protocol": "_global",
+      "broken": [
+        "grant_access",
+        "escalate_access",
+        "log_granted",
+        "log_denied",
+        "bypass_condition"
+      ],
+      "expected": [
+        "grant_access",
+        "escalate_access",
+        "audit_condition",
+        "log_granted",
+        "log_denied",
+        "bypass_condition"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "COND_ACCEPTED",
+        "to": "COND_RESOLVED",
+        "rule": "audit_condition"
+      }
+    },
+    {
+      "goal": "cover transition: COND_REJECTED → COND_RESOLVED via audit_condition",
+      "protocol": "_global",
+      "broken": [
+        "deny_access",
+        "log_granted",
+        "log_denied",
+        "bypass_condition"
+      ],
+      "expected": [
+        "deny_access",
+        "audit_condition",
+        "log_granted",
+        "log_denied",
+        "bypass_condition"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "COND_REJECTED",
+        "to": "COND_RESOLVED",
+        "rule": "audit_condition"
+      }
+    },
+    {
+      "goal": "cover transition: COND_ACCEPTED → ∅ via audit_condition",
+      "protocol": "_global",
+      "broken": [
+        "grant_access",
+        "escalate_access"
+      ],
+      "expected": [
+        "grant_access",
+        "escalate_access",
+        "audit_condition"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "COND_ACCEPTED",
+        "to": "∅",
+        "rule": "audit_condition"
+      }
+    },
+    {
+      "goal": "cover transition: COND_REJECTED → ∅ via audit_condition",
+      "protocol": "_global",
+      "broken": [
+        "deny_access"
+      ],
+      "expected": [
+        "deny_access",
+        "audit_condition"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "COND_REJECTED",
+        "to": "∅",
+        "rule": "audit_condition"
+      }
+    },
+    {
+      "goal": "cover transition: COND_RESOLVED → ∅ via audit_condition",
+      "protocol": "_global",
+      "broken": [
+        "log_granted",
+        "log_denied",
+        "bypass_condition"
+      ],
+      "expected": [
+        "log_granted",
+        "log_denied",
+        "bypass_condition",
+        "audit_condition"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "COND_RESOLVED",
+        "to": "∅",
+        "rule": "audit_condition"
+      }
+    }
+  ],
+  "source": "coverage-gap"
+}

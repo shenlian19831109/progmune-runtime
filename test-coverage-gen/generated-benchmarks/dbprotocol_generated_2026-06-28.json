@@ -1,0 +1,117 @@
+{
+  "protocol": "DBProtocol",
+  "generatedAt": "2026-06-28T13:54:57.662Z",
+  "cases": [
+    {
+      "goal": "cover transition: INIT → DB_CONNECTED via connect_db",
+      "protocol": "_global",
+      "broken": [
+        "disconnect_db"
+      ],
+      "expected": [
+        "connect_db",
+        "connect_db",
+        "disconnect_db"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "INIT",
+        "to": "DB_CONNECTED",
+        "rule": "connect_db"
+      }
+    },
+    {
+      "goal": "cover transition: DB_CONNECTED → ∅ via disconnect_db",
+      "protocol": "_global",
+      "broken": [
+        "connect_db"
+      ],
+      "expected": [
+        "connect_db",
+        "disconnect_db"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "DB_CONNECTED",
+        "to": "∅",
+        "rule": "disconnect_db"
+      }
+    },
+    {
+      "goal": "cover transition: UNAUTHENTICATED → AUTH_DB_GATE via auth_db_connect",
+      "protocol": "_global",
+      "broken": [
+        "auth_db_disconnect"
+      ],
+      "expected": [
+        "auth_db_disconnect",
+        "auth_db_connect"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "UNAUTHENTICATED",
+        "to": "AUTH_DB_GATE",
+        "rule": "auth_db_connect"
+      }
+    },
+    {
+      "goal": "cover transition: AUTH_DB_GATE → AUTH_DB_GATE via auth_db_query",
+      "protocol": "_global",
+      "broken": [
+        "auth_db_connect",
+        "auth_db_disconnect"
+      ],
+      "expected": [
+        "auth_db_connect",
+        "auth_db_query",
+        "auth_db_query",
+        "auth_db_disconnect"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "AUTH_DB_GATE",
+        "to": "AUTH_DB_GATE",
+        "rule": "auth_db_query"
+      }
+    },
+    {
+      "goal": "cover transition: AUTH_DB_GATE → UNAUTHENTICATED via auth_db_disconnect",
+      "protocol": "_global",
+      "broken": [
+        "auth_db_connect",
+        "auth_db_query"
+      ],
+      "expected": [
+        "auth_db_connect",
+        "auth_db_query",
+        "auth_db_disconnect"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "AUTH_DB_GATE",
+        "to": "UNAUTHENTICATED",
+        "rule": "auth_db_disconnect"
+      }
+    },
+    {
+      "goal": "cover transition: AUTH_DB_GATE → ∅ via auth_db_disconnect",
+      "protocol": "_global",
+      "broken": [
+        "auth_db_connect",
+        "auth_db_query"
+      ],
+      "expected": [
+        "auth_db_connect",
+        "auth_db_query",
+        "auth_db_disconnect"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "AUTH_DB_GATE",
+        "to": "∅",
+        "rule": "auth_db_disconnect"
+      }
+    }
+  ],
+  "source": "coverage-gap"
+}

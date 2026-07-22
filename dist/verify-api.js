@@ -54,6 +54,25 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const http = __importStar(require("http"));
 const PORT = parseInt(process.env.PROGMUNE_VERIFY_PORT || "3300", 10);
+const API_KEY = process.env.PROGMUNE_VERIFY_API_KEY || ""; // Empty = no auth required
+const RATE_LIMIT = parseInt(process.env.PROGMUNE_VERIFY_RATE_LIMIT || "100", 10); // requests per window
+const RATE_WINDOW = parseInt(process.env.PROGMUNE_VERIFY_RATE_WINDOW || "3600000", 10); // 1 hour default
+// Rate limiting: IP → count in current window
+const rateMap = new Map();
+function checkRateLimit(ip) {
+    if (!API_KEY)
+        return true; // No API key configured → no rate limiting
+    const now = Date.now();
+    const entry = rateMap.get(ip);
+    if (!entry || now > entry.resetAt) {
+        rateMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW });
+        return true;
+    }
+    if (entry.count >= RATE_LIMIT)
+        return false;
+    entry.count++;
+    return true;
+}
 function getVerificationBundle(sessionId) {
     // 1. Load session
     const { getAllSessions } = require("./failure-corpus");
@@ -198,6 +217,20 @@ function html(res, body, status = 200) {
 const server = http.createServer((req, res) => {
     const url = req.url || "/";
     const method = req.method || "GET";
+    const ip = req.socket.remoteAddress || "unknown";
+    // Auth (if API key configured)
+    if (API_KEY) {
+        const auth = req.headers["authorization"] || "";
+        if (!auth.includes(API_KEY) && url !== "/health" && url !== "/") {
+            json(res, { error: "Unauthorized. Use Authorization: Bearer <api_key>" }, 401);
+            return;
+        }
+    }
+    // Rate limit
+    if (!checkRateLimit(ip) && url !== "/health") {
+        json(res, { error: "Rate limit exceeded. Try again later." }, 429);
+        return;
+    }
     // CORS preflight
     if (method === "OPTIONS") {
         res.writeHead(204, {
@@ -210,7 +243,14 @@ const server = http.createServer((req, res) => {
     }
     // Health
     if (url === "/health") {
-        json(res, { status: "ok", service: "Progmune Verification API", version: "1.0.0" });
+        json(res, {
+            status: "ok",
+            service: "Progmune Verification API",
+            version: "1.0.0",
+            authRequired: !!API_KEY,
+            rateLimit: API_KEY ? `${RATE_LIMIT} requests/hour` : "unlimited",
+            activeClients: rateMap.size,
+        });
         return;
     }
     // Home page

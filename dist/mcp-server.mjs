@@ -168,6 +168,100 @@ async function main() {
                     required: ["brokenSequence"],
                 },
             },
+            {
+                name: "progmune_scaffold",
+                description: "Generate complete project files from templates (Express API, CLI tool, static site). Uses LLM to parameterize templates with project context. Complements progmune_generate which generates function-call-level code. Use this for architecture-level code: servers, pages, CLI entry points.",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        intent: { type: "string", description: "Natural-language description of what to build" },
+                        scaffoldType: { type: "string", enum: ["express-api", "cli-tool", "static-site"], description: "Template type: 'express-api' (REST server with SQLite), 'cli-tool' (CLI with arg parsing), 'static-site' (single-file HTML page)" },
+                        filePath: { type: "string", description: "Relative or absolute path to write the generated file" },
+                        projectPath: { type: "string", description: "Absolute path to project root" },
+                    },
+                    required: ["intent", "scaffoldType", "projectPath"],
+                },
+            },
+            {
+                name: "progmune_governance_report",
+                description: "Generate an AI Code Governance Report for the project. Aggregates session integrity, SSV ledger verification, PLSB benchmark coverage, provenance fingerprint audit, and antibody efficacy into a structured report with PASS/WARN/FAIL verdict. Use this to prove the safety of AI-generated code.",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        projectPath: { type: "string", description: "Absolute path to project root" },
+                        sessionId: { type: "string", description: "Optional: specific session ID for per-session governance certificate" },
+                        format: { type: "string", enum: ["terminal", "json", "markdown"], description: "Output format" },
+                        fast: { type: "boolean", description: "Skip expensive PLSB benchmark for faster response" },
+                    },
+                    required: [],
+                },
+            },
+            {
+                name: "progmune_provenance",
+                description: "Build the end-to-end provenance chain for a session. Traces every generation, validation, repair, and deployment event with cryptographic hashes — proving the full lifecycle of AI-generated code.",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        sessionId: { type: "string", description: "Session ID to trace" },
+                        format: { type: "string", enum: ["terminal", "json"], description: "Output format" },
+                    },
+                    required: ["sessionId"],
+                },
+            },
+            {
+                name: "progmune_accountability",
+                description: "Build the AI Code Supply Chain accountability ledger for a session. Maps every action to a responsible actor (human, LLM, validator, reviewer, deployer) with identity, role, and cryptographic signatures. Detects custody gaps where actor identity cannot be verified.",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        sessionId: { type: "string", description: "Session ID to trace" },
+                        author: { type: "string", description: "Email of human who initiated generation" },
+                        reviewer: { type: "string", description: "Email of human reviewer" },
+                        approver: { type: "string", description: "Email of human who approved deployment" },
+                        deployer: { type: "string", description: "CI/CD system ID that deployed" },
+                        format: { type: "string", enum: ["terminal", "json"], description: "Output format" },
+                    },
+                    required: ["sessionId"],
+                },
+            },
+            {
+                name: "progmune_policy_check",
+                description: "Run the Policy Engine against a file. Evaluates 6 rules (confidence, provenance, PLSB coverage, human review, fingerprint, violations) and returns ALLOW, WARN, or BLOCK. This is the deploy gate — use it in CI/CD to block deployment of unverified AI-generated code.",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        filePath: { type: "string", description: "Absolute path to the file to check" },
+                        author: { type: "string", description: "Email of human who initiated generation" },
+                        reviewer: { type: "string", description: "Email of human reviewer" },
+                        format: { type: "string", enum: ["terminal", "json"], description: "Output format" },
+                    },
+                    required: ["filePath"],
+                },
+            },
+            {
+                name: "progmune_plsb",
+                description: "Query the Protocol Lifecycle Security Benchmark (PLSB). Get taxonomy coverage, recall/precision metrics, and per-category detection status. Use this to check if protocol vulnerability categories are covered.",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        format: { type: "string", enum: ["summary", "json", "markdown"], description: "Output format" },
+                        category: { type: "string", description: "Optional: filter by PLS-ID (e.g., PLS-001)" },
+                    },
+                    required: [],
+                },
+            },
+            {
+                name: "progmune_certify",
+                description: "Issue an AI Code Certificate for a file. Verifies: @progmune-generated marker, session integrity, ledger consistency, fingerprint verification, and PLSB coverage. Returns a human-readable certificate suitable for audit and compliance.",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        filePath: { type: "string", description: "Absolute path to the file to certify" },
+                        format: { type: "string", enum: ["terminal", "json"], description: "Output format" },
+                    },
+                    required: ["filePath"],
+                },
+            },
         ],
     }));
     // ── Tool handler ──
@@ -500,8 +594,11 @@ Then restart Claude Code.`,
             if (result.success) {
                 const marker = `// @progmune-generated session=${result.sessionId}`;
                 let extra = "";
+                if (result.degraded) {
+                    extra = `\n⚠️  LLM generation exhausted — used rule-based fallback. Code quality may be low. Review the output carefully.`;
+                }
                 if (result.repairApplied) {
-                    extra = `\n🔧 SSG Repair: ${result.repairCount} fix(es) applied, branches: ${result.repairBranchIds.map((id) => id.slice(0, 12)).join(", ")}`;
+                    extra += `\n🔧 SSG Repair: ${result.repairCount} fix(es) applied, branches: ${result.repairBranchIds.map((id) => id.slice(0, 12)).join(", ")}`;
                 }
                 return { content: [{ type: "text", text: `✅ Generated and written to ${result.filePath}${extra}
 
@@ -792,6 +889,239 @@ This project uses [Progmune](https://github.com/shenlian19831109/progmune-runtim
             return {
                 content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
             };
+        }
+        if (request.params.name === "progmune_scaffold") {
+            const { intent, scaffoldType, filePath, projectPath } = request.params.arguments;
+            if (!intent || !scaffoldType || !projectPath) {
+                return { content: [{ type: "text", text: "❌ intent, scaffoldType, and projectPath are required." }] };
+            }
+            if (!["express-api", "cli-tool", "static-site"].includes(scaffoldType)) {
+                return { content: [{ type: "text", text: `❌ Unknown scaffold type: ${scaffoldType}. Available: express-api, cli-tool, static-site` }] };
+            }
+            const { scaffold } = require("./scaffold");
+            const result = await scaffold(scaffoldType, intent, projectPath, filePath);
+            if (result.success) {
+                const marker = result.filePath?.endsWith(".html")
+                    ? `<!-- @progmune-scaffolded type=${result.scaffoldType} -->`
+                    : `// @progmune-scaffolded type=${result.scaffoldType}`;
+                let extra = "";
+                if (result.filePath) {
+                    extra = `\n📁 Written to: ${result.filePath}`;
+                }
+                return { content: [{ type: "text", text: `✅ Scaffold generated (${result.scaffoldType})${extra}
+
+${marker}
+Code length: ${result.code.length} chars
+
+Preview (first 80 lines):
+${result.code.split("\n").slice(0, 80).join("\n")}` }] };
+            }
+            return { content: [{ type: "text", text: `❌ Scaffold failed: ${result.error}` }] };
+        }
+        if (request.params.name === "progmune_governance_report") {
+            const { projectPath, sessionId, format, fast } = request.params.arguments;
+            const targetDir = projectPath || process.cwd();
+            process.env.PROGMUNE_PROJECT_DIR = targetDir;
+            const { buildGovernanceReport, formatAsJSON, formatAsTerminal, formatAsMarkdown } = require("./audit");
+            const report = buildGovernanceReport(targetDir, { fast, sessionId });
+            let output;
+            switch (format) {
+                case "json":
+                    output = formatAsJSON(report);
+                    break;
+                case "markdown":
+                    output = formatAsMarkdown(report);
+                    break;
+                default: output = formatAsTerminal(report);
+            }
+            return { content: [{ type: "text", text: output }] };
+        }
+        if (request.params.name === "progmune_provenance") {
+            const { sessionId, format } = request.params.arguments;
+            if (!sessionId) {
+                return { content: [{ type: "text", text: "❌ sessionId is required." }] };
+            }
+            try {
+                const { buildProvenanceChain } = require("./ledger");
+                const chain = buildProvenanceChain(sessionId);
+                if (format === "json") {
+                    return { content: [{ type: "text", text: JSON.stringify(chain, null, 2) }] };
+                }
+                // Terminal format
+                let output = `🔗 Provenance Chain: ${chain.sessionId}\n\n`;
+                output += `Intent: ${chain.intent}\n`;
+                output += `Integrity: ${chain.integrity.toUpperCase()}\n`;
+                output += `Transitions: ${chain.totalTransitions} (${chain.validTransitions} valid, ${chain.invalidTransitions} invalid)\n`;
+                output += `Repairs: ${chain.repairCount}\n`;
+                output += `Ledger Hash: ${chain.finalLedgerHash}\n`;
+                output += `Stored Hash: ${chain.storedFingerprintHash || "(none)"}\n\n`;
+                for (let i = 0; i < chain.events.length; i++) {
+                    const e = chain.events[i];
+                    const icon = e.result === "passed" || e.result === "approved" ? "✅" : e.result === "failed" ? "❌" : "🔧";
+                    output += `[${String(i).padStart(2, "0")}] ${icon} ${e.step.padEnd(10)} | ${e.artifact.padEnd(25).slice(0, 25)} | ${e.hash}\n`;
+                    if (e.detail)
+                        output += `     ${e.detail.slice(0, 100)}\n`;
+                }
+                return { content: [{ type: "text", text: output }] };
+            }
+            catch (e) {
+                return { content: [{ type: "text", text: `❌ Provenance failed: ${e.message}` }] };
+            }
+        }
+        if (request.params.name === "progmune_plsb") {
+            const { format, category } = request.params.arguments;
+            try {
+                const { generatePLSBArtifact, generatePLSBReportMarkdown } = require("./plsb");
+                const ar = generatePLSBArtifact();
+                if (format === "json") {
+                    return { content: [{ type: "text", text: JSON.stringify(ar, null, 2) }] };
+                }
+                if (format === "markdown") {
+                    const md = generatePLSBReportMarkdown();
+                    return { content: [{ type: "text", text: md }] };
+                }
+                // Summary format (default)
+                const bm = ar.benchmark.metadata;
+                let output = "PLSB v1.0 — Protocol Lifecycle Security Benchmark\n\n";
+                output += `Entries:  ${bm.total} (${bm.verified} verified)\n`;
+                output += `Recall:   ${(bm.recall * 100).toFixed(0)}%\n`;
+                output += `Precision: ${(bm.precision * 100).toFixed(0)}%\n`;
+                output += `Coverage: ${Object.keys(bm.byPLS).length}/${ar.benchmark.taxonomy.length} categories\n\n`;
+                const filter = category ? ar.benchmark.taxonomy.filter((t) => t.id === category) : ar.benchmark.taxonomy;
+                for (const t of filter) {
+                    const count = bm.byPLS[t.id] || 0;
+                    output += `  ${count > 0 ? "✅" : "⚠️"} ${t.id} ${t.name}: ${count} entries (${t.category})\n`;
+                }
+                return { content: [{ type: "text", text: output }] };
+            }
+            catch (e) {
+                return { content: [{ type: "text", text: `❌ PLSB query failed: ${e.message}` }] };
+            }
+        }
+        if (request.params.name === "progmune_policy_check") {
+            const { filePath, author, reviewer, format } = request.params.arguments;
+            try {
+                const { certify } = require("./certify");
+                const { buildAccountabilityChain } = require("./ledger");
+                const { evaluatePolicy } = require("./policy");
+                const cert = certify(filePath);
+                let acct;
+                try {
+                    const opts = {};
+                    if (author)
+                        opts.author = { id: author, name: author.split("@")[0], role: "developer" };
+                    if (reviewer)
+                        opts.reviewers = [{ id: reviewer, name: reviewer.split("@")[0], role: "reviewer" }];
+                    acct = buildAccountabilityChain(cert.sessionId, opts);
+                }
+                catch { /* no accountability */ }
+                const ctx = {
+                    certificate: {
+                        validated: cert.validated,
+                        confidence: cert.confidence,
+                        provenanceIntact: cert.provenanceIntact,
+                        fingerprint: cert.fingerprint,
+                        violations: cert.violations,
+                        plsbCoverage: cert.plsbCoverage,
+                        plsbRecall: cert.plsbRecall,
+                        degraded: cert.degraded,
+                        sessionId: cert.sessionId,
+                        file: cert.file,
+                    },
+                    accountability: acct ? {
+                        humanEvents: acct.humanEvents,
+                        aiEvents: acct.aiEvents,
+                        automatedEvents: acct.automatedEvents,
+                        custodyGap: acct.custodyGap,
+                    } : undefined,
+                };
+                const result = evaluatePolicy(ctx);
+                if (format === "json") {
+                    return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+                }
+                const verdictEmoji = result.verdict === "ALLOW" ? "✅" : result.verdict === "WARN" ? "⚠️" : "❌";
+                let output = `Policy Engine: ${verdictEmoji} ${result.verdict}\n\n`;
+                output += `File: ${filePath}\n`;
+                output += `${result.passed_rules}/${result.rules} rules passed\n\n`;
+                if (result.violations.length > 0) {
+                    for (const v of result.violations) {
+                        output += `  [${v.rule.severity.toUpperCase()}] ${v.rule.type}: ${v.actual} → ${v.expected}\n`;
+                        if (v.detail)
+                            output += `       ${v.detail.slice(0, 100)}\n`;
+                    }
+                    output += "\n";
+                }
+                output += result.summary;
+                return { content: [{ type: "text", text: output }] };
+            }
+            catch (e) {
+                return { content: [{ type: "text", text: `❌ Policy check failed: ${e.message}` }] };
+            }
+        }
+        if (request.params.name === "progmune_accountability") {
+            const { sessionId, author, reviewer, approver, deployer, format } = request.params.arguments;
+            if (!sessionId) {
+                return { content: [{ type: "text", text: "❌ sessionId is required." }] };
+            }
+            try {
+                const { buildAccountabilityChain, verifyAccountabilityChain } = require("./ledger");
+                const opts = {};
+                if (author)
+                    opts.author = { id: author, name: author.split("@")[0], role: "developer" };
+                if (reviewer)
+                    opts.reviewers = [{ id: reviewer, name: reviewer.split("@")[0], role: "reviewer" }];
+                if (approver)
+                    opts.approver = { id: approver, name: approver.split("@")[0], role: "security_engineer" };
+                if (deployer)
+                    opts.deployer = { id: deployer, name: deployer };
+                const chain = buildAccountabilityChain(sessionId, opts);
+                if (format === "json") {
+                    return { content: [{ type: "text", text: JSON.stringify(chain, null, 2) }] };
+                }
+                // Terminal format
+                const actors = `${chain.humanEvents} human · ${chain.aiEvents} AI · ${chain.automatedEvents} automated`;
+                const custody = chain.custodyGap ? "⚠️ GAPS" : "✅ VERIFIED";
+                let output = `🔗 Accountability Ledger: ${chain.sessionId}\n\n`;
+                output += `Intent:    ${chain.intent}\n`;
+                output += `Integrity: ${chain.integrity.toUpperCase()}\n`;
+                output += `Custody:   ${custody}\n`;
+                output += `Actors:    ${actors}\n`;
+                output += `Chain:     ${chain.chainHash}\n\n`;
+                for (let i = 0; i < chain.events.length; i++) {
+                    const e = chain.events[i];
+                    const typeIcon = e.actorType === "human" ? "👤" : e.actorType === "llm" ? "🤖"
+                        : e.actorType === "reviewer" ? "✅" : e.actorType === "deployer" ? "🚀" : "⚙";
+                    const resultIcon = e.result === "passed" || e.result === "approved" ? "✅" : e.result === "failed" ? "❌" : "🔧";
+                    output += `[${String(i).padStart(2, "0")}] ${typeIcon} ${e.actorLabel.padEnd(30).slice(0, 30)} ${resultIcon} ${e.action}\n`;
+                    output += `     hash: ${e.hash} ← ${e.prevHash ? e.prevHash.slice(0, 12) : "genesis"}\n`;
+                    if (i < chain.events.length - 1)
+                        output += `  │\n`;
+                }
+                if (chain.custodyGap) {
+                    output += `\n⚠️  Custody gaps detected. Use --author, --reviewer, --approver to identify human actors.\n`;
+                }
+                return { content: [{ type: "text", text: output }] };
+            }
+            catch (e) {
+                return { content: [{ type: "text", text: `❌ Accountability chain failed: ${e.message}` }] };
+            }
+        }
+        if (request.params.name === "progmune_certify") {
+            const { filePath, format } = request.params.arguments;
+            if (!filePath) {
+                return { content: [{ type: "text", text: "❌ filePath is required." }] };
+            }
+            try {
+                const { certify, formatCertificate } = require("./certify");
+                const cert = certify(filePath);
+                if (format === "json") {
+                    return { content: [{ type: "text", text: JSON.stringify(cert, null, 2) }] };
+                }
+                return { content: [{ type: "text", text: formatCertificate(cert) }] };
+            }
+            catch (e) {
+                return { content: [{ type: "text", text: `❌ Certification failed: ${e.message}` }] };
+            }
         }
         throw new Error(`Unknown tool: ${request.params.name}`);
     });

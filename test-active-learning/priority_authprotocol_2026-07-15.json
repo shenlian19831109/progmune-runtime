@@ -1,0 +1,102 @@
+{
+  "generatedAt": "2026-07-15T19:49:17.996Z",
+  "protocol": "AuthProtocol",
+  "topK": 8,
+  "source": "active-learning",
+  "cases": [
+    {
+      "goal": "cover transition: UNAUTHENTICATED → PASSWORD_VERIFIED via verify_password",
+      "protocol": "_global",
+      "broken": [
+        "revoke_token",
+        "logout",
+        "auth_file_close",
+        "auth_db_disconnect",
+        "generate_jwt"
+      ],
+      "expected": [
+        "revoke_token",
+        "logout",
+        "auth_file_close",
+        "auth_db_disconnect",
+        "verify_password",
+        "generate_jwt"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "UNAUTHENTICATED",
+        "to": "PASSWORD_VERIFIED",
+        "rule": "verify_password"
+      },
+      "importance": 0.015,
+      "difficulty": 0.5
+    },
+    {
+      "goal": "cover transition: PASSWORD_VERIFIED → TOKEN_ISSUED via generate_jwt",
+      "protocol": "_global",
+      "broken": [
+        "verify_password",
+        "verify_hash",
+        "create_session",
+        "revoke_token"
+      ],
+      "expected": [
+        "verify_password",
+        "verify_hash",
+        "generate_jwt",
+        "create_session",
+        "revoke_token"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "PASSWORD_VERIFIED",
+        "to": "TOKEN_ISSUED",
+        "rule": "generate_jwt"
+      },
+      "importance": 0.015,
+      "difficulty": 0.5
+    },
+    {
+      "goal": "cover transition: PASSWORD_VERIFIED → ∅ via generate_jwt",
+      "protocol": "_global",
+      "broken": [
+        "verify_password",
+        "verify_hash"
+      ],
+      "expected": [
+        "verify_password",
+        "verify_hash",
+        "generate_jwt"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "PASSWORD_VERIFIED",
+        "to": "∅",
+        "rule": "generate_jwt"
+      },
+      "importance": 0.015,
+      "difficulty": 0.5
+    },
+    {
+      "goal": "cover transition: TOKEN_ISSUED → SESSION_ACTIVE via create_session",
+      "protocol": "_global",
+      "broken": [
+        "generate_jwt",
+        "logout"
+      ],
+      "expected": [
+        "generate_jwt",
+        "create_session",
+        "logout"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "TOKEN_ISSUED",
+        "to": "SESSION_ACTIVE",
+        "rule": "create_session"
+      },
+      "importance": 0.015,
+      "difficulty": 0.5
+    }
+  ]
+}

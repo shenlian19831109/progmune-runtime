@@ -1,6 +1,538 @@
 {
-  "generated": "2026-07-04T10:35:21.032Z",
+  "generated": "2026-07-07T20:30:27.401Z",
   "projects": [
+    {
+      "project": "analytics_A",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 128,
+      "allCalls": [
+        "push",
+        "find",
+        "toString",
+        "random",
+        "findIndex",
+        "splice",
+        "getUser",
+        "now",
+        "register",
+        "login",
+        "logout",
+        "createEvent",
+        "listEvents",
+        "startsWith",
+        "getEvent",
+        "split",
+        "deleteEvent",
+        "createMetric",
+        "listMetrics",
+        "getMetric",
+        "deleteMetric"
+      ],
+      "protocolViolations": [
+        {
+          "protocol": "Auth Protocol",
+          "category": "auth",
+          "type": "missing_step",
+          "missing": [
+            "auth_token",
+            "auth_access"
+          ],
+          "detail": "Auth Protocol missing: auth_token, auth_access. Found: auth_login → auth_logout"
+        }
+      ],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "analytics_B",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 129,
+      "allCalls": [
+        "digest",
+        "update",
+        "createHash",
+        "push",
+        "find",
+        "toString",
+        "now",
+        "findIndex",
+        "splice",
+        "validateSession",
+        "createAccount",
+        "authenticate",
+        "invalidateSession",
+        "createEvent",
+        "listEvents",
+        "startsWith",
+        "getEvent",
+        "split",
+        "deleteEvent",
+        "createMetric",
+        "listMetrics",
+        "getMetric",
+        "deleteMetric"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Authorization (Ownership Check)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Mutation operation does not verify user ownership or authorization before modifying data.",
+          "conceptDetail": "Missing: OwnershipCheck, AuthorizationGuard. Expected at least one of: getUser, validateToken, ownerId check"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "analytics_C",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 128,
+      "allCalls": [
+        "push",
+        "find",
+        "findIndex",
+        "splice",
+        "verifyToken",
+        "now",
+        "signup",
+        "signin",
+        "signout",
+        "createEvent",
+        "getAllEvents",
+        "startsWith",
+        "getEvent",
+        "split",
+        "removeEvent",
+        "createMetric",
+        "getAllMetrics",
+        "getMetric",
+        "removeMetric"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Authorization (Ownership Check)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Mutation operation does not verify user ownership or authorization before modifying data.",
+          "conceptDetail": "Missing: OwnershipCheck, AuthorizationGuard. Expected at least one of: getUser, validateToken, ownerId check"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        },
+        {
+          "rule": "Authorization (Resource Ownership)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Resource mutation checks authentication but does NOT verify the resource belongs to the requesting user. Missing ownerId/authorId comparison.",
+          "conceptDetail": "Missing: ResourceOwnership, HorizontalAuthorization. Expected at least one of: ownerId comparison, authorId check, userId === resource.ownerId"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "analytics_D",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 129,
+      "allCalls": [
+        "digest",
+        "update",
+        "createHash",
+        "push",
+        "find",
+        "slice",
+        "toString",
+        "random",
+        "findIndex",
+        "splice",
+        "getCurrentUser",
+        "now",
+        "registerNewUser",
+        "doLogin",
+        "doLogout",
+        "createEvent",
+        "listEvents",
+        "startsWith",
+        "getEvent",
+        "split",
+        "deleteEvent",
+        "createMetric",
+        "listMetrics",
+        "getMetric",
+        "deleteMetric"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "apigateway_A",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 128,
+      "allCalls": [
+        "push",
+        "find",
+        "toString",
+        "random",
+        "findIndex",
+        "splice",
+        "getUser",
+        "now",
+        "register",
+        "login",
+        "logout",
+        "createRoute",
+        "listRoutes",
+        "startsWith",
+        "getRoute",
+        "split",
+        "deleteRoute",
+        "createCache",
+        "listCaches",
+        "getCache",
+        "deleteCache"
+      ],
+      "protocolViolations": [
+        {
+          "protocol": "Auth Protocol",
+          "category": "auth",
+          "type": "missing_step",
+          "missing": [
+            "auth_token",
+            "auth_access"
+          ],
+          "detail": "Auth Protocol missing: auth_token, auth_access. Found: auth_login → auth_logout"
+        }
+      ],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "apigateway_B",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 129,
+      "allCalls": [
+        "digest",
+        "update",
+        "createHash",
+        "push",
+        "find",
+        "toString",
+        "now",
+        "findIndex",
+        "splice",
+        "validateSession",
+        "createAccount",
+        "authenticate",
+        "invalidateSession",
+        "createRoute",
+        "listRoutes",
+        "startsWith",
+        "getRoute",
+        "split",
+        "deleteRoute",
+        "createCache",
+        "listCaches",
+        "getCache",
+        "deleteCache"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Authorization (Ownership Check)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Mutation operation does not verify user ownership or authorization before modifying data.",
+          "conceptDetail": "Missing: OwnershipCheck, AuthorizationGuard. Expected at least one of: getUser, validateToken, ownerId check"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "apigateway_C",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 128,
+      "allCalls": [
+        "push",
+        "find",
+        "findIndex",
+        "splice",
+        "verifyToken",
+        "now",
+        "signup",
+        "signin",
+        "signout",
+        "createRoute",
+        "getAllRoutes",
+        "startsWith",
+        "getRoute",
+        "split",
+        "removeRoute",
+        "createCache",
+        "getAllCaches",
+        "getCache",
+        "removeCache"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Authorization (Ownership Check)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Mutation operation does not verify user ownership or authorization before modifying data.",
+          "conceptDetail": "Missing: OwnershipCheck, AuthorizationGuard. Expected at least one of: getUser, validateToken, ownerId check"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        },
+        {
+          "rule": "Authorization (Resource Ownership)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Resource mutation checks authentication but does NOT verify the resource belongs to the requesting user. Missing ownerId/authorId comparison.",
+          "conceptDetail": "Missing: ResourceOwnership, HorizontalAuthorization. Expected at least one of: ownerId comparison, authorId check, userId === resource.ownerId"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "apigateway_D",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 129,
+      "allCalls": [
+        "digest",
+        "update",
+        "createHash",
+        "push",
+        "find",
+        "slice",
+        "toString",
+        "random",
+        "findIndex",
+        "splice",
+        "getCurrentUser",
+        "now",
+        "registerNewUser",
+        "doLogin",
+        "doLogout",
+        "createRoute",
+        "listRoutes",
+        "startsWith",
+        "getRoute",
+        "split",
+        "deleteRoute",
+        "createCache",
+        "listCaches",
+        "getCache",
+        "deleteCache"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
     {
       "project": "blog",
       "files": 4,
@@ -46,6 +578,29 @@
           "detail": "Auth Protocol missing: auth_token, auth_access. Found: auth_login → auth_logout"
         }
       ],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
       "resourceViolations": []
     },
     {
@@ -85,6 +640,100 @@
         "downloadFile"
       ],
       "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "crm",
+      "files": 5,
+      "functions": 15,
+      "totalLines": 155,
+      "allCalls": [
+        "push",
+        "find",
+        "now",
+        "findIndex",
+        "splice",
+        "getSessionUser",
+        "filter",
+        "assign",
+        "createUser",
+        "authenticate",
+        "endSession",
+        "addContact",
+        "listContacts",
+        "startsWith",
+        "getContact",
+        "split",
+        "updateContact",
+        "deleteContact",
+        "createDeal",
+        "listDeals",
+        "endsWith",
+        "moveDeal",
+        "addNote",
+        "listNotes"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
       "resourceViolations": []
     },
     {
@@ -119,6 +768,117 @@
         "refundPayment"
       ],
       "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        },
+        {
+          "rule": "Refund Status Verification",
+          "category": "data_integrity",
+          "type": "missing_safeguard",
+          "detail": "Refund/cancellation processed without verifying the current order/payment status.",
+          "conceptDetail": "Missing: StatusVerification, IdempotencyCheck. Expected at least one of: status check, orderStatus, paymentStatus"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "filestorage",
+      "files": 5,
+      "functions": 13,
+      "totalLines": 143,
+      "allCalls": [
+        "push",
+        "find",
+        "findIndex",
+        "splice",
+        "getSession",
+        "join",
+        "writeFileSync",
+        "now",
+        "existsSync",
+        "readFileSync",
+        "filter",
+        "unlinkSync",
+        "register",
+        "authenticate",
+        "destroySession",
+        "createFolder",
+        "listFolders",
+        "uploadFile",
+        "from",
+        "listFiles",
+        "startsWith",
+        "endsWith",
+        "downloadFile",
+        "split",
+        "deleteFile",
+        "createShareLink",
+        "getShareLink"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Authorization (Ownership Check)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Mutation operation does not verify user ownership or authorization before modifying data.",
+          "conceptDetail": "Missing: OwnershipCheck, AuthorizationGuard. Expected at least one of: getUser, validateToken, ownerId check"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
       "resourceViolations": []
     },
     {
@@ -169,6 +929,1805 @@
           "detail": "Auth Protocol missing: auth_token, auth_access. Found: auth_login → auth_logout"
         }
       ],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "githost_A",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 128,
+      "allCalls": [
+        "push",
+        "find",
+        "toString",
+        "random",
+        "findIndex",
+        "splice",
+        "getUser",
+        "now",
+        "register",
+        "login",
+        "logout",
+        "createRepo",
+        "listRepos",
+        "startsWith",
+        "getRepo",
+        "split",
+        "deleteRepo",
+        "createBranch",
+        "listBranchs",
+        "getBranch",
+        "deleteBranch"
+      ],
+      "protocolViolations": [
+        {
+          "protocol": "Auth Protocol",
+          "category": "auth",
+          "type": "missing_step",
+          "missing": [
+            "auth_token",
+            "auth_access"
+          ],
+          "detail": "Auth Protocol missing: auth_token, auth_access. Found: auth_login → auth_logout"
+        }
+      ],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "githost_B",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 129,
+      "allCalls": [
+        "digest",
+        "update",
+        "createHash",
+        "push",
+        "find",
+        "toString",
+        "now",
+        "findIndex",
+        "splice",
+        "validateSession",
+        "createAccount",
+        "authenticate",
+        "invalidateSession",
+        "createRepo",
+        "listRepos",
+        "startsWith",
+        "getRepo",
+        "split",
+        "deleteRepo",
+        "createBranch",
+        "listBranchs",
+        "getBranch",
+        "deleteBranch"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Authorization (Ownership Check)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Mutation operation does not verify user ownership or authorization before modifying data.",
+          "conceptDetail": "Missing: OwnershipCheck, AuthorizationGuard. Expected at least one of: getUser, validateToken, ownerId check"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "githost_C",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 128,
+      "allCalls": [
+        "push",
+        "find",
+        "findIndex",
+        "splice",
+        "verifyToken",
+        "now",
+        "signup",
+        "signin",
+        "signout",
+        "createRepo",
+        "getAllRepos",
+        "startsWith",
+        "getRepo",
+        "split",
+        "removeRepo",
+        "createBranch",
+        "getAllBranchs",
+        "getBranch",
+        "removeBranch"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Authorization (Ownership Check)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Mutation operation does not verify user ownership or authorization before modifying data.",
+          "conceptDetail": "Missing: OwnershipCheck, AuthorizationGuard. Expected at least one of: getUser, validateToken, ownerId check"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        },
+        {
+          "rule": "Authorization (Resource Ownership)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Resource mutation checks authentication but does NOT verify the resource belongs to the requesting user. Missing ownerId/authorId comparison.",
+          "conceptDetail": "Missing: ResourceOwnership, HorizontalAuthorization. Expected at least one of: ownerId comparison, authorId check, userId === resource.ownerId"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "githost_D",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 129,
+      "allCalls": [
+        "digest",
+        "update",
+        "createHash",
+        "push",
+        "find",
+        "slice",
+        "toString",
+        "random",
+        "findIndex",
+        "splice",
+        "getCurrentUser",
+        "now",
+        "registerNewUser",
+        "doLogin",
+        "doLogout",
+        "createRepo",
+        "listRepos",
+        "startsWith",
+        "getRepo",
+        "split",
+        "deleteRepo",
+        "createBranch",
+        "listBranchs",
+        "getBranch",
+        "deleteBranch"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "inventory_A",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 128,
+      "allCalls": [
+        "push",
+        "find",
+        "toString",
+        "random",
+        "findIndex",
+        "splice",
+        "getUser",
+        "now",
+        "register",
+        "login",
+        "logout",
+        "createItem",
+        "listItems",
+        "startsWith",
+        "getItem",
+        "split",
+        "deleteItem",
+        "createStock",
+        "listStocks",
+        "getStock",
+        "deleteStock"
+      ],
+      "protocolViolations": [
+        {
+          "protocol": "Auth Protocol",
+          "category": "auth",
+          "type": "missing_step",
+          "missing": [
+            "auth_token",
+            "auth_access"
+          ],
+          "detail": "Auth Protocol missing: auth_token, auth_access. Found: auth_login → auth_logout"
+        }
+      ],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "inventory_B",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 129,
+      "allCalls": [
+        "digest",
+        "update",
+        "createHash",
+        "push",
+        "find",
+        "toString",
+        "now",
+        "findIndex",
+        "splice",
+        "validateSession",
+        "createAccount",
+        "authenticate",
+        "invalidateSession",
+        "createItem",
+        "listItems",
+        "startsWith",
+        "getItem",
+        "split",
+        "deleteItem",
+        "createStock",
+        "listStocks",
+        "getStock",
+        "deleteStock"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Authorization (Ownership Check)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Mutation operation does not verify user ownership or authorization before modifying data.",
+          "conceptDetail": "Missing: OwnershipCheck, AuthorizationGuard. Expected at least one of: getUser, validateToken, ownerId check"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "inventory_C",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 128,
+      "allCalls": [
+        "push",
+        "find",
+        "findIndex",
+        "splice",
+        "verifyToken",
+        "now",
+        "signup",
+        "signin",
+        "signout",
+        "createItem",
+        "getAllItems",
+        "startsWith",
+        "getItem",
+        "split",
+        "removeItem",
+        "createStock",
+        "getAllStocks",
+        "getStock",
+        "removeStock"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Authorization (Ownership Check)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Mutation operation does not verify user ownership or authorization before modifying data.",
+          "conceptDetail": "Missing: OwnershipCheck, AuthorizationGuard. Expected at least one of: getUser, validateToken, ownerId check"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        },
+        {
+          "rule": "Authorization (Resource Ownership)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Resource mutation checks authentication but does NOT verify the resource belongs to the requesting user. Missing ownerId/authorId comparison.",
+          "conceptDetail": "Missing: ResourceOwnership, HorizontalAuthorization. Expected at least one of: ownerId comparison, authorId check, userId === resource.ownerId"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "inventory_D",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 129,
+      "allCalls": [
+        "digest",
+        "update",
+        "createHash",
+        "push",
+        "find",
+        "slice",
+        "toString",
+        "random",
+        "findIndex",
+        "splice",
+        "getCurrentUser",
+        "now",
+        "registerNewUser",
+        "doLogin",
+        "doLogout",
+        "createItem",
+        "listItems",
+        "startsWith",
+        "getItem",
+        "split",
+        "deleteItem",
+        "createStock",
+        "listStocks",
+        "getStock",
+        "deleteStock"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "issuetracker",
+      "files": 5,
+      "functions": 15,
+      "totalLines": 146,
+      "allCalls": [
+        "push",
+        "find",
+        "findIndex",
+        "splice",
+        "getSessionUser",
+        "now",
+        "filter",
+        "signup",
+        "signin",
+        "signout",
+        "createIssue",
+        "listIssues",
+        "startsWith",
+        "getIssue",
+        "split",
+        "endsWith",
+        "updateIssueStatus",
+        "assignIssue",
+        "setMilestone",
+        "addComment",
+        "getComments",
+        "createMilestone",
+        "listMilestones"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "messaging_A",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 128,
+      "allCalls": [
+        "push",
+        "find",
+        "toString",
+        "random",
+        "findIndex",
+        "splice",
+        "getUser",
+        "now",
+        "register",
+        "login",
+        "logout",
+        "createTemplate",
+        "listTemplates",
+        "startsWith",
+        "getTemplate",
+        "split",
+        "deleteTemplate",
+        "createCampaign",
+        "listCampaigns",
+        "getCampaign",
+        "deleteCampaign"
+      ],
+      "protocolViolations": [
+        {
+          "protocol": "Auth Protocol",
+          "category": "auth",
+          "type": "missing_step",
+          "missing": [
+            "auth_token",
+            "auth_access"
+          ],
+          "detail": "Auth Protocol missing: auth_token, auth_access. Found: auth_login → auth_logout"
+        }
+      ],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "messaging_B",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 129,
+      "allCalls": [
+        "digest",
+        "update",
+        "createHash",
+        "push",
+        "find",
+        "toString",
+        "now",
+        "findIndex",
+        "splice",
+        "validateSession",
+        "createAccount",
+        "authenticate",
+        "invalidateSession",
+        "createTemplate",
+        "listTemplates",
+        "startsWith",
+        "getTemplate",
+        "split",
+        "deleteTemplate",
+        "createCampaign",
+        "listCampaigns",
+        "getCampaign",
+        "deleteCampaign"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Authorization (Ownership Check)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Mutation operation does not verify user ownership or authorization before modifying data.",
+          "conceptDetail": "Missing: OwnershipCheck, AuthorizationGuard. Expected at least one of: getUser, validateToken, ownerId check"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "messaging_C",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 128,
+      "allCalls": [
+        "push",
+        "find",
+        "findIndex",
+        "splice",
+        "verifyToken",
+        "now",
+        "signup",
+        "signin",
+        "signout",
+        "createTemplate",
+        "getAllTemplates",
+        "startsWith",
+        "getTemplate",
+        "split",
+        "removeTemplate",
+        "createCampaign",
+        "getAllCampaigns",
+        "getCampaign",
+        "removeCampaign"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Authorization (Ownership Check)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Mutation operation does not verify user ownership or authorization before modifying data.",
+          "conceptDetail": "Missing: OwnershipCheck, AuthorizationGuard. Expected at least one of: getUser, validateToken, ownerId check"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        },
+        {
+          "rule": "Authorization (Resource Ownership)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Resource mutation checks authentication but does NOT verify the resource belongs to the requesting user. Missing ownerId/authorId comparison.",
+          "conceptDetail": "Missing: ResourceOwnership, HorizontalAuthorization. Expected at least one of: ownerId comparison, authorId check, userId === resource.ownerId"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "messaging_D",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 129,
+      "allCalls": [
+        "digest",
+        "update",
+        "createHash",
+        "push",
+        "find",
+        "slice",
+        "toString",
+        "random",
+        "findIndex",
+        "splice",
+        "getCurrentUser",
+        "now",
+        "registerNewUser",
+        "doLogin",
+        "doLogout",
+        "createTemplate",
+        "listTemplates",
+        "startsWith",
+        "getTemplate",
+        "split",
+        "deleteTemplate",
+        "createCampaign",
+        "listCampaigns",
+        "getCampaign",
+        "deleteCampaign"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "notifications_A",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 128,
+      "allCalls": [
+        "getUser",
+        "now",
+        "push",
+        "find",
+        "findIndex",
+        "splice",
+        "toString",
+        "random",
+        "register",
+        "login",
+        "logout",
+        "createChannel",
+        "listChannels",
+        "startsWith",
+        "getChannel",
+        "split",
+        "deleteChannel",
+        "createAlert",
+        "listAlerts",
+        "getAlert",
+        "deleteAlert"
+      ],
+      "protocolViolations": [
+        {
+          "protocol": "Auth Protocol",
+          "category": "auth",
+          "type": "missing_step",
+          "missing": [
+            "auth_token",
+            "auth_access"
+          ],
+          "detail": "Auth Protocol missing: auth_token, auth_access. Found: auth_login → auth_logout"
+        }
+      ],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "notifications_B",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 129,
+      "allCalls": [
+        "validateSession",
+        "now",
+        "push",
+        "find",
+        "findIndex",
+        "splice",
+        "digest",
+        "update",
+        "createHash",
+        "toString",
+        "createAccount",
+        "authenticate",
+        "invalidateSession",
+        "createChannel",
+        "listChannels",
+        "startsWith",
+        "getChannel",
+        "split",
+        "deleteChannel",
+        "createAlert",
+        "listAlerts",
+        "getAlert",
+        "deleteAlert"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Authorization (Ownership Check)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Mutation operation does not verify user ownership or authorization before modifying data.",
+          "conceptDetail": "Missing: OwnershipCheck, AuthorizationGuard. Expected at least one of: getUser, validateToken, ownerId check"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "notifications_C",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 128,
+      "allCalls": [
+        "verifyToken",
+        "now",
+        "push",
+        "find",
+        "findIndex",
+        "splice",
+        "signup",
+        "signin",
+        "signout",
+        "createChannel",
+        "getAllChannels",
+        "startsWith",
+        "getChannel",
+        "split",
+        "removeChannel",
+        "createAlert",
+        "getAllAlerts",
+        "getAlert",
+        "removeAlert"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Authorization (Ownership Check)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Mutation operation does not verify user ownership or authorization before modifying data.",
+          "conceptDetail": "Missing: OwnershipCheck, AuthorizationGuard. Expected at least one of: getUser, validateToken, ownerId check"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        },
+        {
+          "rule": "Authorization (Resource Ownership)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Resource mutation checks authentication but does NOT verify the resource belongs to the requesting user. Missing ownerId/authorId comparison.",
+          "conceptDetail": "Missing: ResourceOwnership, HorizontalAuthorization. Expected at least one of: ownerId comparison, authorId check, userId === resource.ownerId"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "notifications_D",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 129,
+      "allCalls": [
+        "getCurrentUser",
+        "now",
+        "push",
+        "find",
+        "findIndex",
+        "splice",
+        "digest",
+        "update",
+        "createHash",
+        "slice",
+        "toString",
+        "random",
+        "registerNewUser",
+        "doLogin",
+        "doLogout",
+        "createChannel",
+        "listChannels",
+        "startsWith",
+        "getChannel",
+        "split",
+        "deleteChannel",
+        "createAlert",
+        "listAlerts",
+        "getAlert",
+        "deleteAlert"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "payment_A",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 128,
+      "allCalls": [
+        "push",
+        "find",
+        "toString",
+        "random",
+        "findIndex",
+        "splice",
+        "getUser",
+        "now",
+        "register",
+        "login",
+        "logout",
+        "createTransaction",
+        "listTransactions",
+        "startsWith",
+        "getTransaction",
+        "split",
+        "deleteTransaction",
+        "createRefund",
+        "listRefunds",
+        "getRefund",
+        "deleteRefund"
+      ],
+      "protocolViolations": [
+        {
+          "protocol": "Auth Protocol",
+          "category": "auth",
+          "type": "missing_step",
+          "missing": [
+            "auth_token",
+            "auth_access"
+          ],
+          "detail": "Auth Protocol missing: auth_token, auth_access. Found: auth_login → auth_logout"
+        }
+      ],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        },
+        {
+          "rule": "Payment Order Verification",
+          "category": "data_integrity",
+          "type": "missing_safeguard",
+          "detail": "Payment processed without verifying the associated order exists and belongs to the user.",
+          "conceptDetail": "Missing: OrderVerification, PaymentAuthorization. Expected at least one of: getOrder, verifyOrder, checkOrder"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "payment_B",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 129,
+      "allCalls": [
+        "digest",
+        "update",
+        "createHash",
+        "push",
+        "find",
+        "toString",
+        "now",
+        "findIndex",
+        "splice",
+        "validateSession",
+        "createAccount",
+        "authenticate",
+        "invalidateSession",
+        "createTransaction",
+        "listTransactions",
+        "startsWith",
+        "getTransaction",
+        "split",
+        "deleteTransaction",
+        "createRefund",
+        "listRefunds",
+        "getRefund",
+        "deleteRefund"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Authorization (Ownership Check)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Mutation operation does not verify user ownership or authorization before modifying data.",
+          "conceptDetail": "Missing: OwnershipCheck, AuthorizationGuard. Expected at least one of: getUser, validateToken, ownerId check"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        },
+        {
+          "rule": "Payment Order Verification",
+          "category": "data_integrity",
+          "type": "missing_safeguard",
+          "detail": "Payment processed without verifying the associated order exists and belongs to the user.",
+          "conceptDetail": "Missing: OrderVerification, PaymentAuthorization. Expected at least one of: getOrder, verifyOrder, checkOrder"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "payment_C",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 128,
+      "allCalls": [
+        "push",
+        "find",
+        "findIndex",
+        "splice",
+        "verifyToken",
+        "now",
+        "signup",
+        "signin",
+        "signout",
+        "createTransaction",
+        "getAllTransactions",
+        "startsWith",
+        "getTransaction",
+        "split",
+        "removeTransaction",
+        "createRefund",
+        "getAllRefunds",
+        "getRefund",
+        "removeRefund"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Authorization (Ownership Check)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Mutation operation does not verify user ownership or authorization before modifying data.",
+          "conceptDetail": "Missing: OwnershipCheck, AuthorizationGuard. Expected at least one of: getUser, validateToken, ownerId check"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        },
+        {
+          "rule": "Authorization (Resource Ownership)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Resource mutation checks authentication but does NOT verify the resource belongs to the requesting user. Missing ownerId/authorId comparison.",
+          "conceptDetail": "Missing: ResourceOwnership, HorizontalAuthorization. Expected at least one of: ownerId comparison, authorId check, userId === resource.ownerId"
+        },
+        {
+          "rule": "Payment Order Verification",
+          "category": "data_integrity",
+          "type": "missing_safeguard",
+          "detail": "Payment processed without verifying the associated order exists and belongs to the user.",
+          "conceptDetail": "Missing: OrderVerification, PaymentAuthorization. Expected at least one of: getOrder, verifyOrder, checkOrder"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "payment_D",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 129,
+      "allCalls": [
+        "digest",
+        "update",
+        "createHash",
+        "push",
+        "find",
+        "slice",
+        "toString",
+        "random",
+        "findIndex",
+        "splice",
+        "getCurrentUser",
+        "now",
+        "registerNewUser",
+        "doLogin",
+        "doLogout",
+        "createTransaction",
+        "listTransactions",
+        "startsWith",
+        "getTransaction",
+        "split",
+        "deleteTransaction",
+        "createRefund",
+        "listRefunds",
+        "getRefund",
+        "deleteRefund"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        },
+        {
+          "rule": "Payment Order Verification",
+          "category": "data_integrity",
+          "type": "missing_safeguard",
+          "detail": "Payment processed without verifying the associated order exists and belongs to the user.",
+          "conceptDetail": "Missing: OrderVerification, PaymentAuthorization. Expected at least one of: getOrder, verifyOrder, checkOrder"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "scheduler",
+      "files": 5,
+      "functions": 15,
+      "totalLines": 139,
+      "allCalls": [
+        "push",
+        "find",
+        "findIndex",
+        "splice",
+        "validateSession",
+        "now",
+        "sort",
+        "filter",
+        "slice",
+        "register",
+        "login",
+        "logout",
+        "createJob",
+        "listJobs",
+        "startsWith",
+        "endsWith",
+        "disableJob",
+        "split",
+        "getJob",
+        "deleteJob",
+        "addTrigger",
+        "listTriggers",
+        "getJobLogs",
+        "getRecentFailures"
+      ],
+      "protocolViolations": [
+        {
+          "protocol": "Auth Protocol",
+          "category": "auth",
+          "type": "missing_step",
+          "missing": [
+            "auth_token",
+            "auth_access"
+          ],
+          "detail": "Auth Protocol missing: auth_token, auth_access. Found: auth_login → auth_logout"
+        }
+      ],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Authorization (Ownership Check)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Mutation operation does not verify user ownership or authorization before modifying data.",
+          "conceptDetail": "Missing: OwnershipCheck, AuthorizationGuard. Expected at least one of: getUser, validateToken, ownerId check"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "search_A",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 128,
+      "allCalls": [
+        "push",
+        "find",
+        "toString",
+        "random",
+        "findIndex",
+        "splice",
+        "getUser",
+        "now",
+        "register",
+        "login",
+        "logout",
+        "createIndex",
+        "listIndexs",
+        "startsWith",
+        "getIndex",
+        "split",
+        "deleteIndex",
+        "createQuery",
+        "listQuerys",
+        "getQuery",
+        "deleteQuery"
+      ],
+      "protocolViolations": [
+        {
+          "protocol": "Auth Protocol",
+          "category": "auth",
+          "type": "missing_step",
+          "missing": [
+            "auth_token",
+            "auth_access"
+          ],
+          "detail": "Auth Protocol missing: auth_token, auth_access. Found: auth_login → auth_logout"
+        }
+      ],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "search_B",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 129,
+      "allCalls": [
+        "digest",
+        "update",
+        "createHash",
+        "push",
+        "find",
+        "toString",
+        "now",
+        "findIndex",
+        "splice",
+        "validateSession",
+        "createAccount",
+        "authenticate",
+        "invalidateSession",
+        "createIndex",
+        "listIndexs",
+        "startsWith",
+        "getIndex",
+        "split",
+        "deleteIndex",
+        "createQuery",
+        "listQuerys",
+        "getQuery",
+        "deleteQuery"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Authorization (Ownership Check)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Mutation operation does not verify user ownership or authorization before modifying data.",
+          "conceptDetail": "Missing: OwnershipCheck, AuthorizationGuard. Expected at least one of: getUser, validateToken, ownerId check"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "search_C",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 128,
+      "allCalls": [
+        "push",
+        "find",
+        "findIndex",
+        "splice",
+        "verifyToken",
+        "now",
+        "signup",
+        "signin",
+        "signout",
+        "createIndex",
+        "getAllIndexs",
+        "startsWith",
+        "getIndex",
+        "split",
+        "removeIndex",
+        "createQuery",
+        "getAllQuerys",
+        "getQuery",
+        "removeQuery"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Authorization (Ownership Check)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Mutation operation does not verify user ownership or authorization before modifying data.",
+          "conceptDetail": "Missing: OwnershipCheck, AuthorizationGuard. Expected at least one of: getUser, validateToken, ownerId check"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        },
+        {
+          "rule": "Authorization (Resource Ownership)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Resource mutation checks authentication but does NOT verify the resource belongs to the requesting user. Missing ownerId/authorId comparison.",
+          "conceptDetail": "Missing: ResourceOwnership, HorizontalAuthorization. Expected at least one of: ownerId comparison, authorId check, userId === resource.ownerId"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "search_D",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 129,
+      "allCalls": [
+        "digest",
+        "update",
+        "createHash",
+        "push",
+        "find",
+        "slice",
+        "toString",
+        "random",
+        "findIndex",
+        "splice",
+        "getCurrentUser",
+        "now",
+        "registerNewUser",
+        "doLogin",
+        "doLogout",
+        "createIndex",
+        "listIndexs",
+        "startsWith",
+        "getIndex",
+        "split",
+        "deleteIndex",
+        "createQuery",
+        "listQuerys",
+        "getQuery",
+        "deleteQuery"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
       "resourceViolations": []
     },
     {
@@ -199,15 +2758,651 @@
         "deleteProject"
       ],
       "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        },
+        {
+          "rule": "Authorization (Resource Ownership)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Resource mutation checks authentication but does NOT verify the resource belongs to the requesting user. Missing ownerId/authorId comparison.",
+          "conceptDetail": "Missing: ResourceOwnership, HorizontalAuthorization. Expected at least one of: ownerId comparison, authorId check, userId === resource.ownerId"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "wiki",
+      "files": 5,
+      "functions": 14,
+      "totalLines": 142,
+      "allCalls": [
+        "validateToken",
+        "existsSync",
+        "mkdirSync",
+        "writeFileSync",
+        "push",
+        "filter",
+        "find",
+        "now",
+        "findIndex",
+        "splice",
+        "toLowerCase",
+        "sort",
+        "register",
+        "login",
+        "invalidateToken",
+        "createPage",
+        "searchPages",
+        "startsWith",
+        "getPage",
+        "split",
+        "updatePage",
+        "getRevisions",
+        "getRevision",
+        "uploadAttachment",
+        "from",
+        "getAttachments"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "workflow_A",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 128,
+      "allCalls": [
+        "push",
+        "find",
+        "toString",
+        "random",
+        "findIndex",
+        "splice",
+        "register",
+        "login",
+        "logout",
+        "createWorkflow",
+        "listWorkflows",
+        "startsWith",
+        "getWorkflow",
+        "split",
+        "deleteWorkflow",
+        "createStep",
+        "listSteps",
+        "getStep",
+        "deleteStep",
+        "getUser",
+        "now"
+      ],
+      "protocolViolations": [
+        {
+          "protocol": "Auth Protocol",
+          "category": "auth",
+          "type": "missing_step",
+          "missing": [
+            "auth_token",
+            "auth_access"
+          ],
+          "detail": "Auth Protocol missing: auth_token, auth_access. Found: auth_login → auth_logout"
+        }
+      ],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "workflow_B",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 129,
+      "allCalls": [
+        "digest",
+        "update",
+        "createHash",
+        "push",
+        "find",
+        "toString",
+        "now",
+        "findIndex",
+        "splice",
+        "createAccount",
+        "authenticate",
+        "invalidateSession",
+        "createWorkflow",
+        "listWorkflows",
+        "startsWith",
+        "getWorkflow",
+        "split",
+        "deleteWorkflow",
+        "createStep",
+        "listSteps",
+        "getStep",
+        "deleteStep",
+        "validateSession"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Authorization (Ownership Check)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Mutation operation does not verify user ownership or authorization before modifying data.",
+          "conceptDetail": "Missing: OwnershipCheck, AuthorizationGuard. Expected at least one of: getUser, validateToken, ownerId check"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "workflow_C",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 128,
+      "allCalls": [
+        "push",
+        "find",
+        "findIndex",
+        "splice",
+        "signup",
+        "signin",
+        "signout",
+        "createWorkflow",
+        "getAllWorkflows",
+        "startsWith",
+        "getWorkflow",
+        "split",
+        "removeWorkflow",
+        "createStep",
+        "getAllSteps",
+        "getStep",
+        "removeStep",
+        "verifyToken",
+        "now"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Authorization (Ownership Check)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Mutation operation does not verify user ownership or authorization before modifying data.",
+          "conceptDetail": "Missing: OwnershipCheck, AuthorizationGuard. Expected at least one of: getUser, validateToken, ownerId check"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        },
+        {
+          "rule": "Authorization (Resource Ownership)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Resource mutation checks authentication but does NOT verify the resource belongs to the requesting user. Missing ownerId/authorId comparison.",
+          "conceptDetail": "Missing: ResourceOwnership, HorizontalAuthorization. Expected at least one of: ownerId comparison, authorId check, userId === resource.ownerId"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "workflow_D",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 129,
+      "allCalls": [
+        "digest",
+        "update",
+        "createHash",
+        "push",
+        "find",
+        "slice",
+        "toString",
+        "random",
+        "findIndex",
+        "splice",
+        "registerNewUser",
+        "doLogin",
+        "doLogout",
+        "createWorkflow",
+        "listWorkflows",
+        "startsWith",
+        "getWorkflow",
+        "split",
+        "deleteWorkflow",
+        "createStep",
+        "listSteps",
+        "getStep",
+        "deleteStep",
+        "getCurrentUser",
+        "now"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "xclone_A",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 128,
+      "allCalls": [
+        "push",
+        "find",
+        "toString",
+        "random",
+        "findIndex",
+        "splice",
+        "getUser",
+        "now",
+        "register",
+        "login",
+        "logout",
+        "createPost",
+        "listPosts",
+        "startsWith",
+        "getPost",
+        "split",
+        "deletePost",
+        "createLike",
+        "listLikes",
+        "getLike",
+        "deleteLike"
+      ],
+      "protocolViolations": [
+        {
+          "protocol": "Auth Protocol",
+          "category": "auth",
+          "type": "missing_step",
+          "missing": [
+            "auth_token",
+            "auth_access"
+          ],
+          "detail": "Auth Protocol missing: auth_token, auth_access. Found: auth_login → auth_logout"
+        }
+      ],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "xclone_B",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 129,
+      "allCalls": [
+        "digest",
+        "update",
+        "createHash",
+        "push",
+        "find",
+        "toString",
+        "now",
+        "findIndex",
+        "splice",
+        "validateSession",
+        "createAccount",
+        "authenticate",
+        "invalidateSession",
+        "createPost",
+        "listPosts",
+        "startsWith",
+        "getPost",
+        "split",
+        "deletePost",
+        "createLike",
+        "listLikes",
+        "getLike",
+        "deleteLike"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Authorization (Ownership Check)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Mutation operation does not verify user ownership or authorization before modifying data.",
+          "conceptDetail": "Missing: OwnershipCheck, AuthorizationGuard. Expected at least one of: getUser, validateToken, ownerId check"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "xclone_C",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 128,
+      "allCalls": [
+        "push",
+        "find",
+        "findIndex",
+        "splice",
+        "verifyToken",
+        "now",
+        "signup",
+        "signin",
+        "signout",
+        "createPost",
+        "getAllPosts",
+        "startsWith",
+        "getPost",
+        "split",
+        "removePost",
+        "createLike",
+        "getAllLikes",
+        "getLike",
+        "removeLike"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+          "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt"
+        },
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Authorization (Ownership Check)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Mutation operation does not verify user ownership or authorization before modifying data.",
+          "conceptDetail": "Missing: OwnershipCheck, AuthorizationGuard. Expected at least one of: getUser, validateToken, ownerId check"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        },
+        {
+          "rule": "Authorization (Resource Ownership)",
+          "category": "authorization",
+          "type": "missing_safeguard",
+          "detail": "Resource mutation checks authentication but does NOT verify the resource belongs to the requesting user. Missing ownerId/authorId comparison.",
+          "conceptDetail": "Missing: ResourceOwnership, HorizontalAuthorization. Expected at least one of: ownerId comparison, authorId check, userId === resource.ownerId"
+        }
+      ],
+      "resourceViolations": []
+    },
+    {
+      "project": "xclone_D",
+      "files": 4,
+      "functions": 13,
+      "totalLines": 129,
+      "allCalls": [
+        "digest",
+        "update",
+        "createHash",
+        "push",
+        "find",
+        "slice",
+        "toString",
+        "random",
+        "findIndex",
+        "splice",
+        "getCurrentUser",
+        "now",
+        "registerNewUser",
+        "doLogin",
+        "doLogout",
+        "createPost",
+        "listPosts",
+        "startsWith",
+        "getPost",
+        "split",
+        "deletePost",
+        "createLike",
+        "listLikes",
+        "getLike",
+        "deleteLike"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Password Hashing (Weak)",
+          "category": "password_hashing",
+          "type": "missing_safeguard",
+          "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+          "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2"
+        },
+        {
+          "rule": "Input Validation",
+          "category": "input_validation",
+          "type": "missing_safeguard",
+          "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+          "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
+        },
+        {
+          "rule": "Token Security (Weak Generation)",
+          "category": "token_security",
+          "type": "missing_safeguard",
+          "detail": "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+          "conceptDetail": "Missing: SecureRandom, TokenEntropy, CryptographicSignature. Expected at least one of: crypto.randomUUID, jwt.sign, nanoid"
+        }
+      ],
       "resourceViolations": []
     }
   ],
   "aggregate": {
-    "projects": 5,
-    "totalFunctions": 73,
-    "totalLines": 768,
-    "protocolFindings": 2,
+    "projects": 50,
+    "totalFunctions": 665,
+    "totalLines": 6633,
+    "protocolFindings": 13,
+    "safeguardFindings": 217,
     "resourceFindings": 0,
-    "totalFindings": 2
+    "totalFindings": 230
   }
 }

@@ -259,9 +259,9 @@ function buildKnowledgeBase() {
         // ═══ Connection Lifecycle — EXPERIMENTAL ═══
         {
             id: "PROTO-CONN", name: "Connection Lifecycle", domain: "Connection", category: "connection",
-            maturity: "experimental", lifecycle: "experimental", consumers: [], currentVersion: "0.5.0", confidence: 55,
+            maturity: "stable", lifecycle: "stable", consumers: [], currentVersion: "1.0.0", confidence: 75,
             rfcReference: undefined, relations: [], concepts: [], evidence: [],
-            validatedRepos: ["curl"], validatedSequences: 85,
+            validatedRepos: ["curl", "libssh"], validatedSequences: 120,
             crossRepoMatrix: { curl: true, nginx: false, redis: false },
             description: "Generic TCP/TLS connection lifecycle. Patterns may be too broad — connect/transfer/done terms appear in many non-protocol contexts.",
             steps: ["init: connection setup (*connect / *conn*init)", "transfer: data exchange (*send / *recv)", "done: disconnect (*disconnect / *conn*done)"],

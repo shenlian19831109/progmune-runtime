@@ -20,11 +20,13 @@ import type {
   GovernanceVerdict,
   GovernanceRecommendation,
   SessionVerdict,
+  BusinessTranslationSection,
 } from "./types";
 
 interface BuildOptions {
   fast?: boolean;       // skip PLSB benchmark (expensive)
   sessionId?: string;   // scope to a single session
+  business?: boolean;   // include business translation (default true)
 }
 
 // ── Main Entry Point ──
@@ -39,6 +41,7 @@ export function buildGovernanceReport(
   const plsb = options.fast ? emptyPLSB() : buildPLSBFromBenchmark();
   const provenance = buildProvenance();
   const antibodies = buildAntibodies();
+  const business = buildBusinessSection(plsb, sessions, projectPath, options);
   const recommendations = generateRecommendations(sessions, ssv, provenance, plsb);
   const verdict = computeVerdict(sessions, ssv, provenance, recommendations);
 
@@ -51,6 +54,7 @@ export function buildGovernanceReport(
     antibodies,
     verdict,
     recommendations,
+    business,  // Phase 10: Business Translation
   };
 }
 
@@ -238,6 +242,39 @@ function buildAntibodies(): AntibodiesSection {
       totalHits: 0, fastPathHits: 0, llmCallsSaved: 0, tokensSaved: 0,
       topSignatures: [], byLevel: {},
     };
+  }
+}
+
+// ── Business Translation (Phase 10) ──
+
+function buildBusinessSection(
+  plsb: PLSBSection,
+  sessions: SessionsSection,
+  _projectPath: string,
+  options: BuildOptions
+): BusinessTranslationSection | undefined {
+  if (options.business === false) return undefined;
+
+  try {
+    const { translateToBusinessRisks, getKnowledgeCoverage, getProtocolGraph, buildBusinessSummary } = require("./business-translator");
+
+    const violationsByCategory: Record<string, number> = {};
+    for (const d of sessions.details) {
+      if (d.violations > 0) {
+        // Categorize violations (simplified)
+        violationsByCategory["认证与授权"] = (violationsByCategory["认证与授权"] || 0) + d.violations;
+      }
+    }
+
+    const risks = translateToBusinessRisks(plsb.matchedCategories, plsb.unmatchedCategories, violationsByCategory);
+    const knowledge = getKnowledgeCoverage();
+    const protocolGraph = getProtocolGraph();
+    const summary = buildBusinessSummary(risks, knowledge, violationsByCategory);
+
+    return { risks, knowledgeCoverage: knowledge, protocolGraph, summary };
+  } catch (e) {
+    // Best-effort: if business translator fails, skip the section
+    return undefined;
   }
 }
 

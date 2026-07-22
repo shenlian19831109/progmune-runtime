@@ -1,0 +1,21 @@
+{
+  "generatedAt": "2026-07-17T20:18:46.818Z",
+  "source": "transition-synthesizer",
+  "count": 1,
+  "cases": [
+    {
+      "goal": "verify transition: open_file → flush_file",
+      "protocol": "_global",
+      "broken": [
+        "open_file"
+      ],
+      "expected": [
+        "open_file",
+        "flush_file"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsGap": "open_file → flush_file",
+      "confidence": 1
+    }
+  ]
+}

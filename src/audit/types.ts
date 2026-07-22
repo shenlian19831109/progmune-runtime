@@ -90,6 +90,43 @@ export interface GovernanceRecommendation {
   action: string;
 }
 
+// ── Business Translation (Phase 10: CTO-readable Trust Report) ──
+
+export interface BusinessRisk {
+  category: string;
+  description: string;
+  protocolsCovered: number;
+  violationsPrevented: number;
+  status: "protected" | "partial" | "exposed";
+}
+
+export interface KnowledgeDomain {
+  domain: string;
+  coverage: "full" | "partial" | "none";
+  protocols: string[];
+  entities?: string[];
+}
+
+export interface ProtocolEdge {
+  from: string;
+  to: string;
+  label: string;
+  verified: boolean;
+  description?: string;
+}
+
+export interface BusinessTranslationSection {
+  risks: BusinessRisk[];
+  knowledgeCoverage: KnowledgeDomain[];
+  protocolGraph: ProtocolEdge[];
+  summary: {
+    totalRisksMitigated: number;
+    knowledgeDomainsCovered: number;
+    businessProtocolsIntact: number;
+    preventedViolationsByCategory: Record<string, number>;
+  };
+}
+
 // ── Main Report ──
 
 export type GovernanceVerdict = "PASS" | "WARN" | "FAIL";
@@ -103,4 +140,5 @@ export interface GovernanceReport {
   antibodies: AntibodiesSection;
   verdict: GovernanceVerdict;
   recommendations: GovernanceRecommendation[];
+  business?: BusinessTranslationSection;  // Phase 10: optional, default-on with --no-business to disable
 }

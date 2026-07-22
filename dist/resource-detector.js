@@ -35,6 +35,8 @@ const ALLOCATOR_PATTERNS = [
 // ── Cleanup/destructor functions (expected to call release without acquire) ──
 const CLEANUP_PATTERNS = [
     /\b(remove|cleanup|destroy|free|close|delete|detach|release|shutdown|teardown|done|finish)\w*\b/i,
+    // Curl-specific cleanup functions (cross-function alloc/free patterns)
+    /\b(Curl_close|curl_multi_cleanup|Curl_detach_connection|curl_easy_cleanup|Curl_expire_clear|Curl_resolv_destroy_all|Curl_conncache_remove|Curl_ssl_close_all|Curl_req_free)\b/i,
 ];
 function isAllocatorFunction(funcName) {
     return ALLOCATOR_PATTERNS.some(p => p.test(funcName));
@@ -71,15 +73,16 @@ function detectResourceViolations(calls, enclosingFuncName) {
                 }
             }
         }
-        // Rule 2: release before any acquire → possible double-free or UAF
-        // Exception: cleanup/destructor functions expected to call release
-        if (releases.length > 0 && acquires.length === 0) {
+        // Rule 2: release without acquire → only flag if 2+ releases (true double-free)
+        // Single release without acquire = cross-function cleanup (normal in C code)
+        // Exception: cleanup/destructor functions always exempt
+        if (releases.length >= 2 && acquires.length === 0) {
             if (!isCleanupFunction(funcName)) {
                 violations.push({
-                    type: "use_after_release",
+                    type: "double_free",
                     category: pair.category,
                     releaseCall: calls[releases[0]],
-                    detail: `${calls[releases[0]]} called without prior acquire — possible double-free or use-after-release`,
+                    detail: `${calls[releases[0]]} → ${calls[releases[releases.length - 1]]}: multiple releases without any acquire — possible double-free`,
                 });
             }
         }

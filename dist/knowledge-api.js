@@ -179,8 +179,8 @@ const server = http.createServer((req, res) => {
         const { getDependencies, getDependents } = require("./knowledge-graph");
         json(res, {
             node,
-            dependsOn: getDependencies(g, nodeId).map(n => ({ id: n.id, name: n.name })),
-            dependedBy: getDependents(g, nodeId).map(n => ({ id: n.id, name: n.name })),
+            dependsOn: getDependencies(g, nodeId).map((n) => ({ id: n.id, name: n.name })),
+            dependedBy: getDependents(g, nodeId).map((n) => ({ id: n.id, name: n.name })),
             edges: g.edges.filter(e => e.from === nodeId || e.to === nodeId),
         });
         return;

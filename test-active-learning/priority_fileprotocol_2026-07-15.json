@@ -1,0 +1,91 @@
+{
+  "generatedAt": "2026-07-15T19:49:17.996Z",
+  "protocol": "FileProtocol",
+  "topK": 8,
+  "source": "active-learning",
+  "cases": [
+    {
+      "goal": "cover transition: UNAUTHENTICATED → AUTH_FILE_GATE via auth_file_open",
+      "protocol": "_global",
+      "broken": [
+        "auth_file_close"
+      ],
+      "expected": [
+        "auth_file_close",
+        "auth_file_open"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "UNAUTHENTICATED",
+        "to": "AUTH_FILE_GATE",
+        "rule": "auth_file_open"
+      },
+      "importance": 0.15,
+      "difficulty": 0.5
+    },
+    {
+      "goal": "cover transition: AUTH_FILE_GATE → AUTH_FILE_GATE via auth_file_read",
+      "protocol": "_global",
+      "broken": [
+        "auth_file_open",
+        "auth_file_close"
+      ],
+      "expected": [
+        "auth_file_open",
+        "auth_file_read",
+        "auth_file_read",
+        "auth_file_close"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "AUTH_FILE_GATE",
+        "to": "AUTH_FILE_GATE",
+        "rule": "auth_file_read"
+      },
+      "importance": 0.15,
+      "difficulty": 0.5
+    },
+    {
+      "goal": "cover transition: AUTH_FILE_GATE → UNAUTHENTICATED via auth_file_close",
+      "protocol": "_global",
+      "broken": [
+        "auth_file_open",
+        "auth_file_read"
+      ],
+      "expected": [
+        "auth_file_open",
+        "auth_file_read",
+        "auth_file_close"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "AUTH_FILE_GATE",
+        "to": "UNAUTHENTICATED",
+        "rule": "auth_file_close"
+      },
+      "importance": 0.15,
+      "difficulty": 0.5
+    },
+    {
+      "goal": "cover transition: AUTH_FILE_GATE → ∅ via auth_file_close",
+      "protocol": "_global",
+      "broken": [
+        "auth_file_open",
+        "auth_file_read"
+      ],
+      "expected": [
+        "auth_file_open",
+        "auth_file_read",
+        "auth_file_close"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "AUTH_FILE_GATE",
+        "to": "∅",
+        "rule": "auth_file_close"
+      },
+      "importance": 0.15,
+      "difficulty": 0.5
+    }
+  ]
+}

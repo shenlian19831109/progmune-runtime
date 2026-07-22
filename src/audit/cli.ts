@@ -13,6 +13,7 @@ import { buildGovernanceReport } from "./report-builder";
 import { formatAsTerminal } from "./formatters/terminal";
 import { formatAsJSON } from "./formatters/json";
 import { formatAsMarkdown } from "./formatters/markdown";
+import { formatAsHTML } from "./formatters/html";
 
 const args = process.argv.slice(2);
 
@@ -27,8 +28,10 @@ Options:
   --all           Generate report for all sessions (default)
   --json          Output as JSON
   --markdown      Output as Markdown
+  --html          Output as HTML (standalone, with CSS)
   --terminal      Output for terminal (default)
   --fast          Skip PLSB benchmark (faster)
+  --no-business   Skip business translation (default: enabled)
   --help, -h      Show this help
 
 Examples:
@@ -43,18 +46,22 @@ Examples:
 const projectPath = process.env.PROGMUNE_PROJECT_DIR || process.cwd();
 const useJson = args.includes("--json");
 const useMarkdown = args.includes("--markdown");
+const useHTML = args.includes("--html");
 const fast = args.includes("--fast");
+const useBusiness = !args.includes("--no-business"); // default ON, --no-business to disable
 
 // sessionId: first non-flag argument
 const sessionId = args.find((a) => !a.startsWith("--"));
 
-const report = buildGovernanceReport(projectPath, { fast, sessionId });
+const report = buildGovernanceReport(projectPath, { fast, sessionId, business: useBusiness });
 
 let output: string;
 if (useJson) {
   output = formatAsJSON(report);
 } else if (useMarkdown) {
   output = formatAsMarkdown(report);
+} else if (useHTML) {
+  output = formatAsHTML(report);
 } else {
   output = formatAsTerminal(report);
 }

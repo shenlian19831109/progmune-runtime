@@ -1,0 +1,393 @@
+{
+  "protocol": "TransactionProtocol",
+  "generatedAt": "2026-07-03T15:34:23.106Z",
+  "cases": [
+    {
+      "goal": "cover transition: TX_IDLE → TX_ACTIVE via begin_tx",
+      "protocol": "_global",
+      "broken": [
+        "commit_tx",
+        "rollback_tx",
+        "prep_two_phase"
+      ],
+      "expected": [
+        "commit_tx",
+        "rollback_tx",
+        "prep_two_phase",
+        "begin_tx"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "TX_IDLE",
+        "to": "TX_ACTIVE",
+        "rule": "begin_tx"
+      }
+    },
+    {
+      "goal": "cover transition: TX_ACTIVE → TX_IDLE via commit_tx",
+      "protocol": "_global",
+      "broken": [
+        "begin_tx",
+        "insert_record",
+        "update_record",
+        "delete_record",
+        "savepoint_release",
+        "rollback_to_savepoint"
+      ],
+      "expected": [
+        "begin_tx",
+        "insert_record",
+        "update_record",
+        "delete_record",
+        "savepoint_release",
+        "rollback_to_savepoint",
+        "commit_tx"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "TX_ACTIVE",
+        "to": "TX_IDLE",
+        "rule": "commit_tx"
+      }
+    },
+    {
+      "goal": "cover transition: TX_ACTIVE → ∅ via commit_tx",
+      "protocol": "_global",
+      "broken": [
+        "begin_tx",
+        "insert_record",
+        "update_record",
+        "delete_record",
+        "savepoint_release",
+        "rollback_to_savepoint"
+      ],
+      "expected": [
+        "begin_tx",
+        "insert_record",
+        "update_record",
+        "delete_record",
+        "savepoint_release",
+        "rollback_to_savepoint",
+        "commit_tx"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "TX_ACTIVE",
+        "to": "∅",
+        "rule": "commit_tx"
+      }
+    },
+    {
+      "goal": "cover transition: TX_ACTIVE → TX_IDLE via rollback_tx",
+      "protocol": "_global",
+      "broken": [
+        "begin_tx",
+        "insert_record",
+        "update_record",
+        "delete_record",
+        "savepoint_release",
+        "rollback_to_savepoint"
+      ],
+      "expected": [
+        "begin_tx",
+        "insert_record",
+        "update_record",
+        "delete_record",
+        "savepoint_release",
+        "rollback_to_savepoint",
+        "rollback_tx"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "TX_ACTIVE",
+        "to": "TX_IDLE",
+        "rule": "rollback_tx"
+      }
+    },
+    {
+      "goal": "cover transition: TX_ACTIVE → ∅ via rollback_tx",
+      "protocol": "_global",
+      "broken": [
+        "begin_tx",
+        "insert_record",
+        "update_record",
+        "delete_record",
+        "savepoint_release",
+        "rollback_to_savepoint"
+      ],
+      "expected": [
+        "begin_tx",
+        "insert_record",
+        "update_record",
+        "delete_record",
+        "savepoint_release",
+        "rollback_to_savepoint",
+        "rollback_tx"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "TX_ACTIVE",
+        "to": "∅",
+        "rule": "rollback_tx"
+      }
+    },
+    {
+      "goal": "cover transition: TX_ACTIVE → TX_ACTIVE via insert_record",
+      "protocol": "_global",
+      "broken": [
+        "begin_tx",
+        "update_record",
+        "delete_record",
+        "savepoint_release",
+        "rollback_to_savepoint",
+        "commit_tx",
+        "rollback_tx",
+        "prep_two_phase"
+      ],
+      "expected": [
+        "begin_tx",
+        "insert_record",
+        "update_record",
+        "delete_record",
+        "savepoint_release",
+        "rollback_to_savepoint",
+        "insert_record",
+        "commit_tx",
+        "rollback_tx",
+        "prep_two_phase"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "TX_ACTIVE",
+        "to": "TX_ACTIVE",
+        "rule": "insert_record"
+      }
+    },
+    {
+      "goal": "cover transition: TX_ACTIVE → TX_ACTIVE via update_record",
+      "protocol": "_global",
+      "broken": [
+        "begin_tx",
+        "insert_record",
+        "delete_record",
+        "savepoint_release",
+        "rollback_to_savepoint",
+        "commit_tx",
+        "rollback_tx",
+        "prep_two_phase"
+      ],
+      "expected": [
+        "begin_tx",
+        "insert_record",
+        "update_record",
+        "delete_record",
+        "savepoint_release",
+        "rollback_to_savepoint",
+        "update_record",
+        "commit_tx",
+        "rollback_tx",
+        "prep_two_phase"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "TX_ACTIVE",
+        "to": "TX_ACTIVE",
+        "rule": "update_record"
+      }
+    },
+    {
+      "goal": "cover transition: TX_ACTIVE → TX_ACTIVE via delete_record",
+      "protocol": "_global",
+      "broken": [
+        "begin_tx",
+        "insert_record",
+        "update_record",
+        "savepoint_release",
+        "rollback_to_savepoint",
+        "commit_tx",
+        "rollback_tx",
+        "prep_two_phase"
+      ],
+      "expected": [
+        "begin_tx",
+        "insert_record",
+        "update_record",
+        "delete_record",
+        "savepoint_release",
+        "rollback_to_savepoint",
+        "delete_record",
+        "commit_tx",
+        "rollback_tx",
+        "prep_two_phase"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "TX_ACTIVE",
+        "to": "TX_ACTIVE",
+        "rule": "delete_record"
+      }
+    },
+    {
+      "goal": "cover transition: TX_ACTIVE → SAVEPOINT_HELD via savepoint_create",
+      "protocol": "_global",
+      "broken": [
+        "begin_tx",
+        "insert_record",
+        "update_record",
+        "delete_record",
+        "savepoint_release",
+        "rollback_to_savepoint"
+      ],
+      "expected": [
+        "begin_tx",
+        "insert_record",
+        "update_record",
+        "delete_record",
+        "savepoint_release",
+        "rollback_to_savepoint",
+        "savepoint_create"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "TX_ACTIVE",
+        "to": "SAVEPOINT_HELD",
+        "rule": "savepoint_create"
+      }
+    },
+    {
+      "goal": "cover transition: SAVEPOINT_HELD → TX_ACTIVE via savepoint_release",
+      "protocol": "_global",
+      "broken": [
+        "savepoint_create",
+        "commit_tx",
+        "rollback_tx",
+        "prep_two_phase"
+      ],
+      "expected": [
+        "savepoint_create",
+        "savepoint_release",
+        "commit_tx",
+        "rollback_tx",
+        "prep_two_phase"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "SAVEPOINT_HELD",
+        "to": "TX_ACTIVE",
+        "rule": "savepoint_release"
+      }
+    },
+    {
+      "goal": "cover transition: SAVEPOINT_HELD → ∅ via savepoint_release",
+      "protocol": "_global",
+      "broken": [
+        "savepoint_create"
+      ],
+      "expected": [
+        "savepoint_create",
+        "savepoint_release"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "SAVEPOINT_HELD",
+        "to": "∅",
+        "rule": "savepoint_release"
+      }
+    },
+    {
+      "goal": "cover transition: SAVEPOINT_HELD → TX_ACTIVE via rollback_to_savepoint",
+      "protocol": "_global",
+      "broken": [
+        "savepoint_create",
+        "commit_tx",
+        "rollback_tx",
+        "prep_two_phase"
+      ],
+      "expected": [
+        "savepoint_create",
+        "rollback_to_savepoint",
+        "commit_tx",
+        "rollback_tx",
+        "prep_two_phase"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "SAVEPOINT_HELD",
+        "to": "TX_ACTIVE",
+        "rule": "rollback_to_savepoint"
+      }
+    },
+    {
+      "goal": "cover transition: SAVEPOINT_HELD → ∅ via rollback_to_savepoint",
+      "protocol": "_global",
+      "broken": [
+        "savepoint_create"
+      ],
+      "expected": [
+        "savepoint_create",
+        "rollback_to_savepoint"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "SAVEPOINT_HELD",
+        "to": "∅",
+        "rule": "rollback_to_savepoint"
+      }
+    },
+    {
+      "goal": "cover transition: TX_ACTIVE → TX_IDLE via prep_two_phase",
+      "protocol": "_global",
+      "broken": [
+        "begin_tx",
+        "insert_record",
+        "update_record",
+        "delete_record",
+        "savepoint_release",
+        "rollback_to_savepoint"
+      ],
+      "expected": [
+        "begin_tx",
+        "insert_record",
+        "update_record",
+        "delete_record",
+        "savepoint_release",
+        "rollback_to_savepoint",
+        "prep_two_phase"
+      ],
+      "violationType": "missing_prerequisite",
+      "targetsTransition": {
+        "from": "TX_ACTIVE",
+        "to": "TX_IDLE",
+        "rule": "prep_two_phase"
+      }
+    },
+    {
+      "goal": "cover transition: TX_ACTIVE → ∅ via prep_two_phase",
+      "protocol": "_global",
+      "broken": [
+        "begin_tx",
+        "insert_record",
+        "update_record",
+        "delete_record",
+        "savepoint_release",
+        "rollback_to_savepoint"
+      ],
+      "expected": [
+        "begin_tx",
+        "insert_record",
+        "update_record",
+        "delete_record",
+        "savepoint_release",
+        "rollback_to_savepoint",
+        "prep_two_phase"
+      ],
+      "violationType": "resource_leak",
+      "targetsTransition": {
+        "from": "TX_ACTIVE",
+        "to": "∅",
+        "rule": "prep_two_phase"
+      }
+    }
+  ],
+  "source": "coverage-gap"
+}

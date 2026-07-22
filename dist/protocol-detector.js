@@ -6,6 +6,10 @@
  * any project's naming conventions (curl, nginx, redis, any C project).
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.identifierParse = identifierParse;
+exports.detectSafeguardViolations = detectSafeguardViolations;
+exports.buildCallerMap = buildCallerMap;
+exports.detectSafeguardViolationsV7 = detectSafeguardViolationsV7;
 exports.detectProtocolViolations = detectProtocolViolations;
 exports.validateProtocolState = validateProtocolState;
 exports.validateCombined = validateCombined;
@@ -67,7 +71,355 @@ const PROTOCOLS = [
             { pattern: /\b(\w*quic\w*send|\w*quic\w*recv|\w*quiche_conn)\b/i, label: "quic_transfer", required: true },
         ],
     },
+    {
+        name: "SSL Configuration", category: "ssl", minCompleteness: 0.4,
+        steps: [
+            { pattern: /\b(\w*ssl\w*get_config|\w*ssl_cf_get|\w*ssl\w*setup|\w*ssl\w*seed)\b/i, label: "ssl_cfg_init", required: true },
+            { pattern: /\b(\w*ssl\w*config|\w*ssl\w*set|\w*ssl\w*default|\w*ssl\w*init_method)\b/i, label: "ssl_cfg_apply", required: true },
+            { pattern: /\b(\w*ssl\w*verify|\w*ssl\w*cert|\w*ssl\w*handshake|\w*ssl\w*connect)\b/i, label: "ssl_cfg_done", required: true },
+        ],
+    },
+    {
+        name: "Auth Protocol", category: "auth", minCompleteness: 0.5,
+        steps: [
+            { pattern: /\b(login|register|authenticate|signin)\b/i, label: "auth_login", required: true },
+            { pattern: /\b(generate_token|generate_access_token|issue_token|create_session|jwt_sign)\b/i, label: "auth_token", required: true },
+            { pattern: /\b(refresh_token|get_profile|access_resource|verify_token|authorize|access_token)\b/i, label: "auth_access", required: true },
+            { pattern: /\b(logout|destroy_session|revoke_token|token_revoke|invalidate)\b/i, label: "auth_logout", required: true },
+        ],
+    },
 ];
+const SAFEGUARD_RULES = [
+    // ── Password Hashing ──
+    {
+        name: "Password Hashing",
+        category: "password_hashing",
+        trigger: /\b(register|signUp|createUser|createAccount|registerUser)\b/i,
+        safeguards: [
+            { pattern: /\b(bcrypt|argon2|scrypt|pbkdf2|hash|hashPassword|createHash|hashSync|hash_password)\b/i, label: "secure_hash" },
+        ],
+        violationMessage: "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+        conceptMissing: ["PasswordHash", "KeyDerivation"],
+        conceptExpected: ["bcrypt", "argon2", "scrypt"],
+    },
+    // Catch SHA256/MD5 specifically
+    {
+        name: "Password Hashing (Weak)",
+        category: "password_hashing",
+        trigger: /\b(register|signUp|createUser|createAccount|registerUser)\b/i,
+        safeguards: [
+            { pattern: /\b(bcrypt|argon2|scrypt|pbkdf2)\b/i, label: "strong_hash" },
+        ],
+        violationMessage: "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+        conceptMissing: ["StrongHash", "SaltGeneration"],
+        conceptExpected: ["bcrypt", "argon2"],
+    },
+    // ── Authorization / Ownership Check ──
+    {
+        name: "Authorization (Ownership Check)",
+        category: "authorization",
+        trigger: /\b(add|create|delete|remove|update|toggle|modify|edit|lock|ban|process|refund|assign|transfer|share|schedule|upload|set)[A-Z]\w*\b/i,
+        safeguards: [
+            { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|checkOwner|authorId\s*[!=]==?|ownerId\s*[!=]==?|userId\s*[!=]==?|\.owner\s*[!=]==?)/i, label: "auth_check" },
+        ],
+        violationMessage: "Mutation operation does not verify user ownership or authorization before modifying data.",
+        conceptMissing: ["OwnershipCheck", "AuthorizationGuard"],
+        conceptExpected: ["getUser", "validateToken", "ownerId check"],
+    },
+    // Functions that serve data without any auth
+    {
+        name: "Authorization (Unauthenticated Access)",
+        category: "authorization",
+        trigger: /\b(get|list|download|view|read|fetch|find)[A-Z]\w*\b/i,
+        safeguards: [
+            { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|token|session)\b/i, label: "auth_check" },
+        ],
+        violationMessage: "Data access function does not check authentication. Anyone can access data without credentials.",
+        conceptMissing: ["AuthenticationCheck", "AccessControl"],
+        conceptExpected: ["token validation", "session check"],
+    },
+    // ── Data Integrity (Foreign Key Validation) ──
+    {
+        name: "Data Integrity (Foreign Key)",
+        category: "data_integrity",
+        trigger: /\b(add|create|post|refund|process|send)[A-Z]\w*\b/i,
+        safeguards: [
+            { pattern: /\b(get|find|check|exists|lookup|status)[A-Z]\w*\b/i, label: "fk_check" },
+        ],
+        violationMessage: "Creates a child entity without verifying the parent entity exists. Orphaned references possible.",
+        conceptMissing: ["ForeignKeyValidation", "ReferentialIntegrity"],
+        conceptExpected: ["checkExists", "getParent", "validateReference"],
+    },
+    // ── Input Validation ──
+    {
+        name: "Input Validation",
+        category: "input_validation",
+        trigger: /\b(create|add|post|send|upload)[A-Z]\w*\b/i,
+        safeguards: [
+            { pattern: /\b(validate|sanitize|check|verify)\w*(Content|Input|Length|Title|Body|Type|Size|File)\b/i, label: "input_validation" },
+        ],
+        violationMessage: "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
+        conceptMissing: ["InputSanitization", "ContentValidation", "SizeLimit"],
+        conceptExpected: ["validateContent", "sanitizeInput", "checkLength"],
+    },
+    // ── TLS Enforcement ──
+    {
+        name: "TLS Enforcement",
+        category: "tls_enforcement",
+        trigger: /\b(createServer|listen|handleRequest|app\.listen|express)\b/i,
+        safeguards: [
+            { pattern: /\b(https|tls|ssl|cert|key|TLS|SSL|HTTPS|createSecureContext|credentials)\b/i, label: "tls_config" },
+        ],
+        violationMessage: "Server created without TLS configuration. Connections will be unencrypted HTTP.",
+        conceptMissing: ["TLSConfiguration", "HTTPSEnforcement", "CertificateSetup"],
+        conceptExpected: ["https.createServer", "TLS cert", "SSL configuration"],
+    },
+    // ── Token Security ──
+    {
+        name: "Token Security (Weak Generation)",
+        category: "token_security",
+        trigger: /\b(authenticate|login|signIn|logIn|createSession|generateToken)\b/i,
+        safeguards: [
+            { pattern: /\b(crypto\.randomUUID|jwt\.sign|jsonwebtoken|nanoid|randomBytes|cryptoRandomString)\b/i, label: "secure_token" },
+        ],
+        violationMessage: "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
+        conceptMissing: ["SecureRandom", "TokenEntropy", "CryptographicSignature"],
+        conceptExpected: ["crypto.randomUUID", "jwt.sign", "nanoid"],
+    },
+    // ── Stricter Ownership Check (for resource mutation) ──
+    {
+        name: "Authorization (Resource Ownership)",
+        category: "authorization",
+        trigger: /\b(toggle|remove)[A-Z]\w*\b/i,
+        safeguards: [
+            { pattern: /\b(ownerId\s*[!=]==?|authorId\s*[!=]==?|userId\s*[!=]==?|createdBy|\.owner\s*[!=]==?)/i, label: "ownership_comparison" },
+        ],
+        violationMessage: "Resource mutation checks authentication but does NOT verify the resource belongs to the requesting user. Missing ownerId/authorId comparison.",
+        conceptMissing: ["ResourceOwnership", "HorizontalAuthorization"],
+        conceptExpected: ["ownerId comparison", "authorId check", "userId === resource.ownerId"],
+    },
+    // ── Payment Verification ──
+    {
+        name: "Payment Order Verification",
+        category: "data_integrity",
+        trigger: /\b(process|create|make|submit)\w*(Payment|Charge|Transaction)\b/i,
+        safeguards: [
+            { pattern: /\b(getOrder|verifyOrder|checkOrder|findOrder|orderExists|order\b)\b/i, label: "order_verification" },
+        ],
+        violationMessage: "Payment processed without verifying the associated order exists and belongs to the user.",
+        conceptMissing: ["OrderVerification", "PaymentAuthorization"],
+        conceptExpected: ["getOrder", "verifyOrder", "checkOrder"],
+    },
+    // ── Room Membership ──
+    {
+        name: "Room Membership Check",
+        category: "authorization",
+        trigger: /\b(send|post|publish)\w*(Message|Msg)\b/i,
+        safeguards: [
+            { pattern: /\b(joinRoom|roomMember|checkMember|isMember|members\.includes|members\.find|memberOf|inRoom)\b/i, label: "room_membership" },
+        ],
+        violationMessage: "Message sent to room without verifying the user is a room member.",
+        conceptMissing: ["RoomMembership", "ChannelAuthorization"],
+        conceptExpected: ["joinRoom", "isMember", "members.includes"],
+    },
+    // ── Refund Status Check ──
+    {
+        name: "Refund Status Verification",
+        category: "data_integrity",
+        trigger: /\b(refund|cancel|void|reverse)\w*(Payment|Order|Charge|Transaction)\b/i,
+        safeguards: [
+            { pattern: /\b(status|\.status|getStatus|checkStatus|orderStatus|paymentStatus)\b/i, label: "status_check" },
+        ],
+        violationMessage: "Refund/cancellation processed without verifying the current order/payment status.",
+        conceptMissing: ["StatusVerification", "IdempotencyCheck"],
+        conceptExpected: ["status check", "orderStatus", "paymentStatus"],
+    },
+    // ── Rate Limiting ──
+    {
+        name: "Rate Limiting",
+        category: "rate_limiting",
+        trigger: /\b(createServer|listen|handleRequest|app\.listen|express|router\.(post|get|put|delete|patch))\b/i,
+        safeguards: [
+            { pattern: /\b(rateLimit|rate_limit|throttle|RateLimiter|expressRateLimit|rateLimiterMiddleware|limiter)\b/i, label: "rate_limit" },
+        ],
+        violationMessage: "Server/API endpoint created without rate limiting. Vulnerable to brute force and abuse.",
+        conceptMissing: ["RateLimiting", "DoSProtection", "AbusePrevention"],
+        conceptExpected: ["rateLimit", "throttle", "express-rate-limit"],
+    },
+];
+/**
+ * Identifier Parser: splits camelCase/PascalCase/snake_case into words.
+ * registerNewUser → ["register", "New", "User"]
+ * doLogin         → ["do", "Login"]
+ * verifyToken     → ["verify", "Token"]
+ * Not AST. Just smarter string splitting.
+ */
+function identifierParse(name) {
+    // Split on snake_case, kebab-case, dots
+    const parts = name.split(/[_\-\.]/);
+    const words = [];
+    for (const part of parts) {
+        // Split camelCase/PascalCase: "registerNewUser" → ["register", "New", "User"]
+        const camelWords = part.replace(/([a-z])([A-Z])/g, "$1 $2").split(" ");
+        for (const w of camelWords) {
+            if (w.length > 0)
+                words.push(w);
+        }
+    }
+    return words;
+}
+/**
+ * Detect missing safeguards in function call sequences.
+ * Uses identifier parsing to match compound names (registerNewUser → register).
+ */
+function detectSafeguardViolations(calls, enclosingFuncName) {
+    const violations = [];
+    // Build effective calls: raw names + identifier-parsed words
+    const rawCalls = enclosingFuncName ? [enclosingFuncName, ...calls] : [...calls];
+    const parsedWords = [];
+    for (const c of rawCalls) {
+        parsedWords.push(...identifierParse(c));
+    }
+    const effectiveCalls = [...new Set([...rawCalls, ...parsedWords])];
+    // Skip authorization rules for auth functions — check both raw lowercased name and parsed words
+    const rawLower = enclosingFuncName?.toLowerCase() || "";
+    const AUTH_PATTERN = /\b(register|signup|signin|login|authenticate|createuser|createaccount|registeruser|registernewuser|dologin|verifytoken|validatesession|getuser|getsessionuser|getcurrentuser|endsession|logout|signout|dologout|destroysession|invalidatesession|invalidate|signout)\b/i;
+    const isAuthFunction = enclosingFuncName != null && (AUTH_PATTERN.test(rawLower) ||
+        identifierParse(enclosingFuncName).some(w => AUTH_PATTERN.test(w)));
+    for (const rule of SAFEGUARD_RULES) {
+        // Check if trigger matches
+        const triggerMatch = effectiveCalls.some(c => rule.trigger.test(c));
+        if (!triggerMatch)
+            continue;
+        // Skip authorization rules for auth functions — they ARE the auth
+        if (isAuthFunction && rule.category === "authorization")
+            continue;
+        // Check if at least one safeguard matches
+        const matchedSafeguard = rule.safeguards.find(s => effectiveCalls.some(c => s.pattern.test(c)));
+        if (matchedSafeguard)
+            continue;
+        // No safeguard matched → violation
+        violations.push({
+            rule: rule.name,
+            category: rule.category,
+            type: "missing_safeguard",
+            detail: rule.violationMessage,
+            conceptDetail: `Missing: ${rule.conceptMissing.join(", ")}. Expected at least one of: ${rule.conceptExpected.join(", ")}`,
+            missingConcepts: rule.conceptMissing,
+            expectedConcepts: rule.conceptExpected,
+        });
+    }
+    return violations;
+}
+// ═══════════════════════════════════════════════════════════════
+// v7: Call Graph — Function-level Context
+// ═══════════════════════════════════════════════════════════════
+/**
+ * Build a reverse call graph: function name → list of caller function names.
+ * From IR FunctionInfo[].calls[], computes the inverse: who calls each function.
+ */
+function buildCallerMap(funcs) {
+    const callerMap = new Map();
+    for (const f of funcs) {
+        if (!f.calls)
+            continue;
+        for (const callee of f.calls) {
+            if (!callerMap.has(callee))
+                callerMap.set(callee, []);
+            callerMap.get(callee).push(f.name);
+        }
+    }
+    return callerMap;
+}
+/**
+ * v7: Build safeguard context — own → same-file → caller chain.
+ *
+ * Hierarchy:
+ *   1. Function's own calls + identifier-parsed words
+ *   2. Same-file functions' calls (file-level, as v6)
+ *   3. Transitive caller chain calls (new in v7)
+ */
+function buildSafeguardContext(funcName, callerMap, funcCalls, fileCalls, funcFile, visited = new Set()) {
+    if (visited.has(funcName))
+        return new Set();
+    visited.add(funcName);
+    const context = new Set(funcCalls.get(funcName) || []);
+    // Parse identifier words from funcName itself
+    for (const w of identifierParse(funcName))
+        context.add(w);
+    // ▸ Same-file context (inherited from v6)
+    const file = funcFile.get(funcName);
+    if (file && fileCalls.has(file)) {
+        for (const c of fileCalls.get(file))
+            context.add(c);
+    }
+    // ▸ Caller chain context (new in v7)
+    const callers = callerMap.get(funcName) || [];
+    for (const caller of callers) {
+        const callerContext = buildSafeguardContext(caller, callerMap, funcCalls, fileCalls, funcFile, visited);
+        for (const c of callerContext)
+            context.add(c);
+    }
+    return context;
+}
+/**
+ * v7: Detect missing safeguards — Function Context + Call Graph.
+ *
+ * Trigger check: function's own body + file-level calls (same scope as v6).
+ * Safeguard check: own → same-file → transitive caller chain (superset of v6).
+ *
+ * Rationale: narrow triggers (own-body only) break Recall on C projects where
+ * function names don't carry trigger keywords. Keeping v6's file-level trigger
+ * while expanding safeguard context to include caller chain preserves Recall
+ * and improves Precision.
+ */
+function detectSafeguardViolationsV7(calls, enclosingFuncName, callerMap, funcCalls, fileCalls, funcFile) {
+    const violations = [];
+    // Build effective calls for trigger scope: own body + file-level (same as v6)
+    const rawCalls = enclosingFuncName ? [enclosingFuncName, ...calls] : [...calls];
+    // Add file-level calls to trigger scope (preserves v6 Recall)
+    const file = enclosingFuncName ? funcFile.get(enclosingFuncName) : undefined;
+    const fileLevelCalls = file && fileCalls.has(file) ? [...fileCalls.get(file)] : [];
+    const triggerRawCalls = [...new Set([...rawCalls, ...fileLevelCalls])];
+    const triggerParsedWords = [];
+    for (const c of triggerRawCalls) {
+        triggerParsedWords.push(...identifierParse(c));
+    }
+    const triggerEffectiveCalls = [...new Set([...triggerRawCalls, ...triggerParsedWords])];
+    // Build safeguard context: own + file + all transitive callers
+    const safeContext = enclosingFuncName
+        ? buildSafeguardContext(enclosingFuncName, callerMap, funcCalls, fileCalls, funcFile)
+        : new Set(triggerEffectiveCalls);
+    for (const c of triggerEffectiveCalls)
+        safeContext.add(c);
+    // Skip authorization rules for auth functions
+    const rawLower = enclosingFuncName?.toLowerCase() || "";
+    const AUTH_PATTERN = /\b(register|signup|signin|login|authenticate|createuser|createaccount|registeruser|registernewuser|dologin|verifytoken|validatesession|getuser|getsessionuser|getcurrentuser|endsession|logout|signout|dologout|destroysession|invalidatesession|invalidate|signout)\b/i;
+    const isAuthFunction = enclosingFuncName != null && (AUTH_PATTERN.test(rawLower) ||
+        identifierParse(enclosingFuncName).some(w => AUTH_PATTERN.test(w)));
+    for (const rule of SAFEGUARD_RULES) {
+        // v7b: trigger check against own body + file-level (same scope as v6)
+        const triggerMatch = triggerEffectiveCalls.some(c => rule.trigger.test(c));
+        if (!triggerMatch)
+            continue;
+        if (isAuthFunction && rule.category === "authorization")
+            continue;
+        // v7: safeguard check against FULL context (own + file + callers)
+        const matchedSafeguard = rule.safeguards.find(s => [...safeContext].some(c => s.pattern.test(c)));
+        if (matchedSafeguard)
+            continue;
+        violations.push({
+            rule: rule.name,
+            category: rule.category,
+            type: "missing_safeguard",
+            detail: rule.violationMessage,
+            conceptDetail: `Missing: ${rule.conceptMissing.join(", ")}. Expected at least one of: ${rule.conceptExpected.join(", ")}`,
+            missingConcepts: rule.conceptMissing,
+            expectedConcepts: rule.conceptExpected,
+        });
+    }
+    return violations;
+}
 // ── Concept Mapping (Ontology → Detector) ──
 const CONCEPT_MAP = {
     "TLS Handshake": { "tls_init": ["ClientHello"], "tls_connect": ["ServerHello", "Certificate"], "tls_free": ["Finished"] },
@@ -137,8 +489,9 @@ function validateCombined(calls, enclosingFuncName) {
     const { validateResourceLifecycle } = require("./resource-detector");
     const res = validateResourceLifecycle(calls, enclosingFuncName);
     const proto = validateProtocolState(calls);
-    const all = [...res.violations, ...proto.violations];
-    return { valid: all.length === 0, resourceViolations: res.violations, protocolViolations: proto.violations, detail: all.map((v) => v.detail || "").join("; ") || "All checks passed" };
+    const safe = detectSafeguardViolations(calls, enclosingFuncName);
+    const all = [...res.violations, ...proto.violations, ...safe];
+    return { valid: all.length === 0, resourceViolations: res.violations, protocolViolations: proto.violations, safeguardViolations: safe, detail: all.map((v) => v.detail || "").join("; ") || "All checks passed" };
 }
 // ═══════════════════════════════════════════════════════════════
 // CLI

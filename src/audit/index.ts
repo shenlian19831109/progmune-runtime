@@ -9,6 +9,7 @@ export { buildGovernanceReport } from "./report-builder";
 export { formatAsJSON } from "./formatters/json";
 export { formatAsTerminal } from "./formatters/terminal";
 export { formatAsMarkdown } from "./formatters/markdown";
+export { formatAsHTML } from "./formatters/html";
 export type {
   GovernanceReport,
   GovernanceMetadata,
@@ -20,4 +21,19 @@ export type {
   ProvenanceSection,
   AntibodiesSection,
   SessionVerdict,
+  BusinessRisk,
+  KnowledgeDomain,
+  ProtocolEdge,
+  BusinessTranslationSection,
 } from "./types";
+
+export {
+  translateToBusinessRisks,
+  getKnowledgeCoverage,
+  getProtocolGraph,
+  buildBusinessSummary,
+} from "./business-translator";
+
+export type {
+  BusinessTranslationSummary,
+} from "./business-translator";

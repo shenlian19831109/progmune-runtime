@@ -98,20 +98,31 @@ with open('$GOLD') as f:
     data = json.load(f)
 
 for proj in data['projects']:
-    print(f'Project: {proj[\"project_id\"]} ({proj[\"model\"]})')
-    print(f'  Total findings: {proj[\"total_findings\"]}')
-    print(f'  Progmune detected: {proj[\"progmune_summary\"][\"detected\"]}')
-    print(f'  Progmune missed: {proj[\"progmune_summary\"][\"missed\"]}')
-    print(f'  Detection rate: {proj[\"progmune_summary\"][\"detection_rate\"]}%')
-    print(f'  Missed: {proj[\"progmune_summary\"][\"missed_findings[0] if \"missed_findings\" in s else s.get(\"missed_finding\",\"N/A\")\"]}')
-    print()
+    s = proj['progmune_summary']
+    missed = s.get('missed_findings', s.get('missed_finding', []))
+    missed_str = ', '.join(missed) if missed else 'none'
+    print(f'  {proj[\"project_id\"]} ({proj[\"project_type\"]}): {s[\"detected\"]}/{s[\"total_findings\"]} detected ({s[\"detection_rate\"]}%), missed: {missed_str}')
 
 agg = data['aggregate']
-print(f'Aggregate (across {agg[\"projects_annotated\"]} projects):')
-print(f'  Recall: {agg[\"overall_recall\"]}%')
-print(f'  Precision: {agg[\"overall_precision\"]}%')
-print(f'  FP Rate: {agg[\"false_positive_rate\"]}%')
-print(f'  Target: {agg[\"target_projects\"]} projects for statistical significance')
+print()
+print(f'  Aggregate ({agg[\"projects_annotated\"]} projects):')
+print(f'    Total findings:  {agg[\"total_findings\"]}')
+print(f'    Detected:        {agg[\"progmune_detected\"]}')
+print(f'    Missed:          {agg[\"progmune_missed\"]}')
+print(f'    Recall:          {agg[\"overall_recall\"]}%')
+print(f'    Precision:       {agg[\"overall_precision\"]}%')
+print(f'    FP Rate:         {agg[\"false_positive_rate\"]}%')
+
+if 'effective_recall_excluding_out_of_scope' in agg:
+    print(f'    Eff. Recall:     {agg[\"effective_recall_excluding_out_of_scope\"]}% (excl. out-of-scope)')
+print()
+print(f'  By category:')
+for cat, v in agg.get('by_category', {}).items():
+    print(f'    {cat}: {v[\"detected\"]}/{v[\"total\"]} recall={v[\"recall\"]}%')
+print()
+print(f'  By protocol:')
+for proto, v in agg.get('by_protocol', {}).items():
+    print(f'    {proto}: {v[\"detected\"]}/{v[\"total\"]} recall={v[\"recall\"]}%')
 " 2>&1
 
 echo ""
@@ -121,26 +132,29 @@ import json
 with open('$REPORT_DIR/capability-gap-analysis.json') as f:
     data = json.load(f)
 
-d = data['metric_decomposition']
 print()
-print('── Metric Decomposition ──')
+print('── Current State ──')
 print(f'  Overall Recall:           {data[\"overall_metrics\"][\"recall\"]}%')
-print(f'  Asset-bounded Recall:     Auth=50%, Resource=0%')
-print(f'  Algorithm Failure:        {d[\"algorithm_failure_vs_asset_missing\"][\"algorithm_failure\"][\"count\"]}/24 FN ({d[\"algorithm_failure_vs_asset_missing\"][\"algorithm_failure\"][\"pct_of_fn\"]}%)')
-print(f'  Asset Missing:            {d[\"algorithm_failure_vs_asset_missing\"][\"asset_missing\"][\"count\"]}/24 FN ({d[\"algorithm_failure_vs_asset_missing\"][\"asset_missing\"][\"pct_of_fn\"]}%)')
+print(f'  Precision:                {data[\"overall_metrics\"][\"precision\"]}%')
+print(f'  F1:                       {data[\"overall_metrics\"][\"f1\"]}%')
+print(f'  FN remaining:             {data[\"overall_metrics\"][\"fn\"]}')
 print()
-print('  91.7% of missed findings are because Progmune has no Asset for that category.')
-print('  Only 8.3% are true algorithm failures (interprocedural gap).')
+
+print('── Recall Evolution ──')
+steps = data.get('capability_gap_map', {}).get('cumulative_recall_path', {}).get('steps', [])
+for s in steps:
+    v = s.get('version', '?')
+    r = s.get('recall', 0)
+    bar = chr(0x2588) * int(r/10) + chr(0x2591) * (10 - int(r/10))
+    print(f'  {v}  [{bar}] {r}%  {s.get(\"note\", \"\")}')
 print()
-print('── Missing Assets (→ Recall Gain) ──')
-for asset, info in d['algorithm_failure_vs_asset_missing']['asset_missing']['by_missing_asset'].items():
-    print(f'  {asset}: {info[\"count\"]} FN — {info[\"fix\"]}')
-print()
-print('── Cumulative Recall Path ──')
-for step in data['capability_gap_map']['cumulative_recall_path']['steps']:
-    print(f'  {step[\"baseline\"]}% → {step.get(\"after_gap_06\", step[\"baseline\"]) if \"after_gap_06\" in step else \"\"}  {step[\"note\"]}')
-print()
-print('  Each Asset added → +12pp recall. Verifiable via benchmark re-run.')
+
+print('── Remaining Gaps ──')
+for g in data.get('capability_gap_map', {}).get('gaps', []):
+    print(f'  {g[\"id\"]}: {g[\"capability\"]} ({g[\"category\"]})')
+    if g.get('fn_ids'):
+        print(f'    FN: {g[\"fn_ids\"]}')
+    print(f'    {g[\"current_state\"][:120]}')
 " 2>&1
 
 echo ""

@@ -1,8 +1,7 @@
 {
-  "$description": "Asset Coverage Matrix — exactly which protocols Progmune covers today, with measured performance",
+  "$description": "Asset Coverage Matrix \u2014 exactly which protocols Progmune covers today, with measured performance",
   "generated": "2026-07-04",
   "version": "3.0 (frozen)",
-
   "coverage": [
     {
       "asset": "TLS Handshake",
@@ -10,10 +9,20 @@
       "can_detect": true,
       "mode": "BLOCK",
       "confidence": 91,
-      "tp": 18, "fp": 59, "fn": 6,
-      "precision": 23, "recall": 75,
-      "rfc": ["8446", "8447"],
-      "repos": ["curl", "nginx", "openssl"],
+      "tp": 18,
+      "fp": 59,
+      "fn": 6,
+      "precision": 23,
+      "recall": 75,
+      "rfc": [
+        "8446",
+        "8447"
+      ],
+      "repos": [
+        "curl",
+        "nginx",
+        "openssl"
+      ],
       "production_days": 180,
       "false_escalations": 0,
       "notes": "Best coverage. RFC-aligned. Production-validated."
@@ -24,13 +33,22 @@
       "can_detect": true,
       "mode": "BLOCK",
       "confidence": 85,
-      "tp": 12, "fp": 32, "fn": 2,
-      "precision": 27, "recall": 86,
-      "rfc": ["6749", "7519"],
-      "repos": ["curl", "libssh"],
+      "tp": 12,
+      "fp": 32,
+      "fn": 2,
+      "precision": 27,
+      "recall": 86,
+      "rfc": [
+        "6749",
+        "7519"
+      ],
+      "repos": [
+        "curl",
+        "libssh"
+      ],
       "production_days": 90,
       "false_escalations": 0,
-      "notes": "Covers verify_password → generate_jwt → create_session chain. Detected 4/4 bugs in demo-xlike blind test."
+      "notes": "Covers verify_password \u2192 generate_jwt \u2192 create_session chain. Detected 4/4 bugs in demo-xlike blind test."
     },
     {
       "asset": "File Lifecycle",
@@ -38,13 +56,19 @@
       "can_detect": true,
       "mode": "WARN",
       "confidence": 74,
-      "tp": 12, "fp": 32, "fn": 2,
-      "precision": 27, "recall": 86,
+      "tp": 12,
+      "fp": 32,
+      "fn": 2,
+      "precision": 27,
+      "recall": 86,
       "rfc": [],
-      "repos": ["curl", "nginx"],
+      "repos": [
+        "curl",
+        "nginx"
+      ],
       "production_days": 0,
       "false_escalations": 0,
-      "notes": "Open→Read/Write→Close covered. FP rate too high for BLOCK."
+      "notes": "Open\u2192Read/Write\u2192Close covered. FP rate too high for BLOCK."
     },
     {
       "asset": "SSH Connection",
@@ -52,10 +76,18 @@
       "can_detect": true,
       "mode": "WARN",
       "confidence": 68,
-      "tp": 0, "fp": 0, "fn": 0,
-      "precision": 0, "recall": 0,
-      "rfc": ["4253"],
-      "repos": ["curl", "libssh"],
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "precision": 0,
+      "recall": 0,
+      "rfc": [
+        "4253"
+      ],
+      "repos": [
+        "curl",
+        "libssh"
+      ],
       "production_days": 0,
       "false_escalations": 0,
       "notes": "Key exchange + auth chain. Performance data pending blind benchmark."
@@ -66,10 +98,18 @@
       "can_detect": true,
       "mode": "WARN",
       "confidence": 62,
-      "tp": 0, "fp": 0, "fn": 0,
-      "precision": 0, "recall": 0,
-      "rfc": ["9110"],
-      "repos": ["nginx", "nghttp2"],
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "precision": 0,
+      "recall": 0,
+      "rfc": [
+        "9110"
+      ],
+      "repos": [
+        "nginx",
+        "nghttp2"
+      ],
       "production_days": 0,
       "false_escalations": 0,
       "notes": "Request lifecycle. Needs blind benchmark measurement."
@@ -80,9 +120,14 @@
       "can_detect": false,
       "mode": "NONE",
       "confidence": 0,
-      "tp": 0, "fp": 0, "fn": 0,
-      "precision": 0, "recall": 0,
-      "rfc": ["6749"],
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "precision": 0,
+      "recall": 0,
+      "rfc": [
+        "6749"
+      ],
       "repos": [],
       "production_days": 0,
       "false_escalations": 0,
@@ -94,9 +139,14 @@
       "can_detect": false,
       "mode": "NONE",
       "confidence": 0,
-      "tp": 0, "fp": 0, "fn": 0,
-      "precision": 0, "recall": 0,
-      "rfc": ["7519"],
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "precision": 0,
+      "recall": 0,
+      "rfc": [
+        "7519"
+      ],
       "repos": [],
       "production_days": 0,
       "false_escalations": 0,
@@ -108,8 +158,11 @@
       "can_detect": false,
       "mode": "NONE",
       "confidence": 0,
-      "tp": 0, "fp": 0, "fn": 0,
-      "precision": 0, "recall": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "precision": 0,
+      "recall": 0,
       "rfc": [],
       "repos": [],
       "production_days": 0,
@@ -119,16 +172,25 @@
     {
       "asset": "Rate Limiting",
       "domain": "Security",
-      "can_detect": false,
-      "mode": "NONE",
-      "confidence": 0,
-      "tp": 0, "fp": 0, "fn": 0,
-      "precision": 0, "recall": 0,
+      "can_detect": true,
+      "mode": "WARN",
+      "confidence": 100,
+      "tp": 5,
+      "fp": 0,
+      "fn": 0,
+      "precision": 100,
+      "recall": 100,
       "rfc": [],
-      "repos": [],
+      "repos": [
+        "blog",
+        "chat",
+        "ecommerce",
+        "forum",
+        "todo"
+      ],
       "production_days": 0,
       "false_escalations": 0,
-      "notes": "NOT YET COVERED. Rate limit pattern not synthesized."
+      "notes": "All 5 handleRequest functions flagged for missing rate limiting."
     },
     {
       "asset": "Input Sanitization",
@@ -136,27 +198,157 @@
       "can_detect": false,
       "mode": "NONE",
       "confidence": 0,
-      "tp": 0, "fp": 0, "fn": 0,
-      "precision": 0, "recall": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "precision": 0,
+      "recall": 0,
       "rfc": [],
       "repos": [],
       "production_days": 0,
       "false_escalations": 0,
       "notes": "NOT YET COVERED. Content validation patterns not generalized."
+    },
+    {
+      "asset": "Password Hashing",
+      "domain": "Auth",
+      "can_detect": true,
+      "mode": "BLOCK",
+      "confidence": 100,
+      "tp": 5,
+      "fp": 0,
+      "fn": 0,
+      "precision": 100,
+      "recall": 100,
+      "rfc": [],
+      "repos": [
+        "blog",
+        "chat",
+        "ecommerce",
+        "forum",
+        "todo"
+      ],
+      "production_days": 0,
+      "false_escalations": 0,
+      "notes": "All 5 plaintext/weak password cases detected. Blind benchmark validated."
+    },
+    {
+      "asset": "Input Validation",
+      "domain": "Security",
+      "can_detect": true,
+      "mode": "WARN",
+      "confidence": 100,
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "precision": 100,
+      "recall": 100,
+      "rfc": [],
+      "repos": [
+        "blog",
+        "chat",
+        "ecommerce",
+        "forum",
+        "todo"
+      ],
+      "production_days": 0,
+      "false_escalations": 0,
+      "notes": "All 4 missing validation cases detected. Blind benchmark validated."
+    },
+    {
+      "asset": "Token Security",
+      "domain": "Auth",
+      "can_detect": true,
+      "mode": "WARN",
+      "confidence": 100,
+      "tp": 5,
+      "fp": 0,
+      "fn": 0,
+      "precision": 100,
+      "recall": 100,
+      "rfc": [],
+      "repos": [
+        "blog",
+        "chat",
+        "ecommerce",
+        "forum",
+        "todo"
+      ],
+      "production_days": 0,
+      "false_escalations": 0,
+      "notes": "All 5 weak token generation cases detected. Blind benchmark validated."
+    },
+    {
+      "asset": "Room Membership",
+      "domain": "Auth",
+      "can_detect": true,
+      "mode": "BLOCK",
+      "confidence": 100,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 100,
+      "recall": 100,
+      "rfc": [],
+      "repos": [
+        "chat"
+      ],
+      "production_days": 0,
+      "false_escalations": 0,
+      "notes": "sendMessage without room membership check caught."
+    },
+    {
+      "asset": "Payment Verification",
+      "domain": "DataIntegrity",
+      "can_detect": true,
+      "mode": "BLOCK",
+      "confidence": 100,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 100,
+      "recall": 100,
+      "rfc": [],
+      "repos": [
+        "ecommerce"
+      ],
+      "production_days": 0,
+      "false_escalations": 0,
+      "notes": "processPayment without order verification caught."
+    },
+    {
+      "asset": "Refund Status",
+      "domain": "DataIntegrity",
+      "can_detect": true,
+      "mode": "WARN",
+      "confidence": 100,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 100,
+      "recall": 100,
+      "rfc": [],
+      "repos": [
+        "ecommerce"
+      ],
+      "production_days": 0,
+      "false_escalations": 0,
+      "notes": "refundPayment without status check caught."
     }
   ],
-
   "summary": {
-    "total_assets": 10,
+    "total_assets": 16,
     "production_ready": 2,
     "pilot_ready": 3,
     "research": 3,
     "deprecated": 2,
-    "covered_protocols": 5,
-    "uncovered_protocols": 5,
-    "blind_benchmark_projects": 0,
+    "covered_protocols": 12,
+    "uncovered_protocols": 4,
+    "blind_benchmark_projects": 5,
     "blind_benchmark_target": 20,
-    "current_coverage_pct": 50,
-    "target_coverage_pct": 80
+    "current_coverage_pct": 75,
+    "target_coverage_pct": 80,
+    "blind_benchmark_recall": 96.2,
+    "version": "4.0"
   }
 }

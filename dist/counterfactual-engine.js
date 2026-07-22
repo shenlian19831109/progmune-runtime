@@ -55,6 +55,7 @@ exports.suggestAlternatives = suggestAlternatives;
 exports.formatAlternatives = formatAlternatives;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
+const zeroshot_strategy_1 = require("./zeroshot-strategy");
 const repair_strategies_1 = require("./repair-strategies");
 const repair_ranker_1 = require("./repair-ranker");
 const learning_ranker_1 = require("./learning-ranker");
@@ -164,7 +165,9 @@ async function suggestAlternatives(params) {
             : params.violation.currentStates || [],
         targetState: (params.targetState?.length ?? 0) > 0
             ? params.targetState
-            : params.violation.requiredStates || ["COMPLETED"],
+            : (params.violation.requiredStates?.length ?? 0) > 0
+                ? params.violation.requiredStates
+                : [], // Keep empty to trigger cleanup path — don't fake COMPLETED
         violationType: params.violation.violatedConstraint || "protocol_violation",
         constraints: params.constraints || [],
         rules: params.rules || new Map(),
@@ -178,8 +181,7 @@ async function suggestAlternatives(params) {
     }
     // P8.3: If no candidates found, try ZeroShotStrategy
     if (allCandidates.length === 0) {
-        const { ZeroShotStrategy } = require("./zeroshot-strategy");
-        const zeroShot = new ZeroShotStrategy();
+        const zeroShot = new zeroshot_strategy_1.ZeroShotStrategy();
         allCandidates.push(...zeroShot.search(ctx));
     }
     // 3. Deduplicate by action signature, merge evidence sources
@@ -230,6 +232,7 @@ async function suggestAlternatives(params) {
                 .filter(cn => (cn.type === "safety" || cn.type === "security") &&
                 c.actions.length <= 5)
                 .map(cn => cn.description),
+            repairStrategy: c.metadata?.source,
         };
     });
     return alternatives;

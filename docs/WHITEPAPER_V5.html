@@ -952,38 +952,43 @@ npx progmune-runtime test            # 运行内置测试</code></pre>
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <!-- 更深层技术细节（供技术评估者参考） -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<h2 id="v6">程序免疫学 × 协议安全运行时 — 三层产品定位</h2>
-<p>程序免疫学是<strong>框架</strong>——借用生物免疫系统的三层防御结构（天然免疫、获得性免疫、免疫记忆）来解释系统如何自我进化。协议安全运行时是<strong>产品</strong>——客户实际部署和购买的能力。两者不是二选一：<strong>免疫学解释"为什么这样设计"，协议安全解释"你能用它做什么"。</strong></p>
+<h2 id="v6">产品框架：AI 软件证明 — 可证明的 AI 代码治理</h2>
+
+<h3>定位转变</h3>
+<p>Progmune 不是"更好的代码检查器"。它回答的问题是：<strong>"如何证明 AI 生成的代码没有绕过关键安全协议，并且事后能够追溯？"</strong></p>
+<p>与传统 SAST（CodeQL/Semgrep）<strong>不在同一个赛道</strong>——SAST 分析代码语法，Progmune 验证协议生命周期。SAST 卖"发现 bug"；Progmune 卖"证明合规"。</p>
 
 <div class="grid g3">
   <div class="card">
-    <h4>🛡️ 天然免疫 → 约束引擎</h4>
-    <p><strong>SVL-1/2/3/4</strong> — 毫秒级拦截。确保 AI 生成的代码不调用不存在的函数、不传错类型、不违反协议顺序。</p>
-    <p style="font-size:.85rem;color:var(--muted)">生物类比：皮肤/粘膜——对所有入侵者无差别防御。</p>
-    <p style="font-size:.85rem;color:var(--muted)">卖点：在生成阶段拦截，而非代码写完之后。</p>
+    <h4>AI Code Guard</h4>
+    <p><strong>买家：工程团队</strong></p>
+    <p>Commit 前阻止协议违规：Missing Auth、Missing Release、Double Free、UAF、Session Fixation</p>
+    <p style="font-size:.85rem;color:var(--muted)">交付：VSCode · GitHub Action · CI/CD Gate</p>
+    <p style="font-size:.85rem;color:var(--muted)">定价：开源免费 / /月/团队</p>
   </div>
   <div class="card">
-    <h4>🧬 获得性免疫 → 协议安全检测器</h4>
-    <p><strong>PLSB + SSG + BFS 修复</strong> — 将已知安全漏洞的"协议形状"编码为状态机规则，在 AI 生成代码时实时拦截同类模式。</p>
-    <p style="font-size:.85rem;color:var(--muted)">生物类比：T/B 细胞——识别特定抗原，产生针对性抗体。</p>
-    <p style="font-size:.85rem;color:var(--muted)">卖点：协议级形式化验证，92% CVE 召回率。</p>
+    <h4>Protocol Security Runtime</h4>
+    <p><strong>买家：AppSec / 安全工程</strong></p>
+    <p>状态机验证：Missing State · Missing Edge · Illegal Edge。发现传统 SAST 难以捕获的流程型漏洞。</p>
+    <p style="font-size:.85rem;color:var(--muted)">核心资产：SSG · PLSB · Name-Free Fingerprint · 92% 召回率</p>
+    <p style="font-size:.85rem;color:var(--muted)">定价：K-25K/年</p>
   </div>
   <div class="card">
-    <h4>🧠 免疫记忆 → 可审计治理</h4>
-    <p><strong>Provable Generation + Ledger + Audit</strong> — 每个 AI 生成的文件带 @progmune-generated 标记 + 会话 ID + 规则哈希，完整状态转移链可随时回放验证。</p>
-    <p style="font-size:.85rem;color:var(--muted)">生物类比：记忆细胞——对已知病原体快速反应，长期保留抗体。</p>
-    <p style="font-size:.85rem;color:var(--muted)">卖点："出了安全事故，我能证明代码有没有经过安全检查。"</p>
+    <h4>AI Governance & Audit</h4>
+    <p><strong>买家：CISO / 风控 / 合规</strong></p>
+    <p>证明 AI 代码经过检查：Ledger · Rule Hash · Session Trace · Replay Verification</p>
+    <p style="font-size:.85rem;color:var(--muted)">输出：审计记录 · 合规证明 · 责任链</p>
+    <p style="font-size:.85rem;color:var(--muted)">对应 EU AI Act 可追溯、可审计要求</p>
   </div>
 </div>
 
-<div class="hl"><strong>一句话定位：</strong>Progmune 是一个以程序免疫学为理论框架的<strong>协议安全运行时</strong>——它不是"帮程序员少写 bug"，而是<strong>"用形式化方法证明 AI 生成的代码没有绕过安全步骤"</strong>。目标买家是安全团队和合规部门，而非个人开发者。</div>
-
-<h3>护城河分析</h3>
 <div class="hl">
-  <strong>真正的护城河不是 SVL 验证算法本身</strong>（大厂 3 个月能复刻），而是两样东西的结合：<br>
-  ① <strong>失败语料库 + 抗体记忆</strong>：企业的使用积累本身就是护城河——系统越用越聪明；<br>
-  ② <strong>Name-Free 拓扑指纹</strong>：安全模式可以跨项目、跨语言迁移而不泄露业务逻辑，是"全球免疫网络"愿景的技术前提。
+  <strong>第一代：</strong>测试代码是否正确。<br>
+  <strong>第二代：</strong>检测代码是否存在漏洞。<br>
+  <strong>第三代：</strong><strong>证明 AI 生成代码是否遵守安全协议。</strong>Progmune 属于第三代。<br><br>
+  Progmune 不卖"发现更多 bug"——它卖的是"<strong>可证明的 AI 代码治理</strong>"。这是一个新品类。
 </div>
+
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <!-- 新增：PLSB 基准与真实 CVE 验证 -->

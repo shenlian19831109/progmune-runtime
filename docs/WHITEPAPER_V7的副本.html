@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Progmune Runtime V7 — Knowledge-driven Governance for AI-generated Software</title>
+<style>
+  :root { --bg:#ffffff; --card:#f8f9fa; --border:#dee2e6; --text:#212529; --muted:#6c757d; --accent:#0d9488; --green:#16a34a; --orange:#d97706; --red:#dc2626; --purple:#7c3aed; --blue:#2563eb; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; line-height:1.8; max-width:1100px; margin:0 auto; padding:2rem; }
+  h1 { font-size:2.4rem; text-align:center; margin-bottom:.5rem; background:linear-gradient(135deg,var(--accent),var(--blue)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  h2 { font-size:1.5rem; margin:3rem 0 1rem; padding-bottom:.5rem; border-bottom:2px solid var(--border); color:var(--accent); }
+  h3 { font-size:1.2rem; margin:2rem 0 .8rem; color:#1e293b; }
+  h4 { font-size:1rem; margin:1.2rem 0 .5rem; color:var(--orange); }
+  p,li { margin:.5rem 0; }
+  ul,ol { padding-left:1.5rem; }
+  .subtitle { text-align:center; color:var(--muted); font-size:1rem; margin-bottom:.5rem; }
+  .version { text-align:center; color:var(--muted); font-size:.85rem; margin-bottom:2rem; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:1.5rem; margin:1rem 0; }
+  .card h4 { margin-top:0; color:var(--accent); }
+  .card.accent { border-left:4px solid var(--accent); }
+  .card.blue { border-left:4px solid var(--blue); }
+  .card.green { border-left:4px solid var(--green); }
+  .card.orange { border-left:4px solid var(--orange); }
+  .card.red { border-left:4px solid var(--red); }
+  .card.purple { border-left:4px solid var(--purple); }
+  table { width:100%; border-collapse:collapse; margin:1rem 0; font-size:.9rem; }
+  th,td { padding:8px 12px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background:var(--card); color:var(--accent); font-weight:600; }
+  .metric-big { font-size:2.2rem; font-weight:800; color:var(--accent); }
+  .metric-label { font-size:.8rem; color:var(--muted); text-transform:uppercase; }
+  .grid { display:grid; gap:1rem; }
+  .g2 { grid-template-columns:1fr 1fr; } .g3 { grid-template-columns:1fr 1fr 1fr; } .g4 { grid-template-columns:1fr 1fr 1fr 1fr; } .g5 { grid-template-columns:1fr 1fr 1fr 1fr 1fr; }
+  @media (max-width:768px) { .g2,.g3,.g4,.g5 { grid-template-columns:1fr; } }
+  pre { background:#1e293b; color:#e2e8f0; border-radius:8px; padding:1.2rem; overflow-x:auto; font-size:.85rem; line-height:1.6; }
+  code { font-family:'SF Mono','Fira Code',monospace; font-size:.9em; background:#e9ecef; padding:2px 6px; border-radius:3px; }
+  pre code { background:none; padding:0; }
+  blockquote { border-left:4px solid var(--accent); padding:12px 20px; margin:1rem 0; background:#f0fdfa; }
+  .en { color:var(--muted); font-size:.9em; }
+  .badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:700; }
+  .b-green { background:#dcfce7; color:#16a34a; } .b-red { background:#fee2e2; color:#dc2626; } .b-amber { background:#fef3c7; color:#d97706; } .b-blue { background:#dbeafe; color:#2563eb; } .b-purple { background:#f3e8ff; color:#7c3aed; }
+  .toc { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:1.5rem 2rem; margin:2rem 0; columns:2; }
+  .toc a { color:var(--accent); text-decoration:none; }
+  .footer { margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--border); text-align:center; color:var(--muted); font-size:.85rem; }
+  .bar { display:inline-block; height:1em; border-radius:2px; vertical-align:middle; }
+  .bar-green { background:var(--green); } .bar-yellow { background:var(--orange); } .bar-blue { background:var(--blue); } .bar-gray { background:var(--muted); }
+  @media print { body { padding:1rem; font-size:10pt; } .toc { columns:1; } }
+</style>
+</head>
+<body>
+
+<h1>Progmune Runtime V7</h1>
+<div class="subtitle">Knowledge-driven Governance for AI-generated Software</div>
+<div class="subtitle en">知识驱动的AI生成软件治理运行时</div>
+<div class="version">Comprehensive Whitepaper · 综合技术白皮书 · July 2026</div>
+
+<div class="toc">
+<a href="#s1">1. 定位与愿景 Positioning</a><br>
+<a href="#s2">2. 问题与市场 Problem &amp; Market</a><br>
+<a href="#s2d">2.4 设计哲学：程序免疫学</a><br>
+<a href="#s3">3. 产品架构 Architecture</a><br>
+<a href="#s4">4. 技术体系 Technical System</a><br>
+<a href="#s5">5. 知识体系 Knowledge Base</a><br>
+<a href="#s6">6. 治理体系 Governance</a><br>
+<a href="#s7">7. Runtime API</a><br>
+<a href="#s8">8. 基准与数据 Benchmarks</a><br>
+<a href="#s9">9. 竞争力与护城河 Moat</a><br>
+<a href="#s10">10. 商业模型 Business Model</a><br>
+<a href="#s11">11. 市场策略 Market Strategy</a><br>
+<a href="#s12">12. 路线图 Roadmap</a><br>
+<a href="#s13">13. 版本演进 Version History</a><br>
+<a href="#s14">14. 附录 Appendix</a>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 1 -->
+<!-- ═══════════════════════════════════════════════ -->
+<h2 id="s1">1. 定位与愿景 <span class="en">Positioning &amp; Vision</span></h2>
+
+<div class="card accent">
+<h4>一句话定位 · One-sentence Positioning</h4>
+<blockquote>Progmune is a <strong>Knowledge-driven Governance Runtime for AI-generated Software</strong>.<br>
+<span class="en">Progmune 是<strong>知识驱动的AI生成软件治理运行时</strong>。</span></blockquote>
+</div>
+
+<div class="grid g3">
+<div class="card green">
+<h4>我们做什么 · What We Do</h4>
+<p>AI generates code. Progmune governs it.</p>
+<p class="en">AI 生成代码。Progmune 治理代码。</p>
+<p>Not "does the code look right" (SAST). Not "is this a known CVE" (SCA). <strong>"Does this AI-generated code follow the protocol it's supposed to."</strong></p>
+</div>
+<div class="card blue">
+<h4>我们不是什么 · What We Are NOT</h4>
+<p>❌ AI 代码生成器<br>❌ CodeQL/Semgrep 竞品<br>❌ 静态分析工具<br>❌ 规则库</p>
+</div>
+<div class="card purple">
+<h4>我们卖什么 · What We Sell</h4>
+<p><strong>Governance decisions backed by continuously evolving protocol knowledge.</strong></p>
+<p>不是检测器。不是规则集。是<strong>可审计的治理决策</strong>。</p>
+</div>
+</div>
+
+<div class="card">
+<h4>三层价值主张 · Three-tier Value Proposition</h4>
+<table>
+<tr><th>层 · Tier</th><th>核心 · Core</th><th>价值 · Value</th></tr>
+<tr><td><strong>Knowledge</strong></td><td>持续演化的协议知识库</td><td>护城河 —— 不可复制</td></tr>
+<tr><td><strong>Runtime</strong></td><td>verify() → explain() → fix()</td><td>产品 —— 稳定API</td></tr>
+<tr><td><strong>Governance</strong></td><td>Policy → Certificate → CI Gate</td><td>企业买单的原因</td></tr>
+</table>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 2 -->
+<!-- ═══════════════════════════════════════════════ -->
+<h2 id="s2">2. 问题与市场 <span class="en">Problem &amp; Market</span></h2>
+
+<h3>2.1 核心问题 · The Core Problem</h3>
+
+<div class="card red">
+<p>AI 代码生成器（Claude、GPT、Copilot、Cursor）以史无前例的速度产出语法正确的代码。<strong>但语法正确 ≠ 安全。</strong></p>
+<p class="en">AI code generators produce syntactically correct code at unprecedented speed. <strong>But syntax is not safety.</strong></p>
+</div>
+
+<p>当 AI 生成代码时，它可能：</p>
+<ul>
+<li>跳过认证步骤直接访问敏感数据</li>
+<li>分配资源后从不释放</li>
+<li>关闭连接但未失效会话</li>
+<li>提交事务但未检查授权</li>
+</ul>
+<p class="en">These are <strong>protocol lifecycle violations</strong> — invisible to every existing security tool.</p>
+
+<h3>2.2 市场空白 · Market Gap</h3>
+
+<table>
+<tr><th>工具类型</th><th>能检测</th><th>不能检测</th></tr>
+<tr><td>SAST (CodeQL, Semgrep)</td><td>代码模式、数据流、已知CVE</td><td>协议生命周期违规</td></tr>
+<tr><td>AI Code Review</td><td>代码风格、常见错误</td><td>跨函数协议序列违规</td></tr>
+<tr><td>Linter</td><td>语法风格</td><td>安全协议完整性</td></tr>
+<tr><td><strong>Progmune</strong></td><td><strong>协议状态机违规</strong></td><td>（与SAST互补，不替代）</td></tr>
+</table>
+
+<h3>2.3 合规驱动力 · Compliance Drivers</h3>
+<div class="grid g2">
+<div class="card orange"><strong>EU AI Act</strong> (2026执行)<br>要求 AI 系统输出可解释、可追溯</div>
+<div class="card orange"><strong>FDA 医疗软件指南</strong><br>AI 辅助诊断代码需审计追溯</div>
+<div class="card orange"><strong>金融监管</strong><br>AI 决策系统需证明安全审查</div>
+<div class="card orange"><strong>ISO 42001 / SOC2</strong><br>AI 治理需可审计证据链</div>
+</div>
+
+<h2 id="s2d">2.4 设计哲学：程序免疫学 <span class="en">Design Philosophy: Program Immunology</span></h2>
+
+<div class="card accent">
+<h4>为什么叫 Progmune？· Why "Progmune"?</h4>
+<p><strong>Program</strong> + <strong>Immune</strong> = <strong>Progmune</strong></p>
+<p class="en">程序（Program）+ 免疫（Immune）= 程序免疫系统</p>
+<p>Progmune 借鉴生物免疫系统的三层防御结构，构建 AI 生成代码的安全防线。生物免疫系统不依靠"预测病原体长什么样"——它依靠<strong>识别"自己"和"非自己"</strong>。Progmune 同理：不预测 LLM 会犯什么错，而是从项目中提取<strong>程序真相（IR）</strong>，用它来识别"不符合协议的代码"。</p>
+</div>
+
+<h3>三层免疫防御 · Three-layer Immune Defense</h3>
+
+<div class="grid g3">
+<div class="card green">
+<h4>第一层：天然免疫 <span class="en">Innate Immunity</span></h4>
+<p><strong>生物类比：</strong>皮肤、粘膜——非特异性防御</p>
+<p><strong>技术实现：</strong>约束引擎 (SVL-1~3)</p>
+<ul><li>SVL-1: 符号存在性</li><li>SVL-2: 类型匹配</li><li>SVL-3: 数据流</li></ul>
+<p class="en"><em>Catches hallucinated functions, type errors. Fast, universal.</em></p>
+</div>
+<div class="card orange">
+<h4>第二层：获得性免疫 <span class="en">Adaptive Immunity</span></h4>
+<p><strong>生物类比：</strong>T细胞、B细胞——特异性防御</p>
+<p><strong>技术实现：</strong>协议安全检测器 (SSG + Protocol State Machine)</p>
+<ul><li>语义状态图 (SSG) 强制执行协议步骤</li><li>协议状态机检测跨函数生命周期违规</li></ul>
+<p class="en"><em>Catches auth bypass, resource leaks. Learned from protocol knowledge.</em></p>
+</div>
+<div class="card purple">
+<h4>第三层：免疫记忆 <span class="en">Immune Memory</span></h4>
+<p><strong>生物类比：</strong>记忆细胞——记录每次感染</p>
+<p><strong>技术实现：</strong>可审计治理 (Ledger + Certificate + Evolution)</p>
+<ul><li>分类账记录完整状态转移链</li><li>AI 代码证书证明验证通过</li></ul>
+<p class="en"><em>Ledger records every transition, certificate proves verification.</em></p>
+</div>
+</div>
+
+<div class="card accent">
+<blockquote>Progmune <strong>不信任 LLM 的输出</strong>。它从项目中提取"程序真相"（IR）——符号表、类型图、调用图和协议注解——然后用这套真相去约束 LLM 的提议。LLM 被降级为"受约束的提议者"，最终决定权在程序真相。</blockquote>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 3 -->
+<!-- ═══════════════════════════════════════════════ -->
+<h2 id="s3">3. 产品架构 <span class="en">Product Architecture</span></h2>
+
+<pre><code>Enterprise:  verify("./server.ts") → BLOCK / WARN / ALLOW
+                ↑
+Layer 5: Runtime API     verify() | explain() | fix()       ← Stable Public API
+                ↑
+Layer 4: Governance      Policy Engine | Certificate | CI/CD  ← Product
+                ↑
+Layer 3: Verification    Resource | Protocol | State Machine  ← Capability
+                ↑
+Layer 2: Knowledge       Units | Ontology | Evolution         ← Moat
+                ↑
+Layer 1: Evidence        Repos | Sequences | Benchmarks | RFC ← Foundation</code></pre>
+
+<div class="card accent">
+<h4>数据流 · Data Flow</h4>
+<pre><code>Source Code → IR Extraction → Protocol Detection → Risk Assessment
+  → Knowledge Base Query → Policy Evaluation → Decision → Certificate → CI Gate</code></pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 4 -->
+<!-- ═══════════════════════════════════════════════ -->
+<h2 id="s4">4. 技术体系 <span class="en">Technical System</span></h2>
+
+<h3>4.1 检测引擎三重奏 · Detection Triad</h3>
+
+<h4>Resource Lifecycle Detector <span class="en">资源生命周期检测器</span></h4>
+<table>
+<tr><th>Category</th><th>Acquire</th><th>Release</th></tr>
+<tr><td>Memory 内存</td><td>malloc, calloc, zmalloc, ngx_alloc</td><td>free, zfree, ngx_free</td></tr>
+<tr><td>File 文件</td><td>open, fopen, socket</td><td>close, fclose, shutdown</td></tr>
+<tr><td>SSL/TLS</td><td>SSL_CTX_new, SSL_new, BIO_new</td><td>SSL_CTX_free, SSL_free, BIO_free</td></tr>
+<tr><td>Connection</td><td>connect, Curl_connect</td><td>disconnect, Curl_disconnect</td></tr>
+</table>
+
+<h4>Protocol State Machine Detector <span class="en">协议状态机检测器</span></h4>
+<p>7 个协议定义，全部使用 <code>\w*</code> 模式实现跨仓库泛化。</p>
+<table>
+<tr><th>Protocol</th><th>Steps</th><th>curl</th><th>nginx</th><th>redis</th><th>libssh</th><th>nghttp2</th></tr>
+<tr><td>TLS Handshake</td><td>init→connect→cleanup</td><td>✅</td><td>✅</td><td>—</td><td>✅</td><td>—</td></tr>
+<tr><td>SSH Connection</td><td>init→auth→done</td><td>✅</td><td>—</td><td>—</td><td>✅</td><td>—</td></tr>
+<tr><td>HTTP Request</td><td>init→send→cleanup</td><td>—</td><td>✅</td><td>—</td><td>—</td><td>✅</td></tr>
+<tr><td>HTTP/2 Session</td><td>init→send→close</td><td>—</td><td>—</td><td>—</td><td>—</td><td>✅</td></tr>
+</table>
+
+<h4>Risk Model <span class="en">风险模型</span></h4>
+<p>9 个 Detection Pattern，从布尔值升级为结构化风险评估。</p>
+<table>
+<tr><th>Pattern</th><th>Severity</th><th>Confidence</th><th>Evidence</th></tr>
+<tr><td>Missing Finished (TLS)</td><td><span class="badge b-red">Critical</span></td><td>91%</td><td>135 seqs</td></tr>
+<tr><td>Resource Acquire No Release</td><td><span class="badge b-red">Critical</span></td><td>98%</td><td>250 seqs</td></tr>
+<tr><td>SSH Without Auth</td><td><span class="badge b-red">Critical</span></td><td>78%</td><td>135 seqs</td></tr>
+<tr><td>TLS Without Init</td><td><span class="badge b-amber">High</span></td><td>85%</td><td>135 seqs</td></tr>
+<tr><td>HTTP No Response</td><td><span class="badge b-blue">Medium</span></td><td>80%</td><td>150 seqs</td></tr>
+</table>
+
+<h3>4.2 Resource Abstraction <span class="en">资源抽象层</span> <span class="badge b-purple">V7 增强</span></h3>
+<div class="card green">
+<h4>从单词到语义 · From Words to Semantics</h4>
+<p><code>create&lt;X&gt;</code> → X 是 MutableResource → 自动需要 Ownership + Validation + Authorization。不依赖实体名的精确匹配——<strong>自动泛化</strong>到任何实体名。</p>
+<p>V4 验证：25/25 核心运行时测试通过。支持 credential / mutable_resource / session / file_asset / reference_data 六种资源分类。动词覆盖包括 hash、generate、encrypt、decrypt。</p>
+</div>
+
+<h3>4.3 Capability Layer Map <span class="en">能力分层</span> <span class="badge b-purple">V7 新增</span></h3>
+<div class="card accent">
+<h4>检测能力的四个层级</h4>
+<table>
+<tr><th>层级</th><th>名称</th><th>检测能力</th><th>示例</th></tr>
+<tr><td>L1</td><td>Lexical（词法）</td><td>Regex trigger + safeguard。调用存在/缺失的二元信号。</td><td>cleanup vs. no cleanup</td></tr>
+<tr><td>L2</td><td>Control Flow（控制流）</td><td>函数内调用顺序。A 必须在 B 之前。</td><td>verifySession 在 addNote 之前</td></tr>
+<tr><td>L3</td><td>Interprocedural（跨函数）</td><td>跨函数调用图。调用者链是否提供 safeguard。</td><td>handler → verifySession → addNote</td></tr>
+<tr><td>L4</td><td>Semantic（语义）</td><td>协议状态机、资源生命周期、类型安全。</td><td>TLS handshake 顺序</td></tr>
+</table>
+</div>
+
+<div class="card blue">
+<h4>为什么需要能力分层？</h4>
+<p>V7 的核心发现：<strong>不是所有违规都值得用同一种方式解决。</strong>在 7 个 C 仓库、27,668 个函数、7,740 个 findings 中：</p>
+<table>
+<tr><th>层级</th><th>占比</th><th>可视化</th><th>策略</th></tr>
+<tr><td>L1 (Lexical)</td><td><strong>82.7%</strong></td><td><span class="bar bar-green" style="width:250px">&nbsp;</span></td><td>扩展规则覆盖 — ROI 最高</td></tr>
+<tr><td>L3 (Interprocedural)</td><td>12.4%</td><td><span class="bar bar-blue" style="width:37px">&nbsp;</span></td><td>有信号，未来可投入</td></tr>
+<tr><td>L2 (Control Flow)</td><td>4.9%</td><td><span class="bar bar-yellow" style="width:15px">&nbsp;</span></td><td>数据不支持当前投入</td></tr>
+<tr><td>L4 (Semantic)</td><td>0.0%</td><td><span class="bar bar-gray" style="width:0px">&nbsp;</span></td><td>当前规则未设计 L4 检测</td></tr>
+</table>
+<p><strong>这意味着：写规则之前，先问"这个问题属于哪一层？"不要浪费 L1 时间在 L4 问题上。</strong></p>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 5 -->
+<!-- ═══════════════════════════════════════════════ -->
+<h2 id="s5">5. 知识体系 <span class="en">Knowledge Base</span></h2>
+
+<h3>5.1 对象模型演进 · Object Model Evolution</h3>
+<div class="grid g5">
+<div class="card"><h4>v1: Rule</h4><p>一条正则规则<br>regex + score</p></div>
+<div class="card"><h4>v2: Asset</h4><p>版本 + 置信度 + 证据<br>version + evidence</p></div>
+<div class="card"><h4>v3: Knowledge Unit</h4><p>RFC引用 + 关系 + 域<br>RFC + relations + domain</p></div>
+<div class="card"><h4>v4: Ontology</h4><p>概念分解 + 约束 + 继承<br>Concepts + constraints</p></div>
+<div class="card green"><h4>v5: Runtime</h4><p>稳定API<br>verify() + explain()</p></div>
+</div>
+
+<h3>5.2 Knowledge Base Inventory <span class="en">知识库清单</span></h3>
+<table>
+<tr><th>Unit</th><th>Maturity</th><th>Ver</th><th>Repos</th><th>Seqs</th><th>Conf</th><th>RFC</th></tr>
+<tr><td>TLS Handshake</td><td><span class="badge b-green">Stable ★</span></td><td>1.0.0</td><td>curl, nginx</td><td>135</td><td>85%</td><td>8446</td></tr>
+<tr><td>SSH Connection</td><td><span class="badge b-green">Stable ★</span></td><td>1.0.0</td><td>curl, libssh</td><td>135</td><td>78%</td><td>4253</td></tr>
+<tr><td>HTTP Request</td><td><span class="badge b-green">Stable ★</span></td><td>1.0.0</td><td>nginx, apache</td><td>150</td><td>80%</td><td>9110</td></tr>
+<tr><td>HTTP/2 Session</td><td><span class="badge b-amber">Validated ◉</span></td><td>0.8.0</td><td>nghttp2</td><td>100</td><td>68%</td><td>9113</td></tr>
+<tr><td>Connection Lifecycle</td><td><span class="badge b-green">Stable ★</span></td><td>1.0.0</td><td>curl, libssh</td><td>120</td><td>75%</td><td>—</td></tr>
+<tr><td>TLS Certificate</td><td>Experimental ●</td><td>0.2.0</td><td>—</td><td>0</td><td>30%</td><td>8446§4.4</td></tr>
+<tr><td>TLS Session</td><td>Experimental ●</td><td>0.1.0</td><td>—</td><td>0</td><td>20%</td><td>8446§2.2</td></tr>
+<tr><td>TLS ALPN</td><td>Experimental ●</td><td>0.1.0</td><td>—</td><td>0</td><td>20%</td><td>7301</td></tr>
+<tr><td>Authentication</td><td>Experimental ●</td><td>0.4.0</td><td>—</td><td>0</td><td>40%</td><td>—</td></tr>
+<tr><td>QUIC Connection</td><td>Experimental ●</td><td>0.2.0</td><td>—</td><td>0</td><td>25%</td><td>9000</td></tr>
+</table>
+
+<div class="card green">
+<h4>V7 更新：Connection Lifecycle 升级为稳定</h4>
+<p>从 experimental 升级为 stable（1.0.0）。两个仓库验证（curl + libssh），120 sequences，75% 置信度。这是第五个达到生产级的 Knowledge Unit。</p>
+</div>
+
+<h3>5.3 Maturity Model <span class="en">成熟度模型</span></h3>
+<table>
+<tr><th>Level</th><th>Repos</th><th>Seqs</th><th>Confidence</th><th>Description</th></tr>
+<tr><td>experimental 实验</td><td>0</td><td>0</td><td>0%</td><td>Rule defined, not validated</td></tr>
+<tr><td>validated 验证</td><td>≥1</td><td>≥10</td><td>≥40%</td><td>Validated on 1+ repo</td></tr>
+<tr><td>stable 稳定</td><td>≥2</td><td>≥100</td><td>≥70%</td><td>Cross-repo validated, production-ready</td></tr>
+<tr><td>certified 认证</td><td>≥3</td><td>≥500</td><td>≥90%</td><td>Multi-repo, audit-grade</td></tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 6 -->
+<!-- ═══════════════════════════════════════════════ -->
+<h2 id="s6">6. 治理体系 <span class="en">Governance</span></h2>
+
+<div class="card accent">
+<h4>Governance Pipeline</h4>
+<pre><code>verify(source) → Risk Assessment → Policy Evaluation
+  ├─ BLOCK:  deploy gate rejects
+  ├─ WARN:   deploy proceeds with annotation
+  └─ ALLOW:  deploy proceeds, certificate issued
+
+explain(verification_result) → Human-readable report with evidence chain
+
+Certificate(verification_result) → AI Code Certificate (audit-ready JSON)</code></pre>
+</div>
+
+<h3>6.1 Policy Engine <span class="en">策略引擎</span></h3>
+<p>企业可配置治理策略：Risk Level 阈值、Protocol Category 白名单/黑名单、Knowledge Unit Maturity 最低要求。</p>
+
+<h3>6.2 CI/CD Integration <span class="en">持续集成集成</span></h3>
+<pre><code>name: Progmune Governance
+on: [pull_request]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: shenlian19831109/progmune-runtime@v7
+        with:
+          policy: .progmune-policy.json
+          fail-on: BLOCK</code></pre>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 7 -->
+<!-- ═══════════════════════════════════════════════ -->
+<h2 id="s7">7. Runtime API <span class="en">Stable Public API</span></h2>
+
+<h3>verify(source) → Result</h3>
+<pre><code>import { verify, explain } from 'progmune-runtime';
+
+const result = verify("./src/server.ts");
+// → { certificate, knowledge, risk, evidence }
+
+const report = explain(result);
+// → Human-readable governance report</code></pre>
+
+<h3>Result Structure</h3>
+<pre><code>VerificationResult {
+  certificate:  { sessionId, timestamp, ruleHash, verified: bool }
+  knowledge:    { stableProtocols: int, units: KnowledgeUnit[], ... }
+  risk:         { level: "Critical"|"High"|"Medium"|"Low", patterns: RiskPattern[] }
+  evidence:     { sequences: CallSequence[], patternMatches: EvidenceMatch[] }
+}</code></pre>
+
+<div class="card green">
+<h4>V4 验证状态</h4>
+<p>25/25 核心运行时测试通过。Resource Abstraction 6 种资源分类全部验证。TLS-DOUBLE-FREE FP 修复已确认。SSH 协议检测正常工作。1000 次 abstractResource 调用仅需 8-12ms。</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 8 -->
+<!-- ═══════════════════════════════════════════════ -->
+<h2 id="s8">8. 基准与数据 <span class="en">Benchmarks &amp; Data</span></h2>
+
+<h3>8.1 跨仓库 Gold Benchmark <span class="en">Cross-repo Gold Benchmark</span></h3>
+<p>4 个 C 仓库，人工标注 clean/violation，公开可复现。</p>
+
+<table>
+<tr><th>Repo</th><th>Labeled</th><th>V6 Precision</th><th>V6 Recall</th><th>V7 Precision</th><th>V7 Recall</th></tr>
+<tr><td>curl</td><td>85</td><td>32.1%</td><td>70.8%</td><td>33.3%</td><td>75.0%</td></tr>
+<tr><td>libssh</td><td>47</td><td>28.6%</td><td>14.3%</td><td>46.7%</td><td>50.0%</td></tr>
+<tr><td>nginx</td><td>50</td><td colspan="2">all clean labels</td><td colspan="2">all clean labels</td></tr>
+<tr><td>redis</td><td>50</td><td colspan="2">all clean labels</td><td colspan="2">all clean labels</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>232</strong></td><td><strong>31.7%</strong></td><td><strong>50.0%</strong></td><td><strong>36.2%</strong></td><td><strong>65.8%</strong></td></tr>
+</table>
+
+<h3>8.2 Blind Benchmark (TypeScript) <span class="en">盲测基准</span></h3>
+<p>50 个生成项目，665 个函数。冻结种子，可复现。</p>
+<table>
+<tr><th>Detector Version</th><th>Context Strategy</th><th>Precision</th><th>Recall</th></tr>
+<tr><td>V5</td><td>Global (project-wide)</td><td>98.2%</td><td>83.3%</td></tr>
+<tr><td>V6</td><td>Per-file</td><td>86.8%</td><td>83.6%</td></tr>
+</table>
+
+<h3>8.3 规模化的能力分层统计 <span class="en">Scaled Capability Layer Distribution</span> <span class="badge b-purple">V7 新增</span></h3>
+<p>7 个 C 仓库，27,668 个函数，7,740 个 findings。所有仓库函数提取密度 ≥10/KLOC，统计质量可控。</p>
+
+<table>
+<tr><th>Repo</th><th>.c 文件</th><th>C 代码行数</th><th>提取函数</th><th>/KLOC</th></tr>
+<tr><td>openssl</td><td>1,291</td><td>558,127</td><td>9,835</td><td>17.6</td></tr>
+<tr><td>redis</td><td>286</td><td>261,870</td><td>5,651</td><td>21.6</td></tr>
+<tr><td>apache</td><td>325</td><td>297,184</td><td>5,028</td><td>16.9</td></tr>
+<tr><td>curl</td><td>244</td><td>176,602</td><td>2,826</td><td>16.0</td></tr>
+<tr><td>nginx</td><td>264</td><td>232,821</td><td>2,548</td><td>10.9</td></tr>
+<tr><td>libssh</td><td>128</td><td>105,010</td><td>1,320</td><td>12.6</td></tr>
+<tr><td>nghttp2</td><td>38</td><td>37,076</td><td>421</td><td>11.4</td></tr>
+</table>
+
+<h3>8.4 Benchmark 的诊断能力 <span class="en">Diagnostic Capability</span> <span class="badge b-purple">V7 新增</span></h3>
+
+<div class="card orange">
+<h4>从 "Detector 好不好？" 到 "Detector 哪里不好？"</h4>
+<pre><code>Recall = 65.8% (C Gold)
+    │
+    ├─ Rule Coverage:  ~83%  ← 最大瓶颈（规模化统计, L1）
+    ├─ Context:        ~0%   ← V7 实验证伪（v5→v6→v7: 98.3% 结果不变）
+    ├─ Parser:         ~5%   ← Exp-017: ROI 为负
+    └─ Gold Semantic:  ~21%  ← 函数有 safeguard, gold 关心不同维度</code></pre>
+<p>V7 的 Benchmark 不仅能告诉你 Recall 是多少——<strong>它能告诉你 Recall 为什么是这个数，以及下一块钱应该花在哪里。</strong></p>
+</div>
+
+<div class="card green">
+<h4>实验驱动的证据链</h4>
+<p>V7 完成了 7 轮单变量实验，每一项能力都有独立的实验数据支撑：</p>
+<table>
+<tr><th>实验</th><th>假设</th><th>结果</th><th>决策</th></tr>
+<tr><td>Context v5→v7</td><td>Context 是 C 瓶颈</td><td>C: 0% 影响</td><td><span class="badge b-red">停止投资</span></td></tr>
+<tr><td>Exp-017</td><td>Snake_case Parser 有效</td><td>+1 FN, +3 FP</td><td><span class="badge b-red">ROI 为负</span></td></tr>
+<tr><td>Exp-018</td><td>Key Derivation Safety</td><td>+3 TP, 0 FP</td><td><span class="badge b-green">✅ 毕业</span></td></tr>
+<tr><td>Exp-019</td><td>Auth Message Lifecycle</td><td>5/5 回收, +11 FP</td><td><span class="badge b-purple">Regex Saturated</span></td></tr>
+<tr><td>Exp-021</td><td>Certificate Pinning</td><td>+1 TP, 0 FP</td><td><span class="badge b-green">✅ 毕业</span></td></tr>
+<tr><td>Exp-022</td><td>Safeguard Logic 修复</td><td>+2 TP</td><td><span class="badge b-green">✅ 毕业</span></td></tr>
+</table>
+<p><strong>以前："我们改了五十个东西，Recall 提高了。" <br>现在：每一轮单变量实验告诉你是哪一个改动起了作用。</strong></p>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 9 -->
+<!-- ═══════════════════════════════════════════════ -->
+<h2 id="s9">9. 竞争力与护城河 <span class="en">Competitive Moat</span></h2>
+
+<div class="grid g2">
+<div class="card green">
+<h4>已有的护城河 (V6)</h4>
+<ul>
+<li><strong>协议知识库：</strong>TLS, SSH, HTTP/2, QUIC — 持续演化</li>
+<li><strong>Resource Abstraction：</strong>动词+实体→协议，自动泛化</li>
+<li><strong>Verification Intelligence：</strong>FP 学习循环，自动降噪</li>
+<li><strong>Governance Pipeline：</strong>Verify→Explain→Repair→Certify 完整链路</li>
+<li><strong>三层免疫架构：</strong>与 CoT 路线的根本差异</li>
+</ul>
+</div>
+<div class="card blue">
+<h4>V7 新增的护城河</h4>
+<ul>
+<li><strong>可复现 Benchmark：</strong>Gold + Blind + Coverage Dashboard — 每一项能力有数据支撑</li>
+<li><strong>实验证据链：</strong>7 轮单变量实验 — 每个决策有 Migration Matrix</li>
+<li><strong>能力边界量化：</strong>L1-L4 分层 — 精确知道当前能解决什么、不能解决什么</li>
+<li><strong>规模化统计：</strong>7 repos, 27K functions — 统计结论有代表性</li>
+<li><strong>研发方法论：</strong>Benchmark → Gap → ROI → Experiment → Decision 闭环</li>
+</ul>
+</div>
+</div>
+
+<div class="card purple">
+<h4>最难复制的资产</h4>
+<blockquote>
+<p><strong>不是 Detector。不是 Rule。是 Benchmark + Evaluation Framework。</strong></p>
+<p>Detector 可以重写。Rule 可以增加。Parser 可以换。但<strong>可重复、可量化、可比较的 Benchmark 才是最难建立的壁垒。</strong>很多团队一年都搭不出来。</p>
+</blockquote>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 10 -->
+<!-- ═══════════════════════════════════════════════ -->
+<h2 id="s10">10. 商业模型 <span class="en">Business Model</span></h2>
+
+<div class="grid g3">
+<div class="card green">
+<h4>Open Core</h4>
+<p>Runtime 开源 (MIT)。企业功能付费。</p>
+<table>
+<tr><td>CE</td><td>MIT</td><td>免费</td></tr>
+<tr><td>Pro</td><td>订阅</td><td>$499/mo</td></tr>
+<tr><td>Enterprise</td><td>年付</td><td>定制</td></tr>
+</table>
+</div>
+<div class="card blue">
+<h4>Target Users</h4>
+<p>用 AI 写代码的团队<br>需要 SOC2/ISO 42001 合规<br>CI/CD 集成安全门禁<br>金融/医疗/基础设施</p>
+</div>
+<div class="card orange">
+<h4>Revenue Streams</h4>
+<p>1. Pro 订阅 (CI/CD 集成)<br>2. Enterprise (定制策略 + 私有部署)<br>3. 知识库企业版 (私有协议)<br>4. 认证与审计报告</p>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 11 -->
+<!-- ═══════════════════════════════════════════════ -->
+<h2 id="s11">11. 市场策略 <span class="en">Market Strategy</span></h2>
+
+<div class="card accent">
+<h4>定位：Protocol Compliance Analyzer</h4>
+<p>不是 "AI Security Scanner" — 而是<strong>发现代码是否遵守安全协议</strong>。差异化：SAST 找已知模式，Progmune 找缺失的协议步骤。</p>
+</div>
+
+<p>不卖 "我们什么都能发现"。而是卖：<strong>"我们擅长发现这些问题，目前不覆盖那些问题"</strong>——这反而更容易建立信任。</p>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 12 -->
+<!-- ═══════════════════════════════════════════════ -->
+<h2 id="s12">12. 路线图 <span class="en">Roadmap</span></h2>
+
+<div class="card accent">
+<h4>当前优先级（由实验数据驱动）</h4>
+<table>
+<tr><th>优先级</th><th>方向</th><th>数据依据</th></tr>
+<tr><td>⭐⭐⭐⭐⭐</td><td><strong>产品验证</strong>（真实用户试点）</td><td>当前 ROI 最高 — 需要真实反馈来校准方向</td></tr>
+<tr><td>⭐⭐⭐⭐☆</td><td><strong>L1 Rule Coverage 扩展</strong></td><td>最大能力层（83%），收益明确，实验驱动</td></tr>
+<tr><td>⭐⭐⭐⭐☆</td><td><strong>公开 Benchmark / Dataset</strong></td><td>建立行业评测标准，长期护城河</td></tr>
+<tr><td>⭐⭐⭐☆☆</td><td>L3 Call Graph 原型</td><td>12.4% 信号值得验证，但不要产品化</td></tr>
+<tr><td>⭐☆☆☆☆</td><td>L2 CFG</td><td>规模化数据不支持（~5%）</td></tr>
+<tr><td>⭐☆☆☆☆</td><td>L4 Semantic / IR 增强</td><td>缺乏 ROI 证据</td></tr>
+</table>
+</div>
+
+<div class="card green">
+<h4>V7 的方法论遗产</h4>
+<p>优先级不是凭借直觉排序的——<strong>每一项都有实验数据的支持</strong>。Context 被证明无效（0% 影响）。Parser 被证明 ROI 为负（+1 FN, +3 FP）。Taxonomy 被证明有效（+6 TP, 0 FP）。规模化统计确认 L1 是压倒性瓶颈（82.7%）。</p>
+<p>这就是 V7 对产品路线图的最大贡献：<strong>不再需要猜"下一步该做什么"——数据会告诉你。</strong></p>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 13 -->
+<!-- ═══════════════════════════════════════════════ -->
+<h2 id="s13">13. 版本演进 <span class="en">Version History</span></h2>
+
+<table>
+<tr><th>版本</th><th>日期</th><th>核心变化</th></tr>
+<tr><td>V1</td><td>2026-05</td><td>SSG State Machine + 68 条协议规则</td></tr>
+<tr><td>V2</td><td>2026-05</td><td>Safeguard Rules + Resource Detector（14 条 safeguard 规则）</td></tr>
+<tr><td>V3</td><td>2026-06</td><td>Verification Intelligence（FP 学习循环，curl FP -47%）</td></tr>
+<tr><td>V4</td><td>2026-06</td><td>Resource Abstraction + Knowledge Base + 25/25 核心测试通过</td></tr>
+<tr><td>V5</td><td>2026-06</td><td>Blind Benchmark (50 TS projects) + Asset Coverage Matrix</td></tr>
+<tr><td>V6</td><td>2026-06</td><td>Detector V6 (per-file context) + Q3 Graduation (5 production assets)</td></tr>
+<tr><td><strong>V7</strong></td><td><strong>2026-07</strong></td><td><strong>7 轮实验验证三个竞争假设 + L1 协议类别全部毕业 + 规模化统计 (7 repos, 27K functions) + 研发方法论冻结 + Capability Layer Map + Coverage Dashboard + Connection Lifecycle 升为第 5 个 stable asset</strong></td></tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 14 -->
+<!-- ═══════════════════════════════════════════════ -->
+<h2 id="s14">14. 附录 <span class="en">Appendix</span></h2>
+
+<div class="card accent">
+<h4>A. Experiment Template <span class="badge b-purple">V7 新增</span></h4>
+<pre><code>Experiment: [ID]
+Question:   [一句话 — 我们要学会什么？]
+Independent Variable: [只改一个东西]
+Dependent Variables: [TP, FP, TN, FN, P, R, F1]
+Benchmark:  [哪个基准衡量收益？]
+Result:     [改之前 vs 改之后 + delta + Migration Matrix]
+Verdict:    [Supported / Rejected / Mixed]</code></pre>
+</div>
+
+<div class="card blue">
+<h4>B. 关键命令</h4>
+<pre><code>npm run coverage     # Coverage Dashboard
+npm run build        # 编译
+npm run test:unit    # 单元测试
+npm run sdk file.ts  # 验证文件</code></pre>
+</div>
+
+<div class="card green">
+<h4>C. 数据资产清单</h4>
+<table>
+<tr><th>资产</th><th>位置</th><th>状态</th></tr>
+<tr><td>Gold Benchmark v1</td><td>benchmarks/{curl,libssh,nginx,redis}-*.json</td><td>冻结</td></tr>
+<tr><td>Blind Benchmark Seeds</td><td>blind-benchmark/generated/</td><td>冻结</td></tr>
+<tr><td>C Taxonomy v3</td><td>blind-benchmark/taxonomy/c-categories.json</td><td>活跃</td></tr>
+<tr><td>Coverage Dashboard</td><td>npm run coverage</td><td>活跃</td></tr>
+<tr><td>实验报告 (6)</td><td>blind-benchmark/reports/experiment-*.json</td><td>可复现</td></tr>
+<tr><td>实验脚本 (6)</td><td>blind-benchmark/experiment-*.ts</td><td>可复现</td></tr>
+<tr><td>方法论文档</td><td>docs/experiments/*.md</td><td>冻结</td></tr>
+</table>
+</div>
+
+<div class="footer">
+<p>Progmune Runtime V7 · July 2026 · Internal Technical Whitepaper</p>
+<p>Knowledge-driven Governance for AI-generated Software · 知识驱动的AI生成软件治理运行时</p>
+</div>
+
+</body>
+</html>

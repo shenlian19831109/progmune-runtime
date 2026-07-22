@@ -1,24 +1,8 @@
 {
-  "generated": 693,
+  "generated": 695,
   "repaired": 10,
-  "lastGeneration": "/tmp/refine-test.ts",
+  "lastGeneration": "/tmp/scaffold-test/public/notes.html",
   "history": [
-    {
-      "sessionId": "sess_1780466038228_m7oc0",
-      "timestamp": 1780466044165,
-      "filePath": "/tmp/m-M8.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 420
-    },
-    {
-      "sessionId": "sess_1780469595636_pboue",
-      "timestamp": 1780469598120,
-      "filePath": "/tmp/h-H1.ts",
-      "repaired": false,
-      "repairCount": 0,
-      "irFunctionCount": 423
-    },
     {
       "sessionId": "sess_1780469619711_1d5z7",
       "timestamp": 1780469621319,
@@ -802,6 +786,22 @@
       "repaired": false,
       "repairCount": 0,
       "irFunctionCount": 455
+    },
+    {
+      "sessionId": "scaffold_1782155152048_8l6rgv",
+      "timestamp": 1782155152049,
+      "filePath": "/tmp/scaffold-test/src/cli.ts",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 2
+    },
+    {
+      "sessionId": "scaffold_1782155177415_5prck0",
+      "timestamp": 1782155177416,
+      "filePath": "/tmp/scaffold-test/public/notes.html",
+      "repaired": false,
+      "repairCount": 0,
+      "irFunctionCount": 10
     }
   ]
 }

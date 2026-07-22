@@ -1,0 +1,40 @@
+{
+  "generatedAt": "2026-07-17T20:19:25.560Z",
+  "source": "continuous-benchmark",
+  "skillsCount": 1,
+  "patchesCount": 0,
+  "cases": [
+    {
+      "goal": "cover skill: open file then write file then close file",
+      "protocol": "_global",
+      "broken": [
+        "open_file",
+        "write_file"
+      ],
+      "expected": [
+        "open_file",
+        "write_file",
+        "close_file"
+      ],
+      "violationType": "missing_prerequisite",
+      "source": "skill",
+      "sourceId": "macro-ca034e29e11cd2e2"
+    },
+    {
+      "goal": "cover cleanup: close_file",
+      "protocol": "_global",
+      "broken": [
+        "open_file",
+        "write_file"
+      ],
+      "expected": [
+        "open_file",
+        "write_file",
+        "close_file"
+      ],
+      "violationType": "resource_leak",
+      "source": "skill",
+      "sourceId": "macro-ca034e29e11cd2e2"
+    }
+  ]
+}
