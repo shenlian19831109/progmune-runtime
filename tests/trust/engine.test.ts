@@ -4,7 +4,7 @@
 
 import { describe, it, expect } from "vitest";
 import { evaluateTrust } from "../../src/trust/engine";
-import type { TrustEvaluationContext } from "../../src/trust/engine";
+import type { TrustEvaluationContext } from "../../src/trust/types";
 
 describe("evaluateTrust", () => {
   const baseCtx: TrustEvaluationContext = {

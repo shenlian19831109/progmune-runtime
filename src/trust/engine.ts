@@ -25,7 +25,6 @@ import type {
   ViolationSeverity,
   SeveritySummary,
   AuditTrail,
-  GovernanceDefect,
 } from "./types";
 import {
   DEFAULT_DIMENSION_WEIGHTS,
@@ -42,6 +41,7 @@ import {
   determineConfidence,
   countViolationsBySeverity,
 } from "./score-calculator";
+import type { GovernanceDefect } from "./score-calculator";
 
 // ── Main Entry Point ──
 
@@ -286,7 +286,7 @@ function mapPolicyViolation(
  * Uses rule conditions (file_pattern, function_name, import, api_call, regex).
  */
 function checkEnterpriseRule(
-  rule: import("./types").EnterpriseRule,
+  rule: import("../policy/types").EnterpriseRule,
   projectPath: string
 ): { file: string; function: string; evidence: string } | null {
   if (!rule.conditions || rule.conditions.length === 0) {
@@ -315,7 +315,7 @@ function checkEnterpriseRule(
  * Check a single RuleCondition against a file.
  */
 function checkCondition(
-  cond: import("./types").RuleCondition,
+  cond: import("../policy/types").RuleCondition,
   filePath: string,
   _projectPath: string
 ): { file: string; function: string; evidence: string } | null {
@@ -429,7 +429,7 @@ function collectVerificationCoverage(ctx: TrustEvaluationContext): Record<string
   try {
     const { buildCoverageReport } = require("../ssg-validator");
     const report = buildCoverageReport?.();
-    if (report?.coverage !== undefined) {
+    if (report?.coverage !== undefined && !Number.isNaN(report.coverage)) {
       coverage.ssgRules = Math.round(report.coverage * 30); // max 30
     } else {
       coverage.ssgRules = 15; // conservative default

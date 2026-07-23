@@ -6,7 +6,6 @@
 
 // Engine
 export { evaluateTrust } from "./engine";
-export type { TrustEvaluationContext } from "./engine";
 
 // Explainability
 export { checkExplainability, assertSixTuple, isViolationComplete } from "./explainability";

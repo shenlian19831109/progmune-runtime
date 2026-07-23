@@ -17,7 +17,7 @@ import * as path from "path";
 import { evaluateTrust } from "./engine";
 import { formatTrustTerminal } from "./formatters/terminal";
 import { formatTrustJSON } from "./formatters/json";
-import type { TrustEvaluationContext } from "./engine";
+import type { TrustEvaluationContext } from "./types";
 
 const args = process.argv.slice(2);
 

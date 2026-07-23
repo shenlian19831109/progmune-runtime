@@ -109,11 +109,13 @@ export function scoreProtocolSafety(
   const score = totalWeight > 0 ? Math.round(weightedSum / totalWeight) : 100;
 
   // Determine confidence for this dimension
-  const protocolsWithData = Object.values(details).filter(
-    (d) => d.violations > 0 || d.score < 100
+  // A protocol is considered "checked" if it was evaluated (score < 100 found issues,
+  // or score = 100 with no violations means we checked and it passed clean)
+  const protocolsChecked = Object.values(details).filter(
+    (d) => d.score <= 100 // all protocols are always evaluated
   ).length;
   const confidenceRatio = protocolNames.length > 0
-    ? protocolsWithData / protocolNames.length
+    ? Math.min(1, protocolsChecked / protocolNames.length)
     : 1;
   const confidence = mapDimensionConfidence(confidenceRatio);
 
@@ -173,7 +175,7 @@ export function scoreVerificationCoverage(
     const value = data[name];
     totalChecks++;
 
-    if (value !== undefined) {
+    if (value !== undefined && !Number.isNaN(value)) {
       hasData++;
       const capped = Math.min(value, max);
       details[name] = { score: capped, max };
@@ -244,12 +246,14 @@ export function calculateOverallScore(dimensions: DimensionInput[]): number {
   let totalWeight = 0;
 
   for (const d of dimensions) {
-    weightedSum += d.score * d.weight;
+    const safeScore = Number.isNaN(d.score) ? 0 : d.score;
+    weightedSum += safeScore * d.weight;
     totalWeight += d.weight;
   }
 
   if (totalWeight <= 0) return 0;
-  return Math.round(weightedSum / totalWeight);
+  const result = Math.round(weightedSum / totalWeight);
+  return Number.isNaN(result) ? 0 : result;
 }
 
 // ═══════════════════════════════════════════════
