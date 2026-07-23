@@ -53,6 +53,41 @@ export interface PolicyConfig {
   inherit?: boolean;
 }
 
+// ── Phase 1: Enterprise Policy Types ──
+
+export interface EnterprisePolicyConfig extends PolicyConfig {
+  /** Schema version for enterprise format detection */
+  version?: string;
+  /** Enterprise-specific dimension weight overrides */
+  dimensions?: {
+    policyCompliance?: {
+      weights: Partial<Record<"critical" | "high" | "medium" | "low", number>>;
+    };
+    protocolSafety?: {
+      protocols: Record<string, { weight: number }>;
+    };
+  };
+  /** Enterprise rule definitions (when present, treated as enterprise format) */
+  enterprise?: EnterpriseRule[];
+}
+
+export interface EnterpriseRule {
+  id: string;
+  name: string;
+  severity: "critical" | "high" | "medium" | "low";
+  category: string;
+  description: string;
+  policy_ref: string;
+  conditions?: RuleCondition[];
+}
+
+export interface RuleCondition {
+  type: "file_pattern" | "function_name" | "import" | "api_call" | "regex";
+  pattern: string;
+  /** Optional: human-readable description of what this condition checks */
+  description?: string;
+}
+
 /** Default policy — can be overridden by .progmune-policy.json */
 export const DEFAULT_POLICY: PolicyRule[] = [
   {

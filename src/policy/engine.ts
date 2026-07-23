@@ -12,6 +12,8 @@ import type {
   PolicyRule,
   PolicyResult,
   PolicyConfig,
+  EnterprisePolicyConfig,
+  EnterpriseRule,
   RuleViolation,
 } from "./types";
 import { DEFAULT_POLICY } from "./types";
@@ -276,4 +278,86 @@ export function evaluatePolicy(
     violations,
     summary,
   };
+}
+
+// ── Phase 1: Enterprise Policy Support ──
+
+export interface LoadedEnterprisePolicy {
+  policy: EnterprisePolicyConfig;
+  source: string;
+  rules: EnterpriseRule[];
+  isEnterprise: boolean;
+}
+
+/**
+ * Load policy configuration from a project's .progmune-policy.json.
+ * Auto-detects enterprise format (has `enterprise` array with `id` fields)
+ * vs legacy format (has `rules` array with `type` fields).
+ *
+ * For legacy format: returns isEnterprise=false, rules=[]
+ * For enterprise format: returns parsed EnterpriseRule[] with policy_ref
+ */
+export function loadEnterprisePolicyConfig(
+  projectPath: string,
+  configPath?: string
+): LoadedEnterprisePolicy {
+  const cfgFile = configPath
+    ? path.resolve(configPath)
+    : path.join(projectPath, ".progmune-policy.json");
+
+  const emptyResult: LoadedEnterprisePolicy = {
+    policy: { rules: [...DEFAULT_POLICY] },
+    source: "built-in defaults",
+    rules: [],
+    isEnterprise: false,
+  };
+
+  if (!fs.existsSync(cfgFile)) {
+    return emptyResult;
+  }
+
+  try {
+    const raw = JSON.parse(fs.readFileSync(cfgFile, "utf-8"));
+
+    // Auto-detect: enterprise format has `enterprise` array with `id` fields
+    if (raw.enterprise && Array.isArray(raw.enterprise) && raw.enterprise.length > 0) {
+      const first = raw.enterprise[0];
+      if (first.id && first.policy_ref) {
+        const policy: EnterprisePolicyConfig = {
+          version: raw.version || "1.0",
+          name: raw.name,
+          description: raw.description,
+          rules: raw.rules || [...DEFAULT_POLICY],
+          inherit: raw.inherit,
+          dimensions: raw.dimensions,
+          enterprise: raw.enterprise,
+        };
+        return {
+          policy,
+          source: cfgFile,
+          rules: raw.enterprise as EnterpriseRule[],
+          isEnterprise: true,
+        };
+      }
+    }
+
+    // Fallback: treat as legacy format
+    const policy: EnterprisePolicyConfig = {
+      version: raw.version,
+      name: raw.name,
+      description: raw.description,
+      rules: raw.rules || [...DEFAULT_POLICY],
+      inherit: raw.inherit,
+      dimensions: raw.dimensions,
+    };
+    return {
+      policy,
+      source: cfgFile,
+      rules: [],
+      isEnterprise: false,
+    };
+  } catch (e: any) {
+    console.error(`⚠️  Failed to load enterprise policy config: ${e.message}. Using defaults.`);
+    return emptyResult;
+  }
 }
