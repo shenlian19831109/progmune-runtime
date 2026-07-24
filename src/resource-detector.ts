@@ -25,6 +25,13 @@ const RESOURCE_PAIRS: Array<{ acquire: RegExp; release: RegExp; category: string
   { acquire: /\b(connect|Curl_connect|ngx_connect|redisConnect)\b/i, release: /\b(disconnect|Curl_disconnect|ngx_disconnect|redisFree)\b/i, category: "connection" },
   // General lifecycle — only for double-release / UAF checks, not missing-release
   { acquire: /\b(_init|_create|_setup|_start|_begin|_open|_alloc|_connect|init|create|setup|start|open|alloc)\b/i, release: /\b(_free|_destroy|_cleanup|_close|_stop|_end|_release|_unlock|_done|_finish|_remove|_delete|cleanup|destroy|close|free)\b/i, category: "lifecycle" },
+  // C error-handling: goto cleanup/fail pattern (synthetic calls from sequence-extractor)
+  { acquire: /\b(goto_cleanup|goto_fail|goto_err|goto_error|goto_out)\b/i, release: /\b(_free|_destroy|_cleanup|_close|_release|free|destroy|cleanup|close)\b/i, category: "lifecycle" },
+  // Python resource pairs
+  { acquire: /\b(sqlite3\.connect|psycopg2\.connect|create_engine|pymongo\.MongoClient|redis\.Redis|redis\.StrictRedis)\b/i, release: /\b(close|disconnect)\b/i, category: "connection" },
+  { acquire: /\b(socket\.socket|socket\.create_connection|socket\.socketpair)\b/i, release: /\b(close)\b/i, category: "file" },
+  { acquire: /\b(asyncio\.(Lock|Semaphore|Event|Condition)|threading\.(Lock|RLock|Semaphore|Condition))\b/i, release: /\b(release)\b/i, category: "lock" },
+  { acquire: /\b(tempfile\.(TemporaryFile|NamedTemporaryFile|mkstemp|mkdtemp|SpooledTemporaryFile))\b/i, release: /\b(close|cleanup)\b/i, category: "file" },
 ];
 
 // ── Allocation-return patterns (functions that allocate and return to caller) ──

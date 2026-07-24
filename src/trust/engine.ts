@@ -188,7 +188,8 @@ function collectEnterpriseViolations(ctx: TrustEvaluationContext): TrustViolatio
       const fs = require("fs");
       const srcDir = path.join(projectDir, "src");
       if (fs.existsSync(srcDir)) {
-        const files = walkDir(srcDir, [".ts", ".tsx", ".js"], 50);
+        const extensions = languageToExtensions(ctx.language);
+    const files = walkDir(srcDir, extensions, 50);
         certFile = files.length > 0 ? files[0] : null;
       }
     } catch { /* best-effort */ }
@@ -236,7 +237,7 @@ function collectEnterpriseViolations(ctx: TrustEvaluationContext): TrustViolatio
     // ── B. Enterprise Rules (custom rules from .progmune-policy.json) ──
     if (enterprisePolicy.isEnterprise && enterprisePolicy.rules.length > 0) {
       for (const rule of enterprisePolicy.rules) {
-        const matched = checkEnterpriseRule(rule, ctx.projectPath);
+        const matched = checkEnterpriseRule(rule, ctx.projectPath, ctx.language);
         if (matched) {
           violations.push({
             severity: rule.severity,
@@ -287,7 +288,8 @@ function mapPolicyViolation(
  */
 function checkEnterpriseRule(
   rule: import("../policy/types").EnterpriseRule,
-  projectPath: string
+  projectPath: string,
+  language?: string
 ): { file: string; function: string; evidence: string } | null {
   if (!rule.conditions || rule.conditions.length === 0) {
     return null; // Enterprise rules with no conditions can't be auto-matched
@@ -298,7 +300,8 @@ function checkEnterpriseRule(
     const srcDir = path.join(projectPath, "src");
     if (!fs.existsSync(srcDir)) return null;
 
-    const files = walkDir(srcDir, [".ts", ".tsx", ".js"], 100);
+    const extensions = languageToExtensions(language);
+    const files = walkDir(srcDir, extensions, 100);
 
     for (const file of files) {
       for (const cond of rule.conditions) {
@@ -558,6 +561,19 @@ function extractFunctionAtLine(lines: string[], lineNum: number): string {
 /**
  * Recursively walk a directory, collecting file paths matching extensions.
  */
+function languageToExtensions(language?: string): string[] {
+  switch (language) {
+    case "python": return [".py"];
+    case "c": return [".c", ".h"];
+    case "go": return [".go"];
+    case "java": return [".java"];
+    case "typescript":
+    case "javascript":
+    default:
+      return [".ts", ".tsx", ".js"];
+  }
+}
+
 function walkDir(dir: string, extensions: string[], maxFiles: number): string[] {
   const results: string[] = [];
   try {
