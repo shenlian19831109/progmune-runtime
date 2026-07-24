@@ -256,7 +256,10 @@ function buildBusinessSection(
   if (options.business === false) return undefined;
 
   try {
-    const { translateToBusinessRisks, getKnowledgeCoverage, getProtocolGraph, buildBusinessSummary } = require("./business-translator");
+	    const { translateToBusinessRisks, getKnowledgeCoverage, getProtocolGraph, buildBusinessSummary, detectProjectType } = require("./business-translator");
+
+	    // Auto-detect project type for domain-specific knowledge
+	    const detectedType = detectProjectType(_projectPath);
 
     const violationsByCategory: Record<string, number> = {};
     for (const d of sessions.details) {
@@ -267,9 +270,9 @@ function buildBusinessSection(
     }
 
     const risks = translateToBusinessRisks(plsb.matchedCategories, plsb.unmatchedCategories, violationsByCategory);
-    const knowledge = getKnowledgeCoverage();
-    const protocolGraph = getProtocolGraph();
-    const summary = buildBusinessSummary(risks, knowledge, violationsByCategory);
+    const knowledge = getKnowledgeCoverage(detectedType);
+    const protocolGraph = getProtocolGraph(detectedType);
+    const summary = buildBusinessSummary(risks, knowledge, violationsByCategory, detectedType);
 
     return { risks, knowledgeCoverage: knowledge, protocolGraph, summary };
   } catch (e) {

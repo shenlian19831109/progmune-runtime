@@ -32,6 +32,7 @@ export {
   getKnowledgeCoverage,
   getProtocolGraph,
   buildBusinessSummary,
+  detectProjectType,
 } from "./business-translator";
 
 export type {

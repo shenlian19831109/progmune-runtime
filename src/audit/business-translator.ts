@@ -7,23 +7,27 @@
  * become business protocol graphs.
  *
  * "Not a single AI-generated code path violated a business protocol edge."
+ *
+ * Project types are auto-detected from package.json dependencies,
+ * Prisma schema models, and framework config files.
+ * Falls back to generic domains for unknown project types.
  */
 
 // ── Protocol -> Business Risk Mapping ──
 
 export interface BusinessRisk {
-  category: string;        // "认证与授权", "数据完整性", "业务协议合规"
-  description: string;     // 一句话描述这个风险
-  protocolsCovered: number; // 覆盖的协议规则数
-  violationsPrevented: number; // 挡下的违规数
+  category: string;
+  description: string;
+  protocolsCovered: number;
+  violationsPrevented: number;
   status: "protected" | "partial" | "exposed";
 }
 
 export interface KnowledgeDomain {
-  domain: string;          // "客户管理", "线索管理", "交易管道"
+  domain: string;
   coverage: "full" | "partial" | "none";
-  protocols: string[];     // 覆盖该域的协议
-  entities?: string[];     // 关联的 Prisma 模型
+  protocols: string[];
+  entities?: string[];
 }
 
 export interface ProtocolEdge {
@@ -59,7 +63,56 @@ const PLSB_TO_BUSINESS_RISK: Record<string, { category: string; risk: string }> 
   "PLS-013": { category: "代码溯源", risk: "AI 生成代码无法追溯来源和修改历史" },
 };
 
-// ── 业务知识域定义（按项目类型） ──
+// ── Generic / Fallback Knowledge Domains ──
+
+const GENERIC_KNOWLEDGE_DOMAINS: KnowledgeDomain[] = [
+  {
+    domain: "认证与授权",
+    coverage: "full",
+    protocols: ["PLS-001", "PLS-002", "PLS-003"],
+    entities: ["User", "Role", "Session"],
+  },
+  {
+    domain: "数据完整性",
+    coverage: "full",
+    protocols: ["PLS-004", "PLS-005", "PLS-006"],
+    entities: [],
+  },
+  {
+    domain: "API 合约",
+    coverage: "full",
+    protocols: ["PLS-009", "PLS-010"],
+    entities: [],
+  },
+  {
+    domain: "密码安全",
+    coverage: "full",
+    protocols: ["PLS-011", "PLS-012"],
+    entities: [],
+  },
+  {
+    domain: "代码溯源",
+    coverage: "full",
+    protocols: ["PLS-013"],
+    entities: [],
+  },
+  {
+    domain: "业务协议合规",
+    coverage: "partial",
+    protocols: ["PLS-007", "PLS-008"],
+    entities: [],
+  },
+];
+
+const GENERIC_PROTOCOL_GRAPH: ProtocolEdge[] = [
+  { from: "请求", to: "认证", label: "身份验证", verified: true },
+  { from: "认证", to: "授权", label: "权限检查", verified: true },
+  { from: "授权", to: "处理", label: "业务逻辑", verified: true },
+  { from: "处理", to: "响应", label: "返回结果", verified: true },
+  { from: "处理", to: "审计", label: "日志记录", verified: true },
+];
+
+// ── CRM Knowledge Domains ──
 
 const CRM_KNOWLEDGE_DOMAINS: KnowledgeDomain[] = [
   {
@@ -124,8 +177,6 @@ const CRM_KNOWLEDGE_DOMAINS: KnowledgeDomain[] = [
   },
 ];
 
-// ── 业务协议图（CRM 特有） ──
-
 const CRM_PROTOCOL_GRAPH: ProtocolEdge[] = [
   { from: "新线索", to: "已联系", label: "首次触达", verified: true },
   { from: "已联系", to: "已合格", label: "需求确认", verified: true },
@@ -143,7 +194,76 @@ const CRM_PROTOCOL_GRAPH: ProtocolEdge[] = [
   { from: "公司", to: "交易", label: "关联", verified: true },
 ];
 
-// ── 翻译函数 ──
+// ── Knowledge domains by project type (defined AFTER their const values) ──
+
+const KNOWLEDGE_DOMAINS_BY_TYPE: Record<string, KnowledgeDomain[]> = {
+  crm: CRM_KNOWLEDGE_DOMAINS,
+};
+
+const PROTOCOL_GRAPHS_BY_TYPE: Record<string, ProtocolEdge[]> = {
+  crm: CRM_PROTOCOL_GRAPH,
+};
+
+// ── Project type auto-detection ──
+
+/**
+ * Detect project type from common project indicators.
+ * Checks package.json dependencies, Prisma schema models, framework configs.
+ */
+export function detectProjectType(projectPath: string): string {
+  try {
+    const fs = require("fs");
+    const path = require("path");
+
+    // Check package.json dependencies
+    const pkgPath = path.join(projectPath, "package.json");
+    if (fs.existsSync(pkgPath)) {
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+      const deps = { ...pkg.dependencies, ...pkg.devDependencies };
+      const depNames = Object.keys(deps).map((d: string) => d.toLowerCase());
+
+      // CRM indicators
+      if (depNames.some((d: string) => ["hubspot", "salesforce", "zoho", "crm"].some((kw) => d.includes(kw)))) {
+        return "crm";
+      }
+
+      // E-commerce indicators
+      if (depNames.some((d: string) => ["stripe", "shopify", "woocommerce", "commerce", "payment"].some((kw) => d.includes(kw)))) {
+        return "ecommerce";
+      }
+
+      // SaaS indicators
+      if (depNames.some((d: string) => ["@saas", "billing", "subscription", "multi-tenant"].some((kw) => d.includes(kw)))) {
+        return "saas";
+      }
+
+      // API/Backend indicators
+      if (depNames.some((d: string) => ["express", "fastify", "koa", "hono", "graphql", "trpc"].some((kw) => d.includes(kw)))) {
+        return "api";
+      }
+    }
+
+    // Check for Prisma schema (CRM, ecommerce, SaaS detection)
+    const prismaPath = path.join(projectPath, "prisma", "schema.prisma");
+    if (fs.existsSync(prismaPath)) {
+      const schema = fs.readFileSync(prismaPath, "utf-8");
+      const modelMatches = schema.match(/model\s+(\w+)/g) || [];
+      const models = modelMatches.map((m: string) => m.replace("model ", ""));
+
+      const crmModels = ["Contact", "Lead", "Deal", "Account", "Opportunity"];
+      const ecomModels = ["Product", "Order", "Cart", "Inventory", "Payment"];
+      const saasModels = ["Tenant", "Subscription", "Plan", "Workspace"];
+
+      if (crmModels.some((m) => models.includes(m))) return "crm";
+      if (ecomModels.some((m) => models.includes(m))) return "ecommerce";
+      if (saasModels.some((m) => models.includes(m))) return "saas";
+    }
+  } catch { /* best-effort */ }
+
+  return "generic";
+}
+
+// ── Translation Functions ──
 
 export function translateToBusinessRisks(
   plsbCovered: string[],
@@ -194,23 +314,28 @@ function getCategoryDescription(cat: string): string {
 }
 
 export function getKnowledgeCoverage(projectType: string = "crm"): KnowledgeDomain[] {
-  // Future: load from project config or detect from Prisma schema
-  return CRM_KNOWLEDGE_DOMAINS;
+  const typeSpecific = KNOWLEDGE_DOMAINS_BY_TYPE[projectType];
+  if (typeSpecific) return typeSpecific;
+  return GENERIC_KNOWLEDGE_DOMAINS;
 }
 
 export function getProtocolGraph(projectType: string = "crm"): ProtocolEdge[] {
-  return CRM_PROTOCOL_GRAPH;
+  const typeSpecific = PROTOCOL_GRAPHS_BY_TYPE[projectType];
+  if (typeSpecific) return typeSpecific;
+  return GENERIC_PROTOCOL_GRAPH;
 }
 
 export function buildBusinessSummary(
   risks: BusinessRisk[],
   knowledge: KnowledgeDomain[],
-  violationsByCategory: Record<string, number>
+  violationsByCategory: Record<string, number>,
+  projectType: string = "generic"
 ): BusinessTranslationSummary {
+  const protocolGraph = getProtocolGraph(projectType);
   return {
     totalRisksMitigated: risks.filter(r => r.status === "protected").length,
     knowledgeDomainsCovered: knowledge.filter(k => k.coverage === "full").length,
-    businessProtocolsIntact: CRM_PROTOCOL_GRAPH.filter(e => e.verified).length,
+    businessProtocolsIntact: protocolGraph.filter(e => e.verified).length,
     preventedViolationsByCategory: violationsByCategory,
   };
 }
