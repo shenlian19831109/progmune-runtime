@@ -276,14 +276,17 @@ const COMPLIANCE_REQUIREMENTS: ComplianceRequirement[] = [
  * Mapping logic:
  *   - If a business claim's predicate overlaps with a compliance invariant,
  *     the business claim partially satisfies the compliance requirement.
- *   - The overlap is measured by shared atoms (state names, action names).
+ *   - Scans actual code for evidence patterns (auth middleware, bcrypt, Zod, etc.)
+ *   - Maps compliance concepts to real code artifacts
  */
 function analyzeCoverage(
   businessClaims: any[],
-  complianceReqs: ComplianceRequirement[]
+  complianceReqs: ComplianceRequirement[],
+  projectPath: string
 ): ComplianceCoverage[] {
   const standards = [...new Set(complianceReqs.map(r => r.standard))];
   const coverage: ComplianceCoverage[] = [];
+  const evidence = collectCodeEvidence(projectPath);
 
   for (const standard of standards) {
     const reqs = complianceReqs.filter(r => r.standard === standard);
@@ -291,16 +294,7 @@ function analyzeCoverage(
     const unsatisfied: string[] = [];
 
     for (const req of reqs) {
-      // Extract atoms from the compliance invariant
-      const atoms = extractAtoms(req.invariant);
-
-      // Check if any business claim shares atoms with this requirement
-      const matchingClaims = businessClaims.filter((c: any) => {
-        const claimAtoms = extractAtoms(c.claim || c.predicate || "");
-        return atoms.some(a => claimAtoms.includes(a));
-      });
-
-      if (matchingClaims.length > 0) {
+      if (checkRequirement(req, evidence, businessClaims)) {
         satisfied.push(req.id);
       } else {
         unsatisfied.push(req.id);
@@ -311,7 +305,7 @@ function analyzeCoverage(
       standard,
       totalRequirements: reqs.length,
       satisfiedByBusiness: satisfied.length,
-      satisfiedByEvidence: 0,
+      satisfiedByEvidence: satisfied.length,
       unsatisfied: unsatisfied.length,
       claims: satisfied,
     });
@@ -320,18 +314,97 @@ function analyzeCoverage(
   return coverage;
 }
 
-/** Extract atom names from a predicate string */
-function extractAtoms(predicate: string): string[] {
-  const atoms: string[] = [];
-  // Match words that look like state/action names
-  const words = predicate.match(/[A-Z][a-z]+|[a-z]+(?:_[a-z]+)*/g) || [];
-  for (const w of words) {
-    const lower = w.toLowerCase();
-    if (lower !== "entity" && lower.length > 2) {
-      atoms.push(lower);
+// ── Evidence Collection ──
+
+interface CodeEvidence {
+  files: Set<string>;
+  imports: Set<string>;
+  dependencies: Set<string>;
+  patterns: Map<string, string[]>;  // pattern → matching files
+}
+
+function collectCodeEvidence(projectPath: string): CodeEvidence {
+  const ev: CodeEvidence = {
+    files: new Set(),
+    imports: new Set(),
+    dependencies: new Set(),
+    patterns: new Map(),
+  };
+
+  const serverDir = path.join(projectPath, "server");
+  if (!fs.existsSync(serverDir)) return ev;
+
+  function scanDir(dir: string) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.name.startsWith(".") || entry.name === "node_modules") continue;
+      if (entry.isDirectory()) { scanDir(full); continue; }
+      if (!entry.name.endsWith(".ts")) continue;
+
+      ev.files.add(path.relative(projectPath, full));
+      const content = fs.readFileSync(full, "utf-8");
+
+      const importMatches = content.match(/import\s+.*from\s+['"]([^'"]+)['"]/g) || [];
+      for (const m of importMatches) {
+        const pkg = m.match(/from\s+['"]([^'"]+)['"]/)?.[1] || "";
+        if (pkg && !pkg.startsWith(".")) ev.imports.add(pkg);
+      }
+
+      const patternChecks: [string, RegExp][] = [
+        ["auth_middleware", /authenticate|authRequired|requireAuth|verifyToken|auth\.utils/i],
+        ["bcrypt_usage", /bcrypt|passwordHash|hashPassword|argon2|compareSync/i],
+        ["zod_validation", /z\.(string|number|object|enum|array)\(|\.parse\(|\.safeParse\(/i],
+        ["audit_logging", /audit|log.*activity|recordSession|pointsLog|notification.*log/i],
+        ["rate_limiting", /rate.?limit|throttle|express-rate-limit|verificationAttempts/i],
+        ["verification_code", /verifyCode|verificationCode|verifyPhone|sendVerificationCode/i],
+        ["db_transaction", /db\.transaction|\.transaction\(/i],
+        ["session_management", /session|createSession|refreshSession|revokeSession/i],
+        ["provenance_tracking", /provenance|fingerprint|ledger|@progmune/i],
+        ["mfa_pattern", /mfa|2fa|two.factor|verification/i],
+      ];
+
+      for (const [pattern, regex] of patternChecks) {
+        if (regex.test(content)) {
+          if (!ev.patterns.has(pattern)) ev.patterns.set(pattern, []);
+          ev.patterns.get(pattern)!.push(path.relative(projectPath, full));
+        }
+      }
     }
   }
-  return [...new Set(atoms)];
+
+  scanDir(serverDir);
+
+  const pkgPath = path.join(projectPath, "package.json");
+  if (fs.existsSync(pkgPath)) {
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+    for (const dep of Object.keys({ ...pkg.dependencies, ...pkg.devDependencies })) {
+      ev.dependencies.add(dep);
+    }
+  }
+
+  return ev;
+}
+
+// ── Requirement Checking ──
+
+function checkRequirement(
+  req: ComplianceRequirement,
+  evidence: CodeEvidence,
+  _businessClaims: any[]
+): boolean {
+  const categoryEvidence: Record<string, string[]> = {
+    "access_control": ["auth_middleware", "session_management"],
+    "secrets": ["bcrypt_usage"],
+    "audit": ["audit_logging", "provenance_tracking"],
+    "data_protection": ["zod_validation"],
+    "monitoring": ["rate_limiting"],
+    "ai_governance": ["provenance_tracking", "session_management"],
+    "change_management": ["db_transaction", "audit_logging"],
+  };
+
+  const required = categoryEvidence[req.category] || [];
+  const matched = required.filter(p => (evidence.patterns.get(p)?.length || 0) > 0);
+  return matched.length > 0;
 }
 
 // ══════════════════════════════════════════════
@@ -353,7 +426,7 @@ export function buildComplianceLayer(projectPath: string): UnifiedKnowledgeRepor
 
   // ── Coverage Analysis ──
   console.log("\n── Compliance Coverage by Standard ──");
-  const coverage = analyzeCoverage(businessClaims, COMPLIANCE_REQUIREMENTS);
+  const coverage = analyzeCoverage(businessClaims, COMPLIANCE_REQUIREMENTS, projectPath);
 
   for (const cov of coverage) {
     const pct = Math.round((cov.satisfiedByBusiness / cov.totalRequirements) * 100);
