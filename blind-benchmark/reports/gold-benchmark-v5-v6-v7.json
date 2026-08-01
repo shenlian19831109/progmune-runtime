@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-16T11:21:01.205Z",
+  "generated": "2026-08-01T07:05:50.027Z",
   "summary": {
     "totalSequences": 232,
     "v5": {
@@ -13,37 +13,37 @@
       "f1": 0.2814814814814815
     },
     "v6": {
-      "tp": 19,
-      "fp": 106,
-      "tn": 88,
-      "fn": 19,
+      "tp": 28,
+      "fp": 126,
+      "tn": 68,
+      "fn": 10,
       "total": 232,
-      "precision": 0.152,
-      "recall": 0.5,
-      "f1": 0.2331288343558282
+      "precision": 0.18181818181818182,
+      "recall": 0.7368421052631579,
+      "f1": 0.2916666666666667
     },
     "v7": {
-      "tp": 19,
-      "fp": 108,
-      "tn": 86,
-      "fn": 19,
+      "tp": 27,
+      "fp": 128,
+      "tn": 66,
+      "fn": 11,
       "total": 232,
-      "precision": 0.14960629921259844,
-      "recall": 0.5,
-      "f1": 0.23030303030303034
+      "precision": 0.17419354838709677,
+      "recall": 0.7105263157894737,
+      "f1": 0.27979274611398963
     },
     "delta_v6_to_v7": {
-      "deltaPrecision": -0.0023937007874015592,
-      "deltaRecall": 0,
-      "deltaF1": -0.0028258040527978645,
+      "deltaPrecision": -0.007624633431085048,
+      "deltaRecall": -0.02631578947368418,
+      "deltaF1": -0.011873920552677053,
       "netFPFixed": -2,
-      "netTPNew": 0
+      "netTPNew": -1
     }
   },
   "migration": {
     "v5_to_v6": {
       "FP→TN (fixed)": {
-        "count": 88,
+        "count": 68,
         "examples": [
           "[5] ldap_do (ldap.c)",
           "[11] Curl_auth_create_ntlm_type3_message (ntlm.c)",
@@ -55,18 +55,18 @@
         "examples": []
       },
       "TP→FN (broken)": {
-        "count": 19,
+        "count": 10,
         "examples": [
           "[1] mbed_configure_ssl (mbedtls.c)",
-          "[3] myssh_statemachine (libssh.c)",
-          "[16] Curl_conn_connect (connect.c)"
+          "[16] Curl_conn_connect (connect.c)",
+          "[27] Curl_auth_decode_spnego_message (spnego_sspi.c)"
         ]
       },
       "FN→TP (new catch)": {
         "count": 0,
         "examples": []
       },
-      "unchanged": 125
+      "unchanged": 154
     },
     "v6_to_v7": {
       "FP→TN (fixed)": {
@@ -81,9 +81,10 @@
         ]
       },
       "TP→FN (broken)": {
-        "count": 1,
+        "count": 2,
         "examples": [
-          "[26] Curl_auth_create_digest_md5_message (digest_sspi.c)"
+          "[26] Curl_auth_create_digest_md5_message (digest_sspi.c)",
+          "[40] curve25519_do_create_k (curve25519_gcrypt.c)"
         ]
       },
       "FN→TP (new catch)": {
@@ -92,7 +93,7 @@
           "[12] SSH_PACKET_CALLBACK (hybrid_mlkem.c)"
         ]
       },
-      "unchanged": 228
+      "unchanged": 227
     }
   },
   "repos": [
@@ -112,29 +113,29 @@
         "f1": 0.44036697247706424
       },
       "v6": {
-        "tp": 17,
-        "fp": 36,
-        "tn": 25,
-        "fn": 7,
+        "tp": 20,
+        "fp": 40,
+        "tn": 21,
+        "fn": 4,
         "total": 85,
-        "precision": 0.32075471698113206,
-        "recall": 0.7083333333333334,
-        "f1": 0.44155844155844154
+        "precision": 0.3333333333333333,
+        "recall": 0.8333333333333334,
+        "f1": 0.47619047619047616
       },
       "v7": {
-        "tp": 16,
-        "fp": 36,
-        "tn": 25,
-        "fn": 8,
+        "tp": 19,
+        "fp": 40,
+        "tn": 21,
+        "fn": 5,
         "total": 85,
-        "precision": 0.3076923076923077,
-        "recall": 0.6666666666666666,
-        "f1": 0.42105263157894735
+        "precision": 0.3220338983050847,
+        "recall": 0.7916666666666666,
+        "f1": 0.4578313253012048
       },
       "migration": {
         "v5_to_v6": {
           "FP→TN (fixed)": {
-            "count": 25,
+            "count": 21,
             "examples": [
               "[5] ldap_do (ldap.c)",
               "[11] Curl_auth_create_ntlm_type3_message (ntlm.c)",
@@ -146,18 +147,18 @@
             "examples": []
           },
           "TP→FN (broken)": {
-            "count": 7,
+            "count": 4,
             "examples": [
               "[1] mbed_configure_ssl (mbedtls.c)",
-              "[3] myssh_statemachine (libssh.c)",
-              "[16] Curl_conn_connect (connect.c)"
+              "[16] Curl_conn_connect (connect.c)",
+              "[27] Curl_auth_decode_spnego_message (spnego_sspi.c)"
             ]
           },
           "FN→TP (new catch)": {
             "count": 0,
             "examples": []
           },
-          "unchanged": 53
+          "unchanged": 60
         },
         "v6_to_v7": {
           "FP→TN (fixed)": {
@@ -198,33 +199,33 @@
         "f1": 0.45901639344262296
       },
       "v6": {
-        "tp": 2,
-        "fp": 5,
-        "tn": 28,
-        "fn": 12,
+        "tp": 8,
+        "fp": 13,
+        "tn": 20,
+        "fn": 6,
         "total": 47,
-        "precision": 0.2857142857142857,
-        "recall": 0.14285714285714285,
-        "f1": 0.19047619047619047
+        "precision": 0.38095238095238093,
+        "recall": 0.5714285714285714,
+        "f1": 0.4571428571428571
       },
       "v7": {
-        "tp": 3,
-        "fp": 7,
-        "tn": 26,
-        "fn": 11,
+        "tp": 8,
+        "fp": 15,
+        "tn": 18,
+        "fn": 6,
         "total": 47,
-        "precision": 0.3,
-        "recall": 0.21428571428571427,
-        "f1": 0.25
+        "precision": 0.34782608695652173,
+        "recall": 0.5714285714285714,
+        "f1": 0.4324324324324324
       },
       "migration": {
         "v5_to_v6": {
           "FP→TN (fixed)": {
-            "count": 28,
+            "count": 20,
             "examples": [
-              "[1] atomicio (agent.c)",
-              "[2] ssh_config_parse_line_internal (config.c)",
-              "[4] SSH_PACKET_CALLBACK (hybrid_mlkem.c)"
+              "[4] SSH_PACKET_CALLBACK (hybrid_mlkem.c)",
+              "[5] ecdh_build_k (ecdh_crypto.c)",
+              "[6] libcrux_sha3_generic_keccak_rho_80_04 (libcrux_mlkem768_sha3.c)"
             ]
           },
           "TN→FP (regression)": {
@@ -232,7 +233,7 @@
             "examples": []
           },
           "TP→FN (broken)": {
-            "count": 12,
+            "count": 6,
             "examples": [
               "[0] ecdh_kex_type_to_curve (ecdh_crypto.c)",
               "[12] SSH_PACKET_CALLBACK (hybrid_mlkem.c)",
@@ -243,7 +244,7 @@
             "count": 0,
             "examples": []
           },
-          "unchanged": 7
+          "unchanged": 21
         },
         "v6_to_v7": {
           "FP→TN (fixed)": {
@@ -258,8 +259,10 @@
             ]
           },
           "TP→FN (broken)": {
-            "count": 0,
-            "examples": []
+            "count": 1,
+            "examples": [
+              "[40] curve25519_do_create_k (curve25519_gcrypt.c)"
+            ]
           },
           "FN→TP (new catch)": {
             "count": 1,
@@ -267,7 +270,7 @@
               "[12] SSH_PACKET_CALLBACK (hybrid_mlkem.c)"
             ]
           },
-          "unchanged": 44
+          "unchanged": 43
         }
       }
     },
@@ -288,8 +291,8 @@
       },
       "v6": {
         "tp": 0,
-        "fp": 18,
-        "tn": 32,
+        "fp": 26,
+        "tn": 24,
         "fn": 0,
         "total": 50,
         "precision": 0,
@@ -298,8 +301,8 @@
       },
       "v7": {
         "tp": 0,
-        "fp": 18,
-        "tn": 32,
+        "fp": 26,
+        "tn": 24,
         "fn": 0,
         "total": 50,
         "precision": 0,
@@ -309,7 +312,7 @@
       "migration": {
         "v5_to_v6": {
           "FP→TN (fixed)": {
-            "count": 32,
+            "count": 24,
             "examples": [
               "[1] ngx_conf_handler (ngx_conf_file.c)",
               "[2] ngx_conf_read_token (ngx_conf_file.c)",
@@ -328,7 +331,7 @@
             "count": 0,
             "examples": []
           },
-          "unchanged": 18
+          "unchanged": 26
         },
         "v6_to_v7": {
           "FP→TN (fixed)": {

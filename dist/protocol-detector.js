@@ -118,7 +118,7 @@ const SAFEGUARD_RULES = [
     {
         name: "Authorization (Ownership Check)",
         category: "authorization",
-        trigger: /\b(add|create|delete|remove|update|toggle|modify|edit|lock|ban|process|refund|assign|transfer|share|schedule|upload|set)[A-Z]\w*\b/i,
+        trigger: /\b(add|create|delete|remove|update|toggle|modify|edit|lock|ban|process|refund|assign|transfer|share|schedule|upload|set)(?:[A-Z]\w*|_\w+)\b/i,
         safeguards: [
             { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|checkOwner|authorId\s*[!=]==?|ownerId\s*[!=]==?|userId\s*[!=]==?|\.owner\s*[!=]==?)/i, label: "auth_check" },
         ],
@@ -130,21 +130,21 @@ const SAFEGUARD_RULES = [
     {
         name: "Authorization (Unauthenticated Access)",
         category: "authorization",
-        trigger: /\b(get|list|download|view|read|fetch|find)[A-Z]\w*\b/i,
+        trigger: /\b(get|list|download|view|read|fetch|find)(?:[A-Z]\w*|_\w+)\b/i,
         safeguards: [
-            { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|token|session)\b/i, label: "auth_check" },
+            { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?)\b/i, label: "auth_check" },
         ],
         violationMessage: "Data access function does not check authentication. Anyone can access data without credentials.",
         conceptMissing: ["AuthenticationCheck", "AccessControl"],
-        conceptExpected: ["token validation", "session check"],
+        conceptExpected: ["token validation", "session check", "auth middleware"],
     },
     // ── Data Integrity (Foreign Key Validation) ──
     {
         name: "Data Integrity (Foreign Key)",
         category: "data_integrity",
-        trigger: /\b(add|create|post|refund|process|send)[A-Z]\w*\b/i,
+        trigger: /\b(add|create|post|refund|process|send)(?:[A-Z]\w*|_\w+)\b/i,
         safeguards: [
-            { pattern: /\b(get|find|check|exists|lookup|status)[A-Z]\w*\b/i, label: "fk_check" },
+            { pattern: /\b(get|find|check|exists|lookup|status)(?:[A-Z]\w*|_\w+)\b/i, label: "fk_check" },
         ],
         violationMessage: "Creates a child entity without verifying the parent entity exists. Orphaned references possible.",
         conceptMissing: ["ForeignKeyValidation", "ReferentialIntegrity"],
@@ -154,7 +154,7 @@ const SAFEGUARD_RULES = [
     {
         name: "Input Validation",
         category: "input_validation",
-        trigger: /\b(create|add|post|send|upload)[A-Z]\w*\b/i,
+        trigger: /\b(create|add|post|send|upload)(?:[A-Z]\w*|_\w+)\b/i,
         safeguards: [
             { pattern: /\b(validate|sanitize|check|verify)\w*(Content|Input|Length|Title|Body|Type|Size|File)\b/i, label: "input_validation" },
         ],
@@ -190,7 +190,7 @@ const SAFEGUARD_RULES = [
     {
         name: "Authorization (Resource Ownership)",
         category: "authorization",
-        trigger: /\b(toggle|remove)[A-Z]\w*\b/i,
+        trigger: /\b(toggle|remove)(?:[A-Z]\w*|_\w+)\b/i,
         safeguards: [
             { pattern: /\b(ownerId\s*[!=]==?|authorId\s*[!=]==?|userId\s*[!=]==?|createdBy|\.owner\s*[!=]==?)/i, label: "ownership_comparison" },
         ],
@@ -246,6 +246,106 @@ const SAFEGUARD_RULES = [
         conceptMissing: ["RateLimiting", "DoSProtection", "AbusePrevention"],
         conceptExpected: ["rateLimit", "throttle", "express-rate-limit"],
     },
+    // ── C-Specific Rules ──
+    {
+        name: "Key Derivation Safety",
+        category: "crypto",
+        languages: ["c"],
+        trigger: /\b(ecdh|curve25519|ssh_dh_|kex_|build_k|do_create_k|derive\w*secret|dh_set_param|ec_key|ecdh_)\b/i,
+        safeguards: [
+            { pattern: /\b(EC_KEY_get0_group|EC_KEY_check_key|EVP_PKEY_check|DH_check|get0_group|check_key|verify_param|validate_curve|ssh_key_is_private|ssh_key_type)\b/i, label: "key_validation" },
+            { pattern: /\b(EC_KEY_free|EVP_PKEY_free|DH_free|BN_free|BN_clear_free|gcry_sexp_release|mbedtls_ecp_group_free|mbedtls_ecp_point_free|mbedtls_mpi_free|ssh_string_free|ssh_string_burn|ssh_buffer_free|OSSL_PARAM_BLD_free|OSSL_PARAM_free|explicit_bzero)\b/i, label: "crypto_cleanup" },
+        ],
+        violationMessage: "Key derivation function does not validate generated keys or properly clean up cryptographic material.",
+        conceptMissing: ["KeyValidation", "CryptoCleanup"],
+        conceptExpected: ["EC_KEY_check_key", "EVP_PKEY_check", "explicit_bzero"],
+    },
+    {
+        name: "Certificate Pinning Validation",
+        category: "certificate",
+        languages: ["c"],
+        trigger: /(pin_peer_pubkey|pin_cert|pin_pubkey|pubkey_pin|cert_pin|ssl_pin|pkpin)\b/i,
+        safeguards: [
+            { pattern: /\b(X509_verify_cert|SSL_get_verify_result|X509_STORE_CTX_get_error|verify_certificate|verify_peer|cert_verify|ssl_verify|Curl_ssl_cf_get_config|ossl_verify|gtls_verify|mbedtls_ssl_conf_verify)\b/i, label: "cert_verify" },
+            { pattern: /\b(Curl_ssl_cf_get_primary_config|Curl_ssl_cf_get_config|ssl_cf_get_config|ssl_config_get|peer_cert|get_peer_certificate)\b/i, label: "ssl_config" },
+        ],
+        violationMessage: "Certificate/public key pinning used without proper X.509 certificate verification.",
+        conceptMissing: ["CertificateVerification", "TrustChainValidation"],
+        conceptExpected: ["X509_verify_cert", "SSL_get_verify_result"],
+    },
+    // ── Python-Specific Rules ──
+    {
+        name: "Unsafe Deserialization (Pickle)",
+        category: "input_validation",
+        languages: ["python"],
+        trigger: /\b(pickle\.loads|pickle\.load|cPickle\.loads|cPickle\.load|yaml\.load(?!_safe)|yaml_load(?!_safe))\b/i,
+        safeguards: [
+            { pattern: /\b(pickle\.Unpickler|yaml\.safe_load|yaml_safe_load|json\.loads|ast\.literal_eval)\b/i, label: "safe_deserialize" },
+        ],
+        violationMessage: "Unsafe deserialization of pickle/YAML can execute arbitrary code during deserialization.",
+        conceptMissing: ["SafeDeserialization", "InputSanitization"],
+        conceptExpected: ["yaml.safe_load", "json.loads"],
+    },
+    {
+        name: "Command Injection",
+        category: "input_validation",
+        languages: ["python"],
+        trigger: /\b(os\.system|os\.popen|subprocess\.(call|check_call|Popen|run)|commands\.getoutput|pty\.spawn)\b/i,
+        safeguards: [
+            { pattern: /\b(shlex\.quote|shlex\.split|pipes\.quote|shell\s*=\s*False)\b/i, label: "safe_command" },
+        ],
+        violationMessage: "Shell command execution without input quoting. Vulnerable to command injection.",
+        conceptMissing: ["CommandInjectionPrevention", "InputSanitization"],
+        conceptExpected: ["shlex.quote", "shell=False"],
+    },
+    {
+        name: "Hardcoded Secrets",
+        category: "token_security",
+        languages: ["python"],
+        trigger: /\b(password|secret|api_key|API_KEY|token|\w*TOKEN\w*)\s*=\s*["'][^"']+["']/i,
+        safeguards: [
+            { pattern: /\b(os\.environ|os\.getenv|config|\.env|python-dotenv|load_dotenv|SecretStr|Secret)\b/i, label: "env_secret" },
+        ],
+        violationMessage: "Sensitive credentials hardcoded in source code. Use environment variables or a secrets manager.",
+        conceptMissing: ["SecretManagement", "ConfigurationSecurity"],
+        conceptExpected: ["os.environ", "os.getenv", "dotenv"],
+    },
+    {
+        name: "Dynamic Code Execution",
+        category: "input_validation",
+        languages: ["python"],
+        trigger: /\b(eval|exec|compile|__import__)\s*\(/i,
+        safeguards: [
+            { pattern: /\b(ast\.literal_eval|json\.loads|safe_eval)\b/i, label: "safe_eval" },
+        ],
+        violationMessage: "Dynamic code execution from string input. Attacker-controlled input can execute arbitrary code.",
+        conceptMissing: ["SafeCodeExecution", "InputValidation"],
+        conceptExpected: ["ast.literal_eval"],
+    },
+    {
+        name: "Context Manager Usage",
+        category: "resource_lifecycle",
+        languages: ["python"],
+        trigger: /\b(sqlite3\.connect|psycopg2\.connect|open|io\.open|socket\.socket|redis\.Redis)\b/i,
+        safeguards: [
+            { pattern: /\b(with\s+\w|contextmanager|contextlib|closing|__enter__|\.close\(\))\b/i, label: "context_manager" },
+        ],
+        violationMessage: "Resource opened outside a context manager — may leak on exception paths.",
+        conceptMissing: ["ResourceCleanup", "ExceptionSafety"],
+        conceptExpected: ["with statement", "contextmanager", ".close()"],
+    },
+    {
+        name: "SQL Injection (Python)",
+        category: "input_validation",
+        languages: ["python"],
+        trigger: /\b(execute|executemany)\b/i,
+        safeguards: [
+            { pattern: /\b(%s|\?|:\w+|parameterize|\.execute\s*\(\s*\w+\s*,\s*[\[(])/i, label: "parameterized_query" },
+        ],
+        violationMessage: "SQL executed with string formatting instead of parameterized queries. Vulnerable to SQL injection.",
+        conceptMissing: ["SQLInjectionPrevention", "ParameterizedQueries"],
+        conceptExpected: ["parameterized query", "%s placeholder"],
+    },
 ];
 /**
  * Identifier Parser: splits camelCase/PascalCase/snake_case into words.
@@ -272,7 +372,7 @@ function identifierParse(name) {
  * Detect missing safeguards in function call sequences.
  * Uses identifier parsing to match compound names (registerNewUser → register).
  */
-function detectSafeguardViolations(calls, enclosingFuncName) {
+function detectSafeguardViolations(calls, enclosingFuncName, language) {
     const violations = [];
     // Build effective calls: raw names + identifier-parsed words
     const rawCalls = enclosingFuncName ? [enclosingFuncName, ...calls] : [...calls];
@@ -286,7 +386,11 @@ function detectSafeguardViolations(calls, enclosingFuncName) {
     const AUTH_PATTERN = /\b(register|signup|signin|login|authenticate|createuser|createaccount|registeruser|registernewuser|dologin|verifytoken|validatesession|getuser|getsessionuser|getcurrentuser|endsession|logout|signout|dologout|destroysession|invalidatesession|invalidate|signout)\b/i;
     const isAuthFunction = enclosingFuncName != null && (AUTH_PATTERN.test(rawLower) ||
         identifierParse(enclosingFuncName).some(w => AUTH_PATTERN.test(w)));
-    for (const rule of SAFEGUARD_RULES) {
+    // Filter rules by language
+    const activeRules = language
+        ? SAFEGUARD_RULES.filter(r => !r.languages || r.languages.includes(language))
+        : SAFEGUARD_RULES;
+    for (const rule of activeRules) {
         // Check if trigger matches
         const triggerMatch = effectiveCalls.some(c => rule.trigger.test(c));
         if (!triggerMatch)
@@ -373,7 +477,7 @@ function buildSafeguardContext(funcName, callerMap, funcCalls, fileCalls, funcFi
  * while expanding safeguard context to include caller chain preserves Recall
  * and improves Precision.
  */
-function detectSafeguardViolationsV7(calls, enclosingFuncName, callerMap, funcCalls, fileCalls, funcFile) {
+function detectSafeguardViolationsV7(calls, enclosingFuncName, callerMap, funcCalls, fileCalls, funcFile, language) {
     const violations = [];
     // Build effective calls for trigger scope: own body + file-level (same as v6)
     const rawCalls = enclosingFuncName ? [enclosingFuncName, ...calls] : [...calls];
@@ -397,7 +501,11 @@ function detectSafeguardViolationsV7(calls, enclosingFuncName, callerMap, funcCa
     const AUTH_PATTERN = /\b(register|signup|signin|login|authenticate|createuser|createaccount|registeruser|registernewuser|dologin|verifytoken|validatesession|getuser|getsessionuser|getcurrentuser|endsession|logout|signout|dologout|destroysession|invalidatesession|invalidate|signout)\b/i;
     const isAuthFunction = enclosingFuncName != null && (AUTH_PATTERN.test(rawLower) ||
         identifierParse(enclosingFuncName).some(w => AUTH_PATTERN.test(w)));
-    for (const rule of SAFEGUARD_RULES) {
+    // Filter rules by language
+    const activeRulesV7 = language
+        ? SAFEGUARD_RULES.filter(r => !r.languages || r.languages.includes(language))
+        : SAFEGUARD_RULES;
+    for (const rule of activeRulesV7) {
         // v7b: trigger check against own body + file-level (same scope as v6)
         const triggerMatch = triggerEffectiveCalls.some(c => rule.trigger.test(c));
         if (!triggerMatch)

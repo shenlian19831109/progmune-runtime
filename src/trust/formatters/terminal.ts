@@ -52,8 +52,8 @@ function confidenceLabel(confidence: string): string {
 }
 
 export function formatTrustTerminal(decision: TrustDecision): string {
-  const { overall, dimensions, violations, summary, auditTrail } = decision;
-  const w = 60; // box width
+  const { overall, dimensions, violations, violationTraces, summary, auditTrail } = decision;
+  const w = 68; // wider box for coverage data
 
   const lines: string[] = [];
 
@@ -69,6 +69,16 @@ export function formatTrustTerminal(decision: TrustDecision): string {
   lines.push(`${BOX_V}  ${BOLD}Overall Trust Score  ${scoreStr} / 100           ${scoreColor}${scoreLabel}${RESET}  ${BOX_V}`);
   lines.push(`${BOX_V}  ${BOLD}Decision             ${decisionEmoji(overall.decision)}${" ".repeat(Math.max(0, 14 - overall.decision.length))}         ${BOX_V}`);
   lines.push(`${BOX_V}  ${BOLD}Confidence           ${confidenceLabel(overall.confidence)}${" ".repeat(24)}${BOX_V}`);
+
+  // Phase 1: Coverage-based confidence (quantified)
+  if (overall.coverageConfidence) {
+    const cc = overall.coverageConfidence;
+    const ccColor = cc.level === "HIGH" ? GREEN : cc.level === "MEDIUM" ? YELLOW : RED;
+    lines.push(`${BOX_V}${" ".repeat(w - 2)}${BOX_V}`);
+    lines.push(`${BOX_V}  ${BOLD}Coverage Confidence${RESET}  ${ccColor}${cc.score}%${RESET} ${DIM}±${cc.margin}%${RESET}   ${ccColor}${cc.level}${RESET}${" ".repeat(Math.max(0, w - 48))}${BOX_V}`);
+    lines.push(`${BOX_V}  ${DIM}${cc.summary.slice(0, w - 5)}${RESET}`);
+  }
+
   lines.push(`${BOX_V}${" ".repeat(w - 2)}${BOX_V}`);
 
   // Key Findings
@@ -108,13 +118,31 @@ export function formatTrustTerminal(decision: TrustDecision): string {
     lines.push(`${BOX_V}  ${BOLD}Evidence${RESET}${" ".repeat(w - 13)}${BOX_V}`);
     lines.push(`${BOX_V}${" ".repeat(w - 2)}${BOX_V}`);
 
-    for (const v of violations.slice(0, 10)) {
+    for (let vi = 0; vi < Math.min(violations.length, 10); vi++) {
+      const v = violations[vi];
+      const trace = violationTraces?.[vi];
+
       const sevIcon = v.severity === "critical" ? "❌" : v.severity === "high" ? "⚠️ " : v.severity === "medium" ? "●" : "○";
       const sevColor = v.severity === "critical" ? RED : v.severity === "high" ? YELLOW : CYAN;
       lines.push(`${BOX_V}  ${sevColor}${sevIcon} ${v.rule_id.padEnd(12).slice(0, 12)}${RESET} ${BOLD}${v.severity.toUpperCase()}${RESET}`);
       lines.push(`${BOX_V}  ${DIM}${v.message.slice(0, w - 5)}${RESET}`);
       lines.push(`${BOX_V}  ${DIM}Evidence: ${v.evidence.slice(0, w - 14)}${RESET}`);
-      lines.push(`${BOX_V}  ${DIM}Fix:     ${v.fix.slice(0, w - 13)}${RESET}`);
+
+      // Phase 3: Violation trace (reasoning chain)
+      if (trace && trace.steps.length > 0) {
+        const violStep = trace.steps.find((s: any) => s.label && s.action);
+        if (violStep) {
+          lines.push(`${BOX_V}  ${DIM}Trace:   ${violStep.action} → ${violStep.preState} → ${violStep.explanation.slice(0, 30)}${RESET}`);
+        }
+        if (trace.fixPath.length > 0) {
+          lines.push(`${BOX_V}  ${DIM}Fix:     ${trace.fixPath.join(" → ").slice(0, w - 13)}${RESET}`);
+        }
+        if (trace.estimatedReadingTimeMinutes) {
+          lines.push(`${BOX_V}  ${DIM}Reading: ~${trace.estimatedReadingTimeMinutes}min${RESET}`);
+        }
+      } else {
+        lines.push(`${BOX_V}  ${DIM}Fix:     ${v.fix.slice(0, w - 13)}${RESET}`);
+      }
       lines.push(`${BOX_V}  ${DIM}Policy:  ${v.policy_ref}${RESET}`);
       lines.push(`${BOX_V}${" ".repeat(w - 2)}${BOX_V}`);
     }

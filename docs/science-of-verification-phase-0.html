@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phase 0: Progmune 科学化衡量标准</title>
+<style>
+  :root {
+    --bg: #f8f9fa;
+    --card-bg: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --accent: #2563eb;
+    --accent-light: #dbeafe;
+    --red: #dc2626;
+    --red-light: #fef2f2;
+    --green: #16a34a;
+    --green-light: #f0fdf4;
+    --amber: #d97706;
+    --amber-light: #fffbeb;
+    --purple: #7c3aed;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 40px 20px;
+  }
+  .container { max-width: 900px; margin: 0 auto; }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    color: white;
+    padding: 48px 40px;
+    border-radius: 16px;
+    margin-bottom: 32px;
+  }
+  .header .badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    color: #93c5fd;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    letter-spacing: 0.5px;
+  }
+  .header h1 { font-size: 32px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.5px; }
+  .header .subtitle { color: #cbd5e1; font-size: 16px; font-style: italic; }
+
+  /* Sections */
+  .section {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .section h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section h2 .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px; height: 32px;
+    background: var(--accent);
+    color: white;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .section h3 {
+    font-size: 17px;
+    font-weight: 700;
+    margin: 24px 0 12px;
+    color: #374151;
+  }
+  .section h3.phases {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  th, td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    background: #f9fafb;
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+  }
+  td { vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+
+  /* Progress bars */
+  .bar-wrap {
+    background: #f1f5f9;
+    border-radius: 6px;
+    height: 8px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.6s ease;
+  }
+  .bar-low { background: var(--red); }
+  .bar-mid { background: var(--amber); }
+  .bar-good { background: var(--green); }
+
+  /* Checkboxes */
+  .checklist { list-style: none; margin: 12px 0; }
+  .checklist li {
+    padding: 10px 14px;
+    margin: 6px 0;
+    background: #f9fafb;
+    border-radius: 8px;
+    border-left: 3px solid var(--border);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .checklist li .cb {
+    display: inline-block;
+    width: 18px; height: 18px;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    margin-right: 10px;
+    vertical-align: -3px;
+  }
+  .checklist li strong { color: var(--accent); }
+
+  /* Red flags */
+  .redflag {
+    background: var(--red-light);
+    border-left: 4px solid var(--red);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  .redflag .label {
+    font-weight: 800;
+    color: var(--red);
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+    display: block;
+  }
+
+  /* Phase cards */
+  .phase-card {
+    background: #f9fafb;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 16px 0;
+    border: 1px solid var(--border);
+  }
+  .phase-card h3 {
+    margin-top: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .phase-tag {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 12px;
+    letter-spacing: 0.3px;
+  }
+  .tag-p1 { background: #dbeafe; color: #1d4ed8; }
+  .tag-p2 { background: #f3e8ff; color: #7c3aed; }
+  .tag-p3 { background: #fce7f3; color: #be185d; }
+  .tag-p4 { background: #d1fae5; color: #065f46; }
+  .phase-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--muted);
+    margin: 8px 0 16px;
+  }
+  .phase-meta span { display: flex; align-items: center; gap: 4px; }
+
+  /* Baseline grid */
+  .baseline-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 24px;
+    margin: 16px 0;
+  }
+  .baseline-item {
+    padding: 14px;
+    background: #f9fafb;
+    border-radius: 8px;
+  }
+  .baseline-item .metric { font-size: 20px; font-weight: 800; color: var(--text); }
+  .baseline-item .label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* Global checklist */
+  .global-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .global-item {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .global-item .gid {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-right: 8px;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 32px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .footer strong { color: var(--text); }
+
+  .quote-block {
+    background: #fffbeb;
+    border-left: 4px solid var(--amber);
+    padding: 14px 18px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- HEADER -->
+<div class="header">
+  <div class="badge">PROGMUNE · PHASE 0</div>
+  <h1>科学化衡量标准</h1>
+  <p class="subtitle">目标：用 1–2 天明确"科学化"的操作性定义。<br>没有这个标准，"科学化"会退化为标签，而非实际转变。</p>
+</div>
+
+<!-- SECTION 1: 核心判定 -->
+<div class="section">
+  <h2><span class="num">1</span> 核心判定标准</h2>
+  <table>
+    <thead>
+      <tr><th style="width:14%">维度</th><th style="width:43%">工程化（当前）</th><th>科学化（目标）</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>规则操作</strong></td>
+        <td>加规则 → 测 F1 → 不好就回滚</td>
+        <td>预测新规则对 F1 的期望贡献 → 加规则 → 验证预测</td>
+      </tr>
+      <tr>
+        <td><strong>覆盖度</strong></td>
+        <td>"我们有 68 条规则，覆盖了 TLS/SSH/HTTP"</td>
+        <td>"68 条规则覆盖了 TLS 状态空间的 <strong>X%</strong>，置信度 <strong>Y%</strong>"</td>
+      </tr>
+      <tr>
+        <td><strong>FP 控制</strong></td>
+        <td>VI 逐条抑制 FP（43% 减少，经验驱动）</td>
+        <td>给定协议复杂度 N，理论 FP 下界 = f(N)，当前距下界还有 Z%</td>
+      </tr>
+      <tr>
+        <td><strong>性能预测</strong></td>
+        <td>"curl F1=36%，libssh F1=41%——不同 repo 表现不同"</td>
+        <td>"给定 repo 的协议使用特征向量，预测 F1 范围 ±Δ"</td>
+      </tr>
+      <tr>
+        <td><strong>知识增长</strong></td>
+        <td>"下个 quarter 加 10 条规则"</td>
+        <td>"规则完备性缺口 = {具体协议 × 具体状态}，优先级排序由 ROI 公式驱动"</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- SECTION 2: 各阶段标准 -->
+<div class="section">
+  <h2><span class="num">2</span> 各阶段科学化成功标准</h2>
+
+  <!-- Phase 1 -->
+  <div class="phase-card">
+    <h3>
+      <span class="phase-tag tag-p1">Phase 1</span>
+      状态空间覆盖度
+    </h3>
+    <div class="phase-meta">
+      <span>⏱ 2–3 周</span>
+      <span>📊 输入：Trajectory Corpus + protocols.json</span>
+    </div>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:12px;">
+      输入：~9 sessions · ~2,558 trajectories · 71 states × 109 rules × 17 namespaces
+    </p>
+    <p style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:8px;">成功标准（至少达成 2/3）：</p>
+    <ul class="checklist">
+      <li><span class="cb"></span> <strong>S1.1</strong> 建立 Trajectory→Coverage 数学关系：给定 N 条轨迹，协议覆盖率 C 的置信区间 [C_low, C_high] 可以被计算</li>
+      <li><span class="cb"></span> <strong>S1.2</strong> Trust Report 的 Confidence 字段升级为"覆盖度 63% ± 12%（基于 2,558 条轨迹）"</li>
+      <li><span class="cb"></span> <strong>S1.3</strong> 对 C benchmark（F1=23.3%）给出理论解释：需要 Y 条额外轨迹才能达到 Z% F1</li>
+    </ul>
+    <div class="redflag">
+      <span class="label">⚠ Red Flag — 伪科学化</span>
+      Coverage 数字无法追溯到轨迹数据，或者置信区间是固定常数。
+    </div>
+  </div>
+
+  <!-- Phase 2 -->
+  <div class="phase-card">
+    <h3>
+      <span class="phase-tag tag-p2">Phase 2</span>
+      验证理论白皮书
+    </h3>
+    <div class="phase-meta">
+      <span>⏱ 2–3 周</span>
+      <span>📄 产出：Science of Program Verification 白皮书</span>
+    </div>
+    <ul class="checklist">
+      <li><span class="cb"></span> <strong>S2.1</strong> 包含一个可被独立验证的核心定理（不是纯叙述）</li>
+      <li><span class="cb"></span> <strong>S2.2</strong> 定理的推论可以解释至少一个现有 benchmark 现象</li>
+      <li><span class="cb"></span> <strong>S2.3</strong> 定理产生一个可证伪的预测，并在 Phase 1 数据上做 back-test</li>
+    </ul>
+    <div class="redflag">
+      <span class="label">⚠ Red Flag — 伪科学化</span>
+      白皮书只是重新叙述现有 benchmark 结果，没有可证伪预测。
+    </div>
+  </div>
+
+  <!-- Phase 3 -->
+  <div class="phase-card">
+    <h3>
+      <span class="phase-tag tag-p3">Phase 3</span>
+      推理链可解释性
+    </h3>
+    <div class="phase-meta">
+      <span>⏱ 2 周</span>
+      <span>🔗 产出：ViolationTrace 引擎 + Trust Report 升级</span>
+    </div>
+    <ul class="checklist">
+      <li><span class="cb"></span> <strong>S3.1</strong> <code>ViolationTrace</code> 在 engine 层是一等类型，包含中间状态的序列化表示</li>
+      <li><span class="cb"></span> <strong>S3.2</strong> 未读过 protocols.json 的工程师可在 2 分钟内理解违规的因果链</li>
+      <li><span class="cb"></span> <strong>S3.3</strong> Trace 长度与理解时间不再是指数关系（推理步数灾难被解决）</li>
+    </ul>
+    <div class="redflag">
+      <span class="label">⚠ Red Flag — 伪科学化</span>
+      Trace 只是把已有字段用箭头连起来，工程师仍需查 RFC 才能理解。
+    </div>
+  </div>
+
+  <!-- Phase 4 -->
+  <div class="phase-card">
+    <h3>
+      <span class="phase-tag tag-p4">Phase 4</span>
+      飞轮定性建模
+    </h3>
+    <div class="phase-meta">
+      <span>⏱ 1 周</span>
+      <span>🔄 产出：依赖图 + 关键度量定义</span>
+    </div>
+    <ul class="checklist">
+      <li><span class="cb"></span> <strong>S4.1</strong> 四飞轮依赖关系图（DAG），每条边标注耦合机制</li>
+      <li><span class="cb"></span> <strong>S4.2</strong> 每个飞轮有 1–3 个可测量关键度量，记录当前基线</li>
+      <li><span class="cb"></span> <strong>S4.3</strong> 识别至少一个飞轮间的"瓶颈依赖"</li>
+    </ul>
+    <div class="redflag">
+      <span class="label">⚠ Red Flag — 伪科学化</span>
+      飞轮图是单向箭头堆砌，没有可测量的度量。
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 3: 全局判定 -->
+<div class="section">
+  <h2><span class="num">3</span> 全局判定：Progmune 是否已科学化？</h2>
+  <p style="color:var(--muted);font-size:14px;margin-bottom:16px;">Phase 1–4 全部完成后，用以下标准做总体验收：</p>
+  <div class="global-grid">
+    <div class="global-item">
+      <span class="gid">G1</span> <strong>系统行为可被理论预测</strong>
+      <p style="color:var(--muted);margin-top:4px;">任意新 repo：预测 F1 → 实测 F1，误差在 ±Δ 内</p>
+    </div>
+    <div class="global-item">
+      <span class="gid">G2</span> <strong>规则完备性有量化缺口地图</strong>
+      <p style="color:var(--muted);margin-top:4px;">缺口 = {协议, 状态, 优先级, 预估 F1 增益} 排序列表</p>
+    </div>
+    <div class="global-item">
+      <span class="gid">G3</span> <strong>Confidence 是计算值，不是标注</strong>
+      <p style="color:var(--muted);margin-top:4px;">每条 Trust Report 的 Confidence 可追溯到轨迹覆盖度</p>
+    </div>
+    <div class="global-item">
+      <span class="gid">G4</span> <strong>知识增长由 ROI 公式驱动</strong>
+      <p style="color:var(--muted);margin-top:4px;">规则增长 → F1 增长的预测误差 &lt; 30%</p>
+    </div>
+    <div class="global-item" style="grid-column: 1 / -1;">
+      <span class="gid">G5</span> <strong>存在至少一个被实验验证的可证伪预测</strong>
+      <p style="color:var(--muted);margin-top:4px;">白皮书中的预测 → 实际测量 → 记录偏差</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 4: 当前基线 -->
+<div class="section">
+  <h2><span class="num">4</span> 当前基线 <span style="font-size:13px;color:var(--muted);font-weight:400;">2026-08-01 · 科学化前</span></h2>
+  <div class="baseline-grid">
+    <div class="baseline-item">
+      <div class="metric" style="color:#dc2626;">23.3%</div>
+      <div class="label">C benchmark F1 (v6) · 232 sequences</div>
+      <div class="bar-wrap"><div class="bar-fill bar-low" style="width:23.3%"></div></div>
+    </div>
+    <div class="baseline-item">
+      <div class="metric" style="color:#d97706;">~39%</div>
+      <div class="label">Cross-repo avg F1 (pre-VI)</div>
+      <div class="bar-wrap"><div class="bar-fill bar-mid" style="width:39%"></div></div>
+    </div>
+    <div class="baseline-item">
+      <div class="metric">109 / 71 / 17</div>
+      <div class="label">Rules · States · Namespaces</div>
+    </div>
+    <div class="baseline-item">
+      <div class="metric">~2,558</div>
+      <div class="label">Trajectories · ~9 sessions</div>
+    </div>
+    <div class="baseline-item">
+      <div class="metric">71%</div>
+      <div class="label">FP 根因：entity whitelist</div>
+    </div>
+    <div class="baseline-item">
+      <div class="metric" style="color:#16a34a;">43%</div>
+      <div class="label">VI FP 减少 (68/158 suppressed)</div>
+    </div>
+    <div class="baseline-item" style="grid-column: 1 / -1;">
+      <div class="metric" style="color:#dc2626;font-size:16px;">无</div>
+      <div class="label">覆盖度量化 — 这是 Phase 1 要解决的</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5: 下一步 -->
+<div class="section">
+  <h2><span class="num">5</span> 下一步</h2>
+  <table>
+    <tr>
+      <td style="width:50%;padding:20px;">
+        <div style="font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;">Phase 0 完成标志</div>
+        <div style="font-size:16px;font-weight:700;margin-top:4px;">此文档被 review 并确认标准合理</div>
+      </td>
+      <td style="padding:20px;">
+        <div style="font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;">Phase 1 启动标志</div>
+        <div style="font-size:16px;font-weight:700;margin-top:4px;">基于此标准，设计 Trajectory→Coverage 实验方案</div>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<div class="footer">
+  Progmune · <strong>Science of Verification</strong> · Phase 0 · 2026-08-01
+</div>
+
+</div>
+</body>
+</html>

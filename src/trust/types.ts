@@ -76,10 +76,32 @@ export interface TrustDecision {
     score: number;
     decision: TrustDecisionValue;
     confidence: ConfidenceLevel;
+    /** Phase 1: Coverage-based confidence (computed, not labeled) */
+    coverageConfidence?: {
+      score: number;
+      margin: number;
+      level: "HIGH" | "MEDIUM" | "LOW";
+      summary: string;
+    };
   };
 
   dimensions: TrustDimensions;
   violations: TrustViolation[];
+  /** Phase 3: Structured reasoning chains for each violation */
+  violationTraces?: Array<{
+    rule_id: string;
+    file: string;
+    function: string;
+    steps: Array<{
+      step: number;
+      label: string;
+      action: string;
+      preState: string;
+      explanation: string;
+    }>;
+    fixPath: string[];
+    estimatedReadingTimeMinutes: number;
+  }>;
   summary: SeveritySummary;
   auditTrail: AuditTrail;
 }

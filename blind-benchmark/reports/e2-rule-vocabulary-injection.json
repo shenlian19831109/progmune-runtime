@@ -1,0 +1,38 @@
+{
+  "experiment": "E2-rule-vocabulary-injection",
+  "date": "2026-08-01",
+  "hypothesis": "Rule vocabulary, not trajectory count, is the coverage bottleneck",
+  "method": "18 synthetic trajectories across auth/payment/session_mgmt/tls namespaces",
+  "before": {
+    "trajectories": 2567,
+    "coverage": "32/81 = 39.5%",
+    "covered_namespaces": 5,
+    "total_namespaces": 18
+  },
+  "after": {
+    "trajectories": 2585,
+    "coverage": "55/81 = 67.9%",
+    "covered_namespaces": 10,
+    "delta_transitions": 23,
+    "delta_percent": "+28.4%"
+  },
+  "cascade_effect": {
+    "targeted_transitions": 17,
+    "actual_gain": 23,
+    "cascade_transitions": 6,
+    "cascade_source": "registration (4) + printlab_order (2)",
+    "insight": "Trajectories for one namespace activate rules in connected namespaces via shared rule calls"
+  },
+  "remaining_gaps": {
+    "api_gateway": 1,
+    "data_integrity": 2,
+    "dev_pipeline": 4,
+    "file_upload": 4,
+    "notification": 2,
+    "printlab_order": 6,
+    "printlab_print": 2,
+    "resource": 2,
+    "supplier": 3
+  },
+  "conclusion": "18 synthetic trajectories achieved what 2,567 real trajectories could not. The two-factor model (rule_vocabulary \u00d7 trajectory_density) is validated. Coverage bottleneck is definitively rule vocabulary, not trajectory count."
+}

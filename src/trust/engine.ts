@@ -42,6 +42,9 @@ import {
   countViolationsBySeverity,
 } from "./score-calculator";
 import type { GovernanceDefect } from "./score-calculator";
+import { computeCoverageConfidence } from "./confidence-calculator";
+import type { CoverageConfidence } from "./confidence-calculator";
+import { buildViolationTraces, renderTraceSummary } from "./violation-trace";
 
 // ── Main Entry Point ──
 
@@ -100,6 +103,9 @@ export function evaluateTrust(ctx: TrustEvaluationContext): TrustDecision {
     explainResult.status
   );
 
+  // ── Phase 1: Coverage-based confidence (replaces qualitative labels) ──
+  const coverageConfidence: CoverageConfidence = computeCoverageConfidence(ctx.projectPath);
+
   const dimConfidences = [
     policyResult.hasCritical ? "LOW" as const : coverageResult.confidence,
     protocolResult.confidence,
@@ -112,6 +118,23 @@ export function evaluateTrust(ctx: TrustEvaluationContext): TrustDecision {
   // ═══════════════════════════════════════
   //  PHASE 5: ASSEMBLE
   // ═══════════════════════════════════════
+
+  // Build violation traces (Phase 3)
+  const traces = buildViolationTraces(allViolations);
+  const violationTraces = traces.map(t => ({
+    rule_id: t.violation.rule_id,
+    file: t.violation.file,
+    function: t.violation.function,
+    steps: t.steps.map(s => ({
+      step: s.step,
+      label: s.label,
+      action: s.action,
+      preState: s.preState,
+      explanation: s.explanation,
+    })),
+    fixPath: t.fixPath,
+    estimatedReadingTimeMinutes: t.estimatedReadingTimeMinutes,
+  }));
 
   const summary: SeveritySummary = countViolationsBySeverity(allViolations);
 
@@ -134,6 +157,12 @@ export function evaluateTrust(ctx: TrustEvaluationContext): TrustDecision {
       score: effectiveScore,
       decision,
       confidence,
+      coverageConfidence: {
+        score: coverageConfidence.score,
+        margin: coverageConfidence.margin,
+        level: coverageConfidence.level,
+        summary: coverageConfidence.summary,
+      },
     },
     dimensions: {
       policyCompliance: {
@@ -154,6 +183,7 @@ export function evaluateTrust(ctx: TrustEvaluationContext): TrustDecision {
       },
     },
     violations: allViolations,
+    violationTraces,
     summary,
     auditTrail,
   };

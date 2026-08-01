@@ -1,0 +1,272 @@
+{
+  "version": "3.2.0",
+  "updated": "2026-07-25T20:34:13.277011",
+  "capabilities": {
+    "v1_ai_provenance": {
+      "name": "AI Provenance",
+      "status": "mature",
+      "pct": 85,
+      "description": "Every AI code change is recorded, fingerprinted, and replayable",
+      "components": [
+        {
+          "name": "Session Ledger",
+          "status": "✅",
+          "detail": "70 rules across 17 namespaces"
+        },
+        {
+          "name": "Fingerprint Chain",
+          "status": "✅",
+          "detail": "Cryptographic hash chain per session"
+        },
+        {
+          "name": "Deterministic Replay",
+          "status": "✅",
+          "detail": "Full ledger replay with state verification"
+        },
+        {
+          "name": "Accountability Chain",
+          "status": "✅",
+          "detail": "Human/LLM/Validator/Reviewer/Deployer actors"
+        },
+        {
+          "name": "Failure Corpus",
+          "status": "✅",
+          "detail": "Trajectory recording with antibody learning"
+        },
+        {
+          "name": "Cross-repo Provenance",
+          "status": "⬜",
+          "detail": "Planned — multi-repo ledger sync"
+        }
+      ]
+    },
+    "v2_policy_governance": {
+      "name": "Policy Governance",
+      "status": "growing",
+      "pct": 55,
+      "description": "Business rules enforced during AI code generation",
+      "components": [
+        {
+          "name": "Protocol State Machine",
+          "status": "✅",
+          "detail": "109 rules, 17 namespaces, 71 states"
+        },
+        {
+          "name": "PLSB Taxonomy",
+          "status": "✅",
+          "detail": "13 CWE-aligned protocol weakness categories"
+        },
+        {
+          "name": "Policy Engine",
+          "status": "✅",
+          "detail": "8 deploy-gate rules with BLOCK/WARN/ALLOW"
+        },
+        {
+          "name": "Auth & Secrets",
+          "status": "✅",
+          "detail": "Password hashing, JWT, token lifecycle, session mgmt"
+        },
+        {
+          "name": "Payment Flow",
+          "status": "🆕",
+          "detail": "4 rules: initiate→callback→confirm→fail"
+        },
+        {
+          "name": "Order Lifecycle",
+          "status": "🆕",
+          "detail": "8 rules: upload→slice→gcode→cost→order→queue→print→ship"
+        },
+        {
+          "name": "File Upload",
+          "status": "🆕",
+          "detail": "4 rules: receive→validate→store→reference"
+        },
+        {
+          "name": "API Gateway",
+          "status": "🆕",
+          "detail": "3 rules: rate check→throttle→pass"
+        },
+        {
+          "name": "Notification",
+          "status": "🆕",
+          "detail": "3 rules: compose→send→confirm"
+        },
+        {
+          "name": "Registration",
+          "status": "🆕",
+          "detail": "4 rules: register→send code→verify→activate"
+        },
+        {
+          "name": "Supplier Mgmt",
+          "status": "🆕",
+          "detail": "4 rules: register→verify→enable→assign"
+        },
+        {
+          "name": "Enterprise Web Policies",
+          "status": "🔄",
+          "detail": "Planned: logging, monitoring, error handling, config, feature flags"
+        }
+      ]
+    },
+    "v3_session_governance": {
+      "name": "Session Governance",
+      "status": "growing",
+      "pct": 40,
+      "description": "AI code generation sessions are reviewed, approved, and traceable",
+      "components": [
+        {
+          "name": "Session Recording",
+          "status": "✅",
+          "detail": "Full trajectory: intent→plan→generate→validate→emit"
+        },
+        {
+          "name": "Governance Reports",
+          "status": "✅",
+          "detail": "4 formats: Terminal/JSON/Markdown/HTML"
+        },
+        {
+          "name": "Trust Assessment",
+          "status": "✅",
+          "detail": "Per-session trust scoring with evidence chain"
+        },
+        {
+          "name": "Human Approval Gate",
+          "status": "⬜",
+          "detail": "Planned — hold for review workflow"
+        },
+        {
+          "name": "Risk Labeling",
+          "status": "🔄",
+          "detail": "Growing — not yet embedded in session metadata"
+        },
+        {
+          "name": "Auto-block High Risk",
+          "status": "⬜",
+          "detail": "Planned — automatic blocking above threshold"
+        }
+      ]
+    },
+    "v4_release_governance": {
+      "name": "Release Governance",
+      "status": "growing",
+      "pct": 50,
+      "description": "Deployment decisions backed by governance evidence",
+      "components": [
+        {
+          "name": "Policy Deploy Gate",
+          "status": "✅",
+          "detail": "8-rule evaluation before merge"
+        },
+        {
+          "name": "CI/CD Integration",
+          "status": "✅",
+          "detail": "GitHub Action + progmune-ci CLI"
+        },
+        {
+          "name": "Certificate System",
+          "status": "✅",
+          "detail": "Per-file AI code certificate"
+        },
+        {
+          "name": "Trust Decision Engine",
+          "status": "✅",
+          "detail": "4-dimension scoring with confidence levels"
+        },
+        {
+          "name": "Deployment Approval",
+          "status": "⬜",
+          "detail": "Planned — human-in-the-loop release sign-off"
+        },
+        {
+          "name": "Rollback Automation",
+          "status": "⬜",
+          "detail": "Planned — automated rollback on violation detection"
+        }
+      ]
+    },
+    "v5_organization_governance": {
+      "name": "Organization Governance",
+      "status": "planned",
+      "pct": 25,
+      "description": "Multi-agent, multi-team AI workforce governance",
+      "components": [
+        {
+          "name": "Enterprise Dashboard",
+          "status": "✅",
+          "detail": "Per-domain coverage with CISO summary"
+        },
+        {
+          "name": "Governance Dashboard",
+          "status": "✅",
+          "detail": "Web server on port 3200 with JSON API"
+        },
+        {
+          "name": "Multi-agent Tracking",
+          "status": "⬜",
+          "detail": "Planned — per-AI-agent analytics"
+        },
+        {
+          "name": "Team Trust Trends",
+          "status": "⬜",
+          "detail": "Planned — per-team governance health"
+        },
+        {
+          "name": "Cross-project Rollup",
+          "status": "⬜",
+          "detail": "Planned — enterprise across N repos"
+        },
+        {
+          "name": "Compliance Reports",
+          "status": "⬜",
+          "detail": "Planned — SOC2/ISO27001 auto-generation"
+        }
+      ]
+    },
+    "v6_governance_intelligence": {
+      "name": "Governance Intelligence",
+      "status": "research",
+      "pct": 30,
+      "description": "Predictive analytics, anomaly detection, knowledge flywheel",
+      "components": [
+        {
+          "name": "Antibody System",
+          "status": "✅",
+          "detail": "ACL-4 pattern learning from failures"
+        },
+        {
+          "name": "Knowledge Evolution",
+          "status": "✅",
+          "detail": "4-step: scan→propose→changelog→merge"
+        },
+        {
+          "name": "Counterfactual Engine",
+          "status": "✅",
+          "detail": "Top-3 repair candidates with ranking"
+        },
+        {
+          "name": "Predictive Analytics",
+          "status": "⬜",
+          "detail": "Planned — forecast violation risk"
+        },
+        {
+          "name": "Causal Inference",
+          "status": "⬜",
+          "detail": "Planned — root cause analysis"
+        },
+        {
+          "name": "Continuous Learning",
+          "status": "🔄",
+          "detail": "Growing — logistic reward model, learning ranker"
+        }
+      ]
+    }
+  },
+  "summary": {
+    "total_dimensions": 6,
+    "overall_pct": 48,
+    "mature": 1,
+    "growing": 3,
+    "planned": 1,
+    "research": 1
+  }
+}

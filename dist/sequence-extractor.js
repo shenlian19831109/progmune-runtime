@@ -37,6 +37,21 @@ exports.extractSequences = extractSequences;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const child_process_1 = require("child_process");
+// Python stdlib and built-in names to exclude from call sequences
+const PYTHON_EXCLUDED = new Set([
+    'if', 'for', 'while', 'return', 'print', 'assert', 'raise', 'lambda',
+    'len', 'str', 'int', 'float', 'bool', 'list', 'dict', 'tuple', 'set',
+    'range', 'enumerate', 'zip', 'map', 'filter', 'sorted', 'reversed',
+    'min', 'max', 'sum', 'abs', 'round', 'type', 'isinstance', 'issubclass',
+    'hasattr', 'getattr', 'setattr', 'delattr',
+    'open', 'close', 'read', 'write', 'super',
+    'hexdigest', 'encode', 'decode', 'upper', 'lower', 'strip', 'split',
+    'append', 'extend', 'pop', 'remove', 'insert', 'index', 'count', 'sort', 'reverse',
+    'keys', 'values', 'items', 'get', 'update', 'popitem',
+    'format', 'join', 'replace', 'find', 'startswith', 'endswith',
+    'def', 'class', 'pass', 'del', 'self', 'cls',
+    'None', 'True', 'False', 'Ellipsis', 'NotImplemented',
+]);
 function extractSequences(repoPath, options = {}) {
     const { include = /\.(c|h|ts|js|py)$/, exclude = /(test|vendor|node_modules|build|dist|\.git|__pycache__)/, maxBodyLines = 200 } = options;
     if (options.useCflow && isCProject(repoPath)) {
@@ -159,6 +174,11 @@ function extractFromCFile(filePath, maxBodyLines) {
                                 calls.push(called);
                             }
                         }
+                        // Capture goto targets as synthetic calls (goto cleanup → "goto_cleanup")
+                        const gotoMatches = currentLine.matchAll(/\bgoto\s+([a-zA-Z_][a-zA-Z0-9_]*)\b/g);
+                        for (const gm of gotoMatches) {
+                            calls.push(`goto_${gm[1]}`);
+                        }
                     }
                 }
                 i++;
@@ -247,6 +267,18 @@ function extractFromPythonFile(filePath, maxBodyLines) {
             let indentLevel = 0;
             const calls = [];
             i++;
+            // Extract decorators above the function definition
+            for (let j = startLine - 1; j >= 0; j--) {
+                const decLine = lines[j].trim();
+                if (decLine.startsWith('@')) {
+                    const decMatch = decLine.match(/^@(\w+(?:\.\w+)*)/);
+                    if (decMatch)
+                        calls.push(`@${decMatch[1]}`);
+                }
+                else if (decLine !== '') {
+                    break; // stop at first non-decorator, non-blank line
+                }
+            }
             // 找到函数体的缩进级别
             const indentMatch = lines[i].match(/^(\s*)/);
             if (indentMatch) {
@@ -263,7 +295,7 @@ function extractFromPythonFile(filePath, maxBodyLines) {
                 const callMatches = currentLine.matchAll(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/g);
                 for (const cm of callMatches) {
                     const called = cm[1];
-                    if (!['if', 'for', 'while', 'return', 'print', 'assert', 'raise', 'lambda'].includes(called)) {
+                    if (!PYTHON_EXCLUDED.has(called)) {
                         calls.push(called);
                     }
                 }

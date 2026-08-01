@@ -27,7 +27,7 @@ function severityEmoji(s) {
     return "⚪";
 }
 function formatAsMarkdown(report) {
-    const { metadata, sessions, ssv, plsb, provenance, antibodies, verdict, recommendations } = report;
+    const { metadata, sessions, ssv, plsb, provenance, antibodies, verdict, recommendations, business } = report;
     const lines = [];
     // ── Title ──
     lines.push("# AI Code Governance Report");
@@ -116,6 +116,56 @@ function formatAsMarkdown(report) {
             lines.push(`| \`${d.sessionId.slice(0, 20)}...\` | ${d.intent.slice(0, 30)} | ${d.transitionCount} | ${d.validTransitions} | ${v} | ${c} |`);
         }
         lines.push("");
+    }
+    // ── Business Translation (Trust Report) ──
+    if (business) {
+        const biz = business;
+        lines.push("## Governance Summary");
+        lines.push("");
+        lines.push("### Protected Against");
+        lines.push("");
+        lines.push(`- ✅ **${biz.summary.totalRisksMitigated}** risk categories mitigated`);
+        lines.push(`- ✅ **${biz.summary.knowledgeDomainsCovered}** business knowledge domains covered`);
+        lines.push(`- ✅ **${biz.summary.businessProtocolsIntact}** business protocol edges verified`);
+        lines.push("");
+        // Risk Protection
+        lines.push("### Risk Protection");
+        lines.push("");
+        lines.push("| Category | Status | Description | Protocols | Violations Prevented |");
+        lines.push("|----------|--------|-------------|-----------|---------------------|");
+        for (const r of biz.risks) {
+            const icon = r.status === "protected" ? "🟢" : r.status === "partial" ? "🟡" : "🔴";
+            const statusLabel = r.status === "protected" ? "Protected" : r.status === "partial" ? "Partial" : "Exposed";
+            lines.push(`| ${icon} ${r.category} | ${statusLabel} | ${r.description} | ${r.protocolsCovered} | ${r.violationsPrevented} |`);
+        }
+        lines.push("");
+        // Knowledge Coverage
+        lines.push("### Knowledge Coverage");
+        lines.push("");
+        lines.push("| Domain | Coverage | Protocols | Entities |");
+        lines.push("|--------|----------|-----------|----------|");
+        for (const k of biz.knowledgeCoverage) {
+            const icon = k.coverage === "full" ? "🟢" : k.coverage === "partial" ? "🟡" : "🔴";
+            const label = k.coverage === "full" ? "Full" : k.coverage === "partial" ? "Partial" : "None";
+            const entities = k.entities?.join(", ") || "—";
+            lines.push(`| ${icon} ${k.domain} | ${label} | ${k.protocols.join(", ") || "—"} | ${entities} |`);
+        }
+        lines.push("");
+        // Protocol Graph
+        if (biz.protocolGraph.length > 0) {
+            lines.push("### Business Protocol Graph");
+            lines.push("");
+            lines.push(`All **${biz.summary.businessProtocolsIntact}** edges verified — no AI-generated code violated business protocol edges.`);
+            lines.push("");
+            lines.push("| From | To | Label | Verified |");
+            lines.push("|------|----|-------|----------|");
+            for (const e of biz.protocolGraph.slice(0, 15)) {
+                const check = e.verified ? "✅" : "❌";
+                const desc = e.description ? ` (${e.description})` : "";
+                lines.push(`| ${e.from} | ${e.to} | ${e.label}${desc} | ${check} |`);
+            }
+            lines.push("");
+        }
     }
     // ── Recommendations ──
     if (recommendations.length > 0) {

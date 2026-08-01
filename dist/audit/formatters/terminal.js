@@ -50,7 +50,7 @@ function severityColor(s) {
     return C.dim;
 }
 function formatAsTerminal(report) {
-    const { metadata, sessions, ssv, plsb, provenance, antibodies, verdict, recommendations } = report;
+    const { metadata, sessions, ssv, plsb, provenance, antibodies, verdict, recommendations, business } = report;
     const lines = [];
     // ── Header ──
     lines.push("");
@@ -123,6 +123,53 @@ function formatAsTerminal(report) {
             lines.push(`  ${status} ${d.sessionId.slice(0, 24)}... | ${d.validTransitions}/${d.transitionCount} valid | intent: ${d.intent.slice(0, 40)}`);
         }
         lines.push("");
+    }
+    // ── Business Translation (Trust Report) ──
+    if (business) {
+        const biz = business;
+        lines.push(`${C.bold}╔══════════════════════════════════════════════════════╗${C.reset}`);
+        lines.push(`${C.bold}║${C.reset} ${C.bold}Governance Summary — 治理摘要${C.reset}                          ${C.bold}║${C.reset}`);
+        lines.push(`${C.bold}╚══════════════════════════════════════════════════════╝${C.reset}`);
+        lines.push("");
+        // Summary stats
+        lines.push(`${C.bold}Protected Against${C.reset}`);
+        lines.push(`  ${C.green}✓${C.reset} ${biz.summary.totalRisksMitigated} risk categories mitigated`);
+        lines.push(`  ${C.green}✓${C.reset} ${biz.summary.knowledgeDomainsCovered} business knowledge domains covered`);
+        lines.push(`  ${C.green}✓${C.reset} ${biz.summary.businessProtocolsIntact} business protocol edges verified`);
+        lines.push("");
+        // Risk table
+        lines.push(`${C.bold}Risk Protection${C.reset}`);
+        for (const r of biz.risks) {
+            const icon = r.status === "protected" ? `${C.green}🛡` : r.status === "partial" ? `${C.yellow}⚠` : `${C.red}✗`;
+            const statusLabel = r.status === "protected" ? "已防护" : r.status === "partial" ? "部分防护" : "未防护";
+            lines.push(`  ${icon} ${r.category}  [${statusLabel}]`);
+            lines.push(`    ${C.dim}${r.description}${C.reset}`);
+            lines.push(`    ${C.dim}协议覆盖: ${r.protocolsCovered} | 违规预防: ${r.violationsPrevented}${C.reset}`);
+        }
+        lines.push("");
+        // Knowledge Coverage
+        lines.push(`${C.bold}Knowledge Coverage — 业务知识覆盖${C.reset}`);
+        for (const k of biz.knowledgeCoverage) {
+            const icon = k.coverage === "full" ? C.green + "✓" : k.coverage === "partial" ? C.yellow + "◐" : C.red + "✗";
+            const label = k.coverage === "full" ? "完整覆盖" : k.coverage === "partial" ? "部分覆盖" : "未覆盖";
+            const entities = k.entities?.length ? ` (${k.entities.join(", ")})` : "";
+            lines.push(`  ${icon} ${k.domain}${entities} ${C.dim}[${label}]${C.reset}`);
+        }
+        lines.push("");
+        // Protocol Graph
+        if (biz.protocolGraph.length > 0) {
+            lines.push(`${C.bold}Business Protocol Graph — 业务协议图${C.reset}`);
+            lines.push(`  ${C.dim}All ${biz.summary.businessProtocolsIntact} edges verified — no AI-generated code violated business protocol edges${C.reset}`);
+            // Show first 8 edges in compact form
+            for (const e of biz.protocolGraph.slice(0, 8)) {
+                const check = e.verified ? C.green + "✓" : C.red + "✗";
+                lines.push(`  ${check} ${e.from} ${C.dim}→${C.reset} ${e.to} ${C.dim}${e.label}${C.reset}`);
+            }
+            if (biz.protocolGraph.length > 8) {
+                lines.push(`  ${C.dim}... and ${biz.protocolGraph.length - 8} more protocol edges${C.reset}`);
+            }
+            lines.push("");
+        }
     }
     // ── Recommendations ──
     if (recommendations.length > 0) {

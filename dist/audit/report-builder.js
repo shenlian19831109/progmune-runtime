@@ -52,6 +52,7 @@ function buildGovernanceReport(projectPath, options = {}) {
     const plsb = options.fast ? emptyPLSB() : buildPLSBFromBenchmark();
     const provenance = buildProvenance();
     const antibodies = buildAntibodies();
+    const business = buildBusinessSection(plsb, sessions, projectPath, options);
     const recommendations = generateRecommendations(sessions, ssv, provenance, plsb);
     const verdict = computeVerdict(sessions, ssv, provenance, recommendations);
     return {
@@ -63,6 +64,7 @@ function buildGovernanceReport(projectPath, options = {}) {
         antibodies,
         verdict,
         recommendations,
+        business, // Phase 10: Business Translation
     };
 }
 // ── Metadata ──
@@ -228,6 +230,32 @@ function buildAntibodies() {
             totalHits: 0, fastPathHits: 0, llmCallsSaved: 0, tokensSaved: 0,
             topSignatures: [], byLevel: {},
         };
+    }
+}
+// ── Business Translation (Phase 10) ──
+function buildBusinessSection(plsb, sessions, _projectPath, options) {
+    if (options.business === false)
+        return undefined;
+    try {
+        const { translateToBusinessRisks, getKnowledgeCoverage, getProtocolGraph, buildBusinessSummary, detectProjectType } = require("./business-translator");
+        // Auto-detect project type for domain-specific knowledge
+        const detectedType = detectProjectType(_projectPath);
+        const violationsByCategory = {};
+        for (const d of sessions.details) {
+            if (d.violations > 0) {
+                // Categorize violations (simplified)
+                violationsByCategory["认证与授权"] = (violationsByCategory["认证与授权"] || 0) + d.violations;
+            }
+        }
+        const risks = translateToBusinessRisks(plsb.matchedCategories, plsb.unmatchedCategories, violationsByCategory);
+        const knowledge = getKnowledgeCoverage(detectedType);
+        const protocolGraph = getProtocolGraph(detectedType);
+        const summary = buildBusinessSummary(risks, knowledge, violationsByCategory, detectedType);
+        return { risks, knowledgeCoverage: knowledge, protocolGraph, summary };
+    }
+    catch (e) {
+        // Best-effort: if business translator fails, skip the section
+        return undefined;
     }
 }
 // ── Recommendations ──

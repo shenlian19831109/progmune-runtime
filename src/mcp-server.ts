@@ -279,7 +279,7 @@ async function main() {
       {
         name: "progmune_trust_check",
         description:
-          "Run the AI Trust Decision Engine on a project. Returns a weighted Trust Score (0-100) with APPROVED/NEEDS_REVIEW/BLOCKED decision, Confidence level (HIGH/MEDIUM/LOW/UNCERTAIN), and complete evidence trail. This is the primary CI/CD gating tool — use it to decide whether AI-generated code is safe to deploy. Dimensions: Policy Compliance (35%), Protocol Safety (30%), Verification Coverage (20%), Governance Integrity (15%). Critical violations auto-BLOCK.",
+          "Run the AI Trust Decision Engine on a project. Returns a weighted Trust Score (0-100) with APPROVED/NEEDS_REVIEW/BLOCKED decision, Coverage Confidence (quantified % with ±margin, replacing qualitative HIGH/MEDIUM/LOW labels), Violation Traces (step-by-step protocol state reasoning chains with expected vs actual state comparisons), and complete evidence trail. This is the primary CI/CD gating tool — use it to decide whether AI-generated code is safe to deploy. Dimensions: Policy Compliance (35%), Protocol Safety (30%), Verification Coverage (20%), Governance Integrity (15%). Critical violations auto-BLOCK. Use --json for machine-readable output with coverageConfidence and violationTraces fields.",
         inputSchema: {
           type: "object",
           properties: {
