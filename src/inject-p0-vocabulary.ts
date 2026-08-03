@@ -298,13 +298,13 @@ function estimateCoverageDelta(): { payment: number; session_mgmt: number; regis
   const current = 22;  // from round 1 verification
   const total = 90;
 
-  const deltas: Record<string, number> = {
+  const deltas = {
     payment: 10,
     session_mgmt: 11,
     registration: 4,
     file_upload: 4,
     resource: 2,
-  };
+  } as const;
 
   const totalNew = Object.values(deltas).reduce((a, b) => a + b, 0);
   const newCovered = current + totalNew;

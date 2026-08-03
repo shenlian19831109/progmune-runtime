@@ -82,7 +82,7 @@ function main() {
 
     // Filter noise domains for display
     const significantSteps = semantic.steps.filter(
-      s => s.domain !== "util" && s.domain !== "mem_util" && s.domain !== "str_util"
+      (s: { domain: string; api: string; source: string }) => s.domain !== "util" && s.domain !== "mem_util" && s.domain !== "str_util"
     );
 
     const validation = validateSemanticSequence(semantic);
@@ -120,7 +120,7 @@ function main() {
       const semantic = mapSequenceToSemantic(fp.calls);
       const validation = validateSemanticSequence(semantic);
       console.log(`  idx=${fp.index}: ${validation.reason}`);
-      const domains = [...new Set(semantic.steps.map(s => s.domain))];
+      const domains = [...new Set(semantic.steps.map((s: { domain: string; api: string; source: string }) => s.domain))];
       console.log(`    domains: ${domains.join(", ")}`);
       console.log(`    primary: ${semantic.primaryDomain}`);
     }
