@@ -48,3 +48,10 @@ blind-benchmark/reports/batch-scan-results.json
 blind-benchmark/reports/asset-coverage-matrix.json
 blind-benchmark/reports/capability-gap-analysis.json
 pnpm-lock.yaml
+# Generated runtime artifacts
+test-active-learning/
+test-continuous-benchmark/
+test-coverage-gen/
+test-reward-system/reward_dataset/
+benchmarks/synthesized/
+benchmarks/reports/benchmark-inventory-*
