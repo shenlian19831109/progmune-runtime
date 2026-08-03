@@ -1,15 +1,15 @@
 # Progmune
 
-## The Verification Runtime for AI-generated software.
+## AI Trust Decision Engine for AI-generated software.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-blue)](https://modelcontextprotocol.io)
-[![Precision](https://img.shields.io/badge/Precision-curl%2036%25%20F1-fbbf24)]()
+[![TS Benchmark](https://img.shields.io/badge/TS%20F1-85.2%25-22c55e)]()
 [![Tests](https://img.shields.io/badge/Tests-92%20passing-22c55e)]()
 
-**Verify AI-generated software before production.** Detect protocol violations. Certify AI code. Enforce governance. Every new codebase makes every verification stronger.
+**Verify AI-generated code before it reaches production.** Progmune checks whether your AI-generated code follows correct protocol lifecycles — TLS handshakes, auth flows, payment integrity, resource management — violations that SAST and SCA tools cannot see because they span sequences of function calls, not single statements.
 
-Progmune does not trust what the model says — it verifies what the program actually does.
+Progmune doesn't trust what the model says. It verifies what the program actually does.
 
 ---
 
@@ -19,25 +19,21 @@ Progmune does not trust what the model says — it verifies what the program act
 npm run sdk src/server.ts --explain
 ```
 
-Output: `BLOCK` / `WARN` / `ALLOW` — with evidence, RFC references, and repair suggestions.
+Output: `APPROVED` / `NEEDS_REVIEW` / `BLOCKED` — with Trust Score, evidence, and repair suggestions.
 
 ---
 
-## The Runtime Pipeline
+## What Progmune Detects
 
-```
-Source Code → Extract IR → Verify → Explain → Repair → Validate → BLOCK/WARN/ALLOW
-```
+AI code generators produce syntactically valid code that often violates **protocol lifecycles** — the correct sequence of operations like open→read→close or auth→validate→respond. These violations are invisible to traditional static analysis.
 
-Progmune is not a scanner. It is a **Runtime** — it answers not just "what's wrong?" but "what should we do about it?"
-
-| Capability | What it does |
-|-----------|-------------|
-| **Verify** | Protocol state machine validation against RFCs |
-| **Explain** | Human-readable violation report with evidence chains |
-| **Repair** | Automatic fix generation + verification + rollback |
-| **Certify** | Ontology-backed AI Code Certificate (audit-ready) |
-| **Govern** | CI/CD deploy gate — blocks unverified AI code |
+| Category | Example violations detected |
+|----------|---------------------------|
+| **TLS / SSL** | Handshake without certificate verification, missing hostname validation |
+| **Auth** | Token without expiry, session without timeout, missing rate limiting |
+| **Payment** | Order without verification, refund without authorization, webhook without signature check |
+| **Resource** | File opened but not closed, connection without cleanup, malloc without free |
+| **Data Integrity** | Mutation without audit trail, missing input validation |
 
 ---
 
@@ -46,14 +42,14 @@ Progmune is not a scanner. It is a **Runtime** — it answers not just "what's w
 ```bash
 npm install progmune-runtime
 
-# Verify a file
+# Verify a file — get a Trust Decision
 npm run sdk src/server.ts
 
-# Full explanation with repair suggestions
+# Full explanation with evidence and repair suggestions
 npm run sdk src/server.ts --explain
 
-# Governance dashboard
-npm run dashboard
+# Trust check (CI-ready JSON output)
+npm run trust -- --project . --json
 
 # Run benchmark suite
 npm run precision:all
@@ -61,90 +57,126 @@ npm run precision:all
 
 ---
 
-## Architecture
+## The Trust Decision
 
-```
-SDK:         verify("./server.ts") → BLOCK / WARN / ALLOW
-               ↑
-Runtime:       verify() | explain() | repair() | validate()
-               ↑
-Governance:    Policy Engine | Certificate | CI/CD Gate
-               ↑
-Verification:  SSG State Machine | Protocol Rules | Risk Model
-               ↑
-Knowledge:     Units | Ontology | Evolution | Evidence
-               ↑
-Intelligence:  FP Learning | Confidence Calibration | Decision Engine
-```
+Progmune's output is a **decision** backed by evidence, not a raw list of findings:
+
+| Output | Meaning |
+|--------|---------|
+| **Trust Score** (0–100) | Quantified trust level across 4 dimensions |
+| **Decision** | `APPROVED` / `NEEDS_REVIEW` / `BLOCKED` |
+| **Confidence** | `HIGH` / `MEDIUM` / `LOW` / `UNCERTAIN` |
+| **Evidence** | Each violation traced to code location + RFC reference + fix suggestion |
+
+**Critical violations → hard BLOCK regardless of score.** Enterprises care about "can I deploy?" not "is my score 58 or 61."
+
+→ [Trust Decision Model](docs/ai-trust-decision-model-v1.md)
+
+---
+
+## Coverage
+
+Progmune is honest about what it can and cannot verify.
+
+| Language | Status | Evidence |
+|----------|--------|----------|
+| **TypeScript / JavaScript** | ✅ Production | Blind benchmark: P=86.8%, R=83.6%, F1=85.2% (432 sequences, 10 projects) |
+| **C** | ⚠️ Research | Gold benchmark: curl F1=45.7%, libssh F1=46.2%. L3 cross-function experiment terminated — L4 (pointer/CFG) needed. |
+| **Python** | 🔨 IR only | IR extractor exists (`extract-ir-python.ts`), no verification rules yet |
+| **Go, Java** | ❌ None | Planned |
+
+**Framework adapters: 0/13.** Express, Next.js, NestJS, Fastify, Django, FastAPI — none have dedicated adapters yet. Rules use generic `\w*` prefix patterns. Framework adaptation is the #1 product gap.
+
+→ [Full Coverage Matrix](docs/coverage-matrix.md)
 
 ---
 
 ## Benchmarks
 
-Public, reproducible precision data across repositories:
+Public, reproducible precision data. All numbers measured against gold-annotated benchmarks.
+
+### TypeScript (Blind Benchmark v6)
+
+| Metric | Value |
+|--------|-------|
+| Precision | 86.8% |
+| Recall | 83.6% |
+| F1 | 85.2% |
+| Projects | 10 (ecommerce, blog, chat, crm, forum, wiki, issuetracker, filestorage, todo, scheduler) |
+
+### C (Gold Benchmark v7)
 
 | Repo | Precision | Recall | F1 | Samples |
 |------|-----------|--------|-----|---------|
-| curl | 23% | 75% | 36% | 85 |
-| libssh | 27% | 86% | 41% | 47 |
-| nginx | — | — | — | 50 |
-| redis | — | — | — | 50 |
+| curl | 30.9% | 87.5% | 45.7% | 85 |
+| libssh | 36.0% | 64.3% | 46.2% | 47 |
+| nginx | — | — | 0 FP | 50 |
+| redis | — | — | 0 FP | 50 |
 
-**[Full Benchmark Report →](benchmarks/reports/cross-repo-precision-latest.json)**
+### P0-P3 Rule Injection (2026-08)
 
----
+- **+19 new detections** across 10 TS projects, **0 false positives** across 6 C repos + PostgreSQL
+- Bootstrapping deadlock broken: all 21 protocol namespaces now have rule vocabulary
+- `excludePatterns` + `languages` architecture for FP management
 
-## Knowledge Base
-
-Deep, not broad. Each knowledge unit is RFC-backed, multi-repo validated, and continuously evolving.
-
-| Domain | Unit | Confidence | Validated On | RFC |
-|--------|------|------------|-------------|-----|
-| TLS | Handshake v1.0.0 | 85% | curl, nginx | 8446 |
-| SSH | Connection v1.0.0 | 78% | curl, libssh | 4253 |
-| HTTP | Request v1.0.0 | 80% | nginx, Apache | 9110 |
-| HTTP/2 | Session v0.8.0 | 68% | nghttp2 | 9113 |
+→ [Two-Hump Report](docs/two-hump-report.md) · [P0-P3 Final Report](docs/p0-p3-final-report.md)
 
 ---
 
-## Verification Intelligence
-
-The engine learns from every false positive. Rules that produce too many false alarms are automatically suppressed. Confidence is calibrated by evidence, not hardcoded.
+## Architecture
 
 ```
-Alert → FP detected → Classify reason → Adjust confidence → Better decisions
+SDK (src/sdk.ts)           verify() → APPROVED / NEEDS_REVIEW / BLOCKED
+  └─ Trust Engine           4-dimension scoring → Decision
+       ├─ Policy Engine     Enterprise policy enforcement (ALLOW/WARN/BLOCK)
+       ├─ SSG Validator     Protocol state machine verification
+       ├─ Protocol Detector  Regex-based protocol step detection (22 detectors)
+       ├─ IR Extractor      TypeScript AST → function IR (ts-morph)
+       ├─ Repair Executor   detect → plan → fix → validate → commit/rollback
+       └─ Knowledge Base    31 domains, 140 rules, evidence chains
 ```
 
-**Real impact on benchmark data:**
+### Interfaces
 
-| Repo | Before F1 | After VI | FP Reduction | Rules Suppressed |
-|------|-----------|----------|-------------|-----------------|
-| curl | 36% | **49%** | 47% (28/59) | 9 |
-| libssh | 41% | **53%** | 41% (13/32) | 5 |
-| nginx | — | — | 23% (5/22) | 2 |
-| redis | — | — | 49% (22/45) | 6 |
-| **Combined** | | | **43%** (68/158) | **22** |
-
-FP root cause: rule explosion — 452 SSG rules from 61 clean sequences (curl). VI suppresses the noisiest 22.
+| Interface | Purpose |
+|-----------|---------|
+| **SDK** (`verify()`) | One-call API for developers |
+| **CLI** (`npm run trust`) | Command-line trust checks |
+| **MCP Server** | Claude Code integration (`progmune_check`, `progmune_trust_check`) |
+| **GitHub Action** | CI/CD gate — blocks unverified AI code at PR |
+| **Trust API** | `POST /trust/check` — machine-to-machine |
 
 ---
 
-## Why "Progmune"?
+## Scientific Foundation
 
-The verification engine draws inspiration from program immunology — distinguishing "self" (correct code) from "non-self" (protocol violations) — but the product is a **verification runtime**, not an immunology metaphor.
+Progmune is built on the premise that **LLM outputs are statistical performances, not reasoning** (Kambhampati et al., ICML 2026). Rather than trusting what the model says about code, Progmune verifies what the program actually does — using protocol state machines, IR extraction, and evidence-backed decision chains.
 
-For the academic foundation, see the [Whitepaper →](WHITEPAPER.md).
+Recent work applies Sergei Gukov's "Two-Hump Problem" framework to understand and systematically close detection capability gaps.
+
+→ [Whitepaper](WHITEPAPER.md) · [Positioning](POSITIONING.md)
+
+---
+
+## Contributing
+
+See [CLAUDE.md](CLAUDE.md) for architecture and code conventions, and [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow.
+
+High-impact contribution areas:
+- **Framework adapters** (Express, Next.js, FastAPI) — the #1 product gap
+- **Python verification rules** — extend beyond TypeScript
+- **Bug fixes** for existing detectors and safeguards
 
 ---
 
 ## Status
 
 - **Runtime Pipeline:** Detect → Explain → Repair → Validate (L1–L4)
+- **Trust Engine:** 4-dimension scoring with binary explainability gate
 - **Tests:** 92 passing
-- **Repair simulation:** 100% (standard violations)
-- **Cross-repo benchmark:** 4 repos measured
-- **Knowledge:** 10 units, 3 stable, 7 repos validated
-- **Current focus:** FP reduction (97% → 40%) via Verification Intelligence
+- **Knowledge Base:** 31 domains, 140 protocol rules, 22 detectors, 26 safeguards
+- **Corpus:** 2,500+ trajectories across 6+ repositories
+- **Current focus:** Framework adaptation + enterprise PoC validation
 
 ---
 
