@@ -4,13 +4,10 @@ test-xlarge/
 test-large/
 .env
 .test_report/
+.brainycode_memory/
 failure_corpus/
 immune_hub_data/
 .DS_Store
-.progmune_corpus/trajectories/
-.progmune_corpus/failures/
-.progmune_corpus/antibodies/
-.progmune_corpus/.seq
 # Internal documents (not for public repo)
 docs/Progmune_Runtime_内部技术白皮书*
 docs/Progmune_Runtime_技术白皮书*
