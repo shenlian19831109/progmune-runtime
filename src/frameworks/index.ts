@@ -28,3 +28,17 @@ export type {
   ExpressAppAnalysis,
   ExpressSecurityIssue,
 } from "./express-detector";
+
+// ── Framework Version-Aware Governance ──
+
+export {
+  detectFrameworks,
+  checkFrameworkConventions,
+  checkFileRename,
+  generateVersionAwarenessReport,
+} from "./version-awareness";
+
+export type {
+  FrameworkInfo,
+  ConventionCheck,
+} from "./version-awareness";

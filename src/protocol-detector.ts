@@ -739,6 +739,27 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     conceptMissing: ["AuditTrail", "ChangeTracking", "DataLineage"],
     conceptExpected: ["auditLog", "changeHistory", "write-ahead log"],
   },
+  // ═══════════════════════════════════════════════════════════════
+  // Governance meta-rule: Framework Version Convention Check
+  // Lesson from proxy.ts incident (2026-08-03)
+  // ═══════════════════════════════════════════════════════════════
+  {
+    name: "Framework Convention Override (Anti-Pattern)",
+    category: "governance",
+    languages: ["typescript", "javascript"],
+    trigger: /\b(middleware\.ts|middleware\.js|proxy\.ts|proxy\.js)\b/i,
+    safeguards: [
+      { pattern: /\b(next@|next\s+16|next\s+17|next\s+18)\b/i, label: "next_version_check" },
+    ],
+    violationMessage:
+      "Framework convention file detected without version verification. " +
+      "If this project uses Next.js 16+, 'proxy.ts' is the correct convention (not 'middleware.ts'). " +
+      "Do not rename framework-generated files based on training data defaults. " +
+      "Check node_modules/<framework>/dist/docs/ for the current version's conventions. " +
+      "See: docs/proxy-ts-lesson.md",
+    conceptMissing: ["FrameworkVersionAwareness", "ConventionVerification"],
+    conceptExpected: ["version-specific convention", "framework docs check"],
+  },
 ];
 
 // ── Safeguard Detection ──
