@@ -1,11 +1,26 @@
 /**
- * L3 Cross-Function Resource Lifecycle Analysis
+ * ═══════════════════════════════════════════════════════════════
+ * ARCHIVED — L3 Cross-Function Resource Lifecycle Analysis
+ * ═══════════════════════════════════════════════════════════════
  *
- * Same-file alloc/free pairing check.
- * For each function that calls an allocator,
- * verifies there exists a call-graph path to a function that calls
- * the corresponding deallocator.
+ * Status: TERMINATED (2026-08-03, Two-Hump Report)
  *
+ * Same-file alloc/free pairing check via BFS call-graph traversal.
+ * Analyzed full curl source (4,050 functions) and found only 5 actionable
+ * violations out of 11 total. Mechanism is viable but yield is too low
+ * to justify as a standalone feature.
+ *
+ * Root cause: C function pointer dispatch (ossl_close via cf->close_one())
+ * makes most resource management patterns statically invisible without
+ * L4-level pointer/CFG analysis.
+ *
+ * Decision: Do NOT invest further in L3 cross-function analysis.
+ * Archived to src/experimental/ for reference. L4 is the real bottleneck
+ * for C — and L4 is a multi-year research problem, not an engineering one.
+ *
+ * See: docs/two-hump-report.md §7
+ *
+ * Original header:
  * Phase 1: Experimental — curl openssl.c + redis server.c
  */
 
