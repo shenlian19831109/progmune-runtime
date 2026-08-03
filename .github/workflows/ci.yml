@@ -8,26 +8,34 @@ on:
 
 jobs:
   typecheck:
-    name: Type Check
+    name: Type Check (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ matrix.node-version }}
           cache: "npm"
       - run: npm ci
       - run: npx tsc --noEmit -p tsconfig.json
 
   unittest:
-    name: Unit Tests
+    name: Unit Tests (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ matrix.node-version }}
           cache: "npm"
       - run: npm ci
       - run: npx vitest run --exclude '**/stress/**' --exclude '**/soak/**' --exclude '**/chaos/**' --retry=2 --reporter=verbose > vitest-output.txt 2>&1
@@ -35,17 +43,21 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: vitest-output
+          name: vitest-output-node-${{ matrix.node-version }}
           path: vitest-output.txt
 
   build:
-    name: Build
+    name: Build (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ matrix.node-version }}
           cache: "npm"
       - run: npm ci
       - run: npm run build
