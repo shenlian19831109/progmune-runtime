@@ -72,6 +72,12 @@ const AUTH_MIDDLEWARE_PATTERNS = [
   /\bcheckAuth\b/,
   /\bprotect\b/,
   /\bauthenticateRequest\b/,
+  // Variable references — common Express convention (e.g., const auth = passport.authenticate(...))
+  // These are standalone identifiers in middleware position
+  /^auth$/i,
+  /^authMw$/i,
+  /^jwtAuth$/i,
+  /^tokenAuth$/i,
 ];
 
 const RATE_LIMIT_MIDDLEWARE_PATTERNS = [
@@ -80,6 +86,11 @@ const RATE_LIMIT_MIDDLEWARE_PATTERNS = [
   /\brate_limiter\b/,
   /\bRateLimiter\b/,
   /\bthrottle\b/,
+  // Common variable references
+  /^loginLimiter$/i,
+  /^apiLimiter$/i,
+  /^rateLimiter$/i,
+  /^limiter$/i,
 ];
 
 const VALIDATION_MIDDLEWARE_PATTERNS = [
