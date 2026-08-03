@@ -17,10 +17,12 @@ import * as path from "path";
 import { evaluateTrust } from "./engine";
 import { formatTrustTerminal } from "./formatters/terminal";
 import { formatTrustJSON } from "./formatters/json";
+import { formatTrustCI, ciExitCode } from "./formatters/ci";
 import type { TrustEvaluationContext } from "./types";
 
 const args = process.argv.slice(2);
 
+async function main() {
 // Help flag
 if (args.includes("--help") || args.includes("-h")) {
   console.log(`
@@ -57,6 +59,7 @@ const getFlag = (name: string): string | undefined => {
 };
 
 const isJson = args.includes("--json");
+const isCi = args.includes("--ci");
 const commit = getFlag("commit") || "unknown";
 const branch = getFlag("branch");
 const policy = getFlag("policy");
@@ -72,23 +75,22 @@ const ctx: TrustEvaluationContext = {
 };
 
 try {
-  const decision = evaluateTrust(ctx);
+  const decision = await evaluateTrust(ctx);
 
   if (isJson) {
     console.log(formatTrustJSON(decision));
+  } else if (isCi) {
+    console.log(formatTrustCI(decision));
   } else {
     console.log(formatTrustTerminal(decision));
   }
 
   // Exit code reflects decision
-  if (decision.overall.decision === "APPROVED") {
-    process.exit(0);
-  } else if (decision.overall.decision === "NEEDS_REVIEW") {
-    process.exit(2);
-  } else {
-    process.exit(1);
-  }
+  process.exit(ciExitCode(decision));
 } catch (e: any) {
   console.error(`❌ Trust evaluation failed: ${e.message}`);
   process.exit(3);
 }
+}
+
+main();

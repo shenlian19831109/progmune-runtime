@@ -83,6 +83,23 @@ export interface TrustDecision {
       level: "HIGH" | "MEDIUM" | "LOW";
       summary: string;
     };
+    /** Phase 4: Semantic mapping coverage (API→domain hit rate) */
+    mappingCoverage?: {
+      /** % of APIs mapped to a known domain (not util/noise) */
+      rate: number;
+      /** Number of APIs resolved via prefix lookup */
+      lookupHits: number;
+      /** Number of APIs resolved via LLM fallback */
+      llmHits: number;
+      /** Total APIs mapped */
+      totalApis: number;
+      /** Assessment: GOOD (>70%), ADEQUATE (40-70%), LOW (<40%) */
+      level: "GOOD" | "ADEQUATE" | "LOW";
+      /** Phase 5: Number of sequences enriched via call graph propagation */
+      propagatedDomains?: number;
+      /** Phase 5: Whether IR-based call graph was available */
+      graphAvailable?: boolean;
+    };
   };
 
   dimensions: TrustDimensions;

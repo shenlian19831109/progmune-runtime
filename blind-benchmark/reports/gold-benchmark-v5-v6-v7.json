@@ -1,53 +1,53 @@
 {
-  "generated": "2026-08-01T07:05:50.027Z",
+  "generated": "2026-08-03T06:17:20.630Z",
   "summary": {
-    "totalSequences": 232,
+    "totalSequences": 432,
     "v5": {
       "tp": 38,
-      "fp": 194,
+      "fp": 394,
       "tn": 0,
       "fn": 0,
-      "total": 232,
-      "precision": 0.16379310344827586,
+      "total": 432,
+      "precision": 0.08796296296296297,
       "recall": 1,
-      "f1": 0.2814814814814815
+      "f1": 0.16170212765957445
     },
     "v6": {
-      "tp": 28,
-      "fp": 126,
-      "tn": 68,
-      "fn": 10,
-      "total": 232,
-      "precision": 0.18181818181818182,
-      "recall": 0.7368421052631579,
-      "f1": 0.2916666666666667
+      "tp": 35,
+      "fp": 349,
+      "tn": 45,
+      "fn": 3,
+      "total": 432,
+      "precision": 0.09114583333333333,
+      "recall": 0.9210526315789473,
+      "f1": 0.16587677725118485
     },
     "v7": {
-      "tp": 27,
-      "fp": 128,
-      "tn": 66,
-      "fn": 11,
-      "total": 232,
-      "precision": 0.17419354838709677,
-      "recall": 0.7105263157894737,
-      "f1": 0.27979274611398963
+      "tp": 35,
+      "fp": 350,
+      "tn": 44,
+      "fn": 3,
+      "total": 432,
+      "precision": 0.09090909090909091,
+      "recall": 0.9210526315789473,
+      "f1": 0.16548463356973997
     },
     "delta_v6_to_v7": {
-      "deltaPrecision": -0.007624633431085048,
-      "deltaRecall": -0.02631578947368418,
-      "deltaF1": -0.011873920552677053,
-      "netFPFixed": -2,
-      "netTPNew": -1
+      "deltaPrecision": -0.0002367424242424171,
+      "deltaRecall": 0,
+      "deltaF1": -0.0003921436814448842,
+      "netFPFixed": -1,
+      "netTPNew": 0
     }
   },
   "migration": {
     "v5_to_v6": {
       "FP→TN (fixed)": {
-        "count": 68,
+        "count": 45,
         "examples": [
-          "[5] ldap_do (ldap.c)",
-          "[11] Curl_auth_create_ntlm_type3_message (ntlm.c)",
-          "[15] Curl_vtls_apple_verify (apple.c)"
+          "[31] Curl_wssl_ctx_init (wolfssl.c)",
+          "[33] make_headers (http_aws_sigv4.c)",
+          "[34] Curl_auth_create_gssapi_user_message (krb5_sspi.c)"
         ]
       },
       "TN→FP (regression)": {
@@ -55,18 +55,18 @@
         "examples": []
       },
       "TP→FN (broken)": {
-        "count": 10,
+        "count": 3,
         "examples": [
           "[1] mbed_configure_ssl (mbedtls.c)",
-          "[16] Curl_conn_connect (connect.c)",
-          "[27] Curl_auth_decode_spnego_message (spnego_sspi.c)"
+          "[27] Curl_auth_decode_spnego_message (spnego_sspi.c)",
+          "[85] Curl_auth_create_ntlm_type1_message (ntlm_sspi.c)"
         ]
       },
       "FN→TP (new catch)": {
         "count": 0,
         "examples": []
       },
-      "unchanged": 154
+      "unchanged": 384
     },
     "v6_to_v7": {
       "FP→TN (fixed)": {
@@ -74,26 +74,20 @@
         "examples": []
       },
       "TN→FP (regression)": {
-        "count": 2,
+        "count": 1,
         "examples": [
-          "[4] SSH_PACKET_CALLBACK (hybrid_mlkem.c)",
-          "[9] SSH_PACKET_CALLBACK (curve25519.c)"
+          "[11] ngx_master_process_cycle (ngx_process_cycle.c)"
         ]
       },
       "TP→FN (broken)": {
-        "count": 2,
-        "examples": [
-          "[26] Curl_auth_create_digest_md5_message (digest_sspi.c)",
-          "[40] curve25519_do_create_k (curve25519_gcrypt.c)"
-        ]
+        "count": 0,
+        "examples": []
       },
       "FN→TP (new catch)": {
-        "count": 1,
-        "examples": [
-          "[12] SSH_PACKET_CALLBACK (hybrid_mlkem.c)"
-        ]
+        "count": 0,
+        "examples": []
       },
-      "unchanged": 227
+      "unchanged": 431
     }
   },
   "repos": [
@@ -113,33 +107,33 @@
         "f1": 0.44036697247706424
       },
       "v6": {
-        "tp": 20,
-        "fp": 40,
-        "tn": 21,
-        "fn": 4,
+        "tp": 21,
+        "fp": 52,
+        "tn": 9,
+        "fn": 3,
         "total": 85,
-        "precision": 0.3333333333333333,
-        "recall": 0.8333333333333334,
-        "f1": 0.47619047619047616
+        "precision": 0.2876712328767123,
+        "recall": 0.875,
+        "f1": 0.4329896907216495
       },
       "v7": {
-        "tp": 19,
-        "fp": 40,
-        "tn": 21,
-        "fn": 5,
+        "tp": 21,
+        "fp": 52,
+        "tn": 9,
+        "fn": 3,
         "total": 85,
-        "precision": 0.3220338983050847,
-        "recall": 0.7916666666666666,
-        "f1": 0.4578313253012048
+        "precision": 0.2876712328767123,
+        "recall": 0.875,
+        "f1": 0.4329896907216495
       },
       "migration": {
         "v5_to_v6": {
           "FP→TN (fixed)": {
-            "count": 21,
+            "count": 9,
             "examples": [
-              "[5] ldap_do (ldap.c)",
-              "[11] Curl_auth_create_ntlm_type3_message (ntlm.c)",
-              "[15] Curl_vtls_apple_verify (apple.c)"
+              "[31] Curl_wssl_ctx_init (wolfssl.c)",
+              "[33] make_headers (http_aws_sigv4.c)",
+              "[34] Curl_auth_create_gssapi_user_message (krb5_sspi.c)"
             ]
           },
           "TN→FP (regression)": {
@@ -147,18 +141,18 @@
             "examples": []
           },
           "TP→FN (broken)": {
-            "count": 4,
+            "count": 3,
             "examples": [
               "[1] mbed_configure_ssl (mbedtls.c)",
-              "[16] Curl_conn_connect (connect.c)",
-              "[27] Curl_auth_decode_spnego_message (spnego_sspi.c)"
+              "[27] Curl_auth_decode_spnego_message (spnego_sspi.c)",
+              "[85] Curl_auth_create_ntlm_type1_message (ntlm_sspi.c)"
             ]
           },
           "FN→TP (new catch)": {
             "count": 0,
             "examples": []
           },
-          "unchanged": 60
+          "unchanged": 73
         },
         "v6_to_v7": {
           "FP→TN (fixed)": {
@@ -170,16 +164,14 @@
             "examples": []
           },
           "TP→FN (broken)": {
-            "count": 1,
-            "examples": [
-              "[26] Curl_auth_create_digest_md5_message (digest_sspi.c)"
-            ]
+            "count": 0,
+            "examples": []
           },
           "FN→TP (new catch)": {
             "count": 0,
             "examples": []
           },
-          "unchanged": 84
+          "unchanged": 85
         }
       }
     },
@@ -199,33 +191,33 @@
         "f1": 0.45901639344262296
       },
       "v6": {
-        "tp": 8,
-        "fp": 13,
-        "tn": 20,
-        "fn": 6,
+        "tp": 14,
+        "fp": 30,
+        "tn": 3,
+        "fn": 0,
         "total": 47,
-        "precision": 0.38095238095238093,
-        "recall": 0.5714285714285714,
-        "f1": 0.4571428571428571
+        "precision": 0.3181818181818182,
+        "recall": 1,
+        "f1": 0.4827586206896552
       },
       "v7": {
-        "tp": 8,
-        "fp": 15,
-        "tn": 18,
-        "fn": 6,
+        "tp": 14,
+        "fp": 30,
+        "tn": 3,
+        "fn": 0,
         "total": 47,
-        "precision": 0.34782608695652173,
-        "recall": 0.5714285714285714,
-        "f1": 0.4324324324324324
+        "precision": 0.3181818181818182,
+        "recall": 1,
+        "f1": 0.4827586206896552
       },
       "migration": {
         "v5_to_v6": {
           "FP→TN (fixed)": {
-            "count": 20,
+            "count": 3,
             "examples": [
-              "[4] SSH_PACKET_CALLBACK (hybrid_mlkem.c)",
-              "[5] ecdh_build_k (ecdh_crypto.c)",
-              "[6] libcrux_sha3_generic_keccak_rho_80_04 (libcrux_mlkem768_sha3.c)"
+              "[6] libcrux_sha3_generic_keccak_rho_80_04 (libcrux_mlkem768_sha3.c)",
+              "[29] ssh_config_parse_uri (config_parser.c)",
+              "[33] libcrux_ml_kem_ind_cca_decapsulate_62 (libcrux_mlkem768_sha3.c)"
             ]
           },
           "TN→FP (regression)": {
@@ -233,18 +225,14 @@
             "examples": []
           },
           "TP→FN (broken)": {
-            "count": 6,
-            "examples": [
-              "[0] ecdh_kex_type_to_curve (ecdh_crypto.c)",
-              "[12] SSH_PACKET_CALLBACK (hybrid_mlkem.c)",
-              "[14] ssh_userauth_agent (auth.c)"
-            ]
+            "count": 0,
+            "examples": []
           },
           "FN→TP (new catch)": {
             "count": 0,
             "examples": []
           },
-          "unchanged": 21
+          "unchanged": 44
         },
         "v6_to_v7": {
           "FP→TN (fixed)": {
@@ -252,25 +240,18 @@
             "examples": []
           },
           "TN→FP (regression)": {
-            "count": 2,
-            "examples": [
-              "[4] SSH_PACKET_CALLBACK (hybrid_mlkem.c)",
-              "[9] SSH_PACKET_CALLBACK (curve25519.c)"
-            ]
+            "count": 0,
+            "examples": []
           },
           "TP→FN (broken)": {
-            "count": 1,
-            "examples": [
-              "[40] curve25519_do_create_k (curve25519_gcrypt.c)"
-            ]
+            "count": 0,
+            "examples": []
           },
           "FN→TP (new catch)": {
-            "count": 1,
-            "examples": [
-              "[12] SSH_PACKET_CALLBACK (hybrid_mlkem.c)"
-            ]
+            "count": 0,
+            "examples": []
           },
-          "unchanged": 43
+          "unchanged": 47
         }
       }
     },
@@ -291,8 +272,8 @@
       },
       "v6": {
         "tp": 0,
-        "fp": 26,
-        "tn": 24,
+        "fp": 42,
+        "tn": 8,
         "fn": 0,
         "total": 50,
         "precision": 0,
@@ -301,8 +282,8 @@
       },
       "v7": {
         "tp": 0,
-        "fp": 26,
-        "tn": 24,
+        "fp": 43,
+        "tn": 7,
         "fn": 0,
         "total": 50,
         "precision": 0,
@@ -312,11 +293,11 @@
       "migration": {
         "v5_to_v6": {
           "FP→TN (fixed)": {
-            "count": 24,
+            "count": 8,
             "examples": [
               "[1] ngx_conf_handler (ngx_conf_file.c)",
               "[2] ngx_conf_read_token (ngx_conf_file.c)",
-              "[4] ngx_http_perl_eval_anon_sub (ngx_http_perl_module.c)"
+              "[3] main (nginx.c)"
             ]
           },
           "TN→FP (regression)": {
@@ -331,7 +312,88 @@
             "count": 0,
             "examples": []
           },
-          "unchanged": 26
+          "unchanged": 42
+        },
+        "v6_to_v7": {
+          "FP→TN (fixed)": {
+            "count": 0,
+            "examples": []
+          },
+          "TN→FP (regression)": {
+            "count": 1,
+            "examples": [
+              "[11] ngx_master_process_cycle (ngx_process_cycle.c)"
+            ]
+          },
+          "TP→FN (broken)": {
+            "count": 0,
+            "examples": []
+          },
+          "FN→TP (new catch)": {
+            "count": 0,
+            "examples": []
+          },
+          "unchanged": 49
+        }
+      }
+    },
+    {
+      "repo": "redis",
+      "totalLabeled": 50,
+      "cleanCount": 50,
+      "violationCount": 0,
+      "v5": {
+        "tp": 0,
+        "fp": 50,
+        "tn": 0,
+        "fn": 0,
+        "total": 50,
+        "precision": 0,
+        "recall": 0,
+        "f1": 0
+      },
+      "v6": {
+        "tp": 0,
+        "fp": 48,
+        "tn": 2,
+        "fn": 0,
+        "total": 50,
+        "precision": 0,
+        "recall": 0,
+        "f1": 0
+      },
+      "v7": {
+        "tp": 0,
+        "fp": 48,
+        "tn": 2,
+        "fn": 0,
+        "total": 50,
+        "precision": 0,
+        "recall": 0,
+        "f1": 0
+      },
+      "migration": {
+        "v5_to_v6": {
+          "FP→TN (fixed)": {
+            "count": 2,
+            "examples": [
+              "[11] quicklistTest (quicklist.c)",
+              "[46] loadServerConfigFromString (config.c)"
+            ]
+          },
+          "TN→FP (regression)": {
+            "count": 0,
+            "examples": []
+          },
+          "TP→FN (broken)": {
+            "count": 0,
+            "examples": []
+          },
+          "FN→TP (new catch)": {
+            "count": 0,
+            "examples": []
+          },
+          "unchanged": 48
         },
         "v6_to_v7": {
           "FP→TN (fixed)": {
@@ -355,36 +417,36 @@
       }
     },
     {
-      "repo": "redis",
-      "totalLabeled": 50,
-      "cleanCount": 50,
+      "repo": "nghttp2",
+      "totalLabeled": 100,
+      "cleanCount": 100,
       "violationCount": 0,
       "v5": {
         "tp": 0,
-        "fp": 50,
+        "fp": 100,
         "tn": 0,
         "fn": 0,
-        "total": 50,
+        "total": 100,
         "precision": 0,
         "recall": 0,
         "f1": 0
       },
       "v6": {
         "tp": 0,
-        "fp": 47,
-        "tn": 3,
+        "fp": 89,
+        "tn": 11,
         "fn": 0,
-        "total": 50,
+        "total": 100,
         "precision": 0,
         "recall": 0,
         "f1": 0
       },
       "v7": {
         "tp": 0,
-        "fp": 47,
-        "tn": 3,
+        "fp": 89,
+        "tn": 11,
         "fn": 0,
-        "total": 50,
+        "total": 100,
         "precision": 0,
         "recall": 0,
         "f1": 0
@@ -392,11 +454,11 @@
       "migration": {
         "v5_to_v6": {
           "FP→TN (fixed)": {
-            "count": 3,
+            "count": 11,
             "examples": [
-              "[11] quicklistTest (quicklist.c)",
-              "[46] loadServerConfigFromString (config.c)",
-              "[47] dictTest (dict.c)"
+              "[7] http_request_on_header (nghttp2_http.c)",
+              "[31] parser_bare_item (sfparse.c)",
+              "[32] sfparse_parser_dict (sfparse.c)"
             ]
           },
           "TN→FP (regression)": {
@@ -411,7 +473,7 @@
             "count": 0,
             "examples": []
           },
-          "unchanged": 47
+          "unchanged": 89
         },
         "v6_to_v7": {
           "FP→TN (fixed)": {
@@ -430,7 +492,87 @@
             "count": 0,
             "examples": []
           },
-          "unchanged": 50
+          "unchanged": 100
+        }
+      }
+    },
+    {
+      "repo": "openssl",
+      "totalLabeled": 100,
+      "cleanCount": 100,
+      "violationCount": 0,
+      "v5": {
+        "tp": 0,
+        "fp": 100,
+        "tn": 0,
+        "fn": 0,
+        "total": 100,
+        "precision": 0,
+        "recall": 0,
+        "f1": 0
+      },
+      "v6": {
+        "tp": 0,
+        "fp": 88,
+        "tn": 12,
+        "fn": 0,
+        "total": 100,
+        "precision": 0,
+        "recall": 0,
+        "f1": 0
+      },
+      "v7": {
+        "tp": 0,
+        "fp": 88,
+        "tn": 12,
+        "fn": 0,
+        "total": 100,
+        "precision": 0,
+        "recall": 0,
+        "f1": 0
+      },
+      "migration": {
+        "v5_to_v6": {
+          "FP→TN (fixed)": {
+            "count": 12,
+            "examples": [
+              "[17] log_packet (qlog_event_helpers.c)",
+              "[24] qlog_event_seq_header (qlog.c)",
+              "[53] ossl_quic_hkdf_extract (quic_record_util.c)"
+            ]
+          },
+          "TN→FP (regression)": {
+            "count": 0,
+            "examples": []
+          },
+          "TP→FN (broken)": {
+            "count": 0,
+            "examples": []
+          },
+          "FN→TP (new catch)": {
+            "count": 0,
+            "examples": []
+          },
+          "unchanged": 88
+        },
+        "v6_to_v7": {
+          "FP→TN (fixed)": {
+            "count": 0,
+            "examples": []
+          },
+          "TN→FP (regression)": {
+            "count": 0,
+            "examples": []
+          },
+          "TP→FN (broken)": {
+            "count": 0,
+            "examples": []
+          },
+          "FN→TP (new catch)": {
+            "count": 0,
+            "examples": []
+          },
+          "unchanged": 100
         }
       }
     }

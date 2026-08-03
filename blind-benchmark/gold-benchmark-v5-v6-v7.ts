@@ -1,10 +1,12 @@
 /**
- * Gold Benchmark: v5/v6/v7 Comparison on 4 Repos
+ * Gold Benchmark: v5/v6/v7 Comparison on 6 Repos
  *
  * Measures Precision, Recall, F1 for each Context strategy on
- * curl, libssh, nginx, redis — with human-annotated gold labels.
+ * curl, libssh, nginx, redis, nghttp2, openssl — with human-annotated gold labels.
  *
- * Includes Migration Matrix: which violations were fixed/regressed between versions.
+ * nghttp2 + openssl are "all-clean" precision benchmarks:
+ * these well-maintained C libraries should produce 0 violations.
+ * Any FP detected = rule needs refinement.
  *
  * Usage: npx ts-node blind-benchmark/gold-benchmark-v5-v6-v7.ts
  */
@@ -235,13 +237,13 @@ function buildMigrationMatrix(
 // Main
 // ═══════════════════════════════════════════════════════
 
-const REPOS = ["curl", "libssh", "nginx", "redis"];
+const REPOS = ["curl", "libssh", "nginx", "redis", "nghttp2", "openssl"];
 
 const C = { r: "\x1b[0m", b: "\x1b[1m", d: "\x1b[2m", g: "\x1b[32m", r2: "\x1b[31m", y: "\x1b[33m", c: "\x1b[36m", m: "\x1b[35m" };
 
 console.log(`${C.b}${C.c}╔══════════════════════════════════════════════════════════════════════════╗${C.r}`);
 console.log(`${C.b}${C.c}║${C.r}   ${C.b}Gold Benchmark: v5/v6/v7 — Context Strategy Comparison${C.r}              ${C.b}${C.c}║${C.r}`);
-console.log(`${C.b}${C.c}║${C.r}   ${C.d}curl · libssh · nginx · redis — Human-Annotated Labels${C.r}               ${C.b}${C.c}║${C.r}`);
+console.log(`${C.b}${C.c}║${C.r}   ${C.d}curl · libssh · nginx · redis · nghttp2 · openssl${C.r}   ${C.b}${C.c}║${C.r}`);
 console.log(`${C.b}${C.c}╚══════════════════════════════════════════════════════════════════════════╝${C.r}\n`);
 
 // Per-repo results

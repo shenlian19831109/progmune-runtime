@@ -1,6 +1,6 @@
 {
   "$schema": "https://progmune.dev/schemas/protocols.json",
-  "$description": "Progmune \u534f\u8bae\u5b9a\u4e49 \u2014\u2014 \u51fd\u6570\u8c03\u7528\u7684\u5408\u6cd5\u72b6\u6001\u8f6c\u6362\u89c4\u5219\u3002\u652f\u6301\u547d\u540d\u7a7a\u95f4\uff08namespace\uff09\u9694\u79bb\u4e0d\u540c\u8d44\u6e90\u7684\u72b6\u6001\u673a\u3002",
+  "$description": "Progmune 协议定义 —— 函数调用的合法状态转换规则。支持命名空间（namespace）隔离不同资源的状态机。",
   "initialState": "UNAUTHENTICATED",
   "namespaceInitialStates": {
     "_global": "UNAUTHENTICATED",
@@ -10,45 +10,96 @@
     "transaction": "TX_IDLE",
     "conditional": "COND_IDLE",
     "loop": "LOOP_IDLE",
-    "cross": "UNAUTHENTICATED"
+    "cross": "UNAUTHENTICATED",
+    "payment": "ORDER_CREATED",
+    "file_upload": "UNAUTHENTICATED",
+    "api_gateway": "IDLE",
+    "notification": "IDLE",
+    "registration": "UNAUTHENTICATED",
+    "session_mgmt": "UNAUTHENTICATED",
+    "supplier": "IDLE",
+    "printlab_order": "ORDER_CREATED",
+    "printlab_print": "STL_UPLOADED",
+    "file": "IDLE",
+    "db": "IDLE",
+    "resource": "IDLE",
+    "data_integrity": "IDLE"
   },
   "states": {
-    "UNAUTHENTICATED": "\u521d\u59cb\u72b6\u6001\uff1a\u7528\u6237\u672a\u8ba4\u8bc1",
-    "PASSWORD_VERIFIED": "\u5bc6\u7801\u5df2\u901a\u8fc7\u9a8c\u8bc1",
-    "TOKEN_ISSUED": "JWT \u4ee4\u724c\u5df2\u7b7e\u53d1",
-    "SESSION_ACTIVE": "\u4f1a\u8bdd\u5df2\u6fc0\u6d3b",
-    "IR_STALE": "IR \u5df2\u8fc7\u671f\u6216\u672a\u751f\u6210",
-    "IR_EXTRACTED": "IR \u5df2\u4ece\u6e90\u7801\u63d0\u53d6",
-    "ACTION_VALIDATED": "\u52a8\u4f5c\u5df2\u901a\u8fc7 SVL \u6821\u9a8c",
-    "SEQUENCE_VALIDATED": "\u52a8\u4f5c\u5e8f\u5217 + \u53d8\u91cf\u6d41\u5411\u5df2\u901a\u8fc7\u6821\u9a8c",
-    "CODE_EMITTED": "\u76ee\u6807\u4ee3\u7801\u5df2\u751f\u6210",
-    "SESSION_RECORDED": "\u6267\u884c\u4f1a\u8bdd\u5df2\u4fdd\u5b58",
-    "IDLE": "\u7a7a\u95f2\u72b6\u6001\uff1a\u65e0\u72b6\u6001\u51fd\u6570\u53ef\u968f\u65f6\u8c03\u7528",
-    "TX_IDLE": "\u4e8b\u52a1\u7a7a\u95f2\uff1a\u65e0\u6d3b\u52a8\u4e8b\u52a1",
-    "TX_ACTIVE": "\u4e8b\u52a1\u8fdb\u884c\u4e2d\uff1a\u53ef\u6267\u884c\u4e8b\u52a1\u5185\u64cd\u4f5c",
-    "SAVEPOINT_HELD": "\u4fdd\u5b58\u70b9\u5df2\u521b\u5efa\uff1a\u53ef\u56de\u6eda\u6216\u91ca\u653e",
-    "COND_IDLE": "\u6761\u4ef6\u5224\u65ad\u7a7a\u95f2\uff1a\u7b49\u5f85\u8bc4\u4f30",
-    "COND_EVALUATED": "\u6761\u4ef6\u5df2\u8bc4\u4f30\uff1a\u7b49\u5f85\u5206\u652f\u9009\u62e9",
-    "COND_ACCEPTED": "\u6761\u4ef6\u901a\u8fc7\uff08TRUE \u5206\u652f\uff09",
-    "COND_REJECTED": "\u6761\u4ef6\u62d2\u7edd\uff08FALSE \u5206\u652f\uff09",
-    "COND_RESOLVED": "\u6761\u4ef6\u5df2\u89e3\u51b3\uff1a\u5206\u652f\u6267\u884c\u5b8c\u6bd5",
-    "LOOP_IDLE": "\u5faa\u73af\u7a7a\u95f2\uff1a\u7b49\u5f85\u5f00\u59cb\u8fed\u4ee3",
-    "FETCHING": "\u6b63\u5728\u83b7\u53d6\u4e0b\u4e00\u6279\u6570\u636e",
-    "BATCH_READY": "\u6279\u6b21\u6570\u636e\u5c31\u7eea",
-    "ITERATING": "\u6b63\u5728\u8fed\u4ee3\u5904\u7406\u6570\u636e\u9879",
-    "LOOP_DONE": "\u5faa\u73af\u5df2\u9000\u51fa",
-    "AUTH_FILE_GATE": "\u8de8\u534f\u8bae\u6865\uff1a\u8ba4\u8bc1\u901a\u8fc7\uff0c\u6587\u4ef6\u64cd\u4f5c\u5c31\u7eea",
-    "AUTH_DB_GATE": "\u8de8\u534f\u8bae\u6865\uff1a\u8ba4\u8bc1\u901a\u8fc7\uff0c\u6570\u636e\u5e93\u64cd\u4f5c\u5c31\u7eea",
+    "UNAUTHENTICATED": "初始状态：用户未认证",
+    "PASSWORD_VERIFIED": "密码已通过验证",
+    "TOKEN_ISSUED": "JWT 令牌已签发",
+    "SESSION_ACTIVE": "会话已激活",
+    "IR_STALE": "IR 已过期或未生成",
+    "IR_EXTRACTED": "IR 已从源码提取",
+    "ACTION_VALIDATED": "动作已通过 SVL 校验",
+    "SEQUENCE_VALIDATED": "动作序列 + 变量流向已通过校验",
+    "CODE_EMITTED": "目标代码已生成",
+    "SESSION_RECORDED": "执行会话已保存",
+    "IDLE": "空闲状态：无状态函数可随时调用",
+    "TX_IDLE": "事务空闲：无活动事务",
+    "TX_ACTIVE": "事务进行中：可执行事务内操作",
+    "SAVEPOINT_HELD": "保存点已创建：可回滚或释放",
+    "COND_IDLE": "条件判断空闲：等待评估",
+    "COND_EVALUATED": "条件已评估：等待分支选择",
+    "COND_ACCEPTED": "条件通过（TRUE 分支）",
+    "COND_REJECTED": "条件拒绝（FALSE 分支）",
+    "COND_RESOLVED": "条件已解决：分支执行完毕",
+    "LOOP_IDLE": "循环空闲：等待开始迭代",
+    "FETCHING": "正在获取下一批数据",
+    "BATCH_READY": "批次数据就绪",
+    "ITERATING": "正在迭代处理数据项",
+    "LOOP_DONE": "循环已退出",
+    "AUTH_FILE_GATE": "跨协议桥：认证通过，文件操作就绪",
+    "AUTH_DB_GATE": "跨协议桥：认证通过，数据库操作就绪",
     "TLS_CONFIGURED": "Auto-generated state for Investment Roadmap",
     "SERVER_STARTED": "Auto-generated state for Investment Roadmap",
-    "PASSWORD_RECEIVED": "Auto-generated state for Investment Roadmap",
-    "PASSWORD_HASHED": "Auto-generated state for Investment Roadmap",
-    "AUTHENTICATED": "Auto-generated state for Investment Roadmap",
-    "AUTHORIZED": "Auto-generated state for Investment Roadmap",
+    "PASSWORD_RECEIVED": "已接收用户明文密码",
+    "PASSWORD_HASHED": "密码已哈希存储",
+    "AUTHENTICATED": "用户已通过认证",
+    "AUTHORIZED": "用户已通过授权——可以操作资源",
     "REFERENCE_VALID": "Auto-generated state for Investment Roadmap",
     "REFERENCE_CREATED": "Auto-generated state for Investment Roadmap",
     "CONTENT_SANITIZED": "Auto-generated state for Investment Roadmap",
-    "TYPE_VALIDATED": "Auto-generated state for Investment Roadmap"
+    "TYPE_VALIDATED": "Auto-generated state for Investment Roadmap",
+    "ORDER_CREATED": "订单已创建",
+    "PAYMENT_INITIATED": "支付已发起",
+    "PAYMENT_CALLBACK_RECEIVED": "支付回调已接收",
+    "PAYMENT_CONFIRMED": "支付已确认",
+    "PAYMENT_FAILED": "支付失败",
+    "FILE_RECEIVED": "文件已接收",
+    "FILE_VALIDATED": "文件已验证",
+    "FILE_STORED": "文件已存储",
+    "FILE_REFERENCED": "文件已关联",
+    "RATE_CHECKED": "频率已检查",
+    "THROTTLED": "已被限流",
+    "NOTIFICATION_COMPOSED": "通知已生成",
+    "NOTIFICATION_SENT": "通知已发送",
+    "NOTIFICATION_CONFIRMED": "通知已确认",
+    "USER_REGISTERED": "用户已注册",
+    "VERIFICATION_CODE_SENT": "验证码已发送",
+    "VERIFICATION_CONFIRMED": "验证已确认",
+    "ACCOUNT_ACTIVATED": "账号已激活",
+    "SESSION_CREATED": "会话已创建",
+    "SESSION_REFRESHED": "会话已刷新",
+    "SESSION_EXPIRED": "会话已过期",
+    "SESSION_REVOKED": "会话已撤销",
+    "SUPPLIER_REGISTERED": "供应商已注册",
+    "SUPPLIER_VERIFIED": "供应商已验证",
+    "SUPPLIER_ENABLED": "供应商已启用",
+    "PRODUCT_ASSIGNED": "产品已分配",
+    "STL_UPLOADED": "STL 文件已上传",
+    "STL_SLICED": "STL 已切片",
+    "GCODE_GENERATED": "GCode 已生成",
+    "COST_ESTIMATED": "成本已估算",
+    "ORDER_QUEUED": "订单已排队",
+    "PRINT_STARTED": "打印已开始",
+    "PRINT_COMPLETED": "打印已完成",
+    "ORDER_SHIPPED": "订单已发货",
+    "ORDER_DELIVERED": "订单已交付",
+    "FILE_OPEN": "文件已打开——获得文件句柄",
+    "DB_CONNECTED": "数据库已连接——获得连接句柄",
+    "CONTENT_VALID": "内容已通过全部验证"
   },
   "rules": {
     "verify_password": {
@@ -59,7 +110,7 @@
       "post_states": [
         "PASSWORD_VERIFIED"
       ],
-      "description": "\u9a8c\u8bc1\u7528\u6237\u5bc6\u7801 \u2192 \u8fdb\u5165\u5df2\u8ba4\u8bc1\u72b6\u6001"
+      "description": "验证用户密码 → 进入已认证状态"
     },
     "generate_jwt": {
       "namespace": "auth",
@@ -72,7 +123,7 @@
       "invalidate": [
         "PASSWORD_VERIFIED"
       ],
-      "description": "\u7b7e\u53d1 JWT \u4ee4\u724c \u2192 \u5fc5\u987b\u5728\u5bc6\u7801\u9a8c\u8bc1\u4e4b\u540e\uff0c\u7b7e\u53d1\u540e\u5bc6\u7801\u9a8c\u8bc1\u72b6\u6001\u5931\u6548"
+      "description": "签发 JWT 令牌 → 必须在密码验证之后，签发后密码验证状态失效"
     },
     "create_session": {
       "namespace": "auth",
@@ -85,7 +136,7 @@
       "invalidate": [
         "TOKEN_ISSUED"
       ],
-      "description": "\u521b\u5efa\u4f1a\u8bdd \u2192 \u5fc5\u987b\u5728\u4ee4\u724c\u7b7e\u53d1\u4e4b\u540e\uff0c\u521b\u5efa\u540e\u4ee4\u724c\u72b6\u6001\u5931\u6548"
+      "description": "创建会话 → 必须在令牌签发之后，创建后令牌状态失效"
     },
     "revoke_token": {
       "namespace": "auth",
@@ -98,7 +149,7 @@
       "invalidate": [
         "TOKEN_ISSUED"
       ],
-      "description": "\u64a4\u9500\u4ee4\u724c \u2192 \u56de\u5230\u672a\u8ba4\u8bc1\u72b6\u6001"
+      "description": "撤销令牌 → 回到未认证状态"
     },
     "logout": {
       "namespace": "auth",
@@ -111,7 +162,7 @@
       "invalidate": [
         "SESSION_ACTIVE"
       ],
-      "description": "\u767b\u51fa \u2192 \u6e05\u9664\u4f1a\u8bdd\uff0c\u56de\u5230\u672a\u8ba4\u8bc1\u72b6\u6001"
+      "description": "登出 → 清除会话，回到未认证状态"
     },
     "open_file": {
       "namespace": "file",
@@ -119,7 +170,7 @@
       "post_states": [
         "FILE_OPEN"
       ],
-      "description": "\u6253\u5f00\u6587\u4ef6 \u2192 \u83b7\u5f97\u6587\u4ef6\u53e5\u67c4"
+      "description": "打开文件 → 获得文件句柄"
     },
     "read_file": {
       "namespace": "file",
@@ -127,7 +178,7 @@
         "FILE_OPEN"
       ],
       "post_states": [],
-      "description": "\u8bfb\u53d6\u6587\u4ef6\u5185\u5bb9 \u2192 \u9700\u8981\u6587\u4ef6\u5df2\u6253\u5f00"
+      "description": "读取文件内容 → 需要文件已打开"
     },
     "write_file": {
       "namespace": "file",
@@ -135,7 +186,7 @@
         "FILE_OPEN"
       ],
       "post_states": [],
-      "description": "\u5199\u5165\u6587\u4ef6\u5185\u5bb9 \u2192 \u9700\u8981\u6587\u4ef6\u5df2\u6253\u5f00"
+      "description": "写入文件内容 → 需要文件已打开"
     },
     "close_file": {
       "namespace": "file",
@@ -146,7 +197,7 @@
       "invalidate": [
         "FILE_OPEN"
       ],
-      "description": "\u5173\u95ed\u6587\u4ef6\u53e5\u67c4 \u2192 \u91ca\u653e\u6587\u4ef6\u8d44\u6e90"
+      "description": "关闭文件句柄 → 释放文件资源"
     },
     "connect_db": {
       "namespace": "db",
@@ -154,7 +205,7 @@
       "post_states": [
         "DB_CONNECTED"
       ],
-      "description": "\u5efa\u7acb\u6570\u636e\u5e93\u8fde\u63a5"
+      "description": "建立数据库连接"
     },
     "query_db": {
       "namespace": "db",
@@ -162,7 +213,7 @@
         "DB_CONNECTED"
       ],
       "post_states": [],
-      "description": "\u6267\u884c\u6570\u636e\u5e93\u67e5\u8be2 \u2192 \u9700\u8981\u5df2\u8fde\u63a5"
+      "description": "执行数据库查询 → 需要已连接"
     },
     "disconnect_db": {
       "namespace": "db",
@@ -173,7 +224,7 @@
       "invalidate": [
         "DB_CONNECTED"
       ],
-      "description": "\u65ad\u5f00\u6570\u636e\u5e93\u8fde\u63a5"
+      "description": "断开数据库连接"
     },
     "extractIR": {
       "namespace": "dev_pipeline",
@@ -184,7 +235,7 @@
       "invalidate": [
         "IR_STALE"
       ],
-      "description": "\u4ece\u6e90\u7801\u63d0\u53d6 IR \u2192 \u4ea7\u51fa IR_EXTRACTED \u72b6\u6001"
+      "description": "从源码提取 IR → 产出 IR_EXTRACTED 状态"
     },
     "validateAction": {
       "namespace": "dev_pipeline",
@@ -194,7 +245,7 @@
       "post_states": [
         "ACTION_VALIDATED"
       ],
-      "description": "\u6821\u9a8c\u5355\u4e2a\u52a8\u4f5c\u5408\u6cd5\u6027 \u2192 \u9700\u8981 IR \u5df2\u63d0\u53d6"
+      "description": "校验单个动作合法性 → 需要 IR 已提取"
     },
     "validateActionSequence": {
       "namespace": "dev_pipeline",
@@ -207,7 +258,7 @@
       "invalidate": [
         "ACTION_VALIDATED"
       ],
-      "description": "\u6279\u91cf\u6821\u9a8c\u52a8\u4f5c\u5e8f\u5217 \u2192 \u9700\u8981\u52a8\u4f5c\u5df2\u9a8c\u8bc1\uff0c\u6821\u9a8c\u540e\u6d88\u8017"
+      "description": "批量校验动作序列 → 需要动作已验证，校验后消耗"
     },
     "emitCode": {
       "namespace": "dev_pipeline",
@@ -220,7 +271,7 @@
       "invalidate": [
         "SEQUENCE_VALIDATED"
       ],
-      "description": "\u7f16\u8bd1\u52a8\u4f5c\u5e8f\u5217\u4e3a\u76ee\u6807\u4ee3\u7801 \u2192 \u9700\u8981\u5e8f\u5217\u5df2\u9a8c\u8bc1"
+      "description": "编译动作序列为目标代码 → 需要序列已验证"
     },
     "recordSession": {
       "namespace": "dev_pipeline",
@@ -233,55 +284,55 @@
       "invalidate": [
         "CODE_EMITTED"
       ],
-      "description": "\u4fdd\u5b58\u6267\u884c\u4f1a\u8bdd\u5230\u8bed\u6599\u5e93 \u2192 \u9700\u8981\u4ee3\u7801\u5df2\u751f\u6210"
+      "description": "保存执行会话到语料库 → 需要代码已生成"
     },
     "compute_hash": {
       "namespace": "stateless",
       "pre_states": [],
       "post_states": [],
-      "description": "\u8ba1\u7b97\u8f93\u5165\u6570\u636e\u7684\u54c8\u5e0c\u6458\u8981 \u2014\u2014 \u7eaf\u51fd\u6570/\u5e42\u7b49"
+      "description": "计算输入数据的哈希摘要 —— 纯函数/幂等"
     },
     "validate_schema": {
       "namespace": "stateless",
       "pre_states": [],
       "post_states": [],
-      "description": "\u5bf9\u6570\u636e\u505a Schema \u6821\u9a8c \u2014\u2014 \u65e0\u526f\u4f5c\u7528"
+      "description": "对数据做 Schema 校验 —— 无副作用"
     },
     "sanitize_input": {
       "namespace": "stateless",
       "pre_states": [],
       "post_states": [],
-      "description": "\u6e05\u7406\u7528\u6237\u8f93\u5165\uff0c\u53bb\u9664\u5371\u9669\u5b57\u7b26"
+      "description": "清理用户输入，去除危险字符"
     },
     "verify_checksum": {
       "namespace": "stateless",
       "pre_states": [],
       "post_states": [],
-      "description": "\u901a\u8fc7\u6821\u9a8c\u548c\u9a8c\u8bc1\u6570\u636e\u5b8c\u6574\u6027"
+      "description": "通过校验和验证数据完整性"
     },
     "encode_payload": {
       "namespace": "stateless",
       "pre_states": [],
       "post_states": [],
-      "description": "\u5c06\u6570\u636e\u7f16\u7801\u4e3a base64 / wire format"
+      "description": "将数据编码为 base64 / wire format"
     },
     "decode_payload": {
       "namespace": "stateless",
       "pre_states": [],
       "post_states": [],
-      "description": "\u4ece wire format \u89e3\u7801\u56de\u539f\u59cb\u6570\u636e"
+      "description": "从 wire format 解码回原始数据"
     },
     "compress_buffer": {
       "namespace": "stateless",
       "pre_states": [],
       "post_states": [],
-      "description": "\u538b\u7f29\u6570\u636e\u7f13\u51b2\u533a"
+      "description": "压缩数据缓冲区"
     },
     "decompress_buffer": {
       "namespace": "stateless",
       "pre_states": [],
       "post_states": [],
-      "description": "\u89e3\u538b\u6570\u636e\u7f13\u51b2\u533a"
+      "description": "解压数据缓冲区"
     },
     "begin_tx": {
       "namespace": "transaction",
@@ -291,7 +342,7 @@
       "post_states": [
         "TX_ACTIVE"
       ],
-      "description": "\u5f00\u542f\u65b0\u4e8b\u52a1 \u2192 \u5fc5\u987b\u5728\u7a7a\u95f2\u72b6\u6001\u4e0b"
+      "description": "开启新事务 → 必须在空闲状态下"
     },
     "commit_tx": {
       "namespace": "transaction",
@@ -304,7 +355,7 @@
       "invalidate": [
         "TX_ACTIVE"
       ],
-      "description": "\u63d0\u4ea4\u6d3b\u8dc3\u4e8b\u52a1\u4e2d\u7684\u6240\u6709\u53d8\u66f4"
+      "description": "提交活跃事务中的所有变更"
     },
     "rollback_tx": {
       "namespace": "transaction",
@@ -317,7 +368,7 @@
       "invalidate": [
         "TX_ACTIVE"
       ],
-      "description": "\u56de\u6eda\u6d3b\u8dc3\u4e8b\u52a1\u4e2d\u7684\u6240\u6709\u53d8\u66f4"
+      "description": "回滚活跃事务中的所有变更"
     },
     "insert_record": {
       "namespace": "transaction",
@@ -327,7 +378,7 @@
       "post_states": [
         "TX_ACTIVE"
       ],
-      "description": "\u5728\u6d3b\u8dc3\u4e8b\u52a1\u4e2d\u63d2\u5165\u8bb0\u5f55\uff08\u81ea\u4fdd\u6301\uff09"
+      "description": "在活跃事务中插入记录（自保持）"
     },
     "update_record": {
       "namespace": "transaction",
@@ -337,7 +388,7 @@
       "post_states": [
         "TX_ACTIVE"
       ],
-      "description": "\u5728\u6d3b\u8dc3\u4e8b\u52a1\u4e2d\u66f4\u65b0\u8bb0\u5f55\uff08\u81ea\u4fdd\u6301\uff09"
+      "description": "在活跃事务中更新记录（自保持）"
     },
     "delete_record": {
       "namespace": "transaction",
@@ -347,7 +398,7 @@
       "post_states": [
         "TX_ACTIVE"
       ],
-      "description": "\u5728\u6d3b\u8dc3\u4e8b\u52a1\u4e2d\u5220\u9664\u8bb0\u5f55\uff08\u81ea\u4fdd\u6301\uff09"
+      "description": "在活跃事务中删除记录（自保持）"
     },
     "savepoint_create": {
       "namespace": "transaction",
@@ -357,7 +408,7 @@
       "post_states": [
         "SAVEPOINT_HELD"
       ],
-      "description": "\u5728\u6d3b\u8dc3\u4e8b\u52a1\u4e2d\u521b\u5efa\u5177\u540d\u4fdd\u5b58\u70b9"
+      "description": "在活跃事务中创建具名保存点"
     },
     "savepoint_release": {
       "namespace": "transaction",
@@ -370,7 +421,7 @@
       "invalidate": [
         "SAVEPOINT_HELD"
       ],
-      "description": "\u91ca\u653e\u4fdd\u5b58\u70b9\uff0c\u4fdd\u7559\u540e\u7eed\u53d8\u66f4"
+      "description": "释放保存点，保留后续变更"
     },
     "rollback_to_savepoint": {
       "namespace": "transaction",
@@ -383,7 +434,7 @@
       "invalidate": [
         "SAVEPOINT_HELD"
       ],
-      "description": "\u56de\u6eda\u5230\u4fdd\u5b58\u70b9\uff0c\u64a4\u9500\u4fdd\u5b58\u70b9\u4e4b\u540e\u7684\u53d8\u66f4"
+      "description": "回滚到保存点，撤销保存点之后的变更"
     },
     "prep_two_phase": {
       "namespace": "transaction",
@@ -396,7 +447,7 @@
       "invalidate": [
         "TX_ACTIVE"
       ],
-      "description": "\u51c6\u5907\u4e24\u9636\u6bb5\u63d0\u4ea4\uff08\u8868\u51b3\u9636\u6bb5\uff09"
+      "description": "准备两阶段提交（表决阶段）"
     },
     "evaluate_access": {
       "namespace": "conditional",
@@ -406,7 +457,7 @@
       "post_states": [
         "COND_EVALUATED"
       ],
-      "description": "\u6839\u636e\u6743\u9650\u7b56\u7565\u8bc4\u4f30\u8bbf\u95ee\u6761\u4ef6"
+      "description": "根据权限策略评估访问条件"
     },
     "grant_access": {
       "namespace": "conditional",
@@ -419,7 +470,7 @@
       "invalidate": [
         "COND_EVALUATED"
       ],
-      "description": "TRUE \u5206\u652f\uff1a\u6388\u4e88\u8bbf\u95ee\u6743\u9650"
+      "description": "TRUE 分支：授予访问权限"
     },
     "deny_access": {
       "namespace": "conditional",
@@ -432,7 +483,7 @@
       "invalidate": [
         "COND_EVALUATED"
       ],
-      "description": "FALSE \u5206\u652f\uff1a\u62d2\u7edd\u8bbf\u95ee"
+      "description": "FALSE 分支：拒绝访问"
     },
     "log_granted": {
       "namespace": "conditional",
@@ -446,7 +497,7 @@
         "COND_ACCEPTED",
         "COND_RESOLVED"
       ],
-      "description": "\u8bb0\u5f55\u6388\u6743\u8bbf\u95ee\u5e76\u7ed3\u675f\u6761\u4ef6\u5224\u65ad"
+      "description": "记录授权访问并结束条件判断"
     },
     "log_denied": {
       "namespace": "conditional",
@@ -460,7 +511,7 @@
         "COND_REJECTED",
         "COND_RESOLVED"
       ],
-      "description": "\u8bb0\u5f55\u62d2\u7edd\u8bbf\u95ee\u5e76\u7ed3\u675f\u6761\u4ef6\u5224\u65ad"
+      "description": "记录拒绝访问并结束条件判断"
     },
     "bypass_condition": {
       "namespace": "conditional",
@@ -474,7 +525,7 @@
         "COND_EVALUATED",
         "COND_RESOLVED"
       ],
-      "description": "\u77ed\u8def\uff1a\u76f4\u63a5\u7ed5\u8fc7\u6761\u4ef6\u68c0\u67e5"
+      "description": "短路：直接绕过条件检查"
     },
     "retry_evaluation": {
       "namespace": "conditional",
@@ -487,7 +538,7 @@
       "invalidate": [
         "COND_EVALUATED"
       ],
-      "description": "\u91cd\u8bd5\uff1a\u56de\u5230\u7a7a\u95f2\u72b6\u6001\u91cd\u65b0\u8bc4\u4f30"
+      "description": "重试：回到空闲状态重新评估"
     },
     "escalate_access": {
       "namespace": "conditional",
@@ -500,7 +551,7 @@
       "invalidate": [
         "COND_REJECTED"
       ],
-      "description": "\u5347\u7ea7\uff1a\u5c06\u88ab\u62d2\u7edd\u7684\u8bbf\u95ee\u5347\u7ea7\u4e3a\u901a\u8fc7"
+      "description": "升级：将被拒绝的访问升级为通过"
     },
     "audit_condition": {
       "namespace": "conditional",
@@ -516,7 +567,7 @@
         "COND_REJECTED",
         "COND_RESOLVED"
       ],
-      "description": "\u5ba1\u8ba1\uff1a\u65e0\u8bba\u5206\u652f\u7ed3\u679c\u5982\u4f55\uff0c\u8bb0\u5f55\u6761\u4ef6\u5224\u65ad\u7ed3\u679c"
+      "description": "审计：无论分支结果如何，记录条件判断结果"
     },
     "init_fetch_loop": {
       "namespace": "loop",
@@ -526,7 +577,7 @@
       "post_states": [
         "FETCHING"
       ],
-      "description": "\u521d\u59cb\u5316\u83b7\u53d6\u5faa\u73af\uff0c\u5f00\u59cb\u83b7\u53d6\u6570\u636e"
+      "description": "初始化获取循环，开始获取数据"
     },
     "fetch_batch": {
       "namespace": "loop",
@@ -539,7 +590,7 @@
       "invalidate": [
         "FETCHING"
       ],
-      "description": "\u83b7\u53d6\u4e0b\u4e00\u6279\u6570\u636e"
+      "description": "获取下一批数据"
     },
     "has_more_data": {
       "namespace": "loop",
@@ -552,7 +603,7 @@
       "invalidate": [
         "BATCH_READY"
       ],
-      "description": "\u68c0\u67e5\u8fd8\u6709\u66f4\u591a\u6570\u636e \u2192 \u8fdb\u5165\u8fed\u4ee3\u4f53"
+      "description": "检查还有更多数据 → 进入迭代体"
     },
     "process_item": {
       "namespace": "loop",
@@ -562,7 +613,7 @@
       "post_states": [
         "ITERATING"
       ],
-      "description": "\u5904\u7406\u5355\u4e2a\u6570\u636e\u9879\uff08\u5728\u8fed\u4ee3\u4f53\u5185\u81ea\u5faa\u73af\uff09"
+      "description": "处理单个数据项（在迭代体内自循环）"
     },
     "next_iteration": {
       "namespace": "loop",
@@ -575,7 +626,7 @@
       "invalidate": [
         "ITERATING"
       ],
-      "description": "\u7ed3\u675f\u5f53\u524d\u8fed\u4ee3 \u2192 \u8fd4\u56de\u83b7\u53d6\u4e0b\u4e00\u6279"
+      "description": "结束当前迭代 → 返回获取下一批"
     },
     "exit_loop": {
       "namespace": "loop",
@@ -589,7 +640,7 @@
         "ITERATING",
         "LOOP_DONE"
       ],
-      "description": "\u6b63\u5e38\u9000\u51fa\u5faa\u73af\uff08\u6240\u6709\u6570\u636e\u5df2\u5904\u7406\u5b8c\u6bd5\uff09"
+      "description": "正常退出循环（所有数据已处理完毕）"
     },
     "retry_batch": {
       "namespace": "loop",
@@ -600,7 +651,7 @@
       "post_states": [
         "FETCHING"
       ],
-      "description": "\u83b7\u53d6\u5931\u8d25 \u2192 \u91cd\u8bd5\u5f53\u524d\u6279\u6b21"
+      "description": "获取失败 → 重试当前批次"
     },
     "timeout_exit": {
       "namespace": "loop",
@@ -616,7 +667,7 @@
         "ITERATING",
         "LOOP_DONE"
       ],
-      "description": "\u8d85\u65f6\u7d27\u6025\u9000\u51fa\u5faa\u73af"
+      "description": "超时紧急退出循环"
     },
     "poll_status": {
       "namespace": "loop",
@@ -626,7 +677,7 @@
       "post_states": [
         "ITERATING"
       ],
-      "description": "\u8f6e\u8be2\u72b6\u6001\u66f4\u65b0\uff08\u5728\u8fed\u4ee3\u4f53\u5185\u81ea\u5faa\u73af\uff09"
+      "description": "轮询状态更新（在迭代体内自循环）"
     },
     "auth_file_open": {
       "namespace": "cross",
@@ -636,7 +687,7 @@
       "post_states": [
         "AUTH_FILE_GATE"
       ],
-      "description": "\u8de8\u534f\u8bae\u6865\uff1a\u8ba4\u8bc1 \u2192 \u6253\u5f00\u6587\u4ef6\u8bbf\u95ee\u95e8"
+      "description": "跨协议桥：认证 → 打开文件访问门"
     },
     "auth_file_read": {
       "namespace": "cross",
@@ -646,7 +697,7 @@
       "post_states": [
         "AUTH_FILE_GATE"
       ],
-      "description": "\u8de8\u534f\u8bae\uff1a\u901a\u8fc7\u8ba4\u8bc1\u95e8\u8bfb\u53d6\u6587\u4ef6"
+      "description": "跨协议：通过认证门读取文件"
     },
     "auth_file_close": {
       "namespace": "cross",
@@ -659,7 +710,7 @@
       "invalidate": [
         "AUTH_FILE_GATE"
       ],
-      "description": "\u8de8\u534f\u8bae\uff1a\u5173\u95ed\u7ecf\u8ba4\u8bc1\u95e8\u7684\u6587\u4ef6\u4f1a\u8bdd"
+      "description": "跨协议：关闭经认证门的文件会话"
     },
     "auth_db_connect": {
       "namespace": "cross",
@@ -669,7 +720,7 @@
       "post_states": [
         "AUTH_DB_GATE"
       ],
-      "description": "\u8de8\u534f\u8bae\u6865\uff1a\u8ba4\u8bc1 \u2192 \u6253\u5f00\u6570\u636e\u5e93\u8fde\u63a5"
+      "description": "跨协议桥：认证 → 打开数据库连接"
     },
     "auth_db_query": {
       "namespace": "cross",
@@ -679,7 +730,7 @@
       "post_states": [
         "AUTH_DB_GATE"
       ],
-      "description": "\u8de8\u534f\u8bae\uff1a\u901a\u8fc7\u8ba4\u8bc1\u95e8\u67e5\u8be2\u6570\u636e\u5e93"
+      "description": "跨协议：通过认证门查询数据库"
     },
     "auth_db_disconnect": {
       "namespace": "cross",
@@ -692,7 +743,7 @@
       "invalidate": [
         "AUTH_DB_GATE"
       ],
-      "description": "\u8de8\u534f\u8bae\uff1a\u5173\u95ed\u7ecf\u8ba4\u8bc1\u95e8\u7684\u6570\u636e\u5e93\u8fde\u63a5"
+      "description": "跨协议：关闭经认证门的数据库连接"
     },
     "http_create_server": {
       "namespace": "tls",
@@ -800,6 +851,812 @@
         "CONTENT_VALID"
       ],
       "description": "Validate input within acceptable range/limits"
+    },
+    "initiate_payment": {
+      "namespace": "payment",
+      "pre_states": [
+        "ORDER_CREATED"
+      ],
+      "post_states": [
+        "PAYMENT_INITIATED"
+      ],
+      "invalidate": [
+        "ORDER_CREATED"
+      ],
+      "description": "发起支付 → 需要已创建的订单"
+    },
+    "receive_payment_callback": {
+      "namespace": "payment",
+      "pre_states": [
+        "PAYMENT_INITIATED"
+      ],
+      "post_states": [
+        "PAYMENT_CALLBACK_RECEIVED"
+      ],
+      "invalidate": [
+        "PAYMENT_INITIATED"
+      ],
+      "description": "接收支付回调 → 需要已发起的支付"
+    },
+    "confirm_payment": {
+      "namespace": "payment",
+      "pre_states": [
+        "PAYMENT_CALLBACK_RECEIVED"
+      ],
+      "post_states": [
+        "PAYMENT_CONFIRMED"
+      ],
+      "invalidate": [
+        "PAYMENT_CALLBACK_RECEIVED"
+      ],
+      "description": "确认支付 → 需要已验证的回调签名"
+    },
+    "fail_payment": {
+      "namespace": "payment",
+      "pre_states": [
+        "PAYMENT_INITIATED",
+        "PAYMENT_CALLBACK_RECEIVED"
+      ],
+      "post_states": [
+        "PAYMENT_FAILED"
+      ],
+      "invalidate": [
+        "PAYMENT_INITIATED",
+        "PAYMENT_CALLBACK_RECEIVED"
+      ],
+      "description": "支付失败 → 超时、签名无效或用户取消"
+    },
+    "receive_upload": {
+      "namespace": "file_upload",
+      "pre_states": [
+        "AUTHENTICATED"
+      ],
+      "post_states": [
+        "FILE_RECEIVED"
+      ],
+      "description": "接收文件上传 → 用户需已认证"
+    },
+    "validate_file": {
+      "namespace": "file_upload",
+      "pre_states": [
+        "FILE_RECEIVED"
+      ],
+      "post_states": [
+        "FILE_VALIDATED"
+      ],
+      "invalidate": [
+        "FILE_RECEIVED"
+      ],
+      "description": "验证文件类型和大小 → 需要已接收的文件"
+    },
+    "store_file": {
+      "namespace": "file_upload",
+      "pre_states": [
+        "FILE_VALIDATED"
+      ],
+      "post_states": [
+        "FILE_STORED"
+      ],
+      "invalidate": [
+        "FILE_VALIDATED"
+      ],
+      "description": "存储文件到 S3/本地 → 需要已验证的文件"
+    },
+    "reference_file": {
+      "namespace": "file_upload",
+      "pre_states": [
+        "FILE_STORED"
+      ],
+      "post_states": [
+        "FILE_REFERENCED"
+      ],
+      "description": "关联文件到业务对象 → 需要已存储的文件"
+    },
+    "check_rate_limit": {
+      "namespace": "api_gateway",
+      "pre_states": [],
+      "post_states": [
+        "RATE_CHECKED"
+      ],
+      "description": "检查 API 调用频率 → 无状态检查"
+    },
+    "throttle_request": {
+      "namespace": "api_gateway",
+      "pre_states": [
+        "RATE_CHECKED"
+      ],
+      "post_states": [
+        "THROTTLED"
+      ],
+      "invalidate": [
+        "RATE_CHECKED"
+      ],
+      "description": "限流请求 → 超过频率限制"
+    },
+    "pass_rate_check": {
+      "namespace": "api_gateway",
+      "pre_states": [
+        "RATE_CHECKED"
+      ],
+      "post_states": [],
+      "description": "通过频率检查 → 正常处理请求"
+    },
+    "compose_notification": {
+      "namespace": "notification",
+      "pre_states": [],
+      "post_states": [
+        "NOTIFICATION_COMPOSED"
+      ],
+      "description": "生成通知内容 → 基于业务事件"
+    },
+    "send_notification": {
+      "namespace": "notification",
+      "pre_states": [
+        "NOTIFICATION_COMPOSED"
+      ],
+      "post_states": [
+        "NOTIFICATION_SENT"
+      ],
+      "invalidate": [
+        "NOTIFICATION_COMPOSED"
+      ],
+      "description": "发送通知 → 邮件/短信/推送"
+    },
+    "confirm_delivery": {
+      "namespace": "notification",
+      "pre_states": [
+        "NOTIFICATION_SENT"
+      ],
+      "post_states": [
+        "NOTIFICATION_CONFIRMED"
+      ],
+      "invalidate": [
+        "NOTIFICATION_SENT"
+      ],
+      "description": "确认送达 → 邮件已投递/短信已发送"
+    },
+    "register_user": {
+      "namespace": "registration",
+      "pre_states": [
+        "UNAUTHENTICATED"
+      ],
+      "post_states": [
+        "USER_REGISTERED"
+      ],
+      "description": "用户注册 → 邮箱+密码"
+    },
+    "send_verification_code": {
+      "namespace": "registration",
+      "pre_states": [
+        "USER_REGISTERED"
+      ],
+      "post_states": [
+        "VERIFICATION_CODE_SENT"
+      ],
+      "invalidate": [
+        "USER_REGISTERED"
+      ],
+      "description": "发送验证码 → 邮箱/手机"
+    },
+    "verify_code": {
+      "namespace": "registration",
+      "pre_states": [
+        "VERIFICATION_CODE_SENT"
+      ],
+      "post_states": [
+        "VERIFICATION_CONFIRMED"
+      ],
+      "invalidate": [
+        "VERIFICATION_CODE_SENT"
+      ],
+      "description": "验证码校验 → 匹配且未过期"
+    },
+    "activate_account": {
+      "namespace": "registration",
+      "pre_states": [
+        "VERIFICATION_CONFIRMED"
+      ],
+      "post_states": [
+        "ACCOUNT_ACTIVATED"
+      ],
+      "invalidate": [
+        "VERIFICATION_CONFIRMED"
+      ],
+      "description": "激活账号 → 验证通过后启用"
+    },
+    "create_user_session": {
+      "namespace": "session_mgmt",
+      "pre_states": [
+        "ACCOUNT_ACTIVATED",
+        "AUTHENTICATED"
+      ],
+      "post_states": [
+        "SESSION_CREATED"
+      ],
+      "description": "创建用户会话 → 登录成功后"
+    },
+    "refresh_session": {
+      "namespace": "session_mgmt",
+      "pre_states": [
+        "SESSION_CREATED"
+      ],
+      "post_states": [
+        "SESSION_REFRESHED"
+      ],
+      "description": "刷新会话 → 延长有效期"
+    },
+    "timeout_session": {
+      "namespace": "session_mgmt",
+      "pre_states": [
+        "SESSION_CREATED",
+        "SESSION_REFRESHED"
+      ],
+      "post_states": [
+        "SESSION_EXPIRED"
+      ],
+      "invalidate": [
+        "SESSION_CREATED",
+        "SESSION_REFRESHED"
+      ],
+      "description": "会话超时 → 自动过期"
+    },
+    "revoke_session": {
+      "namespace": "session_mgmt",
+      "pre_states": [
+        "SESSION_CREATED",
+        "SESSION_REFRESHED"
+      ],
+      "post_states": [
+        "SESSION_REVOKED"
+      ],
+      "invalidate": [
+        "SESSION_CREATED",
+        "SESSION_REFRESHED"
+      ],
+      "description": "撤销会话 → 管理员/用户主动登出"
+    },
+    "register_supplier": {
+      "namespace": "supplier",
+      "pre_states": [],
+      "post_states": [
+        "SUPPLIER_REGISTERED"
+      ],
+      "description": "注册供应商 → 基本信息录入"
+    },
+    "verify_supplier": {
+      "namespace": "supplier",
+      "pre_states": [
+        "SUPPLIER_REGISTERED"
+      ],
+      "post_states": [
+        "SUPPLIER_VERIFIED"
+      ],
+      "invalidate": [
+        "SUPPLIER_REGISTERED"
+      ],
+      "description": "验证供应商 → 资质审核"
+    },
+    "enable_supplier": {
+      "namespace": "supplier",
+      "pre_states": [
+        "SUPPLIER_VERIFIED"
+      ],
+      "post_states": [
+        "SUPPLIER_ENABLED"
+      ],
+      "invalidate": [
+        "SUPPLIER_VERIFIED"
+      ],
+      "description": "启用供应商 → 可接单"
+    },
+    "assign_product_to_supplier": {
+      "namespace": "supplier",
+      "pre_states": [
+        "SUPPLIER_ENABLED"
+      ],
+      "post_states": [
+        "PRODUCT_ASSIGNED"
+      ],
+      "description": "分配产品给供应商 → 供应商已启用"
+    },
+    "upload_stl": {
+      "namespace": "printlab_order",
+      "pre_states": [
+        "AUTHENTICATED"
+      ],
+      "post_states": [
+        "STL_UPLOADED"
+      ],
+      "description": "上传 STL 文件 → 用户已认证"
+    },
+    "slice_model": {
+      "namespace": "printlab_order",
+      "pre_states": [
+        "STL_UPLOADED"
+      ],
+      "post_states": [
+        "STL_SLICED"
+      ],
+      "invalidate": [
+        "STL_UPLOADED"
+      ],
+      "description": "切片 3D 模型 → STL 已上传"
+    },
+    "generate_gcode": {
+      "namespace": "printlab_order",
+      "pre_states": [
+        "STL_SLICED"
+      ],
+      "post_states": [
+        "GCODE_GENERATED"
+      ],
+      "invalidate": [
+        "STL_SLICED"
+      ],
+      "description": "生成 GCode → 模型已切片"
+    },
+    "estimate_cost": {
+      "namespace": "printlab_order",
+      "pre_states": [
+        "GCODE_GENERATED"
+      ],
+      "post_states": [
+        "COST_ESTIMATED"
+      ],
+      "description": "估算打印成本 → GCode 已生成"
+    },
+    "create_order": {
+      "namespace": "printlab_order",
+      "pre_states": [
+        "COST_ESTIMATED"
+      ],
+      "post_states": [
+        "ORDER_CREATED"
+      ],
+      "invalidate": [
+        "COST_ESTIMATED"
+      ],
+      "description": "创建订单 → 成本已估算"
+    },
+    "queue_order": {
+      "namespace": "printlab_order",
+      "pre_states": [
+        "PAYMENT_CONFIRMED"
+      ],
+      "post_states": [
+        "ORDER_QUEUED"
+      ],
+      "invalidate": [
+        "PAYMENT_CONFIRMED"
+      ],
+      "description": "订单排队 → 支付已确认"
+    },
+    "start_print": {
+      "namespace": "printlab_print",
+      "pre_states": [
+        "ORDER_QUEUED"
+      ],
+      "post_states": [
+        "PRINT_STARTED"
+      ],
+      "invalidate": [
+        "ORDER_QUEUED"
+      ],
+      "description": "开始打印 → 订单已排队"
+    },
+    "complete_print": {
+      "namespace": "printlab_print",
+      "pre_states": [
+        "PRINT_STARTED"
+      ],
+      "post_states": [
+        "PRINT_COMPLETED"
+      ],
+      "invalidate": [
+        "PRINT_STARTED"
+      ],
+      "description": "打印完成 → 打印已开始"
+    },
+    "ship_order": {
+      "namespace": "printlab_order",
+      "pre_states": [
+        "PRINT_COMPLETED"
+      ],
+      "post_states": [
+        "ORDER_SHIPPED"
+      ],
+      "invalidate": [
+        "PRINT_COMPLETED"
+      ],
+      "description": "发货 → 打印已完成"
+    },
+    "deliver_order": {
+      "namespace": "printlab_order",
+      "pre_states": [
+        "ORDER_SHIPPED"
+      ],
+      "post_states": [
+        "ORDER_DELIVERED"
+      ],
+      "invalidate": [
+        "ORDER_SHIPPED"
+      ],
+      "description": "订单交付 → 已发货"
+    },
+    "check_resource_ownership": {
+      "namespace": "data_integrity",
+      "pre_states": [
+        "AUTHENTICATED"
+      ],
+      "post_states": [
+        "AUTHORIZED"
+      ],
+      "description": "检查资源所有权 → 用户只能操作自己的数据"
+    },
+    "audit_mutation": {
+      "namespace": "data_integrity",
+      "pre_states": [],
+      "post_states": [],
+      "description": "记录数据变更审计日志 → 每次写操作后"
+    },
+    "validate_business_rule": {
+      "namespace": "data_integrity",
+      "pre_states": [],
+      "post_states": [],
+      "description": "验证业务规则 → 订单金额 > 0, 库存 >= 0"
+    },
+    "refund_payment": {
+      "namespace": "payment",
+      "pre_states": [
+        "PAYMENT_CONFIRMED"
+      ],
+      "post_states": [
+        "PAYMENT_FAILED"
+      ],
+      "invalidate": [
+        "PAYMENT_CONFIRMED"
+      ],
+      "description": "退款 → 已确认的支付可退款，退款后状态变更为失败"
+    },
+    "cancel_payment": {
+      "namespace": "payment",
+      "pre_states": [
+        "ORDER_CREATED",
+        "PAYMENT_INITIATED"
+      ],
+      "post_states": [
+        "PAYMENT_FAILED"
+      ],
+      "invalidate": [
+        "ORDER_CREATED",
+        "PAYMENT_INITIATED"
+      ],
+      "description": "取消支付 → 在回调前取消，订单和支付状态一起失效"
+    },
+    "retry_payment": {
+      "namespace": "payment",
+      "pre_states": [
+        "PAYMENT_FAILED"
+      ],
+      "post_states": [
+        "PAYMENT_INITIATED"
+      ],
+      "invalidate": [
+        "PAYMENT_FAILED"
+      ],
+      "description": "重试支付 → 支付失败后可重新发起"
+    },
+    "verify_payment_signature": {
+      "namespace": "payment",
+      "pre_states": [
+        "PAYMENT_CALLBACK_RECEIVED"
+      ],
+      "post_states": [
+        "PAYMENT_CALLBACK_RECEIVED"
+      ],
+      "description": "验证支付回调签名 → 防伪造回调（自保持，不改变状态）"
+    },
+    "reconcile_payment": {
+      "namespace": "payment",
+      "pre_states": [
+        "PAYMENT_CONFIRMED"
+      ],
+      "post_states": [
+        "PAYMENT_CONFIRMED"
+      ],
+      "description": "对账 → 与支付网关日终对账（自保持）"
+    },
+    "validate_session": {
+      "namespace": "session_mgmt",
+      "pre_states": [
+        "SESSION_CREATED",
+        "SESSION_REFRESHED"
+      ],
+      "post_states": [
+        "SESSION_CREATED",
+        "SESSION_REFRESHED"
+      ],
+      "description": "验证会话有效性 → 每个请求的中间件检查（自保持，通过则不改变状态）"
+    },
+    "extend_session": {
+      "namespace": "session_mgmt",
+      "pre_states": [
+        "SESSION_CREATED"
+      ],
+      "post_states": [
+        "SESSION_REFRESHED"
+      ],
+      "invalidate": [
+        "SESSION_CREATED"
+      ],
+      "description": "延长会话有效期 → 用户活跃时自动续期"
+    },
+    "renew_session_from_expired": {
+      "namespace": "session_mgmt",
+      "pre_states": [
+        "SESSION_EXPIRED"
+      ],
+      "post_states": [
+        "SESSION_CREATED"
+      ],
+      "invalidate": [
+        "SESSION_EXPIRED"
+      ],
+      "description": "从过期会话恢复 → 通过 refresh token 或重新登录创建新会话"
+    },
+    "revoke_all_sessions": {
+      "namespace": "session_mgmt",
+      "pre_states": [
+        "SESSION_CREATED",
+        "SESSION_REFRESHED"
+      ],
+      "post_states": [
+        "SESSION_REVOKED"
+      ],
+      "invalidate": [
+        "SESSION_CREATED",
+        "SESSION_REFRESHED"
+      ],
+      "description": "批量撤销所有会话 → 密码修改后强制所有设备下线"
+    },
+    "cleanup_expired_sessions": {
+      "namespace": "session_mgmt",
+      "pre_states": [
+        "SESSION_EXPIRED",
+        "SESSION_REVOKED"
+      ],
+      "post_states": [],
+      "invalidate": [
+        "SESSION_EXPIRED",
+        "SESSION_REVOKED"
+      ],
+      "description": "清理过期/已撤销的会话记录 → 定时任务，释放存储"
+    },
+    "rotate_session_token": {
+      "namespace": "session_mgmt",
+      "pre_states": [
+        "SESSION_CREATED",
+        "SESSION_REFRESHED"
+      ],
+      "post_states": [
+        "SESSION_REFRESHED"
+      ],
+      "invalidate": [
+        "SESSION_CREATED",
+        "SESSION_REFRESHED"
+      ],
+      "description": "轮换会话令牌 → 防固定攻击，旧令牌立即失效"
+    },
+    "resend_verification_code": {
+      "namespace": "registration",
+      "pre_states": [
+        "VERIFICATION_CODE_SENT"
+      ],
+      "post_states": [
+        "VERIFICATION_CODE_SENT"
+      ],
+      "description": "重发验证码 → 前一个验证码失效，发送新验证码"
+    },
+    "expire_verification": {
+      "namespace": "registration",
+      "pre_states": [
+        "VERIFICATION_CODE_SENT"
+      ],
+      "post_states": [
+        "USER_REGISTERED"
+      ],
+      "invalidate": [
+        "VERIFICATION_CODE_SENT"
+      ],
+      "description": "验证码过期 → 回到已注册状态，可重新发送"
+    },
+    "reject_registration": {
+      "namespace": "registration",
+      "pre_states": [
+        "USER_REGISTERED",
+        "VERIFICATION_CODE_SENT"
+      ],
+      "post_states": [
+        "UNAUTHENTICATED"
+      ],
+      "invalidate": [
+        "USER_REGISTERED",
+        "VERIFICATION_CODE_SENT"
+      ],
+      "description": "拒绝注册 → 管理员拒绝或黑名单检测触发，回到未认证状态"
+    },
+    "reject_file": {
+      "namespace": "file_upload",
+      "pre_states": [
+        "FILE_RECEIVED",
+        "FILE_VALIDATED"
+      ],
+      "post_states": [],
+      "invalidate": [
+        "FILE_RECEIVED",
+        "FILE_VALIDATED"
+      ],
+      "description": "拒绝文件 → 类型/大小不符合要求，丢弃文件"
+    },
+    "virus_scan_file": {
+      "namespace": "file_upload",
+      "pre_states": [
+        "FILE_RECEIVED"
+      ],
+      "post_states": [
+        "FILE_RECEIVED"
+      ],
+      "description": "病毒扫描 → 上传后扫描（自保持，通过则继续）"
+    },
+    "delete_file": {
+      "namespace": "file_upload",
+      "pre_states": [
+        "FILE_STORED",
+        "FILE_REFERENCED"
+      ],
+      "post_states": [],
+      "invalidate": [
+        "FILE_STORED",
+        "FILE_REFERENCED"
+      ],
+      "description": "删除已存储文件 → 释放存储空间"
+    },
+    "escape_output": {
+      "namespace": "resource",
+      "pre_states": [
+        "CONTENT_VALID"
+      ],
+      "post_states": [
+        "CONTENT_VALID"
+      ],
+      "description": "输出转义 → 防 XSS，HTML 实体编码（自保持）"
+    },
+    "rate_limit_resource": {
+      "namespace": "resource",
+      "pre_states": [],
+      "post_states": [],
+      "description": "资源访问频率限制 → 防止滥用和 DoS"
+    },
+    "circuit_break": {
+      "namespace": "api_gateway",
+      "pre_states": [
+        "RATE_CHECKED"
+      ],
+      "post_states": [
+        "THROTTLED"
+      ],
+      "invalidate": [
+        "RATE_CHECKED"
+      ],
+      "description": "熔断 → 连续失败超过阈值时触发，直接拒绝请求"
+    },
+    "retry_notification": {
+      "namespace": "notification",
+      "pre_states": [
+        "NOTIFICATION_SENT"
+      ],
+      "post_states": [
+        "NOTIFICATION_SENT"
+      ],
+      "description": "重试发送 → 上次发送失败后重试（自保持）"
+    },
+    "fail_notification": {
+      "namespace": "notification",
+      "pre_states": [
+        "NOTIFICATION_COMPOSED",
+        "NOTIFICATION_SENT"
+      ],
+      "post_states": [],
+      "invalidate": [
+        "NOTIFICATION_COMPOSED",
+        "NOTIFICATION_SENT"
+      ],
+      "description": "通知失败 → 永久失败（如无效地址），放弃发送"
+    },
+    "disable_supplier": {
+      "namespace": "supplier",
+      "pre_states": [
+        "SUPPLIER_ENABLED"
+      ],
+      "post_states": [
+        "SUPPLIER_VERIFIED"
+      ],
+      "invalidate": [
+        "SUPPLIER_ENABLED"
+      ],
+      "description": "停用供应商 → 暂停接单但不取消资质"
+    },
+    "deregister_supplier": {
+      "namespace": "supplier",
+      "pre_states": [
+        "SUPPLIER_REGISTERED",
+        "SUPPLIER_VERIFIED"
+      ],
+      "post_states": [],
+      "invalidate": [
+        "SUPPLIER_REGISTERED",
+        "SUPPLIER_VERIFIED"
+      ],
+      "description": "注销供应商 → 完全移除供应商资格"
+    },
+    "validate_order_integrity": {
+      "namespace": "data_integrity",
+      "pre_states": [
+        "REFERENCE_CREATED"
+      ],
+      "post_states": [
+        "REFERENCE_CREATED"
+      ],
+      "description": "校验订单完整性 → 验证关联数据未被篡改（自保持）"
+    },
+    "renew_tls_certificate": {
+      "namespace": "tls",
+      "pre_states": [
+        "TLS_CONFIGURED"
+      ],
+      "post_states": [
+        "TLS_CONFIGURED"
+      ],
+      "description": "更新 TLS 证书 → 到期前轮换证书（自保持）"
+    },
+    "rollback_ir": {
+      "namespace": "dev_pipeline",
+      "pre_states": [
+        "IR_EXTRACTED",
+        "ACTION_VALIDATED"
+      ],
+      "post_states": [
+        "IR_STALE"
+      ],
+      "invalidate": [
+        "IR_EXTRACTED",
+        "ACTION_VALIDATED"
+      ],
+      "description": "回滚 IR → 校验失败时重置到 STALE 状态"
+    },
+    "cancel_order": {
+      "namespace": "printlab_order",
+      "pre_states": [
+        "ORDER_CREATED",
+        "ORDER_QUEUED"
+      ],
+      "post_states": [],
+      "invalidate": [
+        "ORDER_CREATED",
+        "ORDER_QUEUED"
+      ],
+      "description": "取消订单 → 打印前取消，释放队列资源"
+    },
+    "fail_print": {
+      "namespace": "printlab_print",
+      "pre_states": [
+        "PRINT_STARTED"
+      ],
+      "post_states": [],
+      "invalidate": [
+        "PRINT_STARTED"
+      ],
+      "description": "打印失败 → 材料耗尽/机器故障/翘边等"
     }
   }
 }
