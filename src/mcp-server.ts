@@ -308,6 +308,30 @@ async function main() {
           required: ["projectPath"],
         },
       },
+      {
+        name: "progmune_score",
+        description:
+          "Score a function's protocol compliance on a continuous 0-1 scale across 6 dimensions (auth, tls, payment, data_integrity, resource, session). Unlike progmune_check which returns binary pass/fail, progmune_score returns per-dimension compliance scores, identifies the weakest dimension, and suggests specific missing calls. Use this BEFORE generating code — pass the intended function calls and purpose to see what protocols are missing. No ML. Pure rule-based scoring using existing SSG protocol definitions.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            calls: {
+              type: "array",
+              items: { type: "string" },
+              description: "Array of function call names in execution order (e.g. ['getOrder', 'processRefund', 'sendEmail'])",
+            },
+            purpose: {
+              type: "string",
+              description: "Optional function purpose to trigger dimension relevance (e.g. '退款处理', '用户注册', '文件上传')",
+            },
+            functionName: {
+              type: "string",
+              description: "Optional function name for context",
+            },
+          },
+          required: ["calls"],
+        },
+      },
     ],
   }));
 
@@ -1306,6 +1330,32 @@ ${result.code.split("\n").slice(0, 80).join("\n")}` }] };
         return { content: [{ type: "text", text: formatTrustTerminal(decision) }] };
       } catch (e: any) {
         return { content: [{ type: "text", text: `❌ Trust check failed: ${e.message}` }] };
+      }
+    }
+
+    if (request.params.name === "progmune_score") {
+      const { calls, purpose, functionName } = request.params.arguments as {
+        calls: string[]; purpose?: string; functionName?: string;
+      };
+      if (!calls || !Array.isArray(calls) || calls.length === 0) {
+        return { content: [{ type: "text", text: "❌ calls is required and must be a non-empty array of function names." }] };
+      }
+
+      try {
+        const { scoreCompliance, scoreFunction, formatComplianceReport } = require("./trust/compliance-scorer");
+        const result = functionName
+          ? scoreFunction(functionName, calls, purpose)
+          : scoreCompliance(calls, purpose);
+        const report = formatComplianceReport(result);
+        const json = JSON.stringify(result, null, 2);
+        return {
+          content: [
+            { type: "text", text: report },
+            { type: "text", text: `\n── JSON ──\n${json}` },
+          ],
+        };
+      } catch (e: any) {
+        return { content: [{ type: "text", text: `❌ Compliance scoring failed: ${e.message}` }] };
       }
     }
 

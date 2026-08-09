@@ -88,6 +88,126 @@ const PROTOCOLS = [
             { pattern: /\b(logout|destroy_session|revoke_token|token_revoke|invalidate)\b/i, label: "auth_logout", required: true },
         ],
     },
+    // ═══════════════════════════════════════════════════════════════
+    // P0 Injection: Payment Processing + Session Management detectors
+    // ═══════════════════════════════════════════════════════════════
+    {
+        name: "Payment Processing", category: "payment", minCompleteness: 0.4,
+        steps: [
+            // init: payment intent creation (Stripe, PayPal, Braintree, generic)
+            { pattern: /\b(\w*payment\w*intent|\w*payment\w*init|\w*pay\w*init|\w*pay\w*create|\w*create\w*payment|\w*create\w*order|\w*stripe\w*create|\w*paypal\w*create|\w*braintree\w*create|\w*checkout\w*create|\w*initiate\w*payment|\w*initiate\w*order)\b/i, label: "pay_init", required: true },
+            // process: callback/webhook handling
+            { pattern: /\b(\w*payment\w*callback|\w*webhook|\w*payment\w*confirm|\w*handle\w*webhook|\w*verify\w*signature|\w*validate\w*webhook|\w*stripe\w*webhook|\w*paypal\w*ipn|\w*callback\w*handler|\w*payment\w*success)\b/i, label: "pay_callback", required: true },
+            // complete: confirm/capture
+            { pattern: /\b(\w*payment\w*confirm|\w*capture\w*payment|\w*confirm\w*order|\w*payment\w*done|\w*payment\w*success|\w*order\w*complete|\w*payment\w*succeed)\b/i, label: "pay_done", required: true },
+            // protect: signature verification (not required for minCompleteness)
+            { pattern: /\b(\w*verify\w*sign|\w*check\w*sign|\w*validate\w*sign|\w*hmac\b|\w*webhook\w*secret|\w*stripe\w*sign|\w*paypal\w*verify|\w*verify\w*webhook\w*sign)\b/i, label: "pay_sig_check", required: false },
+        ],
+    },
+    {
+        name: "Session Management", category: "session", minCompleteness: 0.4,
+        steps: [
+            // create: session establishment
+            { pattern: /\b(\w*session\w*create|\w*create\w*session|\w*session\w*init|\w*session\w*new|\w*session\w*start|\w*login\w*session|\w*init\w*session)\b/i, label: "sess_create", required: true },
+            // validate: session check (middleware)
+            { pattern: /\b(\w*session\w*check|\w*session\w*valid|\w*validate\w*session|\w*verify\w*session|\w*authenticate\w*session|\w*session\w*auth|\w*check\w*session|\w*get\w*session)\b/i, label: "sess_validate", required: true },
+            // destroy: session termination/cleanup
+            { pattern: /\b(\w*session\w*destroy|\w*session\w*delete|\w*session\w*revoke|\w*session\w*invalidate|\w*session\w*end|\w*session\w*logout|\w*session\w*signout|\w*session\w*expire|\w*session\w*timeout|\w*destroy\w*session|\w*cleanup\w*session|\w*purge\w*session)\b/i, label: "sess_destroy", required: true },
+            // refresh: token/session refresh (not required for minCompleteness)
+            { pattern: /\b(\w*session\w*refresh|\w*session\w*renew|\w*session\w*extend|\w*refresh\w*session|\w*rotate\w*token|\w*session\w*rotate|\w*renew\w*session)\b/i, label: "sess_refresh", required: false },
+        ],
+    },
+    // ── P0 Round 2: Registration + File Upload + Resource Validation ──
+    {
+        name: "User Registration", category: "registration", minCompleteness: 0.4,
+        steps: [
+            { pattern: /\b(\w*register\w*user|\w*user\w*register|\w*signup|\w*sign\w*up|\w*create\w*account|\w*account\w*create|\w*registration\w*init|\w*registration\w*start)\b/i, label: "reg_init", required: true },
+            { pattern: /\b(\w*send\w*(code|otp|token|verif|sms|email)|\w*(code|otp|token|verif|sms|email)\w*send|\w*verification\w*send|\w*send\w*verif)\b/i, label: "reg_send_code", required: true },
+            { pattern: /\b(\w*verify\w*(code|otp|token|email)|\w*(code|otp|token)\w*verify|\w*confirm\w*(code|registration|account)|\w*validate\w*(code|token|verif))\b/i, label: "reg_verify", required: true },
+            { pattern: /\b(\w*activ\w*account|\w*account\w*activ|\w*registration\w*complete|\w*registration\w*done|\w*registration\w*finish)\b/i, label: "reg_activate", required: false },
+        ],
+    },
+    {
+        name: "File Upload", category: "file_upload", minCompleteness: 0.4,
+        steps: [
+            { pattern: /\b(upload\w*file|file\w*upload|handle\w*upload|receive\w*upload|process\w*upload|multipart|form\w*data|upload\w*handler|upload\w*endpoint)\b/i, label: "up_receive", required: true },
+            { pattern: /\b(\w*validate\w*file|\w*file\w*valid|\w*check\w*file\w*type|\w*check\w*file\w*size|\w*mime\w*check|\w*max\w*file\w*size|\w*allow\w*ext|\w*file\w*ext\w*check)\b/i, label: "up_validate", required: true },
+            { pattern: /\b(\w*file\w*store|\w*store\w*file|\w*file\w*save|\w*save\w*file|\w*upload\w*to\w*cloud|\w*S3\w*upload|\w*cloud\w*upload)\b/i, label: "up_store", required: true },
+            { pattern: /\b(\w*file\w*clean|\w*file\w*remove|\w*remove\w*file|\w*file\w*delete|\w*cleanup\w*upload|\w*upload\w*clean)\b/i, label: "up_cleanup", required: false },
+        ],
+    },
+    {
+        name: "Input Validation Chain", category: "resource", minCompleteness: 0.4,
+        steps: [
+            { pattern: /\b(\w*sanitize|\w*escape|\w*clean|\w*strip\w*tags|\w*html\w*escape|\w*xss\w*clean|\w*filter\w*input|\w*input\w*filter)\b/i, label: "res_sanitize", required: true },
+            { pattern: /\b(\w*valid\w*type|\w*type\w*check|\w*check\w*type|\w*is_string|\w*is_number|\w*is_int|\w*is_bool|\w*type\w*of|\w*schema\w*valid|\w*valid\w*schema)\b/i, label: "res_validate", required: true },
+            { pattern: /\b(\w*valid\w*range|\w*range\w*check|\w*min\w*length|\w*max\w*length|\w*min_value|\w*max_value|\w*length\w*check|\w*bound\w*check)\b/i, label: "res_range", required: false },
+        ],
+    },
+    // ── P0 Round 3: api_gateway + notification + supplier + tls
+    //              + data_integrity + dev_pipeline
+    //              + printlab_order + printlab_print ──
+    {
+        name: "Rate Limiting", category: "api_gateway", minCompleteness: 0.4,
+        steps: [
+            { pattern: /\b(\w*rate\w*limit|\w*rate\w*check|\w*throttle\b|\w*check\w*rate|\w*quota\w*check|\w*concurrency\w*limit|\w*rate\w*limiter)\b/i, label: "rate_check", required: true },
+            { pattern: /\b(\w*rate\w*exceed|rate\w*block|rate\w*reject|conn\w*limit|circuit\w*break|circuit\w*open|too\w*many\w*request)\b/i, label: "rate_block", required: true },
+        ],
+    },
+    {
+        name: "Notification Delivery", category: "notification", minCompleteness: 0.4,
+        steps: [
+            { pattern: /\b(\w*notif\w*compos|\w*compos\w*notif|\w*email\w*compos|\w*sms\w*compos|\w*push\w*compos|\w*notif\w*create|\w*notif\w*build|\w*build\w*notif)\b/i, label: "notif_compose", required: true },
+            { pattern: /\b(\w*send\w*notif|\w*notif\w*send|\w*email\w*send|\w*sms\w*send|\w*push\w*send|\w*dispatch\w*notif|\w*notif\w*dispatch)\b/i, label: "notif_send", required: true },
+            { pattern: /\b(\w*confirm\w*deliv|\w*deliv\w*confirm|\w*notif\w*ack|\w*notif\w*confirm|\w*send\w*confirm|\w*ack\w*deliv)\b/i, label: "notif_confirm", required: false },
+        ],
+    },
+    {
+        name: "Supplier Lifecycle", category: "supplier", minCompleteness: 0.4,
+        steps: [
+            { pattern: /\b(\w*supplier\w*regist|\w*regist\w*supplier|\w*vendor\w*regist|\w*partner\w*onboard|\w*onboard\w*partner|\w*supplier\w*create)\b/i, label: "sup_register", required: true },
+            { pattern: /\b(\w*supplier\w*verif|\w*verif\w*supplier|\w*supplier\w*valid|\w*approve\w*supplier|\w*supplier\w*approve|\w*kyc\w*check)\b/i, label: "sup_verify", required: true },
+            { pattern: /\b(\w*supplier\w*enabl|\w*enabl\w*supplier|\w*supplier\w*activ|\w*activ\w*supplier|\w*supplier\w*assign)\b/i, label: "sup_enable", required: true },
+        ],
+    },
+    {
+        name: "TLS Server Setup", category: "tls", minCompleteness: 0.4,
+        steps: [
+            { pattern: /\b(\w*tls\w*config|\w*ssl\w*config|\w*cert\w*load|\w*load\w*cert|\w*key\w*load|\w*tls\w*setup|\w*tls\w*init|\w*SSL_CTX\w*config)\b/i, label: "tls_config", required: true },
+            { pattern: /\b(\w*create\w*server|\w*server\w*start|\w*listen\b|\w*bind\b|\w*server\w*init|\w*start\w*server|\w*http\w*listen)\b/i, label: "tls_server", required: false },
+        ],
+    },
+    {
+        name: "Data Integrity Check", category: "data_integrity", minCompleteness: 0.4,
+        steps: [
+            { pattern: /\b(\w*check\w*exist|\w*exist\w*check|\w*lookup|\w*find\w*by\w*id|\w*get\w*entity|\w*valid\w*refer|\w*refer\w*valid)\b/i, label: "di_check", required: true },
+            { pattern: /\b(\w*create\w*refer|\w*refer\w*create|\w*link\w*entity|\w*assoc\w*entity|\w*set\w*foreign|\w*foreign\w*key)\b/i, label: "di_refer", required: true },
+            { pattern: /\b(\w*audit|\w*log\w*change|\w*record\w*mutation|\w*track\w*change|\w*change\w*log|\w*audit\w*trail)\b/i, label: "di_audit", required: false },
+        ],
+    },
+    {
+        name: "Dev Pipeline", category: "dev_pipeline", minCompleteness: 0.4,
+        steps: [
+            { pattern: /\b(\w*extract\w*ir|\w*ir\w*extract|\w*parse\w*source|\w*analyze\w*code|\w*ast\w*parse|\w*build\w*ast|\w*compile\w*ir)\b/i, label: "dev_extract", required: true },
+            { pattern: /\b(\w*valid\w*action|\w*action\w*valid|\w*check\w*rule|\w*rule\w*check|\w*lint|\w*verify\w*rule|\w*enforce\w*rule)\b/i, label: "dev_validate", required: true },
+            { pattern: /\b(\w*emit|\w*generate|\w*output|\w*codegen|\w*compile|\w*build\w*out|\w*write\w*out)\b/i, label: "dev_emit", required: false },
+        ],
+    },
+    {
+        name: "3D Print Order", category: "printlab_order", minCompleteness: 0.3,
+        steps: [
+            { pattern: /\b(\w*upload\w*stl|\w*stl\w*upload|\w*upload\w*model|\w*model\w*upload|\w*file\w*upload|\w*upload\w*file)\b/i, label: "po_upload", required: true },
+            { pattern: /\b(\w*slice|\w*gcode|\w*generate\w*gcode|\w*estimate|\w*cost\w*calc|\w*calc\w*cost|\w*create\w*order)\b/i, label: "po_process", required: true },
+            { pattern: /\b(\w*queue|\w*ship|\w*deliver|\w*complete\w*order|\w*order\w*done|\w*finish\w*order)\b/i, label: "po_complete", required: false },
+        ],
+    },
+    {
+        name: "3D Print Execution", category: "printlab_print", minCompleteness: 0.4,
+        steps: [
+            { pattern: /\b(\w*start\w*print|\w*print\w*start|\w*begin\w*print|\w*print\w*begin|\w*execute\w*print|\w*run\w*print)\b/i, label: "pp_start", required: true },
+            { pattern: /\b(\w*complete\w*print|\w*print\w*complete|\w*finish\w*print|\w*print\w*done|\w*print\w*success|\w*print\w*finish)\b/i, label: "pp_complete", required: true },
+        ],
+    },
 ];
 const SAFEGUARD_RULES = [
     // ── Password Hashing ──
@@ -115,52 +235,96 @@ const SAFEGUARD_RULES = [
         conceptExpected: ["bcrypt", "argon2"],
     },
     // ── Authorization / Ownership Check ──
+    // v2: narrowed triggers — removed "process" and "set" (too generic for C libraries)
     {
         name: "Authorization (Ownership Check)",
         category: "authorization",
-        trigger: /\b(add|create|delete|remove|update|toggle|modify|edit|lock|ban|process|refund|assign|transfer|share|schedule|upload|set)(?:[A-Z]\w*|_\w+)\b/i,
+        trigger: /\b(delete|remove|toggle|modify|edit|lock|ban|refund|assign|transfer|share|schedule|upload)(?:[A-Z]\w*|_\w+)|(?:[A-Z]\w*|_\w+)(Delete|Remove|Toggle|Modify|Edit|Lock|Ban|Refund|Assign|Transfer|Share|Schedule|Upload)\b/i,
         safeguards: [
-            { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|checkOwner|authorId\s*[!=]==?|ownerId\s*[!=]==?|userId\s*[!=]==?|\.owner\s*[!=]==?)/i, label: "auth_check" },
+            { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|checkOwner|authorId\s*[!=]==?|ownerId\s*[!=]==?|userId\s*[!=]==?|\.owner\s*[!=]==?|hasPermission|checkPermission|checkAccess|isAuthorized|checkRole|requireRole|adminCheck|isAdmin|canModify|canDelete|canEdit)\b/i, label: "auth_check" },
         ],
         violationMessage: "Mutation operation does not verify user ownership or authorization before modifying data.",
         conceptMissing: ["OwnershipCheck", "AuthorizationGuard"],
         conceptExpected: ["getUser", "validateToken", "ownerId check"],
+        excludePatterns: [
+            /_hd_/, // HPACK header compression internals
+            /_frame_/, // protocol frame handlers
+            /_stream_/, // stream internals
+            /_buf_/, // buffer internals
+            /_pkt_/, // packet internals
+            /set_authn_id/, // internal auth setter
+            /add_auth_info/, // internal auth metadata
+            /process_echo_/, // echo protocol handler
+            /Command$/, // generic command processors
+            /InputBuffer/, // input buffer processors
+        ],
     },
     // Functions that serve data without any auth
+    // v2: removed "read" (I/O op in C) and "find" (internal search); narrowed to API-oriented patterns
     {
         name: "Authorization (Unauthenticated Access)",
         category: "authorization",
-        trigger: /\b(get|list|download|view|read|fetch|find)(?:[A-Z]\w*|_\w+)\b/i,
+        languages: ["typescript", "javascript", "python"],
+        trigger: /\b(list|download|view|fetch)(?:[A-Z]\w*|_\w+)|get(?:[A-Z]\w+|_\w+)/i,
         safeguards: [
-            { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?)\b/i, label: "auth_check" },
+            { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess)\b/i, label: "auth_check" },
         ],
         violationMessage: "Data access function does not check authentication. Anyone can access data without credentials.",
         conceptMissing: ["AuthenticationCheck", "AccessControl"],
         conceptExpected: ["token validation", "session check", "auth middleware"],
+        excludePatterns: [
+            /get_client_cert/, // TLS certificate retrieval
+            /get_ssl_/, // SSL config retrieval
+            /get_config/, // configuration retrieval
+            /get_option/, // option retrieval
+            /get_env/, // environment variable
+            /getpid|getuid|geteuid/, // OS-level getters
+            /listpack/, // Redis internal data structure
+            /readSync|readQuery/, // internal I/O
+            /findBig|findKey|findPk/, // internal search (not API)
+        ],
     },
     // ── Data Integrity (Foreign Key Validation) ──
+    // v2: removed "process" and "send" (too generic for C)
     {
         name: "Data Integrity (Foreign Key)",
         category: "data_integrity",
-        trigger: /\b(add|create|post|refund|process|send)(?:[A-Z]\w*|_\w+)\b/i,
+        trigger: /\b(add|create|post|refund)(?:[A-Z]\w*|_\w+)|(?:[A-Z]\w*|_\w+)(Add|Create|Post|Refund)\b/i,
         safeguards: [
-            { pattern: /\b(get|find|check|exists|lookup|status)(?:[A-Z]\w*|_\w+)\b/i, label: "fk_check" },
+            { pattern: /\b(get|find|check|exists|lookup|status|validate|verify)(?:[A-Z]\w*|_\w+)\b/i, label: "fk_check" },
         ],
         violationMessage: "Creates a child entity without verifying the parent entity exists. Orphaned references possible.",
         conceptMissing: ["ForeignKeyValidation", "ReferentialIntegrity"],
         conceptExpected: ["checkExists", "getParent", "validateReference"],
+        excludePatterns: [
+            /_hd_/, // HPACK header compression
+            /add_auth_info/, // internal auth metadata
+            /add_header/, // HTTP header addition
+            /send_response/, // HTTP response (not entity creation)
+            /create_callback/, // callback creation
+            /create_filter/, // filter creation
+        ],
     },
     // ── Input Validation ──
+    // v2: removed "send" (too generic for C); kept create/add/post/upload
     {
         name: "Input Validation",
         category: "input_validation",
-        trigger: /\b(create|add|post|send|upload)(?:[A-Z]\w*|_\w+)\b/i,
+        trigger: /\b(create|add|post|upload)(?:[A-Z]\w*|_\w+)|(?:[A-Z]\w*|_\w+)(Create|Add|Post|Upload)\b/i,
         safeguards: [
-            { pattern: /\b(validate|sanitize|check|verify)\w*(Content|Input|Length|Title|Body|Type|Size|File)\b/i, label: "input_validation" },
+            { pattern: /\b(validate|sanitize|check|verify)(?:[A-Z]\w*|_\w*)(Content|Input|Length|Title|Body|Type|Size|File|Data|Param|Arg|Field|Value)\b|\b(validateContent|sanitizeInput|checkLength|verifyType|checkSize)\b/i, label: "input_validation" },
         ],
         violationMessage: "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
         conceptMissing: ["InputSanitization", "ContentValidation", "SizeLimit"],
         conceptExpected: ["validateContent", "sanitizeInput", "checkLength"],
+        excludePatterns: [
+            /_hd_/, // HPACK header compression
+            /add_auth_info/, // internal auth metadata
+            /add_header/, // HTTP header addition
+            /send_response/, // HTTP response
+            /send_reply/, // protocol reply
+            /upload_blob/, // binary blob upload (not content)
+        ],
     },
     // ── TLS Enforcement ──
     {
@@ -178,6 +342,7 @@ const SAFEGUARD_RULES = [
     {
         name: "Token Security (Weak Generation)",
         category: "token_security",
+        languages: ["typescript", "javascript", "python"],
         trigger: /\b(authenticate|login|signIn|logIn|createSession|generateToken)\b/i,
         safeguards: [
             { pattern: /\b(crypto\.randomUUID|jwt\.sign|jsonwebtoken|nanoid|randomBytes|cryptoRandomString)\b/i, label: "secure_token" },
@@ -346,6 +511,225 @@ const SAFEGUARD_RULES = [
         conceptMissing: ["SQLInjectionPrevention", "ParameterizedQueries"],
         conceptExpected: ["parameterized query", "%s placeholder"],
     },
+    // ═══════════════════════════════════════════════════════════════
+    // P0 Injection: Payment + Session safeguard rules
+    // ═══════════════════════════════════════════════════════════════
+    // ── Payment: Webhook without signature verification ──
+    {
+        name: "Payment Webhook (No Signature Check)",
+        category: "payment",
+        trigger: /\b(\w*webhook|\w*payment\w*callback|\w*stripe\w*webhook|\w*paypal\w*ipn|\w*ipn\w*handler|\w*payment\w*notify)\b/i,
+        safeguards: [
+            { pattern: /\b(\w*sign|\w*verify\w*sign|\w*check\w*sign|\w*validate\w*sign|\w*hmac\b|\w*webhook\w*secret|\w*signature\w*check|\w*signature\w*valid|\w*raw\w*body|\w*payload\w*raw)\b/i, label: "sig_check" },
+        ],
+        violationMessage: "Payment webhook/callback handler does not verify the request signature. Accepts unauthenticated payment confirmations — trivial to forge.",
+        conceptMissing: ["WebhookSignatureVerification", "HMACValidation"],
+        conceptExpected: ["verifySignature", "stripe.webhooks.constructEvent", "hmac check"],
+    },
+    // ── Payment: Payment without order verification ──
+    {
+        name: "Payment Without Order Verification",
+        category: "payment",
+        trigger: /\b(process\w*payment|payment\w*process|create\w*payment|payment\w*create|processPayment|createPayment|handlePayment|payment\w*handle|complete\w*payment|payment\w*complete|charge\w*payment|payment\w*charge)\b/i,
+        safeguards: [
+            { pattern: /\b(getOrder|checkOrder|verifyOrder|findOrder|orderExists|get_order|check_order|verify_order|find_order|order\w*find|order\w*get|order\w*check|order\w*verify|order\w*valid)\b/i, label: "order_check" },
+        ],
+        violationMessage: "Payment processed without verifying the associated order exists and belongs to the user. Payments can be made against nonexistent or unauthorized orders.",
+        conceptMissing: ["OrderVerification", "PaymentAuthorization", "OrderOwnership"],
+        conceptExpected: ["getOrder", "checkOrder", "verifyOrder"],
+    },
+    // ── Payment: Refund without auth check ──
+    {
+        name: "Payment Refund (No Authorization)",
+        category: "payment",
+        trigger: /\b(refund|void|reverse|cancel\w*payment|\w*refund|\w*void\w*payment)\b/i,
+        safeguards: [
+            { pattern: /\b(\w*auth|\w*admin|\w*role|\w*permission|\w*approve|\w*confirm|\w*verify\w*user|\w*check\w*owner|\w*validate\w*admin|\w*authorize\b)/i, label: "auth_check" },
+        ],
+        violationMessage: "Refund/void function does not check authorization. Any user could initiate refunds without permission.",
+        conceptMissing: ["RefundAuthorization", "AdminCheck"],
+        conceptExpected: ["admin", "role check", "approve refund"],
+    },
+    // ── Session: Missing session timeout/expiry ──
+    {
+        name: "Session No Timeout",
+        category: "session",
+        trigger: /\b(\w*session\w*create|\w*create\w*session|\w*session\w*new|\w*session\w*start|\w*login\w*session|\w*session\w*init|signIn|signin|login\b|authenticate\b|createSession|create_session)\b/i,
+        safeguards: [
+            { pattern: /\b(\w*expir|\w*ttl|\w*timeout|\w*max\w*age|\w*maxAge|\w*max_age|\w*lifetime|\w*duration|\w*expires|\w*deadline|\w*valid\w*for|\w*valid\w*until)/i, label: "timeout_set" },
+        ],
+        violationMessage: "Session created without setting an expiry/TTL. Session tokens could be valid indefinitely.",
+        conceptMissing: ["SessionTimeout", "TTLConfiguration"],
+        conceptExpected: ["expiresIn", "maxAge", "session TTL"],
+        /** Library functions where timeout is configured via separate API (not in constructor) */
+        excludePatterns: [
+            /^session_new$/, // nghttp2 constructor (timeout via callbacks_set_send_timeout)
+            /_frame_/, // internal frame handlers
+            /_internal_/, // internal machinery
+            /CheckPAMAuth/, // PostgreSQL PAM — timeout via /etc/pam.d/
+            /pam_/, // PAM library functions (timeout external)
+            /CheckBSDAuth/, // BSD auth — timeout via login.conf
+        ],
+    },
+    // ── Session: Missing token rotation on sensitive action ──
+    {
+        name: "No Token Rotation After Privilege Change",
+        category: "session",
+        trigger: /\b(\w*password\w*change|\w*password\w*reset|\w*change\w*password|\w*reset\w*password|\w*update\w*password|\w*privilege|\w*role\w*change|\w*escalat|\w*enable\w*2fa|\w*mfa\w*enable|\w*email\w*change)\b/i,
+        safeguards: [
+            { pattern: /\b(\w*revoke|\w*rotate|\w*invalidate|\w*reissue|\w*regenerate|\w*new\w*token|\w*token\w*refresh|\w*session\w*refresh|\w*renew)/i, label: "token_rotate" },
+        ],
+        violationMessage: "Privilege-changing operation detected without subsequent token rotation or session invalidation. Stolen pre-change tokens remain valid.",
+        conceptMissing: ["TokenRotation", "SessionInvalidation", "FixationPrevention"],
+        conceptExpected: ["revoke session", "rotate token", "invalidate old sessions"],
+    },
+    // ═══════════════════════════════════════════════════════════════
+    // P0 Round 2: Registration + File Upload + Resource safeguard rules
+    // ═══════════════════════════════════════════════════════════════
+    // ── Registration: No email verification ──
+    {
+        name: "Registration Without Email Verification",
+        category: "registration",
+        trigger: /\b(register|signup|signUp|registerUser|createUser|createAccount)\b/i,
+        safeguards: [
+            { pattern: /\b(send\w*(Code|Otp|Token|Verif|Email|Sms|Link)|(code|otp|token|verif)\w*send|verification|confirmEmail|verifyEmail|sendVerification|verify_user_email)\b/i, label: "email_verify" },
+        ],
+        violationMessage: "User registration does not send email/SMS verification. Fake accounts can be created without email ownership check.",
+        conceptMissing: ["EmailVerification", "OTPValidation", "AccountOwnership"],
+        conceptExpected: ["sendVerificationCode", "verifyEmail", "confirmAccount"],
+    },
+    // ── File Upload: No type/size validation ──
+    {
+        name: "File Upload Without Validation",
+        category: "file_upload",
+        trigger: /\b(upload|receive\w*file|handle\w*upload|file\w*upload|multipart|form\w*data|write\w*file|save\w*file|store\w*file)\b/i,
+        safeguards: [
+            { pattern: /\b(valid\w*(type|size|ext|mime|file)|check\w*(type|size|ext|mime|file)|file\w*(type|size|ext|mime)|mime\w*check|max\w*size|max\w*file|allow\w*(ext|type)|file\w*filter|content\w*type|scan\w*file|virus\w*scan)\b/i, label: "file_validate" },
+        ],
+        violationMessage: "File upload does not validate file type, size, or content. Vulnerable to malicious file uploads (webshells, oversized files, malware).",
+        conceptMissing: ["FileTypeValidation", "FileSizeLimit", "MalwareScanning"],
+        conceptExpected: ["validateFileType", "checkFileSize", "virus scan"],
+        excludePatterns: [
+            /file_upload/, // generic variable name, not upload handler
+            /ossl_do_file_type/, // OpenSSL file type detection
+            /ngx_file_(size|fs_size)/, // nginx file metadata
+            /nghttp2_max_size/, // nghttp2 size limit
+            /ngtcp2_conn_get_max_tx/, // ngtcp2 packet size
+        ],
+    },
+    // ── Resource: Input sanitization missing ──
+    {
+        name: "No Input Sanitization",
+        category: "resource",
+        trigger: /\b(render|display|write|output|append|insert|innerHTML|dangerouslySetInnerHTML|document\.write|echo|printf|sprintf)\b/i,
+        safeguards: [
+            { pattern: /\b(sanitize|escape|encode|html\w*entities|htmlspecialchars|encodeURI|stripTags|purify|DOMPurify|clean|filter\w*html|escape\w*html)\b/i, label: "sanitize" },
+        ],
+        violationMessage: "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
+        conceptMissing: ["XSSPrevention", "OutputEncoding", "ContentSanitization"],
+        conceptExpected: ["sanitize", "escapeHtml", "encodeURI"],
+        excludePatterns: [
+            /ssl_read|ssl_write|ssl_free/, // OpenSSL BIO I/O wrappers
+            /BIO_read|BIO_write|BIO_puts/, // OpenSSL BIO layer
+            /printf|sprintf|fprintf/, // C stdio — internal logging, not web rendering
+            /expect_quic_with_stream_lock/, // QUIC internal lock helper
+            /quic_write/, // QUIC internal I/O
+            /quic_read/, // QUIC internal I/O
+            /composite_end/, // JSON encoder internal
+            /qlog_event/, // QUIC qlog internal
+            /trace_frame/, // QUIC trace internal
+            /port_init|port_rx_pre/, // QUIC port internal
+            /echo$/, // shell echo, not web echo
+            /ldap_/, // LDAP connection/search — not web rendering
+            /FormatSearchFilter/, // LDAP search filter formatting
+            /InitializeLDAP/, // LDAP initialization
+        ],
+    },
+    // ═══════════════════════════════════════════════════════════════
+    // P0 Round 3: Remaining namespace safeguard rules
+    // ═══════════════════════════════════════════════════════════════
+    // ── API Gateway: No rate limiting ──
+    {
+        name: "API Without Rate Limiting",
+        category: "api_gateway",
+        trigger: /\b(createServer|listen|handleRequest|router|endpoint|api\w*handler|request\w*handler|handle\w*request)\b/i,
+        safeguards: [
+            { pattern: /\b(rate\w*limit|throttle|quota|concurrency|max\w*request|request\w*limit|token\w*bucket|leaky\w*bucket|circuit\w*break|redis\w*rate|limit\w*check)\b/i, label: "rate_limit" },
+        ],
+        violationMessage: "API endpoint created without rate limiting. Vulnerable to DoS and brute-force attacks.",
+        conceptMissing: ["RateLimiting", "DoSProtection", "QuotaManagement"],
+        conceptExpected: ["rateLimit", "throttle", "maxRequests"],
+        excludePatterns: [
+            /ap_(get|setup)_client_block/, // Apache HTTP body reading
+            /connBlock/, // Redis connection blocking
+            /curlx_nonblock/, // curl non-blocking I/O
+            /inflate_header_block/, // HPACK header compression
+            /emit_\w*_block/, // HPACK emit
+            /DTLSv1_listen/, // DTLS protocol listener, not API endpoint
+            /BIO_dgram/, // BIO datagram
+            /recvfrom|sendto/, // socket I/O
+        ],
+    },
+    // ── Notification: No retry on failure ──
+    {
+        name: "Notification Without Retry",
+        category: "notification",
+        trigger: /\b(send\w*email|send\w*sms|send\w*push|send\w*notif|dispatch|deliver\w*message|post\w*message)\b/i,
+        safeguards: [
+            { pattern: /\b(retry|reconnect|fallback|resilience|circuit\w*break|exponential\w*backoff|dead\w*letter|dlq|queue\w*retry|backoff)\b/i, label: "retry" },
+        ],
+        violationMessage: "Notification sent without retry/fallback mechanism. Transient network failures will cause silent message loss.",
+        conceptMissing: ["RetryLogic", "Resilience", "DeadLetterQueue"],
+        conceptExpected: ["retry", "exponential backoff", "dead letter queue"],
+        excludePatterns: [
+            /Curl_auth_create_\w+_message/, // auth message construction, not notification
+            /nghttp2_submit_\w+/, // HTTP/2 frame submission
+        ],
+    },
+    // ── TLS: Certificate without renewal ──
+    {
+        name: "TLS Certificate Without Renewal",
+        category: "tls",
+        trigger: /\b(load\w*cert|load\w*ssl|ssl\w*config|tls\w*config|cert\w*load|ssl\w*ctx|certificate\w*load)\b/i,
+        safeguards: [
+            { pattern: /\b(renew|rotate|expir|notAfter|notBefore|validity|check\w*expir|auto\w*renew|cert\w*watch|watch\w*cert)\b/i, label: "cert_renew" },
+        ],
+        violationMessage: "TLS certificate loaded without expiry check or renewal mechanism. Will cause production outage when certificate expires.",
+        conceptMissing: ["CertificateRenewal", "ExpiryMonitoring", "AutoRotation"],
+        conceptExpected: ["checkExpiry", "autoRenew", "certificate watch"],
+    },
+    // ── Data Integrity: Mutation without audit ──
+    {
+        name: "Data Mutation Without Audit Trail",
+        category: "data_integrity",
+        trigger: /\b(update|delete|modify|change|mutate|set\w*field|edit|remove|drop)\b/i,
+        safeguards: [
+            { pattern: /\b(audit|log\w*change|change\w*log|track\w*change|record\w*mutation|mutation\w*log|history|version|revision|snapshot|write\w*ahead|wal\b)/i, label: "audit_trail" },
+        ],
+        violationMessage: "Data mutation without audit trail. Cannot track who changed what or recover from accidental data corruption.",
+        conceptMissing: ["AuditTrail", "ChangeTracking", "DataLineage"],
+        conceptExpected: ["auditLog", "changeHistory", "write-ahead log"],
+    },
+    // ═══════════════════════════════════════════════════════════════
+    // Governance meta-rule: Framework Version Convention Check
+    // Lesson from proxy.ts incident (2026-08-03)
+    // ═══════════════════════════════════════════════════════════════
+    {
+        name: "Framework Convention Override (Anti-Pattern)",
+        category: "governance",
+        languages: ["typescript", "javascript"],
+        trigger: /\b(middleware\.ts|middleware\.js|proxy\.ts|proxy\.js)\b/i,
+        safeguards: [
+            { pattern: /\b(next@|next\s+16|next\s+17|next\s+18)\b/i, label: "next_version_check" },
+        ],
+        violationMessage: "Framework convention file detected without version verification. " +
+            "If this project uses Next.js 16+, 'proxy.ts' is the correct convention (not 'middleware.ts'). " +
+            "Do not rename framework-generated files based on training data defaults. " +
+            "Check node_modules/<framework>/dist/docs/ for the current version's conventions. " +
+            "See: docs/proxy-ts-lesson.md",
+        conceptMissing: ["FrameworkVersionAwareness", "ConventionVerification"],
+        conceptExpected: ["version-specific convention", "framework docs check"],
+    },
 ];
 /**
  * Identifier Parser: splits camelCase/PascalCase/snake_case into words.
@@ -402,6 +786,12 @@ function detectSafeguardViolations(calls, enclosingFuncName, language) {
         const matchedSafeguard = rule.safeguards.find(s => effectiveCalls.some(c => s.pattern.test(c)));
         if (matchedSafeguard)
             continue;
+        // Check excludePatterns (library functions where safeguard is deferred to separate API)
+        if (rule.excludePatterns) {
+            const excluded = effectiveCalls.some(c => rule.excludePatterns.some(ep => ep.test(c)));
+            if (excluded)
+                continue;
+        }
         // No safeguard matched → violation
         violations.push({
             rule: rule.name,
@@ -516,6 +906,12 @@ function detectSafeguardViolationsV7(calls, enclosingFuncName, callerMap, funcCa
         const matchedSafeguard = rule.safeguards.find(s => [...safeContext].some(c => s.pattern.test(c)));
         if (matchedSafeguard)
             continue;
+        // Check excludePatterns (library functions where safeguard is deferred to separate API)
+        if (rule.excludePatterns) {
+            const excluded = triggerEffectiveCalls.some(c => rule.excludePatterns.some(ep => ep.test(c)));
+            if (excluded)
+                continue;
+        }
         violations.push({
             rule: rule.name,
             category: rule.category,

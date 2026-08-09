@@ -190,6 +190,198 @@ exports.EXPANDED_TRAJECTORIES = [
             ["verify_password", "generate_jwt", "open_file", "write_file", "close_file"],
             ["verify_password", "open_file", "read_file", "connect_db", "query_db", "close_file", "disconnect_db", "logout"],
         ] },
+    // ═══════════════════════════════════════════════════════════════
+    // P0 Rule Vocabulary Injection — payment + session_mgmt
+    // Target: register 12 new namespace transitions in corpus,
+    // breaking the "coverage deadlock" where 69.1% of protocol
+    // transitions have zero rule vocabulary.
+    // ═══════════════════════════════════════════════════════════════
+    // ── 19. payment (Payment Processing — payment namespace) ──
+    // Covers 5 base transitions + 5 new P0 transitions:
+    //   ORDER_CREATED→PAYMENT_INITIATED→PAYMENT_CALLBACK_RECEIVED→PAYMENT_CONFIRMED
+    //   + refund, cancel, retry, verify_signature, reconcile
+    { library: "payment", domain: "Payment", sequences: [
+            // Happy path: order → pay → callback → confirm
+            ["initiate_payment", "receive_payment_callback", "confirm_payment"],
+            // Happy path with signature verification
+            ["initiate_payment", "receive_payment_callback", "verify_payment_signature", "confirm_payment"],
+            // Early cancel before payment
+            ["cancel_payment"],
+            // Cancel after initiate (before callback)
+            ["initiate_payment", "cancel_payment"],
+            // Failure from initiated (timeout)
+            ["initiate_payment", "fail_payment"],
+            // Failure from callback (invalid signature)
+            ["initiate_payment", "receive_payment_callback", "fail_payment"],
+            // Retry after failure
+            ["initiate_payment", "fail_payment", "retry_payment", "receive_payment_callback", "confirm_payment"],
+            // Refund after confirmation
+            ["initiate_payment", "receive_payment_callback", "confirm_payment", "refund_payment"],
+            // Reconciliation loop
+            ["initiate_payment", "receive_payment_callback", "confirm_payment", "reconcile_payment"],
+            // Full lifecycle: retry → confirm → refund
+            ["initiate_payment", "fail_payment", "retry_payment", "receive_payment_callback", "verify_payment_signature", "confirm_payment", "refund_payment"],
+            // Multi-attempt retry
+            ["initiate_payment", "fail_payment", "retry_payment", "fail_payment", "retry_payment", "receive_payment_callback", "confirm_payment"],
+            // Cancel order before payment started
+            ["cancel_payment"],
+        ] },
+    // ── 20. session_mgmt (Session Lifecycle — session_mgmt namespace) ──
+    // Covers 7 base transitions + 6 new P0 transitions:
+    //   ACCOUNT_ACTIVATED→SESSION_CREATED→SESSION_REFRESHED
+    //   + validate, extend, renew_from_expired, revoke_all, cleanup, rotate
+    { library: "session", domain: "Session-Management", sequences: [
+            // Basic session lifecycle
+            ["create_user_session", "validate_session", "refresh_session"],
+            // Session validation middleware (every request)
+            ["create_user_session", "validate_session", "validate_session", "validate_session", "refresh_session"],
+            // Extend on activity
+            ["create_user_session", "validate_session", "extend_session"],
+            // Timeout → renew via refresh token
+            ["create_user_session", "timeout_session", "renew_session_from_expired", "validate_session"],
+            // Revoke single session
+            ["create_user_session", "validate_session", "revoke_session"],
+            // Revoke all sessions (password change — multiple sessions then bulk revoke)
+            ["create_user_session", "validate_session", "refresh_session", "revoke_all_sessions"],
+            // Cleanup expired/revoked
+            ["create_user_session", "timeout_session", "cleanup_expired_sessions"],
+            ["create_user_session", "revoke_session", "cleanup_expired_sessions"],
+            // Token rotation (prevent fixation)
+            ["create_user_session", "rotate_session_token", "validate_session", "rotate_session_token"],
+            // Full lifecycle with extend and timeout
+            ["create_user_session", "extend_session", "validate_session", "refresh_session", "timeout_session", "renew_session_from_expired"],
+            // Session with cross-namespace auth dependency
+            ["create_user_session", "validate_session", "refresh_session", "revoke_session"],
+            // Batch revoke + cleanup cycle
+            ["create_user_session", "refresh_session", "revoke_session", "cleanup_expired_sessions"],
+        ] },
+    // ═══════════════════════════════════════════════════════════════
+    // P0 Round 2: registration + file_upload + resource
+    // Target: eliminate 3 more zero-coverage namespaces
+    // ═══════════════════════════════════════════════════════════════
+    // ── 21. registration (User Registration — registration namespace) ──
+    { library: "registration", domain: "User-Registration", sequences: [
+            // Basic flow
+            ["register_user", "send_verification_code", "verify_code", "activate_account"],
+            // Resend code
+            ["register_user", "send_verification_code", "resend_verification_code", "verify_code", "activate_account"],
+            // Expired code → resend
+            ["register_user", "send_verification_code", "expire_verification", "send_verification_code", "verify_code", "activate_account"],
+            // Reject after registration
+            ["register_user", "reject_registration"],
+            // Reject after code sent
+            ["register_user", "send_verification_code", "reject_registration"],
+            // Double resend
+            ["register_user", "send_verification_code", "resend_verification_code", "expire_verification", "send_verification_code", "verify_code", "activate_account"],
+            // Quick verify (no resend needed)
+            ["register_user", "send_verification_code", "verify_code", "activate_account"],
+        ] },
+    // ── 22. file_upload (File Upload — file_upload namespace) ──
+    { library: "file-upload", domain: "File-Upload", sequences: [
+            // Basic upload flow
+            ["receive_upload", "validate_file", "store_file", "reference_file"],
+            // With virus scan
+            ["receive_upload", "virus_scan_file", "validate_file", "store_file", "reference_file"],
+            // Invalid file → reject
+            ["receive_upload", "validate_file", "reject_file"],
+            // Early reject (before validation)
+            ["receive_upload", "reject_file"],
+            // Virus scan fails → reject
+            ["receive_upload", "virus_scan_file", "reject_file"],
+            // Store then delete
+            ["receive_upload", "validate_file", "store_file", "delete_file"],
+            // Full lifecycle: upload → reference → delete
+            ["receive_upload", "virus_scan_file", "validate_file", "store_file", "reference_file", "delete_file"],
+        ] },
+    // ── 23. resource (Input Validation — resource namespace) ──
+    { library: "resource", domain: "Input-Validation", sequences: [
+            // Full validation chain
+            ["sanitize", "validate_type", "validate_range"],
+            // Sanitize only
+            ["sanitize", "validate_type"],
+            // With escape
+            ["sanitize", "validate_type", "validate_range", "escape_output"],
+            // Rate limit before processing
+            ["rate_limit_resource", "sanitize", "validate_type", "validate_range"],
+            // Multiple inputs
+            ["rate_limit_resource", "sanitize", "validate_type", "validate_range", "escape_output"],
+            // Short path
+            ["sanitize", "escape_output"],
+        ] },
+    // ═══════════════════════════════════════════════════════════════
+    // P0 Round 3: api_gateway + notification + supplier + tls
+    //              + data_integrity + dev_pipeline
+    //              + printlab_order + printlab_print
+    // Target: eliminate final 8 zero-coverage namespaces
+    // ═══════════════════════════════════════════════════════════════
+    // ── 24. api-gateway (Rate Limiting — api_gateway namespace) ──
+    { library: "api-gateway", domain: "API-Gateway", sequences: [
+            ["check_rate_limit", "pass_rate_check"],
+            ["check_rate_limit", "throttle_request"],
+            ["check_rate_limit", "circuit_break"],
+            ["check_rate_limit", "pass_rate_check", "check_rate_limit", "throttle_request"],
+            ["check_rate_limit", "pass_rate_check", "check_rate_limit", "pass_rate_check"],
+            ["check_rate_limit", "throttle_request", "check_rate_limit", "pass_rate_check"],
+        ] },
+    // ── 25. notification (Notification Delivery — notification namespace) ──
+    { library: "notification", domain: "Notification", sequences: [
+            ["compose_notification", "send_notification", "confirm_delivery"],
+            ["compose_notification", "send_notification", "retry_notification", "confirm_delivery"],
+            ["compose_notification", "fail_notification"],
+            ["compose_notification", "send_notification", "fail_notification"],
+            ["compose_notification", "send_notification", "retry_notification", "retry_notification", "confirm_delivery"],
+            ["compose_notification", "send_notification", "confirm_delivery"],
+        ] },
+    // ── 26. supplier (Supplier Lifecycle — supplier namespace) ──
+    { library: "supplier", domain: "Supplier-Management", sequences: [
+            ["register_supplier", "verify_supplier", "enable_supplier", "assign_product_to_supplier"],
+            ["register_supplier", "verify_supplier", "enable_supplier"],
+            ["register_supplier", "verify_supplier", "disable_supplier"],
+            ["register_supplier", "deregister_supplier"],
+            ["register_supplier", "verify_supplier", "enable_supplier", "disable_supplier", "enable_supplier"],
+            ["register_supplier", "verify_supplier", "deregister_supplier"],
+        ] },
+    // ── 27. tls (TLS Configuration — tls namespace) ──
+    { library: "tls", domain: "TLS-Config", sequences: [
+            ["load_tls_config", "http_create_server"],
+            ["load_tls_config", "renew_tls_certificate", "http_create_server"],
+            ["load_tls_config", "http_create_server", "renew_tls_certificate"],
+            ["load_tls_config", "renew_tls_certificate"],
+        ] },
+    // ── 28. data-integrity (Data Integrity — data_integrity namespace) ──
+    { library: "data-integrity", domain: "Data-Integrity", sequences: [
+            ["check_exists", "create_reference"],
+            ["validate_business_rule", "check_exists", "create_reference", "validate_order_integrity"],
+            ["check_exists", "create_reference", "audit_mutation"],
+            ["validate_business_rule", "audit_mutation"],
+            ["check_exists", "create_reference", "validate_order_integrity", "audit_mutation"],
+            ["validate_business_rule", "check_exists", "create_reference"],
+        ] },
+    // ── 29. dev-pipeline (Dev Pipeline — dev_pipeline namespace) ──
+    { library: "dev-pipeline", domain: "Dev-Pipeline", sequences: [
+            ["extractIR", "validateAction", "validateActionSequence", "emitCode", "recordSession"],
+            ["extractIR", "validateAction", "rollback_ir"],
+            ["extractIR", "rollback_ir", "extractIR", "validateAction", "validateActionSequence", "emitCode", "recordSession"],
+            ["extractIR", "validateAction", "validateActionSequence", "rollback_ir"],
+            ["extractIR", "validateAction", "validateActionSequence", "emitCode", "recordSession"],
+        ] },
+    // ── 30. printlab-order (3D Print Order — printlab_order namespace) ──
+    { library: "printlab-order", domain: "PrintLab-Order", sequences: [
+            ["upload_stl", "slice_model", "generate_gcode", "estimate_cost", "create_order"],
+            ["upload_stl", "slice_model", "generate_gcode", "estimate_cost", "create_order", "queue_order"],
+            ["upload_stl", "slice_model", "generate_gcode", "estimate_cost", "create_order", "queue_order", "ship_order", "deliver_order"],
+            ["upload_stl", "slice_model", "generate_gcode", "estimate_cost", "cancel_order"],
+            ["upload_stl", "slice_model", "generate_gcode", "estimate_cost", "create_order", "cancel_order"],
+            ["upload_stl", "slice_model", "generate_gcode", "estimate_cost", "create_order", "queue_order", "cancel_order"],
+            ["upload_stl", "slice_model", "generate_gcode", "estimate_cost", "create_order", "queue_order", "ship_order", "deliver_order"],
+        ] },
+    // ── 31. printlab-print (3D Print Execution — printlab_print namespace) ──
+    { library: "printlab-print", domain: "PrintLab-Print", sequences: [
+            ["start_print", "complete_print"],
+            ["start_print", "fail_print"],
+            ["start_print", "fail_print", "start_print", "complete_print"],
+            ["start_print", "complete_print"],
+        ] },
 ];
 // ═══════════════════════════════════════════════════════════════
 // Integration
