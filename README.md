@@ -85,7 +85,7 @@ Progmune is honest about what it can and cannot verify.
 | **Python** | 🔨 IR only | IR extractor exists (`extract-ir-python.ts`), no verification rules yet |
 | **Go, Java** | ❌ None | Planned |
 
-**Framework adapters: 0/13.** Express, Next.js, NestJS, Fastify, Django, FastAPI — none have dedicated adapters yet. Rules use generic `\w*` prefix patterns. Framework adaptation is the #1 product gap.
+**Framework adapters: 1/13.** Express is the first. Next.js, NestJS, Fastify, Django, FastAPI — 12 remaining. Framework adaptation is the #1 product gap.
 
 → [Full Coverage Matrix](docs/coverage-matrix.md)
 
@@ -154,7 +154,7 @@ Progmune is built on the premise that **LLM outputs are statistical performances
 
 Recent work applies Sergei Gukov's "Two-Hump Problem" framework to understand and systematically close detection capability gaps.
 
-→ [Whitepaper](WHITEPAPER.md) · [Positioning](POSITIONING.md)
+→ [Investor Whitepaper](docs/Progmune_投资人白皮书_v2.0.html) · [Trust Decision Model](docs/ai-trust-decision-model-v1.md)
 
 ---
 
@@ -173,7 +173,8 @@ High-impact contribution areas:
 
 - **Runtime Pipeline:** Detect → Explain → Repair → Validate (L1–L4)
 - **Trust Engine:** 4-dimension scoring with binary explainability gate
-- **Tests:** 92 passing
+- **MCP Tools:** 19 — `progmune_trust_check`, `progmune_score`, `progmune_policy_check`, `progmune_certify`, and more
+- **Framework Adapters:** Express ✅ (1/13)
 - **Knowledge Base:** 31 domains, 140 protocol rules, 22 detectors, 26 safeguards
 - **Corpus:** 2,500+ trajectories across 6+ repositories
 - **Current focus:** Framework adaptation + enterprise PoC validation

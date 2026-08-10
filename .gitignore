@@ -11,13 +11,14 @@ immune_hub_data/
 # Internal documents (not for public repo)
 docs/Progmune_Runtime_内部技术白皮书*
 docs/Progmune_Runtime_技术白皮书*
-docs/WHITEPAPER_V7.html
-docs/WHITEPAPER_V7*
+docs/Progmune_内部技术白皮书*
 docs/WHITEPAPER_V5.html
 docs/WHITEPAPER_V6.html
-docs/WHITEPAPER_INTERNAL.html
-docs/WHITEPAPER_INTERNAL.md
+docs/WHITEPAPER_V7*
+docs/WHITEPAPER_INTERNAL*
+docs/WHITEPAPER_EXTERNAL*
 docs/INVESTOR_PITCH.html
+docs/.DS_Store
 dist-mcp
 benchmarks/generated/
 # Large benchmark repo clones (gitignored, use scripts/extract-sequences.ts to regenerate)

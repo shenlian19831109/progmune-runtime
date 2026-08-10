@@ -104,5 +104,5 @@ Not a scanner. Not a rule set.
 
 ## Version
 
-Runtime v1.0.0 — stable public API.
+Runtime v3.2.0 — AI Trust Decision Engine.
 Knowledge Base v3.0.0 — continuously evolving underneath.

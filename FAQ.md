@@ -53,7 +53,7 @@ npx progmune-runtime setup 你的密钥
 npx progmune-runtime --version
 
 # 检查 MCP 工具列表（需在 MCP 客户端中）
-# 应看到 progmune_generate 和 progmune_status 两个工具
+# 应看到 progmune_generate、progmune_trust_check、progmune_score 等 19 个工具
 
 # 运行内置测试
 npx progmune-runtime test
@@ -139,15 +139,16 @@ export PROGMUNE_HUB=http://localhost:8080/report
 
 通过 MCP 调用 `progmune_status` 工具，返回 JSON 格式的运行状态，包括：
 - LLM 模型和调用次数
-- 免疫网络状态
-- Failure Corpus 统计
-- 记忆系统状态
+- 免疫网络状态（Failure Corpus 统计）
+- 抗体效能统计
+- Trust Engine 版本
+- Ranker 状态
 
 ## 技术细节
 
 ### Progmune 支持哪些语言？
 
-目前代码生成支持 **Python**。IR 提取支持 Python 项目（通过 `extract-ir-python.ts`）。
+目前验证和代码生成以 **TypeScript/JavaScript** 为第一优先级（F1=85.2%）。**Python** IR 提取就绪，验证规则开发中（Phase 2 优先）。**C** 为研究阶段（F1=16.5%）。Go、Java 规划中。
 
 ### 数据隐私如何保障？
 
