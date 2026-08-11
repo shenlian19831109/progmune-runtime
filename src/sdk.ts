@@ -109,12 +109,132 @@ export function verify(filePath: string): VerificationResult {
   };
 }
 
-/** Stub for future AI-driven repair. Consumes VerificationResult. */
-export function fix(_result: VerificationResult): { possible: boolean; patch?: string; reason: string } {
-  return {
-    possible: false,
-    reason: "AI repair not yet available. Coming in Runtime 2.0.",
-  };
+// ═══════════════════════════════════════════════════════════════
+// Fix Engine — extracts repair suggestions from trust violations
+// ═══════════════════════════════════════════════════════════════
+
+export interface FixSuggestion {
+  /** Source file path (relative to project root) */
+  file: string;
+  /** Severity of the issue */
+  severity: string;
+  /** Rule ID that triggered this fix */
+  ruleId: string;
+  /** Human-readable description of the issue */
+  message: string;
+  /** Concrete fix description */
+  fix: string;
+  /** BFS-computed protocol function sequence to insert (SSG violations only) */
+  fixPath?: string[];
+  /** Source subsystem */
+  source: "ssg" | "express" | "nestjs" | "policy" | "protocol";
+}
+
+export interface FixResult {
+  /** Whether any fixable issues were found */
+  possible: boolean;
+  /** Total issues across all sources */
+  totalIssues: number;
+  /** Issues that have actionable fix suggestions */
+  fixableIssues: number;
+  /** Detailed fix suggestions grouped by file */
+  suggestions: FixSuggestion[];
+  /** One-line summary */
+  summary: string;
+}
+
+/**
+ * Analyze a project and return actionable fix suggestions.
+ *
+ * Uses the Trust Engine (SSG state machine + Express/NestJS framework
+ * detectors) to find protocol violations, then extracts concrete
+ * repair steps — BFS-computed fix paths, middleware additions,
+ * decorator insertions, etc.
+ *
+ * Usage:
+ *   const result = await fix("./my-project")
+ *   if (result.possible) {
+ *     for (const s of result.suggestions) {
+ *       console.log(s.file, s.fix)
+ *     }
+ *   }
+ */
+export async function fix(projectPath: string): Promise<FixResult> {
+  try {
+    // Lazy-require trust engine to avoid circular deps at module load
+    const { evaluateTrust } = require("./trust/engine");
+
+    const decision = await evaluateTrust({
+      projectPath,
+      projectName: projectPath.split("/").pop() || "unknown",
+      commit: "working-tree",
+      language: "typescript",
+    });
+
+    const suggestions: FixSuggestion[] = [];
+    const seen = new Set<string>(); // deduplicate by file + ruleId
+
+    for (const v of decision.violations) {
+      if (!v.fix) continue;
+
+      // Deduplicate: same file + same rule → report once
+      const dedupKey = `${v.file}::${v.rule_id}`;
+      if (seen.has(dedupKey)) continue;
+      seen.add(dedupKey);
+
+      const source: FixSuggestion["source"] =
+        v.rule_id.startsWith("SSG_") ? "ssg" :
+        v.policy_ref === "framework.express" ? "express" :
+        v.policy_ref === "framework.nestjs" ? "nestjs" :
+        v.policy_ref?.startsWith("protocol") ? "protocol" : "policy";
+
+      // Extract BFS fix path from SSG violations
+      let fixPath: string[] | undefined;
+      if (source === "ssg") {
+        const match = v.fix.match(/Insert before the violating call:\s*(.+)/);
+        if (match) {
+          fixPath = match[1].split(" → ").map((s: string) => s.trim()).filter(Boolean);
+        }
+      }
+
+      suggestions.push({
+        file: v.file || projectPath,
+        severity: v.severity,
+        ruleId: v.rule_id,
+        message: v.message,
+        fix: v.fix,
+        fixPath: fixPath?.length ? fixPath : undefined,
+        source,
+      });
+    }
+
+    // Sort: critical first, then by file
+    suggestions.sort((a, b) => {
+      const sev = { critical: 0, high: 1, medium: 2, low: 3 };
+      const sa = sev[a.severity as keyof typeof sev] ?? 4;
+      const sb = sev[b.severity as keyof typeof sev] ?? 4;
+      if (sa !== sb) return sa - sb;
+      return a.file.localeCompare(b.file);
+    });
+
+    return {
+      possible: suggestions.length > 0,
+      totalIssues: decision.violations.length,
+      fixableIssues: suggestions.length,
+      suggestions,
+      summary: suggestions.length > 0
+        ? `Found ${suggestions.length} fixable issue(s) across ${new Set(suggestions.map(s => s.file)).size} file(s).`
+        : "No fixable issues found. The project passes all protocol checks.",
+    };
+  } catch (e: any) {
+    return {
+      possible: false,
+      totalIssues: 0,
+      fixableIssues: 0,
+      suggestions: [],
+      summary: `Fix analysis failed: ${e.message || "unknown error"}`,
+    };
+  }
 }
 
 /**
