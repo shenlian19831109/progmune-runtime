@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Progmune — AI Software Verification Infrastructure | 投资人白皮书 v3.2</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 800px; margin: 0 auto; padding: 40px 20px; line-height: 1.7; color: #1a1a1a; }
+  h1 { font-size: 2em; border-bottom: 3px solid #2563eb; padding-bottom: 10px; }
+  h2 { font-size: 1.4em; margin-top: 40px; color: #2563eb; }
+  h3 { font-size: 1.1em; margin-top: 30px; }
+  .tag { display: inline-block; background: #2563eb; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8em; margin-right: 8px; }
+  .metric { background: #f0f4ff; border-left: 4px solid #2563eb; padding: 15px 20px; margin: 15px 0; border-radius: 4px; }
+  .metric strong { font-size: 1.3em; color: #2563eb; }
+  table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+  th, td { border: 1px solid #e5e7eb; padding: 8px 12px; text-align: left; }
+  th { background: #f8fafc; }
+  .check { color: #16a34a; }
+  .status { font-size: 0.9em; color: #6b7280; }
+</style>
+</head>
+<body>
+
+<h1>Progmune — AI Software Verification Infrastructure</h1>
+<p><strong>投资人白皮书 v3.2</strong> | 2026 年 8 月</p>
+<p>一句话：<strong>Progmune 验证 AI 生成的代码是否遵循正确的协议生命周期</strong>——这是 SAST 和 SCA 都看不到的盲区。</p>
+
+<h2>1. 问题：AI 生成代码的隐性风险</h2>
+
+<p>AI 编码助手（Claude Code, Cursor, Copilot）正在被数千万开发者使用。但它们生成的代码有一个系统性问题：<strong>协议生命周期错误</strong>。</p>
+
+<div class="metric">
+<strong>SAST 工具</strong>检查单条语句（SQL injection, XSS）<br>
+<strong>SCA 工具</strong>检查已知 CVE<br>
+<strong>没有人检查</strong>"这个函数调用序列是否遵循了正确的协议？"
+</div>
+
+<p>真实案例：</p>
+<ul>
+  <li><strong>支付漏洞：</strong>AI 生成了支付确认代码，但跳过了回调签名验证——钱收到了，但不知道是谁付的</li>
+  <li><strong>认证绕过：</strong>JWT 在密码验证之前就被签发——任何人拿到 token 就能访问</li>
+  <li><strong>资源泄漏：</strong>文件打开后从未关闭，数据库连接从未断开</li>
+</ul>
+
+<p>这些都是<strong>跨函数调用的序列问题</strong>，不是单行代码 bug。传统工具完全看不到。</p>
+
+<h2>2. 方案：协议状态机验证</h2>
+
+<p>Progmune 用<strong>协议状态机（Protocol State Machine）</strong>来验证函数调用序列。</p>
+
+<pre style="background:#f8fafc;padding:15px;border-radius:4px;overflow-x:auto;">
+真实代码:  bcrypt.compare(password, hash) → jwt.sign(payload) → res.cookie(token)
+              ↓ 别名映射                    ↓ 别名映射            ↓ 别名映射
+协议规则:  verify_hash ──────────────→ generate_jwt ────────→ create_user_session
+              │                              │                      │
+状态机验证: PASSWORD_VERIFIED ──→ TOKEN_ISSUED ──→  SESSION_CREATED
+              │
+        如果 bcrypt.compare 被跳过 → state 停留 UNAUTHENTICATED → generate_jwt 无法执行 → 违规报告
+</pre>
+
+<p><strong>核心机制：</strong></p>
+<ul>
+  <li><strong>144 条协议规则</strong>，每条定义 pre_states → post_states → invalidate 的状态转移</li>
+  <li><strong>226 个库别名</strong>：bcrypt.compare → verify_hash，jwt.sign → generate_jwt，express.listen → http_create_server</li>
+  <li><strong>27 个命名空间</strong>：auth, registration, tls, payment, file, db, transaction, session_mgmt 等</li>
+  <li><strong>BFS 修复路径</strong>：不仅检测违规，还计算"要插入哪个函数"才能修复</li>
+</ul>
+
+<h2>3. 技术里程碑</h2>
+
+<table>
+<tr><th>时间</th><th>里程碑</th><th>指标</th></tr>
+<tr><td>2026.06</td><td>v1.0 — 正则检测器 + 知识库</td><td>TS Blind P=86.8%, R=83.6%, F1=85.2%</td></tr>
+<tr><td>2026.07</td><td>v2.0 — 信任引擎 + 策略引擎</td><td>4 维度评分模型上线</td></tr>
+<tr><td>2026.08</td><td><strong>v3.2 — SSG 状态机接入 + 框架适配器</strong></td><td><strong>真实项目 FP 率 0%，违规 63→4</strong></td></tr>
+</table>
+
+<h2>4. 当前能力（v3.2）</h2>
+
+<h3>4.1 真实项目验证 — printlab_mvp</h3>
+
+<div class="metric">
+<strong>63 → 4 违规</strong>（经过状态机拆分、OAuth 适配、关键词降噪）<br>
+<strong>FP 率：0%</strong>——每一条违规都是真实的协议缺口<br>
+<strong>Score：44/BLOCKED → 66/NEEDS_REVIEW</strong><br>
+<strong>匹配率：301/4568 (6.6%)</strong>——生产代码中的协议相关调用<br>
+<strong>有效覆盖率：~44%</strong>——协议相关调用中已有近半被精确匹配
+</div>
+
+<h3>4.2 框架适配器</h3>
+
+<table>
+<tr><th>框架</th><th>结构分析</th><th>能力</th></tr>
+<tr><td><strong>Express</strong></td><td class="check">✅</td><td>路由提取 + 中间件分类（auth/rate-limit/validation/cors/helmet）+ 安全检测</td></tr>
+<tr><td><strong>NestJS</strong></td><td class="check">✅</td><td>装饰器解析（@Controller/@UseGuards/@UsePipes）+ 类级守卫继承</td></tr>
+<tr><td>Next.js, Fastify, Koa, Nuxt</td><td>⬜</td><td>库别名覆盖（app.listen, fastify.listen 等）</td></tr>
+</table>
+
+<h3>4.3 修复能力</h3>
+
+<p>fix() 不再是 stub——它是一个端到端的修复管道：</p>
+<ol>
+  <li><strong>检测：</strong>SSG 状态机 + 框架适配器发现违规</li>
+  <li><strong>建议：</strong>BFS 计算缺失的函数调用序列（如 "load_tls_config"）</li>
+  <li><strong>应用：</strong>在源码中找到违规行，插入修复代码（带正确缩进）</li>
+  <li><strong>验证：</strong>重新运行 SSG 确认违规已消除</li>
+</ol>
+
+<h3>4.4 知识网络验证</h3>
+
+<p>跨项目知识转移实验（3 个 Express 项目）：</p>
+<ul>
+  <li>✅ <strong>库级别别名转移成立：</strong>bcrypt.compare → verify_hash 在任何使用 bcrypt 的项目中都有效</li>
+  <li>❌ <strong>项目包装函数不转移：</strong>内部函数（createSessionToken 等）需要 <code>.progmune_aliases.json</code></li>
+  <li>结论：<strong>每新增一个使用新库的项目，所有使用该库的项目的验证都变强</strong>。</li>
+</ul>
+
+<h2>5. 竞争格局</h2>
+
+<table>
+<tr><th>工具</th><th>检测什么</th><th>Progmune 的差异</th></tr>
+<tr><td>CodeQL / Semgrep</td><td>单语句模式（SQL injection, XSS）</td><td>Progmune 检测跨函数序列——"这个序列是否遵循了协议？"</td></tr>
+<tr><td>Snyk / Dependabot</td><td>已知 CVE（依赖版本）</td><td>Progmune 检测 AI 生成的新代码，不是已知漏洞</td></tr>
+<tr><td>SonarQube</td><td>代码异味、复杂度</td><td>Progmune 验证行为正确性——"做了该做的事吗？"</td></tr>
+<tr><td>ESLint</td><td>语法/风格规则</td><td>Progmune 验证协议合规性——"按正确的顺序做了吗？"</td></tr>
+</table>
+
+<p><strong>Progmune 是互补的，不是替代品。</strong>它填补了"函数调用序列验证"这个空白——SAST、SCA、linter 都看不到的维度。</p>
+
+<h2>6. 商业模式</h2>
+
+<p><strong>当前：开源核心（MIT）</strong>，通过 GitHub Action + MCP server 分发。</p>
+<p><strong>路径：</strong>企业版（私有策略引擎、SaaS 仪表板、SLA）——在完成 2-3 个企业 PoC 之后。</p>
+
+<h2>7. 团队与技术栈</h2>
+
+<ul>
+  <li><strong>语言：</strong>TypeScript（运行时），Python（IR 提取，未激活）</li>
+  <li><strong>代码规模：</strong>~280 个源文件，515 个测试文件</li>
+  <li><strong>核心模块：</strong>SSG 状态机（144 规则）、SSG 桥接器（别名系统）、信任引擎（4 维评分）、框架适配器（Express + NestJS）</li>
+  <li><strong>分发渠道：</strong>npm 包、GitHub Action、MCP server（Claude Code 集成）</li>
+</ul>
+
+<h2>8. 下一步</h2>
+
+<table>
+<tr><th>优先级</th><th>事项</th><th>预期影响</th></tr>
+<tr><td>P0</td><td>企业 PoC（2-3 个项目）</td><td>验证产品市场匹配</td></tr>
+<tr><td>P1</td><td>更多框架适配器（Next.js, Fastify）</td><td>扩大可服务市场</td></tr>
+<tr><td>P1</td><td>SaaS 仪表板（治理报告 + CI/CD 集成）</td><td>企业可用性</td></tr>
+<tr><td>P2</td><td>OAuth 状态机建模</td><td>消除最后的 FP 类别</td></tr>
+<tr><td>P2</td><td>Python/Go 支持</td><td>多语言覆盖</td></tr>
+</table>
+
+<hr>
+<p class="status">Progmune Runtime v3.2 — August 2026. MIT License.</p>
+
+</body>
+</html>
