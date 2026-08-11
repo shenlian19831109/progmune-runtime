@@ -16,9 +16,9 @@ import {
   buildEmbeddingSpace, retrieveSimilarProtocols,
 } from "./protocol-embedding";
 import { createProtocolForTopology, ALL_TOPOLOGIES, TopologyName } from "./topology-factory";
-import { inferStateMachine } from "./state-inference";
+import { inferStateMachine } from "./experimental/state-inference";
 import { extractWLFingerprint } from "./wl-fingerprint";
-import { CROSS_REPO_SEQUENCES } from "./unsupervised-physics";
+import { CROSS_REPO_SEQUENCES } from "./experimental/unsupervised-physics";
 
 // ═══════════════════════════════════════════════════════════════
 // Generate protocol variants with realistic name variations

@@ -14,7 +14,7 @@
  *   Stream, Crypto, Graph, Search, Template, Notification, Orchestration
  */
 
-import { clusterByStructure, DiscoveredCluster } from "./unsupervised-physics";
+import { clusterByStructure, DiscoveredCluster } from "./experimental/unsupervised-physics";
 import { synthesizeProtocols, SynthesizedProtocol } from "./auto-protocol-synthesizer";
 import { generateRandomWalks, runAugmentation } from "./trajectory-augmentation";
 import { loadDefaultProtocolDefinitions } from "./protocol-coverage";

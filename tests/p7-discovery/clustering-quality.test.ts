@@ -5,7 +5,7 @@
  * across 5 protocol types. Metrics: Adjusted Rand Index, Purity.
  */
 import { describe, it, expect } from "vitest";
-import { clusterByStructure, fingerprintSequences } from "../../src/unsupervised-physics";
+import { clusterByStructure, fingerprintSequences } from "../../src/experimental/unsupervised-physics";
 import { labeledTrajectories, LabeledTrajectory } from "../fixtures/labeled-protocols";
 
 /**

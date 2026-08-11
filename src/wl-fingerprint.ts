@@ -19,7 +19,7 @@
  * Reference: Weisfeiler-Lehman Graph Kernels (Shervashidze et al., JMLR 2011)
  */
 
-import type { InferredStateMachine } from "./state-inference";
+import type { InferredStateMachine } from "./experimental/state-inference";
 
 // ═══════════════════════════════════════════════════════════════
 // WL Relabeling

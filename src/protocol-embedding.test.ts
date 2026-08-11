@@ -12,7 +12,7 @@ import {
   printEmbeddingSpace,
   printRetrievalResult,
 } from "./protocol-embedding";
-import { CROSS_REPO_SEQUENCES } from "./unsupervised-physics";
+import { CROSS_REPO_SEQUENCES } from "./experimental/unsupervised-physics";
 import { createProtocolForTopology, ALL_TOPOLOGIES } from "./topology-factory";
 
 describe("P10.0 Protocol Embedding Space", () => {

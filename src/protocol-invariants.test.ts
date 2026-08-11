@@ -13,7 +13,7 @@ import {
   printViolations,
   detectStructuralViolations,
 } from "./protocol-invariants";
-import { inferStateMachine, printInferredStateMachine } from "./state-inference";
+import { inferStateMachine, printInferredStateMachine } from "./experimental/state-inference";
 
 // ── Test data: clean (complete) and broken (defect) sequences ──
 

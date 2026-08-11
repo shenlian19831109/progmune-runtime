@@ -201,7 +201,7 @@ export interface ProtocolSecurityReport {
 
 export function runProtocolSecurityBenchmark(): ProtocolSecurityReport {
   const bench = buildProtocolSecurityBenchmark();
-  const { inferStateMachine } = require("./state-inference");
+  const { inferStateMachine } = require("./experimental/state-inference");
   const { detectStructuralViolations } = require("./protocol-invariants");
 
   const CWE_TO_VIOLATION: Record<string, string> = {

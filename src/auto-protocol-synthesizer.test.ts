@@ -7,7 +7,7 @@
 
 import { describe, it, expect } from "vitest";
 import { synthesizeProtocols, synthesizeAllKnownProtocols, detectConflicts, runAutoSynthesis, printSynthesisReport, findPrototype, SynthesizedProtocol } from "./auto-protocol-synthesizer";
-import { clusterByStructure } from "./unsupervised-physics";
+import { clusterByStructure } from "./experimental/unsupervised-physics";
 import { loadDefaultProtocolDefinitions } from "./protocol-coverage";
 import type { StateAnnotation } from "./ssg-validator";
 

@@ -10,7 +10,7 @@ import {
   wlSimilarity,
   printWLReport,
 } from "./wl-fingerprint";
-import { inferStateMachine, stateFingerprintSimilarity, extractStateFingerprint } from "./state-inference";
+import { inferStateMachine, stateFingerprintSimilarity, extractStateFingerprint } from "./experimental/state-inference";
 
 // ── Test data: diverse protocol topologies ──
 

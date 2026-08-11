@@ -15,7 +15,7 @@
  * This is the bridge from "pattern discovery" to "self-extending knowledge."
  */
 
-import { clusterByStructure, DiscoveredCluster, CROSS_REPO_SEQUENCES } from "./unsupervised-physics";
+import { clusterByStructure, DiscoveredCluster, CROSS_REPO_SEQUENCES } from "./experimental/unsupervised-physics";
 import { KnowledgePatchStore, KnowledgePatch } from "./knowledge-governance";
 import { loadDefaultProtocolDefinitions } from "./protocol-coverage";
 import { compareRules } from "./repo-evaluator";

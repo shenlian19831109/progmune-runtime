@@ -12,7 +12,7 @@ import {
   extractStateFingerprint,
   stateFingerprintSimilarity,
   printInferredStateMachine,
-} from "./state-inference";
+} from "./experimental/state-inference";
 
 // ── Test data: structurally distinct protocols ──
 

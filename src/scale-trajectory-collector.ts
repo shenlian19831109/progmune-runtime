@@ -11,10 +11,10 @@
 
 import { MINING_SIGNATURES } from "./protocol-mining";
 import { EXPANDED_TRAJECTORIES } from "./trajectory-corpus";
-import { CROSS_REPO_SEQUENCES } from "./unsupervised-physics";
+import { CROSS_REPO_SEQUENCES } from "./experimental/unsupervised-physics";
 import { generateRandomWalks, mutateTrajectories, runAugmentation } from "./trajectory-augmentation";
 import { normalizeFunctionName } from "./function-synonyms";
-import { isValidPhysicsSequence } from "./software-physics";
+import { isValidPhysicsSequence } from "./experimental/software-physics";
 import { loadDefaultProtocolDefinitions } from "./protocol-coverage";
 import { synthesizeAllKnownProtocols } from "./auto-protocol-synthesizer";
 import type { StateAnnotation } from "./ssg-validator";

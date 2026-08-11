@@ -17,7 +17,7 @@
  * If topology similarity survives, it's real structure learning.
  */
 
-import { KNOWN_REPO_SIGNATURES, compareRepoPhysics, analyzeRepoPhysics } from "./software-physics";
+import { KNOWN_REPO_SIGNATURES, compareRepoPhysics, analyzeRepoPhysics } from "./experimental/software-physics";
 
 // ═══════════════════════════════════════════════════════════════
 // L1: Transition Graph

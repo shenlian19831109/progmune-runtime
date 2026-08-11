@@ -21,7 +21,7 @@
 
 import { loadDefaultProtocolDefinitions } from "./protocol-coverage";
 import { synthesizeProtocols, SynthesizedProtocol, findPrototype } from "./auto-protocol-synthesizer";
-import { clusterByStructure, DiscoveredCluster } from "./unsupervised-physics";
+import { clusterByStructure, DiscoveredCluster } from "./experimental/unsupervised-physics";
 import { searchFrontier, FrontierPath } from "./protocol-frontier";
 import { runBenchmark, BenchmarkReport } from "./benchmark-harness";
 import { normalizeFunctionName } from "./function-synonyms";

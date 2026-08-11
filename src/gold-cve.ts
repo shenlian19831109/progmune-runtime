@@ -24,7 +24,7 @@
 
 import type { CVECase } from "./cve-collector";
 import { REAL_WORLD_DEFECTS } from "./realworld-benchmark";
-import { inferStateMachine } from "./state-inference";
+import { inferStateMachine } from "./experimental/state-inference";
 import { detectStructuralViolations } from "./protocol-invariants";
 
 // ═══════════════════════════════════════════════════════════════
@@ -94,6 +94,7 @@ export function loadGoldDataset(): GoldDataset {
     verifiedBy: "manual_curation",
     notes: d.description,
     project: "curated",
+    ...(d.plsId ? { plsId: d.plsId } : {}),
   }));
 
   const byCategory: Record<string, number> = {};

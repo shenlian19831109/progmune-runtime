@@ -175,6 +175,7 @@ export function buildPLSB(): PLSBenchmark {
       verified: true,
       source: "curated",
       notes: c.notes,
+      pls_id: (c as any).plsId,
     });
   }
 
@@ -215,7 +216,7 @@ export function buildPLSB(): PLSBenchmark {
   };
 
   for (const e of entries) {
-    e.pls_id = catToPLS[e.category] || undefined;
+    e.pls_id = e.pls_id || catToPLS[e.category] || undefined;
   }
 
   // Build metadata

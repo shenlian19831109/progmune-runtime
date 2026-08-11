@@ -16,7 +16,7 @@
  */
 
 import { synthesizeAllKnownProtocols, SynthesizedProtocol } from "./auto-protocol-synthesizer";
-import { clusterByStructure } from "./unsupervised-physics";
+import { clusterByStructure } from "./experimental/unsupervised-physics";
 import { generateAllRandomWalks } from "./trajectory-augmentation";
 import { runBootstrapValidation, BootstrapResult } from "./bootstrap-validation";
 

@@ -17,8 +17,8 @@
  *   10-70%                                 → PARTIAL
  */
 
-import { compareRepoPhysics, analyzeRepoPhysics, KNOWN_REPO_SIGNATURES } from "./software-physics";
-import { clusterByStructure, evaluateUnsupervisedDiscovery, CROSS_REPO_SEQUENCES } from "./unsupervised-physics";
+import { compareRepoPhysics, analyzeRepoPhysics, KNOWN_REPO_SIGNATURES } from "./experimental/software-physics";
+import { clusterByStructure, evaluateUnsupervisedDiscovery, CROSS_REPO_SEQUENCES } from "./experimental/unsupervised-physics";
 import { runFamilyIsolation, PROTOCOL_FAMILIES } from "./generalization.test";
 import { normalizeFunctionName } from "./function-synonyms";
 

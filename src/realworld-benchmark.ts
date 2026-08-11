@@ -31,7 +31,9 @@ export interface RealWorldDefect {
   title: string;
   source: string;          // CVE-YYYY-NNNNN, PR #, etc.
   severity: "critical" | "high" | "medium" | "low";
-  category: "resource_leak" | "auth_bypass" | "data_corruption" | "use_after_free" | "race_condition";
+  category: "resource_leak" | "auth_bypass" | "data_corruption" | "use_after_free" | "race_condition" | "session_fixation" | "privilege_escalation" | "transaction_violation" | "double_free" | "missing_validation";
+  /** Optional: explicit PLS-ID override. If set, used directly instead of catToPLS. */
+  plsId?: string;
   description: string;
   broken: string[];        // the buggy action sequence
   expected: string[];      // the correct repair sequence
@@ -306,6 +308,208 @@ export const REAL_WORLD_DEFECTS: RealWorldDefect[] = [
     expected: ["decode_payload", "decompress_buffer", "verify_checksum"],
     protocol: "_global",
     violationType: "missing_prerequisite",
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // P0 Round 4: PLSB Coverage — 8 uncovered PLS categories
+  // ═══════════════════════════════════════════════════════════
+
+  // ── PLS-002: Double Release ──
+  {
+    id: "RW-021",
+    title: "Double close on file descriptor (CWE-675)",
+    source: "CWE-675: Double Release",
+    severity: "medium",
+    category: "resource_leak",
+    plsId: "PLS-002",
+    description: "File descriptor closed twice — second close is an illegal state transition",
+    broken: ["open_file", "read_file", "close_file", "close_file"],
+    expected: ["open_file", "read_file", "close_file"],
+    protocol: "_global",
+    violationType: "double_release",
+  },
+  {
+    id: "RW-022",
+    title: "Double free on database connection (resource leak)",
+    source: "Common resource management bug",
+    severity: "high",
+    category: "resource_leak",
+    plsId: "PLS-002",
+    description: "DB connection freed twice — second disconnect() on already-closed connection",
+    broken: ["connect_db", "query_db", "disconnect_db", "disconnect_db"],
+    expected: ["connect_db", "query_db", "disconnect_db"],
+    protocol: "_global",
+    violationType: "double_release",
+  },
+
+  // ── PLS-003: Use After Release ──
+  {
+    id: "RW-023",
+    title: "Read from closed file descriptor (CWE-416 variant)",
+    source: "CWE-416: Use After Free (file descriptor)",
+    severity: "high",
+    category: "use_after_free",
+    plsId: "PLS-003",
+    description: "File read attempted after file was closed — use after release of resource",
+    broken: ["open_file", "close_file", "read_file"],
+    expected: ["open_file", "read_file", "close_file"],
+    protocol: "_global",
+    violationType: "use_after_release",
+  },
+  {
+    id: "RW-024",
+    title: "Query on disconnected DB connection (use after free)",
+    source: "Common connection pool bug",
+    severity: "high",
+    category: "use_after_free",
+    plsId: "PLS-003",
+    description: "DB query on already-disconnected connection — use after release",
+    broken: ["connect_db", "disconnect_db", "query_db"],
+    expected: ["connect_db", "query_db", "disconnect_db"],
+    protocol: "_global",
+    violationType: "use_after_release",
+  },
+
+  // ── PLS-005: Session Fixation ──
+  {
+    id: "RW-025",
+    title: "Session not invalidated on logout (CWE-384)",
+    source: "CWE-384: Session Fixation",
+    severity: "critical",
+    category: "session_fixation",
+    plsId: "PLS-005",
+    description: "User logout does not destroy server-side session — old tokens remain valid for hijacking",
+    broken: ["verify_password", "create_session", "logout"],
+    expected: ["verify_password", "create_session", "invalidate_session", "logout"],
+    protocol: "_global",
+    violationType: "session_fixation",
+  },
+  {
+    id: "RW-026",
+    title: "Token not revoked on sign out (session fixation)",
+    source: "OWASP Session Management Cheat Sheet",
+    severity: "high",
+    category: "session_fixation",
+    plsId: "PLS-005",
+    description: "Client-side signout without server-side token revocation — session remains active",
+    broken: ["signin", "generate_token", "signout"],
+    expected: ["signin", "generate_token", "revoke_token", "signout"],
+    protocol: "_global",
+    violationType: "session_fixation",
+  },
+
+  // ── PLS-006: Privilege Escalation ──
+  {
+    id: "RW-027",
+    title: "Admin action without role verification (CWE-269)",
+    source: "CWE-269: Improper Privilege Management",
+    severity: "critical",
+    category: "privilege_escalation",
+    plsId: "PLS-006",
+    description: "Admin-level delete performed without verifying user role — any authenticated user can delete all records",
+    broken: ["login", "deleteAllRecords"],
+    expected: ["login", "verifyAdminRole", "deleteAllRecords"],
+    protocol: "_global",
+    violationType: "privilege_escalation",
+  },
+  {
+    id: "RW-028",
+    title: "User role modification without permission check (privilege escalation)",
+    source: "Common RBAC bypass pattern",
+    severity: "critical",
+    category: "privilege_escalation",
+    plsId: "PLS-006",
+    description: "Role assignment function does not verify caller is admin — self-service privilege escalation",
+    broken: ["login", "assignAdminRole"],
+    expected: ["login", "checkPermission", "assignAdminRole"],
+    protocol: "_global",
+    violationType: "privilege_escalation",
+  },
+
+  // ── PLS-008: Double Commit ──
+  {
+    id: "RW-029",
+    title: "Double commit on transaction (data integrity)",
+    source: "Common OLTP bug pattern",
+    severity: "medium",
+    category: "transaction_violation",
+    plsId: "PLS-008",
+    description: "Transaction committed twice — second commit is illegal on already-closed transaction",
+    broken: ["begin_transaction", "insert_record", "commit", "commit"],
+    expected: ["begin_transaction", "insert_record", "commit"],
+    protocol: "_global",
+    violationType: "double_commit",
+  },
+
+  // ── PLS-009: Missing Free ──
+  {
+    id: "RW-030",
+    title: "Memory allocation without free (CWE-401)",
+    source: "CWE-401: Missing Release of Memory",
+    severity: "medium",
+    category: "resource_leak",
+    plsId: "PLS-009",
+    description: "Buffer allocated but never freed — memory leak on every invocation",
+    broken: ["malloc_buffer", "use_buffer"],
+    expected: ["malloc_buffer", "use_buffer", "free_buffer"],
+    protocol: "_global",
+    violationType: "resource_leak",
+  },
+  {
+    id: "RW-031",
+    title: "Connection opened without close (connection leak)",
+    source: "Common connection pool exhaustion",
+    severity: "high",
+    category: "resource_leak",
+    plsId: "PLS-009",
+    description: "DB connection opened but never returned to pool — connection leak under load",
+    broken: ["connect_db", "query_db"],
+    expected: ["connect_db", "query_db", "disconnect_db"],
+    protocol: "_global",
+    violationType: "resource_leak",
+  },
+
+  // ── PLS-010: Double Free ──
+  {
+    id: "RW-032",
+    title: "Double free on buffer (CWE-415)",
+    source: "CWE-415: Double Free",
+    severity: "critical",
+    category: "double_free",
+    plsId: "PLS-010",
+    description: "Buffer freed twice — second free on already-deallocated memory triggers undefined behavior",
+    broken: ["malloc_buffer", "use_buffer", "free_buffer", "free_buffer"],
+    expected: ["malloc_buffer", "use_buffer", "free_buffer"],
+    protocol: "_global",
+    violationType: "double_free",
+  },
+
+  // ── PLS-013: Workflow Bypass ──
+  {
+    id: "RW-033",
+    title: "SQL execution without input validation (workflow bypass)",
+    source: "OWASP Top 10: Injection",
+    severity: "critical",
+    category: "missing_validation",
+    plsId: "PLS-013",
+    description: "Database query executed directly on user input without validation — SQL injection and workflow bypass",
+    broken: ["receive_request", "execute_query"],
+    expected: ["receive_request", "validate_input", "authorize_action", "execute_query"],
+    protocol: "_global",
+    violationType: "missing_validation",
+  },
+  {
+    id: "RW-034",
+    title: "API endpoint without validation middleware (workflow bypass)",
+    source: "Common API security oversight",
+    severity: "high",
+    category: "missing_validation",
+    plsId: "PLS-013",
+    description: "Express route handler processes request without input validation middleware — malicious payload reaches business logic",
+    broken: ["router_post", "processOrder"],
+    expected: ["router_post", "validateBody", "processOrder"],
+    protocol: "_global",
+    violationType: "missing_validation",
   },
 ];
 

@@ -6,8 +6,8 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { fingerprint, fingerprintSequences, clusterByStructure, evaluateUnsupervisedDiscovery, runUnsupervisedDiscovery, printUnsupervisedReport, CROSS_REPO_SEQUENCES } from "./unsupervised-physics";
-import { canonicalize } from "./software-physics";
+import { fingerprint, fingerprintSequences, clusterByStructure, evaluateUnsupervisedDiscovery, runUnsupervisedDiscovery, printUnsupervisedReport, CROSS_REPO_SEQUENCES } from "./experimental/unsupervised-physics";
+import { canonicalize } from "./experimental/software-physics";
 
 describe("Structural Fingerprint (no function names)", () => {
   it("assigns phase 0/1/2 based on position only", () => {

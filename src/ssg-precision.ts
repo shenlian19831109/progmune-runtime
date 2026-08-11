@@ -15,7 +15,7 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import { inferStateMachine } from "./state-inference";
+import { inferStateMachine } from "./experimental/state-inference";
 import { synthesizeProtocols } from "./auto-protocol-synthesizer";
 import { parseProtocolsFromJSON } from "./ssg-validator";
 import type { StateAnnotation } from "./ssg-validator";

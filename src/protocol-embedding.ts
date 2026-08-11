@@ -16,9 +16,9 @@
  */
 
 import { extractWLFingerprint, WLFingerprint, wlSimilarity } from "./wl-fingerprint";
-import { inferStateMachine, InferredStateMachine } from "./state-inference";
+import { inferStateMachine, InferredStateMachine } from "./experimental/state-inference";
 import { createProtocolForTopology, ALL_TOPOLOGIES, TopologyName } from "./topology-factory";
-import { CROSS_REPO_SEQUENCES } from "./unsupervised-physics";
+import { CROSS_REPO_SEQUENCES } from "./experimental/unsupervised-physics";
 
 // ═══════════════════════════════════════════════════════════════
 // Protocol Embedding

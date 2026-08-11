@@ -9,8 +9,8 @@
  * Mode 3 is P9.3: upgrades from "State Completeness" to "Protocol Correctness"
  */
 
-import type { InferredStateMachine } from "./state-inference";
-import { inferStateMachine } from "./state-inference";
+import type { InferredStateMachine } from "./experimental/state-inference";
+import { inferStateMachine } from "./experimental/state-inference";
 
 // ═══════════════════════════════════════════════════════════════
 // Types
@@ -146,7 +146,7 @@ function extractEdgeSet(sm: InferredStateMachine): Set<string> {
 // Invariant Mining (from state machine)
 // ═══════════════════════════════════════════════════════════════
 
-import { InferredState } from "./state-inference";
+import { InferredState } from "./experimental/state-inference";
 
 export function mineInvariants(sm: InferredStateMachine): ProtocolInvariant[] {
   const invariants: ProtocolInvariant[] = [];

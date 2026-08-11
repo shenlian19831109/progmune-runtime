@@ -14,8 +14,8 @@
  * Target: 100% → >20% = first genuine evidence of structure learning.
  */
 
-import { KNOWN_REPO_SIGNATURES, compareRepoPhysics, analyzeRepoPhysics } from "./software-physics";
-import { CROSS_REPO_SEQUENCES } from "./unsupervised-physics";
+import { KNOWN_REPO_SIGNATURES, compareRepoPhysics, analyzeRepoPhysics } from "./experimental/software-physics";
+import { CROSS_REPO_SEQUENCES } from "./experimental/unsupervised-physics";
 
 // ═══════════════════════════════════════════════════════════════
 // P8.0a: Name-Free State Graph

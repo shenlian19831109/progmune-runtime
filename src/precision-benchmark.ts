@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { inferStateMachine } from './state-inference';
+import { inferStateMachine } from './experimental/state-inference';
 
 // ═══════════════════════════════════════════════════════════════
 // Precision Benchmark — measures FP rate against real codebases

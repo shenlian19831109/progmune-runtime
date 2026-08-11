@@ -14,8 +14,8 @@
  *   <10% = just classifying by name
  */
 
-import { compareRepoPhysics, analyzeRepoPhysics, KNOWN_REPO_SIGNATURES, canonicalize } from "./software-physics";
-import { clusterByStructure, evaluateUnsupervisedDiscovery, CROSS_REPO_SEQUENCES } from "./unsupervised-physics";
+import { compareRepoPhysics, analyzeRepoPhysics, KNOWN_REPO_SIGNATURES, canonicalize } from "./experimental/software-physics";
+import { clusterByStructure, evaluateUnsupervisedDiscovery, CROSS_REPO_SEQUENCES } from "./experimental/unsupervised-physics";
 import { normalizeFunctionName } from "./function-synonyms";
 import { loadDefaultProtocolDefinitions } from "./protocol-coverage";
 import { compareRules } from "./repo-evaluator";

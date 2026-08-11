@@ -15,7 +15,7 @@ import {
   printZeroShotResult,
   DefectCase,
 } from "./unknown-protocol-discovery";
-import { CROSS_REPO_SEQUENCES } from "./unsupervised-physics";
+import { CROSS_REPO_SEQUENCES } from "./experimental/unsupervised-physics";
 
 describe("P8.2 Unknown Protocol Discovery", () => {
   it("extracts sequences from known repos", () => {

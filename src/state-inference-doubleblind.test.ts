@@ -19,7 +19,7 @@ import {
   inferStateMachine,
   extractStateFingerprint,
   stateFingerprintSimilarity,
-} from "./state-inference";
+} from "./experimental/state-inference";
 
 // ── Double-blind scrambling ──
 

@@ -14,7 +14,7 @@
 import { loadDefaultProtocolDefinitions } from "./protocol-coverage";
 import { synthesizeAllKnownProtocols, SynthesizedProtocol } from "./auto-protocol-synthesizer";
 import { searchFrontier, FrontierPath } from "./protocol-frontier";
-import { isValidPhysicsSequence } from "./software-physics";
+import { isValidPhysicsSequence } from "./experimental/software-physics";
 import type { StateAnnotation } from "./ssg-validator";
 
 // ═══════════════════════════════════════════════════════════════

@@ -939,7 +939,7 @@ This project uses [Progmune](https://github.com/shenlian19831109/progmune-runtim
       process.env.PROGMUNE_PROJECT_DIR = projectPath;
 
       const { buildKnownFingerprintLibrary, extractUnknownRepoSequences, discoverProtocolsFromSequences } = require("./unknown-protocol-discovery");
-      const { CROSS_REPO_SEQUENCES } = require("./unsupervised-physics");
+      const { CROSS_REPO_SEQUENCES } = require("./experimental/unsupervised-physics");
 
       const known = buildKnownFingerprintLibrary();
       const name = repoName || path.basename(projectPath);

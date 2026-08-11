@@ -18,7 +18,7 @@
  */
 
 import { extractStateMachine, renameStates, compareStateMachines, StateMachineFingerprint } from "./state-machine-fingerprint";
-import { CROSS_REPO_SEQUENCES } from "./unsupervised-physics";
+import { CROSS_REPO_SEQUENCES } from "./experimental/unsupervised-physics";
 import { synthesizeProtocols, SynthesizedProtocol } from "./auto-protocol-synthesizer";
 import { exploreFrontier } from "./protocol-frontier";
 import { loadDefaultProtocolDefinitions } from "./protocol-coverage";

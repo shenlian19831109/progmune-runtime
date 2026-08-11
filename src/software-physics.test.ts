@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { canonicalize, canonicalizeSequence, isValidPhysicsSequence, analyzeRepoPhysics, compareRepoPhysics, analyzeCrossRepoPhysics, printCrossRepoReport, KNOWN_REPO_SIGNATURES } from "./software-physics";
+import { canonicalize, canonicalizeSequence, isValidPhysicsSequence, analyzeRepoPhysics, compareRepoPhysics, analyzeCrossRepoPhysics, printCrossRepoReport, KNOWN_REPO_SIGNATURES } from "./experimental/software-physics";
 
 describe("Protocol Canonicalization", () => {
   it("maps fopen/fclose to ACQUIRE/RELEASE", () => {

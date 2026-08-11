@@ -17,7 +17,7 @@
  * These should be deprecated or manually fixed.
  */
 
-import { inferStateMachine } from "./state-inference";
+import { inferStateMachine } from "./experimental/state-inference";
 
 export interface QualityAssessment {
   /** Overall quality score (0-1). 1 = guaranteed detection, 0 = undetectable. */
