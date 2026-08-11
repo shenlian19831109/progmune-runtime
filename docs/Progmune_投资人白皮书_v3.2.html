@@ -115,24 +115,104 @@
   <li>结论：<strong>每新增一个使用新库的项目，所有使用该库的项目的验证都变强</strong>。</li>
 </ul>
 
-<h2>5. 竞争格局</h2>
+<h2>5. 为什么 SAST 和 SCA 不够</h2>
+
+<p>传统工具的本质是<strong>"比对"</strong>——把代码和一个已知的库做比较。Progmune 的本质是<strong>"验证"</strong>——检查代码是否按正确的协议序列执行。</p>
+
+<h3>5.1 SAST — 比对已知攻击模式</h3>
+
+<p>SAST 把代码解析成 AST、控制流图、数据流图，然后运行规则引擎——每条规则描述了一种<strong>已知的攻击模式</strong>。</p>
 
 <table>
-<tr><th>工具</th><th>检测什么</th><th>Progmune 的差异</th></tr>
-<tr><td>CodeQL / Semgrep</td><td>单语句模式（SQL injection, XSS）</td><td>Progmune 检测跨函数序列——"这个序列是否遵循了协议？"</td></tr>
-<tr><td>Snyk / Dependabot</td><td>已知 CVE（依赖版本）</td><td>Progmune 检测 AI 生成的新代码，不是已知漏洞</td></tr>
-<tr><td>SonarQube</td><td>代码异味、复杂度</td><td>Progmune 验证行为正确性——"做了该做的事吗？"</td></tr>
-<tr><td>ESLint</td><td>语法/风格规则</td><td>Progmune 验证协议合规性——"按正确的顺序做了吗？"</td></tr>
+<tr><th>能检测什么</th><th>怎么检测的</th><th>本质</th></tr>
+<tr><td><code>exec(userInput)</code> — 命令注入</td><td>规则库有"exec + 未转义变量"模式</td><td>代码模式 ↔ 已知风险规则</td></tr>
+<tr><td><code>innerHTML = x</code> — XSS</td><td>数据流追踪"未转义变量 → DOM 赋值"</td><td>污点传播 ↔ 危险汇点</td></tr>
+<tr><td><code>const KEY = "sk-..."</code> — 硬编码密钥</td><td>正则匹配密钥格式</td><td>文本模式 ↔ 密钥正则</td></tr>
+<tr><td><code>yaml.load(input)</code> — 不安全反序列化</td><td>规则库有"yaml.load + 用户输入"模式</td><td>函数名 ↔ 敏感函数列表</td></tr>
 </table>
 
-<p><strong>Progmune 是互补的，不是替代品。</strong>它填补了"函数调用序列验证"这个空白——SAST、SCA、linter 都看不到的维度。</p>
+<p><strong>SAST 的局限：</strong>它能告诉你"第 42 行的 <code>innerHTML</code> 赋值可能被 XSS 利用"——因为规则库里有这条规则。但它不能告诉你"登录函数里先调了 <code>jwt.sign()</code> 后调了 <code>bcrypt.compare()</code>"——因为<strong>没有任何单行代码是错的</strong>。错误在于两行代码的<strong>顺序</strong>。SAST 的规则库不包含跨语句序列规则。</p>
 
-<h2>6. 商业模式</h2>
+<h3>5.2 SCA — 比对已知漏洞数据库</h3>
+
+<p>SCA 解析依赖清单，提取名称和版本，查询公共漏洞库。</p>
+
+<table>
+<tr><th>能检测什么</th><th>怎么检测的</th><th>本质</th></tr>
+<tr><td><code>lodash@4.17.15</code> → CVE 原型污染</td><td>版本号 ↔ NVD 数据库</td><td>依赖版本 ↔ 已知 CVE</td></tr>
+<tr><td>GPL 依赖在专有项目中</td><td>许可证字符串 ↔ 策略规则</td><td>许可证 ↔ 合规策略</td></tr>
+<tr><td>3 年前未更新的依赖</td><td>发布时间 ↔ 当前日期</td><td>版本时间戳 ↔ 过期阈值</td></tr>
+</table>
+
+<p><strong>SCA 的局限：</strong>它能告诉你"你用的库有一个已知漏洞"——因为 CVE 数据库里有记录。但它不能告诉你"你的代码用 <code>jsonwebtoken.sign()</code> 之前忘了验证密码"——因为这不是已知漏洞，是<strong>你写出来的新问题</strong>。</p>
+
+<h3>5.3 SAST 和 SCA 都看不到的</h3>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;">
+<div style="background:#fef2f2;padding:16px;border-radius:8px;">
+<strong style="color:#dc2626;">SAST 能看到（单行模式）</strong>
+<ul style="margin:8px 0 0 0;padding-left:16px;font-size:0.9em;">
+<li><code>exec(userInput)</code> ← 危险函数调用</li>
+<li><code>innerHTML = x</code> ← 危险 DOM 操作</li>
+<li><code>const key = "sk-..."</code> ← 硬编码密钥</li>
+<li><code>yaml.load(input)</code> ← 不安全函数</li>
+</ul>
+</div>
+<div style="background:#f0fdf4;padding:16px;border-radius:8px;">
+<strong style="color:#16a34a;">只有 Progmune 能看到（跨语句序列）</strong>
+<ul style="margin:8px 0 0 0;padding-left:16px;font-size:0.9em;">
+<li><code>jwt.sign()</code> 在 <code>bcrypt.compare()</code> 之前 ← 顺序错误</li>
+<li><code>createOrder()</code> 在 <code>estimateCost()</code> 之前 ← 缺少步骤</li>
+<li><code>file.open()</code> 后从未 <code>file.close()</code> ← 资源泄漏</li>
+<li><code>multer.upload()</code> 在 <code>passport.auth()</code> 之前 ← 中间件顺序</li>
+</ul>
+</div>
+</div>
+
+<h3>5.4 三种工具的本质区别</h3>
+
+<table>
+<tr><th></th><th>SAST</th><th>SCA</th><th>Progmune</th></tr>
+<tr><td><strong>比对什么</strong></td><td>代码模式 ↔ 攻击模式库</td><td>依赖版本 ↔ CVE 数据库</td><td>调用序列 ↔ 协议状态机</td></tr>
+<tr><td><strong>检测粒度</strong></td><td>单行语句</td><td>依赖项</td><td>跨函数序列</td></tr>
+<tr><td><strong>知识来源</strong></td><td>安全专家写的规则</td><td>公开漏洞报告</td><td>协议定义 + 别名映射</td></tr>
+<tr><td><strong>能否检测新问题</strong></td><td>不能——只能匹配已知模式</td><td>不能——只能匹配已知 CVE</td><td><strong>能——验证序列是否遵循协议</strong></td></tr>
+<tr><td><strong>典型输出</strong></td><td>"第 42 行可能有 SQL 注入"</td><td>"lodash 4.17.15 有 CVE-2019-10744"</td><td>"jwt.sign() 缺少前置的 bcrypt.compare()"</td></tr>
+</table>
+
+<p style="margin-top:16px;"><strong>Progmune 是互补的，不是替代品。</strong>SAST 有规则库，SCA 有 CVE 库，但<strong>没有人有"协议序列规则库"</strong>——这就是 Progmune 的品类。三者覆盖代码安全的不同维度。</p>
+
+<h2>6. 市场时机</h2>
+
+<p>AI 编码助手的采用速度已经超过治理基础设施的建设速度。市场正在从"生成代码"转向"治理代码"。</p>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;">
+<div style="background:#f8fafc;padding:20px;border-radius:10px;">
+  <div style="font-size:2em;font-weight:700;color:#2563eb;">97%</div>
+  <div style="color:#64748b;font-size:0.9em;">企业已在用或试点 AI 编码助手<br><span style="font-size:0.8em;">来源: Cycode 2025 (400+ CISO)</span></div>
+</div>
+<div style="background:#f8fafc;padding:20px;border-radius:10px;">
+  <div style="font-size:2em;font-weight:700;color:#dc2626;">81%</div>
+  <div style="color:#64748b;font-size:0.9em;">安全团队缺乏对 AI 代码的可见性<br><span style="font-size:0.8em;">来源: Cycode 2025</span></div>
+</div>
+<div style="background:#f8fafc;padding:20px;border-radius:10px;">
+  <div style="font-size:2em;font-weight:700;color:#2563eb;">91%</div>
+  <div style="color:#64748b;font-size:0.9em;">计划 12 个月内投资 AI 代码治理<br><span style="font-size:0.8em;">来源: GitLab AI Accountability Report 2026 (1,528 人)</span></div>
+</div>
+<div style="background:#f8fafc;padding:20px;border-radius:10px;">
+  <div style="font-size:2em;font-weight:700;color:#dc2626;">2×</div>
+  <div style="color:#64748b;font-size:0.9em;">AI 代码的安全风险约为人类代码的 2 倍<br><span style="font-size:0.8em;">来源: SIG State of Software 2026</span></div>
+</div>
+</div>
+
+<p style="margin-top:16px;"><strong>关键信号：</strong>GitLab 调查中 85% 的受访者同意"AI 在软件领域的下一阶段将少生成、多治理"。82% 担心 AI 代码形成"新型技术债务"。92% 报告了 AI 代码的治理挑战。<strong>市场正在寻找"AI 之后——代码该怎么办"的答案。</strong></p>
+
+<h2>8. 商业模式</h2>
 
 <p><strong>当前：开源核心（MIT）</strong>，通过 GitHub Action + MCP server 分发。</p>
 <p><strong>路径：</strong>企业版（私有策略引擎、SaaS 仪表板、SLA）——在完成 2-3 个企业 PoC 之后。</p>
 
-<h2>7. 团队与技术栈</h2>
+<h2>9. 团队与技术栈</h2>
 
 <ul>
   <li><strong>语言：</strong>TypeScript（运行时），Python（IR 提取，未激活）</li>
@@ -141,7 +221,7 @@
   <li><strong>分发渠道：</strong>npm 包、GitHub Action、MCP server（Claude Code 集成）</li>
 </ul>
 
-<h2>8. 下一步</h2>
+<h2>10. 下一步</h2>
 
 <table>
 <tr><th>优先级</th><th>事项</th><th>预期影响</th></tr>
