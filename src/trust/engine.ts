@@ -87,6 +87,7 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
   const { violations: protocolViolations, coverage: mappingCoverageData, ssgCoverage: ssgCov } =
     await collectProtocolViolations(ctx, callGraph);
   const expressResult = collectExpressViolations(ctx);
+  const nestjsResult = collectNestJSViolations(ctx);
   const coverageData = collectVerificationCoverage(ctx);
   const governanceDefects = collectGovernanceDefects(ctx);
 
@@ -98,6 +99,7 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
     ...enterpriseViolations,
     ...protocolViolations,
     ...expressResult.violations,
+    ...nestjsResult.violations,
   ];
 
   // ═══════════════════════════════════════
@@ -226,6 +228,15 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
             totalRoutes: expressResult.coverage.totalRoutes,
             filesScanned: expressResult.coverage.filesScanned,
             issuesFound: expressResult.violations.length,
+          }
+        : undefined,
+      /** NestJS framework adapter coverage — decorator-based route analysis */
+      nestjsCoverage: nestjsResult.coverage.controllers > 0
+        ? {
+            controllers: nestjsResult.coverage.controllers,
+            totalRoutes: nestjsResult.coverage.routes,
+            filesScanned: nestjsResult.coverage.filesScanned,
+            issuesFound: nestjsResult.violations.length,
           }
         : undefined,
     },
@@ -504,6 +515,74 @@ function collectExpressViolations(ctx: TrustEvaluationContext): {
   } catch { /* best-effort — framework detector optional */ }
 
   return { violations, coverage: { expressApps, totalRoutes, filesScanned } };
+}
+
+// ═══════════════════════════════════════════════
+//  NestJS Framework Adapter Collector
+// ═══════════════════════════════════════════════
+
+/**
+ * Collect NestJS-specific security violations from decorator analysis.
+ * Maps NestJSSecurityIssue[] → TrustViolation[].
+ */
+function collectNestJSViolations(ctx: TrustEvaluationContext): {
+  violations: TrustViolation[];
+  coverage: { controllers: number; routes: number; filesScanned: number };
+} {
+  const violations: TrustViolation[] = [];
+  let controllers = 0;
+  let routes = 0;
+  let filesScanned = 0;
+
+  try {
+    const { analyzeNestJSFile } = require("../frameworks/nestjs-detector");
+    const fs = require("fs");
+
+    const candidateDirs = ["src", "server", "app", "api", "modules"];
+    const extensions = languageToExtensions(ctx.language);
+
+    for (const dir of candidateDirs) {
+      const dirPath = path.join(ctx.projectPath, dir);
+      if (!fs.existsSync(dirPath)) continue;
+
+      let files: string[];
+      try { files = walkDir(dirPath, extensions, 100); } catch { continue; }
+
+      for (const file of files) {
+        if (/\.(test|spec)\.(ts|tsx|js|jsx)$/.test(file)) continue;
+        filesScanned++;
+
+        try {
+          const analysis = analyzeNestJSFile(file);
+          if (!analysis || analysis.controllers.length === 0) continue;
+
+          controllers += analysis.controllers.length;
+          routes += analysis.routes.length;
+
+          for (const issue of analysis.issues) {
+            const severity: ViolationSeverity =
+              issue.severity === "critical" ? "critical" :
+              issue.severity === "high" ? "high" :
+              issue.severity === "medium" ? "medium" : "low";
+
+            violations.push({
+              severity,
+              rule_id: issue.type,
+              file: path.relative(ctx.projectPath, file),
+              function: `${issue.controller}.${issue.route}`,
+              message: issue.message,
+              evidence: `NestJS route: ${issue.route} | Controller: ${issue.controller}`,
+              why: `NestJS decorator analysis: ${issue.type}`,
+              fix: issue.fix,
+              policy_ref: "framework.nestjs",
+            });
+          }
+        } catch { /* skip unreadable files */ }
+      }
+    }
+  } catch { /* best-effort */ }
+
+  return { violations, coverage: { controllers, routes, filesScanned } };
 }
 
 /**

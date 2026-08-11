@@ -115,6 +115,13 @@ export interface TrustDecision {
       filesScanned: number;
       issuesFound: number;
     };
+    /** NestJS framework adapter coverage */
+    nestjsCoverage?: {
+      controllers: number;
+      totalRoutes: number;
+      filesScanned: number;
+      issuesFound: number;
+    };
   };
 
   dimensions: TrustDimensions;

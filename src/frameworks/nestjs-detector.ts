@@ -199,3 +199,147 @@ function extractGuardNames(decorator: Decorator | undefined): string[] {
   }
   return result;
 }
+
+// ── File-level and Project-level Convenience ──
+
+/**
+ * Analyze a single TypeScript file for NestJS controllers.
+ */
+export function analyzeNestJSFile(filePath: string): NestJSAnalysis | null {
+  const fs = require("fs");
+  if (!fs.existsSync(filePath)) return null;
+
+  const code = fs.readFileSync(filePath, "utf-8");
+  // Quick check: does this file look like NestJS?
+  if (!/@Controller\b/.test(code) && !/@nestjs\/common/.test(code)) return null;
+
+  const project = new Project();
+  try {
+    project.addSourceFileAtPath(filePath);
+  } catch {
+    return null;
+  }
+
+  // Parse using the same logic as analyzeNestJSProject
+  const analysis: NestJSAnalysis = {
+    controllers: [],
+    routes: [],
+    issues: [],
+  };
+
+  for (const file of project.getSourceFiles()) {
+    for (const cls of file.getClasses()) {
+      const ctrlDec = cls.getDecorator("Controller");
+      if (!ctrlDec) continue;
+
+      // ... (same parsing logic)
+      const controllerName = cls.getName() || "UnknownController";
+      analysis.controllers.push(controllerName);
+
+      const basePath = getStringArg(ctrlDec, 0) || "";
+      const classGuards = extractGuardNames(cls.getDecorator("UseGuards"));
+      const classPipes = extractGuardNames(cls.getDecorator("UsePipes"));
+
+      for (const method of cls.getMethods()) {
+        const httpMethod = getHttpMethod(method);
+        if (!httpMethod) continue;
+
+        const routePath = getStringArg(
+          method.getDecorators().find(d => isHttpDecorator(d))!,
+          0
+        ) || "";
+
+        const fullPath = basePath + (routePath.startsWith("/") ? routePath : `/${routePath}`);
+
+        const methodGuards = extractGuardNames(method.getDecorator("UseGuards"));
+        const methodPipes = extractGuardNames(method.getDecorator("UsePipes"));
+        const guards = methodGuards.length > 0 ? methodGuards : classGuards;
+        const pipes = methodPipes.length > 0 ? methodPipes : classPipes;
+
+        const route: NestJSRoute = {
+          method: httpMethod,
+          path: fullPath,
+          controller: controllerName,
+          handler: method.getName() || "unknown",
+          hasAuthGuard: guards.length > 0,
+          hasValidationPipe: pipes.length > 0,
+          guards,
+          pipes,
+        };
+
+        analysis.routes.push(route);
+
+        // Security checks
+        if (["POST", "PUT", "DELETE", "PATCH"].includes(httpMethod)) {
+          if (!route.hasAuthGuard) {
+            analysis.issues.push({
+              type: "NESTJS_NO_AUTH",
+              severity: "critical",
+              route: `${httpMethod} ${fullPath}`,
+              controller: controllerName,
+              message: `Mutation route ${httpMethod} ${fullPath} has no @UseGuards. Anyone can call it.`,
+              fix: `Add @UseGuards(AuthGuard) to the method or controller class.`,
+            });
+          }
+          if (!route.hasValidationPipe) {
+            analysis.issues.push({
+              type: "NESTJS_NO_VALIDATION",
+              severity: "medium",
+              route: `${httpMethod} ${fullPath}`,
+              controller: controllerName,
+              message: `Mutation route ${httpMethod} ${fullPath} has no @UsePipes for input validation.`,
+              fix: `Add @UsePipes(ValidationPipe) or a DTO class to validate input.`,
+            });
+          }
+        }
+
+        if (httpMethod === "GET") {
+          const sensitiveTerms = ["admin", "private", "secret", "manage"];
+          if (sensitiveTerms.some(t => fullPath.toLowerCase().includes(t)) && !route.hasAuthGuard) {
+            analysis.issues.push({
+              type: "NESTJS_SENSITIVE_PUBLIC",
+              severity: "high",
+              route: `${httpMethod} ${fullPath}`,
+              controller: controllerName,
+              message: `Sensitive GET route ${fullPath} is publicly accessible without @UseGuards.`,
+              fix: `Add @UseGuards(AuthGuard) to protect this route.`,
+            });
+          }
+        }
+      }
+    }
+  }
+
+  return analysis;
+}
+
+/**
+ * Format a summary report for CLI output.
+ */
+export function formatNestJSReport(analysis: NestJSAnalysis): string {
+  if (analysis.controllers.length === 0) {
+    return "Not a NestJS project (no @Controller classes found).";
+  }
+
+  const lines: string[] = [
+    `Controllers: ${analysis.controllers.length}`,
+    `Routes: ${analysis.routes.length}`,
+    `Issues: ${analysis.issues.length}`,
+    "",
+  ];
+
+  if (analysis.issues.length === 0) {
+    lines.push("✅ No NestJS security issues detected.");
+    return lines.join("\n");
+  }
+
+  for (const issue of analysis.issues) {
+    const emoji = issue.severity === "critical" ? "🔴" : issue.severity === "high" ? "🟠" : "🟡";
+    lines.push(`${emoji} [${issue.type}] ${issue.route}`);
+    lines.push(`   ${issue.message}`);
+    lines.push(`   Fix: ${issue.fix}`);
+    lines.push("");
+  }
+
+  return lines.join("\n");
+}
