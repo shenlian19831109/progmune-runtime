@@ -401,18 +401,9 @@ export function validateSequenceWithSSG(
     const step = steps[i];
     const namespace = DOMAIN_TO_NAMESPACE[step.domain] || "stateless";
 
-    // Skip stateless — no state machine validation needed
-    if (namespace === "stateless") {
-      trace.push({
-        call: step.api,
-        namespace,
-        matchedRule: null,
-        valid: true,
-      });
-      continue;
-    }
-
-    // Try to match call to a protocol rule
+    // Try to match call to a protocol rule FIRST (before namespace check).
+    // Even if the semantic domain maps to "stateless", an alias may still
+    // map this call to a specific protocol rule with its own namespace.
     // Priority: wildcard alias → exact alias → name match → word match → keyword
     const ruleName = inferRuleName(
       step.api,
@@ -423,6 +414,22 @@ export function validateSequenceWithSSG(
       aliases,
       wildcards,
     );
+
+    // Use matched rule's namespace, falling back to domain-inferred namespace
+    const effectiveNamespace = ruleName
+      ? (rules.get(ruleName)?.namespace || namespace)
+      : namespace;
+
+    // Skip stateless — no state machine validation needed (unless alias matched)
+    if (effectiveNamespace === "stateless" && !ruleName) {
+      trace.push({
+        call: step.api,
+        namespace: effectiveNamespace,
+        matchedRule: null,
+        valid: true,
+      });
+      continue;
+    }
 
     if (!ruleName) {
       trace.push({
@@ -437,8 +444,7 @@ export function validateSequenceWithSSG(
     matchedCalls++;
 
     // Use the matched rule's actual namespace, not the domain-inferred one.
-    // The rule defines which state machine it belongs to (protocols.json).
-    const ruleNamespace = rules.get(ruleName)?.namespace || namespace;
+    const ruleNamespace = effectiveNamespace;
 
     // Validate transition
     try {
