@@ -58,6 +58,13 @@ import {
   inferDomainsFromFunctionName,
 } from "./call-graph-propagator";
 import type { CallGraphIndex } from "./call-graph-propagator";
+import {
+  validateSequenceWithSSG,
+  ssgViolationsToTrustViolations,
+  loadProtocolRules,
+  summarizeSSGCoverage,
+} from "./ssg-bridge";
+import type { SSGValidationResult } from "./ssg-bridge";
 
 // ── Main Entry Point ──
 
@@ -76,7 +83,7 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
   );
 
   const enterpriseViolations = collectEnterpriseViolations(ctx);
-  const { violations: protocolViolations, coverage: mappingCoverageData } =
+  const { violations: protocolViolations, coverage: mappingCoverageData, ssgCoverage: ssgCov } =
     await collectProtocolViolations(ctx, callGraph);
   const coverageData = collectVerificationCoverage(ctx);
   const governanceDefects = collectGovernanceDefects(ctx);
@@ -207,6 +214,8 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
             graphAvailable: mappingCoverageData.graphAvailable,
           }
         : undefined,
+      /** SSG State Machine coverage — how many calls were matched to protocol rules */
+      ssgCoverage: ssgCov,
     },
     dimensions: {
       policyCompliance: {
@@ -480,6 +489,16 @@ interface ProtocolViolationResult {
     propagatedDomains: number;
     graphAvailable: boolean;
   };
+  /** SSG state machine validation coverage & results */
+  ssgCoverage?: {
+    sequencesValidated: number;
+    totalCalls: number;
+    matchedCalls: number;
+    ssgViolations: number;
+    summary: string;
+    /** Warnings from project alias validation */
+    aliasWarnings?: string[];
+  };
 }
 
 async function collectProtocolViolations(
@@ -492,11 +511,21 @@ async function collectProtocolViolations(
   let llmHits = 0;
   let propagatedCount = 0;
 
+  // SSG State Machine variables (declared outside try for scope)
+  let protocolRulesData: ReturnType<typeof loadProtocolRules> = null;
+  const ssgResults: SSGValidationResult[] = [];
+  let ssgTotalCalls = 0;
+  let ssgMatchedCalls = 0;
+  let ssgViolationCount = 0;
+
   try {
     // ── Phase 1-5 Semantic Pipeline ──
     const callSequences = extractCallSequencesFromProject(ctx.projectPath, ctx.language);
     const flaggedCount = { value: 0 };
     const cleanCount = { value: 0 };
+
+    // ── SSG State Machine: load protocol rules once ──
+    protocolRulesData = loadProtocolRules(ctx.projectPath);
 
     for (const seq of callSequences) {
       try {
@@ -582,6 +611,39 @@ async function collectProtocolViolations(
             }
           } catch { /* best-effort */ }
         }
+
+        // ── SSG State Machine Validation ──
+        // Validate the call sequence against protocol state machine rules.
+        // Runs after semantic mapping so we can use domain classification
+        // to bridge real API names to abstract protocol function names.
+        if (protocolRulesData) {
+          try {
+            const ssgResult = validateSequenceWithSSG(
+              semantic.steps,
+              protocolRulesData.rules,
+              protocolRulesData.namespaceInitialStates,
+              seq.file,
+              protocolRulesData.aliasIndex,
+              protocolRulesData.wildcardAliases,
+            );
+            ssgResults.push(ssgResult);
+            ssgTotalCalls += ssgResult.stats.totalCalls;
+            ssgMatchedCalls += ssgResult.stats.matchedCalls;
+            ssgViolationCount += ssgResult.violations.length;
+
+            // Convert SSG violations to TrustViolations and add to pipeline
+            if (ssgResult.violations.length > 0) {
+              const trustViolations = ssgViolationsToTrustViolations(
+                ssgResult,
+                seq.file,
+                seq.function || "unknown",
+              );
+              for (const tv of trustViolations) {
+                violations.push(tv);
+              }
+            }
+          } catch { /* SSG validation best-effort */ }
+        }
       } catch { /* best-effort per sequence */ }
     }
 
@@ -618,6 +680,15 @@ async function collectProtocolViolations(
       propagatedDomains: propagatedCount,
       graphAvailable: callGraph.totalFunctions > 0,
     },
+    ssgCoverage: protocolRulesData ? {
+      sequencesValidated: ssgResults.length,
+      totalCalls: ssgTotalCalls,
+      matchedCalls: ssgMatchedCalls,
+      ssgViolations: ssgViolationCount,
+      summary: summarizeSSGCoverage(ssgResults),
+      aliasWarnings: protocolRulesData.aliasWarnings?.length
+        ? protocolRulesData.aliasWarnings : undefined,
+    } : undefined,
   };
 }
 
@@ -638,13 +709,43 @@ function extractCallSequencesFromProject(
 
   try {
     const fs = require("fs");
-    const srcDir = path.join(projectPath, "src");
-    if (!fs.existsSync(srcDir)) return sequences;
 
+    // Scan multiple common source directories (not just "src/")
+    const candidateDirs = ["src", "server", "app", "lib", "api", "pages", "components", "routes"];
     const extensions = languageToExtensions(language);
-    const files = walkDir(srcDir, extensions, 100);
+    const allFiles: string[] = [];
+
+    for (const dir of candidateDirs) {
+      const dirPath = path.join(projectPath, dir);
+      if (!fs.existsSync(dirPath)) continue;
+      try {
+        const files = walkDir(dirPath, extensions, 200);
+        allFiles.push(...files);
+      } catch { /* skip inaccessible dirs */ }
+    }
+
+    // Also scan TypeScript/JS files in root (e.g., next.config.ts, vite.config.ts)
+    try {
+      const rootEntries = fs.readdirSync(projectPath);
+      for (const entry of rootEntries) {
+        const full = path.join(projectPath, entry);
+        if (!fs.statSync(full).isFile()) continue;
+        if (extensions.some((ext: string) => entry.endsWith(ext))) {
+          allFiles.push(full);
+        }
+      }
+    } catch { /* best-effort */ }
+
+    // Limit total files to prevent timeout
+    const files = allFiles.slice(0, 300);
 
     for (const file of files) {
+      // Skip test files — test assertions and setup code produce noise
+      // in protocol validation. Real violations come from production code paths.
+      const relFile = path.relative(projectPath, file);
+      if (/\.(test|spec)\.(ts|tsx|js|jsx)$/.test(relFile)) continue;
+      if (relFile.includes("/test/") || relFile.includes("/__tests__/")) continue;
+
       try {
         const content = fs.readFileSync(file, "utf-8");
         const calls = extractCallsFromSource(content);

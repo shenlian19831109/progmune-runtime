@@ -720,6 +720,7 @@ function parseProtocolsFromJSON(protocolDef) {
                 post_states: rule.post_states,
                 invalidate: rule.invalidate,
                 namespace: rule.namespace,
+                aliases: rule.aliases,
             },
         });
     }

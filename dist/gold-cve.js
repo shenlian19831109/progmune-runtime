@@ -44,6 +44,7 @@ function loadGoldDataset() {
         verifiedBy: "manual_curation",
         notes: d.description,
         project: "curated",
+        ...(d.plsId ? { plsId: d.plsId } : {}),
     }));
     const byCategory = {};
     const verifiedBy = {};

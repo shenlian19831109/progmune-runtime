@@ -164,6 +164,7 @@ function buildPLSB() {
             verified: true,
             source: "curated",
             notes: c.notes,
+            pls_id: c.plsId,
         });
     }
     // Source 2: Diff-based gold from gold-seed.json
@@ -202,7 +203,7 @@ function buildPLSB() {
         missing_validation: "PLS-013",
     };
     for (const e of entries) {
-        e.pls_id = catToPLS[e.category] || undefined;
+        e.pls_id = e.pls_id || catToPLS[e.category] || undefined;
     }
     // Build metadata
     const byCategory = {};

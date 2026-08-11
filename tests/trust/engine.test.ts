@@ -15,8 +15,8 @@ describe("evaluateTrust", () => {
     language: "typescript",
   };
 
-  it("returns a valid TrustDecision structure", () => {
-    const result = evaluateTrust(baseCtx);
+  it("returns a valid TrustDecision structure", async () => {
+    const result = await evaluateTrust(baseCtx);
 
     // Overall
     expect(result.overall).toBeDefined();
@@ -55,26 +55,26 @@ describe("evaluateTrust", () => {
     expect(result.timestamp).toBeDefined();
   });
 
-  it("computes overall score within valid range", () => {
-    const result = evaluateTrust(baseCtx);
+  it("computes overall score within valid range", async () => {
+    const result = await evaluateTrust(baseCtx);
     expect(result.overall.score).toBeGreaterThanOrEqual(0);
     expect(result.overall.score).toBeLessThanOrEqual(100);
   });
 
-  it("evolution stability is always N/A in v1", () => {
-    const result = evaluateTrust(baseCtx);
+  it("evolution stability is always N/A in v1", async () => {
+    const result = await evaluateTrust(baseCtx);
     expect(result.dimensions.evolutionStability.score).toBeNull();
     expect(result.dimensions.evolutionStability.status).toBe("UNAVAILABLE");
     expect(result.dimensions.evolutionStability.weight).toBe(0);
   });
 
-  it("handles unknown project path gracefully", () => {
+  it("handles unknown project path gracefully", async () => {
     const ctx: TrustEvaluationContext = {
       ...baseCtx,
       projectPath: "/nonexistent/path/12345",
       projectName: "unknown",
     };
-    const result = evaluateTrust(ctx);
+    const result = await evaluateTrust(ctx);
     // Should not throw — returns best-effort result
     expect(result.overall).toBeDefined();
   });

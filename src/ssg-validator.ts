@@ -6,6 +6,10 @@ export interface StateAnnotation {
   post_states: string[];
   invalidate?: string[];
   namespace?: string;
+  /** Real-world library API names that map to this abstract protocol function.
+   *  Format: "library.function" (e.g., "bcrypt.compare", "jwt.sign", "fs.openSync").
+   *  Used by the SSG bridge for exact-match call→rule inference. */
+  aliases?: string[];
 }
 
 export interface FunctionProtocol {
@@ -852,6 +856,7 @@ export function parseProtocolsFromJSON(
       post_states: string[];
       invalidate?: string[];
       namespace?: string;
+      aliases?: string[];
     }>;
   }
 ): FunctionProtocol[] {
@@ -864,6 +869,7 @@ export function parseProtocolsFromJSON(
         post_states: rule.post_states,
         invalidate: rule.invalidate,
         namespace: rule.namespace,
+        aliases: rule.aliases,
       },
     });
   }

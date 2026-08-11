@@ -100,6 +100,14 @@ export interface TrustDecision {
       /** Phase 5: Whether IR-based call graph was available */
       graphAvailable?: boolean;
     };
+    /** SSG State Machine coverage: how many calls matched protocol rules */
+    ssgCoverage?: {
+      sequencesValidated: number;
+      totalCalls: number;
+      matchedCalls: number;
+      ssgViolations: number;
+      summary: string;
+    };
   };
 
   dimensions: TrustDimensions;

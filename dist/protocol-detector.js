@@ -209,6 +209,64 @@ const PROTOCOLS = [
         ],
     },
 ];
+// ═══════════════════════════════════════════════════════════════
+// P0 Round 4: PLSB Coverage — Double Release, Use After Release,
+//              Session Fixation, Privilege Escalation, Double Commit,
+//              API Contract / Workflow Bypass
+// ═══════════════════════════════════════════════════════════════
+const PLSB_PROTOCOLS = [
+    {
+        // PLS-002: Double Release
+        name: "Double Release Detection", category: "resource_leak", minCompleteness: 0.3,
+        steps: [
+            { pattern: /\b(\w*close|close\w*|\w*free|free\w*|\w*disconnect|disconnect\w*|\w*cleanup|cleanup\w*|\w*destroy|destroy\w*|\w*release|release\w*|\w*shutdown|shutdown\w*|\w*end|end\w*|\w*delete|delete\w*)\b/i, label: "release_first", required: true },
+            { pattern: /\b(\w*close|close\w*|\w*free|free\w*|\w*disconnect|disconnect\w*|\w*cleanup|cleanup\w*|\w*destroy|destroy\w*|\w*release|release\w*|\w*shutdown|shutdown\w*|\w*end|end\w*|\w*delete|delete\w*)\b/i, label: "release_second", required: false },
+        ],
+    },
+    {
+        // PLS-003: Use After Release
+        name: "Use After Release Detection", category: "use_after_free", minCompleteness: 0.3,
+        steps: [
+            { pattern: /\b(\w*close|close\w*|\w*free|free\w*|\w*disconnect|disconnect\w*|\w*destroy|destroy\w*|\w*release|release\w*|\w*shutdown|shutdown\w*)\b/i, label: "release", required: true },
+            { pattern: /\b(\w*read|read\w*|\w*write|write\w*|\w*send|send\w*|\w*recv|recv\w*|\w*query|query\w*|\w*access|access\w*|\w*use|use\w*|\w*get|get\w*|\w*execute|execute\w*)\b/i, label: "use_after", required: false },
+        ],
+    },
+    {
+        // PLS-005: Session Fixation
+        name: "Session Fixation Detection", category: "session_fixation", minCompleteness: 0.5,
+        steps: [
+            { pattern: /\b(\w*login|login\w*|\w*signin|signin\w*|\w*authenticate|authenticate\w*|\w*create\w*session|session\w*create|\w*session\w*init|init\w*session|\w*session\w*start|start\w*session)\b/i, label: "session_create", required: true },
+            { pattern: /\b(\w*logout|logout\w*|\w*signout|signout\w*|\w*session\w*destroy|destroy\w*session|\w*session\w*invalidate|invalidate\w*session|\w*session\w*revoke|revoke\w*session|\w*session\w*end|end\w*session|\w*session\w*expire|expire\w*session|\w*session\w*clear|clear\w*session|\w*clear\w*session|session\w*clear)\b/i, label: "session_destroy", required: true },
+        ],
+    },
+    {
+        // PLS-006: Privilege Escalation
+        name: "Privilege Escalation Detection", category: "privilege_escalation", minCompleteness: 0.5,
+        steps: [
+            { pattern: /\b(\w*delete\w*all|deleteAll\w*|\w*delete\w*user|deleteUser\w*|\w*delete\w*account|deleteAccount\w*|\w*admin|admin\w*|\w*manage\w*user|manageUser\w*|\w*manage\w*system|manageSystem\w*|\w*system\w*config|systemConfig\w*|\w*ban\w*user|banUser\w*|\w*modify\w*role|modifyRole\w*|\w*assign\w*role|assignRole\w*|\w*grant\w*permission|grantPermission\w*)\b/i, label: "admin_action", required: true },
+            { pattern: /\b(\w*check\w*role|checkRole\w*|\w*verify\w*admin|verifyAdmin\w*|\w*require\w*admin|requireAdmin\w*|\w*is\w*admin|isAdmin\w*|\w*has\w*role|hasRole\w*|\w*check\w*permission|checkPermission\w*|\w*has\w*permission|hasPermission\w*|\w*require\w*role|requireRole\w*|\w*admin\w*only|adminOnly\w*|\w*authorize|authorize\w*|\w*check\w*access|checkAccess\w*)\b/i, label: "admin_auth", required: true },
+        ],
+    },
+    {
+        // PLS-008: Double Commit
+        name: "Double Commit Detection", category: "transaction_violation", minCompleteness: 0.3,
+        steps: [
+            { pattern: /\b(\w*begin\w*tx|beginTx\w*|\w*start\w*transaction|startTransaction\w*|\w*begin\w*transaction|beginTransaction\w*|\w*tx\w*start|txStart\w*|\w*db\w*transaction|dbTransaction\w*|\w*with\w*transaction|withTransaction\w*)\b/i, label: "tx_begin", required: true },
+            { pattern: /\b(\w*commit|commit\w*|\w*commit\w*tx|commitTx\w*|\w*end\w*transaction|endTransaction\w*)\b/i, label: "tx_commit_first", required: true },
+            { pattern: /\b(\w*commit|commit\w*|\w*commit\w*tx|commitTx\w*|\w*end\w*transaction|endTransaction\w*)\b/i, label: "tx_commit_second", required: false },
+        ],
+    },
+    {
+        // PLS-013: Workflow Bypass / API Contract
+        name: "Workflow Bypass Detection", category: "missing_validation", minCompleteness: 0.5,
+        steps: [
+            { pattern: /\b(\w*validate|validate\w*|\w*check|check\w*|\w*verify|verify\w*|\w*sanitize|sanitize\w*|\w*parse|parse\w*|\w*schema|schema\w*|\w*zod|zod\w*|\w*input\w*valid|valid\w*input)\b/i, label: "wf_validate", required: true },
+            { pattern: /\b(\w*execute|execute\w*|\w*process|process\w*|\w*handle|handle\w*|\w*run|run\w*|\w*do\w*action|doAction\w*|\w*perform|perform\w*|\w*dispatch|dispatch\w*|\w*apply|apply\w*)\b/i, label: "wf_action", required: true },
+            { pattern: /\b(\w*log|log\w*|\w*audit|audit\w*|\w*record|record\w*|\w*track|track\w*|\w*metric|metric\w*|\w*monitor|monitor\w*)\b/i, label: "wf_audit", required: false },
+        ],
+    },
+];
+const ALL_PROTOCOLS = [...PROTOCOLS, ...PLSB_PROTOCOLS];
 const SAFEGUARD_RULES = [
     // ── Password Hashing ──
     {
@@ -730,6 +788,61 @@ const SAFEGUARD_RULES = [
         conceptMissing: ["FrameworkVersionAwareness", "ConventionVerification"],
         conceptExpected: ["version-specific convention", "framework docs check"],
     },
+    // ═══════════════════════════════════════════════════════════════
+    // P0 Round 4: PLSB coverage safeguards — Session Fixation,
+    //              Privilege Escalation, API Contract
+    // ═══════════════════════════════════════════════════════════════
+    // ── PLS-005: Session Fixation — session not invalidated on logout ──
+    {
+        name: "Session Fixation (Logout without Invalidation)",
+        category: "session_fixation",
+        languages: ["typescript", "javascript", "python"],
+        trigger: /\b(logout|signOut|logOut|signout|doLogout|handleLogout|endSession|clearSession)\b/i,
+        safeguards: [
+            { pattern: /\b(session\w*destroy|destroy\w*session|session\w*invalidate|invalidate\w*session|session\w*revoke|revoke\w*session|session\w*clear|clear\w*session|session\w*end|end\w*session|session\w*expire|expire\w*session|token\w*revoke|revoke\w*token|token\w*blacklist|blacklist\w*token|invalidate\w*token)\b/i, label: "session_invalidate" },
+        ],
+        violationMessage: "Logout function does not destroy/invalidate the session. Old session tokens remain valid, enabling session hijacking (session fixation).",
+        conceptMissing: ["SessionInvalidation", "SessionRevocation"],
+        conceptExpected: ["session.destroy", "session.invalidate", "session.revoke"],
+    },
+    // ── PLS-006: Privilege Escalation — admin action without role check ──
+    {
+        name: "Privilege Escalation (Admin without Role Check)",
+        category: "privilege_escalation",
+        trigger: /\b(deleteAll|deleteUser|deleteAccount|banUser|modifyRole|assignRole|grantPermission|manageSystem|systemConfig|adminDelete|adminRemove|adminBan|bulkDelete|massDelete)\b/i,
+        safeguards: [
+            { pattern: /\b(checkRole|verifyAdmin|requireAdmin|isAdmin|hasRole|checkPermission|hasPermission|requireRole|adminOnly|authorize|checkAccess|verifyRole|isAuthorized|canDelete|canModify|canManage)\b/i, label: "admin_check" },
+        ],
+        violationMessage: "Privileged/admin action does not verify the user's role or permissions before executing. An attacker with a lower-privilege account could perform this action.",
+        conceptMissing: ["RoleVerification", "PermissionCheck"],
+        conceptExpected: ["checkRole", "isAdmin", "hasPermission"],
+    },
+    // ── PLS-013: API Contract — Express/tRPC handler without input validation ──
+    {
+        name: "API Contract (Handler without Input Validation)",
+        category: "missing_validation",
+        languages: ["typescript", "javascript"],
+        trigger: /\b(router\.(get|post|put|delete|patch)|app\.(get|post|put|delete|patch)|publicProcedure|protectedProcedure|adminProcedure|\.query\(|\.mutation\()\b/i,
+        safeguards: [
+            { pattern: /\b(z\.(string|number|object|array|boolean|enum|union|record)|zodSchema|validateRequest|validateBody|validateQuery|validateParams|parseAsync|\.parse\(|\.safeParse\(|checkSchema|body\(|param\(|query\(|expressValidator|celebrate)\b/i, label: "input_validation" },
+        ],
+        violationMessage: "API endpoint handler does not validate input. Missing Zod schema, express-validator, or parameter validation. This allows malformed/injection payloads to reach business logic.",
+        conceptMissing: ["InputValidation", "SchemaValidation"],
+        conceptExpected: ["z.object", "zod", "express-validator", "validate"],
+    },
+    // ── API Contract — DB write without input sanitization ──
+    {
+        name: "API Contract (DB Write without Sanitization)",
+        category: "missing_validation",
+        languages: ["typescript", "javascript"],
+        trigger: /\b(db\.(insert|update|delete)|\w*\.(insert|update|delete)\(|database\w*\.(insert|update|delete)|db\.(execute|run|query)\(.*INSERT|UPDATE.*SET)\b/i,
+        safeguards: [
+            { pattern: /\b(validate|sanitize|escape|strip|clean|filter|z\.|\.safeParse|\.parse\(|checkPermission|verifyAuth|hasRole|isAdmin|authorize)\b/i, label: "data_sanitize_or_auth" },
+        ],
+        violationMessage: "Database write operation does not validate/sanitize input or check authorization. Risk of SQL injection, data corruption, or unauthorized data modification.",
+        conceptMissing: ["InputSanitization", "WriteAuthorization"],
+        conceptExpected: ["validate", "sanitize", "checkPermission", "zod"],
+    },
 ];
 /**
  * Identifier Parser: splits camelCase/PascalCase/snake_case into words.
@@ -951,7 +1064,7 @@ function enrichWithConcepts(v, matchedLabels) {
 }
 function detectProtocolViolations(calls) {
     const violations = [];
-    for (const proto of PROTOCOLS) {
+    for (const proto of ALL_PROTOCOLS) {
         const matched = [];
         for (let ci = 0; ci < calls.length; ci++) {
             for (const step of proto.steps) {
