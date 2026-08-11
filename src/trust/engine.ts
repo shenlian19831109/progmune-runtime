@@ -58,6 +58,7 @@ import {
   inferDomainsFromFunctionName,
 } from "./call-graph-propagator";
 import type { CallGraphIndex } from "./call-graph-propagator";
+import type { ExpressSecurityIssue } from "../frameworks/express-detector";
 import {
   validateSequenceWithSSG,
   ssgViolationsToTrustViolations,
@@ -85,6 +86,7 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
   const enterpriseViolations = collectEnterpriseViolations(ctx);
   const { violations: protocolViolations, coverage: mappingCoverageData, ssgCoverage: ssgCov } =
     await collectProtocolViolations(ctx, callGraph);
+  const expressResult = collectExpressViolations(ctx);
   const coverageData = collectVerificationCoverage(ctx);
   const governanceDefects = collectGovernanceDefects(ctx);
 
@@ -95,6 +97,7 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
   const allViolations: TrustViolation[] = [
     ...enterpriseViolations,
     ...protocolViolations,
+    ...expressResult.violations,
   ];
 
   // ═══════════════════════════════════════
@@ -216,6 +219,15 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
         : undefined,
       /** SSG State Machine coverage — how many calls were matched to protocol rules */
       ssgCoverage: ssgCov,
+      /** Express framework adapter coverage — routes & middleware analyzed */
+      expressCoverage: expressResult.coverage.expressApps > 0
+        ? {
+            appsDetected: expressResult.coverage.expressApps,
+            totalRoutes: expressResult.coverage.totalRoutes,
+            filesScanned: expressResult.coverage.filesScanned,
+            issuesFound: expressResult.violations.length,
+          }
+        : undefined,
     },
     dimensions: {
       policyCompliance: {
@@ -363,6 +375,135 @@ function mapPolicyViolation(
     fix: `Address ${rv.rule.type} violation: ${rv.expected}`,
     policy_ref: "default",
   };
+}
+
+// ═══════════════════════════════════════════════
+//  Express Framework Adapter Collector
+// ═══════════════════════════════════════════════
+
+/**
+ * Collect Express-specific security violations from the framework detector.
+ * Maps ExpressSecurityIssue[] → TrustViolation[].
+ */
+function collectExpressViolations(ctx: TrustEvaluationContext): {
+  violations: TrustViolation[];
+  coverage: { expressApps: number; totalRoutes: number; filesScanned: number };
+} {
+  const violations: TrustViolation[] = [];
+  let expressApps = 0;
+  let totalRoutes = 0;
+  let filesScanned = 0;
+
+  try {
+    const { analyzeExpressFile } = require("../frameworks/express-detector");
+    const fs = require("fs");
+
+    // Scan common source directories for Express files
+    const candidateDirs = ["src", "server", "app", "api", "routes"];
+    const extensions = languageToExtensions(ctx.language);
+
+    for (const dir of candidateDirs) {
+      const dirPath = path.join(ctx.projectPath, dir);
+      if (!fs.existsSync(dirPath)) continue;
+
+      let files: string[];
+      try {
+        files = walkDir(dirPath, extensions, 100);
+      } catch {
+        continue;
+      }
+
+      // First pass: identify all Express apps and find the main one
+      const expressAnalyses: Array<{ file: string; analysis: ReturnType<typeof analyzeExpressFile> }> = [];
+      for (const file of files) {
+        // Skip test files
+        if (/\.(test|spec)\.(ts|tsx|js|jsx)$/.test(file)) continue;
+        filesScanned++;
+
+        try {
+          const analysis = analyzeExpressFile(file);
+          if (analysis && analysis.hasExpress) {
+            expressAnalyses.push({ file, analysis });
+          }
+        } catch { /* skip unreadable files */ }
+      }
+
+      // Second pass: report issues from the main app file only
+      // (the file with the most routes is the entry point).
+      // Cross-file analysis: merge global findings (helmet/cors/auth)
+      // from all files to avoid false positives from sub-modules.
+      expressApps = expressAnalyses.length;
+      let mainAppRoutes = 0;
+
+      // Collect cross-file evidence
+      const allGlobalMiddleware = new Set<string>();
+      const allRouteMiddleware = new Set<string>();
+      for (const { analysis } of expressAnalyses) {
+        totalRoutes += analysis.routes.length;
+        if (analysis.routes.length > mainAppRoutes) mainAppRoutes = analysis.routes.length;
+        for (const mw of analysis.globalMiddleware) {
+          allGlobalMiddleware.add(mw.type);
+        }
+        for (const route of analysis.routes) {
+          for (const mw of route.middlewares) {
+            // Classify each route middleware
+            try {
+              const { classifyMiddleware } = require("../frameworks/express-detector");
+              allRouteMiddleware.add(classifyMiddleware("", mw));
+            } catch { /* skip */ }
+          }
+        }
+      }
+
+      // Report from main app + cross-file evidence
+      for (const { file, analysis } of expressAnalyses) {
+        if (analysis.routes.length < mainAppRoutes) continue; // skip sub-modules
+
+        for (const issue of analysis.issues) {
+          // Cross-file correction: if the missing thing exists elsewhere, suppress the issue
+          if (issue.rule === "EXPRESS_NO_AUTH_MIDDLEWARE" &&
+              (allGlobalMiddleware.has("auth") || allRouteMiddleware.has("auth"))) {
+            continue; // auth exists in project — this file just doesn't define it directly
+          }
+          if (issue.rule === "EXPRESS_NO_HELMET" && allGlobalMiddleware.has("security_header")) {
+            continue;
+          }
+          if (issue.rule === "EXPRESS_NO_CORS_CONFIG" && allGlobalMiddleware.has("cors")) {
+            continue;
+          }
+          if (issue.rule === "EXPRESS_NO_RATE_LIMIT" && allGlobalMiddleware.has("rate_limit")) {
+            continue;
+          }
+          if (issue.rule === "EXPRESS_NO_INPUT_VALIDATION" &&
+              (allGlobalMiddleware.has("validation") || allRouteMiddleware.has("validation"))) {
+            continue;
+          }
+          if (issue.rule === "EXPRESS_SESSION_INSECURE" && allGlobalMiddleware.has("session")) {
+            continue;
+          }
+
+          const severity: ViolationSeverity =
+            issue.severity === "critical" ? "critical" :
+            issue.severity === "high" ? "high" :
+            issue.severity === "medium" ? "medium" : "low";
+
+          violations.push({
+            severity,
+            rule_id: issue.rule,
+            file: path.relative(ctx.projectPath, file),
+            function: issue.route || "express-app",
+            message: issue.message,
+            evidence: `Express route: ${issue.route || "global"} | Line: ${issue.line}`,
+            why: `Express security check failed: ${issue.rule}`,
+            fix: issue.fix,
+            policy_ref: "framework.express",
+          });
+        }
+      }
+    }
+  } catch { /* best-effort — framework detector optional */ }
+
+  return { violations, coverage: { expressApps, totalRoutes, filesScanned } };
 }
 
 /**

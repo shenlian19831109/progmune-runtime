@@ -108,6 +108,13 @@ export interface TrustDecision {
       ssgViolations: number;
       summary: string;
     };
+    /** Express framework adapter coverage */
+    expressCoverage?: {
+      appsDetected: number;
+      totalRoutes: number;
+      filesScanned: number;
+      issuesFound: number;
+    };
   };
 
   dimensions: TrustDimensions;
