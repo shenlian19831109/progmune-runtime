@@ -119,7 +119,8 @@ export function analyzeNestJSProject(projectRoot: string): NestJSAnalysis {
         // ── Security Checks ──
 
         // POST/PUT/DELETE without auth guard
-        if (["POST", "PUT", "DELETE", "PATCH"].includes(httpMethod)) {
+        // Skip intentionally public routes (login, register, health, etc.)
+        if (["POST", "PUT", "DELETE", "PATCH"].includes(httpMethod) && !isPublicRoute(fullPath)) {
           if (!route.hasAuthGuard) {
             analysis.issues.push({
               type: "NESTJS_NO_AUTH",
@@ -164,6 +165,23 @@ export function analyzeNestJSProject(projectRoot: string): NestJSAnalysis {
 }
 
 // ── Helpers ──
+
+/** Check if a route is intentionally public (login, register, health, etc.). */
+function isPublicRoute(path: string): boolean {
+  // Normalize: ensure leading slash for consistent matching
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  const publicPatterns = [
+    /\/auth\/login$/i,     /\/login$/i,
+    /\/auth\/register$/i,  /\/register$/i,  /\/signup$/i,
+    /\/auth\/signup$/i,    /\/auth\/signin$/i, /\/signin$/i,
+    /\/auth\/refresh$/i,   /\/auth\/forgot/i,  /\/auth\/reset/i,
+    /\/health$/i,          /\/healthcheck$/i,  /\/ping$/i, /\/status$/i,
+    /\/public\//i,         /\/static\//i,
+  ];
+  return publicPatterns.some(p => p.test(normalized));
+}
+
+// ── Low-level Helpers ──
 
 function getHttpMethod(method: MethodDeclaration): string | null {
   for (const dec of method.getDecorators()) {
@@ -270,7 +288,7 @@ export function analyzeNestJSFile(filePath: string): NestJSAnalysis | null {
         analysis.routes.push(route);
 
         // Security checks
-        if (["POST", "PUT", "DELETE", "PATCH"].includes(httpMethod)) {
+        if (["POST", "PUT", "DELETE", "PATCH"].includes(httpMethod) && !isPublicRoute(fullPath)) {
           if (!route.hasAuthGuard) {
             analysis.issues.push({
               type: "NESTJS_NO_AUTH",
