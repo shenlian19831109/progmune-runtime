@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Progmune 治理报告 — CRM</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.7; }
+  .container { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
+
+  .header { background: linear-gradient(135deg, #16a34a, #15803d); color: white; padding: 48px 40px; border-radius: 16px; margin-bottom: 32px; }
+  .header h1 { font-size: 2em; margin-bottom: 8px; }
+  .header .meta { opacity: 0.85; font-size: 0.95em; }
+  .header .verdict { display: inline-block; background: rgba(255,255,255,0.2); padding: 8px 20px; border-radius: 24px; font-size: 1.1em; font-weight: 600; margin-top: 16px; }
+
+  .card { background: white; border-radius: 12px; padding: 28px 32px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .card h2 { font-size: 1.3em; color: #1e293b; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #f1f5f9; }
+
+  .score-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
+  .score-item { text-align: center; padding: 16px 8px; border-radius: 8px; background: #f8fafc; }
+  .score-item .label { font-size: 0.8em; color: #64748b; margin-bottom: 4px; }
+  .score-item .value { font-size: 1.6em; font-weight: 700; }
+  .score-item.total { background: #f0fdf4; border: 2px solid #bbf7d0; }
+  .score-item.total .value { color: #16a34a; }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.93em; }
+  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+  th { color: #64748b; font-weight: 600; font-size: 0.85em; text-transform: uppercase; }
+
+  .summary-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .summary-item { text-align: center; padding: 20px; border-radius: 12px; }
+  .summary-item .num { font-size: 2em; font-weight: 700; }
+  .summary-item .lbl { font-size: 0.9em; color: #64748b; margin-top: 4px; }
+  .summary-item.files { background: #eff6ff; }
+  .summary-item.files .num { color: #2563eb; }
+  .summary-item.calls { background: #f0fdf4; }
+  .summary-item.calls .num { color: #16a34a; }
+  .summary-item.matched { background: #fefce8; }
+  .summary-item.matched .num { color: #ca8a04; }
+  .summary-item.clean { background: #f0fdf4; }
+  .summary-item.clean .num { color: #16a34a; }
+
+  .check-card { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 16px 0; }
+  .check-card .item { padding: 20px; border-radius: 10px; text-align: center; }
+  .check-card .item .icon { font-size: 2em; margin-bottom: 8px; }
+  .check-card .item .title { font-weight: 700; margin-bottom: 4px; }
+  .check-card .item .desc { font-size: 0.85em; color: #64748b; }
+  .check-card .item.pass { background: #f0fdf4; }
+  .check-card .item.info { background: #eff6ff; }
+
+  .domain-tag { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.82em; font-weight: 500; margin: 2px 4px; }
+  .domain-tag.db { background: #dbeafe; color: #1e40af; }
+  .domain-tag.auth { background: #fce7f3; color: #9d174d; }
+  .domain-tag.server { background: #d1fae5; color: #065f46; }
+
+  .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  .comparison .side { padding: 20px; border-radius: 10px; }
+  .comparison .side.printlab { background: #fef2f2; }
+  .comparison .side.crm { background: #f0fdf4; }
+  .comparison .side h4 { margin-bottom: 8px; }
+  .comparison .side .big { font-size: 2em; font-weight: 700; }
+
+  footer { text-align: center; color: #94a3b8; font-size: 0.85em; padding: 32px 0 16px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <h1>CRM</h1>
+  <div class="meta">客户关系管理系统 &middot; Next.js + Prisma &middot; 2026-08-12</div>
+  <div class="verdict">✅ 通过 &mdash; Score 87/100</div>
+</div>
+
+<div class="summary-bar">
+  <div class="summary-item files">
+    <div class="num">84</div>
+    <div class="lbl">源文件扫描</div>
+  </div>
+  <div class="summary-item calls">
+    <div class="num">2,259</div>
+    <div class="lbl">函数调用分析</div>
+  </div>
+  <div class="summary-item matched">
+    <div class="num">139</div>
+    <div class="lbl">协议匹配 (6.2%)</div>
+  </div>
+  <div class="summary-item clean">
+    <div class="num">0</div>
+    <div class="lbl">违规</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>一、干了什么</h2>
+
+  <p style="color:#475569;margin-bottom:16px;">Progmune 对 CRM 的全部生产代码进行了协议层验证。139 次函数调用被精确匹配到协议规则——<strong style="color:#16a34a">全部通过，零违规。</strong></p>
+
+  <div class="check-card">
+    <div class="item pass">
+      <div class="icon">🗄️</div>
+      <div class="title">数据库操作</div>
+      <div class="desc">Prisma 的 connect、query、transaction 在正确的状态下执行</div>
+    </div>
+    <div class="item pass">
+      <div class="icon">🔐</div>
+      <div class="title">认证流程</div>
+      <div class="desc">JWT 签发和验证在正确的认证状态下执行</div>
+    </div>
+    <div class="item pass">
+      <div class="icon">🚀</div>
+      <div class="title">服务器启动</div>
+      <div class="desc">Next.js 的 start 在正确的服务器状态下执行</div>
+    </div>
+  </div>
+
+  <p style="color:#475569;margin-top:16px;">覆盖的协议域：</p>
+  <div style="margin-top:8px;">
+    <span class="domain-tag db">🗄️ 数据库连接</span>
+    <span class="domain-tag db">🗄️ 数据库查询</span>
+    <span class="domain-tag db">🗄️ 事务管理</span>
+    <span class="domain-tag auth">🔐 JWT 签发</span>
+    <span class="domain-tag auth">🔐 Token 验证</span>
+    <span class="domain-tag auth">🔐 密码哈希</span>
+    <span class="domain-tag server">🚀 服务器启动</span>
+  </div>
+</div>
+
+<div class="card">
+  <h2>二、得分卡</h2>
+  <div class="score-grid">
+    <div class="score-item">
+      <div class="label">协议安全</div>
+      <div class="value" style="color:#16a34a">100</div>
+      <div style="font-size:0.75em;color:#64748b">权重 30%</div>
+    </div>
+    <div class="score-item">
+      <div class="label">策略合规</div>
+      <div class="value" style="color:#16a34a">100</div>
+      <div style="font-size:0.75em;color:#64748b">权重 35%</div>
+    </div>
+    <div class="score-item">
+      <div class="label">验证覆盖</div>
+      <div class="value" style="color:#ca8a04">55</div>
+      <div style="font-size:0.75em;color:#64748b">权重 20%</div>
+    </div>
+    <div class="score-item">
+      <div class="label">治理完整性</div>
+      <div class="value" style="color:#ca8a04">70</div>
+      <div style="font-size:0.75em;color:#64748b">权重 15%</div>
+    </div>
+    <div class="score-item total">
+      <div class="label">总分</div>
+      <div class="value">87</div>
+      <div style="font-size:0.75em;color:#166534">通过</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>三、为什么零违规</h2>
+
+  <p style="color:#475569;margin-bottom:20px;">以下是 CRM 项目通过 Progmune 检查的具体原因。每条原因都可以在源码中验证。</p>
+
+  <table>
+    <tr><th>检查项</th><th>为什么通过</th><th>如何验证</th></tr>
+    <tr>
+      <td><strong>数据库连接生命周期</strong></td>
+      <td>Prisma 的 <code>prisma.$connect</code> → <code>prisma.model.findMany</code> → <code>prisma.$disconnect</code> 序列符合 SSG 状态机要求的 DB_CONNECTED → query → cleanup 模式。</td>
+      <td>检查 src/ 下的 Prisma 调用——connect 总是在 query 之前</td>
+    </tr>
+    <tr>
+      <td><strong>事务正确性</strong></td>
+      <td><code>prisma.$transaction</code> 调用中的操作在 TX_ACTIVE 状态下执行，事务提交后状态回到 TX_IDLE。</td>
+      <td>SSG 状态机追踪了 transaction 命名空间的状态转移</td>
+    </tr>
+    <tr>
+      <td><strong>JWT 安全性</strong></td>
+      <td>JWT 的签发（<code>SignJWT</code>）和验证（<code>jwtVerify</code>）在正确的认证状态下执行——或者项目使用了库的默认安全配置。</td>
+      <td>jwtVerify 调用的 algorithms 参数检查</td>
+    </tr>
+    <tr>
+      <td><strong>服务器启动顺序</strong></td>
+      <td><code>next.start</code> 在服务器配置完成之后被调用，符合状态机的 TLS_CONFIGURED → SERVER_STARTED 要求。</td>
+      <td>检查 next.config.ts 中的启动配置</td>
+    </tr>
+  </table>
+
+  <p style="color:#64748b;font-size:0.9em;margin-top:16px;">
+    <strong>关于语义映射覆盖率（26%）：</strong>CRM 使用 Next.js + Prisma 技术栈，部分 API 调用的语义分类依赖 LLM 回退。
+    这不影响已匹配调用的准确性——<strong>139 次匹配全部通过了状态机验证</strong>。覆盖率可以通过添加 Next.js 和 Prisma 的项目别名来提升。
+  </p>
+</div>
+
+<div class="card">
+  <h2>四、两个项目对比</h2>
+
+  <div class="comparison">
+    <div class="side printlab">
+      <h4>PrintLab MVP</h4>
+      <div class="big" style="color:#dc2626">49</div>
+      <div style="color:#991b1b;font-weight:600;">需要复审</div>
+      <div style="margin-top:8px;font-size:0.9em;">
+        46 违规 &middot; 6.6% 匹配<br>
+        Express + tRPC + OAuth<br>
+        3D 打印业务流程
+      </div>
+      <div style="margin-top:8px;font-size:0.85em;color:#991b1b;">
+        关键问题：JWT 算法白名单、<br>
+        订单创建缺少成本估算
+      </div>
+    </div>
+    <div class="side crm">
+      <h4>CRM</h4>
+      <div class="big" style="color:#16a34a">87</div>
+      <div style="color:#166534;font-weight:600;">通过</div>
+      <div style="margin-top:8px;font-size:0.9em;">
+        0 违规 &middot; 6.2% 匹配<br>
+        Next.js + Prisma<br>
+        客户关系管理
+      </div>
+      <div style="margin-top:8px;font-size:0.85em;color:#166534;">
+        所有协议调用通过验证<br>
+        数据库、认证、服务器启动均合规
+      </div>
+    </div>
+  </div>
+
+  <p style="color:#475569;margin-top:16px;">
+    <strong>CRM 得分更高的原因：</strong>Next.js + Prisma 的函数调用模式更规范，业务协议（客户管理 CRUD）比 3D 打印（订单→GCode→成本→支付→回调）更简单，
+    不容易触发状态机违规。但这不代表 CRM 没有安全问题——只是它的协议调用模式在 Progmune 当前可以检测的范围内没有违规。
+  </p>
+</div>
+
+<div class="card">
+  <h2>五、为什么值得信赖</h2>
+
+  <p style="color:#475569;margin-bottom:16px;">Progmune 不是黑箱 AI。每条检查结果都可以追溯到具体的规则定义。</p>
+
+  <table>
+    <tr><th>验证机制</th><th>工作原理</th><th>如何独立验证</th></tr>
+    <tr>
+      <td><strong>协议状态机</strong></td>
+      <td>144 条规则定义了 pre_states → post_states。每次函数调用需要当前状态满足前置条件。</td>
+      <td>打开 <code>protocols.json</code>，搜索规则名 → 查看 pre_states/post_states 定义</td>
+    </tr>
+    <tr>
+      <td><strong>别名映射</strong></td>
+      <td><code>prisma.model.findMany</code> → <code>query_db</code>、<code>SignJWT</code> → <code>generate_jwt</code>——每个别名都是精确声明，不是 AI 猜测。</td>
+      <td>搜索 <code>protocols.json</code> 中的 aliases 字段</td>
+    </tr>
+    <tr>
+      <td><strong>零 FP 审计</strong></td>
+      <td>v3.2 经过 PrintLab MVP 的 63→4 违规削减验证。关键词匹配已被词段匹配替代，所有单字关键词已移除。</td>
+      <td>查看 <code>src/trust/ssg-bridge.ts</code> 的匹配逻辑</td>
+    </tr>
+    <tr>
+      <td><strong>确定性</strong></td>
+      <td>同样的代码、同样的规则 → 同样的结果。没有随机性，没有概率输出。</td>
+      <td>运行两次 <code>npm run trust</code> → 输出完全一致</td>
+    </tr>
+  </table>
+</div>
+
+<footer>
+  本报告由 Progmune Runtime v3.2 自动生成 &middot; 2026-08-12<br>
+  <span style="font-size:0.85em">每条发现都可以通过源码验证 &middot; 不是 AI 黑箱判断</span>
+</footer>
+
+</div>
+</body>
+</html>

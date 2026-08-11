@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Progmune 治理报告 — PrintLab MVP</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.7; }
+  .container { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
+
+  .header { background: linear-gradient(135deg, #dc2626, #991b1b); color: white; padding: 48px 40px; border-radius: 16px; margin-bottom: 32px; }
+  .header h1 { font-size: 2em; margin-bottom: 8px; }
+  .header .meta { opacity: 0.85; font-size: 0.95em; }
+  .header .verdict { display: inline-block; background: rgba(255,255,255,0.2); padding: 8px 20px; border-radius: 24px; font-size: 1.1em; font-weight: 600; margin-top: 16px; }
+
+  .card { background: white; border-radius: 12px; padding: 28px 32px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .card h2 { font-size: 1.3em; color: #1e293b; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #f1f5f9; }
+
+  .score-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
+  .score-item { text-align: center; padding: 16px 8px; border-radius: 8px; background: #f8fafc; }
+  .score-item .label { font-size: 0.8em; color: #64748b; margin-bottom: 4px; }
+  .score-item .value { font-size: 1.6em; font-weight: 700; }
+  .score-item.total { background: #fef2f2; border: 2px solid #fecaca; }
+  .score-item.total .value { color: #dc2626; }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.93em; }
+  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+  th { color: #64748b; font-weight: 600; font-size: 0.85em; text-transform: uppercase; }
+
+  .finding { padding: 14px 18px; margin: 8px 0; border-radius: 8px; border-left: 4px solid; }
+  .finding.critical { background: #fef2f2; border-color: #dc2626; }
+  .finding.high { background: #fff7ed; border-color: #ea580c; }
+  .finding.medium { background: #fefce8; border-color: #ca8a04; }
+  .finding .sev { font-weight: 700; font-size: 0.85em; margin-bottom: 4px; }
+  .finding .msg { color: #475569; }
+  .finding .src { font-size: 0.85em; color: #94a3b8; margin-top: 4px; }
+
+  .trust-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 12px; font-size: 0.85em; font-weight: 600; }
+  .trust-badge.high { background: #dcfce7; color: #166534; }
+  .trust-badge.confirm { background: #fef3c7; color: #92400e; }
+
+  .actions { list-style: none; }
+  .actions li { padding: 12px 16px; margin: 8px 0; border-radius: 8px; background: #f8fafc; display: flex; align-items: flex-start; gap: 12px; }
+  .actions .prio { font-weight: 700; font-size: 0.85em; padding: 2px 8px; border-radius: 6px; flex-shrink: 0; }
+  .actions .prio.p0 { background: #fee2e2; color: #991b1b; }
+  .actions .prio.p1 { background: #fff7ed; color: #9a3412; }
+  .actions .prio.p2 { background: #f0fdf4; color: #166534; }
+
+  .summary-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .summary-item { text-align: center; padding: 20px; border-radius: 12px; }
+  .summary-item .num { font-size: 2em; font-weight: 700; }
+  .summary-item .lbl { font-size: 0.9em; color: #64748b; margin-top: 4px; }
+  .summary-item.files { background: #eff6ff; }
+  .summary-item.files .num { color: #2563eb; }
+  .summary-item.calls { background: #f0fdf4; }
+  .summary-item.calls .num { color: #16a34a; }
+  .summary-item.violations { background: #fef2f2; }
+  .summary-item.violations .num { color: #dc2626; }
+
+  footer { text-align: center; color: #94a3b8; font-size: 0.85em; padding: 32px 0 16px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <h1>PrintLab MVP</h1>
+  <div class="meta">3D 打印电商平台 &middot; Express + tRPC + OAuth &middot; 2026-08-12</div>
+  <div class="verdict">⚠️ 需要复审 &mdash; Score 49/100</div>
+</div>
+
+<div class="summary-bar">
+  <div class="summary-item files">
+    <div class="num">59</div>
+    <div class="lbl">源文件扫描</div>
+  </div>
+  <div class="summary-item calls">
+    <div class="num">4,568</div>
+    <div class="lbl">函数调用分析</div>
+  </div>
+  <div class="summary-item violations">
+    <div class="num">46</div>
+    <div class="lbl">违规发现</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>一、干了什么</h2>
+  <p style="color:#475569;margin-bottom:16px;">Progmune 对 PrintLab MVP 的所有生产代码进行了三层协议验证。</p>
+
+  <table>
+    <tr><th>验证层</th><th>检查了什么</th><th>结果</th></tr>
+    <tr>
+      <td><strong>SSG 状态机</strong></td>
+      <td>144 条协议规则的 pre/post 状态转移是否被遵循</td>
+      <td>301 次调用匹配（6.6%），<strong style="color:#dc2626">43 条违规</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Express 适配器</strong></td>
+      <td>6 个 Express 应用、8 条路由的中间件链</td>
+      <td><strong style="color:#ea580c">1 个安全问题</strong></td>
+    </tr>
+    <tr>
+      <td><strong>协议安全检查</strong></td>
+      <td>JWT 算法白名单、跨域协议兼容性</td>
+      <td><strong style="color:#dc2626">2 条违规</strong></td>
+    </tr>
+  </table>
+</div>
+
+<div class="card">
+  <h2>二、得分卡</h2>
+  <div class="score-grid">
+    <div class="score-item">
+      <div class="label">协议安全</div>
+      <div class="value" style="color:#ea580c">78</div>
+      <div style="font-size:0.75em;color:#64748b">权重 30%</div>
+    </div>
+    <div class="score-item">
+      <div class="label">策略合规</div>
+      <div class="value" style="color:#dc2626">12</div>
+      <div style="font-size:0.75em;color:#64748b">权重 35%</div>
+    </div>
+    <div class="score-item">
+      <div class="label">验证覆盖</div>
+      <div class="value" style="color:#ca8a04">55</div>
+      <div style="font-size:0.75em;color:#64748b">权重 20%</div>
+    </div>
+    <div class="score-item">
+      <div class="label">治理完整性</div>
+      <div class="value" style="color:#ca8a04">70</div>
+      <div style="font-size:0.75em;color:#64748b">权重 15%</div>
+    </div>
+    <div class="score-item total">
+      <div class="label">总分</div>
+      <div class="value">49</div>
+      <div style="font-size:0.75em;color:#991b1b">需要复审</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>三、发现了什么</h2>
+
+  <h3 style="font-size:1em;color:#64748b;margin-bottom:12px;">🔴 高可信发现（真实安全/协议问题）</h3>
+
+  <div class="finding critical">
+    <div class="sev">🔴 JWT 算法白名单缺失 &mdash; sdk.ts, auth.utils.ts</div>
+    <div class="msg"><code>jwtVerify</code> 调用未指定 <code>algorithms</code> 参数。攻击者可通过 <code>none</code> 算法绕过签名验证——这是可被利用的真实安全漏洞。</div>
+    <div class="src"><span class="trust-badge high">✓ 高可信</span> 已验证源码中的 jwtVerify 调用</div>
+  </div>
+
+  <div class="finding critical">
+    <div class="sev">🔴 通知发送缺少合成步骤 &mdash; email-service.ts, notification-log-service.ts</div>
+    <div class="msg"><code>sendOrderStatusNotification</code> 直接调用了 <code>nodemailer.sendMail</code>，但未先执行 <code>composeNotification</code> 来构建邮件内容。共 16 处。</div>
+    <div class="src"><span class="trust-badge high">✓ 高可信</span> 协议状态机要求 NOTIFICATION_COMPOSED → NOTIFICATION_SENT 转移</div>
+  </div>
+
+  <div class="finding critical">
+    <div class="sev">🔴 订单创建跳过成本估算 &mdash; routers.ts, order-payment-router.ts, payment-alipay.ts, payment-wechat.ts</div>
+    <div class="msg"><code>createOrder</code> 在 <code>estimate_cost</code>（GCode 材料成本估算）之前被调用。3D 打印涉及实际材料消耗，成本估算应该在订单创建之前完成。共 8 处。</div>
+    <div class="src"><span class="trust-badge high">✓ 高可信</span> 协议状态机要求 COST_ESTIMATED → ORDER_CREATED 转移</div>
+  </div>
+
+  <div class="finding high">
+    <div class="sev">🟠 支付回调缺少接收步骤 &mdash; payment-callbacks.ts, payment-alipay.ts, payment-wechat.ts</div>
+    <div class="msg"><code>verifyCallback</code> 在 <code>receive_payment_callback</code> 之前被调用。签名验证应该先确认回调已接收。共 4 处。</div>
+    <div class="src"><span class="trust-badge high">✓ 高可信</span> 协议状态机要求 PAYMENT_CALLBACK_RECEIVED → PAYMENT_CONFIRMED</div>
+  </div>
+
+  <div class="finding medium">
+    <div class="sev">🟡 服务器启动缺少 TLS 配置 &mdash; index.ts</div>
+    <div class="msg"><code>server.listen</code> 在 <code>load_tls_config</code> 之前被调用。共 3 处（开发环境通过反向代理处理 TLS）。</div>
+    <div class="src"><span class="trust-badge confirm">⚠ 需确认</span> 开发环境可接受；生产环境需通过反向代理</div>
+  </div>
+
+  <h3 style="font-size:1em;color:#64748b;margin:24px 0 12px;">⚠️ 需要人工确认</h3>
+
+  <div class="finding medium">
+    <div class="sev">🟡 文件同步 API 误报 &mdash; vite.config.ts, vite.ts</div>
+    <div class="msg"><code>fs.writeFileSync</code> 和 <code>fs.promises.readFile</code> 是 Node.js 便捷 API，内部自动完成 open→write/read→close。SSG 状态机不应要求这些同步 API 先调用 open。共 5 处。</div>
+    <div class="src"><span class="trust-badge confirm">⚠ 误报</span> 建议从别名表中移除同步 API</div>
+  </div>
+
+  <div class="finding medium">
+    <div class="sev">🟡 tRPC 认证模式未识别 &mdash; index.ts</div>
+    <div class="msg">Express 检测器报告无认证中间件，但项目通过 tRPC 的 <code>protectedProcedure</code> 和 <code>adminProcedure</code> 处理认证。</div>
+    <div class="src"><span class="trust-badge confirm">⚠ 误报</span> 检测器不认识 tRPC 模式</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>四、为什么值得信赖</h2>
+  <p style="color:#475569;margin-bottom:16px;">Progmune 的发现基于以下机制，可以逐条验证——不是黑箱 AI 判断。</p>
+
+  <table>
+    <tr><th>验证机制</th><th>工作原理</th><th>可验证性</th></tr>
+    <tr>
+      <td><strong>协议状态机</strong></td>
+      <td>144 条规则定义 pre_states → post_states。每次函数调用都需要当前状态满足前置条件。JWT 签发需要 PASSWORD_VERIFIED 在前——这个规则在 protocols.json 中明确定义。</td>
+      <td>打开 protocols.json，搜索 verify_hash → 查看 pre_states 字段</td>
+    </tr>
+    <tr>
+      <td><strong>别名映射</strong></td>
+      <td>bcrypt.compare → verify_hash、jwt.sign → generate_jwt——226 个库别名将真实 API 映射到协议规则。每个别名都是精确声明，不是 AI 猜测。</td>
+      <td>打开 protocols.json，搜索 aliases 字段 → 查看映射表</td>
+    </tr>
+    <tr>
+      <td><strong>BFS 修复路径</strong></td>
+      <td>每条 SSG 违规都附带 BFS 计算的修复路径——比如 "在 server.listen 之前插入 load_tls_config"。这不是建议，是状态图上的最短路径。</td>
+      <td>运行 fix() → 查看 fixPath 字段 → 验证路径在状态图中存在</td>
+    </tr>
+    <tr>
+      <td><strong>FP 审计</strong></td>
+      <td>v3.2 经过 PrintLab MVP 的 63→4 违规削减，每一轮的 FP 消除都有明确的规则变更记录。</td>
+      <td>查看 git log src/trust/ssg-bridge.ts → 每次修复对应一次 commit</td>
+    </tr>
+  </table>
+</div>
+
+<div class="card">
+  <h2>五、推荐行动</h2>
+  <ul class="actions">
+    <li>
+      <span class="prio p0">P0</span>
+      <div>
+        <strong>修复 JWT 算法白名单</strong><br>
+        <span style="color:#64748b">在 sdk.ts 和 auth.utils.ts 的 jwtVerify 调用中添加 <code>algorithms: ['HS256']</code> 参数。这是真实的安全漏洞。</span>
+      </div>
+    </li>
+    <li>
+      <span class="prio p1">P1</span>
+      <div>
+        <strong>确认订单创建流程</strong><br>
+        <span style="color:#64748b">检查 routers.ts 中 createOrder 是否确实在 cost_estimate 之前被调用。如果是——3D 打印成本没有被正确估算就创建了订单。</span>
+      </div>
+    </li>
+    <li>
+      <span class="prio p1">P1</span>
+      <div>
+        <strong>确认支付回调签名验证顺序</strong><br>
+        <span style="color:#64748b">检查 verifyCallback 是否在 receive_payment_callback 之后执行。签名验证应该在回调接收确认之后。</span>
+      </div>
+    </li>
+    <li>
+      <span class="prio p2">P2</span>
+      <div>
+        <strong>移除同步 API 别名</strong><br>
+        <span style="color:#64748b">从别名表中移除 fs.writeFileSync 等同步便捷 API，消除 5 条误报。</span>
+      </div>
+    </li>
+    <li>
+      <span class="prio p2">P2</span>
+      <div>
+        <strong>添加 tRPC 检测规则</strong><br>
+        <span style="color:#64748b">扩展 Express 检测器以识别 tRPC 的 protectedProcedure/adminProcedure 认证模式。</span>
+      </div>
+    </li>
+  </ul>
+</div>
+
+<footer>
+  本报告由 Progmune Runtime v3.2 自动生成 &middot; 2026-08-12<br>
+  <span style="font-size:0.85em">每条发现都可以通过源码验证 &middot; 不是 AI 黑箱判断</span>
+</footer>
+
+</div>
+</body>
+</html>
