@@ -37,13 +37,16 @@ npm run coverage        # coverage dashboard
 ## Architecture
 
 ```
-SDK (src/sdk.ts)           verify() → BLOCK / WARN / ALLOW
+SDK (src/sdk.ts)           verify() / fix() → BLOCK / WARN / ALLOW
   └─ Trust Engine (src/trust/)   4-dimension scoring → Decision
+       ├─ SSG Bridge (src/trust/ssg-bridge.ts)   Alias matching + project aliases
+       │    └─ SSG Validator (src/ssg-validator.ts)   Protocol state machine
+       ├─ Framework Adapters (src/frameworks/)
+       │    ├─ Express (express-detector.ts)   Routes + middleware + security
+       │    └─ NestJS (nestjs-detector.ts)   Decorator-based route analysis
        ├─ Policy Engine (src/policy/)   Enterprise policy enforcement
-       ├─ Verification (src/ssg-validator.ts)   SSG state machine
-       │    └─ Protocol Detector (src/protocol-detector.ts)   Regex rules
+       ├─ Protocol Detector (src/protocol-detector.ts)   Regex safeguard rules
        ├─ IR Extraction (src/extract-ir.ts)   ts-morph AST → function IR
-       ├─ Repair (src/repair-executor.ts)   detect → plan → fix → validate
        └─ Knowledge (src/knowledge-*.ts)   Units, ontology, evolution, flywheel
 ```
 
@@ -51,8 +54,9 @@ SDK (src/sdk.ts)           verify() → BLOCK / WARN / ALLOW
 
 | Module | Path | Purpose |
 |--------|------|---------|
-| **SDK** | `src/sdk.ts` | One-call public API. Composes certify + knowledge + evidence + risk → Decision. |
-| **SSG Validator** | `src/ssg-validator.ts` | Protocol state machine. Consumes function annotations (`pre_states`/`post_states`) and validates call sequences against protocol definitions. |
+| **SDK** | `src/sdk.ts` | One-call public API: `verify()`, `fix()` (real, not stub), `explain()`. |
+| **SSG Bridge** | `src/trust/ssg-bridge.ts` | Connects SSG state machine to trust pipeline. Alias exact-match (O(1)) + wildcard prefix-match. Project-level aliases via `.progmune_aliases.json`. |
+| **SSG Validator** | `src/ssg-validator.ts` | Protocol state machine. Consumes function annotations (`pre_states`/`post_states`/`aliases`) and validates call sequences against protocol definitions. |
 | **Protocol Detector** | `src/protocol-detector.ts` | Regex-based protocol step detection. ~22 detectors + 26 safeguards. All patterns use `\w*` prefix/suffix for language-agnostic matching. |
 | **IR Extractor** | `src/extract-ir.ts` | TypeScript AST → Function IR using ts-morph. Extracts function signatures, JSDoc tags (`@purpose`, `@requires`, `@produces`, `@useWhen`), protocol annotations. |
 | **Trust Engine** | `src/trust/engine.ts` | 5-stage pipeline: Collect → Normalize → Score → Decide → Assemble. 4 dimensions: Policy Compliance (35%), Protocol Safety (30%), Verification Coverage (20%), Governance Integrity (15%). |
@@ -167,7 +171,7 @@ npm run corpus:mine        # Rule mining from corpus
 | Python | ❌ IR only | `extract-ir-python.ts` exists, no rules |
 | Go, Java | ❌ None | No support |
 
-**Critical: 0/13 frameworks adapted.** Express, Next.js, NestJS, Fastify, Django, FastAPI, etc. — none have dedicated adapters. TS rules use generic `\w*` prefix patterns. Framework adaptation is the #1 product gap.
+**Framework adapters: 2/13 with structural analysis** (Express + NestJS), 5/13 with library aliases. Express detector does route extraction + middleware classification + security checks. NestJS detector parses decorators (@Controller, @UseGuards, @UsePipes) via ts-morph. Both feed into the trust engine pipeline. Remaining frameworks (Next.js, Fastify, Django, FastAPI, etc.) have basic alias coverage but no structural analysis.
 
 ### P0-P3 Rule Injection (just completed, 2026-08-03)
 
@@ -181,9 +185,17 @@ The most recent major work broke the "bootstrapping deadlock" — 16/21 protocol
 
 The product philosophy: **enterprises care about "can I deploy?" not "is my score 58 or 61."** The Trust Engine outputs a Decision first, with Score as supporting evidence. Critical violations → hard BLOCK regardless of score.
 
-### Knowledge network thesis (unvalidated)
+### Knowledge network thesis (validated with limits, 2026-08-12)
 
-The core thesis — "every new codebase makes every verification stronger" — has NOT been empirically validated. Cross-project learning transfer is a hypothesis, not a proven fact.
+The core thesis — "every new codebase makes every verification stronger" — was tested via a controlled cross-project experiment (3 Express projects: clean, broken-flow, OAuth). Results:
+
+**Confirmed — library-level alias transfer:**
+`bcrypt.compare → verify_hash`, `jwt.sign → generate_jwt`, `app.listen → http_create_server` work identically in ANY project using the same library. Library aliases are inherently cross-project.
+
+**Not confirmed — project-specific wrapper functions:**
+`createSessionToken`, `sendOrderStatusNotification` etc. do NOT transfer. They require per-project `.progmune_aliases.json` configuration.
+
+**Verdict:** The thesis holds at the library level. Adding a new project that uses new libraries (e.g., Prisma, Knex) enriches the global alias table for all projects. But internal wrapper functions always need project-level mapping. The narrative should be: "every new library makes every verification stronger" — not "every new codebase."
 
 ### What NOT to do
 
