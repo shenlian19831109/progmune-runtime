@@ -1,7 +1,13 @@
 {
   "name": "progmune-runtime",
   "version": "3.2.0",
-  "description": "Progmune — AI Software Verification Infrastructure. Self-evolving verification knowledge network. Every new codebase makes every verification stronger.",
+  "description": "Progmune — AI Trust Decision Engine. Verify AI-generated code before it reaches production. Outputs APPROVED / NEEDS_REVIEW / BLOCKED with evidence.",
+  "files": [
+    "dist/",
+    "protocols.json",
+    "docs/Progmune_项目全解.html",
+    "docs/Progmune_投资人白皮书_v2.0.html"
+  ],
   "main": "dist/mcp-server.mjs",
   "bin": {
     "progmune-runtime": "dist/mcp-server.mjs"

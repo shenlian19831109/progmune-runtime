@@ -46,7 +46,15 @@ src/
 .env
 .env.example
 immune_hub_data/
+# 内部/历史文档（不随 npm 包分发）
 docs/Progmune_Runtime_*
+docs/Progmune_内部技术白皮书*
+docs/Progmune_技术白皮书*
+docs/WHITEPAPER_V*
+docs/WHITEPAPER_INTERNAL*
+docs/WHITEPAPER_EXTERNAL*
+docs/INVESTOR_PITCH.html
+docs/.DS_Store
 backup/
 
 # 其他

@@ -32,9 +32,9 @@ Evidence → Knowledge → Verification → Governance → Observation → Knowl
     └────────────────── Every new repo strengthens all ────────────────────┘
 ```
 
-## Academic foundation (ICML 2026)
+## Academic foundation
 
-Kambhampati et al., *Stop Anthropomorphizing Intermediate Tokens as Reasoning/Thinking Traces!*
+Kambhampati et al., *Stop Anthropomorphizing Intermediate Tokens as Reasoning/Thinking Traces!* (arXiv:2505.22285, 2025) — and Kambhampati's ICML 2026 invited talk "On the Role of Verifiers and Thinking Traces in Reasoning Models". The quote below summarizes his position; it is not a verbatim paper citation.
 
 > LLM 输出的"逐步推理"是统计表演。中间 token 与真实推理之间没有可靠因果对应。
 

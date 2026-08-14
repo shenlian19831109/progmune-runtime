@@ -4,6 +4,8 @@
 > **框架**: Sergei Gukov "Two-Hump Problem" (2026 Science x AI Summit, UC Riverside)
 > **项目**: Progmune — AI Trust Decision Engine
 > **作者**: 基于 P0-P3 执行数据自动生成
+>
+> ⚠️ **引用说明**：本报告借用 Sergei Gukov 在数学物理领域（Andrews-Curtis 猜想相关研究）讨论中使用的"Two-Hump"（双峰分布）术语，作为**跨域类比**来描述 Progmune 检测能力覆盖的分布形态。Gukov 未参与本项目的任何软件安全研究，其双峰讨论与软件安全无直接学术关联。本报告的方法论（规则注入、覆盖率测量）全部为 Progmune 团队的原创工作。
 
 ---
 

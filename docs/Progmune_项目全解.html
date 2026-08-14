@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Progmune 项目全解 — AI 代码信任决策引擎</title>
+<style>
+  :root {
+    --bg: #fafbfc; --card: #ffffff; --ink: #1f2937; --ink-2: #4b5563; --ink-3: #6b7280;
+    --accent: #1a73e8; --accent-dark: #1557b0; --accent-light: #e8f0fe;
+    --green: #1e8e3e; --green-light: #e6f4ea;
+    --amber: #b45309; --amber-light: #fef3c7;
+    --red: #c5221f; --red-light: #fce8e6;
+    --border: #e5e7eb; --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --mono: "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.85; font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 24px 20px 64px; }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(135deg, #0b1c33 0%, #12335c 55%, #1a4d8f 100%);
+    color: #fff; border-radius: 20px; padding: 56px 44px 44px; margin-bottom: 32px;
+    position: relative; overflow: hidden;
+  }
+  .hero::after {
+    content: ""; position: absolute; right: -80px; top: -80px; width: 280px; height: 280px;
+    background: radial-gradient(circle, rgba(255,255,255,.08) 0%, transparent 70%); border-radius: 50%;
+  }
+  .hero .kicker { font-size: .82em; letter-spacing: .12em; text-transform: uppercase; color: #9ec1e8; margin-bottom: 10px; }
+  .hero h1 { font-size: 2.1em; font-weight: 800; line-height: 1.25; margin-bottom: 10px; }
+  .hero .sub { font-size: 1.05em; color: #c8daf0; margin-bottom: 26px; max-width: 640px; }
+  .hero .meta { display: flex; flex-wrap: wrap; gap: 10px; }
+  .hero .meta span {
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18);
+    padding: 5px 14px; border-radius: 20px; font-size: .82em; color: #dbe7f5;
+  }
+
+  /* ── TOC ── */
+  .toc { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 26px 30px; margin-bottom: 32px; box-shadow: var(--shadow); }
+  .toc h2 { font-size: 1em; color: var(--ink-2); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 14px; }
+  .toc ol { columns: 2; column-gap: 36px; }
+  .toc li { margin: 5px 0 5px 18px; font-size: .92em; }
+  .toc a { color: var(--ink-2); text-decoration: none; }
+  .toc a:hover { color: var(--accent); }
+  .toc .num { color: var(--accent); font-weight: 700; margin-right: 6px; }
+
+  /* ── Sections ── */
+  section { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 34px 36px; margin-bottom: 26px; box-shadow: var(--shadow); }
+  section h2 {
+    font-size: 1.45em; font-weight: 800; color: #0f172a; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  section h2 .chap {
+    background: var(--accent); color: #fff; font-size: .62em; font-weight: 800;
+    padding: 3px 10px; border-radius: 6px; letter-spacing: .06em; flex-shrink: 0;
+  }
+  section h3 { font-size: 1.1em; font-weight: 700; color: #111827; margin: 26px 0 10px; }
+  section h4 { font-size: .98em; font-weight: 700; color: var(--ink); margin: 18px 0 6px; }
+  section p { margin: 10px 0; }
+  section .lead { color: var(--ink-2); font-size: 1.02em; margin-bottom: 16px; }
+
+  /* ── Callouts ── */
+  .plain {
+    background: var(--accent-light); border-left: 4px solid var(--accent);
+    padding: 14px 18px; border-radius: 0 10px 10px 0; margin: 14px 0; font-size: .93em; color: #1e3a5f;
+  }
+  .plain strong { color: var(--accent-dark); }
+  .warn-box {
+    background: var(--amber-light); border-left: 4px solid #d97706;
+    padding: 14px 18px; border-radius: 0 10px 10px 0; margin: 14px 0; font-size: .93em;
+  }
+  .good-box {
+    background: var(--green-light); border-left: 4px solid var(--green);
+    padding: 14px 18px; border-radius: 0 10px 10px 0; margin: 14px 0; font-size: .93em;
+  }
+  .risk-box {
+    background: var(--red-light); border-left: 4px solid var(--red);
+    padding: 14px 18px; border-radius: 0 10px 10px 0; margin: 14px 0; font-size: .93em;
+  }
+
+  /* ── Tables ── */
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: .92em; }
+  th { background: #f3f4f6; text-align: left; padding: 10px 14px; font-weight: 700; color: #374151; border-bottom: 2px solid var(--border); white-space: nowrap; }
+  td { padding: 9px 14px; border-bottom: 1px solid #f1f3f5; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+
+  /* ── Stat cards ── */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin: 20px 0; }
+  .stat {
+    background: #f8fafc; border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 16px; text-align: center;
+  }
+  .stat .n { font-size: 1.9em; font-weight: 800; color: var(--accent); line-height: 1.2; }
+  .stat .l { font-size: .82em; color: var(--ink-3); margin-top: 5px; }
+
+  /* ── Bar chart ── */
+  .bar { display: flex; align-items: center; gap: 10px; margin: 7px 0; }
+  .bar .bl { width: 130px; text-align: right; font-size: .85em; color: var(--ink-2); flex-shrink: 0; }
+  .bar .bt { flex: 1; background: #f1f5f9; height: 12px; border-radius: 6px; overflow: hidden; }
+  .bar .bf { height: 100%; border-radius: 6px; background: var(--accent); }
+  .bar .bv { width: 52px; font-size: .85em; font-weight: 700; color: var(--ink); flex-shrink: 0; }
+
+  /* ── Glossary cards ── */
+  .glossary { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+  .term {
+    background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px;
+  }
+  .term .t { font-weight: 700; color: #0f172a; font-size: .93em; }
+  .term .t .en { color: var(--ink-3); font-weight: 400; font-size: .85em; }
+  .term .d { font-size: .88em; color: var(--ink-2); margin-top: 5px; }
+
+  /* ── Flow diagram ── */
+  .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 16px 0; }
+  .flow .node {
+    background: var(--accent-light); border: 1px solid #b6d4fb; color: var(--accent-dark);
+    border-radius: 10px; padding: 10px 16px; font-size: .9em; font-weight: 600; text-align: center;
+  }
+  .flow .arrow { color: var(--ink-3); font-size: 1.1em; }
+
+  /* ── Code ── */
+  code {
+    font-family: var(--mono); background: #f1f5f9; color: #c2410c;
+    padding: 2px 7px; border-radius: 5px; font-size: .88em;
+  }
+  pre {
+    background: #0f172a; color: #e2e8f0; border-radius: 12px; padding: 18px 22px;
+    overflow-x: auto; margin: 14px 0; font-size: .85em; line-height: 1.6;
+  }
+  pre code { background: none; color: inherit; padding: 0; }
+
+  /* ── Verdict banner ── */
+  .verdict {
+    display: flex; align-items: center; gap: 16px; border-radius: 14px; padding: 18px 24px; margin: 16px 0;
+  }
+  .verdict.approved { background: var(--green-light); border: 2px solid #4ade80; }
+  .verdict .icon { width: 52px; height: 52px; border-radius: 50%; background: var(--green); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.5em; flex-shrink: 0; }
+  .verdict h4 { margin: 0; color: #14532d; font-size: 1.15em; }
+  .verdict p { margin: 2px 0 0; font-size: .88em; color: #3f6212; }
+
+  /* ── Footer ── */
+  .foot { text-align: center; color: var(--ink-3); font-size: .84em; padding: 28px 0 8px; }
+  .foot a { color: var(--accent); }
+
+  @media print {
+    body { background: #fff; }
+    section, .toc, .stat, .term { box-shadow: none; }
+    .hero { border-radius: 0; }
+  }
+  @media (max-width: 720px) {
+    .hero { padding: 36px 24px; }
+    .hero h1 { font-size: 1.6em; }
+    .toc ol { columns: 1; }
+    .glossary { grid-template-columns: 1fr; }
+    section { padding: 24px 20px; }
+    .bar .bl { width: 90px; }
+    table { font-size: .82em; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ═══════════ HERO ═══════════ -->
+<div class="hero">
+  <div class="kicker">Project Overview · 项目全解</div>
+  <h1>Progmune<br>AI 代码信任决策引擎</h1>
+  <div class="sub">让 AI 生成的每一行代码，在进入生产环境之前，都经过可解释、可审计、可追溯的验证。
+  本文档面向两类读者：想快速理解的初学者，与需要专业判断的投资人。</div>
+  <div class="meta">
+    <span>📄 版本 v1.0 · 2026-08</span>
+    <span>🧪 引擎版本 v3.2.0</span>
+    <span>📊 13/13 安全类别覆盖</span>
+    <span>🔓 开源 MIT</span>
+    <span>📦 npm install progmune-runtime</span>
+  </div>
+</div>
+
+<!-- ═══════════ TOC ═══════════ -->
+<div class="toc">
+  <h2>目录 · Contents</h2>
+  <ol>
+    <li><span class="num">01</span><a href="#s1">三十秒理解 Progmune</a></li>
+    <li><span class="num">02</span><a href="#s2">名词解释（先读这个）</a></li>
+    <li><span class="num">03</span><a href="#s3">项目背景：AI 代码的信任危机</a></li>
+    <li><span class="num">04</span><a href="#s4">框架逻辑：为什么这样做能解决问题</a></li>
+    <li><span class="num">05</span><a href="#s5">技术方法：具体怎么做</a></li>
+    <li><span class="num">06</span><a href="#s6">产品与能力现状</a></li>
+    <li><span class="num">07</span><a href="#s7">实测案例：PrintLab 治理全过程</a></li>
+    <li><span class="num">08</span><a href="#s8">竞争格局</a></li>
+    <li><span class="num">09</span><a href="#s9">市场机会与商业模式</a></li>
+    <li><span class="num">10</span><a href="#s10">风险分析（客观）</a></li>
+    <li><span class="num">11</span><a href="#s11">路线图</a></li>
+    <li><span class="num">12</span><a href="#s12">给投资人的总结论</a></li>
+  </ol>
+</div>
+
+<!-- ═══════════ 1. 三十秒理解 ═══════════ -->
+<section id="s1">
+  <h2><span class="chap">01</span>三十秒理解 Progmune</h2>
+  <p class="lead">一句话：<strong>Progmune 不生成代码，它给 AI 生成的代码做"上岗体检"，并给出一个明确结论——能不能部署。</strong></p>
+
+  <div class="plain">
+    <strong>一个类比：</strong>飞机在起飞前有完整的检查单——油量、襟翼、液压、仪表。AI 现在以 10 倍速度"造飞机"，但绝大多数企业让这些飞机<strong>没有检查就直接起飞</strong>。Progmune 就是那张检查单：不是替飞行员开飞机，而是确保每一架飞机在起飞前都通过了必检项。
+  </div>
+
+  <p>Progmune 检查的不是"代码风格好不好"，而是四类传统工具看不见的问题：</p>
+  <table>
+    <tr><th>问题类型</th><th>通俗解释</th><th>例子</th></tr>
+    <tr><td><strong>符号幻觉</strong></td><td>AI 调用了项目里根本不存在的函数</td><td>代码里写 <code>getUserByPhone()</code>，但项目只有 <code>getUserByEmail()</code></td></tr>
+    <tr><td><strong>类型漂移</strong></td><td>参数数量或类型对不上</td><td>函数要 3 个参数，AI 只传了 2 个</td></tr>
+    <tr><td><strong>数据流错误</strong></td><td>变量没定义就使用</td><td>用了 <code>userName</code> 但它从未被赋值</td></tr>
+    <tr><td><strong>协议违规</strong> ★核心</td><td>关键步骤顺序错了或漏了</td><td>没验证密码就签发令牌；支付完成但没验证签名</td></tr>
+  </table>
+
+  <p>检查结果不是一份问题清单，而是<strong>一个决策</strong>：</p>
+  <div class="flow">
+    <div class="node">信任评分 0–100</div>
+    <span class="arrow">+</span>
+    <div class="node">决策：批准 / 需复审 / 阻止</div>
+    <span class="arrow">+</span>
+    <div class="node">置信度：高 / 中 / 低 / 不确定</div>
+    <span class="arrow">+</span>
+    <div class="node">证据：每个扣分点都可追溯到代码行</div>
+  </div>
+
+  <div class="good-box">
+    <strong>为什么企业需要它：</strong>企业真正关心的问题是"这段 AI 代码能不能上线？"——不是"它的分数是 58 还是 61"。Progmune 把这个问题的答案做成了一条 CI/CD 命令：<code>BLOCKED</code> 就阻止合并，<code>APPROVED</code> 就放行。
+  </div>
+</section>
+
+<!-- ═══════════ 2. 名词解释 ═══════════ -->
+<section id="s2">
+  <h2><span class="chap">02</span>名词解释（建议先读）</h2>
+  <p class="lead">本文档用到的所有专业术语，按"先易后难"排列。读完这一节，后面不会再被术语挡住。</p>
+
+  <h3>基础层</h3>
+  <div class="glossary">
+    <div class="term">
+      <div class="t">大语言模型（LLM）<span class="en">Large Language Model</span></div>
+      <div class="d">就是 ChatGPT、Claude、DeepSeek 这类 AI 的"大脑"。它会"猜"最可能正确的下一个词——写代码对它来说就是"猜下一行"。</div>
+    </div>
+    <div class="term">
+      <div class="t">AI 生成代码 <span class="en">AI-Generated Code</span></div>
+      <div class="d">由 AI 工具（如 GitHub Copilot、Cursor）写出或协助写出的代码。它的特点是：语法通常正确，但语义可能错。</div>
+    </div>
+    <div class="term">
+      <div class="t">幻觉 <span class="en">Hallucination</span></div>
+      <div class="d">AI 一本正经地输出不存在的东西。写代码时表现为：调用不存在的函数、用不存在的参数——而且不报错。</div>
+    </div>
+    <div class="term">
+      <div class="t">开源 <span class="en">Open Source / MIT</span></div>
+      <div class="d">代码完全公开，任何人可免费使用、修改、商用。Progmune 采用 MIT 协议，与 GitLab、VS Code 同类。</div>
+    </div>
+  </div>
+
+  <h3>概念层</h3>
+  <div class="glossary">
+    <div class="term">
+      <div class="t">中间表示 IR <span class="en">Intermediate Representation</span></div>
+      <div class="d">把项目源码解析成一份"函数清单"（名字、参数、类型、调用关系）。这份清单从真实代码提取，不依赖 AI 的记忆——是系统的"唯一真相来源"。</div>
+    </div>
+    <div class="term">
+      <div class="t">协议 <span class="en">Protocol</span></div>
+      <div class="d">事情必须按特定顺序做的规则。例如：登录 = 先验证密码 → 再签发令牌 → 再创建会话。顺序错了就是安全漏洞。</div>
+    </div>
+    <div class="term">
+      <div class="t">状态机 <span class="en">State Machine</span></div>
+      <div class="d">一种数学工具，用来描述"现在处于什么状态、允许做什么操作"。交通信号灯就是状态机：红灯不能变黄灯，绿灯不能直接跳红灯。</div>
+    </div>
+    <div class="term">
+      <div class="t">SVL 四层验证 <span class="en">Semantic Validation Levels</span></div>
+      <div class="d">Progmune 的检查体系，共四层：SVL-1 函数存在性 → SVL-2 类型正确性 → SVL-3 数据流 → SVL-4 协议顺序。层层递进，越往后越难、越关键。</div>
+    </div>
+    <div class="term">
+      <div class="t">SSG <span class="en">State-Guided Generation</span></div>
+      <div class="d">Progmune 的核心技术：用状态机"引导"AI 生成代码——AI 每提出一步，状态机就检查这一步是否合法，不合法就纠正。</div>
+    </div>
+    <div class="term">
+      <div class="t">免疫记忆 / 抗体 <span class="en">Immune Memory / Antibody</span></div>
+      <div class="d">比喻：系统把每次发现的错误模式记下来。同类错误再出现时，直接调用已知解法（像人得了一次水痘后终身免疫）。</div>
+    </div>
+  </div>
+
+  <h3>产品层</h3>
+  <div class="glossary">
+    <div class="term">
+      <div class="t">信任评分 <span class="en">Trust Score</span></div>
+      <div class="d">0–100 的量化分数，衡量一段 AI 代码的可信程度。由四个维度加权得出（见第 4 章）。</div>
+    </div>
+    <div class="term">
+      <div class="t">部署决策 <span class="en">Decision</span></div>
+      <div class="d">APPROVED（批准）/ NEEDS_REVIEW（需人工复审）/ BLOCKED（阻止）。这是产品的最终输出——CI/CD 管道直接按它行动。</div>
+    </div>
+    <div class="term">
+      <div class="t">置信度 <span class="en">Confidence</span></div>
+      <div class="d">这个评分本身有多可靠。Progmune 的原则是"诚实"：对没能力检查的语言（如 Go），明确说"置信度低"，不假装 100%。</div>
+    </div>
+    <div class="term">
+      <div class="t">PLSB <span class="en">Protocol Lifecycle Security Benchmark</span></div>
+      <div class="d">协议生命周期安全基准——13 类协议安全弱点的分类体系（如资源泄漏、认证绕过、会话劫持）。Progmune 是首个覆盖全部 13 类的验证引擎。</div>
+    </div>
+    <div class="term">
+      <div class="t">MCP <span class="en">Model Context Protocol</span></div>
+      <div class="d">AI 客户端（如 Claude Code）与工具服务器之间的标准接口——相当于 AI 世界的"USB 接口"。Progmune 通过它接入各种 AI 编程工具。</div>
+    </div>
+    <div class="term">
+      <div class="t">CI/CD <span class="en">Continuous Integration/Deployment</span></div>
+      <div class="d">软件开发中的自动化流水线：代码提交后自动测试、自动部署。Progmune 的决策就嵌入在这里——不合格的代码自动被拦下。</div>
+    </div>
+    <div class="term">
+      <div class="t">SAST / 静态分析 <span class="en">Static Application Security Testing</span></div>
+      <div class="d">逐行扫描代码找已知漏洞模式的传统工具（CodeQL、Semgrep 属于此类）。它们的盲区：看不见跨函数的调用顺序错误。</div>
+    </div>
+    <div class="term">
+      <div class="t">tRPC / Express <span class="en">Web Frameworks</span></div>
+      <div class="d">两个流行的 Web 后端框架。可以理解为"搭建网站后端的脚手架"——Progmune 针对这些框架做专项适配。</div>
+    </div>
+  </div>
+
+  <div class="plain">
+    <strong>阅读提示：</strong>如果后面再遇到不懂的词，回到这里。核心记住三件事就够了：<strong>① IR = 真相清单</strong>（真实代码里有什么函数）；<strong>② 协议 = 顺序规则</strong>（必须先做什么再做什么）；<strong>③ 决策 = 最终答案</strong>（能上线 / 不能上线）。
+  </div>
+</section>
+
+<!-- ═══════════ 3. 项目背景 ═══════════ -->
+<section id="s3">
+  <h2><span class="chap">03</span>项目背景：AI 代码的信任危机</h2>
+
+  <h3>3.1 时代背景：代码生产速度暴涨，验证能力原地踏步</h3>
+  <div class="stats">
+    <div class="stat"><div class="n">76%</div><div class="l">企业已采用 AI 编码工具</div></div>
+    <div class="stat"><div class="n">180万+</div><div class="l">Copilot 付费用户</div></div>
+    <div class="stat"><div class="n">$100亿+</div><div class="l">Cursor 估值</div></div>
+    <div class="stat"><div class="n">~40%</div><div class="l">AI 生成代码含潜在缺陷</div></div>
+  </div>
+
+  <p>AI 编码工具让代码的生产速度提升了约 10 倍，但<strong>验证环节几乎没有变化</strong>——仍然靠人工审查和传统测试。GitClear 2024 报告显示，AI 代码的变更回滚率比传统代码高 14%。这形成了一个清晰的剪刀差：</p>
+
+  <div class="bar"><span class="bl">代码生产速度</span><div class="bt"><div class="bf" style="width:100%"></div></div><span class="bv">10x</span></div>
+  <div class="bar"><span class="bl">人工审查能力</span><div class="bt"><div class="bf" style="width:10%"></div></div><span class="bv">1x</span></div>
+
+  <h3>3.2 问题本质：AI 写代码的原理决定了它"看不见"错误</h3>
+  <p>大语言模型生成代码的方式是<strong>统计预测</strong>——根据训练数据猜"下一个最可能的词"。这一观点的代表性论述来自 Subbarao Kambhampati 等的立场论文《Stop Anthropomorphizing Intermediate Tokens as Reasoning/Thinking Traces!》（arXiv:2505.22285）及其 ICML 2026 关于 verifier 的主题演讲：LLM 输出的"逐步推理"是统计表演，中间 token 与真实推理之间没有可靠的因果对应。</p>
+  <p>这意味着：AI 写出"看似合理的代码"和"实际正确的代码"是两件事。它会一本正经地调用不存在的函数、跳过关键的认证步骤——<strong>而且完全静默，不报错</strong>。</p>
+
+  <h3>3.3 现有方案为什么不够</h3>
+  <table>
+    <tr><th>方案</th><th>原理</th><th>根本缺陷</th></tr>
+    <tr><td><strong>Linter / SAST</strong><br><span style="font-size:.85em;color:var(--ink-3)">CodeQL, Semgrep, SonarQube</span></td><td>代码写完后逐行扫描已知漏洞模式</td><td>只看到"单行"，看不到"跨函数调用顺序"——协议违规是它们的系统性盲区</td></tr>
+    <tr><td><strong>RAG 上下文注入</strong></td><td>把项目信息塞进 AI 的提示词，降低幻觉</td><td>降低但<strong>不消除</strong>幻觉；AI 仍然是唯一仲裁者；无形式化保证</td></tr>
+    <tr><td><strong>提示词工程</strong></td><td>精心设计指令引导 AI</td><td>零合规保证；AI 版本一升级就失效</td></tr>
+    <tr><td><strong>人工审查</strong></td><td>人眼逐行检查</td><td>不可扩展——生产速度快 10 倍，人不会快 10 倍</td></tr>
+    <tr><td><strong>单元测试</strong></td><td>写测试用例验证行为</td><td>测试覆盖有限；测试本身也常由 AI 生成（自证循环）</td></tr>
+  </table>
+
+  <div class="warn-box">
+    <strong>关键洞察：</strong>以上所有方案有一个共同点——<strong>它们都是"事后补救"</strong>。错误已经写进代码，再去发现它。而真正的问题发生在代码生成的那一刻。这就是 Progmune 切入的角度：<strong>在生成环节植入确定性验证</strong>。
+  </div>
+
+  <h3>3.4 为什么是现在</h3>
+  <ul>
+    <li><strong>临界点已到</strong>：AI 编码从实验走向企业标配，但没有任何"编译器级"的验证机制保护它</li>
+    <li><strong>监管在收紧</strong>：金融（SOX）、医疗（HIPAA）等受监管行业开始要求 AI 代码可审计、可追溯</li>
+    <li><strong>事故在积累</strong>：AI 生成代码导致的线上事故（支付漏洞、认证绕过）开始进入公众视野</li>
+    <li><strong>技术窗口</strong>：协议状态机 + 中间表示的组合方案在学术界和工业界都还没有成熟竞争者</li>
+  </ul>
+</section>
+
+<!-- ═══════════ 4. 框架逻辑 ═══════════ -->
+<section id="s4">
+  <h2><span class="chap">04</span>框架逻辑：为什么这样做能解决问题</h2>
+  <p class="lead">Progmune 的全部设计源于一个第一性原理：<strong>不信任 AI 说的，只验证程序实际做的。</strong></p>
+
+  <h3>4.1 核心思想：把 AI 从"预言机"降级为"受约束的提议器"</h3>
+  <p>传统模式下，AI 是系统的中心：它写什么，什么就是代码。Progmune 翻转了这个关系：</p>
+  <div class="flow">
+    <div class="node">传统模式<br><span style="font-size:.8em;font-weight:400">AI 提议 → 直接落地</span></div>
+    <span class="arrow">→</span>
+    <div class="node">Progmune 模式<br><span style="font-size:.8em;font-weight:400">AI 提议 → 四层验证 → 通过才落地</span></div>
+  </div>
+  <p>AI 仍然负责"创意"（写什么代码），但<strong>不再拥有"裁决权"</strong>（代码合不合格）。裁决权交给一个确定性的验证系统——同一段代码、同一套规则，永远得到同一个结果。</p>
+
+  <h3>4.2 三大支柱</h3>
+  <table>
+    <tr><th style="width:22%">支柱</th><th style="width:38%">通俗解释</th><th>为什么不可或缺</th></tr>
+    <tr><td><strong>① 程序真相层<br>（IR）</strong></td><td>把项目真实存在的函数、类型、调用关系解析成一份清单</td><td>AI 的"记忆"是概率性的，IR 是确定性的。没有它，验证无从谈起——它是所有检查的事实基础</td></tr>
+    <tr><td><strong>② 协议状态机<br>（SSG）</strong></td><td>把"必须按顺序做的事"建模成状态机，检查每一步是否合法</td><td>这是与传统 SAST 的本质区别：传统工具看"单行代码"，Progmune 看"调用顺序"。认证前签发令牌这种漏洞只有顺序检查能发现</td></tr>
+    <tr><td><strong>③ 免疫记忆</strong></td><td>每次拦截的错误都记入语料库，形成可复用的"抗体"</td><td>让系统越用越强：同类错误第二次出现时直接调用已知解法，甚至跳过 AI 重试——形成数据飞轮</td></tr>
+  </table>
+
+  <h3>4.3 四层验证（SVL）：从便宜到昂贵，层层递进</h3>
+  <table>
+    <tr><th>层级</th><th>检查什么</th><th>拦截的问题</th><th>检查成本</th></tr>
+    <tr><td><strong>SVL-1 符号存在性</strong></td><td>调用的函数在项目里真实存在吗？</td><td>幻觉函数名</td><td>极低（查表）</td></tr>
+    <tr><td><strong>SVL-2 类型完整性</strong></td><td>参数数量和类型与签名匹配吗？</td><td>类型漂移</td><td>低</td></tr>
+    <tr><td><strong>SVL-3 数据流正确性</strong></td><td>变量先声明后使用了吗？</td><td>未定义变量、循环引用</td><td>中</td></tr>
+    <tr><td><strong>SVL-4 协议合法性</strong> ★</td><td>调用顺序符合协议状态机吗？</td><td>认证绕过、支付篡改、会话劫持</td><td>较高（状态机 + BFS 搜索）</td></tr>
+  </table>
+
+  <h3>4.4 决策模型：四个维度加权出一个"能不能上线"</h3>
+  <p>Progmune 的最终输出不是问题清单，而是四维加权后的一个决策：</p>
+  <div class="bar"><span class="bl">① 策略合规 35%</span><div class="bt"><div class="bf" style="width:35%"></div></div><span class="bv">企业安全策略执行</span></div>
+  <div class="bar"><span class="bl">② 协议安全 30%</span><div class="bt"><div class="bf" style="width:30%"></div></div><span class="bv">认证/授权/支付等协议</span></div>
+  <div class="bar"><span class="bl">③ 验证覆盖 20%</span><div class="bt"><div class="bf" style="width:20%"></div></div><span class="bv">类型检查/SSG/测试</span></div>
+  <div class="bar"><span class="bl">④ 治理完整性 15%</span><div class="bt"><div class="bf" style="width:15%"></div></div><span class="bv">溯源链/防篡改</span></div>
+
+  <p>判定规则（简单明确）：</p>
+  <table>
+    <tr><th>条件</th><th>决策</th></tr>
+    <tr><td>存在<strong>严重违规</strong>（critical）</td><td><span style="color:var(--red);font-weight:700">BLOCKED</span> —— 不管分数多高，一律阻止</td></tr>
+    <tr><td>总分 ≥ 80</td><td><span style="color:var(--green);font-weight:700">APPROVED</span> —— 批准部署</td></tr>
+    <tr><td>60–79</td><td><span style="color:var(--amber);font-weight:700">NEEDS_REVIEW</span> —— 需人工复审</td></tr>
+    <tr><td>&lt; 60</td><td><span style="color:var(--red);font-weight:700">BLOCKED</span> —— 阻止</td></tr>
+  </table>
+
+  <div class="plain">
+    <strong>设计哲学（也是产品哲学）：Decision &gt; Score。</strong>企业关心"能不能上线"，不关心"58 分还是 61 分"。所以决策是产品，分数只是支撑决策的证据。同时坚持"诚实原则"：检查不到的能力边界，用置信度明确标注，绝不假装 100% 覆盖。
+  </div>
+
+  <h3>4.5 学习闭环：数据飞轮</h3>
+  <div class="flow">
+    <div class="node">AI 生成代码</div><span class="arrow">→</span>
+    <div class="node">四层验证</div><span class="arrow">→</span>
+    <div class="node">发现违规</div><span class="arrow">→</span>
+    <div class="node">记入失败语料库</div><span class="arrow">→</span>
+    <div class="node">沉淀为抗体</div><span class="arrow">→</span>
+    <div class="node">下次同类错误：直接拦截/跳过 AI</div>
+  </div>
+  <p>每次拦截都让系统更强大。ACL-4 级抗体（同模式出现 ≥10 次且跨 ≥5 个场景）能实现<strong>零 LLM 调用直接修复</strong>——既省钱又更可靠。这是 Progmune 网络效应的技术基础。</p>
+</section>
+
+<!-- ═══════════ 5. 技术方法 ═══════════ -->
+<section id="s5">
+  <h2><span class="chap">05</span>技术方法：具体怎么做</h2>
+  <p class="lead">本章说明技术实现，尽量用类比解释。技术读者可关注括号内的模块名。</p>
+
+  <h3>5.1 IR 提取：建立"真相清单"</h3>
+  <p>用 TypeScript 编译器 API（<code>ts-morph</code>）解析项目源码，提取：函数声明、箭头函数、参数类型、返回类型、JSDoc 注解（<code>@protocol</code> 标记）、调用图、外部依赖（约 40 个常用库函数签名）。Python 项目也有对应提取器。</p>
+  <pre><code>源码: function createOrder(userId: number, items: Item[]): Order
+      ↓ 解析
+IR: { name: "createOrder", params: [{name:"userId", type:"number"}...],
+      returnType: "Order", calls: ["verifyPayment", "insertRecord"] }</code></pre>
+
+  <h3>5.2 协议状态机：把"顺序规则"变成可执行检查</h3>
+  <p>每个关键协议被建模为一个状态机。以登录为例：</p>
+  <pre><code>规则（protocols.json，共 148 条，覆盖 21 个命名空间）:
+  verify_password:  UNAUTHENTICATED → PASSWORD_VERIFIED
+  generate_jwt:     PASSWORD_VERIFIED → TOKEN_ISSUED
+  create_session:   TOKEN_ISSUED      → SESSION_ACTIVE
+  logout:           SESSION_ACTIVE    → UNAUTHENTICATED
+
+AI 生成: create_session(...)   ← 当前状态 UNAUTHENTICATED
+验证器:  ✗ 拒绝！create_session 需要前置状态 TOKEN_ISSUED
+修复器:  BFS 搜索最短修复路径 → [verify_password, generate_jwt]
+        自动插入这两个调用，重新验证 ✓</code></pre>
+  <p>修复是<strong>确定性</strong>的：BFS 图搜索保证找到最短修复路径，无需再次调用 AI。</p>
+
+  <h3>5.3 检测器与防护规则：静态模式的补充</h3>
+  <ul>
+    <li><strong>22 个协议检测器</strong>：TLS 握手、SSH 连接、HTTP 请求、支付处理、会话管理、文件上传、注册流程等</li>
+    <li><strong>26 条防护规则（safeguard）</strong>：触发式检查——"如果出现了 X，就必须有 Y"。例：注册函数必须调用安全哈希（bcrypt/argon2）；管理操作必须检查角色；tRPC mutation 必须有 <code>.input()</code> 校验 schema</li>
+  </ul>
+
+  <h3>5.4 API 语义映射：让检查认识"陌生函数"</h3>
+  <p>真实项目使用的函数名千变万化（<code>createSessionToken</code>、<code>signSession</code>、<code>jwt.sign</code>……）。系统用三层策略把陌生函数映射到协议规则：① 本地前缀/别名表（含项目自定义 <code>.progmune_aliases.json</code>）→ ② 单词切分匹配 → ③ LLM 批量语义分类（带磁盘缓存，重复运行零 LLM 成本）。</p>
+
+  <h3>5.5 双路径架构：生成时拦截 vs 事后检查</h3>
+  <p>Progmune 用两条互补路径覆盖两类代码来源——这是理解产品的关键，也是最容易被误读的地方：</p>
+  <table>
+    <tr><th></th><th><strong>生成路径</strong>（生成时拦截）</th><th><strong>验证路径</strong>（事后检查）</th></tr>
+    <tr><td>覆盖场景</td><td>通过 <code>progmune_generate</code> 生成的代码</td><td>任何来源的代码（Copilot、Cursor、人工）</td></tr>
+    <tr><td>机制</td><td>生成循环内 8 道验证关卡：JSON 解析 → 结构预检 → 符号纠正 → 类型修正 → 数据流 → 协议状态机 → BFS 确定性修复 → 语义合约。违规代码<strong>从不写入文件</strong></td><td>信任引擎五阶段流水线（收集→评分→决策→组装），四维加权输出部署决策</td></tr>
+    <tr><td>错误处理时机</td><td>创建时刻——错误从未存在</td><td>事后——文件已存在</td></tr>
+    <tr><td>成本曲线</td><td>零——违规没有落地</td><td>发现越晚越贵</td></tr>
+  </table>
+  <p>核心产品论：<strong>在生成时刻验证，而非事后补救。</strong>LLM 的输出只是提议，状态机才是裁判——LLM 可以被劝服，状态机不会。</p>
+
+  <h3>5.6 信任引擎：五阶段流水线</h3>
+  <div class="flow">
+    <div class="node">1. 收集<br><span style="font-size:.8em;font-weight:400">策略+协议+框架数据</span></div>
+    <span class="arrow">→</span>
+    <div class="node">2. 归一化<br><span style="font-size:.8em;font-weight:400">统一为7元组证据</span></div>
+    <span class="arrow">→</span>
+    <div class="node">3. 评分<br><span style="font-size:.8em;font-weight:400">四维加权</span></div>
+    <span class="arrow">→</span>
+    <div class="node">4. 决策<br><span style="font-size:.8em;font-weight:400">批准/复审/阻止</span></div>
+    <span class="arrow">→</span>
+    <div class="node">5. 组装<br><span style="font-size:.8em;font-weight:400">完整审计报告</span></div>
+  </div>
+  <p>每条违规都携带<strong>7 元组证据</strong>：规则 ID、文件、函数、代码证据、为什么违规、如何修复、关联策略。这是"可解释性"的技术基础——每一分的扣减都能追溯。</p>
+
+  <h3>5.6 框架适配器：让检查理解具体框架</h3>
+  <p>不同框架（Express、tRPC、NestJS、Next.js）的认证、校验、限流写法各不相同。适配器逐框架解析：Express 的中间件链、tRPC 的 procedure 声明、框架版本差异（如 Next.js 16 用 <code>proxy.ts</code> 而非 <code>middleware.ts</code>）。</p>
+
+  <h3>5.7 基准测试：用数据证明能力</h3>
+  <table>
+    <tr><th>基准</th><th>方法</th><th>结果</th></tr>
+    <tr><td><strong>盲测基准</strong>（TypeScript）</td><td>10 个真实项目、432 个序列、gold 标注</td><td>精确率 <strong>86.8%</strong> · 召回率 <strong>83.6%</strong> · F1 <strong>85.2%</strong></td></tr>
+    <tr><td><strong>黄金基准</strong>（C 语言）</td><td>curl/libssh/nginx/openssl 等真实 CVE 案例</td><td>F1 16.5% —— <strong>研究阶段</strong>，诚实披露</td></tr>
+    <tr><td><strong>PLSB v1.0</strong></td><td>13 类协议安全弱点、39 个手工验证缺陷案例</td><td>覆盖 <strong>13/13 全类别</strong>（业界唯一）</td></tr>
+  </table>
+  <div class="plain">
+    <strong>为什么披露 C 语言的低分？</strong>因为"诚实"是产品原则。一个只报告好消息的基准没有参考价值。TS 已生产可用、Python 规则开发中、C 为研究课题——能力边界清清楚楚。
+  </div>
+</section>
+
+<!-- ═══════════ 6. 产品与能力现状 ═══════════ -->
+<section id="s6">
+  <h2><span class="chap">06</span>产品与能力现状</h2>
+
+  <h3>6.1 产品形态</h3>
+  <table>
+    <tr><th>形态</th><th>说明</th><th>状态</th></tr>
+    <tr><td><strong>MCP 服务器</strong></td><td>19 个工具：<code>progmune_generate</code>（受约束代码生成）、<code>progmune_trust_check</code>（信任决策）、<code>progmune_score</code>（生成前预检）、<code>progmune_certify</code>（证书签发）等，接入 Claude Code 等 AI 客户端</td><td>✅ 可用</td></tr>
+    <tr><td><strong>SDK</strong></td><td>一行调用：<code>verify(file) → BLOCK/WARN/ALLOW</code></td><td>✅ 可用</td></tr>
+    <tr><td><strong>CLI</strong></td><td><code>npm run trust</code>、<code>npm run governance</code>——命令行信任检查与治理报告（终端/JSON/Markdown/HTML 四种格式）</td><td>✅ 可用</td></tr>
+    <tr><td><strong>GitHub Action</strong></td><td>PR 合并前自动门禁</td><td>✅ 可用</td></tr>
+    <tr><td><strong>Trust API</strong></td><td><code>POST /trust/check</code> 机器间接口</td><td>✅ 可用</td></tr>
+    <tr><td><strong>SaaS 仪表盘</strong></td><td>多项目可视化管理</td><td>🔲 规划中（等 PoC 验证后）</td></tr>
+  </table>
+
+  <h3>6.2 语言与框架覆盖（诚实版）</h3>
+  <table>
+    <tr><th>能力</th><th>状态</th><th>说明</th></tr>
+    <tr><td>TypeScript / JavaScript</td><td><span style="color:var(--green);font-weight:700">✅ 生产</span></td><td>F1 85.2%，主战场</td></tr>
+    <tr><td>Python</td><td><span style="color:var(--amber);font-weight:700">⚠️ IR 就绪</span></td><td>代码提取可用，协议规则开发中（下一阶段优先）</td></tr>
+    <tr><td>C</td><td><span style="color:var(--amber);font-weight:700">⚠️ 研究</span></td><td>F1 16.5%，瓶颈已定位（规则覆盖），L3 实验已终止</td></tr>
+    <tr><td>Go / Java</td><td><span style="color:var(--ink-3)">❌ 未支持</span></td><td>路线图内</td></tr>
+    <tr><td>框架适配</td><td><span style="color:var(--amber);font-weight:700">2/13</span></td><td>Express ✅、tRPC ✅、NestJS 部分；Next.js 版本感知已实现</td></tr>
+  </table>
+
+  <h3>6.3 知识库规模</h3>
+  <div class="stats">
+    <div class="stat"><div class="n">148</div><div class="l">协议规则</div></div>
+    <div class="stat"><div class="n">21</div><div class="l">协议命名空间全覆盖</div></div>
+    <div class="stat"><div class="n">22+26</div><div class="l">检测器 + 防护规则</div></div>
+    <div class="stat"><div class="n">39</div><div class="l">黄金缺陷案例（人工验证）</div></div>
+    <div class="stat"><div class="n">19</div><div class="l">MCP 工具</div></div>
+    <div class="stat"><div class="n">71</div><div class="l">单元测试全部通过</div></div>
+  </div>
+</section>
+
+<!-- ═══════════ 7. 实测案例 ═══════════ -->
+<section id="s7">
+  <h2><span class="chap">07</span>实测案例：PrintLab 治理全过程</h2>
+  <p class="lead">PrintLab 是一个真实的 3D 打印电商项目（Express + tRPC + React，59 个后端文件）。用 Progmune 对它做完整治理，结果如下——这是产品能力最直接的证据。</p>
+
+  <h3>7.1 第一轮：发现 46 个问题（其中大量误报）</h3>
+  <div class="verdict" style="background:var(--red-light);border-color:#fca5a5;">
+    <div class="icon" style="background:var(--red)">✗</div>
+    <div>
+      <h4 style="color:#7f1d1d">BLOCKED · 信任评分 44</h4>
+      <p style="color:#991b1b">46 个违规：1 critical + 1 high + 45 medium。但其中 43 个经分析是状态机规则粒度过细导致的误报。</p>
+    </div>
+  </div>
+
+  <h3>7.2 调优：状态机规则修正</h3>
+  <p>逐个分析误报根因并修正规则——例如：通知发送函数在真实代码中"组合+发送"一步完成，但状态机要求先显式"组合"；一次性文件读取 API（<code>readFileSync</code>）内部自带打开/关闭，但状态机要求显式 open。共修正 8 类状态机规则 + 2 处别名误配。</p>
+  <div class="plain">
+    <strong>这个过程本身就是产品价值的一部分：</strong>状态机规则不是死代码，而是像"公司制度"一样持续迭代。每次误报分析都在提升规则的精确度——这正是"越用越准"的飞轮在真实项目上的第一次完整运转。
+  </div>
+
+  <h3>7.3 真实发现（3 个）</h3>
+  <table>
+    <tr><th>严重度</th><th>位置</th><th>问题</th><th>修复</th></tr>
+    <tr><td><span style="color:#ea580c;font-weight:700">HIGH</span></td><td>优化商品路由</td><td>管理员 mutation 批量删除/更新商品，无输入校验 schema</td><td>添加 <code>.input(z.void())</code> 显式声明合约</td></tr>
+    <tr><td><span style="color:#ca8a04;font-weight:700">MEDIUM</span></td><td>认证工具</td><td>JWT 验证未指定算法白名单——"none"算法混淆攻击风险（CVE-2022-23540 模式）</td><td>添加 <code>algorithms: ["HS256"]</code></td></tr>
+    <tr><td><span style="color:#ca8a04;font-weight:700">MEDIUM</span></td><td>会话 SDK</td><td>第二处 JWT 验证同样缺少算法白名单</td><td>同上</td></tr>
+  </table>
+
+  <h3>7.4 最终结果</h3>
+  <div class="verdict approved">
+    <div class="icon">✓</div>
+    <div>
+      <h4>APPROVED · 信任评分 87 · 置信度 HIGH · 0 违规</h4>
+      <p>46 个问题 → 0 个问题；44 分 BLOCKED → 87 分 APPROVED。三个真实安全问题在代码进入生产前被修复。</p>
+    </div>
+  </div>
+  <p>治理报告生成为专业 HTML 文档（含通俗解释），可直接用于向 CTO/合规团队/投资人展示。</p>
+</section>
+
+<!-- ═══════════ 8. 竞争格局 ═══════════ -->
+<section id="s8">
+  <h2><span class="chap">08</span>竞争格局</h2>
+
+  <h3>8.1 定位：不与 Copilot/Cursor 竞争，做它们的安全底盘</h3>
+  <p>AI 编码市场已由 GitHub Copilot、Cursor 等巨头占据——Progmune <strong>不与他们竞争</strong>。Progmune 处于另一层：<strong>验证层</strong>。类比：汽车厂商竞争造车，Progmune 做的是碰撞测试——所有车厂都需要，但没人会把它当作"竞争对手"。</p>
+
+  <h3>8.2 七维对比</h3>
+  <table>
+    <tr><th>能力维度</th><th>传统 SAST<br><span style="font-weight:400;font-size:.85em">CodeQL/Semgrep</span></th><th>Prompt 安全<br><span style="font-weight:400;font-size:.85em">Guardrails AI 等</span></th><th>Progmune</th></tr>
+    <tr><td>介入生成过程</td><td>✗ 事后扫描</td><td>△ 输入/输出过滤</td><td><strong>✓ 生成时验证</strong></td></tr>
+    <tr><td>协议顺序检测（跨函数）</td><td>✗</td><td>✗</td><td><strong>✓ SSG 状态机</strong></td></tr>
+    <tr><td>形式化保证</td><td>✗</td><td>✗</td><td><strong>✓ SVL 1–4</strong></td></tr>
+    <tr><td>可解释证据（每分可追溯）</td><td>部分</td><td>✗</td><td><strong>✓ 7 元组证据</strong></td></tr>
+    <tr><td>模型无关</td><td>✓</td><td>✗ 绑定模型</td><td><strong>✓ 支持任何 LLM</strong></td></tr>
+    <tr><td>越用越强（学习能力）</td><td>✗</td><td>✗</td><td><strong>✓ 免疫记忆飞轮</strong></td></tr>
+    <tr><td>输出部署决策</td><td>✗ 输出告警</td><td>✗</td><td><strong>✓ APPROVED/BLOCKED</strong></td></tr>
+  </table>
+
+  <h3>8.3 竞争壁垒（客观评估）</h3>
+  <table>
+    <tr><th>壁垒</th><th>性质</th><th>客观评估</th></tr>
+    <tr><td><strong>IR 真相层</strong></td><td>技术架构</td><td>从源码确定性提取，不可伪造。但实现难度中等——大厂有追赶能力</td></tr>
+    <tr><td><strong>SVL 分类法</strong></td><td>标准制定</td><td>类似 PCI-DSS 之于支付安全。标准一旦被行业采纳，先发优势巨大——但采纳与否未验证</td></tr>
+    <tr><td><strong>免疫记忆数据</strong></td><td>数据飞轮</td><td>最有价值的壁垒：每次拦截都积累数据。但需要足够的使用量才能形成规模效应</td></tr>
+    <tr><td><strong>协议规则库（148 条）</strong></td><td>领域知识</td><td>从真实 CVE 和缺陷案例提炼，难以从零复制。但可被持续追赶</td></tr>
+    <tr><td><strong>开源社区先发</strong></td><td>生态</td><td>MIT 协议 + MCP 原生集成，建立开发者心智——目前尚在早期</td></tr>
+  </table>
+</section>
+
+<!-- ═══════════ 9. 市场与商业模式 ═══════════ -->
+<section id="s9">
+  <h2><span class="chap">09</span>市场机会与商业模式</h2>
+
+  <h3>9.1 市场规模</h3>
+  <div class="stats">
+    <div class="stat"><div class="n">$25B+</div><div class="l">AI 代码生成市场（2030E）</div></div>
+    <div class="stat"><div class="n">$9B+</div><div class="l">DevSecOps 市场（2024）</div></div>
+    <div class="stat"><div class="n">$3–5B</div><div class="l">AI 安全层近期可寻址市场</div></div>
+  </div>
+  <p class="lead" style="font-size:.95em">核心逻辑：AI 代码生成市场每增长 1%，对验证的需求就增长 1%——这是一个<strong>与 AI 编码同步增长的伴生市场</strong>。而且与 AI 编码不同，验证层目前没有巨头。</p>
+
+  <h3>9.2 目标客户</h3>
+  <table>
+    <tr><th>客户画像</th><th>痛点</th><th>Progmune 提供</th></tr>
+    <tr><td><strong>大规模部署 Copilot/Cursor 的企业</strong></td><td>AI 代码进生产无人把关</td><td>CI/CD 自动门禁 + 审计报告</td></tr>
+    <tr><td><strong>金融/医疗等受监管行业</strong></td><td>SOX/HIPAA 要求 AI 代码可审计</td><td>7 元组证据链 + 治理报告</td></tr>
+    <tr><td><strong>平台工程团队</strong></td><td>多工具 AI 编码各自为政</td><td>统一验证层 + 集中策略</td></tr>
+    <tr><td><strong>AI 原生初创公司</strong></td><td>Agent 直推生产无安全网</td><td>部署前最后一道确定性防线</td></tr>
+  </table>
+
+  <h3>9.3 商业模式：开源内核 + 企业增值</h3>
+  <table>
+    <tr><th>层级</th><th>定价</th><th>内容</th><th>定位</th></tr>
+    <tr><td><strong>开源版（MIT）</strong></td><td>永久免费</td><td>SVL 四层验证、TS/Python IR、MCP 集成、本地语料库</td><td>建立生态与信任</td></tr>
+    <tr><td><strong>企业版</strong></td><td>按席位/年</td><td>CI/CD 门禁集成、团队仪表盘、高性能验证器（Rust/WASM）、私有 Hub、SLA</td><td>营收主力</td></tr>
+    <tr><td><strong>免疫网络</strong></td><td>按组织/年</td><td>全球失败指纹联邦、行业协议模板、威胁情报推送</td><td>网络效应锁定</td></tr>
+  </table>
+  <p>此模式已被 GitLab、Databricks 验证：开源建立信任和分发，企业版解决付费问题。</p>
+</section>
+
+<!-- ═══════════ 10. 风险分析 ═══════════ -->
+<section id="s10">
+  <h2><span class="chap">10</span>风险分析（客观）</h2>
+  <p class="lead">投资人需要知道风险，本节不粉饰。</p>
+
+  <table>
+    <tr><th>风险</th><th>等级</th><th>内容</th><th>缓解措施</th></tr>
+    <tr><td><strong>市场教育成本</strong></td><td><span style="color:var(--red);font-weight:700">高</span></td><td>多数企业尚未意识到"AI 代码需要验证"这个问题本身</td><td>公开缺陷基准库、从受监管行业切入、开源社区自然教育</td></tr>
+    <tr><td><strong>大厂竞争</strong></td><td><span style="color:var(--amber);font-weight:700">中</span></td><td>GitHub/Microsoft 可能内置类似功能</td><td>聚焦"验证层"差异化；大厂内置方案通常浅层；开源先发</td></tr>
+    <tr><td><strong>验证的边界性</strong></td><td><span style="color:var(--amber);font-weight:700">中</span></td><td>当前仅 TS 生产可用；协议规则不可能覆盖所有场景——存在漏检的可能</td><td>诚实披露置信度；数据飞轮持续补规则；规则来自真实 CVE 案例</td></tr>
+    <tr><td><strong>LLM 依赖</strong></td><td><span style="color:var(--green);font-weight:700">低</span></td><td>代码生成环节依赖底层模型能力</td><td>架构上模型无关；验证器本身不依赖任何 LLM；模型越强产品越有价值</td></tr>
+    <tr><td><strong>商业化节奏</strong></td><td><span style="color:var(--amber);font-weight:700">中</span></td><td>开源到付费的转化路径需要时间验证；尚无企业 PoC</td><td>GitLab/Databricks 模式已成熟；优先做 2-3 个企业 PoC 验证 PMF</td></tr>
+    <tr><td><strong>核心假说未验证</strong></td><td><span style="color:var(--amber);font-weight:700">中</span></td><td>"每个新代码库让所有验证更强"的知识网络假说尚无实证</td><td>以 Phase 2 的 PoC 数据为准；假说不成立也不影响单点验证的产品价值</td></tr>
+  </table>
+
+  <div class="risk-box">
+    <strong>最需要投资人关注的风险：</strong>市场教育成本。Progmune 卖的不是"更快的工具"，而是"信任"——这类产品的销售周期天然更长。对冲策略是：用公开基准数据（PLSB、盲测结果）让产品"自证"，而不是靠销售话术。
+  </div>
+</section>
+
+<!-- ═══════════ 11. 路线图 ═══════════ -->
+<section id="s11">
+  <h2><span class="chap">11</span>路线图</h2>
+
+  <table>
+    <tr><th>阶段</th><th>时间</th><th>目标</th><th>关键交付</th></tr>
+    <tr><td><strong>当前</strong></td><td>2026-08</td><td>Trust Foundation 完成</td><td>信任引擎 ✅、策略引擎 ✅、PLSB 13/13 ✅、tRPC/Express 适配 ✅、PrintLab 案例 ✅</td></tr>
+    <tr><td><strong>Phase 1 收官</strong></td><td>2026 Q3</td><td>可信度校准</td><td>已知风险项目上的 Score 校准、真实项目验收、Trust Report PDF</td></tr>
+    <tr><td><strong>Phase 2</strong></td><td>2026 Q4</td><td>语言扩展 + 企业验证</td><td>Python 完整支持、企业 PoC × 2-3、Evolution 追踪、CI/CD 门禁集成</td></tr>
+    <tr><td><strong>Phase 3</strong></td><td>2027+</td><td>平台化</td><td>Go/Java、SaaS 仪表盘、公开基准排行榜、全球免疫网络、协议模板市场</td></tr>
+  </table>
+</section>
+
+<!-- ═══════════ 12. 总结论 ═══════════ -->
+<section id="s12">
+  <h2><span class="chap">12</span>给投资人的总结论</h2>
+
+  <h3>为什么值得投</h3>
+  <ol>
+    <li><strong>真问题 + 真窗口</strong>：76% 企业已用 AI 编码，验证层是明确的基础设施缺口，且没有巨头占位</li>
+    <li><strong>差异化足够深</strong>：协议顺序验证是传统 SAST 的系统性盲区——这是"品类级"差异，不是"功能级"差异</li>
+    <li><strong>数据飞轮成立</strong>：每次拦截都沉淀为抗体，使用量即壁垒（与 Salesforce 的网络效应同构）</li>
+    <li><strong>开源已验证</strong>：19 个工具、148 条规则、85.2% F1、真实项目案例（PrintLab 从 BLOCKED 到 APPROVED 的完整过程可复现）</li>
+  </ol>
+
+  <h3>为什么需要谨慎</h3>
+  <ol>
+    <li>企业 PoC 为零——PMF 未验证，商业化路径尚需数据</li>
+    <li>语言覆盖有限（当前仅 TS 生产可用）</li>
+    <li>"信任"类产品教育成本高，销售周期长</li>
+    <li>大厂随时可能跟进（但架构先发 + 数据积累构成时间壁垒）</li>
+  </ol>
+
+  <div class="verdict approved">
+    <div class="icon">→</div>
+    <div>
+      <h4>建议的验证路径</h4>
+      <p>与其争论技术细节，不如用 3 个月做一件事：在 2-3 家真实企业跑 PoC——让企业用自己的 AI 代码、自己的事故案例，看到 Progmune 拦住真实问题的过程。PMF 一旦验证，后续的资本故事自然成立。</p>
+    </div>
+  </div>
+</section>
+
+<div class="foot">
+  <p><strong>Progmune</strong> — AI Trust Decision Engine · 本文档 v1.0 · 2026-08</p>
+  <p>
+    <a href="https://github.com/shenlian19831109/progmune-runtime">github.com/shenlian19831109/progmune-runtime</a>
+    · npm install progmune-runtime · MIT License
+  </p>
+</div>
+
+</div>
+</body>
+</html>

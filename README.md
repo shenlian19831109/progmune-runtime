@@ -23,6 +23,21 @@ Output: `APPROVED` / `NEEDS_REVIEW` / `BLOCKED` — with Trust Score, evidence, 
 
 ---
 
+## Two Paths: Intercept or Verify
+
+Progmune covers **two code sources** with two complementary mechanisms:
+
+| | **Generate path** (agent-time interception) | **Verify path** (post-hoc checking) |
+|---|---|---|
+| **Covers** | Code generated *through Progmune* (`progmune_generate` / `progmune_execute`) | Code written anywhere — Copilot, Cursor, humans (`progmune_trust_check` / SDK / CI) |
+| **Mechanism** | 8 validation gates inside the generation loop: JSON parse → schema → SVL-1 symbol → SVL-2 types → SVL-3 dataflow → SVL-4 protocol state machine → BFS deterministic repair → semantic contract. Violating code is **never written to disk** — it is corrected or retried before emission. | Trust Engine: 4-dimension weighted scoring (policy 35% / protocol 30% / coverage 20% / governance 15%) → Decision + evidence trail |
+| **When errors are handled** | At creation time — the error never exists | After the fact — the file already exists |
+| **Cost curve** | Zero — the violation never landed | Higher the later it's found |
+
+This is the core product thesis: **verify at generation time, not after the fact.** LLM outputs are proposals; the state machine is the referee. LLMs can be persuaded — state machines cannot.
+
+---
+
 ## What Progmune Detects
 
 AI code generators produce syntactically valid code that often violates **protocol lifecycles** — the correct sequence of operations like open→read→close or auth→validate→respond. These violations are invisible to traditional static analysis.
@@ -81,11 +96,19 @@ Progmune is honest about what it can and cannot verify.
 | Language | Status | Evidence |
 |----------|--------|----------|
 | **TypeScript / JavaScript** | ✅ Production | Blind benchmark: P=86.8%, R=83.6%, F1=85.2% (432 sequences, 10 projects) |
-| **C** | ⚠️ Research | Gold benchmark: curl F1=45.7%, libssh F1=46.2%. L3 cross-function experiment terminated — L4 (pointer/CFG) needed. |
+| **C** | ⚠️ Research-only | Gold benchmark F1=16.5%. L3 cross-function experiment terminated; L4 not planned. See [C Language Status](docs/c-language-status.md). |
 | **Python** | 🔨 IR only | IR extractor exists (`extract-ir-python.ts`), no verification rules yet |
 | **Go, Java** | ❌ None | Planned |
 
-**Framework adapters: 1/13.** Express is the first. Next.js, NestJS, Fastify, Django, FastAPI — 12 remaining. Framework adaptation is the #1 product gap.
+**Framework adapters: 2/13.** Express ✅ and tRPC ✅ have dedicated detectors; Next.js has version-aware governance; NestJS is partial. Django, FastAPI and 8 more remain — framework adaptation is the #1 product gap.
+
+### What Progmune does NOT cover (honest boundaries)
+
+- **Taint-based injection flaws** — SQL injection, XSS, command injection. These require dataflow/taint tracking, which is deliberately out of scope in Phase 1 (adding it would make Progmune a generic SAST competitor; protocol-sequence verification is the differentiator).
+- **SCA / dependency vulnerabilities** — hallucinated package names, supply-chain issues. Separate tooling exists for this.
+- **Runtime behavior** — Progmune is static analysis only; no DAST/sandbox execution.
+- **Obfuscated or dynamic code** — `eval`, `Function` constructor, and heavily obfuscated flows degrade regex/IR detection recall.
+- **Known failure boundaries are documented** rather than hidden: if Progmune cannot verify a language (e.g. Go), Confidence is lowered instead of pretending 100%.
 
 → [Full Coverage Matrix](docs/coverage-matrix.md)
 
@@ -104,14 +127,9 @@ Public, reproducible precision data. All numbers measured against gold-annotated
 | F1 | 85.2% |
 | Projects | 10 (ecommerce, blog, chat, crm, forum, wiki, issuetracker, filestorage, todo, scheduler) |
 
-### C (Gold Benchmark v7)
+### C (Gold Benchmark — research status)
 
-| Repo | Precision | Recall | F1 | Samples |
-|------|-----------|--------|-----|---------|
-| curl | 30.9% | 87.5% | 45.7% | 85 |
-| libssh | 36.0% | 64.3% | 46.2% | 47 |
-| nginx | — | — | 0 FP | 50 |
-| redis | — | — | 0 FP | 50 |
+C analysis is **research-only**: gold benchmark F1=16.5% across 4 repos (curl, libssh, nginx, openssl). The bottleneck is rule coverage, not context. L3 (cross-function) was terminated with data; L4 (pointer/CFG) is a multi-year research problem and not planned. See [C Language Status](docs/c-language-status.md) for the full picture and reasoning.
 
 ### P0-P3 Rule Injection (2026-08)
 
@@ -150,9 +168,9 @@ SDK (src/sdk.ts)           verify() → APPROVED / NEEDS_REVIEW / BLOCKED
 
 ## Scientific Foundation
 
-Progmune is built on the premise that **LLM outputs are statistical performances, not reasoning** (Kambhampati et al., ICML 2026). Rather than trusting what the model says about code, Progmune verifies what the program actually does — using protocol state machines, IR extraction, and evidence-backed decision chains.
+Progmune is built on the premise that **LLM outputs are statistical performances, not reasoning** — a view developed by Subbarao Kambhampati et al. in the position paper ["Stop Anthropomorphizing Intermediate Tokens as Reasoning/Thinking Traces!"](https://arxiv.org/abs/2505.22285) (arXiv:2505.22285, 2025) and elaborated in his ICML 2026 talk "On the Role of Verifiers and Thinking Traces in Reasoning Models". Rather than trusting what the model says about code, Progmune verifies what the program actually does — using protocol state machines, IR extraction, and evidence-backed decision chains.
 
-Recent work applies Sergei Gukov's "Two-Hump Problem" framework to understand and systematically close detection capability gaps.
+Coverage-gap analysis borrows the "two-hump problem" terminology **as a cross-domain analogy** from Sergei Gukov's work in mathematical physics (the Andrews-Curtis conjecture in group theory, 2026) — it describes a bimodal coverage distribution, not a collaboration. See [Two-Hump Report](docs/two-hump-report.md) for the full methodology.
 
 → [Investor Whitepaper](docs/Progmune_投资人白皮书_v2.0.html) · [Trust Decision Model](docs/ai-trust-decision-model-v1.md)
 
@@ -174,8 +192,8 @@ High-impact contribution areas:
 - **Runtime Pipeline:** Detect → Explain → Repair → Validate (L1–L4)
 - **Trust Engine:** 4-dimension scoring with binary explainability gate
 - **MCP Tools:** 19 — `progmune_trust_check`, `progmune_score`, `progmune_policy_check`, `progmune_certify`, and more
-- **Framework Adapters:** Express ✅ (1/13)
-- **Knowledge Base:** 31 domains, 140 protocol rules, 22 detectors, 26 safeguards
+- **Framework Adapters:** Express ✅, tRPC ✅, NestJS partial (2/13)
+- **Knowledge Base:** 31 domains, 148 protocol rules, 22 detectors, 26 safeguards, PLSB 13/13 categories
 - **Corpus:** 2,500+ trajectories across 6+ repositories
 - **Current focus:** Framework adaptation + enterprise PoC validation
 
