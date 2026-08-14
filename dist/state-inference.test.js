@@ -9,7 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  *   C: Real-world: infer state machines from Redis/SQLite sequences
  */
 const vitest_1 = require("vitest");
-const state_inference_1 = require("./state-inference");
+const state_inference_1 = require("./experimental/state-inference");
 // ── Test data: structurally distinct protocols ──
 const ACQUIRE_USE_RELEASE = [
     ["open", "read", "close"],

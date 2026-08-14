@@ -73,12 +73,92 @@ function verify(filePath) {
         timestamp: new Date().toISOString(),
     };
 }
-/** Stub for future AI-driven repair. Consumes VerificationResult. */
-function fix(_result) {
-    return {
-        possible: false,
-        reason: "AI repair not yet available. Coming in Runtime 2.0.",
-    };
+/**
+ * Analyze a project and return actionable fix suggestions.
+ *
+ * Uses the Trust Engine (SSG state machine + Express/NestJS framework
+ * detectors) to find protocol violations, then extracts concrete
+ * repair steps — BFS-computed fix paths, middleware additions,
+ * decorator insertions, etc.
+ *
+ * Usage:
+ *   const result = await fix("./my-project")
+ *   if (result.possible) {
+ *     for (const s of result.suggestions) {
+ *       console.log(s.file, s.fix)
+ *     }
+ *   }
+ */
+async function fix(projectPath) {
+    try {
+        // Lazy-require trust engine to avoid circular deps at module load
+        const { evaluateTrust } = require("./trust/engine");
+        const decision = await evaluateTrust({
+            projectPath,
+            projectName: projectPath.split("/").pop() || "unknown",
+            commit: "working-tree",
+            language: "typescript",
+        });
+        const suggestions = [];
+        const seen = new Set(); // deduplicate by file + ruleId
+        for (const v of decision.violations) {
+            if (!v.fix)
+                continue;
+            // Deduplicate: same file + same rule → report once
+            const dedupKey = `${v.file}::${v.rule_id}`;
+            if (seen.has(dedupKey))
+                continue;
+            seen.add(dedupKey);
+            const source = v.rule_id.startsWith("SSG_") ? "ssg" :
+                v.policy_ref === "framework.express" ? "express" :
+                    v.policy_ref === "framework.nestjs" ? "nestjs" :
+                        v.policy_ref?.startsWith("protocol") ? "protocol" : "policy";
+            // Extract BFS fix path from SSG violations
+            let fixPath;
+            if (source === "ssg") {
+                const match = v.fix.match(/Insert before the violating call:\s*(.+)/);
+                if (match) {
+                    fixPath = match[1].split(" → ").map((s) => s.trim()).filter(Boolean);
+                }
+            }
+            suggestions.push({
+                file: v.file || projectPath,
+                severity: v.severity,
+                ruleId: v.rule_id,
+                message: v.message,
+                fix: v.fix,
+                fixPath: fixPath?.length ? fixPath : undefined,
+                source,
+            });
+        }
+        // Sort: critical first, then by file
+        suggestions.sort((a, b) => {
+            const sev = { critical: 0, high: 1, medium: 2, low: 3 };
+            const sa = sev[a.severity] ?? 4;
+            const sb = sev[b.severity] ?? 4;
+            if (sa !== sb)
+                return sa - sb;
+            return a.file.localeCompare(b.file);
+        });
+        return {
+            possible: suggestions.length > 0,
+            totalIssues: decision.violations.length,
+            fixableIssues: suggestions.length,
+            suggestions,
+            summary: suggestions.length > 0
+                ? `Found ${suggestions.length} fixable issue(s) across ${new Set(suggestions.map(s => s.file)).size} file(s).`
+                : "No fixable issues found. The project passes all protocol checks.",
+        };
+    }
+    catch (e) {
+        return {
+            possible: false,
+            totalIssues: 0,
+            fixableIssues: 0,
+            suggestions: [],
+            summary: `Fix analysis failed: ${e.message || "unknown error"}`,
+        };
+    }
 }
 /**
  * explain() — Human-readable governance explanation.

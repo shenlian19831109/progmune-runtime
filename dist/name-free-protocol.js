@@ -23,7 +23,7 @@ exports.runNameScrambleBenchmark = runNameScrambleBenchmark;
 exports.runFullNameScrambleBenchmark = runFullNameScrambleBenchmark;
 exports.printNameScrambleReport = printNameScrambleReport;
 exports.printFullScrambleReport = printFullScrambleReport;
-const unsupervised_physics_1 = require("./unsupervised-physics");
+const unsupervised_physics_1 = require("./experimental/unsupervised-physics");
 /**
  * Extract a name-free state graph from a set of call sequences.
  *

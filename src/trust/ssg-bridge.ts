@@ -172,8 +172,6 @@ const NAMESPACE_RULE_HINTS: Record<string, RuleKeywordHint[]> = {
     { keyword: "load_tls_config", ruleName: "load_tls_config" },
     { keyword: "tls_config", ruleName: "load_tls_config" },
     { keyword: "ssl_config", ruleName: "load_tls_config" },
-    { keyword: "createServer", ruleName: "http_create_server" },
-    { keyword: "create_server", ruleName: "http_create_server" },
   ],
   resource: [
     { keyword: "open_file", ruleName: "open_file" },
@@ -224,6 +222,14 @@ const NAMESPACE_RULE_HINTS: Record<string, RuleKeywordHint[]> = {
     { keyword: "send_verification", ruleName: "send_verification_code" },
     { keyword: "verify_code", ruleName: "verify_code" },
     { keyword: "activate_account", ruleName: "activate_account" },
+  ],
+  missing_validation: [
+    { keyword: "validate", ruleName: "validate_request" },
+    { keyword: "sanitize", ruleName: "validate_request" },
+    { keyword: "safeParse", ruleName: "validate_request" },
+    { keyword: "parseAsync", ruleName: "validate_request" },
+    { keyword: "checkSchema", ruleName: "validate_request" },
+    { keyword: "zod", ruleName: "validate_request" },
   ],
 };
 

@@ -22,9 +22,9 @@ exports.retrieveSimilarProtocols = retrieveSimilarProtocols;
 exports.printEmbeddingSpace = printEmbeddingSpace;
 exports.printRetrievalResult = printRetrievalResult;
 const wl_fingerprint_1 = require("./wl-fingerprint");
-const state_inference_1 = require("./state-inference");
+const state_inference_1 = require("./experimental/state-inference");
 const topology_factory_1 = require("./topology-factory");
-const unsupervised_physics_1 = require("./unsupervised-physics");
+const unsupervised_physics_1 = require("./experimental/unsupervised-physics");
 /**
  * Build an embedding for a protocol given its call sequences.
  * The embedding is the WL fingerprint vector — a dense structural

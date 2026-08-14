@@ -17,9 +17,9 @@ exports.adjustedRandIndex = adjustedRandIndex;
 exports.kMeansCluster = kMeansCluster;
 exports.printScaledReport = printScaledReport;
 const topology_factory_1 = require("./topology-factory");
-const state_inference_1 = require("./state-inference");
+const state_inference_1 = require("./experimental/state-inference");
 const wl_fingerprint_1 = require("./wl-fingerprint");
-const unsupervised_physics_1 = require("./unsupervised-physics");
+const unsupervised_physics_1 = require("./experimental/unsupervised-physics");
 // ═══════════════════════════════════════════════════════════════
 // Generate protocol variants with realistic name variations
 // ═══════════════════════════════════════════════════════════════

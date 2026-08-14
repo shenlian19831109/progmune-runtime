@@ -27,7 +27,7 @@ exports.loadGoldDataset = loadGoldDataset;
 exports.runGoldBenchmark = runGoldBenchmark;
 exports.printGoldReport = printGoldReport;
 const realworld_benchmark_1 = require("./realworld-benchmark");
-const state_inference_1 = require("./state-inference");
+const state_inference_1 = require("./experimental/state-inference");
 const protocol_invariants_1 = require("./protocol-invariants");
 // ═══════════════════════════════════════════════════════════════
 // Load the gold dataset from curated 20 cases (already verified)

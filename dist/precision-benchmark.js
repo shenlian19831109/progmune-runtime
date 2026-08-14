@@ -35,7 +35,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.runPrecisionBenchmark = runPrecisionBenchmark;
 const fs = __importStar(require("fs"));
-const state_inference_1 = require("./state-inference");
+const state_inference_1 = require("./experimental/state-inference");
 /**
  * Run precision benchmark with labeled data.
  *

@@ -14,10 +14,10 @@ exports.collectTrajectoriesAtScale = collectTrajectoriesAtScale;
 exports.printCollectionReport = printCollectionReport;
 const protocol_mining_1 = require("./protocol-mining");
 const trajectory_corpus_1 = require("./trajectory-corpus");
-const unsupervised_physics_1 = require("./unsupervised-physics");
+const unsupervised_physics_1 = require("./experimental/unsupervised-physics");
 const trajectory_augmentation_1 = require("./trajectory-augmentation");
 const function_synonyms_1 = require("./function-synonyms");
-const software_physics_1 = require("./software-physics");
+const software_physics_1 = require("./experimental/software-physics");
 const protocol_coverage_1 = require("./protocol-coverage");
 const auto_protocol_synthesizer_1 = require("./auto-protocol-synthesizer");
 /**

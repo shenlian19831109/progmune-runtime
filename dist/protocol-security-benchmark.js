@@ -136,7 +136,7 @@ function buildProtocolSecurityBenchmark() {
 }
 function runProtocolSecurityBenchmark() {
     const bench = buildProtocolSecurityBenchmark();
-    const { inferStateMachine } = require("./state-inference");
+    const { inferStateMachine } = require("./experimental/state-inference");
     const { detectStructuralViolations } = require("./protocol-invariants");
     const CWE_TO_VIOLATION = {
         resource_leak: "missing_release",

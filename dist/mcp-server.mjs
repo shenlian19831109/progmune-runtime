@@ -866,7 +866,7 @@ This project uses [Progmune](https://github.com/shenlian19831109/progmune-runtim
             const { projectPath, repoName } = request.params.arguments;
             process.env.PROGMUNE_PROJECT_DIR = projectPath;
             const { buildKnownFingerprintLibrary, extractUnknownRepoSequences, discoverProtocolsFromSequences } = require("./unknown-protocol-discovery");
-            const { CROSS_REPO_SEQUENCES } = require("./unsupervised-physics");
+            const { CROSS_REPO_SEQUENCES } = require("./experimental/unsupervised-physics");
             const known = buildKnownFingerprintLibrary();
             const name = repoName || path.basename(projectPath);
             // Try to extract sequences from the trajectory corpus

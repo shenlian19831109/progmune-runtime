@@ -20,8 +20,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.runNameScrambling = runNameScrambling;
 exports.printScramblingReport = printScramblingReport;
-const software_physics_1 = require("./software-physics");
-const unsupervised_physics_1 = require("./unsupervised-physics");
+const software_physics_1 = require("./experimental/software-physics");
+const unsupervised_physics_1 = require("./experimental/unsupervised-physics");
 // ═══════════════════════════════════════════════════════════════
 // Name Scrambling
 // ═══════════════════════════════════════════════════════════════

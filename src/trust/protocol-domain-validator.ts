@@ -271,7 +271,7 @@ export function validateSemanticSequence(seq: SemanticSequence): DomainValidatio
 export interface SpecificViolationCheck {
   ruleId: string;
   description: string;
-  check: (steps: SemanticStep[]) => boolean;
+  check: (steps: SemanticStep[], filePath?: string) => boolean;
 }
 
 /**
@@ -765,7 +765,7 @@ export const SPECIFIC_VIOLATION_CHECKS: SpecificViolationCheck[] = [
       "JWT verification may not specify required algorithms. " +
       "Without explicit algorithm whitelist, the 'none' algorithm " +
       "can be exploited to accept unsigned tokens (CVE-2022-23540).",
-    check: (steps) => {
+    check: (steps, filePath) => {
       // JWT verification functions being used
       const hasJwtVerify = steps.some(
         (s) =>
@@ -782,7 +782,9 @@ export const SPECIFIC_VIOLATION_CHECKS: SpecificViolationCheck[] = [
           (s.api === "jwt.decode" || s.api.includes("jwt_decode")) &&
           !steps.some((t) => t.api.includes("verify"))
       );
-      // Algorithm explicitly specified (safe pattern)
+      if (!hasJwtVerify && !hasJwtDecode) return false;
+
+      // Algorithm explicitly specified as a call name (rare, but possible)
       const hasAlgorithmSpec = steps.some(
         (s) =>
           s.api.toLowerCase().includes("algorithm") ||
@@ -792,8 +794,37 @@ export const SPECIFIC_VIOLATION_CHECKS: SpecificViolationCheck[] = [
           s.api.toLowerCase().includes("es256") ||
           s.api.toLowerCase().includes("eddsa")
       );
+      if (hasAlgorithmSpec) return false;
 
-      return (hasJwtVerify || hasJwtDecode) && !hasAlgorithmSpec;
+      // File-aware check: the `algorithms: ["HS256"]` option is an object
+      // literal argument, invisible to call-name analysis. Read the source
+      // and verify every jwtVerify/jwt.verify call site has the option nearby.
+      if (filePath) {
+        try {
+          const fs = require("fs");
+          const code = fs.readFileSync(filePath, "utf-8");
+          const verifyRe = /\b(?:jwtVerify|jwt\.verify|verifyToken|jwt_decode|jwt\.decode)\s*\(/g;
+          let found = false;
+          let allSafe = true;
+          let m: RegExpExecArray | null;
+          while ((m = verifyRe.exec(code)) !== null) {
+            found = true;
+            // Look at the call's argument window for an algorithms whitelist
+            const window = code.slice(m.index, Math.min(m.index + 400, code.length));
+            if (!/algorithms\s*:/.test(window)) {
+              allSafe = false;
+              break;
+            }
+          }
+          if (found && allSafe) return false; // every call site whitelists algorithms
+          if (found && !allSafe) return true; // at least one site lacks the whitelist
+          // No verify call sites found in file text → fall through to name-based
+        } catch {
+          // File unreadable → fall through to name-based heuristic
+        }
+      }
+
+      return true;
     },
   },
 
@@ -832,7 +863,7 @@ export function checkSpecificViolations(
   }> = [];
 
   for (const check of SPECIFIC_VIOLATION_CHECKS) {
-    if (check.check(seq.steps)) {
+    if (check.check(seq.steps, _filePath)) {
       violations.push({
         ruleId: check.ruleId,
         description: check.description,

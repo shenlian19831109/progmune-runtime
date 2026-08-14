@@ -21,7 +21,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.assessGoldQuality = assessGoldQuality;
 exports.rankGoldCandidates = rankGoldCandidates;
 exports.printQualityReport = printQualityReport;
-const state_inference_1 = require("./state-inference");
+const state_inference_1 = require("./experimental/state-inference");
 /**
  * Assess the quality of a gold CVE case.
  *

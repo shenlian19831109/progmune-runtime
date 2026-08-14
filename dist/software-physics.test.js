@@ -4,7 +4,7 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 const vitest_1 = require("vitest");
-const software_physics_1 = require("./software-physics");
+const software_physics_1 = require("./experimental/software-physics");
 (0, vitest_1.describe)("Protocol Canonicalization", () => {
     (0, vitest_1.it)("maps fopen/fclose to ACQUIRE/RELEASE", () => {
         (0, vitest_1.expect)((0, software_physics_1.canonicalize)("fopen").pattern).toBe("RESOURCE_ACQUIRE");

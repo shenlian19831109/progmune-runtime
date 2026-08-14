@@ -1,0 +1,2042 @@
+{
+  "$schema": "https://progmune.dev/schemas/protocols.json",
+  "$description": "Progmune 协议定义 —— 函数调用的合法状态转换规则。支持命名空间（namespace）隔离不同资源的状态机。",
+  "initialState": "UNAUTHENTICATED",
+  "namespaceInitialStates": {
+    "_global": "UNAUTHENTICATED",
+    "auth": "UNAUTHENTICATED",
+    "dev_pipeline": "IR_STALE",
+    "stateless": "IDLE",
+    "transaction": "TX_IDLE",
+    "conditional": "COND_IDLE",
+    "loop": "LOOP_IDLE",
+    "cross": "UNAUTHENTICATED",
+    "payment": "ORDER_CREATED",
+    "file_upload": "UNAUTHENTICATED",
+    "api_gateway": "IDLE",
+    "notification": "IDLE",
+    "registration": "UNAUTHENTICATED",
+    "session_mgmt": "UNAUTHENTICATED",
+    "supplier": "IDLE",
+    "printlab_order": "ORDER_CREATED",
+    "printlab_print": "STL_UPLOADED",
+    "file": "IDLE",
+    "db": "DB_CONNECTED",
+    "resource": "IDLE",
+    "data_integrity": "IDLE",
+    "session_fixation": "UNAUTHENTICATED",
+    "privilege_escalation": "UNAUTHENTICATED",
+    "transaction_violation": "TX_IDLE",
+    "missing_validation": "IDLE",
+    "resource_leak": "IDLE",
+    "use_after_free": "IDLE"
+  },
+  "states": {
+    "UNAUTHENTICATED": "初始状态：用户未认证",
+    "PASSWORD_VERIFIED": "密码已通过验证",
+    "TOKEN_ISSUED": "JWT 令牌已签发",
+    "SESSION_ACTIVE": "会话已激活",
+    "IR_STALE": "IR 已过期或未生成",
+    "IR_EXTRACTED": "IR 已从源码提取",
+    "ACTION_VALIDATED": "动作已通过 SVL 校验",
+    "SEQUENCE_VALIDATED": "动作序列 + 变量流向已通过校验",
+    "CODE_EMITTED": "目标代码已生成",
+    "SESSION_RECORDED": "执行会话已保存",
+    "IDLE": "空闲状态：无状态函数可随时调用",
+    "TX_IDLE": "事务空闲：无活动事务",
+    "TX_ACTIVE": "事务进行中：可执行事务内操作",
+    "SAVEPOINT_HELD": "保存点已创建：可回滚或释放",
+    "COND_IDLE": "条件判断空闲：等待评估",
+    "COND_EVALUATED": "条件已评估：等待分支选择",
+    "COND_ACCEPTED": "条件通过（TRUE 分支）",
+    "COND_REJECTED": "条件拒绝（FALSE 分支）",
+    "COND_RESOLVED": "条件已解决：分支执行完毕",
+    "LOOP_IDLE": "循环空闲：等待开始迭代",
+    "FETCHING": "正在获取下一批数据",
+    "BATCH_READY": "批次数据就绪",
+    "ITERATING": "正在迭代处理数据项",
+    "LOOP_DONE": "循环已退出",
+    "AUTH_FILE_GATE": "跨协议桥：认证通过，文件操作就绪",
+    "AUTH_DB_GATE": "跨协议桥：认证通过，数据库操作就绪",
+    "TLS_CONFIGURED": "Auto-generated state for Investment Roadmap",
+    "SERVER_STARTED": "Auto-generated state for Investment Roadmap",
+    "PASSWORD_RECEIVED": "已接收用户明文密码",
+    "PASSWORD_HASHED": "密码已哈希存储",
+    "AUTHENTICATED": "用户已通过认证",
+    "AUTHORIZED": "用户已通过授权——可以操作资源",
+    "REFERENCE_VALID": "Auto-generated state for Investment Roadmap",
+    "REFERENCE_CREATED": "Auto-generated state for Investment Roadmap",
+    "CONTENT_SANITIZED": "Auto-generated state for Investment Roadmap",
+    "TYPE_VALIDATED": "Auto-generated state for Investment Roadmap",
+    "ORDER_CREATED": "订单已创建",
+    "PAYMENT_INITIATED": "支付已发起",
+    "PAYMENT_CALLBACK_RECEIVED": "支付回调已接收",
+    "PAYMENT_CONFIRMED": "支付已确认",
+    "PAYMENT_FAILED": "支付失败",
+    "FILE_RECEIVED": "文件已接收",
+    "FILE_VALIDATED": "文件已验证",
+    "FILE_STORED": "文件已存储",
+    "FILE_REFERENCED": "文件已关联",
+    "RATE_CHECKED": "频率已检查",
+    "THROTTLED": "已被限流",
+    "NOTIFICATION_COMPOSED": "通知已生成",
+    "NOTIFICATION_SENT": "通知已发送",
+    "NOTIFICATION_CONFIRMED": "通知已确认",
+    "USER_REGISTERED": "用户已注册",
+    "VERIFICATION_CODE_SENT": "验证码已发送",
+    "VERIFICATION_CONFIRMED": "验证已确认",
+    "ACCOUNT_ACTIVATED": "账号已激活",
+    "SESSION_CREATED": "会话已创建",
+    "SESSION_REFRESHED": "会话已刷新",
+    "SESSION_EXPIRED": "会话已过期",
+    "SESSION_REVOKED": "会话已撤销",
+    "SUPPLIER_REGISTERED": "供应商已注册",
+    "SUPPLIER_VERIFIED": "供应商已验证",
+    "SUPPLIER_ENABLED": "供应商已启用",
+    "PRODUCT_ASSIGNED": "产品已分配",
+    "STL_UPLOADED": "STL 文件已上传",
+    "STL_SLICED": "STL 已切片",
+    "GCODE_GENERATED": "GCode 已生成",
+    "COST_ESTIMATED": "成本已估算",
+    "ORDER_QUEUED": "订单已排队",
+    "PRINT_STARTED": "打印已开始",
+    "PRINT_COMPLETED": "打印已完成",
+    "ORDER_SHIPPED": "订单已发货",
+    "ORDER_DELIVERED": "订单已交付",
+    "FILE_OPEN": "文件已打开——获得文件句柄",
+    "DB_CONNECTED": "数据库已连接——获得连接句柄",
+    "CONTENT_VALID": "内容已通过全部验证"
+  },
+  "rules": {
+    "verify_password": {
+      "namespace": "auth",
+      "pre_states": [
+        "UNAUTHENTICATED"
+      ],
+      "post_states": [
+        "PASSWORD_VERIFIED"
+      ],
+      "description": "验证用户密码 → 进入已认证状态",
+      "aliases": [
+        "passport.authenticate",
+        "auth.verifyPassword",
+        "auth.validateCredentials",
+        "auth.login",
+        "verifyPassword",
+        "verifyCredentials",
+        "loginMutation.mutateAsync",
+        "signIn",
+        "logIn"
+      ]
+    },
+    "generate_jwt": {
+      "namespace": "auth",
+      "pre_states": [],
+      "post_states": [
+        "TOKEN_ISSUED"
+      ],
+      "description": "签发 JWT 令牌（密码验证后 / OAuth 认证后 / Token 刷新——入口点）",
+      "aliases": [
+        "jsonwebtoken.sign",
+        "jwt.sign",
+        "jose.sign",
+        "SignJWT",
+        "auth.generateToken",
+        "auth.issueToken"
+      ]
+    },
+    "create_session": {
+      "namespace": "auth",
+      "pre_states": [
+        "TOKEN_ISSUED"
+      ],
+      "post_states": [
+        "SESSION_ACTIVE"
+      ],
+      "invalidate": [
+        "TOKEN_ISSUED"
+      ],
+      "description": "创建会话 → 必须在令牌签发之后，创建后令牌状态失效",
+      "aliases": [
+        "express.session.create",
+        "express-session",
+        "cookie-session",
+        "auth.createSession"
+      ]
+    },
+    "revoke_token": {
+      "namespace": "auth",
+      "pre_states": [
+        "TOKEN_ISSUED"
+      ],
+      "post_states": [
+        "UNAUTHENTICATED"
+      ],
+      "invalidate": [
+        "TOKEN_ISSUED"
+      ],
+      "description": "撤销令牌 → 回到未认证状态",
+      "aliases": [
+        "jsonwebtoken.revoke",
+        "jwt.revoke",
+        "auth.revokeToken",
+        "auth.blacklistToken"
+      ]
+    },
+    "logout": {
+      "namespace": "auth",
+      "pre_states": [
+        "SESSION_ACTIVE"
+      ],
+      "post_states": [
+        "UNAUTHENTICATED"
+      ],
+      "invalidate": [
+        "SESSION_ACTIVE"
+      ],
+      "description": "登出 → 清除会话，回到未认证状态",
+      "aliases": [
+        "passport.logout",
+        "req.logout",
+        "auth.logout",
+        "auth.signOut"
+      ]
+    },
+    "open_file": {
+      "namespace": "file",
+      "pre_states": [],
+      "post_states": [
+        "FILE_OPEN"
+      ],
+      "description": "打开文件 → 获得文件句柄",
+      "aliases": [
+        "fs.openSync",
+        "fs.open",
+        "fs.createReadStream",
+        "fs.createWriteStream",
+        "fs.promises.open"
+      ]
+    },
+    "read_file": {
+      "namespace": "file",
+      "pre_states": [
+        "FILE_OPEN"
+      ],
+      "post_states": [],
+      "description": "读取文件内容 → 需要文件已打开",
+      "aliases": [
+        "stream.read",
+        "fs.createReadStream"
+      ]
+    },
+    "write_file": {
+      "namespace": "file",
+      "pre_states": [
+        "FILE_OPEN"
+      ],
+      "post_states": [],
+      "description": "写入文件内容 → 需要文件已打开",
+      "aliases": [
+        "stream.write",
+        "fs.createWriteStream"
+      ]
+    },
+    "close_file": {
+      "namespace": "file",
+      "pre_states": [
+        "FILE_OPEN"
+      ],
+      "post_states": [],
+      "invalidate": [
+        "FILE_OPEN"
+      ],
+      "description": "关闭文件句柄 → 释放文件资源",
+      "aliases": [
+        "fs.closeSync",
+        "fs.close",
+        "fs.promises.close",
+        "stream.end",
+        "stream.destroy"
+      ]
+    },
+    "connect_db": {
+      "namespace": "db",
+      "pre_states": [],
+      "post_states": [
+        "DB_CONNECTED"
+      ],
+      "description": "建立数据库连接",
+      "aliases": [
+        "pg.connect",
+        "pg.Client",
+        "pg.Pool",
+        "mysql.createConnection",
+        "mysql.createPool",
+        "prisma.$connect",
+        "typeorm.createConnection",
+        "mongoose.connect",
+        "sequelize.authenticate",
+        "knex.initialize",
+        "db.connect"
+      ]
+    },
+    "query_db": {
+      "namespace": "db",
+      "pre_states": [
+        "DB_CONNECTED"
+      ],
+      "post_states": [],
+      "description": "执行数据库查询 → 需要已连接",
+      "aliases": [
+        "pg.query",
+        "pg.Client.query",
+        "mysql.query",
+        "mysql.execute",
+        "db.select",
+        "db.query",
+        "db.execute",
+        "tx.select",
+        "tx.query",
+        "prisma.$queryRaw",
+        "prisma.model.findMany",
+        "prisma.model.findUnique",
+        "prisma.model.create",
+        "prisma.model.update",
+        "prisma.model.delete",
+        "typeorm.find",
+        "typeorm.save",
+        "typeorm.remove",
+        "mongoose.find",
+        "mongoose.create",
+        "mongoose.updateOne",
+        "sequelize.query",
+        "sequelize.findAll",
+        "knex.select",
+        "knex.insert",
+        "knex.update",
+        "knex.delete",
+        "db.query",
+        "db.execute",
+        "db.insert",
+        "db.update",
+        "db.delete",
+        "db.select",
+        "db.find",
+        "connection.execute",
+        "connection.query",
+        "tx.select",
+        "pool.query",
+        "pool.execute",
+        "db.*",
+        "connection.*",
+        "pool.*",
+        "prisma.*",
+        "mongoose.*",
+        "sequelize.*",
+        "knex.*",
+        "typeorm.*",
+        "mysql.*",
+        "pg.*",
+        "drizzle.*",
+        "orm.*"
+      ]
+    },
+    "disconnect_db": {
+      "namespace": "db",
+      "pre_states": [
+        "DB_CONNECTED"
+      ],
+      "post_states": [],
+      "invalidate": [
+        "DB_CONNECTED"
+      ],
+      "description": "断开数据库连接",
+      "aliases": [
+        "pg.end",
+        "pg.Pool.end",
+        "mysql.end",
+        "mysql.close",
+        "prisma.$disconnect",
+        "typeorm.close",
+        "mongoose.disconnect",
+        "sequelize.close",
+        "knex.destroy",
+        "db.close",
+        "db.disconnect",
+        "db.end",
+        "connection.end",
+        "connection.close",
+        "pool.end",
+        "pool.close"
+      ]
+    },
+    "extractIR": {
+      "namespace": "dev_pipeline",
+      "pre_states": [],
+      "post_states": [
+        "IR_EXTRACTED"
+      ],
+      "invalidate": [
+        "IR_STALE"
+      ],
+      "description": "从源码提取 IR → 产出 IR_EXTRACTED 状态"
+    },
+    "validateAction": {
+      "namespace": "dev_pipeline",
+      "pre_states": [
+        "IR_EXTRACTED"
+      ],
+      "post_states": [
+        "ACTION_VALIDATED"
+      ],
+      "description": "校验单个动作合法性 → 需要 IR 已提取"
+    },
+    "validateActionSequence": {
+      "namespace": "dev_pipeline",
+      "pre_states": [
+        "ACTION_VALIDATED"
+      ],
+      "post_states": [
+        "SEQUENCE_VALIDATED"
+      ],
+      "invalidate": [
+        "ACTION_VALIDATED"
+      ],
+      "description": "批量校验动作序列 → 需要动作已验证，校验后消耗"
+    },
+    "emitCode": {
+      "namespace": "dev_pipeline",
+      "pre_states": [
+        "SEQUENCE_VALIDATED"
+      ],
+      "post_states": [
+        "CODE_EMITTED"
+      ],
+      "invalidate": [
+        "SEQUENCE_VALIDATED"
+      ],
+      "description": "编译动作序列为目标代码 → 需要序列已验证"
+    },
+    "recordSession": {
+      "namespace": "dev_pipeline",
+      "pre_states": [
+        "CODE_EMITTED"
+      ],
+      "post_states": [
+        "SESSION_RECORDED"
+      ],
+      "invalidate": [
+        "CODE_EMITTED"
+      ],
+      "description": "保存执行会话到语料库 → 需要代码已生成"
+    },
+    "compute_hash": {
+      "namespace": "stateless",
+      "pre_states": [],
+      "post_states": [],
+      "description": "计算输入数据的哈希摘要 —— 纯函数/幂等"
+    },
+    "validate_schema": {
+      "namespace": "stateless",
+      "pre_states": [],
+      "post_states": [],
+      "description": "对数据做 Schema 校验 —— 无副作用"
+    },
+    "sanitize_input": {
+      "namespace": "stateless",
+      "pre_states": [],
+      "post_states": [],
+      "description": "清理用户输入，去除危险字符"
+    },
+    "verify_checksum": {
+      "namespace": "stateless",
+      "pre_states": [],
+      "post_states": [],
+      "description": "通过校验和验证数据完整性"
+    },
+    "encode_payload": {
+      "namespace": "stateless",
+      "pre_states": [],
+      "post_states": [],
+      "description": "将数据编码为 base64 / wire format"
+    },
+    "decode_payload": {
+      "namespace": "stateless",
+      "pre_states": [],
+      "post_states": [],
+      "description": "从 wire format 解码回原始数据"
+    },
+    "compress_buffer": {
+      "namespace": "stateless",
+      "pre_states": [],
+      "post_states": [],
+      "description": "压缩数据缓冲区"
+    },
+    "decompress_buffer": {
+      "namespace": "stateless",
+      "pre_states": [],
+      "post_states": [],
+      "description": "解压数据缓冲区"
+    },
+    "begin_tx": {
+      "namespace": "transaction",
+      "pre_states": [
+        "TX_IDLE"
+      ],
+      "post_states": [
+        "TX_ACTIVE"
+      ],
+      "description": "开启新事务 → 必须在空闲状态下",
+      "aliases": [
+        "db.beginTransaction",
+        "db.transaction",
+        "prisma.$transaction",
+        "typeorm.transaction",
+        "sequelize.transaction",
+        "knex.transaction",
+        "mongoose.startSession",
+        "pg.Client.query"
+      ]
+    },
+    "commit_tx": {
+      "namespace": "transaction",
+      "pre_states": [
+        "TX_ACTIVE"
+      ],
+      "post_states": [
+        "TX_IDLE"
+      ],
+      "invalidate": [
+        "TX_ACTIVE"
+      ],
+      "description": "提交活跃事务中的所有变更",
+      "aliases": [
+        "db.commit",
+        "transaction.commit",
+        "prisma.$transaction",
+        "typeorm.commitTransaction",
+        "sequelize.commit",
+        "knex.commit",
+        "mongoose.commitTransaction"
+      ]
+    },
+    "rollback_tx": {
+      "namespace": "transaction",
+      "pre_states": [
+        "TX_ACTIVE"
+      ],
+      "post_states": [
+        "TX_IDLE"
+      ],
+      "invalidate": [
+        "TX_ACTIVE"
+      ],
+      "description": "回滚活跃事务中的所有变更",
+      "aliases": [
+        "db.rollback",
+        "transaction.rollback",
+        "prisma.$transaction",
+        "typeorm.rollbackTransaction",
+        "sequelize.rollback",
+        "knex.rollback",
+        "mongoose.abortTransaction"
+      ]
+    },
+    "insert_record": {
+      "namespace": "transaction",
+      "pre_states": [],
+      "post_states": [],
+      "description": "插入记录（事务内外均可——单条 SQL 本身原子）",
+      "aliases": [
+        "tx.insert",
+        "tx.create",
+        "transaction.insert",
+        "transaction.create"
+      ]
+    },
+    "update_record": {
+      "namespace": "transaction",
+      "pre_states": [],
+      "post_states": [],
+      "description": "更新记录（事务内外均可——单条 SQL 本身原子）",
+      "aliases": [
+        "tx.update",
+        "transaction.update"
+      ]
+    },
+    "delete_record": {
+      "namespace": "transaction",
+      "pre_states": [],
+      "post_states": [],
+      "description": "删除记录（事务内外均可——单条 SQL 本身原子）",
+      "aliases": [
+        "tx.delete",
+        "tx.remove",
+        "transaction.delete",
+        "transaction.remove"
+      ]
+    },
+    "savepoint_create": {
+      "namespace": "transaction",
+      "pre_states": [
+        "TX_ACTIVE"
+      ],
+      "post_states": [
+        "SAVEPOINT_HELD"
+      ],
+      "description": "在活跃事务中创建具名保存点"
+    },
+    "savepoint_release": {
+      "namespace": "transaction",
+      "pre_states": [
+        "SAVEPOINT_HELD"
+      ],
+      "post_states": [
+        "TX_ACTIVE"
+      ],
+      "invalidate": [
+        "SAVEPOINT_HELD"
+      ],
+      "description": "释放保存点，保留后续变更"
+    },
+    "rollback_to_savepoint": {
+      "namespace": "transaction",
+      "pre_states": [
+        "SAVEPOINT_HELD"
+      ],
+      "post_states": [
+        "TX_ACTIVE"
+      ],
+      "invalidate": [
+        "SAVEPOINT_HELD"
+      ],
+      "description": "回滚到保存点，撤销保存点之后的变更"
+    },
+    "prep_two_phase": {
+      "namespace": "transaction",
+      "pre_states": [
+        "TX_ACTIVE"
+      ],
+      "post_states": [
+        "TX_IDLE"
+      ],
+      "invalidate": [
+        "TX_ACTIVE"
+      ],
+      "description": "准备两阶段提交（表决阶段）"
+    },
+    "evaluate_access": {
+      "namespace": "conditional",
+      "pre_states": [
+        "COND_IDLE"
+      ],
+      "post_states": [
+        "COND_EVALUATED"
+      ],
+      "description": "根据权限策略评估访问条件"
+    },
+    "grant_access": {
+      "namespace": "conditional",
+      "pre_states": [
+        "COND_EVALUATED"
+      ],
+      "post_states": [
+        "COND_ACCEPTED"
+      ],
+      "invalidate": [
+        "COND_EVALUATED"
+      ],
+      "description": "TRUE 分支：授予访问权限"
+    },
+    "deny_access": {
+      "namespace": "conditional",
+      "pre_states": [
+        "COND_EVALUATED"
+      ],
+      "post_states": [
+        "COND_REJECTED"
+      ],
+      "invalidate": [
+        "COND_EVALUATED"
+      ],
+      "description": "FALSE 分支：拒绝访问"
+    },
+    "log_granted": {
+      "namespace": "conditional",
+      "pre_states": [
+        "COND_ACCEPTED"
+      ],
+      "post_states": [
+        "COND_RESOLVED"
+      ],
+      "invalidate": [
+        "COND_ACCEPTED",
+        "COND_RESOLVED"
+      ],
+      "description": "记录授权访问并结束条件判断"
+    },
+    "log_denied": {
+      "namespace": "conditional",
+      "pre_states": [
+        "COND_REJECTED"
+      ],
+      "post_states": [
+        "COND_RESOLVED"
+      ],
+      "invalidate": [
+        "COND_REJECTED",
+        "COND_RESOLVED"
+      ],
+      "description": "记录拒绝访问并结束条件判断"
+    },
+    "bypass_condition": {
+      "namespace": "conditional",
+      "pre_states": [
+        "COND_EVALUATED"
+      ],
+      "post_states": [
+        "COND_RESOLVED"
+      ],
+      "invalidate": [
+        "COND_EVALUATED",
+        "COND_RESOLVED"
+      ],
+      "description": "短路：直接绕过条件检查"
+    },
+    "retry_evaluation": {
+      "namespace": "conditional",
+      "pre_states": [
+        "COND_EVALUATED"
+      ],
+      "post_states": [
+        "COND_IDLE"
+      ],
+      "invalidate": [
+        "COND_EVALUATED"
+      ],
+      "description": "重试：回到空闲状态重新评估"
+    },
+    "escalate_access": {
+      "namespace": "conditional",
+      "pre_states": [
+        "COND_REJECTED"
+      ],
+      "post_states": [
+        "COND_ACCEPTED"
+      ],
+      "invalidate": [
+        "COND_REJECTED"
+      ],
+      "description": "升级：将被拒绝的访问升级为通过"
+    },
+    "audit_condition": {
+      "namespace": "conditional",
+      "pre_states": [
+        "COND_ACCEPTED",
+        "COND_REJECTED"
+      ],
+      "post_states": [
+        "COND_RESOLVED"
+      ],
+      "invalidate": [
+        "COND_ACCEPTED",
+        "COND_REJECTED",
+        "COND_RESOLVED"
+      ],
+      "description": "审计：无论分支结果如何，记录条件判断结果"
+    },
+    "init_fetch_loop": {
+      "namespace": "loop",
+      "pre_states": [
+        "LOOP_IDLE"
+      ],
+      "post_states": [
+        "FETCHING"
+      ],
+      "description": "初始化获取循环，开始获取数据"
+    },
+    "fetch_batch": {
+      "namespace": "loop",
+      "pre_states": [
+        "FETCHING"
+      ],
+      "post_states": [
+        "BATCH_READY"
+      ],
+      "invalidate": [
+        "FETCHING"
+      ],
+      "description": "获取下一批数据"
+    },
+    "has_more_data": {
+      "namespace": "loop",
+      "pre_states": [
+        "BATCH_READY"
+      ],
+      "post_states": [
+        "ITERATING"
+      ],
+      "invalidate": [
+        "BATCH_READY"
+      ],
+      "description": "检查还有更多数据 → 进入迭代体"
+    },
+    "process_item": {
+      "namespace": "loop",
+      "pre_states": [
+        "ITERATING"
+      ],
+      "post_states": [
+        "ITERATING"
+      ],
+      "description": "处理单个数据项（在迭代体内自循环）"
+    },
+    "next_iteration": {
+      "namespace": "loop",
+      "pre_states": [
+        "ITERATING"
+      ],
+      "post_states": [
+        "FETCHING"
+      ],
+      "invalidate": [
+        "ITERATING"
+      ],
+      "description": "结束当前迭代 → 返回获取下一批"
+    },
+    "exit_loop": {
+      "namespace": "loop",
+      "pre_states": [
+        "ITERATING"
+      ],
+      "post_states": [
+        "LOOP_DONE"
+      ],
+      "invalidate": [
+        "ITERATING",
+        "LOOP_DONE"
+      ],
+      "description": "正常退出循环（所有数据已处理完毕）"
+    },
+    "retry_batch": {
+      "namespace": "loop",
+      "pre_states": [
+        "BATCH_READY",
+        "ITERATING"
+      ],
+      "post_states": [
+        "FETCHING"
+      ],
+      "description": "获取失败 → 重试当前批次"
+    },
+    "timeout_exit": {
+      "namespace": "loop",
+      "pre_states": [
+        "FETCHING",
+        "ITERATING"
+      ],
+      "post_states": [
+        "LOOP_DONE"
+      ],
+      "invalidate": [
+        "FETCHING",
+        "ITERATING",
+        "LOOP_DONE"
+      ],
+      "description": "超时紧急退出循环"
+    },
+    "poll_status": {
+      "namespace": "loop",
+      "pre_states": [
+        "ITERATING"
+      ],
+      "post_states": [
+        "ITERATING"
+      ],
+      "description": "轮询状态更新（在迭代体内自循环）"
+    },
+    "auth_file_open": {
+      "namespace": "cross",
+      "pre_states": [
+        "UNAUTHENTICATED"
+      ],
+      "post_states": [
+        "AUTH_FILE_GATE"
+      ],
+      "description": "跨协议桥：认证 → 打开文件访问门"
+    },
+    "auth_file_read": {
+      "namespace": "cross",
+      "pre_states": [
+        "AUTH_FILE_GATE"
+      ],
+      "post_states": [
+        "AUTH_FILE_GATE"
+      ],
+      "description": "跨协议：通过认证门读取文件"
+    },
+    "auth_file_close": {
+      "namespace": "cross",
+      "pre_states": [
+        "AUTH_FILE_GATE"
+      ],
+      "post_states": [
+        "UNAUTHENTICATED"
+      ],
+      "invalidate": [
+        "AUTH_FILE_GATE"
+      ],
+      "description": "跨协议：关闭经认证门的文件会话"
+    },
+    "auth_db_connect": {
+      "namespace": "cross",
+      "pre_states": [
+        "UNAUTHENTICATED"
+      ],
+      "post_states": [
+        "AUTH_DB_GATE"
+      ],
+      "description": "跨协议桥：认证 → 打开数据库连接"
+    },
+    "auth_db_query": {
+      "namespace": "cross",
+      "pre_states": [
+        "AUTH_DB_GATE"
+      ],
+      "post_states": [
+        "AUTH_DB_GATE"
+      ],
+      "description": "跨协议：通过认证门查询数据库"
+    },
+    "auth_db_disconnect": {
+      "namespace": "cross",
+      "pre_states": [
+        "AUTH_DB_GATE"
+      ],
+      "post_states": [
+        "UNAUTHENTICATED"
+      ],
+      "invalidate": [
+        "AUTH_DB_GATE"
+      ],
+      "description": "跨协议：关闭经认证门的数据库连接"
+    },
+    "http_create_server": {
+      "namespace": "tls",
+      "pre_states": [],
+      "post_states": [
+        "SERVER_STARTED"
+      ],
+      "description": "HTTP server must use HTTPS with TLS configured（TLS 配置在其他函数/反向代理完成——不要求在调用序列内）",
+      "aliases": [
+        "express.listen",
+        "express.application.listen",
+        "app.listen",
+        "server.listen",
+        "https.createServer",
+        "http.createServer",
+        "fastify.listen",
+        "koa.listen",
+        "next.start",
+        "nuxt.listen"
+      ]
+    },
+    "load_tls_config": {
+      "namespace": "tls",
+      "pre_states": [],
+      "post_states": [
+        "TLS_CONFIGURED"
+      ],
+      "description": "Load TLS certificate and key before starting server",
+      "aliases": [
+        "https.createServer",
+        "tls.createServer",
+        "express.application.use",
+        "helmet",
+        "cors"
+      ]
+    },
+    "hash_password": {
+      "namespace": "registration",
+      "pre_states": [],
+      "post_states": [
+        "PASSWORD_HASHED"
+      ],
+      "description": "Registration: hash password (entry point — password receipt is implicit in request body)",
+      "aliases": [
+        "bcrypt.hash",
+        "bcrypt.hashSync",
+        "bcryptjs.hash",
+        "bcryptjs.hashSync",
+        "argon2.hash",
+        "scrypt.hash",
+        "crypto.pbkdf2",
+        "auth.hashPassword"
+      ]
+    },
+    "verify_hash": {
+      "namespace": "auth",
+      "pre_states": [],
+      "post_states": [
+        "PASSWORD_VERIFIED"
+      ],
+      "description": "Login: verify password against stored hash (entry point — hash was stored during registration)",
+      "aliases": [
+        "bcrypt.compare",
+        "bcrypt.compareSync",
+        "bcryptjs.compare",
+        "bcryptjs.compareSync",
+        "argon2.verify",
+        "scrypt.verify",
+        "crypto.timingSafeEqual",
+        "auth.verifyPassword"
+      ]
+    },
+    "verify_token": {
+      "namespace": "auth",
+      "pre_states": [],
+      "post_states": [
+        "AUTHENTICATED"
+      ],
+      "description": "Verify auth token（冷启动时 token 已存在 / OAuth 流程）",
+      "aliases": [
+        "jsonwebtoken.verify",
+        "jwt.verify",
+        "jose.verify",
+        "jwtVerify",
+        "jose.jwtVerify",
+        "passport.authenticate",
+        "auth.verifyToken",
+        "auth.middleware"
+      ]
+    },
+    "check_owner": {
+      "namespace": "auth",
+      "pre_states": [
+        "AUTHENTICATED"
+      ],
+      "post_states": [
+        "AUTHORIZED"
+      ],
+      "description": "Check resource ownership before mutating operations",
+      "aliases": [
+        "auth.checkOwner",
+        "auth.authorize",
+        "auth.checkAccess",
+        "auth.checkPermission",
+        "auth.requireRole"
+      ]
+    },
+    "check_exists": {
+      "namespace": "data_integrity",
+      "pre_states": [],
+      "post_states": [
+        "REFERENCE_VALID"
+      ],
+      "description": "Verify referenced resource exists before creating a reference to it"
+    },
+    "create_reference": {
+      "namespace": "data_integrity",
+      "pre_states": [
+        "REFERENCE_VALID"
+      ],
+      "post_states": [
+        "REFERENCE_CREATED"
+      ],
+      "description": "Create reference to existing resource"
+    },
+    "sanitize": {
+      "namespace": "resource",
+      "pre_states": [],
+      "post_states": [
+        "CONTENT_SANITIZED"
+      ],
+      "description": "Sanitize input before processing"
+    },
+    "validate_type": {
+      "namespace": "resource",
+      "pre_states": [
+        "CONTENT_SANITIZED"
+      ],
+      "post_states": [
+        "TYPE_VALIDATED"
+      ],
+      "description": "Validate input type matches expected schema"
+    },
+    "validate_range": {
+      "namespace": "resource",
+      "pre_states": [
+        "TYPE_VALIDATED"
+      ],
+      "post_states": [
+        "CONTENT_VALID"
+      ],
+      "description": "Validate input within acceptable range/limits"
+    },
+    "initiate_payment": {
+      "namespace": "payment",
+      "pre_states": [
+        "ORDER_CREATED"
+      ],
+      "post_states": [
+        "PAYMENT_INITIATED"
+      ],
+      "invalidate": [
+        "ORDER_CREATED"
+      ],
+      "description": "发起支付 → 需要已创建的订单"
+    },
+    "receive_payment_callback": {
+      "namespace": "payment",
+      "pre_states": [
+        "PAYMENT_INITIATED"
+      ],
+      "post_states": [
+        "PAYMENT_CALLBACK_RECEIVED"
+      ],
+      "invalidate": [
+        "PAYMENT_INITIATED"
+      ],
+      "description": "接收支付回调 → 需要已发起的支付"
+    },
+    "confirm_payment": {
+      "namespace": "payment",
+      "pre_states": [
+        "PAYMENT_CALLBACK_RECEIVED"
+      ],
+      "post_states": [
+        "PAYMENT_CONFIRMED"
+      ],
+      "invalidate": [
+        "PAYMENT_CALLBACK_RECEIVED"
+      ],
+      "description": "确认支付 → 需要已验证的回调签名"
+    },
+    "fail_payment": {
+      "namespace": "payment",
+      "pre_states": [
+        "PAYMENT_INITIATED",
+        "PAYMENT_CALLBACK_RECEIVED"
+      ],
+      "post_states": [
+        "PAYMENT_FAILED"
+      ],
+      "invalidate": [
+        "PAYMENT_INITIATED",
+        "PAYMENT_CALLBACK_RECEIVED"
+      ],
+      "description": "支付失败 → 超时、签名无效或用户取消"
+    },
+    "receive_upload": {
+      "namespace": "file_upload",
+      "pre_states": [],
+      "post_states": [
+        "FILE_RECEIVED"
+      ],
+      "description": "接收文件上传 → 用户需已认证（认证由 tRPC protectedProcedure 中间件保障）",
+      "aliases": [
+        "multer.single",
+        "multer.array",
+        "multer.fields",
+        "multer.any",
+        "upload.single",
+        "upload.array",
+        "busboy",
+        "formidable"
+      ]
+    },
+    "validate_file": {
+      "namespace": "file_upload",
+      "pre_states": [
+        "FILE_RECEIVED"
+      ],
+      "post_states": [
+        "FILE_VALIDATED"
+      ],
+      "invalidate": [
+        "FILE_RECEIVED"
+      ],
+      "description": "验证文件类型和大小 → 需要已接收的文件"
+    },
+    "store_file": {
+      "namespace": "file_upload",
+      "pre_states": [
+        "FILE_VALIDATED"
+      ],
+      "post_states": [
+        "FILE_STORED"
+      ],
+      "invalidate": [
+        "FILE_VALIDATED"
+      ],
+      "description": "存储文件到 S3/本地 → 需要已验证的文件"
+    },
+    "reference_file": {
+      "namespace": "file_upload",
+      "pre_states": [
+        "FILE_STORED"
+      ],
+      "post_states": [
+        "FILE_REFERENCED"
+      ],
+      "description": "关联文件到业务对象 → 需要已存储的文件"
+    },
+    "check_rate_limit": {
+      "namespace": "api_gateway",
+      "pre_states": [],
+      "post_states": [
+        "RATE_CHECKED"
+      ],
+      "description": "检查 API 调用频率 → 无状态检查"
+    },
+    "throttle_request": {
+      "namespace": "api_gateway",
+      "pre_states": [
+        "RATE_CHECKED"
+      ],
+      "post_states": [
+        "THROTTLED"
+      ],
+      "invalidate": [
+        "RATE_CHECKED"
+      ],
+      "description": "限流请求 → 超过频率限制"
+    },
+    "pass_rate_check": {
+      "namespace": "api_gateway",
+      "pre_states": [
+        "RATE_CHECKED"
+      ],
+      "post_states": [],
+      "description": "通过频率检查 → 正常处理请求"
+    },
+    "compose_notification": {
+      "namespace": "notification",
+      "pre_states": [],
+      "post_states": [
+        "NOTIFICATION_COMPOSED"
+      ],
+      "description": "生成通知内容 → 基于业务事件",
+      "aliases": [
+        "nodemailer.createTransport",
+        "nodemailer.compose"
+      ]
+    },
+    "send_notification": {
+      "namespace": "notification",
+      "pre_states": [],
+      "post_states": [
+        "NOTIFICATION_SENT"
+      ],
+      "invalidate": [
+        "NOTIFICATION_COMPOSED"
+      ],
+      "description": "发送通知 → 邮件/短信/推送（发送前无需在调用序列中显式 compose——组合是内部实现细节）",
+      "aliases": [
+        "nodemailer.sendMail",
+        "nodemailer.transport.sendMail",
+        "transporter.sendMail",
+        "email.send"
+      ]
+    },
+    "confirm_delivery": {
+      "namespace": "notification",
+      "pre_states": [
+        "NOTIFICATION_SENT"
+      ],
+      "post_states": [
+        "NOTIFICATION_CONFIRMED"
+      ],
+      "invalidate": [
+        "NOTIFICATION_SENT"
+      ],
+      "description": "确认送达 → 邮件已投递/短信已发送"
+    },
+    "receive_password": {
+      "namespace": "registration",
+      "pre_states": [
+        "UNAUTHENTICATED"
+      ],
+      "post_states": [
+        "PASSWORD_RECEIVED"
+      ],
+      "description": "Registration: user submits password → ready to hash"
+    },
+    "register_user": {
+      "namespace": "registration",
+      "pre_states": [
+        "PASSWORD_HASHED"
+      ],
+      "post_states": [
+        "USER_REGISTERED"
+      ],
+      "invalidate": [
+        "PASSWORD_HASHED"
+      ],
+      "description": "Registration: save user with hashed password → user record created"
+    },
+    "send_verification_code": {
+      "namespace": "registration",
+      "pre_states": [],
+      "post_states": [
+        "VERIFICATION_CODE_SENT"
+      ],
+      "invalidate": [
+        "USER_REGISTERED"
+      ],
+      "description": "发送验证码 → 邮箱/手机（手机验证码在注册前发送——前置状态放开）"
+    },
+    "verify_code": {
+      "namespace": "registration",
+      "pre_states": [
+        "VERIFICATION_CODE_SENT"
+      ],
+      "post_states": [
+        "VERIFICATION_CONFIRMED"
+      ],
+      "invalidate": [
+        "VERIFICATION_CODE_SENT"
+      ],
+      "description": "验证码校验 → 匹配且未过期"
+    },
+    "activate_account": {
+      "namespace": "registration",
+      "pre_states": [
+        "VERIFICATION_CONFIRMED"
+      ],
+      "post_states": [
+        "ACCOUNT_ACTIVATED"
+      ],
+      "invalidate": [
+        "VERIFICATION_CONFIRMED"
+      ],
+      "description": "激活账号 → 验证通过后启用"
+    },
+    "create_user_session": {
+      "namespace": "session_mgmt",
+      "pre_states": [],
+      "post_states": [
+        "SESSION_CREATED"
+      ],
+      "description": "创建用户会话 → 登录成功后（OAuth/密码/Token 认证均可）",
+      "aliases": [
+        "ctx.res.cookie",
+        "res.cookie",
+        "express.session.create",
+        "express-session",
+        "cookie-session",
+        "auth.createSession",
+        "sdk.createSessionToken",
+        "createSessionToken",
+        "signSession",
+        "this.signSession"
+      ]
+    },
+    "refresh_session": {
+      "namespace": "session_mgmt",
+      "pre_states": [
+        "SESSION_CREATED"
+      ],
+      "post_states": [
+        "SESSION_REFRESHED"
+      ],
+      "description": "刷新会话 → 延长有效期"
+    },
+    "timeout_session": {
+      "namespace": "session_mgmt",
+      "pre_states": [
+        "SESSION_CREATED",
+        "SESSION_REFRESHED"
+      ],
+      "post_states": [
+        "SESSION_EXPIRED"
+      ],
+      "invalidate": [
+        "SESSION_CREATED",
+        "SESSION_REFRESHED"
+      ],
+      "description": "会话超时 → 自动过期"
+    },
+    "revoke_session": {
+      "namespace": "session_mgmt",
+      "pre_states": [],
+      "post_states": [
+        "SESSION_REVOKED"
+      ],
+      "aliases": [
+        "ctx.res.clearCookie",
+        "res.clearCookie",
+        "req.logout",
+        "passport.logout",
+        "auth.logout",
+        "auth.signOut",
+        "session.destroy"
+      ],
+      "invalidate": [
+        "SESSION_CREATED",
+        "SESSION_REFRESHED"
+      ],
+      "description": "撤销会话 → 管理员/用户主动登出（撤销是幂等操作，任何时刻都合法）"
+    },
+    "register_supplier": {
+      "namespace": "supplier",
+      "pre_states": [],
+      "post_states": [
+        "SUPPLIER_REGISTERED"
+      ],
+      "description": "注册供应商 → 基本信息录入"
+    },
+    "verify_supplier": {
+      "namespace": "supplier",
+      "pre_states": [
+        "SUPPLIER_REGISTERED"
+      ],
+      "post_states": [
+        "SUPPLIER_VERIFIED"
+      ],
+      "invalidate": [
+        "SUPPLIER_REGISTERED"
+      ],
+      "description": "验证供应商 → 资质审核"
+    },
+    "enable_supplier": {
+      "namespace": "supplier",
+      "pre_states": [
+        "SUPPLIER_VERIFIED"
+      ],
+      "post_states": [
+        "SUPPLIER_ENABLED"
+      ],
+      "invalidate": [
+        "SUPPLIER_VERIFIED"
+      ],
+      "description": "启用供应商 → 可接单"
+    },
+    "assign_product_to_supplier": {
+      "namespace": "supplier",
+      "pre_states": [
+        "SUPPLIER_ENABLED"
+      ],
+      "post_states": [
+        "PRODUCT_ASSIGNED"
+      ],
+      "description": "分配产品给供应商 → 供应商已启用"
+    },
+    "upload_stl": {
+      "namespace": "printlab_order",
+      "pre_states": [
+        "AUTHENTICATED"
+      ],
+      "post_states": [
+        "STL_UPLOADED"
+      ],
+      "description": "上传 STL 文件 → 用户已认证"
+    },
+    "slice_model": {
+      "namespace": "printlab_order",
+      "pre_states": [
+        "STL_UPLOADED"
+      ],
+      "post_states": [
+        "STL_SLICED"
+      ],
+      "invalidate": [
+        "STL_UPLOADED"
+      ],
+      "description": "切片 3D 模型 → STL 已上传"
+    },
+    "generate_gcode": {
+      "namespace": "printlab_order",
+      "pre_states": [
+        "STL_SLICED"
+      ],
+      "post_states": [
+        "GCODE_GENERATED"
+      ],
+      "invalidate": [
+        "STL_SLICED"
+      ],
+      "description": "生成 GCode → 模型已切片"
+    },
+    "estimate_cost": {
+      "namespace": "printlab_order",
+      "pre_states": [
+        "GCODE_GENERATED"
+      ],
+      "post_states": [
+        "COST_ESTIMATED"
+      ],
+      "description": "估算打印成本 → GCode 已生成"
+    },
+    "create_order": {
+      "namespace": "printlab_order",
+      "pre_states": [],
+      "post_states": [
+        "ORDER_CREATED"
+      ],
+      "invalidate": [
+        "COST_ESTIMATED"
+      ],
+      "description": "创建订单 → 成本已估算（订单创建是生命周期入口——成本估算发生在创建过程中）"
+    },
+    "queue_order": {
+      "namespace": "printlab_order",
+      "pre_states": [
+        "PAYMENT_CONFIRMED"
+      ],
+      "post_states": [
+        "ORDER_QUEUED"
+      ],
+      "invalidate": [
+        "PAYMENT_CONFIRMED"
+      ],
+      "description": "订单排队 → 支付已确认"
+    },
+    "start_print": {
+      "namespace": "printlab_print",
+      "pre_states": [
+        "ORDER_QUEUED"
+      ],
+      "post_states": [
+        "PRINT_STARTED"
+      ],
+      "invalidate": [
+        "ORDER_QUEUED"
+      ],
+      "description": "开始打印 → 订单已排队"
+    },
+    "complete_print": {
+      "namespace": "printlab_print",
+      "pre_states": [
+        "PRINT_STARTED"
+      ],
+      "post_states": [
+        "PRINT_COMPLETED"
+      ],
+      "invalidate": [
+        "PRINT_STARTED"
+      ],
+      "description": "打印完成 → 打印已开始"
+    },
+    "ship_order": {
+      "namespace": "printlab_order",
+      "pre_states": [
+        "PRINT_COMPLETED"
+      ],
+      "post_states": [
+        "ORDER_SHIPPED"
+      ],
+      "invalidate": [
+        "PRINT_COMPLETED"
+      ],
+      "description": "发货 → 打印已完成"
+    },
+    "deliver_order": {
+      "namespace": "printlab_order",
+      "pre_states": [
+        "ORDER_SHIPPED"
+      ],
+      "post_states": [
+        "ORDER_DELIVERED"
+      ],
+      "invalidate": [
+        "ORDER_SHIPPED"
+      ],
+      "description": "订单交付 → 已发货"
+    },
+    "check_resource_ownership": {
+      "namespace": "data_integrity",
+      "pre_states": [
+        "AUTHENTICATED"
+      ],
+      "post_states": [
+        "AUTHORIZED"
+      ],
+      "description": "检查资源所有权 → 用户只能操作自己的数据"
+    },
+    "audit_mutation": {
+      "namespace": "data_integrity",
+      "pre_states": [],
+      "post_states": [],
+      "description": "记录数据变更审计日志 → 每次写操作后"
+    },
+    "validate_business_rule": {
+      "namespace": "data_integrity",
+      "pre_states": [],
+      "post_states": [],
+      "description": "验证业务规则 → 订单金额 > 0, 库存 >= 0"
+    },
+    "refund_payment": {
+      "namespace": "payment",
+      "pre_states": [
+        "PAYMENT_CONFIRMED"
+      ],
+      "post_states": [
+        "PAYMENT_FAILED"
+      ],
+      "invalidate": [
+        "PAYMENT_CONFIRMED"
+      ],
+      "description": "退款 → 已确认的支付可退款，退款后状态变更为失败"
+    },
+    "cancel_payment": {
+      "namespace": "payment",
+      "pre_states": [
+        "ORDER_CREATED",
+        "PAYMENT_INITIATED"
+      ],
+      "post_states": [
+        "PAYMENT_FAILED"
+      ],
+      "invalidate": [
+        "ORDER_CREATED",
+        "PAYMENT_INITIATED"
+      ],
+      "description": "取消支付 → 在回调前取消，订单和支付状态一起失效"
+    },
+    "retry_payment": {
+      "namespace": "payment",
+      "pre_states": [
+        "PAYMENT_FAILED"
+      ],
+      "post_states": [
+        "PAYMENT_INITIATED"
+      ],
+      "invalidate": [
+        "PAYMENT_FAILED"
+      ],
+      "description": "重试支付 → 支付失败后可重新发起"
+    },
+    "verify_payment_signature": {
+      "namespace": "payment",
+      "pre_states": [],
+      "post_states": [
+        "PAYMENT_CALLBACK_RECEIVED"
+      ],
+      "description": "验证支付回调签名 → 防伪造回调（自保持，不改变状态）（签名验证是回调处理第一步，无前置状态要求）"
+    },
+    "reconcile_payment": {
+      "namespace": "payment",
+      "pre_states": [
+        "PAYMENT_CONFIRMED"
+      ],
+      "post_states": [
+        "PAYMENT_CONFIRMED"
+      ],
+      "description": "对账 → 与支付网关日终对账（自保持）"
+    },
+    "validate_session": {
+      "namespace": "session_mgmt",
+      "pre_states": [],
+      "post_states": [
+        "SESSION_CREATED"
+      ],
+      "description": "验证会话有效性 → 每个请求的中间件检查（入口点——冷启动/已登录均可）"
+    },
+    "extend_session": {
+      "namespace": "session_mgmt",
+      "pre_states": [
+        "SESSION_CREATED"
+      ],
+      "post_states": [
+        "SESSION_REFRESHED"
+      ],
+      "invalidate": [
+        "SESSION_CREATED"
+      ],
+      "description": "延长会话有效期 → 用户活跃时自动续期"
+    },
+    "renew_session_from_expired": {
+      "namespace": "session_mgmt",
+      "pre_states": [
+        "SESSION_EXPIRED"
+      ],
+      "post_states": [
+        "SESSION_CREATED"
+      ],
+      "invalidate": [
+        "SESSION_EXPIRED"
+      ],
+      "description": "从过期会话恢复 → 通过 refresh token 或重新登录创建新会话"
+    },
+    "revoke_all_sessions": {
+      "namespace": "session_mgmt",
+      "pre_states": [],
+      "post_states": [
+        "SESSION_REVOKED"
+      ],
+      "invalidate": [
+        "SESSION_CREATED",
+        "SESSION_REFRESHED"
+      ],
+      "description": "批量撤销所有会话 → 密码修改后强制所有设备下线"
+    },
+    "cleanup_expired_sessions": {
+      "namespace": "session_mgmt",
+      "pre_states": [
+        "SESSION_EXPIRED",
+        "SESSION_REVOKED"
+      ],
+      "post_states": [],
+      "invalidate": [
+        "SESSION_EXPIRED",
+        "SESSION_REVOKED"
+      ],
+      "description": "清理过期/已撤销的会话记录 → 定时任务，释放存储"
+    },
+    "rotate_session_token": {
+      "namespace": "session_mgmt",
+      "pre_states": [
+        "SESSION_CREATED",
+        "SESSION_REFRESHED"
+      ],
+      "post_states": [
+        "SESSION_REFRESHED"
+      ],
+      "invalidate": [
+        "SESSION_CREATED",
+        "SESSION_REFRESHED"
+      ],
+      "description": "轮换会话令牌 → 防固定攻击，旧令牌立即失效"
+    },
+    "resend_verification_code": {
+      "namespace": "registration",
+      "pre_states": [
+        "VERIFICATION_CODE_SENT"
+      ],
+      "post_states": [
+        "VERIFICATION_CODE_SENT"
+      ],
+      "description": "重发验证码 → 前一个验证码失效，发送新验证码"
+    },
+    "expire_verification": {
+      "namespace": "registration",
+      "pre_states": [
+        "VERIFICATION_CODE_SENT"
+      ],
+      "post_states": [
+        "USER_REGISTERED"
+      ],
+      "invalidate": [
+        "VERIFICATION_CODE_SENT"
+      ],
+      "description": "验证码过期 → 回到已注册状态，可重新发送"
+    },
+    "reject_registration": {
+      "namespace": "registration",
+      "pre_states": [
+        "USER_REGISTERED",
+        "VERIFICATION_CODE_SENT"
+      ],
+      "post_states": [
+        "UNAUTHENTICATED"
+      ],
+      "invalidate": [
+        "USER_REGISTERED",
+        "VERIFICATION_CODE_SENT"
+      ],
+      "description": "拒绝注册 → 管理员拒绝或黑名单检测触发，回到未认证状态"
+    },
+    "reject_file": {
+      "namespace": "file_upload",
+      "pre_states": [
+        "FILE_RECEIVED",
+        "FILE_VALIDATED"
+      ],
+      "post_states": [],
+      "invalidate": [
+        "FILE_RECEIVED",
+        "FILE_VALIDATED"
+      ],
+      "description": "拒绝文件 → 类型/大小不符合要求，丢弃文件"
+    },
+    "virus_scan_file": {
+      "namespace": "file_upload",
+      "pre_states": [
+        "FILE_RECEIVED"
+      ],
+      "post_states": [
+        "FILE_RECEIVED"
+      ],
+      "description": "病毒扫描 → 上传后扫描（自保持，通过则继续）"
+    },
+    "delete_file": {
+      "namespace": "file_upload",
+      "pre_states": [
+        "FILE_STORED",
+        "FILE_REFERENCED"
+      ],
+      "post_states": [],
+      "invalidate": [
+        "FILE_STORED",
+        "FILE_REFERENCED"
+      ],
+      "description": "删除已存储文件 → 释放存储空间"
+    },
+    "escape_output": {
+      "namespace": "resource",
+      "pre_states": [
+        "CONTENT_VALID"
+      ],
+      "post_states": [
+        "CONTENT_VALID"
+      ],
+      "description": "输出转义 → 防 XSS，HTML 实体编码（自保持）"
+    },
+    "rate_limit_resource": {
+      "namespace": "resource",
+      "pre_states": [],
+      "post_states": [],
+      "description": "资源访问频率限制 → 防止滥用和 DoS"
+    },
+    "circuit_break": {
+      "namespace": "api_gateway",
+      "pre_states": [
+        "RATE_CHECKED"
+      ],
+      "post_states": [
+        "THROTTLED"
+      ],
+      "invalidate": [
+        "RATE_CHECKED"
+      ],
+      "description": "熔断 → 连续失败超过阈值时触发，直接拒绝请求"
+    },
+    "retry_notification": {
+      "namespace": "notification",
+      "pre_states": [
+        "NOTIFICATION_SENT"
+      ],
+      "post_states": [
+        "NOTIFICATION_SENT"
+      ],
+      "description": "重试发送 → 上次发送失败后重试（自保持）"
+    },
+    "fail_notification": {
+      "namespace": "notification",
+      "pre_states": [
+        "NOTIFICATION_COMPOSED",
+        "NOTIFICATION_SENT"
+      ],
+      "post_states": [],
+      "invalidate": [
+        "NOTIFICATION_COMPOSED",
+        "NOTIFICATION_SENT"
+      ],
+      "description": "通知失败 → 永久失败（如无效地址），放弃发送"
+    },
+    "disable_supplier": {
+      "namespace": "supplier",
+      "pre_states": [
+        "SUPPLIER_ENABLED"
+      ],
+      "post_states": [
+        "SUPPLIER_VERIFIED"
+      ],
+      "invalidate": [
+        "SUPPLIER_ENABLED"
+      ],
+      "description": "停用供应商 → 暂停接单但不取消资质"
+    },
+    "deregister_supplier": {
+      "namespace": "supplier",
+      "pre_states": [
+        "SUPPLIER_REGISTERED",
+        "SUPPLIER_VERIFIED"
+      ],
+      "post_states": [],
+      "invalidate": [
+        "SUPPLIER_REGISTERED",
+        "SUPPLIER_VERIFIED"
+      ],
+      "description": "注销供应商 → 完全移除供应商资格"
+    },
+    "validate_order_integrity": {
+      "namespace": "data_integrity",
+      "pre_states": [
+        "REFERENCE_CREATED"
+      ],
+      "post_states": [
+        "REFERENCE_CREATED"
+      ],
+      "description": "校验订单完整性 → 验证关联数据未被篡改（自保持）"
+    },
+    "renew_tls_certificate": {
+      "namespace": "tls",
+      "pre_states": [
+        "TLS_CONFIGURED"
+      ],
+      "post_states": [
+        "TLS_CONFIGURED"
+      ],
+      "description": "更新 TLS 证书 → 到期前轮换证书（自保持）"
+    },
+    "rollback_ir": {
+      "namespace": "dev_pipeline",
+      "pre_states": [
+        "IR_EXTRACTED",
+        "ACTION_VALIDATED"
+      ],
+      "post_states": [
+        "IR_STALE"
+      ],
+      "invalidate": [
+        "IR_EXTRACTED",
+        "ACTION_VALIDATED"
+      ],
+      "description": "回滚 IR → 校验失败时重置到 STALE 状态"
+    },
+    "cancel_order": {
+      "namespace": "printlab_order",
+      "pre_states": [
+        "ORDER_CREATED"
+      ],
+      "post_states": [],
+      "invalidate": [
+        "ORDER_CREATED",
+        "ORDER_QUEUED"
+      ],
+      "description": "取消订单 → 打印前取消，释放队列资源"
+    },
+    "fail_print": {
+      "namespace": "printlab_print",
+      "pre_states": [
+        "PRINT_STARTED"
+      ],
+      "post_states": [],
+      "invalidate": [
+        "PRINT_STARTED"
+      ],
+      "description": "打印失败 → 材料耗尽/机器故障/翘边等"
+    },
+    "logout_without_invalidate": {
+      "namespace": "session_fixation",
+      "pre_states": [
+        "SESSION_ACTIVE"
+      ],
+      "post_states": [],
+      "invalidate": [
+        "SESSION_ACTIVE"
+      ],
+      "description": "PLSB PLS-005: 登出必须销毁会话——防止会话固定攻击"
+    },
+    "admin_action_without_check": {
+      "namespace": "privilege_escalation",
+      "pre_states": [
+        "AUTHENTICATED"
+      ],
+      "post_states": [
+        "AUTHORIZED"
+      ],
+      "invalidate": [],
+      "description": "PLSB PLS-006: 敏感操作前必须验证管理员角色——防止权限提升"
+    },
+    "double_commit": {
+      "namespace": "transaction_violation",
+      "pre_states": [
+        "TX_ACTIVE"
+      ],
+      "post_states": [
+        "TX_IDLE"
+      ],
+      "invalidate": [
+        "TX_ACTIVE"
+      ],
+      "description": "PLSB PLS-008: 事务只能提交一次——重复提交非法"
+    },
+    "validate_request": {
+      "namespace": "missing_validation",
+      "pre_states": [
+        "IDLE"
+      ],
+      "post_states": [
+        "CONTENT_VALID"
+      ],
+      "invalidate": [],
+      "description": "API 合约: 处理请求前校验输入（zod / express-validator / celebrate 等 schema 校验）",
+      "aliases": [
+        "zod.*",
+        "zodSchema.parse",
+        "zodSchema.safeParse",
+        "checkSchema",
+        "validationResult",
+        "celebrate",
+        "validateRequest",
+        "validateBody",
+        "validateQuery",
+        "validateParams",
+        "joi.validate",
+        "yup.validate",
+        "schema.parse",
+        "schema.safeParse"
+      ]
+    },
+    "execute_without_validation": {
+      "namespace": "missing_validation",
+      "pre_states": [
+        "CONTENT_VALID"
+      ],
+      "post_states": [
+        "IDLE"
+      ],
+      "invalidate": [
+        "CONTENT_VALID"
+      ],
+      "description": "PLSB PLS-013: 执行业务逻辑前必须先完成输入校验——防止工作流绕过（API 合约）",
+      "aliases": [
+        "trpc.procedure.call",
+        "trpc.resolve",
+        "router.handle",
+        "express.handler",
+        "handler.execute"
+      ]
+    },
+    "double_release": {
+      "namespace": "resource_leak",
+      "pre_states": [
+        "IDLE"
+      ],
+      "post_states": [
+        "IDLE"
+      ],
+      "invalidate": [
+        "FILE_OPEN",
+        "DB_CONNECTED"
+      ],
+      "description": "PLSB PLS-002: 资源不能释放两次——重复释放非法"
+    },
+    "use_after_release": {
+      "namespace": "use_after_free",
+      "pre_states": [
+        "IDLE"
+      ],
+      "post_states": [],
+      "invalidate": [],
+      "description": "PLSB PLS-003: 不能在释放后使用资源——使用后释放检查"
+    },
+    "read_file_atomic": {
+      "namespace": "file",
+      "pre_states": [],
+      "post_states": [],
+      "description": "一次性读取（API 内部自行打开+关闭）——无需显式 open",
+      "aliases": [
+        "fs.readFileSync",
+        "fs.readFile",
+        "fs.promises.readFile",
+        "fs.promises.readFileSync"
+      ]
+    },
+    "write_file_atomic": {
+      "namespace": "file",
+      "pre_states": [],
+      "post_states": [],
+      "description": "一次性写入（API 内部自行打开+关闭）——无需显式 open",
+      "aliases": [
+        "fs.writeFileSync",
+        "fs.writeFile",
+        "fs.promises.writeFile",
+        "fs.promises.writeFileSync"
+      ]
+    }
+  }
+}

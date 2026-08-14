@@ -9,7 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 const vitest_1 = require("vitest");
 const protocol_invariants_1 = require("./protocol-invariants");
-const state_inference_1 = require("./state-inference");
+const state_inference_1 = require("./experimental/state-inference");
 // ── Test data: clean (complete) and broken (defect) sequences ──
 const FILE_CLEAN = [
     ["open_file", "read_file", "close_file"],

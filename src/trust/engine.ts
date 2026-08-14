@@ -88,6 +88,7 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
     await collectProtocolViolations(ctx, callGraph);
   const expressResult = collectExpressViolations(ctx);
   const nestjsResult = collectNestJSViolations(ctx);
+  const trpcResult = collectTRPCViolations(ctx);
   const coverageData = collectVerificationCoverage(ctx);
   const governanceDefects = collectGovernanceDefects(ctx);
 
@@ -95,11 +96,19 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
   //  PHASE 2: NORMALIZE — All violations to TrustViolation[]
   // ═══════════════════════════════════════
 
+  // Cross-framework correction: tRPC projects authenticate via
+  // protectedProcedure/adminProcedure, not Express middleware.
+  // Suppress EXPRESS_NO_AUTH_MIDDLEWARE when tRPC auth exists.
+  const expressViolations = trpcResult.coverage.hasTRPCAuth
+    ? expressResult.violations.filter(v => v.rule_id !== "EXPRESS_NO_AUTH_MIDDLEWARE")
+    : expressResult.violations;
+
   const allViolations: TrustViolation[] = [
     ...enterpriseViolations,
     ...protocolViolations,
-    ...expressResult.violations,
+    ...expressViolations,
     ...nestjsResult.violations,
+    ...trpcResult.violations,
   ];
 
   // ═══════════════════════════════════════
@@ -518,6 +527,87 @@ function collectExpressViolations(ctx: TrustEvaluationContext): {
 }
 
 // ═══════════════════════════════════════════════
+//  tRPC Framework Adapter Collector
+// ═══════════════════════════════════════════════
+
+/**
+ * Collect tRPC-specific API contract violations from procedure definitions.
+ * Maps TRPCSecurityIssue[] → TrustViolation[].
+ */
+function collectTRPCViolations(ctx: TrustEvaluationContext): {
+  violations: TrustViolation[];
+  coverage: { trpcFiles: number; procedures: number; filesScanned: number; hasTRPCAuth: boolean };
+} {
+  const violations: TrustViolation[] = [];
+  let trpcFiles = 0;
+  let procedures = 0;
+  let filesScanned = 0;
+  let hasTRPCAuth = false;
+
+  try {
+    const { analyzeTRPCFile } = require("../frameworks/trpc-detector");
+    const fs = require("fs");
+
+    // Scan common source directories for tRPC files
+    const candidateDirs = ["src", "server", "app", "api", "routes", "trpc"];
+    const extensions = languageToExtensions(ctx.language);
+
+    for (const dir of candidateDirs) {
+      const dirPath = path.join(ctx.projectPath, dir);
+      if (!fs.existsSync(dirPath)) continue;
+
+      let files: string[];
+      try {
+        files = walkDir(dirPath, extensions, 100);
+      } catch {
+        continue;
+      }
+
+      for (const file of files) {
+        // Skip test files
+        if (/\.(test|spec)\.(ts|tsx|js|jsx)$/.test(file)) continue;
+        filesScanned++;
+
+        let analysis: ReturnType<typeof analyzeTRPCFile>;
+        try {
+          analysis = analyzeTRPCFile(file);
+        } catch {
+          continue;
+        }
+
+        if (!analysis.hasTRPC) continue;
+        trpcFiles++;
+        procedures += analysis.procedures.length;
+        if (analysis.procedures.some((p: any) => p.procedureType === "protected" || p.procedureType === "admin")) {
+          hasTRPCAuth = true;
+        }
+
+        for (const issue of analysis.issues) {
+          const severity: ViolationSeverity =
+            issue.severity === "critical" ? "critical" :
+            issue.severity === "high" ? "high" :
+            issue.severity === "medium" ? "medium" : "low";
+
+          violations.push({
+            severity,
+            rule_id: issue.rule,
+            file: path.relative(ctx.projectPath, file),
+            function: issue.procedure,
+            message: issue.message,
+            evidence: `tRPC procedure: ${issue.procedure} | Line: ${issue.line}`,
+            why: `tRPC API contract check failed: ${issue.rule}`,
+            fix: issue.fix,
+            policy_ref: "framework.trpc.api-contract",
+          });
+        }
+      }
+    }
+  } catch { /* best-effort — tRPC detector optional */ }
+
+  return { violations, coverage: { trpcFiles, procedures, filesScanned, hasTRPCAuth } };
+}
+
+// ═══════════════════════════════════════════════
 //  NestJS Framework Adapter Collector
 // ═══════════════════════════════════════════════
 
@@ -815,7 +905,10 @@ async function collectProtocolViolations(
           // A sequence may be a valid protocol operation but still violate
           // specific security requirements (e.g., TLS without cert verify)
           try {
-            const specificViolations = checkSpecificViolations(semantic, seq.file);
+            const specificViolations = checkSpecificViolations(
+              semantic,
+              seq.file ? path.join(ctx.projectPath, seq.file) : undefined
+            );
             for (const sv of specificViolations) {
               violations.push({
                 severity: "medium", // Phase 2: per-function window has inherent limitations

@@ -22,7 +22,7 @@ exports.buildTopologyGraph = buildTopologyGraph;
 exports.fingerprintRepo = fingerprintRepo;
 exports.runTopologyExperiment = runTopologyExperiment;
 exports.printTopologyReport = printTopologyReport;
-const software_physics_1 = require("./software-physics");
+const software_physics_1 = require("./experimental/software-physics");
 /** Build a topology graph from a call sequence. Node labels are opaque indices. */
 function buildTopologyGraph(sequence) {
     const n = sequence.length;

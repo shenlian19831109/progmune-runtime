@@ -9,7 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 const vitest_1 = require("vitest");
 const unknown_protocol_discovery_1 = require("./unknown-protocol-discovery");
-const unsupervised_physics_1 = require("./unsupervised-physics");
+const unsupervised_physics_1 = require("./experimental/unsupervised-physics");
 (0, vitest_1.describe)("P8.2 Unknown Protocol Discovery", () => {
     (0, vitest_1.it)("extracts sequences from known repos", () => {
         const redis = (0, unknown_protocol_discovery_1.extractUnknownRepoSequences)("Redis");

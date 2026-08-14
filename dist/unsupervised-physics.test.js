@@ -7,7 +7,7 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 const vitest_1 = require("vitest");
-const unsupervised_physics_1 = require("./unsupervised-physics");
+const unsupervised_physics_1 = require("./experimental/unsupervised-physics");
 (0, vitest_1.describe)("Structural Fingerprint (no function names)", () => {
     (0, vitest_1.it)("assigns phase 0/1/2 based on position only", () => {
         const fp0 = (0, unsupervised_physics_1.fingerprint)("fopen", 0, ["fopen", "fread", "fclose"]);

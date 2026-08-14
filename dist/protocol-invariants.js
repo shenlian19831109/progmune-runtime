@@ -16,7 +16,7 @@ exports.checkInvariants = checkInvariants;
 exports.detectIllegalTransitions = detectIllegalTransitions;
 exports.printInvariants = printInvariants;
 exports.printViolations = printViolations;
-const state_inference_1 = require("./state-inference");
+const state_inference_1 = require("./experimental/state-inference");
 // ═══════════════════════════════════════════════════════════════
 // Core Detection: Structural Violation (P9.1)
 // ═══════════════════════════════════════════════════════════════

@@ -17,7 +17,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.runAblationStudy = runAblationStudy;
 exports.printAblationReport = printAblationReport;
-const software_physics_1 = require("./software-physics");
+const software_physics_1 = require("./experimental/software-physics");
 const function_synonyms_1 = require("./function-synonyms");
 const generalization_test_1 = require("./generalization.test");
 const FULL_SCAFFOLDING = { useSynonyms: true, useHandRules: true, useKnownPatterns: true };

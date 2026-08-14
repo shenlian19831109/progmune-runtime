@@ -8,7 +8,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 const vitest_1 = require("vitest");
 const wl_fingerprint_1 = require("./wl-fingerprint");
-const state_inference_1 = require("./state-inference");
+const state_inference_1 = require("./experimental/state-inference");
 // ── Test data: diverse protocol topologies ──
 const LINEAR_3 = [
     ["open_file", "read_file", "close_file"],

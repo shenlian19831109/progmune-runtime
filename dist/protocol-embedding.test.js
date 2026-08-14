@@ -8,7 +8,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 const vitest_1 = require("vitest");
 const protocol_embedding_1 = require("./protocol-embedding");
-const unsupervised_physics_1 = require("./unsupervised-physics");
+const unsupervised_physics_1 = require("./experimental/unsupervised-physics");
 (0, vitest_1.describe)("P10.0 Protocol Embedding Space", () => {
     (0, vitest_1.it)("builds embedding space from all known protocols", () => {
         const space = (0, protocol_embedding_1.buildEmbeddingSpace)();

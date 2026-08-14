@@ -19,7 +19,7 @@ exports.runAugmentation = runAugmentation;
 exports.printAugmentationReport = printAugmentationReport;
 const protocol_coverage_1 = require("./protocol-coverage");
 const auto_protocol_synthesizer_1 = require("./auto-protocol-synthesizer");
-const software_physics_1 = require("./software-physics");
+const software_physics_1 = require("./experimental/software-physics");
 // ═══════════════════════════════════════════════════════════════
 // Strategy 1: Random Walk Synthesis
 // ═══════════════════════════════════════════════════════════════
