@@ -206,7 +206,7 @@ function rulePredicates(f: Pick<GoldFinding, "category" | "description">): Array
   if (f.category === "auth_bypass" || /no authentication|authentication check/i.test(d))
     // A no-auth mutation flagged with Ownership Check is still an authorization
     // violation on the exact function — credit it.
-    return [r => r === "Authorization (Unauthenticated Access)" || r === "Authorization (Ownership Check)"];
+    return [r => r === "Authorization (Unauthenticated Access)" || r === "Authorization (Ownership Check)" || r === "Authorization (Unauthenticated Mutation)"];
   if (/TLS/i.test(d)) return [r => r === "TLS Enforcement"];
   if (/rate limit/i.test(d)) return [r => r === "Rate Limiting" || r === "API Without Rate Limiting"];
   if (/validation/i.test(d)) return [r => r === "Input Validation"];
@@ -254,27 +254,42 @@ function verdictOf(f: GoldFinding): string {
   return f.severity === "critical" ? "BLOCK" : "WARN";
 }
 
-/** Factual FP classification: session_fixation detections are factually wrong when the
- *  project's logout function actually invalidates the session (e.g. splices it out of
- *  the store). Every session_fixation detection in such a project counts as a wrong
- *  finding — including the duplicate reported on the handleRequest aggregator. */
+/** Factual FP classification — detections whose claim the code contradicts:
+ *  1. session_fixation: the project's logout actually invalidates (splices) the session.
+ *     Every session_fixation detection in such a project is wrong, including the
+ *     duplicate reported on the handleRequest aggregator.
+ *  2. Authorization (Ownership Check) on a function whose body contains an inline
+ *     ownerId/authorId comparison — the code DOES verify ownership (the comparison is
+ *     invisible to the call-list interface of the detector). */
 function factualFPs(proj: ScanProject, projectId: string): number {
   const projDir = path.join(GEN_DIR, projectId, "src");
-  const flagged = proj.perFunction.filter(f =>
-    f.safeguardViolations.some(v => v.category === "session_fixation"));
-  if (flagged.length === 0) return 0;
+  let fps = 0;
 
-  const logoutFns = proj.perFunction.filter(f => /logout|signout|invalidate/i.test(f.name));
-  const invalidates = logoutFns.some(f => {
+  const readBody = (f: ScanFunc): string => {
     const filePath = path.join(projDir, path.basename(f.file));
     let src = "";
-    try { src = fs.readFileSync(filePath, "utf-8"); } catch { return false; }
+    try { src = fs.readFileSync(filePath, "utf-8"); } catch { return ""; }
     const bodyMatch = src.match(new RegExp(`function\\s+${f.name}[\\s\\S]*?\\n\\}`));
-    const body = bodyMatch ? bodyMatch[0] : "";
-    return /splice|\.clear\(\)|\.destroy\(|invalidate/i.test(body);
-  });
+    return bodyMatch ? bodyMatch[0] : "";
+  };
 
-  return invalidates ? flagged.length : 0;
+  // 1. session_fixation
+  const fixationFlagged = proj.perFunction.filter(f =>
+    f.safeguardViolations.some(v => v.category === "session_fixation"));
+  const logoutFns = proj.perFunction.filter(f => /logout|signout|invalidate/i.test(f.name));
+  const invalidates = logoutFns.some(f =>
+    /splice|\.clear\(\)|\.destroy\(|invalidate/i.test(readBody(f)));
+  if (invalidates) fps += fixationFlagged.length;
+
+  // 2. Ownership Check contradicted by an inline ownership comparison
+  for (const f of proj.perFunction) {
+    const hasOwnershipViolation = f.safeguardViolations.some(v => v.rule === "Authorization (Ownership Check)");
+    if (!hasOwnershipViolation) continue;
+    const body = readBody(f);
+    if (/ownerId\s*[!=]==?|authorId\s*[!=]==?|\.owner\s*[!=]==?|createdBy\s*[!=]==?/i.test(body)) fps++;
+  }
+
+  return fps;
 }
 
 function buildSummary(findings: GoldFinding[], fpCount: number): any {
@@ -401,13 +416,12 @@ function main() {
     false_positive_rate: Math.round((fpsTotal / (detected + fpsTotal)) * 1000) / 10,
     false_positives_total: fpsTotal,
     effective_recall_excluding_annotation: Math.round((effectiveDetected / effectiveTotal) * 1000) / 10,
-    note: "FP = detections factually wrong per code review (session_fixation on logout functions that do invalidate). " +
+    note: "FP = detections factually wrong per code review: (1) session_fixation on logout functions that do invalidate; " +
+      "(2) Authorization (Ownership Check) on functions whose body contains an inline ownerId/authorId comparison. " +
       "Factually-true detections not in the gold list are 'unlabeled' and excluded from precision — " +
       "mirrors v5 annotation_issues handling. Matching is strict-localization: a finding counts as detected " +
       "only when ITS function carries the corresponding rule; the handleRequest aggregator fallback applies " +
-      "only to functions absent from the scan. Ownership findings on delete functions are detected for " +
-      "styles B/C (validateSession/verifyToken auth naming) but not A/D (getUser/getCurrentUser) — a real " +
-      "localization gap of the current detector.",
+      "only to functions absent from the scan.",
   };
 
   fs.writeFileSync(V2_PATH, JSON.stringify(out, null, 2));

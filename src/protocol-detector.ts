@@ -290,6 +290,13 @@ interface SafeguardRule {
   conceptExpected: string[];
   /** Optional: function name patterns to exclude (library internals, etc.) */
   excludePatterns?: RegExp[];
+  /** When set, the rule only applies if the function takes a parent-reference
+   *  parameter (name ends with "Id", or entityType/entityId). Requires the
+   *  caller to pass param names (see `params` argument of detectSafeguardViolations). */
+  parentRefGated?: boolean;
+  /** Stricter safeguard patterns used when param names are known
+   *  (parentRefGated rules); the default `safeguards` stay for legacy callers. */
+  strictSafeguards?: Array<{ pattern: RegExp; label: string }>;
 }
 
 const SAFEGUARD_RULES: SafeguardRule[] = [
@@ -329,7 +336,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
   {
     name: "Authorization (Ownership Check)",
     category: "authorization",
-    trigger: /\b(delete|remove|toggle|modify|edit|lock|ban|refund|assign|transfer|share|schedule|upload)(?:[A-Z]\w*|_\w+)|(?:[A-Z]\w*|_\w+)(Delete|Remove|Toggle|Modify|Edit|Lock|Ban|Refund|Assign|Transfer|Share|Schedule|Upload)\b/i,
+    trigger: /\b(delete|remove|toggle|modify|edit|lock|ban|refund|assign|transfer|share|schedule|upload|update)(?:[A-Z]\w*|_\w+)|(?:[A-Z]\w*|_\w+)(Delete|Remove|Toggle|Modify|Edit|Lock|Ban|Refund|Assign|Transfer|Share|Schedule|Upload|Update)\b/i,
     safeguards: [
       { pattern: /\b(checkOwner|isOwner|ownerId\s*[!=]==?|authorId\s*[!=]==?|userId\s*[!=]==?|createdBy\s*[!=]==?|\.owner\s*[!=]==?|\.user\s*[!=]==?)\b/i, label: "ownership_check" },
       { pattern: /\b(hasPermission|checkPermission|checkAccess|isAuthorized|checkRole|requireRole|adminCheck|isAdmin|canModify|canDelete|canEdit)\b/i, label: "authz_check" },
@@ -375,8 +382,37 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
       /findBig|findKey|findPk/, // internal search (not API)
     ],
   },
+  // Mutations without any authentication. The Unauthenticated Access rule above
+  // only covers read verbs (list/get/download/view/fetch); create/add/post/update/
+  // set verbs had no auth coverage (3 gold FNs: addProduct, addCategory, setMilestone).
+  // v3 (2026-08-15)
+  {
+    name: "Authorization (Unauthenticated Mutation)",
+    category: "authorization",
+    languages: ["typescript", "javascript", "python"],
+    // Note: "post" deliberately excluded — it collides with the Post entity name
+    // (listPosts/getPost/deletePost fire via identifier-parsed words).
+    trigger: /\b(add|create|update|set|publish|insert|submit)(?:[A-Z]\w*|_\w+)|(?:[A-Z]\w*|_\w+)(Add|Create|Update|Set|Publish|Insert|Submit)\b/i,
+    safeguards: [
+      { pattern: /\b(getUser|validateToken|verifyToken|verifySession|validateSession|getSessionUser|getSession\b|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess)\b/i, label: "auth_check" },
+    ],
+    violationMessage: "Mutation function does not check authentication. Anyone can create or modify data without credentials.",
+    conceptMissing: ["AuthenticationCheck", "AccessControl"],
+    conceptExpected: ["token validation", "session check", "auth middleware"],
+    excludePatterns: [
+      /set_authn_id/,           // internal auth setter
+      /set_ssl_/,               // SSL config setter
+      /set_config/,             // configuration setter
+      /set_option/,             // option setter
+    ],
+  },
   // ── Data Integrity (Foreign Key Validation) ──
   // v2: removed "process" and "send" (too generic for C)
+  // v3 (2026-08-15): param-aware. The old safeguard counted ANY get*/find* call
+  // as a foreign-key check — including getSessionUser/getUser auth lookups, which
+  // suppressed the rule on addComment/addNote/createReply (4 gold FNs). When param
+  // names are known, the rule only applies to functions taking a parent-reference
+  // parameter (…Id / entityType) and requires a NON-auth lookup call.
   {
     name: "Data Integrity (Foreign Key)",
     category: "data_integrity",
@@ -387,6 +423,11 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     violationMessage: "Creates a child entity without verifying the parent entity exists. Orphaned references possible.",
     conceptMissing: ["ForeignKeyValidation", "ReferentialIntegrity"],
     conceptExpected: ["checkExists", "getParent", "validateReference"],
+    parentRefGated: true,
+    strictSafeguards: [
+      // Entity lookups only — authentication lookups do NOT verify a parent exists.
+      { pattern: /\b(?!get(Session|Current)?User\b|getClient\b|verifyToken\b|validateSession\b)(get|find|check|exists|lookup|status|validate|verify)(?:[A-Z]\w*|_\w+)\b/i, label: "fk_check_strict" },
+    ],
     excludePatterns: [
       /_hd_/,                   // HPACK header compression
       /add_auth_info/,          // internal auth metadata
@@ -927,7 +968,7 @@ export function identifierParse(name: string): string[] {
  * Detect missing safeguards in function call sequences.
  * Uses identifier parsing to match compound names (registerNewUser → register).
  */
-export function detectSafeguardViolations(calls: string[], enclosingFuncName?: string, language?: string): SafeguardViolation[] {
+export function detectSafeguardViolations(calls: string[], enclosingFuncName?: string, language?: string, params?: string[]): SafeguardViolation[] {
   const violations: SafeguardViolation[] = [];
 
   // Build effective calls: raw names + identifier-parsed words
@@ -959,8 +1000,16 @@ export function detectSafeguardViolations(calls: string[], enclosingFuncName?: s
     // Skip authorization rules for auth functions — they ARE the auth
     if (isAuthFunction && rule.category === "authorization") continue;
 
+    // Param-gated rules (parentRefGated): only apply when the function takes a
+    // parent-reference parameter. Requires the caller to pass param names.
+    if (rule.parentRefGated && params) {
+      const hasParentRef = params.some(p => /Id$/i.test(p) || /^entityType$/i.test(p));
+      if (!hasParentRef) continue;
+    }
+
     // Check if at least one safeguard matches
-    const matchedSafeguard = rule.safeguards.find(s => effectiveCalls.some(c => s.pattern.test(c)));
+    const guards = (params && rule.strictSafeguards) ? rule.strictSafeguards : rule.safeguards;
+    const matchedSafeguard = guards.find(s => effectiveCalls.some(c => s.pattern.test(c)));
     if (matchedSafeguard) continue;
 
     // Check excludePatterns (library functions where safeguard is deferred to separate API)

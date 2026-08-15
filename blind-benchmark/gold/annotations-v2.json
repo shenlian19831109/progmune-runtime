@@ -3,8 +3,8 @@
   "annotated_by": "plant-config + template review (style variants); human (model variants, 2026-07-06)",
   "annotated_at": "2026-08-15",
   "version": "6.0",
-  "detector_scan_generated": "2026-08-15T14:28:33.793Z",
-  "detector_commit": "1209c5ab516c88c8ff68f9c4fe6e6578b2490cc8",
+  "detector_scan_generated": "2026-08-15T15:07:21.735Z",
+  "detector_commit": "2fbbd35764be1323bc3a5646ffa912138ed8f08c",
   "projects": [
     {
       "project_id": "analytics_A",
@@ -1712,8 +1712,8 @@
           "severity": "medium",
           "description": "Comment added without verifying referenced post exists.",
           "protocol": "DataIntegrity",
-          "progmune_detected": false,
-          "progmune_verdict": "NOT_CHECKED",
+          "progmune_detected": true,
+          "progmune_verdict": "WARN",
           "false_positive": false
         },
         {
@@ -1743,10 +1743,10 @@
       ],
       "progmune_summary": {
         "total_findings": 5,
-        "detected": 4,
-        "missed": 1,
-        "detection_rate": 80,
-        "false_positives": 2,
+        "detected": 5,
+        "missed": 0,
+        "detection_rate": 100,
+        "false_positives": 5,
         "by_severity": {
           "high": {
             "total": 1,
@@ -1754,16 +1754,14 @@
           },
           "medium": {
             "total": 3,
-            "detected": 2
+            "detected": 3
           },
           "low": {
             "total": 1,
             "detected": 1
           }
         },
-        "missed_findings": [
-          "BLOG-003: Comment added without verifying referenced post exists."
-        ]
+        "missed_findings": []
       }
     },
     {
@@ -3031,8 +3029,8 @@
           "protocol": "DataIntegrity",
           "description": "addNote does not verify referenced entity exists.",
           "fix_suggestion": "Verify entity existence before adding note",
-          "progmune_detected": false,
-          "progmune_verdict": "NOT_CHECKED",
+          "progmune_detected": true,
+          "progmune_verdict": "WARN",
           "false_positive": false,
           "note": "Entity Note not in Data Integrity trigger"
         },
@@ -3065,14 +3063,14 @@
       ],
       "progmune_summary": {
         "total_findings": 7,
-        "detected": 4,
-        "missed": 3,
-        "detection_rate": 57.1,
-        "false_positives": 0,
+        "detected": 5,
+        "missed": 2,
+        "detection_rate": 71.4,
+        "false_positives": 2,
         "by_severity": {
           "medium": {
             "total": 3,
-            "detected": 2
+            "detected": 3
           },
           "high": {
             "total": 2,
@@ -3085,8 +3083,7 @@
         },
         "missed_findings": [
           "CRM-003: getContact() has NO authentication check.",
-          "CRM-004: listNotes() has NO authentication check.",
-          "CRM-005: addNote does not verify referenced entity exists."
+          "CRM-004: listNotes() has NO authentication check."
         ]
       }
     },
@@ -3124,8 +3121,8 @@
           "severity": "high",
           "description": "addProduct() has no authentication check.",
           "protocol": "Auth",
-          "progmune_detected": false,
-          "progmune_verdict": "NOT_CHECKED",
+          "progmune_detected": true,
+          "progmune_verdict": "WARN",
           "false_positive": false
         },
         {
@@ -3180,9 +3177,9 @@
       ],
       "progmune_summary": {
         "total_findings": 6,
-        "detected": 4,
-        "missed": 2,
-        "detection_rate": 66.7,
+        "detected": 5,
+        "missed": 1,
+        "detection_rate": 83.3,
         "false_positives": 2,
         "by_severity": {
           "critical": {
@@ -3191,7 +3188,7 @@
           },
           "high": {
             "total": 2,
-            "detected": 0
+            "detected": 1
           },
           "medium": {
             "total": 2,
@@ -3203,7 +3200,6 @@
           }
         },
         "missed_findings": [
-          "ECOM-002: addProduct() has no authentication check.",
           "ECOM-003: placeOrder uses hardcoded price (quantity * 10). Business lo"
         ]
       }
@@ -3944,8 +3940,8 @@
           "severity": "high",
           "description": "addCategory() has NO authentication check.",
           "protocol": "Auth",
-          "progmune_detected": false,
-          "progmune_verdict": "NOT_CHECKED",
+          "progmune_detected": true,
+          "progmune_verdict": "WARN",
           "false_positive": false
         },
         {
@@ -3968,8 +3964,8 @@
           "severity": "medium",
           "description": "Reply created without checking if topic exists and is not locked.",
           "protocol": "DataIntegrity",
-          "progmune_detected": false,
-          "progmune_verdict": "NOT_CHECKED",
+          "progmune_detected": true,
+          "progmune_verdict": "WARN",
           "false_positive": false
         },
         {
@@ -3999,24 +3995,21 @@
       ],
       "progmune_summary": {
         "total_findings": 6,
-        "detected": 4,
-        "missed": 2,
-        "detection_rate": 66.7,
-        "false_positives": 2,
+        "detected": 6,
+        "missed": 0,
+        "detection_rate": 100,
+        "false_positives": 3,
         "by_severity": {
           "high": {
             "total": 3,
-            "detected": 2
+            "detected": 3
           },
           "medium": {
             "total": 3,
-            "detected": 2
+            "detected": 3
           }
         },
-        "missed_findings": [
-          "FORUM-002: addCategory() has NO authentication check.",
-          "FORUM-004: Reply created without checking if topic exists and is not lo"
-        ]
+        "missed_findings": []
       }
     },
     {
@@ -7365,8 +7358,8 @@
           "protocol": "DataIntegrity",
           "description": "Comment created without verifying issue exists.",
           "fix_suggestion": "Verify issue exists before adding comment",
-          "progmune_detected": false,
-          "progmune_verdict": "NOT_CHECKED",
+          "progmune_detected": true,
+          "progmune_verdict": "WARN",
           "false_positive": false
         },
         {
@@ -7392,8 +7385,8 @@
           "protocol": "Auth",
           "description": "setMilestone() has NO authentication check.",
           "fix_suggestion": "Add token verification",
-          "progmune_detected": false,
-          "progmune_verdict": "NOT_CHECKED",
+          "progmune_detected": true,
+          "progmune_verdict": "WARN",
           "false_positive": false,
           "note": "set not in trigger, Milestone not in entity list"
         },
@@ -7471,18 +7464,18 @@
       ],
       "progmune_summary": {
         "total_findings": 10,
-        "detected": 6,
-        "missed": 4,
-        "detection_rate": 60,
+        "detected": 8,
+        "missed": 2,
+        "detection_rate": 80,
         "false_positives": 2,
         "by_severity": {
           "medium": {
             "total": 5,
-            "detected": 2
+            "detected": 3
           },
           "high": {
             "total": 2,
-            "detected": 1
+            "detected": 2
           },
           "low": {
             "total": 3,
@@ -7490,8 +7483,6 @@
           }
         },
         "missed_findings": [
-          "ISS-003: Comment created without verifying issue exists.",
-          "ISS-005: setMilestone() has NO authentication check.",
           "ISS-006: listIssues() has NO authentication check.",
           "ISS-007: listMilestones() has NO authentication check."
         ]
@@ -12371,7 +12362,7 @@
         "detected": 4,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 0,
+        "false_positives": 1,
         "by_severity": {
           "high": {
             "total": 1,
@@ -12483,8 +12474,8 @@
           "protocol": "Auth",
           "description": "updatePage checks auth but not page ownership.",
           "fix_suggestion": "Check page.authorId === user.id",
-          "progmune_detected": false,
-          "progmune_verdict": "NOT_CHECKED",
+          "progmune_detected": true,
+          "progmune_verdict": "WARN",
           "false_positive": false,
           "note": "Page not in Ownership trigger"
         },
@@ -12517,14 +12508,14 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 5,
-        "missed": 3,
-        "detection_rate": 62.5,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 3,
-            "detected": 2
+            "detected": 3
           },
           "high": {
             "total": 3,
@@ -12537,8 +12528,7 @@
         },
         "missed_findings": [
           "WIKI-003: searchPages() has NO authentication check.",
-          "WIKI-004: getAttachments() has NO authentication check.",
-          "WIKI-006: updatePage checks auth but not page ownership."
+          "WIKI-004: getAttachments() has NO authentication check."
         ]
       }
     },
@@ -13665,16 +13655,16 @@
     "projects_annotated": 100,
     "target_projects": 100,
     "total_findings": 795,
-    "progmune_detected": 775,
-    "progmune_missed": 20,
+    "progmune_detected": 783,
+    "progmune_missed": 12,
     "annotation_issues": 11,
     "out_of_scope": 1,
-    "genuine_fns": 8,
-    "overall_recall": 97.5,
-    "overall_precision": 84.3,
-    "false_positive_rate": 15.7,
-    "false_positives_total": 144,
-    "effective_recall_excluding_annotation": 99,
-    "note": "FP = detections factually wrong per code review (session_fixation on logout functions that do invalidate). Factually-true detections not in the gold list are 'unlabeled' and excluded from precision — mirrors v5 annotation_issues handling. Matching is strict-localization: a finding counts as detected only when ITS function carries the corresponding rule; the handleRequest aggregator fallback applies only to functions absent from the scan. Ownership findings on delete functions are detected for styles B/C (validateSession/verifyToken auth naming) but not A/D (getUser/getCurrentUser) — a real localization gap of the current detector."
+    "genuine_fns": 0,
+    "overall_recall": 98.5,
+    "overall_precision": 83.8,
+    "false_positive_rate": 16.2,
+    "false_positives_total": 151,
+    "effective_recall_excluding_annotation": 100,
+    "note": "FP = detections factually wrong per code review: (1) session_fixation on logout functions that do invalidate; (2) Authorization (Ownership Check) on functions whose body contains an inline ownerId/authorId comparison. Factually-true detections not in the gold list are 'unlabeled' and excluded from precision — mirrors v5 annotation_issues handling. Matching is strict-localization: a finding counts as detected only when ITS function carries the corresponding rule; the handleRequest aggregator fallback applies only to functions absent from the scan."
   }
 }

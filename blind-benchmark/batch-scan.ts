@@ -58,7 +58,7 @@ export function scanProject(projectId: string): ProjectScanResult {
     .map(f => ({
       name: f.name, file: f.file, calls: f.calls || [],
       protocolViolations: detectProtocolViolations(f.calls || []),
-      safeguardViolations: detectSafeguardViolations(f.calls || [], f.name),
+      safeguardViolations: detectSafeguardViolations(f.calls || [], f.name, undefined, (f.params || []).map(p => p.name)),
     }));
 
   return { project: projectId, files: [...new Set(funcs.map(f => f.file))].length,
