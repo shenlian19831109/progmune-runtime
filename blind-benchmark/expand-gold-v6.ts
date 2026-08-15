@@ -389,7 +389,7 @@ function main() {
 
   out.aggregate = {
     projects_annotated: out.projects.length,
-    target_projects: 50,
+    target_projects: 100,
     total_findings: all.length,
     progmune_detected: detected,
     progmune_missed: missed,

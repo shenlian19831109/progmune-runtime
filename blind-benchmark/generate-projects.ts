@@ -8,7 +8,7 @@ import * as path from "path";
 
 const GEN_DIR = path.resolve(__dirname, "generated");
 
-export const TYPES: Array<{ id: string; name: string; entities: string[] }> = [
+export const TYPES: Array<{ id: string; name: string; entities: string[]; styles?: string[] }> = [
   { id: "analytics", name: "Analytics API", entities: ["Event","Metric","Dashboard","Report"] },
   { id: "apigateway", name: "API Gateway", entities: ["Route","Cache","Upstream","Policy"] },
   { id: "inventory", name: "Inventory System", entities: ["Item","Stock","Supplier","Warehouse"] },
@@ -19,6 +19,20 @@ export const TYPES: Array<{ id: string; name: string; entities: string[] }> = [
   { id: "workflow", name: "Workflow Engine", entities: ["Workflow","Step","Instance","Audit"] },
   { id: "githost", name: "Git Host", entities: ["Repo","Branch","Commit","Release"] },
   { id: "xclone", name: "Social Platform", entities: ["Post","Like","Follow","Feed"] },
+  // Expansion wave 2 (2026-08-15): 12 full types + 1 partial type = 50 new projects → 100 total
+  { id: "banking", name: "Banking Core", entities: ["Account","Transfer","Loan","Statement"] },
+  { id: "healthcare", name: "Healthcare Platform", entities: ["Patient","Prescription","Appointment","Billing"] },
+  { id: "cms", name: "Content Management System", entities: ["Article","Tag","Author","Comment"] },
+  { id: "logistics", name: "Logistics Platform", entities: ["Shipment","Driver","Warehouse","Delivery"] },
+  { id: "booking", name: "Booking System", entities: ["Reservation","Guest","Room","Invoice"] },
+  { id: "insurance", name: "Insurance Platform", entities: ["Policy","Claim","Quote","Payout"] },
+  { id: "legal", name: "Legal Practice Suite", entities: ["Case","Document","Client","Invoice"] },
+  { id: "edtech", name: "EdTech Platform", entities: ["Course","Enrollment","Assignment","Grade"] },
+  { id: "iot", name: "IoT Platform", entities: ["Device","Telemetry","Firmware","Gateway"] },
+  { id: "realestate", name: "Real Estate Platform", entities: ["Listing","Offer","Inspection","Lease"] },
+  { id: "hr", name: "HR Platform", entities: ["Employee","Payroll","Leave","Review"] },
+  { id: "music", name: "Music Platform", entities: ["Track","Playlist","License","Royalty"] },
+  { id: "newsfeed", name: "News Feed Service", entities: ["Feed","Subscription"], styles: ["A", "B"] },
 ];
 
 export interface Style {
@@ -189,6 +203,7 @@ if (require.main === module) {
   let count = 0;
   for (const t of TYPES) {
     for (const s of STYLES) {
+      if (t.styles && !t.styles.includes(s.id)) continue;
       const projId = `${t.id}_${s.id}`;
       const dir = path.join(GEN_DIR, projId, "src");
       fs.mkdirSync(dir, { recursive: true });
@@ -202,5 +217,5 @@ if (require.main === module) {
       count++;
     }
   }
-  console.log(`Generated ${count} projects (${TYPES.length} types × ${STYLES.length} styles)`);
+  console.log(`Generated ${count} projects (${TYPES.length} types × ${STYLES.length} styles, partial types allowed)`);
 }
