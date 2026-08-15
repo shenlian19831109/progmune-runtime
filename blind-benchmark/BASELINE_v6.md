@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-15
 **Artifact:** `gold/annotations-v2.json` (version 6.0)
-**Detector:** commit `513d53cb` (post tRPC detector / SSG FP-fix era), scan `2026-08-15T12:22Z` (wave-1) / `2026-08-15` (wave-2)
+**Detector:** commit `1209c5ab` (includes the Ownership Check rule fix), scan `2026-08-15`
 
 > Expansion of the frozen gold-v1 (`gold/annotations.json` v5.0, 10 hand-annotated projects, 2026-07-06).
 > gold-v1 remains frozen and unmodified; this is gold-v2. Wave 1: 10 → 50 projects. Wave 2: 50 → 100 projects.
@@ -35,12 +35,23 @@ Claude template review (applies to all style projects, verified by reading the f
 | Metric | 100 projects | Style-90 | Model-10 |
 |--------|-------------|----------|----------|
 | Gold findings | 795 | 729 | 66 |
-| Recall | **86.2%** | 87.7% | 69.7% (85.2% effective) |
-| Effective recall¹ | **87.5%** | 87.7% | 85.2% |
-| Precision | **82.6%** | — | — |
+| Recall | **97.5%** | 98.6% | 85.2% (effective) |
+| Effective recall¹ | **99.0%** | 98.6% | 85.2% |
+| Precision | **84.3%** | — | — |
 | FPs (factual) | 144 | 134 | 10 |
 
 ¹ Excludes 11 read-auth annotation issues + 1 out-of-scope business-logic finding carried from gold-v1.
+
+### Ownership Check rule fix (2026-08-15)
+
+The dominant FN class (90/98 FNs) was fixed: the rule's satisfier treated identity lookups
+(`getUser`, `validateToken`, `getCurrentUser`…) as satisfying ownership. Authentication ≠
+ownership — a mutation calling only `getUser(token)` without comparing `ownerId` is a
+violation. Satisfiers are now: explicit ownership-comparison names, owner-check helpers, or
+permission/role gates. Result: 90 FN→TP flips, zero regressions, recall 86.2% → 97.5%.
+Known limitation: inline `p.ownerId !== u.id` comparisons are invisible to the call-list
+interface of this detector (would need AST-level analysis), and `update` verbs are outside
+the rule trigger (WIKI-006 remains FN).
 
 ### Detection matching rules (fixed, strict-localization)
 
@@ -50,12 +61,11 @@ Claude template review (applies to all style projects, verified by reading the f
 - **FP** = detection factually wrong per code review: `Session Fixation` on projects whose logout *does* invalidate (splices the session). 72 projects × 2 detections (function + handleRequest duplicate) = 144.
 - Factually-true detections not in the gold list (registration verification, session TTL, audit trail, read-auth on unplanted readers…) are **unlabeled** — excluded from precision, mirroring gold-v1's annotation_issues handling.
 
-### What the 98 genuine FNs tell us (detector improvement roadmap)
+### What the 8 remaining genuine FNs tell us (detector improvement roadmap)
 
-1. **Delete-ownership localization gap (90 FNs — the dominant class):** styles A/D only. The Ownership Check rule treats a call to `getUser`/`getCurrentUser` as satisfying the ownership verification — but the code never compares `ownerId`. Styles B/C (`validateSession`/`verifyToken`) are caught. → Rule needs ownerId-comparison awareness, not auth-fn-name presence.
-2. **Existence/foreign-key class (4 FNs):** addComment/addNote/createReply without verifying the referenced entity exists — FK rule doesn't fire on these functions.
-3. **No-auth mutations (3 FNs):** addProduct (ecommerce), addCategory (forum), setMilestone (issuetracker) carry no authorization flag.
-4. **Ownership on update (1 FN):** updatePage checks auth but not page ownership (gold-v1 WIKI-006).
+1. **Existence/foreign-key class (4 FNs):** addComment/addNote/createReply without verifying the referenced entity exists — FK rule doesn't fire on these functions.
+2. **No-auth mutations (3 FNs):** addProduct (ecommerce), addCategory (forum), setMilestone (issuetracker) carry no authorization flag.
+3. **Ownership on update (1 FN):** updatePage checks auth but not page ownership (gold-v1 WIKI-006) — `update` verbs are outside the Ownership Check trigger.
 
 ### FP class (144): Session Fixation
 
