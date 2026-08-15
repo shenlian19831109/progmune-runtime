@@ -1,0 +1,69 @@
+# Real-World Application Validation v1 — PyGoat Gold Annotation
+
+**Date:** 2026-08-16
+**Corpus:** PyGoat (OWASP vulnerable-by-design Django app, shallow clone)
+**Artifact:** `gold/annotations-pygoat-v1.json` (per-detection verdicts, human review)
+**Pipeline:** `scan-real-python.ts --dir benchmarks/python-apps PyGoat` → `annotate-pygoat.py`
+
+## Headline
+
+First gold annotation of the detector on real application code. **183 detections on
+167 functions: 15 true positives, 11 false positives, 157 unlabeled. Labeled precision
+57.7%.** Among the authorization rules specifically (the product's core surface):
+**9 TP / 5 FP = 64.3% precision**, and all 9 TPs land on PyGoat's deliberately
+vulnerable lab views — the detector correctly finds broken-access-control labs.
+
+## Verified true positives (15)
+
+| Finding | Rule | What it caught |
+|---------|------|----------------|
+| insec_des_lab | Unauthenticated Mutation | `pickle.loads()` on a user cookie — insecure deserialization |
+| xxe_parse | Unauthenticated Mutation | External entities enabled + `parseString(request.body)` — XXE |
+| ba_lab / a1_broken_access_lab_1 | Unauthenticated Mutation | Cookie-based admin check (`COOKIES.get('admin')=='1'`) |
+| Otp | Unauthenticated Mutation | OTP rendered into client HTML |
+| crypto_failure_lab3 | Unauthenticated Mutation | Client-side cookie tampering (`split('|')` expiry) |
+| auth_failure_lab3 | Unauthenticated Mutation | Session-id cookie trusted directly |
+| sec_misconfig_lab3 | Unauthenticated Mutation | JWT decoded with a hardcoded key |
+| get_version | Unauthenticated Access | Unauthenticated version disclosure (the A9 lab) |
+| auth_lab_signup, broken_auth register | Password Hashing ×2 rules | Plaintext password storage |
+| auth_lab_login, broken_auth login | Token Security | `userid` cookie (samesite=None, secure=False) / base64(username:timestamp) token |
+
+## Verified false positives (11) — the framework-delegation class
+
+| Finding | Why wrong |
+|---------|-----------|
+| introduction register (3 rules) | `NewUserForm.save()` — Django hashes pbkdf2 by default |
+| register_view (2 rules) | `User.objects.create_user()` hashes |
+| login_view | Django `authenticate()`/`login()` manage sessions securely |
+| a9_lab2, DoItFast.post | Both check `request.user.is_authenticated` and redirect |
+| login_otp | Only renders a page — no token generated |
+| auth_lab_logout | `delete_cookie('userid')` IS invalidation for this lab's auth |
+| reset_form | The token check IS the authentication |
+| reset_password | Real flaw is the predictable md5 token — not "no rotation after privilege change" |
+
+**Pattern:** Django's framework delegation (forms/`create_user`/`login`) is invisible to
+the call-name interface — the detector cannot see that the called framework function
+hashes/sessions securely.
+
+## Unlabeled (157) — soft classes
+
+`No Input Sanitization` (124) dominates: every Django view calls `render()`, which
+auto-escapes by default; the rule cannot see templates (the actual XSS labs are
+vulnerable via `|safe` in the template, invisible to this interface). Context-manager
+hygiene, audit-trail absence, session-TTL, registration verification — true-ish but soft.
+
+## Recall side (what was missed)
+
+PyGoat ships ~30 labs across OWASP classes. The rule set surfaces 10 broken-auth/access
+labs. **Missed classes:** SQLi (sql_lab uses ORM raw without `execute` call names),
+XSS (template-level), SSTI, SSRF, command injection, XXE-as-injection. These are outside
+the protocol-lifecycle rule set by product positioning — a full recall number requires
+lab-level gold enumeration, noted as future work.
+
+## Next steps
+
+1. Annotate the other three app repos (fastapi-realworld, django-realworld, django-unicorn).
+2. Framework-delegation mitigation: an allowlist of "secure-by-default" framework calls
+   (`form.save`, `create_user`, `authenticate`, `login`, `render` in Django) as
+   safeguard satisfiers — would flip most of the 11 FPs without touching benchmarks.
+3. SQL rule source-level matching (still deferred).
