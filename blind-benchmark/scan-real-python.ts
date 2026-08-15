@@ -15,14 +15,31 @@ import { detectProtocolViolations, detectSafeguardViolations } from "../src/prot
 
 const REPOS_DIR = path.resolve(__dirname, "..", "benchmarks", "python-repos");
 
+const WEB_HANDLER = /\b(handle_request|handleRequest|request_handler|requestHandler)\b/i;
+
+function computeExposed(funcs: Array<{ name: string; calls?: string[] }>): Set<string> {
+  const exposed = new Set<string>();
+  for (const f of funcs) {
+    if (WEB_HANDLER.test(f.name)) {
+      for (const c of f.calls || []) exposed.add(c);
+    }
+  }
+  return exposed;
+}
+
+function isExposed(name: string, exposed: Set<string>): boolean {
+  return exposed.has(name) || exposed.has(name.split(".").pop() || name);
+}
+
 function scanRepo(repoName: string) {
-  const dir = path.join(REPOS_DIR, repoName);
+  const dir = path.join(reposDir, repoName);
   const ir = extractIRPython(dir);
   const funcs = ir.filter(f => !f.external && f.exported);
+  const exposed = computeExposed(funcs);
 
   const violations: any[] = [];
   for (const f of funcs) {
-    const safe = detectSafeguardViolations(f.calls || [], f.name, "python", (f.params || []).map(p => p.name));
+    const safe = detectSafeguardViolations(f.calls || [], f.name, "python", (f.params || []).map(p => p.name), isExposed(f.name, exposed));
     const proto = detectProtocolViolations(f.calls || []);
     if (safe.length === 0 && proto.length === 0) continue;
     violations.push({
@@ -42,9 +59,13 @@ function scanRepo(repoName: string) {
   };
 }
 
-const repos = process.argv.slice(2).length > 0
-  ? process.argv.slice(2)
-  : fs.readdirSync(REPOS_DIR).filter(d => fs.statSync(path.join(REPOS_DIR, d)).isDirectory());
+const args = process.argv.slice(2);
+// --dir <path> scans an alternate repos directory (e.g. benchmarks/python-apps)
+const dirFlag = args.indexOf("--dir");
+const reposDir = dirFlag >= 0 ? path.resolve(args[dirFlag + 1]) : REPOS_DIR;
+const repos = args.filter((a, i) => a !== "--dir" && (dirFlag < 0 || i !== dirFlag + 1)).length > 0
+  ? args.filter((a, i) => a !== "--dir" && (dirFlag < 0 || i !== dirFlag + 1))
+  : fs.readdirSync(reposDir).filter(d => fs.statSync(path.join(reposDir, d)).isDirectory());
 
 const results = [];
 for (const repo of repos) {

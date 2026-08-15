@@ -297,6 +297,13 @@ interface SafeguardRule {
   /** When set, the trigger is tested against raw callee names only — not the
    *  identifier-parsed words (which split execute_command into "execute"). */
   triggerCallsOnly?: boolean;
+  /** When set, the rule only applies to functions that plausibly serve user
+   *  requests: the function is called by a web-handler function (exposed) or
+   *  takes an identity-ish parameter (token/session/user/auth/request/...).
+   *  Requires the caller to pass param names + the `exposed` flag. Kills the
+   *  library-internal noise class found in the real-world Python validation
+   *  (94% of auth-rule detections lacked identity params). */
+  paramGated?: boolean;
   /** Stricter safeguard patterns used when param names are known
    *  (parentRefGated rules); the default `safeguards` stay for legacy callers. */
   strictSafeguards?: Array<{ pattern: RegExp; label: string; callsOnly?: boolean }>;
@@ -339,6 +346,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
   {
     name: "Authorization (Ownership Check)",
     category: "authorization",
+    paramGated: true,
     trigger: /\b(delete|remove|toggle|modify|edit|lock|ban|refund|assign|transfer|share|schedule|upload|update)(?:[A-Z]\w*|_\w+)|(?:[A-Z]\w*|_\w+)(Delete|Remove|Toggle|Modify|Edit|Lock|Ban|Refund|Assign|Transfer|Share|Schedule|Upload|Update)\b/i,
     safeguards: [
       { pattern: /\b(checkOwner|isOwner|ownerId\s*[!=]==?|authorId\s*[!=]==?|userId\s*[!=]==?|createdBy\s*[!=]==?|\.owner\s*[!=]==?|\.user\s*[!=]==?)\b/i, label: "ownership_check" },
@@ -366,6 +374,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     name: "Authorization (Unauthenticated Access)",
     category: "authorization",
     languages: ["typescript", "javascript", "python"],
+    paramGated: true,
     trigger: /\b(list|download|view|fetch)(?:[A-Z]\w*|_\w+)|get(?:[A-Z]\w+|_\w+)/i,
     safeguards: [
       { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware)\b/i, label: "auth_check" },
@@ -393,6 +402,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     name: "Authorization (Unauthenticated Mutation)",
     category: "authorization",
     languages: ["typescript", "javascript", "python"],
+    paramGated: true,
     // Note: "post" deliberately excluded — it collides with the Post entity name
     // (listPosts/getPost/deletePost fire via identifier-parsed words).
     trigger: /\b(add|create|update|set|publish|insert|submit)(?:[A-Z]\w*|_\w+)|(?:[A-Z]\w*|_\w+)(Add|Create|Update|Set|Publish|Insert|Submit)\b/i,
@@ -490,6 +500,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
   {
     name: "Authorization (Resource Ownership)",
     category: "authorization",
+    paramGated: true,
     trigger: /\b(toggle|remove)(?:[A-Z]\w*|_\w+)\b/i,
     safeguards: [
       { pattern: /\b(ownerId\s*[!=]==?|authorId\s*[!=]==?|userId\s*[!=]==?|createdBy|\.owner\s*[!=]==?)/i, label: "ownership_comparison" },
@@ -985,7 +996,7 @@ export function identifierParse(name: string): string[] {
  * Detect missing safeguards in function call sequences.
  * Uses identifier parsing to match compound names (registerNewUser → register).
  */
-export function detectSafeguardViolations(calls: string[], enclosingFuncName?: string, language?: string, params?: string[]): SafeguardViolation[] {
+export function detectSafeguardViolations(calls: string[], enclosingFuncName?: string, language?: string, params?: string[], exposed?: boolean): SafeguardViolation[] {
   const violations: SafeguardViolation[] = [];
 
   // Build effective calls: raw names + identifier-parsed words.
@@ -1027,6 +1038,15 @@ export function detectSafeguardViolations(calls: string[], enclosingFuncName?: s
     if (rule.parentRefGated && params) {
       const hasParentRef = params.some(p => /Id$/i.test(p) || /^entityType$/i.test(p));
       if (!hasParentRef) continue;
+    }
+
+    // Surface gate (paramGated): only apply to functions that can plausibly
+    // authenticate — routed by a web handler (exposed) or taking an
+    // identity-ish parameter. Requires the caller to pass param names.
+    if (rule.paramGated && params) {
+      const hasIdentity = params.some(p =>
+        /\b(token|session|user|auth|request|scope|cookie|credential|permission|role|identity)\b/i.test(p));
+      if (!hasIdentity && !exposed) continue;
     }
 
     // Check if at least one safeguard matches

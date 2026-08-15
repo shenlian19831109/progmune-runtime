@@ -55,16 +55,19 @@ corpus. Examples of what fires: `ConnectionPool.reset`, `Session.send`,
 
 ## Recommendations (priority order)
 
-1. **Validate on application repos, not libraries.** The rules target application
-   surface (endpoints with auth). Correct corpus: Django/Flask/FastAPI apps with real
-   auth (e.g., WrongSecrets, PyGoat, OWASP benchmark, real open-source apps).
-2. **Param-gate the auth rules** (same mechanism as FK's `parentRefGated`): only flag
-   Unauthenticated Access/Mutation/Ownership when the function takes an identity-ish
-   parameter (token/session/user/auth/request/scope/cookie). Kills ~94% of library noise.
-   Requires benchmark adjustment: planted no-auth functions should take-and-ignore a
-   token param to model real endpoints (they currently take none — a benchmark blind
-   spot this validation exposed).
-3. **SQL rule needs source-level analysis** — move to AST-level or accept interface
-   limitation and document.
+1. ~~Validate on application repos~~ → **DONE (corpus prepared):** `benchmarks/python-apps/`
+   — PyGoat (OWASP vulnerable-by-design Django), django-realworld-example-app,
+   fastapi-realworld-example-app, django-unicorn. Preview scan: PyGoat's 12 auth
+   detections land on actual vulnerable lab views (`a1_broken_access_lab_1`,
+   `crypto_failure_lab3`, `xxe_parse`…) — the right corpus. Full gold annotation of
+   app findings is the next workstream.
+2. **Param-gate the auth rules** → **DONE:** `paramGated` surface gate — auth rules
+   (Unauthenticated Access/Mutation, Ownership Check, Resource Ownership) only apply
+   when the function is called by a web handler (`exposed`, computed in the scanners)
+   or takes an identity-ish parameter. Result: auth detections on the library corpus
+   **1,425 → 53 (−96%)**; both synthetic benchmarks unchanged (TS recall 98.5% /
+   precision 99.1%; Python 100% / 100%). Remaining 53 are fastapi ASGI dispatch
+   internals with `scope` params — framework plumbing, not app code.
+3. **SQL rule needs source-level analysis** — deferred (interface limitation documented).
 4. Keep the name-based approach for the synthetic benchmark; real-world precision is a
    separate workstream with its own gold (human-annotated app findings).

@@ -43,11 +43,30 @@ function countLines(dir: string): number {
   return lines;
 }
 
+/** Functions called by a web-handler function are "exposed" — they are the
+ *  request surface that authorization rules target. */
+const WEB_HANDLER = /\b(handle_request|handleRequest|request_handler|requestHandler)\b/i;
+
+function computeExposed(funcs: Array<{ name: string; calls?: string[] }>): Set<string> {
+  const exposed = new Set<string>();
+  for (const f of funcs) {
+    if (WEB_HANDLER.test(f.name)) {
+      for (const c of f.calls || []) exposed.add(c);
+    }
+  }
+  return exposed;
+}
+
+function isExposed(name: string, exposed: Set<string>): boolean {
+  return exposed.has(name) || exposed.has(name.split(".").pop() || name);
+}
+
 export function scanProject(projectId: string): ProjectScanResult {
   const dir = path.join(GEN_DIR, projectId);
   const ir = extractIRWithTypes(dir);
   const funcs = ir.functions.filter(f => !f.external);
   const allCalls = [...new Set(funcs.flatMap(f => f.calls || []))];
+  const exposed = computeExposed(funcs);
 
   const protocolViolations = detectProtocolViolations(allCalls);
   const safeguardViolations = detectSafeguardViolations(allCalls);
@@ -58,7 +77,7 @@ export function scanProject(projectId: string): ProjectScanResult {
     .map(f => ({
       name: f.name, file: f.file, calls: f.calls || [],
       protocolViolations: detectProtocolViolations(f.calls || []),
-      safeguardViolations: detectSafeguardViolations(f.calls || [], f.name, undefined, (f.params || []).map(p => p.name)),
+      safeguardViolations: detectSafeguardViolations(f.calls || [], f.name, undefined, (f.params || []).map(p => p.name), isExposed(f.name, exposed)),
     }));
 
   return { project: projectId, files: [...new Set(funcs.map(f => f.file))].length,

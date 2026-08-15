@@ -14,6 +14,24 @@ import { detectProtocolViolations, detectSafeguardViolations, ProtocolViolation,
 
 const GEN_DIR = path.resolve(__dirname, "generated-py");
 
+/** Shared with batch-scan.ts: functions called by a web handler are the
+ *  request surface that authorization rules target. */
+const WEB_HANDLER = /\b(handle_request|handleRequest|request_handler|requestHandler)\b/i;
+
+function computeExposed(funcs: Array<{ name: string; calls?: string[] }>): Set<string> {
+  const exposed = new Set<string>();
+  for (const f of funcs) {
+    if (WEB_HANDLER.test(f.name)) {
+      for (const c of f.calls || []) exposed.add(c);
+    }
+  }
+  return exposed;
+}
+
+function isExposed(name: string, exposed: Set<string>): boolean {
+  return exposed.has(name) || exposed.has(name.split(".").pop() || name);
+}
+
 interface ProjectScanResult {
   project: string;
   files: number;
@@ -48,6 +66,7 @@ function scanProject(projectId: string): ProjectScanResult {
   const ir = extractIRPython(dir);
   const funcs = ir.filter(f => !f.external);
   const allCalls = [...new Set(funcs.flatMap(f => f.calls || []))];
+  const exposed = computeExposed(funcs);
 
   const protocolViolations = detectProtocolViolations(allCalls);
   const safeguardViolations = detectSafeguardViolations(allCalls, undefined, "python");
@@ -57,7 +76,7 @@ function scanProject(projectId: string): ProjectScanResult {
     .map(f => ({
       name: f.name, file: f.file, calls: f.calls || [],
       protocolViolations: detectProtocolViolations(f.calls || []),
-      safeguardViolations: detectSafeguardViolations(f.calls || [], f.name, "python", (f.params || []).map(p => p.name)),
+      safeguardViolations: detectSafeguardViolations(f.calls || [], f.name, "python", (f.params || []).map(p => p.name), isExposed(f.name, exposed)),
     }));
 
   return { project: projectId, files: [...new Set(funcs.map(f => f.file))].length,
