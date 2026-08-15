@@ -319,16 +319,24 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
   },
   // ── Authorization / Ownership Check ──
   // v2: narrowed triggers — removed "process" and "set" (too generic for C libraries)
+  // v3 (2026-08-15): identity lookups (getUser/validateToken/getCurrentUser...) removed
+  // from satisfiers — authentication is NOT ownership. A mutation calling only
+  // getUser(token) without comparing ownerId/authorId is the 90-FN class found by
+  // the 100-project gold benchmark. Satisfiers are now: explicit ownership
+  // comparison names, owner-check helpers, or permission/role gates.
+  // Limitation: inline `p.ownerId !== u.id` comparisons are not visible in the
+  // call-list interface of this detector (would need AST-level analysis).
   {
     name: "Authorization (Ownership Check)",
     category: "authorization",
     trigger: /\b(delete|remove|toggle|modify|edit|lock|ban|refund|assign|transfer|share|schedule|upload)(?:[A-Z]\w*|_\w+)|(?:[A-Z]\w*|_\w+)(Delete|Remove|Toggle|Modify|Edit|Lock|Ban|Refund|Assign|Transfer|Share|Schedule|Upload)\b/i,
     safeguards: [
-      { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|checkOwner|authorId\s*[!=]==?|ownerId\s*[!=]==?|userId\s*[!=]==?|\.owner\s*[!=]==?|hasPermission|checkPermission|checkAccess|isAuthorized|checkRole|requireRole|adminCheck|isAdmin|canModify|canDelete|canEdit)\b/i, label: "auth_check" },
+      { pattern: /\b(checkOwner|isOwner|ownerId\s*[!=]==?|authorId\s*[!=]==?|userId\s*[!=]==?|createdBy\s*[!=]==?|\.owner\s*[!=]==?|\.user\s*[!=]==?)\b/i, label: "ownership_check" },
+      { pattern: /\b(hasPermission|checkPermission|checkAccess|isAuthorized|checkRole|requireRole|adminCheck|isAdmin|canModify|canDelete|canEdit)\b/i, label: "authz_check" },
     ],
-    violationMessage: "Mutation operation does not verify user ownership or authorization before modifying data.",
+    violationMessage: "Mutation operation does not verify that the acting user owns the resource or holds the required permission before modifying data.",
     conceptMissing: ["OwnershipCheck", "AuthorizationGuard"],
-    conceptExpected: ["getUser", "validateToken", "ownerId check"],
+    conceptExpected: ["ownerId comparison", "authorId check", "permission check"],
     excludePatterns: [
       /_hd_/,                   // HPACK header compression internals
       /_frame_/,                // protocol frame handlers
