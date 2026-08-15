@@ -161,19 +161,26 @@ def extract_functions_from_file(filepath: str, root_dir: str):
 
     funcs = []
     rel_path = os.path.relpath(filepath, root_dir)
+
+    # Single-pass parent map (O(n)). The old per-node full-tree walk was O(n²)
+    # and hung on large real-world files (e.g. fastapi's bigger modules).
+    parent_map = {}
+    for parent in ast.walk(tree):
+        for child in ast.iter_child_nodes(parent):
+            parent_map[child] = parent
+
+    def enclosing_class(node):
+        cur = parent_map.get(node)
+        while cur is not None:
+            if isinstance(cur, ast.ClassDef):
+                return cur.name
+            cur = parent_map.get(cur)
+        return None
+
     for node in ast.walk(tree):
         parent_class = None
-        # Check if this function is inside a class
-        for parent in ast.walk(tree):
-            if isinstance(parent, ast.ClassDef):
-                for child in ast.walk(parent):
-                    if child is node:
-                        parent_class = parent.name
-                        break
-                if parent_class:
-                    break
-
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            parent_class = enclosing_class(node)
             name = node.name
 
             # Params
@@ -227,6 +234,19 @@ def extract_ir(project_root: str):
         if any(p.startswith('.') for p in parts):
             continue
         if 'node_modules' in parts or 'site-packages' in parts or 'venv' in parts:
+            continue
+        # Skip test files — tests are not production surface for a security scanner.
+        # Checks run on the path RELATIVE to project_root (absolute parts would
+        # accidentally match the repo's parent dirs, e.g. .../benchmarks/...).
+        rel_parts = path.relative_to(Path(project_root)).parts
+        fname = path.name
+        if fname.startswith('test_') or fname.endswith('_test.py'):
+            continue
+        if 'tests' in rel_parts or 'test' in rel_parts[:-1]:
+            continue
+        # Skip docs/example/benchmark/script dirs — not shipped production surface
+        nonsurface = ('docs', 'docs_src', 'examples', 'benchmarks', 'scripts')
+        if any(p in nonsurface for p in rel_parts[:-1]):
             continue
         all_funcs.extend(extract_functions_from_file(str(path), project_root))
     return all_funcs

@@ -294,6 +294,9 @@ interface SafeguardRule {
    *  parameter (name ends with "Id", or entityType/entityId). Requires the
    *  caller to pass param names (see `params` argument of detectSafeguardViolations). */
   parentRefGated?: boolean;
+  /** When set, the trigger is tested against raw callee names only — not the
+   *  identifier-parsed words (which split execute_command into "execute"). */
+  triggerCallsOnly?: boolean;
   /** Stricter safeguard patterns used when param names are known
    *  (parentRefGated rules); the default `safeguards` stay for legacy callers. */
   strictSafeguards?: Array<{ pattern: RegExp; label: string; callsOnly?: boolean }>;
@@ -635,7 +638,11 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     name: "SQL Injection (Python)",
     category: "input_validation",
     languages: ["python"],
-    trigger: /\b(execute|executemany)\b/i,
+    // triggerCallsOnly: the identifier-parsed words would otherwise let any
+    // execute_* callee (execute_command, execute_script — e.g. redis-py) match
+    // the bare "execute" trigger and fire on non-SQL code.
+    trigger: /\b(execute|executemany|executescript|execute_query)\b/i,
+    triggerCallsOnly: true,
     safeguards: [
       { pattern: /\b(%s|\?|:\w+|parameterize|\.execute\s*\(\s*\w+\s*,\s*[\[(])/i, label: "parameterized_query" },
     ],
@@ -981,8 +988,12 @@ export function identifierParse(name: string): string[] {
 export function detectSafeguardViolations(calls: string[], enclosingFuncName?: string, language?: string, params?: string[]): SafeguardViolation[] {
   const violations: SafeguardViolation[] = [];
 
-  // Build effective calls: raw names + identifier-parsed words
-  const rawCalls = enclosingFuncName ? [enclosingFuncName, ...calls] : [...calls];
+  // Build effective calls: raw names + identifier-parsed words.
+  // Class-qualified names (Class.method) contribute only their METHOD name —
+  // a class name like SetCommands/ListCommands must not leak "Set"/"List"
+  // words into trigger matching (real-world collision class found in redis-py).
+  const ownName = enclosingFuncName ? (enclosingFuncName.split(".").pop() || enclosingFuncName) : undefined;
+  const rawCalls = ownName ? [ownName, ...calls] : [...calls];
   const parsedWords: string[] = [];
   for (const c of rawCalls) {
     parsedWords.push(...identifierParse(c));
@@ -1004,7 +1015,8 @@ export function detectSafeguardViolations(calls: string[], enclosingFuncName?: s
 
   for (const rule of activeRules) {
     // Check if trigger matches
-    const triggerMatch = effectiveCalls.some(c => rule.trigger.test(c));
+    const triggerCalls = rule.triggerCallsOnly ? rawCalls : effectiveCalls;
+    const triggerMatch = triggerCalls.some(c => rule.trigger.test(c));
     if (!triggerMatch) continue;
 
     // Skip authorization rules for auth functions — they ARE the auth
