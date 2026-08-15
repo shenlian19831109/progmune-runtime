@@ -8,7 +8,7 @@ import * as path from "path";
 
 const GEN_DIR = path.resolve(__dirname, "generated");
 
-const TYPES: Array<{ id: string; name: string; entities: string[] }> = [
+export const TYPES: Array<{ id: string; name: string; entities: string[] }> = [
   { id: "analytics", name: "Analytics API", entities: ["Event","Metric","Dashboard","Report"] },
   { id: "apigateway", name: "API Gateway", entities: ["Route","Cache","Upstream","Policy"] },
   { id: "inventory", name: "Inventory System", entities: ["Item","Stock","Supplier","Warehouse"] },
@@ -21,7 +21,7 @@ const TYPES: Array<{ id: string; name: string; entities: string[] }> = [
   { id: "xclone", name: "Social Platform", entities: ["Post","Like","Follow","Feed"] },
 ];
 
-interface Style {
+export interface Style {
   id: string; desc: string;
   authFn: string; registerName: string; loginName: string; logoutName: string;
   tokenGen: string; hashing: string; idxPrefix: string; passwordStore: string;
@@ -29,7 +29,7 @@ interface Style {
   noAuthFns: string[];
 }
 
-const STYLES: Style[] = [
+export const STYLES: Style[] = [
   { id: "A", desc: "plain", authFn: "getUser", registerName: "register", loginName: "login", logoutName: "logout",
     tokenGen: `"tok_" + Math.random().toString(36)`, hashing: "none", idxPrefix: "next", passwordStore: "password",
     noAuthFns: ["listEvents","getMetric"],
@@ -175,29 +175,32 @@ ${routes}
 }
 
 // ── Main ──
+// Guarded so importing this module (for TYPES/STYLES) does not regenerate projects.
 
-// Clean old generated projects
-for (const d of fs.readdirSync(GEN_DIR)) {
-  const p = path.join(GEN_DIR, d);
-  if (fs.statSync(p).isDirectory() && d.includes("_")) {
-    fs.rmSync(p, { recursive: true });
-  }
-}
-
-let count = 0;
-for (const t of TYPES) {
-  for (const s of STYLES) {
-    const projId = `${t.id}_${s.id}`;
-    const dir = path.join(GEN_DIR, projId, "src");
-    fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(path.join(dir, "..", "tsconfig.json"),
-      '{"compilerOptions":{"target":"ES2020","module":"commonjs","strict":true,"esModuleInterop":true},"include":["src"]}');
-    fs.writeFileSync(path.join(dir, "auth.ts"), genAuth(t, s));
-    for (const e of t.entities.slice(0, 2)) {
-      fs.writeFileSync(path.join(dir, `${e.toLowerCase()}.ts`), genEntity(e, s, t.id));
+if (require.main === module) {
+  // Clean old generated projects
+  for (const d of fs.readdirSync(GEN_DIR)) {
+    const p = path.join(GEN_DIR, d);
+    if (fs.statSync(p).isDirectory() && d.includes("_")) {
+      fs.rmSync(p, { recursive: true });
     }
-    fs.writeFileSync(path.join(dir, "server.ts"), genServer(t, s));
-    count++;
   }
+
+  let count = 0;
+  for (const t of TYPES) {
+    for (const s of STYLES) {
+      const projId = `${t.id}_${s.id}`;
+      const dir = path.join(GEN_DIR, projId, "src");
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(path.join(dir, "..", "tsconfig.json"),
+        '{"compilerOptions":{"target":"ES2020","module":"commonjs","strict":true,"esModuleInterop":true},"include":["src"]}');
+      fs.writeFileSync(path.join(dir, "auth.ts"), genAuth(t, s));
+      for (const e of t.entities.slice(0, 2)) {
+        fs.writeFileSync(path.join(dir, `${e.toLowerCase()}.ts`), genEntity(e, s, t.id));
+      }
+      fs.writeFileSync(path.join(dir, "server.ts"), genServer(t, s));
+      count++;
+    }
+  }
+  console.log(`Generated ${count} projects (${TYPES.length} types × ${STYLES.length} styles)`);
 }
-console.log(`Generated ${count} projects (${TYPES.length} types × ${STYLES.length} styles)`);

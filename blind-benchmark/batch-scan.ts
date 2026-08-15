@@ -43,7 +43,7 @@ function countLines(dir: string): number {
   return lines;
 }
 
-function scanProject(projectId: string): ProjectScanResult {
+export function scanProject(projectId: string): ProjectScanResult {
   const dir = path.join(GEN_DIR, projectId);
   const ir = extractIRWithTypes(dir);
   const funcs = ir.functions.filter(f => !f.external);
@@ -155,6 +155,11 @@ const report = {
     protocolViolations: r.protocolViolations.map(v => ({ protocol: v.protocol, category: v.category, type: v.type, missing: v.missing, detail: v.detail, conceptDetail: v.conceptDetail })),
     safeguardViolations: r.safeguardViolations.map(v => ({ rule: v.rule, category: v.category, type: v.type, detail: v.detail, conceptDetail: v.conceptDetail })),
     resourceViolations: r.resourceViolations,
+    perFunction: r.perFunction.map(f => ({
+      name: f.name, file: f.file, calls: f.calls,
+      protocolViolations: f.protocolViolations.map(v => ({ protocol: v.protocol, category: v.category, type: v.type, missing: v.missing, detail: v.detail, conceptDetail: v.conceptDetail })),
+      safeguardViolations: f.safeguardViolations.map(v => ({ rule: v.rule, category: v.category, type: v.type, detail: v.detail, conceptDetail: v.conceptDetail })),
+    })),
   })),
   aggregate: {
     projects: results.length, totalFunctions: results.reduce((s, r) => s + r.functions, 0),
