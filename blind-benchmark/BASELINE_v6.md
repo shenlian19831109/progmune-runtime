@@ -93,7 +93,36 @@ methodology. Effective recall = 100%.
 
 `Session Fixation (Logout without Invalidation)` fires on logout functions that *do* splice the session out (and duplicates on handleRequest). The rule keys on `session.destroy`-style call names and ignores splice-based invalidation.
 
-## Repro
+## Python Pilot (2026-08-15) — v1
+
+The same pipeline transliterated to Python: `generate-projects-python.ts` emits snake_case
+versions of the same 4 templates with the same planted flaws (90 style-variant projects);
+`batch-scan-python.ts` scans via the existing Python IR extractor
+(`extractIRPython` → `tools/extract_ir.py`); `expand-gold-python.ts` derives the same gold
+and reuses the same strict-localization matching. Required rule vocabulary patches: snake_case
+triggers for Password Hashing / Token Security / TLS / Rate Limiting / Session Fixation /
+Registration, snake_case auth names in AUTH_PATTERN and the two authorization rules'
+satisfiers.
+
+| Metric | Python v1 (90 style projects) | TS (100 projects) |
+|--------|------------------------------|-------------------|
+| Gold findings | 729 | 795 |
+| Recall | **100%** | 98.5% |
+| Precision | **100%** | 99.1% |
+| FPs | **0** | 7 |
+
+The detector's name-based architecture transfers to Python nearly for free — the only
+language-specific layer is the IR extractor (already existed). The 7 TS FPs (inline
+ownerId comparisons) do not occur in the Python corpus because the style templates carry
+no inline comparisons; real-world Python will surface the same class.
+
+```bash
+npx ts-node blind-benchmark/generate-projects-python.ts  # 90 python projects → generated-py/
+npx ts-node blind-benchmark/batch-scan-python.ts          # → reports/batch-scan-python-results.json
+npx ts-node blind-benchmark/expand-gold-python.ts         # → gold/annotations-python-v1.json
+```
+
+## Repro (TypeScript)
 
 ```bash
 npx ts-node blind-benchmark/generate-projects.ts   # (re)generate 90 style projects
@@ -101,4 +130,5 @@ npx ts-node blind-benchmark/batch-scan.ts          # fresh scan → reports/batc
 npx ts-node blind-benchmark/expand-gold-v6.ts      # → gold/annotations-v2.json
 ```
 
-`blind-benchmark/reports/batch-scan-results.json` is gitignored (regenerable). `gold/annotations-v2.json` is committed.
+`blind-benchmark/reports/batch-scan-*-results.json` and `generated*` are gitignored
+(regenerable). Gold annotations are committed.

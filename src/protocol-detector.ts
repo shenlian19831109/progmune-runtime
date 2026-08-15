@@ -304,7 +304,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
   {
     name: "Password Hashing",
     category: "password_hashing",
-    trigger: /\b(register|signUp|createUser|createAccount|registerUser)\b/i,
+    trigger: /\b(register|signUp|createUser|createAccount|registerUser|sign_up|create_user|create_account|register_user|register_new_user)\b/i,
     safeguards: [
       { pattern: /\b(bcrypt|argon2|scrypt|pbkdf2|hash|hashPassword|createHash|hashSync|hash_password)\b/i, label: "secure_hash" },
     ],
@@ -316,7 +316,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
   {
     name: "Password Hashing (Weak)",
     category: "password_hashing",
-    trigger: /\b(register|signUp|createUser|createAccount|registerUser)\b/i,
+    trigger: /\b(register|signUp|createUser|createAccount|registerUser|sign_up|create_user|create_account|register_user|register_new_user)\b/i,
     safeguards: [
       { pattern: /\b(bcrypt|argon2|scrypt|pbkdf2)\b/i, label: "strong_hash" },
     ],
@@ -365,7 +365,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     languages: ["typescript", "javascript", "python"],
     trigger: /\b(list|download|view|fetch)(?:[A-Z]\w*|_\w+)|get(?:[A-Z]\w+|_\w+)/i,
     safeguards: [
-      { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess)\b/i, label: "auth_check" },
+      { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware)\b/i, label: "auth_check" },
     ],
     violationMessage: "Data access function does not check authentication. Anyone can access data without credentials.",
     conceptMissing: ["AuthenticationCheck", "AccessControl"],
@@ -394,7 +394,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     // (listPosts/getPost/deletePost fire via identifier-parsed words).
     trigger: /\b(add|create|update|set|publish|insert|submit)(?:[A-Z]\w*|_\w+)|(?:[A-Z]\w*|_\w+)(Add|Create|Update|Set|Publish|Insert|Submit)\b/i,
     safeguards: [
-      { pattern: /\b(getUser|validateToken|verifyToken|verifySession|validateSession|getSessionUser|getSession\b|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess)\b/i, label: "auth_check" },
+      { pattern: /\b(getUser|validateToken|verifyToken|verifySession|validateSession|getSessionUser|getSession\b|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware)\b/i, label: "auth_check" },
     ],
     violationMessage: "Mutation function does not check authentication. Anyone can create or modify data without credentials.",
     conceptMissing: ["AuthenticationCheck", "AccessControl"],
@@ -462,7 +462,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
   {
     name: "TLS Enforcement",
     category: "tls_enforcement",
-    trigger: /\b(createServer|listen|handleRequest|app\.listen|express)\b/i,
+    trigger: /\b(createServer|listen|handleRequest|handle_request|app\.listen|express)\b/i,
     safeguards: [
       { pattern: /\b(https|tls|ssl|cert|key|TLS|SSL|HTTPS|createSecureContext|credentials)\b/i, label: "tls_config" },
     ],
@@ -475,7 +475,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     name: "Token Security (Weak Generation)",
     category: "token_security",
     languages: ["typescript", "javascript", "python"],
-    trigger: /\b(authenticate|login|signIn|logIn|createSession|generateToken)\b/i,
+    trigger: /\b(authenticate|login|signIn|logIn|createSession|generateToken|do_login|sign_in|log_in|generate_token|create_session)\b/i,
     safeguards: [
       { pattern: /\b(crypto\.randomUUID|jwt\.sign|jsonwebtoken|nanoid|randomBytes|cryptoRandomString)\b/i, label: "secure_token" },
     ],
@@ -535,7 +535,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
   {
     name: "Rate Limiting",
     category: "rate_limiting",
-    trigger: /\b(createServer|listen|handleRequest|app\.listen|express|router\.(post|get|put|delete|patch))\b/i,
+    trigger: /\b(createServer|listen|handleRequest|handle_request|app\.listen|express|router\.(post|get|put|delete|patch))\b/i,
     safeguards: [
       { pattern: /\b(rateLimit|rate_limit|throttle|RateLimiter|expressRateLimit|rateLimiterMiddleware|limiter)\b/i, label: "rate_limit" },
     ],
@@ -688,7 +688,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
   {
     name: "Session No Timeout",
     category: "session",
-    trigger: /\b(\w*session\w*create|\w*create\w*session|\w*session\w*new|\w*session\w*start|\w*login\w*session|\w*session\w*init|signIn|signin|login\b|authenticate\b|createSession|create_session)\b/i,
+    trigger: /\b(\w*session\w*create|\w*create\w*session|\w*session\w*new|\w*session\w*start|\w*login\w*session|\w*session\w*init|signIn|signin|login\b|authenticate\b|createSession|create_session|do_login|sign_in|log_in)\b/i,
     safeguards: [
       { pattern: /\b(\w*expir|\w*ttl|\w*timeout|\w*max\w*age|\w*maxAge|\w*max_age|\w*lifetime|\w*duration|\w*expires|\w*deadline|\w*valid\w*for|\w*valid\w*until)/i, label: "timeout_set" },
     ],
@@ -726,7 +726,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
   {
     name: "Registration Without Email Verification",
     category: "registration",
-    trigger: /\b(register|signup|signUp|registerUser|createUser|createAccount)\b/i,
+    trigger: /\b(register|signup|signUp|registerUser|createUser|createAccount|sign_up|create_user|create_account|register_user|register_new_user)\b/i,
     safeguards: [
       { pattern: /\b(send\w*(Code|Otp|Token|Verif|Email|Sms|Link)|(code|otp|token|verif)\w*send|verification|confirmEmail|verifyEmail|sendVerification|verify_user_email)\b/i, label: "email_verify" },
     ],
@@ -885,14 +885,14 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     name: "Session Fixation (Logout without Invalidation)",
     category: "session_fixation",
     languages: ["typescript", "javascript", "python"],
-    trigger: /\b(logout|signOut|logOut|signout|doLogout|handleLogout|endSession|clearSession)\b/i,
+    trigger: /\b(logout|signOut|logOut|signout|doLogout|handleLogout|endSession|clearSession|do_logout|sign_out|log_out|handle_logout|end_session|clear_session|invalidate_session)\b/i,
     safeguards: [
       { pattern: /\b(session\w*destroy|destroy\w*session|session\w*invalidate|invalidate\w*session|session\w*revoke|revoke\w*session|session\w*clear|clear\w*session|session\w*end|end\w*session|session\w*expire|expire\w*session|token\w*revoke|revoke\w*token|token\w*blacklist|blacklist\w*token|invalidate\w*token)\b/i, label: "session_invalidate" },
       // Store-based invalidation: remove the session entry from the store.
       { pattern: /\b(splice|filter|pop|shift|clear)\b/i, label: "store_invalidate" },
       // Delegation: calling a logout-named function hands invalidation to that
       // function (its own body is checked separately).
-      { pattern: /\b(logout|signOut|logOut|signout|doLogout|handleLogout|endSession|clearSession)\b/i, label: "delegated_logout", callsOnly: true },
+      { pattern: /\b(logout|signOut|logOut|signout|doLogout|handleLogout|endSession|clearSession|do_logout|sign_out|log_out|handle_logout|end_session|clear_session|invalidate_session)\b/i, label: "delegated_logout", callsOnly: true },
     ],
     violationMessage: "Logout function does not destroy/invalidate the session. Old session tokens remain valid, enabling session hijacking (session fixation).",
     conceptMissing: ["SessionInvalidation", "SessionRevocation"],
@@ -991,7 +991,7 @@ export function detectSafeguardViolations(calls: string[], enclosingFuncName?: s
 
   // Skip authorization rules for auth functions — check both raw lowercased name and parsed words
   const rawLower = enclosingFuncName?.toLowerCase() || "";
-  const AUTH_PATTERN = /\b(register|signup|signin|login|authenticate|createuser|createaccount|registeruser|registernewuser|dologin|verifytoken|validatesession|getuser|getsessionuser|getcurrentuser|endsession|logout|signout|dologout|destroysession|invalidatesession|invalidate|signout)\b/i;
+  const AUTH_PATTERN = /\b(register|signup|signin|login|authenticate|createuser|createaccount|registeruser|registernewuser|dologin|verifytoken|validatesession|getuser|getsessionuser|getcurrentuser|endsession|logout|signout|dologout|destroysession|invalidatesession|invalidate|signout|create_account|register_new_user|register_user|sign_up|create_user|do_login|sign_in|log_in|verify_token|validate_session|get_user|get_session_user|get_current_user|do_logout|sign_out|log_out|end_session|invalidate_session|clear_session)\b/i;
   const isAuthFunction = enclosingFuncName != null && (
     AUTH_PATTERN.test(rawLower) ||
     identifierParse(enclosingFuncName).some(w => AUTH_PATTERN.test(w))
@@ -1150,7 +1150,7 @@ export function detectSafeguardViolationsV7(
 
   // Skip authorization rules for auth functions
   const rawLower = enclosingFuncName?.toLowerCase() || "";
-  const AUTH_PATTERN = /\b(register|signup|signin|login|authenticate|createuser|createaccount|registeruser|registernewuser|dologin|verifytoken|validatesession|getuser|getsessionuser|getcurrentuser|endsession|logout|signout|dologout|destroysession|invalidatesession|invalidate|signout)\b/i;
+  const AUTH_PATTERN = /\b(register|signup|signin|login|authenticate|createuser|createaccount|registeruser|registernewuser|dologin|verifytoken|validatesession|getuser|getsessionuser|getcurrentuser|endsession|logout|signout|dologout|destroysession|invalidatesession|invalidate|signout|create_account|register_new_user|register_user|sign_up|create_user|do_login|sign_in|log_in|verify_token|validate_session|get_user|get_session_user|get_current_user|do_logout|sign_out|log_out|end_session|invalidate_session|clear_session)\b/i;
   const isAuthFunction = enclosingFuncName != null && (
     AUTH_PATTERN.test(rawLower) ||
     identifierParse(enclosingFuncName).some(w => AUTH_PATTERN.test(w))

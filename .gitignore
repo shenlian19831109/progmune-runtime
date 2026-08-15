@@ -32,6 +32,7 @@ benchmarks/redis/
 benchmark-pilot/
 # Blind benchmark generated projects
 blind-benchmark/generated/
+blind-benchmark/generated-py/
 # Large data files
 .progmune_corpus/
 .progmune_generated/
@@ -45,6 +46,7 @@ ir.json
 ir_large.json
 feedback.json
 blind-benchmark/reports/batch-scan-results.json
+blind-benchmark/reports/batch-scan-python-results.json
 blind-benchmark/reports/asset-coverage-matrix.json
 blind-benchmark/reports/capability-gap-analysis.json
 pnpm-lock.yaml
