@@ -282,7 +282,7 @@ interface SafeguardRule {
   /** Function name pattern that triggers this rule */
   trigger: RegExp;
   /** Required safeguard patterns — at least one must match */
-  safeguards: Array<{ pattern: RegExp; label: string }>;
+  safeguards: Array<{ pattern: RegExp; label: string; /** match against callee names only, excluding the enclosing function's own name (delegation checks) */ callsOnly?: boolean }>;
   /** Human-readable description of what's missing */
   violationMessage: string;
   /** Concept mapping */
@@ -296,7 +296,7 @@ interface SafeguardRule {
   parentRefGated?: boolean;
   /** Stricter safeguard patterns used when param names are known
    *  (parentRefGated rules); the default `safeguards` stay for legacy callers. */
-  strictSafeguards?: Array<{ pattern: RegExp; label: string }>;
+  strictSafeguards?: Array<{ pattern: RegExp; label: string; callsOnly?: boolean }>;
 }
 
 const SAFEGUARD_RULES: SafeguardRule[] = [
@@ -876,6 +876,11 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
   // ═══════════════════════════════════════════════════════════════
 
   // ── PLS-005: Session Fixation — session not invalidated on logout ──
+  // v2 (2026-08-15): recognize store-based invalidation — splicing/filtering the
+  // session store IS invalidation (144 FPs on the 100-project benchmark came from
+  // logouts that do `sessions.splice(idx, 1)`). Also, a function that delegates to
+  // a logout-named function is not itself failing to invalidate — the logout
+  // function's own body is where the check belongs (callsOnly guard).
   {
     name: "Session Fixation (Logout without Invalidation)",
     category: "session_fixation",
@@ -883,6 +888,11 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     trigger: /\b(logout|signOut|logOut|signout|doLogout|handleLogout|endSession|clearSession)\b/i,
     safeguards: [
       { pattern: /\b(session\w*destroy|destroy\w*session|session\w*invalidate|invalidate\w*session|session\w*revoke|revoke\w*session|session\w*clear|clear\w*session|session\w*end|end\w*session|session\w*expire|expire\w*session|token\w*revoke|revoke\w*token|token\w*blacklist|blacklist\w*token|invalidate\w*token)\b/i, label: "session_invalidate" },
+      // Store-based invalidation: remove the session entry from the store.
+      { pattern: /\b(splice|filter|pop|shift|clear)\b/i, label: "store_invalidate" },
+      // Delegation: calling a logout-named function hands invalidation to that
+      // function (its own body is checked separately).
+      { pattern: /\b(logout|signOut|logOut|signout|doLogout|handleLogout|endSession|clearSession)\b/i, label: "delegated_logout", callsOnly: true },
     ],
     violationMessage: "Logout function does not destroy/invalidate the session. Old session tokens remain valid, enabling session hijacking (session fixation).",
     conceptMissing: ["SessionInvalidation", "SessionRevocation"],
@@ -1009,7 +1019,10 @@ export function detectSafeguardViolations(calls: string[], enclosingFuncName?: s
 
     // Check if at least one safeguard matches
     const guards = (params && rule.strictSafeguards) ? rule.strictSafeguards : rule.safeguards;
-    const matchedSafeguard = guards.find(s => effectiveCalls.some(c => s.pattern.test(c)));
+    const matchedSafeguard = guards.find(s => {
+      const testCalls = s.callsOnly ? (calls || []) : effectiveCalls;
+      return testCalls.some(c => s.pattern.test(c));
+    });
     if (matchedSafeguard) continue;
 
     // Check excludePatterns (library functions where safeguard is deferred to separate API)

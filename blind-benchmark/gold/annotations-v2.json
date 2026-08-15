@@ -3,8 +3,8 @@
   "annotated_by": "plant-config + template review (style variants); human (model variants, 2026-07-06)",
   "annotated_at": "2026-08-15",
   "version": "6.0",
-  "detector_scan_generated": "2026-08-15T15:07:21.735Z",
-  "detector_commit": "2fbbd35764be1323bc3a5646ffa912138ed8f08c",
+  "detector_scan_generated": "2026-08-15T15:32:58.932Z",
+  "detector_commit": "5aef519b56d0536d1439781cbc25f0383bcd30bc",
   "projects": [
     {
       "project_id": "analytics_A",
@@ -154,7 +154,7 @@
         "detected": 10,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -430,7 +430,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -566,7 +566,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -702,7 +702,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -974,7 +974,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -1110,7 +1110,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -1246,7 +1246,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -1518,7 +1518,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -1654,7 +1654,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -1746,7 +1746,7 @@
         "detected": 5,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 5,
+        "false_positives": 3,
         "by_severity": {
           "high": {
             "total": 1,
@@ -1886,7 +1886,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -2158,7 +2158,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -2294,7 +2294,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -2527,7 +2527,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -2799,7 +2799,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -2935,7 +2935,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -3180,7 +3180,7 @@
         "detected": 5,
         "missed": 1,
         "detection_rate": 83.3,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "critical": {
             "total": 1,
@@ -3326,7 +3326,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -3598,7 +3598,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -3734,7 +3734,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -3998,7 +3998,7 @@
         "detected": 6,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 3,
+        "false_positives": 1,
         "by_severity": {
           "high": {
             "total": 3,
@@ -4134,7 +4134,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -4406,7 +4406,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -4555,7 +4555,7 @@
         "detected": 9,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -4695,7 +4695,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -4967,7 +4967,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -5103,7 +5103,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -5239,7 +5239,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -5511,7 +5511,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -5647,7 +5647,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -5783,7 +5783,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -6055,7 +6055,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -6191,7 +6191,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -6327,7 +6327,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -6612,7 +6612,7 @@
         "detected": 9,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -6752,7 +6752,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -6888,7 +6888,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -7160,7 +7160,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -7296,7 +7296,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -7467,7 +7467,7 @@
         "detected": 8,
         "missed": 2,
         "detection_rate": 80,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 5,
@@ -7610,7 +7610,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -7882,7 +7882,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -8018,7 +8018,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -8154,7 +8154,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -8426,7 +8426,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -8562,7 +8562,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -8698,7 +8698,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -9000,7 +9000,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -9136,7 +9136,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -9272,7 +9272,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -9544,7 +9544,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -9680,7 +9680,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -9816,7 +9816,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -10088,7 +10088,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -10373,7 +10373,7 @@
         "detected": 9,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -10513,7 +10513,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -10649,7 +10649,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -10921,7 +10921,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -11057,7 +11057,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -11193,7 +11193,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -11465,7 +11465,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -11601,7 +11601,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -11731,7 +11731,7 @@
         "detected": 5,
         "missed": 2,
         "detection_rate": 71.4,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 2,
@@ -11874,7 +11874,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -12146,7 +12146,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -12282,7 +12282,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -12654,7 +12654,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -12926,7 +12926,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -13088,7 +13088,7 @@
         "detected": 10,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -13228,7 +13228,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -13500,7 +13500,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -13636,7 +13636,7 @@
         "detected": 8,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 4,
@@ -13661,9 +13661,9 @@
     "out_of_scope": 1,
     "genuine_fns": 0,
     "overall_recall": 98.5,
-    "overall_precision": 83.8,
-    "false_positive_rate": 16.2,
-    "false_positives_total": 151,
+    "overall_precision": 99.1,
+    "false_positive_rate": 0.9,
+    "false_positives_total": 7,
     "effective_recall_excluding_annotation": 100,
     "note": "FP = detections factually wrong per code review: (1) session_fixation on logout functions that do invalidate; (2) Authorization (Ownership Check) on functions whose body contains an inline ownerId/authorId comparison. Factually-true detections not in the gold list are 'unlabeled' and excluded from precision — mirrors v5 annotation_issues handling. Matching is strict-localization: a finding counts as detected only when ITS function carries the corresponding rule; the handleRequest aggregator fallback applies only to functions absent from the scan."
   }

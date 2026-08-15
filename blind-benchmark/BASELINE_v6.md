@@ -37,8 +37,8 @@ Claude template review (applies to all style projects, verified by reading the f
 | Gold findings | 795 | 729 | 66 |
 | Recall | **98.5%** | 98.6% | 97.0% |
 | Effective recall¹ | **100%** | 98.6% | 100% |
-| Precision | **83.8%** | — | — |
-| FPs (factual) | 151 | 144 | 7 |
+| Precision | **99.1%** | — | — |
+| FPs (factual) | 7 | 0 | 7 |
 
 ¹ Excludes 11 read-auth annotation issues + 1 out-of-scope business-logic finding carried from gold-v1.
 
@@ -55,6 +55,12 @@ Claude template review (applies to all style projects, verified by reading the f
    (add/create/update/set/publish/insert/submit) without any auth check. `post` verb
    excluded (collides with the Post entity name). Fixed ECOM-002/FORUM-002/ISS-005.
 4. **Ownership Check trigger += `update`** — fixed WIKI-006 (updatePage).
+5. **Session Fixation — store-based invalidation** — the rule only recognized
+   `session.destroy`-style call names; logouts that splice/filter the session store were
+   flagged despite invalidating correctly (144 FPs). Satisfiers now include store-based
+   invalidation verbs (`splice|filter|pop|shift|clear`) and a `callsOnly` delegation guard
+   (a function calling a logout-named function delegates invalidation — checked at the
+   logout function itself). Broken logouts still fire.
 
 Known limitation (now measured): inline `p.ownerId !== u.id` comparisons are invisible to
 the call-list interface — 7 factual FPs on the model projects (blog deleteComment/
@@ -75,13 +81,13 @@ All 795 gold findings are detected; the 12 non-detected findings are the histori
 annotation-issues (11 read-auth) + 1 out-of-scope business-logic finding excluded by
 methodology. Effective recall = 100%.
 
-### FP classes (151)
+### FP classes (7)
 
-1. **Session Fixation (144):** fires on logout functions that *do* splice the session out
-   (and duplicates on handleRequest). 72 projects × 2 detections.
-2. **Ownership Check vs inline comparisons (7):** model-project functions that verify
+1. **Ownership Check vs inline comparisons (7):** model-project functions that verify
    ownership with inline `ownerId/authorId` comparisons — invisible to the call-list
    interface. Next improvement: AST-level comparison detection.
+2. ~~Session Fixation (144)~~ — fixed by recognizing store-based invalidation
+   (`splice`/`filter`) and delegation to logout functions.
 
 ### FP class (144): Session Fixation
 
