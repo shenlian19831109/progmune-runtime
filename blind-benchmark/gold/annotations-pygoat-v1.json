@@ -4,12 +4,12 @@
   "version": "1.0",
   "corpus": "PyGoat (OWASP vulnerable-by-design Django app, shallow clone)",
   "summary": {
-    "total_detections": 205,
-    "true_positives": 26,
+    "total_detections": 208,
+    "true_positives": 30,
     "false_positives": 10,
-    "unlabeled": 169,
-    "labeled_precision": 72.2,
-    "auth_rule_tp": 9
+    "unlabeled": 168,
+    "labeled_precision": 75.0,
+    "auth_rule_tp": 10
   },
   "recall_notes": "PyGoat's lab inventory spans ~30 labs across OWASP classes. The detector surfaced 10 auth/broken-access labs and 3 weak-hashing/token labs. Missed classes: SQLi, XSS, SSTI, SSRF, command injection, XXE-as-injection (the xxe lab fired via the auth rule, not an injection rule) — out of scope for the protocol-lifecycle rule set. A full recall number would require lab-level gold enumeration.",
   "detections": [
@@ -381,8 +381,15 @@
       "function": "xss_lab",
       "file": "introduction/views.py",
       "rule": "Authorization (Unauthenticated Mutation)",
-      "verdict": "unlabeled",
-      "note": "not individually reviewed"
+      "verdict": "tp",
+      "note": "{{ query|safe }} in template + tainted request.GET query — reflected XSS"
+    },
+    {
+      "function": "xss_lab",
+      "file": "introduction/views.py",
+      "rule": "XSS (Unsafe Template Rendering)",
+      "verdict": "tp",
+      "note": "{{ query|safe }} in template + tainted request.GET query — reflected XSS"
     },
     {
       "function": "xss_lab",
@@ -390,6 +397,13 @@
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
+    },
+    {
+      "function": "xss_lab2",
+      "file": "introduction/views.py",
+      "rule": "XSS (Unsafe Template Rendering)",
+      "verdict": "tp",
+      "note": "{{ username|safe }} + tainted username (bypassable filter) — reflected XSS"
     },
     {
       "function": "xss_lab2",
@@ -1111,6 +1125,13 @@
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
+    },
+    {
+      "function": "software_and_data_integrity_failure_lab2",
+      "file": "introduction/views.py",
+      "rule": "XSS (Unsafe Template Rendering)",
+      "verdict": "tp",
+      "note": "{{ username|safe }} + request.GET — reflected XSS hidden in an A8 lab"
     },
     {
       "function": "software_and_data_integrity_failure_lab2",

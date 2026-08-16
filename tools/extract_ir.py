@@ -200,6 +200,87 @@ def is_file_sink_call(node):
     return False
 
 
+XSS_MARKER = "__progmune_xss_unsafe_render__"
+
+
+def scan_unsafe_template_vars(project_root):
+    """Template-layer visibility: map template path (relative to project root)
+    → set of variables rendered WITHOUT escaping — {{ var|safe }} filters or
+    anything inside {% autoescape off %} blocks."""
+    unsafe = {}
+    for path in Path(project_root).rglob("*.html"):
+        if 'node_modules' in path.parts or 'venv' in path.parts \
+                or any(p.startswith('.') for p in path.parts):
+            continue
+        try:
+            text = path.read_text(encoding='utf-8', errors='ignore')
+        except Exception:
+            continue
+        vars_ = set(re.findall(r'{{\s*(\w+)\s*\|\s*safe\s*}}', text))
+        for block in re.findall(
+                r'{%\s*autoescape\s+off\s*%}(.*?){%\s*endautoescape\s*%}',
+                text, re.S):
+            vars_ |= set(re.findall(r'{{\s*(\w+)\s*}}', block))
+        if vars_:
+            unsafe[path.relative_to(project_root).as_posix()] = vars_
+    return unsafe
+
+
+def has_xss(node, unsafe_vars=None):
+    """XSS check: a render/render_to_string call binds tainted request-derived
+    values into template variables that the template renders without escaping
+    ({{ var|safe }} / autoescape off) — or mark_safe() applied to tainted
+    input directly."""
+    assigns = collect_assignments(node)
+    if unsafe_vars:
+        for child in ast.walk(node):
+            if not isinstance(child, ast.Call):
+                continue
+            name = None
+            if isinstance(child.func, ast.Name):
+                name = child.func.id
+            elif isinstance(child.func, ast.Attribute):
+                name = child.func.attr
+            if name not in ("render", "render_to_string"):
+                continue
+            tpl_idx = 1 if name == "render" else 0
+            if len(child.args) <= tpl_idx:
+                continue
+            tpl = child.args[tpl_idx]
+            tpl_name = tpl.value if isinstance(tpl, ast.Constant) \
+                and isinstance(tpl.value, str) else None
+            if not tpl_name:
+                continue
+            vars_ = None
+            for path, vs in unsafe_vars.items():
+                if path.endswith(tpl_name):
+                    vars_ = vs
+                    break
+            if not vars_:
+                continue
+            ctx = None
+            if len(child.args) > tpl_idx + 1:
+                ctx = child.args[tpl_idx + 1]
+            for kw in child.keywords:
+                if kw.arg == "context":
+                    ctx = kw.value
+            if isinstance(ctx, ast.Name):
+                ctx = assigns.get(ctx.id)
+            if not isinstance(ctx, ast.Dict):
+                continue
+            for k, v in zip(ctx.keys, ctx.values):
+                key = k.value if isinstance(k, ast.Constant) else None
+                if key in vars_ and is_tainted(v, assigns):
+                    return True
+    # mark_safe on tainted input is the same flaw expressed in the view
+    for child in ast.walk(node):
+        if isinstance(child, ast.Call) and isinstance(child.func, ast.Name) \
+                and child.func.id == "mark_safe":
+            if any(is_tainted(a, assigns) for a in child.args):
+                return True
+    return False
+
+
 def has_path_traversal(node):
     """Path-traversal check: a file sink whose path argument is tainted by
     request-derived user input (directly or via single-hop assignment —
@@ -227,14 +308,15 @@ def has_path_traversal(node):
     return False
 
 
-def extract_calls(node):
+def extract_calls(node, unsafe_vars=None):
     """Extract function call names from a function body (first-level only).
 
     Attribute calls emit the full qualified chain (e.g. user.change_password,
     User.objects.create_user) so rules can distinguish framework-delegated
     calls from custom same-named functions. Bare-name calls stay as-is.
-    Unparameterized SQL execution emits a synthetic marker call; SSRF
-    (user-controlled URL fetch) emits another."""
+    Source-level checks emit synthetic marker calls: unparameterized SQL,
+    SSRF (user-controlled URL fetch), path traversal, and XSS (unsafe
+    template rendering)."""
     calls = []
     seen = set()
     for child in ast.walk(node):
@@ -262,6 +344,8 @@ def extract_calls(node):
         calls.append(SSRF_MARKER)
     if has_path_traversal(node) and PATH_MARKER not in calls:
         calls.append(PATH_MARKER)
+    if unsafe_vars and has_xss(node, unsafe_vars) and XSS_MARKER not in calls:
+        calls.append(XSS_MARKER)
     return calls
 
 # ── Protocol annotation extraction ──
@@ -355,7 +439,7 @@ def is_exported(name, parent_class=None):
 
 # ── File-level extraction ──
 
-def extract_functions_from_file(filepath: str, root_dir: str):
+def extract_functions_from_file(filepath: str, root_dir: str, unsafe_vars=None):
     """Extract all functions and class methods from a Python file."""
     with open(filepath, 'r', encoding='utf-8') as f:
         try:
@@ -396,7 +480,7 @@ def extract_functions_from_file(filepath: str, root_dir: str):
                 params.append({"name": arg.arg, "type": ptype})
 
             return_type = get_annotation(node.returns) if node.returns else "any"
-            calls = extract_calls(node)
+            calls = extract_calls(node, unsafe_vars)
             exported = is_exported(name, parent_class)
             protocol = extract_protocol_from_decorators(node)
             doc_meta = extract_docstring_meta(node)
@@ -432,6 +516,7 @@ def extract_functions_from_file(filepath: str, root_dir: str):
 def extract_ir(project_root: str):
     """Walk all .py files and extract IR."""
     all_funcs = []
+    unsafe_vars = scan_unsafe_template_vars(project_root)
     for path in Path(project_root).rglob("*.py"):
         # Skip hidden dirs, node_modules, site-packages
         parts = path.parts
@@ -452,7 +537,7 @@ def extract_ir(project_root: str):
         nonsurface = ('docs', 'docs_src', 'examples', 'benchmarks', 'scripts')
         if any(p in nonsurface for p in rel_parts[:-1]):
             continue
-        all_funcs.extend(extract_functions_from_file(str(path), project_root))
+        all_funcs.extend(extract_functions_from_file(str(path), project_root, unsafe_vars))
     return all_funcs
 
 if __name__ == "__main__":

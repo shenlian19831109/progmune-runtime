@@ -709,6 +709,21 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     conceptMissing: ["PathTraversalPrevention", "InputPathValidation"],
     conceptExpected: ["path allowlist", "basename normalization", "path sanitization"],
   },
+  {
+    name: "XSS (Unsafe Template Rendering)",
+    category: "xss",
+    languages: ["python"],
+    // Cross-file detection: the Python extractor scans templates for variables
+    // rendered without escaping ({{ var|safe }}, {% autoescape off %}) and emits
+    // a synthetic marker when a render/render_to_string call binds tainted
+    // request-derived values to those variables — or when mark_safe() is
+    // applied to tainted input.
+    trigger: /\b(__progmune_xss_unsafe_render__)\b/,
+    safeguards: [],
+    violationMessage: "User-controlled input rendered in a template without escaping (|safe / autoescape off / mark_safe) — stored or reflected XSS.",
+    conceptMissing: ["XSSPrevention", "OutputEncoding"],
+    conceptExpected: ["template autoescape", "output escaping"],
+  },
 
   // ═══════════════════════════════════════════════════════════════
   // P0 Injection: Payment + Session safeguard rules

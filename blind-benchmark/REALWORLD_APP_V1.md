@@ -171,12 +171,28 @@ with the correct class. Path traversal coverage 1/1. PyGoat labeled precision
 request.FILES reads staying silent). Zero noise in the 3 well-written apps.
 Both synthetic benchmarks unchanged.
 
+## Coverage expansion #4: XSS template rendering (2026-08-16)
+
+Cross-file detection: the extractor scans project templates for variables rendered
+without escaping (`{{ var|safe }}`, `{% autoescape off %}` blocks), then flags
+`render`/`render_to_string` calls that bind tainted request-derived values to those
+variables (context dicts resolve through assignment) — plus `mark_safe()` applied to
+tainted input.
+
+**Result:** XSS 3/3 class-correct — xss_lab, xss_lab2, AND a hidden reflected XSS in
+the A8 lab (`software_and_data_integrity_failure_lab2` — `{{username|safe}}` with
+`request.GET`). xss_lab3 remains uncovered (its template auto-escapes; the lab's
+JSFuck variant relies on template structure not visible to this check). PyGoat
+labeled precision 72.2% → **75.0%** (TP 30 / FP 10). Zero noise in the 3
+well-written apps. Both synthetic benchmarks unchanged.
+
 ## Next steps
 
 1. Remaining FP classes (documented, tier-2): unqualified-import framework calls,
    DRF class-attribute permissions, unicorn dispatch internals.
-2. Coverage expansion #4 candidate: XSS (template rendering — the largest
-   remaining zero-coverage class, needs template-layer visibility).
+2. Remaining zero-coverage classes: SSTI (template engine specific), XXE
+   (XML parser configuration), MITRE content labs — each needs a new signal
+   source; the extractor-marker pattern is the template for all of them.
 
 ## Next steps
 
