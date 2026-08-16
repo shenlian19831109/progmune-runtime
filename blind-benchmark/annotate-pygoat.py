@@ -57,6 +57,20 @@ VERDICTS = {
     "introduction.views.register": ("fp", "Django login() manages session securely"),
     "dataexposure.views.login_view": ("fp", "Django authenticate()/login() — secure session handling"),
     "introduction.mitre.csrf_lab_login": ("unlabeled", "md5 password storage is a hashing flaw, not token generation"),
+    # SQL Injection (source-level, new rule)
+    "introduction.views.sql_lab": ("tp", "raw() with string-concatenated SQL from POST input — SQLi lab"),
+    "introduction.views.injection_sql_lab": ("tp", "raw() with string-concatenated SQL from POST input — SQLi lab"),
+    # Command Injection (newly active rule)
+    "introduction.views.cmd_lab": ("tp", "user-supplied domain executed via OS command — CMD lab"),
+    "introduction.views.cmd_lab2": ("tp", "eval(val) on user input — code execution lab"),
+    "uninstaller.uninstall_pip_packages": ("fp", "subprocess with static args — no user input reaches the command"),
+    "uninstaller.uninstall_pip": ("fp", "subprocess with static args — no user input reaches the command"),
+    "challenge.views.DoItFast.post": ("fp", "auth checked; container management calls, no user-controlled command verified"),
+    "challenge.views.DoItFast.delete": ("fp", "auth checked; container management calls, no user-controlled command verified"),
+    # Unsafe Deserialization (newly active rule)
+    "introduction.views.insec_des_lab": ("tp", "pickle.loads() on user cookie — deserialization lab"),
+    "introduction.views.a9_lab": ("tp", "yaml.load(file, yaml.Loader) on upload — unsafe YAML deserialization lab"),
+    "dataexposure_lab.main.deserialize_data": ("tp", "dockerized insec_des lab — pickle-based"),
 }
 
 # Soft-rule class verdicts (class-level, sampled)
@@ -74,7 +88,7 @@ def main():
     scan = json.load(open(SCAN))
     repo = next(r for r in scan["results"] if r["repo"] == "PyGoat")
 
-    # Rules judged per-function (auth / password / token classes)
+    # Rules judged per-function (auth / password / token / injection classes)
     JUDGED_RULES = (
         "Authorization (Unauthenticated Mutation)",
         "Authorization (Unauthenticated Access)",
@@ -82,6 +96,9 @@ def main():
         "No Token Rotation After Privilege Change",
         "Password Hashing",
         "Token Security (Weak Generation)",
+        "Command Injection",
+        "Unsafe Deserialization (Pickle)",
+        "SQL Injection (Python)",
     )
 
     detections = []

@@ -4,11 +4,11 @@
   "version": "1.0",
   "corpus": "PyGoat (OWASP vulnerable-by-design Django app, shallow clone)",
   "summary": {
-    "total_detections": 201,
-    "true_positives": 17,
-    "false_positives": 8,
-    "unlabeled": 176,
-    "labeled_precision": 68.0,
+    "total_detections": 203,
+    "true_positives": 24,
+    "false_positives": 10,
+    "unlabeled": 169,
+    "labeled_precision": 70.6,
     "auth_rule_tp": 9
   },
   "recall_notes": "PyGoat's lab inventory spans ~30 labs across OWASP classes. The detector surfaced 10 auth/broken-access labs and 3 weak-hashing/token labs. Missed classes: SQLi, XSS, SSTI, SSRF, command injection, XXE-as-injection (the xxe lab fired via the auth rule, not an injection rule) — out of scope for the protocol-lifecycle rule set. A full recall number would require lab-level gold enumeration.",
@@ -17,15 +17,15 @@
       "function": "uninstall_pip_packages",
       "file": "uninstaller.py",
       "rule": "Command Injection",
-      "verdict": "unlabeled",
-      "note": "not individually reviewed"
+      "verdict": "fp",
+      "note": "subprocess with static args — no user input reaches the command"
     },
     {
       "function": "uninstall_pip",
       "file": "uninstaller.py",
       "rule": "Command Injection",
-      "verdict": "unlabeled",
-      "note": "not individually reviewed"
+      "verdict": "fp",
+      "note": "subprocess with static args — no user input reaches the command"
     },
     {
       "function": "remove_pygoat",
@@ -416,8 +416,15 @@
       "function": "sql_lab",
       "file": "introduction/views.py",
       "rule": "Token Security (Weak Generation)",
-      "verdict": "unlabeled",
-      "note": "not individually reviewed"
+      "verdict": "tp",
+      "note": "raw() with string-concatenated SQL from POST input — SQLi lab"
+    },
+    {
+      "function": "sql_lab",
+      "file": "introduction/views.py",
+      "rule": "SQL Injection (Python)",
+      "verdict": "tp",
+      "note": "raw() with string-concatenated SQL from POST input — SQLi lab"
     },
     {
       "function": "sql_lab",
@@ -445,14 +452,14 @@
       "file": "introduction/views.py",
       "rule": "Authorization (Unauthenticated Mutation)",
       "verdict": "tp",
-      "note": "pickle.loads() on user cookie — insecure deserialization lab"
+      "note": "pickle.loads() on user cookie — deserialization lab"
     },
     {
       "function": "insec_des_lab",
       "file": "introduction/views.py",
       "rule": "Unsafe Deserialization (Pickle)",
-      "verdict": "unlabeled",
-      "note": "not individually reviewed"
+      "verdict": "tp",
+      "note": "pickle.loads() on user cookie — deserialization lab"
     },
     {
       "function": "insec_des_lab",
@@ -661,8 +668,8 @@
       "function": "cmd_lab",
       "file": "introduction/views.py",
       "rule": "Command Injection",
-      "verdict": "unlabeled",
-      "note": "not individually reviewed"
+      "verdict": "tp",
+      "note": "user-supplied domain executed via OS command — CMD lab"
     },
     {
       "function": "cmd_lab",
@@ -766,8 +773,8 @@
       "function": "a9_lab",
       "file": "introduction/views.py",
       "rule": "Unsafe Deserialization (Pickle)",
-      "verdict": "unlabeled",
-      "note": "not individually reviewed"
+      "verdict": "tp",
+      "note": "yaml.load(file, yaml.Loader) on upload — unsafe YAML deserialization lab"
     },
     {
       "function": "a9_lab",
@@ -936,6 +943,13 @@
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
+    },
+    {
+      "function": "injection_sql_lab",
+      "file": "introduction/views.py",
+      "rule": "SQL Injection (Python)",
+      "verdict": "tp",
+      "note": "raw() with string-concatenated SQL from POST input — SQLi lab"
     },
     {
       "function": "injection_sql_lab",
@@ -1270,8 +1284,8 @@
       "function": "deserialize_data",
       "file": "dockerized_labs/insec_des_lab/main.py",
       "rule": "Unsafe Deserialization (Pickle)",
-      "verdict": "unlabeled",
-      "note": "not individually reviewed"
+      "verdict": "tp",
+      "note": "dockerized insec_des lab — pickle-based"
     },
     {
       "function": "deserialize_data",

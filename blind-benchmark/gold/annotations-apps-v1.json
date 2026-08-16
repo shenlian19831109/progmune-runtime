@@ -3,10 +3,10 @@
   "annotated_by": "human review (Claude-assisted, 2026-08-16)",
   "version": "1.0",
   "summary": {
-    "total_detections": 198,
+    "total_detections": 193,
     "true_positives": 0,
     "false_positives": 20,
-    "unlabeled": 178,
+    "unlabeled": 173,
     "labeled_precision": 0.0
   },
   "per_repo": {
@@ -29,10 +29,10 @@
     "fastapi-realworld-example-app": {
       "functions_scanned": 95,
       "functions_with_violations": 53,
-      "total_detections": 101,
+      "total_detections": 96,
       "true_positives": 0,
       "false_positives": 4,
-      "unlabeled": 97
+      "unlabeled": 92
     }
   },
   "detections": [
@@ -1318,25 +1318,11 @@
       "note": "framework serializer/form validation invisible — soft"
     },
     {
-      "function": "create_updated_at_trigger",
-      "file": "app/db/migrations/versions/fdf8821871d7_main_tables.py",
-      "rule": "SQL Injection (Python)",
-      "verdict": "unlabeled",
-      "note": "not individually reviewed"
-    },
-    {
       "function": "create_users_table",
       "file": "app/db/migrations/versions/fdf8821871d7_main_tables.py",
       "rule": "Input Validation",
       "verdict": "unlabeled",
       "note": "framework serializer/form validation invisible — soft"
-    },
-    {
-      "function": "create_users_table",
-      "file": "app/db/migrations/versions/fdf8821871d7_main_tables.py",
-      "rule": "SQL Injection (Python)",
-      "verdict": "unlabeled",
-      "note": "not individually reviewed"
     },
     {
       "function": "create_followers_to_followings_table",
@@ -1351,13 +1337,6 @@
       "rule": "Input Validation",
       "verdict": "unlabeled",
       "note": "framework serializer/form validation invisible — soft"
-    },
-    {
-      "function": "create_articles_table",
-      "file": "app/db/migrations/versions/fdf8821871d7_main_tables.py",
-      "rule": "SQL Injection (Python)",
-      "verdict": "unlabeled",
-      "note": "not individually reviewed"
     },
     {
       "function": "create_tags_table",
@@ -1388,25 +1367,11 @@
       "note": "framework serializer/form validation invisible — soft"
     },
     {
-      "function": "create_commentaries_table",
-      "file": "app/db/migrations/versions/fdf8821871d7_main_tables.py",
-      "rule": "SQL Injection (Python)",
-      "verdict": "unlabeled",
-      "note": "not individually reviewed"
-    },
-    {
       "function": "upgrade",
       "file": "app/db/migrations/versions/fdf8821871d7_main_tables.py",
       "rule": "Input Validation",
       "verdict": "unlabeled",
       "note": "framework serializer/form validation invisible — soft"
-    },
-    {
-      "function": "downgrade",
-      "file": "app/db/migrations/versions/fdf8821871d7_main_tables.py",
-      "rule": "SQL Injection (Python)",
-      "verdict": "unlabeled",
-      "note": "not individually reviewed"
     },
     {
       "function": "downgrade",

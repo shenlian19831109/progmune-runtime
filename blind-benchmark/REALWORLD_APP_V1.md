@@ -116,6 +116,33 @@ would need to add. Every one of these classes requires interface upgrades beyond
 call names (SQL needs source-level f-string/format analysis; XSS needs template
 rendering; SSRF needs URL-flow) — they are new-rule projects, not pattern tweaks.
 
+## Coverage expansion #1: SQLi source-level detection (2026-08-16)
+
+The extractor now performs source-level SQL analysis: a synthetic marker call
+(`__progmune_sql_unparameterized__`) is emitted when a SQL-executing call
+(execute/executemany/raw/…) receives SQL text built with dynamic formatting —
+f-string, `%`, `.format`, concatenation — **including single-hop local-variable
+assignment** (`q = "…" + user; cursor.execute(q)`). Parameterized calls
+(`execute("… %s", (args,))`) emit no marker and are correctly not flagged.
+
+| Metric | Before | After |
+|--------|--------|-------|
+| A1-SQLi class-correct | 0/2 | **2/2** |
+| Class-correct recall | 18/72 (25%) | **19/72 (26.4%)** |
+| PyGoat labeled precision | 37.8% | **70.6%** (TP 24 / FP 10) |
+
+Net +1 lab (SQLi ×2, minus reset_password whose rotation-FP fix removed its only
+firing — its predictable-token flaw has no covering rule yet, noted as a gap).
+cmd_lab2's `eval()` remains uncovered (Command Injection rule triggers on
+subprocess/system patterns, not eval).
+
+## Next steps
+
+1. Remaining FP classes (documented, tier-2): unqualified-import framework calls,
+   DRF class-attribute permissions, unicorn dispatch internals.
+2. Coverage expansion #2 candidate: SSRF (URL-flow) or XSS (template rendering) —
+   same extractor-marker pattern as SQLi.
+
 ## Next steps
 
 1. Remaining FP classes (documented, tier-2): unqualified-import framework calls,

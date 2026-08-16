@@ -667,15 +667,15 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     name: "SQL Injection (Python)",
     category: "input_validation",
     languages: ["python"],
-    // triggerCallsOnly: the identifier-parsed words would otherwise let any
-    // execute_* callee (execute_command, execute_script — e.g. redis-py) match
-    // the bare "execute" trigger and fire on non-SQL code.
-    trigger: /\b(execute|executemany|executescript|execute_query)\b/i,
-    triggerCallsOnly: true,
-    safeguards: [
-      { pattern: /\b(%s|\?|:\w+|parameterize|\.execute\s*\(\s*\w+\s*,\s*[\[(])/i, label: "parameterized_query" },
-    ],
-    violationMessage: "SQL executed with string formatting instead of parameterized queries. Vulnerable to SQL injection.",
+    // Source-level detection: the Python extractor emits a synthetic marker
+    // call when a SQL-executing call (execute/executemany/raw/...) builds its
+    // SQL text with dynamic formatting (f-string / % / .format / concatenation).
+    // Parameterized calls (execute("... %s", (args,))) produce no marker and
+    // are correctly NOT flagged. No satisfier possible — the marker IS the
+    // violation evidence.
+    trigger: /\b(__progmune_sql_unparameterized__)\b/,
+    safeguards: [],
+    violationMessage: "SQL built with string formatting (f-string / % / .format / concatenation) instead of parameterized queries. Vulnerable to SQL injection.",
     conceptMissing: ["SQLInjectionPrevention", "ParameterizedQueries"],
     conceptExpected: ["parameterized query", "%s placeholder"],
   },

@@ -43,12 +43,71 @@ def get_annotation(node):
 
 # ── Call extraction ──
 
+SQL_EXEC_ATTRS = {"execute", "executemany", "executescript", "execute_query", "raw", "extra"}
+SQL_MARKER = "__progmune_sql_unparameterized__"
+
+
+def is_dynamic_format(node):
+    """True if the expression formats data into SQL text: f-string,
+    % formatting, .format() call, or string concatenation."""
+    if isinstance(node, ast.JoinedStr):          # f-string
+        return True
+    if isinstance(node, ast.BinOp):
+        if isinstance(node.op, (ast.Mod, ast.Add)):  # "%" formatting or "+" concat
+            return True
+        return is_dynamic_format(node.left) or is_dynamic_format(node.right)
+    if isinstance(node, ast.Call):
+        if isinstance(node.func, ast.Attribute) and node.func.attr == "format":
+            return True
+    return False
+
+
+def collect_assignments(node):
+    """Variable name → assigned value node (single-hop, same function scope)."""
+    assigns = {}
+    for child in ast.walk(node):
+        if isinstance(child, ast.Assign):
+            for t in child.targets:
+                if isinstance(t, ast.Name):
+                    assigns.setdefault(t.id, child.value)
+        elif isinstance(child, ast.AnnAssign) and isinstance(child.target, ast.Name):
+            assigns.setdefault(child.target.id, child.value)
+    return assigns
+
+
+def has_unparameterized_sql(node):
+    """Source-level SQLi check: a SQL-executing call whose SQL text is built
+    with dynamic formatting (f-string / % / .format / concatenation), either
+    inline in the call args or in a single-hop local-variable assignment
+    (sql_query = "..." + user_input; cursor.execute(sql_query)).
+    Parameterized calls — execute("... %s ...", (args,)) — are NOT flagged."""
+    assigns = collect_assignments(node)
+    for child in ast.walk(node):
+        if isinstance(child, ast.Call):
+            name = None
+            if isinstance(child.func, ast.Name):
+                name = child.func.id
+            elif isinstance(child.func, ast.Attribute):
+                name = child.func.attr
+            if name in SQL_EXEC_ATTRS:
+                for a in child.args:
+                    if is_dynamic_format(a):
+                        return True
+                    if isinstance(a, ast.Name) and is_dynamic_format(assigns.get(a.id)):
+                        return True
+                for k in child.keywords:
+                    if is_dynamic_format(k.value):
+                        return True
+    return False
+
+
 def extract_calls(node):
     """Extract function call names from a function body (first-level only).
 
     Attribute calls emit the full qualified chain (e.g. user.change_password,
     User.objects.create_user) so rules can distinguish framework-delegated
-    calls from custom same-named functions. Bare-name calls stay as-is."""
+    calls from custom same-named functions. Bare-name calls stay as-is.
+    Unparameterized SQL execution emits a synthetic marker call."""
     calls = []
     seen = set()
     for child in ast.walk(node):
@@ -70,6 +129,8 @@ def extract_calls(node):
             if name and name not in seen:
                 seen.add(name)
                 calls.append(name)
+    if has_unparameterized_sql(node) and SQL_MARKER not in calls:
+        calls.append(SQL_MARKER)
     return calls
 
 # ── Protocol annotation extraction ──
