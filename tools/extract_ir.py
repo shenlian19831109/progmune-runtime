@@ -329,6 +329,41 @@ def has_csrf_exempt(node):
     return False
 
 
+GET_STATE_MARKER = "__progmune_get_state_change__"
+
+
+def has_get_state_change(node):
+    """CSRF shape #2: a `request.method == 'GET'` branch performs
+    state-changing calls (.save/.update/.delete/.create) — state change on
+    GET requests, exposed to CSRF even without @csrf_exempt."""
+    def is_get_compare(test):
+        if not isinstance(test, ast.Compare) or len(test.ops) != 1 \
+                or not isinstance(test.ops[0], ast.Eq):
+            return False
+        left, right = test.left, test.comparators[0]
+        const = None
+        attr = None
+        if isinstance(right, ast.Constant) and isinstance(right.value, str):
+            const = right.value
+            attr = left
+        elif isinstance(left, ast.Constant) and isinstance(left.value, str):
+            const = left.value
+            attr = right
+        if const and const.upper() == "GET":
+            return (isinstance(attr, ast.Attribute) and attr.attr == "method"
+                    and isinstance(attr.value, ast.Name) and attr.value.id == "request")
+        return False
+
+    for child in ast.walk(node):
+        if isinstance(child, ast.If) and is_get_compare(child.test):
+            for stmt in child.body:
+                for sub in ast.walk(stmt):
+                    if isinstance(sub, ast.Call) and isinstance(sub.func, ast.Attribute) \
+                            and sub.func.attr in ("save", "update", "delete", "create"):
+                        return True
+    return False
+
+
 def has_dynamic_eval(node):
     """eval/exec/__import__ called with tainted request-derived input."""
     assigns = collect_assignments(node)
@@ -522,6 +557,8 @@ def extract_calls(node, unsafe_vars=None):
         calls.append(CMD_FLOW_MARKER)
     if has_csrf_exempt(node) and CSRF_MARKER not in calls:
         calls.append(CSRF_MARKER)
+    if has_get_state_change(node) and GET_STATE_MARKER not in calls:
+        calls.append(GET_STATE_MARKER)
     return calls
 
 # ── Protocol annotation extraction ──

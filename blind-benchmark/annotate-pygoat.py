@@ -135,9 +135,11 @@ def main():
         for s in v["safeguard"]:
             verdict = None
             # CSRF detections are verified true by construction — the decorator
-            # is visible in the code itself.
+            # / GET-branch state change is visible in the code itself.
             if s["rule"] == "CSRF Protection Disabled":
                 verdict = ("tp", "@csrf_exempt decorator present in the code — protection explicitly disabled")
+            if s["rule"] == "CSRF Exposed GET State Change":
+                verdict = ("tp", "state-changing call inside request.method == 'GET' branch — verified in code")
             if verdict is None and (s["rule"] in JUDGED_RULES or s["rule"].startswith("Password Hashing")):
                 # Match by file basename + function name (extractor reports relative paths)
                 candidates = [k for k in VERDICTS

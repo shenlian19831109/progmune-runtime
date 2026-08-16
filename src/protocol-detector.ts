@@ -769,6 +769,20 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     conceptMissing: ["CSRFProtection", "StateChangingRequestValidation"],
     conceptExpected: ["csrf token validation", "SameSite cookies"],
   },
+  {
+    name: "CSRF Exposed GET State Change",
+    category: "csrf",
+    languages: ["python"],
+    // Source-level detection: the Python extractor emits a synthetic marker
+    // when a `request.method == 'GET'` branch performs state-changing calls
+    // (.save/.update/.delete/.create) — state change on GET, CSRF-exposed
+    // even without @csrf_exempt.
+    trigger: /\b(__progmune_get_state_change__)\b/,
+    safeguards: [],
+    violationMessage: "State-changing operation executed in a GET branch — CSRF-exposed without token validation.",
+    conceptMissing: ["CSRFProtection", "SafeMethodEnforcement"],
+    conceptExpected: ["POST for state changes", "csrf token validation"],
+  },
 
   // ═══════════════════════════════════════════════════════════════
   // P0 Injection: Payment + Session safeguard rules

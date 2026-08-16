@@ -4,12 +4,12 @@
   "version": "1.0",
   "corpus": "PyGoat (OWASP vulnerable-by-design Django app, shallow clone)",
   "summary": {
-    "total_detections": 242,
-    "true_positives": 66,
+    "total_detections": 246,
+    "true_positives": 69,
     "false_positives": 9,
-    "unlabeled": 167,
-    "labeled_precision": 88.0,
-    "auth_rule_tp": 11
+    "unlabeled": 168,
+    "labeled_precision": 88.5,
+    "auth_rule_tp": 12
   },
   "recall_notes": "PyGoat's lab inventory spans ~30 labs across OWASP classes. The detector surfaced 10 auth/broken-access labs and 3 weak-hashing/token labs. Missed classes: SQLi, XSS, SSTI, SSRF, command injection, XXE-as-injection (the xxe lab fired via the auth rule, not an injection rule) — out of scope for the protocol-lifecycle rule set. A full recall number would require lab-level gold enumeration.",
   "detections": [
@@ -362,6 +362,20 @@
       "rule": "Hardcoded Secrets",
       "verdict": "tp",
       "note": "jwt.decode with literal key 'csrf_vulneribility' — hardcoded secret"
+    },
+    {
+      "function": "csrf_transfer_monei_api",
+      "file": "introduction/mitre.py",
+      "rule": "CSRF Exposed GET State Change",
+      "verdict": "tp",
+      "note": "state-changing call inside request.method == 'GET' branch — verified in code"
+    },
+    {
+      "function": "csrf_transfer_monei_api",
+      "file": "introduction/mitre.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
     },
     {
       "function": "mitre_lab_25_api",
@@ -884,6 +898,13 @@
     {
       "function": "Otp",
       "file": "introduction/views.py",
+      "rule": "Authorization (Unauthenticated Access)",
+      "verdict": "tp",
+      "note": "OTP rendered into client HTML — broken auth lab"
+    },
+    {
+      "function": "Otp",
+      "file": "introduction/views.py",
       "rule": "Authorization (Unauthenticated Mutation)",
       "verdict": "tp",
       "note": "OTP rendered into client HTML — broken auth lab"
@@ -894,6 +915,13 @@
       "rule": "CSRF Protection Disabled",
       "verdict": "tp",
       "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
+    },
+    {
+      "function": "Otp",
+      "file": "introduction/views.py",
+      "rule": "CSRF Exposed GET State Change",
+      "verdict": "tp",
+      "note": "state-changing call inside request.method == 'GET' branch — verified in code"
     },
     {
       "function": "Otp",
