@@ -88,11 +88,38 @@ Python 100%/100%). Side benefit: the qualified-chain extractor activated two
 previously-silent vulnerability rules — Command Injection catches PyGoat's cmd_lab,
 Unsafe Deserialization catches the pickle labs.
 
+## App-corpus recall measurement (2026-08-16)
+
+PyGoat's 72 lab views enumerated from code and scored per class. Two metrics:
+
+- **Any-rule fires: 100%** — every lab view gets some flag (mostly the soft
+  No Input Sanitization). Misleading on its own.
+- **Class-correct detection: 18/72 = 25%** — a fired rule whose claim corresponds
+  to the lab's actual vulnerability class. This is the honest recall number.
+
+| Class | Class-correct recall | Note |
+|-------|---------------------|------|
+| A2 Broken Auth | **9/11 (82%)** | the rule set's strength |
+| A8 Insecure Deserialization | 2/3 | newly active Unsafe Deserialization rule |
+| A9 Logging/Monitoring | 2/3 | via Authorization (get_version/a9_lab2) |
+| A1 Command Injection | 1/2 | newly active Command Injection rule |
+| A5 Broken Access | 2/5 | cookie-bypass labs caught; a1_2/3 flagged wrong-class |
+| A2 Crypto / A6 Misconfig | 1/2, 1/3 | partial |
+| **A1 SQLi (0/2), A1 SSTI (0/1), A10 SSRF (0/4), A3 DataExp (0/3), A4 XXE (0/2), A7 XSS (0/3), MITRE (0/28)** | **0%** | no rule class exists for these |
+
+**Strategic conclusion:** precision-side work (param-gate, allowlist) is done to the
+point of diminishing returns — remaining FPs are documented interface boundaries.
+The binding constraint is now **coverage**: the rule set has zero class coverage for
+SQLi / XSS / SSTI / SSRF / XXE / data-exposure, which is consistent with the
+protocol-lifecycle positioning but quantifies exactly what a coverage expansion
+would need to add. Every one of these classes requires interface upgrades beyond
+call names (SQL needs source-level f-string/format analysis; XSS needs template
+rendering; SSRF needs URL-flow) — they are new-rule projects, not pattern tweaks.
+
 ## Next steps
 
-1. Remaining FP classes (documented, tier-2): unqualified-import framework calls
-   (`authenticate`, `login`, `render` — need import resolution), DRF class-attribute
-   permissions, unicorn dispatch internals.
-2. Upgrade the annotation tables to judge the newly-active Command Injection /
-   Unsafe Deserialization detections (currently unlabeled — factually TPs).
-3. SQL rule source-level matching (still deferred).
+1. Remaining FP classes (documented, tier-2): unqualified-import framework calls,
+   DRF class-attribute permissions, unicorn dispatch internals.
+2. Coverage decisions per the recall table — if the product scope expands to
+   injection/rendering classes, each is a new-rule project with an interface
+   upgrade (SQL source-level matching is the deferred item and the first candidate).
