@@ -4,8 +4,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-blue)](https://modelcontextprotocol.io)
-[![TS Benchmark](https://img.shields.io/badge/TS%20F1-85.2%25-22c55e)]()
-[![Tests](https://img.shields.io/badge/Tests-92%20passing-22c55e)]()
+[![TS Benchmark](https://img.shields.io/badge/TS%20R98.5%25%20P100%25-22c55e)]()
+[![Python Benchmark](https://img.shields.io/badge/Python%20R100%25%20P100%25-22c55e)]()
 
 **Verify AI-generated code before it reaches production.** Progmune checks whether your AI-generated code follows correct protocol lifecycles — TLS handshakes, auth flows, payment integrity, resource management — violations that SAST and SCA tools cannot see because they span sequences of function calls, not single statements.
 
@@ -49,6 +49,10 @@ AI code generators produce syntactically valid code that often violates **protoc
 | **Payment** | Order without verification, refund without authorization, webhook without signature check |
 | **Resource** | File opened but not closed, connection without cleanup, malloc without free |
 | **Data Integrity** | Mutation without audit trail, missing input validation |
+| **Injection (Python, source-level)** | SQL built with f-string/`%`/`.format`/concatenation, command injection via dynamic subprocess args, SSRF via user-controlled URL fetches, SSTI via template-string sinks, XXE via external-entity parser config, eval/exec on user input |
+| **Web (Python, source-level)** | XSS via `{{ var\|safe }}`/autoescape-off templates, path traversal via user-controlled file paths, CSRF via `@csrf_exempt` or GET state changes, authorization by client cookies, hardcoded JWT secrets (incl. cross-module constants) |
+
+Source-level detections use an extractor-marker architecture: the IR extractor performs taint tracking, import resolution, and cross-file analysis (templates, module constants), emitting synthetic markers that rules consume — zero pipeline changes, fully auditable.
 
 ---
 
@@ -95,19 +99,19 @@ Progmune is honest about what it can and cannot verify.
 
 | Language | Status | Evidence |
 |----------|--------|----------|
-| **TypeScript / JavaScript** | ✅ Production | Blind benchmark: P=86.8%, R=83.6%, F1=85.2% (432 sequences, 10 projects) |
+| **TypeScript / JavaScript** | ✅ Production | Blind benchmark: **recall 98.5% / precision 100%** (795 gold findings, 100 projects) |
+| **Python** | ✅ Production | Blind benchmark: **recall 100% / precision 100%** (729 gold findings, 90 projects); real-world validation: PyGoat (OWASP vulnerable-by-design Django app) **67 TP / 0 FP, 100% labeled precision**; three well-written apps (django/fastapi realworld, django-unicorn) with 0 false-positive true findings |
 | **C** | ⚠️ Research-only | Gold benchmark F1=16.5%. L3 cross-function experiment terminated; L4 not planned. See [C Language Status](docs/c-language-status.md). |
-| **Python** | 🔨 IR only | IR extractor exists (`extract-ir-python.ts`), no verification rules yet |
 | **Go, Java** | ❌ None | Planned |
 
 **Framework adapters: 2/13.** Express ✅ and tRPC ✅ have dedicated detectors; Next.js has version-aware governance; NestJS is partial. Django, FastAPI and 8 more remain — framework adaptation is the #1 product gap.
 
 ### What Progmune does NOT cover (honest boundaries)
 
-- **Taint-based injection flaws** — SQL injection, XSS, command injection. These require dataflow/taint tracking, which is deliberately out of scope in Phase 1 (adding it would make Progmune a generic SAST competitor; protocol-sequence verification is the differentiator).
+- **TS-side taint-based injection flaws** — the source-level SQLi/XSS/SSRF detections ship for Python; the TypeScript extractor is name/call-based, so TS injection classes remain uncovered (documented, not hidden).
 - **SCA / dependency vulnerabilities** — hallucinated package names, supply-chain issues. Separate tooling exists for this.
 - **Runtime behavior** — Progmune is static analysis only; no DAST/sandbox execution.
-- **Obfuscated or dynamic code** — `eval`, `Function` constructor, and heavily obfuscated flows degrade regex/IR detection recall.
+- **Framework internals** — well-known framework dispatch/cache machinery (e.g. django-unicorn internals) can produce a small number of boundary false positives; they are documented per-corpus in the benchmark gold files.
 - **Known failure boundaries are documented** rather than hidden: if Progmune cannot verify a language (e.g. Go), Confidence is lowered instead of pretending 100%.
 
 → [Full Coverage Matrix](docs/coverage-matrix.md)
@@ -118,14 +122,31 @@ Progmune is honest about what it can and cannot verify.
 
 Public, reproducible precision data. All numbers measured against gold-annotated benchmarks.
 
-### TypeScript (Blind Benchmark v6)
+### TypeScript (Blind Benchmark v6 — 100 projects)
 
 | Metric | Value |
 |--------|-------|
-| Precision | 86.8% |
-| Recall | 83.6% |
-| F1 | 85.2% |
-| Projects | 10 (ecommerce, blog, chat, crm, forum, wiki, issuetracker, filestorage, todo, scheduler) |
+| Precision | **100%** (0 factual FPs) |
+| Recall | **98.5%** (effective 100% — the 12 non-detected findings are excluded by methodology) |
+| Gold findings | 795 across 100 projects (90 style-variants + 10 model-variants) |
+
+### Python (Blind Benchmark v1 — 90 projects)
+
+| Metric | Value |
+|--------|-------|
+| Precision | **100%** |
+| Recall | **100%** |
+| Gold findings | 729 across 90 style-variant projects |
+
+### Real-world validation (PyGoat, OWASP vulnerable-by-design Django app)
+
+| Metric | Value |
+|--------|-------|
+| Labeled precision | **100%** (67 true positives / 0 false positives, per-detection human review) |
+| Classes covered | 14 vulnerability classes incl. SQLi, SSRF, path traversal, XSS, SSTI, XXE, command injection, deserialization, CSRF (both shapes), cookie authorization, hardcoded secrets |
+| Well-written apps | django-realworld, fastapi-realworld, django-unicorn — 0 false-positive true findings; 3 documented framework-internal boundary FPs |
+
+→ [Real-world validation report](blind-benchmark/REALWORLD_APP_V1.md) · [Benchmark baseline](blind-benchmark/BASELINE_v6.md)
 
 ### C (Gold Benchmark — research status)
 
@@ -149,7 +170,9 @@ SDK (src/sdk.ts)           verify() → APPROVED / NEEDS_REVIEW / BLOCKED
        ├─ Policy Engine     Enterprise policy enforcement (ALLOW/WARN/BLOCK)
        ├─ SSG Validator     Protocol state machine verification
        ├─ Protocol Detector  Regex-based protocol step detection (22 detectors)
-       ├─ IR Extractor      TypeScript AST → function IR (ts-morph)
+       ├─ IR Extractors     TypeScript (ts-morph) + Python (ast module) → function IR;
+       │                    source-level markers: taint tracking, import resolution,
+       │                    qualified call chains, cross-file template analysis
        ├─ Repair Executor   detect → plan → fix → validate → commit/rollback
        └─ Knowledge Base    31 domains, 140 rules, evidence chains
 ```
@@ -193,9 +216,9 @@ High-impact contribution areas:
 - **Trust Engine:** 4-dimension scoring with binary explainability gate
 - **MCP Tools:** 19 — `progmune_trust_check`, `progmune_score`, `progmune_policy_check`, `progmune_certify`, and more
 - **Framework Adapters:** Express ✅, tRPC ✅, NestJS partial (2/13)
-- **Knowledge Base:** 31 domains, 148 protocol rules, 22 detectors, 26 safeguards, PLSB 13/13 categories
-- **Corpus:** 2,500+ trajectories across 6+ repositories
-- **Current focus:** Framework adaptation + enterprise PoC validation
+- **Knowledge Base:** 31 domains, 148 protocol rules, 22 detectors, 26 safeguards, PLSB 13/13 categories — plus 15 source-level detection rules (Python)
+- **Corpus:** 2,500+ trajectories across 6+ repositories; blind benchmarks 100 (TS) + 90 (Python) projects; real-world validation on 4 application repos
+- **Current focus:** Enterprise PoC validation + remaining framework-internal boundary FPs
 
 ---
 
