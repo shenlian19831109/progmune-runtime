@@ -189,10 +189,14 @@ if (cliArg === "--verify") {
 }
 
 // ── 1. IR 提取 ──
+// 目标项目：PROGMUNE_PROJECT_DIR > CWD。使用编译产物提取器
+// （安装态下包内没有 src/ 也没有 ts-node）。
 step("1/6 IR 提取");
 try {
-  execSync("npx ts-node src/extract-ir.ts .", { stdio: "pipe", cwd: path.resolve(__dirname, "..") });
-  const irRaw = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../ir.json"), "utf-8"));
+  const projectDir = path.resolve(process.env.PROGMUNE_PROJECT_DIR || process.cwd());
+  const extractor = path.resolve(__dirname, "extract-ir.js");
+  execSync(`node "${extractor}" "${projectDir}"`, { stdio: "pipe" });
+  const irRaw = JSON.parse(fs.readFileSync(path.resolve(projectDir, "ir.json"), "utf-8"));
   const ir = Array.isArray(irRaw) ? irRaw : (irRaw.functions || []);
   const externalCount = ir.filter((f: any) => f.external).length;
   pass(`IR 提取完成: ${ir.length} 个函数 (${externalCount} 外部)`);
@@ -203,8 +207,16 @@ try {
 // ── 2. TypeScript 编译 ──
 step("2/6 TypeScript 类型检查");
 try {
-  execSync("npx tsc --noEmit", { stdio: "pipe", cwd: path.resolve(__dirname, "..") });
-  pass("零类型错误");
+  const projectDir = path.resolve(process.env.PROGMUNE_PROJECT_DIR || process.cwd());
+  const tsconfig = path.resolve(projectDir, "tsconfig.json");
+  if (!fs.existsSync(tsconfig)) {
+    warn("跳过（项目无 tsconfig.json）");
+  } else {
+    // 用包内 typescript 依赖的 tsc（安装态可用），而非全局 npx
+    const tscBin = path.resolve(__dirname, "..", "node_modules", "typescript", "bin", "tsc");
+    execSync(`node "${tscBin}" --noEmit -p "${tsconfig}"`, { stdio: "pipe" });
+    pass("零类型错误");
+  }
 } catch (e: any) {
   const stderr = e.stderr?.toString() || e.stdout?.toString() || "";
   const lines = stderr.split("\n").filter((l: string) => l.includes("error TS"));

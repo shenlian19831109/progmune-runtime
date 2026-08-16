@@ -8,10 +8,24 @@ import * as path from "path";
  * is a bare array or an object with a `functions` key.
  */
 export function loadIR(filePath?: string): any[] {
-  const irPath = filePath || path.resolve(__dirname, "../ir.json");
-  if (!fs.existsSync(irPath)) return [];
-  const raw = JSON.parse(fs.readFileSync(irPath, "utf-8"));
-  return Array.isArray(raw) ? raw : (raw.functions || []);
+  // Resolution order: explicit path → PROGMUNE_PROJECT_DIR → CWD →
+  // package directory (legacy fallback). The package dir must be LAST —
+  // in an installed-package setup the project's ir.json lives in the
+  // consuming project, not inside node_modules/progmune-runtime.
+  const candidates: string[] = [];
+  if (filePath) candidates.push(filePath);
+  const projectDir = process.env.PROGMUNE_PROJECT_DIR;
+  if (projectDir) candidates.push(path.resolve(projectDir, "ir.json"));
+  candidates.push(path.resolve(process.cwd(), "ir.json"));
+  candidates.push(path.resolve(__dirname, "../ir.json"));
+
+  for (const irPath of candidates) {
+    if (fs.existsSync(irPath)) {
+      const raw = JSON.parse(fs.readFileSync(irPath, "utf-8"));
+      return Array.isArray(raw) ? raw : (raw.functions || []);
+    }
+  }
+  return [];
 }
 
 /** Count exported functions in an IR function list.

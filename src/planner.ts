@@ -14,6 +14,7 @@ import { createSnapshot, saveSnapshot } from "./semantic-snapshot";
 import { selectCapabilityChains, formatChainHint } from "./strategy-planner";
 import { getTopology, rebuildTopology } from "./semantic-topology";
 import { SYSTEM_PROMPT, RETRY_HINT, buildCompactFuncList, buildChainHints, buildProtocolChainHint } from "./planner-prompts";
+import { loadIR } from "./ir-utils";
 import * as fs from "fs";
 
 function enrichActions(actions: Action[], ir: any[]): Action[] {
@@ -310,7 +311,7 @@ function loadProtocols(ir: any[]): { protocols: FunctionProtocol[]; namespaceIni
 }
 
 /** 验证动作序列的协议合法性，使用 Semantic Ledger (Phase 3) 纯函数 */
-function validateProtocolWithTransitions(
+export function validateProtocolWithTransitions(
   actions: Action[],
   protocols: FunctionProtocol[],
   namespaceInitialStates: Map<string, string>
@@ -349,6 +350,64 @@ function validateProtocolWithTransitions(
     }
   }
 
+  // End-of-sequence check: held resources must be released (resource leak).
+  // A state S is resource-holding when some rule REQUIRES S and INVALIDATES S
+  // (acquire/release semantics — e.g. FILE_OPEN set by open_file, released by
+  // close_file). Only RESOURCE-LIFECYCLE namespaces apply: session/auth flows
+  // legitimately END with an active session (SESSION_ACTIVE is not a leak).
+  const RESOURCE_NS = /^(file|db|database|connection|conn|socket|stream|resource|io)/i;
+  const heldStates: Array<{ state: string; releaseFn: string; namespace: string }> = [];
+  for (const p of protocols) {
+    const ann = p.protocol;
+    if (!ann) continue;
+    const ns = ann.namespace || "";
+    if (!RESOURCE_NS.test(ns)) continue;
+    const inv = ann.invalidate || [];
+    const pre = ann.pre_states || [];
+    for (const s of inv) {
+      if (pre.includes(s)) heldStates.push({ state: s, releaseFn: p.function, namespace: ns });
+    }
+  }
+  // 只检查"本序列中获取"的持有状态——继承自命名空间初始状态的
+  // （如 db 初始即 DB_CONNECTED）不算泄漏。
+  const acquiredStates = new Set<string>();
+  for (const t of transitions) {
+    for (const ns of Object.keys(t.statesAfter || {})) {
+      const after = t.statesAfter[ns] || [];
+      const before = t.statesBefore?.[ns] || [];
+      for (const s of after) {
+        if (!before.includes(s)) acquiredStates.add(`${ns}::${s}`);
+      }
+    }
+  }
+  for (const hs of heldStates) {
+    const cur = ctx.currentState[hs.namespace] || [];
+    if (!acquiredStates.has(`${hs.namespace}::${hs.state}`)) continue;
+    if (cur.includes(hs.state)) {
+      const trace = transitions.map(t => ({
+        function: t.function,
+        statesBefore: t.statesBefore,
+        statesAfter: t.statesAfter,
+      }));
+      return {
+        valid: false,
+        rejection: {
+          blocked: "(end-of-sequence)",
+          currentState: cur,
+          requiredState: [],
+          missingFunctions: [hs.releaseFn],
+          fixPath: [hs.releaseFn],
+          namespace: hs.namespace,
+          endState: true,
+        },
+        index: actions.length,
+        trace,
+        transitions,
+        ruleHash,
+      };
+    }
+  }
+
   // Invariant check on full ledger
   const consistency = checkLedgerConsistency(transitions, namespaceInitialStates);
   if (!consistency.consistent) {
@@ -367,19 +426,28 @@ function attemptSSGRepair(
   rejection: SSGRejection,
   ir: any[],
   protocols: FunctionProtocol[],
-  namespaceInitialStates: Map<string, string>
+  namespaceInitialStates: Map<string, string>,
+  depth = 0
 ): Action[] | null {
+  if (depth > 5) {
+    console.error(`[修复] 递归深度超限 (${depth})，放弃确定性修复`);
+    return null;
+  }
   if (!rejection.fixPath || rejection.fixPath.length === 0) return null;
 
-  // 找到被拦截函数在序列中的位置
-  const blockedIdx = actions.findIndex(a => a.kind === "call" && a.function === rejection.blocked);
-  if (blockedIdx === -1) return null;
+  // 名称归一化：内置规则可能是下划线风格（generate_jwt），项目 IR 是
+  // camelCase（generateJwt）——修复动作必须使用 IR 中的真实函数名。
+  const normalizeName = (n: string) => n.replace(/[_-]/g, "").toLowerCase();
+  const resolveIR = (fnName: string) =>
+    ir.find((f: any) => f.name === fnName)
+    || ir.find((f: any) => normalizeName(f.name) === normalizeName(fnName));
 
   // 为修复路径中的每个函数创建合成 Action
   const repairActions: Action[] = [];
   for (const fnName of rejection.fixPath) {
-    const def = ir.find((f: any) => f.name === fnName);
+    const def = resolveIR(fnName);
     if (!def) return null;
+    const realName = def.name;
 
     const args = (def.params || []).map((p: any, i: number) => ({
       name: p.name || `p${i}`,
@@ -388,19 +456,29 @@ function attemptSSGRepair(
     }));
 
     const assignTo = def.returnType && def.returnType !== 'void' && def.returnType !== 'undefined'
-      ? `${fnName}_result` : undefined;
+      ? `${realName}_result` : undefined;
 
-    const action: Action = { kind: 'call', function: fnName, args };
+    const action: Action = { kind: 'call', function: realName, args };
     if (assignTo) action.assignTo = assignTo;
     repairActions.push(action);
   }
 
-  // 在被拦截函数前插入修复函数
-  const repaired = [
-    ...actions.slice(0, blockedIdx),
-    ...repairActions,
-    ...actions.slice(blockedIdx),
-  ];
+  let repaired: Action[];
+  if (rejection.endState) {
+    // 末尾状态违规（资源未释放）：释放函数追加到序列末尾
+    repaired = [...actions, ...repairActions];
+  } else {
+    // 找到被拦截函数在序列中的位置
+    const blockedIdx = actions.findIndex(a => a.kind === "call" && a.function === rejection.blocked);
+    if (blockedIdx === -1) return null;
+
+    // 在被拦截函数前插入修复函数
+    repaired = [
+      ...actions.slice(0, blockedIdx),
+      ...repairActions,
+      ...actions.slice(blockedIdx),
+    ];
+  }
 
   // 重新验证
   const recheck = validateProtocolWithTransitions(repaired, protocols, namespaceInitialStates);
@@ -411,7 +489,8 @@ function attemptSSGRepair(
 
   // 单步修复不够，尝试递归修复
   if (recheck.rejection && recheck.rejection.fixPath && recheck.rejection.fixPath.length > 0) {
-    const nested = attemptSSGRepair(repaired, recheck.rejection, ir, protocols, namespaceInitialStates);
+    console.error(`[修复] 重验仍失败 (blocked=${recheck.rejection.blocked}, fixPath=${recheck.rejection.fixPath.join(" → ")})，递归深度 ${depth + 1}`);
+    const nested = attemptSSGRepair(repaired, recheck.rejection, ir, protocols, namespaceInitialStates, depth + 1);
     if (nested) return nested;
   }
 
@@ -429,14 +508,18 @@ export interface PlanResult {
   repairApplied: boolean;
   repairCount: number;
   repairBranchIds: string[];
+  /** True when every generation attempt (and fallback) was blocked by
+   *  constraints — actions will be empty and this MUST NOT be treated as
+   *  "nothing to do". */
+  blocked?: boolean;
+  blockedReason?: string;
 }
 
 /** @requires INTENT @produces ACTION_PLAN */
 export async function plan(userIntent: string, llmSeeds?: string[]): Promise<PlanResult> {
   resetCallCount();
-  const irRaw = JSON.parse(fs.readFileSync("ir.json", "utf-8"));
-  // Support both old (array) and new ({typeMap, functions}) formats
-  const ir = Array.isArray(irRaw) ? irRaw : (irRaw.functions || []);
+  // IR 读取走 loadIR 的解析顺序（显式路径 → PROGMUNE_PROJECT_DIR → CWD → 包目录回退）
+  const ir = loadIR();
 
   // P1: Build Semantic Topology (once per plan call, cached)
   try { rebuildTopology(ir); } catch { /* topology rebuild — optional */ }
@@ -444,7 +527,7 @@ export async function plan(userIntent: string, llmSeeds?: string[]): Promise<Pla
   // Helper: wrap actions into PlanResult
   let repairMetrics = { applied: false, count: 0, branchIds: [] as string[] };
 
-  const wrapResult = (actions: Action[], repair?: { applied: boolean; count: number; branchIds: string[] }, degraded = false): PlanResult => ({
+  const wrapResult = (actions: Action[], repair?: { applied: boolean; count: number; branchIds: string[] }, degraded = false, blocked?: boolean, blockedReason?: string): PlanResult => ({
     actions,
     sessionId: session?.sessionId || "",
     ruleHash: session?.ruleHash,
@@ -452,6 +535,8 @@ export async function plan(userIntent: string, llmSeeds?: string[]): Promise<Pla
     repairApplied: repair?.applied ?? repairMetrics.applied,
     repairCount: repair?.count ?? repairMetrics.count,
     repairBranchIds: repair?.branchIds ?? repairMetrics.branchIds,
+    blocked,
+    blockedReason,
   });
 
   // 初始化执行会话和快照（需在抗体快速通道前创建，以便记录 antibody hits）
@@ -949,16 +1034,21 @@ ${RETRY_HINT}
     }
 
     // 1) 基础序列校验
+    // 预检查的协议违规（"需要先调用 X"）不属于符号/类型错误——
+    // 它们由下方 SSG 块以 SVL-4 处理（含确定性修复）。
+    // 只有符号/类型类错误走本回退分支，避免把 SVL-4 误标为 SVL-1。
+    const preCheckSymbolErrors = preCheckErrors.filter(e =>
+      e.includes("函数不存在") || e.includes("参数数量"));
     const seqResult = validateActionSequence(filtered);
-    if (!seqResult.valid || preCheckErrors.length > 0) {
-      const errorsFlat = [...preCheckErrors, ...seqResult.errors.flat()];
+    if (!seqResult.valid || preCheckSymbolErrors.length > 0) {
+      const errorsFlat = [...preCheckSymbolErrors, ...seqResult.errors.flat()];
       console.error("⚠️ 序列校验失败:", errorsFlat.join(", "));
 
       // Use structured violations directly from validator
       const violations: ConstraintViolation[] = seqResult.violations.length > 0
         ? seqResult.violations
-        : preCheckErrors.length > 0
-        ? [{ svl: 1 as const, violatedConstraint: "symbol_existence", actionIndex: 0, description: preCheckErrors.join("; ") }]
+        : preCheckSymbolErrors.length > 0
+        ? [{ svl: 1 as const, violatedConstraint: "symbol_existence", actionIndex: 0, description: preCheckSymbolErrors.join("; ") }]
         : [{ svl: 1 as const, violatedConstraint: "symbol_existence", actionIndex: 0, description: errorsFlat.join("; ") }];
 
       const primarySvl = `SVL-${violations[0].svl}` as SVL;
@@ -994,8 +1084,8 @@ ${RETRY_HINT}
       });
       recordEpisode({ intent: userIntent, actions: filtered, success: false, svlViolated: primarySvl });
       // Build targeted retry prompt based on pre-check results
-      const specificErrors = preCheckErrors.length > 0
-        ? `精确错误:\n${preCheckErrors.map(e => `  - ${e}`).join("\n")}`
+      const specificErrors = preCheckSymbolErrors.length > 0
+        ? `精确错误:\n${preCheckSymbolErrors.map(e => `  - ${e}`).join("\n")}`
         : `错误：${errorsFlat.join("；")}`;
       currentPrompt = `可用函数：\n${compactFuncList}${protocolChainHint}\n\n需求：${userIntent}${antibodyHint}\n\n${specificErrors}\n请修正上述问题。\n${RETRY_HINT}\n只输出 JSON。`;
       useSystem = false;
@@ -1008,6 +1098,14 @@ ${RETRY_HINT}
       const protoResult = validateProtocolWithTransitions(filtered, protocols, namespaceInitialStates);
       if (!protoResult.valid && protoResult.rejection) {
         const rej = protoResult.rejection;
+        // P3：fixPath / missingFunctions 归一化到 IR 真实函数名——
+        // 内置规则是下划线风格（generate_jwt），项目 IR 是 camelCase
+        // （generateJwt）。提示与记录使用项目里真实存在的名字。
+        const normIRName = (n: string) =>
+          ir.find((f: any) => f.name === n)
+          || ir.find((f: any) => f.name.replace(/[_-]/g, "").toLowerCase() === n.replace(/[_-]/g, "").toLowerCase());
+        rej.fixPath = (rej.fixPath || []).map(n => normIRName(n)?.name || n);
+        rej.missingFunctions = (rej.missingFunctions || []).map(n => normIRName(n)?.name || n);
         const explain = explainRejection(rej);
         console.error(explain);
 
@@ -1303,6 +1401,17 @@ ${RETRY_HINT}
     session.endedAt = Date.now();
     recordSession(session);
     clearCheckpoint(userIntent);
+
+    // 显式失败信号：所有尝试（含本地回退）都被约束拦截——
+    // 调用方必须能区分"无事可做"与"被拦截"。
+    const lastViolation = session.attempts.length > 0
+      ? session.attempts[session.attempts.length - 1].violations[0]
+      : undefined;
+    const reason = lastViolation
+      ? `所有生成尝试均被 SVL-${lastViolation.svl} 拦截: ${lastViolation.violatedConstraint}${lastViolation.fixPath?.length ? `（修复路径: ${lastViolation.fixPath.join(" → ")}）` : ""}`
+      : "所有生成尝试均被约束拦截，本地回退亦失败";
+    console.error(`[拦截] ${reason}`);
+    return wrapResult([], undefined, true, true, reason);
   }
 
   return wrapResult(finalActions);
