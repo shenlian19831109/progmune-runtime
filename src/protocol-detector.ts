@@ -619,7 +619,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     name: "Command Injection",
     category: "input_validation",
     languages: ["python"],
-    trigger: /\b(os\.system|os\.popen|subprocess\.(call|check_call|Popen|run)|commands\.getoutput|pty\.spawn)\b/i,
+    trigger: /\b(os\.system|os\.popen|subprocess\.(call|check_call|Popen|run)|commands\.getoutput|pty\.spawn|__progmune_command_taint_flow__)\b/i,
     safeguards: [
       { pattern: /\b(shlex\.quote|shlex\.split|pipes\.quote|shell\s*=\s*False)\b/i, label: "safe_command" },
     ],
@@ -631,10 +631,12 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     name: "Hardcoded Secrets",
     category: "token_security",
     languages: ["python"],
-    trigger: /\b(password|secret|api_key|API_KEY|token|\w*TOKEN\w*)\s*=\s*["'][^"']+["']/i,
-    safeguards: [
-      { pattern: /\b(os\.environ|os\.getenv|config|\.env|python-dotenv|load_dotenv|SecretStr|Secret)\b/i, label: "env_secret" },
-    ],
+    trigger: /\b(password|secret|api_key|API_KEY|token|\w*TOKEN\w*)\s*=\s*["'][^"']+["']|__progmune_hardcoded_secret__/i,
+    // Empty safeguards: the extractor marker is the complete evidence. (The old
+    // env-secret safeguard suppressed the marker itself — identifierParse of
+    // __progmune_hardcoded_secret__ yields the word "secret", matching the
+    // safeguard's "Secret" alternative.)
+    safeguards: [],
     violationMessage: "Sensitive credentials hardcoded in source code. Use environment variables or a secrets manager.",
     conceptMissing: ["SecretManagement", "ConfigurationSecurity"],
     conceptExpected: ["os.environ", "os.getenv", "dotenv"],
@@ -643,7 +645,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     name: "Dynamic Code Execution",
     category: "input_validation",
     languages: ["python"],
-    trigger: /\b(eval|exec|compile|__import__)\s*\(/i,
+    trigger: /\b(eval|exec|compile|__import__)\s*\(|__progmune_eval_user_input__/i,
     safeguards: [
       { pattern: /\b(ast\.literal_eval|json\.loads|safe_eval)\b/i, label: "safe_eval" },
     ],

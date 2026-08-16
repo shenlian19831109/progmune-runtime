@@ -310,6 +310,72 @@ def has_xxe(node):
     return unsafe_parser and tainted_parse
 
 
+EVAL_MARKER = "__progmune_eval_user_input__"
+SECRET_MARKER = "__progmune_hardcoded_secret__"
+CMD_FLOW_MARKER = "__progmune_command_taint_flow__"
+
+
+def has_dynamic_eval(node):
+    """eval/exec/__import__ called with tainted request-derived input."""
+    assigns = collect_assignments(node)
+    for child in ast.walk(node):
+        if isinstance(child, ast.Call) and isinstance(child.func, ast.Name) \
+                and child.func.id in ("eval", "exec", "__import__"):
+            if any(is_tainted(a, assigns) for a in child.args):
+                return True
+    return False
+
+
+def _root_name(func_node):
+    cur = func_node
+    while isinstance(cur, ast.Attribute):
+        cur = cur.value
+    return cur.id if isinstance(cur, ast.Name) else None
+
+
+def has_hardcoded_secret(node):
+    """jwt.decode/encode with a literal string secret (positional or
+    key=/secret= keyword) — the key is in the source, not the environment."""
+    for child in ast.walk(node):
+        if not isinstance(child, ast.Call):
+            continue
+        name = None
+        if isinstance(child.func, ast.Name):
+            name = child.func.id
+        elif isinstance(child.func, ast.Attribute):
+            name = child.func.attr
+        if name in ("decode", "encode") and _root_name(child.func) in ("jwt", "jose", "itsdangerous"):
+            if len(child.args) >= 2 and isinstance(child.args[1], ast.Constant) \
+                    and isinstance(child.args[1].value, str):
+                return True
+            for kw in child.keywords:
+                if kw.arg in ("key", "secret", "secret_key") \
+                        and isinstance(kw.value, ast.Constant) \
+                        and isinstance(kw.value.value, str):
+                    return True
+    return False
+
+
+def has_command_taint_flow(node):
+    """Tainted value passed to a command-named helper — the cross-function
+    command-injection flow (view builds 'nmap ' + ip and hands it to
+    command_out(); the Popen sink lives in the helper)."""
+    assigns = collect_assignments(node)
+    for child in ast.walk(node):
+        if not isinstance(child, ast.Call):
+            continue
+        name = None
+        if isinstance(child.func, ast.Name):
+            name = child.func.id
+        elif isinstance(child.func, ast.Attribute):
+            name = child.func.attr
+        if name and ("command" in name.lower() or name.lower().startswith("cmd_")
+                     or name.lower().startswith("exec_")):
+            if any(is_tainted(a, assigns) for a in child.args):
+                return True
+    return False
+
+
 def has_xss(node, unsafe_vars=None):
     """XSS check: a render/render_to_string call binds tainted request-derived
     values into template variables that the template renders without escaping
@@ -434,6 +500,12 @@ def extract_calls(node, unsafe_vars=None):
         calls.append(SSTI_MARKER)
     if has_xxe(node) and XXE_MARKER not in calls:
         calls.append(XXE_MARKER)
+    if has_dynamic_eval(node) and EVAL_MARKER not in calls:
+        calls.append(EVAL_MARKER)
+    if has_hardcoded_secret(node) and SECRET_MARKER not in calls:
+        calls.append(SECRET_MARKER)
+    if has_command_taint_flow(node) and CMD_FLOW_MARKER not in calls:
+        calls.append(CMD_FLOW_MARKER)
     return calls
 
 # ── Protocol annotation extraction ──

@@ -83,6 +83,13 @@ VERDICTS = {
     "introduction.views.ssti_lab": ("tp", "user blog content written into a templates/*.html file and rendered — Django dynamic-template SSTI"),
     # XXE
     "introduction.views.xxe_parse": ("tp", "setFeature(feature_external_ges, True) + parseString(request.body) — XXE lab parser"),
+    # MITRE labs (eval / command flow / hardcoded JWT keys)
+    "introduction.mitre.mitre_lab_25_api": ("tp", "eval() on request.POST — code execution lab"),
+    "introduction.views.cmd_lab2": ("tp", "eval(val) on user input — code execution lab (gap filled)"),
+    "introduction.mitre.mitre_lab_17_api": ("tp", "'nmap ' + user ip handed to command_out → Popen(shell=True) — command injection"),
+    "introduction.mitre.csrf_transfer_monei": ("tp", "jwt.decode with literal key 'csrf_vulneribility' — hardcoded secret"),
+    "introduction.mitre.csrf_transfer_monei_api": ("tp", "jwt.decode with literal key 'csrf_vulneribility' — hardcoded secret"),
+    "introduction.mitre.csrf_lab_login": ("tp", "jwt.encode with literal key — hardcoded secret"),
 }
 
 # Soft-rule class verdicts (class-level, sampled)
@@ -116,6 +123,8 @@ def main():
         "XSS (Unsafe Template Rendering)",
         "SSTI (Template Injection)",
         "XXE (External Entity Processing)",
+        "Dynamic Code Execution",
+        "Hardcoded Secrets",
     )
 
     detections = []

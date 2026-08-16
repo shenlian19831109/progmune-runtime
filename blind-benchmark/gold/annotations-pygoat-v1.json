@@ -4,11 +4,11 @@
   "version": "1.0",
   "corpus": "PyGoat (OWASP vulnerable-by-design Django app, shallow clone)",
   "summary": {
-    "total_detections": 210,
-    "true_positives": 32,
+    "total_detections": 216,
+    "true_positives": 39,
     "false_positives": 10,
-    "unlabeled": 168,
-    "labeled_precision": 76.2,
+    "unlabeled": 167,
+    "labeled_precision": 79.6,
     "auth_rule_tp": 10
   },
   "recall_notes": "PyGoat's lab inventory spans ~30 labs across OWASP classes. The detector surfaced 10 auth/broken-access labs and 3 weak-hashing/token labs. Missed classes: SQLi, XSS, SSTI, SSRF, command injection, XXE-as-injection (the xxe lab fired via the auth rule, not an injection rule) — out of scope for the protocol-lifecycle rule set. A full recall number would require lab-level gold enumeration.",
@@ -283,8 +283,15 @@
       "function": "csrf_lab_login",
       "file": "introduction/mitre.py",
       "rule": "Token Security (Weak Generation)",
-      "verdict": "unlabeled",
-      "note": "md5 password storage is a hashing flaw, not token generation"
+      "verdict": "tp",
+      "note": "jwt.encode with literal key — hardcoded secret"
+    },
+    {
+      "function": "csrf_lab_login",
+      "file": "introduction/mitre.py",
+      "rule": "Hardcoded Secrets",
+      "verdict": "tp",
+      "note": "jwt.encode with literal key — hardcoded secret"
     },
     {
       "function": "csrf_lab_login",
@@ -296,9 +303,30 @@
     {
       "function": "csrf_transfer_monei",
       "file": "introduction/mitre.py",
+      "rule": "Hardcoded Secrets",
+      "verdict": "tp",
+      "note": "jwt.decode with literal key 'csrf_vulneribility' — hardcoded secret"
+    },
+    {
+      "function": "csrf_transfer_monei",
+      "file": "introduction/mitre.py",
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
+    },
+    {
+      "function": "csrf_transfer_monei_api",
+      "file": "introduction/mitre.py",
+      "rule": "Hardcoded Secrets",
+      "verdict": "tp",
+      "note": "jwt.decode with literal key 'csrf_vulneribility' — hardcoded secret"
+    },
+    {
+      "function": "mitre_lab_25_api",
+      "file": "introduction/mitre.py",
+      "rule": "Dynamic Code Execution",
+      "verdict": "tp",
+      "note": "eval() on request.POST — code execution lab"
     },
     {
       "function": "mitre_lab_25",
@@ -320,6 +348,13 @@
       "rule": "Command Injection",
       "verdict": "unlabeled",
       "note": "not individually reviewed"
+    },
+    {
+      "function": "mitre_lab_17_api",
+      "file": "introduction/mitre.py",
+      "rule": "Command Injection",
+      "verdict": "tp",
+      "note": "'nmap ' + user ip handed to command_out → Popen(shell=True) — command injection"
     },
     {
       "function": "register",
@@ -698,6 +733,13 @@
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
+    },
+    {
+      "function": "cmd_lab2",
+      "file": "introduction/views.py",
+      "rule": "Dynamic Code Execution",
+      "verdict": "tp",
+      "note": "eval(val) on user input — code execution lab (gap filled)"
     },
     {
       "function": "cmd_lab2",

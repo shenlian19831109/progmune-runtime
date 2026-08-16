@@ -150,11 +150,14 @@ safeguards**. Zero pipeline changes downstream, zero synthetic-benchmark drift.
 | 4 | XSS | cross-file: template `{{v\|safe}}`/autoescape-off vars × tainted render contexts; mark_safe(tainted) | 0/3 → 3/3 (incl. a hidden A8-lab XSS) | 75.0% |
 | 5 | SSTI | template-string sinks (render_template_string/Template/from_string) with taint; tainted content written into templates/*.html | 0/1 → 1/1 | 75.6% |
 | 6 | XXE | dual signal: unsafe parser config (setFeature(external_*, True) / XMLParser(resolve_entities=True)) AND tainted XML parse | 1/2 → the vulnerable parser (xxe_parse); xxe_lab is a form-render wrapper | 76.2% |
+| 7 | MITRE labs | three markers: eval/exec(tainted), jwt literal-key secret, tainted command flow to command-named helpers — reviving two dead source-level rules (Dynamic Code Execution, Hardcoded Secrets) whose source-pattern triggers could never match call names | 5/5 real MITRE labs (mitre_top1-25 are documentation pages, not labs); cmd_lab2 eval() gap filled | 79.6% |
 
 Key implementation facts: lab reclassification (ssrf_lab is path traversal);
-xss_lab3 uncovered (auto-escaped template); cmd_lab2 eval() uncovered; reset_password
-predictable token uncovered; zero noise in well-written apps (parameterized ORMs,
-non-request URLs, safe opens); synthetic benchmarks unchanged throughout
-(TS recall 98.5% / precision 99.1%, Python 100% / 100%).
+xss_lab3 uncovered (auto-escaped template); reset_password predictable token
+uncovered; zero noise in well-written apps (parameterized ORMs, non-request URLs,
+safe opens); synthetic benchmarks unchanged throughout (TS recall 98.5% /
+precision 99.1%, Python 100% / 100%).
 
-Remaining zero-coverage classes: MITRE content labs (needs per-lab assessment).
+Remaining gaps: reset_password predictable token (no rule), MITRE csrf money
+transfer's missing CSRF-token check itself (the hardcoded key is caught, the CSRF
+absence is not — no CSRF rule exists).
