@@ -79,6 +79,8 @@ VERDICTS = {
     "introduction.views.xss_lab": ("tp", "{{ query|safe }} in template + tainted request.GET query — reflected XSS"),
     "introduction.views.xss_lab2": ("tp", "{{ username|safe }} + tainted username (bypassable filter) — reflected XSS"),
     "introduction.views.software_and_data_integrity_failure_lab2": ("tp", "{{ username|safe }} + request.GET — reflected XSS hidden in an A8 lab"),
+    # SSTI
+    "introduction.views.ssti_lab": ("tp", "user blog content written into a templates/*.html file and rendered — Django dynamic-template SSTI"),
 }
 
 # Soft-rule class verdicts (class-level, sampled)
@@ -110,6 +112,7 @@ def main():
         "SSRF (User-Controlled URL Fetch)",
         "Path Traversal (User-Controlled File Path)",
         "XSS (Unsafe Template Rendering)",
+        "SSTI (Template Injection)",
     )
 
     detections = []

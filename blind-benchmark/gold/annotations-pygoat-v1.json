@@ -4,11 +4,11 @@
   "version": "1.0",
   "corpus": "PyGoat (OWASP vulnerable-by-design Django app, shallow clone)",
   "summary": {
-    "total_detections": 208,
-    "true_positives": 30,
+    "total_detections": 209,
+    "true_positives": 31,
     "false_positives": 10,
     "unlabeled": 168,
-    "labeled_precision": 75.0,
+    "labeled_precision": 75.6,
     "auth_rule_tp": 10
   },
   "recall_notes": "PyGoat's lab inventory spans ~30 labs across OWASP classes. The detector surfaced 10 auth/broken-access labs and 3 weak-hashing/token labs. Missed classes: SQLi, XSS, SSTI, SSRF, command injection, XXE-as-injection (the xxe lab fired via the auth rule, not an injection rule) — out of scope for the protocol-lifecycle rule set. A full recall number would require lab-level gold enumeration.",
@@ -1041,6 +1041,13 @@
       "rule": "Context Manager Usage",
       "verdict": "unlabeled",
       "note": "resource-hygiene style warning, not a vulnerability class"
+    },
+    {
+      "function": "ssti_lab",
+      "file": "introduction/views.py",
+      "rule": "SSTI (Template Injection)",
+      "verdict": "tp",
+      "note": "user blog content written into a templates/*.html file and rendered — Django dynamic-template SSTI"
     },
     {
       "function": "ssti_lab",

@@ -226,6 +226,51 @@ def scan_unsafe_template_vars(project_root):
     return unsafe
 
 
+SSTI_MARKER = "__progmune_ssti_template_injection__"
+
+
+def has_ssti(node):
+    """SSTI check: (S1) a template-string sink (render_template_string /
+    Template / from_string) receiving tainted input; (S2) tainted content
+    written to a file opened under a template path — the Django
+    dynamic-template pattern (user input becomes template source)."""
+    assigns = collect_assignments(node)
+    for child in ast.walk(node):
+        if not isinstance(child, ast.Call):
+            continue
+        name = None
+        if isinstance(child.func, ast.Name):
+            name = child.func.id
+        elif isinstance(child.func, ast.Attribute):
+            name = child.func.attr
+        if name in ("render_template_string", "from_string", "Template"):
+            if any(is_tainted(a, assigns) for a in child.args):
+                return True
+        # S2: file.write(tainted) where the file object traces to
+        # open(<template path>, ...)
+        if name == "write":
+            if not any(is_tainted(a, assigns) for a in child.args):
+                continue
+            recv = child.func.value
+            if isinstance(recv, ast.Name):
+                v = assigns.get(recv.id)
+                if isinstance(v, ast.Call) and isinstance(v.func, ast.Name) \
+                        and v.func.id == "open" and v.args:
+                    path_str = ""
+                    p = v.args[0]
+                    if isinstance(p, ast.Constant):
+                        path_str = str(p.value)
+                    elif isinstance(p, ast.Name):
+                        pv = assigns.get(p.id)
+                        if pv is not None:
+                            path_str = ast.unparse(pv)
+                    else:
+                        path_str = ast.unparse(p)
+                    if "template" in path_str.lower() or path_str.endswith(".html"):
+                        return True
+    return False
+
+
 def has_xss(node, unsafe_vars=None):
     """XSS check: a render/render_to_string call binds tainted request-derived
     values into template variables that the template renders without escaping
@@ -346,6 +391,8 @@ def extract_calls(node, unsafe_vars=None):
         calls.append(PATH_MARKER)
     if unsafe_vars and has_xss(node, unsafe_vars) and XSS_MARKER not in calls:
         calls.append(XSS_MARKER)
+    if has_ssti(node) and SSTI_MARKER not in calls:
+        calls.append(SSTI_MARKER)
     return calls
 
 # ── Protocol annotation extraction ──

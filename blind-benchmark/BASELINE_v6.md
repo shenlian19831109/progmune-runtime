@@ -132,3 +132,29 @@ npx ts-node blind-benchmark/expand-gold-v6.ts      # → gold/annotations-v2.jso
 
 `blind-benchmark/reports/batch-scan-*-results.json` and `generated*` are gitignored
 (regenerable). Gold annotations are committed.
+
+## Coverage Expansion Work Package (2026-08-16)
+
+Real-app recall measurement (PyGoat 72 labs, class-correct 25%) showed the binding
+constraint was coverage, not precision. Five source-level coverage expansions shipped
+in one day, all on one pattern — **the Python extractor performs source-level analysis
+and emits synthetic marker calls; rules trigger on the markers with empty
+safeguards**. Zero pipeline changes downstream, zero synthetic-benchmark drift.
+
+| # | Class | Signal | PyGoat coverage | precision after |
+|---|-------|--------|-----------------|-----------------|
+| — | (baseline: param-gate + framework allowlist) | — | — | 37.8% |
+| 1 | SQLi | SQL calls whose text is dynamically formatted (f-string/%/.format/concat), incl. single-hop assignment; parameterized calls silent | 0/2 → 2/2 | 70.6% |
+| 2 | SSRF | qualified HTTP fetch (requests.*/urllib.*/…) with request-rooted URL taint | 0/1 → 1/1 | 71.4% |
+| 3 | Path traversal | file sinks (open/io.open/os.open/Path().read_text) with request-rooted path taint | 0/1 → 1/1 | 72.2% |
+| 4 | XSS | cross-file: template `{{v\|safe}}`/autoescape-off vars × tainted render contexts; mark_safe(tainted) | 0/3 → 3/3 (incl. a hidden A8-lab XSS) | 75.0% |
+| 5 | SSTI | template-string sinks (render_template_string/Template/from_string) with taint; tainted content written into templates/*.html | 0/1 → 1/1 | 75.6% |
+
+Key implementation facts: lab reclassification (ssrf_lab is path traversal);
+xss_lab3 uncovered (auto-escaped template); cmd_lab2 eval() uncovered; reset_password
+predictable token uncovered; zero noise in well-written apps (parameterized ORMs,
+non-request URLs, safe opens); synthetic benchmarks unchanged throughout
+(TS recall 98.5% / precision 99.1%, Python 100% / 100%).
+
+Remaining zero-coverage classes: XXE (XML parser configuration — pure source-level
+check, next candidate), MITRE content labs (needs per-lab assessment).

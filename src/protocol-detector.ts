@@ -724,6 +724,21 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     conceptMissing: ["XSSPrevention", "OutputEncoding"],
     conceptExpected: ["template autoescape", "output escaping"],
   },
+  {
+    name: "SSTI (Template Injection)",
+    category: "ssti",
+    languages: ["python"],
+    // Source-level detection: the Python extractor emits a synthetic marker
+    // when (S1) a template-string sink (render_template_string / Template /
+    // from_string) receives tainted input, or (S2) tainted content is written
+    // to a file opened under a template path — the Django dynamic-template
+    // pattern where user input becomes template source.
+    trigger: /\b(__progmune_ssti_template_injection__)\b/,
+    safeguards: [],
+    violationMessage: "User-controlled input used as template source — server-side template injection.",
+    conceptMissing: ["SSTIPrevention", "TemplateSandbox"],
+    conceptExpected: ["static template files", "no user template syntax"],
+  },
 
   // ═══════════════════════════════════════════════════════════════
   // P0 Injection: Payment + Session safeguard rules
