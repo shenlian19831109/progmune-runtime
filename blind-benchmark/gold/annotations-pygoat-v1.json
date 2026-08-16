@@ -4,12 +4,12 @@
   "version": "1.0",
   "corpus": "PyGoat (OWASP vulnerable-by-design Django app, shallow clone)",
   "summary": {
-    "total_detections": 216,
-    "true_positives": 39,
-    "false_positives": 10,
+    "total_detections": 242,
+    "true_positives": 66,
+    "false_positives": 9,
     "unlabeled": 167,
-    "labeled_precision": 79.6,
-    "auth_rule_tp": 10
+    "labeled_precision": 88.0,
+    "auth_rule_tp": 11
   },
   "recall_notes": "PyGoat's lab inventory spans ~30 labs across OWASP classes. The detector surfaced 10 auth/broken-access labs and 3 weak-hashing/token labs. Missed classes: SQLi, XSS, SSTI, SSRF, command injection, XXE-as-injection (the xxe lab fired via the auth rule, not an injection rule) — out of scope for the protocol-lifecycle rule set. A full recall number would require lab-level gold enumeration.",
   "detections": [
@@ -72,6 +72,13 @@
     {
       "function": "ssrf_code_checker",
       "file": "introduction/apis.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
+    },
+    {
+      "function": "ssrf_code_checker",
+      "file": "introduction/apis.py",
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
@@ -86,9 +93,30 @@
     {
       "function": "log_function_checker",
       "file": "introduction/apis.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
+    },
+    {
+      "function": "log_function_checker",
+      "file": "introduction/apis.py",
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
+    },
+    {
+      "function": "A7_disscussion_api",
+      "file": "introduction/apis.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
+    },
+    {
+      "function": "A6_disscussion_api",
+      "file": "introduction/apis.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
     },
     {
       "function": "A6_disscussion_api_2",
@@ -96,6 +124,13 @@
       "rule": "Context Manager Usage",
       "verdict": "unlabeled",
       "note": "resource-hygiene style warning, not a vulnerability class"
+    },
+    {
+      "function": "A6_disscussion_api_2",
+      "file": "introduction/apis.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
     },
     {
       "function": "A6_disscussion_api_2",
@@ -310,6 +345,13 @@
     {
       "function": "csrf_transfer_monei",
       "file": "introduction/mitre.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
+    },
+    {
+      "function": "csrf_transfer_monei",
+      "file": "introduction/mitre.py",
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
@@ -327,6 +369,13 @@
       "rule": "Dynamic Code Execution",
       "verdict": "tp",
       "note": "eval() on request.POST — code execution lab"
+    },
+    {
+      "function": "mitre_lab_25_api",
+      "file": "introduction/mitre.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
     },
     {
       "function": "mitre_lab_25",
@@ -355,6 +404,13 @@
       "rule": "Command Injection",
       "verdict": "tp",
       "note": "'nmap ' + user ip handed to command_out → Popen(shell=True) — command injection"
+    },
+    {
+      "function": "mitre_lab_17_api",
+      "file": "introduction/mitre.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
     },
     {
       "function": "register",
@@ -534,6 +590,13 @@
     {
       "function": "xxe_see",
       "file": "introduction/views.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
+    },
+    {
+      "function": "xxe_see",
+      "file": "introduction/views.py",
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
@@ -551,6 +614,13 @@
       "rule": "XXE (External Entity Processing)",
       "verdict": "tp",
       "note": "setFeature(feature_external_ges, True) + parseString(request.body) — XXE lab parser"
+    },
+    {
+      "function": "xxe_parse",
+      "file": "introduction/views.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
     },
     {
       "function": "xxe_parse",
@@ -660,6 +730,13 @@
     {
       "function": "ba",
       "file": "introduction/views.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
+    },
+    {
+      "function": "ba",
+      "file": "introduction/views.py",
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
@@ -677,6 +754,13 @@
       "rule": "Token Security (Weak Generation)",
       "verdict": "tp",
       "note": "cookie-based admin check (COOKIES.get('admin')=='1') — broken access lab"
+    },
+    {
+      "function": "ba_lab",
+      "file": "introduction/views.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
     },
     {
       "function": "ba_lab",
@@ -730,6 +814,13 @@
     {
       "function": "cmd_lab",
       "file": "introduction/views.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
+    },
+    {
+      "function": "cmd_lab",
+      "file": "introduction/views.py",
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
@@ -740,6 +831,13 @@
       "rule": "Dynamic Code Execution",
       "verdict": "tp",
       "note": "eval(val) on user input — code execution lab (gap filled)"
+    },
+    {
+      "function": "cmd_lab2",
+      "file": "introduction/views.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
     },
     {
       "function": "cmd_lab2",
@@ -793,6 +891,13 @@
     {
       "function": "Otp",
       "file": "introduction/views.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
+    },
+    {
+      "function": "Otp",
+      "file": "introduction/views.py",
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
@@ -842,6 +947,13 @@
     {
       "function": "a9_lab",
       "file": "introduction/views.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
+    },
+    {
+      "function": "a9_lab",
+      "file": "introduction/views.py",
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
@@ -873,6 +985,13 @@
       "rule": "Context Manager Usage",
       "verdict": "unlabeled",
       "note": "resource-hygiene style warning, not a vulnerability class"
+    },
+    {
+      "function": "a9_lab2",
+      "file": "introduction/views.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
     },
     {
       "function": "a9_lab2",
@@ -961,6 +1080,13 @@
     {
       "function": "a1_broken_access",
       "file": "introduction/views.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
+    },
+    {
+      "function": "a1_broken_access",
+      "file": "introduction/views.py",
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
@@ -975,9 +1101,23 @@
     {
       "function": "a1_broken_access_lab_1",
       "file": "introduction/views.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
+    },
+    {
+      "function": "a1_broken_access_lab_1",
+      "file": "introduction/views.py",
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
+    },
+    {
+      "function": "a1_broken_access_lab_2",
+      "file": "introduction/views.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
     },
     {
       "function": "a1_broken_access_lab_2",
@@ -1003,6 +1143,13 @@
     {
       "function": "injection",
       "file": "introduction/views.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
+    },
+    {
+      "function": "injection",
+      "file": "introduction/views.py",
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
@@ -1013,6 +1160,13 @@
       "rule": "SQL Injection (Python)",
       "verdict": "tp",
       "note": "raw() with string-concatenated SQL from POST input — SQLi lab"
+    },
+    {
+      "function": "injection_sql_lab",
+      "file": "introduction/views.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
     },
     {
       "function": "injection_sql_lab",
@@ -1167,6 +1321,13 @@
       "rule": "Authorization (Unauthenticated Mutation)",
       "verdict": "tp",
       "note": "session_id cookie directly trusted — broken auth lab"
+    },
+    {
+      "function": "auth_failure_lab3",
+      "file": "introduction/views.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
     },
     {
       "function": "A7_discussion",
@@ -1332,9 +1493,16 @@
     {
       "function": "reset_password",
       "file": "dockerized_labs/broken_auth_lab/app.py",
+      "rule": "Token Security (Weak Generation)",
+      "verdict": "tp",
+      "note": "md5(email:timestamp) reset token — predictable, not cryptographically secure"
+    },
+    {
+      "function": "reset_password",
+      "file": "dockerized_labs/broken_auth_lab/app.py",
       "rule": "No Token Rotation After Privilege Change",
-      "verdict": "fp",
-      "note": "real flaw is predictable md5 token — not 'no rotation after privilege change'"
+      "verdict": "tp",
+      "note": "md5(email:timestamp) reset token — predictable, not cryptographically secure"
     },
     {
       "function": "reset_form",
@@ -1468,6 +1636,20 @@
       "rule": "Context Manager Usage",
       "verdict": "unlabeled",
       "note": "resource-hygiene style warning, not a vulnerability class"
+    },
+    {
+      "function": "log_function_target",
+      "file": "introduction/playground/A9/api.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
+    },
+    {
+      "function": "log_function_target",
+      "file": "introduction/playground/A9/archive.py",
+      "rule": "CSRF Protection Disabled",
+      "verdict": "tp",
+      "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
     },
     {
       "function": "Log.info",

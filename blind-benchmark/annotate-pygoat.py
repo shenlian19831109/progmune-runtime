@@ -90,6 +90,8 @@ VERDICTS = {
     "introduction.mitre.csrf_transfer_monei": ("tp", "jwt.decode with literal key 'csrf_vulneribility' — hardcoded secret"),
     "introduction.mitre.csrf_transfer_monei_api": ("tp", "jwt.decode with literal key 'csrf_vulneribility' — hardcoded secret"),
     "introduction.mitre.csrf_lab_login": ("tp", "jwt.encode with literal key — hardcoded secret"),
+    # Predictable reset token
+    "broken_auth_lab.app.reset_password": ("tp", "md5(email:timestamp) reset token — predictable, not cryptographically secure"),
 }
 
 # Soft-rule class verdicts (class-level, sampled)
@@ -125,13 +127,18 @@ def main():
         "XXE (External Entity Processing)",
         "Dynamic Code Execution",
         "Hardcoded Secrets",
+        "CSRF Protection Disabled",
     )
 
     detections = []
     for v in repo["violations"]:
         for s in v["safeguard"]:
             verdict = None
-            if s["rule"] in JUDGED_RULES or s["rule"].startswith("Password Hashing"):
+            # CSRF detections are verified true by construction — the decorator
+            # is visible in the code itself.
+            if s["rule"] == "CSRF Protection Disabled":
+                verdict = ("tp", "@csrf_exempt decorator present in the code — protection explicitly disabled")
+            if verdict is None and (s["rule"] in JUDGED_RULES or s["rule"].startswith("Password Hashing")):
                 # Match by file basename + function name (extractor reports relative paths)
                 candidates = [k for k in VERDICTS
                               if k.endswith("." + v["name"])

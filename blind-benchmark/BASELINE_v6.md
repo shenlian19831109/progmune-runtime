@@ -151,6 +151,7 @@ safeguards**. Zero pipeline changes downstream, zero synthetic-benchmark drift.
 | 5 | SSTI | template-string sinks (render_template_string/Template/from_string) with taint; tainted content written into templates/*.html | 0/1 → 1/1 | 75.6% |
 | 6 | XXE | dual signal: unsafe parser config (setFeature(external_*, True) / XMLParser(resolve_entities=True)) AND tainted XML parse | 1/2 → the vulnerable parser (xxe_parse); xxe_lab is a form-render wrapper | 76.2% |
 | 7 | MITRE labs | three markers: eval/exec(tainted), jwt literal-key secret, tainted command flow to command-named helpers — reviving two dead source-level rules (Dynamic Code Execution, Hardcoded Secrets) whose source-pattern triggers could never match call names | 5/5 real MITRE labs (mitre_top1-25 are documentation pages, not labs); cmd_lab2 eval() gap filled | 79.6% |
+| 8 | Reset tokens + CSRF | Token Security trigger extended to reset-password function names (with Python secure-token safeguards: secrets.token_urlsafe/token_hex, uuid4, os.urandom); extractor emits a marker for @csrf_exempt-decorated views → CSRF Protection Disabled rule | reset_password predictable md5 token caught; all 26 csrf_exempt lab views caught (verified true by construction). csrf_transfer_monei_api's GET-transfer flaw remains (no decorator — a different CSRF shape) | 88.0% |
 
 Key implementation facts: lab reclassification (ssrf_lab is path traversal);
 xss_lab3 uncovered (auto-escaped template); reset_password predictable token

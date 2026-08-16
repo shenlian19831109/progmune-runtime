@@ -498,9 +498,9 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     name: "Token Security (Weak Generation)",
     category: "token_security",
     languages: ["typescript", "javascript", "python"],
-    trigger: /\b(authenticate|login|signIn|logIn|createSession|generateToken|do_login|sign_in|log_in|generate_token|create_session)\b/i,
+    trigger: /\b(authenticate|login|signIn|logIn|createSession|generateToken|do_login|sign_in|log_in|generate_token|create_session|reset_password|password_reset|forgot_password|reset_token|create_reset_token|generate_reset_token)\b/i,
     safeguards: [
-      { pattern: /\b(crypto\.randomUUID|jwt\.sign|jsonwebtoken|nanoid|randomBytes|cryptoRandomString)\b/i, label: "secure_token" },
+      { pattern: /\b(crypto\.randomUUID|jwt\.sign|jsonwebtoken|nanoid|randomBytes|cryptoRandomString|secrets\.token_urlsafe|secrets\.token_hex|token_urlsafe|token_hex|uuid\.uuid4|os\.urandom)\b/i, label: "secure_token" },
       // Framework delegation: calling a token-issuing layer means the session
       // material is handled by that layer, not generated inline. NOTE: bare
       // jwt.encode is deliberately NOT here — a hardcoded secret key makes the
@@ -755,6 +755,19 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     violationMessage: "XML parsed from user-controlled input with external entity processing explicitly enabled — XXE.",
     conceptMissing: ["XXEPrevention", "EntityExpansionControl"],
     conceptExpected: ["disable external entities", "secure parser config"],
+  },
+  {
+    name: "CSRF Protection Disabled",
+    category: "csrf",
+    languages: ["python"],
+    // Source-level detection: the Python extractor emits a synthetic marker
+    // when a function carries the @csrf_exempt decorator — Django CSRF
+    // protection explicitly disabled on the view.
+    trigger: /\b(__progmune_csrf_disabled__)\b/,
+    safeguards: [],
+    violationMessage: "View decorated with @csrf_exempt — CSRF protection explicitly disabled.",
+    conceptMissing: ["CSRFProtection", "StateChangingRequestValidation"],
+    conceptExpected: ["csrf token validation", "SameSite cookies"],
   },
 
   // ═══════════════════════════════════════════════════════════════

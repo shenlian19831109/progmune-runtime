@@ -313,6 +313,20 @@ def has_xxe(node):
 EVAL_MARKER = "__progmune_eval_user_input__"
 SECRET_MARKER = "__progmune_hardcoded_secret__"
 CMD_FLOW_MARKER = "__progmune_command_taint_flow__"
+CSRF_MARKER = "__progmune_csrf_disabled__"
+
+
+def has_csrf_exempt(node):
+    """@csrf_exempt decorator — Django CSRF protection explicitly disabled."""
+    for dec in getattr(node, 'decorator_list', []):
+        name = None
+        if isinstance(dec, ast.Name):
+            name = dec.id
+        elif isinstance(dec, ast.Attribute):
+            name = dec.attr
+        if name == "csrf_exempt":
+            return True
+    return False
 
 
 def has_dynamic_eval(node):
@@ -506,6 +520,8 @@ def extract_calls(node, unsafe_vars=None):
         calls.append(SECRET_MARKER)
     if has_command_taint_flow(node) and CMD_FLOW_MARKER not in calls:
         calls.append(CMD_FLOW_MARKER)
+    if has_csrf_exempt(node) and CSRF_MARKER not in calls:
+        calls.append(CSRF_MARKER)
     return calls
 
 # ── Protocol annotation extraction ──
