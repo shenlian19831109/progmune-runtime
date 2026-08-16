@@ -4,12 +4,12 @@
   "version": "1.0",
   "corpus": "PyGoat (OWASP vulnerable-by-design Django app, shallow clone)",
   "summary": {
-    "total_detections": 227,
-    "true_positives": 62,
+    "total_detections": 232,
+    "true_positives": 67,
     "false_positives": 0,
     "unlabeled": 165,
     "labeled_precision": 100.0,
-    "auth_rule_tp": 6
+    "auth_rule_tp": 10
   },
   "recall_notes": "PyGoat's lab inventory spans ~30 labs across OWASP classes. The detector surfaced 10 auth/broken-access labs and 3 weak-hashing/token labs. Missed classes: SQLi, XSS, SSTI, SSRF, command injection, XXE-as-injection (the xxe lab fired via the auth rule, not an injection rule) — out of scope for the protocol-lifecycle rule set. A full recall number would require lab-level gold enumeration.",
   "detections": [
@@ -522,7 +522,14 @@
       "file": "introduction/views.py",
       "rule": "Unsafe Deserialization (Pickle)",
       "verdict": "tp",
-      "note": "pickle.loads() on user cookie — deserialization lab"
+      "note": "pickle loads a token from a client cookie — cookie-carried trust"
+    },
+    {
+      "function": "insec_des_lab",
+      "file": "introduction/views.py",
+      "rule": "Authorization via Client Cookie",
+      "verdict": "tp",
+      "note": "pickle loads a token from a client cookie — cookie-carried trust"
     },
     {
       "function": "insec_des_lab",
@@ -704,7 +711,7 @@
       "file": "introduction/views.py",
       "rule": "Token Security (Weak Generation)",
       "verdict": "tp",
-      "note": "cookie-based admin check (COOKIES.get('admin')=='1') — broken access lab"
+      "note": "COOKIES.get('admin') == '1' gates admin data — cookie-based authorization"
     },
     {
       "function": "ba_lab",
@@ -712,6 +719,13 @@
       "rule": "CSRF Protection Disabled",
       "verdict": "tp",
       "note": "@csrf_exempt decorator present in the code — protection explicitly disabled"
+    },
+    {
+      "function": "ba_lab",
+      "file": "introduction/views.py",
+      "rule": "Authorization via Client Cookie",
+      "verdict": "tp",
+      "note": "COOKIES.get('admin') == '1' gates admin data — cookie-based authorization"
     },
     {
       "function": "ba_lab",
@@ -1038,6 +1052,13 @@
     {
       "function": "a1_broken_access_lab_1",
       "file": "introduction/views.py",
+      "rule": "Authorization via Client Cookie",
+      "verdict": "tp",
+      "note": "COOKIES.get('admin') == '1' gates admin data — cookie-based authorization"
+    },
+    {
+      "function": "a1_broken_access_lab_1",
+      "file": "introduction/views.py",
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
@@ -1213,9 +1234,23 @@
     {
       "function": "crypto_failure_lab3",
       "file": "introduction/views.py",
+      "rule": "Authorization via Client Cookie",
+      "verdict": "tp",
+      "note": "cookie.split('|')[0] == 'admin' — cookie-based authorization"
+    },
+    {
+      "function": "crypto_failure_lab3",
+      "file": "introduction/views.py",
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
+    },
+    {
+      "function": "sec_misconfig_lab3",
+      "file": "introduction/views.py",
+      "rule": "Hardcoded Secrets",
+      "verdict": "tp",
+      "note": "jwt.decode with SECRET_COOKIE_KEY imported from settings — hardcoded key"
     },
     {
       "function": "auth_failure",

@@ -92,6 +92,13 @@ VERDICTS = {
     "introduction.mitre.csrf_lab_login": ("tp", "jwt.encode with literal key — hardcoded secret"),
     # Predictable reset token
     "broken_auth_lab.app.reset_password": ("tp", "md5(email:timestamp) reset token — predictable, not cryptographically secure"),
+    # Cookie-based authorization (the honest class for the cookie-bypass labs)
+    "introduction.views.ba_lab": ("tp", "COOKIES.get('admin') == '1' gates admin data — cookie-based authorization"),
+    "introduction.views.a1_broken_access_lab_1": ("tp", "COOKIES.get('admin') == '1' gates admin data — cookie-based authorization"),
+    "introduction.views.crypto_failure_lab3": ("tp", "cookie.split('|')[0] == 'admin' — cookie-based authorization"),
+    "introduction.views.insec_des_lab": ("tp", "pickle loads a token from a client cookie — cookie-carried trust"),
+    # Hardcoded secret via cross-module constant
+    "introduction.views.sec_misconfig_lab3": ("tp", "jwt.decode with SECRET_COOKIE_KEY imported from settings — hardcoded key"),
 }
 
 # Soft-rule class verdicts (class-level, sampled)
@@ -128,6 +135,7 @@ def main():
         "Dynamic Code Execution",
         "Hardcoded Secrets",
         "CSRF Protection Disabled",
+        "Authorization via Client Cookie",
     )
 
     detections = []

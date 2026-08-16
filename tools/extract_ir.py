@@ -382,9 +382,27 @@ def _root_name(func_node):
     return cur.id if isinstance(cur, ast.Name) else None
 
 
-def has_hardcoded_secret(node):
+def has_hardcoded_secret(node, module_constants=None, imports=None, global_constants=None):
     """jwt.decode/encode with a literal string secret (positional or
-    key=/secret= keyword) — the key is in the source, not the environment."""
+    key=/secret= keyword) — the key is in the source, not the environment.
+    Name arguments resolve through module-level constant assignments
+    (SECRET_COOKIE_KEY = '...'), including cross-module imports
+    (from pygoat.settings import SECRET_COOKIE_KEY → global constants map)."""
+    def is_literal(v):
+        if isinstance(v, ast.Constant) and isinstance(v.value, str):
+            return True
+        if isinstance(v, ast.Name):
+            if module_constants is not None:
+                cv = module_constants.get(v.id)
+                if isinstance(cv, ast.Constant) and isinstance(cv.value, str):
+                    return True
+            if imports is not None and global_constants is not None:
+                mod = imports.get(v.id)
+                cv = global_constants.get(mod)
+                if isinstance(cv, ast.Constant) and isinstance(cv.value, str):
+                    return True
+        return False
+
     for child in ast.walk(node):
         if not isinstance(child, ast.Call):
             continue
@@ -394,13 +412,10 @@ def has_hardcoded_secret(node):
         elif isinstance(child.func, ast.Attribute):
             name = child.func.attr
         if name in ("decode", "encode") and _root_name(child.func) in ("jwt", "jose", "itsdangerous"):
-            if len(child.args) >= 2 and isinstance(child.args[1], ast.Constant) \
-                    and isinstance(child.args[1].value, str):
+            if len(child.args) >= 2 and is_literal(child.args[1]):
                 return True
             for kw in child.keywords:
-                if kw.arg in ("key", "secret", "secret_key") \
-                        and isinstance(kw.value, ast.Constant) \
-                        and isinstance(kw.value.value, str):
+                if kw.arg in ("key", "secret", "secret_key") and is_literal(kw.value):
                     return True
     return False
 
@@ -576,6 +591,87 @@ def has_dynamic_command(node):
     return False
 
 
+COOKIE_AUTH_MARKER = "__progmune_cookie_authorization__"
+
+
+def build_module_constants(tree):
+    """Module-level constant assignments (SECRET_COOKIE_KEY = '...')."""
+    consts = {}
+    for node in getattr(tree, 'body', []):
+        if isinstance(node, ast.Assign):
+            for t in node.targets:
+                if isinstance(t, ast.Name):
+                    consts.setdefault(t.id, node.value)
+    return consts
+
+
+def build_global_constants(project_root):
+    """Project-wide module-level constants, keyed 'module.path.NAME' —
+    resolves cross-module imports (from pygoat.settings import KEY)."""
+    consts = {}
+    for path in Path(project_root).rglob("*.py"):
+        if any(p.startswith('.') for p in path.parts):
+            continue
+        if 'node_modules' in path.parts or 'venv' in path.parts \
+                or 'site-packages' in path.parts:
+            continue
+        try:
+            tree = ast.parse(path.read_text(encoding='utf-8', errors='ignore'))
+        except Exception:
+            continue
+        rel = path.relative_to(project_root).with_suffix('').as_posix().replace('/', '.')
+        for name, val in build_module_constants(tree).items():
+            consts[f"{rel}.{name}"] = val
+    return consts
+
+
+def _contains_cookies_ref(node):
+    if isinstance(node, ast.Attribute):
+        if node.attr == "COOKIES" and isinstance(node.value, ast.Name) \
+                and node.value.id == "request":
+            return True
+        return _contains_cookies_ref(node.value)
+    if isinstance(node, ast.Subscript):
+        return _contains_cookies_ref(node.value)
+    if isinstance(node, ast.Call):
+        return _contains_cookies_ref(node.func)
+    return False
+
+
+def _cookie_tainted(node, assigns, depth=0):
+    """Expression deriving from request.COOKIES — directly or via single-hop
+    assignment chains (cookie = request.COOKIES['x']; cookie.split('|')[0])."""
+    if node is None or depth > 3:
+        return False
+    if _contains_cookies_ref(node):
+        return True
+    if isinstance(node, ast.Name):
+        v = assigns.get(node.id)
+        return _cookie_tainted(v, assigns, depth + 1) if v is not None else False
+    if isinstance(node, ast.Attribute):
+        return _cookie_tainted(node.value, assigns, depth)
+    if isinstance(node, ast.Subscript):
+        return _cookie_tainted(node.value, assigns, depth)
+    if isinstance(node, ast.Call):
+        return _cookie_tainted(node.func, assigns, depth)
+    return False
+
+
+def has_cookie_authorization(node):
+    """A client-controlled cookie value participates in a comparison or a
+    branch test — authorization decision made from cookie contents."""
+    assigns = collect_assignments(node)
+    for child in ast.walk(node):
+        if isinstance(child, (ast.If, ast.While)):
+            if _cookie_tainted(child.test, assigns):
+                return True
+        if isinstance(child, ast.Compare):
+            if _cookie_tainted(child.left, assigns) \
+                    or any(_cookie_tainted(c, assigns) for c in child.comparators):
+                return True
+    return False
+
+
 def has_xss(node, unsafe_vars=None):
     """XSS check: a render/render_to_string call binds tainted request-derived
     values into template variables that the template renders without escaping
@@ -658,7 +754,7 @@ def has_path_traversal(node):
     return False
 
 
-def extract_calls(node, unsafe_vars=None, imports=None):
+def extract_calls(node, unsafe_vars=None, imports=None, module_constants=None, global_constants=None):
     """Extract function call names from a function body (first-level only).
 
     Attribute calls emit the full qualified chain (e.g. user.change_password,
@@ -703,8 +799,10 @@ def extract_calls(node, unsafe_vars=None, imports=None):
         calls.append(XXE_MARKER)
     if has_dynamic_eval(node) and EVAL_MARKER not in calls:
         calls.append(EVAL_MARKER)
-    if has_hardcoded_secret(node) and SECRET_MARKER not in calls:
+    if has_hardcoded_secret(node, module_constants, imports, global_constants) and SECRET_MARKER not in calls:
         calls.append(SECRET_MARKER)
+    if has_cookie_authorization(node) and COOKIE_AUTH_MARKER not in calls:
+        calls.append(COOKIE_AUTH_MARKER)
     if has_command_taint_flow(node) and CMD_FLOW_MARKER not in calls:
         calls.append(CMD_FLOW_MARKER)
     if has_csrf_exempt(node) and CSRF_MARKER not in calls:
@@ -816,7 +914,7 @@ def is_exported(name, parent_class=None):
 
 # ── File-level extraction ──
 
-def extract_functions_from_file(filepath: str, root_dir: str, unsafe_vars=None):
+def extract_functions_from_file(filepath: str, root_dir: str, unsafe_vars=None, global_constants=None):
     """Extract all functions and class methods from a Python file."""
     with open(filepath, 'r', encoding='utf-8') as f:
         try:
@@ -827,6 +925,7 @@ def extract_functions_from_file(filepath: str, root_dir: str, unsafe_vars=None):
     funcs = []
     rel_path = os.path.relpath(filepath, root_dir)
     imports = build_import_map(tree)
+    module_constants = build_module_constants(tree)
 
     # Single-pass parent map (O(n)). The old per-node full-tree walk was O(n²)
     # and hung on large real-world files (e.g. fastapi's bigger modules).
@@ -858,7 +957,7 @@ def extract_functions_from_file(filepath: str, root_dir: str, unsafe_vars=None):
                 params.append({"name": arg.arg, "type": ptype})
 
             return_type = get_annotation(node.returns) if node.returns else "any"
-            calls = extract_calls(node, unsafe_vars, imports)
+            calls = extract_calls(node, unsafe_vars, imports, module_constants, global_constants)
             exported = is_exported(name, parent_class)
             protocol = extract_protocol_from_decorators(node)
             doc_meta = extract_docstring_meta(node)
@@ -895,6 +994,7 @@ def extract_ir(project_root: str):
     """Walk all .py files and extract IR."""
     all_funcs = []
     unsafe_vars = scan_unsafe_template_vars(project_root)
+    global_constants = build_global_constants(project_root)
     for path in Path(project_root).rglob("*.py"):
         # Skip hidden dirs, node_modules, site-packages
         parts = path.parts
@@ -915,7 +1015,7 @@ def extract_ir(project_root: str):
         nonsurface = ('docs', 'docs_src', 'examples', 'benchmarks', 'scripts')
         if any(p in nonsurface for p in rel_parts[:-1]):
             continue
-        all_funcs.extend(extract_functions_from_file(str(path), project_root, unsafe_vars))
+        all_funcs.extend(extract_functions_from_file(str(path), project_root, unsafe_vars, global_constants))
     return all_funcs
 
 if __name__ == "__main__":

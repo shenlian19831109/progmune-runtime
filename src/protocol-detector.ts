@@ -799,6 +799,20 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     conceptMissing: ["CSRFProtection", "SafeMethodEnforcement"],
     conceptExpected: ["POST for state changes", "csrf token validation"],
   },
+  {
+    name: "Authorization via Client Cookie",
+    category: "authorization",
+    languages: ["python"],
+    // Source-level detection: the Python extractor emits a synthetic marker
+    // when a client-controlled cookie value (request.COOKIES, incl. single-hop
+    // assignment chains like cookie.split('|')[0]) participates in a comparison
+    // or branch test — authorization decided by cookie contents.
+    trigger: /\b(__progmune_cookie_authorization__)\b/,
+    safeguards: [],
+    violationMessage: "Authorization decision based on a client-controlled cookie value — cookie contents are user-editable.",
+    conceptMissing: ["ServerSideAuthorization", "SessionIntegrity"],
+    conceptExpected: ["server-side session checks", "signed sessions"],
+  },
 
   // ═══════════════════════════════════════════════════════════════
   // P0 Injection: Payment + Session safeguard rules
