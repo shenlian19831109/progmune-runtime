@@ -361,13 +361,18 @@ function extractDirectCalls(func: FunctionDeclaration | ArrowFunction): string[]
     }
     if (Node.isFunctionDeclaration(node) || Node.isArrowFunction(node)) traversal.skip();
   });
-  // Token-issuance marker (mirrors the Python extractor): the function
-  // actually issues session/token material — set_cookie calls or token/
-  // session-named assignments/properties. The Token Security rule's
-  // requireMarker precondition consumes it.
+  // Semantic markers (mirroring the Python extractor):
+  // - token issuance: set_cookie calls or token/session-named assignments —
+  //   the Token Security rule's requireMarker precondition consumes it.
+  // - inline ownership comparison: ownerId/authorId compared with ==/!== —
+  //   the Ownership Check rules' satisfier consumes it (the call-name
+  //   interface cannot see inline comparisons).
   const text = func.getText();
   if (/set_cookie\(|setCookie\(|\btoken\s*[:=]|\bsession_token\s*[:=]/.test(text)) {
     calls.push("__progmune_token_issued__");
+  }
+  if (/ownerId\s*[!=]==?|authorId\s*[!=]==?|createdBy\s*[!=]==?|\.owner\s*[!=]==?|userId\s*[!=]==?/.test(text)) {
+    calls.push("__progmune_ownership_checked__");
   }
   return [...new Set(calls)];
 }

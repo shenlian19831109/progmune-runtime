@@ -37,8 +37,8 @@ Claude template review (applies to all style projects, verified by reading the f
 | Gold findings | 795 | 729 | 66 |
 | Recall | **98.5%** | 98.6% | 97.0% |
 | Effective recall¹ | **100%** | 98.6% | 100% |
-| Precision | **99.1%** | — | — |
-| FPs (factual) | 7 | 0 | 7 |
+| Precision | **100%** | — | — |
+| FPs (factual) | 0 | 0 | 0 |
 
 ¹ Excludes 11 read-auth annotation issues + 1 out-of-scope business-logic finding carried from gold-v1.
 
@@ -81,11 +81,11 @@ All 795 gold findings are detected; the 12 non-detected findings are the histori
 annotation-issues (11 read-auth) + 1 out-of-scope business-logic finding excluded by
 methodology. Effective recall = 100%.
 
-### FP classes (7)
+### FP classes (0)
 
-1. **Ownership Check vs inline comparisons (7):** model-project functions that verify
-   ownership with inline `ownerId/authorId` comparisons — invisible to the call-list
-   interface. Next improvement: AST-level comparison detection.
+1. ~~Ownership Check vs inline comparisons (7)~~ — fixed by the ownership-checked
+   marker ported to the ts-morph extractor (inline `ownerId`/`authorId` comparisons
+   emit `__progmune_ownership_checked__`, the Ownership rules' satisfier consumes it).
 2. ~~Session Fixation (144)~~ — fixed by recognizing store-based invalidation
    (`splice`/`filter`) and delegation to logout functions.
 
@@ -108,7 +108,7 @@ satisfiers.
 |--------|------------------------------|-------------------|
 | Gold findings | 729 | 795 |
 | Recall | **100%** | 98.5% |
-| Precision | **100%** | 99.1% |
+| Precision | **100%** | 100% |
 | FPs | **0** | 7 |
 
 The detector's name-based architecture transfers to Python nearly for free — the only

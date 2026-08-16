@@ -3,8 +3,8 @@
   "annotated_by": "plant-config + template review (style variants); human (model variants, 2026-07-06)",
   "annotated_at": "2026-08-15",
   "version": "6.0",
-  "detector_scan_generated": "2026-08-16T08:47:28.151Z",
-  "detector_commit": "38d432de195975d6a7ba28525cf1d11ea7d3a52a",
+  "detector_scan_generated": "2026-08-16T09:15:19.848Z",
+  "detector_commit": "01a8ca0b13b7db2c10bb71411993de974f3ff6d7",
   "projects": [
     {
       "project_id": "analytics_A",
@@ -1746,7 +1746,7 @@
         "detected": 5,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 3,
+        "false_positives": 0,
         "by_severity": {
           "high": {
             "total": 1,
@@ -3066,7 +3066,7 @@
         "detected": 5,
         "missed": 2,
         "detection_rate": 71.4,
-        "false_positives": 2,
+        "false_positives": 0,
         "by_severity": {
           "medium": {
             "total": 3,
@@ -3998,7 +3998,7 @@
         "detected": 6,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 1,
+        "false_positives": 0,
         "by_severity": {
           "high": {
             "total": 3,
@@ -12362,7 +12362,7 @@
         "detected": 4,
         "missed": 0,
         "detection_rate": 100,
-        "false_positives": 1,
+        "false_positives": 0,
         "by_severity": {
           "high": {
             "total": 1,
@@ -13661,9 +13661,9 @@
     "out_of_scope": 1,
     "genuine_fns": 0,
     "overall_recall": 98.5,
-    "overall_precision": 99.1,
-    "false_positive_rate": 0.9,
-    "false_positives_total": 7,
+    "overall_precision": 100,
+    "false_positive_rate": 0,
+    "false_positives_total": 0,
     "effective_recall_excluding_annotation": 100,
     "note": "FP = detections factually wrong per code review: (1) session_fixation on logout functions that do invalidate; (2) Authorization (Ownership Check) on functions whose body contains an inline ownerId/authorId comparison. Factually-true detections not in the gold list are 'unlabeled' and excluded from precision — mirrors v5 annotation_issues handling. Matching is strict-localization: a finding counts as detected only when ITS function carries the corresponding rule; the handleRequest aggregator fallback applies only to functions absent from the scan."
   }
