@@ -71,6 +71,8 @@ VERDICTS = {
     "introduction.views.insec_des_lab": ("tp", "pickle.loads() on user cookie — deserialization lab"),
     "introduction.views.a9_lab": ("tp", "yaml.load(file, yaml.Loader) on upload — unsafe YAML deserialization lab"),
     "dataexposure_lab.main.deserialize_data": ("tp", "dockerized insec_des lab — pickle-based"),
+    # SSRF
+    "introduction.views.ssrf_lab2": ("tp", "requests.get() on user-supplied URL — SSRF lab"),
 }
 
 # Soft-rule class verdicts (class-level, sampled)
@@ -99,6 +101,7 @@ def main():
         "Command Injection",
         "Unsafe Deserialization (Pickle)",
         "SQL Injection (Python)",
+        "SSRF (User-Controlled URL Fetch)",
     )
 
     detections = []

@@ -101,13 +101,88 @@ def has_unparameterized_sql(node):
     return False
 
 
+SSRF_MARKER = "__progmune_ssrf_user_url__"
+HTTP_FETCH_RECEIVERS = ("requests", "httpx", "urllib", "urllib2", "aiohttp", "http")
+
+
+def is_request_rooted(node):
+    """True if the expression derives from the request object
+    (request.POST.get(...), request.GET['x'], request.body ...)."""
+    if isinstance(node, ast.Name):
+        return node.id == "request"
+    if isinstance(node, ast.Attribute):
+        return is_request_rooted(node.value)
+    if isinstance(node, ast.Subscript):
+        return is_request_rooted(node.value)
+    if isinstance(node, ast.Call):
+        return (is_request_rooted(node.func)
+                or any(is_request_rooted(a) for a in node.args)
+                or any(is_request_rooted(k.value) for k in node.keywords))
+    return False
+
+
+def is_tainted(node, assigns, depth=0):
+    """Single-hop taint: request-rooted, variable assigned from a tainted
+    value, or dynamic formatting containing tainted parts."""
+    if node is None or depth > 2:
+        return False
+    if is_request_rooted(node):
+        return True
+    if isinstance(node, ast.Name):
+        return is_tainted(assigns.get(node.id), assigns, depth + 1)
+    if isinstance(node, ast.JoinedStr):
+        return any(is_tainted(v.value, assigns, depth + 1)
+                   for v in node.values if isinstance(v, ast.FormattedValue))
+    if isinstance(node, ast.BinOp):
+        return (is_tainted(node.left, assigns, depth)
+                or is_tainted(node.right, assigns, depth))
+    if isinstance(node, ast.Call):
+        return (any(is_tainted(a, assigns, depth) for a in node.args)
+                or any(is_tainted(k.value, assigns, depth) for k in node.keywords))
+    return False
+
+
+def is_http_fetch_call(node):
+    """requests.get(...) / urllib.request.urlopen(...) / httpx.get(...) /
+    http.client.HTTPConnection.request(...) / bare urlopen(...)."""
+    if isinstance(node.func, ast.Name):
+        return node.func.id == "urlopen"
+    if isinstance(node.func, ast.Attribute):
+        parts = []
+        cur = node.func
+        while isinstance(cur, ast.Attribute):
+            parts.append(cur.attr)
+            cur = cur.value
+        if isinstance(cur, ast.Name):
+            parts.append(cur.id)
+        chain = parts[::-1]
+        if chain and chain[0] in HTTP_FETCH_RECEIVERS:
+            return chain[-1] in ("get", "post", "put", "delete", "head",
+                                 "patch", "request", "urlopen", "open", "fetch")
+    return False
+
+
+def has_ssrf(node):
+    """SSRF check: an HTTP fetch call whose URL argument is tainted by
+    request-derived user input (directly or via single-hop assignment)."""
+    assigns = collect_assignments(node)
+    for child in ast.walk(node):
+        if isinstance(child, ast.Call) and is_http_fetch_call(child):
+            if any(is_tainted(a, assigns) for a in child.args):
+                return True
+            if any(is_tainted(k.value, assigns) for k in child.keywords):
+                return True
+    return False
+
+
 def extract_calls(node):
     """Extract function call names from a function body (first-level only).
 
     Attribute calls emit the full qualified chain (e.g. user.change_password,
     User.objects.create_user) so rules can distinguish framework-delegated
     calls from custom same-named functions. Bare-name calls stay as-is.
-    Unparameterized SQL execution emits a synthetic marker call."""
+    Unparameterized SQL execution emits a synthetic marker call; SSRF
+    (user-controlled URL fetch) emits another."""
     calls = []
     seen = set()
     for child in ast.walk(node):
@@ -131,6 +206,8 @@ def extract_calls(node):
                 calls.append(name)
     if has_unparameterized_sql(node) and SQL_MARKER not in calls:
         calls.append(SQL_MARKER)
+    if has_ssrf(node) and SSRF_MARKER not in calls:
+        calls.append(SSRF_MARKER)
     return calls
 
 # ── Protocol annotation extraction ──

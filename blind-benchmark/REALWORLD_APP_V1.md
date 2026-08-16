@@ -136,12 +136,34 @@ firing — its predictable-token flaw has no covering rule yet, noted as a gap).
 cmd_lab2's `eval()` remains uncovered (Command Injection rule triggers on
 subprocess/system patterns, not eval).
 
+## Coverage expansion #2: SSRF source-level detection (2026-08-16)
+
+Extractor taint check: an HTTP fetch (qualified `requests.*`/`urllib.*`/`httpx.*`/
+`aiohttp.*`/bare `urlopen`) whose URL argument derives from the request object —
+directly, via single-hop assignment, or inside dynamic formatting — emits a marker
+call; the SSRF rule triggers on it. Safe fetches (hardcoded URLs) and helper
+functions taking URL params stay silent (documented single-hop limitation).
+
+**Lab reclassification found during implementation:** PyGoat's `ssrf_lab` is
+actually a **path traversal** (`open(os.path.join(dirname, file))` on user input —
+reads arbitrary local files, no HTTP fetch). The only genuine SSRF lab is
+`ssrf_lab2` (`requests.get(request.POST["url"])`). SSRF coverage: **1/1 = 100%**;
+path traversal becomes a new uncovered class (no rule exists).
+
+| Metric | Before | After |
+|--------|--------|-------|
+| A10-SSRF class-correct | 0/1 (real SSRF labs) | **1/1** |
+| PyGoat labeled precision | 70.6% | **71.4%** (TP 25 / FP 10) |
+
+Zero noise in the 3 well-written apps. Both synthetic benchmarks unchanged.
+
 ## Next steps
 
 1. Remaining FP classes (documented, tier-2): unqualified-import framework calls,
    DRF class-attribute permissions, unicorn dispatch internals.
-2. Coverage expansion #2 candidate: SSRF (URL-flow) or XSS (template rendering) —
-   same extractor-marker pattern as SQLi.
+2. Coverage expansion #3 candidate: XSS (template rendering) or path traversal
+   (newly identified uncovered class, the ssrf_lab mislabel) — same
+   extractor-marker pattern.
 
 ## Next steps
 

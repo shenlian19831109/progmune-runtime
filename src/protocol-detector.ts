@@ -679,6 +679,21 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     conceptMissing: ["SQLInjectionPrevention", "ParameterizedQueries"],
     conceptExpected: ["parameterized query", "%s placeholder"],
   },
+  {
+    name: "SSRF (User-Controlled URL Fetch)",
+    category: "ssrf",
+    languages: ["python"],
+    // Source-level detection: the Python extractor emits a synthetic marker
+    // call when an HTTP fetch (requests.*/urllib.*/httpx.*/aiohttp.*/urlopen)
+    // receives a URL tainted by request-derived user input (directly or via
+    // single-hop assignment). No satisfier possible — the marker IS the
+    // violation evidence.
+    trigger: /\b(__progmune_ssrf_user_url__)\b/,
+    safeguards: [],
+    violationMessage: "HTTP fetch whose URL derives from user-controlled request input — server-side request forgery.",
+    conceptMissing: ["SSRFPrevention", "URLValidation"],
+    conceptExpected: ["URL allowlist", "scheme validation"],
+  },
 
   // ═══════════════════════════════════════════════════════════════
   // P0 Injection: Payment + Session safeguard rules
