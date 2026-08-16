@@ -739,6 +739,21 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     conceptMissing: ["SSTIPrevention", "TemplateSandbox"],
     conceptExpected: ["static template files", "no user template syntax"],
   },
+  {
+    name: "XXE (External Entity Processing)",
+    category: "xxe",
+    languages: ["python"],
+    // Source-level detection: the Python extractor emits a synthetic marker
+    // when BOTH signals co-occur — an explicitly unsafe parser configuration
+    // (setFeature(feature_external_*, True) / XMLParser(resolve_entities=True))
+    // AND parsing of tainted request-derived XML (parse/parseString/fromstring).
+    // Config-only or taint-only alone is not flagged.
+    trigger: /\b(__progmune_xxe_external_entities__)\b/,
+    safeguards: [],
+    violationMessage: "XML parsed from user-controlled input with external entity processing explicitly enabled — XXE.",
+    conceptMissing: ["XXEPrevention", "EntityExpansionControl"],
+    conceptExpected: ["disable external entities", "secure parser config"],
+  },
 
   // ═══════════════════════════════════════════════════════════════
   // P0 Injection: Payment + Session safeguard rules

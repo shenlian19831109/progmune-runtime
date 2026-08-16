@@ -81,6 +81,8 @@ VERDICTS = {
     "introduction.views.software_and_data_integrity_failure_lab2": ("tp", "{{ username|safe }} + request.GET — reflected XSS hidden in an A8 lab"),
     # SSTI
     "introduction.views.ssti_lab": ("tp", "user blog content written into a templates/*.html file and rendered — Django dynamic-template SSTI"),
+    # XXE
+    "introduction.views.xxe_parse": ("tp", "setFeature(feature_external_ges, True) + parseString(request.body) — XXE lab parser"),
 }
 
 # Soft-rule class verdicts (class-level, sampled)
@@ -113,6 +115,7 @@ def main():
         "Path Traversal (User-Controlled File Path)",
         "XSS (Unsafe Template Rendering)",
         "SSTI (Template Injection)",
+        "XXE (External Entity Processing)",
     )
 
     detections = []

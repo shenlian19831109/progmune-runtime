@@ -4,11 +4,11 @@
   "version": "1.0",
   "corpus": "PyGoat (OWASP vulnerable-by-design Django app, shallow clone)",
   "summary": {
-    "total_detections": 209,
-    "true_positives": 31,
+    "total_detections": 210,
+    "true_positives": 32,
     "false_positives": 10,
     "unlabeled": 168,
-    "labeled_precision": 75.6,
+    "labeled_precision": 76.2,
     "auth_rule_tp": 10
   },
   "recall_notes": "PyGoat's lab inventory spans ~30 labs across OWASP classes. The detector surfaced 10 auth/broken-access labs and 3 weak-hashing/token labs. Missed classes: SQLi, XSS, SSTI, SSRF, command injection, XXE-as-injection (the xxe lab fired via the auth rule, not an injection rule) — out of scope for the protocol-lifecycle rule set. A full recall number would require lab-level gold enumeration.",
@@ -508,7 +508,14 @@
       "file": "introduction/views.py",
       "rule": "Authorization (Unauthenticated Mutation)",
       "verdict": "tp",
-      "note": "external entities enabled + parseString(request.body) — XXE lab"
+      "note": "setFeature(feature_external_ges, True) + parseString(request.body) — XXE lab parser"
+    },
+    {
+      "function": "xxe_parse",
+      "file": "introduction/views.py",
+      "rule": "XXE (External Entity Processing)",
+      "verdict": "tp",
+      "note": "setFeature(feature_external_ges, True) + parseString(request.body) — XXE lab parser"
     },
     {
       "function": "xxe_parse",

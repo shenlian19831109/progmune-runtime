@@ -271,6 +271,45 @@ def has_ssti(node):
     return False
 
 
+XXE_MARKER = "__progmune_xxe_external_entities__"
+
+
+def has_xxe(node):
+    """XXE check: BOTH signals required — (1) an explicitly unsafe parser
+    configuration (setFeature(feature_external_*, True) or
+    XMLParser(resolve_entities=True)), AND (2) parsing of tainted
+    request-derived XML (parse / parseString / fromstring / iterparse).
+    Config-only or taint-only alone is not flagged."""
+    assigns = collect_assignments(node)
+    unsafe_parser = False
+    tainted_parse = False
+    for child in ast.walk(node):
+        if not isinstance(child, ast.Call):
+            continue
+        name = None
+        if isinstance(child.func, ast.Name):
+            name = child.func.id
+        elif isinstance(child.func, ast.Attribute):
+            name = child.func.attr
+        if name == "setFeature" and len(child.args) >= 2:
+            arg0 = child.args[0]
+            is_external = (isinstance(arg0, ast.Name) and "external" in arg0.id.lower()) \
+                or (isinstance(arg0, ast.Constant) and "external" in str(arg0.value).lower())
+            arg1_true = isinstance(child.args[1], ast.Constant) \
+                and child.args[1].value is True
+            if is_external and arg1_true:
+                unsafe_parser = True
+        if name == "XMLParser":
+            for kw in child.keywords:
+                if kw.arg == "resolve_entities" and isinstance(kw.value, ast.Constant) \
+                        and kw.value.value is True:
+                    unsafe_parser = True
+        if name in ("parse", "parseString", "fromstring", "from_string", "iterparse"):
+            if any(is_tainted(a, assigns) for a in child.args):
+                tainted_parse = True
+    return unsafe_parser and tainted_parse
+
+
 def has_xss(node, unsafe_vars=None):
     """XSS check: a render/render_to_string call binds tainted request-derived
     values into template variables that the template renders without escaping
@@ -393,6 +432,8 @@ def extract_calls(node, unsafe_vars=None):
         calls.append(XSS_MARKER)
     if has_ssti(node) and SSTI_MARKER not in calls:
         calls.append(SSTI_MARKER)
+    if has_xxe(node) and XXE_MARKER not in calls:
+        calls.append(XXE_MARKER)
     return calls
 
 # ── Protocol annotation extraction ──

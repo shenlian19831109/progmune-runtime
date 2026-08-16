@@ -149,6 +149,7 @@ safeguards**. Zero pipeline changes downstream, zero synthetic-benchmark drift.
 | 3 | Path traversal | file sinks (open/io.open/os.open/Path().read_text) with request-rooted path taint | 0/1 → 1/1 | 72.2% |
 | 4 | XSS | cross-file: template `{{v\|safe}}`/autoescape-off vars × tainted render contexts; mark_safe(tainted) | 0/3 → 3/3 (incl. a hidden A8-lab XSS) | 75.0% |
 | 5 | SSTI | template-string sinks (render_template_string/Template/from_string) with taint; tainted content written into templates/*.html | 0/1 → 1/1 | 75.6% |
+| 6 | XXE | dual signal: unsafe parser config (setFeature(external_*, True) / XMLParser(resolve_entities=True)) AND tainted XML parse | 1/2 → the vulnerable parser (xxe_parse); xxe_lab is a form-render wrapper | 76.2% |
 
 Key implementation facts: lab reclassification (ssrf_lab is path traversal);
 xss_lab3 uncovered (auto-escaped template); cmd_lab2 eval() uncovered; reset_password
@@ -156,5 +157,4 @@ predictable token uncovered; zero noise in well-written apps (parameterized ORMs
 non-request URLs, safe opens); synthetic benchmarks unchanged throughout
 (TS recall 98.5% / precision 99.1%, Python 100% / 100%).
 
-Remaining zero-coverage classes: XXE (XML parser configuration — pure source-level
-check, next candidate), MITRE content labs (needs per-lab assessment).
+Remaining zero-coverage classes: MITRE content labs (needs per-lab assessment).
