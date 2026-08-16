@@ -175,6 +175,58 @@ def has_ssrf(node):
     return False
 
 
+PATH_MARKER = "__progmune_path_traversal__"
+
+
+def is_file_sink_call(node):
+    """open(...) / io.open(...) / os.open(...) / Path(...).read_text() — file
+    sinks whose path argument, when tainted, is a path traversal."""
+    if isinstance(node.func, ast.Name):
+        return node.func.id == "open"
+    if isinstance(node.func, ast.Attribute):
+        if node.func.attr in ("read_text", "read_bytes"):
+            # Any receiver — the taint verification happens in
+            # has_path_traversal (direct Path(...) call or Path-assigned name).
+            return True
+        parts = []
+        cur = node.func
+        while isinstance(cur, ast.Attribute):
+            parts.append(cur.attr)
+            cur = cur.value
+        if isinstance(cur, ast.Name):
+            parts.append(cur.id)
+        chain = parts[::-1]
+        return chain[0] in ("io", "os") and chain[-1] == "open"
+    return False
+
+
+def has_path_traversal(node):
+    """Path-traversal check: a file sink whose path argument is tainted by
+    request-derived user input (directly or via single-hop assignment —
+    os.path.join chains resolve through assignment tracking)."""
+    assigns = collect_assignments(node)
+    for child in ast.walk(node):
+        if not isinstance(child, ast.Call) or not is_file_sink_call(child):
+            continue
+        if any(is_tainted(a, assigns) for a in child.args):
+            return True
+        if any(is_tainted(k.value, assigns) for k in child.keywords):
+            return True
+        # Path(...).read_text(): the tainted path lives in the receiver —
+        # either the direct call or a variable assigned from a Path(...) call.
+        if isinstance(child.func, ast.Attribute) and child.func.attr in ("read_text", "read_bytes"):
+            recv = child.func.value
+            if isinstance(recv, ast.Call) and any(is_tainted(a, assigns) for a in recv.args):
+                return True
+            if isinstance(recv, ast.Name):
+                v = assigns.get(recv.id)
+                if isinstance(v, ast.Call) and isinstance(v.func, ast.Name) \
+                        and v.func.id == "Path" \
+                        and any(is_tainted(a, assigns) for a in v.args):
+                    return True
+    return False
+
+
 def extract_calls(node):
     """Extract function call names from a function body (first-level only).
 
@@ -208,6 +260,8 @@ def extract_calls(node):
         calls.append(SQL_MARKER)
     if has_ssrf(node) and SSRF_MARKER not in calls:
         calls.append(SSRF_MARKER)
+    if has_path_traversal(node) and PATH_MARKER not in calls:
+        calls.append(PATH_MARKER)
     return calls
 
 # ── Protocol annotation extraction ──

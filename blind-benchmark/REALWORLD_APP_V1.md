@@ -157,13 +157,26 @@ path traversal becomes a new uncovered class (no rule exists).
 
 Zero noise in the 3 well-written apps. Both synthetic benchmarks unchanged.
 
+## Coverage expansion #3: Path Traversal (2026-08-16)
+
+File sinks (`open` / `io.open` / `os.open` / `Path(...).read_text()` — including
+variable receivers assigned from `Path(...)` calls) whose path argument is tainted by
+request-derived input — directly, via single-hop assignment (os.path.join chains
+resolve through assignment tracking), or inside dynamic formatting — emit a marker
+call; the rule triggers on it.
+
+**Result:** `ssrf_lab` (the mislabeled lab — arbitrary local file read) now detected
+with the correct class. Path traversal coverage 1/1. PyGoat labeled precision
+71.4% → **72.2%** (TP 26 / FP 10). Unit tests 6/6 (incl. safe opens and
+request.FILES reads staying silent). Zero noise in the 3 well-written apps.
+Both synthetic benchmarks unchanged.
+
 ## Next steps
 
 1. Remaining FP classes (documented, tier-2): unqualified-import framework calls,
    DRF class-attribute permissions, unicorn dispatch internals.
-2. Coverage expansion #3 candidate: XSS (template rendering) or path traversal
-   (newly identified uncovered class, the ssrf_lab mislabel) — same
-   extractor-marker pattern.
+2. Coverage expansion #4 candidate: XSS (template rendering — the largest
+   remaining zero-coverage class, needs template-layer visibility).
 
 ## Next steps
 

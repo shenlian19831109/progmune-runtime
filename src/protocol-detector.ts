@@ -694,6 +694,21 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     conceptMissing: ["SSRFPrevention", "URLValidation"],
     conceptExpected: ["URL allowlist", "scheme validation"],
   },
+  {
+    name: "Path Traversal (User-Controlled File Path)",
+    category: "path_traversal",
+    languages: ["python"],
+    // Source-level detection: the Python extractor emits a synthetic marker
+    // call when a file sink (open / io.open / os.open / Path(...).read_text)
+    // receives a path tainted by request-derived user input (directly or via
+    // single-hop assignment — os.path.join chains resolve through assignment
+    // tracking). No satisfier possible — the marker IS the violation evidence.
+    trigger: /\b(__progmune_path_traversal__)\b/,
+    safeguards: [],
+    violationMessage: "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
+    conceptMissing: ["PathTraversalPrevention", "InputPathValidation"],
+    conceptExpected: ["path allowlist", "basename normalization", "path sanitization"],
+  },
 
   // ═══════════════════════════════════════════════════════════════
   // P0 Injection: Payment + Session safeguard rules

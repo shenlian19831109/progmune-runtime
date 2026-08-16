@@ -73,6 +73,8 @@ VERDICTS = {
     "dataexposure_lab.main.deserialize_data": ("tp", "dockerized insec_des lab — pickle-based"),
     # SSRF
     "introduction.views.ssrf_lab2": ("tp", "requests.get() on user-supplied URL — SSRF lab"),
+    # Path Traversal (the mislabeled 'ssrf_lab')
+    "introduction.views.ssrf_lab": ("tp", "open() on os.path.join(dirname, user input) — arbitrary local file read"),
 }
 
 # Soft-rule class verdicts (class-level, sampled)
@@ -102,6 +104,7 @@ def main():
         "Unsafe Deserialization (Pickle)",
         "SQL Injection (Python)",
         "SSRF (User-Controlled URL Fetch)",
+        "Path Traversal (User-Controlled File Path)",
     )
 
     detections = []

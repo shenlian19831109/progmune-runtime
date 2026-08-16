@@ -4,11 +4,11 @@
   "version": "1.0",
   "corpus": "PyGoat (OWASP vulnerable-by-design Django app, shallow clone)",
   "summary": {
-    "total_detections": 204,
-    "true_positives": 25,
+    "total_detections": 205,
+    "true_positives": 26,
     "false_positives": 10,
     "unlabeled": 169,
-    "labeled_precision": 71.4,
+    "labeled_precision": 72.2,
     "auth_rule_tp": 9
   },
   "recall_notes": "PyGoat's lab inventory spans ~30 labs across OWASP classes. The detector surfaced 10 auth/broken-access labs and 3 weak-hashing/token labs. Missed classes: SQLi, XSS, SSTI, SSRF, command injection, XXE-as-injection (the xxe lab fired via the auth rule, not an injection rule) — out of scope for the protocol-lifecycle rule set. A full recall number would require lab-level gold enumeration.",
@@ -971,6 +971,13 @@
       "rule": "Context Manager Usage",
       "verdict": "unlabeled",
       "note": "resource-hygiene style warning, not a vulnerability class"
+    },
+    {
+      "function": "ssrf_lab",
+      "file": "introduction/views.py",
+      "rule": "Path Traversal (User-Controlled File Path)",
+      "verdict": "tp",
+      "note": "open() on os.path.join(dirname, user input) — arbitrary local file read"
     },
     {
       "function": "ssrf_lab",
