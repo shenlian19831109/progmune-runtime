@@ -44,7 +44,11 @@ def get_annotation(node):
 # ── Call extraction ──
 
 def extract_calls(node):
-    """Extract function call names from a function body (first-level only)."""
+    """Extract function call names from a function body (first-level only).
+
+    Attribute calls emit the full qualified chain (e.g. user.change_password,
+    User.objects.create_user) so rules can distinguish framework-delegated
+    calls from custom same-named functions. Bare-name calls stay as-is."""
     calls = []
     seen = set()
     for child in ast.walk(node):
@@ -54,7 +58,15 @@ def extract_calls(node):
             if isinstance(func, ast.Name):
                 name = func.id
             elif isinstance(func, ast.Attribute):
-                name = func.attr
+                # Walk the attribute chain: User.objects.create_user
+                parts = []
+                cur = func
+                while isinstance(cur, ast.Attribute):
+                    parts.append(cur.attr)
+                    cur = cur.value
+                if isinstance(cur, ast.Name):
+                    parts.append(cur.id)
+                name = ".".join(reversed(parts)) if len(parts) > 1 else func.attr
             if name and name not in seen:
                 seen.add(name)
                 calls.append(name)

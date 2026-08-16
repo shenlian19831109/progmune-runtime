@@ -3,36 +3,36 @@
   "annotated_by": "human review (Claude-assisted, 2026-08-16)",
   "version": "1.0",
   "summary": {
-    "total_detections": 189,
+    "total_detections": 198,
     "true_positives": 0,
-    "false_positives": 52,
-    "unlabeled": 137,
+    "false_positives": 20,
+    "unlabeled": 178,
     "labeled_precision": 0.0
   },
   "per_repo": {
     "django-realworld-example-app": {
       "functions_scanned": 58,
-      "functions_with_violations": 23,
-      "total_detections": 37,
+      "functions_with_violations": 25,
+      "total_detections": 34,
       "true_positives": 0,
-      "false_positives": 14,
+      "false_positives": 11,
       "unlabeled": 23
     },
     "django-unicorn": {
       "functions_scanned": 170,
-      "functions_with_violations": 45,
-      "total_detections": 59,
+      "functions_with_violations": 48,
+      "total_detections": 63,
       "true_positives": 0,
-      "false_positives": 4,
-      "unlabeled": 55
+      "false_positives": 5,
+      "unlabeled": 58
     },
     "fastapi-realworld-example-app": {
       "functions_scanned": 95,
-      "functions_with_violations": 54,
-      "total_detections": 93,
+      "functions_with_violations": 53,
+      "total_detections": 101,
       "true_positives": 0,
-      "false_positives": 34,
-      "unlabeled": 59
+      "false_positives": 4,
+      "unlabeled": 97
     }
   },
   "detections": [
@@ -84,6 +84,20 @@
       "rule": "Authorization (Unauthenticated Mutation)",
       "verdict": "fp",
       "note": "DRF permission_classes=(IsAuthenticatedOrReadOnly,) — public reads by RealWorld spec"
+    },
+    {
+      "function": "ArticleViewSet.retrieve",
+      "file": "conduit/apps/articles/views.py",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "verdict": "fp",
+      "note": "framework delegation / DI auth invisible to call-name interface"
+    },
+    {
+      "function": "ArticleViewSet.update",
+      "file": "conduit/apps/articles/views.py",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "verdict": "fp",
+      "note": "framework delegation / DI auth invisible to call-name interface"
     },
     {
       "function": "ArticleViewSet.update",
@@ -149,6 +163,13 @@
       "note": "audit logging absence — soft"
     },
     {
+      "function": "ProfileRetrieveAPIView.retrieve",
+      "file": "conduit/apps/profiles/views.py",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "verdict": "fp",
+      "note": "framework delegation / DI auth invisible to call-name interface"
+    },
+    {
       "function": "ProfileFollowAPIView.delete",
       "file": "conduit/apps/profiles/views.py",
       "rule": "Data Mutation Without Audit Trail",
@@ -165,20 +186,6 @@
     {
       "function": "UserManager.create_user",
       "file": "conduit/apps/authentication/models.py",
-      "rule": "Password Hashing",
-      "verdict": "fp",
-      "note": "Django built-in — set_password() hashes (framework delegation)"
-    },
-    {
-      "function": "UserManager.create_user",
-      "file": "conduit/apps/authentication/models.py",
-      "rule": "Password Hashing (Weak)",
-      "verdict": "fp",
-      "note": "Django built-in — set_password() hashes (framework delegation)"
-    },
-    {
-      "function": "UserManager.create_user",
-      "file": "conduit/apps/authentication/models.py",
       "rule": "Input Validation",
       "verdict": "unlabeled",
       "note": "framework serializer/form validation invisible — soft"
@@ -193,20 +200,6 @@
     {
       "function": "UserManager.create_superuser",
       "file": "conduit/apps/authentication/models.py",
-      "rule": "Password Hashing",
-      "verdict": "fp",
-      "note": "Django built-in — set_password() hashes (framework delegation)"
-    },
-    {
-      "function": "UserManager.create_superuser",
-      "file": "conduit/apps/authentication/models.py",
-      "rule": "Password Hashing (Weak)",
-      "verdict": "fp",
-      "note": "Django built-in — set_password() hashes (framework delegation)"
-    },
-    {
-      "function": "UserManager.create_superuser",
-      "file": "conduit/apps/authentication/models.py",
       "rule": "Input Validation",
       "verdict": "unlabeled",
       "note": "framework serializer/form validation invisible — soft"
@@ -217,20 +210,6 @@
       "rule": "Registration Without Email Verification",
       "verdict": "unlabeled",
       "note": "true but standard practice — soft"
-    },
-    {
-      "function": "RegistrationSerializer.create",
-      "file": "conduit/apps/authentication/serializers.py",
-      "rule": "Password Hashing",
-      "verdict": "fp",
-      "note": "delegates to create_user() — hashing in framework"
-    },
-    {
-      "function": "RegistrationSerializer.create",
-      "file": "conduit/apps/authentication/serializers.py",
-      "rule": "Password Hashing (Weak)",
-      "verdict": "fp",
-      "note": "delegates to create_user() — hashing in framework"
     },
     {
       "function": "RegistrationSerializer.create",
@@ -352,6 +331,34 @@
       "note": "framework serializer/form validation invisible — soft"
     },
     {
+      "function": "unicorn_scripts",
+      "file": "src/django_unicorn/templatetags/unicorn.py",
+      "rule": "Password Hashing",
+      "verdict": "fp",
+      "note": "framework delegation / DI auth invisible to call-name interface"
+    },
+    {
+      "function": "unicorn_scripts",
+      "file": "src/django_unicorn/templatetags/unicorn.py",
+      "rule": "Registration Without Email Verification",
+      "verdict": "unlabeled",
+      "note": "true but standard practice — soft"
+    },
+    {
+      "function": "unicorn_errors",
+      "file": "src/django_unicorn/templatetags/unicorn.py",
+      "rule": "Password Hashing",
+      "verdict": "fp",
+      "note": "framework delegation / DI auth invisible to call-name interface"
+    },
+    {
+      "function": "unicorn_errors",
+      "file": "src/django_unicorn/templatetags/unicorn.py",
+      "rule": "Registration Without Email Verification",
+      "verdict": "unlabeled",
+      "note": "true but standard practice — soft"
+    },
+    {
       "function": "unicorn",
       "file": "src/django_unicorn/templatetags/unicorn.py",
       "rule": "No Input Sanitization",
@@ -399,6 +406,13 @@
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "Component.reset",
+      "file": "src/django_unicorn/components/unicorn_view.py",
+      "rule": "Unsafe Deserialization (Pickle)",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
     },
     {
       "function": "Component.call",
@@ -490,13 +504,6 @@
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
-    },
-    {
-      "function": "login_not_required",
-      "file": "src/django_unicorn/views/__init__.py",
-      "rule": "Token Security (Weak Generation)",
-      "verdict": "fp",
-      "note": "framework delegation / DI auth invisible to call-name interface"
     },
     {
       "function": "login_not_required",
@@ -774,65 +781,16 @@
     {
       "function": "create_access_token_for_user",
       "file": "app/services/jwt.py",
-      "rule": "Authorization (Unauthenticated Mutation)",
-      "verdict": "fp",
-      "note": "JWT service internal — token generation IS the auth layer"
-    },
-    {
-      "function": "create_access_token_for_user",
-      "file": "app/services/jwt.py",
       "rule": "Input Validation",
       "verdict": "unlabeled",
       "note": "framework serializer/form validation invisible — soft"
     },
     {
-      "function": "get_username_from_token",
-      "file": "app/services/jwt.py",
-      "rule": "Authorization (Unauthenticated Access)",
-      "verdict": "fp",
-      "note": "JWT service internal — token parsing"
-    },
-    {
-      "function": "get_article_by_slug_from_path",
-      "file": "app/api/dependencies/articles.py",
-      "rule": "Authorization (Unauthenticated Access)",
-      "verdict": "fp",
-      "note": "framework delegation / DI auth invisible to call-name interface"
-    },
-    {
-      "function": "check_article_modification_permissions",
-      "file": "app/api/dependencies/articles.py",
-      "rule": "Authorization (Unauthenticated Access)",
-      "verdict": "fp",
-      "note": "this function IS the permission check"
-    },
-    {
       "function": "check_article_modification_permissions",
       "file": "app/api/dependencies/articles.py",
       "rule": "Data Mutation Without Audit Trail",
       "verdict": "unlabeled",
       "note": "audit logging absence — soft"
-    },
-    {
-      "function": "get_profile_by_username_from_path",
-      "file": "app/api/dependencies/profiles.py",
-      "rule": "Authorization (Unauthenticated Access)",
-      "verdict": "fp",
-      "note": "framework delegation / DI auth invisible to call-name interface"
-    },
-    {
-      "function": "get_comment_by_id_from_path",
-      "file": "app/api/dependencies/comments.py",
-      "rule": "Authorization (Unauthenticated Access)",
-      "verdict": "fp",
-      "note": "framework delegation / DI auth invisible to call-name interface"
-    },
-    {
-      "function": "check_comment_modification_permissions",
-      "file": "app/api/dependencies/comments.py",
-      "rule": "Authorization (Unauthenticated Access)",
-      "verdict": "fp",
-      "note": "this function IS the permission check"
     },
     {
       "function": "check_comment_modification_permissions",
@@ -842,21 +800,42 @@
       "note": "audit logging absence — soft"
     },
     {
-      "function": "retrieve_current_user",
-      "file": "app/api/routes/users.py",
-      "rule": "Authorization (Unauthenticated Access)",
-      "verdict": "fp",
-      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+      "function": "get_all_tags",
+      "file": "app/api/routes/tags.py",
+      "rule": "Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "get_all_tags",
+      "file": "app/api/routes/tags.py",
+      "rule": "API Without Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
     },
     {
       "function": "retrieve_current_user",
       "file": "app/api/routes/users.py",
-      "rule": "Authorization (Unauthenticated Mutation)",
-      "verdict": "fp",
-      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
     },
     {
       "function": "retrieve_current_user",
+      "file": "app/api/routes/users.py",
+      "rule": "Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "retrieve_current_user",
+      "file": "app/api/routes/users.py",
+      "rule": "API Without Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "update_current_user",
       "file": "app/api/routes/users.py",
       "rule": "Input Validation",
       "verdict": "unlabeled",
@@ -865,9 +844,16 @@
     {
       "function": "update_current_user",
       "file": "app/api/routes/users.py",
-      "rule": "Input Validation",
+      "rule": "Rate Limiting",
       "verdict": "unlabeled",
-      "note": "framework serializer/form validation invisible — soft"
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "update_current_user",
+      "file": "app/api/routes/users.py",
+      "rule": "API Without Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
     },
     {
       "function": "update_current_user",
@@ -886,9 +872,9 @@
     {
       "function": "login",
       "file": "app/api/routes/authentication.py",
-      "rule": "Token Security (Weak Generation)",
-      "verdict": "fp",
-      "note": "framework delegation / DI auth invisible to call-name interface"
+      "rule": "Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
     },
     {
       "function": "login",
@@ -898,18 +884,11 @@
       "note": "framework session defaults have expiry"
     },
     {
-      "function": "register",
+      "function": "login",
       "file": "app/api/routes/authentication.py",
-      "rule": "Password Hashing",
-      "verdict": "fp",
-      "note": "user.change_password(password) — hashing delegated to model"
-    },
-    {
-      "function": "register",
-      "file": "app/api/routes/authentication.py",
-      "rule": "Password Hashing (Weak)",
-      "verdict": "fp",
-      "note": "user.change_password(password) — hashing delegated to model"
+      "rule": "API Without Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
     },
     {
       "function": "register",
@@ -917,6 +896,13 @@
       "rule": "Input Validation",
       "verdict": "unlabeled",
       "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "register",
+      "file": "app/api/routes/authentication.py",
+      "rule": "Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
     },
     {
       "function": "register",
@@ -926,18 +912,25 @@
       "note": "true but standard practice — soft"
     },
     {
-      "function": "follow_for_user",
-      "file": "app/api/routes/profiles.py",
-      "rule": "Authorization (Unauthenticated Access)",
-      "verdict": "fp",
-      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+      "function": "register",
+      "file": "app/api/routes/authentication.py",
+      "rule": "API Without Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
     },
     {
-      "function": "follow_for_user",
+      "function": "retrieve_profile_by_username",
       "file": "app/api/routes/profiles.py",
-      "rule": "Authorization (Unauthenticated Mutation)",
-      "verdict": "fp",
-      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+      "rule": "Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "retrieve_profile_by_username",
+      "file": "app/api/routes/profiles.py",
+      "rule": "API Without Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
     },
     {
       "function": "follow_for_user",
@@ -945,6 +938,20 @@
       "rule": "Input Validation",
       "verdict": "unlabeled",
       "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "follow_for_user",
+      "file": "app/api/routes/profiles.py",
+      "rule": "Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "follow_for_user",
+      "file": "app/api/routes/profiles.py",
+      "rule": "API Without Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
     },
     {
       "function": "unsubscribe_from_user",
@@ -956,16 +963,23 @@
     {
       "function": "unsubscribe_from_user",
       "file": "app/api/routes/profiles.py",
-      "rule": "Authorization (Unauthenticated Access)",
+      "rule": "Authorization (Resource Ownership)",
       "verdict": "fp",
       "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
     },
     {
       "function": "unsubscribe_from_user",
       "file": "app/api/routes/profiles.py",
-      "rule": "Authorization (Resource Ownership)",
-      "verdict": "fp",
-      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+      "rule": "Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "unsubscribe_from_user",
+      "file": "app/api/routes/profiles.py",
+      "rule": "API Without Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
     },
     {
       "function": "unsubscribe_from_user",
@@ -977,23 +991,16 @@
     {
       "function": "list_comments_for_article",
       "file": "app/api/routes/comments.py",
-      "rule": "Authorization (Unauthenticated Access)",
-      "verdict": "fp",
-      "note": "public comments list by RealWorld spec"
+      "rule": "Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
     },
     {
-      "function": "create_comment_for_article",
+      "function": "list_comments_for_article",
       "file": "app/api/routes/comments.py",
-      "rule": "Authorization (Unauthenticated Access)",
-      "verdict": "fp",
-      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
-    },
-    {
-      "function": "create_comment_for_article",
-      "file": "app/api/routes/comments.py",
-      "rule": "Authorization (Unauthenticated Mutation)",
-      "verdict": "fp",
-      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+      "rule": "API Without Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
     },
     {
       "function": "create_comment_for_article",
@@ -1001,6 +1008,34 @@
       "rule": "Input Validation",
       "verdict": "unlabeled",
       "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "create_comment_for_article",
+      "file": "app/api/routes/comments.py",
+      "rule": "Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "create_comment_for_article",
+      "file": "app/api/routes/comments.py",
+      "rule": "API Without Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "delete_comment_from_article",
+      "file": "app/api/routes/comments.py",
+      "rule": "Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "delete_comment_from_article",
+      "file": "app/api/routes/comments.py",
+      "rule": "API Without Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
     },
     {
       "function": "delete_comment_from_article",
@@ -1012,23 +1047,16 @@
     {
       "function": "list_articles",
       "file": "app/api/routes/articles/articles_resource.py",
-      "rule": "Authorization (Unauthenticated Access)",
-      "verdict": "fp",
-      "note": "public article list by RealWorld spec"
+      "rule": "Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
     },
     {
-      "function": "create_new_article",
+      "function": "list_articles",
       "file": "app/api/routes/articles/articles_resource.py",
-      "rule": "Authorization (Unauthenticated Access)",
-      "verdict": "fp",
-      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
-    },
-    {
-      "function": "create_new_article",
-      "file": "app/api/routes/articles/articles_resource.py",
-      "rule": "Authorization (Unauthenticated Mutation)",
-      "verdict": "fp",
-      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+      "rule": "API Without Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
     },
     {
       "function": "create_new_article",
@@ -1036,6 +1064,48 @@
       "rule": "Input Validation",
       "verdict": "unlabeled",
       "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "create_new_article",
+      "file": "app/api/routes/articles/articles_resource.py",
+      "rule": "Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "create_new_article",
+      "file": "app/api/routes/articles/articles_resource.py",
+      "rule": "API Without Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "retrieve_article_by_slug",
+      "file": "app/api/routes/articles/articles_resource.py",
+      "rule": "Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "retrieve_article_by_slug",
+      "file": "app/api/routes/articles/articles_resource.py",
+      "rule": "API Without Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "update_article_by_slug",
+      "file": "app/api/routes/articles/articles_resource.py",
+      "rule": "Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "update_article_by_slug",
+      "file": "app/api/routes/articles/articles_resource.py",
+      "rule": "API Without Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
     },
     {
       "function": "update_article_by_slug",
@@ -1047,6 +1117,20 @@
     {
       "function": "delete_article_by_slug",
       "file": "app/api/routes/articles/articles_resource.py",
+      "rule": "Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "delete_article_by_slug",
+      "file": "app/api/routes/articles/articles_resource.py",
+      "rule": "API Without Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "delete_article_by_slug",
+      "file": "app/api/routes/articles/articles_resource.py",
       "rule": "Data Mutation Without Audit Trail",
       "verdict": "unlabeled",
       "note": "audit logging absence — soft"
@@ -1054,23 +1138,16 @@
     {
       "function": "get_articles_for_user_feed",
       "file": "app/api/routes/articles/articles_common.py",
-      "rule": "Authorization (Unauthenticated Access)",
-      "verdict": "fp",
-      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+      "rule": "Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
     },
     {
-      "function": "mark_article_as_favorite",
+      "function": "get_articles_for_user_feed",
       "file": "app/api/routes/articles/articles_common.py",
-      "rule": "Authorization (Unauthenticated Access)",
-      "verdict": "fp",
-      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
-    },
-    {
-      "function": "mark_article_as_favorite",
-      "file": "app/api/routes/articles/articles_common.py",
-      "rule": "Authorization (Unauthenticated Mutation)",
-      "verdict": "fp",
-      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+      "rule": "API Without Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
     },
     {
       "function": "mark_article_as_favorite",
@@ -1078,6 +1155,20 @@
       "rule": "Input Validation",
       "verdict": "unlabeled",
       "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "mark_article_as_favorite",
+      "file": "app/api/routes/articles/articles_common.py",
+      "rule": "Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "mark_article_as_favorite",
+      "file": "app/api/routes/articles/articles_common.py",
+      "rule": "API Without Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
     },
     {
       "function": "remove_article_from_favorites",
@@ -1089,16 +1180,23 @@
     {
       "function": "remove_article_from_favorites",
       "file": "app/api/routes/articles/articles_common.py",
-      "rule": "Authorization (Unauthenticated Access)",
+      "rule": "Authorization (Resource Ownership)",
       "verdict": "fp",
       "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
     },
     {
       "function": "remove_article_from_favorites",
       "file": "app/api/routes/articles/articles_common.py",
-      "rule": "Authorization (Resource Ownership)",
-      "verdict": "fp",
-      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+      "rule": "Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "remove_article_from_favorites",
+      "file": "app/api/routes/articles/articles_common.py",
+      "rule": "API Without Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
     },
     {
       "function": "remove_article_from_favorites",
@@ -1117,30 +1215,9 @@
     {
       "function": "UsersRepository.create_user",
       "file": "app/db/repositories/users.py",
-      "rule": "Password Hashing",
-      "verdict": "fp",
-      "note": "user.change_password(password) — hashing delegated to model"
-    },
-    {
-      "function": "UsersRepository.create_user",
-      "file": "app/db/repositories/users.py",
-      "rule": "Password Hashing (Weak)",
-      "verdict": "fp",
-      "note": "user.change_password(password) — hashing delegated to model"
-    },
-    {
-      "function": "UsersRepository.create_user",
-      "file": "app/db/repositories/users.py",
       "rule": "Input Validation",
       "verdict": "unlabeled",
       "note": "framework serializer/form validation invisible — soft"
-    },
-    {
-      "function": "UsersRepository.create_user",
-      "file": "app/db/repositories/users.py",
-      "rule": "No Token Rotation After Privilege Change",
-      "verdict": "fp",
-      "note": "user.change_password(password) — hashing delegated to model"
     },
     {
       "function": "UsersRepository.create_user",
@@ -1155,13 +1232,6 @@
       "rule": "Data Mutation Without Audit Trail",
       "verdict": "unlabeled",
       "note": "audit logging absence — soft"
-    },
-    {
-      "function": "UsersRepository.update_user",
-      "file": "app/db/repositories/users.py",
-      "rule": "No Token Rotation After Privilege Change",
-      "verdict": "fp",
-      "note": "framework delegation / DI auth invisible to call-name interface"
     },
     {
       "function": "UsersRepository.update_user",
@@ -1344,13 +1414,6 @@
       "rule": "Data Mutation Without Audit Trail",
       "verdict": "unlabeled",
       "note": "audit logging absence — soft"
-    },
-    {
-      "function": "UserInDB.change_password",
-      "file": "app/models/domain/users.py",
-      "rule": "No Token Rotation After Privilege Change",
-      "verdict": "fp",
-      "note": "framework delegation / DI auth invisible to call-name interface"
     },
     {
       "function": "UserInDB.change_password",

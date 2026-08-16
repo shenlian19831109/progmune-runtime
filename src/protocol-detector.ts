@@ -317,6 +317,11 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     trigger: /\b(register|signUp|createUser|createAccount|registerUser|sign_up|create_user|create_account|register_user|register_new_user)\b/i,
     safeguards: [
       { pattern: /\b(bcrypt|argon2|scrypt|pbkdf2|hash|hashPassword|createHash|hashSync|hash_password)\b/i, label: "secure_hash" },
+      // Framework delegation (qualified chains only — a bare custom create_user
+      // is NOT treated as secure): Django's built-in user manager and password
+      // setters hash internally; repository/service create_user methods delegate
+      // to the model (users_repo.create_user, self.create_user).
+      { pattern: /\.create_user\b|\.(change_password|set_password)\b/i, label: "framework_hashing" },
     ],
     violationMessage: "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
     conceptMissing: ["PasswordHash", "KeyDerivation"],
@@ -329,6 +334,11 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     trigger: /\b(register|signUp|createUser|createAccount|registerUser|sign_up|create_user|create_account|register_user|register_new_user)\b/i,
     safeguards: [
       { pattern: /\b(bcrypt|argon2|scrypt|pbkdf2)\b/i, label: "strong_hash" },
+      // Framework delegation (qualified chains only)
+      { pattern: /\.create_user\b|\.(change_password|set_password)\b/i, label: "framework_hashing" },
+    ],
+    excludePatterns: [
+      /register\.(simple_tag|tag|filter|inclusion_tag)/,  // Django template-tag registration
     ],
     violationMessage: "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
     conceptMissing: ["StrongHash", "SaltGeneration"],
@@ -377,7 +387,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     paramGated: true,
     trigger: /\b(list|download|view|fetch)(?:[A-Z]\w*|_\w+)|get(?:[A-Z]\w+|_\w+)/i,
     safeguards: [
-      { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware)\b/i, label: "auth_check" },
+      { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware|get_current_user_authorizer|current_user_authorizer|login_required|permission_required|user_passes_test|check_authorization|check_permission|jwt\.decode|decode_token)\b/i, label: "auth_check" },
     ],
     violationMessage: "Data access function does not check authentication. Anyone can access data without credentials.",
     conceptMissing: ["AuthenticationCheck", "AccessControl"],
@@ -407,7 +417,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     // (listPosts/getPost/deletePost fire via identifier-parsed words).
     trigger: /\b(add|create|update|set|publish|insert|submit)(?:[A-Z]\w*|_\w+)|(?:[A-Z]\w*|_\w+)(Add|Create|Update|Set|Publish|Insert|Submit)\b/i,
     safeguards: [
-      { pattern: /\b(getUser|validateToken|verifyToken|verifySession|validateSession|getSessionUser|getSession\b|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware)\b/i, label: "auth_check" },
+      { pattern: /\b(getUser|validateToken|verifyToken|verifySession|validateSession|getSessionUser|getSession\b|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware|get_current_user_authorizer|current_user_authorizer|login_required|permission_required|user_passes_test|check_authorization|check_permission|create_access_token|create_refresh_token|create_jwt_token)\b/i, label: "auth_check" },
     ],
     violationMessage: "Mutation function does not check authentication. Anyone can create or modify data without credentials.",
     conceptMissing: ["AuthenticationCheck", "AccessControl"],
@@ -491,6 +501,14 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     trigger: /\b(authenticate|login|signIn|logIn|createSession|generateToken|do_login|sign_in|log_in|generate_token|create_session)\b/i,
     safeguards: [
       { pattern: /\b(crypto\.randomUUID|jwt\.sign|jsonwebtoken|nanoid|randomBytes|cryptoRandomString)\b/i, label: "secure_token" },
+      // Framework delegation: calling a token-issuing layer means the session
+      // material is handled by that layer, not generated inline. NOTE: bare
+      // jwt.encode is deliberately NOT here — a hardcoded secret key makes the
+      // JWT layer itself the vulnerability (PyGoat sec_misconfig_lab3).
+      { pattern: /\b(create_access_token|create_refresh_token|create_jwt_token|\.check_password\b|get_current_user_authorizer|login_required|permission_required)\b/i, label: "framework_token" },
+    ],
+    excludePatterns: [
+      /login_not_required|login_required/,   // decorators — the auth layer itself
     ],
     violationMessage: "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
     conceptMissing: ["SecureRandom", "TokenEntropy", "CryptographicSignature"],
@@ -730,6 +748,8 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     trigger: /\b(\w*password\w*change|\w*password\w*reset|\w*change\w*password|\w*reset\w*password|\w*update\w*password|\w*privilege|\w*role\w*change|\w*escalat|\w*enable\w*2fa|\w*mfa\w*enable|\w*email\w*change)\b/i,
     safeguards: [
       { pattern: /\b(\w*revoke|\w*rotate|\w*invalidate|\w*reissue|\w*regenerate|\w*new\w*token|\w*token\w*refresh|\w*session\w*refresh|\w*renew)/i, label: "token_rotate" },
+      // Password-change machinery itself (the material IS rotated/reissued here).
+      { pattern: /\.(change_password|set_password|update_password|generate_salt|get_password_hash)\b/i, label: "password_machinery" },
     ],
     violationMessage: "Privilege-changing operation detected without subsequent token rotation or session invalidation. Stolen pre-change tokens remain valid.",
     conceptMissing: ["TokenRotation", "SessionInvalidation", "FixationPrevention"],
@@ -907,7 +927,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     safeguards: [
       { pattern: /\b(session\w*destroy|destroy\w*session|session\w*invalidate|invalidate\w*session|session\w*revoke|revoke\w*session|session\w*clear|clear\w*session|session\w*end|end\w*session|session\w*expire|expire\w*session|token\w*revoke|revoke\w*token|token\w*blacklist|blacklist\w*token|invalidate\w*token)\b/i, label: "session_invalidate" },
       // Store-based invalidation: remove the session entry from the store.
-      { pattern: /\b(splice|filter|pop|shift|clear)\b/i, label: "store_invalidate" },
+      { pattern: /\b(splice|filter|pop|shift|clear|delete_cookie|delete_cookies)\b/i, label: "store_invalidate" },
       // Delegation: calling a logout-named function hands invalidation to that
       // function (its own body is checked separately).
       { pattern: /\b(logout|signOut|logOut|signout|doLogout|handleLogout|endSession|clearSession|do_logout|sign_out|log_out|handle_logout|end_session|clear_session|invalidate_session)\b/i, label: "delegated_logout", callsOnly: true },

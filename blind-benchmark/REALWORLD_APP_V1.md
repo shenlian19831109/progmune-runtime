@@ -60,21 +60,39 @@ XSS (template-level), SSTI, SSRF, command injection, XXE-as-injection. These are
 the protocol-lifecycle rule set by product positioning — a full recall number requires
 lab-level gold enumeration, noted as future work.
 
+## Framework-delegation allowlist (implemented, 2026-08-16)
+
+The extractor now emits **qualified call chains** (`user.change_password`,
+`User.objects.create_user`) instead of bare attr names, and the auth/password/token
+rules accept qualified framework calls as safeguard satisfiers — a bare custom
+`create_user` is NOT treated as secure, per the granularity requirement. Also: DI
+authorizer names (`get_current_user_authorizer`, `login_required`…), token-layer
+functions (`create_access_token`, `create_jwt_token`), password machinery
+(`generate_salt`, `get_password_hash`), `delete_cookie`, template-tag registration
+excludes. Bare `jwt.encode` is deliberately NOT allowlisted — a hardcoded secret key
+makes the JWT layer itself the vulnerability (PyGoat sec_misconfig_lab3; caught after
+an initial over-broad version suppressed it and was reverted).
+
+### Result
+
+| Repo | FP before | FP after |
+|------|-----------|----------|
+| fastapi-realworld | 34 | **4** |
+| django-realworld | 14 | 11 (DRF `permission_classes` class attributes — irreducible at this interface) |
+| django-unicorn | 4 | 5 (net +1: qualified-chain change surfaced new framework-internal firings) |
+| PyGoat | 11 | 8 — **all 15+2 TPs preserved** |
+
+**Cross-corpus: TP 17 / FP 28, labeled precision 37.8% (was 19.2%); auth rules
+9 TP / 19 FP = 32.1%.** Both synthetic benchmarks unchanged (TS 98.5%/99.1%,
+Python 100%/100%). Side benefit: the qualified-chain extractor activated two
+previously-silent vulnerability rules — Command Injection catches PyGoat's cmd_lab,
+Unsafe Deserialization catches the pickle labs.
+
 ## Next steps
 
-1. ~~Annotate the other three app repos~~ → **DONE** (`gold/annotations-apps-v1.json`):
-   django-realworld, django-unicorn, fastapi-realworld — **0 TP, 52 FP, 137 unlabeled**
-   across 189 detections. All FPs are framework-delegation / public-by-design /
-   internal-helper: FastAPI `Depends(get_current_user_authorizer())` DI, DRF
-   `permission_classes`, `user.change_password()` / Django `create_user` hashing,
-   JWT-service internals, unicorn dispatch.
-2. **Cross-app picture (4 repos, 372 detections): TP 15, FP 63, unlabeled 294 —
-   labeled precision 19.2%.** All 15 TPs come from PyGoat (the vulnerable-by-design
-   app); well-written apps produce zero TPs but 52 delegation FPs. The detector finds
-   real vulnerabilities where they exist and misjudges framework delegation where they
-   don't — the delegation allowlist is now the single highest-value fix.
-3. Framework-delegation allowlist: secure-by-default framework calls as safeguard
-   satisfiers — Django (`form.save`, `create_user`, `set_password`, `authenticate`,
-   `login`), FastAPI (`Depends`-injected authorizers, `change_password`) — would flip
-   most of the 63 FPs without touching either synthetic benchmark.
-4. SQL rule source-level matching (still deferred).
+1. Remaining FP classes (documented, tier-2): unqualified-import framework calls
+   (`authenticate`, `login`, `render` — need import resolution), DRF class-attribute
+   permissions, unicorn dispatch internals.
+2. Upgrade the annotation tables to judge the newly-active Command Injection /
+   Unsafe Deserialization detections (currently unlabeled — factually TPs).
+3. SQL rule source-level matching (still deferred).

@@ -4,15 +4,29 @@
   "version": "1.0",
   "corpus": "PyGoat (OWASP vulnerable-by-design Django app, shallow clone)",
   "summary": {
-    "total_detections": 183,
-    "true_positives": 15,
-    "false_positives": 11,
-    "unlabeled": 157,
-    "labeled_precision": 57.7,
+    "total_detections": 201,
+    "true_positives": 17,
+    "false_positives": 8,
+    "unlabeled": 176,
+    "labeled_precision": 68.0,
     "auth_rule_tp": 9
   },
   "recall_notes": "PyGoat's lab inventory spans ~30 labs across OWASP classes. The detector surfaced 10 auth/broken-access labs and 3 weak-hashing/token labs. Missed classes: SQLi, XSS, SSTI, SSRF, command injection, XXE-as-injection (the xxe lab fired via the auth rule, not an injection rule) — out of scope for the protocol-lifecycle rule set. A full recall number would require lab-level gold enumeration.",
   "detections": [
+    {
+      "function": "uninstall_pip_packages",
+      "file": "uninstaller.py",
+      "rule": "Command Injection",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "uninstall_pip",
+      "file": "uninstaller.py",
+      "rule": "Command Injection",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
     {
       "function": "remove_pygoat",
       "file": "uninstaller.py",
@@ -301,6 +315,13 @@
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
     },
     {
+      "function": "command_out",
+      "file": "introduction/mitre.py",
+      "rule": "Command Injection",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
       "function": "register",
       "file": "introduction/views.py",
       "rule": "Password Hashing",
@@ -359,6 +380,13 @@
     {
       "function": "xss_lab",
       "file": "introduction/views.py",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "xss_lab",
+      "file": "introduction/views.py",
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
@@ -387,6 +415,20 @@
     {
       "function": "sql_lab",
       "file": "introduction/views.py",
+      "rule": "Token Security (Weak Generation)",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "sql_lab",
+      "file": "introduction/views.py",
+      "rule": "Session No Timeout",
+      "verdict": "unlabeled",
+      "note": "Django session defaults have expiry; 1-year cookie is long but set"
+    },
+    {
+      "function": "sql_lab",
+      "file": "introduction/views.py",
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
@@ -404,6 +446,13 @@
       "rule": "Authorization (Unauthenticated Mutation)",
       "verdict": "tp",
       "note": "pickle.loads() on user cookie — insecure deserialization lab"
+    },
+    {
+      "function": "insec_des_lab",
+      "file": "introduction/views.py",
+      "rule": "Unsafe Deserialization (Pickle)",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
     },
     {
       "function": "insec_des_lab",
@@ -485,6 +534,20 @@
     {
       "function": "auth_lab_signup",
       "file": "introduction/views.py",
+      "rule": "Token Security (Weak Generation)",
+      "verdict": "tp",
+      "note": "password stored in plaintext via authLogin.objects.create"
+    },
+    {
+      "function": "auth_lab_signup",
+      "file": "introduction/views.py",
+      "rule": "Session No Timeout",
+      "verdict": "unlabeled",
+      "note": "Django session defaults have expiry; 1-year cookie is long but set"
+    },
+    {
+      "function": "auth_lab_signup",
+      "file": "introduction/views.py",
       "rule": "Registration Without Email Verification",
       "verdict": "unlabeled",
       "note": "true but standard practice — soft"
@@ -532,13 +595,6 @@
       "note": "audit logging absence — soft"
     },
     {
-      "function": "auth_lab_logout",
-      "file": "introduction/views.py",
-      "rule": "Session Fixation (Logout without Invalidation)",
-      "verdict": "fp",
-      "note": "logout deletes the auth cookie — invalidation for this lab's cookie-based auth"
-    },
-    {
       "function": "ba",
       "file": "introduction/views.py",
       "rule": "No Input Sanitization",
@@ -551,6 +607,20 @@
       "rule": "Authorization (Unauthenticated Mutation)",
       "verdict": "tp",
       "note": "cookie-based admin check (COOKIES.get('admin')=='1') — broken access lab"
+    },
+    {
+      "function": "ba_lab",
+      "file": "introduction/views.py",
+      "rule": "Token Security (Weak Generation)",
+      "verdict": "tp",
+      "note": "cookie-based admin check (COOKIES.get('admin')=='1') — broken access lab"
+    },
+    {
+      "function": "ba_lab",
+      "file": "introduction/views.py",
+      "rule": "Session No Timeout",
+      "verdict": "unlabeled",
+      "note": "Django session defaults have expiry; 1-year cookie is long but set"
     },
     {
       "function": "ba_lab",
@@ -586,6 +656,13 @@
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
+    },
+    {
+      "function": "cmd_lab",
+      "file": "introduction/views.py",
+      "rule": "Command Injection",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
     },
     {
       "function": "cmd_lab",
@@ -688,6 +765,13 @@
     {
       "function": "a9_lab",
       "file": "introduction/views.py",
+      "rule": "Unsafe Deserialization (Pickle)",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "a9_lab",
+      "file": "introduction/views.py",
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
@@ -744,6 +828,20 @@
     {
       "function": "a10_lab",
       "file": "introduction/views.py",
+      "rule": "Token Security (Weak Generation)",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "a10_lab",
+      "file": "introduction/views.py",
+      "rule": "Session No Timeout",
+      "verdict": "unlabeled",
+      "note": "Django session defaults have expiry; 1-year cookie is long but set"
+    },
+    {
+      "function": "a10_lab",
+      "file": "introduction/views.py",
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
@@ -754,6 +852,20 @@
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
+    },
+    {
+      "function": "a10_lab2",
+      "file": "introduction/views.py",
+      "rule": "Token Security (Weak Generation)",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "a10_lab2",
+      "file": "introduction/views.py",
+      "rule": "Session No Timeout",
+      "verdict": "unlabeled",
+      "note": "Django session defaults have expiry; 1-year cookie is long but set"
     },
     {
       "function": "a10_lab2",
@@ -987,6 +1099,13 @@
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
     },
     {
+      "function": "get_free_port",
+      "file": "challenge/utility.py",
+      "rule": "Context Manager Usage",
+      "verdict": "unlabeled",
+      "note": "resource-hygiene style warning, not a vulnerability class"
+    },
+    {
       "function": "DoItFast.get",
       "file": "challenge/views.py",
       "rule": "No Input Sanitization",
@@ -1003,9 +1122,23 @@
     {
       "function": "DoItFast.post",
       "file": "challenge/views.py",
+      "rule": "Command Injection",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "DoItFast.post",
+      "file": "challenge/views.py",
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
+    },
+    {
+      "function": "DoItFast.delete",
+      "file": "challenge/views.py",
+      "rule": "Command Injection",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
     },
     {
       "function": "DoItFast.delete",
@@ -1136,6 +1269,13 @@
     {
       "function": "deserialize_data",
       "file": "dockerized_labs/insec_des_lab/main.py",
+      "rule": "Unsafe Deserialization (Pickle)",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "deserialize_data",
+      "file": "dockerized_labs/insec_des_lab/main.py",
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
@@ -1174,20 +1314,6 @@
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django autoescape makes render-based claims unverifiable at view level; xss/ssti labs are vulnerable via templates (|safe), invisible to this interface"
-    },
-    {
-      "function": "register_view",
-      "file": "dockerized_labs/sensitive_data_exposure/dataexposure/views.py",
-      "rule": "Password Hashing",
-      "verdict": "fp",
-      "note": "User.objects.create_user() hashes — delegation to framework"
-    },
-    {
-      "function": "register_view",
-      "file": "dockerized_labs/sensitive_data_exposure/dataexposure/views.py",
-      "rule": "Password Hashing (Weak)",
-      "verdict": "fp",
-      "note": "User.objects.create_user() hashes — delegation to framework"
     },
     {
       "function": "register_view",
