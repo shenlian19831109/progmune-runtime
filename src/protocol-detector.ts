@@ -297,6 +297,11 @@ interface SafeguardRule {
   /** When set, the trigger is tested against raw callee names only — not the
    *  identifier-parsed words (which split execute_command into "execute"). */
   triggerCallsOnly?: boolean;
+  /** When set, the rule applies only if this synthetic marker is present in
+   *  the function's calls — a semantic precondition emitted by the extractor
+   *  (e.g. the function actually issues token material, or executes a
+   *  dynamic command). */
+  requireMarker?: string;
   /** When set, the rule only applies to functions that plausibly serve user
    *  requests: the function is called by a web-handler function (exposed) or
    *  takes an identity-ish parameter (token/session/user/auth/request/...).
@@ -320,8 +325,10 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
       // Framework delegation (qualified chains only — a bare custom create_user
       // is NOT treated as secure): Django's built-in user manager and password
       // setters hash internally; repository/service create_user methods delegate
-      // to the model (users_repo.create_user, self.create_user).
-      { pattern: /\.create_user\b|\.(change_password|set_password)\b/i, label: "framework_hashing" },
+      // to the model (users_repo.create_user, self.create_user). Also
+      // XForm(request.POST).save() — Django form validation + hashing
+      // (extractor marker).
+      { pattern: /\.create_user\b|\.(change_password|set_password)\b|__progmune_django_form__/i, label: "framework_hashing" },
     ],
     violationMessage: "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
     conceptMissing: ["PasswordHash", "KeyDerivation"],
@@ -335,7 +342,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     safeguards: [
       { pattern: /\b(bcrypt|argon2|scrypt|pbkdf2)\b/i, label: "strong_hash" },
       // Framework delegation (qualified chains only)
-      { pattern: /\.create_user\b|\.(change_password|set_password)\b/i, label: "framework_hashing" },
+      { pattern: /\.create_user\b|\.(change_password|set_password)\b|__progmune_django_form__/i, label: "framework_hashing" },
     ],
     excludePatterns: [
       /register\.(simple_tag|tag|filter|inclusion_tag)/,  // Django template-tag registration
@@ -387,7 +394,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     paramGated: true,
     trigger: /\b(list|download|view|fetch)(?:[A-Z]\w*|_\w+)|get(?:[A-Z]\w+|_\w+)/i,
     safeguards: [
-      { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware|get_current_user_authorizer|current_user_authorizer|login_required|permission_required|user_passes_test|check_authorization|check_permission|jwt\.decode|decode_token)\b/i, label: "auth_check" },
+      { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware|get_current_user_authorizer|current_user_authorizer|login_required|permission_required|user_passes_test|check_authorization|check_permission|jwt\.decode|decode_token|__progmune_auth_checked__|__progmune_credential_check__)\b/i, label: "auth_check" },
     ],
     violationMessage: "Data access function does not check authentication. Anyone can access data without credentials.",
     conceptMissing: ["AuthenticationCheck", "AccessControl"],
@@ -417,7 +424,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     // (listPosts/getPost/deletePost fire via identifier-parsed words).
     trigger: /\b(add|create|update|set|publish|insert|submit)(?:[A-Z]\w*|_\w+)|(?:[A-Z]\w*|_\w+)(Add|Create|Update|Set|Publish|Insert|Submit)\b/i,
     safeguards: [
-      { pattern: /\b(getUser|validateToken|verifyToken|verifySession|validateSession|getSessionUser|getSession\b|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware|get_current_user_authorizer|current_user_authorizer|login_required|permission_required|user_passes_test|check_authorization|check_permission|create_access_token|create_refresh_token|create_jwt_token)\b/i, label: "auth_check" },
+      { pattern: /\b(getUser|validateToken|verifyToken|verifySession|validateSession|getSessionUser|getSession\b|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware|get_current_user_authorizer|current_user_authorizer|login_required|permission_required|user_passes_test|check_authorization|check_permission|create_access_token|create_refresh_token|create_jwt_token|__progmune_auth_checked__|__progmune_credential_check__)\b/i, label: "auth_check" },
     ],
     violationMessage: "Mutation function does not check authentication. Anyone can create or modify data without credentials.",
     conceptMissing: ["AuthenticationCheck", "AccessControl"],
@@ -499,13 +506,17 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     category: "token_security",
     languages: ["typescript", "javascript", "python"],
     trigger: /\b(authenticate|login|signIn|logIn|createSession|generateToken|do_login|sign_in|log_in|generate_token|create_session|reset_password|password_reset|forgot_password|reset_token|create_reset_token|generate_reset_token)\b/i,
+    // Semantic precondition: only fire when the function actually issues
+    // token material (set_cookie / token-named assignment — extractor marker).
+    // Login-named page renderers (login_otp) no longer fire.
+    requireMarker: "__progmune_token_issued__",
     safeguards: [
       { pattern: /\b(crypto\.randomUUID|jwt\.sign|jsonwebtoken|nanoid|randomBytes|cryptoRandomString|secrets\.token_urlsafe|secrets\.token_hex|token_urlsafe|token_hex|uuid\.uuid4|os\.urandom)\b/i, label: "secure_token" },
       // Framework delegation: calling a token-issuing layer means the session
       // material is handled by that layer, not generated inline. NOTE: bare
       // jwt.encode is deliberately NOT here — a hardcoded secret key makes the
       // JWT layer itself the vulnerability (PyGoat sec_misconfig_lab3).
-      { pattern: /\b(create_access_token|create_refresh_token|create_jwt_token|\.check_password\b|get_current_user_authorizer|login_required|permission_required)\b/i, label: "framework_token" },
+      { pattern: /\b(create_access_token|create_refresh_token|create_jwt_token|\.check_password\b|get_current_user_authorizer|login_required|permission_required|__progmune_framework_auth__)\b/i, label: "framework_token" },
     ],
     excludePatterns: [
       /login_not_required|login_required/,   // decorators — the auth layer itself
@@ -619,9 +630,14 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     name: "Command Injection",
     category: "input_validation",
     languages: ["python"],
-    trigger: /\b(os\.system|os\.popen|subprocess\.(call|check_call|Popen|run)|commands\.getoutput|pty\.spawn|__progmune_command_taint_flow__)\b/i,
+    // Marker-driven: the extractor emits __progmune_command_dynamic__ only
+    // when a subprocess/os command receives a NON-static argument (static
+    // string/list invocations like installers stay silent), and
+    // __progmune_command_taint_flow__ when a tainted value flows to a
+    // command-named helper.
+    trigger: /\b(__progmune_command_dynamic__|__progmune_command_taint_flow__)\b/,
     safeguards: [
-      { pattern: /\b(shlex\.quote|shlex\.split|pipes\.quote|shell\s*=\s*False)\b/i, label: "safe_command" },
+      { pattern: /\b(shlex\.quote|shlex\.split|pipes\.quote)\b/i, label: "safe_command" },
     ],
     violationMessage: "Shell command execution without input quoting. Vulnerable to command injection.",
     conceptMissing: ["CommandInjectionPrevention", "InputSanitization"],
@@ -1153,6 +1169,9 @@ export function detectSafeguardViolations(calls: string[], enclosingFuncName?: s
     const triggerCalls = rule.triggerCallsOnly ? rawCalls : effectiveCalls;
     const triggerMatch = triggerCalls.some(c => rule.trigger.test(c));
     if (!triggerMatch) continue;
+
+    // Semantic precondition marker (extractor-emitted)
+    if (rule.requireMarker && !effectiveCalls.includes(rule.requireMarker)) continue;
 
     // Skip authorization rules for auth functions — they ARE the auth
     if (isAuthFunction && rule.category === "authorization") continue;

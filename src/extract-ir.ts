@@ -361,6 +361,14 @@ function extractDirectCalls(func: FunctionDeclaration | ArrowFunction): string[]
     }
     if (Node.isFunctionDeclaration(node) || Node.isArrowFunction(node)) traversal.skip();
   });
+  // Token-issuance marker (mirrors the Python extractor): the function
+  // actually issues session/token material — set_cookie calls or token/
+  // session-named assignments/properties. The Token Security rule's
+  // requireMarker precondition consumes it.
+  const text = func.getText();
+  if (/set_cookie\(|setCookie\(|\btoken\s*[:=]|\bsession_token\s*[:=]/.test(text)) {
+    calls.push("__progmune_token_issued__");
+  }
   return [...new Set(calls)];
 }
 

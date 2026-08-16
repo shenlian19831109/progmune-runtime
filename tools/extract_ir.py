@@ -425,6 +425,157 @@ def has_command_taint_flow(node):
     return False
 
 
+FRAMEWORK_AUTH_MARKER = "__progmune_framework_auth__"
+FORM_DELEGATION_MARKER = "__progmune_django_form__"
+TOKEN_ISSUED_MARKER = "__progmune_token_issued__"
+AUTH_CHECKED_MARKER = "__progmune_auth_checked__"
+CREDENTIAL_CHECK_MARKER = "__progmune_credential_check__"
+CMD_DYNAMIC_MARKER = "__progmune_command_dynamic__"
+
+
+def build_import_map(tree):
+    """local name → qualified module path (from django.contrib.auth import login)."""
+    m = {}
+    for node in getattr(tree, 'body', []):
+        if isinstance(node, ast.ImportFrom):
+            mod = node.module or ""
+            for alias in node.names:
+                m[alias.asname or alias.name] = f"{mod}.{alias.name}"
+        elif isinstance(node, ast.Import):
+            for alias in node.names:
+                m[alias.asname or alias.name] = alias.name
+    return m
+
+
+def has_framework_auth(node, imports):
+    """Calls resolving (via import resolution) to framework auth functions —
+    django.contrib.auth.login/authenticate, flask_login.*."""
+    for child in ast.walk(node):
+        if isinstance(child, ast.Call) and isinstance(child.func, ast.Name):
+            mod = imports.get(child.func.id, "")
+            if mod.startswith("django.contrib.auth") or mod.startswith("flask_login"):
+                return True
+    return False
+
+
+def has_form_delegation(node):
+    """<Name>Form(request.POST) instantiated and .save() called on that
+    instance — Django form delegation (validation + hashing in framework)."""
+    assigns = collect_assignments(node)
+    for child in ast.walk(node):
+        if not isinstance(child, ast.Call):
+            continue
+        if isinstance(child.func, ast.Name) and child.func.id.endswith("Form") \
+                and any(is_request_rooted(a) for a in child.args):
+            # form = XForm(request.POST) — find its target names
+            return True
+        # form.save() on a variable assigned from an XForm(...) call
+        if isinstance(child.func, ast.Attribute) and child.func.attr == "save":
+            recv = child.func.value
+            if isinstance(recv, ast.Name):
+                v = assigns.get(recv.id)
+                if isinstance(v, ast.Call) and isinstance(v.func, ast.Name) \
+                        and v.func.id.endswith("Form"):
+                    return True
+    return False
+
+
+def has_token_issued(node):
+    """set_cookie calls, assignments to token/session-named variables, or
+    dict literals containing a 'token' key — the function actually issues
+    session/token material (sess = {'token': ...} counts)."""
+    for child in ast.walk(node):
+        if isinstance(child, ast.Call):
+            name = None
+            if isinstance(child.func, ast.Name):
+                name = child.func.id
+            elif isinstance(child.func, ast.Attribute):
+                name = child.func.attr
+            if name in ("set_cookie", "set_secure_cookie"):
+                return True
+        if isinstance(child, ast.Assign):
+            for t in child.targets:
+                if isinstance(t, ast.Name) and re.search(r"token|session|jwt", t.id, re.I):
+                    return True
+            if isinstance(child.value, ast.Dict):
+                for k in child.value.keys:
+                    if isinstance(k, ast.Constant) and isinstance(k.value, str) \
+                            and "token" in k.value.lower():
+                        return True
+    return False
+
+
+def has_auth_checked(node):
+    """An `is_authenticated` guard (if request.user.is_authenticated …)."""
+    for child in ast.walk(node):
+        if isinstance(child, ast.If):
+            if "is_authenticated" in ast.unparse(child.test):
+                return True
+    return False
+
+
+def has_credential_check(node):
+    """`if token in <store>` / `if token == store.get(...)` — a parameter
+    verified against a credential store."""
+    for child in ast.walk(node):
+        if isinstance(child, ast.If) and isinstance(child.test, ast.Compare) \
+                and len(child.test.ops) == 1 \
+                and isinstance(child.test.ops[0], (ast.In, ast.Eq)):
+            s = ast.unparse(child.test)
+            if re.search(r'\btoken\b', s):
+                return True
+    return False
+
+
+def _static_command_arg(a, assigns=None):
+    if isinstance(a, ast.Constant):
+        if isinstance(a.value, str):
+            return True
+        if isinstance(a.value, (list, tuple)) and all(isinstance(x, str) for x in a.value):
+            return True
+    if isinstance(a, (ast.List, ast.Tuple)):
+        return all(_static_command_arg(e, assigns) for e in a.elts)
+    if isinstance(a, ast.Name) and assigns is not None:
+        v = assigns.get(a.id)
+        if v is not None:
+            return _static_command_arg(v, assigns)
+    if isinstance(a, ast.IfExp):
+        return _static_command_arg(a.body, assigns) \
+            and _static_command_arg(a.orelse, assigns)
+    if isinstance(a, ast.Attribute):
+        if _root_name(a) in ("sys", "os", "path"):
+            return True
+    return False
+
+
+def has_dynamic_command(node):
+    """subprocess/os command call with a NON-static command argument —
+    static string/list args (installers, fixed invocations) are not flagged.
+    Variables assigned from static strings count as static."""
+    assigns = collect_assignments(node)
+    for child in ast.walk(node):
+        if not isinstance(child, ast.Call):
+            continue
+        name = None
+        if isinstance(child.func, ast.Name):
+            name = child.func.id
+        elif isinstance(child.func, ast.Attribute):
+            name = child.func.attr
+        if name in ("system", "popen", "getoutput") and name not in ("getoutput",):
+            pass  # os.system / os.popen / os.getoutput — qualify below
+        if name in ("run", "call", "check_call", "check_output", "Popen"):
+            if _root_name(child.func) != "subprocess":
+                continue
+        elif name in ("system", "popen", "getoutput"):
+            if _root_name(child.func) not in ("os", "commands", "pty"):
+                continue
+        else:
+            continue
+        if any(not _static_command_arg(a, assigns) for a in child.args):
+            return True
+    return False
+
+
 def has_xss(node, unsafe_vars=None):
     """XSS check: a render/render_to_string call binds tainted request-derived
     values into template variables that the template renders without escaping
@@ -507,15 +658,16 @@ def has_path_traversal(node):
     return False
 
 
-def extract_calls(node, unsafe_vars=None):
+def extract_calls(node, unsafe_vars=None, imports=None):
     """Extract function call names from a function body (first-level only).
 
     Attribute calls emit the full qualified chain (e.g. user.change_password,
     User.objects.create_user) so rules can distinguish framework-delegated
     calls from custom same-named functions. Bare-name calls stay as-is.
     Source-level checks emit synthetic marker calls: unparameterized SQL,
-    SSRF (user-controlled URL fetch), path traversal, and XSS (unsafe
-    template rendering)."""
+    SSRF, path traversal, XSS, eval, hardcoded secrets, command flow, CSRF,
+    and the semantic markers for framework auth / form delegation / token
+    issuance / auth guards / credential checks / dynamic commands."""
     calls = []
     seen = set()
     for child in ast.walk(node):
@@ -559,6 +711,18 @@ def extract_calls(node, unsafe_vars=None):
         calls.append(CSRF_MARKER)
     if has_get_state_change(node) and GET_STATE_MARKER not in calls:
         calls.append(GET_STATE_MARKER)
+    if imports and has_framework_auth(node, imports) and FRAMEWORK_AUTH_MARKER not in calls:
+        calls.append(FRAMEWORK_AUTH_MARKER)
+    if has_form_delegation(node) and FORM_DELEGATION_MARKER not in calls:
+        calls.append(FORM_DELEGATION_MARKER)
+    if has_token_issued(node) and TOKEN_ISSUED_MARKER not in calls:
+        calls.append(TOKEN_ISSUED_MARKER)
+    if has_auth_checked(node) and AUTH_CHECKED_MARKER not in calls:
+        calls.append(AUTH_CHECKED_MARKER)
+    if has_credential_check(node) and CREDENTIAL_CHECK_MARKER not in calls:
+        calls.append(CREDENTIAL_CHECK_MARKER)
+    if has_dynamic_command(node) and CMD_DYNAMIC_MARKER not in calls:
+        calls.append(CMD_DYNAMIC_MARKER)
     return calls
 
 # ── Protocol annotation extraction ──
@@ -662,6 +826,7 @@ def extract_functions_from_file(filepath: str, root_dir: str, unsafe_vars=None):
 
     funcs = []
     rel_path = os.path.relpath(filepath, root_dir)
+    imports = build_import_map(tree)
 
     # Single-pass parent map (O(n)). The old per-node full-tree walk was O(n²)
     # and hung on large real-world files (e.g. fastapi's bigger modules).
@@ -693,7 +858,7 @@ def extract_functions_from_file(filepath: str, root_dir: str, unsafe_vars=None):
                 params.append({"name": arg.arg, "type": ptype})
 
             return_type = get_annotation(node.returns) if node.returns else "any"
-            calls = extract_calls(node, unsafe_vars)
+            calls = extract_calls(node, unsafe_vars, imports)
             exported = is_exported(name, parent_class)
             protocol = extract_protocol_from_decorators(node)
             doc_meta = extract_docstring_meta(node)
