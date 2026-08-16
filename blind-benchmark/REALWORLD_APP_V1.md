@@ -62,8 +62,19 @@ lab-level gold enumeration, noted as future work.
 
 ## Next steps
 
-1. Annotate the other three app repos (fastapi-realworld, django-realworld, django-unicorn).
-2. Framework-delegation mitigation: an allowlist of "secure-by-default" framework calls
-   (`form.save`, `create_user`, `authenticate`, `login`, `render` in Django) as
-   safeguard satisfiers — would flip most of the 11 FPs without touching benchmarks.
-3. SQL rule source-level matching (still deferred).
+1. ~~Annotate the other three app repos~~ → **DONE** (`gold/annotations-apps-v1.json`):
+   django-realworld, django-unicorn, fastapi-realworld — **0 TP, 52 FP, 137 unlabeled**
+   across 189 detections. All FPs are framework-delegation / public-by-design /
+   internal-helper: FastAPI `Depends(get_current_user_authorizer())` DI, DRF
+   `permission_classes`, `user.change_password()` / Django `create_user` hashing,
+   JWT-service internals, unicorn dispatch.
+2. **Cross-app picture (4 repos, 372 detections): TP 15, FP 63, unlabeled 294 —
+   labeled precision 19.2%.** All 15 TPs come from PyGoat (the vulnerable-by-design
+   app); well-written apps produce zero TPs but 52 delegation FPs. The detector finds
+   real vulnerabilities where they exist and misjudges framework delegation where they
+   don't — the delegation allowlist is now the single highest-value fix.
+3. Framework-delegation allowlist: secure-by-default framework calls as safeguard
+   satisfiers — Django (`form.save`, `create_user`, `set_password`, `authenticate`,
+   `login`), FastAPI (`Depends`-injected authorizers, `change_password`) — would flip
+   most of the 63 FPs without touching either synthetic benchmark.
+4. SQL rule source-level matching (still deferred).

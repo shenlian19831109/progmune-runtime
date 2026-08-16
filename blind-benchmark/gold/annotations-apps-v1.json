@@ -1,0 +1,1363 @@
+{
+  "$description": "Application-corpus gold annotation v1 — 3 well-written production apps. All judged-rule detections are framework-delegation / public-by-design / internal-helper FPs.",
+  "annotated_by": "human review (Claude-assisted, 2026-08-16)",
+  "version": "1.0",
+  "summary": {
+    "total_detections": 189,
+    "true_positives": 0,
+    "false_positives": 52,
+    "unlabeled": 137,
+    "labeled_precision": 0.0
+  },
+  "per_repo": {
+    "django-realworld-example-app": {
+      "functions_scanned": 58,
+      "functions_with_violations": 23,
+      "total_detections": 37,
+      "true_positives": 0,
+      "false_positives": 14,
+      "unlabeled": 23
+    },
+    "django-unicorn": {
+      "functions_scanned": 170,
+      "functions_with_violations": 45,
+      "total_detections": 59,
+      "true_positives": 0,
+      "false_positives": 4,
+      "unlabeled": 55
+    },
+    "fastapi-realworld-example-app": {
+      "functions_scanned": 95,
+      "functions_with_violations": 54,
+      "total_detections": 93,
+      "true_positives": 0,
+      "false_positives": 34,
+      "unlabeled": 59
+    }
+  },
+  "detections": [
+    {
+      "function": "ConduitJSONRenderer.render",
+      "file": "conduit/apps/core/renderers.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "add_slug_to_article_if_not_exists",
+      "file": "conduit/apps/articles/signals.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "ArticleSerializer.get_created_at",
+      "file": "conduit/apps/articles/serializers.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "CommentSerializer.get_created_at",
+      "file": "conduit/apps/articles/serializers.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "TagRelatedField.to_internal_value",
+      "file": "conduit/apps/articles/relations.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "ArticleViewSet.list",
+      "file": "conduit/apps/articles/views.py",
+      "rule": "Authorization (Unauthenticated Access)",
+      "verdict": "fp",
+      "note": "DRF permission_classes=(IsAuthenticatedOrReadOnly,) — public reads by RealWorld spec"
+    },
+    {
+      "function": "ArticleViewSet.list",
+      "file": "conduit/apps/articles/views.py",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "verdict": "fp",
+      "note": "DRF permission_classes=(IsAuthenticatedOrReadOnly,) — public reads by RealWorld spec"
+    },
+    {
+      "function": "ArticleViewSet.update",
+      "file": "conduit/apps/articles/views.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "CommentsDestroyAPIView.destroy",
+      "file": "conduit/apps/articles/views.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "ArticlesFavoriteAPIView.delete",
+      "file": "conduit/apps/articles/views.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "TagListAPIView.list",
+      "file": "conduit/apps/articles/views.py",
+      "rule": "Authorization (Unauthenticated Access)",
+      "verdict": "fp",
+      "note": "public tags endpoint — AllowAny by design"
+    },
+    {
+      "function": "TagListAPIView.list",
+      "file": "conduit/apps/articles/views.py",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "verdict": "fp",
+      "note": "public tags endpoint — AllowAny by design"
+    },
+    {
+      "function": "ArticlesFeedAPIView.list",
+      "file": "conduit/apps/articles/views.py",
+      "rule": "Authorization (Unauthenticated Access)",
+      "verdict": "fp",
+      "note": "feed requires auth via DRF permission_classes"
+    },
+    {
+      "function": "ArticlesFeedAPIView.list",
+      "file": "conduit/apps/articles/views.py",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "verdict": "fp",
+      "note": "feed requires auth via DRF permission_classes"
+    },
+    {
+      "function": "Profile.unfollow",
+      "file": "conduit/apps/profiles/models.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "Profile.unfavorite",
+      "file": "conduit/apps/profiles/models.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "ProfileFollowAPIView.delete",
+      "file": "conduit/apps/profiles/views.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "create_related_profile",
+      "file": "conduit/apps/authentication/signals.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "UserManager.create_user",
+      "file": "conduit/apps/authentication/models.py",
+      "rule": "Password Hashing",
+      "verdict": "fp",
+      "note": "Django built-in — set_password() hashes (framework delegation)"
+    },
+    {
+      "function": "UserManager.create_user",
+      "file": "conduit/apps/authentication/models.py",
+      "rule": "Password Hashing (Weak)",
+      "verdict": "fp",
+      "note": "Django built-in — set_password() hashes (framework delegation)"
+    },
+    {
+      "function": "UserManager.create_user",
+      "file": "conduit/apps/authentication/models.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "UserManager.create_user",
+      "file": "conduit/apps/authentication/models.py",
+      "rule": "Registration Without Email Verification",
+      "verdict": "unlabeled",
+      "note": "true but standard practice — soft"
+    },
+    {
+      "function": "UserManager.create_superuser",
+      "file": "conduit/apps/authentication/models.py",
+      "rule": "Password Hashing",
+      "verdict": "fp",
+      "note": "Django built-in — set_password() hashes (framework delegation)"
+    },
+    {
+      "function": "UserManager.create_superuser",
+      "file": "conduit/apps/authentication/models.py",
+      "rule": "Password Hashing (Weak)",
+      "verdict": "fp",
+      "note": "Django built-in — set_password() hashes (framework delegation)"
+    },
+    {
+      "function": "UserManager.create_superuser",
+      "file": "conduit/apps/authentication/models.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "UserManager.create_superuser",
+      "file": "conduit/apps/authentication/models.py",
+      "rule": "Registration Without Email Verification",
+      "verdict": "unlabeled",
+      "note": "true but standard practice — soft"
+    },
+    {
+      "function": "RegistrationSerializer.create",
+      "file": "conduit/apps/authentication/serializers.py",
+      "rule": "Password Hashing",
+      "verdict": "fp",
+      "note": "delegates to create_user() — hashing in framework"
+    },
+    {
+      "function": "RegistrationSerializer.create",
+      "file": "conduit/apps/authentication/serializers.py",
+      "rule": "Password Hashing (Weak)",
+      "verdict": "fp",
+      "note": "delegates to create_user() — hashing in framework"
+    },
+    {
+      "function": "RegistrationSerializer.create",
+      "file": "conduit/apps/authentication/serializers.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "RegistrationSerializer.create",
+      "file": "conduit/apps/authentication/serializers.py",
+      "rule": "Registration Without Email Verification",
+      "verdict": "unlabeled",
+      "note": "true but standard practice — soft"
+    },
+    {
+      "function": "LoginSerializer.validate",
+      "file": "conduit/apps/authentication/serializers.py",
+      "rule": "Token Security (Weak Generation)",
+      "verdict": "fp",
+      "note": "framework delegation / DI auth invisible to call-name interface"
+    },
+    {
+      "function": "LoginSerializer.validate",
+      "file": "conduit/apps/authentication/serializers.py",
+      "rule": "Session No Timeout",
+      "verdict": "unlabeled",
+      "note": "framework session defaults have expiry"
+    },
+    {
+      "function": "UserSerializer.update",
+      "file": "conduit/apps/authentication/serializers.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "UserJSONRenderer.render",
+      "file": "conduit/apps/authentication/renderers.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "JWTAuthentication.authenticate",
+      "file": "conduit/apps/authentication/backends.py",
+      "rule": "Token Security (Weak Generation)",
+      "verdict": "fp",
+      "note": "framework delegation / DI auth invisible to call-name interface"
+    },
+    {
+      "function": "JWTAuthentication.authenticate",
+      "file": "conduit/apps/authentication/backends.py",
+      "rule": "Session No Timeout",
+      "verdict": "unlabeled",
+      "note": "framework session defaults have expiry"
+    },
+    {
+      "function": "UserRetrieveUpdateAPIView.update",
+      "file": "conduit/apps/authentication/views.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "main",
+      "file": "example/manage.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "restore_from_cache",
+      "file": "src/django_unicorn/cacher.py",
+      "rule": "Authorization (Unauthenticated Access)",
+      "verdict": "fp",
+      "note": "internal cache helper — not an endpoint"
+    },
+    {
+      "function": "restore_from_cache",
+      "file": "src/django_unicorn/cacher.py",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "verdict": "fp",
+      "note": "internal cache helper — not an endpoint"
+    },
+    {
+      "function": "restore_from_cache",
+      "file": "src/django_unicorn/cacher.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "cast_value",
+      "file": "src/django_unicorn/typer.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "create_queryset",
+      "file": "src/django_unicorn/typer.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "create_queryset",
+      "file": "src/django_unicorn/typer.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "create_template",
+      "file": "src/django_unicorn/utils.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "unicorn",
+      "file": "src/django_unicorn/templatetags/unicorn.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "unicorn",
+      "file": "src/django_unicorn/templatetags/unicorn.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "UnicornNode.render",
+      "file": "src/django_unicorn/templatetags/unicorn.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "UnicornNode.render",
+      "file": "src/django_unicorn/templatetags/unicorn.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "is_html_well_formed",
+      "file": "src/django_unicorn/components/unicorn_template_response.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "UnicornTemplateResponse.render",
+      "file": "src/django_unicorn/components/unicorn_template_response.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "get_locations",
+      "file": "src/django_unicorn/components/unicorn_view.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "Component.call",
+      "file": "src/django_unicorn/components/unicorn_view.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "Component.remove",
+      "file": "src/django_unicorn/components/unicorn_view.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "Component.post_parse",
+      "file": "src/django_unicorn/components/unicorn_view.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "Component.render",
+      "file": "src/django_unicorn/components/unicorn_view.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "Component.dispatch",
+      "file": "src/django_unicorn/components/unicorn_view.py",
+      "rule": "Authorization (Unauthenticated Access)",
+      "verdict": "fp",
+      "note": "framework dispatch with its own component-level authorization"
+    },
+    {
+      "function": "Component.dispatch",
+      "file": "src/django_unicorn/components/unicorn_view.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "Component.dispatch",
+      "file": "src/django_unicorn/components/unicorn_view.py",
+      "rule": "Notification Without Retry",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "Component.get_frontend_context_variables",
+      "file": "src/django_unicorn/components/unicorn_view.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "Component.get_frontend_context_variables",
+      "file": "src/django_unicorn/components/unicorn_view.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "Component.get_context_data",
+      "file": "src/django_unicorn/components/unicorn_view.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "Component.validate",
+      "file": "src/django_unicorn/components/unicorn_view.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "Component.validate",
+      "file": "src/django_unicorn/components/unicorn_view.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "Component.create",
+      "file": "src/django_unicorn/components/unicorn_view.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "login_not_required",
+      "file": "src/django_unicorn/views/__init__.py",
+      "rule": "Token Security (Weak Generation)",
+      "verdict": "fp",
+      "note": "framework delegation / DI auth invisible to call-name interface"
+    },
+    {
+      "function": "login_not_required",
+      "file": "src/django_unicorn/views/__init__.py",
+      "rule": "Session No Timeout",
+      "verdict": "unlabeled",
+      "note": "framework session defaults have expiry"
+    },
+    {
+      "function": "UnicornMessageHandler.handle",
+      "file": "src/django_unicorn/views/message.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "ComponentResponse.get_data",
+      "file": "src/django_unicorn/views/response.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "ComponentResponse.get_data",
+      "file": "src/django_unicorn/views/response.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "set_property_from_data",
+      "file": "src/django_unicorn/views/utils.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "Command.add_arguments",
+      "file": "src/django_unicorn/management/commands/startunicorn.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "Command.check_initials_directories",
+      "file": "src/django_unicorn/management/commands/startunicorn.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "Command.create_nested_directories",
+      "file": "src/django_unicorn/management/commands/startunicorn.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "Command.create_component_and_template",
+      "file": "src/django_unicorn/management/commands/startunicorn.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "Command.create_component_and_template",
+      "file": "src/django_unicorn/management/commands/startunicorn.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "Command.ask_for_star_repo",
+      "file": "src/django_unicorn/management/commands/startunicorn.py",
+      "rule": "Context Manager Usage",
+      "verdict": "unlabeled",
+      "note": "resource-hygiene style warning"
+    },
+    {
+      "function": "Command.ask_for_star_repo",
+      "file": "src/django_unicorn/management/commands/startunicorn.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "Command.handle",
+      "file": "src/django_unicorn/management/commands/startunicorn.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "Command.handle",
+      "file": "src/django_unicorn/management/commands/startunicorn.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "index",
+      "file": "example/www/views.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "template",
+      "file": "example/www/views.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "ModelsView.delete",
+      "file": "example/unicorn/components/models.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "JsView.change_states",
+      "file": "example/unicorn/components/js.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "RedirectsView.update_location",
+      "file": "example/unicorn/components/redirects.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "RedirectsView.update_hash",
+      "file": "example/unicorn/components/redirects.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "PollingView.slow_update",
+      "file": "example/unicorn/components/polling.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "PollingView.get_date",
+      "file": "example/unicorn/components/polling.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "PollingView.get_date_2",
+      "file": "example/unicorn/components/polling.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "ObjectsView.add_hour",
+      "file": "example/unicorn/components/objects.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "ObjectsView.add_one_to_float",
+      "file": "example/unicorn/components/objects.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "RowView.edit",
+      "file": "example/unicorn/components/row.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "TodoView.add",
+      "file": "example/unicorn/components/todo.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "TableView.edit",
+      "file": "example/unicorn/components/nested/table.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "RowView.edit",
+      "file": "example/unicorn/components/nested/row.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "Command.handle",
+      "file": "example/coffee/management/commands/import_flavors.py",
+      "rule": "Context Manager Usage",
+      "verdict": "unlabeled",
+      "note": "resource-hygiene style warning"
+    },
+    {
+      "function": "get_application",
+      "file": "app/main.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "get_application",
+      "file": "app/main.py",
+      "rule": "API Without Rate Limiting",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "create_start_app_handler",
+      "file": "app/core/events.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "create_stop_app_handler",
+      "file": "app/core/events.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "connect_to_db",
+      "file": "app/db/events.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "check_user_can_modify_article",
+      "file": "app/services/articles.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "check_user_can_modify_comment",
+      "file": "app/services/comments.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "create_jwt_token",
+      "file": "app/services/jwt.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "create_jwt_token",
+      "file": "app/services/jwt.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "create_access_token_for_user",
+      "file": "app/services/jwt.py",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "verdict": "fp",
+      "note": "JWT service internal — token generation IS the auth layer"
+    },
+    {
+      "function": "create_access_token_for_user",
+      "file": "app/services/jwt.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "get_username_from_token",
+      "file": "app/services/jwt.py",
+      "rule": "Authorization (Unauthenticated Access)",
+      "verdict": "fp",
+      "note": "JWT service internal — token parsing"
+    },
+    {
+      "function": "get_article_by_slug_from_path",
+      "file": "app/api/dependencies/articles.py",
+      "rule": "Authorization (Unauthenticated Access)",
+      "verdict": "fp",
+      "note": "framework delegation / DI auth invisible to call-name interface"
+    },
+    {
+      "function": "check_article_modification_permissions",
+      "file": "app/api/dependencies/articles.py",
+      "rule": "Authorization (Unauthenticated Access)",
+      "verdict": "fp",
+      "note": "this function IS the permission check"
+    },
+    {
+      "function": "check_article_modification_permissions",
+      "file": "app/api/dependencies/articles.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "get_profile_by_username_from_path",
+      "file": "app/api/dependencies/profiles.py",
+      "rule": "Authorization (Unauthenticated Access)",
+      "verdict": "fp",
+      "note": "framework delegation / DI auth invisible to call-name interface"
+    },
+    {
+      "function": "get_comment_by_id_from_path",
+      "file": "app/api/dependencies/comments.py",
+      "rule": "Authorization (Unauthenticated Access)",
+      "verdict": "fp",
+      "note": "framework delegation / DI auth invisible to call-name interface"
+    },
+    {
+      "function": "check_comment_modification_permissions",
+      "file": "app/api/dependencies/comments.py",
+      "rule": "Authorization (Unauthenticated Access)",
+      "verdict": "fp",
+      "note": "this function IS the permission check"
+    },
+    {
+      "function": "check_comment_modification_permissions",
+      "file": "app/api/dependencies/comments.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "retrieve_current_user",
+      "file": "app/api/routes/users.py",
+      "rule": "Authorization (Unauthenticated Access)",
+      "verdict": "fp",
+      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+    },
+    {
+      "function": "retrieve_current_user",
+      "file": "app/api/routes/users.py",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "verdict": "fp",
+      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+    },
+    {
+      "function": "retrieve_current_user",
+      "file": "app/api/routes/users.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "update_current_user",
+      "file": "app/api/routes/users.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "update_current_user",
+      "file": "app/api/routes/users.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "login",
+      "file": "app/api/routes/authentication.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "login",
+      "file": "app/api/routes/authentication.py",
+      "rule": "Token Security (Weak Generation)",
+      "verdict": "fp",
+      "note": "framework delegation / DI auth invisible to call-name interface"
+    },
+    {
+      "function": "login",
+      "file": "app/api/routes/authentication.py",
+      "rule": "Session No Timeout",
+      "verdict": "unlabeled",
+      "note": "framework session defaults have expiry"
+    },
+    {
+      "function": "register",
+      "file": "app/api/routes/authentication.py",
+      "rule": "Password Hashing",
+      "verdict": "fp",
+      "note": "user.change_password(password) — hashing delegated to model"
+    },
+    {
+      "function": "register",
+      "file": "app/api/routes/authentication.py",
+      "rule": "Password Hashing (Weak)",
+      "verdict": "fp",
+      "note": "user.change_password(password) — hashing delegated to model"
+    },
+    {
+      "function": "register",
+      "file": "app/api/routes/authentication.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "register",
+      "file": "app/api/routes/authentication.py",
+      "rule": "Registration Without Email Verification",
+      "verdict": "unlabeled",
+      "note": "true but standard practice — soft"
+    },
+    {
+      "function": "follow_for_user",
+      "file": "app/api/routes/profiles.py",
+      "rule": "Authorization (Unauthenticated Access)",
+      "verdict": "fp",
+      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+    },
+    {
+      "function": "follow_for_user",
+      "file": "app/api/routes/profiles.py",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "verdict": "fp",
+      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+    },
+    {
+      "function": "follow_for_user",
+      "file": "app/api/routes/profiles.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "unsubscribe_from_user",
+      "file": "app/api/routes/profiles.py",
+      "rule": "Authorization (Ownership Check)",
+      "verdict": "fp",
+      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+    },
+    {
+      "function": "unsubscribe_from_user",
+      "file": "app/api/routes/profiles.py",
+      "rule": "Authorization (Unauthenticated Access)",
+      "verdict": "fp",
+      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+    },
+    {
+      "function": "unsubscribe_from_user",
+      "file": "app/api/routes/profiles.py",
+      "rule": "Authorization (Resource Ownership)",
+      "verdict": "fp",
+      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+    },
+    {
+      "function": "unsubscribe_from_user",
+      "file": "app/api/routes/profiles.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "list_comments_for_article",
+      "file": "app/api/routes/comments.py",
+      "rule": "Authorization (Unauthenticated Access)",
+      "verdict": "fp",
+      "note": "public comments list by RealWorld spec"
+    },
+    {
+      "function": "create_comment_for_article",
+      "file": "app/api/routes/comments.py",
+      "rule": "Authorization (Unauthenticated Access)",
+      "verdict": "fp",
+      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+    },
+    {
+      "function": "create_comment_for_article",
+      "file": "app/api/routes/comments.py",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "verdict": "fp",
+      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+    },
+    {
+      "function": "create_comment_for_article",
+      "file": "app/api/routes/comments.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "delete_comment_from_article",
+      "file": "app/api/routes/comments.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "list_articles",
+      "file": "app/api/routes/articles/articles_resource.py",
+      "rule": "Authorization (Unauthenticated Access)",
+      "verdict": "fp",
+      "note": "public article list by RealWorld spec"
+    },
+    {
+      "function": "create_new_article",
+      "file": "app/api/routes/articles/articles_resource.py",
+      "rule": "Authorization (Unauthenticated Access)",
+      "verdict": "fp",
+      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+    },
+    {
+      "function": "create_new_article",
+      "file": "app/api/routes/articles/articles_resource.py",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "verdict": "fp",
+      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+    },
+    {
+      "function": "create_new_article",
+      "file": "app/api/routes/articles/articles_resource.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "update_article_by_slug",
+      "file": "app/api/routes/articles/articles_resource.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "delete_article_by_slug",
+      "file": "app/api/routes/articles/articles_resource.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "get_articles_for_user_feed",
+      "file": "app/api/routes/articles/articles_common.py",
+      "rule": "Authorization (Unauthenticated Access)",
+      "verdict": "fp",
+      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+    },
+    {
+      "function": "mark_article_as_favorite",
+      "file": "app/api/routes/articles/articles_common.py",
+      "rule": "Authorization (Unauthenticated Access)",
+      "verdict": "fp",
+      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+    },
+    {
+      "function": "mark_article_as_favorite",
+      "file": "app/api/routes/articles/articles_common.py",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "verdict": "fp",
+      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+    },
+    {
+      "function": "mark_article_as_favorite",
+      "file": "app/api/routes/articles/articles_common.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "remove_article_from_favorites",
+      "file": "app/api/routes/articles/articles_common.py",
+      "rule": "Authorization (Ownership Check)",
+      "verdict": "fp",
+      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+    },
+    {
+      "function": "remove_article_from_favorites",
+      "file": "app/api/routes/articles/articles_common.py",
+      "rule": "Authorization (Unauthenticated Access)",
+      "verdict": "fp",
+      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+    },
+    {
+      "function": "remove_article_from_favorites",
+      "file": "app/api/routes/articles/articles_common.py",
+      "rule": "Authorization (Resource Ownership)",
+      "verdict": "fp",
+      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
+    },
+    {
+      "function": "remove_article_from_favorites",
+      "file": "app/api/routes/articles/articles_common.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "TagsRepository.create_tags_that_dont_exist",
+      "file": "app/db/repositories/tags.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "UsersRepository.create_user",
+      "file": "app/db/repositories/users.py",
+      "rule": "Password Hashing",
+      "verdict": "fp",
+      "note": "user.change_password(password) — hashing delegated to model"
+    },
+    {
+      "function": "UsersRepository.create_user",
+      "file": "app/db/repositories/users.py",
+      "rule": "Password Hashing (Weak)",
+      "verdict": "fp",
+      "note": "user.change_password(password) — hashing delegated to model"
+    },
+    {
+      "function": "UsersRepository.create_user",
+      "file": "app/db/repositories/users.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "UsersRepository.create_user",
+      "file": "app/db/repositories/users.py",
+      "rule": "No Token Rotation After Privilege Change",
+      "verdict": "fp",
+      "note": "user.change_password(password) — hashing delegated to model"
+    },
+    {
+      "function": "UsersRepository.create_user",
+      "file": "app/db/repositories/users.py",
+      "rule": "Registration Without Email Verification",
+      "verdict": "unlabeled",
+      "note": "true but standard practice — soft"
+    },
+    {
+      "function": "UsersRepository.create_user",
+      "file": "app/db/repositories/users.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "UsersRepository.update_user",
+      "file": "app/db/repositories/users.py",
+      "rule": "No Token Rotation After Privilege Change",
+      "verdict": "fp",
+      "note": "framework delegation / DI auth invisible to call-name interface"
+    },
+    {
+      "function": "UsersRepository.update_user",
+      "file": "app/db/repositories/users.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "ArticlesRepository.create_article",
+      "file": "app/db/repositories/articles.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "ArticlesRepository.update_article",
+      "file": "app/db/repositories/articles.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "ArticlesRepository.delete_article",
+      "file": "app/db/repositories/articles.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "ArticlesRepository.filter_articles",
+      "file": "app/db/repositories/articles.py",
+      "rule": "No Input Sanitization",
+      "verdict": "unlabeled",
+      "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
+    },
+    {
+      "function": "ArticlesRepository.add_article_into_favorites",
+      "file": "app/db/repositories/articles.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "ArticlesRepository.remove_article_from_favorites",
+      "file": "app/db/repositories/articles.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "ProfilesRepository.add_user_into_followers",
+      "file": "app/db/repositories/profiles.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "ProfilesRepository.remove_user_from_followers",
+      "file": "app/db/repositories/profiles.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "CommentsRepository.create_comment_for_article",
+      "file": "app/db/repositories/comments.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "CommentsRepository.delete_comment",
+      "file": "app/db/repositories/comments.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "create_updated_at_trigger",
+      "file": "app/db/migrations/versions/fdf8821871d7_main_tables.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "create_updated_at_trigger",
+      "file": "app/db/migrations/versions/fdf8821871d7_main_tables.py",
+      "rule": "SQL Injection (Python)",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "create_users_table",
+      "file": "app/db/migrations/versions/fdf8821871d7_main_tables.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "create_users_table",
+      "file": "app/db/migrations/versions/fdf8821871d7_main_tables.py",
+      "rule": "SQL Injection (Python)",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "create_followers_to_followings_table",
+      "file": "app/db/migrations/versions/fdf8821871d7_main_tables.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "create_articles_table",
+      "file": "app/db/migrations/versions/fdf8821871d7_main_tables.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "create_articles_table",
+      "file": "app/db/migrations/versions/fdf8821871d7_main_tables.py",
+      "rule": "SQL Injection (Python)",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "create_tags_table",
+      "file": "app/db/migrations/versions/fdf8821871d7_main_tables.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "create_articles_to_tags_table",
+      "file": "app/db/migrations/versions/fdf8821871d7_main_tables.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "create_favorites_table",
+      "file": "app/db/migrations/versions/fdf8821871d7_main_tables.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "create_commentaries_table",
+      "file": "app/db/migrations/versions/fdf8821871d7_main_tables.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "create_commentaries_table",
+      "file": "app/db/migrations/versions/fdf8821871d7_main_tables.py",
+      "rule": "SQL Injection (Python)",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "upgrade",
+      "file": "app/db/migrations/versions/fdf8821871d7_main_tables.py",
+      "rule": "Input Validation",
+      "verdict": "unlabeled",
+      "note": "framework serializer/form validation invisible — soft"
+    },
+    {
+      "function": "downgrade",
+      "file": "app/db/migrations/versions/fdf8821871d7_main_tables.py",
+      "rule": "SQL Injection (Python)",
+      "verdict": "unlabeled",
+      "note": "not individually reviewed"
+    },
+    {
+      "function": "downgrade",
+      "file": "app/db/migrations/versions/fdf8821871d7_main_tables.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    },
+    {
+      "function": "UserInDB.change_password",
+      "file": "app/models/domain/users.py",
+      "rule": "No Token Rotation After Privilege Change",
+      "verdict": "fp",
+      "note": "framework delegation / DI auth invisible to call-name interface"
+    },
+    {
+      "function": "UserInDB.change_password",
+      "file": "app/models/domain/users.py",
+      "rule": "Data Mutation Without Audit Trail",
+      "verdict": "unlabeled",
+      "note": "audit logging absence — soft"
+    }
+  ]
+}
