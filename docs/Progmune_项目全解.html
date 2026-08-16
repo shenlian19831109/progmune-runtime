@@ -465,6 +465,8 @@ AI 生成: create_session(...)   ← 当前状态 UNAUTHENTICATED
   <ul>
     <li><strong>22 个协议检测器</strong>：TLS 握手、SSH 连接、HTTP 请求、支付处理、会话管理、文件上传、注册流程等</li>
     <li><strong>26 条防护规则（safeguard）</strong>：触发式检查——"如果出现了 X，就必须有 Y"。例：注册函数必须调用安全哈希（bcrypt/argon2）；管理操作必须检查角色；tRPC mutation 必须有 <code>.input()</code> 校验 schema</li>
+    <li><strong>15 条源码级检测规则（Python，2026-08 上线）</strong>：SQL 注入（f-string/%/.format/拼接，参数化写法正确放行）、SSRF（限定接收者的 HTTP 抓取 + request 污点追踪）、路径穿越（文件 sink + 污点）、XSS（跨文件：模板 <code>{{ var|safe }}</code> × 污点上下文绑定）、SSTI、XXE（解析器配置 + 污点双信号）、命令注入（仅动态命令参数）、反序列化、CSRF 双形态（<code>@csrf_exempt</code> / GET 状态变更）、eval 代码执行、硬编码 JWT 密钥（含跨模块常量）、cookie 授权、可预测重置令牌</li>
+    <li><strong>提取器标记架构</strong>：IR 提取器做源码级分析（污点追踪、import 解析、限定调用链、模板扫描、跨模块常量表）→ 合成标记 → 规则消费。零管道改动、完全可审计，已同步移植到 TS（ts-morph）提取器</li>
   </ul>
 
   <h3>5.4 API 语义映射：让检查认识"陌生函数"</h3>
@@ -501,12 +503,15 @@ AI 生成: create_session(...)   ← 当前状态 UNAUTHENTICATED
   <h3>5.7 基准测试：用数据证明能力</h3>
   <table>
     <tr><th>基准</th><th>方法</th><th>结果</th></tr>
-    <tr><td><strong>盲测基准</strong>（TypeScript）</td><td>10 个真实项目、432 个序列、gold 标注</td><td>精确率 <strong>86.8%</strong> · 召回率 <strong>83.6%</strong> · F1 <strong>85.2%</strong></td></tr>
+    <tr><td><strong>盲测基准</strong>（TypeScript，100 项目）</td><td>90 个合成风格变体 + 10 个模型变体项目、795 条 gold finding、严格定位匹配</td><td>精确率 <strong>100%</strong> · 召回率 <strong>98.5%</strong>（有效口径 100%）· 事实性误报 <strong>0</strong></td></tr>
+    <tr><td><strong>盲测基准</strong>（Python，90 项目）</td><td>90 个合成风格变体、729 条 gold finding</td><td>精确率 <strong>100%</strong> · 召回率 <strong>100%</strong> · 事实性误报 <strong>0</strong></td></tr>
+    <tr><td><strong>真实应用验证</strong>（PyGoat）</td><td>OWASP 故意脆弱 Django 应用、232 条检测逐条人工核实</td><td>标记精确率 <strong>100%</strong>（67 真阳性 / 0 误报）；覆盖 14 个漏洞类别</td></tr>
+    <tr><td><strong>良构应用</strong>（django/fastapi realworld、django-unicorn）</td><td>176 条检测</td><td>0 条误报真阳性；3 条框架内部边界 FP（已定性归档）</td></tr>
     <tr><td><strong>黄金基准</strong>（C 语言）</td><td>curl/libssh/nginx/openssl 等真实 CVE 案例</td><td>F1 16.5% —— <strong>研究阶段</strong>，诚实披露</td></tr>
     <tr><td><strong>PLSB v1.0</strong></td><td>13 类协议安全弱点、39 个手工验证缺陷案例</td><td>覆盖 <strong>13/13 全类别</strong>（业界唯一）</td></tr>
   </table>
   <div class="plain">
-    <strong>为什么披露 C 语言的低分？</strong>因为"诚实"是产品原则。一个只报告好消息的基准没有参考价值。TS 已生产可用、Python 规则开发中、C 为研究课题——能力边界清清楚楚。
+    <strong>为什么披露 C 语言的低分？</strong>因为"诚实"是产品原则。一个只报告好消息的基准没有参考价值。TS 与 Python 已生产可用、C 为研究课题——能力边界清清楚楚。所有基准均有 gold 标注文件入库，可复现。
   </div>
 </section>
 
@@ -528,21 +533,21 @@ AI 生成: create_session(...)   ← 当前状态 UNAUTHENTICATED
   <h3>6.2 语言与框架覆盖（诚实版）</h3>
   <table>
     <tr><th>能力</th><th>状态</th><th>说明</th></tr>
-    <tr><td>TypeScript / JavaScript</td><td><span style="color:var(--green);font-weight:700">✅ 生产</span></td><td>F1 85.2%，主战场</td></tr>
-    <tr><td>Python</td><td><span style="color:var(--amber);font-weight:700">⚠️ IR 就绪</span></td><td>代码提取可用，协议规则开发中（下一阶段优先）</td></tr>
+    <tr><td>TypeScript / JavaScript</td><td><span style="color:var(--green);font-weight:700">✅ 生产</span></td><td>盲测 100 项目：精确率 100%、召回率 98.5%</td></tr>
+    <tr><td>Python</td><td><span style="color:var(--green);font-weight:700">✅ 生产</span></td><td>盲测 90 项目：精确率/召回率双 100%；15 条源码级检测规则；PyGoat 真实验证 67 TP / 0 FP</td></tr>
     <tr><td>C</td><td><span style="color:var(--amber);font-weight:700">⚠️ 研究</span></td><td>F1 16.5%，瓶颈已定位（规则覆盖），L3 实验已终止</td></tr>
     <tr><td>Go / Java</td><td><span style="color:var(--ink-3)">❌ 未支持</span></td><td>路线图内</td></tr>
-    <tr><td>框架适配</td><td><span style="color:var(--amber);font-weight:700">2/13</span></td><td>Express ✅、tRPC ✅、NestJS 部分；Next.js 版本感知已实现</td></tr>
+    <tr><td>框架适配</td><td><span style="color:var(--amber);font-weight:700">2/13</span></td><td>Express ✅、tRPC ✅、NestJS 部分；Next.js 版本感知已实现；Django/FastAPI 经 Python 源码级检测间接覆盖</td></tr>
   </table>
 
   <h3>6.3 知识库规模</h3>
   <div class="stats">
     <div class="stat"><div class="n">148</div><div class="l">协议规则</div></div>
     <div class="stat"><div class="n">21</div><div class="l">协议命名空间全覆盖</div></div>
-    <div class="stat"><div class="n">22+26</div><div class="l">检测器 + 防护规则</div></div>
+    <div class="stat"><div class="n">22+26+15</div><div class="l">检测器 + 防护 + 源码级规则</div></div>
     <div class="stat"><div class="n">39</div><div class="l">黄金缺陷案例（人工验证）</div></div>
-    <div class="stat"><div class="n">19</div><div class="l">MCP 工具</div></div>
-    <div class="stat"><div class="n">71</div><div class="l">单元测试全部通过</div></div>
+    <div class="stat"><div class="n">190</div><div class="l">盲测项目（TS 100 + Python 90）</div></div>
+    <div class="stat"><div class="n">4</div><div class="l">真实应用验证仓库</div></div>
   </div>
 </section>
 
@@ -655,7 +660,7 @@ AI 生成: create_session(...)   ← 当前状态 UNAUTHENTICATED
     <tr><th>风险</th><th>等级</th><th>内容</th><th>缓解措施</th></tr>
     <tr><td><strong>市场教育成本</strong></td><td><span style="color:var(--red);font-weight:700">高</span></td><td>多数企业尚未意识到"AI 代码需要验证"这个问题本身</td><td>公开缺陷基准库、从受监管行业切入、开源社区自然教育</td></tr>
     <tr><td><strong>大厂竞争</strong></td><td><span style="color:var(--amber);font-weight:700">中</span></td><td>GitHub/Microsoft 可能内置类似功能</td><td>聚焦"验证层"差异化；大厂内置方案通常浅层；开源先发</td></tr>
-    <tr><td><strong>验证的边界性</strong></td><td><span style="color:var(--amber);font-weight:700">中</span></td><td>当前仅 TS 生产可用；协议规则不可能覆盖所有场景——存在漏检的可能</td><td>诚实披露置信度；数据飞轮持续补规则；规则来自真实 CVE 案例</td></tr>
+    <tr><td><strong>验证的边界性</strong></td><td><span style="color:var(--amber);font-weight:700">中</span></td><td>TS 与 Python 已生产可用；协议规则不可能覆盖所有场景——存在漏检的可能</td><td>诚实披露置信度；数据飞轮持续补规则；规则来自真实 CVE 案例</td></tr>
     <tr><td><strong>LLM 依赖</strong></td><td><span style="color:var(--green);font-weight:700">低</span></td><td>代码生成环节依赖底层模型能力</td><td>架构上模型无关；验证器本身不依赖任何 LLM；模型越强产品越有价值</td></tr>
     <tr><td><strong>商业化节奏</strong></td><td><span style="color:var(--amber);font-weight:700">中</span></td><td>开源到付费的转化路径需要时间验证；尚无企业 PoC</td><td>GitLab/Databricks 模式已成熟；优先做 2-3 个企业 PoC 验证 PMF</td></tr>
     <tr><td><strong>核心假说未验证</strong></td><td><span style="color:var(--amber);font-weight:700">中</span></td><td>"每个新代码库让所有验证更强"的知识网络假说尚无实证</td><td>以 Phase 2 的 PoC 数据为准；假说不成立也不影响单点验证的产品价值</td></tr>
@@ -672,9 +677,9 @@ AI 生成: create_session(...)   ← 当前状态 UNAUTHENTICATED
 
   <table>
     <tr><th>阶段</th><th>时间</th><th>目标</th><th>关键交付</th></tr>
-    <tr><td><strong>当前</strong></td><td>2026-08</td><td>Trust Foundation 完成</td><td>信任引擎 ✅、策略引擎 ✅、PLSB 13/13 ✅、tRPC/Express 适配 ✅、PrintLab 案例 ✅</td></tr>
+    <tr><td><strong>当前</strong></td><td>2026-08</td><td>Trust Foundation + 语言扩展完成</td><td>信任引擎 ✅、策略引擎 ✅、PLSB 13/13 ✅、tRPC/Express 适配 ✅、PrintLab 案例 ✅、<strong>Python 生产级 ✅（盲测双 100%、PyGoat 真实验证 0 误报）✅、15 条源码级检测规则 ✅、TS/Python 盲测 precision 100% ✅</strong></td></tr>
     <tr><td><strong>Phase 1 收官</strong></td><td>2026 Q3</td><td>可信度校准</td><td>已知风险项目上的 Score 校准、真实项目验收、Trust Report PDF</td></tr>
-    <tr><td><strong>Phase 2</strong></td><td>2026 Q4</td><td>语言扩展 + 企业验证</td><td>Python 完整支持、企业 PoC × 2-3、Evolution 追踪、CI/CD 门禁集成</td></tr>
+    <tr><td><strong>Phase 2</strong></td><td>2026 Q4</td><td>企业验证</td><td>企业 PoC × 2-3、Evolution 追踪、CI/CD 门禁集成、良构应用框架内部 FP 收尾（类属性建模）</td></tr>
     <tr><td><strong>Phase 3</strong></td><td>2027+</td><td>平台化</td><td>Go/Java、SaaS 仪表盘、公开基准排行榜、全球免疫网络、协议模板市场</td></tr>
   </table>
 </section>
@@ -694,7 +699,7 @@ AI 生成: create_session(...)   ← 当前状态 UNAUTHENTICATED
   <h3>为什么需要谨慎</h3>
   <ol>
     <li>企业 PoC 为零——PMF 未验证，商业化路径尚需数据</li>
-    <li>语言覆盖有限（当前仅 TS 生产可用）</li>
+    <li>语言覆盖有限（TS/Python 生产可用，Go/Java 未支持）</li>
     <li>"信任"类产品教育成本高，销售周期长</li>
     <li>大厂随时可能跟进（但架构先发 + 数据积累构成时间壁垒）</li>
   </ol>
