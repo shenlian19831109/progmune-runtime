@@ -328,7 +328,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
       // to the model (users_repo.create_user, self.create_user). Also
       // XForm(request.POST).save() — Django form validation + hashing
       // (extractor marker).
-      { pattern: /\.create_user\b|\.(change_password|set_password)\b|__progmune_django_form__/i, label: "framework_hashing" },
+      { pattern: /\.create_user\b|\.(change_password|set_password)\b|__progmune_django_form__|__progmune_template_tag__/i, label: "framework_hashing" },
     ],
     violationMessage: "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
     conceptMissing: ["PasswordHash", "KeyDerivation"],
@@ -342,7 +342,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     safeguards: [
       { pattern: /\b(bcrypt|argon2|scrypt|pbkdf2)\b/i, label: "strong_hash" },
       // Framework delegation (qualified chains only)
-      { pattern: /\.create_user\b|\.(change_password|set_password)\b|__progmune_django_form__/i, label: "framework_hashing" },
+      { pattern: /\.create_user\b|\.(change_password|set_password)\b|__progmune_django_form__|__progmune_template_tag__/i, label: "framework_hashing" },
     ],
     excludePatterns: [
       /register\.(simple_tag|tag|filter|inclusion_tag)/,  // Django template-tag registration
@@ -368,6 +368,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     safeguards: [
       { pattern: /\b(checkOwner|isOwner|ownerId\s*[!=]==?|authorId\s*[!=]==?|userId\s*[!=]==?|createdBy\s*[!=]==?|\.owner\s*[!=]==?|\.user\s*[!=]==?)\b/i, label: "ownership_check" },
       { pattern: /\b(hasPermission|checkPermission|checkAccess|isAuthorized|checkRole|requireRole|adminCheck|isAdmin|canModify|canDelete|canEdit)\b/i, label: "authz_check" },
+      { pattern: /\b(__progmune_ownership_checked__)\b/, label: "inline_ownership_check" },
     ],
     violationMessage: "Mutation operation does not verify that the acting user owns the resource or holds the required permission before modifying data.",
     conceptMissing: ["OwnershipCheck", "AuthorizationGuard"],
@@ -394,7 +395,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     paramGated: true,
     trigger: /\b(list|download|view|fetch)(?:[A-Z]\w*|_\w+)|get(?:[A-Z]\w+|_\w+)/i,
     safeguards: [
-      { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware|get_current_user_authorizer|current_user_authorizer|login_required|permission_required|user_passes_test|check_authorization|check_permission|jwt\.decode|decode_token|__progmune_auth_checked__|__progmune_credential_check__)\b/i, label: "auth_check" },
+      { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware|get_current_user_authorizer|current_user_authorizer|login_required|permission_required|user_passes_test|check_authorization|check_permission|jwt\.decode|decode_token|__progmune_auth_checked__|__progmune_credential_check__|__progmune_drf_permissions__|__progmune_auth_machinery__)\b/i, label: "auth_check" },
     ],
     violationMessage: "Data access function does not check authentication. Anyone can access data without credentials.",
     conceptMissing: ["AuthenticationCheck", "AccessControl"],
@@ -424,7 +425,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     // (listPosts/getPost/deletePost fire via identifier-parsed words).
     trigger: /\b(add|create|update|set|publish|insert|submit)(?:[A-Z]\w*|_\w+)|(?:[A-Z]\w*|_\w+)(Add|Create|Update|Set|Publish|Insert|Submit)\b/i,
     safeguards: [
-      { pattern: /\b(getUser|validateToken|verifyToken|verifySession|validateSession|getSessionUser|getSession\b|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware|get_current_user_authorizer|current_user_authorizer|login_required|permission_required|user_passes_test|check_authorization|check_permission|create_access_token|create_refresh_token|create_jwt_token|__progmune_auth_checked__|__progmune_credential_check__)\b/i, label: "auth_check" },
+      { pattern: /\b(getUser|validateToken|verifyToken|verifySession|validateSession|getSessionUser|getSession\b|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware|get_current_user_authorizer|current_user_authorizer|login_required|permission_required|user_passes_test|check_authorization|check_permission|create_access_token|create_refresh_token|create_jwt_token|__progmune_auth_checked__|__progmune_credential_check__|__progmune_drf_permissions__|__progmune_auth_machinery__)\b/i, label: "auth_check" },
     ],
     violationMessage: "Mutation function does not check authentication. Anyone can create or modify data without credentials.",
     conceptMissing: ["AuthenticationCheck", "AccessControl"],
@@ -516,7 +517,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
       // material is handled by that layer, not generated inline. NOTE: bare
       // jwt.encode is deliberately NOT here — a hardcoded secret key makes the
       // JWT layer itself the vulnerability (PyGoat sec_misconfig_lab3).
-      { pattern: /\b(create_access_token|create_refresh_token|create_jwt_token|\.check_password\b|get_current_user_authorizer|login_required|permission_required|__progmune_framework_auth__)\b/i, label: "framework_token" },
+      { pattern: /\b(create_access_token|create_refresh_token|create_jwt_token|\.check_password\b|get_current_user_authorizer|login_required|permission_required|__progmune_framework_auth__|__progmune_auth_machinery__)\b/i, label: "framework_token" },
     ],
     excludePatterns: [
       /login_not_required|login_required/,   // decorators — the auth layer itself
@@ -533,6 +534,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     trigger: /\b(toggle|remove)(?:[A-Z]\w*|_\w+)\b/i,
     safeguards: [
       { pattern: /\b(ownerId\s*[!=]==?|authorId\s*[!=]==?|userId\s*[!=]==?|createdBy|\.owner\s*[!=]==?)/i, label: "ownership_comparison" },
+      { pattern: /\b(__progmune_ownership_checked__)\b/, label: "inline_ownership_check" },
     ],
     violationMessage: "Resource mutation checks authentication but does NOT verify the resource belongs to the requesting user. Missing ownerId/authorId comparison.",
     conceptMissing: ["ResourceOwnership", "HorizontalAuthorization"],

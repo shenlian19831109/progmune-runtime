@@ -186,13 +186,37 @@ JSFuck variant relies on template structure not visible to this check). PyGoat
 labeled precision 72.2% → **75.0%** (TP 30 / FP 10). Zero noise in the 3
 well-written apps. Both synthetic benchmarks unchanged.
 
+## Framework-delegation FP polish on well-written apps (2026-08-16)
+
+Four extractor markers eliminated 16 of 19 app-corpus FPs:
+
+- **DRF class-attribute permissions**: methods of classes declaring
+  `permission_classes`/`authentication_classes` get a framework-guard marker —
+  the class-attribute visibility the call-name interface previously lacked
+- **Auth machinery**: methods of classes named `*Authenticat*`
+  (JWTAuthentication.authenticate) are the auth layer itself
+- **Template-tag decorators**: `@register.simple_tag/inclusion_tag/tag/filter`
+  registration functions no longer fire Password Hashing
+- **Inline ownership**: identity params compared with ==/!= (or per-user
+  boolean state properties like `.favorited`/`.following` in branch tests)
+  count as ownership checks — the inline-comparison limitation is lifted
+  for Python
+
+| Repo | FP before | FP after |
+|------|-----------|----------|
+| django-realworld | 11 | **0** |
+| fastapi-realworld | 4 | **0** |
+| django-unicorn | 5 | 3 (framework dispatch/cache internals — documented tier-2) |
+
+PyGoat unchanged (TP 67 / FP 0, precision 100%). Both synthetic benchmarks
+unchanged.
+
 ## Next steps
 
-1. Remaining FP classes (documented, tier-2): unqualified-import framework calls,
-   DRF class-attribute permissions, unicorn dispatch internals.
-2. Remaining zero-coverage classes: SSTI (template engine specific), XXE
-   (XML parser configuration), MITRE content labs — each needs a new signal
-   source; the extractor-marker pattern is the template for all of them.
+1. Remaining tier-2 FPs: unicorn dispatch/cache internals (3) — require
+   framework semantics, not worth modeling at this interface.
+2. TS-side inline-comparison FPs (7, in the TS blind benchmark) — the
+   ownership-checked marker ported to the ts-morph extractor would clear them.
 
 ## Next steps
 

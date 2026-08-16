@@ -3,35 +3,35 @@
   "annotated_by": "human review (Claude-assisted, 2026-08-16)",
   "version": "1.0",
   "summary": {
-    "total_detections": 193,
+    "total_detections": 176,
     "true_positives": 0,
-    "false_positives": 20,
+    "false_positives": 3,
     "unlabeled": 173,
     "labeled_precision": 0.0
   },
   "per_repo": {
     "django-realworld-example-app": {
       "functions_scanned": 58,
-      "functions_with_violations": 25,
-      "total_detections": 34,
+      "functions_with_violations": 20,
+      "total_detections": 23,
       "true_positives": 0,
-      "false_positives": 11,
+      "false_positives": 0,
       "unlabeled": 23
     },
     "django-unicorn": {
       "functions_scanned": 170,
       "functions_with_violations": 48,
-      "total_detections": 63,
+      "total_detections": 61,
       "true_positives": 0,
-      "false_positives": 5,
+      "false_positives": 3,
       "unlabeled": 58
     },
     "fastapi-realworld-example-app": {
       "functions_scanned": 95,
       "functions_with_violations": 53,
-      "total_detections": 96,
+      "total_detections": 92,
       "true_positives": 0,
-      "false_positives": 4,
+      "false_positives": 0,
       "unlabeled": 92
     }
   },
@@ -72,34 +72,6 @@
       "note": "framework serializer/form validation invisible — soft"
     },
     {
-      "function": "ArticleViewSet.list",
-      "file": "conduit/apps/articles/views.py",
-      "rule": "Authorization (Unauthenticated Access)",
-      "verdict": "fp",
-      "note": "DRF permission_classes=(IsAuthenticatedOrReadOnly,) — public reads by RealWorld spec"
-    },
-    {
-      "function": "ArticleViewSet.list",
-      "file": "conduit/apps/articles/views.py",
-      "rule": "Authorization (Unauthenticated Mutation)",
-      "verdict": "fp",
-      "note": "DRF permission_classes=(IsAuthenticatedOrReadOnly,) — public reads by RealWorld spec"
-    },
-    {
-      "function": "ArticleViewSet.retrieve",
-      "file": "conduit/apps/articles/views.py",
-      "rule": "Authorization (Unauthenticated Mutation)",
-      "verdict": "fp",
-      "note": "framework delegation / DI auth invisible to call-name interface"
-    },
-    {
-      "function": "ArticleViewSet.update",
-      "file": "conduit/apps/articles/views.py",
-      "rule": "Authorization (Unauthenticated Mutation)",
-      "verdict": "fp",
-      "note": "framework delegation / DI auth invisible to call-name interface"
-    },
-    {
       "function": "ArticleViewSet.update",
       "file": "conduit/apps/articles/views.py",
       "rule": "Data Mutation Without Audit Trail",
@@ -121,34 +93,6 @@
       "note": "audit logging absence — soft"
     },
     {
-      "function": "TagListAPIView.list",
-      "file": "conduit/apps/articles/views.py",
-      "rule": "Authorization (Unauthenticated Access)",
-      "verdict": "fp",
-      "note": "public tags endpoint — AllowAny by design"
-    },
-    {
-      "function": "TagListAPIView.list",
-      "file": "conduit/apps/articles/views.py",
-      "rule": "Authorization (Unauthenticated Mutation)",
-      "verdict": "fp",
-      "note": "public tags endpoint — AllowAny by design"
-    },
-    {
-      "function": "ArticlesFeedAPIView.list",
-      "file": "conduit/apps/articles/views.py",
-      "rule": "Authorization (Unauthenticated Access)",
-      "verdict": "fp",
-      "note": "feed requires auth via DRF permission_classes"
-    },
-    {
-      "function": "ArticlesFeedAPIView.list",
-      "file": "conduit/apps/articles/views.py",
-      "rule": "Authorization (Unauthenticated Mutation)",
-      "verdict": "fp",
-      "note": "feed requires auth via DRF permission_classes"
-    },
-    {
       "function": "Profile.unfollow",
       "file": "conduit/apps/profiles/models.py",
       "rule": "Data Mutation Without Audit Trail",
@@ -161,13 +105,6 @@
       "rule": "Data Mutation Without Audit Trail",
       "verdict": "unlabeled",
       "note": "audit logging absence — soft"
-    },
-    {
-      "function": "ProfileRetrieveAPIView.retrieve",
-      "file": "conduit/apps/profiles/views.py",
-      "rule": "Authorization (Unauthenticated Mutation)",
-      "verdict": "fp",
-      "note": "framework delegation / DI auth invisible to call-name interface"
     },
     {
       "function": "ProfileFollowAPIView.delete",
@@ -228,13 +165,6 @@
     {
       "function": "LoginSerializer.validate",
       "file": "conduit/apps/authentication/serializers.py",
-      "rule": "Token Security (Weak Generation)",
-      "verdict": "fp",
-      "note": "framework delegation / DI auth invisible to call-name interface"
-    },
-    {
-      "function": "LoginSerializer.validate",
-      "file": "conduit/apps/authentication/serializers.py",
       "rule": "Session No Timeout",
       "verdict": "unlabeled",
       "note": "framework session defaults have expiry"
@@ -252,13 +182,6 @@
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
-    },
-    {
-      "function": "JWTAuthentication.authenticate",
-      "file": "conduit/apps/authentication/backends.py",
-      "rule": "Token Security (Weak Generation)",
-      "verdict": "fp",
-      "note": "framework delegation / DI auth invisible to call-name interface"
     },
     {
       "function": "JWTAuthentication.authenticate",
@@ -333,23 +256,9 @@
     {
       "function": "unicorn_scripts",
       "file": "src/django_unicorn/templatetags/unicorn.py",
-      "rule": "Password Hashing",
-      "verdict": "fp",
-      "note": "framework delegation / DI auth invisible to call-name interface"
-    },
-    {
-      "function": "unicorn_scripts",
-      "file": "src/django_unicorn/templatetags/unicorn.py",
       "rule": "Registration Without Email Verification",
       "verdict": "unlabeled",
       "note": "true but standard practice — soft"
-    },
-    {
-      "function": "unicorn_errors",
-      "file": "src/django_unicorn/templatetags/unicorn.py",
-      "rule": "Password Hashing",
-      "verdict": "fp",
-      "note": "framework delegation / DI auth invisible to call-name interface"
     },
     {
       "function": "unicorn_errors",
@@ -956,20 +865,6 @@
     {
       "function": "unsubscribe_from_user",
       "file": "app/api/routes/profiles.py",
-      "rule": "Authorization (Ownership Check)",
-      "verdict": "fp",
-      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
-    },
-    {
-      "function": "unsubscribe_from_user",
-      "file": "app/api/routes/profiles.py",
-      "rule": "Authorization (Resource Ownership)",
-      "verdict": "fp",
-      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
-    },
-    {
-      "function": "unsubscribe_from_user",
-      "file": "app/api/routes/profiles.py",
       "rule": "Rate Limiting",
       "verdict": "unlabeled",
       "note": "not individually reviewed"
@@ -1169,20 +1064,6 @@
       "rule": "API Without Rate Limiting",
       "verdict": "unlabeled",
       "note": "not individually reviewed"
-    },
-    {
-      "function": "remove_article_from_favorites",
-      "file": "app/api/routes/articles/articles_common.py",
-      "rule": "Authorization (Ownership Check)",
-      "verdict": "fp",
-      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
-    },
-    {
-      "function": "remove_article_from_favorites",
-      "file": "app/api/routes/articles/articles_common.py",
-      "rule": "Authorization (Resource Ownership)",
-      "verdict": "fp",
-      "note": "Depends(get_current_user_authorizer()) — FastAPI DI auth"
     },
     {
       "function": "remove_article_from_favorites",

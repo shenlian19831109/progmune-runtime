@@ -672,6 +672,60 @@ def has_cookie_authorization(node):
     return False
 
 
+TEMPLATE_TAG_MARKER = "__progmune_template_tag__"
+OWNERSHIP_CHECKED_MARKER = "__progmune_ownership_checked__"
+
+
+def has_template_tag_decorator(node):
+    """@register.simple_tag / @register.inclusion_tag / @register.tag /
+    @register.filter — Django template-tag registration functions."""
+    for dec in getattr(node, 'decorator_list', []):
+        if isinstance(dec, ast.Call):
+            fn = dec.func
+            name = fn.attr if isinstance(fn, ast.Attribute) else \
+                (fn.id if isinstance(fn, ast.Name) else None)
+            if name in ("simple_tag", "inclusion_tag", "tag", "filter"):
+                return True
+        elif isinstance(dec, ast.Attribute) and dec.attr in ("simple_tag", "inclusion_tag", "tag", "filter"):
+            return True
+    return False
+
+
+def has_ownership_checked(node):
+    """Inline ownership comparison: an identity-named parameter (user,
+    current_user, profile, author, owner) compared with ==/!= against another
+    expression — the ownership check the call-name interface cannot see."""
+    args = node.args
+    param_names = {a.arg for a in args.args + args.posonlyargs + args.kwonlyargs}
+    identity = {p for p in param_names
+                if re.search(r'^(user|current_user|profile|author|owner|request_user)$', p, re.I)}
+    if not identity:
+        return False
+
+    def refs_param(n, names, depth=0):
+        if depth > 2:
+            return False
+        if isinstance(n, ast.Name):
+            return n.id in names
+        if isinstance(n, ast.Attribute):
+            return refs_param(n.value, names, depth + 1)
+        return False
+
+    for child in ast.walk(node):
+        if isinstance(child, ast.Compare) and len(child.ops) == 1 \
+                and isinstance(child.ops[0], (ast.Eq, ast.NotEq)):
+            sides = [child.left] + list(child.comparators)
+            if any(refs_param(s, identity) for s in sides):
+                return True
+        # Per-user boolean state properties in branch tests — ownership
+        # checked through the data model (article.favorited, profile.following)
+        if isinstance(child, ast.If) \
+                and re.search(r'\.(favorited|following|is_owner|owned_by|can_edit|can_delete)\b',
+                              ast.unparse(child.test)):
+            return True
+    return False
+
+
 def has_xss(node, unsafe_vars=None):
     """XSS check: a render/render_to_string call binds tainted request-derived
     values into template variables that the template renders without escaping
@@ -803,6 +857,10 @@ def extract_calls(node, unsafe_vars=None, imports=None, module_constants=None, g
         calls.append(SECRET_MARKER)
     if has_cookie_authorization(node) and COOKIE_AUTH_MARKER not in calls:
         calls.append(COOKIE_AUTH_MARKER)
+    if has_template_tag_decorator(node) and TEMPLATE_TAG_MARKER not in calls:
+        calls.append(TEMPLATE_TAG_MARKER)
+    if has_ownership_checked(node) and OWNERSHIP_CHECKED_MARKER not in calls:
+        calls.append(OWNERSHIP_CHECKED_MARKER)
     if has_command_taint_flow(node) and CMD_FLOW_MARKER not in calls:
         calls.append(CMD_FLOW_MARKER)
     if has_csrf_exempt(node) and CSRF_MARKER not in calls:
@@ -927,6 +985,19 @@ def extract_functions_from_file(filepath: str, root_dir: str, unsafe_vars=None, 
     imports = build_import_map(tree)
     module_constants = build_module_constants(tree)
 
+    # Classes declaring DRF permission/authentication class attributes
+    # (permission_classes = (...)) — their methods are framework-guarded.
+    drf_permission_classes = set()
+    for cls in ast.walk(tree):
+        if not isinstance(cls, ast.ClassDef):
+            continue
+        for stmt in cls.body:
+            if isinstance(stmt, ast.Assign):
+                for t in stmt.targets:
+                    if isinstance(t, ast.Name) and t.id in (
+                            "permission_classes", "authentication_classes"):
+                        drf_permission_classes.add(cls.name)
+
     # Single-pass parent map (O(n)). The old per-node full-tree walk was O(n²)
     # and hung on large real-world files (e.g. fastapi's bigger modules).
     parent_map = {}
@@ -958,6 +1029,14 @@ def extract_functions_from_file(filepath: str, root_dir: str, unsafe_vars=None, 
 
             return_type = get_annotation(node.returns) if node.returns else "any"
             calls = extract_calls(node, unsafe_vars, imports, module_constants, global_constants)
+            # Class-level framework guards: DRF permission classes, auth machinery
+            if parent_class:
+                if parent_class in drf_permission_classes \
+                        and "__progmune_drf_permissions__" not in calls:
+                    calls = calls + ["__progmune_drf_permissions__"]
+                if re.search(r'authenticat', parent_class, re.I) \
+                        and "__progmune_auth_machinery__" not in calls:
+                    calls = calls + ["__progmune_auth_machinery__"]
             exported = is_exported(name, parent_class)
             protocol = extract_protocol_from_decorators(node)
             doc_meta = extract_docstring_meta(node)
