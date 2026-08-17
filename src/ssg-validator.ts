@@ -24,6 +24,9 @@ export interface SSGRejection {
   missingFunctions: string[];
   fixPath: string[];
   namespace: string;
+  /** End-of-sequence rejection (held resource not released) — the repair
+   *  appends the release function instead of inserting before a blocked call. */
+  endState?: boolean;
 }
 
 export interface SSGStepResult {
