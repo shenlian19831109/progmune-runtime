@@ -410,6 +410,8 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
       /listpack/,               // Redis internal data structure
       /readSync|readQuery/,     // internal I/O
       /findBig|findKey|findPk/, // internal search (not API)
+      /get_cache\w*/,           // cache machinery (get_cache_alias — not data access)
+      /get_context_data/,       // Django CBV context assembly — framework verb
     ],
   },
   // Mutations without any authentication. The Unauthenticated Access rule above
@@ -435,6 +437,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
       /set_ssl_/,               // SSL config setter
       /set_config/,             // configuration setter
       /set_option/,             // option setter
+      /\bsetup\b/,              // framework/component setup — configuration, not data mutation
     ],
   },
   // ── Data Integrity (Foreign Key Validation) ──

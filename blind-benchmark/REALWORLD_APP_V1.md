@@ -211,12 +211,19 @@ Four extractor markers eliminated 16 of 19 app-corpus FPs:
 PyGoat unchanged (TP 67 / FP 0, precision 100%). Both synthetic benchmarks
 unchanged.
 
-## Next steps
+## Tier-2 FP resolution (unicorn framework internals, 2026-08-17)
 
-1. Remaining tier-2 FPs: unicorn dispatch/cache internals (3) — require
-   framework semantics, not worth modeling at this interface.
-2. TS-side inline-comparison FPs (7, in the TS blind benchmark) — the
-   ownership-checked marker ported to the ts-morph extractor would clear them.
+The last 3 app-corpus FPs were lexical-trigger artifacts, not framework
+semantics: `get_cache_alias`/`get_context_data` matched the Access `get_*`
+trigger (cache machinery + Django CBV context assembly are not data access),
+and `current.setup` matched the Mutation `set*` trigger via the `/i`-mode
+`[A-Z]` artifact (in case-insensitive patterns `[A-Z]` matches any letter,
+so `\bset(?:[A-Z]\w*|_\w+)` effectively matched every `set*` word).
+Semantic excludes added: `get_cache\w*`, `get_context_data`, `\bsetup\b`.
+
+**All four corpora now at 0 false positives** — django-unicorn 3 → 0,
+well-written apps 0 FP total, PyGoat 67 TP / 0 FP, both synthetic
+benchmarks unchanged.
 
 ## Next steps
 

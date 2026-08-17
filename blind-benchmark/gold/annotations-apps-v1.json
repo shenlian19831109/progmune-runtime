@@ -3,11 +3,11 @@
   "annotated_by": "human review (Claude-assisted, 2026-08-16)",
   "version": "1.0",
   "summary": {
-    "total_detections": 176,
+    "total_detections": 173,
     "true_positives": 0,
-    "false_positives": 3,
+    "false_positives": 0,
     "unlabeled": 173,
-    "labeled_precision": 0.0
+    "labeled_precision": 0
   },
   "per_repo": {
     "django-realworld-example-app": {
@@ -21,9 +21,9 @@
     "django-unicorn": {
       "functions_scanned": 170,
       "functions_with_violations": 48,
-      "total_detections": 61,
+      "total_detections": 58,
       "true_positives": 0,
-      "false_positives": 3,
+      "false_positives": 0,
       "unlabeled": 58
     },
     "fastapi-realworld-example-app": {
@@ -207,20 +207,6 @@
     {
       "function": "restore_from_cache",
       "file": "src/django_unicorn/cacher.py",
-      "rule": "Authorization (Unauthenticated Access)",
-      "verdict": "fp",
-      "note": "internal cache helper — not an endpoint"
-    },
-    {
-      "function": "restore_from_cache",
-      "file": "src/django_unicorn/cacher.py",
-      "rule": "Authorization (Unauthenticated Mutation)",
-      "verdict": "fp",
-      "note": "internal cache helper — not an endpoint"
-    },
-    {
-      "function": "restore_from_cache",
-      "file": "src/django_unicorn/cacher.py",
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
@@ -350,13 +336,6 @@
       "rule": "No Input Sanitization",
       "verdict": "unlabeled",
       "note": "Django/Starlette autoescape; template-level rendering invisible to the interface"
-    },
-    {
-      "function": "Component.dispatch",
-      "file": "src/django_unicorn/components/unicorn_view.py",
-      "rule": "Authorization (Unauthenticated Access)",
-      "verdict": "fp",
-      "note": "framework dispatch with its own component-level authorization"
     },
     {
       "function": "Component.dispatch",
