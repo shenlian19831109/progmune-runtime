@@ -7,7 +7,7 @@
 [![TS Benchmark](https://img.shields.io/badge/TS%20R98.5%25%20P100%25-22c55e)]()
 [![Python Benchmark](https://img.shields.io/badge/Python%20R100%25%20P100%25-22c55e)]()
 
-> [中文版](README.zh-CN.md) · English Version
+> [中文版](https://github.com/shenlian19831109/progmune-runtime/blob/main/README.zh-CN.md) · English Version
 
 **Verify AI-generated code before it reaches production.** Progmune checks whether your AI-generated code follows correct protocol lifecycles — TLS handshakes, auth flows, payment integrity, resource management — violations that SAST and SCA tools cannot see because they span sequences of function calls, not single statements.
 
@@ -91,7 +91,7 @@ Progmune's output is a **decision** backed by evidence, not a raw list of findin
 
 **Critical violations → hard BLOCK regardless of score.** Enterprises care about "can I deploy?" not "is my score 58 or 61."
 
-→ [Trust Decision Model](docs/ai-trust-decision-model-v1.md)
+→ [Trust Decision Model](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/ai-trust-decision-model-v1.md)
 
 ---
 
@@ -103,7 +103,7 @@ Progmune is honest about what it can and cannot verify.
 |----------|--------|----------|
 | **TypeScript / JavaScript** | ✅ Production | Blind benchmark: **recall 98.5% / precision 100%** (795 gold findings, 100 projects) |
 | **Python** | ✅ Production | Blind benchmark: **recall 100% / precision 100%** (729 gold findings, 90 projects); real-world validation: PyGoat (OWASP vulnerable-by-design Django app) **67 TP / 0 FP, 100% labeled precision**; three well-written apps (django/fastapi realworld, django-unicorn) with 0 false-positive true findings |
-| **C** | ⚠️ Research-only | Gold benchmark F1=16.5%. L3 cross-function experiment terminated; L4 not planned. See [C Language Status](docs/c-language-status.md). |
+| **C** | ⚠️ Research-only | Gold benchmark F1=16.5%. L3 cross-function experiment terminated; L4 not planned. See [C Language Status](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md). |
 | **Go, Java** | ❌ None | Planned |
 
 **Framework adapters: 2/13.** Express ✅ and tRPC ✅ have dedicated detectors; Next.js has version-aware governance; NestJS is partial. Django, FastAPI and 8 more remain — framework adaptation is the #1 product gap.
@@ -116,7 +116,7 @@ Progmune is honest about what it can and cannot verify.
 - **Framework internals** — well-known framework dispatch/cache machinery (e.g. django-unicorn internals) can produce a small number of boundary false positives; they are documented per-corpus in the benchmark gold files.
 - **Known failure boundaries are documented** rather than hidden: if Progmune cannot verify a language (e.g. Go), Confidence is lowered instead of pretending 100%.
 
-→ [Full Coverage Matrix](docs/coverage-matrix.md)
+→ [Full Coverage Matrix](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix.md)
 
 ---
 
@@ -148,11 +148,11 @@ Public, reproducible precision data. All numbers measured against gold-annotated
 | Classes covered | 14 vulnerability classes incl. SQLi, SSRF, path traversal, XSS, SSTI, XXE, command injection, deserialization, CSRF (both shapes), cookie authorization, hardcoded secrets |
 | Well-written apps | django-realworld, fastapi-realworld, django-unicorn — 0 false-positive true findings; 3 documented framework-internal boundary FPs |
 
-→ [Real-world validation report](blind-benchmark/REALWORLD_APP_V1.md) · [Benchmark baseline](blind-benchmark/BASELINE_v6.md)
+→ [Real-world validation report](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/REALWORLD_APP_V1.md) · [Benchmark baseline](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/BASELINE_v6.md)
 
 ### C (Gold Benchmark — research status)
 
-C analysis is **research-only**: gold benchmark F1=16.5% across 4 repos (curl, libssh, nginx, openssl). The bottleneck is rule coverage, not context. L3 (cross-function) was terminated with data; L4 (pointer/CFG) is a multi-year research problem and not planned. See [C Language Status](docs/c-language-status.md) for the full picture and reasoning.
+C analysis is **research-only**: gold benchmark F1=16.5% across 4 repos (curl, libssh, nginx, openssl). The bottleneck is rule coverage, not context. L3 (cross-function) was terminated with data; L4 (pointer/CFG) is a multi-year research problem and not planned. See [C Language Status](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md) for the full picture and reasoning.
 
 ### P0-P3 Rule Injection (2026-08)
 
@@ -160,7 +160,7 @@ C analysis is **research-only**: gold benchmark F1=16.5% across 4 repos (curl, l
 - Bootstrapping deadlock broken: all 21 protocol namespaces now have rule vocabulary
 - `excludePatterns` + `languages` architecture for FP management
 
-→ [Two-Hump Report](docs/two-hump-report.md) · [P0-P3 Final Report](docs/p0-p3-final-report.md)
+→ [Two-Hump Report](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/two-hump-report.md) · [P0-P3 Final Report](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/p0-p3-final-report.md)
 
 ---
 
@@ -195,15 +195,15 @@ SDK (src/sdk.ts)           verify() → APPROVED / NEEDS_REVIEW / BLOCKED
 
 Progmune is built on the premise that **LLM outputs are statistical performances, not reasoning** — a view developed by Subbarao Kambhampati et al. in the position paper ["Stop Anthropomorphizing Intermediate Tokens as Reasoning/Thinking Traces!"](https://arxiv.org/abs/2505.22285) (arXiv:2505.22285, 2025) and elaborated in his ICML 2026 talk "On the Role of Verifiers and Thinking Traces in Reasoning Models". Rather than trusting what the model says about code, Progmune verifies what the program actually does — using protocol state machines, IR extraction, and evidence-backed decision chains.
 
-Coverage-gap analysis borrows the "two-hump problem" terminology **as a cross-domain analogy** from Sergei Gukov's work in mathematical physics (the Andrews-Curtis conjecture in group theory, 2026) — it describes a bimodal coverage distribution, not a collaboration. See [Two-Hump Report](docs/two-hump-report.md) for the full methodology.
+Coverage-gap analysis borrows the "two-hump problem" terminology **as a cross-domain analogy** from Sergei Gukov's work in mathematical physics (the Andrews-Curtis conjecture in group theory, 2026) — it describes a bimodal coverage distribution, not a collaboration. See [Two-Hump Report](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/two-hump-report.md) for the full methodology.
 
-→ [Investor Whitepaper](docs/Progmune_投资人白皮书_v2.0.html) · [Trust Decision Model](docs/ai-trust-decision-model-v1.md)
+→ [Investor Whitepaper](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/Progmune_投资人白皮书_v2.0.html) · [Trust Decision Model](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/ai-trust-decision-model-v1.md)
 
 ---
 
 ## Contributing
 
-See [CLAUDE.md](CLAUDE.md) for architecture and code conventions, and [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow.
+See [CLAUDE.md](https://github.com/shenlian19831109/progmune-runtime/blob/main/CLAUDE.md) for architecture and code conventions, and [CONTRIBUTING.md](https://github.com/shenlian19831109/progmune-runtime/blob/main/CONTRIBUTING.md) for the development workflow.
 
 High-impact contribution areas:
 - **Framework adapters** (Express, Next.js, FastAPI) — the #1 product gap
@@ -226,4 +226,4 @@ High-impact contribution areas:
 
 ## License
 
-MIT — [LICENSE](LICENSE)
+MIT — [LICENSE](https://github.com/shenlian19831109/progmune-runtime/blob/main/LICENSE)

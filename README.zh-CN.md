@@ -7,7 +7,7 @@
 [![TS Benchmark](https://img.shields.io/badge/TS%20R98.5%25%20P100%25-22c55e)]()
 [![Python Benchmark](https://img.shields.io/badge/Python%20R100%25%20P100%25-22c55e)]()
 
-> [English Version](README.md) · 中文版
+> [English Version](https://github.com/shenlian19831109/progmune-runtime/blob/main/README.md) · 中文版
 
 **在 AI 生成的代码进入生产前验证它。** Progmune 检查你的 AI 生成代码是否遵循正确的协议生命周期——TLS 握手、认证流程、支付完整性、资源管理——这些违规横跨**函数调用序列**而非单条语句，SAST 和 SCA 工具都看不见。
 
@@ -91,7 +91,7 @@ Progmune 的输出是**有证据支撑的决策**，不是原始发现列表：
 
 **严重违规 → 无论评分多少一律硬 BLOCK。** 企业关心的是"能不能上线"，不是"我的评分是 58 还是 61"。
 
-→ [信任决策模型](docs/ai-trust-decision-model-v1.md)
+→ [信任决策模型](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/ai-trust-decision-model-v1.md)
 
 ---
 
@@ -103,7 +103,7 @@ Progmune 对能验证什么、不能验证什么保持诚实。
 |------|------|------|
 | **TypeScript / JavaScript** | ✅ 生产 | 盲测基准：**召回 98.5% / 精确率 100%**（795 条 gold finding，100 个项目） |
 | **Python** | ✅ 生产 | 盲测基准：**召回 100% / 精确率 100%**（729 条 gold finding，90 个项目）；真实应用验证：PyGoat（OWASP 故意脆弱 Django 应用）**67 TP / 0 FP，标记精确率 100%**；三个良构应用（django/fastapi realworld、django-unicorn）0 误报真阳性 |
-| **C** | ⚠️ 仅研究 | 黄金基准 F1=16.5%。L3 跨函数实验已终止；L4 无计划。见 [C 语言状态](docs/c-language-status.md)。 |
+| **C** | ⚠️ 仅研究 | 黄金基准 F1=16.5%。L3 跨函数实验已终止；L4 无计划。见 [C 语言状态](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md)。 |
 | **Go, Java** | ❌ 无 | 规划中 |
 
 **框架适配器：2/13。** Express ✅ 与 tRPC ✅ 有专用检测器；Next.js 有版本感知治理；NestJS 部分支持。Django、FastAPI 及另外 8 个待适配——框架适配是 #1 产品缺口。
@@ -116,7 +116,7 @@ Progmune 对能验证什么、不能验证什么保持诚实。
 - **框架内部件**——知名框架的分发/缓存机制（如 django-unicorn 内部件）可能产生少量边界误报；各语料基准 gold 文件中已逐条记录。
 - **已知失败边界一律记录**而非隐藏：如果 Progmune 无法验证某语言（如 Go），置信度会降低而不是假装 100%。
 
-→ [完整覆盖矩阵](docs/coverage-matrix.md)
+→ [完整覆盖矩阵](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix.md)
 
 ---
 
@@ -148,11 +148,11 @@ Progmune 对能验证什么、不能验证什么保持诚实。
 | 覆盖类别 | 14 个漏洞类别，含 SQLi、SSRF、路径穿越、XSS、SSTI、XXE、命令注入、反序列化、CSRF（双形态）、cookie 授权、硬编码密钥 |
 | 良构应用 | django-realworld、fastapi-realworld、django-unicorn——0 误报真阳性 |
 
-→ [真实验证报告](blind-benchmark/REALWORLD_APP_V1.md) · [基准基线](blind-benchmark/BASELINE_v6.md)
+→ [真实验证报告](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/REALWORLD_APP_V1.md) · [基准基线](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/BASELINE_v6.md)
 
 ### C（黄金基准——研究状态）
 
-C 分析**仅研究**：黄金基准 F1=16.5%，覆盖 4 个仓库（curl、libssh、nginx、openssl）。瓶颈是规则覆盖而非上下文。L3（跨函数）已带数据终止；L4（指针/CFG）是多年研究问题，无计划。详见 [C 语言状态](docs/c-language-status.md)。
+C 分析**仅研究**：黄金基准 F1=16.5%，覆盖 4 个仓库（curl、libssh、nginx、openssl）。瓶颈是规则覆盖而非上下文。L3（跨函数）已带数据终止；L4（指针/CFG）是多年研究问题，无计划。详见 [C 语言状态](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md)。
 
 ### P0-P3 规则注入（2026-08）
 
@@ -160,7 +160,7 @@ C 分析**仅研究**：黄金基准 F1=16.5%，覆盖 4 个仓库（curl、libs
 - 打破引导死锁：全部 21 个协议命名空间已有规则词汇
 - `excludePatterns` + `languages` 架构管理误报
 
-→ [双峰报告](docs/two-hump-report.md) · [P0-P3 终报](docs/p0-p3-final-report.md)
+→ [双峰报告](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/two-hump-report.md) · [P0-P3 终报](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/p0-p3-final-report.md)
 
 ---
 
@@ -194,15 +194,15 @@ SDK (src/sdk.ts)           verify() → APPROVED / NEEDS_REVIEW / BLOCKED
 
 Progmune 建立在"**LLM 输出是统计表演而非推理**"这一前提上——该观点源自 Subbarao Kambhampati 等人的立场论文 ["Stop Anthropomorphizing Intermediate Tokens as Reasoning/Thinking Traces!"](https://arxiv.org/abs/2505.22285)（arXiv:2505.22285，2025），并在其 ICML 2026 演讲 "On the Role of Verifiers and Thinking Traces in Reasoning Models" 中展开。Progmune 不信任模型对代码的说法，而是用协议状态机、IR 提取与证据链验证程序实际行为。
 
-覆盖缺口分析借用"双峰问题"术语作为**跨域类比**，源自 Sergei Gukov 在数学物理领域的工作（群论中的 Andrews-Curtis 猜想，2026）——它描述的是双峰覆盖分布，而非合作关系。详见 [双峰报告](docs/two-hump-report.md)。
+覆盖缺口分析借用"双峰问题"术语作为**跨域类比**，源自 Sergei Gukov 在数学物理领域的工作（群论中的 Andrews-Curtis 猜想，2026）——它描述的是双峰覆盖分布，而非合作关系。详见 [双峰报告](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/two-hump-report.md)。
 
-→ [投资人白皮书](docs/Progmune_投资人白皮书_v2.0.html) · [信任决策模型](docs/ai-trust-decision-model-v1.md)
+→ [投资人白皮书](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/Progmune_投资人白皮书_v2.0.html) · [信任决策模型](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/ai-trust-decision-model-v1.md)
 
 ---
 
 ## 贡献
 
-架构与代码规范见 [CLAUDE.md](CLAUDE.md)，开发流程见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+架构与代码规范见 [CLAUDE.md](https://github.com/shenlian19831109/progmune-runtime/blob/main/CLAUDE.md)，开发流程见 [CONTRIBUTING.md](https://github.com/shenlian19831109/progmune-runtime/blob/main/CONTRIBUTING.md)。
 
 高价值贡献方向：
 - **框架适配器**（Express、Next.js、FastAPI）——#1 产品缺口
@@ -225,4 +225,4 @@ Progmune 建立在"**LLM 输出是统计表演而非推理**"这一前提上—�
 
 ## License
 
-MIT — [LICENSE](LICENSE)
+MIT — [LICENSE](https://github.com/shenlian19831109/progmune-runtime/blob/main/LICENSE)
