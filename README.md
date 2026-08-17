@@ -7,6 +7,8 @@
 [![TS Benchmark](https://img.shields.io/badge/TS%20R98.5%25%20P100%25-22c55e)]()
 [![Python Benchmark](https://img.shields.io/badge/Python%20R100%25%20P100%25-22c55e)]()
 
+> [中文版](README.zh-CN.md) · English Version
+
 **Verify AI-generated code before it reaches production.** Progmune checks whether your AI-generated code follows correct protocol lifecycles — TLS handshakes, auth flows, payment integrity, resource management — violations that SAST and SCA tools cannot see because they span sequences of function calls, not single statements.
 
 Progmune doesn't trust what the model says. It verifies what the program actually does.

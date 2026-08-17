@@ -1,0 +1,228 @@
+# Progmune
+
+## AI 生成代码的信任决策引擎
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![MCP](https://img.shields.io/badge/MCP-Compatible-blue)](https://modelcontextprotocol.io)
+[![TS Benchmark](https://img.shields.io/badge/TS%20R98.5%25%20P100%25-22c55e)]()
+[![Python Benchmark](https://img.shields.io/badge/Python%20R100%25%20P100%25-22c55e)]()
+
+> [English Version](README.md) · 中文版
+
+**在 AI 生成的代码进入生产前验证它。** Progmune 检查你的 AI 生成代码是否遵循正确的协议生命周期——TLS 握手、认证流程、支付完整性、资源管理——这些违规横跨**函数调用序列**而非单条语句，SAST 和 SCA 工具都看不见。
+
+Progmune 不信任模型说的话，它验证程序实际做的事。
+
+---
+
+## 一条命令
+
+```bash
+npm run sdk src/server.ts --explain
+```
+
+输出：`APPROVED` / `NEEDS_REVIEW` / `BLOCKED`——附信任评分、证据与修复建议。
+
+---
+
+## 两条路径：生成时拦截 vs 事后检查
+
+Progmune 用两种互补机制覆盖两类代码来源：
+
+| | **生成路径**（Agent 时刻拦截） | **验证路径**（事后检查） |
+|---|---|---|
+| **覆盖** | 通过 Progmune 生成的代码（`progmune_generate` / `progmune_execute`） | 任何来源的代码——Copilot、Cursor、人工（`progmune_trust_check` / SDK / CI） |
+| **机制** | 生成循环内 8 道验证关卡：JSON 解析 → schema → SVL-1 符号 → SVL-2 类型 → SVL-3 数据流 → SVL-4 协议状态机 → BFS 确定性修复 → 语义合约。违规代码**从不写入磁盘**——在发射前被纠正或重试 | 信任引擎：四维加权评分（策略 35% / 协议 30% / 覆盖 20% / 治理 15%）→ 决策 + 证据链 |
+| **错误处理时机** | 创建时刻——错误从未存在 | 事后——文件已存在 |
+| **成本曲线** | 零——违规没有落地 | 发现越晚越贵 |
+
+核心产品论：**在生成时刻验证，而非事后补救。** LLM 的输出只是提议，状态机才是裁判——LLM 可以被劝服，状态机不会。
+
+---
+
+## Progmune 检测什么
+
+AI 代码生成器产出语法合法的代码，却常常违反**协议生命周期**——正确的操作顺序，如 open→read→close 或 auth→validate→respond。这些违规对传统静态分析不可见。
+
+| 类别 | 检测到的违规示例 |
+|------|----------------|
+| **TLS / SSL** | 握手未校验证书、缺少主机名校验 |
+| **认证** | 令牌无过期时间、会话无超时、缺少限流 |
+| **支付** | 订单未验证、退款未授权、Webhook 无签名校验 |
+| **资源** | 文件打开未关闭、连接未清理、malloc 未 free |
+| **数据完整性** | 变更无审计轨迹、缺少输入校验 |
+| **注入类（Python，源码级）** | 用 f-string/`%`/`.format`/拼接构造 SQL、动态 subprocess 参数导致命令注入、用户可控 URL 抓取导致 SSRF、模板字符串 sink 导致 SSTI、外部实体解析器配置导致 XXE、对用户输入 eval/exec |
+| **Web 类（Python，源码级）** | `{{ var\|safe }}`/autoescape off 模板导致 XSS、用户可控文件路径导致路径穿越、`@csrf_exempt` 或 GET 状态变更导致 CSRF、客户端 cookie 授权、硬编码 JWT 密钥（含跨模块常量） |
+
+源码级检测采用**提取器标记架构**：IR 提取器执行污点追踪、import 解析、跨文件分析（模板、模块常量），发射合成标记供规则消费——零管道改动、完全可审计。
+
+---
+
+## 快速开始
+
+```bash
+npm install progmune-runtime
+
+# 验证一个文件——获得信任决策
+npm run sdk src/server.ts
+
+# 完整解释（证据 + 修复建议）
+npm run sdk src/server.ts --explain
+
+# 信任检查（CI 友好 JSON 输出）
+npm run trust -- --project . --json
+
+# 运行基准套件
+npm run precision:all
+```
+
+---
+
+## 信任决策
+
+Progmune 的输出是**有证据支撑的决策**，不是原始发现列表：
+
+| 输出 | 含义 |
+|------|------|
+| **信任评分**（0–100） | 四维度的量化信任水平 |
+| **决策** | `APPROVED` / `NEEDS_REVIEW` / `BLOCKED` |
+| **置信度** | `HIGH` / `MEDIUM` / `LOW` / `UNCERTAIN` |
+| **证据** | 每条违规追溯到代码位置 + RFC 引用 + 修复建议 |
+
+**严重违规 → 无论评分多少一律硬 BLOCK。** 企业关心的是"能不能上线"，不是"我的评分是 58 还是 61"。
+
+→ [信任决策模型](docs/ai-trust-decision-model-v1.md)
+
+---
+
+## 覆盖范围
+
+Progmune 对能验证什么、不能验证什么保持诚实。
+
+| 语言 | 状态 | 证据 |
+|------|------|------|
+| **TypeScript / JavaScript** | ✅ 生产 | 盲测基准：**召回 98.5% / 精确率 100%**（795 条 gold finding，100 个项目） |
+| **Python** | ✅ 生产 | 盲测基准：**召回 100% / 精确率 100%**（729 条 gold finding，90 个项目）；真实应用验证：PyGoat（OWASP 故意脆弱 Django 应用）**67 TP / 0 FP，标记精确率 100%**；三个良构应用（django/fastapi realworld、django-unicorn）0 误报真阳性 |
+| **C** | ⚠️ 仅研究 | 黄金基准 F1=16.5%。L3 跨函数实验已终止；L4 无计划。见 [C 语言状态](docs/c-language-status.md)。 |
+| **Go, Java** | ❌ 无 | 规划中 |
+
+**框架适配器：2/13。** Express ✅ 与 tRPC ✅ 有专用检测器；Next.js 有版本感知治理；NestJS 部分支持。Django、FastAPI 及另外 8 个待适配——框架适配是 #1 产品缺口。
+
+### Progmune 不覆盖什么（诚实边界）
+
+- **TS 侧的污点注入类缺陷**——源码级 SQLi/XSS/SSRF 检测已在 Python 上线；TypeScript 提取器基于名称/调用，TS 注入类暂未覆盖（如实记录，不隐藏）。
+- **SCA / 依赖漏洞**——幻觉包名、供应链问题。已有独立工具。
+- **运行时行为**——Progmune 仅做静态分析；无 DAST/沙箱执行。
+- **框架内部件**——知名框架的分发/缓存机制（如 django-unicorn 内部件）可能产生少量边界误报；各语料基准 gold 文件中已逐条记录。
+- **已知失败边界一律记录**而非隐藏：如果 Progmune 无法验证某语言（如 Go），置信度会降低而不是假装 100%。
+
+→ [完整覆盖矩阵](docs/coverage-matrix.md)
+
+---
+
+## 基准
+
+公开、可复现的精确率数据。所有数字均对 gold 标注基准测量。
+
+### TypeScript（盲测基准 v6——100 个项目）
+
+| 指标 | 值 |
+|------|-----|
+| 精确率 | **100%**（0 条事实性误报） |
+| 召回率 | **98.5%**（有效口径 100%——12 条未检出按方法论排除） |
+| Gold findings | 795 条，覆盖 100 个项目（90 风格变体 + 10 模型变体） |
+
+### Python（盲测基准 v1——90 个项目）
+
+| 指标 | 值 |
+|------|-----|
+| 精确率 | **100%** |
+| 召回率 | **100%** |
+| Gold findings | 729 条，覆盖 90 个风格变体项目 |
+
+### 真实应用验证（PyGoat，OWASP 故意脆弱 Django 应用）
+
+| 指标 | 值 |
+|------|-----|
+| 标记精确率 | **100%**（67 真阳性 / 0 误报，逐条人工核实） |
+| 覆盖类别 | 14 个漏洞类别，含 SQLi、SSRF、路径穿越、XSS、SSTI、XXE、命令注入、反序列化、CSRF（双形态）、cookie 授权、硬编码密钥 |
+| 良构应用 | django-realworld、fastapi-realworld、django-unicorn——0 误报真阳性 |
+
+→ [真实验证报告](blind-benchmark/REALWORLD_APP_V1.md) · [基准基线](blind-benchmark/BASELINE_v6.md)
+
+### C（黄金基准——研究状态）
+
+C 分析**仅研究**：黄金基准 F1=16.5%，覆盖 4 个仓库（curl、libssh、nginx、openssl）。瓶颈是规则覆盖而非上下文。L3（跨函数）已带数据终止；L4（指针/CFG）是多年研究问题，无计划。详见 [C 语言状态](docs/c-language-status.md)。
+
+### P0-P3 规则注入（2026-08）
+
+- 10 个 TS 项目 **+19 条新检测**，6 个 C 仓库 + PostgreSQL **0 误报**
+- 打破引导死锁：全部 21 个协议命名空间已有规则词汇
+- `excludePatterns` + `languages` 架构管理误报
+
+→ [双峰报告](docs/two-hump-report.md) · [P0-P3 终报](docs/p0-p3-final-report.md)
+
+---
+
+## 架构
+
+```
+SDK (src/sdk.ts)           verify() → APPROVED / NEEDS_REVIEW / BLOCKED
+  └─ 信任引擎                四维评分 → 决策
+       ├─ 策略引擎           企业策略执行（ALLOW/WARN/BLOCK）
+       ├─ SSG 校验器         协议状态机验证
+       ├─ 协议检测器         基于正则的协议步骤检测（22 个检测器）
+       ├─ IR 提取器          TypeScript（ts-morph）+ Python（ast 模块）→ 函数 IR；
+       │                     源码级标记：污点追踪、import 解析、限定调用链、跨文件模板分析
+       ├─ 修复执行器         detect → plan → fix → validate → commit/rollback
+       └─ 知识库             31 个域、140 条规则、证据链
+```
+
+### 接口
+
+| 接口 | 用途 |
+|------|------|
+| **SDK**（`verify()`） | 开发者一次性调用 API |
+| **CLI**（`npm run trust`） | 命令行信任检查 |
+| **MCP 服务器** | Claude Code 集成（`progmune_check`、`progmune_trust_check`） |
+| **GitHub Action** | CI/CD 门禁——在 PR 拦截未验证的 AI 代码 |
+| **Trust API** | `POST /trust/check`——机器间接口 |
+
+---
+
+## 科学基础
+
+Progmune 建立在"**LLM 输出是统计表演而非推理**"这一前提上——该观点源自 Subbarao Kambhampati 等人的立场论文 ["Stop Anthropomorphizing Intermediate Tokens as Reasoning/Thinking Traces!"](https://arxiv.org/abs/2505.22285)（arXiv:2505.22285，2025），并在其 ICML 2026 演讲 "On the Role of Verifiers and Thinking Traces in Reasoning Models" 中展开。Progmune 不信任模型对代码的说法，而是用协议状态机、IR 提取与证据链验证程序实际行为。
+
+覆盖缺口分析借用"双峰问题"术语作为**跨域类比**，源自 Sergei Gukov 在数学物理领域的工作（群论中的 Andrews-Curtis 猜想，2026）——它描述的是双峰覆盖分布，而非合作关系。详见 [双峰报告](docs/two-hump-report.md)。
+
+→ [投资人白皮书](docs/Progmune_投资人白皮书_v2.0.html) · [信任决策模型](docs/ai-trust-decision-model-v1.md)
+
+---
+
+## 贡献
+
+架构与代码规范见 [CLAUDE.md](CLAUDE.md)，开发流程见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+
+高价值贡献方向：
+- **框架适配器**（Express、Next.js、FastAPI）——#1 产品缺口
+- **Python 验证规则**——向 TypeScript 之外扩展
+- 现有检测器与防护规则的**缺陷修复**
+
+---
+
+## 状态
+
+- **运行时管线：** 检测 → 解释 → 修复 → 验证（L1–L4）
+- **信任引擎：** 四维评分 + 二元可解释性门
+- **MCP 工具：** 19 个——`progmune_trust_check`、`progmune_score`、`progmune_policy_check`、`progmune_certify` 等
+- **框架适配器：** Express ✅、tRPC ✅、NestJS 部分（2/13）
+- **知识库：** 31 个域、148 条协议规则、22 个检测器、26 条防护规则、PLSB 13/13 类别——另加 15 条源码级检测规则（Python）
+- **语料：** 6+ 仓库 2,500+ 轨迹；盲测基准 100（TS）+ 90（Python）个项目；4 个应用仓库真实验证
+- **当前重点：** 企业 PoC 验证 + 剩余框架内部边界误报
+
+---
+
+## License
+
+MIT — [LICENSE](LICENSE)
