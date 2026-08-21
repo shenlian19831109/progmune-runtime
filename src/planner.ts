@@ -884,7 +884,11 @@ ${RETRY_HINT}
       text = useSystem
         ? await chat(SYSTEM_PROMPT, currentPrompt)
         : await generate(`你是程序合成助手。\n\n${currentPrompt}`);
-    } catch (e) { continue; }
+    } catch (e: any) {
+      // 铁律：失败原因必须可见（不许静默绕过）——LLM 异常记录后继续重试/降级
+      console.error(`⚠️ LLM 调用失败 (attempt ${r + 1}/${maxRetries}): ${e?.message || e}`);
+      continue;
+    }
     if (!text) continue;
 
     text = text.replace(/```(?:json|javascript)?\s*/gi, '').replace(/```\s*/g, '').trim();

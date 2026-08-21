@@ -30,6 +30,8 @@
     "governance:json": "node dist/audit/cli.js --all --json",
     "governance:md": "node dist/audit/cli.js --all --markdown",
     "certify": "node dist/certify.js",
+    "agent": "node dist/agent-cli.js",
+    "patrol": "node dist/patrol-cli.js",
     "certify:html": "node dist/certify-html.js",
     "policy": "node dist/policy/cli.js check",
     "precision": "node dist/multi-repo-precision.js",

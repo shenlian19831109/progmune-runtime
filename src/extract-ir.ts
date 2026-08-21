@@ -115,7 +115,9 @@ function parseProtocolFromJSDoc(node: any): FunctionInfo['protocol'] | undefined
         const preMatch = text.match(/pre_states\s*=\s*\[([^\]]*)\]/);
         const postMatch = text.match(/post_states\s*=\s*\[([^\]]*)\]/);
         const invMatch = text.match(/invalidate\s*=\s*\[([^\]]*)\]/);
-        if (!preMatch || !postMatch) return undefined;
+        // 非规则注解（如文件头文档正文中的 "@protocol" 字样被 ts-morph 解析为 tag）
+        // → 跳过继续找下一个 @protocol tag，而不是直接放弃
+        if (!preMatch || !postMatch) continue;
         const namespace = nsMatch ? nsMatch[1] : undefined;
         const pre_states = preMatch[1].split(',').map((s: string) => s.trim().replace(/["']/g, '')).filter(Boolean);
         const post_states = postMatch[1].split(',').map((s: string) => s.trim().replace(/["']/g, '')).filter(Boolean);

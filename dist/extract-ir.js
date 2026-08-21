@@ -121,8 +121,10 @@ function parseProtocolFromJSDoc(node) {
                 const preMatch = text.match(/pre_states\s*=\s*\[([^\]]*)\]/);
                 const postMatch = text.match(/post_states\s*=\s*\[([^\]]*)\]/);
                 const invMatch = text.match(/invalidate\s*=\s*\[([^\]]*)\]/);
+                // 非规则注解（如文件头文档正文中的 "@protocol" 字样被 ts-morph 解析为 tag）
+                // → 跳过继续找下一个 @protocol tag，而不是直接放弃
                 if (!preMatch || !postMatch)
-                    return undefined;
+                    continue;
                 const namespace = nsMatch ? nsMatch[1] : undefined;
                 const pre_states = preMatch[1].split(',').map((s) => s.trim().replace(/["']/g, '')).filter(Boolean);
                 const post_states = postMatch[1].split(',').map((s) => s.trim().replace(/["']/g, '')).filter(Boolean);
@@ -352,6 +354,19 @@ function extractDirectCalls(func) {
         if (ts_morph_1.Node.isFunctionDeclaration(node) || ts_morph_1.Node.isArrowFunction(node))
             traversal.skip();
     });
+    // Semantic markers (mirroring the Python extractor):
+    // - token issuance: set_cookie calls or token/session-named assignments —
+    //   the Token Security rule's requireMarker precondition consumes it.
+    // - inline ownership comparison: ownerId/authorId compared with ==/!== —
+    //   the Ownership Check rules' satisfier consumes it (the call-name
+    //   interface cannot see inline comparisons).
+    const text = func.getText();
+    if (/set_cookie\(|setCookie\(|\btoken\s*[:=]|\bsession_token\s*[:=]/.test(text)) {
+        calls.push("__progmune_token_issued__");
+    }
+    if (/ownerId\s*[!=]==?|authorId\s*[!=]==?|createdBy\s*[!=]==?|\.owner\s*[!=]==?|userId\s*[!=]==?/.test(text)) {
+        calls.push("__progmune_ownership_checked__");
+    }
     return [...new Set(calls)];
 }
 /**

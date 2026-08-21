@@ -40,6 +40,9 @@ exports.RETRY_HINT = `输出格式：紧凑 JSON 数组 [{"f":"函数名","to":"
 // ── Formatters ──
 /** Build a compact function list with parameter examples for LLM precision. */
 function buildCompactFuncList(funcs, allFuncs) {
+    // 语义 marker（__progmune_*，提取器注入供规则消费）不是真实可调用函数——
+    // 不出现在 LLM 可见函数列表中，防止被生成成真实调用导致编译失败
+    funcs = funcs.filter((f) => !String(f.name || "").startsWith("__progmune_"));
     // Example values for each type — helps LLM fill meaningful args
     function exampleValue(type, paramName) {
         const t = (type || "any").replace(/\[\]$/, "").toLowerCase();

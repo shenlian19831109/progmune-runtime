@@ -829,6 +829,21 @@ async function collectProtocolViolations(
   let ssgViolationCount = 0;
 
   try {
+    // ── P4.5 校准：TS/JS 项目在 ir.json 缺失时先提取 IR ──
+    // 序列必须来自「函数体内真实调用」而非「文件内函数声明名单」——
+    // 声明顺序 ≠ 执行顺序：正则扫描会把声明当调用（auth.ts 误报），
+    // 也会因调用数不足阈值漏掉单调用违规文件（bad_flow 漏报）。
+    if (!ctx.language || ctx.language === "typescript" || ctx.language === "javascript") {
+      try {
+        const fs = require("fs");
+        if (!fs.existsSync(path.join(ctx.projectPath, "ir.json"))) {
+          const { extractIR } = require("../extract-ir");
+          const ir = extractIR(ctx.projectPath);
+          fs.writeFileSync(path.join(ctx.projectPath, "ir.json"), JSON.stringify(ir, null, 2));
+        }
+      } catch { /* best-effort — 回退正则扫描 */ }
+    }
+
     // ── Phase 1-5 Semantic Pipeline ──
     const callSequences = extractCallSequencesFromProject(ctx.projectPath, ctx.language);
     const flaggedCount = { value: 0 };
@@ -836,6 +851,31 @@ async function collectProtocolViolations(
 
     // ── SSG State Machine: load protocol rules once ──
     protocolRulesData = loadProtocolRules(ctx.projectPath);
+
+    // ── P4.5: 合并项目 IR 注解协议（IR 优先，缺 namespace 继承内置 JSON） ──
+    // 内置 protocols.json 的规则是通用弱约束（如 generate_jwt pre=[]），
+    // 项目文件里的 @protocol 注解才是项目真实协议（如 pre=[PASSWORD_VERIFIED]）。
+    // planner 已用此合并语义，trust 引擎需对齐，否则项目级前置约束不生效。
+    if (protocolRulesData) {
+      try {
+        const fs = require("fs");
+        const irPath = path.join(ctx.projectPath, "ir.json");
+        if (fs.existsSync(irPath)) {
+          const ir = JSON.parse(fs.readFileSync(irPath, "utf-8"));
+          if (Array.isArray(ir)) {
+            for (const f of ir) {
+              if (!f.protocol) continue;
+              const protocol = { ...f.protocol };
+              const existing = protocolRulesData.rules.get(String(f.name));
+              if (existing?.namespace && !protocol.namespace) {
+                protocol.namespace = existing.namespace;
+              }
+              protocolRulesData.rules.set(String(f.name), protocol);
+            }
+          }
+        }
+      } catch { /* best-effort */ }
+    }
 
     for (const seq of callSequences) {
       try {
@@ -1015,6 +1055,48 @@ interface CallSequence {
 }
 
 function extractCallSequencesFromProject(
+  projectPath: string,
+  language?: string
+): CallSequence[] {
+  // P4.5: 优先 IR 精确序列（每个函数体内的真实调用，从各自入口验证）
+  const irSequences = extractCallSequencesFromIR(projectPath);
+  if (irSequences.length > 0) return irSequences;
+  // 回退：正则扫描（C 等无 IR 语言保持原行为）
+  return extractCallSequencesRegex(projectPath, language);
+}
+
+/**
+ * P4.5: 从 ir.json 构建 per-function 调用序列。
+ * 每个函数体内的 calls[] 是一条独立序列（从协议初始状态起步验证）——
+ * 函数声明名单不再是验证对象；语义 marker（__progmune_*）供规则消费，不作真实调用。
+ */
+function extractCallSequencesFromIR(projectPath: string): CallSequence[] {
+  try {
+    const fs = require("fs");
+    const irPath = path.join(projectPath, "ir.json");
+    if (!fs.existsSync(irPath)) return [];
+    const ir = JSON.parse(fs.readFileSync(irPath, "utf-8"));
+    if (!Array.isArray(ir)) return [];
+    const sequences: CallSequence[] = [];
+    for (const f of ir) {
+      const calls = (f.calls || []).filter(
+        (c: string) => typeof c === "string" && !c.startsWith("__progmune_"),
+      );
+      if (calls.length === 0) continue;
+      sequences.push({
+        calls,
+        file: String(f.file || ""),
+        function: String(f.name || "unknown"),
+      });
+    }
+    return sequences;
+  } catch {
+    return [];
+  }
+}
+
+/** 正则扫描回退路径（原实现）：按文件扫调用样 token，≥4 才成序列。 */
+function extractCallSequencesRegex(
   projectPath: string,
   language?: string
 ): CallSequence[] {

@@ -225,6 +225,10 @@ async function execute(intent, projectPath, filePath) {
 /** @requires FILE_PATH @produces COMPILE_RESULT */
 /** @requires FILE_PATH @produces COMPILE_RESULT */
 function verifyCompiles(filePath) {
+    // tsc 报错行以「相对 tsconfig 的文件路径」开头（如 `login_flow.ts(7,13):`），
+    // 而调用方可能传绝对路径——两种形态都要匹配，否则编译门会静默漏报。
+    const base = path.basename(filePath);
+    const isMatch = (l) => l.includes(filePath) || l.startsWith(base + "(") || l.startsWith(base + ":");
     try {
         const { execSync } = require("child_process");
         const result = execSync(`npx tsc --noEmit --project tsconfig.json --pretty false 2>&1`, {
@@ -233,13 +237,13 @@ function verifyCompiles(filePath) {
             stdio: "pipe",
         });
         // tsc exits 0, check if our file is mentioned in output anyway (unlikely but safe)
-        const lines = result.split("\n").filter((l) => l.includes(filePath));
+        const lines = result.split("\n").filter(isMatch);
         return { pass: lines.length === 0, errors: lines };
     }
     catch (e) {
         // tsc exits non-zero — parse stderr/stdout for our file's errors
         const output = (e.stdout || "") + (e.stderr || "");
-        const lines = output.split("\n").filter((l) => l.includes(filePath));
+        const lines = output.split("\n").filter(isMatch);
         return { pass: lines.length === 0, errors: lines };
     }
 }
