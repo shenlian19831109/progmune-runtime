@@ -108,10 +108,15 @@ if (cliArg === "--ledger") {
   const rebuilt = rebuildState(allTransitions, nsInit);
   const lastTransition = allTransitions[allTransitions.length - 1];
   const recorded = lastTransition.statesAfter;
-  const allNs = new Set([...Object.keys(rebuilt), ...Object.keys(recorded)]);
+  // 与 checkLedgerConsistency 同规则：只比较 recorded 中有过非空快照的 ns——
+  // 早期 session 对 file/db 等记录空数组（无信息），不参与比较。
+  const informativeNs = new Set<string>();
+  for (const [ns, s] of Object.entries(recorded)) {
+    if ((s || []).length > 0) informativeNs.add(ns);
+  }
   const norm = (snap: Record<string, string[]>) => {
     const out: Record<string, string[]> = {};
-    for (const ns of [...allNs].sort()) out[ns] = [...(snap[ns] || [])].sort();
+    for (const ns of [...informativeNs].sort()) out[ns] = [...(snap[ns] || [])].sort();
     return out;
   };
   const replayOk = JSON.stringify(norm(rebuilt)) === JSON.stringify(norm(recorded));
@@ -306,6 +311,38 @@ if (!fs.existsSync(protoPath)) {
 }
 
 // ── 4. Ledger 不变量检查 (Phase 3) ──
+
+/**
+ * 历史约定兼容：早期 session 以 "INIT" 作为 _global 初始状态
+ * （当前约定 UNAUTHENTICATED；当前 148 条协议规则已不含 INIT 状态）。
+ * 返回规范化视图（仅比较用，不改盘）与受影响转移数。
+ */
+function normalizeLegacyInit(
+  transitions: StateTransition[],
+  nsInit: Map<string, string>,
+): { view: StateTransition[]; migrated: number } {
+  let migrated = 0;
+  const view = transitions.map((t) => {
+    const normSnap = (snap: Record<string, string[]>): Record<string, string[]> => {
+      const out: Record<string, string[]> = {};
+      let changed = false;
+      for (const [ns, states] of Object.entries(snap)) {
+        const currentInit = nsInit.get(ns);
+        if (currentInit && currentInit !== "INIT" && states.length === 1 && states[0] === "INIT") {
+          out[ns] = [currentInit];
+          changed = true;
+        } else {
+          out[ns] = [...states];
+        }
+      }
+      if (changed) migrated++;
+      return out;
+    };
+    return { ...t, statesBefore: normSnap(t.statesBefore), statesAfter: normSnap(t.statesAfter) };
+  });
+  return { view, migrated };
+}
+
 step("4/6 Ledger 不变量");
 {
   // Load namespace initial states from protocols.json for correct replay
@@ -313,6 +350,7 @@ step("4/6 Ledger 不变量");
   let checked = 0;
   let consistent = 0;
   let stateMatch = 0;
+  let legacyInitMigrations = 0;
   const allLedgers: StateTransition[] = [];
   const violationsDetail: string[] = [];
   const replayMismatchDetail: string[] = [];
@@ -335,9 +373,14 @@ step("4/6 Ledger 不变量");
         for (const attempt of (session.attempts || [])) {
           const transitions = attempt.transitions || [];
           if (transitions.length === 0) continue;
-          allLedgers.push(...transitions);
+          // 历史约定兼容：早期 session 以 "INIT" 作为 _global 初始状态
+          // （当前约定 UNAUTHENTICATED；当前协议规则已不含 INIT）。
+          // 规范化视图只用于比较，不改盘。
+          const { view, migrated } = normalizeLegacyInit(transitions, nsInit);
+          if (migrated > 0) legacyInitMigrations++;
+          allLedgers.push(...view);
           // Invariant check
-          const result = checkLedgerConsistency(transitions, nsInit);
+          const result = checkLedgerConsistency(view, nsInit);
           checked++;
           if (result.consistent) {
             consistent++;
@@ -347,10 +390,15 @@ step("4/6 Ledger 不变量");
             }
           }
           // Replay check: rebuildState === recorded statesAfter
-          const rebuilt = rebuildState(transitions, nsInit);
-          const recorded = transitions[transitions.length - 1].statesAfter;
-          const allNs = new Set([...Object.keys(rebuilt), ...Object.keys(recorded)]);
-          if (JSON.stringify(norm(rebuilt, allNs)) === JSON.stringify(norm(recorded, allNs))) {
+          // 只比较 recorded 中有过非空快照的 ns（早期 session 对部分 ns
+          // 记录空数组，不携带可比较的状态信息）
+          const rebuilt = rebuildState(view, nsInit);
+          const recorded = view[view.length - 1].statesAfter;
+          const informativeNs = new Set<string>();
+          for (const [ns, s] of Object.entries(recorded as Record<string, string[]>)) {
+            if ((s || []).length > 0) informativeNs.add(ns);
+          }
+          if (JSON.stringify(norm(rebuilt, informativeNs)) === JSON.stringify(norm(recorded, informativeNs))) {
             stateMatch++;
           } else {
             replayMismatchDetail.push(`session=${session.sessionId} attempt=${attempt.attemptNumber}`);
@@ -364,6 +412,9 @@ step("4/6 Ledger 不变量");
   } else if (consistent === checked && stateMatch === checked) {
     const combinedHash = hashLedger(allLedgers);
     pass(`全部 ${checked} 个 Ledger 通过 (Invariant-0 + Invariant-1 + Replay) | 完整性指纹: ${combinedHash}`);
+    if (legacyInitMigrations > 0) {
+      warn(`历史约定兼容：${legacyInitMigrations} 条转移的初始状态 INIT 已按当前约定（${nsInit.get("_global")}）规范化比较（不改盘）`);
+    }
   } else {
     if (consistent < checked) {
       fail(`${checked - consistent}/${checked} 个 Ledger 存在一致性问题`);
@@ -398,7 +449,9 @@ step("4/6 Ledger 不变量");
           const transitions = attempt.transitions || [];
           if (transitions.length === 0) continue;
           try {
-            assertLedgerInvariants(transitions, nsInit);
+            // 历史约定兼容：与主检查一致，先规范化旧 INIT 初值
+            const { view } = normalizeLegacyInit(transitions, nsInit);
+            assertLedgerInvariants(view, nsInit);
           } catch (e) {
             if (e instanceof InvariantViolationError) {
               invariantFailed = true;

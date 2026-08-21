@@ -378,10 +378,24 @@ export function checkLedgerConsistency(
     }
   }
 
-  // Normalize a snapshot: ensure all known namespaces are present
+  // Normalize a snapshot: 只比较 ledger 中实际出现过的命名空间。
+  // 历史 session 只记录其触及的命名空间（protocol-registry 包目录回退修复前，
+  // 无 protocols.json 的 cwd 下 nsInit 退化为仅 _global）——用全量 nsInit
+  // 重建时未记录的 ns 不应参与比较，否则旧数据 before-consistency 全量误报。
+  // 更严格一步：只记录"有过非空快照"的 ns——早期 session 对 file/db 等
+  // 记录空数组（键存在但无信息），空数组不携带可比较的状态信息。
+  const recordedNamespaces = new Set<string>();
+  for (const t of ledger) {
+    for (const [ns, states] of Object.entries(t.statesBefore)) {
+      if ((states || []).length > 0) recordedNamespaces.add(ns);
+    }
+    for (const [ns, states] of Object.entries(t.statesAfter)) {
+      if ((states || []).length > 0) recordedNamespaces.add(ns);
+    }
+  }
   function normalizeSnap(snap: Record<string, string[]>): Record<string, string[]> {
     const out: Record<string, string[]> = {};
-    for (const ns of allNamespaces) {
+    for (const ns of recordedNamespaces) {
       out[ns] = [...(snap[ns] || [])].sort();
     }
     return out;
