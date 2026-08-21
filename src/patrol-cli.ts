@@ -18,6 +18,7 @@
 import * as path from "path";
 import { runPatrol, formatPatrolTerminal, writePatrolReport } from "./agent-patrol";
 import { RepoWatcher } from "./agent-perception";
+import { decidePermission } from "./agent-permissions";
 
 // 在 chdir 到项目目录之前按启动 CWD 加载 .env——
 // trust 引擎内部的 lazy require（语义映射 LLM 回退）发生在 chdir 之后，
@@ -59,12 +60,23 @@ const json = args.includes("--json");
 async function scanOnce(label: string): Promise<void> {
   try {
     const report = await runPatrol(projectPath);
-    const reportFile = writePatrolReport(report, projectPath);
+    // ── P5 安全层：报告写入经 FsSandbox（巡逻预设：写=沙箱白名单） ──
+    const writeDecision = decidePermission("patrol", {
+      level: "write",
+      target: path.join(projectPath, ".progmune_patrol_report.md"),
+      projectPath,
+    });
+    let reportFile = "";
+    if (writeDecision.allowed) {
+      reportFile = writePatrolReport(report, projectPath);
+    }
     if (json && !watch) {
       console.log(JSON.stringify(report, null, 2));
     } else {
       console.log(`[${label}] ` + formatPatrolTerminal(report).replace(/\n/g, "\n  "));
-      console.log(`   报告: ${reportFile}`);
+      console.log(writeDecision.allowed
+        ? `   报告: ${reportFile}`
+        : `   ⚠️ 报告写入被沙箱拒绝: ${writeDecision.detail}`);
     }
   } catch (e: any) {
     console.error(`❌ 巡逻失败: ${e?.message || e}`);

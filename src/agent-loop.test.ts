@@ -237,6 +237,7 @@ describe("agent-loop", () => {
       intent: "实现登录流程",
       filePath: "login.ts",
       runTests: true,
+      approveExec: true, // P5：测试门 shell 执行需审批（--yes）
     });
 
     expect(r.success).toBe(true);

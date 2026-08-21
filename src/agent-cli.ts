@@ -17,7 +17,8 @@
  *   --timeout <ms>      单次执行超时毫秒（默认 120000）
  *   --context           注入 git 仓库上下文（默认开启）
  *   --no-context        关闭 git 上下文注入
- *   --test              编译/指纹通过后追加项目测试门
+ *   --test              编译/指纹通过后追加项目测试门（shell 执行需审批）
+ *   --yes               预批准审批门（配合 --test；无此参数时交互确认）
  *   --json              JSON 输出
  *   --help, -h          显示帮助
  */
@@ -67,6 +68,7 @@ function parseArgs(argv: string[]): {
   timeout: number;
   context: boolean;
   test: boolean;
+  yes: boolean;
   json: boolean;
 } {
   const intentParts: string[] = [];
@@ -77,6 +79,7 @@ function parseArgs(argv: string[]): {
   let timeout = 120_000;
   let context = true;
   let test = false;
+  let yes = false;
   let json = false;
 
   for (let i = 0; i < argv.length; i++) {
@@ -89,6 +92,7 @@ function parseArgs(argv: string[]): {
     else if (a === "--context") { context = true; }
     else if (a === "--no-context") { context = false; }
     else if (a === "--test") { test = true; }
+    else if (a === "--yes") { yes = true; }
     else if (a === "--json") { json = true; }
     else { intentParts.push(a); }
   }
@@ -98,7 +102,7 @@ function parseArgs(argv: string[]): {
     console.error("❌ 缺少意图参数。用法: progmune agent \"实现 XX\" [--file path] [--project dir]");
     process.exit(2);
   }
-  return { intent, file, project, iterations, retries, timeout, context, test, json };
+  return { intent, file, project, iterations, retries, timeout, context, test, yes, json };
 }
 
 // ── Formatting ──
@@ -164,6 +168,7 @@ async function main(): Promise<void> {
     timeoutMs: opts.timeout,
     includeContext: opts.context,
     runTests: opts.test,
+    approveExec: opts.yes,
   });
 
   if (opts.json) {

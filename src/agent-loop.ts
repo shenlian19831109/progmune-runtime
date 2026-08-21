@@ -28,6 +28,7 @@ import { expandGoalActions } from "./goal-planner";
 import { collectGitContext, extractIRWithDelta } from "./agent-perception";
 import type { GitContext, IRDelta } from "./agent-perception";
 import { runProjectTests } from "./agent-supervision";
+import { decidePermission, interactiveConfirm } from "./agent-permissions";
 
 // ── Types ──
 
@@ -86,6 +87,8 @@ export interface AgentLoopOptions {
   includeContext?: boolean;
   /** P3: 编译/指纹通过后追加项目测试门（默认 false，CLI --test 开启） */
   runTests?: boolean;
+  /** P5: 测试门（shell 执行）审批预批准（CLI --yes）；缺省时交互确认，无 TTY 则拒绝 */
+  approveExec?: boolean;
 }
 
 export interface AgentLoopResult {
@@ -282,17 +285,28 @@ export async function runAgentLoop(opts: AgentLoopOptions): Promise<AgentLoopRes
       let testPass = true;
       let testFailureSummary = "";
       if (result.success && compilePass && markerPass && runTestsGate && filePath) {
-        try {
-          const t = runProjectTests(projectPath);
-          testRan = t.ran;
-          testPass = t.pass;
-          if (t.ran) {
-            audit("verify:test",
-              t.pass ? `测试通过 (${t.command})` : `测试失败: ${t.failures.slice(0, 3).join(" | ")}`);
-            if (!t.pass) testFailureSummary = `项目测试失败: ${t.failures.slice(0, 3).join("；")}`;
+        // ── P5 安全层：跑测试 = shell 执行 → 审批门 ──
+        const execDecision = decidePermission(
+          "agent",
+          { level: "exec", target: "项目测试（npm test / pytest）", projectPath, preApproved: opts.approveExec },
+          interactiveConfirm,
+        );
+        audit(execDecision.audit.event, execDecision.audit.detail);
+        if (!execDecision.allowed) {
+          audit("verify:test", "测试门被审批门拒绝，跳过（--yes 可预批准）");
+        } else {
+          try {
+            const t = runProjectTests(projectPath);
+            testRan = t.ran;
+            testPass = t.pass;
+            if (t.ran) {
+              audit("verify:test",
+                t.pass ? `测试通过 (${t.command})` : `测试失败: ${t.failures.slice(0, 3).join(" | ")}`);
+              if (!t.pass) testFailureSummary = `项目测试失败: ${t.failures.slice(0, 3).join("；")}`;
+            }
+          } catch (e: any) {
+            audit("verify:test", `测试门异常（忽略）: ${e.message}`);
           }
-        } catch (e: any) {
-          audit("verify:test", `测试门异常（忽略）: ${e.message}`);
         }
       }
 
