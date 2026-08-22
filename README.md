@@ -106,6 +106,8 @@ Progmune is honest about what it can and cannot verify.
 | **C** | ⚠️ Research-only | Gold benchmark F1=16.5%. L3 cross-function experiment terminated; L4 not planned. See [C Language Status](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md). |
 | **Go, Java** | ❌ None | Planned |
 
+**Multi-language IR (registry-based).** TypeScript (ts-morph) and Python (AST) extractors are registered entries in one registry (`src/extract-project-ir.ts`); `extractProjectIR` merges every detected language into a single function IR shared by the agent loop, `execute()`, and the MCP server — the agent composes function-protocol chains across both languages. Adding a language (Go, Java, …) = register one extractor entry; callers don't change.
+
 **Framework adapters: 2/13.** Express ✅ and tRPC ✅ have dedicated detectors; Next.js has version-aware governance; NestJS is partial. Django, FastAPI and 8 more remain — framework adaptation is the #1 product gap.
 
 ### What Progmune does NOT cover (honest boundaries)
@@ -172,9 +174,10 @@ SDK (src/sdk.ts)           verify() → APPROVED / NEEDS_REVIEW / BLOCKED
        ├─ Policy Engine     Enterprise policy enforcement (ALLOW/WARN/BLOCK)
        ├─ SSG Validator     Protocol state machine verification
        ├─ Protocol Detector  Regex-based protocol step detection (22 detectors)
-       ├─ IR Extractors     TypeScript (ts-morph) + Python (ast module) → function IR;
-       │                    source-level markers: taint tracking, import resolution,
-       │                    qualified call chains, cross-file template analysis
+       ├─ IR Extraction      Registry-based: TS (ts-morph) + Python (ast module)
+       │                     merged into one function IR per project;
+       │                     source-level markers: taint tracking, import resolution,
+       │                     qualified call chains, cross-file template analysis
        ├─ Repair Executor   detect → plan → fix → validate → commit/rollback
        └─ Knowledge Base    31 domains, 140 rules, evidence chains
 ```

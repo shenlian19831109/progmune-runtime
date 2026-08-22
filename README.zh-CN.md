@@ -106,6 +106,8 @@ Progmune 对能验证什么、不能验证什么保持诚实。
 | **C** | ⚠️ 仅研究 | 黄金基准 F1=16.5%。L3 跨函数实验已终止；L4 无计划。见 [C 语言状态](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md)。 |
 | **Go, Java** | ❌ 无 | 规划中 |
 
+**多语言 IR（注册表式）。** TypeScript（ts-morph）与 Python（AST）提取器是同一注册表（`src/extract-project-ir.ts`）中的注册项；`extractProjectIR` 把检测到的所有语言合并为一份函数 IR，由 agent loop、`execute()` 与 MCP server 共享——agent 可在两种语言上编排函数协议链。新增语言（Go、Java……）= 注册一条提取器，调用方零改动。
+
 **框架适配器：2/13。** Express ✅ 与 tRPC ✅ 有专用检测器；Next.js 有版本感知治理；NestJS 部分支持。Django、FastAPI 及另外 8 个待适配——框架适配是 #1 产品缺口。
 
 ### Progmune 不覆盖什么（诚实边界）
@@ -172,7 +174,8 @@ SDK (src/sdk.ts)           verify() → APPROVED / NEEDS_REVIEW / BLOCKED
        ├─ 策略引擎           企业策略执行（ALLOW/WARN/BLOCK）
        ├─ SSG 校验器         协议状态机验证
        ├─ 协议检测器         基于正则的协议步骤检测（22 个检测器）
-       ├─ IR 提取器          TypeScript（ts-morph）+ Python（ast 模块）→ 函数 IR；
+       ├─ IR 提取            注册表式：TS（ts-morph）+ Python（ast 模块）
+       │                     合并为每项目一份函数 IR；
        │                     源码级标记：污点追踪、import 解析、限定调用链、跨文件模板分析
        ├─ 修复执行器         detect → plan → fix → validate → commit/rollback
        └─ 知识库             31 个域、140 条规则、证据链
