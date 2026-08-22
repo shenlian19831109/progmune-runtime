@@ -1,5 +1,21 @@
 # Changelog
 
+## [3.4.1] — 2026-08-22
+
+### 修复：`npm run check` 四项失败根因
+
+- protocol-registry：protocols.json 解析加包目录回退——在无协议文件的项目目录下运行时，命名空间初始状态不再退化为仅 `_global`（session 记录与 check 重建的世界一致）
+- checkLedgerConsistency：只比较 ledger 中记录过的非空快照命名空间（早期 session 的空数组/部分命名空间不参与比较）
+- check：历史约定兼容——早期 session 的 `INIT` 初始状态按当前约定（`UNAUTHENTICATED`）规范化比较（只比较、不改盘）
+- audit：`.progmune_allowlist` 祖父条款——存量手写代码一次入册，新文件仍受覆盖率约束
+- 结果：check 从 4 失败 → 0 失败（免疫状态正常），1313/1313 Ledger 全过
+
+### 新增：P5 操作级安全层 v1
+
+- 权限决策引擎（auto / sandbox / approve / deny 四级）+ patrol / agent 预设
+- FsSandbox 白名单（巡逻报告等产品文件）；shell 执行审批门（`--yes` 或交互确认）
+- **commit 恒拒绝且不可被 `--yes` 绕过**（修复信任悖论：自动修复/自动合并永不）
+
 ## [3.4.0] — 2026-08-21
 
 ### 新增：Agent 化 P1–P4.5
