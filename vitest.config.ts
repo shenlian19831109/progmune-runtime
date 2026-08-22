@@ -9,6 +9,17 @@ export default defineConfig({
     // Stress/soak tests may need longer
     hookTimeout: 120_000,
 
+    // 本地语料丰富时（.progmune_corpus 864+ 条），function-synonyms 等
+    // 语料重度测试在并行 worker 内存竞争下会触到 V8 自适应堆上限（~2GB）OOM。
+    // 用 forks 子进程池 + 显式 4GB 堆上限（threads 池的 execArgv 不生效）。
+    // CI 干净检出无语料，不受影响。
+    pool: "forks",
+    poolOptions: {
+      forks: {
+        execArgv: ["--max-old-space-size=4096"],
+      },
+    },
+
     // Coverage
     coverage: {
       provider: "v8",

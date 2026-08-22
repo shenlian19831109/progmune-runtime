@@ -54,6 +54,11 @@ describe("Function Name Normalization", () => {
 });
 
 describe("Synonym Normalization Impact", () => {
+  // 注：这两个测试的重度与本地语料规模线性相关（.progmune_corpus 864+ 条时
+  // 实测 40-130s）。CI 干净检出无语料 → 秒级通过；本地语料丰富 → 需放宽超时。
+  // 显式超时 180s，不依赖 vitest 全局 30s。
+  const CORPUS_HEAVY_TIMEOUT = 180_000;
+
   it("reduces unique function count via normalization", async () => {
     const report = await runSynonymNormalization();
 
@@ -61,7 +66,7 @@ describe("Synonym Normalization Impact", () => {
     expect(report.uniqueAfter).toBeLessThanOrEqual(report.uniqueBefore);
 
     printSynonymReport(report);
-  });
+  }, CORPUS_HEAVY_TIMEOUT);
 
   it("bootstrap function overlap improves with normalization", async () => {
     // Baseline without normalization
@@ -74,5 +79,5 @@ describe("Synonym Normalization Impact", () => {
     console.log(`Function overlap: ${(after.functionOverlap*100).toFixed(0)}%`);
     console.log(`State overlap: ${(after.stateOverlap*100).toFixed(0)}%`);
     console.log(`Behavioral: ${after.behavioralMatch}/${after.behavioralTotal}`);
-  }, 30000);
+  }, CORPUS_HEAVY_TIMEOUT);
 });

@@ -99,8 +99,28 @@ export interface BootstrapResult {
 
 /**
  * Run the bootstrap validation experiment.
+ *
+ * 无参调用结果缓存（纯计算、确定性）：同进程内多次调用复用同一结果。
+ * 运行时与本地语料规模线性相关（语料丰富时可 >30s / 2GB 堆）——
+ * function-synonyms 等测试会 5 次重计算，缓存降为 1 次。
  */
+let _defaultResultCache: Promise<BootstrapResult> | null = null;
+
 export async function runBootstrapValidation(
+  existingRules?: Map<string, StateAnnotation>,
+  extraSequences?: string[][]
+): Promise<BootstrapResult> {
+  if (!existingRules && !extraSequences) {
+    if (!_defaultResultCache) {
+      _defaultResultCache = runBootstrapValidationUncached();
+    }
+    return _defaultResultCache;
+  }
+  return runBootstrapValidationUncached(existingRules, extraSequences);
+}
+
+/** 原实现（无缓存）。 */
+async function runBootstrapValidationUncached(
   existingRules?: Map<string, StateAnnotation>,
   extraSequences?: string[][]
 ): Promise<BootstrapResult> {
