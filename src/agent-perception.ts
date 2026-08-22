@@ -12,7 +12,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import { execSync } from "child_process";
-import { extractIR } from "./extract-ir";
+import { extractProjectIR } from "./extract-project-ir";
 
 // ── Types ──
 
@@ -107,7 +107,7 @@ export function extractIRWithDelta(
   projectPath: string,
   prevNames?: Set<string>,
 ): { ir: any[]; delta: IRDelta } {
-  const ir = extractIR(projectPath);
+  const ir = extractProjectIR(projectPath);
   const names = ir.map((f: any) => String(f.name || "")).filter(Boolean);
   if (!prevNames) {
     return { ir, delta: { added: [], removed: [], functionCount: names.length } };

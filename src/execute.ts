@@ -11,7 +11,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { plan } from "./planner";
 import type { PlanResult } from "./planner";
-import { extractIR } from "./extract-ir";
+import { extractProjectIR } from "./extract-project-ir";
 import { recordFailure, classifyError, classifyPlanError } from "./failure-collector";
 import { emitCode } from "./emitter";
 export interface ExecuteResult {
@@ -110,7 +110,7 @@ export async function execute(
   // 1. IR extraction
   let ir: any[];
   try {
-    ir = extractIR(projectPath);
+    ir = extractProjectIR(projectPath);
   } catch (e: any) {
     return { success: false, degraded: false, code: "", sessionId: "", hash: "", ruleHash: "", irFunctionCount: 0, protocolRuleCount: 0, violations: 0, repairApplied: false, repairCount: 0, repairBranchIds: [], branchWinner: undefined, error: `IR extraction failed: ${e.message}` };
   }

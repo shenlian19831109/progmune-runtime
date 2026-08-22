@@ -59,6 +59,7 @@ SDK (src/sdk.ts)           verify() / fix() → BLOCK / WARN / ALLOW
 | **SSG Validator** | `src/ssg-validator.ts` | Protocol state machine. Consumes function annotations (`pre_states`/`post_states`/`aliases`) and validates call sequences against protocol definitions. |
 | **Protocol Detector** | `src/protocol-detector.ts` | Regex-based protocol step detection. ~22 detectors + 26 safeguards. All patterns use `\w*` prefix/suffix for language-agnostic matching. |
 | **IR Extractor** | `src/extract-ir.ts` | TypeScript AST → Function IR using ts-morph. Extracts function signatures, JSDoc tags (`@purpose`, `@requires`, `@produces`, `@useWhen`), protocol annotations. |
+| **IR Extraction (merged)** | `src/extract-project-ir.ts` | Language registry (detect + extract per language): TypeScript + Python merged into one FunctionInfo list. Shared by agent loop (`extractIRWithDelta`), `execute()`'s ir.json write, and MCP server. Adding a language = one registry entry. |
 | **Trust Engine** | `src/trust/engine.ts` | 5-stage pipeline: Collect → Normalize → Score → Decide → Assemble. 4 dimensions: Policy Compliance (35%), Protocol Safety (30%), Verification Coverage (20%), Governance Integrity (15%). |
 | **Policy Engine** | `src/policy/engine.ts` | Evaluates policy rules against certified files. Returns ALLOW/WARN/BLOCK. |
 | **Repair Executor** | `src/repair-executor.ts` | applyFix → verifyRepair → commit/rollback pipeline. |

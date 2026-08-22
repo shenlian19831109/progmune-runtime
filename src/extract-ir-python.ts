@@ -14,12 +14,20 @@
 
 import { execSync } from "child_process";
 import * as fs from "fs";
+import * as os from "os";
 import * as path from "path";
 import type { FunctionInfo } from "./extract-ir";
 
-export function extractIRPython(projectRoot: string): FunctionInfo[] {
+/**
+ * @param projectRoot - Project root to scan
+ * @param outPath - Output path for the Python script. Defaults to a temp
+ *   file (cleaned up afterwards) so extraction never clobbers the project's
+ *   own ir.json — the merged extractProjectIR runs this on TS projects too.
+ *   Pass an explicit path when the extracted IR must be persisted.
+ */
+export function extractIRPython(projectRoot: string, outPath?: string): FunctionInfo[] {
   const scriptPath = path.resolve(__dirname, "..", "tools", "extract_ir.py");
-  const irPath = path.resolve(projectRoot, "ir.json");
+  const irPath = outPath ?? path.join(os.tmpdir(), `progmune-py-ir-${process.pid}-${Date.now()}.json`);
 
   const cmd = `python3 "${scriptPath}" "${projectRoot}" "${irPath}"`;
   try {
@@ -31,7 +39,14 @@ export function extractIRPython(projectRoot: string): FunctionInfo[] {
 
   if (!fs.existsSync(irPath)) return [];
 
-  const raw = JSON.parse(fs.readFileSync(irPath, "utf-8"));
+  let raw: unknown;
+  try {
+    raw = JSON.parse(fs.readFileSync(irPath, "utf-8"));
+  } finally {
+    if (!outPath) {
+      try { fs.unlinkSync(irPath); } catch { /* 临时文件清理失败无害 */ }
+    }
+  }
   if (!Array.isArray(raw)) return [];
 
   // Map Python IR records to FunctionInfo

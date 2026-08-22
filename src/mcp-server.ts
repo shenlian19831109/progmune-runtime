@@ -42,8 +42,7 @@ for (const envPath of [
 }
 
 import { plan } from "./planner.js";
-import { extractIR } from "./extract-ir.js";
-import { extractIRPython, isPythonProject } from "./extract-ir-python.js";
+import { extractProjectIR, detectLanguages } from "./extract-project-ir.js";
 import { emitCode } from "./emitter.js";
 import { recordRun } from "./feedback.js";
 import { reportFingerprints } from "./immune-reporter.js";
@@ -443,10 +442,9 @@ Then restart Claude Code.`,
       }
 
       // IR extraction — auto-detect language
-      const isPython = isPythonProject(projectPath);
       let ir: FunctionInfo[];
       try {
-        ir = isPython ? extractIRPython(projectPath) : extractIR(projectPath);
+        ir = extractProjectIR(projectPath);
       } catch (e: any) {
         return {
           content: [
@@ -610,9 +608,9 @@ Then restart Claude Code.`,
 
       // 1. IR extraction — auto-detect language
       try {
-        const py = isPythonProject(projectPath);
-        const ir = py ? extractIRPython(projectPath) : extractIR(projectPath);
-        pass(`IR (${py ? "Python" : "TypeScript"}): ${ir.length} functions extracted`);
+        const langs = detectLanguages(projectPath);
+        const ir = extractProjectIR(projectPath);
+        pass(`IR (${langs.length > 0 ? langs.join("+") : "无已支持语言"}): ${ir.length} functions extracted`);
       } catch (e: any) {
         fail(`IR extraction: ${e.message}`);
       }

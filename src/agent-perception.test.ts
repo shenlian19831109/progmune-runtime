@@ -7,19 +7,19 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { execSync } from "child_process";
-import { extractIR } from "./extract-ir";
+import { extractProjectIR } from "./extract-project-ir";
 import { collectGitContext, extractIRWithDelta, RepoWatcher } from "./agent-perception";
 
 vi.mock("child_process", () => ({
   execSync: vi.fn(),
 }));
 
-vi.mock("./extract-ir", () => ({
-  extractIR: vi.fn(),
+vi.mock("./extract-project-ir", () => ({
+  extractProjectIR: vi.fn(),
 }));
 
 const mockExecSync = vi.mocked(execSync);
-const mockExtractIR = vi.mocked(extractIR);
+const mockExtractProjectIR = vi.mocked(extractProjectIR);
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -56,7 +56,7 @@ describe("agent-perception", () => {
   });
 
   it("extractIRWithDelta 计算新增/消失函数差集", () => {
-    mockExtractIR.mockReturnValue([
+    mockExtractProjectIR.mockReturnValue([
       { name: "verify_password" },
       { name: "main" },
     ] as any);
