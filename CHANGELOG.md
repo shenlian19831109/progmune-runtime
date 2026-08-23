@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.7.1] — 2026-08-23
+
+### 修复：词段匹配门控（仅项目函数适用）
+
+- `ssg-bridge` 的词段匹配（Strategy 2）增加 `projectFunctions` 门控：只对项目函数做词段匹配——它是为改名协议原语设计的（协议原语必然是项目内函数，如 S5 的 `create_active_session`），外部库调用（如 Node 的 `readFileSync`）经词段撞上 `read_file` 是纯噪声
+- 外部 API 的语义桥接不受影响：alias 配置（Strategy 0b）与 domain 关键词（Strategy 3）照常工作；未提供集合时保持旧行为（向后兼容）
+- 共享集合构造 `collectProjectFunctionNames`（`src/call-sequence.ts`，全名/裸名/小写变体三形态收录），生产引擎与协议盲测扫描器同款传入
+
+### 修复：合并形态 ir.json 恢复 IR-first（3.5.0 起静默回退的回归）
+
+- `extractCallSequencesFromIR` 与项目 IR 注解合并块兼容 `{ typeMap, functions }` 合并对象（execute/MCP 写盘形态）——此前 `Array.isArray` 守卫使所有 TS 项目自 3.5.0 起静默走正则回退，P4.5/P4.6 的 IR-first 语义在合并形态下未生效
+- 配合词段门控后实测：自身 1966 函数 451 入口序列，SSG 违规 346→**2**（均真实命中，`writeTrajectoryFile`→`write_file`），Trust 总分 60→83（APPROVED）
+- 协议盲测 v1.2 复测零漂移：66 可测金标 64 检出（Recall 97% / Precision 100% / 0 FP），S5 改名检测不受门控影响
+
 ## [3.7.0] — 2026-08-23
 
 ### 新增：P4.6 跨函数传播（入口展开 + 片段抑制）
