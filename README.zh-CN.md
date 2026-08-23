@@ -196,10 +196,12 @@ SDK (src/sdk.ts)           verify() → APPROVED / NEEDS_REVIEW / BLOCKED
 ## 社区与反馈
 
 <p align="center">
-  <img src="https://github.com/shenlian19831109/progmune-runtime/blob/main/assets/qr-relay.png?raw=true" width="240" alt="Progmune 用户讨论群二维码" />
+  <img src="https://github.com/shenlian19831109/progmune-runtime/blob/main/assets/wechat-group.png?raw=true" width="200" alt="微信群二维码" />
+  &nbsp;&nbsp;&nbsp;
+  <img src="https://github.com/shenlian19831109/progmune-runtime/blob/main/assets/whatsapp-group.jpg?raw=true" width="200" alt="WhatsApp 群二维码" />
 </p>
 
-你的意见塑造 Progmune。扫码加入用户讨论群（微信），或通过 [GitHub Issue](https://github.com/shenlian19831109/progmune-runtime/issues) 提交缺陷报告、功能需求与建议。
+你的意见塑造 Progmune。扫码加入用户讨论群（微信 / WhatsApp），或通过 [GitHub Issue](https://github.com/shenlian19831109/progmune-runtime/issues) 提交缺陷报告、功能需求与建议。
 
 ---
 
