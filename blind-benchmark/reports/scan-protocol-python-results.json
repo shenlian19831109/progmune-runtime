@@ -1,7 +1,7 @@
 {
-  "scan_generated": "2026-08-23T02:32:10.935Z",
+  "scan_generated": "2026-08-23T06:31:57.778Z",
   "projects_scanned": 24,
-  "total_violations": 32,
+  "total_violations": 40,
   "results": [
     {
       "projectId": "proto_T0_S1",
@@ -335,25 +335,77 @@
       "projectId": "proto_T5_S1",
       "functionCount": 18,
       "sequenceCount": 17,
-      "violations": []
+      "violations": [
+        {
+          "file": "files.py",
+          "function": "read_config_only",
+          "failingFunction": "(end-of-sequence)",
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        },
+        {
+          "file": "files.py",
+          "function": "read_log_only",
+          "failingFunction": "(end-of-sequence)",
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        }
+      ]
     },
     {
       "projectId": "proto_T5_S2",
       "functionCount": 18,
       "sequenceCount": 17,
-      "violations": []
+      "violations": [
+        {
+          "file": "files.py",
+          "function": "_do_read_config_only",
+          "failingFunction": "(end-of-sequence)",
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        },
+        {
+          "file": "files.py",
+          "function": "_do_read_log_only",
+          "failingFunction": "(end-of-sequence)",
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        }
+      ]
     },
     {
       "projectId": "proto_T5_S3",
       "functionCount": 18,
       "sequenceCount": 17,
-      "violations": []
+      "violations": [
+        {
+          "file": "files.py",
+          "function": "FlowService.svc_read_config_only",
+          "failingFunction": "(end-of-sequence)",
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        },
+        {
+          "file": "files.py",
+          "function": "FlowService.svc_read_log_only",
+          "failingFunction": "(end-of-sequence)",
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        }
+      ]
     },
     {
       "projectId": "proto_T5_S4",
       "functionCount": 18,
       "sequenceCount": 17,
-      "violations": []
+      "violations": [
+        {
+          "file": "files.py",
+          "function": "read_config_only",
+          "failingFunction": "(end-of-sequence)",
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        },
+        {
+          "file": "files.py",
+          "function": "read_log_only",
+          "failingFunction": "(end-of-sequence)",
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        }
+      ]
     }
   ]
 }

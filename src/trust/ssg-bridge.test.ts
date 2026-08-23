@@ -204,7 +204,7 @@ describe("SSG Bridge", () => {
     });
 
     it("detects missing cleanup (file opened but not closed)", () => {
-      // open_file without close_file — state machine will show FILE_OPEN still active
+      // open_file without close_file — held FILE_OPEN at end of sequence
       const steps = [
         step("fs.openSync", "conn_mgmt", "Open file"),
         step("fs.readFileSync", "conn_mgmt", "Read file contents"),
@@ -212,10 +212,15 @@ describe("SSG Bridge", () => {
       ];
       const result = validate(steps);
 
-      // The SSG state machine tracks that file is still open.
-      // While it may not report this as a violation (since close_file
-      // isn't called), the state trace should show FILE_OPEN is active.
-      expect(result.trace.length).toBe(steps.length);
+      // endState 检查：序列末尾资源未释放 → 违规 + 追加式修复路径
+      const endState = result.violations.filter((v) => v.endState);
+      expect(endState).toHaveLength(1);
+      expect(endState[0].namespace).toBe("file");
+      expect(endState[0].currentState).toContain("FILE_OPEN");
+      expect(endState[0].fixPath).toEqual(["close_file"]);
+      expect(result.passed).toBe(false);
+      // trace 含步骤节点 + 末尾 endState 节点
+      expect(result.trace.length).toBe(steps.length + 1);
     });
   });
 

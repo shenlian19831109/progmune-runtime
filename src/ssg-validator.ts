@@ -29,6 +29,37 @@ export interface SSGRejection {
   endState?: boolean;
 }
 
+/** 资源生命周期命名空间：会话/认证流合法地以活跃会话结束（SESSION_ACTIVE 不是泄漏），
+ *  只有资源类命名空间（文件/数据库/连接/流等）做序列末尾持有状态检查。 */
+export const RESOURCE_NAMESPACE_RE = /^(file|db|database|connection|conn|socket|stream|resource|io)/i;
+
+export interface HeldResourceState {
+  state: string;
+  releaseFn: string;
+  namespace: string;
+}
+
+/**
+ * 找出资源持有状态候选：某规则的 pre_states 与 invalidate 的交集
+ * （获取/释放语义——如 FILE_OPEN 由 open_file 设置、close_file 释放），
+ * 仅限资源生命周期命名空间。planner 与 trust 桥接共用（endState 检查）。
+ */
+export function findHeldResourceStates(
+  rules: Map<string, StateAnnotation>,
+): HeldResourceState[] {
+  const held: HeldResourceState[] = [];
+  for (const [fn, ann] of rules) {
+    const ns = ann.namespace || "";
+    if (!RESOURCE_NAMESPACE_RE.test(ns)) continue;
+    for (const s of ann.invalidate || []) {
+      if ((ann.pre_states || []).includes(s)) {
+        held.push({ state: s, releaseFn: fn, namespace: ns });
+      }
+    }
+  }
+  return held;
+}
+
 export interface SSGStepResult {
   valid: boolean;
   rejection?: SSGRejection;

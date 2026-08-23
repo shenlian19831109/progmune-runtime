@@ -13,7 +13,7 @@
  *   T2 missing_precondition_annotation 项目 @progmune 注解路径（P4.5 合并，generate_jwt pre=[PASSWORD_VERIFIED]）
  *   T3 use_after_revoke                invalidate 后重入（revoke_token → create_session）
  *   T4 use_after_close                 invalidate 后重入（close_file → read_file）
- *   T5 missing_cleanup                 endState 检查未实现——已知缺口（detectionExpected=false）
+ *   T5 missing_cleanup                 endState 检查（序列末尾资源未释放）
  *
  * 植入的违规链全部落在单个函数体内（当前协议层按 per-function 序列验证，
  * 跨函数状态传播未实现——与 C 的 L3 同类边界，报告里如实记录）。
@@ -73,8 +73,8 @@ export const VIOLATION_TYPES: ViolationTypeDef[] = [
   },
   {
     id: "T5", protocol: "file", violationType: "missing_cleanup",
-    detectionExpected: false,
-    description: "open_file 之后无 close_file（endState 检查未实现——已知缺口）",
+    detectionExpected: true,
+    description: "open_file 之后无 close_file（endState 检查：序列末尾资源未释放）",
     fixSuggestion: "补 close_file 释放句柄",
   },
 ];

@@ -3,7 +3,7 @@
   "annotated_by": "plant-config + scan strict-location match",
   "annotated_at": "2026-08-23",
   "version": "1.0",
-  "detector_scan_generated": "2026-08-23T02:32:10.935Z",
+  "detector_scan_generated": "2026-08-23T06:31:57.778Z",
   "projects": [
     {
       "project_id": "proto_T1_S1",
@@ -714,10 +714,10 @@
           "severity": "medium",
           "protocol": "Resource Lifecycle",
           "violation_type": "missing_cleanup",
-          "description": "open_file 之后无 close_file（endState 检查未实现——已知缺口）",
+          "description": "open_file 之后无 close_file（endState 检查：序列末尾资源未释放）",
           "fix_suggestion": "补 close_file 释放句柄",
-          "detection_expected": false,
-          "progmune_detected": false,
+          "detection_expected": true,
+          "progmune_detected": true,
           "false_positive": false
         },
         {
@@ -728,10 +728,10 @@
           "severity": "medium",
           "protocol": "Resource Lifecycle",
           "violation_type": "missing_cleanup",
-          "description": "open_file 之后无 close_file（endState 检查未实现——已知缺口）",
+          "description": "open_file 之后无 close_file（endState 检查：序列末尾资源未释放）",
           "fix_suggestion": "补 close_file 释放句柄",
-          "detection_expected": false,
-          "progmune_detected": false,
+          "detection_expected": true,
+          "progmune_detected": true,
           "false_positive": false
         }
       ]
@@ -757,10 +757,10 @@
           "severity": "medium",
           "protocol": "Resource Lifecycle",
           "violation_type": "missing_cleanup",
-          "description": "open_file 之后无 close_file（endState 检查未实现——已知缺口）",
+          "description": "open_file 之后无 close_file（endState 检查：序列末尾资源未释放）",
           "fix_suggestion": "补 close_file 释放句柄",
-          "detection_expected": false,
-          "progmune_detected": false,
+          "detection_expected": true,
+          "progmune_detected": true,
           "false_positive": false
         },
         {
@@ -771,10 +771,10 @@
           "severity": "medium",
           "protocol": "Resource Lifecycle",
           "violation_type": "missing_cleanup",
-          "description": "open_file 之后无 close_file（endState 检查未实现——已知缺口）",
+          "description": "open_file 之后无 close_file（endState 检查：序列末尾资源未释放）",
           "fix_suggestion": "补 close_file 释放句柄",
-          "detection_expected": false,
-          "progmune_detected": false,
+          "detection_expected": true,
+          "progmune_detected": true,
           "false_positive": false
         }
       ]
@@ -800,10 +800,10 @@
           "severity": "medium",
           "protocol": "Resource Lifecycle",
           "violation_type": "missing_cleanup",
-          "description": "open_file 之后无 close_file（endState 检查未实现——已知缺口）",
+          "description": "open_file 之后无 close_file（endState 检查：序列末尾资源未释放）",
           "fix_suggestion": "补 close_file 释放句柄",
-          "detection_expected": false,
-          "progmune_detected": false,
+          "detection_expected": true,
+          "progmune_detected": true,
           "false_positive": false
         },
         {
@@ -814,10 +814,10 @@
           "severity": "medium",
           "protocol": "Resource Lifecycle",
           "violation_type": "missing_cleanup",
-          "description": "open_file 之后无 close_file（endState 检查未实现——已知缺口）",
+          "description": "open_file 之后无 close_file（endState 检查：序列末尾资源未释放）",
           "fix_suggestion": "补 close_file 释放句柄",
-          "detection_expected": false,
-          "progmune_detected": false,
+          "detection_expected": true,
+          "progmune_detected": true,
           "false_positive": false
         }
       ]
@@ -843,10 +843,10 @@
           "severity": "medium",
           "protocol": "Resource Lifecycle",
           "violation_type": "missing_cleanup",
-          "description": "open_file 之后无 close_file（endState 检查未实现——已知缺口）",
+          "description": "open_file 之后无 close_file（endState 检查：序列末尾资源未释放）",
           "fix_suggestion": "补 close_file 释放句柄",
-          "detection_expected": false,
-          "progmune_detected": false,
+          "detection_expected": true,
+          "progmune_detected": true,
           "false_positive": false
         },
         {
@@ -857,10 +857,10 @@
           "severity": "medium",
           "protocol": "Resource Lifecycle",
           "violation_type": "missing_cleanup",
-          "description": "open_file 之后无 close_file（endState 检查未实现——已知缺口）",
+          "description": "open_file 之后无 close_file（endState 检查：序列末尾资源未释放）",
           "fix_suggestion": "补 close_file 释放句柄",
-          "detection_expected": false,
-          "progmune_detected": false,
+          "detection_expected": true,
+          "progmune_detected": true,
           "false_positive": false
         }
       ]
@@ -868,13 +868,13 @@
   ],
   "aggregate": {
     "projects_annotated": 20,
-    "measurable_findings": 32,
-    "progmune_detected": 32,
+    "measurable_findings": 40,
+    "progmune_detected": 40,
     "progmune_missed": 0,
     "overall_recall": 100,
     "overall_precision": 100,
     "false_positives_total": 0,
-    "known_gap_findings": 8,
+    "known_gap_findings": 0,
     "known_gap_fired": 0,
     "note": "T5 missing_cleanup (endState) 检查未实现——known_gap 金标不计入头条 P/R。跨函数状态传播与 LLM 语义桥接层不在本基准测量范围。"
   }

@@ -73,7 +73,7 @@ Ledger             ✅           ❌           ❌         ❌          ❌
 |------|-----|
 | 检测方式 | 正则匹配认证初始化 + 清理配对（TS）；`@progmune` 注解协议状态机（Python） |
 | TS 覆盖 | ✅ 完整（含 Ownership Check：ownerId/authorId 比较 + 权限门） |
-| Python 覆盖 | ⚠️ 注解式协议提取 + SSG 校验；**协议盲测 v1（2026-08-23）：32 gold，Recall/Precision 100%/100%，0 FP**（BASELINE_PROTOCOL_PYTHON_v1）。仍缺：endState 检查、跨函数传播、任意命名验证 |
+| Python 覆盖 | ⚠️ 注解式协议提取 + SSG 校验（含 endState 资源未释放检查）；**协议盲测 v1（2026-08-23）：40 gold，Recall/Precision 100%/100%，0 FP**（BASELINE_PROTOCOL_PYTHON_v1）。仍缺：跨函数传播、任意命名验证 |
 | C 覆盖 | ⚠️ 仅识别 `auth_*` 函数，未覆盖 OAuth2.0/OIDC 流程 |
 | 未覆盖 | OAuth2.0 授权码流程、OIDC、SAML、JWT 签名验证、API Key 管理、Session 固定攻击 |
 
@@ -133,7 +133,7 @@ Ledger             ✅           ❌           ❌         ❌          ❌
 | 检测方式 | 8 对 alloc/free 模式匹配 |
 | C 覆盖 | ⚠️ malloc/free, fopen/fclose, SSL alloc/free, socket/bind/close |
 | TS 覆盖 | ⚠️ 仅正则匹配，TS 的 GC 管理下资源泄漏模式完全不同 |
-| Python 覆盖 | ⚠️ 注解式 file 命名空间（open/read/close 协议）；协议盲测 v1 中 use_after_close 8/8 检出（见 3.1 引用基线） |
+| Python 覆盖 | ⚠️ 注解式 file 命名空间（open/read/close 协议）；协议盲测 v1 中 use_after_close 与 missing_cleanup（endState）各 8/8 检出（见 3.1 引用基线） |
 | 未覆盖 | 数据库连接池、文件句柄泄漏、Promise 未处理、事件监听器未移除 |
 
 ### 3.9 Payment

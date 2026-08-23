@@ -1,11 +1,11 @@
 /**
  * Python 协议盲测 harness 回归测试
  *
- * 用生成器在临时目录生成最小语料（broken / clean / known-gap 各一个），
+ * 用生成器在临时目录生成最小语料（broken / clean / endState 各一个），
  * 走生产 SSG 桥接校验器（无 LLM），断言：
  *   - T1 broken：2 处植入全部检出（file+function 定位）
  *   - T0 clean：0 误报
- *   - T5 known-gap：0 命中（endState 检查未实现——已知缺口，防止静默回归）
+ *   - T5 endState：2 处资源未释放全部检出（endState 检查已上线）
  */
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
@@ -59,14 +59,19 @@ describe("Python 协议盲测 harness", () => {
     expect(result.violations).toHaveLength(0);
   });
 
-  it("T5 known-gap：endState 未实现，0 命中（锁定已知缺口）", () => {
+  it("T5 endState：open 后不 close 全部检出（资源未释放）", () => {
     const plants = generateProtocolProject("proto_T5_S1", findType("T5"), STYLES[0], tmpDir);
-    expect(plants.every((p) => p.detectionExpected === false)).toBe(true);
+    expect(plants.every((p) => p.detectionExpected === true)).toBe(true);
 
     const result = scanProjectProtocol(path.join(tmpDir, "proto_T5_S1"), "proto_T5_S1");
 
-    // 当前生产校验器不检查资源未释放——如果这里开始命中，说明 endState 上线了，
-    // 需要同步改金标 detectionExpected 并更新基线报告。
-    expect(result.violations).toHaveLength(0);
+    expect(result.violations).toHaveLength(2);
+    for (const v of result.violations) {
+      expect(v.file).toBe("files.py");
+      expect(v.reason).toContain("end-state");
+      expect(v.reason).toContain("FILE_OPEN");
+    }
+    const fns = result.violations.map((v) => v.function).sort();
+    expect(fns).toEqual(["read_config_only", "read_log_only"]);
   });
 });

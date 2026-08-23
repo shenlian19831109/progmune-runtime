@@ -26,6 +26,7 @@ import {
   findFixPathStatic,
   hashRules,
   parseProtocolsFromJSON,
+  findHeldResourceStates,
 } from "../ssg-validator";
 
 // ═══════════════════════════════════════════════════════════════
@@ -45,6 +46,9 @@ export interface SSGViolation {
   fixPath: string[];
   /** The matched protocol rule name (if any) */
   matchedRule?: string;
+  /** End-of-sequence violation (held resource not released) — the fix is
+   *  APPENDED at the end of the function, not inserted before a blocked call. */
+  endState?: boolean;
   /** Human-readable explanation */
   explanation: string;
 }
@@ -403,6 +407,21 @@ export function validateSequenceWithSSG(
     }
   })();
 
+  // 本序列中"新获取"的资源状态（endState 检查只针对本序列获取、未释放的状态——
+  // 继承自命名空间初始状态的不算泄漏，与 planner 语义一致）
+  const acquiredStates = new Set<string>();
+  const trackAcquiredStates = (
+    before: Record<string, string[]> | undefined,
+    after: Record<string, string[]>,
+  ) => {
+    for (const ns of Object.keys(after)) {
+      const prev = before?.[ns] || [];
+      for (const s of after[ns]) {
+        if (!prev.includes(s)) acquiredStates.add(`${ns}::${s}`);
+      }
+    }
+  };
+
   for (let i = 0; i < steps.length; i++) {
     const step = steps[i];
     const namespace = DOMAIN_TO_NAMESPACE[step.domain] || "stateless";
@@ -470,6 +489,7 @@ export function validateSequenceWithSSG(
         // Advance state
         ctx.ledger.push(result.transition);
         ctx.currentState = result.transition.statesAfter;
+        trackAcquiredStates(result.transition.statesBefore, result.transition.statesAfter);
       } else {
         violatedCalls++;
         const rejection = result.rejection!;
@@ -506,6 +526,7 @@ export function validateSequenceWithSSG(
         // Still advance state on rejection (best-effort: apply transition anyway
         // so subsequent calls can be validated)
         ctx.ledger.push(result.transition);
+        trackAcquiredStates(result.transition.statesBefore, result.transition.statesAfter);
       }
     } catch {
       // Validation threw — record as unmatched (graceful degradation)
@@ -533,6 +554,39 @@ export function validateSequenceWithSSG(
     });
   }
 
+  // ── End-of-sequence check: held resources must be released (resource leak).
+  // 共享判定见 ssg-validator.findHeldResourceStates：仅资源生命周期命名空间 +
+  // pre/invalidate 交集；只报本序列获取且最终仍持有的状态（对齐 planner）。
+  for (const hs of findHeldResourceStates(rules)) {
+    const ctx = contexts.get(hs.namespace);
+    if (!ctx) continue;
+    if (!acquiredStates.has(`${hs.namespace}::${hs.state}`)) continue;
+    const cur: string[] = ctx.currentState[hs.namespace] || [];
+    if (!cur.includes(hs.state)) continue;
+
+    violatedCalls++;
+    violations.push({
+      callName: "(end-of-sequence)",
+      namespace: hs.namespace,
+      currentState: cur,
+      requiredState: [],
+      fixPath: [hs.releaseFn],
+      matchedRule: hs.releaseFn,
+      endState: true,
+      explanation:
+        `SSG end-state violation: resource state [${hs.state}] ` +
+        `acquired in this function is still held at end of sequence ` +
+        `(namespace ${hs.namespace}, current [${cur.join(", ")}]) — ` +
+        `missing release call: ${hs.releaseFn}.`,
+    });
+    trace.push({
+      call: "(end-of-sequence)",
+      namespace: hs.namespace,
+      matchedRule: hs.releaseFn,
+      valid: false,
+    });
+  }
+
   return {
     passed: violations.length === 0,
     trace,
@@ -557,19 +611,30 @@ export function ssgViolationsToTrustViolations(
 ): TrustViolation[] {
   return ssgResult.violations.map((v) => ({
     severity: "medium" as const,
-    rule_id: `SSG_${v.namespace.toUpperCase()}_STATE_VIOLATION`,
+    rule_id: v.endState
+      ? `SSG_${v.namespace.toUpperCase()}_END_STATE_VIOLATION`
+      : `SSG_${v.namespace.toUpperCase()}_STATE_VIOLATION`,
     file,
     function: funcName,
     message: v.explanation,
-    evidence: `Call: ${v.callName} | Rule: ${v.matchedRule || "unknown"} | ` +
-      `Required: [${v.requiredState.join(", ")}] | ` +
-      `Current: [${v.currentState.join(", ")}]`,
-    why: `Protocol state machine violation in namespace "${v.namespace}": ` +
-      `function "${v.callName}" cannot be called in current state ` +
-      `[${v.currentState.join(", ")}]. Required pre-states: [${v.requiredState.join(", ")}].`,
-    fix: v.fixPath.length > 0
-      ? `Insert before the violating call: ${v.fixPath.join(" → ")}`
-      : `Review protocol documentation for namespace "${v.namespace}" to understand required state transitions.`,
+    evidence: v.endState
+      ? `End-of-sequence: held resource state [${v.currentState.join(", ")}] | ` +
+        `Release call: ${v.fixPath.join(" → ") || "unknown"}`
+      : `Call: ${v.callName} | Rule: ${v.matchedRule || "unknown"} | ` +
+        `Required: [${v.requiredState.join(", ")}] | ` +
+        `Current: [${v.currentState.join(", ")}]`,
+    why: v.endState
+      ? `Protocol state machine violation in namespace "${v.namespace}": ` +
+        `a resource acquired in this function ([${v.currentState.join(", ")}]) ` +
+        `is still held when the function ends — resource leak.`
+      : `Protocol state machine violation in namespace "${v.namespace}": ` +
+        `function "${v.callName}" cannot be called in current state ` +
+        `[${v.currentState.join(", ")}]. Required pre-states: [${v.requiredState.join(", ")}].`,
+    fix: v.endState
+      ? `Append the release call at the end of the function: ${v.fixPath.join(" → ")}`
+      : v.fixPath.length > 0
+        ? `Insert before the violating call: ${v.fixPath.join(" → ")}`
+        : `Review protocol documentation for namespace "${v.namespace}" to understand required state transitions.`,
     policy_ref: `protocol-safety.ssg.${v.namespace}`,
   }));
 }
