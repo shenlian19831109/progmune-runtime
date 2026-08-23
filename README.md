@@ -197,7 +197,7 @@ SDK (src/sdk.ts)           verify() → APPROVED / NEEDS_REVIEW / BLOCKED
 ## Community & Feedback
 
 <p align="center">
-  <img src="https://github.com/shenlian19831109/progmune-runtime/blob/main/assets/wechat-group.png?raw=true" width="240" alt="Progmune user discussion group QR code" />
+  <img src="https://github.com/shenlian19831109/progmune-runtime/blob/main/assets/qr-relay.png?raw=true" width="240" alt="Progmune user discussion group QR code" />
 </p>
 
 Your feedback shapes Progmune. Scan the QR code to join the user discussion group (WeChat), or open a [GitHub Issue](https://github.com/shenlian19831109/progmune-runtime/issues) for bug reports, feature requests, and suggestions.

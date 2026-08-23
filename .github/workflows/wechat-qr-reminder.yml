@@ -56,18 +56,19 @@ jobs:
           fi
 
           body=$(printf '%s\n' \
-            "微信群二维码 **7 天过期**，仓库里的 \`assets/wechat-group.png\` 已经超过 6 天没有更新（上次更新：${last}），扫码可能已失效。" \
+            "微信群二维码 **7 天过期**，仓库里的 \`assets/wechat-group.png\` 已经超过 6 天没有更新（上次更新：${last}），活码中转页可能已失效。" \
             '' \
-            '### 更新方法' \
+            '### 更新方法（活码中转：README 里的码不用动）' \
             '' \
             '1. 微信 → 群聊设置 → 群二维码 → 保存图片' \
-            '2. 覆盖仓库里的 `assets/wechat-group.png`（文件名不变，README 无需改动）' \
+            '2. 覆盖仓库里的 `assets/wechat-group.png`（中转页 qr.html 经 jsdelivr 自动加载新图）' \
             '3. `git add assets/wechat-group.png && git commit && git push`' \
-            '4. 更新后**关闭本 issue**；7 天后这个 workflow 会再次检查' \
+            '4. （可选）刷新 jsdelivr 缓存：访问 https://purge.jsdelivr.net/gh/shenlian19831109/progmune-runtime@main/assets/wechat-group.png' \
+            '5. 更新后**关闭本 issue**；7 天后这个 workflow 会再次检查' \
             '' \
             '### 一劳永逸的方案' \
             '' \
-            '普通微信群码每周都要换。建议改用**企业微信群**二维码（永久有效、上限 2000 人），或使用活码服务中转。' \
+            '改用**企业微信群**二维码（永久有效、上限 2000 人）可彻底不再换图。' \
             '' \
             '（本 issue 由 .github/workflows/wechat-qr-reminder.yml 自动创建）')
 
