@@ -2,6 +2,18 @@
 
 ## [3.7.2] — 2026-08-23
 
+### 新增：社区双渠道自动回复机器人（微信 + WhatsApp）
+
+- **微信公众号自动回复 Bot**（`wechat-bot/`）：零依赖 Node webhook——公众号开发者模式服务器配置（sha1 签名校验、安全模式 AES-256-CBC 加解密、被动回复 5s 窗口）、关键词规则自动回复（与 whatsapp-bot 同规则）、关注欢迎语；`Dockerfile`/`fly.toml` 部署模板 + 本地冒烟文档
+- **WhatsApp 自动回复 Bot**（`whatsapp-bot/`，补录）：零依赖 Node webhook——Meta webhook 握手、Graph API 回复、可选 `X-Hub-Signature-256` 签名校验、关键词规则自动回复；`Dockerfile`/`fly.toml` 部署模板 + 本地冒烟文档
+- **「群」指令升级为二维码图片消息**：新增合成图 `assets/community-qr.png`（微信 + WhatsApp 群码并排）；公众号侧经 access_token + 临时素材上传回图片消息（3 天有效、到期自动重传，未配置 `WEIXIN_APP_SECRET` 时回文字版指引）；WhatsApp 侧直接发送图片链接
+- README（中英）「社区与反馈」章节注明双渠道自动回复已上线：关注公众号 / 向官方号码发送「帮助」查看全部指令
+- 回复规则双端同步维护；版本号硬编码于规则内，发版后需同步（`RULES` 数组）
+
+### 修复：微信安全模式 AES 加解密 IV 规范
+
+- 对齐官方 WXBizMsgCrypt：**IV = AES 密钥前 16 字节、密文不带 IV 前缀**（此前误按"IV = 密文前 16 字节"导致解密错位 16 字节、`msgLen` 读出乱码、`appid mismatch`）
+
 ### 文档
 
 - CHANGELOG 悬空项收口：3.6.0「二维码占位待替换」补注 3.6.1 已换真实群码；3.7.0「合并形态 IR-first 待恢复」补注 3.7.1 已完成；3.4.0「check 失败待单独排期」补注 3.4.1 已修复

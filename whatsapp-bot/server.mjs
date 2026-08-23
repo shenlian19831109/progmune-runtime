@@ -75,12 +75,12 @@ const RULES = [
   },
   {
     keywords: ["群", "二维码", "wechat", "微信", "whatsapp group", "join", "加群"],
+    image: true, // 命中后先发社区二维码图片，再发下方文字
     reply:
-      "社区群（README 内直展二维码）：\n" +
+      "社区群二维码已发送 👆\n" +
       "• 微信群码（7 天过期，过期请去 README 刷新）\n" +
       "• WhatsApp 群\n" +
-      "均在仓库 README「社区与反馈」章节，或提 GitHub Issue：\n" +
-      "github.com/shenlian19831109/progmune-runtime/issues",
+      "群码也会同步在仓库 README「社区与反馈」章节：github.com/shenlian19831109/progmune-runtime",
   },
   {
     keywords: ["支持", "语言", "language", "python", "coverage", "覆盖", "矩阵", "go", "java"],
@@ -95,9 +95,9 @@ const RULES = [
   {
     keywords: ["version", "版本", "release", "更新"],
     reply:
-      "当前最新版本：npm 3.7.1（2026-08-23）。\n" +
-      "近两版：3.7.0 P4.6 跨函数传播 + 协议盲测 v1.2（覆盖矩阵 Python 协议行 ✅）；" +
-      "3.7.1 词段匹配门控 + 合并形态 IR-first。\n" +
+      "当前最新版本：npm 3.7.2（2026-08-23）。\n" +
+      "近两版：3.7.1 词段匹配门控 + 合并形态 IR-first；" +
+      "3.7.2 社区双渠道自动回复机器人（微信公众号 + WhatsApp）。\n" +
       "变更记录：CHANGELOG.md（npm 包内 / GitHub 仓库）",
   },
   {
@@ -114,13 +114,17 @@ const DEFAULT_REPLY =
   "收到 🤖 未命中关键词。输入「帮助」查看可用指令，" +
   "或提 GitHub Issue：github.com/shenlian19831109/progmune-runtime/issues";
 
-function matchReply(text) {
+function matchRule(text) {
   const lower = (text || "").toLowerCase();
   for (const rule of RULES) {
-    if (rule.keywords.some((kw) => lower.includes(kw))) return rule.reply;
+    if (rule.keywords.some((kw) => lower.includes(kw))) return rule;
   }
-  return DEFAULT_REPLY;
+  return null;
 }
+
+// 社区二维码合成图（微信 + WhatsApp 群码并排），与仓库 assets/community-qr.png 同步
+const GROUP_IMAGE_URL =
+  "https://raw.githubusercontent.com/shenlian19831109/progmune-runtime/main/assets/community-qr.png";
 
 // ═══════════════════════════════════════════════════════════
 // Meta Graph API：发送回复
@@ -151,6 +155,36 @@ async function sendReply(to, body) {
   } catch (err) {
     // 网络/Graph API 故障不得打崩服务：记录失败，消息丢失（WhatsApp 用户可重发）
     console.error(`[bot] send failed to ${to}: ${err?.cause?.code || err?.message || err}`);
+    return false;
+  }
+}
+
+/** 发送图片消息（link 需公网可访问） */
+async function sendImage(to, link) {
+  try {
+    const res = await fetch(`${GRAPH_API}/${PHONE_NUMBER_ID}/messages`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${ACCESS_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        recipient_type: "individual",
+        to,
+        type: "image",
+        image: { link },
+      }),
+    });
+    const text = await res.text();
+    if (!res.ok) {
+      console.error(`[bot] Graph API image ${res.status}: ${text}`);
+      return false;
+    }
+    console.log(`[bot] sent image to ${to}`);
+    return true;
+  } catch (err) {
+    console.error(`[bot] send image failed to ${to}: ${err?.cause?.code || err?.message || err}`);
     return false;
   }
 }
@@ -234,9 +268,17 @@ const server = http.createServer(async (req, res) => {
     res.end("ok");
 
     for (const { from, body } of extractTextMessages(payload)) {
-      const reply = matchReply(body);
-      console.log(`[bot] ${from}: "${body.slice(0, 80)}" → ${reply.slice(0, 40)}...`);
-      await sendReply(from, reply);
+      const rule = matchRule(body);
+      if (rule?.image) {
+        // 「群」：先发社区二维码图片，再补一句文字
+        console.log(`[bot] ${from}: "群" → 发送社区二维码图片`);
+        await sendImage(from, GROUP_IMAGE_URL);
+        await sendReply(from, rule.reply);
+      } else {
+        const reply = rule ? rule.reply : DEFAULT_REPLY;
+        console.log(`[bot] ${from}: "${body.slice(0, 80)}" → ${reply.slice(0, 40)}...`);
+        await sendReply(from, reply);
+      }
     }
     return;
   }
@@ -252,6 +294,6 @@ if (!VERIFY_TOKEN || !ACCESS_TOKEN || !PHONE_NUMBER_ID) {
   );
 }
 
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`[bot] Progmune WhatsApp bot listening on :${PORT}`);
 });

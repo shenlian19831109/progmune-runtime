@@ -1,0 +1,32 @@
+# fly.toml app configuration file generated for progmune-mp-bot on 2026-08-24T00:42:33+08:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'progmune-mp-bot'
+primary_region = 'sin'
+
+[build]
+  dockerfile = 'Dockerfile'
+
+[[services]]
+  protocol = 'tcp'
+  internal_port = 8080
+
+  [[services.ports]]
+    port = 80
+    handlers = ['http']
+
+  [[services.ports]]
+    port = 443
+    handlers = ['tls', 'http']
+
+  [services.concurrency]
+    type = 'connections'
+    hard_limit = 200
+    soft_limit = 100
+
+[[vm]]
+  memory = '1gb'
+  cpus = 1
+  memory_mb = 1024

@@ -7,6 +7,7 @@
 - `server.mjs` — 全部逻辑（webhook 握手、关键词规则、Graph API 回复、签名校验）
 - `Dockerfile` / `fly.toml` — Fly.io 部署模板
 - 回复规则在 `server.mjs` 顶部 `RULES` 数组，按顺序首个命中生效（关键词小写包含匹配），改完重启即生效
+- 「群」指令：直接发送社区二维码图片（微信 + WhatsApp 群码合成图，仓库 `assets/community-qr.png`），再补一句文字说明
 
 ## 一、Meta 侧注册（一次性，约 15 分钟）
 

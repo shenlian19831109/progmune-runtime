@@ -204,6 +204,8 @@ SDK (src/sdk.ts)           verify() → APPROVED / NEEDS_REVIEW / BLOCKED
 
 Your feedback shapes Progmune. Scan the QR code to join the user discussion group (WeChat / WhatsApp), or open a [GitHub Issue](https://github.com/shenlian19831109/progmune-runtime/issues) for bug reports, feature requests, and suggestions.
 
+**Auto-reply bots are live on both official messaging channels** — keyword-based instant replies via the WeChat Official Account bot ([`wechat-bot/`](wechat-bot/README.md)) and the WhatsApp Business API bot ([`whatsapp-bot/`](whatsapp-bot/README.md)). Follow the official account / message the business number with "help" to see all commands.
+
 ---
 
 ## Scientific Foundation

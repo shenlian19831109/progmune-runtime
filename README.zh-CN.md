@@ -203,6 +203,8 @@ SDK (src/sdk.ts)           verify() → APPROVED / NEEDS_REVIEW / BLOCKED
 
 你的意见塑造 Progmune。扫码加入用户讨论群（微信 / WhatsApp），或通过 [GitHub Issue](https://github.com/shenlian19831109/progmune-runtime/issues) 提交缺陷报告、功能需求与建议。
 
+**双渠道自动回复已上线**：微信公众号与 WhatsApp Business 均已接入关键词自动回复机器人（[`wechat-bot/`](wechat-bot/README.md) 与 [`whatsapp-bot/`](whatsapp-bot/README.md)）——关注公众号 / 向官方号码发送「帮助」即可查看全部指令，即时互动。
+
 ---
 
 ## 科学基础
