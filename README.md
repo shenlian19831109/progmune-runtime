@@ -194,6 +194,16 @@ SDK (src/sdk.ts)           verify() → APPROVED / NEEDS_REVIEW / BLOCKED
 
 ---
 
+## Community & Feedback
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/shenlian19831109/progmune-runtime/main/assets/wechat-group.png" width="240" alt="Progmune user discussion group QR code" />
+</p>
+
+Your feedback shapes Progmune. Scan the QR code to join the user discussion group (WeChat), or open a [GitHub Issue](https://github.com/shenlian19831109/progmune-runtime/issues) for bug reports, feature requests, and suggestions.
+
+---
+
 ## Scientific Foundation
 
 Progmune is built on the premise that **LLM outputs are statistical performances, not reasoning** — a view developed by Subbarao Kambhampati et al. in the position paper ["Stop Anthropomorphizing Intermediate Tokens as Reasoning/Thinking Traces!"](https://arxiv.org/abs/2505.22285) (arXiv:2505.22285, 2025) and elaborated in his ICML 2026 talk "On the Role of Verifiers and Thinking Traces in Reasoning Models". Rather than trusting what the model says about code, Progmune verifies what the program actually does — using protocol state machines, IR extraction, and evidence-backed decision chains.

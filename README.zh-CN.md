@@ -193,6 +193,16 @@ SDK (src/sdk.ts)           verify() → APPROVED / NEEDS_REVIEW / BLOCKED
 
 ---
 
+## 社区与反馈
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/shenlian19831109/progmune-runtime/main/assets/wechat-group.png" width="240" alt="Progmune 用户讨论群二维码" />
+</p>
+
+你的意见塑造 Progmune。扫码加入用户讨论群（微信），或通过 [GitHub Issue](https://github.com/shenlian19831109/progmune-runtime/issues) 提交缺陷报告、功能需求与建议。
+
+---
+
 ## 科学基础
 
 Progmune 建立在"**LLM 输出是统计表演而非推理**"这一前提上——该观点源自 Subbarao Kambhampati 等人的立场论文 ["Stop Anthropomorphizing Intermediate Tokens as Reasoning/Thinking Traces!"](https://arxiv.org/abs/2505.22285)（arXiv:2505.22285，2025），并在其 ICML 2026 演讲 "On the Role of Verifiers and Thinking Traces in Reasoning Models" 中展开。Progmune 不信任模型对代码的说法，而是用协议状态机、IR 提取与证据链验证程序实际行为。
