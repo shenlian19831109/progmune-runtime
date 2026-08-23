@@ -66,6 +66,8 @@ import {
   summarizeSSGCoverage,
 } from "./ssg-bridge";
 import type { SSGValidationResult } from "./ssg-bridge";
+import { buildCallSequences } from "../call-sequence";
+import type { CallSequence } from "../call-sequence";
 
 // ── Main Entry Point ──
 
@@ -844,13 +846,18 @@ async function collectProtocolViolations(
       } catch { /* best-effort — 回退正则扫描 */ }
     }
 
-    // ── Phase 1-5 Semantic Pipeline ──
-    const callSequences = extractCallSequencesFromProject(ctx.projectPath, ctx.language);
-    const flaggedCount = { value: 0 };
-    const cleanCount = { value: 0 };
-
     // ── SSG State Machine: load protocol rules once ──
     protocolRulesData = loadProtocolRules(ctx.projectPath);
+
+    // ── Phase 1-5 Semantic Pipeline ──
+    // 规则名集合作为展开的保留单元：规则函数不内联（调用名保留给匹配层）
+    const callSequences = extractCallSequencesFromProject(
+      ctx.projectPath,
+      ctx.language,
+      protocolRulesData ? new Set(protocolRulesData.rules.keys()) : undefined,
+    );
+    const flaggedCount = { value: 0 };
+    const cleanCount = { value: 0 };
 
     // ── P4.5: 合并项目 IR 注解协议（IR 优先，缺 namespace 继承内置 JSON） ──
     // 内置 protocols.json 的规则是通用弱约束（如 generate_jwt pre=[]），
@@ -1045,51 +1052,35 @@ async function collectProtocolViolations(
   };
 }
 
-/**
- * Extract call sequences from project source files.
- */
-interface CallSequence {
-  calls: string[];
-  file: string;
-  function?: string;
-}
-
 function extractCallSequencesFromProject(
   projectPath: string,
-  language?: string
+  language?: string,
+  keepNames?: Set<string>,
 ): CallSequence[] {
-  // P4.5: 优先 IR 精确序列（每个函数体内的真实调用，从各自入口验证）
-  const irSequences = extractCallSequencesFromIR(projectPath);
+  // P4.5/P4.6: 优先 IR 精确序列（入口函数展开 + 非入口抑制，跨函数传播）
+  const irSequences = extractCallSequencesFromIR(projectPath, keepNames);
   if (irSequences.length > 0) return irSequences;
   // 回退：正则扫描（C 等无 IR 语言保持原行为）
   return extractCallSequencesRegex(projectPath, language);
 }
 
 /**
- * P4.5: 从 ir.json 构建 per-function 调用序列。
- * 每个函数体内的 calls[] 是一条独立序列（从协议初始状态起步验证）——
- * 函数声明名单不再是验证对象；语义 marker（__progmune_*）供规则消费，不作真实调用。
+ * P4.5/P4.6: 从 ir.json 构建验证序列——入口函数展开 + 非入口抑制
+ * （共享实现见 src/call-sequence.ts buildCallSequences）：
+ * 函数声明名单不再是验证对象；语义 marker（__progmune_*）供规则消费，
+ * 不作真实调用；被项目函数调用的函数片段并入调用方展开序列。
  */
-function extractCallSequencesFromIR(projectPath: string): CallSequence[] {
+function extractCallSequencesFromIR(
+  projectPath: string,
+  keepNames?: Set<string>,
+): CallSequence[] {
   try {
     const fs = require("fs");
     const irPath = path.join(projectPath, "ir.json");
     if (!fs.existsSync(irPath)) return [];
     const ir = JSON.parse(fs.readFileSync(irPath, "utf-8"));
     if (!Array.isArray(ir)) return [];
-    const sequences: CallSequence[] = [];
-    for (const f of ir) {
-      const calls = (f.calls || []).filter(
-        (c: string) => typeof c === "string" && !c.startsWith("__progmune_"),
-      );
-      if (calls.length === 0) continue;
-      sequences.push({
-        calls,
-        file: String(f.file || ""),
-        function: String(f.name || "unknown"),
-      });
-    }
-    return sequences;
+    return buildCallSequences(ir, keepNames);
   } catch {
     return [];
   }

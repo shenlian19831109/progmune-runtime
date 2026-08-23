@@ -109,7 +109,8 @@ function main(): void {
     $description:
       "Progmune blind-benchmark gold annotations — Python PROTOCOL style-variants v1. " +
       "Gold from generator plant configuration (deterministic) + strict-location scan matching. " +
-      "Measures the SSG protocol state-machine path (annotation + built-in rules, P4.5 merge), no LLM.",
+      "Measures the SSG protocol state-machine path (annotation + built-in rules, " +
+      "P4.5 merge + P4.6 cross-function expansion, name/word-segment matching), no LLM.",
     annotated_by: "plant-config + scan strict-location match",
     annotated_at: new Date().toISOString().slice(0, 10),
     version: "1.0",
@@ -126,18 +127,18 @@ function main(): void {
       known_gap_findings: gapFindings,
       known_gap_fired: gapFired,
       note:
-        "T5 missing_cleanup (endState) 检查未实现——known_gap 金标不计入头条 P/R。" +
-        "跨函数状态传播与 LLM 语义桥接层不在本基准测量范围。",
+        "T2×S5 注解依赖前置约束不可恢复——2 处金标如实漏检（命名匹配本身正常）。" +
+        "P4.6 展开为语法内联（深度 ≤4、环安全），不做数据流分析；LLM 语义桥接层不在本基准测量范围。",
     },
   };
   fs.writeFileSync(OUT_PATH, JSON.stringify(gold, null, 2), "utf-8");
 
   // ── 打印汇总 ──
   console.log("═══ Python 协议盲测 v1 汇总 ═══");
-  console.log(`项目数: ${goldProjects.length}（${VIOLATION_TYPES.length} 类型 × 4 风格）`);
+  console.log(`项目数: ${goldProjects.length}（T1–T5 × 5 风格 + T6/T7 × 4 风格，T0 对照不计入）`);
   console.log(`可测金标: ${measurable} | 检出: ${detectedMeas} | 漏检: ${missedMeas}`);
   console.log(`RECALL = ${gold.aggregate.overall_recall}% | PRECISION = ${gold.aggregate.overall_precision}% | FP = ${fpCount}`);
-  console.log(`已知缺口金标(T5): ${gapFindings} | 意外命中: ${gapFired}`);
+  console.log(`已知缺口金标: ${gapFindings} | 意外命中: ${gapFired}`);
   if (missedMeas > 0) {
     console.log("\n漏检清单:");
     for (const p of plants) {

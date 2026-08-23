@@ -1,9 +1,9 @@
 {
-  "$description": "Progmune blind-benchmark gold annotations — Python PROTOCOL style-variants v1. Gold from generator plant configuration (deterministic) + strict-location scan matching. Measures the SSG protocol state-machine path (annotation + built-in rules, P4.5 merge), no LLM.",
+  "$description": "Progmune blind-benchmark gold annotations — Python PROTOCOL style-variants v1. Gold from generator plant configuration (deterministic) + strict-location scan matching. Measures the SSG protocol state-machine path (annotation + built-in rules, P4.5 merge + P4.6 cross-function expansion, name/word-segment matching), no LLM.",
   "annotated_by": "plant-config + scan strict-location match",
   "annotated_at": "2026-08-23",
   "version": "1.0",
-  "detector_scan_generated": "2026-08-23T06:31:57.778Z",
+  "detector_scan_generated": "2026-08-23T12:21:11.546Z",
   "projects": [
     {
       "project_id": "proto_T1_S1",
@@ -163,6 +163,49 @@
         },
         {
           "id": "PROTO_T1_S4-002",
+          "file": "auth.py",
+          "function": "start_checkout",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Auth",
+          "violation_type": "missing_precondition_builtin",
+          "description": "create_session 之前无 generate_jwt（内置规则 pre=[TOKEN_ISSUED]）",
+          "fix_suggestion": "先签发令牌再建会话：generate_jwt → create_session",
+          "detection_expected": true,
+          "progmune_detected": true,
+          "false_positive": false
+        }
+      ]
+    },
+    {
+      "project_id": "proto_T1_S5",
+      "model": "generator",
+      "project_type": "protocol_auth",
+      "style_id": "S5",
+      "type_id": "T1",
+      "files": [
+        "app.py",
+        "auth.py",
+        "files.py"
+      ],
+      "total_findings": 2,
+      "findings": [
+        {
+          "id": "PROTO_T1_S5-001",
+          "file": "auth.py",
+          "function": "issue_session",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Auth",
+          "violation_type": "missing_precondition_builtin",
+          "description": "create_session 之前无 generate_jwt（内置规则 pre=[TOKEN_ISSUED]）",
+          "fix_suggestion": "先签发令牌再建会话：generate_jwt → create_session",
+          "detection_expected": true,
+          "progmune_detected": true,
+          "false_positive": false
+        },
+        {
+          "id": "PROTO_T1_S5-002",
           "file": "auth.py",
           "function": "start_checkout",
           "category": "protocol_violation",
@@ -350,6 +393,49 @@
       ]
     },
     {
+      "project_id": "proto_T2_S5",
+      "model": "generator",
+      "project_type": "protocol_auth",
+      "style_id": "S5",
+      "type_id": "T2",
+      "files": [
+        "app.py",
+        "auth.py",
+        "files.py"
+      ],
+      "total_findings": 2,
+      "findings": [
+        {
+          "id": "PROTO_T2_S5-001",
+          "file": "auth.py",
+          "function": "quick_login",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Auth",
+          "violation_type": "missing_precondition_annotation",
+          "description": "generate_jwt 之前无 verify_password（项目 @progmune 注解 pre=[PASSWORD_VERIFIED]，P4.5 合并路径）",
+          "fix_suggestion": "先验证密码：verify_password → generate_jwt",
+          "detection_expected": true,
+          "progmune_detected": false,
+          "false_positive": false
+        },
+        {
+          "id": "PROTO_T2_S5-002",
+          "file": "auth.py",
+          "function": "silent_login",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Auth",
+          "violation_type": "missing_precondition_annotation",
+          "description": "generate_jwt 之前无 verify_password（项目 @progmune 注解 pre=[PASSWORD_VERIFIED]，P4.5 合并路径）",
+          "fix_suggestion": "先验证密码：verify_password → generate_jwt",
+          "detection_expected": true,
+          "progmune_detected": false,
+          "false_positive": false
+        }
+      ]
+    },
+    {
       "project_id": "proto_T3_S1",
       "model": "generator",
       "project_type": "protocol_auth",
@@ -507,6 +593,49 @@
         },
         {
           "id": "PROTO_T3_S4-002",
+          "file": "auth.py",
+          "function": "token_renew",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Auth",
+          "violation_type": "use_after_revoke",
+          "description": "revoke_token 之后再 create_session（TOKEN_ISSUED 已被 invalidate）",
+          "fix_suggestion": "撤销后重新走完整认证链",
+          "detection_expected": true,
+          "progmune_detected": true,
+          "false_positive": false
+        }
+      ]
+    },
+    {
+      "project_id": "proto_T3_S5",
+      "model": "generator",
+      "project_type": "protocol_auth",
+      "style_id": "S5",
+      "type_id": "T3",
+      "files": [
+        "app.py",
+        "auth.py",
+        "files.py"
+      ],
+      "total_findings": 2,
+      "findings": [
+        {
+          "id": "PROTO_T3_S5-001",
+          "file": "auth.py",
+          "function": "token_cycle",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Auth",
+          "violation_type": "use_after_revoke",
+          "description": "revoke_token 之后再 create_session（TOKEN_ISSUED 已被 invalidate）",
+          "fix_suggestion": "撤销后重新走完整认证链",
+          "detection_expected": true,
+          "progmune_detected": true,
+          "false_positive": false
+        },
+        {
+          "id": "PROTO_T3_S5-002",
           "file": "auth.py",
           "function": "token_renew",
           "category": "protocol_violation",
@@ -694,6 +823,49 @@
       ]
     },
     {
+      "project_id": "proto_T4_S5",
+      "model": "generator",
+      "project_type": "protocol_file",
+      "style_id": "S5",
+      "type_id": "T4",
+      "files": [
+        "app.py",
+        "auth.py",
+        "files.py"
+      ],
+      "total_findings": 2,
+      "findings": [
+        {
+          "id": "PROTO_T4_S5-001",
+          "file": "files.py",
+          "function": "peek_file",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Resource Lifecycle",
+          "violation_type": "use_after_close",
+          "description": "close_file 之后再 read_file（FILE_OPEN 已被 invalidate）",
+          "fix_suggestion": "关闭前完成读取，或重新打开句柄",
+          "detection_expected": true,
+          "progmune_detected": true,
+          "false_positive": false
+        },
+        {
+          "id": "PROTO_T4_S5-002",
+          "file": "files.py",
+          "function": "tail_file",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Resource Lifecycle",
+          "violation_type": "use_after_close",
+          "description": "close_file 之后再 read_file（FILE_OPEN 已被 invalidate）",
+          "fix_suggestion": "关闭前完成读取，或重新打开句柄",
+          "detection_expected": true,
+          "progmune_detected": true,
+          "false_positive": false
+        }
+      ]
+    },
+    {
       "project_id": "proto_T5_S1",
       "model": "generator",
       "project_type": "protocol_file",
@@ -864,18 +1036,405 @@
           "false_positive": false
         }
       ]
+    },
+    {
+      "project_id": "proto_T5_S5",
+      "model": "generator",
+      "project_type": "protocol_file",
+      "style_id": "S5",
+      "type_id": "T5",
+      "files": [
+        "app.py",
+        "auth.py",
+        "files.py"
+      ],
+      "total_findings": 2,
+      "findings": [
+        {
+          "id": "PROTO_T5_S5-001",
+          "file": "files.py",
+          "function": "read_config_only",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Resource Lifecycle",
+          "violation_type": "missing_cleanup",
+          "description": "open_file 之后无 close_file（endState 检查：序列末尾资源未释放）",
+          "fix_suggestion": "补 close_file 释放句柄",
+          "detection_expected": true,
+          "progmune_detected": true,
+          "false_positive": false
+        },
+        {
+          "id": "PROTO_T5_S5-002",
+          "file": "files.py",
+          "function": "read_log_only",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Resource Lifecycle",
+          "violation_type": "missing_cleanup",
+          "description": "open_file 之后无 close_file（endState 检查：序列末尾资源未释放）",
+          "fix_suggestion": "补 close_file 释放句柄",
+          "detection_expected": true,
+          "progmune_detected": true,
+          "false_positive": false
+        }
+      ]
+    },
+    {
+      "project_id": "proto_T6_S1",
+      "model": "generator",
+      "project_type": "protocol_auth",
+      "style_id": "S1",
+      "type_id": "T6",
+      "files": [
+        "app.py",
+        "auth.py",
+        "files.py"
+      ],
+      "total_findings": 2,
+      "findings": [
+        {
+          "id": "PROTO_T6_S1-001",
+          "file": "auth.py",
+          "function": "mint_flow_a",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Auth",
+          "violation_type": "cross_function_precondition",
+          "description": "跨函数缺失前置：入口 flow 调用 helper，helper 内 generate_jwt 无 verify_password（P4.6 展开后归因到入口）",
+          "fix_suggestion": "在入口链上先 verify_password",
+          "detection_expected": true,
+          "progmune_detected": true,
+          "false_positive": false
+        },
+        {
+          "id": "PROTO_T6_S1-002",
+          "file": "auth.py",
+          "function": "mint_flow_b",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Auth",
+          "violation_type": "cross_function_precondition",
+          "description": "跨函数缺失前置：入口 flow 调用 helper，helper 内 generate_jwt 无 verify_password（P4.6 展开后归因到入口）",
+          "fix_suggestion": "在入口链上先 verify_password",
+          "detection_expected": true,
+          "progmune_detected": true,
+          "false_positive": false
+        }
+      ]
+    },
+    {
+      "project_id": "proto_T6_S2",
+      "model": "generator",
+      "project_type": "protocol_auth",
+      "style_id": "S2",
+      "type_id": "T6",
+      "files": [
+        "app.py",
+        "auth.py",
+        "files.py"
+      ],
+      "total_findings": 2,
+      "findings": [
+        {
+          "id": "PROTO_T6_S2-001",
+          "file": "auth.py",
+          "function": "_do_mint_flow_a",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Auth",
+          "violation_type": "cross_function_precondition",
+          "description": "跨函数缺失前置：入口 flow 调用 helper，helper 内 generate_jwt 无 verify_password（P4.6 展开后归因到入口）",
+          "fix_suggestion": "在入口链上先 verify_password",
+          "detection_expected": true,
+          "progmune_detected": true,
+          "false_positive": false
+        },
+        {
+          "id": "PROTO_T6_S2-002",
+          "file": "auth.py",
+          "function": "_do_mint_flow_b",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Auth",
+          "violation_type": "cross_function_precondition",
+          "description": "跨函数缺失前置：入口 flow 调用 helper，helper 内 generate_jwt 无 verify_password（P4.6 展开后归因到入口）",
+          "fix_suggestion": "在入口链上先 verify_password",
+          "detection_expected": true,
+          "progmune_detected": true,
+          "false_positive": false
+        }
+      ]
+    },
+    {
+      "project_id": "proto_T6_S3",
+      "model": "generator",
+      "project_type": "protocol_auth",
+      "style_id": "S3",
+      "type_id": "T6",
+      "files": [
+        "app.py",
+        "auth.py",
+        "files.py"
+      ],
+      "total_findings": 2,
+      "findings": [
+        {
+          "id": "PROTO_T6_S3-001",
+          "file": "auth.py",
+          "function": "FlowService.svc_mint_flow_a",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Auth",
+          "violation_type": "cross_function_precondition",
+          "description": "跨函数缺失前置：入口 flow 调用 helper，helper 内 generate_jwt 无 verify_password（P4.6 展开后归因到入口）",
+          "fix_suggestion": "在入口链上先 verify_password",
+          "detection_expected": true,
+          "progmune_detected": true,
+          "false_positive": false
+        },
+        {
+          "id": "PROTO_T6_S3-002",
+          "file": "auth.py",
+          "function": "FlowService.svc_mint_flow_b",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Auth",
+          "violation_type": "cross_function_precondition",
+          "description": "跨函数缺失前置：入口 flow 调用 helper，helper 内 generate_jwt 无 verify_password（P4.6 展开后归因到入口）",
+          "fix_suggestion": "在入口链上先 verify_password",
+          "detection_expected": true,
+          "progmune_detected": true,
+          "false_positive": false
+        }
+      ]
+    },
+    {
+      "project_id": "proto_T6_S4",
+      "model": "generator",
+      "project_type": "protocol_auth",
+      "style_id": "S4",
+      "type_id": "T6",
+      "files": [
+        "app.py",
+        "auth.py",
+        "files.py"
+      ],
+      "total_findings": 2,
+      "findings": [
+        {
+          "id": "PROTO_T6_S4-001",
+          "file": "auth.py",
+          "function": "mint_flow_a",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Auth",
+          "violation_type": "cross_function_precondition",
+          "description": "跨函数缺失前置：入口 flow 调用 helper，helper 内 generate_jwt 无 verify_password（P4.6 展开后归因到入口）",
+          "fix_suggestion": "在入口链上先 verify_password",
+          "detection_expected": true,
+          "progmune_detected": true,
+          "false_positive": false
+        },
+        {
+          "id": "PROTO_T6_S4-002",
+          "file": "auth.py",
+          "function": "mint_flow_b",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Auth",
+          "violation_type": "cross_function_precondition",
+          "description": "跨函数缺失前置：入口 flow 调用 helper，helper 内 generate_jwt 无 verify_password（P4.6 展开后归因到入口）",
+          "fix_suggestion": "在入口链上先 verify_password",
+          "detection_expected": true,
+          "progmune_detected": true,
+          "false_positive": false
+        }
+      ]
+    },
+    {
+      "project_id": "proto_T7_S1",
+      "model": "generator",
+      "project_type": "protocol_file",
+      "style_id": "S1",
+      "type_id": "T7",
+      "files": [
+        "app.py",
+        "auth.py",
+        "files.py"
+      ],
+      "total_findings": 2,
+      "findings": [
+        {
+          "id": "PROTO_T7_S1-001",
+          "file": "files.py",
+          "function": "read_flow_a",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Resource Lifecycle",
+          "violation_type": "cross_function_cleanup",
+          "description": "跨函数资源泄漏：入口 flow 打开文件、helper 读取，链上无 close_file（P4.6 展开后 endState 检出）",
+          "fix_suggestion": "在链上补 close_file",
+          "detection_expected": true,
+          "progmune_detected": true,
+          "false_positive": false
+        },
+        {
+          "id": "PROTO_T7_S1-002",
+          "file": "files.py",
+          "function": "read_flow_b",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Resource Lifecycle",
+          "violation_type": "cross_function_cleanup",
+          "description": "跨函数资源泄漏：入口 flow 打开文件、helper 读取，链上无 close_file（P4.6 展开后 endState 检出）",
+          "fix_suggestion": "在链上补 close_file",
+          "detection_expected": true,
+          "progmune_detected": true,
+          "false_positive": false
+        }
+      ]
+    },
+    {
+      "project_id": "proto_T7_S2",
+      "model": "generator",
+      "project_type": "protocol_file",
+      "style_id": "S2",
+      "type_id": "T7",
+      "files": [
+        "app.py",
+        "auth.py",
+        "files.py"
+      ],
+      "total_findings": 2,
+      "findings": [
+        {
+          "id": "PROTO_T7_S2-001",
+          "file": "files.py",
+          "function": "_do_read_flow_a",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Resource Lifecycle",
+          "violation_type": "cross_function_cleanup",
+          "description": "跨函数资源泄漏：入口 flow 打开文件、helper 读取，链上无 close_file（P4.6 展开后 endState 检出）",
+          "fix_suggestion": "在链上补 close_file",
+          "detection_expected": true,
+          "progmune_detected": true,
+          "false_positive": false
+        },
+        {
+          "id": "PROTO_T7_S2-002",
+          "file": "files.py",
+          "function": "_do_read_flow_b",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Resource Lifecycle",
+          "violation_type": "cross_function_cleanup",
+          "description": "跨函数资源泄漏：入口 flow 打开文件、helper 读取，链上无 close_file（P4.6 展开后 endState 检出）",
+          "fix_suggestion": "在链上补 close_file",
+          "detection_expected": true,
+          "progmune_detected": true,
+          "false_positive": false
+        }
+      ]
+    },
+    {
+      "project_id": "proto_T7_S3",
+      "model": "generator",
+      "project_type": "protocol_file",
+      "style_id": "S3",
+      "type_id": "T7",
+      "files": [
+        "app.py",
+        "auth.py",
+        "files.py"
+      ],
+      "total_findings": 2,
+      "findings": [
+        {
+          "id": "PROTO_T7_S3-001",
+          "file": "files.py",
+          "function": "FlowService.svc_read_flow_a",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Resource Lifecycle",
+          "violation_type": "cross_function_cleanup",
+          "description": "跨函数资源泄漏：入口 flow 打开文件、helper 读取，链上无 close_file（P4.6 展开后 endState 检出）",
+          "fix_suggestion": "在链上补 close_file",
+          "detection_expected": true,
+          "progmune_detected": true,
+          "false_positive": false
+        },
+        {
+          "id": "PROTO_T7_S3-002",
+          "file": "files.py",
+          "function": "FlowService.svc_read_flow_b",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Resource Lifecycle",
+          "violation_type": "cross_function_cleanup",
+          "description": "跨函数资源泄漏：入口 flow 打开文件、helper 读取，链上无 close_file（P4.6 展开后 endState 检出）",
+          "fix_suggestion": "在链上补 close_file",
+          "detection_expected": true,
+          "progmune_detected": true,
+          "false_positive": false
+        }
+      ]
+    },
+    {
+      "project_id": "proto_T7_S4",
+      "model": "generator",
+      "project_type": "protocol_file",
+      "style_id": "S4",
+      "type_id": "T7",
+      "files": [
+        "app.py",
+        "auth.py",
+        "files.py"
+      ],
+      "total_findings": 2,
+      "findings": [
+        {
+          "id": "PROTO_T7_S4-001",
+          "file": "files.py",
+          "function": "read_flow_a",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Resource Lifecycle",
+          "violation_type": "cross_function_cleanup",
+          "description": "跨函数资源泄漏：入口 flow 打开文件、helper 读取，链上无 close_file（P4.6 展开后 endState 检出）",
+          "fix_suggestion": "在链上补 close_file",
+          "detection_expected": true,
+          "progmune_detected": true,
+          "false_positive": false
+        },
+        {
+          "id": "PROTO_T7_S4-002",
+          "file": "files.py",
+          "function": "read_flow_b",
+          "category": "protocol_violation",
+          "severity": "medium",
+          "protocol": "Resource Lifecycle",
+          "violation_type": "cross_function_cleanup",
+          "description": "跨函数资源泄漏：入口 flow 打开文件、helper 读取，链上无 close_file（P4.6 展开后 endState 检出）",
+          "fix_suggestion": "在链上补 close_file",
+          "detection_expected": true,
+          "progmune_detected": true,
+          "false_positive": false
+        }
+      ]
     }
   ],
   "aggregate": {
-    "projects_annotated": 20,
-    "measurable_findings": 40,
-    "progmune_detected": 40,
-    "progmune_missed": 0,
-    "overall_recall": 100,
+    "projects_annotated": 33,
+    "measurable_findings": 66,
+    "progmune_detected": 64,
+    "progmune_missed": 2,
+    "overall_recall": 97,
     "overall_precision": 100,
     "false_positives_total": 0,
     "known_gap_findings": 0,
     "known_gap_fired": 0,
-    "note": "T5 missing_cleanup (endState) 检查未实现——known_gap 金标不计入头条 P/R。跨函数状态传播与 LLM 语义桥接层不在本基准测量范围。"
+    "note": "T2×S5 注解依赖前置约束不可恢复——2 处金标如实漏检（命名匹配本身正常）。P4.6 展开为语法内联（深度 ≤4、环安全），不做数据流分析；LLM 语义桥接层不在本基准测量范围。"
   }
 }

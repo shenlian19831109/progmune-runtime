@@ -8,17 +8,16 @@
  *   1. extractIRPython → 写项目根 ir.json（execute() 同款）
  *   2. 规则 = 仓库内置 protocols.json + P4.5 合并项目 IR 注解协议
  *      （项目 @progmune 注解覆盖内置弱约束，如 generate_jwt pre=[PASSWORD_VERIFIED]）
- *   3. 序列 = ir.json 每函数 calls[]（过滤 __progmune_ marker，空序列跳过）
- *      —— trust 引擎 extractCallSequencesFromIR 同款语义
+ *   3. 序列 = buildCallSequences（P4.6 跨函数传播：入口函数展开 + 非入口
+ *      抑制 + 规则名/叶子原语不内联）—— trust 引擎同款
  *   4. 生产校验器：src/trust/ssg-bridge.ts validateSequenceWithSSG
- *      （pre-state / invalidate 失败 → SSGViolation + BFS fixPath）
- *      steps 由调用名直构（{api}）——规范名命中 name-match 分支，等价于
- *      生产路径 LLM 语义映射对规范协议名的输出；LLM 桥接层不参与测量。
+ *      （pre-state / invalidate / endState 失败 → SSGViolation + fixPath）
+ *      steps 由调用名直构（{api}）——规范名命中 name-match、改名命中
+ *      word-segment 分支；LLM 桥接层不参与测量。
  *
  * 已知边界（如实记录，不假装全覆盖）：
- *   - 生产校验器无 endState（资源未释放）检查——T5 金标单列 known-gap，
- *     不计入头条 P/R（对应 SSGRejection.endState 类型存在但桥接循环未用）
- *   - 跨函数状态传播未实现（per-function 序列验证）——与 C 的 L3 同类边界
+ *   - 注解依赖前置约束：无注解项目的项目级前置不可恢复（T2×S5 2 处漏检）
+ *   - P4.6 展开为语法内联（深度 ≤4、环安全），不做数据流/分支分析
  *   - LLM 语义桥接层（任意 API 名 → 协议名）不在本基准测量范围
  *
  * Usage: npx ts-node blind-benchmark/scan-protocol-python.ts
@@ -28,6 +27,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { extractIRPython } from "../src/extract-ir-python";
 import { validateSequenceWithSSG } from "../src/trust/ssg-bridge";
+import { buildCallSequences } from "../src/call-sequence";
 import type { StateAnnotation } from "../src/ssg-validator";
 
 export const PROTO_REPORT_PATH = path.resolve(__dirname, "reports", "scan-protocol-python-results.json");
@@ -109,22 +109,19 @@ export function scanProjectProtocol(projectPath: string, projectId?: string): Pr
 
   const { rules, nsInit } = loadProtocolRulesForProject(projectPath);
   const violations: ProtocolScanViolation[] = [];
-  let sequenceCount = 0;
 
-  for (const f of ir) {
-    const calls = (f.calls || []).filter(
-      (c: string) => typeof c === "string" && !c.startsWith("__progmune_"),
-    );
-    if (calls.length === 0) continue;
-    sequenceCount++;
+  // 入口函数展开 + 非入口抑制（与生产 trust 引擎同款，P4.6 跨函数传播）；
+  // 规则函数名是保留单元（不内联，调用名留给匹配层）
+  const sequences = buildCallSequences(ir, new Set(rules.keys()));
 
+  for (const seq of sequences) {
     // 规范协议名直构 steps（name-match 分支）；LLM 语义桥接不参与测量
-    const steps = calls.map((c) => ({ api: c, description: "" })) as any[];
-    const result = validateSequenceWithSSG(steps, rules, nsInit, String(f.file || ""));
+    const steps = seq.calls.map((c) => ({ api: c, description: "" })) as any[];
+    const result = validateSequenceWithSSG(steps, rules, nsInit, seq.file);
     for (const v of result.violations) {
       violations.push({
-        file: String(f.file || ""),
-        function: String(f.name || "unknown"),
+        file: seq.file,
+        function: seq.function || "unknown",
         failingFunction: v.callName,
         reason: v.explanation,
       });
@@ -134,7 +131,7 @@ export function scanProjectProtocol(projectPath: string, projectId?: string): Pr
   return {
     projectId: projectId || path.basename(projectPath),
     functionCount: ir.length,
-    sequenceCount,
+    sequenceCount: sequences.length,
     violations,
   };
 }

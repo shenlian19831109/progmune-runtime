@@ -1,36 +1,42 @@
 {
-  "scan_generated": "2026-08-23T06:31:57.778Z",
-  "projects_scanned": 24,
-  "total_violations": 40,
+  "scan_generated": "2026-08-23T12:21:11.546Z",
+  "projects_scanned": 38,
+  "total_violations": 64,
   "results": [
     {
       "projectId": "proto_T0_S1",
-      "functionCount": 18,
-      "sequenceCount": 17,
+      "functionCount": 22,
+      "sequenceCount": 4,
       "violations": []
     },
     {
       "projectId": "proto_T0_S2",
-      "functionCount": 18,
-      "sequenceCount": 17,
+      "functionCount": 22,
+      "sequenceCount": 4,
       "violations": []
     },
     {
       "projectId": "proto_T0_S3",
-      "functionCount": 18,
-      "sequenceCount": 17,
+      "functionCount": 22,
+      "sequenceCount": 8,
       "violations": []
     },
     {
       "projectId": "proto_T0_S4",
-      "functionCount": 18,
-      "sequenceCount": 17,
+      "functionCount": 22,
+      "sequenceCount": 3,
+      "violations": []
+    },
+    {
+      "projectId": "proto_T0_S5",
+      "functionCount": 22,
+      "sequenceCount": 4,
       "violations": []
     },
     {
       "projectId": "proto_T1_S1",
-      "functionCount": 18,
-      "sequenceCount": 17,
+      "functionCount": 20,
+      "sequenceCount": 5,
       "violations": [
         {
           "file": "auth.py",
@@ -48,8 +54,8 @@
     },
     {
       "projectId": "proto_T1_S2",
-      "functionCount": 18,
-      "sequenceCount": 17,
+      "functionCount": 20,
+      "sequenceCount": 5,
       "violations": [
         {
           "file": "auth.py",
@@ -67,8 +73,8 @@
     },
     {
       "projectId": "proto_T1_S3",
-      "functionCount": 18,
-      "sequenceCount": 17,
+      "functionCount": 20,
+      "sequenceCount": 7,
       "violations": [
         {
           "file": "auth.py",
@@ -86,8 +92,8 @@
     },
     {
       "projectId": "proto_T1_S4",
-      "functionCount": 18,
-      "sequenceCount": 17,
+      "functionCount": 20,
+      "sequenceCount": 4,
       "violations": [
         {
           "file": "auth.py",
@@ -104,9 +110,28 @@
       ]
     },
     {
+      "projectId": "proto_T1_S5",
+      "functionCount": 20,
+      "sequenceCount": 7,
+      "violations": [
+        {
+          "file": "auth.py",
+          "function": "issue_session",
+          "failingFunction": "create_active_session",
+          "reason": "SSG state violation: \"create_active_session\" (mapped to \"create_session\") requires states [TOKEN_ISSUED] but current auth state is [UNAUTHENTICATED]. Fix path: generate_jwt"
+        },
+        {
+          "file": "auth.py",
+          "function": "start_checkout",
+          "failingFunction": "create_active_session",
+          "reason": "SSG state violation: \"create_active_session\" (mapped to \"create_session\") requires states [TOKEN_ISSUED] but current auth state is [UNAUTHENTICATED]. Fix path: generate_jwt"
+        }
+      ]
+    },
+    {
       "projectId": "proto_T2_S1",
-      "functionCount": 18,
-      "sequenceCount": 17,
+      "functionCount": 20,
+      "sequenceCount": 5,
       "violations": [
         {
           "file": "auth.py",
@@ -124,8 +149,8 @@
     },
     {
       "projectId": "proto_T2_S2",
-      "functionCount": 18,
-      "sequenceCount": 17,
+      "functionCount": 20,
+      "sequenceCount": 5,
       "violations": [
         {
           "file": "auth.py",
@@ -143,8 +168,8 @@
     },
     {
       "projectId": "proto_T2_S3",
-      "functionCount": 18,
-      "sequenceCount": 17,
+      "functionCount": 20,
+      "sequenceCount": 7,
       "violations": [
         {
           "file": "auth.py",
@@ -162,8 +187,8 @@
     },
     {
       "projectId": "proto_T2_S4",
-      "functionCount": 18,
-      "sequenceCount": 17,
+      "functionCount": 20,
+      "sequenceCount": 4,
       "violations": [
         {
           "file": "auth.py",
@@ -180,9 +205,15 @@
       ]
     },
     {
+      "projectId": "proto_T2_S5",
+      "functionCount": 20,
+      "sequenceCount": 6,
+      "violations": []
+    },
+    {
       "projectId": "proto_T3_S1",
-      "functionCount": 18,
-      "sequenceCount": 17,
+      "functionCount": 20,
+      "sequenceCount": 5,
       "violations": [
         {
           "file": "auth.py",
@@ -200,8 +231,8 @@
     },
     {
       "projectId": "proto_T3_S2",
-      "functionCount": 18,
-      "sequenceCount": 17,
+      "functionCount": 20,
+      "sequenceCount": 5,
       "violations": [
         {
           "file": "auth.py",
@@ -219,8 +250,8 @@
     },
     {
       "projectId": "proto_T3_S3",
-      "functionCount": 18,
-      "sequenceCount": 17,
+      "functionCount": 20,
+      "sequenceCount": 7,
       "violations": [
         {
           "file": "auth.py",
@@ -238,8 +269,8 @@
     },
     {
       "projectId": "proto_T3_S4",
-      "functionCount": 18,
-      "sequenceCount": 17,
+      "functionCount": 20,
+      "sequenceCount": 4,
       "violations": [
         {
           "file": "auth.py",
@@ -256,9 +287,28 @@
       ]
     },
     {
+      "projectId": "proto_T3_S5",
+      "functionCount": 20,
+      "sequenceCount": 5,
+      "violations": [
+        {
+          "file": "auth.py",
+          "function": "token_cycle",
+          "failingFunction": "create_active_session",
+          "reason": "SSG state violation: \"create_active_session\" (mapped to \"create_session\") requires states [TOKEN_ISSUED] but current auth state is [PASSWORD_VERIFIED, UNAUTHENTICATED]. Fix path: generate_jwt"
+        },
+        {
+          "file": "auth.py",
+          "function": "token_renew",
+          "failingFunction": "create_active_session",
+          "reason": "SSG state violation: \"create_active_session\" (mapped to \"create_session\") requires states [TOKEN_ISSUED] but current auth state is [PASSWORD_VERIFIED, UNAUTHENTICATED]. Fix path: generate_jwt"
+        }
+      ]
+    },
+    {
       "projectId": "proto_T4_S1",
-      "functionCount": 18,
-      "sequenceCount": 17,
+      "functionCount": 20,
+      "sequenceCount": 5,
       "violations": [
         {
           "file": "files.py",
@@ -276,8 +326,8 @@
     },
     {
       "projectId": "proto_T4_S2",
-      "functionCount": 18,
-      "sequenceCount": 17,
+      "functionCount": 20,
+      "sequenceCount": 5,
       "violations": [
         {
           "file": "files.py",
@@ -295,8 +345,8 @@
     },
     {
       "projectId": "proto_T4_S3",
-      "functionCount": 18,
-      "sequenceCount": 17,
+      "functionCount": 20,
+      "sequenceCount": 7,
       "violations": [
         {
           "file": "files.py",
@@ -314,8 +364,8 @@
     },
     {
       "projectId": "proto_T4_S4",
-      "functionCount": 18,
-      "sequenceCount": 17,
+      "functionCount": 20,
+      "sequenceCount": 4,
       "violations": [
         {
           "file": "files.py",
@@ -332,9 +382,28 @@
       ]
     },
     {
+      "projectId": "proto_T4_S5",
+      "functionCount": 20,
+      "sequenceCount": 6,
+      "violations": [
+        {
+          "file": "files.py",
+          "function": "peek_file",
+          "failingFunction": "read_user_file",
+          "reason": "SSG state violation: \"read_user_file\" (mapped to \"read_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+        },
+        {
+          "file": "files.py",
+          "function": "tail_file",
+          "failingFunction": "read_user_file",
+          "reason": "SSG state violation: \"read_user_file\" (mapped to \"read_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+        }
+      ]
+    },
+    {
       "projectId": "proto_T5_S1",
-      "functionCount": 18,
-      "sequenceCount": 17,
+      "functionCount": 20,
+      "sequenceCount": 5,
       "violations": [
         {
           "file": "files.py",
@@ -352,8 +421,8 @@
     },
     {
       "projectId": "proto_T5_S2",
-      "functionCount": 18,
-      "sequenceCount": 17,
+      "functionCount": 20,
+      "sequenceCount": 5,
       "violations": [
         {
           "file": "files.py",
@@ -371,8 +440,8 @@
     },
     {
       "projectId": "proto_T5_S3",
-      "functionCount": 18,
-      "sequenceCount": 17,
+      "functionCount": 20,
+      "sequenceCount": 7,
       "violations": [
         {
           "file": "files.py",
@@ -390,8 +459,8 @@
     },
     {
       "projectId": "proto_T5_S4",
-      "functionCount": 18,
-      "sequenceCount": 17,
+      "functionCount": 20,
+      "sequenceCount": 4,
       "violations": [
         {
           "file": "files.py",
@@ -402,6 +471,177 @@
         {
           "file": "files.py",
           "function": "read_log_only",
+          "failingFunction": "(end-of-sequence)",
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T5_S5",
+      "functionCount": 20,
+      "sequenceCount": 7,
+      "violations": [
+        {
+          "file": "files.py",
+          "function": "read_config_only",
+          "failingFunction": "(end-of-sequence)",
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        },
+        {
+          "file": "files.py",
+          "function": "read_log_only",
+          "failingFunction": "(end-of-sequence)",
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T6_S1",
+      "functionCount": 22,
+      "sequenceCount": 5,
+      "violations": [
+        {
+          "file": "auth.py",
+          "function": "mint_flow_a",
+          "failingFunction": "generate_jwt",
+          "reason": "SSG state violation: \"generate_jwt\" (mapped to \"generate_jwt\") requires states [PASSWORD_VERIFIED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password"
+        },
+        {
+          "file": "auth.py",
+          "function": "mint_flow_b",
+          "failingFunction": "generate_jwt",
+          "reason": "SSG state violation: \"generate_jwt\" (mapped to \"generate_jwt\") requires states [PASSWORD_VERIFIED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password"
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T6_S2",
+      "functionCount": 22,
+      "sequenceCount": 5,
+      "violations": [
+        {
+          "file": "auth.py",
+          "function": "_do_mint_flow_a",
+          "failingFunction": "generate_jwt",
+          "reason": "SSG state violation: \"generate_jwt\" (mapped to \"generate_jwt\") requires states [PASSWORD_VERIFIED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password"
+        },
+        {
+          "file": "auth.py",
+          "function": "_do_mint_flow_b",
+          "failingFunction": "generate_jwt",
+          "reason": "SSG state violation: \"generate_jwt\" (mapped to \"generate_jwt\") requires states [PASSWORD_VERIFIED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password"
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T6_S3",
+      "functionCount": 22,
+      "sequenceCount": 7,
+      "violations": [
+        {
+          "file": "auth.py",
+          "function": "FlowService.svc_mint_flow_a",
+          "failingFunction": "generate_jwt",
+          "reason": "SSG state violation: \"generate_jwt\" (mapped to \"generate_jwt\") requires states [PASSWORD_VERIFIED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password"
+        },
+        {
+          "file": "auth.py",
+          "function": "FlowService.svc_mint_flow_b",
+          "failingFunction": "generate_jwt",
+          "reason": "SSG state violation: \"generate_jwt\" (mapped to \"generate_jwt\") requires states [PASSWORD_VERIFIED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password"
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T6_S4",
+      "functionCount": 22,
+      "sequenceCount": 4,
+      "violations": [
+        {
+          "file": "auth.py",
+          "function": "mint_flow_a",
+          "failingFunction": "generate_jwt",
+          "reason": "SSG state violation: \"generate_jwt\" (mapped to \"generate_jwt\") requires states [PASSWORD_VERIFIED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password"
+        },
+        {
+          "file": "auth.py",
+          "function": "mint_flow_b",
+          "failingFunction": "generate_jwt",
+          "reason": "SSG state violation: \"generate_jwt\" (mapped to \"generate_jwt\") requires states [PASSWORD_VERIFIED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password"
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T7_S1",
+      "functionCount": 22,
+      "sequenceCount": 5,
+      "violations": [
+        {
+          "file": "files.py",
+          "function": "read_flow_a",
+          "failingFunction": "(end-of-sequence)",
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        },
+        {
+          "file": "files.py",
+          "function": "read_flow_b",
+          "failingFunction": "(end-of-sequence)",
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T7_S2",
+      "functionCount": 22,
+      "sequenceCount": 5,
+      "violations": [
+        {
+          "file": "files.py",
+          "function": "_do_read_flow_a",
+          "failingFunction": "(end-of-sequence)",
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        },
+        {
+          "file": "files.py",
+          "function": "_do_read_flow_b",
+          "failingFunction": "(end-of-sequence)",
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T7_S3",
+      "functionCount": 22,
+      "sequenceCount": 7,
+      "violations": [
+        {
+          "file": "files.py",
+          "function": "FlowService.svc_read_flow_a",
+          "failingFunction": "(end-of-sequence)",
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        },
+        {
+          "file": "files.py",
+          "function": "FlowService.svc_read_flow_b",
+          "failingFunction": "(end-of-sequence)",
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T7_S4",
+      "functionCount": 22,
+      "sequenceCount": 4,
+      "violations": [
+        {
+          "file": "files.py",
+          "function": "read_flow_a",
+          "failingFunction": "(end-of-sequence)",
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        },
+        {
+          "file": "files.py",
+          "function": "read_flow_b",
           "failingFunction": "(end-of-sequence)",
           "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
         }
