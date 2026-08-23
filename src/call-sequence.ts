@@ -23,8 +23,32 @@ export interface CallSequence {
 const MAX_DEPTH = 4;
 
 /** 项目函数判定：有真实文件且非外部导入条目（external 条目无函数体可内联）。 */
-function isProjectFn(f: FunctionInfo): boolean {
+export function isProjectFn(f: FunctionInfo): boolean {
   return !f.external && !!f.file && f.file !== "(external)";
+}
+
+/**
+ * 构建项目函数名集合——词段匹配门控用（ssg-bridge 的 projectFunctions 参数）。
+ * 每个项目函数收录三种形态：全名（FlowService.svc_x）、裸名（svc_x）与
+ * 小写变体（调用名大小写差异，如 createActiveSession vs createactivesession）。
+ */
+export function collectProjectFunctionNames(ir: FunctionInfo[]): Set<string> {
+  const names = new Set<string>();
+  for (const f of ir) {
+    if (!isProjectFn(f)) continue;
+    const name = String(f.name || "");
+    if (!name) continue;
+    const lower = name.toLowerCase();
+    names.add(name);
+    names.add(lower);
+    const dotIdx = name.lastIndexOf(".");
+    if (dotIdx >= 0) {
+      const bare = name.slice(dotIdx + 1);
+      names.add(bare);
+      names.add(bare.toLowerCase());
+    }
+  }
+  return names;
 }
 
 /**

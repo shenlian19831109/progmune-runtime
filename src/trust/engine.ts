@@ -66,7 +66,7 @@ import {
   summarizeSSGCoverage,
 } from "./ssg-bridge";
 import type { SSGValidationResult } from "./ssg-bridge";
-import { buildCallSequences } from "../call-sequence";
+import { buildCallSequences, collectProjectFunctionNames } from "../call-sequence";
 import type { CallSequence } from "../call-sequence";
 
 // ── Main Entry Point ──
@@ -859,6 +859,19 @@ async function collectProtocolViolations(
     const flaggedCount = { value: 0 };
     const cleanCount = { value: 0 };
 
+    // ── P4.6.1: 词段匹配门控的项目函数集合（best-effort，与注解合并共用 ir.json） ──
+    // 词段匹配只对项目函数适用（改名协议原语）；外部库调用走 alias/关键词桥接。
+    let projectFunctions: Set<string> | undefined;
+    try {
+      const fs = require("fs");
+      const irPath = path.join(ctx.projectPath, "ir.json");
+      if (fs.existsSync(irPath)) {
+        const ir = JSON.parse(fs.readFileSync(irPath, "utf-8"));
+        const functions = Array.isArray(ir) ? ir : (ir.functions || []);
+        projectFunctions = collectProjectFunctionNames(functions);
+      }
+    } catch { /* best-effort */ }
+
     // ── P4.5: 合并项目 IR 注解协议（IR 优先，缺 namespace 继承内置 JSON） ──
     // 内置 protocols.json 的规则是通用弱约束（如 generate_jwt pre=[]），
     // 项目文件里的 @protocol 注解才是项目真实协议（如 pre=[PASSWORD_VERIFIED]）。
@@ -869,16 +882,17 @@ async function collectProtocolViolations(
         const irPath = path.join(ctx.projectPath, "ir.json");
         if (fs.existsSync(irPath)) {
           const ir = JSON.parse(fs.readFileSync(irPath, "utf-8"));
-          if (Array.isArray(ir)) {
-            for (const f of ir) {
-              if (!f.protocol) continue;
-              const protocol = { ...f.protocol };
-              const existing = protocolRulesData.rules.get(String(f.name));
-              if (existing?.namespace && !protocol.namespace) {
-                protocol.namespace = existing.namespace;
-              }
-              protocolRulesData.rules.set(String(f.name), protocol);
+          // ir.json 两种形态：extractIR/extractIRPython 的裸数组、extractProjectIR
+          // 的 { typeMap, functions } 合并对象（execute/MCP 写盘）——统一取函数列表。
+          const functions = Array.isArray(ir) ? ir : (ir.functions || []);
+          for (const f of functions) {
+            if (!f.protocol) continue;
+            const protocol = { ...f.protocol };
+            const existing = protocolRulesData.rules.get(String(f.name));
+            if (existing?.namespace && !protocol.namespace) {
+              protocol.namespace = existing.namespace;
             }
+            protocolRulesData.rules.set(String(f.name), protocol);
           }
         }
       } catch { /* best-effort */ }
@@ -985,6 +999,7 @@ async function collectProtocolViolations(
               seq.file,
               protocolRulesData.aliasIndex,
               protocolRulesData.wildcardAliases,
+              projectFunctions,
             );
             ssgResults.push(ssgResult);
             ssgTotalCalls += ssgResult.stats.totalCalls;
@@ -1079,8 +1094,11 @@ function extractCallSequencesFromIR(
     const irPath = path.join(projectPath, "ir.json");
     if (!fs.existsSync(irPath)) return [];
     const ir = JSON.parse(fs.readFileSync(irPath, "utf-8"));
-    if (!Array.isArray(ir)) return [];
-    return buildCallSequences(ir, keepNames);
+    // ir.json 两种形态兼容：裸数组（extractIR / extractIRPython）与
+    // { typeMap, functions } 合并对象（extractProjectIR，execute/MCP 写盘）。
+    const functions = Array.isArray(ir) ? ir : (ir.functions || []);
+    if (!Array.isArray(functions) || functions.length === 0) return [];
+    return buildCallSequences(functions, keepNames);
   } catch {
     return [];
   }

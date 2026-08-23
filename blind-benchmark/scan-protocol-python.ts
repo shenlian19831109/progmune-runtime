@@ -27,7 +27,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { extractIRPython } from "../src/extract-ir-python";
 import { validateSequenceWithSSG } from "../src/trust/ssg-bridge";
-import { buildCallSequences } from "../src/call-sequence";
+import { buildCallSequences, collectProjectFunctionNames } from "../src/call-sequence";
 import type { StateAnnotation } from "../src/ssg-validator";
 
 export const PROTO_REPORT_PATH = path.resolve(__dirname, "reports", "scan-protocol-python-results.json");
@@ -114,10 +114,13 @@ export function scanProjectProtocol(projectPath: string, projectId?: string): Pr
   // 规则函数名是保留单元（不内联，调用名留给匹配层）
   const sequences = buildCallSequences(ir, new Set(rules.keys()));
 
+  // P4.6.1 词段匹配门控：与生产引擎同款，只对项目函数做词段匹配（改名协议原语）
+  const projectFunctions = collectProjectFunctionNames(ir);
+
   for (const seq of sequences) {
     // 规范协议名直构 steps（name-match 分支）；LLM 语义桥接不参与测量
     const steps = seq.calls.map((c) => ({ api: c, description: "" })) as any[];
-    const result = validateSequenceWithSSG(steps, rules, nsInit, seq.file);
+    const result = validateSequenceWithSSG(steps, rules, nsInit, seq.file, undefined, undefined, projectFunctions);
     for (const v of result.violations) {
       violations.push({
         file: seq.file,

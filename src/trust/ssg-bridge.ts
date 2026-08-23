@@ -276,6 +276,7 @@ function inferRuleName(
   namespace: string,
   aliases: Map<string, string>,
   wildcardAliases: Map<string, string>,
+  projectFunctions?: Set<string>,
 ): string | null {
   const normalized = normalizeName(apiName);
   const lowerApi = apiName.toLowerCase();
@@ -313,7 +314,20 @@ function inferRuleName(
   // word segment in the normalized call name. This prevents "status" from
   // matching "poll_status" via raw substring, since "status" must appear
   // as a complete _-delimited segment.
+  //
+  // 门控（P4.6.1）：词段匹配只对「项目函数」适用——它是为改名协议原语设计的
+  // （协议原语必然是项目内函数，如 S5 的 create_active_session）。外部库调用
+  // （如 Node 的 readFileSync）经词段撞上 read_file 是纯噪声：外部 API 的语义
+  // 桥接走 alias 配置（Strategy 0b）或 domain 关键词（Strategy 3），不走词段。
+  // 未提供 projectFunctions 时保持旧行为（向后兼容测试与无 IR 的调用方）。
+  const isProjectFn = !projectFunctions
+    || projectFunctions.has(apiName)
+    || projectFunctions.has(lowerApi)
+    || projectFunctions.has(normalized)
+    || (dotIdx >= 0 && projectFunctions.has(lowerApi.slice(dotIdx + 1)));
+
   for (const ruleName of ruleNames) {
+    if (projectFunctions && !isProjectFn) continue;
     const ruleWords = ruleName.split("_");
     const callWords = normalized.split("_");
 
@@ -366,6 +380,8 @@ export function validateSequenceWithSSG(
   file: string,
   aliasIndex?: Map<string, string>,
   wildcardAliases?: Map<string, string>,
+  /** 项目函数名集合（含裸名/全名/小写变体由调用方构造）——提供后词段匹配只对项目函数适用 */
+  projectFunctions?: Set<string>,
 ): SSGValidationResult {
   const allRuleNames = Array.from(rules.keys());
   const aliases = aliasIndex || new Map<string, string>();
@@ -438,6 +454,7 @@ export function validateSequenceWithSSG(
       namespace,
       aliases,
       wildcards,
+      projectFunctions,
     );
 
     // Use matched rule's namespace, falling back to domain-inferred namespace
