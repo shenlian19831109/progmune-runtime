@@ -1,7 +1,7 @@
 # Progmune Coverage Matrix
 
 > Protocol × Language × Framework — 真实覆盖状态  
-> 最后更新：2026-07-24  
+> 最后更新：2026-08-23  
 > 目的：回答企业唯一的关心问题——"Progmune 能不能检查我的项目？"
 
 ---
@@ -11,7 +11,7 @@
 | 标志 | 含义 |
 |------|------|
 | ✅ | 有专用规则 + 有测试/基准数据 + Precision/Recall 可测量 |
-| ⚠️ | 有通用正则规则，但基准数据弱、未校准、或已知高误报/漏报 |
+| ⚠️ | 有通用正则规则或部分适配，但基准数据弱、未校准、或已知高误报/漏报 |
 | ❌ | 无覆盖 |
 | — | 不存在该组合（如 TLS 对 HTTP 框架无意义） |
 
@@ -22,31 +22,46 @@
 ```
 Protocol           TS/JS        C            Go        Python      Java
 ──────────────────────────────────────────────────────────────────────────
-Auth               ✅           ⚠️           ❌         ❌          ❌
+Auth               ✅           ⚠️           ❌         ⚠️          ❌
 TLS/SSL            ⚠️           ✅           ❌         ❌          ❌
 SSH                ⚠️           ✅           ❌         ❌          ❌
 HTTP/2             ⚠️           ✅           ❌         ❌          ❌
 HTTP Request       ⚠️           ✅           ❌         ❌          ❌
 Connection         ⚠️           ✅           ❌         ❌          ❌
 QUIC               ❌           ⚠️           ❌         ❌          ❌
-Resource Lifecycle ⚠️           ⚠️           ❌         ❌          ❌
+Resource Lifecycle ⚠️           ⚠️           ❌         ⚠️          ❌
 Payment            ✅           ❌           ❌         ❌          ❌
 Data Integrity     ✅           ❌           ❌         ❌          ❌
 Ledger             ✅           ❌           ❌         ❌          ❌
 ──────────────────────────────────────────────────────────────────────────
-有效覆盖           TS (✅×4)    C (✅×4)     ❌          ❌          ❌
-                   TS (⚠️×5)    C (⚠️×3)
+有效覆盖           TS (✅×4)    C (✅×4)     ❌         Python (⚠️×2) ❌
+                   TS (⚠️×5)    C (⚠️×3)              ↓ 生产级能力在
+                                                      源码级检测（2.1 节）
 ```
+
+> Python 的 ✅ 不在协议行里，而在源码级缺陷检测（注入/Web 类）——见 2.1。
+
+### 2.1 源码级缺陷检测（Python 生产级）
+
+| 类别 | 覆盖 | 证据 |
+|------|------|------|
+| 注入类 | ✅ | SQLi（f-string/%/.format/拼接）、命令注入（动态 subprocess 参数）、SSRF（用户可控 URL）、SSTI（模板字符串 sink）、XXE（外部实体解析配置）、eval/exec、不安全反序列化 |
+| Web 类 | ✅ | XSS（`{{var\|safe}}`/autoescape off）、路径穿越（用户可控文件路径）、CSRF（@csrf_exempt / GET 状态变更）、cookie 授权、硬编码 JWT 密钥（含跨模块常量） |
+| 检测架构 | — | 提取器标记架构：污点追踪、import 解析、限定调用链、跨文件模板分析——合成标记供规则消费，零管道改动 |
 
 ### 有效性判定依据
 
 | 语言 | 可用性 | 证据 |
 |------|--------|------|
-| TypeScript | ✅ 可用 | Blind Benchmark: P=86.8%, R=83.6% |
-| C | ⚠️ 不可用于生产 | Gold Benchmark (curl/libssh/nginx/openssl): P=15.2%, R=50.0%, F1=23.3% |
-| Go | ❌ | 无规则、无基准、无测试 |
-| Python | ❌ | 仅有 IR 提取器 (`extract-ir-python.ts`)，无安全检测规则 |
-| Java | ❌ | 无任何支持 |
+| TypeScript | ✅ 可用 | Blind Benchmark v6（100 项目 / 795 gold）：P=100%（0 FP）、R=98.5%（有效 100%） |
+| Python | ✅ 可用 | Blind Benchmark v1（90 项目 / 729 gold）：P=100%、R=100%；PyGoat 真实应用 67 TP / 0 FP；3 个良构应用 0 误报真阳性（3 条框架内部件边界 FP 已文档化） |
+| C | ⚠️ 不可用于生产 | Gold Benchmark（curl/libssh/nginx/openssl）：F1=16.5%。L3 跨函数实验已终止；L4（指针/CFG）无计划 |
+| Go | ❌ | 无规则、无基准、无测试——规划中 |
+| Java | ❌ | 无任何支持——规划中 |
+
+### IR 层（v3.5.0 起）
+
+注册表式多语言合并提取（`src/extract-project-ir.ts`）：TypeScript（ts-morph）+ Python（AST）检测/提取器合并为同一份函数 IR，由 agent loop、`execute()`、MCP server 共享——agent 可在两种语言上编排函数协议链。新增语言 = 注册一条提取器，调用方零改动。
 
 ---
 
@@ -56,8 +71,9 @@ Ledger             ✅           ❌           ❌         ❌          ❌
 
 | 属性 | 值 |
 |------|-----|
-| 检测方式 | 正则匹配认证初始化 + 清理配对 |
-| TS 覆盖 | ✅ 完整 |
+| 检测方式 | 正则匹配认证初始化 + 清理配对（TS）；`@progmune` 注解协议状态机（Python） |
+| TS 覆盖 | ✅ 完整（含 Ownership Check：ownerId/authorId 比较 + 权限门） |
+| Python 覆盖 | ⚠️ 注解式协议提取 + SSG 校验有测试覆盖，无独立协议盲测基准 |
 | C 覆盖 | ⚠️ 仅识别 `auth_*` 函数，未覆盖 OAuth2.0/OIDC 流程 |
 | 未覆盖 | OAuth2.0 授权码流程、OIDC、SAML、JWT 签名验证、API Key 管理、Session 固定攻击 |
 
@@ -117,6 +133,7 @@ Ledger             ✅           ❌           ❌         ❌          ❌
 | 检测方式 | 8 对 alloc/free 模式匹配 |
 | C 覆盖 | ⚠️ malloc/free, fopen/fclose, SSL alloc/free, socket/bind/close |
 | TS 覆盖 | ⚠️ 仅正则匹配，TS 的 GC 管理下资源泄漏模式完全不同 |
+| Python 覆盖 | ⚠️ 注解式 file 命名空间（open/read/close 协议），无独立盲测基准 |
 | 未覆盖 | 数据库连接池、文件句柄泄漏、Promise 未处理、事件监听器未移除 |
 
 ### 3.9 Payment
@@ -134,6 +151,7 @@ Ledger             ✅           ❌           ❌         ❌          ❌
 |------|-----|
 | 检测方式 | 数据读写保护、输入校验 |
 | TS 覆盖 | ✅ |
+| Python 覆盖 | ⚠️ 硬编码密钥（含跨模块常量）等源码级检测属于 2.1 节，协议命名空间无覆盖 |
 | 未覆盖 | SQL 注入（需 schema 感知）、XSS、命令注入 |
 
 ### 3.11 Ledger
@@ -142,34 +160,32 @@ Ledger             ✅           ❌           ❌         ❌          ❌
 |------|-----|
 | 检测方式 | SSG 账本一致性检查：before-consistency, delta-consistency, delta-legality |
 | TS 覆盖 | ✅ |
-| 基准数据 | `.progmune_corpus/` 内 2,558 条轨迹 |
+| 基准数据 | `.progmune_corpus/` 内 2,500+ 条轨迹；`npm run check` 1,315/1,315 Ledger 全过 |
 
 ---
 
 ## 4. Framework 覆盖
 
+| Framework | 语言 | 适配状态 | 说明 |
+|-----------|------|---------|------|
+| Express | TS/JS | ✅ 专用检测器 | 路由提取 + 中间件分类 + 安全检查 |
+| tRPC | TS/JS | ✅ 专用检测器 | API 合约规则（3 条），与 Express detector 交叉纠正 |
+| NestJS | TS/JS | ⚠️ 部分 | @Controller/@UseGuards/@UsePipes 装饰器路由解析 |
+| Next.js | TS/JS | ⚠️ 版本感知 | 版本感知治理 |
+| Fastify 等其余 TS 框架 | TS/JS | ⚠️ 基础别名 | 库别名覆盖，无结构分析 |
+| Django | Python | ⚠️ 基础别名 | 框架委托 allowlist（DRF permission_classes、create_user 等白名单） |
+| FastAPI | Python | ⚠️ 基础别名 | 框架委托 allowlist（DI authorizer、create_access_token 等） |
+| Gin / Fiber | Go | ❌ | 无 Go 支持 |
+| Spring Boot | Java | ❌ | 无 Java 支持 |
+| curl / nginx / libssh / OpenSSL | C | ✅ 有基准 | C 黄金基准 4 仓库（研究状态，F1=16.5%） |
+
 ```
-Framework         Language     Auth   TLS   HTTP   Resource   Payment   状态
-─────────────────────────────────────────────────────────────────────────────
-Express           TS/JS        ❌     ❌    ❌     ❌         ❌        无适配
-NestJS            TS/JS        ❌     ❌    ❌     ❌         ❌        无适配
-Next.js           TS/JS        ❌     ❌    ❌     ❌         ❌        无适配
-Fastify           TS/JS        ❌     ❌    ❌     ❌         ❌        无适配
-Gin               Go           ❌     ❌    ❌     ❌         ❌        无 Go 支持
-Fiber             Go           ❌     ❌    ❌     ❌         ❌        无 Go 支持
-Django            Python       ❌     ❌    ❌     ❌         ❌        无 Python 支持
-FastAPI           Python       ❌     ❌    ❌     ❌         ❌        无 Python 支持
-Spring Boot       Java         ❌     ❌    ❌     ❌         ❌        无 Java 支持
-curl              C            ⚠️     ✅    ✅     ⚠️         —        有基准
-nginx             C            ⚠️     ✅    ✅     ⚠️         —        有基准
-libssh            C            —      —     ❌     ⚠️         —        有基准
-OpenSSL           C            —      ✅    —      ⚠️         —        有基准
-─────────────────────────────────────────────────────────────────────────────
-已适配框架        0 / 13
-有基准数据的项目   4 (curl, nginx, libssh, OpenSSL) — 全部为 C 语言
+已适配框架        2 / 13（Express ✅、tRPC ✅ 专用检测器）
+部分支持          2（NestJS 部分、Next.js 版本感知）
+基础别名覆盖      5 / 13（无结构分析）
 ```
 
-> 当前所有规则使用 `\w*` 通用前缀模式（如 `\b(\w*ssl\w*init)\b`）进行匹配，未针对任何具体框架的 API 进行适配。
+> 框架适配是 #1 产品缺口：Django、FastAPI 及另外 8 个待适配。当前所有规则使用 `\w*` 通用前缀模式（如 `\b(\w*ssl\w*init)\b`）进行匹配，未针对具体框架 API 做全量适配。
 
 ---
 
@@ -177,40 +193,33 @@ OpenSSL           C            —      ✅    —      ⚠️         —      
 
 | 指标 | 数值 |
 |------|------|
-| 标注样本 | ~100 条 CVE（`benchmarks/cve-100.json`） |
-| 关联的 CWE 类别 | 未系统分类 |
-| 已测检出率 | 未测量 |
+| 标注样本 | 34 条 CVE（`benchmarks/cve-100.json` 语料子集，基准 harness：`npm run test:cve`） |
+| 检出率 | **88%**（30/34） |
+| 类别匹配 | 63%（19/34） |
+| 按严重度 | critical 13/13（100%）、high 13/15（87%）、medium 4/6（67%） |
 | 目标 | 覆盖 OWASP Top 10 + CWE Top 25 中与 AI 生成代码相关的类别 |
 
 ---
 
 ## 6. 已知覆盖空白（优先级排序）
 
-### P0 — 使 C 可用（当前 F1=23.3% → 目标 60%+）
+### P0 — Framework 适配（#1 产品缺口）
 
 | 空白 | 影响 |
 |------|------|
-| C 语言的 Identifier Parser | 无法识别 C 的宏、typedef、函数指针 |
-| C 内存管理模式 | malloc/free 规则过于基础，无法覆盖池分配、引用计数、arena |
-| C 错误处理模式 | `goto fail`、`errno`、返回值检查模式未覆盖 |
-| C 资源获取模式 | 无法识别 `goto cleanup` 模式的资源释放 |
+| Django / FastAPI 结构分析 | Python 已生产级，但框架 API 语义（DI、ORM 查询安全、DRF 权限类）仅有别名覆盖 |
+| Express 之外的 TS 框架结构分析 | 企业 TS 项目大量使用 Next.js/Fastify/NestJS，当前仅部分覆盖 |
 
-### P1 — 扩展语言支持
+### P1 — 语言扩展
 
 | 语言 | 优先级 | 原因 |
 |------|--------|------|
-| Python | 最高 | AI 生成代码占比最高（GitHub Copilot 数据），FastAPI/Django 企业采用率极高 |
-| Go | 高 | 云原生基础设施项目主流语言 |
+| Go | 高 | 云原生基础设施主流语言（商业化研讨结论：Go 先于 Java） |
 | Java | 中 | 企业遗留系统 + Spring Boot 生态 |
 
-### P2 — Framework 适配
+### P2 — TS 侧源码级注入检测
 
-| Framework | 语言 | 关键检测点 |
-|-----------|------|-----------|
-| Express | TS | middleware chain, auth guard, error handler |
-| Next.js | TS | API routes, middleware.ts, server actions |
-| FastAPI | Python | dependency injection, auth middleware, pydantic validation |
-| Django | Python | DRF permission classes, ORM query safety |
+Python 已有 SQLi/XSS/SSRF 等源码级检测（2.1 节），TypeScript 提取器基于名称/调用——TS 侧同类缺陷暂未覆盖（文档化边界）。
 
 ### P3 — 协议扩展
 
@@ -222,20 +231,25 @@ OpenSSL           C            —      ✅    —      ⚠️         —      
 | WebSocket | 实时应用，认证/授权模式特殊 |
 | DB Transaction | 事务边界、隔离级别、回滚处理 |
 
+### 不投入
+
+C 语言 L4（指针/CFG/数据流）——L3 实验已带数据终止，多年研究问题，无计划（研究状态归档于 `docs/c-language-status.md`）。
+
 ---
 
 ## 7. 版本目标
 
 ```
-                v1 (当前)         v2 (目标)           v3 (目标)
-───────────────────────────────────────────────────────────────
-Protocols        9                12                  16+
-Languages        2 (TS✅, C⚠️)    3 (TS✅, C⚠️, Py⚠️)   4+
-Frameworks       0                3 (Express, curl,    8+
-                                    FastAPI)
-C F1             23.3%            40%+                 60%+
-TS P/R           86.8%/83.6%      90%+/88%+            稳定
-CVE coverage     100 (未校准)      100 (已校准检出率)    200+
+                v1 (当前, 2026-08)      v2 (目标)
+───────────────────────────────────────────────────────────
+Protocols        21 命名空间全有词汇      + OAuth2.0/OIDC、gRPC、
+                                         GraphQL、WebSocket
+Languages        2 ✅ (TS, Python)        + Go ✅
+                 C ⚠️ 仅研究             Java（更远期）
+Frameworks       2/13 专用检测器         Django/FastAPI 结构适配
+TS P/R           100%/98.5%              稳定
+Python P/R       100%/100%               稳定
+CVE              34 (88% 检出)           100 (校准检出率)
 ```
 
 ---

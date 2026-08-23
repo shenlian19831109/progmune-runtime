@@ -65,5 +65,5 @@ These modules are C-specific or C-heavy. They should NOT be modified without und
 
 - [Two-Hump Report](two-hump-report.md) — Gukov framework analysis of C detection distribution
 - [P0-P3 Final Report](p0-p3-final-report.md) — Rule vocabulary injection results
-- [Coverage Matrix](coverage-matrix.md) — Protocol × Language × Framework coverage
+- [Coverage Matrix](coverage-matrix-en.md) — Protocol × Language × Framework coverage
 - [Development Plan](development-plan.md) — 3-phase roadmap

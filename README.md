@@ -118,7 +118,7 @@ Progmune is honest about what it can and cannot verify.
 - **Framework internals** — well-known framework dispatch/cache machinery (e.g. django-unicorn internals) can produce a small number of boundary false positives; they are documented per-corpus in the benchmark gold files.
 - **Known failure boundaries are documented** rather than hidden: if Progmune cannot verify a language (e.g. Go), Confidence is lowered instead of pretending 100%.
 
-→ [Full Coverage Matrix](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix.md)
+→ [Full Coverage Matrix](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix-en.md)
 
 ---
 
