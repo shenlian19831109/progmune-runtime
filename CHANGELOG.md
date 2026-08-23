@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.6.1] — 2026-08-23
+
+### 文档
+
+- README 社区章节直展双群二维码：微信（`assets/wechat-group.png`）+ WhatsApp（`assets/whatsapp-group.jpg`），中英双语同步
+- 微信群码 7 天过期提醒 workflow 文案同步直展形态
+
 ## [3.6.0] — 2026-08-23
 
 ### 新增：SSG endState 检查（序列末尾资源未释放）
