@@ -178,7 +178,7 @@ SDK (src/sdk.ts)           verify() → APPROVED / NEEDS_REVIEW / BLOCKED
        │                     合并为每项目一份函数 IR；
        │                     源码级标记：污点追踪、import 解析、限定调用链、跨文件模板分析
        ├─ 修复执行器         detect → plan → fix → validate → commit/rollback
-       └─ 知识库             31 个域、140 条规则、证据链
+       └─ 知识库             31 个域、148 条规则、证据链
 ```
 
 ### 接口

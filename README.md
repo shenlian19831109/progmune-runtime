@@ -179,7 +179,7 @@ SDK (src/sdk.ts)           verify() → APPROVED / NEEDS_REVIEW / BLOCKED
        │                     source-level markers: taint tracking, import resolution,
        │                     qualified call chains, cross-file template analysis
        ├─ Repair Executor   detect → plan → fix → validate → commit/rollback
-       └─ Knowledge Base    31 domains, 140 rules, evidence chains
+       └─ Knowledge Base    31 domains, 148 rules, evidence chains
 ```
 
 ### Interfaces
