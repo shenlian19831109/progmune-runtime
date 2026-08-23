@@ -162,7 +162,7 @@ C 分析**仅研究**：黄金基准 F1=16.5%，覆盖 4 个仓库（curl、libs
 - 打破引导死锁：全部 21 个协议命名空间已有规则词汇
 - `excludePatterns` + `languages` 架构管理误报
 
-→ [双峰报告](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/two-hump-report.md) · [P0-P3 终报](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/p0-p3-final-report.md)
+→ [P0-P3 终报](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/p0-p3-final-report.md)
 
 ---
 
@@ -206,8 +206,6 @@ SDK (src/sdk.ts)           verify() → APPROVED / NEEDS_REVIEW / BLOCKED
 ## 科学基础
 
 Progmune 建立在"**LLM 输出是统计表演而非推理**"这一前提上——该观点源自 Subbarao Kambhampati 等人的立场论文 ["Stop Anthropomorphizing Intermediate Tokens as Reasoning/Thinking Traces!"](https://arxiv.org/abs/2505.22285)（arXiv:2505.22285，2025），并在其 ICML 2026 演讲 "On the Role of Verifiers and Thinking Traces in Reasoning Models" 中展开。Progmune 不信任模型对代码的说法，而是用协议状态机、IR 提取与证据链验证程序实际行为。
-
-覆盖缺口分析借用"双峰问题"术语作为**跨域类比**，源自 Sergei Gukov 在数学物理领域的工作（群论中的 Andrews-Curtis 猜想，2026）——它描述的是双峰覆盖分布，而非合作关系。详见 [双峰报告](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/two-hump-report.md)。
 
 → [投资人白皮书](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/Progmune_投资人白皮书_v2.0.html) · [信任决策模型](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/ai-trust-decision-model-v1.md)
 

@@ -162,7 +162,7 @@ C analysis is **research-only**: gold benchmark F1=16.5% across 4 repos (curl, l
 - Bootstrapping deadlock broken: all 21 protocol namespaces now have rule vocabulary
 - `excludePatterns` + `languages` architecture for FP management
 
-→ [Two-Hump Report](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/two-hump-report.md) · [P0-P3 Final Report](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/p0-p3-final-report.md)
+→ [P0-P3 Final Report](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/p0-p3-final-report.md)
 
 ---
 
@@ -207,8 +207,6 @@ Your feedback shapes Progmune. Scan the QR code to join the user discussion grou
 ## Scientific Foundation
 
 Progmune is built on the premise that **LLM outputs are statistical performances, not reasoning** — a view developed by Subbarao Kambhampati et al. in the position paper ["Stop Anthropomorphizing Intermediate Tokens as Reasoning/Thinking Traces!"](https://arxiv.org/abs/2505.22285) (arXiv:2505.22285, 2025) and elaborated in his ICML 2026 talk "On the Role of Verifiers and Thinking Traces in Reasoning Models". Rather than trusting what the model says about code, Progmune verifies what the program actually does — using protocol state machines, IR extraction, and evidence-backed decision chains.
-
-Coverage-gap analysis borrows the "two-hump problem" terminology **as a cross-domain analogy** from Sergei Gukov's work in mathematical physics (the Andrews-Curtis conjecture in group theory, 2026) — it describes a bimodal coverage distribution, not a collaboration. See [Two-Hump Report](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/two-hump-report.md) for the full methodology.
 
 → [Investor Whitepaper](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/Progmune_投资人白皮书_v2.0.html) · [Trust Decision Model](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/ai-trust-decision-model-v1.md)
 
