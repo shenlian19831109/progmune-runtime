@@ -74,7 +74,7 @@ Registry-based multi-language merged extraction (`src/extract-project-ir.ts`): T
 |----------|-------|
 | Detection | Regex auth-init + cleanup pairing (TS); `@progmune` annotated protocol state machine (Python) |
 | TS coverage | ✅ Complete (incl. Ownership Check: ownerId/authorId comparison + permission gates) |
-| Python coverage | ⚠️ Annotation-based protocol extraction + SSG validation with test coverage; no independent protocol blind benchmark |
+| Python coverage | ⚠️ Annotation-based protocol extraction + SSG validation; **protocol blind benchmark v1 (2026-08-23): 32 gold, Recall/Precision 100%/100%, 0 FP** (BASELINE_PROTOCOL_PYTHON_v1). Still missing: endState checks, cross-function propagation, arbitrary-naming validation |
 | C coverage | ⚠️ Only `auth_*` functions; OAuth2.0/OIDC flows uncovered |
 | Not covered | OAuth2.0 authorization-code flow, OIDC, SAML, JWT signature verification, API key management, session fixation attacks |
 
@@ -134,7 +134,7 @@ Registry-based multi-language merged extraction (`src/extract-project-ir.ts`): T
 | Detection | 8 alloc/free pattern pairs |
 | C coverage | ⚠️ malloc/free, fopen/fclose, SSL alloc/free, socket/bind/close |
 | TS coverage | ⚠️ Regex only; TS resource leaks under GC follow completely different patterns |
-| Python coverage | ⚠️ Annotation-based file namespace (open/read/close protocol); no independent blind benchmark |
+| Python coverage | ⚠️ Annotation-based file namespace (open/read/close protocol); use_after_close detected 8/8 in protocol benchmark v1 (see §3.1) |
 | Not covered | DB connection pools, file-handle leaks, unhandled Promises, unremoved event listeners |
 
 ### 3.9 Payment

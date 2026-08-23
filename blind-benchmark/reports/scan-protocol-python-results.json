@@ -1,0 +1,359 @@
+{
+  "scan_generated": "2026-08-23T02:32:10.935Z",
+  "projects_scanned": 24,
+  "total_violations": 32,
+  "results": [
+    {
+      "projectId": "proto_T0_S1",
+      "functionCount": 18,
+      "sequenceCount": 17,
+      "violations": []
+    },
+    {
+      "projectId": "proto_T0_S2",
+      "functionCount": 18,
+      "sequenceCount": 17,
+      "violations": []
+    },
+    {
+      "projectId": "proto_T0_S3",
+      "functionCount": 18,
+      "sequenceCount": 17,
+      "violations": []
+    },
+    {
+      "projectId": "proto_T0_S4",
+      "functionCount": 18,
+      "sequenceCount": 17,
+      "violations": []
+    },
+    {
+      "projectId": "proto_T1_S1",
+      "functionCount": 18,
+      "sequenceCount": 17,
+      "violations": [
+        {
+          "file": "auth.py",
+          "function": "issue_session",
+          "failingFunction": "create_session",
+          "reason": "SSG state violation: \"create_session\" (mapped to \"create_session\") requires states [TOKEN_ISSUED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password → generate_jwt"
+        },
+        {
+          "file": "auth.py",
+          "function": "start_checkout",
+          "failingFunction": "create_session",
+          "reason": "SSG state violation: \"create_session\" (mapped to \"create_session\") requires states [TOKEN_ISSUED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password → generate_jwt"
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T1_S2",
+      "functionCount": 18,
+      "sequenceCount": 17,
+      "violations": [
+        {
+          "file": "auth.py",
+          "function": "_do_issue_session",
+          "failingFunction": "create_session",
+          "reason": "SSG state violation: \"create_session\" (mapped to \"create_session\") requires states [TOKEN_ISSUED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password → generate_jwt"
+        },
+        {
+          "file": "auth.py",
+          "function": "_do_start_checkout",
+          "failingFunction": "create_session",
+          "reason": "SSG state violation: \"create_session\" (mapped to \"create_session\") requires states [TOKEN_ISSUED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password → generate_jwt"
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T1_S3",
+      "functionCount": 18,
+      "sequenceCount": 17,
+      "violations": [
+        {
+          "file": "auth.py",
+          "function": "FlowService.svc_issue_session",
+          "failingFunction": "create_session",
+          "reason": "SSG state violation: \"create_session\" (mapped to \"create_session\") requires states [TOKEN_ISSUED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password → generate_jwt"
+        },
+        {
+          "file": "auth.py",
+          "function": "FlowService.svc_start_checkout",
+          "failingFunction": "create_session",
+          "reason": "SSG state violation: \"create_session\" (mapped to \"create_session\") requires states [TOKEN_ISSUED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password → generate_jwt"
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T1_S4",
+      "functionCount": 18,
+      "sequenceCount": 17,
+      "violations": [
+        {
+          "file": "auth.py",
+          "function": "issue_session",
+          "failingFunction": "create_session",
+          "reason": "SSG state violation: \"create_session\" (mapped to \"create_session\") requires states [TOKEN_ISSUED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password → generate_jwt"
+        },
+        {
+          "file": "auth.py",
+          "function": "start_checkout",
+          "failingFunction": "create_session",
+          "reason": "SSG state violation: \"create_session\" (mapped to \"create_session\") requires states [TOKEN_ISSUED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password → generate_jwt"
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T2_S1",
+      "functionCount": 18,
+      "sequenceCount": 17,
+      "violations": [
+        {
+          "file": "auth.py",
+          "function": "quick_login",
+          "failingFunction": "generate_jwt",
+          "reason": "SSG state violation: \"generate_jwt\" (mapped to \"generate_jwt\") requires states [PASSWORD_VERIFIED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password"
+        },
+        {
+          "file": "auth.py",
+          "function": "silent_login",
+          "failingFunction": "generate_jwt",
+          "reason": "SSG state violation: \"generate_jwt\" (mapped to \"generate_jwt\") requires states [PASSWORD_VERIFIED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password"
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T2_S2",
+      "functionCount": 18,
+      "sequenceCount": 17,
+      "violations": [
+        {
+          "file": "auth.py",
+          "function": "_do_quick_login",
+          "failingFunction": "generate_jwt",
+          "reason": "SSG state violation: \"generate_jwt\" (mapped to \"generate_jwt\") requires states [PASSWORD_VERIFIED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password"
+        },
+        {
+          "file": "auth.py",
+          "function": "_do_silent_login",
+          "failingFunction": "generate_jwt",
+          "reason": "SSG state violation: \"generate_jwt\" (mapped to \"generate_jwt\") requires states [PASSWORD_VERIFIED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password"
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T2_S3",
+      "functionCount": 18,
+      "sequenceCount": 17,
+      "violations": [
+        {
+          "file": "auth.py",
+          "function": "FlowService.svc_quick_login",
+          "failingFunction": "generate_jwt",
+          "reason": "SSG state violation: \"generate_jwt\" (mapped to \"generate_jwt\") requires states [PASSWORD_VERIFIED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password"
+        },
+        {
+          "file": "auth.py",
+          "function": "FlowService.svc_silent_login",
+          "failingFunction": "generate_jwt",
+          "reason": "SSG state violation: \"generate_jwt\" (mapped to \"generate_jwt\") requires states [PASSWORD_VERIFIED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password"
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T2_S4",
+      "functionCount": 18,
+      "sequenceCount": 17,
+      "violations": [
+        {
+          "file": "auth.py",
+          "function": "quick_login",
+          "failingFunction": "generate_jwt",
+          "reason": "SSG state violation: \"generate_jwt\" (mapped to \"generate_jwt\") requires states [PASSWORD_VERIFIED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password"
+        },
+        {
+          "file": "auth.py",
+          "function": "silent_login",
+          "failingFunction": "generate_jwt",
+          "reason": "SSG state violation: \"generate_jwt\" (mapped to \"generate_jwt\") requires states [PASSWORD_VERIFIED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password"
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T3_S1",
+      "functionCount": 18,
+      "sequenceCount": 17,
+      "violations": [
+        {
+          "file": "auth.py",
+          "function": "token_cycle",
+          "failingFunction": "create_session",
+          "reason": "SSG state violation: \"create_session\" (mapped to \"create_session\") requires states [TOKEN_ISSUED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password → generate_jwt"
+        },
+        {
+          "file": "auth.py",
+          "function": "token_renew",
+          "failingFunction": "create_session",
+          "reason": "SSG state violation: \"create_session\" (mapped to \"create_session\") requires states [TOKEN_ISSUED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password → generate_jwt"
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T3_S2",
+      "functionCount": 18,
+      "sequenceCount": 17,
+      "violations": [
+        {
+          "file": "auth.py",
+          "function": "_do_token_cycle",
+          "failingFunction": "create_session",
+          "reason": "SSG state violation: \"create_session\" (mapped to \"create_session\") requires states [TOKEN_ISSUED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password → generate_jwt"
+        },
+        {
+          "file": "auth.py",
+          "function": "_do_token_renew",
+          "failingFunction": "create_session",
+          "reason": "SSG state violation: \"create_session\" (mapped to \"create_session\") requires states [TOKEN_ISSUED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password → generate_jwt"
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T3_S3",
+      "functionCount": 18,
+      "sequenceCount": 17,
+      "violations": [
+        {
+          "file": "auth.py",
+          "function": "FlowService.svc_token_cycle",
+          "failingFunction": "create_session",
+          "reason": "SSG state violation: \"create_session\" (mapped to \"create_session\") requires states [TOKEN_ISSUED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password → generate_jwt"
+        },
+        {
+          "file": "auth.py",
+          "function": "FlowService.svc_token_renew",
+          "failingFunction": "create_session",
+          "reason": "SSG state violation: \"create_session\" (mapped to \"create_session\") requires states [TOKEN_ISSUED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password → generate_jwt"
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T3_S4",
+      "functionCount": 18,
+      "sequenceCount": 17,
+      "violations": [
+        {
+          "file": "auth.py",
+          "function": "token_cycle",
+          "failingFunction": "create_session",
+          "reason": "SSG state violation: \"create_session\" (mapped to \"create_session\") requires states [TOKEN_ISSUED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password → generate_jwt"
+        },
+        {
+          "file": "auth.py",
+          "function": "token_renew",
+          "failingFunction": "create_session",
+          "reason": "SSG state violation: \"create_session\" (mapped to \"create_session\") requires states [TOKEN_ISSUED] but current auth state is [UNAUTHENTICATED]. Fix path: verify_password → generate_jwt"
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T4_S1",
+      "functionCount": 18,
+      "sequenceCount": 17,
+      "violations": [
+        {
+          "file": "files.py",
+          "function": "peek_file",
+          "failingFunction": "read_file",
+          "reason": "SSG state violation: \"read_file\" (mapped to \"read_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+        },
+        {
+          "file": "files.py",
+          "function": "tail_file",
+          "failingFunction": "read_file",
+          "reason": "SSG state violation: \"read_file\" (mapped to \"read_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T4_S2",
+      "functionCount": 18,
+      "sequenceCount": 17,
+      "violations": [
+        {
+          "file": "files.py",
+          "function": "_do_peek_file",
+          "failingFunction": "read_file",
+          "reason": "SSG state violation: \"read_file\" (mapped to \"read_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+        },
+        {
+          "file": "files.py",
+          "function": "_do_tail_file",
+          "failingFunction": "read_file",
+          "reason": "SSG state violation: \"read_file\" (mapped to \"read_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T4_S3",
+      "functionCount": 18,
+      "sequenceCount": 17,
+      "violations": [
+        {
+          "file": "files.py",
+          "function": "FlowService.svc_peek_file",
+          "failingFunction": "read_file",
+          "reason": "SSG state violation: \"read_file\" (mapped to \"read_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+        },
+        {
+          "file": "files.py",
+          "function": "FlowService.svc_tail_file",
+          "failingFunction": "read_file",
+          "reason": "SSG state violation: \"read_file\" (mapped to \"read_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T4_S4",
+      "functionCount": 18,
+      "sequenceCount": 17,
+      "violations": [
+        {
+          "file": "files.py",
+          "function": "peek_file",
+          "failingFunction": "read_file",
+          "reason": "SSG state violation: \"read_file\" (mapped to \"read_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+        },
+        {
+          "file": "files.py",
+          "function": "tail_file",
+          "failingFunction": "read_file",
+          "reason": "SSG state violation: \"read_file\" (mapped to \"read_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+        }
+      ]
+    },
+    {
+      "projectId": "proto_T5_S1",
+      "functionCount": 18,
+      "sequenceCount": 17,
+      "violations": []
+    },
+    {
+      "projectId": "proto_T5_S2",
+      "functionCount": 18,
+      "sequenceCount": 17,
+      "violations": []
+    },
+    {
+      "projectId": "proto_T5_S3",
+      "functionCount": 18,
+      "sequenceCount": 17,
+      "violations": []
+    },
+    {
+      "projectId": "proto_T5_S4",
+      "functionCount": 18,
+      "sequenceCount": 17,
+      "violations": []
+    }
+  ]
+}
