@@ -22,24 +22,24 @@
 ```
 Protocol           TS/JS        C            Go        Python      Java
 ──────────────────────────────────────────────────────────────────────────
-Auth               ✅           ⚠️           ❌         ⚠️          ❌
+Auth               ✅           ⚠️           ❌         ✅          ❌
 TLS/SSL            ⚠️           ✅           ❌         ❌          ❌
 SSH                ⚠️           ✅           ❌         ❌          ❌
 HTTP/2             ⚠️           ✅           ❌         ❌          ❌
 HTTP Request       ⚠️           ✅           ❌         ❌          ❌
 Connection         ⚠️           ✅           ❌         ❌          ❌
 QUIC               ❌           ⚠️           ❌         ❌          ❌
-Resource Lifecycle ⚠️           ⚠️           ❌         ⚠️          ❌
+Resource Lifecycle ⚠️           ⚠️           ❌         ✅          ❌
 Payment            ✅           ❌           ❌         ❌          ❌
 Data Integrity     ✅           ❌           ❌         ❌          ❌
 Ledger             ✅           ❌           ❌         ❌          ❌
 ──────────────────────────────────────────────────────────────────────────
-有效覆盖           TS (✅×4)    C (✅×4)     ❌         Python (⚠️×2) ❌
-                   TS (⚠️×5)    C (⚠️×3)              ↓ 生产级能力在
-                                                      源码级检测（2.1 节）
+有效覆盖           TS (✅×4)    C (✅×4)     ❌         Python (✅×2) ❌
+                   TS (⚠️×5)    C (⚠️×3)              + 源码级检测
+                                                      （2.1 节，生产级）
 ```
 
-> Python 的 ✅ 不在协议行里，而在源码级缺陷检测（注入/Web 类）——见 2.1。
+> Python 的协议行 ✅（Auth / Resource Lifecycle）依据协议盲测 v1.2（BASELINE_PROTOCOL_PYTHON_v1：66 gold，Recall 97% / Precision 100% / 0 FP）；源码级缺陷检测见 2.1。
 
 ### 2.1 源码级缺陷检测（Python 生产级）
 
@@ -73,7 +73,7 @@ Ledger             ✅           ❌           ❌         ❌          ❌
 |------|-----|
 | 检测方式 | 正则匹配认证初始化 + 清理配对（TS）；`@progmune` 注解协议状态机（Python） |
 | TS 覆盖 | ✅ 完整（含 Ownership Check：ownerId/authorId 比较 + 权限门） |
-| Python 覆盖 | ⚠️ 注解式协议提取 + SSG 校验（含 endState 资源未释放检查）；**协议盲测 v1（2026-08-23）：40 gold，Recall/Precision 100%/100%，0 FP**（BASELINE_PROTOCOL_PYTHON_v1）。仍缺：跨函数传播、任意命名验证 |
+| Python 覆盖 | ✅ 注解式协议提取 + SSG 校验（pre/invalidate/endState + P4.6 跨函数传播）；**协议盲测 v1.2（2026-08-23）：66 gold，Recall 97% / Precision 100% / 0 FP**（BASELINE_PROTOCOL_PYTHON_v1，含 S5 任意命名变体；2 处漏检为注解依赖前置约束，如实单列） |
 | C 覆盖 | ⚠️ 仅识别 `auth_*` 函数，未覆盖 OAuth2.0/OIDC 流程 |
 | 未覆盖 | OAuth2.0 授权码流程、OIDC、SAML、JWT 签名验证、API Key 管理、Session 固定攻击 |
 
@@ -133,7 +133,7 @@ Ledger             ✅           ❌           ❌         ❌          ❌
 | 检测方式 | 8 对 alloc/free 模式匹配 |
 | C 覆盖 | ⚠️ malloc/free, fopen/fclose, SSL alloc/free, socket/bind/close |
 | TS 覆盖 | ⚠️ 仅正则匹配，TS 的 GC 管理下资源泄漏模式完全不同 |
-| Python 覆盖 | ⚠️ 注解式 file 命名空间（open/read/close 协议）；协议盲测 v1 中 use_after_close 与 missing_cleanup（endState）各 8/8 检出（见 3.1 引用基线） |
+| Python 覆盖 | ✅ 注解式 file 命名空间（open/read/close 协议）；协议盲测 v1.2 中 use_after_close、missing_cleanup（endState）、cross_function_cleanup（P4.6）全检出（见 3.1 引用基线） |
 | 未覆盖 | 数据库连接池、文件句柄泄漏、Promise 未处理、事件监听器未移除 |
 
 ### 3.9 Payment

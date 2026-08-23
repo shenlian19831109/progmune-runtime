@@ -22,25 +22,25 @@
 ```
 Protocol           TS/JS        C            Go        Python      Java
 ──────────────────────────────────────────────────────────────────────────
-Auth               ✅           ⚠️           ❌         ⚠️          ❌
+Auth               ✅           ⚠️           ❌         ✅          ❌
 TLS/SSL            ⚠️           ✅           ❌         ❌          ❌
 SSH                ⚠️           ✅           ❌         ❌          ❌
 HTTP/2             ⚠️           ✅           ❌         ❌          ❌
 HTTP Request       ⚠️           ✅           ❌         ❌          ❌
 Connection         ⚠️           ✅           ❌         ❌          ❌
 QUIC               ❌           ⚠️           ❌         ❌          ❌
-Resource Lifecycle ⚠️           ⚠️           ❌         ⚠️          ❌
+Resource Lifecycle ⚠️           ⚠️           ❌         ✅          ❌
 Payment            ✅           ❌           ❌         ❌          ❌
 Data Integrity     ✅           ❌           ❌         ❌          ❌
 Ledger             ✅           ❌           ❌         ❌          ❌
 ──────────────────────────────────────────────────────────────────────────
-Effective coverage TS (✅×4)    C (✅×4)     ❌         Python (⚠️×2) ❌
-                    TS (⚠️×5)    C (⚠️×3)              ↓ production-grade
-                                                      coverage is in source-
-                                                      level detection (§2.1)
+Effective coverage TS (✅×4)    C (✅×4)     ❌         Python (✅×2) ❌
+                    TS (⚠️×5)    C (⚠️×3)              + source-level
+                                                      detection (§2.1,
+                                                      production)
 ```
 
-> Python's ✅ lives not in the protocol rows but in source-level defect detection (injection / web classes) — see §2.1.
+> Python's protocol rows ✅ (Auth / Resource Lifecycle) per protocol blind benchmark v1.2 (BASELINE_PROTOCOL_PYTHON_v1: 66 gold, Recall 97% / Precision 100% / 0 FP); source-level detection in §2.1.
 
 ### 2.1 Source-level defect detection (Python, production)
 
@@ -74,7 +74,7 @@ Registry-based multi-language merged extraction (`src/extract-project-ir.ts`): T
 |----------|-------|
 | Detection | Regex auth-init + cleanup pairing (TS); `@progmune` annotated protocol state machine (Python) |
 | TS coverage | ✅ Complete (incl. Ownership Check: ownerId/authorId comparison + permission gates) |
-| Python coverage | ⚠️ Annotation-based protocol extraction + SSG validation (incl. endState held-resource checks); **protocol blind benchmark v1 (2026-08-23): 40 gold, Recall/Precision 100%/100%, 0 FP** (BASELINE_PROTOCOL_PYTHON_v1). Still missing: cross-function propagation, arbitrary-naming validation |
+| Python coverage | ✅ Annotation-based protocol extraction + SSG validation (pre/invalidate/endState + P4.6 cross-function propagation); **protocol blind benchmark v1.2 (2026-08-23): 66 gold, Recall 97% / Precision 100% / 0 FP** (BASELINE_PROTOCOL_PYTHON_v1, incl. S5 arbitrary-naming variants; 2 misses are annotation-dependent preconditions, listed honestly) |
 | C coverage | ⚠️ Only `auth_*` functions; OAuth2.0/OIDC flows uncovered |
 | Not covered | OAuth2.0 authorization-code flow, OIDC, SAML, JWT signature verification, API key management, session fixation attacks |
 
@@ -134,7 +134,7 @@ Registry-based multi-language merged extraction (`src/extract-project-ir.ts`): T
 | Detection | 8 alloc/free pattern pairs |
 | C coverage | ⚠️ malloc/free, fopen/fclose, SSL alloc/free, socket/bind/close |
 | TS coverage | ⚠️ Regex only; TS resource leaks under GC follow completely different patterns |
-| Python coverage | ⚠️ Annotation-based file namespace (open/read/close protocol); use_after_close and missing_cleanup (endState) detected 8/8 each in protocol benchmark v1 (see §3.1) |
+| Python coverage | ✅ Annotation-based file namespace (open/read/close protocol); use_after_close, missing_cleanup (endState), and cross_function_cleanup (P4.6) all detected in benchmark v1.2 (see §3.1) |
 | Not covered | DB connection pools, file-handle leaks, unhandled Promises, unremoved event listeners |
 
 ### 3.9 Payment

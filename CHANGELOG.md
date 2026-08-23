@@ -1,5 +1,25 @@
 # Changelog
 
+## [3.7.0] — 2026-08-23
+
+### 新增：P4.6 跨函数传播（入口展开 + 片段抑制）
+
+- `src/call-sequence.ts`：`buildCallSequences` 共享序列构建——入口函数（不被项目函数调用）的调用链做传递展开（内联被调项目函数体，深度 ≤4、环安全）；非入口函数的孤立片段不再单独验证（违规归因到调用它的入口），消除 helper 片段误报
+- 规则名函数与叶子原语（函数体只调外部调用）不内联——协议原语只在调用链内验证，调用名保留给匹配层
+- trust 引擎接线：`extractCallSequencesFromIR` 换用 `buildCallSequences`，规则名集合作为展开保留单元；生效范围如实记录——ir.json 为函数数组形态（协议盲测语料 / extractIR 直出）时 P4.6 生效；合并形态 `{ typeMap, functions }`（execute/MCP 写盘）沿用既有回退路径（3.5.0 起的既有行为，恢复 IR-first 需先做词段匹配门控的 FP 打磨）
+- 边界（与 C 的 L3 同类，如实记录）：展开是语法内联（调用链扁平化），不做数据流/指针/分支分析
+
+### 新增：协议盲测 v1.2（跨函数 + 任意命名变体）
+
+- 语料网格扩至 38 项目：T0–T5 × S1–S5（30）+ T6/T7 × S1–S4（8）；新增违规类 T6 cross_function_precondition、T7 cross_function_cleanup、风格 S5 renamed（无 `@progmune` 注解 + 改名协议函数，词段匹配验证）
+- **复测结果：66 可测金标，检出 64（Recall 97%）/ Precision 100% / 0 FP**；2 处漏检为 T2×S5 注解依赖前置约束（无注解项目级前置不可恢复，命名匹配本身正常），金标与基线如实单列
+- 回归测试 `tests/python-protocol-benchmark.test.ts` 扩至 6 例（T1 broken / T0 clean 含分离式清洁链 / T5 endState / T6 cross-function / S5 renamed）
+
+### 文档
+
+- 覆盖矩阵（中英）Python 协议行（Auth / Resource Lifecycle）由 ⚠️ 升级 ✅，证据引用协议盲测 v1.2；升级条件（跨函数传播、任意命名验证）全部勾选
+- 基线 `BASELINE_PROTOCOL_PYTHON_v1.md` 更新至 v1.2：语料、结果、已知缺口（注解依赖 / LLM 桥接不在测量范围 / P4.6 展开语义边界）如实记录
+
 ## [3.6.1] — 2026-08-23
 
 ### 文档
