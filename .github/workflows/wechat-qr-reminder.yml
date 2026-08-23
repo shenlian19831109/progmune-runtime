@@ -1,0 +1,76 @@
+name: WeChat QR Reminder
+
+# 每周一 10:00 北京时间（02:00 UTC）检查 assets/wechat-group.png 的上次更新时间；
+# 超过 6 天（微信普通群码 7 天过期，留 1 天缓冲）且没有已开启的提醒 issue 时，
+# 自动开一个提醒 issue。也可手动触发（workflow_dispatch）。
+
+on:
+  schedule:
+    - cron: "0 2 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  remind:
+    name: Check QR freshness and remind if stale
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get QR image last update time
+        id: age
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          last_commit=$(gh api "repos/${{ github.repository }}/commits?path=assets/wechat-group.png&per_page=1" --jq '.[0].commit.committer.date')
+          echo "last_commit=${last_commit}" >> "$GITHUB_OUTPUT"
+          echo "QR 上次更新: ${last_commit}"
+
+      - name: Open reminder issue if QR is stale
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          last="${{ steps.age.outputs.last_commit }}"
+          if [ -z "$last" ] || [ "$last" = "null" ]; then
+            echo "QR 文件不存在或无法读取，跳过"
+            exit 0
+          fi
+          stale=$(python3 - "$last" <<'PYEOF'
+          import sys, datetime
+          last = datetime.datetime.fromisoformat(sys.argv[1].replace("Z", "+00:00"))
+          age_days = (datetime.datetime.now(datetime.timezone.utc) - last).days
+          print("yes" if age_days >= 6 else "no")
+          PYEOF
+          )
+          echo "过期判断: ${stale}"
+          if [ "$stale" = "no" ]; then
+            echo "二维码还很新鲜（<6 天前更新），无需提醒"
+            exit 0
+          fi
+
+          existing=$(gh issue list --state open --search '"wechat-qr-reminder" in:title' --json number --jq 'length')
+          if [ "$existing" -gt 0 ]; then
+            echo "已存在开启中的提醒 issue，跳过"
+            exit 0
+          fi
+
+          body=$(printf '%s\n' \
+            "微信群二维码 **7 天过期**，仓库里的 \`assets/wechat-group.png\` 已经超过 6 天没有更新（上次更新：${last}），扫码可能已失效。" \
+            '' \
+            '### 更新方法' \
+            '' \
+            '1. 微信 → 群聊设置 → 群二维码 → 保存图片' \
+            '2. 覆盖仓库里的 `assets/wechat-group.png`（文件名不变，README 无需改动）' \
+            '3. `git add assets/wechat-group.png && git commit && git push`' \
+            '4. 更新后**关闭本 issue**；7 天后这个 workflow 会再次检查' \
+            '' \
+            '### 一劳永逸的方案' \
+            '' \
+            '普通微信群码每周都要换。建议改用**企业微信群**二维码（永久有效、上限 2000 人），或使用活码服务中转。' \
+            '' \
+            '（本 issue 由 .github/workflows/wechat-qr-reminder.yml 自动创建）')
+
+          gh issue create \
+            --title "🔔 [wechat-qr-reminder] 微信群二维码即将过期，请更新 assets/wechat-group.png" \
+            --body "$body"
