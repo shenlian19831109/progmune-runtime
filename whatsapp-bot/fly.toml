@@ -1,0 +1,24 @@
+# Progmune WhatsApp 自动回复 Bot — Fly.io 配置模板
+# fly launch 会自动生成/覆盖 app 名与 region；密钥用 fly secrets set 注入。
+app = "progmune-wa-bot"
+primary_region = "hkg"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 8080
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
+  [services.concurrency]
+    type = "connections"
+    soft_limit = 100
+    hard_limit = 200
