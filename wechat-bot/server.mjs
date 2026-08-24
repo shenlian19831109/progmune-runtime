@@ -90,11 +90,11 @@ const RULES = [
   {
     keywords: ["支持", "语言", "language", "python", "coverage", "覆盖", "矩阵", "go", "java"],
     reply:
-      "语言覆盖（2026-08，v3.7.1）：\n" +
-      "• TypeScript ✅ 生产级（盲测 P=86.8% / R=83.6%）\n" +
-      "• Python ✅ 协议行（盲测 v1.2：66 gold，Recall 97% / Precision 100% / 0 FP）+ 源码级缺陷检测\n" +
-      "• C ⚠️ 研究级（F1=16.5%，L3 跨函数实验已终止）\n" +
-      "• Go/Java ❌ 未实现\n" +
+      "语言覆盖（2026-08，v3.7.2）：\n" +
+      "• TypeScript ✅ 生产级——协议行 ✅×4（Auth/Payment/Data Integrity/Ledger）+ 源码级检测；盲测 795 gold，Recall 98.5%（有效 100%）/ Precision 100%\n" +
+      "• Python ✅——协议行 ✅×2（Auth/Resource Lifecycle，盲测 v1.2：66 gold，97%/100%/0 FP）+ 源码级检测（盲测 729 gold，Recall 100%）\n" +
+      "• C ⚠️ 研究级——TLS/SSL/SSH/HTTP2/HTTP Request ✅，gold 基准 F1=16.5%\n" +
+      "• Go / Java ❌ 未实现\n" +
       "详情见仓库 docs/coverage-matrix.md",
   },
   {
