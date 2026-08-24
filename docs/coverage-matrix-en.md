@@ -1,7 +1,7 @@
 # Progmune Coverage Matrix
 
 > Protocol × Language × Framework — real coverage status  
-> Last updated: 2026-08-23  
+> Last updated: 2026-08-24  
 > Purpose: answer the only question enterprises care about — "Can Progmune check my project?"
 
 ---
@@ -27,7 +27,7 @@ TLS/SSL            ⚠️           ✅           ❌         ❌          ❌
 SSH                ⚠️           ✅           ❌         ❌          ❌
 HTTP/2             ⚠️           ✅           ❌         ❌          ❌
 HTTP Request       ⚠️           ✅           ❌         ❌          ❌
-Connection         ⚠️           ✅           ❌         ❌          ❌
+Connection         ⚠️           ⚠️           ❌         ❌          ❌
 QUIC               ❌           ⚠️           ❌         ❌          ❌
 Resource Lifecycle ⚠️           ⚠️           ❌         ✅          ❌
 Payment            ✅           ❌           ❌         ❌          ❌
@@ -35,7 +35,7 @@ Data Integrity     ✅           ❌           ❌         ❌          ❌
 Ledger             ✅           ❌           ❌         ❌          ❌
 ──────────────────────────────────────────────────────────────────────────
 Effective coverage TS (✅×4)    C (✅×4)     ❌         Python (✅×2) ❌
-                    TS (⚠️×5)    C (⚠️×3)              + source-level
+                    TS (⚠️×5)    C (⚠️×4)              + source-level
                                                       detection (§2.1,
                                                       production)
 ```
@@ -63,6 +63,8 @@ Effective coverage TS (✅×4)    C (✅×4)     ❌         Python (✅×2) ❌
 ### IR layer (since v3.5.0)
 
 Registry-based multi-language merged extraction (`src/extract-project-ir.ts`): TypeScript (ts-morph) + Python (AST) detectors/extractors merge into a single function IR shared by the agent loop, `execute()`, and the MCP server — the agent composes function-protocol chains across both languages. Adding a language = registering one extractor entry; callers don't change.
+
+> Since 3.7.1: merged-shape ir.json (`{ typeMap, functions }`) restored to IR-first sequence validation (fixing the silent regex-fallback regression since 3.5.0), with word-segment matching gated to project functions — external library calls (e.g. Node's `readFileSync`) no longer collide with protocol rules.
 
 ---
 

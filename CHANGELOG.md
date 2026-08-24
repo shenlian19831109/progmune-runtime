@@ -1,5 +1,25 @@
 # Changelog
 
+## [3.7.3] — 2026-08-24
+
+### 文档全量一致性审计
+
+- 全仓文档与当前进度核对并修正：
+  - **CLAUDE.md**：Current coverage reality 更新至 2026-08-24（TS 795 gold 98.5%/100%、Python ✅ 生产级、C ⚠️）；"Python/Go/Java planned"→"TS + Python production"；"Don't add TS rules"禁令改按现行基准表述；P0-P3 标注历史阶段；架构表补 `src/call-sequence.ts`（P4.6）、Protocol Detector 标注为正则回退；SDK 导出修正为 verify/explain/getCompatibility
+  - **README 双语**：P0-P3 数字统一为权威口径（+31 规则/+86 轨迹/+13 检测器/+11 防护，另 +19 检测）；21→27 命名空间；架构图 Protocol Detector 标注正则回退 + 补 P4.6 调用序列层
+  - **覆盖矩阵双语**：C 列 Connection 按图例降 ⚠️（极高误报率），汇总 ✅×4/⚠️×4；IR 层补 3.7.1 恢复 IR-first + 词段门控注记；日期 08-24
+  - **BASELINE_PROTOCOL_PYTHON_v1.md**：标题升 v1.2（文件名兼容保留）；风格表补 S5 行
+  - **BASELINE_v6.md**：reset_password"已检出/未覆盖"矛盾消歧（md5 形状已检出、其他形状无规则）；TS precision 99.1%（8-15 波次）与 100%（8-16 打磨后）口径注明
+  - **QUICK_START.md**：npx 子命令（发布包中不存在）改为真实入口（MCP / GitHub Action / 仓库 CLI）；覆盖表对齐覆盖矩阵
+  - **API_REFERENCE.md**：按真实表面重写——SDK 仅 verify/explain/getCompatibility（verify 为同步单参、VerificationResult 字段如实列出）；npm bin = MCP server（工具清单）；仓库 CLI scripts 表；环境变量表保留
+  - **RUNTIME_ARCHITECTURE.md**：7 protocol definitions→27 命名空间/148 规则；业务指标表过时数字（FPR 97%、F1 27-41%）改为现行基准（0 FP、TS 98.5%/100%、C F1 16.5%）
+  - **项目全解.html**：hero 版本 v3.2.0→v3.7.2；21→27 命名空间（2 处）；85.2% F1 旧数字→现行基准；5.7 基准表补协议盲测 v1.2 行；6.1 产品形态补社区双渠道机器人
+  - **投资人白皮书_v3.2.html**：Python"未激活"→✅；144→148 规则（2 处）；PrintLab 案例对齐最终态（46→0 违规、44→87 APPROVED）；P2 待办 Python/Go→Go/Java；里程碑表补 3.7 行；"当前能力（v3.2）"标注最新 npm 3.7.2
+
+### 修复
+
+- `src/sdk.ts` `RUNTIME_VERSION` 1.0.0 → 3.7.2（verify() 输出的运行时版本与发布版本对齐）
+
 ## [3.7.2] — 2026-08-23
 
 ### 新增：社区双渠道自动回复机器人（微信 + WhatsApp）

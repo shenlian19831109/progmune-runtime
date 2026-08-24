@@ -174,7 +174,7 @@
   本文档面向两类读者：想快速理解的初学者，与需要专业判断的投资人。</div>
   <div class="meta">
     <span>📄 版本 v1.0 · 2026-08</span>
-    <span>🧪 引擎版本 v3.2.0</span>
+    <span>🧪 引擎版本 v3.7.2</span>
     <span>📊 13/13 安全类别覆盖</span>
     <span>🔓 开源 MIT</span>
     <span>📦 npm install progmune-runtime</span>
@@ -449,7 +449,7 @@ IR: { name: "createOrder", params: [{name:"userId", type:"number"}...],
 
   <h3>5.2 协议状态机：把"顺序规则"变成可执行检查</h3>
   <p>每个关键协议被建模为一个状态机。以登录为例：</p>
-  <pre><code>规则（protocols.json，共 148 条，覆盖 21 个命名空间）:
+  <pre><code>规则（protocols.json，共 148 条，覆盖 27 个命名空间）:
   verify_password:  UNAUTHENTICATED → PASSWORD_VERIFIED
   generate_jwt:     PASSWORD_VERIFIED → TOKEN_ISSUED
   create_session:   TOKEN_ISSUED      → SESSION_ACTIVE
@@ -505,6 +505,7 @@ AI 生成: create_session(...)   ← 当前状态 UNAUTHENTICATED
     <tr><th>基准</th><th>方法</th><th>结果</th></tr>
     <tr><td><strong>盲测基准</strong>（TypeScript，100 项目）</td><td>90 个合成风格变体 + 10 个模型变体项目、795 条 gold finding、严格定位匹配</td><td>精确率 <strong>100%</strong> · 召回率 <strong>98.5%</strong>（有效口径 100%）· 事实性误报 <strong>0</strong></td></tr>
     <tr><td><strong>盲测基准</strong>（Python，90 项目）</td><td>90 个合成风格变体、729 条 gold finding</td><td>精确率 <strong>100%</strong> · 召回率 <strong>100%</strong> · 事实性误报 <strong>0</strong></td></tr>
+    <tr><td><strong>协议盲测</strong>（Python v1.2，38 项目）</td><td>8 违规类型 × 5 结构/命名风格、66 条可测金标、生产 SSG 桥接校验器（P4.6 跨函数传播）</td><td>召回 <strong>97%</strong> · 精确率 <strong>100%</strong> · 误报 <strong>0</strong>（2 漏检为注解依赖前置，已单列）</td></tr>
     <tr><td><strong>真实应用验证</strong>（PyGoat）</td><td>OWASP 故意脆弱 Django 应用、232 条检测逐条人工核实</td><td>标记精确率 <strong>100%</strong>（67 真阳性 / 0 误报）；覆盖 14 个漏洞类别</td></tr>
     <tr><td><strong>良构应用</strong>（django/fastapi realworld、django-unicorn）</td><td>176 条检测</td><td>0 条误报真阳性；3 条框架内部边界 FP（已定性归档）</td></tr>
     <tr><td><strong>黄金基准</strong>（C 语言）</td><td>curl/libssh/nginx/openssl 等真实 CVE 案例</td><td>F1 16.5% —— <strong>研究阶段</strong>，诚实披露</td></tr>
@@ -526,6 +527,7 @@ AI 生成: create_session(...)   ← 当前状态 UNAUTHENTICATED
     <tr><td><strong>SDK</strong></td><td>一行调用：<code>verify(file) → BLOCK/WARN/ALLOW</code></td><td>✅ 可用</td></tr>
     <tr><td><strong>CLI</strong></td><td><code>npm run trust</code>、<code>npm run governance</code>——命令行信任检查与治理报告（终端/JSON/Markdown/HTML 四种格式）</td><td>✅ 可用</td></tr>
     <tr><td><strong>GitHub Action</strong></td><td>PR 合并前自动门禁</td><td>✅ 可用</td></tr>
+    <tr><td><strong>社区自动回复</strong></td><td>公众号（wechat-bot）与 WhatsApp（whatsapp-bot）双渠道关键词自动回复，「群」指令发送社区二维码合成图</td><td>✅ 上线（3.7.2）</td></tr>
     <tr><td><strong>Trust API</strong></td><td><code>POST /trust/check</code> 机器间接口</td><td>✅ 可用</td></tr>
     <tr><td><strong>SaaS 仪表盘</strong></td><td>多项目可视化管理</td><td>🔲 规划中（等 PoC 验证后）</td></tr>
   </table>
@@ -543,7 +545,7 @@ AI 生成: create_session(...)   ← 当前状态 UNAUTHENTICATED
   <h3>6.3 知识库规模</h3>
   <div class="stats">
     <div class="stat"><div class="n">148</div><div class="l">协议规则</div></div>
-    <div class="stat"><div class="n">21</div><div class="l">协议命名空间全覆盖</div></div>
+    <div class="stat"><div class="n">27</div><div class="l">协议命名空间全覆盖</div></div>
     <div class="stat"><div class="n">22+26+15</div><div class="l">检测器 + 防护 + 源码级规则</div></div>
     <div class="stat"><div class="n">39</div><div class="l">黄金缺陷案例（人工验证）</div></div>
     <div class="stat"><div class="n">190</div><div class="l">盲测项目（TS 100 + Python 90）</div></div>
@@ -693,7 +695,7 @@ AI 生成: create_session(...)   ← 当前状态 UNAUTHENTICATED
     <li><strong>真问题 + 真窗口</strong>：76% 企业已用 AI 编码，验证层是明确的基础设施缺口，且没有巨头占位</li>
     <li><strong>差异化足够深</strong>：协议顺序验证是传统 SAST 的系统性盲区——这是"品类级"差异，不是"功能级"差异</li>
     <li><strong>数据飞轮成立</strong>：每次拦截都沉淀为抗体，使用量即壁垒（与 Salesforce 的网络效应同构）</li>
-    <li><strong>开源已验证</strong>：19 个工具、148 条规则、85.2% F1、真实项目案例（PrintLab 从 BLOCKED 到 APPROVED 的完整过程可复现）</li>
+    <li><strong>开源已验证</strong>：MCP 工具集成、148 条规则、TS 盲测 Recall 98.5% / Precision 100%（0 FP）、真实项目案例（PrintLab 从 BLOCKED 到 APPROVED 的完整过程可复现）</li>
   </ol>
 
   <h3>为什么需要谨慎</h3>

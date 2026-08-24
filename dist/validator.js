@@ -86,7 +86,18 @@ function checkVariableFlow(actions) {
     };
     const processAction = (action) => {
         if (action.kind === "call") {
-            // call 动作的参数值来自结构化 {name, type, value}，都是字面量，不做变量引用检查
+            // call 参数值若是显式变量引用（$ 前缀），必须已声明——白皮书 SVL-3：
+            // "变量先声明后使用"。裸标识符保持字面量语义（可能是枚举值），
+            // 不做声明检查。
+            for (const arg of action.args || []) {
+                const val = arg?.value;
+                if (typeof val !== "string" || !val.startsWith("$"))
+                    continue;
+                const bare = val.slice(1);
+                if (bare && !isLiteral(bare) && /^[a-zA-Z_]\w*$/.test(bare) && !declared.has(bare)) {
+                    errors.push(`变量 '${bare}' 在使用前未声明 (call 参数 '${arg.name || "?"}')`);
+                }
+            }
             if (action.assignTo) {
                 declared.set(action.assignTo, "any");
             }

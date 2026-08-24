@@ -272,9 +272,16 @@ const SAFEGUARD_RULES = [
     {
         name: "Password Hashing",
         category: "password_hashing",
-        trigger: /\b(register|signUp|createUser|createAccount|registerUser)\b/i,
+        trigger: /\b(register|signUp|createUser|createAccount|registerUser|sign_up|create_user|create_account|register_user|register_new_user)\b/i,
         safeguards: [
             { pattern: /\b(bcrypt|argon2|scrypt|pbkdf2|hash|hashPassword|createHash|hashSync|hash_password)\b/i, label: "secure_hash" },
+            // Framework delegation (qualified chains only — a bare custom create_user
+            // is NOT treated as secure): Django's built-in user manager and password
+            // setters hash internally; repository/service create_user methods delegate
+            // to the model (users_repo.create_user, self.create_user). Also
+            // XForm(request.POST).save() — Django form validation + hashing
+            // (extractor marker).
+            { pattern: /\.create_user\b|\.(change_password|set_password)\b|__progmune_django_form__|__progmune_template_tag__/i, label: "framework_hashing" },
         ],
         violationMessage: "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
         conceptMissing: ["PasswordHash", "KeyDerivation"],
@@ -284,9 +291,14 @@ const SAFEGUARD_RULES = [
     {
         name: "Password Hashing (Weak)",
         category: "password_hashing",
-        trigger: /\b(register|signUp|createUser|createAccount|registerUser)\b/i,
+        trigger: /\b(register|signUp|createUser|createAccount|registerUser|sign_up|create_user|create_account|register_user|register_new_user)\b/i,
         safeguards: [
             { pattern: /\b(bcrypt|argon2|scrypt|pbkdf2)\b/i, label: "strong_hash" },
+            // Framework delegation (qualified chains only)
+            { pattern: /\.create_user\b|\.(change_password|set_password)\b|__progmune_django_form__|__progmune_template_tag__/i, label: "framework_hashing" },
+        ],
+        excludePatterns: [
+            /register\.(simple_tag|tag|filter|inclusion_tag)/, // Django template-tag registration
         ],
         violationMessage: "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
         conceptMissing: ["StrongHash", "SaltGeneration"],
@@ -294,16 +306,26 @@ const SAFEGUARD_RULES = [
     },
     // ── Authorization / Ownership Check ──
     // v2: narrowed triggers — removed "process" and "set" (too generic for C libraries)
+    // v3 (2026-08-15): identity lookups (getUser/validateToken/getCurrentUser...) removed
+    // from satisfiers — authentication is NOT ownership. A mutation calling only
+    // getUser(token) without comparing ownerId/authorId is the 90-FN class found by
+    // the 100-project gold benchmark. Satisfiers are now: explicit ownership
+    // comparison names, owner-check helpers, or permission/role gates.
+    // Limitation: inline `p.ownerId !== u.id` comparisons are not visible in the
+    // call-list interface of this detector (would need AST-level analysis).
     {
         name: "Authorization (Ownership Check)",
         category: "authorization",
-        trigger: /\b(delete|remove|toggle|modify|edit|lock|ban|refund|assign|transfer|share|schedule|upload)(?:[A-Z]\w*|_\w+)|(?:[A-Z]\w*|_\w+)(Delete|Remove|Toggle|Modify|Edit|Lock|Ban|Refund|Assign|Transfer|Share|Schedule|Upload)\b/i,
+        paramGated: true,
+        trigger: /\b(delete|remove|toggle|modify|edit|lock|ban|refund|assign|transfer|share|schedule|upload|update)(?:[A-Z]\w*|_\w+)|(?:[A-Z]\w*|_\w+)(Delete|Remove|Toggle|Modify|Edit|Lock|Ban|Refund|Assign|Transfer|Share|Schedule|Upload|Update)\b/i,
         safeguards: [
-            { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|checkOwner|authorId\s*[!=]==?|ownerId\s*[!=]==?|userId\s*[!=]==?|\.owner\s*[!=]==?|hasPermission|checkPermission|checkAccess|isAuthorized|checkRole|requireRole|adminCheck|isAdmin|canModify|canDelete|canEdit)\b/i, label: "auth_check" },
+            { pattern: /\b(checkOwner|isOwner|ownerId\s*[!=]==?|authorId\s*[!=]==?|userId\s*[!=]==?|createdBy\s*[!=]==?|\.owner\s*[!=]==?|\.user\s*[!=]==?)\b/i, label: "ownership_check" },
+            { pattern: /\b(hasPermission|checkPermission|checkAccess|isAuthorized|checkRole|requireRole|adminCheck|isAdmin|canModify|canDelete|canEdit)\b/i, label: "authz_check" },
+            { pattern: /\b(__progmune_ownership_checked__)\b/, label: "inline_ownership_check" },
         ],
-        violationMessage: "Mutation operation does not verify user ownership or authorization before modifying data.",
+        violationMessage: "Mutation operation does not verify that the acting user owns the resource or holds the required permission before modifying data.",
         conceptMissing: ["OwnershipCheck", "AuthorizationGuard"],
-        conceptExpected: ["getUser", "validateToken", "ownerId check"],
+        conceptExpected: ["ownerId comparison", "authorId check", "permission check"],
         excludePatterns: [
             /_hd_/, // HPACK header compression internals
             /_frame_/, // protocol frame handlers
@@ -323,9 +345,10 @@ const SAFEGUARD_RULES = [
         name: "Authorization (Unauthenticated Access)",
         category: "authorization",
         languages: ["typescript", "javascript", "python"],
+        paramGated: true,
         trigger: /\b(list|download|view|fetch)(?:[A-Z]\w*|_\w+)|get(?:[A-Z]\w+|_\w+)/i,
         safeguards: [
-            { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess)\b/i, label: "auth_check" },
+            { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware|get_current_user_authorizer|current_user_authorizer|login_required|permission_required|user_passes_test|check_authorization|check_permission|jwt\.decode|decode_token|__progmune_auth_checked__|__progmune_credential_check__|__progmune_drf_permissions__|__progmune_auth_machinery__)\b/i, label: "auth_check" },
         ],
         violationMessage: "Data access function does not check authentication. Anyone can access data without credentials.",
         conceptMissing: ["AuthenticationCheck", "AccessControl"],
@@ -340,10 +363,43 @@ const SAFEGUARD_RULES = [
             /listpack/, // Redis internal data structure
             /readSync|readQuery/, // internal I/O
             /findBig|findKey|findPk/, // internal search (not API)
+            /get_cache\w*/, // cache machinery (get_cache_alias — not data access)
+            /get_context_data/, // Django CBV context assembly — framework verb
+        ],
+    },
+    // Mutations without any authentication. The Unauthenticated Access rule above
+    // only covers read verbs (list/get/download/view/fetch); create/add/post/update/
+    // set verbs had no auth coverage (3 gold FNs: addProduct, addCategory, setMilestone).
+    // v3 (2026-08-15)
+    {
+        name: "Authorization (Unauthenticated Mutation)",
+        category: "authorization",
+        languages: ["typescript", "javascript", "python"],
+        paramGated: true,
+        // Note: "post" deliberately excluded — it collides with the Post entity name
+        // (listPosts/getPost/deletePost fire via identifier-parsed words).
+        trigger: /\b(add|create|update|set|publish|insert|submit)(?:[A-Z]\w*|_\w+)|(?:[A-Z]\w*|_\w+)(Add|Create|Update|Set|Publish|Insert|Submit)\b/i,
+        safeguards: [
+            { pattern: /\b(getUser|validateToken|verifyToken|verifySession|validateSession|getSessionUser|getSession\b|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware|get_current_user_authorizer|current_user_authorizer|login_required|permission_required|user_passes_test|check_authorization|check_permission|create_access_token|create_refresh_token|create_jwt_token|__progmune_auth_checked__|__progmune_credential_check__|__progmune_drf_permissions__|__progmune_auth_machinery__)\b/i, label: "auth_check" },
+        ],
+        violationMessage: "Mutation function does not check authentication. Anyone can create or modify data without credentials.",
+        conceptMissing: ["AuthenticationCheck", "AccessControl"],
+        conceptExpected: ["token validation", "session check", "auth middleware"],
+        excludePatterns: [
+            /set_authn_id/, // internal auth setter
+            /set_ssl_/, // SSL config setter
+            /set_config/, // configuration setter
+            /set_option/, // option setter
+            /\bsetup\b/, // framework/component setup — configuration, not data mutation
         ],
     },
     // ── Data Integrity (Foreign Key Validation) ──
     // v2: removed "process" and "send" (too generic for C)
+    // v3 (2026-08-15): param-aware. The old safeguard counted ANY get*/find* call
+    // as a foreign-key check — including getSessionUser/getUser auth lookups, which
+    // suppressed the rule on addComment/addNote/createReply (4 gold FNs). When param
+    // names are known, the rule only applies to functions taking a parent-reference
+    // parameter (…Id / entityType) and requires a NON-auth lookup call.
     {
         name: "Data Integrity (Foreign Key)",
         category: "data_integrity",
@@ -354,6 +410,11 @@ const SAFEGUARD_RULES = [
         violationMessage: "Creates a child entity without verifying the parent entity exists. Orphaned references possible.",
         conceptMissing: ["ForeignKeyValidation", "ReferentialIntegrity"],
         conceptExpected: ["checkExists", "getParent", "validateReference"],
+        parentRefGated: true,
+        strictSafeguards: [
+            // Entity lookups only — authentication lookups do NOT verify a parent exists.
+            { pattern: /\b(?!get(Session|Current)?User\b|getClient\b|verifyToken\b|validateSession\b)(get|find|check|exists|lookup|status|validate|verify)(?:[A-Z]\w*|_\w+)\b/i, label: "fk_check_strict" },
+        ],
         excludePatterns: [
             /_hd_/, // HPACK header compression
             /add_auth_info/, // internal auth metadata
@@ -388,7 +449,7 @@ const SAFEGUARD_RULES = [
     {
         name: "TLS Enforcement",
         category: "tls_enforcement",
-        trigger: /\b(createServer|listen|handleRequest|app\.listen|express)\b/i,
+        trigger: /\b(createServer|listen|handleRequest|handle_request|app\.listen|express)\b/i,
         safeguards: [
             { pattern: /\b(https|tls|ssl|cert|key|TLS|SSL|HTTPS|createSecureContext|credentials)\b/i, label: "tls_config" },
         ],
@@ -401,9 +462,21 @@ const SAFEGUARD_RULES = [
         name: "Token Security (Weak Generation)",
         category: "token_security",
         languages: ["typescript", "javascript", "python"],
-        trigger: /\b(authenticate|login|signIn|logIn|createSession|generateToken)\b/i,
+        trigger: /\b(authenticate|login|signIn|logIn|createSession|generateToken|do_login|sign_in|log_in|generate_token|create_session|reset_password|password_reset|forgot_password|reset_token|create_reset_token|generate_reset_token)\b/i,
+        // Semantic precondition: only fire when the function actually issues
+        // token material (set_cookie / token-named assignment — extractor marker).
+        // Login-named page renderers (login_otp) no longer fire.
+        requireMarker: "__progmune_token_issued__",
         safeguards: [
-            { pattern: /\b(crypto\.randomUUID|jwt\.sign|jsonwebtoken|nanoid|randomBytes|cryptoRandomString)\b/i, label: "secure_token" },
+            { pattern: /\b(crypto\.randomUUID|jwt\.sign|jsonwebtoken|nanoid|randomBytes|cryptoRandomString|secrets\.token_urlsafe|secrets\.token_hex|token_urlsafe|token_hex|uuid\.uuid4|os\.urandom)\b/i, label: "secure_token" },
+            // Framework delegation: calling a token-issuing layer means the session
+            // material is handled by that layer, not generated inline. NOTE: bare
+            // jwt.encode is deliberately NOT here — a hardcoded secret key makes the
+            // JWT layer itself the vulnerability (PyGoat sec_misconfig_lab3).
+            { pattern: /\b(create_access_token|create_refresh_token|create_jwt_token|\.check_password\b|get_current_user_authorizer|login_required|permission_required|__progmune_framework_auth__|__progmune_auth_machinery__)\b/i, label: "framework_token" },
+        ],
+        excludePatterns: [
+            /login_not_required|login_required/, // decorators — the auth layer itself
         ],
         violationMessage: "Token/session generated without cryptographically secure random source. Tokens may be predictable or forgeable.",
         conceptMissing: ["SecureRandom", "TokenEntropy", "CryptographicSignature"],
@@ -413,9 +486,11 @@ const SAFEGUARD_RULES = [
     {
         name: "Authorization (Resource Ownership)",
         category: "authorization",
+        paramGated: true,
         trigger: /\b(toggle|remove)(?:[A-Z]\w*|_\w+)\b/i,
         safeguards: [
             { pattern: /\b(ownerId\s*[!=]==?|authorId\s*[!=]==?|userId\s*[!=]==?|createdBy|\.owner\s*[!=]==?)/i, label: "ownership_comparison" },
+            { pattern: /\b(__progmune_ownership_checked__)\b/, label: "inline_ownership_check" },
         ],
         violationMessage: "Resource mutation checks authentication but does NOT verify the resource belongs to the requesting user. Missing ownerId/authorId comparison.",
         conceptMissing: ["ResourceOwnership", "HorizontalAuthorization"],
@@ -461,7 +536,7 @@ const SAFEGUARD_RULES = [
     {
         name: "Rate Limiting",
         category: "rate_limiting",
-        trigger: /\b(createServer|listen|handleRequest|app\.listen|express|router\.(post|get|put|delete|patch))\b/i,
+        trigger: /\b(createServer|listen|handleRequest|handle_request|app\.listen|express|router\.(post|get|put|delete|patch))\b/i,
         safeguards: [
             { pattern: /\b(rateLimit|rate_limit|throttle|RateLimiter|expressRateLimit|rateLimiterMiddleware|limiter)\b/i, label: "rate_limit" },
         ],
@@ -513,9 +588,14 @@ const SAFEGUARD_RULES = [
         name: "Command Injection",
         category: "input_validation",
         languages: ["python"],
-        trigger: /\b(os\.system|os\.popen|subprocess\.(call|check_call|Popen|run)|commands\.getoutput|pty\.spawn)\b/i,
+        // Marker-driven: the extractor emits __progmune_command_dynamic__ only
+        // when a subprocess/os command receives a NON-static argument (static
+        // string/list invocations like installers stay silent), and
+        // __progmune_command_taint_flow__ when a tainted value flows to a
+        // command-named helper.
+        trigger: /\b(__progmune_command_dynamic__|__progmune_command_taint_flow__)\b/,
         safeguards: [
-            { pattern: /\b(shlex\.quote|shlex\.split|pipes\.quote|shell\s*=\s*False)\b/i, label: "safe_command" },
+            { pattern: /\b(shlex\.quote|shlex\.split|pipes\.quote)\b/i, label: "safe_command" },
         ],
         violationMessage: "Shell command execution without input quoting. Vulnerable to command injection.",
         conceptMissing: ["CommandInjectionPrevention", "InputSanitization"],
@@ -525,10 +605,12 @@ const SAFEGUARD_RULES = [
         name: "Hardcoded Secrets",
         category: "token_security",
         languages: ["python"],
-        trigger: /\b(password|secret|api_key|API_KEY|token|\w*TOKEN\w*)\s*=\s*["'][^"']+["']/i,
-        safeguards: [
-            { pattern: /\b(os\.environ|os\.getenv|config|\.env|python-dotenv|load_dotenv|SecretStr|Secret)\b/i, label: "env_secret" },
-        ],
+        trigger: /\b(password|secret|api_key|API_KEY|token|\w*TOKEN\w*)\s*=\s*["'][^"']+["']|__progmune_hardcoded_secret__/i,
+        // Empty safeguards: the extractor marker is the complete evidence. (The old
+        // env-secret safeguard suppressed the marker itself — identifierParse of
+        // __progmune_hardcoded_secret__ yields the word "secret", matching the
+        // safeguard's "Secret" alternative.)
+        safeguards: [],
         violationMessage: "Sensitive credentials hardcoded in source code. Use environment variables or a secrets manager.",
         conceptMissing: ["SecretManagement", "ConfigurationSecurity"],
         conceptExpected: ["os.environ", "os.getenv", "dotenv"],
@@ -537,7 +619,7 @@ const SAFEGUARD_RULES = [
         name: "Dynamic Code Execution",
         category: "input_validation",
         languages: ["python"],
-        trigger: /\b(eval|exec|compile|__import__)\s*\(/i,
+        trigger: /\b(eval|exec|compile|__import__)\s*\(|__progmune_eval_user_input__/i,
         safeguards: [
             { pattern: /\b(ast\.literal_eval|json\.loads|safe_eval)\b/i, label: "safe_eval" },
         ],
@@ -561,13 +643,133 @@ const SAFEGUARD_RULES = [
         name: "SQL Injection (Python)",
         category: "input_validation",
         languages: ["python"],
-        trigger: /\b(execute|executemany)\b/i,
-        safeguards: [
-            { pattern: /\b(%s|\?|:\w+|parameterize|\.execute\s*\(\s*\w+\s*,\s*[\[(])/i, label: "parameterized_query" },
-        ],
-        violationMessage: "SQL executed with string formatting instead of parameterized queries. Vulnerable to SQL injection.",
+        // Source-level detection: the Python extractor emits a synthetic marker
+        // call when a SQL-executing call (execute/executemany/raw/...) builds its
+        // SQL text with dynamic formatting (f-string / % / .format / concatenation).
+        // Parameterized calls (execute("... %s", (args,))) produce no marker and
+        // are correctly NOT flagged. No satisfier possible — the marker IS the
+        // violation evidence.
+        trigger: /\b(__progmune_sql_unparameterized__)\b/,
+        safeguards: [],
+        violationMessage: "SQL built with string formatting (f-string / % / .format / concatenation) instead of parameterized queries. Vulnerable to SQL injection.",
         conceptMissing: ["SQLInjectionPrevention", "ParameterizedQueries"],
         conceptExpected: ["parameterized query", "%s placeholder"],
+    },
+    {
+        name: "SSRF (User-Controlled URL Fetch)",
+        category: "ssrf",
+        languages: ["python"],
+        // Source-level detection: the Python extractor emits a synthetic marker
+        // call when an HTTP fetch (requests.*/urllib.*/httpx.*/aiohttp.*/urlopen)
+        // receives a URL tainted by request-derived user input (directly or via
+        // single-hop assignment). No satisfier possible — the marker IS the
+        // violation evidence.
+        trigger: /\b(__progmune_ssrf_user_url__)\b/,
+        safeguards: [],
+        violationMessage: "HTTP fetch whose URL derives from user-controlled request input — server-side request forgery.",
+        conceptMissing: ["SSRFPrevention", "URLValidation"],
+        conceptExpected: ["URL allowlist", "scheme validation"],
+    },
+    {
+        name: "Path Traversal (User-Controlled File Path)",
+        category: "path_traversal",
+        languages: ["python"],
+        // Source-level detection: the Python extractor emits a synthetic marker
+        // call when a file sink (open / io.open / os.open / Path(...).read_text)
+        // receives a path tainted by request-derived user input (directly or via
+        // single-hop assignment — os.path.join chains resolve through assignment
+        // tracking). No satisfier possible — the marker IS the violation evidence.
+        trigger: /\b(__progmune_path_traversal__)\b/,
+        safeguards: [],
+        violationMessage: "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
+        conceptMissing: ["PathTraversalPrevention", "InputPathValidation"],
+        conceptExpected: ["path allowlist", "basename normalization", "path sanitization"],
+    },
+    {
+        name: "XSS (Unsafe Template Rendering)",
+        category: "xss",
+        languages: ["python"],
+        // Cross-file detection: the Python extractor scans templates for variables
+        // rendered without escaping ({{ var|safe }}, {% autoescape off %}) and emits
+        // a synthetic marker when a render/render_to_string call binds tainted
+        // request-derived values to those variables — or when mark_safe() is
+        // applied to tainted input.
+        trigger: /\b(__progmune_xss_unsafe_render__)\b/,
+        safeguards: [],
+        violationMessage: "User-controlled input rendered in a template without escaping (|safe / autoescape off / mark_safe) — stored or reflected XSS.",
+        conceptMissing: ["XSSPrevention", "OutputEncoding"],
+        conceptExpected: ["template autoescape", "output escaping"],
+    },
+    {
+        name: "SSTI (Template Injection)",
+        category: "ssti",
+        languages: ["python"],
+        // Source-level detection: the Python extractor emits a synthetic marker
+        // when (S1) a template-string sink (render_template_string / Template /
+        // from_string) receives tainted input, or (S2) tainted content is written
+        // to a file opened under a template path — the Django dynamic-template
+        // pattern where user input becomes template source.
+        trigger: /\b(__progmune_ssti_template_injection__)\b/,
+        safeguards: [],
+        violationMessage: "User-controlled input used as template source — server-side template injection.",
+        conceptMissing: ["SSTIPrevention", "TemplateSandbox"],
+        conceptExpected: ["static template files", "no user template syntax"],
+    },
+    {
+        name: "XXE (External Entity Processing)",
+        category: "xxe",
+        languages: ["python"],
+        // Source-level detection: the Python extractor emits a synthetic marker
+        // when BOTH signals co-occur — an explicitly unsafe parser configuration
+        // (setFeature(feature_external_*, True) / XMLParser(resolve_entities=True))
+        // AND parsing of tainted request-derived XML (parse/parseString/fromstring).
+        // Config-only or taint-only alone is not flagged.
+        trigger: /\b(__progmune_xxe_external_entities__)\b/,
+        safeguards: [],
+        violationMessage: "XML parsed from user-controlled input with external entity processing explicitly enabled — XXE.",
+        conceptMissing: ["XXEPrevention", "EntityExpansionControl"],
+        conceptExpected: ["disable external entities", "secure parser config"],
+    },
+    {
+        name: "CSRF Protection Disabled",
+        category: "csrf",
+        languages: ["python"],
+        // Source-level detection: the Python extractor emits a synthetic marker
+        // when a function carries the @csrf_exempt decorator — Django CSRF
+        // protection explicitly disabled on the view.
+        trigger: /\b(__progmune_csrf_disabled__)\b/,
+        safeguards: [],
+        violationMessage: "View decorated with @csrf_exempt — CSRF protection explicitly disabled.",
+        conceptMissing: ["CSRFProtection", "StateChangingRequestValidation"],
+        conceptExpected: ["csrf token validation", "SameSite cookies"],
+    },
+    {
+        name: "CSRF Exposed GET State Change",
+        category: "csrf",
+        languages: ["python"],
+        // Source-level detection: the Python extractor emits a synthetic marker
+        // when a `request.method == 'GET'` branch performs state-changing calls
+        // (.save/.update/.delete/.create) — state change on GET, CSRF-exposed
+        // even without @csrf_exempt.
+        trigger: /\b(__progmune_get_state_change__)\b/,
+        safeguards: [],
+        violationMessage: "State-changing operation executed in a GET branch — CSRF-exposed without token validation.",
+        conceptMissing: ["CSRFProtection", "SafeMethodEnforcement"],
+        conceptExpected: ["POST for state changes", "csrf token validation"],
+    },
+    {
+        name: "Authorization via Client Cookie",
+        category: "authorization",
+        languages: ["python"],
+        // Source-level detection: the Python extractor emits a synthetic marker
+        // when a client-controlled cookie value (request.COOKIES, incl. single-hop
+        // assignment chains like cookie.split('|')[0]) participates in a comparison
+        // or branch test — authorization decided by cookie contents.
+        trigger: /\b(__progmune_cookie_authorization__)\b/,
+        safeguards: [],
+        violationMessage: "Authorization decision based on a client-controlled cookie value — cookie contents are user-editable.",
+        conceptMissing: ["ServerSideAuthorization", "SessionIntegrity"],
+        conceptExpected: ["server-side session checks", "signed sessions"],
     },
     // ═══════════════════════════════════════════════════════════════
     // P0 Injection: Payment + Session safeguard rules
@@ -612,7 +814,7 @@ const SAFEGUARD_RULES = [
     {
         name: "Session No Timeout",
         category: "session",
-        trigger: /\b(\w*session\w*create|\w*create\w*session|\w*session\w*new|\w*session\w*start|\w*login\w*session|\w*session\w*init|signIn|signin|login\b|authenticate\b|createSession|create_session)\b/i,
+        trigger: /\b(\w*session\w*create|\w*create\w*session|\w*session\w*new|\w*session\w*start|\w*login\w*session|\w*session\w*init|signIn|signin|login\b|authenticate\b|createSession|create_session|do_login|sign_in|log_in)\b/i,
         safeguards: [
             { pattern: /\b(\w*expir|\w*ttl|\w*timeout|\w*max\w*age|\w*maxAge|\w*max_age|\w*lifetime|\w*duration|\w*expires|\w*deadline|\w*valid\w*for|\w*valid\w*until)/i, label: "timeout_set" },
         ],
@@ -636,6 +838,8 @@ const SAFEGUARD_RULES = [
         trigger: /\b(\w*password\w*change|\w*password\w*reset|\w*change\w*password|\w*reset\w*password|\w*update\w*password|\w*privilege|\w*role\w*change|\w*escalat|\w*enable\w*2fa|\w*mfa\w*enable|\w*email\w*change)\b/i,
         safeguards: [
             { pattern: /\b(\w*revoke|\w*rotate|\w*invalidate|\w*reissue|\w*regenerate|\w*new\w*token|\w*token\w*refresh|\w*session\w*refresh|\w*renew)/i, label: "token_rotate" },
+            // Password-change machinery itself (the material IS rotated/reissued here).
+            { pattern: /\.(change_password|set_password|update_password|generate_salt|get_password_hash)\b/i, label: "password_machinery" },
         ],
         violationMessage: "Privilege-changing operation detected without subsequent token rotation or session invalidation. Stolen pre-change tokens remain valid.",
         conceptMissing: ["TokenRotation", "SessionInvalidation", "FixationPrevention"],
@@ -648,7 +852,7 @@ const SAFEGUARD_RULES = [
     {
         name: "Registration Without Email Verification",
         category: "registration",
-        trigger: /\b(register|signup|signUp|registerUser|createUser|createAccount)\b/i,
+        trigger: /\b(register|signup|signUp|registerUser|createUser|createAccount|sign_up|create_user|create_account|register_user|register_new_user)\b/i,
         safeguards: [
             { pattern: /\b(send\w*(Code|Otp|Token|Verif|Email|Sms|Link)|(code|otp|token|verif)\w*send|verification|confirmEmail|verifyEmail|sendVerification|verify_user_email)\b/i, label: "email_verify" },
         ],
@@ -793,13 +997,23 @@ const SAFEGUARD_RULES = [
     //              Privilege Escalation, API Contract
     // ═══════════════════════════════════════════════════════════════
     // ── PLS-005: Session Fixation — session not invalidated on logout ──
+    // v2 (2026-08-15): recognize store-based invalidation — splicing/filtering the
+    // session store IS invalidation (144 FPs on the 100-project benchmark came from
+    // logouts that do `sessions.splice(idx, 1)`). Also, a function that delegates to
+    // a logout-named function is not itself failing to invalidate — the logout
+    // function's own body is where the check belongs (callsOnly guard).
     {
         name: "Session Fixation (Logout without Invalidation)",
         category: "session_fixation",
         languages: ["typescript", "javascript", "python"],
-        trigger: /\b(logout|signOut|logOut|signout|doLogout|handleLogout|endSession|clearSession)\b/i,
+        trigger: /\b(logout|signOut|logOut|signout|doLogout|handleLogout|endSession|clearSession|do_logout|sign_out|log_out|handle_logout|end_session|clear_session|invalidate_session)\b/i,
         safeguards: [
             { pattern: /\b(session\w*destroy|destroy\w*session|session\w*invalidate|invalidate\w*session|session\w*revoke|revoke\w*session|session\w*clear|clear\w*session|session\w*end|end\w*session|session\w*expire|expire\w*session|token\w*revoke|revoke\w*token|token\w*blacklist|blacklist\w*token|invalidate\w*token)\b/i, label: "session_invalidate" },
+            // Store-based invalidation: remove the session entry from the store.
+            { pattern: /\b(splice|filter|pop|shift|clear|delete_cookie|delete_cookies)\b/i, label: "store_invalidate" },
+            // Delegation: calling a logout-named function hands invalidation to that
+            // function (its own body is checked separately).
+            { pattern: /\b(logout|signOut|logOut|signout|doLogout|handleLogout|endSession|clearSession|do_logout|sign_out|log_out|handle_logout|end_session|clear_session|invalidate_session)\b/i, label: "delegated_logout", callsOnly: true },
         ],
         violationMessage: "Logout function does not destroy/invalidate the session. Old session tokens remain valid, enabling session hijacking (session fixation).",
         conceptMissing: ["SessionInvalidation", "SessionRevocation"],
@@ -869,10 +1083,14 @@ function identifierParse(name) {
  * Detect missing safeguards in function call sequences.
  * Uses identifier parsing to match compound names (registerNewUser → register).
  */
-function detectSafeguardViolations(calls, enclosingFuncName, language) {
+function detectSafeguardViolations(calls, enclosingFuncName, language, params, exposed) {
     const violations = [];
-    // Build effective calls: raw names + identifier-parsed words
-    const rawCalls = enclosingFuncName ? [enclosingFuncName, ...calls] : [...calls];
+    // Build effective calls: raw names + identifier-parsed words.
+    // Class-qualified names (Class.method) contribute only their METHOD name —
+    // a class name like SetCommands/ListCommands must not leak "Set"/"List"
+    // words into trigger matching (real-world collision class found in redis-py).
+    const ownName = enclosingFuncName ? (enclosingFuncName.split(".").pop() || enclosingFuncName) : undefined;
+    const rawCalls = ownName ? [ownName, ...calls] : [...calls];
     const parsedWords = [];
     for (const c of rawCalls) {
         parsedWords.push(...identifierParse(c));
@@ -880,7 +1098,7 @@ function detectSafeguardViolations(calls, enclosingFuncName, language) {
     const effectiveCalls = [...new Set([...rawCalls, ...parsedWords])];
     // Skip authorization rules for auth functions — check both raw lowercased name and parsed words
     const rawLower = enclosingFuncName?.toLowerCase() || "";
-    const AUTH_PATTERN = /\b(register|signup|signin|login|authenticate|createuser|createaccount|registeruser|registernewuser|dologin|verifytoken|validatesession|getuser|getsessionuser|getcurrentuser|endsession|logout|signout|dologout|destroysession|invalidatesession|invalidate|signout)\b/i;
+    const AUTH_PATTERN = /\b(register|signup|signin|login|authenticate|createuser|createaccount|registeruser|registernewuser|dologin|verifytoken|validatesession|getuser|getsessionuser|getcurrentuser|endsession|logout|signout|dologout|destroysession|invalidatesession|invalidate|signout|create_account|register_new_user|register_user|sign_up|create_user|do_login|sign_in|log_in|verify_token|validate_session|get_user|get_session_user|get_current_user|do_logout|sign_out|log_out|end_session|invalidate_session|clear_session)\b/i;
     const isAuthFunction = enclosingFuncName != null && (AUTH_PATTERN.test(rawLower) ||
         identifierParse(enclosingFuncName).some(w => AUTH_PATTERN.test(w)));
     // Filter rules by language
@@ -889,14 +1107,37 @@ function detectSafeguardViolations(calls, enclosingFuncName, language) {
         : SAFEGUARD_RULES;
     for (const rule of activeRules) {
         // Check if trigger matches
-        const triggerMatch = effectiveCalls.some(c => rule.trigger.test(c));
+        const triggerCalls = rule.triggerCallsOnly ? rawCalls : effectiveCalls;
+        const triggerMatch = triggerCalls.some(c => rule.trigger.test(c));
         if (!triggerMatch)
+            continue;
+        // Semantic precondition marker (extractor-emitted)
+        if (rule.requireMarker && !effectiveCalls.includes(rule.requireMarker))
             continue;
         // Skip authorization rules for auth functions — they ARE the auth
         if (isAuthFunction && rule.category === "authorization")
             continue;
+        // Param-gated rules (parentRefGated): only apply when the function takes a
+        // parent-reference parameter. Requires the caller to pass param names.
+        if (rule.parentRefGated && params) {
+            const hasParentRef = params.some(p => /Id$/i.test(p) || /^entityType$/i.test(p));
+            if (!hasParentRef)
+                continue;
+        }
+        // Surface gate (paramGated): only apply to functions that can plausibly
+        // authenticate — routed by a web handler (exposed) or taking an
+        // identity-ish parameter. Requires the caller to pass param names.
+        if (rule.paramGated && params) {
+            const hasIdentity = params.some(p => /\b(token|session|user|auth|request|scope|cookie|credential|permission|role|identity)\b/i.test(p));
+            if (!hasIdentity && !exposed)
+                continue;
+        }
         // Check if at least one safeguard matches
-        const matchedSafeguard = rule.safeguards.find(s => effectiveCalls.some(c => s.pattern.test(c)));
+        const guards = (params && rule.strictSafeguards) ? rule.strictSafeguards : rule.safeguards;
+        const matchedSafeguard = guards.find(s => {
+            const testCalls = s.callsOnly ? (calls || []) : effectiveCalls;
+            return testCalls.some(c => s.pattern.test(c));
+        });
         if (matchedSafeguard)
             continue;
         // Check excludePatterns (library functions where safeguard is deferred to separate API)
@@ -1001,7 +1242,7 @@ function detectSafeguardViolationsV7(calls, enclosingFuncName, callerMap, funcCa
         safeContext.add(c);
     // Skip authorization rules for auth functions
     const rawLower = enclosingFuncName?.toLowerCase() || "";
-    const AUTH_PATTERN = /\b(register|signup|signin|login|authenticate|createuser|createaccount|registeruser|registernewuser|dologin|verifytoken|validatesession|getuser|getsessionuser|getcurrentuser|endsession|logout|signout|dologout|destroysession|invalidatesession|invalidate|signout)\b/i;
+    const AUTH_PATTERN = /\b(register|signup|signin|login|authenticate|createuser|createaccount|registeruser|registernewuser|dologin|verifytoken|validatesession|getuser|getsessionuser|getcurrentuser|endsession|logout|signout|dologout|destroysession|invalidatesession|invalidate|signout|create_account|register_new_user|register_user|sign_up|create_user|do_login|sign_in|log_in|verify_token|validate_session|get_user|get_session_user|get_current_user|do_logout|sign_out|log_out|end_session|invalidate_session|clear_session)\b/i;
     const isAuthFunction = enclosingFuncName != null && (AUTH_PATTERN.test(rawLower) ||
         identifierParse(enclosingFuncName).some(w => AUTH_PATTERN.test(w)));
     // Filter rules by language

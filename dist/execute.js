@@ -49,7 +49,7 @@ exports.verifyFileMarker = verifyFileMarker;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const planner_1 = require("./planner");
-const extract_ir_1 = require("./extract-ir");
+const extract_project_ir_1 = require("./extract-project-ir");
 const failure_collector_1 = require("./failure-collector");
 const emitter_1 = require("./emitter");
 const METRICS_FILE = ".progmune_corpus/metrics.json";
@@ -101,7 +101,7 @@ async function execute(intent, projectPath, filePath) {
     // 1. IR extraction
     let ir;
     try {
-        ir = (0, extract_ir_1.extractIR)(projectPath);
+        ir = (0, extract_project_ir_1.extractProjectIR)(projectPath);
     }
     catch (e) {
         return { success: false, degraded: false, code: "", sessionId: "", hash: "", ruleHash: "", irFunctionCount: 0, protocolRuleCount: 0, violations: 0, repairApplied: false, repairCount: 0, repairBranchIds: [], branchWinner: undefined, error: `IR extraction failed: ${e.message}` };

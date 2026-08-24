@@ -60,7 +60,7 @@
 
 <p><strong>核心机制：</strong></p>
 <ul>
-  <li><strong>144 条协议规则</strong>，每条定义 pre_states → post_states → invalidate 的状态转移</li>
+  <li><strong>148 条协议规则</strong>，每条定义 pre_states → post_states → invalidate 的状态转移</li>
   <li><strong>226 个库别名</strong>：bcrypt.compare → verify_hash，jwt.sign → generate_jwt，express.listen → http_create_server</li>
   <li><strong>27 个命名空间</strong>：auth, registration, tls, payment, file, db, transaction, session_mgmt 等</li>
   <li><strong>BFS 修复路径</strong>：不仅检测违规，还计算"要插入哪个函数"才能修复</li>
@@ -72,17 +72,18 @@
 <tr><th>时间</th><th>里程碑</th><th>指标</th></tr>
 <tr><td>2026.06</td><td>v1.0 — 正则检测器 + 知识库</td><td>TS Blind P=86.8%, R=83.6%, F1=85.2%</td></tr>
 <tr><td>2026.07</td><td>v2.0 — 信任引擎 + 策略引擎</td><td>4 维度评分模型上线</td></tr>
-<tr><td>2026.08</td><td><strong>v3.2 — SSG 状态机接入 + 框架适配器</strong></td><td><strong>真实项目 FP 率 0%，违规 63→4</strong></td></tr>
+<tr><td>2026.08</td><td><strong>v3.2 — SSG 状态机接入 + 框架适配器</strong></td><td><strong>真实项目 FP 率 0%，违规 63→4（早期口径）</strong></td></tr>
+<tr><td>2026.08 下</td><td><strong>v3.7 — P4.6 跨函数传播 + 协议盲测 v1.2 + 词段匹配门控 + 社区双渠道机器人</strong></td><td><strong>Python 协议行 ✅（66 gold 97%/100%/0 FP）；PrintLab 44→87 APPROVED；自身 Trust 83</strong></td></tr>
 </table>
 
-<h2>4. 当前能力（v3.2）</h2>
+<h2>4. 当前能力（文档版本 v3.2；最新 npm 3.7.2）</h2>
 
 <h3>4.1 真实项目验证 — printlab_mvp</h3>
 
 <div class="metric">
-<strong>63 → 4 违规</strong>（经过状态机拆分、OAuth 适配、关键词降噪）<br>
+<strong>46 → 0 违规</strong>（经过状态机拆分、OAuth 适配、关键词降噪；46 为早期统计口径，最终为 46→0）<br>
 <strong>FP 率：0%</strong>——每一条违规都是真实的协议缺口<br>
-<strong>Score：44/BLOCKED → 66/NEEDS_REVIEW</strong><br>
+<strong>Score：44/BLOCKED → 87/APPROVED</strong><br>
 <strong>匹配率：301/4568 (6.6%)</strong>——生产代码中的协议相关调用<br>
 <strong>有效覆盖率：~44%</strong>——协议相关调用中已有近半被精确匹配
 </div>
@@ -215,9 +216,9 @@
 <h2>9. 团队与技术栈</h2>
 
 <ul>
-  <li><strong>语言：</strong>TypeScript（运行时），Python（IR 提取，未激活）</li>
+  <li><strong>语言：</strong>TypeScript ✅、Python ✅（协议行 + 源码级检测均生产级），C 研究级，Go/Java 规划中</li>
   <li><strong>代码规模：</strong>~280 个源文件，515 个测试文件</li>
-  <li><strong>核心模块：</strong>SSG 状态机（144 规则）、SSG 桥接器（别名系统）、信任引擎（4 维评分）、框架适配器（Express + NestJS）</li>
+  <li><strong>核心模块：</strong>SSG 状态机（148 规则）、SSG 桥接器（别名系统 + 词段匹配门控）、信任引擎（4 维评分）、框架适配器（Express + NestJS）、P4.6 跨函数传播（src/call-sequence.ts）</li>
   <li><strong>分发渠道：</strong>npm 包、GitHub Action、MCP server（Claude Code 集成）</li>
 </ul>
 
@@ -229,11 +230,11 @@
 <tr><td>P1</td><td>更多框架适配器（Next.js, Fastify）</td><td>扩大可服务市场</td></tr>
 <tr><td>P1</td><td>SaaS 仪表板（治理报告 + CI/CD 集成）</td><td>企业可用性</td></tr>
 <tr><td>P2</td><td>OAuth 状态机建模</td><td>消除最后的 FP 类别</td></tr>
-<tr><td>P2</td><td>Python/Go 支持</td><td>多语言覆盖</td></tr>
+<tr><td>P2</td><td>Go/Java 支持</td><td>多语言覆盖</td></tr>
 </table>
 
 <hr>
-<p class="status">Progmune Runtime v3.2 — August 2026. MIT License.</p>
+<p class="status">Progmune Runtime v3.2（文档版本，最新 npm 3.7.2）— August 2026. MIT License.</p>
 
 </body>
 </html>

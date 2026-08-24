@@ -1,7 +1,7 @@
 # Progmune Coverage Matrix
 
 > Protocol × Language × Framework — 真实覆盖状态  
-> 最后更新：2026-08-23  
+> 最后更新：2026-08-24  
 > 目的：回答企业唯一的关心问题——"Progmune 能不能检查我的项目？"
 
 ---
@@ -27,7 +27,7 @@ TLS/SSL            ⚠️           ✅           ❌         ❌          ❌
 SSH                ⚠️           ✅           ❌         ❌          ❌
 HTTP/2             ⚠️           ✅           ❌         ❌          ❌
 HTTP Request       ⚠️           ✅           ❌         ❌          ❌
-Connection         ⚠️           ✅           ❌         ❌          ❌
+Connection         ⚠️           ⚠️           ❌         ❌          ❌
 QUIC               ❌           ⚠️           ❌         ❌          ❌
 Resource Lifecycle ⚠️           ⚠️           ❌         ✅          ❌
 Payment            ✅           ❌           ❌         ❌          ❌
@@ -35,7 +35,7 @@ Data Integrity     ✅           ❌           ❌         ❌          ❌
 Ledger             ✅           ❌           ❌         ❌          ❌
 ──────────────────────────────────────────────────────────────────────────
 有效覆盖           TS (✅×4)    C (✅×4)     ❌         Python (✅×2) ❌
-                   TS (⚠️×5)    C (⚠️×3)              + 源码级检测
+                   TS (⚠️×5)    C (⚠️×4)              + 源码级检测
                                                       （2.1 节，生产级）
 ```
 
@@ -62,6 +62,8 @@ Ledger             ✅           ❌           ❌         ❌          ❌
 ### IR 层（v3.5.0 起）
 
 注册表式多语言合并提取（`src/extract-project-ir.ts`）：TypeScript（ts-morph）+ Python（AST）检测/提取器合并为同一份函数 IR，由 agent loop、`execute()`、MCP server 共享——agent 可在两种语言上编排函数协议链。新增语言 = 注册一条提取器，调用方零改动。
+
+> 3.7.1 起：合并形态 ir.json（`{ typeMap, functions }`）恢复 IR-first 序列验证（修复 3.5.0 起静默走正则回退的回归），并加词段匹配门控——词段匹配仅对项目函数适用，外部库调用（如 Node 的 `readFileSync`）不再误撞协议规则。
 
 ---
 

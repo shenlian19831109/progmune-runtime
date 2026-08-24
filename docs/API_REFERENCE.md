@@ -1,147 +1,87 @@
 # Progmune API Reference
 
-## Core API
+> 本页描述 npm 包与仓库的真实接口表面（v3.7.2）。npm 包的 `bin` 入口是 **MCP server**（stdio）；SDK（`src/sdk.ts`）为仓库内模块，由仓库内 CLI 脚本消费。
 
-### `verify(filePath, options?)`
+## SDK（`src/sdk.ts`，仓库内模块）
 
-Verify AI-generated code against protocol rules.
+导出：`verify`、`explain`、`getCompatibility`、`RUNTIME_VERSION`。
+
+### `verify(filePath: string): VerificationResult`
+
+同步单参调用，对单个文件产出治理决策：
 
 ```typescript
-import { verify } from "progmune-runtime";
+import { verify } from "./src/sdk";
 
-const result = await verify("src/server.ts", { explain: true });
-// → { verdict: "BLOCK", violations: [...], alternatives: [...] }
+const result = verify("src/server.ts");
+// result.decision: "BLOCK" | "WARN" | "ALLOW"
 ```
-
-**Options:**
-| Option | Type | Description |
-|--------|------|-------------|
-| `explain` | boolean | Include human-readable explanation |
-| `protocol` | string | Filter by protocol (TLS, Auth, File) |
-| `strict` | boolean | Block on WARN as well as BLOCK |
 
 **Returns:** `VerificationResult`
+
 ```typescript
 {
-  verdict: "BLOCK" | "WARN" | "ALLOW";
-  violations: Violation[];
-  alternatives?: RepairAlternative[];
-  trace?: DecisionTrace;
+  runtimeVersion: string;                    // 运行时版本
+  decision: "BLOCK" | "WARN" | "ALLOW";      // 最终治理决策（SDK 词汇；Trust 引擎用 APPROVED/NEEDS_REVIEW/BLOCKED）
+  certificate: Certificate;                  // AI 代码证书
+  knowledge: {
+    version: string;
+    stableProtocols: number;
+    totalProtocols: number;
+    averageConfidence: number;
+  };
+  evidence: {
+    totalRepos: number;
+    totalSequences: number;
+    topProtocols: string[];
+  };
+  risk: {
+    level: string;                           // Critical / High / ...
+    recommendation: string;
+    patterns: Array<{
+      name: string; severity: string; confidence: number;
+      concept?: string; detail: string;
+    }>;
+  };
+  network?: {                                // 知识网络上下文
+    totalNodes: number; totalEdges: number; relatedProtocols: string[];
+  };
+  timestamp: string;
 }
 ```
 
----
+### `explain(result: VerificationResult): string`
 
-### `certify(filePath, options?)`
+人类可读的解释文本（证据链 + 修复建议）。
 
-Generate an AI Code Certificate.
+### `getCompatibility()`
 
-```typescript
-import { certify } from "progmune-runtime";
-
-const cert = await certify("src/server.ts");
-// → { certificateId: "CERT-...", status: "VALID", ... }
-```
-
-**Returns:** `Certificate`
-```typescript
-{
-  certificateId: string;
-  status: "VALID" | "WARNING" | "INVALID";
-  verifiedAt: string;
-  protocols: string[];
-  evidence: EvidenceChain;
-}
-```
+返回兼容矩阵 + `sdkVersion` + `protocols` 列表。
 
 ---
 
-### `policy(filePath, options?)`
+## MCP Server（npm 包 `bin` 入口）
 
-Check code against governance policy. Used in CI/CD gates.
+`progmune-runtime` 命令启动 stdio MCP server（Claude Code 等 MCP 客户端可直接配置）。工具清单（`src/mcp-server.ts` 注册）：
 
-```typescript
-import { policy } from "progmune-runtime";
-
-const result = await policy("src/server.ts", { level: "BLOCK" });
-// → { pass: false, violations: [...] }
-```
+- 核心：`progmune`、`progmune_check`、`progmune_trust_check`、`progmune_score`
+- 治理：`progmune_audit`、`progmune_governance_report`、`progmune_certify`、`progmune_policy_check`、`progmune_accountability`、`progmune_provenance`、`progmune_status`、`progmune_plsb`
+- 生成与执行：`progmune_generate`、`progmune_scaffold`、`progmune_init`、`progmune_execute`、`progmune_repair`、`progmune_accept`、`progmune_discover`、`progmune_zeroshot`
 
 ---
 
-### `dashboard()`
+## 仓库内 CLI（npm scripts）
 
-Generate enterprise coverage dashboard.
-
-```typescript
-import { dashboard } from "progmune-runtime";
-
-const report = await dashboard();
-// → Enterprise coverage, Asset Library, Deployment Runbook
-```
-
----
-
-### `repair(violation, code)`
-
-Auto-repair a detected violation.
-
-```typescript
-import { repair } from "progmune-runtime";
-
-const outcome = await repair(violation, code);
-// → { success: true, fixedCode: "...", appliedFix: "tls_close_notify" }
-```
-
----
-
-### `promotion(assetId)`
-
-View or trigger Asset promotion.
-
-```typescript
-import { promotion } from "progmune-runtime";
-
-const status = await promotion("TLS Handshake");
-// → { tier: "Production Ready", score: 18/20, readyForPromotion: false }
-```
-
----
-
-### `trace(decisionId)`
-
-Get full decision trace for any verification decision.
-
-```typescript
-import { trace } from "progmune-runtime";
-
-const why = await trace("DEC-...");
-// → { decision: "BLOCK", confidence: 91%, evidence: [...], provenance: [...] }
-```
-
----
-
-## CLI Commands
-
-```bash
-# Verify
-npx progmune-runtime verify src/server.ts --explain
-
-# Certify
-npx progmune-runtime certify src/server.ts
-
-# Policy check
-npx progmune-runtime policy check src/server.ts
-
-# Dashboard
-npx progmune-runtime dashboard
-
-# Status
-npx progmune-runtime status
-
-# Precision benchmark
-npx progmune-runtime precision --all
-```
+| 命令 | 用途 |
+|------|------|
+| `npm run sdk <file> --explain` | 单文件验证（BLOCK/WARN/ALLOW + 证据） |
+| `npm run trust -- --project <dir> --json` | Trust 检查（Score + Decision + Evidence，CI 友好） |
+| `npm run check` | 免疫 / Ledger / 覆盖率体检 |
+| `npm run patrol -- --project <dir> [--watch]` | 免疫巡逻（报告 + 建议补丁，绝不自动合并） |
+| `npm run agent "<意图>"` | 自主实现循环（8 门验证 + SSG 确定性修复） |
+| `npm run certify` / `npm run governance` | 证书 / 治理审计 |
+| `npm run dashboard` | 治理仪表盘 |
+| `npm run precision:all` | 跨仓库 precision 基准 |
 
 ---
 

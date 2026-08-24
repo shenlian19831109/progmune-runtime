@@ -9,10 +9,21 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { CallToolRequestSchema, ListToolsRequestSchema, } from "@modelcontextprotocol/sdk/types.js";
 import * as fs from "fs";
 import * as path from "path";
-import { createLogger } from "./logger";
-// ── Load .env (in compiled ESM output, use import.meta.url; here we use __dirname) ──
-const envPath = path.resolve(__dirname, "..", ".env");
-if (fs.existsSync(envPath)) {
+import { fileURLToPath } from "url";
+import { createRequire } from "module";
+import { createLogger } from "./logger.js";
+// ── ESM-compatible __dirname + require (the compiled output is an .mjs
+//    module, but the codebase uses lazy require() for circular-dependency
+//    handling — createRequire keeps those working in ESM scope) ──
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const require = createRequire(import.meta.url);
+// ── Load .env（包目录 + 项目目录，后者优先） ──
+for (const envPath of [
+    path.resolve(process.env.PROGMUNE_PROJECT_DIR || process.cwd(), ".env"),
+    path.resolve(__dirname, "..", ".env"),
+]) {
+    if (!fs.existsSync(envPath))
+        continue;
     const envContent = fs.readFileSync(envPath, "utf-8");
     for (const line of envContent.split("\n")) {
         const trimmed = line.trim();
@@ -27,12 +38,11 @@ if (fs.existsSync(envPath)) {
             process.env[key] = value;
     }
 }
-import { plan } from "./planner";
-import { extractIR } from "./extract-ir";
-import { extractIRPython, isPythonProject } from "./extract-ir-python";
-import { emitCode } from "./emitter";
-import { recordRun } from "./feedback";
-import { reportFingerprints } from "./immune-reporter";
+import { plan } from "./planner.js";
+import { extractProjectIR, detectLanguages } from "./extract-project-ir.js";
+import { emitCode } from "./emitter.js";
+import { recordRun } from "./feedback.js";
+import { reportFingerprints } from "./immune-reporter.js";
 const OPT_IN_FILE = path.resolve(__dirname, "..", ".progmune_memory", "opt_in.json");
 // ── Structured logging (stderr, not stdout JSON-RPC) ──
 const log = createLogger("progmune");
@@ -332,7 +342,7 @@ async function main() {
 
 Progmune needs an LLM API key to generate code. Configure via:
 
-  【.env file】Add to ${envPath}:
+  【.env file】Add to ${path.resolve(process.env.PROGMUNE_PROJECT_DIR || process.cwd(), ".env")}:
     LLM_API_KEY=your-key
     LLM_BASE_URL=https://api.deepseek.com/v1
     LLM_MODEL=deepseek-chat
@@ -408,10 +418,9 @@ Then restart Claude Code.`,
                 log.warn(`No .ts files found in project root, IR may be empty`);
             }
             // IR extraction — auto-detect language
-            const isPython = isPythonProject(projectPath);
             let ir;
             try {
-                ir = isPython ? extractIRPython(projectPath) : extractIR(projectPath);
+                ir = extractProjectIR(projectPath);
             }
             catch (e) {
                 return {
@@ -562,9 +571,9 @@ Then restart Claude Code.`,
             const warn = (msg) => results.push(`! ${msg}`);
             // 1. IR extraction — auto-detect language
             try {
-                const py = isPythonProject(projectPath);
-                const ir = py ? extractIRPython(projectPath) : extractIR(projectPath);
-                pass(`IR (${py ? "Python" : "TypeScript"}): ${ir.length} functions extracted`);
+                const langs = detectLanguages(projectPath);
+                const ir = extractProjectIR(projectPath);
+                pass(`IR (${langs.length > 0 ? langs.join("+") : "无已支持语言"}): ${ir.length} functions extracted`);
             }
             catch (e) {
                 fail(`IR extraction: ${e.message}`);

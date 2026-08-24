@@ -49,12 +49,16 @@ const bootstrap_validation_1 = require("./bootstrap-validation");
     });
 });
 (0, vitest_1.describe)("Synonym Normalization Impact", () => {
+    // 注：这两个测试的重度与本地语料规模线性相关（.progmune_corpus 864+ 条时
+    // 实测 40-130s）。CI 干净检出无语料 → 秒级通过；本地语料丰富 → 需放宽超时。
+    // 显式超时 180s，不依赖 vitest 全局 30s。
+    const CORPUS_HEAVY_TIMEOUT = 180000;
     (0, vitest_1.it)("reduces unique function count via normalization", async () => {
         const report = await (0, function_synonyms_1.runSynonymNormalization)();
         (0, vitest_1.expect)(report.uniqueAfter).toBeLessThanOrEqual(report.uniqueBefore);
         (0, vitest_1.expect)(report.uniqueAfter).toBeLessThanOrEqual(report.uniqueBefore);
         (0, function_synonyms_1.printSynonymReport)(report);
-    });
+    }, CORPUS_HEAVY_TIMEOUT);
     (0, vitest_1.it)("bootstrap function overlap improves with normalization", async () => {
         // Baseline without normalization
         const baseline = await (0, bootstrap_validation_1.runBootstrapValidation)();
@@ -64,5 +68,5 @@ const bootstrap_validation_1 = require("./bootstrap-validation");
         console.log(`Function overlap: ${(after.functionOverlap * 100).toFixed(0)}%`);
         console.log(`State overlap: ${(after.stateOverlap * 100).toFixed(0)}%`);
         console.log(`Behavioral: ${after.behavioralMatch}/${after.behavioralTotal}`);
-    }, 30000);
+    }, CORPUS_HEAVY_TIMEOUT);
 });

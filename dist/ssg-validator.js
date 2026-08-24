@@ -33,7 +33,8 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.StateMachineValidator = exports.InvariantViolationError = void 0;
+exports.StateMachineValidator = exports.InvariantViolationError = exports.RESOURCE_NAMESPACE_RE = void 0;
+exports.findHeldResourceStates = findHeldResourceStates;
 exports.rebuildState = rebuildState;
 exports.applyTransitionDelta = applyTransitionDelta;
 exports.findFixPathStatic = findFixPathStatic;
@@ -51,6 +52,28 @@ exports.explainRejection = explainRejection;
 exports.rejectionToJSON = rejectionToJSON;
 exports.parseProtocolsFromJSON = parseProtocolsFromJSON;
 const crypto = __importStar(require("crypto"));
+/** 资源生命周期命名空间：会话/认证流合法地以活跃会话结束（SESSION_ACTIVE 不是泄漏），
+ *  只有资源类命名空间（文件/数据库/连接/流等）做序列末尾持有状态检查。 */
+exports.RESOURCE_NAMESPACE_RE = /^(file|db|database|connection|conn|socket|stream|resource|io)/i;
+/**
+ * 找出资源持有状态候选：某规则的 pre_states 与 invalidate 的交集
+ * （获取/释放语义——如 FILE_OPEN 由 open_file 设置、close_file 释放），
+ * 仅限资源生命周期命名空间。planner 与 trust 桥接共用（endState 检查）。
+ */
+function findHeldResourceStates(rules) {
+    const held = [];
+    for (const [fn, ann] of rules) {
+        const ns = ann.namespace || "";
+        if (!exports.RESOURCE_NAMESPACE_RE.test(ns))
+            continue;
+        for (const s of ann.invalidate || []) {
+            if ((ann.pre_states || []).includes(s)) {
+                held.push({ state: s, releaseFn: fn, namespace: ns });
+            }
+        }
+    }
+    return held;
+}
 const DEFAULT_NAMESPACE = "_global";
 class InvariantViolationError extends Error {
     constructor(message, detail) {
@@ -308,10 +331,26 @@ function checkLedgerConsistency(ledger, namespaceInitialStates = new Map([["_glo
             running.set(ns, new Set());
         }
     }
-    // Normalize a snapshot: ensure all known namespaces are present
+    // Normalize a snapshot: 只比较 ledger 中实际出现过的命名空间。
+    // 历史 session 只记录其触及的命名空间（protocol-registry 包目录回退修复前，
+    // 无 protocols.json 的 cwd 下 nsInit 退化为仅 _global）——用全量 nsInit
+    // 重建时未记录的 ns 不应参与比较，否则旧数据 before-consistency 全量误报。
+    // 更严格一步：只记录"有过非空快照"的 ns——早期 session 对 file/db 等
+    // 记录空数组（键存在但无信息），空数组不携带可比较的状态信息。
+    const recordedNamespaces = new Set();
+    for (const t of ledger) {
+        for (const [ns, states] of Object.entries(t.statesBefore)) {
+            if ((states || []).length > 0)
+                recordedNamespaces.add(ns);
+        }
+        for (const [ns, states] of Object.entries(t.statesAfter)) {
+            if ((states || []).length > 0)
+                recordedNamespaces.add(ns);
+        }
+    }
     function normalizeSnap(snap) {
         const out = {};
-        for (const ns of allNamespaces) {
+        for (const ns of recordedNamespaces) {
             out[ns] = [...(snap[ns] || [])].sort();
         }
         return out;

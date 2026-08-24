@@ -14,7 +14,7 @@ Progmune has crossed from a detection tool to a **Verification Runtime**. This d
 verify(code) → violations[]
 ```
 
-**Status:** ✅ Production (7 protocol definitions, 4 repos benchmarked)
+**Status:** ✅ Production（27 协议命名空间 / protocols.json 148 条规则，4 repos benchmarked；盲测 795 gold Recall 98.5% / Precision 100%）
 
 **KPI:** Precision, Recall, F1 (per-repo)
 
@@ -161,11 +161,11 @@ commit(fix) → CommitResult
 
 Instead of "Knowledge units" or "Protocol count":
 
-| Metric | Current | Target |
+| Metric | Current (2026-08，见 coverage-matrix / BASELINE_v6) | Target |
 |--------|---------|--------|
-| Detection F1 | 27-41% (varies by repo) | 70%+ |
-| **False Positive Rate** | **97%** | **<40%** |
-| Recall | 75-86% | Maintain |
+| Detection F1 | TS 盲测 Recall 98.5%（有效 100%）/ Precision 100%；C 研究级 F1 16.5% | 70%+（C 不设投资目标） |
+| **False Positive Rate** | **0 FP**（TS 795 gold / Python 729 gold / PyGoat） | **<40%** |
+| Recall | TS 98.5% / Python 100% | Maintain |
 | Repair Success (sim) | 100% | — |
 | **Repair Success (real)** | **?** | **Measure** |
 | **Human Acceptance Rate** | **?** | **>80%** |

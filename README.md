@@ -158,8 +158,8 @@ C analysis is **research-only**: gold benchmark F1=16.5% across 4 repos (curl, l
 
 ### P0-P3 Rule Injection (2026-08)
 
-- **+19 new detections** across 10 TS projects, **0 false positives** across 6 C repos + PostgreSQL
-- Bootstrapping deadlock broken: all 21 protocol namespaces now have rule vocabulary
+- **+31 rules / +86 trajectories / +13 detectors / +11 safeguards** injected; +19 new detections across 10 TS projects, **0 false positives** across 6 C repos + PostgreSQL
+- Bootstrapping deadlock broken: all 21 protocol namespaces gained rule vocabulary (today: 27 namespaces, 148 rules)
 - `excludePatterns` + `languages` architecture for FP management
 
 → [P0-P3 Final Report](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/p0-p3-final-report.md)
@@ -173,7 +173,9 @@ SDK (src/sdk.ts)           verify() → APPROVED / NEEDS_REVIEW / BLOCKED
   └─ Trust Engine           4-dimension scoring → Decision
        ├─ Policy Engine     Enterprise policy enforcement (ALLOW/WARN/BLOCK)
        ├─ SSG Validator     Protocol state machine verification
-       ├─ Protocol Detector  Regex-based protocol step detection (22 detectors)
+       ├─ Call Sequences     P4.6 cross-function: entry expansion (depth ≤4) +
+       │                     helper-fragment suppression
+       ├─ Protocol Detector  Regex fallback for IR-less languages (C), 22 detectors
        ├─ IR Extraction      Registry-based: TS (ts-morph) + Python (ast module)
        │                     merged into one function IR per project;
        │                     source-level markers: taint tracking, import resolution,

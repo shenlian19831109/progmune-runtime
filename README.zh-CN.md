@@ -158,8 +158,8 @@ C 分析**仅研究**：黄金基准 F1=16.5%，覆盖 4 个仓库（curl、libs
 
 ### P0-P3 规则注入（2026-08）
 
-- 10 个 TS 项目 **+19 条新检测**，6 个 C 仓库 + PostgreSQL **0 误报**
-- 打破引导死锁：全部 21 个协议命名空间已有规则词汇
+- 注入 **+31 条规则 / +86 条轨迹 / +13 个检测器 / +11 条防护**；10 个 TS 项目 **+19 条新检测**，6 个 C 仓库 + PostgreSQL **0 误报**
+- 打破引导死锁：全部 21 个协议命名空间获得规则词汇（今天：27 个命名空间、148 条规则）
 - `excludePatterns` + `languages` 架构管理误报
 
 → [P0-P3 终报](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/p0-p3-final-report.md)
@@ -173,7 +173,9 @@ SDK (src/sdk.ts)           verify() → APPROVED / NEEDS_REVIEW / BLOCKED
   └─ 信任引擎                四维评分 → 决策
        ├─ 策略引擎           企业策略执行（ALLOW/WARN/BLOCK）
        ├─ SSG 校验器         协议状态机验证
-       ├─ 协议检测器         基于正则的协议步骤检测（22 个检测器）
+       ├─ 调用序列           P4.6 跨函数：入口展开（深度 ≤4）+
+       │                     helper 片段抑制
+       ├─ 协议检测器         无 IR 语言（C）的正则回退，22 个检测器
        ├─ IR 提取            注册表式：TS（ts-morph）+ Python（ast 模块）
        │                     合并为每项目一份函数 IR；
        │                     源码级标记：污点追踪、import 解析、限定调用链、跨文件模板分析

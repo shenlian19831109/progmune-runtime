@@ -66,7 +66,11 @@ function auditDirectory(dir, threshold = DEFAULT_THRESHOLD) {
     if (!stat.isDirectory()) {
         return result;
     }
-    scanDir(dir, dir, result);
+    // Allowlist（.progmune_allowlist）：豁免名单中的文件不参与覆盖率分母——
+    // 祖父条款：存量手写代码一次入册，新文件仍受覆盖要求约束。
+    // 匹配相对 allowlist 所在目录（通常为项目根），而非被扫描目录。
+    const allowlist = loadAllowlist(dir);
+    scanDir(dir, dir, result, allowlist);
     result.coverage = result.totalFiles > 0
         ? result.progmuneFiles / result.totalFiles
         : 0;
@@ -84,7 +88,46 @@ function auditDirectory(dir, threshold = DEFAULT_THRESHOLD) {
 }
 const MARKER_REGEX = /@progmune-generated\s+session=(\S+)(?:\s+timestamp=(\S+))?(?:\s+ruleHash=(\S+))?/;
 const EXCLUDED_DIRS = new Set(["node_modules", ".git", "dist", ".progmune_corpus", ".progmune_memory"]);
-function scanDir(rootDir, currentDir, result) {
+/** 读取 .progmune_allowlist：从被扫描目录向上查找，返回匹配函数（相对 allowlist 所在目录）。 */
+function loadAllowlist(dir) {
+    let root = dir;
+    let allowlistPath = "";
+    for (let i = 0; i < 4; i++) {
+        const p = path.join(root, ".progmune_allowlist");
+        if (fs.existsSync(p)) {
+            allowlistPath = p;
+            break;
+        }
+        const parent = path.dirname(root);
+        if (parent === root)
+            break;
+        root = parent;
+    }
+    if (!allowlistPath)
+        return { root: dir, match: () => false };
+    try {
+        const patterns = fs.readFileSync(allowlistPath, "utf-8")
+            .split("\n")
+            .map((l) => l.trim())
+            .filter((l) => l.length > 0 && !l.startsWith("#"));
+        return {
+            root: path.dirname(allowlistPath),
+            match: (relPath) => {
+                const normalized = relPath.replace(/\\/g, "/");
+                return patterns.some((p) => {
+                    const pat = p.replace(/^\.\//, ""); // 兼容 "./foo.ts" 写法
+                    if (pat.endsWith("*"))
+                        return normalized.startsWith(pat.slice(0, -1));
+                    return normalized === pat || normalized.startsWith(pat.replace(/\/$/, "") + "/");
+                });
+            },
+        };
+    }
+    catch {
+        return { root: dir, match: () => false };
+    }
+}
+function scanDir(rootDir, currentDir, result, allowlist) {
     let entries;
     try {
         entries = fs.readdirSync(currentDir, { withFileTypes: true });
@@ -96,7 +139,7 @@ function scanDir(rootDir, currentDir, result) {
         const fullPath = path.join(currentDir, entry.name);
         if (entry.isDirectory()) {
             if (!EXCLUDED_DIRS.has(entry.name) && !entry.name.startsWith(".")) {
-                scanDir(rootDir, fullPath, result);
+                scanDir(rootDir, fullPath, result, allowlist);
             }
             continue;
         }
@@ -104,6 +147,10 @@ function scanDir(rootDir, currentDir, result) {
         if (!entry.name.endsWith(".ts") && !entry.name.endsWith(".tsx") && !entry.name.endsWith(".mjs")) {
             continue;
         }
+        // 豁免名单（祖父条款）：不在覆盖率分母内——相对 allowlist 根匹配
+        const rel = path.relative(allowlist.root, fullPath);
+        if (allowlist.match(rel))
+            continue;
         result.totalFiles++;
         try {
             const content = fs.readFileSync(fullPath, "utf-8");

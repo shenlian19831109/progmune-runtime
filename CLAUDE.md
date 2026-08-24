@@ -54,11 +54,12 @@ SDK (src/sdk.ts)           verify() / fix() → BLOCK / WARN / ALLOW
 
 | Module | Path | Purpose |
 |--------|------|---------|
-| **SDK** | `src/sdk.ts` | One-call public API: `verify()`, `fix()` (real, not stub), `explain()`. |
+| **SDK** | `src/sdk.ts` | One-call public API: `verify()`, `explain()`, `getCompatibility()`. |
 | **SSG Bridge** | `src/trust/ssg-bridge.ts` | Connects SSG state machine to trust pipeline. Alias exact-match (O(1)) + wildcard prefix-match. Project-level aliases via `.progmune_aliases.json`. |
 | **SSG Validator** | `src/ssg-validator.ts` | Protocol state machine. Consumes function annotations (`pre_states`/`post_states`/`aliases`) and validates call sequences against protocol definitions. |
-| **Protocol Detector** | `src/protocol-detector.ts` | Regex-based protocol step detection. ~22 detectors + 26 safeguards. All patterns use `\w*` prefix/suffix for language-agnostic matching. |
+| **Protocol Detector** | `src/protocol-detector.ts` | Regex-based protocol step detection — fallback path only (C 等无 IR 语言). ~22 detectors + 26 safeguards. All patterns use `\w*` prefix/suffix for language-agnostic matching. |
 | **IR Extractor** | `src/extract-ir.ts` | TypeScript AST → Function IR using ts-morph. Extracts function signatures, JSDoc tags (`@purpose`, `@requires`, `@produces`, `@useWhen`), protocol annotations. |
+| **Call Sequence Builder** | `src/call-sequence.ts` | P4.6 跨函数传播：入口函数调用链传递展开（深度 ≤4、环安全）+ helper 片段抑制 + 规则名/叶子原语不内联；`collectProjectFunctionNames` 供词段匹配门控。 |
 | **IR Extraction (merged)** | `src/extract-project-ir.ts` | Language registry (detect + extract per language): TypeScript + Python merged into one FunctionInfo list. Shared by agent loop (`extractIRWithDelta`), `execute()`'s ir.json write, and MCP server. Adding a language = one registry entry. |
 | **Trust Engine** | `src/trust/engine.ts` | 5-stage pipeline: Collect → Normalize → Score → Decide → Assemble. 4 dimensions: Policy Compliance (35%), Protocol Safety (30%), Verification Coverage (20%), Governance Integrity (15%). |
 | **Policy Engine** | `src/policy/engine.ts` | Evaluates policy rules against certified files. Returns ALLOW/WARN/BLOCK. |
@@ -154,7 +155,7 @@ npm run corpus:mine        # Rule mining from corpus
 ### What Progmune IS
 - A protocol lifecycle verification tool for AI-generated code
 - Focused on behavior sequences (function call chains violating protocol state machines)
-- TS-first with C as a research target, Python/Go/Java planned
+- TS + Python production, C research, Go/Java planned
 - Output: Trust Score (0–100) + Decision (APPROVED/NEEDS_REVIEW/BLOCKED) + Evidence
 
 ### What Progmune is NOT
@@ -163,20 +164,20 @@ npm run corpus:mine        # Rule mining from corpus
 - ❌ NOT a code generator (governs, doesn't generate)
 - ❌ NOT a runtime monitor (no APM/RASP — static analysis only)
 
-### Current coverage reality (as of 2026-08-03)
+### Current coverage reality (as of 2026-08-24)
 
 | Language | Status | Evidence |
 |----------|--------|----------|
-| TypeScript | ✅ Production | Blind Benchmark P=86.8%, R=83.6%, F1=85.2% |
-| C | ⚠️ Research | Gold Benchmark F1=16.5%. L3 cross-function experiment terminated. |
-| Python | ❌ IR only | `extract-ir-python.ts` exists, no rules |
+| TypeScript | ✅ Production | Blind benchmark 795 gold: Recall 98.5% (effective 100%) / Precision 100% / 0 FP; protocol rows ✅×4 (Auth/Payment/Data Integrity/Ledger) |
+| Python | ✅ Production | Protocol rows ✅×2 (Auth/Resource Lifecycle): blind v1.2 66 gold 97%/100%/0 FP; source-level detection 729 gold Recall 100% |
+| C | ⚠️ Research | TLS/SSL/SSH/HTTP2/HTTP Request ✅; Gold Benchmark F1=16.5%. L3 cross-function experiment terminated. |
 | Go, Java | ❌ None | No support |
 
-**Framework adapters: 2/13 with structural analysis** (Express + NestJS), 5/13 with library aliases. Express detector does route extraction + middleware classification + security checks. NestJS detector parses decorators (@Controller, @UseGuards, @UsePipes) via ts-morph. Both feed into the trust engine pipeline. Remaining frameworks (Next.js, Fastify, Django, FastAPI, etc.) have basic alias coverage but no structural analysis.
+**Framework adapters: 2/13 with structural analysis** (Express + NestJS), 5/13 with library aliases. Express detector does route extraction + middleware classification + security checks. NestJS detector parses decorators (@Controller, @UseGuards, @UsePipes) via ts-morph. Both feed into the trust engine pipeline. Remaining frameworks (Next.js, Fastify, Django, FastAPI, etc.) have basic alias coverage but no structural analysis. (Note: README's framework line also mentions a tRPC detector — `src/frameworks/trpc-detector.ts` exists with 3 rules; treat Express + NestJS as the structural adapters.)
 
-### P0-P3 Rule Injection (just completed, 2026-08-03)
+### P0-P3 Rule Injection (2026-08-03, historical phase)
 
-The most recent major work broke the "bootstrapping deadlock" — 16/21 protocol namespaces had zero rule vocabulary. By injecting +31 rules, +86 synthetic trajectories, +13 detectors, and +11 safeguards, all 21 namespaces now have coverage. Key files:
+This work broke the "bootstrapping deadlock" — 16/21 protocol namespaces had zero rule vocabulary. By injecting +31 rules, +86 synthetic trajectories, +13 detectors, and +11 safeguards, all namespaces gained coverage. Key files:
 - `src/inject-p0-vocabulary.ts` — Round 1 injection
 - `scripts/inject-round2.js`, `scripts/inject-round3.js` — Rounds 2-3
 - `scripts/verify-coverage-delta.ts` — Coverage measurement
@@ -200,7 +201,7 @@ The core thesis — "every new codebase makes every verification stronger" — w
 
 ### What NOT to do
 
-- **Don't add TypeScript rules** — TS benchmark is already P=86.8%. Marginal returns are negative.
+- **Don't add TypeScript rules casually** — TS blind benchmark is at Precision 100% / 0 FP (795 gold); any new TS rule must pass the gold-benchmark zero-drift check before landing.
 - **Don't invest in L4 C analysis** (CFG/dataflow/pointer) — L3 experiment was terminated with data. This is a multi-year research problem.
 - **Don't build a SaaS dashboard** — no enterprise PoC exists yet. Phase 1 of development plan explicitly defers this.
 - **Don't trust the immunology metaphor for external communication** — keep it internal. External narrative is "protocol lifecycle verification."

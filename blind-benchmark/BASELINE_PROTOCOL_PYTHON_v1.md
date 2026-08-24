@@ -1,7 +1,8 @@
-# Python 协议盲测基线 v1（BASELINE_PROTOCOL_PYTHON_v1）
+# Python 协议盲测基线 v1.2（BASELINE_PROTOCOL_PYTHON_v1）
 
 > 测量对象：Python 的 SSG 协议状态机路径（覆盖矩阵 Protocol × Language 的 Python 列）  
-> 生成日期：2026-08-23（v1.2：P4.6 跨函数传播 + S5 任意命名复测）  
+> 文件名沿用 v1（引用方兼容），内容为 **v1.2** 最新复测（v1.2：P4.6 跨函数传播 + S5 任意命名复测；2026-08-23）  
+> 历史版本：v1 首版 24 项目 32 金标；v1.1 加 endState 40 金标——见本文件早期提交历史  
 > 结论：**Recall 97% / Precision 100% / 0 FP（66 处可测金标）**；2 处漏检为注解依赖前置约束（T2×S5 无注解改名），如实单列
 
 ---
@@ -35,6 +36,7 @@
 | S2 helpers | 模块级 helper（app.py 调用） | 间接层 |
 | S3 class | `FlowService` 类方法 | IR 名含类前缀（`FlowService.svc_x`） |
 | S4 noisy | 协议调用间穿插噪声调用 | 噪声函数无规则（`compute_hash`/`log_event`） |
+| S5 renamed | 改名协议函数 + 无 `@progmune` 注解 | 任意命名验证：词段匹配可覆盖的改名应检出；T2 依赖注解的约束为文档化 FN |
 
 ## 3. 结果
 

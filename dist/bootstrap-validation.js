@@ -69,8 +69,23 @@ function buildPath(startFn, rules, visited) {
 }
 /**
  * Run the bootstrap validation experiment.
+ *
+ * 无参调用结果缓存（纯计算、确定性）：同进程内多次调用复用同一结果。
+ * 运行时与本地语料规模线性相关（语料丰富时可 >30s / 2GB 堆）——
+ * function-synonyms 等测试会 5 次重计算，缓存降为 1 次。
  */
+let _defaultResultCache = null;
 async function runBootstrapValidation(existingRules, extraSequences) {
+    if (!existingRules && !extraSequences) {
+        if (!_defaultResultCache) {
+            _defaultResultCache = runBootstrapValidationUncached();
+        }
+        return _defaultResultCache;
+    }
+    return runBootstrapValidationUncached(existingRules, extraSequences);
+}
+/** 原实现（无缓存）。 */
+async function runBootstrapValidationUncached(existingRules, extraSequences) {
     // 1. Ground truth
     const defs = (0, protocol_coverage_1.loadDefaultProtocolDefinitions)();
     const originalRules = existingRules || new Map();

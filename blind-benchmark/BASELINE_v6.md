@@ -157,11 +157,14 @@ safeguards**. Zero pipeline changes downstream, zero synthetic-benchmark drift.
 | 11 | Cookie authorization + cross-module secrets | request.COOKIES-derived values participating in comparisons/branch tests → Authorization via Client Cookie rule (ba_lab, a1_broken_access_lab_1, crypto_failure_lab3, insec_des_lab recovered with the CORRECT class); hardcoded-secret check resolves module-level constants AND cross-module imports (from pygoat.settings import SECRET_COOKIE_KEY → project-wide constants map) — sec_misconfig_lab3 recovered | **TP 67 / FP 0, precision 100.0%** | 100.0% |
 
 Key implementation facts: lab reclassification (ssrf_lab is path traversal);
-xss_lab3 uncovered (auto-escaped template); reset_password predictable token
-uncovered; zero noise in well-written apps (parameterized ORMs, non-request URLs,
-safe opens); synthetic benchmarks unchanged throughout (TS recall 98.5% /
-precision 99.1%, Python 100% / 100%).
+xss_lab3 uncovered (auto-escaped template); reset_password **md5** token caught
+(work package #8, Token Security 触发扩展) but other predictable-token shapes
+(timestamp/sequential) have no rule; zero noise in well-written apps
+(parameterized ORMs, non-request URLs, safe opens); PyGoat 72 labs → 67 TP
+（5 个零覆盖类未检出，见覆盖缺口）; synthetic benchmarks unchanged throughout
+(TS recall 98.5%; precision 99.1% 为 8-15 波次口径、含 7 FP——8-16 波次 FP
+打磨后达 100% / 0 FP；Python 100% / 100%).
 
-Remaining gaps: reset_password predictable token (no rule), MITRE csrf money
-transfer's missing CSRF-token check itself (the hardcoded key is caught, the CSRF
-absence is not — no CSRF rule exists).
+Remaining gaps: reset_password predictable token beyond the md5 shape (no rule),
+MITRE csrf money transfer's missing CSRF-token check itself (the hardcoded key is
+caught, the CSRF absence is not — no CSRF rule exists).

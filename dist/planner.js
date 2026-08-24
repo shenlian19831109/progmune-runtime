@@ -392,26 +392,10 @@ function validateProtocolWithTransitions(actions, protocols, namespaceInitialSta
         }
     }
     // End-of-sequence check: held resources must be released (resource leak).
-    // A state S is resource-holding when some rule REQUIRES S and INVALIDATES S
-    // (acquire/release semantics — e.g. FILE_OPEN set by open_file, released by
-    // close_file). Only RESOURCE-LIFECYCLE namespaces apply: session/auth flows
-    // legitimately END with an active session (SESSION_ACTIVE is not a leak).
-    const RESOURCE_NS = /^(file|db|database|connection|conn|socket|stream|resource|io)/i;
-    const heldStates = [];
-    for (const p of protocols) {
-        const ann = p.protocol;
-        if (!ann)
-            continue;
-        const ns = ann.namespace || "";
-        if (!RESOURCE_NS.test(ns))
-            continue;
-        const inv = ann.invalidate || [];
-        const pre = ann.pre_states || [];
-        for (const s of inv) {
-            if (pre.includes(s))
-                heldStates.push({ state: s, releaseFn: p.function, namespace: ns });
-        }
-    }
+    // 共享判定见 ssg-validator.findHeldResourceStates：资源生命周期命名空间 +
+    // pre/invalidate 交集（获取/释放语义）。会话/认证流合法地以活跃会话结束，
+    // 不在检查范围（SESSION_ACTIVE 不是泄漏）。
+    const heldStates = (0, ssg_validator_1.findHeldResourceStates)(rules);
     // 只检查"本序列中获取"的持有状态——继承自命名空间初始状态的
     // （如 db 初始即 DB_CONNECTED）不算泄漏。
     const acquiredStates = new Set();
