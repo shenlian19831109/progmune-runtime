@@ -1,0 +1,132 @@
+{
+  "generated": "2026-08-26T16:13:54.063Z",
+  "method": "extractIRC + buildCallSequences + validateSequenceWithSSG（IR-first 确定性，无 LLM，词段门控开）",
+  "cleanFunctions": [
+    "authenticate",
+    "do_logout",
+    "run_query",
+    "verify_and_session",
+    "auth_and_logout",
+    "revoke_session",
+    "read_config",
+    "ok_file",
+    "lock_funds",
+    "commit_payment",
+    "checkout"
+  ],
+  "violationFunctions": [
+    "bad_session",
+    "missing_token",
+    "double_logout",
+    "query_after_disconnect",
+    "read_without_open",
+    "leak_file",
+    "bad_checkout",
+    "close_without_open",
+    "double_close",
+    "revoke_without_token",
+    "bad_checkout_via_helper"
+  ],
+  "tp": 11,
+  "fp": 1,
+  "fn": 0,
+  "precision": 0.9166666666666666,
+  "recall": 1,
+  "f1": 0.9565217391304348,
+  "byClass": {
+    "auth": {
+      "tp": 5,
+      "fp": 1,
+      "fn": 0
+    },
+    "db": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0
+    },
+    "endState": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0
+    },
+    "file": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 0
+    },
+    "pay": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 0
+    }
+  },
+  "cleanFlags": [
+    {
+      "function": "do_logout",
+      "failingFunction": "logout",
+      "reason": "SSG state violation: \"logout\" (mapped to \"logout\") requires states [SESSION_ACTIVE] but current auth state is [UNAUTHENTICATED]. Fix path: generate_jwt → create_session"
+    }
+  ],
+  "violationFlags": [
+    {
+      "function": "bad_session",
+      "failingFunction": "create_session",
+      "reason": "SSG state violation: \"create_session\" (mapped to \"create_session\") requires states [TOKEN_ISSUED] but current auth state is [UNAUTHENTICATED]. Fix path: generate_jwt"
+    },
+    {
+      "function": "missing_token",
+      "failingFunction": "create_session",
+      "reason": "SSG state violation: \"create_session\" (mapped to \"create_session\") requires states [TOKEN_ISSUED] but current auth state is [PASSWORD_VERIFIED, UNAUTHENTICATED]. Fix path: generate_jwt"
+    },
+    {
+      "function": "double_logout",
+      "failingFunction": "logout",
+      "reason": "SSG state violation: \"logout\" (mapped to \"logout\") requires states [SESSION_ACTIVE] but current auth state is [UNAUTHENTICATED]. Fix path: generate_jwt → create_session"
+    },
+    {
+      "function": "double_logout",
+      "failingFunction": "logout",
+      "reason": "SSG state violation: \"logout\" (mapped to \"logout\") requires states [SESSION_ACTIVE] but current auth state is [UNAUTHENTICATED]. Fix path: generate_jwt → create_session"
+    },
+    {
+      "function": "query_after_disconnect",
+      "failingFunction": "query_db",
+      "reason": "SSG state violation: \"query_db\" (mapped to \"query_db\") requires states [DB_CONNECTED] but current db state is []. Fix path: connect_db"
+    },
+    {
+      "function": "read_without_open",
+      "failingFunction": "read_file",
+      "reason": "SSG state violation: \"read_file\" (mapped to \"read_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+    },
+    {
+      "function": "leak_file",
+      "failingFunction": "(end-of-sequence)",
+      "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+    },
+    {
+      "function": "bad_checkout",
+      "failingFunction": "commit_payment",
+      "reason": "SSG state violation: \"commit_payment\" (mapped to \"commit_payment\") requires states [FUNDS_LOCKED] but current pay state is [IDLE]. Fix path: lock_funds"
+    },
+    {
+      "function": "close_without_open",
+      "failingFunction": "close_file",
+      "reason": "SSG state violation: \"close_file\" (mapped to \"close_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+    },
+    {
+      "function": "double_close",
+      "failingFunction": "close_file",
+      "reason": "SSG state violation: \"close_file\" (mapped to \"close_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+    },
+    {
+      "function": "revoke_without_token",
+      "failingFunction": "revoke_token",
+      "reason": "SSG state violation: \"revoke_token\" (mapped to \"revoke_token\") requires states [TOKEN_ISSUED] but current auth state is [UNAUTHENTICATED]. Fix path: generate_jwt"
+    },
+    {
+      "function": "bad_checkout_via_helper",
+      "failingFunction": "commit_payment",
+      "reason": "SSG state violation: \"commit_payment\" (mapped to \"commit_payment\") requires states [FUNDS_LOCKED] but current pay state is [IDLE]. Fix path: lock_funds"
+    }
+  ]
+}

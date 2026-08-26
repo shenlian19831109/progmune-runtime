@@ -51,7 +51,7 @@ Trust 检查输出 **Decision 优先**：`APPROVED / NEEDS_REVIEW / BLOCKED` + T
 
 ## 4. 看覆盖范围
 
-[Coverage Matrix](coverage-matrix.md) — 协议 × 语言 × 框架的真实覆盖状态（TS ✅ 生产级、Python ✅、C ⚠️ 研究级、Go/Java ❌）。
+[Coverage Matrix](coverage-matrix.md) — 协议 × 语言 × 框架的真实覆盖状态（TS ✅ 生产级、Python ✅、C ⚠️ 研究级——3.7.4 起 IR 提取 + 应用级协议验证可用、Go/Java ❌）。
 
 ## 5. 下一步
 

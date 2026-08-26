@@ -46,7 +46,11 @@ exports.loadFailures = loadFailures;
 exports.failureStats = failureStats;
 exports.formatFailureStats = formatFailureStats;
 const fs = __importStar(require("fs"));
-const CORPUS_DIR = "failure-corpus";
+const path = __importStar(require("path"));
+// 统一写入路径：与 failure-corpus.ts 一致，落在项目级 .progmune_corpus/emitter-failures/
+// （旧路径为仓库根 failure-corpus/，已废弃——避免两套语料并存）
+const CORPUS_DIR = path.resolve(process.env.PROGMUNE_CORPUS_DIR ||
+    path.resolve(process.env.PROGMUNE_PROJECT_DIR || process.cwd(), ".progmune_corpus"), "emitter-failures");
 /** Classify a compile error string into a root cause. */
 /** Classify a compile error into a root cause category. */
 /** @requires ERROR_STRING @produces ROOT_CAUSE */

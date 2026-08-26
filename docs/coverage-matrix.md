@@ -55,7 +55,7 @@ Ledger             ✅           ❌           ❌         ❌          ❌
 |------|--------|------|
 | TypeScript | ✅ 可用 | Blind Benchmark v6（100 项目 / 795 gold）：P=100%（0 FP）、R=98.5%（有效 100%） |
 | Python | ✅ 可用 | Blind Benchmark v1（90 项目 / 729 gold）：P=100%、R=100%；PyGoat 真实应用 67 TP / 0 FP；3 个良构应用 0 误报真阳性（3 条框架内部件边界 FP 已文档化） |
-| C | ⚠️ 不可用于生产 | Gold Benchmark（curl/libssh/nginx/openssl）：F1=16.5%。L3 跨函数实验已终止；L4（指针/CFG）无计划 |
+| C | ⚠️ 不可用于生产 | 3.7.4：IR 提取接入注册表（`extract-ir-c.ts`），应用级协议生命周期（auth/db/file/payment）经 SSG 状态机可验证——应用级金标 v2：P=91.7% / R=100% / F1=95.7%（1 FP 为跨函数窗口边界）；规模化提取 6 仓库秒级、黄金函数恢复率 89–100%。TLS 级仍无覆盖（旧正则口径 Gold Benchmark F1=16.5% 为历史基线）；L3/L4 结论不变 |
 | Go | ❌ | 无规则、无基准、无测试——规划中 |
 | Java | ❌ | 无任何支持——规划中 |
 
@@ -179,7 +179,7 @@ Ledger             ✅           ❌           ❌         ❌          ❌
 | FastAPI | Python | ⚠️ 基础别名 | 框架委托 allowlist（DI authorizer、create_access_token 等） |
 | Gin / Fiber | Go | ❌ | 无 Go 支持 |
 | Spring Boot | Java | ❌ | 无 Java 支持 |
-| curl / nginx / libssh / OpenSSL | C | ✅ 有基准 | C 黄金基准 4 仓库（研究状态，F1=16.5%） |
+| curl / nginx / libssh / OpenSSL | C | ✅ 有基准 | C 黄金基准（研究状态：旧正则口径 F1=16.5%；3.7.4 起 IR 提取 + 应用级协议验证，金标 v2 F1=95.7%） |
 
 ```
 已适配框架        2 / 13（Express ✅、tRPC ✅ 专用检测器）
@@ -247,7 +247,7 @@ C 语言 L4（指针/CFG/数据流）——L3 实验已带数据终止，多年�
 Protocols        21 命名空间全有词汇      + OAuth2.0/OIDC、gRPC、
                                          GraphQL、WebSocket
 Languages        2 ✅ (TS, Python)        + Go ✅
-                 C ⚠️ 仅研究             Java（更远期）
+                 C ⚠️ 研究（IR 提取✅）  Java（更远期）
 Frameworks       2/13 专用检测器         Django/FastAPI 结构适配
 TS P/R           100%/98.5%              稳定
 Python P/R       100%/100%               稳定

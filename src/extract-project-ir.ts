@@ -17,6 +17,7 @@ import * as path from "path";
 import { extractIR } from "./extract-ir";
 import type { FunctionInfo } from "./extract-ir";
 import { extractIRPython } from "./extract-ir-python";
+import { extractIRC } from "./extract-ir-c";
 
 /** 语言提取器注册项：检测 + 提取。新增语言只需追加一条。 */
 export interface LanguageExtractor {
@@ -31,6 +32,7 @@ export interface LanguageExtractor {
 const SKIP_DIRS = new Set([
   "node_modules", "dist", "build", ".git", ".progmune_corpus",
   "__pycache__", "venv", ".venv",
+  "benchmarks", // vendored C 基准仓库（与 extract-ir-c.ts collectCFiles 口径一致）
 ]);
 
 /** 有界递归扫描：项目是否含指定扩展名源文件（首个命中即返回）。 */
@@ -66,6 +68,11 @@ export const LANGUAGE_EXTRACTORS: LanguageExtractor[] = [
     language: "python",
     detect: (p) => hasSourceFiles(p, new Set([".py"])),
     extract: (p) => extractIRPython(p),
+  },
+  {
+    language: "c",
+    detect: (p) => hasSourceFiles(p, new Set([".c", ".h"])),
+    extract: (p) => extractIRC(p),
   },
 ];
 

@@ -103,7 +103,7 @@ Progmune is honest about what it can and cannot verify.
 |----------|--------|----------|
 | **TypeScript / JavaScript** | ✅ Production | Blind benchmark: **recall 98.5% / precision 100%** (795 gold findings, 100 projects) |
 | **Python** | ✅ Production | Blind benchmark: **recall 100% / precision 100%** (729 gold findings, 90 projects); real-world validation: PyGoat (OWASP vulnerable-by-design Django app) **67 TP / 0 FP, 100% labeled precision**; three well-written apps (django/fastapi realworld, django-unicorn) with 0 false-positive true findings |
-| **C** | ⚠️ Research-only | Gold benchmark F1=16.5%. L3 cross-function experiment terminated; L4 not planned. See [C Language Status](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md). |
+| **C** | ⚠️ Research-only | 3.7.4: IR extraction merged via the language registry — app-level protocol lifecycles (auth/db/file/payment) verifiable through the SSG state machine (app-level gold v2: **P=91.7% / R=100% / F1=95.7%**). TLS-level coverage still absent (old regex-route F1=16.5% is the historical baseline); L3/L4 conclusions unchanged. See [C Language Status](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md). |
 | **Go, Java** | ❌ None | Planned |
 
 **Multi-language IR (registry-based).** TypeScript (ts-morph) and Python (AST) extractors are registered entries in one registry (`src/extract-project-ir.ts`); `extractProjectIR` merges every detected language into a single function IR shared by the agent loop, `execute()`, and the MCP server — the agent composes function-protocol chains across both languages. Adding a language (Go, Java, …) = register one extractor entry; callers don't change.
@@ -152,9 +152,9 @@ Public, reproducible precision data. All numbers measured against gold-annotated
 
 → [Real-world validation report](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/REALWORLD_APP_V1.md) · [Benchmark baseline](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/BASELINE_v6.md)
 
-### C (Gold Benchmark — research status)
+### C (IR extraction + app-level protocol verification — research status)
 
-C analysis is **research-only**: gold benchmark F1=16.5% across 4 repos (curl, libssh, nginx, openssl). The bottleneck is rule coverage, not context. L3 (cross-function) was terminated with data; L4 (pointer/CFG) is a multi-year research problem and not planned. See [C Language Status](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md) for the full picture and reasoning.
+Since 3.7.4, C has an IR extractor in the multi-language registry: C projects flow into IR-first sequence validation + the SSG state machine. App-level protocol lifecycles (auth/db/file/payment) are verifiable on C — app-level gold v2: **11/11 violations caught (Recall 100%), 1 FP, F1=95.7%**; extraction scales to 10k+ functions per repo in seconds with 89–100% gold-function recovery (curl/libssh/nginx/openssl/nghttp2/redis). Two boundaries remain: the old regex-route gold benchmark F1=16.5% measured **TLS-level misuse** (SSG has no TLS state machines — that gap is unchanged), and L3/L4 conclusions stand (function-pointer dispatch is statically invisible; no pointer/CFG analysis planned). See [C Language Status](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md) for the full picture and reasoning.
 
 ### P0-P3 Rule Injection (2026-08)
 
@@ -212,7 +212,7 @@ Your feedback shapes Progmune. Scan the QR code to join the user discussion grou
 
 ## Scientific Foundation
 
-Progmune is built on the premise that **LLM outputs are statistical performances, not reasoning** — a view developed by Subbarao Kambhampati et al. in the position paper ["Stop Anthropomorphizing Intermediate Tokens as Reasoning/Thinking Traces!"](https://arxiv.org/abs/2505.22285) (arXiv:2505.22285, 2025) and elaborated in his ICML 2026 talk "On the Role of Verifiers and Thinking Traces in Reasoning Models". Rather than trusting what the model says about code, Progmune verifies what the program actually does — using protocol state machines, IR extraction, and evidence-backed decision chains.
+Progmune is built on the premise that **LLM outputs are statistical performances, not reasoning** — a view developed by Subbarao Kambhampati et al. in the position paper ["Stop Anthropomorphizing Intermediate Tokens as Reasoning/Thinking Traces!"](https://arxiv.org/abs/2504.09762) (arXiv:2504.09762, 2025) and elaborated in his ICML 2026 talk "On the Role of Verifiers and Thinking Traces in Reasoning Models". Rather than trusting what the model says about code, Progmune verifies what the program actually does — using protocol state machines, IR extraction, and evidence-backed decision chains.
 
 → [Investor Whitepaper](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/Progmune_投资人白皮书_v2.0.html) · [Trust Decision Model](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/ai-trust-decision-model-v1.md)
 

@@ -59,17 +59,34 @@ export function collectProjectFunctionNames(ir: FunctionInfo[]): Set<string> {
  *   规则函数的平凡函数体会把调用名"吞掉"
  */
 export function buildCallSequences(ir: FunctionInfo[], keepNames?: Set<string>): CallSequence[] {
+  // 全局按名回退 + 同文件优先映射：C 中跨文件同名 static 函数极常见
+  // （每个 .c 都有 static cleanup/helper），名字级 Map 会让 last-wins 的
+  // 定义绑定到错误的调用方。同翻译单元（文件）定义优先解析——
+  // 文件内回调（cf->close_one() → 本文件 static close_one）因此接回序列构建；
+  // 跨文件函数指针分发仍不可见（L3 结论不变）。
   const fnMap = new Map<string, FunctionInfo>();
+  const fnMapByFile = new Map<string, Map<string, FunctionInfo>>();
   for (const f of ir) {
-    if (isProjectFn(f)) fnMap.set(f.name, f);
+    if (!isProjectFn(f)) continue;
+    fnMap.set(f.name, f);
+    let byFile = fnMapByFile.get(f.file);
+    if (!byFile) { byFile = new Map(); fnMapByFile.set(f.file, byFile); }
+    if (!byFile.has(f.name)) byFile.set(f.name, f);
   }
 
-  // 被项目函数调用过的函数不是入口（其片段并入调用方展开序列）
+  /** 调用解析：同文件定义优先，全局按名回退（跨文件同名时每个文件绑自己的） */
+  const resolveCall = (fromFile: string, name: string): FunctionInfo | undefined =>
+    fnMapByFile.get(fromFile)?.get(name) ?? fnMap.get(name);
+
+  // 被项目函数调用过的函数不是入口（其片段并入调用方展开序列）——
+  // 按 文件+名字 粒度判定，避免 A 文件的 static x 被 B 文件的调用误判非入口
+  const fnKey = (file: string, name: string) => file + "::" + name;
   const calledBy = new Set<string>();
   for (const f of ir) {
     if (!isProjectFn(f)) continue;
     for (const c of f.calls || []) {
-      if (fnMap.has(c)) calledBy.add(c);
+      const resolved = resolveCall(f.file, c);
+      if (resolved) calledBy.add(fnKey(resolved.file, resolved.name));
     }
   }
 
@@ -78,19 +95,19 @@ export function buildCallSequences(ir: FunctionInfo[], keepNames?: Set<string>):
     const out: string[] = [];
     for (const c of fn.calls || []) {
       if (typeof c !== "string" || c.startsWith("__progmune_")) continue;
-      out.push(...expandCall(c, depth, visiting));
+      out.push(...expandCall(c, depth, visiting, fn.file));
     }
     return out;
   };
 
-  const expandCall = (name: string, depth: number, visiting: Set<string>): string[] => {
+  const expandCall = (name: string, depth: number, visiting: Set<string>, fromFile: string): string[] => {
     if (depth > MAX_DEPTH || visiting.has(name)) return [];
-    const fn = fnMap.get(name);
+    const fn = resolveCall(fromFile, name);
     // 外部调用或规则函数：调用名保留给匹配层，不内联
     if (!fn || (keepNames && keepNames.has(name))) return [name];
     // 叶子函数（函数体只调外部原语）是协议原语或叶子 helper：
     // 保留名字，不内联——否则 S5 改名协议函数的平凡函数体会吞掉调用名
-    const hasProjectCalls = (fn.calls || []).some((c) => fnMap.has(c));
+    const hasProjectCalls = (fn.calls || []).some((c) => resolveCall(fn.file, c));
     if (!hasProjectCalls) return [name];
     visiting.add(name);
     const out = expandBody(fn, depth + 1, visiting);
@@ -101,7 +118,7 @@ export function buildCallSequences(ir: FunctionInfo[], keepNames?: Set<string>):
   const sequences: CallSequence[] = [];
   for (const f of ir) {
     if (!isProjectFn(f)) continue;
-    if (calledBy.has(f.name)) continue; // 非入口：片段并入调用方
+    if (calledBy.has(fnKey(f.file, f.name))) continue; // 非入口：片段并入调用方
     if (keepNames && keepNames.has(f.name)) continue; // 协议原语不是入口：只在调用链内验证
     const calls = expandBody(f, 0, new Set());
     if (calls.length === 0) continue;

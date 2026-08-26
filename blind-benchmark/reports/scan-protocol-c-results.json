@@ -1,0 +1,212 @@
+{
+  "generated": "2026-08-26T16:31:24.344Z",
+  "method": "extractIRC + buildCallSequences + validateSequenceWithSSG（IR-first 确定性，无 LLM）",
+  "baseline": {
+    "f1": 16.5,
+    "precision": 15.2,
+    "recall": 50,
+    "source": "docs/c-language-status.md（旧正则检测器口径）"
+  },
+  "overall": {
+    "tp": 0,
+    "fp": 3,
+    "fn": 38,
+    "precision": 0,
+    "recall": 0,
+    "f1": 0
+  },
+  "repos": [
+    {
+      "repo": "curl",
+      "irFunctions": 5068,
+      "irWithCalls": 4661,
+      "goldFunctions": 100,
+      "recovered": 97,
+      "extractMs": 2387,
+      "direct": {
+        "labeled": 85,
+        "positives": 24,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 24,
+        "precision": 0,
+        "recall": 0,
+        "f1": 0
+      },
+      "directFlags": [],
+      "production": {
+        "sequenceCount": 1553,
+        "flaggedGold": [
+          {
+            "function": "telnet_do",
+            "file": "lib/telnet.c",
+            "failingFunction": "ReadFile",
+            "reason": "SSG state violation: \"ReadFile\" (mapped to \"read_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file",
+            "label": "clean"
+          },
+          {
+            "function": "telnet_do",
+            "file": "lib/telnet.c",
+            "failingFunction": "ReadFile",
+            "reason": "SSG state violation: \"ReadFile\" (mapped to \"read_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file",
+            "label": "clean"
+          }
+        ]
+      }
+    },
+    {
+      "repo": "libssh",
+      "irFunctions": 3989,
+      "irWithCalls": 3705,
+      "goldFunctions": 100,
+      "recovered": 97,
+      "extractMs": 1344,
+      "direct": {
+        "labeled": 47,
+        "positives": 14,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 14,
+        "precision": 0,
+        "recall": 0,
+        "f1": 0
+      },
+      "directFlags": [],
+      "production": {
+        "sequenceCount": 2018,
+        "flaggedGold": []
+      }
+    },
+    {
+      "repo": "nginx",
+      "irFunctions": 3199,
+      "irWithCalls": 2903,
+      "goldFunctions": 100,
+      "recovered": 89,
+      "extractMs": 1264,
+      "direct": {
+        "labeled": 50,
+        "positives": 0,
+        "flagged": 3,
+        "tp": 0,
+        "fp": 3,
+        "fn": 0,
+        "precision": 0,
+        "recall": 1,
+        "f1": 0
+      },
+      "directFlags": [
+        {
+          "index": 1,
+          "function": "ngx_conf_handler",
+          "file": "src/core/ngx_conf_file.c",
+          "failingFunction": "ngx_read_file",
+          "reason": "SSG state violation: \"ngx_read_file\" (mapped to \"read_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file",
+          "label": "clean"
+        },
+        {
+          "index": 2,
+          "function": "ngx_conf_read_token",
+          "file": "src/core/ngx_conf_file.c",
+          "failingFunction": "ngx_read_file",
+          "reason": "SSG state violation: \"ngx_read_file\" (mapped to \"read_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file",
+          "label": "clean"
+        },
+        {
+          "index": 36,
+          "function": "ngx_http_static_handler",
+          "file": "src/http/modules/ngx_http_static_module.c",
+          "failingFunction": "(end-of-sequence)",
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file.",
+          "label": "clean"
+        }
+      ],
+      "production": {
+        "sequenceCount": 1362,
+        "flaggedGold": [
+          {
+            "function": "ngx_http_static_handler",
+            "file": "src/http/modules/ngx_http_static_module.c",
+            "failingFunction": "(end-of-sequence)",
+            "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file.",
+            "label": "clean"
+          }
+        ]
+      }
+    },
+    {
+      "repo": "openssl",
+      "irFunctions": 15896,
+      "irWithCalls": 13848,
+      "goldFunctions": 100,
+      "recovered": 98,
+      "extractMs": 6965,
+      "direct": {
+        "labeled": 100,
+        "positives": 0,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": 0,
+        "recall": 1,
+        "f1": 0
+      },
+      "directFlags": [],
+      "production": {
+        "sequenceCount": 6368,
+        "flaggedGold": []
+      }
+    },
+    {
+      "repo": "nghttp2",
+      "irFunctions": 1315,
+      "irWithCalls": 956,
+      "goldFunctions": 100,
+      "recovered": 100,
+      "extractMs": 733,
+      "direct": {
+        "labeled": 100,
+        "positives": 0,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": 0,
+        "recall": 1,
+        "f1": 0
+      },
+      "directFlags": [],
+      "production": {
+        "sequenceCount": 399,
+        "flaggedGold": []
+      }
+    },
+    {
+      "repo": "redis",
+      "irFunctions": 10170,
+      "irWithCalls": 9245,
+      "goldFunctions": 100,
+      "recovered": 99,
+      "extractMs": 2793,
+      "direct": {
+        "labeled": 50,
+        "positives": 0,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": 0,
+        "recall": 1,
+        "f1": 0
+      },
+      "directFlags": [],
+      "production": {
+        "sequenceCount": 3392,
+        "flaggedGold": []
+      }
+    }
+  ]
+}

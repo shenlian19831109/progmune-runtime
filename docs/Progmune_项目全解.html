@@ -346,7 +346,7 @@
   <div class="bar"><span class="bl">人工审查能力</span><div class="bt"><div class="bf" style="width:10%"></div></div><span class="bv">1x</span></div>
 
   <h3>3.2 问题本质：AI 写代码的原理决定了它"看不见"错误</h3>
-  <p>大语言模型生成代码的方式是<strong>统计预测</strong>——根据训练数据猜"下一个最可能的词"。这一观点的代表性论述来自 Subbarao Kambhampati 等的立场论文《Stop Anthropomorphizing Intermediate Tokens as Reasoning/Thinking Traces!》（arXiv:2505.22285）及其 ICML 2026 关于 verifier 的主题演讲：LLM 输出的"逐步推理"是统计表演，中间 token 与真实推理之间没有可靠的因果对应。</p>
+  <p>大语言模型生成代码的方式是<strong>统计预测</strong>——根据训练数据猜"下一个最可能的词"。这一观点的代表性论述来自 Subbarao Kambhampati 等的立场论文《Stop Anthropomorphizing Intermediate Tokens as Reasoning/Thinking Traces!》（arXiv:2504.09762）及其 ICML 2026 关于 verifier 的主题演讲：LLM 输出的"逐步推理"是统计表演，中间 token 与真实推理之间没有可靠的因果对应。</p>
   <p>这意味着：AI 写出"看似合理的代码"和"实际正确的代码"是两件事。它会一本正经地调用不存在的函数、跳过关键的认证步骤——<strong>而且完全静默，不报错</strong>。</p>
 
   <h3>3.3 现有方案为什么不够</h3>
@@ -508,7 +508,7 @@ AI 生成: create_session(...)   ← 当前状态 UNAUTHENTICATED
     <tr><td><strong>协议盲测</strong>（Python v1.2，38 项目）</td><td>8 违规类型 × 5 结构/命名风格、66 条可测金标、生产 SSG 桥接校验器（P4.6 跨函数传播）</td><td>召回 <strong>97%</strong> · 精确率 <strong>100%</strong> · 误报 <strong>0</strong>（2 漏检为注解依赖前置，已单列）</td></tr>
     <tr><td><strong>真实应用验证</strong>（PyGoat）</td><td>OWASP 故意脆弱 Django 应用、232 条检测逐条人工核实</td><td>标记精确率 <strong>100%</strong>（67 真阳性 / 0 误报）；覆盖 14 个漏洞类别</td></tr>
     <tr><td><strong>良构应用</strong>（django/fastapi realworld、django-unicorn）</td><td>176 条检测</td><td>0 条误报真阳性；3 条框架内部边界 FP（已定性归档）</td></tr>
-    <tr><td><strong>黄金基准</strong>（C 语言）</td><td>curl/libssh/nginx/openssl 等真实 CVE 案例</td><td>F1 16.5% —— <strong>研究阶段</strong>，诚实披露</td></tr>
+    <tr><td><strong>黄金基准</strong>（C 语言）</td><td>curl/libssh/nginx/openssl 等真实 CVE 案例；3.7.4 起 IR 提取接入注册表</td><td>应用级协议验证金标 v2：<strong>F1 95.7%</strong>（召回 100%）；旧正则口径 F1=16.5% 为 TLS 级历史基线 —— <strong>研究阶段</strong>，诚实披露</td></tr>
     <tr><td><strong>PLSB v1.0</strong></td><td>13 类协议安全弱点、39 个手工验证缺陷案例</td><td>覆盖 <strong>13/13 全类别</strong>（业界唯一）</td></tr>
   </table>
   <div class="plain">
@@ -537,7 +537,7 @@ AI 生成: create_session(...)   ← 当前状态 UNAUTHENTICATED
     <tr><th>能力</th><th>状态</th><th>说明</th></tr>
     <tr><td>TypeScript / JavaScript</td><td><span style="color:var(--green);font-weight:700">✅ 生产</span></td><td>盲测 100 项目：精确率 100%、召回率 98.5%</td></tr>
     <tr><td>Python</td><td><span style="color:var(--green);font-weight:700">✅ 生产</span></td><td>盲测 90 项目：精确率/召回率双 100%；15 条源码级检测规则；PyGoat 真实验证 67 TP / 0 FP</td></tr>
-    <tr><td>C</td><td><span style="color:var(--amber);font-weight:700">⚠️ 研究</span></td><td>F1 16.5%，瓶颈已定位（规则覆盖），L3 实验已终止</td></tr>
+    <tr><td>C</td><td><span style="color:var(--amber);font-weight:700">⚠️ 研究</span></td><td>3.7.4 起 IR 提取 + 应用级协议状态机验证（金标 v2：P=91.7%/R=100%/F1=95.7%）；TLS 级仍无覆盖（旧正则口径 F1=16.5% 为历史基线），L3/L4 结论不变</td></tr>
     <tr><td>Go / Java</td><td><span style="color:var(--ink-3)">❌ 未支持</span></td><td>路线图内</td></tr>
     <tr><td>框架适配</td><td><span style="color:var(--amber);font-weight:700">2/13</span></td><td>Express ✅、tRPC ✅、NestJS 部分；Next.js 版本感知已实现；Django/FastAPI 经 Python 源码级检测间接覆盖</td></tr>
   </table>

@@ -1,6 +1,31 @@
 # Changelog
 
+## [3.7.4] — 2026-08-26
+
+### 新增：C 语言 IR 提取（注册表第三语言）
+
+- **`src/extract-ir-c.ts`**：纯 TS C 提取器（无子进程桥、无原生依赖）——函数签名（含多行、`static`/`inline`/`__attribute__`、指针/数组/函数指针参数）、调用列表（成员调用取 `->`/`.` 后的调用名，`goto` 合成 `goto_<label>`）、`@progmune`/`@protocol` 注解与 `@purpose/@tags/@requires/@produces/@useWhen/@inputs/@outputs` 文档标签（C 注释块镜像 Python 装饰器语法）；注释/字符串感知的括号计数（修复 v2 提取器已知缺口，未改动 `sequence-extractor`——C 金标基准管线保持不动）
+- **`LANGUAGE_EXTRACTORS` 注册 `c`**（detect `.c`/`.h`，extract `extractIRC`）——agent 循环、execute() 的 ir.json 写入与 MCP 自动生效；C 项目从纯正则回退切换到 IR-first 序列验证 + SSG 状态机，C 函数名进入词段匹配门控（仅项目函数）；协议行与 protocols.json 规则名（`verify_password` 等）按名命中
+- **端到端验证**：临时 C 项目上 extractProjectIR → evaluateTrust 走通——4 条植入违规全部精确定位（内置 auth×2 / db×1 + 自定义 pay 命名空间注解×1），合法链零误报（NEEDS_REVIEW 72 分）；**应用级 C 金标 v1**（`blind-benchmark/scan-protocol-c-app.ts`，镜像 Python 盲测方法学）：10 clean × 7 违规 → **P=87.5% / R=100% / F1=93.3%**（唯一 FP 为跨函数窗口边界，与 Python 盲测 T2×S5 同类）
+- **规模化提取**（`blind-benchmark/scan-protocol-c.ts`）：6 个 vendored 仓库（curl 4192 / libssh 3689 / nginx 2970 / openssl 14394 / nghttp2 1274 / redis 9590 函数）秒级提取，黄金函数恢复率 81–99%；旧 TLS 级金标上 SSG 命中 0/38（口径差异：SSG 无 TLS 规则，如实记录）；nginx 3 FP 为 `ngx_*` 前缀包装器撞词段匹配（引擎层问题，记录待议，未动 SSG 桥避免 TS/Python 漂移）
+- **修复：签名正则指数级回溯**——v2 风格类型 token 循环对 `name = ssh_userauth_kbdint_getname(...)` 类行穷举标识符切分（44 字符缓冲 ~11s），改为候选迭代（跳过关键字/类型名候选，返回类型从缓冲区前缀推导）；libssh 提取 >15min（病态）→ 1.8s，回归测试已加
+- **评审修复轮（detect/extract 口径、死代码、TU 绑定等）**：①`hasSourceFiles` SKIP_DIRS 补 `benchmarks`（与 extract 口径一致，本仓库自身不再误标 C）；②`#if 0` 死代码块预处理剥离（真实仓库不平衡花括号不再腐蚀函数体计数）；③顶层 `#` 行只跳自身不再吞相邻函数（openssl 14,394→15,896 函数，黄金函数恢复率升至 89–100%）；④`buildCallSequences` 同文件定义优先绑定（跨文件同名 static 不再 last-wins 错绑，入口判定文件化；Python 盲测 v1.2 复测零漂移——报告与基线逐字节一致仅时间戳不同）；⑤提取器取消调用去重（状态机重复调用有语义，双 close/重复 logout 可检出，与 TS/Python 提取器一致）；⑥删死代码 `isCProject`；⑦混合 TS+C 项目回归测试。应用级 C 金标扩至 v2（11 clean × 11 违规 + helper 中介风格 + 逐命名空间分解）：**TP 11/11 FP 1 FN 0 → P=91.7% / R=100% / F1=95.7%**（唯一 FP 为 do_logout 跨函数窗口边界）。已知系统性风险文档化：C 前缀包装器（`ngx_*` 等）撞词段匹配（nginx 3 FP），缓解方案（前缀剥离/连续词段）留待下一轮并强制盲测复跑
+- **限制如实记录**：函数指针分发静态不可见（L3 结论不变）、宏/K&R/C++ 不解析、无数据流/指针分析（L4 无计划）；提取器遍历跳过 vendored `benchmarks/`；`docs/c-language-status.md` 已更新（新路线小节 + 基准结果 + Decision record）
+
 ## [3.7.3] — 2026-08-24
+
+### 中央免疫 Hub 上线 + 失败语料统一
+
+- **中央 Hub 重新部署**（`progmune-runtime` 应用，`server/hub.js`）：fly.toml 补 443 TLS 端口（此前仅 80，https 不可达），`https://progmune-runtime.fly.dev/report` 生效；数据落持久卷 `progmune_data`（`/app/immune_hub_data`），Dashboard `GET /api/dashboard` 可用（含 5 月历史 12 条指纹 + 冒烟测试 1 条）
+- **上报链路打通**：`PROGMUNE_HUB` 指向中央 hub；`immune-reporter` 实测可连（游标增量上报，无新指纹时正常返回）；端到端 POST 冒烟通过（received:1 / total:1）
+- **统一失败语料写入路径**：`failure-collector.ts` 的 `CORPUS_DIR` 由仓库根 `failure-corpus/` 改为项目级 `.progmune_corpus/emitter-failures/`（与 `failure-corpus.ts` 同规则：`PROGMUNE_CORPUS_DIR || <PROGMUNE_PROJECT_DIR|cwd>/.progmune_corpus`），消除两套语料并存；dist 已重建
+- **部署配置瘦身**：根 Dockerfile 改为零依赖（hub 仅需 `server/` + `public/`，去掉 npm install 与 dist 拷贝）；`.dockerignore` 补 benchmarks/、.progmune_corpus/、dist/ 等大目录（构建上下文 1.1G → 数百 KB）
+- **Hub 接口扩展**：`/api/dashboard` 新增 `topPatternsWeek`（本周高频错误模式 Top10）+ 全接口 CORS（`Access-Control-Allow-Origin: *`），供落地页跨域实时拉取
+
+### 落地页新增「失败语料飞轮」板块（05）
+
+- 三卡飞轮叙事（失败入库 → 中央汇聚 → 反馈增强）+ **实时本周高频错误模式 Top 10**（浏览器端 fetch `progmune-runtime.fly.dev/api/dashboard`，SVL 分级徽章 + 调用序列 + 次数；空态/不可达有兜底文案）
+- 中英文切换覆盖（113 i18n 键）；序号顺延：使用→06、路线图→07、社区→08；导航新增「飞轮」入口
 
 ### 文档全量一致性审计
 
@@ -15,6 +40,9 @@
   - **RUNTIME_ARCHITECTURE.md**：7 protocol definitions→27 命名空间/148 规则；业务指标表过时数字（FPR 97%、F1 27-41%）改为现行基准（0 FP、TS 98.5%/100%、C F1 16.5%）
   - **项目全解.html**：hero 版本 v3.2.0→v3.7.2；21→27 命名空间（2 处）；85.2% F1 旧数字→现行基准；5.7 基准表补协议盲测 v1.2 行；6.1 产品形态补社区双渠道机器人
   - **投资人白皮书_v3.2.html**：Python"未激活"→✅；144→148 规则（2 处）；PrintLab 案例对齐最终态（46→0 违规、44→87 APPROVED）；P2 待办 Python/Go→Go/Java；里程碑表补 3.7 行；"当前能力（v3.2）"标注最新 npm 3.7.2
+  - **新增产品落地页 `index.html`**：产品介绍（为什么 / 是什么 / 核心能力 / 覆盖矩阵 / 使用方法 / 社区反馈）+ 双群二维码 + 自动回复说明 + 联系邮箱 shenlian1983@qq.com + 官网 tuxingren.xyz；自包含单文件（内联 CSS，无外部依赖），图片相对路径，可直接部署至 tuxingren.xyz
+  - **落地页上线 Fly.io**：新增 `web/` 静态站部署目录（nginx:alpine + fly.toml，app `progmune-web`，sin 区域，2 台机器）；`fly certs add tuxingren.xyz` 已绑定域名证书，DNS 待用户按记录配置（A `149.248.206.6` / AAAA `2a09:8280:1::17a:e05f:0`）；踩坑记录：Fly 远程构建不解析符号链接（web/ 内用真实文件副本）、hkg 区域已弃用（改用 sin）、文件权限需 644（nginx 用户可读）
+  - **落地页迭代**：新增中英文切换（data-i18n + localStorage）；新增「下一步方向」板块（6 个轻量方向卡：更多语言 / Trust API SaaS / 协议扩展 / CI/CD 插件 / 行业基线 / 公开基准，依据 `docs/development-plan.md`）；移除 tuxingren.xyz 全部引用（官网行 + 页脚链接 + i18n 键，待换新域名）；去除联系卡片"自动回复"行
 
 ### 修复
 

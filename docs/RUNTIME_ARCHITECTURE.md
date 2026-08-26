@@ -163,7 +163,7 @@ Instead of "Knowledge units" or "Protocol count":
 
 | Metric | Current (2026-08，见 coverage-matrix / BASELINE_v6) | Target |
 |--------|---------|--------|
-| Detection F1 | TS 盲测 Recall 98.5%（有效 100%）/ Precision 100%；C 研究级 F1 16.5% | 70%+（C 不设投资目标） |
+| Detection F1 | TS 盲测 Recall 98.5%（有效 100%）/ Precision 100%；C 研究级——3.7.4 起 IR 提取 + 应用级协议验证（金标 v2 F1=95.7%），旧正则口径 F1=16.5% 为历史基线 | 70%+（C 不设投资目标） |
 | **False Positive Rate** | **0 FP**（TS 795 gold / Python 729 gold / PyGoat） | **<40%** |
 | Recall | TS 98.5% / Python 100% | Maintain |
 | Repair Success (sim) | 100% | — |

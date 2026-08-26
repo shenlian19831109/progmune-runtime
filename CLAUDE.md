@@ -170,7 +170,7 @@ npm run corpus:mine        # Rule mining from corpus
 |----------|--------|----------|
 | TypeScript | ✅ Production | Blind benchmark 795 gold: Recall 98.5% (effective 100%) / Precision 100% / 0 FP; protocol rows ✅×4 (Auth/Payment/Data Integrity/Ledger) |
 | Python | ✅ Production | Protocol rows ✅×2 (Auth/Resource Lifecycle): blind v1.2 66 gold 97%/100%/0 FP; source-level detection 729 gold Recall 100% |
-| C | ⚠️ Research | TLS/SSL/SSH/HTTP2/HTTP Request ✅; Gold Benchmark F1=16.5%. L3 cross-function experiment terminated. |
+| C | ⚠️ Research | 3.7.4: IR extraction merged via registry (`extract-ir-c.ts`) — app-level protocol lifecycles (auth/db/file/payment) verifiable via SSG state machine (app-level gold v2: P=91.7% / R=100% / F1=95.7%); TLS-level coverage still absent (old regex-route F1=16.5% historical baseline). L3/L4 conclusions unchanged. |
 | Go, Java | ❌ None | No support |
 
 **Framework adapters: 2/13 with structural analysis** (Express + NestJS), 5/13 with library aliases. Express detector does route extraction + middleware classification + security checks. NestJS detector parses decorators (@Controller, @UseGuards, @UsePipes) via ts-morph. Both feed into the trust engine pipeline. Remaining frameworks (Next.js, Fastify, Django, FastAPI, etc.) have basic alias coverage but no structural analysis. (Note: README's framework line also mentions a tRPC detector — `src/frameworks/trpc-detector.ts` exists with 3 rules; treat Express + NestJS as the structural adapters.)

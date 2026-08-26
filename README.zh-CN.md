@@ -103,7 +103,7 @@ Progmune 对能验证什么、不能验证什么保持诚实。
 |------|------|------|
 | **TypeScript / JavaScript** | ✅ 生产 | 盲测基准：**召回 98.5% / 精确率 100%**（795 条 gold finding，100 个项目） |
 | **Python** | ✅ 生产 | 盲测基准：**召回 100% / 精确率 100%**（729 条 gold finding，90 个项目）；真实应用验证：PyGoat（OWASP 故意脆弱 Django 应用）**67 TP / 0 FP，标记精确率 100%**；三个良构应用（django/fastapi realworld、django-unicorn）0 误报真阳性 |
-| **C** | ⚠️ 仅研究 | 黄金基准 F1=16.5%。L3 跨函数实验已终止；L4 无计划。见 [C 语言状态](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md)。 |
+| **C** | ⚠️ 仅研究 | 3.7.4：IR 提取接入多语言注册表——应用级协议生命周期（认证/数据库/文件/支付）经 SSG 状态机可验证（应用级金标 v2：**P=91.7% / R=100% / F1=95.7%**）。TLS 级覆盖仍无（旧正则口径 F1=16.5% 为历史基线）；L3/L4 结论不变。见 [C 语言状态](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md)。 |
 | **Go, Java** | ❌ 无 | 规划中 |
 
 **多语言 IR（注册表式）。** TypeScript（ts-morph）与 Python（AST）提取器是同一注册表（`src/extract-project-ir.ts`）中的注册项；`extractProjectIR` 把检测到的所有语言合并为一份函数 IR，由 agent loop、`execute()` 与 MCP server 共享——agent 可在两种语言上编排函数协议链。新增语言（Go、Java……）= 注册一条提取器，调用方零改动。
@@ -152,9 +152,9 @@ Progmune 对能验证什么、不能验证什么保持诚实。
 
 → [真实验证报告](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/REALWORLD_APP_V1.md) · [基准基线](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/BASELINE_v6.md)
 
-### C（黄金基准——研究状态）
+### C（IR 提取 + 应用级协议验证——研究状态）
 
-C 分析**仅研究**：黄金基准 F1=16.5%，覆盖 4 个仓库（curl、libssh、nginx、openssl）。瓶颈是规则覆盖而非上下文。L3（跨函数）已带数据终止；L4（指针/CFG）是多年研究问题，无计划。详见 [C 语言状态](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md)。
+3.7.4 起 C 拥有多语言注册表中的 IR 提取器：C 项目进入 IR-first 序列验证 + SSG 状态机。应用级协议生命周期（认证/数据库/文件/支付）在 C 上可验证——应用级金标 v2：**11/11 违规全检出（召回 100%）、1 误报、F1=95.7%**；提取规模化至每仓库 1 万+ 函数、秒级完成、黄金函数恢复率 89–100%（curl/libssh/nginx/openssl/nghttp2/redis）。两条边界不变：旧正则口径黄金基准 F1=16.5% 测的是 **TLS 级误用**（SSG 无 TLS 状态机，该口径不变）；L3/L4 结论维持（函数指针分发静态不可见；无指针/CFG 分析计划）。详见 [C 语言状态](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md)。
 
 ### P0-P3 规则注入（2026-08）
 
@@ -211,7 +211,7 @@ SDK (src/sdk.ts)           verify() → APPROVED / NEEDS_REVIEW / BLOCKED
 
 ## 科学基础
 
-Progmune 建立在"**LLM 输出是统计表演而非推理**"这一前提上——该观点源自 Subbarao Kambhampati 等人的立场论文 ["Stop Anthropomorphizing Intermediate Tokens as Reasoning/Thinking Traces!"](https://arxiv.org/abs/2505.22285)（arXiv:2505.22285，2025），并在其 ICML 2026 演讲 "On the Role of Verifiers and Thinking Traces in Reasoning Models" 中展开。Progmune 不信任模型对代码的说法，而是用协议状态机、IR 提取与证据链验证程序实际行为。
+Progmune 建立在"**LLM 输出是统计表演而非推理**"这一前提上——该观点源自 Subbarao Kambhampati 等人的立场论文 ["Stop Anthropomorphizing Intermediate Tokens as Reasoning/Thinking Traces!"](https://arxiv.org/abs/2504.09762)（arXiv:2504.09762，2025），并在其 ICML 2026 演讲 "On the Role of Verifiers and Thinking Traces in Reasoning Models" 中展开。Progmune 不信任模型对代码的说法，而是用协议状态机、IR 提取与证据链验证程序实际行为。
 
 → [投资人白皮书](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/Progmune_投资人白皮书_v2.0.html) · [信任决策模型](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/ai-trust-decision-model-v1.md)
 

@@ -56,7 +56,7 @@ Effective coverage TS (✅×4)    C (✅×4)     ❌         Python (✅×2) ❌
 |----------|---------|----------|
 | TypeScript | ✅ Usable | Blind Benchmark v6 (100 projects / 795 gold): P=100% (0 FP), R=98.5% (effective 100%) |
 | Python | ✅ Usable | Blind Benchmark v1 (90 projects / 729 gold): P=100%, R=100%; PyGoat real-world validation 67 TP / 0 FP; three well-written apps with 0 false-positive true findings (3 framework-internal boundary FPs documented) |
-| C | ⚠️ Not production-ready | Gold Benchmark (curl/libssh/nginx/openssl): F1=16.5%. L3 cross-function experiment terminated; L4 (pointer/CFG) not planned |
+| C | ⚠️ Not production-ready | 3.7.4: IR extraction merged via the registry (`extract-ir-c.ts`) — app-level protocol lifecycles (auth/db/file/payment) verifiable through the SSG state machine (app-level gold v2: P=91.7% / R=100% / F1=95.7%; the 1 FP is the cross-function window boundary); extraction scales to 6 repos in seconds with 89–100% gold-function recovery. TLS-level coverage still absent (old regex-route Gold Benchmark F1=16.5% is the historical baseline); L3/L4 conclusions unchanged |
 | Go | ❌ | No rules, no benchmark, no tests — planned |
 | Java | ❌ | No support — planned |
 
@@ -180,7 +180,7 @@ Registry-based multi-language merged extraction (`src/extract-project-ir.ts`): T
 | FastAPI | Python | ⚠️ Basic aliases | Framework-delegation allowlist (DI authorizers, create_access_token, etc.) |
 | Gin / Fiber | Go | ❌ | No Go support |
 | Spring Boot | Java | ❌ | No Java support |
-| curl / nginx / libssh / OpenSSL | C | ✅ Benchmarked | C gold benchmark, 4 repos (research status, F1=16.5%) |
+| curl / nginx / libssh / OpenSSL | C | ✅ Benchmarked | C gold benchmark (research status: old regex-route F1=16.5%; since 3.7.4 IR extraction + app-level protocol verification, gold v2 F1=95.7%) |
 
 ```
 Dedicated detectors    2 / 13 (Express ✅, tRPC ✅)
@@ -248,7 +248,7 @@ C-language L4 (pointer/CFG/dataflow) — the L3 experiment was terminated with d
 Protocols        21 namespaces, all with    + OAuth2.0/OIDC, gRPC,
                  rule vocabulary             GraphQL, WebSocket
 Languages        2 ✅ (TS, Python)          + Go ✅
-                 C ⚠️ research only          Java (further out)
+                 C ⚠️ research (IR ✅)      Java (further out)
 Frameworks       2/13 dedicated detectors   Django/FastAPI structural
                                             adaptation
 TS P/R           100%/98.5%                 stable
