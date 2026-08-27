@@ -163,6 +163,13 @@ function findFixPathStatic(rules, namespace, current, targetPreStates) {
             nsFuncs.push({ name: fn, rule });
         }
     }
+    // 项目注解原语优先展开（修复路径输出真实函数名而非通用规则名）；
+    // stable sort：无 displayName 的规则（内置/TS/Python 惯例）相对顺序不变
+    nsFuncs.sort((a, b) => {
+        const pa = a.rule.displayName ? 0 : 1;
+        const pb = b.rule.displayName ? 0 : 1;
+        return pa - pb;
+    });
     // BFS
     const startKey = [...new Set(current)].sort().join(",");
     const visited = new Set();

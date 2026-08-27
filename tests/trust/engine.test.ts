@@ -3,8 +3,12 @@
  */
 
 import { describe, it, expect } from "vitest";
+import * as fs from "fs";
+import * as os from "os";
+import * as path from "path";
 import { evaluateTrust } from "../../src/trust/engine";
 import type { TrustEvaluationContext } from "../../src/trust/types";
+import { extractProjectIR } from "../../src/extract-project-ir";
 
 describe("evaluateTrust", () => {
   const baseCtx: TrustEvaluationContext = {
@@ -152,5 +156,75 @@ describe("Express Framework Adapter (integration)", () => {
     expect(Array.isArray(ssg)).toBe(true);
     expect(Array.isArray(express)).toBe(true);
     expect(Array.isArray(other)).toBe(true);
+  });
+});
+
+describe("evaluateTrust（C 注解原语，回归：CamelCase 规则可达 + 合并先于序列构建）", () => {
+  // demo-real-c-redis 逼出的两个引擎问题：
+  // ① CamelCase 注解规则原样不可触达 → 合并同步注册 normalized 形态；
+  // ② 注解合并晚于序列构建 → 有函数体的注解原语被内联掉、post 不生效。
+  const SOURCE = `
+/* @progmune(namespace="auth", pre=["UNAUTHENTICATED"], post=["PASSWORD_VERIFIED"]) */
+int ACLCheckUserCredentials(robj *username, robj *password) {
+    if (ACLHashPassword(password->ptr, 1) == C_OK) return C_OK;
+    return C_ERR;
+}
+/* @progmune(namespace="auth", pre=[], post=["AUTHENTICATED"]) */
+int checkPasswordBasedAuth(client *c, robj *username, robj *password) {
+    if (ACLCheckUserCredentials(username, password) == C_OK) {
+        c->authenticated = 1;
+        return 1;
+    }
+    return 0;
+}
+/* @progmune(namespace="auth", pre=["AUTHENTICATED"]) */
+int ACLCheckAllPerm(client *c, int *idxptr) {
+    return ACLCheckAllUserCommandPerm(c->user, c->cmd, NULL, 0, NULL, idxptr);
+}
+`;
+
+  async function runWith(source: string) {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pm-engine-c-"));
+    try {
+      fs.writeFileSync(path.join(dir, "auth.c"), source);
+      const ir = extractProjectIR(dir);
+      fs.writeFileSync(path.join(dir, "ir.json"), JSON.stringify({ typeMap: {}, functions: ir }, null, 2));
+      return await evaluateTrust({
+        projectPath: dir,
+        projectName: "c-annotation-test",
+        commit: "test",
+        language: "c",
+      });
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
+  it("合法流：establish（有函数体注解原语）→ perm-check 零违规", async () => {
+    const r = await runWith(SOURCE + `
+void handle_authed_command(client *c, robj *u, robj *p) {
+    if (checkPasswordBasedAuth(c, u, p) == 1) {
+        ACLCheckAllPerm(c, NULL);
+    }
+}
+`);
+    const ssg = r.violations.filter((v) => v.rule_id.startsWith("SSG_"));
+    expect(ssg).toEqual([]);
+  });
+
+  it("违规流：未认证 perm-check 被精确定位（CamelCase 规则可触达）", async () => {
+    const r = await runWith(SOURCE + `
+void handle_monitor_no_auth(client *c) {
+    ACLCheckAllPerm(c, NULL);
+}
+`);
+    const ssg = r.violations.filter((v) => v.rule_id.startsWith("SSG_"));
+    expect(ssg).toHaveLength(1);
+    expect(ssg[0].function).toBe("handle_monitor_no_auth");
+    expect(ssg[0].why).toContain("ACLCheckAllPerm");
+    expect(ssg[0].why).toContain("AUTHENTICATED");
+    // fixPath 输出项目真实函数名（displayName），而非通用规则名 verify_token
+    expect(ssg[0].fix).toContain("checkPasswordBasedAuth");
+    expect(ssg[0].fix).not.toContain("verify_token");
   });
 });

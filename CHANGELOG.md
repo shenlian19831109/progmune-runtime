@@ -1,5 +1,22 @@
 # Changelog
 
+## [3.7.5] — 2026-08-27
+
+### C 真实语料验证 + 注解驱动演示 + 引擎修复（DSH 双轮评审合入）
+
+- **修复（DSH）：单行指针返回函数系统性漏提取**——`char *foo(`/`SSL *foo(` 类定义被 `(?:^|\s)` 锚点漏掉（名字前是 `*` 非空白）；改为 lookbehind `(?<![a-zA-Z0-9_])` + 回归测试。openssl 等指针密集型仓库补回 ~1,500 函数（如 openssl 15,539 含指针修复与表面过滤的净效果）
+- **修复：P4.6 展开兆级序列**（DSH 实测 openssl 单序列可达 1M+ 调用、全扫描 15–25 分钟）——`buildCallSequences` 预算制展开（`MAX_SEQUENCE_CALLS=2000` 可注入，入口自身调用按序优先、超预算即停，`CallSequence.truncated` 标记，不去重——重复调用对状态机有语义）；openssl 全扫描 **15–25 分钟 → 222s**。零漂移前置实测：Python 盲测语料最大序列 23、TS 自身 IR 最大 824（预算零影响），Python 盲测复跑 64 违规不变。**截断是诚实的召回边界**（超大序列尾部违规不可见，非静默回归）
+- **真实语料四仓库**（libssh/redis/nginx/openssl）：24 flags 全部人工标注 FP（0 TP）——误报类别稳定（OS API 桥接 11、回调 endState、包装器词段、跨函数窗口），keyword 白名单方向的观测前提已达标待决策；稳定指标 = 黄金函数恢复率 97–100%
+
+- **真实 C 语料验证 v1**（`blind-benchmark/scan-real-c.ts` + `REALWORLD_C_V1.md`）：生产管线扫 libssh/redis/nginx——表面过滤后 16 flags 逐条人工标注全 FP（真实误报率观测：标记精确率 0%）；「命名鸿沟」发现（exact-name 0 次触发，合成金标 95.7% F1 全靠按名+注解命中）；误报源分类：回调生命周期 endState 12 / OS API 关键词桥接 3 / 跨函数窗口 1
+- **提取器非生产表面过滤**（对齐 `tools/extract_ir.py` Python 先例）：`collectCFiles` 跳过 `tests/test/examples/docs/docs_src/scripts/deps/vendor/third_party` 目录与 `test_*.c`/`*_test.c`——libssh 63→1、redis 1→0 条 flags；C 金标恢复率零漂移（97/97/89/98/100/99）
+- **注解驱动真实项目演示**（`demo-real-c-redis/` + `REALWORLD_C_V2.md`）：真实 redis acl.c 代码 + 3 条注解 → 合法流 APPROVED 85 零误报、植入 missing-auth-check 精确定位；标注成本 ~3 注解/协议——**注解驱动是 C 生产化的现实形态，可行性已验证**
+- **引擎修复①（CamelCase 注解规则不可触达）**：注解合并同步注册 normalized 形态（加性，snake_case 注解零变化）
+- **引擎修复②（注解合并晚于序列构建）**：P4.5 合并移到 `extractCallSequencesFromProject` 之前——有函数体的注解原语不再被内联掉、post 状态生效；与盲测 harness 语义对齐
+- **引擎修复③（fixPath 输出真实函数名）**：`StateAnnotation.displayName` 机制——注解合并记录真实函数名，BFS 展开项目原语优先（stable sort 零漂移）+ 渲染映射；修复建议从通用规则名（`verify_token`）变为项目真实函数（`checkPasswordBasedAuth`），sdk 修复解析直接插入真实调用。三处边界如实记录：establish 赋值状态机不可见（L4 不投入）、模块认证 hook 在状态机外、单条 medium 违规不翻转 APPROVED（决策阈值层独立议题）
+- **零漂移验证**：Python 协议盲测 v1.2 复跑 64 违规（报告仅时间戳差异）；引擎相关套件 113/113 + 2 个新回归测试（tests/trust/engine.test.ts）
+- **如实记录**：C 语言状态标签维持「研究」；不修项（按评估决策）——establish 赋值不可见（L4 不投入）、medium 违规不翻转 APPROVED（累计扣分设计逻辑，非缺陷）
+
 ## [3.7.4] — 2026-08-26
 
 ### 新增：C 语言 IR 提取（注册表第三语言）
@@ -7,7 +24,7 @@
 - **`src/extract-ir-c.ts`**：纯 TS C 提取器（无子进程桥、无原生依赖）——函数签名（含多行、`static`/`inline`/`__attribute__`、指针/数组/函数指针参数）、调用列表（成员调用取 `->`/`.` 后的调用名，`goto` 合成 `goto_<label>`）、`@progmune`/`@protocol` 注解与 `@purpose/@tags/@requires/@produces/@useWhen/@inputs/@outputs` 文档标签（C 注释块镜像 Python 装饰器语法）；注释/字符串感知的括号计数（修复 v2 提取器已知缺口，未改动 `sequence-extractor`——C 金标基准管线保持不动）
 - **`LANGUAGE_EXTRACTORS` 注册 `c`**（detect `.c`/`.h`，extract `extractIRC`）——agent 循环、execute() 的 ir.json 写入与 MCP 自动生效；C 项目从纯正则回退切换到 IR-first 序列验证 + SSG 状态机，C 函数名进入词段匹配门控（仅项目函数）；协议行与 protocols.json 规则名（`verify_password` 等）按名命中
 - **端到端验证**：临时 C 项目上 extractProjectIR → evaluateTrust 走通——4 条植入违规全部精确定位（内置 auth×2 / db×1 + 自定义 pay 命名空间注解×1），合法链零误报（NEEDS_REVIEW 72 分）；**应用级 C 金标 v1**（`blind-benchmark/scan-protocol-c-app.ts`，镜像 Python 盲测方法学）：10 clean × 7 违规 → **P=87.5% / R=100% / F1=93.3%**（唯一 FP 为跨函数窗口边界，与 Python 盲测 T2×S5 同类）
-- **规模化提取**（`blind-benchmark/scan-protocol-c.ts`）：6 个 vendored 仓库（curl 4192 / libssh 3689 / nginx 2970 / openssl 14394 / nghttp2 1274 / redis 9590 函数）秒级提取，黄金函数恢复率 81–99%；旧 TLS 级金标上 SSG 命中 0/38（口径差异：SSG 无 TLS 规则，如实记录）；nginx 3 FP 为 `ngx_*` 前缀包装器撞词段匹配（引擎层问题，记录待议，未动 SSG 桥避免 TS/Python 漂移）
+- **规模化提取**（`blind-benchmark/scan-protocol-c.ts`）：6 个 vendored 仓库（curl 5068 / libssh 3989 / nginx 3199 / openssl 15896 / nghttp2 1315 / redis 10170 函数，3.7.4 发布时代码状态——后续版本口径见 3.7.5）秒级提取，黄金函数恢复率 89–100%；旧 TLS 级金标上 SSG 命中 0/38（口径差异：SSG 无 TLS 规则，如实记录）；nginx 3 FP 为 `ngx_*` 前缀包装器撞词段匹配（引擎层问题，记录待议，未动 SSG 桥避免 TS/Python 漂移）
 - **修复：签名正则指数级回溯**——v2 风格类型 token 循环对 `name = ssh_userauth_kbdint_getname(...)` 类行穷举标识符切分（44 字符缓冲 ~11s），改为候选迭代（跳过关键字/类型名候选，返回类型从缓冲区前缀推导）；libssh 提取 >15min（病态）→ 1.8s，回归测试已加
 - **评审修复轮（detect/extract 口径、死代码、TU 绑定等）**：①`hasSourceFiles` SKIP_DIRS 补 `benchmarks`（与 extract 口径一致，本仓库自身不再误标 C）；②`#if 0` 死代码块预处理剥离（真实仓库不平衡花括号不再腐蚀函数体计数）；③顶层 `#` 行只跳自身不再吞相邻函数（openssl 14,394→15,896 函数，黄金函数恢复率升至 89–100%）；④`buildCallSequences` 同文件定义优先绑定（跨文件同名 static 不再 last-wins 错绑，入口判定文件化；Python 盲测 v1.2 复测零漂移——报告与基线逐字节一致仅时间戳不同）；⑤提取器取消调用去重（状态机重复调用有语义，双 close/重复 logout 可检出，与 TS/Python 提取器一致）；⑥删死代码 `isCProject`；⑦混合 TS+C 项目回归测试。应用级 C 金标扩至 v2（11 clean × 11 违规 + helper 中介风格 + 逐命名空间分解）：**TP 11/11 FP 1 FN 0 → P=91.7% / R=100% / F1=95.7%**（唯一 FP 为 do_logout 跨函数窗口边界）。已知系统性风险文档化：C 前缀包装器（`ngx_*` 等）撞词段匹配（nginx 3 FP），缓解方案（前缀剥离/连续词段）留待下一轮并强制盲测复跑
 - **限制如实记录**：函数指针分发静态不可见（L3 结论不变）、宏/K&R/C++ 不解析、无数据流/指针分析（L4 无计划）；提取器遍历跳过 vendored `benchmarks/`；`docs/c-language-status.md` 已更新（新路线小节 + 基准结果 + Decision record）

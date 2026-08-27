@@ -154,7 +154,7 @@ Progmune 对能验证什么、不能验证什么保持诚实。
 
 ### C（IR 提取 + 应用级协议验证——研究状态）
 
-3.7.4 起 C 拥有多语言注册表中的 IR 提取器：C 项目进入 IR-first 序列验证 + SSG 状态机。应用级协议生命周期（认证/数据库/文件/支付）在 C 上可验证——应用级金标 v2：**11/11 违规全检出（召回 100%）、1 误报、F1=95.7%**；提取规模化至每仓库 1 万+ 函数、秒级完成、黄金函数恢复率 89–100%（curl/libssh/nginx/openssl/nghttp2/redis）。两条边界不变：旧正则口径黄金基准 F1=16.5% 测的是 **TLS 级误用**（SSG 无 TLS 状态机，该口径不变）；L3/L4 结论维持（函数指针分发静态不可见；无指针/CFG 分析计划）。详见 [C 语言状态](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md)。
+3.7.4 起 C 拥有多语言注册表中的 IR 提取器：C 项目进入 IR-first 序列验证 + SSG 状态机。应用级协议生命周期（认证/数据库/文件/支付）在 C 上可验证——应用级金标 v2：**11/11 违规全检出（召回 100%）、1 误报、F1=95.7%**；注解驱动验证在真实 redis ACL 代码上走通（demo-real-c-redis）。提取覆盖大型真实仓库（openssl 15.5k / redis 5.7k / curl 4.2k 函数，秒级，黄金函数恢复率 97–100%）。两条边界不变：旧正则口径黄金基准 F1=16.5% 测的是 **TLS 级误用**（SSG 无 TLS 状态机，该口径不变）；L3/L4 结论维持（函数指针分发静态不可见；无指针/CFG 分析计划）。详见 [C 语言状态](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md)。
 
 ### P0-P3 规则注入（2026-08）
 

@@ -18,9 +18,19 @@ export interface CallSequence {
   calls: string[];
   file: string;
   function?: string;
+  /** 展开被调用预算截断（真实 C 巨型函数的宽度爆炸可达百万级调用）——
+   *  序列尾部的违规不可见，是诚实的召回边界，非静默回归 */
+  truncated?: boolean;
 }
 
 const MAX_DEPTH = 4;
+
+/**
+ * 每序列调用预算上限。真实语料实测：Python 盲测语料 350 序列最大 23、
+ * TS 自身 IR 469 序列最大 824——2,000 对现有语料零影响；C 巨型函数
+ * （openssl 单序列可达 1M+ 调用）在预算处截断。
+ */
+export const MAX_SEQUENCE_CALLS = 2000;
 
 /** 项目函数判定：有真实文件且非外部导入条目（external 条目无函数体可内联）。 */
 export function isProjectFn(f: FunctionInfo): boolean {
@@ -58,7 +68,11 @@ export function collectProjectFunctionNames(ir: FunctionInfo[]): Set<string> {
  *   （其调用名保留给规则匹配），不内联其函数体——否则 create_session 等
  *   规则函数的平凡函数体会把调用名"吞掉"
  */
-export function buildCallSequences(ir: FunctionInfo[], keepNames?: Set<string>): CallSequence[] {
+export function buildCallSequences(
+  ir: FunctionInfo[],
+  keepNames?: Set<string>,
+  maxCalls: number = MAX_SEQUENCE_CALLS,
+): CallSequence[] {
   // 全局按名回退 + 同文件优先映射：C 中跨文件同名 static 函数极常见
   // （每个 .c 都有 static cleanup/helper），名字级 Map 会让 last-wins 的
   // 定义绑定到错误的调用方。同翻译单元（文件）定义优先解析——
@@ -90,11 +104,17 @@ export function buildCallSequences(ir: FunctionInfo[], keepNames?: Set<string>):
     }
   }
 
+  /** 调用预算：预算制展开——入口自身调用按序优先，预算耗尽即停（截断），
+   *  不在事后截断百万级序列（内存/时间双浪费） */
+  const budget = { left: maxCalls, truncated: false };
+
   /** 展开函数体内的调用（入口序列 = 函数体调用，不含函数自己的名字） */
   const expandBody = (fn: FunctionInfo, depth: number, visiting: Set<string>): string[] => {
+    if (budget.left <= 0) { budget.truncated = true; return []; }
     const out: string[] = [];
     for (const c of fn.calls || []) {
       if (typeof c !== "string" || c.startsWith("__progmune_")) continue;
+      if (budget.left <= 0) { budget.truncated = true; return out; }
       out.push(...expandCall(c, depth, visiting, fn.file));
     }
     return out;
@@ -103,12 +123,19 @@ export function buildCallSequences(ir: FunctionInfo[], keepNames?: Set<string>):
   const expandCall = (name: string, depth: number, visiting: Set<string>, fromFile: string): string[] => {
     if (depth > MAX_DEPTH || visiting.has(name)) return [];
     const fn = resolveCall(fromFile, name);
-    // 外部调用或规则函数：调用名保留给匹配层，不内联
-    if (!fn || (keepNames && keepNames.has(name))) return [name];
+    // 外部调用或规则函数：调用名保留给匹配层，不内联（记 1 个调用）
+    if (!fn || (keepNames && keepNames.has(name))) {
+      budget.left--;
+      return [name];
+    }
     // 叶子函数（函数体只调外部原语）是协议原语或叶子 helper：
     // 保留名字，不内联——否则 S5 改名协议函数的平凡函数体会吞掉调用名
     const hasProjectCalls = (fn.calls || []).some((c) => resolveCall(fn.file, c));
-    if (!hasProjectCalls) return [name];
+    if (!hasProjectCalls) {
+      budget.left--;
+      return [name];
+    }
+    // 内联：函数体自身的调用在递归内各自记账
     visiting.add(name);
     const out = expandBody(fn, depth + 1, visiting);
     visiting.delete(name);
@@ -120,9 +147,11 @@ export function buildCallSequences(ir: FunctionInfo[], keepNames?: Set<string>):
     if (!isProjectFn(f)) continue;
     if (calledBy.has(fnKey(f.file, f.name))) continue; // 非入口：片段并入调用方
     if (keepNames && keepNames.has(f.name)) continue; // 协议原语不是入口：只在调用链内验证
+    budget.left = maxCalls;
+    budget.truncated = false;
     const calls = expandBody(f, 0, new Set());
     if (calls.length === 0) continue;
-    sequences.push({ calls, file: f.file, function: f.name });
+    sequences.push({ calls, file: f.file, function: f.name, truncated: budget.truncated || undefined });
   }
   return sequences;
 }

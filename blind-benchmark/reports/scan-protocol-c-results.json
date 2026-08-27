@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-26T16:31:24.344Z",
+  "generated": "2026-08-27T13:13:24.745Z",
   "method": "extractIRC + buildCallSequences + validateSequenceWithSSG（IR-first 确定性，无 LLM）",
   "baseline": {
     "f1": 16.5,
@@ -18,11 +18,11 @@
   "repos": [
     {
       "repo": "curl",
-      "irFunctions": 5068,
-      "irWithCalls": 4661,
+      "irFunctions": 4229,
+      "irWithCalls": 3845,
       "goldFunctions": 100,
       "recovered": 97,
-      "extractMs": 2387,
+      "extractMs": 2191,
       "direct": {
         "labeled": 85,
         "positives": 24,
@@ -36,7 +36,7 @@
       },
       "directFlags": [],
       "production": {
-        "sequenceCount": 1553,
+        "sequenceCount": 888,
         "flaggedGold": [
           {
             "function": "telnet_do",
@@ -57,11 +57,11 @@
     },
     {
       "repo": "libssh",
-      "irFunctions": 3989,
-      "irWithCalls": 3705,
+      "irFunctions": 2129,
+      "irWithCalls": 1844,
       "goldFunctions": 100,
       "recovered": 97,
-      "extractMs": 1344,
+      "extractMs": 1094,
       "direct": {
         "labeled": 47,
         "positives": 14,
@@ -75,7 +75,7 @@
       },
       "directFlags": [],
       "production": {
-        "sequenceCount": 2018,
+        "sequenceCount": 538,
         "flaggedGold": []
       }
     },
@@ -85,7 +85,7 @@
       "irWithCalls": 2903,
       "goldFunctions": 100,
       "recovered": 89,
-      "extractMs": 1264,
+      "extractMs": 1816,
       "direct": {
         "labeled": 50,
         "positives": 0,
@@ -138,11 +138,11 @@
     },
     {
       "repo": "openssl",
-      "irFunctions": 15896,
-      "irWithCalls": 13848,
+      "irFunctions": 15539,
+      "irWithCalls": 12972,
       "goldFunctions": 100,
-      "recovered": 98,
-      "extractMs": 6965,
+      "recovered": 99,
+      "extractMs": 7004,
       "direct": {
         "labeled": 100,
         "positives": 0,
@@ -156,17 +156,17 @@
       },
       "directFlags": [],
       "production": {
-        "sequenceCount": 6368,
+        "sequenceCount": 4740,
         "flaggedGold": []
       }
     },
     {
       "repo": "nghttp2",
-      "irFunctions": 1315,
-      "irWithCalls": 956,
+      "irFunctions": 992,
+      "irWithCalls": 656,
       "goldFunctions": 100,
       "recovered": 100,
-      "extractMs": 733,
+      "extractMs": 766,
       "direct": {
         "labeled": 100,
         "positives": 0,
@@ -180,17 +180,17 @@
       },
       "directFlags": [],
       "production": {
-        "sequenceCount": 399,
+        "sequenceCount": 232,
         "flaggedGold": []
       }
     },
     {
       "repo": "redis",
-      "irFunctions": 10170,
-      "irWithCalls": 9245,
+      "irFunctions": 5723,
+      "irWithCalls": 5142,
       "goldFunctions": 100,
       "recovered": 99,
-      "extractMs": 2793,
+      "extractMs": 1723,
       "direct": {
         "labeled": 50,
         "positives": 0,
@@ -204,7 +204,7 @@
       },
       "directFlags": [],
       "production": {
-        "sequenceCount": 3392,
+        "sequenceCount": 1344,
         "flaggedGold": []
       }
     }

@@ -246,7 +246,7 @@ const NAMESPACE_RULE_HINTS: Record<string, RuleKeywordHint[]> = {
  *   "bcrypt.hashPassword" → "hash_password"
  *   "SSL_CTX_new" → "ssl_ctx_new"
  */
-function normalizeName(name: string): string {
+export function normalizeName(name: string): string {
   // Split on dots, take the last segment
   const segments = name.split(".");
   const last = segments[segments.length - 1];
@@ -520,6 +520,8 @@ export function validateSequenceWithSSG(
             rejection.currentState,
             rejection.requiredState,
           );
+          // 修复路径渲染真实函数名：项目注解原语的 displayName 优先于通用规则名
+          fixPath = fixPath.map((n) => rules.get(n)?.displayName ?? n);
         } catch {
           fixPath = rejection.missingFunctions || [];
         }
@@ -582,19 +584,21 @@ export function validateSequenceWithSSG(
     if (!cur.includes(hs.state)) continue;
 
     violatedCalls++;
+    // 释放函数渲染真实名（项目注解原语的 displayName 优先）
+    const releaseDisplay = rules.get(hs.releaseFn)?.displayName ?? hs.releaseFn;
     violations.push({
       callName: "(end-of-sequence)",
       namespace: hs.namespace,
       currentState: cur,
       requiredState: [],
-      fixPath: [hs.releaseFn],
+      fixPath: [releaseDisplay],
       matchedRule: hs.releaseFn,
       endState: true,
       explanation:
         `SSG end-state violation: resource state [${hs.state}] ` +
         `acquired in this function is still held at end of sequence ` +
         `(namespace ${hs.namespace}, current [${cur.join(", ")}]) — ` +
-        `missing release call: ${hs.releaseFn}.`,
+        `missing release call: ${releaseDisplay}.`,
     });
     trace.push({
       call: "(end-of-sequence)",

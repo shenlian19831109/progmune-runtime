@@ -1,0 +1,359 @@
+{
+  "generated": "2026-08-27T13:12:52.029Z",
+  "method": "extractIRC + buildCallSequences + validateSequenceWithSSG（生产管线，词段门控开，无 LLM）",
+  "repos": [
+    {
+      "repo": "libssh",
+      "flags": [
+        {
+          "file": "src/pcap.c",
+          "function": "ssh_pcap_file_free",
+          "callName": "ssh_pcap_file_close",
+          "matchedRule": "close_file",
+          "strategy": "word-segment",
+          "currentState": [
+            "IDLE"
+          ],
+          "requiredState": [
+            "FILE_OPEN"
+          ],
+          "reason": "SSG state violation: \"ssh_pcap_file_close\" (mapped to \"close_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+        }
+      ],
+      "sequences": 538,
+      "functions": 2129
+    },
+    {
+      "repo": "redis",
+      "flags": [],
+      "sequences": 1344,
+      "functions": 5723
+    },
+    {
+      "repo": "nginx",
+      "flags": [
+        {
+          "file": "src/stream/ngx_stream_log_module.c",
+          "function": "ngx_stream_log_handler",
+          "callName": "(end-of-sequence)",
+          "matchedRule": "close_file",
+          "strategy": "endState",
+          "currentState": [
+            "FILE_OPEN",
+            "IDLE"
+          ],
+          "requiredState": [],
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        },
+        {
+          "file": "src/os/win32/ngx_files.c",
+          "function": "ngx_read_file",
+          "callName": "ReadFile",
+          "matchedRule": "read_file",
+          "strategy": "keyword",
+          "currentState": [
+            "IDLE"
+          ],
+          "requiredState": [
+            "FILE_OPEN"
+          ],
+          "reason": "SSG state violation: \"ReadFile\" (mapped to \"read_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+        },
+        {
+          "file": "src/os/win32/ngx_files.c",
+          "function": "ngx_write_chain_to_file",
+          "callName": "WriteFile",
+          "matchedRule": "write_file",
+          "strategy": "keyword",
+          "currentState": [
+            "IDLE"
+          ],
+          "requiredState": [
+            "FILE_OPEN"
+          ],
+          "reason": "SSG state violation: \"WriteFile\" (mapped to \"write_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+        },
+        {
+          "file": "src/os/win32/ngx_files.c",
+          "function": "ngx_write_fd",
+          "callName": "WriteFile",
+          "matchedRule": "write_file",
+          "strategy": "keyword",
+          "currentState": [
+            "IDLE"
+          ],
+          "requiredState": [
+            "FILE_OPEN"
+          ],
+          "reason": "SSG state violation: \"WriteFile\" (mapped to \"write_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+        },
+        {
+          "file": "src/http/ngx_http_script.c",
+          "function": "ngx_http_script_file_code",
+          "callName": "(end-of-sequence)",
+          "matchedRule": "close_file",
+          "strategy": "endState",
+          "currentState": [
+            "FILE_OPEN",
+            "IDLE"
+          ],
+          "requiredState": [],
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        },
+        {
+          "file": "src/http/modules/ngx_http_flv_module.c",
+          "function": "ngx_http_flv_handler",
+          "callName": "(end-of-sequence)",
+          "matchedRule": "close_file",
+          "strategy": "endState",
+          "currentState": [
+            "FILE_OPEN",
+            "IDLE"
+          ],
+          "requiredState": [],
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        },
+        {
+          "file": "src/http/modules/ngx_http_gzip_static_module.c",
+          "function": "ngx_http_gzip_static_handler",
+          "callName": "(end-of-sequence)",
+          "matchedRule": "close_file",
+          "strategy": "endState",
+          "currentState": [
+            "FILE_OPEN",
+            "IDLE"
+          ],
+          "requiredState": [],
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        },
+        {
+          "file": "src/http/modules/ngx_http_index_module.c",
+          "function": "ngx_http_index_handler",
+          "callName": "(end-of-sequence)",
+          "matchedRule": "close_file",
+          "strategy": "endState",
+          "currentState": [
+            "FILE_OPEN",
+            "IDLE"
+          ],
+          "requiredState": [],
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        },
+        {
+          "file": "src/http/modules/ngx_http_log_module.c",
+          "function": "ngx_http_log_handler",
+          "callName": "(end-of-sequence)",
+          "matchedRule": "close_file",
+          "strategy": "endState",
+          "currentState": [
+            "FILE_OPEN",
+            "IDLE"
+          ],
+          "requiredState": [],
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        },
+        {
+          "file": "src/http/modules/ngx_http_mp4_module.c",
+          "function": "ngx_http_mp4_handler",
+          "callName": "(end-of-sequence)",
+          "matchedRule": "close_file",
+          "strategy": "endState",
+          "currentState": [
+            "FILE_OPEN",
+            "IDLE"
+          ],
+          "requiredState": [],
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        },
+        {
+          "file": "src/http/modules/ngx_http_static_module.c",
+          "function": "ngx_http_static_handler",
+          "callName": "(end-of-sequence)",
+          "matchedRule": "close_file",
+          "strategy": "endState",
+          "currentState": [
+            "FILE_OPEN",
+            "IDLE"
+          ],
+          "requiredState": [],
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        },
+        {
+          "file": "src/core/ngx_open_file_cache.c",
+          "function": "ngx_open_file_cache_cleanup",
+          "callName": "(end-of-sequence)",
+          "matchedRule": "close_file",
+          "strategy": "endState",
+          "currentState": [
+            "FILE_OPEN",
+            "IDLE"
+          ],
+          "requiredState": [],
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        },
+        {
+          "file": "src/core/ngx_open_file_cache.c",
+          "function": "ngx_open_file_cleanup",
+          "callName": "(end-of-sequence)",
+          "matchedRule": "close_file",
+          "strategy": "endState",
+          "currentState": [
+            "FILE_OPEN",
+            "IDLE"
+          ],
+          "requiredState": [],
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        },
+        {
+          "file": "src/core/ngx_open_file_cache.c",
+          "function": "ngx_open_file_cache_remove",
+          "callName": "(end-of-sequence)",
+          "matchedRule": "close_file",
+          "strategy": "endState",
+          "currentState": [
+            "FILE_OPEN",
+            "IDLE"
+          ],
+          "requiredState": [],
+          "reason": "SSG end-state violation: resource state [FILE_OPEN] acquired in this function is still held at end of sequence (namespace file, current [FILE_OPEN, IDLE]) — missing release call: close_file."
+        }
+      ],
+      "sequences": 1362,
+      "functions": 3199
+    },
+    {
+      "repo": "openssl",
+      "flags": [
+        {
+          "file": "include/internal/common.h",
+          "function": "ossl_assert_int",
+          "callName": "WriteFile",
+          "matchedRule": "write_file",
+          "strategy": "keyword",
+          "currentState": [
+            "IDLE"
+          ],
+          "requiredState": [
+            "FILE_OPEN"
+          ],
+          "reason": "SSG state violation: \"WriteFile\" (mapped to \"write_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+        },
+        {
+          "file": "engines/e_dasync.c",
+          "function": "dasync_sha1_init",
+          "callName": "WriteFile",
+          "matchedRule": "write_file",
+          "strategy": "keyword",
+          "currentState": [
+            "IDLE"
+          ],
+          "requiredState": [
+            "FILE_OPEN"
+          ],
+          "reason": "SSG state violation: \"WriteFile\" (mapped to \"write_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+        },
+        {
+          "file": "engines/e_dasync.c",
+          "function": "dasync_sha1_init",
+          "callName": "ReadFile",
+          "matchedRule": "read_file",
+          "strategy": "keyword",
+          "currentState": [
+            "IDLE"
+          ],
+          "requiredState": [
+            "FILE_OPEN"
+          ],
+          "reason": "SSG state violation: \"ReadFile\" (mapped to \"read_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+        },
+        {
+          "file": "engines/e_dasync.c",
+          "function": "dasync_sha1_update",
+          "callName": "WriteFile",
+          "matchedRule": "write_file",
+          "strategy": "keyword",
+          "currentState": [
+            "IDLE"
+          ],
+          "requiredState": [
+            "FILE_OPEN"
+          ],
+          "reason": "SSG state violation: \"WriteFile\" (mapped to \"write_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+        },
+        {
+          "file": "engines/e_dasync.c",
+          "function": "dasync_sha1_update",
+          "callName": "ReadFile",
+          "matchedRule": "read_file",
+          "strategy": "keyword",
+          "currentState": [
+            "IDLE"
+          ],
+          "requiredState": [
+            "FILE_OPEN"
+          ],
+          "reason": "SSG state violation: \"ReadFile\" (mapped to \"read_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+        },
+        {
+          "file": "engines/e_dasync.c",
+          "function": "dasync_sha1_final",
+          "callName": "WriteFile",
+          "matchedRule": "write_file",
+          "strategy": "keyword",
+          "currentState": [
+            "IDLE"
+          ],
+          "requiredState": [
+            "FILE_OPEN"
+          ],
+          "reason": "SSG state violation: \"WriteFile\" (mapped to \"write_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+        },
+        {
+          "file": "engines/e_dasync.c",
+          "function": "dasync_sha1_final",
+          "callName": "ReadFile",
+          "matchedRule": "read_file",
+          "strategy": "keyword",
+          "currentState": [
+            "IDLE"
+          ],
+          "requiredState": [
+            "FILE_OPEN"
+          ],
+          "reason": "SSG state violation: \"ReadFile\" (mapped to \"read_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+        },
+        {
+          "file": "crypto/bio/bss_file.c",
+          "function": "file_puts",
+          "callName": "file_write",
+          "matchedRule": "write_file",
+          "strategy": "word-segment",
+          "currentState": [
+            "IDLE"
+          ],
+          "requiredState": [
+            "FILE_OPEN"
+          ],
+          "reason": "SSG state violation: \"file_write\" (mapped to \"write_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
+        },
+        {
+          "file": "apps/lib/apps.c",
+          "function": "WIN32_rename",
+          "callName": "DeleteFile",
+          "matchedRule": "delete_file",
+          "strategy": "keyword",
+          "currentState": [
+            "UNAUTHENTICATED"
+          ],
+          "requiredState": [
+            "FILE_STORED",
+            "FILE_REFERENCED"
+          ],
+          "reason": "SSG state violation: \"DeleteFile\" (mapped to \"delete_file\") requires states [FILE_STORED, FILE_REFERENCED] but current file_upload state is [UNAUTHENTICATED]. Fix path: receive_upload → validate_file → store_file → reference_file"
+        }
+      ],
+      "sequences": 4740,
+      "functions": 15539
+    }
+  ]
+}

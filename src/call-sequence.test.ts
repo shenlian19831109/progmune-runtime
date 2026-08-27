@@ -90,6 +90,50 @@ describe("buildCallSequences（文件级绑定）", () => {
   });
 });
 
+describe("buildCallSequences（调用预算 / 截断，兆级序列防护）", () => {
+  it("超预算截断：序列长度 = maxCalls，truncated 标记", () => {
+    const ext = Array.from({ length: 15 }, (_, i) => `ext_${i}`);
+    const ir = [fn("entry", "a.c", ext)];
+    const seqs = buildCallSequences(ir, undefined, 10);
+    expect(seqs).toHaveLength(1);
+    expect(seqs[0].calls).toHaveLength(10);
+    expect(seqs[0].calls).toEqual(ext.slice(0, 10)); // 入口自身调用按序优先
+    expect(seqs[0].truncated).toBe(true);
+  });
+
+  it("预算内序列：无 truncated 标记（现有语料零影响）", () => {
+    const ir = [fn("entry", "a.c", ["g", "h"])];
+    const seqs = buildCallSequences(ir, undefined, 2000);
+    expect(seqs).toHaveLength(1);
+    expect(seqs[0].calls).toEqual(["g", "h"]);
+    expect(seqs[0].truncated).toBeUndefined();
+  });
+
+  it("内联超预算：已发出的调用保留，入口后续调用被截（召回边界语义）", () => {
+    const bigBody = Array.from({ length: 20 }, (_, i) => `big_call_${i}`);
+    const ir = [
+      fn("helper", "a.c", ["ext"]), // 项目函数：big 因调它而可内联（叶子规则）
+      fn("big", "a.c", ["helper", ...bigBody]),
+      fn("entry", "a.c", ["big", "tail_call"]),
+    ];
+    const seqs = buildCallSequences(ir, undefined, 5);
+    expect(seqs).toHaveLength(1);
+    expect(seqs[0].calls).toEqual(["helper", "big_call_0", "big_call_1", "big_call_2", "big_call_3"]);
+    expect(seqs[0].truncated).toBe(true);
+  });
+
+  it("多入口各自独立预算", () => {
+    const ext = Array.from({ length: 8 }, (_, i) => `ext_${i}`);
+    const ir = [fn("e1", "a.c", ext), fn("e2", "b.c", ext)];
+    const seqs = buildCallSequences(ir, undefined, 5);
+    expect(seqs).toHaveLength(2);
+    for (const s of seqs) {
+      expect(s.calls).toHaveLength(5);
+      expect(s.truncated).toBe(true);
+    }
+  });
+});
+
 describe("collectProjectFunctionNames", () => {
   it("全名/裸名/小写三形态收录", () => {
     const ir = [fn("FlowService.svc_x", "a.ts", [])];

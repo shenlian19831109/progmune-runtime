@@ -357,6 +357,25 @@ int g(void) { return 1; }
     expect(ir.map((x) => x.name)).toEqual(["f", "g"]);
   });
 
+  it("非生产表面目录被跳过：tests/examples/deps 与测试文件名（Python 先例同款）", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pm-surface-"));
+    try {
+      fs.writeFileSync(path.join(dir, "main.c"), "void prod(void) {}\n");
+      fs.mkdirSync(path.join(dir, "tests"), { recursive: true });
+      fs.writeFileSync(path.join(dir, "tests", "torture_x.c"), "void in_tests(void) {}\n");
+      fs.mkdirSync(path.join(dir, "examples"), { recursive: true });
+      fs.writeFileSync(path.join(dir, "examples", "demo.c"), "void in_examples(void) {}\n");
+      fs.mkdirSync(path.join(dir, "deps", "vendor_lib"), { recursive: true });
+      fs.writeFileSync(path.join(dir, "deps", "vendor_lib", "lib.c"), "void in_deps(void) {}\n");
+      fs.writeFileSync(path.join(dir, "helper_test.c"), "void testfile(void) {}\n");
+
+      const ir = extractIRC(dir);
+      expect(ir.map((f) => f.name)).toEqual(["prod"]);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("#if 0 死代码块被剥离：体内不平衡花括号不腐蚀计数", () => {
     const ir = parse(`
 void f(void) {
@@ -396,5 +415,26 @@ void after(void) { h(); }
 `);
     expect(ir.map((x) => x.name)).toEqual(["maybe_live", "after"]);
     expect(fn(ir, "maybe_live").calls).toEqual(["g"]);
+  });
+});
+
+describe("extract-ir-c pointer-return regression", () => {
+  it("单行指针返回函数必须被提取（char */SSL */const char */FILE * 等）", () => {
+    const src = [
+      "int a(void) { return 1; }",
+      "char *b(void) { return 0; }",
+      "SSL *c(SSL_CTX *ctx) { return 0; }",
+      "const char *d(int x) { return 0; }",
+      "static FILE *f(void) { return 0; }",
+      "int (*handler)(int) { return 0; }",
+    ].join("\n");
+    const fns = parseCSource(src, "ptr.c", "/");
+    const names = fns.map((f) => f.name);
+    expect(names).toEqual(expect.arrayContaining(["b", "c", "d", "f"]));
+    // 函数指针变量不是函数定义
+    expect(names).not.toContain("handler");
+    // 返回类型保留指针
+    const c = fns.find((f) => f.name === "c");
+    expect(c?.returnType).toBe("SSL *");
   });
 });

@@ -10,6 +10,10 @@ export interface StateAnnotation {
    *  Format: "library.function" (e.g., "bcrypt.compare", "jwt.sign", "fs.openSync").
    *  Used by the SSG bridge for exact-match call→rule inference. */
   aliases?: string[];
+  /** 项目注解原语的真实函数名（注解合并时设置）。修复路径渲染时优先展示
+   *  真实名字而非通用规则名（如 checkPasswordBasedAuth 而非 verify_token）；
+   *  BFS 展开时项目原语优先（stable sort，无 displayName 时顺序不变）。 */
+  displayName?: string;
 }
 
 export interface FunctionProtocol {
@@ -220,6 +224,13 @@ export function findFixPathStatic(
       nsFuncs.push({ name: fn, rule });
     }
   }
+  // 项目注解原语优先展开（修复路径输出真实函数名而非通用规则名）；
+  // stable sort：无 displayName 的规则（内置/TS/Python 惯例）相对顺序不变
+  nsFuncs.sort((a, b) => {
+    const pa = a.rule.displayName ? 0 : 1;
+    const pb = b.rule.displayName ? 0 : 1;
+    return pa - pb;
+  });
 
   // BFS
   const startKey = [...new Set(current)].sort().join(",");

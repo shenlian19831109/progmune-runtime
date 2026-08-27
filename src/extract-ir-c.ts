@@ -33,6 +33,24 @@ const SKIP_DIRS = new Set([
   "__pycache__", "venv", ".venv", "benchmarks",
 ]);
 
+/**
+ * 非生产表面目录（与 tools/extract_ir.py 的 Python 先例对齐：
+ * "Skip test files — tests are not production surface for a security
+ * scanner"）：安全扫描只看随产品发布的生产代码路径。真实 C 仓库验证
+ * （libssh/redis/nginx，scan-real-c.ts）中 65/79 条误报来自 tests/
+ * examples/ 与 vendored deps/（jemalloc）。
+ */
+const NON_SURFACE_DIRS = new Set([
+  "tests", "test", "examples", "docs", "docs_src", "scripts",
+  "deps", "vendor", "third_party",
+]);
+
+/** 测试文件名模式（test_*.c / *_test.c / *_test.h，Python 先例同款） */
+function isTestFilename(name: string): boolean {
+  const base = name.replace(/\.[^.]+$/, "");
+  return base.startsWith("test_") || base.endsWith("_test");
+}
+
 /** Copied from sequence-extractor.ts:107-111 (kept local — decoupled benchmark path must not change). */
 const C_KEYWORDS = new Set([
   "if", "for", "while", "switch", "return", "sizeof", "typeof",
@@ -297,8 +315,12 @@ function stripAttributes(s: string): { text: string; origIndex: number[] } {
  * type-name candidates, and derive the return type from the buffer text
  * BEFORE the chosen candidate. `[^;]*?` keeps the params scan bounded.
  * Groups: 1 = name, 2 = params.
+ * Lookbehind anchor: the old `(?:^|\s)` silently dropped every single-line
+ * pointer-return definition (`char *foo(`, `SSL *foo(` — name preceded by
+ * `*`/`&`, not whitespace). `(?<![a-zA-Z0-9_])` allows those while still
+ * rejecting identifiers glued to the name.
  */
-const FUNC_CAND_RE = /(?:^|\s)([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^;]*?)\)\s*\{/g;
+const FUNC_CAND_RE = /(?<![a-zA-Z0-9_])([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^;]*?)\)\s*\{/g;
 
 /** struct/union/enum definition bodies must be skipped, not parsed as functions. */
 const STRUCT_DECL_RE = /^(?:typedef\s+)?(?:struct|union|enum)\b/;
@@ -574,8 +596,8 @@ function collectCFiles(projectRoot: string): string[] {
     for (const e of entries) {
       const full = path.join(dir, e.name);
       if (e.isDirectory()) {
-        if (!SKIP_DIRS.has(e.name) && !e.name.startsWith(".")) stack.push(full);
-      } else if (C_EXTENSIONS.has(path.extname(e.name))) {
+        if (!SKIP_DIRS.has(e.name) && !NON_SURFACE_DIRS.has(e.name) && !e.name.startsWith(".")) stack.push(full);
+      } else if (C_EXTENSIONS.has(path.extname(e.name)) && !isTestFilename(e.name)) {
         out.push(full);
       }
     }

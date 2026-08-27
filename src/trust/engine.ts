@@ -64,6 +64,7 @@ import {
   ssgViolationsToTrustViolations,
   loadProtocolRules,
   summarizeSSGCoverage,
+  normalizeName,
 } from "./ssg-bridge";
 import type { SSGValidationResult } from "./ssg-bridge";
 import { buildCallSequences, collectProjectFunctionNames } from "../call-sequence";
@@ -849,6 +850,47 @@ async function collectProtocolViolations(
     // ── SSG State Machine: load protocol rules once ──
     protocolRulesData = loadProtocolRules(ctx.projectPath);
 
+    // ── P4.5: 合并项目 IR 注解协议（IR 优先，缺 namespace 继承内置 JSON） ──
+    // 内置 protocols.json 的规则是通用弱约束（如 generate_jwt pre=[]），
+    // 项目文件里的 @protocol 注解才是项目真实协议（如 pre=[PASSWORD_VERIFIED]）。
+    // planner 已用此合并语义，trust 引擎需对齐，否则项目级前置约束不生效。
+    // 合并必须在序列构建【之前】：规则名是展开的保留单元（不内联），若合并
+    // 晚于 extractCallSequencesFromProject，注解原语（有函数体、调项目函数的）
+    // 会被内联掉，其 post 状态永不生效——真实 redis ACL 演示暴露（
+    // checkPasswordBasedAuth 被内联 → AUTHENTICATED 未建立 → good 流误报）。
+    // 与盲测 harness（scan-protocol-python）先合并后建序列的语义对齐。
+    if (protocolRulesData) {
+      try {
+        const fs = require("fs");
+        const irPath = path.join(ctx.projectPath, "ir.json");
+        if (fs.existsSync(irPath)) {
+          const ir = JSON.parse(fs.readFileSync(irPath, "utf-8"));
+          // ir.json 两种形态：extractIR/extractIRPython 的裸数组、extractProjectIR
+          // 的 { typeMap, functions } 合并对象（execute/MCP 写盘）——统一取函数列表。
+          const functions = Array.isArray(ir) ? ir : (ir.functions || []);
+          for (const f of functions) {
+            if (!f.protocol) continue;
+            const protocol = { ...f.protocol };
+            const existing = protocolRulesData.rules.get(String(f.name));
+            if (existing?.namespace && !protocol.namespace) {
+              protocol.namespace = existing.namespace;
+            }
+            // 修复路径渲染真实函数名（fixPath 输出项目原语而非通用规则名）
+            protocol.displayName = String(f.name);
+            protocolRulesData.rules.set(String(f.name), protocol);
+            // CamelCase 真实命名（C 代码普遍，如 ACLCheckAllPerm）注册的规则
+            // 原样无法被任何匹配策略触达（normalize 只作用于调用名；词段匹配
+            // 要求 ≥2 个下划线词段）——同步注册规范化形态使注解原语可被按名命中。
+            // 加性改动：snake_case 注解（TS/Python 惯例）normalized === 原名，无变化。
+            const normalized = normalizeName(String(f.name));
+            if (normalized !== String(f.name)) {
+              protocolRulesData.rules.set(normalized, protocol);
+            }
+          }
+        }
+      } catch { /* best-effort */ }
+    }
+
     // ── Phase 1-5 Semantic Pipeline ──
     // 规则名集合作为展开的保留单元：规则函数不内联（调用名保留给匹配层）
     const callSequences = extractCallSequencesFromProject(
@@ -871,32 +913,6 @@ async function collectProtocolViolations(
         projectFunctions = collectProjectFunctionNames(functions);
       }
     } catch { /* best-effort */ }
-
-    // ── P4.5: 合并项目 IR 注解协议（IR 优先，缺 namespace 继承内置 JSON） ──
-    // 内置 protocols.json 的规则是通用弱约束（如 generate_jwt pre=[]），
-    // 项目文件里的 @protocol 注解才是项目真实协议（如 pre=[PASSWORD_VERIFIED]）。
-    // planner 已用此合并语义，trust 引擎需对齐，否则项目级前置约束不生效。
-    if (protocolRulesData) {
-      try {
-        const fs = require("fs");
-        const irPath = path.join(ctx.projectPath, "ir.json");
-        if (fs.existsSync(irPath)) {
-          const ir = JSON.parse(fs.readFileSync(irPath, "utf-8"));
-          // ir.json 两种形态：extractIR/extractIRPython 的裸数组、extractProjectIR
-          // 的 { typeMap, functions } 合并对象（execute/MCP 写盘）——统一取函数列表。
-          const functions = Array.isArray(ir) ? ir : (ir.functions || []);
-          for (const f of functions) {
-            if (!f.protocol) continue;
-            const protocol = { ...f.protocol };
-            const existing = protocolRulesData.rules.get(String(f.name));
-            if (existing?.namespace && !protocol.namespace) {
-              protocol.namespace = existing.namespace;
-            }
-            protocolRulesData.rules.set(String(f.name), protocol);
-          }
-        }
-      } catch { /* best-effort */ }
-    }
 
     for (const seq of callSequences) {
       try {
