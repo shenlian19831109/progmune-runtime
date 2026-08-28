@@ -15,7 +15,7 @@ import { buildKnowledgeBase } from "./protocol-knowledge";
 import { buildEvidenceRepository } from "./evidence-repository";
 
 /** Runtime version — stable public identifier. Internal layers evolve underneath. */
-export const RUNTIME_VERSION = "3.7.8";
+export const RUNTIME_VERSION = "3.7.9";
 
 /** Stable public API — do not break. Consumers depend on this interface.
  *  This is the IR (Intermediate Representation) of Progmune Runtime.

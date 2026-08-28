@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.7.9] — 2026-08-28
+
+### Flask / Fastify / Next.js 框架结构适配（M4——框架适配 7/13）
+
+- **Flask（Python 第 3 个）**：`tools/extract_framework_flask.py`（@app.route/@bp.route + methods kwarg、认证装饰器、before_request 认证守卫、Blueprint）+ `src/frameworks/flask-detector.ts`（`FLASK_ROUTE_NO_AUTH`——mutation 路由无认证装饰器且无认证 before_request 守卫）——合成金标 4 项目 P=R=100%；vendored flask 库结构识别冒烟通过；修复 before_request 误放 Assign 节点（应为 Expr 表达式语句）
+- **Fastify（TS 第 3 个）**：`src/frameworks/fastify-detector.ts`（代码串级，镜像 express-detector——路由注册 + preHandler/preValidation 认证选项 + addHook 认证钩子；`FASTIFY_ROUTE_NO_AUTH`）；引擎冒烟：钩子保护正确识别（0 误报）；8 个单测
+- **Next.js（TS 第 4 个）**：`src/frameworks/nextjs-detector.ts`（App Router 文件级结构——route.ts 的 POST/PUT/PATCH/DELETE 导出 + next-auth/自定义认证调用 + 认证 middleware；`NEXT_ROUTE_NO_AUTH`）——7 个单测；pages/api 旧式 handler 方法不可静态区分（只计数如实）；修复注释内 `app/**/route.ts` 的 `*/` 提前终止块注释陷阱
+- **引擎接线**：collectFlaskViolations / collectFastifyViolations / collectNextjsViolations + overall 三个 coverage 字段——全部加性 best-effort；frameworks/index.ts barrel 补 5 个适配器导出
+- **验证**：新单测 21 个；全相关套件 160/160；Python 盲测 v1.2 64 零漂移；fastapi/django realworld 0 FP 保持；C 演示不变
+- **边界（如实）**：Flask 认证 before_request 按函数名词汇识别（自定义名漏判=漏报方向）；Fastify 代码串级（配置展开不可见）；Next.js 只盯 API 面（route.ts/pages-api，页面组件不检查）；npm 安装态 tools/ 不在包内→Python 框架扫描静默降级（既有遗留）
+
 ## [3.7.8] — 2026-08-28
 
 ### Django / DRF 框架结构适配（M2）——框架适配第 4 个

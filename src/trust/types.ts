@@ -138,6 +138,27 @@ export interface TrustDecision {
       filesScanned: number;
       issuesFound: number;
     };
+    /** Flask framework adapter coverage */
+    flaskCoverage?: {
+      appsDetected: number;
+      totalRoutes: number;
+      filesScanned: number;
+      issuesFound: number;
+    };
+    /** Fastify framework adapter coverage */
+    fastifyCoverage?: {
+      appsDetected: number;
+      totalRoutes: number;
+      filesScanned: number;
+      issuesFound: number;
+    };
+    /** Next.js framework adapter coverage */
+    nextjsCoverage?: {
+      appsDetected: number;
+      totalRoutes: number;
+      filesScanned: number;
+      issuesFound: number;
+    };
   };
 
   dimensions: TrustDimensions;

@@ -7,8 +7,8 @@
  * Each adapter knows the API surface of a specific framework:
  * middleware chains, route handlers, dependency injection, guards, etc.
  *
- * Current: Express.js (first adapter — broke the 0/13 gap)
- * Planned: Next.js, NestJS, Fastify, FastAPI, Django
+ * Adapters: Express, tRPC, NestJS(partial), FastAPI, Django, Flask, Fastify,
+ * Next.js (App Router) — 7 dedicated detectors.
  */
 
 export {
@@ -28,6 +28,21 @@ export type {
   ExpressAppAnalysis,
   ExpressSecurityIssue,
 } from "./express-detector";
+
+export { analyzeFastapiStructure } from "./fastapi-detector";
+export type { FastapiStructure, FastapiSecurityIssue } from "./fastapi-detector";
+
+export { analyzeDjangoStructure } from "./django-detector";
+export type { DjangoStructure, DjangoSecurityIssue } from "./django-detector";
+
+export { analyzeFlaskStructure } from "./flask-detector";
+export type { FlaskStructure, FlaskSecurityIssue } from "./flask-detector";
+
+export { analyzeFastifyApp, analyzeFastifyFile } from "./fastify-detector";
+export type { FastifyAppAnalysis, FastifySecurityIssue } from "./fastify-detector";
+
+export { analyzeNextApp, readNextMiddleware } from "./nextjs-detector";
+export type { NextAppAnalysis, NextSecurityIssue, NextRouteFile } from "./nextjs-detector";
 
 // ── Framework Version-Aware Governance ──
 

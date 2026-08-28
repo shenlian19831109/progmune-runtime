@@ -63,6 +63,9 @@ import type { CallGraphIndex } from "./call-graph-propagator";
 import type { ExpressSecurityIssue } from "../frameworks/express-detector";
 import { analyzeFastapiStructure } from "../frameworks/fastapi-detector";
 import { analyzeDjangoStructure } from "../frameworks/django-detector";
+import { analyzeFlaskStructure } from "../frameworks/flask-detector";
+import { analyzeFastifyFile } from "../frameworks/fastify-detector";
+import { analyzeNextApp, readNextMiddleware } from "../frameworks/nextjs-detector";
 import {
   validateSequenceWithSSG,
   ssgViolationsToTrustViolations,
@@ -111,6 +114,9 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
   const trpcResult = collectTRPCViolations(ctx);
   const fastapiResult = collectFastapiViolations(ctx);
   const djangoResult = collectDjangoViolations(ctx);
+  const flaskResult = collectFlaskViolations(ctx);
+  const fastifyResult = collectFastifyViolations(ctx);
+  const nextjsResult = collectNextjsViolations(ctx);
   const coverageData = collectVerificationCoverage(ctx);
   const governanceDefects = collectGovernanceDefects(ctx);
 
@@ -133,6 +139,9 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
     ...trpcResult.violations,
     ...fastapiResult.violations,
     ...djangoResult.violations,
+    ...flaskResult.violations,
+    ...fastifyResult.violations,
+    ...nextjsResult.violations,
   ];
 
   // ═══════════════════════════════════════
@@ -289,6 +298,33 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
             totalRoutes: djangoResult.coverage.routes,
             filesScanned: djangoResult.coverage.filesScanned,
             issuesFound: djangoResult.violations.length,
+          }
+        : undefined,
+      /** Flask framework adapter coverage — route/auth-guard analysis */
+      flaskCoverage: flaskResult.coverage.routes > 0
+        ? {
+            appsDetected: flaskResult.coverage.apps,
+            totalRoutes: flaskResult.coverage.routes,
+            filesScanned: flaskResult.coverage.filesScanned,
+            issuesFound: flaskResult.violations.length,
+          }
+        : undefined,
+      /** Fastify framework adapter coverage — route/auth-hook analysis */
+      fastifyCoverage: fastifyResult.coverage.routes > 0
+        ? {
+            appsDetected: fastifyResult.coverage.apps,
+            totalRoutes: fastifyResult.coverage.routes,
+            filesScanned: fastifyResult.coverage.filesScanned,
+            issuesFound: fastifyResult.violations.length,
+          }
+        : undefined,
+      /** Next.js framework adapter coverage — App Router route handler analysis */
+      nextjsCoverage: nextjsResult.coverage.routes > 0
+        ? {
+            appsDetected: nextjsResult.coverage.apps,
+            totalRoutes: nextjsResult.coverage.routes,
+            filesScanned: nextjsResult.coverage.filesScanned,
+            issuesFound: nextjsResult.violations.length,
           }
         : undefined,
     },
@@ -448,6 +484,142 @@ function mapPolicyViolation(
  * Collect Express-specific security violations from the framework detector.
  * Maps ExpressSecurityIssue[] → TrustViolation[].
  */
+function collectNextjsViolations(ctx: TrustEvaluationContext): {
+  violations: TrustViolation[];
+  coverage: { apps: number; routes: number; filesScanned: number };
+} {
+  const violations: TrustViolation[] = [];
+  const coverage = { apps: 0, routes: 0, filesScanned: 0 };
+
+  try {
+    const middlewareCode = readNextMiddleware(ctx.projectPath);
+    const analysis = analyzeNextApp(ctx.projectPath, middlewareCode);
+    if (!analysis.hasNext) return { violations, coverage };
+
+    coverage.apps = 1;
+    coverage.routes = analysis.routeFiles.length;
+    coverage.filesScanned = analysis.routeFiles.length;
+
+    for (const issue of analysis.issues) {
+      violations.push({
+        severity: issue.severity === "low" ? "low" : issue.severity,
+        rule_id: issue.rule,
+        file: issue.file || "",
+        function: "unknown",
+        message: issue.message,
+        evidence: issue.route || "",
+        why: `Framework structural analysis: ${issue.message}`,
+        fix: `Add an auth check inside the route handler (e.g. getServerSession) or protect the app with auth middleware.`,
+        policy_ref: "framework-safety.nextjs",
+      });
+    }
+  } catch { /* best-effort */ }
+
+  return { violations, coverage };
+}
+
+function collectFastifyViolations(ctx: TrustEvaluationContext): {
+  violations: TrustViolation[];
+  coverage: { apps: number; routes: number; filesScanned: number };
+} {
+  const violations: TrustViolation[] = [];
+  const coverage = { apps: 0, routes: 0, filesScanned: 0 };
+
+  try {
+    const fs = require("fs");
+    const candidateDirs = ["src", "server", "app", "api", "routes", "lib"];
+    const extensions = languageToExtensions(ctx.language);
+
+    for (const dir of candidateDirs) {
+      const dirPath = path.join(ctx.projectPath, dir);
+      if (!fs.existsSync(dirPath)) continue;
+      let files: string[];
+      try {
+        files = walkDir(dirPath, extensions, 100);
+      } catch {
+        continue;
+      }
+      for (const file of files) {
+        if (/\.(test|spec)\.(ts|tsx|js|jsx)$/.test(file)) continue;
+        coverage.filesScanned++;
+        try {
+          const analysis = analyzeFastifyFile(file);
+          if (!analysis || !analysis.hasFastify) continue;
+          coverage.apps++;
+          coverage.routes += analysis.routes.length;
+          for (const issue of analysis.issues) {
+            violations.push({
+              severity: issue.severity === "low" ? "low" : issue.severity,
+              rule_id: issue.rule,
+              file: path.relative(ctx.projectPath, file),
+              function: "unknown",
+              message: issue.message,
+              evidence: issue.route || "",
+              why: `Framework structural analysis: ${issue.message}`,
+              fix: `Add preHandler/preValidation auth to the route options, or register an auth addHook.`,
+              policy_ref: "framework-safety.fastify",
+            });
+          }
+        } catch { /* skip unreadable files */ }
+      }
+    }
+  } catch { /* best-effort */ }
+
+  return { violations, coverage };
+}
+
+function collectFlaskViolations(ctx: TrustEvaluationContext): {
+  violations: TrustViolation[];
+  coverage: { apps: number; routes: number; filesScanned: number };
+} {
+  const violations: TrustViolation[] = [];
+  const coverage = { apps: 0, routes: 0, filesScanned: 0 };
+
+  // 仅 Python 项目跑框架结构扫描
+  const lang = ctx.language || "typescript";
+  if (lang !== "python") return { violations, coverage };
+
+  try {
+    const { execSync } = require("child_process");
+    const fs = require("fs");
+    const os = require("os");
+    // engine.js 位于 dist/trust/ → 仓库根 tools/ 需要两级向上
+    const scriptPath = path.resolve(__dirname, "..", "..", "tools", "extract_framework_flask.py");
+    const outPath = path.join(os.tmpdir(), `progmune-fwfl-${process.pid}-${Date.now()}.json`);
+    execSync(`python3 "${scriptPath}" "${ctx.projectPath}" "${outPath}"`, {
+      encoding: "utf-8",
+      stdio: "pipe",
+      timeout: 60000,
+    });
+    if (!fs.existsSync(outPath)) return { violations, coverage };
+    const structure = JSON.parse(fs.readFileSync(outPath, "utf-8"));
+    fs.unlinkSync(outPath);
+
+    const analysis = analyzeFlaskStructure(structure);
+    if (!analysis.hasFlask) return { violations, coverage };
+
+    coverage.apps = (structure.apps || []).length + (structure.blueprints || []).length;
+    coverage.routes = (structure.routes || []).length;
+    coverage.filesScanned = structure.filesScanned || 0;
+
+    for (const issue of analysis.issues) {
+      violations.push({
+        severity: issue.severity === "low" ? "low" : issue.severity,
+        rule_id: issue.rule,
+        file: issue.file || "",
+        function: issue.handler || "unknown",
+        message: issue.message,
+        evidence: issue.route || "",
+        why: `Framework structural analysis: ${issue.message}`,
+        fix: `Add an auth decorator (@login_required or custom) to the route handler, or register an auth before_request guard.`,
+        policy_ref: "framework-safety.flask",
+      });
+    }
+  } catch { /* best-effort — framework analysis must never break evaluation */ }
+
+  return { violations, coverage };
+}
+
 function collectDjangoViolations(ctx: TrustEvaluationContext): {
   violations: TrustViolation[];
   coverage: { apps: number; routes: number; filesScanned: number };

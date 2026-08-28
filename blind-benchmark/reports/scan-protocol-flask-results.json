@@ -1,0 +1,65 @@
+{
+  "generated": "2026-08-28T15:10:16.895Z",
+  "method": "extract_framework_flask.py + flask-detector（确定性，无 LLM）",
+  "summary": {
+    "tp": 2,
+    "fp": 0,
+    "fn": 0,
+    "precision": 1,
+    "recall": 1
+  },
+  "rows": [
+    {
+      "id": "flask_F1_clean",
+      "gold": [],
+      "detected": [],
+      "rowTp": 0,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "flask_F1_V1",
+      "gold": [
+        {
+          "rule": "FLASK_ROUTE_NO_AUTH",
+          "handler": "transfer_money"
+        }
+      ],
+      "detected": [
+        {
+          "rule": "FLASK_ROUTE_NO_AUTH",
+          "handler": "transfer_money"
+        }
+      ],
+      "rowTp": 1,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "flask_F2_clean",
+      "gold": [],
+      "detected": [],
+      "rowTp": 0,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "flask_F2_V2",
+      "gold": [
+        {
+          "rule": "FLASK_ROUTE_NO_AUTH",
+          "handler": "transfer_money"
+        }
+      ],
+      "detected": [
+        {
+          "rule": "FLASK_ROUTE_NO_AUTH",
+          "handler": "transfer_money"
+        }
+      ],
+      "rowTp": 1,
+      "rowFp": 0,
+      "rowFn": 0
+    }
+  ]
+}

@@ -173,17 +173,20 @@ Ledger             ✅           ❌           ❌         ❌          ❌
 | Express | TS/JS | ✅ 专用检测器 | 路由提取 + 中间件分类 + 安全检查 |
 | tRPC | TS/JS | ✅ 专用检测器 | API 合约规则（3 条），与 Express detector 交叉纠正 |
 | NestJS | TS/JS | ⚠️ 部分 | @Controller/@UseGuards/@UsePipes 装饰器路由解析 |
-| Next.js | TS/JS | ⚠️ 版本感知 | 版本感知治理 |
-| Fastify 等其余 TS 框架 | TS/JS | ⚠️ 基础别名 | 库别名覆盖，无结构分析 |
+| Next.js | TS/JS | ✅ 结构分析（3.7.9） | App Router route.ts 写导出认证检查 + 认证 middleware；另有版本感知治理 |
+| Fastify | TS/JS | ✅ 结构分析（3.7.9） | 路由 preHandler/钩子认证分析（代码串级） |
+| 其余 TS 框架 | TS/JS | ⚠️ 基础别名 | 库别名覆盖，无结构分析 |
 | Django | Python | ✅ 结构分析（3.7.8） | URL 配置/CBV/DRF 结构适配：无保护 mutation 视图与 AllowAny 写端点标记（合成金标 P=R=100%；django-realworld 0 FP） |
 | FastAPI | Python | ✅ 结构分析（3.7.8） | 路由/认证依赖结构适配：写操作路由认证依赖检查 + 死认证方案标记（合成金标 P=R=100%；fastapi-realworld 0 FP） |
+| Flask | Python | ✅ 结构分析（3.7.9） | 路由/before_request 认证守卫分析（合成金标 P=R=100%） |
 | Gin / Fiber | Go | ❌ | 无 Go 支持 |
 | Spring Boot | Java | ❌ | 无 Java 支持 |
 | curl / nginx / libssh / OpenSSL | C | ✅ 有基准 | C 黄金基准（旧正则口径 F1=16.5% 为 TLS 级历史基线；3.7.4 起 IR 提取 + 应用级协议验证，金标 v2 F1=95.7%；3.7.6 起注解驱动 Beta——真实模块金标 5/5） |
 
 ```
-已适配框架        4 / 13（Express ✅、tRPC ✅、FastAPI ✅、Django ✅ 专用检测器）
-部分支持          2（NestJS 部分、Next.js 版本感知）
+已适配框架        7 / 13（Express ✅、tRPC ✅、FastAPI ✅、Django ✅、
+                  Flask ✅、Fastify ✅、Next.js ✅ 专用检测器）
+部分支持          1（NestJS 部分；Next.js 另有版本感知）
 基础别名覆盖      5 / 13（无结构分析）
 ```
 
@@ -248,7 +251,7 @@ Protocols        21 命名空间全有词汇      + OAuth2.0/OIDC、gRPC、
                                          GraphQL、WebSocket
 Languages        2 ✅ (TS, Python)        + Go ✅
                  C ✅ 注解驱动（Beta）   Java（更远期）
-Frameworks       4/13 专用检测器         Next.js/Fastify/Flask 结构适配
+Frameworks       7/13 专用检测器         Spring Boot/Go 框架结构适配
 TS P/R           100%/98.5%              稳定
 Python P/R       100%/100%               稳定
 CVE              34 (88% 检出)           100 (校准检出率)

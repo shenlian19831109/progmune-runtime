@@ -174,16 +174,18 @@ Registry-based multi-language merged extraction (`src/extract-project-ir.ts`): T
 | Express | TS/JS | ✅ Dedicated detector | Route extraction + middleware classification + security checks |
 | tRPC | TS/JS | ✅ Dedicated detector | API contract rules (3), cross-corrected with the Express detector |
 | NestJS | TS/JS | ⚠️ Partial | @Controller/@UseGuards/@UsePipes decorator route parsing |
-| Next.js | TS/JS | ⚠️ Version-aware | Version-aware governance |
-| Other TS frameworks (Fastify, …) | TS/JS | ⚠️ Basic aliases | Library alias coverage, no structural analysis |
+| Next.js | TS/JS | ✅ Structural (3.7.9) | App Router route.ts mutation-export auth checks + auth middleware; version-aware governance also exists |
+| Fastify | TS/JS | ✅ Structural (3.7.9) | Route preHandler/hook auth analysis (code-string level) |
+| Other TS frameworks | TS/JS | ⚠️ Basic aliases | Library alias coverage, no structural analysis |
 | Django | Python | ✅ Structural (3.7.8) | urlconf/CBV/DRF structural adapter: unprotected mutation views and AllowAny write endpoints flagged (synthetic gold P=R=100%; django-realworld 0 FP) |
 | FastAPI | Python | ✅ Structural (3.7.8) | Route/auth-dependency structural adapter: mutation-route auth checks + dead auth schemes (synthetic gold P=R=100%; fastapi-realworld 0 FP) |
+| Flask | Python | ✅ Structural (3.7.9) | Route/before_request auth-guard analysis (synthetic gold P=R=100%) |
 | Gin / Fiber | Go | ❌ | No Go support |
 | Spring Boot | Java | ❌ | No Java support |
 | curl / nginx / libssh / OpenSSL | C | ✅ Benchmarked | C gold benchmark (old regex-route F1=16.5% is the TLS-level historical baseline; since 3.7.4 IR extraction + app-level protocol verification, gold v2 F1=95.7%; annotation-driven Beta since 3.7.6 — real-module gold 5/5) |
 
 ```
-Dedicated detectors    4 / 13 (Express ✅, tRPC ✅, FastAPI ✅, Django ✅)
+Dedicated detectors    7 / 13 (Express ✅, tRPC ✅, FastAPI ✅, Django ✅, Flask ✅, Fastify ✅, Next.js ✅)
 Partial                2 (NestJS partial, Next.js version-aware)
 Basic alias coverage   5 / 13 (no structural analysis)
 ```
@@ -249,7 +251,7 @@ Protocols        21 namespaces, all with    + OAuth2.0/OIDC, gRPC,
                  rule vocabulary             GraphQL, WebSocket
 Languages        2 ✅ (TS, Python)          + Go ✅
                  C ✅ Annotation (Beta)     Java (further out)
-Frameworks       4/13 dedicated detectors   Next.js/Fastify/Flask structural
+Frameworks       7/13 dedicated detectors   Spring Boot/Go structural
                                             adaptation
 TS P/R           100%/98.5%                 stable
 Python P/R       100%/100%                  stable
