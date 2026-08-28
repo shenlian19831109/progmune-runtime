@@ -176,19 +176,19 @@ Registry-based multi-language merged extraction (`src/extract-project-ir.ts`): T
 | NestJS | TS/JS | ⚠️ Partial | @Controller/@UseGuards/@UsePipes decorator route parsing |
 | Next.js | TS/JS | ⚠️ Version-aware | Version-aware governance |
 | Other TS frameworks (Fastify, …) | TS/JS | ⚠️ Basic aliases | Library alias coverage, no structural analysis |
-| Django | Python | ⚠️ Basic aliases | Framework-delegation allowlist (DRF permission_classes, create_user, etc.) |
-| FastAPI | Python | ⚠️ Basic aliases | Framework-delegation allowlist (DI authorizers, create_access_token, etc.) |
+| Django | Python | ✅ Structural (3.7.8) | urlconf/CBV/DRF structural adapter: unprotected mutation views and AllowAny write endpoints flagged (synthetic gold P=R=100%; django-realworld 0 FP) |
+| FastAPI | Python | ✅ Structural (3.7.8) | Route/auth-dependency structural adapter: mutation-route auth checks + dead auth schemes (synthetic gold P=R=100%; fastapi-realworld 0 FP) |
 | Gin / Fiber | Go | ❌ | No Go support |
 | Spring Boot | Java | ❌ | No Java support |
 | curl / nginx / libssh / OpenSSL | C | ✅ Benchmarked | C gold benchmark (old regex-route F1=16.5% is the TLS-level historical baseline; since 3.7.4 IR extraction + app-level protocol verification, gold v2 F1=95.7%; annotation-driven Beta since 3.7.6 — real-module gold 5/5) |
 
 ```
-Dedicated detectors    2 / 13 (Express ✅, tRPC ✅)
+Dedicated detectors    4 / 13 (Express ✅, tRPC ✅, FastAPI ✅, Django ✅)
 Partial                2 (NestJS partial, Next.js version-aware)
 Basic alias coverage   5 / 13 (no structural analysis)
 ```
 
-> Framework adaptation is the #1 product gap: Django, FastAPI, and 8 more remain. All rules currently use `\w*` generic prefix patterns (e.g. `\b(\w*ssl\w*init)\b`) without full per-framework API adaptation.
+> Framework adaptation is the #1 product gap: FastAPI and Django are structurally adapted (3.7.8, route-level auth checks); Next.js/Fastify/Flask and 5 more remain. Adapted frameworks have dedicated structural detectors; the remaining rules still use `\w*` generic prefix patterns (e.g. `\b(\w*ssl\w*init)\b`).
 
 ---
 
@@ -210,7 +210,7 @@ Basic alias coverage   5 / 13 (no structural analysis)
 
 | Gap | Impact |
 |-----|--------|
-| Django / FastAPI structural analysis | Python is production-grade, but framework API semantics (DI, ORM query safety, DRF permission classes) have alias-level coverage only |
+| Django / FastAPI structural analysis | ✅ Adapted (3.7.8) — route-level auth checks live; ORM query safety, DI chains, serializer validation still source-level only |
 | Structural analysis for TS frameworks beyond Express | Enterprise TS projects heavily use Next.js/Fastify/NestJS — currently only partially covered |
 
 ### P1 — Language extension
@@ -249,7 +249,7 @@ Protocols        21 namespaces, all with    + OAuth2.0/OIDC, gRPC,
                  rule vocabulary             GraphQL, WebSocket
 Languages        2 ✅ (TS, Python)          + Go ✅
                  C ✅ Annotation (Beta)     Java (further out)
-Frameworks       2/13 dedicated detectors   Django/FastAPI structural
+Frameworks       4/13 dedicated detectors   Next.js/Fastify/Flask structural
                                             adaptation
 TS P/R           100%/98.5%                 stable
 Python P/R       100%/100%                  stable

@@ -1,0 +1,255 @@
+{
+  "generated": "2026-08-28T13:44:26.563Z",
+  "method": "extract_framework_py.py + fastapi-detector（确定性，无 LLM）",
+  "summary": {
+    "tp": 13,
+    "fp": 0,
+    "fn": 0,
+    "precision": 1,
+    "recall": 1
+  },
+  "rows": [
+    {
+      "id": "fastapi_S1_clean",
+      "style": "S1",
+      "variant": "clean",
+      "gold": [],
+      "detected": [],
+      "rowTp": 0,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "fastapi_S1_V1",
+      "style": "S1",
+      "variant": "V1",
+      "gold": [
+        {
+          "rule": "FASTAPI_ROUTE_NO_AUTH",
+          "handler": "create_item"
+        }
+      ],
+      "detected": [
+        {
+          "rule": "FASTAPI_ROUTE_NO_AUTH",
+          "handler": "create_item"
+        }
+      ],
+      "rowTp": 1,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "fastapi_S1_V2",
+      "style": "S1",
+      "variant": "V2",
+      "gold": [
+        {
+          "rule": "FASTAPI_DEAD_AUTH_SCHEME",
+          "handler": null
+        }
+      ],
+      "detected": [
+        {
+          "rule": "FASTAPI_DEAD_AUTH_SCHEME",
+          "handler": null
+        }
+      ],
+      "rowTp": 1,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "fastapi_S1_V1V2",
+      "style": "S1",
+      "variant": "V1V2",
+      "gold": [
+        {
+          "rule": "FASTAPI_DEAD_AUTH_SCHEME",
+          "handler": null
+        },
+        {
+          "rule": "FASTAPI_ROUTE_NO_AUTH",
+          "handler": "create_item"
+        }
+      ],
+      "detected": [
+        {
+          "rule": "FASTAPI_ROUTE_NO_AUTH",
+          "handler": "create_item"
+        },
+        {
+          "rule": "FASTAPI_DEAD_AUTH_SCHEME",
+          "handler": null
+        }
+      ],
+      "rowTp": 2,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "fastapi_S2_clean",
+      "style": "S2",
+      "variant": "clean",
+      "gold": [],
+      "detected": [],
+      "rowTp": 0,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "fastapi_S2_V1",
+      "style": "S2",
+      "variant": "V1",
+      "gold": [
+        {
+          "rule": "FASTAPI_ROUTE_NO_AUTH",
+          "handler": "create_item"
+        }
+      ],
+      "detected": [
+        {
+          "rule": "FASTAPI_ROUTE_NO_AUTH",
+          "handler": "create_item"
+        }
+      ],
+      "rowTp": 1,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "fastapi_S2_V2",
+      "style": "S2",
+      "variant": "V2",
+      "gold": [
+        {
+          "rule": "FASTAPI_DEAD_AUTH_SCHEME",
+          "handler": null
+        }
+      ],
+      "detected": [
+        {
+          "rule": "FASTAPI_DEAD_AUTH_SCHEME",
+          "handler": null
+        }
+      ],
+      "rowTp": 1,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "fastapi_S2_V1V2",
+      "style": "S2",
+      "variant": "V1V2",
+      "gold": [
+        {
+          "rule": "FASTAPI_DEAD_AUTH_SCHEME",
+          "handler": null
+        },
+        {
+          "rule": "FASTAPI_ROUTE_NO_AUTH",
+          "handler": "create_item"
+        }
+      ],
+      "detected": [
+        {
+          "rule": "FASTAPI_ROUTE_NO_AUTH",
+          "handler": "create_item"
+        },
+        {
+          "rule": "FASTAPI_DEAD_AUTH_SCHEME",
+          "handler": null
+        }
+      ],
+      "rowTp": 2,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "fastapi_S3_clean",
+      "style": "S3",
+      "variant": "clean",
+      "gold": [],
+      "detected": [],
+      "rowTp": 0,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "fastapi_S3_V1",
+      "style": "S3",
+      "variant": "V1",
+      "gold": [
+        {
+          "rule": "FASTAPI_ROUTE_NO_AUTH",
+          "handler": "create_item"
+        },
+        {
+          "rule": "FASTAPI_DEAD_AUTH_SCHEME",
+          "handler": null
+        }
+      ],
+      "detected": [
+        {
+          "rule": "FASTAPI_ROUTE_NO_AUTH",
+          "handler": "create_item"
+        },
+        {
+          "rule": "FASTAPI_DEAD_AUTH_SCHEME",
+          "handler": null
+        }
+      ],
+      "rowTp": 2,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "fastapi_S3_V2",
+      "style": "S3",
+      "variant": "V2",
+      "gold": [
+        {
+          "rule": "FASTAPI_DEAD_AUTH_SCHEME",
+          "handler": null
+        }
+      ],
+      "detected": [
+        {
+          "rule": "FASTAPI_DEAD_AUTH_SCHEME",
+          "handler": null
+        }
+      ],
+      "rowTp": 1,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "fastapi_S3_V1V2",
+      "style": "S3",
+      "variant": "V1V2",
+      "gold": [
+        {
+          "rule": "FASTAPI_DEAD_AUTH_SCHEME",
+          "handler": null
+        },
+        {
+          "rule": "FASTAPI_ROUTE_NO_AUTH",
+          "handler": "create_item"
+        }
+      ],
+      "detected": [
+        {
+          "rule": "FASTAPI_ROUTE_NO_AUTH",
+          "handler": "create_item"
+        },
+        {
+          "rule": "FASTAPI_DEAD_AUTH_SCHEME",
+          "handler": null
+        }
+      ],
+      "rowTp": 2,
+      "rowFp": 0,
+      "rowFn": 0
+    }
+  ]
+}

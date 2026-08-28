@@ -1,5 +1,33 @@
 # Changelog
 
+## [3.7.8] — 2026-08-28
+
+### Django / DRF 框架结构适配（M2）——框架适配第 4 个
+
+- **结构提取（Python AST）**：`tools/extract_framework_django.py`（与 extract_ir.py / extract_framework_py.py 解耦）——urlpatterns 解析（url()/path()/re_path() → FBV / CBV .as_view() / include）、FBV 登录装饰器（login_required/permission_required/staff_member_required/user_passes_test + 自定义 *auth* 装饰器）、CBV 基类与方法（View/generics + LoginRequiredMixin 等混入）、DRF permission_classes（AllowAny/IsAuthenticated/其他类名）与 @api_view（methods + permission_classes kwarg）
+- **检测规则**（`src/frameworks/django-detector.ts`）：
+  - `DJANGO_VIEW_NO_AUTH`——mutation 视图无保护：FBV 按动词名门控（add/create/update/delete/transfer 等——信息页 home/robots/error 不报）；CBV 按方法含写操作（post/put/patch/delete/create/update/destroy）+ 无认证装饰器/无 LoginRequiredMixin
+  - `DRF_PERMISSION_BYPASS`——DRF 视图写方法 + 显式 AllowAny / 空权限类（非认证入口端点）
+  - 认证入口词汇豁免（login/signin/regist/token/health 等，视图名+URL 名+pattern）
+- **引擎接线**：`collectDjangoViolations`（仅 Python，best-effort）+ `overall.djangoCoverage`——加性零漂移
+- **合成金标**（`generate-projects-django.ts` + `scan-protocol-django.ts`）：FBV/CBV/DRF × clean/V1/V2/V2b/V1V2 = 8 项目——**TP 6 / FP 0 / FN 0 → Precision 100% / Recall 100%**
+- **真实应用验证**：django-realworld（15 路由结构全识别：DRF generics + permission_classes 接线、RegistrationAPIView/LoginAPIView AllowAny 正确豁免）——**0 FP**；PyGoat 133 路由结构全识别，适配器 2 条 flags 均为故意脆弱 lab（csrf_transfer_monei_api / DoItFast）——如实记录；fastapi-realworld 0 FP 保持
+- **修复（子串陷阱）**：`registration` 不含 `register` 子串、`register` 不含 `registr` 子串——认证入口词干统一为 `regist`（FastAPI/Django 两检测器同步）+ 回归测试锁定
+- **验证**：19 个新单元测试（django-detector 10 + fastapi 豁免回归）；套件 139/139；Python 盲测 v1.2 64 零漂移；C 演示 SSG 结果不变
+- **边界（如实）**：FBV 无法静态区分 HTTP 方法（动词名门控口径，非方法级）；include() 递归不展开（被 include 的应用 urls.py 单独成文件时已覆盖）；自定义 permission 类视为保护（保守）
+
+### FastAPI 框架结构适配（M1）——框架适配第 3 个
+
+- **结构提取（Python AST）**：`tools/extract_framework_py.py`（与 extract_ir.py 解耦，零风险）——路由（@app.get/@router.post/@r.api_route）、依赖注入（Depends()/Security()，含 Annotated[...] 订阅、嵌套调用解析、**装饰器级 dependencies=[...]**（realworld 风格）、认证方案声明（OAuth2PasswordBearer/HTTPBearer/APIKeyHeader 等 8 类）、全局中间件；跳过 tests/deps/venv 等非生产目录
+- **检测规则**（`src/frameworks/fastapi-detector.ts`，结构提取与规则判定解耦）：
+  - `FASTAPI_ROUTE_NO_AUTH`——写操作路由（post/put/patch/delete）无认证依赖且非认证入口端点（login/register/token/health 词汇豁免）→「每个 API 入口都有门禁」的精确形态；公开读（GET）不检查（realworld 的 tags/文章列表就是公开 GET——只盯 mutation 面把误报压到最低）
+  - `FASTAPI_DEAD_AUTH_SCHEME`——声明了认证方案但没有任何路由引用（认证设施是死的，装饰性声明）
+- **引擎接线**：`collectFastapiViolations`（仅 Python 项目跑 python3 扫描；best-effort 永不阻断评估）+ `overall.fastapiCoverage`（apps/routes/filesScanned/issuesFound）——加性零漂移
+- **合成金标**（`generate-projects-fastapi.ts` + `scan-protocol-fastapi.ts`，镜像 generate-projects-python 方法论）：3 结构风格（直连/APIRouter/认证方案）× 4 违规变体（clean/V1 无认证写路由/V2 死方案/V1V2）= 12 项目——**TP 13 / FP 0 / FN 0 → Precision 100% / Recall 100%**
+- **真实应用验证**：fastapi-realworld（19 路由全结构识别：签名 Depends 与装饰器 dependencies= 两种认证接线风格）——**0 FP**；django-realworld/django-unicorn 无 FastAPI 结构 → 适配器静默直通（结果不变）
+- **零漂移**：Python 盲测 v1.2 64 违规零漂移；C 演示 SSG 结果不变；相关套件 128/128（含 fastapi-detector 9 个新回归）
+- **边界（如实）**：全局中间件不视为认证（add_middleware 通常是 CORS；自定义认证中间件结构不可见）；Depends 目标按 auth-like 词表+方案引用判定（无数据流分析）；npm 安装态下 tools/ 不在包内 → 框架扫描与既有 Python IR 提取一样静默降级（安装态 Python 全链路为既有遗留问题，不随本版引入新差异）
+
 ## [3.7.7] — 2026-08-28
 
 ### C 注解采纳体验（采纳生死线工具）

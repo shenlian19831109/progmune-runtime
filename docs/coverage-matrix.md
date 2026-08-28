@@ -175,19 +175,19 @@ Ledger             ✅           ❌           ❌         ❌          ❌
 | NestJS | TS/JS | ⚠️ 部分 | @Controller/@UseGuards/@UsePipes 装饰器路由解析 |
 | Next.js | TS/JS | ⚠️ 版本感知 | 版本感知治理 |
 | Fastify 等其余 TS 框架 | TS/JS | ⚠️ 基础别名 | 库别名覆盖，无结构分析 |
-| Django | Python | ⚠️ 基础别名 | 框架委托 allowlist（DRF permission_classes、create_user 等白名单） |
-| FastAPI | Python | ⚠️ 基础别名 | 框架委托 allowlist（DI authorizer、create_access_token 等） |
+| Django | Python | ✅ 结构分析（3.7.8） | URL 配置/CBV/DRF 结构适配：无保护 mutation 视图与 AllowAny 写端点标记（合成金标 P=R=100%；django-realworld 0 FP） |
+| FastAPI | Python | ✅ 结构分析（3.7.8） | 路由/认证依赖结构适配：写操作路由认证依赖检查 + 死认证方案标记（合成金标 P=R=100%；fastapi-realworld 0 FP） |
 | Gin / Fiber | Go | ❌ | 无 Go 支持 |
 | Spring Boot | Java | ❌ | 无 Java 支持 |
 | curl / nginx / libssh / OpenSSL | C | ✅ 有基准 | C 黄金基准（旧正则口径 F1=16.5% 为 TLS 级历史基线；3.7.4 起 IR 提取 + 应用级协议验证，金标 v2 F1=95.7%；3.7.6 起注解驱动 Beta——真实模块金标 5/5） |
 
 ```
-已适配框架        2 / 13（Express ✅、tRPC ✅ 专用检测器）
+已适配框架        4 / 13（Express ✅、tRPC ✅、FastAPI ✅、Django ✅ 专用检测器）
 部分支持          2（NestJS 部分、Next.js 版本感知）
 基础别名覆盖      5 / 13（无结构分析）
 ```
 
-> 框架适配是 #1 产品缺口：Django、FastAPI 及另外 8 个待适配。当前所有规则使用 `\w*` 通用前缀模式（如 `\b(\w*ssl\w*init)\b`）进行匹配，未针对具体框架 API 做全量适配。
+> 框架适配是 #1 产品缺口：FastAPI、Django 已结构适配（3.7.8，路由级认证检查）；Next.js/Fastify/Flask 及另外 5 个待适配。已适配框架有专用结构检测器，其余规则仍使用 `\w*` 通用前缀模式（如 `\b(\w*ssl\w*init)\b`）匹配。
 
 ---
 
@@ -209,7 +209,7 @@ Ledger             ✅           ❌           ❌         ❌          ❌
 
 | 空白 | 影响 |
 |------|------|
-| Django / FastAPI 结构分析 | Python 已生产级，但框架 API 语义（DI、ORM 查询安全、DRF 权限类）仅有别名覆盖 |
+| Django / FastAPI 结构分析 | ✅ 已适配（3.7.8）——路由级认证检查上线；ORM 查询安全、DI 链、serializer 校验仍未结构化（源码级规则覆盖中） |
 | Express 之外的 TS 框架结构分析 | 企业 TS 项目大量使用 Next.js/Fastify/NestJS，当前仅部分覆盖 |
 
 ### P1 — 语言扩展
@@ -248,7 +248,7 @@ Protocols        21 命名空间全有词汇      + OAuth2.0/OIDC、gRPC、
                                          GraphQL、WebSocket
 Languages        2 ✅ (TS, Python)        + Go ✅
                  C ✅ 注解驱动（Beta）   Java（更远期）
-Frameworks       2/13 专用检测器         Django/FastAPI 结构适配
+Frameworks       4/13 专用检测器         Next.js/Fastify/Flask 结构适配
 TS P/R           100%/98.5%              稳定
 Python P/R       100%/100%               稳定
 CVE              34 (88% 检出)           100 (校准检出率)

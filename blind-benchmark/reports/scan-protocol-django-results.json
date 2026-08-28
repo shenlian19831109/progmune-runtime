@@ -1,0 +1,135 @@
+{
+  "generated": "2026-08-28T14:20:31.862Z",
+  "method": "extract_framework_django.py + django-detector（确定性，无 LLM）",
+  "summary": {
+    "tp": 6,
+    "fp": 0,
+    "fn": 0,
+    "precision": 1,
+    "recall": 1
+  },
+  "rows": [
+    {
+      "id": "dj_D1_clean",
+      "gold": [],
+      "detected": [],
+      "rowTp": 0,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "dj_D1_V1",
+      "gold": [
+        {
+          "rule": "DJANGO_VIEW_NO_AUTH",
+          "handler": "transfer_money"
+        }
+      ],
+      "detected": [
+        {
+          "rule": "DJANGO_VIEW_NO_AUTH",
+          "handler": "transfer_money"
+        }
+      ],
+      "rowTp": 1,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "dj_D2_clean",
+      "gold": [],
+      "detected": [],
+      "rowTp": 0,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "dj_D2_V1",
+      "gold": [
+        {
+          "rule": "DJANGO_VIEW_NO_AUTH",
+          "handler": "EditView"
+        }
+      ],
+      "detected": [
+        {
+          "rule": "DJANGO_VIEW_NO_AUTH",
+          "handler": "EditView"
+        }
+      ],
+      "rowTp": 1,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "dj_D3_clean",
+      "gold": [],
+      "detected": [],
+      "rowTp": 0,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "dj_D3_V2",
+      "gold": [
+        {
+          "rule": "DRF_PERMISSION_BYPASS",
+          "handler": "SendMoneyAPIView"
+        }
+      ],
+      "detected": [
+        {
+          "rule": "DRF_PERMISSION_BYPASS",
+          "handler": "SendMoneyAPIView"
+        }
+      ],
+      "rowTp": 1,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "dj_D3_V2b",
+      "gold": [
+        {
+          "rule": "DRF_PERMISSION_BYPASS",
+          "handler": "SendMoneyAPIView"
+        }
+      ],
+      "detected": [
+        {
+          "rule": "DRF_PERMISSION_BYPASS",
+          "handler": "SendMoneyAPIView"
+        }
+      ],
+      "rowTp": 1,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "dj_D1D3_V1V2",
+      "gold": [
+        {
+          "rule": "DJANGO_VIEW_NO_AUTH",
+          "handler": "transfer_money"
+        },
+        {
+          "rule": "DRF_PERMISSION_BYPASS",
+          "handler": "SendMoneyAPIView"
+        }
+      ],
+      "detected": [
+        {
+          "rule": "DJANGO_VIEW_NO_AUTH",
+          "handler": "transfer_money"
+        },
+        {
+          "rule": "DRF_PERMISSION_BYPASS",
+          "handler": "SendMoneyAPIView"
+        }
+      ],
+      "rowTp": 2,
+      "rowFp": 0,
+      "rowFn": 0
+    }
+  ]
+}

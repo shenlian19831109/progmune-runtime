@@ -61,6 +61,8 @@ import {
 } from "./call-graph-propagator";
 import type { CallGraphIndex } from "./call-graph-propagator";
 import type { ExpressSecurityIssue } from "../frameworks/express-detector";
+import { analyzeFastapiStructure } from "../frameworks/fastapi-detector";
+import { analyzeDjangoStructure } from "../frameworks/django-detector";
 import {
   validateSequenceWithSSG,
   ssgViolationsToTrustViolations,
@@ -107,6 +109,8 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
   const expressResult = collectExpressViolations(ctx);
   const nestjsResult = collectNestJSViolations(ctx);
   const trpcResult = collectTRPCViolations(ctx);
+  const fastapiResult = collectFastapiViolations(ctx);
+  const djangoResult = collectDjangoViolations(ctx);
   const coverageData = collectVerificationCoverage(ctx);
   const governanceDefects = collectGovernanceDefects(ctx);
 
@@ -127,6 +131,8 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
     ...expressViolations,
     ...nestjsResult.violations,
     ...trpcResult.violations,
+    ...fastapiResult.violations,
+    ...djangoResult.violations,
   ];
 
   // ═══════════════════════════════════════
@@ -265,6 +271,24 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
             totalRoutes: nestjsResult.coverage.routes,
             filesScanned: nestjsResult.coverage.filesScanned,
             issuesFound: nestjsResult.violations.length,
+          }
+        : undefined,
+      /** FastAPI framework adapter coverage — route/auth-dependency analysis */
+      fastapiCoverage: fastapiResult.coverage.routes > 0
+        ? {
+            appsDetected: fastapiResult.coverage.apps,
+            totalRoutes: fastapiResult.coverage.routes,
+            filesScanned: fastapiResult.coverage.filesScanned,
+            issuesFound: fastapiResult.violations.length,
+          }
+        : undefined,
+      /** Django framework adapter coverage — urlconf/view/permission analysis */
+      djangoCoverage: djangoResult.coverage.routes > 0
+        ? {
+            appsDetected: djangoResult.coverage.apps,
+            totalRoutes: djangoResult.coverage.routes,
+            filesScanned: djangoResult.coverage.filesScanned,
+            issuesFound: djangoResult.violations.length,
           }
         : undefined,
     },
@@ -424,6 +448,114 @@ function mapPolicyViolation(
  * Collect Express-specific security violations from the framework detector.
  * Maps ExpressSecurityIssue[] → TrustViolation[].
  */
+function collectDjangoViolations(ctx: TrustEvaluationContext): {
+  violations: TrustViolation[];
+  coverage: { apps: number; routes: number; filesScanned: number };
+} {
+  const violations: TrustViolation[] = [];
+  const coverage = { apps: 0, routes: 0, filesScanned: 0 };
+
+  // 仅 Python 项目跑框架结构扫描
+  const lang = ctx.language || "typescript";
+  if (lang !== "python") return { violations, coverage };
+
+  try {
+    const { execSync } = require("child_process");
+    const fs = require("fs");
+    const os = require("os");
+    // engine.js 位于 dist/trust/ → 仓库根 tools/ 需要两级向上
+    const scriptPath = path.resolve(__dirname, "..", "..", "tools", "extract_framework_django.py");
+    const outPath = path.join(os.tmpdir(), `progmune-fwdj-${process.pid}-${Date.now()}.json`);
+    execSync(`python3 "${scriptPath}" "${ctx.projectPath}" "${outPath}"`, {
+      encoding: "utf-8",
+      stdio: "pipe",
+      timeout: 60000,
+    });
+    if (!fs.existsSync(outPath)) return { violations, coverage };
+    const structure = JSON.parse(fs.readFileSync(outPath, "utf-8"));
+    fs.unlinkSync(outPath);
+
+    const analysis = analyzeDjangoStructure(structure);
+    if (!analysis.hasDjango) return { violations, coverage };
+
+    coverage.apps = 1;
+    coverage.routes = (structure.routes || []).length;
+    coverage.filesScanned = structure.filesScanned || 0;
+
+    for (const issue of analysis.issues) {
+      violations.push({
+        severity: issue.severity === "low" ? "low" : issue.severity,
+        rule_id: issue.rule,
+        file: issue.file || "",
+        function: issue.handler || "unknown",
+        message: issue.message,
+        evidence: issue.route || "",
+        why: `Framework structural analysis: ${issue.message}`,
+        fix: issue.rule === "DRF_PERMISSION_BYPASS"
+          ? `Require authenticated permissions on write methods (e.g. permission_classes = (IsAuthenticated,)).`
+          : `Add a login decorator (@login_required) or an auth mixin (LoginRequiredMixin) to the view.`,
+        policy_ref: "framework-safety.django",
+      });
+    }
+  } catch { /* best-effort — framework analysis must never break evaluation */ }
+
+  return { violations, coverage };
+}
+
+function collectFastapiViolations(ctx: TrustEvaluationContext): {
+  violations: TrustViolation[];
+  coverage: { apps: number; routes: number; filesScanned: number };
+} {
+  const violations: TrustViolation[] = [];
+  const coverage = { apps: 0, routes: 0, filesScanned: 0 };
+
+  // 仅 Python 项目跑框架结构扫描（避免 TS 项目无谓的 python3 子进程）
+  const lang = ctx.language || "typescript";
+  if (lang !== "python") return { violations, coverage };
+
+  try {
+    const { execSync } = require("child_process");
+    const fs = require("fs");
+    const os = require("os");
+    // engine.js 位于 dist/trust/ → 仓库根 tools/ 需要两级向上
+    const scriptPath = path.resolve(__dirname, "..", "..", "tools", "extract_framework_py.py");
+    const outPath = path.join(os.tmpdir(), `progmune-fw-${process.pid}-${Date.now()}.json`);
+    execSync(`python3 "${scriptPath}" "${ctx.projectPath}" "${outPath}"`, {
+      encoding: "utf-8",
+      stdio: "pipe",
+      timeout: 60000,
+    });
+    if (!fs.existsSync(outPath)) return { violations, coverage };
+    const structure = JSON.parse(fs.readFileSync(outPath, "utf-8"));
+    fs.unlinkSync(outPath);
+
+    const analysis = analyzeFastapiStructure(structure);
+    if (!analysis.hasFastAPI) return { violations, coverage };
+
+    coverage.apps = (structure.apps || []).length + (structure.routers || []).length;
+    coverage.routes = (structure.routes || []).length;
+    coverage.filesScanned = structure.filesScanned || 0;
+
+    for (const issue of analysis.issues) {
+      violations.push({
+        severity: issue.severity === "low" ? "low" : issue.severity,
+        rule_id: issue.rule,
+        file: issue.file || "",
+        function: issue.handler || "unknown",
+        message: issue.message,
+        evidence: issue.route || "",
+        why: `Framework structural analysis: ${issue.message}`,
+        fix: issue.rule === "FASTAPI_ROUTE_NO_AUTH"
+          ? `Add an auth dependency to the route (Depends/Security of an authenticator) or move it behind authenticated middleware.`
+          : `Reference the scheme from a route dependency or remove the unused scheme.`,
+        policy_ref: "framework-safety.fastapi",
+      });
+    }
+  } catch { /* best-effort — framework analysis must never break evaluation */ }
+
+  return { violations, coverage };
+}
+
 function collectExpressViolations(ctx: TrustEvaluationContext): {
   violations: TrustViolation[];
   coverage: { expressApps: number; totalRoutes: number; filesScanned: number };

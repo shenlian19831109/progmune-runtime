@@ -124,6 +124,20 @@ export interface TrustDecision {
       filesScanned: number;
       issuesFound: number;
     };
+    /** FastAPI framework adapter coverage */
+    fastapiCoverage?: {
+      appsDetected: number;
+      totalRoutes: number;
+      filesScanned: number;
+      issuesFound: number;
+    };
+    /** Django framework adapter coverage */
+    djangoCoverage?: {
+      appsDetected: number;
+      totalRoutes: number;
+      filesScanned: number;
+      issuesFound: number;
+    };
   };
 
   dimensions: TrustDimensions;
