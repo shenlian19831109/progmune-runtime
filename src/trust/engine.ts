@@ -52,6 +52,8 @@ import {
 } from "./api-semantic-mapper";
 import { validateSemanticSequence, checkSpecificViolations } from "./protocol-domain-validator";
 import type { SemanticSequence } from "./api-semantic-mapper";
+import { suggestAnnotations } from "../annotation-suggest";
+import type { AnnotationSuggestion } from "../annotation-suggest";
 import {
   buildCallGraphFromIR,
   enrichSequence,
@@ -100,7 +102,7 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
   );
 
   const enterpriseViolations = collectEnterpriseViolations(ctx);
-  const { violations: protocolViolations, coverage: mappingCoverageData, ssgCoverage: ssgCov } =
+  const { violations: protocolViolations, coverage: mappingCoverageData, ssgCoverage: ssgCov, annotationSuggestions: cAnnotationSuggestions } =
     await collectProtocolViolations(ctx, callGraph);
   const expressResult = collectExpressViolations(ctx);
   const nestjsResult = collectNestJSViolations(ctx);
@@ -209,6 +211,7 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
     commit: ctx.commit,
     timestamp,
     engineVersion,
+    annotationSuggestions: cAnnotationSuggestions,
     overall: {
       score: effectiveScore,
       decision,
@@ -825,6 +828,8 @@ interface ProtocolViolationResult {
     /** Warnings from project alias validation */
     aliasWarnings?: string[];
   };
+  /** C 注解建议（采纳生死线）——仅 C 项目生成，其他语言 undefined */
+  annotationSuggestions?: AnnotationSuggestion[];
 }
 
 async function collectProtocolViolations(
@@ -843,6 +848,8 @@ async function collectProtocolViolations(
   let ssgTotalCalls = 0;
   let ssgMatchedCalls = 0;
   let ssgViolationCount = 0;
+  // C 注解建议（函数级作用域——返回值在 try 外组装）
+  let annotationSuggestions: AnnotationSuggestion[] | undefined;
 
   try {
     // ── P4.5 校准：TS/JS 项目在 ir.json 缺失时先提取 IR ──
@@ -933,6 +940,10 @@ async function collectProtocolViolations(
     // ── P4.6.1: 词段匹配门控的项目函数集合（best-effort，与注解合并共用 ir.json） ──
     // 词段匹配只对项目函数适用（改名协议原语）；外部库调用走 alias/关键词桥接。
     let projectFunctions: Set<string> | undefined;
+    // ── 注解建议（采纳生死线）：未注解 C 项目的原语注解候选（加性，仅 C） ──
+    // 未注解项目 SSG 层静默（0 flags）——建议清单是「看不见的问题」的入口：
+    // 按函数名词汇启发式给出现成注释块模板（角色/命名空间/状态转移预填），
+    // 人工确认后生效（与 c-alias-propose 的确认门同一哲学）。
     try {
       const fs = require("fs");
       const irPath = path.join(ctx.projectPath, "ir.json");
@@ -940,6 +951,12 @@ async function collectProtocolViolations(
         const ir = JSON.parse(fs.readFileSync(irPath, "utf-8"));
         const functions = Array.isArray(ir) ? ir : (ir.functions || []);
         projectFunctions = collectProjectFunctionNames(functions);
+        if ((ctx.language || "typescript") === "c") {
+          annotationSuggestions = suggestAnnotations(
+            functions,
+            protocolRulesData ? new Set(protocolRulesData.rules.keys()) : undefined
+          );
+        }
       }
     } catch { /* best-effort */ }
 
@@ -1111,6 +1128,7 @@ async function collectProtocolViolations(
       aliasWarnings: protocolRulesData.aliasWarnings?.length
         ? protocolRulesData.aliasWarnings : undefined,
     } : undefined,
+    annotationSuggestions,
   };
 }
 

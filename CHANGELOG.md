@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.7.7] — 2026-08-28
+
+### C 注解采纳体验（采纳生死线工具）
+
+- **注解建议引擎**（`src/annotation-suggest.ts`）：确定性启发式（无 LLM）——按函数名词汇（3.7.6 金标 5/5 真实注解反推的词表）× 已注解状态，生成原语注解候选（verify/establish/guard/open/close 角色 + 命名空间/状态转移/注释块模板/置信度/命中理由/掩蔽风险标记）；已注解、规则名、外部函数自动排除；两遍计算 maskRisk（体内调用规则原语或本批同被建议函数）
+- **CLI 扫描模式**（`scripts/c-annotate.js --scan <dir> [--write] [--all] [--include-resource]`）：dry-run 默认；--write 自动插入函数定义上方（写入后自动刷新 ir.json 防陈旧）；保守门控（全部实测依据）：establish/掩蔽风险跳过（不提供强制开关）、open/close 跳过（--include-resource 强制）
+- **引擎加性字段**：`evaluateTrust.annotationSuggestions`（仅 C 生成；TS/Python 无该字段——零漂移）
+- **验收（REALWORLD_C_V7.md）**：无注解 uftpd 副本金标恢复率 **4/4 角色正确**（check_user_pass=verify / handle_PASS=establish / do_RETR / do_STOR=guard）；自动应用 7 条后与手写金标**等价**（真实代码 0 SSG FP、植入违规 2/2 精确定位、NEEDS_REVIEW 72 同分）
+- **三个实测安全发现（自动写入的门控依据）**：①掩蔽风险——establish 注解把手握违规的流函数变「原语」（函数内顺序不检查）后植入违规被掩蔽（实测 2 处）；②资源生命周期注解自动应用触发跨函数窗口 FP 类（实测 28 条，open/close 分处不同函数窗口）；③new_session 词汇误判守卫（实测 4 FP，模式收紧为 channel 类）
+- 回归：15 个新单元测试；引擎相关套件 98/98；Python 盲测 v1.2 零漂移（64）；C 应用级金标 F1=95.7% 不变；演示重扫 SSG 结果不变
+
 ## [3.7.6] — 2026-08-28
 
 ### C 生产级路径收官：金标 5/5 + 采纳案例 + 正则层噪声治理

@@ -71,6 +71,8 @@ export interface TrustDecision {
   commit: string;
   timestamp: string;
   engineVersion: string;
+  /** C 注解建议（采纳生死线）——仅 C 项目生成（加性字段，TS/Python undefined） */
+  annotationSuggestions?: import("../annotation-suggest").AnnotationSuggestion[];
 
   overall: {
     score: number;
