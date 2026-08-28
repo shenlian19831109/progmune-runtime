@@ -21,6 +21,9 @@ export interface CallSequence {
   /** 展开被调用预算截断（真实 C 巨型函数的宽度爆炸可达百万级调用）——
    *  序列尾部的违规不可见，是诚实的召回边界，非静默回归 */
   truncated?: boolean;
+  /** 入口函数的直接调用（展开前的原始调用列表）——endState 检查的
+   *  资源获取溯源用：经内联 helper 获取的资源不归因给入口 */
+  directCalls?: string[];
 }
 
 const MAX_DEPTH = 4;
@@ -151,7 +154,13 @@ export function buildCallSequences(
     budget.truncated = false;
     const calls = expandBody(f, 0, new Set());
     if (calls.length === 0) continue;
-    sequences.push({ calls, file: f.file, function: f.name, truncated: budget.truncated || undefined });
+    sequences.push({
+      calls,
+      file: f.file,
+      function: f.name,
+      truncated: budget.truncated || undefined,
+      directCalls: f.calls || [],
+    });
   }
   return sequences;
 }

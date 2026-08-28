@@ -69,12 +69,20 @@ export interface RealCFlag {
   note?: string;
 }
 
-/** 匹配策略分类：exact → word-segment（词段全含）→ keyword（其余） */
+/** 匹配策略分类：exact → word-segment（词段全含）→ keyword（其余）。
+ *  分词按规范化形态（CamelCase → snake_case），与 inferRuleName 的
+ *  normalized 语义一致——ReadFile 类 CamelCase 名按原始名分词会误归 keyword。 */
 function classifyStrategy(callName: string, matchedRule?: string): RealCFlag["strategy"] {
   if (!matchedRule || callName === "(end-of-sequence)") return "endState";
   if (callName.toLowerCase() === matchedRule) return "exact";
+  const normalized = callName
+    .split(".").pop()!
+    .replace(/([A-Z])/g, "_$1")
+    .toLowerCase()
+    .replace(/^_/, "")
+    .replace(/__+/g, "_");
   const ruleWords = matchedRule.split("_");
-  const callWords = callName.toLowerCase().split("_");
+  const callWords = normalized.split("_");
   if (ruleWords.length >= 2 && ruleWords.every((w) => callWords.includes(w))) return "word-segment";
   return "keyword";
 }
@@ -88,7 +96,7 @@ export function scanRealRepo(repoDir: string): { repo: string; flags: RealCFlag[
 
   for (const seq of sequences) {
     const steps = seq.calls.map((c) => ({ api: c, description: "" })) as any[];
-    const result = validateSequenceWithSSG(steps, rules, nsInit, seq.file, undefined, undefined, projectFunctions);
+    const result = validateSequenceWithSSG(steps, rules, nsInit, seq.file, undefined, undefined, projectFunctions, seq.directCalls ? new Set(seq.directCalls) : undefined);
     for (const v of result.violations) {
       flags.push({
         file: seq.file,

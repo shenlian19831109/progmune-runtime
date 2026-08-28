@@ -53,6 +53,16 @@
   - endState 检查：12/16 是回调生命周期盲区——若要修，方向是「识别 cleanup 回调注册」（`*_pool_cleanup_add` 类），而非收紧状态机；
   - keyword 桥接：ReadFile/WriteFile 类 OS API 名应从域关键词中排除或限定。
 
+## Addendum 2（2026-08-27，精度修复后）
+
+**Strategy 1 门控 + endState 溯源两修复落地：四仓库 24 flags → 3 flags（-87.5%）**——
+nginx 14→0（endState 回调生命周期 + OS API 桥接全消）、redis 0、libssh 1、openssl 2。
+残留 3 条均为词段桥接按设计命中项目函数（`ssh_pcap_file_close`/`file_write` 是真实
+项目函数；`DeleteFile` 经项目函数名碰撞过门）。双回归门：Python 盲测 64 零漂移、
+C 应用金标 F1=95.7% 不变。**结论更新：未注解真实代码的自动检测从「0 TP/24 FP」
+改善为「0 TP/3 FP」——噪声降至可忽略但真阳性仍为零，产品定位（自动检测 vs
+注解驱动）的决策数据到此完整，见 c-language-status Decision record。**
+
 ## Addendum（2026-08-27，openssl + 性能修复后）
 
 - **openssl 加入扫描**（`scan-real-c.ts` 默认四仓库）：9 flags（8 keyword + 1 word-segment），

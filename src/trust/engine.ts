@@ -69,9 +69,22 @@ import {
 import type { SSGValidationResult } from "./ssg-bridge";
 import { buildCallSequences, collectProjectFunctionNames } from "../call-sequence";
 import type { CallSequence } from "../call-sequence";
+import { extractIR } from "../extract-ir";
+import { extractIRPython } from "../extract-ir-python";
+import { extractIRC } from "../extract-ir-c";
 
 // ── Main Entry Point ──
 
+/**
+ * Trust 决策主入口：收集 → 归一化 → 评分 → 决策 → 组装。
+ *
+ * IR 写盘语义（勿改）：项目缺少 ir.json 时，引擎按 ctx.language 自动提取
+ * 并落盘（TS/JS → extractIR 裸数组；Python → extractIRPython 裸数组；
+ * C → extractIRC 合并形态 { typeMap, functions }）——注解合并（P4.5）依赖
+ * ir.json，调用方【无需】手动 extractProjectIR/写盘（曾是对 C 注解静默
+ * 失效的文档/API 陷阱，回归测试见 tests/trust/engine.test.ts「DSH 陷阱」）。
+ * 若项目已有 ir.json，以现有文件为准（不覆盖）。
+ */
 export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustDecision> {
   const engineVersion = "trust-runtime-v1.0.0";
   const timestamp = new Date().toISOString();
@@ -836,15 +849,31 @@ async function collectProtocolViolations(
     // 序列必须来自「函数体内真实调用」而非「文件内函数声明名单」——
     // 声明顺序 ≠ 执行顺序：正则扫描会把声明当调用（auth.ts 误报），
     // 也会因调用数不足阈值漏掉单调用违规文件（bad_flow 漏报）。
-    if (!ctx.language || ctx.language === "typescript" || ctx.language === "javascript") {
-      try {
-        const fs = require("fs");
-        if (!fs.existsSync(path.join(ctx.projectPath, "ir.json"))) {
-          const { extractIR } = require("../extract-ir");
-          const ir = extractIR(ctx.projectPath);
-          fs.writeFileSync(path.join(ctx.projectPath, "ir.json"), JSON.stringify(ir, null, 2));
-        }
-      } catch { /* best-effort — 回退正则扫描 */ }
+    // 注解合并（P4.5）依赖 ir.json 写盘：此前仅 TS/JS 自动提取，C/Python 项目
+    // 直接调 evaluateTrust 时注解静默失效（DSH 复测发现的文档/API 陷阱）——
+    // 按语言分派提取器兜底写盘；TS/JS 路径保持原样（裸数组形态，零变化）。
+    {
+      const lang = ctx.language || "typescript";
+      // 静态导入（vitest 环境下 lazy require 的 CJS 互操作不可靠——
+      // TS 路径从未触发过该分支：仓库根遗留 ir.json 短路了 existsSync 检查）
+      const autoExtractor: Record<string, () => any[]> = {
+        typescript: () => extractIR(ctx.projectPath),
+        javascript: () => extractIR(ctx.projectPath),
+        python: () => extractIRPython(ctx.projectPath),
+        c: () => extractIRC(ctx.projectPath),
+      };
+      const extractFn = autoExtractor[lang];
+      if (extractFn) {
+        try {
+          const fs = require("fs");
+          if (!fs.existsSync(path.join(ctx.projectPath, "ir.json"))) {
+            const ir = extractFn();
+            // C 走合并形态（与 execute/MCP 写盘一致）；TS/Python 保持裸数组形态
+            const payload = lang === "c" ? { typeMap: {}, functions: ir } : ir;
+            fs.writeFileSync(path.join(ctx.projectPath, "ir.json"), JSON.stringify(payload, null, 2));
+          }
+        } catch { /* best-effort — 回退正则扫描 */ }
+      }
     }
 
     // ── SSG State Machine: load protocol rules once ──
@@ -984,7 +1013,8 @@ async function collectProtocolViolations(
           try {
             const specificViolations = checkSpecificViolations(
               semantic,
-              seq.file ? path.join(ctx.projectPath, seq.file) : undefined
+              seq.file ? path.join(ctx.projectPath, seq.file) : undefined,
+              ctx.language
             );
             for (const sv of specificViolations) {
               violations.push({
@@ -1016,6 +1046,7 @@ async function collectProtocolViolations(
               protocolRulesData.aliasIndex,
               protocolRulesData.wildcardAliases,
               projectFunctions,
+              seq.directCalls ? new Set(seq.directCalls) : undefined,
             );
             ssgResults.push(ssgResult);
             ssgTotalCalls += ssgResult.stats.totalCalls;

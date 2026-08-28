@@ -103,7 +103,7 @@ Progmune 对能验证什么、不能验证什么保持诚实。
 |------|------|------|
 | **TypeScript / JavaScript** | ✅ 生产 | 盲测基准：**召回 98.5% / 精确率 100%**（795 条 gold finding，100 个项目） |
 | **Python** | ✅ 生产 | 盲测基准：**召回 100% / 精确率 100%**（729 条 gold finding，90 个项目）；真实应用验证：PyGoat（OWASP 故意脆弱 Django 应用）**67 TP / 0 FP，标记精确率 100%**；三个良构应用（django/fastapi realworld、django-unicorn）0 误报真阳性 |
-| **C** | ⚠️ 仅研究 | 3.7.4：IR 提取接入多语言注册表——应用级协议生命周期（认证/数据库/文件/支付）经 SSG 状态机可验证（应用级金标 v2：**P=91.7% / R=100% / F1=95.7%**）。TLS 级覆盖仍无（旧正则口径 F1=16.5% 为历史基线）；L3/L4 结论不变。见 [C 语言状态](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md)。 |
+| **C** | ✅ 注解驱动（Beta） | IR 提取接入注册表 + SSG 状态机；**每协议标注 ~2-3 个原语即获得可信验证**（真实模块金标 5/5：redis ACL / libssh 客户端 / libssh 服务端 / libssh 回调分发 / uftpd 传送授权——全部 0 误报 + 违规精确定位；应用级金标 v2：**P=91.7% / R=100% / F1=95.7%**）。未注解自动检测不在范围（真实语料 0 TP——定位决议见 C 语言状态文档）；TLS 级覆盖仍无。见 [C 语言状态](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md)。 |
 | **Go, Java** | ❌ 无 | 规划中 |
 
 **多语言 IR（注册表式）。** TypeScript（ts-morph）与 Python（AST）提取器是同一注册表（`src/extract-project-ir.ts`）中的注册项；`extractProjectIR` 把检测到的所有语言合并为一份函数 IR，由 agent loop、`execute()` 与 MCP server 共享——agent 可在两种语言上编排函数协议链。新增语言（Go、Java……）= 注册一条提取器，调用方零改动。
@@ -152,9 +152,9 @@ Progmune 对能验证什么、不能验证什么保持诚实。
 
 → [真实验证报告](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/REALWORLD_APP_V1.md) · [基准基线](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/BASELINE_v6.md)
 
-### C（IR 提取 + 应用级协议验证——研究状态）
+### C（IR 提取 + 注解驱动协议验证——Beta）
 
-3.7.4 起 C 拥有多语言注册表中的 IR 提取器：C 项目进入 IR-first 序列验证 + SSG 状态机。应用级协议生命周期（认证/数据库/文件/支付）在 C 上可验证——应用级金标 v2：**11/11 违规全检出（召回 100%）、1 误报、F1=95.7%**；注解驱动验证在真实 redis ACL 代码上走通（demo-real-c-redis）。提取覆盖大型真实仓库（openssl 15.5k / redis 5.7k / curl 4.2k 函数，秒级，黄金函数恢复率 97–100%）。两条边界不变：旧正则口径黄金基准 F1=16.5% 测的是 **TLS 级误用**（SSG 无 TLS 状态机，该口径不变）；L3/L4 结论维持（函数指针分发静态不可见；无指针/CFG 分析计划）。详见 [C 语言状态](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md)。
+3.7.4 起 C 拥有多语言注册表中的 IR 提取器：C 项目进入 IR-first 序列验证 + SSG 状态机。应用级协议生命周期（认证/数据库/文件/支付）在 C 上可验证——应用级金标 v2：**11/11 违规全检出（召回 100%）、1 误报、F1=95.7%**。注解驱动是 C 的生产形态（3.7.6 起 Beta）：真实模块金标 5/5（redis ACL、libssh 客户端/服务端/回调分发、uftpd 传送授权）+ 1 个独立采纳案例（uftpd）——全部 0 误报 + 违规精确定位，标注成本稳定在每协议 ~2-3 条。未注解自动检测不在范围（真实语料 0 TP）。提取覆盖大型真实仓库（openssl 15.5k / redis 5.7k / curl 4.2k 函数，秒级，黄金函数恢复率 97–100%）。两条边界不变：旧正则口径黄金基准 F1=16.5% 测的是 **TLS 级误用**（SSG 无 TLS 状态机，该口径不变）；L3/L4 结论维持（函数指针分发静态不可见；无指针/CFG 分析计划）。详见 [C 语言状态](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md)。
 
 ### P0-P3 规则注入（2026-08）
 

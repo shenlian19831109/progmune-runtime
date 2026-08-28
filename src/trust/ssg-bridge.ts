@@ -301,30 +301,33 @@ function inferRuleName(
     if (ruleName) return ruleName;
   }
 
-  // Strategy 1: Exact normalized match against rule names
-  for (const ruleName of ruleNames) {
-    if (normalized === ruleName || lowerApi === ruleName) {
-      return ruleName;
-    }
-  }
-
-  // Strategy 2: Word-segment match — only match on complete word boundaries.
-  // Split both the rule name and normalized call name into word segments
-  // (separated by _). Match if every word in the rule name appears as a
-  // word segment in the normalized call name. This prevents "status" from
-  // matching "poll_status" via raw substring, since "status" must appear
-  // as a complete _-delimited segment.
-  //
-  // 门控（P4.6.1）：词段匹配只对「项目函数」适用——它是为改名协议原语设计的
-  // （协议原语必然是项目内函数，如 S5 的 create_active_session）。外部库调用
-  // （如 Node 的 readFileSync）经词段撞上 read_file 是纯噪声：外部 API 的语义
-  // 桥接走 alias 配置（Strategy 0b）或 domain 关键词（Strategy 3），不走词段。
+  // 门控判定（P4.6.1 词段门控同款）：项目函数才能按规范化/词段形态命中——
+  // 外部 API（如 Windows 的 ReadFile → snake_case 撞上 read_file）是纯噪声，
+  // 其语义桥接走 alias 配置（Strategy 0b）或 domain 关键词（Strategy 3）。
   // 未提供 projectFunctions 时保持旧行为（向后兼容测试与无 IR 的调用方）。
   const isProjectFn = !projectFunctions
     || projectFunctions.has(apiName)
     || projectFunctions.has(lowerApi)
     || projectFunctions.has(normalized)
     || (dotIdx >= 0 && projectFunctions.has(lowerApi.slice(dotIdx + 1)));
+
+  // Strategy 1: Exact match against rule names.
+  // 原始名（含小写）精确匹配不限门控；规范化形态（CamelCase → snake_case）
+  // 仅项目函数适用——真实 C 语料验证中 ReadFile/WriteFile/DeleteFile 经
+  // normalized 撞上 read_file/write_file/delete_file 是 11/24 FP 的主导源，
+  // 而注解桥接（ACLCheckAllPerm → acl_check_all_perm）全是项目函数，不受影响。
+  for (const ruleName of ruleNames) {
+    if (lowerApi === ruleName) {
+      return ruleName;
+    }
+  }
+  if (isProjectFn) {
+    for (const ruleName of ruleNames) {
+      if (normalized === ruleName) {
+        return ruleName;
+      }
+    }
+  }
 
   for (const ruleName of ruleNames) {
     if (projectFunctions && !isProjectFn) continue;
@@ -382,6 +385,11 @@ export function validateSequenceWithSSG(
   wildcardAliases?: Map<string, string>,
   /** 项目函数名集合（含裸名/全名/小写变体由调用方构造）——提供后词段匹配只对项目函数适用 */
   projectFunctions?: Set<string>,
+  /** 入口函数的直接调用集合——endState 检查的资源获取溯源：经内联 helper
+   *  获取的资源不归因给入口（nginx 回调式生命周期：open 在 helper 链内、
+   *  close 在回调里，直接调用序列看不到），提供后仅在获取调用 ∈ 直接调用
+   *  时报告 endState。未提供时保持旧行为。 */
+  entryDirectCalls?: Set<string>,
 ): SSGValidationResult {
   const allRuleNames = Array.from(rules.keys());
   const aliases = aliasIndex || new Map<string, string>();
@@ -424,16 +432,18 @@ export function validateSequenceWithSSG(
   })();
 
   // 本序列中"新获取"的资源状态（endState 检查只针对本序列获取、未释放的状态——
-  // 继承自命名空间初始状态的不算泄漏，与 planner 语义一致）
-  const acquiredStates = new Set<string>();
+  // 继承自命名空间初始状态的不算泄漏，与 planner 语义一致）。
+  // 记录获取调用名：endState 归因溯源（入口直接调用 vs 内联 helper 获取）。
+  const acquiredStates = new Map<string, string>(); // `${ns}::${state}` → 获取调用名
   const trackAcquiredStates = (
     before: Record<string, string[]> | undefined,
     after: Record<string, string[]>,
+    acquiringCall: string,
   ) => {
     for (const ns of Object.keys(after)) {
       const prev = before?.[ns] || [];
       for (const s of after[ns]) {
-        if (!prev.includes(s)) acquiredStates.add(`${ns}::${s}`);
+        if (!prev.includes(s)) acquiredStates.set(`${ns}::${s}`, acquiringCall);
       }
     }
   };
@@ -506,7 +516,7 @@ export function validateSequenceWithSSG(
         // Advance state
         ctx.ledger.push(result.transition);
         ctx.currentState = result.transition.statesAfter;
-        trackAcquiredStates(result.transition.statesBefore, result.transition.statesAfter);
+        trackAcquiredStates(result.transition.statesBefore, result.transition.statesAfter, step.api);
       } else {
         violatedCalls++;
         const rejection = result.rejection!;
@@ -545,7 +555,7 @@ export function validateSequenceWithSSG(
         // Still advance state on rejection (best-effort: apply transition anyway
         // so subsequent calls can be validated)
         ctx.ledger.push(result.transition);
-        trackAcquiredStates(result.transition.statesBefore, result.transition.statesAfter);
+        trackAcquiredStates(result.transition.statesBefore, result.transition.statesAfter, step.api);
       }
     } catch {
       // Validation threw — record as unmatched (graceful degradation)
@@ -579,7 +589,11 @@ export function validateSequenceWithSSG(
   for (const hs of findHeldResourceStates(rules)) {
     const ctx = contexts.get(hs.namespace);
     if (!ctx) continue;
-    if (!acquiredStates.has(`${hs.namespace}::${hs.state}`)) continue;
+    const acquiringCall = acquiredStates.get(`${hs.namespace}::${hs.state}`);
+    if (!acquiringCall) continue;
+    // 资源获取溯源：经内联 helper 获取的状态不归因给入口（释放可能存在于
+    // 兄弟 helper 或回调注册中——nginx 回调式生命周期是 12/24 FP 的主源）
+    if (entryDirectCalls && !entryDirectCalls.has(acquiringCall)) continue;
     const cur: string[] = ctx.currentState[hs.namespace] || [];
     if (!cur.includes(hs.state)) continue;
 
@@ -812,6 +826,30 @@ export function loadProtocolRules(projectPath?: string): {
     // Ensure essential namespaces have defaults
     if (!nsInit._global) nsInit._global = "INIT";
     if (!nsInit.stateless) nsInit.stateless = "IDLE";
+
+    // ── Load shared C alias registry (c-aliases.json, confirmed entries only) ──
+    // 注解驱动定位的孵化器燃料：库边界别名跨项目迁移——用户项目别名回写提案、
+    // 人工确认（status=confirmed）后对全部项目生效。加载顺序在项目别名之前：
+    // 项目本地映射优先于共享表（与「项目别名不覆盖全局」同哲学，first-wins）。
+    try {
+      const cRegistryPath = [
+        projectPath ? path.join(projectPath, "c-aliases.json") : "",
+        path.join(process.cwd(), "c-aliases.json"),
+        path.join(__dirname, "..", "c-aliases.json"),
+      ].find((p) => p && fs.existsSync(p));
+      if (cRegistryPath) {
+        const reg = JSON.parse(fs.readFileSync(cRegistryPath, "utf-8"));
+        for (const entry of reg.entries || []) {
+          if (entry.status !== "confirmed") continue;
+          const callName = String(entry.call).toLowerCase().trim();
+          const ruleName = String(entry.rule);
+          if (!callName || !rules.has(ruleName)) continue;
+          if (!aliasIndex.has(callName)) {
+            aliasIndex.set(callName, ruleName);
+          }
+        }
+      }
+    } catch { /* best-effort — 共享表缺失或损坏不影响验证 */ }
 
     // ── Load project-level aliases (supplemental, never override global) ──
     let projectAliases: Record<string, string> | undefined;

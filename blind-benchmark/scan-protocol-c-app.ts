@@ -200,7 +200,7 @@ function scanSource(source: string, rules: { rules: Map<string, StateAnnotation>
     const flags: Flagged[] = [];
     for (const seq of sequences) {
       const steps = seq.calls.map((c) => ({ api: c, description: "" })) as any[];
-      const result = validateSequenceWithSSG(steps, rules.rules, rules.nsInit, seq.file, undefined, undefined, projectFunctions);
+      const result = validateSequenceWithSSG(steps, rules.rules, rules.nsInit, seq.file, undefined, undefined, projectFunctions, seq.directCalls ? new Set(seq.directCalls) : undefined);
       for (const v of result.violations) {
         flags.push({ function: seq.function ?? "unknown", failingFunction: v.callName, reason: v.explanation });
       }

@@ -115,7 +115,7 @@ function classifyDirect(repo: string, data: RepoData, rules: ProtocolRuleSet, pr
     const label = data.labels[i];
     if (label !== "violation" && label !== "clean") return;
     const steps = seq.calls.map((c) => ({ api: c, description: "" })) as any[];
-    const result = validateSequenceWithSSG(steps, rules.rules, rules.nsInit, seq.file, undefined, undefined, projectFunctions);
+    const result = validateSequenceWithSSG(steps, rules.rules, rules.nsInit, seq.file, undefined, undefined, projectFunctions, seq.directCalls ? new Set(seq.directCalls) : undefined);
     for (const v of result.violations) {
       flags.push({
         index: i,
@@ -151,7 +151,7 @@ function classifyProduction(data: RepoData, ir: any[], rules: ProtocolRuleSet, p
   const flaggedGold: ProductionResult["flaggedGold"] = [];
   for (const seq of sequences) {
     const steps = seq.calls.map((c) => ({ api: c, description: "" })) as any[];
-    const result = validateSequenceWithSSG(steps, rules.rules, rules.nsInit, seq.file, undefined, undefined, projectFunctions);
+    const result = validateSequenceWithSSG(steps, rules.rules, rules.nsInit, seq.file, undefined, undefined, projectFunctions, seq.directCalls ? new Set(seq.directCalls) : undefined);
     if (result.violations.length === 0) continue;
     const label = goldByKey.get(`${seq.file}::${seq.function}`);
     if (label) {

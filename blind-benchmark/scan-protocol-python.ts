@@ -120,7 +120,7 @@ export function scanProjectProtocol(projectPath: string, projectId?: string): Pr
   for (const seq of sequences) {
     // 规范协议名直构 steps（name-match 分支）；LLM 语义桥接不参与测量
     const steps = seq.calls.map((c) => ({ api: c, description: "" })) as any[];
-    const result = validateSequenceWithSSG(steps, rules, nsInit, seq.file, undefined, undefined, projectFunctions);
+    const result = validateSequenceWithSSG(steps, rules, nsInit, seq.file, undefined, undefined, projectFunctions, seq.directCalls ? new Set(seq.directCalls) : undefined);
     for (const v of result.violations) {
       violations.push({
         file: seq.file,

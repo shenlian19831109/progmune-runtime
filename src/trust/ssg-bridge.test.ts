@@ -9,6 +9,9 @@
  */
 
 import { describe, it, expect } from "vitest";
+import * as fs from "fs";
+import * as os from "os";
+import * as path from "path";
 import {
   validateSequenceWithSSG,
   ssgViolationsToTrustViolations,
@@ -324,5 +327,46 @@ describe("SSG Bridge", () => {
       ).length;
       expect(warnCount).toBe(0);
     });
+  });
+});
+
+describe("共享 C 别名表（c-aliases.json，孵化器机制）", () => {
+  it("confirmed 条目被加载进 aliasIndex；proposed 条目不加载（人工确认门）", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pm-calias-"));
+    try {
+      fs.writeFileSync(path.join(dir, "c-aliases.json"), JSON.stringify({
+        entries: [
+          { call: "ssh_userauth_password", rule: "verify_password", status: "confirmed" },
+          { call: "some_lib_connect", rule: "connect_db", status: "proposed" },
+          { call: "ghost_call", rule: "no_such_rule", status: "confirmed" },
+        ],
+      }));
+
+      const loaded = loadProtocolRules(dir);
+      expect(loaded).not.toBeNull();
+      expect(loaded!.aliasIndex.get("ssh_userauth_password")).toBe("verify_password");
+      expect(loaded!.aliasIndex.has("some_lib_connect")).toBe(false); // 未确认不生效
+      expect(loaded!.aliasIndex.has("ghost_call")).toBe(false); // 规则不存在跳过
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("共享表不覆盖全局别名与项目别名（first-wins）", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pm-calias2-"));
+    try {
+      // 全局 verify_hash 的别名 jsonwebtoken.verify——共享表同名条目不得覆盖
+      fs.writeFileSync(path.join(dir, "c-aliases.json"), JSON.stringify({
+        entries: [
+          { call: "jsonwebtoken.verify", rule: "verify_password", status: "confirmed" },
+        ],
+      }));
+      const loaded = loadProtocolRules(dir);
+      const globalRule = loaded!.rules.get("verify_token")?.aliases?.includes("jsonwebtoken.verify");
+      // jsonwebtoken.verify 若已存在全局别名，共享表不覆盖（值保持原规则）
+      expect(loaded!.aliasIndex.get("jsonwebtoken.verify")).not.toBe("verify_password");
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

@@ -174,7 +174,7 @@
   本文档面向两类读者：想快速理解的初学者，与需要专业判断的投资人。</div>
   <div class="meta">
     <span>📄 版本 v1.0 · 2026-08</span>
-    <span>🧪 引擎版本 v3.7.2</span>
+    <span>🧪 引擎版本 v<span id="npmVersion">3.7.6</span></span>
     <span>📊 13/13 安全类别覆盖</span>
     <span>🔓 开源 MIT</span>
     <span>📦 npm install progmune-runtime</span>
@@ -724,5 +724,24 @@ AI 生成: create_session(...)   ← 当前状态 UNAUTHENTICATED
 </div>
 
 </div>
+
+<script>
+// ═══ 引擎版本号动态展示：registry.npmjs.org dist-tags.latest ═══
+// 发布到 npm 后自动跟随最新版本；拉取失败保留静态回退值。
+(async function loadNpmVersion() {
+  const el = document.getElementById("npmVersion");
+  if (!el) return;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 8000);
+  try {
+    const res = await fetch("https://registry.npmjs.org/progmune-runtime", { signal: ctrl.signal });
+    clearTimeout(timer);
+    if (!res.ok) throw new Error(String(res.status));
+    const pkg = await res.json();
+    const latest = pkg && pkg["dist-tags"] && pkg["dist-tags"].latest;
+    if (latest) el.textContent = latest;
+  } catch { /* 保留静态回退值 */ }
+})();
+</script>
 </body>
 </html>

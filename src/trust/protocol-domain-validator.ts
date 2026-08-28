@@ -271,6 +271,15 @@ export function validateSemanticSequence(seq: SemanticSequence): DomainValidatio
 export interface SpecificViolationCheck {
   ruleId: string;
   description: string;
+  /**
+   * Languages this check applies to. `undefined` = all languages.
+   * Web/TLS-semantic rules are gated away from C: observed real-project
+   * evidence (REALWORLD_C_V3/V5) shows PLAINTEXT_AUTH_WITHOUT_TLS hits
+   * 3 FP / 0 TP on C (FTP/SSH are by-design plaintext at the app layer —
+   * transport encryption lives outside the process). SSH host-key rules
+   * stay language-agnostic (1 TP on the libssh demo).
+   */
+  languages?: string[];
   check: (steps: SemanticStep[], filePath?: string) => boolean;
 }
 
@@ -378,6 +387,10 @@ export const SPECIFIC_VIOLATION_CHECKS: SpecificViolationCheck[] = [
     description:
       "Authentication credentials transmitted without TLS protection. " +
       "SASL PLAIN, LOGIN, or credential data must be sent over an encrypted channel.",
+    // C 排除（2026-08-28，真实语料证据）：libssh 演示 1 FP（SSH 明文协议被
+    // Web/TLS 语义误映射）+ uftpd 采纳案例 2 FP（handle_USER/main）——FTP/SSH
+    // 应用层本就明文，传输加密在协议自身/进程外，本规则的 Web 语义对 C 无 TP。
+    languages: ["typescript", "javascript", "python"],
     check: (steps) => {
       // Auth data being prepared (credentials + mechanism)
       const hasAuthCred = steps.some((s) => s.domain === "auth_cred");
@@ -847,10 +860,14 @@ export const SPECIFIC_VIOLATION_CHECKS: SpecificViolationCheck[] = [
 /**
  * Run specific violation checks against a semantic sequence.
  * Returns violations found (empty for Phase 1 MVP).
+ *
+ * @param language — project language ("c" | "python" | "typescript" | …);
+ *   checks with a `languages` allowlist are skipped for other languages.
  */
 export function checkSpecificViolations(
   seq: SemanticSequence,
-  _filePath?: string
+  _filePath?: string,
+  language?: string
 ): Array<{
   ruleId: string;
   description: string;
@@ -863,6 +880,9 @@ export function checkSpecificViolations(
   }> = [];
 
   for (const check of SPECIFIC_VIOLATION_CHECKS) {
+    if (check.languages && language && !check.languages.includes(language)) {
+      continue;
+    }
     if (check.check(seq.steps, _filePath)) {
       violations.push({
         ruleId: check.ruleId,

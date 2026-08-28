@@ -1,5 +1,31 @@
 # Changelog
 
+## [3.7.6] — 2026-08-28
+
+### C 生产级路径收官：金标 5/5 + 采纳案例 + 正则层噪声治理
+
+- **金标 4/5（libssh 回调分发认证）**（`demo-real-c-libssh-cb/` + `REALWORLD_C_V6.md`）：真实 `samplesshd-cb.c`（359 行）逐字——现代回调分发 API（`ssh_server_callbacks_struct` 的 `auth_password_function` / `channel_open_request_session_function`，决策记录指定的最优模块）。2 注解 → APPROVED 82、真实代码 0 FP、植入 `cb_session_no_auth` 精确定位；认证完成跃迁在 libssh 内部 + main 循环条件（L3 边界），establish 由演示层 wrapper 表达（V5 wrapper 模式）
+- **金标 5/5（uftpd 数据传送授权）**：采纳项目第二个协议——真实 `do_RETR`/`do_STOR` + 2 注解（pre AUTHENTICATED → post AUTHORIZED，镜像 check_resource_ownership 语义）→ 真实代码 0 FP、`ftp_transfer_no_login` 精确定位（fixPath → `establish_login`）；金标累计 5/5 全部 ~2-3 注解/协议
+- **发现 G5（规则面缺口入册）**：SSG 状态机 per-namespace——内置 `check_resource_ownership`（data_integrity，pre=[AUTHENTICATED]）永远不可满足（AUTHENTICATED 在 auth 命名空间，src/tests 全仓库零引用）——规则面设计缺口，非引擎缺陷
+- **正则层噪声治理（V5 发现 4 落地）**：`PLAINTEXT_AUTH_WITHOUT_TLS` 加 `languages` 门控排除 C（真实语料证据 3 FP / 0 TP：libssh 演示 1 + uftpd 采纳案例 2——FTP/SSH 应用层本就明文，Web/TLS 语义对 C 无意义）；SSH 主机密钥规则保留全语言（libssh 演示 1 TP）。`checkSpecificViolations` 加 `language` 参数、engine 传 `ctx.language`、5 个回归测试；**双零漂移**：Python 盲测 v1.2 64 违规（仅时间戳差）、C 应用级金标 F1=95.7% 不变；uftpd 重扫 PLAINTEXT ×2 消失、libssh 演示 FP 消失 TP 保留
+- **标签升级已拍板**：C「⚠️ 研究」→「✅ 注解驱动协议验证（Beta）」——README 双语、覆盖矩阵双语、c-language-status、CLAUDE.md 同步翻新；能力边界如实保留（未注解不检测、TLS 级无覆盖）
+
+### C 定位拍板「注解驱动」+ 库边界机制 + 精度修复
+
+- **定位拍板**（Decision record 定稿）：C = 注解驱动协议验证（研究级）——未注解自动检测 0 TP/3 FP，两条自动检测桥（C 库别名注册表、方言解析器）不排期；文档翻转：README 双语 + 覆盖矩阵双语 C 行「⚠️ 注解驱动（研究级）」
+- **库边界机制（孵化器）**：两层——项目原语注解（`@progmune`，不迁移）+ **库边界别名**（`.progmune_aliases.json` → 共享表 `c-aliases.json`，跨项目迁移）。新增：`scripts/c-annotate.js`（注释块模板 + 别名条目建议脚手架）、`scripts/c-alias-propose.js`（别名校验 + 回写提案 + 人工确认门）；引擎 `loadProtocolRules` 合并共享表 **confirmed** 条目（proposed 不生效、不覆盖全局/项目别名、规则不存在跳过）；`c-aliases.json` 入 npm 包
+- **库边界演示**（`demo-real-c-libssh/` + `REALWORLD_C_V3.md`）：真实 libssh authentication.c 逐字 + 1 别名 + 1 注解 → SSG 层 0 误报、植入 missing-auth 精确定位；正则防护层同跑：SSH_NO_HOST_KEY_CHECK 为**真发现**（示例确实不验证主机密钥）、PLAINTEXT_AUTH_WITHOUT_TLS 为 FP（Web 语义规则误映射 SSH，如实记录）
+- **发现**：多机制认证重试循环的状态机语义缺口（verify 类规则 pre 不可重入——全机制别名映射会误报正常重试流，候选：可重试标记）；fixPath 反向映射（规则名 → 库调用名）候选
+- **陷阱修复（DSH 复测发现）**：`evaluateTrust` 的注解合并依赖 ir.json 写盘，而自动提取此前仅 TS/JS 生效——C/Python 项目直接调用时注解静默失效。现在按语言分派提取器自动写盘（C 走合并形态；TS/JS 路径零变化）+ 回归测试；提取器改静态导入（vitest 下 lazy require 的 CJS 互操作不可靠——该分支从未被测试触发过）
+- **精度修复**：真实语料 24 FP → 3 FP（-87.5%）
+
+### C 精度修复：真实语料 24 FP → 3 FP（-87.5%）
+
+- **Strategy 1 normalized 门控**：Windows API（ReadFile/WriteFile/DeleteFile）经 CamelCase→snake_case 规范化撞上内置规则名是 11/24 FP 的主导源——normalized 分支套用词段门控同款 projectFunctions 门（外部 API 不桥接；注解桥接不受影响——注解原语必为项目函数；原始名精确匹配不限门控）
+- **endState 直接调用溯源**：12/24 FP 是 nginx 回调式生命周期（open 在内联 helper 链、close 在指针注册的回调里——L3 级不可见）——`CallSequence.directCalls` + `validateSequenceWithSSG` 的 `entryDirectCalls` 参数，仅当资源获取调用是入口的直接调用时报告 endState（helper 获取不归因入口）
+- **结果**：真实语料四仓库 24 flags → **3 flags**（nginx 14→0、redis 0、libssh 1、openssl 2；残留 3 条是词段桥接按设计命中项目函数）。双回归门全过：Python 盲测 v1.2 64 违规零漂移（仅时间戳差异）、C 应用级金标 **TP 11/FP 1/FN 0 → F1=95.7% 不变**（leak_file 的 endState TP 保留）、引擎相关套件 120/120
+- **战略记录**：C 产品定位（自动检测 vs 注解驱动）待拍板——写入 `docs/c-language-status.md` Decision record；证据偏向注解驱动（精度修复后未注解自动检测仍 0 TP），金标扩量延后至定位拍板
+
 ## [3.7.5] — 2026-08-27
 
 ### C 真实语料验证 + 注解驱动演示 + 引擎修复（DSH 双轮评审合入）

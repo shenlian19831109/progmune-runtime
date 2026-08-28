@@ -227,4 +227,28 @@ void handle_monitor_no_auth(client *c) {
     expect(ssg[0].fix).toContain("checkPasswordBasedAuth");
     expect(ssg[0].fix).not.toContain("verify_token");
   });
+
+  it("回归（DSH 陷阱）：C 项目不手动写 ir.json，evaluateTrust 自动提取并合并注解", async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pm-engine-c-auto-"));
+    try {
+      fs.writeFileSync(path.join(dir, "auth.c"), SOURCE + `
+void handle_monitor_no_auth(client *c) {
+    ACLCheckAllPerm(c, NULL);
+}
+`);
+      // 注意：不写 ir.json——引擎应按语言自动提取（此前仅 TS/JS 生效，
+      // C 注解静默失效；修复后 C 走 extractIRC 兜底写盘）
+      const r = await evaluateTrust({
+        projectPath: dir,
+        projectName: "c-auto-extract-test",
+        commit: "test",
+        language: "c",
+      });
+      const ssg = r.violations.filter((v) => v.rule_id.startsWith("SSG_"));
+      expect(ssg).toHaveLength(1);
+      expect(ssg[0].function).toBe("handle_monitor_no_auth");
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });
