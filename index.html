@@ -377,11 +377,11 @@
       <tr><td><b>TypeScript</b></td><td><span class="tag ok">✅ Production</span></td><td data-i18n="s04.r1">盲测 795 金标：Recall 98.5% / Precision 100% / 0 FP；协议行 ✅×4</td></tr>
       <tr><td><b>Python</b></td><td><span class="tag ok">✅ Production</span></td><td data-i18n="s04.r2">协议盲测 v1.2：66 金标 97% / 100% / 0 FP；源码级检测 729 金标 Recall 100%</td></tr>
       <tr><td><b>C</b></td><td><span class="tag ok">✅ 注解驱动（Beta）</span></td><td data-i18n="s04.r3">真实模块金标 5/5 + 采纳案例 uftpd：0 误报 + 违规精确定位；每协议 ~2-3 条注解</td></tr>
-      <tr><td><b>框架适配</b></td><td><span class="tag ok">✅ 8/13</span></td><td data-i18n="s04.r5">Express / tRPC / FastAPI / Django / Flask / Fastify / Next.js / NestJS 结构级路由认证检查</td></tr>
+      <tr><td><b>框架适配</b></td><td><span class="tag ok">✅ 10/13</span></td><td data-i18n="s04.r5">Express / tRPC / FastAPI / Django / Flask / Fastify / Next.js / NestJS / Koa / Hapi 结构级路由认证检查</td></tr>
       <tr><td><b>Go / Java</b></td><td><span class="tag no">❌ None</span></td><td data-i18n="s04.r4">规划中；多语言 IR 注册表已就绪，新增语言 = 注册一条</td></tr>
     </tbody>
   </table>
-  <p class="lead" style="margin-top:14px; font-size:13px;" data-i18n="s04.cNote">注：C 为注解驱动验证（Beta）——未注解代码不检测、TLS 级深层覆盖仍无；框架适配 8/13 指结构级路由认证检查。所有数字可点击查看证据。</p>
+  <p class="lead" style="margin-top:14px; font-size:13px;" data-i18n="s04.cNote">注：C 为注解驱动验证（Beta）——未注解代码不检测、TLS 级深层覆盖仍无；框架适配 10/13 指结构级路由认证检查。所有数字可点击查看证据。</p>
 </section>
 
 <!-- ═══ 05 数据飞轮 ═══ -->
@@ -554,8 +554,8 @@ const I18N = {
     "s04.r2": "协议盲测 v1.2：66 金标 97% / 100% / 0 FP；<a href=\"https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/BASELINE_PROTOCOL_PYTHON_v1.md\" target=\"_blank\" rel=\"noopener\">基线文档</a>；源码级检测 729 金标 Recall 100%",
     "s04.r3": "真实模块金标 5/5 + 采纳案例 uftpd：0 误报 + 违规精确定位；每协议 ~2-3 条注解（<a href=\"https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md\" target=\"_blank\" rel=\"noopener\">C 语言状态</a>）",
     "s04.r4": "规划中；多语言 IR 注册表已就绪，新增语言 = 注册一条",
-    "s04.r5": "Express / tRPC / FastAPI / Django / Flask / Fastify / Next.js / NestJS 结构级路由认证检查（<a href=\"https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix.md\" target=\"_blank\" rel=\"noopener\">覆盖矩阵</a>）",
-    "s04.cNote": "注：C 为注解驱动验证（Beta）——未注解代码不检测、TLS 级深层覆盖仍无；框架适配 8/13 指结构级路由认证检查。所有数字可点击查看证据。",
+    "s04.r5": "Express / tRPC / FastAPI / Django / Flask / Fastify / Next.js / NestJS / Koa / Hapi 结构级路由认证检查（<a href=\"https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix.md\" target=\"_blank\" rel=\"noopener\">覆盖矩阵</a>）",
+    "s04.cNote": "注：C 为注解驱动验证（Beta）——未注解代码不检测、TLS 级深层覆盖仍无；框架适配 10/13 指结构级路由认证检查。所有数字可点击查看证据。",
     "fw.title": "失败语料飞轮",
     "fw.lead": "每一次验证失败都不会被浪费——落入失败语料库、汇聚到中央 hub，让「验证覆盖」越来越强、高频错误模式越来越清晰。",
     "fw.s1t": "🧯 失败入库", "fw.s1d": "每次违规记录 SSG 状态快照、SVL 分级与约束类型",

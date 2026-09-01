@@ -43,6 +43,12 @@ export type { FastifyAppAnalysis, FastifySecurityIssue } from "./fastify-detecto
 
 export { analyzeNextApp, readNextMiddleware } from "./nextjs-detector";
 
+export { analyzeKoaApp, analyzeKoaFile } from "./koa-detector";
+export type { KoaAppAnalysis, KoaSecurityIssue } from "./koa-detector";
+
+export { analyzeHapiApp, analyzeHapiFile } from "./hapi-detector";
+export type { HapiAppAnalysis, HapiSecurityIssue } from "./hapi-detector";
+
 export { analyzeNestJSProject, analyzeNestJSFile } from "./nestjs-detector";
 export type { NestJSAnalysis, NestJSRoute, NestJSSecurityIssue } from "./nestjs-detector";
 export type { NextAppAnalysis, NextSecurityIssue, NextRouteFile } from "./nextjs-detector";

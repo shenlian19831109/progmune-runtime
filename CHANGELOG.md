@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.7.12] — 2026-09-01
+
+### Koa + Hapi 框架结构适配——10/13
+
+- **Koa（第 9 个）**：`src/frameworks/koa-detector.ts`（代码串级，镜像 express/koa 中间件模式）——`KOA_ROUTE_NO_AUTH`：mutation 路由注册中间件链无认证名中间件，且文件内无认证 `app.use` 全局中间件；认证名按词表分类（auth/login/permission/jwt/verify/guard…）；GET 读操作与认证入口路径豁免
+- **Hapi（第 10 个）**：`src/frameworks/hapi-detector.ts`（路由配置模式）——`HAPI_ROUTE_NO_AUTH`：mutation 路由 options 无 auth 字段或显式 `auth: false`（显式公开 mutation 检出）；`auth: 'strategy'` / `auth: { strategy: 'x' }` 两种形态均识别为受保护；`auth.strategy` 声明被记录
+- **引擎接线**：collectKoaViolations / collectHapiViolations + overall `koaCoverage`/`hapiCoverage`（加性 best-effort）；frameworks barrel 补全（11 个适配器模块）
+- **验证**：15 个新单测（koa 7 + hapi 8，含显式 auth:false 与 strategy 对象形态）；引擎冒烟：Koa 全局认证中间件 0 误报 APPROVED 90、Hapi 无 auth 路由检出 + login 豁免 APPROVED 87；全套件 **181/181**；Python 盲测 v1.2 64 零漂移
+- **文档**：10/13 口径（README 双语/覆盖矩阵双语/CLAUDE.md/落地页 + Koa/Hapi 矩阵行）
+- **边界（如实）**：文件级窗口（跨文件全局中间件不可见，与 Express 检测器同款）；认证中间件按名词语汇识别；Hapi 路由窗口 500 字符（超长配置截断）
+
 ## [3.7.11] — 2026-09-01
 
 ### NestJS 补全——框架适配 8/13

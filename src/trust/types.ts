@@ -159,6 +159,20 @@ export interface TrustDecision {
       filesScanned: number;
       issuesFound: number;
     };
+    /** Koa framework adapter coverage */
+    koaCoverage?: {
+      appsDetected: number;
+      totalRoutes: number;
+      filesScanned: number;
+      issuesFound: number;
+    };
+    /** Hapi framework adapter coverage */
+    hapiCoverage?: {
+      appsDetected: number;
+      totalRoutes: number;
+      filesScanned: number;
+      issuesFound: number;
+    };
   };
 
   dimensions: TrustDimensions;

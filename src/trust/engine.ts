@@ -66,6 +66,8 @@ import { analyzeDjangoStructure } from "../frameworks/django-detector";
 import { analyzeFlaskStructure } from "../frameworks/flask-detector";
 import { analyzeFastifyFile } from "../frameworks/fastify-detector";
 import { analyzeNextApp, readNextMiddleware } from "../frameworks/nextjs-detector";
+import { analyzeKoaFile } from "../frameworks/koa-detector";
+import { analyzeHapiFile } from "../frameworks/hapi-detector";
 import {
   validateSequenceWithSSG,
   ssgViolationsToTrustViolations,
@@ -117,6 +119,8 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
   const flaskResult = collectFlaskViolations(ctx);
   const fastifyResult = collectFastifyViolations(ctx);
   const nextjsResult = collectNextjsViolations(ctx);
+  const koaResult = collectKoaViolations(ctx);
+  const hapiResult = collectHapiViolations(ctx);
   const coverageData = collectVerificationCoverage(ctx);
   const governanceDefects = collectGovernanceDefects(ctx);
 
@@ -142,6 +146,8 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
     ...flaskResult.violations,
     ...fastifyResult.violations,
     ...nextjsResult.violations,
+    ...koaResult.violations,
+    ...hapiResult.violations,
   ];
 
   // ═══════════════════════════════════════
@@ -327,6 +333,24 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
             issuesFound: nextjsResult.violations.length,
           }
         : undefined,
+      /** Koa framework adapter coverage — route/auth-middleware analysis */
+      koaCoverage: koaResult.coverage.routes > 0
+        ? {
+            appsDetected: koaResult.coverage.apps,
+            totalRoutes: koaResult.coverage.routes,
+            filesScanned: koaResult.coverage.filesScanned,
+            issuesFound: koaResult.violations.length,
+          }
+        : undefined,
+      /** Hapi framework adapter coverage — route-config auth analysis */
+      hapiCoverage: hapiResult.coverage.routes > 0
+        ? {
+            appsDetected: hapiResult.coverage.apps,
+            totalRoutes: hapiResult.coverage.routes,
+            filesScanned: hapiResult.coverage.filesScanned,
+            issuesFound: hapiResult.violations.length,
+          }
+        : undefined,
     },
     dimensions: {
       policyCompliance: {
@@ -484,6 +508,96 @@ function mapPolicyViolation(
  * Collect Express-specific security violations from the framework detector.
  * Maps ExpressSecurityIssue[] → TrustViolation[].
  */
+function collectKoaViolations(ctx: TrustEvaluationContext): {
+  violations: TrustViolation[];
+  coverage: { apps: number; routes: number; filesScanned: number };
+} {
+  const violations: TrustViolation[] = [];
+  const coverage = { apps: 0, routes: 0, filesScanned: 0 };
+
+  try {
+    const fs = require("fs");
+    const candidateDirs = ["src", "server", "app", "api", "routes", "lib"];
+    const extensions = languageToExtensions(ctx.language);
+    for (const dir of candidateDirs) {
+      const dirPath = path.join(ctx.projectPath, dir);
+      if (!fs.existsSync(dirPath)) continue;
+      let files: string[];
+      try { files = walkDir(dirPath, extensions, 100); } catch { continue; }
+      for (const file of files) {
+        if (/\.(test|spec)\.(ts|tsx|js|jsx)$/.test(file)) continue;
+        coverage.filesScanned++;
+        try {
+          const analysis = analyzeKoaFile(file);
+          if (!analysis || !analysis.hasKoa) continue;
+          coverage.apps++;
+          coverage.routes += analysis.routes.length;
+          for (const issue of analysis.issues) {
+            violations.push({
+              severity: issue.severity === "low" ? "low" : issue.severity,
+              rule_id: issue.rule,
+              file: path.relative(ctx.projectPath, file),
+              function: "unknown",
+              message: issue.message,
+              evidence: issue.route || "",
+              why: `Framework structural analysis: ${issue.message}`,
+              fix: `Add an auth middleware to the route registration, or register an auth middleware globally with app.use.`,
+              policy_ref: "framework-safety.koa",
+            });
+          }
+        } catch { /* skip unreadable files */ }
+      }
+    }
+  } catch { /* best-effort */ }
+
+  return { violations, coverage };
+}
+
+function collectHapiViolations(ctx: TrustEvaluationContext): {
+  violations: TrustViolation[];
+  coverage: { apps: number; routes: number; filesScanned: number };
+} {
+  const violations: TrustViolation[] = [];
+  const coverage = { apps: 0, routes: 0, filesScanned: 0 };
+
+  try {
+    const fs = require("fs");
+    const candidateDirs = ["src", "server", "app", "api", "routes", "lib"];
+    const extensions = languageToExtensions(ctx.language);
+    for (const dir of candidateDirs) {
+      const dirPath = path.join(ctx.projectPath, dir);
+      if (!fs.existsSync(dirPath)) continue;
+      let files: string[];
+      try { files = walkDir(dirPath, extensions, 100); } catch { continue; }
+      for (const file of files) {
+        if (/\.(test|spec)\.(ts|tsx|js|jsx)$/.test(file)) continue;
+        coverage.filesScanned++;
+        try {
+          const analysis = analyzeHapiFile(file);
+          if (!analysis || !analysis.hasHapi) continue;
+          coverage.apps++;
+          coverage.routes += analysis.routes.length;
+          for (const issue of analysis.issues) {
+            violations.push({
+              severity: issue.severity === "low" ? "low" : issue.severity,
+              rule_id: issue.rule,
+              file: path.relative(ctx.projectPath, file),
+              function: "unknown",
+              message: issue.message,
+              evidence: issue.route || "",
+              why: `Framework structural analysis: ${issue.message}`,
+              fix: `Add an auth strategy reference to the route options (auth: "<strategy>"), or remove the explicit auth: false.`,
+              policy_ref: "framework-safety.hapi",
+            });
+          }
+        } catch { /* skip unreadable files */ }
+      }
+    }
+  } catch { /* best-effort */ }
+
+  return { violations, coverage };
+}
+
 function collectNextjsViolations(ctx: TrustEvaluationContext): {
   violations: TrustViolation[];
   coverage: { apps: number; routes: number; filesScanned: number };

@@ -108,7 +108,7 @@ Progmune is honest about what it can and cannot verify.
 
 **Multi-language IR (registry-based).** TypeScript (ts-morph) and Python (AST) extractors are registered entries in one registry (`src/extract-project-ir.ts`); `extractProjectIR` merges every detected language into a single function IR shared by the agent loop, `execute()`, and the MCP server — the agent composes function-protocol chains across both languages. Adding a language (Go, Java, …) = register one extractor entry; callers don't change.
 
-**Framework adapters: 8/13.** Express ✅, tRPC ✅, FastAPI ✅, Django ✅ (structural route-level auth analysis — every mutation route checked for auth), Flask ✅ (route/before_request auth guard analysis), Fastify ✅ (route preHandler/hook auth analysis) and Next.js ✅ (App Router route-handler auth analysis) and NestJS ✅ (decorator route parsing + global APP_GUARD recognition + @Public exemption) have dedicated detectors. Next.js version-aware governance also exists. Spring Boot/Go frameworks and a few TS frameworks remain — framework adaptation is the #1 product gap.
+**Framework adapters: 10/13.** Express ✅, tRPC ✅, FastAPI ✅, Django ✅ (structural route-level auth analysis — every mutation route checked for auth), Flask ✅ (route/before_request auth guard analysis), Fastify ✅ (route preHandler/hook auth analysis) and Next.js ✅ (App Router route-handler auth analysis), NestJS ✅ (decorator route parsing + global APP_GUARD recognition + @Public exemption), Koa ✅ (route/auth-middleware chain analysis) and Hapi ✅ (route-config auth strategy analysis) have dedicated detectors. Next.js version-aware governance also exists. Spring Boot/Go frameworks and a few TS frameworks remain — framework adaptation is the #1 product gap.
 
 ### What Progmune does NOT cover (honest boundaries)
 
@@ -234,7 +234,7 @@ High-impact contribution areas:
 - **Runtime Pipeline:** Detect → Explain → Repair → Validate (L1–L4)
 - **Trust Engine:** 4-dimension scoring with binary explainability gate
 - **MCP Tools:** 19 — `progmune_trust_check`, `progmune_score`, `progmune_policy_check`, `progmune_certify`, and more
-- **Framework Adapters:** Express ✅, tRPC ✅, FastAPI ✅, Django ✅, Flask ✅, Fastify ✅, Next.js ✅, NestJS ✅ (8/13)
+- **Framework Adapters:** Express ✅, tRPC ✅, FastAPI ✅, Django ✅, Flask ✅, Fastify ✅, Next.js ✅, NestJS ✅ (10/13)
 - **Knowledge Base:** 31 domains, 148 protocol rules, 22 detectors, 26 safeguards, PLSB 13/13 categories — plus 15 source-level detection rules (Python)
 - **Corpus:** 2,500+ trajectories across 6+ repositories; blind benchmarks 100 (TS) + 90 (Python) projects; real-world validation on 4 application repos
 - **Current focus:** Enterprise PoC validation + remaining framework-internal boundary FPs

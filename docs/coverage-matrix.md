@@ -175,6 +175,8 @@ Ledger             ✅           ❌           ❌         ❌          ❌
 | NestJS | TS/JS | ✅ 结构分析（3.7.11） | 装饰器路由解析 + 全局 APP_GUARD 守卫识别 + @Public 豁免 + 守卫名认证分类（ThrottlerGuard≠认证）（合成金标 P=R=100%） |
 | Next.js | TS/JS | ✅ 结构分析（3.7.9） | App Router route.ts 写导出认证检查 + 认证 middleware；另有版本感知治理 |
 | Fastify | TS/JS | ✅ 结构分析（3.7.9） | 路由 preHandler/钩子认证分析（代码串级） |
+| Koa | TS/JS | ✅ 结构分析（3.7.12） | 路由/认证中间件链分析（app.use + 路由级中间件） |
+| Hapi | TS/JS | ✅ 结构分析（3.7.12） | 路由配置认证策略分析（auth 选项 + 显式 auth: false 检出） |
 | 其余 TS 框架 | TS/JS | ⚠️ 基础别名 | 库别名覆盖，无结构分析 |
 | Django | Python | ✅ 结构分析（3.7.8） | URL 配置/CBV/DRF 结构适配：无保护 mutation 视图与 AllowAny 写端点标记（合成金标 P=R=100%；django-realworld 0 FP） |
 | FastAPI | Python | ✅ 结构分析（3.7.8） | 路由/认证依赖结构适配：写操作路由认证依赖检查 + 死认证方案标记（合成金标 P=R=100%；fastapi-realworld 0 FP） |
@@ -184,8 +186,8 @@ Ledger             ✅           ❌           ❌         ❌          ❌
 | curl / nginx / libssh / OpenSSL | C | ✅ 有基准 | C 黄金基准（旧正则口径 F1=16.5% 为 TLS 级历史基线；3.7.4 起 IR 提取 + 应用级协议验证，金标 v2 F1=95.7%；3.7.6 起注解驱动 Beta——真实模块金标 5/5） |
 
 ```
-已适配框架        8 / 13（Express ✅、tRPC ✅、FastAPI ✅、Django ✅、
-                  Flask ✅、Fastify ✅、Next.js ✅、NestJS ✅ 专用检测器）
+已适配框架        10 / 13（Express ✅、tRPC ✅、FastAPI ✅、Django ✅、Flask ✅、
+                  Fastify ✅、Next.js ✅、NestJS ✅、Koa ✅、Hapi ✅ 专用检测器）
 部分支持          0（Next.js 另有版本感知治理）
 基础别名覆盖      5 / 13（无结构分析）
 ```
@@ -251,7 +253,7 @@ Protocols        21 命名空间全有词汇      + OAuth2.0/OIDC、gRPC、
                                          GraphQL、WebSocket
 Languages        2 ✅ (TS, Python)        + Go ✅
                  C ✅ 注解驱动（Beta）   Java（更远期）
-Frameworks       8/13 专用检测器         Spring Boot/Go 框架结构适配
+Frameworks       10/13 专用检测器         Spring Boot/Go 框架结构适配（需语言支持）
 TS P/R           100%/98.5%              稳定
 Python P/R       100%/100%               稳定
 CVE              34 (88% 检出)           100 (校准检出率)
