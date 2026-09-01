@@ -20,7 +20,7 @@ const risk_model_1 = require("./risk-model");
 const protocol_knowledge_1 = require("./protocol-knowledge");
 const evidence_repository_1 = require("./evidence-repository");
 /** Runtime version — stable public identifier. Internal layers evolve underneath. */
-exports.RUNTIME_VERSION = "3.7.9";
+exports.RUNTIME_VERSION = "3.7.10";
 function verify(filePath) {
     const cert = (0, certify_1.certify)(filePath);
     const kb = (0, protocol_knowledge_1.buildKnowledgeBase)();

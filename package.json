@@ -1,6 +1,6 @@
 {
   "name": "progmune-runtime",
-  "version": "3.7.9",
+  "version": "3.7.10",
   "description": "Progmune — AI Trust Decision Engine. Verify AI-generated code before it reaches production. Outputs APPROVED / NEEDS_REVIEW / BLOCKED with evidence.",
   "files": [
     "dist/",
@@ -8,7 +8,11 @@
     "c-aliases.json",
     "CHANGELOG.md",
     "docs/Progmune_项目全解.html",
-    "docs/Progmune_投资人白皮书_v2.0.html"
+    "docs/Progmune_投资人白皮书_v2.0.html",
+    "tools/extract_ir.py",
+    "tools/extract_framework_py.py",
+    "tools/extract_framework_django.py",
+    "tools/extract_framework_flask.py"
   ],
   "main": "dist/mcp-server.mjs",
   "bin": {

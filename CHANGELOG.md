@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.7.10] — 2026-09-01
+
+### 安装态 Python 全链路修复（npm 包正确性）
+
+- **修复**：`tools/extract_ir.py` + 三个框架扫描器（`extract_framework_py.py` / `extract_framework_django.py` / `extract_framework_flask.py`）加入 npm 包 `files` 白名单——**此前安装态（MCP 主产品形态）的 Python IR 提取与框架结构扫描全部静默失效**（脚本不在包内，execSync 失败被 best-effort 吞掉）。M1/M2 验证时发现的既有遗留，非 3.7.8/3.7.9 引入
+- **安装态端到端验证**（此前从未有过）：打包 tarball → 临时目录 npm install → 用安装态的 dist 跑 evaluateTrust——FastAPI 合成项目检出 `FASTAPI_ROUTE_NO_AUTH`（框架扫描生效）、Python 盲测项目检出 SSG 违规（IR 提取生效）、**安装态与仓库态 A/B 完全一致**；`tools/__pycache__` 未入包（files 精确文件路径）
+- **落地页**：语言覆盖现状更新入版（C 注解驱动 Beta 行 + 框架适配 7/13 行 + 双语 i18n + 证据链接）
+- 包体：377 文件（+4 个 .py，约 71.5KB）
+
 ## [3.7.9] — 2026-08-28
 
 ### Flask / Fastify / Next.js 框架结构适配（M4——框架适配 7/13）
