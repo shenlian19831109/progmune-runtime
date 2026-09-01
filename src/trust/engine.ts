@@ -948,50 +948,36 @@ function collectNestJSViolations(ctx: TrustEvaluationContext): {
   let filesScanned = 0;
 
   try {
-    const { analyzeNestJSFile } = require("../frameworks/nestjs-detector");
-    const fs = require("fs");
+    // 项目级分析（一次 ts-morph Project 装载）：全局 APP_GUARD 守卫与
+    // @Public 豁免需要跨文件上下文——per-file 分析无法识别全局守卫，
+    // 会把受全局保护的 mutation 路由系统性误报（补全轮实测根因）。
+    const { analyzeNestJSProject } = require("../frameworks/nestjs-detector");
+    const analysis = analyzeNestJSProject(ctx.projectPath);
+    if (!analysis || analysis.controllers.length === 0) {
+      return { violations, coverage: { controllers, routes, filesScanned } };
+    }
 
-    const candidateDirs = ["src", "server", "app", "api", "modules"];
-    const extensions = languageToExtensions(ctx.language);
+    controllers = analysis.controllers.length;
+    routes = analysis.routes.length;
+    filesScanned = 1; // 项目级单次装载（口径：分析单元 = 项目）
 
-    for (const dir of candidateDirs) {
-      const dirPath = path.join(ctx.projectPath, dir);
-      if (!fs.existsSync(dirPath)) continue;
+    for (const issue of analysis.issues) {
+      const severity: ViolationSeverity =
+        issue.severity === "critical" ? "critical" :
+        issue.severity === "high" ? "high" :
+        issue.severity === "medium" ? "medium" : "low";
 
-      let files: string[];
-      try { files = walkDir(dirPath, extensions, 100); } catch { continue; }
-
-      for (const file of files) {
-        if (/\.(test|spec)\.(ts|tsx|js|jsx)$/.test(file)) continue;
-        filesScanned++;
-
-        try {
-          const analysis = analyzeNestJSFile(file);
-          if (!analysis || analysis.controllers.length === 0) continue;
-
-          controllers += analysis.controllers.length;
-          routes += analysis.routes.length;
-
-          for (const issue of analysis.issues) {
-            const severity: ViolationSeverity =
-              issue.severity === "critical" ? "critical" :
-              issue.severity === "high" ? "high" :
-              issue.severity === "medium" ? "medium" : "low";
-
-            violations.push({
-              severity,
-              rule_id: issue.type,
-              file: path.relative(ctx.projectPath, file),
-              function: `${issue.controller}.${issue.route}`,
-              message: issue.message,
-              evidence: `NestJS route: ${issue.route} | Controller: ${issue.controller}`,
-              why: `NestJS decorator analysis: ${issue.type}`,
-              fix: issue.fix,
-              policy_ref: "framework.nestjs",
-            });
-          }
-        } catch { /* skip unreadable files */ }
-      }
+      violations.push({
+        severity,
+        rule_id: issue.type,
+        file: issue.controller || "",
+        function: `${issue.controller}.${issue.route}`,
+        message: issue.message,
+        evidence: `NestJS route: ${issue.route} | Controller: ${issue.controller}`,
+        why: `NestJS decorator analysis: ${issue.type}`,
+        fix: issue.fix,
+        policy_ref: "framework.nestjs",
+      });
     }
   } catch { /* best-effort */ }
 

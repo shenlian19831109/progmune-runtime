@@ -1,0 +1,169 @@
+{
+  "generated": "2026-09-01T14:53:48.828Z",
+  "method": "analyzeNestJSProject（ts-morph 项目级，确定性）",
+  "summary": {
+    "tp": 12,
+    "fp": 0,
+    "fn": 0,
+    "precision": 1,
+    "recall": 1
+  },
+  "rows": [
+    {
+      "id": "nestjs_N1_clean",
+      "gold": [
+        {
+          "rule": "NESTJS_NO_VALIDATION",
+          "handler": "ApiController.transfer"
+        }
+      ],
+      "detected": [
+        {
+          "rule": "NESTJS_NO_VALIDATION",
+          "handler": "ApiController.transfer"
+        }
+      ],
+      "rowTp": 1,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "nestjs_N2_clean_global",
+      "gold": [
+        {
+          "rule": "NESTJS_NO_VALIDATION",
+          "handler": "ApiController.transfer"
+        }
+      ],
+      "detected": [
+        {
+          "rule": "NESTJS_NO_VALIDATION",
+          "handler": "ApiController.transfer"
+        }
+      ],
+      "rowTp": 1,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "nestjs_N3_V1_no_guard",
+      "gold": [
+        {
+          "rule": "NESTJS_NO_AUTH",
+          "handler": "ApiController.transfer"
+        },
+        {
+          "rule": "NESTJS_NO_VALIDATION",
+          "handler": "ApiController.transfer"
+        },
+        {
+          "rule": "NESTJS_SENSITIVE_PUBLIC",
+          "handler": "ApiController.admin"
+        }
+      ],
+      "detected": [
+        {
+          "rule": "NESTJS_NO_AUTH",
+          "handler": "ApiController.transfer"
+        },
+        {
+          "rule": "NESTJS_NO_VALIDATION",
+          "handler": "ApiController.transfer"
+        },
+        {
+          "rule": "NESTJS_SENSITIVE_PUBLIC",
+          "handler": "ApiController.admin"
+        }
+      ],
+      "rowTp": 3,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "nestjs_N4_V2_public_bypass",
+      "gold": [
+        {
+          "rule": "NESTJS_NO_AUTH",
+          "handler": "ApiController.transfer"
+        },
+        {
+          "rule": "NESTJS_NO_VALIDATION",
+          "handler": "ApiController.transfer"
+        }
+      ],
+      "detected": [
+        {
+          "rule": "NESTJS_NO_AUTH",
+          "handler": "ApiController.transfer"
+        },
+        {
+          "rule": "NESTJS_NO_VALIDATION",
+          "handler": "ApiController.transfer"
+        }
+      ],
+      "rowTp": 2,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "nestjs_N5_V3_throttler_only",
+      "gold": [
+        {
+          "rule": "NESTJS_NO_AUTH",
+          "handler": "ApiController.transfer"
+        },
+        {
+          "rule": "NESTJS_NO_VALIDATION",
+          "handler": "ApiController.transfer"
+        },
+        {
+          "rule": "NESTJS_SENSITIVE_PUBLIC",
+          "handler": "ApiController.admin"
+        }
+      ],
+      "detected": [
+        {
+          "rule": "NESTJS_NO_AUTH",
+          "handler": "ApiController.transfer"
+        },
+        {
+          "rule": "NESTJS_NO_VALIDATION",
+          "handler": "ApiController.transfer"
+        },
+        {
+          "rule": "NESTJS_SENSITIVE_PUBLIC",
+          "handler": "ApiController.admin"
+        }
+      ],
+      "rowTp": 3,
+      "rowFp": 0,
+      "rowFn": 0
+    },
+    {
+      "id": "nestjs_N6_V4_sensitive_get",
+      "gold": [
+        {
+          "rule": "NESTJS_NO_VALIDATION",
+          "handler": "ApiController.transfer"
+        },
+        {
+          "rule": "NESTJS_SENSITIVE_PUBLIC",
+          "handler": "ApiController.admin"
+        }
+      ],
+      "detected": [
+        {
+          "rule": "NESTJS_NO_VALIDATION",
+          "handler": "ApiController.transfer"
+        },
+        {
+          "rule": "NESTJS_SENSITIVE_PUBLIC",
+          "handler": "ApiController.admin"
+        }
+      ],
+      "rowTp": 2,
+      "rowFp": 0,
+      "rowFn": 0
+    }
+  ]
+}

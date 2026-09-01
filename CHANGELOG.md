@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.7.11] — 2026-09-01
+
+### NestJS 补全——框架适配 8/13
+
+- **三缺口补全**（`src/frameworks/nestjs-detector.ts`）：
+  ①**全局 APP_GUARD 守卫识别**——@Module providers 的 `{ provide: APP_GUARD, useClass: X }`（装饰器参数与类属性两种形态）→ 全局认证守卫存在时 mutation 路由不再误报；
+  ②**@Public()/@SkipAuth()/@AllowAnon() 豁免装饰器**（类级+方法级）——全局守卫模式下的公开路由标记；**显式绕过全局守卫的 mutation 路由 → NESTJS_NO_AUTH**（消息注明绕过的是哪个全局守卫）；
+  ③**守卫名认证分类**——ThrottlerGuard/RateLimit/Logger 等非认证守卫不再算认证（限流≠认证，实测误报源）
+- **引擎接线升级**：collectNestJSViolations 从 per-file 切 **项目级一次装载**（analyzeNestJSProject）——全局守卫与 @Public 需要跨文件上下文，per-file 分析无法识别全局守卫（系统性误报根因）；coverage.filesScanned 口径改为分析单元=项目
+- **合成金标**（`generate-projects-nestjs.ts` + `scan-protocol-nestjs.ts`）：6 项目（类级守卫/全局 APP_GUARD+@Public login/无守卫/显式绕过/ThrottlerGuard 非认证/敏感 GET 公开）——**TP 12 / FP 0 / FN 0 → P=R=100%**
+- **验证**：6 个新单测（含 @Public login 在全局守卫下不报）；引擎冒烟 N2 APPROVED 87（全局守卫正确识别）、N4 BLOCKED（显式绕过 critical 拦截）；全套件 166/166；Python 盲测 v1.2 64 零漂移；C 演示不变
+- **文档**：NestJS ⚠️ 部分 → ✅ 结构分析（README 双语/覆盖矩阵双语/CLAUDE.md/落地页「8/13 专用检测器」口径）
+
 ## [3.7.10] — 2026-09-01
 
 ### 安装态 Python 全链路修复（npm 包正确性）

@@ -173,7 +173,7 @@ Registry-based multi-language merged extraction (`src/extract-project-ir.ts`): T
 |-----------|----------|-----------|-------|
 | Express | TS/JS | ✅ Dedicated detector | Route extraction + middleware classification + security checks |
 | tRPC | TS/JS | ✅ Dedicated detector | API contract rules (3), cross-corrected with the Express detector |
-| NestJS | TS/JS | ⚠️ Partial | @Controller/@UseGuards/@UsePipes decorator route parsing |
+| NestJS | TS/JS | ✅ Structural (3.7.11) | Decorator route parsing + global APP_GUARD recognition + @Public exemption + guard auth-classification (ThrottlerGuard≠auth) (synthetic gold P=R=100%) |
 | Next.js | TS/JS | ✅ Structural (3.7.9) | App Router route.ts mutation-export auth checks + auth middleware; version-aware governance also exists |
 | Fastify | TS/JS | ✅ Structural (3.7.9) | Route preHandler/hook auth analysis (code-string level) |
 | Other TS frameworks | TS/JS | ⚠️ Basic aliases | Library alias coverage, no structural analysis |
@@ -185,8 +185,8 @@ Registry-based multi-language merged extraction (`src/extract-project-ir.ts`): T
 | curl / nginx / libssh / OpenSSL | C | ✅ Benchmarked | C gold benchmark (old regex-route F1=16.5% is the TLS-level historical baseline; since 3.7.4 IR extraction + app-level protocol verification, gold v2 F1=95.7%; annotation-driven Beta since 3.7.6 — real-module gold 5/5) |
 
 ```
-Dedicated detectors    7 / 13 (Express ✅, tRPC ✅, FastAPI ✅, Django ✅, Flask ✅, Fastify ✅, Next.js ✅)
-Partial                2 (NestJS partial, Next.js version-aware)
+Dedicated detectors    8 / 13 (Express ✅, tRPC ✅, FastAPI ✅, Django ✅, Flask ✅, Fastify ✅, Next.js ✅)
+Partial                0 (Next.js additionally version-aware)
 Basic alias coverage   5 / 13 (no structural analysis)
 ```
 
@@ -213,7 +213,7 @@ Basic alias coverage   5 / 13 (no structural analysis)
 | Gap | Impact |
 |-----|--------|
 | Django / FastAPI structural analysis | ✅ Adapted (3.7.8) — route-level auth checks live; ORM query safety, DI chains, serializer validation still source-level only |
-| Structural analysis for TS frameworks beyond Express | Enterprise TS projects heavily use Next.js/Fastify/NestJS — currently only partially covered |
+| Structural analysis for TS frameworks beyond Express | ✅ Next.js/Fastify/NestJS all structurally adapted (3.7.9/3.7.11) — all four major TS frameworks covered; niche frameworks (Koa etc.) remain alias-level |
 
 ### P1 — Language extension
 
@@ -251,7 +251,7 @@ Protocols        21 namespaces, all with    + OAuth2.0/OIDC, gRPC,
                  rule vocabulary             GraphQL, WebSocket
 Languages        2 ✅ (TS, Python)          + Go ✅
                  C ✅ Annotation (Beta)     Java (further out)
-Frameworks       7/13 dedicated detectors   Spring Boot/Go structural
+Frameworks       8/13 dedicated detectors   Spring Boot/Go structural
                                             adaptation
 TS P/R           100%/98.5%                 stable
 Python P/R       100%/100%                  stable

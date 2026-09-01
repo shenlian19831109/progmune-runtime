@@ -42,6 +42,9 @@ export { analyzeFastifyApp, analyzeFastifyFile } from "./fastify-detector";
 export type { FastifyAppAnalysis, FastifySecurityIssue } from "./fastify-detector";
 
 export { analyzeNextApp, readNextMiddleware } from "./nextjs-detector";
+
+export { analyzeNestJSProject, analyzeNestJSFile } from "./nestjs-detector";
+export type { NestJSAnalysis, NestJSRoute, NestJSSecurityIssue } from "./nestjs-detector";
 export type { NextAppAnalysis, NextSecurityIssue, NextRouteFile } from "./nextjs-detector";
 
 // ── Framework Version-Aware Governance ──

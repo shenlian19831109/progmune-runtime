@@ -172,7 +172,7 @@ Ledger             ✅           ❌           ❌         ❌          ❌
 |-----------|------|---------|------|
 | Express | TS/JS | ✅ 专用检测器 | 路由提取 + 中间件分类 + 安全检查 |
 | tRPC | TS/JS | ✅ 专用检测器 | API 合约规则（3 条），与 Express detector 交叉纠正 |
-| NestJS | TS/JS | ⚠️ 部分 | @Controller/@UseGuards/@UsePipes 装饰器路由解析 |
+| NestJS | TS/JS | ✅ 结构分析（3.7.11） | 装饰器路由解析 + 全局 APP_GUARD 守卫识别 + @Public 豁免 + 守卫名认证分类（ThrottlerGuard≠认证）（合成金标 P=R=100%） |
 | Next.js | TS/JS | ✅ 结构分析（3.7.9） | App Router route.ts 写导出认证检查 + 认证 middleware；另有版本感知治理 |
 | Fastify | TS/JS | ✅ 结构分析（3.7.9） | 路由 preHandler/钩子认证分析（代码串级） |
 | 其余 TS 框架 | TS/JS | ⚠️ 基础别名 | 库别名覆盖，无结构分析 |
@@ -184,9 +184,9 @@ Ledger             ✅           ❌           ❌         ❌          ❌
 | curl / nginx / libssh / OpenSSL | C | ✅ 有基准 | C 黄金基准（旧正则口径 F1=16.5% 为 TLS 级历史基线；3.7.4 起 IR 提取 + 应用级协议验证，金标 v2 F1=95.7%；3.7.6 起注解驱动 Beta——真实模块金标 5/5） |
 
 ```
-已适配框架        7 / 13（Express ✅、tRPC ✅、FastAPI ✅、Django ✅、
-                  Flask ✅、Fastify ✅、Next.js ✅ 专用检测器）
-部分支持          1（NestJS 部分；Next.js 另有版本感知）
+已适配框架        8 / 13（Express ✅、tRPC ✅、FastAPI ✅、Django ✅、
+                  Flask ✅、Fastify ✅、Next.js ✅、NestJS ✅ 专用检测器）
+部分支持          0（Next.js 另有版本感知治理）
 基础别名覆盖      5 / 13（无结构分析）
 ```
 
@@ -213,7 +213,7 @@ Ledger             ✅           ❌           ❌         ❌          ❌
 | 空白 | 影响 |
 |------|------|
 | Django / FastAPI 结构分析 | ✅ 已适配（3.7.8）——路由级认证检查上线；ORM 查询安全、DI 链、serializer 校验仍未结构化（源码级规则覆盖中） |
-| Express 之外的 TS 框架结构分析 | 企业 TS 项目大量使用 Next.js/Fastify/NestJS，当前仅部分覆盖 |
+| Express 之外的 TS 框架结构分析 | ✅ Next.js/Fastify/NestJS 均已结构适配（3.7.9/3.7.11）——TS 四大框架齐；Koa 等小众框架为别名覆盖 |
 
 ### P1 — 语言扩展
 
@@ -251,7 +251,7 @@ Protocols        21 命名空间全有词汇      + OAuth2.0/OIDC、gRPC、
                                          GraphQL、WebSocket
 Languages        2 ✅ (TS, Python)        + Go ✅
                  C ✅ 注解驱动（Beta）   Java（更远期）
-Frameworks       7/13 专用检测器         Spring Boot/Go 框架结构适配
+Frameworks       8/13 专用检测器         Spring Boot/Go 框架结构适配
 TS P/R           100%/98.5%              稳定
 Python P/R       100%/100%               稳定
 CVE              34 (88% 检出)           100 (校准检出率)

@@ -15,7 +15,14 @@
  * and identifies security gaps (mutation routes without guards, etc.).
  */
 
-import { Project, ClassDeclaration, MethodDeclaration, Decorator } from "ts-morph";
+import {
+  Project,
+  ClassDeclaration,
+  MethodDeclaration,
+  Decorator,
+  SyntaxKind,
+  Expression,
+} from "ts-morph";
 
 // ── Types ──
 
@@ -28,6 +35,8 @@ export interface NestJSRoute {
   hasValidationPipe: boolean;
   guards: string[];
   pipes: string[];
+  /** @Public()/@SkipAuth() 标记（配合全局守卫的公开路由豁免） */
+  isPublicDecorated: boolean;
 }
 
 export interface NestJSSecurityIssue {
@@ -43,6 +52,8 @@ export interface NestJSAnalysis {
   controllers: string[];
   routes: NestJSRoute[];
   issues: NestJSSecurityIssue[];
+  /** 全局认证守卫（@Module providers 里的 APP_GUARD，认证名分类后） */
+  globalAuthGuards: string[];
 }
 
 // ── Core Analysis ──
@@ -60,7 +71,7 @@ export function analyzeNestJSProject(projectRoot: string): NestJSAnalysis {
     try {
       project.addSourceFilesAtPaths(`${projectRoot}/**/*.ts`);
     } catch {
-      return { controllers: [], routes: [], issues: [] };
+      return { controllers: [], routes: [], issues: [], globalAuthGuards: [] };
     }
   }
 
@@ -68,7 +79,26 @@ export function analyzeNestJSProject(projectRoot: string): NestJSAnalysis {
     controllers: [],
     routes: [],
     issues: [],
+    globalAuthGuards: [],
   };
+
+  // ── 第一遍：全局守卫（@Module providers 里的 APP_GUARD）──
+  for (const file of project.getSourceFiles()) {
+    if (file.getFilePath().includes("node_modules")) continue;
+    if (/\.(test|spec)\.ts$/.test(file.getFilePath())) continue;
+
+    for (const cls of file.getClasses()) {
+      const moduleDec = cls.getDecorator("Module");
+      if (!moduleDec) continue;
+      const guardNames = extractAppGuardNames(moduleDec, cls);
+      for (const name of guardNames) {
+        if (isAuthGuardName(name) && !analysis.globalAuthGuards.includes(name)) {
+          analysis.globalAuthGuards.push(name);
+        }
+      }
+    }
+  }
+  const hasGlobalAuthGuard = analysis.globalAuthGuards.length > 0;
 
   for (const file of project.getSourceFiles()) {
     // Skip node_modules and test files
@@ -85,6 +115,9 @@ export function analyzeNestJSProject(projectRoot: string): NestJSAnalysis {
       const basePath = getStringArg(ctrlDec, 0) || "";
       const classGuards = extractGuardNames(cls.getDecorator("UseGuards"));
       const classPipes = extractGuardNames(cls.getDecorator("UsePipes"));
+      const classPublic = cls.getDecorator("Public") !== undefined
+        || cls.getDecorator("SkipAuth") !== undefined
+        || cls.getDecorator("AllowAnon") !== undefined;
 
       for (const method of cls.getMethods()) {
         const httpMethod = getHttpMethod(method);
@@ -102,33 +135,47 @@ export function analyzeNestJSProject(projectRoot: string): NestJSAnalysis {
         const methodPipes = extractGuardNames(method.getDecorator("UsePipes"));
         const guards = methodGuards.length > 0 ? methodGuards : classGuards;
         const pipes = methodPipes.length > 0 ? methodPipes : classPipes;
+        const isPublicDecorated = classPublic
+          || method.getDecorator("Public") !== undefined
+          || method.getDecorator("SkipAuth") !== undefined
+          || method.getDecorator("AllowAnon") !== undefined;
+
+        // 认证守卫 = 认证名分类后的守卫（ThrottlerGuard 等限流守卫不算认证）
+        const authGuards = guards.filter(isAuthGuardName);
 
         const route: NestJSRoute = {
           method: httpMethod,
           path: fullPath,
           controller: controllerName,
           handler: method.getName() || "unknown",
-          hasAuthGuard: guards.length > 0,
+          hasAuthGuard: authGuards.length > 0,
           hasValidationPipe: pipes.length > 0,
           guards,
           pipes,
+          isPublicDecorated,
         };
 
         analysis.routes.push(route);
+
+        // 路由级保护判定：类/方法认证守卫，或全局 APP_GUARD（除非 @Public 豁免）
+        const protectedByGlobal = hasGlobalAuthGuard && !isPublicDecorated;
 
         // ── Security Checks ──
 
         // POST/PUT/DELETE without auth guard
         // Skip intentionally public routes (login, register, health, etc.)
         if (["POST", "PUT", "DELETE", "PATCH"].includes(httpMethod) && !isPublicRoute(fullPath)) {
-          if (!route.hasAuthGuard) {
+          if (!route.hasAuthGuard && !protectedByGlobal) {
             analysis.issues.push({
               type: "NESTJS_NO_AUTH",
               severity: "critical",
               route: `${httpMethod} ${fullPath}`,
               controller: controllerName,
-              message: `Mutation route ${httpMethod} ${fullPath} has no @UseGuards. Anyone can call it.`,
-              fix: `Add @UseGuards(AuthGuard) to the method or controller class.`,
+              message: `Mutation route ${httpMethod} ${fullPath} has no auth guard and ` +
+                (hasGlobalAuthGuard
+                  ? `is explicitly marked public — it bypasses the global ${analysis.globalAuthGuards.join("/")}.`
+                  : `no global APP_GUARD protects the app. Anyone can call it.`),
+              fix: `Add @UseGuards(AuthGuard) to the method or controller class, or remove the @Public marker.`,
             });
           }
           if (!route.hasValidationPipe) {
@@ -146,13 +193,14 @@ export function analyzeNestJSProject(projectRoot: string): NestJSAnalysis {
         // Sensitive GET routes without auth
         if (httpMethod === "GET") {
           const sensitiveTerms = ["admin", "private", "secret", "manage"];
-          if (sensitiveTerms.some(t => fullPath.toLowerCase().includes(t)) && !route.hasAuthGuard) {
+          if (sensitiveTerms.some(t => fullPath.toLowerCase().includes(t))
+              && !route.hasAuthGuard && !protectedByGlobal) {
             analysis.issues.push({
               type: "NESTJS_SENSITIVE_PUBLIC",
               severity: "high",
               route: `${httpMethod} ${fullPath}`,
               controller: controllerName,
-              message: `Sensitive GET route ${fullPath} is publicly accessible without @UseGuards.`,
+              message: `Sensitive GET route ${fullPath} is publicly accessible without auth protection.`,
               fix: `Add @UseGuards(AuthGuard) to protect this route.`,
             });
           }
@@ -165,6 +213,59 @@ export function analyzeNestJSProject(projectRoot: string): NestJSAnalysis {
 }
 
 // ── Helpers ──
+
+/**
+ * 守卫名认证分类：auth/jwt/session/permission/role/access 等为认证守卫；
+ * throttler/rate/logger 等非认证守卫不算（限流≠认证——实测误报源）。
+ */
+function isAuthGuardName(name: string): boolean {
+  const lower = name.toLowerCase();
+  if (/throttler|rate.?limit|logger|logging|cache/.test(lower)) return false;
+  return /auth|jwt|session|permission|role|access|apikey|api_key|token|login|passport/.test(lower);
+}
+
+/**
+ * 从 @Module 装饰器的 providers 提取 APP_GUARD 类名：
+ *   providers: [{ provide: APP_GUARD, useClass: AuthGuard }]
+ * 支持装饰器参数对象字面量与类属性 providers 两种形态。
+ */
+function extractAppGuardNames(moduleDec: Decorator, cls: ClassDeclaration): string[] {
+  const names: string[] = [];
+  const scanProviders = (arg: Expression | undefined) => {
+    if (!arg) return;
+    // @Module({ providers: [...] })
+    const obj = arg.asKind(SyntaxKind.ObjectLiteralExpression);
+    if (obj) {
+      const providersProp = obj.getProperty("providers");
+      if (providersProp) {
+        const initializer = (providersProp as any).getInitializer?.();
+        if (initializer && initializer.asKind(SyntaxKind.ArrayLiteralExpression)) {
+          for (const el of initializer.getElements()) {
+            const elObj = el.asKind(SyntaxKind.ObjectLiteralExpression);
+            if (!elObj) continue;
+            const provideProp = elObj.getProperty("provide");
+            const useClassProp = elObj.getProperty("useClass");
+            const provideName = (provideProp as any)?.getInitializer?.()?.getText?.();
+            const useClassName = (useClassProp as any)?.getInitializer?.()?.getText?.();
+            if (provideName === "APP_GUARD" && useClassName) {
+              names.push(useClassName);
+            }
+          }
+        }
+      }
+    }
+  };
+  // 装饰器参数形态
+  const decArg = moduleDec.getArguments()[0];
+  scanProviders(decArg as Expression | undefined);
+  // 类属性形态：providers = [...]
+  for (const prop of cls.getProperties()) {
+    if (prop.getName() === "providers") {
+      scanProviders(prop.getInitializer());
+    }
+  }
+  return names;
+}
 
 /** Check if a route is intentionally public (login, register, health, etc.). */
 function isPublicRoute(path: string): boolean {
@@ -243,6 +344,7 @@ export function analyzeNestJSFile(filePath: string): NestJSAnalysis | null {
     controllers: [],
     routes: [],
     issues: [],
+    globalAuthGuards: [], // 单文件分析无全局守卫上下文（项目级请用 analyzeNestJSProject）
   };
 
   for (const file of project.getSourceFiles()) {
@@ -279,10 +381,11 @@ export function analyzeNestJSFile(filePath: string): NestJSAnalysis | null {
           path: fullPath,
           controller: controllerName,
           handler: method.getName() || "unknown",
-          hasAuthGuard: guards.length > 0,
+          hasAuthGuard: guards.filter(isAuthGuardName).length > 0,
           hasValidationPipe: pipes.length > 0,
           guards,
           pipes,
+          isPublicDecorated: false, // 单文件分析不解析 @Public（项目级用 analyzeNestJSProject）
         };
 
         analysis.routes.push(route);
