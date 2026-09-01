@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.7.13] — 2026-09-02
+
+### Go 语言支持 + Gin/Fiber 框架适配——12/13
+
+- **Go IR 提取器**（`src/extract-ir-go.ts`，纯 TS 词法——与 C 提取器同哲学：零外部工具链，npm 安装态可用，不重蹈 Python 桥的安装态覆辙）：func 签名（多行/接收者方法）、调用提取（obj.Method() 取 Method）、注释注解 `// @progmune(...)` + 文档标签、exported=首字母大写、vendor/testdata/*_test.go 表面过滤、Go 关键字排除、反引号 raw string 掩码；8 个单测
+- **注册表接入**：LANGUAGE_EXTRACTORS 第 4 语言（detect .go → extractIRGo）→ extractProjectIR/evaluateTrust 全链路自动生效；**引擎 autoExtractor 补 go**（修复 Go 项目静默走正则回退的同类陷阱——首轮金标全错暴露）
+- **Go 协议盲测 v1**（`scan-protocol-golang.ts`，自包含生成+扫描）：3 干净（直连/方法/helper）× 3 植入违规（missing_auth/read_without_open/leak）——**TP 5 / FP 0 / FN 0 → P=100% / R=100%**
+- **Gin（第 11 个）**：`gin-detector.ts`——GIN_ROUTE_NO_AUTH（r.POST 中间件链 + Use/Group 组级认证）；Go 方法名大写（r.POST）正则 i 标志修复；"middleware" 词误撞修复（loggerMiddleware 类工具中间件≠认证）
+- **Fiber（第 12 个）**：`fiber-detector.ts`——FIBER_ROUTE_NO_AUTH（app.Post 中间件链 + Use）；同款修复
+- **引擎**：collectGinViolations/collectFiberViolations（Go 目录结构特殊：cmd/internal/pkg + 根目录 main.go）+ ginCoverage/fiberCoverage
+- **文档**：Go 语言行 ❌→✅ 注解驱动（Beta）（README 双语/矩阵双语/CLAUDE.md/落地页 + i18n）；框架 **12/13** 口径（剩余 Spring Boot 需 Java 支持先行）
+- **验证**：23 个新单测（Go 提取器 8 + Gin 8 + Fiber 7）；全套件 **204/204**；Python 盲测 v1.2 64 零漂移；C 演示不变；check 免疫正常
+
 ## [3.7.12] — 2026-09-01
 
 ### Koa + Hapi 框架结构适配——10/13

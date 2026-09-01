@@ -56,7 +56,7 @@ Ledger             ✅           ❌           ❌         ❌          ❌
 | TypeScript | ✅ 可用 | Blind Benchmark v6（100 项目 / 795 gold）：P=100%（0 FP）、R=98.5%（有效 100%） |
 | Python | ✅ 可用 | Blind Benchmark v1（90 项目 / 729 gold）：P=100%、R=100%；PyGoat 真实应用 67 TP / 0 FP；3 个良构应用 0 误报真阳性（3 条框架内部件边界 FP 已文档化） |
 | C | ✅ 注解驱动（Beta） | IR 提取 + SSG 状态机；**每协议标注 ~2-3 个原语即获可信验证**（真实模块金标 5/5：redis ACL/libssh 客户端/服务端/回调分发/uftpd 传送授权——0 误报 + 违规精确定位；金标 v2：P=91.7%/R=100%/F1=95.7%；真实语料未注解自动检测 0 TP——定位决议见 c-language-status Decision record）。TLS 级仍无覆盖（旧正则口径 F1=16.5% 为历史基线）；L3/L4 结论不变 |
-| Go | ❌ | 无规则、无基准、无测试——规划中 |
+| Go | ✅ 注解驱动（Beta） | IR 提取接入注册表 + SSG 状态机；合成金标 v1：P=100%/R=100%；零外部工具链（纯 TS 词法提取） |
 | Java | ❌ | 无任何支持——规划中 |
 
 ### IR 层（v3.5.0 起）
@@ -181,13 +181,14 @@ Ledger             ✅           ❌           ❌         ❌          ❌
 | Django | Python | ✅ 结构分析（3.7.8） | URL 配置/CBV/DRF 结构适配：无保护 mutation 视图与 AllowAny 写端点标记（合成金标 P=R=100%；django-realworld 0 FP） |
 | FastAPI | Python | ✅ 结构分析（3.7.8） | 路由/认证依赖结构适配：写操作路由认证依赖检查 + 死认证方案标记（合成金标 P=R=100%；fastapi-realworld 0 FP） |
 | Flask | Python | ✅ 结构分析（3.7.9） | 路由/before_request 认证守卫分析（合成金标 P=R=100%） |
-| Gin / Fiber | Go | ❌ | 无 Go 支持 |
+| Gin | Go | ✅ 结构分析（3.7.13） | 路由/中间件链认证分析（r.POST 中间件 + Use/Group） |
+| Fiber | Go | ✅ 结构分析（3.7.13） | 路由/中间件链认证分析（app.Post 中间件 + Use） |
 | Spring Boot | Java | ❌ | 无 Java 支持 |
 | curl / nginx / libssh / OpenSSL | C | ✅ 有基准 | C 黄金基准（旧正则口径 F1=16.5% 为 TLS 级历史基线；3.7.4 起 IR 提取 + 应用级协议验证，金标 v2 F1=95.7%；3.7.6 起注解驱动 Beta——真实模块金标 5/5） |
 
 ```
-已适配框架        10 / 13（Express ✅、tRPC ✅、FastAPI ✅、Django ✅、Flask ✅、
-                  Fastify ✅、Next.js ✅、NestJS ✅、Koa ✅、Hapi ✅ 专用检测器）
+已适配框架        12 / 13（Express ✅、tRPC ✅、FastAPI ✅、Django ✅、Flask ✅、Fastify ✅、
+                  Next.js ✅、NestJS ✅、Koa ✅、Hapi ✅、Gin ✅、Fiber ✅ 专用检测器）
 部分支持          0（Next.js 另有版本感知治理）
 基础别名覆盖      5 / 13（无结构分析）
 ```
@@ -253,7 +254,7 @@ Protocols        21 命名空间全有词汇      + OAuth2.0/OIDC、gRPC、
                                          GraphQL、WebSocket
 Languages        2 ✅ (TS, Python)        + Go ✅
                  C ✅ 注解驱动（Beta）   Java（更远期）
-Frameworks       10/13 专用检测器         Spring Boot/Go 框架结构适配（需语言支持）
+Frameworks       12/13 专用检测器         Spring Boot 结构适配（需 Java 支持）
 TS P/R           100%/98.5%              稳定
 Python P/R       100%/100%               稳定
 CVE              34 (88% 检出)           100 (校准检出率)

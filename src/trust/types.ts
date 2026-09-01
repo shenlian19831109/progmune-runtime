@@ -173,6 +173,20 @@ export interface TrustDecision {
       filesScanned: number;
       issuesFound: number;
     };
+    /** Gin framework adapter coverage */
+    ginCoverage?: {
+      appsDetected: number;
+      totalRoutes: number;
+      filesScanned: number;
+      issuesFound: number;
+    };
+    /** Fiber framework adapter coverage */
+    fiberCoverage?: {
+      appsDetected: number;
+      totalRoutes: number;
+      filesScanned: number;
+      issuesFound: number;
+    };
   };
 
   dimensions: TrustDimensions;

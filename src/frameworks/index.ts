@@ -49,6 +49,12 @@ export type { KoaAppAnalysis, KoaSecurityIssue } from "./koa-detector";
 export { analyzeHapiApp, analyzeHapiFile } from "./hapi-detector";
 export type { HapiAppAnalysis, HapiSecurityIssue } from "./hapi-detector";
 
+export { analyzeGinApp, analyzeGinFile } from "./gin-detector";
+export type { GinAppAnalysis, GinSecurityIssue } from "./gin-detector";
+
+export { analyzeFiberApp, analyzeFiberFile } from "./fiber-detector";
+export type { FiberAppAnalysis, FiberSecurityIssue } from "./fiber-detector";
+
 export { analyzeNestJSProject, analyzeNestJSFile } from "./nestjs-detector";
 export type { NestJSAnalysis, NestJSRoute, NestJSSecurityIssue } from "./nestjs-detector";
 export type { NextAppAnalysis, NextSecurityIssue, NextRouteFile } from "./nextjs-detector";

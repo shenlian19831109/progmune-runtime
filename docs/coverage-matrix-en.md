@@ -57,7 +57,7 @@ Effective coverage TS (✅×4)    C (✅×4)     ❌         Python (✅×2) ❌
 | TypeScript | ✅ Usable | Blind Benchmark v6 (100 projects / 795 gold): P=100% (0 FP), R=98.5% (effective 100%) |
 | Python | ✅ Usable | Blind Benchmark v1 (90 projects / 729 gold): P=100%, R=100%; PyGoat real-world validation 67 TP / 0 FP; three well-written apps with 0 false-positive true findings (3 framework-internal boundary FPs documented) |
 | C | ✅ Annotation-driven (Beta) | IR extraction + SSG state machine; **~2-3 annotated protocol primitives per protocol yield trusted verification** (real-module gold 5/5: redis ACL / libssh client / libssh server / libssh callback-dispatch / uftpd transfer-auth — 0 FP with precise violation localization; gold v2: P=91.7% / R=100% / F1=95.7%; unannotated auto-detection: 0 TP on real corpus — positioning decision in the C Language Status doc). TLS-level coverage still absent (old regex-route Gold Benchmark F1=16.5% is the historical baseline); L3/L4 conclusions unchanged |
-| Go | ❌ | No rules, no benchmark, no tests — planned |
+| Go | ✅ Annotation-driven (Beta) | IR extraction via registry + SSG state machine; synthetic gold v1: P=100%/R=100%; zero toolchain deps (pure-TS lexical extractor) |
 | Java | ❌ | No support — planned |
 
 ### IR layer (since v3.5.0)
@@ -182,12 +182,13 @@ Registry-based multi-language merged extraction (`src/extract-project-ir.ts`): T
 | Django | Python | ✅ Structural (3.7.8) | urlconf/CBV/DRF structural adapter: unprotected mutation views and AllowAny write endpoints flagged (synthetic gold P=R=100%; django-realworld 0 FP) |
 | FastAPI | Python | ✅ Structural (3.7.8) | Route/auth-dependency structural adapter: mutation-route auth checks + dead auth schemes (synthetic gold P=R=100%; fastapi-realworld 0 FP) |
 | Flask | Python | ✅ Structural (3.7.9) | Route/before_request auth-guard analysis (synthetic gold P=R=100%) |
-| Gin / Fiber | Go | ❌ | No Go support |
+| Gin | Go | ✅ Structural (3.7.13) | Route/middleware-chain auth analysis (r.POST middleware + Use/Group) |
+| Fiber | Go | ✅ Structural (3.7.13) | Route/middleware-chain auth analysis (app.Post middleware + Use) |
 | Spring Boot | Java | ❌ | No Java support |
 | curl / nginx / libssh / OpenSSL | C | ✅ Benchmarked | C gold benchmark (old regex-route F1=16.5% is the TLS-level historical baseline; since 3.7.4 IR extraction + app-level protocol verification, gold v2 F1=95.7%; annotation-driven Beta since 3.7.6 — real-module gold 5/5) |
 
 ```
-Dedicated detectors    10 / 13 (Express ✅, tRPC ✅, FastAPI ✅, Django ✅, Flask ✅, Fastify ✅, Next.js ✅, NestJS ✅, Koa ✅, Hapi ✅)
+Dedicated detectors    12 / 13 (Express ✅, tRPC ✅, FastAPI ✅, Django ✅, Flask ✅, Fastify ✅, Next.js ✅, NestJS ✅, Koa ✅, Hapi ✅, Gin ✅, Fiber ✅)
 Partial                0 (Next.js additionally version-aware)
 Basic alias coverage   5 / 13 (no structural analysis)
 ```
@@ -253,7 +254,7 @@ Protocols        21 namespaces, all with    + OAuth2.0/OIDC, gRPC,
                  rule vocabulary             GraphQL, WebSocket
 Languages        2 ✅ (TS, Python)          + Go ✅
                  C ✅ Annotation (Beta)     Java (further out)
-Frameworks       10/13 dedicated detectors   Spring Boot/Go structural (needs language support)
+Frameworks       12/13 dedicated detectors   Spring Boot structural (needs Java support)
                                             adaptation
 TS P/R           100%/98.5%                 stable
 Python P/R       100%/100%                  stable

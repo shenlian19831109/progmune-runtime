@@ -68,6 +68,8 @@ import { analyzeFastifyFile } from "../frameworks/fastify-detector";
 import { analyzeNextApp, readNextMiddleware } from "../frameworks/nextjs-detector";
 import { analyzeKoaFile } from "../frameworks/koa-detector";
 import { analyzeHapiFile } from "../frameworks/hapi-detector";
+import { analyzeGinFile } from "../frameworks/gin-detector";
+import { analyzeFiberFile } from "../frameworks/fiber-detector";
 import {
   validateSequenceWithSSG,
   ssgViolationsToTrustViolations,
@@ -81,6 +83,7 @@ import type { CallSequence } from "../call-sequence";
 import { extractIR } from "../extract-ir";
 import { extractIRPython } from "../extract-ir-python";
 import { extractIRC } from "../extract-ir-c";
+import { extractIRGo } from "../extract-ir-go";
 
 // ── Main Entry Point ──
 
@@ -121,6 +124,8 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
   const nextjsResult = collectNextjsViolations(ctx);
   const koaResult = collectKoaViolations(ctx);
   const hapiResult = collectHapiViolations(ctx);
+  const ginResult = collectGinViolations(ctx);
+  const fiberResult = collectFiberViolations(ctx);
   const coverageData = collectVerificationCoverage(ctx);
   const governanceDefects = collectGovernanceDefects(ctx);
 
@@ -148,6 +153,8 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
     ...nextjsResult.violations,
     ...koaResult.violations,
     ...hapiResult.violations,
+    ...ginResult.violations,
+    ...fiberResult.violations,
   ];
 
   // ═══════════════════════════════════════
@@ -351,6 +358,24 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
             issuesFound: hapiResult.violations.length,
           }
         : undefined,
+      /** Gin framework adapter coverage — Go route/auth-middleware analysis */
+      ginCoverage: ginResult.coverage.routes > 0
+        ? {
+            appsDetected: ginResult.coverage.apps,
+            totalRoutes: ginResult.coverage.routes,
+            filesScanned: ginResult.coverage.filesScanned,
+            issuesFound: ginResult.violations.length,
+          }
+        : undefined,
+      /** Fiber framework adapter coverage — Go route/auth-middleware analysis */
+      fiberCoverage: fiberResult.coverage.routes > 0
+        ? {
+            appsDetected: fiberResult.coverage.apps,
+            totalRoutes: fiberResult.coverage.routes,
+            filesScanned: fiberResult.coverage.filesScanned,
+            issuesFound: fiberResult.violations.length,
+          }
+        : undefined,
     },
     dimensions: {
       policyCompliance: {
@@ -508,6 +533,92 @@ function mapPolicyViolation(
  * Collect Express-specific security violations from the framework detector.
  * Maps ExpressSecurityIssue[] → TrustViolation[].
  */
+function collectGoFrameworkViolations(
+  ctx: TrustEvaluationContext,
+  analyzer: (file: string) => any,
+  rulePrefix: string,
+  fixText: string,
+  policyRef: string
+): {
+  violations: TrustViolation[];
+  coverage: { apps: number; routes: number; filesScanned: number };
+} {
+  const violations: TrustViolation[] = [];
+  const coverage = { apps: 0, routes: 0, filesScanned: 0 };
+
+  try {
+    const fs = require("fs");
+    // Go 项目结构特殊：cmd/internal/pkg + 根目录 main.go 都要扫
+    const candidateDirs = ["cmd", "internal", "pkg", "src", "server", "app", "api", "routes", "lib", "handlers", "middleware"];
+    const extensions = languageToExtensions(ctx.language);
+    const files: string[] = [];
+    for (const dir of candidateDirs) {
+      const dirPath = path.join(ctx.projectPath, dir);
+      if (!fs.existsSync(dirPath)) continue;
+      try { files.push(...walkDir(dirPath, extensions, 100)); } catch { /* skip */ }
+    }
+    try {
+      for (const entry of fs.readdirSync(ctx.projectPath)) {
+        const full = path.join(ctx.projectPath, entry);
+        if (!fs.statSync(full).isFile()) continue;
+        if (extensions.some((ext: string) => entry.endsWith(ext))) files.push(full);
+      }
+    } catch { /* best-effort */ }
+
+    for (const file of files) {
+      if (file.includes("_test.")) continue;
+      coverage.filesScanned++;
+      try {
+        const analysis = analyzer(file);
+        if (!analysis || !analysis[`has${rulePrefix}`]) continue;
+        coverage.apps++;
+        coverage.routes += analysis.routes.length;
+        for (const issue of analysis.issues) {
+          violations.push({
+            severity: issue.severity === "low" ? "low" : issue.severity,
+            rule_id: issue.rule,
+            file: path.relative(ctx.projectPath, file),
+            function: "unknown",
+            message: issue.message,
+            evidence: issue.route || "",
+            why: `Framework structural analysis: ${issue.message}`,
+            fix: fixText,
+            policy_ref: policyRef,
+          });
+        }
+      } catch { /* skip unreadable files */ }
+    }
+  } catch { /* best-effort */ }
+
+  return { violations, coverage };
+}
+
+function collectGinViolations(ctx: TrustEvaluationContext): {
+  violations: TrustViolation[];
+  coverage: { apps: number; routes: number; filesScanned: number };
+} {
+  return collectGoFrameworkViolations(
+    ctx,
+    analyzeGinFile,
+    "Gin",
+    "Add an auth middleware to the route registration, or register auth middleware with r.Use/r.Group.",
+    "framework-safety.gin"
+  );
+}
+
+function collectFiberViolations(ctx: TrustEvaluationContext): {
+  violations: TrustViolation[];
+  coverage: { apps: number; routes: number; filesScanned: number };
+} {
+  return collectGoFrameworkViolations(
+    ctx,
+    analyzeFiberFile,
+    "Fiber",
+    "Add an auth middleware to the route registration, or register auth middleware with app.Use.",
+    "framework-safety.fiber"
+  );
+}
+
 function collectKoaViolations(ctx: TrustEvaluationContext): {
   violations: TrustViolation[];
   coverage: { apps: number; routes: number; filesScanned: number };
@@ -1272,6 +1383,7 @@ async function collectProtocolViolations(
         javascript: () => extractIR(ctx.projectPath),
         python: () => extractIRPython(ctx.projectPath),
         c: () => extractIRC(ctx.projectPath),
+        go: () => extractIRGo(ctx.projectPath),
       };
       const extractFn = autoExtractor[lang];
       if (extractFn) {

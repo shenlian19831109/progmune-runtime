@@ -104,11 +104,12 @@ Progmune 对能验证什么、不能验证什么保持诚实。
 | **TypeScript / JavaScript** | ✅ 生产 | 盲测基准：**召回 98.5% / 精确率 100%**（795 条 gold finding，100 个项目） |
 | **Python** | ✅ 生产 | 盲测基准：**召回 100% / 精确率 100%**（729 条 gold finding，90 个项目）；真实应用验证：PyGoat（OWASP 故意脆弱 Django 应用）**67 TP / 0 FP，标记精确率 100%**；三个良构应用（django/fastapi realworld、django-unicorn）0 误报真阳性 |
 | **C** | ✅ 注解驱动（Beta） | IR 提取接入注册表 + SSG 状态机；**每协议标注 ~2-3 个原语即获得可信验证**（真实模块金标 5/5：redis ACL / libssh 客户端 / libssh 服务端 / libssh 回调分发 / uftpd 传送授权——全部 0 误报 + 违规精确定位；应用级金标 v2：**P=91.7% / R=100% / F1=95.7%**）。未注解自动检测不在范围（真实语料 0 TP——定位决议见 C 语言状态文档）；TLS 级覆盖仍无。见 [C 语言状态](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md)。 |
-| **Go, Java** | ❌ 无 | 规划中 |
+| **Go** | ✅ 注解驱动（Beta） | IR 提取接入注册表 + SSG 状态机；合成金标 v1：**P=100% / R=100%**（3 干净 × 3 植入违规）；零外部工具链（纯 TS 词法提取，npm 安装态可用） |
+| **Java** | ❌ 无 | 规划中 |
 
 **多语言 IR（注册表式）。** TypeScript（ts-morph）与 Python（AST）提取器是同一注册表（`src/extract-project-ir.ts`）中的注册项；`extractProjectIR` 把检测到的所有语言合并为一份函数 IR，由 agent loop、`execute()` 与 MCP server 共享——agent 可在两种语言上编排函数协议链。新增语言（Go、Java……）= 注册一条提取器，调用方零改动。
 
-**框架适配器：10/13。** Express ✅、tRPC ✅、FastAPI ✅、Django ✅（结构级路由认证分析——逐条检查写操作入口的认证）、Flask ✅（路由/before_request 认证守卫分析）、Fastify ✅（路由 preHandler/钩子认证分析）与 Next.js ✅（App Router 路由处理器认证分析）、NestJS ✅（装饰器路由解析 + 全局 APP_GUARD 守卫识别 + @Public 豁免）、Koa ✅（路由/认证中间件链分析）与 Hapi ✅（路由配置认证策略分析）有专用检测器；Next.js 另有版本感知治理。Spring Boot、Go 框架及少数 TS 框架待适配——框架适配是 #1 产品缺口。
+**框架适配器：12/13。** Express ✅、tRPC ✅、FastAPI ✅、Django ✅（结构级路由认证分析——逐条检查写操作入口的认证）、Flask ✅（路由/before_request 认证守卫分析）、Fastify ✅（路由 preHandler/钩子认证分析）与 Next.js ✅（App Router 路由处理器认证分析）、NestJS ✅（装饰器路由解析 + 全局 APP_GUARD 守卫识别 + @Public 豁免）、Koa ✅、Hapi ✅（路由配置认证策略分析）、Gin ✅ 与 Fiber ✅（Go 路由/认证中间件分析）有专用检测器；Next.js 另有版本感知治理。Spring Boot、Go 框架及少数 TS 框架待适配——框架适配是 #1 产品缺口。
 
 ### Progmune 不覆盖什么（诚实边界）
 
@@ -233,7 +234,7 @@ Progmune 建立在"**LLM 输出是统计表演而非推理**"这一前提上—�
 - **运行时管线：** 检测 → 解释 → 修复 → 验证（L1–L4）
 - **信任引擎：** 四维评分 + 二元可解释性门
 - **MCP 工具：** 19 个——`progmune_trust_check`、`progmune_score`、`progmune_policy_check`、`progmune_certify` 等
-- **框架适配器：** Express ✅、tRPC ✅、FastAPI ✅、Django ✅、Flask ✅、Fastify ✅、Next.js ✅、NestJS ✅（10/13）
+- **框架适配器：** Express ✅、tRPC ✅、FastAPI ✅、Django ✅、Flask ✅、Fastify ✅、Next.js ✅、NestJS ✅（12/13）
 - **知识库：** 31 个域、148 条协议规则、22 个检测器、26 条防护规则、PLSB 13/13 类别——另加 15 条源码级检测规则（Python）
 - **语料：** 6+ 仓库 2,500+ 轨迹；盲测基准 100（TS）+ 90（Python）个项目；4 个应用仓库真实验证
 - **当前重点：** 企业 PoC 验证 + 剩余框架内部边界误报
