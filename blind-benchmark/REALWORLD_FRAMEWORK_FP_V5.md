@@ -52,3 +52,19 @@ withAuth/authenticate 等——全是**会话/中间件式登录态检查**。�
   裸 auth() + clerk；AUTH_ENTRY 豁免补 `/webhooks/`、`/api/webhooks` 段
 - 谱系：v1 Express FP 形态失配 / v2 Fastify 全盲 / v3 Koa 分类器串扰 /
   v4 tRPC 嵌套括号失明（首个 0 FP）/ **v5 Next.js webhook 词表缺口 FP**
+
+## ✅ 修复记录（2026-09-02 修复轮）
+
+**认证词表扩展已修**（`nextjs-detector.ts` `AUTH_CALL_RE`）：
+- 补 webhook **载荷签名校验**调用：constructEvent / verifyWebhook /
+  verifySignature / verifyWebhookSignature / validateWebhook /
+  validateSignature——签名校验即端点认证（Stripe/GitHub/Twilio 等
+  webhook SDK 的标准形态）
+- 补 next-auth v5 / clerk **裸 `auth()`** 与 `currentUser()`（会话
+  获取器新形态，词表原先只认 getServerSession 旧 API）
+- 豁免用语义而非路径：webhook 路由**有**签名校验 → 不报；**没有** →
+  仍报（保留对真缺失认证的敏感性）
+
+回归测试 +3（10 green）。**重测 netflx-web**：`api/webhooks/stripe/
+route.ts` authCall=true → **0 issues**（session 路由 + webhook 路由均
+正确识别，V5 的 1/1 FP 消除）

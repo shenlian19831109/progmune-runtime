@@ -89,4 +89,42 @@ describe("nextjs-detector", () => {
     expect(hasNext).toBe(false);
     expect(issues).toHaveLength(0);
   });
+
+  it("V5 修复回归：Stripe webhook 签名校验（constructEvent）视为端点认证——不报", () => {
+    writeRoute("app/api/webhooks/stripe/route.ts", `
+import { stripe } from "@/lib/stripe";
+export async function POST(req: Request) {
+  const body = await req.text();
+  const signature = req.headers.get("stripe-signature") as string;
+  const event = stripe.webhooks.constructEvent(body, signature, process.env.SECRET!);
+  return Response.json({ received: true });
+}
+`);
+    const { issues } = analyzeNextApp(dir);
+    expect(issues).toHaveLength(0);
+  });
+
+  it("V5 修复回归：webhook 无签名校验仍报（保留对真缺失认证的敏感性）", () => {
+    writeRoute("app/api/webhooks/stripe/route.ts", `
+export async function POST(req: Request) {
+  const body = await req.text();
+  return Response.json({ received: true });
+}
+`);
+    const { issues } = analyzeNextApp(dir);
+    expect(issues.map((i) => i.rule)).toContain("NEXT_ROUTE_NO_AUTH");
+  });
+
+  it("V5 修复回归：next-auth v5 / clerk 裸 auth() 调用视为认证——不报", () => {
+    writeRoute("app/api/transfer/route.ts", `
+import { auth } from "@/auth";
+export async function POST(req: Request) {
+  const session = await auth();
+  if (!session?.user) return new Response(null, { status: 403 });
+  return Response.json({ ok: true });
+}
+`);
+    const { issues } = analyzeNextApp(dir);
+    expect(issues).toHaveLength(0);
+  });
 });

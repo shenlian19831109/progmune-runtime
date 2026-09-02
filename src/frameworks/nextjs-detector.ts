@@ -56,7 +56,10 @@ const AUTH_ENTRY_WORDS = [
   "token", "auth", "health",
 ];
 
-const AUTH_CALL_RE = /\b(getServerSession|requireAuth|requireUser|verifyToken|verifyAuth|isAuthenticated|checkAuth|getToken|withAuth|authSession|authenticate)\s*\(/;
+// 路由级认证信号：会话式（getServerSession/next-auth v5 auth()/clerk
+// currentUser）+ webhook 载荷签名校验（Stripe constructEvent 等——
+// V5 真实语料证明 webhook 端点的标准保护是签名校验而非会话）
+const AUTH_CALL_RE = /\b(getServerSession|requireAuth|requireUser|verifyToken|verifyAuth|isAuthenticated|checkAuth|getToken|withAuth|authSession|authenticate|auth|currentUser)\s*\(|\b(constructEvent|verifyWebhook|verifySignature|verifyWebhookSignature|validateWebhook|validateSignature)\s*\(/;
 
 const AUTH_MIDDLEWARE_RE = /\b(getServerSession|requireAuth|verifyToken|getToken|withAuth|next-auth|authorization|authenticate)\b/;
 
