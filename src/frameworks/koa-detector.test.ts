@@ -67,4 +67,26 @@ router.post("/login", async (ctx) => { ctx.body = "token"; });
     expect(hasKoa).toBe(false);
     expect(issues).toHaveLength(0);
   });
+
+  it("回归：窗口不跨路由串扰——公开路由后面的 auth 路由不再把它洗成 protected（修复 300 字符 bleed）", () => {
+    const { issues, routes } = analyzeKoaApp(app(`
+router.post("/users", ctrl.post);            // 公开 register —— 应报
+router.post("/articles", auth, ctrl.create); // 受保护 —— 不报
+`));
+    const register = routes.find((r) => r.path === "/users");
+    const article = routes.find((r) => r.path === "/articles");
+    expect(register!.protected).toBe(false);
+    expect(article!.protected).toBe(true);
+    expect(issues.map((i) => i.route)).toContain("POST /users");
+    expect(issues.map((i) => i.route)).not.toContain("POST /articles");
+  });
+
+  it("回归：config.get('secret') 不再是幻影路由（接收者限定 router/app）", () => {
+    const { routes } = analyzeKoaApp(app(`
+const secret = config.get("secret");
+router.post("/x", auth, h);
+`));
+    expect(routes.map((r) => r.path)).not.toContain("secret");
+    expect(routes.map((r) => r.path)).toContain("/x");
+  });
 });

@@ -66,6 +66,48 @@ function isAuthFnName(name: string): boolean {
   return AUTH_FN_WORDS.some((w) => lower.includes(w));
 }
 
+/**
+ * 从路由调用参数串提取中间件候选名：
+ * 1. 按顶层逗号切分参数（深度感知 ()[]{}，容忍内联 handler 里的逗号/括号）
+ * 2. 最后一个参数若是纯标识符（函数引用）→ 是 handler，排除
+ *    （inline handler 如 async (ctx) => {...} 无法整参排除，其内部
+ *     标识符仍会进入候选——保守方向：多认少漏，认证名在 handler 体内
+ *     的概率极低）
+ */
+function collectMiddlewareNames(callWindow: string): string[] {
+  const names: string[] = [];
+  // 去掉尾部的闭合括号（window 含 scanEnd 处的 ')'）
+  const body = callWindow.replace(/\)\s*$/, "");
+  // 顶层逗号切分
+  const parts: string[] = [];
+  let cur = "";
+  let d = 0;
+  for (const ch of body) {
+    if (ch === "(" || ch === "[" || ch === "{") d++;
+    else if (ch === ")" || ch === "]" || ch === "}") d--;
+    if (ch === "," && d === 0) {
+      parts.push(cur);
+      cur = "";
+    } else {
+      cur += ch;
+    }
+  }
+  if (cur.trim().length > 0) parts.push(cur);
+
+  const isPlainFnRef = (s: string): boolean =>
+    /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*)*$/.test(s.trim());
+  // 排除末参（若为纯函数引用）
+  const mwParts = isPlainFnRef(parts[parts.length - 1] ?? "")
+    ? parts.slice(0, -1)
+    : parts;
+
+  for (const p of mwParts) {
+    const found = p.match(/[A-Za-z_$][\w$]*/g) || [];
+    names.push(...found);
+  }
+  return names;
+}
+
 // ── Analysis（代码串级） ──
 
 export function analyzeKoaApp(code: string): KoaAppAnalysis {
@@ -86,14 +128,32 @@ export function analyzeKoaApp(code: string): KoaAppAnalysis {
   }
 
   // 路由注册：router.post('/x', mw1, mw2, handler) / .del()
-  const routeRe = /\.(get|post|put|patch|delete|del)\s*\(\s*['"]([^'"]+)['"]/g;
+  // 接收者限定 router/*Router/app——config.get('secret') 之类不再被当路由
+  const routeRe = /\b(?:router|[A-Za-z_$][\w$]*[Rr]outer|app)\s*\.(get|post|put|patch|delete|del)\s*\(\s*['"]([^'"]+)['"]/g;
   while ((m = routeRe.exec(code)) !== null) {
     const method = m[1].toLowerCase() === "del" ? "delete" : m[1].toLowerCase();
     const pathName = m[2];
-    // 从路径串向后截 300 字符窗口，收集中间件名（认证名判定）
-    const windowStart = m.index + m[0].length;
-    const window = code.slice(windowStart, windowStart + 300);
-    const mwNames = window.match(/[A-Za-z_$][\w$]*/g) || [];
+    // 认证名收集窗口 = 本次路由调用（自路径串后至本调用闭合括号），
+    // 不跨路由边界——修复 300 字符前向窗口跨路由串扰（bleed）缺陷：
+    // 后面路由的 auth 名不再把前面的公开路由洗成 protected
+    let scanStart = m.index + m[0].length;
+    let depth = 1; // .post( 的括号仍在开
+    let scanEnd = scanStart;
+    const MAX_SCAN = 4000;
+    while (scanEnd < code.length && scanEnd - scanStart < MAX_SCAN) {
+      const ch = code[scanEnd];
+      if (ch === "(") depth++;
+      else if (ch === ")") {
+        depth--;
+        if (depth === 0) break;
+      }
+      scanEnd++;
+    }
+    const window = code.slice(scanStart, scanEnd + 1);
+    // koa-router 语义：router.post(path, ...middleware, handler)——最后一个
+    // 参数是 handler。末参若为纯标识符（函数引用）则排除，避免 handler 名
+    // （如 ctrl.login）含 auth 词被误判为认证中间件
+    const mwNames = collectMiddlewareNames(window);
     const hasAuthMw = mwNames.some((name) => isAuthFnName(name));
 
     routes.push({

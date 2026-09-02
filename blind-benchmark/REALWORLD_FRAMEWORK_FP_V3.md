@@ -55,3 +55,22 @@ middleware、app.js 各一处）被提取为 `GET secret` 路由——虚增计�
   `/users` 不含 "regist"）——届时 0/1 协议级 TP 的 FP 数据点成立
 - 三语料互补：Express=有 flags 全 FP；Fastify=连路由都看不见；
   Koa=提取 OK 但分类器把公开路由全标 protected、单点违规无感
+
+## ✅ 修复记录（2026-09-02 修复轮）
+
+**窗口串扰 + 幻影路由 + handler 名误判 三项已修**（`koa-detector.ts`）：
+1. 窗口改为**本次路由调用边界内**（括号深度感知到闭合 `)`），不再
+   300 字符跨路由扫描——后面路由的 `auth` 不再污染前面公开路由
+2. 路由正则接收者限定 `router|*Router|app`——`config.get("secret")`
+   幻影路由消除
+3. **末参 handler 排除**——koa-router 语义 `(path, ...mw, handler)`，
+   纯函数引用末参（如 `ctrl.login`）不再被当认证中间件
+
+回归测试 +3（9 tests green）。**修复后重测 koa-realworld**：
+- 19 路由保护分类全部正确（mutation ×11 正确 protected、公开 GET
+  不再误标、login/register 不再被 handler 名洗白）
+- issues = **1**：`POST /users`（register）——预言的豁免词表缺口 FP
+  落地：真实 world 注册路径是集合根 `/users`（不含 "regist" 词），
+  检测器无法静态判定「POST /users 无认证」是公开注册还是缺失认证
+  → 0/1 协议级 TP。该缺口与 Next.js register 豁免同源，属**语义层**
+  问题（register 集合识别），列入转正待办（跨框架同款）
