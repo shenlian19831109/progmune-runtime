@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.7.14] — 2026-09-02
+
+### Go 提取器修复 + 恢复率裁决 + 框架诚实分层 + 三语料实验
+
+- **提取器两处修复**：①无函数体声明行（`//go:linkname` 类）吞并下一个函数（Getuid/RoundTrip 漏检根因——与 C 3.7.4「# 行吞函数」同族）；②接收者方法 receiver 括号组误当参数组（returnType 取到整签名）——回归测试锁定
+- **恢复率裁决**（评审第 3 条落地）：tools/go-fn-list.go（go/parser 金标，同一文件集+只计有体函数）+ scan-go-recovery.ts——stdlib 四包 **2434/2434 = 100.0%** → **维持纯词法，go/parser 桥推迟**
+- **命名鸿沟测量**（孵化器理论核心数据）：词段可桥接 0-1.9%——Go stdlib 惯用命名无法桥接内置规则词汇（与 C 命名鸿沟同构）
+- **框架诚实分层**（评审第 5 条落地）：「12/13 结构级」→「**12 专用检测器 = 4 结构级（AST：NestJS/FastAPI/Django/Flask）+ 8 启发式（代码串：Express/tRPC/Fastify/Next.js/Koa/Hapi/Gin/Fiber）**」；转正门槛 = 真实项目 FP 数据点；CLAUDE.md 矛盾行修复；落地页/矩阵/README 双语同步
+- **Go 三语料实验**（REALWORLD_GO_V1.md，评审第 4 条落地）：stdlib 4 FP 全 FP（readColonFile 词段桥接跨窗口类）；govwa（vendored benchmarks/go-apps/）B 路径 0 flags；**A 路径 demo-real-go-govwa**：真实代码 3 注解（loginAction=verify/SetSession=establish/AuthCheck=guard）→ 0 FP + 植入违规精确定位 + 3 注解/协议——**Go 定位维持注解驱动（Beta）**
+- **TS 795 完整复跑**（评审第 6 条落地）：recall 98.5%（有效 100%）/ precision 100% / FP 0——12 个框架探测器全上线后与历史基线一致
+- 验证：35 定向测试；Python 盲测 v1.2 64 零漂移；check 免疫正常
+
 ## [3.7.13] — 2026-09-02
 
 ### Go 语言支持 + Gin/Fiber 框架适配——12/13
