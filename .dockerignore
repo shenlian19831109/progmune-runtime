@@ -12,3 +12,23 @@ immune_hub_data/
 feedback.json
 ir.json
 *.md
+
+# 大体积目录（构建上下文瘦身）
+benchmarks/
+blind-benchmark/
+dist/
+docs/
+models/
+progmune-self/
+backup/
+demo-*/
+governance-reports/
+test-real-requests/
+.progmune_corpus/
+.progmune_generated/
+.progmune_memory/
+.progmune_keys/
+.progmune_repair_tmp/
+.locks/
+.next/
+.test_report/

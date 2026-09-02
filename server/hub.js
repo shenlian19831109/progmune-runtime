@@ -20,7 +20,20 @@ function getAllFingerprints() {
   return all;
 }
 
-// 仪表板 API
+// 仪表板 API（含本周高频模式，供落地页实时展示）
+function topPatternsOf(list, n) {
+  const patternMap = new Map();
+  list.forEach(f => {
+    const seq = Array.isArray(f.functionSequence) ? f.functionSequence.join(' → ') : f.functionSequence;
+    const key = `${f.violatedSVL} | ${f.constraintType} | ${seq || '(empty)'}`;
+    patternMap.set(key, (patternMap.get(key) || 0) + 1);
+  });
+  return [...patternMap.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, n)
+    .map(([pattern, count]) => ({ pattern, count }));
+}
+
 function handleDashboard(req, res) {
   const fingerprints = getAllFingerprints();
   const now = new Date();
@@ -29,20 +42,13 @@ function handleDashboard(req, res) {
 
   // 今日/本周/总计
   const todayCount = fingerprints.filter(f => f.timestamp.startsWith(today)).length;
-  const weekCount = fingerprints.filter(f => f.timestamp >= weekAgo).length;
+  const weekFingerprints = fingerprints.filter(f => (f.timestamp || '') >= weekAgo);
+  const weekCount = weekFingerprints.length;
   const totalCount = fingerprints.length;
 
-  // 高频错误模式 (Top 10)
-  const patternMap = new Map();
-  fingerprints.forEach(f => {
-    const seq = Array.isArray(f.functionSequence) ? f.functionSequence.join(' → ') : f.functionSequence;
-    const key = `${f.violatedSVL} | ${f.constraintType} | ${seq || '(empty)'}`;
-    patternMap.set(key, (patternMap.get(key) || 0) + 1);
-  });
-  const topPatterns = [...patternMap.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 10)
-    .map(([pattern, count]) => ({ pattern, count }));
+  // 高频错误模式：全量 Top10 + 本周 Top10
+  const topPatterns = topPatternsOf(fingerprints, 10);
+  const topPatternsWeek = topPatternsOf(weekFingerprints, 10);
 
   // 最近10条时间线
   const timeline = fingerprints
@@ -54,15 +60,18 @@ function handleDashboard(req, res) {
       pattern: Array.isArray(f.functionSequence) ? f.functionSequence.join(' → ') : f.functionSequence,
     }));
 
-  res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ todayCount, weekCount, totalCount, topPatterns, timeline }));
+  res.writeHead(200, {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+  });
+  res.end(JSON.stringify({ todayCount, weekCount, totalCount, topPatterns, topPatternsWeek, timeline }));
 }
 
 // 静态页面
 function handleDashboardPage(res) {
   const htmlPath = path.resolve(__dirname, "../public/dashboard.html");
   if (fs.existsSync(htmlPath)) {
-    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.writeHead(200, { 'Content-Type': 'text/html', 'Access-Control-Allow-Origin': '*' });
     res.end(fs.readFileSync(htmlPath, 'utf-8'));
   } else {
     res.writeHead(404);
@@ -86,19 +95,19 @@ const server = http.createServer((req, res) => {
         existing.push(...fingerprints);
         fs.writeFileSync(filePath, JSON.stringify(existing, null, 2));
         console.log(`[Hub] 收到 ${fingerprints.length} 条指纹，总计 ${existing.length} 条`);
-        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
         res.end(JSON.stringify({ status: 'ok', received: fingerprints.length, total: existing.length }));
       } catch (e) {
-        res.writeHead(400);
+        res.writeHead(400, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
         res.end(JSON.stringify({ error: e.message }));
       }
     });
   } else if (req.method === 'GET' && req.url === '/antibodies') {
     if (fs.existsSync(RULES_FILE)) {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
       res.end(fs.readFileSync(RULES_FILE, 'utf-8'));
     } else {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
       res.end('[]');
     }
   } else if (req.method === 'GET' && req.url === '/api/dashboard') {

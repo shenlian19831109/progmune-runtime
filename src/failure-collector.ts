@@ -6,6 +6,7 @@
  */
 
 import * as fs from "fs";
+import * as path from "path";
 
 export type RootCause =
   | "F01" | "F02" | "F03" | "F04" | "F05"
@@ -23,7 +24,13 @@ export interface FailureRecord {
   sessionId?: string;
 }
 
-const CORPUS_DIR = "failure-corpus";
+// 统一写入路径：与 failure-corpus.ts 一致，落在项目级 .progmune_corpus/emitter-failures/
+// （旧路径为仓库根 failure-corpus/，已废弃——避免两套语料并存）
+const CORPUS_DIR = path.resolve(
+  process.env.PROGMUNE_CORPUS_DIR ||
+    path.resolve(process.env.PROGMUNE_PROJECT_DIR || process.cwd(), ".progmune_corpus"),
+  "emitter-failures",
+);
 
 /** Classify a compile error string into a root cause. */
 /** Classify a compile error into a root cause category. */
