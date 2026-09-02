@@ -64,7 +64,11 @@ export function analyzeHapiApp(code: string): HapiAppAnalysis {
   const routes: HapiRoute[] = [];
   const strategies: string[] = [];
 
-  const hasHapi = /@hapi\/hapi|\bHapi\.server\b|\bhapi\.server\b/.test(code);
+  // @hapi-scoped（v17+）或 v16 时代 require('hapi')（V6 gate 时代失配修复）
+  const hasHapi =
+    /@hapi\/hapi|\bHapi\.server\b|\bhapi\.server\b|require\(\s*['"]hapi['"]\s*\)|from\s+['"]hapi['"]/.test(
+      code
+    );
   if (!hasHapi) {
     return { hasHapi: false, routes, strategies, issues };
   }
@@ -124,6 +128,13 @@ export function analyzeHapiApp(code: string): HapiAppAnalysis {
 export function analyzeHapiFile(filePath: string): HapiAppAnalysis | null {
   if (!fs.existsSync(filePath)) return null;
   const code = fs.readFileSync(filePath, "utf-8");
-  if (!/@hapi\/hapi|@hapi\/hawk|\bHapi\.server\b/.test(code)) return null;
+  // gate 兼容 v16（require('hapi')）与 @hapi-scoped v17+
+  if (
+    !/@hapi\/hapi|@hapi\/hawk|\bHapi\.server\b|require\(\s*['"]hapi['"]\s*\)|from\s+['"]hapi['"]/.test(
+      code
+    )
+  ) {
+    return null;
+  }
   return analyzeHapiApp(code);
 }

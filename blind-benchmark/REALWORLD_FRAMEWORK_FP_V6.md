@@ -58,3 +58,20 @@
   证据有力；v17+ 现代语料可作为后续补充验证
 - 谱系：v1 形态失配 FP / v2 路由全盲 / v3 分类器串扰 / v4 括号失明 /
   v5 webhook 词表缺口 / **v6 gate 时代失配（0 文件进入）**
+
+## ✅ 修复记录（2026-09-02 修复轮）
+
+**gate/hasHapi 兼容 v16 已修**（`hapi-detector.ts`）：
+- `analyzeHapiFile` gate 与 `analyzeHapiApp` hasHapi 补
+  `require('hapi')` / `from 'hapi'`（v16 时代直接 import 形态；闭合引号
+  紧随要求避免误收 `hapi-auth-jwt2` 等子包）
+- 回归测试 +2（10 green）：v16 直连形态（`require('hapi')` +
+  `server.auth.strategy` + `server.route`）现可完整分析（策略识别、
+  auth 字段读取、缺失认证触发）；gate 不误收 hapi-auth-jwt2
+
+**本语料重测仍 0 文件进门——如实归因**：gothinkster hapi realworld
+是 **glue/manifest 声明式**应用（`Glue.compose(manifest)` 建 server，
+零文件直接 `require('hapi')`，路由以数组声明导出）——gate 修复覆盖
+v16 **直连**形态；声明式（manifest/glue/pal）形态需转正级
+「声明式路由 + config.auth 嵌套解析」（V6 转正清单），非本次范围。
+v17+ 现代直连语料可作为后续补充验证

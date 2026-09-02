@@ -70,3 +70,35 @@ server.route({ method: "POST", path: "/login", handler: () => "token" });
     expect(issues).toHaveLength(0);
   });
 });
+
+// ── V6 修复轮回归：v16 时代 require('hapi') gate 兼容 ──
+
+describe("hapi-detector V6 gate 修复回归", () => {
+  it("v16 形态 require('hapi') + server.route 可被分析（旧 gate 只认 @hapi-scoped）", () => {
+    const code = `
+const Hapi = require("hapi");
+const server = new Hapi.Server();
+server.connection({ port: 3000 });
+server.auth.strategy("jwt", "jwt", { key: "s" });
+server.route({ method: "POST", path: "/articles", config: { auth: "jwt" }, handler: (r, reply) => reply({}) });
+server.route({ method: "POST", path: "/payments", handler: (r, reply) => reply({}) });
+`;
+    const { hasHapi, strategies, routes, issues } = analyzeHapiApp(code);
+    expect(hasHapi).toBe(true);
+    expect(strategies).toContain("jwt");
+    const articles = routes.find((r) => r.path === "/articles");
+    const payments = routes.find((r) => r.path === "/payments");
+    expect(articles).toBeDefined();
+    expect(articles!.authOption).toBe("jwt"); // config.auth 嵌套亦被窗口文本捕获
+    expect(issues.map((i) => i.rule)).toContain("HAPI_ROUTE_NO_AUTH");
+    expect(issues.map((i) => i.route)).not.toContain("POST /articles");
+  });
+
+  it("gate 不误收 hapi-auth-jwt2（require('hapi') 需闭合引号紧随）", () => {
+    const { hasHapi } = analyzeHapiApp(`
+const hapiAuth = require("hapi-auth-jwt2");
+module.exports = (server) => { return []; };
+`);
+    expect(hasHapi).toBe(false);
+  });
+});
