@@ -9,20 +9,24 @@
 
 | 项 | 值 |
 |----|----|
-| 扫描文件 | 28（.ts，排除 tests/e2e/node_modules） |
+| 扫描文件 | 27（src 下 .ts 共 32 − 5 个 `*.test.*` 命名文件；CLI 只按文件名排除 .test. 与 node_modules，tests/ 下非 .test. 文件仍计入但无 express） |
 | hasExpress 命中 | 7 文件（含 6 个路由模块——per-file 计数虚高，见下） |
 | 路由提取 | 仅 1 条（检测器路由正则与真实注册形态失配，见下） |
-| issues | 19 条 = 7 × (NO_AUTH_MIDDLEWARE + NO_HELMET + NO_CORS_CONFIG) |
+| issues | 19 条 = NO_AUTH_MIDDLEWARE ×7 + NO_HELMET ×6 + NO_CORS_CONFIG ×6 |
 
-## 逐条标注（全部人工核实）
+## 逐条标注（全部人工核实 + 检测器源码复核）
 
 | 规则 | 条数 | 标注 | 依据 |
 |------|------|------|------|
-| EXPRESS_NO_AUTH_MIDDLEWARE | 7 | **FP ×7** | 真实应用有**路由级认证**（`auth.required` / `auth.optional` 每路由中间件，article.controller.ts 等）——检测器只看全局 `app.use`，路由级中间件不可见 |
-| EXPRESS_NO_CORS_CONFIG | 7 | **FP ×7** | main.ts 显式 `app.use(cors())`——检测器未识别 cors 包的该形态 |
-| EXPRESS_NO_HELMET | 7 | **真实但非协议级** | 应用确实未用 helmet（CSP/HSTS 缺失属实），但属安全加固建议类，非协议生命周期违规 |
+| EXPRESS_NO_AUTH_MIDDLEWARE | 7 | **FP ×7** | 真实应用有**路由级认证**（`auth.required` / `auth.optional` 每路由中间件，auth/profile.controller.ts 等 20+ 路由）——但检测器路由提取仅得 1 条 + 只看全局 `app.use`，路由级中间件不可见 |
+| EXPRESS_NO_CORS_CONFIG | 6 | **FP ×6** | 真实应用 main.ts 显式 `app.use(cors())`（检测器 `/\bcors\s*\(/` 正则**能**识别，main.ts 因此未被标记）。6 条来自 6 个路由模块被误判为独立「express app」——它们从不挂载中间件，per-file 计数虚高所致 |
+| EXPRESS_NO_HELMET | 6 | **真实但非协议级** | 应用确实未用 helmet（7/7 文件皆无，CSP/HSTS 缺失属实），属安全加固建议类，非协议生命周期违规。main.ts 未出此 flag 是**检测器缺陷**（见缺陷 5），非应用有 helmet |
 
 **真实语料标记精确率（协议级 TP）：0 / 19 = 0%。**
+
+> 复核注（2026-09-02 二勘）：初版标注 NO_CORS/NO_HELMET 记 ×7 有误。
+> 逐条重扫 JSON 显示 main.ts 仅 1 条（NO_AUTH）——cors 被识别 + helmet
+> 检查被缺陷 5 抑制；6 个路由模块各 3 条。
 
 ## 检测器结构缺陷（转正门槛的具体工作）
 
@@ -33,9 +37,17 @@
 2. **路由提取失配**——真实应用 20+ 路由仅提取 1 条（检测器正则与
    `router.get('/x', ...)` 分号/多行形态失配待查）
 3. **per-file app 计数虚高**——路由模块 import Router 即算一个
-   「express app」，7 个文件产生 7 份重复 flags（同 3 类问题）
+   「express app」，7 个文件按文件产出重复 flags（NO_CORS ×6 即此
+   根因——6 个路由模块从不挂中间件却各自被问「你的 CORS 呢」）
 4. **规则语义边界**——NO_HELMET/NO_CORS 是加固建议类，与
    协议生命周期违规混在一个 issues 数组里（严重度/口径需分离）
+5. **classifyMiddleware 顺序缺陷（新发现）**——`SECURITY_HEADER_PATTERNS`
+   含 `/\bcors\b/` 且先于 206 行 `/\bcors\b/ → "cors"` 判定，导致
+   `cors()` 恒被分类为 `security_header` 而非 `cors`。后果：任何
+   用 cors 的应用 `hasHelmet` 误真 → **NO_HELMET 漏报**（FN，main.ts
+   即此例）；`type === "cors"` 分支对标准形态永远不可达。修法：
+   从 SECURITY_HEADER_PATTERNS 移除 cors 模式（cors 是跨域配置，
+   非安全头加固）
 
 ## 结论
 
