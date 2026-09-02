@@ -169,11 +169,14 @@ function extractGoFile(filePath: string): FunctionInfo[] {
     const name = plain ? plain[1] : receiver ? receiver[1] : null;
     if (!name) continue;
 
-    // 多行签名：从 func 起拼接直到找到 { 或 ;
+    // 多行签名：从 func 起拼接直到找到 { 或 ;——遇到下一个 func 行即停
+    // （无函数体声明行如 `func runtime_args() []string // in package runtime`
+    // 不能吞掉紧随其后的函数定义——proc.go::Getuid 漏检根因）
     let sigText = lines[i];
     let j = i;
     while (!sigText.includes("{") && !sigText.includes(";") && j < lines.length - 1) {
       j++;
+      if (/^\s*func\b/.test(lines[j]) && j > i) break;
       sigText += "\n" + lines[j];
     }
     const braceIdx = sigText.indexOf("{");
@@ -212,15 +215,33 @@ function extractGoFile(filePath: string): FunctionInfo[] {
     const produces = docTag(commentText, "produces")?.split(/[,\s]+/).filter(Boolean);
     const useWhen = docTag(commentText, "useWhen")?.split(/[,\s]+/).filter(Boolean);
 
-    // 参数列表：签名中第一个 ( ... )
-    const openParen = signature.indexOf("(");
-    const closeParen = signature.indexOf(")", openParen);
+    // 参数列表：签名中第一个 ( ... )——接收者方法的 receiver 括号组要先跳过
+    // （bug 修复：func (s *Service) Login(...) 的 (s *Service) 曾被当作参数组，
+    // returnType 取到整个签名）
+    let sigAfterReceiver = signature;
+    if (receiver) {
+      let depth = 0;
+      for (let ci = signature.indexOf("("); ci < signature.length; ci++) {
+        if (signature[ci] === "(") depth++;
+        else if (signature[ci] === ")") { depth--; if (depth === 0) { sigAfterReceiver = signature.slice(ci + 1); break; } }
+      }
+    }
+    const openParen = sigAfterReceiver.indexOf("(");
+    let closeParen = -1;
+    if (openParen >= 0) {
+      // 平衡括号匹配（参数可含 func 类型嵌套括号）
+      let depth = 0;
+      for (let ci = openParen; ci < sigAfterReceiver.length; ci++) {
+        if (sigAfterReceiver[ci] === "(") depth++;
+        else if (sigAfterReceiver[ci] === ")") { depth--; if (depth === 0) { closeParen = ci; break; } }
+      }
+    }
     let params: string[] = [];
     if (openParen >= 0 && closeParen > openParen) {
-      params = splitTopLevelParams(signature.slice(openParen + 1, closeParen));
+      params = splitTopLevelParams(sigAfterReceiver.slice(openParen + 1, closeParen));
     }
     // 返回类型：签名尾部（剥除泛型括号）
-    const returnType = signature.slice(closeParen + 1).replace(/\[[^\]]*\]/g, "").trim();
+    const returnType = sigAfterReceiver.slice(closeParen + 1).replace(/\[[^\]]*\]/g, "").trim();
 
     // 函数体：从签名行（j）的 { 起逐行扫描到匹配 }（掩码后括号平衡，
     // 增量计数——每行只数一次，避免累积体重复计数）

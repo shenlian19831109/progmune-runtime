@@ -1,0 +1,47 @@
+{
+  "generated": "2026-09-02T01:31:28.802Z",
+  "method": "go/parser（gold） vs extractIRGo（词法），同一文件集口径",
+  "summary": {
+    "totalGold": 2434,
+    "totalHit": 2434,
+    "recoveryRate": 100
+  },
+  "rows": [
+    {
+      "corpus": "net/http",
+      "gold": 1176,
+      "recovered": 1176,
+      "recoveryRate": 100,
+      "bridgeable": 2,
+      "totalNames": 1176,
+      "bridgeRate": 0.17006802721088435
+    },
+    {
+      "corpus": "crypto/tls",
+      "gold": 340,
+      "recovered": 340,
+      "recoveryRate": 100,
+      "bridgeable": 0,
+      "totalNames": 340,
+      "bridgeRate": 0
+    },
+    {
+      "corpus": "os",
+      "gold": 780,
+      "recovered": 780,
+      "recoveryRate": 100,
+      "bridgeable": 15,
+      "totalNames": 780,
+      "bridgeRate": 1.9230769230769231
+    },
+    {
+      "corpus": "database/sql",
+      "gold": 138,
+      "recovered": 138,
+      "recoveryRate": 100,
+      "bridgeable": 2,
+      "totalNames": 138,
+      "bridgeRate": 1.4492753623188406
+    }
+  ]
+}

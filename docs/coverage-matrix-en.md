@@ -171,24 +171,26 @@ Registry-based multi-language merged extraction (`src/extract-project-ir.ts`): T
 
 | Framework | Language | Adaptation | Notes |
 |-----------|----------|-----------|-------|
-| Express | TS/JS | ✅ Dedicated detector | Route extraction + middleware classification + security checks |
-| tRPC | TS/JS | ✅ Dedicated detector | API contract rules (3), cross-corrected with the Express detector |
+| Express | TS/JS | ⚠️ Heuristic | Route extraction + middleware classification + security checks |
+| tRPC | TS/JS | ⚠️ Heuristic | API contract rules (3), cross-corrected with the Express detector |
 | NestJS | TS/JS | ✅ Structural (3.7.11) | Decorator route parsing + global APP_GUARD recognition + @Public exemption + guard auth-classification (ThrottlerGuard≠auth) (synthetic gold P=R=100%) |
-| Next.js | TS/JS | ✅ Structural (3.7.9) | App Router route.ts mutation-export auth checks + auth middleware; version-aware governance also exists |
-| Fastify | TS/JS | ✅ Structural (3.7.9) | Route preHandler/hook auth analysis (code-string level) |
-| Koa | TS/JS | ✅ Structural (3.7.12) | Route/auth-middleware chain analysis (app.use + route-level middleware) |
-| Hapi | TS/JS | ✅ Structural (3.7.12) | Route-config auth strategy analysis (auth option + explicit auth: false detection) |
+| Next.js | TS/JS | ⚠️ Heuristic (3.7.9) | App Router route.ts mutation-export auth checks + auth middleware; version-aware governance also exists |
+| Fastify | TS/JS | ⚠️ Heuristic (3.7.9) | Route preHandler/hook auth analysis (code-string level) |
+| Koa | TS/JS | ⚠️ Heuristic (3.7.12) | Route/auth-middleware chain analysis (app.use + route-level middleware) |
+| Hapi | TS/JS | ⚠️ Heuristic (3.7.12) | Route-config auth strategy analysis (auth option + explicit auth: false detection) |
 | Other TS frameworks | TS/JS | ⚠️ Basic aliases | Library alias coverage, no structural analysis |
 | Django | Python | ✅ Structural (3.7.8) | urlconf/CBV/DRF structural adapter: unprotected mutation views and AllowAny write endpoints flagged (synthetic gold P=R=100%; django-realworld 0 FP) |
 | FastAPI | Python | ✅ Structural (3.7.8) | Route/auth-dependency structural adapter: mutation-route auth checks + dead auth schemes (synthetic gold P=R=100%; fastapi-realworld 0 FP) |
 | Flask | Python | ✅ Structural (3.7.9) | Route/before_request auth-guard analysis (synthetic gold P=R=100%) |
-| Gin | Go | ✅ Structural (3.7.13) | Route/middleware-chain auth analysis (r.POST middleware + Use/Group) |
-| Fiber | Go | ✅ Structural (3.7.13) | Route/middleware-chain auth analysis (app.Post middleware + Use) |
+| Gin | Go | ⚠️ Heuristic (3.7.13) | Route/middleware-chain auth analysis (r.POST middleware + Use/Group) |
+| Fiber | Go | ⚠️ Heuristic (3.7.13) | Route/middleware-chain auth analysis (app.Post middleware + Use) |
 | Spring Boot | Java | ❌ | No Java support |
 | curl / nginx / libssh / OpenSSL | C | ✅ Benchmarked | C gold benchmark (old regex-route F1=16.5% is the TLS-level historical baseline; since 3.7.4 IR extraction + app-level protocol verification, gold v2 F1=95.7%; annotation-driven Beta since 3.7.6 — real-module gold 5/5) |
 
 ```
-Dedicated detectors    12 / 13 (Express ✅, tRPC ✅, FastAPI ✅, Django ✅, Flask ✅, Fastify ✅, Next.js ✅, NestJS ✅, Koa ✅, Hapi ✅, Gin ✅, Fiber ✅)
+Dedicated detectors    12 = 4 structural (AST: NestJS/FastAPI/Django/Flask) + 8 heuristic
+                       (code-string: Express/tRPC/Fastify/Next.js/Koa/Hapi/Gin/Fiber —
+                        real-project FP data pending as promotion gate)
 Partial                0 (Next.js additionally version-aware)
 Basic alias coverage   5 / 13 (no structural analysis)
 ```
@@ -254,7 +256,8 @@ Protocols        21 namespaces, all with    + OAuth2.0/OIDC, gRPC,
                  rule vocabulary             GraphQL, WebSocket
 Languages        2 ✅ (TS, Python)          + Go ✅
                  C ✅ Annotation (Beta)     Java (further out)
-Frameworks       12/13 dedicated detectors   Spring Boot structural (needs Java support)
+Frameworks       12 dedicated (4 structural  Spring Boot structural (needs Java)
+                  + 8 heuristic)
                                             adaptation
 TS P/R           100%/98.5%                 stable
 Python P/R       100%/100%                  stable

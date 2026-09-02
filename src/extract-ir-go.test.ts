@@ -57,6 +57,24 @@ func (r *Repo) SaveUser(u User) error {
     expect(ir.find((f) => f.name === "SaveUser")?.exported).toBe(true);
   });
 
+  it("接收者方法 returnType 与参数正确（receiver 括号组不被误取——回归）", () => {
+    write("svc.go", `
+package main
+
+func (s *Service) Login(ctx Context, user, password string) (Token, error) {
+	return Token{}, nil
+}
+`);
+    const ir = extractIRGo(dir);
+    const fn = ir.find((f) => f.name === "Login");
+    expect(fn?.returnType).toBe("(Token, error)");
+    // Go 语义：ctx / user / password 是 3 个参数（user 与 password 共享类型）
+    expect(fn?.params).toHaveLength(3);
+    expect(fn?.params[0].type).toContain("ctx");
+    expect(fn?.params[1].type).toContain("user");
+    expect(fn?.params[2].type).toContain("string");
+  });
+
   it("多行签名 + 返回类型", () => {
     write("multi.go", `
 package main
