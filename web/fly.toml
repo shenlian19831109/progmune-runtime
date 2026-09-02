@@ -1,0 +1,28 @@
+# Progmune 产品落地页静态站 — Fly.io 配置
+# 部署：cd web && fly deploy
+# 官方域名：progmune.top / www.progmune.top
+#   DNS（阿里云万网控制台）：A @ → 149.248.206.6、A www → 149.248.206.6
+#   （可选 AAAA @ → 2a09:8280:1::17a:e05f:0）；证书由 fly certs 自动验证
+app = "progmune-web"
+primary_region = "sin"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 8080
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+    force_https = true
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
+  [services.concurrency]
+    type = "connections"
+    soft_limit = 100
+    hard_limit = 200

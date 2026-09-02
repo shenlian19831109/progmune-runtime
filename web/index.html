@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Progmune — AI 代码协议生命周期验证</title>
+<meta name="description" content="Progmune — AI Trust Decision Engine：验证 AI 生成的代码是否遵循正确的协议生命周期（TLS 握手、认证流、支付完整性、资源管理），输出 Trust Score + Decision + 证据链。">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Progmune">
+<meta property="og:title" content="Progmune — AI 代码协议生命周期验证">
+<meta property="og:description" content="验证 AI 生成的代码是否遵循正确的协议生命周期，输出 Trust Score + Decision + 证据链。">
+<meta property="og:url" content="https://progmune.top/">
+<meta property="og:image" content="https://progmune.top/assets/og-card.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Progmune — AI 代码协议生命周期验证">
+<meta name="twitter:description" content="AI Trust Decision Engine · Protocol Lifecycle Verification">
+<meta name="twitter:image" content="https://progmune.top/assets/og-card.png">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Progmune","applicationCategory":"DeveloperApplication","operatingSystem":"Any","description":"AI code protocol lifecycle verification — Trust Decision Engine","url":"https://progmune.top/","email":"shenlian1983@qq.com"}
+</script>
+<style>
+  :root {
+    --ink: #0d1117;
+    --muted: #57606a;
+    --line: #d0d7de;
+    --accent: #3b82f6;
+    --accent-2: #8b5cf6;
+    --green: #1a7f37;
+    --amber: #9a6700;
+    --red: #cf222e;
+    --radius: 14px;
+    --shadow: 0 6px 24px rgba(13, 17, 23, 0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: #fbfcfe;
+    color: var(--ink);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── 导航 ── */
+  nav {
+    position: sticky; top: 0; z-index: 60;
+    background: rgba(251, 252, 254, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .brand { font-weight: 800; font-size: 19px; letter-spacing: -0.3px; }
+  .brand em { font-style: normal; background: linear-gradient(90deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  nav .links a { margin-left: 26px; font-size: 14px; color: var(--muted); font-weight: 500; }
+  nav .links a:hover { color: var(--ink); text-decoration: none; }
+  #langToggle {
+    margin-left: 22px; padding: 5px 14px; border-radius: 999px;
+    border: 1px solid var(--line); background: #fff; color: var(--ink);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  #langToggle:hover { border-color: var(--accent); color: var(--accent); }
+  @media (max-width: 760px) {
+    nav { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+    nav .links { order: 3; width: 100%; display: flex; justify-content: space-between; }
+    nav .links a { margin: 0; font-size: 13px; }
+  }
+
+  /* ── Hero ── */
+  .hero {
+    position: relative; overflow: hidden;
+    background: radial-gradient(1200px 500px at 20% -10%, rgba(59,130,246,0.16), transparent 60%),
+                radial-gradient(1000px 500px at 85% 10%, rgba(139,92,246,0.14), transparent 55%),
+                linear-gradient(180deg, #fbfcfe 0%, #eef3fb 100%);
+    text-align: center; padding: 110px 24px 96px;
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(13,17,23,0.035) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(13,17,23,0.035) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(600px 320px at 50% 0%, #000 30%, transparent 100%);
+    -webkit-mask-image: radial-gradient(600px 320px at 50% 0%, #000 30%, transparent 100%);
+    pointer-events: none;
+  }
+  .hero .kicker {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid rgba(59,130,246,0.3); background: rgba(59,130,246,0.06);
+    color: var(--accent); border-radius: 999px; padding: 6px 18px;
+    font-size: 13px; font-weight: 600; letter-spacing: 0.4px;
+  }
+  .hero h1 {
+    margin: 26px auto 18px; max-width: 860px;
+    font-size: clamp(34px, 6vw, 62px); font-weight: 800; letter-spacing: -1px; line-height: 1.15;
+  }
+  .hero h1 em {
+    font-style: normal;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero .tagline { max-width: 720px; margin: 0 auto; font-size: clamp(15px, 2vw, 18px); color: #3c4654; }
+  .hero .badges { margin-top: 30px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .badge {
+    font-weight: 700; font-size: 13px; letter-spacing: 1.2px;
+    padding: 8px 18px; border-radius: 10px;
+  }
+  .badge.approved { background: rgba(26,127,55,0.1); color: var(--green); border: 1px solid rgba(26,127,55,0.35); }
+  .badge.review  { background: rgba(154,103,0,0.1); color: var(--amber); border: 1px solid rgba(154,103,0,0.35); }
+  .badge.block   { background: rgba(207,34,46,0.1); color: var(--red); border: 1px solid rgba(207,34,46,0.35); }
+  .hero .cta { margin-top: 40px; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    display: inline-block; padding: 13px 32px; border-radius: 12px;
+    font-size: 15px; font-weight: 700; transition: transform 0.08s ease, box-shadow 0.2s ease;
+  }
+  .btn:hover { text-decoration: none; transform: translateY(-1px); }
+  .btn.primary {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: #fff; box-shadow: 0 8px 24px rgba(59,130,246,0.35);
+  }
+  .btn.primary:hover { box-shadow: 0 12px 30px rgba(59,130,246,0.45); }
+  .btn.ghost { border: 1px solid var(--line); background: #fff; color: var(--ink); }
+  .btn.ghost:hover { border-color: var(--accent); color: var(--accent); }
+  a.brand { color: var(--ink); text-decoration: none; }
+  a.brand:hover { text-decoration: none; }
+  .hero .badge-note { margin-top: 14px; font-size: 12.5px; color: var(--muted); }
+  .hero-npm { margin-top: 26px; font-size: 13.5px; color: #3c4654; }
+  .hero-npm code { background: rgba(13,17,23,0.06); border-radius: 5px; padding: 1px 6px; font-size: 12.5px; }
+  .hero-npm b { color: var(--accent); font-weight: 700; }
+  .hero-open { margin-top: 10px; font-size: 12.5px; color: var(--muted); }
+  .code::after { content: "▊"; color: #58a6ff; margin-left: 6px; animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  a.pill { text-decoration: none; }
+  a.pill:hover { border-color: var(--accent); color: var(--accent); }
+  .stats a.stat { display: block; text-decoration: none; color: inherit; }
+  .stats a.stat:hover .l { color: #58a6ff; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .card, .btn { transition: none; }
+    .card:hover, .btn:hover { transform: none; }
+    .code::after { animation: none; opacity: 0; }
+  }
+
+  /* ── 失败语料飞轮 ── */
+  .pattern-list { list-style: none; padding: 0; margin: 0; }
+  .pattern-item { display: flex; align-items: center; gap: 12px; padding: 10px 4px; border-bottom: 1px dashed var(--line); font-size: 13.5px; }
+  .pattern-item:last-child { border-bottom: none; }
+  .pattern-item .rank { width: 22px; height: 22px; border-radius: 6px; background: #f0f3f8; color: var(--muted); font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .pattern-item .rank.top { background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: #fff; }
+  .pattern-item .svl { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; flex-shrink: 0; }
+  .pattern-item .svl.svl-1, .pattern-item .svl.svl-2 { background: rgba(207,34,46,0.12); color: var(--red); }
+  .pattern-item .svl.svl-3 { background: rgba(154,103,0,0.12); color: var(--amber); }
+  .pattern-item .svl.svl-4 { background: rgba(26,127,55,0.12); color: var(--green); }
+  .pattern-item .ctype { color: var(--muted); flex-shrink: 0; }
+  .pattern-item .seq { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; background: #f0f3f8; border-radius: 5px; padding: 2px 7px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+  .pattern-item .count { font-weight: 700; color: var(--accent); flex-shrink: 0; }
+  .pattern-empty, .pattern-loading { color: var(--muted); font-size: 13.5px; padding: 10px 4px; }
+
+  /* ── 主体 ── */
+  main { max-width: 1080px; margin: 0 auto; padding: 80px 28px 30px; }
+  section { margin-bottom: 96px; }
+  section h2 {
+    font-size: clamp(24px, 3vw, 32px); font-weight: 800; letter-spacing: -0.4px;
+    margin-bottom: 14px; display: flex; align-items: center; gap: 14px;
+  }
+  section h2 .no {
+    font-size: 13px; font-weight: 700; letter-spacing: 1px;
+    color: var(--accent); border: 1px solid rgba(59,130,246,0.3); background: rgba(59,130,246,0.06);
+    border-radius: 8px; padding: 4px 10px;
+  }
+  section .lead { color: var(--muted); max-width: 840px; margin-bottom: 30px; font-size: 15px; }
+  section .lead b { color: var(--ink); }
+
+  .grid { display: grid; gap: 18px; }
+  .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 860px) { .grid.cols-2, .grid.cols-3 { grid-template-columns: 1fr; } }
+
+  .card {
+    background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 24px; box-shadow: 0 1px 2px rgba(13,17,23,0.04);
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+  .card h3 { font-size: 16px; margin-bottom: 8px; }
+  .card p, .card li { font-size: 14px; color: var(--muted); }
+  .card ul { padding-left: 18px; }
+  .card ul li { margin-bottom: 5px; }
+  .card code { background: #f0f3f8; border-radius: 4px; padding: 1px 5px; font-size: 12.5px; }
+
+  /* ── 对比 ── */
+  .compare { display: grid; grid-template-columns: 1fr 48px 1fr; align-items: center; gap: 0; }
+  @media (max-width: 860px) { .compare { grid-template-columns: 1fr; } }
+  .vs-box { border-radius: var(--radius); padding: 26px; border: 1px solid var(--line); background: #fff; }
+  .vs-box h3 { font-size: 15px; margin-bottom: 14px; }
+  .vs-box ul { padding-left: 18px; font-size: 14px; color: var(--muted); }
+  .vs-box ul li { margin-bottom: 8px; }
+  .vs-arrow { text-align: center; font-size: 26px; font-weight: 800; color: var(--accent); }
+  @media (max-width: 860px) { .vs-arrow { padding: 10px 0; transform: rotate(90deg); } }
+
+  /* ── 数据带 ── */
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px;
+    background: linear-gradient(120deg, #0d1117, #161b22);
+    border-radius: 18px; padding: 36px 30px; margin-bottom: 34px;
+    box-shadow: 0 18px 44px rgba(13,17,23,0.18);
+  }
+  @media (max-width: 860px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+  .stat { text-align: center; }
+  .stat .v { font-size: 32px; font-weight: 800; color: #58a6ff; line-height: 1.2; }
+  .stat .l { font-size: 13px; color: #8b949e; margin-top: 4px; }
+
+  /* ── 终端 ── */
+  pre.code {
+    background: #0d1117; color: #e6edf3; border-radius: 12px; padding: 20px 22px;
+    font-size: 13px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    overflow-x: auto; line-height: 1.75; border: 1px solid #30363d;
+  }
+  pre.code .c { color: #8b949e; }
+  pre.code .ok { color: #3fb950; }
+  pre.code .warn { color: #d29922; }
+  pre.code .dim { color: #6e7681; }
+
+  /* ── 覆盖矩阵 ── */
+  table.matrix { width: 100%; border-collapse: collapse; font-size: 14px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  table.matrix th, table.matrix td { text-align: left; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+  table.matrix th { background: #f6f8fa; font-weight: 600; font-size: 13px; color: var(--muted); }
+  table.matrix tr:last-child td { border-bottom: none; }
+  .tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 3px 11px; border-radius: 999px; }
+  .tag.ok { background: rgba(26,127,55,0.12); color: var(--green); }
+  .tag.warn { background: rgba(154,103,0,0.12); color: var(--amber); }
+  .tag.no { background: rgba(207,34,46,0.10); color: var(--red); }
+
+  /* ── 社区 ── */
+  .community { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; align-items: start; }
+  @media (max-width: 860px) { .community { grid-template-columns: 1fr; } }
+  .qr-wrap { text-align: center; }
+  .qr-wrap img { width: 320px; max-width: 82vw; border-radius: 12px; border: 1px solid var(--line); background: #fff; padding: 8px; box-shadow: var(--shadow); }
+  .qr-wrap .cap { font-size: 13px; color: var(--muted); margin-top: 12px; }
+  .contact-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; box-shadow: 0 1px 2px rgba(13,17,23,0.04); }
+  .contact-card h3 { margin-bottom: 16px; font-size: 17px; }
+  .contact-row { display: flex; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px dashed var(--line); font-size: 14px; }
+  .contact-row:last-child { border-bottom: none; }
+  .contact-row .k { color: var(--muted); min-width: 52px; font-size: 13px; }
+  .contact-row .v { font-weight: 600; word-break: break-all; }
+
+  /* ── Footer ── */
+  footer {
+    background: #0d1117; color: #8b949e;
+    padding: 44px 28px 52px; text-align: center; font-size: 13px;
+  }
+  footer .ft-links { margin-bottom: 14px; display: flex; justify-content: center; gap: 28px; flex-wrap: wrap; }
+  footer .ft-links a { color: #c9d1d9; font-weight: 500; }
+  footer .ft-links a:hover { color: #58a6ff; text-decoration: none; }
+
+  .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 5px 14px; margin: 0 6px 8px 0; }
+  .pill b { color: var(--ink); }
+</style>
+</head>
+<body id="top">
+
+<nav>
+  <a class="brand" href="#top">Progmune<em>.</em></a>
+  <div class="links">
+    <a href="#problem" data-i18n="nav.problem">为什么</a>
+    <a href="#what" data-i18n="nav.what">是什么</a>
+    <a href="#capabilities" data-i18n="nav.cap">能力</a>
+    <a href="#coverage" data-i18n="nav.coverage">覆盖</a>
+    <a href="#flywheel" data-i18n="nav.flywheel">飞轮</a>
+    <a href="#usage" data-i18n="nav.usage">使用</a>
+    <a href="#roadmap" data-i18n="nav.roadmap">路线图</a>
+    <a href="#community" data-i18n="nav.community">社区</a>
+  </div>
+  <button id="langToggle" title="Switch language">EN</button>
+</nav>
+
+<!-- ═══ Hero ═══ -->
+<header class="hero">
+  <div class="kicker" data-i18n="hero.kicker">AI Trust Decision Engine · 协议生命周期验证</div>
+  <h1 data-i18n="hero.h1">AI 生成的代码，<em>可信吗？</em></h1>
+  <p class="tagline" data-i18n="hero.tagline">Progmune 验证 AI 软件是否遵循正确的协议生命周期——TLS 握手、认证流、支付完整性、资源管理。这类违规跨越函数调用序列，SAST / SCA 看不见，Progmune 看得见。</p>
+  <div class="badges">
+    <span class="badge approved">APPROVED</span>
+    <span class="badge review">NEEDS_REVIEW</span>
+    <span class="badge block">BLOCKED</span>
+  </div>
+  <p class="badge-note" data-i18n="hero.badgeNote">示例：Progmune 对代码的三种裁决输出</p>
+  <div class="cta">
+    <a class="btn primary" href="#usage" data-i18n="hero.cta1">开始使用</a>
+    <a class="btn ghost" href="#community" data-i18n="hero.cta2">加入社区</a>
+  </div>
+  <p class="hero-npm">
+    📦 npm <code>progmune-runtime</code> <b id="npmVersion">v3.7.6</b> ·
+    <span data-i18n="npm.week">本周下载</span> <b id="npmDownloads">…</b> ·
+    <span data-i18n="npm.total">累计下载</span> <b id="npmDownloadsTotal">…</b>
+  </p>
+  <p class="hero-open" data-i18n="hero.open">🧡 开源 MIT · 免费 · 5 分钟上手</p>
+</header>
+
+<main>
+
+<!-- ═══ 01 问题 ═══ -->
+<section id="problem">
+  <h2><span class="no">01</span><span data-i18n="s01.title">为什么需要 Progmune</span></h2>
+  <p class="lead" data-i18n="s01.lead">研究指出：<b>LLM 输出是统计表演而非推理</b>（Kambhampati 等，arXiv:2504.09762）。当 AI 代码跨多个函数实现协议流程时，任何一环缺失都可能酿成安全事故。</p>
+  <div class="compare">
+    <div class="vs-box">
+      <h3 data-i18n="s01.oldTitle">❌ 传统检查的盲区</h3>
+      <ul>
+        <li data-i18n="s01.old1">SAST 逐行扫模式：看不到跨调用序列的违规</li>
+        <li data-i18n="s01.old2">SCA 查依赖漏洞：不管代码是否走完协议流程</li>
+        <li data-i18n="s01.old3">单测覆盖“写过的用例”，不是“协议要求的路径”</li>
+        <li data-i18n="s01.old4">CodeQL 能跨函数追踪数据流，但不验证协议时序约束——生命周期合规需要状态机，不是污点流</li>
+      </ul>
+    </div>
+    <div class="vs-arrow">→</div>
+    <div class="vs-box">
+      <h3 data-i18n="s01.newTitle">✅ Progmune 的视角</h3>
+      <ul>
+        <li data-i18n="s01.new1">函数 IR + 调用序列，映射到协议状态机</li>
+        <li data-i18n="s01.new2">验证“握手 → 建立 → 释放”全生命周期合规</li>
+        <li data-i18n="s01.new3">输出 Trust Score + Decision + 证据链</li>
+        <li data-i18n="s01.new4">序列级协议状态机验证，而非模式匹配</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 02 是什么 ═══ -->
+<section id="what">
+  <h2><span class="no">02</span><span data-i18n="s02.title">Progmune 是什么</span></h2>
+  <p class="lead" data-i18n="s02.lead">一套 <b>AI 代码治理基础设施</b>：静态分析代码的实际协议行为，回答“能不能部署”，而不是给一个孤立分数。</p>
+  <p class="lead" style="margin-top:4px; font-size:13.5px;" data-i18n="s02.name">名字释义：Progmune = <b>Program + Immune（程序免疫）</b>——如免疫系统，从每一次被拦截的失败中学习、记忆并防御反复出现的错误模式。</p>
+  <div class="stats">
+    <a class="stat" href="https://github.com/shenlian19831109/progmune-runtime/blob/main/protocols.json" target="_blank" rel="noopener"><div class="v">27</div><div class="l" data-i18n="stats.s1l">协议命名空间</div></a>
+    <a class="stat" href="https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix.md" target="_blank" rel="noopener"><div class="v">148</div><div class="l" data-i18n="stats.s2l">验证规则</div></a>
+    <a class="stat" href="https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/BASELINE_PROTOCOL_PYTHON_v1.md" target="_blank" rel="noopener"><div class="v">0</div><div class="l" data-i18n="stats.s3l">盲测误报（TS/Python）</div></a>
+    <a class="stat" href="https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/ai-trust-decision-model-v1.md" target="_blank" rel="noopener"><div class="v">4</div><div class="l" data-i18n="stats.s4l">信任评分维度</div></a>
+  </div>
+  <div class="grid cols-3">
+    <div class="card">
+      <h3 data-i18n="s02.c1t">5 阶段流水线</h3>
+      <p data-i18n="s02.c1d">Collect → Normalize → Score → Decide → Assemble，产出决策与证据。</p>
+    </div>
+    <div class="card">
+      <h3 data-i18n="s02.c2t">4 维度评分</h3>
+      <p data-i18n="s02.c2d">策略合规 35% · 协议安全 30% · 验证覆盖 20% · 治理完整性 15%</p>
+    </div>
+    <div class="card">
+      <h3 data-i18n="s02.c3t">Decision &gt; Score</h3>
+      <p data-i18n="s02.c3d">企业要的是“能不能部署”，不是“58 分还是 61 分”——关键违规直接 BLOCK。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 03 能力 ═══ -->
+<section id="capabilities">
+  <h2><span class="no">03</span><span data-i18n="s03.title">核心能力</span></h2>
+  <div class="grid cols-3">
+    <div class="card"><h3 data-i18n="s03.c1t">🔬 IR + 调用序列</h3><p data-i18n="s03.c1d">TS / Python 双语言 AST 提取，构建跨函数调用链（深度 ≤4、环安全），违规归因到入口函数。</p></div>
+    <div class="card"><h3 data-i18n="s03.c2t">🗺️ 协议状态机</h3><p data-i18n="s03.c2d">消费 <code>pre/post_states</code> 注解校验序列合法性，含 endState 资源释放检查。无需手写注解——别名匹配 + 词段门控自动识别协议原语</p></div>
+    <div class="card"><h3 data-i18n="s03.c3t">🧠 知识网络飞轮</h3><p data-i18n="s03.c3d">“每一个新库让所有验证变强”——库级 alias 跨项目迁移。</p></div>
+    <div class="card"><h3 data-i18n="s03.c4t">🛡️ 治理审计</h3><p data-i18n="s03.c4d">Policy Engine + 多格式审计报告 + 账本溯源与签名，满足企业合规。</p></div>
+    <div class="card"><h3 data-i18n="s03.c5t">🔧 修复执行器</h3><p data-i18n="s03.c5d">applyFix → verifyRepair → commit/rollback，修复后自动重新验证。</p></div>
+    <div class="card"><h3 data-i18n="s03.c6t">🤖 全场景接入</h3><p data-i18n="s03.c6d">SDK · CLI · MCP（Claude Code）· GitHub Action（PR 门禁）· Trust API。</p></div>
+  </div>
+</section>
+
+<!-- ═══ 04 覆盖 ═══ -->
+<section id="coverage">
+  <h2><span class="no">04</span><span data-i18n="s04.title">语言覆盖现状</span></h2>
+  <table class="matrix">
+    <thead><tr><th data-i18n="s04.th1">语言</th><th data-i18n="s04.th2">状态</th><th data-i18n="s04.th3">证据</th></tr></thead>
+    <tbody>
+      <tr><td><b>TypeScript</b></td><td><span class="tag ok">✅ Production</span></td><td data-i18n="s04.r1">盲测 795 金标：Recall 98.5% / Precision 100% / 0 FP；协议行 ✅×4</td></tr>
+      <tr><td><b>Python</b></td><td><span class="tag ok">✅ Production</span></td><td data-i18n="s04.r2">协议盲测 v1.2：66 金标 97% / 100% / 0 FP；源码级检测 729 金标 Recall 100%</td></tr>
+      <tr><td><b>C</b></td><td><span class="tag ok">✅ 注解驱动（Beta）</span></td><td data-i18n="s04.r3">真实模块金标 5/5 + 采纳案例 uftpd：0 误报 + 违规精确定位；每协议 ~2-3 条注解</td></tr>
+      <tr><td><b>框架适配</b></td><td><span class="tag ok">✅ 12 专用</span></td><td data-i18n="s04.r5">Express / tRPC / FastAPI / Django / Flask / Fastify / Next.js / NestJS / Koa / Hapi / Gin / Fiber 结构级路由认证检查</td></tr>
+      <tr><td><b>Go</b></td><td><span class="tag ok">✅ 注解驱动（Beta）</span></td><td data-i18n="s04.r6">IR 提取接入注册表 + SSG 状态机；合成金标 P=100% / R=100%；零外部工具链</td></tr>
+      <tr><td><b>Java</b></td><td><span class="tag no">❌ None</span></td><td data-i18n="s04.r4">规划中；多语言 IR 注册表已就绪，新增语言 = 注册一条</td></tr>
+    </tbody>
+  </table>
+  <p class="lead" style="margin-top:14px; font-size:13px;" data-i18n="s04.cNote">注：C 与 Go 为注解驱动验证（Beta）——未注解代码不检测、TLS 级深层覆盖仍无；框架适配 12 专用 = 4 结构级（AST）+ 8 启发式（代码串）。所有数字可点击查看证据。</p>
+</section>
+
+<!-- ═══ 05 数据飞轮 ═══ -->
+<section id="flywheel">
+  <h2><span class="no">05</span><span data-i18n="fw.title">失败语料飞轮</span></h2>
+  <p class="lead" data-i18n="fw.lead">每一次验证失败都不会被浪费——落入失败语料库、汇聚到中央 hub，让「验证覆盖」越来越强、高频错误模式越来越清晰。</p>
+  <div class="grid cols-3">
+    <div class="card"><h3 data-i18n="fw.s1t">🧯 失败入库</h3><p data-i18n="fw.s1d">每次违规记录 SSG 状态快照、SVL 分级与约束类型</p></div>
+    <div class="card"><h3 data-i18n="fw.s2t">📡 中央汇聚</h3><p data-i18n="fw.s2d">按项目本地入库 + 增量上报中央 hub，指纹去重</p></div>
+    <div class="card"><h3 data-i18n="fw.s3t">📈 反馈增强</h3><p data-i18n="fw.s3d">失败语料帮助发现检测盲区、驱动规则迭代</p></div>
+  </div>
+  <h3 style="margin:30px 0 12px; font-size:16px;" data-i18n="fw.mapTitle">🧬 免疫隐喻对照</h3>
+  <table class="matrix">
+    <thead><tr><th data-i18n="fw.mapTh1">生物免疫</th><th data-i18n="fw.mapTh2">Progmune 对应</th></tr></thead>
+    <tbody>
+      <tr><td data-i18n="fw.map1a">免疫记忆</td><td data-i18n="fw.map1b">ACL-4 快速通道：命中已知失败模式直接修复（0 LLM）</td></tr>
+      <tr><td data-i18n="fw.map2a">抗体</td><td data-i18n="fw.map2b">从被拦截的失败中提取的修复模式</td></tr>
+      <tr><td data-i18n="fw.map3a">记忆细胞 / 免疫档案</td><td data-i18n="fw.map3b">失败语料库（SVL 分级 + 状态机快照）</td></tr>
+      <tr><td data-i18n="fw.map4a">免疫中枢</td><td data-i18n="fw.map4b">中央 hub：汇聚各项目失败指纹，去重入库</td></tr>
+      <tr><td data-i18n="fw.map5a">疫苗</td><td data-i18n="fw.map5b">148 条协议规则：把常见违规提前写成规则</td></tr>
+      <tr><td data-i18n="fw.map6a">免疫耐受</td><td data-i18n="fw.map6b">词段门控：区分项目函数与外部库，降低误报</td></tr>
+    </tbody>
+  </table>
+  <div class="card" style="margin-top:18px;">
+    <h3 data-i18n="fw.patternsTitle">📊 高频错误模式 Top 10</h3>
+    <p class="lead" style="margin:8px 0 14px; font-size:13px;" data-i18n="fw.patternsSub">实时从中央失败语料库拉取</p>
+    <ol id="patternList" class="pattern-list">
+      <li class="pattern-loading" data-i18n="fw.loading">加载中…</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ═══ 06 使用 ═══ -->
+<section id="usage">
+  <h2><span class="no">06</span><span data-i18n="s05.title">使用方法</span></h2>
+  <div class="grid cols-2">
+    <div class="card">
+      <h3 data-i18n="s05.installH">1️⃣ 安装</h3>
+      <pre class="code">npm install progmune-runtime</pre>
+      <h3 style="margin-top:20px;" data-i18n="s05.verifyH">2️⃣ 验证一个文件</h3>
+      <pre class="code">npm run sdk src/server.ts --explain
+<span class="c"># → BLOCK / WARN / ALLOW + 证据链</span></pre>
+    </div>
+    <div class="card">
+      <h3 data-i18n="s05.trustH">3️⃣ 项目级 Trust 检查</h3>
+      <pre class="code">npm run trust -- --project . --json</pre>
+      <h3 style="margin-top:20px;" data-i18n="s05.moreH">4️⃣ 更多</h3>
+      <pre class="code">npm run check          <span class="c"># 体检</span>
+npm run governance     <span class="c"># 治理审计</span>
+npm run precision:all  <span class="c"># 基准套件</span></pre>
+    </div>
+  </div>
+  <div class="card" style="margin-top:18px;">
+    <h3 data-i18n="s05.exampleH">5️⃣ 结果示例</h3>
+    <pre class="code"><span class="dim">$ npm run sdk src/server.ts --explain</span>
+
+<span class="warn">⚠ WARN</span>  protocol=auth   <span class="c"># 支付回调缺少签名验证</span>
+   at server.ts:42 → payment-callbacks.ts:9
+   rule: AUTH_SIGNATURE_BEFORE_CONFIRM
+
+<span class="ok">✔ Decision: NEEDS_REVIEW</span>   Trust Score: 64/100</pre>
+  </div>
+  <div style="margin-top:18px;">
+    <span class="pill"><b>MCP</b> Claude Code：<code>progmune_check</code> / <code>progmune_trust_check</code></span>
+    <span class="pill"><b>GitHub Action</b> PR 门禁</span>
+    <span class="pill"><b>Trust API</b> <code>POST /trust/check</code></span>
+  </div>
+  <div style="margin-top:14px;">
+    <a class="pill" data-i18n="s05.link1" href="https://github.com/shenlian19831109/progmune-runtime/blob/main/README.md" target="_blank" rel="noopener">📄 GitHub README</a>
+    <a class="pill" data-i18n="s05.link2" href="https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/QUICK_START.md" target="_blank" rel="noopener">🚀 Quick Start</a>
+    <a class="pill" data-i18n="s05.link3" href="https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/API_REFERENCE.md" target="_blank" rel="noopener">📚 API 参考</a>
+    <a class="pill" data-i18n="s05.link5" href="https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix.md" target="_blank" rel="noopener">📊 覆盖矩阵</a>
+  </div>
+  <div style="margin-top:8px;">
+    <span class="pill" data-i18n="s05.local">🛡️ 完全本地静态分析 · 代码不上传 · 无运行时依赖</span>
+  </div>
+</section>
+
+<!-- ═══ 07 路线图 ═══ -->
+<section id="roadmap">
+  <h2><span class="no">07</span><span data-i18n="rm.title">下一步方向</span></h2>
+  <p class="lead" data-i18n="rm.lead">从“检测器”走向“企业级治理平台”，以下方向正在推进。</p>
+  <div class="grid cols-3">
+    <div class="card"><h3 data-i18n="rm.d1t">🌐 更多语言</h3><p data-i18n="rm.d1d">Python · C · Go</p></div>
+    <div class="card"><h3 data-i18n="rm.d2t">📦 Trust API SaaS</h3><p data-i18n="rm.d2d">Dashboard → 多租户</p></div>
+    <div class="card"><h3 data-i18n="rm.d3t">🔌 协议扩展</h3><p data-i18n="rm.d3d">OAuth2.0 · gRPC · GraphQL</p></div>
+    <div class="card"><h3 data-i18n="rm.d4t">⚙️ CI/CD 插件</h3><p data-i18n="rm.d4d">GitHub App · GitLab · Jenkins</p></div>
+    <div class="card"><h3 data-i18n="rm.d5t">📊 行业基线</h3><p data-i18n="rm.d5d">同行业 Trust Score 对比</p></div>
+    <div class="card"><h3 data-i18n="rm.d6t">🏆 公开基准</h3><p data-i18n="rm.d6d">开源基准数据与方法论</p></div>
+  </div>
+  <p style="margin-top:26px; font-size:13px; color:var(--muted);" data-i18n="rm.indTitle">🎯 商业化重点行业</p>
+  <div style="margin-top:8px;">
+    <span class="pill"><b data-i18n="rm.ind1">金融科技（支付 / 交易）</b></span>
+    <span class="pill"><b data-i18n="rm.ind2">云原生基础设施</b></span>
+    <span class="pill"><b data-i18n="rm.ind3">SaaS 平台</b></span>
+    <span class="pill"><b data-i18n="rm.ind4">电商</b></span>
+    <span class="pill"><b data-i18n="rm.ind5">政务与合规</b></span>
+  </div>
+</section>
+
+<!-- ═══ 08 社区 ═══ -->
+<section id="community">
+  <h2><span class="no">08</span><span data-i18n="s06.title">社区与反馈</span></h2>
+  <p class="lead" data-i18n="s06.lead">扫码加入讨论群（微信 / WhatsApp），或通过邮箱、GitHub 联系我们。你的意见塑造 Progmune。</p>
+  <div class="community">
+    <div class="qr-wrap">
+      <img src="assets/community-qr.png" alt="Progmune community QR codes (WeChat + WhatsApp)">
+      <div class="cap" data-i18n="s06.qrCap">微信讨论群（7 天过期）+ WhatsApp 讨论群</div>
+    </div>
+    <div class="contact-card">
+      <h3 data-i18n="s06.contactTitle">📮 联系我们</h3>
+      <div class="contact-row"><span class="k" data-i18n="s06.rowEmailK">邮箱</span><span class="v"><a href="mailto:shenlian1983@qq.com">shenlian1983@qq.com</a></span></div>
+      <div class="contact-row"><span class="k" data-i18n="s06.rowRepoK">仓库</span><span class="v"><a href="https://github.com/shenlian19831109/progmune-runtime" target="_blank" rel="noopener">github.com/shenlian19831109/progmune-runtime</a></span></div>
+      <div class="contact-row"><span class="k" data-i18n="s06.rowIssueK">Issue</span><span class="v"><a href="https://github.com/shenlian19831109/progmune-runtime/issues" target="_blank" rel="noopener" data-i18n="s06.rowIssueV">提交缺陷 / 功能建议</a></span></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="ft-links">
+    <a href="mailto:shenlian1983@qq.com">shenlian1983@qq.com</a>
+    <a href="https://github.com/shenlian19831109/progmune-runtime" target="_blank" rel="noopener">GitHub</a>
+  </div>
+  <div data-i18n="footer.copyright">© 2026 Progmune · AI Software Verification Infrastructure</div>
+  <div style="margin-top:8px; opacity:.8;">v<span id="npmVersionFooter">3.7.6</span> · <span data-i18n="footer.updatedAt">更新于</span> <span id="npmUpdatedDate">2026-08-28</span></div>
+</footer>
+
+<script>
+const I18N = {
+  zh: {
+    "nav.problem": "为什么", "nav.what": "是什么", "nav.cap": "能力",
+    "nav.coverage": "覆盖", "nav.flywheel": "飞轮", "nav.roadmap": "路线图", "nav.usage": "使用", "nav.community": "社区",
+    "hero.kicker": "AI Trust Decision Engine · 协议生命周期验证",
+    "hero.h1": "AI 生成的代码，<em>可信吗？</em>",
+    "hero.tagline": "Progmune 验证 AI 软件是否遵循正确的协议生命周期——TLS 握手、认证流、支付完整性、资源管理。这类违规跨越函数调用序列，SAST / SCA 看不见，Progmune 看得见。",
+    "hero.cta1": "开始使用", "hero.cta2": "加入社区",
+    "hero.badgeNote": "示例：Progmune 对代码的三种裁决输出",
+    "hero.open": "🧡 开源 MIT · 免费 · 5 分钟上手",
+    "s01.title": "为什么需要 Progmune",
+    "s01.lead": "研究指出：<b>LLM 输出是统计表演而非推理</b>（Kambhampati 等，<a href=\"https://arxiv.org/abs/2504.09762\" target=\"_blank\" rel=\"noopener\">arXiv:2504.09762</a>）。当 AI 代码跨多个函数实现协议流程时，任何一环缺失都可能酿成安全事故。",
+    "s01.oldTitle": "❌ 传统检查的盲区",
+    "s01.old1": "SAST 逐行扫模式：看不到跨调用序列的违规",
+    "s01.old2": "SCA 查依赖漏洞：不管代码是否走完协议流程",
+    "s01.old3": "单测覆盖“写过的用例”，不是“协议要求的路径”",
+    "s01.old4": "CodeQL 能跨函数追踪数据流，但不验证协议时序约束（握手后必须释放、支付确认前必须验签）——生命周期合规需要状态机，不是污点流",
+    "s01.newTitle": "✅ Progmune 的视角",
+    "s01.new1": "函数 IR + 调用序列，映射到协议状态机",
+    "s01.new2": "验证“握手 → 建立 → 释放”全生命周期合规",
+    "s01.new3": "输出 Trust Score + Decision + 证据链",
+    "s01.new4": "序列级协议状态机验证，而非模式匹配",
+    "s02.title": "Progmune 是什么",
+    "s02.lead": "一套 <b>AI 代码治理基础设施</b>：静态分析代码的实际协议行为，回答“能不能部署”，而不是给一个孤立分数。",
+    "s02.name": "名字释义：Progmune = <b>Program + Immune（程序免疫）</b>——如免疫系统，从每一次被拦截的失败中学习、记忆并防御反复出现的错误模式。",
+    "stats.s1l": "协议命名空间", "stats.s2l": "验证规则", "stats.s3l": "盲测误报（TS/Python）", "stats.s4l": "信任评分维度",
+    "s02.c1t": "5 阶段流水线", "s02.c1d": "Collect → Normalize → Score → Decide → Assemble，产出决策与证据。",
+    "s02.c2t": "4 维度评分", "s02.c2d": "策略合规 35% · 协议安全 30% · 验证覆盖 20% · 治理完整性 15%",
+    "s02.c3t": "Decision > Score", "s02.c3d": "企业要的是“能不能部署”，不是“58 分还是 61 分”——关键违规直接 BLOCK。",
+    "s03.title": "核心能力",
+    "s03.c1t": "🔬 IR + 调用序列", "s03.c1d": "TS / Python 双语言 AST 提取，构建跨函数调用链（深度 ≤4、环安全），违规归因到入口函数。",
+    "s03.c2t": "🗺️ 协议状态机", "s03.c2d": "消费 <code>pre/post_states</code> 注解校验序列合法性，含 endState 资源释放检查。无需手写注解——别名匹配 + 词段门控自动识别协议原语",
+    "s03.c3t": "🧠 知识网络飞轮", "s03.c3d": "“每一个新库让所有验证变强”——库级 alias 跨项目迁移。",
+    "s03.c4t": "🛡️ 治理审计", "s03.c4d": "Policy Engine + 多格式审计报告 + 账本溯源与签名，满足企业合规。",
+    "s03.c5t": "🔧 修复执行器", "s03.c5d": "applyFix → verifyRepair → commit/rollback，修复后自动重新验证。",
+    "s03.c6t": "🤖 全场景接入", "s03.c6d": "SDK · CLI · MCP（Claude Code）· GitHub Action（PR 门禁）· Trust API。",
+    "s04.title": "语言覆盖现状",
+    "s04.th1": "语言", "s04.th2": "状态", "s04.th3": "证据",
+    "s04.r1": "盲测 795 金标：Recall 98.5% / Precision 100% / 0 FP；<a href=\"https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix.md\" target=\"_blank\" rel=\"noopener\">协议行 ✅×4</a>",
+    "s04.r2": "协议盲测 v1.2：66 金标 97% / 100% / 0 FP；<a href=\"https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/BASELINE_PROTOCOL_PYTHON_v1.md\" target=\"_blank\" rel=\"noopener\">基线文档</a>；源码级检测 729 金标 Recall 100%",
+    "s04.r3": "真实模块金标 5/5 + 采纳案例 uftpd：0 误报 + 违规精确定位；每协议 ~2-3 条注解（<a href=\"https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md\" target=\"_blank\" rel=\"noopener\">C 语言状态</a>）",
+    "s04.r4": "规划中；多语言 IR 注册表已就绪，新增语言 = 注册一条",
+    "s04.r6": "IR 提取接入注册表 + SSG 状态机；合成金标 P=100% / R=100%；零外部工具链",
+    "s04.r5": "Express / tRPC / FastAPI / Django / Flask / Fastify / Next.js / NestJS / Koa / Hapi / Gin / Fiber 结构级路由认证检查（<a href=\"https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix.md\" target=\"_blank\" rel=\"noopener\">覆盖矩阵</a>）",
+    "s04.cNote": "注：C 与 Go 为注解驱动验证（Beta）——未注解代码不检测、TLS 级深层覆盖仍无；框架适配 12 专用 = 4 结构级（AST）+ 8 启发式（代码串）。所有数字可点击查看证据。",
+    "fw.title": "失败语料飞轮",
+    "fw.lead": "每一次验证失败都不会被浪费——落入失败语料库、汇聚到中央 hub，让「验证覆盖」越来越强、高频错误模式越来越清晰。",
+    "fw.s1t": "🧯 失败入库", "fw.s1d": "每次违规记录 SSG 状态快照、SVL 分级与约束类型",
+    "fw.s2t": "📡 中央汇聚", "fw.s2d": "按项目本地入库 + 增量上报中央 hub，指纹去重",
+    "fw.s3t": "📈 反馈增强", "fw.s3d": "失败语料帮助发现检测盲区、驱动规则迭代",
+    "fw.mapTitle": "🧬 免疫隐喻对照",
+    "fw.mapTh1": "生物免疫", "fw.mapTh2": "Progmune 对应",
+    "fw.map1a": "免疫记忆", "fw.map1b": "ACL-4 快速通道：命中已知失败模式直接修复（0 LLM）",
+    "fw.map2a": "抗体", "fw.map2b": "从被拦截的失败中提取的修复模式",
+    "fw.map3a": "记忆细胞 / 免疫档案", "fw.map3b": "失败语料库（SVL 分级 + 状态机快照）",
+    "fw.map4a": "免疫中枢", "fw.map4b": "中央 hub：汇聚各项目失败指纹，去重入库",
+    "fw.map5a": "疫苗", "fw.map5b": "148 条协议规则：把常见违规提前写成规则",
+    "fw.map6a": "免疫耐受", "fw.map6b": "词段门控：区分项目函数与外部库，降低误报",
+    "fw.patternsTitle": "📊 高频错误模式 Top 10",
+    "fw.patternsSub": "实时从中央失败语料库拉取",
+    "fw.loading": "加载中…", "fw.empty": "暂无失败记录", "fw.unavailable": "中央语料暂时不可达", "fw.retry": "重试",
+    "s05.title": "使用方法",
+    "s05.installH": "1️⃣ 安装", "s05.verifyH": "2️⃣ 验证一个文件",
+    "s05.trustH": "3️⃣ 项目级 Trust 检查", "s05.moreH": "4️⃣ 更多",
+    "s05.exampleH": "5️⃣ 结果示例",
+    "s05.link1": "📄 GitHub README", "s05.link2": "🚀 Quick Start", "s05.link3": "📚 API 参考", "s05.link5": "📊 覆盖矩阵",
+    "s05.local": "🛡️ 完全本地静态分析 · 代码不上传 · 无运行时依赖",
+    "npm.week": "本周下载", "npm.total": "累计下载",
+    "s06.title": "社区与反馈",
+    "s06.lead": "扫码加入讨论群（微信 / WhatsApp），或通过邮箱、GitHub 联系我们。你的意见塑造 Progmune。",
+    "s06.qrCap": "微信讨论群（7 天过期）+ WhatsApp 讨论群",
+    "s06.contactTitle": "📮 联系我们",
+    "s06.rowEmailK": "邮箱", "s06.rowRepoK": "仓库", "s06.rowIssueK": "Issue", "s06.rowIssueV": "提交缺陷 / 功能建议",
+    "rm.title": "下一步方向",
+    "rm.lead": "从“检测器”走向“企业级治理平台”，以下方向正在推进。",
+    "rm.d1t": "🌐 更多语言", "rm.d1d": "Python · C · Go",
+    "rm.d2t": "📦 Trust API SaaS", "rm.d2d": "Dashboard → 多租户",
+    "rm.d3t": "🔌 协议扩展", "rm.d3d": "OAuth2.0 · gRPC · GraphQL",
+    "rm.d4t": "⚙️ CI/CD 插件", "rm.d4d": "GitHub App · GitLab · Jenkins",
+    "rm.d5t": "📊 行业基线", "rm.d5d": "同行业 Trust Score 对比",
+    "rm.d6t": "🏆 公开基准", "rm.d6d": "开源基准数据与方法论",
+    "rm.indTitle": "🎯 商业化重点行业",
+    "rm.ind1": "金融科技（支付 / 交易）", "rm.ind2": "云原生基础设施", "rm.ind3": "SaaS 平台", "rm.ind4": "电商", "rm.ind5": "政务与合规",
+    "footer.copyright": "© 2026 Progmune · AI Software Verification Infrastructure",
+    "footer.updatedAt": "更新于"
+  },
+  en: {
+    "nav.problem": "Why", "nav.what": "What", "nav.cap": "Capabilities",
+    "nav.coverage": "Coverage", "nav.flywheel": "Flywheel", "nav.roadmap": "Roadmap", "nav.usage": "Usage", "nav.community": "Community",
+    "hero.kicker": "AI Trust Decision Engine · Protocol Lifecycle Verification",
+    "hero.h1": "AI-generated code — <em>can you trust it?</em>",
+    "hero.tagline": "Progmune verifies that AI-generated software follows correct protocol lifecycles — TLS handshakes, auth flows, payment integrity, resource management. Violations that span function-call sequences are invisible to SAST/SCA. Progmune sees them.",
+    "hero.cta1": "Get Started", "hero.cta2": "Join Community",
+    "hero.badgeNote": "Sample: three decision outputs of Progmune on code",
+    "hero.open": "🧡 Open source MIT · Free · Get started in 5 minutes",
+    "s01.title": "Why Progmune",
+    "s01.lead": "Research shows <b>LLM outputs are statistical performances, not reasoning</b> (Kambhampati et al., <a href=\"https://arxiv.org/abs/2504.09762\" target=\"_blank\" rel=\"noopener\">arXiv:2504.09762</a>). When AI code implements a protocol across many functions, a single missing step can become a security incident.",
+    "s01.oldTitle": "❌ Blind spots of traditional checks",
+    "s01.old1": "SAST scans line patterns — misses violations across call sequences",
+    "s01.old2": "SCA checks dependency CVEs — not whether your code completes the flow",
+    "s01.old3": "Unit tests cover written cases, not protocol-required paths",
+    "s01.old4": "CodeQL can track cross-function data flow, but not protocol temporal constraints (release after handshake, verify before payment) — lifecycle compliance needs a state machine, not taint flow",
+    "s01.newTitle": "✅ The Progmune view",
+    "s01.new1": "Function IR + call sequences mapped onto protocol state machines",
+    "s01.new2": "Validates the full lifecycle: handshake → established → teardown",
+    "s01.new3": "Outputs Trust Score + Decision + evidence chain",
+    "s01.new4": "Sequence-level protocol state-machine verification, not pattern matching",
+    "s02.title": "What is Progmune",
+    "s02.lead": "An <b>AI code governance infrastructure</b>: statically analyzes actual protocol behavior and answers “can we deploy?” — not just a standalone score.",
+    "s02.name": "Etymology: Progmune = <b>Program + Immune</b> — like an immune system, it learns from every blocked failure, remembers, and defends against recurring error patterns.",
+    "stats.s1l": "Protocol namespaces", "stats.s2l": "Verification rules", "stats.s3l": "Blind-test false positives (TS/Python)", "stats.s4l": "Trust scoring dimensions",
+    "s02.c1t": "5-stage pipeline", "s02.c1d": "Collect → Normalize → Score → Decide → Assemble, producing decisions with evidence.",
+    "s02.c2t": "4 scoring dimensions", "s02.c2d": "Policy 35% · Protocol Safety 30% · Coverage 20% · Governance 15%",
+    "s02.c3t": "Decision > Score", "s02.c3d": "Enterprises ask “can I deploy?”, not “is it 58 or 61?” — critical violations hard-BLOCK.",
+    "s03.title": "Core Capabilities",
+    "s03.c1t": "🔬 IR + Call Sequences", "s03.c1d": "TS / Python AST extraction, cross-function call chains (depth ≤4, cycle-safe), violations attributed to entry functions.",
+    "s03.c2t": "🗺️ Protocol State Machine", "s03.c2d": "Validates sequences via <code>pre/post_states</code> annotations, incl. endState resource-release checks. No annotations required — alias matching + word-segment gating auto-recognize protocol primitives",
+    "s03.c3t": "🧠 Knowledge Flywheel", "s03.c3d": "“Every new library strengthens every verification” — library aliases transfer across projects.",
+    "s03.c4t": "🛡️ Governance Audit", "s03.c4d": "Policy Engine + multi-format audit reports + ledger provenance & signatures for compliance.",
+    "s03.c5t": "🔧 Repair Executor", "s03.c5d": "applyFix → verifyRepair → commit/rollback, re-verifying after every fix.",
+    "s03.c6t": "🤖 Everywhere Integration", "s03.c6d": "SDK · CLI · MCP (Claude Code) · GitHub Action (PR gate) · Trust API.",
+    "s04.title": "Language Coverage",
+    "s04.th1": "Language", "s04.th2": "Status", "s04.th3": "Evidence",
+    "s04.r1": "Blind test, 795 gold: Recall 98.5% / Precision 100% / 0 FP; <a href=\"https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix.md\" target=\"_blank\" rel=\"noopener\">protocol rows ✅×4</a>",
+    "s04.r2": "Protocol blind test v1.2: 66 gold 97% / 100% / 0 FP; <a href=\"https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/BASELINE_PROTOCOL_PYTHON_v1.md\" target=\"_blank\" rel=\"noopener\">baseline doc</a>; source-level 729 gold, Recall 100%",
+    "s04.r3": "Real-module gold 5/5 + adoption case uftpd: 0 FP with precise violation localization; ~2-3 annotations per protocol (<a href=\"https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md\" target=\"_blank\" rel=\"noopener\">C Language Status</a>)",
+    "s04.r4": "Planned; multi-language IR registry ready — a new language = one registry entry",
+    "s04.r6": "IR extraction via the registry + SSG state machine; synthetic gold P=100% / R=100%; zero toolchain deps",
+    "s04.r5": "Express / tRPC / FastAPI / Django / Flask / Fastify / Next.js / NestJS / Koa / Hapi / Gin / Fiber structural route-level auth checks (<a href=\"https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix.md\" target=\"_blank\" rel=\"noopener\">coverage matrix</a>)",
+    "s04.cNote": "Note: C and Go are annotation-driven (Beta) — unannotated code is not checked and deep TLS-level coverage is still absent; 12 dedicated detectors = 4 structural (AST) + 8 heuristic (code-string, real-project FP data pending). Every number links to its evidence.",
+    "fw.title": "Failure Corpus Flywheel",
+    "fw.lead": "No verification failure goes to waste — each one lands in the failure corpus and flows to the central hub, making verification coverage stronger and failure patterns clearer.",
+    "fw.s1t": "🧯 Failures recorded", "fw.s1d": "Each violation captures SSG state snapshots, SVL level, and constraint type",
+    "fw.s2t": "📡 Central aggregation", "fw.s2d": "Per-project local storage + incremental reporting to the central hub, fingerprint-deduped",
+    "fw.s3t": "📈 Feedback loop", "fw.s3d": "Failure corpus surfaces detection blind spots and steers rule iteration",
+    "fw.mapTitle": "🧬 Immunity Metaphor Map",
+    "fw.mapTh1": "Biological immunity", "fw.mapTh2": "Progmune counterpart",
+    "fw.map1a": "Immune memory", "fw.map1b": "ACL-4 fast path: known failure patterns fixed instantly (0 LLM)",
+    "fw.map2a": "Antibodies", "fw.map2b": "Repair patterns extracted from blocked failures",
+    "fw.map3a": "Memory cells / immune archive", "fw.map3b": "Failure corpus (SVL level + state-machine snapshots)",
+    "fw.map4a": "Immune center", "fw.map4b": "Central hub: aggregates failure fingerprints, deduped",
+    "fw.map5a": "Vaccines", "fw.map5b": "148 protocol rules: common violations codified in advance",
+    "fw.map6a": "Immune tolerance", "fw.map6b": "Word-segment gating: distinguishes project functions from libraries, fewer false positives",
+    "fw.patternsTitle": "📊 Top-10 Failure Patterns",
+    "fw.patternsSub": "Live from the central failure corpus",
+    "fw.loading": "Loading…", "fw.empty": "No failures recorded", "fw.unavailable": "Central corpus temporarily unreachable", "fw.retry": "Retry",
+    "s05.title": "Usage",
+    "s05.installH": "1️⃣ Install", "s05.verifyH": "2️⃣ Verify a file",
+    "s05.trustH": "3️⃣ Project trust check", "s05.moreH": "4️⃣ More",
+    "s05.exampleH": "5️⃣ Sample output",
+    "s05.link1": "📄 GitHub README", "s05.link2": "🚀 Quick Start", "s05.link3": "📚 API Reference", "s05.link5": "📊 Coverage Matrix",
+    "s05.local": "🛡️ Fully local static analysis · code never leaves your machine · no runtime",
+    "npm.week": "weekly downloads", "npm.total": "total downloads",
+    "s06.title": "Community & Feedback",
+    "s06.lead": "Scan to join the discussion groups (WeChat / WhatsApp), or reach us via email / GitHub. Your feedback shapes Progmune.",
+    "s06.qrCap": "WeChat group (expires in 7 days) + WhatsApp group",
+    "s06.contactTitle": "📮 Contact Us",
+    "s06.rowEmailK": "Email", "s06.rowRepoK": "Repo", "s06.rowIssueK": "Issue", "s06.rowIssueV": "File a bug / feature request",
+    "rm.title": "Next Directions",
+    "rm.lead": "From “detector” to “enterprise governance platform” — these directions are in motion.",
+    "rm.d1t": "🌐 More Languages", "rm.d1d": "Python · C · Go",
+    "rm.d2t": "📦 Trust API SaaS", "rm.d2d": "Dashboard → multi-tenant",
+    "rm.d3t": "🔌 Protocol Expansion", "rm.d3d": "OAuth2.0 · gRPC · GraphQL",
+    "rm.d4t": "⚙️ CI/CD Plugins", "rm.d4d": "GitHub App · GitLab · Jenkins",
+    "rm.d5t": "📊 Industry Baselines", "rm.d5d": "Trust-score comparison per industry",
+    "rm.d6t": "🏆 Public Benchmark", "rm.d6d": "Open-source benchmark data & methodology",
+    "rm.indTitle": "🎯 Focus Industries",
+    "rm.ind1": "FinTech (payments / trading)", "rm.ind2": "Cloud-native infrastructure", "rm.ind3": "SaaS platforms", "rm.ind4": "E-commerce", "rm.ind5": "Government & compliance",
+    "footer.copyright": "© 2026 Progmune · AI Software Verification Infrastructure",
+    "footer.updatedAt": "Updated"
+  }
+};
+
+// 语言：手动切换优先（localStorage），否则按浏览器语言自动检测
+const SAVED = localStorage.getItem("progmune-lang");
+let lang = SAVED
+  ? SAVED
+  : (navigator.language || "").toLowerCase().startsWith("zh")
+    ? "zh"
+    : "en";
+
+function applyLang() {
+  document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+  const dict = I18N[lang];
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    const key = el.dataset.i18n;
+    if (dict[key] !== undefined) el.innerHTML = dict[key];
+  });
+  document.getElementById("langToggle").textContent = lang === "zh" ? "EN" : "中文";
+}
+document.getElementById("langToggle").addEventListener("click", () => {
+  lang = lang === "zh" ? "en" : "zh";
+  localStorage.setItem("progmune-lang", lang);
+  applyLang();
+});
+
+// ═══ 实时拉取中央失败语料库：高频错误模式 Top 10（本周优先，历史兜底） ═══
+async function loadWeeklyPatterns() {
+  const el = document.getElementById("patternList");
+  if (!el) return;
+  // 词典是扁平键（"fw.xxx" 挂在 I18N[lang] 上），这里统一用扁平查找
+  const dict = I18N[lang] || I18N.zh;
+  const t = (k) => (dict[k] !== undefined ? dict[k] : I18N.zh[k]);
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 8000); // 8s 超时，避免无限"加载中"
+  try {
+    const res = await fetch("https://progmune-runtime.fly.dev/api/dashboard", { signal: ctrl.signal });
+    clearTimeout(timer);
+    if (!res.ok) throw new Error(String(res.status));
+    const data = await res.json();
+    let week = Array.isArray(data.topPatternsWeek) ? data.topPatternsWeek : [];
+    const all = Array.isArray(data.topPatterns) ? data.topPatterns : [];
+    // 本周无数据时回退到历史（全量）高频模式
+    if (!week.length && all.length) week = all;
+    if (!week.length) {
+      el.innerHTML = `<li class="pattern-empty">${t("fw.empty")}</li>`;
+      return;
+    }
+    el.innerHTML = week
+      .map((p, i) => {
+        const parts = String(p.pattern || "").split(" | ");
+        const svl = parts[0] || "?";
+        const ctype = parts[1] || "";
+        const seq = parts.slice(2).join(" | ") || "";
+        const svlClass = "svl-" + svl.replace("SVL-", "");
+        return (
+          `<li class="pattern-item">` +
+          `<span class="rank${i < 3 ? " top" : ""}">${i + 1}</span>` +
+          `<span class="svl ${svlClass}">${svl}</span>` +
+          (ctype ? `<span class="ctype">${ctype}</span>` : "") +
+          (seq ? `<code class="seq">${seq}</code>` : "") +
+          `<span class="count">×${p.count}</span>` +
+          `</li>`
+        );
+      })
+      .join("");
+  } catch {
+    el.innerHTML =
+      `<li class="pattern-empty">${t("fw.unavailable")} ` +
+      `<a href="#flywheel" onclick="loadWeeklyPatterns();return false;" style="color:var(--accent);">` +
+      `${t("fw.retry")}</a></li>`;
+  }
+}
+
+// ═══ 实时拉取 npm 版本号（registry.npmjs.org dist-tags.latest）：
+// hero + 页脚两处动态展示；发布到 npm 后自动跟随最新版本，无需改 HTML ═══
+async function loadNpmVersion() {
+  const elHero = document.getElementById("npmVersion");
+  const elFoot = document.getElementById("npmVersionFooter");
+  const elDate = document.getElementById("npmUpdatedDate");
+  if (!elHero && !elFoot) return;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 8000);
+  try {
+    const res = await fetch("https://registry.npmjs.org/progmune-runtime", { signal: ctrl.signal });
+    clearTimeout(timer);
+    if (!res.ok) throw new Error(String(res.status));
+    const pkg = await res.json();
+    const latest = pkg && pkg["dist-tags"] && pkg["dist-tags"].latest;
+    if (!latest) throw new Error("no dist-tags.latest");
+    if (elHero) elHero.textContent = "v" + latest;
+    if (elFoot) elFoot.textContent = latest;
+    if (elDate) {
+      const published = pkg.time && pkg.time[latest];
+      if (published) elDate.textContent = String(published).slice(0, 10);
+    }
+  } catch {
+    // 拉取失败保留静态回退值（页面内默认文案）
+  }
+}
+
+// ═══ 实时拉取 npm 下载量（api.npmjs.org，CORS 开放）：本周 + 全量累计 ═══
+async function loadNpmDownloads() {
+  const el = document.getElementById("npmDownloads"); // 本周
+  const elTotal = document.getElementById("npmDownloadsTotal"); // 全量累计
+  if (!el) return;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 8000);
+  try {
+    const res = await fetch("https://api.npmjs.org/downloads/point/last-week/progmune-runtime", { signal: ctrl.signal });
+    clearTimeout(timer);
+    if (!res.ok) throw new Error(String(res.status));
+    const data = await res.json();
+    if (data && typeof data.downloads === "number") {
+      el.textContent = data.downloads.toLocaleString("en-US");
+    } else {
+      throw new Error("no downloads field");
+    }
+  } catch {
+    el.textContent = "—";
+  }
+  // 全量累计：range API 从首次发布日求和
+  if (elTotal) {
+    const ctrl2 = new AbortController();
+    const timer2 = setTimeout(() => ctrl2.abort(), 12000);
+    try {
+      const reg = await fetch("https://registry.npmjs.org/progmune-runtime", { signal: ctrl2.signal });
+      const pkg = await reg.json();
+      const created = (pkg.time && pkg.time.created) ? pkg.time.created.slice(0, 10) : "2020-01-01";
+      const today = new Date().toISOString().slice(0, 10);
+      const r2 = await fetch(
+        `https://api.npmjs.org/downloads/range/${created}:${today}/progmune-runtime`,
+        { signal: ctrl2.signal },
+      );
+      clearTimeout(timer2);
+      if (r2.ok) {
+        const d2 = await r2.json();
+        const total = (d2.downloads || []).reduce((a, x) => a + (x.downloads || 0), 0);
+        elTotal.textContent = total.toLocaleString("en-US");
+      } else {
+        throw new Error("range api failed");
+      }
+    } catch {
+      clearTimeout(timer2);
+      elTotal.textContent = "—";
+    }
+  }
+}
+
+applyLang();
+loadWeeklyPatterns();
+loadNpmVersion();
+loadNpmDownloads();
+</script>
+
+</body>
+</html>
