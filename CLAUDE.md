@@ -176,8 +176,8 @@ npm run corpus:mine        # Rule mining from corpus
 
 **Framework adapters: 12 dedicated detectors — 4 structural (AST-based) + 8 heuristic (code-string), plus 5/13 with library aliases.** 诚实分层（2026-09-02 评审定稿）：
 - **结构级（AST 解析）**：NestJS（ts-morph 装饰器 + APP_GUARD + @Public 豁免）、FastAPI/Django/Flask（Python AST 扫描器 tools/extract_framework_{py,django,flask}.py → 路由/依赖注入/urlconf/权限类）——合成金标 P=R=100% 实测
-- **启发式（代码串模式）**：Express（路由+中间件分类）、tRPC（3 条合约规则）、Fastify（preHandler/钩子）、Next.js（App Router route.ts 导出）、Koa/Hapi/Gin/Fiber（路由中间件链/配置认证）——单测覆盖。**真实 FP 数据点进度：3/8**——Express（`REALWORLD_FRAMEWORK_FP_V1.md`）：20 flags 协议级 TP 0/20（FP 侧）；Fastify（`REALWORLD_FRAMEWORK_FP_V2.md`）：真实 20 路由全不可见 + 无感反证（recall 侧，转正需结构性重写）；Koa（`REALWORLD_FRAMEWORK_FP_V3.md`）：提取 OK（19/19 真路由 + 2 幻影）但 300 字符窗口**跨路由串扰**致 19/19 全标 protected（含 7 个公开路由）→ 单点摘 auth 无感（E2），全裸才报（E3）——分类器缺陷侧。三者皆维持「启发式 ⚠️」；Express 语料产出并修复 cors→security_header 缺陷（NO_HELMET 漏报）。剩余 5 个（tRPC/Next.js/Hapi/Gin/Fiber）待补
-- 转正门槛：每个启发式探测器补一个真实项目 FP 数据点（C 的 real-corpus 方法论延伸）后才可升级结构级标签；Express 转正 = 清单 4 项做完重测；Fastify 转正 = object-form 路由/plugin 注入/onRequest+decorator 认证/register 链 4 项重写后 20 路由全见 + 变异实验有反应；Koa 转正 = 窗口按路由边界截断 + 幻影路由限定接收者后重测（预判报出 register FP → 豁免词表需补 "/users" 形态）
+- **启发式（代码串模式）**：Express（路由+中间件分类）、tRPC（3 条合约规则）、Fastify（preHandler/钩子）、Next.js（App Router route.ts 导出）、Koa/Hapi/Gin/Fiber（路由中间件链/配置认证）——单测覆盖。**真实 FP 数据点进度：4/8**——Express（`REALWORLD_FRAMEWORK_FP_V1.md`）：20 flags 协议级 TP 0/20（FP 侧）；Fastify（`…V2.md`）：真实 20 路由全不可见 + 无感反证（recall 侧）；Koa（`…V3.md`）：提取 OK 但 300 字符窗口跨路由串扰 → 19/19 全标 protected、单点摘 auth 无感（分类器缺陷侧）；tRPC（`…V4.md`）：netflx-web 真实 19 过程只见 7（37%）、**mutation 0/8 可见**——链匹配正则不跨嵌套括号 → 标准 `.input(z.object({...}))` 过程全失明；首个 0 FP 语料（有积极意义）但覆盖率结构性受限；附带缺陷 `/g` lastIndex 泄漏致多文件扫描漂移（4/19 vs 7/19）。已修复：Express cors→security_header（NO_HELMET 漏报）。剩余 4 个（Next.js/Hapi/Gin/Fiber）待补
+- 转正门槛：每个启发式探测器补一个真实项目 FP 数据点（C 的 real-corpus 方法论延伸）后才可升级结构级标签；Express 转正 = 清单 4 项做完重测；Fastify 转正 = object-form/plugin/onRequest+decorator/register 4 项重写后 20 路由全见 + 变异有反应；Koa 转正 = 窗口按路由边界截断 + 幻影路由限定接收者后重测；tRPC 转正 = 括号感知链解析 + lastIndex 修复后 19 过程全见 + 摘 input 实验有反应
 
 ### P0-P3 Rule Injection (2026-08-03, historical phase)
 
