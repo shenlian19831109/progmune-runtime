@@ -176,7 +176,7 @@ npm run corpus:mine        # Rule mining from corpus
 
 **Framework adapters: 12 dedicated detectors — 4 structural (AST-based) + 8 heuristic (code-string), plus 5/13 with library aliases.** 诚实分层（2026-09-02 评审定稿）：
 - **结构级（AST 解析）**：NestJS（ts-morph 装饰器 + APP_GUARD + @Public 豁免）、FastAPI/Django/Flask（Python AST 扫描器 tools/extract_framework_{py,django,flask}.py → 路由/依赖注入/urlconf/权限类）——合成金标 P=R=100% 实测
-- **启发式（代码串模式）**：Express（路由+中间件分类）、tRPC（3 条合约规则）、Fastify（preHandler/钩子）、Next.js（App Router route.ts 导出）、Koa/Hapi/Gin/Fiber（路由中间件链/配置认证）——单测覆盖。**真实 FP 数据点进度：1/8**——Express 首个数据点已交付（2026-09-02，`blind-benchmark/REALWORLD_FRAMEWORK_FP_V1.md`）：node-express-realworld 真实应用 19 flags 协议级 TP 0/19 → 维持「启发式 ⚠️」有据；转正清单 5 项（路由级中间件识别/路由提取失配/per-file app 计数口径/加固类规则语义分离/cors→security_header 分类顺序缺陷→NO_HELMET 漏报）。剩余 7 个（tRPC/Fastify/Next.js/Koa/Hapi/Gin/Fiber）待补
+- **启发式（代码串模式）**：Express（路由+中间件分类）、tRPC（3 条合约规则）、Fastify（preHandler/钩子）、Next.js（App Router route.ts 导出）、Koa/Hapi/Gin/Fiber（路由中间件链/配置认证）——单测覆盖。**真实 FP 数据点进度：1/8**——Express 首个数据点已交付（2026-09-02，`blind-benchmark/REALWORLD_FRAMEWORK_FP_V1.md`）：node-express-realworld 真实应用 20 flags 协议级 TP 0/20 → 维持「启发式 ⚠️」有据。语料方法论当场产出并修复 1 个真缺陷（cors() 曾误分类 security_header → NO_HELMET 漏报，已修 + 回归测试 ×2）。转正清单剩 4 项（路由级中间件识别/路由提取失配/per-file app 计数口径/加固类规则语义分离）。剩余 7 个（tRPC/Fastify/Next.js/Koa/Hapi/Gin/Fiber）待补
 - 转正门槛：每个启发式探测器补一个真实项目 FP 数据点（C 的 real-corpus 方法论延伸）后才可升级结构级标签；Express 转正 = 做完上述清单在本语料重测 TP/FP 变化
 
 ### P0-P3 Rule Injection (2026-08-03, historical phase)

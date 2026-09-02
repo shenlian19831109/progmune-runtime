@@ -146,6 +146,12 @@ describe("classifyMiddleware", () => {
   it("should classify helmet as security_header", () => {
     expect(classifyMiddleware("", "helmet()")).toBe("security_header");
   });
+
+  it("should classify cors() as cors, NOT security_header (regression: SECURITY_HEADER_PATTERNS 曾含 cors 模式致 cors 恒被误分类 → 用 cors 的应用 NO_HELMET 漏报)", () => {
+    expect(classifyMiddleware("", "cors()")).toBe("cors");
+    expect(classifyMiddleware("", "cors({ origin: 'https://example.com' })")).toBe("cors");
+    expect(classifyMiddleware("", "cors(")).toBe("cors");
+  });
 });
 
 describe("extractGlobalMiddleware", () => {
@@ -183,6 +189,23 @@ describe("analyzeExpressApp", () => {
   it("should detect missing helmet", () => {
     const result = analyzeExpressApp(INSECURE_APP);
     expect(result.issues.some(i => i.rule === "EXPRESS_NO_HELMET")).toBe(true);
+  });
+
+  it("should still flag NO_HELMET when app uses cors() but no helmet (regression: cors 曾误分类为 security_header → hasHelmet 误真 → FN)", () => {
+    const corsNoHelmet = `
+      const express = require('express');
+      const cors = require('cors');
+      const app = express();
+      app.use(cors());
+      app.get('/', (req, res) => { res.send('ok'); });
+      app.listen(3000);
+    `;
+    const result = analyzeExpressApp(corsNoHelmet);
+    expect(result.issues.some(i => i.rule === "EXPRESS_NO_HELMET")).toBe(true);
+    // cors IS recognized — no NO_CORS_CONFIG flag on this app
+    expect(result.issues.some(i => i.rule === "EXPRESS_NO_CORS_CONFIG")).toBe(false);
+    // cors() must be typed cors, so engine cross-file suppression works
+    expect(result.globalMiddleware.some(m => m.type === "cors")).toBe(true);
   });
 
   it("should detect missing CORS", () => {

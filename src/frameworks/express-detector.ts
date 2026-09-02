@@ -108,8 +108,6 @@ const VALIDATION_MIDDLEWARE_PATTERNS = [
 
 const SECURITY_HEADER_PATTERNS = [
   /\bhelmet\b/,
-  /\bcors\s*\(/,
-  /\bcors\b/,
   /\bcsp\b/,
   /\bcontentSecurityPolicy\b/,
   /\bhsts\b/,
