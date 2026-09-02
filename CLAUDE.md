@@ -176,7 +176,18 @@ npm run corpus:mine        # Rule mining from corpus
 
 **Framework adapters: 12 dedicated detectors — 4 structural (AST-based) + 8 heuristic (code-string), plus 5/13 with library aliases.** 诚实分层（2026-09-02 评审定稿）：
 - **结构级（AST 解析）**：NestJS（ts-morph 装饰器 + APP_GUARD + @Public 豁免）、FastAPI/Django/Flask（Python AST 扫描器 tools/extract_framework_{py,django,flask}.py → 路由/依赖注入/urlconf/权限类）——合成金标 P=R=100% 实测
-- **启发式（代码串模式）**：Express（路由+中间件分类）、tRPC（3 条合约规则）、Fastify（preHandler/钩子）、Next.js（App Router route.ts 导出）、Koa/Hapi/Gin/Fiber（路由中间件链/配置认证）——单测覆盖。**真实 FP 数据点进度：8/8 收官（2026-09-02 全系列 `blind-benchmark/REALWORLD_FRAMEWORK_FP_V1-V8.md`）**——Express 20 flags 0/20 TP（形态失配）；Fastify 20 路由全不可见（recall 侧）；Koa 窗口串扰单点无感（分类器缺陷）；tRPC 嵌套括号失明 7/19（0 FP 但 coverage 受限）；Next.js webhook 词表缺口 1/1 FP；Hapi v16 gate 时代失配 0/38 进门；Gin 组级认证跨文件不可见 11/11 FP；Fiber（gofiber/recipes 官方语料，生态无生产级开源应用——FP 率不可测定）：同缺陷族复现（窗口串扰掩盖单点摘保护）+ 57 demo flags 语境噪声。**核心归纳：8/8 未过转正门槛；跨框架三类根因 = ① 300 字符窗口串扰（Koa/Gin/Fiber）② 声明式/组级/跨文件认证形态不可见（Fastify/Hapi/Gin）③ 词表与豁免缺口（Express/Next.js/tRPC/Koa register）**。已修复：Express cors→security_header。语料方法论产出缺陷清单见各 V 文档
+- **启发式（代码串模式）**：Express（路由+中间件分类）、tRPC（3 条合约规则）、Fastify（preHandler/钩子）、Next.js（App Router route.ts 导出）、Koa/Hapi/Gin/Fiber（路由中间件链/配置认证）——单测覆盖。**真实 FP 数据点进度：8/8 收官（2026-09-02 全系列 `blind-benchmark/REALWORLD_FRAMEWORK_FP_V1-V8.md`）**——Express 20 flags 0/20 TP（形态失配）；Fastify 20 路由全不可见（recall 侧）；Koa 窗口串扰单点无感（分类器缺陷）；tRPC 嵌套括号失明 7/19（0 FP 但 coverage 受限）；Next.js webhook 词表缺口 1/1 FP；Hapi v16 gate 时代失配 0/38 进门；Gin 组级认证跨文件不可见 11/11 FP；Fiber（gofiber/recipes 官方语料，生态无生产级开源应用——FP 率不可测定）：同缺陷族复现（窗口串扰掩盖单点摘保护）+ 57 demo flags 语境噪声。**核心归纳：8/8 未过转正门槛；跨框架三类根因 = ① 300 字符窗口串扰（Koa/Gin/Fiber）② 声明式/组级/跨文件认证形态不可见（Fastify/Hapi/Gin）③ 词表与豁免缺口（Express/Next.js/tRPC/Koa register）**
+
+**修复轮（2026-09-02）已修复缺陷**（各带回归测试 + 语料重测，见 V 文档「修复记录」）：
+- Express cors→security_header（NO_HELMET 漏报）
+- Koa 窗口边界截断 + 幻影路由 + handler 名误判（重测：19 路由分类全对，剩 register 语义 FP）
+- tRPC 括号感知链解析 + lastIndex 泄漏（重测：19/19 过程全提取）
+- Gin/Fiber Use 点限定捕获 + 窗口边界 + 空路径（共享 `src/frameworks/route-window.ts`；fiber 认证类 recipe 0 flags 转真）
+- Next.js 认证词表补 webhook 签名校验 + 裸 auth()/currentUser()（重测 netflx 0 issues）
+- Hapi gate 兼容 `require('hapi')`（v16 直连形态；glue/manifest 声明式仍待转正级解析）
+- 全框架 + trust engine 118 tests green
+
+**转正待办（未修，均为功能级）**：Express 清单 4 项（路由级中间件识别/路由提取/计数口径/语义分离）；Fastify object-form/plugin/onRequest+decorator/register 重写；Koa/Gin/Fiber register 集合豁免（语义层）；Gin/Fiber 组认证跨文件传播；tRPC v11 t.procedure 形态；Hapi 声明式数组路由 + config.auth 嵌套；Fiber 需真实生产语料
 - 转正门槛：每个启发式探测器补一个真实项目 FP 数据点（C 的 real-corpus 方法论延伸）后才可升级结构级标签；各探测器转正工作清单与重测路径见 `REALWORLD_FRAMEWORK_FP_V1-V8.md`（Express 清单 4 项 / Fastify 结构性重写 4 项 / Koa 窗口截断 + 幻影路由 / tRPC 括号感知 + lastIndex / Next.js 词表扩展 + webhooks 豁免 / Hapi 门兼容 + 声明式路由 / Gin Use 捕获 + 组认证跨文件 / Fiber 需真实生产语料）
 
 ### P0-P3 Rule Injection (2026-08-03, historical phase)
