@@ -58,3 +58,20 @@ Fastify（全盲）与 Koa（单点无感）。失效方向是**选择性失明*
   非全局正则或显式重置 lastIndex；v11 `t.procedure` 形态未覆盖（另记）
 - 四语料谱系：Express=有 flags 全 FP；Fastify=连路由都看不见；
   Koa=分类器串扰单点无感；tRPC=标准过程看不见、裸链有真敏感性
+
+## ✅ 修复记录（2026-09-02 修复轮）
+
+**括号感知链解析 + lastIndex 泄漏 两项已修**（`trpc-detector.ts`）：
+1. `extractProcedures` 重写为位置扫描：自 `name: XxxProcedure` 起逐个
+   解析 `.method(balancedArgs)`（深度感知 + 字符串感知，容忍嵌套括号
+   与多行）直至 `.query(/.mutation(`——标准 `.input(z.object({...}))`
+   链不再失明
+2. `PROCEDURE_TYPE_PATTERN` 移除 `/g`（detect 用 test() 不再跨文件
+   泄漏 lastIndex，逐文件扫描稳定）
+
+新测试文件 +5（`trpc-detector.test.ts`，此前无单测）：多行 input 链
+提取、单行 z.string 链、裸链触发、合规 0 issues、lastIndex 交替调用
+稳定。**修复后重测 netflx-web**：**19/19 过程全提取**（原 7/19），
+8 mutation 全部可见且带 input schema，0 issues——与金标一致，且
+「0 issues」不再是空洞（每个过程都被真正检查过）；摘 input 敏感性
+回归由单测锁定。跨文件扫描漂移（4/19 vs 7/19）消除

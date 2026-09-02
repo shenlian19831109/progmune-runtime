@@ -50,7 +50,9 @@ export interface TRPCFileAnalysis {
 
 // ── Detection Patterns ──
 
-const PROCEDURE_TYPE_PATTERN = /\b(publicProcedure|protectedProcedure|adminProcedure)\b/g;
+// 注意：detect 用途不带 /g——带 /g 的 test() 会跨文件泄漏 lastIndex，
+// 导致逐文件扫描结果随顺序漂移（实测 4/19 vs 7/19）
+const PROCEDURE_TYPE_PATTERN = /\b(publicProcedure|protectedProcedure|adminProcedure)\b/;
 
 const DB_WRITE_PATTERN =
   /\b(db\.(insert|update|delete|create|upsert|execute)|prisma\.\w+\.(create|update|delete|upsert|createMany|updateMany|deleteMany)|drizzle\.(insert|update|delete)|\.(insert|update|delete|create|upsert)\s*\()/i;
@@ -88,32 +90,85 @@ export function extractRouterNames(code: string): string[] {
  */
 export function extractProcedures(code: string): TRPCProcedure[] {
   const procedures: TRPCProcedure[] = [];
-  // Match: name: <procedureType>.input(...).<kind>( or name: <procedureType>.<kind>(
-  const procRe =
-    /([A-Za-z_][A-Za-z0-9_]*)\s*:\s*(publicProcedure|protectedProcedure|adminProcedure)((?:\.\w+\s*\([^()]*\))*)\.(query|mutation)\s*\(/g;
+  // 过程起点：name: <procedureType>（不含链）
+  const procStartRe =
+    /([A-Za-z_][A-Za-z0-9_]*)\s*:\s*(publicProcedure|protectedProcedure|adminProcedure)\b/g;
 
   let m: RegExpExecArray | null;
-  while ((m = procRe.exec(code)) !== null) {
+  while ((m = procStartRe.exec(code)) !== null) {
     const name = m[1];
     const procType = m[2].replace(/Procedure$/, "") as "public" | "protected" | "admin";
-    const chain = m[3] || "";
-    const kind = m[4] as "query" | "mutation";
 
-    const hasInputSchema = /\.input\s*\(/.test(chain);
+    // ── 链扫描（括号感知）──
+    // 自 procedure 类型后逐个解析 .method(balancedArgs)，容忍嵌套括号与
+    // 多行（.input(z.object({...})) 等标准形态），直至 .query(/.mutation(
+    // 或链中断。旧实现用 (?:\.\w+\([^()]*\))* 不跨嵌套括号 → 标准
+    // zod input 链整体失明（V4 缺陷）。
+    let pos = procStartRe.lastIndex;
+    let hasInputSchema = false;
+    let kind: "query" | "mutation" | null = null;
+    let kindOpenIdx = -1; // .query( 或 .mutation( 的 '(' 下标
 
-    // Extract body until matching closing paren of the query/mutation call.
-    // Heuristic: scan forward for the closing paren matching the one after
-    // the .query( / .mutation( token.
-    const openIdx = procRe.lastIndex - 1; // index of '(' after query/mutation
+    const skipWs = (): void => {
+      while (pos < code.length && /\s/.test(code[pos])) pos++;
+    };
+    const consumeBalanced = (open: string, close: string): void => {
+      let depth = 1;
+      let quote: string | null = null;
+      pos++; // 跳过 open
+      while (pos < code.length && depth > 0) {
+        const ch = code[pos];
+        if (quote) {
+          if (ch === quote && code[pos - 1] !== "\\") quote = null;
+        } else if (ch === '"' || ch === "'" || ch === "`") {
+          quote = ch;
+        } else if (ch === open) {
+          depth++;
+        } else if (ch === close) {
+          depth--;
+        }
+        pos++;
+      }
+    };
+
+    for (let step = 0; step < 100; step++) {
+      skipWs();
+      if (code[pos] !== ".") break;
+      pos++;
+      const methStart = pos;
+      while (pos < code.length && /[A-Za-z0-9_$]/.test(code[pos])) pos++;
+      const method = code.slice(methStart, pos);
+      skipWs();
+      if (code[pos] !== "(") break;
+      if (method === "query" || method === "mutation") {
+        kind = method as "query" | "mutation";
+        kindOpenIdx = pos; // '(' 位置
+        break;
+      }
+      if (method === "input") hasInputSchema = true;
+      consumeBalanced("(", ")");
+    }
+
+    if (kind === null || kindOpenIdx < 0) continue; // 非完整过程定义
+
+    // ── body：自 kind 的 '(' 后到匹配闭合括号（字符串感知）──
     let depth = 1;
-    let closeIdx = openIdx + 1;
+    let closeIdx = kindOpenIdx + 1;
+    let quote: string | null = null;
     while (closeIdx < code.length && depth > 0) {
       const ch = code[closeIdx];
-      if (ch === "(") depth++;
-      else if (ch === ")") depth--;
+      if (quote) {
+        if (ch === quote && code[closeIdx - 1] !== "\\") quote = null;
+      } else if (ch === '"' || ch === "'" || ch === "`") {
+        quote = ch;
+      } else if (ch === "(") {
+        depth++;
+      } else if (ch === ")") {
+        depth--;
+      }
       closeIdx++;
     }
-    const body = code.slice(openIdx + 1, Math.min(closeIdx - 1, openIdx + 2000));
+    const body = code.slice(kindOpenIdx + 1, Math.min(closeIdx - 1, kindOpenIdx + 2000));
 
     const usesInputInBody = /input\s*\./.test(body) || /\binput\b/.test(body);
     const doesDbWrite = DB_WRITE_PATTERN.test(body);
