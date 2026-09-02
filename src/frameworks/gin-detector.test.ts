@@ -74,3 +74,45 @@ describe("gin-detector", () => {
     expect(issues).toHaveLength(0);
   });
 });
+
+// ── V7 修复轮回归：Use 点限定捕获 / 窗口边界 / 空路径 ──
+
+describe("gin-detector V7 修复回归", () => {
+  it("Use 点限定成员（users.AuthMiddleware）被识别为认证中间件（旧版只捕 'users'）", () => {
+    const { issues, authGroupMiddleware } = analyzeGinApp(app(`
+	v1 := r.Group("/api")
+	v1.Use(users.AuthMiddleware(true))
+	v1.POST("/pay", createPayment)
+`));
+    expect(authGroupMiddleware).toContain("users.AuthMiddleware");
+    expect(issues).toHaveLength(0);
+  });
+
+  it("窗口不跨路由串扰：后面路由的认证中间件不保护前面的公开路由", () => {
+    const { issues, routes } = analyzeGinApp(app(`
+	v1.POST("/users", UsersRegistration)
+	v1.POST("/articles", AuthMiddleware(), ArticleCreate)
+`));
+    const reg = routes.find((x) => x.path === "/users");
+    const art = routes.find((x) => x.path === "/articles");
+    expect(reg!.protected).toBe(false);
+    expect(art!.protected).toBe(true);
+    expect(issues.map((i) => i.route)).toContain("POST /users");
+    expect(issues.map((i) => i.route)).not.toContain("POST /articles");
+  });
+
+  it("handler 名含 auth 词不误判为认证（UsersLogin 是 handler 不是中间件）", () => {
+    const { routes } = analyzeGinApp(app(`
+	v1.POST("/login", UsersLogin)
+`));
+    const login = routes.find((x) => x.path === "/login");
+    expect(login!.protected).toBe(false);
+  });
+
+  it("空路径注册可见（realworld 惯用 POST(\"\", ...)）", () => {
+    const { routes } = analyzeGinApp(app(`
+	v1.POST("", UsersRegistration)
+`));
+    expect(routes.some((x) => x.path === "")).toBe(true);
+  });
+});

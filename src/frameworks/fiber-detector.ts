@@ -18,6 +18,7 @@
  */
 
 import * as fs from "fs";
+import { routeCallWindow, middlewareNamesFromWindow } from "./route-window";
 
 // ── Types ──
 
@@ -78,19 +79,22 @@ export function analyzeFiberApp(code: string): FiberAppAnalysis {
   }
 
   // 全局/组级认证中间件：app.Use(authMW) / group.Use(authMW)
-  const useRe = /\.Use\s*\(\s*([A-Za-z_][\w]*)/g;
+  // 捕获支持点限定成员（jwtware.New 前的一般为 middleware.Protected 等）
+  const useRe = /\.Use\s*\(\s*([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*)/g;
   let m: RegExpExecArray | null;
   while ((m = useRe.exec(code)) !== null) {
     if (isAuthFnName(m[1])) authMiddleware.push(m[1]);
   }
 
   // 路由注册：app.Post("/x", mw1, mw2, handler)——Go 方法名大写（Post 惯例）
-  const routeRe = /\.(get|post|put|patch|delete)\s*\(\s*"([^"]+)"/gi;
+  // 空路径 "..." 允许
+  const routeRe = /\.(get|post|put|patch|delete)\s*\(\s*"([^"]*)"(\s*,\s*|\s*\))/gi;
   while ((m = routeRe.exec(code)) !== null) {
     const method = m[1].toLowerCase();
     const pathName = m[2];
-    const window = code.slice(m.index + m[0].length, m.index + m[0].length + 300);
-    const mwNames = window.match(/[A-Za-z_][\w]*/g) || [];
+    // 认证窗口 = 本次调用边界内（括号感知），不跨路由（V8 缺陷修复）
+    const window = routeCallWindow(code, m.index + m[0].length);
+    const mwNames = middlewareNamesFromWindow(window);
     const hasAuthMw = mwNames.some((name) => isAuthFnName(name));
 
     routes.push({

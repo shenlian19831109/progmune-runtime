@@ -57,3 +57,18 @@ auth-jwt router.go：摘掉 `POST /logout` 的 `middleware.Protected()` →
   门槛；跨框架反复出现的三类根因 = ① 300 字符窗口串扰（Koa/Gin/
   Fiber）② 真实框架的声明式/组级/跨文件认证形态不可见（Fastify/
   Hapi/Gin）③ 词表与豁免缺口（Express/Next.js/tRPC/Koa register）**
+
+## ✅ 修复记录（2026-09-02 修复轮）
+
+**窗口边界 + handler 排除 + Use 点限定捕获 已修**（`fiber-detector.ts`
+与 Gin 同步，共用 `route-window.ts`）：
+- 认证窗口改为本次调用边界内（不再 300 字符跨路由）——单点摘
+  Protected 不再被下一路由的 RefreshToken 等标识符掩盖（C 反证消除）
+- 末参 handler 排除（authHandler.Logout 不再被当认证中间件）
+- `.Use` 捕获支持点限定成员
+
+回归测试 +2（fiber 9 / gin 12 / 共 21 green）。**重测 fiber-recipes**：
+- 认证类 recipe（auth-jwt 等）0 flags 现为**真实**（窗口正确、不再靠
+  bleed）；0-issue 应用 74 个
+- CRUD demo 的 61 flags 仍为语境噪声（demo 无认证意图——语义边界
+  缺陷，转正待办）；Fiber 生态无生产语料 → FP 率仍不可测定（悬置）

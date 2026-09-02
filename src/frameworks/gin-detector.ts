@@ -19,6 +19,7 @@
  */
 
 import * as fs from "fs";
+import { routeCallWindow, middlewareNamesFromWindow } from "./route-window";
 
 // ── Types ──
 
@@ -81,23 +82,27 @@ export function analyzeGinApp(code: string): GinAppAnalysis {
   }
 
   // 组级认证中间件：r.Use(authMW) / r.Group("/api", authMW) / g.Use(authMW)
-  const useRe = /\.Use\s*\(\s*([A-Za-z_][\w]*)/g;
+  // 捕获支持点限定成员（users.AuthMiddleware）——修复旧版只捕限定符
+  // "users" 的缺陷（V7）。整名送词表判定（AuthMiddleware 含 auth ✓）
+  const useRe = /\.Use\s*\(\s*([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*)/g;
   let m: RegExpExecArray | null;
   while ((m = useRe.exec(code)) !== null) {
     if (isAuthFnName(m[1])) authGroupMiddleware.push(m[1]);
   }
-  const groupRe = /\.Group\s*\(\s*"[^"]*"\s*,\s*([A-Za-z_][\w]*)/g;
+  const groupRe = /\.Group\s*\(\s*"[^"]*"\s*,\s*([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*)/g;
   while ((m = groupRe.exec(code)) !== null) {
     if (isAuthFnName(m[1])) authGroupMiddleware.push(m[1]);
   }
 
   // 路由注册：r.POST("/x", mw1, mw2, handler)——Go 方法名大写（POST 惯例）
-  const routeRe = /\.(get|post|put|patch|delete)\s*\(\s*"([^"]+)"/gi;
+  // 空路径 "..." 允许（realworld 惯用 POST("", ...) 双注册）
+  const routeRe = /\.(get|post|put|patch|delete)\s*\(\s*"([^"]*)"(\s*,\s*|\s*\))/gi;
   while ((m = routeRe.exec(code)) !== null) {
     const method = m[1].toLowerCase();
     const pathName = m[2];
-    const window = code.slice(m.index + m[0].length, m.index + m[0].length + 300);
-    const mwNames = window.match(/[A-Za-z_][\w]*/g) || [];
+    // 认证窗口 = 本次调用边界内（括号感知），不跨路由（V7 缺陷修复）
+    const window = routeCallWindow(code, m.index + m[0].length);
+    const mwNames = middlewareNamesFromWindow(window);
     const hasAuthMw = mwNames.some((name) => isAuthFnName(name));
 
     routes.push({

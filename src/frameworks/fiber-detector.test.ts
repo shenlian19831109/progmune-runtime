@@ -66,3 +66,27 @@ describe("fiber-detector", () => {
     expect(issues).toHaveLength(0);
   });
 });
+
+// ── V8 修复轮回归：窗口边界（单点摘保护不再被后续路由掩盖）──
+
+describe("fiber-detector V8 修复回归", () => {
+  it("窗口不跨路由串扰：下一路由的 Protected 不掩盖上一路由摘保护", () => {
+    const { issues, routes } = analyzeFiberApp(app(`
+	api.Post("/logout", logoutHandler)
+	api.Post("/refresh-token", middleware.Protected(), refreshHandler)
+`));
+    const logout = routes.find((x) => x.path === "/logout");
+    const refresh = routes.find((x) => x.path === "/refresh-token");
+    expect(logout!.protected).toBe(false);
+    expect(refresh!.protected).toBe(true);
+    expect(issues.map((i) => i.route)).toContain("POST /logout");
+    expect(issues.map((i) => i.route)).not.toContain("POST /refresh-token");
+  });
+
+  it("handler 名含 auth 词不误判（logoutHandler 不被当认证）", () => {
+    const { routes } = analyzeFiberApp(app(`
+	api.Post("/logout", authHandler.Logout)
+`));
+    expect(routes.find((x) => x.path === "/logout")!.protected).toBe(false);
+  });
+});

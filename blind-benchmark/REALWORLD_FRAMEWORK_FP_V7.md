@@ -63,3 +63,24 @@ articles.ArticlesRegister(v1.Group("/articles")) // 全部 mutation
   路由正则支持空路径；窗口串扰同 Koa 修法（按调用边界截断）
 - 谱系：v1 形态失配 / v2 全盲 / v3 分类器串扰 / v4 括号失明 /
   v5 webhook 词表 / v6 gate 时代失配 / **v7 组级认证跨文件不可见**
+
+## ✅ 修复记录（2026-09-02 修复轮）
+
+**Use 点限定捕获 + 窗口边界 + 空路径 三项已修**（`gin-detector.ts`，
+与 Fiber 共用新模块 `route-window.ts`）：
+1. `\.Use` / `\.Group` 捕获支持点限定成员（`users.AuthMiddleware`）——
+   整名送词表（旧版只捕限定符 "users"，同文件组认证也失效）
+2. 认证窗口 = **本次调用边界内**（括号深度感知，共享
+   `routeCallWindow`）+ 末参 handler 排除（共享
+   `middlewareNamesFromWindow`）——跨路由 bleed 消除、handler 名
+   含 auth 词不再误判
+3. 路由正则支持**空路径** `POST("", …)`（realworld 惯用双注册）
+
+回归测试 +4（gin 12 / fiber 9 / 共 21 green）。**重测 gin-realworld**：
+- 路由 21→27（空路径可见，提取完整）
+- issues 11→15：**全部仍为跨文件组认证 FP**（保护在 hello.go 的
+  `v1.Use(users.AuthMiddleware(true))`，mutation 在独立 routers.go）+
+  register 空路径/"/" 双注册的 register 语义 FP（同 Koa/Next 豁免缺口）
+- **剩余唯一根因 = 组认证跨文件传播**（hello.go 的 Use 需作用到该组
+  注册的所有路由）——属转正级功能改造，非本次缺陷修复范围；per-file
+  逻辑现已正确（单测锁定同文件场景）
