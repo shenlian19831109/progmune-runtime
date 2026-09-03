@@ -17,6 +17,7 @@
  */
 
 import * as fs from "fs";
+import { collectRegisterRoots, isRegisterRoot } from "./route-window";
 
 // ── Types ──
 
@@ -72,6 +73,10 @@ const AUTH_MIDDLEWARE_PATTERNS = [
   /\bcheckAuth\b/,
   /\bprotect\b/,
   /\bauthenticateRequest\b/,
+  // realworld 惯用法：const auth = require('../middleware/auth') →
+  // router.get('/x', auth.required, ...)（V1 根因：点成员 auth.required 不可见）
+  /\bauth\s*\.\s*(required|optional)\b/i,
+  /\bauth\s*\./i,
   // Variable references — common Express convention (e.g., const auth = passport.authenticate(...))
   // These are standalone identifiers in middleware position
   /^auth$/i,
@@ -149,11 +154,18 @@ export function extractRoutes(code: string, appName: string): ExpressRoute[] {
   const routes: ExpressRoute[] = [];
   const methods = ["get", "post", "put", "delete", "patch", "all", "use"] as const;
 
+  // 接收者：真 app（appName）或路由对象（router/Router/*Router）——
+  // 真实 Express 应用把路由注册在 Router 实例上（V1 只提取 1/20+ 根因）
+  const receivers =
+    appName && appName !== "app"
+      ? `(?:${appName}|router|Router|[A-Za-z_$][\\w$]*[Rr]outer)`
+      : `(?:router|Router|[A-Za-z_$][\\w$]*[Rr]outer|app)`;
+
   for (const method of methods) {
     // Pattern: app.get('/path', middleware1, middleware2, handler)
     // or: router.post('/path', handler)
     const routeRegex = new RegExp(
-      `${appName}\\.${method}\\s*\\(\\s*['\"]([^'\"]+)['\"]\\s*,([^;]+)\\)`,
+      `\\b${receivers}\\.${method}\\s*\\(\\s*['\"]([^'\"]+)['\"]\\s*,([^;]+)\\)`,
       "gi"
     );
 
@@ -247,11 +259,23 @@ export function analyzeExpressApp(code: string): ExpressAppAnalysis {
   const globalMiddleware = extractGlobalMiddleware(code, appName);
   const issues: ExpressSecurityIssue[] = [];
 
+  // 真 app：代码里实例化了 express()（route 模块只建 Router 不算 app——
+  // V1 per-file 计数虚高：6 个路由模块被当作独立 app 各报一遍）
+  const appIsCreator =
+    /(?:const|let|var)\s+\w+\s*=\s*express\s*\(|require\(\s*['"]express['"]\s*\)\s*\(/.test(code);
+  // register 集合豁免（语义层）：users/login 姊妹 → POST users 公开注册
+  const registerRoots = collectRegisterRoots(routes.map((r) => r.path));
+  const routeHasAuth = (r: ExpressRoute): boolean =>
+    r.middlewares.some((mm) => AUTH_MIDDLEWARE_PATTERNS.some((pp) => pp.test(mm)));
+  const isMutation = (r: ExpressRoute): boolean =>
+    ["post", "put", "patch", "delete"].includes(r.method);
+  const nonPublicMutation = (r: ExpressRoute): boolean =>
+    isMutation(r) && !isPublicRoute(r.path)
+    && !(r.method === "post" && isRegisterRoot(r.path, registerRoots));
+
   // Check 1: Does the app have any auth middleware at all?
   const hasGlobalAuth = globalMiddleware.some(m => m.type === "auth");
-  const hasAnyAuth = hasGlobalAuth || routes.some(r =>
-    r.middlewares.some(m => AUTH_MIDDLEWARE_PATTERNS.some(p => p.test(m)))
-  );
+  const hasAnyAuth = hasGlobalAuth || routes.some(routeHasAuth);
 
   // Check 2: Does the app have rate limiting on auth routes?
   const hasRateLimit = globalMiddleware.some(m => m.type === "rate_limit");
@@ -274,7 +298,10 @@ export function analyzeExpressApp(code: string): ExpressAppAnalysis {
 
   // ── Generate Issues ──
 
-  if (!hasAnyAuth) {
+  // 整 app 无认证：仅真 app（实例化 express()）且自身有非公开 mutation
+  // 路由时报——main.ts 只挂载路由模块（真实认证在 controllers 内）不算裸
+  const hasNakedMutation = routes.some(nonPublicMutation);
+  if (!hasAnyAuth && appIsCreator && hasNakedMutation) {
     issues.push({
       severity: "critical",
       rule: "EXPRESS_NO_AUTH_MIDDLEWARE",
@@ -284,36 +311,29 @@ export function analyzeExpressApp(code: string): ExpressAppAnalysis {
     });
   }
 
-  // Check for routes without auth middleware (when auth middleware exists globally)
+  // 逐路由缺失认证：文件里已有认证（全局或路由级）时，未保护的非公开
+  // mutation 路由单独报——真实 Express 认证惯例是每路由 auth.required
+  // （V1 根因：检测器只认全局 app.use）
   if (hasAnyAuth) {
     for (const route of routes) {
       if (["use", "all"].includes(route.method)) continue; // skip middleware registrations
-
-      const routeHasAuth = route.middlewares.some(m =>
-        AUTH_MIDDLEWARE_PATTERNS.some(p => p.test(m))
-      );
-
-      if (!routeHasAuth && !hasGlobalAuth) {
-        // Route has no auth middleware AND no global auth → each route needs its own
-        // (already reported as EXPRESS_NO_AUTH_MIDDLEWARE above)
-        continue;
-      }
-
-      if (!routeHasAuth && hasGlobalAuth && !isPublicRoute(route.path)) {
-        issues.push({
-          severity: "high",
-          rule: "EXPRESS_ROUTE_MISSING_AUTH",
-          message: `Route ${route.method.toUpperCase()} ${route.path} has no auth middleware. It may be inadvertently public.`,
-          route: `${route.method.toUpperCase()} ${route.path}`,
-          line: route.line,
-          fix: `Add auth middleware to the route: app.${route.method}('${route.path}', authMiddleware, ${route.handler})`,
-        });
-      }
+      if (!isMutation(route)) continue; // 读操作不查（公开读常见）
+      if (routeHasAuth(route)) continue;
+      if (isPublicRoute(route.path)) continue;
+      if (route.method === "post" && isRegisterRoot(route.path, registerRoots)) continue;
+      issues.push({
+        severity: "high",
+        rule: "EXPRESS_ROUTE_MISSING_AUTH",
+        message: `Route ${route.method.toUpperCase()} ${route.path} has no auth middleware. It may be inadvertently public.`,
+        route: `${route.method.toUpperCase()} ${route.path}`,
+        line: route.line,
+        fix: `Add auth middleware to the route: app.${route.method}('${route.path}', authMiddleware, ${route.handler})`,
+      });
     }
   }
 
-  // Auth routes without rate limiting
-  if (authRoutes.length > 0 && !hasRateLimit) {
+  // Auth routes without rate limiting —— 仅真 app
+  if (appIsCreator && authRoutes.length > 0 && !hasRateLimit) {
     for (const route of authRoutes) {
       issues.push({
         severity: "high",
@@ -326,8 +346,8 @@ export function analyzeExpressApp(code: string): ExpressAppAnalysis {
     }
   }
 
-  // Missing security headers
-  if (!hasHelmet) {
+  // Missing security headers —— 仅真 app（route 模块不重复报，V1 ×7 虚高）
+  if (appIsCreator && !hasHelmet) {
     issues.push({
       severity: "medium",
       rule: "EXPRESS_NO_HELMET",
@@ -337,9 +357,9 @@ export function analyzeExpressApp(code: string): ExpressAppAnalysis {
     });
   }
 
-  // POST/PUT routes without validation
-  const mutationRoutes = routes.filter(r => ["post", "put", "patch"].includes(r.method));
-  if (mutationRoutes.length > 0 && !hasValidation) {
+  // POST/PUT routes without validation —— 仅真 app
+  const mutationRoutes = routes.filter(r => isMutation(r) && r.method !== "delete");
+  if (appIsCreator && mutationRoutes.length > 0 && !hasValidation) {
     issues.push({
       severity: "medium",
       rule: "EXPRESS_NO_INPUT_VALIDATION",
@@ -349,8 +369,8 @@ export function analyzeExpressApp(code: string): ExpressAppAnalysis {
     });
   }
 
-  // Missing CORS configuration
-  if (!hasCors) {
+  // Missing CORS configuration —— 仅真 app
+  if (appIsCreator && !hasCors) {
     issues.push({
       severity: "low",
       rule: "EXPRESS_NO_CORS_CONFIG",
@@ -360,8 +380,8 @@ export function analyzeExpressApp(code: string): ExpressAppAnalysis {
     });
   }
 
-  // Session without secure settings (if present)
-  if (hasSession) {
+  // Session without secure settings (if present) —— 仅真 app
+  if (appIsCreator && hasSession) {
     const sessionSecure = /secure\s*:\s*true/.test(code) && /httpOnly\s*:\s*true/.test(code) && /sameSite\s*:\s*['"](?:strict|lax)['"]/.test(code);
     if (!sessionSecure) {
       issues.push({
@@ -398,6 +418,11 @@ function isPublicRoute(path: string): boolean {
     /^\/robots\.txt/i,
     /^\/$/,
   ];
+  // 尾段认证入口：/users/login、/api/register 等带前缀的真实 world 形态
+  // （V1 时代只认 ^/login 精确匹配——前缀登录入口被误报）
+  if (/\/?(login|signin|signup|sign_in|register|refresh)(\/|$)/i.test(path)) {
+    return true;
+  }
   return publicPatterns.some(p => p.test(path));
 }
 

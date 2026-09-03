@@ -58,6 +58,25 @@
    `src/frameworks/express-detector.test.ts`（23 tests green）。
    修复后重扫：NO_HELMET 6→7、总数 19→20、协议级 TP 0/20 不变。
 
+## ✅ 转正修复（2026-09-02，Express 清单 4 项逐步落地）
+
+1. **路由提取接收者化**：app.get + router/Router/*Router——真实路由注册在
+   Router 实例上（V1：20+ 路由只提取 1 条 → 现 20 条全见）
+2. **路由级中间件识别（根因项）**：AUTH_MIDDLEWARE_PATTERNS 补
+   `auth.required/auth.optional`（realworld 惯用法 `const auth = …;
+   router.post('/x', auth.required, …)`）→ 受保护 mutation 不再误报
+3. **per-file app 计数口径**：真 app 判定（代码实例化 express()）——
+   NO_AUTH/NO_HELMET/NO_CORS/validation/session 只对真 app 报；route 模块
+   只贡献路由与逐路由缺失认证（NO_HELMET 7→1、NO_CORS 6→0）
+4. **逐路由缺失认证**：EXPRESS_ROUTE_MISSING_AUTH 扩展到路由级认证环境
+   （不再要求全局 auth），mutation-only + 前缀登录/register 豁免
+   （/users/login 等真实 world 形态）
+
+**express-realworld 重测：20 issues → 1**（剩 main.ts NO_HELMET——
+真实加固缺口，非协议级；协议级 0 FP）。**反证**：摘 POST /articles 的
+auth.required（其余仍保护）→ ROUTE_MISSING_AUTH 触发 ✓。回归测试 +4
+（27 green）；全框架 143 tests green。
+
 ## 结论
 
 - **Express 维持「启发式 ⚠️」标签有据**：真实数据点 0/20 协议级 TP

@@ -260,3 +260,64 @@ describe("formatExpressReport", () => {
     expect(report).toContain("Security Issues:");
   });
 });
+
+// ── V1 转正回归：接收者路由 / 路由级 auth / 逐路由缺失 / 真 app 门 / 前缀入口 ──
+
+const ROUTER_MODULE = `
+const express = require('express');
+const router = express.Router();
+const auth = require('../middleware/auth');
+router.get('/articles', async (req, res) => { res.json([]); });
+router.post('/articles', auth.required, async (req, res) => { res.json({}); });
+router.post('/payments', async (req, res) => { res.json({}); });
+module.exports = router;
+`;
+
+const ROUTER_WITH_LOGIN = `
+const express = require('express');
+const router = express.Router();
+const auth = require('../middleware/auth');
+router.post('/users/login', async (req, res) => { res.json({}); });   // 公开登录
+router.post('/users', async (req, res) => { res.json({}); });          // 公开注册（有 login 姊妹）
+router.put('/user', auth.required, async (req, res) => { res.json({}); });
+module.exports = router;
+`;
+
+describe("express V1 转正回归", () => {
+  it("router 接收者路由可提取（旧版只认 app.——20+ 路由只提取 1 条）", () => {
+    const { routes } = analyzeExpressApp(ROUTER_MODULE);
+    expect(routes.some((r) => r.method === "post" && r.path === "/articles")).toBe(true);
+  });
+
+  it("路由级 auth.required 保护不报；同文件其他无认证 mutation 报 ROUTE_MISSING_AUTH", () => {
+    const { issues } = analyzeExpressApp(ROUTER_MODULE);
+    const missing = issues.filter((i) => i.rule === "EXPRESS_ROUTE_MISSING_AUTH").map((i) => i.route);
+    expect(missing).not.toContain("POST /articles");
+    expect(missing).toContain("POST /payments");
+    // 路由模块不是 app：NO_AUTH/NO_HELMET/NO_CORS 不报（V1 per-file 计数虚高修复）
+    expect(issues.some((i) => i.rule === "EXPRESS_NO_AUTH_MIDDLEWARE")).toBe(false);
+    expect(issues.some((i) => i.rule === "EXPRESS_NO_HELMET")).toBe(false);
+  });
+
+  it("前缀登录/注册入口豁免：/users/login 与 /users（姊妹佐证）不报", () => {
+    const { issues } = analyzeExpressApp(ROUTER_WITH_LOGIN);
+    const missing = issues.filter((i) => i.rule === "EXPRESS_ROUTE_MISSING_AUTH").map((i) => i.route);
+    expect(missing).not.toContain("POST /users/login");
+    expect(missing).not.toContain("POST /users");
+    expect(missing).not.toContain("PUT /user");
+  });
+
+  it("摘掉某条 auth.required（其余仍受保护）→ 该 mutation 报 ROUTE_MISSING_AUTH（敏感性）", () => {
+    const twoProtected = ROUTER_MODULE.replace(
+      "router.post('/payments', async",
+      "router.put('/admin', auth.required, async"
+    );
+    const stripped = twoProtected.replace(
+      "router.post('/articles', auth.required,",
+      "router.post('/articles',"
+    );
+    const { issues } = analyzeExpressApp(stripped);
+    expect(issues.some((i) => i.rule === "EXPRESS_ROUTE_MISSING_AUTH" && i.route === "POST /articles")).toBe(true);
+    expect(issues.some((i) => i.rule === "EXPRESS_ROUTE_MISSING_AUTH" && i.route === "PUT /admin")).toBe(false);
+  });
+});

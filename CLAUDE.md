@@ -193,9 +193,13 @@ npm run corpus:mine        # Rule mining from corpus
 - **Fastify 结构性重写（转正功能）**：object-form `server.route({})` 解析
   + plugin(fp 模块)进门 + onRequest/点限定认证 + register 豁免——fastify-realworld
   0 路由 → 20 全见 / 0 issues，摘 POST articles 认证反证 0→1
-- 全框架 + trust engine 139 tests green
+- **Express 转正修复（清单 4 项）**：路由提取接收者化（1→20 全见）+
+  auth.required 路由级识别 + 真 app 计数口径（route 模块不重复报）+ 逐
+  路由缺失认证 + 前缀登录/register 豁免——express-realworld 20→1 issues
+  （剩 main.ts NO_HELMET 加固缺口，协议级 0 FP；摘单条 auth 反证触发）
+- 全框架 + trust engine 143 tests green
 
-**转正待办（未修，均为功能级）**：Express 清单 4 项（路由级中间件识别/路由提取/计数口径/语义分离）；tRPC v11 t.procedure 形态；Hapi 声明式数组路由 + config.auth 嵌套；Fiber 组认证跨文件模型（gin 同款，待真实语料）+ Fiber 需真实生产语料
+**转正待办（未修，均为功能级）**：tRPC v11 t.procedure 形态；Hapi 声明式数组路由 + config.auth 嵌套；Fiber 组认证跨文件模型（gin 同款，待真实语料）+ Fiber 需真实生产语料
 - 转正门槛：每个启发式探测器补一个真实项目 FP 数据点（C 的 real-corpus 方法论延伸）后才可升级结构级标签；各探测器转正工作清单与重测路径见 `REALWORLD_FRAMEWORK_FP_V1-V8.md`（Express 清单 4 项 / Fastify 结构性重写 4 项 / Koa 窗口截断 + 幻影路由 / tRPC 括号感知 + lastIndex / Next.js 词表扩展 + webhooks 豁免 / Hapi 门兼容 + 声明式路由 / Gin Use 捕获 + 组认证跨文件 / Fiber 需真实生产语料）
 
 ### P0-P3 Rule Injection (2026-08-03, historical phase)
