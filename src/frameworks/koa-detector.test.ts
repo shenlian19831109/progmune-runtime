@@ -90,3 +90,23 @@ router.post("/x", auth, h);
     expect(routes.map((r) => r.path)).toContain("/x");
   });
 });
+
+describe("koa-detector register 集合豁免（语义层）", () => {
+  it("有 /users/login 姊妹佐证：POST /users（公开注册）不报", () => {
+    const { issues } = analyzeKoaApp(app(`
+router.post("/users/login", ctrl.login);
+router.post("/users", ctrl.register);
+router.post("/articles", auth, ctrl.create);
+`));
+    expect(issues.map((i) => i.route)).not.toContain("POST /users");
+    expect(issues.map((i) => i.route)).not.toContain("POST /users/login");
+    expect(issues.map((i) => i.route)).not.toContain("POST /articles");
+  });
+
+  it("无姊妹佐证：POST /users 仍报（管理员建用户类端点不豁免）", () => {
+    const { issues } = analyzeKoaApp(app(`
+router.post("/users", ctrl.createUser);
+`));
+    expect(issues.map((i) => i.route)).toContain("POST /users");
+  });
+});

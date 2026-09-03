@@ -88,3 +88,10 @@ register/login/读路由按 spec 公开 → 0 协议级违规（理想输出 0�
   - NESTJS_NO_VALIDATION 12 → 11（register 有 ValidationPipe）
 - **无感反证闭合**：摘光 article 模块 forRoutes → NO_AUTH 2 → 9
   （7 条 mutation 浮现 ✓——中间件形态保护被摘除现在有反应）
+
+## ✅ register 集合豁免（语义层，2026-09-02 后续修复）
+
+项目级预扫账户入口路由（*/login|register|signup…）→ 集合根；该集合的
+POST = 公开注册豁免（POST-only、无佐证不豁免）。**nestjs-realworld
+重测：13 → 12 issues**——register FP 消除，剩 DELETE /users/:slug
+（真实 TP）

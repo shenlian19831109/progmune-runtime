@@ -23,6 +23,7 @@ import {
   SyntaxKind,
   Expression,
 } from "ts-morph";
+import { collectRegisterRoots, isRegisterRoot } from "./route-window";
 
 // ── Types ──
 
@@ -125,6 +126,34 @@ export function analyzeNestJSProject(projectRoot: string): NestJSAnalysis {
     }
   }
 
+  // ── register 集合豁免预扫（语义层）──
+  // 项目级收集账户入口路由（*\/login|register|signup…）→ 集合根
+  // （/users/login → /users）；该集合的 POST = 公开注册（realworld 惯用
+  // POST /users——register FP 跨框架根因）。POST-only：同集合的 PUT 等
+  // 不豁免；无 login 姊妹佐证的写集合（管理员建用户）仍查
+  const allRoutePaths: string[] = [];
+  for (const file of project.getSourceFiles()) {
+    if (file.getFilePath().includes("node_modules")) continue;
+    if (/\.(test|spec)\.ts$/.test(file.getFilePath())) continue;
+    for (const cls of file.getClasses()) {
+      const ctrlDec = cls.getDecorator("Controller");
+      if (!ctrlDec) continue;
+      const basePath = getStringArg(ctrlDec, 0) || "";
+      for (const method of cls.getMethods()) {
+        const http = getHttpMethod(method);
+        if (!http) continue;
+        const routePath = getStringArg(
+          method.getDecorators().find((d) => isHttpDecorator(d))!,
+          0
+        ) || "";
+        allRoutePaths.push(
+          basePath + (routePath.startsWith("/") ? routePath : `/${routePath}`)
+        );
+      }
+    }
+  }
+  const registerRoots = collectRegisterRoots(allRoutePaths);
+
   for (const file of project.getSourceFiles()) {
     // Skip node_modules and test files
     if (file.getFilePath().includes("node_modules")) continue;
@@ -192,7 +221,8 @@ export function analyzeNestJSProject(projectRoot: string): NestJSAnalysis {
         // POST/PUT/DELETE without auth guard
         // Skip intentionally public routes (login, register, health, etc.)
         if (["POST", "PUT", "DELETE", "PATCH"].includes(httpMethod) && !isPublicRoute(fullPath)) {
-          if (!route.hasAuthGuard && !protectedByGlobal && !protectedByMiddleware) {
+          const isRegisterPost = httpMethod === "POST" && isRegisterRoot(fullPath, registerRoots);
+          if (!route.hasAuthGuard && !protectedByGlobal && !protectedByMiddleware && !isRegisterPost) {
             analysis.issues.push({
               type: "NESTJS_NO_AUTH",
               severity: "critical",

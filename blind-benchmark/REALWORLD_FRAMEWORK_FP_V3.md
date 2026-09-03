@@ -74,3 +74,11 @@ middleware、app.js 各一处）被提取为 `GET secret` 路由——虚增计�
   检测器无法静态判定「POST /users 无认证」是公开注册还是缺失认证
   → 0/1 协议级 TP。该缺口与 Next.js register 豁免同源，属**语义层**
   问题（register 集合识别），列入转正待办（跨框架同款）
+
+## ✅ register 集合豁免（语义层，2026-09-02 后续修复）
+
+**Koa/Gin/Fiber/NestJS 四检测器已修**（共享 `route-window.ts`
+`collectRegisterRoots`/`isRegisterRoot`）：同文件存在 `<path>/login|
+register|signup…` 姊妹路由 ⇒ `<path>` 是账户集合，其无认证 **POST** =
+公开注册（豁免）；**POST-only**（同集合 PUT 等不豁免）、**无姊妹佐证
+不豁免**（管理员建用户类端点仍查）。**koa-realworld 重测：1 → 0 issues**

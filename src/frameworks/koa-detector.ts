@@ -19,7 +19,7 @@
  */
 
 import * as fs from "fs";
-import { routeCallWindow, middlewareNamesFromWindow } from "./route-window";
+import { routeCallWindow, middlewareNamesFromWindow, collectRegisterRoots, isRegisterRoot } from "./route-window";
 
 // ── Types ──
 
@@ -108,17 +108,27 @@ export function analyzeKoaApp(code: string): KoaAppAnalysis {
       protected: hasAuthMw,
       line: code.slice(0, m.index).split("\n").length,
     });
+  }
 
-    if (MUTATION_METHODS.has(method) && !hasAuthMw
-        && authGlobalMiddleware.length === 0 && !isAuthEntryPath(pathName)) {
+  // register 集合豁免（语义层）：同文件存在 <path>/login|register|signup…
+  // 姊妹路由 ⇒ <path> 是账户集合，其无认证 POST = 公开注册（realworld
+  // 惯用 POST /users 而非 /register——路径豁免词表认不出，Koa 语料
+  // 1/1 register FP 的根因）。有 login 佐证才豁免：管理员建用户类
+  // 端点（无姊妹 login）仍会报
+  const registerRoots = collectRegisterRoots(routes.map((r) => r.path));
+  for (const r of routes) {
+    if (MUTATION_METHODS.has(r.method) && !r.protected
+        && authGlobalMiddleware.length === 0
+        && !isAuthEntryPath(r.path)
+        && !(r.method === "post" && isRegisterRoot(r.path, registerRoots))) {
       issues.push({
         severity: "medium",
         rule: "KOA_ROUTE_NO_AUTH",
         message:
-          `Route ${method.toUpperCase()} ${pathName} has no auth middleware ` +
+          `Route ${r.method.toUpperCase()} ${r.path} has no auth middleware ` +
           `and the app registers no auth middleware — any caller can reach it.`,
-        route: `${method.toUpperCase()} ${pathName}`,
-        line: code.slice(0, m.index).split("\n").length,
+        route: `${r.method.toUpperCase()} ${r.path}`,
+        line: r.line,
       });
     }
   }

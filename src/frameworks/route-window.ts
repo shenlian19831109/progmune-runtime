@@ -79,3 +79,39 @@ export function middlewareNamesFromWindow(window: string): string[] {
   }
   return names;
 }
+
+// ── register 集合豁免（语义层，Koa/Gin/Fiber/NestJS 共用）──
+
+/** 账户集合根判定词：路径以这些后缀结尾的路由是账户入口（login 等） */
+const ACCOUNT_ENTRY_SUFFIXES = [
+  "/login", "/signin", "/sign_in", "/register", "/signup", "/sign_up",
+];
+
+/** 规范化路径：去首尾斜杠 */
+export function normPath(p: string): string {
+  return p.replace(/^\/+|\/+$/g, "");
+}
+
+/**
+ * 收集「账户集合根」：对每条路径，若以账户入口后缀结尾（如 /users/login），
+ * 剥掉后缀得集合根（/users）。该集合的无认证 POST = 公开注册（豁免）。
+ * 佐证式豁免——无 login/register 姊妹的写集合不豁免（管理员建用户等仍查）。
+ */
+export function collectRegisterRoots(paths: string[]): Set<string> {
+  const roots = new Set<string>();
+  for (const p of paths) {
+    const lower = p.toLowerCase();
+    for (const suffix of ACCOUNT_ENTRY_SUFFIXES) {
+      if (lower.endsWith(suffix)) {
+        roots.add(normPath(p.slice(0, -suffix.length)));
+        break;
+      }
+    }
+  }
+  return roots;
+}
+
+/** routePath 是否命中账户集合根（规范化比较） */
+export function isRegisterRoot(routePath: string, roots: Set<string>): boolean {
+  return roots.has(normPath(routePath));
+}

@@ -18,7 +18,7 @@
  */
 
 import * as fs from "fs";
-import { routeCallWindow, middlewareNamesFromWindow } from "./route-window";
+import { routeCallWindow, middlewareNamesFromWindow, collectRegisterRoots, isRegisterRoot } from "./route-window";
 
 // ── Types ──
 
@@ -103,17 +103,23 @@ export function analyzeFiberApp(code: string): FiberAppAnalysis {
       protected: hasAuthMw,
       line: code.slice(0, m.index).split("\n").length,
     });
+  }
 
-    if (MUTATION_METHODS.has(method) && !hasAuthMw
-        && authMiddleware.length === 0 && !isAuthEntryPath(pathName)) {
+  // register 集合豁免（语义层，同 Koa/Gin）
+  const registerRoots = collectRegisterRoots(routes.map((r) => r.path));
+  for (const r of routes) {
+    if (MUTATION_METHODS.has(r.method) && !r.protected
+        && authMiddleware.length === 0
+        && !isAuthEntryPath(r.path)
+        && !(r.method === "post" && isRegisterRoot(r.path, registerRoots))) {
       issues.push({
         severity: "medium",
         rule: "FIBER_ROUTE_NO_AUTH",
         message:
-          `Route ${method.toUpperCase()} ${pathName} has no auth middleware ` +
+          `Route ${r.method.toUpperCase()} ${r.path} has no auth middleware ` +
           `and no auth Use middleware — any caller can reach it.`,
-        route: `${method.toUpperCase()} ${pathName}`,
-        line: code.slice(0, m.index).split("\n").length,
+        route: `${r.method.toUpperCase()} ${r.path}`,
+        line: r.line,
       });
     }
   }

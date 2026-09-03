@@ -19,7 +19,7 @@
  */
 
 import * as fs from "fs";
-import { routeCallWindow, middlewareNamesFromWindow } from "./route-window";
+import { routeCallWindow, middlewareNamesFromWindow, collectRegisterRoots, isRegisterRoot } from "./route-window";
 
 // ── Types ──
 
@@ -111,17 +111,25 @@ export function analyzeGinApp(code: string): GinAppAnalysis {
       protected: hasAuthMw,
       line: code.slice(0, m.index).split("\n").length,
     });
+  }
 
-    if (MUTATION_METHODS.has(method) && !hasAuthMw
-        && authGroupMiddleware.length === 0 && !isAuthEntryPath(pathName)) {
+  // register 集合豁免（语义层，同 Koa）：有 <path>/login 姊妹佐证的
+  // 账户集合，其无认证 POST = 公开注册（gin realworld 用 POST "" /
+  // "/" + /login 双注册——路径豁免词表认不出）
+  const registerRoots = collectRegisterRoots(routes.map((r) => r.path));
+  for (const r of routes) {
+    if (MUTATION_METHODS.has(r.method) && !r.protected
+        && authGroupMiddleware.length === 0
+        && !isAuthEntryPath(r.path)
+        && !(r.method === "post" && isRegisterRoot(r.path, registerRoots))) {
       issues.push({
         severity: "medium",
         rule: "GIN_ROUTE_NO_AUTH",
         message:
-          `Route ${method.toUpperCase()} ${pathName} has no auth middleware ` +
+          `Route ${r.method.toUpperCase()} ${r.path} has no auth middleware ` +
           `and no auth Use/Group middleware — any caller can reach it.`,
-        route: `${method.toUpperCase()} ${pathName}`,
-        line: code.slice(0, m.index).split("\n").length,
+        route: `${r.method.toUpperCase()} ${r.path}`,
+        line: r.line,
       });
     }
   }

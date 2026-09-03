@@ -202,3 +202,40 @@ export class AuthMiddleware implements NestMiddleware { use() {} }
     expect(a.issues.some((i) => i.type === "NESTJS_NO_AUTH" && i.route === "POST api/transfer")).toBe(true);
   });
 });
+
+describe("nestjs-detector register 集合豁免（语义层）", () => {
+  function writeUserApp() {
+    write("tsconfig.json", TSCONFIG);
+    write("src/user.controller.ts", `
+import { Controller, Post, Get, Delete } from "@nestjs/common";
+@Controller()
+export class UserController {
+  @Post("users/login") login() { return {}; }
+  @Post("users") register() { return {}; }            // 公开注册
+  @Delete("users/:slug") deleteUser() { return {}; }  // 真实无保护
+}
+`);
+  }
+  it("有 users/login 姊妹佐证：POST users（公开注册）不报", () => {
+    writeUserApp();
+    const a = analyzeNestJSProject(dir);
+    const noAuth = a.issues.filter((i) => i.type === "NESTJS_NO_AUTH");
+    expect(noAuth.map((i) => i.route)).not.toContain("POST /users");
+    expect(noAuth.map((i) => i.route)).not.toContain("POST /users/login");
+    // 真实无保护的 DELETE 仍报（豁免不误伤）
+    expect(noAuth.map((i) => i.route)).toContain("DELETE /users/:slug");
+  });
+
+  it("无姊妹佐证：POST users 仍报（管理员建用户不豁免）", () => {
+    write("tsconfig.json", TSCONFIG);
+    write("src/admin.controller.ts", `
+import { Controller, Post } from "@nestjs/common";
+@Controller()
+export class AdminController {
+  @Post("users") adminCreateUser() { return {}; }
+}
+`);
+    const a = analyzeNestJSProject(dir);
+    expect(a.issues.some((i) => i.type === "NESTJS_NO_AUTH" && i.route === "POST /users")).toBe(true);
+  });
+});

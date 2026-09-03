@@ -84,3 +84,11 @@ articles.ArticlesRegister(v1.Group("/articles")) // 全部 mutation
 - **剩余唯一根因 = 组认证跨文件传播**（hello.go 的 Use 需作用到该组
   注册的所有路由）——属转正级功能改造，非本次缺陷修复范围；per-file
   逻辑现已正确（单测锁定同文件场景）
+
+## ✅ register 集合豁免（语义层，2026-09-02 后续修复）
+
+同文件有 `/login` 姊妹佐证 ⇒ POST ""/"/"（users 双注册）豁免（共享
+route-window helpers）。**gin-realworld 重测：15 → 13 issues**（register
+两行消除；articles 的 POST ""/"/" 是 ArticleCreate（非注册、无 login
+姊妹）与 user-update PUT 双注册保持报出——跨文件组认证 FP 未动，
+POST-only 保证不误伤）

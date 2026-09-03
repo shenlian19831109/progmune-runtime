@@ -116,3 +116,35 @@ describe("gin-detector V7 修复回归", () => {
     expect(routes.some((x) => x.path === "")).toBe(true);
   });
 });
+
+// ── register 集合豁免（语义层）──
+
+describe("gin-detector register 集合豁免", () => {
+  it("有 /login 姊妹佐证：POST \"\"/\"/\"（公开注册双注册）不报", () => {
+    const { issues } = analyzeGinApp(app(`
+	v1.POST("", UsersRegistration)
+	v1.POST("/", UsersRegistration)
+	v1.POST("/login", UsersLogin)
+`));
+    expect(issues.map((i) => i.route)).not.toContain("POST ");
+    expect(issues.map((i) => i.route)).not.toContain("POST /");
+    expect(issues.map((i) => i.route)).not.toContain("POST /login");
+  });
+
+  it("POST-only：同根的 PUT 不豁免（user-update 类仍查）", () => {
+    const { issues } = analyzeGinApp(app(`
+	v1.POST("", UsersRegistration)
+	v1.POST("/login", UsersLogin)
+	v1.PUT("", UserUpdate)
+`));
+    expect(issues.map((i) => i.route)).not.toContain("POST ");
+    expect(issues.map((i) => i.route)).toContain("PUT ");
+  });
+
+  it("无姊妹佐证：POST \"/users\" 仍报（管理员建用户不豁免）", () => {
+    const { issues } = analyzeGinApp(app(`
+	v1.POST("/users", AdminCreateUser)
+`));
+    expect(issues.map((i) => i.route)).toContain("POST /users");
+  });
+});
