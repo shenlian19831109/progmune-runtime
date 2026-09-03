@@ -59,6 +59,21 @@
 - 谱系：v1 形态失配 FP / v2 路由全盲 / v3 分类器串扰 / v4 括号失明 /
   v5 webhook 词表缺口 / **v6 gate 时代失配（0 文件进入）**
 
+## ✅ 声明式数组路由 + config.auth（V6 遗留缺口，2026-09-02 后续修复）
+
+`hapi-detector.ts` 支持声明式数组模块：
+- `isDeclarativeHapiModule`：`module.exports=(server)=>…`（或 function
+  server / return [）+ 含 method/path/config 键的路由对象 → 视为 hapi
+  路由模块（无需 require('hapi')）
+- 声明式提取：逐 `method:` 命中回找对象 `{` → 平衡块 → path 字面量 +
+  config.auth 读取（嵌套 config 对象）
+- register 集合豁免接入（users/login 姊妹 → POST users 公开）
+
+**hapi-realworld 重测：0 文件进门 → 4 文件进门 / 19 路由全见 / 0 issues**
+（mutation 全 config.auth=jwt 识别；register/login 公开正确）。
+**反证**：摘 PUT /articles/{slug} 的 auth → HAPI_ROUTE_NO_AUTH 触发 ✓。
+回归 +3（13 green）；全框架 149 tests green。
+
 ## ✅ 修复记录（2026-09-02 修复轮）
 
 **gate/hasHapi 兼容 v16 已修**（`hapi-detector.ts`）：

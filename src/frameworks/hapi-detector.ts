@@ -20,6 +20,7 @@
  */
 
 import * as fs from "fs";
+import { collectRegisterRoots, isRegisterRoot } from "./route-window";
 
 // ── Types ──
 
@@ -59,16 +60,62 @@ function isAuthEntryPath(pathName: string): boolean {
 
 // ── Analysis（代码串级） ──
 
+/** 声明式 hapi 路由模块（V6 遗留缺口）：真实 hapi 应用（glue/pal/插件）
+ * 以数组声明路由——module.exports = (server) => [ { method, path,
+ *   config: { auth: 'jwt', ... }, handler }, ... ]，由框架注册；
+ * 文件本身无 require('hapi')、无 server.route 调用 */
+function isDeclarativeHapiModule(code: string): boolean {
+  const hasRouteObject =
+    /method\s*:\s*['"](GET|POST|PUT|PATCH|DELETE|get|post|put|patch|delete)['"]/.test(code) &&
+    /path\s*:\s*['"]/.test(code) &&
+    /\b(?:config|options)\s*:/.test(code);
+  if (!hasRouteObject) return false;
+  return (
+    /module\.exports\s*=\s*\(?\s*server\b/.test(code) ||
+    /module\.exports\s*=\s*function\s*\(\s*server\b/.test(code) ||
+    /return\s*\[/.test(code)
+  );
+}
+
+/** 自 routeObjStart('{') 取平衡块文本（含嵌套 config 对象；字符串感知） */
+function hapiBalancedBlock(code: string, openIdx: number): string {
+  let depth = 1;
+  let end = openIdx + 1;
+  let quote: string | null = null;
+  while (end < code.length && depth > 0) {
+    const ch = code[end];
+    if (quote) {
+      if (ch === quote && code[end - 1] !== "\\") quote = null;
+    } else if (ch === '"' || ch === "'" || ch === "`") {
+      quote = ch;
+    } else if (ch === "{") {
+      depth++;
+    } else if (ch === "}") {
+      depth--;
+    }
+    end++;
+  }
+  return code.slice(openIdx + 1, Math.max(openIdx + 1, end - 1));
+}
+
+function hapiAuthOption(block: string): string | null {
+  const authM = block.match(
+    /\bauth\s*:\s*(?:['"]([^'"]+)['"]|\{\s*strategy\s*:\s*['"]([^'"]+)['"]|\s*(false|true))/
+  );
+  if (!authM) return null;
+  return authM[3] === "false" ? "false" : authM[1] || authM[2] || authM[3] || null;
+}
+
 export function analyzeHapiApp(code: string): HapiAppAnalysis {
   const issues: HapiSecurityIssue[] = [];
   const routes: HapiRoute[] = [];
   const strategies: string[] = [];
 
-  // @hapi-scoped（v17+）或 v16 时代 require('hapi')（V6 gate 时代失配修复）
+  // @hapi-scoped（v17+）、v16 require('hapi'），或声明式数组模块（V6 修复）
   const hasHapi =
     /@hapi\/hapi|\bHapi\.server\b|\bhapi\.server\b|require\(\s*['"]hapi['"]\s*\)|from\s+['"]hapi['"]/.test(
       code
-    );
+    ) || isDeclarativeHapiModule(code);
   if (!hasHapi) {
     return { hasHapi: false, routes, strategies, issues };
   }
@@ -80,44 +127,64 @@ export function analyzeHapiApp(code: string): HapiAppAnalysis {
     strategies.push(m[1]);
   }
 
-  // 路由块：server.route({ ... }) —— 从 route( 向后截 500 字符窗口
-  const routeRe = /\.route\s*\(\s*\{/g;
-  while ((m = routeRe.exec(code)) !== null) {
-    const window = code.slice(m.index, m.index + 500);
-    const methodM = window.match(/method\s*:\s*['"]([^'"]+)['"]/);
-    const pathM = window.match(/path\s*:\s*['"]([^'"]+)['"]/);
-    const authM = window.match(/auth\s*:\s*(?:['"]([^'"]+)['"]|\{\s*strategy\s*:\s*['"]([^'"]+)['"]|\s*(false|true))/);
-    if (!methodM || !pathM) continue;
+  const declarative = isDeclarativeHapiModule(code);
+  const lineAt = (idx: number): number => code.slice(0, idx).split("\n").length;
 
-    const method = methodM[1].toLowerCase();
-    const pathName = pathM[1];
-    // auth: false → 显式公开；无 auth 字段 → authM null
-    const authOption = authM
-      ? (authM[3] === "false" ? "false" : authM[1] || authM[2] || authM[3] || null)
-      : null;
+  if (!declarative) {
+    // 直连形态：server.route({ ... }) —— 500 字符窗口
+    const routeRe = /\.route\s*\(\s*\{/g;
+    while ((m = routeRe.exec(code)) !== null) {
+      const window = code.slice(m.index, m.index + 500);
+      const methodM = window.match(/method\s*:\s*['"]([^'"]+)['"]/);
+      const pathM = window.match(/path\s*:\s*['"]([^'"]+)['"]/);
+      if (!methodM || !pathM) continue;
+      routes.push({
+        method: methodM[1].toLowerCase(),
+        path: pathM[1],
+        authOption: hapiAuthOption(window),
+        line: lineAt(m.index),
+      });
+    }
+  } else {
+    // 声明式数组：每个 { method, path, config:{auth} } 路由对象
+    const verbRe = /method\s*:\s*['"](GET|POST|PUT|PATCH|DELETE|get|post|put|patch|delete)['"]/g;
+    while ((m = verbRe.exec(code)) !== null) {
+      const verb = m[1].toLowerCase();
+      const verbLine = lineAt(m.index);
+      const objStart = code.lastIndexOf("{", m.index);
+      if (objStart < 0) continue;
+      const block = hapiBalancedBlock(code, objStart);
+      const pathM = block.match(/path\s*:\s*['"]([^'"]+)['"]/);
+      if (!pathM) continue;
+      // 重复对象去重
+      if (routes.some((r) => r.line === verbLine && r.method === verb)) continue;
+      routes.push({
+        method: verb,
+        path: pathM[1],
+        authOption: hapiAuthOption(block),
+        line: verbLine,
+      });
+    }
+  }
 
-    routes.push({
-      method,
-      path: pathName,
-      authOption,
-      line: code.slice(0, m.index).split("\n").length,
-    });
-
-    if (!MUTATION_METHODS.has(method)) continue;
-    if (isAuthEntryPath(pathName)) continue;
-    // 无 auth 字段（authOption null 且非显式 false 已涵盖）或显式 false → 报
-    if (authOption === null || authOption === "false") {
+  // register 集合豁免（语义层，同其他框架）：users/login 姊妹 → POST users 公开
+  const registerRoots = collectRegisterRoots(routes.map((r) => r.path));
+  for (const r of routes) {
+    if (!MUTATION_METHODS.has(r.method)) continue;
+    if (isAuthEntryPath(r.path)) continue;
+    if (r.method === "post" && isRegisterRoot(r.path, registerRoots)) continue;
+    if (r.authOption === null || r.authOption === "false") {
       issues.push({
         severity: "medium",
         rule: "HAPI_ROUTE_NO_AUTH",
         message:
-          authOption === "false"
-            ? `Mutation route ${method.toUpperCase()} ${pathName} is explicitly ` +
+          r.authOption === "false"
+            ? `Mutation route ${r.method.toUpperCase()} ${r.path} is explicitly ` +
               `public (auth: false) — any caller can reach it.`
-            : `Mutation route ${method.toUpperCase()} ${pathName} has no auth ` +
+            : `Mutation route ${r.method.toUpperCase()} ${r.path} has no auth ` +
               `option in its route config — any caller can reach it.`,
-        route: `${method.toUpperCase()} ${pathName}`,
-        line: code.slice(0, m.index).split("\n").length,
+        route: `${r.method.toUpperCase()} ${r.path}`,
+        line: r.line,
       });
     }
   }
@@ -128,13 +195,11 @@ export function analyzeHapiApp(code: string): HapiAppAnalysis {
 export function analyzeHapiFile(filePath: string): HapiAppAnalysis | null {
   if (!fs.existsSync(filePath)) return null;
   const code = fs.readFileSync(filePath, "utf-8");
-  // gate 兼容 v16（require('hapi')）与 @hapi-scoped v17+
-  if (
-    !/@hapi\/hapi|@hapi\/hawk|\bHapi\.server\b|require\(\s*['"]hapi['"]\s*\)|from\s+['"]hapi['"]/.test(
+  // gate：@hapi-scoped / v16 require('hapi') / 声明式数组模块
+  const marker =
+    /@hapi\/hapi|@hapi\/hawk|\bHapi\.server\b|require\(\s*['"]hapi['"]\s*\)|from\s+['"]hapi['"]/.test(
       code
-    )
-  ) {
-    return null;
-  }
+    ) || isDeclarativeHapiModule(code);
+  if (!marker) return null;
   return analyzeHapiApp(code);
 }

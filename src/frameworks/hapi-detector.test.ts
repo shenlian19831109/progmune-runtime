@@ -102,3 +102,74 @@ module.exports = (server) => { return []; };
     expect(hasHapi).toBe(false);
   });
 });
+
+// ── V6 遗留缺口：声明式数组路由 + config.auth 嵌套 ──
+
+const DECLARATIVE = `
+module.exports = (server) => {
+  const handlers = require('./handlers')(server)
+  return [
+    // GET 公开
+    {
+      method: 'GET',
+      path: '/articles',
+      config: { description: 'list' },
+      handler: handlers.list
+    },
+    // mutation 受保护（config.auth 嵌套）
+    {
+      method: 'POST',
+      path: '/articles',
+      config: { auth: 'jwt', response: {} },
+      handler: handlers.create
+    },
+    // 无认证 mutation
+    {
+      method: 'POST',
+      path: '/payments',
+      config: {},
+      handler: handlers.pay
+    }
+  ]
+}
+`;
+
+const DECLARATIVE_USERS = `
+module.exports = (server) => {
+  return [
+    { method: 'POST', path: '/users/login', config: {}, handler: h },
+    { method: 'POST', path: '/users', config: {}, handler: h },
+    { method: 'PUT', path: '/user', config: { auth: 'jwt' }, handler: h }
+  ]
+}
+`;
+
+describe("hapi 声明式数组路由（V6 修复回归）", () => {
+  it("module.exports=(server)+数组路由对象被识别，config.auth 保护生效", () => {
+    const { hasHapi, routes, issues } = analyzeHapiApp(DECLARATIVE);
+    expect(hasHapi).toBe(true);
+    expect(routes.length).toBe(3);
+    const create = routes.find((r) => r.method === "post" && r.path === "/articles");
+    expect(create!.authOption).toBe("jwt");
+    const missing = issues.filter((i) => i.rule === "HAPI_ROUTE_NO_AUTH").map((i) => i.route);
+    expect(missing).toContain("POST /payments");
+    expect(missing).not.toContain("POST /articles");
+  });
+
+  it("摘 config.auth → mutation 报（敏感性）", () => {
+    const stripped = DECLARATIVE.replace(
+      "config: { auth: 'jwt', response: {} }",
+      "config: { response: {} }"
+    );
+    const { issues } = analyzeHapiApp(stripped);
+    expect(issues.some((i) => i.rule === "HAPI_ROUTE_NO_AUTH" && i.route === "POST /articles")).toBe(true);
+  });
+
+  it("register/login 公开：users/login + users（姊妹佐证）不报", () => {
+    const { issues } = analyzeHapiApp(DECLARATIVE_USERS);
+    const missing = issues.filter((i) => i.rule === "HAPI_ROUTE_NO_AUTH").map((i) => i.route);
+    expect(missing).not.toContain("POST /users/login");
+    expect(missing).not.toContain("POST /users");
+    expect(missing).not.toContain("PUT /user");
+  });
+});

@@ -199,9 +199,12 @@ npm run corpus:mine        # Rule mining from corpus
   （剩 main.ts NO_HELMET 加固缺口，协议级 0 FP；摘单条 auth 反证触发）
 - **tRPC v11 t.procedure 支持（V4 遗留缺口）**：过程起点补 t.procedure
   内联形态（默认公开语义）——netflx 19/19/0 保持，裸 mutation 敏感性一致
-- 全框架 + trust engine 146 tests green
+- **Hapi 声明式数组路由支持（V6 遗留缺口）**：module.exports=(server) +
+  {method,path,config:{auth}} 路由对象识别（无需 hapi import）——hapi-realworld
+  0 进门 → 4 文件 / 19 路由全见 / 0 issues，摘 PUT auth 反证触发
+- 全框架 + trust engine 149 tests green
 
-**转正待办（未修，均为功能级）**：Hapi 声明式数组路由 + config.auth 嵌套；Fiber 组认证跨文件模型（gin 同款，待真实语料）+ Fiber 需真实生产语料
+**转正待办（未修，均为功能级）**：Fiber 组认证跨文件模型（gin 同款，待真实语料）+ Fiber 需真实生产语料
 - 转正门槛：每个启发式探测器补一个真实项目 FP 数据点（C 的 real-corpus 方法论延伸）后才可升级结构级标签；各探测器转正工作清单与重测路径见 `REALWORLD_FRAMEWORK_FP_V1-V8.md`（Express 清单 4 项 / Fastify 结构性重写 4 项 / Koa 窗口截断 + 幻影路由 / tRPC 括号感知 + lastIndex / Next.js 词表扩展 + webhooks 豁免 / Hapi 门兼容 + 声明式路由 / Gin Use 捕获 + 组认证跨文件 / Fiber 需真实生产语料）
 
 ### P0-P3 Rule Injection (2026-08-03, historical phase)
