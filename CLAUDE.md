@@ -190,9 +190,12 @@ npm run corpus:mine        # Rule mining from corpus
 - NestJS configure/forRoutes 中间件覆盖（23→13：识别保护 + 抓出 DELETE /users/:slug 真实 TP）
 - **register 集合豁免（语义层，Koa/Gin/Fiber/NestJS）**：有 `<path>/login` 姊妹佐证的账户集合，其无认证 POST = 公开注册（POST-only、无佐证不豁免）——koa 1→0、gin 15→13、nestjs 13→12，跨框架最后一个系统性 register FP 消除
 - **Gin 组认证跨文件传播（转正功能）**：`analyzeGinProject`——bootstrap 语句序推导组 Use 认证相位（可选 Use(false) 不置真）+ 注册调用相位 → 跨文件 RegisterFn 内路由受保护（gin-realworld 13→0；删 Use(true) 反证 13 重现）
-- 全框架 + trust engine 134 tests green
+- **Fastify 结构性重写（转正功能）**：object-form `server.route({})` 解析
+  + plugin(fp 模块)进门 + onRequest/点限定认证 + register 豁免——fastify-realworld
+  0 路由 → 20 全见 / 0 issues，摘 POST articles 认证反证 0→1
+- 全框架 + trust engine 139 tests green
 
-**转正待办（未修，均为功能级）**：Express 清单 4 项（路由级中间件识别/路由提取/计数口径/语义分离）；Fastify object-form/plugin/onRequest+decorator/register 重写；tRPC v11 t.procedure 形态；Hapi 声明式数组路由 + config.auth 嵌套；Fiber 组认证跨文件模型（gin 同款，待真实语料）+ Fiber 需真实生产语料
+**转正待办（未修，均为功能级）**：Express 清单 4 项（路由级中间件识别/路由提取/计数口径/语义分离）；tRPC v11 t.procedure 形态；Hapi 声明式数组路由 + config.auth 嵌套；Fiber 组认证跨文件模型（gin 同款，待真实语料）+ Fiber 需真实生产语料
 - 转正门槛：每个启发式探测器补一个真实项目 FP 数据点（C 的 real-corpus 方法论延伸）后才可升级结构级标签；各探测器转正工作清单与重测路径见 `REALWORLD_FRAMEWORK_FP_V1-V8.md`（Express 清单 4 项 / Fastify 结构性重写 4 项 / Koa 窗口截断 + 幻影路由 / tRPC 括号感知 + lastIndex / Next.js 词表扩展 + webhooks 豁免 / Hapi 门兼容 + 声明式路由 / Gin Use 捕获 + 组认证跨文件 / Fiber 需真实生产语料）
 
 ### P0-P3 Rule Injection (2026-08-03, historical phase)

@@ -5,7 +5,10 @@
  * 认证选项 + addHook 认证钩子。
  */
 import { describe, it, expect } from "vitest";
-import { analyzeFastifyApp } from "./fastify-detector";
+import { analyzeFastifyApp, analyzeFastifyFile } from "./fastify-detector";
+import * as fs from "fs";
+import * as os from "os";
+import * as path from "path";
 
 const app = (routes: string, hooks = ""): string => `
 import Fastify from "fastify";
@@ -77,5 +80,73 @@ fastify.post("/register", async (req, reply) => ({ ok: true }));
     );
     expect(hasFastify).toBe(false);
     expect(issues).toHaveLength(0);
+  });
+});
+
+// ── V2 结构性重写回归：object-form / onRequest / plugin 门 / register 豁免 ──
+
+describe("fastify-detector object-form 路由（V2 修复回归）", () => {
+  it("server.route({method,path,onRequest:[server.authenticate]}) 受保护不报", () => {
+    const { issues, routes } = analyzeFastifyApp(app(`
+server.route({
+  method: 'POST',
+  path: options.prefix + 'articles',
+  onRequest: [server.authenticate],
+  handler: onCreate
+});
+`));
+    expect(routes.find((r) => r.path === "articles")!.protected).toBe(true);
+    expect(issues).toHaveLength(0);
+  });
+
+  it("object-form 无认证 mutation → 报", () => {
+    const { issues } = analyzeFastifyApp(app(`
+server.route({
+  method: 'POST',
+  path: options.prefix + 'payments',
+  handler: onPay
+});
+`));
+    expect(issues.map((i) => i.route)).toContain("POST payments");
+  });
+
+  it("点限定 server.authenticate 在 onRequest 数组被识别（词表含 auth）", () => {
+    const { routes } = analyzeFastifyApp(app(`
+server.route({ method: 'DELETE', path: 'x', onRequest: [server.authenticate], handler: h });
+`));
+    expect(routes[0]!.protected).toBe(true);
+  });
+
+  it("register 集合豁免：POST users（有 users/login 姊妹）不报", () => {
+    const { issues } = analyzeFastifyApp(app(`
+server.route({ method: 'POST', path: options.prefix + 'users/login', handler: onLogin });
+server.route({ method: 'POST', path: options.prefix + 'users', handler: onRegister });
+`));
+    expect(issues.map((i) => i.route)).not.toContain("POST users");
+    expect(issues.map((i) => i.route)).not.toContain("POST users/login");
+  });
+});
+
+describe("fastify-detector plugin 门（V2 修复回归）", () => {
+  it("fastify-plugin 模块（fp(plugin) 路由文件）现可被分析", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "fastify-det-"));
+    try {
+      const fp = path.join(dir, "routes-users.js");
+      fs.writeFileSync(fp, `
+const fp = require('fastify-plugin')
+async function users (server, options, done) {
+  server.route({ method: 'POST', path: 'articles', onRequest: [server.authenticate], handler: h })
+  server.route({ method: 'POST', path: 'open', handler: h })
+}
+module.exports = fp(users)
+`);
+      const a = analyzeFastifyFile(fp);
+      expect(a).not.toBeNull();
+      expect(a!.routes.length).toBe(2);
+      expect(a!.issues.map((i) => i.route)).toContain("POST open");
+      expect(a!.issues.map((i) => i.route)).not.toContain("POST articles");
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

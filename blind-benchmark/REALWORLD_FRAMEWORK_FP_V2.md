@@ -57,6 +57,23 @@
   转正代价显著高于 Express（重写路由/认证/插件解析，而非补模式）
 - 后续 6 个启发式（tRPC/Next.js/Koa/Hapi/Gin/Fiber）沿用本方法学
 
+## ✅ 结构性重写（转正功能，2026-09-02 后续修复）
+
+`fastify-detector.ts` 重写四项（V2 失明链逐项解决）：
+1. **object-form 路由解析**：`server.route({ method, path, ... })`（20/20
+   真实路由形态）——平衡块扫描，path 支持 `options.prefix + 'x'` 拼接取
+   字面量
+2. **plugin 模块进门**：analyzeFastifyFile 门补 `fastify-plugin`
+   （真实路由模块是 fp(plugin) 包裹、接收 server 实例）
+3. **onRequest 认证识别**：选项名集 preHandler/preValidation → 补
+   onRequest；支持点限定 `server.authenticate`（词表含 auth）
+4. register 集合豁免接入（users/login 姊妹佐证 → POST users 公开注册）
+
+**fastify-realworld 重测：0 路由/0 issues → 20 路由全见 / 0 issues**
+（13 mutation：11 受保护正确识别 + login/register 公开）。**反证闭合**：
+摘 POST articles 的 onRequest → NO_AUTH 0→1（V2 无感反证消除）。
+回归测试 +5（13 green）；全框架 139 tests green。
+
 ## 结论
 
 - **Fastify 维持「启发式 ⚠️」有据（recall 侧）**：真实语料 0/20 路由可见，
