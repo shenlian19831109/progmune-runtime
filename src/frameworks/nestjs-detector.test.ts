@@ -132,3 +132,73 @@ describe("nestjs-detector 补全", () => {
     expect(issues.map((i) => i.type)).not.toContain("NESTJS_NO_AUTH");
   });
 });
+
+describe("nestjs-detector 模块中间件覆盖（V1 修复回归）", () => {
+  it("NestModule configure/forRoutes 保护的 mutation 不报（Nest 5 惯用法）", () => {
+    write("tsconfig.json", TSCONFIG);
+    write("src/app.module.ts", `
+import { Module, NestModule, MiddlewareConsumer, RequestMethod } from "@nestjs/common";
+import { AuthMiddleware } from "./auth.middleware";
+import { ApiController } from "./api.controller";
+
+@Module({ controllers: [ApiController] })
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(AuthMiddleware)
+      .forRoutes(
+        { path: "api/transfer", method: RequestMethod.POST },
+        { path: "api/items/:id", method: RequestMethod.ALL },
+      );
+  }
+}
+`);
+    write("src/api.controller.ts", `
+import { Controller, Post, Delete, Get } from "@nestjs/common";
+@Controller("api")
+export class ApiController {
+  @Post("transfer") transfer() { return {}; }
+  @Delete("items/:id") deleteItem() { return {}; }
+  @Post("public") publicCreate() { return {}; }
+}
+`);
+    write("src/auth.middleware.ts", `
+import { NestMiddleware } from "@nestjs/common";
+export class AuthMiddleware implements NestMiddleware { use() {} }
+`);
+    const a = analyzeNestJSProject(dir);
+    const noAuth = a.issues.filter((i) => i.type === "NESTJS_NO_AUTH");
+    // transfer 与 items/:id 受 forRoutes 中间件保护 → 不报
+    expect(noAuth.map((i) => i.route)).not.toContain("POST api/transfer");
+    expect(noAuth.map((i) => i.route)).not.toContain("DELETE api/items/:id");
+    // 未覆盖的 public 写路由仍报（保留敏感性）
+    expect(noAuth.map((i) => i.route)).toContain("POST api/public");
+  });
+
+  it("摘除 forRoutes 中间件覆盖后 mutation 重新被报（无感修复回归）", () => {
+    write("tsconfig.json", TSCONFIG);
+    write("src/app.module.ts", `
+import { Module, NestModule, MiddlewareConsumer, RequestMethod } from "@nestjs/common";
+import { ApiController } from "./api.controller";
+@Module({ controllers: [ApiController] })
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AuthMiddleware).forRoutes(); // 覆盖被摘空
+  }
+}
+`);
+    write("src/api.controller.ts", `
+import { Controller, Post } from "@nestjs/common";
+@Controller("api")
+export class ApiController {
+  @Post("transfer") transfer() { return {}; }
+}
+`);
+    write("src/auth.middleware.ts", `
+import { NestMiddleware } from "@nestjs/common";
+export class AuthMiddleware implements NestMiddleware { use() {} }
+`);
+    const a = analyzeNestJSProject(dir);
+    expect(a.issues.some((i) => i.type === "NESTJS_NO_AUTH" && i.route === "POST api/transfer")).toBe(true);
+  });
+});

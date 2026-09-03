@@ -100,6 +100,31 @@ export function analyzeNestJSProject(projectRoot: string): NestJSAnalysis {
   }
   const hasGlobalAuthGuard = analysis.globalAuthGuards.length > 0;
 
+  // ── 第二遍：模块级中间件保护（Nest 5 时代惯用法）──
+  // class XxxModule implements NestModule { configure(consumer) {
+  //   consumer.apply(AuthMiddleware).forRoutes({path, method}, ...) } }
+  // 覆盖关系：controller → [{path, methods}]（REALWORLD_STRUCTURAL_V1：
+  // guard 单一模型漏掉 configure/forRoutes 中间件保护 → 23 issues 全 FP）
+  const ctrlMiddleware = new Map<string, Array<{ path: string; methods: string[] }>>();
+  for (const file of project.getSourceFiles()) {
+    if (file.getFilePath().includes("node_modules")) continue;
+    for (const cls of file.getClasses()) {
+      const moduleDec = cls.getDecorator("Module");
+      if (!moduleDec) continue;
+      const configure = cls.getMethods().find((mm) => mm.getName() === "configure");
+      if (!configure) continue;
+      const coverage = extractMiddlewareForRoutes(configure.getText());
+      if (coverage.length === 0) continue;
+      // 该模块声明管哪些 controller
+      const ctrlNames = extractModuleControllerNames(moduleDec);
+      for (const c of ctrlNames) {
+        const merged = ctrlMiddleware.get(c) || [];
+        merged.push(...coverage);
+        ctrlMiddleware.set(c, merged);
+      }
+    }
+  }
+
   for (const file of project.getSourceFiles()) {
     // Skip node_modules and test files
     if (file.getFilePath().includes("node_modules")) continue;
@@ -157,15 +182,17 @@ export function analyzeNestJSProject(projectRoot: string): NestJSAnalysis {
 
         analysis.routes.push(route);
 
-        // 路由级保护判定：类/方法认证守卫，或全局 APP_GUARD（除非 @Public 豁免）
+        // 路由级保护判定：类/方法认证守卫，或全局 APP_GUARD（除非 @Public 豁免），
+        // 或模块级中间件 forRoutes 覆盖（Nest 5 惯用法）
         const protectedByGlobal = hasGlobalAuthGuard && !isPublicDecorated;
+        const protectedByMiddleware = middlewareCovers(ctrlMiddleware, controllerName, httpMethod, fullPath);
 
         // ── Security Checks ──
 
         // POST/PUT/DELETE without auth guard
         // Skip intentionally public routes (login, register, health, etc.)
         if (["POST", "PUT", "DELETE", "PATCH"].includes(httpMethod) && !isPublicRoute(fullPath)) {
-          if (!route.hasAuthGuard && !protectedByGlobal) {
+          if (!route.hasAuthGuard && !protectedByGlobal && !protectedByMiddleware) {
             analysis.issues.push({
               type: "NESTJS_NO_AUTH",
               severity: "critical",
@@ -194,7 +221,7 @@ export function analyzeNestJSProject(projectRoot: string): NestJSAnalysis {
         if (httpMethod === "GET") {
           const sensitiveTerms = ["admin", "private", "secret", "manage"];
           if (sensitiveTerms.some(t => fullPath.toLowerCase().includes(t))
-              && !route.hasAuthGuard && !protectedByGlobal) {
+              && !route.hasAuthGuard && !protectedByGlobal && !protectedByMiddleware) {
             analysis.issues.push({
               type: "NESTJS_SENSITIVE_PUBLIC",
               severity: "high",
@@ -265,6 +292,86 @@ function extractAppGuardNames(moduleDec: Decorator, cls: ClassDeclaration): stri
     }
   }
   return names;
+}
+
+// ── 模块级中间件覆盖（Nest 5 configure/forRoutes 惯用法）──
+
+/** 从 configure(consumer) 方法文本提取 forRoutes 覆盖：{path, methods[]} */
+function extractMiddlewareForRoutes(configureText: string): Array<{ path: string; methods: string[] }> {
+  const out: Array<{ path: string; methods: string[] }> = [];
+  // consumer.apply(X).forRoutes({...}, {...}) / .forRoutes('path', ...)
+  const frIndexes: number[] = [];
+  let idx = 0;
+  while ((idx = configureText.indexOf(".forRoutes(", idx)) !== -1) {
+    frIndexes.push(idx + ".forRoutes(".length);
+    idx += ".forRoutes(".length;
+  }
+  for (const start of frIndexes) {
+    // 括号平衡取 forRoutes 参数块
+    let depth = 1;
+    let end = start;
+    while (end < configureText.length && depth > 0) {
+      if (configureText[end] === "(") depth++;
+      else if (configureText[end] === ")") depth--;
+      end++;
+    }
+    const argsText = configureText.slice(start, end - 1);
+    // 逐顶层参数（逗号切分，深度感知）
+    const args: string[] = [];
+    let cur = "";
+    let d = 0;
+    for (const ch of argsText) {
+      if (ch === "(" || ch === "[" || ch === "{") d++;
+      else if (ch === ")" || ch === "]" || ch === "}") d--;
+      if (ch === "," && d === 0) { args.push(cur); cur = ""; }
+      else cur += ch;
+    }
+    if (cur.trim()) args.push(cur);
+
+    for (const arg of args) {
+      const trimmed = arg.trim();
+      const pathM = trimmed.match(/path\s*:\s*['"]([^'"]+)['"]/);
+      const methodM = trimmed.match(/method\s*:\s*RequestMethod\.(\w+)/);
+      const plain = trimmed.match(/^['"]([^'"]+)['"]$/);
+      const path = pathM ? pathM[1] : plain ? plain[1] : null;
+      if (!path) continue;
+      const method = methodM ? methodM[1] : "*";
+      out.push({ path, methods: [method] });
+    }
+  }
+  return out;
+}
+
+/** @Module({ controllers: [A, B] }) 里的控制器类名 */
+function extractModuleControllerNames(moduleDec: Decorator): string[] {
+  const out: string[] = [];
+  const text = moduleDec.getText();
+  const m = text.match(/controllers\s*:\s*\[([^\]]*)\]/);
+  if (!m) return out;
+  for (const name of m[1].split(",")) {
+    const n = name.trim().replace(/\s+as\s+\w+$/, "").split(".").pop();
+    if (n && /^[A-Za-z_$]/.test(n)) out.push(n);
+  }
+  return out;
+}
+
+/** route（method, fullPath）是否被 controller 的模块中间件覆盖 */
+function middlewareCovers(
+  ctrlMiddleware: Map<string, Array<{ path: string; methods: string[] }>>,
+  controllerName: string,
+  httpMethod: string,
+  fullPath: string,
+): boolean {
+  const entries = ctrlMiddleware.get(controllerName);
+  if (!entries || entries.length === 0) return false;
+  const norm = (p: string): string => p.replace(/^\/+|\/+$/g, "");
+  const routePath = norm(fullPath);
+  return entries.some((e) => {
+    const em = e.methods[0] || "*";
+    // RequestMethod.ALL 与通配 * 匹配任意方法
+    if (em !== "*" && em !== "ALL" && em !== httpMethod) return false;
+    return norm(e.path) === routePath;
+  });
 }
 
 /** Check if a route is intentionally public (login, register, health, etc.). */

@@ -69,3 +69,22 @@ register/login/读路由按 spec 公开 → 0 协议级违规（理想输出 0�
   register 豁免同语义层
 - **方法学意义**：4 结构级检测器的「结构级更可靠」假设首次被真实数据
   检验——NestJS 未通过。待 FastAPI/Django/Flask 三语料补齐后定论
+
+## ✅ 修复记录（2026-09-02 结构级修复轮）
+
+**模块级中间件覆盖（configure/forRoutes）已支持**（`nestjs-detector.ts`）：
+- 新采集通道：@Module 类若有 `configure(consumer)`，解析
+  `consumer.apply(AuthMiddleware).forRoutes({path, method}, ...)`
+  覆盖集（RequestMethod.* → HTTP 方法，ALL=通配）；按模块
+  @Module({controllers:[...]}) 关联到 controller
+- 判定接入：mutation 无守卫、无 APP_GUARD 时，若命中模块中间件覆盖
+  → 视为受保护不报（route 仍如实标记 hasAuthGuard=false——装饰器层
+  事实不变）
+- 回归测试 +2（8 green）；**重测 nestjs-realworld**：23 → 13 issues
+  - NESTJS_NO_AUTH 11 → 2：articles 7 + profile follow 2 中间件保护
+    正确识别；剩 POST /users（register——语义豁免缺口，跨框架同源）
+    + **DELETE /users/:slug（真实 TP：该老应用确有无保护的用户删除
+    端点——检测器现在能抓真漏洞）**
+  - NESTJS_NO_VALIDATION 12 → 11（register 有 ValidationPipe）
+- **无感反证闭合**：摘光 article 模块 forRoutes → NO_AUTH 2 → 9
+  （7 条 mutation 浮现 ✓——中间件形态保护被摘除现在有反应）
