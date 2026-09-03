@@ -47,6 +47,13 @@ Fastify（全盲）与 Koa（单点无感）。失效方向是**选择性失明*
 （实测 4/19 与 7/19 两版）。检测器被 trust engine 逐文件循环调用时
 会受影响。
 
+## ✅ tRPC v11 t.procedure 支持（V4 遗留缺口，2026-09-02 修复）
+
+`extractProcedures` 过程起点正则补 `t.procedure`（v11 内联基础构造器，
+无命名包装——默认公开语义；命名包装 XxxProcedure 不受影响）。回归 +3
+（8 green）。**netflx-web 复查：19/19 / 0 issues 保持**；裸
+`t.procedure.mutation`（无 input）敏感性与命名包装一致。
+
 ## 结论
 
 - **tRPC 维持「启发式 ⚠️」有据（覆盖率受限侧）**：首个 0 FP 语料

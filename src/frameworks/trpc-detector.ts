@@ -90,14 +90,18 @@ export function extractRouterNames(code: string): string[] {
  */
 export function extractProcedures(code: string): TRPCProcedure[] {
   const procedures: TRPCProcedure[] = [];
-  // 过程起点：name: <procedureType>（不含链）
+  // 过程起点：name: <procedureType>（不含链）——v11 惯用法 t.procedure
+  // （V4 遗留缺口：只认 XxxProcedure 命名包装，内联 t.procedure 不可见）
   const procStartRe =
-    /([A-Za-z_][A-Za-z0-9_]*)\s*:\s*(publicProcedure|protectedProcedure|adminProcedure)\b/g;
+    /([A-Za-z_][A-Za-z0-9_]*)\s*:\s*(t\s*\.\s*procedure|publicProcedure|protectedProcedure|adminProcedure)\b/g;
 
   let m: RegExpExecArray | null;
   while ((m = procStartRe.exec(code)) !== null) {
     const name = m[1];
-    const procType = m[2].replace(/Procedure$/, "") as "public" | "protected" | "admin";
+    // t.procedure = v11 基础构造器（无包装 → 默认公开语义）；命名包装去掉后缀
+    const procType = (
+      m[2].includes(".") ? "public" : m[2].replace(/Procedure$/, "")
+    ) as "public" | "protected" | "admin";
 
     // ── 链扫描（括号感知）──
     // 自 procedure 类型后逐个解析 .method(balancedArgs)，容忍嵌套括号与

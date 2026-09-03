@@ -109,3 +109,45 @@ describe("detectTRPCApp — 无 /g lastIndex 泄漏", () => {
     ]);
   });
 });
+
+// ── tRPC v11：内联 t.procedure 形态（V4 遗留缺口）──
+
+describe("trpc v11 t.procedure 支持", () => {
+  it("t.procedure.input(z.object).mutation 可见且视为公开（默认语义）", () => {
+    const procs = extractProcedures(`
+import { initTRPC } from "@trpc/server";
+const t = initTRPC.create();
+export const r = t.router({
+  ping: t.procedure
+    .input(z.object({ msg: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.prisma.log.create({ data: { msg: input.msg } });
+    }),
+  list: t.procedure.query(async () => []),
+});`);
+    const ping = procs.find((p) => p.name === "ping");
+    expect(ping).toBeDefined();
+    expect(ping!.kind).toBe("mutation");
+    expect(ping!.procedureType).toBe("public");
+    expect(ping!.hasInputSchema).toBe(true);
+    expect(procs.some((p) => p.name === "list")).toBe(true);
+  });
+
+  it("裸 t.procedure mutation（无 input）触发规则（敏感性与命名包装一致）", () => {
+    const procs = extractProcedures(`
+export const r = t.router({
+  nuke: t.procedure.mutation(async ({ ctx }) => {
+    await ctx.prisma.post.deleteMany();
+  }),
+});`);
+    const nuke = procs.find((p) => p.name === "nuke");
+    expect(nuke).toBeDefined();
+    expect(nuke!.hasInputSchema).toBe(false);
+    expect(nuke!.doesDbWrite).toBe(true);
+  });
+
+  it("netflx v10 命名包装形态不受影响（19/19 保持）", () => {
+    const procs = extractProcedures(ROUTER_WITH_INPUT);
+    expect(procs.length).toBe(2);
+  });
+});
