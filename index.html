@@ -785,50 +785,47 @@ async function loadNpmVersion() {
 }
 
 // ═══ 实时拉取 npm 下载量（api.npmjs.org，CORS 开放）：本周 + 全量累计 ═══
+// 口径与 npm 官网一致：range 日报求和——
+//   本周 = 截至昨天往前 7 天（不含今天；npm 统计滞后数天，point/last-week
+//         返回的是「上一个完整结算周」而非滚动 7 天，会造成观感不更新）
+//   累计 = created 至今全量
 async function loadNpmDownloads() {
   const el = document.getElementById("npmDownloads"); // 本周
   const elTotal = document.getElementById("npmDownloadsTotal"); // 全量累计
   if (!el) return;
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 8000);
+  const timer = setTimeout(() => ctrl.abort(), 12000);
   try {
-    const res = await fetch("https://api.npmjs.org/downloads/point/last-week/progmune-runtime", { signal: ctrl.signal });
+    const reg = await fetch("https://registry.npmjs.org/progmune-runtime", { signal: ctrl.signal });
+    const pkg = await reg.json();
+    const created = (pkg.time && pkg.time.created) ? pkg.time.created.slice(0, 10) : "2020-01-01";
+    const today = new Date().toISOString().slice(0, 10);
+    const r2 = await fetch(
+      `https://api.npmjs.org/downloads/range/${created}:${today}/progmune-runtime`,
+      { signal: ctrl.signal },
+    );
     clearTimeout(timer);
-    if (!res.ok) throw new Error(String(res.status));
-    const data = await res.json();
-    if (data && typeof data.downloads === "number") {
-      el.textContent = data.downloads.toLocaleString("en-US");
-    } else {
-      throw new Error("no downloads field");
-    }
+    if (!r2.ok) throw new Error("range api failed");
+    const d2 = await r2.json();
+    const rows = (d2.downloads || []).filter((x) => x && typeof x.downloads === "number");
+    if (rows.length === 0) throw new Error("no rows");
+    // 累计：全量
+    const total = rows.reduce((a, x) => a + x.downloads, 0);
+    elTotal.textContent = total.toLocaleString("en-US");
+    // 本周：截至昨天往前 7 天（去掉今天的行——当天统计未完成/为 0）
+    let weekRows = rows;
+    if (rows[rows.length - 1].day === today) weekRows = rows.slice(0, -1);
+    const week = weekRows.slice(-7).reduce((a, x) => a + x.downloads, 0);
+    el.textContent = week.toLocaleString("en-US");
+    // 数据截至标注（npm 统计有数天滞后，避免访客误以为未更新）
+    const asOf = weekRows[weekRows.length - 1].day;
+    if (el.title) el.title = "";
+    el.title = "统计截至 " + asOf;
+    elTotal.title = "统计截至 " + rows[rows.length - 1].day;
   } catch {
+    clearTimeout(timer);
     el.textContent = "—";
-  }
-  // 全量累计：range API 从首次发布日求和
-  if (elTotal) {
-    const ctrl2 = new AbortController();
-    const timer2 = setTimeout(() => ctrl2.abort(), 12000);
-    try {
-      const reg = await fetch("https://registry.npmjs.org/progmune-runtime", { signal: ctrl2.signal });
-      const pkg = await reg.json();
-      const created = (pkg.time && pkg.time.created) ? pkg.time.created.slice(0, 10) : "2020-01-01";
-      const today = new Date().toISOString().slice(0, 10);
-      const r2 = await fetch(
-        `https://api.npmjs.org/downloads/range/${created}:${today}/progmune-runtime`,
-        { signal: ctrl2.signal },
-      );
-      clearTimeout(timer2);
-      if (r2.ok) {
-        const d2 = await r2.json();
-        const total = (d2.downloads || []).reduce((a, x) => a + (x.downloads || 0), 0);
-        elTotal.textContent = total.toLocaleString("en-US");
-      } else {
-        throw new Error("range api failed");
-      }
-    } catch {
-      clearTimeout(timer2);
-      elTotal.textContent = "—";
-    }
+    if (elTotal) elTotal.textContent = "—";
   }
 }
 
