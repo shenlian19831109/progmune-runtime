@@ -109,6 +109,9 @@ export function analyzeDjangoStructure(data: DjangoStructure): {
     return { hasDjango: false, issues: [] };
   }
   const issues: DjangoSecurityIssue[] = [];
+  // ViewSet 经 DefaultRouter 展开为多条路由（集合+详情）——同一视图的
+  // DRF_PERMISSION_BYPASS 只报一次（变异形状是视图级的）
+  const reportedDrfBypass = new Set<string>();
 
   for (const route of data.routes) {
     if (route.kind !== "fbv" && route.kind !== "cbv") continue;
@@ -146,6 +149,8 @@ export function analyzeDjangoStructure(data: DjangoStructure): {
     if (view.isDrf) {
       if (!hasMutationMethod(view)) continue;
       if (view.openPermission) {
+        if (reportedDrfBypass.has(viewName)) continue;
+        reportedDrfBypass.add(viewName);
         issues.push({
           severity: "medium",
           rule: "DRF_PERMISSION_BYPASS",

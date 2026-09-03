@@ -148,3 +148,34 @@ describe("django-detector", () => {
     expect(issues).toHaveLength(0);
   });
 });
+
+describe("django-detector ViewSet 展开回归", () => {
+  it("同一 ViewSet 多条展开路由（集合+详情）DRF_PERMISSION_BYPASS 只报一次", () => {
+    const { issues } = analyzeDjangoStructure(structure({
+      routes: [
+        { pattern: "^articles/?$", urlname: "", view: "ArticleViewSet", kind: "cbv", file: "urls.py" },
+        { pattern: "^articles/(?P<pk>[^/.]+)/?$", urlname: "", view: "ArticleViewSet", kind: "cbv", file: "urls.py" },
+      ],
+      views: {
+        ArticleViewSet: cbv("ArticleViewSet", {
+          isDrf: true, methods: ["create", "list", "retrieve", "update"],
+          permissionClasses: ["AllowAny"], openPermission: true,
+        }),
+      },
+    }));
+    expect(issues.filter((i) => i.rule === "DRF_PERMISSION_BYPASS")).toHaveLength(1);
+  });
+
+  it("受保护 ViewSet（IsAuthenticatedOrReadOnly）不报——写面现在被真正检查", () => {
+    const { issues } = analyzeDjangoStructure(structure({
+      routes: [{ pattern: "^articles/?$", urlname: "", view: "ArticleViewSet", kind: "cbv", file: "urls.py" }],
+      views: {
+        ArticleViewSet: cbv("ArticleViewSet", {
+          isDrf: true, methods: ["create", "list", "retrieve", "update"],
+          permissionClasses: ["IsAuthenticatedOrReadOnly"], openPermission: false,
+        }),
+      },
+    }));
+    expect(issues).toHaveLength(0);
+  });
+});

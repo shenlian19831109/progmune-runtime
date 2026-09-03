@@ -161,13 +161,67 @@ class UrlCollector(ast.NodeVisitor):
     def __init__(self, filepath):
         self.file = filepath
         self.routes = []
+        # DRF ViewSet/DefaultRouter（REALWORLD_STRUCTURAL_V3：router.register
+        # + include(router.urls) 的路由由运行时生成，urlpatterns 解析不可见）
+        self.router_regs = {}    # router 变量 -> [(prefix, viewName)]
+        self.router_slash = {}   # router 变量 -> trailing_slash
+        self.router_uses = []    # (prefixBase, routerVar) urlpatterns 里的 include
 
     def visit_Assign(self, node):
         for t in node.targets:
-            if isinstance(t, ast.Name) and t.id == "urlpatterns" and isinstance(node.value, (ast.List, ast.Tuple)):
+            if not isinstance(t, ast.Name):
+                continue
+            # DefaultRouter 定义（trailing_slash 关键字，默认 True）
+            if isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Name) \
+                    and node.value.func.id == "DefaultRouter":
+                slash = True
+                for kw in node.value.keywords:
+                    if kw.arg == "trailing_slash" and isinstance(kw.value, ast.Constant):
+                        slash = bool(kw.value.value)
+                self.router_slash[t.id] = slash
+                self.router_regs.setdefault(t.id, [])
+            # urlpatterns：扫描直连条目，并展开 include(router.urls) 的 ViewSet
+            if t.id == "urlpatterns" and isinstance(node.value, (ast.List, ast.Tuple)):
                 for elt in node.value.elts:
                     self._scan_entry(elt)
+                for (prefix, var) in self.router_uses:
+                    self._expand_router_routes(prefix, var)
         self.generic_visit(node)
+
+    def visit_Expr(self, node):
+        # router.register(r'articles', ArticleViewSet, ...) 语句
+        call = node.value
+        if isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute) \
+                and call.func.attr == "register":
+            var = name_of(call.func.value)
+            if not var or var not in self.router_regs:
+                return
+            prefix = ""
+            if call.args and isinstance(call.args[0], ast.Constant):
+                prefix = str(call.args[0].value)
+            view = None
+            if len(call.args) > 1:
+                a1 = call.args[1]
+                if isinstance(a1, ast.Name):
+                    view = a1.id
+                elif isinstance(a1, ast.Attribute):
+                    view = a1.attr
+            if view:
+                self.router_regs.setdefault(var, []).append((prefix, view))
+        self.generic_visit(node)
+
+    def _expand_router_routes(self, prefix_base, var):
+        # 本工具不做 include 前缀传播（urlconf 各文件 pattern 独立）——
+        # prefix_base 仅作路由存在性触发，不拼进 pattern
+        for (prefix, view) in self.router_regs.get(var, []):
+            base = "^" + prefix
+            # DRF 默认 action 路由：list/create 集合级、retrieve/update/
+            # destroy 详情级（权限由 views 表判定，规则在 TS 检测器侧）
+            for pat in (base + "/?$", base + "/(?P<pk>[^/.]+)/?$"):
+                self.routes.append({
+                    "pattern": pat, "urlname": "", "view": view, "kind": "cbv",
+                    "file": self.file, "viewset": True,
+                })
 
     def _scan_entry(self, elt):
         if not isinstance(elt, ast.Call):
@@ -199,6 +253,13 @@ class UrlCollector(ast.NodeVisitor):
             elif isinstance(view_ref, ast.Call) and isinstance(view_ref.func, ast.Name):
                 if view_ref.func.id == "include":
                     kind = "include"
+                    # include(router.urls)：记录 router 变量（同一文件的
+                    # router.register 展开见 _expand_router_routes）
+                    if view_ref.args and isinstance(view_ref.args[0], ast.Attribute) \
+                            and view_ref.args[0].attr == "urls":
+                        rvar = name_of(view_ref.args[0].value)
+                        if rvar:
+                            self.router_uses.append((pattern, rvar))
                 else:
                     kind = "fbv"
                     view_name = view_ref.func.id

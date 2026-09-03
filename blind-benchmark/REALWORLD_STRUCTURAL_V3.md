@@ -52,3 +52,18 @@ urlconf 直连视图的分析链路是好的——缺口只在 ViewSet/DefaultRo
   词表精度缺陷）/ Django urlconf 直连通过 + ViewSet 注册不可见——
   **结构级的真实分水岭不是 AST vs 代码串，而是「是否实现了该框架
   主流注册/保护机制的解析」**
+
+## ✅ 修复记录（2026-09-02 结构级修复轮）
+
+**DRF ViewSet + DefaultRouter 路由展开已修**：
+- `tools/extract_framework_django.py`：收集 `DefaultRouter(...)` 定义
+  （trailing_slash 关键字）与 `router.register(prefix, ViewSet)` 语句；
+  当 urlpatterns 含 `include(router.urls)` 时按 DRF 约定展开集合/详情
+  两条路由（`^prefix/?$` 与 `^prefix/(?P<pk>[^/.]+)/?$`），权限由
+  views 表原样接入——ViewSet 写面进入路由表
+- `django-detector.ts`：DRF_PERMISSION_BYPASS 按视图去重（同一 ViewSet
+  多条展开路由只报一次）
+- 回归测试 +2（12 green）；**重测 django-realworld**：ArticleViewSet
+  写面现可见（routes 15→17），0 issues 从部分空洞变为**全部真实核查**
+  （含文章 CRUD 的 IsAuthenticatedOrReadOnly）；AllowAny 变异实验
+  **由无感变为触发**（DRF_PERMISSION_BYPASS ×1）
