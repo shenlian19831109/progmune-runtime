@@ -2,7 +2,10 @@
  * fiber-detector.test.ts — Fiber 框架适配器规则回归（纯函数，无文件 I/O）
  */
 import { describe, it, expect } from "vitest";
-import { analyzeFiberApp } from "./fiber-detector";
+import { analyzeFiberApp, fiberProtectedRegisterFns, fiberEnclosingFunc, analyzeFiberProject } from "./fiber-detector";
+import * as fs from "fs";
+import * as os from "os";
+import * as path from "path";
 
 const app = (routes: string, extra = ""): string => `
 import "github.com/gofiber/fiber/v2"
@@ -88,5 +91,79 @@ describe("fiber-detector V8 修复回归", () => {
 	api.Post("/logout", authHandler.Logout)
 `));
     expect(routes.find((x) => x.path === "/logout")!.protected).toBe(false);
+  });
+});
+
+// ── Fiber 组认证跨文件传播（gin 同款模型移植）──
+
+const FBOOT = `package main
+import "github.com/gofiber/fiber/v2"
+func main() {
+	app := fiber.New()
+	api := app.Group("/api")
+	users.UsersRegister(api.Group("/users"))
+	api.Use(middleware.Protected())
+	users.UserRegister(api.Group("/user"))
+	articles.ArticlesRegister(api.Group("/articles"))
+}
+`;
+
+const FROUTERS = `package users
+import "github.com/gofiber/fiber/v2"
+func UsersRegister(router fiber.Router) {
+	router.Post("/login", UsersLogin)
+	router.Post("", UsersRegistration)
+}
+func UserRegister(router fiber.Router) {
+	router.Put("", UserUpdate)
+}
+`;
+
+describe("fiberProtectedRegisterFns 组认证相位", () => {
+  it("Use 之后的 Register 受保护，Use 之前的公开", () => {
+    const p = fiberProtectedRegisterFns(FBOOT);
+    expect(p.get("UserRegister")).toBe(true);
+    expect(p.get("ArticlesRegister")).toBe(true);
+    expect(p.get("UsersRegister")).toBeUndefined();
+  });
+});
+
+describe("fiberEnclosingFunc 归属", () => {
+  it("按 func 头行号归属", () => {
+    // FROUTERS：1 package / 2 import / 3 func UsersRegister / 6 func UserRegister
+    expect(fiberEnclosingFunc(FROUTERS, 4)).toBe("UsersRegister");
+    expect(fiberEnclosingFunc(FROUTERS, 7)).toBe("UserRegister");
+  });
+});
+
+describe("analyzeFiberProject 跨文件传播", () => {
+  function makeProject(withUse: boolean): string {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "fiber-proj-"));
+    const boot = withUse ? FBOOT : FBOOT.replace(/\s*api\.Use\(middleware\.Protected\(\)\)\n/, "");
+    fs.writeFileSync(path.join(dir, "main.go"), boot);
+    fs.writeFileSync(path.join(dir, "routers.go"), FROUTERS);
+    return dir;
+  }
+
+  it("Use 保护下跨文件 mutation 不报", () => {
+    const dir = makeProject(true);
+    try {
+      const a = analyzeFiberProject(dir);
+      expect(a.issues.filter((i) => i.rule === "FIBER_ROUTE_NO_AUTH")).toHaveLength(0);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("删 Use → mutation 重现（敏感性保留）", () => {
+    const dir = makeProject(false);
+    try {
+      const a = analyzeFiberProject(dir);
+      const routes = a.issues.filter((i) => i.rule === "FIBER_ROUTE_NO_AUTH").map((i) => i.route);
+      expect(routes).toContain("PUT "); // UserRegister mutation 重现
+      // POST "" 是 register（/login 姊妹佐证豁免，公开）——不报正确
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

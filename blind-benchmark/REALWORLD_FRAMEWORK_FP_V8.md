@@ -72,3 +72,11 @@ auth-jwt router.go：摘掉 `POST /logout` 的 `middleware.Protected()` →
   bleed）；0-issue 应用 74 个
 - CRUD demo 的 61 flags 仍为语境噪声（demo 无认证意图——语义边界
   缺陷，转正待办）；Fiber 生态无生产语料 → FP 率仍不可测定（悬置）
+
+## ✅ 组认证跨文件模型移植（2026-09-02 后续修复）
+
+`analyzeFiberProject`（fiber-detector.ts，gin 同款）：bootstrap（fiber.New）
+语句序状态机 + RegisterFn 调用相位 → 跨文件 mutation 受保护；无法建立
+证据保持文件级。回归 +5（13 green）。**fiber-recipes 项目级复扫：0
+protected fns / 60 issues 与文件级一致（无回归）**——recipes 无
+bootstrap+RegisterFn 跨文件模式；模型就绪，待真实生产语料验证

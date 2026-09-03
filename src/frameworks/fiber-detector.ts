@@ -133,3 +133,98 @@ export function analyzeFiberFile(filePath: string): FiberAppAnalysis | null {
   if (!/gofiber|fiber\.New\(/.test(code)) return null;
   return analyzeFiberApp(code);
 }
+
+// ═══════ 项目级：组认证跨文件传播（gin 同款模型，Fiber 移植） ═══════
+
+/**
+ * Fiber 与 Gin 同为 Go 组式路由：bootstrap（fiber.New 文件）以组级
+ * `api.Use(middleware.Protected())` 施加认证，mutation 经
+ * `pkg.RegisterFn(组.Group(...))` 注册在独立文件——保护来自调用点相位。
+ * 模型同 gin：语句序状态机 + 注册调用相位；无法建立证据的路由保持文件级。
+ */
+export interface FiberProjectAnalysis {
+  filesScanned: number;
+  protectedFunctions: string[];
+  issues: FiberSecurityIssue[];
+}
+
+/** 顶层函数头（行号 1-based） */
+export function fiberFuncStarts(text: string): Array<{ name: string; line: number }> {
+  const out: Array<{ name: string; line: number }> = [];
+  const re = /^func\s+([A-Za-z_]\w*)\s*\(/gm;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    out.push({ name: m[1], line: text.slice(0, m.index).split("\n").length });
+  }
+  return out;
+}
+
+/** routeLine 所在顶层函数名 */
+export function fiberEnclosingFunc(text: string, routeLine: number): string | null {
+  let name: string | null = null;
+  for (const f of fiberFuncStarts(text)) {
+    if (f.line <= routeLine) name = f.name;
+    else break;
+  }
+  return name;
+}
+
+/** bootstrap 相位推导：认证 Use 之后调用的 Register fn（组编号 1,2|3,4|5,6|7,8） */
+export function fiberProtectedRegisterFns(bootstrapText: string): Map<string, boolean> {
+  const state = new Map<string, boolean>();
+  const protectedFns = new Map<string, boolean>();
+  const re =
+    /(\w+)\s*(?::=|=)\s*fiber\.New\s*\(|(\w+)\.Use\s*\(\s*([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*)|(\w+)\s*(?::=|=)\s*(?:[\w.]*\.)?([A-Za-z_]\w*)\.Group\s*\(|(?:[\w.]*\.)?([A-Z][A-Za-z0-9_]*)\s*\(\s*(?:[\w.]*\.)?([A-Za-z_]\w*)\.Group\s*\(/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(bootstrapText)) !== null) {
+    if (m[1] !== undefined) {
+      state.set(m[1], false);
+    } else if (m[2] !== undefined) {
+      if (isAuthFnName(m[3])) state.set(m[2], true);
+    } else if (m[4] !== undefined) {
+      state.set(m[4], !!state.get(m[5]));
+    } else if (m[6] !== undefined) {
+      if (state.get(m[7])) protectedFns.set(m[6], true);
+    }
+  }
+  return protectedFns;
+}
+
+/** 项目级分析：跨文件组认证传播（同 gin analyzeGinProject） */
+export function analyzeFiberProject(projectRoot: string): FiberProjectAnalysis {
+  const files: Array<{ file: string; text: string; a: FiberAppAnalysis | null }> = [];
+  const walk = (d: string): void => {
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      if (e.isDirectory()) {
+        if (["vendor", "node_modules", ".git"].includes(e.name)) continue;
+        walk(`${d}/${e.name}`);
+      } else if (e.name.endsWith(".go") && !e.name.endsWith("_test.go")) {
+        const fp = `${d}/${e.name}`;
+        try {
+          files.push({ file: fp, text: fs.readFileSync(fp, "utf-8"), a: analyzeFiberFile(fp) });
+        } catch { /* skip */ }
+      }
+    }
+  };
+  if (fs.existsSync(projectRoot)) walk(projectRoot.replace(/\/$/, ""));
+
+  const bootstrap = files.find((f) => /fiber\.New\s*\(/.test(f.text));
+  const protectedFns = bootstrap
+    ? fiberProtectedRegisterFns(bootstrap.text)
+    : new Map<string, boolean>();
+
+  const issues: FiberSecurityIssue[] = [];
+  for (const { file, text, a } of files) {
+    if (!a || a.issues.length === 0) continue;
+    for (const issue of a.issues) {
+      const fn = issue.line ? fiberEnclosingFunc(text, issue.line) : null;
+      if (fn && protectedFns.get(fn)) continue;
+      issues.push({ ...issue });
+    }
+  }
+  return {
+    filesScanned: files.length,
+    protectedFunctions: [...protectedFns.keys()].filter((k) => protectedFns.get(k)),
+    issues,
+  };
+}
