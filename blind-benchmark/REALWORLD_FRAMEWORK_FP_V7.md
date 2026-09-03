@@ -85,6 +85,23 @@ articles.ArticlesRegister(v1.Group("/articles")) // 全部 mutation
   注册的所有路由）——属转正级功能改造，非本次缺陷修复范围；per-file
   逻辑现已正确（单测锁定同文件场景）
 
+## ✅ 组认证跨文件传播（转正功能，2026-09-02 后续修复）
+
+`analyzeGinProject(root)` 新增（`gin-detector.ts`）：
+- bootstrap（含 gin.Default/New）按语句顺序维护 组变量 → 已认证 状态：
+  根组假、`g.Use(认证)` 置真（**首参字面 false = 可选认证不置真**——
+  否则删 required Use 后 mutations 被可选 Use 掩盖）、子组继承父组
+- 注册调用 `pkg.Fn(组.Group(...))` 发生在认证相位 → 该 Fn 内全部路由
+  视为受保护；路由按 func 头行号归属（`ginEnclosingFunc`）
+- 无法建立传播证据的路由保持文件级判定（宁报勿漏）
+
+**gin-realworld 重测：13 → 0 issues**（UserRegister/ProfileRegister/
+ArticlesRegister 三个 mutation 注册正确识别为认证相位调用；
+UsersRegister（Use 之前）与 GET-only 匿名注册不在保护集）。
+**反证闭环**：删 `v1.Use(users.AuthMiddleware(true))` → 保护集清空 →
+**13 issues 重现**（可选 Use(false) 不再掩盖）。回归测试 +5（20 green）。
+Fiber 共享同款模型待真实语料验证（当前生态无生产级语料）。
+
 ## ✅ register 集合豁免（语义层，2026-09-02 后续修复）
 
 同文件有 `/login` 姊妹佐证 ⇒ POST ""/"/"（users 双注册）豁免（共享
