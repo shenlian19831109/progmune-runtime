@@ -30,9 +30,13 @@ import sys
 
 # 认证词表（依赖函数名命中即视为 auth-like；与 TS 侧 annotation-suggest 词表同源）
 # 注意：扫描器只做「结构提取」，规则判定（豁免词/方法门控）在 TS 检测器侧。
+# 注意：不含裸 "user"——get_profile_by_username_from_path 等 DB 查询
+# 依赖名含 user 会被误标认证（REALWORLD_STRUCTURAL_V2 假保护 FN）。
+# 真认证依赖用 current_user/authorizer 等强词识别（get_current_user
+# 含 current_user ✓）。
 AUTH_WORDS = (
-    "auth", "login", "token", "user", "credential", "session",
-    "bearer", "permission", "current_user", "api_key", "oauth",
+    "auth", "login", "token", "credential", "session",
+    "bearer", "permission", "current_user", "api_key", "oauth", "jwt",
 )
 
 SKIP_DIRS = {"tests", "test", "deps", "venv", "env", "node_modules", "vendor",

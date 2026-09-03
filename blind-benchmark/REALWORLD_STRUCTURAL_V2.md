@@ -44,3 +44,13 @@ user-词 DB 依赖，检测器会漏报。AUTH_WORDS 的 `"user"` 过宽（与
 - 对照：NestJS（guard 单一惯用法失明）vs FastAPI（现代依赖形态
   通过）——结构级检测器的成败取决于**是否覆盖了该框架的真实惯用法**，
   与 AST 与否无关；真正拉开差距的是形态模型，不是解析技术
+
+## ✅ 修复记录（2026-09-02 结构级修复轮）
+
+**AUTH_WORDS 去裸 "user" 已修**（`tools/extract_framework_py.py`）：
+- 词表移除 `"user"`（保留 `current_user`，另补 `jwt`）——DB 查询依赖
+  名（get_profile_by_username_from_path 等）不再被误标认证
+- **重测 fastapi-realworld：仍 0 issues**（真认证依赖
+  get_current_user_authorizer 含 current_user 照常识别 ✓）
+- **假保护反证修复**：仅 user-词 DB 依赖的无认证 mutation 现被报
+  （FASTAPI_ROUTE_NO_AUTH ✓），真认证路由不误报 ✓
