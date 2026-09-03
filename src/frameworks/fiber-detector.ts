@@ -208,17 +208,17 @@ export function analyzeFiberProject(projectRoot: string): FiberProjectAnalysis {
   };
   if (fs.existsSync(projectRoot)) walk(projectRoot.replace(/\/$/, ""));
 
-  const bootstrap = files.find((f) => /fiber\.New\s*\(/.test(f.text));
-  const protectedFns = bootstrap
-    ? fiberProtectedRegisterFns(bootstrap.text)
-    : new Map<string, boolean>();
+  // 多层 Register 链传播（journalist 式 main→api.Register(Group+Use)→…）
+  const protectedFns = fiberProjectProtectedFns(files);
 
   const issues: FiberSecurityIssue[] = [];
   for (const { file, text, a } of files) {
     if (!a || a.issues.length === 0) continue;
+    const pkgM = text.match(/^package\s+(\w+)/m);
+    const filePkg = pkgM ? pkgM[1] : "";
     for (const issue of a.issues) {
       const fn = issue.line ? fiberEnclosingFunc(text, issue.line) : null;
-      if (fn && protectedFns.get(fn)) continue;
+      if (fn && protectedFns.get(`${filePkg}:${fn}`)) continue;
       issues.push({ ...issue });
     }
   }
@@ -227,4 +227,148 @@ export function analyzeFiberProject(projectRoot: string): FiberProjectAnalysis {
     protectedFunctions: [...protectedFns.keys()].filter((k) => protectedFns.get(k)),
     issues,
   };
+}
+
+// ═══════ 多层 Register 链传播（真实 Fiber 语料 journalist 验证） ═══════
+
+/** 项目内全部顶层函数（含 fiber 路由参数名） */
+interface GoFuncInfo {
+  file: string;
+  pkg: string;
+  name: string;
+  routerParams: string[]; // 参数名：类型含 fiber + Router/App/Group
+  body: string;
+}
+
+/** 解析一个 Go 文件的顶层函数 */
+export function goFuncsOf(text: string, file: string): GoFuncInfo[] {
+  const out: GoFuncInfo[] = [];
+  const pkgM = text.match(/^package\s+(\w+)/m);
+  const pkg = pkgM ? pkgM[1] : "";
+  const headerRe = /^func\s+([A-Za-z_]\w*)\s*\(/gm;
+  let m: RegExpExecArray | null;
+  while ((m = headerRe.exec(text)) !== null) {
+    const hStart = m.index;
+    // 平衡取参数
+    let depth = 1;
+    let end = m.index + m[0].length;
+    while (end < text.length && depth > 0) {
+      if (text[end] === "(") depth++;
+      else if (text[end] === ")") depth--;
+      end++;
+    }
+    const paramsText = text.slice(m.index + m[0].length, end - 1);
+    // 找下一个 func 头作为 body 终点
+    const nxt = out.length ? text.indexOf("func ", end) : text.indexOf("\nfunc ", end);
+    const bodyEnd = (() => {
+      const nextHeader = text.slice(end).search(/^func\s/m);
+      return nextHeader === -1 ? text.length : end + nextHeader;
+    })();
+    const body = text.slice(end, bodyEnd);
+    const routerParams: string[] = [];
+    // 参数切分（顶层逗号）
+    let d = 0; let cur = ""; const parts: string[] = [];
+    for (const ch of paramsText) {
+      if (ch === "(") d++; else if (ch === ")") d--;
+      if (ch === "," && d === 0) { parts.push(cur.trim()); cur = ""; } else cur += ch;
+    }
+    if (cur.trim()) parts.push(cur.trim());
+    for (const p of parts) {
+      // name *pkg.fiber.Router | name fiber.App …
+      const pm = p.match(/^([A-Za-z_]\w*)\s+[\w./*]*(\bfiber\b[\w./]*(?:Router|App|Group))/);
+      if (pm && /Router|App|Group/.test(pm[2])) routerParams.push(pm[1]);
+    }
+    out.push({ file, pkg, name: m[1], routerParams, body: text.slice(end, bodyEnd) });
+    headerRe.lastIndex = bodyEnd; // 跳过函数体
+  }
+  return out;
+}
+
+/**
+ * 项目级保护函数集（多层 Register 链，包限定键）：
+ * 队列自全部函数「参数未认证」种子起，凡函数体在「组已 Use 认证」后以
+ * 认证组调用项目内 Register 函数 → 该函数入队（参数认证）——支持
+ * journalist 式 main→api.Register(Group+Use)→v1.Register→模块 多层链。
+ * 键 = pkg:name，避免跨包同名函数（feeds.Register/tokens.Register…）串扰。
+ */
+export function fiberProjectProtectedFns(
+  files: Array<{ file: string; text: string }>,
+): Map<string, boolean> {
+  const funcs: GoFuncInfo[] = [];
+  for (const f of files) funcs.push(...goFuncsOf(f.text, f.file));
+  const keyOf = (pkg: string, name: string): string => `${pkg}:${name}`;
+  const byKey = new Map<string, GoFuncInfo[]>();
+  for (const fn of funcs) {
+    byKey.set(keyOf(fn.pkg, fn.name), [...(byKey.get(keyOf(fn.pkg, fn.name)) || []), fn]);
+  }
+  const protectedFns = new Map<string, boolean>();
+  const done = new Set<string>();
+  const queue: Array<{ pkg: string; name: string; authed: boolean }> = [];
+  for (const fn of funcs) queue.push({ pkg: fn.pkg, name: fn.name, authed: false });
+  while (queue.length) {
+    const { pkg, name, authed } = queue.shift()!;
+    const dk = `${pkg}|${name}|${authed}`;
+    if (done.has(dk)) continue;
+    done.add(dk);
+    if (authed) protectedFns.set(keyOf(pkg, name), true);
+    const candidates = byKey.get(keyOf(pkg, name)) || [];
+    for (const fn of candidates) {
+      const authedParams = new Set<string>();
+      if (authed) fn.routerParams.forEach((pp) => authedParams.add(pp));
+      const callees = fiberBodyProtectedCalls(fn.body, authedParams, funcs);
+      for (const c of callees) queue.push({ pkg: c.pkg, name: c.name, authed: true });
+    }
+  }
+  return protectedFns;
+}
+
+/**
+ * 函数体内事件模拟 v2：返回在其认证相位被调用的项目函数（包限定）。
+ * 调用限定符 feeds.Register → pkg 匹配 feeds；同包调用按当前函数包。
+ */
+function fiberBodyProtectedCalls(
+  body: string,
+  authedParams: Set<string>,
+  allFuncs: GoFuncInfo[],
+): Array<{ pkg: string; name: string }> {
+  const calls: Array<{ pkg: string; name: string }> = [];
+  const b = body.replace(/\(\s*\*\s*(\w+)\s*\)/g, "$1");
+  const curPkg = allFuncs.find((f) => f.body === body)?.pkg || "";
+  const state = new Map<string, boolean>();
+  for (const p of authedParams) state.set(p, true);
+  const re =
+    /(\w+)\s*(?::=|=)\s*(?:[\w.]*\.)?([A-Za-z_]\w*)\.Group\s*\(|(\w+)\.Use\s*\(\s*([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*)|(?:([A-Za-z_]\w*)\.)?([A-Z][A-Za-z0-9_]*)\s*\(/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(b)) !== null) {
+    if (m[1] !== undefined) {
+      state.set(m[1], !!state.get(m[2]));
+    } else if (m[3] !== undefined) {
+      if (isAuthFnName(m[4])) state.set(m[3], true);
+    } else if (m[5] !== undefined || m[6] !== undefined) {
+      const qual = m[5];
+      const fname = m[6];
+      // 项目内函数匹配：限定符 → pkg==qual；无限定符 → 同包
+      const matches = allFuncs.filter((f) => f.name === fname && (qual ? f.pkg === qual : f.pkg === curPkg));
+      if (matches.length === 0) continue;
+      const openIdx = b.indexOf("(", m.index + m[0].length - 1);
+      if (openIdx < 0) continue;
+      let depth = 1; let i = openIdx + 1;
+      while (i < b.length && depth > 0) {
+        if (b[i] === "(") depth++;
+        else if (b[i] === ")") depth--;
+        i++;
+      }
+      const args = b.slice(openIdx + 1, i - 1).split(",").map((x) => x.trim().replace(/^[&*]+/, ""));
+      // 实参认证判定：直接组变量 或 内联组派生 X.Group(...)（X 已认证）
+      const argAuthed = (a: string): boolean => {
+        if (state.get(a)) return true;
+        const g = a.match(/^([A-Za-z_]\w*)\.Group\s*\(/);
+        return !!g && !!state.get(g[1]);
+      };
+      if (args.some(argAuthed)) {
+        for (const mm of matches) calls.push({ pkg: mm.pkg, name: mm.name });
+      }
+    }
+  }
+  return calls;
 }

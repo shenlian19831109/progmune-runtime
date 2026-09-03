@@ -167,3 +167,68 @@ describe("analyzeFiberProject 跨文件传播", () => {
     }
   });
 });
+
+// ── 多层 Register 链（journalist 式 main→api(Group+Use)→v1→模块）──
+
+function makeNestedProject(withUse: boolean): string {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "fiber-nest-"));
+  const mk = (rel: string, content: string) => {
+    const fp = path.join(dir, rel);
+    fs.mkdirSync(path.dirname(fp), { recursive: true });
+    fs.writeFileSync(fp, content);
+  };
+  mk("main/main.go", `package main
+import "github.com/gofiber/fiber/v2"
+func main() {
+	app := fiber.New()
+	api.Register(app)
+}
+`);
+  mk("api/api.go", `package api
+import "github.com/gofiber/fiber/v2"
+func Register(fiberApp *fiber.App) {
+	api := fiberApp.Group("/api")
+${withUse ? "\tapi.Use(middleware.Protected())\n" : ""}\tv1.Register(&api)
+}
+`);
+  mk("v1/v1.go", `package v1
+import "github.com/gofiber/fiber/v2"
+func Register(router *fiber.Router) {
+	feeds.Register(router)
+}
+`);
+  mk("feeds/feeds.go", `package feeds
+import "github.com/gofiber/fiber/v2"
+func Register(router *fiber.Router) {
+	router.Post("/", CreateFeed)
+	router.Put("/:id", UpdateFeed)
+}
+`);
+  return dir;
+}
+
+describe("analyzeFiberProject 多层 Register 链（journalist 式）", () => {
+  it("api(Group+Use)→v1→feeds 链：跨层 mutation 不报", () => {
+    const dir = makeNestedProject(true);
+    try {
+      const a = analyzeFiberProject(dir);
+      expect(a.issues.filter((i) => i.rule === "FIBER_ROUTE_NO_AUTH")).toHaveLength(0);
+      expect(a.protectedFunctions).toContain("feeds:Register");
+      expect(a.protectedFunctions).toContain("v1:Register");
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("删中间层 api.Use → feeds mutation 重现（敏感性穿透多层）", () => {
+    const dir = makeNestedProject(false);
+    try {
+      const a = analyzeFiberProject(dir);
+      const routes = a.issues.filter((i) => i.rule === "FIBER_ROUTE_NO_AUTH").map((i) => i.route);
+      expect(routes).toContain("POST /");
+      expect(routes).toContain("PUT /:id");
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});

@@ -73,6 +73,30 @@ auth-jwt router.go：摘掉 `POST /logout` 的 `middleware.Protected()` →
 - CRUD demo 的 61 flags 仍为语境噪声（demo 无认证意图——语义边界
   缺陷，转正待办）；Fiber 生态无生产语料 → FP 率仍不可测定（悬置）
 
+## ✅ 真实生产语料考核（2026-09-02，生态约束突破）
+
+自找两个真实 Fiber 生产项目补上缺失的真实数据点：
+
+**① mrusme/journalist（365★ RSS 聚合产品，95 .go）——12/12 FP → 0**
+- 认证架构：`api.Register` 内 `api.Use(authorizer(...))`（/api 组 token
+  中间件）→ 再委派 v1→feeds/tokens/users；/web 组同款 → subscriptions。
+  mutation 全受保护——但认证在**多层 Register 链**中间层函数体内
+  （比 gin 语料深一级）
+- 检测器：12 flags 全 FP（跨层组认证不可见）
+- **修复：多层 Register 链传播引擎**（`fiberProjectProtectedFns`，包限定
+  键 pkg:name 防跨包同名串扰；队列种子 + 认证组实参（含内联 X.Group）
+  传播）→ **journalist 12 → 0 issues**；反证：删 api.go 的
+  `api.Use(authorizer)` → **9 条重现**（/api 系 feeds/tokens/users，
+  /web 系 subscriptions 3 条仍受保护——精确、无过度抑制）
+- 回归 +2（fiber 15 green）
+
+**② JioTV-Go/jiotv_go（726★ 流媒体代理）——2 flags 特殊形态标注**
+- POST /live/key/:channelID、/drm 无中间件认证——但 handler 以
+  **加密能力令牌**鉴权（`DecryptURLParam` 校验，解密失败 Forbidden，
+  令牌由 OTP 登录后的 MPD 流程签发）——非会话式认证，检测器词表外
+- 标注：能力令牌形态（同 webhook 签名族），不修检测器；语料本身
+  无 0 FP 争议之外的新问题
+
 ## ✅ 组认证跨文件模型移植（2026-09-02 后续修复）
 
 `analyzeFiberProject`（fiber-detector.ts，gin 同款）：bootstrap（fiber.New）

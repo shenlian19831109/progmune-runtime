@@ -205,9 +205,14 @@ npm run corpus:mine        # Rule mining from corpus
 - **Fiber 组认证跨文件模型（gin 同款移植）**：analyzeFiberProject——
   fiber.New bootstrap 相位 + RegisterFn 调用推导（recipes 复扫无回归，
   模型就绪待真实生产语料）
-- 全框架 + trust engine 153 tests green
+- **Fiber 真实语料考核（生态约束突破）**：journalist（365★ RSS 产品）
+  12/12 FP——认证在多层 Register 链（api(Group+Use)→v1→模块），新增
+  多层传播引擎（包限定键 pkg:name + 认证组实参/内联派生传播）→ 0
+  issues，删中间层 authorizer 反证 9 重现；jiotv_go（726★）2 flags =
+  能力令牌形态标注（DecryptURLParam 校验，非会话）
+- 全框架 + trust engine 155 tests green
 
-**转正待办（未修，均为功能级）**：Fiber 需真实生产语料（组认证跨文件模型已就绪，待语料验证）
+**转正待办（未修，均为功能级）**：（无代码级遗留——12 个检测器均已在真实语料验证到 0 协议级 FP + 反证；fiber 生态参考级 recipes 的 demo 语境噪声为文档化边界）
 - 转正门槛：每个启发式探测器补一个真实项目 FP 数据点（C 的 real-corpus 方法论延伸）后才可升级结构级标签；各探测器转正工作清单与重测路径见 `REALWORLD_FRAMEWORK_FP_V1-V8.md`（Express 清单 4 项 / Fastify 结构性重写 4 项 / Koa 窗口截断 + 幻影路由 / tRPC 括号感知 + lastIndex / Next.js 词表扩展 + webhooks 豁免 / Hapi 门兼容 + 声明式路由 / Gin Use 捕获 + 组认证跨文件 / Fiber 需真实生产语料）
 
 ### P0-P3 Rule Injection (2026-08-03, historical phase)
