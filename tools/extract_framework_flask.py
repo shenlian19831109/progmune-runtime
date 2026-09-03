@@ -26,8 +26,10 @@ SKIP_DIRS = {"tests", "test", "deps", "venv", "env", "node_modules", "vendor",
              ".git", "migrations", "__pycache__", "scripts", "docs",
              "staticfiles", "static"}
 
+# jwt 必在词表：flask_jwt_extended 的 @jwt_required 是生态头号认证装饰器
+# （REALWORLD_STRUCTURAL_V4：缺 "jwt" → 10 个受保护 mutation 全误报 FP）
 AUTH_WORDS = ("auth", "login", "permission", "token", "credential", "session",
-              "user")
+              "user", "jwt")
 
 MUTATION_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
 

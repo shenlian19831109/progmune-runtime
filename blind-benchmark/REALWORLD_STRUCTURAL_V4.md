@@ -56,3 +56,10 @@ FastAPI 多认 → FN，Flask 少认 → FP）。
   形态（FastAPI/Django urlconf 证明有效），但认证词表、注册机制覆盖、
   惯用法模型仍是结构级与启发式共享的软肋；任何「100%」背书（无论
   合成还是结构级）都需真实语料复核
+
+## ✅ 修复记录（2026-09-02 结构级修复轮）
+
+**AUTH_WORDS 补 "jwt" 已修**（`tools/extract_framework_flask.py`）：
+- 词表加 `jwt` → `@jwt_required`（flask_jwt_extended 头号认证装饰器）
+  被识别。**重测 flask-realworld：10 FP → 0 issues**
+  （POST /api/articles authDecorators=["jwt_required"] ✓）
