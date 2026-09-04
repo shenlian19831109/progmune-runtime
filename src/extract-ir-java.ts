@@ -1,13 +1,10 @@
 /**
  * extract-ir-java.ts — Java 语言 IR 提取（纯 TS 词法，零工具链依赖）
  *
- * 与 C/Go 提取器同模式：逐 .java 文件扫描方法声明 → FunctionInfo 列表。
- * Java 语言支持（3.7.17 里程碑 1）：注册表 LANGUAGE_EXTRACTORS 一项 +
- * evaluateTrust/engine 语言分派；Spring Security 路由覆盖模型见
- * src/frameworks/spring-detector.ts。
- *
- * 注意：提取为词法近似（方法签名正则）——注解驱动的协议金标建立后
- * 再评估是否需 AST（JavaParser 等不引入，保持零依赖）。
+ * 与 C/Go 提取器同模式：逐 .java 文件扫描方法声明 → FunctionInfo 列表，
+ * 附带：方法体调用边（calls）与方法前注释协议注解（protocol，
+ * // @protocol namespace=… pre_states=[…] post_states=[…]，TS JSDoc
+ * 同口径）——供 SSG/序列验证（Java 协议行金标 v1，2026-09-02）。
  */
 import * as fs from "fs";
 import * as path from "path";
@@ -25,7 +22,39 @@ const JAVA_KEYWORDS = new Set([
   "new", "case", "do", "try", "else", "instanceof",
 ]);
 
-const MODIFIERS = "(?:public|protected|private|static|final|synchronized|abstract|default|native|strictfp|transient|volatile|\\s)+";
+/** 从方法前注释（// @protocol … / // @progmune(…)）解析协议注解，
+ *  与 TS JSDoc @protocol 同口径：namespace/pre_states/post_states/invalidate */
+function parseJavaProtocol(commentText: string): FunctionInfo["protocol"] | undefined {
+  const nsMatch = commentText.match(/namespace\s*=\s*["']?(\w+)/);
+  const preMatch = commentText.match(/pre(?:_states)?\s*=\s*\[([^\]]*)\]/);
+  const postMatch = commentText.match(/post(?:_states)?\s*=\s*\[([^\]]*)\]/);
+  if (!preMatch || !postMatch) return undefined;
+  const split = (g: string): string[] =>
+    g.split(",").map((x) => x.trim().replace(/["']/g, "")).filter(Boolean);
+  const invMatch = commentText.match(/invalidate\s*=\s*\[([^\]]*)\]/);
+  return {
+    pre_states: split(preMatch[1]),
+    post_states: split(postMatch[1]),
+    invalidate: invMatch ? split(invMatch[1]) : undefined,
+    namespace: nsMatch ? nsMatch[1] : undefined,
+  };
+}
+
+/** 方法头部向上收集注释（只允许空行/注释/@注解行；遇代码即停，防串方法） */
+function collectPrecedingComment(code: string, matchIndex: number): string {
+  const headerLine = code.slice(0, matchIndex).split("\n").length; // 1-based
+  const srcLines = code.split("\n");
+  const pieces: string[] = [];
+  let li = headerLine - 2;
+  while (li >= 0) {
+    const t = srcLines[li].trim();
+    if (t === "") { li--; continue; }
+    if (/^\/\//.test(t) || /^\/\*/.test(t) || /^\*/.test(t)) { pieces.unshift(srcLines[li]); li--; continue; }
+    if (/^@[A-Za-z]/.test(t)) { li--; continue; } // @Override 等注解行
+    break;
+  }
+  return pieces.join("\n");
+}
 
 /** 单文件提取 */
 export function extractJavaFile(filePath: string): FunctionInfo[] {
@@ -43,12 +72,23 @@ export function extractJavaFile(filePath: string): FunctionInfo[] {
   while ((m = re.exec(code)) !== null) {
     const name = m[1];
     if (JAVA_KEYWORDS.has(name)) continue;
-    // 前置字符过滤：排除 '.'/'='/'( ' 前导（调用/赋值/子表达式误匹配）；
-    // '@' 允许——@Override protected void … 是注解修饰的合法方法
+    // 重叠守卫：匹配起点若早于参数 '(' 所在行（如从上一行注释/注解开吃
+    // 吞掉真头）→ 从 '(' 行首重扫，避免方法被错配候选吞掉
+    const parenPos = code.indexOf("(", m.index + m[0].indexOf(name));
+    const parenLineStart = code.lastIndexOf("\n", parenPos - 1) + 1;
+    if (m.index < parenLineStart) {
+      re.lastIndex = parenLineStart;
+      continue;
+    }
+    // 起点规则：'.' 前导 = 方法调用（如 adminService.act( 的 act）；
+    // 注解行起点（@RequestMapping…）非方法声明；容忍注释内起点——
+    // 其名字/参数/体边界本就正确（正则 type-part 可吞注释空白）
     const pre = code.slice(Math.max(0, m.index - 1), m.index);
-    if (/[.=(]/.test(pre)) continue;
+    if (pre === ".") continue;
+    const lineStart = code.lastIndexOf("\n", m.index - 1) + 1;
+    const curLine = code.slice(lineStart, code.indexOf("\n", lineStart) === -1 ? code.length : code.indexOf("\n", lineStart)).trim();
+    if (curLine.startsWith("@") && !curLine.startsWith("@protocol") && !curLine.startsWith("@progmune")) continue;
 
-    // 可见性（近似）：行内是否有 public/protected（或文件在接口里默认 public）
     const head = code.slice(m.index, m.index + 40);
     const visM = head.match(/\b(public|protected|private)\b/);
     const exported =
@@ -60,7 +100,6 @@ export function extractJavaFile(filePath: string): FunctionInfo[] {
       for (const raw of rawParams.split(",")) {
         const t = raw.trim();
         if (!t) continue;
-        // 最后一个词为参数名，其余为类型（含泛型/数组）
         const parts = t.split(/\s+/);
         const pname = parts.pop() || "";
         const ptype = parts.join(" ") || "?";
@@ -69,11 +108,22 @@ export function extractJavaFile(filePath: string): FunctionInfo[] {
         }
       }
     }
-    // 返回类型：方法名前的一段（简化取最近一个类型令牌）
     const returnType = "unknown";
 
+    // protocol：方法前注释里的 @protocol/@progmune
+    // 行号基准 = 参数 '(' 所在行（正则匹配起点可能早于方法行——用
+    // '(' 位置定真实 header 行，避免注释归属串位）
+    let protocol: FunctionInfo["protocol"];
+    {
+      const parenIdx = code.indexOf("(", m.index);
+      const joined = parenIdx === -1 ? "" : collectPrecedingComment(code, parenIdx);
+      const lastAt = Math.max(joined.lastIndexOf("@protocol"), joined.lastIndexOf("@progmune"));
+      if (lastAt !== -1) {
+        protocol = parseJavaProtocol(joined.slice(lastAt, Math.min(joined.length, lastAt + 300)));
+      }
+    }
+
     // calls：方法体（自头正则消费的 '{' 起平衡到 '}'）内的方法调用
-    // （词法近似：标识符 + '('，过滤关键字；obj.method → 取末段）
     const calls: string[] = [];
     const bodyStart = m.index + m[0].length; // 正则已含 '{'
     let depth = 1;
@@ -85,14 +135,13 @@ export function extractJavaFile(filePath: string): FunctionInfo[] {
       bodyEnd++;
     }
     const body = code.slice(bodyStart, Math.min(bodyEnd, bodyStart + 8000));
-    const callRe = /(?:^|[^\w$])([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*)\s*\(/g;
+    // 零宽后视：前导 '(' 等不被上一匹配吞掉（if (verifyToken(…) 中能收到 verifyToken）
+    const callRe = /(?<=^|[^\w$])([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*)\s*\(/g;
     let cm: RegExpExecArray | null;
     while ((cm = callRe.exec(body)) !== null) {
-      const full = cm[1];
-      const seg = full.split(".").pop() || "";
+      const seg = cm[1].split(".").pop() || "";
       if (JAVA_KEYWORDS.has(seg)) continue;
       if (/^(if|for|while|switch|catch|new|return|case|do)$/.test(seg)) continue;
-      // 排除声明后立即调用形态（如 new Foo( 里 Foo）——new 已过滤
       if (calls.length < 400 && !calls.includes(seg)) calls.push(seg);
     }
 
@@ -103,6 +152,7 @@ export function extractJavaFile(filePath: string): FunctionInfo[] {
       file: filePath,
       exported,
       calls,
+      protocol,
     });
   }
   return out;

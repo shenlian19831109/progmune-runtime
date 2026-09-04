@@ -252,3 +252,95 @@ void handle_monitor_no_auth(client *c) {
     }
   });
 });
+
+describe("evaluateTrust（Java 注解原语，token 生命周期协议行 v1——3.7.20）", () => {
+  const SOURCE = `package app;
+public class AuthService {
+  // @protocol namespace=token pre_states=[] post_states=["AUTHENTICATED"]
+  void authenticate(String token) {
+    if (jwtService.verify(token) != null) session.setCurrent(token);
+  }
+  // @protocol namespace=token pre_states=["AUTHENTICATED"] post_states=[]
+  boolean performAdminAction(long uid) {
+    return adminService.act(uid);
+  }
+  void handleOk(String token, long uid) {
+    if (token != null) { authenticate(token); performAdminAction(uid); }
+  }
+  void handleBad(long uid) {
+    performAdminAction(uid);
+  }
+}`;
+
+  async function runWith(extra: string) {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pm-engine-java-"));
+    try {
+      fs.writeFileSync(path.join(dir, "AuthService.java"), SOURCE.replace(
+        "  void handleBad(long uid) {\n    performAdminAction(uid);\n  }",
+        extra
+      ));
+      // 不手动写 ir.json——引擎按语言自动提取（java 分派 3.7.17 起）
+      return await evaluateTrust({
+        projectPath: dir,
+        projectName: "java-token-test",
+        commit: "test",
+        language: "java",
+      });
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
+  it("合法流：authenticate（establish）→ performAdminAction（use）零违规", async () => {
+    const r = await runWith("");
+    const ssg = r.violations.filter((v) => v.rule_id.startsWith("SSG_"));
+    expect(ssg).toEqual([]);
+  });
+
+  it("违规流：未认证直接 performAdminAction 被精确定位", async () => {
+    // 保留 handleBad（违规）——额外再复制一个
+    const r = await runWith("  void handleBad2(long uid) {\n    performAdminAction(uid);\n  }\n}");
+    const ssg = r.violations.filter((v) => v.rule_id.startsWith("SSG_"));
+    expect(ssg.length).toBeGreaterThanOrEqual(1);
+    const hit = ssg.find((v) => v.function === "handleBad2" || v.function === "handleBad");
+    expect(hit).toBeDefined();
+    expect(hit!.why).toContain("performAdminAction");
+    expect(hit!.why).toContain("AUTHENTICATED");
+  });
+});
+
+describe("evaluateTrust（Java 协议行 v2：auth/register——密码 hash 先于入库）", () => {
+  const SRC = `package app;
+public class UserService {
+  // @protocol namespace=auth pre_states=[] post_states=["PASSWORD_HASHED"]
+  String hashPassword(String p) { return bcrypt.hash(p); }
+  // @protocol namespace=auth pre_states=["PASSWORD_HASHED"] post_states=["USER_STORED"]
+  void storeUser(String u, String h) { db.insert(u, h); }
+  void registerOk(String u, String p) { String h = hashPassword(p); storeUser(u, h); }
+  void registerBad(String u, String p) { storeUser(u, p); }
+}`;
+  async function run(keepBad: boolean) {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pm-engine-java-auth-"));
+    try {
+      const body = keepBad
+        ? SRC
+        : SRC.replace("\n  void registerBad(String u, String p) { storeUser(u, p); }", "");
+      fs.writeFileSync(path.join(dir, "UserService.java"), body);
+      return await evaluateTrust({ projectPath: dir, projectName: "java-auth-test", commit: "t", language: "java" });
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  }
+  it("registerOk（hash 后入库）→ 零违规", async () => {
+    const r = await run(false);
+    expect(r.violations.filter((v) => v.rule_id.startsWith("SSG_"))).toEqual([]);
+  });
+  it("registerBad（未 hash 直接入库）→ 精确定位 storeUser", async () => {
+    const r = await run(true);
+    const ssg = r.violations.filter((v) => v.rule_id.startsWith("SSG_"));
+    expect(ssg.length).toBeGreaterThanOrEqual(1);
+    const hit = ssg.find((v) => v.function === "registerBad");
+    expect(hit).toBeDefined();
+    expect(hit!.why).toContain("storeUser");
+  });
+});

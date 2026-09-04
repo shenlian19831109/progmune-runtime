@@ -30,14 +30,22 @@
 3. 注解约定：沿用 C 注释式（`// @requires: …` / `/* @produces … */`
    等），由注解合并通道（P4.5/别名孵化器）读取——跨语言同一机制
 
-## 协议行金标 v1（2026-09-02，token 生命周期）
+## 协议行引擎化（2026-09-02，evaluateTrust 全自动跑）
 
-- 规则：`doFilterInternal` 调用序须 **getSubFromToken（verify）先于
-  setAuthentication（use/信任）**
-- 真实链验证：原文合规（verify→use ✓）；变异摘 verify → 违规被判定
-  （负例；回归测试 +2 锁定，extract-ir-java 5 green）
-- 注：金标 harness 层验证（IR+序判定就绪）；引擎规则命名空间接入为
-  后续工作（同 C REALWORLD_C 流程的规则侧）
+提取器现输出 FunctionInfo.protocol（`// @protocol namespace=… pre_states
+=[…] post_states=[…]`，方法前注释行级收集）+ 调用边（calls，零宽后视），
+引擎 java 语言分派 → 注解合并 → SSG 序列验证**全自动**（同 C 路径）：
+
+- **v1 token 生命周期**：`authenticate`(→AUTHENTICATED) 先于
+  `performAdminAction`(需 AUTHENTICATED)——违规流（未认证直接 use）被
+  SSG_ 精确定位（engine 回归锁定）
+- **v2 auth/register**：`hashPassword`(→PASSWORD_HASHED) 先于
+  `storeUser`(需 PASSWORD_HASHED)——registerBad（未 hash 入库）被定位
+- 提取器顽疾修复链（本次）：注释内正则开吃/重叠吞头/@Override 误滤/
+  嵌套实参调用序——现规则：注释行级收集 + `(` 行起点守卫 + lookbehind；
+  嵌套实参（storeUser(u, hashPassword(p))）词法序≠求值序——金标夹具
+  用顺序语句规避（如实记录）
+- 引擎回归 +4（token v1 ×2 + auth v2 ×2）
 
 ## Spring 方言扩展（2026-09-02）
 
