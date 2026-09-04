@@ -78,8 +78,10 @@ export function antToRegex(pattern: string): RegExp {
 function parseSecurityConfig(code: string): { rules: SpringSecurityRule[]; catchAll: string | null } {
   const rules: SpringSecurityRule[] = [];
   let catchAll: string | null = null;
-  // 逐个 .antMatchers(...) 与其后 .access() 配对
-  const re = /\.antMatchers\(\s*([^)]*)\)\s*\.(\w+)\s*\(|\.anyRequest\(\)\s*\.(\w+)\s*\(/g;
+  // 逐个 .antMatchers/.requestMatchers(...) 与其后 .access() 配对
+  // （旧 DSL antMatchers + 新式 SecurityFilterChain authorizeHttpRequests
+  //   requestMatchers——2026-09-02 Spring 方言扩展）
+  const re = /\.(?:antMatchers|requestMatchers)\s*\(\s*([^)]*)\)\s*\.(\w+)\s*\(|\.anyRequest\(\)\s*\.(\w+)\s*\(/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(code)) !== null) {
     if (m[3] !== undefined) {
@@ -208,6 +210,8 @@ export function analyzeSpringProject(projectRoot: string): SpringProjectAnalysis
     // 类级 @RequestMapping 只认类声明头（方法级 @RequestMapping 不算前缀）
     const clsReq = c.header.match(/@RequestMapping\s*\((?:path\s*=\s*)?["']([^"']*)["']/);
     const prefix = clsReq ? clsReq[1].replace(/^\//, "") : "";
+    // 类级方法安全：@PreAuthorize/@Secured 于类声明头 → 全部方法受保护
+    const classPreAuth = /@PreAuthorize|@Secured/.test(c.header);
     const annRe = /@(Get|Post|Put|Delete|Patch|Request)Mapping\s*(\([^)]*\))?/g;
     let m: RegExpExecArray | null;
     while ((m = annRe.exec(c.body)) !== null) {
@@ -219,7 +223,7 @@ export function analyzeSpringProject(projectRoot: string): SpringProjectAnalysis
       // 找到该 handler 起始行（用于 line + 后续注解如 @PreAuthorize）
       const line = c.body.slice(0, m.index).split("\n").length;
       const window = c.body.slice(m.index, m.index + 600);
-      const preAuth = /@PreAuthorize/.test(window);
+      const preAuth = classPreAuth || /@PreAuthorize|@Secured/.test(window);
       allPaths.push(fullPath);
       routes.push({
         method,

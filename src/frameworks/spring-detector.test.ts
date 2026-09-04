@@ -92,3 +92,61 @@ describe("analyzeSpringProject", () => {
     expect(a.issues.some((i) => i.route === "POST /articles")).toBe(true);
   });
 });
+
+// ── Spring 方言扩展：SecurityFilterChain bean + requestMatchers + @PreAuthorize ──
+
+const SEC_BEAN = `${PKG}
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+@Configuration @EnableWebSecurity
+public class WebSecurityConfig {
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http.csrf().disable().authorizeHttpRequests(auth -> auth
+      .requestMatchers(HttpMethod.POST, "/users", "/users/login").permitAll()
+      .requestMatchers(HttpMethod.GET, "/articles/**", "/tags").permitAll()
+      .requestMatchers(HttpMethod.GET, "/articles/feed").authenticated()
+      .anyRequest().authenticated());
+    return http.build();
+  }
+}`;
+
+const ADMIN_CTRL = `${PKG}
+@RestController @RequestMapping(path = "admin")
+@PreAuthorize("hasRole('ADMIN')")
+public class AdminApi {
+  @DeleteMapping("/users/{id}") public Object ban() { return null; }
+  @PostMapping("/reset") public Object reset() { return null; }
+}`;
+
+describe("spring 方言扩展（2026-09-02）", () => {
+  it("SecurityFilterChain bean + authorizeHttpRequests + requestMatchers 解析", () => {
+    writeJava("sec/WebSecurityConfig.java", SEC_BEAN);
+    writeJava("api/ArticleApi.java", CTRL);
+    const a = analyzeSpringProject(dir);
+    expect(a.hasSecurityConfig).toBe(true);
+    expect(a.catchAll).toBe("authenticated");
+    expect(a.issues).toHaveLength(0);
+    const post = a.routes.find((r) => r.method === "post" && r.path === "/articles");
+    expect(post!.access).toBe("authenticated");
+  });
+
+  it("类级 @PreAuthorize → 该类 mutation 全部受保护（不报）", () => {
+    writeJava("sec/WebSecurityConfig.java", SEC("permitAll")); // 兜底全公开
+    writeJava("api/AdminApi.java", ADMIN_CTRL);
+    const a = analyzeSpringProject(dir);
+    // 兜底 permitAll 下，无注解类会报；@PreAuthorize 类不报
+    expect(a.issues.some((i) => i.route === "DELETE /admin/users/{id}")).toBe(false);
+    expect(a.issues.some((i) => i.route === "POST /admin/reset")).toBe(false);
+  });
+
+  it("方言反证：requestMatchers permitAll 的 mutation 公开（register 豁免外仍查）", () => {
+    const cfg = SEC_BEAN.replace(
+      ".requestMatchers(HttpMethod.GET, \"/articles/**\", \"/tags\").permitAll()",
+      ".requestMatchers(HttpMethod.GET, \"/articles/**\", \"/tags\", \"/payments\").permitAll()"
+    ).replace(/\.anyRequest\(\)\.authenticated\(\)/, ".anyRequest().permitAll()");
+    writeJava("sec/WebSecurityConfig.java", cfg);
+    writeJava("api/ArticleApi.java", CTRL);
+    const a = analyzeSpringProject(dir);
+    expect(a.issues.some((i) => i.route === "POST /articles")).toBe(true);
+  });
+});

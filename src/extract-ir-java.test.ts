@@ -63,3 +63,60 @@ public class Plain {
     expect(fns.some((f) => f.name === "add")).toBe(true);
   });
 });
+
+// ── 协议行金标 v1：token 生命周期（verify 先于 use，2026-09-02）──
+
+/** 真实语料 token 链的 verify-before-use 判定（金标规则 v1）：
+ *  doFilterInternal 的调用序须满足 getSubFromToken（verify）先于
+ *  setAuthentication（use/信任）。 */
+function tokenVerifyBeforeUse(calls: string[] | undefined): { ok: boolean; why: string } {
+  if (!calls) return { ok: false, why: "无调用边" };
+  const verifyIdx = calls.findIndex((c) => /getSubFromToken|verify/.test(c));
+  const useIdx = calls.findIndex((c) => c === "setAuthentication");
+  if (useIdx === -1) return { ok: true, why: "无 use（本链不消费认证）" };
+  if (verifyIdx === -1) return { ok: false, why: "use(setAuthentication) 之前无 verify" };
+  return verifyIdx < useIdx
+    ? { ok: true, why: "verify→use 序正确" }
+    : { ok: false, why: "use 先于 verify" };
+}
+
+const REAL_FILTER = `package io.spring.api.security;
+public class JwtTokenFilter {
+  @Override
+  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+      throws Exception {
+    getTokenString(request.getHeader(header))
+        .flatMap(token -> jwtService.getSubFromToken(token))
+        .ifPresent(id -> {
+          if (SecurityContextHolder.getContext().getAuthentication() == null) {
+            setAuthentication(id, request);   // use：信任已验 token
+          }
+        });
+    chain.doFilter(request, response);
+  }
+}`;
+// 变异：删掉 verify（真实违规：未验 token 直接信任）
+const MUT_FILTER = REAL_FILTER.replace(
+  "        .flatMap(token -> jwtService.getSubFromToken(token))",
+  "        .map(id -> id)"
+);
+
+describe("协议行金标 v1 — token 生命周期（verify-before-use）", () => {
+  it("原文链：verify 先于 use → 合规", () => {
+    const fp = path.join(dir, "JwtTokenFilter.java");
+    fs.writeFileSync(fp, REAL_FILTER);
+    const fns = extractJavaFile(fp);
+    const calls = fns.find((f) => f.name === "doFilterInternal")!.calls;
+    expect(tokenVerifyBeforeUse(calls).ok).toBe(true);
+    expect(tokenVerifyBeforeUse(calls).why).toContain("verify→use");
+  });
+
+  it("变异（摘 verify）：use 前无 verify → 违规被判定（0-FP 语义负例）", () => {
+    const fp = path.join(dir, "JwtTokenFilter.java");
+    fs.writeFileSync(fp, MUT_FILTER);
+    const fns = extractJavaFile(fp);
+    const calls = fns.find((f) => f.name === "doFilterInternal")!.calls;
+    expect(tokenVerifyBeforeUse(calls).ok).toBe(false);
+    expect(tokenVerifyBeforeUse(calls).why).toContain("无 verify");
+  });
+});

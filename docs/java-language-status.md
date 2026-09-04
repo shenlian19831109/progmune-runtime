@@ -30,6 +30,22 @@
 3. 注解约定：沿用 C 注释式（`// @requires: …` / `/* @produces … */`
    等），由注解合并通道（P4.5/别名孵化器）读取——跨语言同一机制
 
+## 协议行金标 v1（2026-09-02，token 生命周期）
+
+- 规则：`doFilterInternal` 调用序须 **getSubFromToken（verify）先于
+  setAuthentication（use/信任）**
+- 真实链验证：原文合规（verify→use ✓）；变异摘 verify → 违规被判定
+  （负例；回归测试 +2 锁定，extract-ir-java 5 green）
+- 注：金标 harness 层验证（IR+序判定就绪）；引擎规则命名空间接入为
+  后续工作（同 C REALWORLD_C 流程的规则侧）
+
+## Spring 方言扩展（2026-09-02）
+
+- matcher 名扩展：antMatchers → 兼容 **requestMatchers**（SecurityFilterChain
+  bean + authorizeHttpRequests 新式 DSL）
+- **类级 @PreAuthorize/@Secured**：类声明头命中 → 该类全部方法受保护
+- 回归 +3（spring-detector 8 green）；语料复扫 0 不变
+
 ## 待办（协议行金标，逐个建立）
 
 1. **token 生命周期行**：verify/before-use（getSubFromToken 先于
