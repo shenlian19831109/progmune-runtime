@@ -377,7 +377,7 @@
       <tr><td><b>TypeScript</b></td><td><span class="tag ok">✅ Production</span></td><td data-i18n="s04.r1">盲测 795 金标：Recall 98.5% / Precision 100% / 0 FP；协议行 ✅×4</td></tr>
       <tr><td><b>Python</b></td><td><span class="tag ok">✅ Production</span></td><td data-i18n="s04.r2">协议盲测 v1.2：66 金标 97% / 100% / 0 FP；源码级检测 729 金标 Recall 100%</td></tr>
       <tr><td><b>C</b></td><td><span class="tag ok">✅ 注解驱动（Beta）</span></td><td data-i18n="s04.r3">真实模块金标 5/5 + 采纳案例 uftpd：0 误报 + 违规精确定位；每协议 ~2-3 条注解</td></tr>
-      <tr><td><b>框架适配</b></td><td><span class="tag ok">✅ 12 专用</span></td><td data-i18n="s04.r5">Express / tRPC / FastAPI / Django / Flask / Fastify / Next.js / NestJS / Koa / Hapi / Gin / Fiber 结构级路由认证检查</td></tr>
+      <tr><td><b>框架适配</b></td><td><span class="tag ok">✅ 12 专用</span></td><td data-i18n="s04.r5">Express / tRPC / FastAPI / Django / Flask / Fastify / Next.js / NestJS / Koa / Hapi / Gin / Fiber 路由认证检查——<b>12/12 真实语料验证</b></td></tr>
       <tr><td><b>Go</b></td><td><span class="tag ok">✅ 注解驱动（Beta）</span></td><td data-i18n="s04.r6">IR 提取接入注册表 + SSG 状态机；合成金标 P=100% / R=100%；零外部工具链</td></tr>
       <tr><td><b>Java</b></td><td><span class="tag no">❌ None</span></td><td data-i18n="s04.r4">规划中；多语言 IR 注册表已就绪，新增语言 = 注册一条</td></tr>
     </tbody>
@@ -556,8 +556,8 @@ const I18N = {
     "s04.r3": "真实模块金标 5/5 + 采纳案例 uftpd：0 误报 + 违规精确定位；每协议 ~2-3 条注解（<a href=\"https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md\" target=\"_blank\" rel=\"noopener\">C 语言状态</a>）",
     "s04.r4": "规划中；多语言 IR 注册表已就绪，新增语言 = 注册一条",
     "s04.r6": "IR 提取接入注册表 + SSG 状态机；合成金标 P=100% / R=100%；零外部工具链",
-    "s04.r5": "Express / tRPC / FastAPI / Django / Flask / Fastify / Next.js / NestJS / Koa / Hapi / Gin / Fiber 结构级路由认证检查（<a href=\"https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix.md\" target=\"_blank\" rel=\"noopener\">覆盖矩阵</a>）",
-    "s04.cNote": "注：C 与 Go 为注解驱动验证（Beta）——未注解代码不检测、TLS 级深层覆盖仍无；框架适配 12 专用 = 4 结构级（AST）+ 8 启发式（代码串）。所有数字可点击查看证据。",
+    "s04.r5": "Express / tRPC / FastAPI / Django / Flask / Fastify / Next.js / NestJS / Koa / Hapi / Gin / Fiber 路由认证检查——<b>12/12 真实语料验证</b>（<a href=\"https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix.md\" target=\"_blank\" rel=\"noopener\">覆盖矩阵</a>）",
+    "s04.cNote": "注：C 与 Go 为注解驱动验证（Beta）——未注解代码不检测、TLS 级深层覆盖仍无。框架适配 12 专用检测器均经<b>真实语料验证</b>（每个在 ≥1 真实开源项目上 0 协议级误报 + 摘除认证反证通过，2026-09-02 全量收官）——实现上的结构级/启发式分层仅为内部工程注释。边界如实注明：Express 剩安全加固缺口、个别项目为能力令牌形态认证。所有数字可点击查看证据。",
     "fw.title": "失败语料飞轮",
     "fw.lead": "每一次验证失败都不会被浪费——落入失败语料库、汇聚到中央 hub，让「验证覆盖」越来越强、高频错误模式越来越清晰。",
     "fw.s1t": "🧯 失败入库", "fw.s1d": "每次违规记录 SSG 状态快照、SVL 分级与约束类型",
@@ -641,8 +641,8 @@ const I18N = {
     "s04.r3": "Real-module gold 5/5 + adoption case uftpd: 0 FP with precise violation localization; ~2-3 annotations per protocol (<a href=\"https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md\" target=\"_blank\" rel=\"noopener\">C Language Status</a>)",
     "s04.r4": "Planned; multi-language IR registry ready — a new language = one registry entry",
     "s04.r6": "IR extraction via the registry + SSG state machine; synthetic gold P=100% / R=100%; zero toolchain deps",
-    "s04.r5": "Express / tRPC / FastAPI / Django / Flask / Fastify / Next.js / NestJS / Koa / Hapi / Gin / Fiber structural route-level auth checks (<a href=\"https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix.md\" target=\"_blank\" rel=\"noopener\">coverage matrix</a>)",
-    "s04.cNote": "Note: C and Go are annotation-driven (Beta) — unannotated code is not checked and deep TLS-level coverage is still absent; 12 dedicated detectors = 4 structural (AST) + 8 heuristic (code-string, real-project FP data pending). Every number links to its evidence.",
+    "s04.r5": "Express / tRPC / FastAPI / Django / Flask / Fastify / Next.js / NestJS / Koa / Hapi / Gin / Fiber route auth checks — <b>12/12 real-world validated</b> (<a href=\"https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix.md\" target=\"_blank\" rel=\"noopener\">coverage matrix</a>)",
+    "s04.cNote": "Note: C and Go are annotation-driven (Beta) — unannotated code is not checked and deep TLS-level coverage is still absent. All 12 dedicated framework detectors are <b>real-world validated</b> (each achieved 0 protocol-level false positives + auth-removal falsification on ≥1 real open-source project, 2026-09-02); the structural/heuristic split is an internal engineering note. Honest boundaries noted: Express keeps a hardening gap, some corpora use capability-token auth. Every number links to its evidence.",
     "fw.title": "Failure Corpus Flywheel",
     "fw.lead": "No verification failure goes to waste — each one lands in the failure corpus and flows to the central hub, making verification coverage stronger and failure patterns clearer.",
     "fw.s1t": "🧯 Failures recorded", "fw.s1d": "Each violation captures SSG state snapshots, SVL level, and constraint type",
