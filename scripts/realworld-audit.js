@@ -35,7 +35,7 @@ let repo = getArg("repo");
 const nameArg = getArg("name");
 if (!framework || !repo) {
   console.error("用法: node scripts/realworld-audit.js --framework <detector> --repo <url|dir> [--name slug]");
-  console.error("detector:", "express|fastify|koa|hapi|nextjs|nestjs|trpc|gin|fiber|fastapi|django|flask");
+  console.error("detector:", "express|fastify|koa|hapi|nextjs|nestjs|trpc|gin|fiber|spring|fastapi|django|flask");
   process.exit(1);
 }
 
@@ -155,6 +155,11 @@ const runners = {
     const { analyzeFiberProject } = require("../dist/frameworks/fiber-detector.js");
     const a = analyzeFiberProject(root);
     return { files: a.filesScanned, routes: 0, issues: a.issues.map((i) => ({ rule: i.rule, route: i.route || "", file: "" })) };
+  },
+  spring: (root) => {
+    const { analyzeSpringProject } = require("../dist/frameworks/spring-detector.js");
+    const a = analyzeSpringProject(root);
+    return { files: a.filesScanned, routes: a.routes.length, issues: a.issues.map((i) => ({ rule: i.rule, route: i.route || "", file: "" })) };
   },
   fastapi: (root) => py("extract_framework_py.py", root, "analyzeFastapiStructure"),
   django: (root) => py("extract_framework_django.py", root, "analyzeDjangoStructure"),
