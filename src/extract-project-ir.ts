@@ -19,6 +19,7 @@ import type { FunctionInfo } from "./extract-ir";
 import { extractIRPython } from "./extract-ir-python";
 import { extractIRC } from "./extract-ir-c";
 import { extractIRGo } from "./extract-ir-go";
+import { extractIRJava } from "./extract-ir-java";
 
 /** 语言提取器注册项：检测 + 提取。新增语言只需追加一条。 */
 export interface LanguageExtractor {
@@ -79,6 +80,11 @@ export const LANGUAGE_EXTRACTORS: LanguageExtractor[] = [
     language: "go",
     detect: (p) => hasSourceFiles(p, new Set([".go"])),
     extract: (p) => extractIRGo(p),
+  },
+  {
+    language: "java",
+    detect: (p) => hasSourceFiles(p, new Set([".java"])),
+    extract: (p) => extractIRJava(p),
   },
 ];
 

@@ -84,6 +84,7 @@ import { extractIR } from "../extract-ir";
 import { extractIRPython } from "../extract-ir-python";
 import { extractIRC } from "../extract-ir-c";
 import { extractIRGo } from "../extract-ir-go";
+import { extractIRJava } from "../extract-ir-java";
 
 // ── Main Entry Point ──
 
@@ -1384,6 +1385,7 @@ async function collectProtocolViolations(
         python: () => extractIRPython(ctx.projectPath),
         c: () => extractIRC(ctx.projectPath),
         go: () => extractIRGo(ctx.projectPath),
+        java: () => extractIRJava(ctx.projectPath),
       };
       const extractFn = autoExtractor[lang];
       if (extractFn) {
