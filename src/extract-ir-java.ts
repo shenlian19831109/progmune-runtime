@@ -43,9 +43,10 @@ export function extractJavaFile(filePath: string): FunctionInfo[] {
   while ((m = re.exec(code)) !== null) {
     const name = m[1];
     if (JAVA_KEYWORDS.has(name)) continue;
-    // 前置字符过滤：方法名不应紧跟 '.'（调用）或 '='（赋值）等
+    // 前置字符过滤：排除 '.'/'='/'( ' 前导（调用/赋值/子表达式误匹配）；
+    // '@' 允许——@Override protected void … 是注解修饰的合法方法
     const pre = code.slice(Math.max(0, m.index - 1), m.index);
-    if (/[.=@(]/.test(pre)) continue;
+    if (/[.=(]/.test(pre)) continue;
 
     // 可见性（近似）：行内是否有 public/protected（或文件在接口里默认 public）
     const head = code.slice(m.index, m.index + 40);
@@ -71,12 +72,37 @@ export function extractJavaFile(filePath: string): FunctionInfo[] {
     // 返回类型：方法名前的一段（简化取最近一个类型令牌）
     const returnType = "unknown";
 
+    // calls：方法体（自头正则消费的 '{' 起平衡到 '}'）内的方法调用
+    // （词法近似：标识符 + '('，过滤关键字；obj.method → 取末段）
+    const calls: string[] = [];
+    const bodyStart = m.index + m[0].length; // 正则已含 '{'
+    let depth = 1;
+    let bodyEnd = bodyStart;
+    while (bodyEnd < code.length && depth > 0) {
+      const ch = code[bodyEnd];
+      if (ch === "{") depth++;
+      else if (ch === "}") depth--;
+      bodyEnd++;
+    }
+    const body = code.slice(bodyStart, Math.min(bodyEnd, bodyStart + 8000));
+    const callRe = /(?:^|[^\w$])([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*)\s*\(/g;
+    let cm: RegExpExecArray | null;
+    while ((cm = callRe.exec(body)) !== null) {
+      const full = cm[1];
+      const seg = full.split(".").pop() || "";
+      if (JAVA_KEYWORDS.has(seg)) continue;
+      if (/^(if|for|while|switch|catch|new|return|case|do)$/.test(seg)) continue;
+      // 排除声明后立即调用形态（如 new Foo( 里 Foo）——new 已过滤
+      if (calls.length < 400 && !calls.includes(seg)) calls.push(seg);
+    }
+
     out.push({
       name,
       params,
       returnType,
       file: filePath,
       exported,
+      calls,
     });
   }
   return out;
