@@ -88,7 +88,8 @@
     "test:soak": "vitest run tests/soak/",
     "test:p7": "vitest run tests/p7-*/",
     "fetch:cves": "tsx scripts/fetch-cves.ts",
-    "test:cve": "vitest run src/cve-benchmark.test.ts"
+    "test:cve": "vitest run src/cve-benchmark.test.ts",
+    "audit:realworld": "node scripts/realworld-audit.js"
   },
   "keywords": [
     "program-synthesis",
