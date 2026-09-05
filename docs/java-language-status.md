@@ -16,6 +16,13 @@
 ### 框架层（已完成 ✅）
 - `spring-detector.ts`：安全配置规则序 + ant 模式 + 控制器注解路由——
   19 路由/12 mutation 全解析、0 issues、anyRequest 兜底翻转反证 10 重现
+  （`REALWORLD_SPRING_V1.md`，deprecated WebSecurityConfigurerAdapter 形态）
+- **现代方言验证（2026-09-05，`REALWORLD_SPRING_V2.md`）**：ali-bouali/
+  spring-boot-3-jwt-security（Boot 3 教程标杆）——SecurityFilterChain
+  bean + HttpMethod 静态导入 matchers + **String[] 变量数组白名单展开**
+  （原保守跳过致公开 mutation 漏报）+ auth 词段豁免修复（authenticate/
+  refresh-token）——15 路由全见、0 issues、摘兜底反证 5 重现；V1 语料
+  复扫 0 无回归
 
 ### 核心层（本记录依据）
 1. **提取器 + 调用图已通**（3.7.17-18）：`extract-ir-java.ts` 纯 TS
@@ -62,12 +69,41 @@
 - **类级 @PreAuthorize/@Secured**：类声明头命中 → 该类全部方法受保护
 - 回归 +3（spring-detector 8 green）；语料复扫 0 不变
 
-## 待办（真实语料金标，逐行转真）
+## 提取器恢复率裁决（2026-09-05，AST 基准）
 
-1. ✅ **token 生命周期行**（合成金标已引擎化，v1）——真实语料行待标注
-2. ✅ **认证/注册行**（合成金标已引擎化，v2）——真实语料行待标注
-3. ✅ **资源管理行**（合成金标已引擎化，v3，含 invalidate/泄漏端）——
-   真实语料行待标注（spring-realworld 数据访问层 Connection 关闭）
+tree-sitter-java AST 基准对 spring-realworld 全量 .java 裁决（178 有 body
+方法/构造器 + 1174 调用边，对齐 8000 字符截断口径）：
+
+| 指标 | 修复前 | 修复后 |
+|------|--------|--------|
+| 方法恢复率 | 78.1% | **100%** |
+| 调用边恢复率（有效） | 56.0% | **100%** |
+| 精度 | 100% | **100%** |
+
+三根因实测分解并修复（39 漏检全覆盖）：参数注解实参括号 34
+（`@PathVariable("slug")` 打断 `[^)]*` → 字符串感知平衡括号扫描）、
+通配符泛型 3（`ResponseEntity<?>` → type-part 补 `?`）、构造器 2
+（无返回类型 → 可见性 + Name( 分支）；调用侧补泛型构造调用可见 +
+super/this 过滤。回归 +5。**裁决：词法提取器成立，不引入 JavaParser
+依赖**（详见 `blind-benchmark/REALWORLD_JAVA_ANNOTATION_V1.md`）。
+
+## 真实语料协议行标注闭环（2026-09-05，3 注解 + 1 别名）
+
+trust CLI 端到端（`--language java`）：未注解基线 0 违规 APPROVED；
+标注后 10 违规 BLOCKED；修复变异 9（updateUser 直接位消失）；
+v1 反证 +1（doFilterInternal 精确报出）。详见
+`blind-benchmark/REALWORLD_JAVA_ANNOTATION_V1.md`。
+
+## 待办（真实语料金标，逐行转真）——2026-09-05 更新
+
+1. ✅ **token 生命周期行**（v1）：真实语料闭环完成——getTokenString→
+   getSubFromToken 抽取→验证链合法流 0 违规，摘 getTokenString 反证
+   精确报出
+2. ⚠️ **认证/注册行**（v2）：真实 TP 捕获（updateUser 密码明文入库
+   ——1581★ 参考实现真实 bug，修复变异违规即消）——但末段名匹配致
+   9 名碰撞误报（article.update 等），Java 注解模型需接收者限定名升级
+3. ⚠️ **资源管理行**（v3）：spring-realworld 无手工资源管理（MyBatis
+   托管连接）——本语料无锚点，维持合成金标；待 NIO/文件处理语料
 
 ## 风险与边界（如实）
 
