@@ -120,3 +120,78 @@ describe("协议行金标 v1 — token 生命周期（verify-before-use）", () 
     expect(tokenVerifyBeforeUse(calls).why).toContain("无 verify");
   });
 });
+
+// ── 恢复率裁决修复回归（spring-realworld AST 基准实测根因，2026-09-05）──
+
+describe("恢复率裁决修复回归（spring-realworld 实测三根因）", () => {
+  it("参数注解实参括号：@PathVariable(\"slug\") 不截断参数列表", () => {
+    const fp = path.join(dir, "ArticleApi.java");
+    fs.writeFileSync(fp, `package app;
+public class ArticleApi {
+  @DeleteMapping
+  public ResponseEntity deleteArticle(
+      @PathVariable("slug") String slug, @AuthenticationPrincipal User user) {
+    return articleRepository.findBySlug(slug);
+  }
+}`);
+    const fns = extractJavaFile(fp);
+    const fn = fns.find((f) => f.name === "deleteArticle");
+    expect(fn).toBeTruthy();
+    expect(fn!.params.map((p) => p.name)).toEqual(["slug", "user"]);
+  });
+
+  it("通配符泛型返回类型：ResponseEntity<?> 方法被提取", () => {
+    const fp = path.join(dir, "Wildcard.java");
+    fs.writeFileSync(fp, `package app;
+public class Wildcard {
+  public ResponseEntity<?> article(String slug) {
+    return ResponseEntity.ok(slug);
+  }
+}`);
+    const fns = extractJavaFile(fp);
+    expect(fns.some((f) => f.name === "article")).toBe(true);
+  });
+
+  it("构造器（无返回类型）：public Name(…) 被提取（含同行 @Autowired）", () => {
+    const fp = path.join(dir, "UserService.java");
+    fs.writeFileSync(fp, `package app;
+public class UserService {
+  @Autowired
+  public UserService(
+      UserRepository userRepository,
+      @Value("\${image.default}") String defaultImage) {
+    this.userRepository = userRepository;
+  }
+}`);
+    const fns = extractJavaFile(fp);
+    expect(fns.some((f) => f.name === "UserService")).toBe(true);
+  });
+
+  it("泛型对象构造调用：new HashMap<String, Object>() 的 HashMap 可见", () => {
+    const fp = path.join(dir, "Resp.java");
+    fs.writeFileSync(fp, `package app;
+public class Resp {
+  public Map<?, ?> build() {
+    Map<String, Object> m = new HashMap<String, Object>();
+    return m;
+  }
+}`);
+    const fns = extractJavaFile(fp);
+    const calls = fns.find((f) => f.name === "build")!.calls;
+    expect(calls).toContain("HashMap");
+  });
+
+  it("super/this 构造调用不算调用边", () => {
+    const fp = path.join(dir, "Base.java");
+    fs.writeFileSync(fp, `package app;
+public class Base {
+  public Base(int config) {
+    super(config);
+  }
+}`);
+    const fns = extractJavaFile(fp);
+    const ctor = fns.find((f) => f.name === "Base");
+    expect(ctor).toBeTruthy();
+    expect(ctor!.calls).not.toContain("super");
+  });
+});

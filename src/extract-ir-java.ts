@@ -65,29 +65,65 @@ export function extractJavaFile(filePath: string): FunctionInfo[] {
   } catch {
     return out;
   }
-  // 方法声明：修饰符 + 返回类型 名字(参数) [throws ...] {
+  // 方法声明：两分支——构造器（可见性 + Name(，无返回类型）与普通方法
+  // （修饰符 + 返回类型 Name(，返回类型含 '?' 通配符如 ResponseEntity<?>）。
+  // 匹配止于 '('；参数区用字符串感知平衡括号扫描（@PathVariable("slug")
+  // 等注解实参的内层括号不再截断参数列表）；throws 子句与 '{' 手扫确认。
   const re =
-    /(?:\b(?:public|protected|private)\s+)?(?:(?:static|final|synchronized|abstract|default)\s+)*(?:[\w$<>\[\],.\s]+?)\s+([A-Za-z_$][\w$]*)\s*\(([^)]*)\)\s*(?:throws\s+[^{]+?)?\{/g;
+    /(?:\b(public|protected|private)\s+([A-Za-z_$][\w$]*)\s*\(|(?:\b(?:public|protected|private)\s+)?(?:(?:static|final|synchronized|abstract|default)\s+)*(?:[\w$<>\[\],.?\s]+?)\s+([A-Za-z_$][\w$]*)\s*\()/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(code)) !== null) {
-    const name = m[1];
+    const isCtor = m[1] !== undefined;
+    const name = isCtor ? m[2] : m[3];
     if (JAVA_KEYWORDS.has(name)) continue;
+    const parenPos = m.index + m[0].length - 1; // 匹配止于 '('
     // 重叠守卫：匹配起点若早于参数 '(' 所在行（如从上一行注释/注解开吃
     // 吞掉真头）→ 从 '(' 行首重扫，避免方法被错配候选吞掉
-    const parenPos = code.indexOf("(", m.index + m[0].indexOf(name));
     const parenLineStart = code.lastIndexOf("\n", parenPos - 1) + 1;
     if (m.index < parenLineStart) {
       re.lastIndex = parenLineStart;
       continue;
     }
-    // 起点规则：'.' 前导 = 方法调用（如 adminService.act( 的 act）；
-    // 注解行起点（@RequestMapping…）非方法声明；容忍注释内起点——
-    // 其名字/参数/体边界本就正确（正则 type-part 可吞注释空白）
+    // 起点规则：'.' 前导 = 方法调用（如 adminService.act( 的 act）。
+    // 注：'@'/'='/'"' 不在 type-part 字符类内，注解文本本身不可能成为
+    // 匹配起点，无需旧版 @ 行守卫（@Autowired public UserService( 的
+    // 匹配起于 public，行首是 @——旧守卫会误杀同行注解构造器）
     const pre = code.slice(Math.max(0, m.index - 1), m.index);
     if (pre === ".") continue;
-    const lineStart = code.lastIndexOf("\n", m.index - 1) + 1;
-    const curLine = code.slice(lineStart, code.indexOf("\n", lineStart) === -1 ? code.length : code.indexOf("\n", lineStart)).trim();
-    if (curLine.startsWith("@") && !curLine.startsWith("@protocol") && !curLine.startsWith("@progmune")) continue;
+
+    // 参数区：字符串感知平衡括号扫描
+    let pDepth = 1;
+    let k = parenPos + 1;
+    let quote: string | null = null;
+    while (k < code.length && pDepth > 0) {
+      const ch = code[k];
+      if (quote) {
+        if (ch === quote && code[k - 1] !== "\\") quote = null;
+      } else if (ch === '"' || ch === "'") {
+        quote = ch;
+      } else if (ch === "(") {
+        pDepth++;
+      } else if (ch === ")") {
+        pDepth--;
+      }
+      k++;
+    }
+    if (pDepth !== 0) continue; // 括号不闭合
+    const rawParams = code.slice(parenPos + 1, k - 1);
+
+    // throws 子句 + '{' 手扫确认（候选非方法声明时在此丢弃）
+    let t = k;
+    while (t < code.length && /\s/.test(code[t])) t++;
+    let bodyStart: number;
+    if (code.slice(t, t + 6) === "throws" && !/[\w$]/.test(code[t + 6] || "")) {
+      const brace = code.indexOf("{", t);
+      if (brace === -1) continue;
+      if (/;/.test(code.slice(t, brace))) continue; // throws 到 { 之间有 ; = 调用行
+      bodyStart = brace + 1;
+    } else {
+      if (code[t] !== "{") continue;
+      bodyStart = t + 1;
+    }
 
     const head = code.slice(m.index, m.index + 40);
     const visM = head.match(/\b(public|protected|private)\b/);
@@ -95,12 +131,11 @@ export function extractJavaFile(filePath: string): FunctionInfo[] {
       visM ? visM[1] !== "private" : /^interface\s/.test(code.slice(0, m.index).split("\n").pop() || "") ? true : undefined;
 
     const params: ParamInfo[] = [];
-    const rawParams = m[2].trim();
-    if (rawParams.length > 0) {
+    if (rawParams.trim().length > 0) {
       for (const raw of rawParams.split(",")) {
-        const t = raw.trim();
-        if (!t) continue;
-        const parts = t.split(/\s+/);
+        const t2 = raw.trim();
+        if (!t2) continue;
+        const parts = t2.split(/\s+/);
         const pname = parts.pop() || "";
         const ptype = parts.join(" ") || "?";
         if (/^[A-Za-z_$][\w$]*$/.test(pname) && pname !== "final") {
@@ -115,17 +150,15 @@ export function extractJavaFile(filePath: string): FunctionInfo[] {
     // '(' 位置定真实 header 行，避免注释归属串位）
     let protocol: FunctionInfo["protocol"];
     {
-      const parenIdx = code.indexOf("(", m.index);
-      const joined = parenIdx === -1 ? "" : collectPrecedingComment(code, parenIdx);
+      const joined = collectPrecedingComment(code, parenPos);
       const lastAt = Math.max(joined.lastIndexOf("@protocol"), joined.lastIndexOf("@progmune"));
       if (lastAt !== -1) {
         protocol = parseJavaProtocol(joined.slice(lastAt, Math.min(joined.length, lastAt + 300)));
       }
     }
 
-    // calls：方法体（自头正则消费的 '{' 起平衡到 '}'）内的方法调用
+    // calls：方法体（'{' 起平衡到 '}'）内的方法调用
     const calls: string[] = [];
-    const bodyStart = m.index + m[0].length; // 正则已含 '{'
     let depth = 1;
     let bodyEnd = bodyStart;
     while (bodyEnd < code.length && depth > 0) {
@@ -135,13 +168,14 @@ export function extractJavaFile(filePath: string): FunctionInfo[] {
       bodyEnd++;
     }
     const body = code.slice(bodyStart, Math.min(bodyEnd, bodyStart + 8000));
-    // 零宽后视：前导 '(' 等不被上一匹配吞掉（if (verifyToken(…) 中能收到 verifyToken）
-    const callRe = /(?<=^|[^\w$])([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*)\s*\(/g;
+    // 零宽后视：前导 '(' 等不被上一匹配吞掉（if (verifyToken(…) 中能收到 verifyToken）；
+    // <…> 可选类型实参：new HashMap<String, Object>() 的 HashMap 可见
+    const callRe = /(?<=^|[^\w$])([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*)\s*(?:<[^<>;]*(?:<[^<>;]*>[^<>;]*)*>)?\s*\(/g;
     let cm: RegExpExecArray | null;
     while ((cm = callRe.exec(body)) !== null) {
       const seg = cm[1].split(".").pop() || "";
       if (JAVA_KEYWORDS.has(seg)) continue;
-      if (/^(if|for|while|switch|catch|new|return|case|do)$/.test(seg)) continue;
+      if (/^(if|for|while|switch|catch|new|return|case|do|super|this)$/.test(seg)) continue;
       if (calls.length < 400 && !calls.includes(seg)) calls.push(seg);
     }
 
