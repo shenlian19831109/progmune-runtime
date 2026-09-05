@@ -65,7 +65,10 @@ const ACCESS_AUTH = new Set([
 ]);
 
 function isAuthEntryPath(p: string): boolean {
-  return /\/?(login|signin|signup|sign_in|register|refresh)(\/|$)/i.test(p);
+  // 词段前缀 + [-/] 边界：refresh-token、authenticate、token 家族均豁免
+  // （ali-bouali 现代语料实测：/auth/authenticate、/auth/refresh-token
+  // 被白名单 permitAll 命中后误报——真实登录/刷新入口，词表缺口修复）
+  return /\/(login|signin|signup|sign_in|register|refresh|authenticate|token)([-/]|$)/i.test(p);
 }
 
 /** Spring ant 模式 → 正则（** → 任意段，* → 单段） */
@@ -78,6 +81,21 @@ export function antToRegex(pattern: string): RegExp {
 function parseSecurityConfig(code: string): { rules: SpringSecurityRule[]; catchAll: string | null } {
   const rules: SpringSecurityRule[] = [];
   let catchAll: string | null = null;
+  // String[] 常量数组声明（现代方言标配：private static final String[]
+  // WHITE_LIST_URL = {...}）——requestMatchers(NAME) 变量引用展开为字面量。
+  // 仅覆盖本文件内 String[] 形态；List.of/Set.of/跨文件常量待语料补充。
+  const arrayVars = new Map<string, string[]>();
+  {
+    const arrRe = /(?:private\s+|public\s+|protected\s+)?static\s+final\s+String\[\]\s+([A-Za-z_]\w*)\s*=\s*\{/g;
+    let am: RegExpExecArray | null;
+    while ((am = arrRe.exec(code)) !== null) {
+      const name = am[1];
+      const end = code.indexOf("};", am.index + am[0].length);
+      if (end === -1) continue;
+      const literals = [...code.slice(am.index, end).matchAll(/"([^"]+)"/g)].map((x) => x[1]);
+      arrayVars.set(name, literals);
+    }
+  }
   // 逐个 .antMatchers/.requestMatchers(...) 与其后 .access() 配对
   // （旧 DSL antMatchers + 新式 SecurityFilterChain authorizeHttpRequests
   //   requestMatchers——2026-09-02 Spring 方言扩展）
@@ -99,8 +117,12 @@ function parseSecurityConfig(code: string): { rules: SpringSecurityRule[]; catch
     const patterns: string[] = [];
     for (const pm of rest.matchAll(/"([^"]+)"/g)) patterns.push(pm[1]);
     if (patterns.length === 0) {
-      // 无引号模式（变量引用）→ 宽匹配不了，跳过（保守：不豁免）
-      continue;
+      // 无引号模式（变量引用）→ String[] 常量数组展开；
+      // 未知变量保守跳过（不豁免）
+      const varName = rest.match(/^([A-Za-z_]\w*)$/);
+      const arr = varName ? arrayVars.get(varName[1]) : undefined;
+      if (!arr) continue;
+      patterns.push(...arr);
     }
     rules.push({ method, patterns, access: m[2] });
   }

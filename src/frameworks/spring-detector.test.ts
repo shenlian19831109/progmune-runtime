@@ -149,4 +149,80 @@ describe("spring 方言扩展（2026-09-02）", () => {
     const a = analyzeSpringProject(dir);
     expect(a.issues.some((i) => i.route === "POST /articles")).toBe(true);
   });
+
+  it("String[] 白名单变量展开：非 auth 词路径 permitAll mutation 被看见（修复前被兜底掩盖）", () => {
+    // 现代 Boot 3 教程标配形态：变量数组白名单（ali-bouali/spring-boot-3-jwt-security）。
+    // 展开后 /public/** 命中 permitAll 规则 → POST /public/files 公开 mutation 被报；
+    // 未展开时该规则被跳过、路由落到兜底 authenticated → 漏报（保守方向错误）。
+    const cfg = `${PKG}
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+@Configuration @EnableWebSecurity
+public class WebSecurityConfig {
+  private static final String[] WHITE_LIST_URL = {"/api/v1/auth/**", "/v3/api-docs", "/public/**"};
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http.authorizeHttpRequests(req -> req
+      .requestMatchers(WHITE_LIST_URL).permitAll()
+      .anyRequest().authenticated());
+    return http.build();
+  }
+}`;
+    writeJava("sec/WebSecurityConfig.java", cfg);
+    writeJava("api/PublicApi.java", `${PKG}
+@RestController @RequestMapping("/public")
+public class PublicApi {
+  @PostMapping("/files") public Object up() { return null; }
+}`);
+    const a = analyzeSpringProject(dir);
+    expect(a.issues.some((i) => i.route === "POST /public/files")).toBe(true);
+  });
+
+  it("auth 词段豁免：/auth/authenticate 与 /auth/refresh-token 公开 mutation 不报（词表缺口修复）", () => {
+    const cfg = `${PKG}
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+@Configuration @EnableWebSecurity
+public class WebSecurityConfig {
+  private static final String[] WHITE_LIST_URL = {"/api/v1/auth/**"};
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http.authorizeHttpRequests(req -> req
+      .requestMatchers(WHITE_LIST_URL).permitAll()
+      .anyRequest().authenticated());
+    return http.build();
+  }
+}`;
+    writeJava("sec/WebSecurityConfig.java", cfg);
+    writeJava("api/AuthApi.java", `${PKG}
+@RestController @RequestMapping("/api/v1/auth")
+public class AuthApi {
+  @PostMapping("/authenticate") public Object login() { return null; }
+  @PostMapping("/refresh-token") public Object refresh() { return null; }
+}`);
+    const a = analyzeSpringProject(dir);
+    expect(a.issues).toHaveLength(0);
+  });
+
+  it("反证：白名单变量改名（展开失明）→ 路由落到兜底 authenticated，公开 mutation 漏报", () => {
+    const cfg = `${PKG}
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+@Configuration @EnableWebSecurity
+public class WebSecurityConfig {
+  private static final String[] RENAMED = {"/public/**"};
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http.authorizeHttpRequests(req -> req
+      .requestMatchers(WHITE_LIST_URL).permitAll()
+      .anyRequest().authenticated());
+    return http.build();
+  }
+}`;
+    writeJava("sec/WebSecurityConfig.java", cfg);
+    writeJava("api/PublicApi.java", `${PKG}
+@RestController @RequestMapping("/public")
+public class PublicApi {
+  @PostMapping("/files") public Object up() { return null; }
+}`);
+    const a = analyzeSpringProject(dir);
+    expect(a.issues).toHaveLength(0);
+  });
 });
