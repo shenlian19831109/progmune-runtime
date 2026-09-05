@@ -7,8 +7,9 @@
 ## 决策
 
 **Java 核心 SSG = 注解驱动（Beta 方向，同 C/Go）；框架层（Spring 路由
-覆盖）已完成真实语料验证（✅，REALWORLD_SPRING_V1.md）。** 待协议行
-金标建立后再定生产标签。
+覆盖）已完成真实语料验证（✅，REALWORLD_SPRING_V1.md）；核心协议行
+（token/auth/register/resource）已引擎化并经引擎回归锁定（v1-v3，
+3.7.21）。** 生产标签需企业 POC 或更大语料集（同其余语言门槛）。
 
 ## 证据
 
@@ -41,11 +42,18 @@
   SSG_ 精确定位（engine 回归锁定）
 - **v2 auth/register**：`hashPassword`(→PASSWORD_HASHED) 先于
   `storeUser`(需 PASSWORD_HASHED)——registerBad（未 hash 入库）被定位
+- **v3 resource 管理**（3.7.21）：`openFile`(→RESOURCE_OPEN) /
+  `writeData`(需 RESOURCE_OPEN) / `closeFile`(需 RESOURCE_OPEN +
+  `invalidate=["RESOURCE_OPEN"]`，命名空间 resource 命中
+  RESOURCE_NAMESPACE_RE 泄漏端检查)——三个违规方向全部定位：
+  ① 未 open 直接 write（缺前置态）② **use-after-close**（invalidate
+  摘除后复用的形态验证）③ open 不 close（end-state 泄漏，fix 给出
+  释放调用 closeFile）
 - 提取器顽疾修复链（本次）：注释内正则开吃/重叠吞头/@Override 误滤/
   嵌套实参调用序——现规则：注释行级收集 + `(` 行起点守卫 + lookbehind；
   嵌套实参（storeUser(u, hashPassword(p))）词法序≠求值序——金标夹具
   用顺序语句规避（如实记录）
-- 引擎回归 +4（token v1 ×2 + auth v2 ×2）
+- 引擎回归 +8（token v1 ×2 + auth v2 ×2 + resource v3 ×4）
 
 ## Spring 方言扩展（2026-09-02）
 
@@ -54,13 +62,12 @@
 - **类级 @PreAuthorize/@Secured**：类声明头命中 → 该类全部方法受保护
 - 回归 +3（spring-detector 8 green）；语料复扫 0 不变
 
-## 待办（协议行金标，逐个建立）
+## 待办（真实语料金标，逐行转真）
 
-1. **token 生命周期行**：verify/before-use（getSubFromToken 先于
-   setAuthentication；SecurityContext 读取前必须已验）
-2. **认证/注册行**：login 校验（BCrypt matches）成功才发 token；
-   register 密码 hash 后才入库
-3. **资源管理行**：Connection/Response 关闭（realworld 数据访问层）
+1. ✅ **token 生命周期行**（合成金标已引擎化，v1）——真实语料行待标注
+2. ✅ **认证/注册行**（合成金标已引擎化，v2）——真实语料行待标注
+3. ✅ **资源管理行**（合成金标已引擎化，v3，含 invalidate/泄漏端）——
+   真实语料行待标注（spring-realworld 数据访问层 Connection 关闭）
 
 ## 风险与边界（如实）
 

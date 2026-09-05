@@ -344,3 +344,81 @@ public class UserService {
     expect(hit!.why).toContain("storeUser");
   });
 });
+
+describe("evaluateTrust（Java 协议行 v3：resource 管理——open/use/close + invalidate 语义）", () => {
+  // 三个注解原语（open 建立 RESOURCE_OPEN；use 需 RESOURCE_OPEN；
+  // close 需 RESOURCE_OPEN 且 invalidate 摘除之——资源生命周期命名空间
+  // "resource" 命中 RESOURCE_NAMESPACE_RE，序列末尾持有状态触发泄漏检查）
+  function src(entries: string): string {
+    return `package app;
+public class ResourceService {
+  // @protocol namespace=resource pre_states=[] post_states=["RESOURCE_OPEN"]
+  Resource openFile(String p) { return store.open(p); }
+  // @protocol namespace=resource pre_states=["RESOURCE_OPEN"] post_states=[]
+  void writeData(Resource r, byte[] d) { r.write(d); }
+  // @protocol namespace=resource pre_states=["RESOURCE_OPEN"] post_states=[] invalidate=["RESOURCE_OPEN"]
+  void closeFile(Resource r) { r.close(); }
+${entries}
+}`;
+  }
+  async function run(entries: string) {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pm-engine-java-res-"));
+    try {
+      fs.writeFileSync(path.join(dir, "ResourceService.java"), src(entries));
+      return await evaluateTrust({ projectPath: dir, projectName: "java-res-test", commit: "t", language: "java" });
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  }
+  const ssgOf = (r: Awaited<ReturnType<typeof evaluateTrust>>) =>
+    r.violations.filter((v) => v.rule_id.startsWith("SSG_"));
+
+  it("合法流：open → use → close 零违规", async () => {
+    const r = await run(`  void lifecycleOk(String p, byte[] d) {
+    Resource r = openFile(p);
+    writeData(r, d);
+    closeFile(r);
+  }`);
+    expect(ssgOf(r)).toEqual([]);
+  });
+
+  it("违规流：未 open 直接 write（缺 RESOURCE_OPEN）→ 精确定位", async () => {
+    const r = await run(`  void writeNoOpen(byte[] d) {
+    writeData(null, d);
+  }`);
+    const ssg = ssgOf(r);
+    expect(ssg.length).toBeGreaterThanOrEqual(1);
+    const hit = ssg.find((v) => v.function === "writeNoOpen");
+    expect(hit).toBeDefined();
+    expect(hit!.why).toContain("writeData");
+    expect(hit!.why).toContain("RESOURCE_OPEN");
+  });
+
+  it("use-after-close：close 的 invalidate 摘除 RESOURCE_OPEN 后 write 被定位（invalidate 形态验证）", async () => {
+    const r = await run(`  void useAfterClose(String p, byte[] d) {
+    Resource r = openFile(p);
+    closeFile(r);
+    writeData(r, d);
+  }`);
+    const ssg = ssgOf(r);
+    expect(ssg.length).toBeGreaterThanOrEqual(1);
+    const hit = ssg.find((v) => v.function === "useAfterClose");
+    expect(hit).toBeDefined();
+    expect(hit!.why).toContain("writeData");
+    expect(hit!.why).toContain("RESOURCE_OPEN");
+  });
+
+  it("open 未 close：序列末尾持有 RESOURCE_OPEN → 泄漏（end-state）定位 closeFile", async () => {
+    const r = await run(`  void openOnly(String p) {
+    Resource r = openFile(p);
+  }`);
+    const ssg = ssgOf(r);
+    expect(ssg.length).toBeGreaterThanOrEqual(1);
+    const hit = ssg.find((v) => v.function === "openOnly");
+    expect(hit).toBeDefined();
+    expect(hit!.rule_id).toContain("END_STATE");
+    expect(hit!.why).toContain("resource leak");
+    // 释放函数名在 fix 字段（why 为通用语义模板——与代码库报告设计一致）
+    expect(hit!.fix).toContain("closeFile");
+  });
+});
