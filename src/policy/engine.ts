@@ -140,6 +140,29 @@ export function evaluatePolicy(
   const activeRules = rules || DEFAULT_POLICY;
   const violations: RuleViolation[] = [];
 
+  // fail-closed（审计复检 2026-09-06）：空数组是 truthy，原实现会
+  // 零规则 → 零违规 → ALLOW——空规则集必须拒绝而非放行
+  if (activeRules.length === 0) {
+    return {
+      passed: false,
+      verdict: "BLOCK",
+      rules: 0,
+      passed_rules: 0,
+      failed_rules: 1,
+      violations: [{
+        rule: {
+          type: "policy_config",
+          severity: "block",
+          description: "Empty policy ruleset is rejected (fail-closed)",
+        },
+        actual: "0 active rules",
+        expected: ">= 1 active rule",
+        detail: "empty ruleset passes nothing — refusing to ALLOW (fail-closed)",
+      }],
+      summary: "BLOCK: empty policy ruleset",
+    };
+  }
+
   for (const rule of activeRules) {
     switch (rule.type) {
       // ── Confidence ──
@@ -349,6 +372,8 @@ export interface LoadedEnterprisePolicy {
   source: string;
   rules: EnterpriseRule[];
   isEnterprise: boolean;
+  /** 配置解析失败时的显式信号（fail-closed，2026-09-06） */
+  configError?: string;
 }
 
 /**
@@ -419,7 +444,13 @@ export function loadEnterprisePolicyConfig(
       isEnterprise: false,
     };
   } catch (e: any) {
-    console.error(`⚠️  Failed to load enterprise policy config: ${e.message}. Using defaults.`);
-    return emptyResult;
+    console.error(`⚠️  Failed to load enterprise policy config: ${e.message}.`);
+    // fail-closed 信号（审计复检 2026-09-06）：与 loadPolicyConfig 同口径——
+    // 显式携带 configError，调用方拒绝静默评估
+    return {
+      ...emptyResult,
+      source: "built-in defaults (enterprise config error)",
+      configError: `Failed to parse ${cfgFile}: ${e.message}`,
+    };
   }
 }

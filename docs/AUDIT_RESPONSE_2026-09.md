@@ -11,7 +11,7 @@
 |---|---|---|
 | Kimi：risk 规则空 catch 静默放行 + 伪造 `["SSL_CTX_new","SSL_connect"]` 输入 | fail-closed：真实调用提取，无数据/模块不可用 → 显式违规 | `ab0d0dec` |
 | Kimi：配置解析失败静默回退默认策略 | 显式 `configError`，policy CLI 拒绝评估（exit 2） | `ab0d0dec` |
-| Kimi：execute 写盘与策略引擎脱节 | opt-in 写盘策略门（`.progmune-policy.json` 时写后即验，BLOCK 自动回滚） | `ab0d0dec` |
+| Kimi：execute 写盘与策略引擎脱节 | opt-in **写后回滚门**（`.progmune-policy.json` 时写后即验，BLOCK 时文件不残留——补偿控制，写盘与回滚间进程中断为已知边界） | `ab0d0dec` |
 | 智谱/Kimi：PROGMUNE_STRICT=false 逃生门不留痕 | 降级写入审计事件日志 | `ab0d0dec` |
 | 智谱：决策层注释（乘积）与实现（加权平均）矛盾 | 注释与实现对齐（0.4/0.25/0.35） | `ab0d0dec` |
 | 智谱：证书无时效绑定 | PolicyContext 贯通证书时间戳（CLI + MCP） | `ab0d0dec` |
@@ -20,7 +20,7 @@
 | Kimi：14 条跨命名空间死规则 | 4 条归位（G5 模式）+ 10 条 printlab 显式例外 + 活性守卫测试 | `24bd895d` |
 | 智谱：「免疫系统自我进化」叙事 | 落地页收敛到可实现口径（失败语料库 + 快速通道 + 知识库扩充） | `acf2026e` |
 | 智谱：「必须配置 LLM Key 才能运行」 | FAQ 澄清：LLM 是可选增强，确定性核心无外部依赖 | `acf2026e` |
-| 智谱/Kimi：BLOCK 无强制力 | README 双语边界声明：三处 OS 级执行点（trust --ci / policy CLI / 写盘策略门）+ 「辅助检查器」定位 | `acf2026e` |
+| 智谱/Kimi：BLOCK 无强制力 | README 双语边界声明：三处 OS 级执行点（trust --ci / policy CLI / 写后回滚门）+ 「辅助检查器」定位 | `acf2026e` |
 
 ## 二、事实澄清（两份报告中的出入）
 

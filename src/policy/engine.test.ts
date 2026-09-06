@@ -67,6 +67,15 @@ describe("policy engine（fail-closed 回归）", () => {
     expect(res.configError).toBeDefined();
     expect(res.configError).toContain("Failed to parse");
   });
+
+  it("空规则集 fail-closed：[] 是 truthy 但必须拒绝（BLOCK，非 ALLOW）", () => {
+    const f = path.join(dir, "empty.ts");
+    fs.writeFileSync(f, "");
+    const result = evaluatePolicy(baseCtx(f), []);
+    expect(result.passed).toBe(false);
+    expect(result.verdict).toBe("BLOCK");
+    expect(result.violations.some((v) => v.rule.type === "policy_config")).toBe(true);
+  });
 });
 
 describe("execute 写盘策略门（opt-in）", () => {

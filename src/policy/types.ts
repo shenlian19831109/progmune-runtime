@@ -15,7 +15,8 @@ export type RuleType =
   | "fingerprint"      // Fingerprint must exist and be verified
   | "violations"       // No SSG ledger violations allowed
   | "kb_coverage"      // Knowledge Base must have at least N stable assets
-  | "risk";             // Risk-based: block if severity >= threshold, confidence >= threshold
+  | "risk"             // Risk-based: block if severity >= threshold, confidence >= threshold
+  | "policy_config";   // 合成规则：空规则集 fail-closed（2026-09-06 审计复检）
 
 export interface PolicyRule {
   type: RuleType;

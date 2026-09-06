@@ -4,7 +4,7 @@
 
 ### 第三方审计修复批次 + Oracle 隔离政策 + 分资产分级策略
 
-- **治理层 fail-open 修复**（Kimi 行号级审计 P0）：risk 规则 fail-closed（不再伪造 SSL 输入，真实调用提取，无数据/模块不可用 → 显式违规）；kb_coverage 显式化；策略配置解析失败拒绝静默评估（policy CLI exit 2）；**execute 写盘策略门**（项目 opt-in `.progmune-policy.json` 后写盘即时验证，BLOCK 自动回滚——策略引擎首次获得写盘强制力）；`PROGMUNE_STRICT=false` 逃生门写入审计事件日志；决策层注释与实现对齐（乘积→加权平均）；证书时间戳贯通 PolicyContext；**潜伏 bug**：certify 的 plsbRecall 恒为 0（metadata 从未有 recall 字段，HIGH 置信度门槛永远不可达）→ 修为 verified/total
+- **治理层 fail-open 修复**（Kimi 行号级审计 P0）：risk 规则 fail-closed（不再伪造 SSL 输入，真实调用提取，无数据/模块不可用 → 显式违规）；kb_coverage 显式化；策略配置解析失败拒绝静默评估（policy CLI exit 2）；**execute 写后回滚门**（项目 opt-in `.progmune-policy.json` 后写盘随即验证，BLOCK 时文件不残留——补偿控制而非写前拦截，写盘与回滚间进程中断为已知边界；策略引擎首次获得写盘强制力）；`PROGMUNE_STRICT=false` 逃生门写入审计事件日志；决策层注释与实现对齐（乘积→加权平均）；证书时间戳贯通 PolicyContext；**潜伏 bug**：certify 的 plsbRecall 恒为 0（metadata 从未有 recall 字段，HIGH 置信度门槛永远不可达）→ 修为 verified/total
 - **跨命名空间死规则归位 + 活性守卫**（Kimi 发现 3 系统化）：全量扫描 14 条死规则——4 条归位（logout_without_invalidate/admin_action_without_check/double_commit/check_resource_ownership 挪进 pre 状态所在命名空间）、10 条 printlab 业务链为文档化例外（待跨命名空间状态引用特性）；`protocol-rules-liveness.test.ts` 使死规则永久回归可防
 - **P1 批**：SUPPRESS 等全部决策持久化审计事件日志（含 fpRate/envFactor/importance 全输入）；截断序列覆盖率显式降级上报（truncatedSequences + summary 标注）；README 双语边界声明（刻意规避不在防护目标内 / BLOCK 强制力三执行点）；FAQ 澄清 LLM 密钥为可选增强；落地页免疫叙事收敛
 - **Oracle 隔离政策**（Hunyuan 定律 5 落地，`docs/ORACLE_ISOLATION_POLICY.md`）：四类评估体系变更（规则/匹配策略/阈值/别名）必须人工确认，AI 只提案；protocols.json 全量 `status: "confirmed"` + 加载端跳过 proposed + `scripts/rule-propose.js` 提案脚手架；evaluateTrust 输出 **oracleIndependence**（confirmedRules / sameSourceAnnotations / confirmedAliases）
