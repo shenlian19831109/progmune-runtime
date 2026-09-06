@@ -76,6 +76,7 @@ import {
   loadProtocolRules,
   summarizeSSGCoverage,
   normalizeName,
+  loadProjectAliases,
 } from "./ssg-bridge";
 import type { SSGValidationResult } from "./ssg-bridge";
 import { buildCallSequences, collectProjectFunctionNames } from "../call-sequence";
@@ -1422,23 +1423,60 @@ async function collectProtocolViolations(
           // ir.json 两种形态：extractIR/extractIRPython 的裸数组、extractProjectIR
           // 的 { typeMap, functions } 合并对象（execute/MCP 写盘）——统一取函数列表。
           const functions = Array.isArray(ir) ? ir : (ir.functions || []);
+          // 裸名出现次数（Java 接收者限定匹配：碰撞名不注册裸键——
+          // User.update 与 Article.update 同名时裸键 "update" 会命中所有
+          // .update( 调用点，REALWORLD_JAVA_ANNOTATION_V1 名碰撞 9 FP 根因）
+          const nameCounts = new Map<string, number>();
+          for (const f of functions) {
+            const n = String(f.name);
+            nameCounts.set(n, (nameCounts.get(n) || 0) + 1);
+          }
           for (const f of functions) {
             if (!f.protocol) continue;
             const protocol = { ...f.protocol };
-            const existing = protocolRulesData.rules.get(String(f.name));
+            const fname = String(f.name);
+            const existing = protocolRulesData.rules.get(fname);
             if (existing?.namespace && !protocol.namespace) {
               protocol.namespace = existing.namespace;
             }
             // 修复路径渲染真实函数名（fixPath 输出项目原语而非通用规则名）
-            protocol.displayName = String(f.name);
-            protocolRulesData.rules.set(String(f.name), protocol);
+            protocol.displayName = fname;
+            // Java（className 存在且 name 无点）：总是注册 Class.method 限定键；
+            // 裸键仅在项目内唯一时注册（碰撞名只留限定键，匹配走限定调用）
+            const qualified = f.className && !fname.includes(".")
+              ? `${f.className}.${fname}` : undefined;
+            const nameUnique = (nameCounts.get(fname) || 0) === 1;
+            if (qualified) {
+              protocolRulesData.rules.set(qualified, protocol);
+            }
+            if (!f.className || nameUnique) {
+              protocolRulesData.rules.set(fname, protocol);
+            }
             // CamelCase 真实命名（C 代码普遍，如 ACLCheckAllPerm）注册的规则
             // 原样无法被任何匹配策略触达（normalize 只作用于调用名；词段匹配
             // 要求 ≥2 个下划线词段）——同步注册规范化形态使注解原语可被按名命中。
             // 加性改动：snake_case 注解（TS/Python 惯例）normalized === 原名，无变化。
-            const normalized = normalizeName(String(f.name));
-            if (normalized !== String(f.name)) {
+            const normalized = normalizeName(fname);
+            if (normalized !== fname && (!f.className || nameUnique)) {
               protocolRulesData.rules.set(normalized, protocol);
+            }
+          }
+        }
+      } catch { /* best-effort */ }
+    }
+
+    // ── 项目别名重校验（注解合并后）──
+    // 注解合并注册的限定键（Java Class.method）在 loadProtocolRules 时还不
+    // 存在，指向它们的别名当时被「规则不存在」校验拒绝——合并后重跑一次，
+    // 把「变量名→限定规则」映射补进 aliasIndex（如 jwtservice.getsubfromtoken
+    // → DefaultJwtService.getSubFromToken；变量名≠类名的文档化桥接通道）
+    if (protocolRulesData) {
+      try {
+        const pa = loadProjectAliases(ctx.projectPath, new Set(protocolRulesData.rules.keys()));
+        if (pa) {
+          for (const [callName, ruleName] of Object.entries(pa.aliases)) {
+            if (!protocolRulesData.aliasIndex.has(callName)) {
+              protocolRulesData.aliasIndex.set(callName, ruleName);
             }
           }
         }

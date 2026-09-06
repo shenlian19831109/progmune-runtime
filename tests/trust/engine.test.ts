@@ -422,3 +422,56 @@ ${entries}
     expect(hit!.fix).toContain("closeFile");
   });
 });
+
+describe("evaluateTrust（Java 接收者限定名匹配——名碰撞根因修复，2026-09-06）", () => {
+  // User.update 注解 PASSWORD_HASHED 前置；Article.update 同名不注解——
+  // 修复前裸键 "update" 命中全部 .update( 调用点（9 FP 实测）；
+  // 修复后 user.update 只命中 User.update，article.update 不误配
+  const SRC = `package app;
+public class User {
+  // @protocol namespace=registration pre_states=["PASSWORD_HASHED"] post_states=["PASSWORD_UPDATED"]
+  public void update(String password) { this.password = password; }
+}
+public class Article {
+  public void update(String content) { this.content = content; }
+}
+public class UserService {
+  public void updateUser(User user) {
+    user.update("raw-password");
+  }
+  public void updateArticle(Article article) {
+    article.update("hello world");
+  }
+}`;
+
+  async function run() {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pm-engine-java-qual-"));
+    try {
+      fs.writeFileSync(path.join(dir, "UserService.java"), SRC);
+      return await evaluateTrust({
+        projectPath: dir,
+        projectName: "java-qual-test",
+        commit: "test",
+        language: "java",
+      });
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
+  it("user.update（变量名≈类名）命中 User.update 规则 → 违规精确报出", async () => {
+    const r = await run();
+    const ssg = r.violations.filter((v) => v.rule_id.startsWith("SSG_"));
+    const hit = ssg.find((v) => v.function === "updateUser");
+    expect(hit).toBeDefined();
+    expect(hit!.why).toContain("PASSWORD_HASHED");
+  });
+
+  it("article.update 不误配 User.update 规则（名碰撞消除）→ 零违规", async () => {
+    const r = await run();
+    const ssg = r.violations.filter((v) => v.rule_id.startsWith("SSG_"));
+    expect(ssg.some((v) => v.function === "updateArticle")).toBe(false);
+    // 全项目 SSG 违规仅 updateUser 一处（0 名碰撞误报）
+    expect(ssg.filter((v) => v.function !== "updateUser")).toEqual([]);
+  });
+});

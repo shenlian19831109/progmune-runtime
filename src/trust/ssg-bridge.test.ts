@@ -99,6 +99,59 @@ describe("SSG Bridge", () => {
     });
   });
 
+  // ── 接收者限定名匹配（Java 名碰撞根因修复，2026-09-06）──
+  describe("qualified call → rule inference", () => {
+    it("限定调用精确匹配限定规则（大小写不敏感：user.update → User.update）", () => {
+      const prev = rules!.get("User.update");
+      rules!.set("User.update", {
+        pre_states: ["PASSWORD_HASHED"],
+        post_states: ["PASSWORD_UPDATED"],
+        namespace: "registration",
+      });
+      try {
+        const result = validateSequenceWithSSG(
+          [step("user.update", "registration", "Update user data")],
+          rules!, nsInit, "test.java", aliasIndex, undefined,
+          new Set(["user.update", "update"]),
+        );
+        expect(result.stats.matchedCalls).toBeGreaterThanOrEqual(1);
+      } finally {
+        if (prev) rules!.set("User.update", prev); else rules!.delete("User.update");
+      }
+    });
+
+    it("不同类限定调用不误配（article.update 不命中 User.update 规则）", () => {
+      const prev = rules!.get("User.update");
+      rules!.set("User.update", {
+        pre_states: ["PASSWORD_HASHED"],
+        post_states: ["PASSWORD_UPDATED"],
+        namespace: "registration",
+      });
+      try {
+        const result = validateSequenceWithSSG(
+          [step("article.update", "registration", "Update article content")],
+          rules!, nsInit, "test.java", aliasIndex, undefined,
+          new Set(["article.update", "update"]),
+        );
+        expect(result.stats.matchedCalls).toBe(0);
+        expect(result.stats.unmatchedCalls).toBe(1);
+      } finally {
+        if (prev) rules!.set("User.update", prev); else rules!.delete("User.update");
+      }
+    });
+
+    it("带点调用不参与词段匹配（helper.verify_hash 不命中 verify_hash）", () => {
+      // 无 projectFunctions 时不限制（回退路径旧行为）；提供后带点调用
+      // 只走限定精确匹配 + 别名——末段词段回退会重造名碰撞
+      const result = validateSequenceWithSSG(
+        [step("helper.verify_hash", "auth", "Verify something")],
+        rules!, nsInit, "test.java", aliasIndex, undefined,
+        new Set(["helper.verify_hash", "verify_hash"]),
+      );
+      expect(result.stats.matchedCalls).toBe(0);
+    });
+  });
+
   describe("alias-based matching (exact)", () => {
     it("matches bcrypt.compare to verify_hash via alias", () => {
       expect(aliasIndex.get("bcrypt.compare")).toBe("verify_hash");

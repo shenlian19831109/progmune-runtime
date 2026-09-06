@@ -316,12 +316,16 @@ function inferRuleName(
   // 仅项目函数适用——真实 C 语料验证中 ReadFile/WriteFile/DeleteFile 经
   // normalized 撞上 read_file/write_file/delete_file 是 11/24 FP 的主导源，
   // 而注解桥接（ACLCheckAllPerm → acl_check_all_perm）全是项目函数，不受影响。
+  // Java 限定键（Class.method）与限定调用（user.update）大小写不敏感精确
+  // 匹配（变量名 user vs 类名 User）；带点调用不参与规范化/词段形态匹配——
+  // 末段回退会重造名碰撞（article.update 撞 User.update 的裸键/词段）。
+  const isDotted = dotIdx >= 0;
   for (const ruleName of ruleNames) {
-    if (lowerApi === ruleName) {
+    if (lowerApi === ruleName.toLowerCase()) {
       return ruleName;
     }
   }
-  if (isProjectFn) {
+  if (isProjectFn && !(projectFunctions && isDotted)) {
     for (const ruleName of ruleNames) {
       if (normalized === ruleName) {
         return ruleName;
@@ -331,6 +335,7 @@ function inferRuleName(
 
   for (const ruleName of ruleNames) {
     if (projectFunctions && !isProjectFn) continue;
+    if (projectFunctions && isDotted) continue; // 带点调用只走限定精确匹配（+别名/域提示）
     const ruleWords = ruleName.split("_");
     const callWords = normalized.split("_");
 
