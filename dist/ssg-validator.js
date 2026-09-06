@@ -759,6 +759,9 @@ function rejectionToJSON(rejection) {
 function parseProtocolsFromJSON(protocolDef) {
     const protocols = [];
     for (const [funcName, rule] of Object.entries(protocolDef.rules)) {
+        // 未人工确认的提案规则不加载——AI 只提案，人不签字不生效
+        if (rule.status && rule.status !== "confirmed")
+            continue;
         protocols.push({
             function: funcName,
             protocol: {
