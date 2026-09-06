@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.7.24] — 2026-09-06
+
+### 审计复检三项修复
+
+- **空规则集 fail-closed**：`evaluatePolicy` 对空规则数组直接 BLOCK（合成 `policy_config` 违规）——空数组是 truthy，原实现零规则→零违规→ALLOW；写盘门 / policy CLI / MCP 三路径同步收口，测试锁定
+- **loadEnterprisePolicyConfig 解析失败显式携带 configError**（与 loadPolicyConfig 同口径，六条 fail-open 中第 4 条全修）
+- **写盘门口径修正**（README 双语 / TIERED_POLICY / AUDIT_RESPONSE）：「写盘策略门」→「**写后回滚门——BLOCK 时文件不残留**」，明确为补偿控制而非写前拦截，写盘与回滚之间进程中断的残留为已知边界
+- **落地页 66 金标口径自解释**：「66 金标 检出 64（97%）/ 100% / 0 FP——2 条为注解依赖前置的已知漏检（基线文档单列）」，与发布门 64 一致
+- npm gitHead 溯源核对：npm gitHead = tag v3.7.23 commit，三点对齐（发布产物 ↔ tag ↔ 发布 commit）
+- 回归 29 green；check 免疫正常
+
 ## [3.7.23] — 2026-09-06
 
 ### 第三方审计修复批次 + Oracle 隔离政策 + 分资产分级策略
