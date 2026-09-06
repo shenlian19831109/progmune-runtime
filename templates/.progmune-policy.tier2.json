@@ -1,0 +1,9 @@
+{
+  "name": "Progmune Tier-2（标准）——业务逻辑/CRUD：violations 阻断，其余 WARN 观察",
+  "inherit": true,
+  "rules": [
+    { "type": "confidence", "severity": "warn" },
+    { "type": "human_review", "severity": "warn" },
+    { "type": "risk", "severity": "warn" }
+  ]
+}

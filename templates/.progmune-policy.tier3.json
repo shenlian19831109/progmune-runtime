@@ -1,0 +1,11 @@
+{
+  "name": "Progmune Tier-3（观察）——工具/demo/实验：只报告不拦截",
+  "inherit": true,
+  "rules": [
+    { "type": "confidence", "severity": "warn" },
+    { "type": "provenance", "severity": "warn" },
+    { "type": "human_review", "severity": "warn" },
+    { "type": "violations", "severity": "warn" },
+    { "type": "risk", "severity": "warn" }
+  ]
+}

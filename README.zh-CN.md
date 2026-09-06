@@ -121,6 +121,14 @@ Progmune 对能验证什么、不能验证什么保持诚实。
 - **刻意规避不在防护目标内**——注解驱动模型拦截的是 AI 的「意外」协议错误（漏写前置步骤、顺序颠倒）；对故意改名/混淆的对抗性规避不设防（任何静态工具同理）。
 - **BLOCK 的强制力由集成方承担**——Progmune 输出判定与证据，不运行时拦截。OS 级强制执行点：`trust --ci` 退出码（CI 门禁）、`policy CLI` 退出码、以及 opt-in 的写盘策略门（项目配置 `.progmune-policy.json` 后，execute 写盘即时验证，BLOCK 自动回滚）。
 
+**分资产分级接入**（[TIERED_POLICY](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/TIERED_POLICY.md)）：不要给所有代码同一套门禁——按「出错代价 × AI 参与度」选档，一条命令落地：
+
+```bash
+npx progmune-init-policy --tier 1   # 强制：鉴权/支付/资源生命周期——写盘策略门激活
+npx progmune-init-policy --tier 2   # 标准：业务逻辑——violations 阻断，其余 WARN
+npx progmune-init-policy --tier 3   # 观察：工具/demo——只报告不拦截
+```
+
 → [完整覆盖矩阵](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix.md)
 
 ---

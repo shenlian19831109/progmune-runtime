@@ -12,11 +12,14 @@
     "tools/extract_ir.py",
     "tools/extract_framework_py.py",
     "tools/extract_framework_django.py",
-    "tools/extract_framework_flask.py"
+    "tools/extract_framework_flask.py",
+    "scripts/init-policy.js",
+    "templates/"
   ],
   "main": "dist/mcp-server.mjs",
   "bin": {
-    "progmune-runtime": "dist/mcp-server.mjs"
+    "progmune-runtime": "dist/mcp-server.mjs",
+    "progmune-init-policy": "scripts/init-policy.js"
   },
   "scripts": {
     "prepare": "npm run build",

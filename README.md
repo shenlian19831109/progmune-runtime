@@ -121,6 +121,14 @@ Progmune is honest about what it can and cannot verify.
 - **Deliberate evasion is out of scope** — the annotation-driven model catches *accidental* AI protocol mistakes (missing prerequisites, wrong ordering); it does not defend against adversarial renaming/obfuscation (true of any static tool).
 - **BLOCK enforcement is the integrator's responsibility** — Progmune outputs decisions and evidence; it does not intercept at runtime. OS-level enforcement points: `trust --ci` exit code (CI gates), `policy CLI` exit code, and the opt-in write-gate (with `.progmune-policy.json`, `execute` verifies immediately after writing and rolls back on BLOCK).
 
+**Tiered adoption by asset class** ([TIERED_POLICY](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/TIERED_POLICY.md)): don't gate all code alike — pick a tier by "cost of failure × AI involvement", one command to install:
+
+```bash
+npx progmune-init-policy --tier 1   # Enforce: auth/payment/resource lifecycle — write-gate active
+npx progmune-init-policy --tier 2   # Standard: business logic — violations block, rest WARN
+npx progmune-init-policy --tier 3   # Observe: tools/demos — report only
+```
+
 → [Full Coverage Matrix](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix-en.md)
 
 ---
