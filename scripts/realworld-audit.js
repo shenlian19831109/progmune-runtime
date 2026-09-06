@@ -175,7 +175,9 @@ function py(tool, root, analyzeFn) {
     return { files: 0, routes: 0, issues: [{ rule: "TOOL_ERROR", route: String(e.message || e).slice(0, 200), file: "" }] };
   }
   const data = JSON.parse(fs.readFileSync(out, "utf-8"));
-  const { [analyzeFn]: fn } = require("../dist/frameworks/" + tool.replace("extract_framework_", "").replace(".py", "") + "-detector.js");
+  // 模块名推导：extract_framework_py.py → fastapi-detector（py 是 fastapi 提取器的历史文件名）
+  const modBase = tool.replace("extract_framework_", "").replace(".py", "");
+  const { [analyzeFn]: fn } = require("../dist/frameworks/" + (modBase === "py" ? "fastapi" : modBase) + "-detector.js");
   const res = fn(data);
   const routes = (data.routes || []).length;
   return { files: data.filesScanned || 0, routes, issues: (res.issues || []).map((i) => ({ rule: i.rule, route: i.route || "", file: i.file || i.handler || "" })) };
