@@ -118,6 +118,8 @@ Progmune is honest about what it can and cannot verify.
 - **Runtime behavior** — Progmune is static analysis only; no DAST/sandbox execution.
 - **Framework internals** — well-known framework dispatch/cache machinery (e.g. django-unicorn internals) can produce a small number of boundary false positives; they are documented per-corpus in the benchmark gold files.
 - **Known failure boundaries are documented** rather than hidden: if Progmune cannot verify a language (e.g. Go), Confidence is lowered instead of pretending 100%.
+- **Deliberate evasion is out of scope** — the annotation-driven model catches *accidental* AI protocol mistakes (missing prerequisites, wrong ordering); it does not defend against adversarial renaming/obfuscation (true of any static tool).
+- **BLOCK enforcement is the integrator's responsibility** — Progmune outputs decisions and evidence; it does not intercept at runtime. OS-level enforcement points: `trust --ci` exit code (CI gates), `policy CLI` exit code, and the opt-in write-gate (with `.progmune-policy.json`, `execute` verifies immediately after writing and rolls back on BLOCK).
 
 → [Full Coverage Matrix](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix-en.md)
 

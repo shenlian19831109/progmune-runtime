@@ -267,7 +267,9 @@ export class DecisionEngine {
       reason: action === "BLOCK"
         ? `High-confidence violation (${(confidence*100).toFixed(0)}%, importance ${importance})`
         : action === "SUPPRESS"
-          ? `Low confidence (${(confidence*100).toFixed(0)}%), ${context.recentFPs || 0} recent FPs`
+          // 审计修复 2026-09-06：抑制决策的输入全部入审计记录
+          // （FP 率/环境因子/资产），可追溯为何被压、被谁压
+          ? `Suppressed (silent) at ${(confidence*100).toFixed(0)}% confidence — fpRate=${(fpRate*100).toFixed(0)}%, envFactor=${envFactor}, importance=${importance}, ${context.recentFPs || 0} recent FPs`
           : `Moderate confidence (${(confidence*100).toFixed(0)}%) — ${action}`,
       provenance: {
         assets: [asset.id],
@@ -468,6 +470,27 @@ export class DecisionEngine {
     const id = `DEC-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
     const decision: Decision = { id, ...partial };
     this.history.push(decision);
+    // 审计修复 2026-09-06：决策（尤其 SUPPRESS 静默抑制）持久化到审计
+    // 事件日志——此前仅内存记录，抑制决策对外不可见、不可追溯
+    try {
+      const fs = require("fs");
+      const path = require("path");
+      const auditDir = path.join(process.cwd(), ".progmune_memory");
+      if (!fs.existsSync(auditDir)) fs.mkdirSync(auditDir, { recursive: true });
+      fs.appendFileSync(
+        path.join(auditDir, "audit-events.jsonl"),
+        JSON.stringify({
+          event: "DECISION_RECORDED",
+          decisionId: id,
+          kind: decision.kind,
+          action: decision.action,
+          confidence: decision.confidence,
+          reason: decision.reason,
+          timestamp: decision.provenance.timestamp,
+        }) + "\n",
+        "utf-8",
+      );
+    } catch { /* audit log write — best-effort */ }
     return decision;
   }
 }

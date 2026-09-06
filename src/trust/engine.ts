@@ -1341,6 +1341,8 @@ interface ProtocolViolationResult {
     totalCalls: number;
     matchedCalls: number;
     ssgViolations: number;
+    /** 预算耗尽被截断的序列数（尾部调用未验证——覆盖率降级信号） */
+    truncatedSequences?: number;
     summary: string;
     /** Warnings from project alias validation */
     aliasWarnings?: string[];
@@ -1365,6 +1367,8 @@ async function collectProtocolViolations(
   let ssgTotalCalls = 0;
   let ssgMatchedCalls = 0;
   let ssgViolationCount = 0;
+  // 截断序列计数（预算耗尽——尾部调用未验证，覆盖率降级信号）
+  let truncatedSeqCount = 0;
   // C 注解建议（函数级作用域——返回值在 try 外组装）
   let annotationSuggestions: AnnotationSuggestion[] | undefined;
 
@@ -1517,6 +1521,7 @@ async function collectProtocolViolations(
     } catch { /* best-effort */ }
 
     for (const seq of callSequences) {
+      if (seq.truncated) truncatedSeqCount++;
       try {
         const semantic = await mapSequenceToSemanticWithLLM(seq.calls);
 
@@ -1680,7 +1685,13 @@ async function collectProtocolViolations(
       totalCalls: ssgTotalCalls,
       matchedCalls: ssgMatchedCalls,
       ssgViolations: ssgViolationCount,
-      summary: summarizeSSGCoverage(ssgResults),
+      // 截断序列显式上报（审计修复 2026-09-06）：预算耗尽时尾部调用
+      // （close_file 类释放操作）不可见——覆盖率降级信号，不再静默
+      truncatedSequences: truncatedSeqCount,
+      summary: summarizeSSGCoverage(ssgResults) +
+        (truncatedSeqCount > 0
+          ? ` (${truncatedSeqCount} sequence(s) truncated — tail calls unverified)`
+          : ""),
       aliasWarnings: protocolRulesData.aliasWarnings?.length
         ? protocolRulesData.aliasWarnings : undefined,
     } : undefined,

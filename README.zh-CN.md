@@ -118,6 +118,8 @@ Progmune 对能验证什么、不能验证什么保持诚实。
 - **运行时行为**——Progmune 仅做静态分析；无 DAST/沙箱执行。
 - **框架内部件**——知名框架的分发/缓存机制（如 django-unicorn 内部件）可能产生少量边界误报；各语料基准 gold 文件中已逐条记录。
 - **已知失败边界一律记录**而非隐藏：如果 Progmune 无法验证某语言（如 Go），置信度会降低而不是假装 100%。
+- **刻意规避不在防护目标内**——注解驱动模型拦截的是 AI 的「意外」协议错误（漏写前置步骤、顺序颠倒）；对故意改名/混淆的对抗性规避不设防（任何静态工具同理）。
+- **BLOCK 的强制力由集成方承担**——Progmune 输出判定与证据，不运行时拦截。OS 级强制执行点：`trust --ci` 退出码（CI 门禁）、`policy CLI` 退出码、以及 opt-in 的写盘策略门（项目配置 `.progmune-policy.json` 后，execute 写盘即时验证，BLOCK 自动回滚）。
 
 → [完整覆盖矩阵](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix.md)
 
