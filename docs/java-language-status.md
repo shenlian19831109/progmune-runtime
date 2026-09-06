@@ -94,14 +94,27 @@ trust CLI 端到端（`--language java`）：未注解基线 0 违规 APPROVED�
 v1 反证 +1（doFilterInternal 精确报出）。详见
 `blind-benchmark/REALWORLD_JAVA_ANNOTATION_V1.md`。
 
-## 待办（真实语料金标，逐行转真）——2026-09-05 更新
+## 接收者限定名匹配（2026-09-06，名碰撞根因修复）
+
+- 提取器：`className` 捕获（嵌套类感知类名栈）+ 调用输出完整点链
+  （多行点链/泛型静态调用/注释噪声一并修复——限定语义下 AST 基准
+  恢复率 1216/1216 保持 100%）
+- 注册层：Java 注解函数总是注册 `Class.method` 限定键；裸名键仅
+  项目内唯一时注册（碰撞名只留限定键）
+- 匹配层：精确匹配大小写不敏感；带点调用只走限定精确匹配（跳过
+  规范化/词段形态——末段回退重造碰撞）
+- 变量名≠类名：`.progmune_aliases.json` 桥接（注解合并后重校验加载）
+- 重测：原文 **1 违规 = updateUser 真实 TP、0 误报**（9 名碰撞消失）；
+  修复变异 0；摘 getTokenString 反证 doFilterInternal 精确报出
+
+## 待办（真实语料金标，逐行转真）——2026-09-06 更新
 
 1. ✅ **token 生命周期行**（v1）：真实语料闭环完成——getTokenString→
    getSubFromToken 抽取→验证链合法流 0 违规，摘 getTokenString 反证
-   精确报出
-2. ⚠️ **认证/注册行**（v2）：真实 TP 捕获（updateUser 密码明文入库
-   ——1581★ 参考实现真实 bug，修复变异违规即消）——但末段名匹配致
-   9 名碰撞误报（article.update 等），Java 注解模型需接收者限定名升级
+   精确报出（变量名经项目别名桥接）
+2. ✅ **认证/注册行**（v2）：真实 TP 捕获（updateUser 密码明文入库
+   ——1581★ 参考实现真实 bug，修复变异违规即消）；名碰撞 9 FP 经
+   接收者限定名匹配消除（重测 1 TP / 0 FP）
 3. ⚠️ **资源管理行**（v3）：spring-realworld 无手工资源管理（MyBatis
    托管连接）——本语料无锚点，维持合成金标；待 NIO/文件处理语料
 

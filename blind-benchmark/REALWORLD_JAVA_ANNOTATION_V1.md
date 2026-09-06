@@ -60,21 +60,31 @@ callRe 补可选 `<…>` 类型实参组；`super(`/`this(` 构造调用 → 过
 修复变异（`passwordEncoder.encode(...)` 前置于 update）后该违规消失——
 **真实 TP + 修复即消，敏感性双向验证**。
 
-### 四、名碰撞边界（如实记录——Java 注解模型的下一步）
+### 四、名碰撞边界 → 已解决（2026-09-06，接收者限定名匹配）
 
-规则名按函数名注册，调用名取末段：`User.update` 的规则名 `update`
+规则名按函数名注册 + 调用名取末段时：`User.update` 的规则名 `update`
 命中语料内**全部** `.update(` 调用点（article.update ×2、userMapper.update、
 articleMapper.update 及传播放大）→ 10 违规中 **1 为真实 TP，9 为名碰撞
 误报**（文章内容更新不涉密码）。根因：Java 服务层惯用通用名
 （save/update/encode），末段名匹配 + 按名注册规则在 Java 上系统性碰撞
 （TS/C/Go 语料的协议函数名均有区分度，未暴露此边界）。
 
-**方向**（Java 注解采纳前需决策）：
-1. 接收者限定调用名（`user.update` / `article.update`）+ 类限定规则
-   注册（`User.update`）——需要提取器捕获 enclosing class + 匹配层支持
-   限定名（normalizeName 现取末段，需新增策略）
-2. 或：类型感知匹配（变量→类型映射），成本更高
-3. 或：接受按名粒度并在报告层按站点裁决（当前形态的兜底）
+**已修复**（接收者限定名匹配，三处共享路径改动 + 恢复率复测 100%）：
+1. 提取器捕获 `className`（嵌套类感知的类名栈）+ 调用输出完整点链
+   （`user.update`/`article.update` 分流；多行点链、泛型静态调用、
+   注释噪声一并修复——AST 基准恢复率 1216/1216 保持 100%）
+2. 注册层：Java 注解函数总是注册 `Class.method` 限定键；裸名键仅项目内
+   唯一时注册（碰撞名只留限定键）
+3. 匹配层：精确规则名匹配大小写不敏感；带点调用只走限定精确匹配
+   （跳过规范化/词段形态——末段回退会重造碰撞）
+4. 变量名≠类名（`jwtService.` vs `DefaultJwtService`）：项目别名文件
+   桥接（`.progmune_aliases.json`，注解合并后重校验加载）
+
+**重测**（trust CLI 三态）：原文 **1 违规 = updateUser 真实 TP、0 误报**；
+修复变异 0（违规即消）；摘 getTokenString 反证 doFilterInternal 精确报出
+（`jwtService.getSubFromToken` → `DefaultJwtService.getSubFromToken`）。
+回归：engine 21 green（新增两类碰撞测试）、ssg-bridge 32、extract-ir-java
+16、全框架 165。
 
 ### 五、v3 resource 行：语料无手工资源管理
 
@@ -85,8 +95,9 @@ open/use/close 形态（grep Connection/InputStream/.close() 无命中）——
 
 ### 六、结论
 
-- v1 token 行：**真实闭环完成**（合法 0 + 反证精确定位）✅
-- v2 register 行：**真实 TP 捕获 + 修复敏感性验证**，但名碰撞致 9 FP
-  ——真实信号成立，名称模型待升级（第四节）⚠️
+- v1 token 行：**真实闭环完成**（合法 0 + 反证精确定位，变量名经
+  项目别名桥接）✅
+- v2 register 行：**真实 TP 捕获 + 修复敏感性验证 + 名碰撞消除**
+  （接收者限定名匹配后 1 TP / 0 FP）✅
 - v3 resource 行：本语料无锚点，维持合成验证 ⚠️
-- 提取器：恢复率/精度 100%/100%（AST 基准裁决）✅
+- 提取器：恢复率/精度 100%/100%（限定语义下 AST 基准复测）✅
