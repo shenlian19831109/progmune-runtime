@@ -22,6 +22,8 @@ export interface FunctionInfo {
   external?: boolean;
   /** 外部函数的描述 */
   description?: string;
+  /** 声明类名（Java 提取器捕获；用于接收者限定名匹配 Class.method） */
+  className?: string;
   /** Phase 7: Capability Graph */
   purpose?: string;           // @purpose JSDoc tag
   tags?: string[];            // @tags JSDoc tag (comma-separated)

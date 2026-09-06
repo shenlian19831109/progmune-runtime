@@ -56,6 +56,98 @@ function collectPrecedingComment(code: string, matchIndex: number): string {
   return pieces.join("\n");
 }
 
+/**
+ * 类名栈扫描：逐字符维护括号深度（字符串/注释感知），产出按字符位置
+ * 索引的当前类名表（null = 匿名类/方法体/块内）。'{' 前回溯 token：
+ * class|interface|enum|record Name → 命名类；new X(...) { 匿名类等 → null。
+ * 方法声明位置取栈顶为 className（嵌套类感知——JacksonCustomizations
+ * 内 DateTimeSerializer 等方法归属正确的嵌套类）。
+ */
+function buildClassStack(code: string): Array<string | null> {
+  const stack: Array<string | null> = [null]; // 文件顶层
+  const at: Array<string | null> = new Array(code.length).fill(null);
+  let i = 0;
+  while (i < code.length) {
+    at[i] = stack[stack.length - 1];
+    const ch = code[i];
+    const next = code[i + 1];
+    if (ch === "/" && next === "/") {
+      i += 2;
+      while (i < code.length && code[i] !== "\n") i++;
+      continue;
+    }
+    if (ch === "/" && next === "*") {
+      i += 2;
+      while (i < code.length && !(code[i] === "*" && code[i + 1] === "/")) i++;
+      i += 2;
+      continue;
+    }
+    if (ch === '"' || ch === "'") {
+      // 跳字符串/字符字面量（含转义）
+      const q = ch;
+      i++;
+      while (i < code.length) {
+        if (code[i] === "\\") { i += 2; continue; }
+        if (code[i] === q) { i++; break; }
+        i++;
+      }
+      continue;
+    }
+    if (ch === "{") {
+      // 判定 '{' 打开什么：回溯最近类声明（允许 record Name(...) 组件形态）
+      const before = code.slice(Math.max(0, i - 200), i);
+      const clsM = before.match(/\b(class|interface|enum|record)\s+([A-Za-z_$]\w*)[^{]*$/);
+      stack.push(clsM ? clsM[2] : null);
+      i++;
+      continue;
+    }
+    if (ch === "}") {
+      if (stack.length > 1) stack.pop();
+      i++;
+      continue;
+    }
+    i++;
+  }
+  return at;
+}
+
+/** 剔除行注释与块注释（字符串感知）——注释里的标识符不是调用 */
+function stripJavaComments(code: string): string {
+  let out = "";
+  let i = 0;
+  while (i < code.length) {
+    const ch = code[i];
+    const next = code[i + 1];
+    if (ch === "/" && next === "/") {
+      i += 2;
+      while (i < code.length && code[i] !== "\n") i++;
+      out += "\n";
+      continue;
+    }
+    if (ch === "/" && next === "*") {
+      i += 2;
+      while (i < code.length && !(code[i] === "*" && code[i + 1] === "/")) i++;
+      i += 2;
+      out += " ";
+      continue;
+    }
+    if (ch === '"' || ch === "'") {
+      const q = ch;
+      out += ch; i++;
+      while (i < code.length) {
+        out += code[i];
+        if (code[i] === "\\") { i++; out += code[i]; i++; continue; }
+        if (code[i] === q) { i++; break; }
+        i++;
+      }
+      continue;
+    }
+    out += ch;
+    i++;
+  }
+  return out;
+}
+
 /** 单文件提取 */
 export function extractJavaFile(filePath: string): FunctionInfo[] {
   const out: FunctionInfo[] = [];
@@ -65,6 +157,7 @@ export function extractJavaFile(filePath: string): FunctionInfo[] {
   } catch {
     return out;
   }
+  const classStack = buildClassStack(code);
   // 方法声明：两分支——构造器（可见性 + Name(，无返回类型）与普通方法
   // （修饰符 + 返回类型 Name(，返回类型含 '?' 通配符如 ResponseEntity<?>）。
   // 匹配止于 '('；参数区用字符串感知平衡括号扫描（@PathVariable("slug")
@@ -168,15 +261,24 @@ export function extractJavaFile(filePath: string): FunctionInfo[] {
       bodyEnd++;
     }
     const body = code.slice(bodyStart, Math.min(bodyEnd, bodyStart + 8000));
+    // 注释剔除：// 注释里的 setAllowCredentials(true) 不是调用（限定化后
+    // 与真实调用分流，注释噪声显形——REALWORLD 恢复率复测发现）
+    const cleanBody = stripJavaComments(body);
     // 零宽后视：前导 '(' 等不被上一匹配吞掉（if (verifyToken(…) 中能收到 verifyToken）；
-    // <…> 可选类型实参：new HashMap<String, Object>() 的 HashMap 可见
-    const callRe = /(?<=^|[^\w$])([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*)\s*(?:<[^<>;]*(?:<[^<>;]*>[^<>;]*)*>)?\s*\(/g;
+    // <…> 可选类型实参：new HashMap<String, Object>() 的 HashMap 可见；
+    // 链原子容忍点两侧空白 + 泛型静态调用（DataFetcherResult.<T>newResult()）：
+    // 接收者限定匹配的前提——REALWORLD 恢复率复测 96.6%→100%
+    const callRe = /(?<=^|[^\w$])([A-Za-z_$][\w$]*(?:\s*\.\s*(?:<[^<>;]*>)?\s*[A-Za-z_$][\w$]*)*)\s*(?:<[^<>;]*(?:<[^<>;]*>[^<>;]*)*>)?\s*\(/g;
     let cm: RegExpExecArray | null;
-    while ((cm = callRe.exec(body)) !== null) {
-      const seg = cm[1].split(".").pop() || "";
+    while ((cm = callRe.exec(cleanBody)) !== null) {
+      // 接收者限定输出（Class.method 匹配前提）：带点链保留完整、剥空白/
+      // 泛型实参与 this.
+      let full = cm[1].replace(/\s+/g, "").replace(/<[^<>]*>/g, "");
+      if (full.startsWith("this.")) full = full.slice(5);
+      const seg = full.split(".").pop() || "";
       if (JAVA_KEYWORDS.has(seg)) continue;
       if (/^(if|for|while|switch|catch|new|return|case|do|super|this)$/.test(seg)) continue;
-      if (calls.length < 400 && !calls.includes(seg)) calls.push(seg);
+      if (calls.length < 400 && !calls.includes(full)) calls.push(full);
     }
 
     out.push({
@@ -187,6 +289,7 @@ export function extractJavaFile(filePath: string): FunctionInfo[] {
       exported,
       calls,
       protocol,
+      className: classStack[m.index] || undefined,
     });
   }
   return out;

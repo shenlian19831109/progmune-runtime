@@ -40,12 +40,15 @@ describe("extract-ir-java", () => {
     expect(fns.some((f) => f.name === "getTokenString")).toBe(true);
   });
 
-  it("方法调用边（calls）被提取——JWT 认证链可见", () => {
+  it("方法调用边（calls）被提取——JWT 认证链可见（带接收者输出完整链）", () => {
     const fp = path.join(dir, "JwtTokenFilter.java");
     fs.writeFileSync(fp, SAMPLE);
     const fns = extractJavaFile(fp);
     const filter = fns.find((f) => f.name === "doFilterInternal");
-    expect(filter!.calls).toContain("getSubFromToken");
+    expect(filter!.calls).toContain("jwtService.getSubFromToken");
+    // 链式调用按段输出：SecurityContextHolder.getContext() 输出第一段，
+    // 其返回值的 getAuthentication() 无文本接收者 → 裸名
+    expect(filter!.calls).toContain("SecurityContextHolder.getContext");
     expect(filter!.calls).toContain("getAuthentication");
     expect(filter!.calls).toContain("setAuthentication");
     // 关键字不算调用
@@ -193,5 +196,101 @@ public class Base {
     const ctor = fns.find((f) => f.name === "Base");
     expect(ctor).toBeTruthy();
     expect(ctor!.calls).not.toContain("super");
+  });
+});
+
+// ── 接收者限定名匹配（名碰撞根因修复，2026-09-06）──
+
+describe("接收者限定名匹配（className 捕获 + 限定调用输出）", () => {
+  it("className 捕获：顶层类与嵌套类归属正确", () => {
+    const fp = path.join(dir, "JacksonCustomizations.java");
+    fs.writeFileSync(fp, `package app;
+public class JacksonCustomizations {
+  public void outer() {}
+  public static class DateTimeSerializer {
+    public void serialize() {}
+    public static class Inner {
+      public void innermost() {}
+    }
+  }
+  public interface NestedIface {
+    default void ifaceMethod() {}
+  }
+}`);
+    const fns = extractJavaFile(fp);
+    const byName = new Map(fns.map((f) => [f.name, f]));
+    expect(byName.get("outer")!.className).toBe("JacksonCustomizations");
+    expect(byName.get("serialize")!.className).toBe("DateTimeSerializer");
+    expect(byName.get("innermost")!.className).toBe("Inner");
+    expect(byName.get("ifaceMethod")!.className).toBe("NestedIface");
+  });
+
+  it("匿名类内方法 className 为 undefined（按无类名处理）", () => {
+    const fp = path.join(dir, "Anon.java");
+    fs.writeFileSync(fp, `package app;
+public class Anon {
+  public void setup() {
+    Runnable r = new Runnable() {
+      public void run() {
+        doWork();
+      }
+    };
+  }
+}`);
+    const fns = extractJavaFile(fp);
+    expect(fns.find((f) => f.name === "run")!.className).toBeUndefined();
+    expect(fns.find((f) => f.name === "setup")!.className).toBe("Anon");
+  });
+
+  it("record 声明形态：record Name(...) { 的类名被捕获", () => {
+    const fp = path.join(dir, "Point.java");
+    fs.writeFileSync(fp, `package app;
+public record Point(int x, int y) {
+  public int sum() { return x + y; }
+}`);
+    const fns = extractJavaFile(fp);
+    expect(fns.find((f) => f.name === "sum")!.className).toBe("Point");
+  });
+
+  it("this. 前缀剥离：this.foo() 输出裸名", () => {
+    const fp = path.join(dir, "Self.java");
+    fs.writeFileSync(fp, `package app;
+public class Self {
+  public void outer() {
+    this.inner();
+  }
+  public void inner() {}
+}`);
+    const fns = extractJavaFile(fp);
+    expect(fns.find((f) => f.name === "outer")!.calls).toContain("inner");
+    expect(fns.find((f) => f.name === "outer")!.calls).not.toContain("this.inner");
+  });
+
+  it("限定串去重：a.open() 与 b.open() 是两条不同调用边", () => {
+    const fp = path.join(dir, "Multi.java");
+    fs.writeFileSync(fp, `package app;
+public class Multi {
+  public void go(A a, B b) {
+    a.open();
+    b.open();
+  }
+}`);
+    const fns = extractJavaFile(fp);
+    const calls = fns.find((f) => f.name === "go")!.calls;
+    expect(calls).toContain("a.open");
+    expect(calls).toContain("b.open");
+  });
+
+  it("无接收者调用保持裸名（protocol 金标 exact-match 锁）", () => {
+    const fp = path.join(dir, "Bare.java");
+    fs.writeFileSync(fp, `package app;
+public class Bare {
+  public void caller() {
+    setAuthentication(id, request);
+  }
+  public void setAuthentication(String id, Object r) {}
+}`);
+    const fns = extractJavaFile(fp);
+    expect(fns.find((f) => f.name === "caller")!.calls).toContain("setAuthentication");
   });
 });
