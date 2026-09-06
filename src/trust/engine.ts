@@ -1343,6 +1343,12 @@ interface ProtocolViolationResult {
     ssgViolations: number;
     /** 预算耗尽被截断的序列数（尾部调用未验证——覆盖率降级信号） */
     truncatedSequences?: number;
+    /** Oracle 独立度：人工确认绑定 vs 与代码同源的注解绑定 */
+    oracleIndependence?: {
+      confirmedRules: number;
+      sameSourceAnnotations: number;
+      confirmedAliases: number;
+    };
     summary: string;
     /** Warnings from project alias validation */
     aliasWarnings?: string[];
@@ -1369,6 +1375,9 @@ async function collectProtocolViolations(
   let ssgViolationCount = 0;
   // 截断序列计数（预算耗尽——尾部调用未验证，覆盖率降级信号）
   let truncatedSeqCount = 0;
+  // Oracle 隔离政策（docs/ORACLE_ISOLATION_POLICY.md）：注解合并注册的
+  // 绑定与代码作者同源——单独统计并在报告中披露（独立度指标）
+  const annotationRuleNames = new Set<string>();
   // C 注解建议（函数级作用域——返回值在 try 外组装）
   let annotationSuggestions: AnnotationSuggestion[] | undefined;
 
@@ -1452,9 +1461,11 @@ async function collectProtocolViolations(
             const nameUnique = (nameCounts.get(fname) || 0) === 1;
             if (qualified) {
               protocolRulesData.rules.set(qualified, protocol);
+              annotationRuleNames.add(qualified);
             }
             if (!f.className || nameUnique) {
               protocolRulesData.rules.set(fname, protocol);
+              annotationRuleNames.add(fname);
             }
             // CamelCase 真实命名（C 代码普遍，如 ACLCheckAllPerm）注册的规则
             // 原样无法被任何匹配策略触达（normalize 只作用于调用名；词段匹配
@@ -1463,6 +1474,7 @@ async function collectProtocolViolations(
             const normalized = normalizeName(fname);
             if (normalized !== fname && (!f.className || nameUnique)) {
               protocolRulesData.rules.set(normalized, protocol);
+              annotationRuleNames.add(normalized);
             }
           }
         }
@@ -1694,6 +1706,13 @@ async function collectProtocolViolations(
           : ""),
       aliasWarnings: protocolRulesData.aliasWarnings?.length
         ? protocolRulesData.aliasWarnings : undefined,
+      // Oracle 独立度（docs/ORACLE_ISOLATION_POLICY.md）：规则/别名均为
+      // 人工确认（加载端过滤）；项目注解与代码作者同源，单独披露
+      oracleIndependence: {
+        confirmedRules: protocolRulesData.rules.size - annotationRuleNames.size,
+        sameSourceAnnotations: annotationRuleNames.size,
+        confirmedAliases: protocolRulesData.aliasIndex.size,
+      },
     } : undefined,
     annotationSuggestions,
   };

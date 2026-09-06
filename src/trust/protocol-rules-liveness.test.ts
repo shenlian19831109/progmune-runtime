@@ -21,6 +21,7 @@ interface RuleDef {
   namespace?: string;
   pre_states?: string[];
   post_states?: string[];
+  status?: string;
 }
 
 interface ProtocolsFile {
@@ -59,9 +60,16 @@ function reachableStates(
 }
 
 describe("protocol rules liveness（跨命名空间死规则守卫）", () => {
-  it("每条规则的 pre_states 在其命名空间内可达（跨命名空间引用为显式例外）", () => {
+  it("每条 confirmed 规则的 pre_states 在其命名空间内可达（跨命名空间引用为显式例外）", () => {
     const { rules, namespaceInitialStates } = loadProtocols();
     const nsInit = namespaceInitialStates ?? {};
+
+    // Oracle 隔离政策：proposed 规则不参与判定，也不做活性断言
+    // （在人工确认时由 rule-propose 流程检查）
+    const activeRules: Record<string, RuleDef> = {};
+    for (const [name, r] of Object.entries(rules)) {
+      if (!r.status || r.status === "confirmed") activeRules[name] = r;
+    }
 
     // 文档化例外：printlab 业务链（printlab_order ↔ printlab_print 跨
     // 命名空间依赖：queue_order → start_print、upload_stl pre AUTHENTICATED
@@ -73,9 +81,9 @@ describe("protocol rules liveness（跨命名空间死规则守卫）", () => {
     ]);
 
     const dead: string[] = [];
-    for (const [name, r] of Object.entries(rules)) {
+    for (const [name, r] of Object.entries(activeRules)) {
       const ns = r.namespace ?? "_global";
-      const reach = reachableStates(ns, rules, nsInit);
+      const reach = reachableStates(ns, activeRules, nsInit);
       for (const s of r.pre_states ?? []) {
         if (!reach.has(s)) {
           dead.push(`${name} (ns=${ns}, pre=${s} 不可达)`);

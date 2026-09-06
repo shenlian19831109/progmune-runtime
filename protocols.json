@@ -127,7 +127,8 @@
         "loginMutation.mutateAsync",
         "signIn",
         "logIn"
-      ]
+      ],
+      "status": "confirmed"
     },
     "generate_jwt": {
       "namespace": "auth",
@@ -143,7 +144,8 @@
         "SignJWT",
         "auth.generateToken",
         "auth.issueToken"
-      ]
+      ],
+      "status": "confirmed"
     },
     "create_session": {
       "namespace": "auth",
@@ -162,7 +164,8 @@
         "express-session",
         "cookie-session",
         "auth.createSession"
-      ]
+      ],
+      "status": "confirmed"
     },
     "revoke_token": {
       "namespace": "auth",
@@ -181,7 +184,8 @@
         "jwt.revoke",
         "auth.revokeToken",
         "auth.blacklistToken"
-      ]
+      ],
+      "status": "confirmed"
     },
     "logout": {
       "namespace": "auth",
@@ -200,7 +204,8 @@
         "req.logout",
         "auth.logout",
         "auth.signOut"
-      ]
+      ],
+      "status": "confirmed"
     },
     "open_file": {
       "namespace": "file",
@@ -215,7 +220,8 @@
         "fs.createReadStream",
         "fs.createWriteStream",
         "fs.promises.open"
-      ]
+      ],
+      "status": "confirmed"
     },
     "read_file": {
       "namespace": "file",
@@ -227,7 +233,8 @@
       "aliases": [
         "stream.read",
         "fs.createReadStream"
-      ]
+      ],
+      "status": "confirmed"
     },
     "write_file": {
       "namespace": "file",
@@ -239,7 +246,8 @@
       "aliases": [
         "stream.write",
         "fs.createWriteStream"
-      ]
+      ],
+      "status": "confirmed"
     },
     "close_file": {
       "namespace": "file",
@@ -257,7 +265,8 @@
         "fs.promises.close",
         "stream.end",
         "stream.destroy"
-      ]
+      ],
+      "status": "confirmed"
     },
     "connect_db": {
       "namespace": "db",
@@ -278,7 +287,8 @@
         "sequelize.authenticate",
         "knex.initialize",
         "db.connect"
-      ]
+      ],
+      "status": "confirmed"
     },
     "query_db": {
       "namespace": "db",
@@ -339,7 +349,8 @@
         "pg.*",
         "drizzle.*",
         "orm.*"
-      ]
+      ],
+      "status": "confirmed"
     },
     "disconnect_db": {
       "namespace": "db",
@@ -368,7 +379,8 @@
         "connection.close",
         "pool.end",
         "pool.close"
-      ]
+      ],
+      "status": "confirmed"
     },
     "extractIR": {
       "namespace": "dev_pipeline",
@@ -379,7 +391,8 @@
       "invalidate": [
         "IR_STALE"
       ],
-      "description": "从源码提取 IR → 产出 IR_EXTRACTED 状态"
+      "description": "从源码提取 IR → 产出 IR_EXTRACTED 状态",
+      "status": "confirmed"
     },
     "validateAction": {
       "namespace": "dev_pipeline",
@@ -389,7 +402,8 @@
       "post_states": [
         "ACTION_VALIDATED"
       ],
-      "description": "校验单个动作合法性 → 需要 IR 已提取"
+      "description": "校验单个动作合法性 → 需要 IR 已提取",
+      "status": "confirmed"
     },
     "validateActionSequence": {
       "namespace": "dev_pipeline",
@@ -402,7 +416,8 @@
       "invalidate": [
         "ACTION_VALIDATED"
       ],
-      "description": "批量校验动作序列 → 需要动作已验证，校验后消耗"
+      "description": "批量校验动作序列 → 需要动作已验证，校验后消耗",
+      "status": "confirmed"
     },
     "emitCode": {
       "namespace": "dev_pipeline",
@@ -415,7 +430,8 @@
       "invalidate": [
         "SEQUENCE_VALIDATED"
       ],
-      "description": "编译动作序列为目标代码 → 需要序列已验证"
+      "description": "编译动作序列为目标代码 → 需要序列已验证",
+      "status": "confirmed"
     },
     "recordSession": {
       "namespace": "dev_pipeline",
@@ -428,55 +444,64 @@
       "invalidate": [
         "CODE_EMITTED"
       ],
-      "description": "保存执行会话到语料库 → 需要代码已生成"
+      "description": "保存执行会话到语料库 → 需要代码已生成",
+      "status": "confirmed"
     },
     "compute_hash": {
       "namespace": "stateless",
       "pre_states": [],
       "post_states": [],
-      "description": "计算输入数据的哈希摘要 —— 纯函数/幂等"
+      "description": "计算输入数据的哈希摘要 —— 纯函数/幂等",
+      "status": "confirmed"
     },
     "validate_schema": {
       "namespace": "stateless",
       "pre_states": [],
       "post_states": [],
-      "description": "对数据做 Schema 校验 —— 无副作用"
+      "description": "对数据做 Schema 校验 —— 无副作用",
+      "status": "confirmed"
     },
     "sanitize_input": {
       "namespace": "stateless",
       "pre_states": [],
       "post_states": [],
-      "description": "清理用户输入，去除危险字符"
+      "description": "清理用户输入，去除危险字符",
+      "status": "confirmed"
     },
     "verify_checksum": {
       "namespace": "stateless",
       "pre_states": [],
       "post_states": [],
-      "description": "通过校验和验证数据完整性"
+      "description": "通过校验和验证数据完整性",
+      "status": "confirmed"
     },
     "encode_payload": {
       "namespace": "stateless",
       "pre_states": [],
       "post_states": [],
-      "description": "将数据编码为 base64 / wire format"
+      "description": "将数据编码为 base64 / wire format",
+      "status": "confirmed"
     },
     "decode_payload": {
       "namespace": "stateless",
       "pre_states": [],
       "post_states": [],
-      "description": "从 wire format 解码回原始数据"
+      "description": "从 wire format 解码回原始数据",
+      "status": "confirmed"
     },
     "compress_buffer": {
       "namespace": "stateless",
       "pre_states": [],
       "post_states": [],
-      "description": "压缩数据缓冲区"
+      "description": "压缩数据缓冲区",
+      "status": "confirmed"
     },
     "decompress_buffer": {
       "namespace": "stateless",
       "pre_states": [],
       "post_states": [],
-      "description": "解压数据缓冲区"
+      "description": "解压数据缓冲区",
+      "status": "confirmed"
     },
     "begin_tx": {
       "namespace": "transaction",
@@ -496,7 +521,8 @@
         "knex.transaction",
         "mongoose.startSession",
         "pg.Client.query"
-      ]
+      ],
+      "status": "confirmed"
     },
     "commit_tx": {
       "namespace": "transaction",
@@ -518,7 +544,8 @@
         "sequelize.commit",
         "knex.commit",
         "mongoose.commitTransaction"
-      ]
+      ],
+      "status": "confirmed"
     },
     "rollback_tx": {
       "namespace": "transaction",
@@ -540,7 +567,8 @@
         "sequelize.rollback",
         "knex.rollback",
         "mongoose.abortTransaction"
-      ]
+      ],
+      "status": "confirmed"
     },
     "insert_record": {
       "namespace": "transaction",
@@ -552,7 +580,8 @@
         "tx.create",
         "transaction.insert",
         "transaction.create"
-      ]
+      ],
+      "status": "confirmed"
     },
     "update_record": {
       "namespace": "transaction",
@@ -562,7 +591,8 @@
       "aliases": [
         "tx.update",
         "transaction.update"
-      ]
+      ],
+      "status": "confirmed"
     },
     "delete_record": {
       "namespace": "transaction",
@@ -574,7 +604,8 @@
         "tx.remove",
         "transaction.delete",
         "transaction.remove"
-      ]
+      ],
+      "status": "confirmed"
     },
     "savepoint_create": {
       "namespace": "transaction",
@@ -584,7 +615,8 @@
       "post_states": [
         "SAVEPOINT_HELD"
       ],
-      "description": "在活跃事务中创建具名保存点"
+      "description": "在活跃事务中创建具名保存点",
+      "status": "confirmed"
     },
     "savepoint_release": {
       "namespace": "transaction",
@@ -597,7 +629,8 @@
       "invalidate": [
         "SAVEPOINT_HELD"
       ],
-      "description": "释放保存点，保留后续变更"
+      "description": "释放保存点，保留后续变更",
+      "status": "confirmed"
     },
     "rollback_to_savepoint": {
       "namespace": "transaction",
@@ -610,7 +643,8 @@
       "invalidate": [
         "SAVEPOINT_HELD"
       ],
-      "description": "回滚到保存点，撤销保存点之后的变更"
+      "description": "回滚到保存点，撤销保存点之后的变更",
+      "status": "confirmed"
     },
     "prep_two_phase": {
       "namespace": "transaction",
@@ -623,7 +657,8 @@
       "invalidate": [
         "TX_ACTIVE"
       ],
-      "description": "准备两阶段提交（表决阶段）"
+      "description": "准备两阶段提交（表决阶段）",
+      "status": "confirmed"
     },
     "evaluate_access": {
       "namespace": "conditional",
@@ -633,7 +668,8 @@
       "post_states": [
         "COND_EVALUATED"
       ],
-      "description": "根据权限策略评估访问条件"
+      "description": "根据权限策略评估访问条件",
+      "status": "confirmed"
     },
     "grant_access": {
       "namespace": "conditional",
@@ -646,7 +682,8 @@
       "invalidate": [
         "COND_EVALUATED"
       ],
-      "description": "TRUE 分支：授予访问权限"
+      "description": "TRUE 分支：授予访问权限",
+      "status": "confirmed"
     },
     "deny_access": {
       "namespace": "conditional",
@@ -659,7 +696,8 @@
       "invalidate": [
         "COND_EVALUATED"
       ],
-      "description": "FALSE 分支：拒绝访问"
+      "description": "FALSE 分支：拒绝访问",
+      "status": "confirmed"
     },
     "log_granted": {
       "namespace": "conditional",
@@ -673,7 +711,8 @@
         "COND_ACCEPTED",
         "COND_RESOLVED"
       ],
-      "description": "记录授权访问并结束条件判断"
+      "description": "记录授权访问并结束条件判断",
+      "status": "confirmed"
     },
     "log_denied": {
       "namespace": "conditional",
@@ -687,7 +726,8 @@
         "COND_REJECTED",
         "COND_RESOLVED"
       ],
-      "description": "记录拒绝访问并结束条件判断"
+      "description": "记录拒绝访问并结束条件判断",
+      "status": "confirmed"
     },
     "bypass_condition": {
       "namespace": "conditional",
@@ -701,7 +741,8 @@
         "COND_EVALUATED",
         "COND_RESOLVED"
       ],
-      "description": "短路：直接绕过条件检查"
+      "description": "短路：直接绕过条件检查",
+      "status": "confirmed"
     },
     "retry_evaluation": {
       "namespace": "conditional",
@@ -714,7 +755,8 @@
       "invalidate": [
         "COND_EVALUATED"
       ],
-      "description": "重试：回到空闲状态重新评估"
+      "description": "重试：回到空闲状态重新评估",
+      "status": "confirmed"
     },
     "escalate_access": {
       "namespace": "conditional",
@@ -727,7 +769,8 @@
       "invalidate": [
         "COND_REJECTED"
       ],
-      "description": "升级：将被拒绝的访问升级为通过"
+      "description": "升级：将被拒绝的访问升级为通过",
+      "status": "confirmed"
     },
     "audit_condition": {
       "namespace": "conditional",
@@ -743,7 +786,8 @@
         "COND_REJECTED",
         "COND_RESOLVED"
       ],
-      "description": "审计：无论分支结果如何，记录条件判断结果"
+      "description": "审计：无论分支结果如何，记录条件判断结果",
+      "status": "confirmed"
     },
     "init_fetch_loop": {
       "namespace": "loop",
@@ -753,7 +797,8 @@
       "post_states": [
         "FETCHING"
       ],
-      "description": "初始化获取循环，开始获取数据"
+      "description": "初始化获取循环，开始获取数据",
+      "status": "confirmed"
     },
     "fetch_batch": {
       "namespace": "loop",
@@ -766,7 +811,8 @@
       "invalidate": [
         "FETCHING"
       ],
-      "description": "获取下一批数据"
+      "description": "获取下一批数据",
+      "status": "confirmed"
     },
     "has_more_data": {
       "namespace": "loop",
@@ -779,7 +825,8 @@
       "invalidate": [
         "BATCH_READY"
       ],
-      "description": "检查还有更多数据 → 进入迭代体"
+      "description": "检查还有更多数据 → 进入迭代体",
+      "status": "confirmed"
     },
     "process_item": {
       "namespace": "loop",
@@ -789,7 +836,8 @@
       "post_states": [
         "ITERATING"
       ],
-      "description": "处理单个数据项（在迭代体内自循环）"
+      "description": "处理单个数据项（在迭代体内自循环）",
+      "status": "confirmed"
     },
     "next_iteration": {
       "namespace": "loop",
@@ -802,7 +850,8 @@
       "invalidate": [
         "ITERATING"
       ],
-      "description": "结束当前迭代 → 返回获取下一批"
+      "description": "结束当前迭代 → 返回获取下一批",
+      "status": "confirmed"
     },
     "exit_loop": {
       "namespace": "loop",
@@ -816,7 +865,8 @@
         "ITERATING",
         "LOOP_DONE"
       ],
-      "description": "正常退出循环（所有数据已处理完毕）"
+      "description": "正常退出循环（所有数据已处理完毕）",
+      "status": "confirmed"
     },
     "retry_batch": {
       "namespace": "loop",
@@ -827,7 +877,8 @@
       "post_states": [
         "FETCHING"
       ],
-      "description": "获取失败 → 重试当前批次"
+      "description": "获取失败 → 重试当前批次",
+      "status": "confirmed"
     },
     "timeout_exit": {
       "namespace": "loop",
@@ -843,7 +894,8 @@
         "ITERATING",
         "LOOP_DONE"
       ],
-      "description": "超时紧急退出循环"
+      "description": "超时紧急退出循环",
+      "status": "confirmed"
     },
     "poll_status": {
       "namespace": "loop",
@@ -853,7 +905,8 @@
       "post_states": [
         "ITERATING"
       ],
-      "description": "轮询状态更新（在迭代体内自循环）"
+      "description": "轮询状态更新（在迭代体内自循环）",
+      "status": "confirmed"
     },
     "auth_file_open": {
       "namespace": "cross",
@@ -863,7 +916,8 @@
       "post_states": [
         "AUTH_FILE_GATE"
       ],
-      "description": "跨协议桥：认证 → 打开文件访问门"
+      "description": "跨协议桥：认证 → 打开文件访问门",
+      "status": "confirmed"
     },
     "auth_file_read": {
       "namespace": "cross",
@@ -873,7 +927,8 @@
       "post_states": [
         "AUTH_FILE_GATE"
       ],
-      "description": "跨协议：通过认证门读取文件"
+      "description": "跨协议：通过认证门读取文件",
+      "status": "confirmed"
     },
     "auth_file_close": {
       "namespace": "cross",
@@ -886,7 +941,8 @@
       "invalidate": [
         "AUTH_FILE_GATE"
       ],
-      "description": "跨协议：关闭经认证门的文件会话"
+      "description": "跨协议：关闭经认证门的文件会话",
+      "status": "confirmed"
     },
     "auth_db_connect": {
       "namespace": "cross",
@@ -896,7 +952,8 @@
       "post_states": [
         "AUTH_DB_GATE"
       ],
-      "description": "跨协议桥：认证 → 打开数据库连接"
+      "description": "跨协议桥：认证 → 打开数据库连接",
+      "status": "confirmed"
     },
     "auth_db_query": {
       "namespace": "cross",
@@ -906,7 +963,8 @@
       "post_states": [
         "AUTH_DB_GATE"
       ],
-      "description": "跨协议：通过认证门查询数据库"
+      "description": "跨协议：通过认证门查询数据库",
+      "status": "confirmed"
     },
     "auth_db_disconnect": {
       "namespace": "cross",
@@ -919,7 +977,8 @@
       "invalidate": [
         "AUTH_DB_GATE"
       ],
-      "description": "跨协议：关闭经认证门的数据库连接"
+      "description": "跨协议：关闭经认证门的数据库连接",
+      "status": "confirmed"
     },
     "http_create_server": {
       "namespace": "tls",
@@ -939,7 +998,8 @@
         "koa.listen",
         "next.start",
         "nuxt.listen"
-      ]
+      ],
+      "status": "confirmed"
     },
     "load_tls_config": {
       "namespace": "tls",
@@ -954,7 +1014,8 @@
         "express.application.use",
         "helmet",
         "cors"
-      ]
+      ],
+      "status": "confirmed"
     },
     "hash_password": {
       "namespace": "registration",
@@ -972,7 +1033,8 @@
         "scrypt.hash",
         "crypto.pbkdf2",
         "auth.hashPassword"
-      ]
+      ],
+      "status": "confirmed"
     },
     "verify_hash": {
       "namespace": "auth",
@@ -990,7 +1052,8 @@
         "scrypt.verify",
         "crypto.timingSafeEqual",
         "auth.verifyPassword"
-      ]
+      ],
+      "status": "confirmed"
     },
     "verify_token": {
       "namespace": "auth",
@@ -1008,7 +1071,8 @@
         "passport.authenticate",
         "auth.verifyToken",
         "auth.middleware"
-      ]
+      ],
+      "status": "confirmed"
     },
     "check_owner": {
       "namespace": "auth",
@@ -1025,7 +1089,8 @@
         "auth.checkAccess",
         "auth.checkPermission",
         "auth.requireRole"
-      ]
+      ],
+      "status": "confirmed"
     },
     "check_exists": {
       "namespace": "data_integrity",
@@ -1033,7 +1098,8 @@
       "post_states": [
         "REFERENCE_VALID"
       ],
-      "description": "Verify referenced resource exists before creating a reference to it"
+      "description": "Verify referenced resource exists before creating a reference to it",
+      "status": "confirmed"
     },
     "create_reference": {
       "namespace": "data_integrity",
@@ -1043,7 +1109,8 @@
       "post_states": [
         "REFERENCE_CREATED"
       ],
-      "description": "Create reference to existing resource"
+      "description": "Create reference to existing resource",
+      "status": "confirmed"
     },
     "sanitize": {
       "namespace": "resource",
@@ -1051,7 +1118,8 @@
       "post_states": [
         "CONTENT_SANITIZED"
       ],
-      "description": "Sanitize input before processing"
+      "description": "Sanitize input before processing",
+      "status": "confirmed"
     },
     "validate_type": {
       "namespace": "resource",
@@ -1061,7 +1129,8 @@
       "post_states": [
         "TYPE_VALIDATED"
       ],
-      "description": "Validate input type matches expected schema"
+      "description": "Validate input type matches expected schema",
+      "status": "confirmed"
     },
     "validate_range": {
       "namespace": "resource",
@@ -1071,7 +1140,8 @@
       "post_states": [
         "CONTENT_VALID"
       ],
-      "description": "Validate input within acceptable range/limits"
+      "description": "Validate input within acceptable range/limits",
+      "status": "confirmed"
     },
     "initiate_payment": {
       "namespace": "payment",
@@ -1084,7 +1154,8 @@
       "invalidate": [
         "ORDER_CREATED"
       ],
-      "description": "发起支付 → 需要已创建的订单"
+      "description": "发起支付 → 需要已创建的订单",
+      "status": "confirmed"
     },
     "receive_payment_callback": {
       "namespace": "payment",
@@ -1097,7 +1168,8 @@
       "invalidate": [
         "PAYMENT_INITIATED"
       ],
-      "description": "接收支付回调 → 需要已发起的支付"
+      "description": "接收支付回调 → 需要已发起的支付",
+      "status": "confirmed"
     },
     "confirm_payment": {
       "namespace": "payment",
@@ -1110,7 +1182,8 @@
       "invalidate": [
         "PAYMENT_CALLBACK_RECEIVED"
       ],
-      "description": "确认支付 → 需要已验证的回调签名"
+      "description": "确认支付 → 需要已验证的回调签名",
+      "status": "confirmed"
     },
     "fail_payment": {
       "namespace": "payment",
@@ -1125,7 +1198,8 @@
         "PAYMENT_INITIATED",
         "PAYMENT_CALLBACK_RECEIVED"
       ],
-      "description": "支付失败 → 超时、签名无效或用户取消"
+      "description": "支付失败 → 超时、签名无效或用户取消",
+      "status": "confirmed"
     },
     "receive_upload": {
       "namespace": "file_upload",
@@ -1143,7 +1217,8 @@
         "upload.array",
         "busboy",
         "formidable"
-      ]
+      ],
+      "status": "confirmed"
     },
     "validate_file": {
       "namespace": "file_upload",
@@ -1156,7 +1231,8 @@
       "invalidate": [
         "FILE_RECEIVED"
       ],
-      "description": "验证文件类型和大小 → 需要已接收的文件"
+      "description": "验证文件类型和大小 → 需要已接收的文件",
+      "status": "confirmed"
     },
     "store_file": {
       "namespace": "file_upload",
@@ -1169,7 +1245,8 @@
       "invalidate": [
         "FILE_VALIDATED"
       ],
-      "description": "存储文件到 S3/本地 → 需要已验证的文件"
+      "description": "存储文件到 S3/本地 → 需要已验证的文件",
+      "status": "confirmed"
     },
     "reference_file": {
       "namespace": "file_upload",
@@ -1179,7 +1256,8 @@
       "post_states": [
         "FILE_REFERENCED"
       ],
-      "description": "关联文件到业务对象 → 需要已存储的文件"
+      "description": "关联文件到业务对象 → 需要已存储的文件",
+      "status": "confirmed"
     },
     "check_rate_limit": {
       "namespace": "api_gateway",
@@ -1187,7 +1265,8 @@
       "post_states": [
         "RATE_CHECKED"
       ],
-      "description": "检查 API 调用频率 → 无状态检查"
+      "description": "检查 API 调用频率 → 无状态检查",
+      "status": "confirmed"
     },
     "throttle_request": {
       "namespace": "api_gateway",
@@ -1200,7 +1279,8 @@
       "invalidate": [
         "RATE_CHECKED"
       ],
-      "description": "限流请求 → 超过频率限制"
+      "description": "限流请求 → 超过频率限制",
+      "status": "confirmed"
     },
     "pass_rate_check": {
       "namespace": "api_gateway",
@@ -1208,7 +1288,8 @@
         "RATE_CHECKED"
       ],
       "post_states": [],
-      "description": "通过频率检查 → 正常处理请求"
+      "description": "通过频率检查 → 正常处理请求",
+      "status": "confirmed"
     },
     "compose_notification": {
       "namespace": "notification",
@@ -1220,7 +1301,8 @@
       "aliases": [
         "nodemailer.createTransport",
         "nodemailer.compose"
-      ]
+      ],
+      "status": "confirmed"
     },
     "send_notification": {
       "namespace": "notification",
@@ -1237,7 +1319,8 @@
         "nodemailer.transport.sendMail",
         "transporter.sendMail",
         "email.send"
-      ]
+      ],
+      "status": "confirmed"
     },
     "confirm_delivery": {
       "namespace": "notification",
@@ -1250,7 +1333,8 @@
       "invalidate": [
         "NOTIFICATION_SENT"
       ],
-      "description": "确认送达 → 邮件已投递/短信已发送"
+      "description": "确认送达 → 邮件已投递/短信已发送",
+      "status": "confirmed"
     },
     "receive_password": {
       "namespace": "registration",
@@ -1260,7 +1344,8 @@
       "post_states": [
         "PASSWORD_RECEIVED"
       ],
-      "description": "Registration: user submits password → ready to hash"
+      "description": "Registration: user submits password → ready to hash",
+      "status": "confirmed"
     },
     "register_user": {
       "namespace": "registration",
@@ -1273,7 +1358,8 @@
       "invalidate": [
         "PASSWORD_HASHED"
       ],
-      "description": "Registration: save user with hashed password → user record created"
+      "description": "Registration: save user with hashed password → user record created",
+      "status": "confirmed"
     },
     "send_verification_code": {
       "namespace": "registration",
@@ -1284,7 +1370,8 @@
       "invalidate": [
         "USER_REGISTERED"
       ],
-      "description": "发送验证码 → 邮箱/手机（手机验证码在注册前发送——前置状态放开）"
+      "description": "发送验证码 → 邮箱/手机（手机验证码在注册前发送——前置状态放开）",
+      "status": "confirmed"
     },
     "verify_code": {
       "namespace": "registration",
@@ -1297,7 +1384,8 @@
       "invalidate": [
         "VERIFICATION_CODE_SENT"
       ],
-      "description": "验证码校验 → 匹配且未过期"
+      "description": "验证码校验 → 匹配且未过期",
+      "status": "confirmed"
     },
     "activate_account": {
       "namespace": "registration",
@@ -1310,7 +1398,8 @@
       "invalidate": [
         "VERIFICATION_CONFIRMED"
       ],
-      "description": "激活账号 → 验证通过后启用"
+      "description": "激活账号 → 验证通过后启用",
+      "status": "confirmed"
     },
     "create_user_session": {
       "namespace": "session_mgmt",
@@ -1330,7 +1419,8 @@
         "createSessionToken",
         "signSession",
         "this.signSession"
-      ]
+      ],
+      "status": "confirmed"
     },
     "refresh_session": {
       "namespace": "session_mgmt",
@@ -1340,7 +1430,8 @@
       "post_states": [
         "SESSION_REFRESHED"
       ],
-      "description": "刷新会话 → 延长有效期"
+      "description": "刷新会话 → 延长有效期",
+      "status": "confirmed"
     },
     "timeout_session": {
       "namespace": "session_mgmt",
@@ -1355,7 +1446,8 @@
         "SESSION_CREATED",
         "SESSION_REFRESHED"
       ],
-      "description": "会话超时 → 自动过期"
+      "description": "会话超时 → 自动过期",
+      "status": "confirmed"
     },
     "revoke_session": {
       "namespace": "session_mgmt",
@@ -1376,7 +1468,8 @@
         "SESSION_CREATED",
         "SESSION_REFRESHED"
       ],
-      "description": "撤销会话 → 管理员/用户主动登出（撤销是幂等操作，任何时刻都合法）"
+      "description": "撤销会话 → 管理员/用户主动登出（撤销是幂等操作，任何时刻都合法）",
+      "status": "confirmed"
     },
     "register_supplier": {
       "namespace": "supplier",
@@ -1384,7 +1477,8 @@
       "post_states": [
         "SUPPLIER_REGISTERED"
       ],
-      "description": "注册供应商 → 基本信息录入"
+      "description": "注册供应商 → 基本信息录入",
+      "status": "confirmed"
     },
     "verify_supplier": {
       "namespace": "supplier",
@@ -1397,7 +1491,8 @@
       "invalidate": [
         "SUPPLIER_REGISTERED"
       ],
-      "description": "验证供应商 → 资质审核"
+      "description": "验证供应商 → 资质审核",
+      "status": "confirmed"
     },
     "enable_supplier": {
       "namespace": "supplier",
@@ -1410,7 +1505,8 @@
       "invalidate": [
         "SUPPLIER_VERIFIED"
       ],
-      "description": "启用供应商 → 可接单"
+      "description": "启用供应商 → 可接单",
+      "status": "confirmed"
     },
     "assign_product_to_supplier": {
       "namespace": "supplier",
@@ -1420,7 +1516,8 @@
       "post_states": [
         "PRODUCT_ASSIGNED"
       ],
-      "description": "分配产品给供应商 → 供应商已启用"
+      "description": "分配产品给供应商 → 供应商已启用",
+      "status": "confirmed"
     },
     "upload_stl": {
       "namespace": "printlab_order",
@@ -1430,7 +1527,8 @@
       "post_states": [
         "STL_UPLOADED"
       ],
-      "description": "上传 STL 文件 → 用户已认证"
+      "description": "上传 STL 文件 → 用户已认证",
+      "status": "confirmed"
     },
     "slice_model": {
       "namespace": "printlab_order",
@@ -1443,7 +1541,8 @@
       "invalidate": [
         "STL_UPLOADED"
       ],
-      "description": "切片 3D 模型 → STL 已上传"
+      "description": "切片 3D 模型 → STL 已上传",
+      "status": "confirmed"
     },
     "generate_gcode": {
       "namespace": "printlab_order",
@@ -1456,7 +1555,8 @@
       "invalidate": [
         "STL_SLICED"
       ],
-      "description": "生成 GCode → 模型已切片"
+      "description": "生成 GCode → 模型已切片",
+      "status": "confirmed"
     },
     "estimate_cost": {
       "namespace": "printlab_order",
@@ -1466,7 +1566,8 @@
       "post_states": [
         "COST_ESTIMATED"
       ],
-      "description": "估算打印成本 → GCode 已生成"
+      "description": "估算打印成本 → GCode 已生成",
+      "status": "confirmed"
     },
     "create_order": {
       "namespace": "printlab_order",
@@ -1477,7 +1578,8 @@
       "invalidate": [
         "COST_ESTIMATED"
       ],
-      "description": "创建订单 → 成本已估算（订单创建是生命周期入口——成本估算发生在创建过程中）"
+      "description": "创建订单 → 成本已估算（订单创建是生命周期入口——成本估算发生在创建过程中）",
+      "status": "confirmed"
     },
     "queue_order": {
       "namespace": "printlab_order",
@@ -1490,7 +1592,8 @@
       "invalidate": [
         "PAYMENT_CONFIRMED"
       ],
-      "description": "订单排队 → 支付已确认"
+      "description": "订单排队 → 支付已确认",
+      "status": "confirmed"
     },
     "start_print": {
       "namespace": "printlab_print",
@@ -1503,7 +1606,8 @@
       "invalidate": [
         "ORDER_QUEUED"
       ],
-      "description": "开始打印 → 订单已排队"
+      "description": "开始打印 → 订单已排队",
+      "status": "confirmed"
     },
     "complete_print": {
       "namespace": "printlab_print",
@@ -1516,7 +1620,8 @@
       "invalidate": [
         "PRINT_STARTED"
       ],
-      "description": "打印完成 → 打印已开始"
+      "description": "打印完成 → 打印已开始",
+      "status": "confirmed"
     },
     "ship_order": {
       "namespace": "printlab_order",
@@ -1529,7 +1634,8 @@
       "invalidate": [
         "PRINT_COMPLETED"
       ],
-      "description": "发货 → 打印已完成"
+      "description": "发货 → 打印已完成",
+      "status": "confirmed"
     },
     "deliver_order": {
       "namespace": "printlab_order",
@@ -1542,7 +1648,8 @@
       "invalidate": [
         "ORDER_SHIPPED"
       ],
-      "description": "订单交付 → 已发货"
+      "description": "订单交付 → 已发货",
+      "status": "confirmed"
     },
     "check_resource_ownership": {
       "namespace": "auth",
@@ -1552,19 +1659,22 @@
       "post_states": [
         "AUTHORIZED"
       ],
-      "description": "检查资源所有权 → 用户只能操作自己的数据"
+      "description": "检查资源所有权 → 用户只能操作自己的数据",
+      "status": "confirmed"
     },
     "audit_mutation": {
       "namespace": "data_integrity",
       "pre_states": [],
       "post_states": [],
-      "description": "记录数据变更审计日志 → 每次写操作后"
+      "description": "记录数据变更审计日志 → 每次写操作后",
+      "status": "confirmed"
     },
     "validate_business_rule": {
       "namespace": "data_integrity",
       "pre_states": [],
       "post_states": [],
-      "description": "验证业务规则 → 订单金额 > 0, 库存 >= 0"
+      "description": "验证业务规则 → 订单金额 > 0, 库存 >= 0",
+      "status": "confirmed"
     },
     "refund_payment": {
       "namespace": "payment",
@@ -1577,7 +1687,8 @@
       "invalidate": [
         "PAYMENT_CONFIRMED"
       ],
-      "description": "退款 → 已确认的支付可退款，退款后状态变更为失败"
+      "description": "退款 → 已确认的支付可退款，退款后状态变更为失败",
+      "status": "confirmed"
     },
     "cancel_payment": {
       "namespace": "payment",
@@ -1592,7 +1703,8 @@
         "ORDER_CREATED",
         "PAYMENT_INITIATED"
       ],
-      "description": "取消支付 → 在回调前取消，订单和支付状态一起失效"
+      "description": "取消支付 → 在回调前取消，订单和支付状态一起失效",
+      "status": "confirmed"
     },
     "retry_payment": {
       "namespace": "payment",
@@ -1605,7 +1717,8 @@
       "invalidate": [
         "PAYMENT_FAILED"
       ],
-      "description": "重试支付 → 支付失败后可重新发起"
+      "description": "重试支付 → 支付失败后可重新发起",
+      "status": "confirmed"
     },
     "verify_payment_signature": {
       "namespace": "payment",
@@ -1613,7 +1726,8 @@
       "post_states": [
         "PAYMENT_CALLBACK_RECEIVED"
       ],
-      "description": "验证支付回调签名 → 防伪造回调（自保持，不改变状态）（签名验证是回调处理第一步，无前置状态要求）"
+      "description": "验证支付回调签名 → 防伪造回调（自保持，不改变状态）（签名验证是回调处理第一步，无前置状态要求）",
+      "status": "confirmed"
     },
     "reconcile_payment": {
       "namespace": "payment",
@@ -1623,7 +1737,8 @@
       "post_states": [
         "PAYMENT_CONFIRMED"
       ],
-      "description": "对账 → 与支付网关日终对账（自保持）"
+      "description": "对账 → 与支付网关日终对账（自保持）",
+      "status": "confirmed"
     },
     "validate_session": {
       "namespace": "session_mgmt",
@@ -1631,7 +1746,8 @@
       "post_states": [
         "SESSION_CREATED"
       ],
-      "description": "验证会话有效性 → 每个请求的中间件检查（入口点——冷启动/已登录均可）"
+      "description": "验证会话有效性 → 每个请求的中间件检查（入口点——冷启动/已登录均可）",
+      "status": "confirmed"
     },
     "extend_session": {
       "namespace": "session_mgmt",
@@ -1644,7 +1760,8 @@
       "invalidate": [
         "SESSION_CREATED"
       ],
-      "description": "延长会话有效期 → 用户活跃时自动续期"
+      "description": "延长会话有效期 → 用户活跃时自动续期",
+      "status": "confirmed"
     },
     "renew_session_from_expired": {
       "namespace": "session_mgmt",
@@ -1657,7 +1774,8 @@
       "invalidate": [
         "SESSION_EXPIRED"
       ],
-      "description": "从过期会话恢复 → 通过 refresh token 或重新登录创建新会话"
+      "description": "从过期会话恢复 → 通过 refresh token 或重新登录创建新会话",
+      "status": "confirmed"
     },
     "revoke_all_sessions": {
       "namespace": "session_mgmt",
@@ -1669,7 +1787,8 @@
         "SESSION_CREATED",
         "SESSION_REFRESHED"
       ],
-      "description": "批量撤销所有会话 → 密码修改后强制所有设备下线"
+      "description": "批量撤销所有会话 → 密码修改后强制所有设备下线",
+      "status": "confirmed"
     },
     "cleanup_expired_sessions": {
       "namespace": "session_mgmt",
@@ -1682,7 +1801,8 @@
         "SESSION_EXPIRED",
         "SESSION_REVOKED"
       ],
-      "description": "清理过期/已撤销的会话记录 → 定时任务，释放存储"
+      "description": "清理过期/已撤销的会话记录 → 定时任务，释放存储",
+      "status": "confirmed"
     },
     "rotate_session_token": {
       "namespace": "session_mgmt",
@@ -1697,7 +1817,8 @@
         "SESSION_CREATED",
         "SESSION_REFRESHED"
       ],
-      "description": "轮换会话令牌 → 防固定攻击，旧令牌立即失效"
+      "description": "轮换会话令牌 → 防固定攻击，旧令牌立即失效",
+      "status": "confirmed"
     },
     "resend_verification_code": {
       "namespace": "registration",
@@ -1707,7 +1828,8 @@
       "post_states": [
         "VERIFICATION_CODE_SENT"
       ],
-      "description": "重发验证码 → 前一个验证码失效，发送新验证码"
+      "description": "重发验证码 → 前一个验证码失效，发送新验证码",
+      "status": "confirmed"
     },
     "expire_verification": {
       "namespace": "registration",
@@ -1720,7 +1842,8 @@
       "invalidate": [
         "VERIFICATION_CODE_SENT"
       ],
-      "description": "验证码过期 → 回到已注册状态，可重新发送"
+      "description": "验证码过期 → 回到已注册状态，可重新发送",
+      "status": "confirmed"
     },
     "reject_registration": {
       "namespace": "registration",
@@ -1735,7 +1858,8 @@
         "USER_REGISTERED",
         "VERIFICATION_CODE_SENT"
       ],
-      "description": "拒绝注册 → 管理员拒绝或黑名单检测触发，回到未认证状态"
+      "description": "拒绝注册 → 管理员拒绝或黑名单检测触发，回到未认证状态",
+      "status": "confirmed"
     },
     "reject_file": {
       "namespace": "file_upload",
@@ -1748,7 +1872,8 @@
         "FILE_RECEIVED",
         "FILE_VALIDATED"
       ],
-      "description": "拒绝文件 → 类型/大小不符合要求，丢弃文件"
+      "description": "拒绝文件 → 类型/大小不符合要求，丢弃文件",
+      "status": "confirmed"
     },
     "virus_scan_file": {
       "namespace": "file_upload",
@@ -1758,7 +1883,8 @@
       "post_states": [
         "FILE_RECEIVED"
       ],
-      "description": "病毒扫描 → 上传后扫描（自保持，通过则继续）"
+      "description": "病毒扫描 → 上传后扫描（自保持，通过则继续）",
+      "status": "confirmed"
     },
     "delete_file": {
       "namespace": "file_upload",
@@ -1771,7 +1897,8 @@
         "FILE_STORED",
         "FILE_REFERENCED"
       ],
-      "description": "删除已存储文件 → 释放存储空间"
+      "description": "删除已存储文件 → 释放存储空间",
+      "status": "confirmed"
     },
     "escape_output": {
       "namespace": "resource",
@@ -1781,13 +1908,15 @@
       "post_states": [
         "CONTENT_VALID"
       ],
-      "description": "输出转义 → 防 XSS，HTML 实体编码（自保持）"
+      "description": "输出转义 → 防 XSS，HTML 实体编码（自保持）",
+      "status": "confirmed"
     },
     "rate_limit_resource": {
       "namespace": "resource",
       "pre_states": [],
       "post_states": [],
-      "description": "资源访问频率限制 → 防止滥用和 DoS"
+      "description": "资源访问频率限制 → 防止滥用和 DoS",
+      "status": "confirmed"
     },
     "circuit_break": {
       "namespace": "api_gateway",
@@ -1800,7 +1929,8 @@
       "invalidate": [
         "RATE_CHECKED"
       ],
-      "description": "熔断 → 连续失败超过阈值时触发，直接拒绝请求"
+      "description": "熔断 → 连续失败超过阈值时触发，直接拒绝请求",
+      "status": "confirmed"
     },
     "retry_notification": {
       "namespace": "notification",
@@ -1810,7 +1940,8 @@
       "post_states": [
         "NOTIFICATION_SENT"
       ],
-      "description": "重试发送 → 上次发送失败后重试（自保持）"
+      "description": "重试发送 → 上次发送失败后重试（自保持）",
+      "status": "confirmed"
     },
     "fail_notification": {
       "namespace": "notification",
@@ -1823,7 +1954,8 @@
         "NOTIFICATION_COMPOSED",
         "NOTIFICATION_SENT"
       ],
-      "description": "通知失败 → 永久失败（如无效地址），放弃发送"
+      "description": "通知失败 → 永久失败（如无效地址），放弃发送",
+      "status": "confirmed"
     },
     "disable_supplier": {
       "namespace": "supplier",
@@ -1836,7 +1968,8 @@
       "invalidate": [
         "SUPPLIER_ENABLED"
       ],
-      "description": "停用供应商 → 暂停接单但不取消资质"
+      "description": "停用供应商 → 暂停接单但不取消资质",
+      "status": "confirmed"
     },
     "deregister_supplier": {
       "namespace": "supplier",
@@ -1849,7 +1982,8 @@
         "SUPPLIER_REGISTERED",
         "SUPPLIER_VERIFIED"
       ],
-      "description": "注销供应商 → 完全移除供应商资格"
+      "description": "注销供应商 → 完全移除供应商资格",
+      "status": "confirmed"
     },
     "validate_order_integrity": {
       "namespace": "data_integrity",
@@ -1859,7 +1993,8 @@
       "post_states": [
         "REFERENCE_CREATED"
       ],
-      "description": "校验订单完整性 → 验证关联数据未被篡改（自保持）"
+      "description": "校验订单完整性 → 验证关联数据未被篡改（自保持）",
+      "status": "confirmed"
     },
     "renew_tls_certificate": {
       "namespace": "tls",
@@ -1869,7 +2004,8 @@
       "post_states": [
         "TLS_CONFIGURED"
       ],
-      "description": "更新 TLS 证书 → 到期前轮换证书（自保持）"
+      "description": "更新 TLS 证书 → 到期前轮换证书（自保持）",
+      "status": "confirmed"
     },
     "rollback_ir": {
       "namespace": "dev_pipeline",
@@ -1884,7 +2020,8 @@
         "IR_EXTRACTED",
         "ACTION_VALIDATED"
       ],
-      "description": "回滚 IR → 校验失败时重置到 STALE 状态"
+      "description": "回滚 IR → 校验失败时重置到 STALE 状态",
+      "status": "confirmed"
     },
     "cancel_order": {
       "namespace": "printlab_order",
@@ -1896,7 +2033,8 @@
         "ORDER_CREATED",
         "ORDER_QUEUED"
       ],
-      "description": "取消订单 → 打印前取消，释放队列资源"
+      "description": "取消订单 → 打印前取消，释放队列资源",
+      "status": "confirmed"
     },
     "fail_print": {
       "namespace": "printlab_print",
@@ -1907,7 +2045,8 @@
       "invalidate": [
         "PRINT_STARTED"
       ],
-      "description": "打印失败 → 材料耗尽/机器故障/翘边等"
+      "description": "打印失败 → 材料耗尽/机器故障/翘边等",
+      "status": "confirmed"
     },
     "logout_without_invalidate": {
       "namespace": "auth",
@@ -1918,7 +2057,8 @@
       "invalidate": [
         "SESSION_ACTIVE"
       ],
-      "description": "PLSB PLS-005: 登出必须销毁会话——防止会话固定攻击"
+      "description": "PLSB PLS-005: 登出必须销毁会话——防止会话固定攻击",
+      "status": "confirmed"
     },
     "admin_action_without_check": {
       "namespace": "auth",
@@ -1929,7 +2069,8 @@
         "AUTHORIZED"
       ],
       "invalidate": [],
-      "description": "PLSB PLS-006: 敏感操作前必须验证管理员角色——防止权限提升"
+      "description": "PLSB PLS-006: 敏感操作前必须验证管理员角色——防止权限提升",
+      "status": "confirmed"
     },
     "double_commit": {
       "namespace": "transaction",
@@ -1942,7 +2083,8 @@
       "invalidate": [
         "TX_ACTIVE"
       ],
-      "description": "PLSB PLS-008: 事务只能提交一次——重复提交非法"
+      "description": "PLSB PLS-008: 事务只能提交一次——重复提交非法",
+      "status": "confirmed"
     },
     "validate_request": {
       "namespace": "missing_validation",
@@ -1969,7 +2111,8 @@
         "yup.validate",
         "schema.parse",
         "schema.safeParse"
-      ]
+      ],
+      "status": "confirmed"
     },
     "execute_without_validation": {
       "namespace": "missing_validation",
@@ -1989,7 +2132,8 @@
         "router.handle",
         "express.handler",
         "handler.execute"
-      ]
+      ],
+      "status": "confirmed"
     },
     "double_release": {
       "namespace": "resource_leak",
@@ -2003,7 +2147,8 @@
         "FILE_OPEN",
         "DB_CONNECTED"
       ],
-      "description": "PLSB PLS-002: 资源不能释放两次——重复释放非法"
+      "description": "PLSB PLS-002: 资源不能释放两次——重复释放非法",
+      "status": "confirmed"
     },
     "use_after_release": {
       "namespace": "use_after_free",
@@ -2012,7 +2157,8 @@
       ],
       "post_states": [],
       "invalidate": [],
-      "description": "PLSB PLS-003: 不能在释放后使用资源——使用后释放检查"
+      "description": "PLSB PLS-003: 不能在释放后使用资源——使用后释放检查",
+      "status": "confirmed"
     },
     "read_file_atomic": {
       "namespace": "file",
@@ -2024,7 +2170,8 @@
         "fs.readFile",
         "fs.promises.readFile",
         "fs.promises.readFileSync"
-      ]
+      ],
+      "status": "confirmed"
     },
     "write_file_atomic": {
       "namespace": "file",
@@ -2036,7 +2183,8 @@
         "fs.writeFile",
         "fs.promises.writeFile",
         "fs.promises.writeFileSync"
-      ]
+      ],
+      "status": "confirmed"
     }
   }
 }

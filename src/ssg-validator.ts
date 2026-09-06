@@ -916,11 +916,16 @@ export function parseProtocolsFromJSON(
       invalidate?: string[];
       namespace?: string;
       aliases?: string[];
+      /** Oracle 隔离政策（docs/ORACLE_ISOLATION_POLICY.md）：人工确认门。
+       *  缺失 = 存量祖父（视为 confirmed）；proposed = 提案不参与判定 */
+      status?: string;
     }>;
   }
 ): FunctionProtocol[] {
   const protocols: FunctionProtocol[] = [];
   for (const [funcName, rule] of Object.entries(protocolDef.rules)) {
+    // 未人工确认的提案规则不加载——AI 只提案，人不签字不生效
+    if (rule.status && rule.status !== "confirmed") continue;
     protocols.push({
       function: funcName,
       protocol: {
