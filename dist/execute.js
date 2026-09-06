@@ -43,6 +43,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.recordGeneration = recordGeneration;
 exports.getExecutionMetrics = getExecutionMetrics;
+exports.applyPolicyGateAfterWrite = applyPolicyGateAfterWrite;
 exports.execute = execute;
 exports.verifyCompiles = verifyCompiles;
 exports.verifyFileMarker = verifyFileMarker;
@@ -52,6 +53,9 @@ const planner_1 = require("./planner");
 const extract_project_ir_1 = require("./extract-project-ir");
 const failure_collector_1 = require("./failure-collector");
 const emitter_1 = require("./emitter");
+// 静态导入（vitest 下 lazy require CJS 互操作不可靠；certify/policy 无环）
+const certify_1 = require("./certify");
+const engine_1 = require("./policy/engine");
 const METRICS_FILE = ".progmune_corpus/metrics.json";
 function loadMetrics() {
     try {
@@ -95,6 +99,68 @@ function getExecutionMetrics() {
  * @param projectPath - Absolute path to project root
  * @param filePath - Optional: write generated code to this file
  */
+/**
+ * 策略门（审计修复 2026-09-06）：项目配置 .progmune-policy.json 时，
+ * 写盘后即时 certify + evaluatePolicy；BLOCK 或验证自身失败 → 回滚写盘
+ * （恢复 prevContent 或删除新文件）——策略引擎 BLOCK 至此获得写盘强制力。
+ * 未配置策略文件时无操作（旧行为保持）。
+ */
+function applyPolicyGateAfterWrite(projectPath, resolvedPath, prevContent) {
+    const policyOptIn = fs.existsSync(path.join(projectPath, ".progmune-policy.json"));
+    if (!policyOptIn)
+        return { blocked: false };
+    const rollback = () => {
+        if (prevContent !== undefined) {
+            fs.writeFileSync(resolvedPath, prevContent, "utf-8");
+        }
+        else if (fs.existsSync(resolvedPath)) {
+            fs.unlinkSync(resolvedPath);
+        }
+    };
+    try {
+        const cert = (0, certify_1.certify)(resolvedPath);
+        const { rules, configError } = (0, engine_1.loadPolicyConfig)(projectPath);
+        if (configError) {
+            throw new Error(configError);
+        }
+        const policyResult = (0, engine_1.evaluatePolicy)({
+            certificate: {
+                validated: cert.validated,
+                confidence: cert.confidence,
+                provenanceIntact: cert.provenanceIntact,
+                fingerprint: cert.fingerprint,
+                violations: cert.violations,
+                plsbCoverage: cert.plsbCoverage,
+                plsbRecall: cert.plsbRecall,
+                degraded: cert.degraded,
+                sessionId: cert.sessionId,
+                file: cert.file,
+                timestamp: cert.timestamp,
+            },
+        }, rules);
+        if (!policyResult.passed) {
+            rollback();
+            return {
+                blocked: true,
+                decision: policyResult.verdict,
+                violations: policyResult.violations.map((v) => ({
+                    ruleType: v.rule.type,
+                    detail: v.detail || v.actual,
+                })),
+                error: `Policy gate BLOCKED the write: ${policyResult.violations.map((v) => v.rule.type).join(", ")} — file rolled back`,
+            };
+        }
+        return { blocked: false };
+    }
+    catch (e) {
+        // fail-closed：策略验证自身失败 → 回滚写盘
+        rollback();
+        return {
+            blocked: true,
+            error: `Policy gate failed (fail-closed): ${e.message} — file rolled back`,
+        };
+    }
+}
 /** @requires INTENT @produces CODE */
 /** @requires INTENT @produces CODE */
 async function execute(intent, projectPath, filePath) {
@@ -149,14 +215,31 @@ async function execute(intent, projectPath, filePath) {
         irFunctionCount: ir.length,
         protocolRuleCount,
     });
-    // 5. Write to file if requested
+    // 5. Write to file if requested（策略门：项目配置了 .progmune-policy.json
+    //    时，写盘后即时验证；BLOCK → 回滚写盘并返回策略违规——审计修复
+    //    2026-09-06：此前策略引擎与代码生成管道完全脱节，BLOCK 无强制力）
     if (filePath) {
         const resolvedPath = path.isAbsolute(filePath) ? filePath : path.resolve(projectPath, filePath);
         const dir = path.dirname(resolvedPath);
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, { recursive: true });
         }
+        const prevContent = fs.existsSync(resolvedPath)
+            ? fs.readFileSync(resolvedPath, "utf-8") : undefined;
         fs.writeFileSync(resolvedPath, code, "utf-8");
+        const gate = applyPolicyGateAfterWrite(projectPath, resolvedPath, prevContent);
+        if (gate.blocked) {
+            return {
+                success: false, degraded: planResult.degraded ?? false, code,
+                sessionId: planResult.sessionId, hash: "", ruleHash: planResult.ruleHash || "",
+                irFunctionCount: ir.length, protocolRuleCount, violations: 0,
+                repairApplied: false, repairCount: 0, repairBranchIds: [],
+                branchWinner: undefined,
+                policyDecision: gate.decision,
+                policyViolations: gate.violations,
+                error: gate.error,
+            };
+        }
     }
     // 6. Compute hash (from code content)
     const crypto = require("crypto");

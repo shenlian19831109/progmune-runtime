@@ -46,6 +46,10 @@ exports.loadEnterprisePolicyConfig = loadEnterprisePolicyConfig;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const types_1 = require("./types");
+// 静态导入（vitest 环境下 lazy require 的 CJS 互操作不可靠——engine.ts
+// 同款陷阱，2026-08-27 DSH 修复先例；两模块无环，静态导入安全）
+const risk_model_1 = require("../risk-model");
+const protocol_knowledge_1 = require("../protocol-knowledge");
 function confidenceToNumber(c) {
     if (c === "high")
         return 2;
@@ -93,8 +97,39 @@ function loadPolicyConfig(projectPath, configPath) {
         return { rules: merged, source: cfgFile };
     }
     catch (e) {
-        console.error(`⚠️  Failed to load policy config: ${e.message}. Using defaults.`);
-        return { rules: [...types_1.DEFAULT_POLICY], source: "built-in defaults (config error)" };
+        // 审计修复（fail-closed 信号）：解析失败不再静默回退——显式携带
+        // configError，由调用方（policy CLI / MCP）决定拒绝评估并报错
+        console.error(`⚠️  Failed to load policy config: ${e.message}.`);
+        return {
+            rules: [...types_1.DEFAULT_POLICY],
+            source: "built-in defaults (config error)",
+            configError: `Failed to parse ${cfgFile}: ${e.message}`,
+        };
+    }
+}
+/** 真实调用提取（certificate.file 的 best-effort 词法扫描，供 risk 规则
+ *  使用——不伪造输入；读不到文件时返回空数组，由调用方按 fail-closed
+ *  计为违规） */
+function extractCallsBestEffort(file) {
+    if (!file)
+        return [];
+    try {
+        const fs = require("fs");
+        const code = fs.readFileSync(file, "utf-8");
+        const calls = [];
+        const re = /(?<=^|[^\w$])([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*)\s*\(/g;
+        let m;
+        while ((m = re.exec(code)) !== null) {
+            const seg = m[1].split(".").pop() || "";
+            if (/^(if|for|while|switch|catch|return|new|case|do|super|this)$/.test(seg))
+                continue;
+            if (calls.length < 200 && !calls.includes(seg))
+                calls.push(seg);
+        }
+        return calls;
+    }
+    catch {
+        return [];
     }
 }
 function evaluatePolicy(ctx, rules) {
@@ -177,24 +212,44 @@ function evaluatePolicy(ctx, rules) {
                 const minSeverity = rule.threshold ?? 2;
                 const minConfidence = rule.require ?? 70;
                 try {
-                    const { assessRisk } = require("../risk-model");
-                    // Extract call sequence from file (best-effort)
-                    const calls = ctx.certificate.validated ? [] : ["SSL_CTX_new", "SSL_connect"]; // fallback
-                    const risk = assessRisk(calls.length > 0 ? calls : ["init", "connect"]);
-                    const criticalOrHigh = risk.patterns.filter((p) => {
-                        const sevOrder = ["Low", "Medium", "High", "Critical"];
-                        return sevOrder.indexOf(p.severity) >= minSeverity && p.confidence >= minConfidence;
-                    });
-                    if (criticalOrHigh.length > 0) {
+                    // 真实调用提取（certificate.file 的 best-effort 词法扫描）——
+                    // 审计修复（Kimi 2026-09-06）：不再伪造 ["SSL_CTX_new","SSL_connect"]
+                    // 假输入喂评估；输入不可得时按 fail-closed 计为违规
+                    const calls = extractCallsBestEffort(ctx.certificate.file);
+                    if (calls.length === 0) {
                         violations.push({
                             rule,
-                            actual: `${criticalOrHigh.length} risk pattern(s) ≥ severity threshold`,
-                            expected: `0 patterns at this severity+confidence level`,
-                            detail: criticalOrHigh.map((p) => `${p.patternName} (${p.severity}, ${p.confidence}%): ${p.detail}`).join("; "),
+                            actual: "no call data extractable from certificate file",
+                            expected: "risk assessment over real call sequence",
+                            detail: "risk rule requires a readable file with calls; unavailable input is a violation (fail-closed)",
                         });
                     }
+                    else {
+                        const risk = (0, risk_model_1.assessRisk)(calls);
+                        const criticalOrHigh = risk.patterns.filter((p) => {
+                            const sevOrder = ["Low", "Medium", "High", "Critical"];
+                            return sevOrder.indexOf(p.severity) >= minSeverity && p.confidence >= minConfidence;
+                        });
+                        if (criticalOrHigh.length > 0) {
+                            violations.push({
+                                rule,
+                                actual: `${criticalOrHigh.length} risk pattern(s) ≥ severity threshold`,
+                                expected: `0 patterns at this severity+confidence level`,
+                                detail: criticalOrHigh.map((p) => `${p.patternName} (${p.severity}, ${p.confidence}%): ${p.detail}`).join("; "),
+                            });
+                        }
+                    }
                 }
-                catch { /* risk model unavailable */ }
+                catch {
+                    // fail-closed：risk model 不可用 → 显式违规，而非静默跳过
+                    // （审计修复：原空 catch 使整条规则无声失效）
+                    violations.push({
+                        rule,
+                        actual: "risk model unavailable",
+                        expected: "risk assessment completed",
+                        detail: "risk-model module failed to load — failing closed (explicit violation)",
+                    });
+                }
                 break;
             }
             // ── Knowledge Base Coverage ──
@@ -202,11 +257,20 @@ function evaluatePolicy(ctx, rules) {
                 const minStable = rule.threshold ?? 3;
                 let stableCount = 0;
                 try {
-                    const { buildKnowledgeBase } = require("../protocol-knowledge");
-                    const kb = buildKnowledgeBase();
+                    const kb = (0, protocol_knowledge_1.buildKnowledgeBase)();
                     stableCount = kb.units.filter((u) => u.maturity === "stable").length;
                 }
-                catch { /* KB unavailable */ }
+                catch {
+                    // fail-closed 显式化（审计修复）：原空 catch 后 stableCount=0 恰好
+                    // 触发违规，但消息误导为「0 stable assets」——改为明确的不可用违规
+                    violations.push({
+                        rule,
+                        actual: "knowledge base unavailable",
+                        expected: `>= ${minStable} stable assets`,
+                        detail: "protocol-knowledge module failed to load — failing closed (explicit violation)",
+                    });
+                    break;
+                }
                 if (stableCount < minStable) {
                     violations.push({
                         rule,

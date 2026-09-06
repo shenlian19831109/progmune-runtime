@@ -473,6 +473,24 @@ step("4/6 Ledger 不变量");
             fail("PROGMUNE_STRICT=true — 严格不变量断言发现违规");
         }
     }
+    else if (process.env.PROGMUNE_STRICT === "false") {
+        // 逃生门记账（审计修复 2026-09-06）：降级必须留痕——
+        // 不变量违规降级为提示时，向审计事件日志追加一条记录
+        warn("PROGMUNE_STRICT=false — 不变量违规降级为提示（已记入审计事件日志）");
+        try {
+            const fs = require("fs");
+            const path = require("path");
+            const auditDir = path.join(process.cwd(), ".progmune_memory");
+            if (!fs.existsSync(auditDir))
+                fs.mkdirSync(auditDir, { recursive: true });
+            fs.appendFileSync(path.join(auditDir, "audit-events.jsonl"), JSON.stringify({
+                event: "PROGMUNE_STRICT_DISABLED",
+                timestamp: new Date().toISOString(),
+                cwd: process.cwd(),
+            }) + "\n", "utf-8");
+        }
+        catch { /* audit log write — best-effort */ }
+    }
     // P0: Fingerprint registration — ensure every session has an execution certificate
     {
         const registered = (0, ledger_registry_1.registerAllMissingFingerprints)();
