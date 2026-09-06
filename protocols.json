@@ -1545,7 +1545,7 @@
       "description": "订单交付 → 已发货"
     },
     "check_resource_ownership": {
-      "namespace": "data_integrity",
+      "namespace": "auth",
       "pre_states": [
         "AUTHENTICATED"
       ],
@@ -1910,7 +1910,7 @@
       "description": "打印失败 → 材料耗尽/机器故障/翘边等"
     },
     "logout_without_invalidate": {
-      "namespace": "session_fixation",
+      "namespace": "auth",
       "pre_states": [
         "SESSION_ACTIVE"
       ],
@@ -1921,7 +1921,7 @@
       "description": "PLSB PLS-005: 登出必须销毁会话——防止会话固定攻击"
     },
     "admin_action_without_check": {
-      "namespace": "privilege_escalation",
+      "namespace": "auth",
       "pre_states": [
         "AUTHENTICATED"
       ],
@@ -1932,7 +1932,7 @@
       "description": "PLSB PLS-006: 敏感操作前必须验证管理员角色——防止权限提升"
     },
     "double_commit": {
-      "namespace": "transaction_violation",
+      "namespace": "transaction",
       "pre_states": [
         "TX_ACTIVE"
       ],
