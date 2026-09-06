@@ -14,6 +14,14 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as crypto from "crypto";
+// 静态导入（vitest 下 lazy require CJS 互操作不可靠——engine.ts 同款
+// 陷阱，2026-08-27 DSH 修复先例；以下模块均不反向依赖 certify，无环）
+import { getAllSessions } from "./failure-corpus";
+import { checkLedgerConsistency } from "./ssg-validator";
+import { getNsInit } from "./protocol-registry";
+import { verifyFingerprint, getFingerprint } from "./ledger-registry";
+import { buildPLSB, PROTOCOL_WEAKNESS_TAXONOMY } from "./plsb-benchmark";
+import { buildKnowledgeBase } from "./protocol-knowledge";
 
 // ── Types ──
 
@@ -70,7 +78,6 @@ export function certify(filePath: string): Certificate {
   const markerTimestamp = markerMatch[2];
 
   // 2. Load session from corpus
-  const { getAllSessions } = require("./failure-corpus");
   const sessions: any[] = getAllSessions();
   const session = sessions.find(
     (s: any) => s.sessionId === sessionId || s.sessionId?.startsWith(sessionId)
@@ -93,8 +100,6 @@ export function certify(filePath: string): Certificate {
   let violations = 0;
   try {
     if (session && allTransitions.length > 0) {
-      const { checkLedgerConsistency } = require("./ssg-validator");
-      const { getNsInit } = require("./protocol-registry");
       const result = checkLedgerConsistency(allTransitions, getNsInit());
       validated = result.consistent;
       violations = (result.violations || []).length;
@@ -109,11 +114,9 @@ export function certify(filePath: string): Certificate {
   let fingerprint = "";
   let provenanceIntact = true;
   try {
-    const { verifyFingerprint } = require("./ledger-registry");
     const fp = verifyFingerprint(sessionId, allTransitions);
     fingerprint = fp.stored?.ledgerHash || fp.stored?.ledgerHash || "";
     if (!fingerprint) {
-      const { getFingerprint } = require("./ledger-registry");
       const fp2 = getFingerprint(sessionId);
       fingerprint = fp2?.ledgerHash || "";
     }
@@ -127,10 +130,13 @@ export function certify(filePath: string): Certificate {
   let plsbCoverage = "unknown";
   let plsbRecall = 0;
   try {
-    const { buildPLSB, PROTOCOL_WEAKNESS_TAXONOMY } = require("./plsb-benchmark");
     const benchmark = buildPLSB();
     plsbVersion = benchmark.version || "1.0";
-    plsbRecall = benchmark.metadata?.recall || 0;
+    // recall = verified/total（类型修复暴露的潜伏 bug：metadata 从未有
+    // recall 字段，原写法恒为 0 → HIGH 置信度门槛永远不可达）
+    plsbRecall = benchmark.metadata
+      ? benchmark.metadata.verified / Math.max(1, benchmark.metadata.total)
+      : 0;
     const taxonomy = PROTOCOL_WEAKNESS_TAXONOMY as any[];
     const byPLS = benchmark.metadata?.byPLS || {};
     const covered = taxonomy.filter((t: any) => (byPLS[t.id] || 0) > 0).length;
@@ -174,7 +180,6 @@ export function certify(filePath: string): Certificate {
   let kbVersion: string | undefined;
   let kbAssets: Certificate["kbAssets"];
   try {
-    const { buildKnowledgeBase } = require("./protocol-knowledge");
     const kb = buildKnowledgeBase();
     kbVersion = kb.version;
     const stableAssets = kb.units.filter((u: any) => u.maturity === "stable");

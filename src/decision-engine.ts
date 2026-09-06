@@ -16,7 +16,9 @@
  *   Output: BLOCK/WARN/ALLOW | promote/demote/hold | fix/retry/rollback | accept/reject
  *
  * Importance is COMPUTED, not configured:
- *   Importance = Impact × Universality × Criticality
+ *   Importance = 0.4×Impact + 0.25×Universality + 0.35×Criticality
+ * （加权平均，权重之和为 1；Impact 权重最高——安全影响优先于
+ *  出现广度。审计修复 2026-09-06：原注释写乘积公式，与实现矛盾）
  */
 
 import type { UnifiedAsset, AssetStage, AssetKind } from "./asset-promotion";
@@ -166,7 +168,7 @@ export function computeImportance(asset: UnifiedAsset): number {
   const universality = computeUniversality(asset);
   const criticality = computeCriticality(asset);
 
-  // Weighted product: Impact is most important, Universality is secondary
+  // Weighted average (weights sum to 1): Impact is most important, Universality secondary
   return Math.round((impact * 0.4 + universality * 0.25 + criticality * 0.35) * 100);
 }
 

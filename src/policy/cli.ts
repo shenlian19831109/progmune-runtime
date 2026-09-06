@@ -78,7 +78,14 @@ try {
 
 // 3. Load policy (from project config or defaults)
 const projectDir = process.env.PROGMUNE_PROJECT_DIR || process.cwd();
-const { rules, source } = loadPolicyConfig(projectDir, policyPath);
+const { rules, source, configError } = loadPolicyConfig(projectDir, policyPath);
+
+// 配置解析失败：拒绝静默评估（fail-closed 信号，审计修复 2026-09-06）
+if (configError) {
+  console.error(`❌ ${configError}`);
+  console.error(`   拒绝在损坏的策略配置下评估——请修复配置后重试。`);
+  process.exit(2);
+}
 
 // 4. Evaluate policy
 const ctx: PolicyContext = {
@@ -93,6 +100,7 @@ const ctx: PolicyContext = {
     degraded: cert.degraded,
     sessionId: cert.sessionId,
     file: cert.file,
+    timestamp: cert.timestamp,
   },
   accountability: acct ? {
     humanEvents: acct.humanEvents,

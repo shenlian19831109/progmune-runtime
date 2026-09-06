@@ -1204,6 +1204,7 @@ ${result.code.split("\n").slice(0, 80).join("\n")}` }] };
             degraded: cert.degraded,
             sessionId: cert.sessionId,
             file: cert.file,
+            timestamp: cert.timestamp,
           },
           accountability: acct ? {
             humanEvents: acct.humanEvents,
