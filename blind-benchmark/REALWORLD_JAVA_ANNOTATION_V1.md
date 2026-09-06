@@ -86,6 +86,12 @@ articleMapper.update 及传播放大）→ 10 违规中 **1 为真实 TP，9 为
 回归：engine 21 green（新增两类碰撞测试）、ssg-bridge 32、extract-ir-java
 16、全框架 165。
 
+**P4.6 内联深度恢复（2026-09-06）**：call-sequence 限定调用末段回退解析
+（同文件优先 + 接收者-类名双向后缀偏好 userRepository→MyBatisUserRepository；
+规则保留集大小写不敏感前置防误内联）——`userService.updateUser` 重新解析
+内联后，违规归因从 helper 上移到入口 **updateProfile**（与 TS/Python 的
+「helper 违规归因到入口 flow」语义对齐），1 TP / 0 FP 保持。
+
 ### 五、v3 resource 行：语料无手工资源管理
 
 spring-realworld 数据访问为 MyBatis + Spring 托管连接，源码中无

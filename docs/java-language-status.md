@@ -104,8 +104,12 @@ v1 反证 +1（doFilterInternal 精确报出）。详见
 - 匹配层：精确匹配大小写不敏感；带点调用只走限定精确匹配（跳过
   规范化/词段形态——末段回退重造碰撞）
 - 变量名≠类名：`.progmune_aliases.json` 桥接（注解合并后重校验加载）
-- 重测：原文 **1 违规 = updateUser 真实 TP、0 误报**（9 名碰撞消失）；
-  修复变异 0；摘 getTokenString 反证 doFilterInternal 精确报出
+- P4.6 内联深度恢复：call-sequence 限定调用末段回退解析（同文件优先 +
+  接收者-类名双向后缀偏好；规则保留集大小写不敏感前置）——违规归因
+  上移到入口（updateProfile），与 TS/Python 入口 flow 语义对齐
+- 重测：原文 **1 违规 = 真实 TP、0 误报**（9 名碰撞消失，归因入口
+  updateProfile）；修复变异 0；摘 getTokenString 反证 doFilterInternal
+  精确报出
 
 ## 待办（真实语料金标，逐行转真）——2026-09-06 更新
 

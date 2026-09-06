@@ -83,17 +83,57 @@ export function buildCallSequences(
   // 跨文件函数指针分发仍不可见（L3 结论不变）。
   const fnMap = new Map<string, FunctionInfo>();
   const fnMapByFile = new Map<string, Map<string, FunctionInfo>>();
+  const fnMapAll = new Map<string, FunctionInfo[]>(); // 裸名 → 全部定义（限定回退候选）
   for (const f of ir) {
     if (!isProjectFn(f)) continue;
     fnMap.set(f.name, f);
     let byFile = fnMapByFile.get(f.file);
     if (!byFile) { byFile = new Map(); fnMapByFile.set(f.file, byFile); }
     if (!byFile.has(f.name)) byFile.set(f.name, f);
+    const all = fnMapAll.get(f.name) || [];
+    all.push(f);
+    fnMapAll.set(f.name, all);
   }
+  // 保留集小写副本：限定调用名大小写不敏感命中（Java 规则键
+  // User.update vs 变量调用 user.update——大小写差异下的保留判定）
+  const keepNamesLower = keepNames ? new Set([...keepNames].map((k) => k.toLowerCase())) : undefined;
 
-  /** 调用解析：同文件定义优先，全局按名回退（跨文件同名时每个文件绑自己的） */
-  const resolveCall = (fromFile: string, name: string): FunctionInfo | undefined =>
-    fnMapByFile.get(fromFile)?.get(name) ?? fnMap.get(name);
+  /** 限定名末段回退（Java 接收者限定输出）：同文件优先；全局候选
+   *  偏好 className 与接收者变量名大小写不敏感后缀匹配（user→User、
+   *  userRepository→MyBatisUserRepository、jwtService→DefaultJwtService
+   *  ——Java 字段名=类名 camelCase 的惯例）；无偏好时 last-wins 兜底 */
+  const resolveQualified = (fromFile: string, name: string): FunctionInfo | undefined => {
+    const dot = name.lastIndexOf(".");
+    const seg = name.slice(dot + 1);
+    if (!seg) return undefined;
+    const byFile = fnMapByFile.get(fromFile)?.get(seg);
+    if (byFile) return byFile;
+    const all = fnMapAll.get(seg) || [];
+    if (all.length === 0) return undefined;
+    if (all.length === 1) return all[0];
+    const recv = name.slice(0, dot).toLowerCase();
+    // 双向后缀：变量名=类名去前缀（userRepository→MyBatisUserRepository、
+    // jwtService→DefaultJwtService——类名以接收者结尾）或变量名带类名
+    // （类名以接收者结尾的场景罕见，保留）
+    const hit = recv
+      ? all.find((f) => {
+          if (!f.className) return false;
+          const cn = f.className.toLowerCase();
+          return recv === cn || cn.endsWith(recv) || recv.endsWith(cn);
+        })
+      : undefined;
+    return hit ?? fnMap.get(seg);
+  };
+
+  /** 调用解析：同文件定义优先，全局按名回退（跨文件同名时每个文件绑自己的）；
+   *  限定名精确不中时末段回退——无注解项目 helper 的 P4.6 内联深度恢复
+   *  （Java 限定化前此类调用按裸名解析，限定化后曾退化为外部 token） */
+  const resolveCall = (fromFile: string, name: string): FunctionInfo | undefined => {
+    const exact = fnMapByFile.get(fromFile)?.get(name) ?? fnMap.get(name);
+    if (exact) return exact;
+    if (!name.includes(".")) return undefined;
+    return resolveQualified(fromFile, name);
+  };
 
   // 被项目函数调用过的函数不是入口（其片段并入调用方展开序列）——
   // 按 文件+名字 粒度判定，避免 A 文件的 static x 被 B 文件的调用误判非入口
@@ -125,9 +165,16 @@ export function buildCallSequences(
 
   const expandCall = (name: string, depth: number, visiting: Set<string>, fromFile: string): string[] => {
     if (depth > MAX_DEPTH || visiting.has(name)) return [];
+    // 规则函数保留优先（先于解析）：限定调用名大小写不敏感命中保留集
+    // → 保留 token 不解析不内联（解析会经末段回退内联掉规则 token，
+    // 且可能绑到同名异类定义）
+    if (keepNames && (keepNames.has(name) || (name.includes(".") && keepNamesLower!.has(name.toLowerCase())))) {
+      budget.left--;
+      return [name];
+    }
     const fn = resolveCall(fromFile, name);
-    // 外部调用或规则函数：调用名保留给匹配层，不内联（记 1 个调用）
-    if (!fn || (keepNames && keepNames.has(name))) {
+    // 外部调用：调用名保留给匹配层，不内联（记 1 个调用）
+    if (!fn) {
       budget.left--;
       return [name];
     }

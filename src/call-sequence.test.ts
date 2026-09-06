@@ -150,3 +150,64 @@ describe("collectProjectFunctionNames", () => {
     expect(collectProjectFunctionNames([external]).size).toBe(0);
   });
 });
+
+// ── 限定调用末段回退解析（Java 接收者限定输出，2026-09-06）──
+
+/** 带 className 的最小 FunctionInfo（Java 接收者限定语义） */
+function fnQ(name: string, file: string, calls: string[], className?: string): FunctionInfo {
+  return { name, params: [], returnType: "void", file, calls, exported: true, external: false, className };
+}
+
+describe("buildCallSequences（限定调用回退解析）", () => {
+  it("限定调用末段回退：无注解项目 helper 经接收者解析后被内联（P4.6 深度恢复）", () => {
+    const ir = [
+      fnQ("save", "MyBatisUserRepository.java", ["insertUser"], "MyBatisUserRepository"),
+      fnQ("insertUser", "MyBatisUserRepository.java", ["db.execute"]),
+      fnQ("updateUser", "UserService.java", ["userRepository.save"]),
+    ];
+    const seqs = buildCallSequences(ir);
+    expect(seqs).toHaveLength(1);
+    expect(seqs[0].function).toBe("updateUser");
+    // save 被解析并内联 → insertUser（叶子）保留
+    expect(seqs[0].calls).toEqual(["insertUser"]);
+  });
+
+  it("限定调用命中保留集（大小写不敏感）：规则 token 不解析不内联", () => {
+    const ir = [
+      fnQ("update", "User.java", ["audit"], "User"),
+      fnQ("audit", "User.java", ["db.write"]),
+      fnQ("updateUser", "UserService.java", ["user.update"]),
+    ];
+    // 规则键 = 类限定（User.update）；调用 = 变量限定（user.update）——大小写差异
+    const seqs = buildCallSequences(ir, new Set(["User.update"]));
+    expect(seqs).toHaveLength(1);
+    expect(seqs[0].function).toBe("updateUser");
+    // 保留 token 而非内联（audit 不得出现）
+    expect(seqs[0].calls).toEqual(["user.update"]);
+  });
+
+  it("接收者-类名后缀偏好：同名 save 绑定到接收者对应类（userRepository → MyBatisUserRepository）", () => {
+    const ir = [
+      fnQ("save", "MyBatisUserRepository.java", ["insertUser"], "MyBatisUserRepository"),
+      fnQ("save", "MyBatisArticleRepository.java", ["insertArticle"], "MyBatisArticleRepository"),
+      fnQ("insertUser", "MyBatisUserRepository.java", ["db.execute"]),
+      fnQ("insertArticle", "MyBatisArticleRepository.java", ["db.execute"]),
+      fnQ("updateUser", "UserService.java", ["userRepository.save"]),
+      fnQ("updateArticle", "ArticleCommandService.java", ["articleRepository.save"]),
+    ];
+    const seqs = buildCallSequences(ir);
+    const byFn = new Map(seqs.map((s) => [s.function, s.calls]));
+    expect(byFn.get("updateUser")).toEqual(["insertUser"]);
+    expect(byFn.get("updateArticle")).toEqual(["insertArticle"]);
+  });
+
+  it("入口判定：仅被限定名调用的函数不是入口", () => {
+    const ir = [
+      fnQ("save", "MyBatisUserRepository.java", ["db.execute"]),
+      fnQ("updateUser", "UserService.java", ["userRepository.save"]),
+    ];
+    const seqs = buildCallSequences(ir);
+    expect(seqs.filter((s) => s.function === "save")).toHaveLength(0);
+    expect(seqs).toHaveLength(1);
+  });
+});
