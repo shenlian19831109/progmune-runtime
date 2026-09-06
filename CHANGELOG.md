@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.7.23] — 2026-09-06
+
+### 第三方审计修复批次 + Oracle 隔离政策 + 分资产分级策略
+
+- **治理层 fail-open 修复**（Kimi 行号级审计 P0）：risk 规则 fail-closed（不再伪造 SSL 输入，真实调用提取，无数据/模块不可用 → 显式违规）；kb_coverage 显式化；策略配置解析失败拒绝静默评估（policy CLI exit 2）；**execute 写盘策略门**（项目 opt-in `.progmune-policy.json` 后写盘即时验证，BLOCK 自动回滚——策略引擎首次获得写盘强制力）；`PROGMUNE_STRICT=false` 逃生门写入审计事件日志；决策层注释与实现对齐（乘积→加权平均）；证书时间戳贯通 PolicyContext；**潜伏 bug**：certify 的 plsbRecall 恒为 0（metadata 从未有 recall 字段，HIGH 置信度门槛永远不可达）→ 修为 verified/total
+- **跨命名空间死规则归位 + 活性守卫**（Kimi 发现 3 系统化）：全量扫描 14 条死规则——4 条归位（logout_without_invalidate/admin_action_without_check/double_commit/check_resource_ownership 挪进 pre 状态所在命名空间）、10 条 printlab 业务链为文档化例外（待跨命名空间状态引用特性）；`protocol-rules-liveness.test.ts` 使死规则永久回归可防
+- **P1 批**：SUPPRESS 等全部决策持久化审计事件日志（含 fpRate/envFactor/importance 全输入）；截断序列覆盖率显式降级上报（truncatedSequences + summary 标注）；README 双语边界声明（刻意规避不在防护目标内 / BLOCK 强制力三执行点）；FAQ 澄清 LLM 密钥为可选增强；落地页免疫叙事收敛
+- **Oracle 隔离政策**（Hunyuan 定律 5 落地，`docs/ORACLE_ISOLATION_POLICY.md`）：四类评估体系变更（规则/匹配策略/阈值/别名）必须人工确认，AI 只提案；protocols.json 全量 `status: "confirmed"` + 加载端跳过 proposed + `scripts/rule-propose.js` 提案脚手架；evaluateTrust 输出 **oracleIndependence**（confirmedRules / sameSourceAnnotations / confirmedAliases）
+- **分资产分级策略**（`docs/TIERED_POLICY.md` + `templates/` 三档 + `progmune-init-policy` bin）：Tier-1 强制（致命资产，写盘门激活）/ Tier-2 标准（violations 阻断，其余 WARN）/ Tier-3 观察（只报告）——「出错代价 × AI 参与度」二维分级，一条命令落地
+- **审计回应文档** `docs/AUDIT_RESPONSE_2026-09.md`：逐条回应智谱 + Kimi 两份审查（已修复 12 项 / 事实澄清 5 项 / 设计边界 3 项 / 计划 4 项）
+- 发布门：套件全绿（含 policy 新测试 6 项）；Python 盲测 64 / TS 795 / C 应用金标零漂移；check 免疫正常
+
 ## [3.7.22] — 2026-09-06
 
 ### Java 方法学三连——恢复率裁决 + 真实闭环 + 名碰撞消除
