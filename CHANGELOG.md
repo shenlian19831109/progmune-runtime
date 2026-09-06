@@ -1,5 +1,26 @@
 # Changelog
 
+## [3.7.22] — 2026-09-06
+
+### Java 方法学三连——恢复率裁决 + 真实闭环 + 名碰撞消除
+
+- **提取器恢复率裁决**（tree-sitter-java AST 基准，spring-realworld）：修复三根因（参数注解实参括号 34、通配符泛型 3、构造器 2）+ 调用侧修复（泛型构造调用/注释剔除/多行点链/泛型静态调用）——方法 100%（178/178）、调用边 100%（1216/1216）、0 FP。**词法路线成立，无需 JavaParser 依赖**（与 C/Go 同级别裁决）
+- **真实语料协议行标注闭环**（`REALWORLD_JAVA_ANNOTATION_V1.md`）：3 注解 + 1 别名端到端——v1 token 合法流 0 违规 + 摘抽取步反证精确报出；**v2 捕获真实 TP**（spring-realworld `updateUser` 密码明文入库——1581★ 参考实现真实 bug，改密后无法登录；修复变异违规即消）；v3 语料无手工资源管理（MyBatis 托管）维持合成金标
+- **接收者限定名匹配（名碰撞根因修复）**：提取器 `className` 捕获（嵌套类感知类名栈）+ 完整点链调用输出；注册层 `Class.method` 限定键（裸名键仅项目内唯一时注册）；匹配层大小写不敏感限定精确匹配（带点调用跳过规范化/词段形态）；变量名≠类名（`jwtService.` vs `DefaultJwtService`）走项目别名（注解合并后重校验加载）——**1 真实 TP / 0 误报**（9 名碰撞消除）
+- **P4.6 内联深度恢复**：call-sequence 限定调用末段回退解析（同文件优先 + 接收者-类名双向后缀偏好；规则保留集大小写不敏感前置）——违规归因上移到入口（updateProfile），与 TS/Python「helper 违规归因到入口 flow」语义对齐
+- **Spring 现代方言真实语料验证**（`REALWORLD_SPRING_V2.md`，ali-bouali/spring-boot-3-jwt-security，Boot 3 教程标杆）：SecurityFilterChain bean + requestMatchers 静态导入 + **String[] 变量白名单展开**（原保守跳过致公开 mutation 被兜底掩盖漏报）+ auth 词段豁免修复（authenticate/refresh-token）——15 路由 0 issues、摘兜底反证 5 重现、V1 语料复扫无回归
+- **audit:realworld fastapi 考核入口修复**（模块名推导 py→fastapi，该框架自工具建立即不可用）+ 全框架语料复扫 14/14 零回归
+- 发布门：套件 255 green；Python 盲测 64 / TS 795 / C 应用金标 F1=95.7% 全部零漂移；check 免疫正常（.progmune_allowlist 存量补录）
+
+## [3.7.15 – 3.7.21] — 2026-09-04/05
+
+### 框架真实语料 12/12 收官 + Java/Spring 语言支持 + Java 协议行引擎化
+
+- **框架检测器真实语料全量收官（12/12）**：Fiber 真实生产语料考核（journalist 多层 Register 链传播引擎 12 FP→0 + 反证 9 重现；jiotv_go 能力令牌形态标注）——8 启发式 + 4 结构级全部真实语料验证到 0 协议级 FP + 敏感性反证；CLAUDE.md 转正待办清空
+- **audit:realworld 一键考核工具 + 证据档位制**：任意真实开源项目 clone/vendor → 扫描 → JSON 报告 → 金标标注模板（docs/REALWORLD_METHODOLOGY.md）
+- **Java/Spring 语言支持（3.7.17-18）**：`extract-ir-java.ts` 提取器（纯 TS 词法）+ Spring 路由覆盖模型（19 路由/12 mutation 全解析、0 issues、anyRequest 兜底翻转反证 10 重现）+ 调用图提取 + SSG 方向决策（`REALWORLD_SPRING_V1.md`）
+- **Java 协议行引擎化（3.7.19-21）**：协议行金标 v1 + Spring 方言扩展（requestMatchers/类级 @PreAuthorize）；token 生命周期 / auth-register 哈希先行 / resource 管理（invalidate + 泄漏端）三族引擎回归锁定（docs/java-language-status.md）
+
 ## [3.7.14] — 2026-09-02
 
 ### Go 提取器修复 + 恢复率裁决 + 框架诚实分层 + 三语料实验

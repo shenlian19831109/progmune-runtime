@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-03T06:17:20.630Z",
+  "generated": "2026-09-06T04:37:53.665Z",
   "summary": {
     "totalSequences": 432,
     "v5": {
@@ -14,28 +14,28 @@
     },
     "v6": {
       "tp": 35,
-      "fp": 349,
-      "tn": 45,
+      "fp": 364,
+      "tn": 30,
       "fn": 3,
       "total": 432,
-      "precision": 0.09114583333333333,
+      "precision": 0.08771929824561403,
       "recall": 0.9210526315789473,
-      "f1": 0.16587677725118485
+      "f1": 0.16018306636155605
     },
     "v7": {
       "tp": 35,
-      "fp": 350,
-      "tn": 44,
+      "fp": 365,
+      "tn": 29,
       "fn": 3,
       "total": 432,
-      "precision": 0.09090909090909091,
+      "precision": 0.0875,
       "recall": 0.9210526315789473,
-      "f1": 0.16548463356973997
+      "f1": 0.1598173515981735
     },
     "delta_v6_to_v7": {
-      "deltaPrecision": -0.0002367424242424171,
+      "deltaPrecision": -0.00021929824561403577,
       "deltaRecall": 0,
-      "deltaF1": -0.0003921436814448842,
+      "deltaF1": -0.00036571476338254083,
       "netFPFixed": -1,
       "netTPNew": 0
     }
@@ -43,7 +43,7 @@
   "migration": {
     "v5_to_v6": {
       "FP→TN (fixed)": {
-        "count": 45,
+        "count": 30,
         "examples": [
           "[31] Curl_wssl_ctx_init (wolfssl.c)",
           "[33] make_headers (http_aws_sigv4.c)",
@@ -66,7 +66,7 @@
         "count": 0,
         "examples": []
       },
-      "unchanged": 384
+      "unchanged": 399
     },
     "v6_to_v7": {
       "FP→TN (fixed)": {
@@ -76,7 +76,7 @@
       "TN→FP (regression)": {
         "count": 1,
         "examples": [
-          "[11] ngx_master_process_cycle (ngx_process_cycle.c)"
+          "[39] ngx_mail_imap_auth_state (ngx_mail_imap_handler.c)"
         ]
       },
       "TP→FN (broken)": {
@@ -108,28 +108,28 @@
       },
       "v6": {
         "tp": 21,
-        "fp": 52,
-        "tn": 9,
+        "fp": 55,
+        "tn": 6,
         "fn": 3,
         "total": 85,
-        "precision": 0.2876712328767123,
+        "precision": 0.27631578947368424,
         "recall": 0.875,
-        "f1": 0.4329896907216495
+        "f1": 0.42
       },
       "v7": {
         "tp": 21,
-        "fp": 52,
-        "tn": 9,
+        "fp": 55,
+        "tn": 6,
         "fn": 3,
         "total": 85,
-        "precision": 0.2876712328767123,
+        "precision": 0.27631578947368424,
         "recall": 0.875,
-        "f1": 0.4329896907216495
+        "f1": 0.42
       },
       "migration": {
         "v5_to_v6": {
           "FP→TN (fixed)": {
-            "count": 9,
+            "count": 6,
             "examples": [
               "[31] Curl_wssl_ctx_init (wolfssl.c)",
               "[33] make_headers (http_aws_sigv4.c)",
@@ -152,7 +152,7 @@
             "count": 0,
             "examples": []
           },
-          "unchanged": 73
+          "unchanged": 76
         },
         "v6_to_v7": {
           "FP→TN (fixed)": {
@@ -272,8 +272,8 @@
       },
       "v6": {
         "tp": 0,
-        "fp": 42,
-        "tn": 8,
+        "fp": 45,
+        "tn": 5,
         "fn": 0,
         "total": 50,
         "precision": 0,
@@ -282,8 +282,8 @@
       },
       "v7": {
         "tp": 0,
-        "fp": 43,
-        "tn": 7,
+        "fp": 46,
+        "tn": 4,
         "fn": 0,
         "total": 50,
         "precision": 0,
@@ -293,7 +293,7 @@
       "migration": {
         "v5_to_v6": {
           "FP→TN (fixed)": {
-            "count": 8,
+            "count": 5,
             "examples": [
               "[1] ngx_conf_handler (ngx_conf_file.c)",
               "[2] ngx_conf_read_token (ngx_conf_file.c)",
@@ -312,7 +312,7 @@
             "count": 0,
             "examples": []
           },
-          "unchanged": 42
+          "unchanged": 45
         },
         "v6_to_v7": {
           "FP→TN (fixed)": {
@@ -322,7 +322,7 @@
           "TN→FP (regression)": {
             "count": 1,
             "examples": [
-              "[11] ngx_master_process_cycle (ngx_process_cycle.c)"
+              "[39] ngx_mail_imap_auth_state (ngx_mail_imap_handler.c)"
             ]
           },
           "TP→FN (broken)": {
@@ -433,8 +433,8 @@
       },
       "v6": {
         "tp": 0,
-        "fp": 89,
-        "tn": 11,
+        "fp": 96,
+        "tn": 4,
         "fn": 0,
         "total": 100,
         "precision": 0,
@@ -443,8 +443,8 @@
       },
       "v7": {
         "tp": 0,
-        "fp": 89,
-        "tn": 11,
+        "fp": 96,
+        "tn": 4,
         "fn": 0,
         "total": 100,
         "precision": 0,
@@ -454,11 +454,11 @@
       "migration": {
         "v5_to_v6": {
           "FP→TN (fixed)": {
-            "count": 11,
+            "count": 4,
             "examples": [
               "[7] http_request_on_header (nghttp2_http.c)",
-              "[31] parser_bare_item (sfparse.c)",
-              "[32] sfparse_parser_dict (sfparse.c)"
+              "[56] http_response_on_header (nghttp2_http.c)",
+              "[82] nghttp2_adjust_local_window_size (nghttp2_helper.c)"
             ]
           },
           "TN→FP (regression)": {
@@ -473,7 +473,7 @@
             "count": 0,
             "examples": []
           },
-          "unchanged": 89
+          "unchanged": 96
         },
         "v6_to_v7": {
           "FP→TN (fixed)": {
@@ -513,8 +513,8 @@
       },
       "v6": {
         "tp": 0,
-        "fp": 88,
-        "tn": 12,
+        "fp": 90,
+        "tn": 10,
         "fn": 0,
         "total": 100,
         "precision": 0,
@@ -523,8 +523,8 @@
       },
       "v7": {
         "tp": 0,
-        "fp": 88,
-        "tn": 12,
+        "fp": 90,
+        "tn": 10,
         "fn": 0,
         "total": 100,
         "precision": 0,
@@ -534,7 +534,7 @@
       "migration": {
         "v5_to_v6": {
           "FP→TN (fixed)": {
-            "count": 12,
+            "count": 10,
             "examples": [
               "[17] log_packet (qlog_event_helpers.c)",
               "[24] qlog_event_seq_header (qlog.c)",
@@ -553,7 +553,7 @@
             "count": 0,
             "examples": []
           },
-          "unchanged": 88
+          "unchanged": 90
         },
         "v6_to_v7": {
           "FP→TN (fixed)": {
