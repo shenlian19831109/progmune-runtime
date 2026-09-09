@@ -2,6 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { sendMail } = require('./mailer');
 
 /**
  * Progmune Immune Hub — 中央失败语料汇聚服务器。
@@ -18,7 +19,208 @@ const crypto = require('crypto');
 const DATA_DIR = process.env.PROGMUNE_HUB_DATA_DIR || path.resolve(__dirname, "../immune_hub_data");
 const RULES_FILE = path.resolve(__dirname, "../global_antibodies.json");
 const HUB_TOKEN = process.env.PROGMUNE_HUB_TOKEN || "";
+const SUBSCRIBERS_FILE = path.join(DATA_DIR, "subscribers.json");
+const FROM_NAME = "Progmune Founder Lian";
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+
+// ── 订阅模块 ──
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const pendingCodes = new Map(); // email -> { code, expires, attempts, lastSent }
+const CODE_TTL_MS = 10 * 60 * 1000;      // 确认码 10 分钟有效
+const CODE_MAX_ATTEMPTS = 5;
+const RESEND_COOLDOWN_MS = 60 * 1000;    // 60s 内不重发
+const NEWSLETTER_DAILY_MAX = 400;        // Gmail 个人账号日发上限 ~500，留余量
+
+function loadSubscribers() {
+  try {
+    if (fs.existsSync(SUBSCRIBERS_FILE)) {
+      const list = JSON.parse(fs.readFileSync(SUBSCRIBERS_FILE, "utf-8"));
+      return Array.isArray(list) ? list : [];
+    }
+  } catch { /* best-effort */ }
+  return [];
+}
+
+function saveSubscribers(list) {
+  fs.writeFileSync(SUBSCRIBERS_FILE, JSON.stringify(list, null, 2));
+}
+
+function unsubscribeToken(email) {
+  const salt = HUB_TOKEN || "progmune-unsubscribe";
+  return crypto.createHash("sha256").update(email + salt).digest("hex").substring(0, 16);
+}
+
+function subscribeRateLimited(key) {
+  const now = Date.now();
+  const hits = (rateHits.get(key) || []).filter((t) => now - t < RATE_WINDOW_MS);
+  if (hits.length >= RATE_MAX_REQUESTS) {
+    rateHits.set(key, hits);
+    return true;
+  }
+  hits.push(now);
+  rateHits.set(key, hits);
+  return false;
+}
+
+function handleSubscribeRequest(req, res) {
+  let body = "";
+  req.on('data', (c) => body += c);
+  req.on('end', () => {
+    let email = "";
+    try { email = String(JSON.parse(body).email || "").trim().toLowerCase(); } catch { /* 400 below */ }
+    if (!EMAIL_RE.test(email) || email.length > 128) {
+      jsonResponse(res, 400, { error: "invalid email" });
+      return;
+    }
+    if (subscribeRateLimited("sub:" + email)) {
+      jsonResponse(res, 429, { error: "rate limited" });
+      return;
+    }
+    if (loadSubscribers().some((s) => s.email === email)) {
+      jsonResponse(res, 200, { status: "already-subscribed" });
+      return;
+    }
+    const existing = pendingCodes.get(email);
+    if (existing && Date.now() - existing.lastSent < RESEND_COOLDOWN_MS) {
+      jsonResponse(res, 429, { error: "too frequent, wait a minute" });
+      return;
+    }
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    pendingCodes.set(email, { code, expires: Date.now() + CODE_TTL_MS, attempts: 0, lastSent: Date.now() });
+
+    const text =
+`Your Progmune verification code is: ${code}
+
+This code is valid for 10 minutes.
+
+你的 Progmune 订阅确认码是：${code}
+有效期 10 分钟。如果你没有发起订阅，请忽略这封邮件。
+
+— Progmune Founder Lian
+https://progmune.top`;
+
+    sendMail({
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_APP_PASSWORD,
+      to: email,
+      subject: "[Progmune] 订阅确认码 / Verification code",
+      text,
+      fromName: FROM_NAME,
+    }).then(() => {
+      console.log(`[Subscribe] 确认码已发送 ${email}`);
+    }).catch((e) => {
+      console.error(`[Subscribe] 邮件发送失败 ${email}: ${e.message}`);
+    });
+
+    jsonResponse(res, 200, { status: "code-sent" });
+  });
+}
+
+function handleSubscribeConfirm(req, res) {
+  let body = "";
+  req.on('data', (c) => body += c);
+  req.on('end', () => {
+    let email = "", code = "";
+    try {
+      const p = JSON.parse(body);
+      email = String(p.email || "").trim().toLowerCase();
+      code = String(p.code || "").trim();
+    } catch { /* 400 below */ }
+    const pending = pendingCodes.get(email);
+    if (!pending || Date.now() > pending.expires) {
+      jsonResponse(res, 400, { error: "code expired, request a new one" });
+      return;
+    }
+    pending.attempts++;
+    if (pending.attempts > CODE_MAX_ATTEMPTS) {
+      pendingCodes.delete(email);
+      jsonResponse(res, 429, { error: "too many attempts" });
+      return;
+    }
+    if (pending.code !== code) {
+      jsonResponse(res, 400, { error: "wrong code" });
+      return;
+    }
+    pendingCodes.delete(email);
+    const subs = loadSubscribers();
+    if (!subs.some((s) => s.email === email)) {
+      subs.push({ email, subscribedAt: new Date().toISOString() });
+      saveSubscribers(subs);
+    }
+    console.log(`[Subscribe] 新订阅确认 ${email}（总计 ${subs.length}）`);
+    jsonResponse(res, 200, { status: "confirmed", subscribers: subs.length });
+  });
+}
+
+function handleUnsubscribe(req, res) {
+  const u = new URL(req.url, "http://localhost");
+  const email = (u.searchParams.get("email") || "").trim().toLowerCase();
+  const token = (u.searchParams.get("token") || "").trim();
+  if (!email || token !== unsubscribeToken(email)) {
+    res.writeHead(400, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end('<p>无效的退订链接 / Invalid unsubscribe link. <a href="https://progmune.top/contact.html">联系我们</a></p>');
+    return;
+  }
+  const subs = loadSubscribers().filter((s) => s.email !== email);
+  saveSubscribers(subs);
+  console.log(`[Subscribe] 退订 ${email}（剩余 ${subs.length}）`);
+  res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+  res.end('<p>已退订，再见 👋 You have been unsubscribed. <a href="https://progmune.top/">回到 Progmune</a></p>');
+}
+
+function handleNewsletterSend(req, res) {
+  // 管理端点：必须 Bearer 认证（未配置 HUB_TOKEN 时一律拒绝）
+  if (!HUB_TOKEN || String(req.headers.authorization || "") !== `Bearer ${HUB_TOKEN}`) {
+    jsonResponse(res, 401, { error: "unauthorized" });
+    return;
+  }
+  let body = "";
+  req.on('data', (c) => body += c);
+  req.on('end', () => {
+    let subject = "", text = "";
+    try {
+      const p = JSON.parse(body);
+      subject = String(p.subject || "").slice(0, 200);
+      text = String(p.text || "").slice(0, 20000);
+    } catch { /* 400 below */ }
+    if (!subject || !text) {
+      jsonResponse(res, 400, { error: "subject and text required" });
+      return;
+    }
+    const subs = loadSubscribers();
+    if (subs.length === 0) {
+      jsonResponse(res, 200, { status: "ok", sent: 0, failed: 0, total: 0 });
+      return;
+    }
+
+    // 顺序发送（限速），上限受 Gmail 日限额约束
+    const batch = subs.slice(0, NEWSLETTER_DAILY_MAX);
+    let sent = 0, failed = 0;
+    const sendOne = (s) => {
+      const fullText = text + `\n\n— Progmune Founder Lian\nhttps://progmune.top\n退订 Unsubscribe: https://progmune-runtime.fly.dev/api/unsubscribe?email=${encodeURIComponent(s.email)}&token=${unsubscribeToken(s.email)}`;
+      return sendMail({
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD,
+        to: s.email,
+        subject,
+        text: fullText,
+        fromName: FROM_NAME,
+      }).then(() => { sent++; }).catch((e) => { failed++; console.error(`[Newsletter] 发送失败 ${s.email}: ${e.message}`); });
+    };
+
+    (async () => {
+      for (const s of batch) {
+        await sendOne(s);
+        await new Promise((r) => setTimeout(r, 500)); // 0.5s 间隔，稳过 Gmail 速率限制
+      }
+      console.log(`[Newsletter] 完成：发送 ${sent}，失败 ${failed}，共 ${subs.length} 订阅者`);
+      jsonResponse(res, 200, { status: "ok", sent, failed, total: subs.length });
+    })().catch((e) => {
+      console.error(`[Newsletter] 异常: ${e.message}`);
+      jsonResponse(res, 500, { error: e.message });
+    });
+  });
+}
 
 // ── 防护参数 ──
 const MAX_BODY_BYTES = 512 * 1024;                 // 512KB
@@ -264,8 +466,23 @@ function handleDashboardPage(res) {
 }
 
 const server = http.createServer((req, res) => {
-  if (req.method === 'POST' && req.url === '/report') {
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204, {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+    });
+    res.end();
+  } else if (req.method === 'POST' && req.url === '/report') {
     handleReport(req, res);
+  } else if (req.method === 'POST' && req.url === '/api/subscribe/request') {
+    handleSubscribeRequest(req, res);
+  } else if (req.method === 'POST' && req.url === '/api/subscribe/confirm') {
+    handleSubscribeConfirm(req, res);
+  } else if (req.method === 'GET' && req.url.startsWith('/api/unsubscribe')) {
+    handleUnsubscribe(req, res);
+  } else if (req.method === 'POST' && req.url === '/api/newsletter/send') {
+    handleNewsletterSend(req, res);
   } else if (req.method === 'GET' && req.url === '/antibodies') {
     if (fs.existsSync(RULES_FILE)) {
       res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });

@@ -340,6 +340,18 @@
   .faq-item summary::-webkit-details-marker { display: none; }
   .faq-item summary::before { content: "Q "; color: var(--accent); }
   .faq-item p { margin-top: 10px; font-size: 14px; color: var(--muted); line-height: 1.75; }
+
+  /* ── 订阅版本更新 ── */
+  .sub-benefits ul { list-style: none; margin: 14px 0 0; }
+  .sub-benefits li { padding: 5px 0; font-size: 14px; color: var(--muted); }
+  .sub-benefits li::before { content: "✓ "; color: var(--green); font-weight: 700; }
+  .sub-form { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  .sub-form input { flex: 1 1 240px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; background: #fff; }
+  .sub-form input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .sub-msg { margin-top: 10px; font-size: 13.5px; color: var(--muted); min-height: 1.2em; }
+  .sub-msg.ok { color: var(--green); }
+  .sub-msg.err { color: var(--red); }
+  .sub-note { margin-top: 6px; font-size: 12.5px; color: var(--muted); }
 </style>
 </head>
 <body id="top">
@@ -599,9 +611,35 @@ npm run precision:all  <span class="c"># 基准套件</span></pre>
   </div>
 </section>
 
-<!-- ═══ 09 社区 ═══ -->
+<!-- ═══ 09 订阅 ═══ -->
+<section id="subscribe">
+  <h2><span class="no">09</span><span data-i18n="sub.title">订阅版本更新</span></h2>
+  <p class="lead" data-i18n="sub.lead">每次发版一封邮件，无垃圾，随时一键退订。订阅后你会：</p>
+  <div class="sub-benefits">
+    <ul>
+      <li data-i18n="sub.b1">新版本第一时间送达——每周 1-2 版，修复与增强不再错过</li>
+      <li data-i18n="sub.b2">你遇到的误报修好时，立刻知道</li>
+      <li data-i18n="sub.b3">语言与框架进展抢先知道：Java 转正、C/Go 走出 Beta、新框架适配</li>
+      <li data-i18n="sub.b4">真实语料验证报告与审计回应——干货，不是营销文</li>
+      <li data-i18n="sub.b5">影响路线图——订阅者投票决定下一步先做什么</li>
+      <li data-i18n="sub.b6">企业级能力内测的早鸟资格</li>
+    </ul>
+  </div>
+  <div class="sub-form">
+    <input id="subEmail" type="email" placeholder="you@example.com" autocomplete="email">
+    <button id="subSendBtn" class="btn primary" data-i18n="sub.send">获取确认码</button>
+  </div>
+  <div class="sub-form" id="subCodeRow" style="display:none;">
+    <input id="subCode" type="text" inputmode="numeric" maxlength="6" placeholder="123456" autocomplete="one-time-code">
+    <button id="subConfirmBtn" class="btn primary" data-i18n="sub.confirm">确认订阅</button>
+  </div>
+  <p id="subMsg" class="sub-msg" role="status"></p>
+  <p class="sub-note" data-i18n="sub.note">落款署名 Progmune Founder Lian · 订阅即表示同意<a href="/privacy.html">隐私政策</a></p>
+</section>
+
+<!-- ═══ 10 社区 ═══ -->
 <section id="community">
-  <h2><span class="no">09</span><span data-i18n="s06.title">社区与反馈</span></h2>
+  <h2><span class="no">10</span><span data-i18n="s06.title">社区与反馈</span></h2>
   <p class="lead" data-i18n="s06.lead">扫码加入讨论群（微信 / WhatsApp），或通过邮箱、GitHub 联系我们。你的意见塑造 Progmune。</p>
   <div class="community">
     <div class="qr-wrap">
@@ -734,7 +772,28 @@ const I18N = {
     "faq.q5": "能当部署门禁用吗？",
     "faq.a5": "如实定位为辅助检查器，而非部署门禁。生成路径的拦截（违规代码不落盘）是硬保证；但把它作为生产部署的强制门禁，需第三方评测、独立审查与企业 POC 之后再做结论。今天可作为辅助检查接入 Trust API / CI。",
     "faq.q6": "怎么接入我的工作流？",
-    "faq.a6": "三种入口：npm 包一条命令验证文件；MCP server 接入 Claude Code（progmune_check / progmune_trust_check）；GitHub Action 做 PR 辅助检查。完全本地静态分析，代码不上传；脱敏违规指纹默认匿名上报中央语料库，PROGMUNE_HUB=off 可关闭。"
+    "faq.a6": "三种入口：npm 包一条命令验证文件；MCP server 接入 Claude Code（progmune_check / progmune_trust_check）；GitHub Action 做 PR 辅助检查。完全本地静态分析，代码不上传；脱敏违规指纹默认匿名上报中央语料库，PROGMUNE_HUB=off 可关闭。",
+    "sub.title": "订阅版本更新",
+    "sub.lead": "每次发版一封邮件，无垃圾，随时一键退订。订阅后你会：",
+    "sub.b1": "新版本第一时间送达——每周 1-2 版，修复与增强不再错过",
+    "sub.b2": "你遇到的误报修好时，立刻知道",
+    "sub.b3": "语言与框架进展抢先知道：Java 转正、C/Go 走出 Beta、新框架适配",
+    "sub.b4": "真实语料验证报告与审计回应——干货，不是营销文",
+    "sub.b5": "影响路线图——订阅者投票决定下一步先做什么",
+    "sub.b6": "企业级能力内测的早鸟资格",
+    "sub.send": "获取确认码",
+    "sub.confirm": "确认订阅",
+    "sub.note": "落款署名 Progmune Founder Lian · 订阅即表示同意<a href=\"/privacy.html\">隐私政策</a>",
+    "sub.msgSent": "✅ 确认码已发送至你的邮箱，10 分钟内有效（查收垃圾箱）",
+    "sub.msgBadEmail": "❌ 请输入有效的邮箱地址",
+    "sub.msgNetwork": "❌ 网络错误，请稍后重试",
+    "sub.msgConfirming": "⏳ 验证中…",
+    "sub.msgConfirmed": "🎉 订阅成功！下次发版见。",
+    "sub.msgWrongCode": "❌ 确认码不正确，请重新输入",
+    "sub.msgExpired": "❌ 确认码已过期，请重新获取",
+    "sub.msgTooMany": "❌ 尝试次数过多，请重新获取确认码",
+    "sub.msgAlready": "你已订阅过，无需重复订阅",
+    "sub.msgFrequency": "⏳ 一分钟内已发送过，请查收邮箱"
   },
   en: {
     "nav.problem": "Why", "nav.what": "What", "nav.cap": "Capabilities",
@@ -832,7 +891,28 @@ const I18N = {
     "faq.q5": "Can it gate production deployments?",
     "faq.a5": "We position it honestly as an auxiliary checker, not a deployment gate. Interception on the generation path (violating code never lands on disk) is a hard guarantee; but gating production deploys on it requires third-party evaluation, independent review, and enterprise POCs. Today it works as an auxiliary check via Trust API / CI.",
     "faq.q6": "How do I integrate it into my workflow?",
-    "faq.a6": "Three entry points: an npm one-command file check; an MCP server for Claude Code (progmune_check / progmune_trust_check); a GitHub Action for PR auxiliary checks. Fully local static analysis — code never leaves your machine; masked violation fingerprints upload anonymously by default (opt out: PROGMUNE_HUB=off)."
+    "faq.a6": "Three entry points: an npm one-command file check; an MCP server for Claude Code (progmune_check / progmune_trust_check); a GitHub Action for PR auxiliary checks. Fully local static analysis — code never leaves your machine; masked violation fingerprints upload anonymously by default (opt out: PROGMUNE_HUB=off).",
+    "sub.title": "Subscribe to Release Updates",
+    "sub.lead": "One email per release, no spam, one-click unsubscribe. As a subscriber you get:",
+    "sub.b1": "New releases first — 1-2 per week; never miss a fix or improvement",
+    "sub.b2": "Instant notice when the false positive you hit is fixed",
+    "sub.b3": "Early news on language & framework progress: Java GA, C/Go beyond Beta, new adapters",
+    "sub.b4": "Real-corpus validation reports and audit responses — substance, not marketing",
+    "sub.b5": "Roadmap influence — subscribers vote on what to build next",
+    "sub.b6": "Early access to enterprise-grade capabilities in private beta",
+    "sub.send": "Send Code",
+    "sub.confirm": "Confirm",
+    "sub.note": "Signed: Progmune Founder Lian · Subscribing means you agree to the <a href=\"/privacy.html\">Privacy Policy</a>",
+    "sub.msgSent": "✅ Code sent to your inbox — valid 10 minutes (check spam)",
+    "sub.msgBadEmail": "❌ Please enter a valid email address",
+    "sub.msgNetwork": "❌ Network error, please retry",
+    "sub.msgConfirming": "⏳ Verifying…",
+    "sub.msgConfirmed": "🎉 Subscribed! See you at the next release.",
+    "sub.msgWrongCode": "❌ Wrong code, try again",
+    "sub.msgExpired": "❌ Code expired, request a new one",
+    "sub.msgTooMany": "❌ Too many attempts, request a new code",
+    "sub.msgAlready": "You are already subscribed",
+    "sub.msgFrequency": "⏳ Already sent within the last minute — check your inbox"
   }
 };
 
@@ -978,6 +1058,69 @@ async function loadNpmDownloads() {
     if (elTotal) elTotal.textContent = "—";
   }
 }
+
+// ═══ 订阅版本更新：确认码流程（邮箱 → 确认码 → 订阅） ═══
+const SUB_HUB = "https://progmune-runtime.fly.dev";
+
+function subT(k) {
+  const dict = I18N[lang] || I18N.zh;
+  return dict[k] !== undefined ? dict[k] : I18N.zh[k];
+}
+
+function setSubMsg(key, cls) {
+  const el = document.getElementById("subMsg");
+  el.textContent = subT(key);
+  el.className = "sub-msg " + (cls || "");
+}
+
+async function subRequest() {
+  const email = document.getElementById("subEmail").value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { setSubMsg("sub.msgBadEmail", "err"); return; }
+  setSubMsg("sub.msgConfirming", "");
+  try {
+    const r = await fetch(SUB_HUB + "/api/subscribe/request", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const d = await r.json().catch(() => ({}));
+    if (r.ok && (d.status === "code-sent" || d.status === "already-subscribed")) {
+      if (d.status === "already-subscribed") { setSubMsg("sub.msgAlready", "ok"); return; }
+      document.getElementById("subCodeRow").style.display = "flex";
+      setSubMsg("sub.msgSent", "ok");
+    } else if (r.status === 429) {
+      setSubMsg("sub.msgFrequency", "err");
+    } else {
+      setSubMsg("sub.msgBadEmail", "err");
+    }
+  } catch { setSubMsg("sub.msgNetwork", "err"); }
+}
+
+async function subConfirm() {
+  const email = document.getElementById("subEmail").value.trim();
+  const code = document.getElementById("subCode").value.trim();
+  if (!code) { setSubMsg("sub.msgWrongCode", "err"); return; }
+  setSubMsg("sub.msgConfirming", "");
+  try {
+    const r = await fetch(SUB_HUB + "/api/subscribe/confirm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, code }),
+    });
+    const d = await r.json().catch(() => ({}));
+    if (r.ok) {
+      document.getElementById("subCodeRow").style.display = "none";
+      setSubMsg("sub.msgConfirmed", "ok");
+    } else if (d.error === "wrong code") setSubMsg("sub.msgWrongCode", "err");
+    else if (d.error === "code expired, request a new one") setSubMsg("sub.msgExpired", "err");
+    else if (d.error === "too many attempts") setSubMsg("sub.msgTooMany", "err");
+    else setSubMsg("sub.msgNetwork", "err");
+  } catch { setSubMsg("sub.msgNetwork", "err"); }
+}
+
+document.getElementById("subSendBtn").addEventListener("click", subRequest);
+document.getElementById("subConfirmBtn").addEventListener("click", subConfirm);
+document.getElementById("subCode").addEventListener("keydown", (e) => { if (e.key === "Enter") subConfirm(); });
 
 applyLang();
 loadWeeklyPatterns();

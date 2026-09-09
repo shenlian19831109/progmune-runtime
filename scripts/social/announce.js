@@ -74,6 +74,23 @@ async function post(platform, env, text) {
     const posted = await twitter.postTweet(env, text);
     return { id: posted.id, who: `@${me.username}` };
   }
+  if (platform === "mail") {
+    // 版本邮件推送：调中央 hub 的管理端点（Bearer 认证），hub 用 Gmail 群发
+    const HUB = process.env.PROGMUNE_HUB || "https://progmune-runtime.fly.dev";
+    const token = env.PROGMUNE_HUB_TOKEN;
+    if (!token) {
+      console.error("缺 PROGMUNE_HUB_TOKEN（scripts/social/.env），邮件推送跳过");
+      return { id: "skipped", who: "mail" };
+    }
+    const r = await fetch(`${HUB}/api/newsletter/send`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ subject: `Progmune v${version} released 新版本发布`, text }),
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(`newsletter send failed: ${r.status} ${JSON.stringify(d)}`);
+    return { id: `${d.sent}/${d.total}`, who: `mail (${d.sent} sent, ${d.failed} failed)` };
+  }
   const weibo = require("./lib/weibo");
   const me = await weibo.authCheck(env);
   const posted = await weibo.postStatus(env, text);
@@ -90,8 +107,8 @@ async function main() {
   const dryRun = process.argv.includes("--dry-run");
   const goIdx = process.argv.indexOf("--go");
   const go = goIdx >= 0 ? process.argv[goIdx + 1] : null;
-  if (go && !["x", "weibo", "all"].includes(go)) {
-    console.error("--go 参数需为 x | weibo | all");
+  if (go && !["x", "weibo", "mail", "all"].includes(go)) {
+    console.error("--go 参数需为 x | weibo | mail | all");
     process.exit(2);
   }
 
@@ -99,7 +116,8 @@ async function main() {
     console.log(`\n════ v${version} 发布公告草稿（人审后 --go 才发）════\n`);
     console.log(`[X / EN]\n${en}\n`);
     console.log(`[微博 / CN]\n${zh}\n`);
-    if (!go) console.log("\n（dry-run：未发送。确认后运行 --go x|weibo|all）");
+    console.log(`[邮件 / Mail] 主题：Progmune v${version} released 新版本发布（正文=中文版）\n`);
+    if (!go) console.log("\n（dry-run：未发送。确认后运行 --go x|weibo|mail|all）");
     return;
   }
 
@@ -110,7 +128,7 @@ async function main() {
   }
 
   const env = loadEnv();
-  const targets = go === "all" ? ["x", "weibo"] : [go];
+  const targets = go === "all" ? ["x", "weibo", "mail"] : [go];
   for (const p of targets) {
     const text = p === "x" ? en : zh;
     if (p === "x" && !(env.X_API_KEY && env.X_ACCESS_TOKEN)) { console.error("缺 X 凭据"); process.exit(2); }
