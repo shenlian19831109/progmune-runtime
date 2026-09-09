@@ -329,13 +329,8 @@ function handleReport(req, res) {
       jsonResponse(res, 413, { error: "payload too large" });
       return;
     }
-    if (HUB_TOKEN) {
-      const auth = String(req.headers.authorization || "");
-      if (auth !== `Bearer ${HUB_TOKEN}`) {
-        jsonResponse(res, 401, { error: "unauthorized" });
-        return;
-      }
-    }
+    // 注意：/report 保持开放（默认上报的客户端不带 token），滥用由
+    // 校验+限流+去重防护；HUB_TOKEN 只保护管理端点（/api/newsletter/send）
     let parsed;
     try { parsed = JSON.parse(body); } catch {
       jsonResponse(res, 400, { error: "invalid JSON" });
