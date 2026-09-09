@@ -1,0 +1,13 @@
+{
+  "date": "2026-09-14",
+  "label": "Day 5 — What using it actually feels like",
+  "tweets": [
+    "Enough theory. What does verifying AI code look like at 5pm on a Friday? Short thread. 🧵",
+
+    "Step 1 — install (one line, no daemon, no SaaS):\n\nnpm i progmune-runtime\n\nRuns locally. Your code never leaves your machine. Static analysis: it reads files, doesn't execute them.",
+
+    "Step 2 — verify:\n\nprogmune src/server.ts\n\nVerdict, not a score salad:\n✅ APPROVED — clean, evidence shown\n🟡 NEEDS_REVIEW — sequence + why + fix path\n🔴 BLOCKED — critical lifecycle violation\n\nEvery verdict ships evidence: which sequence, which state, where to fix.",
+
+    "Step 3 — wire it where AI code lands:\n\n• CI gate before merge\n• Agent loop: Claude Code self-checks via MCP\n• Repo governance dashboard\n\n\"Can I deploy this change?\" → yes/no + proof.\n\nTry: https://progmune.top · npm i progmune-runtime\n#DevSecOps #AIAgents #AICode"
+  ]
+}

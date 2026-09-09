@@ -1,0 +1,13 @@
+{
+  "date": "2026-09-16",
+  "label": "Day 7 — The last mile of AI code is trust",
+  "tweets": [
+    "One week, one thesis:\n\nAI writes more production code every quarter. The bottleneck is no longer *generation* — it's *trust*.\n\n\"Is this AI-written change safe to deploy?\" needs an answer with proof, not a vibe. Final thread 🧵",
+
+    "The gap, mapped:\n- bugs spanning functions, not lines\n- order violations: auth before use, close before reopen\n- skipped steps: hash, verify, release\n\nExisting tools check lines, taint, deps — not *ceremony*. That's our niche.",
+
+    "What we believe:\n\n1) Verification = release gate for AI code, not post-mortem\n2) Every verdict ships readable evidence\n3) Boundaries public — overclaiming is a security bug\n4) Work where AI code lands: CI, agents, MCP\n\nMIT, free, local. Trust is earned, not bought.",
+
+    "Try it on your own repo — 5 minutes:\n\nnpm i progmune-runtime\nprogmune src/server.ts --explain\n\nSite: https://progmune.top · Code: github.com/shenlian19831109/progmune-runtime\n\nFound something it missed? Open an issue — that's how it gets better.\n#AISecurity #opensource #LLM"
+  ]
+}

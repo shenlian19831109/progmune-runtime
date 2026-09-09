@@ -1,0 +1,15 @@
+# Progmune 社交发布排期（crontab 片段）——每天 2 条：X 一条 + 微博一条
+#
+# 安装示例（macOS，先 `which node` 拿绝对路径，再替换下面的 NODE）：
+#   crontab -e
+# 追加：
+#   NODE=/Users/shenlian/.nvm/versions/node/v24.15.0/bin/node
+#   PM=/Users/shenlian/progmune-runtime/scripts/social/publish.js
+#   0 0 * * * $NODE $PM x today          # X：每天 00:00 UTC（北京 08:00）
+#   30 12 * * * $NODE $PM weibo today    # 微博：每天 12:30 UTC（北京 20:30）
+#
+# cron 环境没有 PATH/login shell——务必用绝对路径；日志重定向建议：
+#   0 0 * * * $NODE $PM x today >> /tmp/progmune-social.log 2>&1
+#
+# 安装前先手动 --dry-run 检查内容，再发当天首条验证凭据。
+# 幂等：某天已发过会跳过（记录在 scripts/social/.state/state.json）。

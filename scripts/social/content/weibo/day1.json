@@ -1,0 +1,5 @@
+{
+  "date": "2026-09-10",
+  "label": "Day 1 — AI 代码全绿，你敢直接上生产吗",
+  "text": "AI 帮你写了 300 行代码：单测全过、CI 全绿、Review 说 LGTM。\n\n但某个接口的登录校验，它漏了。\n\n问题不在某一行代码，而在「跨函数的调用顺序」——先验证身份、再执行操作，这个协议流程断了一环。逐行扫的检查工具看不见「缺失的那一步」。\n\nProgmune 就是干这个的：把函数调用序列映射成协议状态机，输出 APPROVED / NEEDS_REVIEW / BLOCKED + 证据链。\n\n5 分钟上手：npm i progmune-runtime\n官网：https://progmune.top\n\n#AI代码安全 #AICode #LLM #网络安全"
+}

@@ -1,0 +1,13 @@
+{
+  "date": "2026-09-12",
+  "label": "Day 3 — Why SAST/SCA structurally can't see sequence bugs",
+  "tweets": [
+    "\"Isn't this what SAST / Semgrep / CodeQL already does?\"\n\nThey're good at what they do — but this gap is structural, not a versioning issue. 🧵",
+
+    "SAST = patterns over single statements: \"is THIS line dangerous?\"\n\nThe bug is not in a statement — it's the *absence and order* of calls across functions:\n\nwhere is the hash call?\ndid close() run before query()?\n\nA line scanner can't see what isn't there.",
+
+    "CodeQL is closest — interprocedural dataflow, but it answers a *value* question: can tainted input reach a sink?\nProtocol compliance is a *timing* question: was the token verified BEFORE the action? Taint can't express order — you need a state machine.",
+
+    "SCA asks a third thing: \"known CVEs in my dependencies?\" — inventory, not behavior.\n\nSo: SAST → per-line patterns · CodeQL → taint flow · SCA → dependency CVEs · Progmune → lifecycle state machines over call sequences.\n\nThe missing fourth corner — not a replacement. #AISecurity"
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "date": "2026-09-14",
+  "label": "Day 5 — 用起来什么样：周五下午五点的真实工作流",
+  "text": "周五下午五点，AI 写完了最后一个接口。你怎么办？\n\nProgmune 的真实流程：\n\n① 安装：npm i progmune-runtime（本地跑、无 SaaS、代码不出机器、纯静态）\n\n② 验证：progmune src/server.ts\n\n输出不是「分数沙拉」，是裁决 + 证据：\n✅ APPROVED（协议序列干净）\n🟡 NEEDS_REVIEW（哪条序列、缺哪个状态、怎么改）\n🔴 BLOCKED（严重生命周期违规）\n\n③ 接进 AI 代码落地的每个口：CI 合并闸门 / 智能体循环（Claude Code 通过 MCP 自查）/ 仓库治理看板。\n\n一句话：AI 写的这次改动能不能部署？给个带证据的是/否。\n\n5 分钟试试：https://progmune.top\n\n#AI代码安全 #DevSecOps #AIAgent"
+}

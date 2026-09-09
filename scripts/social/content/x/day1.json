@@ -1,0 +1,13 @@
+{
+  "date": "2026-09-10",
+  "label": "Day 1 — The invisible bug in AI code",
+  "tweets": [
+    "Your AI coding agent shipped 300 lines. Unit tests pass. CI is green. Review says LGTM.\n\nAnd one endpoint still skips the auth check.\n\nThat's what Progmune verifies: not syntax, but broken *sequences* across functions. 🧵",
+
+    "The bug isn't in one line — it's the *order*:\n\nauthenticate(token) → ok\nperformAdminAction() → no proof auth ran\n\nLinters scan lines. Unit tests cover what you wrote. Neither checks the protocol: \"act only after authentication.\"",
+
+    "Caught in production Spring code (gothinkster realworld, 1.5k★): an update endpoint stored the *plaintext* password — the hash step was never called on that path. No linter flagged it. A real bug in the reference app.",
+
+    "So we built verification around protocol state machines:\n\nfunctions declare pre/post states → every call sequence is checked → verdict APPROVED / NEEDS_REVIEW / BLOCKED, with evidence.\n\n5 min: npm i progmune-runtime · https://progmune.top\n#AISecurity #AICode #LLM #DevSecOps"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "date": "2026-09-11",
+  "label": "Day 2 — What a protocol violation actually looks like",
+  "tweets": [
+    "Yesterday: broken *sequences* are the blind spot of AI code. Today: three concrete shapes. 🧵",
+
+    "1/3 — MISSING STEP across functions.\n\nregister() calls storeUser(u, p), but hashPassword() — two files away — is never invoked on this path → plaintext passwords in the DB.\n\nA linter sees two valid calls. Progmune models the rule: storeUser requires state PASSWORD_HASHED.",
+
+    "2/3 — WRONG ORDER. Lifecycle is open→write→close. AI writes:\n\nconn = open()\nconn.close()\nconn.query()  ← use-after-close\n\nclose() *invalidates* the open state; query() requires it. A state machine catches this instantly. Regex on lines? No.",
+
+    "3/3 NEVER RELEASED. AI opens a resource in one helper; the close() never runs.\nPer-function analyzers miss it — acquire here, release elsewhere. Progmune tracks acquire→release across calls, incl. end-of-seq leaks.\nWhy SAST/SCA miss these → tomorrow. #AISecurity #infosec"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "date": "2026-09-13",
+  "label": "Day 4 — Evidence over hype (and honest boundaries)",
+  "tweets": [
+    "Every AI-security product claims magic. Here are the numbers we can defend — and the boundaries we can't. Honest thread. 🧵",
+
+    "HOW WE TEST (most tools skip this):\n\n1) Gold labels hand-verified on real open-source apps (1k–2.6k★)\n2) Counter-proof: REMOVE a protection from real code — the tool must flag it. Silent = blind\n3) Real-corpus audits on 13 web frameworks, 0 protocol-level FP",
+
+    "Numbers:\n\nTS: 795 gold — Recall 98.5% (effective 100%), Precision 100%, 0 FP\nPython: 729 gold — Recall 100%\n\nReal catches: an auth bypass in a 2.6k★ app; the Day-1 plaintext-password bug",
+
+    "The 13 frameworks (Express Koa Hapi Fastify NestJS Next.js tRPC Gin Fiber FastAPI Django Flask Spring Boot) — each real-corpus verified, 0 FP + counter-proof.",
+
+    "Boundaries, stated publicly:\n\n• static only — no runtime/APM\n• C/Go/Java protocol rows: annotation-driven Beta\n• TLS-level misuse: open, documented gap\n\nWe publish our limits — code is open:\ngithub.com/shenlian19831109/progmune-runtime #AISecurity #opensource"
+  ]
+}

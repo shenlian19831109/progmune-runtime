@@ -1,0 +1,5 @@
+{
+  "date": "2026-09-15",
+  "label": "Day 6 — 今天能用在哪些技术栈（含诚实标注）",
+  "text": "Progmune 现在能用在哪些栈？诚实版覆盖图——「支持 30 种语言」通常等于「30 种语言各写了几条正则」：\n\n核心协议验证（真调用序列 + 状态机）：\n• TypeScript / Python：生产级，盲测金标锁定\n• C：注解驱动 Beta，真实模块验证过（redis ACL、libssh、uftpd），5/5 金标 0 误报\n• Go：注解驱动 Beta（Gin/Fiber）\n• Java：提取器 + Spring Security 适配器，token/认证/注册/资源四类协议行已引擎化\n\n框架层（路由 + 认证形态识别，各过 ≥1 真实语料 0 误报 + 反证）：\nExpress · Koa · Hapi · Fastify · NestJS · Next.js · tRPC · Gin · Fiber · FastAPI · Django · Flask · Spring Boot 共 13 个，认框架惯用法（Spring Security 配置类 / Gin 组中间件 / NestJS 守卫），不是猜文件名。\n\n提取零工具链依赖（纯 TS 词法），npm 装上就能跑。\nMIT 开源。完整覆盖表带证据链接在仓库 README。\n\n#开源 #AI代码安全 #Java #TypeScript #Go"
+}

@@ -1,0 +1,5 @@
+{
+  "date": "2026-09-13",
+  "label": "Day 4 — 讲数据前，先讲我们怎么测的",
+  "text": "AI 安全产品都在喊「我们的检出率」。先别信数字，看测试方法——我们的方法：\n\n① 拿真实开源项目（gothinkster RealWorld 家族，1k-2.6k★）人工标金标；\n② 反证实验：把真实代码里的防护删掉一条，工具必须报出来——不报就是瞎；\n③ 13 个框架全过这套：Express/Koa/Hapi/Fastify/NestJS/Next.js/tRPC/Gin/Fiber/FastAPI/Django/Flask/Spring Boot。\n\n结果：TS 795 条金标 100% 精度 0 误报；Python 729 条全中；13 框架真实语料 0 协议级误报。\n\n边界也如实写：纯静态分析、C/Go/Java 核心协议行是注解驱动 Beta、TLS 级误用仍是开放缺口。\n\n敢把边界公开的工具，才配当你的发布闸门。代码全开源：github.com/shenlian19831109/progmune-runtime\n\n#AI代码安全 #开源 #网络安全"
+}

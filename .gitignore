@@ -72,3 +72,7 @@ blind-benchmark/generated-protocol-py/
 benchmarks/py-apps/
 benchmarks/audit-cache/
 benchmarks/java-apps/
+
+# social publisher secrets & state
+scripts/social/.env
+scripts/social/.state/
