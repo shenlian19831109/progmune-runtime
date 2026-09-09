@@ -1,2 +1,25 @@
+# Progmune — https://progmune.top
+# 内容全部公开：搜索引擎与 AI 引擎爬虫一律放行（欢迎抓取与引用）
+
 User-agent: *
 Allow: /
+
+# AI 引擎显式声明（GEO：便于被 ChatGPT / Perplexity / Claude 等引用）
+User-agent: GPTBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: anthropic-ai
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: Bingbot
+Allow: /
+
+Sitemap: https://progmune.top/sitemap.xml

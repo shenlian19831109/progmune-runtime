@@ -16,8 +16,81 @@
 <meta name="twitter:title" content="Progmune — AI 代码协议生命周期验证">
 <meta name="twitter:description" content="AI Trust Decision Engine · Protocol Lifecycle Verification">
 <meta name="twitter:image" content="https://progmune.top/assets/og-card.png">
+<link rel="canonical" href="https://progmune.top/">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Progmune","applicationCategory":"DeveloperApplication","operatingSystem":"Any","description":"AI code protocol lifecycle verification — Trust Decision Engine","url":"https://progmune.top/","email":"shenlian1983@qq.com"}
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://progmune.top/#org",
+      "name": "Progmune",
+      "url": "https://progmune.top/",
+      "logo": "https://progmune.top/assets/favicon.svg",
+      "email": "shenlian1983@qq.com",
+      "sameAs": [
+        "https://github.com/shenlian19831109/progmune-runtime",
+        "https://www.npmjs.com/package/progmune-runtime"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://progmune.top/#website",
+      "name": "Progmune",
+      "url": "https://progmune.top/",
+      "inLanguage": ["zh-CN", "en"],
+      "publisher": { "@id": "https://progmune.top/#org" }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://progmune.top/#software",
+      "name": "Progmune",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Any",
+      "description": "AI Trust Decision Engine — verifies that AI-generated code follows correct protocol lifecycles (TLS handshake, auth flow, payment integrity, resource management) via deterministic state-machine checking of cross-function call sequences.",
+      "url": "https://progmune.top/",
+      "license": "https://opensource.org/licenses/MIT",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "publisher": { "@id": "https://progmune.top/#org" }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://progmune.top/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Progmune 能替代 CodeQL / Semgrep 吗？",
+          "acceptedAnswer": { "@type": "Answer", "text": "不能，也不打算替代。CodeQL/Semgrep 是模式级/数据流级检查器，Progmune 是序列级协议状态机验证器——检查跨函数调用序列是否违反协议生命周期（如支付确认前未验签）。定位是辅助检查器：与 SAST/SCA 互补，建议联合使用而非二选一。" }
+        },
+        {
+          "@type": "Question",
+          "name": "误报率高吗？",
+          "acceptedAnswer": { "@type": "Answer", "text": "合成金标上：TypeScript 795 金标 Precision 100%/0 误报；Python 729 金标 100%/0 误报。真实语料按系统化 FP 治理方法学逐探测器补数据点并公开记录；边界如实标注：C/Go 为注解驱动 Beta，未注解代码不检测。" }
+        },
+        {
+          "@type": "Question",
+          "name": "支持哪些语言？",
+          "acceptedAnswer": { "@type": "Answer", "text": "TypeScript 与 Python 生产级；C、Go 注解驱动（Beta）；Java 进行中。框架适配 12 个：Express、tRPC、FastAPI、Django、Flask、Fastify、Next.js、NestJS、Koa、Hapi、Gin、Fiber，均经真实语料验证。" }
+        },
+        {
+          "@type": "Question",
+          "name": "和让 LLM 自己审代码有什么区别？",
+          "acceptedAnswer": { "@type": "Answer", "text": "LLM 审查可被说服、不可复现、没有证据链。Progmune 的判定由确定性状态机完成——LLM 仅把 API 名称翻译成协议类别（磁盘缓存），不参与裁决。每次输出带 Trust Score、Decision 与可审计、可复现的证据链。" }
+        },
+        {
+          "@type": "Question",
+          "name": "能当部署门禁用吗？",
+          "acceptedAnswer": { "@type": "Answer", "text": "如实定位为辅助检查器，而非部署门禁。生成路径的拦截（违规代码不落盘）是硬保证；但把它作为生产部署的强制门禁，需第三方评测、独立审查与企业 POC 之后再做结论。今天可作为辅助检查接入 Trust API / CI。" }
+        },
+        {
+          "@type": "Question",
+          "name": "怎么接入我的工作流？",
+          "acceptedAnswer": { "@type": "Answer", "text": "三种入口：npm 包一条命令验证文件；MCP server 接入 Claude Code（progmune_check / progmune_trust_check）；GitHub Action 做 PR 辅助检查。完全本地静态分析，代码不上传。" }
+        }
+      ]
+    }
+  ]
+}
 </script>
 <style>
   :root {
@@ -258,6 +331,15 @@
   .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 5px 14px; margin: 0 6px 8px 0; }
   .pill b { color: var(--ink); }
 </style>
+<style>
+  /* ── FAQ（GEO：自然问句式问答，供 AI 引擎提取） ── */
+  .faq-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+  .faq-item { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; }
+  .faq-item summary { cursor: pointer; font-weight: 700; font-size: 15px; list-style: none; }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item summary::before { content: "Q "; color: var(--accent); }
+  .faq-item p { margin-top: 10px; font-size: 14px; color: var(--muted); line-height: 1.75; }
+</style>
 </head>
 <body id="top">
 
@@ -483,9 +565,40 @@ npm run precision:all  <span class="c"># 基准套件</span></pre>
   </div>
 </section>
 
-<!-- ═══ 08 社区 ═══ -->
+<!-- ═══ 08 FAQ ═══ -->
+<section id="faq">
+  <h2><span class="no">08</span><span data-i18n="faq.title">常见问题</span></h2>
+  <div class="faq-list">
+    <details class="faq-item">
+      <summary data-i18n="faq.q1">Progmune 能替代 CodeQL / Semgrep 吗？</summary>
+      <p data-i18n="faq.a1">不能，也不打算替代。CodeQL / Semgrep 是模式级 / 数据流级检查器，Progmune 是序列级协议状态机验证器——检查跨函数调用序列是否违反协议生命周期（如支付确认前未验签）。定位是辅助检查器：与 SAST / SCA 互补，建议联合使用而非二选一。</p>
+    </details>
+    <details class="faq-item">
+      <summary data-i18n="faq.q2">误报率高吗？</summary>
+      <p data-i18n="faq.a2">合成金标上：TypeScript 795 金标 Precision 100% / 0 误报；Python 729 金标 100% / 0 误报。真实语料按系统化 FP 治理方法学逐探测器补数据点并公开记录。边界如实标注：C / Go 为注解驱动 Beta，未注解代码不检测。不建议把它当零误报工具预期。</p>
+    </details>
+    <details class="faq-item">
+      <summary data-i18n="faq.q3">支持哪些语言？</summary>
+      <p data-i18n="faq.a3">TypeScript 与 Python 生产级；C、Go 注解驱动（Beta）；Java 进行中。框架适配 12 个：Express、tRPC、FastAPI、Django、Flask、Fastify、Next.js、NestJS、Koa、Hapi、Gin、Fiber，均经真实语料验证。</p>
+    </details>
+    <details class="faq-item">
+      <summary data-i18n="faq.q4">和让 LLM 自己审代码有什么区别？</summary>
+      <p data-i18n="faq.a4">LLM 审查可被说服、不可复现、没有证据链。Progmune 的判定由确定性状态机完成——LLM 仅把 API 名称翻译成协议类别（磁盘缓存），不参与裁决。每次输出带 Trust Score、Decision 与可审计、可复现的证据链。</p>
+    </details>
+    <details class="faq-item">
+      <summary data-i18n="faq.q5">能当部署门禁用吗？</summary>
+      <p data-i18n="faq.a5">如实定位为辅助检查器，而非部署门禁。生成路径的拦截（违规代码不落盘）是硬保证；但把它作为生产部署的强制门禁，需第三方评测、独立审查与企业 POC 之后再做结论。今天可作为辅助检查接入 Trust API / CI。</p>
+    </details>
+    <details class="faq-item">
+      <summary data-i18n="faq.q6">怎么接入我的工作流？</summary>
+      <p data-i18n="faq.a6">三种入口：npm 包一条命令验证文件；MCP server 接入 Claude Code（progmune_check / progmune_trust_check）；GitHub Action 做 PR 辅助检查。完全本地静态分析，代码不上传。</p>
+    </details>
+  </div>
+</section>
+
+<!-- ═══ 09 社区 ═══ -->
 <section id="community">
-  <h2><span class="no">08</span><span data-i18n="s06.title">社区与反馈</span></h2>
+  <h2><span class="no">09</span><span data-i18n="s06.title">社区与反馈</span></h2>
   <p class="lead" data-i18n="s06.lead">扫码加入讨论群（微信 / WhatsApp），或通过邮箱、GitHub 联系我们。你的意见塑造 Progmune。</p>
   <div class="community">
     <div class="qr-wrap">
@@ -507,6 +620,8 @@ npm run precision:all  <span class="c"># 基准套件</span></pre>
   <div class="ft-links">
     <a href="mailto:shenlian1983@qq.com">shenlian1983@qq.com</a>
     <a href="https://github.com/shenlian19831109/progmune-runtime" target="_blank" rel="noopener">GitHub</a>
+    <a href="/privacy.html">Privacy</a>
+    <a href="/terms.html">Terms</a>
   </div>
   <div data-i18n="footer.copyright">© 2026 Progmune · AI Software Verification Infrastructure</div>
   <div style="margin-top:8px; opacity:.8;">v<span id="npmVersionFooter">3.7.6</span> · <span data-i18n="footer.updatedAt">更新于</span> <span id="npmUpdatedDate">2026-08-28</span></div>
@@ -597,7 +712,20 @@ const I18N = {
     "rm.indTitle": "🎯 商业化重点行业",
     "rm.ind1": "金融科技（支付 / 交易）", "rm.ind2": "云原生基础设施", "rm.ind3": "SaaS 平台", "rm.ind4": "电商", "rm.ind5": "政务与合规",
     "footer.copyright": "© 2026 Progmune · AI Software Verification Infrastructure",
-    "footer.updatedAt": "更新于"
+    "footer.updatedAt": "更新于",
+    "faq.title": "常见问题",
+    "faq.q1": "Progmune 能替代 CodeQL / Semgrep 吗？",
+    "faq.a1": "不能，也不打算替代。CodeQL / Semgrep 是模式级 / 数据流级检查器，Progmune 是序列级协议状态机验证器——检查跨函数调用序列是否违反协议生命周期（如支付确认前未验签）。定位是辅助检查器：与 SAST / SCA 互补，建议联合使用而非二选一。",
+    "faq.q2": "误报率高吗？",
+    "faq.a2": "合成金标上：TypeScript 795 金标 Precision 100% / 0 误报；Python 729 金标 100% / 0 误报。真实语料按系统化 FP 治理方法学逐探测器补数据点并公开记录。边界如实标注：C / Go 为注解驱动 Beta，未注解代码不检测。不建议把它当零误报工具预期。",
+    "faq.q3": "支持哪些语言？",
+    "faq.a3": "TypeScript 与 Python 生产级；C、Go 注解驱动（Beta）；Java 进行中。框架适配 12 个：Express、tRPC、FastAPI、Django、Flask、Fastify、Next.js、NestJS、Koa、Hapi、Gin、Fiber，均经真实语料验证。",
+    "faq.q4": "和让 LLM 自己审代码有什么区别？",
+    "faq.a4": "LLM 审查可被说服、不可复现、没有证据链。Progmune 的判定由确定性状态机完成——LLM 仅把 API 名称翻译成协议类别（磁盘缓存），不参与裁决。每次输出带 Trust Score、Decision 与可审计、可复现的证据链。",
+    "faq.q5": "能当部署门禁用吗？",
+    "faq.a5": "如实定位为辅助检查器，而非部署门禁。生成路径的拦截（违规代码不落盘）是硬保证；但把它作为生产部署的强制门禁，需第三方评测、独立审查与企业 POC 之后再做结论。今天可作为辅助检查接入 Trust API / CI。",
+    "faq.q6": "怎么接入我的工作流？",
+    "faq.a6": "三种入口：npm 包一条命令验证文件；MCP server 接入 Claude Code（progmune_check / progmune_trust_check）；GitHub Action 做 PR 辅助检查。完全本地静态分析，代码不上传。"
   },
   en: {
     "nav.problem": "Why", "nav.what": "What", "nav.cap": "Capabilities",
@@ -682,7 +810,20 @@ const I18N = {
     "rm.indTitle": "🎯 Focus Industries",
     "rm.ind1": "FinTech (payments / trading)", "rm.ind2": "Cloud-native infrastructure", "rm.ind3": "SaaS platforms", "rm.ind4": "E-commerce", "rm.ind5": "Government & compliance",
     "footer.copyright": "© 2026 Progmune · AI Software Verification Infrastructure",
-    "footer.updatedAt": "Updated"
+    "footer.updatedAt": "Updated",
+    "faq.title": "FAQ",
+    "faq.q1": "Can Progmune replace CodeQL / Semgrep?",
+    "faq.a1": "No — and it doesn't intend to. CodeQL/Semgrep are pattern/dataflow-level checkers; Progmune is a sequence-level protocol state-machine verifier — it checks whether cross-function call sequences violate protocol lifecycles (e.g., payment confirmed without signature verification). It is positioned as an auxiliary checker: complementary to SAST/SCA. Use them together, not instead.",
+    "faq.q2": "How high is the false-positive rate?",
+    "faq.a2": "On synthetic gold sets: TypeScript 795 gold — Precision 100% / 0 FP; Python 729 gold — 100% / 0 FP. For real corpora we run a systematic FP-governance methodology (one real-project data point per heuristic detector, published). Boundaries are stated honestly: C/Go are annotation-driven Beta; unannotated code is not checked. Don't expect a zero-FP tool.",
+    "faq.q3": "Which languages are supported?",
+    "faq.a3": "TypeScript and Python are production-grade; C and Go are annotation-driven (Beta); Java is in progress. 12 framework adapters — Express, tRPC, FastAPI, Django, Flask, Fastify, Next.js, NestJS, Koa, Hapi, Gin, Fiber — all real-world validated.",
+    "faq.q4": "How is it different from asking an LLM to review code?",
+    "faq.a4": "An LLM reviewer can be persuaded, is non-deterministic, and produces no evidence chain. Progmune's verdicts come from a deterministic state machine — the LLM only translates API names into protocol categories (disk-cached) and never judges. Every output carries a Trust Score, Decision, and an auditable, reproducible evidence chain.",
+    "faq.q5": "Can it gate production deployments?",
+    "faq.a5": "We position it honestly as an auxiliary checker, not a deployment gate. Interception on the generation path (violating code never lands on disk) is a hard guarantee; but gating production deploys on it requires third-party evaluation, independent review, and enterprise POCs. Today it works as an auxiliary check via Trust API / CI.",
+    "faq.q6": "How do I integrate it into my workflow?",
+    "faq.a6": "Three entry points: an npm one-command file check; an MCP server for Claude Code (progmune_check / progmune_trust_check); a GitHub Action for PR auxiliary checks. Fully local static analysis — code never leaves your machine."
   }
 };
 

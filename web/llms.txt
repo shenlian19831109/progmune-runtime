@@ -1,0 +1,20 @@
+# Progmune
+
+> Progmune is an AI Trust Decision Engine for AI-generated software. It verifies that code follows correct protocol lifecycles (TLS handshakes, auth flows, payment integrity, resource management) — violations that span function-call sequences and are invisible to SAST/SCA. Output: Trust Score + Decision (APPROVED / NEEDS_REVIEW / BLOCKED) + evidence chain. Deterministic state-machine checking; the LLM never judges. Open source (MIT), fully local static analysis.
+
+- [README (English)](https://github.com/shenlian19831109/progmune-runtime/blob/main/README.md): what it detects, two paths (generation-time intercept / post-hoc verify), one-command usage.
+- [README 中文](https://github.com/shenlian19831109/progmune-runtime/blob/main/README.zh-CN.md): 中文说明。
+- [Quick Start](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/QUICK_START.md)
+- [API Reference](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/API_REFERENCE.md)
+- [Coverage Matrix](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix.md): language & framework coverage with evidence links.
+- [npm](https://www.npmjs.com/package/progmune-runtime): `npm i progmune-runtime`
+
+## Key facts
+
+- TypeScript: blind test 795 gold — Recall 98.5% (effective 100%) / Precision 100% / 0 FP (synthetic gold; see docs).
+- Python: protocol blind test v1.2 — 66 gold, 64 detected / Precision 100% / 0 FP; source-level detection 729 gold Recall 100%.
+- C / Go: annotation-driven (Beta) — ~2-3 annotations per protocol; unannotated code is not checked.
+- Java: in progress (extractor recovery 100%, real-corpus annotation validation).
+- 12 framework adapters real-world validated: Express, tRPC, FastAPI, Django, Flask, Fastify, Next.js, NestJS, Koa, Hapi, Gin, Fiber.
+- Positioning: auxiliary checker, not a deployment gate.
+- Third-party audits: three independent reviews (2026-09) — fixes shipped, response at [docs/AUDIT_RESPONSE_2026-09.md](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/AUDIT_RESPONSE_2026-09.md).
