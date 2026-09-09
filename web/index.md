@@ -26,7 +26,7 @@ npm run sdk src/server.ts --explain
 ## Positioning (honest boundaries)
 
 - Auxiliary checker, not a deployment gate.
-- Fully local static analysis — code never leaves your machine.
+- Fully local static analysis — code never leaves your machine. Masked violation fingerprints (hashed function names, no source) upload anonymously by default; opt out with `PROGMUNE_HUB=off`.
 - Open source (MIT). Three independent third-party audits (2026-09) completed; response published.
 
 ## Links

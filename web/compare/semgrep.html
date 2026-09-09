@@ -48,7 +48,7 @@
     <tr><td>Determinism</td><td>Deterministic</td><td>Deterministic — an LLM never judges; outputs evidence chain</td></tr>
     <tr><td>Languages</td><td>30+ languages, no build step for most</td><td>TypeScript / Python production; C / Go annotation-driven Beta; Java in progress; 12 framework adapters</td></tr>
     <tr><td>Generation-time interception</td><td>No</td><td>Yes — code generated through Progmune is validated before it lands on disk</td></tr>
-    <tr><td>Open source</td><td>OSS engine (LGPL), paid cloud platform</td><td>MIT, fully local, no uploads</td></tr>
+    <tr><td>Open source</td><td>OSS engine (LGPL), paid cloud platform</td><td>MIT; code stays local; masked fingerprints upload by default (opt-out)</td></tr>
     <tr><td>Positioning</td><td>Used widely as a CI gate</td><td>Auxiliary checker — evidence for human review, not a deployment gate</td></tr>
     <tr><td>Typical setup</td><td>CLI + CI + cloud dashboards, minutes</td><td><code>npm i progmune-runtime</code>, one command, minutes</td></tr>
   </table>
@@ -73,7 +73,7 @@
     <tr><td>确定性</td><td>确定性</td><td>确定性——LLM 不参与裁决，输出证据链</td></tr>
     <tr><td>语言</td><td>30+ 语言，多数无需构建</td><td>TS/Python 生产级；C/Go 注解驱动 Beta；Java 进行中；12 个框架适配器</td></tr>
     <tr><td>生成时拦截</td><td>无</td><td>有——经 Progmune 生成的代码落盘前完成校验</td></tr>
-    <tr><td>开源</td><td>引擎开源（LGPL），云平台付费</td><td>MIT，完全本地，代码不上传</td></tr>
+    <tr><td>开源</td><td>引擎开源（LGPL），云平台付费</td><td>MIT；代码完全本地；脱敏指纹默认匿名上报（可关闭）</td></tr>
     <tr><td>定位</td><td>广泛用作 CI 门禁</td><td>辅助检查器——供人工审查的证据，非部署门禁</td></tr>
     <tr><td>接入成本</td><td>CLI + CI + 云端面板，分钟级</td><td><code>npm i progmune-runtime</code>，一条命令，分钟级</td></tr>
   </table>

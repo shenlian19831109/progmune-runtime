@@ -86,7 +86,7 @@
         {
           "@type": "Question",
           "name": "怎么接入我的工作流？",
-          "acceptedAnswer": { "@type": "Answer", "text": "三种入口：npm 包一条命令验证文件；MCP server 接入 Claude Code（progmune_check / progmune_trust_check）；GitHub Action 做 PR 辅助检查。完全本地静态分析，代码不上传。" }
+          "acceptedAnswer": { "@type": "Answer", "text": "三种入口：npm 包一条命令验证文件；MCP server 接入 Claude Code（progmune_check / progmune_trust_check）；GitHub Action 做 PR 辅助检查。完全本地静态分析，代码不上传；脱敏违规指纹默认匿名上报中央语料库，PROGMUNE_HUB=off 可关闭。" }
         }
       ]
     }
@@ -542,7 +542,7 @@ npm run precision:all  <span class="c"># 基准套件</span></pre>
     <a class="pill" data-i18n="s05.link5" href="https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix.md" target="_blank" rel="noopener">📊 覆盖矩阵</a>
   </div>
   <div style="margin-top:8px;">
-    <span class="pill" data-i18n="s05.local">🛡️ 完全本地静态分析 · 代码不上传 · 无运行时依赖</span>
+    <span class="pill" data-i18n="s05.local">🛡️ 完全本地静态分析 · 代码不上传 · 脱敏违规指纹默认匿名上报（可关闭）</span>
   </div>
 </section>
 
@@ -594,7 +594,7 @@ npm run precision:all  <span class="c"># 基准套件</span></pre>
     </details>
     <details class="faq-item">
       <summary data-i18n="faq.q6">怎么接入我的工作流？</summary>
-      <p data-i18n="faq.a6">三种入口：npm 包一条命令验证文件；MCP server 接入 Claude Code（progmune_check / progmune_trust_check）；GitHub Action 做 PR 辅助检查。完全本地静态分析，代码不上传。</p>
+      <p data-i18n="faq.a6">三种入口：npm 包一条命令验证文件；MCP server 接入 Claude Code（progmune_check / progmune_trust_check）；GitHub Action 做 PR 辅助检查。完全本地静态分析，代码不上传；脱敏违规指纹默认匿名上报中央语料库，PROGMUNE_HUB=off 可关闭。</p>
     </details>
   </div>
 </section>
@@ -685,7 +685,7 @@ const I18N = {
     "fw.title": "失败语料飞轮",
     "fw.lead": "每一次验证失败都不会被浪费——落入失败语料库、汇聚到中央 hub，让「验证覆盖」越来越强、高频错误模式越来越清晰。",
     "fw.s1t": "🧯 失败入库", "fw.s1d": "每次违规记录 SSG 状态快照、SVL 分级与约束类型",
-    "fw.s2t": "📡 中央汇聚", "fw.s2d": "按项目本地入库 + 增量上报中央 hub，指纹去重",
+    "fw.s2t": "📡 中央汇聚", "fw.s2d": "按项目本地入库 + 脱敏指纹增量上报中央 hub（PROGMUNE_HUB=off 可关），去重",
     "fw.s3t": "📈 反馈增强", "fw.s3d": "失败语料帮助发现检测盲区、驱动规则迭代",
     "fw.mapTitle": "🧬 免疫隐喻对照",
     "fw.mapTh1": "生物免疫", "fw.mapTh2": "Progmune 对应",
@@ -703,7 +703,7 @@ const I18N = {
     "s05.trustH": "3️⃣ 项目级 Trust 检查", "s05.moreH": "4️⃣ 更多",
     "s05.exampleH": "5️⃣ 结果示例",
     "s05.link1": "📄 GitHub README", "s05.link2": "🚀 Quick Start", "s05.link3": "📚 API 参考", "s05.link5": "📊 覆盖矩阵",
-    "s05.local": "🛡️ 完全本地静态分析 · 代码不上传 · 无运行时依赖",
+    "s05.local": "🛡️ 完全本地静态分析 · 代码不上传 · 脱敏违规指纹默认匿名上报（PROGMUNE_HUB=off 可关）",
     "npm.week": "本周下载", "npm.total": "累计下载",
     "s06.title": "社区与反馈",
     "s06.lead": "扫码加入讨论群（微信 / WhatsApp），或通过邮箱、GitHub 联系我们。你的意见塑造 Progmune。",
@@ -734,7 +734,7 @@ const I18N = {
     "faq.q5": "能当部署门禁用吗？",
     "faq.a5": "如实定位为辅助检查器，而非部署门禁。生成路径的拦截（违规代码不落盘）是硬保证；但把它作为生产部署的强制门禁，需第三方评测、独立审查与企业 POC 之后再做结论。今天可作为辅助检查接入 Trust API / CI。",
     "faq.q6": "怎么接入我的工作流？",
-    "faq.a6": "三种入口：npm 包一条命令验证文件；MCP server 接入 Claude Code（progmune_check / progmune_trust_check）；GitHub Action 做 PR 辅助检查。完全本地静态分析，代码不上传。"
+    "faq.a6": "三种入口：npm 包一条命令验证文件；MCP server 接入 Claude Code（progmune_check / progmune_trust_check）；GitHub Action 做 PR 辅助检查。完全本地静态分析，代码不上传；脱敏违规指纹默认匿名上报中央语料库，PROGMUNE_HUB=off 可关闭。"
   },
   en: {
     "nav.problem": "Why", "nav.what": "What", "nav.cap": "Capabilities",
@@ -783,7 +783,7 @@ const I18N = {
     "fw.title": "Failure Corpus Flywheel",
     "fw.lead": "No verification failure goes to waste — each one lands in the failure corpus and flows to the central hub, making verification coverage stronger and failure patterns clearer.",
     "fw.s1t": "🧯 Failures recorded", "fw.s1d": "Each violation captures SSG state snapshots, SVL level, and constraint type",
-    "fw.s2t": "📡 Central aggregation", "fw.s2d": "Per-project local storage + incremental reporting to the central hub, fingerprint-deduped",
+    "fw.s2t": "📡 Central aggregation", "fw.s2d": "Per-project local storage + masked-fingerprint incremental reporting to the central hub (opt out: PROGMUNE_HUB=off), deduped",
     "fw.s3t": "📈 Feedback loop", "fw.s3d": "Failure corpus surfaces detection blind spots and steers rule iteration",
     "fw.mapTitle": "🧬 Immunity Metaphor Map",
     "fw.mapTh1": "Biological immunity", "fw.mapTh2": "Progmune counterpart",
@@ -801,7 +801,7 @@ const I18N = {
     "s05.trustH": "3️⃣ Project trust check", "s05.moreH": "4️⃣ More",
     "s05.exampleH": "5️⃣ Sample output",
     "s05.link1": "📄 GitHub README", "s05.link2": "🚀 Quick Start", "s05.link3": "📚 API Reference", "s05.link5": "📊 Coverage Matrix",
-    "s05.local": "🛡️ Fully local static analysis · code never leaves your machine · no runtime · no telemetry shipped",
+    "s05.local": "🛡️ Fully local static analysis · code never leaves your machine · masked violation fingerprints upload anonymously by default (opt out: PROGMUNE_HUB=off)",
     "npm.week": "weekly downloads", "npm.total": "total downloads",
     "s06.title": "Community & Feedback",
     "s06.lead": "Scan to join the discussion groups (WeChat / WhatsApp), or reach us via email / GitHub. Your feedback shapes Progmune.",
@@ -832,7 +832,7 @@ const I18N = {
     "faq.q5": "Can it gate production deployments?",
     "faq.a5": "We position it honestly as an auxiliary checker, not a deployment gate. Interception on the generation path (violating code never lands on disk) is a hard guarantee; but gating production deploys on it requires third-party evaluation, independent review, and enterprise POCs. Today it works as an auxiliary check via Trust API / CI.",
     "faq.q6": "How do I integrate it into my workflow?",
-    "faq.a6": "Three entry points: an npm one-command file check; an MCP server for Claude Code (progmune_check / progmune_trust_check); a GitHub Action for PR auxiliary checks. Fully local static analysis — code never leaves your machine."
+    "faq.a6": "Three entry points: an npm one-command file check; an MCP server for Claude Code (progmune_check / progmune_trust_check); a GitHub Action for PR auxiliary checks. Fully local static analysis — code never leaves your machine; masked violation fingerprints upload anonymously by default (opt out: PROGMUNE_HUB=off)."
   }
 };
 

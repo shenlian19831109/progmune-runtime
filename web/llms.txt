@@ -1,6 +1,6 @@
 # Progmune
 
-> Progmune is an AI Trust Decision Engine for AI-generated software. It verifies that code follows correct protocol lifecycles (TLS handshakes, auth flows, payment integrity, resource management) — violations that span function-call sequences and are invisible to SAST/SCA. Output: Trust Score + Decision (APPROVED / NEEDS_REVIEW / BLOCKED) + evidence chain. Deterministic state-machine checking; the LLM never judges. Open source (MIT), fully local static analysis.
+> Progmune is an AI Trust Decision Engine for AI-generated software. It verifies that code follows correct protocol lifecycles (TLS handshakes, auth flows, payment integrity, resource management) — violations that span function-call sequences and are invisible to SAST/SCA. Output: Trust Score + Decision (APPROVED / NEEDS_REVIEW / BLOCKED) + evidence chain. Deterministic state-machine checking; the LLM never judges. Open source (MIT), fully local static analysis — code never leaves the machine; masked violation fingerprints (hashed function names, no source) upload anonymously by default, opt out with PROGMUNE_HUB=off.
 
 - [README (English)](https://github.com/shenlian19831109/progmune-runtime/blob/main/README.md): what it detects, two paths (generation-time intercept / post-hoc verify), one-command usage.
 - [README 中文](https://github.com/shenlian19831109/progmune-runtime/blob/main/README.zh-CN.md): 中文说明。

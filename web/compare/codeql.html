@@ -48,7 +48,7 @@
     <tr><td>Determinism</td><td>Deterministic</td><td>Deterministic — an LLM never judges; outputs evidence chain</td></tr>
     <tr><td>Languages</td><td>Broad support; compiled languages typically require a build step to create the database</td><td>TypeScript / Python production; C / Go annotation-driven Beta; Java in progress; 12 framework adapters</td></tr>
     <tr><td>Generation-time interception</td><td>No</td><td>Yes — code generated through Progmune is validated before it lands on disk</td></tr>
-    <tr><td>Open source</td><td>Proprietary engine with free tiers (open-source projects); GitHub-centric</td><td>MIT, fully local, no uploads</td></tr>
+    <tr><td>Open source</td><td>Proprietary engine with free tiers (open-source projects); GitHub-centric</td><td>MIT; code stays local; masked fingerprints upload by default (opt-out)</td></tr>
     <tr><td>Positioning</td><td>Industry-standard semantic analysis, widely used as a security gate</td><td>Auxiliary checker — evidence for human review, not a deployment gate</td></tr>
     <tr><td>Typical setup</td><td>GitHub Actions integration, query packs, minutes to hours depending on builds</td><td><code>npm i progmune-runtime</code>, one command, minutes</td></tr>
   </table>
@@ -73,7 +73,7 @@
     <tr><td>确定性</td><td>确定性</td><td>确定性——LLM 不参与裁决，输出证据链</td></tr>
     <tr><td>语言</td><td>覆盖广；编译语言通常需要构建步骤生成数据库</td><td>TS/Python 生产级；C/Go 注解驱动 Beta；Java 进行中；12 个框架适配器</td></tr>
     <tr><td>生成时拦截</td><td>无</td><td>有——经 Progmune 生成的代码落盘前完成校验</td></tr>
-    <tr><td>开源</td><td>专有引擎 + 免费档（面向开源项目）；GitHub 生态中心</td><td>MIT，完全本地，代码不上传</td></tr>
+    <tr><td>开源</td><td>专有引擎 + 免费档（面向开源项目）；GitHub 生态中心</td><td>MIT；代码完全本地；脱敏指纹默认匿名上报（可关闭）</td></tr>
     <tr><td>定位</td><td>业界标准的语义分析，广泛用作安全门禁</td><td>辅助检查器——供人工审查的证据，非部署门禁</td></tr>
     <tr><td>接入成本</td><td>GitHub Actions 集成、query pack，视构建情况分钟到小时</td><td><code>npm i progmune-runtime</code>，一条命令，分钟级</td></tr>
   </table>
