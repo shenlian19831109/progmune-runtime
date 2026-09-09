@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Glossary — AI Code Verification Terms | Progmune</title>
+<meta name="description" content="What is protocol lifecycle verification? What is an AI trust score? A concise glossary of AI code verification terms: state machine verification, call sequence analysis, SAST, evidence chain, and more. 中英双语。">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="canonical" href="https://progmune.top/glossary.html">
+<meta name="robots" content="index,follow">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What is protocol lifecycle verification?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Protocol lifecycle verification checks whether a program's operations follow a valid sequence defined by a protocol state machine — for example handshake before data transfer, or signature verification before payment confirmation. Unlike pattern matching, it validates the state transitions across a sequence of function calls." } },
+    { "@type": "Question", "name": "What is an AI trust score?",
+      "acceptedAnswer": { "@type": "Answer", "text": "An AI trust score is a numeric rating of how much a piece of code can be trusted to follow correct protocol behavior. Progmune computes a 0–100 score from four weighted dimensions — policy compliance (35%), protocol safety (30%), verification coverage (20%), and governance integrity (15%) — and combines it with a Decision: APPROVED, NEEDS_REVIEW, or BLOCKED." } },
+    { "@type": "Question", "name": "What is an evidence chain?",
+      "acceptedAnswer": { "@type": "Answer", "text": "An evidence chain is the auditable trail behind a verification verdict: which rule fired, which call sequence violated which protocol state, and where in the code. Progmune attaches an evidence chain to every result so reviewers can reproduce the finding without trusting the tool blindly." } },
+    { "@type": "Question", "name": "What is state machine verification?",
+      "acceptedAnswer": { "@type": "Answer", "text": "State machine verification models a protocol as a set of states and transitions (for example UNAUTHENTICATED → AUTHENTICATED → AUTHORIZED) and checks that a program's actual call sequence performs only valid transitions. It catches temporal violations that pattern matching cannot express." } },
+    { "@type": "Question", "name": "What is call sequence analysis?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Call sequence analysis reconstructs the chain of function calls a program performs across functions and files, then evaluates that sequence against constraints. Progmune builds call sequences from extracted IR with cross-function expansion (depth ≤ 4, cycle-safe) and attributes violations to entry functions." } },
+    { "@type": "Question", "name": "What is SAST?",
+      "acceptedAnswer": { "@type": "Answer", "text": "SAST (Static Application Security Testing) analyzes source code without running it to find vulnerabilities — typically via pattern matching, rules, or dataflow analysis (tools like CodeQL and Semgrep). Traditional SAST checks statements and patterns; it does not validate protocol lifecycles across call sequences, which is where tools like Progmune complement it." } },
+    { "@type": "Question", "name": "What is annotation-driven verification?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Annotation-driven verification lets developers declare protocol primitives in code (e.g., which function verifies a password, which establishes a session), and the verifier then checks call sequences against those declarations. Progmune uses this model for C and Go (Beta): roughly 2–3 annotations per protocol; unannotated code is not checked." } },
+    { "@type": "Question", "name": "What is an auxiliary checker?",
+      "acceptedAnswer": { "@type": "Answer", "text": "An auxiliary checker produces advisory evidence for human review rather than acting as an automated deployment gate. Progmune positions itself this way: results are evidence, and using it as a hard gate requires third-party evaluation, independent review, and enterprise POCs." } }
+  ]
+}
+</script>
+<style>
+  :root { --ink:#0d1117; --muted:#57606a; --line:#d0d7de; --accent:#3b82f6; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; background:#fbfcfe; color:var(--ink); line-height:1.8; }
+  main { max-width:820px; margin:0 auto; padding:48px 24px 72px; }
+  h1 { font-size:26px; margin-bottom:8px; }
+  h2 { font-size:19px; margin:32px 0 10px; border-bottom:1px solid var(--line); padding-bottom:6px; }
+  p { font-size:14.5px; color:var(--muted); margin-bottom:10px; }
+  a { color:var(--accent); }
+  .term { background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin-bottom:12px; }
+  .term h3 { font-size:16px; margin-bottom:6px; }
+  .term p { font-size:14px; margin:0; }
+  .back { margin-top:32px; font-size:14px; }
+  .updated { font-size:12.5px; color:var(--muted); margin-bottom:16px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Glossary — AI Code Verification Terms</h1>
+  <p class="updated">Last updated: 2026-09-09 · 中文版见下</p>
+  <p>Concise definitions of the concepts behind Progmune — written so both humans and AI assistants can extract them directly.</p>
+
+  <div class="term"><h3>Protocol Lifecycle Verification</h3><p>Checks whether a program's operations follow a valid sequence defined by a protocol state machine — handshake before data transfer, signature verification before payment confirmation. Unlike pattern matching, it validates state transitions across a sequence of function calls.</p></div>
+  <div class="term"><h3>AI Trust Score</h3><p>A 0–100 rating of how much code can be trusted to follow correct protocol behavior. Progmune weights four dimensions — policy 35%, protocol safety 30%, coverage 20%, governance 15% — and combines the score with a Decision: APPROVED / NEEDS_REVIEW / BLOCKED.</p></div>
+  <div class="term"><h3>Evidence Chain</h3><p>The auditable trail behind a verdict: which rule fired, which call sequence violated which protocol state, and where in the code — so reviewers can reproduce findings without trusting the tool blindly.</p></div>
+  <div class="term"><h3>State Machine Verification</h3><p>Models a protocol as states and transitions (UNAUTHENTICATED → AUTHENTICATED → AUTHORIZED) and checks that a program's actual call sequence performs only valid transitions. Catches temporal violations pattern matching cannot express.</p></div>
+  <div class="term"><h3>Call Sequence Analysis</h3><p>Reconstructs the chain of function calls across functions and files, then evaluates it against constraints. Progmune builds sequences from extracted IR with cross-function expansion (depth ≤ 4, cycle-safe) and attributes violations to entry functions.</p></div>
+  <div class="term"><h3>SAST (Static Application Security Testing)</h3><p>Analyzes source code without running it — typically pattern matching, rules, or dataflow (CodeQL, Semgrep). Traditional SAST checks statements and patterns; it does not validate protocol lifecycles across call sequences — where Progmune complements it.</p></div>
+  <div class="term"><h3>Annotation-Driven Verification</h3><p>Developers declare protocol primitives in code (which function verifies a password, which establishes a session); the verifier checks call sequences against those declarations. Progmune uses this for C and Go (Beta): ~2–3 annotations per protocol; unannotated code is not checked.</p></div>
+  <div class="term"><h3>Auxiliary Checker</h3><p>A tool that produces advisory evidence for human review rather than acting as an automated deployment gate. Progmune positions itself this way: results are evidence; hard-gating requires third-party evaluation, independent review, and enterprise POCs.</p></div>
+
+  <h2>中文版</h2>
+  <div class="term"><h3>协议生命周期验证（Protocol Lifecycle Verification）</h3><p>检查程序的操作是否遵循协议状态机定义的合法序列——传输前完成握手、支付确认前完成验签。与模式匹配不同，它验证的是跨函数调用序列的状态迁移。</p></div>
+  <div class="term"><h3>AI 信任评分（AI Trust Score）</h3><p>0–100 的评分，衡量一段代码可以被信任为「遵循正确协议行为」的程度。Progmune 按四维加权——策略 35%、协议安全 30%、覆盖 20%、治理 15%——并与 Decision（APPROVED / NEEDS_REVIEW / BLOCKED）合并输出。</p></div>
+  <div class="term"><h3>证据链（Evidence Chain）</h3><p>裁决背后的可审计轨迹：哪条规则触发、哪条调用序列违反了哪个协议状态、位于代码何处——评审者无需盲信工具即可复现发现。</p></div>
+  <div class="term"><h3>状态机验证（State Machine Verification）</h3><p>把协议建模为状态与迁移（UNAUTHENTICATED → AUTHENTICATED → AUTHORIZED），检查程序的实际调用序列是否只执行合法迁移。能抓住模式匹配无法表达的时序违规。</p></div>
+  <div class="term"><h3>调用序列分析（Call Sequence Analysis）</h3><p>重建跨函数、跨文件的函数调用链并对照约束评估。Progmune 从提取的 IR 构建调用序列，跨函数展开（深度 ≤4、环安全），违规归因到入口函数。</p></div>
+  <div class="term"><h3>SAST（静态应用安全测试）</h3><p>不运行代码就分析源码找漏洞——通常靠模式匹配、规则或数据流（CodeQL、Semgrep）。传统 SAST 检查语句与模式；它不验证跨调用序列的协议生命周期——这正是 Progmune 与之互补的地方。</p></div>
+  <div class="term"><h3>注解驱动验证（Annotation-Driven Verification）</h3><p>开发者在代码中声明协议原语（哪个函数验证密码、哪个建立会话），验证器据此检查调用序列。Progmune 在 C 和 Go 上采用此模式（Beta）：每协议约 2–3 条注解；未注解代码不检测。</p></div>
+  <div class="term"><h3>辅助检查器（Auxiliary Checker）</h3><p>产出供人工审查的参考证据、而非充当自动化部署门禁的工具。Progmune 如此定位自身：结果是证据；硬门禁化需第三方评测、独立审查与企业 POC。</p></div>
+
+  <p class="back"><a href="/">← Back to Progmune 返回首页</a></p>
+</main>
+</body>
+</html>

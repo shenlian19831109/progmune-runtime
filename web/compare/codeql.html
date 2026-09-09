@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Progmune vs CodeQL — complementary, not competing | Progmune</title>
+<meta name="description" content="CodeQL runs deep semantic queries with cross-function dataflow; Progmune verifies protocol lifecycles with a deterministic state machine. See the honest comparison and how to use both together.">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="canonical" href="https://progmune.top/compare/codeql.html">
+<meta name="robots" content="index,follow">
+<style>
+  :root { --ink:#0d1117; --muted:#57606a; --line:#d0d7de; --accent:#3b82f6; --green:#1a7f37; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; background:#fbfcfe; color:var(--ink); line-height:1.8; }
+  main { max-width:820px; margin:0 auto; padding:48px 24px 72px; }
+  h1 { font-size:26px; margin-bottom:8px; }
+  h2 { font-size:19px; margin:32px 0 10px; border-bottom:1px solid var(--line); padding-bottom:6px; }
+  p, li { font-size:14.5px; color:var(--muted); margin-bottom:10px; }
+  a { color:var(--accent); }
+  .tldr { background:#f0f7ff; border:1px solid #cfe3ff; border-radius:12px; padding:14px 18px; font-size:14.5px; margin:16px 0; }
+  table { width:100%; border-collapse:collapse; margin:14px 0; font-size:13.5px; }
+  th, td { border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top; }
+  th { background:#f6f8fa; }
+  td:first-child { font-weight:600; white-space:nowrap; }
+  .who { display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; }
+  .who > div { flex:1 1 240px; background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
+  .who h3 { font-size:15px; margin-bottom:6px; }
+  .who p { font-size:13.5px; margin:0; }
+  .cta { margin-top:28px; background:#f6f8fa; border:1px solid var(--line); border-radius:12px; padding:16px 18px; font-size:14.5px; }
+  .back { margin-top:32px; font-size:14px; }
+  .zh { margin-top:40px; }
+  .updated { font-size:12.5px; color:var(--muted); margin-bottom:16px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Progmune vs CodeQL: complementary, not competing</h1>
+  <p class="updated">Last verified: 2026-09 · Facts about third-party tools are checked quarterly.</p>
+
+  <div class="tldr"><b>TL;DR</b> — CodeQL runs <b>semantic queries with cross-function dataflow</b> over a queryable code database. Progmune verifies <b>protocol lifecycles</b> with a deterministic state machine over call sequences. CodeQL tracks how data flows; it does not check whether the sequence of operations follows a valid protocol state machine (verify before confirm, handshake before transfer). Progmune does not replace CodeQL's query depth. Use both.</div>
+
+  <h2>Quick comparison</h2>
+  <table>
+    <tr><th>Dimension</th><th>CodeQL</th><th>Progmune</th></tr>
+    <tr><td>Core model</td><td>QL queries over a semantic code database; cross-function dataflow, taint, points-to</td><td>Deterministic protocol state machine over cross-function call sequences</td></tr>
+    <tr><td>What it catches</td><td>Deep semantic vulnerabilities: injection chains, complex dataflow paths, queryable code properties at scale</td><td>Sequence-level lifecycle violations: missing handshake steps, unauthenticated session handling, payment confirmation without signature verification, unreleased resources</td></tr>
+    <tr><td>What it does NOT catch</td><td>Protocol temporal constraints — it tracks data, not the state of a protocol across a sequence of operations</td><td>Pattern/dataflow-level vulnerabilities; Progmune is deliberately not a query engine</td></tr>
+    <tr><td>Determinism</td><td>Deterministic</td><td>Deterministic — an LLM never judges; outputs evidence chain</td></tr>
+    <tr><td>Languages</td><td>Broad support; compiled languages typically require a build step to create the database</td><td>TypeScript / Python production; C / Go annotation-driven Beta; Java in progress; 12 framework adapters</td></tr>
+    <tr><td>Generation-time interception</td><td>No</td><td>Yes — code generated through Progmune is validated before it lands on disk</td></tr>
+    <tr><td>Open source</td><td>Proprietary engine with free tiers (open-source projects); GitHub-centric</td><td>MIT, fully local, no uploads</td></tr>
+    <tr><td>Positioning</td><td>Industry-standard semantic analysis, widely used as a security gate</td><td>Auxiliary checker — evidence for human review, not a deployment gate</td></tr>
+    <tr><td>Typical setup</td><td>GitHub Actions integration, query packs, minutes to hours depending on builds</td><td><code>npm i progmune-runtime</code>, one command, minutes</td></tr>
+  </table>
+
+  <h2>Who should use which</h2>
+  <div class="who">
+    <div><h3>CodeQL fits you if</h3><p>You want deep semantic analysis, complex dataflow queries at scale, GitHub-native security workflows, or have the build infrastructure for compiled languages.</p></div>
+    <div><h3>Progmune fits you if</h3><p>Your team generates code with AI and wants lifecycle/sequence verification — proof that auth flows, payments, and resource handling follow valid protocol state machines — plus generation-time interception.</p></div>
+  </div>
+  <p><b>Bottom line:</b> choose CodeQL for semantic depth and dataflow analysis; choose Progmune for protocol-lifecycle verification as auxiliary evidence. They answer different questions: "where does this data flow?" vs "does this sequence of operations follow the protocol?"</p>
+
+  <h2>Using both together</h2>
+  <p>A pragmatic setup: keep CodeQL as your semantic analysis layer in GitHub Actions. Add Progmune as an auxiliary check in the same pipeline (<code>npm run trust -- --project . --json</code>), or via MCP in Claude Code, and enable generation-time interception for agent-produced code. CodeQL answers dataflow questions; Progmune answers lifecycle questions with an evidence chain.</p>
+
+  <h2 id="zh">中文版</h2>
+  <div class="tldr"><b>TL;DR</b> — CodeQL 在可查询的代码数据库上运行<b>带跨函数数据流的语义查询</b>；Progmune 用确定性状态机验证<b>协议生命周期</b>。CodeQL 追踪数据怎么流；它不检查操作序列是否符合有效协议状态机（确认前验签、传输前握手）。Progmune 不替代 CodeQL 的查询深度。建议联合使用。</div>
+  <table>
+    <tr><th>维度</th><th>CodeQL</th><th>Progmune</th></tr>
+    <tr><td>核心模型</td><td>QL 查询 + 语义代码数据库；跨函数数据流、污点、指向分析</td><td>确定性协议状态机，作用于跨函数调用序列</td></tr>
+    <tr><td>能抓住</td><td>深层语义漏洞：注入链、复杂数据流路径、规模化代码属性查询</td><td>序列级生命周期违规：握手步骤缺失、未认证会话处理、支付确认前未验签、资源未释放</td></tr>
+    <tr><td>抓不住</td><td>协议时序约束——它追踪数据，不追踪协议在一串操作中的状态</td><td>模式/数据流级漏洞；Progmune 刻意不做查询引擎</td></tr>
+    <tr><td>确定性</td><td>确定性</td><td>确定性——LLM 不参与裁决，输出证据链</td></tr>
+    <tr><td>语言</td><td>覆盖广；编译语言通常需要构建步骤生成数据库</td><td>TS/Python 生产级；C/Go 注解驱动 Beta；Java 进行中；12 个框架适配器</td></tr>
+    <tr><td>生成时拦截</td><td>无</td><td>有——经 Progmune 生成的代码落盘前完成校验</td></tr>
+    <tr><td>开源</td><td>专有引擎 + 免费档（面向开源项目）；GitHub 生态中心</td><td>MIT，完全本地，代码不上传</td></tr>
+    <tr><td>定位</td><td>业界标准的语义分析，广泛用作安全门禁</td><td>辅助检查器——供人工审查的证据，非部署门禁</td></tr>
+    <tr><td>接入成本</td><td>GitHub Actions 集成、query pack，视构建情况分钟到小时</td><td><code>npm i progmune-runtime</code>，一条命令，分钟级</td></tr>
+  </table>
+  <div class="who">
+    <div><h3>CodeQL 适合你，如果</h3><p>你想要深层语义分析、规模化复杂数据流查询、GitHub 原生安全工作流，或已具备编译语言的构建基础设施。</p></div>
+    <div><h3>Progmune 适合你，如果</h3><p>你的团队用 AI 产码，需要生命周期/序列验证——证明认证流、支付与资源处理遵循有效协议状态机——以及生成时拦截。</p></div>
+  </div>
+  <p><b>结论：</b>语义深度与数据流分析选 CodeQL；协议生命周期验证作为辅助证据选 Progmune。它们回答的是不同问题：「数据流到哪里」vs「这串操作是否遵循协议」。</p>
+
+  <div class="cta">Try Progmune: <code>npm install progmune-runtime</code> · <a href="/docs.html">Docs</a> · <a href="https://github.com/shenlian19831109/progmune-runtime" target="_blank" rel="noopener">GitHub</a></div>
+  <p class="back"><a href="/">← Back to Progmune</a></p>
+</main>
+</body>
+</html>

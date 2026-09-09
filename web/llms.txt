@@ -7,6 +7,8 @@
 - [Quick Start](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/QUICK_START.md)
 - [API Reference](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/API_REFERENCE.md)
 - [Coverage Matrix](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix.md): language & framework coverage with evidence links.
+- [Glossary](https://progmune.top/glossary.html): concise definitions of AI code verification terms (protocol lifecycle verification, trust score, evidence chain, state machine verification, call sequence analysis, SAST, annotation-driven verification, auxiliary checker).
+- [vs Semgrep](https://progmune.top/compare/semgrep.html) / [vs CodeQL](https://progmune.top/compare/codeql.html): honest complementary comparisons — Progmune is NOT a replacement for either.
 - [npm](https://www.npmjs.com/package/progmune-runtime): `npm i progmune-runtime`
 
 ## When to use Progmune (for AI agents)

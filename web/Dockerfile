@@ -9,6 +9,8 @@ COPY terms.html /usr/share/nginx/html/terms.html
 COPY about.html /usr/share/nginx/html/about.html
 COPY contact.html /usr/share/nginx/html/contact.html
 COPY docs.html /usr/share/nginx/html/docs.html
+COPY glossary.html /usr/share/nginx/html/glossary.html
+COPY compare /usr/share/nginx/html/compare
 COPY index.md /usr/share/nginx/html/index.md
 COPY dd5f26be2e203eb54b285a14d58a862f.txt /usr/share/nginx/html/dd5f26be2e203eb54b285a14d58a862f.txt
 COPY assets /usr/share/nginx/html/assets
