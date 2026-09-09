@@ -20,8 +20,8 @@ const SMTP_HOST = process.env.SMTP_HOST || 'smtp.gmail.com';
 const SMTP_PORT = Number(process.env.SMTP_PORT || 587);
 const SMTP_TLS = process.env.SMTP_TLS !== 'off'; // 测试用：off 跳过 STARTTLS（生产默认开启，Gmail 必需）
 
-/** 与 SMTP 服务器对话：发送命令并读取到多行响应结束（"250 " 等三位码后接空格）。 */
-function command(sock, cmd) {
+/** 与 SMTP 服务器对话：发送命令并读取响应，校验响应码（expect 可为码或码数组）。 */
+function command(sock, cmd, expect) {
   return new Promise((resolve, reject) => {
     let buf = '';
     const onData = (chunk) => {
@@ -32,7 +32,13 @@ function command(sock, cmd) {
       const doneLine = lines.length >= 2 ? lines[lines.length - 2] : "";
       if (doneLine && /^\d{3} /.test(doneLine)) {
         sock.removeListener('data', onData);
-        resolve(buf);
+        const code = parseInt(doneLine.slice(0, 3), 10);
+        const expected = Array.isArray(expect) ? expect : [expect];
+        if (expected.includes(code)) {
+          resolve(buf);
+        } else {
+          reject(new Error(`SMTP ${code}: ${doneLine.slice(4, 120)}`));
+        }
       }
     };
     sock.on('data', onData);
@@ -64,28 +70,28 @@ async function sendMail({ user, pass, to, subject, text, fromName }) {
     sock.once('connect', resolve);
     sock.once('error', reject);
   });
-  await command(sock); // greeting
-  await command(sock, 'EHLO progmune.top');
+  await command(sock, undefined, 220); // greeting
+  await command(sock, 'EHLO progmune.top', 250);
 
   let secure = sock;
   if (SMTP_TLS) {
-    await command(sock, 'STARTTLS');
+    await command(sock, 'STARTTLS', 220);
     // 升级为 TLS
     secure = await new Promise((resolve, reject) => {
       const t = tls.connect({ socket: sock, servername: SMTP_HOST }, () => resolve(t));
       t.once('error', reject);
     });
-    await command(secure); // TLS greeting
-    await command(secure, 'EHLO progmune.top');
+    await command(secure, undefined, 220); // TLS greeting
+    await command(secure, 'EHLO progmune.top', 250);
   }
-  await command(secure, 'AUTH LOGIN');
-  await command(secure, b64(user));
-  await command(secure, b64(pass));
+  await command(secure, 'AUTH LOGIN', 334);
+  await command(secure, b64(user), 334);
+  await command(secure, b64(pass), 235);
 
   const from = fromName ? `${fromName} <${user}>` : user;
-  await command(secure, `MAIL FROM:<${user}>`);
-  await command(secure, `RCPT TO:<${to}>`);
-  await command(secure, 'DATA');
+  await command(secure, `MAIL FROM:<${user}>`, 250);
+  await command(secure, `RCPT TO:<${to}>`, [250, 251]);
+  await command(secure, 'DATA', 354);
 
   const message = [
     headerLine('From', from),
@@ -100,8 +106,8 @@ async function sendMail({ user, pass, to, subject, text, fromName }) {
     '.',
   ].join('\r\n');
 
-  await command(secure, message);
-  await command(secure, 'QUIT');
+  await command(secure, message, 250);
+  await command(secure, 'QUIT', 221).catch(() => { /* QUIT 响应可选 */ });
   secure.destroy();
   return true;
 }
