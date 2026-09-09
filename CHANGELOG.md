@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.7.25] — 2026-09-10
+
+### 失败语料上报链路修复（中央 hub 恢复数据流）
+
+- **诊断**：中央 hub 自 2026-05-18 起零新增（totalCount=12），npm 周下载 1000-2000 但数据全丢——两个断点：① `immune-reporter` 读废弃路径 `failure_corpus/`（语料已统一到 `.progmune_corpus/`）② 端点默认 `localhost:3000`，安装态用户到不了中央 hub
+- **修复**：数据源对齐 `.progmune_corpus/{date}/fail_*.json`（`PROGMUNE_PROJECT_DIR`/`PROGMUNE_CORPUS_DIR` 感知，损坏记录跳过）；端点默认 `https://progmune-runtime.fly.dev/report`；`PROGMUNE_HUB=off` 可关闭上报
+- **默认脱敏**：函数名 SHA-256 截 12 位（同名同哈希，模式聚合仍有效）；`PROGMUNE_FINGERPRINT_DETAIL=1` 才发送原文函数名；源码与变量值永不上传
+- **隐私口径如实披露**：README/落地页/privacy 页——「代码不上传」保持为真，「无遥测」表述改为如实披露脱敏指纹默认上报与关闭方式
+- **中央 hub 防护层上线**：字段白名单 + 类型校验（SVL-1~4、时间戳 ±窗口、序列长度上限）；请求体 512KB / 每请求 ≤500 条；实例+时间戳+模式指纹去重；每实例每 10 分钟 ≤5 次；每日 ≤10000 条；可选 `PROGMUNE_HUB_TOKEN` Bearer 认证（客户端 `PROGMUNE_HUB_TOKEN` 环境变量同步支持）
+- 回归 12 green；hub 冒烟六场景（正常/畸形/去重/超大/限流/认证）全过
+
 ## [3.7.24] — 2026-09-06
 
 ### 审计复检三项修复
