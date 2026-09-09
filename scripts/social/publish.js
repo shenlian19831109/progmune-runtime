@@ -46,9 +46,9 @@ async function main() {
   const dryRun = args.includes("--dry-run");
   const force = args.includes("--force");
 
-  if (!["x", "weibo", "all"].includes(platformArg) || !dayArg) {
+  if (!["x", "weibo", "devto", "all"].includes(platformArg) || !dayArg) {
     console.error(
-      "usage: node scripts/social/publish.js <x|weibo|all> <1..7> [--dry-run] [--force]"
+      "usage: node scripts/social/publish.js <x|weibo|devto|all> <1..7> [--dry-run] [--force]"
     );
     process.exit(2);
   }
@@ -61,7 +61,7 @@ async function main() {
       for (let d = 1; d <= 7; d++) {
         const c = readContent(p, d);
         if (c.date === today) {
-          if (p === platformArg || platformArg === "all") day = d;
+          if (p === platformArg || platformArg === "all" || (platformArg === "devto" && p === "x")) day = d;
         }
       }
     }
@@ -78,6 +78,7 @@ async function main() {
   }
 
   const env = loadEnv();
+  // devto 草稿从当天 X 内容派生（x 主题的英文文章）；"all" = A 级日历双平台。
   const targets = platformArg === "all" ? ["x", "weibo"] : [platformArg];
 
   // Dry-run only previews content — no credentials required.
@@ -85,6 +86,7 @@ async function main() {
     const missing = [];
     if (targets.includes("x") && !(env.X_API_KEY && env.X_ACCESS_TOKEN)) missing.push("X (X_API_KEY/X_API_SECRET/X_ACCESS_TOKEN/X_ACCESS_SECRET)");
     if (targets.includes("weibo") && !env.WEIBO_ACCESS_TOKEN) missing.push("Weibo (WEIBO_ACCESS_TOKEN)");
+    if (targets.includes("devto") && !env.DEV_API_KEY) missing.push("Dev.to (DEV_API_KEY)");
     if (missing.length) {
       console.error(`missing credentials for: ${missing.join(", ")}\n→ fill scripts/social/.env (see .env.example)`);
       process.exit(2);
@@ -97,6 +99,26 @@ async function main() {
       console.log(`[skip] ${platform} day${day} already posted (${existing.postedAt}) — use --force to repost`);
       continue;
     }
+
+    if (platform === "devto") {
+      // dev.to 无日历状态文件——用 X 当天内容建草稿
+      const x = readContent("x", day);
+      const { devtoArticle } = require("./lib/article-gen");
+      const article = devtoArticle(x);
+      console.log(`\n── DEV.TO draft · day ${day} · ${x.date} · ${article.title} ──`);
+      if (dryRun) {
+        console.log(`\n[title] ${article.title}\n[tags] ${article.tags.join(", ")}\n\n${article.body_markdown.slice(0, 400)}…`);
+        continue;
+      }
+      const devto = require("./lib/devto");
+      const me = await devto.authCheck(env);
+      console.log(`auth ok: @${me.username}`);
+      const created = await devto.createDraft(env, article);
+      state.mark("devto", day, [created.id]);
+      console.log(`draft created → id ${created.id} — 网页发布: ${created.url}`);
+      continue;
+    }
+
     const content = readContent(platform, day);
     console.log(`\n── ${platform.toUpperCase()} · day ${day} · ${content.date} · ${content.label} ──`);
 

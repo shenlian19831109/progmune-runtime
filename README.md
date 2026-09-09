@@ -6,6 +6,10 @@
 [![MCP](https://img.shields.io/badge/MCP-Compatible-blue)](https://modelcontextprotocol.io)
 [![TS Benchmark](https://img.shields.io/badge/TS%20R98.5%25%20P100%25-22c55e)]()
 [![Python Benchmark](https://img.shields.io/badge/Python%20R100%25%20P100%25-22c55e)]()
+[![npm version](https://img.shields.io/npm/v/progmune-runtime?color=cb3837)](https://www.npmjs.com/package/progmune-runtime)
+[![npm weekly downloads](https://img.shields.io/npm/dw/progmune-runtime?color=cb3837)](https://www.npmjs.com/package/progmune-runtime)
+[![GitHub stars](https://img.shields.io/github/stars/shenlian19831109/progmune-runtime?color=gold)](https://github.com/shenlian19831109/progmune-runtime)
+[![GitHub release](https://img.shields.io/github/v/release/shenlian19831109/progmune-runtime?color=gold)](https://github.com/shenlian19831109/progmune-runtime/releases)
 
 > [中文版](https://github.com/shenlian19831109/progmune-runtime/blob/main/README.zh-CN.md) · English Version
 
