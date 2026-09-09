@@ -28,6 +28,7 @@
       "url": "https://progmune.top/",
       "logo": "https://progmune.top/assets/favicon.svg",
       "email": "shenlian1983@qq.com",
+      "contactPoint": { "@type": "ContactPoint", "email": "shenlian1983@qq.com", "contactType": "customer support" },
       "sameAs": [
         "https://github.com/shenlian19831109/progmune-runtime",
         "https://www.npmjs.com/package/progmune-runtime"
@@ -354,6 +355,7 @@
     <a href="#usage" data-i18n="nav.usage">使用</a>
     <a href="#roadmap" data-i18n="nav.roadmap">路线图</a>
     <a href="#community" data-i18n="nav.community">社区</a>
+    <a href="/docs.html" data-i18n="nav.docs">文档</a>
   </div>
   <button id="langToggle" title="Switch language">EN</button>
 </nav>
@@ -378,6 +380,7 @@
     <span data-i18n="npm.week">本周下载</span> <b id="npmDownloads">…</b> ·
     <span data-i18n="npm.total">累计下载</span> <b id="npmDownloadsTotal">…</b>
   </p>
+  <pre class="code hero-install" style="display:inline-block; margin-top:14px;">npm install progmune-runtime</pre>
   <p class="hero-open" data-i18n="hero.open">🧡 开源 MIT · 免费 · 5 分钟上手</p>
 </header>
 
@@ -620,6 +623,9 @@ npm run precision:all  <span class="c"># 基准套件</span></pre>
   <div class="ft-links">
     <a href="mailto:shenlian1983@qq.com">shenlian1983@qq.com</a>
     <a href="https://github.com/shenlian19831109/progmune-runtime" target="_blank" rel="noopener">GitHub</a>
+    <a href="/docs.html">Docs</a>
+    <a href="/about.html">About</a>
+    <a href="/contact.html">Contact</a>
     <a href="/privacy.html">Privacy</a>
     <a href="/terms.html">Terms</a>
   </div>
@@ -631,7 +637,7 @@ npm run precision:all  <span class="c"># 基准套件</span></pre>
 const I18N = {
   zh: {
     "nav.problem": "为什么", "nav.what": "是什么", "nav.cap": "能力",
-    "nav.coverage": "覆盖", "nav.flywheel": "飞轮", "nav.roadmap": "路线图", "nav.usage": "使用", "nav.community": "社区",
+    "nav.coverage": "覆盖", "nav.flywheel": "飞轮", "nav.roadmap": "路线图", "nav.usage": "使用", "nav.community": "社区", "nav.docs": "文档",
     "hero.kicker": "AI Trust Decision Engine · 协议生命周期验证",
     "hero.h1": "AI 生成的代码，<em>可信吗？</em>",
     "hero.tagline": "Progmune 验证 AI 软件是否遵循正确的协议生命周期——TLS 握手、认证流、支付完整性、资源管理。这类违规跨越函数调用序列，SAST / SCA 看不见，Progmune 看得见。",
@@ -729,7 +735,7 @@ const I18N = {
   },
   en: {
     "nav.problem": "Why", "nav.what": "What", "nav.cap": "Capabilities",
-    "nav.coverage": "Coverage", "nav.flywheel": "Flywheel", "nav.roadmap": "Roadmap", "nav.usage": "Usage", "nav.community": "Community",
+    "nav.coverage": "Coverage", "nav.flywheel": "Flywheel", "nav.roadmap": "Roadmap", "nav.usage": "Usage", "nav.community": "Community", "nav.docs": "Docs",
     "hero.kicker": "AI Trust Decision Engine · Protocol Lifecycle Verification",
     "hero.h1": "AI-generated code — <em>can you trust it?</em>",
     "hero.tagline": "Progmune verifies that AI-generated software follows correct protocol lifecycles — TLS handshakes, auth flows, payment integrity, resource management. Violations that span function-call sequences are invisible to SAST/SCA. Progmune sees them.",

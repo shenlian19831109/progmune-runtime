@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documentation 文档 — Progmune</title>
+<meta name="description" content="Progmune developer documentation portal: README, quick start, API reference, coverage matrix, MCP server, benchmarks. 开发者文档入口：README、快速开始、API 参考、覆盖矩阵、MCP、基准。">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="canonical" href="https://progmune.top/docs.html">
+<meta name="robots" content="index,follow">
+<style>
+  :root { --ink:#0d1117; --muted:#57606a; --line:#d0d7de; --accent:#3b82f6; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; background:#fbfcfe; color:var(--ink); line-height:1.8; }
+  main { max-width:760px; margin:0 auto; padding:48px 24px 72px; }
+  h1 { font-size:26px; margin-bottom:8px; }
+  h2 { font-size:18px; margin:28px 0 8px; }
+  p, li { font-size:14.5px; color:var(--muted); margin-bottom:10px; }
+  a { color:var(--accent); }
+  .lang-tag { display:inline-block; font-size:12px; color:var(--accent); border:1px solid var(--accent); border-radius:999px; padding:2px 10px; margin-bottom:16px; }
+  .back { margin-top:40px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Progmune Documentation 开发者文档</h1>
+  <span class="lang-tag">English below ｜ 中文见下</span>
+
+  <h2>English</h2>
+  <p>Progmune is an AI Trust Decision Engine for AI-generated software. Install with <code>npm install progmune-runtime</code> and verify a file with <code>npm run sdk src/server.ts --explain</code>.</p>
+  <ul>
+    <li><a href="https://github.com/shenlian19831109/progmune-runtime/blob/main/README.md" target="_blank" rel="noopener"><b>README</b></a> — what it detects, the two paths (intercept / verify), full usage.</li>
+    <li><a href="https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/QUICK_START.md" target="_blank" rel="noopener"><b>Quick Start</b></a> — 5-minute onboarding.</li>
+    <li><a href="https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/API_REFERENCE.md" target="_blank" rel="noopener"><b>API Reference</b></a> — SDK verify / explain / getCompatibility, MCP tools, npm bins.</li>
+    <li><a href="https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix.md" target="_blank" rel="noopener"><b>Coverage Matrix</b></a> — language &amp; framework coverage with evidence links.</li>
+    <li><a href="https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/RUNTIME_ARCHITECTURE.md" target="_blank" rel="noopener"><b>Runtime Architecture</b></a> — trust engine internals, scoring model, decision thresholds.</li>
+    <li><a href="https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/BASELINE_PROTOCOL_PYTHON_v1.md" target="_blank" rel="noopener"><b>Benchmarks</b></a> — protocol blind-test methodology and baselines.</li>
+    <li><a href="https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/AUDIT_RESPONSE_2026-09.md" target="_blank" rel="noopener"><b>Audit Response</b></a> — response to three independent third-party audits (2026-09).</li>
+  </ul>
+  <p><b>MCP server:</b> expose Progmune to Claude Code via <code>progmune_check</code> and <code>progmune_trust_check</code> tools — see the README MCP section for setup.</p>
+
+  <h2>中文</h2>
+  <p>Progmune 是面向 AI 生成软件的 AI 信任决策引擎。安装：<code>npm install progmune-runtime</code>；验证单个文件：<code>npm run sdk src/server.ts --explain</code>。</p>
+  <ul>
+    <li><a href="https://github.com/shenlian19831109/progmune-runtime/blob/main/README.zh-CN.md" target="_blank" rel="noopener"><b>README 中文版</b></a> — 检测内容、两条路径（拦截 / 验证）、完整用法。</li>
+    <li><a href="https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/QUICK_START.md" target="_blank" rel="noopener"><b>快速开始</b></a> — 5 分钟上手。</li>
+    <li><a href="https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/API_REFERENCE.md" target="_blank" rel="noopener"><b>API 参考</b></a> — SDK verify / explain / getCompatibility、MCP 工具、npm bin。</li>
+    <li><a href="https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/coverage-matrix.md" target="_blank" rel="noopener"><b>覆盖矩阵</b></a> — 语言与框架覆盖现状（附证据链接）。</li>
+    <li><a href="https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/RUNTIME_ARCHITECTURE.md" target="_blank" rel="noopener"><b>运行时架构</b></a> — 信任引擎内部、评分模型、决策阈值。</li>
+    <li><a href="https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/BASELINE_PROTOCOL_PYTHON_v1.md" target="_blank" rel="noopener"><b>基准</b></a> — 协议盲测方法学与基线。</li>
+    <li><a href="https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/AUDIT_RESPONSE_2026-09.md" target="_blank" rel="noopener"><b>审计回应</b></a> — 三份独立第三方审计（2026-09）的回应。</li>
+  </ul>
+  <p><b>MCP server：</b>通过 <code>progmune_check</code> 与 <code>progmune_trust_check</code> 工具把 Progmune 接入 Claude Code——配置方式见 README 的 MCP 章节。</p>
+
+  <p class="back"><a href="/">← Back to Progmune 返回首页</a></p>
+</main>
+</body>
+</html>

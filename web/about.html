@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About 关于 — Progmune</title>
+<meta name="description" content="About Progmune: an open-source AI Trust Decision Engine that verifies protocol lifecycles in AI-generated code. Founded 2026, MIT licensed. 关于 Progmune：开源 AI 代码协议生命周期验证引擎。">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="canonical" href="https://progmune.top/about.html">
+<meta name="robots" content="index,follow">
+<style>
+  :root { --ink:#0d1117; --muted:#57606a; --line:#d0d7de; --accent:#3b82f6; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; background:#fbfcfe; color:var(--ink); line-height:1.8; }
+  main { max-width:760px; margin:0 auto; padding:48px 24px 72px; }
+  h1 { font-size:26px; margin-bottom:8px; }
+  h2 { font-size:18px; margin:28px 0 8px; }
+  p, li { font-size:14.5px; color:var(--muted); margin-bottom:10px; }
+  a { color:var(--accent); }
+  .lang-tag { display:inline-block; font-size:12px; color:var(--accent); border:1px solid var(--accent); border-radius:999px; padding:2px 10px; margin-bottom:16px; }
+  .back { margin-top:40px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>About Progmune 关于我们</h1>
+  <span class="lang-tag">English below ｜ 中文见下</span>
+
+  <h2>English</h2>
+  <p>Progmune is an <b>AI Trust Decision Engine for AI-generated software</b>. It verifies that code — written by AI or humans — follows correct protocol lifecycles: TLS handshakes, authentication flows, payment integrity, and resource management. These violations span sequences of function calls, which makes them invisible to pattern-based SAST and dependency-level SCA tools.</p>
+  <p>Progmune works through two complementary paths: a <b>generation-time intercept</b> (code produced through Progmune is validated before it ever lands on disk) and a <b>post-hoc verify path</b> (any codebase can be checked via CLI, SDK, MCP, or CI). Verdicts come from a deterministic protocol state machine — not from an LLM judging itself. Every result ships with a Trust Score, a Decision (APPROVED / NEEDS_REVIEW / BLOCKED), and an auditable evidence chain.</p>
+  <p>The project is <b>open source (MIT)</b>, published on <a href="https://www.npmjs.com/package/progmune-runtime" target="_blank" rel="noopener">npm</a> and <a href="https://github.com/shenlian19831109/progmune-runtime" target="_blank" rel="noopener">GitHub</a>. It was founded in 2026 by a solo maintainer. Benchmarks are published openly: TypeScript 795-gold blind test at 98.5% recall / 100% precision / 0 FP; Python at 100% / 100% / 0 FP. Three independent third-party audits (2026-09) were completed and all findings addressed; the response is public in the repository.</p>
+  <p>Progmune positions itself honestly as an <b>auxiliary checker</b> — evidence for human review — not a deployment gate. Questions or feedback: <a href="mailto:shenlian1983@qq.com">shenlian1983@qq.com</a>.</p>
+
+  <h2>中文</h2>
+  <p>Progmune 是面向 AI 生成软件的 <b>AI 信任决策引擎</b>。它验证代码——无论由 AI 还是人类编写——是否遵循正确的协议生命周期：TLS 握手、认证流、支付完整性、资源管理。这类违规跨越函数调用序列，模式级 SAST 与依赖级 SCA 都看不见。</p>
+  <p>Progmune 通过两条互补路径工作：<b>生成时拦截</b>（经由 Progmune 产出的代码在落盘前完成校验）与<b>事后验证</b>（任何代码库都可通过 CLI、SDK、MCP 或 CI 检查）。判定来自确定性协议状态机——不是 LLM 自审自判。每次结果附带 Trust Score、Decision（APPROVED / NEEDS_REVIEW / BLOCKED）与可审计的证据链。</p>
+  <p>项目为<b>开源（MIT）</b>，发布于 <a href="https://www.npmjs.com/package/progmune-runtime" target="_blank" rel="noopener">npm</a> 与 <a href="https://github.com/shenlian19831109/progmune-runtime" target="_blank" rel="noopener">GitHub</a>，2026 年由独立维护者创立。基准公开：TypeScript 795 金标盲测 Recall 98.5% / Precision 100% / 0 误报；Python 100% / 100% / 0 误报。三份独立第三方审计（2026-09）已全部回应并修复，回应文档在仓库中公开。</p>
+  <p>Progmune 如实定位为<b>辅助检查器</b>——为人工审查提供证据——而非部署门禁。问题或反馈：<a href="mailto:shenlian1983@qq.com">shenlian1983@qq.com</a>。</p>
+
+  <p class="back"><a href="/">← Back to Progmune 返回首页</a></p>
+</main>
+</body>
+</html>
