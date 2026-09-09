@@ -19,6 +19,10 @@ const tls = require('tls');
 const SMTP_HOST = process.env.SMTP_HOST || 'smtp.gmail.com';
 const SMTP_PORT = Number(process.env.SMTP_PORT || 587);
 const SMTP_TLS = process.env.SMTP_TLS !== 'off'; // 测试用：off 跳过 STARTTLS（生产默认开启，Gmail 必需）
+const SMTP_DEBUG = process.env.SMTP_DEBUG === '1';
+const SMTP_TIMEOUT_MS = Number(process.env.SMTP_TIMEOUT_MS || 25000); // 全程超时
+
+function debug(step) { if (SMTP_DEBUG) console.log(`[mailer] ${step}`); }
 
 /** 与 SMTP 服务器对话：发送命令并读取响应，校验响应码（expect 可为码或码数组）。 */
 function command(sock, cmd, expect) {
@@ -65,33 +69,44 @@ function headerLine(name, value) {
 async function sendMail({ user, pass, to, subject, text, fromName }) {
   if (!user || !pass) throw new Error('GMAIL_USER / GMAIL_APP_PASSWORD 未配置');
 
+  // 全程超时：任何一步挂起都强制终止并报错（否则调用方 promise 永不落定）
   const sock = net.connect(SMTP_PORT, SMTP_HOST);
+  sock.setTimeout(SMTP_TIMEOUT_MS, () => sock.destroy(new Error('SMTP 超时')));
+  debug(`connecting ${SMTP_HOST}:${SMTP_PORT}`);
   await new Promise((resolve, reject) => {
     sock.once('connect', resolve);
     sock.once('error', reject);
   });
+  debug('connected');
   await command(sock, undefined, 220); // greeting
+  debug('greeting ok');
   await command(sock, 'EHLO progmune.top', 250);
+  debug('ehlo ok');
 
   let secure = sock;
   if (SMTP_TLS) {
     await command(sock, 'STARTTLS', 220);
+    debug('starttls ok');
     // 升级为 TLS
     secure = await new Promise((resolve, reject) => {
       const t = tls.connect({ socket: sock, servername: SMTP_HOST }, () => resolve(t));
       t.once('error', reject);
     });
+    debug('tls handshake ok');
     await command(secure, undefined, 220); // TLS greeting
     await command(secure, 'EHLO progmune.top', 250);
   }
+  debug('auth login');
   await command(secure, 'AUTH LOGIN', 334);
   await command(secure, b64(user), 334);
   await command(secure, b64(pass), 235);
+  debug('auth ok');
 
   const from = fromName ? `${fromName} <${user}>` : user;
   await command(secure, `MAIL FROM:<${user}>`, 250);
   await command(secure, `RCPT TO:<${to}>`, [250, 251]);
   await command(secure, 'DATA', 354);
+  debug('sending data');
 
   const message = [
     headerLine('From', from),
@@ -107,8 +122,10 @@ async function sendMail({ user, pass, to, subject, text, fromName }) {
   ].join('\r\n');
 
   await command(secure, message, 250);
+  debug('message accepted');
   await command(secure, 'QUIT', 221).catch(() => { /* QUIT 响应可选 */ });
   secure.destroy();
+  debug('done');
   return true;
 }
 
