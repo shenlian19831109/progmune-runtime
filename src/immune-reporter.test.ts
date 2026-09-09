@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import { resolveEndpoint, maskFunctionName, extractFingerprints } from "./immune-reporter";
+import { resolveEndpoint, maskFunctionName, buildHeaders, extractFingerprints } from "./immune-reporter";
 
 /**
  * Immune Reporter 测试——2026-09 修复轮：
@@ -51,6 +51,18 @@ describe("maskFunctionName", () => {
 
   it("PROGMUNE_FINGERPRINT_DETAIL=1 时保留原文", () => {
     expect(maskFunctionName("generate_jwt", true)).toBe("generate_jwt");
+  });
+});
+
+describe("buildHeaders", () => {
+  it("无 token 时只带 Content-Type", () => {
+    expect(buildHeaders(undefined)).toEqual({ "Content-Type": "application/json" });
+  });
+
+  it("设置 PROGMUNE_HUB_TOKEN 时带 Bearer 认证头", () => {
+    const h = buildHeaders("secret-token");
+    expect(h["Authorization"]).toBe("Bearer secret-token");
+    expect(h["Content-Type"]).toBe("application/json");
   });
 });
 

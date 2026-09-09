@@ -36,8 +36,16 @@ const CURSOR_FILE = path.join(CORPUS_DIR, ".report_cursor.json");
 
 // ── 端点与开关 ──
 const HUB_ENV = process.env.PROGMUNE_HUB;
+const HUB_TOKEN = process.env.PROGMUNE_HUB_TOKEN;
 const DETAIL_ENABLED = process.env.PROGMUNE_FINGERPRINT_DETAIL === "1";
 const OFF_PATTERN = /^(off|0|false|no|disabled)$/i;
+
+/** 上报请求头：hub 设了 PROGMUNE_HUB_TOKEN 时需带 Bearer 认证。 */
+export function buildHeaders(token: string | undefined = HUB_TOKEN): Record<string, string> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  return headers;
+}
 
 /** 解析上报端点：显式关闭 → null；未设 → 中央 hub；其他 → 自定义 URL。 */
 export function resolveEndpoint(env: string | undefined = HUB_ENV): string | null {
@@ -142,7 +150,7 @@ export async function reportFingerprints(): Promise<{ success: boolean; message:
     const transport = url.protocol === "https:" ? https : http;
     const req = transport.request(endpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: buildHeaders(),
     }, (res: any) => {
       let data = "";
       res.on("data", (chunk: string) => data += chunk);

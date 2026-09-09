@@ -33,6 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.buildHeaders = buildHeaders;
 exports.resolveEndpoint = resolveEndpoint;
 exports.maskFunctionName = maskFunctionName;
 exports.extractFingerprints = extractFingerprints;
@@ -49,8 +50,16 @@ const CORPUS_DIR = process.env.PROGMUNE_CORPUS_DIR || path.resolve(PROJECT_DIR, 
 const CURSOR_FILE = path.join(CORPUS_DIR, ".report_cursor.json");
 // ── 端点与开关 ──
 const HUB_ENV = process.env.PROGMUNE_HUB;
+const HUB_TOKEN = process.env.PROGMUNE_HUB_TOKEN;
 const DETAIL_ENABLED = process.env.PROGMUNE_FINGERPRINT_DETAIL === "1";
 const OFF_PATTERN = /^(off|0|false|no|disabled)$/i;
+/** 上报请求头：hub 设了 PROGMUNE_HUB_TOKEN 时需带 Bearer 认证。 */
+function buildHeaders(token = HUB_TOKEN) {
+    const headers = { "Content-Type": "application/json" };
+    if (token)
+        headers["Authorization"] = `Bearer ${token}`;
+    return headers;
+}
 /** 解析上报端点：显式关闭 → null；未设 → 中央 hub；其他 → 自定义 URL。 */
 function resolveEndpoint(env = HUB_ENV) {
     if (env && OFF_PATTERN.test(env))
@@ -143,7 +152,7 @@ async function reportFingerprints() {
         const transport = url.protocol === "https:" ? https : http;
         const req = transport.request(endpoint, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: buildHeaders(),
         }, (res) => {
             let data = "";
             res.on("data", (chunk) => data += chunk);
