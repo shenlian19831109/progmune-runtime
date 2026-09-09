@@ -341,7 +341,24 @@
   .faq-item summary::before { content: "Q "; color: var(--accent); }
   .faq-item p { margin-top: 10px; font-size: 14px; color: var(--muted); line-height: 1.75; }
 
-  /* ── 订阅版本更新 ── */
+  /* ── Hero 订阅（主转化：顶端邮箱注册） ── */
+  .hero-subscribe {
+    max-width: 520px; margin: 26px auto 0; padding: 18px 20px 14px;
+    border-radius: 16px;
+    background: linear-gradient(#fff, #fff) padding-box,
+      linear-gradient(120deg, var(--accent), var(--accent-2)) border-box;
+    border: 1.5px solid transparent;
+    box-shadow: 0 8px 30px rgba(59, 130, 246, 0.10);
+    text-align: left;
+  }
+  .hs-head { display: flex; flex-direction: column; gap: 2px; margin-bottom: 10px; }
+  .hs-head b { font-size: 15px; }
+  .hs-head span { font-size: 12.5px; color: var(--muted); }
+  .hero-subscribe .sub-form { margin-top: 8px; }
+  .hero-subscribe .sub-form input { background: #fbfcfe; }
+  .hero-subscribe .sub-note { font-size: 12px; }
+
+  /* ── 订阅版本更新（09 利益节） ── */
   .sub-benefits ul { list-style: none; margin: 14px 0 0; }
   .sub-benefits li { padding: 5px 0; font-size: 14px; color: var(--muted); }
   .sub-benefits li::before { content: "✓ "; color: var(--green); font-weight: 700; }
@@ -356,7 +373,7 @@
 </head>
 <body id="top">
 
-<nav>
+<nav id="top">
   <a class="brand" href="#top">Progmune<em>.</em></a>
   <div class="links">
     <a href="#problem" data-i18n="nav.problem">为什么</a>
@@ -386,6 +403,19 @@
   <div class="cta">
     <a class="btn primary" href="#usage" data-i18n="hero.cta1">开始使用</a>
     <a class="btn ghost" href="#community" data-i18n="hero.cta2">加入社区</a>
+  </div>
+  <div class="hero-subscribe">
+    <div class="hs-head"><b data-i18n="hero.subTitle">订阅 Progmune 版本更新</b><span data-i18n="hero.subSub">每版一封邮件 · 无垃圾 · 一键退订</span></div>
+    <div class="sub-form">
+      <input id="subEmail" type="email" placeholder="you@example.com" autocomplete="email">
+      <button id="subSendBtn" class="btn primary" data-i18n="sub.send">获取确认码</button>
+    </div>
+    <div class="sub-form" id="subCodeRow" style="display:none;">
+      <input id="subCode" type="text" inputmode="numeric" maxlength="6" placeholder="123456" autocomplete="one-time-code">
+      <button id="subConfirmBtn" class="btn primary" data-i18n="sub.confirm">确认订阅</button>
+    </div>
+    <p id="subMsg" class="sub-msg" role="status"></p>
+    <p class="sub-note" data-i18n="sub.note">订阅即表示同意<a href="/privacy.html">隐私政策</a> · 随时一键退订</p>
   </div>
   <p class="hero-npm">
     📦 npm <code>progmune-runtime</code> <b id="npmVersion">v3.7.6</b> ·
@@ -625,16 +655,7 @@ npm run precision:all  <span class="c"># 基准套件</span></pre>
       <li data-i18n="sub.b6">企业级能力内测的早鸟资格</li>
     </ul>
   </div>
-  <div class="sub-form">
-    <input id="subEmail" type="email" placeholder="you@example.com" autocomplete="email">
-    <button id="subSendBtn" class="btn primary" data-i18n="sub.send">获取确认码</button>
-  </div>
-  <div class="sub-form" id="subCodeRow" style="display:none;">
-    <input id="subCode" type="text" inputmode="numeric" maxlength="6" placeholder="123456" autocomplete="one-time-code">
-    <button id="subConfirmBtn" class="btn primary" data-i18n="sub.confirm">确认订阅</button>
-  </div>
-  <p id="subMsg" class="sub-msg" role="status"></p>
-  <p class="sub-note" data-i18n="sub.note">落款署名 Progmune Founder Lian · 订阅即表示同意<a href="/privacy.html">隐私政策</a></p>
+  <p style="margin-top:16px;"><a class="btn primary" href="#top" data-i18n="sub.backTop">↑ 返回顶部订阅</a></p>
 </section>
 
 <!-- ═══ 10 社区 ═══ -->
@@ -665,6 +686,7 @@ npm run precision:all  <span class="c"># 基准套件</span></pre>
     <a href="/glossary.html">Glossary</a>
     <a href="/compare/semgrep.html">vs Semgrep</a>
     <a href="/compare/codeql.html">vs CodeQL</a>
+    <a href="/compare/codebuddy-security.html">vs CodeBuddy Security</a>
     <a href="/about.html">About</a>
     <a href="/contact.html">Contact</a>
     <a href="/privacy.html">Privacy</a>
@@ -685,6 +707,8 @@ const I18N = {
     "hero.cta1": "开始使用", "hero.cta2": "加入社区",
     "hero.badgeNote": "示例：Progmune 对代码的三种裁决输出",
     "hero.open": "🧡 开源 MIT · 免费 · 5 分钟上手",
+    "hero.subTitle": "订阅 Progmune 版本更新",
+    "hero.subSub": "每版一封邮件 · 无垃圾 · 一键退订",
     "s01.title": "为什么需要 Progmune",
     "s01.lead": "研究指出：<b>LLM 输出是统计表演而非推理</b>（Kambhampati 等，<a href=\"https://arxiv.org/abs/2504.09762\" target=\"_blank\" rel=\"noopener\">arXiv:2504.09762</a>）。当 AI 代码跨多个函数实现协议流程时，任何一环缺失都可能酿成安全事故。",
     "s01.oldTitle": "❌ 传统检查的盲区",
@@ -783,7 +807,8 @@ const I18N = {
     "sub.b6": "企业级能力内测的早鸟资格",
     "sub.send": "获取确认码",
     "sub.confirm": "确认订阅",
-    "sub.note": "落款署名 Progmune Founder Lian · 订阅即表示同意<a href=\"/privacy.html\">隐私政策</a>",
+    "sub.backTop": "↑ 返回顶部订阅",
+    "sub.note": "订阅即表示同意<a href=\"/privacy.html\">隐私政策</a> · 随时一键退订",
     "sub.msgSent": "✅ 确认码已发送至你的邮箱，10 分钟内有效（查收垃圾箱）",
     "sub.msgBadEmail": "❌ 请输入有效的邮箱地址",
     "sub.msgNetwork": "❌ 网络错误，请稍后重试",
@@ -804,6 +829,8 @@ const I18N = {
     "hero.cta1": "Get Started", "hero.cta2": "Join Community",
     "hero.badgeNote": "Sample: three decision outputs of Progmune on code",
     "hero.open": "🧡 Open source MIT · Free · Get started in 5 minutes",
+    "hero.subTitle": "Subscribe to Progmune Release Updates",
+    "hero.subSub": "One email per release · no spam · one-click unsubscribe",
     "s01.title": "Why Progmune",
     "s01.lead": "Research shows <b>LLM outputs are statistical performances, not reasoning</b> (Kambhampati et al., <a href=\"https://arxiv.org/abs/2504.09762\" target=\"_blank\" rel=\"noopener\">arXiv:2504.09762</a>). When AI code implements a protocol across many functions, a single missing step can become a security incident.",
     "s01.oldTitle": "❌ Blind spots of traditional checks",
@@ -902,7 +929,8 @@ const I18N = {
     "sub.b6": "Early access to enterprise-grade capabilities in private beta",
     "sub.send": "Send Code",
     "sub.confirm": "Confirm",
-    "sub.note": "Signed: Progmune Founder Lian · Subscribing means you agree to the <a href=\"/privacy.html\">Privacy Policy</a>",
+    "sub.backTop": "↑ Subscribe at the top",
+    "sub.note": "Subscribing means you agree to the <a href=\"/privacy.html\">Privacy Policy</a> · one-click unsubscribe anytime",
     "sub.msgSent": "✅ Code sent to your inbox — valid 10 minutes (check spam)",
     "sub.msgBadEmail": "❌ Please enter a valid email address",
     "sub.msgNetwork": "❌ Network error, please retry",

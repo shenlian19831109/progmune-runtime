@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Progmune vs CodeBuddy Security (Tencent Cloud) — complementary | Progmune</title>
+<meta name="description" content="CodeBuddy Security is Tencent Cloud's AI-driven enterprise code audit platform with PoC verification; Progmune is an open-source deterministic protocol state-machine checker. Honest comparison and how to use both.">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="canonical" href="https://progmune.top/compare/codebuddy-security.html">
+<meta name="robots" content="index,follow">
+<style>
+  :root { --ink:#0d1117; --muted:#57606a; --line:#d0d7de; --accent:#3b82f6; --green:#1a7f37; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; background:#fbfcfe; color:var(--ink); line-height:1.8; }
+  main { max-width:820px; margin:0 auto; padding:48px 24px 72px; }
+  h1 { font-size:26px; margin-bottom:8px; }
+  h2 { font-size:19px; margin:32px 0 10px; border-bottom:1px solid var(--line); padding-bottom:6px; }
+  p, li { font-size:14.5px; color:var(--muted); margin-bottom:10px; }
+  a { color:var(--accent); }
+  .tldr { background:#f0f7ff; border:1px solid #cfe3ff; border-radius:12px; padding:14px 18px; font-size:14.5px; margin:16px 0; }
+  table { width:100%; border-collapse:collapse; margin:14px 0; font-size:13.5px; }
+  th, td { border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top; }
+  th { background:#f6f8fa; }
+  td:first-child { font-weight:600; white-space:nowrap; }
+  .who { display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; }
+  .who > div { flex:1 1 240px; background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
+  .who h3 { font-size:15px; margin-bottom:6px; }
+  .who p { font-size:13.5px; margin:0; }
+  .cta { margin-top:28px; background:#f6f8fa; border:1px solid var(--line); border-radius:12px; padding:16px 18px; font-size:14.5px; }
+  .back { margin-top:32px; font-size:14px; }
+  .updated { font-size:12.5px; color:var(--muted); margin-bottom:16px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Progmune vs CodeBuddy Security: complementary, not competing</h1>
+  <p class="updated">Last verified: 2026-09 · Facts about third-party tools are checked quarterly. CodeBuddy Security is Tencent Cloud's AI-driven enterprise code audit platform (launched 2026-06).</p>
+
+  <div class="tldr"><b>TL;DR</b> — CodeBuddy Security <b>mines unknown vulnerabilities</b> with an AI deep-audit engine (backed by PoC verification in a sandbox) plus a static Xcheck engine. Progmune <b>verifies protocol lifecycles</b> with a deterministic state machine over call sequences — no LLM in the loop. CodeBuddy Security digs deep and is enterprise-grade; Progmune guards the routine, runs free and local on every commit. Use both: one for depth, one for cadence.</div>
+
+  <h2>Quick comparison</h2>
+  <table>
+    <tr><th>Dimension</th><th>CodeBuddy Security (Tencent Cloud)</th><th>Progmune</th></tr>
+    <tr><td>Core model</td><td>Dual engine: Xcheck static rules (known-vulnerability patterns) + AI deep-audit (LLM) for cross-module memory safety, protocol state-machine issues, business-logic flaws; adversarial self-falsification + automated PoC verification in Docker sandbox</td><td>Deterministic protocol state machine over cross-function call sequences — an LLM never judges</td></tr>
+    <tr><td>What it catches</td><td>Known patterns fast (Xcheck), unknown/complex vulnerabilities via AI + PoC proof — with public 0-day finds (NVIDIA, TensorFlow, Langflow, Firefox, etc.)</td><td>Sequence-level lifecycle violations: missing handshake steps, unauthenticated session handling, payment confirmation without signature verification, unreleased resources</td></tr>
+    <tr><td>Protocol state-machine angle</td><td>AI-driven discovery of protocol state-machine problems, validated by generated PoC</td><td>Deterministic checking of protocol lifecycles against known state machines — reproducible evidence, zero hallucination surface</td></tr>
+    <tr><td>Hallucination handling</td><td>Adversarial review (assume false-positive, falsify it) + PoC must produce on-disk evidence before verdict</td><td>No LLM in the verdict path, so no hallucination class to defend against</td></tr>
+    <tr><td>Verification</td><td>Dynamic: generated PoC compiled and executed in Docker sandbox</td><td>Static: evidence chain (rule → sequence → code location), reproducible on any machine</td></tr>
+    <tr><td>Generation-time interception</td><td>Not a generation tool</td><td>Yes — code generated through Progmune is validated before it lands on disk</td></tr>
+    <tr><td>Deployment & license</td><td>Enterprise product on Tencent Cloud (SaaS / private deployment), commercial trial</td><td>Open source MIT, fully local, <code>npm i progmune-runtime</code></td></tr>
+    <tr><td>Cost</td><td>Token-metered (optimized: ≤13M tokens per repo, &gt;70% cache hit reported)</td><td>Free</td></tr>
+    <tr><td>Cadence</td><td>Periodic deep audits (enterprise workflow)</td><td>Every commit / every generation — minutes, zero setup</td></tr>
+    <tr><td>Positioning</td><td>Enterprise vulnerability-mining platform</td><td>Auxiliary checker — evidence for human review, not a deployment gate</td></tr>
+  </table>
+
+  <h2>Who should use which</h2>
+  <div class="who">
+    <div><h3>CodeBuddy Security fits you if</h3><p>You run an enterprise security program, need deep unknown-vulnerability mining with PoC proof, threat modeling, and Tencent Cloud ecosystem integration — and have budget for token-based audits.</p></div>
+    <div><h3>Progmune fits you if</h3><p>You generate code with AI and want free, local, deterministic protocol-lifecycle verification on every commit, plus generation-time interception — evidence, not a bill.</p></div>
+  </div>
+  <p><b>Bottom line:</b> choose CodeBuddy Security for periodic deep audits that find what nobody else finds; choose Progmune for continuous, zero-cost lifecycle checks. They answer different questions: "is there an unknown flaw here?" vs "does this sequence follow the protocol?"</p>
+
+  <h2>Using both together</h2>
+  <p>A pragmatic enterprise setup: run Progmune in CI and on the generation path for cheap, deterministic lifecycle checks (every commit, minutes, free). Schedule CodeBuddy Security deep audits periodically (release candidates, high-risk modules) for unknown-vulnerability mining with PoC proof. Progmune findings that look suspicious become input for deeper AI audit — each tool feeds the other.</p>
+
+  <h2 id="zh">中文版</h2>
+  <div class="tldr"><b>TL;DR</b> — CodeBuddy Security 用 AI 深度审计引擎<b>挖掘未知漏洞</b>（沙箱 PoC 验证兜底）+ Xcheck 静态引擎；Progmune 用确定性状态机<b>验证协议生命周期</b>——裁决链路无 LLM。CodeBuddy Security 挖得深、企业级；Progmune 守日常、免费本地每次提交都跑。两者互补：一个要深度，一个要频率。</div>
+  <table>
+    <tr><th>维度</th><th>CodeBuddy Security（腾讯云）</th><th>Progmune</th></tr>
+    <tr><td>核心模型</td><td>双引擎：Xcheck 静态规则（已知特征漏洞）+ AI 深度审计（LLM）挖掘跨模块内存安全、协议状态机问题、业务逻辑漏洞；对抗式自我证伪 + Docker 沙箱自动 PoC 验证</td><td>确定性协议状态机，作用于跨函数调用序列——LLM 不参与裁决</td></tr>
+    <tr><td>能抓住</td><td>已知模式快查（Xcheck），未知/复杂漏洞靠 AI + PoC 证据——公开 0day 战绩（NVIDIA、TensorFlow、Langflow、Firefox 等）</td><td>序列级生命周期违规：握手步骤缺失、未认证会话处理、支付确认前未验签、资源未释放</td></tr>
+    <tr><td>协议状态机角度</td><td>AI 驱动挖掘协议状态机问题，PoC 验证后裁定</td><td>对已知协议状态机做确定性检查——证据可复现，零幻觉面</td></tr>
+    <tr><td>幻觉处理</td><td>对抗式审查（默认假设误报、要求证伪）+ PoC 落盘证据才裁定</td><td>裁决链路无 LLM，没有幻觉这个故障类</td></tr>
+    <tr><td>验证方式</td><td>动态：自动生成 PoC 在 Docker 沙箱编译执行</td><td>静态：证据链（规则 → 序列 → 代码位置），任意机器可复现</td></tr>
+    <tr><td>生成时拦截</td><td>非生成工具</td><td>有——经 Progmune 生成的代码落盘前完成校验</td></tr>
+    <tr><td>部署与许可</td><td>腾讯云企业产品（SaaS / 私有化），商业试用</td><td>MIT 开源，完全本地，<code>npm i progmune-runtime</code></td></tr>
+    <tr><td>成本</td><td>按 Token 计费（官方披露优化后 ≤13M/仓、缓存命中率 &gt;70%）</td><td>免费</td></tr>
+    <tr><td>频率</td><td>周期性深度审计（企业工作流）</td><td>每次提交 / 每次生成——分钟级，零配置</td></tr>
+    <tr><td>定位</td><td>企业级漏洞挖掘平台</td><td>辅助检查器——供人工审查的证据，非部署门禁</td></tr>
+  </table>
+  <div class="who">
+    <div><h3>CodeBuddy Security 适合你，如果</h3><p>你运行企业安全项目，需要带 PoC 证据的未知漏洞深度挖掘、威胁建模与腾讯云生态集成，且有 Token 计费的预算。</p></div>
+    <div><h3>Progmune 适合你，如果</h3><p>你的团队用 AI 产码，想要免费、本地、确定性的协议生命周期验证——每次提交都跑——外加生成时拦截。拿证据，不拿账单。</p></div>
+  </div>
+  <p><b>结论：</b>周期性深度审计、挖别人挖不到的漏洞选 CodeBuddy Security；持续、零成本的日常生命周期检查选 Progmune。它们回答不同问题：「这里有没有未知缺陷」vs「这串操作是否遵循协议」。</p>
+
+  <div class="cta">Try Progmune: <code>npm install progmune-runtime</code> · <a href="/docs.html">Docs</a> · <a href="https://github.com/shenlian19831109/progmune-runtime" target="_blank" rel="noopener">GitHub</a></div>
+  <p class="back"><a href="/">← Back to Progmune</a></p>
+</main>
+</body>
+</html>
