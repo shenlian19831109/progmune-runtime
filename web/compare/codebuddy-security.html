@@ -34,7 +34,7 @@
 <body>
 <main>
   <h1>Progmune vs CodeBuddy Security: complementary, not competing</h1>
-  <p class="updated">Last verified: 2026-09 · Facts about third-party tools are checked quarterly. CodeBuddy Security is Tencent Cloud's AI-driven enterprise code audit platform (launched 2026-06).</p>
+  <p class="updated">Last verified: 2026-09 · Facts about third-party tools are checked quarterly. CodeBuddy Security is Tencent Cloud's AI-driven enterprise code audit platform (launched 2026-06). Sources: <a href="https://cloud.tencent.com/developer/article/2694980" target="_blank" rel="noopener">Tencent Cloud Dev article 1</a> · <a href="https://pad.zol.com.cn/1195/11955524.html" target="_blank" rel="noopener">ZOL report</a></p>
 
   <div class="tldr"><b>TL;DR</b> — CodeBuddy Security <b>mines unknown vulnerabilities</b> with an AI deep-audit engine (backed by PoC verification in a sandbox) plus a static Xcheck engine. Progmune <b>verifies protocol lifecycles</b> with a deterministic state machine over call sequences — no LLM in the loop. CodeBuddy Security digs deep and is enterprise-grade; Progmune guards the routine, runs free and local on every commit. Use both: one for depth, one for cadence.</div>
 
@@ -47,8 +47,8 @@
     <tr><td>Hallucination handling</td><td>Adversarial review (assume false-positive, falsify it) + PoC must produce on-disk evidence before verdict</td><td>No LLM in the verdict path, so no hallucination class to defend against</td></tr>
     <tr><td>Verification</td><td>Dynamic: generated PoC compiled and executed in Docker sandbox</td><td>Static: evidence chain (rule → sequence → code location), reproducible on any machine</td></tr>
     <tr><td>Generation-time interception</td><td>Not a generation tool</td><td>Yes — code generated through Progmune is validated before it lands on disk</td></tr>
-    <tr><td>Deployment & license</td><td>Enterprise product on Tencent Cloud (SaaS / private deployment), commercial trial</td><td>Open source MIT, fully local, <code>npm i progmune-runtime</code></td></tr>
-    <tr><td>Cost</td><td>Token-metered (optimized: ≤13M tokens per repo, &gt;70% cache hit reported)</td><td>Free</td></tr>
+    <tr><td>Deployment & license</td><td>Enterprise product on Tencent Cloud (SaaS / private deployment), commercial trial</td><td>MIT; code stays local; masked fingerprints upload by default (opt-out) · <code>npm i progmune-runtime</code></td></tr>
+    <tr><td>Cost</td><td>Enterprise pricing (trial-based); token-optimized per public data: ≤13M per repo, &gt;70% cache hit</td><td>Free</td></tr>
     <tr><td>Cadence</td><td>Periodic deep audits (enterprise workflow)</td><td>Every commit / every generation — minutes, zero setup</td></tr>
     <tr><td>Positioning</td><td>Enterprise vulnerability-mining platform</td><td>Auxiliary checker — evidence for human review, not a deployment gate</td></tr>
   </table>
@@ -73,8 +73,8 @@
     <tr><td>幻觉处理</td><td>对抗式审查（默认假设误报、要求证伪）+ PoC 落盘证据才裁定</td><td>裁决链路无 LLM，没有幻觉这个故障类</td></tr>
     <tr><td>验证方式</td><td>动态：自动生成 PoC 在 Docker 沙箱编译执行</td><td>静态：证据链（规则 → 序列 → 代码位置），任意机器可复现</td></tr>
     <tr><td>生成时拦截</td><td>非生成工具</td><td>有——经 Progmune 生成的代码落盘前完成校验</td></tr>
-    <tr><td>部署与许可</td><td>腾讯云企业产品（SaaS / 私有化），商业试用</td><td>MIT 开源，完全本地，<code>npm i progmune-runtime</code></td></tr>
-    <tr><td>成本</td><td>按 Token 计费（官方披露优化后 ≤13M/仓、缓存命中率 &gt;70%）</td><td>免费</td></tr>
+    <tr><td>部署与许可</td><td>腾讯云企业产品（SaaS / 私有化），商业试用</td><td>MIT；代码完全本地；脱敏指纹默认匿名上报（可关闭）· <code>npm i progmune-runtime</code></td></tr>
+    <tr><td>成本</td><td>企业定价（试用制）；公开数据披露 token 优化：≤13M/仓、缓存命中率 &gt;70%</td><td>免费</td></tr>
     <tr><td>频率</td><td>周期性深度审计（企业工作流）</td><td>每次提交 / 每次生成——分钟级，零配置</td></tr>
     <tr><td>定位</td><td>企业级漏洞挖掘平台</td><td>辅助检查器——供人工审查的证据，非部署门禁</td></tr>
   </table>
