@@ -69,6 +69,27 @@ function headerLine(name, value) {
 async function sendMail({ user, pass, to, subject, text, fromName }) {
   if (!user || !pass) throw new Error('GMAIL_USER / GMAIL_APP_PASSWORD 未配置');
 
+  // 451 4.4.2 是 Google 对数据中心 IP 的临时政策限流：间隔重试通常能过
+  const MAX_ATTEMPTS = 3;
+  const RETRY_DELAY_MS = Number(process.env.SMTP_RETRY_DELAY_MS || 45000);
+  let lastErr;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      await sendMailOnce({ user, pass, to, subject, text, fromName });
+      return true;
+    } catch (e) {
+      lastErr = e;
+      const isTemporary = /451|4\.4\.2|ETIMEDOUT|超时/i.test(e.message || "");
+      if (!isTemporary || attempt === MAX_ATTEMPTS) throw e;
+      debug(`attempt ${attempt} 失败（${e.message.slice(0, 60)}），${RETRY_DELAY_MS / 1000}s 后重试`);
+      await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+    }
+  }
+  throw lastErr;
+}
+
+async function sendMailOnce({ user, pass, to, subject, text, fromName }) {
+
   // 全程超时：任何一步挂起都强制终止并报错（否则调用方 promise 永不落定）
   const sock = net.connect(SMTP_PORT, SMTP_HOST);
   sock.setTimeout(SMTP_TIMEOUT_MS, () => sock.destroy(new Error('SMTP 超时')));
