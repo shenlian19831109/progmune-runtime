@@ -1,5 +1,7 @@
 const net = require('net');
 const tls = require('tls');
+const https = require('https');
+const crypto = require('crypto');
 
 /**
  * 零依赖 Gmail SMTP 客户端（STARTTLS + AUTH LOGIN）。
@@ -23,6 +25,76 @@ const SMTP_DEBUG = process.env.SMTP_DEBUG === '1';
 const SMTP_TIMEOUT_MS = Number(process.env.SMTP_TIMEOUT_MS || 25000); // 全程超时
 
 function debug(step) { if (SMTP_DEBUG) console.log(`[mailer] ${step}`); }
+
+// ── 阿里云 DirectMail 通道（正规邮件推送，不受 Google 机房 IP 政策限制） ──
+const MAIL_PROVIDER = process.env.MAIL_PROVIDER || 'gmail'; // gmail | aliyun
+const ALIYUN_ACCESS_KEY_ID = process.env.ALIYUN_ACCESS_KEY_ID;
+const ALIYUN_ACCESS_KEY_SECRET = process.env.ALIYUN_ACCESS_KEY_SECRET;
+const ALIYUN_ACCOUNT_NAME = process.env.ALIYUN_ACCOUNT_NAME; // 已验证的发信地址，如 noreply@progmune.top
+const ALIYUN_ENDPOINT = process.env.ALIYUN_DM_ENDPOINT || 'dm.aliyuncs.com';
+
+function percentEncode(s) {
+  return encodeURIComponent(s)
+    .replace(/\+/g, '%20')
+    .replace(/\*/g, '%2A')
+    .replace(/%7E/g, '~');
+}
+
+/** 阿里云 RPC 签名请求（GET 方式，零依赖 HMAC-SHA1） */
+function aliyunRequest(params) {
+  const common = {
+    Format: 'JSON',
+    Version: '2015-11-23',
+    AccessKeyId: ALIYUN_ACCESS_KEY_ID,
+    SignatureMethod: 'HMAC-SHA1',
+    Timestamp: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
+    SignatureVersion: '1.0',
+    SignatureNonce: crypto.randomBytes(16).toString('hex'),
+    ...params,
+  };
+  const canonical = Object.keys(common)
+    .sort()
+    .map((k) => `${percentEncode(k)}=${percentEncode(String(common[k]))}`)
+    .join('&');
+  const stringToSign = `GET&${percentEncode('/')}&${percentEncode(canonical)}`;
+  const signature = crypto
+    .createHmac('sha1', ALIYUN_ACCESS_KEY_SECRET + '&')
+    .update(stringToSign)
+    .digest('base64');
+  const url = `https://${ALIYUN_ENDPOINT}/?${canonical}&Signature=${percentEncode(signature)}`;
+
+  return new Promise((resolve, reject) => {
+    const req = https.get(url, (res) => {
+      let data = '';
+      res.on('data', (c) => data += c);
+      res.on('end', () => {
+        try { resolve(JSON.parse(data)); }
+        catch { reject(new Error('阿里云响应解析失败: ' + data.slice(0, 200))); }
+      });
+    });
+    req.setTimeout(15000, () => req.destroy(new Error('阿里云请求超时')));
+    req.on('error', reject);
+  });
+}
+
+async function sendViaAliyun({ to, subject, text, fromName }) {
+  if (!ALIYUN_ACCESS_KEY_ID || !ALIYUN_ACCESS_KEY_SECRET || !ALIYUN_ACCOUNT_NAME) {
+    throw new Error('阿里云邮件推送凭据未配置（ALIYUN_ACCESS_KEY_ID/SECRET/ACCOUNT_NAME）');
+  }
+  const res = await aliyunRequest({
+    Action: 'SingleSendMail',
+    AccountName: ALIYUN_ACCOUNT_NAME,
+    AddressType: '1',           // 触发邮件（不进入垃圾箱的常规发信）
+    ReplyToAddress: 'true',
+    ToAddress: to,
+    FromAlias: fromName,
+    Subject: String(subject).slice(0, 100),
+    TextBody: String(text).slice(0, 1900), // DirectMail 正文上限
+  });
+  if (res && res.Code) throw new Error(`阿里云错误 ${res.Code}: ${res.Message || ''}`);
+  debug('aliyun sent ok');
+  return true;
+}
 
 /** 与 SMTP 服务器对话：发送命令并读取响应，校验响应码（expect 可为码或码数组）。 */
 function command(sock, cmd, expect) {
@@ -66,7 +138,12 @@ function headerLine(name, value) {
   return `${name}: ${encoded}`;
 }
 
-async function sendMail({ user, pass, to, subject, text, fromName }) {
+async function sendMail(opts) {
+  if (MAIL_PROVIDER === 'aliyun') return sendViaAliyun(opts);
+  return sendMailViaGmail(opts);
+}
+
+async function sendMailViaGmail({ user, pass, to, subject, text, fromName }) {
   if (!user || !pass) throw new Error('GMAIL_USER / GMAIL_APP_PASSWORD 未配置');
 
   // 451 4.4.2 是 Google 对数据中心 IP 的临时政策限流：间隔重试通常能过
