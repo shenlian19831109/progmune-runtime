@@ -453,6 +453,7 @@
       </ul>
     </div>
   </div>
+  <p class="lead complement" data-i18n="s01.complement">Progmune 不替代 SAST / SCA，也不被它们替代：SAST 看单语句与模式，Progmune 看跨函数序列的协议生命周期——两层确定性筛查联合部署，各守各的层。详见<a href="/compare/semgrep.html">对比页</a>。</p>
 </section>
 
 <!-- ═══ 02 是什么 ═══ -->
@@ -599,6 +600,7 @@ npm run precision:all  <span class="c"># 基准套件</span></pre>
     <div class="card"><h3 data-i18n="rm.d4t">⚙️ CI/CD 插件</h3><p data-i18n="rm.d4d">GitHub App · GitLab · Jenkins</p></div>
     <div class="card"><h3 data-i18n="rm.d5t">📊 行业基线</h3><p data-i18n="rm.d5d">同行业 Trust Score 对比</p></div>
     <div class="card"><h3 data-i18n="rm.d6t">🏆 公开基准</h3><p data-i18n="rm.d6d">开源基准数据与方法论</p></div>
+    <div class="card"><h3 data-i18n="rm.d7t">🔗 SAST 结果聚合</h3><p data-i18n="rm.d7d">把 Semgrep / CodeQL 的发现纳入统一审计报告——互补而非替代</p></div>
   </div>
   <p style="margin-top:26px; font-size:13px; color:var(--muted);" data-i18n="rm.indTitle">🎯 商业化重点行业</p>
   <div style="margin-top:8px;">
@@ -721,6 +723,7 @@ const I18N = {
     "s01.new2": "验证“握手 → 建立 → 释放”全生命周期合规",
     "s01.new3": "输出 Trust Score + Decision + 证据链",
     "s01.new4": "序列级协议状态机验证，而非模式匹配",
+    "s01.complement": "Progmune 不替代 SAST / SCA，也不被它们替代：SAST 看单语句与模式，Progmune 看跨函数序列的协议生命周期——两层确定性筛查联合部署，各守各的层。详见<a href=\"/compare/semgrep.html\">对比页</a>。",
     "s02.title": "Progmune 是什么",
     "s02.lead": "一套 <b>AI 代码治理基础设施</b>：静态分析代码的实际协议行为，回答“能不能部署”，而不是给一个孤立分数。",
     "s02.name": "名字释义：Progmune = <b>Program + Immune（程序免疫）</b>——如免疫系统，从每一次被拦截的失败中学习、记忆并防御反复出现的错误模式。",
@@ -780,6 +783,7 @@ const I18N = {
     "rm.d4t": "⚙️ CI/CD 插件", "rm.d4d": "GitHub App · GitLab · Jenkins",
     "rm.d5t": "📊 行业基线", "rm.d5d": "同行业 Trust Score 对比",
     "rm.d6t": "🏆 公开基准", "rm.d6d": "开源基准数据与方法论",
+    "rm.d7t": "🔗 SAST 结果聚合", "rm.d7d": "把 Semgrep / CodeQL 的发现纳入统一审计报告——互补而非替代",
     "rm.indTitle": "🎯 商业化重点行业",
     "rm.ind1": "金融科技（支付 / 交易）", "rm.ind2": "云原生基础设施", "rm.ind3": "SaaS 平台", "rm.ind4": "电商", "rm.ind5": "政务与合规",
     "footer.copyright": "© 2026 Progmune · AI Software Verification Infrastructure",
@@ -843,6 +847,7 @@ const I18N = {
     "s01.new2": "Validates the full lifecycle: handshake → established → teardown",
     "s01.new3": "Outputs Trust Score + Decision + evidence chain",
     "s01.new4": "Sequence-level protocol state-machine verification, not pattern matching",
+    "s01.complement": "Progmune does not replace SAST/SCA — and they cannot replace it: SAST checks statements and patterns, Progmune checks protocol lifecycles across call sequences. Deploy both deterministic layers, each guarding its own. See the <a href=\"/compare/semgrep.html\">comparison pages</a>.",
     "s02.title": "What is Progmune",
     "s02.lead": "An <b>AI code governance infrastructure</b>: statically analyzes actual protocol behavior and answers “can we deploy?” — not just a standalone score.",
     "s02.name": "Etymology: Progmune = <b>Program + Immune</b> — like an immune system, it learns from every blocked failure, remembers, and defends against recurring error patterns.",
@@ -902,6 +907,7 @@ const I18N = {
     "rm.d4t": "⚙️ CI/CD Plugins", "rm.d4d": "GitHub App · GitLab · Jenkins",
     "rm.d5t": "📊 Industry Baselines", "rm.d5d": "Trust-score comparison per industry",
     "rm.d6t": "🏆 Public Benchmark", "rm.d6d": "Open-source benchmark data & methodology",
+    "rm.d7t": "🔗 SAST Report Aggregation", "rm.d7d": "Fold Semgrep / CodeQL findings into one audit report — complementary, not a replacement",
     "rm.indTitle": "🎯 Focus Industries",
     "rm.ind1": "FinTech (payments / trading)", "rm.ind2": "Cloud-native infrastructure", "rm.ind3": "SaaS platforms", "rm.ind4": "E-commerce", "rm.ind5": "Government & compliance",
     "footer.copyright": "© 2026 Progmune · AI Software Verification Infrastructure",
