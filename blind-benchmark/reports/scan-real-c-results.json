@@ -1,75 +1,12 @@
 {
-  "generated": "2026-08-27T15:00:37.241Z",
+  "generated": "2026-09-11T10:56:43.730Z",
   "method": "extractIRC + buildCallSequences + validateSequenceWithSSG（生产管线，词段门控开，无 LLM）",
   "repos": [
-    {
-      "repo": "libssh",
-      "flags": [
-        {
-          "file": "src/pcap.c",
-          "function": "ssh_pcap_file_free",
-          "callName": "ssh_pcap_file_close",
-          "matchedRule": "close_file",
-          "strategy": "word-segment",
-          "currentState": [
-            "IDLE"
-          ],
-          "requiredState": [
-            "FILE_OPEN"
-          ],
-          "reason": "SSG state violation: \"ssh_pcap_file_close\" (mapped to \"close_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
-        }
-      ],
-      "sequences": 538,
-      "functions": 2129
-    },
-    {
-      "repo": "redis",
-      "flags": [],
-      "sequences": 1344,
-      "functions": 5723
-    },
     {
       "repo": "nginx",
       "flags": [],
       "sequences": 1362,
       "functions": 3199
-    },
-    {
-      "repo": "openssl",
-      "flags": [
-        {
-          "file": "crypto/bio/bss_file.c",
-          "function": "file_puts",
-          "callName": "file_write",
-          "matchedRule": "write_file",
-          "strategy": "word-segment",
-          "currentState": [
-            "IDLE"
-          ],
-          "requiredState": [
-            "FILE_OPEN"
-          ],
-          "reason": "SSG state violation: \"file_write\" (mapped to \"write_file\") requires states [FILE_OPEN] but current file state is [IDLE]. Fix path: open_file"
-        },
-        {
-          "file": "apps/lib/apps.c",
-          "function": "WIN32_rename",
-          "callName": "DeleteFile",
-          "matchedRule": "delete_file",
-          "strategy": "word-segment",
-          "currentState": [
-            "UNAUTHENTICATED"
-          ],
-          "requiredState": [
-            "FILE_STORED",
-            "FILE_REFERENCED"
-          ],
-          "reason": "SSG state violation: \"DeleteFile\" (mapped to \"delete_file\") requires states [FILE_STORED, FILE_REFERENCED] but current file_upload state is [UNAUTHENTICATED]. Fix path: receive_upload → validate_file → store_file → reference_file"
-        }
-      ],
-      "sequences": 4740,
-      "functions": 15539
     }
   ]
 }

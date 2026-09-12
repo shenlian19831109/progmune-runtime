@@ -1,0 +1,143 @@
+{
+  "name": "fix-regression-corpus",
+  "version": 1,
+  "created": "2026-09-11",
+  "method": "真实安全修复回归：对每个修复，扫描「修复前 parent commit」——引擎在该位置/该类型上能否报出违规；再扫修复后确认不误报。来源=GitHub 安全公告数据库（GHSA/CVE），SHA 均经 api.github.com 实测核验。",
+  "entries": [
+    {
+      "id": "fr-001",
+      "repo": "open-webui/open-webui",
+      "lang": "python",
+      "ghsa": "GHSA-wpmr-8h3q-fwj7",
+      "cve": "CVE-2026-87016",
+      "type": "auth_bypass_identity_substring",
+      "summary": "SQLite 部署下 OAuth subject 身份映射用子串匹配而非精确匹配——subject 含 SQL 通配符可绑定到任意账户（含管理员）。SCIM external-ID 同缺陷。PostgreSQL 不受影响。",
+      "fix_commit": "73c1f5806aeb6345dad5de8f5aa26d1f3d0bef80",
+      "parent_commit": "90724cdee01bd9260d15f8482d4e0d2fbe2ebffb",
+      "severity": "high",
+      "patched_version": "0.11.1",
+      "ground_truth_files": [
+        "backend/open_webui/models/users.py"
+      ],
+      "result": "MISS (2026-09-11)"
+    },
+    {
+      "id": "fr-002",
+      "repo": "open-webui/open-webui",
+      "lang": "python",
+      "ghsa": "GHSA-wvm9-9g5j-623f",
+      "type": "authz_policy_bypass",
+      "summary": "被 OAuth 角色策略拒绝的用户仍可经令牌交换流程登录（角色策略未在令牌交换路径执行）。",
+      "fix_commit": "d799e81edbdc971c6deb096b6474cd95b93504bf",
+      "parent_commit": "c0d09a5de93d48517efe043ea2f4a2f6a7a44fc3",
+      "severity": "medium",
+      "ground_truth_files": [
+        "backend/open_webui/routers/auths.py",
+        "backend/open_webui/utils/oauth.py"
+      ],
+      "result": "MISS (2026-09-11)"
+    },
+    {
+      "id": "fr-003",
+      "repo": "open-webui/open-webui",
+      "lang": "python",
+      "ghsa": "GHSA-4qg5-cxx4-g927",
+      "type": "authz_domain_allowlist_bypass",
+      "summary": "被 OAuth 域白名单或角色策略拒绝的用户仍可登录（白名单检查路径遗漏）。",
+      "fix_commit": "fb5ef978bfb451c3f2221931e08e54250cec58ca",
+      "parent_commit": "977d638afe1b3983360abea5185c9c5a96eff45d",
+      "severity": "medium",
+      "ground_truth_files": [
+        "backend/open_webui/routers/auths.py"
+      ],
+      "result": "MISS (2026-09-11)"
+    },
+    {
+      "id": "fr-004",
+      "repo": "open-webui/open-webui",
+      "lang": "python",
+      "ghsa": "GHSA-p78m-89r6-pgf7",
+      "type": "session_cookie_exfiltration",
+      "summary": "用户会话 cookie 被发送到配置为 bearer 的工具服务器（会话凭据外泄到第三方）。",
+      "fix_commit": "cd9db21c5276807a2975ddba17cef369ad1114b7",
+      "parent_commit": "7d392bedc9c1aaecc94509a58e59186b614433dc",
+      "severity": "medium",
+      "ground_truth_files": [
+        "backend/open_webui/utils/tools.py"
+      ],
+      "result": "MISS (2026-09-11)"
+    },
+    {
+      "id": "fr-005",
+      "repo": "open-webui/open-webui",
+      "lang": "python",
+      "ghsa": "GHSA-3pf7-q2g3-wj28",
+      "type": "ownership_check_missing",
+      "summary": "任意已认证用户可把自己的聊天注入其他用户的文件夹（跨用户归属校验缺失）。",
+      "fix_commit": "d9e23b90c100d19b00270aea3cde0501d2354a6c",
+      "parent_commit": "72a909fd2f3ac8d67554f6c85bc1723934454e2d",
+      "severity": "medium",
+      "ground_truth_files": [
+        "backend/open_webui/main.py",
+        "backend/open_webui/routers/chats.py",
+        "backend/open_webui/utils/access_control/folders.py"
+      ],
+      "result": "MISS (2026-09-11)"
+    },
+    {
+      "id": "fr-006",
+      "repo": "open-webui/open-webui",
+      "lang": "python",
+      "ghsa": "GHSA-34r3-9m95-vq73",
+      "type": "authz_channel_reach",
+      "summary": "任意已认证用户可经服务端通道触达 Azure 平台通道（通道级授权缺失）。",
+      "fix_commit": "e3e4bd87df6fc629e7e22081d980d55a7632b8b7",
+      "parent_commit": "ca4e07a40b4ff11989a25d84b517d3d0049f93ae",
+      "severity": "high",
+      "ground_truth_files": [
+        "backend/open_webui/config.py",
+        "backend/open_webui/retrieval/web/main.py",
+        "backend/open_webui/retrieval/web/utils.py",
+        "backend/open_webui/utils/misc.py"
+      ],
+      "result": "MISS (2026-09-11)"
+    },
+    {
+      "id": "fr-007",
+      "repo": "naorsabag/openhop",
+      "lang": "typescript",
+      "ghsa": "GHSA-g72f-jw3w-mgh7",
+      "type": "path_traversal",
+      "summary": "Flow ID 文件操作中的路径穿越（flow id 未经校验进入文件路径）。",
+      "fix_commit": "c8190fbefa3a50e7b0c16c001d2e05b0e920cfb4",
+      "parent_commit": "6bde78bf88aafa09a39dfaf45978c73d1c5fedc3",
+      "severity": "high",
+      "patched_version": "0.3.6",
+      "ground_truth_files": [
+        "packages/server/src/flow-id.ts",
+        "packages/server/src/routes.ts",
+        "packages/server/src/index.ts",
+        "packages/server/src/store.ts"
+      ],
+      "ground_truth_note": "store.ts 为漏洞 sink 所在（filePath(id)→join→readFile/writeFile/unlink，修复 commit 未改它——校验加在上游 routes）。扫描目标=packages/server 子包（根仓库无 tsconfig）。",
+      "result": "DETECTED (2026-09-12)",
+      "result_detail": "PATH_TRAVERSAL ×4（flowRoutes + FlowStore.save/get/delete）——A1：TS 提取器路径穿越标记（request 污点→fs sink，跨函数一跳）+ 引擎 IR 层标记消费"
+    },
+    {
+      "id": "fr-008",
+      "repo": "MasterKale/SimpleWebAuthn",
+      "lang": "typescript",
+      "ghsa": "GHSA-6hxq-p678-4hr2",
+      "type": "webauthn_registration_verification",
+      "summary": "注册验证未充分确保 attestation 的完整校验（WebAuthn 注册验证弱化）。",
+      "fix_commit": "67a41fed3dfd96cab1dcf414f6d1792a72e06e35",
+      "parent_commit": "ba9c97b980741e290f883aa4b4a6e24d23a1e9c9",
+      "severity": "low",
+      "patched_version": "13.3.2",
+      "ground_truth_files": [
+        "packages/server/src/helpers/validateCertificatePath.ts"
+      ],
+      "result": "MISS (2026-09-11)"
+    }
+  ]
+}

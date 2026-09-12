@@ -369,6 +369,235 @@ function extractDirectCalls(func) {
     }
     return [...new Set(calls)];
 }
+// ═══════════════════════════════════════════════════════════════
+// Path traversal marker（2026-09-11，REALWORLD_FIX_REGRESSION_V1 fr-007）
+// 镜像 tools/extract_ir.py 的 request 污点 → 文件 sink 单跳追踪，另补
+// 跨函数一跳：调用点把污点实参传给项目方法，该方法体内对应参数流入
+// 文件 sink → 在调用方函数注入 __progmune_path_traversal__。
+// 消费方：protocol-domain-validator 的 PATH_TRAVERSAL 检查（引擎路径）
+// 与 protocol-detector 的同名规则（source-level benchmark 路径）。
+// ═══════════════════════════════════════════════════════════════
+const PATH_TRAVERSAL_MARKER = "__progmune_path_traversal__";
+const TS_FILE_SINK_NAMES = [
+    "readFile", "readFileSync", "writeFile", "writeFileSync",
+    "appendFile", "appendFileSync", "unlink", "unlinkSync", "rm", "rmSync",
+    "mkdir", "mkdirSync", "open", "openSync", "createReadStream",
+    "createWriteStream", "existsSync", "readdir", "readdirSync",
+    "copyFile", "rename", "stat", "lstat", "rmdir", "truncate",
+];
+function tsSinkCallRegex() {
+    return new RegExp(`(?:^|[^\\w.$])(?:await\\s+)?(?:[\\w$]+\\.)?(${TS_FILE_SINK_NAMES.join("|")})\\s*\\(([\\s\\S]{0,250}?)\\)`, "g");
+}
+/** request 根表达式：req.params / request.body / req.query['x'] … */
+function hasRequestRootedExpr(text) {
+    return /\b(?:req|request)\.(?:params|query|body|headers|cookies)\b[.[]?/.test(text);
+}
+/** 函数体内被 request 污染的局部名（含解构与单跳赋值，深度 ≤2） */
+function collectTaintedNames(text) {
+    const tainted = new Set();
+    let m;
+    const direct = /(?:const|let|var)\s+([\w$]+)\s*=\s*(?:await\s+)?(?:req|request)\.(?:params|query|body|headers|cookies)\b[.[]?/g;
+    while ((m = direct.exec(text)) !== null)
+        tainted.add(m[1]);
+    const destr = /(?:const|let|var)\s*\{\s*([^}=]*?)\s*\}\s*=\s*(?:await\s+)?(?:req|request)\.(?:params|query|body|headers|cookies)\b/g;
+    while ((m = destr.exec(text)) !== null) {
+        for (const part of m[1].split(",")) {
+            const name = part.trim().split(":")[0].trim();
+            if (/^[\w$]+$/.test(name))
+                tainted.add(name);
+        }
+    }
+    const bareAssign = /(?:^|[^\w$.])([\w$]+)\s*=\s*(?:req|request)\.(?:params|query|body|headers|cookies)\b[.[]?/g;
+    while ((m = bareAssign.exec(text)) !== null)
+        tainted.add(m[1]);
+    // 单跳传播（深度 ≤2）
+    for (let depth = 0; depth < 2; depth++) {
+        if (tainted.size === 0)
+            break;
+        const names = [...tainted].join("|");
+        const hop = new RegExp(`(?:const|let|var)\\s+([\\w$]+)\\s*=\\s*\\b(?:${names})\\b`, "g");
+        let added = false;
+        while ((m = hop.exec(text)) !== null) {
+            if (!tainted.has(m[1])) {
+                tainted.add(m[1]);
+                added = true;
+            }
+        }
+        if (!added)
+            break;
+    }
+    return tainted;
+}
+function taintPattern(tainted) {
+    const parts = [
+        /\b(?:req|request)\.(?:params|query|body|headers|cookies)\b[.[]?/.source,
+    ];
+    if (tainted.size > 0) {
+        parts.push(`\\b(?:${[...tainted].join("|")})\\b`);
+    }
+    return new RegExp(parts.join("|"));
+}
+/** 本函数体内：文件 sink 的实参窗口含 request 污点 → true */
+function hasTaintedSinkCall(text, tainted) {
+    const taint = taintPattern(tainted);
+    if (!taint)
+        return false;
+    const sinkRe = tsSinkCallRegex();
+    let m;
+    while ((m = sinkRe.exec(text)) !== null) {
+        if (taint.test(m[2] || ""))
+            return true;
+    }
+    return false;
+}
+/** 深度 0 逗号切分实参窗口（截断窗口内近似；首个参数位置常用于路径） */
+function splitArgWindow(win) {
+    const args = [];
+    let depth = 0;
+    let cur = "";
+    for (const ch of win) {
+        if (ch === "(" || ch === "[" || ch === "{")
+            depth++;
+        else if (ch === ")" || ch === "]" || ch === "}")
+            depth--;
+        else if (ch === "," && depth === 0) {
+            args.push(cur);
+            cur = "";
+            continue;
+        }
+        cur += ch;
+    }
+    if (cur.trim())
+        args.push(cur);
+    return args;
+}
+/** 项目方法名 → 方法体内流入文件 sink 的形参下标集合 */
+function methodSinkParamMap(project, absRoot) {
+    const map = new Map();
+    for (const sf of project.getSourceFiles()) {
+        const relPath = path.relative(absRoot, sf.getFilePath());
+        for (const cls of sf.getClasses()) {
+            const cn = cls.getName();
+            if (!cn)
+                continue;
+            for (const m of cls.getMethods()) {
+                const params = m.getParameters().map((p) => p.getName());
+                if (params.length === 0)
+                    continue;
+                const text = m.getText();
+                const sinkRe = tsSinkCallRegex();
+                let sm;
+                while ((sm = sinkRe.exec(text)) !== null) {
+                    const win = sm[2] || "";
+                    params.forEach((pname, idx) => {
+                        if (new RegExp(`\\b${pname}\\b`).test(win)) {
+                            if (!map.has(m.getName())) {
+                                map.set(m.getName(), { idxs: new Set(), entries: [] });
+                            }
+                            const rec = map.get(m.getName());
+                            rec.idxs.add(idx);
+                            const fullName = `${cn}.${m.getName()}`;
+                            if (!rec.entries.some((e) => e.name === fullName)) {
+                                rec.entries.push({ name: fullName, file: relPath });
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    }
+    return map;
+}
+/**
+ * 注入路径穿越标记：
+ *  1) 本函数体内 sink 实参直接污点；
+ *  2) 跨函数一跳——调用项目方法且污点实参落在该方法的 sink 形参位置。
+ * 标记只进 funcs 中该函数的 calls（方法条目不单独标——违规归因到入口）。
+ */
+function augmentPathTraversalMarkers(project, funcs, absRoot) {
+    const sinkParams = methodSinkParamMap(project, absRoot);
+    const methodCallRe = new RegExp(`\\.([\\w$]+)\\s*\\(([\\s\\S]{0,250}?)\\)`, "g");
+    const mark = (name, file) => {
+        const entry = funcs.find((x) => x.name === name && x.file === file);
+        if (!entry)
+            return;
+        entry.calls = entry.calls || [];
+        if (!entry.calls.includes(PATH_TRAVERSAL_MARKER)) {
+            entry.calls.push(PATH_TRAVERSAL_MARKER);
+        }
+    };
+    // 对每个函数式节点（函数声明/方法/箭头回调——fastify 路由回调是内联
+    // 箭头函数，不在 funcs 中）独立做污点分析。节点文本预过滤：
+    // 不含 request 访问也不含 sink 方法调用则跳过。
+    const sinkMethodNames = [...sinkParams.keys()];
+    const prefilter = new RegExp(`\\b(?:req|request)\\.(?:params|query|body|headers|cookies)\\b|` +
+        (sinkMethodNames.length > 0 ? `\\.(?:${sinkMethodNames.join("|")})\\s*\\(` : "a^"));
+    for (const sf of project.getSourceFiles()) {
+        if (sf.getFilePath().includes("node_modules"))
+            continue;
+        const relPath = path.relative(absRoot, sf.getFilePath());
+        sf.forEachDescendant((node) => {
+            if (!ts_morph_1.Node.isFunctionDeclaration(node) &&
+                !ts_morph_1.Node.isArrowFunction(node) &&
+                !ts_morph_1.Node.isMethodDeclaration(node)) {
+                return;
+            }
+            const text = node.getText();
+            if (!prefilter.test(text))
+                return;
+            const tainted = collectTaintedNames(text);
+            if (tainted.size === 0)
+                return;
+            const taint = taintPattern(tainted);
+            if (!taint)
+                return;
+            // 1) 节点体内 sink 实参直接污点 → 标记该节点归属的 funcs 条目
+            if (hasTaintedSinkCall(text, tainted)) {
+                const nodeName = ts_morph_1.Node.isArrowFunction(node) ? undefined : node.getName();
+                if (ts_morph_1.Node.isFunctionDeclaration(node) && nodeName) {
+                    mark(nodeName, relPath);
+                }
+                else if (ts_morph_1.Node.isMethodDeclaration(node) && nodeName) {
+                    const cls = node.getParent();
+                    if (ts_morph_1.Node.isClassDeclaration(cls) && cls.getName()) {
+                        mark(`${cls.getName()}.${nodeName}`, relPath);
+                    }
+                }
+                return;
+            }
+            // 2) 跨函数一跳：污点实参传入项目方法体的文件 sink。
+            //    标记调用方（若可归属）+ 被调方法条目——路由回调不可归属时，
+            //    方法条目是唯一可归因位置（openhop 形态）。
+            methodCallRe.lastIndex = 0;
+            let m;
+            while ((m = methodCallRe.exec(text)) !== null) {
+                const callee = m[1];
+                const rec = sinkParams.get(callee);
+                if (!rec || rec.idxs.size === 0)
+                    continue;
+                const win = m[2] || "";
+                const args = splitArgWindow(win);
+                const hit = args.some((arg, i) => rec.idxs.has(i) && taint.test(arg));
+                if (!hit)
+                    continue;
+                const nodeName = ts_morph_1.Node.isArrowFunction(node) ? undefined : node.getName();
+                if (ts_morph_1.Node.isFunctionDeclaration(node) && nodeName) {
+                    mark(nodeName, relPath);
+                }
+                else if (ts_morph_1.Node.isMethodDeclaration(node) && nodeName) {
+                    const cls = node.getParent();
+                    if (ts_morph_1.Node.isClassDeclaration(cls) && cls.getName()) {
+                        mark(`${cls.getName()}.${nodeName}`, relPath);
+                    }
+                }
+                for (const me of rec.entries) {
+                    mark(me.name, me.file);
+                }
+                return;
+            }
+        });
+    }
+}
 /**
  * 从 TypeScript 项目提取 IR（函数签名、参数、返回值、协议注解）。
  * @protocol namespace=dev_pipeline pre_states=[] post_states=["IR_EXTRACTED"] invalidate=["IR_STALE"]
@@ -519,29 +748,42 @@ function _extractSingleProject(absRoot, tsconfigPath) {
                     }
                 }
             }
-            // Extract class methods: ts-morph getFunctions() excludes class members
-            for (const cls of sf.getClasses()) {
-                const cn = cls.getName();
-                if (!cn)
+        }
+        // Extract class methods: ts-morph getFunctions() excludes class members
+        // （2026-09-12 修复：此循环此前误置于 VariableDeclaration 循环内——
+        //   无顶层变量声明的文件（如 openhop store.ts）方法整体漏提取，
+        //   且有变量声明的文件会重复 push。移至 sf 层 + 去重语义。）
+        for (const cls of sf.getClasses()) {
+            const cn = cls.getName();
+            if (!cn)
+                continue;
+            for (const m of cls.getMethods()) {
+                const mn = m.getName();
+                if (!mn)
                     continue;
-                for (const m of cls.getMethods()) {
-                    const mn = m.getName();
-                    if (!mn)
-                        continue;
-                    funcs.push({
-                        name: `${cn}.${mn}`,
-                        params: m.getParameters().map((p) => ({ name: p.getName(), type: getParamType(p), typeDetail: getParamTypeDetail(p) })),
-                        returnType: m.getReturnTypeNode?.()?.getText?.() || "any",
-                        returnTypeDetail: m.getReturnTypeNode?.()?.getText?.() || "any",
-                        file: relPath,
-                        exported: vd.isExported(), calls: [],
-                        ...parseCapabilityFromJSDoc(m),
-                        protocol: parseProtocolFromJSDoc(m),
-                    });
-                }
+                funcs.push({
+                    name: `${cn}.${mn}`,
+                    params: m.getParameters().map((p) => ({ name: p.getName(), type: getParamType(p), typeDetail: getParamTypeDetail(p) })),
+                    returnType: m.getReturnTypeNode?.()?.getText?.() || "any",
+                    returnTypeDetail: m.getReturnTypeNode?.()?.getText?.() || "any",
+                    file: relPath,
+                    exported: cls.isExported(),
+                    calls: [],
+                    ...parseCapabilityFromJSDoc(m),
+                    protocol: parseProtocolFromJSDoc(m),
+                });
             }
         }
     }
+    // ═══════════════════════════════════════════════════════════════
+    // Phase 4.5: Path traversal marker（2026-09-11，fr-007 openhop）
+    // 镜像 Python 提取器的 request 污点 → 文件 sink 单跳追踪，并补
+    // 跨函数一跳：调用点把污点参数传给项目方法，该方法体内该参数
+    // 流入文件 sink → 调用方函数注入 __progmune_path_traversal__。
+    // 消费方：protocol-domain-validator PATH_TRAVERSAL 检查（引擎）
+    // 与 protocol-detector 同名规则（source-level benchmark 路径）。
+    // ═══════════════════════════════════════════════════════════════
+    augmentPathTraversalMarkers(project, funcs, absRoot);
     // ═══════════════════════════════════════════════════════════════
     // Phase 5: Dynamic external function resolution
     // Replaces hardcoded knownExternals

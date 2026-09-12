@@ -34,9 +34,20 @@ import sys
 # 依赖名含 user 会被误标认证（REALWORLD_STRUCTURAL_V2 假保护 FN）。
 # 真认证依赖用 current_user/authorizer 等强词识别（get_current_user
 # 含 current_user ✓）。
+# 2026-09-11（REALWORLD_AI_GENERATED_V2 / skyvern）：补 org-token 认证模型
+# 词族——get_current_org / get_current_caller_context 是 23k★ 生产 SaaS
+# 的主力认证依赖名，词表不认识 → 146 条 FASTAPI_ROUTE_NO_AUTH 误报。
+# current_org/current_caller/caller_context 与 current_user 同强度
+# （get_current_organization 误标风险与 get_current_user 同族，已接受）。
 AUTH_WORDS = (
     "auth", "login", "token", "credential", "session",
     "bearer", "permission", "current_user", "api_key", "oauth", "jwt",
+    "current_org", "current_caller", "caller_context",
+    # open-webui 真实语料（修复回归 fr-001 扫描，2026-09-11）：get_verified_user /
+    # get_admin_user 是其全路由主力认证依赖（session/JWT 校验），词表不认识 →
+    # 142 条 FASTAPI_ROUTE_NO_AUTH 误报。复合词窄口：verified_user/admin_user
+    # 是强认证词（区别于裸 "user" 的 DB 查询误标风险）。
+    "verified_user", "admin_user",
 )
 
 SKIP_DIRS = {"tests", "test", "deps", "venv", "env", "node_modules", "vendor",

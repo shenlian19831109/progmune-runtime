@@ -1,5 +1,26 @@
 # Changelog
 
+## [3.7.26] — 2026-09-13
+
+### 精度修复批次（AI 生成项目验证 V2 + 真实修复回归驱动的引擎改动）
+
+- **FastAPI 认证词表补现代认证形态**（`tools/extract_framework_py.py`）：`current_org`/`current_caller`/`caller_context`（skyvern 146 条误报的根因词族）+ `verified_user`/`admin_user`（open-webui 142 条误报的根因词族）——每个新真实语料都暴露一批框架层词汇缺口；fastapi-realworld 0 FP 保持 + 摘保护反证精确触发
+- **词段匹配边界收紧**（`ssg-bridge.ts` Strategy 2）：规则词必须按序出现且首词@词位 0、末词@末位（此前仅要求全部出现即命中）——skyvern 35 条 SSG 误报消灭 16 条、nginx 3 FP→0；**Python 盲测 64/64 零漂移、TS 795 零漂移（3086 flags LOST 0 / ADDED 0）、C 金标 F1=95.7% 不变、Go 盲测 P=R=100%**
+- **一次性文件 API 原子化**（`protocols.json`）：`read_text`/`write_text`/`read_bytes`/`write_bytes`/`pathlib.*` 入 `read_file_atomic`/`write_file_atomic` 别名——Path.read_text 族内部完成 open→close，不再报裸读
+- **类方法提取修复**（`extract-ir.ts`）：类方法循环此前误置于变量声明循环内——无顶层变量声明的文件（openhop store.ts 复现）方法整体漏提取，有变量声明的文件重复 push；移至文件层 + `cls.isExported()`
+- **路径穿越检测 TS 化（A1，修复回归 fr-007 驱动）**：TS 提取器注入 `__progmune_path_traversal__`（request 污点→fs sink 单跳 + 跨函数一跳——调用点污点实参流入项目方法体内的文件 sink）；**引擎 IR 层直接消费标记**（call-sequence 构建过滤 `__progmune_` 前缀，标记到不了 specific-check——Python 标记此前在引擎管线中是死的，本版同时点亮两侧）；规则 `languages` 补 typescript/javascript；domain-validator 补 `PATH_TRAVERSAL` 检查
+
+### 真实安全修复回归 V1（决定性实验，回答「能力 vs 语料」）
+
+- **语料**：8 条真实修复（open-webui 6 Python / openhop 1 TS / SimpleWebAuthn 1 TS，全部 GHSA/CVE + 修复 commit + 真值文件清单），注册表 `blind-benchmark/fix-regression-corpus.json`
+- **基线 0/8 检出**——漏报根因七类逐条记录（查询语义 / 策略逻辑分支 / 凭据数据流 / 归属数据流 / 配置通道路由 / 语言面缺口 / 密码学协议语义），见 `blind-benchmark/REALWORLD_FIX_REGRESSION_V1.md`
+- **A1 后 fr-007（openhop Flow ID 路径穿越）转 DETECTED**：PATH_TRAVERSAL ×4 命中真值位置（routes.ts flowRoutes + store.ts FlowStore.save/get/delete）；fr-001~006/008 待对应能力扩展
+- **AI 生成项目验证 V2**（`blind-benchmark/REALWORLD_AI_GENERATED_V2.md`）：Skyvern ⭐22,971 生产管线扫描 181 条违规逐条人工标注全 FP——框架层认证词汇缺口 144 条 + 词段误报 35 条（其中 16 条把代码里的路径穿越防御/符号链接校验误报为协议违规）；修复后 181→22（剩余 19 条夹心形态词法不可区分 + 2 条 HMAC webhook + 1 条精确名碰撞，见报告 §3.2 与 §5）
+
+### 回归
+
+- 发布门：build ✓ / check 免疫正常 ✓ / Python 盲测 64 零漂移 ✓ / TS 795 零漂移 ✓ / C 金标 F1=95.7% ✓ / Go 盲测 P=R=100% ✓ / 定向 184 tests green（本地全量套件重负载 worker 崩溃为既有环境问题，以 CI 为准）
+
 ## [3.7.25] — 2026-09-10
 
 ### 失败语料上报链路修复（中央 hub 恢复数据流）

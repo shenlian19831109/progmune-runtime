@@ -844,6 +844,29 @@ export const SPECIFIC_VIOLATION_CHECKS: SpecificViolationCheck[] = [
   // ═══════════════════════════════════════════════════════
   // QUIC-001: Active migration disabled
   // ═══════════════════════════════════════════════════════
+  // 2026-09-11（REALWORLD_FIX_REGRESSION_V1 fr-007）：路径穿越引擎化。
+  // 标记由语言提取器注入（Python: tools/extract_ir.py 请求污点→文件
+  // sink 单跳追踪；TypeScript: src/extract-ir.ts 同款 + 跨函数一跳——
+  // 调用点污点参数流入项目方法体内的文件 sink）。此前 Python 标记在
+  // 引擎管线中无消费方（source-level 规则只活在 benchmark harness），
+  // 本检查同时点亮 Python 与 TS 两侧。
+  // ═══════════════════════════════════════════════════════
+  {
+    ruleId: "PATH_TRAVERSAL",
+    description:
+      "A file operation receives a path derived from request-controlled input " +
+      "without visible validation — path traversal / arbitrary file access.",
+    languages: ["typescript", "javascript", "python"],
+    check: (steps) => {
+      return steps.some(
+        (s) =>
+          s.api === "__progmune_path_traversal__" ||
+          s.api.startsWith("__progmune_path_traversal")
+      );
+    },
+  },
+
+  // ═══════════════════════════════════════════════════════
   {
     ruleId: "QUIC_DISABLE_ACTIVE_MIGRATION",
     description:

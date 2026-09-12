@@ -2169,7 +2169,11 @@
         "fs.readFileSync",
         "fs.readFile",
         "fs.promises.readFile",
-        "fs.promises.readFileSync"
+        "fs.promises.readFileSync",
+        "read_text",
+        "read_bytes",
+        "pathlib.read_text",
+        "pathlib.read_bytes"
       ],
       "status": "confirmed"
     },
@@ -2182,7 +2186,11 @@
         "fs.writeFileSync",
         "fs.writeFile",
         "fs.promises.writeFile",
-        "fs.promises.writeFileSync"
+        "fs.promises.writeFileSync",
+        "write_text",
+        "write_bytes",
+        "pathlib.write_text",
+        "pathlib.write_bytes"
       ],
       "status": "confirmed"
     }

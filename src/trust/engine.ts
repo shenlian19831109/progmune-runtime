@@ -1444,6 +1444,30 @@ async function collectProtocolViolations(
             const n = String(f.name);
             nameCounts.set(n, (nameCounts.get(n) || 0) + 1);
           }
+          // 2026-09-12（REALWORLD_FIX_REGRESSION_V1 fr-007）：路径穿越标记
+          // 在 IR 层直接消费——call-sequence 构建会过滤 __progmune_ 前缀
+          // （P4.5 历史），标记到不了 checkSpecificViolations；此前的 Python
+          // 标记因此在引擎管线中一直是死的。此处同时点亮 Python 与 TS 两侧。
+          for (const f of functions) {
+            const calls = f.calls || [];
+            if (calls.includes("__progmune_path_traversal__")) {
+              violations.push({
+                severity: "medium",
+                rule_id: "PATH_TRAVERSAL",
+                file: f.file,
+                function: f.name || "unknown",
+                message:
+                  "File operation receives a request-controlled path without visible validation — path traversal / arbitrary file access.",
+                evidence: "__progmune_path_traversal__",
+                why:
+                  "Extractor-verified taint flow: request-derived input reaches a file sink " +
+                  "(directly or via one-hop project method).",
+                fix:
+                  "Validate/sanitize the path (allowlist, basename normalization) before file operations.",
+                policy_ref: "protocol-safety.specific",
+              });
+            }
+          }
           for (const f of functions) {
             if (!f.protocol) continue;
             const protocol = { ...f.protocol };

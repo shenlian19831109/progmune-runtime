@@ -673,9 +673,12 @@ const SAFEGUARD_RULES = [
     {
         name: "Path Traversal (User-Controlled File Path)",
         category: "path_traversal",
-        languages: ["python"],
-        // Source-level detection: the Python extractor emits a synthetic marker
-        // call when a file sink (open / io.open / os.open / Path(...).read_text)
+        // 2026-09-11（fr-007）：TS 提取器（extract-ir.ts）自 2026-09-11 起同样
+        // 注入该标记（request 污点 → 文件 sink，含跨函数一跳）——语言面扩展。
+        languages: ["typescript", "javascript", "python"],
+        // Source-level detection: the language extractors emit a synthetic marker
+        // call when a file sink (open / io.open / os.open / Path(...).read_text;
+        // TS: readFile/writeFile/unlink/rm/mkdir/createReadStream 等 fs 族)
         // receives a path tainted by request-derived user input (directly or via
         // single-hop assignment — os.path.join chains resolve through assignment
         // tracking). No satisfier possible — the marker IS the violation evidence.

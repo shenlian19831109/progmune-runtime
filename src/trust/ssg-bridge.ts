@@ -337,15 +337,39 @@ function inferRuleName(
     if (projectFunctions && !isProjectFn) continue;
     if (projectFunctions && isDotted) continue; // 带点调用只走限定精确匹配（+别名/域提示）
     const ruleWords = ruleName.split("_");
-    const callWords = normalized.split("_");
 
     // Rule must have at least 2 words for this strategy (single-word rules
     // are too prone to false positives via substring)
     if (ruleWords.length < 2) continue;
 
-    // Every rule word must appear as a complete call word segment
-    const allWordsMatch = ruleWords.every((rw) => callWords.includes(rw));
-    if (allWordsMatch) {
+    // 2026-09-11（REALWORLD_AI_GENERATED_V2 / skyvern）：词段匹配加
+    // 「首词@首位 + 末词@末位」边界收紧。此前仅要求规则词全部出现——
+    // validate_local_file_path / _validate_file_stat / _session_create_data /
+    // _revoke_refresh_token_at_google / ngx_read_file 等真实语料 FP 均破坏
+    // 该边界；Python 盲测 S5 改名形态（verify_user_password /
+    // create_active_session / open_user_file）全部满足边界，TP 不受影响。
+    let callWords = normalized.split("_").filter((w) => w !== "");
+    if (callWords.length === 0) callWords = normalized.split("_");
+
+    // Rule words must appear in order — first rule word at word index 0,
+    // last rule word at the final word index — not just anywhere in the set
+    let pos = 0;
+    const positions: number[] = [];
+    let ordered = true;
+    for (const rw of ruleWords) {
+      let found = -1;
+      for (let i = pos; i < callWords.length; i++) {
+        if (callWords[i] === rw) { found = i; break; }
+      }
+      if (found === -1) { ordered = false; break; }
+      positions.push(found);
+      pos = found + 1;
+    }
+    if (
+      ordered &&
+      positions[0] === 0 &&
+      positions[positions.length - 1] === callWords.length - 1
+    ) {
       return ruleName;
     }
   }
