@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.7.27] — 2026-09-13
+
+### 归属校验 Python 化（A2，修复回归 fr-005 驱动）
+
+- **跨用户资源写入检测**（`tools/extract_ir.py` 新标记 `__progmune_cross_user_write__`）：函数把请求 payload 里的外来资源 id（folder_id）带着持久化（insert/add/create）却没有资源归属守卫 → 标记。**严格归属守卫词表**（任一出现即抑制）：归属字段比较（user_id/owner_id/user.id）、`has_*/check_*_folder_access` 助手、`get_*_by_id_and_user_id` 限定查询——**不含 `has_permission`**（fr-005 真值函数含特性权限检查，与资源归属无关）；`insert_` 前缀持久化原语不标（归属决策在上游路由层）
+- **引擎 IR 层消费**（`src/trust/engine.ts`）：`AUTHZ_CROSS_USER_WRITE` 违规直接报出（同 PATH_TRAVERSAL 模式）；`protocol-detector.ts` 同名规则供 source-level 路径
+- **fr-005 闭环验收**：修复前 DETECTED（open-webui main.py::chat_completion，真值位置）；修复后 0 误报（has_folder_write_access 抑制）；chats.py create_new_chat / automations.py（有守卫）均不标
+- **修复回归战绩 2/8**（fr-007 路径穿越 TS 化 + fr-005 归属校验 Python 化）
+
+### 回归
+
+- Python 盲测 64/64 零漂移 ✓ / Python 源级金标新规则 0 命中 ✓ / skyvern 24 无漂移 ✓ / 引擎测试 73 green ✓ / build ✓ / check 免疫正常 ✓
+
 ## [3.7.26] — 2026-09-13
 
 ### 精度修复批次（AI 生成项目验证 V2 + 真实修复回归驱动的引擎改动）

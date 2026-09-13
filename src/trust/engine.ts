@@ -1448,6 +1448,7 @@ async function collectProtocolViolations(
           // 在 IR 层直接消费——call-sequence 构建会过滤 __progmune_ 前缀
           // （P4.5 历史），标记到不了 checkSpecificViolations；此前的 Python
           // 标记因此在引擎管线中一直是死的。此处同时点亮 Python 与 TS 两侧。
+          // 2026-09-13（fr-005）：同层消费跨用户资源写入标记。
           for (const f of functions) {
             const calls = f.calls || [];
             if (calls.includes("__progmune_path_traversal__")) {
@@ -1464,6 +1465,23 @@ async function collectProtocolViolations(
                   "(directly or via one-hop project method).",
                 fix:
                   "Validate/sanitize the path (allowlist, basename normalization) before file operations.",
+                policy_ref: "protocol-safety.specific",
+              });
+            }
+            if (calls.includes("__progmune_cross_user_write__")) {
+              violations.push({
+                severity: "medium",
+                rule_id: "AUTHZ_CROSS_USER_WRITE",
+                file: f.file,
+                function: f.name || "unknown",
+                message:
+                  "Data is persisted with a user-supplied foreign resource id (folder_id) without an ownership guard — any authenticated user can write into another user's resource.",
+                evidence: "__progmune_cross_user_write__",
+                why:
+                  "Extractor-verified: folder_id from request payload is persisted (insert/add/create) " +
+                  "with no ownership comparison or folder write-access check in this function.",
+                fix:
+                  "Verify folder write access for the acting user (ownership query or access-control helper) before persisting.",
                 policy_ref: "protocol-safety.specific",
               });
             }

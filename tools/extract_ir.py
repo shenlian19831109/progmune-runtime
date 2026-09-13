@@ -691,6 +691,47 @@ def has_template_tag_decorator(node):
     return False
 
 
+CROSS_USER_WRITE_MARKER = "__progmune_cross_user_write__"
+
+
+def has_cross_user_resource_write(node):
+    """跨用户资源写入（REALWORLD_FIX_REGRESSION_V1 fr-005 open-webui）：
+    函数把请求 payload 里的外来资源 id（folder_id 等）连同持久化调用
+    写入（insert/add/create），却没有资源归属守卫——任意已认证用户可
+    把数据写进其他用户的资源。归属守卫证据（任一出现即抑制）：
+    ① 归属字段比较 user_id/owner_id/author_id/user.id/folder.user_id
+    ② 文件夹写权限助手 has_*/check_*_folder_access / has_folder_access
+    ③ 按用户 id 限定的查询 get_*_by_id_and_user_id。
+    注意：不把 has_permission 算作归属证据——fr-005 真值函数含
+    features.direct_tool_servers 特性权限检查（user.role != 'admin' 同
+    族，has_ownership_checked 会误放行），与资源归属无关。
+    另：函数名以 insert_/save_/add_ 开头 = 持久化原语层（模型方法），
+    归属决策在上游路由层，不标记。"""
+    try:
+        name = getattr(node, "name", "")
+        if re.match(r"^(insert_|save_|add_)", name):
+            return False
+        text = ast.unparse(node)
+    except Exception:
+        return False
+    if "folder_id" not in text:
+        return False
+    if not any(k in text for k in ("metadata", "form_data", "body", "request")):
+        return False
+    if not re.search(r"insert_new_chat|insert_new\w*|\binsert\(|\.add\(|\.create\(", text):
+        return False
+    if re.search(r"\b(user_id|owner_id|author_id|user\.id|folder\.user_id)\s*[!=]==?", text):
+        return False
+    if re.search(
+        r"has_folder_write_access|has_folder_access|"
+        r"has_\w*_folder_access|check_\w*_folder_access|check_folder\w*|"
+        r"get_\w+_by_id_and_user_id",
+        text,
+    ):
+        return False
+    return True
+
+
 def has_ownership_checked(node):
     """Inline ownership comparison: an identity-named parameter (user,
     current_user, profile, author, owner) compared with ==/!= against another
@@ -861,6 +902,8 @@ def extract_calls(node, unsafe_vars=None, imports=None, module_constants=None, g
         calls.append(TEMPLATE_TAG_MARKER)
     if has_ownership_checked(node) and OWNERSHIP_CHECKED_MARKER not in calls:
         calls.append(OWNERSHIP_CHECKED_MARKER)
+    if has_cross_user_resource_write(node) and CROSS_USER_WRITE_MARKER not in calls:
+        calls.append(CROSS_USER_WRITE_MARKER)
     if has_command_taint_flow(node) and CMD_FLOW_MARKER not in calls:
         calls.append(CMD_FLOW_MARKER)
     if has_csrf_exempt(node) and CSRF_MARKER not in calls:

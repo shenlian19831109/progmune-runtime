@@ -82,7 +82,8 @@
         "backend/open_webui/routers/chats.py",
         "backend/open_webui/utils/access_control/folders.py"
       ],
-      "result": "MISS (2026-09-11)"
+      "result": "DETECTED (2026-09-13)",
+      "result_detail": "AUTHZ_CROSS_USER_WRITE ×1 @ main.py::chat_completion——A2：Python 提取器跨用户资源写入标记（folder_id 来自 payload + 持久化 + 无严格归属守卫；has_permission 不算守卫、insert_ 前缀模型方法不标）+ 引擎 IR 层消费。抑制验证：chats.py create_new_chat（有 get_folder_by_id_and_user_id）与 automations.py（有 check_automation_folder_access）均不标。"
     },
     {
       "id": "fr-006",

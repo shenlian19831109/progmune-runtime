@@ -689,6 +689,20 @@ const SAFEGUARD_RULES = [
         conceptExpected: ["path allowlist", "basename normalization", "path sanitization"],
     },
     {
+        name: "Authorization (Cross-User Resource Write)",
+        category: "authorization",
+        // 2026-09-13（REALWORLD_FIX_REGRESSION_V1 fr-005）：Python 提取器在
+        // 「请求 payload 外来资源 id（folder_id）带着持久化、无归属守卫」时
+        // 注入标记。证据语义全部在提取器侧（严格归属守卫词表——不含
+        // has_permission 类特性权限检查，见 tools/extract_ir.py）。
+        languages: ["python"],
+        trigger: /\b(__progmune_cross_user_write__)\b/,
+        safeguards: [],
+        violationMessage: "Data is persisted with a user-supplied foreign resource id (folder_id) without an ownership guard — any authenticated user can write into another user's resource.",
+        conceptMissing: ["ResourceOwnership", "CrossUserReference"],
+        conceptExpected: ["folder write-access check", "get_*_by_id_and_user_id query"],
+    },
+    {
         name: "XSS (Unsafe Template Rendering)",
         category: "xss",
         languages: ["python"],
