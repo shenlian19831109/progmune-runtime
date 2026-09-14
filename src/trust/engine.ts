@@ -160,6 +160,12 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
   ];
 
   // ═══════════════════════════════════════
+  // ── 失败语料沉淀（2026-09-14）：信任引擎检出的违规写入本地语料库 ——
+  //    知识网络的入口。此前只有 agent-loop 的 planner 失败会入语料，
+  //    trust 扫描（CLI/agent/patrol/MCP）检出的真违规不沉淀。
+  //    测试环境跳过；同日同（项目+规则+函数）去重；语料写入永不打断扫描。
+  writeTrustFailuresToCorpus(ctx, allViolations);
+
   //  PHASE 3: SCORE
   // ═══════════════════════════════════════
 
@@ -2030,6 +2036,95 @@ function mapRiskSeverity(severity: string): ViolationSeverity {
     case "medium": return "medium";
     default: return "low";
   }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 失败语料沉淀（2026-09-14）：信任引擎违规 → .progmune_corpus
+// ═══════════════════════════════════════════════════════════════
+
+const SEVERITY_TO_SVL: Record<string, string> = {
+  critical: "SVL-4",
+  high: "SVL-3",
+  medium: "SVL-2",
+  low: "SVL-1",
+};
+
+/** 与 failure-corpus.ts 相同的语料目录解析（模块加载时定死 cwd 的语义） */
+function trustCorpusDir(): string {
+  if (process.env.PROGMUNE_CORPUS_DIR) return process.env.PROGMUNE_CORPUS_DIR;
+  const projectDir = process.env.PROGMUNE_PROJECT_DIR || process.cwd();
+  return path.join(projectDir, ".progmune_corpus");
+}
+
+/**
+ * 把本次扫描检出的违规写入失败语料库（知识网络的入口）。
+ * - 测试环境（VITEST/NODE_ENV=test）跳过——单测不得污染语料
+ * - 同日同（项目+规则+函数）去重——反复扫描不重复沉淀
+ * - 全部 best-effort：语料写入失败绝不打断扫描主流程
+ */
+function writeTrustFailuresToCorpus(
+  ctx: TrustEvaluationContext,
+  violations: TrustViolation[]
+): void {
+  if (process.env.VITEST === "true" || process.env.NODE_ENV === "test") return;
+  if (violations.length === 0) return;
+  try {
+    const { recordFailure } = require("../failure-corpus");
+    const fs = require("fs");
+    const corpusDir = trustCorpusDir();
+    const date = new Date().toISOString().slice(0, 10);
+    const dedupFile = path.join(corpusDir, `.trust-dedup-${date}.json`);
+    let seen: Record<string, boolean> = {};
+    try { seen = JSON.parse(fs.readFileSync(dedupFile, "utf-8")); } catch { /* fresh day */ }
+
+    // 项目函数名快照（语料挖掘的词段门控输入），cap 300
+    let projectFunctions: string[] = [];
+    try {
+      const irPath = path.join(ctx.projectPath, "ir.json");
+      if (fs.existsSync(irPath)) {
+        const ir = JSON.parse(fs.readFileSync(irPath, "utf-8"));
+        const funcs = Array.isArray(ir) ? ir : (ir.functions || []);
+        projectFunctions = funcs
+          .map((f: any) => String(f.name))
+          .filter((n: string) => n && !n.startsWith("__progmune_"))
+          .slice(0, 300);
+      }
+    } catch { /* best-effort */ }
+
+    let added = 0;
+    for (const v of violations.slice(0, 50)) {
+      // 已知高 FP 的 specific-check 规则不入语料——它们以 LLM 域映射
+      // 抖动为主（open-webui 单次扫描 36 条 CROSS_DOMAIN），对语料挖掘
+      // 是纯噪声。真实检出面（PATH_TRAVERSAL/SSRF/CROSS_USER_WRITE/
+      // 框架层/SSG）照常沉淀。
+      if (v.rule_id === "PROTOCOL_CROSS_DOMAIN" || v.rule_id === "PLAINTEXT_AUTH_WITHOUT_TLS") continue;
+      const key = `${ctx.projectName}:${v.rule_id}:${v.function || ""}`;
+      if (seen[key]) continue;
+      recordFailure({
+        intent: `trust-scan:${ctx.projectName}`,
+        projectFunctions,
+        violatedSVL: (SEVERITY_TO_SVL[v.severity] || "SVL-2") as any,
+        constraintType: v.rule_id,
+        actionSequence: [
+          {
+            kind: "violation",
+            function: v.function || "unknown",
+            file: v.file,
+            rule: v.rule_id,
+          },
+        ],
+        errorDetail: (v.message || v.why || "").slice(0, 500),
+      });
+      seen[key] = true;
+      added++;
+    }
+    if (added > 0) {
+      try {
+        fs.mkdirSync(corpusDir, { recursive: true });
+        fs.writeFileSync(dedupFile, JSON.stringify(seen, null, 2));
+      } catch { /* best-effort */ }
+    }
+  } catch { /* corpus write must never crash the scan */ }
 }
 
 function extractFunctionName(text: string): string {

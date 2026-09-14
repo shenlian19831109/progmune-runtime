@@ -1,5 +1,21 @@
 # Changelog
 
+## [3.7.29] — 2026-09-14
+
+### 失败语料沉淀接通（知识网络入口修复）
+
+- **断点**：信任引擎（trust CLI/agent/patrol/MCP）检出的违规从不写入失败语料库——此前只有 agent-loop 的 planner 失败会入 `.progmune_corpus`，引擎找到的真东西不进库，知识网络永远不喂新数据
+- **修复**（`src/trust/engine.ts` `writeTrustFailuresToCorpus`）：每次 evaluateTrust 的违规（cap 50/扫描）经 `recordFailure` 沉淀——intent=`trust-scan:<project>`、severity→SVL 阶梯映射（critical→SVL-4…low→SVL-1）、项目函数名快照（cap 300，语料挖掘词段门控输入）
+- **去重**：同日同（项目+规则+函数）sidecar 去重——反复扫描不重复沉淀
+- **噪声排除**：`PROTOCOL_CROSS_DOMAIN`/`PLAINTEXT_AUTH_WITHOUT_TLS`（已知高 FP、LLM 域映射抖动的 specific-check）不入语料；真实检出面（PATH_TRAVERSAL/SSRF/AUTHZ_CROSS_USER_WRITE/框架层/SSG）照常沉淀
+- **测试隔离**：VITEST/NODE_ENV=test 跳过——单测不污染语料
+- **首批入库验证**：本周 10 条真实检出全部入库存（openhop PATH_TRAVERSAL×4 + FASTIFY×1、open-webui SSRF×3 + AUTHZ_CROSS_USER_WRITE×1、mcp-from-openapi SSRF×1）——其中 open-webui 3 条 SSRF 命中的正是 fr-009 修复补丁加固的 web 加载器函数族，交叉验证 A3 扩展
+- 语料经 immune-reporter 既有管线脱敏上传 hub（默认脱敏口径不变）
+
+### 回归
+
+- build ✓ / 引擎测试 21 green ✓ / 语料写入全部 best-effort（永不打断扫描）
+
 ## [3.7.28] — 2026-09-14
 
 ### SSRF 检测 TS 化 + Python 形参污点扩展（A3，修复回归 fr-009/010/011 驱动）
