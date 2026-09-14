@@ -658,12 +658,17 @@ const SAFEGUARD_RULES = [
     {
         name: "SSRF (User-Controlled URL Fetch)",
         category: "ssrf",
-        languages: ["python"],
-        // Source-level detection: the Python extractor emits a synthetic marker
-        // call when an HTTP fetch (requests.*/urllib.*/httpx.*/aiohttp.*/urlopen)
-        // receives a URL tainted by request-derived user input (directly or via
-        // single-hop assignment). No satisfier possible — the marker IS the
-        // violation evidence.
+        // 2026-09-14（A3 fr-011/fr-010）：TS 提取器（extract-ir.ts）自 2026-09-14
+        // 起同样注入该标记（URL 形参/request 污点 → HTTP fetch sink，无 SSRF
+        // 守卫），Python 侧同版扩展形参污点——语言面扩展。
+        languages: ["typescript", "javascript", "python"],
+        // Source-level detection: the language extractors emit a synthetic marker
+        // call when an HTTP fetch (requests.*/urllib.*/httpx.*/aiohttp.*/urlopen;
+        // TS: fetch/axios.*/http.request/ky.*/got/undici.request) receives a URL
+        // tainted by request-derived user input or a URL-shaped function parameter
+        // (directly or via single-hop assignment) with no SSRF guard in the
+        // function (private-IP/loopback/denylist/hostname validation evidence).
+        // No satisfier possible — the marker IS the violation evidence.
         trigger: /\b(__progmune_ssrf_user_url__)\b/,
         safeguards: [],
         violationMessage: "HTTP fetch whose URL derives from user-controlled request input — server-side request forgery.",

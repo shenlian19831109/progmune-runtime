@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.7.28] — 2026-09-14
+
+### SSRF 检测 TS 化 + Python 形参污点扩展（A3，修复回归 fr-009/010/011 驱动）
+
+- **TS 提取器 SSRF 标记**（`extract-ir.ts`）：URL 形参/request 污点 → HTTP fetch sink（fetch/axios.*/http.request/ky.*/undici.request/nodeFetch/got），函数内无 SSRF 守卫词汇（private-IP/loopback/denylist/hostname 校验）→ `__progmune_ssrf_user_url__`
+- **Python 形参污点扩展**（`extract_ir.py`）：URL 形参（url/target/endpoint/spec_url…）作为污点源（库形态，如 from_url(url)）；守卫抑制词汇（validate_url/safe_http/is_blocked_hostname 等；**不含裸 "ssrf"**——PyGoat 实验模板名 ssrf_lab2.html 会被误抑制）；**is_request_rooted 收紧**：裸名 "request" 仅当它是函数形参才算请求根——此前局部变量命名为 request 会被误判（skyvern _fetch_discovery FP 根因）
+- **引擎 IR 层消费**：SSRF 违规直接报出（同 PATH_TRAVERSAL/AUTHZ_CROSS_USER_WRITE 模式）——Python 侧 SSRF 标记此前在引擎管线中是死的，本版点亮
+- **修复回归战绩 4/11**：fr-011（mcp-from-openapi TS，引擎级：修复前 SSRF ×1 @ fromURL 真值位置/修复后 0）✅、fr-010（unstructured Python，提取器级：修复前 2 标记命中 partition_md/file_and_type_from_url/修复后 0；整仓 tarball 网络截断，mini 语料验证如实记录）✅、PyGoat ssrf_lab2 引擎级 TP 恢复 ✅；fr-009（open-webui DNS 重绑定）为「守卫存在但不足」类，标记模型边界如实不覆盖
+- **skyvern 精化**：_fetch_discovery FP 消除；_download_screenshot 为弱 TP（scheme 校验≠SSRF 防护，如实标注）
+
+### 回归
+
+- TS 795 零漂移（3086 LOST 0/ADDED 0）✓ / Python 盲测 64/64 ✓ / Python 源级金标 SSRF 0 命中 ✓ / open-seo 10 无漂移 ✓ / 引擎测试 73 green ✓ / build ✓ / check 免疫正常 ✓
+
 ## [3.7.27] — 2026-09-13
 
 ### 归属校验 Python 化（A2，修复回归 fr-005 驱动）

@@ -598,6 +598,96 @@ function augmentPathTraversalMarkers(project, funcs, absRoot) {
         });
     }
 }
+// ═══════════════════════════════════════════════════════════════
+// SSRF marker（2026-09-14，REALWORLD_FIX_REGRESSION fr-011/fr-010）
+// URL 形参/request 污点 → HTTP fetch sink，函数内无 SSRF 守卫证据
+// （private-IP/loopback/denylist/hostname 校验词汇）→ 注入
+// __progmune_ssrf_user_url__。库形态（mcp-from-openapi fromURL）与
+// Web 形态（req.params）共用同一标记；引擎 IR 层消费。
+// ═══════════════════════════════════════════════════════════════
+const TS_HTTP_FETCH_SINK = /\b(fetch|axios\.(?:get|post|put|delete|head|patch)|http\.request|https\.request|ky\.(?:get|post|put|delete|head|patch)|undici\.request|nodeFetch|got)\s*\(/;
+const SSRF_GUARD_EVIDENCE = /127\.0\.0\.1|0\.0\.0\.0|169\.254\.|::1|localhost|isPrivate|isLoopback|hostname|denylist|blocklist|ssrf|validateUrl|isSafeUrl|getAddresses|ipaddress|forbidden_host|private_ip/i;
+const URL_PARAM_NAME = /^(url|target|endpoint|link|href|webUrl|web_url|sourceUrl|source_url|remoteUrl|remote_url|fetchUrl|fetch_url|specUrl|spec_url|apiUrl|api_url|origin|baseUrl|base_url)$/i;
+function collectUrlParamNames(params) {
+    return params.map((p) => p.name).filter((n) => URL_PARAM_NAME.test(n));
+}
+function augmentSsfrMarkers(project, funcs, absRoot) {
+    const sinkRe = TS_HTTP_FETCH_SINK;
+    for (const sf of project.getSourceFiles()) {
+        if (sf.getFilePath().includes("node_modules"))
+            continue;
+        const relPath = path.relative(absRoot, sf.getFilePath());
+        sf.forEachDescendant((node) => {
+            if (!ts_morph_1.Node.isFunctionDeclaration(node) &&
+                !ts_morph_1.Node.isArrowFunction(node) &&
+                !ts_morph_1.Node.isMethodDeclaration(node)) {
+                return;
+            }
+            const text = node.getText();
+            if (text.length > 12000)
+                return; // 巨型函数跳过（性能 + 噪声）
+            // 预过滤：必须有 fetch sink
+            sinkRe.lastIndex = 0;
+            if (!sinkRe.test(text))
+                return;
+            // 守卫证据：函数内有 SSRF 防护词汇 → 抑制
+            if (SSRF_GUARD_EVIDENCE.test(text))
+                return;
+            // URL 形参污点
+            const urlParams = ts_morph_1.Node.isArrowFunction(node)
+                ? []
+                : collectUrlParamNames(node.getParameters().map((p) => ({ name: p.getName() })));
+            // request 污点（Web 形态）
+            const reqTainted = collectTaintedNames(text);
+            const taintParts = [];
+            if (urlParams.length > 0)
+                taintParts.push(`\\b(?:${urlParams.join("|")})\\b`);
+            if (reqTainted.size > 0)
+                taintParts.push(`\\b(?:${[...reqTainted].join("|")})\\b`);
+            taintParts.push(/\b(?:req|request)\.(?:params|query|body|headers|cookies)\b[.[]?/.source);
+            const taint = new RegExp(taintParts.join("|"));
+            if (taintParts.length <= 1) {
+                // 只有 request 根模式而无实际污点名——仍需检查 sink 实参
+            }
+            // sink 实参窗口含污点 → 标记
+            let flagged = false;
+            sinkRe.lastIndex = 0;
+            let m;
+            while ((m = sinkRe.exec(text)) !== null) {
+                // 取调用后 300 字符窗口（URL 是首个实参）
+                const after = text.slice(m.index + m[0].length, m.index + m[0].length + 300);
+                if (taint.test(after)) {
+                    flagged = true;
+                    break;
+                }
+            }
+            if (!flagged)
+                return;
+            const nodeName = ts_morph_1.Node.isArrowFunction(node) ? undefined : node.getName();
+            if (ts_morph_1.Node.isFunctionDeclaration(node) && nodeName) {
+                const entry = funcs.find((x) => x.name === nodeName && x.file === relPath);
+                if (entry) {
+                    entry.calls = entry.calls || [];
+                    if (!entry.calls.includes("__progmune_ssrf_user_url__")) {
+                        entry.calls.push("__progmune_ssrf_user_url__");
+                    }
+                }
+            }
+            else if (ts_morph_1.Node.isMethodDeclaration(node) && nodeName) {
+                const cls = node.getParent();
+                if (ts_morph_1.Node.isClassDeclaration(cls) && cls.getName()) {
+                    const entry = funcs.find((x) => x.name === `${cls.getName()}.${nodeName}` && x.file === relPath);
+                    if (entry) {
+                        entry.calls = entry.calls || [];
+                        if (!entry.calls.includes("__progmune_ssrf_user_url__")) {
+                            entry.calls.push("__progmune_ssrf_user_url__");
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
 /**
  * 从 TypeScript 项目提取 IR（函数签名、参数、返回值、协议注解）。
  * @protocol namespace=dev_pipeline pre_states=[] post_states=["IR_EXTRACTED"] invalidate=["IR_STALE"]
@@ -784,6 +874,7 @@ function _extractSingleProject(absRoot, tsconfigPath) {
     // 与 protocol-detector 同名规则（source-level benchmark 路径）。
     // ═══════════════════════════════════════════════════════════════
     augmentPathTraversalMarkers(project, funcs, absRoot);
+    augmentSsfrMarkers(project, funcs, absRoot);
     // ═══════════════════════════════════════════════════════════════
     // Phase 5: Dynamic external function resolution
     // Replaces hardcoded knownExternals

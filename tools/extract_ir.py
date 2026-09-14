@@ -105,40 +105,50 @@ SSRF_MARKER = "__progmune_ssrf_user_url__"
 HTTP_FETCH_RECEIVERS = ("requests", "httpx", "urllib", "urllib2", "aiohttp", "http")
 
 
-def is_request_rooted(node):
+def is_request_rooted(node, request_params=None):
     """True if the expression derives from the request object
-    (request.POST.get(...), request.GET['x'], request.body ...)."""
+    (request.POST.get(...), request.GET['x'], request.body ...).
+    2026-09-14 收紧：裸名 "request" 仅当它是函数形参（Web 处理器签名）
+    时才算 request 根——此前任何局部变量命名为 request 都被误判
+    （skyvern _fetch_discovery：request = urllib.request.Request(url)，
+    局部变量撞词 → SSRF 误报）。request_params=None 保持旧行为。"""
     if isinstance(node, ast.Name):
-        return node.id == "request"
+        if node.id != "request":
+            return False
+        return request_params is None or "request" in request_params
     if isinstance(node, ast.Attribute):
-        return is_request_rooted(node.value)
+        return is_request_rooted(node.value, request_params)
     if isinstance(node, ast.Subscript):
-        return is_request_rooted(node.value)
+        return is_request_rooted(node.value, request_params)
     if isinstance(node, ast.Call):
-        return (is_request_rooted(node.func)
-                or any(is_request_rooted(a) for a in node.args)
-                or any(is_request_rooted(k.value) for k in node.keywords))
+        return (is_request_rooted(node.func, request_params)
+                or any(is_request_rooted(a, request_params) for a in node.args)
+                or any(is_request_rooted(k.value, request_params) for k in node.keywords))
     return False
 
 
-def is_tainted(node, assigns, depth=0):
+def _func_param_names(node):
+    return {a.arg for a in node.args.args + node.args.posonlyargs + node.args.kwonlyargs}
+
+
+def is_tainted(node, assigns, depth=0, request_params=None):
     """Single-hop taint: request-rooted, variable assigned from a tainted
     value, or dynamic formatting containing tainted parts."""
     if node is None or depth > 2:
         return False
-    if is_request_rooted(node):
+    if is_request_rooted(node, request_params):
         return True
     if isinstance(node, ast.Name):
-        return is_tainted(assigns.get(node.id), assigns, depth + 1)
+        return is_tainted(assigns.get(node.id), assigns, depth + 1, request_params)
     if isinstance(node, ast.JoinedStr):
-        return any(is_tainted(v.value, assigns, depth + 1)
+        return any(is_tainted(v.value, assigns, depth + 1, request_params)
                    for v in node.values if isinstance(v, ast.FormattedValue))
     if isinstance(node, ast.BinOp):
-        return (is_tainted(node.left, assigns, depth)
-                or is_tainted(node.right, assigns, depth))
+        return (is_tainted(node.left, assigns, depth, request_params)
+                or is_tainted(node.right, assigns, depth, request_params))
     if isinstance(node, ast.Call):
-        return (any(is_tainted(a, assigns, depth) for a in node.args)
-                or any(is_tainted(k.value, assigns, depth) for k in node.keywords))
+        return (any(is_tainted(a, assigns, depth, request_params) for a in node.args)
+                or any(is_tainted(k.value, assigns, depth, request_params) for k in node.keywords))
     return False
 
 
@@ -162,15 +172,57 @@ def is_http_fetch_call(node):
     return False
 
 
+URL_PARAM_NAMES = re.compile(
+    r"^(url|target|endpoint|link|href|web_url|source_url|remote_url|"
+    r"fetch_url|spec_url|api_url|base_url|origin)$",
+    re.I,
+)
+
+SSRF_GUARD_EVIDENCE = re.compile(
+    r"127\.0\.0\.1|0\.0\.0\.0|169\.254\.|::1|localhost|is_private|"
+    r"is_loopback|hostname|deny_?list|block_?list|validate_url|"
+    r"is_safe_url|get_addresses|ipaddress|forbidden_host|private_ip|"
+    r"safe_http|get_ssrf_safe|assert_url_safe|is_blocked_hostname|"
+    r"is_blocked_address|blocked_hostnames",
+    re.I,
+)
+
+
 def has_ssrf(node):
     """SSRF check: an HTTP fetch call whose URL argument is tainted by
-    request-derived user input (directly or via single-hop assignment)."""
+    request-derived user input (directly or via single-hop assignment)
+    or references a URL-shaped function parameter (library form, e.g.
+    from_url(url)) — with no SSRF guard evidence in the function
+    (private-IP/loopback/denylist/hostname validation vocabulary).
+    2026-09-14 扩展（fr-010/fr-011）：形参污点 + 守卫抑制。"""
+    # 守卫证据：函数体内有 SSRF 防护词汇 → 不报（fr-009 证明
+    # 「守卫存在但不足」的 DNS 重绑定类是标记模型的边界，如实不覆盖）
+    try:
+        text = ast.unparse(node)
+    except Exception:
+        text = ""
+    if text and SSRF_GUARD_EVIDENCE.search(text):
+        return False
     assigns = collect_assignments(node)
+    request_params = _func_param_names(node)
+    url_params = {
+        a for a in request_params if URL_PARAM_NAMES.match(a or "")
+    }
+
+    def refs_url_param(n):
+        if isinstance(n, ast.Name):
+            return n.id in url_params
+        if isinstance(n, (ast.Attribute, ast.Subscript)):
+            return refs_url_param(n.value)
+        return False
+
     for child in ast.walk(node):
         if isinstance(child, ast.Call) and is_http_fetch_call(child):
-            if any(is_tainted(a, assigns) for a in child.args):
+            if any(is_tainted(a, assigns, request_params=request_params) for a in child.args):
                 return True
-            if any(is_tainted(k.value, assigns) for k in child.keywords):
+            if any(is_tainted(k.value, assigns, request_params=request_params) for k in child.keywords):
+                return True
+            if any(refs_url_param(a) for a in child.args):
                 return True
     return False
 
@@ -827,12 +879,13 @@ def has_path_traversal(node):
     request-derived user input (directly or via single-hop assignment —
     os.path.join chains resolve through assignment tracking)."""
     assigns = collect_assignments(node)
+    request_params = _func_param_names(node)
     for child in ast.walk(node):
         if not isinstance(child, ast.Call) or not is_file_sink_call(child):
             continue
-        if any(is_tainted(a, assigns) for a in child.args):
+        if any(is_tainted(a, assigns, request_params=request_params) for a in child.args):
             return True
-        if any(is_tainted(k.value, assigns) for k in child.keywords):
+        if any(is_tainted(k.value, assigns, request_params=request_params) for k in child.keywords):
             return True
         # Path(...).read_text(): the tainted path lives in the receiver —
         # either the direct call or a variable assigned from a Path(...) call.

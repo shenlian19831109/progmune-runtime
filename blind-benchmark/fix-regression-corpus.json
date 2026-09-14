@@ -139,6 +139,62 @@
         "packages/server/src/helpers/validateCertificatePath.ts"
       ],
       "result": "MISS (2026-09-11)"
+    },
+    {
+      "id": "fr-009",
+      "repo": "open-webui/open-webui",
+      "lang": "python",
+      "ghsa": "GHSA-4v28-j6q3-5m4r",
+      "type": "ssrf_dns_rebinding",
+      "summary": "Playwright web loader SSRF：经 DNS 重绑定访问内部服务——预修复代码已有 validate_url + SSRF 安全适配器，但 connect-time 检查后 requests 重新解析（DNS-rebinding 缺口）。",
+      "fix_commit": "27402ff210bfa253445720920dfb86b15a00327b",
+      "parent_commit": "73c1f5806aeb6345dad5de8f5aa26d1f3d0bef80",
+      "severity": "high",
+      "patched_version": "0.11.1",
+      "ground_truth_files": [
+        "backend/open_webui/retrieval/utils.py",
+        "backend/open_webui/retrieval/web/utils.py"
+      ],
+      "result": "MISS（守卫不足类——标记模型边界）",
+      "result_detail": "预修复函数含 validate_url/_SSRFSafeAdapter 守卫证据 → 标记模型正确抑制；此类「守卫存在但不足」的 DNS 重绑定是静态标记的已知边界，如实不覆盖"
+    },
+    {
+      "id": "fr-010",
+      "repo": "Unstructured-IO/unstructured",
+      "lang": "python",
+      "ghsa": "GHSA-4mvj-m6j5-pmf7",
+      "type": "ssrf_url_partition",
+      "summary": "URL-based partitioning SSRF：partition(url=...) 直接抓取用户 URL，无主机校验；修复=新增 safe_http.py 统一主机校验入口。",
+      "fix_commit": "445c95735c4045057f51f399bc04c657751923bd",
+      "parent_commit": "f6eea758911fcf627cbe6f9df9f790e549500d7b",
+      "severity": "critical",
+      "patched_version": "0.24.0",
+      "ground_truth_files": [
+        "unstructured/partition/auto.py",
+        "unstructured/partition/html/partition.py",
+        "unstructured/partition/md.py",
+        "unstructured/safe_http.py"
+      ],
+      "result": "DETECTED（提取器级，2026-09-14）",
+      "result_detail": "A3 Python 形参污点：pre-fix 标记 ×2（partition_md + file_and_type_from_url，均为修复 patch 路由经 safe_http 的 url= 函数）；post-fix（+safe_http.py 主机校验词汇）0 标记。验证方式=mini 语料（3-4 个真值文件经 raw 直链取 parent/fix SHA）——整仓 tarball 98.6MB 下载被网络反复截断，补全后补跑引擎级"
+    },
+    {
+      "id": "fr-011",
+      "repo": "agentfront/mcp-from-openapi",
+      "lang": "typescript",
+      "ghsa": "GHSA-65h7-9wrw-629c",
+      "type": "ssrf_openapi_ref",
+      "summary": "OpenAPI external $ref 反解引用 SSRF 绕过（主机名解析/重定向/IPv4-mapped IPv6 到达回环）；修复=新增 src/ssrf.ts 防护。",
+      "fix_commit": "be3409cce6e9",
+      "parent_commit": "0dedbf5f5f6fa736275c7b071c576db2fb94a134",
+      "severity": "high",
+      "patched_version": "2.5.0",
+      "ground_truth_files": [
+        "src/generator.ts",
+        "src/ssrf.ts"
+      ],
+      "result": "DETECTED（引擎级，2026-09-14）",
+      "result_detail": "A3 TS 形参污点：pre-fix SSRF ×1 @ OpenAPIToolGenerator.fromURL（公告点名 API，真值位置）；post-fix 0（ssrf.ts 守卫词汇抑制）。仓库小，引擎全链路扫描"
     }
   ]
 }

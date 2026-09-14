@@ -1468,6 +1468,23 @@ async function collectProtocolViolations(
                 policy_ref: "protocol-safety.specific",
               });
             }
+            if (calls.includes("__progmune_ssrf_user_url__")) {
+              violations.push({
+                severity: "medium",
+                rule_id: "SSRF",
+                file: f.file,
+                function: f.name || "unknown",
+                message:
+                  "HTTP fetch whose URL derives from user-controlled input or a URL-shaped function parameter with no SSRF guard — server-side request forgery.",
+                evidence: "__progmune_ssrf_user_url__",
+                why:
+                  "Extractor-verified: fetch sink receives request-tainted or URL-parameter input " +
+                  "with no private-IP/loopback/denylist/hostname validation evidence in the function.",
+                fix:
+                  "Validate the URL (scheme allowlist, private-IP/loopback block, DNS pinning) before fetching.",
+                policy_ref: "protocol-safety.specific",
+              });
+            }
             if (calls.includes("__progmune_cross_user_write__")) {
               violations.push({
                 severity: "medium",
