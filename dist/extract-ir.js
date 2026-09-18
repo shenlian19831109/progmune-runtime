@@ -516,6 +516,19 @@ function methodSinkParamMap(project, absRoot) {
 // Web 形态（req.params）共用同一标记；引擎 IR 层消费。
 // ═══════════════════════════════════════════════════════════════
 const TS_HTTP_FETCH_SINK = /\b(fetch|axios\.(?:get|post|put|delete|head|patch)|http\.request|https\.request|ky\.(?:get|post|put|delete|head|patch)|undici\.request|nodeFetch|got)\s*\(/;
+/**
+ * 同模式的**全局**版本，仅用于 while-exec 迭代。
+ *
+ * 2026-09-18 P0 修复：此前 while 循环直接对无 `g` 标志的 TS_HTTP_FETCH_SINK
+ * 反复调用 exec()。非全局正则的 exec() 会忽略 lastIndex 并恒返回首个匹配，
+ * 一旦首个匹配的 300 字符窗口内不含污点（真实代码里最常见的良性 fetch
+ * 形态），循环无出口 → 提取器 100% CPU 死循环。CPU 采样证实：
+ * 2193/2193 采样全部落在 Builtins_RegExpPrototypeExec。
+ * 该缺陷会使任何含 `fetch(` 且无 SSRF 守卫词汇的 TS 工程挂死提取阶段。
+ */
+function tsHttpFetchSinkIter() {
+    return new RegExp(TS_HTTP_FETCH_SINK.source, "g");
+}
 const SSRF_GUARD_EVIDENCE = /127\.0\.0\.1|0\.0\.0\.0|169\.254\.|::1|localhost|isPrivate|isLoopback|hostname|denylist|blocklist|ssrf|validateUrl|isSafeUrl|getAddresses|ipaddress|forbidden_host|private_ip/i;
 const URL_PARAM_NAME = /^(url|target|endpoint|link|href|webUrl|web_url|sourceUrl|source_url|remoteUrl|remote_url|fetchUrl|fetch_url|specUrl|spec_url|apiUrl|api_url|origin|baseUrl|base_url)$/i;
 function collectUrlParamNames(params) {
@@ -569,9 +582,9 @@ function computeMarkerCalls(text, paramNames, sinkParams, onMethodHit) {
             taintParts.push(`\\b(?:${[...reqTainted].join("|")})\\b`);
         taintParts.push(/\b(?:req|request)\.(?:params|query|body|headers|cookies)\b[.[]?/.source);
         const taint = new RegExp(taintParts.join("|"));
-        TS_HTTP_FETCH_SINK.lastIndex = 0;
+        const fetchSinkIter = tsHttpFetchSinkIter();
         let m;
-        while ((m = TS_HTTP_FETCH_SINK.exec(text)) !== null) {
+        while ((m = fetchSinkIter.exec(text)) !== null) {
             const after = text.slice(m.index + m[0].length, m.index + m[0].length + 300);
             if (taint.test(after)) {
                 markers.push("__progmune_ssrf_user_url__");

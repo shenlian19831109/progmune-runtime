@@ -195,6 +195,134 @@
       ],
       "result": "DETECTED（引擎级，2026-09-14）",
       "result_detail": "A3 TS 形参污点：pre-fix SSRF ×1 @ OpenAPIToolGenerator.fromURL（公告点名 API，真值位置）；post-fix 0（ssrf.ts 守卫词汇抑制）。仓库小，引擎全链路扫描"
+    },
+    {
+      "id": "fr-012",
+      "repo": "zereight/gitlab-mcp",
+      "lang": "typescript",
+      "ghsa": "GHSA-cv3r-c5h8-f4g5",
+      "cve": "CVE-2026-61560",
+      "type": "file_read_unauth",
+      "summary": "未认证任意文件读取：SSE 传输无鉴权暴露全部 MCP 工具 + upload_markdown 的 file_path 未经校验直接进 fs sink（可读 /proc/self/environ 窃取 GITLAB_PERSONAL_ACCESS_TOKEN）。",
+      "fix_commit": "7d19ebf6f41596a442b6eacc66f12fc5f10cd41e",
+      "parent_commit": "c2577169b21d62197f767895fe97651ffb2d7443",
+      "severity": "critical",
+      "patched_version": "2.1.27",
+      "ground_truth_files": [
+        "index.ts"
+      ],
+      "ground_truth_note": "真值 sink = index.ts::markdownUpload(projectId, filePath) — fs.existsSync(filePath) / fs.readFileSync(filePath)，filePath 由工具实参 args.file_path 一跳传入（无路径校验）。本条锚定「文件读取」半边：其修复为 PR #482「fix: make download and upload work for remote deployments」（2026-05-21，remote 时 upload_markdown 只接受内联内容）。同一 GHSA 的另半边「SSE 传输未鉴权」由 PR #554（e436ee4a，2026-06-22）修复——若扫描 PR #482 的 base 之前的快照，两条缺陷同时在场。",
+  "sha_verified": "2026-09-18（api.github.com 核验：PR #482 merge=7d19ebf6，base=c2577169；PR #554 merge=e436ee4a）",
+  "result": "MISS（2026-09-18，真值函数切片语料；trust 扫描 pre=0 / post=0 违规）",
+  "result_detail": "★语料形态说明：gitlab-mcp 的 index.ts 单文件 454 KB，本机 8 GB 内存 + swap 已用 8.6/10 GB，全文件扫描被 OOM kill（exit 137），故按「大仓用真值切片」规则取 markdownUpload 函数体切片（55 行 pre / 45 行 post）扫描。切片保留了 filePath 形参 → fs.readFileSync 的完整污点链。★根因：A1 路径穿越标记要求 request 根表达式（`req.params` 等）为污点源；本例污点来自 **MCP 工具实参**（`args.file_path` → `filePath` 形参），不在 request 词汇表内 → 标记不注入。这是「污点源词汇表」的缺口，与 skyvern/open-webui 暴露的认证词表缺口同族。见 V2 报告 §6"
+},
+    {
+      "id": "fr-013",
+      "repo": "zereight/gitlab-mcp",
+      "lang": "typescript",
+      "ghsa": "GHSA-5648-rgj9-v224",
+      "type": "authz_bypass",
+      "summary": "多个安全控制绕过（F1 execute_graphql 只读+白名单绕过 / F2-F3 传输未鉴权 / F4 会话耗尽 DoS / F5 CI 日志注入）——MCP 威胁模型下工具实参可被提示注入塑造。",
+      "fix_commit": "8d2b486b08bf2ae912806fe99f040c532b029de3",
+      "parent_commit": "1700c74028d3ecde75238708c970dbf7affc7558",
+      "severity": "high",
+      "patched_version": "2.1.30",
+      "ground_truth_files": [
+        "index.ts",
+        "utils/graphql-query.ts",
+        "schemas.ts",
+        "tools/registry.ts"
+      ],
+      "ground_truth_note": "**原始注册有误，2026-09-18 修正**：① parent SHA 末 4 位转置（…6dbd6 → …6db6d，404 不可达）；② 原 fix_commit 69e784da 是「把修复写进 CHANGELOG」的纯文档提交（只改 CHANGELOG.md，PR #624），不是代码修复。真实代码修复 = PR #571「fix: harden MCP safety controls」（merge 8d2b486b，16 文件：index.ts / schemas.ts / utils/graphql-query.ts / tools/registry.ts + 11 个测试），PR #624 正文明确 link 到它并建议升级到 v2.1.30+。公告另点名 reviewed commit 60adcc0de5b0e96c4c2029f7a25d2775946421d8（v2.1.28）为已确认存在缺陷的状态。post-fix 语料用 69e784da 快照（它在 #571 之后，代码已是修复态）。",
+  "sha_verified": "2026-09-18（api.github.com 核验：PR #571 merge=8d2b486b base=1700c740 merged_at=2026-07-05）",
+  "result": "MISS（2026-09-18，mini 语料；trust 扫描 pre=0 / post=0 违规）",
+  "result_detail": "真值文件 utils/graphql-query.ts 的修复是**纯字符串解析加固**（处理 `{, mutation{...}}` 逗号前缀这类 GraphQL 文本形态），不涉及调用序列或污点流——**确定在检出面外**，属「字符串/URL 解析语义」类。本条作为模型边界的显式标注，不硬凑检出。见 V2 报告 §6"
+},
+    {
+      "id": "fr-014",
+      "repo": "mockoon/mockoon",
+      "lang": "typescript",
+      "ghsa": "GHSA-rqx4-3f6q-3x2v",
+      "cve": "CVE-2026-59148",
+      "type": "unauth_admin_api",
+      "summary": "未认证管理 API + 通配 CORS：管理 API 挂在与 mock 路由同一个 Express listener 上且默认启用，对所有端点返回 Access-Control-Allow-Origin: *（任意方法）——任意站点可管理 mock 服务器、窃取 mock 状态与 secrets。",
+      "fix_commit": "c420b5a56918475b8663977b51e5f986e45b3299",
+      "parent_commit": "b42bdfb7f82e83f0e81bea8e6fe41adf5ec82585",
+      "severity": "high",
+      "patched_version": "9.7.0",
+      "ground_truth_files": [
+        "packages/commons-server/src/libs/server/admin-api.ts",
+        "packages/commons-server/src/libs/server/server.ts",
+        "packages/commons-server/src/libs/server/events-listeners.ts",
+        "packages/commons-server/src/libs/utils.ts",
+        "packages/commons-server/src/libs/logger.ts"
+      ],
+      "ground_truth_note": "修复 = admin-api.ts 新增 bearer token 鉴权（extractBearerToken + timingSafeEqual）+ CORS 来源白名单（adminApiCorsOrigins 取代硬编码 '*'）+ 事务脱敏（redactTransaction）。漏洞形态 = **中间件/鉴权整体缺席**（pre-fix admin-api.ts 无任何 auth 检查）+ 配置层 CORS 通配。注意：该管理 API 是库形态（commons-server 内部 server.use 挂载），不是 app.get('/path', handler) 的顶层路由注册形态——这是框架适配器可见性的已知软肋。",
+      "sha_verified": "2026-09-18（api.github.com 核验；PR #2254 merge=c420b5a5 34 文件）",
+      "result": "MISS（2026-09-18，mini 语料；trust 扫描 0 违规，pre/post 均 0）",
+      "result_detail": "mini 语料（5 个真值文件）提取 99 个函数，trust 引擎 0 违规。根因类别 = 缺失检查类 + 配置类（CORS 通配无域名恰语义），且管理路由以库内 server.use 挂载、不具 app.get 形态"
+    },
+    {
+      "id": "fr-015",
+      "repo": "nuxt-modules/og-image",
+      "lang": "typescript",
+      "ghsa": "GHSA-q8hw-4fvp-9rwv",
+      "type": "ssrf_font_path",
+      "summary": "未认证 SSRF：fonts[].path URL 参数被服务端抓取。",
+      "fix_commit": "243cac2228671d3711c2bd65e300c278fcdf5a4e",
+      "parent_commit": "5aa6dbf0b3848b578a87144032cfb6b734454b56",
+      "severity": "medium",
+      "patched_version": "6.7.0",
+      "ground_truth_files": [
+        "src/runtime/server/og-image/fonts.ts",
+        "src/runtime/server/util/ssrf.ts"
+      ],
+      "ground_truth_note": "**重要发现：pre-fix 快照里 `util/ssrf.ts` 及其守卫 `isBlockedUrl()` 已经存在** —— 漏洞不是「没有守卫」，而是「守卫没接在 fonts 这条路径上」+ 守卫本身对同源自信任/重定向放行过宽。这使其成为 fr-009 同类的「守卫存在但不足」样本。修复三处：① fonts.ts 对 URL 解码来的 fonts[] 做字段类型/长度/数量边界校验；② ssrf.ts 新增 trustedHost 豁免并对每一跳重定向重新做 isBlockedUrl；③ 新增 bindings/font-assets/external-url.ts（该绑定文件 pre-fix 不存在，故不计入 pre 语料）。",
+      "sha_verified": "2026-09-18（api.github.com 核验；PR #637 merge=243cac22 「fix: prevent unauthenticated SSRF via font URL parameter」）",
+  "result": "MISS（2026-09-18，mini 语料；trust 扫描 pre=0 / post=0 违规）",
+  "result_detail": "★阻塞已解除：此前 >480s 未完成的根因是提取器 SSRF 标记的正则死循环（3.7.28 引入，2026-09-18 修复，见 V2 报告 §5）。修复后 og-mini-pre 48s 完成。**0 违规的原因值得单独记录**：SSRF 标记要求 fetch 后的 300 字符窗口内出现污点名；本例 fonts[] 的 URL 来自 `decodeURIComponent` 解码后的对象字段（`font.path`），不在 URL_PARAM_NAME 词汇表内，也不构成 `req.*` 污染 → 标记不注入。与 fr-009/fr-015 同属「守卫存在但没接在这条路径」+「污点源词汇表缺口」的叠加。见 V2 报告 §6"
+    },
+    {
+      "id": "fr-016",
+      "repo": "Redocly/redocly-cli",
+      "lang": "typescript",
+      "ghsa": "GHSA-657c-g7qc-r9j2",
+      "type": "path_traversal_split",
+      "summary": "split 命令路径穿越：输出文件路径未限制在目录内。",
+      "fix_commit": "26a0f299fae0b3bb7bd513043d2f1e90e69f79ee",
+      "parent_commit": "d32cd86caf7dbcf16c736b77eda8324173b824b1",
+      "severity": "medium",
+      "patched_version": "1.34.17",
+      "ground_truth_files": [
+        "packages/cli/src/commands/split/asyncapi/iterate-asyncapi-channels.ts",
+        "packages/cli/src/commands/split/asyncapi/iterate-asyncapi-components.ts",
+        "packages/cli/src/commands/split/asyncapi/iterate-asyncapi-operations.ts",
+        "packages/cli/src/commands/split/utils/iterate-components.ts",
+        "packages/cli/src/commands/split/utils/iterate-path-items.ts"
+      ],
+      "ground_truth_note": "**fr-002/fr-003 同族的最干净样本**：修复 diff 就是在每个写文件<｜hy_place▁holder▁no▁813｜>前**新增一行 `assertWithinDir(dir, file, name)`**（新增合约 tests/fixtures/path-traversal*.json 与 assert-within-dir.test.ts 同批落地）。漏洞 = 「该有的检查没有被调用」——一个调用序列状态机在原理上不可见（它只能证明「顺序错了」，不能证明「少了」）。此外污点源是被 split 的 OpenAPI/AsyncAPI 描述文件内容（非 request 对象），且经过 pathToFilename 跨文件助手处理，超出 A1 标记的「request 污点 → fs sink 单跳 + 跨函数一跳」射程。",
+      "sha_verified": "2026-09-18（api.github.com 核验；PR #2891 merge=26a0f299 「fix: path traversal in the split command」）",
+      "result": "MISS（2026-09-18，mini 语料；trust 扫描 0 违规，pre/post 均 0）",
+      "result_detail": "mini 语料（5 个真值文件）提取 19 个函数，IR 层 `__progmune_path_traversal__` 标记 0 命中，trust 引擎 0 违规。双重不确定性：① 缺失检查类本就不可见；② 污点源非 request"
+    },
+    {
+      "id": "fr-017",
+      "repo": "tinacms/tinacms",
+      "lang": "typescript",
+      "ghsa": "GHSA-g74q-6g2f-874x",
+      "type": "broken_access_control_oauth",
+      "summary": "访问控制破坏：任意 TinaCloud 用户可对任意 clientId 授权。",
+      "fix_commit": "0a927a4f8d228dd05ee7ca4be32899bc190e73af",
+      "parent_commit": "c2c03c677f67b6fd3a2155d5227b9bf785b43288",
+      "severity": "high",
+      "patched_version": "1.1.4",
+      "ground_truth_files": [
+        "packages/@tinacms/auth/src/index.ts"
+      ],
+      "ground_truth_note": "pre-fix `isAuthorized(req)` 从**请求参数**取 clientID（`req.query.clientID`）去问 identity 服务「这个 token 是不是它自称那个 app 的已验证用户」；修复改为从**服务端配置**取（`expectedClientID` 形参 → 回落 `process.env.NEXT_PUBLIC_TINA_CLIENT_ID`，取不到则拒绝授权）。本质是「身份锚点的归属」问题：需要判断用于校验的身份标识**应当来自服务端配置而非请求输入**——属数据流/归属语义，非调用序列。",
+      "sha_verified": "2026-09-18（api.github.com 核验；PR #7168 merge=0a927a4f 「Scope TinaCloud authorization to the site's configured clientID」）",
+  "result": "MISS（2026-09-18，扁平单文件语料；trust 扫描 pre=0 / post=0 违规）",
+  "result_detail": "★两处历史作废/阻塞均已解除：①早期 0 违规无效（缺 tsconfig.json，ts-morph FileNotFoundError，引擎未实质分析）；②补 tsconfig 后 >300s 未完成的根因是提取器 SSRF 正则死循环（2026-09-18 修复，见 V2 报告 §5），修复后 57s 完成。★根因：`isAuthorized` 的 clientID 归属错误（应取服务端配置，实取 `req.query.clientID`）——需要判断「用于校验的身份标识**应当**来自何处」，属**归属语义/策略语义**，不是调用顺序也不是污点可达性，当前引擎无对应维度。与 V1 fr-004（凭据数据流）不同族。见 V2 报告 §6"
     }
   ]
 }

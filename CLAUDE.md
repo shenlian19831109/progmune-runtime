@@ -155,7 +155,7 @@ npm run corpus:mine        # Rule mining from corpus
 ### What Progmune IS
 - A protocol lifecycle verification tool for AI-generated code
 - Focused on behavior sequences (function call chains violating protocol state machines)
-- TS + Python production, C annotation-driven Beta (3.7.6+), Go/Java planned
+- TS + Python production, C/Go/Java annotation-driven Beta (C 3.7.6+, Go 3.7.13+, Java 3.7.17+)
 - Output: Trust Score (0–100) + Decision (APPROVED/NEEDS_REVIEW/BLOCKED) + Evidence
 
 ### What Progmune is NOT
@@ -164,7 +164,7 @@ npm run corpus:mine        # Rule mining from corpus
 - ❌ NOT a code generator (governs, doesn't generate)
 - ❌ NOT a runtime monitor (no APM/RASP — static analysis only)
 
-### Current coverage reality (as of 2026-08-24)
+### Current coverage reality (as of 2026-09-18, v3.7.30)
 
 | Language | Status | Evidence |
 |----------|--------|----------|
@@ -215,6 +215,27 @@ npm run corpus:mine        # Rule mining from corpus
 
 **转正待办（未修，均为功能级）**：（无代码级遗留——12 个检测器均已在真实语料验证到 0 协议级 FP + 反证；fiber 生态参考级 recipes 的 demo 语境噪声为文档化边界）
 - 转正门槛：每个启发式探测器补一个真实项目 FP 数据点（C 的 real-corpus 方法论延伸）后才可升级结构级标签；各探测器转正工作清单与重测路径见 `REALWORLD_FRAMEWORK_FP_V1-V8.md`（Express 清单 4 项 / Fastify 结构性重写 4 项 / Koa 窗口截断 + 幻影路由 / tRPC 括号感知 + lastIndex / Next.js 词表扩展 + webhooks 豁免 / Hapi 门兼容 + 声明式路由 / Gin Use 捕获 + 组认证跨文件 / Fiber 需真实生产语料）
+
+### Real-fix regression corpus — 召回基准（2026-09-11 建立，当前第一优先方法论）
+
+**这是本项目的决定性实验，任何引擎改动都用它测召回。** 方法：对每个真实发生过的安全修复（GHSA/CVE），扫描**修复前 parent commit**——引擎能否在公告真值位置报出；再扫修复后确认不误报。
+
+- 注册表：`blind-benchmark/fix-regression-corpus.json`（每条含 repo / ghsa / cve / fix_commit / parent_commit / severity / ground_truth_files / result）
+- 报告：`blind-benchmark/REALWORLD_FIX_REGRESSION_V1.md`（V1，8 条基线）、`REALWORLD_FIX_REGRESSION_V2.md`（V2，扩样至独立仓库）
+- 快照获取：小仓走 codeload tarball 整包；大仓（mockoon/redocly-cli/tinacms 等）只用真值文件做 **mini 语料**——整包下载会超时
+- **SHA 必须经 `api.github.com` 核验后才能入表**。已发生过两类错误：① 末 4 位转置（`…6dbd6` vs `…6db6d`）导致 404；② 把「文档化修复的 changelog 提交」当成代码修复提交（真修复需回到 PR 描述里 link 的那个 PR，如 fr-013 → PR #571 而非 #624）
+
+**V1 基线 0/8**。逐条人工核实：未检出条目的真值位置引擎零命中。结论写死在报告里——「是能力面问题」，不粉饰。漏报根因七类：查询语义 / **策略逻辑分支** / 凭据数据流 / 归属数据流 / 配置通道路由 / 语言面缺口 / 密码学协议语义。
+
+**已按语料拿下的能力**（每项都走「加语料 → 写规则 → 复测转 DETECTED → 修复后不误报」闭环）：
+
+| 项 | 能力 | 拿下 | 版本 |
+|---|---|---|---|
+| A1 | 路径穿越检测 TS 化（提取器标记 → 引擎 IR 层消费） | fr-007 | 3.7.26 |
+| A2 | 归属校验 Python 化（`__progmune_cross_user_write__`） | fr-005 | 3.7.27 |
+| A3 | SSRF 检测 TS 化 + Python 形参污点 | fr-010 / fr-011 | 3.7.28 |
+
+**核心结论（对外口径已同步进 README）**：状态机只能检「调用顺序错」，检不出「该有的检查没有」——后者才是真实世界安全修复的主流形态，也是当前最大的未覆盖类。
 
 ### P0-P3 Rule Injection (2026-08-03, historical phase)
 

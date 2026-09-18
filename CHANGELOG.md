@@ -1,5 +1,29 @@
 # Changelog
 
+## [3.7.31] — 2026-09-18
+
+### 提取器 SSRF 标记正则死循环修复（P0，真实工程可用性故障）
+
+- **现象**：IR 提取阶段对含 `fetch(` 的 TS 文件 100% CPU 挂死——一个 55 行的切片 >480s 未完成，而 108 KB / 5 文件的语料只需 35s。实测 **nuxt-modules/og-image、tinacms/tinacms、zereight/gitlab-mcp 三个独立仓库全部触发**
+- **定位**：对挂住进程做 CPU 采样（`sample`），**2193/2193 采样全部落在 `Builtins_RegExpPrototypeExec`**——确定为正则死循环，而非此前怀疑的 OOM / ts-morph 依赖解析
+- **根因**（`src/extract-ir.ts` SSRF 分支，3.7.28 引入）：`TS_HTTP_FETCH_SINK` 是**无 `g` 标志**的正则，却用于 `while ((m = TS_HTTP_FETCH_SINK.exec(text)) !== null)` 迭代。非全局正则的 `exec()` 忽略 `lastIndex` 并恒返回首个匹配；当首个 `fetch(` 后的 300 字符窗口不含污点时（真实代码里最常见的「良性 fetch」形态），循环无出口。同文件另 7 处 `while-exec` 循环均带 `g`，仅此一处遗漏
+- **修复**：新增 `tsHttpFetchSinkIter()`（同模式 `"g"` 版）专供迭代；布尔探测仍用无标志版本（带 `g` 的 `.test()` 会污染 `lastIndex`）。模式至少匹配 5 字符，不可能零宽匹配
+- **影响面**：任何含 `fetch(` 且函数体内无 SSRF 守卫词汇（`localhost|ssrf|hostname|…`）的 TS 工程都会挂死提取阶段——这是面向真实代码的普遍故障，不是基准内部的边缘情况
+- **验收**：og-image 480s+ → **48s**；tinacms 300s+ → **57s**；gitlab-mcp 切片 480s+ → **80s**；最小复现 70s+ → **18s**
+
+### 修复回归语料扩样至 17 条（fr-012 ~ fr-017）
+
+- **样本结构**：open-webui 占比 75% → **41%**，独立仓库 3 → **10**（gitlab-mcp ×2、mockoon、og-image、redocly-cli、tinacms）
+- **结果**：6 条新语料全部 MISS（pre/post 均 0 违规），全库 **DETECTED 4/17、MISS 13/17、PENDING 0**
+- **正向对照**：为排除「0 违规是哑值」，scan `demo-project/` 报出 1 条真实违规（`SSG_AUTH_STATE_VIOLATION`，`token_lifecycle_flow.ts::main`）——引擎是活的
+- **注册数据修正**：fr-013 的 parent SHA 末 4 位转置（codeload 404）且原 fix_commit 是纯 CHANGELOG 文档提交，经 PR #624 正文 link 定位到真修复 PR #571；fr-012 锚点错位（其「文件读取」半边由更早的 PR #482 修复）
+- **新根因类别**：fr-012（MCP 工具实参 `args.file_path`）、fr-015（`decodeURIComponent` 解码后的对象字段 `font.path`）暴露**污点源词汇表缺口**——与 skyvern/open-webui 已暴露的认证词表缺口同族，共同病灶是「标记管线靠名字识源，不靠数据流语义」
+- 详见 `blind-benchmark/REALWORLD_FIX_REGRESSION_V2.md`
+
+### 回归
+
+- 新增 `src/extract-ir-ssrf-loop.test.ts` 2 green ✓（①良性 fetch 必须正常返回——修复前永不返回；②URL 形参流入 fetch 仍必须注入 `__progmune_ssrf_user_url__`）/ build ✓
+
 ## [3.7.30] — 2026-09-17
 
 ### 提取器性能重构（3.7.28 引入的回归修复）
