@@ -353,7 +353,7 @@ function manualResolveModule(
   return null;
 }
 
-function extractDirectCalls(func: FunctionDeclaration | ArrowFunction): string[] {
+function extractDirectCalls(func: FunctionDeclaration | ArrowFunction, preText?: string): string[] {
   const body = func.getBody();
   if (!body) return [];
   const calls: string[] = [];
@@ -371,7 +371,7 @@ function extractDirectCalls(func: FunctionDeclaration | ArrowFunction): string[]
   // - inline ownership comparison: ownerId/authorId compared with ==/!== —
   //   the Ownership Check rules' satisfier consumes it (the call-name
   //   interface cannot see inline comparisons).
-  const text = func.getText();
+  const text = preText !== undefined ? preText : func.getText();
   if (/set_cookie\(|setCookie\(|\btoken\s*[:=]|\bsession_token\s*[:=]/.test(text)) {
     calls.push("__progmune_token_issued__");
   }
@@ -380,6 +380,8 @@ function extractDirectCalls(func: FunctionDeclaration | ArrowFunction): string[]
   }
   return [...new Set(calls)];
 }
+
+
 
 // ═══════════════════════════════════════════════════════════════
 // Path traversal marker（2026-09-11，REALWORLD_FIX_REGRESSION_V1 fr-007）
@@ -517,103 +519,6 @@ function methodSinkParamMap(
   return map;
 }
 
-/**
- * 注入路径穿越标记：
- *  1) 本函数体内 sink 实参直接污点；
- *  2) 跨函数一跳——调用项目方法且污点实参落在该方法的 sink 形参位置。
- * 标记只进 funcs 中该函数的 calls（方法条目不单独标——违规归因到入口）。
- */
-function augmentPathTraversalMarkers(
-  project: Project,
-  funcs: FunctionInfo[],
-  absRoot: string
-): void {
-  const sinkParams = methodSinkParamMap(project, absRoot);
-  const methodCallRe = new RegExp(
-    `\\.([\\w$]+)\\s*\\(([\\s\\S]{0,250}?)\\)`,
-    "g"
-  );
-
-  const mark = (name: string, file: string) => {
-    const entry = funcs.find((x) => x.name === name && x.file === file);
-    if (!entry) return;
-    entry.calls = entry.calls || [];
-    if (!entry.calls.includes(PATH_TRAVERSAL_MARKER)) {
-      entry.calls.push(PATH_TRAVERSAL_MARKER);
-    }
-  };
-
-  // 对每个函数式节点（函数声明/方法/箭头回调——fastify 路由回调是内联
-  // 箭头函数，不在 funcs 中）独立做污点分析。节点文本预过滤：
-  // 不含 request 访问也不含 sink 方法调用则跳过。
-  const sinkMethodNames = [...sinkParams.keys()];
-  const prefilter = new RegExp(
-    `\\b(?:req|request)\\.(?:params|query|body|headers|cookies)\\b|` +
-    (sinkMethodNames.length > 0 ? `\\.(?:${sinkMethodNames.join("|")})\\s*\\(` : "a^")
-  );
-
-  for (const sf of project.getSourceFiles()) {
-    if (sf.getFilePath().includes("node_modules")) continue;
-    const relPath = path.relative(absRoot, sf.getFilePath());
-    sf.forEachDescendant((node) => {
-      if (
-        !Node.isFunctionDeclaration(node) &&
-        !Node.isArrowFunction(node) &&
-        !Node.isMethodDeclaration(node)
-      ) {
-        return;
-      }
-      const text = node.getText();
-      if (!prefilter.test(text)) return;
-      const tainted = collectTaintedNames(text);
-      if (tainted.size === 0) return;
-      const taint = taintPattern(tainted);
-      if (!taint) return;
-
-      // 1) 节点体内 sink 实参直接污点 → 标记该节点归属的 funcs 条目
-      if (hasTaintedSinkCall(text, tainted)) {
-        const nodeName = Node.isArrowFunction(node) ? undefined : node.getName();
-        if (Node.isFunctionDeclaration(node) && nodeName) {
-          mark(nodeName, relPath);
-        } else if (Node.isMethodDeclaration(node) && nodeName) {
-          const cls = node.getParent();
-          if (Node.isClassDeclaration(cls) && cls.getName()) {
-            mark(`${cls.getName()}.${nodeName}`, relPath);
-          }
-        }
-        return;
-      }
-
-      // 2) 跨函数一跳：污点实参传入项目方法体的文件 sink。
-      //    标记调用方（若可归属）+ 被调方法条目——路由回调不可归属时，
-      //    方法条目是唯一可归因位置（openhop 形态）。
-      methodCallRe.lastIndex = 0;
-      let m: RegExpExecArray | null;
-      while ((m = methodCallRe.exec(text)) !== null) {
-        const callee = m[1];
-        const rec = sinkParams.get(callee);
-        if (!rec || rec.idxs.size === 0) continue;
-        const win = m[2] || "";
-        const args = splitArgWindow(win);
-        const hit = args.some((arg, i) => rec.idxs.has(i) && taint.test(arg));
-        if (!hit) continue;
-        const nodeName = Node.isArrowFunction(node) ? undefined : node.getName();
-        if (Node.isFunctionDeclaration(node) && nodeName) {
-          mark(nodeName, relPath);
-        } else if (Node.isMethodDeclaration(node) && nodeName) {
-          const cls = node.getParent();
-          if (Node.isClassDeclaration(cls) && cls.getName()) {
-            mark(`${cls.getName()}.${nodeName}`, relPath);
-          }
-        }
-        for (const me of rec.entries) {
-          mark(me.name, me.file);
-        }
-        return;
-      }
-    });
-  }
-}
 
 // ═══════════════════════════════════════════════════════════════
 // SSRF marker（2026-09-14，REALWORLD_FIX_REGRESSION fr-011/fr-010）
@@ -635,82 +540,74 @@ function collectUrlParamNames(params: Array<{ name: string }>): string[] {
   return params.map((p) => p.name).filter((n) => URL_PARAM_NAME.test(n));
 }
 
-function augmentSsfrMarkers(
-  project: Project,
-  funcs: FunctionInfo[],
-  absRoot: string
-): void {
-  const sinkRe = TS_HTTP_FETCH_SINK;
-  for (const sf of project.getSourceFiles()) {
-    if (sf.getFilePath().includes("node_modules")) continue;
-    const relPath = path.relative(absRoot, sf.getFilePath());
-    sf.forEachDescendant((node) => {
-      if (
-        !Node.isFunctionDeclaration(node) &&
-        !Node.isArrowFunction(node) &&
-        !Node.isMethodDeclaration(node)
-      ) {
-        return;
-      }
-      const text = node.getText();
-      if (text.length > 12000) return; // 巨型函数跳过（性能 + 噪声）
-      // 预过滤：必须有 fetch sink
-      sinkRe.lastIndex = 0;
-      if (!sinkRe.test(text)) return;
-      // 守卫证据：函数内有 SSRF 防护词汇 → 抑制
-      if (SSRF_GUARD_EVIDENCE.test(text)) return;
 
-      // URL 形参污点
-      const urlParams = Node.isArrowFunction(node)
-        ? []
-        : collectUrlParamNames(node.getParameters().map((p: any) => ({ name: p.getName() })));
-      // request 污点（Web 形态）
-      const reqTainted = collectTaintedNames(text);
-      const taintParts: string[] = [];
-      if (urlParams.length > 0) taintParts.push(`\\b(?:${urlParams.join("|")})\\b`);
-      if (reqTainted.size > 0) taintParts.push(`\\b(?:${[...reqTainted].join("|")})\\b`);
-      taintParts.push(/\b(?:req|request)\.(?:params|query|body|headers|cookies)\b[.[]?/.source);
-      const taint = new RegExp(taintParts.join("|"));
-      if (taintParts.length <= 1) {
-        // 只有 request 根模式而无实际污点名——仍需检查 sink 实参
-      }
 
-      // sink 实参窗口含污点 → 标记
-      let flagged = false;
-      sinkRe.lastIndex = 0;
-      let m: RegExpExecArray | null;
-      while ((m = sinkRe.exec(text)) !== null) {
-        // 取调用后 300 字符窗口（URL 是首个实参）
-        const after = text.slice(m.index + m[0].length, m.index + m[0].length + 300);
-        if (taint.test(after)) { flagged = true; break; }
-      }
-      if (!flagged) return;
+/**
+ * 标记增强的内联实现（2026-09-15 性能重构）：消费主循环已获取的
+ * 函数文本与形参名，输出该函数应附加的合成标记。
+ * - 路径穿越：request 污点 → 文件 sink（本函数内）；或污点实参传入
+ *   项目方法体内的文件 sink（跨函数一跳，onMethodHit 回调登记方法条目）
+ * - SSRF：URL 形参/request 污点 → HTTP fetch sink，无守卫词汇
+ */
+function computeMarkerCalls(
+  text: string,
+  paramNames: string[],
+  sinkParams: Map<string, { idxs: Set<number>; entries: Array<{ name: string; file: string }> }>,
+  onMethodHit: (rec: { idxs: Set<number>; entries: Array<{ name: string; file: string }> }) => void
+): string[] {
+  const markers: string[] = [];
 
-      const nodeName = Node.isArrowFunction(node) ? undefined : node.getName();
-      if (Node.isFunctionDeclaration(node) && nodeName) {
-        const entry = funcs.find((x) => x.name === nodeName && x.file === relPath);
-        if (entry) {
-          entry.calls = entry.calls || [];
-          if (!entry.calls.includes("__progmune_ssrf_user_url__")) {
-            entry.calls.push("__progmune_ssrf_user_url__");
-          }
-        }
-      } else if (Node.isMethodDeclaration(node) && nodeName) {
-        const cls = node.getParent();
-        if (Node.isClassDeclaration(cls) && cls.getName()) {
-          const entry = funcs.find(
-            (x) => x.name === `${cls.getName()}.${nodeName}` && x.file === relPath
-          );
-          if (entry) {
-            entry.calls = entry.calls || [];
-            if (!entry.calls.includes("__progmune_ssrf_user_url__")) {
-              entry.calls.push("__progmune_ssrf_user_url__");
+  // ── 路径穿越 ──
+  if (hasRequestRootedExpr(text)) {
+    const tainted = collectTaintedNames(text);
+    if (tainted.size > 0) {
+      if (hasTaintedSinkCall(text, tainted)) {
+        markers.push("__progmune_path_traversal__");
+      } else {
+        const methodCallRe = new RegExp(
+          `\\.([\\w$]+)\\s*\\(([\\s\\S]{0,250}?)\\)`,
+          "g"
+        );
+        const taint = taintPattern(tainted);
+        if (taint) {
+          let m: RegExpExecArray | null;
+          while ((m = methodCallRe.exec(text)) !== null) {
+            const rec = sinkParams.get(m[1]);
+            if (!rec || rec.idxs.size === 0) continue;
+            const args = splitArgWindow(m[2] || "");
+            const hit = args.some((arg, i) => rec.idxs.has(i) && taint.test(arg));
+            if (hit) {
+              markers.push("__progmune_path_traversal__");
+              onMethodHit(rec);
             }
           }
         }
       }
-    });
+    }
   }
+
+  // ── SSRF ──
+  TS_HTTP_FETCH_SINK.lastIndex = 0;
+  if (TS_HTTP_FETCH_SINK.test(text) && !SSRF_GUARD_EVIDENCE.test(text)) {
+    const urlParams = paramNames.filter((n) => URL_PARAM_NAME.test(n));
+    const reqTainted = collectTaintedNames(text);
+    const taintParts: string[] = [];
+    if (urlParams.length > 0) taintParts.push(`\\b(?:${urlParams.join("|")})\\b`);
+    if (reqTainted.size > 0) taintParts.push(`\\b(?:${[...reqTainted].join("|")})\\b`);
+    taintParts.push(/\b(?:req|request)\.(?:params|query|body|headers|cookies)\b[.[]?/.source);
+    const taint = new RegExp(taintParts.join("|"));
+    TS_HTTP_FETCH_SINK.lastIndex = 0;
+    let m: RegExpExecArray | null;
+    while ((m = TS_HTTP_FETCH_SINK.exec(text)) !== null) {
+      const after = text.slice(m.index + m[0].length, m.index + m[0].length + 300);
+      if (taint.test(after)) {
+        markers.push("__progmune_ssrf_user_url__");
+        break;
+      }
+    }
+  }
+
+  return markers;
 }
 
 /**
@@ -813,14 +710,28 @@ function _extractSingleProject(
     project.addSourceFilesAtPaths(path.join(absRoot, "**/*.ts"));
   }
   const funcs: FunctionInfo[] = [];
+  // 标记增强的共享状态（2026-09-15 内联重构）：
+  // sinkParams = 项目方法名 → 方法体内流入文件 sink 的形参下标 + 方法条目；
+  // pendingMethodMarks = 跨函数命中待标记的方法条目（主循环后统一应用）
+  const sinkParams = methodSinkParamMap(project, absRoot);
+  const pendingMethodMarks = new Set<string>();
+  const onMethodHit = (rec: { entries: Array<{ name: string; file: string }> }) => {
+    for (const me of rec.entries) pendingMethodMarks.add(`${me.name}\u0000${me.file}`);
+  };
   for (const sf of project.getSourceFiles()) {
+    if (sf.getFilePath().includes("node_modules")) continue; // lib.d.ts 等声明文件只贡献噪声（2026-09-17 性能）
     const relPath = path.relative(absRoot, sf.getFilePath());
+    const _ft0 = Date.now();
     for (const f of sf.getFunctions()) {
       const name = f.getName();
       if (!name) continue;
+      const fParams = f.getParameters();
+      const fText = f.getText();
+      const fCalls = extractDirectCalls(f, fText);
+      fCalls.push(...computeMarkerCalls(fText, fParams.map((p: any) => p.getName()), sinkParams, onMethodHit));
       funcs.push({
         name,
-        params: f.getParameters().map(p => ({
+        params: fParams.map(p => ({
           name: p.getName(),
           type: getParamType(p),
           typeDetail: getParamTypeDetail(p),
@@ -828,7 +739,7 @@ function _extractSingleProject(
         returnType: getReturnType(f),
         returnTypeDetail: getReturnTypeDetail(f),
         file: relPath,
-        calls: extractDirectCalls(f),
+        calls: fCalls,
         exported: f.isExported(),
         inputs: deriveInputs(f.getParameters().map(p => ({name: p.getName(), type: p.getTypeNode()?.getText() || "any"}))),
         outputs: deriveOutputs(f.getReturnTypeNode()?.getText() || "any"),
@@ -843,9 +754,13 @@ function _extractSingleProject(
       // 直接箭头函数: const fn = () => {}
       if (Node.isArrowFunction(init)) {
         const name = vd.getName();
+        const initParams = init.getParameters();
+        const initText = init.getText();
+        const initCalls = extractDirectCalls(init, initText);
+        initCalls.push(...computeMarkerCalls(initText, initParams.map((p: any) => p.getName()), sinkParams, onMethodHit));
         funcs.push({
           name,
-          params: init.getParameters().map(p => ({
+          params: initParams.map(p => ({
             name: p.getName(),
             type: getParamType(p),
             typeDetail: getParamTypeDetail(p),
@@ -854,7 +769,7 @@ function _extractSingleProject(
           returnTypeDetail: getReturnTypeDetail(init),
           file: relPath,
           exported: vd.isExported(),
-          calls: extractDirectCalls(init),
+          calls: initCalls,
 	        protocol: parseProtocolFromJSDoc(vd),
           ...parseCapabilityFromJSDoc(vd),
         });
@@ -865,9 +780,13 @@ function _extractSingleProject(
         for (const arg of init.getArguments()) {
           if (Node.isArrowFunction(arg)) {
             const name = vd.getName();
+            const argParams = arg.getParameters();
+            const argText = arg.getText();
+            const argCalls = extractDirectCalls(arg, argText);
+            argCalls.push(...computeMarkerCalls(argText, argParams.map((p: any) => p.getName()), sinkParams, onMethodHit));
             funcs.push({
               name,
-              params: arg.getParameters().map(p => ({
+              params: argParams.map(p => ({
                 name: p.getName(),
                 type: getParamType(p),
                 typeDetail: getParamTypeDetail(p),
@@ -876,7 +795,7 @@ function _extractSingleProject(
               returnTypeDetail: getReturnTypeDetail(arg),
               file: relPath,
           exported: vd.isExported(),
-              calls: extractDirectCalls(arg),
+              calls: argCalls,
 	            protocol: parseProtocolFromJSDoc(vd),
             });
             break; // 只取第一个箭头函数参数
@@ -895,31 +814,41 @@ function _extractSingleProject(
       for (const m of cls.getMethods()) {
         const mn = m.getName();
         if (!mn) continue;
+        const mParams = m.getParameters();
+        const mText = m.getText();
+        const mCalls = computeMarkerCalls(mText, mParams.map((p: any) => p.getName()), sinkParams, onMethodHit);
         funcs.push({
           name: `${cn}.${mn}`,
-          params: m.getParameters().map((p: any) => ({ name: p.getName(), type: getParamType(p), typeDetail: getParamTypeDetail(p) })),
+          params: mParams.map((p: any) => ({ name: p.getName(), type: getParamType(p), typeDetail: getParamTypeDetail(p) })),
           returnType: (m as any).getReturnTypeNode?.()?.getText?.() || "any",
           returnTypeDetail: (m as any).getReturnTypeNode?.()?.getText?.() || "any",
           file: relPath,
           exported: cls.isExported(),
-          calls: [],
+          calls: mCalls,
           ...parseCapabilityFromJSDoc(m),
           protocol: parseProtocolFromJSDoc(m),
         });
       }
     }
+    const _ftd = Date.now() - _ft0;
+    if (_ftd > 3000) console.error(`[perf-file] ${relPath}: ${_ftd}ms`);
   }
 
-  // ═══════════════════════════════════════════════════════════════
-  // Phase 4.5: Path traversal marker（2026-09-11，fr-007 openhop）
-  // 镜像 Python 提取器的 request 污点 → 文件 sink 单跳追踪，并补
-  // 跨函数一跳：调用点把污点参数传给项目方法，该方法体内该参数
-  // 流入文件 sink → 调用方函数注入 __progmune_path_traversal__。
-  // 消费方：protocol-domain-validator PATH_TRAVERSAL 检查（引擎）
-  // 与 protocol-detector 同名规则（source-level benchmark 路径）。
-  // ═══════════════════════════════════════════════════════════════
-  augmentPathTraversalMarkers(project, funcs, absRoot);
-  augmentSsfrMarkers(project, funcs, absRoot);
+  // ── 标记增强（2026-09-11 fr-007 / 2026-09-14 fr-011）：在下方
+  //    主循环内联计算（复用已获取的函数文本，无独立遍历——
+  //    2026-09-15 性能重构）；跨函数命中在循环结束后统一应用。
+  for (const key of pendingMethodMarks) {
+    const idx = key.indexOf("\u0000");
+    const mname = key.slice(0, idx);
+    const mfile = key.slice(idx + 1);
+    const entry = funcs.find((x) => x.name === mname && x.file === mfile);
+    if (entry) {
+      entry.calls = entry.calls || [];
+      if (!entry.calls.includes("__progmune_path_traversal__")) {
+        entry.calls.push("__progmune_path_traversal__");
+      }
+    }
+  }
 
   // ═══════════════════════════════════════════════════════════════
   // Phase 5: Dynamic external function resolution

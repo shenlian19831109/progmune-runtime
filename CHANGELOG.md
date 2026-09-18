@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.7.30] — 2026-09-17
+
+### 提取器性能重构（3.7.28 引入的回归修复）
+
+- **问题**：3.7.28 的标记增强（路径穿越/SSRF）采用独立遍历——对每个函数类节点做 ts-morph getStart/getEnd/getText + 正则扫描，check 自扫（仓库 375 个源文件）从 ~30s 退化到 10 分钟+（SSRF 增强单测 4 分钟 CPU）
+- **修复**（`src/extract-ir.ts`）：①标记计算**内联进主循环**——复用主循环已获取的函数文本与形参名（computeMarkerCalls），删除两个独立遍历增强函数；②文件级预过滤（路径穿越只看含 request 模式的文件，SSRF 只看含 fetch sink 的文件）；③主循环跳过 node_modules（lib.d.ts 等声明文件只贡献噪声）；④微型节点（<80 字符）跳过正则扫描
+- **行为保持**：fr-007 openhop 标记（flowRoutes + FlowStore.save/get/delete/updateFlow）与 fr-011 mcp-from-openapi 标记（fromURL）重构后逐项一致；**TS 795 零漂移（3086 flags LOST 0 / ADDED 0）**
+- **诊断教训**：期间本机 8GB 内存被后台进程耗尽（一个 9 小时 CPU 的幽灵 extractor 进程 + 多个未杀净的扫描进程），计时测量被环境噪声污染——定位靠逐步计时（PT 增强 267ms / SSRF 增强 4min+）与进程审计，最终重构从架构上消除该开销
+
+### 回归
+
+- TS 795 零漂移 ✓ / 标记双语料复验一致 ✓ / 引擎测试 73 green ✓ / build ✓
+
 ## [3.7.29] — 2026-09-14
 
 ### 失败语料沉淀接通（知识网络入口修复）
