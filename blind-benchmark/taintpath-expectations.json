@@ -14,7 +14,8 @@
     "每条 suppressed/no-taint 都有同形状的 mark 用例做正对照（方法学规则 R6）。",
     "taintpath_B 的 dispatchToolGuarded 标记为 mark —— 这是【反向】缺口 G2：自定义校验函数名不含路径语义后缀（assertTemplateName）时，调用点不会被抑制。",
     "2026-09-19：C4（路径塑形传播）闭合了全部 4 条 known-gap，期望已转 mark。剩余缺口为 G2（自定义校验函数名不含路径语义后缀时调用点不被抑制）与 C4b（项目自有 helper 如 buildPath(p) 不在塑形白名单内）。",
-    "2026-09-19：本闸门改为【默认实时提取】。原默认读 reports/batch-scan-results.json 是陈旧产物，C4 落地后仍报「未标记，符合预期」——第二种空过。"
+    "2026-09-19：本闸门改为【默认实时提取】。原默认读 reports/batch-scan-results.json 是陈旧产物，C4 落地后仍报「未标记，符合预期」——第二种空过。",
+    "2026-09-19 续：G2（调用点抑制）闭合，dispatchToolGuarded 由 mark 转 suppressed。G2 不按函数名猜语义（Name 后缀曾导致 ensureDir 误判、fr-007 召回归零），改为看被调用方函数体内是否有校验证据；净化作用在【表达式】上而非整函数，且只认 tier-0（自身含证据），经 helper 转手不生效（记为 G2b 缺口）。TS 盲测实测 LOST 1 / ADDED 0 —— 唯一变化就是本条。"
   ],
   "projects": {
     "taintpath_A": [
@@ -43,7 +44,7 @@
       { "fn": "dispatchToolInline", "file": "src/handler.ts", "expect": "mark", "why": "C5：不可信根直接写在跨函数调用的实参里" },
       { "fn": "dispatchToolMethod", "file": "src/handler.ts", "expect": "mark", "why": "成员调用传播到类方法 sink 形参" },
       { "fn": "dispatchToolWrite", "file": "src/handler.ts", "expect": "mark", "why": "写侧跨函数传播" },
-      { "fn": "dispatchToolGuarded", "file": "src/handler.ts", "expect": "mark", "why": "反向缺口 G2：自定义校验函数名 assertTemplateName 不含路径语义后缀（Name 已被移出守卫后缀表），调用点未被抑制" }
+      { "fn": "dispatchToolGuarded", "file": "src/handler.ts", "expect": "suppressed", "why": "G2 已闭合（3.7.37）：assertTemplateName 函数体内是锚定字符集白名单，被调用 ⇒ 该污点表达式视为已净化。正对照 = dispatchToolBare（同形状去掉校验，仍 mark）" }
     ]
   },
   "updated": "2026-09-19"

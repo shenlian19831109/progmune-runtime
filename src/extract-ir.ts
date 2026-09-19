@@ -561,14 +561,18 @@ function escapeRe(s: string): string {
  * 真正含 sink 的 `FlowStore.get/save/...` 与外层 `flowRoutes` 里**一个校验词汇都没有**——
  * 只看函数体等于没做。传播上限 3 轮（防止公共函数名导致的无限扩散）。
  */
-function pathGuardFunctionNames(project: Project): Set<string> {
+function pathGuardFunctionNames(project: Project): { all: Set<string>; direct: Set<string> } {
   const guarded = new Set<string>();
+  /** tier-0：函数体自身含校验证据的名字（G1 原语义） */
+  const direct = new Set<string>();
   const bodies: Array<{ names: string[]; text: string }> = [];
 
   const note = (names: string[], text: string) => {
     if (!text) return;
     bodies.push({ names, text });
-    if (hasPathGuardEvidence(text)) for (const n of names) if (n) guarded.add(n);
+    if (hasPathGuardEvidence(text)) {
+      for (const n of names) if (n) { guarded.add(n); direct.add(n); }
+    }
   };
 
   for (const sf of project.getSourceFiles()) {
@@ -604,7 +608,56 @@ function pathGuardFunctionNames(project: Project): Set<string> {
     if (!added) break;
   }
 
-  return guarded;
+  return { all: guarded, direct };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// G2（2026-09-19）：调用点抑制 —— 污点【表达式级】净化
+// ═══════════════════════════════════════════════════════════════
+// 缺口实证（taintpath_B，2026-09-19 measured）：
+//   `assertTemplateName(args.name); return loadTemplate(args.name);`
+// 仍被标记。`assertTemplateName` 的函数体内是锚定字符集白名单（G-D），
+// 是**真的**校验，但它的名字不含路径语义后缀 —— `Name` 在修 `ensureDir()`
+// 误判时被整体移出了 G-C 守卫后缀表，于是调用点侧认不出来。
+//
+// 为什么不直接放宽后缀表：那是按【名字】猜语义，会把判别力稀释成猜函数名
+// （G-C 的实证代价已经量过一次：放宽 ⇒ fr-007 pre 侧召回归零）。
+// 本实现改为按【被调用方的实际证据】定案：
+//   函数体内调用了 tier-0 守卫函数（自身含校验证据），且污点表达式被当作
+//   实参传进去 ⇒ 该表达式视为已净化，再流进 sink 不算污点。
+//
+// 精度取舍（关键点）：净化作用在【表达式】上，不是整函数。
+//   G1 的 selfGuarded 是函数级的（一个校验词汇压掉整个函数体所有流）；
+//   G2 只净化真正被传进守卫调用的那个表达式 —— 同函数体里另一条未被校验
+//   的流仍会标记。这是 G2 相对 G1 的收窄，而不是又一次放宽。
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * 收集函数体内「被传进 tier-0 守卫函数」的实参表达式，编译成一个判定正则。
+ *
+ * 边界：只收**简单取值表达式**（标识符 / 成员 / 下标 / 字符串字面量），
+ * 复杂表达式（模板串、拼接、调用）不收 —— 那些形态无法在 sink 侧可靠比对。
+ */
+function collectSanitizedExprs(text: string, directGuardFns?: Set<string>): RegExp | null {
+  if (!directGuardFns || directGuardFns.size === 0) return null;
+  const names = [...directGuardFns].filter((n) => !n.includes("."));
+  if (names.length === 0) return null;
+  const callRe = new RegExp(
+    `(?:^|[^\\w$.])(?:${names.map(escapeRe).join("|")})\\s*\\(([\\s\\S]{0,250}?)\\)`,
+    "g"
+  );
+  const exprs = new Set<string>();
+  let m: RegExpExecArray | null;
+  while ((m = callRe.exec(text)) !== null) {
+    for (const a of splitArgWindow(m[1] || "")) {
+      const t = a.trim();
+      if (t && /^[A-Za-z_$][\w$]*(?:\s*\.\s*[\w$]+|\[[^\]]*\])*$/.test(t)) exprs.add(t.replace(/\s+/g, ""));
+    }
+  }
+  if (exprs.size === 0) return null;
+  // 前缀 `(?:^|[^\w$.])` 是精度关键：`name` 不能匹配 `other.name` 里的 name，
+  // 但 `args.name` 能匹配 `path.join(DIR, args.name)` 里的 args.name。
+  return new RegExp([...exprs].map((e) => `(?:^|[^\\w$.])${escapeRe(e)}\\b`).join("|"));
 }
 
 const TS_FILE_SINK_NAMES = [
@@ -752,14 +805,33 @@ function taintPattern(tainted: Set<string>): RegExp | null {
   return new RegExp(parts.join("|"));
 }
 
-/** 本函数体内：文件 sink 的实参窗口含 request 污点 → true */
-function hasTaintedSinkCall(text: string, tainted: Set<string>): boolean {
+/**
+ * 本函数体内：文件 sink 的实参窗口含 request 污点 → true。
+ *
+ * `sanitizedRe` 非空时（G2）：实参里被净化过的表达式不再算污点 ——
+ * 逐实参判定，只要还有一个实参含【未被净化】的污点就照旧标记。
+ */
+function hasTaintedSinkCall(
+  text: string,
+  tainted: Set<string>,
+  sanitizedRe?: RegExp | null
+): boolean {
   const taint = taintPattern(tainted);
   if (!taint) return false;
   const sinkRe = tsSinkCallRegex();
   let m: RegExpExecArray | null;
   while ((m = sinkRe.exec(text)) !== null) {
-    if (taint.test(m[2] || "")) return true;
+    const win = m[2] || "";
+    if (!taint.test(win)) continue;
+    if (sanitizedRe) {
+      const args = splitArgWindow(win);
+      if (args.length > 0) {
+        if (!args.some((a) => taint.test(a) && !sanitizedRe.test(a))) continue;
+      } else if (sanitizedRe.test(win)) {
+        continue;
+      }
+    }
+    return true;
   }
   return false;
 }
@@ -888,7 +960,8 @@ function computeMarkerCalls(
   paramNames: string[],
   sinkParams: Map<string, { idxs: Set<number>; entries: Array<{ name: string; file: string }> }>,
   onMethodHit: (rec: { idxs: Set<number>; entries: Array<{ name: string; file: string }> }) => void,
-  guardFns?: Set<string>
+  guardFns?: Set<string>,
+  directGuardFns?: Set<string>
 ): string[] {
   const markers: string[] = [];
 
@@ -899,6 +972,10 @@ function computeMarkerCalls(
   if (hasRequestRootedExpr(text)) {
     const tainted = collectTaintedNames(text);
     const selfGuarded = guardFns ? hasPathGuardEvidence(text) !== null : false;
+    // G2：调用点抑制 —— 被传进「自身含校验证据的函数」的表达式视为已净化。
+    // 与 selfGuarded（函数级、按词形）互补：这条按【被调用方的实际证据】定案，
+    // 因此认得出 assertTemplateName 这类不含路径语义后缀的自定义校验函数。
+    const sanitizedRe = collectSanitizedExprs(text, directGuardFns);
     // C5（2026-09-19）：不可信根可以直接写在 sink 实参里，不需要中间变量。
     // 此前外层要求 collectTaintedNames 非空，于是
     //   `fs.readFileSync("/data/" + req.params.name)` —— 真实工程里最常见的形态
@@ -906,7 +983,7 @@ function computeMarkerCalls(
     // SSRF 侧从来不是这样（它把 UNTRUSTED_ROOT_SRC 并进 taint 模式去匹配实参窗口），
     // 这是同一条数据流上的又一处口径不一致。
     if (!selfGuarded) {
-      if (hasTaintedSinkCall(text, tainted)) {
+      if (hasTaintedSinkCall(text, tainted, sanitizedRe)) {
         markers.push("__progmune_path_traversal__");
       } else {
         const methodCallRe = new RegExp(
@@ -932,7 +1009,9 @@ function computeMarkerCalls(
               // G1：被调用方自身已校验 ⇒ 这条跨函数流已被拦截，不标记
               if (guardFns && guardFns.has(m[1])) continue;
               const args = splitArgWindow(m[2] || "");
-              const hit = args.some((arg, i) => rec.idxs.has(i) && taint.test(arg));
+              const hit = args.some(
+                (arg, i) => rec.idxs.has(i) && taint.test(arg) && !(sanitizedRe && sanitizedRe.test(arg))
+              );
               if (hit) {
                 markers.push("__progmune_path_traversal__");
                 onMethodHit(rec);
@@ -1073,7 +1152,10 @@ function _extractSingleProject(
   // pendingMethodMarks = 跨函数命中待标记的方法条目（主循环后统一应用）
   const sinkParams = methodSinkParamMap(project, absRoot);
   // G1（2026-09-19）：路径校验识别。自身含校验证据的函数名 + 向调用方传播一跳。
-  const guardFns = pathGuardFunctionNames(project);
+  // direct = tier-0（自身含校验证据）；all = 再向调用方传播一跳后的集合。
+  // G2 只用 direct —— 传播得到的名字是「被推断为守卫」，拿它做抑制会把
+  // 推断误差直接放大成误报消除。
+  const { all: guardFns, direct: directGuardFns } = pathGuardFunctionNames(project);
   const pendingMethodMarks = new Set<string>();
   const onMethodHit = (rec: { entries: Array<{ name: string; file: string }> }) => {
     for (const me of rec.entries) pendingMethodMarks.add(`${me.name}\u0000${me.file}`);
@@ -1088,7 +1170,7 @@ function _extractSingleProject(
       const fParams = f.getParameters();
       const fText = f.getText();
       const fCalls = extractDirectCalls(f, fText);
-      fCalls.push(...computeMarkerCalls(fText, fParams.map((p: any) => p.getName()), sinkParams, onMethodHit, guardFns));
+      fCalls.push(...computeMarkerCalls(fText, fParams.map((p: any) => p.getName()), sinkParams, onMethodHit, guardFns, directGuardFns));
       funcs.push({
         name,
         params: fParams.map(p => ({
@@ -1117,7 +1199,7 @@ function _extractSingleProject(
         const initParams = init.getParameters();
         const initText = init.getText();
         const initCalls = extractDirectCalls(init, initText);
-        initCalls.push(...computeMarkerCalls(initText, initParams.map((p: any) => p.getName()), sinkParams, onMethodHit, guardFns));
+        initCalls.push(...computeMarkerCalls(initText, initParams.map((p: any) => p.getName()), sinkParams, onMethodHit, guardFns, directGuardFns));
         funcs.push({
           name,
           params: initParams.map(p => ({
@@ -1143,7 +1225,7 @@ function _extractSingleProject(
             const argParams = arg.getParameters();
             const argText = arg.getText();
             const argCalls = extractDirectCalls(arg, argText);
-            argCalls.push(...computeMarkerCalls(argText, argParams.map((p: any) => p.getName()), sinkParams, onMethodHit, guardFns));
+            argCalls.push(...computeMarkerCalls(argText, argParams.map((p: any) => p.getName()), sinkParams, onMethodHit, guardFns, directGuardFns));
             funcs.push({
               name,
               params: argParams.map(p => ({
@@ -1176,7 +1258,7 @@ function _extractSingleProject(
         if (!mn) continue;
         const mParams = m.getParameters();
         const mText = m.getText();
-        const mCalls = computeMarkerCalls(mText, mParams.map((p: any) => p.getName()), sinkParams, onMethodHit, guardFns);
+        const mCalls = computeMarkerCalls(mText, mParams.map((p: any) => p.getName()), sinkParams, onMethodHit, guardFns, directGuardFns);
         funcs.push({
           name: `${cn}.${mn}`,
           params: mParams.map((p: any) => ({ name: p.getName(), type: getParamType(p), typeDetail: getParamTypeDetail(p) })),

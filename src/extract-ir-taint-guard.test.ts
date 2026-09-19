@@ -339,6 +339,159 @@ export function read(req: any) {
   });
 });
 
+describe("G2：调用点抑制 —— 按被调用方的实际证据定案（种子=taintpath_B assertTemplateName）", () => {
+  // 缺口形态（2026-09-19 measured，taintpath_B dispatchToolGuarded）：
+  //   `assertTemplateName(args.name); return loadTemplate(args.name);`
+  // `assertTemplateName` 函数体内是锚定字符集白名单（G-D），是真校验，
+  // 但它的名字不含路径语义后缀 —— `Name` 在修 `ensureDir()` 误判时被整体
+  // 移出了 G-C 守卫后缀表，于是调用点侧认不出来，仍被标记。
+  //
+  // G2 的修法不是把 `Name` 加回词表（那是按【名字】猜语义，G-C 已经为这份
+  // 宽松付过一次代价：fr-007 pre 侧召回归零），而是看**被调用方函数体内
+  // 到底有没有校验证据**。
+  //
+  // 精度取舍：净化作用在【表达式】上，不是整函数 —— 同函数体里另一条未被
+  // 校验的流仍会标记。这是 G2 相对 G1（函数级 selfGuarded）的收窄。
+
+  const body = (guardCall: string) => `
+import * as fs from "fs";
+export function read(req: any) {
+  const name = req.params.name;
+${guardCall}  return fs.readFileSync("/data/" + name, "utf-8");
+}
+function assertTemplateName(name: string): void {
+  if (!/^[A-Za-z0-9_-]+$/.test(name)) throw new Error("bad template name");
+}
+`;
+
+  it("正对照：去掉自定义校验调用后必须标记", () => {
+    const dir = makeProject({ "a.ts": body("") });
+    try {
+      expect(marksFor(dir, "read")).toContain(PATH_MARK);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("自定义校验函数（名字不含路径语义后缀）被调用 → 不得标记", () => {
+    const dir = makeProject({ "a.ts": body("  assertTemplateName(name);\n") });
+    try {
+      expect(marksFor(dir, "read")).not.toContain(PATH_MARK);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("负对照：被调用方体内**没有**校验证据时，调用它不得抑制（不能见调用就净化）", () => {
+    const dir = makeProject({
+      "a.ts": `
+import * as fs from "fs";
+export function read(req: any) {
+  const name = req.params.name;
+  logIt(name);
+  return fs.readFileSync("/data/" + name, "utf-8");
+}
+function logIt(x: string): void { console.log(x); }
+`,
+    });
+    try {
+      expect(marksFor(dir, "read")).toContain(PATH_MARK);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("表达式级净化：同函数体里另一条未被校验的流仍要标记", () => {
+    // G1 的函数级 selfGuarded 会把整个函数体一起静默；G2 只净化真正被传进
+    // 守卫调用的表达式 —— 这条用例锁住这个差别。
+    const dir = makeProject({
+      "a.ts": `
+import * as fs from "fs";
+export function read(req: any) {
+  const name = req.params.name;
+  const other = req.params.other;
+  assertTemplateName(name);
+  fs.readFileSync("/data/" + name, "utf-8");
+  return fs.writeFileSync("/data/" + other, "x");
+}
+function assertTemplateName(name: string): void {
+  if (!/^[A-Za-z0-9_-]+$/.test(name)) throw new Error("bad template name");
+}
+`,
+    });
+    try {
+      expect(marksFor(dir, "read")).toContain(PATH_MARK);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("跨函数（taintpath_B 形态）：净化只发生在调用点，被调用方定义照旧被反标", () => {
+    // 语料里 `loadTemplate` 自身不含任何不可信根，它被标记是因为调用点命中了
+    // 跨函数一跳（onMethodHit 反标）。故本用例在同一文件里放两个几乎相同的
+    // 调用点 —— 一个净化、一个不净化 —— 才能同时锁住两侧。
+    const dir = makeProject({
+      "store.ts": `
+import * as fs from "fs";
+export function loadTemplate(p: string): string {
+  return fs.readFileSync("/srv/templates/" + p, "utf-8");
+}
+`,
+      "handler.ts": `
+import { loadTemplate } from "./store";
+export function dispatchToolGuarded(params: any) {
+  const args = params.arguments;
+  assertTemplateName(args.name);
+  return loadTemplate(args.name);
+}
+export function dispatchToolBare(params: any) {
+  const args = params.arguments;
+  return loadTemplate(args.name);
+}
+function assertTemplateName(name: string): void {
+  if (!/^[A-Za-z0-9_-]+$/.test(name)) throw new Error("bad template name");
+}
+`,
+    });
+    try {
+      // 净化侧：污点表达式已被校验 ⇒ 调用点不标记
+      expect(marksFor(dir, "dispatchToolGuarded")).not.toContain(PATH_MARK);
+      // 正对照：同形状去掉校验 ⇒ 照旧标记，且被调用方被反标
+      expect(marksFor(dir, "dispatchToolBare")).toContain(PATH_MARK);
+      expect(marksFor(dir, "loadTemplate")).toContain(PATH_MARK);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("已知缺口 G2b：经项目自有 helper 转手的校验证据不生效（保守边界，仍标记）", () => {
+    // 只认 tier-0（函数体自身含校验证据）。经 helper 转手 ⇒ 那是【推断】出来
+    // 的守卫，拿推断结果做抑制会把推断误差直接放大成误报消除。
+    // 代价：这类形态仍会误报，与 C4b（helper 不传播）是同一族缺口。
+    const dir = makeProject({
+      "a.ts": `
+import * as fs from "fs";
+export function read(req: any) {
+  const name = req.params.name;
+  checkName(name);
+  return fs.readFileSync("/data/" + name, "utf-8");
+}
+function checkName(name: string): void {
+  assertTemplateName(name);
+}
+function assertTemplateName(name: string): void {
+  if (!/^[A-Za-z0-9_-]+$/.test(name)) throw new Error("bad template name");
+}
+`,
+    });
+    try {
+      expect(marksFor(dir, "read")).toContain(PATH_MARK);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
 /**
  * ── 已知边界（本次写用例时实测踩到，记录以免后人重复踩）──
  *

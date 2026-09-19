@@ -1,5 +1,50 @@
 # Changelog
 
+## [3.7.37] — 2026-09-19
+
+### G2：自定义校验函数的调用点抑制（判别力）
+
+缺口实证（taintpath_B `dispatchToolGuarded`，measured）：
+
+```ts
+assertTemplateName(args.name);   // 函数体内是 /^[A-Za-z0-9_-]+$/ —— 真校验
+return loadTemplate(args.name);  // 仍被标记（误报）
+```
+
+`assertTemplateName` 名字不含路径语义后缀——`Name` 在修 `ensureDir()` 误判时被
+整体移出了 G-C 后缀表，于是调用点侧认不出来。这是 G1 收紧词表的已知代价。
+
+修法**不是**把 `Name` 加回词表（那是按名字猜语义，G-C 已经为这份宽松付过代价：
+fr-007 pre 侧召回归零），而是看**被调用方函数体内到底有没有校验证据**：
+
+- `pathGuardFunctionNames` 拆两档：tier-0 `direct`（自身含证据）/ tier-1+ `all`（推断）
+- `collectSanitizedExprs`：被调用方属 tier-0 ⇒ 把调用实参里的取值表达式收进
+  「已净化」集合；sink 实参命中污点但已被净化 ⇒ 不算污点
+
+### 三处精度取舍（全部比 G1 的函数级 selfGuarded 窄）
+
+| 取舍 | 说明 |
+|---|---|
+| 表达式级，非函数级 | G1 是一个校验词汇压掉整个函数体的所有流；G2 只净化被传进守卫调用的那个表达式，同函数体里另一条未校验的流仍标记 |
+| 只认 tier-0 | 推断出来的守卫不用于抑制 —— 升为方法学规则 **R9-no-inferred-suppression**（抑制不可逆，压掉的真阳性不会出现在任何回归统计里） |
+| 前缀 `(?:^\|[^\w$.])` | 净化 `name` 不连坐 `other.name`；但 `args.name` 能命中 `path.join(DIR, args.name)` |
+
+### 验收
+
+- taintpath 闸门 **24/24**（`dispatchToolGuarded` mark → suppressed；正对照
+  `dispatchToolBare` 仍 mark）
+- **fr-007 openhop 真实语料维持 pre 5 / post 0** —— G2 未压掉真阳性
+- TS 盲测（102 项目）：**LOST 1 / ADDED 0**，唯一变化就是本条；覆盖力 19 → 18
+- `extract-ir-taint-guard.test.ts` 新增 G2 组 6 条（含正/负对照，R6）
+- 反向验证：回退 v3.7.36 后 G2 两条正例失败，其余 18 条仍绿
+- 新增 `blind-benchmark/check-fr-corpus.ts` —— 把 fr-007 的 pre/post 复测固化成
+  一条命令；快照置于 `blind-benchmark/fr-corpus/`（**受保护资产**，不再放 /tmp）
+
+### 已知缺口 G2b
+
+经项目自有 helper 转手的校验证据不生效（`checkName(n)` 内部再调守卫函数）——
+只认 tier-0 的代价，与 C4b 同族。缺口是可见的（仍有误报），压掉的真阳性不可见。
+
 ## [3.7.36] — 2026-09-19
 
 ### C4：污点经路径塑形表达式包装后仍传播

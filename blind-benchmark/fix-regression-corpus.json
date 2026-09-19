@@ -62,6 +62,14 @@
       "rule": "验收闸门不得默认读取上一次运行留下的产物文件。闸门必须【重新计算】被测指标（实时提取 / 实时扫描），或至少校验产物的时效（产物生成时间晚于被测代码/语料的最后修改时间）。读陈旧产物的闸门是第二种空过——它不是没覆盖，是覆盖了但读到旧数据，且比第一种更难发现，因为它有输出、有历史、看起来一直在工作。",
       "why": "实测：C4 落地后 4 条 known-gap 已翻正，check-taintpath 仍报「未标记，符合预期」。已改为默认实时 extractIR，需走报告时显式 --report。",
       "current_status": "check-taintpath.ts 默认实时提取；batch-scan-results.json 仍可用于 --report 模式"
+    },
+    {
+      "id": "R9-no-inferred-suppression",
+      "added": "2026-09-19",
+      "source": "G2 调用点抑制实现期（3.7.37）",
+      "rule": "抑制类判别只允许使用【直接证据】：被调用方函数体自身含校验证据（tier-0）。经传播/推断得到的守卫（tier-1+，即「它调用了一个守卫函数所以它也守卫」）不得用于抑制，只能用于跨函数流的解释。同时，抑制的作用粒度应尽量落在【表达式】而非整个函数——函数级抑制会连带压掉同函数体里未被校验的其他流。",
+      "why": "推断出来的证据含误差，而抑制是一种【不可逆】操作：真阳性一旦被压掉就不会再报出，也不会出现在任何回归统计里（它只会表现为 LOST，容易被当成无关噪声）。把推断误差乘以不可逆性，是这类判别最危险的失败模式。代价是留下缺口 G2b（经项目自有 helper 转手的校验证据不生效）——缺口是可见的（仍有误报），压掉的真阳性是不可见的。",
+      "current_status": "G2 只认 tier-0；G2b 记为已知缺口（与 C4b 同族：项目自有 helper 不传播）"
     }
   ],
   "entries": [
@@ -185,7 +193,8 @@
       "result": "DETECTED（2026-09-19 复核：G1 PATH_GUARD_EVIDENCE 上线后成立）",
       "result_detail": "PATH_TRAVERSAL ×4（flowRoutes + FlowStore.save/get/delete）——A1：TS 提取器路径穿越标记（request 污点→fs sink，跨函数一跳）+ 引擎 IR 层标记消费",
       "result_reason": "detected_after_g1",
-      "result_note": "2026-09-19 对 fix commit 完整 packages/server/src 复核（pre=6bde78bf88aa / post=c8190fbefa3a）。真修复 = 抽出独立校验模块 flow-id.ts（assertValidFlowId + FLOW_ID_PATTERN /^[A-Za-z0-9_-]+$/），在 FlowStore.filePath() 里调用；routes.ts 侧改为 JSON-schema flowIdParamsSchema（pattern）。G1 前：pre 5 条 / post 5 条（标记器看不见校验）；G1 后：pre 5 条 / post **0** 条 —— 这是真实语料上首次出现「修复后流消失」的判别力证据。注：本条此前记为 DETECTED，但按现行「post 侧须 0 误报」标准，G1 之前并不成立——DETECTED 结论会随判别力变化，改判别逻辑后必须重测全部 DETECTED 条目。"
+      "result_note": "2026-09-19 对 fix commit 完整 packages/server/src 复核（pre=6bde78bf88aa / post=c8190fbefa3a）。真修复 = 抽出独立校验模块 flow-id.ts（assertValidFlowId + FLOW_ID_PATTERN /^[A-Za-z0-9_-]+$/），在 FlowStore.filePath() 里调用；routes.ts 侧改为 JSON-schema flowIdParamsSchema（pattern）。G1 前：pre 5 条 / post 5 条（标记器看不见校验）；G1 后：pre 5 条 / post **0** 条 —— 这是真实语料上首次出现「修复后流消失」的判别力证据。注：本条此前记为 DETECTED，但按现行「post 侧须 0 误报」标准，G1 之前并不成立——DETECTED 结论会随判别力变化，改判别逻辑后必须重测全部 DETECTED 条目。 ｜ 2026-09-19 二次复核（3.7.37 G2 调用点抑制）：pre 5 / post 0 维持 —— G2 未压掉真阳性；复核已固化为 blind-benchmark/check-fr-corpus.ts（快照放在 blind-benchmark/fr-corpus/<id>-<repo>/{pre,post}，受保护资产，不得放 /tmp）。",
+      "updated": "2026-09-19"
     },
     {
       "id": "fr-008",
