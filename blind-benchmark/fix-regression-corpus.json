@@ -54,6 +54,14 @@
       "rule": "回归闸门必须对被测能力有实际覆盖才能算通过。每次发布前须确认：被测代码路径在新语料上确实被走到（如统计 __progmune_path_traversal__ 出现次数 > 0）。出现「改动前后该指标均为 0」即空过（vacuous pass），须在报告里显式标注，并优先补语料而不是宣称通过。",
       "why": "本报告已三次把 3086 flags LOST 0/ADDED 0 当作验收证据，而它三次都没有覆盖当时正在改的能力。空过比失败更危险：它给出安全错觉。已由 blind-benchmark/generated/taintpath_A|B + check-taintpath.ts 补上覆盖。",
       "current_status": "path_traversal 标记在全语料出现 15 次（此前 0 次）"
+    },
+    {
+      "id": "R8-no-stale-artifact-gate",
+      "added": "2026-09-19",
+      "source": "C4 落地时发现 check-taintpath.ts 读陈旧报告仍报 24/24 全绿",
+      "rule": "验收闸门不得默认读取上一次运行留下的产物文件。闸门必须【重新计算】被测指标（实时提取 / 实时扫描），或至少校验产物的时效（产物生成时间晚于被测代码/语料的最后修改时间）。读陈旧产物的闸门是第二种空过——它不是没覆盖，是覆盖了但读到旧数据，且比第一种更难发现，因为它有输出、有历史、看起来一直在工作。",
+      "why": "实测：C4 落地后 4 条 known-gap 已翻正，check-taintpath 仍报「未标记，符合预期」。已改为默认实时 extractIR，需走报告时显式 --report。",
+      "current_status": "check-taintpath.ts 默认实时提取；batch-scan-results.json 仍可用于 --report 模式"
     }
   ],
   "entries": [

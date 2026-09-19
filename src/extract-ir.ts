@@ -411,6 +411,28 @@ interface PathGuardRule {
   re: RegExp;
   why: string;
   source: string;
+  /**
+   * 可选：比 `re` 更精确的定案函数（re 只做粗筛）。
+   * 存在时以本函数为准 —— 有些形态（如「startsWith 的实参是不是基目录名」）
+   * 用单条正则写不出既不全收、又不漏掉 canonical 形态的判定。
+   */
+  decide?: (text: string) => boolean;
+}
+
+/**
+ * 标识符是否「看起来像基目录」—— G-A2 的定案依据。
+ *
+ * 判定：以 base / root / dir 结尾（大小写与 camel、下划线均可），
+ * 前缀任意（`base` / `baseDir` / `allowedRoot` / `root_dir` 都算）。
+ *
+ * 反例名单是实证加的：`database` 以 base 结尾但与目录无关，若不排除，
+ * 一旦有人写 `p.startsWith(database)` 就会被当成守卫 —— 那是精度漏洞。
+ */
+const BASE_DIR_IDENT_DENY = /^(?:database|databases|codebase|knowledgebase|base64|basename|dirname|basenames)$/i;
+
+function isBaseDirIdent(id: string): boolean {
+  if (BASE_DIR_IDENT_DENY.test(id)) return false;
+  return /^(?:[A-Za-z_$][\w$]*)?(?:base|root|dir)$/i.test(id);
 }
 
 const PATH_GUARD_RULES: PathGuardRule[] = [
@@ -423,9 +445,33 @@ const PATH_GUARD_RULES: PathGuardRule[] = [
   },
   {
     id: "G-A2",
-    re: /\.\s*startsWith\s*\(\s*[A-Za-z_$][\w$]*(?:[Bb]ase|[Rr]oot|[Dd]ir|Dir|Root|Base)[\w$]*\s*\)/,
-    why: "目录包含性校验（基目录名形态）：startsWith(baseDir/rootDir/...)",
-    source: "设计形态，canonical",
+    // 粗筛：任意 `.startsWith(<ident>)`；定案交给 decide —— 实参名是否像基目录。
+    re: /\.\s*startsWith\s*\(\s*([^)]*?)\s*\)/,
+    // 2026-09-19 两次修订，都是被 C4「顶出来」的真问题（C4 之前相关用例
+    // 的「不标记」是空过——污点根本没走到 sink，见方法学规则 R7）：
+    //  ① 原正则 `[A-Za-z_$][\w$]*(?:[Bb]ase|…)` 要求标识符在 base/root/dir
+    //     **之外**还至少有一个前导字符，于是最朴素的 `startsWith(base)`
+    //     （taintpath_A readGuardWithin）匹配不上；
+    //  ② `startsWith("/srv/data")` —— 基目录写成**字符串字面量**——同样匹配
+    //     不上（C5 负对照 readInlineGuarded 就是这形态）。
+    // 故改为：先取出 startsWith 的整个实参，再判定它是「基目录名」还是
+    // 「绝对路径字面量」。
+    decide: (text: string) => {
+      const re = /\.\s*startsWith\s*\(\s*([^)]*?)\s*\)/g;
+      let m: RegExpExecArray | null;
+      while ((m = re.exec(text)) !== null) {
+        const arg = m[1] || "";
+        // 形参里的标识符：`base` / `base + path.sep` / `rootDir + "/"`
+        const idm = /([A-Za-z_$][\w$]*)/.exec(arg);
+        if (idm && isBaseDirIdent(idm[1])) return true;
+        // 绝对路径字面量：`"/srv/data"`。长度 >1 是为了排除 `startsWith("/")`
+        // —— 那只是「是否绝对路径」，不构成包含性。
+        if (/["'`]\/[^"'`]+["'`]/.test(arg)) return true;
+      }
+      return false;
+    },
+    why: "目录包含性校验（基目录名或绝对路径字面量）：startsWith(base / baseDir / \"/srv/data\" / base + sep）",
+    source: "设计形态，canonical；2026-09-19 补 `base` 单标识符（taintpath_A readGuardWithin）与绝对路径字面量（C5 负对照 readInlineGuarded）",
   },
   {
     id: "G-B1",
@@ -498,7 +544,7 @@ function callsPathGuardFn(text: string): boolean {
 /** 返回命中的守卫规则 id；无校验证据返回 null。 */
 function hasPathGuardEvidence(text: string): string | null {
   for (const r of PATH_GUARD_RULES) {
-    if (r.re.test(text)) return r.id;
+    if (r.decide ? r.decide(text) : r.re.test(text)) return r.id;
   }
   if (callsPathGuardFn(text)) return "G-C";
   return null;
@@ -610,7 +656,32 @@ function tsSinkCallRegex(): RegExp {
   );
 }
 
-/** 函数体内被不可信根污染的局部名（含解构与单跳赋值，深度 ≤2） */
+/**
+ * C4（2026-09-19）：污点经「路径塑形表达式」包装后仍然传播。
+ *
+ * 缺口实证（taintpath_A，2026-09-19 measured）：
+ *   `const target = path.join(ROOT, req.params.name); fs.readFileSync(target)`
+ * 不标记 —— 因为传播只认 `x = <污点>` 直赋，`path.join(...)` 把流掐断了。
+ * 真实工程里 `join/resolve/normalize/basename` 是路径构造的**默认写法**，
+ * 这条断链等于把最常见的形态整片漏掉。
+ *
+ * 政策：**白名单传播**，不是「RHS 含污点就传播」。
+ *   - 只经【路径塑形】的调用传播（path.* 家族 + 保值的字符串方法）；
+ *   - 字符串拼接与模板字面量同样只塑形、不改来源，故一并传播；
+ *   - 认不出的调用**不传播** —— 于是 `const safe = sanitizeName(p)` 天然
+ *     不污染。这是白名单相对黑名单的决定性优势：未知函数默认站在精度一侧。
+ *   代价：项目自有 helper（如 `buildPath(p)`）仍不传播，记为 C4b 缺口。
+ *
+ * 已知限制：只扫单行赋值（`const x = …;` 一行写完）。跨行书写的调用
+ * 链不传播——保持简单，等 C4b 一并处理。
+ */
+const TS_PATH_SHAPER_RE =
+  /(?:path\s*\.\s*(?:posix|win32)\s*\.\s*|path\s*\.\s*)?\b(?:join|resolve|normalize|basename|dirname|extname|relative|format|toNamespacedPath)\s*\(|\.\s*(?:trim|trimStart|trimEnd|replace|replaceAll|toLowerCase|toUpperCase|toString|slice|substring|substr|padStart|padEnd|concat|normalize)\s*\(/;
+
+/** 拼接形态：`+` 或反引号（模板字面量）—— 同样只是塑形 */
+const TS_CONCAT_RE = /\+|`/;
+
+/** 函数体内被不可信根污染的局部名（含解构、单跳赋值与 C4 塑形传播，深度 ≤3） */
 function collectTaintedNames(text: string): Set<string> {
   const tainted = new Set<string>();
   let m: RegExpExecArray | null;
@@ -626,6 +697,7 @@ function collectTaintedNames(text: string): Set<string> {
   }
   const bareAssign = new RegExp(`(?:^|[^\\w$.])([\\w$]+)\\s*=\\s*(?:await\\s+)?(?:${root})`, "g");
   while ((m = bareAssign.exec(text)) !== null) tainted.add(m[1]);
+  taintedViaShaper(text, tainted);
   // 单跳传播（深度 ≤2）
   for (let depth = 0; depth < 2; depth++) {
     if (tainted.size === 0) break;
@@ -638,6 +710,38 @@ function collectTaintedNames(text: string): Set<string> {
     if (!added) break;
   }
   return tainted;
+}
+
+/**
+ * C4：把「经路径塑形表达式包装」的赋值名补进污点集合（有界迭代 ≤3 轮）。
+ *
+ * 按行扫描 `[(const|let|var)] NAME = RHS`：RHS 含污点证据 且
+ * （含塑形调用 或 含拼接/模板）⇒ NAME 污染。迭代是为了让
+ * `normalized = path.normalize(p)` → `savePath = path.join(normalized, f)`
+ * 这类链式构造能接上（fr-012 下载侧守卫块就是这个形状）。
+ */
+function taintedViaShaper(text: string, tainted: Set<string>): void {
+  for (let depth = 0; depth < 3; depth++) {
+    // 注意：这里**不能**以 `tainted.size === 0` 提前退出 —— 种子是根模式
+    // （taintPattern 恒定并入 UNTRUSTED_ROOT_SRC）。本轮这 4 条 known-gap
+    // 的共同形态恰恰是「全函数没有任何直赋污点，根只出现在塑形调用里」，
+    // 加这道闸门等于整条 C4 不生效（2026-09-19 实测踩到）。
+    const taintRe = taintPattern(tainted);
+    if (!taintRe) return;
+    let added = false;
+    for (const line of text.split("\n")) {
+      const m = /^\s*(?:const|let|var)?\s*([\w$]+)\s*=\s*(?:await\s+)?(.+)$/.exec(line);
+      if (!m) continue;
+      const name = m[1];
+      const rhs = m[2];
+      if (tainted.has(name)) continue;
+      if (taintRe.test(rhs) && (TS_PATH_SHAPER_RE.test(rhs) || TS_CONCAT_RE.test(rhs))) {
+        tainted.add(name);
+        added = true;
+      }
+    }
+    if (!added) return;
+  }
 }
 
 function taintPattern(tainted: Set<string>): RegExp | null {

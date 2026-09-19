@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-19T06:52:03.753Z",
+  "generated": "2026-09-19T09:06:57.570Z",
   "projects": [
     {
       "project": "analytics_A",
@@ -43164,10 +43164,19 @@
           "file": "src/paths.ts",
           "calls": [
             "basename",
-            "readFileSync"
+            "readFileSync",
+            "__progmune_path_traversal__"
           ],
           "protocolViolations": [],
-          "safeguardViolations": []
+          "safeguardViolations": [
+            {
+              "rule": "Path Traversal (User-Controlled File Path)",
+              "category": "path_traversal",
+              "type": "missing_safeguard",
+              "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
+              "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
+            }
+          ]
         },
         {
           "name": "readLengthCheck",
@@ -43210,10 +43219,19 @@
           "file": "src/paths.ts",
           "calls": [
             "resolve",
-            "readFileSync"
+            "readFileSync",
+            "__progmune_path_traversal__"
           ],
           "protocolViolations": [],
-          "safeguardViolations": []
+          "safeguardViolations": [
+            {
+              "rule": "Path Traversal (User-Controlled File Path)",
+              "category": "path_traversal",
+              "type": "missing_safeguard",
+              "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
+              "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
+            }
+          ]
         },
         {
           "name": "readEnsureDirOnly",
@@ -43293,20 +43311,38 @@
           "file": "src/paths.ts",
           "calls": [
             "join",
-            "readFileSync"
+            "readFileSync",
+            "__progmune_path_traversal__"
           ],
           "protocolViolations": [],
-          "safeguardViolations": []
+          "safeguardViolations": [
+            {
+              "rule": "Path Traversal (User-Controlled File Path)",
+              "category": "path_traversal",
+              "type": "missing_safeguard",
+              "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
+              "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
+            }
+          ]
         },
         {
           "name": "readNormalizeWrapped",
           "file": "src/paths.ts",
           "calls": [
             "normalize",
-            "readFileSync"
+            "readFileSync",
+            "__progmune_path_traversal__"
           ],
           "protocolViolations": [],
-          "safeguardViolations": []
+          "safeguardViolations": [
+            {
+              "rule": "Path Traversal (User-Controlled File Path)",
+              "category": "path_traversal",
+              "type": "missing_safeguard",
+              "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
+              "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
+            }
+          ]
         }
       ]
     },

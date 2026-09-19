@@ -1,5 +1,53 @@
 # Changelog
 
+## [3.7.36] — 2026-09-19
+
+### C4：污点经路径塑形表达式包装后仍传播
+
+缺口实证（taintpath_A，measured）：`readBasename` / `readResolveOnly` /
+`readJoinWrapped` / `readNormalizeWrapped` 四条语义上应标记、实测不标记——
+传播只认 `x = <污点>` 直赋，而 `path.join/resolve/normalize/basename` 是真实
+工程构造路径的**默认写法**，这条断链等于把最常见形态整片漏掉。
+
+政策是**白名单传播**，不是「RHS 含污点就传播」：
+- 只经 path.* 家族与保值的字符串方法（trim/replace/…）传播；拼接与模板字面量
+  同样只塑形、不改来源；有界迭代 3 跳（`normalize → join` 这类链式能接上）
+- **认不出的调用不传播** ⇒ `const safe = sanitizeName(p)` 天然不污染。
+  未知函数默认站在精度一侧——这是白名单相对黑名单的决定性优势
+- 代价（记为缺口 C4b）：项目自有 helper（如 `buildPath(p)`）仍不传播
+
+### 两处必须一并改的「假通过」（C4 把它们顶出来了）
+
+C4 之前，下列用例的「不标记」**不是因为判别力对，而是污点根本没走到 sink**
+——方法学规则 R7 的第二种形态。C4 一放开它们就会翻成误报：
+
+1. **G-A2 漏 `startsWith(base)`**：原正则要求标识符在 base/root/dir 之外还有
+   前导字符，最朴素的 `target.startsWith(base)` 匹配不上。改为取出整个实参再
+   判定，并加 `database` 等反例名单（`database` 以 base 结尾但与目录无关）
+2. **G-A2 漏字符串字面量形态**：`startsWith("/srv/data")` 同样匹配不上。
+   现支持绝对路径字面量（长度 >1，排除 `startsWith("/")`——那只是判绝对路径）
+
+### 闸门改为实时提取（第二处空过）
+
+`check-taintpath.ts` 原默认读 `reports/batch-scan-results.json`——那是别人跑
+batch-scan 留下的**陈旧产物**。实测踩到：C4 落地后 4 条 known-gap 已翻正，
+闸门仍报「未标记，符合预期」。已改为默认对 `generated/taintpath_*` 实时跑
+extractIR（需走报告时显式 `--report`）。
+
+### 验收
+
+- taintpath 闸门 **24/24，失败 0、缺口闭合待更新 0**；4 条 known-gap 转 mark
+- fr-007 openhop 真实语料维持 **pre 5 / post 0** —— C4 只补召回，未削弱 G1 判别力
+- `extract-ir-taint-structural.test.ts` 新增 C4 组 11 条（7 正 + 4 负对照，R6）
+- 反向验证：回退 v3.7.35 后 **7 条正例全失败**，4 条负对照仍绿
+- 全组回归 72 passed；`tsc -p tsconfig.json` 零错误
+
+### 实现期踩的一个坑（已入注释）
+
+`taintedViaShaper` 最初写了 `if (tainted.size === 0) return`——而这 4 条
+known-gap 的共同形态恰恰是「全函数没有任何直赋污点」，等于整条 C4 不生效。
+种子是根模式（taintPattern 恒定并入 UNTRUSTED_ROOT_SRC），不该依赖已有污点。
+
 ## [3.7.35] — 2026-09-19
 
 ### 重建盲测覆盖：taintpath 语料族（TS 795 空过的终结）
