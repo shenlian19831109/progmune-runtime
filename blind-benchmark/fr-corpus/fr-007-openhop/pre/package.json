@@ -1,0 +1,70 @@
+{
+  "name": "@openhop/server",
+  "version": "0.3.5",
+  "description": "OpenHop API server. Fastify app for storing and serving data-flow definitions.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/naorsabag/openhop.git",
+    "directory": "packages/server"
+  },
+  "homepage": "https://github.com/naorsabag/openhop#readme",
+  "bugs": {
+    "url": "https://github.com/naorsabag/openhop/issues"
+  },
+  "license": "MIT",
+  "author": "Naor Sabag (https://github.com/naorsabag)",
+  "keywords": [
+    "openhop",
+    "data-flow",
+    "diagram",
+    "fastify",
+    "ai-agents",
+    "yaml"
+  ],
+  "type": "module",
+  "main": "dist/server.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/server.js"
+    }
+  },
+  "files": [
+    "dist",
+    "examples"
+  ],
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "build": "tsc -p tsconfig.build.json --emitDeclarationOnly && esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/server.js --external:fastify --external:@fastify/cors --external:@fastify/swagger --external:@fastify/swagger-ui --external:nanoid --external:yaml --external:zod --external:zod-to-json-schema",
+    "prepack": "npm run build && rm -rf examples && { test -d ../../examples || { echo 'prepack: ../../examples missing — refusing to publish without bundled examples' >&2; exit 1; }; } && cp -r ../../examples ./examples",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.0",
+    "@fastify/swagger": "^9.0.0",
+    "@fastify/swagger-ui": "^5.2.6",
+    "fastify": "^5.0.0",
+    "nanoid": "^5.1.11",
+    "yaml": "^2.9.0",
+    "zod": "^4.4.3",
+    "zod-to-json-schema": "^3.24.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@openhop/shared": "*",
+    "@types/node": "^24.13.2",
+    "@vitest/coverage-v8": "^4.1.8",
+    "esbuild": "^0.28.1",
+    "eslint": "^9.39.4",
+    "globals": "^17.6.0",
+    "tsx": "^4.22.4",
+    "typescript-eslint": "^8.61.0",
+    "vitest": "^4.1.8"
+  }
+}
