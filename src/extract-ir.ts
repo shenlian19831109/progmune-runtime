@@ -402,6 +402,40 @@ const TS_FILE_SINK_NAMES = [
   "copyFile", "rename", "stat", "lstat", "rmdir", "truncate",
 ];
 
+// ═══════════════════════════════════════════════════════════════
+// 不可信入口根表 —— 污点数据流试点（2026-09-18）
+//
+// 此前整条污点链路只锚定 Express 形态的
+// `(?:req|request)\.(?:params|query|body|headers|cookies)`，
+// 即**根集合只有一种来源**。后果是 MCP 工具实参、CLI 参数、URL 解码产物
+// 等来源天然不可见：fr-012 的 `args.file_path`（← params.arguments）与
+// fr-015 的 `font.path`（← URL 解码）都因此 MISS。往 URL_PARAM_NAME 里加
+// 名字解决不了——那只是在已经认错了根的前提下扩充变量名清单（打地鼠）。
+//
+// 本表改为按**传输面**声明根：判定依据是值的来源性质，而不是变量叫什么。
+// 每条根必须窄且可解释，新增需附 `why`（closes #taint-pilot）。
+// ═══════════════════════════════════════════════════════════════
+const UNTRUSTED_ROOTS: Array<{ id: string; expr: string; why: string }> = [
+  {
+    id: "http_request",
+    expr: String.raw`\b(?:req|request)\.(?:params|query|body|headers|cookies)\b[.[]?`,
+    why: "HTTP 请求对象字段，Express/Koa/Fastify/Nest 等通用形态",
+  },
+  {
+    id: "mcp_tool_args",
+    expr: String.raw`\bparams\.arguments\b[.[]?`,
+    why: "MCP CallToolRequest.params.arguments —— 工具调用实参，调用方可控（fr-012）",
+  },
+];
+
+/** 所有根的来源片段，供 **无标志** 的布尔探测正则使用 */
+const UNTRUSTED_ROOT_SRC = UNTRUSTED_ROOTS.map((r) => `(?:${r.expr})`).join("|");
+
+/** 既有的 request 根语义，改由根表统一提供 */
+function hasRequestRootedExpr(text: string): boolean {
+  return new RegExp(UNTRUSTED_ROOT_SRC).test(text);
+}
+
 function tsSinkCallRegex(): RegExp {
   return new RegExp(
     `(?:^|[^\\w.$])(?:await\\s+)?(?:[\\w$]+\\.)?(${TS_FILE_SINK_NAMES.join("|")})\\s*\\(([\\s\\S]{0,250}?)\\)`,
@@ -409,25 +443,21 @@ function tsSinkCallRegex(): RegExp {
   );
 }
 
-/** request 根表达式：req.params / request.body / req.query['x'] … */
-function hasRequestRootedExpr(text: string): boolean {
-  return /\b(?:req|request)\.(?:params|query|body|headers|cookies)\b[.[]?/.test(text);
-}
-
-/** 函数体内被 request 污染的局部名（含解构与单跳赋值，深度 ≤2） */
+/** 函数体内被不可信根污染的局部名（含解构与单跳赋值，深度 ≤2） */
 function collectTaintedNames(text: string): Set<string> {
   const tainted = new Set<string>();
   let m: RegExpExecArray | null;
-  const direct = /(?:const|let|var)\s+([\w$]+)\s*=\s*(?:await\s+)?(?:req|request)\.(?:params|query|body|headers|cookies)\b[.[]?/g;
+  const root = UNTRUSTED_ROOT_SRC;
+  const direct = new RegExp(`(?:const|let|var)\\s+([\\w$]+)\\s*=\\s*(?:await\\s+)?(?:${root})`, "g");
   while ((m = direct.exec(text)) !== null) tainted.add(m[1]);
-  const destr = /(?:const|let|var)\s*\{\s*([^}=]*?)\s*\}\s*=\s*(?:await\s+)?(?:req|request)\.(?:params|query|body|headers|cookies)\b/g;
+  const destr = new RegExp(`(?:const|let|var)\\s*\\{\\s*([^}=]*?)\\s*\\}\\s*=\\s*(?:await\\s+)?(?:${root})`, "g");
   while ((m = destr.exec(text)) !== null) {
     for (const part of m[1].split(",")) {
       const name = part.trim().split(":")[0].trim();
       if (/^[\w$]+$/.test(name)) tainted.add(name);
     }
   }
-  const bareAssign = /(?:^|[^\w$.])([\w$]+)\s*=\s*(?:req|request)\.(?:params|query|body|headers|cookies)\b[.[]?/g;
+  const bareAssign = new RegExp(`(?:^|[^\\w$.])([\\w$]+)\\s*=\\s*(?:await\\s+)?(?:${root})`, "g");
   while ((m = bareAssign.exec(text)) !== null) tainted.add(m[1]);
   // 单跳传播（深度 ≤2）
   for (let depth = 0; depth < 2; depth++) {
@@ -444,9 +474,7 @@ function collectTaintedNames(text: string): Set<string> {
 }
 
 function taintPattern(tainted: Set<string>): RegExp | null {
-  const parts: string[] = [
-    /\b(?:req|request)\.(?:params|query|body|headers|cookies)\b[.[]?/.source,
-  ];
+  const parts: string[] = [UNTRUSTED_ROOT_SRC];
   if (tainted.size > 0) {
     parts.push(`\\b(?:${[...tainted].join("|")})\\b`);
   }
@@ -486,6 +514,33 @@ function methodSinkParamMap(
   absRoot: string
 ): Map<string, { idxs: Set<number>; entries: Array<{ name: string; file: string }> }> {
   const map = new Map<string, { idxs: Set<number>; entries: Array<{ name: string; file: string }> }>();
+
+  const register = (
+    keyName: string,
+    fullName: string,
+    text: string,
+    relPath: string,
+    params: string[]
+  ) => {
+    const sinkRe = tsSinkCallRegex();
+    let sm: RegExpExecArray | null;
+    while ((sm = sinkRe.exec(text)) !== null) {
+      const win = sm[2] || "";
+      params.forEach((pname, idx) => {
+        if (!pname) return;
+        if (!new RegExp(`\\b${pname}\\b`).test(win)) return;
+        if (!map.has(keyName)) {
+          map.set(keyName, { idxs: new Set(), entries: [] });
+        }
+        const rec = map.get(keyName)!;
+        rec.idxs.add(idx);
+        if (!rec.entries.some((e) => e.name === fullName)) {
+          rec.entries.push({ name: fullName, file: relPath });
+        }
+      });
+    }
+  };
+
   for (const sf of project.getSourceFiles()) {
     const relPath = path.relative(absRoot, sf.getFilePath());
     for (const cls of sf.getClasses()) {
@@ -494,26 +549,20 @@ function methodSinkParamMap(
       for (const m of cls.getMethods()) {
         const params = m.getParameters().map((p) => p.getName());
         if (params.length === 0) continue;
-        const text = m.getText();
-        const sinkRe = tsSinkCallRegex();
-        let sm: RegExpExecArray | null;
-        while ((sm = sinkRe.exec(text)) !== null) {
-          const win = sm[2] || "";
-          params.forEach((pname, idx) => {
-            if (new RegExp(`\\b${pname}\\b`).test(win)) {
-              if (!map.has(m.getName())) {
-                map.set(m.getName(), { idxs: new Set(), entries: [] });
-              }
-              const rec = map.get(m.getName())!;
-              rec.idxs.add(idx);
-              const fullName = `${cn}.${m.getName()}`;
-              if (!rec.entries.some((e) => e.name === fullName)) {
-                rec.entries.push({ name: fullName, file: relPath });
-              }
-            }
-          });
-        }
+        register(m.getName(), `${cn}.${m.getName()}`, m.getText(), relPath, params);
       }
+    }
+    // ── 污点数据流试点（2026-09-18）──
+    // 此前只登记**类方法**。真实 TS 工程大量使用顶层函数声明（MCP handler、
+    // Nuxt runtime binding、工具函数），跨函数一跳对它们完全不生效——fr-012 的
+    // `markdownUpload` 正是顶层函数，因此从未进入本表，即使上游 taint 已识别，
+    // 也无法传导到 sink。这里按同样的「形参 → 文件 sink」规则纳入函数声明。
+    for (const fn of sf.getFunctions()) {
+      const fnName = fn.getName();
+      if (!fnName) continue;
+      const params = fn.getParameters().map((p) => p.getName());
+      if (params.length === 0) continue;
+      register(fnName, fnName, fn.getText(), relPath, params);
     }
   }
   return map;
@@ -582,17 +631,28 @@ function computeMarkerCalls(
           `\\.([\\w$]+)\\s*\\(([\\s\\S]{0,250}?)\\)`,
           "g"
         );
+        // ── 污点数据流试点（2026-09-18）──
+        // 此前只识别成员调用（`obj.sink(...)`）。顶层/模块内函数是真实 TS 工程
+        // 的主要形态（fr-012 的 `markdownUpload(...)` 就是裸调用），缺这一则
+        // 即使该函数的形参已登记为 sink 形参，taint 也无法传导过去。
+        const directCallRe = new RegExp(
+          `(?:^|[^\\w$.])([\\w$]+)\\s*\\(([\\s\\S]{0,250}?)\\)`,
+          "g"
+        );
         const taint = taintPattern(tainted);
         if (taint) {
-          let m: RegExpExecArray | null;
-          while ((m = methodCallRe.exec(text)) !== null) {
-            const rec = sinkParams.get(m[1]);
-            if (!rec || rec.idxs.size === 0) continue;
-            const args = splitArgWindow(m[2] || "");
-            const hit = args.some((arg, i) => rec.idxs.has(i) && taint.test(arg));
-            if (hit) {
-              markers.push("__progmune_path_traversal__");
-              onMethodHit(rec);
+          for (const callRe of [methodCallRe, directCallRe]) {
+            callRe.lastIndex = 0;
+            let m: RegExpExecArray | null;
+            while ((m = callRe.exec(text)) !== null) {
+              const rec = sinkParams.get(m[1]);
+              if (!rec || rec.idxs.size === 0) continue;
+              const args = splitArgWindow(m[2] || "");
+              const hit = args.some((arg, i) => rec.idxs.has(i) && taint.test(arg));
+              if (hit) {
+                markers.push("__progmune_path_traversal__");
+                onMethodHit(rec);
+              }
             }
           }
         }
@@ -608,7 +668,7 @@ function computeMarkerCalls(
     const taintParts: string[] = [];
     if (urlParams.length > 0) taintParts.push(`\\b(?:${urlParams.join("|")})\\b`);
     if (reqTainted.size > 0) taintParts.push(`\\b(?:${[...reqTainted].join("|")})\\b`);
-    taintParts.push(/\b(?:req|request)\.(?:params|query|body|headers|cookies)\b[.[]?/.source);
+    taintParts.push(UNTRUSTED_ROOT_SRC);
     const taint = new RegExp(taintParts.join("|"));
     const fetchSinkIter = tsHttpFetchSinkIter();
     let m: RegExpExecArray | null;

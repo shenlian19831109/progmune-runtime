@@ -1,5 +1,21 @@
 # Changelog
 
+## [3.7.33] — 2026-09-19
+
+### 污点标记管线三处结构性修复（C1/C2/C3，正确性修复，不改变判别逻辑）
+
+从「污点源数据流试点 V1」拆出的**独立正确性条目**——它们只解决「看得见」，
+不解决「看得懂」（判别力是 `PATH_GUARD_EVIDENCE`，另一个条目，尚未实现）。
+
+- **C3 污点根按传输面声明**（`UNTRUSTED_ROOTS`）：此前整条链路只锚 Express 形态的 `req|request.(params|query|body|headers|cookies)`，即**根集合只有一种来源**。MCP 工具实参（`params.arguments`）、CLI 参数等来源天然不可见（fr-012 的 `args.file_path`）。改为按传输面声明根，每条附 `why`，不再靠补变量名清单打地鼠
+- **C1 sink 形参表纳入顶层函数**：`methodSinkParamMap` 此前只遍历 `sf.getClasses()`，真实 TS 工程大量使用顶层函数声明（MCP handler / Nuxt runtime binding），跨函数一跳对它们完全不生效——fr-012 的 `markdownUpload` 正因如此从未入表
+- **C2 跨函数传播识别裸调用**：调用匹配此前要求 `obj.sink(`（成员调用），新增 `directCallRe` 覆盖 `func(` 形态
+- **验收**：
+  - TS 795 盲测 **3086 flags LOST 0 / ADDED 0**
+  - ⚠️ **但这是空过（vacuous pass）**：实测整份 generated 语料重跑后 per-function calls 差异 **0**、`__progmune` 标记 **826 vs 826**——盲测语料根本走不到这三个分支。真正的门是新增的定向用例
+  - 新增 `src/extract-ir-taint-structural.test.ts` **6 green**；**反向验证**：把 `src/extract-ir.ts` 回退到 3.7.32 后其中 **3 项失败**（MCP 根 / 顶层函数 / 裸调用），确认这三个用例真的锁住了行为，而非同义反复。另 3 项（Express 旧语义仍标记、常量路径不标记、常量裸调用不标记）在修复前后均通过——它们锁的是「不得回归 / 不得过度标记」
+- **行为边界**：本条目**不**改变判别逻辑。路径穿越侧仍无「校验识别」，因此放宽根集合后对已校验流同样会标记——这正是试点 V1 记录为未过验收的原因，由后续 `PATH_GUARD_EVIDENCE` 解决
+
 ## [3.7.32] — 2026-09-19
 
 ### IR 陈旧性判定（两次会话级误判的根因修复）
