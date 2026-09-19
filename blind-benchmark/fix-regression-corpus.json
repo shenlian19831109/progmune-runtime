@@ -1,8 +1,53 @@
 {
   "name": "fix-regression-corpus",
-  "version": 1,
+  "version": 2,
   "created": "2026-09-11",
+  "updated": "2026-09-19",
   "method": "真实安全修复回归：对每个修复，扫描「修复前 parent commit」——引擎在该位置/该类型上能否报出违规；再扫修复后确认不误报。来源=GitHub 安全公告数据库（GHSA/CVE），SHA 均经 api.github.com 实测核验。",
+  "methodology_rules": [
+    {
+      "id": "R1-taint-sink-capture",
+      "added": "2026-09-19",
+      "source": "fr-015 / fr-010 教训（污点数据流试点 V1 §3、§4）",
+      "rule": "污点流类条目（type 含 ssrf / path_traversal / file_read / url_partition 等「源→sink」形态）的 ground_truth_files 必须包含 sink 所在文件，且必须由 fix commit 的【完整调用链】确定（调用者、中转函数、sink），不得只取 patch hunk 命中的文件。",
+      "why": "sink 不在真值清单里时，分析器无论多强都看不见；此时的 MISS 是语料缺陷，不代表引擎能力。"
+    },
+    {
+      "id": "R2-slice-coverage-verification",
+      "added": "2026-09-19",
+      "source": "fr-015 mini 切片教训",
+      "rule": "切片后必须做覆盖率校验：逐条确认 ground_truth_files（含按 R1 补齐的 sink 文件）与调用链中转文件都落在实际切片目录内。任何一格缺失 → 该条目的 MISS 记为不可判定（corpus_invalid），不得计入「分析未检出」。",
+      "why": "真值清单写对了、切片没收全，结论一样是哑值——清单与切片是两回事。"
+    },
+    {
+      "id": "R3-mini-only-when-sink-captured",
+      "added": "2026-09-19",
+      "source": "DeepSeek 评审意见（污点试点 V1）",
+      "rule": "小仓库一律整包 tarball，不做 mini 切片；只有已确认 sink 与调用链文件均被收录的大仓才允许 mini。",
+      "why": "mini 切片省下的下载时间远小于它引入的不可判定风险。"
+    },
+    {
+      "id": "R4-result-must-name-reason",
+      "added": "2026-09-19",
+      "source": "fr-012/fr-015 双 MISS 复盘",
+      "rule": "result 字段必须区分「分析未检出（analysis_miss）」与「语料不可判定（corpus_invalid）」两种 MISS，并注明日期与判定依据；否则跨会话的结论会被二次误读。",
+      "why": "两个不同原因的 MISS 混在同一个标签下，会让后续优先级排序建立在错误前提上。"
+    },
+    {
+      "id": "R5-fix-mechanism-match",
+      "added": "2026-09-19",
+      "source": "fr-012 复核（对 fix commit 完整 diff 逐行核对）",
+      "rule": "验收条目必须与修复机制匹配：先读 fix commit 的完整 diff 确认修复到底改了什么。若修复是部署模式闸门（`if (IS_REMOTE && …) throw`）、鉴权策略分支、配置开关等【上下文开关】而非数据流本身，则 pre/post 在污点流层面本来就该同数——该条目标记为 corpus_mismatch，不得用于判定判别力，也不得记为分析器 MISS。",
+      "why": "否则会把「语料不提供信号」误读成「分析器没有判别力」，进而在错误的前提下追一个不存在的能力缺口。"
+    },
+    {
+      "id": "R6-negative-assertion-needs-positive-control",
+      "added": "2026-09-19",
+      "source": "G1 PATH_GUARD_EVIDENCE 实现期（3 条用例假通过）",
+      "rule": "任何「不得标记 / 不得报出」类断言，必须配一条【同形状、去掉被验证机制后必须重新报出】的正对照。缺正对照的负向断言视为无效——它可能因为管线在别处已经断了（如污点经表达式包装后不传播）而假通过，与被验证机制无关。",
+      "why": "标记管线的失败模式里，「根本没走到」和「走到了但被正确压制」在输出上完全一样。只有正对照能把两者区分开。"
+    }
+  ],
   "entries": [
     {
       "id": "fr-001",
@@ -121,8 +166,10 @@
         "packages/server/src/store.ts"
       ],
       "ground_truth_note": "store.ts 为漏洞 sink 所在（filePath(id)→join→readFile/writeFile/unlink，修复 commit 未改它——校验加在上游 routes）。扫描目标=packages/server 子包（根仓库无 tsconfig）。",
-      "result": "DETECTED (2026-09-12)",
-      "result_detail": "PATH_TRAVERSAL ×4（flowRoutes + FlowStore.save/get/delete）——A1：TS 提取器路径穿越标记（request 污点→fs sink，跨函数一跳）+ 引擎 IR 层标记消费"
+      "result": "DETECTED（2026-09-19 复核：G1 PATH_GUARD_EVIDENCE 上线后成立）",
+      "result_detail": "PATH_TRAVERSAL ×4（flowRoutes + FlowStore.save/get/delete）——A1：TS 提取器路径穿越标记（request 污点→fs sink，跨函数一跳）+ 引擎 IR 层标记消费",
+      "result_reason": "detected_after_g1",
+      "result_note": "2026-09-19 对 fix commit 完整 packages/server/src 复核（pre=6bde78bf88aa / post=c8190fbefa3a）。真修复 = 抽出独立校验模块 flow-id.ts（assertValidFlowId + FLOW_ID_PATTERN /^[A-Za-z0-9_-]+$/），在 FlowStore.filePath() 里调用；routes.ts 侧改为 JSON-schema flowIdParamsSchema（pattern）。G1 前：pre 5 条 / post 5 条（标记器看不见校验）；G1 后：pre 5 条 / post **0** 条 —— 这是真实语料上首次出现「修复后流消失」的判别力证据。注：本条此前记为 DETECTED，但按现行「post 侧须 0 误报」标准，G1 之前并不成立——DETECTED 结论会随判别力变化，改判别逻辑后必须重测全部 DETECTED 条目。"
     },
     {
       "id": "fr-008",
@@ -212,10 +259,12 @@
         "index.ts"
       ],
       "ground_truth_note": "真值 sink = index.ts::markdownUpload(projectId, filePath) — fs.existsSync(filePath) / fs.readFileSync(filePath)，filePath 由工具实参 args.file_path 一跳传入（无路径校验）。本条锚定「文件读取」半边：其修复为 PR #482「fix: make download and upload work for remote deployments」（2026-05-21，remote 时 upload_markdown 只接受内联内容）。同一 GHSA 的另半边「SSE 传输未鉴权」由 PR #554（e436ee4a，2026-06-22）修复——若扫描 PR #482 的 base 之前的快照，两条缺陷同时在场。",
-  "sha_verified": "2026-09-18（api.github.com 核验：PR #482 merge=7d19ebf6，base=c2577169；PR #554 merge=e436ee4a）",
-  "result": "MISS（2026-09-18，真值函数切片语料；trust 扫描 pre=0 / post=0 违规）",
-  "result_detail": "★语料形态说明：gitlab-mcp 的 index.ts 单文件 454 KB，本机 8 GB 内存 + swap 已用 8.6/10 GB，全文件扫描被 OOM kill（exit 137），故按「大仓用真值切片」规则取 markdownUpload 函数体切片（55 行 pre / 45 行 post）扫描。切片保留了 filePath 形参 → fs.readFileSync 的完整污点链。★根因：A1 路径穿越标记要求 request 根表达式（`req.params` 等）为污点源；本例污点来自 **MCP 工具实参**（`args.file_path` → `filePath` 形参），不在 request 词汇表内 → 标记不注入。这是「污点源词汇表」的缺口，与 skyvern/open-webui 暴露的认证词表缺口同族。见 V2 报告 §6"
-},
+      "sha_verified": "2026-09-18（api.github.com 核验：PR #482 merge=7d19ebf6，base=c2577169；PR #554 merge=e436ee4a）",
+      "result": "MISS（2026-09-18，真值函数切片语料；trust 扫描 pre=0 / post=0 违规）",
+      "result_detail": "★语料形态说明：gitlab-mcp 的 index.ts 单文件 454 KB，本机 8 GB 内存 + swap 已用 8.6/10 GB，全文件扫描被 OOM kill（exit 137），故按「大仓用真值切片」规则取 markdownUpload 函数体切片（55 行 pre / 45 行 post）扫描。切片保留了 filePath 形参 → fs.readFileSync 的完整污点链。★根因：A1 路径穿越标记要求 request 根表达式（`req.params` 等）为污点源；本例污点来自 **MCP 工具实参**（`args.file_path` → `filePath` 形参），不在 request 词汇表内 → 标记不注入。这是「污点源词汇表」的缺口，与 skyvern/open-webui 暴露的认证词表缺口同族。见 V2 报告 §6",
+      "result_reason": "corpus_mismatch",
+      "result_note": "2026-09-19 复核（对 fix commit 完整 index.ts 逐行 diff）：本条【不适合作为污点流判别力的验收条目】——修复机制与条目类型不匹配。真修复在 markdownUpload 里是 `if (IS_REMOTE && filePath) throw`（远程/网络模式下禁止使用 file_path，并新增 base64 inline-content 模式），属**部署模式闸门**，不是路径校验；本地模式的 taint→readFileSync 流在修复后依然存在且本就不算漏洞。因此 pre/post 在污点流层面**本来就应该同数**，用本条判定 PATH_GUARD_EVIDENCE 的判别力是无效实验。另：下载侧 localPath 的 `path.normalize + isAbsolute || '..' || startsWith('..'+sep) || includes(sep+'..'+sep)`在 pre 与 post **都存在**（pre 7968-7977 / post 8719-8728 完全一致）——它是既有代码、不是本次修复，但正因如此，它是真实世界的「已校验」负样本，可直接用于 G1 的「有守卫 → 不得标记」用例。"
+    },
     {
       "id": "fr-013",
       "repo": "zereight/gitlab-mcp",
@@ -234,10 +283,12 @@
         "tools/registry.ts"
       ],
       "ground_truth_note": "**原始注册有误，2026-09-18 修正**：① parent SHA 末 4 位转置（…6dbd6 → …6db6d，404 不可达）；② 原 fix_commit 69e784da 是「把修复写进 CHANGELOG」的纯文档提交（只改 CHANGELOG.md，PR #624），不是代码修复。真实代码修复 = PR #571「fix: harden MCP safety controls」（merge 8d2b486b，16 文件：index.ts / schemas.ts / utils/graphql-query.ts / tools/registry.ts + 11 个测试），PR #624 正文明确 link 到它并建议升级到 v2.1.30+。公告另点名 reviewed commit 60adcc0de5b0e96c4c2029f7a25d2775946421d8（v2.1.28）为已确认存在缺陷的状态。post-fix 语料用 69e784da 快照（它在 #571 之后，代码已是修复态）。",
-  "sha_verified": "2026-09-18（api.github.com 核验：PR #571 merge=8d2b486b base=1700c740 merged_at=2026-07-05）",
-  "result": "MISS（2026-09-18，mini 语料；trust 扫描 pre=0 / post=0 违规）",
-  "result_detail": "真值文件 utils/graphql-query.ts 的修复是**纯字符串解析加固**（处理 `{, mutation{...}}` 逗号前缀这类 GraphQL 文本形态），不涉及调用序列或污点流——**确定在检出面外**，属「字符串/URL 解析语义」类。本条作为模型边界的显式标注，不硬凑检出。见 V2 报告 §6"
-},
+      "sha_verified": "2026-09-18（api.github.com 核验：PR #571 merge=8d2b486b base=1700c740 merged_at=2026-07-05）",
+      "result": "MISS（2026-09-18，mini 语料；trust 扫描 pre=0 / post=0 违规）",
+      "result_detail": "真值文件 utils/graphql-query.ts 的修复是**纯字符串解析加固**（处理 `{, mutation{...}}` 逗号前缀这类 GraphQL 文本形态），不涉及调用序列或污点流——**确定在检出面外**，属「字符串/URL 解析语义」类。本条作为模型边界的显式标注，不硬凑检出。见 V2 报告 §6",
+      "result_reason": "corpus_unverified",
+      "result_note": "mini 语料；ground_truth_files 4 个文件均在切片内（2026-09-19 严格路径校验），但未按 R1 校验调用链完整性。MISS 结论暂定。"
+    },
     {
       "id": "fr-014",
       "repo": "mockoon/mockoon",
@@ -260,7 +311,9 @@
       "ground_truth_note": "修复 = admin-api.ts 新增 bearer token 鉴权（extractBearerToken + timingSafeEqual）+ CORS 来源白名单（adminApiCorsOrigins 取代硬编码 '*'）+ 事务脱敏（redactTransaction）。漏洞形态 = **中间件/鉴权整体缺席**（pre-fix admin-api.ts 无任何 auth 检查）+ 配置层 CORS 通配。注意：该管理 API 是库形态（commons-server 内部 server.use 挂载），不是 app.get('/path', handler) 的顶层路由注册形态——这是框架适配器可见性的已知软肋。",
       "sha_verified": "2026-09-18（api.github.com 核验；PR #2254 merge=c420b5a5 34 文件）",
       "result": "MISS（2026-09-18，mini 语料；trust 扫描 0 违规，pre/post 均 0）",
-      "result_detail": "mini 语料（5 个真值文件）提取 99 个函数，trust 引擎 0 违规。根因类别 = 缺失检查类 + 配置类（CORS 通配无域名恰语义），且管理路由以库内 server.use 挂载、不具 app.get 形态"
+      "result_detail": "mini 语料（5 个真值文件）提取 99 个函数，trust 引擎 0 违规。根因类别 = 缺失检查类 + 配置类（CORS 通配无域名恰语义），且管理路由以库内 server.use 挂载、不具 app.get 形态",
+      "result_reason": "corpus_unverified",
+      "result_note": "mini 语料；5 个真值文件均在切片内（2026-09-19 严格路径校验），调用链完整性未校验。MISS 结论暂定。"
     },
     {
       "id": "fr-015",
@@ -279,8 +332,10 @@
       ],
       "ground_truth_note": "**重要发现：pre-fix 快照里 `util/ssrf.ts` 及其守卫 `isBlockedUrl()` 已经存在** —— 漏洞不是「没有守卫」，而是「守卫没接在 fonts 这条路径上」+ 守卫本身对同源自信任/重定向放行过宽。这使其成为 fr-009 同类的「守卫存在但不足」样本。修复三处：① fonts.ts 对 URL 解码来的 fonts[] 做字段类型/长度/数量边界校验；② ssrf.ts 新增 trustedHost 豁免并对每一跳重定向重新做 isBlockedUrl；③ 新增 bindings/font-assets/external-url.ts（该绑定文件 pre-fix 不存在，故不计入 pre 语料）。",
       "sha_verified": "2026-09-18（api.github.com 核验；PR #637 merge=243cac22 「fix: prevent unauthenticated SSRF via font URL parameter」）",
-  "result": "MISS（2026-09-18，mini 语料；trust 扫描 pre=0 / post=0 违规）",
-  "result_detail": "★阻塞已解除：此前 >480s 未完成的根因是提取器 SSRF 标记的正则死循环（3.7.28 引入，2026-09-18 修复，见 V2 报告 §5）。修复后 og-mini-pre 48s 完成。**0 违规的原因值得单独记录**：SSRF 标记要求 fetch 后的 300 字符窗口内出现污点名；本例 fonts[] 的 URL 来自 `decodeURIComponent` 解码后的对象字段（`font.path`），不在 URL_PARAM_NAME 词汇表内，也不构成 `req.*` 污染 → 标记不注入。与 fr-009/fr-015 同属「守卫存在但没接在这条路径」+「污点源词汇表缺口」的叠加。见 V2 报告 §6"
+      "result": "MISS（2026-09-18，mini 语料；trust 扫描 pre=0 / post=0 违规）",
+      "result_detail": "★阻塞已解除：此前 >480s 未完成的根因是提取器 SSRF 标记的正则死循环（3.7.28 引入，2026-09-18 修复，见 V2 报告 §5）。修复后 og-mini-pre 48s 完成。**0 违规的原因值得单独记录**：SSRF 标记要求 fetch 后的 300 字符窗口内出现污点名；本例 fonts[] 的 URL 来自 `decodeURIComponent` 解码后的对象字段（`font.path`），不在 URL_PARAM_NAME 词汇表内，也不构成 `req.*` 污染 → 标记不注入。与 fr-009/fr-015 同属「守卫存在但没接在这条路径」+「污点源词汇表缺口」的叠加。见 V2 报告 §6",
+      "result_reason": "corpus_invalid",
+      "result_note": "不可判定：mini 切片（fonts.ts + ssrf.ts）内没有任何出站 sink——唯一 fetch 在 ssrf.ts:260，真值链路的 sink 在 src/runtime/server/util/fetchLocalAsset.ts（$fetch）等未被收录的文件。按 R1/R3：该 MISS 不代表引擎能力。"
     },
     {
       "id": "fr-016",
@@ -303,7 +358,9 @@
       "ground_truth_note": "**fr-002/fr-003 同族的最干净样本**：修复 diff 就是在每个写文件<｜hy_place▁holder▁no▁813｜>前**新增一行 `assertWithinDir(dir, file, name)`**（新增合约 tests/fixtures/path-traversal*.json 与 assert-within-dir.test.ts 同批落地）。漏洞 = 「该有的检查没有被调用」——一个调用序列状态机在原理上不可见（它只能证明「顺序错了」，不能证明「少了」）。此外污点源是被 split 的 OpenAPI/AsyncAPI 描述文件内容（非 request 对象），且经过 pathToFilename 跨文件助手处理，超出 A1 标记的「request 污点 → fs sink 单跳 + 跨函数一跳」射程。",
       "sha_verified": "2026-09-18（api.github.com 核验；PR #2891 merge=26a0f299 「fix: path traversal in the split command」）",
       "result": "MISS（2026-09-18，mini 语料；trust 扫描 0 违规，pre/post 均 0）",
-      "result_detail": "mini 语料（5 个真值文件）提取 19 个函数，IR 层 `__progmune_path_traversal__` 标记 0 命中，trust 引擎 0 违规。双重不确定性：① 缺失检查类本就不可见；② 污点源非 request"
+      "result_detail": "mini 语料（5 个真值文件）提取 19 个函数，IR 层 `__progmune_path_traversal__` 标记 0 命中，trust 引擎 0 违规。双重不确定性：① 缺失检查类本就不可见；② 污点源非 request",
+      "result_reason": "corpus_unverified",
+      "result_note": "mini 语料；5 个真值文件均在切片内（2026-09-19 严格路径校验），调用链完整性未校验。MISS 结论暂定。"
     },
     {
       "id": "fr-017",
@@ -321,8 +378,10 @@
       ],
       "ground_truth_note": "pre-fix `isAuthorized(req)` 从**请求参数**取 clientID（`req.query.clientID`）去问 identity 服务「这个 token 是不是它自称那个 app 的已验证用户」；修复改为从**服务端配置**取（`expectedClientID` 形参 → 回落 `process.env.NEXT_PUBLIC_TINA_CLIENT_ID`，取不到则拒绝授权）。本质是「身份锚点的归属」问题：需要判断用于校验的身份标识**应当来自服务端配置而非请求输入**——属数据流/归属语义，非调用序列。",
       "sha_verified": "2026-09-18（api.github.com 核验；PR #7168 merge=0a927a4f 「Scope TinaCloud authorization to the site's configured clientID」）",
-  "result": "MISS（2026-09-18，扁平单文件语料；trust 扫描 pre=0 / post=0 违规）",
-  "result_detail": "★两处历史作废/阻塞均已解除：①早期 0 违规无效（缺 tsconfig.json，ts-morph FileNotFoundError，引擎未实质分析）；②补 tsconfig 后 >300s 未完成的根因是提取器 SSRF 正则死循环（2026-09-18 修复，见 V2 报告 §5），修复后 57s 完成。★根因：`isAuthorized` 的 clientID 归属错误（应取服务端配置，实取 `req.query.clientID`）——需要判断「用于校验的身份标识**应当**来自何处」，属**归属语义/策略语义**，不是调用顺序也不是污点可达性，当前引擎无对应维度。与 V1 fr-004（凭据数据流）不同族。见 V2 报告 §6"
+      "result": "MISS（2026-09-18，扁平单文件语料；trust 扫描 pre=0 / post=0 违规）",
+      "result_detail": "★两处历史作废/阻塞均已解除：①早期 0 违规无效（缺 tsconfig.json，ts-morph FileNotFoundError，引擎未实质分析）；②补 tsconfig 后 >300s 未完成的根因是提取器 SSRF 正则死循环（2026-09-18 修复，见 V2 报告 §5），修复后 57s 完成。★根因：`isAuthorized` 的 clientID 归属错误（应取服务端配置，实取 `req.query.clientID`）——需要判断「用于校验的身份标识**应当**来自何处」，属**归属语义/策略语义**，不是调用顺序也不是污点可达性，当前引擎无对应维度。与 V1 fr-004（凭据数据流）不同族。见 V2 报告 §6",
+      "result_reason": "corpus_unverified",
+      "result_note": "扁平单文件语料；1 个真值文件在切片内（2026-09-19 严格路径校验），调用链完整性未校验。MISS 结论暂定。"
     }
   ]
 }

@@ -394,6 +394,173 @@ function extractDirectCalls(func: FunctionDeclaration | ArrowFunction, preText?:
 
 const PATH_TRAVERSAL_MARKER = "__progmune_path_traversal__";
 
+// ═══════════════════════════════════════════════════════════════
+// G1 PATH_GUARD_EVIDENCE —— 路径穿越的「校验识别」（2026-09-19）
+//
+// 背景：路径穿越标记此前是 `taint → file sink ⇒ 标记`，**不看中间有没有校验**；
+// SSRF 侧不是这样（`taint → fetch sink 且无 SSRF_GUARD_EVIDENCE ⇒ 标记`）。
+// 两侧数据流同构、判别力差一档 —— 这正是根集合不敢放宽的真正原因。
+//
+// 本表把路径侧改成与 SSRF 对齐：`taint → file sink 且无校验证据 ⇒ 标记`。
+//
+// 每条规则的种子都来自语料真实修复的逐字形态（不是拍脑袋设计的词表），
+// `source` 字段记录出处，改动词条必须同时更新出处。
+// ═══════════════════════════════════════════════════════════════
+interface PathGuardRule {
+  id: string;
+  re: RegExp;
+  why: string;
+  source: string;
+}
+
+const PATH_GUARD_RULES: PathGuardRule[] = [
+  {
+    id: "G-A",
+    // resolve(p).startsWith(resolve(root)+sep) / x.startsWith(baseDir)
+    re: /(?:resolve|realpath|normalize)\s*\([^()]*\)\s*\.\s*startsWith\s*\(/,
+    why: "目录包含性校验（canonical 形态）：规范化后判断是否落在基目录内",
+    source: "设计形态，canonical；fr-016 Redocly 修复的同族（见 G-C）",
+  },
+  {
+    id: "G-A2",
+    re: /\.\s*startsWith\s*\(\s*[A-Za-z_$][\w$]*(?:[Bb]ase|[Rr]oot|[Dd]ir|Dir|Root|Base)[\w$]*\s*\)/,
+    why: "目录包含性校验（基目录名形态）：startsWith(baseDir/rootDir/...)",
+    source: "设计形态，canonical",
+  },
+  {
+    id: "G-B1",
+    re: /\b(?:path\.)?isAbsolute\s*\(/,
+    why: "绝对路径拒绝：绝对路径不受 join(root, p) 约束",
+    source: "fr-012 gitlab-mcp 下载侧 localPath 既有守卫块（pre/post 同一段，@ index.ts:7968）",
+  },
+  {
+    id: "G-B2",
+    // startsWith(".." + sep) / includes(sep + ".." + sep) / === ".."
+    re: /\.\s*(?:startsWith|includes)\s*\(\s*(?:[^()]*["'`]\.\.)/,
+    why: "上跳拒绝：显式检测 .. 段",
+    source: "fr-012 gitlab-mcp 下载侧 localPath 既有守卫块（index.ts:7968-7977）",
+  },
+  {
+    id: "G-B3",
+    re: /(?:===?|!==)\s*["'`]\.\.["'`]/,
+    why: "上跳拒绝：与 .. 字面量直接比较",
+    source: "fr-012 gitlab-mcp 下载侧 localPath 既有守卫块（normalizedLocalPath === \"..\"）",
+  },
+  // 注：G-C 不放在本数组里——它是「按函数名判定」，需要配反例名单
+  // （见 PATH_GUARD_FN_CALL_RE / PATH_GUARD_FN_DENY 与下方注释）。
+  {
+    id: "G-D",
+    // /^[A-Za-z0-9_-]+$/ —— 锚定的字符集白名单，天然排除 / \ .
+    re: /\/\^\[[^\]]*\]\s*[+*?]\$\//,
+    why: "锚定字符集白名单：^…$ 且字符类不含 ./\\ 时无法构造上跳",
+    source: "fr-007 openhop `FLOW_ID_PATTERN = /^[A-Za-z0-9_-]+$/`（flow-id.ts）",
+  },
+];
+
+/**
+ * 明确**不算**守卫的形态（反例清单）。
+ *
+ * N-A `path.basename` 是这张表里最重要的一行：它只去目录、不去 `..`，
+ * 却极常被当成「已经 sanitize 过」。fr-012 pre 的实测反例：漏洞态代码里
+ * 就有 `path.basename`，漏洞依然成立。一旦把 basename 算作守卫，
+ * fr-012 的真值会被自己压掉 —— 见 src/extract-ir-taint-guard.test.ts。
+ */
+const PATH_NON_GUARD_NOTE =
+  "N-A path.basename / N-B 单独出现的 join·resolve / N-C 长度或字符数检查 / N-D if (!p) throw —— 均不计入守卫";
+
+/**
+ * G-C：独立校验函数被调用（项目自有命名）。
+ *
+ * 后缀刻意**不收** `Dir` / `Name` / 裸的 `Valid` —— 实证代价：
+ *   - `ensureDir()`（fr-007 openhop store.ts:46）与 `s.isDirectory()` 都会被
+ *     `…Dir(` 命中，而它们是**建目录 / 类型判断**，与校验无关；第一版词表
+ *     因此把 fr-007 的 pre 侧 5 条全部误压成 0（召回归零）。
+ *   - `isValid(x)` / `isSub(a,b)` 同理，会把判别力稀释成猜函数名。
+ * 保留 `Id`（fr-007 `assertValidFlowId`）、`Within`（fr-016 `assertWithinDir`）、
+ * `Safe|Path|Inside|InDir|Contained|Traversal|Root|Base`。
+ */
+const PATH_GUARD_FN_CALL_RE =
+  /\b(?:assert|ensure|check|validate|verify|sanitize|is)[A-Za-z$]*(?:Safe|Path|Paths|Within|Inside|InDir|Contained|Traversal|Id|Root|Base)[A-Za-z0-9_$]*(?=\s*\()/g;
+
+/** 形态上会命中 G-C 但**确定不是**路径校验的名字（实证反例，逐个加） */
+const PATH_GUARD_FN_DENY =
+  /^(?:ensureDir|isDirectory|isDir|assertDir|makeDir|mkdir|checkExists|isValid|isRoot|ensureId|getId)$/i;
+
+function callsPathGuardFn(text: string): boolean {
+  PATH_GUARD_FN_CALL_RE.lastIndex = 0;
+  let m: RegExpExecArray | null;
+  while ((m = PATH_GUARD_FN_CALL_RE.exec(text)) !== null) {
+    if (!PATH_GUARD_FN_DENY.test(m[0])) return true;
+  }
+  return false;
+}
+
+/** 返回命中的守卫规则 id；无校验证据返回 null。 */
+function hasPathGuardEvidence(text: string): string | null {
+  for (const r of PATH_GUARD_RULES) {
+    if (r.re.test(text)) return r.id;
+  }
+  if (callsPathGuardFn(text)) return "G-C";
+  return null;
+}
+
+function escapeRe(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * 项目内「自身含校验证据」的函数名集合，并向调用方传播一跳（有界）。
+ *
+ * 为什么必须传播：fr-007 的修复是把 `assertValidFlowId(id)` 放进 `filePath()`，
+ * 真正含 sink 的 `FlowStore.get/save/...` 与外层 `flowRoutes` 里**一个校验词汇都没有**——
+ * 只看函数体等于没做。传播上限 3 轮（防止公共函数名导致的无限扩散）。
+ */
+function pathGuardFunctionNames(project: Project): Set<string> {
+  const guarded = new Set<string>();
+  const bodies: Array<{ names: string[]; text: string }> = [];
+
+  const note = (names: string[], text: string) => {
+    if (!text) return;
+    bodies.push({ names, text });
+    if (hasPathGuardEvidence(text)) for (const n of names) if (n) guarded.add(n);
+  };
+
+  for (const sf of project.getSourceFiles()) {
+    for (const cls of sf.getClasses()) {
+      const cn = cls.getName();
+      if (!cn) continue;
+      for (const m of cls.getMethods()) {
+        const mn = m.getName();
+        if (!mn) continue;
+        note([mn, `${cn}.${mn}`], m.getText());
+      }
+    }
+    for (const fn of sf.getFunctions()) {
+      const fnName = fn.getName();
+      if (!fnName) continue;
+      note([fnName], fn.getText());
+    }
+  }
+
+  // 向调用方传播：调用了一个已校验函数 ⇒ 这条流已被拦截（有界 3 轮）
+  for (let round = 0; round < 3; round++) {
+    const names = [...guarded].filter((n) => !n.includes("."));
+    if (names.length === 0) break;
+    const re = new RegExp(`\\b(?:${names.map(escapeRe).join("|")})\\s*\\(`, "g");
+    let added = false;
+    for (const b of bodies) {
+      if (b.names.every((n) => guarded.has(n))) continue;
+      re.lastIndex = 0;
+      if (re.test(b.text)) {
+        for (const n of b.names) if (n && !guarded.has(n)) { guarded.add(n); added = true; }
+      }
+    }
+    if (!added) break;
+  }
+
+  return guarded;
+}
+
 const TS_FILE_SINK_NAMES = [
   "readFile", "readFileSync", "writeFile", "writeFileSync",
   "appendFile", "appendFileSync", "unlink", "unlinkSync", "rm", "rmSync",
@@ -616,14 +783,19 @@ function computeMarkerCalls(
   text: string,
   paramNames: string[],
   sinkParams: Map<string, { idxs: Set<number>; entries: Array<{ name: string; file: string }> }>,
-  onMethodHit: (rec: { idxs: Set<number>; entries: Array<{ name: string; file: string }> }) => void
+  onMethodHit: (rec: { idxs: Set<number>; entries: Array<{ name: string; file: string }> }) => void,
+  guardFns?: Set<string>
 ): string[] {
   const markers: string[] = [];
 
   // ── 路径穿越 ──
+  // G1（2026-09-19）：有流还不够，必须【没有校验证据】才标记——
+  // 与 SSRF 侧「无 SSRF_GUARD_EVIDENCE 才标记」对齐。
+  // 未传 guardFns（旧调用点/单测）时按「不做校验识别」的旧语义处理。
   if (hasRequestRootedExpr(text)) {
     const tainted = collectTaintedNames(text);
-    if (tainted.size > 0) {
+    const selfGuarded = guardFns ? hasPathGuardEvidence(text) !== null : false;
+    if (tainted.size > 0 && !selfGuarded) {
       if (hasTaintedSinkCall(text, tainted)) {
         markers.push("__progmune_path_traversal__");
       } else {
@@ -647,6 +819,8 @@ function computeMarkerCalls(
             while ((m = callRe.exec(text)) !== null) {
               const rec = sinkParams.get(m[1]);
               if (!rec || rec.idxs.size === 0) continue;
+              // G1：被调用方自身已校验 ⇒ 这条跨函数流已被拦截，不标记
+              if (guardFns && guardFns.has(m[1])) continue;
               const args = splitArgWindow(m[2] || "");
               const hit = args.some((arg, i) => rec.idxs.has(i) && taint.test(arg));
               if (hit) {
@@ -788,6 +962,8 @@ function _extractSingleProject(
   // sinkParams = 项目方法名 → 方法体内流入文件 sink 的形参下标 + 方法条目；
   // pendingMethodMarks = 跨函数命中待标记的方法条目（主循环后统一应用）
   const sinkParams = methodSinkParamMap(project, absRoot);
+  // G1（2026-09-19）：路径校验识别。自身含校验证据的函数名 + 向调用方传播一跳。
+  const guardFns = pathGuardFunctionNames(project);
   const pendingMethodMarks = new Set<string>();
   const onMethodHit = (rec: { entries: Array<{ name: string; file: string }> }) => {
     for (const me of rec.entries) pendingMethodMarks.add(`${me.name}\u0000${me.file}`);
@@ -802,7 +978,7 @@ function _extractSingleProject(
       const fParams = f.getParameters();
       const fText = f.getText();
       const fCalls = extractDirectCalls(f, fText);
-      fCalls.push(...computeMarkerCalls(fText, fParams.map((p: any) => p.getName()), sinkParams, onMethodHit));
+      fCalls.push(...computeMarkerCalls(fText, fParams.map((p: any) => p.getName()), sinkParams, onMethodHit, guardFns));
       funcs.push({
         name,
         params: fParams.map(p => ({
@@ -831,7 +1007,7 @@ function _extractSingleProject(
         const initParams = init.getParameters();
         const initText = init.getText();
         const initCalls = extractDirectCalls(init, initText);
-        initCalls.push(...computeMarkerCalls(initText, initParams.map((p: any) => p.getName()), sinkParams, onMethodHit));
+        initCalls.push(...computeMarkerCalls(initText, initParams.map((p: any) => p.getName()), sinkParams, onMethodHit, guardFns));
         funcs.push({
           name,
           params: initParams.map(p => ({
@@ -857,7 +1033,7 @@ function _extractSingleProject(
             const argParams = arg.getParameters();
             const argText = arg.getText();
             const argCalls = extractDirectCalls(arg, argText);
-            argCalls.push(...computeMarkerCalls(argText, argParams.map((p: any) => p.getName()), sinkParams, onMethodHit));
+            argCalls.push(...computeMarkerCalls(argText, argParams.map((p: any) => p.getName()), sinkParams, onMethodHit, guardFns));
             funcs.push({
               name,
               params: argParams.map(p => ({
@@ -890,7 +1066,7 @@ function _extractSingleProject(
         if (!mn) continue;
         const mParams = m.getParameters();
         const mText = m.getText();
-        const mCalls = computeMarkerCalls(mText, mParams.map((p: any) => p.getName()), sinkParams, onMethodHit);
+        const mCalls = computeMarkerCalls(mText, mParams.map((p: any) => p.getName()), sinkParams, onMethodHit, guardFns);
         funcs.push({
           name: `${cn}.${mn}`,
           params: mParams.map((p: any) => ({ name: p.getName(), type: getParamType(p), typeDetail: getParamTypeDetail(p) })),

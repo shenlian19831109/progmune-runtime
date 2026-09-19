@@ -1,5 +1,43 @@
 # Changelog
 
+## [3.7.34] — 2026-09-19
+
+### G1 PATH_GUARD_EVIDENCE —— 路径穿越的「校验识别」
+
+路径穿越标记此前是 `taint → 文件 sink ⇒ 标记`，**不看中间有没有校验**；SSRF 侧
+不是这样（`taint → fetch sink 且无 SSRF_GUARD_EVIDENCE ⇒ 标记`）。两侧数据流同构、
+判别力差一档——这正是根集合不敢放宽的真正原因（fr-012/fr-015 的 MISS 由此从
+「词表缺口」升级为「机制缺口」）。本版把路径侧改成与 SSRF 对齐：
+**`taint → 文件 sink 且无校验证据 ⇒ 标记`**。
+
+守卫形态的种子全部来自语料真实修复，逐条可追溯：
+
+- **G-A 目录包含性**：`resolve(p).startsWith(resolve(root))`、`x.startsWith(baseDir)`
+- **G-B 上跳/绝对路径拒绝**：`path.isAbsolute`、`startsWith(".."+sep)`、`=== ".."`
+  （种子 = fr-012 gitlab-mcp 下载侧 `localPath` 既有守卫块，index.ts:7968-7977）
+- **G-C 独立校验函数**：`assertValidFlowId`（fr-007 openhop）/ `assertWithinDir`（fr-016 Redocly）
+  —— 含向调用方**有界传播 3 跳**：校验被抽进被调用函数时，调用方一个校验词汇都没有
+- **G-D 锚定字符集白名单**：`/^[A-Za-z0-9_-]+$/`（fr-007 `FLOW_ID_PATTERN`）
+
+明确**不算**守卫：`path.basename`（fr-012 pre 实测反例，漏洞态就有它）、
+单独出现的 `join`/`resolve`、长度检查、`if (!p) throw`。
+
+**验收**
+
+- fr-007 openhop 真实语料：**pre 5 条 / post 0 条** —— 真实语料上首次出现
+  「修复后流消失」的判别力证据（G1 之前是 5 / 5）
+- `src/extract-ir-taint-guard.test.ts` 14 passed；反向验证回退 3.7.33 后 5 条失败
+- TS 795 盲测 3086 flags LOST 0 / ADDED 0 —— ⚠️ **空过**：盲测语料里
+  `__progmune_path_traversal__` 出现 0 次，无覆盖；真正的门是 fr-007 与定向用例
+- `tsc -p tsconfig.json` 零错误
+
+**实现期修掉的两个反例**（都写进代码注释与方法学规则）：
+
+1. `ensureDir()` / `isDirectory()` 曾被 G-C 误判为守卫（后缀 `Dir`），导致 fr-007
+   pre 侧 5 条被压成 0、召回归零。已移除 `Dir`/`Name` 后缀并加显式反例名单
+2. 「不得标记」类断言会**假通过**：污点经 `path.join(x)` 包装后不再传播，
+   sink 处根本没污点。已定为方法学规则 **R6**：负向断言必须配同形状正对照
+
 ## [3.7.33] — 2026-09-19
 
 ### 污点标记管线三处结构性修复（C1/C2/C3，正确性修复，不改变判别逻辑）
