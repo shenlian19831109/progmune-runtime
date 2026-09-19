@@ -373,3 +373,10 @@ src/python-emitter.ts
 src/trust/protocol-domain-validator.test.ts
 src/trust/protocol-rules-liveness.test.ts
 src/policy/engine.test.ts
+# 2026-09-19 污点/路径穿越攻坚：语料族、闸门与定向回归（手写，非 progmune 生成）
+blind-benchmark/generate-projects-taintpath.ts
+blind-benchmark/check-taintpath.ts
+src/extract-ir-taint-structural.test.ts
+src/extract-ir-taint-guard.test.ts
+src/ir-staleness.test.ts
+src/ir-staleness.ts

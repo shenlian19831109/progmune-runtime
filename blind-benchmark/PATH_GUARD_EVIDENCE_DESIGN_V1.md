@@ -150,6 +150,55 @@ sink 而通过**——跟守卫生效与否无关。本轮最初有 3 条（G-A 
 | 定向用例 | `src/extract-ir-taint-guard.test.ts` **14 passed**；反向验证：回退 v3.7.33 后 **5 条失败**（G-B/G-C×2/G-A/G-D 的负向断言），9 条正对照与反例仍绿 |
 | 构建 | `tsc -p tsconfig.json` 零错误 |
 
+> **上表 TS 795 那一行已于 3.7.35 被修掉**——见下 §七。当时它确实是空过，
+> 而这个缺陷连续误导了三次验收（3.7.32/33/34）。
+
+## 七、后续（3.7.35）：TS 795 空过的终结 + 新语料立刻挖出的两个缺口
+
+### 7.1 为什么必须先修补覆盖而不是继续加能力
+
+盲测语料里 `__progmune_path_traversal__` 出现 **0 次**，意味着任何关于
+路径穿越的改动在 TS 795 上都「零漂移」——它既不能证明安全，也不能暴露回归。
+3.7.35 新增语料族把它补上了：
+
+- `generated/taintpath_A`：HTTP 请求面 16 条（4 类守卫形态 + 4 类反例 + 常量负对照 + 4 条 known-gap）
+- `generated/taintpath_B`：MCP 工具实参面 + 跨文件/跨函数传播 8 条（同时把 C1/C2 纳入盲测覆盖）
+- 闸门：`check-taintpath.ts` + `taintpath-expectations.json`，逐函数断言，退出码非 0 即失败
+- 覆盖力 **0 → 15 次**；24/24 符合期望；已有 100 个项目 LOST 0 / ADDED 0（总 3086 → 3109）
+- 方法学规则 **R7-no-vacuous-gate**：发布前必须确认被测路径真的被走到
+
+### 7.2 C5（已修）：不可信根可以直连 sink
+
+新语料第一条就挖出：`fs.readFileSync("/data/" + req.params.name)` —— 真实 Express
+工程最常见的写法 —— **不标记**。根因是 `computeMarkerCalls` 外层要求
+`collectTaintedNames` 非空，等于要求污点先落成局部变量。SSRF 侧从不这样。
+这是与 G1 同类的「同一条数据流、两套口径」，已修，fr-007 维持 pre 5 / post 0。
+
+### 7.3 C4（未修）：污点经表达式包装后断链
+
+`const p = path.join(ROOT, tainted)` / `path.resolve` / `path.normalize` /
+`path.basename` 之后，`p` 不再被算作污点。语料里 4 条记为 known-gap：
+`readJoinWrapped` / `readNormalizeWrapped` / `readBasename` / `readResolveOnly`。
+
+代价要记清楚：**N-A「basename 不算守卫」这条结论在盲测语料里演示不了**
+（因为包装本身就把流掐断了），它由 `src/extract-ir-taint-guard.test.ts`
+里那条「有影传播」的正对照锁住。修 C4 时要重新审视 `basename` 的语义：
+它究竟是「包装」还是「净化」——目前当作包装（不免除标记）。
+
+### 7.4 G2（未修，反向）：自定义校验函数的调用点不被抑制
+
+`taintpath_B` 的 `dispatchToolGuarded` 调了 `assertTemplateName(name)`
+（该函数体内是字符集白名单校验），**仍被标记**。原因：调用点侧只按
+**函数名模式**判守卫，而 `Name` 后缀在修 `ensureDir()` 误判时被整体移出了
+守卫后缀表。这是 G1 那次修复的已知代价——收紧了词表，同时失去了对
+「名字不含路径语义的自定义校验函数」的识别。
+
+可选修法（未做）：把「被调用方函数体内含校验证据」也作为调用点的守卫证据
+（与 G-C 的传播方向相反的一侧）。**风险是会连带压掉真阳性**，须先在
+taintpath + 全部 DETECTED 语料上量过再定。
+
+## 五、与 C1–C3 的关系
+
 ### 一个必须记下的能力边界
 
 **fr-007 此前被记为 DETECTED，但按现行「post 侧须 0 误报」的标准，它在 G1 之前 post 侧是 5 条。**
