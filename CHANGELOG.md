@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.7.32] — 2026-09-19
+
+### IR 陈旧性判定（两次会话级误判的根因修复）
+
+- **断点**：trust 引擎自动提取是「缺才提取」——项目已有 ir.json 就以文件为准不重生成。源码改了、ir.json 没更新时静默吃旧 IR：fr-005 首扫报 0（`rm ir.json` 后才报出）、污点试点「标记注入但 trust 报 0」同源
+- **修复**（`src/ir-staleness.ts` + `src/trust/engine.ts` 集成）：mtime 比对——仅当有源码新于 ir.json 才重提，不做每次全量重提（skyvern 级项目 5-10 分钟成本）
+- **三档策略 `PROGMUNE_IR_REEXTRACT`**：auto（陈旧 + 遍历完整 + 源码 ≤5000 文件才自动重提，否则**只警告不重提**）／always（语料复测自担成本）／never（旧语义，但必须打「IR 可能陈旧」警告——**不接受静默**）
+- **双闸设计**：完整遍历（不做「找到就早退」——早退会抹掉 truncated 信号，本仓库 22k 源文件实测会把单测推过 30s 超时）+ evidenceComplete + 规模预算闸；stat 一次遍历的常量成本换可靠的 fresh 判定
+- **验收**：`src/ir-staleness.test.ts` 12 green + DSH 陷阱回归 + SSRF 死循环锁 35 passed；**TS 795 零漂移（3086 LOST 0/ADDED 0）**；build ✓
+
 ## [3.7.31] — 2026-09-18
 
 ### 提取器 SSRF 标记正则死循环修复（P0，真实工程可用性故障）

@@ -60,6 +60,7 @@ import {
   inferDomainsFromFunctionName,
 } from "./call-graph-propagator";
 import type { CallGraphIndex } from "./call-graph-propagator";
+import { inspectIrFreshness, reextractMode } from "../ir-staleness";
 import type { ExpressSecurityIssue } from "../frameworks/express-detector";
 import { analyzeFastapiStructure } from "../frameworks/fastapi-detector";
 import { analyzeDjangoStructure } from "../frameworks/django-detector";
@@ -97,7 +98,10 @@ import { extractIRJava } from "../extract-ir-java";
  * C → extractIRC 合并形态 { typeMap, functions }）——注解合并（P4.5）依赖
  * ir.json，调用方【无需】手动 extractProjectIR/写盘（曾是对 C 注解静默
  * 失效的文档/API 陷阱，回归测试见 tests/trust/engine.test.ts「DSH 陷阱」）。
- * 若项目已有 ir.json，以现有文件为准（不覆盖）。
+ * 若项目已有 ir.json：原语义是「以现有文件为准（不覆盖）」——该语义会让
+ * 【源码已改、ir.json 未更新】的场景静默读旧 IR（2026-09-19 修正）：
+ * mtime 比对发现有源码新于 ir.json 时重提；否则沿用磁盘文件（不做无谓的全量重提）。
+ * 逃生阀 PROGMUNE_IR_REEXTRACT=never 可回到旧语义（会打「IR 可能陈旧」警告）。
  */
 export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustDecision> {
   const engineVersion = "trust-runtime-v1.0.0";
@@ -1411,7 +1415,32 @@ async function collectProtocolViolations(
       if (extractFn) {
         try {
           const fs = require("fs");
-          if (!fs.existsSync(path.join(ctx.projectPath, "ir.json"))) {
+          // 陈旧性判定（2026-09-19）：原来只看 existsSync——源码改了、ir.json 没更新时
+          // 引擎静默吃旧 IR（fr-005 首扫报 0、污点试点「标记注入但 trust 报 0」同源）。
+          // 改为 mtime 比对：仅当有源码比 ir.json 新时才重提，避免全量重提的分钟级成本。
+          const freshness = inspectIrFreshness(ctx.projectPath);
+          const mode = reextractMode();
+          // 陈旧的判定由 mtime 给出；是否【自动】重提还要过成本闸：
+          // ① evidenceComplete 为假 → 遍历被截断，证据不可信；
+          // ② exceedsAutoBudget → 源码规模超预算（万级源文件的本仓库实测把
+          //    单次 evaluateTrust 推过 30s 超时），重提成本不该由默认路径承担。
+          // 两种情况都改为显式警告；语料复测等场景用 PROGMUNE_IR_REEXTRACT=always 承担。
+          const shouldExtract =
+            !freshness.exists ||
+            (freshness.stale &&
+              (mode === "always" ||
+                (mode === "auto" &&
+                  freshness.evidenceComplete &&
+                  !freshness.exceedsAutoBudget)));
+          if (freshness.exists && freshness.stale && !shouldExtract) {
+            console.warn(
+              `[progmune] ⚠️ IR 可能陈旧：${freshness.newestSourcePath} 新于 ir.json` +
+                `（mode=${mode}${freshness.exceedsAutoBudget ? "，源码超出重提预算" : ""}` +
+                `${freshness.truncated ? "，遍历被截断" : ""}；` +
+                `需重提取运行 PROGMUNE_IR_REEXTRACT=always 或删除 ir.json）`
+            );
+          }
+          if (shouldExtract) {
             const ir = extractFn();
             // C 走合并形态（与 execute/MCP 写盘一致）；TS/Python 保持裸数组形态
             const payload = lang === "c" ? { typeMap: {}, functions: ir } : ir;
