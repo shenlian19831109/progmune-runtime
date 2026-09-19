@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-19T04:37:39.968Z",
+  "generated": "2026-09-19T06:52:03.753Z",
   "projects": [
     {
       "project": "analytics_A",
@@ -43040,6 +43040,506 @@
       ]
     },
     {
+      "project": "taintpath_A",
+      "files": 1,
+      "functions": 18,
+      "totalLines": 116,
+      "allCalls": [
+        "includes",
+        "existsSync",
+        "mkdirSync",
+        "readFileSync",
+        "__progmune_path_traversal__",
+        "writeFileSync",
+        "basename",
+        "resolve",
+        "ensureDir",
+        "startsWith",
+        "assertSafePath",
+        "test",
+        "normalize",
+        "isAbsolute",
+        "join"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Path Traversal (User-Controlled File Path)",
+          "category": "path_traversal",
+          "type": "missing_safeguard",
+          "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
+          "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
+        },
+        {
+          "rule": "No Input Sanitization",
+          "category": "resource",
+          "type": "missing_safeguard",
+          "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
+          "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
+        }
+      ],
+      "resourceViolations": [],
+      "perFunction": [
+        {
+          "name": "readDirect",
+          "file": "src/paths.ts",
+          "calls": [
+            "readFileSync",
+            "__progmune_path_traversal__"
+          ],
+          "protocolViolations": [],
+          "safeguardViolations": [
+            {
+              "rule": "Path Traversal (User-Controlled File Path)",
+              "category": "path_traversal",
+              "type": "missing_safeguard",
+              "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
+              "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
+            }
+          ]
+        },
+        {
+          "name": "readViaQuery",
+          "file": "src/paths.ts",
+          "calls": [
+            "readFileSync",
+            "__progmune_path_traversal__"
+          ],
+          "protocolViolations": [],
+          "safeguardViolations": [
+            {
+              "rule": "Path Traversal (User-Controlled File Path)",
+              "category": "path_traversal",
+              "type": "missing_safeguard",
+              "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
+              "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
+            }
+          ]
+        },
+        {
+          "name": "readViaLocal",
+          "file": "src/paths.ts",
+          "calls": [
+            "readFileSync",
+            "__progmune_path_traversal__"
+          ],
+          "protocolViolations": [],
+          "safeguardViolations": [
+            {
+              "rule": "Path Traversal (User-Controlled File Path)",
+              "category": "path_traversal",
+              "type": "missing_safeguard",
+              "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
+              "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
+            }
+          ]
+        },
+        {
+          "name": "writeViaHeader",
+          "file": "src/paths.ts",
+          "calls": [
+            "writeFileSync",
+            "__progmune_path_traversal__"
+          ],
+          "protocolViolations": [],
+          "safeguardViolations": [
+            {
+              "rule": "Path Traversal (User-Controlled File Path)",
+              "category": "path_traversal",
+              "type": "missing_safeguard",
+              "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
+              "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
+            },
+            {
+              "rule": "No Input Sanitization",
+              "category": "resource",
+              "type": "missing_safeguard",
+              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
+              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
+            }
+          ]
+        },
+        {
+          "name": "readBasename",
+          "file": "src/paths.ts",
+          "calls": [
+            "basename",
+            "readFileSync"
+          ],
+          "protocolViolations": [],
+          "safeguardViolations": []
+        },
+        {
+          "name": "readLengthCheck",
+          "file": "src/paths.ts",
+          "calls": [
+            "readFileSync",
+            "__progmune_path_traversal__"
+          ],
+          "protocolViolations": [],
+          "safeguardViolations": [
+            {
+              "rule": "Path Traversal (User-Controlled File Path)",
+              "category": "path_traversal",
+              "type": "missing_safeguard",
+              "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
+              "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
+            }
+          ]
+        },
+        {
+          "name": "readNullCheck",
+          "file": "src/paths.ts",
+          "calls": [
+            "readFileSync",
+            "__progmune_path_traversal__"
+          ],
+          "protocolViolations": [],
+          "safeguardViolations": [
+            {
+              "rule": "Path Traversal (User-Controlled File Path)",
+              "category": "path_traversal",
+              "type": "missing_safeguard",
+              "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
+              "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
+            }
+          ]
+        },
+        {
+          "name": "readResolveOnly",
+          "file": "src/paths.ts",
+          "calls": [
+            "resolve",
+            "readFileSync"
+          ],
+          "protocolViolations": [],
+          "safeguardViolations": []
+        },
+        {
+          "name": "readEnsureDirOnly",
+          "file": "src/paths.ts",
+          "calls": [
+            "ensureDir",
+            "readFileSync",
+            "__progmune_path_traversal__"
+          ],
+          "protocolViolations": [],
+          "safeguardViolations": [
+            {
+              "rule": "Path Traversal (User-Controlled File Path)",
+              "category": "path_traversal",
+              "type": "missing_safeguard",
+              "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
+              "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
+            }
+          ]
+        },
+        {
+          "name": "readGuardWithin",
+          "file": "src/paths.ts",
+          "calls": [
+            "resolve",
+            "startsWith",
+            "readFileSync"
+          ],
+          "protocolViolations": [],
+          "safeguardViolations": []
+        },
+        {
+          "name": "readGuardFn",
+          "file": "src/paths.ts",
+          "calls": [
+            "assertSafePath",
+            "readFileSync"
+          ],
+          "protocolViolations": [],
+          "safeguardViolations": []
+        },
+        {
+          "name": "readGuardPattern",
+          "file": "src/paths.ts",
+          "calls": [
+            "test",
+            "readFileSync"
+          ],
+          "protocolViolations": [],
+          "safeguardViolations": []
+        },
+        {
+          "name": "readGuardTraversal",
+          "file": "src/paths.ts",
+          "calls": [
+            "normalize",
+            "isAbsolute",
+            "startsWith",
+            "includes",
+            "join",
+            "readFileSync"
+          ],
+          "protocolViolations": [],
+          "safeguardViolations": []
+        },
+        {
+          "name": "readConstant",
+          "file": "src/paths.ts",
+          "calls": [
+            "readFileSync"
+          ],
+          "protocolViolations": [],
+          "safeguardViolations": []
+        },
+        {
+          "name": "readJoinWrapped",
+          "file": "src/paths.ts",
+          "calls": [
+            "join",
+            "readFileSync"
+          ],
+          "protocolViolations": [],
+          "safeguardViolations": []
+        },
+        {
+          "name": "readNormalizeWrapped",
+          "file": "src/paths.ts",
+          "calls": [
+            "normalize",
+            "readFileSync"
+          ],
+          "protocolViolations": [],
+          "safeguardViolations": []
+        }
+      ]
+    },
+    {
+      "project": "taintpath_B",
+      "files": 2,
+      "functions": 9,
+      "totalLines": 51,
+      "allCalls": [
+        "loadTemplate",
+        "__progmune_path_traversal__",
+        "load",
+        "writeRendered",
+        "assertTemplateName",
+        "test",
+        "readFileSync",
+        "writeFileSync"
+      ],
+      "protocolViolations": [],
+      "safeguardViolations": [
+        {
+          "rule": "Path Traversal (User-Controlled File Path)",
+          "category": "path_traversal",
+          "type": "missing_safeguard",
+          "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
+          "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
+        },
+        {
+          "rule": "No Input Sanitization",
+          "category": "resource",
+          "type": "missing_safeguard",
+          "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
+          "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
+        }
+      ],
+      "resourceViolations": [],
+      "perFunction": [
+        {
+          "name": "dispatchToolBare",
+          "file": "src/handler.ts",
+          "calls": [
+            "loadTemplate",
+            "__progmune_path_traversal__"
+          ],
+          "protocolViolations": [],
+          "safeguardViolations": [
+            {
+              "rule": "Path Traversal (User-Controlled File Path)",
+              "category": "path_traversal",
+              "type": "missing_safeguard",
+              "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
+              "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
+            },
+            {
+              "rule": "Notification Without Retry",
+              "category": "notification",
+              "type": "missing_safeguard",
+              "detail": "Notification sent without retry/fallback mechanism. Transient network failures will cause silent message loss.",
+              "conceptDetail": "Missing: RetryLogic, Resilience, DeadLetterQueue. Expected at least one of: retry, exponential backoff, dead letter queue"
+            }
+          ]
+        },
+        {
+          "name": "dispatchToolInline",
+          "file": "src/handler.ts",
+          "calls": [
+            "loadTemplate",
+            "__progmune_path_traversal__"
+          ],
+          "protocolViolations": [],
+          "safeguardViolations": [
+            {
+              "rule": "Path Traversal (User-Controlled File Path)",
+              "category": "path_traversal",
+              "type": "missing_safeguard",
+              "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
+              "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
+            },
+            {
+              "rule": "Notification Without Retry",
+              "category": "notification",
+              "type": "missing_safeguard",
+              "detail": "Notification sent without retry/fallback mechanism. Transient network failures will cause silent message loss.",
+              "conceptDetail": "Missing: RetryLogic, Resilience, DeadLetterQueue. Expected at least one of: retry, exponential backoff, dead letter queue"
+            }
+          ]
+        },
+        {
+          "name": "dispatchToolMethod",
+          "file": "src/handler.ts",
+          "calls": [
+            "load",
+            "__progmune_path_traversal__"
+          ],
+          "protocolViolations": [],
+          "safeguardViolations": [
+            {
+              "rule": "Path Traversal (User-Controlled File Path)",
+              "category": "path_traversal",
+              "type": "missing_safeguard",
+              "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
+              "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
+            },
+            {
+              "rule": "Notification Without Retry",
+              "category": "notification",
+              "type": "missing_safeguard",
+              "detail": "Notification sent without retry/fallback mechanism. Transient network failures will cause silent message loss.",
+              "conceptDetail": "Missing: RetryLogic, Resilience, DeadLetterQueue. Expected at least one of: retry, exponential backoff, dead letter queue"
+            }
+          ]
+        },
+        {
+          "name": "dispatchToolWrite",
+          "file": "src/handler.ts",
+          "calls": [
+            "writeRendered",
+            "__progmune_path_traversal__"
+          ],
+          "protocolViolations": [],
+          "safeguardViolations": [
+            {
+              "rule": "Path Traversal (User-Controlled File Path)",
+              "category": "path_traversal",
+              "type": "missing_safeguard",
+              "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
+              "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
+            },
+            {
+              "rule": "No Input Sanitization",
+              "category": "resource",
+              "type": "missing_safeguard",
+              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
+              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
+            },
+            {
+              "rule": "Notification Without Retry",
+              "category": "notification",
+              "type": "missing_safeguard",
+              "detail": "Notification sent without retry/fallback mechanism. Transient network failures will cause silent message loss.",
+              "conceptDetail": "Missing: RetryLogic, Resilience, DeadLetterQueue. Expected at least one of: retry, exponential backoff, dead letter queue"
+            }
+          ]
+        },
+        {
+          "name": "dispatchToolGuarded",
+          "file": "src/handler.ts",
+          "calls": [
+            "assertTemplateName",
+            "loadTemplate",
+            "__progmune_path_traversal__"
+          ],
+          "protocolViolations": [],
+          "safeguardViolations": [
+            {
+              "rule": "Path Traversal (User-Controlled File Path)",
+              "category": "path_traversal",
+              "type": "missing_safeguard",
+              "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
+              "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
+            },
+            {
+              "rule": "Notification Without Retry",
+              "category": "notification",
+              "type": "missing_safeguard",
+              "detail": "Notification sent without retry/fallback mechanism. Transient network failures will cause silent message loss.",
+              "conceptDetail": "Missing: RetryLogic, Resilience, DeadLetterQueue. Expected at least one of: retry, exponential backoff, dead letter queue"
+            }
+          ]
+        },
+        {
+          "name": "loadTemplate",
+          "file": "src/store.ts",
+          "calls": [
+            "readFileSync",
+            "__progmune_path_traversal__"
+          ],
+          "protocolViolations": [],
+          "safeguardViolations": [
+            {
+              "rule": "Path Traversal (User-Controlled File Path)",
+              "category": "path_traversal",
+              "type": "missing_safeguard",
+              "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
+              "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
+            }
+          ]
+        },
+        {
+          "name": "writeRendered",
+          "file": "src/store.ts",
+          "calls": [
+            "writeFileSync",
+            "__progmune_path_traversal__"
+          ],
+          "protocolViolations": [],
+          "safeguardViolations": [
+            {
+              "rule": "Path Traversal (User-Controlled File Path)",
+              "category": "path_traversal",
+              "type": "missing_safeguard",
+              "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
+              "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
+            },
+            {
+              "rule": "No Input Sanitization",
+              "category": "resource",
+              "type": "missing_safeguard",
+              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
+              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
+            }
+          ]
+        },
+        {
+          "name": "DocStore.load",
+          "file": "src/store.ts",
+          "calls": [
+            "__progmune_path_traversal__"
+          ],
+          "protocolViolations": [],
+          "safeguardViolations": [
+            {
+              "rule": "Path Traversal (User-Controlled File Path)",
+              "category": "path_traversal",
+              "type": "missing_safeguard",
+              "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
+              "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "project": "todo",
       "files": 4,
       "functions": 12,
@@ -47771,12 +48271,12 @@
     }
   ],
   "aggregate": {
-    "projects": 100,
-    "totalFunctions": 1315,
-    "totalLines": 13058,
+    "projects": 102,
+    "totalFunctions": 1342,
+    "totalLines": 13225,
     "protocolFindings": 55,
-    "safeguardFindings": 810,
+    "safeguardFindings": 814,
     "resourceFindings": 0,
-    "totalFindings": 865
+    "totalFindings": 869
   }
 }

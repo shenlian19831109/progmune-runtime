@@ -743,7 +743,13 @@ function computeMarkerCalls(text, paramNames, sinkParams, onMethodHit, guardFns)
     if (hasRequestRootedExpr(text)) {
         const tainted = collectTaintedNames(text);
         const selfGuarded = guardFns ? hasPathGuardEvidence(text) !== null : false;
-        if (tainted.size > 0 && !selfGuarded) {
+        // C5（2026-09-19）：不可信根可以直接写在 sink 实参里，不需要中间变量。
+        // 此前外层要求 collectTaintedNames 非空，于是
+        //   `fs.readFileSync("/data/" + req.params.name)` —— 真实工程里最常见的形态
+        // 不标记；只有写成 `const n = req.params.name; readFileSync("/data/" + n)` 才标。
+        // SSRF 侧从来不是这样（它把 UNTRUSTED_ROOT_SRC 并进 taint 模式去匹配实参窗口），
+        // 这是同一条数据流上的又一处口径不一致。
+        if (!selfGuarded) {
             if (hasTaintedSinkCall(text, tainted)) {
                 markers.push("__progmune_path_traversal__");
             }

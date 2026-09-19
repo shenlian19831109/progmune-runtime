@@ -1,5 +1,46 @@
 # Changelog
 
+## [3.7.35] — 2026-09-19
+
+### 重建盲测覆盖：taintpath 语料族（TS 795 空过的终结）
+
+TS 795 盲测对「路径穿越标记」**连续三次零覆盖**——语料里没有任何
+`不可信根 → 文件 sink` 的流，`__progmune_path_traversal__` 出现次数前 0 后 0。
+于是「3086 flags LOST 0 / ADDED 0」这道硬门在这项能力上一直是空过（3.7.32/33/34
+三次验收都把它当作证据）。
+
+- 新增语料族 `generated/taintpath_A`（HTTP 请求面）与 `taintpath_B`
+  （MCP 工具实参面 + 跨文件/跨函数传播），共 24 条期望
+- 新增生成器 `blind-benchmark/generate-projects-taintpath.ts`
+  （**只写自己前缀**，不像 generate-projects.ts 那样清理含 `_` 的目录）
+- 新增闸门 `blind-benchmark/check-taintpath.ts` + 期望表
+  `blind-benchmark/taintpath-expectations.json`：逐函数断言
+  mark / suppressed / no-taint / known-gap 四类，退出码非 0 即失败
+- 覆盖力：`__progmune_path_traversal__` **0 → 15 次**；24/24 符合期望
+- 已有 100 个项目零漂移：LOST 0 / ADDED 0（总数 3086 → 3109，增量全部来自新语料）
+- 升级为方法学规则 **R7-no-vacuous-gate**
+
+### C5：不可信根可以直连 sink（召回）
+
+此前外层要求 `collectTaintedNames` 非空，因此
+`fs.readFileSync("/data/" + req.params.name)` —— 真实 Express 工程最常见的形态
+——不标记，只有先赋给局部变量才标记。SSRF 侧从来不要求中间变量，这是同一条
+数据流上的又一处口径不一致，与 G1 同类。改为：先看 sink 实参窗口有没有污点证据（taint 模式本来就含不可信根），
+跨函数传播仍须有具名污点。
+
+- `src/extract-ir-taint-structural.test.ts` 新增 6 条（4 正 + 2 负对照）
+- 反向验证：回退 v3.7.34 后其中 4 条失败、2 条负对照仍绿
+- fr-007 真实语料维持 pre 5 / post **0**（C5 只补召回，未削弱 G1 判别力）
+
+### 本次暴露、尚未修的两处缺口（已进语料，作为下一轮的验收对象）
+
+- **C4**：污点经表达式包装（`path.join/resolve/normalize/basename`）后不传播。
+  语料里 readBasename / readResolveOnly / readJoinWrapped / readNormalizeWrapped
+  四条语义上应标记、实测不标记，记为 known-gap（闸门会盯着，一旦补上就提醒更新）
+- **G2**（反向）：自定义校验函数名不含路径语义后缀时调用点不被抑制。语料里
+  `dispatchToolGuarded` 调了 `assertTemplateName()`（函数体内有字符集白名单），
+  仍被标记——因为 `Name` 后缀在修 ensureDir 误判时被移出了守卫词表
+
 ## [3.7.34] — 2026-09-19
 
 ### G1 PATH_GUARD_EVIDENCE —— 路径穿越的「校验识别」

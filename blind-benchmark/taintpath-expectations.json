@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "created": "2026-09-19",
+  "purpose": "让 TS 795 盲测真正覆盖「不可信根 → 文件 sink」这条流。此前该能力在盲测里零覆盖（__progmune_path_traversal__ 出现 0 次），3086 flags LOST 0/ADDED 0 是空过。本文件把期望逐函数钉死，由 blind-benchmark/check-taintpath.ts 校验。",
+  "marker": "__progmune_path_traversal__",
+  "expect_meaning": {
+    "mark": "必须标记（召回）",
+    "suppressed": "有校验证据 → 必须不标记（精度，G1）",
+    "no-taint": "无污点流入 → 必须不标记（过度标记回归锁）",
+    "known-gap": "已知召回缺口：语义上应标记、当前实测不标记。若开始标记，闸门会失败并提示更新期望"
+  },
+  "notes": [
+    "期望值不是设计出来的，是 measured：先跑 extractIR 看实际标记，再据此分类。",
+    "每条 suppressed/no-taint 都有同形状的 mark 用例做正对照（方法学规则 R6）。",
+    "known-gap 全部指向同一处缺口 C4：污点经表达式包装（join/resolve/normalize/basename）后不再传播。",
+    "taintpath_B 的 dispatchToolGuarded 标记为 mark —— 这是【反向】缺口 G2：自定义校验函数名不含路径语义后缀（assertTemplateName）时，调用点不会被抑制。"
+  ],
+  "projects": {
+    "taintpath_A": [
+      { "fn": "readDirect", "file": "src/paths.ts", "expect": "mark", "why": "最小形态：req.params 直连 readFileSync（C5 之前不标记）" },
+      { "fn": "readViaQuery", "file": "src/paths.ts", "expect": "mark", "why": "req.query + 模板字符串直连（C5 之前不标记）" },
+      { "fn": "readViaLocal", "file": "src/paths.ts", "expect": "mark", "why": "污点经局部变量单跳进 sink（历史行为，C5 前就标记）" },
+      { "fn": "writeViaHeader", "file": "src/paths.ts", "expect": "mark", "why": "写侧 sink + request.headers 根" },
+      { "fn": "readLengthCheck", "file": "src/paths.ts", "expect": "mark", "why": "N-C：长度检查不算守卫" },
+      { "fn": "readNullCheck", "file": "src/paths.ts", "expect": "mark", "why": "N-D：空值检查不算守卫" },
+      { "fn": "readEnsureDirOnly", "file": "src/paths.ts", "expect": "mark", "why": "反例回归锁：ensureDir() 曾被 G-C 误判为守卫致召回归零" },
+      { "fn": "readBasename", "file": "src/paths.ts", "expect": "known-gap", "why": "C4：path.basename(x) 包装后污点不再传播（语义上应标记）" },
+      { "fn": "readResolveOnly", "file": "src/paths.ts", "expect": "known-gap", "why": "C4 + N-C：只有 resolve 没有包含性比较，应标记但包装断链" },
+      { "fn": "readJoinWrapped", "file": "src/paths.ts", "expect": "known-gap", "why": "C4：path.join(ROOT, taint) 包装后断链" },
+      { "fn": "readNormalizeWrapped", "file": "src/paths.ts", "expect": "known-gap", "why": "C4：path.normalize(taint) 包装后断链" },
+      { "fn": "readGuardWithin", "file": "src/paths.ts", "expect": "suppressed", "why": "G-A 目录包含性：resolve(p).startsWith(resolve(root))" },
+      { "fn": "readGuardFn", "file": "src/paths.ts", "expect": "suppressed", "why": "G-C 独立校验函数（fr-007/ fr-016 形态）" },
+      { "fn": "readGuardPattern", "file": "src/paths.ts", "expect": "suppressed", "why": "G-D 锚定字符集白名单（FLOW_ID_PATTERN 形态）" },
+      { "fn": "readGuardTraversal", "file": "src/paths.ts", "expect": "suppressed", "why": "G-B 上跳/绝对路径拒绝（fr-012 localPath 真实守卫块形态）" },
+      { "fn": "readConstant", "file": "src/paths.ts", "expect": "no-taint", "why": "常量路径无污点；marks 用例的正对照" }
+    ],
+    "taintpath_B": [
+      { "fn": "loadTemplate", "file": "src/store.ts", "expect": "mark", "why": "C1：顶层函数的 sink 形参被污点流入" },
+      { "fn": "writeRendered", "file": "src/store.ts", "expect": "mark", "why": "C1：同上，写侧" },
+      { "fn": "DocStore.load", "file": "src/store.ts", "expect": "mark", "why": "类方法的 sink 形参被污点流入" },
+      { "fn": "dispatchToolBare", "file": "src/handler.ts", "expect": "mark", "why": "C2：裸调用 loadTemplate(tainted)" },
+      { "fn": "dispatchToolInline", "file": "src/handler.ts", "expect": "mark", "why": "C5：不可信根直接写在跨函数调用的实参里" },
+      { "fn": "dispatchToolMethod", "file": "src/handler.ts", "expect": "mark", "why": "成员调用传播到类方法 sink 形参" },
+      { "fn": "dispatchToolWrite", "file": "src/handler.ts", "expect": "mark", "why": "写侧跨函数传播" },
+      { "fn": "dispatchToolGuarded", "file": "src/handler.ts", "expect": "mark", "why": "反向缺口 G2：自定义校验函数名 assertTemplateName 不含路径语义后缀（Name 已被移出守卫后缀表），调用点未被抑制" }
+    ]
+  }
+}

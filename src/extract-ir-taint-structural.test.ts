@@ -202,3 +202,84 @@ export function seedFlow() {
     150_000
   );
 });
+
+/**
+ * C5（2026-09-19）：不可信根**直接写在 sink 实参里**（无中间变量）此前不标记。
+ *
+ * 发现途径：新建的 blind-benchmark taintpath 语料族里有两条最朴素的用例
+ * （`readFileSync("/d/" + req.params.name)`、模板字符串形态）跑出「不标记」。
+ * 根因是外层 `tainted.size > 0` 的闸门——而 SSRF 侧从来不要求中间变量。
+ *
+ * 按 R6：**每条「不得标记」都要配正对照**。这里的负对照是同形状无污点的常量路径。
+ */
+describe("C5：内联不可信根（不经中间变量）必须标记", () => {
+  const cases: Array<{ name: string; fn: string; code: string; expectMark: boolean; why: string }> = [
+    {
+      name: "字符串拼接直连",
+      fn: "readInline",
+      code: `export function readInline(req: any) {
+  return fs.readFileSync("/srv/data/" + req.params.name, "utf-8");
+}`,
+      expectMark: true,
+      why: "真实 Express 工程最常见的写法",
+    },
+    {
+      name: "模板字符串直连",
+      fn: "readTemplate",
+      code: "export function readTemplate(req: any) {\n  return fs.readFileSync(`/srv/data/${req.query.name}`, \"utf-8\");\n}",
+      expectMark: true,
+      why: "query 根 + 模板插值",
+    },
+    {
+      name: "写侧 header 根",
+      fn: "writeHeader",
+      code: `export function writeHeader(request: any, data: any) {
+  return fs.writeFileSync("/srv/data/" + request.headers["x-name"], data);
+}`,
+      expectMark: true,
+      why: "写 sink + request.headers 根",
+    },
+    {
+      name: "MCP 实参直连",
+      fn: "writeMcp",
+      code: `export function writeMcp(params: any, data: any) {
+  return fs.writeFileSync(params.arguments.path, data);
+}`,
+      expectMark: true,
+      why: "传输面里的第二个根：MCP 工具实参",
+    },
+    {
+      name: "负对照：常量路径不得标记",
+      fn: "readConstant",
+      code: `export function readConstant() {
+  return fs.readFileSync("/srv/data/index.html", "utf-8");
+}`,
+      expectMark: false,
+      why: "R6：证明前面的用例不是靠「只要有 fs sink 就标记」蒙对",
+    },
+    {
+      name: "负对照：有守卫时内联根仍不标记",
+      fn: "readInlineGuarded",
+      code: `export function readInlineGuarded(req: any) {
+  const target = path.resolve("/srv/data", req.params.name);
+  if (!target.startsWith("/srv/data")) throw new Error("outside");
+  return fs.readFileSync(target, "utf-8");
+}`,
+      expectMark: false,
+      why: "C5 只补召回，不得绕过 G1 的判别力",
+    },
+  ];
+
+  for (const c of cases) {
+    it(`${c.name} —— ${c.why}`, () => {
+      const dir = makeProject({ "a.ts": `import * as fs from "fs";\nimport * as path from "path";\n\n${c.code}\n` });
+      try {
+        const marks = marksFor(dir, c.fn);
+        if (c.expectMark) expect(marks).toContain(PATH_MARK);
+        else expect(marks).not.toContain(PATH_MARK);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    }, 150_000);
+  }
+});
