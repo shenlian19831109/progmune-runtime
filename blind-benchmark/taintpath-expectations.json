@@ -22,7 +22,8 @@
     "2026-09-20 续（同日第二次）：E 族补 5 条至 15 条，覆盖 C4d-b 三处 —— 无括号单参箭头、ES5 function 回调、成员链接收者；另加两条负对照，其中 emitForEachNamedHandler 锁住一个**真实误报**：回调写成函数引用 `forEach(handleOne)` 时，初版正则把 handleOne 当成形参绑进污点集合，同名局部变量随即被误判。修法是把「内联回调」作为前提写进正则（箭头分支必须见到 `=>`、ES5 分支必须见到 `function`）。顺带发现形参字符集漏了 `:`：`(s: any) =>` 这种带类型标注的写法整环不匹配 —— TS 工程里的常态写法。",
     "2026-09-20 第三次：新增 taintpath_F 族（C4e helper 的现代写法）。这是 R7 第五次 —— generated 全量 .ts 里 `export const X = (…) =>` 0 处，A–E 族对本能力空过。F 族写法上有一条硬约束：sink 实参里不得直接出现污点变量，污点只能经 helper 返回值流进 sink；否则命中「实参含污点名」的兜底判定，所有用例会假通过（2026-09-20 第一版探针就是这么全绿的，P/N 对照一次性全 MARK）。另记两条勘误：备忘里说的 toSlug 缺口（`p.trim().toLowerCase()`）实测早就能穿透；reduce 首参不绑也确认按设计生效。",
     "2026-09-20 C4e：taintpath_D/emitHelperFixed 由 known-gap 转 mark —— 「helper 的 return 引用模块级字面量常量」这条漏报已闭合。同一族的 emitHelperWithSink（helper 体内有 sink）仍是 known-gap，未随本轮放宽。",
-    "2026-09-20 第四次：新增 taintpath_G 族（C4f 精度收窄），这是 R7 第一次朝【反方向】咬 —— 前面四轮都是「语料零覆盖 ⇒ 门空过」，这一轮语料零覆盖照样空过，但更该防的是另外两件事：① 收窄收过头把真阳性也收掉（LOST）；② 那批 no-taint 用例其实空转（它们本来就不该标）。所以 G 族的反向验证按 R14 多切一刀：把依赖分析退回「全部形参都算依赖」，7 条 no-taint 必须立刻转红。另记：G 族 12 条里 4 mark / 7 no-taint / 1 suppressed，其中 emitSwapAligned 与 emitSwapMisaligned 是一对 —— 只有按位置对齐、而不是「实参里出现污点名就算」，才能把这两条分开。"
+    "2026-09-20 第四次：新增 taintpath_G 族（C4f 精度收窄），这是 R7 第一次朝【反方向】咬 —— 前面四轮都是「语料零覆盖 ⇒ 门空过」，这一轮语料零覆盖照样空过，但更该防的是另外两件事：① 收窄收过头把真阳性也收掉（LOST）；② 那批 no-taint 用例其实空转（它们本来就不该标）。所以 G 族的反向验证按 R14 多切一刀：把依赖分析退回「全部形参都算依赖」，7 条 no-taint 必须立刻转红。另记：G 族 12 条里 4 mark / 7 no-taint / 1 suppressed，其中 emitSwapAligned 与 emitSwapMisaligned 是一对 —— 只有按位置对齐、而不是「实参里出现污点名就算」，才能把这两条分开。",
+    "2026-09-20 第五次：新增 taintpath_H 族（C4g helper 的载体）。两条值得记：① R12 第四次生效 —— 备忘里列的『依赖分析深层形态』（三元返回、默认参、多 return）实测本来就是通的，只有解构形参真漏；对象字面量方法 / 类方法（含实例与静态）才是本轮主体。② 实例方法那条走了个折中：宿主是变量 (`r.inst(k)`) 时限定名对不上，靠【方法名全项目唯一 + 成员调用位 `.inst(` 】接上。唯一性是 R11 的替代品 —— 不存在同名方法就不可能张冠李戴；同名方法出现两次时这一律不登记，宁可漏报。另有一条刻意不做的缺口：常量实参代入（`viaTernaryDrop(k, true)` 返回常量分支），那需要常量传播，超出本轮范围。"
   ],
   "projects": {
     "taintpath_A": [
@@ -523,6 +524,74 @@
         "file": "src/handler.ts",
         "expect": "suppressed",
         "why": "C4f × G2：收窄之后守卫仍压得住。stamp 不含任何 G-C 后缀 ⇒ 压制依据只能是被调用方自身证据（tier-0）；正对照 = emitPlainShaper"
+      }
+    ],
+    "taintpath_H": [
+      {
+        "fn": "emitObjMethod",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4g：对象字面量方法 `Util.toPath(k)` —— 走【限定名】Owner.method，宿主名可确证"
+      },
+      {
+        "fn": "emitClassInstance",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4g：类实例方法 `r.inst(k)` —— 宿主是变量，限定名对不上，靠【方法名唯一 + 成员调用位】接上"
+      },
+      {
+        "fn": "emitClassStatic",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4g：静态类方法 `Renderer.stat(k)` —— 与对象字面量同形，走限定名"
+      },
+      {
+        "fn": "emitDestructured",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4g：解构形参 `viaName({ name: k })` —— 形参名要从绑定模式里抽出来，getName() 给的是整个模式"
+      },
+      {
+        "fn": "emitTernary",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "return 是三元条件式，仍依赖形参（C4g 探针实测这条本来就是通的）"
+      },
+      {
+        "fn": "emitDefaultParam",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "带默认值的形参 —— 形参名照取（同上，本来就是通的）"
+      },
+      {
+        "fn": "emitMultiReturn",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "多条 return，依赖集取并集（同上，本来就是通的）"
+      },
+      {
+        "fn": "emitObjMethodDrop",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4g × C4f：对象字面量方法同样丢弃形参 —— 召回放宽之后收窄要跟得上新载体；正对照 = emitObjMethod"
+      },
+      {
+        "fn": "emitDestructuredLiteral",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "解构形参喂进去的是字面量 —— 无污点流入；正对照 = emitDestructured"
+      },
+      {
+        "fn": "emitObjMethodLiteral",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "方法是真塑形，但实参是字面量"
+      },
+      {
+        "fn": "emitMethodGuarded",
+        "file": "src/handler.ts",
+        "expect": "suppressed",
+        "why": "C4g × G2：召回放宽到方法与解构形参之后守卫仍压得住。stamp 不含任何 G-C 后缀 ⇒ 压制依据只能是被调用方自身证据（tier-0）；正对照 = emitObjMethod"
       }
     ]
   },

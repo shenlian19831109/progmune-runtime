@@ -1415,3 +1415,64 @@ describe("C4f：只有落在「返回值真依赖的形参位」上的污点才�
     }, 150_000);
   }
 });
+
+describe("C4g：helper 换个载体（对象字面量方法 / 类方法 / 解构形参）也要能传播", () => {
+  type Case = { name: string; fn: string; files: Record<string, string>; expectMark: boolean; why: string };
+
+  const emit = (relExpr: string, pre = "") =>
+    [
+      'import * as fs from "fs";',
+      'import { Util, Drop, Renderer, viaName } from "./helpers";',
+      "export function emit(doc: Record<string, any>, outDir: string) {",
+      ...(pre ? [`  ${pre}`] : []),
+      "  Object.keys(doc).forEach((k) => {",
+      `    const rel = ${relExpr};`,
+      '    fs.writeFileSync(outDir + "/" + rel, "x");',
+      "  });",
+      "}",
+    ].join("\n");
+
+  const HELPERS = [
+    "export const Util = {",
+    '  toPath(n: string): string { return n + ".md"; },',
+    "};",
+    "export const Drop = {",
+    '  fixed(n: string): string { return "fixed.md"; },',
+    "};",
+    "export class Renderer {",
+    '  inst(n: string): string { return n + ".md"; }',
+    '  static stat(n: string): string { return n + ".txt"; }',
+    "}",
+    'export function viaName({ name }: any): string { return name + ".md"; }',
+  ].join("\n");
+
+  const cases: Case[] = [
+    { name: "正例·对象字面量方法", fn: "emit", files: { "helpers.ts": HELPERS, "it.ts": emit("Util.toPath(k)") },
+      expectMark: true, why: "宿主名可确证 ⇒ 走限定名 Owner.method" },
+    { name: "正例·类实例方法", fn: "emit", files: { "helpers.ts": HELPERS, "it.ts": emit("r.inst(k)", "const r = new Renderer();") },
+      expectMark: true, why: "宿主是变量，限定名对不上 ⇒ 靠方法名唯一 + 成员调用位" },
+    { name: "正例·静态类方法", fn: "emit", files: { "helpers.ts": HELPERS, "it.ts": emit("Renderer.stat(k)") },
+      expectMark: true, why: "与对象字面量同形，走限定名" },
+    { name: "正例·解构形参", fn: "emit", files: { "helpers.ts": HELPERS, "it.ts": emit("viaName({ name: k })") },
+      expectMark: true, why: "形参名要从绑定模式里抽出来 —— getName() 给的是整个模式而不是 name" },
+    { name: "负对照·对象字面量方法丢弃形参", fn: "emit", files: { "helpers.ts": HELPERS, "it.ts": emit("Drop.fixed(k)") },
+      expectMark: false, why: "召回放宽到方法之后，C4f 的收窄也要跟得上新载体；正对照 = 正例·对象字面量方法" },
+    { name: "负对照·解构形参喂字面量", fn: "emit", files: { "helpers.ts": HELPERS, "it.ts": emit('viaName({ name: "lit" })') },
+      expectMark: false, why: "无污点流入；正对照 = 正例·解构形参" },
+    { name: "负对照·方法是真塑形但实参是字面量", fn: "emit", files: { "helpers.ts": HELPERS, "it.ts": emit('Util.toPath("static")') },
+      expectMark: false, why: "传播得靠实参带污点" },
+  ];
+
+  for (const c of cases) {
+    it(`${c.name} —— ${c.why}`, () => {
+      const dir = makeProject(c.files);
+      try {
+        const marks = marksFor(dir, c.fn);
+        if (c.expectMark) expect(marks).toContain(PATH_MARK);
+        else expect(marks).not.toContain(PATH_MARK);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    }, 150_000);
+  }
+});

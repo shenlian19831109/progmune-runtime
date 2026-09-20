@@ -999,6 +999,162 @@ export function emitShaperGuarded(doc: Record<string, any>, outDir: string): voi
 }
 `;
 
+// ═══════════════════════════════════════════════════════════════
+// taintpath_H —— C4g：helper 的另外几种载体（对象字面量方法 / 类方法 / 解构形参）
+//
+// C4e 时刻意保留了「对象字面量方法」这个缺口：按裸名放行会让别的对象上的同名
+// 方法被误认成塑形（R11）。这一轮的解法是【限定名 + 唯一性】：
+//   - 宿主名能确定时登记 `Owner.method`，调用点写 `Util.toPath(k)` 直接对上；
+//   - 实例方法的主要写法是 `p.method(k)`（宿主是变量，限定名对不上），
+//     所以该方法名在**全项目唯一**时额外允许 `.method(` 这种成员调用位匹配。
+//     唯一性是 R11 的替代品：不存在同名方法，就不可能张冠李戴。
+//
+// 写法约定（与 E/F/G 族同源）：sink 实参里**不直接出现**污点变量 k。
+// ═══════════════════════════════════════════════════════════════
+const HELPERS_H = `// taintpath_H —— C4g：helper 的现代载体
+import * as p from "path";
+import * as fsx from "fs";
+
+// 对象字面量方法 —— 现代工程里很常见的一种「小工具集合」写法
+export const Util = {
+  toPath(n: string): string { return n + ".md"; },
+};
+
+// 对象字面量方法但丢弃形参（精度侧对照）
+export const Drop = {
+  fixed(n: string): string { return "fixed.md"; },
+};
+
+// 类：实例方法 + 静态方法。方法名各自唯一，成员调用位才敢按裸名匹配。
+// 注意方法名【不能撞 sink 名单】（fs.stat / fs.readdir 等都在里面）—— 撞了的话
+// 调用点会被 sink 兜底直接标中，用例变成假通过，测的根本不是 helper 传播（R13）。
+export class Renderer {
+  inst(n: string): string { return n + ".md"; }
+  static toFile(n: string): string { return n + ".txt"; }
+}
+
+// 解构形参
+export function viaName({ name }: any): string { return name + ".md"; }
+
+// 三元返回（return 表达式是条件式，仍依赖形参）
+export function viaTernary(n: string): string { return n ? n + ".md" : "x.md"; }
+
+// 带默认值的形参
+export function viaDefault(n = "a"): string { return n + ".md"; }
+
+// 多条 return：依赖集取并集
+export function viaMultiReturn(n: string): string {
+  if (!n) return "empty.md";
+  return n + ".md";
+}
+
+// 真守卫，名字不含任何 G-C 后缀（G2 tier-0 自身证据）
+export function stamp(baseDir: string, targetPath: string): void {
+  const base = p.resolve(baseDir);
+  const target = p.resolve(targetPath);
+  if (target !== base && !target.startsWith(base + p.sep)) {
+    throw new Error("path escapes output dir");
+  }
+}
+`;
+
+const HANDLER_H = `// taintpath_H —— C4g：helper 换了个载体，污点照样要能穿过去
+import * as fs from "fs";
+import {
+  Util, Drop, Renderer, viaName, viaTernary, viaDefault, viaMultiReturn, stamp,
+} from "./helpers";
+
+// 正例：对象字面量方法（限定名 Util.toPath）
+export function emitObjMethod(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = Util.toPath(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 正例：类实例方法（宿主是变量 ⇒ 走成员调用位匹配）
+export function emitClassInstance(doc: Record<string, any>, outDir: string): void {
+  const r = new Renderer();
+  Object.keys(doc).forEach((k) => {
+    const rel = r.inst(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 正例：静态类方法（与对象字面量同形，走限定名）
+export function emitClassStatic(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = Renderer.toFile(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 正例：解构形参 —— 形参名要从绑定模式里抽出来
+export function emitDestructured(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = viaName({ name: k });
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 正例：三元返回
+export function emitTernary(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = viaTernary(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 正例：带默认值的形参
+export function emitDefaultParam(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = viaDefault(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 正例：多条 return（依赖集取并集）
+export function emitMultiReturn(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = viaMultiReturn(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 负对照：对象字面量方法同样丢弃形参 —— 收窄要跟得上新载体
+export function emitObjMethodDrop(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = Drop.fixed(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 负对照：解构形参喂进去的是字面量 —— 无污点流入
+export function emitDestructuredLiteral(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach(() => {
+    const rel = viaName({ name: "lit" });
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 负对照：对象字面量方法是真塑形，但实参是字面量
+export function emitObjMethodLiteral(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach(() => {
+    const rel = Util.toPath("static");
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 压制对照：召回放宽到方法与解构形参之后，守卫仍压得住
+export function emitMethodGuarded(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const file = outDir + "/" + Util.toPath(k);
+    stamp(outDir, file);
+    fs.writeFileSync(file, "x");
+  });
+}
+`;
+
 function writeProject(id: string, files: Record<string, string>): void {
   const dir = path.join(GEN_DIR, id);
   fs.mkdirSync(path.join(dir, "src"), { recursive: true });
@@ -1017,4 +1173,5 @@ if (require.main === module) {
   writeProject("taintpath_E", { "src/helpers.ts": HELPERS_E, "src/handler.ts": HANDLER_E });
   writeProject("taintpath_F", { "src/helpers.ts": HELPERS_F, "src/handler.ts": HANDLER_F });
   writeProject("taintpath_G", { "src/helpers.ts": HELPERS_G, "src/handler.ts": HANDLER_G });
+  writeProject("taintpath_H", { "src/helpers.ts": HELPERS_H, "src/handler.ts": HANDLER_H });
 }

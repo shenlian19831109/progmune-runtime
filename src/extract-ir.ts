@@ -1,4 +1,4 @@
-import { Project, Node, FunctionDeclaration, VariableStatement, ArrowFunction, Type, CallExpression, SourceFile } from "ts-morph";
+import { Project, Node, FunctionDeclaration, VariableStatement, ArrowFunction, MethodDeclaration, Type, CallExpression, SourceFile } from "ts-morph";
 import * as path from "path";
 import * as fs from "fs";
 import * as ts from "typescript";
@@ -814,9 +814,67 @@ function pathModuleAliases(project: Project): Set<string> {
   return out;
 }
 
-/** 一个纯塑形 helper 的形参表（有序）+ 「返回值真正依赖哪些形参」 */
-type ShaperInfo = { params: string[]; deps: Set<string> };
-type ShaperTable = { names: Set<string>; info: Map<string, ShaperInfo> };
+/** 一个纯塑形 helper 的形参表（有序）+「返回值真正依赖哪些形参」+ 原始 return 表达式 */
+type ShaperInfo = { params: string[]; deps: Set<string>; rets: string[] };
+/**
+ * names       —— 可按裸调用位匹配的（`withExt(` / `Util.toPath(`）
+ * memberNames —— 只按成员调用位匹配的（`.toPath(`）：对象是哪个不确定，
+ *                只有该方法名在全项目唯一时才登记，避免同名方法张冠李戴（R11）
+ */
+type ShaperTable = {
+  names: Set<string>;
+  memberNames: Set<string>;
+  info: Map<string, ShaperInfo>;
+};
+
+/**
+ * 形参名列表：解构形参（`function f({ name }) {…}`）不能用 getName() 直接取，
+ * ts-morph 给的是整个绑定模式，要把里面的 BindingElement 名字逐个抽出来。
+ */
+function paramNamesOf(p: { getNameNode(): Node }): string[] {
+  const nn = p.getNameNode();
+  if (Node.isIdentifier(nn)) return [nn.getText()];
+  const out: string[] = [];
+  for (const be of nn.getDescendantsOfKind(ts.SyntaxKind.BindingElement)) {
+    const n = be.getNameNode();
+    if (Node.isIdentifier(n)) out.push(n.getText());
+  }
+  return out;
+}
+
+/**
+ * 方法声明的宿主限定名：`const Util = { toPath(){} }` ⇒ "Util"、
+ * `const Cfg = { inner: { toPath(){} } }` ⇒ "Cfg.inner"、`class Paths {…}` ⇒ "Paths"。
+ * 取不出来就返回 null —— 认不出宿主的宁可不登记（保守侧）。
+ */
+function ownerQualifier(md: Node & { getParent(): Node | undefined }): string | null {
+  const parent = md.getParent();
+  if (!parent) return null;
+  if (Node.isClassDeclaration(parent)) return parent.getName() ?? null;
+  if (!Node.isObjectLiteralExpression(parent)) return null;
+  const parts: string[] = [];
+  let cur: Node = parent;
+  for (let guard = 0; guard < 5; guard++) {
+    const up = cur.getParent();
+    if (!up) return null;
+    if (Node.isPropertyAssignment(up)) {
+      const key = up.getNameNode?.();
+      const keyName = key
+        ? key.getText().replace(/^["'`]|["'`]$/g, "")
+        : up.getChildAtIndex(0).getText().replace(/^["'`]|["'`]$/g, "");
+      parts.unshift(keyName);
+      cur = up.getParent();
+      if (!cur) return null;
+      continue;
+    }
+    if (Node.isVariableDeclaration(up)) {
+      parts.unshift(up.getName());
+      return parts.join(".");
+    }
+    return null;
+  }
+  return null;
+}
 
 /** 按顶层逗号切分实参串（跳过字符串与已配平的括号，后者由调用方保证不含嵌套） */
 function splitTopLevelArgs(argText: string): string[] {
@@ -855,11 +913,15 @@ function splitTopLevelArgs(argText: string): string[] {
  * 抹掉的是**证据**，`shaped` 判定仍看原式 —— helper 是不是塑形，与它的返回值
  * 依不依赖实参是两件事。
  */
-function maskNonDependentArgs(text: string, info: Map<string, ShaperInfo>): string {
+function maskNonDependentArgs(
+  text: string,
+  info: Map<string, ShaperInfo>,
+  memberNames: Set<string> = new Set()
+): string {
   if (info.size === 0) return text;
   let cur = text;
   for (let round = 0; round < 3; round++) {
-    const next = maskNonDependentArgsOnce(cur, info);
+    const next = maskNonDependentArgsOnce(cur, info, memberNames);
     if (next === null) break;
     cur = next;
   }
@@ -867,12 +929,22 @@ function maskNonDependentArgs(text: string, info: Map<string, ShaperInfo>): stri
 }
 
 /** 抹掉**一个**最内层调用；没有任何调用需要抹时返回 null（供调用方收敛） */
-function maskNonDependentArgsOnce(text: string, info: Map<string, ShaperInfo>): string | null {
+function maskNonDependentArgsOnce(
+  text: string,
+  info: Map<string, ShaperInfo>,
+  memberNames: Set<string>
+): string | null {
   for (const [name, si] of info) {
-    const re = new RegExp(`(?:^|[^\\w$.])${escapeRe(name)}\\s*\\(`, "g");
+    const re = memberNames.has(name)
+      ? new RegExp(`\\.${escapeRe(name)}\\s*\\(`, "g")
+      : new RegExp(
+          `(?:^|[${name.includes(".") ? "^\\w$" : "^\\w$."}])${escapeRe(name)}\\s*\\(`,
+          "g"
+        );
     let m: RegExpExecArray | null;
     while ((m = re.exec(text)) !== null) {
-      const nameStart = m.index + (m[0].startsWith(name) ? 0 : 1);
+      // 成员形态的匹配从 `.` 起算，替换也连点一起换掉
+      const nameStart = memberNames.has(name) ? m.index : m.index + (m[0].startsWith(name) ? 0 : 1);
       const open = m.index + m[0].length - 1; // 开括号位置
       let depth = 0;
       let close = -1;
@@ -884,7 +956,10 @@ function maskNonDependentArgsOnce(text: string, info: Map<string, ShaperInfo>): 
       const argText = text.slice(open + 1, close);
       if (/[([{]/.test(argText)) continue; // 还嵌着别的调用 —— 下一轮再处理
       const args = splitTopLevelArgs(argText);
-      const kept = args.filter((_, i) => si.params[i] !== undefined && si.deps.has(si.params[i]));
+      // C4h-①：按【本次调用】重算一下哪些位置会流出去 —— 名录里的 deps 是对所有
+      // 实参形状都成立的最宽结论，本次若喂了常量，可能一个都流不出来。
+      const flags = callSiteKeepFlags(si, args, info, memberNames);
+      const kept = args.filter((_, i) => si.params[i] !== undefined && flags[i]);
       if (kept.length === args.length) continue; // 每个形参都被依赖 ⇒ 无需抹
       const replacement = kept.length > 0 ? `(${kept.join(" + ")})` : `""`;
       return text.slice(0, nameStart) + replacement + text.slice(close + 1);
@@ -894,13 +969,196 @@ function maskNonDependentArgsOnce(text: string, info: Map<string, ShaperInfo>): 
 }
 
 /**
- * return 表达式真正依赖哪些形参：把「已知 helper 调用里不被依赖的实参」抹掉后，
+ * C4h-①（2026-09-20）：调用点专用的「哪些实参会流到返回值里」。
+ *
+ * 名录里的 deps 是**跨调用点**的并集 —— 对所有实参形状都成立的最宽结论。
+ * 但本次调用喂的可能是常量：
+ *
+ *   viaFlag(n, flag) { return flag ? "fixed.md" : n + ".md"; }
+ *   viaFlag(k, true)  ⇒ 返回值就是字面量 —— n 位虽然进了函数也出不来。
+ *
+ * 于是按位置把**字面量实参**代进 return 表达式，试着解掉 cond 可判定的三元，
+ * 再看还有哪些形参活着。两种情形一律退回名录的 deps（保守侧，宁可不收精度）：
+ *   - 实参一个常量都没有；
+ *   - cond 代入后判不出真假 —— 认不出就不收精度。
+ */
+function callSiteKeepFlags(
+  si: ShaperInfo,
+  args: string[],
+  info: Map<string, ShaperInfo>,
+  memberNames: Set<string>
+): boolean[] {
+  const fallback = si.params.map((p) => si.deps.has(p));
+  if (si.rets.length === 0) return fallback;
+  const litArgs = new Map<string, string>();
+  args.forEach((a, i) => {
+    const p = si.params[i];
+    if (p === undefined) return;
+    const t = a.trim();
+    // 只代【字面量】—— 变量名进来不等于知道它的值
+    if (litKind(t) !== null) litArgs.set(p, t);
+  });
+  if (litArgs.size === 0) return fallback;
+  const subbed = si.rets.map((r) => foldDecidableTernary(substituteParams(r, litArgs)));
+  const remaining = si.params.filter((p) => p !== undefined && !litArgs.has(p));
+  // 嵌套 helper 的支路仍由 returnDeps 负责抹
+  const deps = returnDeps(subbed, remaining, info, memberNames);
+  return si.params.map((p) => deps.has(p));
+}
+
+/** 把形参名替换成实参文本（跳字符串与模板字面量内部 —— 判不出就保守地留着形参） */
+function substituteParams(expr: string, litArgs: Map<string, string>): string {
+  let out = "";
+  let quote = "";
+  let i = 0;
+  while (i < expr.length) {
+    const ch = expr[i];
+    if (quote) {
+      out += ch;
+      if (ch === "\\") { out += expr[i + 1] ?? ""; i += 2; continue; }
+      if (ch === quote) quote = "";
+      i++;
+      continue;
+    }
+    if (ch === '"' || ch === "'" || ch === "`") { quote = ch; out += ch; i++; continue; }
+    const m = /^[A-Za-z_$][\w$]*/.exec(expr.slice(i));
+    if (m && expr[i - 1] !== "." && litArgs.has(m[0])) {
+      out += `(${litArgs.get(m[0])})`; // 加括号保住运算优先级
+      i += m[0].length;
+      continue;
+    }
+    out += ch;
+    i++;
+  }
+  return out;
+}
+
+/** 递归解掉 cond 可判定的三元；判不出就保持原样（保守侧） */
+function foldDecidableTernary(expr: string, depth = 0): string {
+  if (depth > 4) return expr;
+  const t = topLevelTernary(expr);
+  if (!t) return expr;
+  const v = truthOf(t.cond);
+  if (v === null) return expr;
+  return foldDecidableTernary(v ? t.a : t.b, depth + 1);
+}
+
+/**
+ * 顶层三元的三段。要点是"顶层"：`a ? b ? c : d : e` 里第一个顶层 `:` 属于内层
+ * 三元，不能拿来切 —— 否则会把 b 误当成整个真值分支。
+ */
+function topLevelTernary(expr: string): { cond: string; a: string; b: string } | null {
+  let paren = 0;
+  let qDepth = 0;
+  let qPos = -1;
+  let cPos = -1;
+  let quote = "";
+  let i = 0;
+  while (i < expr.length) {
+    const ch = expr[i];
+    if (quote) {
+      if (ch === "\\") i++;
+      else if (ch === quote) quote = "";
+      i++;
+      continue;
+    }
+    if (ch === '"' || ch === "'" || ch === "`") { quote = ch; i++; continue; }
+    if (ch === "(" || ch === "[" || ch === "{") paren++;
+    else if (ch === ")" || ch === "]" || ch === "}") paren--;
+    else if (paren === 0) {
+      if (ch === "?") { if (qDepth === 0) qPos = i; qDepth++; }
+      else if (ch === ":" && qDepth > 0) {
+        if (qDepth === 1) { cPos = i; break; }
+        qDepth--;
+      }
+    }
+    i++;
+  }
+  if (qPos < 0 || cPos < 0) return null;
+  return { cond: expr.slice(0, qPos), a: expr.slice(qPos + 1, cPos), b: expr.slice(cPos + 1) };
+}
+
+/** 判得出来就返回 true/false，判不出返回 null */
+function truthOf(cond: string): boolean | null {
+  let s = cond.trim();
+  // 脱外层括号（整串被一层括号包住时反复脱）
+  while (s.startsWith("(") && matchingParen(s, 0) === s.length - 1) s = s.slice(1, -1).trim();
+  if (/^!\s*\S/.test(s)) {
+    const v = truthOf(s.replace(/^!\s*/, ""));
+    return v === null ? null : !v;
+  }
+  const lit = litKind(s);
+  if (lit) {
+    if (lit.k === "bool") return lit.v === "true";
+    if (lit.k === "null") return false; // null / undefined
+    if (lit.k === "num") return Number(lit.v) !== 0;
+    return lit.v.length > 0; // 字符串
+  }
+  const eq = /^(.+?)\s*(===|!==)\s*(.+)$/.exec(s);
+  if (eq) {
+    const l = litKind(eq[1].trim());
+    const r = litKind(eq[3].trim());
+    // 两边都是字面量但类型不同（`"1" === 1`）—— JS 语义下也是 false/true，可判
+    if (l && r) {
+      const same = l.k === r.k && l.v === r.v;
+      return eq[2] === "===" ? same : !same;
+    }
+  }
+  return null;
+}
+
+/** 字面量种类：字符串 / 数字 / 布尔 / null-undefined；不是字面量返回 null */
+function litKind(s: string): { k: "str" | "num" | "bool" | "null"; v: string } | null {
+  if (/^"(?:\\.|[^"\\])*"$/.test(s) || /^'(?:\\.|[^'\\])*'$/.test(s) || /^`(?:\\.|[^`\\])*`$/.test(s)) {
+    return { k: "str", v: s.slice(1, -1) };
+  }
+  if (/^-?\d+(?:\.\d+)?$/.test(s)) return { k: "num", v: s };
+  if (s === "true" || s === "false") return { k: "bool", v: s };
+  if (s === "null" || s === "undefined") return { k: "null", v: s };
+  return null;
+}
+
+/** s[open] 是开括号时，返回与之配对的闭括号下标；不配对返回 -1 */
+function matchingParen(s: string, open: number): number {
+  let depth = 0;
+  for (let i = open; i < s.length; i++) {
+    if (s[i] === "(") depth++;
+    else if (s[i] === ")") { depth--; if (depth === 0) return i; }
+  }
+  return -1;
+}
+
+/**
+ * 同名多处的依赖集合并：按**形参位**取并集（OR）—— 任何一个实现在某个位置
+ * 会流出污点，那个位置就得当成会流出（合并到保守侧）。
+ * 形参表不一致时不合并 return 表达式（`rets=[]` ⇒ 调用点折叠自动退回，
+ * 只按并集传播），因为把 A 的形参名代进 B 的 return 是错的。
+ */
+function mergeShapers(infos: ShaperInfo[]): ShaperInfo {
+  if (infos.length === 0) return { params: [], deps: new Set<string>(), rets: [] };
+  const params = infos.reduce((a, b) => (b.params.length > a.params.length ? b : a)).params;
+  const flags = params.map(() => false);
+  let sameShape = true;
+  for (const si of infos) {
+    if (si.params.length !== params.length || si.params.some((p, i) => p !== params[i])) sameShape = false;
+    si.params.forEach((p, i) => { if (i < flags.length && si.deps.has(p)) flags[i] = true; });
+  }
+  const rets = sameShape ? infos.flatMap((si) => si.rets) : [];
+  return { params, deps: new Set(params.filter((_, i) => flags[i])), rets };
+}
+
+/** return 表达式真正依赖哪些形参：把「已知 helper 调用里不被依赖的实参」抹掉后，
  * 剩下的形参名就是会流进返回值的那些。`wrap(n) { return discard(n); }` ⇒ 空集。
  */
-function returnDeps(exprs: string[], params: string[], info: Map<string, ShaperInfo>): Set<string> {
+function returnDeps(
+  exprs: string[],
+  params: string[],
+  info: Map<string, ShaperInfo>,
+  memberNames: Set<string> = new Set()
+): Set<string> {
   const deps = new Set<string>();
   for (const raw of exprs) {
-    const masked = maskNonDependentArgs(raw, info);
+    const masked = maskNonDependentArgs(raw, info, memberNames);
     for (const p of params) {
       if (new RegExp(`(?:^|[^\\w$.])${escapeRe(p)}(?:[^\\w$]|$)`).test(masked)) deps.add(p);
     }
@@ -922,12 +1180,32 @@ function returnExprsOf(body: Node): string[] {
 /** 扫描全项目，收集「纯塑形」helper 的名字 + 返回值依赖（有界两轮不动点） */
 function pureShaperFunctionNames(project: Project): ShaperTable {
   const sinkRe = tsSinkCallRegex();
-  const cands: Array<{
-    name: string; params: Set<string>; paramList: string[]; rets: string[];
-  }> = [];
+
+  /**
+   * 候选。三段的用意：
+   *   key   —— 内部唯一编号。**同名多处各有一条**（同一 `toPath` 被两个类实现时
+   *            两条并存），因为「确证」是逐条发生的；
+   *   name  —— 确证后**对外发布**的名字；null 表示这条只作为"资格凭证"，不发
+   *            布（宿主认不出 / 名字已被先到者占用）；
+   *   group —— 成员形态的裸名（方法与属性箭头），用于 C4h-② 的同名合并。
+   */
+  type Cand = {
+    key: string; name: string | null; group: string | null;
+    params: Set<string>; paramList: string[]; rets: string[];
+  };
+  const cands: Cand[] = [];
+  const takenNames = new Set<string>();
+  const groups = new Map<string, string[]>();
 
   /** 登记一个候选：三条判据 —— 有形参 / 有返回值 / 体内无 sink */
-  const consider = (name: string, paramNodes: string[], declText: string, bodyNode: Node) => {
+  const consider = (
+    key: string,
+    name: string | null,
+    group: string | null,
+    paramNodes: string[],
+    declText: string,
+    bodyNode: Node
+  ) => {
     const paramList = paramNodes.filter(Boolean);
     const params = new Set(paramList);
     if (params.size === 0) return;
@@ -937,8 +1215,17 @@ function pureShaperFunctionNames(project: Project): ShaperTable {
     // 让「遇到花括号就停」的朴素正则在 `path.join(a,b) + \`.${c}\`` 上截断。
     const rets = returnExprsOf(bodyNode);
     if (rets.length === 0) return; // ①
-    if (cands.some((c) => c.name === name)) return; // 同名重复登记：先到先得
-    cands.push({ name, params, paramList, rets });
+    let pub = name;
+    if (pub !== null) {
+      if (takenNames.has(pub)) pub = null; // 同名重复登记：先到先得，后者降到资格凭证
+      else takenNames.add(pub);
+    }
+    cands.push({ key, name: pub, group, params, paramList, rets });
+    if (group !== null) {
+      const list = groups.get(group) ?? [];
+      list.push(key);
+      groups.set(group, list);
+    }
   };
 
   for (const sf of project.getSourceFiles()) {
@@ -949,8 +1236,10 @@ function pureShaperFunctionNames(project: Project): ShaperTable {
       const body = fn.getBody();
       if (!body) continue; // 重载签名 / declare 只有签名
       consider(
+        `fn:${name}`,
         name,
-        fn.getParameters().map((p) => p.getName()),
+        null,
+        fn.getParameters().flatMap(paramNamesOf),
         fn.getText(),
         body
       );
@@ -968,11 +1257,77 @@ function pureShaperFunctionNames(project: Project): ShaperTable {
       const body = fnLike.getBody();
       if (!body) continue;
       consider(
+        `var:${vd.getName()}`,
         vd.getName(),
-        fnLike.getParameters().map((p) => p.getName()),
+        null,
+        fnLike.getParameters().flatMap(paramNamesOf),
         init.getText(),
         body
       );
+    }
+  }
+
+  // ── 成员形态的 helper（对象字面量方法 / 类方法 / 属性箭头 / 属性赋值箭头）──
+  //     `const Util = { toPath(n) {…} }`、`class Paths { toPath(n) {…} }`、
+  //     `const Util = { toPath: (n) => n + ".md" }`、`Util.toPath = (n) => …`
+  //     都不在 getFunctions() 里。C4e 时刻意不做的理由仍在（R11）：按裸名放行会
+  //     让别的对象上的同名条目被误认成塑形。所以这里只登记**限定名** Owner.method；
+  //     裸名（`.method(` 这种成员调用位）留给下面的 C4h-②，按「同名每一处都被
+  //     确证」这条不变量统一放行。
+  let memberSeq = 0;
+  /** 登记一个成员形态的函数体；owner 认得出时按限定名发布 */
+  const considerMember = (
+    bare: string,
+    owner: string | null,
+    paramNodes: string[],
+    declText: string,
+    body: Node
+  ) => {
+    memberSeq += 1;
+    consider(
+      `mb:${memberSeq}`,
+      owner !== null ? `${owner}.${bare}` : null,
+      bare,
+      paramNodes,
+      declText,
+      body
+    );
+  };
+  for (const sf of project.getSourceFiles()) {
+    // (c) 对象字面量方法 / 类方法
+    for (const md of sf.getDescendantsOfKind(ts.SyntaxKind.MethodDeclaration)) {
+      const bare = md.getName();
+      if (!bare || !/^[A-Za-z_$][\w$]*$/.test(bare)) continue; // 计算属性名认不出 ⇒ 不收
+      const body = md.getBody();
+      if (!body) continue; // 重载签名 / declare
+      considerMember(bare, ownerQualifier(md), md.getParameters().flatMap(paramNamesOf), md.getText(), body);
+    }
+    // (d) 属性承载的箭头 / 函数表达式 —— 现代工程里 Objects-as-namespace 的常态。
+    //     ownerQualifier 从父链走（对象字面量 → 属性赋值 → 变量声明），嵌套也认。
+    for (const pa of sf.getDescendantsOfKind(ts.SyntaxKind.PropertyAssignment)) {
+      const init = pa.getInitializer();
+      if (!init) continue;
+      if (!Node.isArrowFunction(init) && !Node.isFunctionExpression(init)) continue;
+      const body = (init as ArrowFunction).getBody();
+      if (!body) continue;
+      const bare = pa.getName();
+      if (!bare || !/^[A-Za-z_$][\w$]*$/.test(bare)) continue;
+      considerMember(bare, ownerQualifier(pa), (init as ArrowFunction).getParameters().flatMap(paramNamesOf), init.getText(), body);
+    }
+    // (e) 后挂上去的属性箭头 `Util.toPath = (n) => …`（monkey patch / 渐进导出）
+    for (const be of sf.getDescendantsOfKind(ts.SyntaxKind.BinaryExpression)) {
+      if (be.getOperatorToken().getKind() !== ts.SyntaxKind.EqualsToken) continue;
+      const left = be.getLeft();
+      const right = be.getRight();
+      if (!Node.isPropertyAccessExpression(left)) continue;
+      if (!Node.isArrowFunction(right) && !Node.isFunctionExpression(right)) continue;
+      const body = (right as ArrowFunction).getBody();
+      if (!body) continue;
+      const qname = left.getText();
+      // 只收 `Name.member` 这种纯静态链（`this.x` / `a[b].x` 一律不认）
+      if (!/^[A-Za-z_$][\w$]*(?:\.[\w$]+)+$/.test(qname)) continue;
+      const bare = qname.split(".").pop() as string;
+      considerMember(bare, qname.slice(0, -(bare.length + 1)), (right as ArrowFunction).getParameters().flatMap(paramNamesOf), right.getText(), body);
     }
   }
 
@@ -981,14 +1336,32 @@ function pureShaperFunctionNames(project: Project): ShaperTable {
   for (const a of pathModuleAliases(project)) extraIdents.add(a);
   const names = new Set<string>();
   const info = new Map<string, ShaperInfo>();
+  const acceptedKeys = new Set<string>();
+  const keyInfo = new Map<string, ShaperInfo>();
+  // 给 maskNonDependentArgsOnce 用的成员名候选（**尚未确证**）。这里宽一点是安全
+  // 的：那里的替换只会针对 info 里确证过的名字发生，这个集合只决定「按成员位还是
+  // 按裸名位去匹配」。
+  const prelimMember = new Set<string>(groups.keys());
+  const publish = (name: string, si: ShaperInfo): void => {
+    if (names.has(name)) return;
+    names.add(name);
+    info.set(name, si);
+  };
+
   for (let round = 0; round < 2; round++) {
     let added = false;
     for (const c of cands) {
-      if (names.has(c.name)) continue;
+      if (acceptedKeys.has(c.key)) continue;
       const ok = c.rets.every((e) => isPureShaperExpr(e, c.params, names, extraIdents));
       if (!ok) continue;
-      names.add(c.name);
-      info.set(c.name, { params: c.paramList, deps: returnDeps(c.rets, c.paramList, info) });
+      acceptedKeys.add(c.key);
+      const si: ShaperInfo = {
+        params: c.paramList,
+        deps: returnDeps(c.rets, c.paramList, info, prelimMember),
+        rets: c.rets,
+      };
+      keyInfo.set(c.key, si);
+      if (c.name !== null) publish(c.name, si);
       added = true;
     }
     if (!added) break;
@@ -997,13 +1370,13 @@ function pureShaperFunctionNames(project: Project): ShaperTable {
   // C4f：依赖分析有次序依赖 —— `wrap(n) { return discard(n); }` 若在 discard 之前
   // 被接受，那一刻 info 里还没有 discard ⇒ deps 偏宽（偏宽 = 继续传播 = 保守侧，
   // 不会误报，但收不紧）。名录定稿后按完整的 info 再算两轮，把次序依赖消掉。
-  const byName = new Map(cands.map((c) => [c.name, c]));
+  const candByKey = new Map(cands.map((c) => [c.key, c]));
   for (let round = 0; round < 2; round++) {
     let changed = false;
-    for (const [name, si] of info) {
-      const c = byName.get(name);
+    for (const [key, si] of keyInfo) {
+      const c = candByKey.get(key);
       if (!c) continue;
-      const d = returnDeps(c.rets, si.params, info);
+      const d = returnDeps(c.rets, si.params, info, prelimMember);
       if (d.size !== si.deps.size || [...d].some((x) => !si.deps.has(x))) {
         si.deps = d;
         changed = true;
@@ -1011,7 +1384,26 @@ function pureShaperFunctionNames(project: Project): ShaperTable {
     }
     if (!changed) break;
   }
-  return { names, info };
+
+  // ── C4h-②（2026-09-20）：同名【成员】多处，只要**每一处**都被确证为纯塑形 ──
+  // 旧规则（C4g）是「该方法名全项目唯一才登记裸名」。唯一性只是【不可能认错】这个
+  // 不变量的一个充分条件，不是必要条件：同名两处都被确证了，`.toPath(` 这个成员
+  // 调用位同样不可能落到别的实现上。把"唯一"换成"全部确证"，两个类各有一个同名
+  //  helper 时两边都能接上；依赖集按形参位取并集（保守侧）。
+  //
+  // 顺带修掉一处真实缺陷：旧代码在 consider() 之后【无条件】把裸名塞进
+  // memberNames，于是「方法名唯一但三条判据不成立」的方法，其成员调用位照样被
+  // 当成塑形 ⇒ 误标。探针实测（2026-09-20）：
+  //   `class Reg { lookup(n) { return registry[n]; } }`（registry 是模块级非字面量
+  //   对象 ⇒ 判据③不成立）之后写 `r.lookup(k)`，照样MARKED。
+  // 现在改成确证之后才登记，这个口子自然封上。
+  const memberNames = new Set<string>();
+  for (const [bare, keys] of groups) {
+    if (!keys.every((k) => acceptedKeys.has(k))) continue;
+    memberNames.add(bare);
+    publish(bare, mergeShapers(keys.map((k) => keyInfo.get(k)).filter(Boolean) as ShaperInfo[]));
+  }
+  return { names, memberNames, info };
 }
 
 const TS_FILE_SINK_NAMES = [
@@ -1246,8 +1638,14 @@ function taintedViaShaper(text: string, tainted: Set<string>, shapers?: ShaperTa
     shapers && shapers.names.size > 0
       ? new RegExp(`(?:^|[^\\w$.])(?:${[...shapers.names].map(escapeRe).join("|")})\\s*\\(`)
       : null;
+  // C4g：成员调用位（`.toPath(`）—— 宿主是变量、限定名匹配不到时用
+  const memberShaperRe =
+    shapers && shapers.memberNames.size > 0
+      ? new RegExp(`\\.(?:${[...shapers.memberNames].map(escapeRe).join("|")})\\s*\\(`)
+      : null;
   // C4f：helper 调用里【返回值不依赖的实参】不构成污点证据。
   const shaperInfo = shapers?.info;
+  const memberNames = shapers?.memberNames;
   let grewAny = false;
   for (let depth = 0; depth < 3; depth++) {
     // 注意：这里**不能**以 `tainted.size === 0` 提前退出 —— 种子是根模式
@@ -1266,11 +1664,13 @@ function taintedViaShaper(text: string, tainted: Set<string>, shapers?: ShaperTa
       const shaped =
         TS_PATH_SHAPER_RE.test(rhs) ||
         TS_CONCAT_RE.test(rhs) ||
-        (localShaperRe !== null && localShaperRe.test(rhs));
+        (localShaperRe !== null && localShaperRe.test(rhs)) ||
+        (memberShaperRe !== null && memberShaperRe.test(rhs));
       // 证据看的是【抹掉不被依赖的实参之后】的 rhs：`discard(k)` 里 k 不流出，
       // 那条支路就不该算证据。`shaped` 仍看原式 —— helper 是不是塑形，与它的
       // 返回值依不依赖实参是两件事。
-      const evidence = shaperInfo ? maskNonDependentArgs(rhs, shaperInfo) : rhs;
+      const evidence =
+        shaperInfo && memberNames ? maskNonDependentArgs(rhs, shaperInfo, memberNames) : rhs;
       if (taintRe.test(evidence) && shaped) {
         tainted.add(name);
         added = true;

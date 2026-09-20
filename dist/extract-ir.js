@@ -772,6 +772,60 @@ function pathModuleAliases(project) {
     }
     return out;
 }
+/**
+ * 形参名列表：解构形参（`function f({ name }) {…}`）不能用 getName() 直接取，
+ * ts-morph 给的是整个绑定模式，要把里面的 BindingElement 名字逐个抽出来。
+ */
+function paramNamesOf(p) {
+    const nn = p.getNameNode();
+    if (ts_morph_1.Node.isIdentifier(nn))
+        return [nn.getText()];
+    const out = [];
+    for (const be of nn.getDescendantsOfKind(ts.SyntaxKind.BindingElement)) {
+        const n = be.getNameNode();
+        if (ts_morph_1.Node.isIdentifier(n))
+            out.push(n.getText());
+    }
+    return out;
+}
+/**
+ * 方法声明的宿主限定名：`const Util = { toPath(){} }` ⇒ "Util"、
+ * `const Cfg = { inner: { toPath(){} } }` ⇒ "Cfg.inner"、`class Paths {…}` ⇒ "Paths"。
+ * 取不出来就返回 null —— 认不出宿主的宁可不登记（保守侧）。
+ */
+function ownerQualifier(md) {
+    const parent = md.getParent();
+    if (!parent)
+        return null;
+    if (ts_morph_1.Node.isClassDeclaration(parent))
+        return parent.getName() ?? null;
+    if (!ts_morph_1.Node.isObjectLiteralExpression(parent))
+        return null;
+    const parts = [];
+    let cur = parent;
+    for (let guard = 0; guard < 5; guard++) {
+        const up = cur.getParent();
+        if (!up)
+            return null;
+        if (ts_morph_1.Node.isPropertyAssignment(up)) {
+            const key = up.getNameNode?.();
+            const keyName = key
+                ? key.getText().replace(/^["'`]|["'`]$/g, "")
+                : up.getChildAtIndex(0).getText().replace(/^["'`]|["'`]$/g, "");
+            parts.unshift(keyName);
+            cur = up.getParent();
+            if (!cur)
+                return null;
+            continue;
+        }
+        if (ts_morph_1.Node.isVariableDeclaration(up)) {
+            parts.unshift(up.getName());
+            return parts.join(".");
+        }
+        return null;
+    }
+    return null;
+}
 /** 按顶层逗号切分实参串（跳过字符串与已配平的括号，后者由调用方保证不含嵌套） */
 function splitTopLevelArgs(argText) {
     const out = [];
@@ -820,12 +874,12 @@ function splitTopLevelArgs(argText) {
  * 抹掉的是**证据**，`shaped` 判定仍看原式 —— helper 是不是塑形，与它的返回值
  * 依不依赖实参是两件事。
  */
-function maskNonDependentArgs(text, info) {
+function maskNonDependentArgs(text, info, memberNames = new Set()) {
     if (info.size === 0)
         return text;
     let cur = text;
     for (let round = 0; round < 3; round++) {
-        const next = maskNonDependentArgsOnce(cur, info);
+        const next = maskNonDependentArgsOnce(cur, info, memberNames);
         if (next === null)
             break;
         cur = next;
@@ -833,12 +887,15 @@ function maskNonDependentArgs(text, info) {
     return cur;
 }
 /** 抹掉**一个**最内层调用；没有任何调用需要抹时返回 null（供调用方收敛） */
-function maskNonDependentArgsOnce(text, info) {
+function maskNonDependentArgsOnce(text, info, memberNames) {
     for (const [name, si] of info) {
-        const re = new RegExp(`(?:^|[^\\w$.])${escapeRe(name)}\\s*\\(`, "g");
+        const re = memberNames.has(name)
+            ? new RegExp(`\\.${escapeRe(name)}\\s*\\(`, "g")
+            : new RegExp(`(?:^|[${name.includes(".") ? "^\\w$" : "^\\w$."}])${escapeRe(name)}\\s*\\(`, "g");
         let m;
         while ((m = re.exec(text)) !== null) {
-            const nameStart = m.index + (m[0].startsWith(name) ? 0 : 1);
+            // 成员形态的匹配从 `.` 起算，替换也连点一起换掉
+            const nameStart = memberNames.has(name) ? m.index : m.index + (m[0].startsWith(name) ? 0 : 1);
             const open = m.index + m[0].length - 1; // 开括号位置
             let depth = 0;
             let close = -1;
@@ -872,10 +929,10 @@ function maskNonDependentArgsOnce(text, info) {
  * return 表达式真正依赖哪些形参：把「已知 helper 调用里不被依赖的实参」抹掉后，
  * 剩下的形参名就是会流进返回值的那些。`wrap(n) { return discard(n); }` ⇒ 空集。
  */
-function returnDeps(exprs, params, info) {
+function returnDeps(exprs, params, info, memberNames = new Set()) {
     const deps = new Set();
     for (const raw of exprs) {
-        const masked = maskNonDependentArgs(raw, info);
+        const masked = maskNonDependentArgs(raw, info, memberNames);
         for (const p of params) {
             if (new RegExp(`(?:^|[^\\w$.])${escapeRe(p)}(?:[^\\w$]|$)`).test(masked))
                 deps.add(p);
@@ -926,7 +983,7 @@ function pureShaperFunctionNames(project) {
             const body = fn.getBody();
             if (!body)
                 continue; // 重载签名 / declare 只有签名
-            consider(name, fn.getParameters().map((p) => p.getName()), fn.getText(), body);
+            consider(name, fn.getParameters().flatMap(paramNamesOf), fn.getText(), body);
         }
         // (b) 变量承载的箭头 / 函数表达式 —— 现代 TS 里 helper 的主力写法
         //     `export const toPath = (n: string) => n + ".md";`
@@ -943,8 +1000,46 @@ function pureShaperFunctionNames(project) {
             const body = fnLike.getBody();
             if (!body)
                 continue;
-            consider(vd.getName(), fnLike.getParameters().map((p) => p.getName()), init.getText(), body);
+            consider(vd.getName(), fnLike.getParameters().flatMap(paramNamesOf), init.getText(), body);
         }
+    }
+    // (c) 对象字面量方法 / 类方法 —— C4g。
+    //     `const Util = { toPath(n) {…} }`、`class Paths { toPath(n) {…} }` 都不在
+    //     getFunctions() 里，C4e 时刻意没做：按裸名放行会让别的对象上的同名方法被
+    //     误认成塑形（R11）。这里只登记**限定名** Owner.method；只有当该方法名在全
+    //     项目唯一（不存在同名方法）时，才额外允许 `.method(` 这种不写宿主名的
+    //     成员调用 —— 实例方法的主要写法正是这个。
+    const methodCands = [];
+    for (const sf of project.getSourceFiles()) {
+        for (const md of sf.getDescendantsOfKind(ts.SyntaxKind.MethodDeclaration)) {
+            const bare = md.getName();
+            if (!bare)
+                continue;
+            const body = md.getBody();
+            if (!body)
+                continue; // 重载签名 / declare
+            const owner = ownerQualifier(md);
+            methodCands.push({ qualified: owner ? `${owner}.${bare}` : null, bare, md });
+        }
+    }
+    const bareCount = new Map();
+    for (const m of methodCands)
+        bareCount.set(m.bare, (bareCount.get(m.bare) ?? 0) + 1);
+    const memberNames = new Set();
+    for (const m of methodCands) {
+        const params = m.md.getParameters().flatMap(paramNamesOf);
+        const text = m.md.getText();
+        const body = m.md.getBody();
+        if (!body)
+            continue;
+        // 实例方法的主要写法是 `p.toPath(k)` —— 宿主名是变量，限定名匹配不到，
+        // 所以唯一时额外登记「按成员调用位匹配」的裸名。
+        if (bareCount.get(m.bare) === 1) {
+            consider(m.bare, params, text, body);
+            memberNames.add(m.bare);
+        }
+        if (m.qualified)
+            consider(m.qualified, params, text, body);
     }
     // 形参之外允许出现的自由标识符 = 模块级字面量常量 ∪ 确证的 path 模块别名
     const extraIdents = moduleLiteralConstNames(project);
@@ -961,7 +1056,10 @@ function pureShaperFunctionNames(project) {
             if (!ok)
                 continue;
             names.add(c.name);
-            info.set(c.name, { params: c.paramList, deps: returnDeps(c.rets, c.paramList, info) });
+            info.set(c.name, {
+                params: c.paramList,
+                deps: returnDeps(c.rets, c.paramList, info, memberNames),
+            });
             added = true;
         }
         if (!added)
@@ -977,7 +1075,7 @@ function pureShaperFunctionNames(project) {
             const c = byName.get(name);
             if (!c)
                 continue;
-            const d = returnDeps(c.rets, si.params, info);
+            const d = returnDeps(c.rets, si.params, info, memberNames);
             if (d.size !== si.deps.size || [...d].some((x) => !si.deps.has(x))) {
                 si.deps = d;
                 changed = true;
@@ -986,7 +1084,7 @@ function pureShaperFunctionNames(project) {
         if (!changed)
             break;
     }
-    return { names, info };
+    return { names, memberNames, info };
 }
 const TS_FILE_SINK_NAMES = [
     "readFile", "readFileSync", "writeFile", "writeFileSync",
@@ -1213,8 +1311,13 @@ function taintedViaShaper(text, tainted, shapers) {
     const localShaperRe = shapers && shapers.names.size > 0
         ? new RegExp(`(?:^|[^\\w$.])(?:${[...shapers.names].map(escapeRe).join("|")})\\s*\\(`)
         : null;
+    // C4g：成员调用位（`.toPath(`）—— 宿主是变量、限定名匹配不到时用
+    const memberShaperRe = shapers && shapers.memberNames.size > 0
+        ? new RegExp(`\\.(?:${[...shapers.memberNames].map(escapeRe).join("|")})\\s*\\(`)
+        : null;
     // C4f：helper 调用里【返回值不依赖的实参】不构成污点证据。
     const shaperInfo = shapers?.info;
+    const memberNames = shapers?.memberNames;
     let grewAny = false;
     for (let depth = 0; depth < 3; depth++) {
         // 注意：这里**不能**以 `tainted.size === 0` 提前退出 —— 种子是根模式
@@ -1235,11 +1338,12 @@ function taintedViaShaper(text, tainted, shapers) {
                 continue;
             const shaped = TS_PATH_SHAPER_RE.test(rhs) ||
                 TS_CONCAT_RE.test(rhs) ||
-                (localShaperRe !== null && localShaperRe.test(rhs));
+                (localShaperRe !== null && localShaperRe.test(rhs)) ||
+                (memberShaperRe !== null && memberShaperRe.test(rhs));
             // 证据看的是【抹掉不被依赖的实参之后】的 rhs：`discard(k)` 里 k 不流出，
             // 那条支路就不该算证据。`shaped` 仍看原式 —— helper 是不是塑形，与它的
             // 返回值依不依赖实参是两件事。
-            const evidence = shaperInfo ? maskNonDependentArgs(rhs, shaperInfo) : rhs;
+            const evidence = shaperInfo && memberNames ? maskNonDependentArgs(rhs, shaperInfo, memberNames) : rhs;
             if (taintRe.test(evidence) && shaped) {
                 tainted.add(name);
                 added = true;

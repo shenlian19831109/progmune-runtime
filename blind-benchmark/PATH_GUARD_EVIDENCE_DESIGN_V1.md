@@ -563,3 +563,59 @@ const rel = dropParam(k);                                // k 流不出来，但
 新增 `taintpath_G`（12 条：4 mark / 7 no-taint / 1 suppressed）。反向验证按 R14
 多切一刀：把依赖分析退回「全部形参都算依赖」（等价于收窄前的老行为），
 那 7 条 no-taint 必须立刻转红 —— 否则说明这批对照一条都没咬住。
+
+---
+
+## 十三、C4g：helper 换个载体（2026-09-20）
+
+### 缺口：helper 不一定是函数，也可能是方法
+
+C4e 补了箭头与函数表达式，但 helper 还有一种很常见的载体 —— 方法和类：
+
+```ts
+export const Util = { toPath(n: string): string { return n + ".md"; } };   // 对象字面量方法
+export class Renderer { inst(n: string): string { return n + ".md"; } }    // 类实例方法
+```
+
+C4e 时刻意没做这一路，理由是 R11：按裸名放行，别的对象上的同名方法会被误认成
+塑形。这一轮的解法是**限定名 + 唯一性**：
+
+- 宿主名能确定时登记 `Owner.method`，调用点 `Util.toPath(k)` 直接对上；
+- 实例方法的主要写法是 `r.inst(k)`（宿主是变量，限定名对不上），所以该方法名在
+  **全项目唯一**时，额外允许 `.inst(` 这种成员调用位匹配。唯一性是 R11 的替代品：
+  不存在同名方法，就不可能张冠李戴。同名方法出现两次时一律不登记，宁可漏报。
+
+另外两处是顺手补的：解构形参（`function f({ name }) {…}` 的 `getName()` 给的是
+整个绑定模式而不是 `name`，要从 BindingElement 里抽）和「三元返回 / 默认参 /
+多 return」—— 后三条探针实测**本来就是通的**，备忘里的「依赖分析深层形态」清单
+大部分是过期的（R12 第四次生效）。
+
+### 语料里踩到的坑：helper 名字不能撞 sink 名单
+
+H 族第一版把静态方法写成 `Renderer.stat(k)`，闸门全绿。但反向验证「摘掉方法收集」
+之后它**仍然标** —— 一查：`stat` 就在 `TS_FILE_SINK_NAMES` 里，调用点被 sink 兜底
+直接命中，跟 helper 传播毫无关系。实测 `Other.stat(k)`（接收者根本没定义）、
+以及类里压根没有 `stat` 方法，照样标。
+
+这就是 R13 说的旁路，第二次踩到：**写完用例要问「这个标记还能从哪条路产生」**，
+这条尤其阴 —— 它让正例「标对了」，但标对的原因完全是另一回事。改名为 `toFile`
+之后归因才干净（摘掉方法收集 ⇒ 3 条方法正例全部转漏报）。
+
+### 反向验证四刀（归因）
+
+| 刀 | 改动 | 转红的用例 |
+|---|---|---|
+| 1 | 摘掉方法候选收集 | emitObjMethod / emitClassInstance / emitClassStatic |
+| 2 | 只摘掉成员调用位 `.method(` | emitClassInstance（宿主是变量那条） |
+| 3 | 解构形参名提取退回整体文本 | emitDestructured |
+| 4 | 关掉 C4f 收窄 | G 族 6 条 + H 族 emitObjMethodDrop |
+
+刀 4 顺带证明了另一件事：C4f 的收窄对新载体同样生效 —— `Drop.fixed(k)`（对象字面量
+方法丢弃形参）不是「本来就没人管」的空转对照。
+
+### 刻意不做：常量实参代入
+
+`viaTernaryDrop(n, flag) { return flag ? "fixed.md" : n + ".md"; }` 在
+`viaTernaryDrop(k, true)` 下返回的是常量分支，形参不流出 —— 现在仍会被判污染。
+要收这条得在调用点做常量传播（把实参字面量代入 return 再重算依赖），属于另一个
+量级的改动，且代入出错的代价是漏报。登记为已知缺口。
