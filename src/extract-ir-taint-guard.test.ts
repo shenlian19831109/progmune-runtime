@@ -493,6 +493,68 @@ function assertTemplateName(name: string): void {
 });
 
 /**
+ * ── fr-016 post 侧的压制不是同义反复（2026-09-19，3.7.38）──
+ *
+ * 疑虑是合理的：G-C 的后缀表里 `Within` 这一项，当初就是照着 fr-016 的
+ * `assertWithinDir` 加进去的。那么 fr-016 的 post=0 到底算不算证据？
+ *
+ * 区分办法：把守卫函数名换成**不含任何 G-C 后缀**的名字（ enforces 都不带
+ * assert/ensure/check/validate 前缀，这里用 `containCheck` 与 `stamp`），
+ * 只保留它函数体内的真实包含性校验：
+ *   const base = path.resolve(baseDir);
+ *   if (!path.resolve(targetPath).startsWith(base + path.sep)) throw …
+ * 若仍被压制，说明压制的依据是被调用方**自身的证据**（G2 的 tier-0），
+ * 不是名字；那么 fr-016 的 post=0 就不是用测试集反推出来的同义反复。
+ * 正对照：同形状把函数体里的 startWith 删掉，必须重新标记。
+ */
+describe("fr-016 的压制依据是被调用方的证据，不是它的名字", () => {
+  const body = (guardName: string, keepGuard: boolean) => [
+    'import * as fs from "fs";',
+    'import * as path from "path";',
+    `function ${guardName}(baseDir: string, targetPath: string): void {`,
+    "  const base = path.resolve(baseDir);",
+    "  const target = path.resolve(targetPath);",
+    keepGuard
+      ? '  if (target !== base && !target.startsWith(base + path.sep)) throw new Error("outside");'
+      : "  // 故意不校验：这里是正对照，删掉守卫后必须重新标记",
+    "}",
+    "export function emit(doc: Record<string, any>, outDir: string) {",
+    "  for (const channelName of Object.keys(doc)) {",
+    "    const channelFile = `${outDir}/${channelName}.yaml`;",
+    `    ${guardName}(outDir, channelFile);`,
+    '    fs.writeFileSync(channelFile, "x");',
+    "  }",
+    "}",
+  ].join("\n");
+
+  it(
+    "负向：守卫函数名不含 G-C 后缀，但其函数体含包含性校验 ⇒ 仍不标记",
+    () => {
+      const dir = makeProject({ "a.ts": body("stamp", true) });
+      try {
+        expect(marksFor(dir, "emit")).not.toContain(PATH_MARK);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    },
+    150_000
+  );
+
+  it(
+    "正对照：同形状删掉函数体里的 startsWith ⇒ 必须重新标记（证明上一条不是空过）",
+    () => {
+      const dir = makeProject({ "a.ts": body("stamp", false) });
+      try {
+        expect(marksFor(dir, "emit")).toContain(PATH_MARK);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    },
+    150_000
+  );
+});
+
+/**
  * ── 已知边界（本次写用例时实测踩到，记录以免后人重复踩）──
  *
  * C4：污点经表达式包装后不再传播。

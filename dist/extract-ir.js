@@ -516,15 +516,20 @@ function escapeRe(s) {
  */
 function pathGuardFunctionNames(project) {
     const guarded = new Set();
+    /** tier-0：函数体自身含校验证据的名字（G1 原语义） */
+    const direct = new Set();
     const bodies = [];
     const note = (names, text) => {
         if (!text)
             return;
         bodies.push({ names, text });
-        if (hasPathGuardEvidence(text))
+        if (hasPathGuardEvidence(text)) {
             for (const n of names)
-                if (n)
+                if (n) {
                     guarded.add(n);
+                    direct.add(n);
+                }
+        }
     };
     for (const sf of project.getSourceFiles()) {
         for (const cls of sf.getClasses()) {
@@ -567,7 +572,286 @@ function pathGuardFunctionNames(project) {
         if (!added)
             break;
     }
-    return guarded;
+    return { all: guarded, direct };
+}
+// ═══════════════════════════════════════════════════════════════
+// G2（2026-09-19）：调用点抑制 —— 污点【表达式级】净化
+// ═══════════════════════════════════════════════════════════════
+// 缺口实证（taintpath_B，2026-09-19 measured）：
+//   `assertTemplateName(args.name); return loadTemplate(args.name);`
+// 仍被标记。`assertTemplateName` 的函数体内是锚定字符集白名单（G-D），
+// 是**真的**校验，但它的名字不含路径语义后缀 —— `Name` 在修 `ensureDir()`
+// 误判时被整体移出了 G-C 守卫后缀表，于是调用点侧认不出来。
+//
+// 为什么不直接放宽后缀表：那是按【名字】猜语义，会把判别力稀释成猜函数名
+// （G-C 的实证代价已经量过一次：放宽 ⇒ fr-007 pre 侧召回归零）。
+// 本实现改为按【被调用方的实际证据】定案：
+//   函数体内调用了 tier-0 守卫函数（自身含校验证据），且污点表达式被当作
+//   实参传进去 ⇒ 该表达式视为已净化，再流进 sink 不算污点。
+//
+// 精度取舍（关键点）：净化作用在【表达式】上，不是整函数。
+//   G1 的 selfGuarded 是函数级的（一个校验词汇压掉整个函数体所有流）；
+//   G2 只净化真正被传进守卫调用的那个表达式 —— 同函数体里另一条未被校验
+//   的流仍会标记。这是 G2 相对 G1 的收窄，而不是又一次放宽。
+// ═══════════════════════════════════════════════════════════════
+/**
+ * 收集函数体内「被传进 tier-0 守卫函数」的实参表达式，编译成一个判定正则。
+ *
+ * 边界：只收**简单取值表达式**（标识符 / 成员 / 下标 / 字符串字面量），
+ * 复杂表达式（模板串、拼接、调用）不收 —— 那些形态无法在 sink 侧可靠比对。
+ */
+function collectSanitizedExprs(text, directGuardFns) {
+    if (!directGuardFns || directGuardFns.size === 0)
+        return null;
+    const names = [...directGuardFns].filter((n) => !n.includes("."));
+    if (names.length === 0)
+        return null;
+    const callRe = new RegExp(`(?:^|[^\\w$.])(?:${names.map(escapeRe).join("|")})\\s*\\(([\\s\\S]{0,250}?)\\)`, "g");
+    const exprs = new Set();
+    let m;
+    while ((m = callRe.exec(text)) !== null) {
+        for (const a of splitArgWindow(m[1] || "")) {
+            const t = a.trim();
+            if (t && /^[A-Za-z_$][\w$]*(?:\s*\.\s*[\w$]+|\[[^\]]*\])*$/.test(t))
+                exprs.add(t.replace(/\s+/g, ""));
+        }
+    }
+    if (exprs.size === 0)
+        return null;
+    // 前缀 `(?:^|[^\w$.])` 是精度关键：`name` 不能匹配 `other.name` 里的 name，
+    // 但 `args.name` 能匹配 `path.join(DIR, args.name)` 里的 args.name。
+    return new RegExp([...exprs].map((e) => `(?:^|[^\\w$.])${escapeRe(e)}\\b`).join("|"));
+}
+// ═══════════════════════════════════════════════════════════════
+// C4b（2026-09-20）：项目自有的「纯塑形」helper —— 补齐 C4 的最后一跳
+//
+// 缺口形态（fr-016 真实语料，iterateAsyncApiComponents / iterateComponents）：
+//   const filename = getFileNamePath(componentDirPath, componentName, ext);
+//   writeToFileByExtension(componentData, filename);      // sink 侧已继承（fr-016）
+//   // getFileNamePath(a, b, c) { return path.join(a, b) + `.${c}`; }
+// `componentName` 已被 Object.keys 污染，但 `getFileNamePath` 不在
+// TS_PATH_SHAPER_RE 里（那是 node:path 家族 + String 原型方法的固定清单），
+// 于是 `filename` 收不到污点 —— 整条流断在最后一跳。
+//
+// 判据（三条同时成立才认，宁可漏、不可错）：
+//   ① 有形参，且有带表达式的 return（void / 只写文件的函数不算）
+//   ② 函数体内没有文件 sink —— 含 sink 说明它不只是塑形
+//   ③ 每个 return 表达式里：所有调用都是塑形调用（node:path 家族 / 保值字符串
+//      方法 / 已认定的纯塑形 helper），且所有自由标识符都是自己的形参
+// ③ 的后半句是精度核心：return 里只要出现任何**不是形参**的自由标识符
+//   （模块常量、闭包变量、别的调用结果），就不认。
+//
+// 这与 C4 是同一条原则（白名单优于黑名单）：只对**能证明**的形态传播。
+// 认不出来的 helper 不传播 —— 那是可见的漏报，比不可见的误报便宜（R9）。
+// 有界：两轮不动点，允许 helper 调用已认定的 helper，但不追环。
+// ═══════════════════════════════════════════════════════════════
+/** node:path 家族里只做塑形、不做校验的方法名 */
+const PATH_SHAPER_METHODS = new Set([
+    "join", "resolve", "normalize", "basename", "dirname",
+    "extname", "relative", "format", "toNamespacedPath",
+]);
+/**
+ * 字符过滤方法 —— **故意不进** C4b 的证据集。
+ *
+ * C4 的内联规则里 `.replace/.trim/...` 是算塑形的（TS_PATH_SHAPER_RE 第二组），
+ * 但那是「参数窗口里看得见整个表达式」时的取舍。helper 形式看不见实参窗口，
+ * 判据就该更严：`.replace(/[^a-z0-9]/gi, "")` 恰恰是净化函数最常见的写法，
+ * 把字符过滤当成「确定不净化」的证据，正是 C4 当初用白名单避开的那类错误
+ * （`readSanitized` 用例锁的就是它）。
+ * 代价：`toSlug(p) { return p.trim().toLowerCase(); }` 仍不传播（已知缺口）。
+ */
+const VALUE_STRING_METHODS = new Set([
+    "trim", "trimStart", "trimEnd", "replace", "replaceAll",
+    "toLowerCase", "toUpperCase", "toString", "slice", "substring",
+    "substr", "padStart", "padEnd", "concat", "normalize",
+]);
+/** return 表达式里允许出现的非形参自由标识符（语言/模块级常量） */
+const SHAPER_ALLOWED_FREE_IDENTS = new Set([
+    "path", "sep", "undefined", "null", "true", "false", "String", "Number",
+]);
+/** 允许出现在调用位的值转换函数（不改变路径语义） */
+const VALUE_CONVERTER_CALLS = new Set(["String", "Number", "Boolean"]);
+/**
+ * 判断 return 表达式是不是「纯塑形」：
+ * 所有调用都在塑形白名单内，且所有自由标识符都是形参（或模块级字面量常量）。
+ *
+ * 实现上刻意做**单趟标识符扫描**（看每个标识符的紧邻字符），而不是
+ * `NAME(?!\s*\()` 这种前瞻 —— 前瞻会被正则回溯绕过：
+ * 对 `withExt(...)`，`([A-Za-z_$][\w$]*)(?!\s*\()` 可以退化成匹配 `withEx`
+ * 让前瞻通过，于是把调用名误判成自由标识符（2026-09-20 实测踩到）。
+ */
+function isPureShaperExpr(expr, params, shapers, extraIdents) {
+    // 先抹掉字符串与模板字面量：里面的 `${...}` 可能带花括号，会干扰后续扫描；
+    // 抹掉后如果表达式里还有别的自由标识符，仍会被下面的检查拦住。
+    const s = expr
+        .replace(/`(?:\\.|\$\{[^}]*\}|[^`\\])*`/g, '""')
+        .replace(/'(?:\\.|[^'\\])*'/g, '""')
+        .replace(/"(?:\\.|[^"\\])*"/g, '""');
+    const idRe = /[A-Za-z_$][\w$]*/g;
+    let m;
+    while ((m = idRe.exec(s)) !== null) {
+        const n = m[0];
+        // 紧前一个非空字符 / 紧后一个非空字符
+        let i = m.index - 1;
+        while (i >= 0 && /\s/.test(s[i]))
+            i--;
+        const before = i >= 0 ? s[i] : "";
+        let j = m.index + n.length;
+        while (j < s.length && /\s/.test(s[j]))
+            j++;
+        const after = j < s.length ? s[j] : "";
+        if (before === ".")
+            continue; // 成员名（`.join` / `.name`），不参与判定
+        if (after === "(") {
+            // 调用位：必须落在塑形白名单。字符过滤方法（`VALUE_STRING_METHODS`）
+            // **不算**证据 —— 见其定义处注释。
+            if (!PATH_SHAPER_METHODS.has(n) && !VALUE_CONVERTER_CALLS.has(n) && !shapers.has(n)) {
+                return false;
+            }
+            continue;
+        }
+        // 自由标识符：必须是自己的形参、语言级常量白名单，或**已确证的字面量常量 / path 别名**
+        if (params.has(n) || SHAPER_ALLOWED_FREE_IDENTS.has(n))
+            continue;
+        if (extraIdents && extraIdents.has(n))
+            continue;
+        return false;
+    }
+    return true;
+}
+/** 收集模块级（top-level）**字面量**常量名 —— helper 的 return 引用它们仍是纯塑形 */
+function moduleLiteralConstNames(project) {
+    const out = new Set();
+    for (const sf of project.getSourceFiles()) {
+        for (const vd of sf.getVariableDeclarations()) {
+            // 只要模块作用域：VariableStatement 的父节点必须是 SourceFile
+            const stmt = vd.getVariableStatement();
+            if (!stmt || !ts_morph_1.Node.isSourceFile(stmt.getParent()))
+                continue;
+            const init = vd.getInitializer();
+            if (!init)
+                continue;
+            // 只收「字面量」—— 一旦允许任意表达式，helper 就能把别处的污点藏在常量后面
+            // （C4e 政策：看不见的一律不传播）
+            const isLiteral = ts_morph_1.Node.isStringLiteral(init) ||
+                ts_morph_1.Node.isNoSubstitutionTemplateLiteral(init) ||
+                ts_morph_1.Node.isNumericLiteral(init) ||
+                init.getKind() === ts.SyntaxKind.TrueKeyword ||
+                init.getKind() === ts.SyntaxKind.FalseKeyword;
+            if (isLiteral)
+                out.add(vd.getName());
+        }
+    }
+    return out;
+}
+/**
+ * C4e：`import * as p from "path"` / `import nodePath from "node:path"` /
+ * `import { join } from "path"` —— 这些局部名随项目各异，但**出处可确证**是
+ * path 模块，helper 的 return 引用它们仍是纯塑形。
+ * 只放行 path 模块本身（含 node: 前缀），不放行 fs/os —— 后者会被 helper 用来把
+ * IO 藏进 return（判据②只扫 sink 调用，覆盖不到「返回内嵌读写」这一类）。
+ */
+function pathModuleAliases(project) {
+    const out = new Set(["path"]);
+    for (const sf of project.getSourceFiles()) {
+        for (const id of sf.getImportDeclarations()) {
+            const spec = id.getModuleSpecifierValue();
+            if (spec !== "path" && spec !== "node:path")
+                continue;
+            // 实测（ts-morph 本仓库版本）：NamespaceImport 上既无 getName() 也无
+            // getNameNode()，只有 getText() —— 返回的就是别名本身。
+            const ns = id.getNamespaceImport(); // `import * as X`
+            if (ns)
+                out.add(ns.getText().replace(/[^\w$]/g, ""));
+            const def = id.getDefaultImport();
+            if (def)
+                out.add(def.getText());
+            for (const nb of id.getNamedImports())
+                out.add(nb.getName());
+        }
+    }
+    return out;
+}
+/** return 表达式列表：块体取 return 语句，箭头简洁体把整个体当作返回值 */
+function returnExprsOf(body) {
+    if (!ts_morph_1.Node.isBlock(body))
+        return [body.getText()]; // 箭头简洁体
+    const rets = [];
+    for (const rs of body.getDescendantsOfKind(ts.SyntaxKind.ReturnStatement)) {
+        const e = rs.getExpression();
+        if (e)
+            rets.push(e.getText());
+    }
+    return rets;
+}
+/** 扫描全项目，收集「纯塑形」helper 的名字（有界两轮不动点） */
+function pureShaperFunctionNames(project) {
+    const sinkRe = tsSinkCallRegex();
+    const cands = [];
+    /** 登记一个候选：三条判据 —— 有形参 / 有返回值 / 体内无 sink */
+    const consider = (name, paramNodes, declText, bodyNode) => {
+        const params = new Set(paramNodes.filter(Boolean));
+        if (params.size === 0)
+            return;
+        sinkRe.lastIndex = 0;
+        if (sinkRe.test(declText))
+            return; // ②
+        // 用 AST 取 return 表达式，而不是正则 —— 模板字面量里的 `${}` 会
+        // 让「遇到花括号就停」的朴素正则在 `path.join(a,b) + \`.${c}\`` 上截断。
+        const rets = returnExprsOf(bodyNode);
+        if (rets.length === 0)
+            return; // ①
+        cands.push({ name, params, rets });
+    };
+    for (const sf of project.getSourceFiles()) {
+        // (a) 函数声明
+        for (const fn of sf.getFunctions()) {
+            const name = fn.getName();
+            if (!name)
+                continue;
+            const body = fn.getBody();
+            if (!body)
+                continue; // 重载签名 / declare 只有签名
+            consider(name, fn.getParameters().map((p) => p.getName()), fn.getText(), body);
+        }
+        // (b) 变量承载的箭头 / 函数表达式 —— 现代 TS 里 helper 的主力写法
+        //     `export const toPath = (n: string) => n + ".md";`
+        //     sf.getFunctions() 收不到这些，2026-09-20 实测整片漏。
+        for (const vd of sf.getVariableDeclarations()) {
+            const init = vd.getInitializer();
+            if (!init)
+                continue;
+            const isArrow = ts_morph_1.Node.isArrowFunction(init);
+            const isFnExpr = ts_morph_1.Node.isFunctionExpression(init);
+            if (!isArrow && !isFnExpr)
+                continue;
+            const fnLike = init;
+            const body = fnLike.getBody();
+            if (!body)
+                continue;
+            consider(vd.getName(), fnLike.getParameters().map((p) => p.getName()), init.getText(), body);
+        }
+    }
+    // 形参之外允许出现的自由标识符 = 模块级字面量常量 ∪ 确证的 path 模块别名
+    const extraIdents = moduleLiteralConstNames(project);
+    for (const a of pathModuleAliases(project))
+        extraIdents.add(a);
+    const shapers = new Set();
+    for (let round = 0; round < 2; round++) {
+        let added = false;
+        for (const c of cands) {
+            if (shapers.has(c.name))
+                continue;
+            const ok = c.rets.every((e) => isPureShaperExpr(e, c.params, shapers, extraIdents));
+            if (!ok)
+                continue;
+            shapers.add(c.name);
+            added = true;
+        }
+        if (!added)
+            break;
+    }
+    return shapers;
 }
 const TS_FILE_SINK_NAMES = [
     "readFile", "readFileSync", "writeFile", "writeFileSync",
@@ -599,6 +883,29 @@ const UNTRUSTED_ROOTS = [
         id: "mcp_tool_args",
         expr: String.raw `\bparams\.arguments\b[.[]?`,
         why: "MCP CallToolRequest.params.arguments —— 工具调用实参，调用方可控（fr-012）",
+    },
+    {
+        id: "document_parse",
+        expr: String.raw `\b(?:JSON|JSON5)\s*\.\s*parse\b|\b(?:YAML|yaml)\s*\.\s*(?:parse|load)\b|\b(?:parse|load|read)(?:Yaml|YAML|Json|JSON|Toml|TOML|Xml|XML|Csv|CSV)\s*\(`,
+        why: "外部文档的解析产物：值的**内容**由被解析的输入决定，而非由代码写死（fr-016 的 OpenAPI/AsyncAPI 描述文件经 parseYaml 进入后再 split 落盘）",
+    },
+    // ── 一类性质不同的根（务必读懂再改）──
+    // 上面两条是**传输面**：值跨进程边界进来，来源性质无歧义。这一条不是。
+    // `Object.keys/values/entries` 是语言运算，声明的是一件更弱的事：
+    // 「这些名字/值不是字面量，而是运行时数据结构的产物」。
+    // 之所以仍然列为根，理由与取舍：
+    //   - 根的职责是【如实描述值的来源】，不是做是否有害的价值判断。
+    //     键名能否落到 fs sink、以及有没有被校验，那是前缀修剪与守卫证据的事
+    //     （G1/G2）。压掉来源的代价是不可见的漏报，而留下来的误报是可见的。
+    //   - 它是 fr-016 唯一本地可观测的入口：文档本体已由**上游**解析好作为形参
+    //     传入（`channels: Record<string, any>`），函数体内没有任何解析调用，
+    //     看得见的只有这次枚举。
+    // 代价：键名来自内部固定字典（如 `for (const l of Object.keys(locales))`）
+    // 也会被标记。若工具体现为噪声过大，应优先收窄**这里**，不要在守卫侧放宽。
+    {
+        id: "runtime_key_enum",
+        expr: String.raw `\bObject\s*\.\s*(?:keys|values|entries)\s*\(`,
+        why: "运行时枚举产物：键名/键值由数据结构内容决定，不是字面量（fr-016 的 Object.keys(channels) → channelName）",
     },
 ];
 /** 所有根的来源片段，供 **无标志** 的布尔探测正则使用 */
@@ -633,7 +940,7 @@ const TS_PATH_SHAPER_RE = /(?:path\s*\.\s*(?:posix|win32)\s*\.\s*|path\s*\.\s*)?
 /** 拼接形态：`+` 或反引号（模板字面量）—— 同样只是塑形 */
 const TS_CONCAT_RE = /\+|`/;
 /** 函数体内被不可信根污染的局部名（含解构、单跳赋值与 C4 塑形传播，深度 ≤3） */
-function collectTaintedNames(text) {
+function collectTaintedNames(text, shapers) {
     const tainted = new Set();
     let m;
     const root = UNTRUSTED_ROOT_SRC;
@@ -651,21 +958,108 @@ function collectTaintedNames(text) {
     const bareAssign = new RegExp(`(?:^|[^\\w$.])([\\w$]+)\\s*=\\s*(?:await\\s+)?(?:${root})`, "g");
     while ((m = bareAssign.exec(text)) !== null)
         tainted.add(m[1]);
-    taintedViaShaper(text, tainted);
-    // 单跳传播（深度 ≤2）
-    for (let depth = 0; depth < 2; depth++) {
-        if (tainted.size === 0)
-            break;
-        const names = [...tainted].join("|");
-        const hop = new RegExp(`(?:const|let|var)\\s+([\\w$]+)\\s*=\\s*\\b(?:${names})\\b`, "g");
-        let added = false;
-        while ((m = hop.exec(text)) !== null) {
-            if (!tainted.has(m[1])) {
-                tainted.add(m[1]);
-                added = true;
+    // 枚举绑定：`for (const k of Object.keys(doc))` / `for (const [k, v] of Object.entries(doc))`
+    // fr-016 的污点就是这样进来的 —— 文档本体已由上游解析好作为形参传入，
+    // 函数体内没有赋值语句，只有这次枚举。少了这条，iterate-* 系列函数的
+    // 局部变量一个都收不到（此前 MISS 的一半原因在此）。
+    const bindFromEnum = (pattern) => {
+        const enumBind = new RegExp(`for\\s*\\(\\s*(?:const|let|var)\\s+([\\w$\\[\\],\\s]+?)\\s+(?:of|in)\\s+(?:await\\s+)?(?:${pattern})`, "g");
+        let hit = false;
+        let em;
+        while ((em = enumBind.exec(text)) !== null) {
+            const binding = em[1].replace(/[[\]]/g, " ");
+            for (const part of binding.split(",")) {
+                const name = part.trim().split(":")[0].trim();
+                if (/^[\w$]+$/.test(name) && !tainted.has(name)) {
+                    tainted.add(name);
+                    hit = true;
+                }
             }
         }
-        if (!added)
+        return hit;
+    };
+    bindFromEnum(root);
+    // ── C4d（2026-09-20）：高阶枚举方法的回调形参 ──
+    // `Object.keys(doc).forEach(k => …)` / `ks.map(k => …)` 与 for-of 语义等价
+    // （形参 = 被枚举到的元素），但此前只绑 for-of/for-in，这类整片漏。
+    // 实测（2026-09-20 探针）：Object.keys/entries 后接 forEach/map 的 4 种
+    // 写法全部 MISS，而 for-in 其实一直是通的 —— 缺口在回调，不在 for-in。
+    //
+    // 方法表的取舍（务必读懂再扩）：只收【枚举全部元素、且形参 = 元素本身】的
+    // forEach/map/flatMap/filter 四个。不收：
+    //   - find/some/every —— 谓词，形参虽是元素但语义是「判定」，且常配合
+    //     白名单做守卫，盲目绑进去反而给守卫侧喂误报；
+    //   - reduce           —— 第一个形参是累加器不是元素，语义错位。
+    // 认不出就不传播，代价是漏报，不是误报。
+    //
+    // ── C4d-b（2026-09-20，同日第二次修正）──
+    // 初版正则以 `[,)]` 收尾，带来两件事：
+    //   ① `forEach(handleOne)` —— 回调是【函数引用】而非内联函数，`handleOne` 被
+    //      当成形参绑进污点集合。探针 `Object.keys(doc).forEach(handle); … = handle`
+    //      实测误标：这是把回调名当元素，语义错误；
+    //   ② 只认 `(k) =>` 带括号的箭头，`k =>` / `function (k) {}` 两种常见写法漏。
+    // 改法：分两条 —— 箭头分支形参后必须见 `=>`（括号可有可无），ES5 分支必须见
+    // `function` 关键字。两者都要求【回调体是内联的】，函数引用形态自然被排除。
+    const CALLBACK_ENUM_METHODS = "forEach|map|flatMap|filter";
+    const bindFromCallback = (receiver) => {
+        const callbackRe = (paramsTail) => new RegExp(`${receiver}\\s*\\.\\s*(?:${CALLBACK_ENUM_METHODS})\\s*\\(\\s*(?:async\\s+)?${paramsTail}`, "g");
+        // 形参字符集要容得下 TS 的**类型标注**（`(s: any) =>` 是 TS 工程里的常态，
+        // 漏了 `:` 会让整环不匹配 —— 2026-09-20 实测踩到），因此放行 `:.|<>`
+        // （联合类型与泛型形参）；`=>` 与 `{` 仍不在集合内，函数体不会被吃进来。
+        const params = String.raw `\(?\s*([\w$\[\],.:\s<>|]+?)\s*\)?`;
+        // 箭头回调：`(k) =>` / `k =>` / `async (k) =>` / `([k, v]) =>`
+        const arrow = callbackRe(`${params}\\s*=>`);
+        // ES5 回调：`function (k) { … }` —— 不是箭头，但形参同样是元素
+        const fnCb = callbackRe(String.raw `function\s*\(?\s*([\w$\[\],.:\s<>|]+?)\s*\)`);
+        let hit = false;
+        for (const re of [arrow, fnCb]) {
+            let cm;
+            while ((cm = re.exec(text)) !== null) {
+                const raw = cm[1].trim();
+                // `[k, v]` 解构：两个都是元素，都绑；`k, i` 只取第一个（第二个是索引）
+                const parts = raw.startsWith("[")
+                    ? raw.replace(/[[\]]/g, " ").split(",")
+                    : [raw.split(",")[0]];
+                for (const part of parts) {
+                    const name = part.trim().split(":")[0].trim();
+                    if (/^[\w$]+$/.test(name) && !tainted.has(name)) {
+                        tainted.add(name);
+                        hit = true;
+                    }
+                }
+            }
+        }
+        return hit;
+    };
+    // 根形态：`Object.keys(doc).forEach(...)` —— root 正则只吃到开括号，
+    // 这里补 `[^()]*\)` 吃掉实参列表与闭括号（`Object.keys` 的实参无嵌套）。
+    bindFromCallback(`(?:${root})[^()]*\\)`);
+    // ── 有界不动点（≤3 轮）：塑形传播 / 聚合迭代 / 单跳赋值 ──
+    // C4c：三轮里的第二轮才是关键 —— `const ks = Object.keys(o); for (const k of ks)`
+    // 的被迭代对象是**已被污染的变量**，不再是根表达式。此前 enumBind 只按 root
+    // 匹配，这种「先收集再迭代」的写法一根都收不到（fr-016 的 gather* 系列如此）。
+    for (let depth = 0; depth < 3; depth++) {
+        let grew = taintedViaShaper(text, tainted, shapers);
+        if (tainted.size > 0) {
+            const names = [...tainted].map(escapeRe).join("|");
+            if (bindFromEnum(`\\b(?:${names})\\b`))
+                grew = true;
+            // C4d 变量形态：`const ks = Object.keys(doc); ks.forEach(k => …)`
+            // C4d-b：接收者允许中间隔着成员 —— `doc.sections.forEach((s) => …)`。
+            // doc/ks 已污时，它的成员同样是污点数据的组成部分，枚举出来的元素也是。
+            // 末尾仍必须是四个枚举方法之一，`doc.length` 之类不会触发。
+            if (bindFromCallback(`(?:^|[^\\w$.])(?:${names})(?:\\s*\\.\\s*[\\w$]+)*`))
+                grew = true;
+            const hop = new RegExp(`(?:const|let|var)\\s+([\\w$]+)\\s*=\\s*\\b(?:${names})\\b`, "g");
+            let hm;
+            while ((hm = hop.exec(text)) !== null) {
+                if (!tainted.has(hm[1])) {
+                    tainted.add(hm[1]);
+                    grew = true;
+                }
+            }
+        }
+        if (!grew)
             break;
     }
     return tainted;
@@ -678,7 +1072,13 @@ function collectTaintedNames(text) {
  * `normalized = path.normalize(p)` → `savePath = path.join(normalized, f)`
  * 这类链式构造能接上（fr-012 下载侧守卫块就是这个形状）。
  */
-function taintedViaShaper(text, tainted) {
+function taintedViaShaper(text, tainted, shapers) {
+    // C4b：项目自有「纯塑形」helper 的调用也算子（如 getFileNamePath(dir, name, ext)）。
+    // 见 pureShaperFunctionNames —— 只认三条判据全部成立的函数，认不出就不传播。
+    const localShaperRe = shapers && shapers.size > 0
+        ? new RegExp(`(?:^|[^\\w$.])(?:${[...shapers].map(escapeRe).join("|")})\\s*\\(`)
+        : null;
+    let grewAny = false;
     for (let depth = 0; depth < 3; depth++) {
         // 注意：这里**不能**以 `tainted.size === 0` 提前退出 —— 种子是根模式
         // （taintPattern 恒定并入 UNTRUSTED_ROOT_SRC）。本轮这 4 条 known-gap
@@ -686,7 +1086,7 @@ function taintedViaShaper(text, tainted) {
         // 加这道闸门等于整条 C4 不生效（2026-09-19 实测踩到）。
         const taintRe = taintPattern(tainted);
         if (!taintRe)
-            return;
+            return grewAny;
         let added = false;
         for (const line of text.split("\n")) {
             const m = /^\s*(?:const|let|var)?\s*([\w$]+)\s*=\s*(?:await\s+)?(.+)$/.exec(line);
@@ -696,14 +1096,19 @@ function taintedViaShaper(text, tainted) {
             const rhs = m[2];
             if (tainted.has(name))
                 continue;
-            if (taintRe.test(rhs) && (TS_PATH_SHAPER_RE.test(rhs) || TS_CONCAT_RE.test(rhs))) {
+            const shaped = TS_PATH_SHAPER_RE.test(rhs) ||
+                TS_CONCAT_RE.test(rhs) ||
+                (localShaperRe !== null && localShaperRe.test(rhs));
+            if (taintRe.test(rhs) && shaped) {
                 tainted.add(name);
                 added = true;
             }
         }
         if (!added)
-            return;
+            return grewAny;
+        grewAny = true;
     }
+    return grewAny;
 }
 function taintPattern(tainted) {
     const parts = [UNTRUSTED_ROOT_SRC];
@@ -712,16 +1117,33 @@ function taintPattern(tainted) {
     }
     return new RegExp(parts.join("|"));
 }
-/** 本函数体内：文件 sink 的实参窗口含 request 污点 → true */
-function hasTaintedSinkCall(text, tainted) {
+/**
+ * 本函数体内：文件 sink 的实参窗口含 request 污点 → true。
+ *
+ * `sanitizedRe` 非空时（G2）：实参里被净化过的表达式不再算污点 ——
+ * 逐实参判定，只要还有一个实参含【未被净化】的污点就照旧标记。
+ */
+function hasTaintedSinkCall(text, tainted, sanitizedRe) {
     const taint = taintPattern(tainted);
     if (!taint)
         return false;
     const sinkRe = tsSinkCallRegex();
     let m;
     while ((m = sinkRe.exec(text)) !== null) {
-        if (taint.test(m[2] || ""))
-            return true;
+        const win = m[2] || "";
+        if (!taint.test(win))
+            continue;
+        if (sanitizedRe) {
+            const args = splitArgWindow(win);
+            if (args.length > 0) {
+                if (!args.some((a) => taint.test(a) && !sanitizedRe.test(a)))
+                    continue;
+            }
+            else if (sanitizedRe.test(win)) {
+                continue;
+            }
+        }
+        return true;
     }
     return false;
 }
@@ -749,6 +1171,7 @@ function splitArgWindow(win) {
 /** 项目方法名 → 方法体内流入文件 sink 的形参下标集合 */
 function methodSinkParamMap(project, absRoot) {
     const map = new Map();
+    const bodies = [];
     const register = (keyName, fullName, text, relPath, params) => {
         const sinkRe = tsSinkCallRegex();
         let sm;
@@ -780,7 +1203,9 @@ function methodSinkParamMap(project, absRoot) {
                 const params = m.getParameters().map((p) => p.getName());
                 if (params.length === 0)
                     continue;
-                register(m.getName(), `${cn}.${m.getName()}`, m.getText(), relPath, params);
+                const body = { keyName: m.getName(), fullName: `${cn}.${m.getName()}`, relPath, params, text: m.getText() };
+                bodies.push(body);
+                register(body.keyName, body.fullName, body.text, relPath, params);
             }
         }
         // ── 污点数据流试点（2026-09-18）──
@@ -795,8 +1220,63 @@ function methodSinkParamMap(project, absRoot) {
             const params = fn.getParameters().map((p) => p.getName());
             if (params.length === 0)
                 continue;
-            register(fnName, fnName, fn.getText(), relPath, params);
+            const body = { keyName: fnName, fullName: fnName, relPath, params, text: fn.getText() };
+            bodies.push(body);
+            register(body.keyName, body.fullName, body.text, relPath, params);
         }
+    }
+    // ── sink 形参继承（2026-09-19，fr-016）──
+    // 真实工程落盘几乎必过一层自有封装，只做「形参 → 本函数体内 fs sink」的
+    // 一跳登记，等于把整层 wrapper 排除在外：
+    //   writeToFileByExtension(data, filePath) → writeJson/writeYaml(d, filePath) → fs.writeFileSync(filePath)
+    // 于是即使上游 taint 已识别，`writeToFileByExtension(data, taintedPath)`
+    // 也查不到任何记录 —— fr-016 的流量断了 sink 侧这一环，与来源侧的根缺口
+    // 是**两个独立缺陷**，必须两个都补才能让真实语料动起来。
+    //
+    // 规矩与既有 register 完全一致、只是再推一层：自己的形参被传进已登记函数的
+    // sink 位置 ⇒ 继承该 sink 位置。有界迭代（≤3 轮）保证收敛。
+    //
+    // 注意这不是 C4b。C4b 是**值侧**（ helper 会不会改变污点性质）；
+    // 这里是** sink 侧**（ wrapper 会不会真的写到文件）。两侧对称，缺一不可。
+    // 注意用 new RegExp(String) 而非正则字面量：本文件同类表达式（directCallRe 等）
+    // 都按这套写法，写成字面量时 `\\w` 会被当成「反斜杠 + w」，一个调用都匹配不到。
+    const wrapperCallRe = new RegExp(`(?:^|[^\\w$.])([\\w$]+)\\s*\\(([\\s\\S]{0,250}?)\\)`, "g");
+    for (let round = 0; round < 3; round++) {
+        let grew = false;
+        for (const b of bodies) {
+            wrapperCallRe.lastIndex = 0;
+            let cm;
+            while ((cm = wrapperCallRe.exec(b.text)) !== null) {
+                const callee = map.get(cm[1]);
+                if (!callee || callee.idxs.size === 0)
+                    continue;
+                const args = splitArgWindow(cm[2] || "");
+                if (args.length === 0)
+                    continue;
+                b.params.forEach((pname, idx) => {
+                    if (!pname)
+                        return;
+                    const pre = new RegExp(`\\b${escapeRe(pname)}\\b`);
+                    // 形参出现在被调用方的【sink 形参位】上，才算继承了 sink
+                    const inherited = [...callee.idxs].some((i) => i < args.length && pre.test(args[i]));
+                    if (!inherited)
+                        return;
+                    if (!map.has(b.keyName)) {
+                        map.set(b.keyName, { idxs: new Set(), entries: [] });
+                    }
+                    const rec = map.get(b.keyName);
+                    if (rec.idxs.has(idx))
+                        return;
+                    rec.idxs.add(idx);
+                    grew = true;
+                    if (!rec.entries.some((e) => e.name === b.fullName)) {
+                        rec.entries.push({ name: b.fullName, file: b.relPath });
+                    }
+                });
+            }
+        }
+        if (!grew)
+            break;
     }
     return map;
 }
@@ -833,15 +1313,19 @@ function collectUrlParamNames(params) {
  *   项目方法体内的文件 sink（跨函数一跳，onMethodHit 回调登记方法条目）
  * - SSRF：URL 形参/request 污点 → HTTP fetch sink，无守卫词汇
  */
-function computeMarkerCalls(text, paramNames, sinkParams, onMethodHit, guardFns) {
+function computeMarkerCalls(text, paramNames, sinkParams, onMethodHit, guardFns, directGuardFns, shapers) {
     const markers = [];
     // ── 路径穿越 ──
     // G1（2026-09-19）：有流还不够，必须【没有校验证据】才标记——
     // 与 SSRF 侧「无 SSRF_GUARD_EVIDENCE 才标记」对齐。
     // 未传 guardFns（旧调用点/单测）时按「不做校验识别」的旧语义处理。
     if (hasRequestRootedExpr(text)) {
-        const tainted = collectTaintedNames(text);
+        const tainted = collectTaintedNames(text, shapers);
         const selfGuarded = guardFns ? hasPathGuardEvidence(text) !== null : false;
+        // G2：调用点抑制 —— 被传进「自身含校验证据的函数」的表达式视为已净化。
+        // 与 selfGuarded（函数级、按词形）互补：这条按【被调用方的实际证据】定案，
+        // 因此认得出 assertTemplateName 这类不含路径语义后缀的自定义校验函数。
+        const sanitizedRe = collectSanitizedExprs(text, directGuardFns);
         // C5（2026-09-19）：不可信根可以直接写在 sink 实参里，不需要中间变量。
         // 此前外层要求 collectTaintedNames 非空，于是
         //   `fs.readFileSync("/data/" + req.params.name)` —— 真实工程里最常见的形态
@@ -849,7 +1333,7 @@ function computeMarkerCalls(text, paramNames, sinkParams, onMethodHit, guardFns)
         // SSRF 侧从来不是这样（它把 UNTRUSTED_ROOT_SRC 并进 taint 模式去匹配实参窗口），
         // 这是同一条数据流上的又一处口径不一致。
         if (!selfGuarded) {
-            if (hasTaintedSinkCall(text, tainted)) {
+            if (hasTaintedSinkCall(text, tainted, sanitizedRe)) {
                 markers.push("__progmune_path_traversal__");
             }
             else {
@@ -872,7 +1356,7 @@ function computeMarkerCalls(text, paramNames, sinkParams, onMethodHit, guardFns)
                             if (guardFns && guardFns.has(m[1]))
                                 continue;
                             const args = splitArgWindow(m[2] || "");
-                            const hit = args.some((arg, i) => rec.idxs.has(i) && taint.test(arg));
+                            const hit = args.some((arg, i) => rec.idxs.has(i) && taint.test(arg) && !(sanitizedRe && sanitizedRe.test(arg)));
                             if (hit) {
                                 markers.push("__progmune_path_traversal__");
                                 onMethodHit(rec);
@@ -887,7 +1371,7 @@ function computeMarkerCalls(text, paramNames, sinkParams, onMethodHit, guardFns)
     TS_HTTP_FETCH_SINK.lastIndex = 0;
     if (TS_HTTP_FETCH_SINK.test(text) && !SSRF_GUARD_EVIDENCE.test(text)) {
         const urlParams = paramNames.filter((n) => URL_PARAM_NAME.test(n));
-        const reqTainted = collectTaintedNames(text);
+        const reqTainted = collectTaintedNames(text, shapers);
         const taintParts = [];
         if (urlParams.length > 0)
             taintParts.push(`\\b(?:${urlParams.join("|")})\\b`);
@@ -990,7 +1474,14 @@ function _extractSingleProject(absRoot, tsconfigPath) {
     // pendingMethodMarks = 跨函数命中待标记的方法条目（主循环后统一应用）
     const sinkParams = methodSinkParamMap(project, absRoot);
     // G1（2026-09-19）：路径校验识别。自身含校验证据的函数名 + 向调用方传播一跳。
-    const guardFns = pathGuardFunctionNames(project);
+    // direct = tier-0（自身含校验证据）；all = 再向调用方传播一跳后的集合。
+    // G2 只用 direct —— 传播得到的名字是「被推断为守卫」，拿它做抑制会把
+    // 推断误差直接放大成误报消除。
+    const { all: guardFns, direct: directGuardFns } = pathGuardFunctionNames(project);
+    // C4b：项目自有「纯塑形」helper —— 让污点能穿过 getFileNamePath(...) 这类
+    // 自建封装。与 guardFns 方向相反：那边是压掉流，这边是接通流，
+    // 所以它的判据更严（三条全中才认），认不出就留着漏报。
+    const shapers = pureShaperFunctionNames(project);
     const pendingMethodMarks = new Set();
     const onMethodHit = (rec) => {
         for (const me of rec.entries)
@@ -1008,7 +1499,7 @@ function _extractSingleProject(absRoot, tsconfigPath) {
             const fParams = f.getParameters();
             const fText = f.getText();
             const fCalls = extractDirectCalls(f, fText);
-            fCalls.push(...computeMarkerCalls(fText, fParams.map((p) => p.getName()), sinkParams, onMethodHit, guardFns));
+            fCalls.push(...computeMarkerCalls(fText, fParams.map((p) => p.getName()), sinkParams, onMethodHit, guardFns, directGuardFns, shapers));
             funcs.push({
                 name,
                 params: fParams.map(p => ({
@@ -1038,7 +1529,7 @@ function _extractSingleProject(absRoot, tsconfigPath) {
                 const initParams = init.getParameters();
                 const initText = init.getText();
                 const initCalls = extractDirectCalls(init, initText);
-                initCalls.push(...computeMarkerCalls(initText, initParams.map((p) => p.getName()), sinkParams, onMethodHit, guardFns));
+                initCalls.push(...computeMarkerCalls(initText, initParams.map((p) => p.getName()), sinkParams, onMethodHit, guardFns, directGuardFns, shapers));
                 funcs.push({
                     name,
                     params: initParams.map(p => ({
@@ -1064,7 +1555,7 @@ function _extractSingleProject(absRoot, tsconfigPath) {
                         const argParams = arg.getParameters();
                         const argText = arg.getText();
                         const argCalls = extractDirectCalls(arg, argText);
-                        argCalls.push(...computeMarkerCalls(argText, argParams.map((p) => p.getName()), sinkParams, onMethodHit, guardFns));
+                        argCalls.push(...computeMarkerCalls(argText, argParams.map((p) => p.getName()), sinkParams, onMethodHit, guardFns, directGuardFns, shapers));
                         funcs.push({
                             name,
                             params: argParams.map(p => ({
@@ -1098,7 +1589,7 @@ function _extractSingleProject(absRoot, tsconfigPath) {
                     continue;
                 const mParams = m.getParameters();
                 const mText = m.getText();
-                const mCalls = computeMarkerCalls(mText, mParams.map((p) => p.getName()), sinkParams, onMethodHit, guardFns);
+                const mCalls = computeMarkerCalls(mText, mParams.map((p) => p.getName()), sinkParams, onMethodHit, guardFns, directGuardFns, shapers);
                 funcs.push({
                     name: `${cn}.${mn}`,
                     params: mParams.map((p) => ({ name: p.getName(), type: getParamType(p), typeDetail: getParamTypeDetail(p) })),

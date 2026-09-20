@@ -1,5 +1,254 @@
 # Changelog
 
+## [3.7.41] — 2026-09-20
+
+### C4e：helper 的现代写法（箭头 / 函数表达式 / 模块常量）
+
+C4b 的「纯塑形 helper」名录是用 `sf.getFunctions()` 扫出来的 —— 那只能拿到
+**函数声明**。而真实 TS 工程里 helper 的主力写法是箭头常量：
+
+```ts
+export const withExt = (name: string): string => name + ".md";   // ← 此前整片漏
+export const withExtBlock = (name: string): string => { return name + ".md"; };
+export const withExtExpr = function (name: string): string { return name + ".md"; };
+```
+
+现在收集阶段并入变量声明上的箭头与函数表达式，判据（有形参 / 有返回值 /
+体内无 sink）原样不变 —— 只是不再漏掉一大半候选。
+
+另外两处放宽：
+
+- **模块级字面量常量**：`const EXT = ".doc"; f(n) { return n + EXT; }` 以前因自由
+  标识符被判据③拦死（这是 D 族登记过的 known-gap）。现在放行【初值是字符串 /
+  数字 / 布尔字面量】的模块级常量 —— 出处可确证。初值是**任意表达式**的常量仍拦
+  （`const ROOT = path.resolve(process.cwd(), "runs")`），否则 helper 能把别处的
+  污点藏在一个常量后面，等于给任意数据流发通行证。
+- **path 模块的局部别名**：白名单里写死 `path` 一个名字不够用，
+  `import * as p from "path"` / `import nodePath from "node:path"` /
+  `import { join } from "path"` 现在都能认。只放行 path 模块本身 —— fs / os 不放，
+  那会被 helper 用来把 IO 藏进 return（判据②只扫 sink 调用，覆盖不到这一类）。
+
+### 探针设计的坑（值得记）
+
+第一版探针把 helper 调用直接写在 sink 实参里：`fs.writeFileSync(outDir + "/" + withExt(k))`。
+结果**正负对照一次性全 MARK** —— 因为判定有一条兜底规则：sink 实参窗口里出现
+污点名就标。那样测的根本不是 helper 传播。改成隔离写法后才分得出胜负：
+
+```ts
+const rel = withExt(k);                  // 污点只能经 helper 的返回值进来
+fs.writeFileSync(outDir + "/" + rel, "x");
+```
+
+同一批复现还纠正了两条备忘：`toSlug`（`p.trim().toLowerCase()`）实测早就穿透，
+不是备忘里记的缺口；`reduce` 首参不绑确认按设计生效。
+
+### 验收
+
+| 门 | 结果 |
+|---|---|
+| taintpath 闸门 | **69/69**（新增 F 族 10 条：6 mark / 1 suppressed / 3 no-taint） |
+| 既有 D 族 known-gap | `emitHelperFixed` 因本轮闭合，已由 known-gap 转 **mark** |
+| 定向用例 | **63 passed**（structural 单文件）／**153 passed**（含 taint-guard、ssrf-loop、project-ir、C/Go/Java 提取组共 7 个文件）—— 新增 C4e 组 9 条：6 正 3 负；另因同一闭合把一条旧负对照转正，并补「非字面量模块常量」锁边界 |
+| fr-007 真实语料 | pre 5 / post 0 **维持** |
+| fr-016 真实语料 | pre 7 / post 0 **维持** —— 放宽收集后守卫侧仍无新增误报 |
+| TS 盲测 | 106 项目，按 path_traversal 口径：**LOST 0 / ADDED 16** —— E 族 9（C4d）+ F 族 6（C4e）+ D 族 `emitHelperFixed` 1（本轮闭合），**基线那 104 个项目零漂移** |
+| tsc | 零错误 |
+
+### R7 第五次：generated 语料又是零覆盖
+
+实测全量 .ts 里 `export const X = (…) =>` **0 处**，A–E 族对本能力照样空过。
+新增 `taintpath_F`（10 条）之后这道门才重新咬得住。
+
+### 反向验证做了三刀（不只摘整体）
+
+| 摘掉什么 | 结果 |
+|---|---|
+| 箭头 / 函数表达式的候选收集 | F 族 6 条正例**全部**转漏报（模块常量与 path 别名两条也在内 —— 那两个 helper 本身就是箭头写的） |
+| 模块常量 + path 别名（extraIdents 置空） | 只有 `emitModuleConstHelper` / `emitPathAliasHelper` 两条转漏报，其余箭头正例不受影响 |
+| 反过来把模块常量**放宽**到任意初值 | 「非字面量模块常量」那条负对照立刻变红 —— 证明这条边界用例不是空转 |
+
+只摘整体只能证明正例依赖新代码，证明不了**边界负对照**真的咬得住，所以补了第三刀。
+
+### 顺带查明（不是 bug，记录以免下次重复怀疑）
+
+- `helper 体内有 sink` 形态会被标，来自 `methodSinkParamMap` 的跨函数传播：
+  helper 的形参确实流进了 sink，标是对的，与 helper 是否被认成纯塑形无关。
+- 名字级传播的精度边界仍在：`discard(k) { return "fixed.md"; }` 丢弃形参，
+  结果仍会被判污染。这是「看得见就传播」的名级近似，修它需要形参-实参位置对齐
+  与返回值依赖分析 —— 记入下一步。
+
+## [3.7.40] — 2026-09-20
+
+### C4d：高阶枚举方法的回调形参
+
+`Object.keys(doc)` 的枚举绑定此前只认 `for (const k of|in …)`。同一种数据流还有
+一半写在回调里，那半整片漏：
+
+```ts
+Object.keys(doc).forEach((k) => { fs.writeFileSync(outDir + "/" + k, "x"); });
+Object.entries(doc).map(([k, v]) => { fs.writeFileSync(outDir + "/" + k, String(v)); });
+```
+
+回调形参 = 被枚举到的元素，语义与 for-of 完全等价，没有理由区别对待。现在并入
+同一套枚举绑定：接收者支持「根形态」（`Object.keys(doc).forEach`）与「变量形态」
+（`const ks = Object.keys(doc); ks.forEach`，走 C4c 那条不动点）。
+
+**绑定规则的边界**（两条都配了负对照钉死）：
+
+- `[k, v]` 解构两个都是元素，都绑；`k, i` **只取第一个** —— 第二个是索引，
+  绑了就是误报。
+- 方法表只收 `forEach / map / flatMap / filter`。不收 `find/some/every`（谓词语义，
+  常与白名单校验同现，绑进去反而给守卫侧喂误报），不收 `reduce`（首参是累加器）。
+
+**一条纠正**：此前备忘写「`for...in` 也不绑定」，最小复现实测是错的 ——
+`bindFromEnum` 的正则本就是 `(?:of|in)`，for-in 一直是通的。真缺口只有回调这一处。
+备忘里的「下一步」若不先复现就照着做，会改一个已经对的地方。
+
+### C4d-b：回调形态的三处遗漏 + 一处真实误报（同日第二轮）
+
+放宽后立刻在新语料上验了剩余写法，初版有两件事没做对：
+
+| 形态 | 初版 | 现在 |
+|---|---|---|
+| `forEach(k => …)` 无括号单参 | 漏 | 标记 |
+| `forEach(function (k) { … })` ES5 回调 | 漏 | 标记 |
+| `doc.sections.forEach((s: any) => …)` 成员链 + 类型标注形参 | 漏 | 标记 |
+| `forEach(handleOne)` 回调是**函数引用** | **误标** | 不标记 |
+
+误报那条值得单独看：`handleOne` 是别人函数的名字，不是被枚举的元素，但初版正则
+以 `[,)]` 收尾，把它当形参绑进了污点集合 —— 同名的局部变量随即被判成污点。
+修法是把**「回调必须内联」**写进正则前提：箭头分支形参后必须见到 `=>`，ES5 分支
+必须见到 `function` 关键字，函数引用形态自然落空。
+
+顺带发现形参字符集漏了 `:`：`(s: any) =>` 这种带类型标注的写法在 TS 工程里是常态，
+一个冒号就让整环不匹配。现放行 `:.|<>`（类型标注、联合类型与泛型形参），
+`=>` 与 `{}` 仍不在集合内，函数体不会被吃进来。
+
+### 验收
+
+| 门 | 结果 |
+|---|---|
+| fr-007 真实语料 | pre 5 / post 0 **维持**（post 侧含 forEach 形态，放宽后仍未新增误报） |
+| fr-016 真实语料 | pre 7 / post 0 **维持** |
+| taintpath 闸门 | **59/59**（新增 E 族 15 条：9 mark / 1 suppressed / 5 no-taint） |
+| 定向用例 | **143 passed / 7 个测试文件**（新增 C4d 组 12 条：7 正 5 负；taint-guard、structural、ssrf-loop、project-ir、C/Go/Java 提取组全绿） |
+| TS 盲测 | 105 项目，按 path_traversal 口径：**LOST 0 / ADDED 9** —— 9 条全部来自新增语料 `taintpath_E`，其余 104 个项目**零漂移**（另有 2 条 resource 类别的 No Input Sanitization 随新语料首次出现，与本类判定无关） |
+| tsc | 零错误 |
+
+### R7 第四次：门自身必须有覆盖
+
+generated 全量 .ts 里 `.forEach/.map/.flatMap/.filter` 回调形参 **0 处**（A–D 族都没有），
+所以「LOST 0 / ADDED 0」对这项能力仍然是空过。新增 `taintpath_E`（10 条：
+6 mark / 1 suppressed / 3 no-taint）后，该门才重新咬得住。
+
+## [3.7.39] — 2026-09-20
+
+### C4b：项目自有的「纯塑形」helper —— 污点穿过自建封装
+
+fr-016 里 `iterateAsyncApiComponents` / `iterateComponents` 在 3.7.38 之后仍看不到，
+原因是污点断在最后一跳：
+
+```
+const filename = getFileNamePath(componentDirPath, componentName, ext);
+// getFileNamePath(a, b, c) { return path.join(a, b) + `.${c}`; }
+writeToFileByExtension(componentData, filename);
+```
+
+`componentName` 已被 `Object.keys` 污染，但 `getFileNamePath` 不在 C4 的塑形词表里
+（那是 node:path 家族 + String 原型方法的**固定清单**，覆盖不到每个项目自己的封装）。
+
+修法不是放宽词表，而是**按函数体证明它只做塑形**，三条判据全中才传播：
+
+1. 有形参、且有带表达式的 `return`（void / 只写文件的函数不算）
+2. 函数体内**没有**文件 sink —— 含 sink 说明它不只是塑形
+3. 每个 return 表达式里：所有调用都在塑形白名单内，且所有自由标识符都是自己的形参
+
+判据③里的**字符过滤方法刻意不算证据**（新增方法学规则 **R11**）：C4 的内联规则把
+`.replace/.trim/...` 当塑形，但那是「看得见整个实参窗口」时的取舍；helper 形式看不见，
+而 `.replace(/[^a-z0-9]/gi, "")` 恰恰是净化函数的标准写法。helper 侧的证据集必须比
+内联侧更严。有界两轮不动点，允许 helper 调已认定的 helper，不追环。
+
+### C4c：迭代已被污染的聚合
+
+`const ks = Object.keys(o); for (const k of ks)` —— 被迭代对象已是**被污染的变量**
+而非根表达式，枚举绑定此前只按根匹配，这种「先收集、再迭代」的写法一根都收不到。
+现把枚举绑定并入有界不动点，与塑形传播、单跳赋值一起迭代至收敛（≤3 轮）。
+
+### 验收
+
+| 门 | 结果 |
+|---|---|
+| fr-016 真实语料 | **pre 5 → 7**（新增的两条正是 C4b 目标，均为真阳性） |
+| fr-007 真实语料 | pre 5 / post 0 维持 |
+| taintpath 闸门 | **44/44**（新增 D 族 10 条） |
+| TS 盲测 | 见下（D 族专为 R7 补，否则这两处空过） |
+| 反向验证 | 回退 v3.7.37 后对应用例失败，负对照全绿 |
+
+### R7 的第三次应用：这次也先补了语料
+
+C4b / C4c 在含 C 族的既有盲测语料上**仍然空过** —— 实测 generated 全量 .ts 里
+「先收集再迭代」形态 0 处、「自有 path 塑形 helper」0 处。因此本轮把 fr-016 的
+helper 形态搬进盲测做成 `taintpath_D`（10 条），重生成基线后才比漂移。
+
+D 族的守卫侧刻意用 `stamp`（不含任何 G-C 后缀）而非 `assertWithinDir`：
+若压制真的发生，依据就只能是被调用方自身的证据（G2 tier-0），不是名字。
+
+## [3.7.38] — 2026-09-19
+
+### fr-016：补「文档解析产物」根 + sink 形参继承（召回，两侧各缺一环）
+
+真实语料 fr-016（Redocly/redocly-cli `split` 命令路径穿越，GHSA-657c-g7qc-r9j2）
+在连续三轮改动之后仍是 **pre 0 / post 0**。逐段拆开才发现断点是**两个独立缺陷**，
+且两侧对称——只补一侧，语料纹丝不动：
+
+- **来源侧**：污点根表里没有「外部文档」。文档本体由上游 `parseYaml` 解析好后
+  **作为形参**传入（`channels: Record<string, any>`），函数体内无解析调用，唯一
+  本地可见入口是 `for (const channelName of Object.keys(channels))` 这次枚举。
+  - 新增根 `document_parse`：`JSON.parse` / `YAML.load` / `parseYaml` … 的解析产物
+  - 新增根 `runtime_key_enum`：`Object.keys/values/entries` 的枚举产物
+    （内部注释标明它是**性质较弱**的一类根：声明的是「名字不是字面量、而是运行时
+    数据结构的产物」，与按传输面声明的前两条不同；是否加害交给守卫判定）
+  - `collectTaintedNames` 增加 for-of 绑定收集（含 `[k, v]` 解构）
+
+- **sink 侧**：落盘经 `writeToFileByExtension → writeYaml → fs.writeFileSync`
+  两层自有封装，`methodSinkParamMap` 原本只登记「形参 → 本函数体内 fs sink」
+  一跳，整层 wrapper 从未入表。现增加一个有界闭包（≤3 轮）：**自己的形参被传进
+  已登记函数的 sink 位 ⇒ 继承该 sink 位**。注意这不是 C4b——C4b 是值侧，这是 sink 侧。
+
+### 验收
+
+| 门 | 结果 |
+|---|---|
+| **fr-016 真实语料** | **pre 5 条 / post 0 条**（此前 0/0）—— 成为继 fr-007 之后**第二个**有判别力的真实语料对 |
+| fr-007 真实语料 | pre 5 / post 0 维持（未压掉真阳性） |
+| taintpath 闸门 | 24/24 |
+| 全组回归 | 87 passed；`tsc` 零错误 |
+| TS 盲测 102 项目 | LOST 0 / ADDED 0（见下） |
+
+fr-016 语料同步升级：从 mini 切片（5 个真值文件）换成完整 `packages/cli` 子包，
+快照入库 `blind-benchmark/fr-corpus/fr-016-redocly/{pre,post}`（各 1.1M，受保护资产）；
+`check-fr-corpus.ts` 登记 `fr-016: { pre: 5, post: 0 }`，此后一条命令即可复核。
+
+### 诚实说明（避免把水印当证据）
+
+G-C 的 `Within` 后缀当初是照着 fr-016 的 `assertWithinDir` 加的，所以 post=0
+对 **G-C** 是一种同义反复。真正结实的证据是新增的定向用例：把守卫函数改名为
+不含任何 G-C 后缀的 `stamp`、只保留函数体内的 `resolve + startsWith(base + sep)`，
+依然被压制 ⇒ 压制依据是被调用方自身的证据（G2 tier-0），不是名字。
+
+### 新增方法学规则 R10
+
+一条污点流要被观测到，**来源侧与 sink 侧必须同时连通**。补一侧时语料往往纹丝
+不动，看起来像修补无效。调试须先写最小复现逐段确认通断——总数是唯一结果变量，
+任何一侧断着都等于 0，没有定位能力。
+
+### 已知缺口
+
+- C4b：值侧助手（`buildPath(p)`、`getFileNamePath(a,b,c)`）不传播 —— fr-016 的
+  `iterateAsyncApiComponents` / `iterateComponents` 仍因此看不到
+- C4c：`const names = Object.keys(o); for (const n of names)` —— 迭代**已被污染
+  的聚合**（而非直接枚举根）不传播
+
 ## [3.7.37] — 2026-09-19
 
 ### G2：自定义校验函数的调用点抑制（判别力）

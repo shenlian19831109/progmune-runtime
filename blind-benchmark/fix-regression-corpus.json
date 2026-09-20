@@ -2,7 +2,7 @@
   "name": "fix-regression-corpus",
   "version": 2,
   "created": "2026-09-11",
-  "updated": "2026-09-19",
+  "updated": "2026-09-20",
   "method": "真实安全修复回归：对每个修复，扫描「修复前 parent commit」——引擎在该位置/该类型上能否报出违规；再扫修复后确认不误报。来源=GitHub 安全公告数据库（GHSA/CVE），SHA 均经 api.github.com 实测核验。",
   "methodology_rules": [
     {
@@ -70,6 +70,46 @@
       "rule": "抑制类判别只允许使用【直接证据】：被调用方函数体自身含校验证据（tier-0）。经传播/推断得到的守卫（tier-1+，即「它调用了一个守卫函数所以它也守卫」）不得用于抑制，只能用于跨函数流的解释。同时，抑制的作用粒度应尽量落在【表达式】而非整个函数——函数级抑制会连带压掉同函数体里未被校验的其他流。",
       "why": "推断出来的证据含误差，而抑制是一种【不可逆】操作：真阳性一旦被压掉就不会再报出，也不会出现在任何回归统计里（它只会表现为 LOST，容易被当成无关噪声）。把推断误差乘以不可逆性，是这类判别最危险的失败模式。代价是留下缺口 G2b（经项目自有 helper 转手的校验证据不生效）——缺口是可见的（仍有误报），压掉的真阳性是不可见的。",
       "current_status": "G2 只认 tier-0；G2b 记为已知缺口（与 C4b 同族：项目自有 helper 不传播）"
+    },
+    {
+      "id": "R10-two-sided-taint-path",
+      "added": "2026-09-19",
+      "source": "fr-016 真实语料连续三轮 0 条之后定位到两侧同时断开（3.7.38）",
+      "rule": "一条污点流要能被观测到，【来源侧】与【sink 侧】必须同时连通。只补一侧时语料往往纹丝不动，看起来像修补无效，实际另一侧也断着。调试必须先写最小复现逐段确认通断，不要在真实语料上只看总数——总数是唯一结果变量，两侧任何一侧断着它都等于 0，没有定位能力。",
+      "why": "fr-016 的 pre 侧连修三轮（C4 塑形传播 / G2 调用点抑制 / 补文档解析产物根）都保持 0 条，直到把 sink 侧的 wrapper 继承也补上才跳到 5 条。若一直只在根表上打磨，会得出『这条路走不通』的错误结论。",
+      "current_status": "两侧均已连通：来源侧新增 runtime_key_enum / document_parse 根；sink 侧 methodSinkParamMap 增加 wrapper 继承一跳。已知缺口 C4b（helper 传播）与 C4c（迭代已被污染的聚合）"
+    },
+    {
+      "id": "R11-helper-stricter-than-inline",
+      "added": "2026-09-20",
+      "source": "C4b 项目自有纯塑形 helper 传播（3.7.39）",
+      "rule": "同一个判别规则，作用在【内联表达式】与作用在【项目自有 helper】上时，helper 侧的证据集必须比内联侧更严 —— 内联看得见整个实参窗口，helper 看不见，推断的证据等级天然更低。",
+      "why": "C4 的内联规则把 `.replace/.trim/...` 算作塑形（不净化）。若把同一条规则照搬到 helper 上，`.replace(/[^a-z0-9]/gi, \"\")` 这种标准净化写法就会被判成「确定不净化」—— 而它恰恰是净化函数的常见实现。这类错误在 helper 侧不可见（看不到函数体为什么被认成塑形），代价高于漏报。",
+      "current_status": "C4b 的证据集只收 node:path 家族 + 值转换（String/Number/Boolean） + 已认定的纯塑形 helper；字符过滤方法不计入。代价：`toSlug(p){return p.trim().toLowerCase()}` 仍不传播（已知缺口，与 C4b 同族）"
+    },
+    {
+      "id": "R12-repro-before-trusting-backlog",
+      "added": "2026-09-20",
+      "source": "C4d 高阶枚举回调形参（3.7.40）—— 备忘里写的『for-in 也不绑定』经最小复现实测是错的",
+      "rule": "备忘/待办里登记的『已知缺口』在动手之前必须先写最小复现确认它真的存在。未复现的缺口清单会随代码演进过期：它可能是被后续改动顺手闭合的，也可能一开始就是误判。照着过期的清单做，会改一个已经对的地方，还顺带承担回归风险。",
+      "why": "C4d 这轮开工前，备忘的『下一步』列着『for-in 与 .map/.forEach 回调形参不绑定』。8 个最小复现跑下来：for-in 两种形态本来就是通的（`bindFromEnum` 的正则本就写成 `(?:of|in)`），真正不通的只有回调那 4 种。若无复现直接动手，会去改一段正确代码，且因为『改了没变化』而继续怀疑别的方向。",
+      "current_status": "C4d 已落地（只收 forEach/map/flatMap/filter，只绑第一个形参、`[k,v]` 解构两个都绑）。同一批复现也确认了负对照：字面量数组回调、只把索引写进路径、被枚举的是干净变量 —— 三条均不标记"
+    },
+    {
+      "id": "R13-no-bypass-in-repro",
+      "added": "2026-09-20",
+      "source": "C4e helper 的现代写法（3.7.41）—— 第一版探针正负对照一次性全 MARK，什么都测不出来",
+      "rule": "写最小复现（以及任何单测 fixture）之前，先问一句：『我断言的这个现象，还能通过哪条旁路产生？』只要存在一条不经过被测机制的旁路，正对照的价值就是零 —— 它会带着负对照一起全绿。设计上必须让断言只能通过被测机制成立。",
+      "why": "C4e 初版把 helper 调用直接写在 sink 实参里（`writeFileSync(outDir + '/' + withExt(k))`）。判定里有一条兜底规则：sink 实参窗口出现污点名就标 —— 于是 helper 认不认得出都会被标，13 条用例全 MARK，连「helper 调用未定义函数」这种明显该不标的负对照也 MARK。改成隔离写法（`const rel = withExt(k)`，污点只能经 helper 返回值进来）才分出胜负。",
+      "current_status": "taintpath_F 全族、C4e 定向组 9 条均按隔离写法构造：sink 实参里不得出现污点变量本身"
+    },
+    {
+      "id": "R14-three-blade-reverse-verification",
+      "added": "2026-09-20",
+      "source": "C4e 取舍：既要证明正例依赖新代码，也要证明边界负对照不是空转",
+      "rule": "任何『放宽某条判据』的改动，反向验证至少三刀：① 摘掉整体能力 ⇒ 正例应全部失败；② 只摘放宽的那一项 ⇒ 只相关的那几条失败（做归因）；③ 反过来把判据再放宽一格 ⇒ 为这次收窄新写的边界负对照必须变红（证明它不是空转）。只做①会把「边界用例其实拦不住任何东西」漏过去。",
+      "why": "C4e 把 module 常量从『一律拦死』放宽到『字面量放行』，并新写了一条负对照锁定非字面量仍拦。只摘整体（全 F 族正例失败）证明不了这条负对照有效 —— 因为它本来就该不标，旧代码也不会让它红。第三刀把常量收集临时改成任意初值都收，那条负对照立刻报错，才确认它真的咬得住。",
+      "current_status": "C4e 三刀均执行并记录结果；第三刀（`out.add(vd.getName())`）跑完已还原"
     }
   ],
   "entries": [
@@ -382,10 +422,11 @@
       ],
       "ground_truth_note": "**fr-002/fr-003 同族的最干净样本**：修复 diff 就是在每个写文件<｜hy_place▁holder▁no▁813｜>前**新增一行 `assertWithinDir(dir, file, name)`**（新增合约 tests/fixtures/path-traversal*.json 与 assert-within-dir.test.ts 同批落地）。漏洞 = 「该有的检查没有被调用」——一个调用序列状态机在原理上不可见（它只能证明「顺序错了」，不能证明「少了」）。此外污点源是被 split 的 OpenAPI/AsyncAPI 描述文件内容（非 request 对象），且经过 pathToFilename 跨文件助手处理，超出 A1 标记的「request 污点 → fs sink 单跳 + 跨函数一跳」射程。",
       "sha_verified": "2026-09-18（api.github.com 核验；PR #2891 merge=26a0f299 「fix: path traversal in the split command」）",
-      "result": "MISS（2026-09-18，mini 语料；trust 扫描 0 违规，pre/post 均 0）",
-      "result_detail": "mini 语料（5 个真值文件）提取 19 个函数，IR 层 `__progmune_path_traversal__` 标记 0 命中，trust 引擎 0 违规。双重不确定性：① 缺失检查类本就不可见；② 污点源非 request",
-      "result_reason": "corpus_unverified",
-      "result_note": "mini 语料；5 个真值文件均在切片内（2026-09-19 严格路径校验），调用链完整性未校验。MISS 结论暂定。"
+      "result": "DETECTED（2026-09-20，3.7.39；pre 7 条 / post 0 条）",
+      "result_detail": "完整 packages/cli 快照实测：pre 7 条 / post 0 条。pre 命中 handleSplit、iterateAsyncApiChannels、iterateAsyncApiComponents、iterateComponents、iteratePathItems、splitOASDefinition、writeToFileByExtension。post 因新增 assertWithinDir(dir, file, name) 全部归零。此前 0/0 有两个独立断链点（见 R10）：① 污点根是外部文档解析产物（Object.keys(channels) 键名），不在 UNTRUSTED_ROOTS 里；② 落盘经writeToFileByExtension → writeYaml → fs.writeFileSync 两层自有封装，methodSinkParamMap 只登记一跳。3.7.39 又补上第三处（C4b）：`const filename = getFileNamePath(dir, componentName, ext)` 里的getFileNamePath 是项目自有 helper，此前不在塑形词表内，污点断在最后一跳。",
+      "result_reason": "detected_after_document_root_and_sink_inheritance",
+      "result_note": "mini 语料；5 个真值文件均在切片内（2026-09-19 严格路径校验），调用链完整性未校验。MISS 结论暂定。 ｜ 2026-09-19 二次复测（3.7.38）：① 语料从 mini 切片（5 个真值文件）升级为完整 packages/cli 子包，快照入库 blind-benchmark/fr-corpus/fr-016-redocly/{pre,post}（各 1.1M，受保护资产，不得放 /tmp）；② pre/post 由 0/0 变为 **5/0**，成为继 fr-007 之后第二个有判别力的真实语料对；③ 注意为本条新增 G-C 的 Within 后缀是照着本条形态加的，为避免同义反复，另有一条守卫函数名为 stamp（不含任何 G-C 后缀）的定向用例证明压制依据是被调用方自身的证据而非名字。 ｜ 2026-09-20 三次复测（3.7.39 C4b/C4c）：pre 5 → **7**，新增的两条正是 iterateAsyncApiComponents / iterateComponents —— 它们的污点要穿过 getFileNamePath(dir, componentName, ext) 这一跳，而该 helper 此前不在 C4 的塑形词表内。两条均为真阳性（组件名带 ../ 逃出输出目录，即本 CVE 形态）。 post 侧仍是 0：新增的 assertWithinDir(asyncapiDir, filename, componentName) 是 tier-0 守卫，由 G2 按被调用方自身证据压制——与 G-C 的 Within 后缀无关。",
+      "updated": "2026-09-20"
     },
     {
       "id": "fr-017",

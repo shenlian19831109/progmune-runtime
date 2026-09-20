@@ -84,7 +84,7 @@ G1 改变的是判别逻辑，因此不能只过「零漂移」：
 |---|---|
 | TS 795 盲测 | 3086 flags LOST 0 / ADDED 0（⚠️ 对标记类改动同样是**空过**，真正起作用的是下面几条） |
 | ~~fr-012~~ | **撤回**——`corpus_mismatch`（部署模式闸门），不能用于判定判别力（见下节） |
-| ~~fr-016（Redocly）~~ | **也撤回**——实测 pre 侧 **0 条**：污点根是 OpenAPI 文档解析产物，不在根表里，pre 根本没有信号。要让它可用须先补「文档/配置解析产物」根，那是 C 组召回的事，不能拿来当判别力的门。 |
+| **fr-016（Redocly）** | 2026-09-19 **重新启用**：3.7.38 补齐「文档解析产物」根 + sink 形参继承后实测 **pre 5 / post 0**（此前 pre 侧 0 条，仅可作无效控件，见 §三原文）；完整语料见 §六 |
 | **fr-007（openhop）** | **G1 的主验收对**：pre 报出（实测 5 条）**且 post 归 0**（实测 0 条）✅ |
 | 真实世界负样本 | gitlab-mcp 下载侧 `localPath` 守卫块（pre/post 都有）**必须不被标记** |
 | 反例单测 | `basename` 不压制、`resolve+startsWith(root)` 压制 —— 两条都要有 |
@@ -145,7 +145,32 @@ sink 而通过**——跟守卫生效与否无关。本轮最初有 3 条（G-A 
 |---|---|
 | fr-007 openhop 真实语料 | ✅ **pre 5 条 / post 0 条**（修复前 `flowRoutes` + `FlowStore.save/get/delete/updateFlow`；修复后全部归零） |
 | fr-012 gitlab-mcp | 维持 2/2（本条已改判 `corpus_mismatch`，不参与判别力判定） |
-| fr-016 Redocly | 维持 0/0 —— **pre 侧无信号**（污点根是 OpenAPI 文档解析产物，不在根表里），本条不构成 G1 的失败项，但也**不能**当验收对 |
+| fr-016 Redocly | 3.7.38 起 **✅ pre 5 条 / post 0 条**（此前维持 0/0，根因见 §三被撤回的那行）。pre 命中：`handleSplit` / `iterateAsyncApiChannels` / `iteratePathItems` / `splitOASDefinition` / `writeToFileByExtension`（最后一跳是 `onMethodHit` 反向标记）；post 因新增 `assertWithinDir(dir, file, name)` 归零 |
+
+### 6.1 fr-016 为什么到现在才有信号（两侧同时断）
+
+口径放在这里是因为它差点被误判成「这条路走不通」——pre 侧连续三轮改动
+（C4 塑形传播 / G2 调用点抑制 / 补文档解析产物根）都是 0 条，直到把 sink 侧
+也补上才动。两侧缺一不可：
+
+- **来源侧**：文档本体由上游 `parseYaml` 解析好后**作为形参**传入
+  （`channels: Record<string, any>`），函数体内没有任何解析调用，唯一本地可见
+  的入口是 `for (const channelName of Object.keys(channels))` 这次枚举。
+  新增根 `runtime_key_enum`（内部注释已标明它是性质较弱的一类根：声明的是
+  「名字不是字面量、而是运行时数据结构的产物」，与其他按传输面声明的根不同）。
+- **sink 侧**：落盘经 `writeToFileByExtension → writeYaml → fs.writeFileSync`
+  两层自有封装，而 `methodSinkParamMap` 原本只登记「形参 → 本函数体内 fs sink」
+  的一跳，整层 wrapper 从未入表。
+
+这条已固化为方法学规则 **R10**：补全常年 fail 的语料时，先写最小复现逐段确认
+通断，不要只在真实语料上看总数（总数是唯一结果变量，任何一侧断着都等于 0，
+没有定位能力）。
+
+> 另一个诚实说明：G-C 的 `Within` 后缀当初是照着 fr-016 的 `assertWithinDir`
+> 加的，所以 fr-016 的 post=0 对 **G-C** 而言是同义反复。真正结实的证据是另一条
+> 定向用例：把守卫函数改名为不含任何 G-C 后缀的 `stamp`、只保留函数体内的
+> `resolve + startsWith(base + sep)`，依然被压制 —— 说明压制依据是被调用方自身的
+> 证据（G2 的 tier-0），而不是名字。
 | TS 795 盲测 | 3086 flags LOST 0 / ADDED 0 —— ⚠️ **仍是空过**：盲测语料里 `__progmune_path_traversal__` 出现 **0 次**（前 0 后 0），根本没有覆盖。真正的门是 fr-007 与定向用例 |
 | 定向用例 | `src/extract-ir-taint-guard.test.ts` **14 passed**；反向验证：回退 v3.7.33 后 **5 条失败**（G-B/G-C×2/G-A/G-D 的负向断言），9 条正对照与反例仍绿 |
 | 构建 | `tsc -p tsconfig.json` 零错误 |
@@ -270,3 +295,211 @@ C4（污点经路径塑形表达式包装后仍传播）落地后，`taintpath_A
 
 先补判别力（G-A2 两处）→ 再放召回（C4）。反过来做的话，C4 会把这两条守卫用例
 直接打成误报，而误报会被记进语料、被当成真阳性继续放大。
+
+## 九、2026-09-20：C4b 项目自有纯塑形 helper —— 白名单的边界在哪
+
+### 缺口
+
+fr-016 在 3.7.38（补根 + sink 形参继承）之后是 pre 5 / post 0，但
+`iterateAsyncApiComponents` / `iterateComponents` 仍然看不见。断点是最后一跳：
+
+```
+const filename = getFileNamePath(componentDirPath, componentName, ext);
+// getFileNamePath(a, b, c) { return path.join(a, b) + `.${c}`; }
+writeToFileByExtension(componentData, filename);
+```
+
+`componentName` 已被 `Object.keys` 污染，但 `getFileNamePath` 不在 C4 的塑形词表里。
+
+### 修法：不放宽词表，改为按函数体证明
+
+C4 的 `TS_PATH_SHAPER_RE` 是 node:path 家族 + String 原型方法的**固定清单**，
+覆盖不到每个项目自己的封装 —— 往里加名字是打地鼠。改为证明「这个函数只做塑形」：
+
+| # | 判据 | 反例（不能认） |
+|---|---|---|
+| ① | 有形参、且有带表达式的 `return` | `void` 函数、只写文件的函数 |
+| ② | 函数体内**没有**文件 sink | `getFileNamePathWithMkdir`（体内 `fs.mkdirSync`） |
+| ③ | return 里所有调用都在塑形白名单，且所有自由标识符都是自己的形参 | `return FIXED_DIR + name`（`FIXED_DIR` 不是形参） |
+
+有界两轮不动点：允许 helper 调已认定的 helper（`buildOutPath → withExt`），不追环。
+
+### R11：helper 侧的证据集必须比内联侧更严
+
+C4 的内联规则把 `.replace/.trim/...` 当塑形（不净化）。若把同一条规则照搬到
+helper 上，`sanitizeName(p) { return p.replace(/[^a-z0-9]/gi, ""); }` 就会被判成
+「确定不净化」—— 而它恰恰是净化函数的标准写法。
+
+差别在于**可见性**：内联时实参窗口整个看得见；helper 形式看不见，推断的证据等级
+天然更低。所以 C4b 的证据集只收 node:path 家族 + 值转换（`String/Number/Boolean`）
++ 已认定的纯塑形 helper，**字符过滤方法不计入**。代价是 `toSlug(p){p.trim().toLowerCase()}`
+仍不传播 —— 已知缺口，可见，比不可见的误报便宜。
+
+### 实现坑：正则前瞻会被回溯绕过
+
+最初写的自由标识符检查是 `([A-Za-z_$][\w$]*)(?!\s*\()`，用来「排除调用名」。
+对 `withExt(...)`，正则可以**退化**成匹配 `withEx` 让前瞻通过（后面是 `t` 不是
+`(`），于是把调用名误判成自由标识符，`getFileNamePath` 永远认不出。
+改为**单趟扫描**：逐个标识符看它紧邻的前后字符，`before === "."` 是成员名、
+`after === "("` 是调用位（必须落在白名单）、其余必须都是形参。
+
+### 验收
+
+- fr-016：**pre 5 → 7**，新增的两条正是 C4b 目标，且均为真阳性
+  （组件名带 `../` 逃出输出目录，即本 CVE 形态）
+- post 侧仍 0：新增的 `assertWithinDir(asyncapiDir, filename, componentName)` 是
+  tier-0 守卫，由 G2 按被调用方自身证据压制
+- 新增盲测 `taintpath_D`（10 条）与定向用例 11 条；闸门 44/44
+
+---
+
+## 十、C4d：高阶枚举方法的回调形参（2026-09-20）
+
+### 缺口：与 for-of 语义等价的另一种写法，整片漏
+
+C4c 之后，`Object.keys(doc)` 的枚举绑定只认 `for (const k of|in …)`。
+但同一种数据流还有一半写在**回调**里 —— 探针实测（2026-09-20，8 个最小复现）：
+
+| 形态 | 3.7.39 实测 |
+|---|---|
+| `for (const k in doc)`（doc 已污） | 已标记 |
+| `const ks = Object.keys(doc); for (const k in ks)` | 已标记 |
+| `Object.keys(doc).forEach((k) => …)` | **未标记** |
+| `Object.keys(doc).map((k) => …)` | **未标记** |
+| `Object.entries(doc).forEach(([k, v]) => …)` | **未标记** |
+| `const ks = Object.keys(doc); ks.forEach((k) => …)` | **未标记** |
+| `["a","b"].forEach((k) => …)`（负对照） | 未标记（正确） |
+| 被枚举的是干净变量（负对照） | 未标记（正确） |
+
+**一条需要纠正的记录**：此前备忘写「`for...in` 也不绑定」，实测是错的 ——
+`bindFromEnum` 的正则本就是 `(?:of|in)`，for-in 一直是通的。真缺口只有回调。
+这条值得单独记：备忘里的「下一步」若未经复现就照着做，会白白改一个已经对的地方。
+
+### 修法：把回调形参并入同一套枚举绑定
+
+`collectTaintedNames` 里新增 `bindFromCallback(receiver)`，接收者两种形态：
+
+- **根形态** `(?:${root})[^()]*\)` —— `Object.keys(doc)` 的实参列表与闭括号由
+  `[^()]*\)` 吃掉（root 正则本身只吃到开括号）；
+- **变量形态** `(?:^|[^\w$.])(?:${names})` —— 走不动点，与 C4c 同源。
+
+形参取值规则：`[k, v]` 解构两个**都是**元素，都绑；`k, i` 只取第一个
+（第二个是索引，绑了就是误报）。`async (k) =>` 前的 `async` 不能挡住匹配。
+
+### 方法表的取舍（只收四个）
+
+只收 `forEach / map / flatMap / filter` —— 形参 = 元素本身、且枚举全部元素。
+刻意不收：
+
+- `find / some / every` —— 谓词语义，且常与白名单校验同现，绑进去反而给
+  守卫侧喂误报；
+- `reduce` —— 第一个形参是累加器不是元素，语义错位。
+
+### R7 第四次：门自身必须有覆盖
+
+实测 generated 全量 .ts 里 `.forEach/.map/.flatMap/.filter` 回调形参 **0 处**
+（A–D 族都没有），所以「LOST 0 / ADDED 0」在这项上照样是空过。新增
+`taintpath_E`（10 条：6 mark / 1 suppressed / 3 no-taint）：
+
+- `emitForEachGuarded` 用 `stamp`（不含 G-C 后缀）做守卫 —— 召回接通后守卫仍
+  压得住，且依据只能是被调用方自身证据（G2 tier-0）；
+- `emitForEachIndexOnly` 只把索引 `i` 写进路径 —— 钉死「只绑第一个形参」；
+- `emitForEachCleanVar` 根在、回调在、但接收者干净 —— 钉死「看接收者，不是看函数里有没有污点」。
+
+### C4d-b：同一天的第二次修正（三处遗漏 + 一处真实误报）
+
+C4d 落地后立刻用新语料验剩余写法，初版正则有两件事没做对。初版以 `[,)]` 收尾：
+
+| 形态 | 初版 | 现在 |
+|---|---|---|
+| `forEach(k => …)` 无括号单参 | 漏 | 标记 |
+| `forEach(function (k) { … })` ES5 回调 | 漏 | 标记 |
+| `doc.sections.forEach((s: any) => …)` | 漏 | 标记 |
+| `forEach(handleOne)` 回调是**函数引用** | **误标** | 不标记 |
+
+**误报那条是重点**：正则以 `[,)]` 收尾时，`forEach(handleOne)` 里的 `handleOne`
+（别人函数的名字）会被当成形参绑进污点集合，于是同名局部变量随机被判成污点。
+E 族用 `emitForEachNamedHandler` 把它钉住：函数体里故意放一个同名的
+`const handleOne`（值是字面量路径），若误绑则会立刻产生一条 chargeable false positive。
+
+修法是把**「回调必须内联」**写进正则前提：箭头分支形参后必须见到 `=>`，
+ES5 分支必须见到 `function` 关键字，函数引用形态自然落空。
+
+顺带发现形参字符集漏了 `:` —— `(s: any) =>` 这种带类型标注的写法在 TS 工程里是
+常态，一个冒号就让整环不匹配。现放行 `: . | < >`（类型标注、联合类型与泛型形参），
+`=>` 与 `{ }` 仍不在集合内，函数体不会被吃进来。
+
+### 反向验证做了两次
+
+光「摘掉整个 C4d」不够 —— 那样只能证明 9 条正例依赖它，证明不了那条**误报**负对照
+不是空转。所以第二次把 arrow 分支单独退回初版形态（`[,)]` 收尾）：
+闸门立刻报 `emitForEachNamedHandler ✗ 不应标记却标记了（no-taint）`，
+并顺带复现了冒号问题导致的 `emitMemberChainForEach` 漏报。两条负对照都被验证过真的会红。
+
+---
+
+## 十一、C4e：helper 的现代写法（2026-09-20）
+
+### 缺口：名录是用 `sf.getFunctions()` 扫的，只能拿到【函数声明】
+
+C4b 判据本身没问题（有形参 / 有返回值 / 体内无 sink），问题在**候选的名字从哪来**。
+现代 TS 工程里 helper 的主力写法是箭头常量，实测（2026-09-20，13 个最小复现）：
+
+| 写法 | 之前 | 现在 |
+|---|---|---|
+| `function f(n) { return n + ".md"; }` | 传播 | 传播 |
+| `const f = (n) => n + ".md";` 简洁体箭头 | **漏** | 传播 |
+| `const f = (n) => { return n + ".md"; };` 块体箭头 | **漏** | 传播 |
+| `const f = function (n) { return n + ".md"; };` | **漏** | 传播 |
+| return 引用模块级字面量常量 | **漏** | 传播 |
+| return 用 path 模块别名 `p.join` | **漏** | 传播 |
+| 箭头 → 箭头两跳 | **漏** | 传播 |
+| `Util.method(n)` 对象字面量方法 | **漏** | **仍漏**（刻意保留，见下） |
+
+另外两处放宽的边界都是以「出处可确证」为限：
+
+- **模块级字面量常量**：只收初值是 string / number / boolean 字面量的 top-level
+  `const`。初值是任意表达式的（`const ROOT = path.resolve(...)`）一律不收 ——
+  一旦放开，helper 就能把别处的污点藏在一个常量后面，等于跨函数常量摘要对任意
+  数据流发通行证。这条顺便闭合了 D 族登记过的 known-gap `emitHelperFixed`。
+- **path 模块别名**：`import * as p` / `import nodePath from "node:path"` /
+  `import { join } from "path"` 都能认；只放行 path 模块本身，fs / os 不放
+  —— 判据②只扫 sink 调用，覆盖不到「把 IO 藏进 return」这一类。
+
+刻意保留的缺口：`Util.method(n)` 这种对象字面量方法。要支持就得把成员名并入
+传播点的匹配集合，而同名的成员方法在别的对象上未必是塑形 —— 按 R11（helper 侧
+证据必须比内联侧更严），先不收。
+
+### 探针设计：别把 helper 调用写进 sink 实参
+
+同一个套路第二版才写对。初版写成：
+
+```ts
+fs.writeFileSync(outDir + "/" + withExt(k), "x");   // ← 正负对照一次性全 MARK
+```
+
+因为 `hasTaintedSinkCall` 有一条兜底：**sink 实参窗口里出现污点名就标**。
+`k` 写在实参里，helper 认不认得出都会被标 —— 于是 13 条用例全绿，什么都测不出来。
+改成隔离写法才分得出胜负：
+
+```ts
+const rel = withExt(k);              // 污点只能经 helper 的返回值进来
+fs.writeFileSync(outDir + "/" + rel, "x");
+```
+
+这条比 C4e 本身更值得记住：**写最小复现时要先问一句「这个标记还能通过哪条路产生」**，
+只要存在旁路，正对照的价值就是零。
+
+### 顺带查明的两件事（不是 bug）
+
+1. 「helper 体内有 sink」的用例会被标记，来自 `methodSinkParamMap` 的跨函数传播：
+   helper 的形参确实流进了 sink，判定正确，与它是否被认成纯塑形无关。
+2. 备忘里记的 toSlug 缺口（`p.trim().toLowerCase()`）**早就穿透**；`reduce` 首参
+   不绑也确认按设计生效 —— R12 再次生效（备忘的「已知」动手前先复现）。
+
+### 遗留的精度边界（下一步）
+
+传播是**名字级**的：`discard(k) { return "fixed.md"; }` 丢弃形参，结果照样被判污染。
+要收窄就得做形参-实参位置对齐 + 返回值依赖分析：只有当污点实参落在「return 真的
+依赖的那些形参」上时才传播。这是纯精度增量，但会动到传播主体 `taintedViaShaper`，
+单独一轮做。

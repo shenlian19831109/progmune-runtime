@@ -28,6 +28,13 @@ const SNAPSHOTS = path.resolve(__dirname, "fr-corpus");
 /** 登记值写在条目的 result_note 里（"pre 5 条 / post 0"），这里人工传入比对 */
 const EXPECTED: Record<string, { pre: number; post: number }> = {
   "fr-007": { pre: 5, post: 0 },
+  // 2026-09-19（3.7.38）：补全「文档解析产物」根 + sink 形参继承后，
+  // fr-016 成为第二个有判别力的真实语料对。此前它是 pre 0 / post 0，
+  // 不能当验证对（见设计稿 §三）；现在它有了判别力，可以被继续守卫。
+  // 2026-09-20（3.7.39）5 → 7：C4b（项目自有纯塑形 helper 传播）接通
+  // getFileNamePath(...) 这一跳，iterateAsyncApiComponents / iterateComponents
+  // 由漏报转为检出。两条都是真阳性（恶意组件名带 ../ 逃出输出目录）。
+  "fr-016": { pre: 7, post: 0 },
 };
 
 function markedFns(dir: string): string[] {

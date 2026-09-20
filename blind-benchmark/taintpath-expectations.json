@@ -15,37 +15,441 @@
     "taintpath_B 的 dispatchToolGuarded 标记为 mark —— 这是【反向】缺口 G2：自定义校验函数名不含路径语义后缀（assertTemplateName）时，调用点不会被抑制。",
     "2026-09-19：C4（路径塑形传播）闭合了全部 4 条 known-gap，期望已转 mark。剩余缺口为 G2（自定义校验函数名不含路径语义后缀时调用点不被抑制）与 C4b（项目自有 helper 如 buildPath(p) 不在塑形白名单内）。",
     "2026-09-19：本闸门改为【默认实时提取】。原默认读 reports/batch-scan-results.json 是陈旧产物，C4 落地后仍报「未标记，符合预期」——第二种空过。",
-    "2026-09-19 续：G2（调用点抑制）闭合，dispatchToolGuarded 由 mark 转 suppressed。G2 不按函数名猜语义（Name 后缀曾导致 ensureDir 误判、fr-007 召回归零），改为看被调用方函数体内是否有校验证据；净化作用在【表达式】上而非整函数，且只认 tier-0（自身含证据），经 helper 转手不生效（记为 G2b 缺口）。TS 盲测实测 LOST 1 / ADDED 0 —— 唯一变化就是本条。"
+    "2026-09-19 续：G2（调用点抑制）闭合，dispatchToolGuarded 由 mark 转 suppressed。G2 不按函数名猜语义（Name 后缀曾导致 ensureDir 误判、fr-007 召回归零），改为看被调用方函数体内是否有校验证据；净化作用在【表达式】上而非整函数，且只认 tier-0（自身含证据），经 helper 转手不生效（记为 G2b 缺口）。TS 盲测实测 LOST 1 / ADDED 0 —— 唯一变化就是本条。",
+    "2026-09-19 续二：新增 taintpath_C 族。原因是一道硬规则 R7 —— 门自身必须有覆盖。fr-016 那轮（runtime_key_enum / document_parse 根 + methodSinkParamMap 的 wrapper 继承）在既有语料上是空过：实测 413 个 generated .ts 里 Object.keys/values/entries 出现 0 次，也没有任何『自有写封装 → 内部 fs sink』两跳结构，于是 LOST 0/ADDED 0 无法与『功能没写』区分。C 族把 fr-016 的真实形态（文档中键名 → 两层封装落盘）搬进盲测，使该门重新咬得住。",
+    "2026-09-20：新增 taintpath_D 族（C4b 项目自有纯塑形 helper + C4c 迭代已被污染的聚合）。同样是 R7：这两处在含 C 族的既有语料上仍然空过 —— 实测 generated 全量 .ts 里『const ks = Object.keys(o); for (const k of ks)』形态 0 处、『自有 path 塑形 helper』0 处。D 族的守卫侧刻意用 stamp（不含任何 G-C 后缀）而非 assertWithinDir：若压制真的发生，依据就只能是被调用方自身的证据（G2 tier-0），不是名字。",
+    "2026-09-20 续：新增 taintpath_E 族（C4d 高阶枚举方法的回调形参）。R7 第四次咬人 —— 实测 generated 全量 .ts 里 .forEach/.map/.flatMap/.filter 的回调形参 0 处，A–D 族对这处仍是空过。另有两点值得记：① 探针实测发现 for-in 其实一直是通的（bindFromEnum 正则本就是 of|in），此前备忘里『for-in 不绑定』的判断是错的，真缺口只在回调；② 方法表只收 forEach/map/flatMap/filter，不收 find/some/every（谓词语义）与 reduce（首参是累加器）—— E 族用 emitForEachIndexOnly 钉死『只绑第一个形参』。",
+    "2026-09-20 续（同日第二次）：E 族补 5 条至 15 条，覆盖 C4d-b 三处 —— 无括号单参箭头、ES5 function 回调、成员链接收者；另加两条负对照，其中 emitForEachNamedHandler 锁住一个**真实误报**：回调写成函数引用 `forEach(handleOne)` 时，初版正则把 handleOne 当成形参绑进污点集合，同名局部变量随即被误判。修法是把「内联回调」作为前提写进正则（箭头分支必须见到 `=>`、ES5 分支必须见到 `function`）。顺带发现形参字符集漏了 `:`：`(s: any) =>` 这种带类型标注的写法整环不匹配 —— TS 工程里的常态写法。",
+    "2026-09-20 第三次：新增 taintpath_F 族（C4e helper 的现代写法）。这是 R7 第五次 —— generated 全量 .ts 里 `export const X = (…) =>` 0 处，A–E 族对本能力空过。F 族写法上有一条硬约束：sink 实参里不得直接出现污点变量，污点只能经 helper 返回值流进 sink；否则命中「实参含污点名」的兜底判定，所有用例会假通过（2026-09-20 第一版探针就是这么全绿的，P/N 对照一次性全 MARK）。另记两条勘误：备忘里说的 toSlug 缺口（`p.trim().toLowerCase()`）实测早就能穿透；reduce 首参不绑也确认按设计生效。",
+    "2026-09-20 C4e：taintpath_D/emitHelperFixed 由 known-gap 转 mark —— 「helper 的 return 引用模块级字面量常量」这条漏报已闭合。同一族的 emitHelperWithSink（helper 体内有 sink）仍是 known-gap，未随本轮放宽。"
   ],
   "projects": {
     "taintpath_A": [
-      { "fn": "readDirect", "file": "src/paths.ts", "expect": "mark", "why": "最小形态：req.params 直连 readFileSync（C5 之前不标记）" },
-      { "fn": "readViaQuery", "file": "src/paths.ts", "expect": "mark", "why": "req.query + 模板字符串直连（C5 之前不标记）" },
-      { "fn": "readViaLocal", "file": "src/paths.ts", "expect": "mark", "why": "污点经局部变量单跳进 sink（历史行为，C5 前就标记）" },
-      { "fn": "writeViaHeader", "file": "src/paths.ts", "expect": "mark", "why": "写侧 sink + request.headers 根" },
-      { "fn": "readLengthCheck", "file": "src/paths.ts", "expect": "mark", "why": "N-C：长度检查不算守卫" },
-      { "fn": "readNullCheck", "file": "src/paths.ts", "expect": "mark", "why": "N-D：空值检查不算守卫" },
-      { "fn": "readEnsureDirOnly", "file": "src/paths.ts", "expect": "mark", "why": "反例回归锁：ensureDir() 曾被 G-C 误判为守卫致召回归零" },
-      { "fn": "readBasename", "file": "src/paths.ts", "expect": "mark", "why": "C4 已闭合：path.basename(x) 包装后污点仍传播；N-A 原意（basename 不算守卫）由本条与 readGuard* 组共同锁住" },
-      { "fn": "readResolveOnly", "file": "src/paths.ts", "expect": "mark", "why": "C4 已闭合；本条同时是 readGuardWithin 的正对照（R6）：同形状去掉 startsWith(base) 后必须重新报出" },
-      { "fn": "readJoinWrapped", "file": "src/paths.ts", "expect": "mark", "why": "C4 已闭合：path.join(ROOT, taint) 不再断链" },
-      { "fn": "readNormalizeWrapped", "file": "src/paths.ts", "expect": "mark", "why": "C4 已闭合：path.normalize(taint) 不再断链" },
-      { "fn": "readGuardWithin", "file": "src/paths.ts", "expect": "suppressed", "why": "G-A 目录包含性：resolve(p).startsWith(resolve(root))" },
-      { "fn": "readGuardFn", "file": "src/paths.ts", "expect": "suppressed", "why": "G-C 独立校验函数（fr-007/ fr-016 形态）" },
-      { "fn": "readGuardPattern", "file": "src/paths.ts", "expect": "suppressed", "why": "G-D 锚定字符集白名单（FLOW_ID_PATTERN 形态）" },
-      { "fn": "readGuardTraversal", "file": "src/paths.ts", "expect": "suppressed", "why": "G-B 上跳/绝对路径拒绝（fr-012 localPath 真实守卫块形态）" },
-      { "fn": "readConstant", "file": "src/paths.ts", "expect": "no-taint", "why": "常量路径无污点；marks 用例的正对照" }
+      {
+        "fn": "readDirect",
+        "file": "src/paths.ts",
+        "expect": "mark",
+        "why": "最小形态：req.params 直连 readFileSync（C5 之前不标记）"
+      },
+      {
+        "fn": "readViaQuery",
+        "file": "src/paths.ts",
+        "expect": "mark",
+        "why": "req.query + 模板字符串直连（C5 之前不标记）"
+      },
+      {
+        "fn": "readViaLocal",
+        "file": "src/paths.ts",
+        "expect": "mark",
+        "why": "污点经局部变量单跳进 sink（历史行为，C5 前就标记）"
+      },
+      {
+        "fn": "writeViaHeader",
+        "file": "src/paths.ts",
+        "expect": "mark",
+        "why": "写侧 sink + request.headers 根"
+      },
+      {
+        "fn": "readLengthCheck",
+        "file": "src/paths.ts",
+        "expect": "mark",
+        "why": "N-C：长度检查不算守卫"
+      },
+      {
+        "fn": "readNullCheck",
+        "file": "src/paths.ts",
+        "expect": "mark",
+        "why": "N-D：空值检查不算守卫"
+      },
+      {
+        "fn": "readEnsureDirOnly",
+        "file": "src/paths.ts",
+        "expect": "mark",
+        "why": "反例回归锁：ensureDir() 曾被 G-C 误判为守卫致召回归零"
+      },
+      {
+        "fn": "readBasename",
+        "file": "src/paths.ts",
+        "expect": "mark",
+        "why": "C4 已闭合：path.basename(x) 包装后污点仍传播；N-A 原意（basename 不算守卫）由本条与 readGuard* 组共同锁住"
+      },
+      {
+        "fn": "readResolveOnly",
+        "file": "src/paths.ts",
+        "expect": "mark",
+        "why": "C4 已闭合；本条同时是 readGuardWithin 的正对照（R6）：同形状去掉 startsWith(base) 后必须重新报出"
+      },
+      {
+        "fn": "readJoinWrapped",
+        "file": "src/paths.ts",
+        "expect": "mark",
+        "why": "C4 已闭合：path.join(ROOT, taint) 不再断链"
+      },
+      {
+        "fn": "readNormalizeWrapped",
+        "file": "src/paths.ts",
+        "expect": "mark",
+        "why": "C4 已闭合：path.normalize(taint) 不再断链"
+      },
+      {
+        "fn": "readGuardWithin",
+        "file": "src/paths.ts",
+        "expect": "suppressed",
+        "why": "G-A 目录包含性：resolve(p).startsWith(resolve(root))"
+      },
+      {
+        "fn": "readGuardFn",
+        "file": "src/paths.ts",
+        "expect": "suppressed",
+        "why": "G-C 独立校验函数（fr-007/ fr-016 形态）"
+      },
+      {
+        "fn": "readGuardPattern",
+        "file": "src/paths.ts",
+        "expect": "suppressed",
+        "why": "G-D 锚定字符集白名单（FLOW_ID_PATTERN 形态）"
+      },
+      {
+        "fn": "readGuardTraversal",
+        "file": "src/paths.ts",
+        "expect": "suppressed",
+        "why": "G-B 上跳/绝对路径拒绝（fr-012 localPath 真实守卫块形态）"
+      },
+      {
+        "fn": "readConstant",
+        "file": "src/paths.ts",
+        "expect": "no-taint",
+        "why": "常量路径无污点；marks 用例的正对照"
+      }
     ],
     "taintpath_B": [
-      { "fn": "loadTemplate", "file": "src/store.ts", "expect": "mark", "why": "C1：顶层函数的 sink 形参被污点流入" },
-      { "fn": "writeRendered", "file": "src/store.ts", "expect": "mark", "why": "C1：同上，写侧" },
-      { "fn": "DocStore.load", "file": "src/store.ts", "expect": "mark", "why": "类方法的 sink 形参被污点流入" },
-      { "fn": "dispatchToolBare", "file": "src/handler.ts", "expect": "mark", "why": "C2：裸调用 loadTemplate(tainted)" },
-      { "fn": "dispatchToolInline", "file": "src/handler.ts", "expect": "mark", "why": "C5：不可信根直接写在跨函数调用的实参里" },
-      { "fn": "dispatchToolMethod", "file": "src/handler.ts", "expect": "mark", "why": "成员调用传播到类方法 sink 形参" },
-      { "fn": "dispatchToolWrite", "file": "src/handler.ts", "expect": "mark", "why": "写侧跨函数传播" },
-      { "fn": "dispatchToolGuarded", "file": "src/handler.ts", "expect": "suppressed", "why": "G2 已闭合（3.7.37）：assertTemplateName 函数体内是锚定字符集白名单，被调用 ⇒ 该污点表达式视为已净化。正对照 = dispatchToolBare（同形状去掉校验，仍 mark）" }
+      {
+        "fn": "loadTemplate",
+        "file": "src/store.ts",
+        "expect": "mark",
+        "why": "C1：顶层函数的 sink 形参被污点流入"
+      },
+      {
+        "fn": "writeRendered",
+        "file": "src/store.ts",
+        "expect": "mark",
+        "why": "C1：同上，写侧"
+      },
+      {
+        "fn": "DocStore.load",
+        "file": "src/store.ts",
+        "expect": "mark",
+        "why": "类方法的 sink 形参被污点流入"
+      },
+      {
+        "fn": "dispatchToolBare",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C2：裸调用 loadTemplate(tainted)"
+      },
+      {
+        "fn": "dispatchToolInline",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C5：不可信根直接写在跨函数调用的实参里"
+      },
+      {
+        "fn": "dispatchToolMethod",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "成员调用传播到类方法 sink 形参"
+      },
+      {
+        "fn": "dispatchToolWrite",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "写侧跨函数传播"
+      },
+      {
+        "fn": "dispatchToolGuarded",
+        "file": "src/handler.ts",
+        "expect": "suppressed",
+        "why": "G2 已闭合（3.7.37）：assertTemplateName 函数体内是锚定字符集白名单，被调用 ⇒ 该污点表达式视为已净化。正对照 = dispatchToolBare（同形状去掉校验，仍 mark）"
+      }
+    ],
+    "taintpath_C": [
+      {
+        "fn": "splitChannels",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "fr-016 pre 形态：Object.keys 枚举键名 → 模板字面量 → 两层 wrapper 落盘"
+      },
+      {
+        "fn": "splitChannelsGuarded",
+        "file": "src/handler.ts",
+        "expect": "suppressed",
+        "why": "fr-016 post 形态：新增 assertWithinDir(dir, file, name)。G-C(Within) + G2(tier-0) 双覆盖；正对照 = splitChannels"
+      },
+      {
+        "fn": "emitFromEntries",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "Object.entries 的 [k, v] 解构绑定都要进污点集合"
+      },
+      {
+        "fn": "splitViaTwoHops",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "两层 wrapper：sink 形参继承须能经有界闭包传下来（writeNested → writeToFileByExtension → writeYaml → fs.writeFileSync）"
+      },
+      {
+        "fn": "emitFromParsed",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "document_parse 根：JSON.parse 产物（键名 cfg.name）直接用于构造落盘路径"
+      },
+      {
+        "fn": "writeToFileByExtension",
+        "file": "src/wrappers.ts",
+        "expect": "mark",
+        "why": "onMethodHit 反向标记：被调用方自身也是可被外部污染的入口"
+      },
+      {
+        "fn": "writeNested",
+        "file": "src/wrappers.ts",
+        "expect": "mark",
+        "why": "同上，第二层 wrapper"
+      },
+      {
+        "fn": "splitConstants",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "R6 负对照：名字是代码写死的，不是运行时数据结构产物；正对照 = splitChannels"
+      },
+      {
+        "fn": "touchOnly",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "R6 负对照：helper 不写文件 ⇒ 不构成 sink 继承；正对照 = splitChannels"
+      },
+      {
+        "fn": "writeSwapped",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "R6 负对照：形参落在被调用方的【非 sink 位】⇒ 不继承 sink"
+      }
+    ],
+    "taintpath_D": [
+      {
+        "fn": "emitViaHelper",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4b：污点穿过项目自有的纯塑形 helper（getFileNamePath = path.join + 拼接，三条判据全中）"
+      },
+      {
+        "fn": "emitViaTwoHopHelper",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4b 两跳：buildOutPath 调已认定的 withExt，验有界不动点第二轮"
+      },
+      {
+        "fn": "emitViaHelperGuarded",
+        "file": "src/handler.ts",
+        "expect": "suppressed",
+        "why": "C4b × G2：helper 接通召回后守卫仍压得住。守卫名 stamp 不含任何 G-C 后缀 ⇒ 压制依据只能是被调用方自身的证据（tier-0），不是名字；正对照 = emitViaHelper"
+      },
+      {
+        "fn": "emitCollectThenIterate",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4c：const ks = Object.keys(doc) 再 for (const k of ks) —— 被迭代对象是已被污染的变量，不再是根表达式"
+      },
+      {
+        "fn": "emitFromValues",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4c：Object.values 同族，成员取值 v.name 也要带出去"
+      },
+      {
+        "fn": "emitHelperWithSink",
+        "file": "src/handler.ts",
+        "expect": "known-gap",
+        "why": "C4b 判据②：helper 体内有文件 sink ⇒ 不算纯塑形 ⇒ 不传播（保守导致的漏报）"
+      },
+      {
+        "fn": "emitHelperFixed",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "原 C4b 判据③的已知缺口，2026-09-20 C4e 闭合：模块级【字面量】常量（只收 string/number/boolean 字面量初值）现已放行为 helper return 的自由标识符，出处可确证 ⇒ 不再是「看不见就拦死」。判据边界仍在：初值是任意表达式的常量仍拦。"
+      },
+      {
+        "fn": "emitSanitizedHelper",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "R11：字符过滤（.replace）不算「纯塑形」的证据 —— 它是净化函数的常见实现；正对照 = emitViaHelper"
+      },
+      {
+        "fn": "emitLiteralArgs",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "R6 负对照：根在、helper 也在，但传进去的是字面量 ⇒ 不是「见到 helper 就标记」"
+      },
+      {
+        "fn": "emitUntrackedAggregate",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "R6 负对照：根在、sink 也在，但迭代的是字面量数组 ⇒ 绑定看的是被迭代对象是否污"
+      }
+    ],
+    "taintpath_E": [
+      {
+        "fn": "emitForEachKeys",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4d：Object.keys(doc).forEach((k) => …) —— 回调形参 = 被枚举元素，与 for-of 等价；此前整片漏"
+      },
+      {
+        "fn": "emitMapKeys",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4d：map 回调同形态，方法表收 forEach/map/flatMap/filter 四个"
+      },
+      {
+        "fn": "emitEntriesForEach",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4d：Object.entries + 解构形参 [k, v]，两个都是元素，都要绑"
+      },
+      {
+        "fn": "emitCollectThenForEach",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4d × C4c：接收者已是被污染的变量 ks（先收集再 forEach），走不动点的变量形态"
+      },
+      {
+        "fn": "emitValuesMapAsync",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4d：async 回调（Promise.all + map 的并发写法），形参前的 async 不能挡住绑定"
+      },
+      {
+        "fn": "emitForEachHelper",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4d × C4b：回调形参还要能穿过项目自有的纯塑形 helper getFileNamePath"
+      },
+      {
+        "fn": "emitForEachGuarded",
+        "file": "src/handler.ts",
+        "expect": "suppressed",
+        "why": "C4d × G2：召回接通后守卫仍压得住。stamp 不含任何 G-C 后缀 ⇒ 压制依据只能是被调用方自身证据（tier-0）；正对照 = emitForEachKeys"
+      },
+      {
+        "fn": "emitForEachIndexOnly",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "只把【索引 i】（第二个形参）写进路径 —— 钉死「只绑第一个形参」：绑了第二个就是误报"
+      },
+      {
+        "fn": "emitForEachLiteral",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "字面量数组回调，无污点流入；正对照 = emitForEachKeys"
+      },
+      {
+        "fn": "emitForEachCleanVar",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "根在（all 已污）、但被枚举的是干净变量 ks —— 证明绑的是【接收者是否污】不是「函数里有污点就标」"
+      },
+      {
+        "fn": "emitForEachNoParen",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4d-b：无括号单参箭头 forEach(k => …) —— 初版正则只认带括号的箭头"
+      },
+      {
+        "fn": "emitForEachFunctionCb",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4d-b：ES5 `function (k) {}` 回调 —— 不是箭头，但形参同样是元素"
+      },
+      {
+        "fn": "emitMemberChainForEach",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4d-b：接收者隔着一层成员（doc.sections.forEach），doc 来自 JSON.parse ⇒ 成员枚举出来的元素同样是污点"
+      },
+      {
+        "fn": "emitForEachNamedHandler",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "回调是【函数引用】handleOne 而不是内联函数 —— 那是别人函数的名字，不是元素。初版把它当形参绑进污点集合，同名的 const handleOne 随即被误标；本条锁住这个修复"
+      },
+      {
+        "fn": "emitMemberChainClean",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "干净对象的成员链枚举，无污点流入；正对照 = emitMemberChainForEach"
+      }
+    ],
+    "taintpath_F": [
+      {
+        "fn": "emitArrowHelper",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4e：箭头 helper `export const f = (x) => x + '.md'` —— 现代 TS 里 helper 的主力写法，此前 sf.getFunctions() 收不到，整片漏"
+      },
+      {
+        "fn": "emitArrowBlockHelper",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4e：箭头 helper 的块体形态 `{ return …; }`，与简洁体等价"
+      },
+      {
+        "fn": "emitFnExprHelper",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4e：函数表达式 `const f = function (x) { return …; }` —— 同样不被 getFunctions() 收录"
+      },
+      {
+        "fn": "emitModuleConstHelper",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4e：helper 的 return 引用【模块级字面量常量】EXT_DOC —— 此前自由标识符一律拦死"
+      },
+      {
+        "fn": "emitPathAliasHelper",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4e：path 模块的局部别名 `import * as p from 'path'`，出处可确证 ⇒ 允许；白名单里写死 'path' 一个名字不够"
+      },
+      {
+        "fn": "emitArrowTwoHop",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4e × C4b：两跳（箭头 helper 调另一个箭头 helper），走有界两轮不动点"
+      },
+      {
+        "fn": "emitArrowGuarded",
+        "file": "src/handler.ts",
+        "expect": "suppressed",
+        "why": "C4e × G2：召回放宽到箭头 helper 之后守卫仍压得住。stamp 不含 G-C 后缀 ⇒ 压制依据只能是被调用方自身证据（tier-0）；正对照 = emitArrowHelper"
+      },
+      {
+        "fn": "emitUnknownHelper",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "helper 调用项目内【未定义】的函数 —— 认不出的一律不传播；正对照 = emitArrowHelper"
+      },
+      {
+        "fn": "emitSinkHelper",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "helper 体内有 sink（判据②）—— 箭头形态同样不得豁免；正对照 = emitArrowHelper"
+      },
+      {
+        "fn": "emitArrowLiteral",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "helper 是真塑形、但喂进去的是字面量 —— 无污点流入；钉死「传播要靠实参，不是靠 helper 长得像」"
+      }
     ]
   },
-  "updated": "2026-09-19"
+  "updated": "2026-09-20"
 }
