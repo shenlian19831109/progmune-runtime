@@ -814,6 +814,100 @@ function pathModuleAliases(project: Project): Set<string> {
   return out;
 }
 
+/** 一个纯塑形 helper 的形参表（有序）+ 「返回值真正依赖哪些形参」 */
+type ShaperInfo = { params: string[]; deps: Set<string> };
+type ShaperTable = { names: Set<string>; info: Map<string, ShaperInfo> };
+
+/** 按顶层逗号切分实参串（跳过字符串与已配平的括号，后者由调用方保证不含嵌套） */
+function splitTopLevelArgs(argText: string): string[] {
+  const out: string[] = [];
+  let depth = 0;
+  let quote = "";
+  let cur = "";
+  for (let i = 0; i < argText.length; i++) {
+    const ch = argText[i];
+    if (quote) {
+      cur += ch;
+      if (ch === quote && argText[i - 1] !== "\\") quote = "";
+      continue;
+    }
+    if (ch === '"' || ch === "'" || ch === "`") { quote = ch; cur += ch; continue; }
+    if (ch === "(" || ch === "[" || ch === "{") depth++;
+    else if (ch === ")" || ch === "]" || ch === "}") depth--;
+    if (ch === "," && depth === 0) { out.push(cur); cur = ""; continue; }
+    cur += ch;
+  }
+  if (cur.trim() !== "" || out.length > 0) out.push(cur);
+  return out;
+}
+
+/**
+ * C4f：把 helper 调用里【返回值不依赖的那些实参】抹掉。
+ *
+ * 名字级传播的老问题是：`discard(k) { return "fixed.md"; }` 明明把形参丢了，
+ * 只要 `k` 出现在赋值右侧就会被当成污点证据 ⇒ 误标。返回值既然不依赖那个形参，
+ * 那条支路就没有数据流。按形参-实参位置对齐后：
+ *
+ *   discard(k)          ⇒ `""`          （不依赖任何形参）
+ *   pick("safe", k)     ⇒ `("safe")`    （只依赖第一个形参）
+ *
+ * 只处理实参里不再嵌套括号的调用（最内层优先），有界 3 轮向外。
+ * 抹掉的是**证据**，`shaped` 判定仍看原式 —— helper 是不是塑形，与它的返回值
+ * 依不依赖实参是两件事。
+ */
+function maskNonDependentArgs(text: string, info: Map<string, ShaperInfo>): string {
+  if (info.size === 0) return text;
+  let cur = text;
+  for (let round = 0; round < 3; round++) {
+    const next = maskNonDependentArgsOnce(cur, info);
+    if (next === null) break;
+    cur = next;
+  }
+  return cur;
+}
+
+/** 抹掉**一个**最内层调用；没有任何调用需要抹时返回 null（供调用方收敛） */
+function maskNonDependentArgsOnce(text: string, info: Map<string, ShaperInfo>): string | null {
+  for (const [name, si] of info) {
+    const re = new RegExp(`(?:^|[^\\w$.])${escapeRe(name)}\\s*\\(`, "g");
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(text)) !== null) {
+      const nameStart = m.index + (m[0].startsWith(name) ? 0 : 1);
+      const open = m.index + m[0].length - 1; // 开括号位置
+      let depth = 0;
+      let close = -1;
+      for (let i = open; i < text.length; i++) {
+        if (text[i] === "(") depth++;
+        else if (text[i] === ")") { depth--; if (depth === 0) { close = i; break; } }
+      }
+      if (close < 0) continue;
+      const argText = text.slice(open + 1, close);
+      if (/[([{]/.test(argText)) continue; // 还嵌着别的调用 —— 下一轮再处理
+      const args = splitTopLevelArgs(argText);
+      const kept = args.filter((_, i) => si.params[i] !== undefined && si.deps.has(si.params[i]));
+      if (kept.length === args.length) continue; // 每个形参都被依赖 ⇒ 无需抹
+      const replacement = kept.length > 0 ? `(${kept.join(" + ")})` : `""`;
+      return text.slice(0, nameStart) + replacement + text.slice(close + 1);
+    }
+  }
+  return null;
+}
+
+/**
+ * return 表达式真正依赖哪些形参：把「已知 helper 调用里不被依赖的实参」抹掉后，
+ * 剩下的形参名就是会流进返回值的那些。`wrap(n) { return discard(n); }` ⇒ 空集。
+ */
+function returnDeps(exprs: string[], params: string[], info: Map<string, ShaperInfo>): Set<string> {
+  const deps = new Set<string>();
+  for (const raw of exprs) {
+    const masked = maskNonDependentArgs(raw, info);
+    for (const p of params) {
+      if (new RegExp(`(?:^|[^\\w$.])${escapeRe(p)}(?:[^\\w$]|$)`).test(masked)) deps.add(p);
+    }
+  }
+  return deps;
+}
+
 /** return 表达式列表：块体取 return 语句，箭头简洁体把整个体当作返回值 */
 function returnExprsOf(body: Node): string[] {
   if (!Node.isBlock(body)) return [body.getText()]; // 箭头简洁体
@@ -825,14 +919,17 @@ function returnExprsOf(body: Node): string[] {
   return rets;
 }
 
-/** 扫描全项目，收集「纯塑形」helper 的名字（有界两轮不动点） */
-function pureShaperFunctionNames(project: Project): Set<string> {
+/** 扫描全项目，收集「纯塑形」helper 的名字 + 返回值依赖（有界两轮不动点） */
+function pureShaperFunctionNames(project: Project): ShaperTable {
   const sinkRe = tsSinkCallRegex();
-  const cands: Array<{ name: string; params: Set<string>; rets: string[] }> = [];
+  const cands: Array<{
+    name: string; params: Set<string>; paramList: string[]; rets: string[];
+  }> = [];
 
   /** 登记一个候选：三条判据 —— 有形参 / 有返回值 / 体内无 sink */
   const consider = (name: string, paramNodes: string[], declText: string, bodyNode: Node) => {
-    const params = new Set(paramNodes.filter(Boolean));
+    const paramList = paramNodes.filter(Boolean);
+    const params = new Set(paramList);
     if (params.size === 0) return;
     sinkRe.lastIndex = 0;
     if (sinkRe.test(declText)) return; // ②
@@ -840,7 +937,8 @@ function pureShaperFunctionNames(project: Project): Set<string> {
     // 让「遇到花括号就停」的朴素正则在 `path.join(a,b) + \`.${c}\`` 上截断。
     const rets = returnExprsOf(bodyNode);
     if (rets.length === 0) return; // ①
-    cands.push({ name, params, rets });
+    if (cands.some((c) => c.name === name)) return; // 同名重复登记：先到先得
+    cands.push({ name, params, paramList, rets });
   };
 
   for (const sf of project.getSourceFiles()) {
@@ -881,19 +979,39 @@ function pureShaperFunctionNames(project: Project): Set<string> {
   // 形参之外允许出现的自由标识符 = 模块级字面量常量 ∪ 确证的 path 模块别名
   const extraIdents = moduleLiteralConstNames(project);
   for (const a of pathModuleAliases(project)) extraIdents.add(a);
-  const shapers = new Set<string>();
+  const names = new Set<string>();
+  const info = new Map<string, ShaperInfo>();
   for (let round = 0; round < 2; round++) {
     let added = false;
     for (const c of cands) {
-      if (shapers.has(c.name)) continue;
-      const ok = c.rets.every((e) => isPureShaperExpr(e, c.params, shapers, extraIdents));
+      if (names.has(c.name)) continue;
+      const ok = c.rets.every((e) => isPureShaperExpr(e, c.params, names, extraIdents));
       if (!ok) continue;
-      shapers.add(c.name);
+      names.add(c.name);
+      info.set(c.name, { params: c.paramList, deps: returnDeps(c.rets, c.paramList, info) });
       added = true;
     }
     if (!added) break;
   }
-  return shapers;
+
+  // C4f：依赖分析有次序依赖 —— `wrap(n) { return discard(n); }` 若在 discard 之前
+  // 被接受，那一刻 info 里还没有 discard ⇒ deps 偏宽（偏宽 = 继续传播 = 保守侧，
+  // 不会误报，但收不紧）。名录定稿后按完整的 info 再算两轮，把次序依赖消掉。
+  const byName = new Map(cands.map((c) => [c.name, c]));
+  for (let round = 0; round < 2; round++) {
+    let changed = false;
+    for (const [name, si] of info) {
+      const c = byName.get(name);
+      if (!c) continue;
+      const d = returnDeps(c.rets, si.params, info);
+      if (d.size !== si.deps.size || [...d].some((x) => !si.deps.has(x))) {
+        si.deps = d;
+        changed = true;
+      }
+    }
+    if (!changed) break;
+  }
+  return { names, info };
 }
 
 const TS_FILE_SINK_NAMES = [
@@ -994,7 +1112,7 @@ const TS_PATH_SHAPER_RE =
 const TS_CONCAT_RE = /\+|`/;
 
 /** 函数体内被不可信根污染的局部名（含解构、单跳赋值与 C4 塑形传播，深度 ≤3） */
-function collectTaintedNames(text: string, shapers?: Set<string>): Set<string> {
+function collectTaintedNames(text: string, shapers?: ShaperTable): Set<string> {
   const tainted = new Set<string>();
   let m: RegExpExecArray | null;
   const root = UNTRUSTED_ROOT_SRC;
@@ -1121,13 +1239,15 @@ function collectTaintedNames(text: string, shapers?: Set<string>): Set<string> {
  * `normalized = path.normalize(p)` → `savePath = path.join(normalized, f)`
  * 这类链式构造能接上（fr-012 下载侧守卫块就是这个形状）。
  */
-function taintedViaShaper(text: string, tainted: Set<string>, shapers?: Set<string>): boolean {
+function taintedViaShaper(text: string, tainted: Set<string>, shapers?: ShaperTable): boolean {
   // C4b：项目自有「纯塑形」helper 的调用也算子（如 getFileNamePath(dir, name, ext)）。
   // 见 pureShaperFunctionNames —— 只认三条判据全部成立的函数，认不出就不传播。
   const localShaperRe =
-    shapers && shapers.size > 0
-      ? new RegExp(`(?:^|[^\\w$.])(?:${[...shapers].map(escapeRe).join("|")})\\s*\\(`)
+    shapers && shapers.names.size > 0
+      ? new RegExp(`(?:^|[^\\w$.])(?:${[...shapers.names].map(escapeRe).join("|")})\\s*\\(`)
       : null;
+  // C4f：helper 调用里【返回值不依赖的实参】不构成污点证据。
+  const shaperInfo = shapers?.info;
   let grewAny = false;
   for (let depth = 0; depth < 3; depth++) {
     // 注意：这里**不能**以 `tainted.size === 0` 提前退出 —— 种子是根模式
@@ -1147,7 +1267,11 @@ function taintedViaShaper(text: string, tainted: Set<string>, shapers?: Set<stri
         TS_PATH_SHAPER_RE.test(rhs) ||
         TS_CONCAT_RE.test(rhs) ||
         (localShaperRe !== null && localShaperRe.test(rhs));
-      if (taintRe.test(rhs) && shaped) {
+      // 证据看的是【抹掉不被依赖的实参之后】的 rhs：`discard(k)` 里 k 不流出，
+      // 那条支路就不该算证据。`shaped` 仍看原式 —— helper 是不是塑形，与它的
+      // 返回值依不依赖实参是两件事。
+      const evidence = shaperInfo ? maskNonDependentArgs(rhs, shaperInfo) : rhs;
+      if (taintRe.test(evidence) && shaped) {
         tainted.add(name);
         added = true;
       }
@@ -1388,7 +1512,7 @@ function computeMarkerCalls(
   onMethodHit: (rec: { idxs: Set<number>; entries: Array<{ name: string; file: string }> }) => void,
   guardFns?: Set<string>,
   directGuardFns?: Set<string>,
-  shapers?: Set<string>
+  shapers?: ShaperTable
 ): string[] {
   const markers: string[] = [];
 

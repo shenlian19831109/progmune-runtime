@@ -1345,3 +1345,73 @@ describe("C4e：helper 的现代写法（箭头 / 函数表达式 / 模块常量
     }, 150_000);
   }
 });
+
+describe("C4f：只有落在「返回值真依赖的形参位」上的污点才算流过去", () => {
+  type Case = { name: string; fn: string; files: Record<string, string>; expectMark: boolean; why: string };
+
+  // 与 C4e 同源的隔离写法：sink 实参里不出现污点变量 k，污点只能经 helper 返回值进来。
+  const emit = (relExpr: string) =>
+    [
+      'import * as fs from "fs";',
+      'import { dropParam, pickFirst, withExt, wrapDrop, wrapPick, swapPick } from "./helpers";',
+      "export function emit(doc: Record<string, any>, outDir: string) {",
+      "  Object.keys(doc).forEach((k) => {",
+      `    const rel = ${relExpr};`,
+      '    fs.writeFileSync(outDir + "/" + rel, "x");',
+      "  });",
+      "}",
+    ].join("\n");
+
+  const HELPERS = [
+    '// 依赖集为空：丢弃形参，返回常量',
+    'export const dropParam = (n: string): string => "fixed.md";',
+    '// 只依赖第一个形参',
+    'export const pickFirst = (a: string, b: string): string => a + ".md";',
+    '// 常规塑形（正对照）',
+    'export const withExt = (name: string): string => name + ".md";',
+    '// 两跳丢弃',
+    'export const wrapDrop = (n: string): string => dropParam(n);',
+    '// 两跳对齐',
+    'export const wrapPick = (a: string, b: string): string => pickFirst(a, b);',
+    '// 换序两跳：真正被依赖的是第二个形参',
+    'export const swapPick = (x: string, y: string): string => pickFirst(y, x);',
+  ].join("\n");
+
+  const cases: Case[] = [
+    { name: "正例·常规塑形", fn: "emit", files: { "helpers.ts": HELPERS, "it.ts": emit("withExt(k)") },
+      expectMark: true, why: "收精度不得收过头 —— 这条必须照标" },
+    { name: "正例·污点在被依赖的形参位", fn: "emit", files: { "helpers.ts": HELPERS, "it.ts": emit('pickFirst(k, "safe")') },
+      expectMark: true, why: "第一个形参真的影响返回值" },
+    { name: "正例·两跳仍在被依赖的位置", fn: "emit", files: { "helpers.ts": HELPERS, "it.ts": emit('wrapPick(k, "safe")') },
+      expectMark: true, why: "依赖集要能跨函数传递" },
+    { name: "正例·换序两跳", fn: "emit", files: { "helpers.ts": HELPERS, "it.ts": emit('swapPick("safe", k)') },
+      expectMark: true, why: "swapPick 真正依赖的是 y（第二个形参），位置对齐要跟着换" },
+    { name: "负对照·helper 丢弃形参", fn: "emit", files: { "helpers.ts": HELPERS, "it.ts": emit("dropParam(k)") },
+      expectMark: false, why: "return 常量 —— 实参带污点也流不出来；这是收窄前的真实误报" },
+    { name: "负对照·污点在不被依赖的形参位", fn: "emit", files: { "helpers.ts": HELPERS, "it.ts": emit('pickFirst("safe", k)') },
+      expectMark: false, why: "第二个形参进了函数也出不来；正对照 = 正例·污点在被依赖的形参位" },
+    { name: "负对照·嵌套在 concat 里", fn: "emit", files: { "helpers.ts": HELPERS, "it.ts": emit('path.join("out", dropParam(k))') },
+      expectMark: false, why: "整条 rhs 含 k，但那条支路不流出 —— 证据必须按支路算，不能整行一锅端" },
+    { name: "负对照·两跳后依赖集为空", fn: "emit", files: { "helpers.ts": HELPERS, "it.ts": emit("wrapDrop(k)") },
+      expectMark: false, why: "wrapDrop(n) = dropParam(n)，依赖集同样为空（跨函数对齐）" },
+    { name: "负对照·两跳位置不对齐", fn: "emit", files: { "helpers.ts": HELPERS, "it.ts": emit('wrapPick("safe", k)') },
+      expectMark: false, why: "正对照 = 正例·两跳仍在被依赖的位置" },
+    { name: "负对照·换序的反向", fn: "emit", files: { "helpers.ts": HELPERS, "it.ts": emit('swapPick(k, "safe")') },
+      expectMark: false, why: "k 落在不被依赖的 x 位；正对照 = 正例·换序两跳" },
+    { name: "负对照·实参本身无污点", fn: "emit", files: { "helpers.ts": HELPERS, "it.ts": emit('dropParam("lit")') },
+      expectMark: false, why: "无污点流入" },
+  ];
+
+  for (const c of cases) {
+    it(`${c.name} —— ${c.why}`, () => {
+      const dir = makeProject(c.files);
+      try {
+        const marks = marksFor(dir, c.fn);
+        if (c.expectMark) expect(marks).toContain(PATH_MARK);
+        else expect(marks).not.toContain(PATH_MARK);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    }, 150_000);
+  }
+});

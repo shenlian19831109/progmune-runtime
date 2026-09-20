@@ -847,6 +847,158 @@ export function emitArrowLiteral(doc: Record<string, any>, outDir: string): void
 }
 `;
 
+// ═══════════════════════════════════════════════════════════════
+// taintpath_G —— C4f：名字级传播的精度收窄（形参-实参位置对齐 + 返回值依赖）
+//
+// 与 A–F 族方向相反：前面几轮都是补召回，这一轮是**收精度**。
+// 名字级传播的老毛病是「实参里出现污点名就算流过去了」——
+// helper 把形参丢掉（return 常量）、或污点落在返回值根本不依赖的形参位上，
+// 都会判成污染。
+//
+// 门的重点也反过来：这里最该防的不是漏报，而是
+//   ① 收窄收过头，把真阳性也收掉（LOST）；
+//   ② 那批 no-taint 用例其实是空转 —— 它们本来就不该标，旧代码也不会让它们红。
+// 所以反向验证要按 R14 多切一刀：把依赖分析退回「全部形参都算依赖」，
+// no-taint 那批必须立刻转红，才说明这批对照真的咬得住。
+//
+// 写法约定（与 E/F 族同源）：sink 实参里**不直接出现**污点变量 k。
+// ═══════════════════════════════════════════════════════════════
+const HELPERS_G = `// taintpath_G —— C4f：helper 的返回值到底依赖哪些形参
+import * as p from "path";
+
+// 依赖集为空：丢弃形参，返回常量 —— 调用它不该带出任何污点
+export const dropParam = (n: string): string => "fixed.md";
+
+// 只依赖第一个形参：第二个形参进了函数也出不来
+export const pickFirst = (a: string, b: string): string => a + ".md";
+
+// 常规塑形（正对照）
+export const withExt = (name: string): string => name + ".md";
+
+// 两跳丢弃：wrapDrop(n) = dropParam(n) —— 依赖集同样为空
+export const wrapDrop = (n: string): string => dropParam(n);
+
+// 两跳对齐：wrapPick(a, b) = pickFirst(a, b) —— 只依赖 a
+export const wrapPick = (a: string, b: string): string => pickFirst(a, b);
+
+// 换序两跳：swapPick(x, y) = pickFirst(y, x) —— 真正被依赖的是 y，不是 x
+export const swapPick = (x: string, y: string): string => pickFirst(y, x);
+
+// 真守卫，名字不含任何 G-C 后缀（G2 tier-0 自身证据）
+export function stamp(baseDir: string, targetPath: string): void {
+  const base = p.resolve(baseDir);
+  const target = p.resolve(targetPath);
+  if (target !== base && !target.startsWith(base + p.sep)) {
+    throw new Error("path escapes output dir");
+  }
+}
+`;
+
+const HANDLER_G = `// taintpath_G —— C4f：只有落在「返回值真依赖的形参位」上的污点才算流过去
+import * as fs from "fs";
+import * as p from "path";
+import {
+  dropParam, pickFirst, withExt, wrapDrop, wrapPick, swapPick, stamp,
+} from "./helpers";
+
+// 正对照：常规塑形，污点必须照样流出（收窄不得收过头）
+export function emitPlainShaper(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = withExt(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 正例：污点落在被依赖的形参位（第 1 位）
+export function emitPosAligned(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = pickFirst(k, "safe");
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 正例：两跳后仍在被依赖的位置
+export function emitTwoHopAligned(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = wrapPick(k, "safe");
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 正例：换序两跳 —— 被依赖的是第二个形参，位置对齐要跟着换
+export function emitSwapAligned(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = swapPick("safe", k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 负对照：helper 丢弃形参返回常量 —— 实参有污点也流不出来
+export function emitDropParam(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = dropParam(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 负对照：污点落在【不被依赖】的形参位（第 2 位）
+export function emitPosMisaligned(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = pickFirst("safe", k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 负对照：嵌套在 concat 里 —— 整条 rhs 含 k，但那条支路不流出
+export function emitDropInConcat(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = p.join("out", dropParam(k));
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 负对照：两跳之后依赖集为空
+export function emitTwoHopDrop(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = wrapDrop(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 负对照：两跳，污点落在不被依赖的位置
+export function emitTwoHopMisaligned(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = wrapPick("safe", k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 负对照：换序的反向 —— k 落在不被依赖的 x 位
+export function emitSwapMisaligned(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = swapPick(k, "safe");
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 负对照：实参本身无污点
+export function emitDropLiteral(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach(() => {
+    const rel = dropParam("lit");
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 压制对照：收窄之后守卫仍压得住
+export function emitShaperGuarded(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const file = outDir + "/" + withExt(k);
+    stamp(outDir, file);
+    fs.writeFileSync(file, "x");
+  });
+}
+`;
+
 function writeProject(id: string, files: Record<string, string>): void {
   const dir = path.join(GEN_DIR, id);
   fs.mkdirSync(path.join(dir, "src"), { recursive: true });
@@ -864,4 +1016,5 @@ if (require.main === module) {
   writeProject("taintpath_D", { "src/helpers.ts": HELPERS_D, "src/handler.ts": HANDLER_D });
   writeProject("taintpath_E", { "src/helpers.ts": HELPERS_E, "src/handler.ts": HANDLER_E });
   writeProject("taintpath_F", { "src/helpers.ts": HELPERS_F, "src/handler.ts": HANDLER_F });
+  writeProject("taintpath_G", { "src/helpers.ts": HELPERS_G, "src/handler.ts": HANDLER_G });
 }

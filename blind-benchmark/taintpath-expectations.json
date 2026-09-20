@@ -21,7 +21,8 @@
     "2026-09-20 续：新增 taintpath_E 族（C4d 高阶枚举方法的回调形参）。R7 第四次咬人 —— 实测 generated 全量 .ts 里 .forEach/.map/.flatMap/.filter 的回调形参 0 处，A–D 族对这处仍是空过。另有两点值得记：① 探针实测发现 for-in 其实一直是通的（bindFromEnum 正则本就是 of|in），此前备忘里『for-in 不绑定』的判断是错的，真缺口只在回调；② 方法表只收 forEach/map/flatMap/filter，不收 find/some/every（谓词语义）与 reduce（首参是累加器）—— E 族用 emitForEachIndexOnly 钉死『只绑第一个形参』。",
     "2026-09-20 续（同日第二次）：E 族补 5 条至 15 条，覆盖 C4d-b 三处 —— 无括号单参箭头、ES5 function 回调、成员链接收者；另加两条负对照，其中 emitForEachNamedHandler 锁住一个**真实误报**：回调写成函数引用 `forEach(handleOne)` 时，初版正则把 handleOne 当成形参绑进污点集合，同名局部变量随即被误判。修法是把「内联回调」作为前提写进正则（箭头分支必须见到 `=>`、ES5 分支必须见到 `function`）。顺带发现形参字符集漏了 `:`：`(s: any) =>` 这种带类型标注的写法整环不匹配 —— TS 工程里的常态写法。",
     "2026-09-20 第三次：新增 taintpath_F 族（C4e helper 的现代写法）。这是 R7 第五次 —— generated 全量 .ts 里 `export const X = (…) =>` 0 处，A–E 族对本能力空过。F 族写法上有一条硬约束：sink 实参里不得直接出现污点变量，污点只能经 helper 返回值流进 sink；否则命中「实参含污点名」的兜底判定，所有用例会假通过（2026-09-20 第一版探针就是这么全绿的，P/N 对照一次性全 MARK）。另记两条勘误：备忘里说的 toSlug 缺口（`p.trim().toLowerCase()`）实测早就能穿透；reduce 首参不绑也确认按设计生效。",
-    "2026-09-20 C4e：taintpath_D/emitHelperFixed 由 known-gap 转 mark —— 「helper 的 return 引用模块级字面量常量」这条漏报已闭合。同一族的 emitHelperWithSink（helper 体内有 sink）仍是 known-gap，未随本轮放宽。"
+    "2026-09-20 C4e：taintpath_D/emitHelperFixed 由 known-gap 转 mark —— 「helper 的 return 引用模块级字面量常量」这条漏报已闭合。同一族的 emitHelperWithSink（helper 体内有 sink）仍是 known-gap，未随本轮放宽。",
+    "2026-09-20 第四次：新增 taintpath_G 族（C4f 精度收窄），这是 R7 第一次朝【反方向】咬 —— 前面四轮都是「语料零覆盖 ⇒ 门空过」，这一轮语料零覆盖照样空过，但更该防的是另外两件事：① 收窄收过头把真阳性也收掉（LOST）；② 那批 no-taint 用例其实空转（它们本来就不该标）。所以 G 族的反向验证按 R14 多切一刀：把依赖分析退回「全部形参都算依赖」，7 条 no-taint 必须立刻转红。另记：G 族 12 条里 4 mark / 7 no-taint / 1 suppressed，其中 emitSwapAligned 与 emitSwapMisaligned 是一对 —— 只有按位置对齐、而不是「实参里出现污点名就算」，才能把这两条分开。"
   ],
   "projects": {
     "taintpath_A": [
@@ -448,6 +449,80 @@
         "file": "src/handler.ts",
         "expect": "no-taint",
         "why": "helper 是真塑形、但喂进去的是字面量 —— 无污点流入；钉死「传播要靠实参，不是靠 helper 长得像」"
+      }
+    ],
+    "taintpath_G": [
+      {
+        "fn": "emitPlainShaper",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4f 正对照：常规塑形 —— 收精度不得收过头，这条必须照标"
+      },
+      {
+        "fn": "emitPosAligned",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4f：污点落在返回值真依赖的形参位（第 1 位）"
+      },
+      {
+        "fn": "emitTwoHopAligned",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4f：两跳之后仍在被依赖的位置（依赖集要能跨函数传递）"
+      },
+      {
+        "fn": "emitSwapAligned",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4f：换序两跳 —— 被依赖的是第二个形参，位置对齐要跟着换；只按「出现就传播」也会标，但标对了不代表这条有意义，真正区分它的是 emitSwapMisaligned"
+      },
+      {
+        "fn": "emitDropParam",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4f：helper 丢弃形参返回常量 —— 实参带污点也流不出来（收窄前的真实误报）"
+      },
+      {
+        "fn": "emitPosMisaligned",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4f：污点落在【不被依赖】的形参位（第 2 位）—— 位置对齐；正对照 = emitPosAligned"
+      },
+      {
+        "fn": "emitDropInConcat",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4f：嵌套在 concat 里 —— 整条 rhs 含 k，但那条支路不流出"
+      },
+      {
+        "fn": "emitTwoHopDrop",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4f：两跳之后依赖集为空（wrapDrop(n) = dropParam(n)）"
+      },
+      {
+        "fn": "emitTwoHopMisaligned",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4f：两跳，污点落在不被依赖的位置；正对照 = emitTwoHopAligned"
+      },
+      {
+        "fn": "emitSwapMisaligned",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4f：换序的反向 —— k 落在不被依赖的 x 位；正对照 = emitSwapAligned"
+      },
+      {
+        "fn": "emitDropLiteral",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "实参本身无污点"
+      },
+      {
+        "fn": "emitShaperGuarded",
+        "file": "src/handler.ts",
+        "expect": "suppressed",
+        "why": "C4f × G2：收窄之后守卫仍压得住。stamp 不含任何 G-C 后缀 ⇒ 压制依据只能是被调用方自身证据（tier-0）；正对照 = emitPlainShaper"
       }
     ]
   },
