@@ -874,13 +874,14 @@ type ShaperInfo = {
  * names       —— 可按裸调用位匹配的（`withExt(` / `Util.toPath(`）
  * memberNames —— 只按成员调用位匹配的（`.toPath(`）：对象是哪个不确定，
  *                只有该方法名在全项目唯一时才登记，避免同名方法张冠李戴（R11）
- * curried     —— C4i：柯里化 helper（`withExt(ext)(n)`），按名字索引
+ * curried     —— C4i/C4j：柯里化 / 工厂形态 helper，按名字索引；一个名字可以对
+ *                多条链（工厂返回含多个方法的对象，每个方法一条）
  */
 type ShaperTable = {
   names: Set<string>;
   memberNames: Set<string>;
   info: Map<string, ShaperInfo>;
-  curried: Map<string, CurrySpec>;
+  curried: Map<string, CurrySpec[]>;
 };
 
 /**
@@ -1750,6 +1751,21 @@ function pureShaperFunctionNames(project: Project): ShaperTable {
   // 模块级字面量常量（值一并留着：C4i 的计算属性名 `[KEY]` 要靠它解）
   const constTexts = moduleConstTexts(project);
 
+  /**
+   * 把一个**没通过判据**的实现记进它所属的成员组。
+   *
+   * C4j 修（探针 B4/B6 实测）：C4h-② 的"全组确证"只在**进了组**的候选之间成立，
+   * 而三条判据不成立的实现在 consider() 里就 return 了 —— 它压根不在组里，于是
+   * 「同名三处，一处无形参、一处体内有 sink、一处是好 helper」会被当成"全组都确证"，
+   * 成员调用位被放行 ⇒ 误标。组必须记全：**存在过但没确证**也要算进"不是全组确证"。
+   */
+  const noteUnaccepted = (key: string, group: string | null) => {
+    if (group === null) return;
+    const list = groups.get(group) ?? [];
+    if (!list.includes(key)) list.push(key);
+    groups.set(group, list);
+  };
+
   /** 登记一个候选：三条判据 —— 有形参 / 有返回值 / 体内无 sink */
   const consider = (
     key: string,
@@ -1763,14 +1779,14 @@ function pureShaperFunctionNames(project: Project): ShaperTable {
   ) => {
     const paramList = paramNodes.filter(Boolean);
     const params = new Set(paramList);
-    if (params.size === 0) return;
+    if (params.size === 0) return noteUnaccepted(key, group); // 判据①
     sinkRe.lastIndex = 0;
-    if (sinkRe.test(declText)) return; // ②
+    if (sinkRe.test(declText)) return noteUnaccepted(key, group); // ②
     // 用 AST 取 return 表达式，而不是正则 —— 模板字面量里的 `${}` 会
     // 让「遇到花括号就停」的朴素正则在 `path.join(a,b) + \`.${c}\`` 上截断。
     const rets = returnExprsOf(bodyNode);
     // 柯里化 / 工厂形态：return 出来的是函数或装着函数的对象 ⇒ 判据①看的是最内层
-    if (rets.length === 0 && curry.length === 0) return; // ①
+    if (rets.length === 0 && curry.length === 0) return noteUnaccepted(key, group); // ③
     let pub = name;
     if (pub !== null) {
       if (takenNames.has(pub)) pub = null; // 同名重复登记：先到先得，后者降到资格凭证

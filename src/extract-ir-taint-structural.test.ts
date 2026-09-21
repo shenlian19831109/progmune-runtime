@@ -1799,3 +1799,178 @@ describe("C4i：helper 的又一批载体与又一批可判定分支", () => {
     }, 150_000);
   }
 });
+
+// C4j（2026-09-21）：再一批载体 + 一条判据误杀 + 一处**既有**缺陷的回归门
+//   召回 ① 运算符关键字（typeof）不再让整条 helper 落选
+//        ② getter 返回出来的箭头（类 / 对象字面量）
+//        ③ as / satisfies / 类型断言包住箭头
+//        ④ 柯里化多跳（≥3 跳）+ 首跳实参是污点
+//        ⑤ 工厂形态：返回的对象字面量里再取方法
+//        ⑥ export default 匿名箭头（名字只能来自导入方）
+//   回归 ⑦ 成员组必须**记全**：同名三处里只要有一处判据不成立，成员调用位就不许放行
+//        （C4h-② 的"全组确证"漏掉了"进不了组"的实现 —— 探针 B4/B6 实测挖到）
+// 每条真缺口都配镜像负对照（R14/R15）。
+describe("C4j：载体收口的最后一批 + 成员组完整性回归", () => {
+  type Case = { name: string; fn: string; files: Record<string, string>; expectMark: boolean; why: string };
+
+  const emit = (relExpr: string, pre = "", imports = "", helpers = ""): Record<string, string> => ({
+    "helpers.ts": helpers,
+    "it.ts": [
+      'import * as fs from "fs";',
+      ...(imports ? [`import { ${imports} } from "./helpers";`] : []),
+      "export function emit(doc: Record<string, any>, outDir: string, mode: string) {",
+      ...(pre ? [`  ${pre}`] : []),
+      "  Object.keys(doc).forEach((k) => {",
+      `    const rel = ${relExpr};`,
+      '    fs.writeFileSync(outDir + "/" + rel, "x");',
+      "  });",
+      "}",
+    ].join("\n"),
+  });
+
+  /** 默认导出形态：helpers.ts 里 default 导出，it.ts 里真的 import 它 */
+  const emitDef = (relExpr: string, importLine: string, helpers: string): Record<string, string> => ({
+    "helpers.ts": helpers,
+    "it.ts": [
+      'import * as fs from "fs";',
+      importLine,
+      "export function emit(doc: Record<string, any>, outDir: string, mode: string) {",
+      "  Object.keys(doc).forEach((k) => {",
+      `    const rel = ${relExpr};`,
+      '    fs.writeFileSync(outDir + "/" + rel, "x");',
+      "  });",
+      "}",
+    ].join("\n"),
+  });
+
+  // ── ① 关键字判据 ─────────────────────────────────────────────────
+  const H_KW = [
+    'export const viaKw = (n: string, m: string): any => typeof m === "string" || n + ".md";',
+    'export const viaKwDrop = (n: string, m: string): any => typeof m === "string" || "fixed.md";',
+  ].join("\n");
+
+  // ── ② getter 返回箭头（含同名三处的组成员完整性）─────────────────
+  const H_GET = [
+    "import * as fs from 'fs';",
+    // 同一个文件里三个同名 getter，覆盖三类命运：
+    //   无形参（判据①不收）/ 好 helper（确证）/ 体内有 sink（判据③不收）
+    'export const ONoParam: any = { get mk() { return (): string => "fixed.md"; } };',
+    'export const OSideCall: any = { get mk() { return (n: string): string => { __audit(n); return n + ".md"; }; } };',
+    'export const OWithSink: any = { get mk() { return (n: string): void => { fs.writeFileSync(n, ""); }; } };',
+  ].join("\n");
+  const H_GET_CLS = [
+    'export class CfgMk { get mk(): (n: string) => string { return (n: string): string => n + ".md"; } }',
+  ].join("\n");
+  const H_GET_DROP = [
+    'export const OGet2: any = { get mk() { return (_n: string): string => "fixed.md"; } };',
+  ].join("\n");
+
+  // ── ③ 断言解包 ───────────────────────────────────────────────────
+  const H_ASSERT = [
+    'export const toPathAs = ((n: string): string => n + ".md") as (n: string) => string;',
+    'export const toPathSat = ((n: string): string => n + ".md") satisfies (n: string) => string;',
+    'export const ObjAs: any = { toPath: ((n: string): string => n + ".md") as any };',
+    'export const notFn = (("x") as any);',
+  ].join("\n");
+
+  // ── ④ 柯里化多跳 ─────────────────────────────────────────────────
+  const H_LVL = [
+    'export const lvl3 = (a: string) => (b: string) => (n: string): string => n + a + b;',
+    'export const lvl4 = (a: string) => (b: string) => (c: string) => (n: string): string => n + a + b + c;',
+    'export const dropLast = (a: string) => (b: string) => (_n: string): string => "fixed.md";',
+  ].join("\n");
+
+  // ── ⑤ 工厂形态 ───────────────────────────────────────────────────
+  const H_FACT = [
+    "import * as fs from 'fs';",
+    'export const factory = (ext: string) => ({ toPath: (n: string): string => n + ext });',
+    'export const factoryDrop = (_ext: string) => ({ toPath: (_n: string): string => "fixed.md" });',
+    'export const factorySink = (ext: string) => ({ toPath: (n: string): string => { fs.readFileSync(n); return ext; } });',
+  ].join("\n");
+  // 一个工厂返回含**两个**方法的对象：一个塑形、一个丢弃。
+  // 这守的是「一个名字 → 多条链，按成员名选链」——选错就等于张冠李戴。
+  const H_MIX = [
+    'export const makeMixed = (ext: string) => ({',
+    '  mix: (n: string): string => n + ext,',
+    '  skip: (_n: string): string => "fixed.md",',
+    '});',
+  ].join("\n");
+
+  // ── ⑥ 默认导出 ───────────────────────────────────────────────────
+  const H_DEF = 'export default (n: string): string => n + ".md";';
+  const H_DEF_DROP = 'export default (_n: string): string => "fixed.md";';
+  const H_DEF_NOTFN = 'export default "fixed.md";';
+
+  const cases: Case[] = [
+    // ① 关键字
+    { name: "正例·① 含 typeof 的 helper 要能进名录", fn: "emit", files: emit("viaKw(k, mode)", "", "viaKw", H_KW),
+      expectMark: true, why: "旧代码把 typeof 当成未知自由标识符 ⇒ 整条判据不通过 ⇒ 漏报" },
+    { name: "负对照·① 同形但返回值是常量", fn: "emit", files: emit("viaKwDrop(k, mode)", "", "viaKwDrop", H_KW),
+      expectMark: false, why: "关键字放行不等于放水：依赖分析照旧；正对照 = 上一条" },
+
+    // ② getter
+    { name: "正例·② 类 getter 返回的箭头", fn: "emit", files: emit("new CfgMk().mk(k)", "", "CfgMk", H_GET_CLS),
+      expectMark: true, why: "getter 不是方法声明（没有形参）⇒ 旧收集整族漏" },
+    { name: "正例·② 对象 getter 返回的箭头", fn: "emit", files: emit("OSideCall.mk(k)", "", "OSideCall", H_GET),
+      expectMark: true, why: "靠限定名 OSideCall.mk 接上（裸名 mk 因组里有未确证的实现而不放行）" },
+    { name: "回归·⑦ 同名 getter 有一处无形参 ⇒ 成员位不许放行", fn: "emit", files: emit("ONoParam.mk(k)", "", "ONoParam", H_GET),
+      expectMark: false, why: "组必须记全：进不了组的实现（判据①不成立）也算「不是全组确证」" },
+    { name: "回归·⑦ 同名 getter 有一处体内有 sink ⇒ 成员位不许放行", fn: "emit", files: emit("OWithSink.mk(k)", "", "OWithSink", H_GET),
+      expectMark: false, why: "同上，判据③不成立的那一处同样要进组" },
+    { name: "负对照·② getter 返回的箭头丢弃形参", fn: "emit", files: emit("OGet2.mk(k)", "", "OGet2", H_GET_DROP),
+      expectMark: false, why: "载体换了，收窄照旧；正对照 = ② 对象 getter" },
+
+    // ③ 断言解包
+    { name: "正例·③ as 断言包住箭头", fn: "emit", files: emit("toPathAs(k)", "", "toPathAs", H_ASSERT),
+      expectMark: true, why: "初值是 AsExpression，旧代码只认「初值就是箭头」" },
+    { name: "正例·③ satisfies 断言包住箭头", fn: "emit", files: emit("toPathSat(k)", "", "toPathSat", H_ASSERT),
+      expectMark: true, why: "同族另一种写法" },
+    { name: "正例·③ 成员位也要解断言", fn: "emit", files: emit("ObjAs.toPath(k)", "", "ObjAs", H_ASSERT),
+      expectMark: true, why: "属性位的初值同样被断言包着" },
+    { name: "负对照·③ as 包住的不是函数", fn: "emit", files: emit("notFn(k)", "", "notFn", H_ASSERT),
+      expectMark: false, why: "解断言不等于把任意 as 表达式当 helper" },
+
+    // ④ 柯里化多跳
+    { name: "正例·④ 三跳柯里化", fn: "emit", files: emit('lvl3("a")("b")(k)', "", "lvl3", H_LVL),
+      expectMark: true, why: "旧代码只吃两跳 ⇒ 三跳整条不展" },
+    { name: "正例·④ 四跳柯里化", fn: "emit", files: emit('lvl4("a")("b")("c")(k)', "", "lvl4", H_LVL),
+      expectMark: true, why: "链式消费各跳实参，跳数不设上限（爬取有界 4 层）" },
+    { name: "正例·④ 三跳·污点在第一跳", fn: "emit", files: emit('lvl3(k)("a")("b")', "", "lvl3", H_LVL),
+      expectMark: true, why: "首跳实参被闭包一路捕获" },
+    { name: "负对照·④ 三跳·最后一跳丢弃形参", fn: "emit", files: emit('dropLast("a")("b")(k)', "", "dropLast", H_LVL),
+      expectMark: false, why: "多跳之下依赖分析仍要生效；正对照 = ④ 三跳" },
+
+    // ⑤ 工厂形态
+    { name: "正例·⑤ 返回对象再取方法", fn: "emit", files: emit('factory(".md").toPath(k)', "", "factory", H_FACT),
+      expectMark: true, why: "真正塑形的是返回出来的那个成员方法" },
+    { name: "负对照·⑤ 工厂里方法丢弃形参", fn: "emit", files: emit('factoryDrop(".md").toPath(k)', "", "factoryDrop", H_FACT),
+      expectMark: false, why: "镜像" },
+    { name: "负对照·⑤ 工厂里方法体内有 sink", fn: "emit", files: emit('factorySink(".md").toPath(k)', "", "factorySink", H_FACT),
+      expectMark: false, why: "判据③在链的最内层照旧生效" },
+    { name: "正例·⑤ 工厂返回多个方法·取塑形那个", fn: "emit", files: emit('makeMixed(".md").mix(k)', "", "makeMixed", H_MIX),
+      expectMark: true, why: "一个工厂名对多条链，按**成员名**选链" },
+    { name: "负对照·⑤ 工厂返回多个方法·取丢弃那个", fn: "emit", files: emit('makeMixed(".md").skip(k)', "", "makeMixed", H_MIX),
+      expectMark: false, why: "同名工厂的另条链返回常量 ⇒ 不许张冠李戴；正对照 = 上一条" },
+
+    // ⑥ 默认导出
+    { name: "正例·⑥ 匿名默认导出（名字来自导入方）", fn: "emit", files: emitDef("toPath(k)", 'import toPath from "./helpers";', H_DEF),
+      expectMark: true, why: "匿名 default 没有名字可登记 ⇒ 只能用导入它的文件里起的本地名" },
+    { name: "负对照·⑥ 匿名默认导出·丢弃形参", fn: "emit", files: emitDef("toPath(k)", 'import toPath from "./helpers";', H_DEF_DROP),
+      expectMark: false, why: "镜像" },
+    { name: "负对照·⑥ 默认导出的不是函数", fn: "emit", files: emitDef("toPath(k)", 'import toPath from "./helpers";', H_DEF_NOTFN),
+      expectMark: false, why: "边界：不许乱收" },
+  ];
+
+  for (const c of cases) {
+    it(`${c.name} —— ${c.why}`, () => {
+      const dir = makeProject(c.files);
+      try {
+        const marks = marksFor(dir, c.fn);
+        if (c.expectMark) expect(marks).toContain(PATH_MARK);
+        else expect(marks).not.toContain(PATH_MARK);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    }, 150_000);
+  }
+});

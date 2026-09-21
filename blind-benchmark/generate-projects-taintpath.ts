@@ -1685,6 +1685,261 @@ export function emitGuarded(doc: Record<string, any>, outDir: string): void {
 }
 `;
 
+// ═══════════════════════════════════════════════════════════════
+// taintpath_K —— C4j：载体收口的最后一批 + 一条判据误杀 + 组完整性回归
+//
+// ① 运算符关键字（typeof）：旧判据把它当成"未知自由标识符"⇒ **整条 helper** 落选，
+//    后果不是少收精度而是漏报。emitKwDrop 守「放行不等于放水」。
+// ② getter 返回出来的箭头：getter 没有形参，既不是方法声明也不是属性赋值
+//    ⇒ 上一轮三条收集路径都收不到它。
+// ③ as / satisfies 断言包住箭头：初值不是箭头，是 AsExpression / SatisfiesExpression。
+// ④ 柯里化多跳：`lvl3(a)(b)(n)` 要沿链把每一跳的实参都吃掉。
+// ⑤ 工厂形态：`makeWith(".md").build(k)` —— 返回的对象字面量里那个方法才是塑形层。
+// ⑥ 匿名 export default：没有名字可登记，只能用**导入它的文件**里的本地名。
+//    这也是本族唯一需要「真实 import」的机制（其余形状靠全项目文本匹配）。
+//
+// 写法约定（与前几族同源）：sink 实参里**不直接出现**污点变量 k；命名前先 grep
+// TS_FILE_SINK_NAMES（R13/R16）。本族的 getter / 工厂各自用**不同的属性名或宿主**，
+// 避免「同名成员只能靠组内全确证」把彼此的可达性绑在一起 —— 组完整性本身由
+// 定向用例里的回归组专门守（那条要的是"故意同名"）。
+// ═══════════════════════════════════════════════════════════════
+const HELPERS_K = `// taintpath_K —— C4j：载体收口的最后一批
+import * as p from "path";
+import * as fsx from "fs";
+
+// ── ① 运算符关键字 ──
+export const viaKw = (n: string, m: string): any => typeof m === "string" || n + ".md";
+export const viaKwDrop = (n: string, m: string): any => typeof m === "string" || "fixed.md";
+
+// ── ② getter 返回出来的箭头（类 / 对象字面量各一）──
+export class ShapeMk {
+  get shape(): (n: string) => string { return (n: string): string => n + ".md"; }
+}
+export const ObjShape: any = { get shape() { return (n: string): string => n + ".md"; } };
+export const ObjBlank: any = { get blank() { return (_n: string): string => "fixed.md"; } };
+export const ObjRaw: any = {
+  get raw() { return (n: string): string => { fsx.readFileSync(n); return "x"; }; },
+};
+
+// ── ③ 断言解包 ──
+export const toPathAs = ((n: string): string => n + ".md") as (n: string) => string;
+export const dropAs = ((_n: string): string => "fixed.md") as (n: string) => string;
+export const toPathSat = ((n: string): string => n + ".md") satisfies (n: string) => string;
+export const ObjAs: any = { toPath: ((n: string): string => n + ".md") as any };
+
+// ── ④ 柯里化多跳 ──
+export const lvl3 = (a: string) => (b: string) => (n: string): string => n + a + b;
+export const lvl4 = (a: string) => (b: string) => (c: string) => (n: string): string => n + a + b + c;
+export const dropLast = (a: string) => (b: string) => (_n: string): string => "fixed.md";
+
+// ── ⑤ 工厂形态（返回对象再取方法）──
+export const makeWith = (ext: string) => ({ build: (n: string): string => n + ext });
+export const makeBlank = (_ext: string) => ({ build: (_n: string): string => "fixed.md" });
+export const makeRaw = (ext: string) => ({
+  build: (n: string): string => { fsx.readFileSync(n); return ext; },
+});
+// 一个工厂返回含两个方法的对象：一个塑形、一个丢弃 —— 按成员名选链，选错即张冠李戴
+export const makeMixed = (ext: string) => ({
+  mix: (n: string): string => n + ext,
+  skip: (_n: string): string => "fixed.md",
+});
+
+// ── ⑥ 匿名默认导出（名字只能来自导入方）──
+export default (n: string): string => n + ".md";
+
+// 真守卫，名字不含任何 G-C 后缀（G2 tier-0 自身证据）
+export function stamp(baseDir: string, targetPath: string): void {
+  const base = p.resolve(baseDir);
+  const target = p.resolve(targetPath);
+  if (target !== base && !target.startsWith(base + p.sep)) {
+    throw new Error("path escapes output dir");
+  }
+}
+`;
+
+const ALT_K = `// taintpath_K 的第二个默认导出：丢弃形参的那一版
+export default (_n: string): string => "fixed.md";
+`;
+
+const HANDLER_K = `// taintpath_K —— C4j：载体收口的最后一批
+import * as fs from "fs";
+import * as p from "path";
+import toPathDefault from "./helpers";
+import altDefault from "./alt";
+import {
+  viaKw, viaKwDrop,
+  ShapeMk, ObjShape, ObjBlank, ObjRaw,
+  toPathAs, dropAs, toPathSat, ObjAs,
+  lvl3, lvl4, dropLast,
+  makeWith, makeBlank, makeRaw, makeMixed,
+  stamp,
+} from "./helpers";
+// ① 含 typeof 的 helper 要能进名录 —— 正对照 = emitKwDrop
+export function emitKw(doc: Record<string, any>, outDir: string, mode: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = viaKw(k, mode);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+export function emitKwDrop(doc: Record<string, any>, outDir: string, mode: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = viaKwDrop(k, mode);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ② getter 返回的箭头：类 / 对象字面量 —— 正对照 = emitGetterBlank
+export function emitGetterCls(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = new ShapeMk().shape(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+export function emitGetterObj(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = ObjShape.shape(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+export function emitGetterBlank(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = ObjBlank.blank(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// getter 返回的箭头体内有 sink ⇒ 判据③不收
+export function emitGetterRaw(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = ObjRaw.raw(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ③ 断言解包 —— 正对照 = emitAsDrop
+export function emitAs(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = toPathAs(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+export function emitAsDrop(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = dropAs(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+export function emitAsSat(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = toPathSat(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+export function emitAsMember(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = ObjAs.toPath(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ④ 柯里化多跳 —— 正对照 = emitCurryDrop
+export function emitCurry3(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = lvl3("a")("b")(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+export function emitCurry4(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = lvl4("a")("b")("c")(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+export function emitCurryFirst(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = lvl3(k)("a")("b");
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+export function emitCurryDrop(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = dropLast("a")("b")(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ⑤ 工厂形态 —— 正对照 = emitFactoryBlank
+export function emitFactory(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = makeWith(".md").build(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+export function emitFactoryBlank(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = makeBlank(".md").build(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 工厂方法体内有 sink ⇒ 判据③在链的最内层照旧生效
+export function emitFactoryRaw(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = makeRaw(".md").build(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 同一个工厂返回两个方法：按成员名选链 —— 正对照 = emitFactorySkip
+export function emitFactoryMix(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = makeMixed(".md").mix(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+export function emitFactorySkip(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = makeMixed(".md").skip(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ⑥ 匿名默认导出 —— 正对照 = emitDefaultDrop
+export function emitDefault(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = toPathDefault(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+export function emitDefaultDrop(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = altDefault(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 压制对照：召回再放宽一轮，守卫仍压得住
+export function emitGuarded(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const file = outDir + "/" + ObjShape.shape(k);
+    stamp(outDir, file);
+    fs.writeFileSync(file, "x");
+  });
+}
+`;
+
 function writeProject(id: string, files: Record<string, string>): void {
   const dir = path.join(GEN_DIR, id);
   fs.mkdirSync(path.join(dir, "src"), { recursive: true });
@@ -1706,4 +1961,9 @@ if (require.main === module) {
   writeProject("taintpath_H", { "src/helpers.ts": HELPERS_H, "src/handler.ts": HANDLER_H });
   writeProject("taintpath_I", { "src/helpers.ts": HELPERS_I, "src/handler.ts": HANDLER_I });
   writeProject("taintpath_J", { "src/helpers.ts": HELPERS_J, "src/handler.ts": HANDLER_J });
+  writeProject("taintpath_K", {
+    "src/helpers.ts": HELPERS_K,
+    "src/alt.ts": ALT_K,
+    "src/handler.ts": HANDLER_K,
+  });
 }

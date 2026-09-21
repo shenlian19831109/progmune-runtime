@@ -25,7 +25,8 @@
     "2026-09-20 第四次：新增 taintpath_G 族（C4f 精度收窄），这是 R7 第一次朝【反方向】咬 —— 前面四轮都是「语料零覆盖 ⇒ 门空过」，这一轮语料零覆盖照样空过，但更该防的是另外两件事：① 收窄收过头把真阳性也收掉（LOST）；② 那批 no-taint 用例其实空转（它们本来就不该标）。所以 G 族的反向验证按 R14 多切一刀：把依赖分析退回「全部形参都算依赖」，7 条 no-taint 必须立刻转红。另记：G 族 12 条里 4 mark / 7 no-taint / 1 suppressed，其中 emitSwapAligned 与 emitSwapMisaligned 是一对 —— 只有按位置对齐、而不是「实参里出现污点名就算」，才能把这两条分开。",
     "2026-09-20 第五次：新增 taintpath_H 族（C4g helper 的载体）。两条值得记：① R12 第四次生效 —— 备忘里列的『依赖分析深层形态』（三元返回、默认参、多 return）实测本来就是通的，只有解构形参真漏；对象字面量方法 / 类方法（含实例与静态）才是本轮主体。② 实例方法那条走了个折中：宿主是变量 (`r.inst(k)`) 时限定名对不上，靠【方法名全项目唯一 + 成员调用位 `.inst(` 】接上。唯一性是 R11 的替代品 —— 不存在同名方法就不可能张冠李戴；同名方法出现两次时这一律不登记，宁可漏报。另有一条刻意不做的缺口：常量实参代入（`viaTernaryDrop(k, true)` 返回常量分支），那需要常量传播，超出本轮范围。",
     "2026-09-20 第六次：新增 taintpath_I 族（C4h 名录之外的三处收口）。这一轮是 R12 第四次生效的另一种样子 —— 动工前先写探针，备忘里的三个候选里只有两个是真缺口（同名方法两处、属性承载的箭头），外加一个探针顺手挖出来的**既有缺陷**：方法名唯一但三条判据不成立时，旧代码在确证之前就把裸名登记进成员名录，于是 `registry[n]` 这类成员调用位被当成塑形 ⇒ 误标。另一条要紧的教训是把 R13 从语料扩展到了**定向用例**：C4g 组的静态类方法用例原本叫 `Renderer.stat`，而 stat 就在 fs sink 名单里 ⇒ 调用点被 sink 兜底直接标中，那条用例一直是假通过（改名 toFile 后才真的在测 helper 传播）。",
-    "2026-09-21 第七次：新增 taintpath_J 族（C4i）—— R17 第二次生效，且这次探针挖出的比备忘多：备忘只列了 getter/computed 与常量代入扩展，探针跑完确认的真缺口是六个（短路折叠、模板串内嵌、柯里化、namespace、rest、IIFE + 计算属性名），其中柯里化与 rest 都不在备忘里。另有一条**用例本身写错**：初版把「属性名算不出来」的 DynBox 和同名可解 helper 放在同一个项目里 —— 成员调用位 `.name(` 的匹配本就与宿主无关（C4g 的保守策略），于是那条负对照必然被顺带命中。教训：写负对照前先确认「不标」到底是因为哪一个机制不成立。"
+    "2026-09-21 第七次：新增 taintpath_J 族（C4i）—— R17 第二次生效，且这次探针挖出的比备忘多：备忘只列了 getter/computed 与常量代入扩展，探针跑完确认的真缺口是六个（短路折叠、模板串内嵌、柯里化、namespace、rest、IIFE + 计算属性名），其中柯里化与 rest 都不在备忘里。另有一条**用例本身写错**：初版把「属性名算不出来」的 DynBox 和同名可解 helper 放在同一个项目里 —— 成员调用位 `.name(` 的匹配本就与宿主无关（C4g 的保守策略），于是那条负对照必然被顺带命中。教训：写负对照前先确认「不标」到底是因为哪一个机制不成立。",
+    "2026-09-21 第八次：新增 taintpath_K 族（C4j 载体收口）。R17 第三次生效，这次探针挖出的三条里**两条不在备忘**（柯里化多跳的边界、getter 之外的工厂形态），而备忘里那条「短路左值是可判定表达式」实测**不是缺口**（x === 1 代入后本来就判得出）。更要紧的是探针顺手挖出一个**既有缺陷**：C4h-② 的「同名成员全组确证」有个洞 —— 三条判据不成立的实现在 consider() 里就 return 了，压根不进组，于是「同名三处：一处无形参、一处体内有 sink、一处是好 helper」被判成「全组都确证」⇒ 成员调用位放行 ⇒ 误标。修法是把没通过判据的实现也记进组。同一轮还有一条**期望写错**：factory(.md).other(k) 我原本期望不标 —— 但 factory( 本身就是已登记的塑形名，污点出现在它的实参里 ⇒ 保守照标才是对的；换成「一个工厂两条链，按成员名选链」（emitFactoryMix / emitFactorySkip）才真的在测选链。"
   ],
   "projects": {
     "taintpath_A": [
@@ -874,6 +875,140 @@
         "file": "src/handler.ts",
         "expect": "suppressed",
         "why": "C4i × G2：召回再放宽一轮，守卫仍压得住。stamp 不含任何 G-C 后缀 ⇒ 压制依据只能是被调用方自身证据（tier-0）；正对照 = emitCurrySecond"
+      }
+    ],
+    "taintpath_K": [
+      {
+        "fn": "emitKw",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4j-①：含 typeof 的 helper 要能进名录 —— 旧判据把 typeof 当未知自由标识符 ⇒ 整条落选 ⇒ 漏报；正对照 = emitKwDrop"
+      },
+      {
+        "fn": "emitKwDrop",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4j-①：关键字放行不等于放水，依赖分析照旧；负对照 = emitKw"
+      },
+      {
+        "fn": "emitGetterCls",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4j-②：类 getter 返回出来的箭头（getter 没有形参 ⇒ 旧三条收集路径都收不到）"
+      },
+      {
+        "fn": "emitGetterObj",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4j-②：对象字面量 getter，同族另一种写法"
+      },
+      {
+        "fn": "emitGetterBlank",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4j-②：getter 返回的箭头丢弃形参；正对照 = emitGetterObj"
+      },
+      {
+        "fn": "emitGetterRaw",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4j-②：getter 返回的箭头体内有 sink ⇒ 判据③不收"
+      },
+      {
+        "fn": "emitAs",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4j-③：as 断言包住箭头（初值是 AsExpression，不是箭头）"
+      },
+      {
+        "fn": "emitAsDrop",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4j-③：镜像"
+      },
+      {
+        "fn": "emitAsSat",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4j-③：satisfies 断言同属一族"
+      },
+      {
+        "fn": "emitAsMember",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4j-③：成员位的初值同样被断言包着"
+      },
+      {
+        "fn": "emitCurry3",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4j-④：三跳柯里化 —— 旧代码只吃两跳"
+      },
+      {
+        "fn": "emitCurry4",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4j-④：四跳；链式消费各跳实参，跳数不设上限"
+      },
+      {
+        "fn": "emitCurryFirst",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4j-④：污点在第一跳（被闭包一路捕获）"
+      },
+      {
+        "fn": "emitCurryDrop",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4j-④：最后一跳丢弃形参 ⇒ 多跳之下依赖分析仍要生效；正对照 = emitCurry3"
+      },
+      {
+        "fn": "emitFactory",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4j-⑤：工厂形态 —— 返回对象里那个方法才是塑形层"
+      },
+      {
+        "fn": "emitFactoryBlank",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4j-⑤：镜像"
+      },
+      {
+        "fn": "emitFactoryRaw",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4j-⑤：工厂方法体内有 sink ⇒ 判据③在链的最内层照旧生效"
+      },
+      {
+        "fn": "emitFactoryMix",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4j-⑤：一个工厂两条链，按成员名选链 —— 正对照 = emitFactorySkip"
+      },
+      {
+        "fn": "emitFactorySkip",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4j-⑤：选到丢弃那条链；负对照 = emitFactoryMix（选错链即张冠李戴）"
+      },
+      {
+        "fn": "emitDefault",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4j-⑥：匿名 export default —— 名字只能来自导入它的文件"
+      },
+      {
+        "fn": "emitDefaultDrop",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4j-⑥：另一个文件的默认导出丢弃形参；正对照 = emitDefault"
+      },
+      {
+        "fn": "emitGuarded",
+        "file": "src/handler.ts",
+        "expect": "suppressed",
+        "why": "C4j × G2：载体再放宽一批，守卫仍压得住。stamp 不含任何 G-C 后缀 ⇒ 压制依据只能是被调用方自身证据（tier-0）；正对照 = emitGetterObj"
       }
     ]
   },
