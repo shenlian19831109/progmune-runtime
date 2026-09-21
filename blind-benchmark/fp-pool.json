@@ -336,5 +336,271 @@
     "why": "类方法但体内只有赋值（@BeforeUpdate 钩子），确无调用 ⇒ 空是正确的"
    }
   ]
+ },
+ "r21_quantification": {
+  "date": "2026-09-21",
+  "tool": "python3 blind-benchmark/fp-pool-attrib.py（只读，对全量 perFunction 违规打标）",
+  "why_needed": "上面 rule_side_calibration_signals 的 4 条是从 18 条【新增】违规里归纳的，样本有偏；R24 要求分母必须是全量。全池 72 条（56 函数 / 4 切片）。",
+  "sample_bias": {
+   "Input Validation": "新增 10/18（56%） vs 全池 25/72（34.7%）",
+   "Data Mutation Without Audit Trail": "新增 4/18（22%） vs 全池 26/72（36.1%）",
+   "consequence": "从新增归纳会高估输入校验类、低估审计轨迹类"
+  },
+  "leads": [
+   {
+    "id": "L4",
+    "name": "审计轨迹需『工程内已有审计设施』前置",
+    "hits": 26,
+    "exclusive": 22,
+    "pct": 36.1,
+    "risk": "中：审计设施可能叫 logger/history/event，探测不到就误抑制",
+    "action": "最大项，先写探针",
+    "evidence": "4 个切片 grep -i audit 零命中 ⇒ 加前置条件可全抑制"
+   },
+   {
+    "id": "L7",
+    "name": "工厂装配函数（create*/make*/build*/*Loader）不是内容创建",
+    "hits": 14,
+    "exclusive": 14,
+    "pct": 19.4,
+    "risk": "中：真创建（UserService.create）与工厂同名",
+    "action": "与 L2 合成一轮（需外部输入可达性）"
+   },
+   {
+    "id": "L1",
+    "name": "迁移/种子脚本豁免（原线索①）",
+    "hits": 9,
+    "exclusive": 5,
+    "pct": 12.5,
+    "risk": "低",
+    "action": "先做"
+   },
+   {
+    "id": "L3",
+    "name": "部署运维层（TLS/rate limit/retry）降级为建议级",
+    "hits": 7,
+    "exclusive": 7,
+    "pct": 9.7,
+    "risk": "低：本就不是代码缺陷",
+    "action": "先做"
+   },
+   {
+    "id": "L8",
+    "name": "`register` 词义歧义（Fastify 插件注册 vs 用户注册）",
+    "hits": 6,
+    "exclusive": 6,
+    "pct": 8.3,
+    "risk": "低",
+    "action": "先做"
+   },
+   {
+    "id": "L2",
+    "name": "ORM 查询构造链（原线索②）",
+    "hits": 4,
+    "exclusive": 3,
+    "pct": 5.6,
+    "risk": "中偏高：limit/offset 可能真来自用户输入",
+    "action": "与 L7 合成一轮"
+   },
+   {
+    "id": "L6",
+    "name": "内部/私有工具方法（原线索③）",
+    "hits": 3,
+    "exclusive": 3,
+    "pct": 4.2,
+    "risk": "中",
+    "action": "暂缓"
+   },
+   {
+    "id": "L5",
+    "name": "校验器词表缺口（原线索④）",
+    "hits": 1,
+    "exclusive": 0,
+    "pct": 1.4,
+    "risk": "低",
+    "action": "顺手"
+   }
+  ],
+  "coverage": {
+   "原四条（L1/L2/L5/L6）": "17 条 = 23.6%",
+   "新发现四条（L4/L7/L8/L3）": "53 条 = 73.6%",
+   "未归因": "7 条 = 9.7%（加入 L7/L8 前是 27 条 37.5%）"
+  },
+  "conclusion": "线索清单从 4 条扩到 8 条，优先级完全重排；L4 单项（36.1%）就比原四条加起来还多。设计稿 §十九。",
+  "pending": "复核到 6 片 / 367 条违规：L4 21.5%、L6 10.4%、L7 7.6%、L9 6.5%、L3 4.4%、L8 3.3%、L1 2.5%、L10 2.2%、L2 1.1%、L5 0.3%，未归因 44.4%（仍在涨）⇒ 按 R25 判据仍未饱和，不可据此开工。",
+  "leads_after_5th_slice": [
+   {
+    "id": "L4",
+    "pct": 20.2,
+    "hits": 40
+   },
+   {
+    "id": "L9-Express中间件",
+    "pct": 12.1,
+    "hits": 24
+   },
+   {
+    "id": "L7",
+    "pct": 10.1,
+    "hits": 20
+   },
+   {
+    "id": "L3",
+    "pct": 6.6,
+    "hits": 13
+   },
+   {
+    "id": "L8",
+    "pct": 6.1,
+    "hits": 12
+   },
+   {
+    "id": "L1",
+    "pct": 4.5,
+    "hits": 9
+   },
+   {
+    "id": "L6",
+    "pct": 4,
+    "hits": 8
+   },
+   {
+    "id": "L10-框架ACL词表",
+    "pct": 4,
+    "hits": 8
+   },
+   {
+    "id": "L2",
+    "pct": 2,
+    "hits": 4
+   },
+   {
+    "id": "L5",
+    "pct": 0.5,
+    "hits": 1
+   },
+   {
+    "id": "未归因",
+    "pct": 37.4,
+    "hits": 74
+   }
+  ],
+  "leads_after_6th_slice": [
+   {
+    "id": "L4",
+    "pct": 21.5,
+    "hits": 79
+   },
+   {
+    "id": "L6",
+    "pct": 10.4,
+    "hits": 38
+   },
+   {
+    "id": "L7",
+    "pct": 7.6,
+    "hits": 28
+   },
+   {
+    "id": "L9",
+    "pct": 6.5,
+    "hits": 24
+   },
+   {
+    "id": "L3",
+    "pct": 4.4,
+    "hits": 16
+   },
+   {
+    "id": "L8",
+    "pct": 3.3,
+    "hits": 12
+   },
+   {
+    "id": "L1",
+    "pct": 2.5,
+    "hits": 9
+   },
+   {
+    "id": "L10",
+    "pct": 2.2,
+    "hits": 8
+   },
+   {
+    "id": "L2",
+    "pct": 1.1,
+    "hits": 4
+   },
+   {
+    "id": "L5",
+    "pct": 0.3,
+    "hits": 1
+   },
+   {
+    "id": "未归因",
+    "pct": 44.4,
+    "hits": 163
+   }
+  ]
+ },
+ "expansion_2026_09_21": {
+  "tool": "python3 blind-benchmark/fp-pool-fetch.py <owner/repo> [--prefix <子包>] [--max-files N]",
+  "safety_notes": [
+   "单文件 >400KB 一律丢弃（本机 8GB + swap 吃满，ts-morph 会 OOM）",
+   "monorepo 必须加 --prefix 只切一个子包，否则根目录没有 tsconfig.json，扫描直接 File not found",
+   "切片根目录自动补 package.json / tsconfig.json（取自 tarball 里最浅的一份）"
+  ],
+  "incident": {
+   "what": "fp-pool-scan.ts 在单切片扫描失败时仍照常 writeFileSync，把整份 reports/fp-pool-results.json 覆盖成空",
+   "loss": "此前的人工判定（18 条新增 + 54 条既有的逐条结论）全部丢失",
+   "fix": "① 写盘前备份 .prev.json；② 只扫一片时并入既有结果而非覆盖",
+   "recovery": "已重扫恢复：4 切片 / 197 文件 / safeguard 21，读数与事故前一致"
+  },
+  "slices_added": [
+   {
+    "repo": "docmost/docmost",
+    "prefix": "apps/server",
+    "files": 120,
+    "status": "已扫/待扫"
+   },
+   {
+    "repo": "verdaccio/verdaccio",
+    "files": 110,
+    "scanned": "72 文件 / 249 函数 / 命中 83 函数 / 空calls 42（类方法 24）",
+    "status": "已扫"
+   },
+   {
+    "repo": "hedgedoc/hedgedoc",
+    "status": "抓取失败：sandbox 对 tar 解包的 mkdir 报 PermissionError，需放开沙箱后重试"
+   },
+   {
+    "repo": "docmost/docmost",
+    "prefix": "apps/server",
+    "files": 118,
+    "scanned": "118 文件 / 262 函数 / 命中 94 函数 / 空calls 19（类方法 6）/ protocol=2 resource=3",
+    "status": "已扫"
+   },
+   {
+    "repo": "outline/outline",
+    "prefix": "server",
+    "files": 110,
+    "scanned": "110 文件 / 37 函数 / 命中 4 —— **有偏切片**",
+    "bias": "按优先分取前 N，\"api/\" 得分最高 ⇒ 110 个名额几乎全给了 routes/api/*，函数数只有别的片的零头",
+    "status": "待用 round_robin 重切后重扫替换（已把旧切片移到 /tmp/fp-pool-outline-biased-routes-only）"
+   },
+   {
+    "repo": "hoppscotch/hoppscotch",
+    "prefix": "packages/hoppscotch-backend",
+    "status": "抓取中，因本机 load 610 已中止，待机器恢复后重跑"
+   }
+  ],
+  "saturation": "未饱和（R25）：6 片时未归因 44.4% 仍在涨；L6 从 4.0% 反弹到 10.4%",
+  "sampler_bias": "已修：round_robin() 按目录轮转取样，避免名额被单一子树吃光（2026-09-21 outline 事故）",
+  "saturation_guard": "R25 判据加空过防线：新切片贡献 <5% 总违规 ⇒ 报「比较无效」（outline 那次贡献 4 条 = 1.1%，差点被误判为已饱和）"
+ },
+ "verdaccio_empty_calls_closed": {
+  "conclusion": "不是 E1 的遗留缺口，24 个点名空函数全部有解释",
+  "evidence": "ts-morph AST 逐条核对：23 个体内零 CallExpression（setter/accessor/return this）；1 个 AuthStorageCommand.promptPassword 调用全在嵌套箭头回调里（§十八 已登记的「不修」项）",
+  "probe": "/tmp/probe-verdaccio-empty2.ts"
  }
 }

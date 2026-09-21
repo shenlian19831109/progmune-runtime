@@ -163,13 +163,37 @@ for (const repo of repos) {
   );
 }
 
+// 写盘前的两道保险（2026-09-21，都是踩出来的）：
+// ① .prev 备份 —— 一次单切片扫描失败会把整份结果覆盖成空，历史判定就丢了；
+// ② --merge：只扫一片时，把新结果并回旧文件，其余切片原样保留。
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
-fs.writeFileSync(OUT, JSON.stringify(results, null, 1));
-const tp = results.reduce((a, r) => a + r.protocol, 0);
-const ts = results.reduce((a, r) => a + r.safeguard, 0);
-const tr = results.reduce((a, r) => a + r.resource, 0);
-const tf = results.reduce((a, r) => a + r.files, 0);
+let out = results;
+if (only && fs.existsSync(OUT)) {
+  try {
+    const prev: PoolScanResult[] = JSON.parse(fs.readFileSync(OUT, "utf8"));
+    const names = new Set(results.map((r) => r.repo));
+    out = [...prev.filter((r) => !names.has(r.repo)), ...results].sort((a, b) =>
+      a.repo.localeCompare(b.repo)
+    );
+    console.log(`\n[merge] 已并入既有结果（保留 ${prev.filter((r) => !names.has(r.repo)).length} 个切片）`);
+  } catch {
+    console.log("\n[merge] 既有结果解析失败，按新结果写盘");
+  }
+}
+if (fs.existsSync(OUT)) {
+  try {
+    fs.copyFileSync(OUT, OUT.replace(/\.json$/, ".prev.json"));
+  } catch {
+    /* 备份失败不阻断 */
+  }
+}
+fs.writeFileSync(OUT, JSON.stringify(out, null, 1));
+// 用 out（含并入的旧切片）统计，否则单切片扫描会打出「池合计 1 个切片」的假总数
+const tp = out.reduce((a, r) => a + r.protocol, 0);
+const ts = out.reduce((a, r) => a + r.safeguard, 0);
+const tr = out.reduce((a, r) => a + r.resource, 0);
+const tf = out.reduce((a, r) => a + r.files, 0);
 console.log(
-  `\n池合计：${results.length} 个切片 / ${tf} 文件 / protocol=${tp} safeguard=${ts} resource=${tr}`
+  `\n池合计：${out.length} 个切片 / ${tf} 文件 / protocol=${tp} safeguard=${ts} resource=${tr}`
 );
 console.log(`明细已写入 ${path.relative(process.cwd(), OUT)}（供人工逐条判定 TP/FP）`);
