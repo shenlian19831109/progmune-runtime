@@ -353,7 +353,22 @@ function manualResolveModule(
   return null;
 }
 
-function extractDirectCalls(func: FunctionDeclaration | ArrowFunction, preText?: string): string[] {
+/**
+ * 提取函数体内**真实出现的调用名**（区别于 computeMarkerCalls 产出的语义标记）。
+ *
+ * 2026-09-21（类方法空转修复）：形参类型补 MethodDeclaration。
+ *   此前本函数只对函数声明 / 箭头 / 包装箭头三个载体调用过；主 IR 循环里的
+ *   **类方法分支从来没调过它**，只调了 computeMarkerCalls ⇒ 类方法的 calls 里
+ *   永远只有标记、没有真实调用 ⇒ 状态机在 OO 代码上拿不到输入（FP 观测池实测：
+ *   NestJS 切片 61 个函数里 59 个 calls 为空）。该空转自类方法提取功能诞生即存在，
+ *   因 taintpath 十一族语料全是函数载体而从未现形。
+ *   MethodDeclaration 与 FunctionDeclaration 一样具备 getBody() / getText()，
+ *   遍历逻辑无需改动。
+ */
+function extractDirectCalls(
+  func: FunctionDeclaration | ArrowFunction | MethodDeclaration,
+  preText?: string,
+): string[] {
   const body = func.getBody();
   if (!body) return [];
   const calls: string[] = [];
@@ -2908,7 +2923,10 @@ function _extractSingleProject(
         if (!mn) continue;
         const mParams = m.getParameters();
         const mText = m.getText();
-        const mCalls = computeMarkerCalls(mText, mParams.map((p: any) => p.getName()), sinkParams, onMethodHit, guardFns, directGuardFns, shapers);
+        // 2026-09-21：补上真实调用提取（此前只有 computeMarkerCalls，见 extractDirectCalls 注释）。
+        // 顺序与函数声明 / 箭头两个分支保持一致：先真实调用，再追加语义标记。
+        const mCalls = extractDirectCalls(m, mText);
+        mCalls.push(...computeMarkerCalls(mText, mParams.map((p: any) => p.getName()), sinkParams, onMethodHit, guardFns, directGuardFns, shapers));
         funcs.push({
           name: `${cn}.${mn}`,
           params: mParams.map((p: any) => ({ name: p.getName(), type: getParamType(p), typeDetail: getParamTypeDetail(p) })),

@@ -1,0 +1,137 @@
+import { Static, Type } from '@sinclair/typebox'
+import { Ajv } from 'ajv'
+import { envSchema } from 'env-schema'
+
+const NODE_ENVS = {
+  PRODUCTION: 'production',
+  DEVELOPMENT: 'development',
+  TEST: 'test',
+} as const
+type NODE_ENVS = typeof NODE_ENVS[keyof typeof NODE_ENVS]
+
+export const STORAGE_PROVIDERS = {
+  LOCAL: 'local',
+  S3: 'S3',
+  s3: 's3',
+  GOOGLE_CLOUD_STORAGE: 'google-cloud-storage',
+  AZURE_BLOB_STORAGE: 'azure-blob-storage',
+  MINIO: 'minio',
+} as const
+export type STORAGE_PROVIDERS =
+  typeof STORAGE_PROVIDERS[keyof typeof STORAGE_PROVIDERS]
+
+// Schema default for BODY_LIMIT (100 MB). Exported so the runtime fallback uses
+// the same value as the schema's `default`.
+export const BODY_LIMIT_DEFAULT = 104857600
+
+const schema = Type.Object(
+  {
+    NODE_ENV: Type.Optional(
+      Type.Enum(NODE_ENVS, { default: NODE_ENVS.PRODUCTION }),
+    ),
+    AUTH_MODE: Type.Optional(
+      Type.Enum({ static: 'static', jwt: 'jwt', none: 'none' }),
+    ),
+    HOST: Type.String({ default: '0.0.0.0' }),
+    JWT_AUDIENCE: Type.Optional(Type.String({ separator: ',' })),
+    JWT_ISSUER: Type.Optional(Type.String()),
+    JWKS_URL: Type.Optional(Type.String()),
+    JWT_SCOPE_CLAIM: Type.String({ default: 'scope' }),
+    JWT_READ_SCOPES: Type.Optional(Type.String({ separator: ',' })),
+    JWT_WRITE_SCOPES: Type.Optional(Type.String({ separator: ',' })),
+    JWT_ROLES_CLAIM: Type.String({ default: 'roles' }),
+    JWT_READ_ROLES: Type.Optional(Type.String({ separator: ',' })),
+    JWT_WRITE_ROLES: Type.Optional(Type.String({ separator: ',' })),
+    JWT_TEAM_CLAIM: Type.Optional(Type.String()),
+    TURBO_TOKEN: Type.Optional(Type.String({ separator: ',' })),
+    PORT: Type.Number({ default: 3000 }),
+    LOG_LEVEL: Type.Optional(Type.String({ default: 'info' })),
+    ENABLE_STATUS_LOG: Type.Optional(Type.Boolean({ default: true })),
+    LOG_MODE: Type.Optional(Type.String({ default: 'stdout' })),
+    LOG_FILE: Type.Optional(Type.String({ default: 'server.log' })),
+    STORAGE_PROVIDER: Type.Optional(
+      Type.Enum(STORAGE_PROVIDERS, { default: STORAGE_PROVIDERS.LOCAL }),
+    ),
+    BODY_LIMIT: Type.Optional(Type.Number({ default: BODY_LIMIT_DEFAULT })),
+    STORAGE_PATH: Type.Optional(Type.String()),
+    STORAGE_PATH_USE_TMP_FOLDER: Type.Optional(Type.Boolean({ default: true })),
+    HTTP2: Type.Optional(Type.Boolean({ default: false })),
+    // S3_ env vars are used by Vercel. ref: https://vercel.com/support/articles/how-can-i-use-aws-sdk-environment-variables-on-vercel
+    S3_ACCESS_KEY: Type.Optional(Type.String()),
+    S3_SECRET_KEY: Type.Optional(Type.String()),
+    S3_REGION: Type.Optional(Type.String()),
+    // S3_ENDPOINT is shared between are deployments type
+    S3_ENDPOINT: Type.Optional(Type.String()),
+    // S3_MAX_SOCKETS is used to increase the number of sockets for the S3 client
+    S3_MAX_SOCKETS: Type.Optional(Type.Number({ default: 50 })),
+
+    // Google Cloud Storage credentials
+    GCS_PROJECT_ID: Type.Optional(Type.String()),
+    GCS_CLIENT_EMAIL: Type.Optional(Type.String()),
+    GCS_PRIVATE_KEY: Type.Optional(Type.String()),
+
+    // Azure Blob Storage credentials
+    ABS_CONNECTION_STRING: Type.Optional(Type.String()),
+
+    // SSL support
+    SSL_KEY_PATH: Type.Optional(Type.String()),
+    SSL_CERT_PATH: Type.Optional(Type.String()),
+
+    // Artifact signature verification
+    TURBO_REMOTE_CACHE_SIGNATURE_KEY: Type.Optional(Type.String()),
+
+    READ_ONLY: Type.Optional(Type.Boolean({ default: false })),
+    TURBO_CACHE_READ_URL: Type.Optional(
+      Type.String({ pattern: '^https?:\\/\\/.+$' }),
+    ),
+  },
+  {
+    additionalProperties: false,
+  },
+)
+
+export type Config = Static<typeof schema>
+let _env: Config
+export function load(overrides?: Partial<Config>) {
+  _env = envSchema<Static<typeof schema>>({
+    ajv: new Ajv({
+      removeAdditional: true,
+      useDefaults: true,
+      coerceTypes: true,
+      keywords: ['kind', 'RegExp', 'modifier', envSchema.keywords.separator],
+    }),
+    data: overrides,
+    dotenv: process.env.NODE_ENV === NODE_ENVS.DEVELOPMENT ? true : false,
+    schema,
+  })
+  return _env
+}
+_env = load()
+
+// we export an object so we can mock the env value while testing. In fact exported vars in are not mockable in ESM
+export const env = {
+  get() {
+    return _env
+  },
+}
+
+/**
+ * Resolves a candidate BODY_LIMIT value to one that is safe to hand to
+ * fastify. If the input is not a finite positive integer (e.g. NaN, 0,
+ * negative, non-numeric) we fall back to the schema default and return a
+ * warning string so the caller can surface it through its logger.
+ */
+export function resolveBodyLimit(input: unknown): {
+  value: number
+  warning?: string
+} {
+  if (typeof input === 'number' && Number.isFinite(input) && input > 0) {
+    return { value: Math.floor(input) }
+  }
+  return {
+    value: BODY_LIMIT_DEFAULT,
+    warning: `BODY_LIMIT value ${String(
+      input,
+    )} is not a positive finite number; falling back to default ${BODY_LIMIT_DEFAULT}`,
+  }
+}

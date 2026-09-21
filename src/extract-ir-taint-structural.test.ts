@@ -1974,3 +1974,231 @@ describe("C4j：载体收口的最后一批 + 成员组完整性回归", () => {
     }, 150_000);
   }
 });
+
+// ═══════════════════════════════════════════════════════════════
+// E1：类方法的**真实调用**必须进 IR（2026-09-21）
+//
+// 命名说明：C4k 已被占用（容器承载轴「属性写入 ⇒ 容器传播」，实测收益上限 0，
+// 判定不修，见设计稿 §十七）。本组是**提取器主干**，另开 E（Extractor）系列。
+//
+// 背景（Claude 补充的历史事实）：主 IR 循环的类方法分支自该功能诞生之日起
+// 只调 computeMarkerCalls（产 __progmune_* 语义标记），从未调 extractDirectCalls
+// （产真实调用名）；函数声明 / 箭头 / 包装箭头三个分支都是两行齐全。
+// 结果：类方法的 calls 里永远只有标记、没有真实调用 ⇒ **状态机在 OO 代码上
+// 拿不到输入**。FP 观测池实测：NestJS 切片 61 个函数里 59 个 calls 为空（97%），
+// 池合计 197 个里 140 个空。此前未暴露是因为 taintpath 十一族语料全是函数载体。
+//
+// 判据：类方法条目的 calls 必须同时含「真实调用名」与「语义标记」——
+//      本轮是**补**真实调用，不是拿它替换标记（负对照·②守这条）。
+// ═══════════════════════════════════════════════════════════════
+
+describe("E1：类方法的真实调用必须进 IR（此前只有标记，状态机拿不到输入）", () => {
+  const cases: Array<{
+    name: string;
+    fn: string;
+    files: Record<string, string>;
+    /** 必须出现的调用名 */
+    want: string[];
+    /** 必须**不**出现的调用名（防修过头 / 守既有口径） */
+    dontWant?: string[];
+    why: string;
+  }> = [
+    // ── 正例：此前全空的五种已知形态 ──────────────────────────
+    {
+      name: "正例·① 类方法（同步）",
+      fn: "C.m",
+      files: {
+        "a.ts": `
+function helper() { return 1; }
+export class C { m() { helper(); } }
+`,
+      },
+      want: ["helper"],
+      why: "最基础的类方法；此前 calls 为空",
+    },
+    {
+      name: "正例·② 类方法（async / await）",
+      fn: "C.m",
+      files: {
+        "a.ts": `
+function helper() { return 1; }
+export class C { async m() { await helper(); } }
+`,
+      },
+      want: ["helper"],
+      why: "async 方法体同样是 Block，此前一样空",
+    },
+    {
+      name: "正例·③ 类方法经 this 成员调用",
+      fn: "C.m",
+      files: {
+        "a.ts": `
+export class C { private repo: any; m() { this.repo.save(); } }
+`,
+      },
+      want: ["save"],
+      why: "NestJS/TypeORM 的实际写法；属性访问取末端名",
+    },
+    {
+      name: "正例·④ 类方法带装饰器",
+      fn: "C.m",
+      files: {
+        "a.ts": `
+function helper() { return 1; }
+function Get(): any { return () => {}; }
+export class C { @Get() m() { helper(); } }
+`,
+      },
+      want: ["helper"],
+      why: "装饰器不得影响方法体遍历",
+    },
+    {
+      name: "正例·⑤ 构造函数注入（方法用注入进来的依赖）",
+      fn: "C.m",
+      files: {
+        "a.ts": `
+export class C { constructor(private repo: any) {} m() { this.repo.save(); } }
+`,
+      },
+      want: ["save"],
+      why: "DI 形态；探针里五种已知失效形态之一",
+    },
+    // ── 正例：顺手测到的、没人提过的形状 ──────────────────────
+    {
+      name: "正例·⑥ static 方法",
+      fn: "C.m",
+      files: {
+        "a.ts": `
+function helper() { return 1; }
+export class C { static m() { helper(); } }
+`,
+      },
+      want: ["helper"],
+      why: "static 也在 getMethods() 内，同属本轮",
+    },
+    {
+      name: "正例·⑦ private 方法",
+      fn: "C.m",
+      files: {
+        "a.ts": `
+function helper() { return 1; }
+export class C { private m() { helper(); } }
+`,
+      },
+      want: ["helper"],
+      why: "可见性修饰符不得影响提取",
+    },
+    {
+      name: "正例·⑧ 抽象类里的实现方法",
+      fn: "C.m",
+      files: {
+        "a.ts": `
+function helper() { return 1; }
+export abstract class C { abstract a(): void; m() { helper(); } }
+`,
+      },
+      want: ["helper"],
+      why: "abstract 无体，但有体的方法照旧要提",
+    },
+    {
+      name: "正例·⑨ 链式调用 this.a.b()",
+      fn: "C.m",
+      files: {
+        "a.ts": `
+export class C { a: any; m() { this.a.b(); } }
+`,
+      },
+      want: ["b"],
+      why: "末端名即被调用的方法名",
+    },
+    {
+      name: "正例·⑩ 计算属性名方法",
+      fn: "C.[K]",
+      files: {
+        "a.ts": `
+function helper() { return 1; }
+const K = "m";
+export class C { [K]() { helper(); } }
+`,
+      },
+      want: ["helper"],
+      why: "名字解不解得出是另一回事，calls 不该受名字影响",
+    },
+    // ── 正对照：既有载体不得被误伤 ────────────────────────────
+    {
+      name: "正对照·⑪ 函数声明（基线）",
+      fn: "plain",
+      files: {
+        "a.ts": `
+function helper() { return 1; }
+export function plain() { helper(); }
+`,
+      },
+      want: ["helper"],
+      why: "本轮只补类方法，函数声明分支不得回归",
+    },
+    {
+      name: "正对照·⑫ 箭头函数（基线）",
+      fn: "arrow",
+      files: {
+        "a.ts": `
+function helper() { return 1; }
+export const arrow = () => { helper(); };
+`,
+      },
+      want: ["helper"],
+      why: "同上；箭头分支不得回归",
+    },
+    // ── 负对照：防修过头 ─────────────────────────────────────
+    {
+      name: "负对照·① 嵌套箭头回调里的调用仍不提取",
+      fn: "C.m",
+      files: {
+        "a.ts": `
+function helper() { return 1; }
+export class C { m() { setTimeout(() => { helper(); }, 0); } }
+`,
+      },
+      want: ["setTimeout"],
+      dontWant: ["helper"],
+      why:
+        "既有设计：extractDirectCalls 遇嵌套函数即 skip。已实测函数声明/箭头/类方法三者口径一致 ⇒ 本轮不动",
+    },
+    {
+      name: "负对照·② 真实调用不得挤掉语义标记",
+      fn: "Uploader.read",
+      files: {
+        "handler.ts": `
+import * as fs from "fs";
+export class Uploader {
+  read(filePath: string) {
+    return fs.readFileSync(filePath, "utf-8");
+  }
+}
+export function dispatchTool(args: any) {
+  const target = params.arguments.file_path;
+  return new Uploader().read(target);
+}
+`,
+      },
+      want: ["readFileSync", PATH_MARK],
+      why:
+        "本轮是**补**真实调用，标记必须仍在——否则污点轴会整体倒退。" +
+        "（写这条用例时先跑探针确认判据：marker 只在**调用方把污点传进来**时才注入到" +
+        "被调用方，无调用方的类方法本就无 marker —— 探针 ①/④ 一致、②/③ 一致）",
+    },
+  ];
+
+  for (const c of cases) {
+    it(`${c.name} —— ${c.why}`, () => {
+      const dir = makeProject(c.files);
+      try {
+        const calls = marksFor(dir, c.fn);
+        for (const w of c.want) expect(calls).toContain(w);
+        for (const d of c.dontWant ?? []) expect(calls).not.toContain(d);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    }, 150_000);
+  }
+});

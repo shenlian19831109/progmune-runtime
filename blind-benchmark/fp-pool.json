@@ -1,0 +1,340 @@
+{
+ "$purpose": "FP 观测池（证据池换标准之后的新池）。与 fr-corpus 的分工：fr-corpus 是「有漏洞+有修复」的成对语料，有精确真值，测召回与精度双向；本池是**真实代码切片、不要求有 CVE**，没有现成真值，专门用来**观测误报**，真值靠人工抽样判定。",
+ "$why_change_criterion": "旧标准（R20 三问：pre 侧无校验 / 污点根在切片内 / fix 是新增校验）太严，2026-09-21 找第三对语料时连查三个候选全部落空。放宽到「只要求真实 + 有 HTTP 入口 + 有文件操作」之后，材料可从 GitHub 批量获得，能规模化。",
+ "$created": "2026-09-21",
+ "$tools": {
+  "fetch": "本目录由 scripts 手动切片生成（codeload tarball → 只留 .ts/.tsx + package.json + tsconfig.json，删 >400KB 单文件以避开本机 OOM）",
+  "scan": "npx tsx blind-benchmark/fp-pool-scan.ts [子目录名]  （与 batch-scan 同一套 detector，口径一致）",
+  "shapes": "PM_ROOTS=<池目录> python3 blind-benchmark/mine-path-shapes.py",
+  "output": "blind-benchmark/reports/fp-pool-results.json"
+ },
+ "slices": [
+  {
+   "repo": "gothinkster/node-express-realworld-example-app",
+   "files": 37,
+   "style": "Express",
+   "note": "切出来 fns=0 —— 实为 JS 项目（.ts 仅 37 个且无有效提取），作为「无效切片」保留，提醒不是所有高星 TS 标签仓库都可用"
+  },
+  {
+   "repo": "w3tecch/express-typescript-boilerplate",
+   "files": 77,
+   "style": "Express + TypeORM + 类控制器"
+  },
+  {
+   "repo": "lujakob/nestjs-realworld-example-app",
+   "files": 35,
+   "style": "NestJS（装饰器 + 类方法）"
+  },
+  {
+   "repo": "ducktors/turborepo-remote-cache",
+   "files": 48,
+   "style": "Fastify + 函数式（对照：几乎无类方法）"
+  }
+ ],
+ "first_reading": {
+  "files": 197,
+  "lines": 12747,
+  "path_sinks": 33,
+  "protocol_violations": 0,
+  "safeguard_violations_perFunction": 54,
+  "resource_violations": 0,
+  "sink_increment": "原有真实语料 48 处 sink ⇒ 现共 81 处（+69%）",
+  "note": "protocol=0 与 resource=0 不是「干净」，而是**类方法提取不到调用**导致状态机没有输入（见 key_finding）"
+ },
+ "spot_check_verdicts": [
+  {
+   "where": "ducktors-turborepo-remote-cache/src/app.ts :: createApp",
+   "rules": [
+    "Password Hashing",
+    "Password Hashing (Weak)",
+    "Registration Without Email Verification",
+    "Input Validation"
+   ],
+   "verdict": "FP",
+   "confidence": "high",
+   "evidence": "calls = get, existsSync, readFileSync, Fastify, after, register, setErrorHandler —— `register` 是 Fastify 的插件注册方法，被当成「用户注册」触发密码哈希/邮件验证规则。这个服务根本没有用户体系。"
+  },
+  {
+   "where": "w3tecch-express-typescript-boilerplate/test/utils/database.ts :: createDatabaseConnection",
+   "rules": [
+    "Input Validation"
+   ],
+   "verdict": "FP",
+   "confidence": "high",
+   "evidence": "calls = useContainer, createConnection —— `create` 触发「内容创建需校验输入」规则；建连接与输入校验无关。"
+  },
+  {
+   "where": "lujakob-nestjs-realworld-example-app/src/article/article.service.ts :: ArticleService.update",
+   "rules": [
+    "Data Mutation Without Audit Trail"
+   ],
+   "verdict": "FP（且叠加提取缺陷）",
+   "confidence": "high",
+   "evidence": "源码实有 this.articleRepository.findOne / Object.assign / this.articleRepository.save，IR 里 calls 却是空的 ⇒ 违规纯由函数名 update 触发；且博客文章 update 本无审计要求。"
+  },
+  {
+   "where": "w3tecch-express-typescript-boilerplate/src/api/services/PetService.ts :: PetService.update",
+   "rules": [
+    "Data Mutation Without Audit Trail"
+   ],
+   "verdict": "FP（且叠加提取缺陷）",
+   "confidence": "high",
+   "evidence": "calls 为空，同上。"
+  },
+  {
+   "where": "w3tecch-express-typescript-boilerplate/src/loaders/expressLoader.ts :: expressLoader",
+   "rules": [
+    "TLS Enforcement",
+    "Rate Limiting",
+    "API Without Rate Limiting"
+   ],
+   "verdict": "弱真（部署层建议，非代码缺陷）",
+   "confidence": "medium",
+   "evidence": "该 Express 装配确实未配 TLS / rate limit，但这是运行环境的责任，报为代码违规属建议级。是否算 FP 取决于产品定位。"
+  },
+  {
+   "where": "ducktors-turborepo-remote-cache/src/plugins/remote-cache/storage/azure-blob-storage.ts :: createAzureBlobStorage",
+   "rules": [
+    "File Upload Without Validation",
+    "Input Validation",
+    "No Input Sanitization"
+   ],
+   "verdict": "待人工复核",
+   "confidence": "low",
+   "evidence": "确实有 uploadStream/write 的上传流，但上传目标是 Azure Blob 而非 Web 端点；是否需类型/大小校验取决于该端点是否对外暴露。"
+  },
+  {
+   "where": "lujakob-nestjs-realworld-example-app/src/user/user.controller.ts :: UserController.login",
+   "rules": [
+    "Session No Timeout"
+   ],
+   "verdict": "无法判定",
+   "confidence": "low",
+   "evidence": "calls 为空，看不到 session 创建逻辑，无从判断。"
+  }
+ ],
+ "key_finding": {
+  "title": "提取器对「类方法」不提取任何调用 —— 状态机在 OO 代码上没有输入",
+  "severity": "主干级（影响协议生命周期验证的输入，不是某一类规则的边界）",
+  "probe": "/tmp/probe-extractor-class.ts（7 个最小用例）",
+  "probe_result": [
+   "① 普通函数声明 → calls=[writeFileSync]  OK",
+   "② 箭头函数     → calls=[writeFileSync]  OK",
+   "③ 类方法（同步）→ calls=[]  EMPTY",
+   "④ 类方法（async）→ calls=[]  EMPTY",
+   "⑤ 类方法 + this 成员调用 → calls=[]  EMPTY",
+   "⑥ 类方法 + 装饰器 → calls=[]  EMPTY",
+   "⑦ 类 + 构造函数注入（NestJS 形态）→ calls=[]  EMPTY"
+  ],
+  "impact_measured": {
+   "lujakob-nestjs-realworld-example-app": "61 个函数中 59 个 calls 为空，59 个全是类方法（97%）",
+   "w3tecch-express-typescript-boilerplate": "113 个函数中 76 个 calls 为空，其中 67 个是类方法（67%）",
+   "ducktors-turborepo-remote-cache": "23 个函数中 5 个为空，0 个类方法（函数式风格，作为对照）",
+   "pool_total": "197 个函数中 140 个 calls 为空（71%），其中 126 个是类方法"
+  },
+  "double_consequence": [
+   "FP：没有 calls 来证伪 ⇒ safeguard 规则退化成「靠函数名关键词猜」（54 条违规里 28 条所在函数 calls 为空，占 52%；Data Mutation Without Audit Trail 22 条里 20 条如此）",
+   "FN：真违规同样检不出 ⇒ 协议状态机在类方法代码上等于关闭（池里 protocol=0 就是这个原因，不是干净）"
+  ],
+  "why_never_caught_before": "taintpath 十一族人造语料全是函数声明 / 变量箭头 / 属性箭头等形态，没有一个「类方法」载体 ⇒ 该路径从未被 fixture 触发。与 3.7.31 的 P0 教训同源（新增能力必须配能触发它的 fixture）。",
+  "status": "已复现、未修。修它要动提取器主干，需完整四门验收（闸门 / fr-007+fr-016 / 全量盲测 3201 条基线 / 反向验证），单列一轮。"
+ },
+ "after_class_method_fix": {
+  "version": "3.7.47（工作树，未提交）",
+  "date": "2026-09-21",
+  "what_changed": "主 IR 循环的类方法分支补上 extractDirectCalls（此前只调 computeMarkerCalls）",
+  "empty_calls": {
+   "before": {
+    "fns": 197,
+    "empty": 140,
+    "pct": 71,
+    "class_methods_empty": 126
+   },
+   "after": {
+    "fns": 197,
+    "empty": 23,
+    "pct": 12,
+    "class_methods_empty": 9
+   },
+   "per_slice_after": {
+    "ducktors-turborepo-remote-cache": {
+     "fns": 23,
+     "empty": 5,
+     "cls": 0
+    },
+    "gothinkster-node-express-realworld-example-app": {
+     "fns": 0,
+     "empty": 0,
+     "cls": 0
+    },
+    "lujakob-nestjs-realworld-example-app": {
+     "fns": 61,
+     "empty": 3,
+     "cls": 3
+    },
+    "w3tecch-express-typescript-boilerplate": {
+     "fns": 113,
+     "empty": 15,
+     "cls": 6
+    }
+   },
+   "note": "空 calls 71% → 12%。剩余 23 个里只有 2 个落在「有违规」的函数上（createS3 / ArticleEntity.updateTimestamp）；其余 21 个函数名不触发规则，无害。"
+  },
+  "violations": {
+   "project_level_before": 19,
+   "project_level_after": 21,
+   "perFunction_added": 18,
+   "note": "项目级只 +2（去重口径），但 **perFunction 层面新增 18 条** —— 类方法第一次有了 calls，规则第一次看见这些序列。这正是 Claude 预警的「规则侧第一次实战」。"
+  },
+  "new_violations_verdicts": [
+   {
+    "where": "lujakob/ArticleService.findAll",
+    "rule": "Input Validation",
+    "verdict": "FP",
+    "confidence": "high",
+    "evidence": "calls = createQueryBuilder/leftJoinAndSelect/where/andWhere/getMany —— TypeORM 查询构造器链被当成「缺输入校验」。查询构造不是校验缺失的证据。"
+   },
+   {
+    "where": "lujakob/ArticleService.findFeed",
+    "rule": "Input Validation",
+    "verdict": "FP",
+    "confidence": "high",
+    "evidence": "同上，query builder 链（find/where/orderBy/getCount/limit/offset）。"
+   },
+   {
+    "where": "lujakob/UserService.create",
+    "rule": "Input Validation",
+    "verdict": "FP",
+    "confidence": "high",
+    "evidence": "calls 含 validate（class-validator）与 orWhere/where —— 其实**有**校验，规则没认出来 ⇒ 属词表缺口，不是真缺校验。"
+   },
+   {
+    "where": "lujakob/UserService.generateJWT",
+    "rule": "Authorization (Unauthenticated Access)",
+    "verdict": "FP",
+    "confidence": "high",
+    "evidence": "jwt.sign + setDate/getDate/getTime，是内部工具方法；工具函数不应被要求做授权检查。"
+   },
+   {
+    "where": "lujakob/UserService.generateJWT",
+    "rule": "Authorization (Unauthenticated Mutation)",
+    "verdict": "FP",
+    "confidence": "high",
+    "evidence": "同上。"
+   },
+   {
+    "where": "lujakob/UserController.login",
+    "rule": "Token Security (Weak Generation)",
+    "verdict": "FP",
+    "confidence": "high",
+    "evidence": "源码 findOne → 判空 401 → generateJWT（jwt.sign + SECRET），是标准签发而非弱生成。**上一轮因 calls 为空判为「无法判定」，本轮有了 calls 才判得动 ⇒ 正是 Claude 说的「废票变有效票」。**"
+   },
+   {
+    "where": "lujakob/ProfileService.unFollow",
+    "rule": "Data Mutation Without Audit Trail",
+    "verdict": "weak-true",
+    "confidence": "medium",
+    "evidence": "calls = findOne, delete —— 取消关注确实没有审计日志，但是否算违规取决于产品定位。"
+   },
+   {
+    "where": "w3tecch/PetRepository.findByUserId",
+    "rule": "Input Validation",
+    "verdict": "FP",
+    "confidence": "high",
+    "evidence": "query builder 链（createQueryBuilder/where/select/join/getMany/map）。"
+   },
+   {
+    "where": "w3tecch/PetService.create",
+    "rule": "Notification Without Retry",
+    "verdict": "weak-true",
+    "confidence": "medium",
+    "evidence": "eventDispatcher.dispatch 发出事件但无重试机制；属**部署层建议**，与上一轮 TLS/rate limit 同类。"
+   },
+   {
+    "where": "w3tecch/UserService.create",
+    "rule": "Notification Without Retry",
+    "verdict": "weak-true",
+    "confidence": "medium",
+    "evidence": "同上（dispatch 无重试）。"
+   },
+   {
+    "where": "w3tecch/CreateUserTable15111051836",
+    "rule": "Input Validation",
+    "verdict": "FP",
+    "confidence": "high",
+    "evidence": "calls = createTable —— TypeORM **迁移脚本**，不处理用户输入。"
+   },
+   {
+    "where": "w3tecch/CreateUserTable15111051836",
+    "rule": "Data Mutation Without Audit Trail",
+    "verdict": "FP",
+    "confidence": "high",
+    "evidence": "calls = dropTable，迁移回滚方法。"
+   },
+   {
+    "where": "w3tecch/CreatePetTable151266352480",
+    "rule": "Input Validation",
+    "verdict": "FP",
+    "confidence": "high",
+    "evidence": "迁移脚本 createTable。"
+   },
+   {
+    "where": "w3tecch/CreatePetTable151266352480",
+    "rule": "Data Mutation Without Audit Trail",
+    "verdict": "FP",
+    "confidence": "high",
+    "evidence": "迁移脚本 dropTable。"
+   },
+   {
+    "where": "w3tecch/AddUserRelationToPetTable1",
+    "rule": "Input Validation",
+    "verdict": "FP",
+    "confidence": "high",
+    "evidence": "迁移脚本 createForeignKey。"
+   },
+   {
+    "where": "w3tecch/AddUserRelationToPetTable1",
+    "rule": "Data Mutation Without Audit Trail",
+    "verdict": "FP",
+    "confidence": "high",
+    "evidence": "迁移脚本 dropForeignKey。"
+   },
+   {
+    "where": "w3tecch/CreateBruce.seed",
+    "rule": "Input Validation",
+    "verdict": "FP",
+    "confidence": "high",
+    "evidence": "calls = createEntityManager, v1(uuid), save —— **种子数据脚本**，无外部输入。"
+   },
+   {
+    "where": "w3tecch/CreatePets.seed",
+    "rule": "Input Validation",
+    "verdict": "FP",
+    "confidence": "high",
+    "evidence": "同上（times/createEntityManager/save）。"
+   }
+  ],
+  "verdict_summary": {
+   "FP": 15,
+   "weak-true": 3,
+   "TP": 0,
+   "note": "18 条里**真漏洞 0 条**。判定由 WorkBuddy 做出，建议 Claude 复核，尤其 3 条 weak-true 取决于产品定位。"
+  },
+  "rule_side_calibration_signals": [
+   "迁移/种子脚本（createTable / dropTable / createForeignKey / createEntityManager+save）应豁免 —— 6 条 FP 全来自这一类",
+   "TypeORM query builder 链（createQueryBuilder/where/getMany）被 Input Validation 误判 —— 4 条 FP",
+   "内部工具方法（generateJWT 这种只做 jwt.sign 的）不应被要求 Authorization —— 2 条 FP",
+   "UserService.create 其实**有** validate 却仍报 Input Validation ⇒ 不是缺校验，是**规则不认 class-validator 的 validate**"
+  ],
+  "still_empty_after_fix": [
+   {
+    "where": "ducktors/createS3",
+    "why": "函数式写法，返回对象；非类方法"
+   },
+   {
+    "where": "lujakob/ArticleEntity.updateTimestamp",
+    "why": "类方法但体内只有赋值（@BeforeUpdate 钩子），确无调用 ⇒ 空是正确的"
+   }
+  ]
+ }
+}
