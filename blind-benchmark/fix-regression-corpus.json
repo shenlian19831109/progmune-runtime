@@ -150,6 +150,14 @@
       "rule": "凡是用「全组确证」这类**集体判据**决定放行，组的分母必须包含**被判据拒掉的那些**。只把通过判据的实现算进组，等于把「判据不成立」这件事从集合里摘出去 —— 组会显示『全组确证』，而被拒的那些实现照样被放行。另：写探针的期望之前，必须先指明『这条标/不标，由哪一个机制决定』，否则期望本身可能不可达（F9a）或无意义（F9f）。",
       "why": "C4h 把「同名成员唯一才登记」换成「全组确证」，但实现只把通过判据①②③的实现算进组。同名三处 getter：无形参的（判据①不成立）没进组、体内有 sink 的（判据③不成立）没进组 ⇒ 组里只剩一条通过者 ⇒ 『全组确证』成立 ⇒ 成员调用位 `.mk(` 放行 ⇒ `ONoParam.mk(k)` 与 `OWithSink.mk(k)` 两条本该不标的被误标。归因靠反向验证第 7 刀（`noteUnaccepted` 退回旧行为）：闸门 160/160 里恰好只有这两条转红。同轮两次探针期望写错 —— F9a：匿名默认导出那条忘了写 import，而名字只能来自导入它的文件，没有 import 期望本身不可达；F9f：期望 unmarked 实测 mark，查清后是期望错，`(0, (n) => …)(k)` 里那个内联匿名箭头自己就是塑形函数，与默认导出无关（删掉 helpers.ts 照样标），标是保守侧的正常行为。",
       "current_status": "taintpath_K 22 条（12 mark / 9 no-taint / 1 suppressed）；定向用例 C4j 组 23 条，其中两条「回归·⑦」（ONoParam.mk / OWithSink.mk）是该缺陷的回归门；七刀结果已记入 CHANGELOG 3.7.46 与设计稿 §十六"
+    },
+    {
+      "id": "R20-three-questions-before-adopting-a-corpus-pair",
+      "added": "2026-09-21",
+      "source": "为 taintpath 找第三对真实语料：连查三个候选全部 0/0 落空，且落空原因各不相同",
+      "rule": "新条目入库前先过三问，**任一不过就不要下载快照**（省下的正是最贵的那一步）：① **pre 侧有没有 path 校验** —— 只要有（哪怕是 `startsWith` 这种 prefix-only 的弱守卫）就会被 G1 压成 0，属已声明的「守卫存在但不足」面外类，做不出判别力；② **污点根在不在要扫的切片里** —— 词表只有 `req.*`/`request.*` 形态、URL 参数类、文档解析键三种，跨包入参（React Router 的 session id）、类字段（AdonisJS 的 clientName）、MCP 工具实参（fr-012）、CLI argv 都不在内 ⇒ pre 恒为 0；③ **fix 是不是「新增校验」** —— 换掉污点源（AdonisJS 把默认文件名换成随机 UUID）、加强既有守卫、纯文档提交、或压根没有修复版本（TypeSpec）都做不成 post 侧。三问全过才可能得到 pre>0 / post=0。",
+      "why": "2026-09-21 为补第三对真实语料，从 npm 侧 400 条公告里按 CWE 过滤出 11 条路径类，逐个核到提交级：① **AdonisJS bodyparser**（CVE-2026-21440，TS，`MultipartFile.move()`）—— 修复是 `Object.assign({ name: crypto.randomUUID() … })`，把污点源 `this.clientName` 换成随机串，不是加校验；且 clientName 是类字段、不在 `req.*` 词表内 ⇒ pre/post 都会是 0。② **Mockoon commons-server**（CVE-2026-59149，`getSafeFilePath`）—— 漏洞恰是「有守卫但守卫是 `resolvedPath.startsWith(staticBaseDir)` 这种 prefix-only」，属 fr-009/fr-015 同族的「守卫存在但不足」，G1 会压成 0。③ **React Router 文件会话存储**（CVE-2025-61686，fix `6ff0bb35db54` 「Add some validation for session IDs」，形态其实最对路：自有 helper `getFile(dir,id)` 加了 `/^[0-9a-f]{16}$/i` 校验 + 四个调用点判空）—— 但 `fileStorage.ts` pre 版里 `req.`/`request.`/`headers` 出现 **0 次**，session id 是跨包传进来的**入参**，污点根在切片外 ⇒ 仍是 0/0。三问里各踩一条。",
+      "current_status": "三个候选均未入库（作为「已核过、不适用」记录在此，避免以后重复查）。第三对仍缺。同轮改用「按 sink 反查真实代码的路径实参形态」找新形状（见 2026-09-21 日志）：真实代码里 71%（34/48）的路径实参是**上游算好装在变量/成员里**的裸标识符，而非就地拼接 —— 由此提出 C4k 的三个候选形状（构造函数里 `this.x = <shaping>`、`{ path: <shaping> }` 对象成员、跨函数返回值传播），动工前须按 R17 先写探针复现"
     }
   ],
   "entries": [
