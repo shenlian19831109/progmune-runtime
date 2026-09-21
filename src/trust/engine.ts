@@ -118,7 +118,7 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
   );
 
   const enterpriseViolations = collectEnterpriseViolations(ctx);
-  const { violations: protocolViolations, coverage: mappingCoverageData, ssgCoverage: ssgCov, annotationSuggestions: cAnnotationSuggestions } =
+  const { violations: protocolViolations, coverage: mappingCoverageData, ssgCoverage: ssgCov, annotationSuggestions: cAnnotationSuggestions, extractionWarning } =
     await collectProtocolViolations(ctx, callGraph);
   const expressResult = collectExpressViolations(ctx);
   const nestjsResult = collectNestJSViolations(ctx);
@@ -256,12 +256,20 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
       score: effectiveScore,
       decision,
       confidence,
-      coverageConfidence: {
-        score: coverageConfidence.score,
-        margin: coverageConfidence.margin,
-        level: coverageConfidence.level,
-        summary: coverageConfidence.summary,
-      },
+      coverageConfidence: extractionWarning
+        ? {
+            score: 0,
+            margin: 25,
+            level: "LOW",
+            summary: `${extractionWarning}——本次扫描是废票，不得据此得出「干净」结论`,
+          }
+        : {
+            score: coverageConfidence.score,
+            margin: coverageConfidence.margin,
+            level: coverageConfidence.level,
+            summary: coverageConfidence.summary,
+          },
+      extractionWarning,
       mappingCoverage: mappingCoverageData.totalApis > 0
         ? {
             rate: Math.round(
@@ -1338,6 +1346,8 @@ function checkCondition(
 
 interface ProtocolViolationResult {
   violations: TrustViolation[];
+  /** 2026-09-22：提取失败（异常/产物为空）时非空——结果不可信标记 */
+  extractionWarning?: string;
   coverage: {
     totalApis: number;
     lookupHits: number;
@@ -1390,6 +1400,8 @@ async function collectProtocolViolations(
   const annotationRuleNames = new Set<string>();
   // C 注解建议（函数级作用域——返回值在 try 外组装）
   let annotationSuggestions: AnnotationSuggestion[] | undefined;
+  // 2026-09-22：提取失败标记（跨 try 作用域，随结果返回）
+  let extractionWarning: string | undefined;
 
   try {
     // ── P4.5 校准：TS/JS 项目在 ir.json 缺失时先提取 IR ──
@@ -1441,10 +1453,33 @@ async function collectProtocolViolations(
             );
           }
           if (shouldExtract) {
-            const ir = extractFn();
-            // C 走合并形态（与 execute/MCP 写盘一致）；TS/Python 保持裸数组形态
-            const payload = lang === "c" ? { typeMap: {}, functions: ir } : ir;
-            fs.writeFileSync(path.join(ctx.projectPath, "ir.json"), JSON.stringify(payload, null, 2));
+            try {
+              const ir = extractFn();
+              // C 走合并形态（与 execute/MCP 写盘一致）；TS/Python 保持裸数组形态
+              const payload = lang === "c" ? { typeMap: {}, functions: ir } : ir;
+              fs.writeFileSync(path.join(ctx.projectPath, "ir.json"), JSON.stringify(payload, null, 2));
+            } catch (extractErr: any) {
+              // 2026-09-22：提取异常不再静默吞掉——OOM 杀（exit 137）等失败
+              // 必须发声，否则引擎带着空 IR 输出「0 违规」的假干净结论
+              extractionWarning = `IR 提取失败（${extractErr?.message || extractErr}）——结果不可信`;
+            }
+          }
+          // 2026-09-22：提取后验尸——ir.json 存在但函数数为 0 且项目确有
+          // 源码时，说明提取被静默截断（如 python3 被 OOM 杀后留下 2 字节
+          // 空数组），同样记为失败
+          if (!extractionWarning) {
+            try {
+              const irPath2 = path.join(ctx.projectPath, "ir.json");
+              if (fs.existsSync(irPath2)) {
+                const raw = fs.readFileSync(irPath2, "utf-8");
+                const parsed = JSON.parse(raw);
+                const fnCount = Array.isArray(parsed) ? parsed.length : (parsed.functions || []).length;
+                if (fnCount === 0 && freshness.scannedFiles > 0) {
+                  extractionWarning = `IR 提取产物为空（0 函数，但项目有 ${freshness.scannedFiles} 个源文件）——提取可能被 OOM 截断，结果不可信`;
+                  console.warn(`[progmune] ⚠️ ${extractionWarning}`);
+                }
+              }
+            } catch { /* best-effort */ }
           }
         } catch { /* best-effort — 回退正则扫描 */ }
       }
@@ -1809,6 +1844,7 @@ async function collectProtocolViolations(
       },
     } : undefined,
     annotationSuggestions,
+    extractionWarning,
   };
 }
 

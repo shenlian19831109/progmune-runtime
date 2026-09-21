@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.7.48] — 2026-09-22
+
+### IR 提取失败必须发声（OOM 杀后的「0 违规假干净」根治）
+
+- **事故**：skyvern E1 重扫时 python3 提取器被 OOM 杀（SIGKILL），ir.json 被写成 2 字节空数组——引擎带着空 IR 照样输出「0 违规、85 分 APPROVED」，结果自洽、无任何迹象表明它是废票（静默降级比 R8 陈旧产物更阴）
+- **修复**（`src/trust/engine.ts` + `types.ts`）：
+  - 提取异常不再静默吞掉——异常信息记入 `extractionWarning`
+  - **提取后验尸**：ir.json 存在但函数数=0 且项目确有源码 ⇒ 记失败并 console.warn
+  - TrustDecision 新增 `overall.extractionWarning` 字段；失败时 `coverageConfidence` 强制降 LOW，摘要明示「本次扫描是废票，不得据此得出干净结论」
+- **E2E 验证**：空 ir.json + 1 个源文件 → warning 触发 / confidence LOW / 摘要正确
+- 回归：engine 21 + ir-staleness 12 + structural 165 全绿；build ✓
+- 后续：python3 提取分块（skyvern 级项目单进程内存峰值不可控，按目录分批提取、引擎侧合并）——机器资源恢复后按四门验收
+
 ## [3.7.47] — 2026-09-21
 
 ### 类方法的真实调用必须进 IR（状态机在 OO 代码上没有输入）

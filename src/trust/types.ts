@@ -85,6 +85,10 @@ export interface TrustDecision {
       level: "HIGH" | "MEDIUM" | "LOW";
       summary: string;
     };
+    /** 2026-09-22：IR 提取失败警告——结果基于空/残缺 IR，不可信。
+     *  出现即代表本次扫描是废票（如 python3 提取器被 OOM 杀后
+     *  静默降级为 0 违规）。消费方应据此拦截「假干净」结论。 */
+    extractionWarning?: string;
     /** Phase 4: Semantic mapping coverage (API→domain hit rate) */
     mappingCoverage?: {
       /** % of APIs mapped to a known domain (not util/noise) */
