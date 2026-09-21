@@ -619,3 +619,219 @@ H 族第一版把静态方法写成 `Renderer.stat(k)`，闸门全绿。但反�
 `viaTernaryDrop(k, true)` 下返回的是常量分支，形参不流出 —— 现在仍会被判污染。
 要收这条得在调用点做常量传播（把实参字面量代入 return 再重算依赖），属于另一个
 量级的改动，且代入出错的代价是漏报。登记为已知缺口。
+
+## 十四、C4h：名录之外的三处收口（2026-09-20）
+
+### 起点：备忘里的三个候选，先过探针（R12 第四次）
+
+| 候选 | 探针实测 | 结论 |
+|---|---|---|
+| 调用点常量实参代入 | `viaFlag(k, true)` 误标 | 真误报 ⇒ 本轮修（精度侧） |
+| 同名方法出现两次 | `u.toPath(k)` 不标 | 真漏报 ⇒ 本轮修（召回侧） |
+| 属性承载的箭头 helper | `Util.toPath(k)` 不标 | 真漏报 ⇒ 本轮修（召回侧） |
+| （非备忘项，探针顺手挖到） | 方法名唯一但判据不成立 ⇒ 成员调用位照样进名录 | **既有缺陷**，`r.lookup(k)` 误标 |
+
+最后那条是这一轮最值钱的东西，因为它不是备忘里来的：探针顺手测了一句
+`class Reg { lookup(n) { return registry[n]; } }`（registry 是模块级**非字面量**
+对象 ⇒ 判据③不成立）+ 调用点 `r.lookup(k)`，结果照样 MARKED。根因是 C4g 的代码
+在 `consider()` 之后**无条件**把裸名塞进 `memberNames` —— 确证失败了名字还在名录里，
+于是「是不是塑形」这道闸门被绕过。
+
+### ① 调用点常量代入：名录级结论 vs 个案形状
+
+名录里的 `deps` 是**跨调用点**的并集 —— 对所有实参形状都成立的最宽结论。个案上
+它可能宽得多：
+
+```ts
+const viaFlag = (n: string, flag: boolean): string => (flag ? "fixed.md" : n + ".md");
+const rel = viaFlag(k, true);   // 本次调用的返回值就是字面量 —— n 位进了函数也出不来
+```
+
+按形参位把**字面量实参**代回 return 表达式，试着解掉 cond 可判定的三元，再看还有
+哪些形参活着。`stripOuterParens` → `substituteParams` → `foldDecidableTernary`
+→ 用现成的 `returnDeps` 重算，**解不出就一律退回名录结论**（实参不是常量、或 cond 代入后算不出真假）。保守侧的
+方向在这儿是明确的：折叠出错的代价是**漏报**，所以不确定时就照旧传播。这与 C4b
+「认不出就不传播」是同一张表上的两级 —— 收精度时不确定就放松标sipă；放宽召回时不
+确定就不传播。
+
+### ② 同名成员多处：把「唯一」换成「全组确证」
+
+旧规则要求方法名全项目唯一才登记 `.method(`。唯一性只是「不可能认错」的**充分
+条件**，不是必要条件：同名两处**都被确证**为纯塑形时，同样不可能认错。换成全组
+确证后依赖集按形参位取并集（任一个实现在某位会流出，那位就算会流出）。
+
+配套改动：候选登记从「名字」改成 `key / name / group` 三段 —— 同名多处各留一条，
+`name` 是确证后才发布的名字。这同时也把上面那个缺陷封掉了：**确证之后**才进名录。
+
+### ③ 属性承载的箭头
+
+```ts
+export const Util = { toPath: (n) => n + ".md" };   // 对象字面量属性
+Util.toPath = (n) => n + ".md";                     // 后挂上去的属性
+```
+
+既不是 `getFunctions()` 也不是 `getVariableDeclarations()` 能扫到的东西，旧名录
+一片收不到。现在和方法共用同一张表：限定名用 `ownerQualifier` 沿 owner 链拼
+（`NS.path.toName` 能拼到 `NS.path.toName`），裸名同样交给全组确证来发布。
+
+### R13 的变种：假通过也会出现在**定向用例**里
+
+上一节已经记了 H 族的 `Renderer.stat`（blind 语料撞 sink 名单）。同一轮发现 C4g
+的**定向用例**也有一个：`Renderer.stat(k)` 那条在 `extract-ir-taint-structural.test.ts`
+里同样写着 —— `stat` 在 `TS_FILE_SINK_NAMES` 里，调用点被 sink 兜底直接标中，
+于是那条用例从写下来那天起就是绿的，**删掉整段方法收集它照样绿**。改名 `toFile`
+后才真的在测 helper 传播。
+
+⇒ R16 原本只约束盲测语料命名，从本轮起同样适用于 fixture：**写用例前先 grep
+`TS_FILE_SINK_NAMES`**。这条比 blind 那条更难发现，因为定向用例看起来是"小而干净"的。
+
+### 实现坑两条
+
+1. 整条表达式被括号包住时（`=> (flag ? a : b)`），在第一个顶层 `?` 处切开得到的前缀
+   是 `((true)` —— 括号不配对 ⇒ `truthOf` 判不出 ⇒ **折叠静默失效，什么都不收**。
+   先跑一遍 `stripOuterParens` 脱掉包住整串的括号。
+2. 代入时**别给字面量加括号**。`(true)` 会让 `maskNonDependentArgsOnce` 把实参串误判
+   成嵌套调用（它的判据是「实参里还有 `(`」），内层 helper 就永远轮不到被处理 ——
+   两跳那条 `wrapFlag(k, true)` 卡在这儿。
+
+### 反向验证四刀（归因）
+
+| 刀 | 改动 | 转红 |
+|---|---|---|
+| 1 | 关掉调用点折叠 | emitFlagTrue / emitPickMiss / emitFlagNested / emitWrapFlagTrue |
+| 2 | 同名合并退回「全项目唯一」 | emitSameNameA / emitSameNameB |
+| 3 | 摘掉属性箭头收集 ((d)(e)) | emitPropArrow / emitNestedPropArrow / emitPatchedArrow |
+| 4 | 成员名退回「确证之前就登记」 | emitNonShaperMember / emitSameNameRejected |
+
+四刀互不相干，各自只动自己那一组 ⇒ 归因干净。刀 4 是把探针发现的缺陷复现出来的
+那一刀，也是它能被钉进语料的理由。
+
+### 验收
+
+- taintpath 闸门 **112/112**（新增 I 族 20 条：11 mark / 8 no-taint / 1 suppressed）
+- fr-007 pre 5 / post 0、fr-016 pre 7 / post 0 **均维持**
+- 定向用例 **102 passed**（本这一族 21 条：12 正 9 负）
+- TS 盲测 109 项目 / perFunction **3165 条**：**LOST 0 / ADDED 11**（全是新增 I 族那
+  11 条本该标的），基线 3152 条零漂移
+- tsc 零错误
+
+### 仍未做
+
+- getter / computed 属性承载的 helper（`get x() {…}` 无形参，本身也进不了名录；
+  带形参的 computed 名 `["to" + "Path"](n)` 认不出宿主，一律不收）
+- 同名 helper 的**形参表不一致**时不能按位合并 return 表达式，只保留依赖集并集
+  （这是故意的 —— 把 A 的形参名代进 B 的 return 是错的）
+
+---
+
+## 十五、C4i：可判定分支的扩展 + helper 载体的扩展（2026-09-21）
+
+### 起点：备忘只覆盖了一半
+
+备忘挂着两条（getter/computed、常量代入扩展到短路与模板串）。按 R17 先写探针，19 个
+形状跑完：真缺口六个，备忘里只有三条对得上，**柯里化与 rest 两条备忘里根本没有**；
+而备忘列的 getter 实测**不是缺口**（无形参 ⇒ 判据①本就不成立）。
+
+| 形状 | 实测 | 结论 |
+|---|---|---|
+| 短路 `\|\|` / `&&` / `??` | `viaOr(k, "fixed.md")` 误标 | 真误报 |
+| 模板串内嵌三元 | `viaTpl(k, true)` 误标 | 真误报 |
+| 柯里化 `withExt(".md")(k)` | 不标 | 真漏报（备忘未列） |
+| namespace 内函数声明 | `P.toPath(k)` 不标 | 真漏报 |
+| rest 形参 | `joinAll("out", k)` 不标 | 真漏报（备忘未列） |
+| IIFE 定义 / 计算属性名 | 不标 | 真漏报 |
+| getter | 不标 | **不是缺口** |
+
+### 精度侧：可判定分支的扩展
+
+短路运算符与三元同形，只是判据从 cond 换成**左操作数的真假**：
+
+```
+a || b   左为真  ⇒ 取左（右支根本不执行）
+a && b   左为真  ⇒ 取右
+a ?? b   左非空  ⇒ 取左
+```
+
+只认**最左边**的顶层运算符（JS 求值从左到右，且 `??` 与 `\|\|`/`&&` 混用必须加括号，
+加了括号就不是顶层了）。`??` 的判据是「非空」不是「真」，两套语义分开实现
+（`notNullish` vs `truthOf`）。
+
+模板串的 `${...}` 是独立表达式：`` `${flag ? "fixed" : n}.md` `` 里的三元，折叠必须能
+进去 —— 现代代码里这种写法比裸三元更常见。
+
+### 召回侧：四个新载体
+
+**柯里化。** `withExt(ext)(n)` 真正塑形的是被返回出来的**内层**函数。收集时识别
+「return 箭头 / 函数表达式」，三条判据落在内层（形参集 = 两层并集）；调用点把
+`NAME(a)(b)` 按两层实参代入后**原地摊开**：
+
+```
+withExt(".md")(k)   ⇒   k + ".md"
+withExt(k)("name")  ⇒   "name" + k
+dropExt(".md")(k)   ⇒   "fixed.md"      ← 丢形参的内层摊开后是常量 ⇒ 自然不传播
+```
+
+摊开后的串直接参与污点检测，C4f/C4h 的收窄机制不用改就能接上。外层名也照常发布
+（闭包会捕获外层实参，`const g = withExt(k)` 同样是污的），`rets` 留空 ⇒ 调用点折叠
+自动退回「全部依赖」。
+
+**namespace。** `sf.getFunctions()` 取不到 namespace 里的函数 ⇒ 改遍历声明节点。只收
+顶层 / namespace 链上的：函数体内嵌套声明的作用域与调用点不同，按同一裸名发布会
+张冠李戴。限定名 `P.toPath` 与裸名同时登记是安全的 —— `takenNames` 先到先得，一个
+名字只会落到一处定义上。
+
+**rest 形参。** 它吃掉的是**一批**实参，不是一位。原先按位对齐会把第二位当成「越界」
+抹掉：`joinAll("out", k)` 的 `k` 被当成多余的实参丢掉 ⇒ 漏报。现在 rest 位吃掉末尾
+所有位，且常量代入时**跳过** rest 位（代单个实参进去是错的）。
+
+**IIFE / 计算属性名。** `(() => (n) => …)()` 的初值是调用不是箭头，真正的 helper 在
+返回值里（declText 仍取整条 IIFE ⇒ sink 检查照旧覆盖）。`{ [KEY]: (n) => … }` 的属性名
+只有 KEY 是**模块级字面量常量**时才解 —— 解不出就不登记，与「看不见就不传播」同一条
+政策。
+
+### 又一条「用例自己写错了」
+
+初版把「属性名算不出来」的 `DynBox` 和同名可解的 `Box` 放进同一个项目，期望 unmarked
+却实测 mark。机制没错：成员调用位 `.name(` 的匹配**本就与宿主无关**（C4g 的保守策略），
+`Box.toPath` 登记之后 `DynBox.toPath` 必然被顺带命中。
+
+⇒ 写负对照前必须先确认「不标」到底是因为**哪一个机制**不成立，否则测的是别的机制。
+
+### 实现坑三条
+
+1. **`substituteParams` 把模板串整段跳过了** —— 折叠逻辑写对了也没用，`${flag ? …}` 里
+   的 flag 根本没被代进去。模板串要按 `${}` 逐段递归代入，字面量部分照抄。
+2. **ts-morph 的两层包装**：`namespace P {…}` 里函数的父节点是 **ModuleBlock**
+   （ModuleDeclaration 在上一层）；`(() => (n) => …)()` 里被括号包住的不止内层箭头，
+   连 callee 都是 `ParenthesizedExpression`。两处都得脱（`unparen`）。
+3. 生成器里模板串内写 `${}` / 反引号要转义，否则 esbuild 的报错指向**文件末尾**，
+   很容易误判成别处的语法错。
+
+### 反向验证（五刀 + 两处单独退回）
+
+| 刀 | 改动 | 转红 |
+|---|---|---|
+| 1 | `topLevelLogical` 恒返回 null | emitOrTakeLeft / emitAndTakeLeft / emitNullishTakeLeft |
+| 2 | `foldTemplateSubsts` 恒返回原串 | emitTplConst |
+| 3 | `currySpecOf` 恒返回 null | emitCurrySecond / emitCurryFirst / emitCurryFn |
+| 4 | namespace 不发限定名 | emitNsPath |
+| 5 | `paramIndexOf` 退回按位 | emitRestJoin |
+
+IIFE 解包与计算属性名各自退回时只转自己那一条（`emitIifePath` / `emitComputed`）。
+七处互不相干 ⇒ 归因干净。
+
+### 验收
+
+- taintpath 闸门 **138/138**（新增 J 族 26 条：13 mark / 12 no-taint / 1 suppressed）
+- fr-007 pre 5 / post 0、fr-016 pre 7 / post 0 **均维持**
+- 定向用例 **204 passed / 6 文件**（C4i 组 26 条：11 正 15 负）
+- TS 盲测：见 CHANGELOG 3.7.45
+- tsc 零错误
+
+### 仍未做
+
+- getter / computed 属性里**带形参**的 helper（`get f() { return (n) => … }`）—— 柯里化
+  那套机制理论上能覆盖，但 getter 本身的收集路径还没开
+- 短路折叠目前只认**字面量**左值：`a || b` 里 a 是 `x === 1` 这种可判定表达式时仍判
+  不出（退回保守）
+- 柯里化只做两跳；三跳 `f(a)(b)(c)` 与「返回对象再取方法」的形状尚未支持

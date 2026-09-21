@@ -23,7 +23,9 @@
     "2026-09-20 第三次：新增 taintpath_F 族（C4e helper 的现代写法）。这是 R7 第五次 —— generated 全量 .ts 里 `export const X = (…) =>` 0 处，A–E 族对本能力空过。F 族写法上有一条硬约束：sink 实参里不得直接出现污点变量，污点只能经 helper 返回值流进 sink；否则命中「实参含污点名」的兜底判定，所有用例会假通过（2026-09-20 第一版探针就是这么全绿的，P/N 对照一次性全 MARK）。另记两条勘误：备忘里说的 toSlug 缺口（`p.trim().toLowerCase()`）实测早就能穿透；reduce 首参不绑也确认按设计生效。",
     "2026-09-20 C4e：taintpath_D/emitHelperFixed 由 known-gap 转 mark —— 「helper 的 return 引用模块级字面量常量」这条漏报已闭合。同一族的 emitHelperWithSink（helper 体内有 sink）仍是 known-gap，未随本轮放宽。",
     "2026-09-20 第四次：新增 taintpath_G 族（C4f 精度收窄），这是 R7 第一次朝【反方向】咬 —— 前面四轮都是「语料零覆盖 ⇒ 门空过」，这一轮语料零覆盖照样空过，但更该防的是另外两件事：① 收窄收过头把真阳性也收掉（LOST）；② 那批 no-taint 用例其实空转（它们本来就不该标）。所以 G 族的反向验证按 R14 多切一刀：把依赖分析退回「全部形参都算依赖」，7 条 no-taint 必须立刻转红。另记：G 族 12 条里 4 mark / 7 no-taint / 1 suppressed，其中 emitSwapAligned 与 emitSwapMisaligned 是一对 —— 只有按位置对齐、而不是「实参里出现污点名就算」，才能把这两条分开。",
-    "2026-09-20 第五次：新增 taintpath_H 族（C4g helper 的载体）。两条值得记：① R12 第四次生效 —— 备忘里列的『依赖分析深层形态』（三元返回、默认参、多 return）实测本来就是通的，只有解构形参真漏；对象字面量方法 / 类方法（含实例与静态）才是本轮主体。② 实例方法那条走了个折中：宿主是变量 (`r.inst(k)`) 时限定名对不上，靠【方法名全项目唯一 + 成员调用位 `.inst(` 】接上。唯一性是 R11 的替代品 —— 不存在同名方法就不可能张冠李戴；同名方法出现两次时这一律不登记，宁可漏报。另有一条刻意不做的缺口：常量实参代入（`viaTernaryDrop(k, true)` 返回常量分支），那需要常量传播，超出本轮范围。"
+    "2026-09-20 第五次：新增 taintpath_H 族（C4g helper 的载体）。两条值得记：① R12 第四次生效 —— 备忘里列的『依赖分析深层形态』（三元返回、默认参、多 return）实测本来就是通的，只有解构形参真漏；对象字面量方法 / 类方法（含实例与静态）才是本轮主体。② 实例方法那条走了个折中：宿主是变量 (`r.inst(k)`) 时限定名对不上，靠【方法名全项目唯一 + 成员调用位 `.inst(` 】接上。唯一性是 R11 的替代品 —— 不存在同名方法就不可能张冠李戴；同名方法出现两次时这一律不登记，宁可漏报。另有一条刻意不做的缺口：常量实参代入（`viaTernaryDrop(k, true)` 返回常量分支），那需要常量传播，超出本轮范围。",
+    "2026-09-20 第六次：新增 taintpath_I 族（C4h 名录之外的三处收口）。这一轮是 R12 第四次生效的另一种样子 —— 动工前先写探针，备忘里的三个候选里只有两个是真缺口（同名方法两处、属性承载的箭头），外加一个探针顺手挖出来的**既有缺陷**：方法名唯一但三条判据不成立时，旧代码在确证之前就把裸名登记进成员名录，于是 `registry[n]` 这类成员调用位被当成塑形 ⇒ 误标。另一条要紧的教训是把 R13 从语料扩展到了**定向用例**：C4g 组的静态类方法用例原本叫 `Renderer.stat`，而 stat 就在 fs sink 名单里 ⇒ 调用点被 sink 兜底直接标中，那条用例一直是假通过（改名 toFile 后才真的在测 helper 传播）。",
+    "2026-09-21 第七次：新增 taintpath_J 族（C4i）—— R17 第二次生效，且这次探针挖出的比备忘多：备忘只列了 getter/computed 与常量代入扩展，探针跑完确认的真缺口是六个（短路折叠、模板串内嵌、柯里化、namespace、rest、IIFE + 计算属性名），其中柯里化与 rest 都不在备忘里。另有一条**用例本身写错**：初版把「属性名算不出来」的 DynBox 和同名可解 helper 放在同一个项目里 —— 成员调用位 `.name(` 的匹配本就与宿主无关（C4g 的保守策略），于是那条负对照必然被顺带命中。教训：写负对照前先确认「不标」到底是因为哪一个机制不成立。"
   ],
   "projects": {
     "taintpath_A": [
@@ -593,7 +595,287 @@
         "expect": "suppressed",
         "why": "C4g × G2：召回放宽到方法与解构形参之后守卫仍压得住。stamp 不含任何 G-C 后缀 ⇒ 压制依据只能是被调用方自身证据（tier-0）；正对照 = emitObjMethod"
       }
+    ],
+    "taintpath_I": [
+      {
+        "fn": "emitFlagFalse",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4h-①：viaFlag(k, false) —— 走到含形参的那支；负对照 = emitFlagTrue"
+      },
+      {
+        "fn": "emitFlagTrue",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4h-①：viaFlag(k, true) —— 本次调用的返回值就是字面量 'fixed.md'，名录级依赖集收不住这种个案；正对照 = emitFlagFalse"
+      },
+      {
+        "fn": "emitEitherWay",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4h-①：eitherWay 两支都含形参 —— 收精度不许收过头"
+      },
+      {
+        "fn": "emitPickHit",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4h-①：mode === \"raw\" 命中 ⇒ 返回形参"
+      },
+      {
+        "fn": "emitPickMiss",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4h-①：mode === \"raw\" 未命中 ⇒ 走常量支；正对照 = emitPickHit"
+      },
+      {
+        "fn": "emitFlagNested",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4h-①：p.join(\"out\", viaFlag(k, true)) —— 折叠必须作用在嵌套的内层"
+      },
+      {
+        "fn": "emitWrapFlagTrue",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4h-①：隔着一层 helper 的常量（wrapFlag(n, flag) = viaFlag(n, flag)）；正对照 = emitWrapFlagFalse"
+      },
+      {
+        "fn": "emitWrapFlagFalse",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4h-①：与 emitWrapFlagTrue 镜像 —— 常量换变量立刻转红，归因才干净"
+      },
+      {
+        "fn": "emitRuntimeFlag",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4h-① 保守侧：实参是变量不是常量 ⇒ 判不出 ⇒ 一律照标"
+      },
+      {
+        "fn": "emitSameNameA",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4h-②：同名成员两处均塑形 ⇒ 第一个宿主也接得上（旧规则要求全项目唯一，第二处必漏）"
+      },
+      {
+        "fn": "emitSameNameB",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4h-②：同组的另一个宿主 —— 合并是对称的"
+      },
+      {
+        "fn": "emitSameNameRejected",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4h-②：同名一处非塑形 ⇒ 整组不放行（R11 不变量：必须在每种实现上都成立）；正对照 = emitSameNameA"
+      },
+      {
+        "fn": "emitBothDrop",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4h-②：同名两处都丢形参 ⇒ 合并后的依赖集按位取并集仍为空 ⇒ 精度不许丢"
+      },
+      {
+        "fn": "emitPropArrow",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4h-③：`{ toName: (n) => … }` 既不是方法声明也不是变量声明 —— 旧名录整片漏"
+      },
+      {
+        "fn": "emitNestedPropArrow",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4h-③：限定名要能沿 owner 链一路拼到最外层变量"
+      },
+      {
+        "fn": "emitPatchedArrow",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4h-③：`Obj.method = (n) => …` 这种后挂写法同属一族"
+      },
+      {
+        "fn": "emitPropArrowDrop",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4h-③：属性箭头丢弃形参 —— 召回放宽到新载体，收窄要跟得上；正对照 = emitPropArrow"
+      },
+      {
+        "fn": "emitNonShaperMember",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4h 缺陷回归门：判据不成立的成员，其成员调用位不许进名录（旧代码在确证之前就登记裸名 ⇒ 误标）；正对照 = emitShapedMember"
+      },
+      {
+        "fn": "emitShapedMember",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4h：与上一条镜像 —— 换成纯塑形版立刻转红"
+      },
+      {
+        "fn": "emitGuarded",
+        "file": "src/handler.ts",
+        "expect": "suppressed",
+        "why": "C4h × G2：召回再放宽一轮，守卫仍压得住。stamp 不含任何 G-C 后缀 ⇒ 压制依据只能是被调用方自身证据（tier-0）；正对照 = emitPropArrow"
+      }
+    ],
+    "taintpath_J": [
+      {
+        "fn": "emitOrTakeLeft",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4i-①：|| 左为真值 ⇒ 返回左值常量；正对照 = emitOrTakeRight"
+      },
+      {
+        "fn": "emitOrTakeRight",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4i-①：|| 左为空串（falsy）⇒ 真的走到含形参的那支"
+      },
+      {
+        "fn": "emitAndTakeLeft",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4i-①：&& 左为假值 ⇒ 短路在左值就结束；正对照 = emitAndTakeRight"
+      },
+      {
+        "fn": "emitAndTakeRight",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4i-①：&& 左为真值 ⇒ 走右支"
+      },
+      {
+        "fn": "emitNullishTakeLeft",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4i-①：?? 左非 null ⇒ 取左支（判据是「非空」不是「真」，两种语义不能混）；正对照 = emitNullishTakeRight"
+      },
+      {
+        "fn": "emitNullishTakeRight",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4i-①：?? 左为 null ⇒ 取右支"
+      },
+      {
+        "fn": "emitOrRuntime",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4i-① 保守侧：实参是变量不是常量 ⇒ 判不出 ⇒ 一律照标，不许假装看得懂"
+      },
+      {
+        "fn": "emitTplConst",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4i-②：模板串里的三元被常量钉死；正对照 = emitTplFlow"
+      },
+      {
+        "fn": "emitTplFlow",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4i-②：折叠要能进模板串的插值内部"
+      },
+      {
+        "fn": "emitCurrySecond",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4i-③：柯里化 —— 真正塑形的是被返回出来的内层函数"
+      },
+      {
+        "fn": "emitCurryFirst",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4i-③：污点在第一跳（被闭包捕获）同样算流进去"
+      },
+      {
+        "fn": "emitCurryFn",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4i-③：函数声明写法的柯里化（return 箭头不只出现在箭头 helper 上）"
+      },
+      {
+        "fn": "emitCurryDrop",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4i-③：内层丢弃形参 ⇒ 摊开后是常量；正对照 = emitCurrySecond"
+      },
+      {
+        "fn": "emitCurryConst",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4i-③：两跳都是常量 ⇒ 根本没有污点进来"
+      },
+      {
+        "fn": "emitNsPath",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4i-④：namespace 内的函数声明（旧收集走 sf.getFunctions() ⇒ 整片漏）"
+      },
+      {
+        "fn": "emitNsDrop",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4i-④：限定名也要走依赖分析；正对照 = emitNsPath"
+      },
+      {
+        "fn": "emitNsLeak",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4i-④：体内有 sink ⇒ 判据③不放行 —— 载体换了不等于放水"
+      },
+      {
+        "fn": "emitRestJoin",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4i-⑤：rest 形参吃掉一批实参，按位截断会把第二位当成越界抹掉；正对照 = emitRestDrop"
+      },
+      {
+        "fn": "emitRestDrop",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4i-⑤：rest 但丢弃 ⇒ 召回放宽后精度不许丢"
+      },
+      {
+        "fn": "emitIifePath",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4i-⑥：IIFE 定义 —— 初值是调用不是箭头，真正的 helper 在返回值里"
+      },
+      {
+        "fn": "emitIifeDrop",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4i-⑥：IIFE 内丢弃形参；正对照 = emitIifePath"
+      },
+      {
+        "fn": "emitIifeLeak",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4i-⑥：IIFE 体内有 sink（declText 取的是整条 IIFE ⇒ sink 检查仍覆盖得到）"
+      },
+      {
+        "fn": "emitComputed",
+        "file": "src/handler.ts",
+        "expect": "mark",
+        "why": "C4i-⑦：计算属性名可解（KEY 是模块级字面量常量）"
+      },
+      {
+        "fn": "emitComputedDrop",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4i-⑦：同一载体但丢弃形参；正对照 = emitComputed"
+      },
+      {
+        "fn": "emitComputedDyn",
+        "file": "src/handler.ts",
+        "expect": "no-taint",
+        "why": "C4i-⑦：属性名算不出来 ⇒ 不登记（本项目里没有别处登记过 toPath 这个成员名）"
+      },
+      {
+        "fn": "emitGuarded",
+        "file": "src/handler.ts",
+        "expect": "suppressed",
+        "why": "C4i × G2：召回再放宽一轮，守卫仍压得住。stamp 不含任何 G-C 后缀 ⇒ 压制依据只能是被调用方自身证据（tier-0）；正对照 = emitCurrySecond"
+      }
     ]
   },
-  "updated": "2026-09-20"
+  "updated": "2026-09-21"
 }

@@ -1,4 +1,4 @@
-import { Project, Node, FunctionDeclaration, VariableStatement, ArrowFunction, MethodDeclaration, Type, CallExpression, SourceFile } from "ts-morph";
+import { Project, Node, FunctionDeclaration, FunctionExpression, VariableStatement, ArrowFunction, MethodDeclaration, Type, CallExpression, SourceFile } from "ts-morph";
 import * as path from "path";
 import * as fs from "fs";
 import * as ts from "typescript";
@@ -711,6 +711,22 @@ const SHAPER_ALLOWED_FREE_IDENTS = new Set([
   "path", "sep", "undefined", "null", "true", "false", "String", "Number",
 ]);
 
+/**
+ * C4j：**运算符关键字**——本身不携带数据，出现在 return 表达式里不该让整条 helper 落选。
+ *
+ * 缺陷实证（2026-09-21 探针 G1/G2）：`(n, m) => typeof m === "string" || n + ".md"`
+ * 整条判据不通过 —— 单趟标识符扫描把 `typeof` 当成"未知的自由标识符"给否了。
+ * 后果不是"少收一点精度"，而是**整个 helper 不进名录** ⇒ 调用点拿不到任何证据 ⇒ 漏报。
+ * 差别只在 typeof：G2 同形去掉 typeof 后 MARKED，G1 不标。
+ *
+ * `this` / `super` 刻意**不放行**：它们是接收者，可能携带数据（`this.prefix + n`），
+ * 属于另一个话题（要不要把接收者纳入证据），不能靠"关键字"这条口子捎带进来。
+ */
+const SHAPER_ALLOWED_KEYWORDS = new Set([
+  "typeof", "void", "delete", "in", "instanceof", "keyof", "as", "satisfies",
+  "is", "asserts", "readonly", "infer", "new", "await", "yield", "of",
+]);
+
 /** 允许出现在调用位的值转换函数（不改变路径语义） */
 const VALUE_CONVERTER_CALLS = new Set(["String", "Number", "Boolean"]);
 
@@ -759,15 +775,23 @@ function isPureShaperExpr(
     }
     // 自由标识符：必须是自己的形参、语言级常量白名单，或**已确证的字面量常量 / path 别名**
     if (params.has(n) || SHAPER_ALLOWED_FREE_IDENTS.has(n)) continue;
+    if (SHAPER_ALLOWED_KEYWORDS.has(n)) continue; // C4j：运算符关键字不携带数据
     if (extraIdents && extraIdents.has(n)) continue;
     return false;
   }
   return true;
 }
 
-/** 收集模块级（top-level）**字面量**常量名 —— helper 的 return 引用它们仍是纯塑形 */
-function moduleLiteralConstNames(project: Project): Set<string> {
-  const out = new Set<string>();
+/**
+ * 收集模块级（top-level）**字面量**常量：名字 → 字面量文本（引号已脱）。
+ *
+ * 两个用途：
+ *   ① helper 的 return 引用它们仍是纯塑形（C4e）；
+ *   ② C4i：`{ [KEY]: (n) => … }` 这种计算属性名，只有 KEY 是字面量常量才解得
+ *      出来 —— 解不出一律不登记（与「看不见就不传播」同一条政策）。
+ */
+function moduleConstTexts(project: Project): Map<string, string> {
+  const out = new Map<string, string>();
   for (const sf of project.getSourceFiles()) {
     for (const vd of sf.getVariableDeclarations()) {
       // 只要模块作用域：VariableStatement 的父节点必须是 SourceFile
@@ -783,7 +807,7 @@ function moduleLiteralConstNames(project: Project): Set<string> {
         Node.isNumericLiteral(init) ||
         init.getKind() === ts.SyntaxKind.TrueKeyword ||
         init.getKind() === ts.SyntaxKind.FalseKeyword;
-      if (isLiteral) out.add(vd.getName());
+      if (isLiteral) out.set(vd.getName(), init.getText().replace(/^["'`]|["'`]$/g, ""));
     }
   }
   return out;
@@ -814,17 +838,49 @@ function pathModuleAliases(project: Project): Set<string> {
   return out;
 }
 
-/** 一个纯塑形 helper 的形参表（有序）+「返回值真正依赖哪些形参」+ 原始 return 表达式 */
-type ShaperInfo = { params: string[]; deps: Set<string>; rets: string[] };
+/**
+ * 柯里化 / 工厂形态 helper 的调用链。
+ *
+ * C4i 只会两跳（外层吃掉第一批实参、返回的内层再吃掉第二批）。C4j 把它推广成
+ * **一串跳**，每跳声明自己吃哪批实参、以及这一跳是普通调用还是成员调用：
+ *
+ *   `const lvl3 = (a) => (b) => (n) => n + a + b`
+ *     outerParams=[a]，hops=[call[b], call[n]]
+ *   `const factory = (ext) => ({ toPath: (n) => n + ext })`
+ *     outerParams=[ext]，hops=[member toPath [n]]
+ *
+ * `allParams` = 所有层次形参的并集，给 isPureShaperExpr 判据用；
+ * `rets` = 最内层（真正塑形那一层）的 return 表达式。
+ */
+type CurryHop = { kind: "call" | "member"; name: string; params: string[] };
+type CurrySpec = {
+  outerParams: string[];
+  hops: CurryHop[];
+  allParams: string[];
+  rets: string[];
+};
+
+/**
+ * 一个纯塑形 helper 的形参表（有序）+「返回值真正依赖哪些形参」+ 原始 return 表达式。
+ *
+ * restAt —— C4i：形参表里 rest 形参（`...parts`）的位置，没有则 -1。rest 形参
+ *           吃掉**从它开始的所有剩余实参**（位置对齐不能按位截断，否则
+ *           `joinAll("out", k)` 会把 k 当成「越界的实参」抹掉 ⇒ 漏报）。
+ */
+type ShaperInfo = {
+  params: string[]; deps: Set<string>; rets: string[]; restAt: number;
+};
 /**
  * names       —— 可按裸调用位匹配的（`withExt(` / `Util.toPath(`）
  * memberNames —— 只按成员调用位匹配的（`.toPath(`）：对象是哪个不确定，
  *                只有该方法名在全项目唯一时才登记，避免同名方法张冠李戴（R11）
+ * curried     —— C4i：柯里化 helper（`withExt(ext)(n)`），按名字索引
  */
 type ShaperTable = {
   names: Set<string>;
   memberNames: Set<string>;
   info: Map<string, ShaperInfo>;
+  curried: Map<string, CurrySpec>;
 };
 
 /**
@@ -843,11 +899,36 @@ function paramNamesOf(p: { getNameNode(): Node }): string[] {
 }
 
 /**
+ * 属性名：普通标识符 / 字符串字面量直接取；**计算属性名** `[KEY]` 只有在 KEY 是
+ * 模块级字面量常量时才解（C4i）。解不出返回 null —— 认不出的一律不登记。
+ */
+function propertyNameOf(
+  pa: Node & { getNameNode(): Node },
+  constTexts: Map<string, string>
+): string | null {
+  const nn = pa.getNameNode();
+  if (Node.isIdentifier(nn)) return nn.getText();
+  if (Node.isStringLiteral(nn) || Node.isNoSubstitutionTemplateLiteral(nn)) {
+    return nn.getText().replace(/^["'`]|["'`]$/g, "");
+  }
+  if (Node.isComputedPropertyName(nn)) {
+    const e = nn.getExpression();
+    // `const KEY = "toPath"; … { [KEY]: (n) => … }` —— KEY 的值必须看得见；
+    // `[key()]` 这种算不出来的，宁可整个不收（探针 K2 守的就是这条）。
+    if (Node.isIdentifier(e)) return constTexts.get(e.getText()) ?? null;
+  }
+  return null;
+}
+
+/**
  * 方法声明的宿主限定名：`const Util = { toPath(){} }` ⇒ "Util"、
  * `const Cfg = { inner: { toPath(){} } }` ⇒ "Cfg.inner"、`class Paths {…}` ⇒ "Paths"。
  * 取不出来就返回 null —— 认不出宿主的宁可不登记（保守侧）。
  */
-function ownerQualifier(md: Node & { getParent(): Node | undefined }): string | null {
+function ownerQualifier(
+  md: Node & { getParent(): Node | undefined },
+  constTexts: Map<string, string> = new Map()
+): string | null {
   const parent = md.getParent();
   if (!parent) return null;
   if (Node.isClassDeclaration(parent)) return parent.getName() ?? null;
@@ -858,10 +939,8 @@ function ownerQualifier(md: Node & { getParent(): Node | undefined }): string | 
     const up = cur.getParent();
     if (!up) return null;
     if (Node.isPropertyAssignment(up)) {
-      const key = up.getNameNode?.();
-      const keyName = key
-        ? key.getText().replace(/^["'`]|["'`]$/g, "")
-        : up.getChildAtIndex(0).getText().replace(/^["'`]|["'`]$/g, "");
+      const keyName = propertyNameOf(up, constTexts);
+      if (keyName === null) return null;
       parts.unshift(keyName);
       cur = up.getParent();
       if (!cur) return null;
@@ -872,6 +951,89 @@ function ownerQualifier(md: Node & { getParent(): Node | undefined }): string | 
       return parts.join(".");
     }
     return null;
+  }
+  return null;
+}
+
+/**
+ * C4i：函数声明的命名空间限定名 —— `namespace P { export function toPath(){} }` ⇒ "P"
+ * （嵌套 namespace 拼成 "A.B"）。只认**纯 namespace 链**：函数套函数那种 helper
+ * 作用域与调用点不同，按同一名字发布会张冠李戴，一律返回 null 交给调用方跳过。
+ */
+function moduleQualifier(fn: FunctionDeclaration): string | null {
+  const parts: string[] = [];
+  let cur: Node = fn;
+  for (let guard = 0; guard < 6; guard++) {
+    const up = cur.getParent();
+    if (!up) return null;
+    // 注意（实测）：`namespace P { export function f(){} }` 里函数的父节点是
+    // **ModuleBlock**（namespace 的体），ModuleDeclaration 在它的上一层。
+    if (Node.isModuleBlock(up)) {
+      const decl = up.getParent();
+      if (!decl || !Node.isModuleDeclaration(decl)) return null;
+      const n = decl.getName();
+      if (!n) return null;
+      parts.unshift(n);
+      cur = decl;
+      continue;
+    }
+    if (Node.isModuleDeclaration(up)) {
+      const n = up.getName();
+      if (!n) return null;
+      parts.unshift(n);
+      cur = up;
+      continue;
+    }
+    if (Node.isSourceFile(up)) return parts.length > 0 ? parts.join(".") : null;
+    return null; // 函数体内的嵌套声明：作用域不同，不收
+  }
+  return null;
+}
+
+/**
+ * 剥掉包在**函数体外面的**那几层壳，露出真正的箭头 / 函数表达式：
+ * 括号 `((n) => …)`、类型断言 `((n) => …) as Fn`、`satisfies Fn`、`<Fn>(…)`。
+ *
+ * C4j 补后三种。实测（探针 F3b/F3c）：`export const toPath = ((n) => n + ".md")
+ * satisfies Fn` 与 `{ toPath: ((n) => n + ".md") as any }` 都不传播 ——
+ * 旧代码只认「初值就是箭头」，断言把它们包了一层，整族漏。
+ */
+function unwrapFns(n: Node | undefined): Node | undefined {
+  let cur = n;
+  for (let i = 0; i < 6 && cur; i++) {
+    if (Node.isParenthesizedExpression(cur)) { cur = cur.getExpression(); continue; }
+    if (Node.isAsExpression(cur)) { cur = cur.getExpression(); continue; }
+    if (Node.isSatisfiesExpression(cur)) { cur = cur.getExpression(); continue; }
+    if (Node.isTypeAssertion(cur)) { cur = cur.getExpression(); continue; }
+    break;
+  }
+  return cur;
+}
+
+/**
+ * C4i：变量初值承载的 helper 体。除箭头 / 函数表达式外，再解一层 IIFE ——
+ * `const toPath = (() => (n) => n + ".md")();` 的初值是**调用**不是箭头，
+ * 真正的 helper 是被 IIFE 返回出来的那个内层箭头（旧代码整条族漏）。
+ */
+function functionLikeOf(init: Node): ArrowFunction | FunctionExpression | null {
+  // 实测：`(() => (n) => n + ".md")()` 里被括号包住的**不止**内层箭头 ——
+  // 连被调用的 callee 都是 ParenthesizedExpression。两处都得脱。
+  const base = unwrapFns(init);
+  if (!base) return null;
+  if (Node.isArrowFunction(base) || Node.isFunctionExpression(base)) return base;
+  if (Node.isCallExpression(base)) {
+    const callee = unwrapFns(base.getExpression());
+    if (!Node.isArrowFunction(callee) && !Node.isFunctionExpression(callee)) return null;
+    const b = callee.getBody();
+    if (!Node.isBlock(b)) {
+      // 简洁体：`(() => (n) => n + ".md")()` —— 括号包着也算（unparen）
+      const e = unwrapFns(b);
+      return e && (Node.isArrowFunction(e) || Node.isFunctionExpression(e)) ? e : null;
+    }
+    for (const rs of b.getDescendantsOfKind(ts.SyntaxKind.ReturnStatement)) {
+      const e = unwrapFns(rs.getExpression());
+      if (e && (Node.isArrowFunction(e) || Node.isFunctionExpression(e))) return e;
+    }
   }
   return null;
 }
@@ -897,6 +1059,193 @@ function splitTopLevelArgs(argText: string): string[] {
   }
   if (cur.trim() !== "" || out.length > 0) out.push(cur);
   return out;
+}
+
+/**
+ * C4i：形参表里 rest 形参（`...parts`）的位置；没有返回 -1。
+ * rest 形参对应的是【一批】实参，不是一位 —— 位置对齐必须让它吃掉末尾所有位。
+ */
+function restIndexOf(ps: Array<{ isRestParameter(): boolean }>): number {
+  return ps.findIndex((p) => p.isRestParameter());
+}
+
+/** 实参位 ⇒ 形参位（rest 形参吃掉从它开始的剩余位） */
+function paramIndexOf(si: ShaperInfo, argIndex: number): number {
+  return si.restAt >= 0 && argIndex >= si.restAt ? si.restAt : argIndex;
+}
+
+/**
+ * C4i/C4j：柯里化 helper —— 函数体【返回】另一个函数
+ * （`(ext) => (n) => n + ext`、`(a) => (b) => (n) => n + a + b`）。
+ * 被调用的不是最外层，而是它一路返回出来的最内层；真正塑形在那里，
+ * 外层只负责捕获自己那一批实参。返回的不是函数（含返回对象字面量的工厂形态）
+ * 一律返回 null，交给 currySpecsOf 的另一条路。
+ */
+function curryChainOf(outerParams: string[], body: Node): CurrySpec | null {
+  const ret = returnedValueOf(body);
+  if (!ret) return null;
+  if (!Node.isArrowFunction(ret) && !Node.isFunctionExpression(ret)) return null;
+
+  const hops: CurryHop[] = [];
+  let cur: Node | undefined = ret;
+  for (let depth = 0; depth < 4; depth++) {
+    if (!cur) break;
+    if (!Node.isArrowFunction(cur) && !Node.isFunctionExpression(cur)) return null;
+    const fbody = cur.getBody();
+    if (!fbody) return null;
+    const params = cur.getParameters().flatMap(paramNamesOf).filter(Boolean);
+    hops.push({ kind: "call", name: "", params });
+    const next = returnedFunctionOf(fbody);
+    if (!next) {
+      const rets = returnExprsOf(fbody);
+      if (rets.length === 0) return null;
+      // 内层无形参 ⇒ 没有「经内层实参进来」的污点，外层按普通 helper 处理
+      if (hops[hops.length - 1].params.length === 0) return null;
+      const allParams = new Set(outerParams);
+      for (const h of hops) for (const p of h.params) allParams.add(p);
+      return { outerParams, hops, allParams: [...allParams], rets };
+    }
+    cur = next;
+  }
+  return null;
+}
+
+/**
+ * C4j：一个函数体对应的全部调用链。
+ *   - 「返回函数」形态 ⇒ 0 或 1 条（沿返回值爬到最内层）；
+ *   - 「返回对象字面量」形态 ⇒ 每个**函数属性**各一条（工厂 / builder 的常态，
+ *     `factory(".md").toPath(k)` 里的 `toPath` 才是塑形那一层）。
+ * 属性名算不出（计算属性名而常量不可见）或无形参 / 无返回的，跳过该条。
+ */
+function currySpecsOf(outerParams: string[], body: Node): CurrySpec[] {
+  const ret = returnedValueOf(body);
+  if (!ret) return [];
+  if (!Node.isObjectLiteralExpression(ret)) {
+    const one = curryChainOf(outerParams, body);
+    return one ? [one] : [];
+  }
+  const specs: CurrySpec[] = [];
+  for (const prop of ret.getProperties()) {
+    let name: string | null = null;
+    let fn: ArrowFunction | FunctionExpression | MethodDeclaration | undefined;
+    if (Node.isPropertyAssignment(prop)) {
+      name = prop.getName().replace(/^["'`]|["'`]$/g, "");
+      const inner = unwrapFns(prop.getInitializer());
+      if (inner && (Node.isArrowFunction(inner) || Node.isFunctionExpression(inner))) {
+        fn = inner;
+      }
+    } else if (Node.isMethodDeclaration(prop)) {
+      name = prop.getName();
+      fn = prop;
+    }
+    if (!fn || !name || !/^[A-Za-z_$][\w$]*$/.test(name)) continue;
+    const fbody = fn.getBody();
+    if (!fbody) continue; // 重载签名 / declare
+    const params = fn.getParameters().flatMap(paramNamesOf).filter(Boolean);
+    if (params.length === 0) continue; // 判据①
+    const rets = returnExprsOf(fbody);
+    if (rets.length === 0) continue;
+    specs.push({
+      outerParams,
+      hops: [{ kind: "member", name, params }],
+      allParams: [...outerParams, ...params],
+      rets,
+    });
+  }
+  return specs;
+}
+
+/** 函数体返回出来的那个值（简洁体本身 / return 语句的表达式，都先解断言与括号） */
+function returnedValueOf(body: Node): Node | undefined {
+  if (!Node.isBlock(body)) return unwrapFns(body);
+  for (const rs of body.getDescendantsOfKind(ts.SyntaxKind.ReturnStatement)) {
+    const e = unwrapFns(rs.getExpression());
+    if (e) return e;
+  }
+  return undefined;
+}
+
+/** 函数体返回出来的那个箭头 / 函数表达式（没有则 null） */
+function returnedFunctionOf(body: Node): ArrowFunction | FunctionExpression | null {
+  if (!Node.isBlock(body)) {
+    // 箭头简洁体本身就是要返回的函数：`(ext) => (n) => n + ext`（可能被括号包住）
+    const e = unwrapFns(body);
+    return e && (Node.isArrowFunction(e) || Node.isFunctionExpression(e)) ? e : null;
+  }
+  for (const rs of body.getDescendantsOfKind(ts.SyntaxKind.ReturnStatement)) {
+    const e = unwrapFns(rs.getExpression());
+    if (e && (Node.isArrowFunction(e) || Node.isFunctionExpression(e))) return e;
+  }
+  return null;
+}
+
+/**
+ * C4i/C4j：柯里化与工厂形态的调用点展开。`withExt(".md")(k)`、`lvl4(a)(b)(c)(k)`、
+ * `factory(".md").toPath(k)` 里真正塑形的是链的**最后一跳** —— 这里按各跳的实参把
+ * 最内层 return 表达式代入后原地摊开，之后的污点检测直接看摊开后的串：
+ *   `withExt(".md")(k)` ⇒ `k + ".md"`；`factory(".md").toPath(k)` ⇒ `k + ".md"`。
+ * 丢形参的最后一跳（`(_n) => "fixed.md"`）摊开后是常量 ⇒ 自然不传播。
+ */
+function expandCurried(text: string, curried: Map<string, CurrySpec[]>): string {
+  if (curried.size === 0) return text;
+  let cur = text;
+  for (let round = 0; round < 4; round++) {
+    const next = expandCurriedOnce(cur, curried);
+    if (next === null) break;
+    cur = next;
+  }
+  return cur;
+}
+
+/** 摊开**一处**柯里化 / 工厂形态调用；没有可摊的返回 null（供调用方收敛） */
+function expandCurriedOnce(text: string, curried: Map<string, CurrySpec[]>): string | null {
+  for (const [name, specs] of curried) {
+    const re = new RegExp(`(?:^|[^\\w$.])${escapeRe(name)}\\s*\\(`, "g");
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(text)) !== null) {
+      const open1 = m.index + m[0].length - 1;
+      const close1 = matchingParen(text, open1);
+      if (close1 < 0) continue;
+      const args0 = splitTopLevelArgs(text.slice(open1 + 1, close1));
+      for (const cs of specs) {
+        const map = new Map<string, string>();
+        args0.forEach((a, i) => {
+          const p = cs.outerParams[i];
+          if (p !== undefined) map.set(p, stripOuterParens(a.trim()));
+        });
+        // 沿链一路吃掉各跳：普通跳是紧跟的 `(`，成员跳是 `.name(`
+        let cursor = close1 + 1;
+        let ok = true;
+        for (const hop of cs.hops) {
+          let j = cursor;
+          while (j < text.length && /\s/.test(text[j])) j++;
+          if (hop.kind === "member") {
+            if (text[j] === "?") j++; // 可选链 `?.toPath(`
+            if (text[j] !== ".") { ok = false; break; }
+            j++;
+            const nm = /^[A-Za-z_$][\w$]*/.exec(text.slice(j));
+            if (!nm || nm[0] !== hop.name) { ok = false; break; }
+            j += nm[0].length;
+            while (j < text.length && /\s/.test(text[j])) j++;
+          }
+          if (text[j] !== "(") { ok = false; break; }
+          const cl = matchingParen(text, j);
+          if (cl < 0) { ok = false; break; }
+          splitTopLevelArgs(text.slice(j + 1, cl)).forEach((a, i) => {
+            const p = hop.params[i];
+            if (p !== undefined && !map.has(p)) map.set(p, stripOuterParens(a.trim()));
+          });
+          cursor = cl + 1;
+        }
+        if (!ok) continue;
+        const inner = cs.rets.length === 1 ? cs.rets[0] : cs.rets.join(" + ");
+        const expanded = foldDecidableTernary(substituteParams(inner, map));
+        const nameStart = m.index + (m[0].startsWith(name) ? 0 : 1);
+        return text.slice(0, nameStart) + expanded + text.slice(cursor);
+      }
+    }
+  }
+  return null;
 }
 
 /**
@@ -959,7 +1308,10 @@ function maskNonDependentArgsOnce(
       // C4h-①：按【本次调用】重算一下哪些位置会流出去 —— 名录里的 deps 是对所有
       // 实参形状都成立的最宽结论，本次若喂了常量，可能一个都流不出来。
       const flags = callSiteKeepFlags(si, args, info, memberNames);
-      const kept = args.filter((_, i) => si.params[i] !== undefined && flags[i]);
+      const kept = args.filter((_, i) => {
+        const pi = paramIndexOf(si, i); // C4i：rest 形参吃掉剩余位
+        return si.params[pi] !== undefined && flags[pi] === true;
+      });
       if (kept.length === args.length) continue; // 每个形参都被依赖 ⇒ 无需抹
       const replacement = kept.length > 0 ? `(${kept.join(" + ")})` : `""`;
       return text.slice(0, nameStart) + replacement + text.slice(close + 1);
@@ -992,9 +1344,12 @@ function callSiteKeepFlags(
   if (si.rets.length === 0) return fallback;
   const litArgs = new Map<string, string>();
   args.forEach((a, i) => {
+    // C4i：rest 形参拿到的是【一批】实参，不等于任意一个 —— 不代，否则
+    // `parts.join("/")` 会被代成 `"out".join("/"` 从而误判「不依赖 parts」
+    if (si.restAt >= 0 && i >= si.restAt) return;
     const p = si.params[i];
     if (p === undefined) return;
-    const t = a.trim();
+    const t = stripOuterParens(a.trim());
     // 只代【字面量】—— 变量名进来不等于知道它的值
     if (litKind(t) !== null) litArgs.set(p, t);
   });
@@ -1020,10 +1375,43 @@ function substituteParams(expr: string, litArgs: Map<string, string>): string {
       i++;
       continue;
     }
-    if (ch === '"' || ch === "'" || ch === "`") { quote = ch; out += ch; i++; continue; }
+    if (ch === '"' || ch === "'") { quote = ch; out += ch; i++; continue; }
+    // C4i：模板串不能像普通字符串那样整段跳过 —— `${flag ? "fixed" : n}` 里的
+    // flag 是要代的。字面量部分照抄，只对 `${}` 内部递归代入。
+    if (ch === "`") {
+      out += ch;
+      i++;
+      while (i < expr.length) {
+        const c = expr[i];
+        if (c === "`") break; // 模板串内不可能有裸反引号（转义的已被下面处理）
+        if (c === "\\") { out += expr.slice(i, i + 2); i += 2; continue; }
+        if (c === "$" && expr[i + 1] === "{") {
+          let k = i + 2;
+          let brace = 0;
+          let inner = "";
+          while (k < expr.length) {
+            const d = expr[k];
+            if (d === "{") brace++;
+            else if (d === "}") { if (brace === 0) break; brace--; }
+            inner += d;
+            k++;
+          }
+          out += "${" + substituteParams(inner, litArgs) + "}";
+          i = k + 1;
+          continue;
+        }
+        out += c;
+        i++;
+      }
+      if (i < expr.length && expr[i] === "`") { out += "`"; i++; }
+      continue;
+    }
     const m = /^[A-Za-z_$][\w$]*/.exec(expr.slice(i));
     if (m && expr[i - 1] !== "." && litArgs.has(m[0])) {
-      out += `(${litArgs.get(m[0])})`; // 加括号保住运算优先级
+      // 不加括号：代进去的永远是【原子字面量】（字符串/数字/布尔/null），
+      // 不会改变优先级；而加括号会让 maskNonDependentArgsOnce 把参数串误判成嵌套
+      // 调用（它的判据是「实参里还有 `(`」），内层就再也轮不到它来处理。
+      out += litArgs.get(m[0]);
       i += m[0].length;
       continue;
     }
@@ -1033,14 +1421,130 @@ function substituteParams(expr: string, litArgs: Map<string, string>): string {
   return out;
 }
 
-/** 递归解掉 cond 可判定的三元；判不出就保持原样（保守侧） */
+/**
+ * 递归解掉 cond 可判定的三元 / 短路；判不出就保持原样（保守侧）。
+ *
+ * C4i（2026-09-21）补两类：
+ *   - 模板串内部的 `${...}` 是独立表达式，折叠必须能进去 —— 否则
+ *     `` `${flag ? "fixed" : n}.md` `` 这种写法（现代代码里比裸三元更常见）
+ *     永远收不住；
+ *   - 短路运算符 `||` / `&&` / `??`：与三元同形，只是判据从 cond 换成了
+ *     左操作数的真假。JS 求值是从左到右，短路一发生右边整段根本不执行。
+ */
 function foldDecidableTernary(expr: string, depth = 0): string {
   if (depth > 4) return expr;
-  const t = topLevelTernary(expr);
-  if (!t) return expr;
-  const v = truthOf(t.cond);
-  if (v === null) return expr;
-  return foldDecidableTernary(v ? t.a : t.b, depth + 1);
+  // 先脱掉包住整串的括号 —— 不脱的话 `(()flag ? a : b)` 这种写法切出来的 cond
+  // 是 `((true)`，括号不配对 ⇒ 判不出真假 ⇒ 白白丢掉一次收精度的机会
+  // （2026-09-20 探针：viaFlag(k, true) 一直没收住，根因就是这个）。
+  const s = stripOuterParens(expr);
+
+  // ① 模板串：先处理 `${}` 内部（外面那层字面量部分不参与判定）
+  const tpl = foldTemplateSubsts(s, depth);
+  if (tpl !== s) return tpl;
+
+  // ② 三元
+  const t = topLevelTernary(s);
+  if (t) {
+    const v = truthOf(t.cond);
+    if (v !== null) return foldDecidableTernary(v ? t.a : t.b, depth + 1);
+  }
+  // ③ 短路
+  const lg = topLevelLogical(s);
+  if (lg) {
+    const v = lg.op === "??" ? notNullish(lg.left) : truthOf(lg.left);
+    if (v !== null) {
+      // `||` 左为真 ⇒ 取左；`&&` 左为真 ⇒ 取右；`??` 左非空 ⇒ 取左
+      const takeLeft = lg.op === "&&" ? !v : v;
+      return foldDecidableTernary(takeLeft ? lg.left : lg.right, depth + 1);
+    }
+  }
+  return expr === s ? expr : s;
+}
+
+/**
+ * 折叠模板串里每个 `${...}` 的内部；没有任何一处可折叠就**原样返回**（让调用方
+ * 知道这一层没做事，好继续试三元/短路）。
+ */
+function foldTemplateSubsts(expr: string, depth: number): string {
+  if (!expr.includes("`")) return expr;
+  let out = "";
+  let changed = false;
+  let i = 0;
+  while (i < expr.length) {
+    const ch = expr[i];
+    if (ch !== "`") { out += ch; i++; continue; }
+    let seg = "";
+    let j = i + 1;
+    while (j < expr.length) {
+      const c = expr[j];
+      if (c === "\\") { seg += expr.slice(j, j + 2); j += 2; continue; }
+      if (c === "`") break;
+      if (c === "$" && expr[j + 1] === "{") {
+        // 找与 `${` 配对的 `}`（`${ {a:1}.a }` 里的花括号要跳过）
+        let brace = 0;
+        let k = j + 2;
+        let inner = "";
+        while (k < expr.length) {
+          const d = expr[k];
+          if (d === "{") brace++;
+          else if (d === "}") { if (brace === 0) break; brace--; }
+          inner += d;
+          k++;
+        }
+        const folded = foldDecidableTernary(inner, depth + 1);
+        if (folded !== inner) changed = true;
+        seg += "${" + folded + "}";
+        j = k + 1;
+        continue;
+      }
+      seg += c;
+      j++;
+    }
+    out += "`" + seg + "`";
+    i = j + 1;
+  }
+  return changed ? out : expr;
+}
+
+/**
+ * 顶层短路运算符：**最左边**的一个。优先级从低到高依次找 `||` → `??` → `&&`
+ * （TS 里 `??` 与 `||`/`&&` 同级混用必须加括号，加了括号就不是顶层了）。
+ * 只认左右都非空的那一个。
+ */
+function topLevelLogical(expr: string): { left: string; right: string; op: "||" | "&&" | "??" } | null {
+  for (const op of ["||", "??", "&&"] as const) {
+    let paren = 0;
+    let quote = "";
+    let i = 0;
+    while (i < expr.length) {
+      const ch = expr[i];
+      if (quote) {
+        if (ch === "\\") i++;
+        else if (ch === quote) quote = "";
+        i++;
+        continue;
+      }
+      if (ch === '"' || ch === "'" || ch === "`") { quote = ch; i++; continue; }
+      if (ch === "(" || ch === "[" || ch === "{") paren++;
+      else if (ch === ")" || ch === "]" || ch === "}") paren--;
+      else if (paren === 0 && expr.startsWith(op, i)) {
+        // `??`/`||`/`&&` 各占两字符，注意别把 `a ||= b` 这类当短路（赋值语义不同）
+        if (expr[i + 2] === "=") { i += 3; continue; }
+        const left = expr.slice(0, i).trim();
+        const right = expr.slice(i + 2).trim();
+        if (left !== "" && right !== "") return { left, right, op };
+      }
+      i++;
+    }
+  }
+  return null;
+}
+
+/** 左操作数**确定不是** null/undefined 时返回 true；判不出返回 null */
+function notNullish(s: string): boolean | null {
+  const lit = litOf(s);
+  if (!lit) return null;
+  return lit.k !== "null";
 }
 
 /**
@@ -1078,16 +1582,31 @@ function topLevelTernary(expr: string): { cond: string; a: string; b: string } |
   return { cond: expr.slice(0, qPos), a: expr.slice(qPos + 1, cPos), b: expr.slice(cPos + 1) };
 }
 
+/**
+ * 脱掉**包住整串**的括号（`(x)` ⇒ `x`，可能多层）。只脱真的配到串尾的那种 ——
+ * `(a) + (b)` 的首个括号不到底，不会被误脱。
+ */
+function stripOuterParens(expr: string): string {
+  let cur = expr.trim();
+  for (let guard = 0; guard < 8; guard++) {
+    if (!cur.startsWith("(")) break;
+    const close = matchingParen(cur, 0);
+    if (close !== cur.length - 1) break;
+    const inner = cur.slice(1, -1).trim();
+    if (inner === "") break;
+    cur = inner;
+  }
+  return cur;
+}
+
 /** 判得出来就返回 true/false，判不出返回 null */
 function truthOf(cond: string): boolean | null {
-  let s = cond.trim();
-  // 脱外层括号（整串被一层括号包住时反复脱）
-  while (s.startsWith("(") && matchingParen(s, 0) === s.length - 1) s = s.slice(1, -1).trim();
+  const s = stripOuterParens(cond);
   if (/^!\s*\S/.test(s)) {
     const v = truthOf(s.replace(/^!\s*/, ""));
     return v === null ? null : !v;
   }
-  const lit = litKind(s);
+  const lit = litOf(s);
   if (lit) {
     if (lit.k === "bool") return lit.v === "true";
     if (lit.k === "null") return false; // null / undefined
@@ -1096,8 +1615,8 @@ function truthOf(cond: string): boolean | null {
   }
   const eq = /^(.+?)\s*(===|!==)\s*(.+)$/.exec(s);
   if (eq) {
-    const l = litKind(eq[1].trim());
-    const r = litKind(eq[3].trim());
+    const l = litOf(eq[1]);
+    const r = litOf(eq[3]);
     // 两边都是字面量但类型不同（`"1" === 1`）—— JS 语义下也是 false/true，可判
     if (l && r) {
       const same = l.k === r.k && l.v === r.v;
@@ -1108,6 +1627,11 @@ function truthOf(cond: string): boolean | null {
 }
 
 /** 字面量种类：字符串 / 数字 / 布尔 / null-undefined；不是字面量返回 null */
+function litOf(s: string): { k: "str" | "num" | "bool" | "null"; v: string } | null {
+  const clean = stripOuterParens(s.trim()); // 代入时实参被套了括号：`(true) === true`
+  return litKind(clean);
+}
+
 function litKind(s: string): { k: "str" | "num" | "bool" | "null"; v: string } | null {
   if (/^"(?:\\.|[^"\\])*"$/.test(s) || /^'(?:\\.|[^'\\])*'$/.test(s) || /^`(?:\\.|[^`\\])*`$/.test(s)) {
     return { k: "str", v: s.slice(1, -1) };
@@ -1135,8 +1659,9 @@ function matchingParen(s: string, open: number): number {
  * 只按并集传播），因为把 A 的形参名代进 B 的 return 是错的。
  */
 function mergeShapers(infos: ShaperInfo[]): ShaperInfo {
-  if (infos.length === 0) return { params: [], deps: new Set<string>(), rets: [] };
-  const params = infos.reduce((a, b) => (b.params.length > a.params.length ? b : a)).params;
+  if (infos.length === 0) return { params: [], deps: new Set<string>(), rets: [], restAt: -1 };
+  const widest = infos.reduce((a, b) => (b.params.length > a.params.length ? b : a));
+  const params = widest.params;
   const flags = params.map(() => false);
   let sameShape = true;
   for (const si of infos) {
@@ -1144,7 +1669,7 @@ function mergeShapers(infos: ShaperInfo[]): ShaperInfo {
     si.params.forEach((p, i) => { if (i < flags.length && si.deps.has(p)) flags[i] = true; });
   }
   const rets = sameShape ? infos.flatMap((si) => si.rets) : [];
-  return { params, deps: new Set(params.filter((_, i) => flags[i])), rets };
+  return { params, deps: new Set(params.filter((_, i) => flags[i])), rets, restAt: widest.restAt };
 }
 
 /** return 表达式真正依赖哪些形参：把「已知 helper 调用里不被依赖的实参」抹掉后，
@@ -1177,6 +1702,31 @@ function returnExprsOf(body: Node): string[] {
   return rets;
 }
 
+/**
+ * C4j：`export default (n) => n + ".md"` 这种**匿名**默认导出没有名字可登记，
+ * 能用的名字只有「别的文件 import 它时起的本地名」。用 ts-morph 的模块解析找到
+ * 真正指向该文件的默认导入（解析不出的模块一律跳过 —— 认不出就不收）。
+ */
+function defaultImportLocalNames(project: Project, target: SourceFile): Set<string> {
+  const out = new Set<string>();
+  const targetPath = target.getFilePath();
+  for (const sf of project.getSourceFiles()) {
+    if (sf.getFilePath() === targetPath) continue;
+    for (const imp of sf.getImportDeclarations()) {
+      let resolved: SourceFile | undefined;
+      try {
+        resolved = imp.getModuleSpecifierSourceFile() ?? undefined;
+      } catch {
+        continue; // 解析不了（路径写错 / 别名没配）—— 跳过
+      }
+      if (!resolved || resolved.getFilePath() !== targetPath) continue;
+      const d = imp.getDefaultImport();
+      if (d) out.add(d.getText());
+    }
+  }
+  return out;
+}
+
 /** 扫描全项目，收集「纯塑形」helper 的名字 + 返回值依赖（有界两轮不动点） */
 function pureShaperFunctionNames(project: Project): ShaperTable {
   const sinkRe = tsSinkCallRegex();
@@ -1192,10 +1742,13 @@ function pureShaperFunctionNames(project: Project): ShaperTable {
   type Cand = {
     key: string; name: string | null; group: string | null;
     params: Set<string>; paramList: string[]; rets: string[];
+    restAt: number; curry: CurrySpec[];
   };
   const cands: Cand[] = [];
   const takenNames = new Set<string>();
   const groups = new Map<string, string[]>();
+  // 模块级字面量常量（值一并留着：C4i 的计算属性名 `[KEY]` 要靠它解）
+  const constTexts = moduleConstTexts(project);
 
   /** 登记一个候选：三条判据 —— 有形参 / 有返回值 / 体内无 sink */
   const consider = (
@@ -1203,6 +1756,8 @@ function pureShaperFunctionNames(project: Project): ShaperTable {
     name: string | null,
     group: string | null,
     paramNodes: string[],
+    restAt: number,
+    curry: CurrySpec[],
     declText: string,
     bodyNode: Node
   ) => {
@@ -1214,13 +1769,14 @@ function pureShaperFunctionNames(project: Project): ShaperTable {
     // 用 AST 取 return 表达式，而不是正则 —— 模板字面量里的 `${}` 会
     // 让「遇到花括号就停」的朴素正则在 `path.join(a,b) + \`.${c}\`` 上截断。
     const rets = returnExprsOf(bodyNode);
-    if (rets.length === 0) return; // ①
+    // 柯里化 / 工厂形态：return 出来的是函数或装着函数的对象 ⇒ 判据①看的是最内层
+    if (rets.length === 0 && curry.length === 0) return; // ①
     let pub = name;
     if (pub !== null) {
       if (takenNames.has(pub)) pub = null; // 同名重复登记：先到先得，后者降到资格凭证
       else takenNames.add(pub);
     }
-    cands.push({ key, name: pub, group, params, paramList, rets });
+    cands.push({ key, name: pub, group, params, paramList, rets, restAt, curry });
     if (group !== null) {
       const list = groups.get(group) ?? [];
       list.push(key);
@@ -1229,39 +1785,57 @@ function pureShaperFunctionNames(project: Project): ShaperTable {
   };
 
   for (const sf of project.getSourceFiles()) {
-    // (a) 函数声明
-    for (const fn of sf.getFunctions()) {
+    // (a) 函数声明 —— 顶层 + namespace 内
+    //     C4i：旧代码用 sf.getFunctions()，实测取不到 `namespace P { export
+    //     function toPath(){} }` 里的函数，整片漏（探针 F1）。改遍历声明节点，
+    //     但**只收顶层 / namespace 链上的**：函数体内嵌套声明的作用域与调用点
+    //     不同，按同一裸名发布会张冠李戴。
+    for (const fn of sf.getDescendantsOfKind(ts.SyntaxKind.FunctionDeclaration)) {
+      const parent = fn.getParent();
+      // 顶层 / namespace 体内两种；函数体内嵌套的声明作用域与调用点不同，不收
+      if (!Node.isSourceFile(parent) && !Node.isModuleBlock(parent)) continue;
       const name = fn.getName();
       if (!name) continue;
       const body = fn.getBody();
       if (!body) continue; // 重载签名 / declare 只有签名
-      consider(
-        `fn:${name}`,
-        name,
-        null,
-        fn.getParameters().flatMap(paramNamesOf),
-        fn.getText(),
-        body
-      );
+      const ps = fn.getParameters();
+      const paramNodes = ps.flatMap(paramNamesOf);
+      const restAt = restIndexOf(ps);
+      const curry = currySpecsOf(paramNodes, body);
+      const owner = moduleQualifier(fn);
+      // namespace 内却认不出宿主链 ⇒ 不收（宁可漏，不可张冠李戴）
+      if (!Node.isSourceFile(parent) && owner === null) continue;
+      // namespace 内：`P.toPath(k)` 是主要写法。裸名同时登记是安全的 ——
+      // takenNames 先到先得，一个名字只会落到一处定义上（另一处会降级为资格凭证）。
+      if (owner !== null) {
+        consider(
+          `fn:${owner}.${name}`, `${owner}.${name}`, null,
+          paramNodes, restAt, curry, fn.getText(), body
+        );
+      }
+      consider(`fn:${name}`, name, null, paramNodes, restAt, curry, fn.getText(), body);
     }
     // (b) 变量承载的箭头 / 函数表达式 —— 现代 TS 里 helper 的主力写法
     //     `export const toPath = (n: string) => n + ".md";`
     //     sf.getFunctions() 收不到这些，2026-09-20 实测整片漏。
+    //     C4i 再解一层 IIFE（functionLikeOf）。
     for (const vd of sf.getVariableDeclarations()) {
       const init = vd.getInitializer();
       if (!init) continue;
-      const isArrow = Node.isArrowFunction(init);
-      const isFnExpr = Node.isFunctionExpression(init);
-      if (!isArrow && !isFnExpr) continue;
-      const fnLike = init as ArrowFunction;
+      const fnLike = functionLikeOf(init);
+      if (!fnLike) continue;
       const body = fnLike.getBody();
       if (!body) continue;
+      const ps = fnLike.getParameters();
+      const paramNodes = ps.flatMap(paramNamesOf);
       consider(
         `var:${vd.getName()}`,
         vd.getName(),
         null,
-        fnLike.getParameters().flatMap(paramNamesOf),
-        init.getText(),
+        paramNodes,
+        restIndexOf(ps),
+        currySpecsOf(paramNodes, body),
+        init.getText(), // IIFE 时含整条调用 ⇒ sink 检查仍覆盖得到
         body
       );
     }
@@ -1280,6 +1854,8 @@ function pureShaperFunctionNames(project: Project): ShaperTable {
     bare: string,
     owner: string | null,
     paramNodes: string[],
+    restAt: number,
+    curry: CurrySpec[],
     declText: string,
     body: Node
   ) => {
@@ -1289,6 +1865,8 @@ function pureShaperFunctionNames(project: Project): ShaperTable {
       owner !== null ? `${owner}.${bare}` : null,
       bare,
       paramNodes,
+      restAt,
+      curry,
       declText,
       body
     );
@@ -1296,43 +1874,105 @@ function pureShaperFunctionNames(project: Project): ShaperTable {
   for (const sf of project.getSourceFiles()) {
     // (c) 对象字面量方法 / 类方法
     for (const md of sf.getDescendantsOfKind(ts.SyntaxKind.MethodDeclaration)) {
-      const bare = md.getName();
-      if (!bare || !/^[A-Za-z_$][\w$]*$/.test(bare)) continue; // 计算属性名认不出 ⇒ 不收
+      const bare = propertyNameOf(md, constTexts);
+      if (!bare || !/^[A-Za-z_$][\w$]*$/.test(bare)) continue; // 算不出的属性名 ⇒ 不收
       const body = md.getBody();
       if (!body) continue; // 重载签名 / declare
-      considerMember(bare, ownerQualifier(md), md.getParameters().flatMap(paramNamesOf), md.getText(), body);
+      const ps = md.getParameters();
+      const pns = ps.flatMap(paramNamesOf);
+      considerMember(
+        bare, ownerQualifier(md, constTexts), pns,
+        restIndexOf(ps), currySpecsOf(pns, body), md.getText(), body
+      );
     }
     // (d) 属性承载的箭头 / 函数表达式 —— 现代工程里 Objects-as-namespace 的常态。
     //     ownerQualifier 从父链走（对象字面量 → 属性赋值 → 变量声明），嵌套也认。
+    //     C4j：初值外面可能还包着 as / satisfies（`{ toPath: ((n) => …) as any }`）。
     for (const pa of sf.getDescendantsOfKind(ts.SyntaxKind.PropertyAssignment)) {
-      const init = pa.getInitializer();
+      const rawInit = pa.getInitializer();
+      if (!rawInit) continue;
+      const init = unwrapFns(rawInit);
       if (!init) continue;
       if (!Node.isArrowFunction(init) && !Node.isFunctionExpression(init)) continue;
-      const body = (init as ArrowFunction).getBody();
+      const fn = init as ArrowFunction;
+      const body = fn.getBody();
       if (!body) continue;
-      const bare = pa.getName();
+      const bare = propertyNameOf(pa, constTexts);
       if (!bare || !/^[A-Za-z_$][\w$]*$/.test(bare)) continue;
-      considerMember(bare, ownerQualifier(pa), (init as ArrowFunction).getParameters().flatMap(paramNamesOf), init.getText(), body);
+      const ps = fn.getParameters();
+      const pns = ps.flatMap(paramNamesOf);
+      considerMember(
+        bare, ownerQualifier(pa, constTexts), pns,
+        restIndexOf(ps), currySpecsOf(pns, body), rawInit.getText(), body
+      );
     }
     // (e) 后挂上去的属性箭头 `Util.toPath = (n) => …`（monkey patch / 渐进导出）
     for (const be of sf.getDescendantsOfKind(ts.SyntaxKind.BinaryExpression)) {
       if (be.getOperatorToken().getKind() !== ts.SyntaxKind.EqualsToken) continue;
       const left = be.getLeft();
-      const right = be.getRight();
+      const right = unwrapFns(be.getRight());
       if (!Node.isPropertyAccessExpression(left)) continue;
-      if (!Node.isArrowFunction(right) && !Node.isFunctionExpression(right)) continue;
+      if (!right || (!Node.isArrowFunction(right) && !Node.isFunctionExpression(right))) continue;
       const body = (right as ArrowFunction).getBody();
       if (!body) continue;
       const qname = left.getText();
       // 只收 `Name.member` 这种纯静态链（`this.x` / `a[b].x` 一律不认）
       if (!/^[A-Za-z_$][\w$]*(?:\.[\w$]+)+$/.test(qname)) continue;
       const bare = qname.split(".").pop() as string;
-      considerMember(bare, qname.slice(0, -(bare.length + 1)), (right as ArrowFunction).getParameters().flatMap(paramNamesOf), right.getText(), body);
+      const ps = (right as ArrowFunction).getParameters();
+      const pns = ps.flatMap(paramNamesOf);
+      considerMember(
+        bare, qname.slice(0, -(bare.length + 1)), pns,
+        restIndexOf(ps), currySpecsOf(pns, body), right.getText(), body
+      );
+    }
+    // (f) C4j：getter 返回出来的箭头 —— `get mk() { return (n) => n + ".md"; }`。
+    //     它既不是 MethodDeclaration（没有形参）也不是 PropertyAssignment（值是 getter），
+    //     上一轮三种载体都收不到它，整族漏（探针 B1/B2）。真正塑形的是**返回出来的箭头**，
+    //     所以判据看的是内层：无形参不收（B4）、体内有 sink 不收（B6）。
+    //     注意这里**不**走 currySpecOf —— getter 的读取本身不消耗实参，调用点是
+    //     `o.mk(k)` 一次调用，不是 `mk()(k)` 两跳。
+    for (const ga of sf.getDescendantsOfKind(ts.SyntaxKind.GetAccessor)) {
+      const body = ga.getBody();
+      if (!body) continue;
+      const inner = returnedFunctionOf(body);
+      if (!inner) continue; // getter 直接返回拼接（无形参）⇒ 判据①本就不成立
+      const innerBody = inner.getBody();
+      if (!innerBody) continue;
+      const bare = propertyNameOf(ga, constTexts);
+      if (!bare || !/^[A-Za-z_$][\w$]*$/.test(bare)) continue;
+      const ps = inner.getParameters();
+      const pns = ps.flatMap(paramNamesOf);
+      considerMember(
+        bare, ownerQualifier(ga, constTexts), pns,
+        restIndexOf(ps), currySpecsOf(pns, innerBody), ga.getText(), innerBody
+      );
+    }
+    // (g) C4j：`export default (n) => …` —— 匿名默认导出。它既不是函数声明（没有名字）
+    //     也不是变量声明，上一轮整族漏（探针 F9）。名字只能用**导入它的文件**里起的
+    //     本地名；多个文件用不同名字导入 ⇒ 每个名字各登记一条（takenNames 仍然先到先得）。
+    for (const ea of sf.getDescendantsOfKind(ts.SyntaxKind.ExportAssignment)) {
+      if (ea.isExportEquals()) continue;
+      const fn = unwrapFns(ea.getExpression());
+      if (!fn || (!Node.isArrowFunction(fn) && !Node.isFunctionExpression(fn))) continue;
+      const fnBody = (fn as ArrowFunction).getBody();
+      if (!fnBody) continue;
+      const localNames = defaultImportLocalNames(project, sf);
+      if (localNames.size === 0) continue; // 没人默认导入 ⇒ 名字无从谈起
+      const ps = (fn as ArrowFunction).getParameters();
+      const pns = ps.flatMap(paramNamesOf);
+      const curry = currySpecsOf(pns, fnBody);
+      for (const ln of localNames) {
+        consider(
+          `def:${sf.getFilePath()}:${ln}`, ln, null,
+          pns, restIndexOf(ps), curry, ea.getText(), fnBody
+        );
+      }
     }
   }
 
   // 形参之外允许出现的自由标识符 = 模块级字面量常量 ∪ 确证的 path 模块别名
-  const extraIdents = moduleLiteralConstNames(project);
+  const extraIdents = new Set(constTexts.keys());
   for (const a of pathModuleAliases(project)) extraIdents.add(a);
   const names = new Set<string>();
   const info = new Map<string, ShaperInfo>();
@@ -1348,23 +1988,57 @@ function pureShaperFunctionNames(project: Project): ShaperTable {
     info.set(name, si);
   };
 
+  /** C4j：确证通过的链（工厂可能有几条，脏的那条会被剔掉，见下） */
+  const pureCurried = new Map<string, CurrySpec[]>();
   for (let round = 0; round < 2; round++) {
     let added = false;
     for (const c of cands) {
       if (acceptedKeys.has(c.key)) continue;
-      const ok = c.rets.every((e) => isPureShaperExpr(e, c.params, names, extraIdents));
-      if (!ok) continue;
-      acceptedKeys.add(c.key);
-      const si: ShaperInfo = {
-        params: c.paramList,
-        deps: returnDeps(c.rets, c.paramList, info, prelimMember),
-        rets: c.rets,
-      };
+      let si: ShaperInfo;
+      if (c.curry.length > 0) {
+        // 柯里化 / 工厂形态：判据落在**最内层**的 return 上，形参集合是本链各层并起来。
+        // 每个 spec 各自过判据：工厂返回多个方法时，只把**确证过的那些**收进名录，
+        // 脏的那条不发 spec ⇒ 调用点不会摊开它 ⇒ 退化为漏报而不是误报（保守侧）。
+        const pure = c.curry.filter((spec) =>
+          spec.rets.every((e) =>
+            isPureShaperExpr(e, new Set([...c.params, ...spec.allParams]), names, extraIdents)
+          )
+        );
+        if (pure.length === 0) continue;
+        acceptedKeys.add(c.key);
+        pureCurried.set(c.key, pure);
+        // 外层名照发：闭包会捕获外层实参（`const g = withExt(k)` 也是污的）。
+        // rets 留空 ⇒ 调用点折叠自动退回「全部依赖」（保守侧）。
+        si = { params: c.paramList, deps: new Set(c.paramList), rets: [], restAt: c.restAt };
+      } else {
+        if (!c.rets.every((e) => isPureShaperExpr(e, c.params, names, extraIdents))) continue;
+        acceptedKeys.add(c.key);
+        si = {
+          params: c.paramList,
+          deps: returnDeps(c.rets, c.paramList, info, prelimMember),
+          rets: c.rets,
+          restAt: c.restAt,
+        };
+      }
       keyInfo.set(c.key, si);
       if (c.name !== null) publish(c.name, si);
       added = true;
     }
     if (!added) break;
+  }
+
+  // C4i/C4j：柯里化与工厂名录。只有**发布了名字**的才登记 —— 名字被别处同名定义占用时
+  // （pub 降为 null），`withExt(a)(b)` 里的 withExt 可能指的不是这个 helper，
+  // 展开它会张冠李戴 ⇒ 宁可不展（保守侧，退化为漏报而非误报）。
+  // 一个名字可以对多条链（工厂返回含多个方法的对象）。
+  const curried = new Map<string, CurrySpec[]>();
+  for (const c of cands) {
+    if (c.name === null || !acceptedKeys.has(c.key)) continue;
+    const pure = pureCurried.get(c.key);
+    if (!pure || pure.length === 0) continue;
+    const list = curried.get(c.name) ?? [];
+    for (const spec of pure) if (!list.includes(spec)) list.push(spec);
+    curried.set(c.name, list);
   }
 
   // C4f：依赖分析有次序依赖 —— `wrap(n) { return discard(n); }` 若在 discard 之前
@@ -1403,7 +2077,7 @@ function pureShaperFunctionNames(project: Project): ShaperTable {
     memberNames.add(bare);
     publish(bare, mergeShapers(keys.map((k) => keyInfo.get(k)).filter(Boolean) as ShaperInfo[]));
   }
-  return { names, memberNames, info };
+  return { names, memberNames, info, curried };
 }
 
 const TS_FILE_SINK_NAMES = [
@@ -1661,16 +2335,21 @@ function taintedViaShaper(text: string, tainted: Set<string>, shapers?: ShaperTa
       const name = m[1];
       const rhs = m[2];
       if (tainted.has(name)) continue;
+      // C4i：柯里化调用先在证据里摊开 —— `withExt(".md")(k)` ⇒ `k + ".md"`，
+      // 摊开后的串自己就是拼接，shaped 也顺理成章成立。
+      const expanded = shapers ? expandCurried(rhs, shapers.curried) : rhs;
       const shaped =
-        TS_PATH_SHAPER_RE.test(rhs) ||
-        TS_CONCAT_RE.test(rhs) ||
+        TS_PATH_SHAPER_RE.test(expanded) ||
+        TS_CONCAT_RE.test(expanded) ||
         (localShaperRe !== null && localShaperRe.test(rhs)) ||
         (memberShaperRe !== null && memberShaperRe.test(rhs));
       // 证据看的是【抹掉不被依赖的实参之后】的 rhs：`discard(k)` 里 k 不流出，
       // 那条支路就不该算证据。`shaped` 仍看原式 —— helper 是不是塑形，与它的
       // 返回值依不依赖实参是两件事。
       const evidence =
-        shaperInfo && memberNames ? maskNonDependentArgs(rhs, shaperInfo, memberNames) : rhs;
+        shaperInfo && memberNames
+          ? maskNonDependentArgs(expanded, shaperInfo, memberNames)
+          : expanded;
       if (taintRe.test(evidence) && shaped) {
         tainted.add(name);
         added = true;

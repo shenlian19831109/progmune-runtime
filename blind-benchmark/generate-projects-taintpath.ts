@@ -1155,6 +1155,536 @@ export function emitMethodGuarded(doc: Record<string, any>, outDir: string): voi
 }
 `;
 
+// ═══════════════════════════════════════════════════════════════
+// taintpath_I —— C4h：名录之外的三处收口
+//
+// ① 调用点常量代入：helper 的 return 走三元，本次调用喂的是常量 ⇒ 返回值其实是
+//    字面量。名录里的依赖集是**跨调用点**的并集，收不住这种个案。
+// ② 同名成员多处：旧规则要求方法名全项目唯一才登记 `.method(`。唯一性只是「不可能
+//    认错」的**充分条件**，同名两处都被确证时同样不可能认错 —— 换成全组确证后，
+//    依赖集按形参位取并集（保守侧）。顺带修掉一处真实缺陷：旧代码在确证之前就把
+//    裸名登记进成员名录（emitNonShaperMember 是那道回归门）。
+// ③ 属性承载的箭头：`{ toName: (n) => … }`、`Obj.toName = (n) => …` —— 既不是
+//    方法声明也不是变量声明，旧名录整片漏。
+//
+// 写法约定（与前面几族同源）：sink 实参里**不直接出现**污点变量 k。
+// 命名前先 grep TS_FILE_SINK_NAMES —— 撞上会被 sink 兜底命中，用例变假通过（R13）。
+// ═══════════════════════════════════════════════════════════════
+const HELPERS_I = `// taintpath_I —— C4h：名录之外的三处收口
+import * as p from "path";
+import * as fsx from "fs";
+
+// ── ① 调用点常量代入 ──
+export const viaFlag = (n: string, flag: boolean): string => (flag ? "fixed.md" : n + ".md");
+// 两支都含形参 —— 收精度不能收到这儿
+export const eitherWay = (n: string, flag: boolean): string => (flag ? n : n + ".md");
+export const pickMode = (n: string, mode: string): string => (mode === "raw" ? n : "fixed.md");
+// 两跳：折叠要能穿过 helper 之间的嵌套调用
+export const wrapFlag = (n: string, flag: boolean): string => viaFlag(n, flag);
+
+// ── ② 同名成员多处 ──
+// 两处都是纯塑形 ⇒ 整组放行（旧规则要求唯一，第二个宿主必漏）
+export class Uploader { toPath(n: string): string { return n + ".md"; } }
+export class Downloader { toPath(n: string): string { return n + ".tmp"; } }
+// 两处都丢弃形参 ⇒ 合并后的依赖集仍为空 ⇒ 精度不许丢
+export class StillA { keep(n: string): string { return "fixed.md"; } }
+export class StillB { keep(n: string): string { return "other.md"; } }
+// 一处依赖了模块级【非字面量】对象 ⇒ 判据③不成立 ⇒ 整组不放行。
+// 刻意不含 sink —— 否则会被跨函数 sink 形参映射标中，归因就不干净了。
+export const dict: Record<string, string> = {};
+export class Weird { which(n: string): string { return dict[n]; } }
+export class Clean { which(n: string): string { return n + ".md"; } }
+
+// ── ③ 属性承载的箭头 ──
+export const Toolkit = {
+  toName: (n: string): string => n + ".md",
+};
+export const Nested = {
+  path: {
+    toName: (n: string): string => n + ".md",
+  },
+};
+export const Kitchen: any = {};
+Kitchen.toName = (n: string): string => n + ".md";
+Kitchen.drop = (n: string): string => "fixed.md";
+
+// ── 缺陷回归门用的对照：引用模块级非字面量对象的成员 ──
+export const registry: Record<string, string> = {};
+export class Reg { lookup(n: string): string { return registry[n]; } }
+export class RegSafe { lookupOk(n: string): string { return n + ".md"; } }
+
+// 真守卫，名字不含任何 G-C 后缀（G2 tier-0 自身证据）
+export function stamp(baseDir: string, targetPath: string): void {
+  const base = p.resolve(baseDir);
+  const target = p.resolve(targetPath);
+  if (target !== base && !target.startsWith(base + p.sep)) {
+    throw new Error("path escapes output dir");
+  }
+}
+`;
+
+const HANDLER_I = `// taintpath_I —— C4h：helper 名录之外还剩的三处
+import * as fs from "fs";
+import * as p from "path";
+import {
+  viaFlag, eitherWay, pickMode, wrapFlag,
+  Uploader, Downloader, StillA, Clean, Weird,
+  Toolkit, Nested, Kitchen, Reg, RegSafe, stamp,
+} from "./helpers";
+
+// ① 常量实参 —— 走真流出的那一支
+export function emitFlagFalse(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = viaFlag(k, false);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ① 常量把分支钉死成字面量 —— 正对照 = emitFlagFalse
+export function emitFlagTrue(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = viaFlag(k, true);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ① 选中的分支里仍有形参
+export function emitEitherWay(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = eitherWay(k, true);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ① 字符串比较命中 —— 正对照
+export function emitPickHit(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = pickMode(k, "raw");
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ① 字符串比较没命中 —— 正对照 = emitPickHit
+export function emitPickMiss(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = pickMode(k, "cooked");
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ① 折叠要能作用在嵌套的内层
+export function emitFlagNested(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = p.join("out", viaFlag(k, true));
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ① 隔着一层 helper 的常量 —— 正对照 = emitWrapFlagFalse
+export function emitWrapFlagTrue(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = wrapFlag(k, true);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+export function emitWrapFlagFalse(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = wrapFlag(k, false);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ① 保守侧：实参是变量不是常量 ⇒ 判不出 ⇒ 一律照标（不许假装看得懂）
+export function emitRuntimeFlag(doc: Record<string, any>, outDir: string): void {
+  const runtimeOn = Date.now() > 0;
+  Object.keys(doc).forEach((k) => {
+    const rel = viaFlag(k, runtimeOn);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ② 同名成员两处均塑形 —— 第一个宿主
+export function emitSameNameA(doc: Record<string, any>, outDir: string): void {
+  const u = new Uploader();
+  Object.keys(doc).forEach((k) => {
+    const rel = u.toPath(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ② 同组的另一个宿主 —— 合并是对称的
+export function emitSameNameB(doc: Record<string, any>, outDir: string): void {
+  const d = new Downloader();
+  Object.keys(doc).forEach((k) => {
+    const rel = d.toPath(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ② 同名一处非塑形 ⇒ 整组不放行 —— 正对照 = emitSameNameA
+export function emitSameNameRejected(doc: Record<string, any>, outDir: string): void {
+  const c = new Clean();
+  Object.keys(doc).forEach((k) => {
+    const rel = c.which(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ② 同名两处都丢弃形参 ⇒ 合并后的依赖集仍为空
+export function emitBothDrop(doc: Record<string, any>, outDir: string): void {
+  const a = new StillA();
+  Object.keys(doc).forEach((k) => {
+    const rel = a.keep(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ③ 属性箭头 helper
+export function emitPropArrow(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = Toolkit.toName(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ③ 嵌套对象的属性箭头 —— 限定名要能沿 owner 链拼到最外层
+export function emitNestedPropArrow(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = Nested.path.toName(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ③ 后挂上去的属性箭头
+export function emitPatchedArrow(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = Kitchen.toName(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ③ 属性箭头丢弃形参 —— 正对照 = emitPropArrow
+export function emitPropArrowDrop(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = Kitchen.drop(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 回归门：判据不成立的成员，其成员调用位不许进名录 —— 正对照 = emitShapedMember
+export function emitNonShaperMember(doc: Record<string, any>, outDir: string): void {
+  const r = new Reg();
+  Object.keys(doc).forEach((k) => {
+    const rel = r.lookup(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+export function emitShapedMember(doc: Record<string, any>, outDir: string): void {
+  const r = new RegSafe();
+  Object.keys(doc).forEach((k) => {
+    const rel = r.lookupOk(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 压制对照：召回再放宽一轮，守卫仍压得住
+export function emitGuarded(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const file = outDir + "/" + Toolkit.toName(k);
+    stamp(outDir, file);
+    fs.writeFileSync(file, "x");
+  });
+}
+`;
+
+// ═══════════════════════════════════════════════════════════════
+// taintpath_J —— C4i：又一批可判定分支 + 又一批 helper 载体
+//
+// ① 短路运算符（|| / && / ??）：与三元同形，只是判据从 cond 换成左操作数的真假。
+//    判不出（实参不是常量）一律退回保守 —— emitOrRuntime 守的就是这条底线。
+// ② 模板串内嵌的三元：`${f ? "fixed" : n}` 是独立表达式，折叠要能进去。
+// ③ 柯里化：`withExt(ext)(n)` 真正塑形的是被返回出来的内层函数。
+// ④ namespace 内的函数声明：旧收集走 sf.getFunctions() ⇒ namespace 里整片漏。
+// ⑤ rest 形参：它吃掉**一批**实参，按位截断会把第二位当成越界抹掉。
+// ⑥ IIFE 定义：初值是**调用**不是箭头；计算属性名只有 KEY 是模块级字面量常量才解得出。
+//
+// 写法约定（与前面几族同源）：sink 实参里**不直接出现**污点变量 k。
+// 命名前先 grep TS_FILE_SINK_NAMES —— 撞上会被 sink 兜底命中，用例变假通过（R13）。
+// 另：成员调用位 `.name(` 的匹配与宿主无关（C4g 的保守策略），所以「算不出属性名」
+// 那条负对照不能和同名可解 helper 放在同一项目里（2026-09-21 实测踩到）。
+// ═══════════════════════════════════════════════════════════════
+const HELPERS_J = `// taintpath_J —— C4i：可判定分支的扩展 + helper 载体的扩展
+import * as p from "path";
+import * as fsx from "fs";
+
+// ── ① 短路 + ② 模板串 ──
+export const viaOr = (n: string, s: any): string => s || n + ".md";
+export const viaAnd = (n: string, s: any): string => s && n + ".md";
+export const viaNull = (n: string, s: any): string => s ?? n + ".md";
+export const viaTpl = (n: string, f: boolean): string => \`\${f ? "fixed" : n}.md\`;
+
+// ── ③ 柯里化 ──
+export const withExt = (ext: string) => (n: string): string => n + ext;
+export const dropExt = (_ext: string) => (_n: string): string => "fixed.md";
+export function curriedFn(ext: string) { return (n: string): string => n + ext; }
+
+// ── ④ namespace ──
+export namespace P {
+  export function toPath(n: string): string { return n + ".md"; }
+  export function dropPath(_n: string): string { return "fixed.md"; }
+}
+// 体内有 sink ⇒ 判据③不成立（注意：这族的 sink 用的是间接形态，避免被
+// 跨函数 sink 形参映射兜底命中，那样归因就不干净了）
+export namespace L {
+  export function leakPath(n: string): string { fsx.readFileSync(n); return "x"; }
+}
+
+// ── ⑤ rest 形参 ──
+export function joinAll(...parts: string[]): string { return parts.join("/"); }
+export function fixedAll(..._parts: string[]): string { return "fixed.md"; }
+
+// ── ⑥ IIFE 定义 ──
+export const toPathIife = (() => (n: string): string => n + ".md")();
+export const dropIife = (() => (_n: string): string => "fixed.md")();
+export const leakIife = (() => (n: string): string => { fsx.readFileSync(n); return "x"; })();
+
+// ── ⑦ 计算属性名 ──
+const KEY = "toFile";   // 模块级字面量常量 ⇒ 解得出来
+const DROP = "toText";
+const RANDOM = String(Math.random()); // 不是常量 ⇒ 解不出来
+export const Box: any = { [KEY]: (n: string): string => n + ".md" };
+export const DropBox: any = { [DROP]: (_n: string): string => "fixed.md" };
+export const DynBox: any = { [RANDOM]: (n: string): string => n + ".md" };
+
+// 真守卫，名字不含任何 G-C 后缀（G2 tier-0 自身证据）
+export function stamp(baseDir: string, targetPath: string): void {
+  const base = p.resolve(baseDir);
+  const target = p.resolve(targetPath);
+  if (target !== base && !target.startsWith(base + p.sep)) {
+    throw new Error("path escapes output dir");
+  }
+}
+`;
+
+const HANDLER_J = `// taintpath_J —— C4i：可判定分支的扩展 + helper 载体的扩展
+import * as fs from "fs";
+import * as p from "path";
+import {
+  viaOr, viaAnd, viaNull, viaTpl,
+  withExt, dropExt, curriedFn,
+  P, L, joinAll, fixedAll,
+  toPathIife, dropIife, leakIife,
+  Box, DropBox, DynBox, stamp,
+} from "./helpers";
+
+// ① || 左为真值 ⇒ 返回左值常量 —— 正对照 = emitOrTakeRight
+export function emitOrTakeLeft(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = viaOr(k, "fixed.md");
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+export function emitOrTakeRight(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = viaOr(k, "");
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ① && 左为假值 ⇒ 短路在左值就结束 —— 正对照 = emitAndTakeRight
+export function emitAndTakeLeft(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = viaAnd(k, "");
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+export function emitAndTakeRight(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = viaAnd(k, "pre");
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ① ?? 左非 null ⇒ 取左支 —— 正对照 = emitNullishTakeRight
+export function emitNullishTakeLeft(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = viaNull(k, "fixed.md");
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+export function emitNullishTakeRight(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = viaNull(k, null);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ① 保守侧：实参不是常量 ⇒ 判不出 ⇒ 一律照标
+export function emitOrRuntime(doc: Record<string, any>, outDir: string): void {
+  const runtimeOn = Date.now() > 0;
+  Object.keys(doc).forEach((k) => {
+    const rel = viaOr(k, runtimeOn);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ② 模板串里走常量分支 —— 正对照 = emitTplFlow
+export function emitTplConst(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = viaTpl(k, true);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+export function emitTplFlow(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = viaTpl(k, false);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ③ 柯里化：污点在第二跳
+export function emitCurrySecond(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = withExt(".md")(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ③ 柯里化：污点在第一跳（被闭包捕获）
+export function emitCurryFirst(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = withExt(k)("name");
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ③ 柯里化：函数声明写法
+export function emitCurryFn(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = curriedFn(".md")(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ③ 内层丢弃形参 —— 正对照 = emitCurrySecond
+export function emitCurryDrop(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = dropExt(".md")(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ③ 两边都是常量 —— 没有污点进来
+export function emitCurryConst(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = withExt(".md")("fixed");
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ④ namespace 内的 helper
+export function emitNsPath(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = P.toPath(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ④ 限定名也要走依赖分析 —— 正对照 = emitNsPath
+export function emitNsDrop(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = P.dropPath(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ④ 体内有 sink ⇒ 判据③不放行
+export function emitNsLeak(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = L.leakPath(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ⑤ rest 形参吃掉剩余实参 —— 正对照 = emitRestDrop
+export function emitRestJoin(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = joinAll("out", k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+export function emitRestDrop(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = fixedAll("out", k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ⑥ IIFE 定义 —— 正对照 = emitIifeDrop
+export function emitIifePath(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = toPathIife(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+export function emitIifeDrop(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = dropIife(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ⑥ IIFE 体内有 sink
+export function emitIifeLeak(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = leakIife(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ⑦ 计算属性名可解
+export function emitComputed(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = Box.toFile(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ⑦ 同一个载体但丢弃形参 —— 正对照 = emitComputed
+export function emitComputedDrop(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = DropBox.toText(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// ⑦ 属性名算不出来 ⇒ 不登记（本项目里没有别处登记过 toPath 这个成员名，
+//    所以 .toPath( 这个调用位匹配不到任何已确证的 helper）
+export function emitComputedDyn(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const rel = DynBox.toPath(k);
+    fs.writeFileSync(outDir + "/" + rel, "x");
+  });
+}
+
+// 压制对照：召回再放宽一轮，守卫仍压得住
+export function emitGuarded(doc: Record<string, any>, outDir: string): void {
+  Object.keys(doc).forEach((k) => {
+    const file = outDir + "/" + withExt(".md")(k);
+    stamp(outDir, file);
+    fs.writeFileSync(file, "x");
+  });
+}
+`;
+
 function writeProject(id: string, files: Record<string, string>): void {
   const dir = path.join(GEN_DIR, id);
   fs.mkdirSync(path.join(dir, "src"), { recursive: true });
@@ -1174,4 +1704,6 @@ if (require.main === module) {
   writeProject("taintpath_F", { "src/helpers.ts": HELPERS_F, "src/handler.ts": HANDLER_F });
   writeProject("taintpath_G", { "src/helpers.ts": HELPERS_G, "src/handler.ts": HANDLER_G });
   writeProject("taintpath_H", { "src/helpers.ts": HELPERS_H, "src/handler.ts": HANDLER_H });
+  writeProject("taintpath_I", { "src/helpers.ts": HELPERS_I, "src/handler.ts": HANDLER_I });
+  writeProject("taintpath_J", { "src/helpers.ts": HELPERS_J, "src/handler.ts": HANDLER_J });
 }

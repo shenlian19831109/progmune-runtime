@@ -1441,7 +1441,9 @@ describe("C4g：helper 换个载体（对象字面量方法 / 类方法 / 解构
     "};",
     "export class Renderer {",
     '  inst(n: string): string { return n + ".md"; }',
-    '  static stat(n: string): string { return n + ".txt"; }',
+    // 原名 stat —— **stat 在 fs sink 名单里**，调用点会被 sink 兜底直接标中，
+    // 这条用例于是变成假通过（测的根本不是 helper 传播，R13）。改名后才测得准。
+    '  static toFile(n: string): string { return n + ".txt"; }',
     "}",
     'export function viaName({ name }: any): string { return name + ".md"; }',
   ].join("\n");
@@ -1451,8 +1453,8 @@ describe("C4g：helper 换个载体（对象字面量方法 / 类方法 / 解构
       expectMark: true, why: "宿主名可确证 ⇒ 走限定名 Owner.method" },
     { name: "正例·类实例方法", fn: "emit", files: { "helpers.ts": HELPERS, "it.ts": emit("r.inst(k)", "const r = new Renderer();") },
       expectMark: true, why: "宿主是变量，限定名对不上 ⇒ 靠方法名唯一 + 成员调用位" },
-    { name: "正例·静态类方法", fn: "emit", files: { "helpers.ts": HELPERS, "it.ts": emit("Renderer.stat(k)") },
-      expectMark: true, why: "与对象字面量同形，走限定名" },
+    { name: "正例·静态类方法", fn: "emit", files: { "helpers.ts": HELPERS, "it.ts": emit("Renderer.toFile(k)") },
+      expectMark: true, why: "与对象字面量同形，走限定名（方法名刻意避开 sink 名单，否则用例是假通过）" },
     { name: "正例·解构形参", fn: "emit", files: { "helpers.ts": HELPERS, "it.ts": emit("viaName({ name: k })") },
       expectMark: true, why: "形参名要从绑定模式里抽出来 —— getName() 给的是整个模式而不是 name" },
     { name: "负对照·对象字面量方法丢弃形参", fn: "emit", files: { "helpers.ts": HELPERS, "it.ts": emit("Drop.fixed(k)") },
@@ -1461,6 +1463,327 @@ describe("C4g：helper 换个载体（对象字面量方法 / 类方法 / 解构
       expectMark: false, why: "无污点流入；正对照 = 正例·解构形参" },
     { name: "负对照·方法是真塑形但实参是字面量", fn: "emit", files: { "helpers.ts": HELPERS, "it.ts": emit('Util.toPath("static")') },
       expectMark: false, why: "传播得靠实参带污点" },
+  ];
+
+  for (const c of cases) {
+    it(`${c.name} —— ${c.why}`, () => {
+      const dir = makeProject(c.files);
+      try {
+        const marks = marksFor(dir, c.fn);
+        if (c.expectMark) expect(marks).toContain(PATH_MARK);
+        else expect(marks).not.toContain(PATH_MARK);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    }, 150_000);
+  }
+});
+
+// ══════════════════════════════════════════════════════════════════════
+// C4h（2026-09-20）：三件都在「名录 ↔ 调用点」交界上的事
+//
+//   ① 调用点常量代入 —— helper 的 return 走三元，本次调用喂的是常量 ⇒ 返回值
+//      其实是字面量。名录里的依赖集是**跨调用点**的并集，收不住这种个案
+//      （探针实测：`viaFlag(k, true)` 误标）。按位置把常量代回去、解掉可判定的
+//      三元，判不出就退回原结论（保守侧）。
+//   ② 同名成员多处 —— 旧规则要求方法名全项目唯一才登记 `.method(`。唯一性只是
+//      「不可能认错」的充分条件：同名两处**都被确证**时同样不可能认错。
+//      顺带修掉一处真实缺陷：旧代码在确证之前就把裸名塞进了成员名录。
+//   ③ 属性承载的箭头 helper —— `const Util = { toPath: (n) => … }` 与
+//      `Util.toPath = (n) => …`，这两种既不是方法声明也不是变量声明。
+//
+// 写法约定（与前几族同源）：sink 实参里**不直接出现**污点变量 k。
+// ══════════════════════════════════════════════════════════════════════
+describe("C4h：名录之外的三处收口（调用点常量 / 同名成员 / 属性箭头）", () => {
+  type Case = { name: string; fn: string; files: Record<string, string>; expectMark: boolean; why: string };
+
+  const emit = (relExpr: string, pre = "", imports = "", helpers = "") => ({
+    "helpers.ts": helpers,
+    "it.ts": [
+      'import * as fs from "fs";',
+      ...(imports ? [`import { ${imports} } from "./helpers";`] : []),
+      "export function emit(doc: Record<string, any>, outDir: string) {",
+      ...(pre ? [`  ${pre}`] : []),
+      "  Object.keys(doc).forEach((k) => {",
+      `    const rel = ${relExpr};`,
+      '    fs.writeFileSync(outDir + "/" + rel, "x");',
+      "  });",
+      "}",
+    ].join("\n"),
+  });
+
+  // ── ① 调用点常量代入 ───────────────────────────────────────────────
+  const H_CONST = [
+    'export const viaFlag = (n: string, flag: boolean): string => (flag ? "fixed.md" : n + ".md");',
+    // 两支都含形参 —— 收精度不能收到这儿
+    "export const eitherWay = (n: string, flag: boolean): string => (flag ? n : n + '.md');",
+    "export const pickMode = (n: string, mode: string): string => (mode === 'raw' ? n : 'fixed.md');",
+    // 两跳：折叠要能穿过 helper 之间的嵌套调用
+    'export const wrapFlag = (n: string, flag: boolean): string => viaFlag(n, flag);',
+  ].join("\n");
+
+  // ── ② 同名成员多处 ─────────────────────────────────────────────────
+  const H_TWICE_OK = [
+    "export class Uploader { toPath(n: string): string { return n + '.md'; } }",
+    "export class Downloader { toPath(n: string): string { return n + '.tmp'; } }",
+  ].join("\n");
+  const H_TWICE_DROP = [
+    "export class DropA { still(n: string): string { return 'fixed.md'; } }",
+    "export class DropB { still(n: string): string { return 'other.md'; } }",
+  ].join("\n");
+  // 一处引用了模块级**非字面量**对象 ⇒ 判据③不成立 ⇒ 整个同名组都不许放行。
+  // 刻意不含 sink —— 否则会被跨函数 sink 形参映射标中，归因就不干净了（R13）。
+  const H_TWICE_BAD = [
+    "export class Uploader { toPath(n: string): string { return n + '.md'; } }",
+    "export const dict: Record<string, string> = {};",
+    "export class Weird { toPath(n: string): string { return dict[n]; } }",
+  ].join("\n");
+  const H_SOLO = [
+    "export class Solo { toPath(n: string): string { return n + '.md'; } }",
+  ].join("\n");
+
+  // ── ③ 属性承载的箭头 ───────────────────────────────────────────────
+  const H_PROP = [
+    "export const Util2 = {",
+    "  toPath: (n: string): string => n + '.md',",
+    "};",
+    "export const NS = {",
+    "  path: {",
+    "    toPath: (n: string): string => n + '.md',",
+    "  },",
+    "};",
+    "export const Patched: any = {};",
+    "Patched.toPath = (n: string): string => n + '.md';",
+    "export const DropProp = {",
+    "  fixed: (n: string): string => 'fixed.md',",
+    "};",
+  ].join("\n");
+
+  // ── 缺陷回归门：非塑形方法的成员调用位不能算塑形 ────────────────────
+  const H_NONSHAPER = [
+    "export const registry: Record<string, string> = {};",
+    "export class Reg {",
+    "  lookup(n: string): string { return registry[n]; }",
+    "}",
+  ].join("\n");
+  const H_SHAPER_LOOKUP = [
+    "export class RegSafe {",
+    "  lookup(n: string): string { return n + '.md'; }",
+    "}",
+  ].join("\n");
+
+  const cases: Case[] = [
+    // ① —— 精度侧
+    { name: "正例·① 走真流出分支", fn: "emit", files: emit("viaFlag(k, false)", "", "viaFlag", H_CONST),
+      expectMark: true, why: "flag=false ⇒ 走的是含 n 的那支" },
+    { name: "正例·① 两支都含形参", fn: "emit", files: emit("eitherWay(k, true)", "", "eitherWay", H_CONST),
+      expectMark: true, why: "收精度不许收过头 —— 选中的分支里仍有 n" },
+    { name: "正例·① 字符串比较命中", fn: "emit", files: emit('pickMode(k, "raw")', "", "pickMode", H_CONST),
+      expectMark: true, why: "mode === 'raw' 命中 ⇒ 返回 n" },
+    { name: "正例·① 第二参是变量（判不出就照标）", fn: "emit", files: emit("viaFlag(k, dyn)", "const dyn = Math.random() > 0;", "viaFlag", H_CONST),
+      expectMark: true, why: "保守侧：实参不是常量 ⇒ 一律退回名录结论，不许假装看得懂" },
+    { name: "负对照·① 常量把分支钉死成字面量", fn: "emit", files: emit("viaFlag(k, true)", "", "viaFlag", H_CONST),
+      expectMark: false, why: "本次调用的返回值就是 'fixed.md' —— 名录级依赖集收不住这种个案；正对照 = ① 走真流出分支" },
+    { name: "负对照·① 字符串比较没命中", fn: "emit", files: emit('pickMode(k, "cooked")', "", "pickMode", H_CONST),
+      expectMark: false, why: "mode 不是 'raw' ⇒ 走常量支；正对照 = ① 字符串比较命中" },
+    { name: "负对照·① 嵌套在 path.join 里", fn: "emit", files: emit('path.join("out", viaFlag(k, true))', "", "viaFlag", H_CONST),
+      expectMark: false, why: "整条 rhs 含 k，但那条支路不流出 —— 折叠要能作用在嵌套的内层" },
+    { name: "负对照·① 两跳 + 常量", fn: "emit", files: emit("wrapFlag(k, true)", "", "wrapFlag", H_CONST),
+      expectMark: false, why: "wrapFlag(n, flag) = viaFlag(n, flag)，折叠要穿过一层 helper" },
+    { name: "正对照·① 两跳走流出分支", fn: "emit", files: emit("wrapFlag(k, false)", "", "wrapFlag", H_CONST),
+      expectMark: true, why: "与上一条镜像：常量改变量 ⇒ 立刻转红，证明归因在这条机制上" },
+
+    // ② —— 召回侧
+    { name: "正例·② 同名成员两处均塑形", fn: "emit", files: emit("u.toPath(k)", "const u = new Uploader();", "Uploader", H_TWICE_OK),
+      expectMark: true, why: "两处都被确证 ⇒ `.toPath(` 不可能落到别的实现上（唯一性换成全组确证）" },
+    { name: "正例·② 另一处同名也被识别", fn: "emit", files: emit("d.toPath(k)", "const d = new Downloader();", "Downloader", H_TWICE_OK),
+      expectMark: true, why: "合并是对称的：同组的另一个宿主同样要接得上" },
+    { name: "正例·② 单处同名的老对照组", fn: "emit", files: emit("s.toPath(k)", "const s = new Solo();", "Solo", H_SOLO),
+      expectMark: true, why: "全组确证是旧唯一性规则的上位，老行为必须还在" },
+    { name: "负对照·② 同名两处都丢弃形参", fn: "emit", files: emit("a.still(k)", "const a = new DropA();", "DropA", H_TWICE_DROP),
+      expectMark: false, why: "合并后的依赖集按位取并集 —— 两处都丢 ⇒ 仍为空，精度不许丢" },
+    { name: "负对照·② 同名一处非塑形", fn: "emit", files: emit("u.toPath(k)", "const u = new Uploader();", "Uploader", H_TWICE_BAD),
+      expectMark: false, why: "整组不放行（R11 的不变量：必须在每一种实现上都成立）；正对照 = ② 同名成员两处均塑形" },
+
+    // ③ —— 召回侧
+    { name: "正例·③ 属性箭头 helper", fn: "emit", files: emit("Util2.toPath(k)", "", "Util2", H_PROP),
+      expectMark: true, why: "`{ toPath: (n) => … }` 既不是方法声明也不是变量声明 —— 旧名录整片漏" },
+    { name: "正例·③ 嵌套对象的属性箭头", fn: "emit", files: emit("NS.path.toPath(k)", "", "NS", H_PROP),
+      expectMark: true, why: "限定名要能沿 owner 链一路拼到最外层变量" },
+    { name: "正例·③ 属性赋值箭头", fn: "emit", files: emit("Patched.toPath(k)", "", "Patched", H_PROP),
+      expectMark: true, why: "`Obj.method = (n) => …` 这种后挂写法同属一族" },
+    { name: "负对照·③ 属性箭头丢弃形参", fn: "emit", files: emit("DropProp.fixed(k)", "", "DropProp", H_PROP),
+      expectMark: false, why: "召回放宽到新载体，C4f/C4h-① 的收窄要跟得上；正对照 = ③ 属性箭头 helper" },
+    { name: "负对照·③ 属性箭头喂字面量", fn: "emit", files: emit('Util2.toPath("lit")', "", "Util2", H_PROP),
+      expectMark: false, why: "无污点流入" },
+
+    // 缺陷回归门（旧行为：确证之前就把裸名登记进成员名录）
+    { name: "负对照·非塑形方法的成员调用位不算塑形", fn: "emit", files: emit("r.lookup(k)", "const r = new Reg();", "Reg", H_NONSHAPER),
+      expectMark: false, why: "lookup 引用了模块级非字面量对象 ⇒ 三条判据不成立 ⇒ 成员调用位不许进名录" },
+    { name: "正对照·同一个名字换成塑形版", fn: "emit", files: emit("r.lookup(k)", "const r = new RegSafe();", "RegSafe", H_SHAPER_LOOKUP),
+      expectMark: true, why: "与上一条镜像 ⇒ 不标是因为判据，不是因为这条路压根走不通" },
+  ];
+
+  for (const c of cases) {
+    it(`${c.name} —— ${c.why}`, () => {
+      const dir = makeProject(c.files);
+      try {
+        const marks = marksFor(dir, c.fn);
+        if (c.expectMark) expect(marks).toContain(PATH_MARK);
+        else expect(marks).not.toContain(PATH_MARK);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    }, 150_000);
+  }
+});
+
+// C4i（2026-09-21）：六个缺口 —— 三个是精度、三个是召回载体
+//   精度 ① 短路运算符（|| / && / ?? 与三元同形，只是判据换成左操作数的真假）
+//        ② 模板串内嵌的三元（${} 内部是独立表达式，折叠要能进去）
+//   召回 ③ 柯里化高阶 helper    ④ namespace 内的函数声明
+//        ⑤ rest 形参            ⑥ IIFE 定义 / 计算属性名
+// 每组都配「判不出 ⇒ 退回保守」与「helper 真丢弃 ⇒ 仍不标」两条镜像（R14/R15）。
+describe("C4i：helper 的又一批载体与又一批可判定分支", () => {
+  type Case = { name: string; fn: string; files: Record<string, string>; expectMark: boolean; why: string };
+
+  const emit = (relExpr: string, pre = "", imports = "", helpers = "") => ({
+    "helpers.ts": helpers,
+    "it.ts": [
+      'import * as fs from "fs";',
+      ...(imports ? [`import { ${imports} } from "./helpers";`] : []),
+      "export function emit(doc: Record<string, any>, outDir: string) {",
+      ...(pre ? [`  ${pre}`] : []),
+      "  Object.keys(doc).forEach((k) => {",
+      `    const rel = ${relExpr};`,
+      '    fs.writeFileSync(outDir + "/" + rel, "x");',
+      "  });",
+      "}",
+    ].join("\n"),
+  });
+
+  // ── ① 短路 + ② 模板串 ─────────────────────────────────────────────
+  const H_FOLD = [
+    'export const viaOr = (n: string, s: any): string => s || n + ".md";',
+    'export const viaAnd = (n: string, s: any): string => s && n + ".md";',
+    'export const viaNull = (n: string, s: any): string => s ?? n + ".md";',
+    'export const viaTpl = (n: string, f: boolean): string => `${f ? "fixed" : n}.md`;',
+  ].join("\n");
+
+  // ── ③ 柯里化 ─────────────────────────────────────────────────────
+  const H_CURRY = [
+    'export const withExt = (ext: string) => (n: string): string => n + ext;',
+    'export const dropExt = (_ext: string) => (_n: string): string => "fixed.md";',
+    'export function curriedFn(ext: string) { return (n: string): string => n + ext; }',
+  ].join("\n");
+
+  // ── ④ namespace ──────────────────────────────────────────────────
+  const H_NS = [
+    'import * as fs from "fs";',
+    "export namespace P {",
+    "  export function toPath(n: string): string { return n + '.md'; }",
+    "  export function dropPath(_n: string): string { return 'fixed.md'; }",
+    "}",
+    "export namespace L {",
+    "  export function leakPath(n: string): string { fs.readFileSync(n); return 'x'; }",
+    "}",
+  ].join("\n");
+
+  // ── ⑤ rest 形参 ──────────────────────────────────────────────────
+  const H_REST = [
+    'export function joinAll(...parts: string[]): string { return parts.join("/"); }',
+    'export function fixedAll(..._parts: string[]): string { return "fixed.md"; }',
+  ].join("\n");
+
+  // ── ⑥ IIFE 定义 ──────────────────────────────────────────────────
+  const H_IIFE = [
+    'import * as fs from "fs";',
+    'export const toPathIife = (() => (n: string): string => n + ".md")();',
+    'export const dropIife = (() => (_n: string): string => "fixed.md")();',
+    'export const leakIife = (() => (n: string): string => { fs.readFileSync(n); return "x"; })();',
+  ].join("\n");
+
+  // ── ⑦ 计算属性名（只有 KEY 是模块级字面量常量才解得出来）────────────
+  const H_COMPUTED = [
+    'const KEY = "toPath";',
+    'const DROP = "toFile";',
+    "export const Box: any = { [KEY]: (n: string): string => n + '.md' };",
+    "export const DropBox: any = { [DROP]: (_n: string): string => 'fixed.md' };",
+  ].join("\n");
+  // 刻意**单独一个文件**：成员调用位 `.toPath(` 的匹配与宿主无关（C4g 的保守策略），
+  // 把它和上面那个可解的 Box 放进同一个文件，会被 Box 登记的成员名顺带命中 ——
+  // 那条期望就得改成 mark，测的也就不是「算不出」了（2026-09-21 实测踩到）。
+  const H_DYN = [
+    "const RANDOM = String(Math.random());",
+    "export const DynBox: any = { [RANDOM]: (n: string): string => n + '.md' };",
+  ].join("\n");
+
+  const cases: Case[] = [
+    // ① 短路 —— 精度侧
+    { name: "正例·① ||左为假值 ⇒ 取右支", fn: "emit", files: emit('viaOr(k, "")', "", "viaOr", H_FOLD),
+      expectMark: true, why: "空串 falsy ⇒ 真的会走到含 n 的那支" },
+    { name: "负对照·① ||左为真值 ⇒ 取左支", fn: "emit", files: emit('viaOr(k, "fixed.md")', "", "viaOr", H_FOLD),
+      expectMark: false, why: "返回值就是左值常量；正对照 = 上一条" },
+    { name: "正例·① &&左为真值 ⇒ 取右支", fn: "emit", files: emit('viaAnd(k, "pre")', "", "viaAnd", H_FOLD),
+      expectMark: true, why: "truthy ⇒ 走到形参那支" },
+    { name: "负对照·① &&左为假值 ⇒ 取左支", fn: "emit", files: emit('viaAnd(k, "")', "", "viaAnd", H_FOLD),
+      expectMark: false, why: "短路在左值就结束了；正对照 = 上一条" },
+    { name: "负对照·① ??左非 null ⇒ 取左支", fn: "emit", files: emit('viaNull(k, "fixed.md")', "", "viaNull", H_FOLD),
+      expectMark: false, why: "?? 的判据是「非空」而不是「真」，两种语义不能混" },
+    { name: "正例·① ??左为 null ⇒ 取右支", fn: "emit", files: emit("viaNull(k, null)", "", "viaNull", H_FOLD),
+      expectMark: true, why: "与上一条镜像 ⇒ 归因确实落在 ?? 的判定上" },
+    { name: "保守侧·① 实参是变量 ⇒ 判不出就照标", fn: "emit", files: emit("viaOr(k, dyn)", "const dyn = Math.random() > 0;", "viaOr", H_FOLD),
+      expectMark: true, why: "认不出就不收精度 —— 这条守的是保守侧的底线" },
+
+    // ② 模板串 —— 精度侧
+    { name: "正例·② 模板串里走流出分支", fn: "emit", files: emit("viaTpl(k, false)", "", "viaTpl", H_FOLD),
+      expectMark: true, why: "f=false ⇒ ${} 里取 n" },
+    { name: "负对照·② 模板串里走常量分支", fn: "emit", files: emit("viaTpl(k, true)", "", "viaTpl", H_FOLD),
+      expectMark: false, why: "折叠必须能进 ${} 内部；正对照 = 上一条" },
+    { name: "保守侧·② 模板串的 flag 是变量", fn: "emit", files: emit("viaTpl(k, dyn)", "const dyn = Math.random() > 0;", "viaTpl", H_FOLD),
+      expectMark: true, why: "判不出 ⇒ 退回保守" },
+
+    // ③ 柯里化 —— 召回侧
+    { name: "正例·③ 柯里化·污点在第二跳", fn: "emit", files: emit('withExt(".md")(k)', "", "withExt", H_CURRY),
+      expectMark: true, why: "真正塑形的是被返回出来的内层函数" },
+    { name: "正例·③ 柯里化·污点在第一跳", fn: "emit", files: emit('withExt(k)("name")', "", "withExt", H_CURRY),
+      expectMark: true, why: "外层实参被闭包捕获，同样是流进去的" },
+    { name: "正例·③ 柯里化·函数声明写法", fn: "emit", files: emit('curriedFn(".md")(k)', "", "curriedFn", H_CURRY),
+      expectMark: true, why: "return 箭头不只出现在箭头 helper 上" },
+    { name: "负对照·③ 柯里化·内层丢弃形参", fn: "emit", files: emit('dropExt(".md")(k)', "", "dropExt", H_CURRY),
+      expectMark: false, why: "召回放宽到新载体，收窄要跟得上；正对照 = ③ 污点在第二跳" },
+    { name: "负对照·③ 柯里化·两边都是常量", fn: "emit", files: emit('withExt(".md")("fixed")', "", "withExt", H_CURRY),
+      expectMark: false, why: "根本没有污点进来" },
+
+    // ④ namespace —— 召回侧
+    { name: "正例·④ namespace 内的 helper", fn: "emit", files: emit("P.toPath(k)", "", "P", H_NS),
+      expectMark: true, why: "旧收集只走 sf.getFunctions() ⇒ namespace 里整片漏" },
+    { name: "负对照·④ namespace 内丢弃形参", fn: "emit", files: emit("P.dropPath(k)", "", "P", H_NS),
+      expectMark: false, why: "限定名也要走依赖分析；正对照 = 上一条" },
+    { name: "负对照·④ namespace 内有 sink", fn: "emit", files: emit("L.leakPath(k)", "", "L", H_NS),
+      expectMark: false, why: "判据③照旧生效 —— 载体换了不等于放水" },
+
+    // ⑤ rest —— 召回侧
+    { name: "正例·⑤ rest 形参吃掉剩余实参", fn: "emit", files: emit('joinAll("out", k)', "", "joinAll", H_REST),
+      expectMark: true, why: "rest 位是**一批**实参，按位截断会把第二位当成越界抹掉" },
+    { name: "负对照·⑤ rest 但丢弃", fn: "emit", files: emit('fixedAll("out", k)', "", "fixedAll", H_REST),
+      expectMark: false, why: "召回放宽后精度不许丢；正对照 = 上一条" },
+
+    // ⑥ IIFE —— 召回侧
+    { name: "正例·⑥ IIFE 定义 helper", fn: "emit", files: emit("toPathIife(k)", "", "toPathIife", H_IIFE),
+      expectMark: true, why: "初值是**调用**不是箭头 —— 真正的 helper 在返回值里" },
+    { name: "负对照·⑥ IIFE 内丢弃形参", fn: "emit", files: emit("dropIife(k)", "", "dropIife", H_IIFE),
+      expectMark: false, why: "收窄要跟得上；正对照 = 上一条" },
+    { name: "负对照·⑥ IIFE 体内有 sink", fn: "emit", files: emit("leakIife(k)", "", "leakIife", H_IIFE),
+      expectMark: false, why: "declText 取的是整条 IIFE ⇒ sink 检查仍覆盖得到" },
+
+    // ⑦ 计算属性名 —— 召回侧
+    { name: "正例·⑦ 计算属性名可解", fn: "emit", files: emit("Box.toPath(k)", "", "Box", H_COMPUTED),
+      expectMark: true, why: "KEY 是模块级字面量常量 ⇒ 名字解得出来" },
+    { name: "负对照·⑦ 计算属性名里的 helper 丢弃形参", fn: "emit", files: emit("DropBox.toFile(k)", "", "DropBox", H_COMPUTED),
+      expectMark: false, why: "收窄要跟得上；正对照 = 上一条" },
+    { name: "负对照·⑦ 属性名算不出来", fn: "emit", files: emit("DynBox.toPath(k)", "", "DynBox", H_DYN),
+      expectMark: false, why: "`String(Math.random())` 不是常量 ⇒ 不登记（认不出就不传播）" },
   ];
 
   for (const c of cases) {

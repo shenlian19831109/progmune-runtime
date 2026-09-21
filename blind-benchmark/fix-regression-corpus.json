@@ -2,7 +2,7 @@
   "name": "fix-regression-corpus",
   "version": 2,
   "created": "2026-09-11",
-  "updated": "2026-09-20",
+  "updated": "2026-09-21",
   "method": "真实安全修复回归：对每个修复，扫描「修复前 parent commit」——引擎在该位置/该类型上能否报出违规；再扫修复后确认不误报。来源=GitHub 安全公告数据库（GHSA/CVE），SHA 均经 api.github.com 实测核验。",
   "methodology_rules": [
     {
@@ -125,7 +125,23 @@
       "source": "C4g（3.7.43）—— 语料里的静态方法写成 Renderer.stat(k)，闸门全绿但归因时发现它是被 sink 名单兜底命中的",
       "rule": "测试语料里的标识符（函数名/方法名/变量名）必须先对照产品的各类名单（sink 名单、守卫词表、白名单）查一遍，不能撞名。撞了的话用例会被一条与被测机制毫无关系的规则命中 —— 而且往往是『标对了』的假象，比明显的假通过更难发现。",
       "why": "H 族第一版把静态方法命名为 stat，而 stat 就在 TS_FILE_SINK_NAMES 里（fs.stat）。闸门 92/92 全绿，直到反向验证摘掉方法收集后它仍标才暴露：实测 Other.stat(k)（接收者未定义）、以及类里根本没有 stat 方法，照样标。改名 toFile 后归因才干净（摘掉方法收集 ⇒ 3 条方法正例全部转漏报）。这是 R13（旁路）的一个子类：旁路不只在被测机制内部，还可能来自**别的规则表**。",
-      "current_status": "taintpath_H 静态方法已改名 toFile；生成器里加了注释说明原因。以后新增语料命名前先 grep 一遍 TS_FILE_SINK_NAMES / 守卫词表"
+      "current_status": "taintpath_H 静态方法已改名 toFile；生成器里加了注释说明原因。【2026-09-20 续】同一轮发现**定向用例**里也有同样的假通过：extract-ir-taint-structural.test.ts 的 C4g 组原本也写着 Renderer.stat(k)，那条用例从写下来那天起就没测过 helper 传播（被 sink 名单兜底）。已改名 toFile。⇒ 本规则适用于**所有 fixture**，不只 blind 语料 —— 定向用例看起来小而干净，反而更容易让人不设防。"
+    },
+    {
+      "id": "R17-adjust-without-reproducing-first",
+      "added": "2026-09-20",
+      "source": "C4h（3.7.44）—— 备忘里的三个候选动工前先过探针，结果只有两个是真缺口，反倒挖出一个备忘里没有的**既有缺陷**",
+      "rule": "备忘/清单里的『下一步』条目在动工前必须先用最小探针复现一遍：① 它现在到底是 FAIL 还是 PASS；② 若 FAIL，失败的原因是不是本以为的那个机制。探针的对照组里要顺手带上『看起来差不多但没人提过』的形状 —— 真缺陷常常长在这些地方，而不是清单上。",
+      "why": "C4h 的三个候选里，同名方法两处、属性箭头是真漏报（修了），而探针顺手多写的一句 `class Reg { lookup(n) { return registry[n]; } }` + `r.lookup(k)` 暴露了一个**既有**误报：C4g 在 consider() 之后无条件把裸名登记进成员名录，确证失败的名字照样留在名录里 ⇒ 非塑形方法的成员调用位被当成塑形。这个缺陷不在任何备忘里，也不是本轮的目标 —— 它只是探针旁边多写的一句。反向验证专门加了第 4 刀（退回『确证之前就登记』），才把这条缺陷钉进语料、且归因到具体机制上。",
+      "current_status": "taintpath_I 20 条；反向验证四刀已记入 CHANGELOG 3.7.44 与设计稿 §十四"
+    },
+    {
+      "id": "R18-reverse-blad-must-restore-old-behaviour",
+      "added": "2026-09-21",
+      "source": "C4i（3.7.45）反向验证：七刀里两刀第一次都打偏了",
+      "rule": "反向验证的刀必须退回【旧行为】，不能图省事让函数返回 null / 空值。写刀之前先读调用方怎么用这个返回值 —— 尤其是靠「返回值 !== 入参」判断「这一层有没有做事」的那种（返回 null 会被当成已处理）。刀的转红清单必须落在自己那一组；一旦出现跨组转红，先怀疑刀打偏了，不要急着下「机制有耦合」的结论。",
+      "why": "第 5 刀把 paramIndexOf 改成返回 null ⇒ rest 位整个失去对应形参 ⇒ 所有 helper 的实参被抹光 ⇒ 40 条漏报（正确写法是 return argIndex）。第 2 刀把 foldTemplateSubsts 改成返回 null ⇒ 调用方 `tpl !== s` 判成「已折叠」⇒ 连带 11 条无关用例转红（正确写法是 return expr）。两刀修正后各自只转 1 条，归因才干净。",
+      "current_status": "taintpath_J 26 条；七刀结果已记入 CHANGELOG 3.7.45 与设计稿 §十五"
     }
   ],
   "entries": [
