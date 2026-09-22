@@ -1316,3 +1316,135 @@ outline 切片 110 个文件几乎全是 `routes/api/*`，结果只提取到 **3
 | 4 | 7（+outline，有偏） | 371 | 43.9% | **比较无效**（新片只贡献 4 条 = 1.1%） |
 
 ⇒ outline 需用轮转取样重切后重扫，再判。hoppscotch（backend 子包）抓取中。
+
+---
+
+## 二十、E2：装饰器里的鉴权对规则不可见（2026-09-22）
+
+### 起因：从 44% 未归因里挖形态，挖出一件比「线索清单」更根本的事
+
+§十九 收尾时池的未归因是 **43.9%**。本轮不开新切片，改从**现有 163 条未归因**里挖形态：
+
+| 未归因违规的分布 | 条数 |
+|---|---:|
+| Input Validation | 76 |
+| No Input Sanitization | 24 |
+| Authorization（三类合计） | 21 |
+| 其余（外键 / 会话 / 上传 / 令牌轮换 / 上下文管理 …） | 42 |
+
+逐条回源码看，撞见 `docmost` 的 `GroupController.createGroup`：
+
+```ts
+@UseGuards(JwtAuthGuard)          // ← 类级鉴权
+@Controller('groups')
+export class GroupController {
+  @Post('create')
+  createGroup(@Body() createGroupDto: CreateGroupDto) {
+    const ability = this.workspaceAbility.createForUser(user, workspace);
+    if (ability.cannot(WorkspaceCaslAction.Manage, ...)) throw new ForbiddenException();
+    return this.groupService.createGroup(...);
+  }
+}
+```
+
+而 IR 里这条函数只有 `calls: ["create"]`，`params: [{name:"dto", type:"CreateGroupDto"}]`。
+**`@UseGuards(JwtAuthGuard)` 不在 calls 里，装饰器不在 IR 的任何字段里。**
+
+### 决定性探针（先证明「看不见」，再谈修）
+
+`/tmp/e2-probe`（10 行 NestJS 控制器）→ 跑提取器 + `detectSafeguardViolations`：
+
+| | 结果 |
+|---|---|
+| IR calls | `["create"]` —— 守卫不存在 |
+| 修复前违规 | `Authorization (Unauthenticated Mutation)` + `Input Validation` |
+| 手工注入 `__progmune_auth_machinery__` 后 | 只剩 `Input Validation` |
+
+⇒ ① 装饰器确实不可见；② 标记通道确实能消掉那条；③ **Input Validation 不受影响**
+（它的 safeguard 不接受任何标记，见下）。三条一次坐实。
+
+### 更底层的发现：语义标记层的跨语言不对称
+
+规则侧（`src/protocol-detector.ts`）定义了 **23 个** `__progmune_*` 语义标记。产出侧：
+
+| 提取器 | 产出标记数 |
+|---|---:|
+| `tools/extract_ir.py`（Python） | **23 / 23** |
+| `src/extract-ir.ts`（TS/JS） | **4 / 23**（path_traversal、ssrf_user_url、token_issued、ownership_checked） |
+| `extract-ir-c` / `-go` / `-java` | **0 / 23** |
+
+而 **FP 观测池 100% 是 TS/JS**。⇒ 规则在 TS 上跑的时候，**19 条证据通道是断的**。
+这不是「规则不准」，是**规则饿着**——在饿着的规则上做词表校准，只会把阈值越调越怪。
+
+其中真正能用来**抑制误报**（safeguard 性质）的只有 5 个，本轮补的是唯一一个
+「**规则侧已经等着认、只是没人产**」的：`__progmune_auth_machinery__`
+（`protocol-detector.ts:398` / `:430` 两条 Authorization 规则的 `auth_check`）。
+
+### 判据抄录（R22：写 expect 前先抄，不靠想象）
+
+| 规则 | safeguard 接受的标记 | 装饰器能否救 |
+|---|---|---|
+| Authorization (Unauthenticated Access / Mutation) | `auth_checked`、`credential_check`、`drf_permissions`、**`auth_machinery`** | ✅ 能 |
+| Token Security (Weak Generation) | `framework_auth`、`auth_machinery` | ✅ 能 |
+| **Input Validation / No Input Sanitization** | **不接受任何 `__progmune_*`**（纯词形匹配） | ❌ **不能** |
+| Data Mutation Without Audit Trail | （本轮未查） | — |
+
+**这条表直接推翻了我自己的一个乐观估计**：初测「装饰器/DTO 覆盖 15.3% 全池」里，
+很大一部分落在 Input Validation 上，而那条规则**根本没有标记通道**。
+修正后按规则重算（分母 367）：
+
+| 路径 | 上限 | 说明 |
+|---|---:|---|
+| E2 装饰器 → `auth_machinery` | Authorization 77 条中 37 条（48%）= **10.1% 全池** | 规则侧零改动 |
+| 规则侧 CASL 词表（`cannot`/`can`，**已在 calls 里**） | 77 条中 39 条 = 10.6% | 属校准，按 R25 等池饱和 |
+| E3 DTO 入参 → 校验 | 输入校验 139 条中 19 条 = 5.2% | **双侧都要动**：新标记 + 给规则加通道 |
+
+### 实现（`src/extract-ir.ts`，类方法分支追加）
+
+镜像 Python 的「类级框架守卫」（`tools/extract_ir.py:1134`：类名含 `authenticator`
+或 DRF `permission_classes` ⇒ 注入 `auth_machinery`）。TS 侧等价物是装饰器：
+
+- 收集**类级 + 方法级**装饰器（类级守卫对全控制器生效）
+- `@Public()` / `@SkipAuth()` / `@AllowAnonymous()` … ⇒ **不注入**（显式免鉴权）
+- `@Api*` ⇒ 跳过（Swagger 文档装饰器，只描述不实施）
+- `@UseGuards(X)` 的实参须像鉴权守卫（`auth|jwt|session|login|permission|role|admin|bearer|credential`）
+  ⇒ 排除 `@UseGuards(ThrottlerGuard)` 这类同名不同义
+- 顶层函数装饰器**不在本轮范围**（边界写死在代码注释与负对照里）
+
+### 实测效果（FP 观测池 6 切片 / 367 条，E2 前后逐条比对）
+
+| 指标 | 结果 |
+|---|---:|
+| Authorization 违规 | **−24**（Unauthenticated Access −11 / Mutation −13） |
+| 新增（ADDED） | **0** |
+| 非 Authorization 规则的变动 | **0**（与判据完全一致） |
+| 涉及切片 | 全在 docmost（池里唯一用装饰器的片；另 5 片是 Express 函数式 / 无守卫） |
+| 命中函数 | 94 → 87（7 个函数的**唯一**违规被消掉，整条从列表消失） |
+
+抽查确认真 FP：`AttachmentController.uploadFile` 第 89 行就是 `@UseGuards(JwtAuthGuard)`。
+**上限 37 条 vs 实际 24 条的差额**：初测的 D1/D2 启发式把 `@Post`/`@Get`/`@Controller`
+也算成「装饰器」（它们不是鉴权装饰器），按设计本就是偏乐观的上限。
+
+### 四门验收
+
+| 门 | 结果 |
+|---|---|
+| build | ✓ tsc 零错误 |
+| taintpath 闸门 | ✓ 160 / 160，失败 0 |
+| fr-007 / fr-016 | ✓ pre 5 / post 0、pre 7 / post 0 维持 |
+| 定向测试 | ✓ 176 全绿（165 → +11 = E2 组） |
+| 反向验证 | ✓ 四刀各落自己那组、残留 0 |
+| **TS 盲测** | LOST 0 / ADDED 0 —— **但这是空过（R23 家族第三次）** |
+
+**为什么盲测是空过**：generated 语料里 `@UseGuards|@Controller|@Roles|@Authorize|@Injectable`
+的命中数是 **0** —— 基线压根没有装饰器，测不到本轮。真证据是上表 FP 池的 −24/0。
+（与 E1 那次同型，只是那次是「判据不看该轴」，这次是「语料缺形状」。）
+
+### 三条不修 / 待办
+
+1. **E3（DTO 校验）**：IR 的 `params` **带着类型**（`type: "CreateGroupDto"`），
+   但要判定「校验在 DTO 类里」得解析那个类的 class-validator 装饰器，
+   并且**规则侧要先给 Input Validation 开一条标记通道** ⇒ 双侧改动，单列一轮。
+2. **CASL 词表**（`cannot` / `can` / `createForUser` 已在 calls 里、规则不认）：
+   属规则侧校准，按 **R25 等池饱和**再动。
+3. **其余 18 条缺的标记**：按 R21 逐条量化后再排优先级，不要一次全补。

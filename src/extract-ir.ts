@@ -410,6 +410,57 @@ function extractDirectCalls(
 const PATH_TRAVERSAL_MARKER = "__progmune_path_traversal__";
 
 // ═══════════════════════════════════════════════════════════════
+// E2（2026-09-22）：TS 侧「框架鉴权」语义标记 —— 镜像 tools/extract_ir.py:1134
+//
+// Python 侧由**类级框架守卫**触发（类名含 authenticator / DRF permission_classes）；
+// TS 侧的等价物是 NestJS 的类/方法级守卫装饰器：@UseGuards(JwtAuthGuard)、@Roles(...) 等。
+// 装饰器里的鉴权既不在函数体文本里、也不在 calls 里，规则**无论如何都看不到**——
+// 探针：@UseGuards(JwtAuthGuard) 的 createGroup 被报「未鉴权」，注入本标记后该条消失。
+//
+// 消费方：protocol-detector 的 Authorization (Unauthenticated Access / Mutation)
+// 两条规则的 auth_check safeguard（protocol-detector.ts:398 / :430）——它们**早已接受**
+// __progmune_auth_machinery__，TS 侧此前从未产出 ⇒ 规则侧零改动。
+//
+// 边界（写死在这里，别想当然）：只有**接受标记的规则**会受益。
+// Input Validation 的 safeguard 不接受任何 __progmune_* 标记（protocol-detector.ts:481
+// 是纯词形匹配），装饰器对它无效；实测注入后 Input Validation 条仍在。
+// ═══════════════════════════════════════════════════════════════
+const AUTH_MACHINERY_MARKER = "__progmune_auth_machinery__";
+/** 显式免鉴权装饰器 —— 出现即不注入。把公开端点判成「有鉴权」是最危险的假阴性。 */
+const AUTH_SKIP_DECORATOR =
+  /^(?:Public|SkipAuth|AllowAnonymous|IsPublic|NoAuth|ApiExcludeEndpoint)$/i;
+/** 承载鉴权的装饰器名（NestJS 约定：Guard = 鉴权/授权）。 */
+const AUTH_DECORATOR =
+  /^(?:UseGuards|Roles|Permissions|Authorize|RequireAuth|RequiresAuth|Authenticated|UseAuth|CheckPermissions|RequirePermissions|AdminOnly)$/i;
+/** @UseGuards(X) 的实参须像鉴权守卫 —— 用于排除 @UseGuards(ThrottlerGuard) 之类。 */
+const GUARD_ARG_AUTH = /auth|jwt|session|login|permission|role|admin|bearer|credential/i;
+
+/**
+ * 由类/方法装饰器判定是否注入框架鉴权标记。文本匹配（与 computeMarkerCalls 口径一致）。
+ * @returns [] 或 [AUTH_MACHINERY_MARKER]
+ */
+function authMachineryFromDecorators(decorators: any[]): string[] {
+  let skip = false;
+  let auth = false;
+  for (const d of decorators) {
+    const text = (d?.getText?.() ?? "").trim();
+    const name = /^@([A-Za-z_$][\w$]*)/.exec(text)?.[1];
+    if (!name) continue;
+    if (AUTH_SKIP_DECORATOR.test(name)) {
+      skip = true;
+      continue;
+    }
+    // Swagger 文档装饰器（@ApiBearerAuth …）只描述、不实施鉴权
+    if (/^Api/i.test(name)) continue;
+    if (!AUTH_DECORATOR.test(name) && !/guard|auth/i.test(name)) continue;
+    const args = /^@[\w$]*\(([\s\S]*)\)$/.exec(text)?.[1] ?? "";
+    if (args.trim() && !GUARD_ARG_AUTH.test(args)) continue;
+    auth = true;
+  }
+  return auth && !skip ? [AUTH_MACHINERY_MARKER] : [];
+}
+
+// ═══════════════════════════════════════════════════════════════
 // G1 PATH_GUARD_EVIDENCE —— 路径穿越的「校验识别」（2026-09-19）
 //
 // 背景：路径穿越标记此前是 `taint → file sink ⇒ 标记`，**不看中间有没有校验**；
@@ -2927,6 +2978,14 @@ function _extractSingleProject(
         // 顺序与函数声明 / 箭头两个分支保持一致：先真实调用，再追加语义标记。
         const mCalls = extractDirectCalls(m, mText);
         mCalls.push(...computeMarkerCalls(mText, mParams.map((p: any) => p.getName()), sinkParams, onMethodHit, guardFns, directGuardFns, shapers));
+        // E2（2026-09-22）：类级 + 方法级守卫装饰器 → 框架鉴权标记。鉴权写在装饰器里，
+        // 函数体文本与 calls 都看不到（镜像 Python 提取器的「类级框架守卫」处理）。
+        for (const mk of authMachineryFromDecorators([
+          ...(cls.getDecorators?.() ?? []),
+          ...(m.getDecorators?.() ?? []),
+        ])) {
+          if (!mCalls.includes(mk)) mCalls.push(mk);
+        }
         funcs.push({
           name: `${cn}.${mn}`,
           params: mParams.map((p: any) => ({ name: p.getName(), type: getParamType(p), typeDetail: getParamTypeDetail(p) })),

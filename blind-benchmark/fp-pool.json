@@ -602,5 +602,60 @@
   "conclusion": "不是 E1 的遗留缺口，24 个点名空函数全部有解释",
   "evidence": "ts-morph AST 逐条核对：23 个体内零 CallExpression（setter/accessor/return this）；1 个 AuthStorageCommand.promptPassword 调用全在嵌套箭头回调里（§十八 已登记的「不修」项）",
   "probe": "/tmp/probe-verdaccio-empty2.ts"
+ },
+ "marker_parity_2026_09_22": {
+  "finding": "规则侧定义 23 个 __progmune_* 语义标记；产出侧严重不对称",
+  "produced": {
+   "python": 23,
+   "ts": 4,
+   "c": 0,
+   "go": 0,
+   "java": 0
+  },
+  "ts_produces": [
+   "__progmune_path_traversal__",
+   "__progmune_ssrf_user_url__",
+   "__progmune_token_issued__",
+   "__progmune_ownership_checked__"
+  ],
+  "pool_is_100pct_ts": true,
+  "consequence": "规则在 TS 上跑的时候 19 条证据通道是断的 ⇒ 不是规则不准，是规则饿着（R27）",
+  "check_before_tuning": "先查规则的 safeguard 接受哪些标记、以及它**是否接受标记**——Input Validation 的 safeguard 是纯词形匹配、不接受任何标记"
+ },
+ "e2_round_2026_09_22": {
+  "gap": "NestJS 的鉴权写在装饰器里（@UseGuards(JwtAuthGuard)，类级/方法级），既不在函数体文本也不在 calls 里 ⇒ 规则看不见",
+  "probe": "/tmp/e2-probe + /tmp/e2-verify.ts：IR calls=[create]；手工注入 __progmune_auth_machinery__ 后 Authorization (Unauthenticated Mutation) 消失，Input Validation 仍在",
+  "fix": "extract-ir.ts 类方法分支：类级+方法级装饰器 ⇒ __progmune_auth_machinery__（镜像 tools/extract_ir.py:1134 的类级框架守卫）；**规则侧零改动**（protocol-detector.ts:398/:430 早已接受）",
+  "boundaries": [
+   "@Public()/@SkipAuth()/@AllowAnonymous() 显式免鉴权 ⇒ 不注入",
+   "@Api*（Swagger 文档装饰器）⇒ 跳过",
+   "@UseGuards(ThrottlerGuard) 等非鉴权守卫 ⇒ 不注入（实参须匹配 auth|jwt|session|login|permission|role|admin|bearer|credential）",
+   "顶层函数装饰器不在本轮范围"
+  ],
+  "measured_effect": {
+   "authorization_lost": 24,
+   "breakdown": {
+    "Authorization (Unauthenticated Access)": 11,
+    "Authorization (Unauthenticated Mutation)": 13
+   },
+   "added": 0,
+   "non_authorization_change": 0,
+   "slice": "docmost 全部",
+   "hit_functions": "94 → 87"
+  },
+  "estimate_vs_actual": {
+   "upper_bound": 37,
+   "actual": 24,
+   "why_gap": "初测启发式把 @Post/@Get/@Controller 也当「装饰器」，它们不是鉴权装饰器；上限按设计偏乐观"
+  },
+  "gates": {
+   "tsc": "✓ 零错误",
+   "taintpath": "✓ 160/160",
+   "fr_007": "✓ pre5/post0",
+   "fr_016": "✓ pre7/post0",
+   "targeted_tests": "✓ 176 全绿（+11 E2 组）",
+   "reverse_verify": "✓ 四刀各落自己那组、残留 0",
+   "ts_blind_scan": "LOST 0 / ADDED 0 —— **空过**：generated 语料装饰器命中数 = 0（R23 家族第三次）"
+  }
  }
 }

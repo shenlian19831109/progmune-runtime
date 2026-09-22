@@ -1,5 +1,33 @@
 # Changelog
 
+## [3.7.49] — 2026-09-22
+
+### TS 侧「框架鉴权」语义标记：装饰器里的鉴权第一次对规则可见（E2）
+
+- **缺口**：NestJS 的鉴权写在装饰器里（`@UseGuards(JwtAuthGuard)`，类级或方法级），
+  既不在函数体文本里、也不在 `calls` 里 ⇒ 规则**无论如何都看不到**。
+  探针：`@UseGuards(JwtAuthGuard)` 的 `createGroup` 被报
+  「Authorization (Unauthenticated Mutation)」，而它明明有守卫。
+- **更底层的发现**：规则侧定义了 23 个 `__progmune_*` 语义标记；Python 提取器产出
+  **23/23**，TS 提取器只产出 **4/23**（C/Go/Java **0/23**）。FP 观测池 100% 是 TS/JS
+  ⇒ 规则在 TS 上跑的时候 19 条证据通道是断的。本轮补的是其中一条（且是唯一
+  「规则侧已经等着认、只是没人产」的那条）。
+- **修复**（`src/extract-ir.ts`，类方法分支追加注入）：
+  类级 + 方法级装饰器 ⇒ `__progmune_auth_machinery__`（镜像 `tools/extract_ir.py:1134`
+  的「类级框架守卫」）。**规则侧零改动**——Authorization 两条规则的 `auth_check`
+  safeguard 早已接受该标记。
+- **边界（写死）**：`@Public()` / `@SkipAuth()` 显式免鉴权不注入；
+  `@UseGuards(ThrottlerGuard)` 等非鉴权守卫不注入；`@ApiBearerAuth()` 等 Swagger
+  文档装饰器不注入；顶层函数装饰器不在本轮范围内。
+- **实测效果**（FP 观测池 6 切片 / 367 条）：Authorization 违规 **−24 条**
+  （Unauthenticated Access −11 / Mutation −13），**新增 0**，非 Authorization 规则
+  **0 变动**（与判据一致：只有接受标记的规则会受益；Input Validation 的 safeguard
+  不接受任何标记，装饰器救不了它）。
+- 回归：tsc ✓ / taintpath 160 条 ✓ / fr-007 pre 5·post 0、fr-016 pre 7·post 0 ✓ /
+  定向测试 176 全绿（新增 E2 组 11 条）/ 反向验证四刀各落自己那组、残留 0。
+  **TS 盲测 LOST 0 / ADDED 0 —— 但这是空过**：generated 语料里装饰器命中数为 0，
+  该门测不到本轮（R23 家族第三次），真证据来自 FP 观测池。
+
 ## [3.7.48] — 2026-09-22
 
 ### IR 提取失败必须发声（OOM 杀后的「0 违规假干净」根治）

@@ -2202,3 +2202,223 @@ export function dispatchTool(args: any) {
     }, 150_000);
   }
 });
+
+// ═══════════════════════════════════════════════════════════════
+// E2：框架鉴权（装饰器）必须对规则可见（2026-09-22）
+//
+// 判据（先抄准再写 expect，R22）：
+//   protocol-detector.ts:398 / :430 —— Authorization (Unauthenticated Access /
+//   Mutation) 两条规则的 auth_check safeguard 接受 __progmune_auth_machinery__；
+//   探针实测：@UseGuards(JwtAuthGuard) 的 createGroup 修复前报
+//   「Authorization (Unauthenticated Mutation)」，注入标记后该条消失，
+//   而 Input Validation 仍在（它的 safeguard 不接受任何标记 ⇒ 装饰器救不了它）。
+//
+// 反面风险（注入过头 = 假阴性，比误报更危险）：
+//   @Public()/@SkipAuth() 是「显式免鉴权」，不得注入；
+//   @UseGuards(ThrottlerGuard) 是限流不是鉴权，不得注入；
+//   @ApiBearerAuth() 只是 Swagger 文档，不实施鉴权，不得注入。
+// ═══════════════════════════════════════════════════════════════
+
+describe("E2：框架鉴权装饰器必须对规则可见（此前 TS 侧从未产出该标记）", () => {
+  const AUTH_MARK = "__progmune_auth_machinery__";
+
+  const cases: Array<{
+    name: string;
+    fn: string;
+    files: Record<string, string>;
+    want: string[];
+    dontWant?: string[];
+    why: string;
+  }> = [
+    {
+      name: "正例·① 类级 @UseGuards(JwtAuthGuard)",
+      fn: "GroupController.createGroup",
+      files: {
+        "a.ts": `
+declare const UseGuards: any;
+declare const Controller: any;
+declare const Post: any;
+declare class JwtAuthGuard {}
+@UseGuards(JwtAuthGuard)
+@Controller('groups')
+export class GroupController {
+  createGroup(dto: any) { return this.svc.create(dto); }
+}
+`,
+      },
+      want: [AUTH_MARK],
+      why: "NestJS 最常见的形态：鉴权写在类上，方法体内什么都没有 ⇒ 规则原来看不见",
+    },
+    {
+      name: "正例·② 方法级 @UseGuards(JwtAuthGuard)",
+      fn: "C.m",
+      files: {
+        "a.ts": `
+declare const UseGuards: any;
+declare class JwtAuthGuard {}
+export class C {
+  @UseGuards(JwtAuthGuard)
+  m() { return 1; }
+}
+`,
+      },
+      want: [AUTH_MARK],
+      why: "守卫挂在单个端点上（而不是整个控制器）",
+    },
+    {
+      name: "正例·③ @UseGuards(AuthGuard('jwt'))",
+      fn: "C.m",
+      files: {
+        "a.ts": `
+declare const UseGuards: any;
+declare function AuthGuard(x: string): any;
+export class C {
+  @UseGuards(AuthGuard('jwt'))
+  m() { return 1; }
+}
+`,
+      },
+      want: [AUTH_MARK],
+      why: "NestJS 官方 passport 形态：守卫是工厂调用，实参里含 jwt",
+    },
+    {
+      name: "正例·④ @Roles('admin')",
+      fn: "C.m",
+      files: {
+        "a.ts": `
+declare const Roles: any;
+export class C {
+  @Roles('admin')
+  m() { return 1; }
+}
+`,
+      },
+      want: [AUTH_MARK],
+      why: "角色/权限装饰器同样是框架鉴权",
+    },
+    {
+      name: "正例·⑤ @Authorize()（无实参）",
+      fn: "C.m",
+      files: {
+        "a.ts": `
+declare const Authorize: any;
+export class C {
+  @Authorize()
+  m() { return 1; }
+}
+`,
+      },
+      want: [AUTH_MARK],
+      why: "无实参装饰器：无法靠实参判断，按装饰器名判定（保守放行）",
+    },
+    {
+      name: "负对照·① @Public() 显式免鉴权，不得注入",
+      fn: "C.m",
+      files: {
+        "a.ts": `
+declare const UseGuards: any;
+declare const Public: any;
+declare class JwtAuthGuard {}
+@UseGuards(JwtAuthGuard)
+export class C {
+  @Public()
+  m() { return 1; }
+}
+`,
+      },
+      want: [],
+      dontWant: [AUTH_MARK],
+      why: "公开端点被判成「有鉴权」= 假阴性，比误报危险得多，必须挡住",
+    },
+    {
+      name: "负对照·② @UseGuards(ThrottlerGuard) 是限流不是鉴权",
+      fn: "C.m",
+      files: {
+        "a.ts": `
+declare const UseGuards: any;
+declare class ThrottlerGuard {}
+export class C {
+  @UseGuards(ThrottlerGuard)
+  m() { return 1; }
+}
+`,
+      },
+      want: [],
+      dontWant: [AUTH_MARK],
+      why: "同名装饰器、非鉴权语义 ⇒ 实参必须看起来像鉴权守卫（R19：分母里最容易漏的就是被拒掉的那些）",
+    },
+    {
+      name: "负对照·③ @ApiBearerAuth() 只是 Swagger 文档",
+      fn: "C.m",
+      files: {
+        "a.ts": `
+declare const ApiBearerAuth: any;
+export class C {
+  @ApiBearerAuth()
+  m() { return 1; }
+}
+`,
+      },
+      want: [],
+      dontWant: [AUTH_MARK],
+      why: "名字里带 auth，但不实施鉴权 ⇒ Api* 一律跳过",
+    },
+    {
+      name: "负对照·④ 无装饰器不得注入",
+      fn: "C.m",
+      files: {
+        "a.ts": `
+export class C { m() { return 1; } }
+`,
+      },
+      want: [],
+      dontWant: [AUTH_MARK],
+      why: "基线：没有鉴权证据就不许凭空给出鉴权",
+    },
+    {
+      name: "负对照·⑤ 顶层函数（非类）不在本轮范围内",
+      fn: "handler",
+      files: {
+        "a.ts": `
+declare const UseGuards: any;
+declare class JwtAuthGuard {}
+@UseGuards(JwtAuthGuard)
+export function handler() { return 1; }
+`,
+      },
+      want: [],
+      dontWant: [AUTH_MARK],
+      why: "本轮只覆盖类/方法（镜像 Python 的『类级守卫』）。顶层函数装饰器罕见，边界写死在此",
+    },
+    {
+      name: "正对照·⑥ 真实调用与既有标记不得被挤掉（E1 不回归）",
+      fn: "Uploader.read",
+      files: {
+        "a.ts": `
+import * as fs from "fs";
+declare const UseGuards: any;
+declare class JwtAuthGuard {}
+@UseGuards(JwtAuthGuard)
+export class Uploader {
+  read(filePath: string) { return fs.readFileSync(filePath, "utf-8"); }
+}
+`,
+      },
+      want: [AUTH_MARK, "readFileSync"],
+      why: "本轮是**追加**标记，不是替换；E1 补进来的真实调用必须仍在",
+    },
+  ];
+
+  for (const c of cases) {
+    it(`${c.name} —— ${c.why}`, () => {
+      const dir = makeProject(c.files);
+      try {
+        const calls = marksFor(dir, c.fn);
+        for (const w of c.want) expect(calls).toContain(w);
+        for (const d of c.dontWant ?? []) expect(calls).not.toContain(d);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    }, 150_000);
+  }
+});
