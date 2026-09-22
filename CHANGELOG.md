@@ -1,5 +1,63 @@
 # Changelog
 
+## [3.7.51] — 2026-09-22
+
+### Input Validation 的 trigger 只认函数名：不再被 callee 拖下水（F 轮）
+
+- **缺口（不是词表问题，是「陈述对象」错位）**：本规则的 violationMessage 是
+  *"Content creation function does not validate…"* —— 陈述对象是
+  **「这个函数自己是不是内容创建函数」**。但 trigger 此前拿 **callee 名字**
+  去匹配 `create*|add*|post*|upload*`，于是产生两类缺陷：
+  1. **重复投射**：分发器 `handleRequest` 因调用 `createEvent` / `createRoute`
+     被计一次，而那些 callee 自己也在报 ⇒ 同一条问题计两遍；
+  2. **理由错**：`login` / `registerNewUser` / `authenticate` 因调用
+     **`createHash`**（密码哈希）被判成「内容创建函数未校验输入」。
+- **修复**：新增规则字段 `triggerOwnNameOnly`（只拿 enclosing function 自身名字
+  去匹配 trigger），在 `detectSafeguardViolations` 里加分支，并在
+  Input Validation 规则上开启。其余规则行为不变。
+- **175 条损失逐条归类，无一真阳性**（R30）：100 条重复投射（callee 自己仍报）、
+  69 条 `createHash`、6 条 `list/get` 查询函数。真实池 37 条同理
+  （7 重复投射 / 3 被其他规则覆盖 / 27 触发源为 ORM·哈希·权限工厂·内部工具）。
+- **实测**：TS 盲测 Input Validation **417 → 242（−175）**、ADDED 0、
+  **其他规则 0 变动**；FP 池 docmost 24 → 14（−10）、ADDED 0。
+  离线重放（R29）的预测与真实重扫**逐条一致**（第二次确认保真度）。
+- **已知边界（不掩饰）**：函数名不含 create/add/post/upload、但确实是
+  「入口把用户输入交给内容创建」的函数（如 `handleSubmit` 调
+  `commentRepo.create`，而 create 不在扫描范围内）本轮后不再报。175 条里此类
+  为 0；若要补回需要 `exposed`（web handler）通道 —— **按 R27 先查通道**。
+
+## [3.7.50] — 2026-09-22
+
+### TS 侧「入参已按 schema 校验」语义标记：DTO 的校验第一次对规则可见（E3）
+
+- **缺口（R27 说的「证据通道断着」的实例）**：Input Validation 的 safeguard 是
+  **纯词形匹配，不接受任何 `__progmune_*` 标记**（`protocol-detector.ts:481`）。
+  NestJS 把校验写在**另一个文件**的 DTO 类属性装饰器上（`@IsString()` / `@MinLength(2)`），
+  既不在函数体文本里、也不在 `calls` 里 ⇒ 规则永远看不到。E2 结束时已实测确认
+  「装饰器救不了 Input Validation」，本轮是**接通道**，不是调词表。
+- **修复（双侧，各一行）**：
+  - 提取器 `src/extract-ir.ts`：新增 `validatedDtoClassNames(project)` 预扫
+    （类自身或其属性上带校验装饰器 ⇒ 类名入集合），主循环后统一应用 ——
+    入参类型是集合中的类 ⇒ 注入 `__progmune_input_schema__`。
+    按**入参**判定、不按函数形态 ⇒ 函数声明 / 箭头 / 类方法全形态覆盖。
+  - 规则 `protocol-detector.ts`：Input Validation 的 safeguard 追加一个接受分支。
+    **只加在抑制位，不进 trigger**——新通道只能做减法。
+- **标记命名是一个真陷阱（本轮抓到的）**：初版取名 `__progmune_validated_input__`，
+  离线重放发现它会被 `Data Integrity (Foreign Key)` 的 safeguard
+  `\b(…|validate|…)(?:[A-Z]\w*|_\w+)\b` 命中（`validate` + `d_input__`），
+  凭空压掉 **10 条无关违规**。改名 `__progmune_input_schema__`（不含
+  get/find/check/verify/validate/create/add/post/upload 任何动词词根）后归零。
+  已加定向用例守住这条。
+- **实测效果**（FP 观测池，docmost 切片真实重扫）：Input Validation **39 → 24（−15）**，
+  **新增 0**，其他规则 **0 变动**。全池口径 −17（含 lujakob −1、w3tecch −1）。
+- 回归：tsc ✓ / taintpath 160 条 ✓ / fr-007 pre 5·post 0、fr-016 pre 7·post 0 ✓ /
+  定向测试 **187 全绿**（新增 E3 组 11 条）/ 反向验证两刀（拆规则侧接受位、关提取器
+  发射）各自精确回到 39、残留 0。
+- **TS 盲测 3201 → 3201、逐函数差异 0 —— 这是空过（R23 家族第四次）**，已核实：
+  generated 语料里校验装饰器命中数 **0**，该门测不到本轮；真证据来自 FP 观测池。
+- 另附：本轮先用**离线重放**（拿已记录的 `calls + name` 直接喂 detector，不重新提取 IR）
+  预测量三个候选变体的效果，再挑一个实现。重放预测的 −15 与真实重扫**逐条一致**。
+
 ## [3.7.49] — 2026-09-22
 
 ### TS 侧「框架鉴权」语义标记：装饰器里的鉴权第一次对规则可见（E2）

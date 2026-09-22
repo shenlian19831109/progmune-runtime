@@ -461,6 +461,67 @@ function authMachineryFromDecorators(decorators: any[]): string[] {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// E3（2026-09-22）：TS 侧「入参已按 schema 校验」语义标记
+//
+// 判据（先抄准再写 expect，R22）：
+//   Input Validation 的 safeguard（protocol-detector.ts:481）此前是**纯词形匹配**，
+//   不接受任何 __progmune_* 标记 ⇒ NestJS 把校验写在 DTO 类的属性装饰器上时，
+//   规则无论如何都看不到 —— 这是 R27 说的「证据通道断着」。
+//   本轮做的是「接通道」：提取器产标记 + 规则侧开一个接受位，**只抑制，不新增触发**。
+//
+// 为什么标记名叫 __progmune_input_schema__ 而不是 ..._validated_input__：
+//   标记本身会被别的规则当普通调用名匹配。实测 __progmune_validated_input__ 会
+//   撞上 Data Integrity (Foreign Key) 的 safeguard
+//   `\b(get|find|check|exists|lookup|status|validate|verify)(?:[A-Z]\w*|_\w+)\b`
+//   （"validate" + "d_input__" 命中），凭空压掉 10 条无关违规。
+//   命名必须避开 get/find/check/verify/validate/create/add/post/upload 等动词词根。
+//
+// 边界（写死在这里）：只在**入参类型**是本项目里带校验装饰器的类时才注入；
+// 装饰器的「校验性」判定见下，@IsOptional / @Type / @Transform 单独出现不算。
+// ═══════════════════════════════════════════════════════════════
+const INPUT_SCHEMA_MARKER = "__progmune_input_schema__";
+/** 前缀式：MinLength / MaxLength / Matches / ValidateNested … 都是真校验 */
+const VALIDATOR_DECORATOR_PREFIX =
+  /^(?:Min|Max|Length|Matches|ArrayMinSize|ArrayMaxSize|Validate|Equals|NotEquals|Allow|Contains|NotContains)/;
+/** class-validator 的 Is* 族；@IsOptional 只是「可缺省」，不校验 ⇒ 排除 */
+const VALIDATOR_DECORATOR_IS = /^Is(?!Optional$)[A-Z]/;
+
+function decoratorIsValidator(text: string): boolean {
+  const name = /^@([A-Za-z_$][\w$]*)/.exec((text ?? "").trim())?.[1];
+  if (!name) return false;
+  return VALIDATOR_DECORATOR_PREFIX.test(name) || VALIDATOR_DECORATOR_IS.test(name);
+}
+
+/**
+ * 全项目扫描：类自身或其属性上带校验装饰器的类名集合。
+ * 只看类名（不做类型解析）—— 与污点管线口径一致，跨文件引用靠名字对上。
+ */
+function validatedDtoClassNames(project: any): Set<string> {
+  const out = new Set<string>();
+  for (const sf of project.getSourceFiles()) {
+    if (sf.getFilePath().includes("node_modules")) continue;
+    for (const cls of sf.getClasses()) {
+      const name = cls.getName();
+      if (!name) continue;
+      let hit = false;
+      for (const d of cls.getDecorators()) {
+        if (decoratorIsValidator(d?.getText?.() ?? "")) { hit = true; break; }
+      }
+      if (!hit) {
+        for (const prop of cls.getProperties()) {
+          for (const d of prop.getDecorators()) {
+            if (decoratorIsValidator(d?.getText?.() ?? "")) { hit = true; break; }
+          }
+          if (hit) break;
+        }
+      }
+      if (hit) out.add(name);
+    }
+  }
+  return out;
+}
+
+// ═══════════════════════════════════════════════════════════════
 // G1 PATH_GUARD_EVIDENCE —— 路径穿越的「校验识别」（2026-09-19）
 //
 // 背景：路径穿越标记此前是 `taint → file sink ⇒ 标记`，**不看中间有没有校验**；
@@ -3017,6 +3078,19 @@ function _extractSingleProject(
         entry.calls.push("__progmune_path_traversal__");
       }
     }
+  }
+
+  const validatedDtoClasses = validatedDtoClassNames(project);
+
+  // ── E3（2026-09-22）：入参已按 schema 校验 ⇒ 注入 __progmune_input_schema__
+  //    放在主循环之后统一应用，覆盖全部函数形态（函数声明 / 箭头 / 类方法），
+  //    与 pendingMethodMarks 的跨函数标记同一处收口。
+  for (const f of funcs) {
+    if (!f.params || f.params.length === 0) continue;
+    const hit = f.params.some((p: any) => p.type && validatedDtoClasses.has(p.type));
+    if (!hit) continue;
+    f.calls = f.calls || [];
+    if (!f.calls.includes(INPUT_SCHEMA_MARKER)) f.calls.push(INPUT_SCHEMA_MARKER);
   }
 
   // ═══════════════════════════════════════════════════════════════

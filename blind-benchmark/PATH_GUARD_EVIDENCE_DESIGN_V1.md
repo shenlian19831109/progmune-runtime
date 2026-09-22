@@ -1448,3 +1448,384 @@ export class GroupController {
 2. **CASL 词表**（`cannot` / `can` / `createForUser` 已在 calls 里、规则不认）：
    属规则侧校准，按 **R25 等池饱和**再动。
 3. **其余 18 条缺的标记**：按 R21 逐条量化后再排优先级，不要一次全补。
+
+
+---
+
+## §二十一 E3：DTO 的 schema 校验接上 Input Validation（3.7.50，2026-09-22）
+
+### 起点：按 R27 先查通道
+
+E2 收尾时留下三条待办，第一条就是 E3（DTO）。按 R27 先问「这条规则的证据通道通不通」：
+
+| 规则 | safeguard 是否接受 `__progmune_*` | 结论 |
+|---|---|---|
+| Authorization (Access/Mutation) | 接受 `auth_checked` / `credential_check` / `drf_permissions` / **auth_machinery** | E2 已接上 |
+| Token Security | 接受 `framework_auth` / **auth_machinery** | 已有 |
+| **Input Validation** | **不接受任何标记**（`:481` 纯词形匹配） | **断着，本轮接** |
+| No Input Sanitization | 同样不接受 | 未动（不在本轮分母里） |
+
+Input Validation 是全池**第一大规则**（112/343，32.7%），通道断着，等于在饿着的规则上。
+但注意 R27 的补问：**不是所有「规则不准」都是通道问题**——本轮量化后发现，这条规则
+还有第二个、更大的毛病（见「量完没做的变体 A」）。
+
+### 量化：三个变体的离线重放（R29，因为机器吃不消真扫）
+
+本机 load 200~550、可用内存 15~150MB，重扫会被随机 SIGKILL。改用离线重放：
+复制 `dist/protocol-detector.js` → 在副本上打补丁 → 拿 `fp-pool-results.json` /
+`batch-scan-results.json` 里已记录的 `calls + name` 直接喂 `detectSafeguardViolations`。
+
+| 变体 | FP 池 Input Validation | 盲测 111 项目 | 污染其他规则 |
+|---|---|---|---|
+| 基线 | 112 | 417 | — |
+| **B：开 DTO 通道（本轮实现）** | **95（−17）** | 417（0） | 无 |
+| A：trigger 只认函数名 | 64（−48） | 242（**−175**） | 无 |
+| C = A+B | 59（−52） | 242（−175） | 无 |
+
+**A 为什么没做**：−175 太大且需要逐条判定。样本里 `handleRequest`（路由器，它调用的
+`createPost` 自身仍会被扫到）是明确的重复报；但 `registerNewUser` / `doLogin`（因调
+`createHash` 而触发）被拿掉之后，注册类函数的「入参该校验」这条就断了 —— 可能是真阳性
+损失。**交裁决，不在本轮擅自做。**
+
+### 实现（双侧各一处，且只做减法）
+
+- 提取器：新增 `validatedDtoClassNames(project)` 预扫（类自身或属性上带校验装饰器 ⇒
+  类名入集合），主循环后统一应用：入参类型命中 ⇒ 注入 `__progmune_input_schema__`。
+  按**入参**判定、不按函数形态 ⇒ 函数声明 / 箭头 / 类方法全覆盖。
+- 规则：Input Validation 的 safeguard 追加一个接受分支。**只加抑制位，不进 trigger。**
+
+### 抓到的陷阱：标记名自己会被别的规则读走（升 R28）
+
+初版取名 `__progmune_validated_input__`。重放一跑，非目标规则一栏出现
+`Data Integrity (Foreign Key) 76 → 66`：该规则 safeguard 是
+`\b(get|find|check|exists|lookup|status|validate|verify)(?:[A-Z]\w*|_\w+)\b`，
+`validate` + `d_input__` 命中。改名 `__progmune_input_schema__` 后归零，并加了定向用例守住。
+
+### 验收
+
+| 门 | 结果 |
+|---|---|
+| build | ✓ tsc 零错误 |
+| taintpath 闸门 | ✓ 160 / 160 |
+| fr-007 / fr-016 | ✓ pre 5 / post 0、pre 7 / post 0 |
+| 定向测试 | ✓ **187** 全绿（176 → +11 = E3 组） |
+| FP 池真实重扫（docmost） | ✓ Input Validation **39 → 24（−15）**、新增 0、其他规则 0 变动 |
+| 反向验证 | ✓ 两刀（拆规则侧接受位 / 关提取器发射）各自精确回到 39，残留 0 |
+| **TS 盲测** | **3201 → 3201、逐函数差异 0 —— 空过（R23 家族第四次）** |
+
+**盲测为什么是空过**：generated 语料里 `@Is*|@MinLength|@MaxLength|@Matches|@ValidateNested`
+命中数是 **0**（已 grep 核实）—— 压根没有 DTO，测不到本轮。真证据是 FP 池的 −15/0。
+与前三次同型但成因不同：这次是「语料里没有这种代码」。
+
+**重放的保真度**：重放预测 docmost −15，真实重扫 −15，**逐条一致**（LOST 15 的名字完全重合）。
+⇒ R29 可作为机器吃不消时的量化手段（但对 paramGated / parentRefGated 规则不成立）。
+
+### 未做 / 待办
+
+1. **变体 A**（trigger 只认函数名）：−48 池 / −175 盲测，需裁决后单列一轮。
+2. **CASL 词表**（`cannot` / `can`）：规则侧校准，按 **R25 等池饱和**——池还只有 6 片。
+3. **池饱和的三条待办**（outline 轮转重切重扫、hoppscotch 重抓、hedgedoc 沙箱重试）：
+   机器 load 已降到 35，可以开，但本轮被 E3 占满，未并进。
+4. **其余 17 条仍断着的通道**：按 R21 逐条量化后再排优先级。
+
+
+---
+
+## §二十二 F 轮：Input Validation 的 trigger 只认函数名（3.7.51，2026-09-22）
+
+### 起点：上一轮留下的裁决项
+
+E3 结束时量出三个变体，只实现了 B。变体 A（trigger 只认函数名）收益更大
+（池 −48 / 盲测 −175），但当时判断「175 条里可能有真阳性损失」，未擅自做。
+本轮即**逐条判这 175 条**。
+
+### 判定方法：离线重放 + 四类归因（R30）
+
+机器 load 仍在 150~230，重扫随时可能被杀 ⇒ 继续用 R29 的离线重放。
+对每条 LOST，取它被触发的 callee 名单（`calls` 中匹配 trigger 的那些），按
+**被调用者的处境**分四类：
+
+| 类别 | 判据 | 含义 |
+|---|---|---|
+| `SAFE_DUP` | 触发源在同项目里有独立函数，且该函数在变体 A 下**仍报** IV | 重复投射，信息没丢 |
+| `COVERED_OTHER` | 变体 A 下该函数仍被别的输入类规则覆盖 | 换条规则报，信息没丢 |
+| `DUP_NO_IV` | 触发源在语料里但自己不报 | 需人工看（本轮 0 条） |
+| `RISKY_EXTERNAL` | 触发源不在语料函数集合里 | 多为库函数 ⇒ 多半是误触发 |
+
+### 结果：175 条全部可解释，无一真阳性
+
+盲测 111 项目（generated 语料是模板化的，175 条只对应 **9 个不同的函数名**）：
+
+| 函数名 | 条数 | 触发源 | 归类 |
+|---|---|---|---|
+| `handleRequest` | 100 | `createEvent` / `createRoute` / `createAccount` … | SAFE_DUP：那些 callee 自己全都在报 |
+| `authenticate` | 23 | `createHash` | 密码哈希 ≠ 内容创建 |
+| `registerNewUser` | 22 | `createHash` | 同上 |
+| `doLogin` | 22 | `createHash` | 同上 |
+| `listPosts` / `listPostsByTag` / `getAllPosts` | 6 | （仅 `sort` / `filter`） | 查询函数 |
+| `register` / `login` | 2 | `createHash` | 同上 |
+
+**关键**：那 100 条 `handleRequest` 正是上一轮最担心的一类（"入口函数"）——
+但归类是 SAFE_DUP：它调用的 `createEvent` 等**自己仍在报**，所以去掉的只是
+重复计数，不是信息。
+
+真实池 37 条同样逐条查了触发源在源码里的定义位置：
+`createQueryBuilder`（TypeORM 查询）、`createTable`（DDL）、`createEntityManager`、
+`createDatabaseConnection`、`createTarballHash`、`createRelativePositionFromJSON`（Yjs）、
+`createForUser`（**CASL 权限工厂**，不是内容创建）、`addContributors`、`createLocation`、
+`addUniqueIdsToDoc`。**没有一条是「handler 把用户输入交给真实内容创建」。**
+
+⇒ 结论：不是「可能损失真阳性」，是**没有真阳性**。可以做。
+
+### 根因的一句话
+
+本规则的陈述对象（violationMessage 的主语）是
+**「这个函数自己是不是内容创建函数」**，而 trigger 却拿 **callee** 去匹配。
+陈述对象错位 ⇒ ① 分发器重复计数；② 库函数的 `create*` 前缀被当成内容创建。
+修法就是把 trigger 拉回它自己的主语。
+
+### 实现
+
+新增规则字段 `triggerOwnNameOnly`（只对 enclosing function 自身名字匹配 trigger），
+`detectSafeguardViolations` 加分支，Input Validation 开启。其余规则不受影响。
+
+### 验收
+
+| 门 | 结果 |
+|---|---|
+| tsc | ✓ 零错误 |
+| taintpath 闸门 | ✓ 160 / 160 |
+| fr-007 / fr-016 | ✓ pre 5·post 0 / pre 7·post 0 |
+| 定向测试 | ✓ **201** 全绿（187 → +14 = F 组） |
+| FP 池真实重扫（docmost） | ✓ IV **24 → 14（−10）**、ADDED 0、其他规则 0 变动 |
+| 反向验证 | ✓ 两刀（拆规则开关 / 禁用机制执行分支）各自**精确回到 24**，残留 0 |
+| **TS 盲测** | ✓ IV **417 → 242（−175）**、逐函数差异 175、ADDED 0、其他规则 0 变动 —— **不再是空过** |
+
+R29 的保真度**第二次验证**：重放预测的 175 条与真实重扫的 LOST 名单**逐条一致**
+（docmost 那 10 条也完全一致）。
+
+### 本轮抓到的一次自伤：变体构造漏了一行（升 R31）
+
+第一次构造 `variantA2.js` 时，python 脚本里**漏了 `src = src.replace(OLD, NEW)`**，
+只插入了 `triggerOwnNameOnly: true` 字段、没改执行分支 ⇒ 变体恒等于基线，
+第一次测量得到「0 变化」。若信了这个数，会得出「变体 A 在 3.7.50 上无效」的
+**完全错误**结论。发现方式是它与上一轮 −175 不符。
+
+⇒ **R31：变体 / 探针构造完，先跑一个「已知该变」的微用例自验，再拿去测量。**
+与 R23（零漂移可能空过）不同：R23 是被测对象没被覆盖，R31 是**测量工具自己坏了**。
+
+### 已知边界（登记，未修）
+
+函数名不含 `create|add|post|upload`、但确实是「入口把用户输入交给内容创建」的
+函数（`handleSubmit` → `commentRepo.create`，且 create 不在扫描范围内）本轮后不报。
+175 条里此类为 0，池里 27 条里也没有。要补回需要 `exposed`（web handler）通道，
+**按 R27 先查该通道通不通**，不在本轮。
+
+
+---
+
+## §二十三 通道审计：SAFEGUARD_RULES 不进 TS 产品路径（2026-09-22，架构级，待裁决）
+
+### 起因：按 R27 去查 `exposed` 通道，查出了更上层的问题
+
+F 轮留的第一条待办是「补回入口函数需要 `exposed`（web handler）通道，按 R27 先查通道通不通」。
+查的过程里发现了一个层级更高的事实，本节记录它。
+
+### `exposed` 的直接答案：产品路径根本不传
+
+`exposed` 是 `detectSafeguardViolations(calls, name, language, params, exposed)` 的第 5 个参数，
+**由调用方自己算**（基准脚本里 `WEB_HANDLER.test(f.name)` + 反向调用图）。传它的只有
+`blind-benchmark/batch-scan.ts` / `fp-pool-scan.ts` / `batch-scan-python.ts`。
+`validateCombined(calls, name)`（protocol-detector 自带 CLI 的入口）**只传两个参数**
+⇒ `params`、`exposed` 恒为 undefined ⇒ 依赖它们的机制全部失效：
+
+| 机制 | 条件 | params/exposed 缺失时 |
+|---|---|---|
+| `paramGated` | `if (rule.paramGated && params)` | 门不生效，规则照报（降噪机制形同没有） |
+| `parentRefGated` | 同上 | 同上 |
+| `strictSafeguards` | `(params && rule.strictSafeguards)` | 退回宽松版 safeguards |
+
+### 更上层的事实：SAFEGUARD_RULES 本身不被产品调用
+
+`src/` 内引用 `detectSafeguardViolations` / `SAFEGUARD_RULES` 的文件只有四处：
+
+| 文件 | 性质 | 是否产品 |
+|---|---|---|
+| `src/python-benchmark.ts` | `npx ts-node src/python-benchmark.ts <path>` 的 CLI，无其他模块调用，只在 `benchmarks/` justfile 里被提及 | **否，基准工具** |
+| `src/protocol-detector.ts` | 自身的 `require.main === module` CLI 分支 + `validateCombined` | **否，自带 CLI** |
+| `src/trust/compliance-scorer.ts` | **仅出现在第 14 行注释**（"using existing PROTOCOLS + SAFEGUARD_RULES"），代码里没有任何 import，维度是自己内联的 | **否，注释** |
+| 测试文件 | — | 否 |
+
+其余调用方全在 `blind-benchmark/`：`batch-scan.ts`、`fp-pool-scan.ts`、
+`gold-benchmark-v5-v6-v7.ts`、`fn-root-cause-analysis.ts`、`compare-v5-v6-v7.ts`。
+
+**产品侧的反证**：
+- `src/trust/*.ts` 里没有 `protocol-detector` 引用，也没有 `safeguard` 字样；
+  trust 引擎走 `./protocol-domain-validator` + frameworks（collectExpress/NestJS/FastAPI/…）。
+- `dist/mcp-server.mjs`（`main` 与 `bin` 的入口，66 KB）require 的模块是
+  failure-corpus / memory-layer / llm / counterfactual-engine / ssg-validator / execute /
+  audit / repair-proposal / branch-ledger / deterministic-replay / protocol-registry
+  —— **没有 protocol-detector**。
+- `dist/protocol-detector.js` 是全仓库唯一含字符串 "Input Validation" 的产物。
+
+**正面验证**（不是只靠 grep）：用产品入口跑真实项目
+`npx tsx src/trust/cli.ts blind-benchmark/generated/blog --json`
+⇒ 只产出 **1 条**违规，内容是 protocol 状态机违规
+（`"function "logout" cannot be called in current state [PASSWORD_VERIFIED, UNAUTHENTICATED]"`，
+修法 `generate_jwt → create_session`）。**没有任何 Input Validation / Authorization 类违规**；
+而同一项目在 `batch-scan.ts` 的口径下是若干条 safeguard 违规。
+
+### 这意味着什么（要裁决，不擅自改）
+
+1. **E2 / E3 / F 三轮改的规则，改善的是基准口径的误报率，不等于产品行为变化。**
+   TS 产品的判定体系是 protocol 状态机 + frameworks + trust 引擎，不是 SAFEGUARD_RULES。
+2. **FP 池的意义要重估**：它是 `fp-pool-scan.ts`（TS 基准）产出的，而 TS 产品不用这套规则
+   ⇒ 池里的误报**不代表产品误报**。「FP 池 100% 是 TS ⇒ 规则饿着」的推论仍然成立，
+   但它的作用域是**基准口径**。
+3. **Python 侧不对称再加一条**：Python 的 safeguard 至少有一个 src 内的 CLI 在跑；TS 连这个都没有。
+4. F 轮登记的「入口函数」已知边界，只在基准口径上成立。
+
+### 待裁决的三个问题
+
+1. 我是否漏看了某个入口（请指出哪个模块才是 TS 产品的扫描主路径）？
+2. 若 SAFEGUARD_RULES 是**有意**留作研究/基准用途 —— 那么这三轮的成果要重新定位为
+   「基准口径的精化」，战线表述要改。
+3. 若应当接进产品 —— 那是**架构级改动**（把 safeguard 挂进 trust 引擎或 MCP 扫描链路），
+   必须单列一轮，且要先回答「接上后产品会不会突然多出成百上千条告警」。
+
+### 方法学：R32（本轮新增，已写入 fix-regression-corpus.json）
+
+**调规则前先确认这条规则被谁调用。** 基准口径 ≠ 产品口径。
+R27 查的是「提取器证据 → 规则」的通道，**R32 查的是「规则 → 产品」的通道**，
+且 **R32 优先级高于 R27**：规则若不被产品调用，接证据通道是白接。
+
+
+---
+
+## §二十四 沙箱实测：清单口径接进产品的代价与增量（2026-09-22）
+
+上一节（§二十三）留了三个待裁决问题。本节**自己查、自己测**，不再交裁决。
+其中 §二十三 的一处暗示需要更正（见末尾「对上一节的更正」）。
+
+### Q1：是不是漏看了入口？——没有。逐个排查的结果
+
+`main` 与 `bin` 都是 `dist/mcp-server.mjs`（`src/mcp-server.ts`，1383 行，19 个工具）。
+逐个看这 19 个工具里**唯一可能"扫目录出违规"**的两个：
+
+| 工具 | 落到哪个模块 | 实际做的事 | 是不是安全扫描 |
+|---|---|---|---|
+| `progmune_audit` | `src/audit.ts` → `auditDirectory` | 统计有多少文件带 `@progmune-generated` 标记，**覆盖率审计**（coverage < 0.8 报警） | **否** |
+| `progmune_check` | `src/check.ts` | 本仓库自检：IR 重提、tsc、SSG 协议、ledger 不变量、指纹回放 | **否**（是 self-check，不是扫用户代码） |
+
+产品真正的安全判定在 `src/trust/` 引擎，由三部分组成：
+
+1. **IR 层标记消费**（`engine.ts:1522` 起）：只消费 **3 个**标记 ——
+   `__progmune_path_traversal__` / `__progmune_ssrf_user_url__` / `__progmune_cross_user_write__`。
+2. **`SPECIFIC_VIOLATION_CHECKS`**（`protocol-domain-validator.ts`，17 条）：**全部是协议/密码学类** ——
+   TLS_NO_HOSTNAME_VERIFY / TLS_NO_CERT_VERIFY / SSH_NO_HOST_KEY_CHECK / JWT_UNSAFE_ALGORITHM /
+   OCSP_UNVERIFIED_RESPONSE / DH_UNVALIDATED_PARAMETERS / AUTH_SRP_USAGE / PLAINTEXT_AUTH_WITHOUT_TLS /
+   QUIC_DISABLE_ACTIVE_MIGRATION / SECURITY_RESULT_NOT_CHECKED / PATH_TRAVERSAL …
+   **没有任何 Authorization / Input Validation 类规则。**
+3. **SSG 状态机**（protocols.json，74 状态 / 148 规则）。
+
+另外 `validateProtocolState`（同一文件里的状态机部分）**确实被产品模块 import**
+（`evidence-repository` / `knowledge-evolution` / `evidence-growth` / `knowledge-flywheel` / `progmune-status`）——
+说明 `protocol-detector.ts` 这个文件是**两用的**：状态机部分进产品，safeguard 部分不进。
+
+### Q2：是不是有意留作研究/考试用？——不是设计决策，是接线没做完
+
+引入 `SAFEGUARD_RULES` / `detectSafeguardViolations` 的两个提交：
+
+- `a8e42a03`（2026-07-07）*feat: Detector B deployed — Recall 74% → 85% (+11pp)*
+  正文是 A/B 对比实验：Detector A（实体白名单）vs B（动词泛化）、10 projects、recall/precision 测量。
+- `9b1553d5`（2026-07-17）*Phase 2-3: **Research** methodology freeze*，正文即
+  "**Research** pipeline: FN→Root Cause→Capability Layer→ROI→Experiment→Decision"。
+
+⇒ 它是**研究阶段的产物**，不是"有意声明留作研究"的设计决策——差别很大：
+前者是**未完成的接线**，后者是**不该接**。
+
+**接线模式其实现成，而且重复用过三次**（CHANGELOG 3.7.26 / 3.7.27 / 3.7.28）：
+
+> 路径穿越检测 TS 化（A1）：TS 提取器注入 `__progmune_path_traversal__`；
+> **引擎 IR 层直接消费标记**……（Python 标记此前在引擎管线中是死的，本版同时点亮两侧）
+
+> 引擎 IR 层消费：SSRF 违规直接报出（同 PATH_TRAVERSAL / AUTHZ_CROSS_USER_WRITE 模式）；
+> **`protocol-detector.ts` 同名规则供 source-level 路径**
+
+最后一句是关键：**同一个能力在两条路径上各有一份**——引擎那份进产品，
+`protocol-detector.ts` 那份供 source-level（基准）。Authorization / Input Validation
+属于「引擎那份还没写」的情况。
+
+### Q3：接上会多出多少告警？——沙箱实测
+
+同一批项目，分别跑**产品路径**（`npx tsx src/trust/cli.ts <dir> --json`）与**清单口径**：
+
+| 项目 | 性质 | 产品路径 | 清单口径 |
+|---|---|---|---|
+| blog | generated | **1**（SSG_AUTH_STATE_VIOLATION，`handleRequest` 里 logout 顺序错，**真阳性**） | 32 |
+| banking_A | generated | 1 | 35 |
+| cms_A | generated | 1 | 27 |
+| **docmost** | **真实项目切片（118 ts 文件）** | **0** | **120** |
+| FP 池 6 切片合计 | 真实 | — | 318 / 215 函数 |
+| 111 项目全量 | generated | ~111 | **3201** |
+
+⇒ **「会不会突然多出成百上千条」= 会，约 30 倍**（真实项目上是 0 → 120，即从无到有）。
+
+### 决定性测试：多出来的这些，有没有产品报不出来的真值？
+
+只算条数不够——按 R30 的思路，要问「**它报的东西里，有没有产品路径报不出来的**」。
+用两条有真值的语料实测（`blind-benchmark/fr-corpus/` 的 pre 快照）：
+
+| 语料 | 函数数 | 清单告警 | 命中真值文件 | 命中的规则 | 引擎口径战绩 |
+|---|---|---|---|---|---|
+| fr-007 openhop（路径穿越） | 50 | 35 | 7 处 / **5 个真值位置** | **Path Traversal ×5**（flowRoutes、FlowStore.save/get/delete/updateFlow） | pre 5 / post 0 |
+| fr-016 redocly（写文件缺校验） | 458 | 84 | 4 处 | **Path Traversal ×3** + No Input Sanitization ×1 | pre 7 / post 0 |
+
+**清单口径确实有真值召回能力**——它精确命中了 fr-007 的全部 5 个真值位置。
+
+但两个样本的命中**全部落在 Path Traversal 这一条规则上**，而 Path Traversal
+**产品引擎已经有了**（`__progmune_path_traversal__` → `PATH_TRAVERSAL`，3.7.26 接通）。
+
+⇒ **增量召回 = 0。** 清单能报的真值，产品都已经报了；清单多出来的全是产品没有的
+**规则维度**（Authorization / Input Validation / Password Hashing / TLS / Rate Limiting），
+而这些维度在两个真值样本上**没有贡献任何真值，只贡献噪声**：
+
+- fr-007：35 条里 5 条真值 → 精度 ≈ 14%
+- fr-016：84 条里 4 条命中真值文件 → 精度 ≈ 5%
+
+### 结论与建议（不再交裁决）
+
+**不整体接。** 整体接 = 告警 30 倍 + 真值召回 +0。理由不是"清单不准"
+（它准的部分和引擎重合），而是**它没有增量**。
+
+**继续走「能力化」路线**（3.7.26/27/28 已验证的模式）：对引擎缺的规则维度，
+按 path_traversal 的路子做——先在提取器侧造**阳性证据标记**（确证污点流/确证无鉴权路径），
+再在引擎 IR 层加消费分支，用 fr-corpus 真值验收。**不是搬规则，是补能力。**
+
+**第一个该补的是 Authorization**，因为：
+① 引擎 17 条检查里一条都没有；② 修复回归 17 条里最大的漏报类就是「路由缺鉴权」
+（fr-002 / fr-003 / fr-014 / fr-016 所在类）；③ E2 已经产出了 `auth_machinery` 标记。
+
+**但要注意一个陷阱**：`auth_machinery` / `input_schema` 是**抑制型标记**（有防护 ⇒ 压掉告警），
+而引擎里**没有对应的阳性规则可被抑制**。单独把抑制型标记接进去毫无作用——
+**必须成对做**：阳性规则（确证无鉴权）+ 抑制标记（看到防护就压）。
+这与 path_traversal（纯阳性）不同，是本轮才看清的结构性差别。
+
+### 对上一节（§二十三）的更正
+
+§二十三 的证据都是对的（safeguard 确实不进产品路径），但语气暗示了
+「清单口径≈研究遗留、价值可疑」。**这个暗示错了**，实测更正：
+
+- 清单口径**有真值召回能力**，在 fr-007 上与产品引擎**等价**（都命中 5 个位置）；
+- 它的问题不是"没用"，是**与引擎重合、无增量**，且重合之外的维度精度只有 5~14%。
+
+⇒ §二十三 的「E2/E3/F 改善的是基准口径误报率」这句话仍然成立且不变，
+但**不能**推出"这三轮白做了"：它们降的是清单口径的误报，而清单口径是
+「未来要把 Authorization 能力化时，用来衡量精度的主要尺子」。尺子本身要准。
+
+### 方法学：R33（本轮新增）
+
+**评估一个能力要不要接进产品，量的是增量召回（并集差集），不是绝对召回。**
+做法：拿真值语料，分别跑「现有产品路径」与「候选能力」，比较命中集合。
+候选能报很多 ≠ 有价值；只有当它报的东西里有现有路径报不出来的，才值得接。
+（本次：清单在 fr-007/fr-016 上能报 35/84 条，但命中集合 ⊆ 引擎命中集合 ⇒ 增量 0 ⇒ 不接。）

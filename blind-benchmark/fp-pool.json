@@ -657,5 +657,179 @@
    "reverse_verify": "✓ 四刀各落自己那组、残留 0",
    "ts_blind_scan": "LOST 0 / ADDED 0 —— **空过**：generated 语料装饰器命中数 = 0（R23 家族第三次）"
   }
+ },
+ "e3_round_2026_09_22": {
+  "version": "3.7.50",
+  "claim": "Input Validation 的 safeguard 此前不接受任何 __progmune_* 标记（纯词形匹配）⇒ DTO 里的校验对规则不可见（R27：证据通道断着）",
+  "fix": {
+   "extractor": "src/extract-ir.ts 新增 validatedDtoClassNames(project) 预扫 + 主循环后统一注入 __progmune_input_schema__（按入参类型判定，覆盖全函数形态）",
+   "rule": "protocol-detector.ts Input Validation 的 safeguard 追加接受分支；只加抑制位，不进 trigger"
+  },
+  "marker_naming_trap": {
+   "first_name": "__progmune_validated_input__",
+   "collision": "被 Data Integrity (Foreign Key) 的 safeguard \\b(...|validate|...)(?:[A-Z]\\w*|_\\w+)\\b 命中（validate + d_input__）⇒ 凭空压掉 10 条无关违规",
+   "final_name": "__progmune_input_schema__",
+   "rule_of_thumb": "标记名不得含 get/find/check/verify/validate/create/add/post/upload 等动词词根"
+  },
+  "measured": {
+   "docmost_real_rescan": {
+    "input_validation": "39 → 24 (-15)",
+    "added": 0,
+    "other_rules": 0
+   },
+   "pool_wide_offline_replay": {
+    "input_validation": "112 → 95 (-17)",
+    "added": 0,
+    "other_rules": 0
+   }
+  },
+  "replay_fidelity": "离线重放预测的 -15 与真实重扫逐条一致",
+  "gates": {
+   "tsc": "✓ 零错误",
+   "taintpath": "✓ 160/160",
+   "fr_007": "✓ pre5/post0",
+   "fr_016": "✓ pre7/post0",
+   "targeted_tests": "✓ 187 全绿（+11 E3 组）",
+   "reverse_verify": "✓ 两刀（拆规则接受位 / 关提取器发射）各自精确回到 39，残留 0",
+   "ts_blind_scan": "3201 → 3201，逐函数差异 0 —— **空过**：generated 语料校验装饰器命中数 = 0（R23 家族第四次）"
+  },
+  "next_candidates_measured_not_implemented": {
+   "variant_A_trigger_own_name_only": {
+    "what": "Input Validation 的 trigger 只认函数名，不再被被调用的 create*/add* 触发",
+    "pool": "112 → 64 (-48)",
+    "blind": "417 → 242 (-175)",
+    "risk": "175 条 LOST 需逐条判定；样本里 registerNewUser/doLogin 等是可能的真阳性损失 ⇒ 未实现，交裁决"
+   },
+   "variant_C_A_plus_B": "pool 112 → 59 (-52)"
+  }
+ },
+ "f_round_2026_09_22": {
+  "version": "3.7.51",
+  "claim": "Input Validation 的 trigger 拿 callee 名字去匹配，而规则的陈述对象是「这个函数自己是不是内容创建函数」⇒ 两类缺陷：重复投射 + 理由错（createHash）",
+  "decision": "上一轮把变体 A 列为裁决项（-175 可能有真阳性损失）；本轮逐条判完，175 条全部可解释、无一真阳性 ⇒ 做",
+  "attribution": {
+   "blind_175": {
+    "handleRequest_SAFE_DUP": 100,
+    "createHash_wrong_reason": 69,
+    "list_get_queries": 6
+   },
+   "pool_37": {
+    "SAFE_DUP": 7,
+    "COVERED_OTHER": 3,
+    "RISKY_EXTERNAL": 27
+   },
+   "pool_27_trigger_sources": "createQueryBuilder / createTable / createEntityManager / createDatabaseConnection / createTarballHash / createRelativePositionFromJSON(Yjs) / createForUser(CASL 权限工厂) / addContributors / createLocation / addUniqueIdsToDoc —— 无一为「handler 交用户输入给内容创建」"
+  },
+  "fix": "新增规则字段 triggerOwnNameOnly（trigger 只匹配 enclosing function 自身名字），Input Validation 开启；其余规则不变",
+  "measured": {
+   "ts_blind_scan": {
+    "input_validation": "417 → 242 (-175)",
+    "added": 0,
+    "other_rules": 0,
+    "per_function_diff": 175
+   },
+   "pool_docmost_real_rescan": {
+    "input_validation": "24 → 14 (-10)",
+    "added": 0,
+    "other_rules": 0
+   },
+   "pool_wide_offline_replay": {
+    "input_validation": "97 → 60 (-37)"
+   }
+  },
+  "replay_fidelity": "第二次验证：重放预测的 175 条与真实重扫 LOST 名单逐条一致；docmost 10 条亦一致",
+  "gates": {
+   "tsc": "✓ 零错误",
+   "taintpath": "✓ 160/160",
+   "fr_007": "✓ pre5/post0",
+   "fr_016": "✓ pre7/post0",
+   "targeted_tests": "✓ 201 全绿（+14 F 组）",
+   "reverse_verify": "✓ 两刀各自精确回到 24，残留 0",
+   "ts_blind_scan": "不再是空过（-175）"
+  },
+  "known_gap": "函数名不含 create/add/post/upload 但确实是「入口把用户输入交给内容创建」的函数不再报（175 条里此类 0）。补回需 exposed 通道，按 R27 先查通道",
+  "self_injury": "变体构造漏了 replace 一行 ⇒ 变体恒等于基线 ⇒ 首次测得 0 变化（升 R31）"
+ },
+ "channel_audit_2026_09_22": {
+  "trigger": "F 轮待办①：补回入口函数需 exposed 通道，按 R27 先查通道",
+  "exposed_answer": "exposed/params 只由 blind-benchmark 的 batch-scan.ts / fp-pool-scan.ts / batch-scan-python.ts 传入；protocol-detector 自带 CLI 的 validateCombined 只传 2 个参数 ⇒ paramGated / parentRefGated / strictSafeguards 在这些路径上全部失效",
+  "bigger_finding": "SAFEGUARD_RULES 不被 TS 产品调用。src 内引用方仅 python-benchmark.ts（自带 CLI，无模块调用）、protocol-detector.ts 自带 CLI、compliance-scorer.ts（仅第 14 行注释）、测试；其余全在 blind-benchmark/",
+  "product_evidence": {
+   "mcp_entry": "dist/mcp-server.mjs（main+bin，66KB）require 列表不含 protocol-detector",
+   "trust_engine": "src/trust/*.ts 无 protocol-detector 引用、无 safeguard 字样；走 protocol-domain-validator + frameworks",
+   "dist_scan": "dist/protocol-detector.js 是全仓唯一含 'Input Validation' 字符串的产物",
+   "positive_test": "npx tsx src/trust/cli.ts blind-benchmark/generated/blog --json ⇒ 仅 1 条 protocol 状态机违规（logout 状态错），无 Input Validation / Authorization"
+  },
+  "impact": [
+   "E2/E3/F 三轮改善的是基准口径误报率，不等于产品行为变化",
+   "FP 池（fp-pool-scan.ts 产出）的误报不代表产品误报",
+   "F 轮登记的「入口函数」已知边界只在基准口径上成立"
+  ],
+  "decision_needed": [
+   "是否漏看了 TS 产品扫描主路径？",
+   "SAFEGUARD_RULES 是否有意留作研究/基准用途？",
+   "若应接进产品 ⇒ 架构级改动，需单列一轮，并先回答「接上后产品会不会突然多出成百上千条告警」"
+  ],
+  "status": "未动代码，仅记录，交裁决",
+  "methodology": "新增 R32"
+ },
+ "sandbox_2026_09_22": {
+  "trigger": "§二十三 的三个待裁决问题，用户要求自己查、自己测、做成沙箱",
+  "q1_entry_audit": {
+   "method": "main/bin = dist/mcp-server.mjs（src/mcp-server.ts 1383 行，19 工具），逐个排查",
+   "progmune_audit": "src/audit.ts → auditDirectory = @progmune-generated 覆盖率审计（coverage<0.8 报警），不是安全扫描",
+   "progmune_check": "src/check.ts = 本仓库自检（IR 重提/tsc/SSG/ledger 不变量/指纹回放）",
+   "verdict": "没有漏看入口。产品安全判定 = trust 引擎"
+  },
+  "product_judgement_stack": {
+   "ir_markers": "engine.ts:1522 起，只消费 3 个：__progmune_path_traversal__ / __progmune_ssrf_user_url__ / __progmune_cross_user_write__",
+   "specific_checks": "protocol-domain-validator.ts SPECIFIC_VIOLATION_CHECKS 17 条，全部协议/密码学类（TLS/SSH/JWT/OCSP/DH/SRP/QUIC/PLAINTEXT_AUTH/PATH_TRAVERSAL…），无 Authorization / Input Validation",
+   "ssg": "protocols.json 74 状态 / 148 规则",
+   "two_use_file": "protocol-detector.ts 是两用：validateProtocolState 被 evidence-repository / knowledge-evolution / evidence-growth / knowledge-flywheel / progmune-status import（进产品）；detectSafeguardViolations 只被基准用"
+  },
+  "q2_intent": {
+   "introduced_by": [
+    "a8e42a03 2026-07-07 'Detector B deployed — Recall 74% → 85%'（A/B 实验、10 projects、recall/precision 测量）",
+    "9b1553d5 2026-07-17 'Phase 2-3: Research methodology freeze'（Research pipeline: FN→Root Cause→Capability Layer→ROI→Experiment→Decision）"
+   ],
+   "verdict": "不是『有意留作研究』的设计决策，是**研究产物 + 接线没做完**。区别很大：前者不该接，后者可以接",
+   "wiring_pattern_exists": "3.7.26/27/28 已用同一模式接通 path_traversal / cross_user_write / ssrf —— 提取器产标记 → 引擎 IR 层消费；CHANGELOG 明确写『protocol-detector.ts 同名规则供 source-level 路径』，即同一能力在两条路径各有一份，Authorization/Input Validation 属于『引擎那份还没写』"
+  },
+  "q3_sandbox": {
+   "method": "同一批项目分别跑产品路径（npx tsx src/trust/cli.ts <dir> --json）与清单口径",
+   "results": {
+    "blog": "产品 1（SSG_AUTH_STATE_VIOLATION，handleRequest 里 logout 顺序错，真阳性） vs 清单 32",
+    "banking_A": "1 vs 35",
+    "cms_A": "1 vs 27",
+    "docmost_real": "**0 vs 120**",
+    "fp_pool_6_slices": "318 条 / 215 函数",
+    "generated_111": "~111 vs 3201"
+   },
+   "verdict": "会多出成百上千条：约 **30 倍**；真实项目上是从 0 到 120（从无到有）"
+  },
+  "decisive_test_incremental_recall": {
+   "question": "多出来的这些，有没有产品报不出来的真值？",
+   "fr_007_openhop": {
+    "functions": 50,
+    "safeguard": 35,
+    "truth_hits": "5 个真值位置（flowRoutes + FlowStore.save/get/delete/updateFlow），规则全是 Path Traversal",
+    "engine_record": "pre 5 / post 0"
+   },
+   "fr_016_redocly": {
+    "functions": 458,
+    "safeguard": 84,
+    "truth_hits": "4 处（Path Traversal ×3 + No Input Sanitization ×1）",
+    "engine_record": "pre 7 / post 0"
+   },
+   "verdict": "**增量召回 = 0**。清单的真值命中全部落在 Path Traversal，而 Path Traversal 引擎已有（3.7.26 接通）。清单多出的维度（Authorization/Input Validation/Password Hashing/TLS/Rate Limiting）在两个真值样本上零贡献、只贡献噪声",
+   "precision": {
+    "fr_007": "5/35 ≈ 14%",
+    "fr_016": "4/84 ≈ 5%"
+   }
+  },
+  "decision": "**不整体接**（30 倍告警 + 零增量）。继续走能力化路线：按 path_traversal 模式为引擎缺的维度造阳性标记 + 引擎消费分支，用 fr-corpus 验收。第一个补 Authorization",
+  "trap_found": "auth_machinery / input_schema 是**抑制型**标记，引擎里没有阳性规则可被抑制 ⇒ 单独接抑制标记毫无作用，必须成对做（阳性规则 + 抑制标记）。与 path_traversal（纯阳性）不同",
+  "correction_to_prev_round": "§二十三 暗示『清单≈研究遗留、价值可疑』是错的：清单有真值召回能力且在 fr-007 上与引擎等价；问题不是没用，是与引擎重合、无增量",
+  "methodology": "新增 R33（增量召回，不是绝对召回）"
  }
 }

@@ -297,6 +297,19 @@ interface SafeguardRule {
   /** When set, the trigger is tested against raw callee names only — not the
    *  identifier-parsed words (which split execute_command into "execute"). */
   triggerCallsOnly?: boolean;
+  /** When set, the trigger is tested against the **enclosing function's own
+   *  name** only — not against the names it calls. Use for rules whose subject
+   *  is the function itself ("this function creates content"), where matching
+   *  on callees produces two defect classes:
+   *    (a) duplicate projection — a dispatcher (handleRequest) is flagged for
+   *        every create* it calls, while the callee is flagged on its own;
+   *    (b) wrong-reason hits — createHash / createQueryBuilder / createTable
+   *        match the `create*` prefix but are hashing/ORM/DDL, not content
+   *        creation, so a login function gets "content creation function
+   *        does not validate input".
+   *  Verified 2026-09-22 (F 轮): all 175 blind-scan losses classified, none
+   *  a true positive — 100 duplicate projection, 69 createHash, 6 list/get. */
+  triggerOwnNameOnly?: boolean;
   /** When set, the rule applies only if this synthetic marker is present in
    *  the function's calls — a semantic precondition emitted by the extractor
    *  (e.g. the function actually issues token material, or executes a
@@ -476,9 +489,20 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
   {
     name: "Input Validation",
     category: "input_validation",
+    // F 轮（2026-09-22）：本规则的陈述对象是「这个函数自己是不是内容创建函数」
+    // （violationMessage: "Content creation function ..."）。此前拿 callee 名字
+    // 去匹配 trigger，造成两类缺陷：① 分发器 handleRequest 因调用 createEvent 等
+    // 被重复计一次，而那些 callee 自己也在报；② login/register 因调用
+    // **createHash**（密码哈希）被判成「内容创建函数未校验输入」。
+    // 175 条损失已逐条归类，无一为真阳性。⇒ trigger 只看函数名。
+    triggerOwnNameOnly: true,
     trigger: /\b(create|add|post|upload)(?:[A-Z]\w*|_\w+)|(?:[A-Z]\w*|_\w+)(Create|Add|Post|Upload)\b/i,
     safeguards: [
-      { pattern: /\b(validate|sanitize|check|verify)(?:[A-Z]\w*|_\w*)(Content|Input|Length|Title|Body|Type|Size|File|Data|Param|Arg|Field|Value)\b|\b(validateContent|sanitizeInput|checkLength|verifyType|checkSize)\b/i, label: "input_validation" },
+      // E3（2026-09-22）：__progmune_input_schema__ —— 提取器在「入参类型是带校验
+      // 装饰器的 DTO 类」时产出（NestJS 把校验写在 DTO 属性装饰器上，词形匹配永远
+      // 看不到）。本规则此前不接受任何 __progmune_* 标记 ⇒ 该证据通道是断的。
+      // 注意只加在**抑制位**（safeguard），不进 trigger：新通道只能做减法。
+      { pattern: /\b(validate|sanitize|check|verify)(?:[A-Z]\w*|_\w*)(Content|Input|Length|Title|Body|Type|Size|File|Data|Param|Arg|Field|Value)\b|\b(validateContent|sanitizeInput|checkLength|verifyType|checkSize)\b|__progmune_input_schema__/i, label: "input_validation" },
     ],
     violationMessage: "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
     conceptMissing: ["InputSanitization", "ContentValidation", "SizeLimit"],
@@ -1207,7 +1231,11 @@ export function detectSafeguardViolations(calls: string[], enclosingFuncName?: s
 
   for (const rule of activeRules) {
     // Check if trigger matches
-    const triggerCalls = rule.triggerCallsOnly ? rawCalls : effectiveCalls;
+    const triggerCalls = rule.triggerOwnNameOnly
+      ? (ownName ? [ownName] : [])
+      : rule.triggerCallsOnly
+        ? rawCalls
+        : effectiveCalls;
     const triggerMatch = triggerCalls.some(c => rule.trigger.test(c));
     if (!triggerMatch) continue;
 

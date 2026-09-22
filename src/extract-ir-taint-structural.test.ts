@@ -22,6 +22,7 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 import { extractIR } from "./extract-ir";
+import { detectSafeguardViolations } from "./protocol-detector";
 
 const TSCONFIG = JSON.stringify({
   compilerOptions: {
@@ -2421,4 +2422,282 @@ export class Uploader {
       }
     }, 150_000);
   }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// E3：DTO 的 schema 校验必须对规则可见（2026-09-22）
+//
+// 判据（先抄准再写 expect，R22）：
+//   protocol-detector.ts Input Validation 的 safeguard **此前不接受任何
+//   __progmune_* 标记**（纯词形匹配）⇒ NestJS 把校验写在 DTO 属性装饰器上时，
+//   规则永远看不到。本轮是「接通道」：提取器产 __progmune_input_schema__ +
+//   规则侧在**抑制位**加一个接受分支。只做减法，不进 trigger。
+//
+// 反面风险（注入过头 = 假阴性）：
+//   DTO 只有 @IsOptional / @Type / @Transform（不校验）⇒ 不得注入；
+//   入参是基本类型 / 无入参 ⇒ 不得注入；
+//   标记不得顺带压掉别的规则（Data Integrity 曾因标记名含 validate 被误压，
+//   见 extract-ir.ts 里标记命名的说明 ⇒ 这是本组专门要守的）。
+// ═══════════════════════════════════════════════════════════════
+
+describe("E3：DTO 的 schema 校验必须对 Input Validation 可见", () => {
+  const MARK = "__progmune_input_schema__";
+  const DECLS = `
+declare function Body(): any;
+declare function IsString(): any;
+declare function IsUUID(a?: any, b?: any): any;
+declare function MinLength(n: number): any;
+declare function IsOptional(): any;
+declare function Type(fn: any): any;
+declare function Transform(fn: any): any;
+`;
+
+  const cases: Array<{
+    name: string;
+    fn: string;
+    files: Record<string, string>;
+    want: string[];
+    dontWant?: string[];
+    why: string;
+  }> = [
+    {
+      name: "正例·① 跨文件 DTO（属性装饰器 @IsString）",
+      fn: "GroupController.createGroup",
+      files: {
+        "dto.ts": DECLS + `
+export class CreateGroupDto {
+  @IsString()
+  name: string;
+}
+`,
+        "a.ts": `
+import { CreateGroupDto } from "./dto";
+export class GroupController {
+  createGroup(@Body() dto: CreateGroupDto) { return this.svc.createGroup(dto); }
+}
+`,
+      },
+      want: [MARK],
+      why: "NestJS 最常见形态：校验写在另一个文件的 DTO 类上，函数体内什么都没有",
+    },
+    {
+      name: "正例·② 同文件 DTO",
+      fn: "C.createGroup",
+      files: {
+        "a.ts": DECLS + `
+export class CreateGroupDto {
+  @IsUUID()
+  id: string;
+}
+export class C {
+  createGroup(dto: CreateGroupDto) { return 1; }
+}
+`,
+      },
+      want: [MARK],
+      why: "DTO 与消费者同文件（小模块常见）",
+    },
+    {
+      name: "正例·③ @MinLength 也算校验（不只是 Is* 族）",
+      fn: "C.createGroup",
+      files: {
+        "a.ts": DECLS + `
+export class D {
+  @MinLength(2)
+  name: string;
+}
+export class C {
+  createGroup(dto: D) { return 1; }
+}
+`,
+      },
+      want: [MARK],
+      why: "R19：分母不只是 Is* 族；MinLength/MaxLength/Matches 都是真校验",
+    },
+    {
+      name: "正例·④ 顶层函数同样覆盖（与 E2 的『仅类/方法』边界不同）",
+      fn: "createGroup",
+      files: {
+        "a.ts": DECLS + `
+export class D {
+  @IsString()
+  name: string;
+}
+export function createGroup(dto: D) { return 1; }
+`,
+      },
+      want: [MARK],
+      why: "按入参判定，不按函数形态 ⇒ 顶层函数同样接得上（E2 那只覆盖装饰器，本轮不看装饰器）",
+    },
+    {
+      name: "负对照·① DTO 只有 @IsOptional/@Type/@Transform —— 不是校验",
+      fn: "C.createGroup",
+      files: {
+        "a.ts": DECLS + `
+export class D {
+  @IsOptional()
+  @Type(() => String)
+  @Transform(({ value }) => value)
+  name?: string;
+}
+export class C {
+  createGroup(dto: D) { return 1; }
+}
+`,
+      },
+      want: [],
+      dontWant: [MARK],
+      why: "可缺省 + 类型转换 ≠ 校验；判成已校验就是假阴性",
+    },
+    {
+      name: "负对照·② 入参是基本类型（不是 DTO 类）",
+      fn: "C.createGroup",
+      files: {
+        "a.ts": `
+export class C { createGroup(name: string) { return 1; } }
+`,
+      },
+      want: [],
+      dontWant: [MARK],
+      why: "基线：没有 schema 就不许凭空给出校验证据",
+    },
+    {
+      name: "负对照·③ 无入参",
+      fn: "C.createGroup",
+      files: {
+        "a.ts": DECLS + `
+export class D { @IsString() name: string; }
+export class C { createGroup() { return 1; } }
+`,
+      },
+      want: [],
+      dontWant: [MARK],
+      why: "DTO 存在但没被当入参 ⇒ 该函数的输入没有被校验",
+    },
+    {
+      name: "正对照·⑤ 真实调用不得被挤掉（E1 不回归）",
+      fn: "C.createGroup",
+      files: {
+        "a.ts": DECLS + `
+export class D { @IsString() name: string; }
+export class C {
+  createGroup(dto: D) { return this.repo.createGroup(dto); }
+}
+`,
+      },
+      want: [MARK, "createGroup"],
+      why: "本轮是**追加**标记；E1 补进来的真实调用必须仍在",
+    },
+  ];
+
+  for (const c of cases) {
+    it(`${c.name} —— ${c.why}`, () => {
+      const dir = makeProject(c.files);
+      try {
+        const calls = marksFor(dir, c.fn);
+        for (const w of c.want) expect(calls).toContain(w);
+        for (const d of c.dontWant ?? []) expect(calls).not.toContain(d);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    }, 150_000);
+  }
+
+  // ── 规则侧：标记必须真的压得住 Input Validation，且只压这一条 ──
+  it("规则侧·① 注入标记后 Input Validation 必须消失", () => {
+    const before = detectSafeguardViolations(["createPost"], "createPost");
+    expect(before.some(v => v.rule === "Input Validation")).toBe(true);
+    const after = detectSafeguardViolations(["createPost", MARK], "createPost");
+    expect(after.some(v => v.rule === "Input Validation")).toBe(false);
+  });
+
+  it("规则侧·② 标记不得压掉别的规则（Authorization 仍在）", () => {
+    const after = detectSafeguardViolations(["createPost", MARK], "createPost");
+    expect(after.some(v => v.category === "authorization")).toBe(true);
+  });
+
+  it("规则侧·③ 标记名不得撞上 Data Integrity 的 safeguard（命名事故回归）", () => {
+    // 曾用的名字 __progmune_validated_input__ 会被
+    // \b(get|find|check|exists|lookup|status|validate|verify)(?:[A-Z]\w*|_\w+)\b 命中，
+    // 凭空压掉 Foreign Key 校验。改名后必须仍报。
+    const withOld = detectSafeguardViolations(
+      ["addChild", "__progmune_validated_input__"], "addChild", undefined, ["parentId"], false
+    );
+    const withNew = detectSafeguardViolations(
+      ["addChild", MARK], "addChild", undefined, ["parentId"], false
+    );
+    expect(withOld.some(v => v.rule === "Data Integrity (Foreign Key)")).toBe(false);
+    expect(withNew.some(v => v.rule === "Data Integrity (Foreign Key)")).toBe(true);
+  });
+});
+
+describe("F：Input Validation 的 trigger 只认函数名（不再被 callee 拖下水）", () => {
+  // 立项依据（2026-09-22）：本规则的陈述对象是「这个函数自己是不是内容创建函数」
+  // （violationMessage 原文："Content creation function does not validate..."）。
+  // 此前拿 callee 名字去匹配 trigger，产生两类缺陷，各占一半：
+  //   (a) 重复投射   —— 分发器 handleRequest 因调用 createEvent/createRoute 被计一次，
+  //                     而那些 callee 自己也在报（实测 100/175，全部 SAFE_DUP）。
+  //   (b) 理由错     —— login/register/authenticate 因调用 **createHash**（密码哈希）
+  //                     被判成「内容创建函数未校验输入」（69/175）。
+  // 175 条已逐条归类，无一为真阳性；另有 6 条 list/get 查询函数。
+  const IV = (calls: string[], own: string) =>
+    detectSafeguardViolations(calls, own).filter(v => v.rule === "Input Validation");
+  const hit = (calls: string[], own: string) => IV(calls, own).length > 0;
+
+  // ── 正例：函数名自己就是创建函数 ⇒ 必须仍然报（本轮不得削弱真阳性） ──
+  it("正例·① createPost 自身仍报", () => {
+    expect(hit(["db.save"], "createPost")).toBe(true);
+  });
+  it("正例·② 类方法 C.createPost 仍报（ownName 取末段）", () => {
+    expect(hit(["db.save"], "C.createPost")).toBe(true);
+  });
+  it("正例·③ addComment 仍报", () => {
+    expect(hit(["db.save"], "addComment")).toBe(true);
+  });
+  it("正例·④ uploadFile 仍报", () => {
+    expect(hit(["fs.write"], "uploadFile")).toBe(true);
+  });
+  it("正例·⑤ 下划线形态 create_post 仍报", () => {
+    expect(hit(["db.save"], "create_post")).toBe(true);
+  });
+
+  // ── 负例：靠 callee 触发 ⇒ 必须不再报 ──
+  it("负例·① 分发器 handleRequest 不再因 createEvent 被计（重复投射）", () => {
+    expect(hit(["createEvent", "createMetric"], "handleRequest")).toBe(false);
+  });
+  it("负例·② registerNewUser 不再因 createHash 被判内容创建（密码哈希）", () => {
+    expect(hit(["createHash", "bcrypt.hash"], "registerNewUser")).toBe(false);
+  });
+  it("负例·③ doLogin 同上", () => {
+    expect(hit(["createHash"], "doLogin")).toBe(false);
+  });
+  it("负例·④ authenticate 同上", () => {
+    expect(hit(["createHash"], "authenticate")).toBe(false);
+  });
+  it("负例·⑤ 查询函数 listPosts 不再被报", () => {
+    expect(hit(["sort", "filter"], "listPosts")).toBe(false);
+  });
+  it("负例·⑥ ORM/建表类 callee 不再拖累调用者（createQueryBuilder）", () => {
+    expect(hit(["createQueryBuilder"], "findArticles")).toBe(false);
+  });
+
+  // ── 边界与回归保护 ──
+  it("边界·① ownName 缺失时不得误触发（triggerCalls 为空数组）", () => {
+    expect(hit(["createPost"], "")).toBe(false);
+  });
+  it("回归·① E3 的 schema 标记仍然压得住（本轮不得破坏 E3）", () => {
+    expect(hit(["createPost", "__progmune_input_schema__"], "createPost")).toBe(false);
+    expect(hit(["createPost"], "createPost")).toBe(true);
+  });
+  it("回归·② 非目标规则不受影响（Authorization 仍在）", () => {
+    const v = detectSafeguardViolations(["createEvent"], "handleRequest");
+    expect(v.some(x => x.category === "authorization")).toBe(true);
+  });
+
+  // ── 已知边界（登记，不断言）──
+  // 函数名不含 create/add/post/upload、但确实是「入口把用户输入交给内容创建」
+  // 的函数（如 handleSubmit 调 commentRepo.create，而 create 不在扫描范围内），
+  // 本轮之后不再报。这是 triggerOwnNameOnly 的固有代价：175 条损失里此类为 0，
+  // real-world 池里亦未发现（27 条触发源全为 ORM/哈希/权限工厂/内部工具）。
+  // 若要补回，需要 `exposed`（web handler）通道 —— 按 R27 先查该通道通不通。
 });

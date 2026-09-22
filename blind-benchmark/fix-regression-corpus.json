@@ -2,7 +2,7 @@
  "name": "fix-regression-corpus",
  "version": 2,
  "created": "2026-09-11",
- "updated": "2026-09-21",
+ "updated": "2026-09-22",
  "method": "真实安全修复回归：对每个修复，扫描「修复前 parent commit」——引擎在该位置/该类型上能否报出违规；再扫修复后确认不误报。来源=GitHub 安全公告数据库（GHSA/CVE），SHA 均经 api.github.com 实测核验。",
  "methodology_rules": [
   {
@@ -215,6 +215,48 @@
    "rule": "**调规则之前，先确认这条规则的证据通道是通的。** 做法：先看规则的 safeguard 接受哪些**语义标记**，再看你这套语言的提取器**产不产**它们。如果产不出，那不是规则不准，是规则饿着——在饿着的规则上做词表/阈值校准，只会把阈值越调越怪。补一问（本轮吃过亏）：**该规则是否接受标记**——有的规则（如 Input Validation）safeguard 是纯词形匹配、不接受任何标记，给它补提取器侧证据是白做。",
    "why": "与 R19（判据的分母）/ R24（候选清单的分母）/ R25（池要饱和）同一族，但发生在更上游：前面三条问的是「你量的东西对不对」，R27 问的是**「你喂给它的数据管道通不通」**——分母再对、池再饱和，通道断了全都是 0。本轮实测：Authorization 规则的 auth_check 早已接受 __progmune_auth_machinery__，只是 TS 侧从来没产过 ⇒ 规则侧零改动，纯提取器补齐就拿到 −24 条 FP / 0 ADDED。",
    "current_status": "已按 R27 摸清 23 个标记的产出/接受对照（Python 23/23、TS 4/23、C/Go/Java 0/23），E2 补了 auth_machinery 一条；其余 18 条待按 R21 逐条量化后再排优先级"
+  },
+  {
+   "id": "R28-a-marker-name-is-itself-matched-by-other-rules",
+   "added": "2026-09-22",
+   "source": "E3 轮：抑制型标记取名 __progmune_validated_input__，离线重放发现它被 Data Integrity (Foreign Key) 的 safeguard \\b(get|find|check|exists|lookup|status|validate|verify)(?:[A-Z]\\w*|_\\w+)\\b 命中（validate + d_input__），凭空压掉 10 条无关违规",
+   "rule": "**新增语义标记时，先跑一遍「这个标记名会被哪些别的规则命中」。** 标记是以普通调用名的身份进 effectiveCalls 的，所有词形规则都会拿它去匹配。命名必须避开 get/find/check/verify/validate/create/add/post/upload/sanitize 等动词词根（以及任何规则 safeguard/trigger 里出现过的词根）。落地做法：写实现之前先做离线重放（R29），看「非目标规则」一栏是不是 0。",
+   "why": "与 R17（动工前写最小探针）/ R19（判据的分母）同族：名字级机制的边界条件里，最容易漏的是「这个名字在别处还被谁读」。这次是抑制型标记，压错方向 = 假阴性，比误报更危险。"
+  },
+  {
+   "id": "R29-replay-offline-before-rescanning",
+   "added": "2026-09-22",
+   "source": "E3 轮：本机 load 200~550、可用内存 15~150MB，重扫会被随机 SIGKILL；改用「拿已记录的 calls + name 直接喂 detectSafeguardViolations」的离线重放，一次 2 秒，预测结果与之后的真实重扫逐条一致",
+   "rule": "**规则侧候选改动，先用离线重放量完再决定动不动手。** 做法：把 dist/protocol-detector.js 复制一份、在副本上打补丁（改 trigger / 加 safeguard 接受位），拿 fp-pool-results.json 与 batch-scan-results.json 里已记录的 perFunction.calls + name 重放，比较基线与变体的规则级计数。能同时给出三件事：① 效果上限；② 有没有污染非目标规则；③ 盲测基线会不会空过。注意副本改完要核对改动点唯一（assert count==1）。",
+   "why": "与 R21（先量化再动手）是同一条原则的执行手段：R21 说要量化，R29 给出在机器吃不消时**怎么量化**。代价是重放依赖已记录的 calls（不含 params/exposed），故对 paramGated / parentRefGated 规则不成立——这类规则仍要真扫。"
+  },
+  {
+   "id": "R30-attribute-every-loss-before-shipping-a-reduction",
+   "added": "2026-09-22",
+   "source": "F 轮：变体 A 会让 Input Validation 少报 175 条，上一轮因「可能有真阳性损失」不敢做；本轮逐条归因后发现 100 条是重复投射（callee 自己仍报）、69 条是 createHash 误触发、6 条是查询函数，无一真阳性",
+   "rule": "**任何「减少告警数量」的改动，LOST 清单必须逐条归类到机制类别，归类完成后只要有 1 条无法解释，就不能做。** 有效的分类维度是被去掉的那条的**信息有没有在别处保留**：① 被调用者自己仍在报（重复投射）；② 别的规则仍覆盖；③ 触发源是库函数（理由错）。「看起来像误报」不是归类。判不出来就交裁决，不要靠数量大小做决定。",
+   "why": "与 R19（判据的分母）/ R24（候选清单分母须全量）同族，但作用方向相反：那两条是防止漏掉该管的，这条是防止**删掉不该删的**。减告警的改动天然自带正反馈（数字变小了），最容易被数字骗过去。"
+  },
+  {
+   "id": "R31-self-verify-the-probe-before-measuring-with-it",
+   "added": "2026-09-22",
+   "source": "F 轮：构造 variantA2.js 时 python 脚本漏了 `src = src.replace(OLD, NEW)`，只插入了规则字段、没改执行分支 ⇒ 变体恒等于基线，首次测量得到「0 变化」。若信了这个数，会得出「该改动在新基线上无效」的完全错误结论；发现方式只是它与上一轮的 -175 不符",
+   "rule": "**变体 / 探针 / 测量脚本构造完成后，先跑一个「已知该变」的微用例自验，确认它真的变了，再拿去测量。** 自验用例要选那种「变了对、没变就是坏了」的极端样本（本次：`handleRequest` + `createPost` 应从报变不报，`createPost` 应始终报）。构造脚本里凡是先 assert 再改的地方，改完要 assert 改动点**已生效**（计数从 0 变 1），而不只是 assert 改动点**存在**（count==1）。",
+   "why": "与 R23（零漂移可能空过）是两种不同的空过：R23 是**被测对象**没被语料覆盖，R31 是**测量工具自己坏了**。两者都表现为「0 变化」，但 R31 更危险——它会让一个真实有效的改动被误判为无效而永久搁置。"
+  },
+  {
+   "id": "R32-check-who-calls-the-rule-before-tuning-it",
+   "added": "2026-09-22",
+   "source": "F 轮后按 R27 去查 exposed 通道，结果查出更上层的问题：SAFEGUARD_RULES 的调用方全是基准工具（src/python-benchmark.ts 是 CLI、protocol-detector 自带 CLI、blind-benchmark/*.ts）或注释；TS 产品路径（MCP 入口 dist/mcp-server.mjs、trust 引擎）根本不调用它。正面验证：npx tsx src/trust/cli.ts 跑 blog 项目只产 1 条 protocol 状态机违规，无任何 Input Validation",
+   "rule": "**调一条规则之前，先确认这条规则被谁调用——基准口径不等于产品口径。** 做法：拿规则的唯一标识字符串（规则名 / 常量名）去 grep 全仓 src，逐个判断引用方是产品代码还是基准/CLI 工具；再用**产品入口跑一次真实项目**做正面验证，不能只靠 grep 下结论。",
+   "why": "R27 查的是「提取器证据 → 规则」的通道（标记产不出来，规则饿着）；**R32 查的是「规则 → 产品」的通道**（规则压根没被调用）。R32 优先级更高：规则若不进产品，接证据通道是白接。E2/E3/F 三轮都是在「规则会被产品调用」的默认假设下做的——默认假设是最贵的假设，因为它从来不被检查。与 R31（测量工具自己坏了）同族：三者都表现为「你以为在量产品，其实在量别的东西」。"
+  },
+  {
+   "id": "R33-measure-incremental-recall-not-absolute",
+   "added": "2026-09-22",
+   "source": "沙箱轮：清单口径在 fr-007 上能报 35 条并精确命中全部 5 个真值位置，看似很有价值；但那 5 个位置产品引擎（path_traversal 标记 → PATH_TRAVERSAL）早已覆盖 ⇒ 增量 0。若只看『它能报多少』就会误判为值得接，代价是告警 30 倍",
+   "rule": "**评估一个能力要不要接进产品，量的是增量召回，不是绝对召回。** 做法：拿真值语料，分别跑「现有产品路径」与「候选能力」，比较**命中集合的差集**。候选能报很多 ≠ 有价值；只有当它报出的东西里有现有路径报不出来的，才值得接。附带必须报两个数：候选的绝对精度（真值命中 / 总告警），以及在真值上的命中是否落在『已有能力』的规则里。",
+   "why": "与 R30（减告警要逐条归因）是对称的：R30 管『删掉不该删的』，R33 管『加上不该加的』。加能力天然自带正反馈（能报 = 有本事），最容易被『它报了 84 条』这种数字说服。而真正决定价值的是差集，差集是看不见的，必须专门去量。"
   }
  ],
  "entries": [
