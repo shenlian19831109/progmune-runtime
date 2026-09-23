@@ -1,0 +1,76 @@
+{
+  "name": "@hedgedoc/html-to-react",
+  "version": "2.2.0",
+  "description": "Parse HTML into React components",
+  "source": "src/index.ts",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "type": "module",
+  "scripts": {
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "build": "rm -rf dist && tsc --project tsconfig.json",
+    "prepublish": "pnpm run lint && pnpm run build && pnpm run test",
+    "format": "../node_modules/.bin/oxfmt --check src",
+    "format:fix": "../node_modules/.bin/oxfmt src",
+    "lint": "../node_modules/.bin/oxlint src",
+    "lint:fix": "../node_modules/.bin/oxlint --fix src"
+  },
+  "files": [
+    "LICENSES/*",
+    "package.json",
+    "README.md",
+    "dist/**"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hedgedoc/hedgedoc.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hedgedoc/hedgedoc/issues"
+  },
+  "keywords": [
+    "react",
+    "html",
+    "htmlparser",
+    "htmlparser2",
+    "inner html",
+    "dangerouslySetInnerHTML"
+  ],
+  "author": "The HedgeDoc Authors",
+  "license": "AGPL-3.0",
+  "devDependencies": {
+    "@jest/globals": "30.5.0",
+    "@jest/types": "29.6.3",
+    "@types/react": "18.3.27",
+    "@types/react-dom": "18.3.7",
+    "@typescript/native": "npm:typescript@7.0.2",
+    "jest": "30.5.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "ts-jest": "29.4.12",
+    "typescript": "npm:@typescript/typescript6@6.0.2"
+  },
+  "dependencies": {
+    "domelementtype": "3.0.0",
+    "domhandler": "6.0.1",
+    "htmlparser2": "12.0.0"
+  },
+  "peerDependencies": {
+    "react": ">=16.0"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "browserslist": [
+    "node> 12"
+  ],
+  "engines": {
+    "node": ">=12"
+  }
+}

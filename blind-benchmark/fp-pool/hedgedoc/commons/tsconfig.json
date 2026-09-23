@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "lib": [
+      "esnext",
+      "dom"
+    ],
+    "declaration": true,
+    "strict": true,
+    "rootDir": ".",
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "typeRoots": ["./types", "../node_modules/@types"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "target" : "ESNext",
+    "isolatedModules": true,
+    "outDir": "./dist",
+    "types": ["node"],
+    "declarationDir": "./dist"
+  },
+  "include": ["./src", "./types"],
+  "exclude": ["./dist", "**/*.spec.ts"]
+}

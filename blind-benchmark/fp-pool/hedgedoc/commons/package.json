@@ -1,0 +1,62 @@
+{
+  "name": "@hedgedoc/commons",
+  "private": true,
+  "version": "0.4.0",
+  "description": "Common code between frontend and backend",
+  "author": "The HedgeDoc Authors",
+  "license": "AGPL-3.0",
+  "scripts": {
+    "build": "rm -rf dist && tsc --project tsconfig.json",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:ci": "NODE_OPTIONS=--experimental-vm-modules jest --ci",
+    "prepublish": "pnpm run lint && pnpm run build && pnpm run test",
+    "format": "../node_modules/.bin/oxfmt --check src",
+    "format:fix": "../node_modules/.bin/oxfmt src",
+    "lint": "../node_modules/.bin/oxlint src",
+    "lint:fix": "../node_modules/.bin/oxlint --fix src"
+  },
+  "type": "module",
+  "source": "src/index.ts",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "files": [
+    "LICENSES/*",
+    "package.json",
+    "README.md",
+    "dist/**"
+  ],
+  "browserslist": [
+    "node> 12"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hedgedoc/hedgedoc.git"
+  },
+  "dependencies": {
+    "@file-type/xml": "1.1.1",
+    "domhandler": "6.0.1",
+    "eventemitter2": "6.4.9",
+    "file-type": "22.0.2",
+    "js-yaml": "5.4.1",
+    "reveal.js": "5.2.1",
+    "ws": "8.21.3",
+    "yjs": "13.6.32",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@jest/types": "29.6.3",
+    "@mrdrogdrog/optional": "1.2.1",
+    "@types/node": "24.10.7",
+    "@types/ws": "8.18.1",
+    "@typescript/native": "npm:typescript@7.0.2",
+    "jest": "30.5.0",
+    "ts-jest": "29.4.12",
+    "typescript": "npm:@typescript/typescript6@6.0.2"
+  }
+}
