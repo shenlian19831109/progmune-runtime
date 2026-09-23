@@ -315,6 +315,13 @@ interface SafeguardRule {
    *  (e.g. the function actually issues token material, or executes a
    *  dynamic command). */
   requireMarker?: string;
+  /** Languages in which `requireMarker` is actually enforced.  MUST be set
+   *  whenever the marker is produced by only some extractors: markers are
+   *  emitted by the TypeScript extractor, and the Python extractor emits none.
+   *  Without this gate a marker-gated rule silently reports ZERO on every
+   *  language that cannot produce the marker — a regression that no TS-side
+   *  gate would ever catch (R42). */
+  requireMarkerLanguages?: string[];
   /** When set, the rule only applies to functions that plausibly serve user
    *  requests: the function is called by a web-handler function (exposed) or
    *  takes an identity-ish parameter (token/session/user/auth/request/...).
@@ -497,12 +504,38 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     // 175 条损失已逐条归类，无一为真阳性。⇒ trigger 只看函数名。
     triggerOwnNameOnly: true,
     trigger: /\b(create|add|post|upload)(?:[A-Z]\w*|_\w+)|(?:[A-Z]\w*|_\w+)(Create|Add|Post|Upload)\b/i,
+    // E5（2026-09-23）：语义前置条件 —— 只有「参数确实流向外部副作用」才谈得上
+    // 该不该校验。此前 trigger 是纯函数名正则（create|add|post|upload），判据手里
+    // **只有名字**：verdaccio 的 ConfigBuilder.addStorage/addLogger（纯配置装配）、
+    // ducktors 的 createS3/createAzureBlobStorage（工厂）都被要求「必须校验输入」，
+    // 而它们根本不接外部输入。FP 池实测：75 条里 62 条（83%）完全没有请求入口迹象。
+    //
+    // 为什么是「副作用」而不是「是否 HTTP 入口」（R41：先分缺信息 vs 缺语义）：
+    //   「非入口 ⇒ 不报」这个更直觉的判据**有毒** —— 真值集里 4 条已核验 TP
+    //   （docmost addContributors→redis.sadd、addLabelsToPage→labelRepo.findOrCreate、
+    //    hedgedoc ApiTokenService.createToken、hoppscotch AdminService.createATeam）
+    //   都没有 req 对象，但参数是从 Controller 透传的外部输入，且确实没有校验。
+    //   ⇒ Service 层方法不因「组件边界」获得豁免。区分点在**参数流向**，不在入口形态。
+    //
+    // 量化（blind-benchmark/probe-body-evidence.ts --from-gold，74 条已标注真值）：
+    //   TP 召回 100%（17/17，丢 0 条真报）／FP 压制 77.2%（44/57）／
+    //   precision 23.0% → 56.7%／净收益 44 条。多数类基线 77.0%。
+    // 「要求副作用调用吃到参数」的精化版 FP 压制虽达 91.2%，但会丢 4 条真报，
+    //   漏报比误报贵 ⇒ 取粗判据。
+    requireMarker: "__progmune_input_effect__",
+    // 该标记只由 TS 提取器产出（Python 提取器不产出任何 __progmune_* 标记），
+    // 故只在 TS/JS 上强制，Python 侧保持原有行为，避免静默归零（R42）。
+    requireMarkerLanguages: ["typescript", "javascript"],
     safeguards: [
       // E3（2026-09-22）：__progmune_input_schema__ —— 提取器在「入参类型是带校验
       // 装饰器的 DTO 类」时产出（NestJS 把校验写在 DTO 属性装饰器上，词形匹配永远
       // 看不到）。本规则此前不接受任何 __progmune_* 标记 ⇒ 该证据通道是断的。
       // 注意只加在**抑制位**（safeguard），不进 trigger：新通道只能做减法。
-      { pattern: /\b(validate|sanitize|check|verify)(?:[A-Z]\w*|_\w*)(Content|Input|Length|Title|Body|Type|Size|File|Data|Param|Arg|Field|Value)\b|\b(validateContent|sanitizeInput|checkLength|verifyType|checkSize)\b|__progmune_input_schema__/i, label: "input_validation" },
+      // E4（2026-09-23）：__progmune_input_guard__ —— 提取器在函数体内找到输入校验
+      // 证据时产出（limits:{fileSize…} / if(!x) throw BadRequest…）。此前规则只看
+      // 函数名与调用名，函数体里的校验看不见 ⇒ docmost 两个 upload controller
+      // 明明有校验仍被判「未校验」。与 E3 同源：只加在抑制位，不进 trigger。
+      { pattern: /\b(validate|sanitize|check|verify)(?:[A-Z]\w*|_\w*)(Content|Input|Length|Title|Body|Type|Size|File|Data|Param|Arg|Field|Value)\b|\b(validateContent|sanitizeInput|checkLength|verifyType|checkSize)\b|__progmune_input_schema__|__progmune_input_guard__/i, label: "input_validation" },
     ],
     violationMessage: "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
     conceptMissing: ["InputSanitization", "ContentValidation", "SizeLimit"],
@@ -1189,7 +1222,7 @@ export function identifierParse(name: string): string[] {
   const words: string[] = [];
   for (const part of parts) {
     // Split camelCase/PascalCase: "registerNewUser" → ["register", "New", "User"]
-    const camelWords = part.replace(/([a-z])([A-Z])/g, "$1 $2").split(" ");
+    const camelWords = part.replace(/([a-z])([A-Z])/g, "$1\x00$2").split("\x00");
     for (const w of camelWords) {
       if (w.length > 0) words.push(w);
     }
@@ -1239,8 +1272,15 @@ export function detectSafeguardViolations(calls: string[], enclosingFuncName?: s
     const triggerMatch = triggerCalls.some(c => rule.trigger.test(c));
     if (!triggerMatch) continue;
 
-    // Semantic precondition marker (extractor-emitted)
-    if (rule.requireMarker && !effectiveCalls.includes(rule.requireMarker)) continue;
+    // Semantic precondition marker (extractor-emitted).
+    // E5（2026-09-23）：只在能产出该标记的语言上强制。不限定语言的话，
+    // Python 侧（提取器不产出任何 __progmune_* 标记）会静默归零——
+    // 而 TS 侧所有闸门都看不见这种退化（R42）。
+    if (rule.requireMarker) {
+      const enforce = !rule.requireMarkerLanguages
+        || (language ? rule.requireMarkerLanguages.includes(language) : true);
+      if (enforce && !effectiveCalls.includes(rule.requireMarker)) continue;
+    }
 
     // Skip authorization rules for auth functions — they ARE the auth
     if (isAuthFunction && rule.category === "authorization") continue;

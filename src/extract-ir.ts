@@ -522,6 +522,162 @@ function validatedDtoClassNames(project: any): Set<string> {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// E4（2026-09-23）：函数体里的输入校验证据 ⇒ 注入 __progmune_input_guard__
+//
+// 背景：Input Validation 规则的 safeguard 只看**函数名与调用名**（词形匹配），
+//   看不见函数体。实测 docmost 的 AttachmentController.uploadFile 函数体里明明
+//   写着 `limits:{ fileSize, fields, files }` 与
+//   `if (!pageId) throw new BadRequestException('PageId is required')`，
+//   却仍被判「内容创建函数未校验输入」。判据不是不准，是**瞎** ——
+//   缺的是信息，不是语义理解，所以这里是确定性规则而不是概率模型。
+//
+// 判据（逐条来自语料实测，不是拍脑袋词表）:
+//   A. 上传/写入限制选项：`limits:{ … }` 且块后 140 字符内出现
+//      fileSize | maxFileSize | files | fields | parts
+//   B. 入参判空即拒：`if (!x) throw <HTTP/校验类异常>`
+//      —— 必须是 BadRequest/Validation/Unprocessable/Invalid/Forbidden/Http… 类。
+//      实测两条反例因此被排除：createS3 抛裸 `Error('…required')` 是**环境配置**
+//      校验；AttachmentService.uploadFile 抛 NotFoundException 是**存在性**校验。
+//      两者都不是「对输入内容做校验」。
+//
+// 范围实测：在 FP 池 112 条 Input Validation 违规上，A 与 B 命中集合**完全重合**
+// （均为 docmost 的两个 upload controller），**零命中 verified TP**；
+// 候选 C（校验库调用 validateOrReject/schema.parse）与 D（mime 白名单）
+// 命中数均为 0 ⇒ **不实现**（没有证据支撑的机制不进代码）。
+//
+// 与 E3 同构：AST 预扫 ⇒ key 集合 ⇒ 主循环后统一注入。只进 safeguard，不进 trigger。
+// ═══════════════════════════════════════════════════════════════
+const INPUT_GUARD_MARKER = "__progmune_input_guard__";
+
+function bodyHasInputGuard(text: string): boolean {
+  if (!text) return false;
+  // 迭代用的正则必须带 g（非全局正则的 exec 恒返回首个匹配 ⇒ 死循环）。
+  // 每次调用新建字面量正则，不复用带 lastIndex 的共享对象。
+  for (const m of text.matchAll(/\blimits\s*:\s*\{/gi)) {
+    const tail = text.slice(m.index + m[0].length, m.index + m[0].length + 140);
+    if (/\b(?:fileSize|maxFileSize|files|fields|parts)\b/i.test(tail)) return true;
+  }
+  for (const m of text.matchAll(/\bif\s*\(\s*!\s*[A-Za-z_$][\w$.?]*\s*\)\s*\{?\s*throw\b/g)) {
+    const tail = text.slice(m.index + m[0].length, m.index + m[0].length + 120);
+    if (/BadRequest|Validation|Unprocessable|Invalid|Forbidden|Http|NotAcceptable|PayloadTooLarge/i.test(tail)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * 全项目扫描：函数体内存在输入校验证据的函数集合。
+ * key = `${相对路径}|${函数名}`（类方法为 `Class.method`，与 IR 的 f.name 一致）。
+ */
+function inputGuardFunctionKeys(project: any, absRoot: string): Set<string> {
+  const out = new Set<string>();
+  const consider = (name: string | undefined, node: any, fileRel: string) => {
+    if (!name || !node) return;
+    if (bodyHasInputGuard(node.getText?.() ?? "")) out.add(`${fileRel}|${name}`);
+  };
+  for (const sf of project.getSourceFiles()) {
+    if (sf.getFilePath().includes("node_modules")) continue;
+    const fileRel = path.relative(absRoot, sf.getFilePath()).split(path.sep).join("/");
+    for (const fn of sf.getFunctions()) consider(fn.getName(), fn, fileRel);
+    for (const cls of sf.getClasses()) {
+      const cn = cls.getName();
+      for (const m of cls.getMethods()) {
+        const mn = m.getName();
+        consider(cn ? `${cn}.${mn}` : mn, m, fileRel);
+      }
+    }
+    for (const vd of sf.getVariableDeclarations()) {
+      const init: any = vd.getInitializer();
+      if (init && (Node.isArrowFunction(init) || Node.isFunctionExpression(init))) {
+        consider(vd.getName(), init, fileRel);
+      }
+    }
+  }
+  return out;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// E5（2026-09-23）：参数流向外部副作用的证据 ⇒ 注入 __progmune_input_effect__
+//
+// 背景：Input Validation 规则的判据手里**只有函数名**（trigger 是
+//   create|add|post|upload 的名字正则），于是任何叫 add*/create* 的函数都被要求
+//   「必须校验输入」：verdaccio ConfigBuilder.addStorage（配置装配）、ducktors
+//   createS3（工厂）都在报。FP 池 75 条里 62 条（83%）完全没有请求入口迹象。
+//
+// 判据来源：不是拍脑袋的词表，是先写探针 blind-benchmark/probe-body-evidence.ts
+//   在**真值集**（fp-gold.jsonl，74 条已标注）上量化出来的：
+//     粗判据   TP 召回 100%（17/17）/ FP 压制 77.2%（44/57）/ precision 23%→56.7%
+//     精化判据（要求副作用调用吃到参数）FP 压制 91.2% 但丢 4 条真报 ⇒ 弃
+//   ⇒ 本文件里的正则与探针里的 EFFECT 表**逐字一致**，改一处必须改另一处
+//     （否则实测口径与代码口径不可比，R38）。
+//
+// 判据不是「是否 HTTP 入口」：见 protocol-detector.ts 侧注释，那条判据会压掉
+//   4 条已核验真报。这里问的是「参数流向」，不是「入口形态」。
+//
+// 与 E3/E4 同构：AST 预扫 ⇒ key 集合 ⇒ 主循环后统一注入。
+// ═══════════════════════════════════════════════════════════════
+const INPUT_EFFECT_MARKER = "__progmune_input_effect__";
+
+// 与 probe-body-evidence.ts 的 EFFECT 表一致（S1-S7）
+const INPUT_EFFECT_PATTERNS: RegExp[] = [
+  // S1 ORM/repository 写入
+  /\b(?:save|create|update|insert|upsert|persist|remove|deleteMany|delete|findOrCreate|upsertMany|createMany|updateMany)\s*\(/,
+  // S2 缓存/Redis 写入
+  /\b(?:sadd|hset|hmset|lpush|rpush|setex|zadd|incr|append)\s*\(/,
+  // S3 HTTP 出站 / 消息投递
+  /\b(?:fetch|axios|request|got|superagent)\s*[.(]|\bhttps?\.\s*(?:request|get|post)\s*\(|\b(?:publish|emit|send|dispatch)\s*\(/,
+  // S4 文件系统写入
+  /\b(?:writeFile|writeFileSync|appendFile|createWriteStream|mkdir|unlink|rm|rename|copyFile)\s*\(/,
+  // S5 委托给 repo/service/storage 层。**必须大小写不敏感**：webshape_E 语料写的是
+  //    `repo.saveBanner(file)`（小写前缀 + 带后缀动词），大写前缀版两条件都不满足
+  //    ⇒ 副作用漏判 ⇒ 该报的被压掉，闸门当场转红 3 条。
+  //    动词表含 upload：docmost uploadToDrive 只有 `this.storageService.upload(...)`，
+  //    漏一个动词就丢一条真报。
+  /\b\w*(?:repo|repository|service|storage|dao|manager|gateway|client|provider)\s*\.\s*(?:create|add|save|update|insert|upsert|write|store|persist|set|upload|put|send|publish|remove|delete)[A-Za-z0-9_]*\s*\(/i,
+  // S6 prisma / knex 写入
+  /\bprisma\s*\.\s*\w+\s*\.\s*(?:create|update|upsert|delete|createMany|updateMany)\s*\(|\b(?:knex|db|connection|tx|trx)\s*\(\s*['"]\w+['"]\s*\)\s*\.\s*(?:insert|update|del)\s*\(/,
+  // S7 Kysely 链式（trx.insertInto(...).values(...).execute()）
+  /\.\s*(?:insertInto|updateTable|deleteFrom|insert|update|del|delete)\s*\(/,
+];
+
+function bodyHasExternalEffect(text: string): boolean {
+  if (!text) return false;
+  return INPUT_EFFECT_PATTERNS.some((re) => re.test(text));
+}
+
+/**
+ * 全项目扫描：函数体内存在「参数流向外部副作用」证据的函数集合。
+ * key = `${相对路径}|${函数名}`（类方法为 `Class.method`，与 IR 的 f.name 一致）。
+ */
+function inputEffectFunctionKeys(project: any, absRoot: string): Set<string> {
+  const out = new Set<string>();
+  const consider = (name: string | undefined, node: any, fileRel: string) => {
+    if (!name || !node) return;
+    if (bodyHasExternalEffect(node.getText?.() ?? "")) out.add(`${fileRel}|${name}`);
+  };
+  for (const sf of project.getSourceFiles()) {
+    if (sf.getFilePath().includes("node_modules")) continue;
+    const fileRel = path.relative(absRoot, sf.getFilePath()).split(path.sep).join("/");
+    for (const fn of sf.getFunctions()) consider(fn.getName(), fn, fileRel);
+    for (const cls of sf.getClasses()) {
+      const cn = cls.getName();
+      for (const m of cls.getMethods()) {
+        const mn = m.getName();
+        consider(cn ? `${cn}.${mn}` : mn, m, fileRel);
+      }
+    }
+    for (const vd of sf.getVariableDeclarations()) {
+      const init: any = vd.getInitializer();
+      if (init && (Node.isArrowFunction(init) || Node.isFunctionExpression(init))) {
+        consider(vd.getName(), init, fileRel);
+      }
+    }
+  }
+  return out;
+}
+
+// ═══════════════════════════════════════════════════════════════
 // G1 PATH_GUARD_EVIDENCE —— 路径穿越的「校验识别」（2026-09-19）
 //
 // 背景：路径穿越标记此前是 `taint → file sink ⇒ 标记`，**不看中间有没有校验**；
@@ -2919,6 +3075,29 @@ function _extractSingleProject(
   if (!fs.existsSync(tsconfigPath)) {
     project.addSourceFilesAtPaths(path.join(absRoot, "**/*.ts"));
   }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 零源文件兜底（2026-09-22）：solution 风格 tsconfig 会静默产出 0 函数
+  //
+  // 根 tsconfig 是「容器」时（`"files": []` + `"include": []` + `references`
+  // 指向 tsconfig.app.json 等），ts-morph 按它加载会得到 **0 个源文件** ⇒
+  // 0 个函数 ⇒ 0 条违规，**且不报错、不告警**。
+  //   这比崩溃危险得多：调用方会把「0 函数」读成「这个仓库很干净」——
+  //   实测踩到：FP 池 6 个切片里 gothinkster-node-express-realworld-example-app
+  //   一直以 functions=0 参与统计（切片只保留了根 tsconfig.json，它引用的
+  //   tsconfig.app.json / tsconfig.spec.json 不在切片里，references 因此全被过滤掉）。
+  //
+  // 只在「确实一个源文件都没有」时才兜底 ⇒ 现有工程全部不受影响（它们是
+  // `include: ["src"]` 的正常 tsconfig，走不到这里）。兜底同时打 stderr，
+  // 让这类切片不可能再悄悄以「0 违规」混入统计。
+  // ═══════════════════════════════════════════════════════════════
+  if (!project.getSourceFiles().some((sf) => !sf.getFilePath().includes("node_modules"))) {
+    console.error(
+      `⚠️  [extract-ir] ${absRoot}：tsconfig 未纳入任何源文件（solution 风格 / 引用缺失）→ 回退为全目录 glob`
+    );
+    project.addSourceFilesAtPaths(path.join(absRoot, "**/*.ts"));
+    project.addSourceFilesAtPaths(path.join(absRoot, "**/*.tsx"));
+  }
   const funcs: FunctionInfo[] = [];
   // 标记增强的共享状态（2026-09-15 内联重构）：
   // sinkParams = 项目方法名 → 方法体内流入文件 sink 的形参下标 + 方法条目；
@@ -3091,6 +3270,25 @@ function _extractSingleProject(
     if (!hit) continue;
     f.calls = f.calls || [];
     if (!f.calls.includes(INPUT_SCHEMA_MARKER)) f.calls.push(INPUT_SCHEMA_MARKER);
+  }
+
+  // ── E4（2026-09-23）：函数体里有输入校验证据 ⇒ 注入 __progmune_input_guard__
+  //    与 E3 同一处收口、同一套形态（函数声明 / 类方法 / 变量箭头）。
+  const inputGuardKeys = inputGuardFunctionKeys(project, absRoot);
+  for (const f of funcs) {
+    if (!inputGuardKeys.has(`${f.file}|${f.name}`)) continue;
+    f.calls = f.calls || [];
+    if (!f.calls.includes(INPUT_GUARD_MARKER)) f.calls.push(INPUT_GUARD_MARKER);
+  }
+
+  // ── E5（2026-09-23）：参数流向外部副作用的证据 ⇒ 注入 __progmune_input_effect__
+  //    与 E3/E4 同一处收口、同一套形态（函数声明 / 类方法 / 变量箭头）。
+  //    Input Validation 规则据此做 requireMarker（无副作用证据 ⇒ 不要求输入校验）。
+  const inputEffectKeys = inputEffectFunctionKeys(project, absRoot);
+  for (const f of funcs) {
+    if (!inputEffectKeys.has(`${f.file}|${f.name}`)) continue;
+    f.calls = f.calls || [];
+    if (!f.calls.includes(INPUT_EFFECT_MARKER)) f.calls.push(INPUT_EFFECT_MARKER);
   }
 
   // ═══════════════════════════════════════════════════════════════

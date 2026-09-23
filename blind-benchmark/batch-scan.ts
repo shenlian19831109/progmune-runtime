@@ -68,8 +68,12 @@ export function scanProject(projectId: string): ProjectScanResult {
   const allCalls = [...new Set(funcs.flatMap(f => f.calls || []))];
   const exposed = computeExposed(funcs);
 
+  // language 必须传 "typescript"（2026-09-22）：传 undefined 会让 activeRules
+  // 退化成「全部规则」，把 Python 专属（Context Manager Usage 等）与 C 专属规则
+  // 套在 TS 语料上。实测 TS 盲测 115 项目差值为 0（generated 语料不触发那些词形），
+  // 但 FP 池真实切片上有 5 条纯噪声 —— 属口径修正，不影响既有结论。
   const protocolViolations = detectProtocolViolations(allCalls);
-  const safeguardViolations = detectSafeguardViolations(allCalls);
+  const safeguardViolations = detectSafeguardViolations(allCalls, undefined, "typescript");
   const resourceViolations = detectResourceViolations(allCalls);
 
   const perFunction = funcs
@@ -77,7 +81,7 @@ export function scanProject(projectId: string): ProjectScanResult {
     .map(f => ({
       name: f.name, file: f.file, calls: f.calls || [],
       protocolViolations: detectProtocolViolations(f.calls || []),
-      safeguardViolations: detectSafeguardViolations(f.calls || [], f.name, undefined, (f.params || []).map(p => p.name), isExposed(f.name, exposed)),
+      safeguardViolations: detectSafeguardViolations(f.calls || [], f.name, "typescript", (f.params || []).map(p => p.name), isExposed(f.name, exposed)),
     }));
 
   return { project: projectId, files: [...new Set(funcs.map(f => f.file))].length,

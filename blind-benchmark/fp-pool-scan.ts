@@ -120,10 +120,16 @@ for (const repo of repos) {
   const perFunction: PoolScanResult["perFunction"] = [];
   for (const f of funcs.filter((f) => f.exported)) {
     const calls = f.calls || [];
+    // language 必须传 "typescript"（2026-09-22）：此前传 undefined ⇒
+    // `activeRules` 退化为「全部规则」，Python 专属规则（Context Manager Usage /
+    // Unsafe Deserialization (Pickle) / Command Injection …）与 C 专属规则会
+    // 一并套在 TS 代码上。实测：8 切片池里这类纯噪声 5 条（全为 Context Manager
+    // Usage，落在 TS 的 WebSocket gateway 与 OIDC controller 上）。
+    // 对照：batch-scan-python.ts 一直传 "python"，只有 TS 侧漏了。
     const sv = detectSafeguardViolations(
       calls,
       f.name,
-      undefined,
+      "typescript",
       (f.params || []).map((p) => p.name),
       isExposed(f.name, exposed)
     );
@@ -146,7 +152,7 @@ for (const repo of repos) {
     functions: funcs.length,
     totalLines: countLines(dir),
     protocol: detectProtocolViolations(allCalls).length,
-    safeguard: detectSafeguardViolations(allCalls).length,
+    safeguard: detectSafeguardViolations(allCalls, undefined, "typescript").length,
     resource: detectResourceViolations(allCalls).length,
     emptyCallFns: funcs.filter((f) => !f.calls || f.calls.length === 0).length,
     emptyClassMethods: funcs.filter(

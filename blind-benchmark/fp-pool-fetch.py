@@ -125,8 +125,14 @@ def slice_repo(
                         skipped_big += 1
                         continue
                     kept.append((rel, size, priority(rel)))
-                elif fn in ("package.json", "tsconfig.json"):
+                elif fn == "package.json" or (fn.startswith("tsconfig") and fn.endswith(".json")):
                     # 只留最靠近根的两层，避免每个 package 都塞一份
+                    # ⚠ tsconfig 必须用前缀匹配而非只认 `tsconfig.json`（2026-09-22）：
+                    #   solution 风格仓库的根 tsconfig 只是容器（`files: []` +
+                    #   `include: []` + references 指向 tsconfig.app.json），
+                    #   只留它会让切片加载出 **0 个源文件 ⇒ 0 个函数**，
+                    #   并且**静默**——切出来的片在池里以「0 违规」假装参与统计。
+                    #   实测踩到：gothinkster/node-express-realworld-example-app。
                     depth = rel.count(os.sep)
                     if depth <= 2:
                         kept.append((rel, size, 10))

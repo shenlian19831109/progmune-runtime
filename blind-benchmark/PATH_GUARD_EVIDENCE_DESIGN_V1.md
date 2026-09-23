@@ -1829,3 +1829,779 @@ R27 查的是「提取器证据 → 规则」的通道，**R32 查的是「规�
 做法：拿真值语料，分别跑「现有产品路径」与「候选能力」，比较命中集合。
 候选能报很多 ≠ 有价值；只有当它报的东西里有现有路径报不出来的，才值得接。
 （本次：清单在 fr-007/fr-016 上能报 35/84 条，但命中集合 ⊆ 引擎命中集合 ⇒ 增量 0 ⇒ 不接。）
+
+
+---
+
+## §二十五 exposed 通道实测：通道是断的，且按字面做会倒退 F 轮（2026-09-22）
+
+### 起因
+
+3.7.50 / 3.7.51 发布后确定的第一优先：exposed（web-handler）通道，理由是
+① 恢复 F 轮丢掉的分发器检出（handleSubmit 类）② DTO 通道的自然延伸
+③ 让生成语料获得真实 TS web 形状、终结 R23 空过。
+
+按 R27 先查通道。**查出来的结果与预期不同**，本节是实测记录。
+
+### 通道现状：定义窄 + 语义反 + 真实覆盖率 0.5%
+
+`exposed` 由调用方自己算（`batch-scan.ts` / `fp-pool-scan.ts` / `batch-scan-python.ts`），
+规则侧只在**一个门**里用到它：
+
+```ts
+// paramGated：只有「可能被 authenticate 的函数」才应用
+if (rule.paramGated && params) {
+  const hasIdentity = params.some(p => /\b(token|session|user|auth|request|...)\b/i.test(p));
+  if (!hasIdentity && !exposed) continue;
+}
+```
+
+⇒ 它是**放行条件**，不参与 trigger。而计算它的是：
+
+```ts
+const WEB_HANDLER = /\b(handle_request|handleRequest|request_handler|requestHandler)\b/i;
+function computeExposed(funcs) { /* 收集 WEB_HANDLER 函数的 callees */ }
+```
+
+三个问题：
+
+1. **词表只认 4 个名字**，且这 4 个是 generated 语料的模板名，真实项目不用。
+2. **语义方向反了**：exposed = 「**被** handler 调用的**下游**函数」，
+   而要恢复的 `handleSubmit` 是「**入口/分发器**」本身——上游。
+3. **真实覆盖率**：离线重放实测——
+   - TS 盲测 1543 条函数，**1110 条 exposed（72%）**（generated 人人叫 handleRequest）
+   - **FP 池真实项目 199 条，仅 1 条 exposed（0.5%）**
+   - docmost 切片：真实 `@Controller(` **8 个**、`@Get/Post/Put/Patch/Delete(` **38 个**，
+     旧词表命中 **0** 个
+
+⇒ 通道在真实世界基本是死的。
+
+### 两个变体的离线重放（R29，先做 R31 自验）
+
+| 变体 | 做法 |
+|---|---|
+| D | 字面做 exposed 通道：exposed ⇒ trigger 回退到 effectiveCalls |
+| E | 更精确的替代：ownName 不命中时，若存在**不在本项目函数集合内**的触发源 ⇒ 触发（即"没人替它报"才报） |
+
+**R31 自验（4 个微用例，全部符合预期）**：
+
+| 用例 | base | D | E |
+|---|---|---|---|
+| `handleSubmit` + `commentRepo.createComment`（callee 不在集合） | 0 | 0 | **1** ✓ 恢复边界 |
+| `handleRequest` + `createEvent`（callee 在集合） | 0 | 0 | 0 ✓ 保住 F 轮 |
+| `handleRequest` exposed=true | 0 | **1** | 0 ✗ D 会倒退 |
+| `createPost` | 1 | 1 | 1 ✓ 不受影响 |
+
+**全量重放（基线 IV 242，与盲测实测一致 ⇒ 保真度第三次确认）**：
+
+| | 盲测 111 项目 | FP 池 6 切片 |
+|---|---|---|
+| 基线 | 242 | 59 |
+| **D** | **317（+75）** | 60（+1） |
+| **E** | **311（+69）** | 68（+9） |
+
+**两个变体的 ADDED 全是同一批**——`authenticate` 23 / `registerNewUser` 22 /
+`doLogin` 22，也就是 **F 轮已经逐条判定为误报的 createHash 类（69 条）**。
+
+E 为什么也中招：`createHash` 是**库函数**，天然满足「不在本项目函数集合内」，
+于是被 E 当成「没人替它报的创建函数」。库函数的 `create*` 前缀 vs 真实内容创建，
+**光靠"在不在集合里"分不开**——这正是 F 轮 RISKY_EXTERNAL 那一类的老问题。
+
+E 在 FP 池多出的 9 条（`setJoinedWorkspacesCookie` / `computeEmailSignature` /
+`getLegacyAuthCacheKey` / `getListenAddress` / `stringToMD5` / `turboRemoteCache` / `ask` /
+`execute` / `expressLoader`）逐条看全是噪声。
+
+### 结论：不能按字面做，且顺序要反过来
+
+**按 R33（增量召回）判定**：两个变体的增量都是**负的**——
++69~75 全是已知误报回归，而**目标形状（handleSubmit 类）在 ADDED 里 0 条**。
+generated 语料根本没有这种形状，所以收益**在当前语料上无法验证**。
+
+⇒ **exposed 通道不能按字面做。**
+
+⇒ **顺序调整为：语料补形 → exposed 通道 → 规则侧校准。**
+原顺序（exposed → 补形 → 校准）在实测下不成立：exposed 通道的验收**依赖**
+真实 TS web 形状语料——没有形状，就无法证明「恢复分发器」的收益，
+只会看到 69 条已知误报回来。补形是 exposed 通道的**前置**，不是后续。
+
+### 补形的具体目标（下一轮执行）
+
+语料族需具备四种真实 TS web 形状（对应四次 R23 空过的成因）：
+
+| 形状 | 对应空过 | 例子 |
+|---|---|---|
+| NestJS Controller + HTTP 装饰器 | E2（装饰器） | `@Controller('x')` + `@Post()` + `@UseGuards(JwtAuthGuard)` |
+| DTO + 校验装饰器 | E3（DTO） | `class CreateXDto { @IsString() @MinLength(1) name }` |
+| 类方法作为入口 | 类方法轴 | `class XController { @Post() async create(@Body() dto) {...} }` |
+| **分发器**：入口函数名不含 create，把入参交给**外部** create | F（本轮） | `handleSubmit(input) { commentRepo.createComment(input) }` |
+
+第四条是 F 轮登记的已知边界，也是 exposed 通道要恢复的目标——**先造出它，
+通道才有验收对象。**
+
+### 对 R23 的处置（按发布方的意见，不再记空过注记）
+
+R23 已出现四次（装饰器 / DTO / 类方法 / 分发器），根因同一：generated 语料缺
+TS web 框架形状。**对策是补形，不是第五条注记。** 本节不再登记第五次空过；
+补形完成前，凡触及上述四种形状的改动，盲测一律视为**不可验证**，
+须以 FP 池真实切片或新建定向语料为准。
+
+补形已于 §二十六 完成，本条约定随之升级为方法学规则 **R35**（已写入
+`fix-regression-corpus.json`）：**「无法验证」时先量语料里有没有那个形状，
+没有就先补形；补形 = 语料 + 随语料落盘的期望表 + 反向验证，三件套缺一不可。**
+
+## §二十六 语料补形：webshape_A..D（2026-09-22）
+
+### 起因：先把「没有形状」量成数字
+
+R23 的四次空过此前只是**推断**。补形前先量：
+
+| 度量 | 实测 |
+|---|---|
+| `generated/` 项目数 | 116 |
+| 匹配 `^\s*@[A-Z]\w*(`（装饰器）的**文件数** | **0** |
+| 含 `class` 声明的文件数 | 4（taintpath_B / H / I / K） |
+| 其中带装饰器的 | **0** |
+
+⇒ E2（装饰器鉴权）、E3（DTO schema）、F/exposed 三轮的盲测是**结构性空过**：
+不是改对了，是语料里压根没有可判的形状，`LOST 0 / ADDED 0` 证明不了任何东西。
+
+### 做了什么
+
+新生成器 `blind-benchmark/generate-projects-webshape.ts`，四族钉进 `generated/`
+（**必须落在 batch-scan 真正枚举的目录**，否则等于没补）：
+
+| 族 | 形状 | 对应空过 | 例数 |
+|---|---|---|---|
+| `webshape_A` | NestJS Controller + HTTP 装饰器 | E2 | 5 |
+| `webshape_B` | DTO + class-validator 校验装饰器 | E3 | 4 |
+| `webshape_C` | 类方法作入口（无框架） | 类方法轴 | 3 |
+| `webshape_D` | 分发器：入口名不含 create、创建在项目外 | F / exposed | 6 |
+
+两条设计纪律：
+
+- **每族正向反向并列。** A 族除 `@UseGuards(JwtAuthGuard)` 外还有 `@Public()`
+  （显式免鉴权）、`@UseGuards(ThrottlerGuard)`（限流≠鉴权）、裸路由三个反向——
+  只放正向的话，「类名含 Controller 就注入」这种实现也能全绿。
+- **期望表由生成器一并写出**（`webshape-expectations.json`，禁止手改）。
+  手写 JSON 会与语料漂移，这是 R7 的执行点。
+
+新闸门 `check-webshape.ts`：**默认实时提取**（不读报告——读陈旧产物是第二种空过），
+**语料目录缺失即报错退出**（`generate-projects.ts` 会 rm -rf 所有含 `_` 的目录，
+跑过它之后本族会静默消失 ⇒ 必须变成硬失败）。
+
+### 验收：四门
+
+| 门 | 结果 |
+|---|---|
+| `tsc --noEmit` | 0 错 |
+| taintpath 闸门 | 160/160 |
+| 真实语料 fr-007 | pre 5 / post 0 |
+| 真实语料 fr-016 | pre 7 / post 0 |
+| **webshape 闸门** | **18/18** |
+| 定向 `extract-ir-taint-structural.test.ts` | 201/201 |
+| TS 盲测漂移 | 既有 111 项目 **LOST 0 / 内容漂移 0**；新增 21 条全部落在 `webshape_*`；总数 3026 → 3044 |
+
+（定向测试过程中出现 1 次 `vitest-worker: Timeout calling "onTaskUpdate"`——
+是机器欠载下 worker 与主线程 RPC 的通信抖动，用例本身 201/201 通过。）
+
+### 反向验证：四刀精确转红（R18/R31）
+
+闸门全绿**不是**证据。切四刀，看是否精确转红：
+
+| 刀 | 做法 | 转红 |
+|---|---|---|
+| CUT-1 | 去掉 E2 装饰器鉴权注入 | `readGuarded` / `readGuardedAndChecked` |
+| CUT-2 | 去掉 E3 `validatedDtoClassNames` | `createValidated` / `updateValidated` |
+| CUT-4 | 鉴权标记**无条件**注入 | 4 条声明 `none:auth_machinery` 的用例 |
+| CUT-5 | 所有类都算已校验 | 4 条声明 `none:input_schema` 的用例 |
+
+四刀全部精确命中，跑完 `REVERSE-VERIFY` 残留 0、源文件与备份逐字节一致。
+
+**其中两刀第一次报 BAD，是期望算错了不是机制坏了**（升 **R34**）：CUT-4/CUT-5 的
+转红范围比手列的大，逐条核对后发现 `ArchiveService.extract` 与 `handleSubmit`
+同样声明了 `none`，无条件注入当然也会转红。**反向验证的期望集必须由期望表推导，不能手列。**
+
+同一族的另一次踩坑：D 族 `handleSubmitValidated` 我按直觉写成「已校验 ⇒ 不得报」，
+但 Input Validation 的 safeguard 词表不认 `assertSafePath`（只认
+`validate|sanitize|check|verify` + `Content|Input|…`，`validateContent` 走显式列表命中）
+——**按规则语义它只查路径不查内容，该报**。R22「先抄准判据再写 expect」的事后执行点：
+语料改成 `validateContent(input)` 作反向用例，另加 `handleSubmitPathChecked`
+（`assertSafePath`）作正向用例，把「任何 assert* 都算校验」锁死。
+
+### 补形的回报：§二十五 那个「无法验证」立刻变成了可测的
+
+这才是补形的目的。变体 E（ownName 不命中时，若存在**不在本项目函数集合内**的
+触发源则触发）在此前只有 4 个微用例、无法全量验证；现在：
+
+| | TS 盲测 115 项目 | FP 池 6 切片 |
+|---|---|---|
+| 基线 Input Validation | 246 | 59 |
+| 变体 D | 321（+75） | 60（+1） |
+| **变体 E** | **318（+72）** | 68（+9） |
+
+**E 的 +72 逐条拆开**：
+
+| 来源 | 条数 | 判定 |
+|---|---|---|
+| `authenticate` / `registerNewUser` / `doLogin` / `register` / `login` ← `createHash` | 69 | **误报**（F 轮已判定的密码哈希类） |
+| `handleHash` ← `createHash` | 1 | **误报** |
+| `handleSubmit` ← `createComment` | 1 | **真阳性**（目标形状，恢复了） |
+| `handleSubmitPathChecked` ← `createComment` | 1 | **真阳性**（只查路径不查内容） |
+
+FP 池 +9 的外部触发源：`addDays` / `createHmac` / `createSessionAndToken` /
+`addContentTypeParser` / `createHash` / `addrToString` / `createInterface` /
+`createExpressServer`——**没有一个跟内容创建有关**。
+
+### 结论：exposed 通道不做（按 R33）
+
+真实代码上 **增量召回 0、精度 −9**。 ⇒ 不做，且理由不是「没做完」是「做完也不划算」。
+
+三个判别子逐一试过，都不成立：
+
+1. **按名字**（堵住库函数的 `create*`）：FP 池 8 个触发源是开放集合，堵不完。
+2. **按实参是否被污染**：`AuthService.login → createSessionAndToken(user)` 同样是
+   形参传入，与 `commentRepo.createComment(input)` **分不开**。
+3. **按接收者**（`obj.createX` = 领域仓库 vs 裸 `createX` = 库函数）：理论上成立，
+   但 `extractDirectCalls` 当前把接收者丢掉（`fs.readFileSync` → `readFileSync`），
+   要改就得动提取器，波及 23 个标记与 111 个项目 ⇒ **不擅自做**，交给发布方裁决。
+
+第 3 条是唯一还有希望的方向，代价是提取器层改动。若要做，建议先单开一轮评估
+「保留接收者」对既有 3026 条判定的影响面，而不是与 exposed 通道绑在一起做。
+
+### 顺序推进情况
+
+原定：补形 → exposed → 规则侧校准。本轮补形完成，并顺带把 exposed 通道
+**量成结论**（不做）。下一轮进入**规则侧校准**，CASL 词表仍顺延。
+
+### 本轮新增方法学规则
+
+- **R34**：反向验证的期望转红集合必须由期望表推导，不能手列（与 R22 同族：一个防正向期望写错，一个防反向期望写错）。
+- **R35**：「无法验证」时先量语料形状，缺就先补形；补形 = 语料 + 随落盘期望表 + 反向验证。这是对 R23 的**处置**，不是第五条注记。
+
+## §二十七 规则侧校准的前置检查：池里有 1/6 是死的，且两个 TS 基准工具的 language 是断的（2026-09-22）
+
+### 起因：动手前按 R25 去查池，第一眼就撞见一个死切片
+
+R25 的要求是先扩池到饱和再排序。开池核对，6 个切片的 perFunction 分布：
+
+| 切片 | files | functions | perFunction | safeguard |
+|---|---:|---:|---:|---:|
+| docmost | 118 | 262 | 75 | 120 |
+| verdaccio | 72 | 249 | 78 | 112 |
+| w3tecch-express-typescript-boilerplate | 77 | 113 | 23 | 25 |
+| lujakob-nestjs-realworld-example-app | 35 | 61 | 16 | 18 |
+| ducktors-turborepo-remote-cache | 48 | 23 | 7 | 15 |
+| **gothinkster-node-express-realworld-example-app** | **37** | **0** | **0** | **0** |
+
+37 个 TS 文件扫出 **0 个函数**。它一直以「0 违规」的形式参与全池统计——
+**所有占比的分母里混着一片死的**。
+
+### 根因：两处缺陷叠加，都不是「数据脏」，是可修的缺陷
+
+1. **抓取器**：`fp-pool-fetch.py` 只保留 `tsconfig.json`
+   （`elif fn in ("package.json", "tsconfig.json")`），把 solution 风格仓库的
+   `tsconfig.app.json` / `tsconfig.spec.json` 全丢了。
+2. **提取器**：该仓库根 tsconfig 是**容器**（`"files": []` + `"include": []` +
+   `references`），references 的目标又不在切片里 ⇒ ts-morph 按它加载得到 **0 个源文件**
+   ⇒ 0 个函数，**不报错、不告警**。
+
+第 2 条是产品路径上的隐患，比池的问题更严重：**用户扫这种仓库会拿到「无发现」。**
+
+### 三处修复（两处在工具，一处在提取器）
+
+| 修复 | 文件 | 内容 |
+|---|---|---|
+| 零源文件兜底 | `src/extract-ir.ts` | `project` 无任何非 node_modules 源文件时，回退 `**/*.ts` + `**/*.tsx`，并打 stderr 告警 |
+| 抓取器保留 tsconfig 变体 | `fp-pool-fetch.py` | 改前缀匹配 `tsconfig*.json` |
+| **language 门** | `batch-scan.ts` / `fp-pool-scan.ts` | `detectSafeguardViolations` 第三参 `undefined` → `"typescript"` |
+
+第三处是查走廊的時候发现的：`batch-scan-python.ts` 一直传 `"python"`，**只有 TS 侧传 undefined**，
+而 `language` 为空时 `activeRules` 退化为「全部规则」⇒ Python 专属规则
+（`Context Manager Usage` / `Unsafe Deserialization (Pickle)` / `Command Injection` …）
+与 C 专属规则一并套在 TS 代码上。
+
+**影响实测**：TS 盲测 115 项目差 **0**；FP 池精确少 **5 条**，
+全是 `Context Manager Usage`（落在 TS 的 WebSocket gateway 与 OIDC controller 上）。
+影响很小，但它是错的，且改起来零代价。
+
+### 验收
+
+| 门 | 结果 |
+|---|---|
+| `tsc --noEmit` | 0 错 |
+| taintpath | 160/160 |
+| webshape | 18/18 |
+| fr-007 / fr-016 | pre 5 / post 0 与 pre 7 / post 0 |
+| 定向 `extract-ir-taint-structural.test.ts` | 201/201 |
+| TS 盲测 | **LOST 0 / 漂移 0 / ADDED 0**，总数 3044 → 3044 |
+| 零源文件兜底误触发（115 generated 项目） | **0 次** |
+| 兜底反向验证 | 摘掉兜底 ⇒ gothinkster 精确回到 0 函数；残留 0、源文件逐字节还原 |
+| language 门反向验证 | 退回 `undefined` ⇒ 精确多出那 5 条 `Context Manager Usage`，不多不少 |
+
+（两次定向测试都伴随 1 次 `vitest-worker: Timeout calling "onTaskUpdate"`——
+机器欠载下 worker 与主线程 RPC 的通信抖动，用例本身全通过。）
+
+### 池的变化与饱和复核
+
+| | 6 片（修复后） | 7 片（+hedgedoc） | 8 片（+hoppscotch） |
+|---|---:|---:|---:|
+| 函数 | 212 | 245 | **281** |
+| 违规 | 308 | 366 | **414** |
+| 未归因 | 43.5% | 46.7% | **44.0%** |
+
+死切片复活贡献 31 函数 / 13 命中函数；hedgedoc 136 函数 / 37 命中
+（**它的 tsconfig 同样是 solution 风格 ⇒ 没有零源文件兜底，这片也会是 0**）。
+
+**R25 判据复核**：① 各线索漂移最大 **L4 +3.1pp**（<5pp ✓，修复前这里是 +6.7 / −5.5）；
+② 未归因 43.5 → 46.7 → 44.0，两步净 **+0.5pp**、最后一步下降
+（对比历史：5→6 片时 +27.7pp、6→7 时 +3.2pp）。
+
+⇒ **接近达标但尚未稳定。本轮因此没有改任何一条规则。**
+
+### 为什么判据②很难达到：线索清单本身有覆盖盲区
+
+未归因那 182 条的规则分布（按规则名）：
+
+`Input Validation` 46 / `No Input Sanitization` 26 / `Session No Timeout` 12 /
+`Data Integrity` 10 / `Authorization (Ownership)` 10 / `Registration Without Email Verification` 9 /
+`Password Hashing (Weak)` 9 / `Password Hashing` 8 / `No Token Rotation` 7 / 其他若干
+
+L1–L10 当初是从「Data Mutation Without Audit Trail + Input Validation」**两族**归纳的，
+而 session / password / registration / token 这四族**一条线索都没有**。
+⇒ **只要线索清单有覆盖盲区，光靠扩池永远达不到判据②**——新语料带来的必然是没见过的族。
+
+结论：**规则侧校准要分成两步走，顺序不能反**：
+
+1. **先做「归因补齐」（零风险）**：把未归因的那 44% 按族分类，给 session/password/
+   registration/token 各写一条仮线索（只打标，不改规则、不抑制）。分类错没代价。
+2. **再做「抑制改动」（有风险）**：排序后逐条做，每条配反向验证。
+
+### 顺带发现的一条候选线索（登记，未实现）
+
+**L11 框架机制实现体**（12 条 / 3.3%，其中 `JwtAuthGuard.*` 7 条）：
+
+```
+docmost/JwtAuthGuard.handleRequest :: Authorization (Unauthenticated Access)
+docmost/JwtAuthGuard.handleRequest :: Authorization (Unauthenticated Mutation)
+```
+
+守卫的**实现体**被判「缺鉴权」。这是 E2 的另一面：E2 让「被 `@UseGuards` 装饰的函数」
+认到鉴权，而「装饰器的提供者本人」没人认——`isAuthFunction` 按函数名单词匹配，
+类名部分（`JwtAuthGuard`）不参与。
+
+规模与 L3（4.1%）/ L6（4.3%）相当。**未实现**：先补 `isAuthFunction` 是否吃
+class-qualified 名字，需要看 `identifierParse` 与 exempt 范围，属有风险改动，按上面两步走。
+
+### 本轮新增方法学规则
+
+- **R36**：任何产出「0」的环节都必须自证「确实扫到了东西」。`0 源文件 / 0 函数 / 0 违规`
+  既能表示「干净」也能表示「根本没扫到」，在报告里长得一模一样，而它污染的是**分母**。
+  做法：归零打 stderr（要出现在扫描日志里）+ 能兜底就兜底 + 兜底条件窄到不可能误触发。
+  本次实测：115 个 generated 项目 0 次误触发、盲测零漂移。
+
+---
+
+## §二十八 规则侧校准第一步：归因补齐（2026-09-23，不改规则）
+
+上一轮定的顺序是「**先零风险的归因补齐，再有风险的抑制改动**」。本轮做第一步。
+
+### 0. 开工前先纠正上一轮的一处陈述错误
+
+上一轮报告写「language 门修正后 FP 池精确少 5 条」。**那是离线重放的预测，不是实测**：
+实测 `reports/fp-pool-results.json` 在修正前后总数都是 419、`Context Manager Usage` 都是 5 条
+—— 上一轮的全池重扫**没有真正写入**（跑了但结果文件未被覆盖，而离线重放用的是同一份 detector
++ 同一份 calls，所以预测才是准的，看上去像实测过了）。
+
+本轮重跑真扫：**419 → 414**，少的正是 5 条 `Context Manager Usage`（python-only 规则落在 TS
+的 WebSocket gateway / OIDC controller 上），残留 **0**。预测与实测现在一致了。
+
+> 教训：离线重放（R29）的产出是**预测**，不是实测。两者数字对得上也不能互相替代 ——
+> 因为重放绕过了「结果文件有没有真的被重写」这一整段链路。
+
+### 1. 归因器的口径缺陷：未归因下降可能是自欺
+
+未归因占比从 44.6% 降到 24.6%，但这个数字**本身没有价值** —— 它有两条达成路径：
+
+1. 真理解了，找到了可操作的类别
+2. 把「不知道」改名成一条新线索
+
+②是自欺：收益上限虚高，真动手时一条都消不掉。所以本轮把归因结果**二分**：
+
+| 分组 | 含义 | 是否计入收益上限 |
+|---|---|---|
+| **抑制候选 L\*** | 有明确判据、可实施、误伤可控 | ✅ 计入 |
+| **真阳性形态 T\*** | 确认报得**对**，不许改 | ❌ 不计入（作用是反向护栏，防止以后被当 FP 改掉） |
+
+「无归属」= 既非 L 也非 T。**只认出形态、没认出抑制手段的，仍算无归属。**
+在这个更严格的分母下：未归因 187 → 102（**44.6% → 24.6%**）。
+
+### 2. 新增三条抑制候选（每条都先证伪再归类）
+
+| 线索 | 命中 | 判据 | 证伪方式 |
+|---|---|---|---|
+| **L11** registerDecorator 词义歧义 | 3 | `registerDecorator` ∈ calls 且规则属注册族 | `NoUrls` 的 calls 只有 `registerDecorator/test/containsDomain`；**摘掉 `registerDecorator` 后 3 条违规全消失** |
+| **L12** 前端 API 客户端不是后端主体 | 15 | 路径含 `frontend/` | `registerGuest` 的 calls 是 `sendRequest/asParsedJsonObject`（`PostApiRequestBuilder`），源码确认只发 HTTP |
+| **L13** 配置构造器装配方法 | 27 | 类/文件含 Config\|Builder\|Options\|Settings + `add*/set*/with*` | `ConfigBuilder.addPackageAccess` 的 calls 是**空数组**，纯靠 `triggerOwnNameOnly` 的函数名触发 |
+
+三条共 45 条，**逐条核验零误标**（L11 3/3、L12 15/15、L13 27/27）。
+
+L11 的机理在 `identifierParse`（protocol-detector.ts）里：`registerDecorator` 被 camelCase 切词
+切成 `["register","Decorator"]`，其中 `register` 命中 Password Hashing / Registration 的 trigger。
+**顺带**：该函数里嵌着**两个字面 NUL 字节**（`"$1<NUL>$2"` / `.split("<NUL>")`），导致 ripgrep
+把源文件判成二进制并**提前截断搜索**（本次就漏看了 `SAFEGUARD_RULES` 的多处命中）。已改为
+`\x00` 转义（语义等价，实测 `registerNewUser → ["register","New","User"]` 不变），src/dist 同步。
+
+### 3. 判据冲突检测：立刻抓到 L7 虚高
+
+两组判据独立编写，可能在同一条目上同时命中（既「该抑制」又「不许改」）。加了冲突检测后
+**立刻抓到 3 条**：
+
+```
+docmost/GroupService.createGroup      L=[L7-工厂装配]  T=[T1-业务服务写入]
+hedgedoc/ApiTokenService.createToken  L=[L7-工厂装配]  T=[T1-业务服务写入]
+hoppscotch/AdminService.createATeam   L=[L7-工厂装配]  T=[T1-业务服务写入]
+```
+
+回源码裁决：`createGroup(authUser, workspaceId, createGroupDto: CreateGroupDto, trx)` 收 DTO、
+`createATeam(userUid, name)` 调 `teamService.createTeam` —— **都是真业务创建，不是工厂**。
+⇒ **L7 此前把 3 条真阳性算进了自己的收益上限**，判据已收紧（排除 Service/Repo/Controller/Resolver）。
+冲突归零，T1 26 → 29。
+
+这正好是 L7 risk 字段早就写着的模糊地带（「真创建 UserService.create 与工厂同名」）——
+**risk 里写了不算数，得等冲突检测把它逼出来。**
+
+### 4. 饱和判定：仍未达标 ⇒ 本轮一条规则都没改
+
+口径变更（v1 → v2）会让「未归因下降」看起来像饱和改善。已给快照加 `schema` 字段，
+`--check-saturation` 跨口径时直接判**本次比较无效**。
+
+同口径内的判据①（各线索漂移 < 5pp）：**L4 +9.8pp（22.1% → 31.9%）、L6 −5.9pp**，两项超标
+⇒ **仍未饱和**。按 R25，没达标就不排序、不实施抑制。L11/L12/L13 只登记不改代码。
+
+### 5. 本轮新增方法学规则
+
+- **R37**：分类体系里**互斥**的两组判据（如「该抑制」vs「不许改」）必须做**冲突检测**，
+  冲突条目从两组中都剔除、交人工裁决。各算各的会自相矛盾，而且冲突处恰恰是判据最模糊、
+  最该看的地方 —— 本次就靠它逼出了 L7 的 3 条虚高。
+- **R38**：**口径变更后，变更前后的指标不可直接比较。** 未归因占比下降可能只是分母定义变了
+  （v2 把真阳性形态剔出分母），不等于池更饱和。快照必须带 `schema` 版本，跨版本时判定脚本
+  要主动报「本次比较无效」。与 R29 同源：可比性要先自证。
+
+### 6. 四门
+
+tsc 0 错 / taintpath 160/160 / webshape 18/18 / 盲测 **LOST 0、漂移 0、ADDED 0（3044 不变）**。
+`src/protocol-detector.ts` 仅 1 行变更（NUL → `\x00` 转义，语义等价），dist 同步。
+
+下一轮：继续扩池到饱和（L4 是最大项 132 条 / 31.9%，优先补含审计设施的仓库切片）。
+
+---
+
+## §二十九 jev 可用性实验：真值集与实验台（2026-09-23，未升版本）
+
+上一轮评估了 jev（TypeSafe System One）「可能有用」，但那是**读文档的判断，未实测**。
+本轮搭实验台，目标只有一个：**回答「语义判定能不能替我们做 FP/TP 初筛」**。
+
+### 0. 结论先行：实验只差一个 key
+
+本机无任何 `TYPESAFE_API_KEY`。用无效 key 打了一次真请求，返回 **401 Unauthorized** ⇒
+端点 URL 正确、请求体格式被接受（格式错会是 400）、超时设置生效（0.8s 返回）。
+**剩下唯一障碍是凭据。** 拿到 key 后一条命令即可跑完：
+
+```
+TYPESAFE_API_KEY=sk-... python3 blind-benchmark/jev-experiment.py
+```
+
+### 1. 造真值集时撞见的第一个坑：没有真值
+
+`--export-jsonl` 导出 414 条后分层统计：
+
+| 分层 | 条数 | 说明 |
+|---|---|---|
+| FP / **verified** | 42 | L11(3) + L12(15) + L13(27)，逐条核验过（§二十八） |
+| TP / **verified** | 11 | 5 个经源码裁决的函数（含本轮新核 2 条） |
+| FP / heuristic | 229 | 启发式打标，**未核验** |
+| TP / heuristic | 30 | 判据匹配，未核验 |
+| UNKNOWN | 102 | 无线索 |
+
+⇒ **414 条里只有 53 条是真值（12.8%）**。把 heuristic 当 gold 去算一致率，就是拿猜测当标准答案
+——jev 与它不一致时无法归因（可能是 jev 错，也可能是启发式错）。导出时每条都带
+`gold_confidence`，实验默认只用 verified。
+
+### 2. 第二个坑：类别严重不平衡（42 FP : 11 TP）
+
+**多数类基线 79.2%** —— 一个「永远判 FP」的傻瓜模型，总一致率就是 79%，看着像能用，
+但 TP 召回是 **0**。所以评分器强制报告三项：总一致率、**多数类基线**、**per-class 召回**；
+低于多数类基线即判「没用」。
+
+为把 TP 侧做实，抽查了 T1（业务服务写入方法）10 条源码，**只有 2 条能确证**：
+
+- ✅ `CollabHistoryService.addContributors`：只判 `userIds.length===0` 就 `redis.sadd`
+- ✅ `LabelService.addLabelsToPage`：只做 `name.trim()` 就入库
+- ❌ `AttachmentController.uploadFile` / `uploadAvatarOrLogo`：**其实已经有措施** ——
+  `req.file({limits:{fileSize,fields,files}})`、calls 里的 `includes` 是 mimetype 白名单
+- ❌ `AttachmentService.uploadToDrive`：`uploadFile` 的内部实现，不是入口（形态更像 L6）
+
+⇒ **T1 判据确有实质噪声（10 条里 8 条不能确证）**。这条记录本身就是「启发式不能当 gold」的实证。
+
+### 3. 实验设计（脚本 `blind-benchmark/jev-experiment.py`）
+
+- **state 公平对照**：默认只给 detector 自己也看得见的（仓库/路径/函数名/规则/调用列表），
+  `--with-source` 是第二档，用于量「补源码能提升多少」
+- **一次请求并行三问**：`is_true_positive`(noul) + `fp_reason`(choice, 8 项**互斥**+uncertain 兜底)
+  + `info_sufficient`(noul，自报信息够不够判 ⇒ 低分转人工)
+- **必须验校准**：jev 卖点是 RLCD「说 0.9 就九成对」。评分器算 **ECE**（10 桶），
+  不直接信官方数字。ECE > 0.15 ⇒ 概率不能当阈值用
+- **硬边界**：脚本只在离线校准环节跑，**绝不进扫描路径**（引擎须本地确定性、离线、可复现）
+- 结果记 `model` 版本（换模型即换口径，跨版本不可比，R38）
+
+零成本可跑：`--baseline-only`（算基线）、`--dry-run`（打印 payload 供检查）。
+
+### 4. 本轮新增方法学规则
+
+- **R39**：gold 必须带 confidence 分层、默认只用 verified；类别比 <1:4 时**必须**报多数类基线
+  与 per-class 召回（与 R37 同族：一个防判据自相矛盾，一个防拿猜测当答案）。
+- **R40**：引入外部服务做实验，先用**无效凭据**打一次 —— 401/403 = 只差凭据；404/400 = 契约理解错了。
+  避免为一个根本接不通的服务去申请 key。任何外部调用必须先证明「不会挂」再谈「能不能用」。
+
+### 5. 改动与下一步
+
+新增 `blind-benchmark/jev-experiment.py`、`blind-benchmark/fp-gold.jsonl`（真值集，**入库保护**）；
+`fp-pool-attrib.py` 增加 `--export-jsonl` 与真值分层常量。**未改任何规则、未改 src**。
+
+下一步（拿到 key 后）：先跑 verified 53 条；若 FP 召回与 TP 召回都显著高于多数类基线，
+再考虑用它初筛 102 条 UNKNOWN。**TP 侧真值仍偏少，这是已知局限，需继续人工补核。**
+
+---
+
+## §三十 E4：让判据看见函数体（2026-09-23，改 src 2 处）
+
+上一轮评估 jev 时，用户的质疑（"jev 也要学了才懂，而且只是概率判断，跟状态机没法比"）
+逼出了一个此前没回答的问题：**如果判据能用文字讲给模型听，为什么不直接写成规则？**
+
+顺着这一问发现：我们真正的病根不是"说不清"，是**判据瞎**。
+
+### 0. 先分清「缺信息」还是「缺语义」
+
+上一轮抽检 T1 的 10 条，我们判错了 8 条。当时的解释是"判据说不清"。但打开
+`AttachmentController.uploadFile` 的函数体，里面明明白白写着：
+
+```ts
+file = await req.file({ limits: { fileSize: maxFileSize, fields: 3, files: 1 } });
+if (!pageId) { throw new BadRequestException('PageId is required'); }
+```
+
+⇒ 判据不是不准，是**它做决定时根本没看这些**。判据的输入只有函数名与调用列表，
+而真值写在函数体里。**缺的是信息，不是语义。**
+
+补信息是确定性的、可测的、免费的；上模型是概率的、不可复现的、且模型拿到的输入
+跟规则一样（我们喂给它的 state 就是我们有的信息）。**这类问题用模型是错配。**
+
+### 1. 判据（逐条来自语料实测）
+
+| | 判据 | 排除的反例（实测形态） |
+|---|---|---|
+| **A** | `limits:{ … }` 且块后 140 字符内含 fileSize/maxFileSize/files/fields/parts | — |
+| **B** | `if (!x) throw <HTTP/校验类异常>` | `AttachmentService.uploadFile` 抛 **NotFoundException** ＝存在性校验；`ducktors/createS3` 抛裸 **Error('…required')** ＝环境配置校验 |
+
+预演范围：FP 池 112 条 Input Validation 违规的函数体原文。**A 与 B 命中集合完全重合**
+（均为 docmost 的两个 upload controller），**零命中 verified TP**。
+候选 C（校验库调用 validateOrReject / schema.parse）与 D（mime 白名单）命中数**均为 0**
+⇒ **不实现**——没有证据支撑的机制不进代码。
+
+> 注：临时探脚本用文本抓函数体，漏了 `export const x = async () =>` 形态，
+> 因此预测的 2 条**低于**实测的 5 条。探针的抓取覆盖率会系统性低估收益，
+> 定稿数字一律以真实链路实测为准（与 R29/R38 同源）。
+
+### 2. 实现（与 E3 同构，只做减法）
+
+- `src/extract-ir.ts`：`inputGuardFunctionKeys(project, absRoot)` 全项目 AST 预扫
+  （函数声明 / 类方法 / 变量箭头），key = `相对路径|函数名`，命中者注入
+  `__progmune_input_guard__`；注入点与 E3 同一处收口
+- `src/protocol-detector.ts`：Input Validation 的 **safeguard** 增加该标记的接受位，
+  **不进 trigger**
+
+**R28 命名检查用行为验证**（比静态查 regex 强）：把标记喂给 25 个典型函数名跑
+`detectSafeguardViolations`，只有 Input Validation 被压，其余零影响 ⇒ 命名安全。
+
+### 3. 语料补形 webshape_E（正反两面，R19）
+
+抑制类机制如果只写"该压的"，**无条件抑制也能全绿**。所以 E 族 5 条同时钉住两面：
+
+| 函数 | 期望 | 锁住什么 |
+|---|---|---|
+| `uploadAvatar` limits + 抛 4xx | 不报 + 带标记 | 正面：有校验证据 |
+| `uploadBanner` 无任何校验 | **报** | 反面护栏：不许变成无条件抑制 |
+| `uploadIcon` 抛 NotFound | **报** | 存在性校验 ≠ 输入校验 |
+| `uploadThumb` 抛裸 Error | **报** | 环境配置校验 ≠ 输入校验 |
+| `uploadCover` validateContent | 不报 + **无标记** | 对照：旧词表功劳，与本轮无关 |
+
+闸门 `check-webshape.ts` 相应扩展了 `reportRules` / `suppressRules` 两个期望维度
+（此前只能验标记有无，验不了违规有无）。
+
+### 4. 反向验证：三刀精确转红（但 CUT-C 第一版期望算错了）
+
+| 刀 | 结果 |
+|---|---|
+| CUT-A 提取侧恒 false | 转红 1（uploadAvatar）✓ |
+| CUT-B 规则侧移除接受位 | 转红 1 ✓ |
+| CUT-C 无条件注入 | 转红 4 ✓（**第一版报 BAD**） |
+
+CUT-C 第一版我推导的期望是 3 条，实际转红 4 条 —— 多出 `uploadCover`。
+逐条看后确认**不是机制坏了，是我的期望推导漏项**：无条件注入会让 uploadCover 带上
+`input_guard` 标记，从而违反它的 `none:["input_guard"]` 期望，而我推导时只算了
+`reportRules`。这是 **R34 第二次同形踩坑**（第一次是 §二十六的 CUT-4/5），
+修的是推导逻辑不是代码。
+
+### 5. 四门与实测
+
+tsc 0 错 / taintpath 160 / webshape **23** / fr-007 5-0 / fr-016 7-0 / 定向 201 /
+盲测 **LOST 0、漂移 0、ADDED 5**（新增全在 webshape_E，3044 → 3052）。
+
+**FP 池实测 412 → 407，新增 0。** 压掉的 5 条逐条归因（R30）：
+
+| 条目 | 函数体里的校验证据 | 裁决 |
+|---|---|---|
+| docmost/AttachmentController.uploadFile | `limits:{fileSize,fields,files}` + `!pageId` 抛 BadRequest | 上一轮确证的错判 ✓ |
+| docmost/AttachmentController.uploadAvatarOrLogo | 同上 + 类型白名单 | ✓ |
+| gothinkster/createArticle | `!title/!description/!body` 抛 `HttpException(422)` | 必填判空 ✓ |
+| gothinkster/addComment | `!body` 抛 `HttpException(422)` | ✓ |
+| gothinkster/createUser | `!email/!username/!password` 抛 `HttpException(422)` | ✓ |
+
+后 3 条**不在预测内**（探针抓取形态漏了箭头常量），经源码逐条确证为正确压制。
+
+### 6. 收益评估：小，但确证
+
+净 -5 条（占池 1.2%）。小是因为 FP 池里 Input Validation 的绝大多数误报是
+**词形误触发**（verdaccio 的 `ConfigBuilder.add*` 纯配置装配，函数体里确实没有校验），
+那是 L13 的地盘，本通道不该也压不掉。
+
+本轮的价值是**通道打通 + 5 条确证**，不是数字。后续可在同一通道加证据类型
+（白名单 `.includes`、校验库调用），且有了本轮基线后**增量可测**（R33）。
+
+### 7. 本轮新增方法学规则
+
+- **R41**：判据失灵时先区分**缺信息**还是**缺语义**。打开被判错的样本，看判据做决定时
+  **用到了哪些输入**；若真值所在的位置不在这些输入里，就是缺信息 ⇒ 补信息（确定性、
+  可测、免费）。只有"看得见的都看见了，但仍说不清"才值得考虑概率模型。
+  用模型治"缺信息"是错配：模型拿到的输入与规则相同，先验不高，还失去了可复现性。
+
+---
+
+## §三十一 E5：Input Validation 的语义前置条件（2026-09-23）
+
+### 1. 起点是"加证据类型"，但先验证收益
+
+E4 收尾记着"后续可在同一通道加证据类型（白名单 `.includes`、校验库调用）"。
+本轮第一步不是改代码，是**先把 §三十 那个探针换掉**——它是文本抓函数体，漏了
+`export const x = async () =>` 形态（gothinkster 3 条就是这么被漏的），所以它报的
+"命中 0"根本不可信。
+
+新探针 `blind-benchmark/probe-body-evidence.ts` 用 ts-morph AST（只加载命中文件，
+避免本机 8GB 下整仓 OOM），**75 条全部解析成功、未解析 0**。重查结果：
+
+- C/D 两类证据命中 **2/75**，其中 hoppscotch 那条是 `body(` 的假阳性 ⇒ **真实收益 ≈1 条**
+- 顺带扫出的关键事实：**62/75（83%）完全没有请求入口迹象**（无装饰器、无 req/ctx、无路由注册）
+
+⇒ 加证据类型撑不起一轮机制（没有证据支撑的机制不进代码），转向找病根。
+
+### 2. 候选判据的毒性检验：拿真值集先试再实现
+
+最直觉的修法是"不是 HTTP 入口 ⇒ 不要求输入校验"。**先拿真值集试**（R39 的 gold 分层）：
+
+真值集里 **4 条已核验 TP 完全没有 req 对象**：
+
+| 真报 | 函数体事实 |
+|---|---|
+| docmost `CollabHistoryService.addContributors` | `async addContributors(pageId, userIds)` 只判 `userIds.length===0` 就 `redis.sadd` |
+| docmost `LabelService.addLabelsToPage` | `names: string[]` 只做 `trim()` 就 `labelRepo.findOrCreate` |
+| hedgedoc `ApiTokenService.createToken` | 真创建 token |
+| hoppscotch `AdminService.createATeam` | 调 `teamService.createTeam` |
+
+⇒ **判据有毒，弃用**。同时确立一条产品口径：Service 层方法虽不直接拿 `req`，参数却是从
+Controller 透传的外部输入 —— **组件边界不是输入校验的豁免条件**。区分点在**参数流向**，
+不在**入口形态**。
+
+### 3. 换成"参数流向外部副作用"，先量化再实现（R43）
+
+两个候选在真值集（74 条已标注）上的实测：
+
+| 判据 | TP 召回 | FP 压制 | precision | 净收益 |
+|---|---|---|---|---|
+| 现状（无前置条件） | — | — | 23.0% | 多数类基线 77.0% |
+| 粗：函数体有副作用调用 | **100%（17/17）** | 77.2%（44/57） | **56.7%** | +44 |
+| 精：副作用调用须吃到参数 | 76.5%（丢 4） | 91.2% | 72.2% | +48 |
+
+精化版的 FP 压制数字更好看，但会丢 4 条真报。**漏报比误报贵**，取粗判据。
+
+### 4. 实现（与 E3/E4 同构）
+
+- `src/extract-ir.ts`：`inputEffectFunctionKeys(project, absRoot)` 全项目 AST 预扫，
+  命中注入 `__progmune_input_effect__`；判据表 `INPUT_EFFECT_PATTERNS`（S1-S7）与探针的
+  EFFECT 表**逐字一致**，改一处必须改另一处（R38 口径不可比）
+- `src/protocol-detector.ts`：`requireMarker` + **`requireMarkerLanguages`**
+
+语言限定是本轮最该记的一条（**R42**）：`__progmune_*` 标记只由 TS 提取器产出，Python
+提取器一个都不产出。不限定语言 ⇒ **Python 侧该规则整体归零**，而四门全是 TS 语料，
+闸门会一直绿着，谁也看不见这个退化。
+
+### 5. 语料补形 webshape_F（正反两面，R19）
+
+| 函数 | 期望 | 锁住什么 |
+|---|---|---|
+| `createWidget` repo.save | **报** | 正面：有副作用证据仍须报（防无条件压制） |
+| `addWidgetToCache` 纯内存 push | 不报 | 反面核心：参数不流向任何 sink |
+| `createStorageClient` `return new X()` | 不报 | 工厂（FP 池 ducktors createS3 即此形态） |
+| `createOrder` `db.insertInto` | **报** | S7 链式通道专项 |
+| `postMetric` `fetch` | **报** | S3 出站通道专项 |
+| `uploadDraft` upload + validateContent | 不报 | 校验位优先，两个机制不互相覆盖 |
+
+### 6. 三件坑（都是"看不见的地方"）
+
+1. **S5 大小写敏感**：`repo.saveBanner(file)` 不匹配大写前缀版 ⇒ webshape_E 该报的 3 条
+   被压，闸门当场转红。合成语料比真值集更早暴露这个洞——它把形状写得很干净。
+2. **定向测试喂裸 calls**：`extract-ir-taint-structural.test.ts` 有 7 条直接调
+   `detectSafeguardViolations`，不经过提取器 ⇒ 加 requireMarker 后一起静默转红。
+   修法是显式带标记，并**补一组 E5 用例钉住新行为本身**（含"Python 不得归零"）。
+3. **CUT-A 期望漏维度**：只推导了 `reportRules`，忘了 `have:["input_effect"]` 这个标记
+   维度，少算 `uploadDraft`。**R34 第三次同形踩坑**（前两次 §二十六 CUT-4/5、§三十 CUT-C）。
+
+### 7. 四门与实测
+
+tsc 0 错 / taintpath 160 / webshape **29** / fr-007 5-0 / fr-016 7-0 / 定向 **212**（+11）/
+反向验证三刀 **PASS**（CUT-A 转红 7 / CUT-B 2 / CUT-C 2，还原后 0）。
+
+**FP 池（真实仓库）409 → 364，Input Validation 75 → 30，其余 19 条规则一条没变。** 真值核验：
+
+| 分层 | 结果 |
+|---|---|
+| TP / verified 6 条 | **全部仍在报** |
+| TP / heuristic 11 条 | 全部仍在报 |
+| FP / verified 29 条 | **全部压掉** |
+| FP / heuristic 28 条 | 压 15 / 留 13 |
+
+**已核验真报零丢失，已核验误报全压掉** —— 与探针在真值集上的预测（丢 0 / 压 44 / 留 13）
+逐条吻合，说明"先量化再实现"这一步是有效的。
+
+### 8. 盲测 -216 条：口径修正，但语料保真度是本轮的账
+
+盲测 perFunction 3052 → 2841，LOST **216 条全部是 Input Validation**，ADDED 5（3 条在
+webshape_F），其余 19 条规则零漂移。
+
+这 216 条的性质必须说清楚：`generated/` 是**内存实现的 demo**——`blog.createPost` 就是
+`posts.push(post)`（模块级数组），没有 DB、没有 HTTP、没有文件。按新口径它们不报；而
+webshape_F 补进来的正是"有 sink"的真阳性形状，3 条照常报出。
+
+⇒ 这是**口径修正，不是能力退化**（真实仓库的 verified TP 一条没丢），但它同时暴露：
+盲测语料造不出真实 sink 形状，与 R23 空过同源。下一轮若要让盲测真正能证伪这条规则，
+得往 `generated/` 里补带 sink 的形状。
+
+### 9. 本轮新增方法学规则
+
+- **R42**：给规则加 `requireMarker` 时必须声明 **requireMarkerLanguages**，并把喂裸 calls
+  的单测显式带上标记 + 补一组钉住新行为的用例（含"其他语言不得归零"）。
+  与 R27 同族：R27 防"通道根本没通"，R42 防"通道只在一部分入口上通"——失效都发生在
+  你看不见的地方。
+- **R43**：候选判据进代码前，先在带 confidence 分层的真值集上算 **TP 召回与 FP 压制**，
+  取舍原则 **丢真报比留误报贵**，不得按"哪个数字更好看"选。真值集跑通后**仍须过合成
+  语料闸门**——真值集覆盖真实形状的分布，合成语料能写出真值集里没有的干净形状
+  （本轮 S5 那个洞就是合成语料抓出来的）。

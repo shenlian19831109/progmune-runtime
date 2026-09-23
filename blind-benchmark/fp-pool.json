@@ -1,835 +1,1223 @@
 {
- "$purpose": "FP 观测池（证据池换标准之后的新池）。与 fr-corpus 的分工：fr-corpus 是「有漏洞+有修复」的成对语料，有精确真值，测召回与精度双向；本池是**真实代码切片、不要求有 CVE**，没有现成真值，专门用来**观测误报**，真值靠人工抽样判定。",
- "$why_change_criterion": "旧标准（R20 三问：pre 侧无校验 / 污点根在切片内 / fix 是新增校验）太严，2026-09-21 找第三对语料时连查三个候选全部落空。放宽到「只要求真实 + 有 HTTP 入口 + 有文件操作」之后，材料可从 GitHub 批量获得，能规模化。",
- "$created": "2026-09-21",
- "$tools": {
-  "fetch": "本目录由 scripts 手动切片生成（codeload tarball → 只留 .ts/.tsx + package.json + tsconfig.json，删 >400KB 单文件以避开本机 OOM）",
-  "scan": "npx tsx blind-benchmark/fp-pool-scan.ts [子目录名]  （与 batch-scan 同一套 detector，口径一致）",
-  "shapes": "PM_ROOTS=<池目录> python3 blind-benchmark/mine-path-shapes.py",
-  "output": "blind-benchmark/reports/fp-pool-results.json"
- },
- "slices": [
-  {
-   "repo": "gothinkster/node-express-realworld-example-app",
-   "files": 37,
-   "style": "Express",
-   "note": "切出来 fns=0 —— 实为 JS 项目（.ts 仅 37 个且无有效提取），作为「无效切片」保留，提醒不是所有高星 TS 标签仓库都可用"
+  "$purpose": "FP 观测池（证据池换标准之后的新池）。与 fr-corpus 的分工：fr-corpus 是「有漏洞+有修复」的成对语料，有精确真值，测召回与精度双向；本池是**真实代码切片、不要求有 CVE**，没有现成真值，专门用来**观测误报**，真值靠人工抽样判定。",
+  "$why_change_criterion": "旧标准（R20 三问：pre 侧无校验 / 污点根在切片内 / fix 是新增校验）太严，2026-09-21 找第三对语料时连查三个候选全部落空。放宽到「只要求真实 + 有 HTTP 入口 + 有文件操作」之后，材料可从 GitHub 批量获得，能规模化。",
+  "$created": "2026-09-21",
+  "$tools": {
+    "fetch": "本目录由 scripts 手动切片生成（codeload tarball → 只留 .ts/.tsx + package.json + tsconfig.json，删 >400KB 单文件以避开本机 OOM）",
+    "scan": "npx tsx blind-benchmark/fp-pool-scan.ts [子目录名]  （与 batch-scan 同一套 detector，口径一致）",
+    "shapes": "PM_ROOTS=<池目录> python3 blind-benchmark/mine-path-shapes.py",
+    "output": "blind-benchmark/reports/fp-pool-results.json"
   },
-  {
-   "repo": "w3tecch/express-typescript-boilerplate",
-   "files": 77,
-   "style": "Express + TypeORM + 类控制器"
-  },
-  {
-   "repo": "lujakob/nestjs-realworld-example-app",
-   "files": 35,
-   "style": "NestJS（装饰器 + 类方法）"
-  },
-  {
-   "repo": "ducktors/turborepo-remote-cache",
-   "files": 48,
-   "style": "Fastify + 函数式（对照：几乎无类方法）"
-  }
- ],
- "first_reading": {
-  "files": 197,
-  "lines": 12747,
-  "path_sinks": 33,
-  "protocol_violations": 0,
-  "safeguard_violations_perFunction": 54,
-  "resource_violations": 0,
-  "sink_increment": "原有真实语料 48 处 sink ⇒ 现共 81 处（+69%）",
-  "note": "protocol=0 与 resource=0 不是「干净」，而是**类方法提取不到调用**导致状态机没有输入（见 key_finding）"
- },
- "spot_check_verdicts": [
-  {
-   "where": "ducktors-turborepo-remote-cache/src/app.ts :: createApp",
-   "rules": [
-    "Password Hashing",
-    "Password Hashing (Weak)",
-    "Registration Without Email Verification",
-    "Input Validation"
-   ],
-   "verdict": "FP",
-   "confidence": "high",
-   "evidence": "calls = get, existsSync, readFileSync, Fastify, after, register, setErrorHandler —— `register` 是 Fastify 的插件注册方法，被当成「用户注册」触发密码哈希/邮件验证规则。这个服务根本没有用户体系。"
-  },
-  {
-   "where": "w3tecch-express-typescript-boilerplate/test/utils/database.ts :: createDatabaseConnection",
-   "rules": [
-    "Input Validation"
-   ],
-   "verdict": "FP",
-   "confidence": "high",
-   "evidence": "calls = useContainer, createConnection —— `create` 触发「内容创建需校验输入」规则；建连接与输入校验无关。"
-  },
-  {
-   "where": "lujakob-nestjs-realworld-example-app/src/article/article.service.ts :: ArticleService.update",
-   "rules": [
-    "Data Mutation Without Audit Trail"
-   ],
-   "verdict": "FP（且叠加提取缺陷）",
-   "confidence": "high",
-   "evidence": "源码实有 this.articleRepository.findOne / Object.assign / this.articleRepository.save，IR 里 calls 却是空的 ⇒ 违规纯由函数名 update 触发；且博客文章 update 本无审计要求。"
-  },
-  {
-   "where": "w3tecch-express-typescript-boilerplate/src/api/services/PetService.ts :: PetService.update",
-   "rules": [
-    "Data Mutation Without Audit Trail"
-   ],
-   "verdict": "FP（且叠加提取缺陷）",
-   "confidence": "high",
-   "evidence": "calls 为空，同上。"
-  },
-  {
-   "where": "w3tecch-express-typescript-boilerplate/src/loaders/expressLoader.ts :: expressLoader",
-   "rules": [
-    "TLS Enforcement",
-    "Rate Limiting",
-    "API Without Rate Limiting"
-   ],
-   "verdict": "弱真（部署层建议，非代码缺陷）",
-   "confidence": "medium",
-   "evidence": "该 Express 装配确实未配 TLS / rate limit，但这是运行环境的责任，报为代码违规属建议级。是否算 FP 取决于产品定位。"
-  },
-  {
-   "where": "ducktors-turborepo-remote-cache/src/plugins/remote-cache/storage/azure-blob-storage.ts :: createAzureBlobStorage",
-   "rules": [
-    "File Upload Without Validation",
-    "Input Validation",
-    "No Input Sanitization"
-   ],
-   "verdict": "待人工复核",
-   "confidence": "low",
-   "evidence": "确实有 uploadStream/write 的上传流，但上传目标是 Azure Blob 而非 Web 端点；是否需类型/大小校验取决于该端点是否对外暴露。"
-  },
-  {
-   "where": "lujakob-nestjs-realworld-example-app/src/user/user.controller.ts :: UserController.login",
-   "rules": [
-    "Session No Timeout"
-   ],
-   "verdict": "无法判定",
-   "confidence": "low",
-   "evidence": "calls 为空，看不到 session 创建逻辑，无从判断。"
-  }
- ],
- "key_finding": {
-  "title": "提取器对「类方法」不提取任何调用 —— 状态机在 OO 代码上没有输入",
-  "severity": "主干级（影响协议生命周期验证的输入，不是某一类规则的边界）",
-  "probe": "/tmp/probe-extractor-class.ts（7 个最小用例）",
-  "probe_result": [
-   "① 普通函数声明 → calls=[writeFileSync]  OK",
-   "② 箭头函数     → calls=[writeFileSync]  OK",
-   "③ 类方法（同步）→ calls=[]  EMPTY",
-   "④ 类方法（async）→ calls=[]  EMPTY",
-   "⑤ 类方法 + this 成员调用 → calls=[]  EMPTY",
-   "⑥ 类方法 + 装饰器 → calls=[]  EMPTY",
-   "⑦ 类 + 构造函数注入（NestJS 形态）→ calls=[]  EMPTY"
-  ],
-  "impact_measured": {
-   "lujakob-nestjs-realworld-example-app": "61 个函数中 59 个 calls 为空，59 个全是类方法（97%）",
-   "w3tecch-express-typescript-boilerplate": "113 个函数中 76 个 calls 为空，其中 67 个是类方法（67%）",
-   "ducktors-turborepo-remote-cache": "23 个函数中 5 个为空，0 个类方法（函数式风格，作为对照）",
-   "pool_total": "197 个函数中 140 个 calls 为空（71%），其中 126 个是类方法"
-  },
-  "double_consequence": [
-   "FP：没有 calls 来证伪 ⇒ safeguard 规则退化成「靠函数名关键词猜」（54 条违规里 28 条所在函数 calls 为空，占 52%；Data Mutation Without Audit Trail 22 条里 20 条如此）",
-   "FN：真违规同样检不出 ⇒ 协议状态机在类方法代码上等于关闭（池里 protocol=0 就是这个原因，不是干净）"
-  ],
-  "why_never_caught_before": "taintpath 十一族人造语料全是函数声明 / 变量箭头 / 属性箭头等形态，没有一个「类方法」载体 ⇒ 该路径从未被 fixture 触发。与 3.7.31 的 P0 教训同源（新增能力必须配能触发它的 fixture）。",
-  "status": "已复现、未修。修它要动提取器主干，需完整四门验收（闸门 / fr-007+fr-016 / 全量盲测 3201 条基线 / 反向验证），单列一轮。"
- },
- "after_class_method_fix": {
-  "version": "3.7.47（工作树，未提交）",
-  "date": "2026-09-21",
-  "what_changed": "主 IR 循环的类方法分支补上 extractDirectCalls（此前只调 computeMarkerCalls）",
-  "empty_calls": {
-   "before": {
-    "fns": 197,
-    "empty": 140,
-    "pct": 71,
-    "class_methods_empty": 126
-   },
-   "after": {
-    "fns": 197,
-    "empty": 23,
-    "pct": 12,
-    "class_methods_empty": 9
-   },
-   "per_slice_after": {
-    "ducktors-turborepo-remote-cache": {
-     "fns": 23,
-     "empty": 5,
-     "cls": 0
+  "slices": [
+    {
+      "repo": "gothinkster/node-express-realworld-example-app",
+      "files": 37,
+      "style": "Express",
+      "note": "切出来 fns=0 —— 实为 JS 项目（.ts 仅 37 个且无有效提取），作为「无效切片」保留，提醒不是所有高星 TS 标签仓库都可用"
     },
-    "gothinkster-node-express-realworld-example-app": {
-     "fns": 0,
-     "empty": 0,
-     "cls": 0
+    {
+      "repo": "w3tecch/express-typescript-boilerplate",
+      "files": 77,
+      "style": "Express + TypeORM + 类控制器"
     },
-    "lujakob-nestjs-realworld-example-app": {
-     "fns": 61,
-     "empty": 3,
-     "cls": 3
+    {
+      "repo": "lujakob/nestjs-realworld-example-app",
+      "files": 35,
+      "style": "NestJS（装饰器 + 类方法）"
     },
-    "w3tecch-express-typescript-boilerplate": {
-     "fns": 113,
-     "empty": 15,
-     "cls": 6
+    {
+      "repo": "ducktors/turborepo-remote-cache",
+      "files": 48,
+      "style": "Fastify + 函数式（对照：几乎无类方法）"
     }
-   },
-   "note": "空 calls 71% → 12%。剩余 23 个里只有 2 个落在「有违规」的函数上（createS3 / ArticleEntity.updateTimestamp）；其余 21 个函数名不触发规则，无害。"
-  },
-  "violations": {
-   "project_level_before": 19,
-   "project_level_after": 21,
-   "perFunction_added": 18,
-   "note": "项目级只 +2（去重口径），但 **perFunction 层面新增 18 条** —— 类方法第一次有了 calls，规则第一次看见这些序列。这正是 Claude 预警的「规则侧第一次实战」。"
-  },
-  "new_violations_verdicts": [
-   {
-    "where": "lujakob/ArticleService.findAll",
-    "rule": "Input Validation",
-    "verdict": "FP",
-    "confidence": "high",
-    "evidence": "calls = createQueryBuilder/leftJoinAndSelect/where/andWhere/getMany —— TypeORM 查询构造器链被当成「缺输入校验」。查询构造不是校验缺失的证据。"
-   },
-   {
-    "where": "lujakob/ArticleService.findFeed",
-    "rule": "Input Validation",
-    "verdict": "FP",
-    "confidence": "high",
-    "evidence": "同上，query builder 链（find/where/orderBy/getCount/limit/offset）。"
-   },
-   {
-    "where": "lujakob/UserService.create",
-    "rule": "Input Validation",
-    "verdict": "FP",
-    "confidence": "high",
-    "evidence": "calls 含 validate（class-validator）与 orWhere/where —— 其实**有**校验，规则没认出来 ⇒ 属词表缺口，不是真缺校验。"
-   },
-   {
-    "where": "lujakob/UserService.generateJWT",
-    "rule": "Authorization (Unauthenticated Access)",
-    "verdict": "FP",
-    "confidence": "high",
-    "evidence": "jwt.sign + setDate/getDate/getTime，是内部工具方法；工具函数不应被要求做授权检查。"
-   },
-   {
-    "where": "lujakob/UserService.generateJWT",
-    "rule": "Authorization (Unauthenticated Mutation)",
-    "verdict": "FP",
-    "confidence": "high",
-    "evidence": "同上。"
-   },
-   {
-    "where": "lujakob/UserController.login",
-    "rule": "Token Security (Weak Generation)",
-    "verdict": "FP",
-    "confidence": "high",
-    "evidence": "源码 findOne → 判空 401 → generateJWT（jwt.sign + SECRET），是标准签发而非弱生成。**上一轮因 calls 为空判为「无法判定」，本轮有了 calls 才判得动 ⇒ 正是 Claude 说的「废票变有效票」。**"
-   },
-   {
-    "where": "lujakob/ProfileService.unFollow",
-    "rule": "Data Mutation Without Audit Trail",
-    "verdict": "weak-true",
-    "confidence": "medium",
-    "evidence": "calls = findOne, delete —— 取消关注确实没有审计日志，但是否算违规取决于产品定位。"
-   },
-   {
-    "where": "w3tecch/PetRepository.findByUserId",
-    "rule": "Input Validation",
-    "verdict": "FP",
-    "confidence": "high",
-    "evidence": "query builder 链（createQueryBuilder/where/select/join/getMany/map）。"
-   },
-   {
-    "where": "w3tecch/PetService.create",
-    "rule": "Notification Without Retry",
-    "verdict": "weak-true",
-    "confidence": "medium",
-    "evidence": "eventDispatcher.dispatch 发出事件但无重试机制；属**部署层建议**，与上一轮 TLS/rate limit 同类。"
-   },
-   {
-    "where": "w3tecch/UserService.create",
-    "rule": "Notification Without Retry",
-    "verdict": "weak-true",
-    "confidence": "medium",
-    "evidence": "同上（dispatch 无重试）。"
-   },
-   {
-    "where": "w3tecch/CreateUserTable15111051836",
-    "rule": "Input Validation",
-    "verdict": "FP",
-    "confidence": "high",
-    "evidence": "calls = createTable —— TypeORM **迁移脚本**，不处理用户输入。"
-   },
-   {
-    "where": "w3tecch/CreateUserTable15111051836",
-    "rule": "Data Mutation Without Audit Trail",
-    "verdict": "FP",
-    "confidence": "high",
-    "evidence": "calls = dropTable，迁移回滚方法。"
-   },
-   {
-    "where": "w3tecch/CreatePetTable151266352480",
-    "rule": "Input Validation",
-    "verdict": "FP",
-    "confidence": "high",
-    "evidence": "迁移脚本 createTable。"
-   },
-   {
-    "where": "w3tecch/CreatePetTable151266352480",
-    "rule": "Data Mutation Without Audit Trail",
-    "verdict": "FP",
-    "confidence": "high",
-    "evidence": "迁移脚本 dropTable。"
-   },
-   {
-    "where": "w3tecch/AddUserRelationToPetTable1",
-    "rule": "Input Validation",
-    "verdict": "FP",
-    "confidence": "high",
-    "evidence": "迁移脚本 createForeignKey。"
-   },
-   {
-    "where": "w3tecch/AddUserRelationToPetTable1",
-    "rule": "Data Mutation Without Audit Trail",
-    "verdict": "FP",
-    "confidence": "high",
-    "evidence": "迁移脚本 dropForeignKey。"
-   },
-   {
-    "where": "w3tecch/CreateBruce.seed",
-    "rule": "Input Validation",
-    "verdict": "FP",
-    "confidence": "high",
-    "evidence": "calls = createEntityManager, v1(uuid), save —— **种子数据脚本**，无外部输入。"
-   },
-   {
-    "where": "w3tecch/CreatePets.seed",
-    "rule": "Input Validation",
-    "verdict": "FP",
-    "confidence": "high",
-    "evidence": "同上（times/createEntityManager/save）。"
-   }
   ],
-  "verdict_summary": {
-   "FP": 15,
-   "weak-true": 3,
-   "TP": 0,
-   "note": "18 条里**真漏洞 0 条**。判定由 WorkBuddy 做出，建议 Claude 复核，尤其 3 条 weak-true 取决于产品定位。"
+  "first_reading": {
+    "files": 197,
+    "lines": 12747,
+    "path_sinks": 33,
+    "protocol_violations": 0,
+    "safeguard_violations_perFunction": 54,
+    "resource_violations": 0,
+    "sink_increment": "原有真实语料 48 处 sink ⇒ 现共 81 处（+69%）",
+    "note": "protocol=0 与 resource=0 不是「干净」，而是**类方法提取不到调用**导致状态机没有输入（见 key_finding）"
   },
-  "rule_side_calibration_signals": [
-   "迁移/种子脚本（createTable / dropTable / createForeignKey / createEntityManager+save）应豁免 —— 6 条 FP 全来自这一类",
-   "TypeORM query builder 链（createQueryBuilder/where/getMany）被 Input Validation 误判 —— 4 条 FP",
-   "内部工具方法（generateJWT 这种只做 jwt.sign 的）不应被要求 Authorization —— 2 条 FP",
-   "UserService.create 其实**有** validate 却仍报 Input Validation ⇒ 不是缺校验，是**规则不认 class-validator 的 validate**"
+  "spot_check_verdicts": [
+    {
+      "where": "ducktors-turborepo-remote-cache/src/app.ts :: createApp",
+      "rules": [
+        "Password Hashing",
+        "Password Hashing (Weak)",
+        "Registration Without Email Verification",
+        "Input Validation"
+      ],
+      "verdict": "FP",
+      "confidence": "high",
+      "evidence": "calls = get, existsSync, readFileSync, Fastify, after, register, setErrorHandler —— `register` 是 Fastify 的插件注册方法，被当成「用户注册」触发密码哈希/邮件验证规则。这个服务根本没有用户体系。"
+    },
+    {
+      "where": "w3tecch-express-typescript-boilerplate/test/utils/database.ts :: createDatabaseConnection",
+      "rules": [
+        "Input Validation"
+      ],
+      "verdict": "FP",
+      "confidence": "high",
+      "evidence": "calls = useContainer, createConnection —— `create` 触发「内容创建需校验输入」规则；建连接与输入校验无关。"
+    },
+    {
+      "where": "lujakob-nestjs-realworld-example-app/src/article/article.service.ts :: ArticleService.update",
+      "rules": [
+        "Data Mutation Without Audit Trail"
+      ],
+      "verdict": "FP（且叠加提取缺陷）",
+      "confidence": "high",
+      "evidence": "源码实有 this.articleRepository.findOne / Object.assign / this.articleRepository.save，IR 里 calls 却是空的 ⇒ 违规纯由函数名 update 触发；且博客文章 update 本无审计要求。"
+    },
+    {
+      "where": "w3tecch-express-typescript-boilerplate/src/api/services/PetService.ts :: PetService.update",
+      "rules": [
+        "Data Mutation Without Audit Trail"
+      ],
+      "verdict": "FP（且叠加提取缺陷）",
+      "confidence": "high",
+      "evidence": "calls 为空，同上。"
+    },
+    {
+      "where": "w3tecch-express-typescript-boilerplate/src/loaders/expressLoader.ts :: expressLoader",
+      "rules": [
+        "TLS Enforcement",
+        "Rate Limiting",
+        "API Without Rate Limiting"
+      ],
+      "verdict": "弱真（部署层建议，非代码缺陷）",
+      "confidence": "medium",
+      "evidence": "该 Express 装配确实未配 TLS / rate limit，但这是运行环境的责任，报为代码违规属建议级。是否算 FP 取决于产品定位。"
+    },
+    {
+      "where": "ducktors-turborepo-remote-cache/src/plugins/remote-cache/storage/azure-blob-storage.ts :: createAzureBlobStorage",
+      "rules": [
+        "File Upload Without Validation",
+        "Input Validation",
+        "No Input Sanitization"
+      ],
+      "verdict": "待人工复核",
+      "confidence": "low",
+      "evidence": "确实有 uploadStream/write 的上传流，但上传目标是 Azure Blob 而非 Web 端点；是否需类型/大小校验取决于该端点是否对外暴露。"
+    },
+    {
+      "where": "lujakob-nestjs-realworld-example-app/src/user/user.controller.ts :: UserController.login",
+      "rules": [
+        "Session No Timeout"
+      ],
+      "verdict": "无法判定",
+      "confidence": "low",
+      "evidence": "calls 为空，看不到 session 创建逻辑，无从判断。"
+    }
   ],
-  "still_empty_after_fix": [
-   {
-    "where": "ducktors/createS3",
-    "why": "函数式写法，返回对象；非类方法"
-   },
-   {
-    "where": "lujakob/ArticleEntity.updateTimestamp",
-    "why": "类方法但体内只有赋值（@BeforeUpdate 钩子），确无调用 ⇒ 空是正确的"
-   }
-  ]
- },
- "r21_quantification": {
-  "date": "2026-09-21",
-  "tool": "python3 blind-benchmark/fp-pool-attrib.py（只读，对全量 perFunction 违规打标）",
-  "why_needed": "上面 rule_side_calibration_signals 的 4 条是从 18 条【新增】违规里归纳的，样本有偏；R24 要求分母必须是全量。全池 72 条（56 函数 / 4 切片）。",
-  "sample_bias": {
-   "Input Validation": "新增 10/18（56%） vs 全池 25/72（34.7%）",
-   "Data Mutation Without Audit Trail": "新增 4/18（22%） vs 全池 26/72（36.1%）",
-   "consequence": "从新增归纳会高估输入校验类、低估审计轨迹类"
+  "key_finding": {
+    "title": "提取器对「类方法」不提取任何调用 —— 状态机在 OO 代码上没有输入",
+    "severity": "主干级（影响协议生命周期验证的输入，不是某一类规则的边界）",
+    "probe": "/tmp/probe-extractor-class.ts（7 个最小用例）",
+    "probe_result": [
+      "① 普通函数声明 → calls=[writeFileSync]  OK",
+      "② 箭头函数     → calls=[writeFileSync]  OK",
+      "③ 类方法（同步）→ calls=[]  EMPTY",
+      "④ 类方法（async）→ calls=[]  EMPTY",
+      "⑤ 类方法 + this 成员调用 → calls=[]  EMPTY",
+      "⑥ 类方法 + 装饰器 → calls=[]  EMPTY",
+      "⑦ 类 + 构造函数注入（NestJS 形态）→ calls=[]  EMPTY"
+    ],
+    "impact_measured": {
+      "lujakob-nestjs-realworld-example-app": "61 个函数中 59 个 calls 为空，59 个全是类方法（97%）",
+      "w3tecch-express-typescript-boilerplate": "113 个函数中 76 个 calls 为空，其中 67 个是类方法（67%）",
+      "ducktors-turborepo-remote-cache": "23 个函数中 5 个为空，0 个类方法（函数式风格，作为对照）",
+      "pool_total": "197 个函数中 140 个 calls 为空（71%），其中 126 个是类方法"
+    },
+    "double_consequence": [
+      "FP：没有 calls 来证伪 ⇒ safeguard 规则退化成「靠函数名关键词猜」（54 条违规里 28 条所在函数 calls 为空，占 52%；Data Mutation Without Audit Trail 22 条里 20 条如此）",
+      "FN：真违规同样检不出 ⇒ 协议状态机在类方法代码上等于关闭（池里 protocol=0 就是这个原因，不是干净）"
+    ],
+    "why_never_caught_before": "taintpath 十一族人造语料全是函数声明 / 变量箭头 / 属性箭头等形态，没有一个「类方法」载体 ⇒ 该路径从未被 fixture 触发。与 3.7.31 的 P0 教训同源（新增能力必须配能触发它的 fixture）。",
+    "status": "已复现、未修。修它要动提取器主干，需完整四门验收（闸门 / fr-007+fr-016 / 全量盲测 3201 条基线 / 反向验证），单列一轮。"
   },
-  "leads": [
-   {
-    "id": "L4",
-    "name": "审计轨迹需『工程内已有审计设施』前置",
-    "hits": 26,
-    "exclusive": 22,
-    "pct": 36.1,
-    "risk": "中：审计设施可能叫 logger/history/event，探测不到就误抑制",
-    "action": "最大项，先写探针",
-    "evidence": "4 个切片 grep -i audit 零命中 ⇒ 加前置条件可全抑制"
-   },
-   {
-    "id": "L7",
-    "name": "工厂装配函数（create*/make*/build*/*Loader）不是内容创建",
-    "hits": 14,
-    "exclusive": 14,
-    "pct": 19.4,
-    "risk": "中：真创建（UserService.create）与工厂同名",
-    "action": "与 L2 合成一轮（需外部输入可达性）"
-   },
-   {
-    "id": "L1",
-    "name": "迁移/种子脚本豁免（原线索①）",
-    "hits": 9,
-    "exclusive": 5,
-    "pct": 12.5,
-    "risk": "低",
-    "action": "先做"
-   },
-   {
-    "id": "L3",
-    "name": "部署运维层（TLS/rate limit/retry）降级为建议级",
-    "hits": 7,
-    "exclusive": 7,
-    "pct": 9.7,
-    "risk": "低：本就不是代码缺陷",
-    "action": "先做"
-   },
-   {
-    "id": "L8",
-    "name": "`register` 词义歧义（Fastify 插件注册 vs 用户注册）",
-    "hits": 6,
-    "exclusive": 6,
-    "pct": 8.3,
-    "risk": "低",
-    "action": "先做"
-   },
-   {
-    "id": "L2",
-    "name": "ORM 查询构造链（原线索②）",
-    "hits": 4,
-    "exclusive": 3,
-    "pct": 5.6,
-    "risk": "中偏高：limit/offset 可能真来自用户输入",
-    "action": "与 L7 合成一轮"
-   },
-   {
-    "id": "L6",
-    "name": "内部/私有工具方法（原线索③）",
-    "hits": 3,
-    "exclusive": 3,
-    "pct": 4.2,
-    "risk": "中",
-    "action": "暂缓"
-   },
-   {
-    "id": "L5",
-    "name": "校验器词表缺口（原线索④）",
-    "hits": 1,
-    "exclusive": 0,
-    "pct": 1.4,
-    "risk": "低",
-    "action": "顺手"
-   }
-  ],
-  "coverage": {
-   "原四条（L1/L2/L5/L6）": "17 条 = 23.6%",
-   "新发现四条（L4/L7/L8/L3）": "53 条 = 73.6%",
-   "未归因": "7 条 = 9.7%（加入 L7/L8 前是 27 条 37.5%）"
+  "after_class_method_fix": {
+    "version": "3.7.47（工作树，未提交）",
+    "date": "2026-09-21",
+    "what_changed": "主 IR 循环的类方法分支补上 extractDirectCalls（此前只调 computeMarkerCalls）",
+    "empty_calls": {
+      "before": {
+        "fns": 197,
+        "empty": 140,
+        "pct": 71,
+        "class_methods_empty": 126
+      },
+      "after": {
+        "fns": 197,
+        "empty": 23,
+        "pct": 12,
+        "class_methods_empty": 9
+      },
+      "per_slice_after": {
+        "ducktors-turborepo-remote-cache": {
+          "fns": 23,
+          "empty": 5,
+          "cls": 0
+        },
+        "gothinkster-node-express-realworld-example-app": {
+          "fns": 0,
+          "empty": 0,
+          "cls": 0
+        },
+        "lujakob-nestjs-realworld-example-app": {
+          "fns": 61,
+          "empty": 3,
+          "cls": 3
+        },
+        "w3tecch-express-typescript-boilerplate": {
+          "fns": 113,
+          "empty": 15,
+          "cls": 6
+        }
+      },
+      "note": "空 calls 71% → 12%。剩余 23 个里只有 2 个落在「有违规」的函数上（createS3 / ArticleEntity.updateTimestamp）；其余 21 个函数名不触发规则，无害。"
+    },
+    "violations": {
+      "project_level_before": 19,
+      "project_level_after": 21,
+      "perFunction_added": 18,
+      "note": "项目级只 +2（去重口径），但 **perFunction 层面新增 18 条** —— 类方法第一次有了 calls，规则第一次看见这些序列。这正是 Claude 预警的「规则侧第一次实战」。"
+    },
+    "new_violations_verdicts": [
+      {
+        "where": "lujakob/ArticleService.findAll",
+        "rule": "Input Validation",
+        "verdict": "FP",
+        "confidence": "high",
+        "evidence": "calls = createQueryBuilder/leftJoinAndSelect/where/andWhere/getMany —— TypeORM 查询构造器链被当成「缺输入校验」。查询构造不是校验缺失的证据。"
+      },
+      {
+        "where": "lujakob/ArticleService.findFeed",
+        "rule": "Input Validation",
+        "verdict": "FP",
+        "confidence": "high",
+        "evidence": "同上，query builder 链（find/where/orderBy/getCount/limit/offset）。"
+      },
+      {
+        "where": "lujakob/UserService.create",
+        "rule": "Input Validation",
+        "verdict": "FP",
+        "confidence": "high",
+        "evidence": "calls 含 validate（class-validator）与 orWhere/where —— 其实**有**校验，规则没认出来 ⇒ 属词表缺口，不是真缺校验。"
+      },
+      {
+        "where": "lujakob/UserService.generateJWT",
+        "rule": "Authorization (Unauthenticated Access)",
+        "verdict": "FP",
+        "confidence": "high",
+        "evidence": "jwt.sign + setDate/getDate/getTime，是内部工具方法；工具函数不应被要求做授权检查。"
+      },
+      {
+        "where": "lujakob/UserService.generateJWT",
+        "rule": "Authorization (Unauthenticated Mutation)",
+        "verdict": "FP",
+        "confidence": "high",
+        "evidence": "同上。"
+      },
+      {
+        "where": "lujakob/UserController.login",
+        "rule": "Token Security (Weak Generation)",
+        "verdict": "FP",
+        "confidence": "high",
+        "evidence": "源码 findOne → 判空 401 → generateJWT（jwt.sign + SECRET），是标准签发而非弱生成。**上一轮因 calls 为空判为「无法判定」，本轮有了 calls 才判得动 ⇒ 正是 Claude 说的「废票变有效票」。**"
+      },
+      {
+        "where": "lujakob/ProfileService.unFollow",
+        "rule": "Data Mutation Without Audit Trail",
+        "verdict": "weak-true",
+        "confidence": "medium",
+        "evidence": "calls = findOne, delete —— 取消关注确实没有审计日志，但是否算违规取决于产品定位。"
+      },
+      {
+        "where": "w3tecch/PetRepository.findByUserId",
+        "rule": "Input Validation",
+        "verdict": "FP",
+        "confidence": "high",
+        "evidence": "query builder 链（createQueryBuilder/where/select/join/getMany/map）。"
+      },
+      {
+        "where": "w3tecch/PetService.create",
+        "rule": "Notification Without Retry",
+        "verdict": "weak-true",
+        "confidence": "medium",
+        "evidence": "eventDispatcher.dispatch 发出事件但无重试机制；属**部署层建议**，与上一轮 TLS/rate limit 同类。"
+      },
+      {
+        "where": "w3tecch/UserService.create",
+        "rule": "Notification Without Retry",
+        "verdict": "weak-true",
+        "confidence": "medium",
+        "evidence": "同上（dispatch 无重试）。"
+      },
+      {
+        "where": "w3tecch/CreateUserTable15111051836",
+        "rule": "Input Validation",
+        "verdict": "FP",
+        "confidence": "high",
+        "evidence": "calls = createTable —— TypeORM **迁移脚本**，不处理用户输入。"
+      },
+      {
+        "where": "w3tecch/CreateUserTable15111051836",
+        "rule": "Data Mutation Without Audit Trail",
+        "verdict": "FP",
+        "confidence": "high",
+        "evidence": "calls = dropTable，迁移回滚方法。"
+      },
+      {
+        "where": "w3tecch/CreatePetTable151266352480",
+        "rule": "Input Validation",
+        "verdict": "FP",
+        "confidence": "high",
+        "evidence": "迁移脚本 createTable。"
+      },
+      {
+        "where": "w3tecch/CreatePetTable151266352480",
+        "rule": "Data Mutation Without Audit Trail",
+        "verdict": "FP",
+        "confidence": "high",
+        "evidence": "迁移脚本 dropTable。"
+      },
+      {
+        "where": "w3tecch/AddUserRelationToPetTable1",
+        "rule": "Input Validation",
+        "verdict": "FP",
+        "confidence": "high",
+        "evidence": "迁移脚本 createForeignKey。"
+      },
+      {
+        "where": "w3tecch/AddUserRelationToPetTable1",
+        "rule": "Data Mutation Without Audit Trail",
+        "verdict": "FP",
+        "confidence": "high",
+        "evidence": "迁移脚本 dropForeignKey。"
+      },
+      {
+        "where": "w3tecch/CreateBruce.seed",
+        "rule": "Input Validation",
+        "verdict": "FP",
+        "confidence": "high",
+        "evidence": "calls = createEntityManager, v1(uuid), save —— **种子数据脚本**，无外部输入。"
+      },
+      {
+        "where": "w3tecch/CreatePets.seed",
+        "rule": "Input Validation",
+        "verdict": "FP",
+        "confidence": "high",
+        "evidence": "同上（times/createEntityManager/save）。"
+      }
+    ],
+    "verdict_summary": {
+      "FP": 15,
+      "weak-true": 3,
+      "TP": 0,
+      "note": "18 条里**真漏洞 0 条**。判定由 WorkBuddy 做出，建议 Claude 复核，尤其 3 条 weak-true 取决于产品定位。"
+    },
+    "rule_side_calibration_signals": [
+      "迁移/种子脚本（createTable / dropTable / createForeignKey / createEntityManager+save）应豁免 —— 6 条 FP 全来自这一类",
+      "TypeORM query builder 链（createQueryBuilder/where/getMany）被 Input Validation 误判 —— 4 条 FP",
+      "内部工具方法（generateJWT 这种只做 jwt.sign 的）不应被要求 Authorization —— 2 条 FP",
+      "UserService.create 其实**有** validate 却仍报 Input Validation ⇒ 不是缺校验，是**规则不认 class-validator 的 validate**"
+    ],
+    "still_empty_after_fix": [
+      {
+        "where": "ducktors/createS3",
+        "why": "函数式写法，返回对象；非类方法"
+      },
+      {
+        "where": "lujakob/ArticleEntity.updateTimestamp",
+        "why": "类方法但体内只有赋值（@BeforeUpdate 钩子），确无调用 ⇒ 空是正确的"
+      }
+    ]
   },
-  "conclusion": "线索清单从 4 条扩到 8 条，优先级完全重排；L4 单项（36.1%）就比原四条加起来还多。设计稿 §十九。",
-  "pending": "复核到 6 片 / 367 条违规：L4 21.5%、L6 10.4%、L7 7.6%、L9 6.5%、L3 4.4%、L8 3.3%、L1 2.5%、L10 2.2%、L2 1.1%、L5 0.3%，未归因 44.4%（仍在涨）⇒ 按 R25 判据仍未饱和，不可据此开工。",
-  "leads_after_5th_slice": [
-   {
-    "id": "L4",
-    "pct": 20.2,
-    "hits": 40
-   },
-   {
-    "id": "L9-Express中间件",
-    "pct": 12.1,
-    "hits": 24
-   },
-   {
-    "id": "L7",
-    "pct": 10.1,
-    "hits": 20
-   },
-   {
-    "id": "L3",
-    "pct": 6.6,
-    "hits": 13
-   },
-   {
-    "id": "L8",
-    "pct": 6.1,
-    "hits": 12
-   },
-   {
-    "id": "L1",
-    "pct": 4.5,
-    "hits": 9
-   },
-   {
-    "id": "L6",
-    "pct": 4,
-    "hits": 8
-   },
-   {
-    "id": "L10-框架ACL词表",
-    "pct": 4,
-    "hits": 8
-   },
-   {
-    "id": "L2",
-    "pct": 2,
-    "hits": 4
-   },
-   {
-    "id": "L5",
-    "pct": 0.5,
-    "hits": 1
-   },
-   {
-    "id": "未归因",
-    "pct": 37.4,
-    "hits": 74
-   }
-  ],
-  "leads_after_6th_slice": [
-   {
-    "id": "L4",
-    "pct": 21.5,
-    "hits": 79
-   },
-   {
-    "id": "L6",
-    "pct": 10.4,
-    "hits": 38
-   },
-   {
-    "id": "L7",
-    "pct": 7.6,
-    "hits": 28
-   },
-   {
-    "id": "L9",
-    "pct": 6.5,
-    "hits": 24
-   },
-   {
-    "id": "L3",
-    "pct": 4.4,
-    "hits": 16
-   },
-   {
-    "id": "L8",
-    "pct": 3.3,
-    "hits": 12
-   },
-   {
-    "id": "L1",
-    "pct": 2.5,
-    "hits": 9
-   },
-   {
-    "id": "L10",
-    "pct": 2.2,
-    "hits": 8
-   },
-   {
-    "id": "L2",
-    "pct": 1.1,
-    "hits": 4
-   },
-   {
-    "id": "L5",
-    "pct": 0.3,
-    "hits": 1
-   },
-   {
-    "id": "未归因",
-    "pct": 44.4,
-    "hits": 163
-   }
-  ]
- },
- "expansion_2026_09_21": {
-  "tool": "python3 blind-benchmark/fp-pool-fetch.py <owner/repo> [--prefix <子包>] [--max-files N]",
-  "safety_notes": [
-   "单文件 >400KB 一律丢弃（本机 8GB + swap 吃满，ts-morph 会 OOM）",
-   "monorepo 必须加 --prefix 只切一个子包，否则根目录没有 tsconfig.json，扫描直接 File not found",
-   "切片根目录自动补 package.json / tsconfig.json（取自 tarball 里最浅的一份）"
-  ],
-  "incident": {
-   "what": "fp-pool-scan.ts 在单切片扫描失败时仍照常 writeFileSync，把整份 reports/fp-pool-results.json 覆盖成空",
-   "loss": "此前的人工判定（18 条新增 + 54 条既有的逐条结论）全部丢失",
-   "fix": "① 写盘前备份 .prev.json；② 只扫一片时并入既有结果而非覆盖",
-   "recovery": "已重扫恢复：4 切片 / 197 文件 / safeguard 21，读数与事故前一致"
+  "r21_quantification": {
+    "date": "2026-09-21",
+    "tool": "python3 blind-benchmark/fp-pool-attrib.py（只读，对全量 perFunction 违规打标）",
+    "why_needed": "上面 rule_side_calibration_signals 的 4 条是从 18 条【新增】违规里归纳的，样本有偏；R24 要求分母必须是全量。全池 72 条（56 函数 / 4 切片）。",
+    "sample_bias": {
+      "Input Validation": "新增 10/18（56%） vs 全池 25/72（34.7%）",
+      "Data Mutation Without Audit Trail": "新增 4/18（22%） vs 全池 26/72（36.1%）",
+      "consequence": "从新增归纳会高估输入校验类、低估审计轨迹类"
+    },
+    "leads": [
+      {
+        "id": "L4",
+        "name": "审计轨迹需『工程内已有审计设施』前置",
+        "hits": 26,
+        "exclusive": 22,
+        "pct": 36.1,
+        "risk": "中：审计设施可能叫 logger/history/event，探测不到就误抑制",
+        "action": "最大项，先写探针",
+        "evidence": "4 个切片 grep -i audit 零命中 ⇒ 加前置条件可全抑制"
+      },
+      {
+        "id": "L7",
+        "name": "工厂装配函数（create*/make*/build*/*Loader）不是内容创建",
+        "hits": 14,
+        "exclusive": 14,
+        "pct": 19.4,
+        "risk": "中：真创建（UserService.create）与工厂同名",
+        "action": "与 L2 合成一轮（需外部输入可达性）"
+      },
+      {
+        "id": "L1",
+        "name": "迁移/种子脚本豁免（原线索①）",
+        "hits": 9,
+        "exclusive": 5,
+        "pct": 12.5,
+        "risk": "低",
+        "action": "先做"
+      },
+      {
+        "id": "L3",
+        "name": "部署运维层（TLS/rate limit/retry）降级为建议级",
+        "hits": 7,
+        "exclusive": 7,
+        "pct": 9.7,
+        "risk": "低：本就不是代码缺陷",
+        "action": "先做"
+      },
+      {
+        "id": "L8",
+        "name": "`register` 词义歧义（Fastify 插件注册 vs 用户注册）",
+        "hits": 6,
+        "exclusive": 6,
+        "pct": 8.3,
+        "risk": "低",
+        "action": "先做"
+      },
+      {
+        "id": "L2",
+        "name": "ORM 查询构造链（原线索②）",
+        "hits": 4,
+        "exclusive": 3,
+        "pct": 5.6,
+        "risk": "中偏高：limit/offset 可能真来自用户输入",
+        "action": "与 L7 合成一轮"
+      },
+      {
+        "id": "L6",
+        "name": "内部/私有工具方法（原线索③）",
+        "hits": 3,
+        "exclusive": 3,
+        "pct": 4.2,
+        "risk": "中",
+        "action": "暂缓"
+      },
+      {
+        "id": "L5",
+        "name": "校验器词表缺口（原线索④）",
+        "hits": 1,
+        "exclusive": 0,
+        "pct": 1.4,
+        "risk": "低",
+        "action": "顺手"
+      }
+    ],
+    "coverage": {
+      "原四条（L1/L2/L5/L6）": "17 条 = 23.6%",
+      "新发现四条（L4/L7/L8/L3）": "53 条 = 73.6%",
+      "未归因": "7 条 = 9.7%（加入 L7/L8 前是 27 条 37.5%）"
+    },
+    "conclusion": "线索清单从 4 条扩到 8 条，优先级完全重排；L4 单项（36.1%）就比原四条加起来还多。设计稿 §十九。",
+    "pending": "复核到 6 片 / 367 条违规：L4 21.5%、L6 10.4%、L7 7.6%、L9 6.5%、L3 4.4%、L8 3.3%、L1 2.5%、L10 2.2%、L2 1.1%、L5 0.3%，未归因 44.4%（仍在涨）⇒ 按 R25 判据仍未饱和，不可据此开工。",
+    "leads_after_5th_slice": [
+      {
+        "id": "L4",
+        "pct": 20.2,
+        "hits": 40
+      },
+      {
+        "id": "L9-Express中间件",
+        "pct": 12.1,
+        "hits": 24
+      },
+      {
+        "id": "L7",
+        "pct": 10.1,
+        "hits": 20
+      },
+      {
+        "id": "L3",
+        "pct": 6.6,
+        "hits": 13
+      },
+      {
+        "id": "L8",
+        "pct": 6.1,
+        "hits": 12
+      },
+      {
+        "id": "L1",
+        "pct": 4.5,
+        "hits": 9
+      },
+      {
+        "id": "L6",
+        "pct": 4,
+        "hits": 8
+      },
+      {
+        "id": "L10-框架ACL词表",
+        "pct": 4,
+        "hits": 8
+      },
+      {
+        "id": "L2",
+        "pct": 2,
+        "hits": 4
+      },
+      {
+        "id": "L5",
+        "pct": 0.5,
+        "hits": 1
+      },
+      {
+        "id": "未归因",
+        "pct": 37.4,
+        "hits": 74
+      }
+    ],
+    "leads_after_6th_slice": [
+      {
+        "id": "L4",
+        "pct": 21.5,
+        "hits": 79
+      },
+      {
+        "id": "L6",
+        "pct": 10.4,
+        "hits": 38
+      },
+      {
+        "id": "L7",
+        "pct": 7.6,
+        "hits": 28
+      },
+      {
+        "id": "L9",
+        "pct": 6.5,
+        "hits": 24
+      },
+      {
+        "id": "L3",
+        "pct": 4.4,
+        "hits": 16
+      },
+      {
+        "id": "L8",
+        "pct": 3.3,
+        "hits": 12
+      },
+      {
+        "id": "L1",
+        "pct": 2.5,
+        "hits": 9
+      },
+      {
+        "id": "L10",
+        "pct": 2.2,
+        "hits": 8
+      },
+      {
+        "id": "L2",
+        "pct": 1.1,
+        "hits": 4
+      },
+      {
+        "id": "L5",
+        "pct": 0.3,
+        "hits": 1
+      },
+      {
+        "id": "未归因",
+        "pct": 44.4,
+        "hits": 163
+      }
+    ]
   },
-  "slices_added": [
-   {
-    "repo": "docmost/docmost",
-    "prefix": "apps/server",
-    "files": 120,
-    "status": "已扫/待扫"
-   },
-   {
-    "repo": "verdaccio/verdaccio",
-    "files": 110,
-    "scanned": "72 文件 / 249 函数 / 命中 83 函数 / 空calls 42（类方法 24）",
-    "status": "已扫"
-   },
-   {
-    "repo": "hedgedoc/hedgedoc",
-    "status": "抓取失败：sandbox 对 tar 解包的 mkdir 报 PermissionError，需放开沙箱后重试"
-   },
-   {
-    "repo": "docmost/docmost",
-    "prefix": "apps/server",
-    "files": 118,
-    "scanned": "118 文件 / 262 函数 / 命中 94 函数 / 空calls 19（类方法 6）/ protocol=2 resource=3",
-    "status": "已扫"
-   },
-   {
-    "repo": "outline/outline",
-    "prefix": "server",
-    "files": 110,
-    "scanned": "110 文件 / 37 函数 / 命中 4 —— **有偏切片**",
-    "bias": "按优先分取前 N，\"api/\" 得分最高 ⇒ 110 个名额几乎全给了 routes/api/*，函数数只有别的片的零头",
-    "status": "待用 round_robin 重切后重扫替换（已把旧切片移到 /tmp/fp-pool-outline-biased-routes-only）"
-   },
-   {
-    "repo": "hoppscotch/hoppscotch",
-    "prefix": "packages/hoppscotch-backend",
-    "status": "抓取中，因本机 load 610 已中止，待机器恢复后重跑"
-   }
-  ],
-  "saturation": "未饱和（R25）：6 片时未归因 44.4% 仍在涨；L6 从 4.0% 反弹到 10.4%",
-  "sampler_bias": "已修：round_robin() 按目录轮转取样，避免名额被单一子树吃光（2026-09-21 outline 事故）",
-  "saturation_guard": "R25 判据加空过防线：新切片贡献 <5% 总违规 ⇒ 报「比较无效」（outline 那次贡献 4 条 = 1.1%，差点被误判为已饱和）"
- },
- "verdaccio_empty_calls_closed": {
-  "conclusion": "不是 E1 的遗留缺口，24 个点名空函数全部有解释",
-  "evidence": "ts-morph AST 逐条核对：23 个体内零 CallExpression（setter/accessor/return this）；1 个 AuthStorageCommand.promptPassword 调用全在嵌套箭头回调里（§十八 已登记的「不修」项）",
-  "probe": "/tmp/probe-verdaccio-empty2.ts"
- },
- "marker_parity_2026_09_22": {
-  "finding": "规则侧定义 23 个 __progmune_* 语义标记；产出侧严重不对称",
-  "produced": {
-   "python": 23,
-   "ts": 4,
-   "c": 0,
-   "go": 0,
-   "java": 0
+  "expansion_2026_09_21": {
+    "tool": "python3 blind-benchmark/fp-pool-fetch.py <owner/repo> [--prefix <子包>] [--max-files N]",
+    "safety_notes": [
+      "单文件 >400KB 一律丢弃（本机 8GB + swap 吃满，ts-morph 会 OOM）",
+      "monorepo 必须加 --prefix 只切一个子包，否则根目录没有 tsconfig.json，扫描直接 File not found",
+      "切片根目录自动补 package.json / tsconfig.json（取自 tarball 里最浅的一份）"
+    ],
+    "incident": {
+      "what": "fp-pool-scan.ts 在单切片扫描失败时仍照常 writeFileSync，把整份 reports/fp-pool-results.json 覆盖成空",
+      "loss": "此前的人工判定（18 条新增 + 54 条既有的逐条结论）全部丢失",
+      "fix": "① 写盘前备份 .prev.json；② 只扫一片时并入既有结果而非覆盖",
+      "recovery": "已重扫恢复：4 切片 / 197 文件 / safeguard 21，读数与事故前一致"
+    },
+    "slices_added": [
+      {
+        "repo": "docmost/docmost",
+        "prefix": "apps/server",
+        "files": 120,
+        "status": "已扫/待扫"
+      },
+      {
+        "repo": "verdaccio/verdaccio",
+        "files": 110,
+        "scanned": "72 文件 / 249 函数 / 命中 83 函数 / 空calls 42（类方法 24）",
+        "status": "已扫"
+      },
+      {
+        "repo": "hedgedoc/hedgedoc",
+        "status": "抓取失败：sandbox 对 tar 解包的 mkdir 报 PermissionError，需放开沙箱后重试"
+      },
+      {
+        "repo": "docmost/docmost",
+        "prefix": "apps/server",
+        "files": 118,
+        "scanned": "118 文件 / 262 函数 / 命中 94 函数 / 空calls 19（类方法 6）/ protocol=2 resource=3",
+        "status": "已扫"
+      },
+      {
+        "repo": "outline/outline",
+        "prefix": "server",
+        "files": 110,
+        "scanned": "110 文件 / 37 函数 / 命中 4 —— **有偏切片**",
+        "bias": "按优先分取前 N，\"api/\" 得分最高 ⇒ 110 个名额几乎全给了 routes/api/*，函数数只有别的片的零头",
+        "status": "待用 round_robin 重切后重扫替换（已把旧切片移到 /tmp/fp-pool-outline-biased-routes-only）"
+      },
+      {
+        "repo": "hoppscotch/hoppscotch",
+        "prefix": "packages/hoppscotch-backend",
+        "status": "抓取中，因本机 load 610 已中止，待机器恢复后重跑"
+      }
+    ],
+    "saturation": "未饱和（R25）：6 片时未归因 44.4% 仍在涨；L6 从 4.0% 反弹到 10.4%",
+    "sampler_bias": "已修：round_robin() 按目录轮转取样，避免名额被单一子树吃光（2026-09-21 outline 事故）",
+    "saturation_guard": "R25 判据加空过防线：新切片贡献 <5% 总违规 ⇒ 报「比较无效」（outline 那次贡献 4 条 = 1.1%，差点被误判为已饱和）"
   },
-  "ts_produces": [
-   "__progmune_path_traversal__",
-   "__progmune_ssrf_user_url__",
-   "__progmune_token_issued__",
-   "__progmune_ownership_checked__"
-  ],
-  "pool_is_100pct_ts": true,
-  "consequence": "规则在 TS 上跑的时候 19 条证据通道是断的 ⇒ 不是规则不准，是规则饿着（R27）",
-  "check_before_tuning": "先查规则的 safeguard 接受哪些标记、以及它**是否接受标记**——Input Validation 的 safeguard 是纯词形匹配、不接受任何标记"
- },
- "e2_round_2026_09_22": {
-  "gap": "NestJS 的鉴权写在装饰器里（@UseGuards(JwtAuthGuard)，类级/方法级），既不在函数体文本也不在 calls 里 ⇒ 规则看不见",
-  "probe": "/tmp/e2-probe + /tmp/e2-verify.ts：IR calls=[create]；手工注入 __progmune_auth_machinery__ 后 Authorization (Unauthenticated Mutation) 消失，Input Validation 仍在",
-  "fix": "extract-ir.ts 类方法分支：类级+方法级装饰器 ⇒ __progmune_auth_machinery__（镜像 tools/extract_ir.py:1134 的类级框架守卫）；**规则侧零改动**（protocol-detector.ts:398/:430 早已接受）",
-  "boundaries": [
-   "@Public()/@SkipAuth()/@AllowAnonymous() 显式免鉴权 ⇒ 不注入",
-   "@Api*（Swagger 文档装饰器）⇒ 跳过",
-   "@UseGuards(ThrottlerGuard) 等非鉴权守卫 ⇒ 不注入（实参须匹配 auth|jwt|session|login|permission|role|admin|bearer|credential）",
-   "顶层函数装饰器不在本轮范围"
-  ],
-  "measured_effect": {
-   "authorization_lost": 24,
-   "breakdown": {
-    "Authorization (Unauthenticated Access)": 11,
-    "Authorization (Unauthenticated Mutation)": 13
-   },
-   "added": 0,
-   "non_authorization_change": 0,
-   "slice": "docmost 全部",
-   "hit_functions": "94 → 87"
+  "verdaccio_empty_calls_closed": {
+    "conclusion": "不是 E1 的遗留缺口，24 个点名空函数全部有解释",
+    "evidence": "ts-morph AST 逐条核对：23 个体内零 CallExpression（setter/accessor/return this）；1 个 AuthStorageCommand.promptPassword 调用全在嵌套箭头回调里（§十八 已登记的「不修」项）",
+    "probe": "/tmp/probe-verdaccio-empty2.ts"
   },
-  "estimate_vs_actual": {
-   "upper_bound": 37,
-   "actual": 24,
-   "why_gap": "初测启发式把 @Post/@Get/@Controller 也当「装饰器」，它们不是鉴权装饰器；上限按设计偏乐观"
+  "marker_parity_2026_09_22": {
+    "finding": "规则侧定义 23 个 __progmune_* 语义标记；产出侧严重不对称",
+    "produced": {
+      "python": 23,
+      "ts": 4,
+      "c": 0,
+      "go": 0,
+      "java": 0
+    },
+    "ts_produces": [
+      "__progmune_path_traversal__",
+      "__progmune_ssrf_user_url__",
+      "__progmune_token_issued__",
+      "__progmune_ownership_checked__"
+    ],
+    "pool_is_100pct_ts": true,
+    "consequence": "规则在 TS 上跑的时候 19 条证据通道是断的 ⇒ 不是规则不准，是规则饿着（R27）",
+    "check_before_tuning": "先查规则的 safeguard 接受哪些标记、以及它**是否接受标记**——Input Validation 的 safeguard 是纯词形匹配、不接受任何标记"
   },
-  "gates": {
-   "tsc": "✓ 零错误",
-   "taintpath": "✓ 160/160",
-   "fr_007": "✓ pre5/post0",
-   "fr_016": "✓ pre7/post0",
-   "targeted_tests": "✓ 176 全绿（+11 E2 组）",
-   "reverse_verify": "✓ 四刀各落自己那组、残留 0",
-   "ts_blind_scan": "LOST 0 / ADDED 0 —— **空过**：generated 语料装饰器命中数 = 0（R23 家族第三次）"
+  "e2_round_2026_09_22": {
+    "gap": "NestJS 的鉴权写在装饰器里（@UseGuards(JwtAuthGuard)，类级/方法级），既不在函数体文本也不在 calls 里 ⇒ 规则看不见",
+    "probe": "/tmp/e2-probe + /tmp/e2-verify.ts：IR calls=[create]；手工注入 __progmune_auth_machinery__ 后 Authorization (Unauthenticated Mutation) 消失，Input Validation 仍在",
+    "fix": "extract-ir.ts 类方法分支：类级+方法级装饰器 ⇒ __progmune_auth_machinery__（镜像 tools/extract_ir.py:1134 的类级框架守卫）；**规则侧零改动**（protocol-detector.ts:398/:430 早已接受）",
+    "boundaries": [
+      "@Public()/@SkipAuth()/@AllowAnonymous() 显式免鉴权 ⇒ 不注入",
+      "@Api*（Swagger 文档装饰器）⇒ 跳过",
+      "@UseGuards(ThrottlerGuard) 等非鉴权守卫 ⇒ 不注入（实参须匹配 auth|jwt|session|login|permission|role|admin|bearer|credential）",
+      "顶层函数装饰器不在本轮范围"
+    ],
+    "measured_effect": {
+      "authorization_lost": 24,
+      "breakdown": {
+        "Authorization (Unauthenticated Access)": 11,
+        "Authorization (Unauthenticated Mutation)": 13
+      },
+      "added": 0,
+      "non_authorization_change": 0,
+      "slice": "docmost 全部",
+      "hit_functions": "94 → 87"
+    },
+    "estimate_vs_actual": {
+      "upper_bound": 37,
+      "actual": 24,
+      "why_gap": "初测启发式把 @Post/@Get/@Controller 也当「装饰器」，它们不是鉴权装饰器；上限按设计偏乐观"
+    },
+    "gates": {
+      "tsc": "✓ 零错误",
+      "taintpath": "✓ 160/160",
+      "fr_007": "✓ pre5/post0",
+      "fr_016": "✓ pre7/post0",
+      "targeted_tests": "✓ 176 全绿（+11 E2 组）",
+      "reverse_verify": "✓ 四刀各落自己那组、残留 0",
+      "ts_blind_scan": "LOST 0 / ADDED 0 —— **空过**：generated 语料装饰器命中数 = 0（R23 家族第三次）"
+    }
+  },
+  "e3_round_2026_09_22": {
+    "version": "3.7.50",
+    "claim": "Input Validation 的 safeguard 此前不接受任何 __progmune_* 标记（纯词形匹配）⇒ DTO 里的校验对规则不可见（R27：证据通道断着）",
+    "fix": {
+      "extractor": "src/extract-ir.ts 新增 validatedDtoClassNames(project) 预扫 + 主循环后统一注入 __progmune_input_schema__（按入参类型判定，覆盖全函数形态）",
+      "rule": "protocol-detector.ts Input Validation 的 safeguard 追加接受分支；只加抑制位，不进 trigger"
+    },
+    "marker_naming_trap": {
+      "first_name": "__progmune_validated_input__",
+      "collision": "被 Data Integrity (Foreign Key) 的 safeguard \\b(...|validate|...)(?:[A-Z]\\w*|_\\w+)\\b 命中（validate + d_input__）⇒ 凭空压掉 10 条无关违规",
+      "final_name": "__progmune_input_schema__",
+      "rule_of_thumb": "标记名不得含 get/find/check/verify/validate/create/add/post/upload 等动词词根"
+    },
+    "measured": {
+      "docmost_real_rescan": {
+        "input_validation": "39 → 24 (-15)",
+        "added": 0,
+        "other_rules": 0
+      },
+      "pool_wide_offline_replay": {
+        "input_validation": "112 → 95 (-17)",
+        "added": 0,
+        "other_rules": 0
+      }
+    },
+    "replay_fidelity": "离线重放预测的 -15 与真实重扫逐条一致",
+    "gates": {
+      "tsc": "✓ 零错误",
+      "taintpath": "✓ 160/160",
+      "fr_007": "✓ pre5/post0",
+      "fr_016": "✓ pre7/post0",
+      "targeted_tests": "✓ 187 全绿（+11 E3 组）",
+      "reverse_verify": "✓ 两刀（拆规则接受位 / 关提取器发射）各自精确回到 39，残留 0",
+      "ts_blind_scan": "3201 → 3201，逐函数差异 0 —— **空过**：generated 语料校验装饰器命中数 = 0（R23 家族第四次）"
+    },
+    "next_candidates_measured_not_implemented": {
+      "variant_A_trigger_own_name_only": {
+        "what": "Input Validation 的 trigger 只认函数名，不再被被调用的 create*/add* 触发",
+        "pool": "112 → 64 (-48)",
+        "blind": "417 → 242 (-175)",
+        "risk": "175 条 LOST 需逐条判定；样本里 registerNewUser/doLogin 等是可能的真阳性损失 ⇒ 未实现，交裁决"
+      },
+      "variant_C_A_plus_B": "pool 112 → 59 (-52)"
+    }
+  },
+  "f_round_2026_09_22": {
+    "version": "3.7.51",
+    "claim": "Input Validation 的 trigger 拿 callee 名字去匹配，而规则的陈述对象是「这个函数自己是不是内容创建函数」⇒ 两类缺陷：重复投射 + 理由错（createHash）",
+    "decision": "上一轮把变体 A 列为裁决项（-175 可能有真阳性损失）；本轮逐条判完，175 条全部可解释、无一真阳性 ⇒ 做",
+    "attribution": {
+      "blind_175": {
+        "handleRequest_SAFE_DUP": 100,
+        "createHash_wrong_reason": 69,
+        "list_get_queries": 6
+      },
+      "pool_37": {
+        "SAFE_DUP": 7,
+        "COVERED_OTHER": 3,
+        "RISKY_EXTERNAL": 27
+      },
+      "pool_27_trigger_sources": "createQueryBuilder / createTable / createEntityManager / createDatabaseConnection / createTarballHash / createRelativePositionFromJSON(Yjs) / createForUser(CASL 权限工厂) / addContributors / createLocation / addUniqueIdsToDoc —— 无一为「handler 交用户输入给内容创建」"
+    },
+    "fix": "新增规则字段 triggerOwnNameOnly（trigger 只匹配 enclosing function 自身名字），Input Validation 开启；其余规则不变",
+    "measured": {
+      "ts_blind_scan": {
+        "input_validation": "417 → 242 (-175)",
+        "added": 0,
+        "other_rules": 0,
+        "per_function_diff": 175
+      },
+      "pool_docmost_real_rescan": {
+        "input_validation": "24 → 14 (-10)",
+        "added": 0,
+        "other_rules": 0
+      },
+      "pool_wide_offline_replay": {
+        "input_validation": "97 → 60 (-37)"
+      }
+    },
+    "replay_fidelity": "第二次验证：重放预测的 175 条与真实重扫 LOST 名单逐条一致；docmost 10 条亦一致",
+    "gates": {
+      "tsc": "✓ 零错误",
+      "taintpath": "✓ 160/160",
+      "fr_007": "✓ pre5/post0",
+      "fr_016": "✓ pre7/post0",
+      "targeted_tests": "✓ 201 全绿（+14 F 组）",
+      "reverse_verify": "✓ 两刀各自精确回到 24，残留 0",
+      "ts_blind_scan": "不再是空过（-175）"
+    },
+    "known_gap": "函数名不含 create/add/post/upload 但确实是「入口把用户输入交给内容创建」的函数不再报（175 条里此类 0）。补回需 exposed 通道，按 R27 先查通道",
+    "self_injury": "变体构造漏了 replace 一行 ⇒ 变体恒等于基线 ⇒ 首次测得 0 变化（升 R31）"
+  },
+  "channel_audit_2026_09_22": {
+    "trigger": "F 轮待办①：补回入口函数需 exposed 通道，按 R27 先查通道",
+    "exposed_answer": "exposed/params 只由 blind-benchmark 的 batch-scan.ts / fp-pool-scan.ts / batch-scan-python.ts 传入；protocol-detector 自带 CLI 的 validateCombined 只传 2 个参数 ⇒ paramGated / parentRefGated / strictSafeguards 在这些路径上全部失效",
+    "bigger_finding": "SAFEGUARD_RULES 不被 TS 产品调用。src 内引用方仅 python-benchmark.ts（自带 CLI，无模块调用）、protocol-detector.ts 自带 CLI、compliance-scorer.ts（仅第 14 行注释）、测试；其余全在 blind-benchmark/",
+    "product_evidence": {
+      "mcp_entry": "dist/mcp-server.mjs（main+bin，66KB）require 列表不含 protocol-detector",
+      "trust_engine": "src/trust/*.ts 无 protocol-detector 引用、无 safeguard 字样；走 protocol-domain-validator + frameworks",
+      "dist_scan": "dist/protocol-detector.js 是全仓唯一含 'Input Validation' 字符串的产物",
+      "positive_test": "npx tsx src/trust/cli.ts blind-benchmark/generated/blog --json ⇒ 仅 1 条 protocol 状态机违规（logout 状态错），无 Input Validation / Authorization"
+    },
+    "impact": [
+      "E2/E3/F 三轮改善的是基准口径误报率，不等于产品行为变化",
+      "FP 池（fp-pool-scan.ts 产出）的误报不代表产品误报",
+      "F 轮登记的「入口函数」已知边界只在基准口径上成立"
+    ],
+    "decision_needed": [
+      "是否漏看了 TS 产品扫描主路径？",
+      "SAFEGUARD_RULES 是否有意留作研究/基准用途？",
+      "若应接进产品 ⇒ 架构级改动，需单列一轮，并先回答「接上后产品会不会突然多出成百上千条告警」"
+    ],
+    "status": "未动代码，仅记录，交裁决",
+    "methodology": "新增 R32"
+  },
+  "sandbox_2026_09_22": {
+    "trigger": "§二十三 的三个待裁决问题，用户要求自己查、自己测、做成沙箱",
+    "q1_entry_audit": {
+      "method": "main/bin = dist/mcp-server.mjs（src/mcp-server.ts 1383 行，19 工具），逐个排查",
+      "progmune_audit": "src/audit.ts → auditDirectory = @progmune-generated 覆盖率审计（coverage<0.8 报警），不是安全扫描",
+      "progmune_check": "src/check.ts = 本仓库自检（IR 重提/tsc/SSG/ledger 不变量/指纹回放）",
+      "verdict": "没有漏看入口。产品安全判定 = trust 引擎"
+    },
+    "product_judgement_stack": {
+      "ir_markers": "engine.ts:1522 起，只消费 3 个：__progmune_path_traversal__ / __progmune_ssrf_user_url__ / __progmune_cross_user_write__",
+      "specific_checks": "protocol-domain-validator.ts SPECIFIC_VIOLATION_CHECKS 17 条，全部协议/密码学类（TLS/SSH/JWT/OCSP/DH/SRP/QUIC/PLAINTEXT_AUTH/PATH_TRAVERSAL…），无 Authorization / Input Validation",
+      "ssg": "protocols.json 74 状态 / 148 规则",
+      "two_use_file": "protocol-detector.ts 是两用：validateProtocolState 被 evidence-repository / knowledge-evolution / evidence-growth / knowledge-flywheel / progmune-status import（进产品）；detectSafeguardViolations 只被基准用"
+    },
+    "q2_intent": {
+      "introduced_by": [
+        "a8e42a03 2026-07-07 'Detector B deployed — Recall 74% → 85%'（A/B 实验、10 projects、recall/precision 测量）",
+        "9b1553d5 2026-07-17 'Phase 2-3: Research methodology freeze'（Research pipeline: FN→Root Cause→Capability Layer→ROI→Experiment→Decision）"
+      ],
+      "verdict": "不是『有意留作研究』的设计决策，是**研究产物 + 接线没做完**。区别很大：前者不该接，后者可以接",
+      "wiring_pattern_exists": "3.7.26/27/28 已用同一模式接通 path_traversal / cross_user_write / ssrf —— 提取器产标记 → 引擎 IR 层消费；CHANGELOG 明确写『protocol-detector.ts 同名规则供 source-level 路径』，即同一能力在两条路径各有一份，Authorization/Input Validation 属于『引擎那份还没写』"
+    },
+    "q3_sandbox": {
+      "method": "同一批项目分别跑产品路径（npx tsx src/trust/cli.ts <dir> --json）与清单口径",
+      "results": {
+        "blog": "产品 1（SSG_AUTH_STATE_VIOLATION，handleRequest 里 logout 顺序错，真阳性） vs 清单 32",
+        "banking_A": "1 vs 35",
+        "cms_A": "1 vs 27",
+        "docmost_real": "**0 vs 120**",
+        "fp_pool_6_slices": "318 条 / 215 函数",
+        "generated_111": "~111 vs 3201"
+      },
+      "verdict": "会多出成百上千条：约 **30 倍**；真实项目上是从 0 到 120（从无到有）"
+    },
+    "decisive_test_incremental_recall": {
+      "question": "多出来的这些，有没有产品报不出来的真值？",
+      "fr_007_openhop": {
+        "functions": 50,
+        "safeguard": 35,
+        "truth_hits": "5 个真值位置（flowRoutes + FlowStore.save/get/delete/updateFlow），规则全是 Path Traversal",
+        "engine_record": "pre 5 / post 0"
+      },
+      "fr_016_redocly": {
+        "functions": 458,
+        "safeguard": 84,
+        "truth_hits": "4 处（Path Traversal ×3 + No Input Sanitization ×1）",
+        "engine_record": "pre 7 / post 0"
+      },
+      "verdict": "**增量召回 = 0**。清单的真值命中全部落在 Path Traversal，而 Path Traversal 引擎已有（3.7.26 接通）。清单多出的维度（Authorization/Input Validation/Password Hashing/TLS/Rate Limiting）在两个真值样本上零贡献、只贡献噪声",
+      "precision": {
+        "fr_007": "5/35 ≈ 14%",
+        "fr_016": "4/84 ≈ 5%"
+      }
+    },
+    "decision": "**不整体接**（30 倍告警 + 零增量）。继续走能力化路线：按 path_traversal 模式为引擎缺的维度造阳性标记 + 引擎消费分支，用 fr-corpus 验收。第一个补 Authorization",
+    "trap_found": "auth_machinery / input_schema 是**抑制型**标记，引擎里没有阳性规则可被抑制 ⇒ 单独接抑制标记毫无作用，必须成对做（阳性规则 + 抑制标记）。与 path_traversal（纯阳性）不同",
+    "correction_to_prev_round": "§二十三 暗示『清单≈研究遗留、价值可疑』是错的：清单有真值召回能力且在 fr-007 上与引擎等价；问题不是没用，是与引擎重合、无增量",
+    "methodology": "新增 R33（增量召回，不是绝对召回）"
+  },
+  "exposed_channel_2026_09_22": {
+    "status": "**不按字面实现**——实测增量是负的；顺序调整为 语料补形 → exposed 通道 → 规则侧校准",
+    "channel_audit": {
+      "rule_side_usage": "只在 paramGated 一个门里当放行条件（protocol-detector.ts:1261 `if (!hasIdentity && !exposed) continue;`），不参与 trigger",
+      "computed_by": "调用方自算：batch-scan.ts / fp-pool-scan.ts / batch-scan-python.ts",
+      "web_handler_regex": "\\b(handle_request|handleRequest|request_handler|requestHandler)\\b —— 只认 4 个名字",
+      "semantics": "**语义方向反了**：exposed = 被 handler 调用的下游函数；而 F 轮要恢复的 handleSubmit 是入口/分发器（上游）",
+      "real_coverage": {
+        "ts_blind_1543_funcs": "1110 exposed（72%）—— generated 语料人人叫 handleRequest",
+        "fp_pool_199_funcs": "**仅 1 条 exposed（0.5%）**",
+        "docmost_slice": "真实 @Controller( 8 个、@Get/Post/Put/Patch/Delete( 38 个，旧词表命中 **0**"
+      }
+    },
+    "variants_replayed": {
+      "D": "exposed ⇒ trigger 回退 effectiveCalls（字面做 exposed 通道）",
+      "E": "ownName 不命中时，若存在不在本项目函数集合内的触发源 ⇒ 触发（更精确的替代）",
+      "self_verify_R31": [
+        [
+          "handleSubmit + commentRepo.createComment",
+          "0",
+          "0",
+          "**1** 恢复边界 ✓"
+        ],
+        [
+          "handleRequest + createEvent(在集合)",
+          "0",
+          "0",
+          "0 保住 F 轮 ✓"
+        ],
+        [
+          "handleRequest exposed=true",
+          "0",
+          "**1** 倒退",
+          "0"
+        ],
+        [
+          "createPost",
+          "1",
+          "1",
+          "1 ✓"
+        ]
+      ],
+      "replay": {
+        "ts_blind": "基线 242 → D 317(+75) / E 311(+69)",
+        "fp_pool": "基线 59 → D 60(+1) / E 68(+9)"
+      },
+      "added_composition": "两个变体的 ADDED 全是同一批：authenticate 23 / registerNewUser 22 / doLogin 22 = **F 轮已判定的 createHash 误报 69 条**；目标形状（handleSubmit 类）**0 条**",
+      "why_E_also_failed": "createHash 是库函数，天然满足『不在项目函数集合内』⇒ 被当成『没人替它报的创建函数』。库函数 create* 前缀 vs 真实内容创建，光靠集合内外分不开（F 轮 RISKY_EXTERNAL 的老问题）",
+      "baseline_fidelity": "基线重放 IV=242，与盲测实测一致 ⇒ R29 保真度**第三次**确认"
+    },
+    "verdict": "按 R33（增量召回）：两个变体增量都是**负的**（+69~75 全是已知误报回归，目标形状 0 条）⇒ 不做",
+    "order_change": {
+      "from": "exposed 通道 → 语料补形 → 规则侧校准",
+      "to": "**语料补形 → exposed 通道 → 规则侧校准**",
+      "reason": "exposed 通道的验收依赖真实 TS web 形状语料；没有形状就看不到收益、只会看到 69 条误报回来 ⇒ 补形是 exposed 的**前置**不是后续"
+    },
+    "corpus_shapes_needed": [
+      [
+        "NestJS Controller + HTTP 装饰器",
+        "E2 装饰器空过",
+        "@Controller('x') + @Post() + @UseGuards(JwtAuthGuard)"
+      ],
+      [
+        "DTO + 校验装饰器",
+        "E3 DTO 空过",
+        "class CreateXDto { @IsString() @MinLength(1) name }"
+      ],
+      [
+        "类方法作为入口",
+        "类方法轴空过",
+        "class XController { @Post() async create(@Body() dto) }"
+      ],
+      [
+        "分发器：入口名不含 create，把入参交给外部 create",
+        "F 轮已知边界",
+        "handleSubmit(input){ commentRepo.createComment(input) }"
+      ]
+    ],
+    "r23_disposition": "不再记第五次空过注记（按发布方意见）；补形完成前，触及上述四种形状的改动盲测一律视为**不可验证**，以 FP 池真实切片或新建定向语料为准"
+  },
+  "shape_round_2026_09_22": {
+    "_what": "语料补形轮：把四种真实 TS web 形状钉进盲测语料（R35 的执行）",
+    "why": "R23 四次空过的同一根因 —— generated/ 里没有装饰器、没有类方法入口、没有分发器",
+    "measured_absence": {
+      "generated_projects": 116,
+      "files_matching_decorator_regex": 0,
+      "files_with_class_decl": 4,
+      "those_with_decorators": 0,
+      "note": "含 class 的只有 taintpath_B/H/I/K 四个文件，且全部无装饰器"
+    },
+    "corpus_added": {
+      "generator": "blind-benchmark/generate-projects-webshape.ts",
+      "gate": "blind-benchmark/check-webshape.ts（实时提取；目录缺失即失败）",
+      "expectations": "blind-benchmark/webshape-expectations.json（随语料落盘，禁止手改）",
+      "projects": {
+        "webshape_A": "NestJS Controller + HTTP 装饰器（E2 形状）5 例",
+        "webshape_B": "DTO + class-validator 校验装饰器（E3 形状）4 例",
+        "webshape_C": "类方法作入口（无框架，单独钉类方法轴）3 例",
+        "webshape_D": "分发器：入口名不含 create、创建在项目外（F/exposed 形状）6 例"
+      },
+      "cases_total": 18
+    },
+    "reverse_verification": {
+      "cuts": 4,
+      "all_precise": true,
+      "residual_REVERSE_VERIFY": 0,
+      "note": "CUT-4/CUT-5 首次转红范围大于手列期望 —— 是期望集漏项（ArchiveService.extract / handleSubmit 也声明了 none），机制无误。升 R34"
+    },
+    "gates": {
+      "tsc": "0 错",
+      "taintpath": "160/160",
+      "fr_007": "pre 5 / post 0",
+      "fr_016": "pre 7 / post 0",
+      "webshape": "18/18",
+      "targeted_vitest": "201/201",
+      "batch_scan_drift": "既有 111 项目 LOST 0 / 内容漂移 0；新增 21 条全部落在 webshape_*",
+      "batch_scan_total": "3026 → 3044",
+      "fp_pool_after_shape_and_lang_fix": "8 切片 / 573 文件 / 281 函数 / 414 条违规 / 未归因 44.0%"
+    },
+    "decisive_measurement": {
+      "question": "§二十五 变体 E 在真实形状上到底恢复什么、付出什么",
+      "variant_E_ADDED_blind": 72,
+      "breakdown": {
+        "createHash_cluster_FP": 69,
+        "handleHash_FP": 1,
+        "handleSubmit_TP": 1,
+        "handleSubmitPathChecked_TP": 1
+      },
+      "variant_E_ADDED_fp_pool": 9,
+      "fp_pool_trigger_sources": [
+        "addDays",
+        "createHmac",
+        "createSessionAndToken",
+        "addContentTypeParser",
+        "createHash",
+        "addrToString",
+        "createInterface",
+        "createExpressServer"
+      ],
+      "verdict": "真实代码上增量召回 0、精度 -9 ⇒ 按 R33 不做"
+    },
+    "why_no_discriminator": {
+      "by_name": "FP 池 9 个触发源全是库/框架调用，是开放集合，词表堵不住（打地鼠）",
+      "by_argument_taint": "AuthService.login → createSessionAndToken(user) 同样是形参传入，与 commentRepo.createComment(input) 分不开",
+      "by_receiver": "理论可行（obj.createX = 领域仓库 vs 裸 createX = 库函数），但 extractDirectCalls 当前把接收者丢掉（fs.readFileSync → readFileSync），需改提取器，波及 23 个标记与 111 项目 ⇒ 不擅自做"
+    }
+  },
+  "pool_repair_2026_09_22": {
+    "_what": "规则侧校准的前置检查：池里有 1/6 是死的，且两个 TS 基准工具的 language 是断的",
+    "dead_slice": {
+      "repo": "gothinkster-node-express-realworld-example-app",
+      "before": {
+        "files": 37,
+        "functions": 0,
+        "safeguard": 0,
+        "perFunction": 0
+      },
+      "after": {
+        "files": 37,
+        "functions": 31,
+        "perFunction": 13,
+        "violations": 18
+      },
+      "root_cause_1_fetcher": "fp-pool-fetch.py 只保留 `tsconfig.json`（第 128 行 `elif fn in (\"package.json\", \"tsconfig.json\")`），把 solution 风格仓库的 tsconfig.app.json / tsconfig.spec.json 丢了 ⇒ references 全被过滤",
+      "root_cause_2_extractor": "extract-ir 在 tsconfig 纳入 0 个源文件时**静默**返回 0 函数，不报错也不告警",
+      "why_dangerous": "0 与「干净」长得一样 ⇒ 死切片以「0 违规」参与全池统计，污染所有占比的分母；产品侧同理：用户扫这种仓库得到「无发现」"
+    },
+    "fixes": {
+      "extract_ir_zero_source_fallback": {
+        "file": "src/extract-ir.ts",
+        "what": "project 无源文件时回退为全目录 glob（**/*.ts + **/*.tsx）并打 stderr 告警",
+        "blast_radius": "只在「一个源文件都没有」时触发 ⇒ 115 个 generated 项目实测 0 次误触发，盲测 LOST 0 / 漂移 0 / ADDED 0、总数 3044 不变",
+        "reverse_verify": "摘掉兜底 ⇒ gothinkster 精确回到 0 函数；残留 0、源文件逐字节还原"
+      },
+      "fetcher_keep_tsconfig_variants": {
+        "file": "blind-benchmark/fp-pool-fetch.py",
+        "what": "改前缀匹配 `tsconfig*.json`（原来只认 `tsconfig.json`）"
+      },
+      "language_gate_in_ts_harnesses": {
+        "files": [
+          "blind-benchmark/batch-scan.ts",
+          "blind-benchmark/fp-pool-scan.ts"
+        ],
+        "what": "detectSafeguardViolations 的第三参 language 由 undefined 改为 \"typescript\"",
+        "why": "language=undefined ⇒ activeRules 退化为全部规则，Python 专属（Context Manager Usage / Pickle / Command Injection …）与 C 专属规则会套在 TS 上；batch-scan-python.ts 一直传 \"python\"，只有 TS 侧漏了",
+        "measured_effect": "TS 盲测 115 项目差 0；FP 池精确少 5 条（全部 Context Manager Usage，落在 TS 的 WebSocket gateway 与 OIDC controller 上）"
+      }
+    },
+    "pool_growth": {
+      "6_slices_repaired": "212 函数 / 308 违规 / 未归因 43.5%",
+      "7_slices_hedgedoc": "245 函数 / 366 违规 / 未归因 46.7%",
+      "8_slices_hoppscotch": "281 函数 / 414 违规 / 未归因 44.0%",
+      "hedgedoc": {
+        "files": 97,
+        "fns": 136,
+        "hits": 37,
+        "fallback_fired": true
+      },
+      "hoppscotch": {
+        "files": 89,
+        "fns": 205,
+        "hits": 43,
+        "fallback_fired": false
+      },
+      "note": "hedgedoc 若无零源文件兜底同样会是 0（solution 风格 tsconfig，references 被抓取器剥离）"
+    },
+    "saturation_verdict": {
+      "r25_criterion_1_leads_within_5pp": "✓ 最大漂移 L4 +3.1pp（修复前这里是 +6.7 / −5.5）",
+      "r25_criterion_2_unattributed_not_rising": "△ 43.5 → 46.7 → 44.0，两步净 +0.5pp、最后一步下降；对比历史：5→6 片时 +27.7pp、6→7 时 +3.2pp",
+      "verdict": "接近达标但尚未稳定 ⇒ 本轮**仍未开始改规则**，只做零风险的口径/工具修复 + 归因补齐",
+      "why_hard_to_saturate": "未归因集中在 session / password / registration / token 族（Session No Timeout 12、Registration 9、Password Hashing 17、Token Weak Gen 5…），而 L1–L10 线索清单当初是从「Data Mutation + Input Validation」两族归纳的 ⇒ **线索清单有覆盖盲区时，靠扩池永远达不到判据②**"
+    },
+    "new_lead_candidates_not_yet_implemented": {
+      "L11_framework_mechanism_implementor": {
+        "size": "12 条 / 3.3%（其中 JwtAuthGuard.* 7 条）",
+        "example": "docmost/JwtAuthGuard.handleRequest 被判 Authorization (Unauthenticated Access/Mutation) —— 守卫的**实现体**被判「缺鉴权」，是 E2 的另一面：E2 让「被 @UseGuards 装饰」认到鉴权，而这里「装饰器的提供者本人」没人认",
+        "note": "isAuthFunction 只对 `rule.category === \"authorization\"` 生效，且按函数名单词匹配；类名部分（JwtAuthGuard）不参与 ⇒ 需要先确认改动面再动"
+      }
+    }
+  },
+  "attribution_completion_2026_09_23": {
+    "goal": "规则侧校准第一步：只做归因补齐（零风险），不改任何规则",
+    "correction_of_last_round": {
+      "wrong_claim": "上一轮报『language 门修正后 FP 池精确少 5 条』",
+      "truth": "那是离线重放的**预测**。实测结果文件修正前后都是 419 条、Context Manager Usage 都是 5 条 ⇒ 上一轮全池重扫没有真正写入",
+      "this_round": "真跑全池重扫：419 → 414，少的正是 5 条 Context Manager Usage，残留 0",
+      "lesson": "离线重放（R29）给的是预测不是实测；它绕过了『结果文件有没有真被重写』这段链路"
+    },
+    "pool": {
+      "slices": 8,
+      "violations": 414,
+      "functions": 281,
+      "context_manager_usage_remaining": 0
+    },
+    "attribution_schema_v2": {
+      "suppress_candidates_L": "计入收益上限；有判据、可实施、误伤可控",
+      "true_positive_shapes_T": "**不计入**上限；作用是反向护栏，防止以后被当 FP 改掉",
+      "unattributed": "既非 L 也非 T。**只认形态、没认出抑制手段的，仍算无归属**",
+      "why": "未归因下降有两条路：真理解了 / 把不知道改名成新线索。后者是自欺，会让收益上限虚高",
+      "result": "187 → 102 条（44.6% → 24.6%），且是在剔除真阳性形态的更严格分母下"
+    },
+    "new_leads": {
+      "L11-registerDecorator词义歧义": {
+        "hits": 3,
+        "risk": "极低",
+        "falsification": "NoUrls 的 calls 只有 registerDecorator/test/containsDomain；摘掉 registerDecorator 后 3 条违规全消失",
+        "mechanism": "identifierParse 把 registerDecorator 切成 ['register','Decorator']，'register' 命中密码哈希/注册规则 trigger"
+      },
+      "L12-前端API客户端不是后端主体": {
+        "hits": 15,
+        "risk": "低",
+        "falsification": "registerGuest 的 calls 是 sendRequest/asParsedJsonObject（PostApiRequestBuilder），源码确认只发 HTTP",
+        "criterion": "路径含 frontend/；实施时宜叠加『calls 含 sendRequest/fetch/axios』"
+      },
+      "L13-配置构造器装配方法": {
+        "hits": 27,
+        "risk": "中",
+        "falsification": "ConfigBuilder.addPackageAccess 的 calls 是空数组，纯靠 triggerOwnNameOnly 的函数名触发",
+        "criterion": "类/文件含 Config|Builder|Options|Settings + add*/set*/with*；需叠加『不接收外部输入』"
+      }
+    },
+    "verification": "三条新线索共 45 条，逐条人工核验零误标（L11 3/3、L12 15/15、L13 27/27）",
+    "conflict_detection": {
+      "found": 3,
+      "cases": "GroupService.createGroup / ApiTokenService.createToken / AdminService.createATeam",
+      "both": "L=[L7-工厂装配] 与 T=[T1-业务服务写入] 同时命中",
+      "adjudication": "回源码：createGroup 收 CreateGroupDto、createATeam 调 teamService.createTeam ⇒ 都是真业务创建",
+      "action": "L7 判据收紧（排除 Service/Repo/Controller/Resolver）；冲突归零，T1 26 → 29",
+      "meaning": "L7 此前把 3 条真阳性算进了自己的收益上限（虚高）"
+    },
+    "saturation": {
+      "schema_guard": "快照加 schema 字段；跨口径时 --check-saturation 报『本次比较无效』",
+      "criterion_1": "L4 +9.8pp（22.1% → 31.9%）、L6 −5.9pp，均超 5pp ⇒ 未达标",
+      "verdict": "仍未饱和 ⇒ **本轮一条规则都没改**，L11/L12/L13 只登记不实施"
+    },
+    "source_fix": {
+      "file": "src/protocol-detector.ts",
+      "issue": "identifierParse 里嵌着两个字面 NUL 字节，导致 ripgrep 把源文件判成二进制并**提前截断搜索**（本次漏看了 SAFEGUARD_RULES 的多处命中）",
+      "fix": "改为 \\x00 转义；语义等价（实测 registerNewUser → ['register','New','User'] 不变）；src/dist 同步",
+      "diff": "1 行"
+    },
+    "gates": {
+      "tsc": "0 错",
+      "taintpath": "160/160",
+      "webshape": "18/18",
+      "batch_scan": "LOST 0 / 漂移 0 / ADDED 0 / 3044 不变"
+    },
+    "new_rules": [
+      "R37-互斥判据必须做冲突检测",
+      "R38-口径变更后跨版本不可直接比较"
+    ]
+  },
+  "e4_body_evidence_2026_09_23": {
+    "motivation": "用户质疑 jev 后重新定位：我们缺的是信息（判据看不见函数体），不是语义理解",
+    "evidence_criteria": {
+      "A_limits_option": "limits:{...} 且块后 140 字符内含 fileSize|maxFileSize|files|fields|parts",
+      "B_reject_on_empty": "if (!x) throw <HTTP/校验类异常>",
+      "B_excluded_counterexamples": [
+        "AttachmentService.uploadFile 抛 NotFoundException = 存在性校验，不算",
+        "ducktors/createS3 抛裸 Error('...required') = 环境配置校验，不算"
+      ],
+      "not_implemented": "候选 C（校验库调用）与 D（mime 白名单）在 112 条上命中均为 0，无证据支撑的机制不进代码"
+    },
+    "implementation": {
+      "extract_ir": "inputGuardFunctionKeys(project, absRoot) AST 预扫（函数声明/类方法/变量箭头）→ 注入 __progmune_input_guard__，与 E3 同一处收口",
+      "protocol_detector": "Input Validation 的 safeguard 增加接受位，不进 trigger",
+      "r28_name_check": "行为验证（25 个典型函数名跑 detectSafeguardViolations）⇒ 只压 Input Validation，命名安全"
+    },
+    "corpus": {
+      "added": "webshape_E 5 条：uploadAvatar(压)/uploadBanner(报)/uploadIcon(报)/uploadThumb(报)/uploadCover(对照不报)",
+      "why_both_sides": "抑制类机制只写「该压的」⇒ 无条件抑制也能全绿；必须同时钉住反面（R19）",
+      "gate_change": "check-webshape.ts 扩展 reportRules / suppressRules 期望维度"
+    },
+    "reverse_verify": {
+      "CUT-A_extract_side_off": "转红 1（uploadAvatar）✓",
+      "CUT-B_rule_side_off": "转红 1 ✓",
+      "CUT-C_unconditional_inject": "转红 4 ✓（第一版期望 3 条报 BAD — 我的推导漏了 none:input_guard，R34 第二次同形）"
+    },
+    "gates": {
+      "tsc": "0 错",
+      "taintpath": "160/160",
+      "webshape": "23/23",
+      "fr_007": "pre 5 / post 0",
+      "fr_016": "pre 7 / post 0",
+      "targeted_vitest": "201/201",
+      "batch_scan": "LOST 0 / 漂移 0 / ADDED 5（全在 webshape_E）| 3044 → 3052",
+      "fp_pool": "412 → 407（净 -5，新增 0）"
+    },
+    "suppressed_5_attributed": [
+      "docmost/AttachmentController.uploadFile — limits + !pageId 抛 BadRequest（上一轮确证的错判）",
+      "docmost/AttachmentController.uploadAvatarOrLogo — 同上 + 类型白名单",
+      "gothinkster/createArticle — !title/!description/!body 抛 HttpException(422)",
+      "gothinkster/addComment — !body 抛 HttpException(422)",
+      "gothinkster/createUser — !email/!username/!password 抛 HttpException(422)"
+    ],
+    "note": "后 3 条不在预测内：临时探针用文本抓函数体漏了 `export const x = async () =>` 形态 ⇒ 预测 2 < 实测 5。已逐条源码确证为正确压制",
+    "assessment": "收益小（占池 1.2%）但确证。池里 Input Validation 的多数误报是词形误触发（verdaccio ConfigBuilder.add* 纯配置装配，函数体确实没校验），属 L13 地盘，本通道不该也压不掉",
+    "new_rule": "R41（先区分缺信息还是缺语义）"
+  },
+  "e5_input_effect_2026_09_23": {
+    "motivation": "E4 收尾时记的「后续可在同一通道加证据类型（白名单 includes / 校验库调用）」—— 先用不会漏形态的 AST 探针重查，命中只有 2/75（且其中 1 条是 body( 的假阳性），真实收益 ≈1 条，撑不起一轮机制 ⇒ 转向找病根",
+    "probe": {
+      "tool": "blind-benchmark/probe-body-evidence.ts（ts-morph AST，只加载命中文件避免 OOM）",
+      "why_ast": "§三十 用文本脚本抓函数体，漏了 export const x = async () => 形态，gothinkster 3 条不在预测内 ⇒ 它报的「命中 0」不可信",
+      "coverage": "75 条全部解析成功（未解析 0）",
+      "finding_1": "75 条里 62 条（83%）完全没有请求入口迹象（无装饰器、无 req/ctx、无路由注册）",
+      "finding_2": "C/D 两类证据命中 2/75，其中 hoppscotch 那条是 body( 的假阳性 ⇒ 真实 1 条"
+    },
+    "toxicity_check": {
+      "candidate": "「非入口 ⇒ 不报」",
+      "verdict": "有毒，弃用",
+      "counterexamples": [
+        "docmost CollabHistoryService.addContributors（verified TP）：async addContributors(pageId, userIds) 只判 length===0 就 redis.sadd",
+        "docmost LabelService.addLabelsToPage（verified TP）：names: string[] 只 trim 就 findOrCreate",
+        "hedgedoc ApiTokenService.createToken（verified TP）",
+        "hoppscotch AdminService.createATeam（verified TP）"
+      ],
+      "product_stance": "Service 层方法虽不直接拿 req，但参数是从 Controller 透传的外部输入 ⇒ 组件边界不是输入校验的豁免条件。区分点在「参数流向」，不在「入口形态」"
+    },
+    "criterion": {
+      "chosen": "粗判据：函数体里存在外部副作用调用（ORM/缓存/出站/文件/委托/链式，S1-S7）",
+      "rejected": "精化判据（副作用调用必须吃到本函数参数）：FP 压制 91.2% 更高，但丢 4 条真报（召回 76.5%）⇒ 漏报比误报贵",
+      "gold_quantification": "TP 召回 100%（17/17，丢 0）／FP 压制 77.2%（44/57）／precision 23.0%→56.7%／净收益 44／多数类基线 77.0%",
+      "regex_sync": "src/extract-ir.ts 的 INPUT_EFFECT_PATTERNS 与 probe-body-evidence.ts 的 EFFECT 表逐字一致，改一处必须改另一处（R38）"
+    },
+    "implementation": {
+      "extract_ir": "inputEffectFunctionKeys(project, absRoot) AST 预扫 → 注入 __progmune_input_effect__，与 E3/E4 同一处收口",
+      "protocol_detector": "Input Validation 加 requireMarker + requireMarkerLanguages:[typescript,javascript]",
+      "r42": "标记只由 TS 提取器产出，Python 侧不产出任何 __progmune_* ⇒ 不限定语言会让 Python 侧静默归零，而四门全是 TS 语料看不见"
+    },
+    "pitfalls_hit": [
+      "S5 大小写敏感：webshape_E 的 repo.saveBanner(file) 不匹配大写前缀版 ⇒ 该报的 3 条被压，闸门当场转红（大小写不敏感修复）",
+      "定向测试喂裸 calls：src/extract-ir-taint-structural.test.ts 7 条直接调 detectSafeguardViolations，不经过提取器 ⇒ 加 requireMarker 后一起静默转红",
+      "CUT-A 期望漏维度：只算 reportRules 忘了 have 标记维度，少推导 uploadDraft（R34 第三次同形踩坑）"
+    ],
+    "corpus": "webshape_F（6 条，正反两面）：该报=repo.save/db.insertInto/fetch；不该报=纯内存 push / 工厂 return new X() / 已 validateContent",
+    "gates": {
+      "tsc": "0 错",
+      "taintpath": 160,
+      "webshape": 29,
+      "fr_007": "5-0",
+      "fr_016": "7-0",
+      "targeted": "212 passed（原 201 + E5 组 11）",
+      "reverse_verify": "三刀 PASS（CUT-A 转红 7 / CUT-B 2 / CUT-C 2，还原后 0）",
+      "blind": "perFunction 3052 → 2841；LOST 216 全为 Input Validation（合成 demo 为内存实现、无 sink），ADDED 5（3 条在 webshape_F）；其余 19 条规则零漂移",
+      "fp_pool": "409 → 364；Input Validation 75 → 30；verified TP 6 条全保留、heuristic TP 11 条全保留；verified FP 29 条全压掉；heuristic FP 压 15 留 13"
+    }
   }
- },
- "e3_round_2026_09_22": {
-  "version": "3.7.50",
-  "claim": "Input Validation 的 safeguard 此前不接受任何 __progmune_* 标记（纯词形匹配）⇒ DTO 里的校验对规则不可见（R27：证据通道断着）",
-  "fix": {
-   "extractor": "src/extract-ir.ts 新增 validatedDtoClassNames(project) 预扫 + 主循环后统一注入 __progmune_input_schema__（按入参类型判定，覆盖全函数形态）",
-   "rule": "protocol-detector.ts Input Validation 的 safeguard 追加接受分支；只加抑制位，不进 trigger"
-  },
-  "marker_naming_trap": {
-   "first_name": "__progmune_validated_input__",
-   "collision": "被 Data Integrity (Foreign Key) 的 safeguard \\b(...|validate|...)(?:[A-Z]\\w*|_\\w+)\\b 命中（validate + d_input__）⇒ 凭空压掉 10 条无关违规",
-   "final_name": "__progmune_input_schema__",
-   "rule_of_thumb": "标记名不得含 get/find/check/verify/validate/create/add/post/upload 等动词词根"
-  },
-  "measured": {
-   "docmost_real_rescan": {
-    "input_validation": "39 → 24 (-15)",
-    "added": 0,
-    "other_rules": 0
-   },
-   "pool_wide_offline_replay": {
-    "input_validation": "112 → 95 (-17)",
-    "added": 0,
-    "other_rules": 0
-   }
-  },
-  "replay_fidelity": "离线重放预测的 -15 与真实重扫逐条一致",
-  "gates": {
-   "tsc": "✓ 零错误",
-   "taintpath": "✓ 160/160",
-   "fr_007": "✓ pre5/post0",
-   "fr_016": "✓ pre7/post0",
-   "targeted_tests": "✓ 187 全绿（+11 E3 组）",
-   "reverse_verify": "✓ 两刀（拆规则接受位 / 关提取器发射）各自精确回到 39，残留 0",
-   "ts_blind_scan": "3201 → 3201，逐函数差异 0 —— **空过**：generated 语料校验装饰器命中数 = 0（R23 家族第四次）"
-  },
-  "next_candidates_measured_not_implemented": {
-   "variant_A_trigger_own_name_only": {
-    "what": "Input Validation 的 trigger 只认函数名，不再被被调用的 create*/add* 触发",
-    "pool": "112 → 64 (-48)",
-    "blind": "417 → 242 (-175)",
-    "risk": "175 条 LOST 需逐条判定；样本里 registerNewUser/doLogin 等是可能的真阳性损失 ⇒ 未实现，交裁决"
-   },
-   "variant_C_A_plus_B": "pool 112 → 59 (-52)"
-  }
- },
- "f_round_2026_09_22": {
-  "version": "3.7.51",
-  "claim": "Input Validation 的 trigger 拿 callee 名字去匹配，而规则的陈述对象是「这个函数自己是不是内容创建函数」⇒ 两类缺陷：重复投射 + 理由错（createHash）",
-  "decision": "上一轮把变体 A 列为裁决项（-175 可能有真阳性损失）；本轮逐条判完，175 条全部可解释、无一真阳性 ⇒ 做",
-  "attribution": {
-   "blind_175": {
-    "handleRequest_SAFE_DUP": 100,
-    "createHash_wrong_reason": 69,
-    "list_get_queries": 6
-   },
-   "pool_37": {
-    "SAFE_DUP": 7,
-    "COVERED_OTHER": 3,
-    "RISKY_EXTERNAL": 27
-   },
-   "pool_27_trigger_sources": "createQueryBuilder / createTable / createEntityManager / createDatabaseConnection / createTarballHash / createRelativePositionFromJSON(Yjs) / createForUser(CASL 权限工厂) / addContributors / createLocation / addUniqueIdsToDoc —— 无一为「handler 交用户输入给内容创建」"
-  },
-  "fix": "新增规则字段 triggerOwnNameOnly（trigger 只匹配 enclosing function 自身名字），Input Validation 开启；其余规则不变",
-  "measured": {
-   "ts_blind_scan": {
-    "input_validation": "417 → 242 (-175)",
-    "added": 0,
-    "other_rules": 0,
-    "per_function_diff": 175
-   },
-   "pool_docmost_real_rescan": {
-    "input_validation": "24 → 14 (-10)",
-    "added": 0,
-    "other_rules": 0
-   },
-   "pool_wide_offline_replay": {
-    "input_validation": "97 → 60 (-37)"
-   }
-  },
-  "replay_fidelity": "第二次验证：重放预测的 175 条与真实重扫 LOST 名单逐条一致；docmost 10 条亦一致",
-  "gates": {
-   "tsc": "✓ 零错误",
-   "taintpath": "✓ 160/160",
-   "fr_007": "✓ pre5/post0",
-   "fr_016": "✓ pre7/post0",
-   "targeted_tests": "✓ 201 全绿（+14 F 组）",
-   "reverse_verify": "✓ 两刀各自精确回到 24，残留 0",
-   "ts_blind_scan": "不再是空过（-175）"
-  },
-  "known_gap": "函数名不含 create/add/post/upload 但确实是「入口把用户输入交给内容创建」的函数不再报（175 条里此类 0）。补回需 exposed 通道，按 R27 先查通道",
-  "self_injury": "变体构造漏了 replace 一行 ⇒ 变体恒等于基线 ⇒ 首次测得 0 变化（升 R31）"
- },
- "channel_audit_2026_09_22": {
-  "trigger": "F 轮待办①：补回入口函数需 exposed 通道，按 R27 先查通道",
-  "exposed_answer": "exposed/params 只由 blind-benchmark 的 batch-scan.ts / fp-pool-scan.ts / batch-scan-python.ts 传入；protocol-detector 自带 CLI 的 validateCombined 只传 2 个参数 ⇒ paramGated / parentRefGated / strictSafeguards 在这些路径上全部失效",
-  "bigger_finding": "SAFEGUARD_RULES 不被 TS 产品调用。src 内引用方仅 python-benchmark.ts（自带 CLI，无模块调用）、protocol-detector.ts 自带 CLI、compliance-scorer.ts（仅第 14 行注释）、测试；其余全在 blind-benchmark/",
-  "product_evidence": {
-   "mcp_entry": "dist/mcp-server.mjs（main+bin，66KB）require 列表不含 protocol-detector",
-   "trust_engine": "src/trust/*.ts 无 protocol-detector 引用、无 safeguard 字样；走 protocol-domain-validator + frameworks",
-   "dist_scan": "dist/protocol-detector.js 是全仓唯一含 'Input Validation' 字符串的产物",
-   "positive_test": "npx tsx src/trust/cli.ts blind-benchmark/generated/blog --json ⇒ 仅 1 条 protocol 状态机违规（logout 状态错），无 Input Validation / Authorization"
-  },
-  "impact": [
-   "E2/E3/F 三轮改善的是基准口径误报率，不等于产品行为变化",
-   "FP 池（fp-pool-scan.ts 产出）的误报不代表产品误报",
-   "F 轮登记的「入口函数」已知边界只在基准口径上成立"
-  ],
-  "decision_needed": [
-   "是否漏看了 TS 产品扫描主路径？",
-   "SAFEGUARD_RULES 是否有意留作研究/基准用途？",
-   "若应接进产品 ⇒ 架构级改动，需单列一轮，并先回答「接上后产品会不会突然多出成百上千条告警」"
-  ],
-  "status": "未动代码，仅记录，交裁决",
-  "methodology": "新增 R32"
- },
- "sandbox_2026_09_22": {
-  "trigger": "§二十三 的三个待裁决问题，用户要求自己查、自己测、做成沙箱",
-  "q1_entry_audit": {
-   "method": "main/bin = dist/mcp-server.mjs（src/mcp-server.ts 1383 行，19 工具），逐个排查",
-   "progmune_audit": "src/audit.ts → auditDirectory = @progmune-generated 覆盖率审计（coverage<0.8 报警），不是安全扫描",
-   "progmune_check": "src/check.ts = 本仓库自检（IR 重提/tsc/SSG/ledger 不变量/指纹回放）",
-   "verdict": "没有漏看入口。产品安全判定 = trust 引擎"
-  },
-  "product_judgement_stack": {
-   "ir_markers": "engine.ts:1522 起，只消费 3 个：__progmune_path_traversal__ / __progmune_ssrf_user_url__ / __progmune_cross_user_write__",
-   "specific_checks": "protocol-domain-validator.ts SPECIFIC_VIOLATION_CHECKS 17 条，全部协议/密码学类（TLS/SSH/JWT/OCSP/DH/SRP/QUIC/PLAINTEXT_AUTH/PATH_TRAVERSAL…），无 Authorization / Input Validation",
-   "ssg": "protocols.json 74 状态 / 148 规则",
-   "two_use_file": "protocol-detector.ts 是两用：validateProtocolState 被 evidence-repository / knowledge-evolution / evidence-growth / knowledge-flywheel / progmune-status import（进产品）；detectSafeguardViolations 只被基准用"
-  },
-  "q2_intent": {
-   "introduced_by": [
-    "a8e42a03 2026-07-07 'Detector B deployed — Recall 74% → 85%'（A/B 实验、10 projects、recall/precision 测量）",
-    "9b1553d5 2026-07-17 'Phase 2-3: Research methodology freeze'（Research pipeline: FN→Root Cause→Capability Layer→ROI→Experiment→Decision）"
-   ],
-   "verdict": "不是『有意留作研究』的设计决策，是**研究产物 + 接线没做完**。区别很大：前者不该接，后者可以接",
-   "wiring_pattern_exists": "3.7.26/27/28 已用同一模式接通 path_traversal / cross_user_write / ssrf —— 提取器产标记 → 引擎 IR 层消费；CHANGELOG 明确写『protocol-detector.ts 同名规则供 source-level 路径』，即同一能力在两条路径各有一份，Authorization/Input Validation 属于『引擎那份还没写』"
-  },
-  "q3_sandbox": {
-   "method": "同一批项目分别跑产品路径（npx tsx src/trust/cli.ts <dir> --json）与清单口径",
-   "results": {
-    "blog": "产品 1（SSG_AUTH_STATE_VIOLATION，handleRequest 里 logout 顺序错，真阳性） vs 清单 32",
-    "banking_A": "1 vs 35",
-    "cms_A": "1 vs 27",
-    "docmost_real": "**0 vs 120**",
-    "fp_pool_6_slices": "318 条 / 215 函数",
-    "generated_111": "~111 vs 3201"
-   },
-   "verdict": "会多出成百上千条：约 **30 倍**；真实项目上是从 0 到 120（从无到有）"
-  },
-  "decisive_test_incremental_recall": {
-   "question": "多出来的这些，有没有产品报不出来的真值？",
-   "fr_007_openhop": {
-    "functions": 50,
-    "safeguard": 35,
-    "truth_hits": "5 个真值位置（flowRoutes + FlowStore.save/get/delete/updateFlow），规则全是 Path Traversal",
-    "engine_record": "pre 5 / post 0"
-   },
-   "fr_016_redocly": {
-    "functions": 458,
-    "safeguard": 84,
-    "truth_hits": "4 处（Path Traversal ×3 + No Input Sanitization ×1）",
-    "engine_record": "pre 7 / post 0"
-   },
-   "verdict": "**增量召回 = 0**。清单的真值命中全部落在 Path Traversal，而 Path Traversal 引擎已有（3.7.26 接通）。清单多出的维度（Authorization/Input Validation/Password Hashing/TLS/Rate Limiting）在两个真值样本上零贡献、只贡献噪声",
-   "precision": {
-    "fr_007": "5/35 ≈ 14%",
-    "fr_016": "4/84 ≈ 5%"
-   }
-  },
-  "decision": "**不整体接**（30 倍告警 + 零增量）。继续走能力化路线：按 path_traversal 模式为引擎缺的维度造阳性标记 + 引擎消费分支，用 fr-corpus 验收。第一个补 Authorization",
-  "trap_found": "auth_machinery / input_schema 是**抑制型**标记，引擎里没有阳性规则可被抑制 ⇒ 单独接抑制标记毫无作用，必须成对做（阳性规则 + 抑制标记）。与 path_traversal（纯阳性）不同",
-  "correction_to_prev_round": "§二十三 暗示『清单≈研究遗留、价值可疑』是错的：清单有真值召回能力且在 fr-007 上与引擎等价；问题不是没用，是与引擎重合、无增量",
-  "methodology": "新增 R33（增量召回，不是绝对召回）"
- }
 }

@@ -1,5 +1,24 @@
 # Changelog
 
+## [3.7.52] — 2026-09-23
+
+### 语料补形 + 两处基础设施修复 + E4/E5 两个确定性通道（§26-§31 合并发布）
+
+**语料补形（§26，R23 家族的处置而非第五条注记）**：`webshape_A..F` 六族钉进 generated/——NestJS 装饰器/DTO 校验/类方法入口/分发器/上传校验证据/副作用 sink 形状；`check-webshape.ts` 闸门（默认实时提取、语料缺失即硬失败）；期望表由生成器落盘（R7）；补形后 exposed 通道两变体的离线重放得以全量验证——增量召回 2 条真报 vs 70 条已知误报 ⇒ **exposed 通道按 R33 判不做**（做完也不划算，理由写死进设计稿 §25）。
+
+**基础设施两修（§27）**：
+- 死切片复活：solution 风格仓库的根 tsconfig 是容器 ⇒ 提取器 0 源文件静默通过（gothinkster 37 文件 0 函数污染所有分母）——修复=零源文件兜底回退 `**/*.ts` + stderr 告警（115 generated 项目 0 误触发）+ 抓取器保留 tsconfig 变体
+- language 门：TS 扫描一直传 undefined ⇒ activeRules 退化「全部规则」，Python/C 专属规则套在 TS 上（池少 5 条 Context Manager Usage）——batch-scan/fp-pool-scan 补 "typescript"
+- R36：产出 0 的环节必须自证扫到了东西；R37 判据冲突检测（当场逼出 L7 虚高 3 条真报）；R38 口径可比性；R39 gold 分层+多数类基线；R40 外部服务先无效凭据验证
+
+**E4（§30）：判据瞎，不是判据不准**（R41 缺信息 vs 缺语义）——`inputGuardFunctionKeys` 预扫函数体校验证据（limits:{…}+HTTP 异常抛掷）⇒ `__progmune_input_guard__`（只进抑制位）；webshape_E 5 条正反钉死；池 −5 条全部逐条确证（3 条在探针预测外——探针漏箭头常量形态）
+
+**E5（§31）：参数流向外部副作用的语义前置**（先量化再实现，R43）——`inputEffectFunctionKeys` + `requireMarkerLanguages`（R42：不限定语言 Python 侧该规则整体归零而四门看不见）；真值集预演：TP 召回 100%（17/17）、FP 压制 77.2%，粗判据取舍（丢真报比留误报贵）；池 409→364、IV 75→30、**verified TP 6/6 零丢失、verified FP 29/29 全压**；盲测 −216 全 IV=口径修正（generated 语料无真实 sink），webshape_F 补真实 sink 形状 3 条照常报
+
+**方法学累计**：R34（反向验证期望须由期望表推导，本轮第三次同形踩坑——推导逻辑应工具化）、R41-R43；fp-gold.jsonl 真值集入库（verified 53 条/12.8%——启发式不能当 gold 的实证）；jev 实验台（无 key，401 确认端点，ECE/多数类基线硬指标，绝不进扫描路径）
+
+**门**：build ✓ / taintpath 160/160 / webshape 29/29 / fr-007 pre5·post0 + fr-016 pre7·post0 / 定向 212 全绿 / 盲测 LOST 391 IV+1 已知 G2 项、ADDED 全在新语料 / 池 8 片 573 文件 IV=30 ✓
+
 ## [3.7.51] — 2026-09-22
 
 ### Input Validation 的 trigger 只认函数名：不再被 callee 拖下水（F 轮）

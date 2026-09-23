@@ -14,6 +14,21 @@ FP 观测池违规归因器 —— R21「动工前先量化收益上限」的量
   启发式打标【偏乐观】——它给的是**上限**，不是实际收益。真动手前必须逐条人工看。
   每条线索的**反面风险**（过度抑制 ⇒ 漏报）不在本脚本里，写在 leads 表的 risk 字段。
 
+⚠ 口径声明 v2（2026-09-23 加，别删）：
+  **「归因」不等于「该抑制」。** 未归因占比下降有两条路：①真理解了，找到了可操作的
+  类别；②把「不知道」改名成一条新线索。②是自欺 —— 收益上限会虚高，真动手时会发现
+  根本消不掉。所以本脚本把结果分成两组：
+
+    - **抑制候选（L 系列）**：有明确判据、可实施、误伤可控 ⇒ 计入收益上限
+    - **真阳性形态（T 系列）**：确认报得对，**不计入**上限。它的作用是反向护栏 ——
+      防止以后有人把它当 FP 改掉
+
+  「无归属」= 既非 L 也非 T。**只认出形态、没认出抑制手段的，仍算无归属。**
+
+  两组判据独立编写，可能在同一条目上同时命中（既「该抑制」又「不许改」）。这叫
+  **判据冲突**，脚本会单独计数并打印：冲突条目既不计入上限、也不计入形态，
+  必须人工裁决后才能归类 —— 各算各的会自相矛盾。
+
 用法：
     python3 blind-benchmark/fp-pool-attrib.py            # 全池
     python3 blind-benchmark/fp-pool-attrib.py --slice X  # 只看一个切片
@@ -53,6 +68,11 @@ REGISTRATION_RULES = {
     "Password Hashing", "Password Hashing (Weak)",
     "Registration Without Email Verification",
 }
+# 前端 API 客户端所在目录 —— 这些函数只是发 HTTP 请求，不是后端业务主体
+FRONTEND_PATH = re.compile(r"(^|/)frontend/|(^|/)client/|/web/src/|(^|/)webapp/", re.I)
+# 配置 / 构造器形态（类名或文件名）
+CONFIG_SHAPE = re.compile(r"(Config|Builder|Options|Settings)(?=[A-Z0-9]|\b)", re.I)
+BUILDER_METHOD = re.compile(r"^(add|set|with)[A-Z0-9]", re.I)
 INPUT_RULES = {
     "Input Validation", "No Input Sanitization",
     "File Upload Without Validation",
@@ -102,7 +122,72 @@ LEADS = {
         "idea": "框架自带的 ACL 词（verdaccio 的 allow / can / deny）没被认成鉴权 ⇒ 有鉴权却报『未鉴权 / 缺归属检查』",
         "risk": "低。补词表是纯增益，但要注意 allow/can 也可能是普通单词",
     },
+    "L11-registerDecorator词义歧义": {
+        "idea": "class-validator 的 `registerDecorator` 被 identifierParse 拆出『register』，当成用户注册 ⇒ 触发密码哈希/邮箱验证。已证伪：NoUrls 的 calls 只有 registerDecorator/test/containsDomain，摘掉 registerDecorator 后 3 条违规全消失",
+        "risk": "极低。纯词义歧义，且 registerDecorator 只有一个语义（注册校验装饰器）",
+    },
+    "L12-前端API客户端不是后端主体": {
+        "idea": "frontend/ 下的 API 客户端函数（registerGuest/logInGuest，calls 是 sendRequest/asParsedJsonObject）只是发 HTTP 请求，却被当成后端注册/登录主体",
+        "risk": "低。目录切分明确；但 monorepo 里 frontend/ 下若真有校验逻辑会误抑制 ⇒ 实施时宜叠加『calls 含 sendRequest/fetch/axios』",
+    },
+    "L13-配置构造器装配方法": {
+        "idea": "ConfigBuilder.add*() 只写自身 config 对象（无外部输入、无业务实体），被 triggerOwnNameOnly 的 add* 判成内容创建。已证伪：addPackageAccess 的 calls 是空数组，纯靠函数名触发",
+        "risk": "中。真配置校验方法也叫 add*/set* ⇒ 需叠加『不接收外部输入』（如无 req/body/DTO 形参）",
+    },
 }
+
+# ── 真阳性形态（登记，不是抑制候选）──────────────────────────────────────────
+# ⚠ 为什么单独列：见文件头「口径声明 v2」。把「不知道」改名成一条线索就能让
+#   未归因下降，但那是自欺 —— 收益上限会虚高，动手时会发现根本消不掉。
+#   这类条目的作用是【反向护栏】：确认它们是对的，防止以后被当 FP 改掉。
+SHAPES = {
+    "T1-业务服务写入方法": "Service/Repo 的 add*/create*（如 FavoriteService.addFavorite，calls=[insert]）真的在写业务数据 ⇒ 报 Input Validation 是对的",
+    "T2-子实体创建未验父": "Data Integrity 的 add*/create*（addAlias / createToken）真的创建子实体 ⇒ 报缺外键检查是对的",
+}
+
+# 口径版本。v1 = 只有抑制候选、未区分真阳性形态；v2 = 二分 + 剔除冲突。
+ATTRIB_SCHEMA = "v2"
+
+# ---- 真值分层（导出真值集时用）------------------------------------------
+# 【为什么必须分层】LEADS 里绝大多数是**启发式**打标，给的是收益「上限」，不是事实。
+#   L4(132) / L7(30) / L9(22) / L6(18) / L3(17) / L8(12) / L10(7) / L1(5) 从未逐条核验过。
+# 把启发式标签当 gold 去算「一致率」，等于拿猜测当标准答案 —— 判不一致时无法归因
+# （可能是 jev 错，也可能是启发式错）。所以每条必须带 gold_confidence。
+VERIFIED_FP_LEADS = {
+    "L11-registerDecorator词义歧义",   # 3 条，摘掉 registerDecorator 后违规全消失（决定性证据）
+    "L12-前端API客户端不是后端主体",     # 15 条，源码确认为 PostApiRequestBuilder，只发 HTTP
+    "L13-配置构造器装配方法",           # 27 条，ConfigBuilder.add* 的 calls 为空数组
+}
+# 人工看过源码、确认是真业务创建的条目（前一轮 L7/T1 判据冲突时裁决出来的）
+VERIFIED_TP_KEYS = {
+    "docmost/GroupService.createGroup":
+        "收 CreateGroupDto、带 trx 事务 ⇒ 真业务创建，不是工厂（2026-09-23 源码裁决）",
+    "hedgedoc/ApiTokenService.createToken":
+        "真创建 token（2026-09-23 源码裁决）",
+    "hoppscotch/AdminService.createATeam":
+        "调 teamService.createTeam ⇒ 真业务创建（2026-09-23 源码裁决）",
+    # ↓ 2026-09-23 jev 实验前补核（TP 侧太少，会导致「永远判 FP」的傻瓜基线也拿高分）
+    "hoppscotch/AdminResolver.createTeamByAdmin":
+        "GraphQL Mutation，@Args 收 userUid/name 后直接 adminService.createATeam，"
+        "函数体内无任何输入校验 ⇒ 报 Input Validation 是对的（源码确证）",
+    "w3tecch-express-typescript-boilerplate/PetResolver.addPet":
+        "@Arg('pet') pet: PetInput → new PetModel(); newPet.name = pet.name; newPet.age = pet.age "
+        "直接赋值后 create，全程无校验 ⇒ 报 Input Validation 是对的（源码确证）",
+    "docmost/CollabHistoryService.addContributors":
+        "async addContributors(pageId, userIds) 只判 userIds.length===0 就 redis.sadd，"
+        "无任何内容校验 ⇒ 报 Input Validation 是对的（源码确证）",
+    "docmost/LabelService.addLabelsToPage":
+        "收 names: string[]，只做 name.trim() 就 labelRepo.findOrCreate，无校验 ⇒ 报得对（源码确证）",
+}
+
+# 【核验 T1 时的实测记录，2026-09-23】抽查 10 条，**只有 2 条能确证为 TP**，其余存疑：
+#   - AttachmentController.uploadFile / uploadAvatarOrLogo：其实**已有**校验措施
+#     （req.file 的 limits:{fileSize,fields,files}、calls 里的 includes = mimetype 白名单）
+#     ⇒ T1 判据把它们当「缺校验」，属**判据噪声**，不可当 gold
+#   - AttachmentService.uploadToDrive：是 uploadFile 的内部实现，不是入口，形态更像 L6
+# ⇒ 这条记录本身就是「启发式标签不能当真值」的实证 —— 见设计稿 §二十九。
+# 整条线索都已核验的（目前没有 —— T1 的 29 条只有上面 3 条经过人工裁决）
+VERIFIED_TP_SHAPES = set()
 
 
 def tag(row: dict) -> list:
@@ -140,10 +225,17 @@ def tag(row: dict) -> list:
     ):
         tags.append("L6-内部私有工具方法")
 
+    # L7 的排除项（2026-09-23 由判据冲突裁决得出）：Service/Repo/Controller/Resolver
+    # 里的 create* 是**真业务创建**（如 GroupService.createGroup 收 CreateGroupDto、
+    # AdminService.createATeam 调 teamService.createTeam），不是工厂装配。
+    # 此前未排除 ⇒ L7 把 3 条真阳性算进了自己的收益上限。
+    biz_cls = re.search(r"(Service|Repo|Repository|Controller|Resolver)$",
+                        fn.split(".")[0] if "." in fn else "", re.I)
     if (
         rule in INPUT_RULES
         and FACTORY_NAME.search(fn.split(".")[-1])
         and not ENTRY_PATH.search(file_l)
+        and not biz_cls
     ):
         tags.append("L7-工厂装配函数不是内容创建")
 
@@ -159,7 +251,53 @@ def tag(row: dict) -> list:
     if calls & {"allow", "can", "deny"}:
         tags.append("L10-框架ACL词表缺口")
 
+    # L11：class-validator 的 registerDecorator 被拆出 "register" ⇒ 当成用户注册。
+    # 已证伪（2026-09-23）：摘掉该 call 后 NoUrls 的 3 条违规全部消失。
+    if "registerDecorator" in calls and rule in REGISTRATION_RULES:
+        tags.append("L11-registerDecorator词义歧义")
+
+    # L12：frontend/ 下的 API 客户端只是发请求，不是后端主体。
+    if FRONTEND_PATH.search(file_l):
+        tags.append("L12-前端API客户端不是后端主体")
+
+    # L13：Config/Builder/Options/Settings 的 add*/set*/with* 装配方法。
+    cls = fn.split(".")[0] if "." in fn else ""
+    base = fn.split(".")[-1]
+    if (
+        (CONFIG_SHAPE.search(cls) or CONFIG_SHAPE.search(file_l))
+        and BUILDER_METHOD.match(base)
+        and rule in INPUT_RULES
+    ):
+        tags.append("L13-配置构造器装配方法")
+
     return tags
+
+
+def tag_shape(row: dict) -> list:
+    """返回该违规所属的【真阳性形态】（只登记，不计入收益上限）。
+
+    与 tag() 分开的理由见文件头「口径声明 v2」：两者混在一起会让「未归因」
+    靠改名而下降，虚高收益上限。
+    """
+    fn = row["fn"]
+    rule = row["rule"]
+    cls = fn.split(".")[0] if "." in fn else ""
+    base = fn.split(".")[-1]
+    shapes = []
+
+    # T1：业务服务写入方法真的在写数据 ⇒ Input Validation 报得对
+    if (
+        re.search(r"(Service|Repo|Repository|Controller|Resolver)$", cls, re.I)
+        and re.match(r"^(add|create|post|upload|update)[A-Z0-9]", base, re.I)
+        and rule in INPUT_RULES
+    ):
+        shapes.append("T1-业务服务写入方法")
+
+    # T2：Data Integrity 报的子实体创建，形态正确
+    if rule == "Data Integrity (Foreign Key)":
+        shapes.append("T2-子实体创建未验父")
+
+    return shapes
 
 
 def main() -> int:
@@ -170,6 +308,8 @@ def main() -> int:
                     help="把本次读数存进 reports/fp-pool-attrib-history.json（R25 用）")
     ap.add_argument("--check-saturation", action="store_true",
                     help="比较最近两次快照，按 R25 判据判定池是否饱和")
+    ap.add_argument("--export-jsonl", default=None, metavar="PATH",
+                    help="导出真值集（每条一行 JSON），供 jev 实验消费")
     args = ap.parse_args()
 
     data = json.load(open(RESULTS))
@@ -188,13 +328,70 @@ def main() -> int:
                 )
     for r in rows:
         r["tags"] = tag(r)
+        r["shapes"] = tag_shape(r)
+
+    # ---- 导出真值集（供 jev 实验消费）------------------------------------
+    # 【关键】gold 必须分层：只有人工逐条核验过的条目才是 verified。
+    # 把启发式打标当 gold，等于拿猜测当标准答案 —— jev 与它不一致时无法归因
+    # （可能是 jev 错，也可能是启发式错）。所以置信度必须随条目一起导出。
+    if args.export_jsonl:
+        out = []
+        for r in rows:
+            # 用「列表非空」判有无线索，不能用独占 ——
+            # 命中多条线索的条目若按独占算，会被误归入 UNKNOWN（本次实测差 17 条）。
+            lead_list = list(r["tags"])
+            shape_list = list(r["shapes"])
+            lead = lead_list[0] if len(lead_list) == 1 else None
+            shape = shape_list[0] if len(shape_list) == 1 else None
+            key = f"{r['repo']}/{r['fn']}"
+            if lead_list and shape_list:
+                gold, conf, why = "EXCLUDED", "unlabeled", "判据冲突，待人工裁决"
+            elif lead_list:
+                # 只有「命中的全部线索都已核验」才算 verified；
+                # 混了启发式标签的条目不予升级（保守，防虚高）
+                if lead_list and set(lead_list) <= VERIFIED_FP_LEADS:
+                    gold, conf = "FP", "verified"
+                    why = f"{'+'.join(lead_list)} 已逐条人工核验（见设计稿 §二十八）"
+                else:
+                    gold, conf = "FP", "heuristic"
+                    why = f"{'+'.join(lead_list)} 仅启发式打标，未经逐条核验"
+            elif shape_list:
+                if key in VERIFIED_TP_KEYS or set(shape_list) <= VERIFIED_TP_SHAPES:
+                    gold, conf = "TP", "verified"
+                    why = VERIFIED_TP_KEYS.get(key, f"{'+'.join(shape_list)} 已核验")
+                else:
+                    gold, conf = "TP", "heuristic"
+                    why = f"{'+'.join(shape_list)} 仅判据匹配，未经逐条核验"
+            else:
+                gold, conf, why = "UNKNOWN", "unlabeled", "无任何线索命中"
+            out.append(dict(
+                id=key + "::" + r["rule"],
+                repo=r["repo"], fn=r["fn"], file=r["file"],
+                rule=r["rule"], calls=r.get("calls", []),
+                lead=lead, shape=shape,
+                gold=gold, gold_confidence=conf, gold_reason=why,
+                schema=ATTRIB_SCHEMA,
+            ))
+        with open(args.export_jsonl, "w", encoding="utf-8") as fh:
+            for o in out:
+                fh.write(json.dumps(o, ensure_ascii=False) + "\n")
+        import collections as _c
+        cc = _c.Counter((o["gold"], o["gold_confidence"]) for o in out)
+        print(f"\n[export] 已写出 {len(out)} 条 → {args.export_jsonl}")
+        for k in sorted(cc):
+            print(f"  {k[0]:<9}{k[1]:<10}{cc[k]:>4}")
+
+    # 判据冲突：同一条既被判「该抑制」又被判「不许改」⇒ 两组判据必有一个在猜。
+    # 各算各的自相矛盾，所以**先从两组里都剔除**，再统计。
+    conflict = [r for r in rows if r["tags"] and r["shapes"]]
+    ok = [r for r in rows if not (r["tags"] and r["shapes"])]
 
     total = len(rows)
     print(f"违规总数 {total}（{len({(r['repo'], r['fn']) for r in rows})} 个函数）\n")
 
     incl = collections.Counter()
     excl = collections.Counter()
-    for r in rows:
+    for r in ok:  # 冲突条目不进任何一组
         for t in r["tags"]:
             incl[t] += 1
         if len(r["tags"]) == 1:
@@ -208,9 +405,32 @@ def main() -> int:
             f"{name:<24}{incl[name]:>10}{excl[name]:>8}{pct:>9.1f}%   {LEADS[name]['risk']}"
         )
 
-    none = [r for r in rows if not r["tags"]]
+    # 【真阳性形态】单独统计：它们**不该**被抑制，不计入收益上限
+    shp = collections.Counter()
+    for r in ok:
+        for s in r["shapes"]:
+            shp[s] += 1
+    print("\n真阳性形态（登记用，**不计入**收益上限——这些报得对，不许改）：")
+    for name in SHAPES:
+        print(f"  {shp[name]:3d}  {name}  — {SHAPES[name]}")
+
+    # 判据冲突：同一条既被判「该抑制」又被判「不许改」⇒ 两组判据必有一个在猜。
+    # 各算各的自相矛盾，剔出来交人工裁决。
+    if conflict:
+        print(f"\n⚠ 判据冲突 {len(conflict)} 条（既在抑制候选、又在真阳性形态）"
+              f" —— 已从两组中剔除，须人工裁决：")
+        for r in conflict[:10]:
+            print(f"   {r['repo']}/{r['fn']} :: {r['rule']}"
+                  f" | L={r['tags']} T={r['shapes']}")
+    else:
+        print("\n判据冲突：0 条（当前数据下两组判据无交叠）")
+
+    none = [r for r in rows if not r["tags"] and not r["shapes"]]
     print("-" * 100)
-    print(f"无任何线索命中：{len(none)} 条（{len(none)/total*100:.1f}%）← 这些是真要逐条看的")
+    print(f"无归属（既非抑制候选也非真阳性形态）：{len(none)} 条"
+          f"（{len(none)/total*100:.1f}%）← 这些是真要逐条看的")
+    print("注意：『无归属』的分母里已剔除真阳性形态 —— 只认形态不认抑制，"
+          "不算归因成功。")
 
     # 规则分布（找漏项用）
     print("\n规则分布（找漏列的线索）：")
@@ -220,13 +440,16 @@ def main() -> int:
     if args.dump:
         print("\n逐条：")
         for r in rows:
-            print(
-                f"  [{','.join(r['tags']) or '-'}] {r['repo']}/{r['fn']}"
-                f" ({r['file']}) :: {r['rule']}"
-            )
+            mark = ",".join(r["tags"]) or "-"
+            if r["shapes"]:
+                mark += " <" + ",".join(r["shapes"]) + ">"
+            print(f"  [{mark}] {r['repo']}/{r['fn']} ({r['file']}) :: {r['rule']}")
 
     snapshot = {
         "date": time.strftime("%Y-%m-%d %H:%M"),
+        # 口径版本。v1 = 只有抑制候选、未区分真阳性形态；v2 = 二分 + 剔除冲突。
+        # **跨版本的两条快照不可直接比较** —— 未归因下降可能只是口径变更。
+        "schema": "v2",
         # 用结果文件里的切片数，不要用 rows 里的去重仓库数——
         # 有切片（如纯 JS 的 gothinkster）一条违规都没有，会被漏掉，快照就少算一片
         "slices": len(data),
@@ -234,6 +457,9 @@ def main() -> int:
         "leads": {name: round(incl[name] / total * 100, 1) if total else 0
                   for name in LEADS},
         "unattributed_pct": round(len(none) / total * 100, 1) if total else 0,
+        # v2：分开记，才看得出「未归因下降」是真归因还是改名
+        "true_positive_pct": round(
+            sum(1 for r in rows if r["shapes"]) / total * 100, 1) if total else 0,
     }
 
     if args.snapshot:
@@ -260,6 +486,11 @@ def main() -> int:
         a, b = hist[-2], hist[-1]
         print(f"\n[saturation] {a['slices']} 片({a['total']} 条) → "
               f"{b['slices']} 片({b['total']} 条)")
+        sa, sb = a.get("schema", "v1"), b.get("schema", "v1")
+        if sa != sb:
+            print(f"   ⚠ 口径不同（{sa} → {sb}），**本次比较无效**。\n"
+                  f"     未归因占比的下降可能只是口径变更（例如 v2 把真阳性形态剔出分母），\n"
+                  f"     不等于池更饱和。请以同口径内**第二次**快照起判。")
         # 空过防线（R23 家族）：新切片贡献太少时，「没漂移」不代表饱和，只代表没信息。
         added = b["total"] - a["total"]
         share = added / b["total"] * 100 if b["total"] else 0

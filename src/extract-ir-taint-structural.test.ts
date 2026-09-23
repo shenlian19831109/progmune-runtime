@@ -2440,6 +2440,11 @@ export class Uploader {
 //   见 extract-ir.ts 里标记命名的说明 ⇒ 这是本组专门要守的）。
 // ═══════════════════════════════════════════════════════════════
 
+/** E5（2026-09-23）：提取器在「参数流向外部副作用」时注入的语义前置标记。
+ *  Input Validation 规则据此 requireMarker —— 名字叫 create/add 但根本不接外部
+ *  输入的函数（配置装配、工厂）不该被要求「必须校验输入」。 */
+const INPUT_EFFECT = "__progmune_input_effect__";
+
 describe("E3：DTO 的 schema 校验必须对 Input Validation 可见", () => {
   const MARK = "__progmune_input_schema__";
   const DECLS = `
@@ -2604,15 +2609,18 @@ export class C {
   }
 
   // ── 规则侧：标记必须真的压得住 Input Validation，且只压这一条 ──
+  // E5（2026-09-23）：Input Validation 现在带 requireMarker（须有副作用证据才触发），
+  // 故这几条断言必须显式带上 INPUT_EFFECT —— 它们验证的是「在提取器已产出副作用
+  // 证据的前提下，schema 标记仍能压住本条」，不是「裸名字就该报」。
   it("规则侧·① 注入标记后 Input Validation 必须消失", () => {
-    const before = detectSafeguardViolations(["createPost"], "createPost");
+    const before = detectSafeguardViolations(["createPost", INPUT_EFFECT], "createPost");
     expect(before.some(v => v.rule === "Input Validation")).toBe(true);
-    const after = detectSafeguardViolations(["createPost", MARK], "createPost");
+    const after = detectSafeguardViolations(["createPost", INPUT_EFFECT, MARK], "createPost");
     expect(after.some(v => v.rule === "Input Validation")).toBe(false);
   });
 
   it("规则侧·② 标记不得压掉别的规则（Authorization 仍在）", () => {
-    const after = detectSafeguardViolations(["createPost", MARK], "createPost");
+    const after = detectSafeguardViolations(["createPost", INPUT_EFFECT, MARK], "createPost");
     expect(after.some(v => v.category === "authorization")).toBe(true);
   });
 
@@ -2640,8 +2648,12 @@ describe("F：Input Validation 的 trigger 只认函数名（不再被 callee �
   //   (b) 理由错     —— login/register/authenticate 因调用 **createHash**（密码哈希）
   //                     被判成「内容创建函数未校验输入」（69/175）。
   // 175 条已逐条归类，无一为真阳性；另有 6 条 list/get 查询函数。
+  // E5（2026-09-23）：本规则现在带 requireMarker（须有「参数流向外部副作用」的证据
+  // 才触发）。F 组守护的是「trigger 只认函数名、不被 callee 拖下水」——这个命题在
+  // **已有副作用证据**的前提下才成立，故统一带上 INPUT_EFFECT。
+  // 副作用证据本身的行为由下面 E5 组单独钉住（含正反两面与语言限定）。
   const IV = (calls: string[], own: string) =>
-    detectSafeguardViolations(calls, own).filter(v => v.rule === "Input Validation");
+    detectSafeguardViolations([...calls, INPUT_EFFECT], own).filter(v => v.rule === "Input Validation");
   const hit = (calls: string[], own: string) => IV(calls, own).length > 0;
 
   // ── 正例：函数名自己就是创建函数 ⇒ 必须仍然报（本轮不得削弱真阳性） ──
@@ -2700,4 +2712,73 @@ describe("F：Input Validation 的 trigger 只认函数名（不再被 callee �
   // 本轮之后不再报。这是 triggerOwnNameOnly 的固有代价：175 条损失里此类为 0，
   // real-world 池里亦未发现（27 条触发源全为 ORM/哈希/权限工厂/内部工具）。
   // 若要补回，需要 `exposed`（web handler）通道 —— 按 R27 先查该通道通不通。
+});
+
+// ═══════════════════════════════════════════════════════════════
+// E5（2026-09-23）：Input Validation 的语义前置条件 —— 参数流向外部副作用
+//
+// 立项依据：本规则的 trigger 是纯函数名正则（create|add|post|upload），判据手里
+// **只有名字**。FP 池实测 75 条里 62 条（83%）完全没有请求入口迹象：
+// verdaccio ConfigBuilder.addStorage/addLogger（配置装配）、ducktors
+// createS3/createAzureBlobStorage（工厂）都被要求「必须校验输入」。
+//
+// 判据为什么不是「是否 HTTP 入口」：真值集里 4 条已核验真报（docmost
+// addContributors→redis.sadd、addLabelsToPage→labelRepo.findOrCreate、hedgedoc
+// ApiTokenService.createToken、hoppscotch AdminService.createATeam）都没有 req
+// 对象，但参数是从 Controller 透传的外部输入，且确实没校验 ⇒ Service 层不因
+// 组件边界豁免。区分点在**参数流向**，不在入口形态。
+//
+// 量化（probe-body-evidence.ts --from-gold，74 条已标注）：
+//   TP 召回 100%（17/17，丢 0）／FP 压制 77.2%（44/57）／precision 23.0%→56.7%
+// ═══════════════════════════════════════════════════════════════
+describe("E5：Input Validation 须有「参数流向外部副作用」的证据才触发", () => {
+  const IV = (calls: string[], own: string, language?: string) =>
+    detectSafeguardViolations(calls, own, language).filter(v => v.rule === "Input Validation");
+  const hit = (calls: string[], own: string, language?: string) => IV(calls, own, language).length > 0;
+
+  // ── 反面：名字像创建函数，但参数不流向任何 sink ⇒ 不该报 ──
+  it("反例·① 纯内存装配（push 进数组）不再被要求校验输入", () => {
+    expect(hit(["push", "sort"], "addWidgetToCache")).toBe(false);
+  });
+  it("反例·② 工厂形态（只构造对象）不再被要求校验输入", () => {
+    // FP 池里 ducktors createS3 / createAzureBlobStorage 即此形态
+    expect(hit(["Bucket", "Credentials"], "createS3")).toBe(false);
+  });
+  it("反例·③ 配置装配（写进内部 config 对象）不再被要求校验输入", () => {
+    // FP 池里 verdaccio ConfigBuilder.addStorage / addLogger 即此形态
+    expect(hit(["assign", "keys"], "addStorage")).toBe(false);
+  });
+
+  // ── 正面：有副作用证据 ⇒ 仍须报（防止 requireMarker 退化成无条件压制）──
+  it("正例·① ORM 写入（repo.save）仍报", () => {
+    expect(hit(["db.save", INPUT_EFFECT], "createWidget")).toBe(true);
+  });
+  it("正例·② 委托给 service 层（含 upload 动词）仍报", () => {
+    // docmost uploadToDrive 只有 `storageService.upload(...)`，
+    // 动词表漏掉 upload 就会丢这条真报
+    expect(hit(["storageService.upload", INPUT_EFFECT], "uploadToDrive")).toBe(true);
+  });
+  it("正例·③ 缓存写入（redis.sadd）仍报 —— Service 层不因无 req 豁免", () => {
+    // docmost CollabHistoryService.addContributors 是已核验真报，没有 req 对象
+    expect(hit(["redis.sadd", INPUT_EFFECT], "addContributors")).toBe(true);
+  });
+
+  // ── 语言限定（R42）：标记只由 TS 提取器产出，Python 侧不得因此静默归零 ──
+  it("语言·① TypeScript 缺标记 ⇒ 不报（前置条件生效）", () => {
+    expect(hit(["db.save"], "createWidget", "typescript")).toBe(false);
+  });
+  it("语言·② Python 无标记也必须照旧报（不得静默归零）", () => {
+    expect(hit(["db.save"], "createWidget", "python")).toBe(true);
+  });
+  it("语言·③ 未传语言时按原语义处理（不引入新的静默失效）", () => {
+    expect(hit(["db.save", INPUT_EFFECT], "createWidget")).toBe(true);
+  });
+
+  // ── 与既有抑制机制的关系：两个通道互不覆盖 ──
+  it("关系·① 有副作用 + 有 schema 标记 ⇒ 仍不报（E3 通道未被本轮破坏）", () => {
+    expect(hit(["db.save", INPUT_EFFECT, "__progmune_input_schema__"], "createWidget")).toBe(false);
+  });
+  it("关系·② 有副作用 + 有函数体校验证据 ⇒ 仍不报（E4 通道未被本轮破坏）", () => {
+    expect(hit(["db.save", INPUT_EFFECT, "__progmune_input_guard__"], "createWidget")).toBe(false);
+  });
 });

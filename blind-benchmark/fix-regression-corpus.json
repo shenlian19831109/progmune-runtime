@@ -1,600 +1,670 @@
 {
- "name": "fix-regression-corpus",
- "version": 2,
- "created": "2026-09-11",
- "updated": "2026-09-22",
- "method": "真实安全修复回归：对每个修复，扫描「修复前 parent commit」——引擎在该位置/该类型上能否报出违规；再扫修复后确认不误报。来源=GitHub 安全公告数据库（GHSA/CVE），SHA 均经 api.github.com 实测核验。",
- "methodology_rules": [
-  {
-   "id": "R1-taint-sink-capture",
-   "added": "2026-09-19",
-   "source": "fr-015 / fr-010 教训（污点数据流试点 V1 §3、§4）",
-   "rule": "污点流类条目（type 含 ssrf / path_traversal / file_read / url_partition 等「源→sink」形态）的 ground_truth_files 必须包含 sink 所在文件，且必须由 fix commit 的【完整调用链】确定（调用者、中转函数、sink），不得只取 patch hunk 命中的文件。",
-   "why": "sink 不在真值清单里时，分析器无论多强都看不见；此时的 MISS 是语料缺陷，不代表引擎能力。"
-  },
-  {
-   "id": "R2-slice-coverage-verification",
-   "added": "2026-09-19",
-   "source": "fr-015 mini 切片教训",
-   "rule": "切片后必须做覆盖率校验：逐条确认 ground_truth_files（含按 R1 补齐的 sink 文件）与调用链中转文件都落在实际切片目录内。任何一格缺失 → 该条目的 MISS 记为不可判定（corpus_invalid），不得计入「分析未检出」。",
-   "why": "真值清单写对了、切片没收全，结论一样是哑值——清单与切片是两回事。"
-  },
-  {
-   "id": "R3-mini-only-when-sink-captured",
-   "added": "2026-09-19",
-   "source": "DeepSeek 评审意见（污点试点 V1）",
-   "rule": "小仓库一律整包 tarball，不做 mini 切片；只有已确认 sink 与调用链文件均被收录的大仓才允许 mini。",
-   "why": "mini 切片省下的下载时间远小于它引入的不可判定风险。"
-  },
-  {
-   "id": "R4-result-must-name-reason",
-   "added": "2026-09-19",
-   "source": "fr-012/fr-015 双 MISS 复盘",
-   "rule": "result 字段必须区分「分析未检出（analysis_miss）」与「语料不可判定（corpus_invalid）」两种 MISS，并注明日期与判定依据；否则跨会话的结论会被二次误读。",
-   "why": "两个不同原因的 MISS 混在同一个标签下，会让后续优先级排序建立在错误前提上。"
-  },
-  {
-   "id": "R5-fix-mechanism-match",
-   "added": "2026-09-19",
-   "source": "fr-012 复核（对 fix commit 完整 diff 逐行核对）",
-   "rule": "验收条目必须与修复机制匹配：先读 fix commit 的完整 diff 确认修复到底改了什么。若修复是部署模式闸门（`if (IS_REMOTE && …) throw`）、鉴权策略分支、配置开关等【上下文开关】而非数据流本身，则 pre/post 在污点流层面本来就该同数——该条目标记为 corpus_mismatch，不得用于判定判别力，也不得记为分析器 MISS。",
-   "why": "否则会把「语料不提供信号」误读成「分析器没有判别力」，进而在错误的前提下追一个不存在的能力缺口。"
-  },
-  {
-   "id": "R6-negative-assertion-needs-positive-control",
-   "added": "2026-09-19",
-   "source": "G1 PATH_GUARD_EVIDENCE 实现期（3 条用例假通过）",
-   "rule": "任何「不得标记 / 不得报出」类断言，必须配一条【同形状、去掉被验证机制后必须重新报出】的正对照。缺正对照的负向断言视为无效——它可能因为管线在别处已经断了（如污点经表达式包装后不传播）而假通过，与被验证机制无关。",
-   "why": "标记管线的失败模式里，「根本没走到」和「走到了但被正确压制」在输出上完全一样。只有正对照能把两者区分开。"
-  },
-  {
-   "id": "R7-no-vacuous-gate",
-   "added": "2026-09-19",
-   "source": "TS 795 盲测对路径穿越连续三次零覆盖（taintpath 语料族建立后确认）",
-   "rule": "回归闸门必须对被测能力有实际覆盖才能算通过。每次发布前须确认：被测代码路径在新语料上确实被走到（如统计 __progmune_path_traversal__ 出现次数 > 0）。出现「改动前后该指标均为 0」即空过（vacuous pass），须在报告里显式标注，并优先补语料而不是宣称通过。",
-   "why": "本报告已三次把 3086 flags LOST 0/ADDED 0 当作验收证据，而它三次都没有覆盖当时正在改的能力。空过比失败更危险：它给出安全错觉。已由 blind-benchmark/generated/taintpath_A|B + check-taintpath.ts 补上覆盖。",
-   "current_status": "path_traversal 标记在全语料出现 15 次（此前 0 次）"
-  },
-  {
-   "id": "R8-no-stale-artifact-gate",
-   "added": "2026-09-19",
-   "source": "C4 落地时发现 check-taintpath.ts 读陈旧报告仍报 24/24 全绿",
-   "rule": "验收闸门不得默认读取上一次运行留下的产物文件。闸门必须【重新计算】被测指标（实时提取 / 实时扫描），或至少校验产物的时效（产物生成时间晚于被测代码/语料的最后修改时间）。读陈旧产物的闸门是第二种空过——它不是没覆盖，是覆盖了但读到旧数据，且比第一种更难发现，因为它有输出、有历史、看起来一直在工作。",
-   "why": "实测：C4 落地后 4 条 known-gap 已翻正，check-taintpath 仍报「未标记，符合预期」。已改为默认实时 extractIR，需走报告时显式 --report。",
-   "current_status": "check-taintpath.ts 默认实时提取；batch-scan-results.json 仍可用于 --report 模式"
-  },
-  {
-   "id": "R9-no-inferred-suppression",
-   "added": "2026-09-19",
-   "source": "G2 调用点抑制实现期（3.7.37）",
-   "rule": "抑制类判别只允许使用【直接证据】：被调用方函数体自身含校验证据（tier-0）。经传播/推断得到的守卫（tier-1+，即「它调用了一个守卫函数所以它也守卫」）不得用于抑制，只能用于跨函数流的解释。同时，抑制的作用粒度应尽量落在【表达式】而非整个函数——函数级抑制会连带压掉同函数体里未被校验的其他流。",
-   "why": "推断出来的证据含误差，而抑制是一种【不可逆】操作：真阳性一旦被压掉就不会再报出，也不会出现在任何回归统计里（它只会表现为 LOST，容易被当成无关噪声）。把推断误差乘以不可逆性，是这类判别最危险的失败模式。代价是留下缺口 G2b（经项目自有 helper 转手的校验证据不生效）——缺口是可见的（仍有误报），压掉的真阳性是不可见的。",
-   "current_status": "G2 只认 tier-0；G2b 记为已知缺口（与 C4b 同族：项目自有 helper 不传播）"
-  },
-  {
-   "id": "R10-two-sided-taint-path",
-   "added": "2026-09-19",
-   "source": "fr-016 真实语料连续三轮 0 条之后定位到两侧同时断开（3.7.38）",
-   "rule": "一条污点流要能被观测到，【来源侧】与【sink 侧】必须同时连通。只补一侧时语料往往纹丝不动，看起来像修补无效，实际另一侧也断着。调试必须先写最小复现逐段确认通断，不要在真实语料上只看总数——总数是唯一结果变量，两侧任何一侧断着它都等于 0，没有定位能力。",
-   "why": "fr-016 的 pre 侧连修三轮（C4 塑形传播 / G2 调用点抑制 / 补文档解析产物根）都保持 0 条，直到把 sink 侧的 wrapper 继承也补上才跳到 5 条。若一直只在根表上打磨，会得出『这条路走不通』的错误结论。",
-   "current_status": "两侧均已连通：来源侧新增 runtime_key_enum / document_parse 根；sink 侧 methodSinkParamMap 增加 wrapper 继承一跳。已知缺口 C4b（helper 传播）与 C4c（迭代已被污染的聚合）"
-  },
-  {
-   "id": "R11-helper-stricter-than-inline",
-   "added": "2026-09-20",
-   "source": "C4b 项目自有纯塑形 helper 传播（3.7.39）",
-   "rule": "同一个判别规则，作用在【内联表达式】与作用在【项目自有 helper】上时，helper 侧的证据集必须比内联侧更严 —— 内联看得见整个实参窗口，helper 看不见，推断的证据等级天然更低。",
-   "why": "C4 的内联规则把 `.replace/.trim/...` 算作塑形（不净化）。若把同一条规则照搬到 helper 上，`.replace(/[^a-z0-9]/gi, \"\")` 这种标准净化写法就会被判成「确定不净化」—— 而它恰恰是净化函数的常见实现。这类错误在 helper 侧不可见（看不到函数体为什么被认成塑形），代价高于漏报。",
-   "current_status": "C4b 的证据集只收 node:path 家族 + 值转换（String/Number/Boolean） + 已认定的纯塑形 helper；字符过滤方法不计入。代价：`toSlug(p){return p.trim().toLowerCase()}` 仍不传播（已知缺口，与 C4b 同族）"
-  },
-  {
-   "id": "R12-repro-before-trusting-backlog",
-   "added": "2026-09-20",
-   "source": "C4d 高阶枚举回调形参（3.7.40）—— 备忘里写的『for-in 也不绑定』经最小复现实测是错的",
-   "rule": "备忘/待办里登记的『已知缺口』在动手之前必须先写最小复现确认它真的存在。未复现的缺口清单会随代码演进过期：它可能是被后续改动顺手闭合的，也可能一开始就是误判。照着过期的清单做，会改一个已经对的地方，还顺带承担回归风险。",
-   "why": "C4d 这轮开工前，备忘的『下一步』列着『for-in 与 .map/.forEach 回调形参不绑定』。8 个最小复现跑下来：for-in 两种形态本来就是通的（`bindFromEnum` 的正则本就写成 `(?:of|in)`），真正不通的只有回调那 4 种。若无复现直接动手，会去改一段正确代码，且因为『改了没变化』而继续怀疑别的方向。",
-   "current_status": "C4d 已落地（只收 forEach/map/flatMap/filter，只绑第一个形参、`[k,v]` 解构两个都绑）。同一批复现也确认了负对照：字面量数组回调、只把索引写进路径、被枚举的是干净变量 —— 三条均不标记"
-  },
-  {
-   "id": "R13-no-bypass-in-repro",
-   "added": "2026-09-20",
-   "source": "C4e helper 的现代写法（3.7.41）—— 第一版探针正负对照一次性全 MARK，什么都测不出来",
-   "rule": "写最小复现（以及任何单测 fixture）之前，先问一句：『我断言的这个现象，还能通过哪条旁路产生？』只要存在一条不经过被测机制的旁路，正对照的价值就是零 —— 它会带着负对照一起全绿。设计上必须让断言只能通过被测机制成立。",
-   "why": "C4e 初版把 helper 调用直接写在 sink 实参里（`writeFileSync(outDir + '/' + withExt(k))`）。判定里有一条兜底规则：sink 实参窗口出现污点名就标 —— 于是 helper 认不认得出都会被标，13 条用例全 MARK，连「helper 调用未定义函数」这种明显该不标的负对照也 MARK。改成隔离写法（`const rel = withExt(k)`，污点只能经 helper 返回值进来）才分出胜负。",
-   "current_status": "taintpath_F 全族、C4e 定向组 9 条均按隔离写法构造：sink 实参里不得出现污点变量本身"
-  },
-  {
-   "id": "R14-three-blade-reverse-verification",
-   "added": "2026-09-20",
-   "source": "C4e 取舍：既要证明正例依赖新代码，也要证明边界负对照不是空转",
-   "rule": "任何『放宽某条判据』的改动，反向验证至少三刀：① 摘掉整体能力 ⇒ 正例应全部失败；② 只摘放宽的那一项 ⇒ 只相关的那几条失败（做归因）；③ 反过来把判据再放宽一格 ⇒ 为这次收窄新写的边界负对照必须变红（证明它不是空转）。只做①会把「边界用例其实拦不住任何东西」漏过去。",
-   "why": "C4e 把 module 常量从『一律拦死』放宽到『字面量放行』，并新写了一条负对照锁定非字面量仍拦。只摘整体（全 F 族正例失败）证明不了这条负对照有效 —— 因为它本来就该不标，旧代码也不会让它红。第三刀把常量收集临时改成任意初值都收，那条负对照立刻报错，才确认它真的咬得住。",
-   "current_status": "C4e 三刀均执行并记录结果；第三刀（`out.add(vd.getName())`）跑完已还原"
-  },
-  {
-   "id": "R15-narrowing-is-mirror-image",
-   "added": "2026-09-20",
-   "source": "C4f 名字级传播收窄（3.7.42）—— 前四轮都是补召回，这一轮反过来收精度，门的风险方向整个翻转",
-   "rule": "补召回的改动怕漏报，收精度的改动怕两件事：【收过头】把真阳性也收掉，和【负对照空转】（那批 no-taint 本来就不该标，旧代码也不会让它们红）。所以收窄轮的验收要看反的：盲测重点看 LOST 而不是 ADDED；反向验证除了「退回旧行为 ⇒ 负对照转红」，还要再切一刀【把收窄做得更激进】，确认正例不是靠旁路通过的。",
-   "why": "C4f 把 6 种误报收掉（helper 丢弃形参、污点落在不被依赖的形参位、嵌在 concat 里、两跳依赖集为空、两跳位置不对齐、换序反向）。这批 no-taint 用例在旧代码下同样不标 —— 摘掉新代码它们也不会红，所以光做「摘掉能力」那一刀证明不了任何东西。必须再切一刀把收窄推到过头：G 族 3 条位置对齐正例随即转漏报，而 emitPlainShaper（常规塑形）不受影响，这才同时证明了「对照咬得住」和「收窄没波及常规路径」。",
-   "current_status": "taintpath_G 12 条（4 mark / 7 no-taint / 1 suppressed）；三刀反向验证结果已记入 CHANGELOG 3.7.42 与设计稿 §十二"
-  },
-  {
-   "id": "R16-fixture-names-must-not-collide-with-product-lists",
-   "added": "2026-09-20",
-   "source": "C4g（3.7.43）—— 语料里的静态方法写成 Renderer.stat(k)，闸门全绿但归因时发现它是被 sink 名单兜底命中的",
-   "rule": "测试语料里的标识符（函数名/方法名/变量名）必须先对照产品的各类名单（sink 名单、守卫词表、白名单）查一遍，不能撞名。撞了的话用例会被一条与被测机制毫无关系的规则命中 —— 而且往往是『标对了』的假象，比明显的假通过更难发现。",
-   "why": "H 族第一版把静态方法命名为 stat，而 stat 就在 TS_FILE_SINK_NAMES 里（fs.stat）。闸门 92/92 全绿，直到反向验证摘掉方法收集后它仍标才暴露：实测 Other.stat(k)（接收者未定义）、以及类里根本没有 stat 方法，照样标。改名 toFile 后归因才干净（摘掉方法收集 ⇒ 3 条方法正例全部转漏报）。这是 R13（旁路）的一个子类：旁路不只在被测机制内部，还可能来自**别的规则表**。",
-   "current_status": "taintpath_H 静态方法已改名 toFile；生成器里加了注释说明原因。【2026-09-20 续】同一轮发现**定向用例**里也有同样的假通过：extract-ir-taint-structural.test.ts 的 C4g 组原本也写着 Renderer.stat(k)，那条用例从写下来那天起就没测过 helper 传播（被 sink 名单兜底）。已改名 toFile。⇒ 本规则适用于**所有 fixture**，不只 blind 语料 —— 定向用例看起来小而干净，反而更容易让人不设防。"
-  },
-  {
-   "id": "R17-adjust-without-reproducing-first",
-   "added": "2026-09-20",
-   "source": "C4h（3.7.44）—— 备忘里的三个候选动工前先过探针，结果只有两个是真缺口，反倒挖出一个备忘里没有的**既有缺陷**",
-   "rule": "备忘/清单里的『下一步』条目在动工前必须先用最小探针复现一遍：① 它现在到底是 FAIL 还是 PASS；② 若 FAIL，失败的原因是不是本以为的那个机制。探针的对照组里要顺手带上『看起来差不多但没人提过』的形状 —— 真缺陷常常长在这些地方，而不是清单上。",
-   "why": "C4h 的三个候选里，同名方法两处、属性箭头是真漏报（修了），而探针顺手多写的一句 `class Reg { lookup(n) { return registry[n]; } }` + `r.lookup(k)` 暴露了一个**既有**误报：C4g 在 consider() 之后无条件把裸名登记进成员名录，确证失败的名字照样留在名录里 ⇒ 非塑形方法的成员调用位被当成塑形。这个缺陷不在任何备忘里，也不是本轮的目标 —— 它只是探针旁边多写的一句。反向验证专门加了第 4 刀（退回『确证之前就登记』），才把这条缺陷钉进语料、且归因到具体机制上。",
-   "current_status": "taintpath_I 20 条；反向验证四刀已记入 CHANGELOG 3.7.44 与设计稿 §十四"
-  },
-  {
-   "id": "R18-reverse-blad-must-restore-old-behaviour",
-   "added": "2026-09-21",
-   "source": "C4i（3.7.45）反向验证：七刀里两刀第一次都打偏了",
-   "rule": "反向验证的刀必须退回【旧行为】，不能图省事让函数返回 null / 空值。写刀之前先读调用方怎么用这个返回值 —— 尤其是靠「返回值 !== 入参」判断「这一层有没有做事」的那种（返回 null 会被当成已处理）。刀的转红清单必须落在自己那一组；一旦出现跨组转红，先怀疑刀打偏了，不要急着下「机制有耦合」的结论。",
-   "why": "第 5 刀把 paramIndexOf 改成返回 null ⇒ rest 位整个失去对应形参 ⇒ 所有 helper 的实参被抹光 ⇒ 40 条漏报（正确写法是 return argIndex）。第 2 刀把 foldTemplateSubsts 改成返回 null ⇒ 调用方 `tpl !== s` 判成「已折叠」⇒ 连带 11 条无关用例转红（正确写法是 return expr）。两刀修正后各自只转 1 条，归因才干净。",
-   "current_status": "taintpath_J 26 条；七刀结果已记入 CHANGELOG 3.7.45 与设计稿 §十五"
-  },
-  {
-   "id": "R19-group-completeness-must-count-rejected",
-   "added": "2026-09-21",
-   "source": "C4j（3.7.46）—— 探针 B4/B6 挖出 C4h 引入的既有缺陷；同一轮还有两次「探针期望写错」",
-   "rule": "凡是用「全组确证」这类**集体判据**决定放行，组的分母必须包含**被判据拒掉的那些**。只把通过判据的实现算进组，等于把「判据不成立」这件事从集合里摘出去 —— 组会显示『全组确证』，而被拒的那些实现照样被放行。另：写探针的期望之前，必须先指明『这条标/不标，由哪一个机制决定』，否则期望本身可能不可达（F9a）或无意义（F9f）。",
-   "why": "C4h 把「同名成员唯一才登记」换成「全组确证」，但实现只把通过判据①②③的实现算进组。同名三处 getter：无形参的（判据①不成立）没进组、体内有 sink 的（判据③不成立）没进组 ⇒ 组里只剩一条通过者 ⇒ 『全组确证』成立 ⇒ 成员调用位 `.mk(` 放行 ⇒ `ONoParam.mk(k)` 与 `OWithSink.mk(k)` 两条本该不标的被误标。归因靠反向验证第 7 刀（`noteUnaccepted` 退回旧行为）：闸门 160/160 里恰好只有这两条转红。同轮两次探针期望写错 —— F9a：匿名默认导出那条忘了写 import，而名字只能来自导入它的文件，没有 import 期望本身不可达；F9f：期望 unmarked 实测 mark，查清后是期望错，`(0, (n) => …)(k)` 里那个内联匿名箭头自己就是塑形函数，与默认导出无关（删掉 helpers.ts 照样标），标是保守侧的正常行为。",
-   "current_status": "taintpath_K 22 条（12 mark / 9 no-taint / 1 suppressed）；定向用例 C4j 组 23 条，其中两条「回归·⑦」（ONoParam.mk / OWithSink.mk）是该缺陷的回归门；七刀结果已记入 CHANGELOG 3.7.46 与设计稿 §十六"
-  },
-  {
-   "id": "R20-three-questions-before-adopting-a-corpus-pair",
-   "added": "2026-09-21",
-   "source": "为 taintpath 找第三对真实语料：连查三个候选全部 0/0 落空，且落空原因各不相同",
-   "rule": "新条目入库前先过三问，**任一不过就不要下载快照**（省下的正是最贵的那一步）：① **pre 侧有没有 path 校验** —— 只要有（哪怕是 `startsWith` 这种 prefix-only 的弱守卫）就会被 G1 压成 0，属已声明的「守卫存在但不足」面外类，做不出判别力；② **污点根在不在要扫的切片里** —— 词表只有 `req.*`/`request.*` 形态、URL 参数类、文档解析键三种，跨包入参（React Router 的 session id）、类字段（AdonisJS 的 clientName）、MCP 工具实参（fr-012）、CLI argv 都不在内 ⇒ pre 恒为 0；③ **fix 是不是「新增校验」** —— 换掉污点源（AdonisJS 把默认文件名换成随机 UUID）、加强既有守卫、纯文档提交、或压根没有修复版本（TypeSpec）都做不成 post 侧。三问全过才可能得到 pre>0 / post=0。",
-   "why": "2026-09-21 为补第三对真实语料，从 npm 侧 400 条公告里按 CWE 过滤出 11 条路径类，逐个核到提交级：① **AdonisJS bodyparser**（CVE-2026-21440，TS，`MultipartFile.move()`）—— 修复是 `Object.assign({ name: crypto.randomUUID() … })`，把污点源 `this.clientName` 换成随机串，不是加校验；且 clientName 是类字段、不在 `req.*` 词表内 ⇒ pre/post 都会是 0。② **Mockoon commons-server**（CVE-2026-59149，`getSafeFilePath`）—— 漏洞恰是「有守卫但守卫是 `resolvedPath.startsWith(staticBaseDir)` 这种 prefix-only」，属 fr-009/fr-015 同族的「守卫存在但不足」，G1 会压成 0。③ **React Router 文件会话存储**（CVE-2025-61686，fix `6ff0bb35db54` 「Add some validation for session IDs」，形态其实最对路：自有 helper `getFile(dir,id)` 加了 `/^[0-9a-f]{16}$/i` 校验 + 四个调用点判空）—— 但 `fileStorage.ts` pre 版里 `req.`/`request.`/`headers` 出现 **0 次**，session id 是跨包传进来的**入参**，污点根在切片外 ⇒ 仍是 0/0。三问里各踩一条。",
-   "current_status": "三个候选均未入库（作为「已核过、不适用」记录在此，避免以后重复查）。第三对仍缺。同轮改用「按 sink 反查真实代码的路径实参形态」找新形状：真实代码里 71%（34/48）的路径实参是**上游算好装在变量/成员里**的裸标识符，而非就地拼接 —— 由此提出 C4k 的三个候选形状，按 R17 先写了探针；探针确认真漏报后按 R21 量化，收益上限 0 ⇒ **判定不修**（详见设计稿 §十七）"
-  },
-  {
-   "id": "R21-quantify-recall-ceiling-before-building",
-   "added": "2026-09-21",
-   "source": "C4k 寻址轮：探针已确认「成员/容器位不传播」是 5 个形状的真漏报，但在真实语料上量化后发现收益上限为 0",
-   "rule": "确认漏报之后、动工之前，先用**只读文本**在真实语料上量化「做出来能拿到多少」：① 统计该形态在 sink 实参里的占比；② 对每个命中点回溯上游写入/赋值，看 RHS 是否真带污点；③ 只有①②都非零才动手。**上限为 0 就判定不修** —— 省下的是「实现 + 反向验证 + 全量盲测」的一整轮。还要问反面：若该机制要求**流敏感**（写入后被常量覆盖）或**对象身份**（两个对象同名属性）才能不误标，成本就是另一个量级，收益要按这个成本打折。",
-   "why": "C4k 实测：探针确认五种形状漏报（构造函数 `this.p = <污>`→`o.p`、后挂 `f.path = <污>`→`f.path`、解构 `const {path:p}=f`、`arr.push(<污>)`→`arr[0]`、`m.set(...,<污>)`→`m.get()`，全部 no-taint 而期望 mark），看着像一条大有可为的召回轴。但 `mine-member-carriers.py` 在 fr-016 pre / fr-007 pre / demo-realworld（219 文件 / 48 sink）上量化：成员读取 8（17%）、下标 2（4%），能追到对应属性写入的只有 4 处，且**全部是 redocly `oauth-client.ts` 的 `this.credentialsFile*Path`，RHS 是常量** `path.join(homeDirPath, '.redocly')` ⇒ 收益上限 0、风险为正（真做出来先标的就是这 4 处常量路径，纯 FP）。同时第二轮边界探针显示：要不做误标就得支持流敏感（N2 覆盖）与对象身份（N3 两个对象同名属性），成本远超收益。",
-   "current_status": "C4k 成员/容器承载轴据此判定**不修**（设计稿 §十七 已记录完整寻址过程与读数）。样本强度提示：结论基于 219 文件 / 48 sink，换更大的真实语料应重跑 `blind-benchmark/mine-member-carriers.py` 再下结论"
-  },
-  {
-   "id": "R22-confirm-the-criterion-before-writing-probe-expectations",
-   "added": "2026-09-21",
-   "source": "C4k 第一轮探针 16 条跑出 7 条 DIFF，其中 4 条是**期望写错**——把判据理解错了",
-   "rule": "写探针期望之前，先把判据的**准确定义**抄进探针注释里再动手。本项目的 no-taint 判据是「helper 把形参丢了 / 返回值不依赖污点形参」，**不是**「路径看起来被规整了」——加 `.md` 后缀、走 `path.join`、赋值到成员、经三元二选一，这些都不算净化：`k + \".md\"` 里的 k 照样流得出来（`../../../etc/passwd.md` 照样穿越），**标才是正确的**。期望写错 = 整轮对着错的靶子改代码，比不改更糟。",
-   "why": "第三次犯同一类错：C4j 轮两次（F9a 忘了写 import，使匿名默认导出的名字根本不可达、期望本身不成立；F9f 把「`(0,(n)=>n+'.md')(k)` 里内联匿名箭头自己就是塑形函数」的保守侧标记当成误报），C4k 轮一次（把 T1 `k + \".md\"`、C1/C2 helper 调用、X4 不可判定三元这 4 条的 mark 当成缺口，实际都是正确行为）。三次的共性：动笔写 expect 时没有先把判据摆出来对照。",
-   "current_status": "C4k 第一轮探针已按修正后的口径重读：7 条 DIFF 中 4 条实为正确行为、3 条归入 R21 量化。第二轮 12 条边界探针已列清「实现后必须仍为 no-taint」的负对照清单（常量写成员 / 被常量覆盖 / 对象身份 / 另一属性 / 跨函数写属性 / push 常量 / set 常量 / 经丢弃形参 shaper / 成员链 / sink 之后写入 / basename 净化），当前 11 条 no-taint（`arr[k]` 下标带污点直接标，保守侧正确）"
-  },
-  {
-   "id": "R23-zero-drift-may-be-a-vacuous-pass",
-   "added": "2026-09-21",
-   "source": "E1 轮（类方法 calls 提取）：TS 盲测 111 项目 / 3201 条 **LOST 0 / ADDED 0**，汇总数字与基线完全一致；同期反向验证刀③「摘掉类方法的全部标记」后闸门仍 160/160",
-   "rule": "**「零漂移」不等于「改动安全」，先确认基线是否覆盖你改的那条轴——而且『覆盖』要看闸门的判据口径，不是看语料里有没有那种写法。** 本轮 LOST 0 / ADDED 0 的真正原因是**闸门对该轴不敏感**：taintpath 闸门只比对 `calls` 里是否出现 `__progmune_path_traversal__` 标记，而类方法的标记在 E1 之前就由 `computeMarkerCalls` 正常产出了；E1 补的是 `calls` 里的**真实调用名**，这道门根本不看。刀③摘掉类方法标记后闸门照旧 160/160，正是空过的铁证。判断方法：改完跑一次反向验证，如果「把新机制完全摘掉」基线仍全绿，**就说明这条门是空过**，真证据必须另找（本轮是 FP 观测池 + 定向用例）。",
-   "why": "与 R7（「pre/post 都是 0 的语料是空过，不是通过」）同族，只是发生在盲测门上。R7 说的是**语料**没触发规则，R23 说的是**基线**没覆盖形态。两处的失败模式一样：数字好看但没信息量。这类教训在本项目已第三次出现（3.7.31 的 P0：`fetch(` 标记从未被 fixture 触发；E1 轮：类方法的真实调用名从未被闸门判据使用）。",
-   "wording_correction_2026_09_21": "初版写「generated 语料全是函数载体、没有一个类方法」——**不准确**，已更正。实测基线里确有类：taintpath_B/src/store.ts 1 个、taintpath_H/src/helpers.ts 1 个、taintpath_I/src/helpers.ts 8 个、taintpath_K/src/helpers.ts 1 个，共 11 个（就是 C4g/C4h 的 helper 载体夹具）。所以不是「语料没有这种写法」，而是「闸门判据（标记存在与否）对『真实调用名』这条轴不敏感」。结论与证据（刀③）不变，但措辞必须分得清这两种空过：**语料缺形状** vs **判据不看该轴**——两者的补救方式不同（前者加 fixture，后者换门或补门）。",
-   "current_status": "E1 轮据此把验收重心移到 FP 观测池（空 calls 71% → 12%）与定向用例（E1 组 14 条），并在设计稿 §十八 明确写下「盲测 LOST 0 / ADDED 0 的正确解读是闸门口径不覆盖，不是改动无影响」"
-  },
-  {
-   "id": "R24-derive-candidate-list-from-the-full-denominator",
-   "added": "2026-09-21",
-   "source": "R21 量化轮：E1 留下的四条规则侧线索全部从 18 条【新增】违规里归纳，而全池有 72 条；新增样本偏 Input Validation（56%），全池第一大项却是 Data Mutation Without Audit Trail（36.1%）。按全量重算：原四条合计只覆盖 23.6%，漏掉的 L4 单项就是 36.1%",
-   "rule": "归纳候选机制（线索清单 / 待办清单）时，分母必须是**全量**观测，不能是本次改动**新增**的那批。新增样本天然有偏——它只包含『这次改动让规则第一次看见的』，分布与总体不同，且会系统性偏向这次改动所触及的那条轴。做法：先写只读的归因脚本对全量打标（本轮是 `fp-pool-attrib.py`），按上限排序后再决定做什么；**不要从增量堆里凭印象列清单**。",
-   "why": "与 R19（全组分母须含被判据拒掉的那些）、R23（零漂移可能是空过）同族——**第三次栽在分母选错**：R19 是判据的分母，R23 是验收门的分母，R24 是归纳样本的分母。三者的共同动作都一样：动手前先问『这个数字的分母是谁』。R19 那次漏的是被拒掉的成员，R24 这次漏的是占比最大的那条规则。",
-   "current_status": "按 R24 重算后线索从 4 条扩到 8 条，优先级完全重排：原四条降到 23.6%，新增的 L4（审计轨迹需『工程内已有审计设施』前置，36.1%）与 L7（工厂装配函数不是内容创建，19.4%）成为前两大项；未归因违规从 37.5% 降到 9.7%。设计稿 §十九 记录了完整表与建议顺序。**但见 R25：这批上限随后被证明不稳定**"
-  },
-  {
-   "id": "R25-confirm-the-pool-is-saturated-before-ranking",
-   "added": "2026-09-21",
-   "source": "R24 之后立刻被打脸：按全量重排出 8 条线索的优先级，只加进第 5 个切片 verdaccio（72 → 198 条违规），最大项 L4 就从 36.1% 掉到 20.2%、L7 从 19.4% 掉到 10.1%、未归因从 9.7% 涨到 37.4%",
-   "rule": "**光把分母换成全量还不够，全量本身必须饱和。** 排序 / 定优先级之前先验证：再往池里加语料，分布还会不会变。可执行判据——连续加 2 个切片后，① 各候选机制的占比变化 **< 5 个百分点**；② **未归因比例不再上升**（说明新语料带来的都是已见过的形态）。两条都满足才停手；否则继续扩。**在未饱和的池上排出来的优先级，换一批语料就会重排**——那是白做一轮。",
-   "why": "R24 说「分母要全量」，R25 说「全量也要够大且够杂」。两者是同一道防线的前后两段：R24 防的是**选错样本**（只用新增），R25 防的是**样本量不足 / 形态不全**（只用一类风格的语料）。本项目的证据池长期只有 4 片 NestJS+TypeORM 风格的切片，任何从它归纳的结论都带着那个风格的形状；加一片 Express 中间件风格的 verdaccio 就把结论全掀了。",
-   "current_status": "当前池 6 切片 / 367 条违规（已排除有偏的 outline 片），未归因 44.4% **仍在涨** ⇒ 规则侧校准仍未到开工线。饱和判据已工具化：fp-pool-attrib.py --snapshot / --check-saturation，并加了空过防线（新切片贡献 <5% 总违规 ⇒ 报「比较无效」）"
-  },
-  {
-   "id": "R26-silent-degradation-must-speak",
-   "added": "2026-09-22",
-   "source": "skyvern 重扫事故：python3 提取器被 OOM 杀（SIGKILL），ir.json 被写成 2 字节空数组，引擎带着空 IR 照样输出「0 违规、85 分 APPROVED」——结果自洽、无任何迹象表明它是废票（3.7.48 根治）",
-   "rule": "**静默降级比崩溃危险一个量级：失败必须发声，且发声要直达最终结论。** 崩溃你一眼就看见；降级会产出一份结构完整、数值合理、但完全无效的结论，而下游所有统计和人工判定都会把它当真。判据：任何「拿不到证据」的路径都必须 ① 记录原因；② 把它**传到最终输出**（置信度降级 + 结论里写明示警），不能只留在日志里。补一条：断言「0 违规 / 全绿」之前，先问**这次提取到底跑成了没有**。",
-   "why": "与 R7（pre/post 都是 0 的语料是空过）、R8（陈旧产物）、R23（基线不覆盖该轴）同族——它们都是「看起来在工作」的陷阱，区别只在失效发生的层：R7/R8 在语料与产物层，R23 在验收门层，R26 在**运行时失败**层。共同点：都会给出一个漂亮的数字。",
-   "current_status": "3.7.48 已落地三层：提取异常不再静默吞掉（记入 extractionWarning）、提取后验尸（0 函数但有源码 ⇒ 判失败）、TrustDecision 新增 extractionWarning 且失败时 confidence 强制 LOW + 摘要明示「废票」。E2E 已验证"
-  },
-  {
-   "id": "R27-check-the-evidence-channel-before-tuning-the-rule",
-   "added": "2026-09-22",
-   "source": "E2 轮：规则侧定义了 23 个 __progmune_* 语义标记，Python 提取器产出 23/23，TS 只产出 4/23、C/Go/Java 0/23；而 FP 观测池 100% 是 TS/JS ⇒ 规则在 TS 上跑的时候 19 条证据通道是断的",
-   "rule": "**调规则之前，先确认这条规则的证据通道是通的。** 做法：先看规则的 safeguard 接受哪些**语义标记**，再看你这套语言的提取器**产不产**它们。如果产不出，那不是规则不准，是规则饿着——在饿着的规则上做词表/阈值校准，只会把阈值越调越怪。补一问（本轮吃过亏）：**该规则是否接受标记**——有的规则（如 Input Validation）safeguard 是纯词形匹配、不接受任何标记，给它补提取器侧证据是白做。",
-   "why": "与 R19（判据的分母）/ R24（候选清单的分母）/ R25（池要饱和）同一族，但发生在更上游：前面三条问的是「你量的东西对不对」，R27 问的是**「你喂给它的数据管道通不通」**——分母再对、池再饱和，通道断了全都是 0。本轮实测：Authorization 规则的 auth_check 早已接受 __progmune_auth_machinery__，只是 TS 侧从来没产过 ⇒ 规则侧零改动，纯提取器补齐就拿到 −24 条 FP / 0 ADDED。",
-   "current_status": "已按 R27 摸清 23 个标记的产出/接受对照（Python 23/23、TS 4/23、C/Go/Java 0/23），E2 补了 auth_machinery 一条；其余 18 条待按 R21 逐条量化后再排优先级"
-  },
-  {
-   "id": "R28-a-marker-name-is-itself-matched-by-other-rules",
-   "added": "2026-09-22",
-   "source": "E3 轮：抑制型标记取名 __progmune_validated_input__，离线重放发现它被 Data Integrity (Foreign Key) 的 safeguard \\b(get|find|check|exists|lookup|status|validate|verify)(?:[A-Z]\\w*|_\\w+)\\b 命中（validate + d_input__），凭空压掉 10 条无关违规",
-   "rule": "**新增语义标记时，先跑一遍「这个标记名会被哪些别的规则命中」。** 标记是以普通调用名的身份进 effectiveCalls 的，所有词形规则都会拿它去匹配。命名必须避开 get/find/check/verify/validate/create/add/post/upload/sanitize 等动词词根（以及任何规则 safeguard/trigger 里出现过的词根）。落地做法：写实现之前先做离线重放（R29），看「非目标规则」一栏是不是 0。",
-   "why": "与 R17（动工前写最小探针）/ R19（判据的分母）同族：名字级机制的边界条件里，最容易漏的是「这个名字在别处还被谁读」。这次是抑制型标记，压错方向 = 假阴性，比误报更危险。"
-  },
-  {
-   "id": "R29-replay-offline-before-rescanning",
-   "added": "2026-09-22",
-   "source": "E3 轮：本机 load 200~550、可用内存 15~150MB，重扫会被随机 SIGKILL；改用「拿已记录的 calls + name 直接喂 detectSafeguardViolations」的离线重放，一次 2 秒，预测结果与之后的真实重扫逐条一致",
-   "rule": "**规则侧候选改动，先用离线重放量完再决定动不动手。** 做法：把 dist/protocol-detector.js 复制一份、在副本上打补丁（改 trigger / 加 safeguard 接受位），拿 fp-pool-results.json 与 batch-scan-results.json 里已记录的 perFunction.calls + name 重放，比较基线与变体的规则级计数。能同时给出三件事：① 效果上限；② 有没有污染非目标规则；③ 盲测基线会不会空过。注意副本改完要核对改动点唯一（assert count==1）。",
-   "why": "与 R21（先量化再动手）是同一条原则的执行手段：R21 说要量化，R29 给出在机器吃不消时**怎么量化**。代价是重放依赖已记录的 calls（不含 params/exposed），故对 paramGated / parentRefGated 规则不成立——这类规则仍要真扫。"
-  },
-  {
-   "id": "R30-attribute-every-loss-before-shipping-a-reduction",
-   "added": "2026-09-22",
-   "source": "F 轮：变体 A 会让 Input Validation 少报 175 条，上一轮因「可能有真阳性损失」不敢做；本轮逐条归因后发现 100 条是重复投射（callee 自己仍报）、69 条是 createHash 误触发、6 条是查询函数，无一真阳性",
-   "rule": "**任何「减少告警数量」的改动，LOST 清单必须逐条归类到机制类别，归类完成后只要有 1 条无法解释，就不能做。** 有效的分类维度是被去掉的那条的**信息有没有在别处保留**：① 被调用者自己仍在报（重复投射）；② 别的规则仍覆盖；③ 触发源是库函数（理由错）。「看起来像误报」不是归类。判不出来就交裁决，不要靠数量大小做决定。",
-   "why": "与 R19（判据的分母）/ R24（候选清单分母须全量）同族，但作用方向相反：那两条是防止漏掉该管的，这条是防止**删掉不该删的**。减告警的改动天然自带正反馈（数字变小了），最容易被数字骗过去。"
-  },
-  {
-   "id": "R31-self-verify-the-probe-before-measuring-with-it",
-   "added": "2026-09-22",
-   "source": "F 轮：构造 variantA2.js 时 python 脚本漏了 `src = src.replace(OLD, NEW)`，只插入了规则字段、没改执行分支 ⇒ 变体恒等于基线，首次测量得到「0 变化」。若信了这个数，会得出「该改动在新基线上无效」的完全错误结论；发现方式只是它与上一轮的 -175 不符",
-   "rule": "**变体 / 探针 / 测量脚本构造完成后，先跑一个「已知该变」的微用例自验，确认它真的变了，再拿去测量。** 自验用例要选那种「变了对、没变就是坏了」的极端样本（本次：`handleRequest` + `createPost` 应从报变不报，`createPost` 应始终报）。构造脚本里凡是先 assert 再改的地方，改完要 assert 改动点**已生效**（计数从 0 变 1），而不只是 assert 改动点**存在**（count==1）。",
-   "why": "与 R23（零漂移可能空过）是两种不同的空过：R23 是**被测对象**没被语料覆盖，R31 是**测量工具自己坏了**。两者都表现为「0 变化」，但 R31 更危险——它会让一个真实有效的改动被误判为无效而永久搁置。"
-  },
-  {
-   "id": "R32-check-who-calls-the-rule-before-tuning-it",
-   "added": "2026-09-22",
-   "source": "F 轮后按 R27 去查 exposed 通道，结果查出更上层的问题：SAFEGUARD_RULES 的调用方全是基准工具（src/python-benchmark.ts 是 CLI、protocol-detector 自带 CLI、blind-benchmark/*.ts）或注释；TS 产品路径（MCP 入口 dist/mcp-server.mjs、trust 引擎）根本不调用它。正面验证：npx tsx src/trust/cli.ts 跑 blog 项目只产 1 条 protocol 状态机违规，无任何 Input Validation",
-   "rule": "**调一条规则之前，先确认这条规则被谁调用——基准口径不等于产品口径。** 做法：拿规则的唯一标识字符串（规则名 / 常量名）去 grep 全仓 src，逐个判断引用方是产品代码还是基准/CLI 工具；再用**产品入口跑一次真实项目**做正面验证，不能只靠 grep 下结论。",
-   "why": "R27 查的是「提取器证据 → 规则」的通道（标记产不出来，规则饿着）；**R32 查的是「规则 → 产品」的通道**（规则压根没被调用）。R32 优先级更高：规则若不进产品，接证据通道是白接。E2/E3/F 三轮都是在「规则会被产品调用」的默认假设下做的——默认假设是最贵的假设，因为它从来不被检查。与 R31（测量工具自己坏了）同族：三者都表现为「你以为在量产品，其实在量别的东西」。"
-  },
-  {
-   "id": "R33-measure-incremental-recall-not-absolute",
-   "added": "2026-09-22",
-   "source": "沙箱轮：清单口径在 fr-007 上能报 35 条并精确命中全部 5 个真值位置，看似很有价值；但那 5 个位置产品引擎（path_traversal 标记 → PATH_TRAVERSAL）早已覆盖 ⇒ 增量 0。若只看『它能报多少』就会误判为值得接，代价是告警 30 倍",
-   "rule": "**评估一个能力要不要接进产品，量的是增量召回，不是绝对召回。** 做法：拿真值语料，分别跑「现有产品路径」与「候选能力」，比较**命中集合的差集**。候选能报很多 ≠ 有价值；只有当它报出的东西里有现有路径报不出来的，才值得接。附带必须报两个数：候选的绝对精度（真值命中 / 总告警），以及在真值上的命中是否落在『已有能力』的规则里。",
-   "why": "与 R30（减告警要逐条归因）是对称的：R30 管『删掉不该删的』，R33 管『加上不该加的』。加能力天然自带正反馈（能报 = 有本事），最容易被『它报了 84 条』这种数字说服。而真正决定价值的是差集，差集是看不见的，必须专门去量。"
-  }
- ],
- "entries": [
-  {
-   "id": "fr-001",
-   "repo": "open-webui/open-webui",
-   "lang": "python",
-   "ghsa": "GHSA-wpmr-8h3q-fwj7",
-   "cve": "CVE-2026-87016",
-   "type": "auth_bypass_identity_substring",
-   "summary": "SQLite 部署下 OAuth subject 身份映射用子串匹配而非精确匹配——subject 含 SQL 通配符可绑定到任意账户（含管理员）。SCIM external-ID 同缺陷。PostgreSQL 不受影响。",
-   "fix_commit": "73c1f5806aeb6345dad5de8f5aa26d1f3d0bef80",
-   "parent_commit": "90724cdee01bd9260d15f8482d4e0d2fbe2ebffb",
-   "severity": "high",
-   "patched_version": "0.11.1",
-   "ground_truth_files": [
-    "backend/open_webui/models/users.py"
-   ],
-   "result": "MISS (2026-09-11)"
-  },
-  {
-   "id": "fr-002",
-   "repo": "open-webui/open-webui",
-   "lang": "python",
-   "ghsa": "GHSA-wvm9-9g5j-623f",
-   "type": "authz_policy_bypass",
-   "summary": "被 OAuth 角色策略拒绝的用户仍可经令牌交换流程登录（角色策略未在令牌交换路径执行）。",
-   "fix_commit": "d799e81edbdc971c6deb096b6474cd95b93504bf",
-   "parent_commit": "c0d09a5de93d48517efe043ea2f4a2f6a7a44fc3",
-   "severity": "medium",
-   "ground_truth_files": [
-    "backend/open_webui/routers/auths.py",
-    "backend/open_webui/utils/oauth.py"
-   ],
-   "result": "MISS (2026-09-11)"
-  },
-  {
-   "id": "fr-003",
-   "repo": "open-webui/open-webui",
-   "lang": "python",
-   "ghsa": "GHSA-4qg5-cxx4-g927",
-   "type": "authz_domain_allowlist_bypass",
-   "summary": "被 OAuth 域白名单或角色策略拒绝的用户仍可登录（白名单检查路径遗漏）。",
-   "fix_commit": "fb5ef978bfb451c3f2221931e08e54250cec58ca",
-   "parent_commit": "977d638afe1b3983360abea5185c9c5a96eff45d",
-   "severity": "medium",
-   "ground_truth_files": [
-    "backend/open_webui/routers/auths.py"
-   ],
-   "result": "MISS (2026-09-11)"
-  },
-  {
-   "id": "fr-004",
-   "repo": "open-webui/open-webui",
-   "lang": "python",
-   "ghsa": "GHSA-p78m-89r6-pgf7",
-   "type": "session_cookie_exfiltration",
-   "summary": "用户会话 cookie 被发送到配置为 bearer 的工具服务器（会话凭据外泄到第三方）。",
-   "fix_commit": "cd9db21c5276807a2975ddba17cef369ad1114b7",
-   "parent_commit": "7d392bedc9c1aaecc94509a58e59186b614433dc",
-   "severity": "medium",
-   "ground_truth_files": [
-    "backend/open_webui/utils/tools.py"
-   ],
-   "result": "MISS (2026-09-11)"
-  },
-  {
-   "id": "fr-005",
-   "repo": "open-webui/open-webui",
-   "lang": "python",
-   "ghsa": "GHSA-3pf7-q2g3-wj28",
-   "type": "ownership_check_missing",
-   "summary": "任意已认证用户可把自己的聊天注入其他用户的文件夹（跨用户归属校验缺失）。",
-   "fix_commit": "d9e23b90c100d19b00270aea3cde0501d2354a6c",
-   "parent_commit": "72a909fd2f3ac8d67554f6c85bc1723934454e2d",
-   "severity": "medium",
-   "ground_truth_files": [
-    "backend/open_webui/main.py",
-    "backend/open_webui/routers/chats.py",
-    "backend/open_webui/utils/access_control/folders.py"
-   ],
-   "result": "DETECTED (2026-09-13)",
-   "result_detail": "AUTHZ_CROSS_USER_WRITE ×1 @ main.py::chat_completion——A2：Python 提取器跨用户资源写入标记（folder_id 来自 payload + 持久化 + 无严格归属守卫；has_permission 不算守卫、insert_ 前缀模型方法不标）+ 引擎 IR 层消费。抑制验证：chats.py create_new_chat（有 get_folder_by_id_and_user_id）与 automations.py（有 check_automation_folder_access）均不标。"
-  },
-  {
-   "id": "fr-006",
-   "repo": "open-webui/open-webui",
-   "lang": "python",
-   "ghsa": "GHSA-34r3-9m95-vq73",
-   "type": "authz_channel_reach",
-   "summary": "任意已认证用户可经服务端通道触达 Azure 平台通道（通道级授权缺失）。",
-   "fix_commit": "e3e4bd87df6fc629e7e22081d980d55a7632b8b7",
-   "parent_commit": "ca4e07a40b4ff11989a25d84b517d3d0049f93ae",
-   "severity": "high",
-   "ground_truth_files": [
-    "backend/open_webui/config.py",
-    "backend/open_webui/retrieval/web/main.py",
-    "backend/open_webui/retrieval/web/utils.py",
-    "backend/open_webui/utils/misc.py"
-   ],
-   "result": "MISS (2026-09-11)"
-  },
-  {
-   "id": "fr-007",
-   "repo": "naorsabag/openhop",
-   "lang": "typescript",
-   "ghsa": "GHSA-g72f-jw3w-mgh7",
-   "type": "path_traversal",
-   "summary": "Flow ID 文件操作中的路径穿越（flow id 未经校验进入文件路径）。",
-   "fix_commit": "c8190fbefa3a50e7b0c16c001d2e05b0e920cfb4",
-   "parent_commit": "6bde78bf88aafa09a39dfaf45978c73d1c5fedc3",
-   "severity": "high",
-   "patched_version": "0.3.6",
-   "ground_truth_files": [
-    "packages/server/src/flow-id.ts",
-    "packages/server/src/routes.ts",
-    "packages/server/src/index.ts",
-    "packages/server/src/store.ts"
-   ],
-   "ground_truth_note": "store.ts 为漏洞 sink 所在（filePath(id)→join→readFile/writeFile/unlink，修复 commit 未改它——校验加在上游 routes）。扫描目标=packages/server 子包（根仓库无 tsconfig）。",
-   "result": "DETECTED（2026-09-19 复核：G1 PATH_GUARD_EVIDENCE 上线后成立）",
-   "result_detail": "PATH_TRAVERSAL ×4（flowRoutes + FlowStore.save/get/delete）——A1：TS 提取器路径穿越标记（request 污点→fs sink，跨函数一跳）+ 引擎 IR 层标记消费",
-   "result_reason": "detected_after_g1",
-   "result_note": "2026-09-19 对 fix commit 完整 packages/server/src 复核（pre=6bde78bf88aa / post=c8190fbefa3a）。真修复 = 抽出独立校验模块 flow-id.ts（assertValidFlowId + FLOW_ID_PATTERN /^[A-Za-z0-9_-]+$/），在 FlowStore.filePath() 里调用；routes.ts 侧改为 JSON-schema flowIdParamsSchema（pattern）。G1 前：pre 5 条 / post 5 条（标记器看不见校验）；G1 后：pre 5 条 / post **0** 条 —— 这是真实语料上首次出现「修复后流消失」的判别力证据。注：本条此前记为 DETECTED，但按现行「post 侧须 0 误报」标准，G1 之前并不成立——DETECTED 结论会随判别力变化，改判别逻辑后必须重测全部 DETECTED 条目。 ｜ 2026-09-19 二次复核（3.7.37 G2 调用点抑制）：pre 5 / post 0 维持 —— G2 未压掉真阳性；复核已固化为 blind-benchmark/check-fr-corpus.ts（快照放在 blind-benchmark/fr-corpus/<id>-<repo>/{pre,post}，受保护资产，不得放 /tmp）。",
-   "updated": "2026-09-19"
-  },
-  {
-   "id": "fr-008",
-   "repo": "MasterKale/SimpleWebAuthn",
-   "lang": "typescript",
-   "ghsa": "GHSA-6hxq-p678-4hr2",
-   "type": "webauthn_registration_verification",
-   "summary": "注册验证未充分确保 attestation 的完整校验（WebAuthn 注册验证弱化）。",
-   "fix_commit": "67a41fed3dfd96cab1dcf414f6d1792a72e06e35",
-   "parent_commit": "ba9c97b980741e290f883aa4b4a6e24d23a1e9c9",
-   "severity": "low",
-   "patched_version": "13.3.2",
-   "ground_truth_files": [
-    "packages/server/src/helpers/validateCertificatePath.ts"
-   ],
-   "result": "MISS (2026-09-11)"
-  },
-  {
-   "id": "fr-009",
-   "repo": "open-webui/open-webui",
-   "lang": "python",
-   "ghsa": "GHSA-4v28-j6q3-5m4r",
-   "type": "ssrf_dns_rebinding",
-   "summary": "Playwright web loader SSRF：经 DNS 重绑定访问内部服务——预修复代码已有 validate_url + SSRF 安全适配器，但 connect-time 检查后 requests 重新解析（DNS-rebinding 缺口）。",
-   "fix_commit": "27402ff210bfa253445720920dfb86b15a00327b",
-   "parent_commit": "73c1f5806aeb6345dad5de8f5aa26d1f3d0bef80",
-   "severity": "high",
-   "patched_version": "0.11.1",
-   "ground_truth_files": [
-    "backend/open_webui/retrieval/utils.py",
-    "backend/open_webui/retrieval/web/utils.py"
-   ],
-   "result": "MISS（守卫不足类——标记模型边界）",
-   "result_detail": "预修复函数含 validate_url/_SSRFSafeAdapter 守卫证据 → 标记模型正确抑制；此类「守卫存在但不足」的 DNS 重绑定是静态标记的已知边界，如实不覆盖"
-  },
-  {
-   "id": "fr-010",
-   "repo": "Unstructured-IO/unstructured",
-   "lang": "python",
-   "ghsa": "GHSA-4mvj-m6j5-pmf7",
-   "type": "ssrf_url_partition",
-   "summary": "URL-based partitioning SSRF：partition(url=...) 直接抓取用户 URL，无主机校验；修复=新增 safe_http.py 统一主机校验入口。",
-   "fix_commit": "445c95735c4045057f51f399bc04c657751923bd",
-   "parent_commit": "f6eea758911fcf627cbe6f9df9f790e549500d7b",
-   "severity": "critical",
-   "patched_version": "0.24.0",
-   "ground_truth_files": [
-    "unstructured/partition/auto.py",
-    "unstructured/partition/html/partition.py",
-    "unstructured/partition/md.py",
-    "unstructured/safe_http.py"
-   ],
-   "result": "DETECTED（提取器级，2026-09-14）",
-   "result_detail": "A3 Python 形参污点：pre-fix 标记 ×2（partition_md + file_and_type_from_url，均为修复 patch 路由经 safe_http 的 url= 函数）；post-fix（+safe_http.py 主机校验词汇）0 标记。验证方式=mini 语料（3-4 个真值文件经 raw 直链取 parent/fix SHA）——整仓 tarball 98.6MB 下载被网络反复截断，补全后补跑引擎级"
-  },
-  {
-   "id": "fr-011",
-   "repo": "agentfront/mcp-from-openapi",
-   "lang": "typescript",
-   "ghsa": "GHSA-65h7-9wrw-629c",
-   "type": "ssrf_openapi_ref",
-   "summary": "OpenAPI external $ref 反解引用 SSRF 绕过（主机名解析/重定向/IPv4-mapped IPv6 到达回环）；修复=新增 src/ssrf.ts 防护。",
-   "fix_commit": "be3409cce6e9",
-   "parent_commit": "0dedbf5f5f6fa736275c7b071c576db2fb94a134",
-   "severity": "high",
-   "patched_version": "2.5.0",
-   "ground_truth_files": [
-    "src/generator.ts",
-    "src/ssrf.ts"
-   ],
-   "result": "DETECTED（引擎级，2026-09-14）",
-   "result_detail": "A3 TS 形参污点：pre-fix SSRF ×1 @ OpenAPIToolGenerator.fromURL（公告点名 API，真值位置）；post-fix 0（ssrf.ts 守卫词汇抑制）。仓库小，引擎全链路扫描"
-  },
-  {
-   "id": "fr-012",
-   "repo": "zereight/gitlab-mcp",
-   "lang": "typescript",
-   "ghsa": "GHSA-cv3r-c5h8-f4g5",
-   "cve": "CVE-2026-61560",
-   "type": "file_read_unauth",
-   "summary": "未认证任意文件读取：SSE 传输无鉴权暴露全部 MCP 工具 + upload_markdown 的 file_path 未经校验直接进 fs sink（可读 /proc/self/environ 窃取 GITLAB_PERSONAL_ACCESS_TOKEN）。",
-   "fix_commit": "7d19ebf6f41596a442b6eacc66f12fc5f10cd41e",
-   "parent_commit": "c2577169b21d62197f767895fe97651ffb2d7443",
-   "severity": "critical",
-   "patched_version": "2.1.27",
-   "ground_truth_files": [
-    "index.ts"
-   ],
-   "ground_truth_note": "真值 sink = index.ts::markdownUpload(projectId, filePath) — fs.existsSync(filePath) / fs.readFileSync(filePath)，filePath 由工具实参 args.file_path 一跳传入（无路径校验）。本条锚定「文件读取」半边：其修复为 PR #482「fix: make download and upload work for remote deployments」（2026-05-21，remote 时 upload_markdown 只接受内联内容）。同一 GHSA 的另半边「SSE 传输未鉴权」由 PR #554（e436ee4a，2026-06-22）修复——若扫描 PR #482 的 base 之前的快照，两条缺陷同时在场。",
-   "sha_verified": "2026-09-18（api.github.com 核验：PR #482 merge=7d19ebf6，base=c2577169；PR #554 merge=e436ee4a）",
-   "result": "MISS（2026-09-18，真值函数切片语料；trust 扫描 pre=0 / post=0 违规）",
-   "result_detail": "★语料形态说明：gitlab-mcp 的 index.ts 单文件 454 KB，本机 8 GB 内存 + swap 已用 8.6/10 GB，全文件扫描被 OOM kill（exit 137），故按「大仓用真值切片」规则取 markdownUpload 函数体切片（55 行 pre / 45 行 post）扫描。切片保留了 filePath 形参 → fs.readFileSync 的完整污点链。★根因：A1 路径穿越标记要求 request 根表达式（`req.params` 等）为污点源；本例污点来自 **MCP 工具实参**（`args.file_path` → `filePath` 形参），不在 request 词汇表内 → 标记不注入。这是「污点源词汇表」的缺口，与 skyvern/open-webui 暴露的认证词表缺口同族。见 V2 报告 §6",
-   "result_reason": "corpus_mismatch",
-   "result_note": "2026-09-19 复核（对 fix commit 完整 index.ts 逐行 diff）：本条【不适合作为污点流判别力的验收条目】——修复机制与条目类型不匹配。真修复在 markdownUpload 里是 `if (IS_REMOTE && filePath) throw`（远程/网络模式下禁止使用 file_path，并新增 base64 inline-content 模式），属**部署模式闸门**，不是路径校验；本地模式的 taint→readFileSync 流在修复后依然存在且本就不算漏洞。因此 pre/post 在污点流层面**本来就应该同数**，用本条判定 PATH_GUARD_EVIDENCE 的判别力是无效实验。另：下载侧 localPath 的 `path.normalize + isAbsolute || '..' || startsWith('..'+sep) || includes(sep+'..'+sep)`在 pre 与 post **都存在**（pre 7968-7977 / post 8719-8728 完全一致）——它是既有代码、不是本次修复，但正因如此，它是真实世界的「已校验」负样本，可直接用于 G1 的「有守卫 → 不得标记」用例。"
-  },
-  {
-   "id": "fr-013",
-   "repo": "zereight/gitlab-mcp",
-   "lang": "typescript",
-   "ghsa": "GHSA-5648-rgj9-v224",
-   "type": "authz_bypass",
-   "summary": "多个安全控制绕过（F1 execute_graphql 只读+白名单绕过 / F2-F3 传输未鉴权 / F4 会话耗尽 DoS / F5 CI 日志注入）——MCP 威胁模型下工具实参可被提示注入塑造。",
-   "fix_commit": "8d2b486b08bf2ae912806fe99f040c532b029de3",
-   "parent_commit": "1700c74028d3ecde75238708c970dbf7affc7558",
-   "severity": "high",
-   "patched_version": "2.1.30",
-   "ground_truth_files": [
-    "index.ts",
-    "utils/graphql-query.ts",
-    "schemas.ts",
-    "tools/registry.ts"
-   ],
-   "ground_truth_note": "**原始注册有误，2026-09-18 修正**：① parent SHA 末 4 位转置（…6dbd6 → …6db6d，404 不可达）；② 原 fix_commit 69e784da 是「把修复写进 CHANGELOG」的纯文档提交（只改 CHANGELOG.md，PR #624），不是代码修复。真实代码修复 = PR #571「fix: harden MCP safety controls」（merge 8d2b486b，16 文件：index.ts / schemas.ts / utils/graphql-query.ts / tools/registry.ts + 11 个测试），PR #624 正文明确 link 到它并建议升级到 v2.1.30+。公告另点名 reviewed commit 60adcc0de5b0e96c4c2029f7a25d2775946421d8（v2.1.28）为已确认存在缺陷的状态。post-fix 语料用 69e784da 快照（它在 #571 之后，代码已是修复态）。",
-   "sha_verified": "2026-09-18（api.github.com 核验：PR #571 merge=8d2b486b base=1700c740 merged_at=2026-07-05）",
-   "result": "MISS（2026-09-18，mini 语料；trust 扫描 pre=0 / post=0 违规）",
-   "result_detail": "真值文件 utils/graphql-query.ts 的修复是**纯字符串解析加固**（处理 `{, mutation{...}}` 逗号前缀这类 GraphQL 文本形态），不涉及调用序列或污点流——**确定在检出面外**，属「字符串/URL 解析语义」类。本条作为模型边界的显式标注，不硬凑检出。见 V2 报告 §6",
-   "result_reason": "corpus_unverified",
-   "result_note": "mini 语料；ground_truth_files 4 个文件均在切片内（2026-09-19 严格路径校验），但未按 R1 校验调用链完整性。MISS 结论暂定。"
-  },
-  {
-   "id": "fr-014",
-   "repo": "mockoon/mockoon",
-   "lang": "typescript",
-   "ghsa": "GHSA-rqx4-3f6q-3x2v",
-   "cve": "CVE-2026-59148",
-   "type": "unauth_admin_api",
-   "summary": "未认证管理 API + 通配 CORS：管理 API 挂在与 mock 路由同一个 Express listener 上且默认启用，对所有端点返回 Access-Control-Allow-Origin: *（任意方法）——任意站点可管理 mock 服务器、窃取 mock 状态与 secrets。",
-   "fix_commit": "c420b5a56918475b8663977b51e5f986e45b3299",
-   "parent_commit": "b42bdfb7f82e83f0e81bea8e6fe41adf5ec82585",
-   "severity": "high",
-   "patched_version": "9.7.0",
-   "ground_truth_files": [
-    "packages/commons-server/src/libs/server/admin-api.ts",
-    "packages/commons-server/src/libs/server/server.ts",
-    "packages/commons-server/src/libs/server/events-listeners.ts",
-    "packages/commons-server/src/libs/utils.ts",
-    "packages/commons-server/src/libs/logger.ts"
-   ],
-   "ground_truth_note": "修复 = admin-api.ts 新增 bearer token 鉴权（extractBearerToken + timingSafeEqual）+ CORS 来源白名单（adminApiCorsOrigins 取代硬编码 '*'）+ 事务脱敏（redactTransaction）。漏洞形态 = **中间件/鉴权整体缺席**（pre-fix admin-api.ts 无任何 auth 检查）+ 配置层 CORS 通配。注意：该管理 API 是库形态（commons-server 内部 server.use 挂载），不是 app.get('/path', handler) 的顶层路由注册形态——这是框架适配器可见性的已知软肋。",
-   "sha_verified": "2026-09-18（api.github.com 核验；PR #2254 merge=c420b5a5 34 文件）",
-   "result": "MISS（2026-09-18，mini 语料；trust 扫描 0 违规，pre/post 均 0）",
-   "result_detail": "mini 语料（5 个真值文件）提取 99 个函数，trust 引擎 0 违规。根因类别 = 缺失检查类 + 配置类（CORS 通配无域名恰语义），且管理路由以库内 server.use 挂载、不具 app.get 形态",
-   "result_reason": "corpus_unverified",
-   "result_note": "mini 语料；5 个真值文件均在切片内（2026-09-19 严格路径校验），调用链完整性未校验。MISS 结论暂定。"
-  },
-  {
-   "id": "fr-015",
-   "repo": "nuxt-modules/og-image",
-   "lang": "typescript",
-   "ghsa": "GHSA-q8hw-4fvp-9rwv",
-   "type": "ssrf_font_path",
-   "summary": "未认证 SSRF：fonts[].path URL 参数被服务端抓取。",
-   "fix_commit": "243cac2228671d3711c2bd65e300c278fcdf5a4e",
-   "parent_commit": "5aa6dbf0b3848b578a87144032cfb6b734454b56",
-   "severity": "medium",
-   "patched_version": "6.7.0",
-   "ground_truth_files": [
-    "src/runtime/server/og-image/fonts.ts",
-    "src/runtime/server/util/ssrf.ts"
-   ],
-   "ground_truth_note": "**重要发现：pre-fix 快照里 `util/ssrf.ts` 及其守卫 `isBlockedUrl()` 已经存在** —— 漏洞不是「没有守卫」，而是「守卫没接在 fonts 这条路径上」+ 守卫本身对同源自信任/重定向放行过宽。这使其成为 fr-009 同类的「守卫存在但不足」样本。修复三处：① fonts.ts 对 URL 解码来的 fonts[] 做字段类型/长度/数量边界校验；② ssrf.ts 新增 trustedHost 豁免并对每一跳重定向重新做 isBlockedUrl；③ 新增 bindings/font-assets/external-url.ts（该绑定文件 pre-fix 不存在，故不计入 pre 语料）。",
-   "sha_verified": "2026-09-18（api.github.com 核验；PR #637 merge=243cac22 「fix: prevent unauthenticated SSRF via font URL parameter」）",
-   "result": "MISS（2026-09-18，mini 语料；trust 扫描 pre=0 / post=0 违规）",
-   "result_detail": "★阻塞已解除：此前 >480s 未完成的根因是提取器 SSRF 标记的正则死循环（3.7.28 引入，2026-09-18 修复，见 V2 报告 §5）。修复后 og-mini-pre 48s 完成。**0 违规的原因值得单独记录**：SSRF 标记要求 fetch 后的 300 字符窗口内出现污点名；本例 fonts[] 的 URL 来自 `decodeURIComponent` 解码后的对象字段（`font.path`），不在 URL_PARAM_NAME 词汇表内，也不构成 `req.*` 污染 → 标记不注入。与 fr-009/fr-015 同属「守卫存在但没接在这条路径」+「污点源词汇表缺口」的叠加。见 V2 报告 §6",
-   "result_reason": "corpus_invalid",
-   "result_note": "不可判定：mini 切片（fonts.ts + ssrf.ts）内没有任何出站 sink——唯一 fetch 在 ssrf.ts:260，真值链路的 sink 在 src/runtime/server/util/fetchLocalAsset.ts（$fetch）等未被收录的文件。按 R1/R3：该 MISS 不代表引擎能力。"
-  },
-  {
-   "id": "fr-016",
-   "repo": "Redocly/redocly-cli",
-   "lang": "typescript",
-   "ghsa": "GHSA-657c-g7qc-r9j2",
-   "type": "path_traversal_split",
-   "summary": "split 命令路径穿越：输出文件路径未限制在目录内。",
-   "fix_commit": "26a0f299fae0b3bb7bd513043d2f1e90e69f79ee",
-   "parent_commit": "d32cd86caf7dbcf16c736b77eda8324173b824b1",
-   "severity": "medium",
-   "patched_version": "1.34.17",
-   "ground_truth_files": [
-    "packages/cli/src/commands/split/asyncapi/iterate-asyncapi-channels.ts",
-    "packages/cli/src/commands/split/asyncapi/iterate-asyncapi-components.ts",
-    "packages/cli/src/commands/split/asyncapi/iterate-asyncapi-operations.ts",
-    "packages/cli/src/commands/split/utils/iterate-components.ts",
-    "packages/cli/src/commands/split/utils/iterate-path-items.ts"
-   ],
-   "ground_truth_note": "**fr-002/fr-003 同族的最干净样本**：修复 diff 就是在每个写文件<｜hy_place▁holder▁no▁813｜>前**新增一行 `assertWithinDir(dir, file, name)`**（新增合约 tests/fixtures/path-traversal*.json 与 assert-within-dir.test.ts 同批落地）。漏洞 = 「该有的检查没有被调用」——一个调用序列状态机在原理上不可见（它只能证明「顺序错了」，不能证明「少了」）。此外污点源是被 split 的 OpenAPI/AsyncAPI 描述文件内容（非 request 对象），且经过 pathToFilename 跨文件助手处理，超出 A1 标记的「request 污点 → fs sink 单跳 + 跨函数一跳」射程。",
-   "sha_verified": "2026-09-18（api.github.com 核验；PR #2891 merge=26a0f299 「fix: path traversal in the split command」）",
-   "result": "DETECTED（2026-09-20，3.7.39；pre 7 条 / post 0 条）",
-   "result_detail": "完整 packages/cli 快照实测：pre 7 条 / post 0 条。pre 命中 handleSplit、iterateAsyncApiChannels、iterateAsyncApiComponents、iterateComponents、iteratePathItems、splitOASDefinition、writeToFileByExtension。post 因新增 assertWithinDir(dir, file, name) 全部归零。此前 0/0 有两个独立断链点（见 R10）：① 污点根是外部文档解析产物（Object.keys(channels) 键名），不在 UNTRUSTED_ROOTS 里；② 落盘经writeToFileByExtension → writeYaml → fs.writeFileSync 两层自有封装，methodSinkParamMap 只登记一跳。3.7.39 又补上第三处（C4b）：`const filename = getFileNamePath(dir, componentName, ext)` 里的getFileNamePath 是项目自有 helper，此前不在塑形词表内，污点断在最后一跳。",
-   "result_reason": "detected_after_document_root_and_sink_inheritance",
-   "result_note": "mini 语料；5 个真值文件均在切片内（2026-09-19 严格路径校验），调用链完整性未校验。MISS 结论暂定。 ｜ 2026-09-19 二次复测（3.7.38）：① 语料从 mini 切片（5 个真值文件）升级为完整 packages/cli 子包，快照入库 blind-benchmark/fr-corpus/fr-016-redocly/{pre,post}（各 1.1M，受保护资产，不得放 /tmp）；② pre/post 由 0/0 变为 **5/0**，成为继 fr-007 之后第二个有判别力的真实语料对；③ 注意为本条新增 G-C 的 Within 后缀是照着本条形态加的，为避免同义反复，另有一条守卫函数名为 stamp（不含任何 G-C 后缀）的定向用例证明压制依据是被调用方自身的证据而非名字。 ｜ 2026-09-20 三次复测（3.7.39 C4b/C4c）：pre 5 → **7**，新增的两条正是 iterateAsyncApiComponents / iterateComponents —— 它们的污点要穿过 getFileNamePath(dir, componentName, ext) 这一跳，而该 helper 此前不在 C4 的塑形词表内。两条均为真阳性（组件名带 ../ 逃出输出目录，即本 CVE 形态）。 post 侧仍是 0：新增的 assertWithinDir(asyncapiDir, filename, componentName) 是 tier-0 守卫，由 G2 按被调用方自身证据压制——与 G-C 的 Within 后缀无关。",
-   "updated": "2026-09-20"
-  },
-  {
-   "id": "fr-017",
-   "repo": "tinacms/tinacms",
-   "lang": "typescript",
-   "ghsa": "GHSA-g74q-6g2f-874x",
-   "type": "broken_access_control_oauth",
-   "summary": "访问控制破坏：任意 TinaCloud 用户可对任意 clientId 授权。",
-   "fix_commit": "0a927a4f8d228dd05ee7ca4be32899bc190e73af",
-   "parent_commit": "c2c03c677f67b6fd3a2155d5227b9bf785b43288",
-   "severity": "high",
-   "patched_version": "1.1.4",
-   "ground_truth_files": [
-    "packages/@tinacms/auth/src/index.ts"
-   ],
-   "ground_truth_note": "pre-fix `isAuthorized(req)` 从**请求参数**取 clientID（`req.query.clientID`）去问 identity 服务「这个 token 是不是它自称那个 app 的已验证用户」；修复改为从**服务端配置**取（`expectedClientID` 形参 → 回落 `process.env.NEXT_PUBLIC_TINA_CLIENT_ID`，取不到则拒绝授权）。本质是「身份锚点的归属」问题：需要判断用于校验的身份标识**应当来自服务端配置而非请求输入**——属数据流/归属语义，非调用序列。",
-   "sha_verified": "2026-09-18（api.github.com 核验；PR #7168 merge=0a927a4f 「Scope TinaCloud authorization to the site's configured clientID」）",
-   "result": "MISS（2026-09-18，扁平单文件语料；trust 扫描 pre=0 / post=0 违规）",
-   "result_detail": "★两处历史作废/阻塞均已解除：①早期 0 违规无效（缺 tsconfig.json，ts-morph FileNotFoundError，引擎未实质分析）；②补 tsconfig 后 >300s 未完成的根因是提取器 SSRF 正则死循环（2026-09-18 修复，见 V2 报告 §5），修复后 57s 完成。★根因：`isAuthorized` 的 clientID 归属错误（应取服务端配置，实取 `req.query.clientID`）——需要判断「用于校验的身份标识**应当**来自何处」，属**归属语义/策略语义**，不是调用顺序也不是污点可达性，当前引擎无对应维度。与 V1 fr-004（凭据数据流）不同族。见 V2 报告 §6",
-   "result_reason": "corpus_unverified",
-   "result_note": "扁平单文件语料；1 个真值文件在切片内（2026-09-19 严格路径校验），调用链完整性未校验。MISS 结论暂定。"
-  }
- ]
+  "name": "fix-regression-corpus",
+  "version": 2,
+  "created": "2026-09-11",
+  "updated": "2026-09-23",
+  "method": "真实安全修复回归：对每个修复，扫描「修复前 parent commit」——引擎在该位置/该类型上能否报出违规；再扫修复后确认不误报。来源=GitHub 安全公告数据库（GHSA/CVE），SHA 均经 api.github.com 实测核验。",
+  "methodology_rules": [
+    {
+      "id": "R1-taint-sink-capture",
+      "added": "2026-09-19",
+      "source": "fr-015 / fr-010 教训（污点数据流试点 V1 §3、§4）",
+      "rule": "污点流类条目（type 含 ssrf / path_traversal / file_read / url_partition 等「源→sink」形态）的 ground_truth_files 必须包含 sink 所在文件，且必须由 fix commit 的【完整调用链】确定（调用者、中转函数、sink），不得只取 patch hunk 命中的文件。",
+      "why": "sink 不在真值清单里时，分析器无论多强都看不见；此时的 MISS 是语料缺陷，不代表引擎能力。"
+    },
+    {
+      "id": "R2-slice-coverage-verification",
+      "added": "2026-09-19",
+      "source": "fr-015 mini 切片教训",
+      "rule": "切片后必须做覆盖率校验：逐条确认 ground_truth_files（含按 R1 补齐的 sink 文件）与调用链中转文件都落在实际切片目录内。任何一格缺失 → 该条目的 MISS 记为不可判定（corpus_invalid），不得计入「分析未检出」。",
+      "why": "真值清单写对了、切片没收全，结论一样是哑值——清单与切片是两回事。"
+    },
+    {
+      "id": "R3-mini-only-when-sink-captured",
+      "added": "2026-09-19",
+      "source": "DeepSeek 评审意见（污点试点 V1）",
+      "rule": "小仓库一律整包 tarball，不做 mini 切片；只有已确认 sink 与调用链文件均被收录的大仓才允许 mini。",
+      "why": "mini 切片省下的下载时间远小于它引入的不可判定风险。"
+    },
+    {
+      "id": "R4-result-must-name-reason",
+      "added": "2026-09-19",
+      "source": "fr-012/fr-015 双 MISS 复盘",
+      "rule": "result 字段必须区分「分析未检出（analysis_miss）」与「语料不可判定（corpus_invalid）」两种 MISS，并注明日期与判定依据；否则跨会话的结论会被二次误读。",
+      "why": "两个不同原因的 MISS 混在同一个标签下，会让后续优先级排序建立在错误前提上。"
+    },
+    {
+      "id": "R5-fix-mechanism-match",
+      "added": "2026-09-19",
+      "source": "fr-012 复核（对 fix commit 完整 diff 逐行核对）",
+      "rule": "验收条目必须与修复机制匹配：先读 fix commit 的完整 diff 确认修复到底改了什么。若修复是部署模式闸门（`if (IS_REMOTE && …) throw`）、鉴权策略分支、配置开关等【上下文开关】而非数据流本身，则 pre/post 在污点流层面本来就该同数——该条目标记为 corpus_mismatch，不得用于判定判别力，也不得记为分析器 MISS。",
+      "why": "否则会把「语料不提供信号」误读成「分析器没有判别力」，进而在错误的前提下追一个不存在的能力缺口。"
+    },
+    {
+      "id": "R6-negative-assertion-needs-positive-control",
+      "added": "2026-09-19",
+      "source": "G1 PATH_GUARD_EVIDENCE 实现期（3 条用例假通过）",
+      "rule": "任何「不得标记 / 不得报出」类断言，必须配一条【同形状、去掉被验证机制后必须重新报出】的正对照。缺正对照的负向断言视为无效——它可能因为管线在别处已经断了（如污点经表达式包装后不传播）而假通过，与被验证机制无关。",
+      "why": "标记管线的失败模式里，「根本没走到」和「走到了但被正确压制」在输出上完全一样。只有正对照能把两者区分开。"
+    },
+    {
+      "id": "R7-no-vacuous-gate",
+      "added": "2026-09-19",
+      "source": "TS 795 盲测对路径穿越连续三次零覆盖（taintpath 语料族建立后确认）",
+      "rule": "回归闸门必须对被测能力有实际覆盖才能算通过。每次发布前须确认：被测代码路径在新语料上确实被走到（如统计 __progmune_path_traversal__ 出现次数 > 0）。出现「改动前后该指标均为 0」即空过（vacuous pass），须在报告里显式标注，并优先补语料而不是宣称通过。",
+      "why": "本报告已三次把 3086 flags LOST 0/ADDED 0 当作验收证据，而它三次都没有覆盖当时正在改的能力。空过比失败更危险：它给出安全错觉。已由 blind-benchmark/generated/taintpath_A|B + check-taintpath.ts 补上覆盖。",
+      "current_status": "path_traversal 标记在全语料出现 15 次（此前 0 次）"
+    },
+    {
+      "id": "R8-no-stale-artifact-gate",
+      "added": "2026-09-19",
+      "source": "C4 落地时发现 check-taintpath.ts 读陈旧报告仍报 24/24 全绿",
+      "rule": "验收闸门不得默认读取上一次运行留下的产物文件。闸门必须【重新计算】被测指标（实时提取 / 实时扫描），或至少校验产物的时效（产物生成时间晚于被测代码/语料的最后修改时间）。读陈旧产物的闸门是第二种空过——它不是没覆盖，是覆盖了但读到旧数据，且比第一种更难发现，因为它有输出、有历史、看起来一直在工作。",
+      "why": "实测：C4 落地后 4 条 known-gap 已翻正，check-taintpath 仍报「未标记，符合预期」。已改为默认实时 extractIR，需走报告时显式 --report。",
+      "current_status": "check-taintpath.ts 默认实时提取；batch-scan-results.json 仍可用于 --report 模式"
+    },
+    {
+      "id": "R9-no-inferred-suppression",
+      "added": "2026-09-19",
+      "source": "G2 调用点抑制实现期（3.7.37）",
+      "rule": "抑制类判别只允许使用【直接证据】：被调用方函数体自身含校验证据（tier-0）。经传播/推断得到的守卫（tier-1+，即「它调用了一个守卫函数所以它也守卫」）不得用于抑制，只能用于跨函数流的解释。同时，抑制的作用粒度应尽量落在【表达式】而非整个函数——函数级抑制会连带压掉同函数体里未被校验的其他流。",
+      "why": "推断出来的证据含误差，而抑制是一种【不可逆】操作：真阳性一旦被压掉就不会再报出，也不会出现在任何回归统计里（它只会表现为 LOST，容易被当成无关噪声）。把推断误差乘以不可逆性，是这类判别最危险的失败模式。代价是留下缺口 G2b（经项目自有 helper 转手的校验证据不生效）——缺口是可见的（仍有误报），压掉的真阳性是不可见的。",
+      "current_status": "G2 只认 tier-0；G2b 记为已知缺口（与 C4b 同族：项目自有 helper 不传播）"
+    },
+    {
+      "id": "R10-two-sided-taint-path",
+      "added": "2026-09-19",
+      "source": "fr-016 真实语料连续三轮 0 条之后定位到两侧同时断开（3.7.38）",
+      "rule": "一条污点流要能被观测到，【来源侧】与【sink 侧】必须同时连通。只补一侧时语料往往纹丝不动，看起来像修补无效，实际另一侧也断着。调试必须先写最小复现逐段确认通断，不要在真实语料上只看总数——总数是唯一结果变量，两侧任何一侧断着它都等于 0，没有定位能力。",
+      "why": "fr-016 的 pre 侧连修三轮（C4 塑形传播 / G2 调用点抑制 / 补文档解析产物根）都保持 0 条，直到把 sink 侧的 wrapper 继承也补上才跳到 5 条。若一直只在根表上打磨，会得出『这条路走不通』的错误结论。",
+      "current_status": "两侧均已连通：来源侧新增 runtime_key_enum / document_parse 根；sink 侧 methodSinkParamMap 增加 wrapper 继承一跳。已知缺口 C4b（helper 传播）与 C4c（迭代已被污染的聚合）"
+    },
+    {
+      "id": "R11-helper-stricter-than-inline",
+      "added": "2026-09-20",
+      "source": "C4b 项目自有纯塑形 helper 传播（3.7.39）",
+      "rule": "同一个判别规则，作用在【内联表达式】与作用在【项目自有 helper】上时，helper 侧的证据集必须比内联侧更严 —— 内联看得见整个实参窗口，helper 看不见，推断的证据等级天然更低。",
+      "why": "C4 的内联规则把 `.replace/.trim/...` 算作塑形（不净化）。若把同一条规则照搬到 helper 上，`.replace(/[^a-z0-9]/gi, \"\")` 这种标准净化写法就会被判成「确定不净化」—— 而它恰恰是净化函数的常见实现。这类错误在 helper 侧不可见（看不到函数体为什么被认成塑形），代价高于漏报。",
+      "current_status": "C4b 的证据集只收 node:path 家族 + 值转换（String/Number/Boolean） + 已认定的纯塑形 helper；字符过滤方法不计入。代价：`toSlug(p){return p.trim().toLowerCase()}` 仍不传播（已知缺口，与 C4b 同族）"
+    },
+    {
+      "id": "R12-repro-before-trusting-backlog",
+      "added": "2026-09-20",
+      "source": "C4d 高阶枚举回调形参（3.7.40）—— 备忘里写的『for-in 也不绑定』经最小复现实测是错的",
+      "rule": "备忘/待办里登记的『已知缺口』在动手之前必须先写最小复现确认它真的存在。未复现的缺口清单会随代码演进过期：它可能是被后续改动顺手闭合的，也可能一开始就是误判。照着过期的清单做，会改一个已经对的地方，还顺带承担回归风险。",
+      "why": "C4d 这轮开工前，备忘的『下一步』列着『for-in 与 .map/.forEach 回调形参不绑定』。8 个最小复现跑下来：for-in 两种形态本来就是通的（`bindFromEnum` 的正则本就写成 `(?:of|in)`），真正不通的只有回调那 4 种。若无复现直接动手，会去改一段正确代码，且因为『改了没变化』而继续怀疑别的方向。",
+      "current_status": "C4d 已落地（只收 forEach/map/flatMap/filter，只绑第一个形参、`[k,v]` 解构两个都绑）。同一批复现也确认了负对照：字面量数组回调、只把索引写进路径、被枚举的是干净变量 —— 三条均不标记"
+    },
+    {
+      "id": "R13-no-bypass-in-repro",
+      "added": "2026-09-20",
+      "source": "C4e helper 的现代写法（3.7.41）—— 第一版探针正负对照一次性全 MARK，什么都测不出来",
+      "rule": "写最小复现（以及任何单测 fixture）之前，先问一句：『我断言的这个现象，还能通过哪条旁路产生？』只要存在一条不经过被测机制的旁路，正对照的价值就是零 —— 它会带着负对照一起全绿。设计上必须让断言只能通过被测机制成立。",
+      "why": "C4e 初版把 helper 调用直接写在 sink 实参里（`writeFileSync(outDir + '/' + withExt(k))`）。判定里有一条兜底规则：sink 实参窗口出现污点名就标 —— 于是 helper 认不认得出都会被标，13 条用例全 MARK，连「helper 调用未定义函数」这种明显该不标的负对照也 MARK。改成隔离写法（`const rel = withExt(k)`，污点只能经 helper 返回值进来）才分出胜负。",
+      "current_status": "taintpath_F 全族、C4e 定向组 9 条均按隔离写法构造：sink 实参里不得出现污点变量本身"
+    },
+    {
+      "id": "R14-three-blade-reverse-verification",
+      "added": "2026-09-20",
+      "source": "C4e 取舍：既要证明正例依赖新代码，也要证明边界负对照不是空转",
+      "rule": "任何『放宽某条判据』的改动，反向验证至少三刀：① 摘掉整体能力 ⇒ 正例应全部失败；② 只摘放宽的那一项 ⇒ 只相关的那几条失败（做归因）；③ 反过来把判据再放宽一格 ⇒ 为这次收窄新写的边界负对照必须变红（证明它不是空转）。只做①会把「边界用例其实拦不住任何东西」漏过去。",
+      "why": "C4e 把 module 常量从『一律拦死』放宽到『字面量放行』，并新写了一条负对照锁定非字面量仍拦。只摘整体（全 F 族正例失败）证明不了这条负对照有效 —— 因为它本来就该不标，旧代码也不会让它红。第三刀把常量收集临时改成任意初值都收，那条负对照立刻报错，才确认它真的咬得住。",
+      "current_status": "C4e 三刀均执行并记录结果；第三刀（`out.add(vd.getName())`）跑完已还原"
+    },
+    {
+      "id": "R15-narrowing-is-mirror-image",
+      "added": "2026-09-20",
+      "source": "C4f 名字级传播收窄（3.7.42）—— 前四轮都是补召回，这一轮反过来收精度，门的风险方向整个翻转",
+      "rule": "补召回的改动怕漏报，收精度的改动怕两件事：【收过头】把真阳性也收掉，和【负对照空转】（那批 no-taint 本来就不该标，旧代码也不会让它们红）。所以收窄轮的验收要看反的：盲测重点看 LOST 而不是 ADDED；反向验证除了「退回旧行为 ⇒ 负对照转红」，还要再切一刀【把收窄做得更激进】，确认正例不是靠旁路通过的。",
+      "why": "C4f 把 6 种误报收掉（helper 丢弃形参、污点落在不被依赖的形参位、嵌在 concat 里、两跳依赖集为空、两跳位置不对齐、换序反向）。这批 no-taint 用例在旧代码下同样不标 —— 摘掉新代码它们也不会红，所以光做「摘掉能力」那一刀证明不了任何东西。必须再切一刀把收窄推到过头：G 族 3 条位置对齐正例随即转漏报，而 emitPlainShaper（常规塑形）不受影响，这才同时证明了「对照咬得住」和「收窄没波及常规路径」。",
+      "current_status": "taintpath_G 12 条（4 mark / 7 no-taint / 1 suppressed）；三刀反向验证结果已记入 CHANGELOG 3.7.42 与设计稿 §十二"
+    },
+    {
+      "id": "R16-fixture-names-must-not-collide-with-product-lists",
+      "added": "2026-09-20",
+      "source": "C4g（3.7.43）—— 语料里的静态方法写成 Renderer.stat(k)，闸门全绿但归因时发现它是被 sink 名单兜底命中的",
+      "rule": "测试语料里的标识符（函数名/方法名/变量名）必须先对照产品的各类名单（sink 名单、守卫词表、白名单）查一遍，不能撞名。撞了的话用例会被一条与被测机制毫无关系的规则命中 —— 而且往往是『标对了』的假象，比明显的假通过更难发现。",
+      "why": "H 族第一版把静态方法命名为 stat，而 stat 就在 TS_FILE_SINK_NAMES 里（fs.stat）。闸门 92/92 全绿，直到反向验证摘掉方法收集后它仍标才暴露：实测 Other.stat(k)（接收者未定义）、以及类里根本没有 stat 方法，照样标。改名 toFile 后归因才干净（摘掉方法收集 ⇒ 3 条方法正例全部转漏报）。这是 R13（旁路）的一个子类：旁路不只在被测机制内部，还可能来自**别的规则表**。",
+      "current_status": "taintpath_H 静态方法已改名 toFile；生成器里加了注释说明原因。【2026-09-20 续】同一轮发现**定向用例**里也有同样的假通过：extract-ir-taint-structural.test.ts 的 C4g 组原本也写着 Renderer.stat(k)，那条用例从写下来那天起就没测过 helper 传播（被 sink 名单兜底）。已改名 toFile。⇒ 本规则适用于**所有 fixture**，不只 blind 语料 —— 定向用例看起来小而干净，反而更容易让人不设防。"
+    },
+    {
+      "id": "R17-adjust-without-reproducing-first",
+      "added": "2026-09-20",
+      "source": "C4h（3.7.44）—— 备忘里的三个候选动工前先过探针，结果只有两个是真缺口，反倒挖出一个备忘里没有的**既有缺陷**",
+      "rule": "备忘/清单里的『下一步』条目在动工前必须先用最小探针复现一遍：① 它现在到底是 FAIL 还是 PASS；② 若 FAIL，失败的原因是不是本以为的那个机制。探针的对照组里要顺手带上『看起来差不多但没人提过』的形状 —— 真缺陷常常长在这些地方，而不是清单上。",
+      "why": "C4h 的三个候选里，同名方法两处、属性箭头是真漏报（修了），而探针顺手多写的一句 `class Reg { lookup(n) { return registry[n]; } }` + `r.lookup(k)` 暴露了一个**既有**误报：C4g 在 consider() 之后无条件把裸名登记进成员名录，确证失败的名字照样留在名录里 ⇒ 非塑形方法的成员调用位被当成塑形。这个缺陷不在任何备忘里，也不是本轮的目标 —— 它只是探针旁边多写的一句。反向验证专门加了第 4 刀（退回『确证之前就登记』），才把这条缺陷钉进语料、且归因到具体机制上。",
+      "current_status": "taintpath_I 20 条；反向验证四刀已记入 CHANGELOG 3.7.44 与设计稿 §十四"
+    },
+    {
+      "id": "R18-reverse-blad-must-restore-old-behaviour",
+      "added": "2026-09-21",
+      "source": "C4i（3.7.45）反向验证：七刀里两刀第一次都打偏了",
+      "rule": "反向验证的刀必须退回【旧行为】，不能图省事让函数返回 null / 空值。写刀之前先读调用方怎么用这个返回值 —— 尤其是靠「返回值 !== 入参」判断「这一层有没有做事」的那种（返回 null 会被当成已处理）。刀的转红清单必须落在自己那一组；一旦出现跨组转红，先怀疑刀打偏了，不要急着下「机制有耦合」的结论。",
+      "why": "第 5 刀把 paramIndexOf 改成返回 null ⇒ rest 位整个失去对应形参 ⇒ 所有 helper 的实参被抹光 ⇒ 40 条漏报（正确写法是 return argIndex）。第 2 刀把 foldTemplateSubsts 改成返回 null ⇒ 调用方 `tpl !== s` 判成「已折叠」⇒ 连带 11 条无关用例转红（正确写法是 return expr）。两刀修正后各自只转 1 条，归因才干净。",
+      "current_status": "taintpath_J 26 条；七刀结果已记入 CHANGELOG 3.7.45 与设计稿 §十五"
+    },
+    {
+      "id": "R19-group-completeness-must-count-rejected",
+      "added": "2026-09-21",
+      "source": "C4j（3.7.46）—— 探针 B4/B6 挖出 C4h 引入的既有缺陷；同一轮还有两次「探针期望写错」",
+      "rule": "凡是用「全组确证」这类**集体判据**决定放行，组的分母必须包含**被判据拒掉的那些**。只把通过判据的实现算进组，等于把「判据不成立」这件事从集合里摘出去 —— 组会显示『全组确证』，而被拒的那些实现照样被放行。另：写探针的期望之前，必须先指明『这条标/不标，由哪一个机制决定』，否则期望本身可能不可达（F9a）或无意义（F9f）。",
+      "why": "C4h 把「同名成员唯一才登记」换成「全组确证」，但实现只把通过判据①②③的实现算进组。同名三处 getter：无形参的（判据①不成立）没进组、体内有 sink 的（判据③不成立）没进组 ⇒ 组里只剩一条通过者 ⇒ 『全组确证』成立 ⇒ 成员调用位 `.mk(` 放行 ⇒ `ONoParam.mk(k)` 与 `OWithSink.mk(k)` 两条本该不标的被误标。归因靠反向验证第 7 刀（`noteUnaccepted` 退回旧行为）：闸门 160/160 里恰好只有这两条转红。同轮两次探针期望写错 —— F9a：匿名默认导出那条忘了写 import，而名字只能来自导入它的文件，没有 import 期望本身不可达；F9f：期望 unmarked 实测 mark，查清后是期望错，`(0, (n) => …)(k)` 里那个内联匿名箭头自己就是塑形函数，与默认导出无关（删掉 helpers.ts 照样标），标是保守侧的正常行为。",
+      "current_status": "taintpath_K 22 条（12 mark / 9 no-taint / 1 suppressed）；定向用例 C4j 组 23 条，其中两条「回归·⑦」（ONoParam.mk / OWithSink.mk）是该缺陷的回归门；七刀结果已记入 CHANGELOG 3.7.46 与设计稿 §十六"
+    },
+    {
+      "id": "R20-three-questions-before-adopting-a-corpus-pair",
+      "added": "2026-09-21",
+      "source": "为 taintpath 找第三对真实语料：连查三个候选全部 0/0 落空，且落空原因各不相同",
+      "rule": "新条目入库前先过三问，**任一不过就不要下载快照**（省下的正是最贵的那一步）：① **pre 侧有没有 path 校验** —— 只要有（哪怕是 `startsWith` 这种 prefix-only 的弱守卫）就会被 G1 压成 0，属已声明的「守卫存在但不足」面外类，做不出判别力；② **污点根在不在要扫的切片里** —— 词表只有 `req.*`/`request.*` 形态、URL 参数类、文档解析键三种，跨包入参（React Router 的 session id）、类字段（AdonisJS 的 clientName）、MCP 工具实参（fr-012）、CLI argv 都不在内 ⇒ pre 恒为 0；③ **fix 是不是「新增校验」** —— 换掉污点源（AdonisJS 把默认文件名换成随机 UUID）、加强既有守卫、纯文档提交、或压根没有修复版本（TypeSpec）都做不成 post 侧。三问全过才可能得到 pre>0 / post=0。",
+      "why": "2026-09-21 为补第三对真实语料，从 npm 侧 400 条公告里按 CWE 过滤出 11 条路径类，逐个核到提交级：① **AdonisJS bodyparser**（CVE-2026-21440，TS，`MultipartFile.move()`）—— 修复是 `Object.assign({ name: crypto.randomUUID() … })`，把污点源 `this.clientName` 换成随机串，不是加校验；且 clientName 是类字段、不在 `req.*` 词表内 ⇒ pre/post 都会是 0。② **Mockoon commons-server**（CVE-2026-59149，`getSafeFilePath`）—— 漏洞恰是「有守卫但守卫是 `resolvedPath.startsWith(staticBaseDir)` 这种 prefix-only」，属 fr-009/fr-015 同族的「守卫存在但不足」，G1 会压成 0。③ **React Router 文件会话存储**（CVE-2025-61686，fix `6ff0bb35db54` 「Add some validation for session IDs」，形态其实最对路：自有 helper `getFile(dir,id)` 加了 `/^[0-9a-f]{16}$/i` 校验 + 四个调用点判空）—— 但 `fileStorage.ts` pre 版里 `req.`/`request.`/`headers` 出现 **0 次**，session id 是跨包传进来的**入参**，污点根在切片外 ⇒ 仍是 0/0。三问里各踩一条。",
+      "current_status": "三个候选均未入库（作为「已核过、不适用」记录在此，避免以后重复查）。第三对仍缺。同轮改用「按 sink 反查真实代码的路径实参形态」找新形状：真实代码里 71%（34/48）的路径实参是**上游算好装在变量/成员里**的裸标识符，而非就地拼接 —— 由此提出 C4k 的三个候选形状，按 R17 先写了探针；探针确认真漏报后按 R21 量化，收益上限 0 ⇒ **判定不修**（详见设计稿 §十七）"
+    },
+    {
+      "id": "R21-quantify-recall-ceiling-before-building",
+      "added": "2026-09-21",
+      "source": "C4k 寻址轮：探针已确认「成员/容器位不传播」是 5 个形状的真漏报，但在真实语料上量化后发现收益上限为 0",
+      "rule": "确认漏报之后、动工之前，先用**只读文本**在真实语料上量化「做出来能拿到多少」：① 统计该形态在 sink 实参里的占比；② 对每个命中点回溯上游写入/赋值，看 RHS 是否真带污点；③ 只有①②都非零才动手。**上限为 0 就判定不修** —— 省下的是「实现 + 反向验证 + 全量盲测」的一整轮。还要问反面：若该机制要求**流敏感**（写入后被常量覆盖）或**对象身份**（两个对象同名属性）才能不误标，成本就是另一个量级，收益要按这个成本打折。",
+      "why": "C4k 实测：探针确认五种形状漏报（构造函数 `this.p = <污>`→`o.p`、后挂 `f.path = <污>`→`f.path`、解构 `const {path:p}=f`、`arr.push(<污>)`→`arr[0]`、`m.set(...,<污>)`→`m.get()`，全部 no-taint 而期望 mark），看着像一条大有可为的召回轴。但 `mine-member-carriers.py` 在 fr-016 pre / fr-007 pre / demo-realworld（219 文件 / 48 sink）上量化：成员读取 8（17%）、下标 2（4%），能追到对应属性写入的只有 4 处，且**全部是 redocly `oauth-client.ts` 的 `this.credentialsFile*Path`，RHS 是常量** `path.join(homeDirPath, '.redocly')` ⇒ 收益上限 0、风险为正（真做出来先标的就是这 4 处常量路径，纯 FP）。同时第二轮边界探针显示：要不做误标就得支持流敏感（N2 覆盖）与对象身份（N3 两个对象同名属性），成本远超收益。",
+      "current_status": "C4k 成员/容器承载轴据此判定**不修**（设计稿 §十七 已记录完整寻址过程与读数）。样本强度提示：结论基于 219 文件 / 48 sink，换更大的真实语料应重跑 `blind-benchmark/mine-member-carriers.py` 再下结论"
+    },
+    {
+      "id": "R22-confirm-the-criterion-before-writing-probe-expectations",
+      "added": "2026-09-21",
+      "source": "C4k 第一轮探针 16 条跑出 7 条 DIFF，其中 4 条是**期望写错**——把判据理解错了",
+      "rule": "写探针期望之前，先把判据的**准确定义**抄进探针注释里再动手。本项目的 no-taint 判据是「helper 把形参丢了 / 返回值不依赖污点形参」，**不是**「路径看起来被规整了」——加 `.md` 后缀、走 `path.join`、赋值到成员、经三元二选一，这些都不算净化：`k + \".md\"` 里的 k 照样流得出来（`../../../etc/passwd.md` 照样穿越），**标才是正确的**。期望写错 = 整轮对着错的靶子改代码，比不改更糟。",
+      "why": "第三次犯同一类错：C4j 轮两次（F9a 忘了写 import，使匿名默认导出的名字根本不可达、期望本身不成立；F9f 把「`(0,(n)=>n+'.md')(k)` 里内联匿名箭头自己就是塑形函数」的保守侧标记当成误报），C4k 轮一次（把 T1 `k + \".md\"`、C1/C2 helper 调用、X4 不可判定三元这 4 条的 mark 当成缺口，实际都是正确行为）。三次的共性：动笔写 expect 时没有先把判据摆出来对照。",
+      "current_status": "C4k 第一轮探针已按修正后的口径重读：7 条 DIFF 中 4 条实为正确行为、3 条归入 R21 量化。第二轮 12 条边界探针已列清「实现后必须仍为 no-taint」的负对照清单（常量写成员 / 被常量覆盖 / 对象身份 / 另一属性 / 跨函数写属性 / push 常量 / set 常量 / 经丢弃形参 shaper / 成员链 / sink 之后写入 / basename 净化），当前 11 条 no-taint（`arr[k]` 下标带污点直接标，保守侧正确）"
+    },
+    {
+      "id": "R23-zero-drift-may-be-a-vacuous-pass",
+      "added": "2026-09-21",
+      "source": "E1 轮（类方法 calls 提取）：TS 盲测 111 项目 / 3201 条 **LOST 0 / ADDED 0**，汇总数字与基线完全一致；同期反向验证刀③「摘掉类方法的全部标记」后闸门仍 160/160",
+      "rule": "**「零漂移」不等于「改动安全」，先确认基线是否覆盖你改的那条轴——而且『覆盖』要看闸门的判据口径，不是看语料里有没有那种写法。** 本轮 LOST 0 / ADDED 0 的真正原因是**闸门对该轴不敏感**：taintpath 闸门只比对 `calls` 里是否出现 `__progmune_path_traversal__` 标记，而类方法的标记在 E1 之前就由 `computeMarkerCalls` 正常产出了；E1 补的是 `calls` 里的**真实调用名**，这道门根本不看。刀③摘掉类方法标记后闸门照旧 160/160，正是空过的铁证。判断方法：改完跑一次反向验证，如果「把新机制完全摘掉」基线仍全绿，**就说明这条门是空过**，真证据必须另找（本轮是 FP 观测池 + 定向用例）。",
+      "why": "与 R7（「pre/post 都是 0 的语料是空过，不是通过」）同族，只是发生在盲测门上。R7 说的是**语料**没触发规则，R23 说的是**基线**没覆盖形态。两处的失败模式一样：数字好看但没信息量。这类教训在本项目已第三次出现（3.7.31 的 P0：`fetch(` 标记从未被 fixture 触发；E1 轮：类方法的真实调用名从未被闸门判据使用）。",
+      "wording_correction_2026_09_21": "初版写「generated 语料全是函数载体、没有一个类方法」——**不准确**，已更正。实测基线里确有类：taintpath_B/src/store.ts 1 个、taintpath_H/src/helpers.ts 1 个、taintpath_I/src/helpers.ts 8 个、taintpath_K/src/helpers.ts 1 个，共 11 个（就是 C4g/C4h 的 helper 载体夹具）。所以不是「语料没有这种写法」，而是「闸门判据（标记存在与否）对『真实调用名』这条轴不敏感」。结论与证据（刀③）不变，但措辞必须分得清这两种空过：**语料缺形状** vs **判据不看该轴**——两者的补救方式不同（前者加 fixture，后者换门或补门）。",
+      "current_status": "E1 轮据此把验收重心移到 FP 观测池（空 calls 71% → 12%）与定向用例（E1 组 14 条），并在设计稿 §十八 明确写下「盲测 LOST 0 / ADDED 0 的正确解读是闸门口径不覆盖，不是改动无影响」"
+    },
+    {
+      "id": "R24-derive-candidate-list-from-the-full-denominator",
+      "added": "2026-09-21",
+      "source": "R21 量化轮：E1 留下的四条规则侧线索全部从 18 条【新增】违规里归纳，而全池有 72 条；新增样本偏 Input Validation（56%），全池第一大项却是 Data Mutation Without Audit Trail（36.1%）。按全量重算：原四条合计只覆盖 23.6%，漏掉的 L4 单项就是 36.1%",
+      "rule": "归纳候选机制（线索清单 / 待办清单）时，分母必须是**全量**观测，不能是本次改动**新增**的那批。新增样本天然有偏——它只包含『这次改动让规则第一次看见的』，分布与总体不同，且会系统性偏向这次改动所触及的那条轴。做法：先写只读的归因脚本对全量打标（本轮是 `fp-pool-attrib.py`），按上限排序后再决定做什么；**不要从增量堆里凭印象列清单**。",
+      "why": "与 R19（全组分母须含被判据拒掉的那些）、R23（零漂移可能是空过）同族——**第三次栽在分母选错**：R19 是判据的分母，R23 是验收门的分母，R24 是归纳样本的分母。三者的共同动作都一样：动手前先问『这个数字的分母是谁』。R19 那次漏的是被拒掉的成员，R24 这次漏的是占比最大的那条规则。",
+      "current_status": "按 R24 重算后线索从 4 条扩到 8 条，优先级完全重排：原四条降到 23.6%，新增的 L4（审计轨迹需『工程内已有审计设施』前置，36.1%）与 L7（工厂装配函数不是内容创建，19.4%）成为前两大项；未归因违规从 37.5% 降到 9.7%。设计稿 §十九 记录了完整表与建议顺序。**但见 R25：这批上限随后被证明不稳定**"
+    },
+    {
+      "id": "R25-confirm-the-pool-is-saturated-before-ranking",
+      "added": "2026-09-21",
+      "source": "R24 之后立刻被打脸：按全量重排出 8 条线索的优先级，只加进第 5 个切片 verdaccio（72 → 198 条违规），最大项 L4 就从 36.1% 掉到 20.2%、L7 从 19.4% 掉到 10.1%、未归因从 9.7% 涨到 37.4%",
+      "rule": "**光把分母换成全量还不够，全量本身必须饱和。** 排序 / 定优先级之前先验证：再往池里加语料，分布还会不会变。可执行判据——连续加 2 个切片后，① 各候选机制的占比变化 **< 5 个百分点**；② **未归因比例不再上升**（说明新语料带来的都是已见过的形态）。两条都满足才停手；否则继续扩。**在未饱和的池上排出来的优先级，换一批语料就会重排**——那是白做一轮。",
+      "why": "R24 说「分母要全量」，R25 说「全量也要够大且够杂」。两者是同一道防线的前后两段：R24 防的是**选错样本**（只用新增），R25 防的是**样本量不足 / 形态不全**（只用一类风格的语料）。本项目的证据池长期只有 4 片 NestJS+TypeORM 风格的切片，任何从它归纳的结论都带着那个风格的形状；加一片 Express 中间件风格的 verdaccio 就把结论全掀了。",
+      "current_status": "当前池 6 切片 / 367 条违规（已排除有偏的 outline 片），未归因 44.4% **仍在涨** ⇒ 规则侧校准仍未到开工线。饱和判据已工具化：fp-pool-attrib.py --snapshot / --check-saturation，并加了空过防线（新切片贡献 <5% 总违规 ⇒ 报「比较无效」）"
+    },
+    {
+      "id": "R26-silent-degradation-must-speak",
+      "added": "2026-09-22",
+      "source": "skyvern 重扫事故：python3 提取器被 OOM 杀（SIGKILL），ir.json 被写成 2 字节空数组，引擎带着空 IR 照样输出「0 违规、85 分 APPROVED」——结果自洽、无任何迹象表明它是废票（3.7.48 根治）",
+      "rule": "**静默降级比崩溃危险一个量级：失败必须发声，且发声要直达最终结论。** 崩溃你一眼就看见；降级会产出一份结构完整、数值合理、但完全无效的结论，而下游所有统计和人工判定都会把它当真。判据：任何「拿不到证据」的路径都必须 ① 记录原因；② 把它**传到最终输出**（置信度降级 + 结论里写明示警），不能只留在日志里。补一条：断言「0 违规 / 全绿」之前，先问**这次提取到底跑成了没有**。",
+      "why": "与 R7（pre/post 都是 0 的语料是空过）、R8（陈旧产物）、R23（基线不覆盖该轴）同族——它们都是「看起来在工作」的陷阱，区别只在失效发生的层：R7/R8 在语料与产物层，R23 在验收门层，R26 在**运行时失败**层。共同点：都会给出一个漂亮的数字。",
+      "current_status": "3.7.48 已落地三层：提取异常不再静默吞掉（记入 extractionWarning）、提取后验尸（0 函数但有源码 ⇒ 判失败）、TrustDecision 新增 extractionWarning 且失败时 confidence 强制 LOW + 摘要明示「废票」。E2E 已验证"
+    },
+    {
+      "id": "R27-check-the-evidence-channel-before-tuning-the-rule",
+      "added": "2026-09-22",
+      "source": "E2 轮：规则侧定义了 23 个 __progmune_* 语义标记，Python 提取器产出 23/23，TS 只产出 4/23、C/Go/Java 0/23；而 FP 观测池 100% 是 TS/JS ⇒ 规则在 TS 上跑的时候 19 条证据通道是断的",
+      "rule": "**调规则之前，先确认这条规则的证据通道是通的。** 做法：先看规则的 safeguard 接受哪些**语义标记**，再看你这套语言的提取器**产不产**它们。如果产不出，那不是规则不准，是规则饿着——在饿着的规则上做词表/阈值校准，只会把阈值越调越怪。补一问（本轮吃过亏）：**该规则是否接受标记**——有的规则（如 Input Validation）safeguard 是纯词形匹配、不接受任何标记，给它补提取器侧证据是白做。",
+      "why": "与 R19（判据的分母）/ R24（候选清单的分母）/ R25（池要饱和）同一族，但发生在更上游：前面三条问的是「你量的东西对不对」，R27 问的是**「你喂给它的数据管道通不通」**——分母再对、池再饱和，通道断了全都是 0。本轮实测：Authorization 规则的 auth_check 早已接受 __progmune_auth_machinery__，只是 TS 侧从来没产过 ⇒ 规则侧零改动，纯提取器补齐就拿到 −24 条 FP / 0 ADDED。",
+      "current_status": "已按 R27 摸清 23 个标记的产出/接受对照（Python 23/23、TS 4/23、C/Go/Java 0/23），E2 补了 auth_machinery 一条；其余 18 条待按 R21 逐条量化后再排优先级"
+    },
+    {
+      "id": "R28-a-marker-name-is-itself-matched-by-other-rules",
+      "added": "2026-09-22",
+      "source": "E3 轮：抑制型标记取名 __progmune_validated_input__，离线重放发现它被 Data Integrity (Foreign Key) 的 safeguard \\b(get|find|check|exists|lookup|status|validate|verify)(?:[A-Z]\\w*|_\\w+)\\b 命中（validate + d_input__），凭空压掉 10 条无关违规",
+      "rule": "**新增语义标记时，先跑一遍「这个标记名会被哪些别的规则命中」。** 标记是以普通调用名的身份进 effectiveCalls 的，所有词形规则都会拿它去匹配。命名必须避开 get/find/check/verify/validate/create/add/post/upload/sanitize 等动词词根（以及任何规则 safeguard/trigger 里出现过的词根）。落地做法：写实现之前先做离线重放（R29），看「非目标规则」一栏是不是 0。",
+      "why": "与 R17（动工前写最小探针）/ R19（判据的分母）同族：名字级机制的边界条件里，最容易漏的是「这个名字在别处还被谁读」。这次是抑制型标记，压错方向 = 假阴性，比误报更危险。"
+    },
+    {
+      "id": "R29-replay-offline-before-rescanning",
+      "added": "2026-09-22",
+      "source": "E3 轮：本机 load 200~550、可用内存 15~150MB，重扫会被随机 SIGKILL；改用「拿已记录的 calls + name 直接喂 detectSafeguardViolations」的离线重放，一次 2 秒，预测结果与之后的真实重扫逐条一致",
+      "rule": "**规则侧候选改动，先用离线重放量完再决定动不动手。** 做法：把 dist/protocol-detector.js 复制一份、在副本上打补丁（改 trigger / 加 safeguard 接受位），拿 fp-pool-results.json 与 batch-scan-results.json 里已记录的 perFunction.calls + name 重放，比较基线与变体的规则级计数。能同时给出三件事：① 效果上限；② 有没有污染非目标规则；③ 盲测基线会不会空过。注意副本改完要核对改动点唯一（assert count==1）。",
+      "why": "与 R21（先量化再动手）是同一条原则的执行手段：R21 说要量化，R29 给出在机器吃不消时**怎么量化**。代价是重放依赖已记录的 calls（不含 params/exposed），故对 paramGated / parentRefGated 规则不成立——这类规则仍要真扫。"
+    },
+    {
+      "id": "R30-attribute-every-loss-before-shipping-a-reduction",
+      "added": "2026-09-22",
+      "source": "F 轮：变体 A 会让 Input Validation 少报 175 条，上一轮因「可能有真阳性损失」不敢做；本轮逐条归因后发现 100 条是重复投射（callee 自己仍报）、69 条是 createHash 误触发、6 条是查询函数，无一真阳性",
+      "rule": "**任何「减少告警数量」的改动，LOST 清单必须逐条归类到机制类别，归类完成后只要有 1 条无法解释，就不能做。** 有效的分类维度是被去掉的那条的**信息有没有在别处保留**：① 被调用者自己仍在报（重复投射）；② 别的规则仍覆盖；③ 触发源是库函数（理由错）。「看起来像误报」不是归类。判不出来就交裁决，不要靠数量大小做决定。",
+      "why": "与 R19（判据的分母）/ R24（候选清单分母须全量）同族，但作用方向相反：那两条是防止漏掉该管的，这条是防止**删掉不该删的**。减告警的改动天然自带正反馈（数字变小了），最容易被数字骗过去。"
+    },
+    {
+      "id": "R31-self-verify-the-probe-before-measuring-with-it",
+      "added": "2026-09-22",
+      "source": "F 轮：构造 variantA2.js 时 python 脚本漏了 `src = src.replace(OLD, NEW)`，只插入了规则字段、没改执行分支 ⇒ 变体恒等于基线，首次测量得到「0 变化」。若信了这个数，会得出「该改动在新基线上无效」的完全错误结论；发现方式只是它与上一轮的 -175 不符",
+      "rule": "**变体 / 探针 / 测量脚本构造完成后，先跑一个「已知该变」的微用例自验，确认它真的变了，再拿去测量。** 自验用例要选那种「变了对、没变就是坏了」的极端样本（本次：`handleRequest` + `createPost` 应从报变不报，`createPost` 应始终报）。构造脚本里凡是先 assert 再改的地方，改完要 assert 改动点**已生效**（计数从 0 变 1），而不只是 assert 改动点**存在**（count==1）。",
+      "why": "与 R23（零漂移可能空过）是两种不同的空过：R23 是**被测对象**没被语料覆盖，R31 是**测量工具自己坏了**。两者都表现为「0 变化」，但 R31 更危险——它会让一个真实有效的改动被误判为无效而永久搁置。"
+    },
+    {
+      "id": "R32-check-who-calls-the-rule-before-tuning-it",
+      "added": "2026-09-22",
+      "source": "F 轮后按 R27 去查 exposed 通道，结果查出更上层的问题：SAFEGUARD_RULES 的调用方全是基准工具（src/python-benchmark.ts 是 CLI、protocol-detector 自带 CLI、blind-benchmark/*.ts）或注释；TS 产品路径（MCP 入口 dist/mcp-server.mjs、trust 引擎）根本不调用它。正面验证：npx tsx src/trust/cli.ts 跑 blog 项目只产 1 条 protocol 状态机违规，无任何 Input Validation",
+      "rule": "**调一条规则之前，先确认这条规则被谁调用——基准口径不等于产品口径。** 做法：拿规则的唯一标识字符串（规则名 / 常量名）去 grep 全仓 src，逐个判断引用方是产品代码还是基准/CLI 工具；再用**产品入口跑一次真实项目**做正面验证，不能只靠 grep 下结论。",
+      "why": "R27 查的是「提取器证据 → 规则」的通道（标记产不出来，规则饿着）；**R32 查的是「规则 → 产品」的通道**（规则压根没被调用）。R32 优先级更高：规则若不进产品，接证据通道是白接。E2/E3/F 三轮都是在「规则会被产品调用」的默认假设下做的——默认假设是最贵的假设，因为它从来不被检查。与 R31（测量工具自己坏了）同族：三者都表现为「你以为在量产品，其实在量别的东西」。"
+    },
+    {
+      "id": "R33-measure-incremental-recall-not-absolute",
+      "added": "2026-09-22",
+      "source": "沙箱轮：清单口径在 fr-007 上能报 35 条并精确命中全部 5 个真值位置，看似很有价值；但那 5 个位置产品引擎（path_traversal 标记 → PATH_TRAVERSAL）早已覆盖 ⇒ 增量 0。若只看『它能报多少』就会误判为值得接，代价是告警 30 倍",
+      "rule": "**评估一个能力要不要接进产品，量的是增量召回，不是绝对召回。** 做法：拿真值语料，分别跑「现有产品路径」与「候选能力」，比较**命中集合的差集**。候选能报很多 ≠ 有价值；只有当它报出的东西里有现有路径报不出来的，才值得接。附带必须报两个数：候选的绝对精度（真值命中 / 总告警），以及在真值上的命中是否落在『已有能力』的规则里。",
+      "why": "与 R30（减告警要逐条归因）是对称的：R30 管『删掉不该删的』，R33 管『加上不该加的』。加能力天然自带正反馈（能报 = 有本事），最容易被『它报了 84 条』这种数字说服。而真正决定价值的是差集，差集是看不见的，必须专门去量。"
+    },
+    {
+      "id": "R34-derive-the-reverse-verify-expectation-from-the-expectation-table",
+      "added": "2026-09-22",
+      "source": "补形轮给 webshape 闸门做反向验证：CUT-4（鉴权标记无条件注入）与 CUT-5（所有类都算已校验）第一次跑出来「转红范围大于期望」，看着像机制失灵；逐条核对后是**我的期望集手列漏了** —— ArchiveService.extract 与 handleSubmit 同样声明了 none:[auth_machinery] / none:[input_schema]，无条件注入当然也会转红。机制是对的，期望算错了",
+      "rule": "**反向验证的「期望转红集合」必须由期望表推导，不能手列。** 做法：切一刀前，先按「这一刀会让哪种标记出现在哪些函数上」去期望表里筛（例如「无条件注入 X」⇒ 转红集合 = 所有声明了 none:X 的用例 ∪ 所有声明了 have:X 之外…），用脚本筛出来再跑；手列的集合一旦漏项，就会把一次**正确**的失败误读成机制缺陷，进而去改一处本来没问题的代码。",
+      "why": "与 R22（先抄准判据再写 expect）是同一族的两种形态：R22 防的是**正向期望**写错（本轮也踩了一次——handleSubmitValidated 我按直觉写成「已校验不得报」，但规则 safeguard 词表不认 assertSafePath，按规则语义它**该报**），R34 防的是**反向期望**写错。两者都会让闸门锁住一个不存在的语义，而闸门是绿的，看不出来。"
+    },
+    {
+      "id": "R35-shape-the-corpus-before-claiming-a-mechanism-is-unverifiable",
+      "added": "2026-09-22",
+      "source": "R23 出现四次（装饰器 / DTO / 类方法 / 分发器），根因同一：116 个 generated 项目里 `^\\s*@[A-Z]\\w*(` 命中 0 个文件，含 class 的只有 taintpath_B/H/I/K 4 个文件且全部无装饰器 ⇒ E2/E3/F/exposed 四轮的盲测都是空过。本轮造 webshape_A..D 四种形状补进去，立刻把 §二十五「无法验证」的结论变成了可测的：变体 E 在真实形状上恢复 1 条真阳性、带来 70 条误报",
+      "rule": "**当「某改动在盲测上无法验证」时，先去量语料里到底有没有那个形状；没有就先补形，补形是前置不是后续。** 补形必须三件套齐全：①语料（放进盲测真正枚举的目录，否则等于没补）②随语料落盘的期望表（手写的会漂移）③**反向验证**（闸门全绿不是证据，切一刀能精确转红才是）。补形完成前，凡触及该形状的改动，盲测一律视为不可验证，不得以「LOST 0 / ADDED 0」当作通过。",
+      "why": "这是对 R23 的**处置**，不是第五条注记：R23 记了四次「空过」也没能阻止第五次的冲动，因为注记只描述了症状、没给出动作。R35 把动作定死，并把「补形后必须反向验证」也钉进去——否则补出来的语料可能只是让闸门多一片永远全绿的绿。"
+    },
+    {
+      "id": "R36-zero-is-the-most-dangerous-reading-prove-you-scanned-something",
+      "added": "2026-09-22",
+      "source": "规则侧校准前按 R25 查池，发现 FP 池 6 个切片里 gothinkster-node-express-realworld-example-app **files=37 / functions=0 / safeguard=0** —— 37 个 TS 文件扫出 0 个函数，而它一直以「0 违规」参与全池统计，任何占比都是拿它当分母的一部分。根因两处叠加：① fp-pool-fetch.py 只保留 `tsconfig.json`，把 solution 风格仓库的 tsconfig.app.json / tsconfig.spec.json 丢了；② extract-ir 在 tsconfig 纳入 0 个源文件时**静默**返回 0 函数，不报错也不告警",
+      "rule": "**任何产出「0」的环节，都必须自带「我确实扫到了东西」的自证信号。** 0 源文件 / 0 函数 / 0 违规 / 0 标记 —— 这些读数既能表示「干净」，也能表示「根本没扫到」，而这两种含义在报告里长得一模一样。做法：① 归零时打 stderr 告警（不是 console.log，要出现在扫描日志里）；② 能兜底就兜底（本次：0 源文件 ⇒ 回退全目录 glob）；③ 兜底条件必须**窄到不可能误触发**（本次只在「一个源文件都没有」时才触发，实测 115 个 generated 项目 0 次误触发、盲测 LOST 0 / 漂移 0 / ADDED 0）。",
+      "why": "与 R23/R35（闸门对被测轴不敏感 ⇒ 空过）是同一个病的**更靠上游的一段**：R23/R35 是「测了但测不到」，R36 是「压根没测，却报了个 0 让人以为测过」。R36 更危险，因为它污染的是**分母** —— 一个死切片会让全池所有占比都算错，而错误方向是随机的（本次复活它之后，L4 从 21.5% 跳到 28.2%，L6 从 10.4% 掉到 4.9%）。这也正是 R19（全组分母须含被判据拒掉的那些）在语料层面的对应物：**先确认分母是活的，再去算分子。**"
+    },
+    {
+      "id": "R37-detect-conflicts-between-mutually-exclusive-classifiers",
+      "added": "2026-09-23",
+      "source": "给归因器加了『抑制候选 L*』与『真阳性形态 T*』两组互斥判据后，冲突检测立刻抓到 3 条同时命中：GroupService.createGroup / ApiTokenService.createToken / AdminService.createATeam 既被 L7 判成『工厂装配该抑制』、又被 T1 判成『真业务写入不许改』。回源码裁决（createGroup 收 CreateGroupDto、createATeam 调 teamService.createTeam）⇒ 都是真业务创建，L7 判据把 3 条真阳性算进了自己的收益上限",
+      "rule": "**分类体系里互斥的两组判据必须做冲突检测：同一条目同时命中两组时，不是『各记一次』，而是标记为冲突、从两组中都剔除、交人工裁决。** 冲突处恰恰是判据最模糊、最该看的地方。实现上先算冲突集，再统计，绝不能让一条样本同时进两个互斥的桶。",
+      "why": "L7 的 risk 字段早就写着『真创建 UserService.create 与工厂同名，实现成本不低』——**risk 里写了不算数，得等冲突检测把它逼出来**。文字警告不会自动变成数字，冲突计数会。与 R19（全组分母须含被判据拒掉的那些）同源：互斥分类最容易漏的就是交集。"
+    },
+    {
+      "id": "R38-a-schema-change-invalidates-comparison-across-it",
+      "added": "2026-09-23",
+      "source": "归因器口径从 v1（只有抑制候选）升级到 v2（二分 + 剔除冲突），未归因占比 44.6% → 24.6%。这个下降里有多少是『真理解了』、多少只是『分母定义变了』（v2 把真阳性形态剔出分母），如果不标口径就会当成饱和改善，进而提前动手改规则",
+      "rule": "**指标的口径一变，变更前后的数字就不可直接比较。** 快照必须带 schema/口径版本字段；比较脚本遇到跨版本要主动报『本次比较无效』，而不是照常打印差值。饱和/趋势类判据一律以同口径内的第二次快照起算。",
+      "why": "与 R29（离线重放的保真度要先自证）同源：**可比性也要先自证**。本轮还纠正了上一轮一处同源错误——上轮把离线重放的『预测』当成实测报了（FP 池少 5 条），因为重放绕过了『结果文件有没有真被重写』这段链路。重放给的是预测，不是实测。"
+    },
+    {
+      "id": "R39-gold-must-not-be-heuristic-and-must-report-majority-baseline",
+      "added": "2026-09-23",
+      "source": "为 jev 可用性实验准备真值集时发现：fp-gold.jsonl 414 条里真正人工核验过的只有 53 条，其余 259 条是启发式打标。抽查 T1（业务服务写入方法）10 条源码，**只有 2 条能确证为真阳性** —— AttachmentController.uploadFile/uploadAvatarOrLogo 其实已经有限制措施（req.file 的 limits:{fileSize,fields,files}、calls 里的 includes 即 mimetype 白名单），AttachmentService.uploadToDrive 是内部实现不是入口。T1 判据把它们一律判成「缺校验」。",
+      "rule": "任何算「一致率 / 准确率」的实验，gold 必须带 confidence 分层（verified / heuristic / unlabeled），**默认只用 verified**，heuristic 只能在明确标注「参考，gold 本身未核验」时分开报告。另外：类别比低于 1:4 时必须同时报 **多数类基线**（永远判多数类的傻瓜能拿多少分）与 **per-class 召回**；只报总一致率会让不平衡数据给出假成功。",
+      "why": "与 R37 同族：R37 防的是两组判据自相矛盾，R39 防的是**拿猜测当标准答案**。启发式打标给的是收益「上限」不是事实，用它当 gold 会出现无法归因的诉讼——jev 与它不一致时，说不清是 jev 错还是启发式错。本次实测正好给出了实证：T1 判据确有实质噪声（10 条里 8 条不能确证）。不平衡那条是独立的坑：verified 集 42 FP : 11 TP，多数类基线 79.2%，一个「永远判 FP」的模型能拿 79% 一致率，看着像能用，实际 TP 召回是 0。"
+    },
+    {
+      "id": "R40-probe-the-endpoint-with-an-invalid-credential-before-investing",
+      "added": "2026-09-23",
+      "source": "jev 实验准备阶段：本机没有任何 TYPESAFE_API_KEY，但脚本已写好。用一个无效 key 打了一次真请求，返回 **401 Unauthorized** —— 这一步同时验证了：端点 URL 对、请求体格式被 API 接受（错格式会 400 而非 401）、超时设置生效（0.8s 返回，不会挂死）。于是实验被精确定位到「只差一个有效凭据」。",
+      "rule": "引入外部服务做实验时，**先用无效凭据打一次真请求**，把「服务根本接不通」与「只是没 key」分开：401/403 = 端点与格式都对、只差凭据，值得去申请；404/400/DNS 失败 = 接口契约理解错了，先改代码。探针请求只带目标服务需要的最小样例，并**必须设置 timeout**。",
+      "why": "不这么做的话，会为一个根本接不通（或格式写错）的服务去申请凭据、等审批，最后才发现代码是错的。本项目在这上面有直接教训：src/llm.ts 没有 timeout，缺 key 时网络调用会挂死整个流程，所以跑语料前必设 PROGMUNE_MAX_LLM_CALLS=0 —— 任何外部调用都必须先证明「不会挂」，再谈「能不能用」。"
+    },
+    {
+      "id": "R41-distinguish-missing-information-from-missing-semantics",
+      "added": "2026-09-23",
+      "source": "E4 轮。用户质疑 jev（「也要学了才懂，而且只是概率判断」）逼出了一个此前没回答的问题：判据能用文字讲给模型听，为什么不直接写成规则？顺着查下去发现——上一轮抽检 T1 判错 8/10，我当时的归因是「判据说不清」；但打开 docmost/AttachmentController.uploadFile 的函数体，里面明明白白写着 limits:{fileSize,fields,files} 和 if (!pageId) throw new BadRequestException。判据不是不准，是它做决定时用的输入里根本没有函数体。",
+      "rule": "判据失灵时，先区分【缺信息】还是【缺语义】。做法：打开被判错的样本，看判据做决定时【用到了哪些输入】；若真值所在的位置不在这些输入里，就是缺信息 ⇒ 补信息（确定性、可测、免费）。只有「看得见的都看见了，但仍说不清」才值得考虑概率模型。",
+      "why": "用模型治「缺信息」是错配，而且错得隐蔽：模型拿到的 state 就是我们有的信息，它并不比规则多看一眼函数体，却把确定性问题变成了概率问题（不可复现、要 key、要标注数据才能验证）。本轮补信息后，5 条误报被确定性地压掉，零误伤，代价是一次 AST 预扫。另记一条同源教训：我用临时脚本抓函数体做预测，漏了 `export const x = async () =>` 形态，预测 2 条 < 实测 5 条 —— 探针的抓取覆盖率会系统性【低估】收益，定稿数字一律以真实链路实测为准（与 R29/R38 同源）。"
+    },
+    {
+      "id": "R42-marker-gated-rules-must-declare-which-languages-can-emit-the-marker",
+      "added": "2026-09-23",
+      "source": "E5 给 Input Validation 加 requireMarker（语义前置条件）时，同一类失效在两个地方同时出现：① __progmune_* 标记只由 TS 提取器产出，Python 提取器一个都不产出 ⇒ 不限定语言的话 Python 侧该规则整体归零，而四门全是 TS 语料，闸门永远绿，看不见这种退化；② src/extract-ir-taint-structural.test.ts 里 7 条定向用例直接调 detectSafeguardViolations 喂**裸 calls 数组**，不经过提取器 ⇒ 加 requireMarker 后这 7 条一起静默转红（F 组 5 条 + E3 规则侧 2 条）。",
+      "rule": "给规则加 requireMarker 时必须同时做两件事：① 声明 requireMarkerLanguages —— 该标记实际能被哪些语言的提取器产出；未在列表内的语言不得因标记缺失而失效。② 把喂裸 calls 的单测显式带上标记，并**补一组用例钉住新行为本身**，其中必须包含「其他语言不得归零」这一条。",
+      "why": "与 R27（先查通道通不通）同族：R27 防的是「通道根本没通」，R42 防的是「通道只在一部分入口上通」。共同点是失效发生在看不见的地方——TS 闸门全绿的同时 Python 侧已经全哑。标记型机制比词表型机制多一个失效面：它不仅可能「没产出」，还可能「产出的地方没人消费」，以及「有人消费但喂不进标记」。"
+    },
+    {
+      "id": "R43-qualify-a-candidate-criterion-on-gold-before-implementing-it",
+      "added": "2026-09-23",
+      "source": "E5 有两个候选判据：粗判据（函数体里存在副作用调用）与精化判据（副作用调用必须吃到本函数参数）。精化版 FP 压制 91.2%，看着明显更好，但会丢 4 条真报（TP 召回降到 76.5%）。若按「压制率最高」选就会选错；实测后取粗判据：TP 召回 100%（丢 0）、FP 压制 77.2%、precision 23%→56.7%、净收益 44 条。另外，判据在真值集上跑通后，webshape 闸门仍抓出 S5 大小写敏感（repo.saveBanner 不匹配）导致 3 条该报的被压掉——真值集与合成语料看的是不同形状。",
+      "rule": "候选判据进代码前，先在带 confidence 分层的真值集上算出 **TP 召回** 与 **FP 压制** 两个数字（R39），并同时报净收益与多数类基线。取舍原则：**丢真报比留误报贵**，安全产品里一个漏报的代价高于一批误报，不得按「哪个数字更好看」选判据。真值集跑通后仍须过合成语料闸门——真值集覆盖的是真实形状的分布，合成语料能写出真值集里没出现过的干净形状。",
+      "why": "与 R39 同族：R39 给出「怎么算才算数」，R43 给出「算完之后怎么选」。二者缺一都会选错：只有数字不选判据原则 ⇒ 选到压制率最高但漏报最多的；只有原则不算数字 ⇒ 选到自己以为最好的。webshape_E 那 3 条转红是第三重保险的价值：若不跑合成闸门，一个大小写敏感 bug 会一路带到发布。"
+    }
+  ],
+  "entries": [
+    {
+      "id": "fr-001",
+      "repo": "open-webui/open-webui",
+      "lang": "python",
+      "ghsa": "GHSA-wpmr-8h3q-fwj7",
+      "cve": "CVE-2026-87016",
+      "type": "auth_bypass_identity_substring",
+      "summary": "SQLite 部署下 OAuth subject 身份映射用子串匹配而非精确匹配——subject 含 SQL 通配符可绑定到任意账户（含管理员）。SCIM external-ID 同缺陷。PostgreSQL 不受影响。",
+      "fix_commit": "73c1f5806aeb6345dad5de8f5aa26d1f3d0bef80",
+      "parent_commit": "90724cdee01bd9260d15f8482d4e0d2fbe2ebffb",
+      "severity": "high",
+      "patched_version": "0.11.1",
+      "ground_truth_files": [
+        "backend/open_webui/models/users.py"
+      ],
+      "result": "MISS (2026-09-11)"
+    },
+    {
+      "id": "fr-002",
+      "repo": "open-webui/open-webui",
+      "lang": "python",
+      "ghsa": "GHSA-wvm9-9g5j-623f",
+      "type": "authz_policy_bypass",
+      "summary": "被 OAuth 角色策略拒绝的用户仍可经令牌交换流程登录（角色策略未在令牌交换路径执行）。",
+      "fix_commit": "d799e81edbdc971c6deb096b6474cd95b93504bf",
+      "parent_commit": "c0d09a5de93d48517efe043ea2f4a2f6a7a44fc3",
+      "severity": "medium",
+      "ground_truth_files": [
+        "backend/open_webui/routers/auths.py",
+        "backend/open_webui/utils/oauth.py"
+      ],
+      "result": "MISS (2026-09-11)"
+    },
+    {
+      "id": "fr-003",
+      "repo": "open-webui/open-webui",
+      "lang": "python",
+      "ghsa": "GHSA-4qg5-cxx4-g927",
+      "type": "authz_domain_allowlist_bypass",
+      "summary": "被 OAuth 域白名单或角色策略拒绝的用户仍可登录（白名单检查路径遗漏）。",
+      "fix_commit": "fb5ef978bfb451c3f2221931e08e54250cec58ca",
+      "parent_commit": "977d638afe1b3983360abea5185c9c5a96eff45d",
+      "severity": "medium",
+      "ground_truth_files": [
+        "backend/open_webui/routers/auths.py"
+      ],
+      "result": "MISS (2026-09-11)"
+    },
+    {
+      "id": "fr-004",
+      "repo": "open-webui/open-webui",
+      "lang": "python",
+      "ghsa": "GHSA-p78m-89r6-pgf7",
+      "type": "session_cookie_exfiltration",
+      "summary": "用户会话 cookie 被发送到配置为 bearer 的工具服务器（会话凭据外泄到第三方）。",
+      "fix_commit": "cd9db21c5276807a2975ddba17cef369ad1114b7",
+      "parent_commit": "7d392bedc9c1aaecc94509a58e59186b614433dc",
+      "severity": "medium",
+      "ground_truth_files": [
+        "backend/open_webui/utils/tools.py"
+      ],
+      "result": "MISS (2026-09-11)"
+    },
+    {
+      "id": "fr-005",
+      "repo": "open-webui/open-webui",
+      "lang": "python",
+      "ghsa": "GHSA-3pf7-q2g3-wj28",
+      "type": "ownership_check_missing",
+      "summary": "任意已认证用户可把自己的聊天注入其他用户的文件夹（跨用户归属校验缺失）。",
+      "fix_commit": "d9e23b90c100d19b00270aea3cde0501d2354a6c",
+      "parent_commit": "72a909fd2f3ac8d67554f6c85bc1723934454e2d",
+      "severity": "medium",
+      "ground_truth_files": [
+        "backend/open_webui/main.py",
+        "backend/open_webui/routers/chats.py",
+        "backend/open_webui/utils/access_control/folders.py"
+      ],
+      "result": "DETECTED (2026-09-13)",
+      "result_detail": "AUTHZ_CROSS_USER_WRITE ×1 @ main.py::chat_completion——A2：Python 提取器跨用户资源写入标记（folder_id 来自 payload + 持久化 + 无严格归属守卫；has_permission 不算守卫、insert_ 前缀模型方法不标）+ 引擎 IR 层消费。抑制验证：chats.py create_new_chat（有 get_folder_by_id_and_user_id）与 automations.py（有 check_automation_folder_access）均不标。"
+    },
+    {
+      "id": "fr-006",
+      "repo": "open-webui/open-webui",
+      "lang": "python",
+      "ghsa": "GHSA-34r3-9m95-vq73",
+      "type": "authz_channel_reach",
+      "summary": "任意已认证用户可经服务端通道触达 Azure 平台通道（通道级授权缺失）。",
+      "fix_commit": "e3e4bd87df6fc629e7e22081d980d55a7632b8b7",
+      "parent_commit": "ca4e07a40b4ff11989a25d84b517d3d0049f93ae",
+      "severity": "high",
+      "ground_truth_files": [
+        "backend/open_webui/config.py",
+        "backend/open_webui/retrieval/web/main.py",
+        "backend/open_webui/retrieval/web/utils.py",
+        "backend/open_webui/utils/misc.py"
+      ],
+      "result": "MISS (2026-09-11)"
+    },
+    {
+      "id": "fr-007",
+      "repo": "naorsabag/openhop",
+      "lang": "typescript",
+      "ghsa": "GHSA-g72f-jw3w-mgh7",
+      "type": "path_traversal",
+      "summary": "Flow ID 文件操作中的路径穿越（flow id 未经校验进入文件路径）。",
+      "fix_commit": "c8190fbefa3a50e7b0c16c001d2e05b0e920cfb4",
+      "parent_commit": "6bde78bf88aafa09a39dfaf45978c73d1c5fedc3",
+      "severity": "high",
+      "patched_version": "0.3.6",
+      "ground_truth_files": [
+        "packages/server/src/flow-id.ts",
+        "packages/server/src/routes.ts",
+        "packages/server/src/index.ts",
+        "packages/server/src/store.ts"
+      ],
+      "ground_truth_note": "store.ts 为漏洞 sink 所在（filePath(id)→join→readFile/writeFile/unlink，修复 commit 未改它——校验加在上游 routes）。扫描目标=packages/server 子包（根仓库无 tsconfig）。",
+      "result": "DETECTED（2026-09-19 复核：G1 PATH_GUARD_EVIDENCE 上线后成立）",
+      "result_detail": "PATH_TRAVERSAL ×4（flowRoutes + FlowStore.save/get/delete）——A1：TS 提取器路径穿越标记（request 污点→fs sink，跨函数一跳）+ 引擎 IR 层标记消费",
+      "result_reason": "detected_after_g1",
+      "result_note": "2026-09-19 对 fix commit 完整 packages/server/src 复核（pre=6bde78bf88aa / post=c8190fbefa3a）。真修复 = 抽出独立校验模块 flow-id.ts（assertValidFlowId + FLOW_ID_PATTERN /^[A-Za-z0-9_-]+$/），在 FlowStore.filePath() 里调用；routes.ts 侧改为 JSON-schema flowIdParamsSchema（pattern）。G1 前：pre 5 条 / post 5 条（标记器看不见校验）；G1 后：pre 5 条 / post **0** 条 —— 这是真实语料上首次出现「修复后流消失」的判别力证据。注：本条此前记为 DETECTED，但按现行「post 侧须 0 误报」标准，G1 之前并不成立——DETECTED 结论会随判别力变化，改判别逻辑后必须重测全部 DETECTED 条目。 ｜ 2026-09-19 二次复核（3.7.37 G2 调用点抑制）：pre 5 / post 0 维持 —— G2 未压掉真阳性；复核已固化为 blind-benchmark/check-fr-corpus.ts（快照放在 blind-benchmark/fr-corpus/<id>-<repo>/{pre,post}，受保护资产，不得放 /tmp）。",
+      "updated": "2026-09-19"
+    },
+    {
+      "id": "fr-008",
+      "repo": "MasterKale/SimpleWebAuthn",
+      "lang": "typescript",
+      "ghsa": "GHSA-6hxq-p678-4hr2",
+      "type": "webauthn_registration_verification",
+      "summary": "注册验证未充分确保 attestation 的完整校验（WebAuthn 注册验证弱化）。",
+      "fix_commit": "67a41fed3dfd96cab1dcf414f6d1792a72e06e35",
+      "parent_commit": "ba9c97b980741e290f883aa4b4a6e24d23a1e9c9",
+      "severity": "low",
+      "patched_version": "13.3.2",
+      "ground_truth_files": [
+        "packages/server/src/helpers/validateCertificatePath.ts"
+      ],
+      "result": "MISS (2026-09-11)"
+    },
+    {
+      "id": "fr-009",
+      "repo": "open-webui/open-webui",
+      "lang": "python",
+      "ghsa": "GHSA-4v28-j6q3-5m4r",
+      "type": "ssrf_dns_rebinding",
+      "summary": "Playwright web loader SSRF：经 DNS 重绑定访问内部服务——预修复代码已有 validate_url + SSRF 安全适配器，但 connect-time 检查后 requests 重新解析（DNS-rebinding 缺口）。",
+      "fix_commit": "27402ff210bfa253445720920dfb86b15a00327b",
+      "parent_commit": "73c1f5806aeb6345dad5de8f5aa26d1f3d0bef80",
+      "severity": "high",
+      "patched_version": "0.11.1",
+      "ground_truth_files": [
+        "backend/open_webui/retrieval/utils.py",
+        "backend/open_webui/retrieval/web/utils.py"
+      ],
+      "result": "MISS（守卫不足类——标记模型边界）",
+      "result_detail": "预修复函数含 validate_url/_SSRFSafeAdapter 守卫证据 → 标记模型正确抑制；此类「守卫存在但不足」的 DNS 重绑定是静态标记的已知边界，如实不覆盖"
+    },
+    {
+      "id": "fr-010",
+      "repo": "Unstructured-IO/unstructured",
+      "lang": "python",
+      "ghsa": "GHSA-4mvj-m6j5-pmf7",
+      "type": "ssrf_url_partition",
+      "summary": "URL-based partitioning SSRF：partition(url=...) 直接抓取用户 URL，无主机校验；修复=新增 safe_http.py 统一主机校验入口。",
+      "fix_commit": "445c95735c4045057f51f399bc04c657751923bd",
+      "parent_commit": "f6eea758911fcf627cbe6f9df9f790e549500d7b",
+      "severity": "critical",
+      "patched_version": "0.24.0",
+      "ground_truth_files": [
+        "unstructured/partition/auto.py",
+        "unstructured/partition/html/partition.py",
+        "unstructured/partition/md.py",
+        "unstructured/safe_http.py"
+      ],
+      "result": "DETECTED（提取器级，2026-09-14）",
+      "result_detail": "A3 Python 形参污点：pre-fix 标记 ×2（partition_md + file_and_type_from_url，均为修复 patch 路由经 safe_http 的 url= 函数）；post-fix（+safe_http.py 主机校验词汇）0 标记。验证方式=mini 语料（3-4 个真值文件经 raw 直链取 parent/fix SHA）——整仓 tarball 98.6MB 下载被网络反复截断，补全后补跑引擎级"
+    },
+    {
+      "id": "fr-011",
+      "repo": "agentfront/mcp-from-openapi",
+      "lang": "typescript",
+      "ghsa": "GHSA-65h7-9wrw-629c",
+      "type": "ssrf_openapi_ref",
+      "summary": "OpenAPI external $ref 反解引用 SSRF 绕过（主机名解析/重定向/IPv4-mapped IPv6 到达回环）；修复=新增 src/ssrf.ts 防护。",
+      "fix_commit": "be3409cce6e9",
+      "parent_commit": "0dedbf5f5f6fa736275c7b071c576db2fb94a134",
+      "severity": "high",
+      "patched_version": "2.5.0",
+      "ground_truth_files": [
+        "src/generator.ts",
+        "src/ssrf.ts"
+      ],
+      "result": "DETECTED（引擎级，2026-09-14）",
+      "result_detail": "A3 TS 形参污点：pre-fix SSRF ×1 @ OpenAPIToolGenerator.fromURL（公告点名 API，真值位置）；post-fix 0（ssrf.ts 守卫词汇抑制）。仓库小，引擎全链路扫描"
+    },
+    {
+      "id": "fr-012",
+      "repo": "zereight/gitlab-mcp",
+      "lang": "typescript",
+      "ghsa": "GHSA-cv3r-c5h8-f4g5",
+      "cve": "CVE-2026-61560",
+      "type": "file_read_unauth",
+      "summary": "未认证任意文件读取：SSE 传输无鉴权暴露全部 MCP 工具 + upload_markdown 的 file_path 未经校验直接进 fs sink（可读 /proc/self/environ 窃取 GITLAB_PERSONAL_ACCESS_TOKEN）。",
+      "fix_commit": "7d19ebf6f41596a442b6eacc66f12fc5f10cd41e",
+      "parent_commit": "c2577169b21d62197f767895fe97651ffb2d7443",
+      "severity": "critical",
+      "patched_version": "2.1.27",
+      "ground_truth_files": [
+        "index.ts"
+      ],
+      "ground_truth_note": "真值 sink = index.ts::markdownUpload(projectId, filePath) — fs.existsSync(filePath) / fs.readFileSync(filePath)，filePath 由工具实参 args.file_path 一跳传入（无路径校验）。本条锚定「文件读取」半边：其修复为 PR #482「fix: make download and upload work for remote deployments」（2026-05-21，remote 时 upload_markdown 只接受内联内容）。同一 GHSA 的另半边「SSE 传输未鉴权」由 PR #554（e436ee4a，2026-06-22）修复——若扫描 PR #482 的 base 之前的快照，两条缺陷同时在场。",
+      "sha_verified": "2026-09-18（api.github.com 核验：PR #482 merge=7d19ebf6，base=c2577169；PR #554 merge=e436ee4a）",
+      "result": "MISS（2026-09-18，真值函数切片语料；trust 扫描 pre=0 / post=0 违规）",
+      "result_detail": "★语料形态说明：gitlab-mcp 的 index.ts 单文件 454 KB，本机 8 GB 内存 + swap 已用 8.6/10 GB，全文件扫描被 OOM kill（exit 137），故按「大仓用真值切片」规则取 markdownUpload 函数体切片（55 行 pre / 45 行 post）扫描。切片保留了 filePath 形参 → fs.readFileSync 的完整污点链。★根因：A1 路径穿越标记要求 request 根表达式（`req.params` 等）为污点源；本例污点来自 **MCP 工具实参**（`args.file_path` → `filePath` 形参），不在 request 词汇表内 → 标记不注入。这是「污点源词汇表」的缺口，与 skyvern/open-webui 暴露的认证词表缺口同族。见 V2 报告 §6",
+      "result_reason": "corpus_mismatch",
+      "result_note": "2026-09-19 复核（对 fix commit 完整 index.ts 逐行 diff）：本条【不适合作为污点流判别力的验收条目】——修复机制与条目类型不匹配。真修复在 markdownUpload 里是 `if (IS_REMOTE && filePath) throw`（远程/网络模式下禁止使用 file_path，并新增 base64 inline-content 模式），属**部署模式闸门**，不是路径校验；本地模式的 taint→readFileSync 流在修复后依然存在且本就不算漏洞。因此 pre/post 在污点流层面**本来就应该同数**，用本条判定 PATH_GUARD_EVIDENCE 的判别力是无效实验。另：下载侧 localPath 的 `path.normalize + isAbsolute || '..' || startsWith('..'+sep) || includes(sep+'..'+sep)`在 pre 与 post **都存在**（pre 7968-7977 / post 8719-8728 完全一致）——它是既有代码、不是本次修复，但正因如此，它是真实世界的「已校验」负样本，可直接用于 G1 的「有守卫 → 不得标记」用例。"
+    },
+    {
+      "id": "fr-013",
+      "repo": "zereight/gitlab-mcp",
+      "lang": "typescript",
+      "ghsa": "GHSA-5648-rgj9-v224",
+      "type": "authz_bypass",
+      "summary": "多个安全控制绕过（F1 execute_graphql 只读+白名单绕过 / F2-F3 传输未鉴权 / F4 会话耗尽 DoS / F5 CI 日志注入）——MCP 威胁模型下工具实参可被提示注入塑造。",
+      "fix_commit": "8d2b486b08bf2ae912806fe99f040c532b029de3",
+      "parent_commit": "1700c74028d3ecde75238708c970dbf7affc7558",
+      "severity": "high",
+      "patched_version": "2.1.30",
+      "ground_truth_files": [
+        "index.ts",
+        "utils/graphql-query.ts",
+        "schemas.ts",
+        "tools/registry.ts"
+      ],
+      "ground_truth_note": "**原始注册有误，2026-09-18 修正**：① parent SHA 末 4 位转置（…6dbd6 → …6db6d，404 不可达）；② 原 fix_commit 69e784da 是「把修复写进 CHANGELOG」的纯文档提交（只改 CHANGELOG.md，PR #624），不是代码修复。真实代码修复 = PR #571「fix: harden MCP safety controls」（merge 8d2b486b，16 文件：index.ts / schemas.ts / utils/graphql-query.ts / tools/registry.ts + 11 个测试），PR #624 正文明确 link 到它并建议升级到 v2.1.30+。公告另点名 reviewed commit 60adcc0de5b0e96c4c2029f7a25d2775946421d8（v2.1.28）为已确认存在缺陷的状态。post-fix 语料用 69e784da 快照（它在 #571 之后，代码已是修复态）。",
+      "sha_verified": "2026-09-18（api.github.com 核验：PR #571 merge=8d2b486b base=1700c740 merged_at=2026-07-05）",
+      "result": "MISS（2026-09-18，mini 语料；trust 扫描 pre=0 / post=0 违规）",
+      "result_detail": "真值文件 utils/graphql-query.ts 的修复是**纯字符串解析加固**（处理 `{, mutation{...}}` 逗号前缀这类 GraphQL 文本形态），不涉及调用序列或污点流——**确定在检出面外**，属「字符串/URL 解析语义」类。本条作为模型边界的显式标注，不硬凑检出。见 V2 报告 §6",
+      "result_reason": "corpus_unverified",
+      "result_note": "mini 语料；ground_truth_files 4 个文件均在切片内（2026-09-19 严格路径校验），但未按 R1 校验调用链完整性。MISS 结论暂定。"
+    },
+    {
+      "id": "fr-014",
+      "repo": "mockoon/mockoon",
+      "lang": "typescript",
+      "ghsa": "GHSA-rqx4-3f6q-3x2v",
+      "cve": "CVE-2026-59148",
+      "type": "unauth_admin_api",
+      "summary": "未认证管理 API + 通配 CORS：管理 API 挂在与 mock 路由同一个 Express listener 上且默认启用，对所有端点返回 Access-Control-Allow-Origin: *（任意方法）——任意站点可管理 mock 服务器、窃取 mock 状态与 secrets。",
+      "fix_commit": "c420b5a56918475b8663977b51e5f986e45b3299",
+      "parent_commit": "b42bdfb7f82e83f0e81bea8e6fe41adf5ec82585",
+      "severity": "high",
+      "patched_version": "9.7.0",
+      "ground_truth_files": [
+        "packages/commons-server/src/libs/server/admin-api.ts",
+        "packages/commons-server/src/libs/server/server.ts",
+        "packages/commons-server/src/libs/server/events-listeners.ts",
+        "packages/commons-server/src/libs/utils.ts",
+        "packages/commons-server/src/libs/logger.ts"
+      ],
+      "ground_truth_note": "修复 = admin-api.ts 新增 bearer token 鉴权（extractBearerToken + timingSafeEqual）+ CORS 来源白名单（adminApiCorsOrigins 取代硬编码 '*'）+ 事务脱敏（redactTransaction）。漏洞形态 = **中间件/鉴权整体缺席**（pre-fix admin-api.ts 无任何 auth 检查）+ 配置层 CORS 通配。注意：该管理 API 是库形态（commons-server 内部 server.use 挂载），不是 app.get('/path', handler) 的顶层路由注册形态——这是框架适配器可见性的已知软肋。",
+      "sha_verified": "2026-09-18（api.github.com 核验；PR #2254 merge=c420b5a5 34 文件）",
+      "result": "MISS（2026-09-18，mini 语料；trust 扫描 0 违规，pre/post 均 0）",
+      "result_detail": "mini 语料（5 个真值文件）提取 99 个函数，trust 引擎 0 违规。根因类别 = 缺失检查类 + 配置类（CORS 通配无域名恰语义），且管理路由以库内 server.use 挂载、不具 app.get 形态",
+      "result_reason": "corpus_unverified",
+      "result_note": "mini 语料；5 个真值文件均在切片内（2026-09-19 严格路径校验），调用链完整性未校验。MISS 结论暂定。"
+    },
+    {
+      "id": "fr-015",
+      "repo": "nuxt-modules/og-image",
+      "lang": "typescript",
+      "ghsa": "GHSA-q8hw-4fvp-9rwv",
+      "type": "ssrf_font_path",
+      "summary": "未认证 SSRF：fonts[].path URL 参数被服务端抓取。",
+      "fix_commit": "243cac2228671d3711c2bd65e300c278fcdf5a4e",
+      "parent_commit": "5aa6dbf0b3848b578a87144032cfb6b734454b56",
+      "severity": "medium",
+      "patched_version": "6.7.0",
+      "ground_truth_files": [
+        "src/runtime/server/og-image/fonts.ts",
+        "src/runtime/server/util/ssrf.ts"
+      ],
+      "ground_truth_note": "**重要发现：pre-fix 快照里 `util/ssrf.ts` 及其守卫 `isBlockedUrl()` 已经存在** —— 漏洞不是「没有守卫」，而是「守卫没接在 fonts 这条路径上」+ 守卫本身对同源自信任/重定向放行过宽。这使其成为 fr-009 同类的「守卫存在但不足」样本。修复三处：① fonts.ts 对 URL 解码来的 fonts[] 做字段类型/长度/数量边界校验；② ssrf.ts 新增 trustedHost 豁免并对每一跳重定向重新做 isBlockedUrl；③ 新增 bindings/font-assets/external-url.ts（该绑定文件 pre-fix 不存在，故不计入 pre 语料）。",
+      "sha_verified": "2026-09-18（api.github.com 核验；PR #637 merge=243cac22 「fix: prevent unauthenticated SSRF via font URL parameter」）",
+      "result": "MISS（2026-09-18，mini 语料；trust 扫描 pre=0 / post=0 违规）",
+      "result_detail": "★阻塞已解除：此前 >480s 未完成的根因是提取器 SSRF 标记的正则死循环（3.7.28 引入，2026-09-18 修复，见 V2 报告 §5）。修复后 og-mini-pre 48s 完成。**0 违规的原因值得单独记录**：SSRF 标记要求 fetch 后的 300 字符窗口内出现污点名；本例 fonts[] 的 URL 来自 `decodeURIComponent` 解码后的对象字段（`font.path`），不在 URL_PARAM_NAME 词汇表内，也不构成 `req.*` 污染 → 标记不注入。与 fr-009/fr-015 同属「守卫存在但没接在这条路径」+「污点源词汇表缺口」的叠加。见 V2 报告 §6",
+      "result_reason": "corpus_invalid",
+      "result_note": "不可判定：mini 切片（fonts.ts + ssrf.ts）内没有任何出站 sink——唯一 fetch 在 ssrf.ts:260，真值链路的 sink 在 src/runtime/server/util/fetchLocalAsset.ts（$fetch）等未被收录的文件。按 R1/R3：该 MISS 不代表引擎能力。"
+    },
+    {
+      "id": "fr-016",
+      "repo": "Redocly/redocly-cli",
+      "lang": "typescript",
+      "ghsa": "GHSA-657c-g7qc-r9j2",
+      "type": "path_traversal_split",
+      "summary": "split 命令路径穿越：输出文件路径未限制在目录内。",
+      "fix_commit": "26a0f299fae0b3bb7bd513043d2f1e90e69f79ee",
+      "parent_commit": "d32cd86caf7dbcf16c736b77eda8324173b824b1",
+      "severity": "medium",
+      "patched_version": "1.34.17",
+      "ground_truth_files": [
+        "packages/cli/src/commands/split/asyncapi/iterate-asyncapi-channels.ts",
+        "packages/cli/src/commands/split/asyncapi/iterate-asyncapi-components.ts",
+        "packages/cli/src/commands/split/asyncapi/iterate-asyncapi-operations.ts",
+        "packages/cli/src/commands/split/utils/iterate-components.ts",
+        "packages/cli/src/commands/split/utils/iterate-path-items.ts"
+      ],
+      "ground_truth_note": "**fr-002/fr-003 同族的最干净样本**：修复 diff 就是在每个写文件<｜hy_place▁holder▁no▁813｜>前**新增一行 `assertWithinDir(dir, file, name)`**（新增合约 tests/fixtures/path-traversal*.json 与 assert-within-dir.test.ts 同批落地）。漏洞 = 「该有的检查没有被调用」——一个调用序列状态机在原理上不可见（它只能证明「顺序错了」，不能证明「少了」）。此外污点源是被 split 的 OpenAPI/AsyncAPI 描述文件内容（非 request 对象），且经过 pathToFilename 跨文件助手处理，超出 A1 标记的「request 污点 → fs sink 单跳 + 跨函数一跳」射程。",
+      "sha_verified": "2026-09-18（api.github.com 核验；PR #2891 merge=26a0f299 「fix: path traversal in the split command」）",
+      "result": "DETECTED（2026-09-20，3.7.39；pre 7 条 / post 0 条）",
+      "result_detail": "完整 packages/cli 快照实测：pre 7 条 / post 0 条。pre 命中 handleSplit、iterateAsyncApiChannels、iterateAsyncApiComponents、iterateComponents、iteratePathItems、splitOASDefinition、writeToFileByExtension。post 因新增 assertWithinDir(dir, file, name) 全部归零。此前 0/0 有两个独立断链点（见 R10）：① 污点根是外部文档解析产物（Object.keys(channels) 键名），不在 UNTRUSTED_ROOTS 里；② 落盘经writeToFileByExtension → writeYaml → fs.writeFileSync 两层自有封装，methodSinkParamMap 只登记一跳。3.7.39 又补上第三处（C4b）：`const filename = getFileNamePath(dir, componentName, ext)` 里的getFileNamePath 是项目自有 helper，此前不在塑形词表内，污点断在最后一跳。",
+      "result_reason": "detected_after_document_root_and_sink_inheritance",
+      "result_note": "mini 语料；5 个真值文件均在切片内（2026-09-19 严格路径校验），调用链完整性未校验。MISS 结论暂定。 ｜ 2026-09-19 二次复测（3.7.38）：① 语料从 mini 切片（5 个真值文件）升级为完整 packages/cli 子包，快照入库 blind-benchmark/fr-corpus/fr-016-redocly/{pre,post}（各 1.1M，受保护资产，不得放 /tmp）；② pre/post 由 0/0 变为 **5/0**，成为继 fr-007 之后第二个有判别力的真实语料对；③ 注意为本条新增 G-C 的 Within 后缀是照着本条形态加的，为避免同义反复，另有一条守卫函数名为 stamp（不含任何 G-C 后缀）的定向用例证明压制依据是被调用方自身的证据而非名字。 ｜ 2026-09-20 三次复测（3.7.39 C4b/C4c）：pre 5 → **7**，新增的两条正是 iterateAsyncApiComponents / iterateComponents —— 它们的污点要穿过 getFileNamePath(dir, componentName, ext) 这一跳，而该 helper 此前不在 C4 的塑形词表内。两条均为真阳性（组件名带 ../ 逃出输出目录，即本 CVE 形态）。 post 侧仍是 0：新增的 assertWithinDir(asyncapiDir, filename, componentName) 是 tier-0 守卫，由 G2 按被调用方自身证据压制——与 G-C 的 Within 后缀无关。",
+      "updated": "2026-09-20"
+    },
+    {
+      "id": "fr-017",
+      "repo": "tinacms/tinacms",
+      "lang": "typescript",
+      "ghsa": "GHSA-g74q-6g2f-874x",
+      "type": "broken_access_control_oauth",
+      "summary": "访问控制破坏：任意 TinaCloud 用户可对任意 clientId 授权。",
+      "fix_commit": "0a927a4f8d228dd05ee7ca4be32899bc190e73af",
+      "parent_commit": "c2c03c677f67b6fd3a2155d5227b9bf785b43288",
+      "severity": "high",
+      "patched_version": "1.1.4",
+      "ground_truth_files": [
+        "packages/@tinacms/auth/src/index.ts"
+      ],
+      "ground_truth_note": "pre-fix `isAuthorized(req)` 从**请求参数**取 clientID（`req.query.clientID`）去问 identity 服务「这个 token 是不是它自称那个 app 的已验证用户」；修复改为从**服务端配置**取（`expectedClientID` 形参 → 回落 `process.env.NEXT_PUBLIC_TINA_CLIENT_ID`，取不到则拒绝授权）。本质是「身份锚点的归属」问题：需要判断用于校验的身份标识**应当来自服务端配置而非请求输入**——属数据流/归属语义，非调用序列。",
+      "sha_verified": "2026-09-18（api.github.com 核验；PR #7168 merge=0a927a4f 「Scope TinaCloud authorization to the site's configured clientID」）",
+      "result": "MISS（2026-09-18，扁平单文件语料；trust 扫描 pre=0 / post=0 违规）",
+      "result_detail": "★两处历史作废/阻塞均已解除：①早期 0 违规无效（缺 tsconfig.json，ts-morph FileNotFoundError，引擎未实质分析）；②补 tsconfig 后 >300s 未完成的根因是提取器 SSRF 正则死循环（2026-09-18 修复，见 V2 报告 §5），修复后 57s 完成。★根因：`isAuthorized` 的 clientID 归属错误（应取服务端配置，实取 `req.query.clientID`）——需要判断「用于校验的身份标识**应当**来自何处」，属**归属语义/策略语义**，不是调用顺序也不是污点可达性，当前引擎无对应维度。与 V1 fr-004（凭据数据流）不同族。见 V2 报告 §6",
+      "result_reason": "corpus_unverified",
+      "result_note": "扁平单文件语料；1 个真值文件在切片内（2026-09-19 严格路径校验），调用链完整性未校验。MISS 结论暂定。"
+    }
+  ]
 }
