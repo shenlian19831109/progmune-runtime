@@ -548,7 +548,10 @@ export async function uploadCover(input: any): Promise<void> {
     {
       fn: "uploadAvatar",
       file: "guarded.ts",
-      have: ["input_guard"],
+      // input_effect 是 2026-09-23 补的：E 族原本只钉 input_guard 维度，
+      // derive-cut-expectations 的「仅因规则维度转红」提示暴露了缺口 ——
+      // 若将来只改规则不改标记，这 5 条就抓不到（R19：分母要含被拒掉的那些）。
+      have: ["input_guard", "input_effect"],
       suppressRules: ["Input Validation"],
       why: "limits 选项 + 判空抛 4xx ⇒ 有校验证据，不该报",
     },
@@ -556,6 +559,7 @@ export async function uploadCover(input: any): Promise<void> {
       fn: "uploadBanner",
       file: "guarded.ts",
       none: ["input_guard"],
+      have: ["input_effect"],
       reportRules: ["Input Validation"],
       why: "无校验 ⇒ 该报（抑制机制的反面护栏，防止变成无条件抑制）",
     },
@@ -563,6 +567,7 @@ export async function uploadCover(input: any): Promise<void> {
       fn: "uploadIcon",
       file: "guarded.ts",
       none: ["input_guard"],
+      have: ["input_effect"],
       reportRules: ["Input Validation"],
       why: "抛 NotFound = 存在性校验，不算输入校验 ⇒ 该报",
     },
@@ -570,6 +575,7 @@ export async function uploadCover(input: any): Promise<void> {
       fn: "uploadThumb",
       file: "guarded.ts",
       none: ["input_guard"],
+      have: ["input_effect"],
       reportRules: ["Input Validation"],
       why: "抛裸 Error = 环境配置校验，不算输入校验 ⇒ 该报",
     },
@@ -577,6 +583,7 @@ export async function uploadCover(input: any): Promise<void> {
       fn: "uploadCover",
       file: "guarded.ts",
       none: ["input_guard"],
+      have: ["input_effect"],
       suppressRules: ["Input Validation"],
       why: "validateContent 旧词表就认 ⇒ 与本轮机制无关，不该报（对照）",
     },
@@ -644,6 +651,132 @@ export async function uploadDraft(input: any): Promise<void> {
   await storageService.upload(input.path, input.body);
 }
 `,
+    // ── sinks.ts：S1–S7 逐通道扩量（2026-09-23，验收要求 ≥20 条带 sink 形状）──
+    // 原 F 族只有 3 条带 sink 的正例，承担不起盲测 −216 之后的证伪力。
+    // 扩量原则：**每条通道至少一正**，且每条函数名都必须命中 trigger
+    // （create|add|post|upload）—— 名字不命中 trigger 的「该报/不该报」是空过（R19）。
+    // ⚠ 写语料时的坑：bodyHasExternalEffect 吃的是 node.getText()（**含注释**），
+    //    注释里若出现 `save(` 这类「动词+括号」会被误判成有副作用。
+    "src/sinks.ts": `declare const redis: any;
+declare const fs: any;
+declare const prisma: any;
+declare const knex: any;
+declare const queue: any;
+declare const bus: any;
+declare const s3Client: any;
+declare const mailService: any;
+declare const trx: any;
+declare const userRepository: any;
+declare const axios: any;
+declare const validateContent: any;
+declare const logger: any;
+declare const app: any;
+declare const z: any;
+declare const repo: any;
+declare const pkg: any;
+declare const items: any[];
+
+/** S2 缓存写入 ⇒ 该报 */
+export async function addUserRole(roleId: any): Promise<void> {
+  await redis.sadd("roles", roleId);
+}
+
+/** S4 文件系统写入 ⇒ 该报 */
+export async function createAuditLog(entry: any): Promise<void> {
+  await fs.writeFile("/var/log/audit.log", JSON.stringify(entry));
+}
+
+/** S6 prisma 写入 ⇒ 该报 */
+export async function createAccountRow(input: any): Promise<void> {
+  await prisma.user.create({ data: input });
+}
+
+/** S6 knex 写入 ⇒ 该报 */
+export async function createTicket(input: any): Promise<void> {
+  await knex("tickets").insert(input);
+}
+
+/** S3 消息投递 ⇒ 该报 */
+export async function addEventToQueue(input: any): Promise<void> {
+  await queue.publish("events", input);
+}
+
+/** S3 事件派发 ⇒ 该报 */
+export async function postNotice(input: any): Promise<void> {
+  await bus.dispatch(input);
+}
+
+/** S5 对象存储客户端 ⇒ 该报 */
+export async function uploadAsset(input: any): Promise<void> {
+  await s3Client.putObject({ Key: input.name, Body: input.body });
+}
+
+/** S5 委托给邮件服务 ⇒ 该报 */
+export async function postWelcomeMail(input: any): Promise<void> {
+  await mailService.send(input);
+}
+
+/** S7 Kysely 链式删除 ⇒ 该报 */
+export async function createMemberRemoval(memberId: any): Promise<void> {
+  await trx.deleteFrom("members").where("id", memberId).execute();
+}
+
+/** S5 委托给 repository ⇒ 该报 */
+export async function createProfileUpdate(id: any, input: any): Promise<void> {
+  await userRepository.update(id, input);
+}
+
+/** S2 带 TTL 的缓存写入 ⇒ 该报 */
+export async function createSession(input: any): Promise<void> {
+  await redis.setex("sess:" + input.id, 3600, JSON.stringify(input));
+}
+
+/** S3 HTTP 客户端 ⇒ 该报 */
+export async function postWebhook(input: any): Promise<void> {
+  await axios.post(input.url, input.payload);
+}
+
+/** 反例：工厂/驱动构造，只返回对象 ⇒ 无副作用 ⇒ 不该报（ducktors 形态） */
+export function createLocalDriver(opts: any): any {
+  return { type: "local", root: opts.root };
+}
+
+/** 反例：配置装配，只 push 到内存数组 ⇒ 不该报（verdaccio 形态） */
+export function addPackageAccess(rule: any): void {
+  pkg.access.push(rule);
+}
+
+/** 反例：只读查询，动词不在写入表内 ⇒ 不该报 */
+export async function createWidgetPreview(id: any): Promise<any> {
+  return repo.findById(id);
+}
+
+/** 反例：纯计算 ⇒ 不该报 */
+export function createCartTotal(discount: any): number {
+  return items.reduce((s, i) => s + i.price, 0) - discount;
+}
+
+/** 反例（边界）：派生日志子实例不是 sink ⇒ 不该报 */
+export function createLogger(name: any): any {
+  return logger.child({ name });
+}
+
+/** 反例（边界）：路由注册不是 sink ⇒ 不该报 */
+export function addRoute(path: any, handler: any): void {
+  app.get(path, handler);
+}
+
+/** 反例（边界）：构造校验 schema 不是 sink ⇒ 不该报 */
+export function createWidgetSchema(): any {
+  return z.object({ name: z.string(), price: z.number() });
+}
+
+/** 反例：有副作用（redis.sadd）但已 validateContent ⇒ 校验位优先 ⇒ 不该报 */
+export async function createValidatedRole(input: any): Promise<void> {
+  validateContent(input.name);
+  await redis.sadd("roles", input.id);
+}
+`,
   },
   cases: [
     {
@@ -687,6 +820,148 @@ export async function uploadDraft(input: any): Promise<void> {
       have: ["input_effect"],
       suppressRules: ["Input Validation"],
       why: "有副作用但已 validateContent ⇒ 校验位优先，不该报（两个机制不互相覆盖）",
+    },
+    // ── sinks.ts 扩量：S1–S7 逐通道正例（12 条）──────────────────────────────
+    {
+      fn: "addUserRole",
+      file: "sinks.ts",
+      have: ["input_effect"],
+      reportRules: ["Input Validation"],
+      why: "S2 缓存：redis.sadd ⇒ 该报",
+    },
+    {
+      fn: "createAuditLog",
+      file: "sinks.ts",
+      have: ["input_effect"],
+      reportRules: ["Input Validation"],
+      why: "S4 文件：fs.writeFile ⇒ 该报",
+    },
+    {
+      fn: "createAccountRow",
+      file: "sinks.ts",
+      have: ["input_effect"],
+      reportRules: ["Input Validation"],
+      why: "S6 prisma：prisma.user.create ⇒ 该报",
+    },
+    {
+      fn: "createTicket",
+      file: "sinks.ts",
+      have: ["input_effect"],
+      reportRules: ["Input Validation"],
+      why: "S6 knex：knex('tickets').insert ⇒ 该报",
+    },
+    {
+      fn: "addEventToQueue",
+      file: "sinks.ts",
+      have: ["input_effect"],
+      reportRules: ["Input Validation"],
+      why: "S3 投递：queue.publish ⇒ 该报",
+    },
+    {
+      fn: "postNotice",
+      file: "sinks.ts",
+      have: ["input_effect"],
+      reportRules: ["Input Validation"],
+      why: "S3 派发：bus.dispatch ⇒ 该报",
+    },
+    {
+      fn: "uploadAsset",
+      file: "sinks.ts",
+      have: ["input_effect"],
+      reportRules: ["Input Validation"],
+      why: "S5 客户端：s3Client.putObject ⇒ 该报（client 前缀专项）",
+    },
+    {
+      fn: "postWelcomeMail",
+      file: "sinks.ts",
+      have: ["input_effect"],
+      reportRules: ["Input Validation"],
+      why: "S5 委托：mailService.send ⇒ 该报（service 前缀专项）",
+    },
+    {
+      fn: "createMemberRemoval",
+      file: "sinks.ts",
+      have: ["input_effect"],
+      reportRules: ["Input Validation"],
+      why: "S7 链式：trx.deleteFrom ⇒ 该报（删除也是副作用）",
+    },
+    {
+      fn: "createProfileUpdate",
+      file: "sinks.ts",
+      have: ["input_effect"],
+      reportRules: ["Input Validation"],
+      why: "S5 委托：userRepository.update ⇒ 该报（repository 前缀专项）",
+    },
+    {
+      fn: "createSession",
+      file: "sinks.ts",
+      have: ["input_effect"],
+      reportRules: ["Input Validation"],
+      why: "S2 缓存：redis.setex ⇒ 该报",
+    },
+    {
+      fn: "postWebhook",
+      file: "sinks.ts",
+      have: ["input_effect"],
+      reportRules: ["Input Validation"],
+      why: "S3 出站：axios.post ⇒ 该报（HTTP 客户端与 fetch 是两条路）",
+    },
+    // ── sinks.ts 扩量：反例（8 条）—— 无 sink / 边界形状 / 校验位优先 ──────────
+    {
+      fn: "createLocalDriver",
+      file: "sinks.ts",
+      none: ["input_effect"],
+      suppressRules: ["Input Validation"],
+      why: "工厂：只返回对象 ⇒ 不该报（FP 池 ducktors createLocal 真形态）",
+    },
+    {
+      fn: "addPackageAccess",
+      file: "sinks.ts",
+      none: ["input_effect"],
+      suppressRules: ["Input Validation"],
+      why: "配置装配：push 到内存数组 ⇒ 不该报（FP 池 verdaccio addPackageAccess 真形态）",
+    },
+    {
+      fn: "createWidgetPreview",
+      file: "sinks.ts",
+      none: ["input_effect"],
+      suppressRules: ["Input Validation"],
+      why: "只读查询：findById 动词不在写入表内 ⇒ 不该报（防 S1/S5 泛化）",
+    },
+    {
+      fn: "createCartTotal",
+      file: "sinks.ts",
+      none: ["input_effect"],
+      suppressRules: ["Input Validation"],
+      why: "纯计算 ⇒ 不该报",
+    },
+    {
+      fn: "createLogger",
+      file: "sinks.ts",
+      none: ["input_effect"],
+      suppressRules: ["Input Validation"],
+      why: "边界：派生日志子实例不是 sink ⇒ 不该报（logger 不在 S5 前缀表内）",
+    },
+    {
+      fn: "addRoute",
+      file: "sinks.ts",
+      none: ["input_effect"],
+      suppressRules: ["Input Validation"],
+      why: "边界：路由注册不是 sink ⇒ 不该报（app.get 不落 S3 动词表）",
+    },
+    {
+      fn: "createWidgetSchema",
+      file: "sinks.ts",
+      none: ["input_effect"],
+      suppressRules: ["Input Validation"],
+      why: "边界：构造校验 schema 不是 sink ⇒ 不该报",
+    },
+    {
+      fn: "createValidatedRole",
+      file: "sinks.ts",
+      have: ["input_effect"],
+      suppressRules: ["Input Validation"],
+      why: "有副作用（redis.sadd）但已 validateContent ⇒ 校验位优先 ⇒ 不该报",
     },
   ],
 };

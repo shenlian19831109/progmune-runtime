@@ -1219,5 +1219,130 @@
       "blind": "perFunction 3052 → 2841；LOST 216 全为 Input Validation（合成 demo 为内存实现、无 sink），ADDED 5（3 条在 webshape_F）；其余 19 条规则零漂移",
       "fp_pool": "409 → 364；Input Validation 75 → 30；verified TP 6 条全保留、heuristic TP 11 条全保留；verified FP 29 条全压掉；heuristic FP 压 15 留 13"
     }
+  },
+  "gold_verification_2026_09_23": {
+    "motive": "3.7.52 验收保留意见 3：真值集 verified 仅 12.96%（53/409），其中 TP/verified 只有 11 条；T1 抽查 10 条只 2 条确证 ⇒ 启发式不能当 gold，TP 补核必须先于任何校准动作。目标 verified 15-20%。",
+    "method": {
+      "step1": "新工具 prepare-gold-review.ts：用 ts-morph 定位每条待核条目的函数体（含类方法/箭头常量/对象方法），连同装饰器、参数、文件里与校验相关的 import 一起落盘 —— 判定需要上下文（是否 Controller、DTO 校验在不在别处），光看函数体不够。28 条全部定位成功（0 未定位）。",
+      "step2": "逐条读源码判定，判定与源码依据一并落盘 gold-verdicts-2026-09-23.json（入库资产，可复核）。",
+      "step3": "apply-gold-verdicts.ts 合并回 fp-gold.jsonl。",
+      "why_not_grep": "用 grep 找函数体会漏形态（E5 的文本探针就漏过 export const x = async () =>）；素材准备这一步必须走 AST，否则「未定位」会被误当成「该函数不存在」。"
+    },
+    "honesty_note": {
+      "issue": "用户说的是「TP **人工**补核」。我（AI）读源码判定不算人工确证。",
+      "resolution": "gold_confidence 仍只分 verified / heuristic 两档（比例口径不变、可比），但新增 verified_by='ai-read-source' 字段标注**谁核的**，并给每条附 verified_evidence（源码依据）。任何人可据此复核。若需要 human_verified 档，在此基础上加一层即可。",
+      "why_field_not_new_tier": "新增第三档会让 verified 比例与历史数字不可比（R38）。用字段标注既能追溯又不破坏可比性。"
+    },
+    "result": {
+      "before": {
+        "verified": 53,
+        "total": 409,
+        "pct": "12.96%",
+        "tp_verified": 11,
+        "fp_verified": 42
+      },
+      "after": {
+        "verified": 79,
+        "total": 409,
+        "pct": "19.3%",
+        "tp_verified": 24,
+        "fp_verified": 55
+      },
+      "verdict_breakdown": "28 条 TP/heuristic 待核 → 真报 13、误报 13、保持 UNKNOWN 2（+1 条后补信息定判）",
+      "target": "达成（15-20% 区间内）"
+    },
+    "key_finding": {
+      "headline": "启发式 TP 标注的准确率只有约 48%",
+      "numbers": "可判定 25 条中真报 12、误报 13 ⇒ 48%。与 2026-09-21 T1 抽查（10 条只 2 条确证）是两次独立测量，量级一致。",
+      "typical_false_alarms": [
+        "verdaccio ConfigBuilder.addUplink —— this.config.uplinks[id]=uplink 纯配置装配，无 sink（E5 要压的典型形态）",
+        "hoppscotch AdminService.addUserToTeam —— 首行即 if (!validateEmail(userEmail)) return E.left(INVALID_EMAIL)",
+        "docmost GroupUserService.addUsersToGroupBatch —— findAndValidateGroup + .where(users.workspaceId = workspaceId) 两道过滤，跨空间 ID 根本进不到 insert",
+        "docmost computeEmailSignature —— 纯 HMAC 计算，规则把 createHmac 误当子实体创建",
+        "docmost LabelController.assertCanReadSpace —— 是 CASL 鉴权断言，不是子实体创建"
+      ],
+      "consequence": "⇒ 升 R46：heuristic gold 不得用于校准，且补核后所有旧量化数字必须重算。"
+    },
+    "recalibration_check": {
+      "what": "E5 判据当初是在含 heuristic 的 gold 上量出「TP 召回 100%」。gold 变了，必须重算。",
+      "after": "Input Validation 的 TP/verified 从 6 → 11 后重算：粗判据 **TP 召回仍 100%（丢 0）**，FP 压制 72.1%，净 44 ⇒ **结论存活**。",
+      "but": "「现状 precision」从 56.7% 变成 39.3% ⇒ 当初那个数字不可信。教训：召回类指标对标签噪声相对不敏感，precision 类指标极其敏感（R46）。",
+      "decision_unchanged": "精化判据仍丢 4 条真报（召回 63.6%）⇒ 当初「取粗判据」的决定不变。"
+    },
+    "unresolved": {
+      "count": 2,
+      "ids": [
+        "hedgedoc/ApiTokensController.postTokenRequest::Data Integrity (Foreign Key)",
+        "hedgedoc/ApiTokensController.postTokenRequest::Input Validation"
+      ],
+      "why": "判定取决于项目是否启用 NestJS 全局 ValidationPipe，而 hedgedoc 切片不含入口文件，该信息在池内不可判定。raw.githubusercontent.com 本机不通（codeload 通），单文件补取做不到；整仓重拉会改变已补核条目的位置，暂不为 2 条冒这个险。",
+      "handling": "按 R41 标为缺信息（不是缺语义）⇒ 不猜、不交给概率模型。升 R47：切片必须含入口文件。",
+      "partial_win": "同批的 lujakob/ArticleController.createComment 原本也卡在这里，后来发现切片**其实含** main.ts，读后确认没有 useGlobalPipes ⇒ 定判 TP。说明「以为缺信息」时第一步是确认切片里到底有没有。"
+    },
+    "rules_added": [
+      "R46：heuristic gold 约 50% 是错的，不得用于校准；补核后旧量化数字必须重算",
+      "R47：池切片必须包含入口文件（main.ts/app.ts），否则「全局校验中间件是否启用」不可判定"
+    ],
+    "unknown_composition": {
+      "total": 101,
+      "by_rule_top": {
+        "No Input Sanitization": 25,
+        "Authorization (Unauthenticated / Ownership)": 28,
+        "Session No Timeout": 10,
+        "No Token Rotation": 6,
+        "Password Hashing (Weak + 常规)": 11,
+        "Registration Without Email Verification": 6
+      },
+      "input_validation_only": 2,
+      "finding": "UNKNOWN 的主体不是 Input Validation，而是 Authorization / Session / Password / Token 族 —— 这些需要的上下文是**跨函数、跨文件的调用链**（这个 endpoint 上游有没有 auth 中间件、session 在哪里失效），不是入口文件里那几行配置。",
+      "cross_check": "与 2026-09-21 fp-pool.json 里 why_hard_to_saturate 的判断一致（未归因集中在 session/password/registration/token 族）⇒ 两次独立观察互相印证，该判断存活。",
+      "implication": "继续补核的边际成本会越来越高：这 70+ 条每条都要追调用链才能判。若要显著抬升 verified 比例，下一步应该是「给鉴权/会话类规则补跨函数上下文」，而不是继续逐条读源码。"
+    }
+  },
+  "pool_expansion_2026_09_23": {
+    "what": "验收保留意见 3 的后半：「池扩样 + TP 人工补核」。补核见 gold_verification_2026_09_23（已完成、达标）；本键记扩样与饱和复核。",
+    "outline_re_slice": {
+      "background": "outline 在 2026-09-21 被判为**有偏切片**：按「优先目录」打分取前 N，110 个名额几乎全给了 routes/api/* ⇒ 只有 37 个函数、命中 4 条（1.1%）。修复为 round_robin() 按目录轮转取样，台账待办是「重切后重扫替换」。本次落地该待办。",
+      "result": {
+        "files": 60,
+        "candidates": 1861,
+        "functions": 106,
+        "violations": 17,
+        "share": "4.5%"
+      },
+      "comparison": {
+        "before": "4 条 / 1.1%",
+        "after": "17 条 / 4.5%"
+      },
+      "verdict": "采样器修复**有效**（贡献量 4 → 17，且不再是单一子树）"
+    },
+    "second_slice_failed": {
+      "repo": "formbricks/formbricks",
+      "size": "486MB",
+      "why": "与 outline(331MB) 并行拉取，本机 load 377、网络慢，26 分钟两个都没完成 ⇒ 中止 formbricks 让 outline 独占带宽。",
+      "consequence": "本轮只成功扩 1 片，而 R25 饱和判据要求「连续加 2 个切片」⇒ 片数条件本身就不满足。"
+    },
+    "saturation": {
+      "command": "python3 blind-benchmark/fp-pool-attrib.py --check-saturation",
+      "output": "8 片(364 条) → 9 片(381 条)：⚠ 本次比较**无效**，新切片只贡献 17 条（4.5% < 5%）",
+      "verdict": "未达开工线 ⇒ **本轮一条规则都没改**",
+      "note": "4.5% 距 5% 只差 0.5pp —— 这条空过防线（R25）这次真的起了作用：若没有它，「各线索没漂移」会被误读成已饱和，进而提前动手。"
+    },
+    "desync_warning": {
+      "issue": "fp-pool-results.json 已是 9 片 / 381 条（含 outline）；fp-gold.jsonl 仍是 409 条（不含 outline 的 17 条）。**故意不同步**。",
+      "why": "本轮 28 条补核判定都落在 fp-gold.jsonl 上；重新导出真值集会覆盖已判定条目，风险大于收益。",
+      "next_time": "要把 outline 纳入真值集时，必须做**合并式导出**（保留已判定条目的 gold / verified_by / verified_evidence 字段），不能整体重导。这是下次开工前必须先解决的前置项。"
+    },
+    "why_not_verify_outline_17": [
+      "目标已达成（19.3%，在 15-20% 区间内），继续补会超出区间",
+      "outline 贡献的构成（Data Mutation 8 / Password 4 / Registration 2 / Authorization 1 / Payment Webhook 1 / Session 1）**没有一条 Input Validation** ⇒ 对当前校准焦点无新素材",
+      "其中 ComponentView.update 是 .tsx React 组件、removeStopWords / getChangeset 是纯计算，看着像误报，但要落判定得先解决合并导出问题",
+      "UNKNOWN 主体是鉴权/会话族，补这 17 条不改变该结论"
+    ],
+    "todo": [
+      "合并式导出：让 fp-gold.jsonl 纳入 outline 的 17 条且保留已判定字段",
+      "再拉 1 个切片（单机拉，不要并行）以满足「连续 2 片」的饱和条件",
+      "饱和达标后才可做规则侧校准（本轮未动任何规则）"
+    ]
   }
 }

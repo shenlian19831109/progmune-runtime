@@ -2605,3 +2605,249 @@ webshape_F 补进来的正是"有 sink"的真阳性形状，3 条照常报出。
   取舍原则 **丢真报比留误报贵**，不得按"哪个数字更好看"选。真值集跑通后**仍须过合成
   语料闸门**——真值集覆盖真实形状的分布，合成语料能写出真值集里没有的干净形状
   （本轮 S5 那个洞就是合成语料抓出来的）。
+
+---
+
+## §三十二 期望推导工具化 + webshape_F 扩量（2026-09-23，v3.7.52 之后）
+
+起因是 3.7.52 验收的三条保留意见中的前两条：
+① R34 第三次同形踩坑 ⇒ 期望推导要工具化；② webshape_F 只有 3 条带 sink 形状，
+承担不起盲测 −216 之后的证伪力 ⇒ 扩量到 ≥20。
+
+### 32.1 期望推导工具化（治 R34 的根）
+
+**工具**：`blind-benchmark/derive-cut-expectations.ts`
+
+旧做法的问题不在"算错了"，而在"手列这个动作本身"。三次踩坑每次漏的都是同一个
+东西——**只推了「违规报不报」，忘了期望表还有「标记有没有」**：
+
+| 轮次 | 刀 | 漏掉的维度 | 后果 |
+|---|---|---|---|
+| §二十六 | CUT-4/5 | traversal | 期望少算，转红对不上 |
+| §三十 | CUT-C | reportRules | 同上 |
+| §三十一 | CUT-A | have（uploadDraft） | 同上 |
+
+三次修的都是推导逻辑不是代码 ⇒ 说明靠人记住"要检查全部维度"不可靠。
+
+**工具的四要素**
+
+1. **全维度重算**：have / none / traversal / reportRules / suppressRules **五个维度
+   全部逐项检查**，不再挑着看。
+2. **维度归因**：每条转红都标明因哪个维度红（如 `have:input_effect`）—— 漏维度
+   不再可能"静默发生"，它会直接出现在输出里。
+3. **两条不变量**（R34 的锁）：
+   - never 刀 ⇒ 所有声明 `have:[m]` 的 case **必须**转红
+   - always 刀 ⇒ 所有声明 `none:[m]` 的 case **必须**转红
+   不满足即判推导不可信并退出。**有了这两条，漏维度在结构上不可能。**
+4. **刀施加在 IR 层**（增删标记后重放规则），**不改源码** ⇒ 零残留风险、秒级。
+   语义依据：requireMarker 移除 ⇒ 有没有标记都触发 ⇒ 等价于"人人都有标记"= always；
+   注入侧恒 false ⇒ 等价于"人人都没有" = never。
+
+**源码实测仍要做**（`reverse-verify-e5.py`），但它的**期望现在来自工具**（不再手列）。
+两侧不一致即报警 —— 这能抓"改了源码但改动点根本没生效"这类静默失效。
+
+**实测对账**（语料扩量后）：
+
+| 刀 | 推导 | 源码实测 | 标记维度直接 / 规则维度介导 |
+|---|---|---|---|
+| CUT-A | 22 | 22 | 22 / **0** |
+| CUT-B | 9 | 9 | 9 / **0** |
+| CUT-C | 9 | 9 | 9 / **0** |
+
+推导与实测**逐条一致**，反过来验证了 IR 层等价性假设成立。
+
+**三个白捡的收益**
+
+1. **CUT-B 与 CUT-C 是同一刀**：工具自动报出两者转红集合完全相同 ⇒ 历史上当成两个
+   施加点在跑，IR 层看是同一个语义。以后不必重复。
+2. **机制-语料覆盖矩阵**（`--all`）：某机制的 never/always 两刀转红皆 0 ⇒ **没有任何
+   语料钉住它** ⇒ R23 空过的自动探测器。本次实测 5 个机制全部有语料钉住，无空过。
+3. **暴露 E 族缺口**：E 族 5 条只钉了 input_guard，**没钉 input_effect** ⇒ 若将来只改
+   规则不改标记，这 5 条抓不到。已补 have 维度（R19：分母要含被判据拒掉的那些）。
+
+### 32.2 webshape_F 扩量（6 → 26 条）
+
+新增 `src/sinks.ts`，**逐通道钉住 S1–S7**：
+
+- **正例 12 条**（该报）：S2 redis.sadd / redis.setex、S4 fs.writeFile、
+  S6 prisma.user.create / knex().insert、S3 queue.publish / bus.dispatch / axios.post、
+  S5 s3Client.putObject / mailService.send / userRepository.update、S7 trx.deleteFrom
+- **反例 8 条**（不该报）：工厂 createLocalDriver（ducktors 真形态）、配置装配
+  addPackageAccess（verdaccio 真形态）、只读 createWidgetPreview、纯计算、
+  三个边界形状（createLogger / addRoute / createWidgetSchema 都不是 sink）、
+  校验位优先 createValidatedRole
+
+**扩量的两条硬约束**：
+
+1. **每条函数名都必须命中 trigger**（create|add|post|upload）。名字不命中 trigger 的
+   "该报/不该报"是空过（R19）—— 判据根本没被调用，绿了也不算数。为此把
+   `writeAuditLog`→`createAuditLog`、`publishEvent`→`addEventToQueue`、
+   `removeMember`→`createMemberRemoval` 等全部改名。
+2. **注释里不得出现判据动词的「动词+括号」**（见 R45）—— bodyHasExternalEffect 吃的是
+   `node.getText()`，**含 JSDoc 注释**，注释里写 `save(` 会把反例变正例且闸门照样绿。
+
+**盲测**：perFunction 2841 → 2865，**LOST 0 / ADDED 24 全部落在 webshape_F**。
+12 条正例全部报出 Input Validation，8 条反例全部不报 —— 盲测现在**真的能证伪**这条规则了
+（此前 −216 条全是内存实现 demo，证伪力为零）。
+
+### 32.3 本轮四门
+
+| 门 | 结果 |
+|---|---|
+| tsc | 0 错 |
+| taintpath | 160 / 160 |
+| webshape | **49 / 49**（29 → 49） |
+| fr-007 / fr-016 | 5-0 / 7-0 |
+| 定向 | 212 passed |
+| 反向验证 | 三刀 PASS（22 / 9 / 9），推导与源码实测一致 |
+| 盲测 | LOST 0 / ADDED 24（全在新语料） |
+
+本轮**未改 src** ⇒ FP 池无需重扫（维持 3.7.52 的 IV=30、verified TP 6/6）。
+
+### 32.4 新增方法学规则（至 45 条）
+
+- **R44**：反向验证的转红集合**必须由工具从期望表机械推导，不得手列**。四要素见 32.1。
+  与 R34 是同一族但更进一层：R34 说"期望要从期望表推导"，R44 说"推导这个动作本身
+  要交给机器"。
+- **R45**：合成语料的**注释也算函数体文本**。写反例语料时注释里不得出现判据动词的
+  「动词+括号」形态；更稳的做法是给判据传去注释的文本。与 R23 同族但方向相反：
+  R23 是语料**没覆盖**机制（空过），R45 是语料**误覆盖**机制（注释冒充代码）。
+
+---
+
+## §三十三 真值补核（2026-09-23，v3.7.52 之后）
+
+起因是 3.7.52 验收的保留意见 3：真值集 verified 只有 12.96%（53/409），其中
+**TP/verified 仅 11 条**；T1 抽查 10 条只 2 条确证 ⇒ 启发式不能当 gold，**TP 补核
+必须先于任何校准动作**。目标 verified 15–20%。
+
+### 33.1 做法：素材用 AST 备，判定留证据
+
+三个新资产，职责分离：
+
+| 资产 | 职责 |
+|---|---|
+| `prepare-gold-review.ts` | 用 ts-morph 定位每条待核条目的函数体（类方法/箭头常量/对象方法全覆盖），连同装饰器、参数、校验相关 import 一起落盘 |
+| `gold-verdicts-2026-09-23.json` | 判定表：**每条附源码依据（evidence）**，入库可复核 |
+| `apply-gold-verdicts.ts` | 合并回 fp-gold.jsonl |
+
+素材准备必须走 AST，不能用 grep —— E5 时文本探针漏过 `export const x = async () =>`
+形态，「未定位」会被误当成「该函数不存在」。本次 **28 条全部定位成功（0 未定位）**。
+
+**核验方式的诚实标注**：用户说的是「TP **人工**补核」，AI 读源码判定不算人工确证。
+处理方式是 `gold_confidence` 仍只分 verified / heuristic 两档（比例口径不变、与历史
+可比），另加 `verified_by='ai-read-source'` 字段标注**谁核的**，每条附 `verified_evidence`。
+任何人可据此复核；需要人工档时在此基础上加一层即可。
+
+### 33.2 结果
+
+| | 前 | 后 |
+|---|---|---|
+| verified | 53 / 409（12.96%） | **79 / 409（19.3%）** |
+| TP/verified | 11 | **24** |
+| FP/verified | 42 | 55 |
+| TP/heuristic | 28 | **0** |
+
+28 条 TP/heuristic 逐条读完：真报 13、误报 13、保持 UNKNOWN 2。
+
+### 33.3 关键发现：启发式 TP 的准确率只有 48%
+
+可判定 25 条里真报 12、误报 13 ⇒ **48%**。与 2026-09-21 的 T1 抽查（10 条只 2 条
+确证）是两次独立测量，量级一致。典型误标：
+
+- `verdaccio ConfigBuilder.addUplink` —— `this.config.uplinks[id] = uplink` 纯配置装配（E5 要压的典型形态）
+- `hoppscotch AdminService.addUserToTeam` —— 首行即 `if (!validateEmail(userEmail)) return E.left(INVALID_EMAIL)`
+- `docmost GroupUserService.addUsersToGroupBatch` —— `findAndValidateGroup` + `.where('users.workspaceId','=',workspaceId)` 两道过滤
+- `docmost computeEmailSignature` —— 纯 HMAC 计算，规则把 `createHmac` 误当子实体创建
+- `docmost LabelController.assertCanReadSpace` —— 是 CASL 鉴权断言，不是子实体创建
+
+⇒ 升 **R46**：heuristic gold 不得用于校准，且补核后**所有旧量化数字必须重算**。
+
+### 33.4 连带：E5 判据在新真值上重算（结论存活）
+
+E5 判据当初是在**含 heuristic** 的 gold 上量出「TP 召回 100%」。gold 变了就必须重算
+（这正是「补核先于校准」的意义）：
+
+| 指标 | 旧 gold | 新 gold（TP/verified 6→11） |
+|---|---|---|
+| 粗判据 TP 召回 | 100% | **100%（丢 0）** |
+| 精化判据 TP 召回 | 94.1% | 63.6%（仍丢 4） |
+| 现状 precision | 23.0% | 15.3% |
+| 粗判据后 precision | 56.7% | **39.3%** |
+
+**结论存活**：粗判据召回仍满分，「取粗判据」的决定不变。但「precision 56.7%」变成了
+39.3% ⇒ 当初那个数字本就不可信。教训：**召回类指标对标签噪声相对不敏感，precision 类
+指标极其敏感**（已写入 R46）。
+
+### 33.5 UNKNOWN 的真实瓶颈（修正了我自己的判断）
+
+101 条 UNKNOWN 的构成：No Input Sanitization 25、Authorization 28、Session/Password/
+Token 30+，而 **Input Validation 只有 2 条**。
+
+⇒ 补核的下一个瓶颈不是入口文件（我一度以为是，写完 R47 后统计发现只影响 2 条，已把
+R47 收窄并记下自我修正），而是 **Authorization / Session / Token 族需要的跨函数、跨文件
+调用链上下文**。这与 2026-09-21 `why_hard_to_saturate` 的判断一致 ⇒ 两次独立观察互证。
+
+推论：继续逐条读源码的边际成本会快速上升。要显著抬升 verified，下一步应是**给鉴权/
+会话类规则补跨函数上下文**，而不是继续堆人力读代码。
+
+---
+
+## §三十四 池扩样与饱和复核（2026-09-23）
+
+### 34.1 扩样：outline 用修好的采样器重切
+
+`outline/outline` 此前（2026-09-21）因**取样偏差**被判为有偏切片：按「优先目录」打分
+取前 N，110 个名额几乎全给了 `routes/api/*`，只切出 37 个函数、命中 4 条。修复方式是
+`round_robin()` 按目录轮转取样，台账里留的待办是「用 round_robin 重切后重扫替换」。
+
+本次即该待办的落地：
+
+| | 2026-09-21 有偏切片 | 2026-09-23 重切 |
+|---|---|---|
+| 文件 | 110（几乎全是 routes/api） | 60 / 候选 1861（轮转取样） |
+| 函数 | 37 | 106 |
+| 贡献违规 | 4 条（1.1%） | **17 条（4.5%）** |
+
+⇒ 采样器修复**确实有效**（贡献量 4 → 17）。但同时印证了 R25 那条空过防线不是
+纸上谈兵：**4.5% 仍低于 5% 的门槛，工具直接判「本次比较无效」**。差一点就会被误读成
+「各线索没漂移 ⇒ 已饱和」。
+
+### 34.2 第二个切片没拉成
+
+`formbricks/formbricks`（486MB）与 outline（331MB）并行拉取，本机 load 377、网络慢，
+26 分钟仍未完成 ⇒ 已中止 formbricks，让 outline 独占带宽。
+
+⇒ 本轮实际只**成功扩 1 片**，而 R25 的饱和判据要求「连续加 2 个切片」。两个条件
+（片数、贡献量）都不满足。
+
+### 34.3 饱和结论：不动规则（第 4 项）
+
+```
+[saturation] 8 片(364 条) → 9 片(381 条)
+   ⚠ 这次比较**无效**：新切片只贡献 17 条（4.5% < 5%）
+```
+
+**本轮一条规则都没改。** 这与 3.7.52 那轮的克制一致：池没饱和就排序，换一批语料
+优先级就会重排（R24/R25 的失败模式）。
+
+### 34.4 一个必须记下的不同步
+
+- `fp-pool-results.json` 已是 **9 片 / 381 条**（含 outline）
+- `fp-gold.jsonl` 仍是 **409 条**（不含 outline 的 17 条）
+
+两者**故意不同步**：本轮补核的判定都在 fp-gold.jsonl 上，重新导出真值集会覆盖已判定
+条目（风险大于收益）。下次要把 outline 纳入真值集时，必须**合并式导出**（保留已判定
+条目的 gold 字段），不能整体重导。
+
+### 34.5 为什么没有顺手补核 outline 那 17 条
+
+1. 目标已达成（19.3%，在 15–20% 区间内），继续补会超出区间；
+2. outline 贡献的构成是 Data Mutation 8 / Password 4 / Registration 2 / Authorization 1 /
+   Payment Webhook 1 / Session No Timeout 1 —— **没有一条 Input Validation**，对当前
+   校准焦点没有新素材；
+3. 其中 `ComponentView.update` 是 `.tsx` React 组件、`removeStopWords` /
+   `getChangeset` 是纯计算，看着就是误报，但要落判定得先解决 34.4 的合并导出问题；
+4. 边际成本：UNKNOWN 的主体是鉴权/会话族（§33.5），补这 17 条不改变那个结论。
+
+⇒ 记为**待办**而非本轮完成项。

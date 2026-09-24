@@ -1,0 +1,175 @@
+{
+  "_comment": "2026-09-23 真值补核判定表。由 prepare-gold-review.ts 提供源码素材，逐条读源码后判定，每条附 evidence（源码依据）。核验方式字段 verified_by='ai-read-source' —— 意为「读源码 + 留证据」，区别于人工确证；比例口径不变（仍归 verified 档），但谁核的可追溯。",
+  "_why": "真值集 verified 仅 12.96%（53/409），其中 TP/verified 只有 11 条 —— 规则校准的最大瓶颈。用户保留意见 3：T1 抽查 10 条只 2 条确证，启发式不能当 gold，TP 补核必须先于任何校准动作。",
+  "_result_note": "28 条 TP/heuristic 待核，可判定 25 条：真报 12、误报 13。启发式 TP 标注准确率 12/25 = 48%，与用户 T1 抽查（2/10）同量级 ⇒ 第三次独立确证「启发式不能当 gold」。3 条保持 UNKNOWN：缺的信息是「切片不含 main.ts，全局 ValidationPipe 是否启用不可判定」（R41：缺信息 ≠ 缺语义，缺信息就补信息，不猜）。",
+  "verdicts": [
+    {
+      "id": "docmost/AttachmentService.uploadFile::Input Validation",
+      "gold": "TP",
+      "reason": "filePath 由 getAttachmentFolderPath + attachmentId + preparedFile.fileName 拼接，fileName 来自上传文件且未 sanitize ⇒ 路径穿越面；opts 进入时无类型/大小校验（大小限制只在 Controller 层）。按 E5 确立的口径，Service 层不因组件边界豁免。",
+      "evidence": "attachment.service.ts uploadFile: preparedFile.fileName 直接拼进 filePath，随后 uploadToDrive(filePath, stream)"
+    },
+    {
+      "id": "docmost/AttachmentService.uploadFile::File Upload Without Validation",
+      "gold": "TP",
+      "reason": "Service 层自身没有文件类型/大小校验，prepareFile 只做解包与元信息提取。",
+      "evidence": "await prepareFile(filePromise, { skipBuffer: true }) —— 无类型白名单、无大小上限"
+    },
+    {
+      "id": "docmost/AttachmentService.uploadToDrive::Input Validation",
+      "gold": "TP",
+      "reason": "filePath 直接透传给 storageService.upload，无任何校验或规范化 ⇒ 外部可控路径直达存储 sink。",
+      "evidence": "await this.storageService.upload(filePath, fileContent)"
+    },
+    {
+      "id": "docmost/AttachmentService.uploadToDrive::File Upload Without Validation",
+      "gold": "TP",
+      "reason": "同上：上传动作在此发生且无类型/内容校验。",
+      "evidence": "整个函数体只有 try/catch + upload，校验缺席"
+    },
+    {
+      "id": "docmost/FavoriteService.addFavorite::Data Integrity (Foreign Key)",
+      "gold": "TP",
+      "reason": "opts.pageId / spaceId / templateId 未验证属于传入的 workspaceId，直接构造 favorite 并 insert ⇒ 可跨空间挂载引用。",
+      "evidence": "const favorite = { userId, pageId: opts.pageId ?? null, ... }; await this.favoriteRepo.insert(favorite)"
+    },
+    {
+      "id": "docmost/FavoriteService.addFavorite::Input Validation",
+      "gold": "TP",
+      "reason": "opts.type 仅由 TS 类型 FavoriteType 约束（运行时不校验），三个可选 ID 全未校验归属即入库。",
+      "evidence": "函数体仅 8 行：构造对象 → insert，无任何 if 校验"
+    },
+    {
+      "id": "docmost/FavoriteService.addFavorite::No Input Sanitization",
+      "gold": "TP",
+      "reason": "无任何清洗/转义，外部 ID 直接入库。",
+      "evidence": "同上"
+    },
+    {
+      "id": "docmost/AuthService.register::Data Integrity (Foreign Key)",
+      "gold": "TP",
+      "reason": "本函数委托 signupService.signup；展开后 signup 内 workspaceRepo.findById(workspaceId) **取值后未判空**即传入 getWorkspaceDefaultPageEditMode(workspace)，随后 insertUser + addUserToWorkspace 写入 ⇒ 父实体存在性未校验。",
+      "evidence": "signup.service.ts:52-62 const workspace = await this.workspaceRepo.findById(workspaceId); ... insertUser(..., { pageEditMode: getWorkspaceDefaultPageEditMode(workspace) }) —— 无 if (!workspace) throw"
+    },
+    {
+      "id": "hedgedoc/AliasService.addAlias::Data Integrity (Foreign Key)",
+      "gold": "TP",
+      "reason": "noteId 未验证存在即插入 aliases 表；查不到旧别名时只把新别名置为 primary，不抛错 ⇒ 孤儿别名。",
+      "evidence": "if (oldAliases.length === 0) { newAlias.isPrimary = true } await dbActor(TableAlias).insert(newAlias)"
+    },
+    {
+      "id": "hedgedoc/AliasService.addAlias::Input Validation",
+      "gold": "TP",
+      "reason": "alias 字符串无格式/长度/保留字校验直接入库（alias 实际是 URL slug，应受限）。",
+      "evidence": "const newAlias = { alias, noteId, isPrimary: null } —— alias 原样进 insert"
+    },
+    {
+      "id": "hedgedoc/AliasService.addAlias::No Input Sanitization",
+      "gold": "TP",
+      "reason": "同上，无清洗。",
+      "evidence": "同上"
+    },
+    {
+      "id": "lujakob-nestjs-realworld-example-app/ArticleService.addComment::Input Validation",
+      "gold": "TP",
+      "reason": "articleRepository.findOne({slug}) 未判空即 article.comments.push（slug 不存在 ⇒ TypeError 500）；commentData.body 无长度/内容校验直接 save。",
+      "evidence": "let article = await this.articleRepository.findOne({slug}); ... article.comments.push(comment); await this.commentRepository.save(comment)"
+    },
+    {
+      "id": "docmost/AttachmentController.uploadFile::File Upload Without Validation",
+      "gold": "FP",
+      "reason": "已有明确的上传限制：req.file({ limits: { fileSize: maxFileSize, fields: 3, files: 1 } })，并对 413 抛 BadRequest。与 webshape_E 的 uploadAvatar 同形态，按同口径判不该报。",
+      "evidence": "req.file({ limits: { fileSize: maxFileSize, fields: 3, files: 1 } }) + catch 413 → BadRequestException"
+    },
+    {
+      "id": "docmost/AttachmentController.uploadAvatarOrLogo::File Upload Without Validation",
+      "gold": "FP",
+      "reason": "同上：MAX_AVATAR_SIZE + limits + 413 处理。",
+      "evidence": "const maxFileSize = bytes(MAX_AVATAR_SIZE); req.file({ limits: {...} })"
+    },
+    {
+      "id": "docmost/computeEmailSignature::Data Integrity (Foreign Key)",
+      "gold": "FP",
+      "reason": "纯 HMAC 计算，无持久化、无父实体引用。规则把 createHmac 误当子实体创建。",
+      "evidence": "return createHmac('sha256', appSecret).update(...).digest('hex') —— 无 DB 调用"
+    },
+    {
+      "id": "docmost/LabelController.assertCanReadSpace::Data Integrity (Foreign Key)",
+      "gold": "FP",
+      "reason": "这是 CASL 能力断言（鉴权），不是子实体创建；且不写库。",
+      "evidence": "const ability = await this.spaceAbility.createForUser(...); if (ability.cannot(...)) throw new ForbiddenException()"
+    },
+    {
+      "id": "docmost/GroupUserService.addUsersToGroupBatch::Input Validation",
+      "gold": "FP",
+      "reason": "有双重校验：groupService.findAndValidateGroup(groupId, workspaceId) 验组归属；随后 .where('users.workspaceId','=',workspaceId) 把跨空间 userIds 过滤掉 ⇒ 无效/越权 ID 进不到 insert。此前在 E5 判为 TP 是因为 S7 链式判据当时漏判，属误判。",
+      "evidence": "await this.groupService.findAndValidateGroup(groupId, workspaceId, trx); .where('users.id','in',userIds).where('users.workspaceId','=',workspaceId)"
+    },
+    {
+      "id": "docmost/GroupUserService.addUsersToGroupBatch::No Input Sanitization",
+      "gold": "FP",
+      "reason": "同上：输入已被 workspaceId 过滤，不构成未清洗输入直入 sink。",
+      "evidence": "同上"
+    },
+    {
+      "id": "hedgedoc/AliasController.addAlias::Input Validation",
+      "gold": "FP",
+      "reason": "Controller 层已有两道校验：getNoteIdAndCheckIfUserCanEditAliases（权限+note 解析）与 ensureAliasIsAvailable（可用性）。",
+      "evidence": "await this.getNoteIdAndCheckIfUserCanEditAliases(userId, newAliasDto.noteAlias); await this.aliasService.ensureAliasIsAvailable(newAliasDto.newAlias)"
+    },
+    {
+      "id": "hoppscotch/AccessTokenController.deletePAT::Data Integrity (Foreign Key)",
+      "gold": "FP",
+      "reason": "有判空（!id → BadRequest），且下游 deletePAT(id, user.uid) 用当前用户 uid 限定 ⇒ 有归属校验。",
+      "evidence": "if (!id) throw new BadRequestException(...); await this.accessTokenService.deletePAT(id, user.uid)"
+    },
+    {
+      "id": "hoppscotch/AdminResolver.updateUserDisplayNameByAdmin::No Input Sanitization",
+      "gold": "FP",
+      "reason": "纯委托，无字符串拼接、无输出渲染 ⇒ sanitize 规则的适用场景不成立（不是「未清洗就输出」）。",
+      "evidence": "const isUpdated = await this.adminService.updateUserDisplayName(userUID, displayName)"
+    },
+    {
+      "id": "hoppscotch/AdminResolver.addUserToTeamByAdmin::Input Validation",
+      "gold": "FP",
+      "reason": "Resolver 纯委托，校验在下游 Service 完成（validateEmail）。按 E5 口径「看参数流向」，此处参数确实流到了一个会校验的下游。",
+      "evidence": "await this.adminService.addUserToTeam(args.teamID, args.userEmail, args.role) —— 下游首行即 validateEmail"
+    },
+    {
+      "id": "hoppscotch/AdminService.updateUserDisplayName::No Input Sanitization",
+      "gold": "FP",
+      "reason": "纯委托给 userService，无输出 sink。",
+      "evidence": "const updatedUser = await this.userService.updateUserDisplayName(userUid, displayName)"
+    },
+    {
+      "id": "hoppscotch/AdminService.addUserToTeam::Input Validation",
+      "gold": "FP",
+      "reason": "首行即 if (!validateEmail(userEmail)) return E.left(INVALID_EMAIL)，并有用户存在性检查 ⇒ 校验明确存在。",
+      "evidence": "if (!validateEmail(userEmail)) return E.left(INVALID_EMAIL); const user = await this.userService.findUserByEmail(userEmail); if (O.isNone(user)) return E.left(USER_NOT_FOUND)"
+    },
+    {
+      "id": "verdaccio/ConfigBuilder.addUplink::Data Integrity (Foreign Key)",
+      "gold": "FP",
+      "reason": "this.config.uplinks[id] = uplink 是纯内存配置装配，既无持久化也无父实体 ⇒ 正是 E5 要压的典型形态。",
+      "evidence": "public addUplink(id, uplink) { this.config.uplinks[id] = uplink; return this; }"
+    },
+    {
+      "id": "hedgedoc/ApiTokensController.postTokenRequest::Data Integrity (Foreign Key)",
+      "gold": "UNKNOWN",
+      "reason": "缺信息，不猜：判定取决于项目是否启用 NestJS 全局 ValidationPipe（DTO 注解在此生效），而池切片不含 main.ts，该信息在池内不可判定。按 R41 这是缺信息不是缺语义 ⇒ 补信息（把 main.ts 纳入切片）后再判，不能用概率模型兜。",
+      "evidence": "切片 97 个 .ts 中无 main.ts；grep useGlobalPipes / ValidationPipe 皆无命中"
+    },
+    {
+      "id": "hedgedoc/ApiTokensController.postTokenRequest::Input Validation",
+      "gold": "UNKNOWN",
+      "reason": "同上，缺全局 ValidationPipe 是否启用的信息。",
+      "evidence": "同上"
+    },
+    {
+      "id": "lujakob-nestjs-realworld-example-app/ArticleController.createComment::Input Validation",
+      "gold": "TP",
+      "reason": "信息已补齐后定判：切片**含** main.ts，其中只有 NestFactory.create + Swagger，**没有 useGlobalPipes(new ValidationPipe())** ⇒ CreateCommentDto 的注解不生效，commentData 未经任何校验即流向 addComment → commentRepository.save。与已判 TP 的 Service 层同源（同一条数据流确实缺校验）。",
+      "evidence": "src/main.ts 全文无 useGlobalPipes/ValidationPipe；createComment(@Param('slug') slug, @Body('comment') commentData: CreateCommentDto) 直接委托 articleService.addComment(slug, commentData)"
+    }
+  ]
+}

@@ -1,0 +1,535 @@
+{
+  "_comment": "由 generate-projects-webshape.ts 自动生成，请勿手改。标记口径见文件头；have=必须出现，none=必须不出现，traversal=path_traversal 专属口径。",
+  "markers": {
+    "auth_machinery": "__progmune_auth_machinery__",
+    "input_schema": "__progmune_input_schema__",
+    "input_guard": "__progmune_input_guard__",
+    "input_effect": "__progmune_input_effect__",
+    "path_traversal": "__progmune_path_traversal__"
+  },
+  "projects": {
+    "webshape_A": {
+      "shape": "NestJS Controller + HTTP 装饰器（E2 装饰器鉴权标记）",
+      "cases": [
+        {
+          "fn": "FilesController.readGuarded",
+          "file": "files.controller.ts",
+          "have": [
+            "auth_machinery"
+          ],
+          "traversal": "mark",
+          "why": "@UseGuards(JwtAuthGuard) ⇒ 框架鉴权标记；守卫不防路径穿越 ⇒ 穿越标记同时在"
+        },
+        {
+          "fn": "FilesController.readGuardedAndChecked",
+          "file": "files.controller.ts",
+          "have": [
+            "auth_machinery"
+          ],
+          "traversal": "suppressed",
+          "why": "有鉴权 + 有路径校验证据 ⇒ 鉴权标记在、穿越标记被压（G-C 形态）"
+        },
+        {
+          "fn": "FilesController.readUnguarded",
+          "file": "files.controller.ts",
+          "none": [
+            "auth_machinery"
+          ],
+          "traversal": "mark",
+          "why": "裸路由：类级/方法级都没有鉴权装饰器 ⇒ 不得注入鉴权标记"
+        },
+        {
+          "fn": "FilesController.health",
+          "file": "files.controller.ts",
+          "none": [
+            "auth_machinery"
+          ],
+          "traversal": "n/a",
+          "why": "@Public() 显式免鉴权 ⇒ 注入即假阴性（最危险方向），必须挡住"
+        },
+        {
+          "fn": "FilesController.throttled",
+          "file": "files.controller.ts",
+          "none": [
+            "auth_machinery"
+          ],
+          "traversal": "mark",
+          "why": "@UseGuards(ThrottlerGuard) 是限流不是鉴权 ⇒ 守卫实参不像 auth 语义，不得注入"
+        }
+      ]
+    },
+    "webshape_B": {
+      "shape": "DTO + class-validator 校验装饰器（E3 schema 校验标记）",
+      "cases": [
+        {
+          "fn": "CommentsController.createValidated",
+          "file": "comments.controller.ts",
+          "have": [
+            "input_schema"
+          ],
+          "why": "入参类型 CreateCommentDto 带 @IsString/@MinLength/@MaxLength ⇒ 已按 schema 校验"
+        },
+        {
+          "fn": "CommentsController.updateValidated",
+          "file": "comments.controller.ts",
+          "have": [
+            "input_schema"
+          ],
+          "why": "入参类型 UpdateCommentDto 带 @IsInt/@IsString ⇒ 已按 schema 校验"
+        },
+        {
+          "fn": "CommentsController.createLoose",
+          "file": "comments.controller.ts",
+          "none": [
+            "input_schema"
+          ],
+          "why": "LoosePayload 只有 @IsOptional/@Type/@Transform ⇒ 不是校验，不得注入"
+        },
+        {
+          "fn": "CommentsController.createUntyped",
+          "file": "comments.controller.ts",
+          "none": [
+            "input_schema"
+          ],
+          "why": "入参类型是 any ⇒ 无 schema 信息，不得注入"
+        }
+      ]
+    },
+    "webshape_C": {
+      "shape": "类方法作为入口（无框架装饰器，单独验证类方法轴）",
+      "cases": [
+        {
+          "fn": "ArchiveService.extract",
+          "file": "archive.service.ts",
+          "none": [
+            "auth_machinery",
+            "input_schema"
+          ],
+          "traversal": "mark",
+          "why": "类方法入口：req.query 直进 sink ⇒ 穿越标记；无装饰器 ⇒ 不得有鉴权/schema 标记"
+        },
+        {
+          "fn": "ArchiveService.extractChecked",
+          "file": "archive.service.ts",
+          "traversal": "suppressed",
+          "why": "类方法内有校验证据 ⇒ 穿越标记被压（若按文件/按类压，本条会连坐另一条）"
+        },
+        {
+          "fn": "ArchiveService.extractConstant",
+          "file": "archive.service.ts",
+          "traversal": "no-taint",
+          "why": "无污点：类方法里常量路径不得标记"
+        }
+      ]
+    },
+    "webshape_D": {
+      "shape": "分发器：入口名不含 create，创建动作在项目外（F 轮 / exposed 通道）",
+      "cases": [
+        {
+          "fn": "handleSubmit",
+          "file": "dispatcher.ts",
+          "none": [
+            "auth_machinery",
+            "input_schema"
+          ],
+          "traversal": "n/a",
+          "why": "目标形状：外部 createComment —— 变体 E 应当在这里**新增**检出（下轮量）"
+        },
+        {
+          "fn": "handleRequest",
+          "file": "dispatcher.ts",
+          "traversal": "n/a",
+          "why": "本地 createEvent 在项目内 ⇒ 任何版本都不得重复报（F 轮 −175 的守门用例）"
+        },
+        {
+          "fn": "handleHash",
+          "file": "dispatcher.ts",
+          "traversal": "n/a",
+          "why": "createHash 是库函数不是内容创建 ⇒ 变体 E 若在这里报，就是 69 条误报的来源"
+        },
+        {
+          "fn": "handleSubmitValidated",
+          "file": "dispatcher.ts",
+          "traversal": "n/a",
+          "why": "validateContent 命中 Input Validation 的 safeguard 词表 ⇒ 已校验，不得报"
+        },
+        {
+          "fn": "handleSubmitPathChecked",
+          "file": "dispatcher.ts",
+          "traversal": "n/a",
+          "why": "assertSafePath 只查路径不查内容，不在内容校验词表内 ⇒ 语义上仍该报（防「任何 assert* 都算校验」）"
+        },
+        {
+          "fn": "createPost",
+          "file": "dispatcher.ts",
+          "traversal": "n/a",
+          "why": "对照：函数名自带 create，基线就该触发，不受任何变体影响"
+        }
+      ]
+    },
+    "webshape_E": {
+      "shape": "函数体里的输入校验证据（E4）：limits 选项 / 判空抛 4xx，以及三类反例",
+      "cases": [
+        {
+          "fn": "uploadAvatar",
+          "file": "guarded.ts",
+          "have": [
+            "input_guard",
+            "input_effect"
+          ],
+          "suppressRules": [
+            "Input Validation"
+          ],
+          "why": "limits 选项 + 判空抛 4xx ⇒ 有校验证据，不该报"
+        },
+        {
+          "fn": "uploadBanner",
+          "file": "guarded.ts",
+          "have": [
+            "input_effect"
+          ],
+          "none": [
+            "input_guard"
+          ],
+          "reportRules": [
+            "Input Validation"
+          ],
+          "why": "无校验 ⇒ 该报（抑制机制的反面护栏，防止变成无条件抑制）"
+        },
+        {
+          "fn": "uploadIcon",
+          "file": "guarded.ts",
+          "have": [
+            "input_effect"
+          ],
+          "none": [
+            "input_guard"
+          ],
+          "reportRules": [
+            "Input Validation"
+          ],
+          "why": "抛 NotFound = 存在性校验，不算输入校验 ⇒ 该报"
+        },
+        {
+          "fn": "uploadThumb",
+          "file": "guarded.ts",
+          "have": [
+            "input_effect"
+          ],
+          "none": [
+            "input_guard"
+          ],
+          "reportRules": [
+            "Input Validation"
+          ],
+          "why": "抛裸 Error = 环境配置校验，不算输入校验 ⇒ 该报"
+        },
+        {
+          "fn": "uploadCover",
+          "file": "guarded.ts",
+          "have": [
+            "input_effect"
+          ],
+          "none": [
+            "input_guard"
+          ],
+          "suppressRules": [
+            "Input Validation"
+          ],
+          "why": "validateContent 旧词表就认 ⇒ 与本轮机制无关，不该报（对照）"
+        }
+      ]
+    },
+    "webshape_F": {
+      "shape": "参数流向外部副作用的证据（E5）：ORM/链式/出站三类 sink，以及纯装配与工厂两类反例",
+      "cases": [
+        {
+          "fn": "createWidget",
+          "file": "effect.ts",
+          "have": [
+            "input_effect"
+          ],
+          "reportRules": [
+            "Input Validation"
+          ],
+          "why": "repo.save = ORM 写入，有副作用证据 ⇒ 仍该报（防止 requireMarker 变成无条件压制）"
+        },
+        {
+          "fn": "addWidgetToCache",
+          "file": "effect.ts",
+          "none": [
+            "input_effect"
+          ],
+          "suppressRules": [
+            "Input Validation"
+          ],
+          "why": "纯内存装配，参数不流向任何 sink ⇒ 不该报（本轮要压的主体）"
+        },
+        {
+          "fn": "createStorageClient",
+          "file": "effect.ts",
+          "none": [
+            "input_effect"
+          ],
+          "suppressRules": [
+            "Input Validation"
+          ],
+          "why": "工厂：只构造对象 ⇒ 不该报（FP 池里 ducktors createS3/createLocal 即此形态）"
+        },
+        {
+          "fn": "createOrder",
+          "file": "effect.ts",
+          "have": [
+            "input_effect"
+          ],
+          "reportRules": [
+            "Input Validation"
+          ],
+          "why": "Kysely 链式 insertInto —— S7 通道专项，防止链式判据退化丢真报"
+        },
+        {
+          "fn": "postMetric",
+          "file": "effect.ts",
+          "have": [
+            "input_effect"
+          ],
+          "reportRules": [
+            "Input Validation"
+          ],
+          "why": "fetch 出站 —— S3 通道专项"
+        },
+        {
+          "fn": "uploadDraft",
+          "file": "effect.ts",
+          "have": [
+            "input_effect"
+          ],
+          "suppressRules": [
+            "Input Validation"
+          ],
+          "why": "有副作用但已 validateContent ⇒ 校验位优先，不该报（两个机制不互相覆盖）"
+        },
+        {
+          "fn": "addUserRole",
+          "file": "sinks.ts",
+          "have": [
+            "input_effect"
+          ],
+          "reportRules": [
+            "Input Validation"
+          ],
+          "why": "S2 缓存：redis.sadd ⇒ 该报"
+        },
+        {
+          "fn": "createAuditLog",
+          "file": "sinks.ts",
+          "have": [
+            "input_effect"
+          ],
+          "reportRules": [
+            "Input Validation"
+          ],
+          "why": "S4 文件：fs.writeFile ⇒ 该报"
+        },
+        {
+          "fn": "createAccountRow",
+          "file": "sinks.ts",
+          "have": [
+            "input_effect"
+          ],
+          "reportRules": [
+            "Input Validation"
+          ],
+          "why": "S6 prisma：prisma.user.create ⇒ 该报"
+        },
+        {
+          "fn": "createTicket",
+          "file": "sinks.ts",
+          "have": [
+            "input_effect"
+          ],
+          "reportRules": [
+            "Input Validation"
+          ],
+          "why": "S6 knex：knex('tickets').insert ⇒ 该报"
+        },
+        {
+          "fn": "addEventToQueue",
+          "file": "sinks.ts",
+          "have": [
+            "input_effect"
+          ],
+          "reportRules": [
+            "Input Validation"
+          ],
+          "why": "S3 投递：queue.publish ⇒ 该报"
+        },
+        {
+          "fn": "postNotice",
+          "file": "sinks.ts",
+          "have": [
+            "input_effect"
+          ],
+          "reportRules": [
+            "Input Validation"
+          ],
+          "why": "S3 派发：bus.dispatch ⇒ 该报"
+        },
+        {
+          "fn": "uploadAsset",
+          "file": "sinks.ts",
+          "have": [
+            "input_effect"
+          ],
+          "reportRules": [
+            "Input Validation"
+          ],
+          "why": "S5 客户端：s3Client.putObject ⇒ 该报（client 前缀专项）"
+        },
+        {
+          "fn": "postWelcomeMail",
+          "file": "sinks.ts",
+          "have": [
+            "input_effect"
+          ],
+          "reportRules": [
+            "Input Validation"
+          ],
+          "why": "S5 委托：mailService.send ⇒ 该报（service 前缀专项）"
+        },
+        {
+          "fn": "createMemberRemoval",
+          "file": "sinks.ts",
+          "have": [
+            "input_effect"
+          ],
+          "reportRules": [
+            "Input Validation"
+          ],
+          "why": "S7 链式：trx.deleteFrom ⇒ 该报（删除也是副作用）"
+        },
+        {
+          "fn": "createProfileUpdate",
+          "file": "sinks.ts",
+          "have": [
+            "input_effect"
+          ],
+          "reportRules": [
+            "Input Validation"
+          ],
+          "why": "S5 委托：userRepository.update ⇒ 该报（repository 前缀专项）"
+        },
+        {
+          "fn": "createSession",
+          "file": "sinks.ts",
+          "have": [
+            "input_effect"
+          ],
+          "reportRules": [
+            "Input Validation"
+          ],
+          "why": "S2 缓存：redis.setex ⇒ 该报"
+        },
+        {
+          "fn": "postWebhook",
+          "file": "sinks.ts",
+          "have": [
+            "input_effect"
+          ],
+          "reportRules": [
+            "Input Validation"
+          ],
+          "why": "S3 出站：axios.post ⇒ 该报（HTTP 客户端与 fetch 是两条路）"
+        },
+        {
+          "fn": "createLocalDriver",
+          "file": "sinks.ts",
+          "none": [
+            "input_effect"
+          ],
+          "suppressRules": [
+            "Input Validation"
+          ],
+          "why": "工厂：只返回对象 ⇒ 不该报（FP 池 ducktors createLocal 真形态）"
+        },
+        {
+          "fn": "addPackageAccess",
+          "file": "sinks.ts",
+          "none": [
+            "input_effect"
+          ],
+          "suppressRules": [
+            "Input Validation"
+          ],
+          "why": "配置装配：push 到内存数组 ⇒ 不该报（FP 池 verdaccio addPackageAccess 真形态）"
+        },
+        {
+          "fn": "createWidgetPreview",
+          "file": "sinks.ts",
+          "none": [
+            "input_effect"
+          ],
+          "suppressRules": [
+            "Input Validation"
+          ],
+          "why": "只读查询：findById 动词不在写入表内 ⇒ 不该报（防 S1/S5 泛化）"
+        },
+        {
+          "fn": "createCartTotal",
+          "file": "sinks.ts",
+          "none": [
+            "input_effect"
+          ],
+          "suppressRules": [
+            "Input Validation"
+          ],
+          "why": "纯计算 ⇒ 不该报"
+        },
+        {
+          "fn": "createLogger",
+          "file": "sinks.ts",
+          "none": [
+            "input_effect"
+          ],
+          "suppressRules": [
+            "Input Validation"
+          ],
+          "why": "边界：派生日志子实例不是 sink ⇒ 不该报（logger 不在 S5 前缀表内）"
+        },
+        {
+          "fn": "addRoute",
+          "file": "sinks.ts",
+          "none": [
+            "input_effect"
+          ],
+          "suppressRules": [
+            "Input Validation"
+          ],
+          "why": "边界：路由注册不是 sink ⇒ 不该报（app.get 不落 S3 动词表）"
+        },
+        {
+          "fn": "createWidgetSchema",
+          "file": "sinks.ts",
+          "none": [
+            "input_effect"
+          ],
+          "suppressRules": [
+            "Input Validation"
+          ],
+          "why": "边界：构造校验 schema 不是 sink ⇒ 不该报"
+        },
+        {
+          "fn": "createValidatedRole",
+          "file": "sinks.ts",
+          "have": [
+            "input_effect"
+          ],
+          "suppressRules": [
+            "Input Validation"
+          ],
+          "why": "有副作用（redis.sadd）但已 validateContent ⇒ 校验位优先 ⇒ 不该报"
+        }
+      ]
+    }
+  }
+}
